@@ -39,8 +39,6 @@ make latexpdf
 ```
 ＃ venv activate後
 sphinx-build -b html ./source ./docs
-# もしくは
-make html
 ```
 
 
