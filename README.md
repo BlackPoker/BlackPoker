@@ -5,19 +5,36 @@
 ## 修正環境構築方法
 
 ### pythonインストール
-window (choco使用時)
+
+pythonは3.7系がsphinx-autobuildが利用できるためおすすめです。
+
+#### window (choco使用時)
 ```
-choco install python
+choco install -y python --version=3.7.5
 ```
-mac (brew使用時)
+#### mac (brew使用時)
 ```
-brew install python
+$ brew install pyenv
 ```
+~/.bash_profileに以下を追加
+```
+export PYENV_ROOT=${HOME}/.pyenv
+if [ -d "${PYENV_ROOT}" ]; then
+    export PATH=${PYENV_ROOT}/bin:$PATH
+    eval "$(pyenv init -)"
+fi
+```
+pythonをバージョン指定してインストールし
+```
+$ pyenv install 3.7.7
+$ pyenv global 3.7.7
+```
+
 
 ### venv環境
 #### .venv作成
 ```
-python -m venv .venv
+$ python -m venv .venv
 ```
 
 #### ライブラリインストール
@@ -25,21 +42,25 @@ python -m venv .venv
 # venv環境を有効化
 .venv/bin/activate
 # venvライブラリインストール
-pip install -r ./requirements.txt
+(.venv) $ pip install -r ./requirements.txt
 ```
 
 ## ドキュメント生成
 ### PDF生成方法
 ```
 ＃ venv activate後
-make latexpdf
+(.venv) $ make latexpdf
 ```
 
 ### HTML生成
 ```
 ＃ venv activate後
-sphinx-build -b html ./source ./docs
+(.venv) $ sphinx-build -b html ./source ./docs
 ```
 
-
+## autobuild起動
+autobuildを起動するとブラウザで確認しながら執筆できます。
+```
+(.venv) $ sphinx-autobuild ./source ./docs
+```
 
