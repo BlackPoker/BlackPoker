@@ -10,7 +10,7 @@ Welcome to BlackPoker's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   init/init.rst
 
 Indices and tables
 ==================
