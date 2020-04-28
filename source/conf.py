@@ -20,6 +20,7 @@
 project = 'BlackPoker'
 copyright = '2013, BlackPoker'
 author = 'BlackPoker'
+numfig = True
 # release = '2019/6/30'
 # version = '5th'
 
@@ -28,7 +29,11 @@ author = 'BlackPoker'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
+extensions = ['sphinx_rtd_theme','sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
+
+plantuml = 'plantuml'
+plantuml_output_format = 'svg_img'
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -45,10 +50,6 @@ language = 'ja'
 # This pattern also affects html_static_path and html_extra_path.
 
 import sphinx_rtd_theme
-
-extensions = [
-    "sphinx_rtd_theme",
-]
 
 # -- Options for HTML output -------------------------------------------------
 

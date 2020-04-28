@@ -8,6 +8,8 @@
 
 pythonは3.7系がsphinx-autobuildが利用できるためおすすめです。
 
+すでに入っている方は、飛ばしてください。
+
 #### window (choco使用時)
 ```
 choco install -y python --version=3.7.5
@@ -28,6 +30,16 @@ pythonをバージョン指定してインストールし
 ```
 $ pyenv install 3.7.7
 $ pyenv global 3.7.7
+```
+
+### plantumlインストール
+#### window (choco使用時)
+```
+choco install plantuml
+```
+#### mac (brew使用時)
+```
+$ brew install plantuml
 ```
 
 

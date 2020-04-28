@@ -12,5 +12,12 @@
 ==============================
 文章の構成は次のようになっています。
 
-.. note:: 図説予定
+
+.. uml::
+
+    skinparam handwritten true
+    abstract class core
+    abstract class common
+    core <|.. common
+    common ^-- baseformat
 
