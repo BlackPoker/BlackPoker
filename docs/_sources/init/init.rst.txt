@@ -13,11 +13,5 @@
 文章の構成は次のようになっています。
 
 
-.. uml::
-
-    skinparam handwritten true
-    abstract class core
-    abstract class common
-    core <|.. common
-    common ^-- baseformat
+.. uml:: rule.puml
 

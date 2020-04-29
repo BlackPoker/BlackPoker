@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="295px" preserveAspectRatio="none" style="width:119px;height:295px;" version="1.1" viewBox="0 0 119 295" width="119px" zoomAndPan="magnify"><defs><filter height="300%" id="fuvpdysedegij" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[290b23b195cda7e553d7254bfd9175c6]
+class コアルール--><rect fill="#FEFECE" filter="url(#fuvpdysedegij)" height="24.1328" id="コアルール" style="stroke: #A80036; stroke-width: 1.5;" width="66" x="24" y="8"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="60" x="27" y="24.6016">コアルール</text><!--MD5=[dfc0cd2a72eeb5823a75133eb3e753c8]
+class 共通ルール--><rect fill="#FEFECE" filter="url(#fuvpdysedegij)" height="24.1328" id="共通ルール" style="stroke: #A80036; stroke-width: 1.5;" width="66" x="24" y="92"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="60" x="27" y="108.6016">共通ルール</text><!--MD5=[8c6a0ae348e7a404ac950b7e3e3cae03]
+class 通常フォーマット--><rect fill="#FEFECE" filter="url(#fuvpdysedegij)" height="24.1328" id="通常フォーマット" style="stroke: #A80036; stroke-width: 1.5;" width="102" x="6" y="176"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="96" x="9" y="192.6016">通常フォーマット</text><!--MD5=[1b7b03c11ecb8bc64ccfd19cc7a1f7d1]
+class 拡張フォーマット--><rect fill="#FEFECE" filter="url(#fuvpdysedegij)" height="24.1328" id="拡張フォーマット" style="stroke: #A80036; stroke-width: 1.5;" width="102" x="6" y="260"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="96" x="9" y="276.6016">拡張フォーマット</text><!--MD5=[5577348cf13f5f77464f961bef7277b5]
+reverse link コアルール to 共通ルール--><path d="M57,52.2 C57,66.14 57,81.68 57,91.85 " fill="none" id="コアルール&lt;-共通ルール" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="50,52.06,57,32.06,64,52.06,50,52.06" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[61579a87438075da7a77d4ef16fe1c88]
+reverse link 共通ルール to 通常フォーマット--><path d="M57,136.2 C57,150.14 57,165.68 57,175.85 " fill="none" id="共通ルール&lt;-通常フォーマット" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="50,136.06,57,116.06,64,136.06,50,136.06" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[02fc3bd81231d50c97705b06a5154e1d]
+reverse link 通常フォーマット to 拡張フォーマット--><path d="M57,220.2 C57,234.14 57,249.68 57,259.85 " fill="none" id="通常フォーマット&lt;-拡張フォーマット" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="50,220.06,57,200.06,64,220.06,50,220.06" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[1ad815b573166dc9de82b38f646eee43]
+@startuml
+hide members
+hide circle
+
+abstract class コアルール
+abstract class 共通ルール
+
+コアルール <|.. 共通ルール
+共通ルール ^- - 通常フォーマット
+通常フォーマット ^- - 拡張フォーマット
+
+@enduml
+
+PlantUML version 1.2020.07(Sun Apr 19 20:42:40 JST 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 13.0.2+8
+Operating System: Mac OS X
+Default Encoding: UTF-8
+Language: ja
+Country: JP
+--></g></svg>

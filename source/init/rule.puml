@@ -1,0 +1,16 @@
+
+    hide members
+    hide circle
+
+    abstract class コアルール 
+    abstract class 共通ルール
+
+    コアルール <|.. 共通ルール
+    共通ルール ^-- 通常フォーマット
+    通常フォーマット ^-- 拡張フォーマット
+
+    note right of コアルール : ターン制ゲームに適応できる抽象的なルール定義
+    note right of 共通ルール : コアルールを具体化したルール定義
+    note right of 通常フォーマット : ライト、スタンダードなどの具体的なフォーマット定義
+    note right of 拡張フォーマット : エクストラなどの通常フォーマットを拡張したフォーマット定義
+

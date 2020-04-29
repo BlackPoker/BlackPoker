@@ -160,11 +160,23 @@
 <h2>文章の構成<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>文章の構成は次のようになっています。</p>
 <p class="plantuml">
-<img src="../_images/plantuml-12249fa4a8a5b6badd85850c3abcc1112b215c74.svg" alt="skinparam handwritten true
-abstract class core
-abstract class common
-core &lt;|.. common
-common ^-- baseformat"/></p>
+<img src="../_images/plantuml-55eb800320053b084715b44214f0d22e973d9340.svg" alt="
+    hide members
+    hide circle
+
+    abstract class コアルール 
+    abstract class 共通ルール
+
+    コアルール &lt;|.. 共通ルール
+    共通ルール ^-- 通常フォーマット
+    通常フォーマット ^-- 拡張フォーマット
+
+    note right of コアルール : ターン制ゲームに適応できる抽象的なルール定義
+    note right of 共通ルール : コアルールを具体化したルール定義
+    note right of 通常フォーマット : ライト、スタンダードなどの具体的なフォーマット定義
+    note right of 拡張フォーマット : エクストラなどの通常フォーマットを拡張したフォーマット定義
+
+"/></p>
 </div>
 </div>
 
