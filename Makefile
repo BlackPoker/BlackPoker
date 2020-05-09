@@ -5,6 +5,7 @@
 # from the environment for the first two.
 SPHINXOPTS    ?=
 SPHINXBUILD   ?= sphinx-build
+SPHINXAUTO    ?= sphinx-autobuild
 SOURCEDIR     = source
 BUILDDIR      = build
 
@@ -15,9 +16,9 @@ help:
 livehtml:
 	@$(SPHINXAUTO) "$(SOURCEDIR)" "$(BUILDDIR)/_html"
 
-docs:
+doc:
 	rm -rf "$(BUILDDIR)/../docs/*"
-	html -M $@ "$(SOURCEDIR)" "$(BUILDDIR)/../docs"
+	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/../docs"
 
 .PHONY: help Makefile
 

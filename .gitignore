@@ -10,4 +10,7 @@
 pyvenv.cfg
 .venv
 pip-selfcheck.json
-build/_html/*
+build/_html
+build/html
+build/doctrees
+build/latex
