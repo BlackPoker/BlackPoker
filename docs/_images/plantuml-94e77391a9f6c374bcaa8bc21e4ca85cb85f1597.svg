@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="351px" preserveAspectRatio="none" style="width:553px;height:351px;" version="1.1" viewBox="0 0 553 351" width="553px" zoomAndPan="magnify"><defs><filter height="300%" id="f1fyrgedf1g8gs" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[290b23b195cda7e553d7254bfd9175c6]
+class コアルール--><rect fill="#FEFECE" filter="url(#f1fyrgedf1g8gs)" height="24.1328" id="コアルール" style="stroke: #A80036; stroke-width: 1.5;" width="66" x="24" y="8.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="60" x="27" y="25.1016">コアルール</text><!--MD5=[dfc0cd2a72eeb5823a75133eb3e753c8]
+class 共通ルール--><rect fill="#FEFECE" filter="url(#f1fyrgedf1g8gs)" height="24.1328" id="共通ルール" style="stroke: #A80036; stroke-width: 1.5;" width="66" x="24" y="110.5"/><text fill="#000000" font-family="sans-serif" font-size="12" font-style="italic" lengthAdjust="spacingAndGlyphs" textLength="60" x="27" y="127.1016">共通ルール</text><!--MD5=[8c6a0ae348e7a404ac950b7e3e3cae03]
+class 通常フォーマット--><rect fill="#FEFECE" filter="url(#f1fyrgedf1g8gs)" height="24.1328" id="通常フォーマット" style="stroke: #A80036; stroke-width: 1.5;" width="102" x="6" y="212.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="96" x="9" y="229.1016">通常フォーマット</text><!--MD5=[1b7b03c11ecb8bc64ccfd19cc7a1f7d1]
+class 拡張フォーマット--><rect fill="#FEFECE" filter="url(#f1fyrgedf1g8gs)" height="24.1328" id="拡張フォーマット" style="stroke: #A80036; stroke-width: 1.5;" width="102" x="6" y="314.5"/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="96" x="9" y="331.1016">拡張フォーマット</text><path d="M125.5,8 L125.5,16.5 L90.39,20.5 L125.5,24.5 L125.5,33.3105 A0,0 0 0 0 125.5,33.3105 L432.5,33.3105 A0,0 0 0 0 432.5,33.3105 L432.5,18 L422.5,8 L125.5,8 A0,0 0 0 0 125.5,8 " fill="#FBFB77" filter="url(#f1fyrgedf1g8gs)" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M422.5,8 L422.5,18 L432.5,18 L422.5,8 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="286" x="131.5" y="25.5684">ターン制ゲームに適応できる抽象的なルール定義</text><path d="M125.5,110 L125.5,118.5 L90.24,122.5 L125.5,126.5 L125.5,135.3105 A0,0 0 0 0 125.5,135.3105 L354.5,135.3105 A0,0 0 0 0 354.5,135.3105 L354.5,120 L344.5,110 L125.5,110 A0,0 0 0 0 125.5,110 " fill="#FBFB77" filter="url(#f1fyrgedf1g8gs)" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M344.5,110 L344.5,120 L354.5,120 L344.5,110 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="208" x="131.5" y="127.5684">コアルールを具体化したルール定義</text><path d="M143,212 L143,220.5 L108.09,224.5 L143,228.5 L143,237.3105 A0,0 0 0 0 143,237.3105 L489,237.3105 A0,0 0 0 0 489,237.3105 L489,222 L479,212 L143,212 A0,0 0 0 0 143,212 " fill="#FBFB77" filter="url(#f1fyrgedf1g8gs)" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M479,212 L479,222 L489,222 L479,212 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="325" x="149" y="229.5684">ライト、スタンダードなどの具体的なフォーマット定義</text><path d="M143,314 L143,322.5 L108.21,326.5 L143,330.5 L143,339.3105 A0,0 0 0 0 143,339.3105 L541,339.3105 A0,0 0 0 0 541,339.3105 L541,324 L531,314 L143,314 A0,0 0 0 0 143,314 " fill="#FBFB77" filter="url(#f1fyrgedf1g8gs)" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M531,314 L531,324 L541,324 L531,314 " fill="#FBFB77" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="377" x="149" y="331.5684">エクストラなどの通常フォーマットを拡張したフォーマット定義</text><!--MD5=[5577348cf13f5f77464f961bef7277b5]
+reverse link コアルール to 共通ルール--><path d="M57,52.68 C57,72.33 57,96.53 57,110.37 " fill="none" id="コアルール&lt;-共通ルール" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="none" points="50,52.58,57,32.58,64,52.58,50,52.58" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#000000" points="66.5,74,69.5,68,72.5,74,66.5,74" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="58" y="89.5684">実装</text><!--MD5=[61579a87438075da7a77d4ef16fe1c88]
+reverse link 共通ルール to 通常フォーマット--><path d="M57,154.68 C57,174.33 57,198.53 57,212.37 " fill="none" id="共通ルール&lt;-通常フォーマット" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="50,154.58,57,134.58,64,154.58,50,154.58" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#000000" points="66.5,176,69.5,170,72.5,176,66.5,176" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="58" y="191.5684">継承</text><!--MD5=[02fc3bd81231d50c97705b06a5154e1d]
+reverse link 通常フォーマット to 拡張フォーマット--><path d="M57,256.68 C57,276.33 57,300.53 57,314.37 " fill="none" id="通常フォーマット&lt;-拡張フォーマット" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="none" points="50,256.58,57,236.58,64,256.58,50,256.58" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#000000" points="66.5,278,69.5,272,72.5,278,66.5,278" style="stroke: #000000; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="58" y="293.5684">継承</text><!--MD5=[b0bcb3d0ad40c43a6b8bf8852a0d68e2]
+@startuml
+
+    hide members
+    hide circle
+
+    abstract class コアルール 
+    abstract class 共通ルール
+
+    コアルール <|.. 共通ルール : < 実装
+    共通ルール ^- - 通常フォーマット : < 継承
+    通常フォーマット ^- - 拡張フォーマット : < 継承
+
+    note right of コアルール : ターン制ゲームに適応できる抽象的なルール定義
+    note right of 共通ルール : コアルールを具体化したルール定義
+    note right of 通常フォーマット : ライト、スタンダードなどの具体的なフォーマット定義
+    note right of 拡張フォーマット : エクストラなどの通常フォーマットを拡張したフォーマット定義
+
+
+@enduml
+
+PlantUML version 1.2020.07(Sun Apr 19 20:42:40 JST 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 13.0.2+8
+Operating System: Mac OS X
+Default Encoding: UTF-8
+Language: ja
+Country: JP
+--></g></svg>
