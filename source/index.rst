@@ -11,7 +11,11 @@ Welcome to BlackPoker's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+
    init/init
+   core/core
+
+   format-common/format-common
 
 Indices and tables
 ==================
