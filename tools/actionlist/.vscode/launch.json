@@ -14,7 +14,7 @@
             "type": "java",
             "name": "Debug (Launch)-App<actionlist>",
             "request": "launch",
-            "mainClass": "github.com.blackpoker.actionlist.App",
+            "mainClass": "com.github.blackpoker.actionlist.App",
             "projectName": "actionlist"
         }
     ]

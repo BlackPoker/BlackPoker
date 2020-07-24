@@ -1,4 +1,4 @@
-package github.com.blackpoker.actionlist;
+package com.github.blackpoker.actionlist;
 
 import static org.junit.Assert.assertTrue;
 
