@@ -18,7 +18,7 @@ choco install -y python --version=3.7.5
 ```
 $ brew install pyenv
 ```
-~/.bash_profileに以下を追加
+~/.bash_profileまたは、~/.zshrcに以下を追加
 ```
 export PYENV_ROOT=${HOME}/.pyenv
 if [ -d "${PYENV_ROOT}" ]; then
@@ -52,9 +52,16 @@ $ python -m venv .venv
 #### ライブラリインストール
 ```
 # venv環境を有効化
-.venv/bin/activate
+. .venv/bin/activate
+# もしくは
+source .venv/bin/activate
 # venvライブラリインストール
 (.venv) $ pip install -r ./requirements.txt
+```
+
+```
+# venv環境を無効化する場合
+deactivate
 ```
 
 ## ドキュメント生成
@@ -74,5 +81,7 @@ $ python -m venv .venv
 autobuildを起動するとブラウザで確認しながら執筆できます。
 ```
 (.venv) $ sphinx-autobuild ./source ./docs
+# もしくは
+(.venv) $ make livehtml
 ```
 
