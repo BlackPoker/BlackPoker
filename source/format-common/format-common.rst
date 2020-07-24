@@ -16,11 +16,13 @@ BlackPokerでは共通ルールとフォーマットに応じたアクション�
     frame "フォーマット" as format{
         rectangle "ライト" as light
         rectangle "スタンダード" as std
+        rectangle "プロ" as pro
         rectangle "マスター" as master
     }
 
     common <-- light
     common <-- std
+    common <-- pro
     common <-- master
     
 

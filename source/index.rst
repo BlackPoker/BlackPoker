@@ -13,8 +13,10 @@ Welcome to BlackPoker's documentation!
 
 
    init/init
+   match-regulations/match-regulations
+   format/format
    core/core
-
+   common/common
    format-common/format-common
 
 Indices and tables
