@@ -1,0 +1,305 @@
+\documentclass[twocolumn,a5paper,papersize,10pt]{jarticle}
+\usepackage{bxpapersize}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage[dvipdfmx]{graphicx} %画像読み込み設定
+\usepackage{here} %画像を好きな位置に出力
+\usepackage[absolute,overlay]{textpos}%座標指定
+
+\usepackage{newtxtext,newtxmath} %timeフォント設定
+\usepackage{titlesec}%タイトルの文字サイズ変更
+\usepackage{setspace} % setspaceパッケージのインクルード
+
+\usepackage{tcolorbox} % 枠囲み
+
+\titleformat*{\section}{\small\bfseries} %sectionの文字サイズ
+\titleformat*{\subsection}{\footnotesize\bfseries} %subsectionの文字サイズ
+\titleformat*{\subsubsection}{\scriptsize\bfseries} %subsubsectionの文字サイズ
+
+\setlength{\columnsep}{0.5cm}
+\setlength{\hoffset}{-2cm}
+\setlength{\voffset}{-4cm}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\headheight}{5pt}
+\setlength{\textheight}{19cm}
+\setlength{\textwidth}{13.8cm}
+
+\setlength\intextsep{0pt} %図の余白をなくす
+\setlength\textfloatsep{0pt} %図の余白をなくす
+
+\setlength\floatsep{0pt} %図と図の間の余白
+\setlength\textfloatsep{0pt} %本文と図の間の余白
+\setlength\intextsep{0pt} %本文中の図の余白
+\setlength\abovecaptionskip{0pt} %図とキャプションの間の余白
+
+
+\setstretch{1} % ページ全体の行間を設定
+
+
+\title{\empty}
+\author{\empty}
+\date{\empty}
+
+%%%%%%    TEXT START    %%%%%%
+\begin{document}
+
+% ロゴ出力
+% この場合は (230pt, 100pt) の位置に 0.4\linewidth の幅のブロックができる．
+\begin{textblock*}{0.4\linewidth}(175pt, 120pt)
+    \centering
+    \includegraphics[width=0.6cm]{blackpoker_logo.pdf}
+\end{textblock*}
+
+\section*{\textrm{BlackPoker} 第三版 extra {\scriptsize 2017/10/04}}
+
+\scriptsize%本文の文字サイズを小さく設定
+\renewcommand{\labelitemi}{・}%箇条書きのラベルを変更
+
+extraとは、BlackPokerの遊び方の一つです。プレイヤーは切札を設置してからゲームを開始します。
+切札については 切札についてを参照して下さい。extraではスタンダード版のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。
+
+本誌はextraで使用できるアクションと切札をまとめたものです。
+
+\vspace{-3zh}%余白削除
+
+\subsection*{補足}
+\subsubsection*{切札について}
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}%箇条書きを左詰め
+%\setlength{\itemsep}{0pt}      %2. ブロック間の余白
+\setlength{\parskip}{0pt}      %4. 段落間余白．
+%\setlength{\itemindent}{-10pt}   %5. 最初のインデント
+%\setlength{\labelsep}{15pt}     %6. item と文字の間
+
+\item 対戦前に裏向きで２枚まで切札を置くことができる。
+\item 切札はデッキと直角に交わるようにデッキの下に置く。
+\item 切札を表にするときはスートと数字が見えるようにし、対応する能力の名称を言う。
+\item デッキが０枚になった場合、切札が残っていても敗北する。
+\end{itemize}
+\vspace{-3.5zh}%余白削除
+
+%%%%% ActionList %%%%%
+\begin{center}
+\begin{center}
+\section*{= = = = = = = = = = ActionList = = = = = = = = = =}
+\end{center}
+\end{center}
+\vspace{-2zh}%余白削除
+
+%%% Action %%%
+\vspace{1zh} %余白追加
+\subsubsection*{■オープン (通常魔法) [ex]} %Actionタイトル
+\vspace{-0.5zh}
+
+@メイン
+  / \$ BBD
+
+\vspace{-1.2zh}%余白削除
+\begin{spacing}{0.8}%効果欄
+\begin{center}
+
+\begin{tabularx}{6.5cm}{p{6cm}} \toprule[0.4pt]
+%特記事項
+\vspace{-1zh}%余白削除
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item クイックタイミングでこのアクションを起こす場合コストを\$DDとする。
+
+\item このアクションはステージに置かれた時に即効果を発揮する。
+\vspace{-2.5zh}%余白削除
+\end{enumerate}
+\vspace{-1zh}%余白削除
+\\ \midrule[0.4pt]
+（効果）
+
+自分の切札を1枚表にし、切札に対応した能力を発揮する。 
+
+切札については「切札について」参照
+
+切札に対応する能力については「アビリティーリスト」参照
+\\ \bottomrule[0.4pt]
+\end{tabularx}
+
+\end{center}
+\end{spacing}
+\vspace{-4zh}
+
+
+%%% Action %%%
+\vspace{1zh} %余白追加
+\subsubsection*{■クローズ (速攻魔法) [ex]} %Actionタイトル
+\vspace{-0.5zh}
+
+@クイック
+  / \$ B
+  / ★同じスート2枚
+
+\vspace{-1.2zh}%余白削除
+\begin{spacing}{0.8}%効果欄
+\begin{center}
+
+\begin{tabularx}{6.5cm}{p{6cm}} \toprule[0.4pt]
+（対象）
+
+切札1枚を対象とする。
+\\ \midrule[0.4pt]
+（効果）
+
+対象の切札が表向きかつキーカードのスートと同じ場合、その切札を裏向きにする。対象の切札に対応した能力は無効になる。 
+
+切札については「切札について」参照
+\\ \bottomrule[0.4pt]
+\end{tabularx}
+
+\end{center}
+\end{spacing}
+\vspace{-4zh}
+
+
+%%% Action %%%
+\vspace{1zh} %余白追加
+\subsubsection*{■切札破壊 (速攻魔法) [ex]} %Actionタイトル
+\vspace{-0.5zh}
+
+@クイック
+  / \$ B
+  / ★A〜K
+
+\vspace{-1.2zh}%余白削除
+\begin{spacing}{0.8}%効果欄
+\begin{center}
+
+\begin{tabularx}{6.5cm}{p{6cm}} \toprule[0.4pt]
+（対象）
+
+切札1枚を対象とする。
+\\ \midrule[0.4pt]
+（効果）
+
+対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。 
+
+切札については「切札について」参照
+\\ \bottomrule[0.4pt]
+\end{tabularx}
+
+\end{center}
+\end{spacing}
+\vspace{-4zh}
+
+
+%%%%% AbilityList %%%%%
+\begin{center}
+\begin{center}
+\section*{= = = = = = = = = = AbilityList = = = = = = = = = =}
+\end{center}
+\end{center}
+\vspace{-4zh}%余白削除
+
+\tcbset{top=1mm, left=1mm, bottom=1mm, left=1mm}
+
+%%% Ability %%%
+\vspace{1zh} %余白追加
+\subsection*{ {\normalsize $\heartsuit$}2 【援軍】} %Abilityタイトル
+\vspace{-0.5zh}
+
+テスト
+
+\begin{tcolorbox}[title=【Action】援軍]
+
+
+@クイック
+  / \$ B
+  / ★A〜K
+
+\vspace{-1.2zh}%余白削除
+\begin{spacing}{0.8}%効果欄
+\begin{center}
+
+\begin{tabularx}{5.8cm}{p{5.4cm}} \toprule[0.4pt]
+（対象）
+
+切札1枚を対象とする。
+あああああああああああああああああああああああああああああああああ
+\\ \midrule[0.4pt]
+（効果）
+
+対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。 
+
+切札については「切札について」参照
+
+\end{tabularx}
+
+\vspace{-4zh}
+\end{center}
+\end{spacing}
+
+\end{tcolorbox}
+
+\vspace{-4zh}
+
+
+%%% Ability %%%
+\vspace{1zh} %余白追加
+\subsection*{ {\normalsize $\heartsuit$}2 【援軍】} %Abilityタイトル
+\vspace{-0.5zh}
+
+テスト
+
+\begin{tcolorbox}[title=【Action】援軍]
+
+
+@クイック
+  / \$ B
+  / ★A〜K
+
+\vspace{-1.2zh}%余白削除
+\begin{spacing}{0.8}%効果欄
+\begin{center}
+
+\begin{tabularx}{5.8cm}{p{5.4cm}} \toprule[0.4pt]
+（対象）
+
+切札1枚を対象とする。
+あああああああああああああああああああああああああああああああああ
+\\ \midrule[0.4pt]
+（効果）
+
+対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。 
+
+切札については「切札について」参照
+
+\end{tabularx}
+
+\vspace{-4zh}
+\end{center}
+\end{spacing}
+
+\end{tcolorbox}
+
+\vspace{-4zh}
+
+%% 奥付 %%
+\thispagestyle{empty}
+\vspace*{\stretch{1}}
+\begin{flushright}
+\begin{minipage}{0.6\hsize}
+\begin{description}
+  \item{誌名：}BlackPoker Support Paper 第三版
+  \item{発行：}2017/10/04
+\end{description}
+\end{minipage}
+\end{flushright}
+
+\begin{flushright}
+\copyright 2013 BlackPoker
+\end{flushright}
+
+\end{document}

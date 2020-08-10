@@ -1,0 +1,972 @@
+\documentclass[twocolumn,a5paper,papersize,10pt]{jarticle}
+\usepackage{bxpapersize}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage[dvipdfmx]{graphicx} %画像読み込み設定
+\usepackage{here} %画像を好きな位置に出力
+\usepackage[absolute,overlay]{textpos}%座標指定
+
+\usepackage{newtxtext,newtxmath} %timeフォント設定
+\usepackage{titlesec}%タイトルの文字サイズ変更
+\usepackage{setspace} % setspaceパッケージのインクルード
+
+\usepackage{tcolorbox} % 枠囲み
+\usepackage{okumacro} % ルビ
+
+%\columnseprule=0.1pt %段組み罫線
+\setlength{\columnsep}{0.5cm} %段組みの幅
+
+
+\titleformat*{\section}{\small\bfseries} %sectionの文字サイズ
+\titleformat*{\subsection}{\scriptsize\bfseries} %subsectionの文字サイズ
+\titleformat*{\subsubsection}{\scriptsize\bfseries} %subsubsectionの文字サイズ
+
+\setlength{\hoffset}{-2cm}
+\setlength{\voffset}{-4cm}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\headheight}{5pt}
+\setlength{\textheight}{19cm}
+\setlength{\textwidth}{13.8cm}
+
+\setlength\intextsep{0pt} %図の余白をなくす
+\setlength\textfloatsep{0pt} %図の余白をなくす
+
+\setlength\floatsep{0pt} %図と図の間の余白
+\setlength\textfloatsep{0pt} %本文と図の間の余白
+\setlength\intextsep{0pt} %本文中の図の余白
+\setlength\abovecaptionskip{0pt} %図とキャプションの間の余白
+
+
+\setstretch{1} % ページ全体の行間を設定
+\parindent = 0pt %インデントを無効化
+
+\title{\empty}
+\author{\empty}
+\date{\empty}
+
+%%%%%%    TEXT START    %%%%%%
+\begin{document}
+
+% ロゴ出力
+% この場合は (230pt, 100pt) の位置に 0.4\linewidth の幅のブロックができる．
+\begin{textblock*}{0.4\linewidth}(55pt, 145pt)
+    \centering
+    \includegraphics[width=1.2cm]{blackpoker_logo.pdf}
+\end{textblock*}
+
+%%%%% QRコード第三版用 %%%%%
+\begin{textblock*}{0.4\linewidth}(200pt, 135pt)
+    \centering
+    \includegraphics[width=1.7cm,keepaspectratio]{qr_blackpoker-support_v5-lite.pdf}
+\end{textblock*}
+\begin{textblock*}{0.4\linewidth}(200pt, 130pt)
+    \centering
+    \textcolor{black}{Web版}
+\end{textblock*}
+
+%%%%% QRコード第三版用 %%%%%
+
+\section*{\textrm{\Large BlackPoker}}
+\vspace{-1zh}%余白削除
+\noindent
+
+\begin{center}
+{\footnotesize 第五版 act5.2 ライト}
+
+{\scriptsize 2019/06/16}
+\end{center}
+
+\scriptsize%本文の文字サイズを小さく設定
+\renewcommand{\labelitemi}{・}%箇条書きのラベルを変更
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+\subsection*{（補足）記号の意味}
+\vspace{-1zh}%余白削除
+{\small @:タイミング, 
+\$:コスト, 
+★:キーカード}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）コストの意味}
+\vspace{-1zh}%余白削除
+\begin{small}
+\begin{tabbing}
+ \hspace{2mm} \= \hspace{2mm} \= \hspace{1mm} \= hspace{15mm} \kill
+\> B \> : \>防壁をドライブする \\
+\> L \> : \>1点ダメージを受ける \\
+\> D \> : \>手札を1枚捨てる \\
+\end{tabbing}
+\end{small}
+
+\vspace{-3zh}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）防壁の置き方}
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}%箇条書きを左詰め
+%\setlength{\itemsep}{0pt}      %2. ブロック間の余白
+\setlength{\parskip}{0pt}      %4. 段落間余白．
+%\setlength{\itemindent}{-10pt}   %5. 最初のインデント
+%\setlength{\labelsep}{15pt}     %6. item と文字の間
+
+\item 防壁を置く時はデッキ側に詰めて置く。
+\item 防壁の左右の入れ替えは行わない。
+\end{itemize}
+
+\vspace{-1zh}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）誘発する場合}
+\vspace{-1zh}%余白削除
+アクションを誘発する場合、誘発したアクションをステージに乗せます。詳しくは、公式ルール第五章の誘発を参照して下さい。
+\vspace{-1zh}%余白削除
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% ActionList %%%%%
+\begin{center}
+\begin{center}
+\hrule height 1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\Large\bf \ruby{Action List}{アクションリスト}}
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\end{center}
+\end{center}
+\vspace{-1zh}%余白削除
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 展開系}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 防壁設置 {\scriptsize (召喚) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+  {\footnotesize\bf | } {\footnotesize\bf \$ L}
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（即時効果）}
+
+手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の能力はキャラクターリスト参照。防壁の置き方は「防壁の置き方」参照。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 兵士召喚 {\scriptsize (召喚) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+  {\footnotesize\bf | } {\footnotesize\bf \$ BL}
+
+{\footnotesize\bf ★2〜10}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+キーカードを一般兵として表向きかつチャージ状態で場に出す。一般兵の能力は、キャラクターリスト参照。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 英雄召喚 {\scriptsize (召喚) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+  {\footnotesize\bf | } {\footnotesize\bf \$ BBL}
+
+{\footnotesize\bf ★J〜K}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+キーカードを英雄として表向きかつチャージ状態で場に出す。英雄の能力は、キャラクターリスト参照。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ エース召喚 {\scriptsize (召喚) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+  {\footnotesize\bf | } {\footnotesize\bf \$ L}
+
+{\footnotesize\bf ★A}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+キーカードをエースとして表向きかつチャージ状態で場に出す。エースの能力は、キャラクターリスト参照。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 装備 {\scriptsize (召喚) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+  {\footnotesize\bf | } {\footnotesize\bf \$ BL}
+
+{\footnotesize\bf ★A〜K}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+自分の場にいるキーカードと同じスートの兵士1体を対象とする。Jokerは対象にできない。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象とした兵士の上にキーカードを置き装備兵とする。装備兵の能力は、キャラクターリスト参照。
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf ターン制御系}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ チャージ {\scriptsize (ターン制御) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーはこのアクションを直接起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（即時効果）}
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
+
+\item ドローアクションを起こす。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ ドロー {\scriptsize (ターン制御) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーはこのアクションを直接起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+ターンを持っているプレイヤーは次を行う。
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item デッキの一番上からカードを1枚引き、手札に加える。
+
+\item 必要であれば、更にデッキの一番上からカードを1枚引き、手札に加える。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ エンド {\scriptsize (ターン制御) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 手札が7枚を越えた場合、7枚になるよう手札を捨てる。
+
+\item 自分のターンを終了し、対戦相手にターンを渡す。
+
+\item チャージアクションを起こす。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 攻撃系}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ アタック {\scriptsize (攻防) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 対戦相手を攻撃する兵士（アタッカー）をドライブして指定する。アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
+
+\item ブロックアクションを起こす。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ ブロック {\scriptsize (攻防) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーはこのアクションを直接起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
+
+\item ダメージ判定アクションを起こす。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ ダメージ判定 {\scriptsize (攻防) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーはこのアクションを直接起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+アタッカーとブロッカーを比較する
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、少ない方を墓地に移す。同じ場合は両方を墓地に移動する。1アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+
+\item 兵士（アタッカー）と防壁（ブロッカー）の場合、キャラクターリストの防壁-（能力）【ダメージ判定】参照
+
+\item アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。
+\vspace{-1zh}%余白削除
+\end{enumerate}
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 魔法系}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ アップ {\scriptsize (速攻魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+  {\footnotesize\bf | } {\footnotesize\bf \$ D}
+
+{\footnotesize\bf ★{\normalsize $\heartsuit$} A〜10}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+兵士1体を対象とする。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ ダウン {\scriptsize (速攻魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+  {\footnotesize\bf | } {\footnotesize\bf \$ D}
+
+{\footnotesize\bf ★{\normalsize $\spadesuit$} A〜10}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+兵士1体を対象とする。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が0以下となった場合、対象を墓地に移す。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ ツイスト {\scriptsize (速攻魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+  {\footnotesize\bf | } {\footnotesize\bf \$ D}
+
+{\footnotesize\bf ★{\normalsize $\diamondsuit$} A〜10}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+キャラクター1体を対象とする。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象のキャラクターをドライブ状態またはチャージ状態にする。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ カウンター {\scriptsize (速攻魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+  {\footnotesize\bf | } {\footnotesize\bf \$ D}
+
+{\footnotesize\bf ★{\normalsize $\clubsuit$} A〜10}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+以下のいずれかの条件に該当するアクションを対象とする。Xはこのアクションのキーカードの数字とする。
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item キーカードが1枚かつそのキーカードの数字がX以下
+
+\item キーカードが2枚
+\vspace{-1zh}%余白削除
+\end{itemize}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象のアクションは効果を発揮しない。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 防壁破壊 {\scriptsize (通常魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+{\footnotesize\bf ★{\normalsize $\heartsuit$} A〜K と {\normalsize $\diamondsuit$} A〜K}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+防壁1体を対象とする。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象の防壁を場から墓地に移す。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 投擲 {\scriptsize (通常魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @メイン }
+
+{\footnotesize\bf ★{\normalsize $\spadesuit$} A〜K と {\normalsize $\clubsuit$} A〜K}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（対象）}
+
+対戦相手1人を対象とする。
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（通常効果）}
+
+対象の対戦相手にX点のダメージを与える。Xはキーカードの{\normalsize $\spadesuit$} カードの数字に等しい。
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ サーチ {\scriptsize (速攻魔法) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+
+{\footnotesize\bf ★Joker}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（即時効果）}
+
+デッキから好きなカードを1枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 誘発系}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Action %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 世代交代 {\scriptsize (誘発) }} %Actionタイトル
+\hfill 
+{\footnotesize\bf @クイック }
+
+
+%特記事項
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\renewcommand{\labelenumi}{※}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\itemsep}{0pt} %2. ブロック間の余白
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item プレイヤーはこのアクションを直接起こすことができない。
+
+\vspace{-3mm}%余白削除
+\end{enumerate}
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（即時効果）}
+
+デッキの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% CharacterList %%%%%
+\begin{center}
+\begin{center}
+\hrule height 1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\Large\bf \ruby{CharacterList}{キャラクターリスト}}
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\end{center}
+\end{center}
+\vspace{-1zh}%余白削除
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 兵士}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Character %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 一般兵 {\scriptsize (兵士) }} %Characterタイトル
+\hfill 
+{\footnotesize\bf ★2〜10 }
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+\vspace{-1zh}%余白削除
+\end{itemize}
+%%% Character %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 英雄 {\scriptsize (兵士) }} %Characterタイトル
+\hfill 
+{\footnotesize\bf ★J〜K }
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+
+\item 場から墓地に行く場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+\vspace{-1zh}%余白削除
+\end{itemize}
+%%% Character %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ エース {\scriptsize (兵士) }} %Characterタイトル
+\hfill 
+{\footnotesize\bf ★A }
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）
+
+\item 場から墓地に行く場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+\vspace{-1zh}%余白削除
+\end{itemize}
+%%% Character %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 装備兵 {\scriptsize (兵士) }} %Characterタイトル
+\hfill 
+{\footnotesize\bf ★同じスートを2枚以上 }
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item キーカードにAが含まれる場合、速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）を得る。
+
+\item キーカードにAが含まれない場合、準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）を得る。
+
+\item 数字はキーカードの合計値とする。
+
+\item 場から墓地に行く場合、キーカードに含まれるA,J,Q,Kの枚数と同じ回数だけ世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+\vspace{-1zh}%余白削除
+\end{itemize}
+
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf 防壁}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+%%% Character %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+{\small\bf ■ 防壁 {\scriptsize (防壁) }} %Characterタイトル
+\hfill 
+{\footnotesize\bf ★全て(裏向き) }
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item アタッカーに指定することができない。
+
+\item 墓地に移る際に防壁がJoker,A,J,Q,Kの場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+
+\item 【ダメージ判定】 この能力はダメージ判定アクションにて兵士（アタッカー）をブロックした場合に発揮する。
+
+\vspace{-1zh}%余白削除
+\begin{enumerate}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 防壁を表にし、防壁が以下の条件に当てはまる場合、アタッカーを墓地に移す。
+
+\begin{enumerate}
+\renewcommand{\labelenumi}{\Alph{enumi}}
+\setlength{\leftskip}{-0.3cm}
+\setlength{\parskip}{0pt} %4. 段落間余白．
+
+\item 防壁がJokerの場合
+
+\item 防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合
+
+\end{enumerate}
+\item 防壁を墓地に移す。
+\vspace{-1zh}%余白削除
+\end{enumerate}\vspace{-1zh}%余白削除
+\end{itemize}
+
+
+\thispagestyle{empty}
+\vspace*{\stretch{1}}
+\begin{flushright}
+\begin{minipage}{0.8\hsize}
+\hrule height 0.2mm depth 0mm width 50mm %罫線
+\begin{description}
+  \item{誌名：}BlackPoker ActionList 第五版 act5.2
+  \item{発行：}2019/06/16
+\end{description}
+\end{minipage}
+\end{flushright}
+
+\begin{flushright}
+\copyright 2013 BlackPoker
+\end{flushright}
+
+\end{document}

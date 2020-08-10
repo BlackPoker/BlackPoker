@@ -1,0 +1,16 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-3.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>My first template with Thymeleaf</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+	<table>
+		<tr th:each="row : ${list}">
+			<td th:text="${row.trump}"></td>
+			<td th:text="${row.name}"></td>
+		</tr>
+	</table>
+</body>
+</html>
