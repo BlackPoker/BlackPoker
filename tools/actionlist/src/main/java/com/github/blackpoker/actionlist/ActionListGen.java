@@ -3,6 +3,7 @@ package com.github.blackpoker.actionlist;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -15,6 +16,7 @@ import org.jopendocument.dom.spreadsheet.Sheet;
 import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+import org.yaml.snakeyaml.Yaml;
 
 import com.github.blackpoker.actionlist.writer.HtmlWriter;
 import com.github.blackpoker.actionlist.writer.TexWriter;
@@ -93,6 +95,16 @@ public class ActionListGen {
 		if (texOutputPath != null && !"".equals(texOutputPath)) {
 			Writer pdfWriter = new TexWriter();
 			pdfWriter.write(map, texOutputPath, templateName);
+		}
+
+		// yaml書き出し
+		{
+			Yaml yaml = new Yaml();
+			StringWriter writer = new StringWriter();
+			yaml.dump(map, writer);
+			System.out.println("-----");
+			System.out.println(writer.toString());
+			System.out.println("-----");
 		}
 	}
 

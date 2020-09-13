@@ -67,6 +67,14 @@
       <artifactId>velocity-engine-core</artifactId>
       <version>2.0</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+    <dependency>
+        <groupId>org.yaml</groupId>
+        <artifactId>snakeyaml</artifactId>
+        <version>1.26</version>
+    </dependency>
+
   </dependencies>
   <build>
     <pluginManagement>      <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
@@ -124,6 +132,49 @@
           </executions>
           <configuration>
             <mainClass>com.github.blackpoker.actionlist.ActionListGen</mainClass>
+            <arguments>
+              <!-- <argument>-i</argument>
+              <argument>original/v5-QA.ods</argument>
+              <argument>-o</argument>
+              <argument>web-site/static/v5-QA.html</argument>
+              <argument>-t</argument>
+              <argument>v5-QA</argument> -->
+
+              <argument>-i</argument>
+              <argument>original/v5-act.ods</argument>
+              <argument>-o</argument>
+              <argument>web-site/static/v5-std.html</argument>
+              <argument>-t</argument>
+              <argument>v5-std</argument>
+              <argument>-arg0</argument>
+              <argument>std</argument>
+              <argument>--texOutput</argument>
+              <argument>./tex/blackpoker-v5-std.tex</argument>
+
+            </arguments>
+            <systemProperties>
+              <systemProperty>
+                <key>myproperty</key>
+                <value>myvalue</value>
+              </systemProperty>
+            </systemProperties>
+          </configuration>
+        </plugin>
+
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>exec-maven-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>odsyaml</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <mainClass>com.github.blackpoker.actionlist.OdsYaml</mainClass>
             <arguments>
               <!-- <argument>-i</argument>
               <argument>original/v5-QA.ods</argument>

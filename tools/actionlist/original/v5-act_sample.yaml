@@ -1,0 +1,582 @@
+arg0: std
+arg1: null
+arg2: null
+listlist:
+- - &id001
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 展開系
+    actName: 防壁設置
+    actId: setBulwark
+    actType: 召喚
+    actTime: メイン
+    actCost: L
+    actS: ●
+    actKey: ''
+    actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+    actTarget: ''
+    actEffect: 手札からカード１枚を防壁として裏向きかつチャージ状態で場に出す。防壁の能力はキャラクターリスト参照。防壁の置き方は「防壁の置き方」参照。
+    story: どの国もいきなり攻撃はしません。自国を守るため、防衛拠点（防壁：bulwark）を作り、徐々に相手に攻め入ります。
+    flavor: |
+      「まずは、防壁を出す。話はそれからだ。」
+    flavorSpeaker: 再現の師より
+  - &id002 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 展開系, actName: 兵士召喚,
+    actId: summonsSoldier, actType: 召喚, actTime: メイン, actCost: BL, actS: '', actKey: 2〜10,
+    actNote: '', actTarget: '', actEffect: キーカードを一般兵として表向きかつチャージ状態で場に出す。一般兵の能力は、キャラクターリスト参照。,
+    story: 兵士をいきない戦場に出すことはできません。防衛拠点に受け入れてもらい、休息をとってから戦場に出ます。当然民の支援も必要です。, flavor: 「防壁の次は兵士を出します。これが戦術の基本です。」,
+    flavorSpeaker: 再現者の心得第二章より}
+  - &id003 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 展開系, actName: 英雄召喚,
+    actId: summonsHero, actType: 召喚, actTime: メイン, actCost: BBL, actS: '', actKey: J〜K,
+    actNote: '', actTarget: '', actEffect: キーカードを英雄として表向きかつチャージ状態で場に出す。英雄の能力は、キャラクターリスト参照。,
+    story: 英雄の召喚には一般兵よりコストがかかります。防壁による厳重な警護。十分な休息。そして民の支援です。, flavor: 「実力はわからんが一応英雄様の出陣じゃ。粗相のないようしっかりやれよ。」,
+    flavorSpeaker: 古参兵より}
+  - &id004 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 展開系, actName: エース召喚,
+    actId: summonsAce, actType: 召喚, actTime: メイン, actCost: L, actS: '', actKey: A,
+    actNote: '', actTarget: '', actEffect: キーカードをエースとして表向きかつチャージ状態で場に出す。エースの能力は、キャラクターリスト参照。,
+    story: エースは素早く行動を起こします。いきなり戦場に登場し切り込んで行きます。, flavor: 「あいつ！何も持たずに飛び出して行きやがった！」,
+    flavorSpeaker: 親方より}
+  - &id005
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 展開系
+    actName: 魔術士召喚
+    actId: summonsMagic
+    actType: 召喚
+    actTime: メイン
+    actCost: BD
+    actS: ''
+    actKey: Joker
+    actNote: ''
+    actTarget: ''
+    actEffect: キーカードを魔術士として表向きかつチャージ状態で場に出す。魔術士の能力は、キャラクターリスト参照。
+    story: |-
+      魔法使いは戦場では魔術士として戦いに臨みます。
+      コストとして民の支援より手元の予定を狂わせることを要求するあたり捻くれ者であることが伺えます。
+    flavor: 「場に出れば強いんだよなぁ。場に出れば。」
+    flavorSpeaker: 再現者見習いより
+  - &id006 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 展開系, actName: 装備,
+    actId: mountSoldier, actType: 召喚, actTime: メイン, actCost: BL, actS: '', actKey: A〜K,
+    actNote: '', actTarget: 自分の場にいるキーカードと同じスートの兵士１体を対象とする。Jokerは対象にできない。, actEffect: 対象とした兵士の上にキーカードを置き装備兵とする。装備兵の能力は、キャラクターリスト参照。,
+    story: 兵士を強化することができます。強化した分強くなるのですが、弱点も増えるので要注意です。, flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」,
+    flavorSpeaker: デッキよりの防壁より}
+  - &id007
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 展開系
+    actName: 帰還
+    actId: unsummons
+    actType: 召喚
+    actTime: クイック
+    actCost: B
+    actS: ''
+    actKey: 同じスートを2枚
+    actNote: ''
+    actTarget: |
+      自分の場のキャラクター１体を対象とする。
+    actEffect: |-
+      １．対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
+      ２．キーカードを手札に戻す。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+- - &id008
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: ターン制御系
+    actName: チャージ
+    actId: charge
+    actType: ターン制御
+    actTime: メイン
+    actCost: ''
+    actS: ●
+    actKey: ''
+    actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+    actTarget: ''
+    actEffect: |-
+      １．ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
+      ２．ドローアクションを起こす。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id009
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: ターン制御系
+    actName: ドロー
+    actId: draw
+    actType: ターン制御
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ''
+    actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+    actTarget: ''
+    actEffect: |-
+      ターンを持っているプレイヤーは次を行う。
+      １．デッキの一番上からカードを１枚引き、手札に加える。
+      ２．必要であれば、更にデッキの一番上からカードを１枚引き、手札に加える。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id010
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: ターン制御系
+    actName: エンド
+    actId: end
+    actType: ターン制御
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ''
+    actNote: ''
+    actTarget: ''
+    actEffect: |-
+      １．手札が7枚を越えた場合、7枚になるよう手札を捨てる。
+      ２．自分のターンを終了し、対戦相手にターンを渡す。
+      ３．チャージアクションを起こす。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+- - &id011
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 攻撃系
+    actName: アタック
+    actId: attack
+    actType: 攻防
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ''
+    actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+    actTarget: ''
+    actEffect: |-
+      １．対戦相手を攻撃する兵士（アタッカー）をドライブして指定する。アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
+      ２．ブロックアクションを起こす。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id012
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 攻撃系
+    actName: ブロック
+    actId: block
+    actType: 攻防
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ''
+    actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+    actTarget: ''
+    actEffect: |-
+      １．対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
+      ２．ダメージ判定アクションを起こす。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id013
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 攻撃系
+    actName: ダメージ判定
+    actId: damageJudge
+    actType: 攻防
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ''
+    actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+    actTarget: ''
+    actEffect: |-
+      アタッカーとブロッカーを比較する
+      １．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、少ない方を墓地に移す。同じ場合は両方を墓地に移動する。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+      ２．兵士（アタッカー）と防壁（ブロッカー）の場合、キャラクターリストの防壁-（能力）【ダメージ判定】参照
+      ３．アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+- - &id014 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: アップ,
+    actId: up, actType: 速攻魔法, actTime: クイック, actCost: D, actS: '', actKey: ♡A〜10,
+    actNote: '', actTarget: 兵士1体を対象とする。, actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id015 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: ダウン,
+    actId: down, actType: 速攻魔法, actTime: クイック, actCost: D, actS: '', actKey: ♠A〜10,
+    actNote: '', actTarget: 兵士1体を対象とする。, actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が０以下となった場合、対象を墓地に移す。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id016 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: ツイスト,
+    actId: twist, actType: 速攻魔法, actTime: クイック, actCost: D, actS: '', actKey: ♢A〜10,
+    actNote: '', actTarget: キャラクター1体を対象とする。, actEffect: 対象のキャラクターをドライブ状態またはチャージ状態にする。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id017
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 魔法系
+    actName: カウンター
+    actId: counter
+    actType: 速攻魔法
+    actTime: クイック
+    actCost: D
+    actS: ''
+    actKey: ♣A〜10
+    actNote: ''
+    actTarget: |-
+      以下のいずれかの条件に該当するアクションを対象とする。Xはこのアクションのキーカードの数字とする。
+      ・キーカードが１枚かつそのキーカードの数字がX以下
+      ・キーカードが２枚
+    actEffect: 対象のアクションは効果を発揮しない。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id018 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: 再会, actId: reunion,
+    actType: 速攻魔法, actTime: クイック, actCost: '', actS: '', actKey: ♡A〜10 を 2枚, actNote: '',
+    actTarget: '', actEffect: 自分の墓地からカードを１枚選び対戦相手に見せ手札に加える。, story: 親愛な仲間との再会を強く強く願った。どんな手段も厭わないその願いが今叶った。,
+    flavor: 「ねぇねぇ知ってた。この後ヒロインの願いが届いて死んだはずの主人公が登場して、二人で敵を全員やっつけちゃうの！ありがちよねぇ。」, flavorSpeaker: ネタバレ娘より}
+  - &id019 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: キル, actId: kill,
+    actType: 速攻魔法, actTime: クイック, actCost: '', actS: '', actKey: ♠A〜10 を 2枚, actNote: '',
+    actTarget: 兵士1体を対象とする。, actEffect: 対象とした兵士を墓地に移す。, story: '', flavor: '', flavorSpeaker: ''}
+  - &id020 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: 停戦, actId: truce,
+    actType: 速攻魔法, actTime: クイック, actCost: '', actS: '', actKey: ♢A〜10 を 2枚, actNote: '',
+    actTarget: ダメージ判定アクションを対象とする。, actEffect: 対象のアクションは効果を発揮しない。, story: '', flavor: '',
+    flavorSpeaker: ''}
+  - &id021 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: 対象変更,
+    actId: changeTarget, actType: 速攻魔法, actTime: クイック, actCost: '', actS: '', actKey: ♣A〜10
+      を 2枚, actNote: '', actTarget: 対象が指定されているアクションを対象とする。, actEffect: 対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id022 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: 防壁破壊,
+    actId: destroyBulwark, actType: 通常魔法, actTime: メイン, actCost: '', actS: '', actKey: ♡A〜K
+      と ♢A〜K, actNote: '', actTarget: 防壁１体を対象とする。, actEffect: 対象の防壁を場から墓地に移す。, story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。,
+    flavor: 「あれ？いつの間にかなくなってるよ？」, flavorSpeaker: かくれんぼしていた子供より}
+  - &id023 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: 投擲,
+    actId: throwing, actType: 通常魔法, actTime: メイン, actCost: '', actS: '', actKey: ♠A〜K
+      と ♣A〜K, actNote: '', actTarget: 対戦相手１人を対象とする。, actEffect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。,
+    story: 知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。, flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」,
+    flavorSpeaker: 再現者の心得第十一章より}
+  - &id024
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 魔法系
+    actName: 死の槍
+    actId: deathLance
+    actType: 通常魔法
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ♠A〜K と ♢A〜K
+    actNote: ''
+    actTarget: 兵士１体を対象とする。
+    actEffect: |-
+      対象の兵士の数字が０以外かつ、キーカードの♢カードの数字で割切れる場合、次を行う。
+      １．対象の兵士をオーナーのデッキの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でデッキの一番上に裏向きで移す。
+      ２．対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
+    story: 死♠の槍♢。そのままだな。
+    flavor: 「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」
+    flavorSpeaker: 再現者の心得第十二章より
+  - &id025
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 魔法系
+    actName: 防壁補充
+    actId: addBulwark
+    actType: 通常魔法
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: ♡A〜K と ♣A〜K
+    actNote: ''
+    actTarget: ''
+    actEffect: |-
+      自分のデッキの一番上から１枚を防壁として裏向きかつチャージ状態で場に出す。もしくは、自分のデッキの一番上から２枚を防壁として裏向きかつドライブ状態で場に出す。防壁の能力はキャラクターリスト参照。
+      防壁の置き方は「防壁の置き方」参照
+    story: 愛する人♡を守るため知恵♣を絞った結果守りを固めることにした。
+    flavor: 「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」
+    flavorSpeaker: 無能な指揮官より
+  - &id026 {lite: '', std: ●, pro: ●, format: ',std,pro', type: 魔法系, actName: リアニメイト,
+    actId: reanimate, actType: 通常魔法, actTime: メイン, actCost: '', actS: '', actKey: ♠A〜K
+      と ♡A〜K, actNote: '', actTarget: 自分の場のキャラクター１体を対象とする。, actEffect: 自分の墓地にあるカード１枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id027 {lite: '', std: ●, pro: ●, format: ',std,pro', type: 魔法系, actName: ハンデス,
+    actId: handeth, actType: 通常魔法, actTime: メイン, actCost: '', actS: '', actKey: ♢A〜K
+      と ♣A〜K, actNote: '', actTarget: 対戦相手１人を対象とする。, actEffect: 対戦相手の手札を見て１枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id028 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: フォース,
+    actId: force, actType: 通常魔法, actTime: メイン, actCost: BB, actS: '', actKey: ♡A〜10
+      を 2枚, actNote: ※このアクションはカウンターアクションの対象にならない。, actTarget: '', actEffect: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id029 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: 剣の雨, actId: swordRain,
+    actType: 通常魔法, actTime: メイン, actCost: BB, actS: '', actKey: ♠A〜10 を 2枚, actNote: ※このアクションはカウンターアクションの対象にならない。,
+    actTarget: '', actEffect: キーカードの合計値以下の全ての兵士を墓地に移す。, story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。,
+    flavor: 「え！助かる訳ないじゃん！！」, flavorSpeaker: 平和主義の♣3一般兵より}
+  - &id030
+    lite: ''
+    std: ''
+    pro: ●
+    format: ',,pro'
+    type: 魔法系
+    actName: 徴募
+    actId: recruit
+    actType: 通常魔法
+    actTime: メイン
+    actCost: BB
+    actS: ''
+    actKey: ♢A〜10 を 2枚
+    actNote: ※このアクションはカウンターアクションの対象にならない。
+    actTarget: ''
+    actEffect: |-
+      １．デッキの一番上から４枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。
+      ２．残りのカードをデッキの一番下に好きな順で移す。
+    story: 金♢が手元にたくさんあれば、戦力強化が定石だろう。
+    flavor: |-
+      「君はどう？兵士になる？...あっそう。」
+      「君はどう？兵士になる？...あっそう。」
+      「はぁ。金がなけれりゃ誰も来やしねぇ」
+    flavorSpeaker: 孤独な徴募兵より
+  - &id031
+    lite: ''
+    std: ''
+    pro: ●
+    format: ',,pro'
+    type: 魔法系
+    actName: 奇襲
+    actId: surprise
+    actType: 通常魔法
+    actTime: メイン
+    actCost: BB
+    actS: ''
+    actKey: ♣A〜10 を 2枚
+    actNote: ※このアクションはカウンターアクションの対象にならない。
+    actTarget: ''
+    actEffect: |-
+      １．自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+      ２．自分の場にいる全ての兵士をチャージ状態にする。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id032 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 魔法系, actName: サーチ,
+    actId: search, actType: 速攻魔法, actTime: クイック, actCost: '', actS: ●, actKey: Joker,
+    actNote: '', actTarget: '', actEffect: デッキから好きなカードを1枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id033 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: B・J, actId: bj,
+    actType: 通常魔法, actTime: メイン, actCost: SS, actS: ●, actKey: 同じスートの A と J, actNote: ※コストの支払によって誘発したアクションより先に効果を発揮する。,
+    actTarget: '', actEffect: デッキから好きなカードを2枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。, story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。,
+    flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」, flavorSpeaker: 革命者より}
+  - &id034 {lite: '', std: '', pro: ●, format: ',,pro', type: 魔法系, actName: R・S・F,
+    actId: rsf, actType: 通常魔法, actTime: メイン, actCost: BB, actS: '', actKey: '同じスートの
+      A,10〜K を 5枚', actNote: ※このアクションはカウンターアクションの対象にならない。, actTarget: プレイヤー１人を対象とする。,
+    actEffect: 対象のプレイヤーに40点のダメージを与える。, story: '', flavor: '', flavorSpeaker: ''}
+  - &id035
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 魔法系
+    actName: リバース
+    actId: reverse
+    actType: 通常魔法
+    actTime: メイン
+    actCost: ''
+    actS: ''
+    actKey: 同じ数字を２枚
+    actNote: ''
+    actTarget: キャラクター１体を対象とする。
+    actEffect: |-
+      １．必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。
+      ２．対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
+      ３．対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+- - &id036 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 誘発系, actName: 世代交代,
+    actId: nextGeneration, actType: 誘発, actTime: クイック, actCost: '', actS: ●, actKey: '',
+    actNote: ※プレイヤーはこのアクションを直接起こすことができない。, actTarget: '', actEffect: 'デッキの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。',
+    story: '', flavor: '', flavorSpeaker: ''}
+list:
+- *id001
+- *id002
+- *id003
+- *id004
+- *id005
+- *id006
+- *id007
+- *id008
+- *id009
+- *id010
+- *id011
+- *id012
+- *id013
+- *id014
+- *id015
+- *id016
+- *id017
+- *id018
+- *id019
+- *id020
+- *id021
+- *id022
+- *id023
+- *id024
+- *id025
+- *id026
+- *id027
+- *id028
+- *id029
+- *id030
+- *id031
+- *id032
+- *id033
+- *id034
+- *id035
+- *id036
+list1list:
+- - &id037 {lite: ●, std: ●, pro: ●, format: 'lite,std,pro', type: 兵士, charName: 一般兵,
+    charId: soldier, charType: 兵士, charKey: 2〜10, etc1: '', etc4: '', etc2: '', charNote: '',
+    etc3: '', charAbility: ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）,
+    story: '', flavor: '', flavorSpeaker: ''}
+  - &id038
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 兵士
+    charName: 英雄
+    charId: hero
+    charType: 兵士
+    charKey: J〜K
+    etc1: ''
+    etc4: ''
+    etc2: ''
+    charNote: ''
+    etc3: ''
+    charAbility: |-
+      ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+      ・場から墓地に行く場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id039
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 兵士
+    charName: エース
+    charId: ace
+    charType: 兵士
+    charKey: A
+    etc1: ''
+    etc4: ''
+    etc2: ''
+    charNote: ''
+    etc3: ''
+    charAbility: |-
+      ・速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）
+      ・場から墓地に行く場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+    story: エースは先駆者であり皆の先頭に立ち切り込んで行く力があります。一人では大きなダメージにはなりませんが、大きな力を持っています。あなたもエースがまさにエースであることに気づくでしょう。
+    flavor: 「俺には、ちびですばしっこいだけにしか見えませんが？」
+    flavorSpeaker: 再現者見習いより
+  - &id040
+    lite: ''
+    std: ●
+    pro: ●
+    format: ',std,pro'
+    type: 兵士
+    charName: 魔術士
+    charId: magician
+    charType: 兵士
+    charKey: Joker
+    etc1: ''
+    etc4: ''
+    etc2: ''
+    charNote: ''
+    etc3: ''
+    charAbility: |-
+      ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストが無しになる。）
+      ・速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）
+      ・場から墓地に行く場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+  - &id041
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 兵士
+    charName: 装備兵
+    charId: soldier
+    charType: 兵士
+    charKey: 同じスートを2枚以上
+    etc1: ''
+    etc4: ''
+    etc2: ''
+    charNote: ''
+    etc3: ''
+    charAbility: |-
+      ・キーカードにAが含まれる場合、速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）を得る。
+      ・キーカードにAが含まれない場合、準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）を得る。
+      ・数字はキーカードの合計値とする。
+      ・場から墓地に行く場合、キーカードに含まれるA,J,Q,Kの枚数と同じ回数だけ世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+- - &id042
+    lite: ●
+    std: ●
+    pro: ●
+    format: lite,std,pro
+    type: 防壁
+    charName: 防壁
+    charId: bulwark
+    charType: 防壁
+    charKey: 全て(裏向き)
+    etc1: ''
+    etc4: ''
+    etc2: ''
+    charNote: ''
+    etc3: ''
+    charAbility: |-
+      ・アタッカーに指定することができない。
+      ・墓地に移る際に防壁がJoker,A,J,Q,Kの場合、世代交代アクションを誘発する。誘発については「誘発する場合」を参照。
+      ・【ダメージ判定】 この能力はダメージ判定アクションにて兵士（アタッカー）をブロックした場合に発揮する。
+      -１．防壁を表にし、防壁が以下の条件に当てはまる場合、アタッカーを墓地に移す。
+      --A.防壁がJokerの場合
+      --B.防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合
+      -２．防壁を墓地に移す。
+    story: ''
+    flavor: ''
+    flavorSpeaker: ''
+list1:
+- *id037
+- *id038
+- *id039
+- *id040
+- *id041
+- *id042
+data: {ver: 第五版 act5.2, lastupdate: 2019/06/16, pdfurl_std: /pdf/blackpoker-v5-std,
+  pdfurl_lite: /pdf/blackpoker-v5-lite, pdfurl_pro: /pdf/blackpoker-v5-pro, qrStd: qr_blackpoker-support_v5-std.pdf,
+  qrLite: qr_blackpoker-support_v5-lite.pdf, qrPro: qr_blackpoker-support_v5-pro.pdf}
