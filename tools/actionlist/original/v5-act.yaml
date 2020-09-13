@@ -1,11 +1,11 @@
 data: 
-  ver: 第五版 act5.2, 
-  lastupdate: 2019/06/16, 
-  pdfurl_std: /pdf/blackpoker-v5-std,
-  pdfurl_lite: /pdf/blackpoker-v5-lite, 
-  pdfurl_pro: /pdf/blackpoker-v5-pro, 
-  qrStd: qr_blackpoker-support_v5-std.pdf,
-  qrLite: qr_blackpoker-support_v5-lite.pdf, 
+  ver: 第五版 act5.230
+  lastupdate: 2019/06/16
+  pdfurl_std: /pdf/blackpoker-v5-std
+  pdfurl_lite: /pdf/blackpoker-v5-lite
+  pdfurl_pro: /pdf/blackpoker-v5-pro
+  qrStd: qr_blackpoker-support_v5-std.pdf
+  qrLite: qr_blackpoker-support_v5-lite.pdf
   qrPro: qr_blackpoker-support_v5-pro.pdf
 
 actList:
@@ -27,19 +27,19 @@ actList:
         「まずは、防壁を出す。話はそれからだ。」
       flavorSpeaker: 再現の師より
 
-    - format: 'lite,std,pro', 
-      actName: 兵士召喚,
-      actId: summonsSoldier, 
-      actType: 召喚, 
-      actTime: メイン, 
-      actCost: BL, 
-      actS: '', 
-      actKey: 2〜10,
-      actNote: '', 
-      actTarget: '', 
-      actEffect: キーカードを一般兵として表向きかつチャージ状態で場に出す。一般兵の能力は、キャラクターリスト参照。,
-      story: 兵士をいきない戦場に出すことはできません。防衛拠点に受け入れてもらい、休息をとってから戦場に出ます。当然民の支援も必要です。, 
-      flavor: 「防壁の次は兵士を出します。これが戦術の基本です。」,
+    - format: 'lite,std,pro'
+      actName: 兵士召喚
+      actId: summonsSoldier
+      actType: 召喚
+      actTime: メイン
+      actCost: BL
+      actS: ''
+      actKey: 2〜10
+      actNote: ''
+      actTarget: ''
+      actEffect: キーカードを一般兵として表向きかつチャージ状態で場に出す。一般兵の能力は、キャラクターリスト参照。
+      story: 兵士をいきない戦場に出すことはできません。防衛拠点に受け入れてもらい、休息をとってから戦場に出ます。当然民の支援も必要です。
+      flavor: 「防壁の次は兵士を出します。これが戦術の基本です。」
       flavorSpeaker: 再現者の心得第二章より
       
     - format: 'lite,std,pro'
@@ -91,18 +91,18 @@ actList:
       flavorSpeaker: 再現者見習いより
 
     - format: 'lite,std,pro'
-      actName: 装備,
+      actName: 装備
       actId: mountSoldier
       actType: 召喚
       actTime: メイン
       actCost: BL
       actS: ''
-      actKey: A〜K,
+      actKey: A〜K
       actNote: ''
       actTarget: 自分の場にいるキーカードと同じスートの兵士１体を対象とする。Jokerは対象にできない。
-      actEffect: 対象とした兵士の上にキーカードを置き装備兵とする。装備兵の能力は、キャラクターリスト参照。,
+      actEffect: 対象とした兵士の上にキーカードを置き装備兵とする。装備兵の能力は、キャラクターリスト参照。
       story: 兵士を強化することができます。強化した分強くなるのですが、弱点も増えるので要注意です。
-      flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」,
+      flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」
       flavorSpeaker: デッキよりの防壁より
 
     - format: ',std,pro'
@@ -241,46 +241,46 @@ actList:
   - type: 魔法系
     acts:  
     - format: 'lite,std,pro'
-      actName: アップ,
+      actName: アップ
       actId: up
       actType: 速攻魔法
       actTime: クイック
       actCost: D
       actS: ''
-      actKey: ♡A〜10,
+      actKey: ♡A〜10
       actNote: ''
       actTarget: 兵士1体を対象とする。
-      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。,
+      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。
       story: ''
       flavor: ''
       flavorSpeaker: ''
 
     - format: 'lite,std,pro'
-      actName: ダウン,
+      actName: ダウン
       actId: down
       actType: 速攻魔法
       actTime: クイック
       actCost: D
       actS: ''
-      actKey: ♠A〜10,
+      actKey: ♠A〜10
       actNote: ''
       actTarget: 兵士1体を対象とする。
-      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が０以下となった場合、対象を墓地に移す。,
+      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が０以下となった場合、対象を墓地に移す。
       story: ''
       flavor: ''
-      flavorSpeaker: ''}
+      flavorSpeaker: ''
 
     - format: 'lite,std,pro'
-      actName: ツイスト,
+      actName: ツイスト
       actId: twist
       actType: 速攻魔法
       actTime: クイック
       actCost: D
       actS: ''
-      actKey: ♢A〜10,
+      actKey: ♢A〜10
       actNote: ''
       actTarget: キャラクター1体を対象とする。
-      actEffect: 対象のキャラクターをドライブ状態またはチャージ状態にする。,
+      actEffect: 対象のキャラクターをドライブ状態またはチャージ状態にする。
       story: ''
       flavor: ''
       flavorSpeaker: ''
@@ -305,51 +305,51 @@ actList:
 
     - format: ',,pro'
       actName: 再会
-      actId: reunion,
+      actId: reunion
       actType: 速攻魔法
       actTime: クイック
       actCost: ''
       actS: ''
       actKey: ♡A〜10 を 2枚
-      actNote: '',
+      actNote: ''
       actTarget: ''
       actEffect: 自分の墓地からカードを１枚選び対戦相手に見せ手札に加える。
-      story: 親愛な仲間との再会を強く強く願った。どんな手段も厭わないその願いが今叶った。,
+      story: 親愛な仲間との再会を強く強く願った。どんな手段も厭わないその願いが今叶った。
       flavor: 「ねぇねぇ知ってた。この後ヒロインの願いが届いて死んだはずの主人公が登場して、二人で敵を全員やっつけちゃうの！ありがちよねぇ。」
-      flavorSpeaker: ネタバレ娘より}
+      flavorSpeaker: ネタバレ娘より
 
     - format: ',,pro'
       actName: キル
-      actId: kill,
+      actId: kill
       actType: 速攻魔法
       actTime: クイック
       actCost: ''
       actS: ''
       actKey: ♠A〜10 を 2枚
-      actNote: '',
+      actNote: ''
       actTarget: 兵士1体を対象とする。
       actEffect: 対象とした兵士を墓地に移す。
       story: ''
       flavor: ''
-      flavorSpeaker: ''}
+      flavorSpeaker: ''
 
     - format: ',,pro'
       actName: 停戦
-      actId: truce,
+      actId: truce
       actType: 速攻魔法
       actTime: クイック
       actCost: ''
       actS: ''
       actKey: ♢A〜10 を 2枚
-      actNote: '',
+      actNote: ''
       actTarget: ダメージ判定アクションを対象とする。
       actEffect: 対象のアクションは効果を発揮しない。
       story: ''
-      flavor: '',
-      flavorSpeaker: ''}
+      flavor: ''
+      flavorSpeaker: ''
 
     - format: ',,pro'
-      actName: 対象変更,
+      actName: 対象変更
       actId: changeTarget
       actType: 速攻魔法
       actTime: クイック
@@ -358,13 +358,13 @@ actList:
       actKey: ♣A〜10 を 2枚
       actNote: ''
       actTarget: 対象が指定されているアクションを対象とする。
-      actEffect: 対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。,
+      actEffect: 対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。
       story: ''
       flavor: ''
-      flavorSpeaker: ''}
+      flavorSpeaker: ''
 
     - format: 'lite,std,pro'
-      actName: 防壁破壊,
+      actName: 防壁破壊
       actId: destroyBulwark
       actType: 通常魔法
       actTime: メイン
@@ -374,12 +374,12 @@ actList:
       actNote: ''
       actTarget: 防壁１体を対象とする。
       actEffect: 対象の防壁を場から墓地に移す。
-      story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。,
+      story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。
       flavor: 「あれ？いつの間にかなくなってるよ？」
       flavorSpeaker: かくれんぼしていた子供より
 
     - format: 'lite,std,pro'
-      actName: 投擲,
+      actName: 投擲
       actId: throwing
       actType: 通常魔法
       actTime: メイン
@@ -388,9 +388,9 @@ actList:
       actKey: ♠A〜K と ♣A〜K
       actNote: ''
       actTarget: 対戦相手１人を対象とする。
-      actEffect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。,
+      actEffect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
       story: 知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。
-      flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」,
+      flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」
       flavorSpeaker: 再現者の心得第十一章より
 
     - format: ',std,pro'
@@ -429,7 +429,7 @@ actList:
       flavorSpeaker: 無能な指揮官より
 
     - format: ',std,pro'
-      actName: リアニメイト,
+      actName: リアニメイト
       actId: reanimate
       actType: 通常魔法
       actTime: メイン
@@ -438,13 +438,13 @@ actList:
       actKey: ♠A〜K と ♡A〜K
       actNote: ''
       actTarget: 自分の場のキャラクター１体を対象とする。
-      actEffect: 自分の墓地にあるカード１枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。,
+      actEffect: 自分の墓地にあるカード１枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
       story: ''
       flavor: ''
       flavorSpeaker: ''
 
     - format: ',std,pro'
-      actName: ハンデス,
+      actName: ハンデス
       actId: handeth
       actType: 通常魔法
       actTime: メイン
@@ -453,13 +453,13 @@ actList:
       actKey: ♢A〜K と ♣A〜K
       actNote: ''
       actTarget: 対戦相手１人を対象とする。
-      actEffect: 対戦相手の手札を見て１枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。,
+      actEffect: 対戦相手の手札を見て１枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
       story: ''
       flavor: ''
       flavorSpeaker: ''
 
     - format: ',,pro'
-      actName: フォース,
+      actName: フォース
       actId: force
       actType: 通常魔法
       actTime: メイン
@@ -468,23 +468,23 @@ actList:
       actKey: ♡A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
-      actEffect: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。,
+      actEffect: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
       story: ''
       flavor: ''
       flavorSpeaker: ''
 
     - format: ',,pro'
       actName: 剣の雨
-      actId: swordRain,
+      actId: swordRain
       actType: 通常魔法
       actTime: メイン
       actCost: BB
       actS: ''
       actKey: ♠A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。,
+      actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
       actEffect: キーカードの合計値以下の全ての兵士を墓地に移す。
-      story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。,
+      story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
       flavor: 「え！助かる訳ないじゃん！！」
       flavorSpeaker: 平和主義の♣3一般兵より
 
@@ -526,46 +526,45 @@ actList:
       flavorSpeaker: ''
 
     - format: 'lite,std,pro'
-      actName: サーチ,
+      actName: サーチ
       actId: search
       actType: 速攻魔法
       actTime: クイック
       actCost: ''
       actS: ●
-      actKey: Joker,
+      actKey: Joker
       actNote: ''
       actTarget: ''
-      actEffect: デッキから好きなカードを1枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。,
+      actEffect: デッキから好きなカードを1枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。
       story: ''
       flavor: ''
       flavorSpeaker: ''
 
     - format: ',,pro'
       actName: B・J
-      actId: bj,
+      actId: bj
       actType: 通常魔法
       actTime: メイン
       actCost: SS
       actS: ●
       actKey: 同じスートの A と J
-      actNote: ※コストの支払によって誘発したアクションより先に効果を発揮する。,
+      actNote: ※コストの支払によって誘発したアクションより先に効果を発揮する。
       actTarget: ''
       actEffect: デッキから好きなカードを2枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。
-      story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。,
+      story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。
       flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」
-      flavorSpeaker: 革命者より}
+      flavorSpeaker: 革命者より
 
     - format: ',,pro'
-      actName: R・S・F,
+      actName: R・S・F
       actId: rsf
       actType: 通常魔法
       actTime: メイン
       actCost: BB
       actS: ''
-      actKey: '同じスートの
-        A,10〜K を 5枚'
-        actNote: ※このアクションはカウンターアクションの対象にならない。
-        actTarget: プレイヤー１人を対象とする。,
+      actKey: '同じスートのA,10〜K を 5枚'
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actTarget: プレイヤー１人を対象とする。
       actEffect: 対象のプレイヤーに40点のダメージを与える。
       story: ''
       flavor: ''
@@ -593,16 +592,16 @@ actList:
     acts:
     - format: 'lite,std,pro'
       type: 誘発系
-      actName: 世代交代,
+      actName: 世代交代
       actId: nextGeneration
       actType: 誘発
       actTime: クイック
       actCost: ''
       actS: ●
-      actKey: '',
+      actKey: ''
       actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
-      actEffect: 'デッキの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。',
+      actEffect: 'デッキの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
       story: ''
       flavor: ''
       flavorSpeaker: ''
@@ -611,10 +610,10 @@ charList:
   - type: 兵士
     chars:
     - format: 'lite,std,pro'
-      charName: 一般兵,
+      charName: 一般兵
       charId: soldier
       charKey: 2〜10
-      charNote: '',
+      charNote: ''
       charAbility: |-
         ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
       story: ''
