@@ -140,16 +140,18 @@
               <argument>-t</argument>
               <argument>v5-QA</argument> -->
 
+              <!-- <argument>-i</argument>
+              <argument>original/v5-act.ods</argument> -->
               <argument>-i</argument>
-              <argument>original/v5-act.ods</argument>
+                <argument>original/v6-act.yaml</argument>
               <argument>-o</argument>
-              <argument>web-site/static/v5-std.html</argument>
+              <argument>web-site/static/v6-std.html</argument>
               <argument>-t</argument>
-              <argument>v5-std</argument>
+              <argument>v6-std</argument>
               <argument>-arg0</argument>
               <argument>std</argument>
               <argument>--texOutput</argument>
-              <argument>./tex/blackpoker-v5-std.tex</argument>
+              <argument>./tex/blackpoker-v6-std.tex</argument>
 
             </arguments>
             <systemProperties>

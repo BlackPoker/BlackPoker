@@ -3,7 +3,11 @@ package com.github.blackpoker.actionlist;
 import java.awt.Point;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -24,7 +28,9 @@ import com.github.blackpoker.actionlist.writer.TexWriter;
 public class ActionListGen {
 
 	// 入力ファイルのパス
-	@Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT")
+	// @Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT")
+	// private static String inputPath;
+	@Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT YAML")
 	private static String inputPath;
 	// 入力ファイルのシート名
 	@Option(name = "-s", aliases = { "--sheet" }, metaVar = "sheetName", usage = "SheetName")
@@ -110,19 +116,22 @@ public class ActionListGen {
 
 	// List<Map<String, String>>
 	private Map<String, Object> load(String filepath) throws IOException {
-		File file = new File(filepath);
-		SpreadSheet wb = SpreadSheet.createFromFile(file);
-		Sheet sheet = wb.getSheet(sheetName);
-
-		System.out.println("読み込みました。" + filepath + " " + sheetName);
-
 		Map<String, Object> ret = new LinkedHashMap<>();
+		Path input = Paths.get(filepath);
+		Yaml yaml = new Yaml();
+		try (InputStream in = Files.newInputStream(input)) {
+            
+			ret = (Map<String,Object>)yaml.load(in);
+			
+			System.out.println(ret);
+			System.out.println("読み込みました。" + filepath);
+        }
 
-		// 設定値読み込み
-		{
-			Map<String, String> config = SheetUtil.loadConfig(sheet);
-			this.conf = config;
-		}
+		// // 設定値読み込み
+		// {
+		// 	Map<String, String> config = SheetUtil.loadConfig(sheet);
+		// 	this.conf = config;
+		// }
 
 		// コマンドライン引数を設定
 		{
@@ -134,115 +143,115 @@ public class ActionListGen {
 			}
 		}
 
-		// ------------------------------------
-		// listX:"開始セル,必須列(0始まり),-r(逆順),リストにまとめる列数(0始まり)"
-		for (int i = 0;; i++) {
-			String key;
-			if (i == 0) {
-				key = "list";
-			} else {
-				key = "list" + i;
-			}
+		// // ------------------------------------
+		// // listX:"開始セル,必須列(0始まり),-r(逆順),リストにまとめる列数(0始まり)"
+		// for (int i = 0;; i++) {
+		// 	String key;
+		// 	if (i == 0) {
+		// 		key = "list";
+		// 	} else {
+		// 		key = "list" + i;
+		// 	}
 
-			// keyが存在しない場合、ループを抜ける
-			if (!conf.containsKey(key)) {
-				break;
-			}
+		// 	// keyが存在しない場合、ループを抜ける
+		// 	if (!conf.containsKey(key)) {
+		// 		break;
+		// 	}
 
-			String[] split = conf.get(key).split(",");
+		// 	String[] split = conf.get(key).split(",");
 
-			Point point = SheetUtil.getPoint(split[0]);
-			int stCol = (int) point.getX();
-			int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
+		// 	Point point = SheetUtil.getPoint(split[0]);
+		// 	int stCol = (int) point.getX();
+		// 	int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
 
-			int reqCol = stCol;
-			if (1 < split.length) {
-				reqCol = Integer.parseInt(split[1]);
-			}
+		// 	int reqCol = stCol;
+		// 	if (1 < split.length) {
+		// 		reqCol = Integer.parseInt(split[1]);
+		// 	}
 
-			List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
+		// 	List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
 
-			for (Map<String, String> map : listMap) {
-				for (Entry<String, String> entry : map.entrySet()) {
-					System.out.println(entry.getKey() + ":" + entry.getValue());
-				}
-			}
+		// 	for (Map<String, String> map : listMap) {
+		// 		for (Entry<String, String> entry : map.entrySet()) {
+		// 			System.out.println(entry.getKey() + ":" + entry.getValue());
+		// 		}
+		// 	}
 
-			// reverse設定
-			if (2 < split.length && "-r".equals(split[2])) {
-				Collections.reverse(listMap);
-			}
+		// 	// reverse設定
+		// 	if (2 < split.length && "-r".equals(split[2])) {
+		// 		Collections.reverse(listMap);
+		// 	}
 
-			// listにまとめる設定
-			List<List<Map<String, String>>> wrapList = new ArrayList<>();
-			if (3 < split.length && Pattern.matches("[0-9]+", split[3])) {
-				int idx = Integer.parseInt(split[3]);
+		// 	// listにまとめる設定
+		// 	List<List<Map<String, String>>> wrapList = new ArrayList<>();
+		// 	if (3 < split.length && Pattern.matches("[0-9]+", split[3])) {
+		// 		int idx = Integer.parseInt(split[3]);
 
-				String idxKey = (String) listMap.get(0).keySet().toArray()[idx];
+		// 		String idxKey = (String) listMap.get(0).keySet().toArray()[idx];
 
-				String listKeyVal = "";
-				for (Map<String, String> m : listMap) {
+		// 		String listKeyVal = "";
+		// 		for (Map<String, String> m : listMap) {
 
-					// リストにまとめる時のキー値と異なる場合、新しいリストに詰める
-					if (!listKeyVal.equals(m.get(idxKey))) {
-						listKeyVal = m.get(idxKey);
-						List<Map<String, String>> _list = new ArrayList<>();
-						wrapList.add(_list);
-					}
+		// 			// リストにまとめる時のキー値と異なる場合、新しいリストに詰める
+		// 			if (!listKeyVal.equals(m.get(idxKey))) {
+		// 				listKeyVal = m.get(idxKey);
+		// 				List<Map<String, String>> _list = new ArrayList<>();
+		// 				wrapList.add(_list);
+		// 			}
 
-					// 一番最後のリストに追加する
-					wrapList.get(wrapList.size() - 1).add(m);
-				}
-			}
+		// 			// 一番最後のリストに追加する
+		// 			wrapList.get(wrapList.size() - 1).add(m);
+		// 		}
+		// 	}
 
-			// 結果を設定
-			if (!wrapList.isEmpty()) {
-				// ネストしたlistはlistlistというキーで設定する
-				ret.put(key + "list", wrapList);
-			}
-			ret.put(key, listMap);
+		// 	// 結果を設定
+		// 	if (!wrapList.isEmpty()) {
+		// 		// ネストしたlistはlistlistというキーで設定する
+		// 		ret.put(key + "list", wrapList);
+		// 	}
+		// 	ret.put(key, listMap);
 
-		}
+		// }
 
-		// ------------------------------------
-		// dataX:"開始セル"
-		for (int i = 0;; i++) {
-			String key;
-			if (i == 0) {
-				key = "data";
-			} else {
-				key = "data" + i;
-			}
+		// // ------------------------------------
+		// // dataX:"開始セル"
+		// for (int i = 0;; i++) {
+		// 	String key;
+		// 	if (i == 0) {
+		// 		key = "data";
+		// 	} else {
+		// 		key = "data" + i;
+		// 	}
 
-			// keyが存在しない場合、ループを抜ける
-			if (!conf.containsKey(key)) {
-				break;
-			}
+		// 	// keyが存在しない場合、ループを抜ける
+		// 	if (!conf.containsKey(key)) {
+		// 		break;
+		// 	}
 
-			String[] split = conf.get(key).split(",");
+		// 	String[] split = conf.get(key).split(",");
 
-			Point point = SheetUtil.getPoint(split[0]);
-			int stCol = (int) point.getX();
-			int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
+		// 	Point point = SheetUtil.getPoint(split[0]);
+		// 	int stCol = (int) point.getX();
+		// 	int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
 
-			int reqCol = stCol;
-			if (1 < split.length) {
-				reqCol = Integer.parseInt(split[1]);
-			}
+		// 	int reqCol = stCol;
+		// 	if (1 < split.length) {
+		// 		reqCol = Integer.parseInt(split[1]);
+		// 	}
 
-			List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
+		// 	List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
 
-			for (Map<String, String> map : listMap) {
-				for (Entry<String, String> entry : map.entrySet()) {
-					System.out.println(entry.getKey() + ":" + entry.getValue());
-				}
-			}
+		// 	for (Map<String, String> map : listMap) {
+		// 		for (Entry<String, String> entry : map.entrySet()) {
+		// 			System.out.println(entry.getKey() + ":" + entry.getValue());
+		// 		}
+		// 	}
 
-			if (!listMap.isEmpty()) {
-				// 結果を設定
-				ret.put(key, listMap.get(0));
-			}
-		}
+		// 	if (!listMap.isEmpty()) {
+		// 		// 結果を設定
+		// 		ret.put(key, listMap.get(0));
+		// 	}
+		// }
 		return ret;
 	}
 
