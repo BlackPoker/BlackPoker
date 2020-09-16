@@ -444,7 +444,124 @@
     </div>
   </header>
 
-  <div class="modal fade slide left hidden-print" id="modal_sidebar_links" th:include="sidebar::links"></div>
+  <div class="modal fade slide left hidden-print" id="modal_sidebar_links">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4>
+            <span class="glyphicon glyphicon-link" aria-hidden="true"></span> Link</a>
+          </h4>
+          <h5>
+            <a href="https://sites.google.com/site/blackpoker000/">BlackPoker公式サイト</a>
+          </h5>
+        </div>
+        <div class="modal-body">
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第五版
+              <span class="tag tag-default tag-pill pull-right">
+                <span>
+                  <a target="_blank" href="/pdf/BlackPoker5th.pdf">
+                    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    &thinsp;[PDF]&thinsp;公式ルール</span>
+                </a>
+            </p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v5-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-pro">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> プロ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-changelog">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> ChangeLog：変更履歴
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-QA">
+              <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a>
+            <!--
+             <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a> <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+          -->
+          </div>
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第四版
+              <span class="tag tag-default tag-pill pull-right">
+                <span>
+                  <a target="_blank" href="/pdf/BlackPoker4th.pdf">
+                    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    &thinsp;[PDF]&thinsp;公式ルール</span>
+                </a>
+            </p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v4-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-changelog">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> ChangeLog：変更履歴
+            </a>
+            <!--
+             <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a> <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+          -->
+          </div>
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第三版</p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v3-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+
+          </div>
+          <div class="list-group">
+            <p class="list-group-item disabled">第二版</p>
+
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v2-standard">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
   <!-- /.modal -->
 
   <div class="modal fade slide right hidden-print" id="modal_sidebar">
@@ -454,9 +571,9 @@
           <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
           ActionList
           <h5>
-            <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small>
-            <small class="" th:if="${'lite' == arg0}"th:text="${data.ver}+' ライト版'"></small>
-            <small class="" th:if="${'pro' == arg0}" th:text="${data.ver}+' プロ版'"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
+            <small class="">第五版 act5.230 スタンダード版</small>
+            
+             <small class=""> : 2019/06/16</small>
           </h5>
           <ul class="nav nav-pills">
             <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">Action</a></li>
@@ -474,14 +591,123 @@
           <div class="tab-content">
             <div class="tab-pane active" id="actionlist-summary">
 
-              <div th:each="actList:${actList}">
-                <span th:text="${actList.type}"></span>
+              <div>
+                <span>展開系</span>
                 <div class="list-group">
 
-                  <a th:each="row : ${actList.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action"
-                    th:if="${( ('std' == arg0) && ( #strings.contains(row.format,'std')) )||(('lite' == arg0) && ( #strings.contains(row.format,'lite')) ) || (('pro' == arg0) && ( #strings.contains(row.format,'pro')) )}">
-                    <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
-                          th:text="${row.actTime}"></span></b>
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#act-setBulwark">
+                    <span>防壁設置</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-summonsSoldier">
+                    <span>兵士召喚</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-summonsHero">
+                    <span>英雄召喚</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-summonsAce">
+                    <span>エース召喚</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-summonsMagic">
+                    <span>魔術士召喚</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-mountSoldier">
+                    <span>装備</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-unsummons">
+                    <span>帰還</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a>
+
+                </div>
+             </div>
+
+              <div>
+                <span>展開系</span>
+                <div class="list-group">
+
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#act-charge">
+                    <span>チャージ</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-draw">
+                    <span>ドロー</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-end">
+                    <span>エンド</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a>
+
+                </div>
+             </div>
+
+              <div>
+                <span>攻撃系</span>
+                <div class="list-group">
+
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#act-attack">
+                    <span>アタック</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-block">
+                    <span>ブロック</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-damageJudge">
+                    <span>ダメージ判定</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a>
+
+                </div>
+             </div>
+
+              <div>
+                <span>魔法系</span>
+                <div class="list-group">
+
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#act-up">
+                    <span>アップ</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-down">
+                    <span>ダウン</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-twist">
+                    <span>ツイスト</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-counter">
+                    <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-destroyBulwark">
+                    <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-throwing">
+                    <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-deathLance">
+                    <span>死の槍</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-addBulwark">
+                    <span>防壁補充</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-reanimate">
+                    <span>リアニメイト</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-handeth">
+                    <span>ハンデス</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-search">
+                    <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-reverse">
+                    <span>リバース</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a>
+
+                </div>
+             </div>
+
+              <div>
+                <span>誘発系</span>
+                <div class="list-group">
+
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#act-nextGeneration">
+                    <span>世代交代</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
                     </span>
                   </a>
 
@@ -490,30 +716,24 @@
             </div>
             <div class="tab-pane" id="characterlist-summary">
               <div class="list-group">
-                <a th:each="row : ${list1}" th:attr="href='#char-'+${row.charId}" th:if="${(('std' == arg0) && (not #strings.isEmpty(row.std)) )||(('lite' == arg0) && (not #strings.isEmpty(row.lite)) )|| (('pro' == arg0) && (not #strings.isEmpty(row.pro)) )}"
-                  class="scroll-offset list-group-item list-group-item-action"> <span th:text="${row.charName}"></span>
-                </a>
+                
 
               </div>
             </div>
 
-            <a target="_blank" th:if="${'lite' == arg0}" th:attr="href=${data.pdfurl_lite+'.pdf'}"><span class="glyphicon glyphicon-download-alt"
-                aria-hidden="true">&thinsp;ライト版PDF(A5)</a>
+            
             <br>
-            <a target="_blank" th:if="${'lite' == arg0}" th:attr="href=${data.pdfurl_lite+'-2up.pdf'}"><span class="glyphicon glyphicon-download-alt"
-                aria-hidden="true">&thinsp;ライト版PDF(A4)</a>
+            
 
-            <a target="_blank" th:if="${'std' == arg0}" th:attr="href=${data.pdfurl_std+'.pdf'}"><span class="glyphicon glyphicon-download-alt"
+            <a target="_blank" href="/pdf/blackpoker-v5-std.pdf"><span class="glyphicon glyphicon-download-alt"
                 aria-hidden="true">&thinsp;スタンダード版PDF(A5)</a>
             <br>
-            <a target="_blank" th:if="${'std' == arg0}" th:attr="href=${data.pdfurl_std+'-2up.pdf'}"><span class="glyphicon glyphicon-download-alt"
+            <a target="_blank" href="/pdf/blackpoker-v5-std-2up.pdf"><span class="glyphicon glyphicon-download-alt"
                 aria-hidden="true">&thinsp;スタンダード版PDF(A4)</a>
 
-            <a target="_blank" th:if="${'pro' == arg0}" th:attr="href=${data.pdfurl_pro+'.pdf'}"><span class="glyphicon glyphicon-download-alt"
-                aria-hidden="true">&thinsp;プロ版PDF(A5)</a>
+            
             <br>
-            <a target="_blank" th:if="${'pro' == arg0}" th:attr="href=${data.pdfurl_pro+'-2up.pdf'}"><span class="glyphicon glyphicon-download-alt"
-                aria-hidden="true">&thinsp;プロ版PDF(A4)</a>
+            
 
             <br>
             <br>
@@ -625,75 +845,12 @@
           <h2 class="visible-print-block blackpoker-font">
             BlackPoker <img src="img/blackpoker.svg" width="35px"> ActionList
           </h2>
-          <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-            th:text="${data.ver}+' ライト版'"></small> <small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small><small class="" th:text="' : '+${data.lastupdate}"></small>
+          <small class="">第五版 act5.230 スタンダード版</small>  <small class=""> : 2019/06/16</small>
         </div>
         <hr>
 
         <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
-        <div th:each="nestList : ${listlist}">
-          <h5 th:text="${nestList[0].type}" class="text-center"></h5>
-          <div class="row">
-
-            <div th:each="row : ${nestList}" th:if="${(('std' == arg0) && (not #strings.isEmpty(row.std)) )||(('lite' == arg0) && (not #strings.isEmpty(row.lite)) )||(('pro' == arg0) && (not #strings.isEmpty(row.pro)) )}"
-              class="col-lg-4">
-              <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.actId}">
-                  <div class="panel-heading">
-
-                    <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.actName}"></span>
-                    </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType}"></span>
-                      </small>
-                    </span>
-                    <div class="pull-right">
-                      &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime}"></span>
-                      </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
-                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
-                      </small>
-
-
-                    </div>
-                    <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                      </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                          <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                          <br>
-                        </span>
-                      </small>
-
-                    </div>
-
-                  </div>
-                  <div class="panel-body">
-                    <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
-                      th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
-                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
-                    <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                    <p th:if="${not #strings.isEmpty(row.actS)}">（即時効果）</p>
-                    <p th:if="${#strings.isEmpty(row.actS)}">（通常効果）</p>
-                     <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
-
-                    <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">
-                      <hr>
-                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-                      Flavor:Rule's<br> <span th:text="${row.story}"></span>
-                      <div class="flavorText well well-sm">
-                        <span th:text="${row.flavor}"></span>
-                        <div class="text-right" th:text="${row.flavorSpeaker}"></div>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
 
       <!-- characterlist -->
@@ -703,56 +860,11 @@
           <h2 class="visible-print-block blackpoker-font">
             BlackPoker <img src="img/blackpoker.svg" width="35px"> CharacterList
           </h2>
-          <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-            th:text="${data.ver}+' ライト版'"></small><small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small>  <small class="" th:text="' : '+${data.lastupdate}"></small>
+          <small class="">第五版 act5.230 スタンダード版</small>   <small class=""> : 2019/06/16</small>
         </div>
         <hr>
 
-        <div th:each="nestList : ${list1list}">
-          <h5 th:text="${nestList[0].type}" class="text-center"></h5>
-          <div class="row">
-
-            <div th:each="row : ${nestList}" th:if="${#strings.contains(row.format,arg0)}"
-              class="col-lg-6">
-              <div class="bs-component">
-
-                <div class="panel panel-default blackpoker-action" th:attr="id='char-'+${row.charId}">
-                  <div class="panel-heading">
-
-                    <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}" th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.charName}"></span>
-                    </a> <span class="act-title" th:text="${row.charName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.charType}"></span>
-                      </small>
-                    </span>
-                    <div class="pull-right">
-                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
-                      </small>
-                    </div>
-                  </div>
-                  <div class="panel-body">
-                    （能力）<br> <span th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
-
-                    <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.charId}" class="panel-collapse collapse storyText">
-                      <hr>
-                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-                      Flavor:Rule's<br> <span th:text="${row.story}"></span>
-                      <div class="flavorText well well-sm">
-                        <span th:text="${row.flavor}"></span>
-                        <div class="text-right" th:text="${row.flavorSpeaker}"></div>
-                      </div>
-                    </div>
-
-                  </div>
-
-
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        
       </div>
       <!-- characterlist end -->
 
