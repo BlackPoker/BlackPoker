@@ -479,7 +479,7 @@
                 <div class="list-group">
 
                   <a th:each="row : ${actList.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action"
-                    th:if="${( ('std' == arg0) && ( #strings.contains(row.format,'std')) )||(('lite' == arg0) && ( #strings.contains(row.format,'lite')) ) || (('pro' == arg0) && ( #strings.contains(row.format,'pro')) )}">
+                  th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                           th:text="${row.actTime}"></span></b>
                     </span>
@@ -494,7 +494,7 @@
                 <span th:text="${charList.type}"></span>
                 <div class="list-group">
                   <a th:each="row : ${charList.chars}" th:attr="href='#char-'+${row.charId}" class="scroll-offset list-group-item list-group-item-action"
-                  th:if="${( ('std' == arg0) && ( #strings.contains(row.format,'std')) )||(('lite' == arg0) && ( #strings.contains(row.format,'lite')) ) || (('pro' == arg0) && ( #strings.contains(row.format,'pro')) )}">
+                  th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.charName}"></span>
                   </a>
 
@@ -637,12 +637,13 @@
         <hr>
 
         <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
-        <div th:each="nestList : ${listlist}">
-          <h5 th:text="${nestList[0].type}" class="text-center"></h5>
+        <div th:each="nestList : ${actList}">
+          <h5 th:text="${nestList.type}" class="text-center"></h5>
           <div class="row">
 
-            <div th:each="row : ${nestList}" th:if="${(('std' == arg0) && (not #strings.isEmpty(row.std)) )||(('lite' == arg0) && (not #strings.isEmpty(row.lite)) )||(('pro' == arg0) && (not #strings.isEmpty(row.pro)) )}"
-              class="col-lg-4">
+            <div th:each="row : ${nestList.acts}" class="col-lg-4"
+            th:if="${#strings.contains(row.format,arg0)}">
+            
               <div class="bs-component">
                 <div class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.actId}">
                   <div class="panel-heading">
@@ -714,11 +715,11 @@
         </div>
         <hr>
 
-        <div th:each="nestList : ${list1list}">
-          <h5 th:text="${nestList[0].type}" class="text-center"></h5>
+        <div th:each="nestList : ${charList}">
+          <h5 th:text="${nestList.type}" class="text-center"></h5>
           <div class="row">
 
-            <div th:each="row : ${nestList}" th:if="${#strings.contains(row.format,arg0)}"
+            <div th:each="row : ${nestList.chars}" th:if="${#strings.contains(row.format,arg0)}"
               class="col-lg-6">
               <div class="bs-component">
 
