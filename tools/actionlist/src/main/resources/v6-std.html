@@ -488,12 +488,17 @@
                 </div>
              </div>
             </div>
+            
             <div class="tab-pane" id="characterlist-summary">
-              <div class="list-group">
-                <a th:each="row : ${list1}" th:attr="href='#char-'+${row.charId}" th:if="${(('std' == arg0) && (not #strings.isEmpty(row.std)) )||(('lite' == arg0) && (not #strings.isEmpty(row.lite)) )|| (('pro' == arg0) && (not #strings.isEmpty(row.pro)) )}"
-                  class="scroll-offset list-group-item list-group-item-action"> <span th:text="${row.charName}"></span>
-                </a>
+              <div th:each="charList:${charList}">
+                <span th:text="${charList.type}"></span>
+                <div class="list-group">
+                  <a th:each="row : ${charList.chars}" th:attr="href='#char-'+${row.charId}" class="scroll-offset list-group-item list-group-item-action"
+                  th:if="${( ('std' == arg0) && ( #strings.contains(row.format,'std')) )||(('lite' == arg0) && ( #strings.contains(row.format,'lite')) ) || (('pro' == arg0) && ( #strings.contains(row.format,'pro')) )}">
+                    <span th:text="${row.charName}"></span>
+                  </a>
 
+                </div>
               </div>
             </div>
 
