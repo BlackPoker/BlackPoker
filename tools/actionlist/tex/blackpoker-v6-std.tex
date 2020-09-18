@@ -1,0 +1,179 @@
+\documentclass[twocolumn,a5paper,papersize,10pt]{jarticle}
+\usepackage{bxpapersize}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage[dvipdfmx]{graphicx} %画像読み込み設定
+\usepackage{here} %画像を好きな位置に出力
+\usepackage[absolute,overlay]{textpos}%座標指定
+
+\usepackage{newtxtext,newtxmath} %timeフォント設定
+\usepackage{titlesec}%タイトルの文字サイズ変更
+\usepackage{setspace} % setspaceパッケージのインクルード
+
+\usepackage{tcolorbox} % 枠囲み
+\usepackage{okumacro} % ルビ
+
+%\columnseprule=0.1pt %段組み罫線
+\setlength{\columnsep}{0.5cm} %段組みの幅
+
+
+\titleformat*{\section}{\small\bfseries} %sectionの文字サイズ
+\titleformat*{\subsection}{\scriptsize\bfseries} %subsectionの文字サイズ
+\titleformat*{\subsubsection}{\scriptsize\bfseries} %subsubsectionの文字サイズ
+
+\setlength{\hoffset}{-2cm}
+\setlength{\voffset}{-4cm}
+\setlength{\marginparsep}{0pt}
+\setlength{\marginparwidth}{0pt}
+\setlength{\headheight}{5pt}
+\setlength{\textheight}{19cm}
+\setlength{\textwidth}{13.8cm}
+
+\setlength\intextsep{0pt} %図の余白をなくす
+\setlength\textfloatsep{0pt} %図の余白をなくす
+
+\setlength\floatsep{0pt} %図と図の間の余白
+\setlength\textfloatsep{0pt} %本文と図の間の余白
+\setlength\intextsep{0pt} %本文中の図の余白
+\setlength\abovecaptionskip{0pt} %図とキャプションの間の余白
+
+
+\setstretch{1} % ページ全体の行間を設定
+\parindent = 0pt %インデントを無効化
+
+\title{\empty}
+\author{\empty}
+\date{\empty}
+
+%%%%%%    TEXT START    %%%%%%
+\begin{document}
+
+% ロゴ出力
+% この場合は (230pt, 100pt) の位置に 0.4\linewidth の幅のブロックができる．
+\begin{textblock*}{0.4\linewidth}(55pt, 145pt)
+    \centering
+    \includegraphics[width=1.2cm]{blackpoker_logo.pdf}
+\end{textblock*}
+
+%%%%% QRコード第三版用 %%%%%
+\begin{textblock*}{0.4\linewidth}(200pt, 135pt)
+    \centering
+    \includegraphics[width=1.7cm,keepaspectratio]{qr_blackpoker-support_v5-std.pdf}
+\end{textblock*}
+\begin{textblock*}{0.4\linewidth}(200pt, 130pt)
+    \centering
+    \textcolor{black}{Web版}
+\end{textblock*}
+
+%%%%% QRコード第三版用 %%%%%
+
+\section*{\textrm{\Large BlackPoker}}
+\vspace{-1zh}%余白削除
+\noindent
+
+\begin{center}
+{\footnotesize 第五版 act5.230 スタンダード}
+
+{\scriptsize 2019/06/16}
+\end{center}
+
+\scriptsize%本文の文字サイズを小さく設定
+\renewcommand{\labelitemi}{・}%箇条書きのラベルを変更
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+\subsection*{（補足）記号の意味}
+\vspace{-1zh}%余白削除
+{\small @:タイミング, 
+\$:コスト, 
+★:キーカード}
+
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）コストの意味}
+\vspace{-1zh}%余白削除
+\begin{small}
+\begin{tabbing}
+ \hspace{2mm} \= \hspace{2mm} \= \hspace{1mm} \= hspace{15mm} \kill
+\> B \> : \>防壁をドライブする \\
+\> L \> : \>1点ダメージを受ける \\
+\> D \> : \>手札を1枚捨てる \\
+\> S \> : \>キャラクター1体を墓地に移す \\
+\end{tabbing}
+\end{small}
+
+\vspace{-3zh}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）防壁の置き方}
+\vspace{-1zh}%余白削除
+\begin{itemize}
+\setlength{\leftskip}{-0.3cm}%箇条書きを左詰め
+%\setlength{\itemsep}{0pt}      %2. ブロック間の余白
+\setlength{\parskip}{0pt}      %4. 段落間余白．
+%\setlength{\itemindent}{-10pt}   %5. 最初のインデント
+%\setlength{\labelsep}{15pt}     %6. item と文字の間
+
+\item 防壁を置く時はデッキ側に詰めて置く。
+\item 防壁の左右の入れ替えは行わない。
+\end{itemize}
+
+\vspace{-1zh}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{-3zh}%余白削除
+
+\subsection*{（補足）誘発する場合}
+\vspace{-1zh}%余白削除
+アクションを誘発する場合、誘発したアクションをステージに乗せます。詳しくは、公式ルール第五章の誘発を参照して下さい。
+\vspace{-1zh}%余白削除
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% ActionList %%%%%
+\begin{center}
+\begin{center}
+\hrule height 1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\Large\bf \ruby{Action List}{アクションリスト}}
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\end{center}
+\end{center}
+\vspace{-1zh}%余白削除
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% CharacterList %%%%%
+\begin{center}
+\begin{center}
+\hrule height 1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\Large\bf \ruby{CharacterList}{キャラクターリスト}}
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\end{center}
+\end{center}
+\vspace{-1zh}%余白削除
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\thispagestyle{empty}
+\vspace*{\stretch{1}}
+\begin{flushright}
+\begin{minipage}{0.8\hsize}
+\hrule height 0.2mm depth 0mm width 50mm %罫線
+\begin{description}
+  \item{誌名：}BlackPoker ActionList 第五版 act5.230
+  \item{発行：}2019/06/16
+\end{description}
+\end{minipage}
+\end{flushright}
+
+\begin{flushright}
+\copyright 2013 BlackPoker
+\end{flushright}
+
+\end{document}
