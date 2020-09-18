@@ -193,14 +193,14 @@
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if((${arg0} == 'lite') && (${row.format.contains('lite')}) && (${row.format.contains('std')}))
-{\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) }} %Actionタイトル
-#elseif((${row.format.contains('lite')}) && (${row.format.containts('std')}))
+#if(${row.format.contains(${arg0})})
+#if(${row.format.contains('lite')})
 {\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) [lite]}} %Actionタイトル
-#elseif(${row.format.containts('std')})
+#elseif(${row.format.contains('std')})
 {\small\bf ○ ${row.actName} {\scriptsize (${row.actType}) [std]}} %Actionタイトル
 #elseif(${row.format.contains('pro')})
 {\small\bf ◎ ${row.actName} {\scriptsize (${row.actType}) [pro]}} %Actionタイトル
+#end
 #end
 \hfill 
 #if(${row.actTime} != "")
@@ -279,12 +279,14 @@ ${texFn.cnv(${row.actEffect})}
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if((${arg0} == 'lite') && (${row.format.contains('lite')}) )
+#if(${row.format.contains(${arg0})})
+#if(${row.format.contains('lite')})
 {\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) [lite]}} %Characterタイトル
-#elseif((${arg0} == 'std') && (${row.format.contains('std')}) )
+#elseif(${row.format.contains('std')})
 {\small\bf ○ ${row.charName} {\scriptsize (${row.charType}) [std]}} %Characterタイトル
-#elseif((${arg0} == 'pro') && (${row.format.contains('pro')}) )
+#elseif(${row.format.contains('pro')})
 {\small\bf ◎ ${row.charName} {\scriptsize (${row.charType}) [pro]}} %Characterタイトル
+#end
 #end
 \hfill 
 #if(${row.charKey.trim()} != "")
