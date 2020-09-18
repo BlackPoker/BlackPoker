@@ -177,15 +177,15 @@
 \vspace{-1zh}%余白削除
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#foreach( $nestList in $listlist)
+#foreach( $nestList in $actList)
 
 %%% 大項目 %%%
 \tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
 \begin{tcolorbox}
-{\scriptsize\bf ${nestList[0].type}}
+{\scriptsize\bf ${nestList.type}}
 \end{tcolorbox}
 \vspace{-1zh}%余白削除
-#foreach( $row in ${nestList})
+#foreach( $row in ${nestList.acts})
 ## arg0とがformatに含まれている行のみ出力する
 #if(${row.format.contains(${arg0})})
 %%% Action %%%
@@ -193,11 +193,11 @@
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if((${arg0} == "lite") && (${row.lite.trim()} != "") && (${row.std.trim()} != ""))
+#if((${arg0} == 'lite') && (${row.format.contains('lite')}) && (${row.format.contains('std')}))
 {\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) }} %Actionタイトル
-#elseif((${row.lite.trim()} != "") && (${row.std.trim()} != ""))
+#elseif((${row.format.contains('lite')}) && (${row.format.containts('std')}))
 {\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) [lite]}} %Actionタイトル
-#elseif(${row.std.trim()} != "")
+#elseif(${row.format.containts('std')})
 {\small\bf ○ ${row.actName} {\scriptsize (${row.actType}) [std]}} %Actionタイトル
 #elseif(${row.format.contains('pro')})
 {\small\bf ◎ ${row.actName} {\scriptsize (${row.actType}) [pro]}} %Actionタイトル
@@ -263,15 +263,15 @@ ${texFn.cnv(${row.actEffect})}
 \vspace{-1zh}%余白削除
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#foreach( $nestList in $list1list)
+#foreach( $nestList in $charList)
 
 %%% 大項目 %%%
 \tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
 \begin{tcolorbox}
-{\scriptsize\bf ${nestList[0].type}}
+{\scriptsize\bf ${nestList.type}}
 \end{tcolorbox}
 \vspace{-1zh}%余白削除
-#foreach( $row in ${nestList})
+#foreach( $row in ${nestList.chars})
 ## arg0とがformatに含まれている行のみ出力する
 #if(${row.format.contains(${arg0})})
 %%% Character %%%
@@ -279,14 +279,12 @@ ${texFn.cnv(${row.actEffect})}
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if((${arg0} == "lite") && (${row.lite.trim()} != "") && (${row.std.trim()} != ""))
-{\small\bf ■ ${row.charName} {\scriptsize (${row.type}) }} %Characterタイトル
-#elseif((${row.lite.trim()} != "") && (${row.std.trim()} != ""))
-{\small\bf ■ ${row.charName} {\scriptsize (${row.type}) [lite]}} %Characterタイトル
-#elseif(${row.std.trim()} != "")
-{\small\bf ○ ${row.charName} {\scriptsize (${row.type}) [std]}} %Characterタイトル
-#elseif(${row.format.contains('pro')})
-{\small\bf ◎ ${row.accharNametName} {\scriptsize (${row.type}) [pro]}} %Actionタイトル
+#if((${arg0} == 'lite') && (${row.format.contains('lite')}) )
+{\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) [lite]}} %Characterタイトル
+#elseif((${arg0} == 'std') && (${row.format.contains('std')}) )
+{\small\bf ○ ${row.charName} {\scriptsize (${row.charType}) [std]}} %Characterタイトル
+#elseif((${arg0} == 'pro') && (${row.format.contains('pro')}) )
+{\small\bf ◎ ${row.charName} {\scriptsize (${row.charType}) [pro]}} %Characterタイトル
 #end
 \hfill 
 #if(${row.charKey.trim()} != "")

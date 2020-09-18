@@ -591,7 +591,6 @@ actList:
   - type: 誘発系
     acts:
     - format: 'lite,std,pro'
-      type: 誘発系
       actName: 世代交代
       actId: nextGeneration
       actType: 誘発
@@ -612,6 +611,7 @@ charList:
     - format: 'lite,std,pro'
       charName: 一般兵
       charId: soldier
+      charType: 兵士
       charKey: 2〜10
       charNote: ''
       charAbility: |-
@@ -621,9 +621,9 @@ charList:
       flavorSpeaker: ''
 
     - format: lite,std,pro
-      type: 兵士
       charName: 英雄
       charId: hero
+      charType: 兵士
       charKey: J〜K
       charNote: ''
       charAbility: |-
@@ -634,9 +634,9 @@ charList:
       flavorSpeaker: ''
 
     - format: lite,std,pro
-      type: 兵士
       charName: エース
       charId: ace
+      charType: 兵士
       charKey: A
       charNote: ''
       charAbility: |-
@@ -647,9 +647,9 @@ charList:
       flavorSpeaker: 再現者見習いより
 
     - format: ',std,pro'
-      type: 兵士
       charName: 魔術士
       charId: magician
+      charType: 兵士
       charKey: Joker
       charNote: ''
       charAbility: |-
@@ -661,9 +661,9 @@ charList:
       flavorSpeaker: ''
 
     - format: lite,std,pro
-      type: 兵士
       charName: 装備兵
       charId: soldier
+      charType: 兵士
       charKey: 同じスートを2枚以上
       charNote: ''
       charAbility: |-
@@ -678,9 +678,9 @@ charList:
   - type: 防壁
     chars:
     - format: lite,std,pro
-      type: 
       charName: 防壁
       charId: bulwark
+      charType: 防壁
       charType: 防壁
       charKey: 全て(裏向き)
       charNote: ''
