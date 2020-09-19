@@ -1,5 +1,32 @@
-FROM alpine:latest
+# syntax = docker/dockerfile:1.0-experimental
 
+# ------------------------------
+# 定義からaction-list等生成
+# ------------------------------
+FROM maven:3.6.2-jdk-11 as builder
+
+WORKDIR /usr/local/src/actionlist
+
+RUN mkdir src && \
+ chown 1000:1000 src && \
+ mkdir tex && \
+ chown 1000:1000 tex && \
+ mkdir original && \
+ chown 1000:1000 original && \
+ mkdir web-site && \
+ chown 1000:1000 web-site
+
+COPY src/* src/.
+COPY original/* original/.
+COPY pom.xml .
+COPY web-site/* web-site/.
+
+RUN mvn compile exec:java
+
+# ------------------------------
+# 起動
+# ------------------------------
+FROM alpine:latest
 
 RUN apk --no-cache add python3
 RUN apk --no-cache add python3-dev
@@ -9,19 +36,23 @@ RUN apk --no-cache add texlive-full
 RUN pip3 install --upgrade pip
 RUN pip3 install pdfrw
 
-RUN mkdir /tex && \
- chown 1000:1000 /tex && \
- mkdir /python && \
- chown 1000:1000 /python && \
- mkdir /dist && \
- chown 1000:1000 /dist
+WORKDIR /
+RUN mkdir tex && \
+ chown 1000:1000 tex && \
+ mkdir python && \
+ chown 1000:1000 python && \
+ mkdir web-site && \
+ chown 1000:1000 web-site && \
+ mkdir dist && \
+ chown 1000:1000 dist
 
-
-COPY ./tex/* /tex/.
-COPY ./python/* /python/.
-COPY build.sh /.
+COPY --from=builder /usr/local/src/actionlist/tex/* tex/.
+COPY ./python/* python/.
+COPY ./docker-resource/build.sh .
+COPY ./docker-resource/*.pdf ./tex/.
+COPY --from=builder /usr/local/src/actionlist/web-site web-site
 
 VOLUME /dist
-WORKDIR /
+
 USER 1000:1000
-CMD ["sh", "/build.sh"]
+CMD ["sh", "/build.sh","blackpoker-v6-std"]
