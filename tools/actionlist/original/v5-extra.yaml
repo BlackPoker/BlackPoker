@@ -1,0 +1,1533 @@
+list:
+    - suit: s
+      num: A
+      output: ●
+      beta: ''
+      name: 革命
+      ability: |
+        この能力が有効である時にダメージ判定アクションが効果を発揮した場合、ダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。
+        １．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+        ---
+        自分の兵士は以下の能力を得る。
+        ・アタッカーかつダメージ判定アクションにてブロックされなかった場合、革命ドローアクションを起こす。
+      actName: 革命ドロー
+      actType: 誘発
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: ''
+      actEffect: デッキの一番上からカードを1枚引き手札に加える。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: s
+      num: '2'
+      output: ●
+      beta: ''
+      name: スラッシュ
+      ability: |-
+        自分の♠兵士は以下の能力を得る。
+        ・この兵士がチャージ状態でステージが空かつチャンスを持っている場合、ドライブしてスラッシュアクションを起こすことができる。
+      actName: スラッシュ
+      actType: 兵士起因
+      actTime: メイン
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: 兵士１体を対象とする。
+      actEffect: 対象の兵士がこのアクションを起こした兵士の数字以下の場合、対象の兵士を墓地に移す。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: s, num: '3', output: ●, beta: ●, name: ドレイン, ability: ドレインアクションを起こすことができる。,
+      actName: ドレイン, actType: 通常魔法, actTime: メイン, actCost: '', actS: '', actKey: '', actNote: '',
+      actTarget: 対戦相手1人を対象とする。, actEffect: 自分の場にいるキャラクター1体をデッキの一番下に移す。移せた場合、対象の対戦相手に2点のダメージを与える。,
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '4', output: ●, beta: '', name: 威圧, ability: 威圧アクションを起こすことができる。,
+      actName: 威圧, actType: 通常魔法, actTime: メイン, actCost: L, actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: 数字が10以下の全ての兵士を墓地に移す。, charName: '', charType: '', charKey: '',
+      charNote: '', charAbility: '', actName1: '', actType1: '', actTime1: '', actCost1: '',
+      actS1: '', actKey1: '', actNote1: '', actTarget1: '', actEffect1: '', actName2: '',
+      actType2: '', actTime2: '', actCost2: '', actS2: '', actKey2: '', actNote2: '',
+      actTarget2: '', actEffect2: '', actName3: '', actType3: '', actTime3: '', actCost3: '',
+      actS3: '', actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '5', output: ●, beta: '', name: 蘇生, ability: 蘇生アクションを起こすことができる。,
+      actName: 蘇生, actType: 通常魔法, actTime: メイン, actCost: BL, actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: 自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。, charName: '',
+      charType: '', charKey: '', charNote: '', charAbility: '', actName1: '', actType1: '',
+      actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '', actTarget1: '',
+      actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '', actS2: '',
+      actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '', actType3: '',
+      actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '', actTarget3: '',
+      actEffect3: ''}
+    - {suit: s, num: '6', output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '7', output: ●, beta: ●, name: 瞬殺, ability: 瞬殺アクションを起こすことができる。, actName: 瞬殺,
+      actType: 速攻魔法, actTime: クイック, actCost: '', actS: ●, actKey: '', actNote: '', actTarget: 兵士１体を対象とする。,
+      actEffect: 自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士の数字の合計値が対象の兵士の数字以上の場合、対象の兵士を墓地に移す。,
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '8', output: '', beta: '', name: 抑制, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '9', output: '', beta: '', name: 圧力, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: s, num: '10', output: '', beta: '', name: 英雄の死, ability: 英雄に死アクションを起こすことができる。,
+      actName: 英雄の死, actType: '', actTime: メイン, actCost: BBL, actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: 全てのAJQKJokerを墓地に移す, charName: '', charType: '', charKey: '',
+      charNote: '', charAbility: '', actName1: '', actType1: '', actTime1: '', actCost1: '',
+      actS1: '', actKey1: '', actNote1: '', actTarget1: '', actEffect1: '', actName2: '',
+      actType2: '', actTime2: '', actCost2: '', actS2: '', actKey2: '', actNote2: '',
+      actTarget2: '', actEffect2: '', actName3: '', actType3: '', actTime3: '', actCost3: '',
+      actS3: '', actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: s
+      num: J
+      output: ●
+      beta: ''
+      name: リアニメーター
+      ability: リアニメーター召喚アクションを起こすことができる。
+      actName: リアニメーター召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: BL
+      actS: ''
+      actKey: ♡2〜10
+      actNote: ※コストを$BDとすればタイミングをクイックとして起こすことができる。
+      actTarget: ''
+      actEffect: |-
+        切札の♠Jが表の場合、次を行う。
+        １．墓地にあるカードを1枚選び、兵士として表向きかつチャージ状態で場に出す。
+        ２．キーカードと切札の♠Jをあわせてリアニメーターとしてチャージ状態で場に出す。
+      charName: リアニメーター
+      charType: 兵士
+      charKey: ♠J と ♡2〜10
+      charNote: ''
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・準備（場に出たターンは、アタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地もしくは手札に行く場合、対象を♠Jとして切札再生アクションを誘発する。誘発については「誘発する場合」を参照。
+        ・数字は11として扱う。
+        ・♠兵士としても♡兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+        ・この兵士がチャージ状態でステージが空かつチャンスを持っている場合、ドライブして「リアニメイト」アクションをコストを支払わずに起こすことができる。アクションを起こした場合対象は任意に指定し、キーカードは仮想的に♠Jと♡Jとする。アクションを起こした後、チャンスをパスする。
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: s, num: Q, output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: s
+      num: K
+      output: ●
+      beta: ''
+      name: 魔王
+      ability: 魔王召喚アクションを起こすことができる。
+      actName: 魔王召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: SS
+      actS: ''
+      actKey: J〜K
+      actNote: ''
+      actTarget: ''
+      actEffect: |-
+        切札の♠Kが表の場合、次を行う。
+        １．キーカード、手札、デッキ、墓地、切札の中から♣Kを見つける。
+        ２．♣Kを見つけた場合、場にいるすべての兵士を墓地に移し、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
+        ３．♣Kが無い場合、切札の♠Kを墓地に移す。
+        ４．デッキを切りなおす。
+      charName: 魔王
+      charType: 兵士
+      charKey: ♠K と ♣K
+      charNote: ''
+      charAbility: |-
+        ・アクションの対象にできない。
+        ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地に行く場合、世代交代アクションを２回誘発する。
+        ・自分がエンドアクションを起こした場合、世代交代アクションを誘発する。
+        ・数字は２６として扱う。
+        ・♣兵士としても♠兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: h, num: A, output: '', beta: '', name: 平和, ability: 全てのプレイヤーはアタックアクションを起こすことができない。,
+      actName: '', actType: '', actTime: '', actCost: '', actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: '', charName: '', charType: '', charKey: '', charNote: '',
+      charAbility: '', actName1: '', actType1: '', actTime1: '', actCost1: '', actS1: '',
+      actKey1: '', actNote1: '', actTarget1: '', actEffect1: '', actName2: '', actType2: '',
+      actTime2: '', actCost2: '', actS2: '', actKey2: '', actNote2: '', actTarget2: '',
+      actEffect2: '', actName3: '', actType3: '', actTime3: '', actCost3: '', actS3: '',
+      actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - {suit: h, num: '2', output: ●, beta: '', name: 援軍, ability: 援軍アクションを起こすことができる。,
+      actName: 援軍, actType: 通常魔法, actTime: メイン, actCost: BL, actS: '', actKey: '', actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。,
+      actTarget: '', actEffect: デッキの一番上から２枚カードをめくり１枚を兵士としてチャージ状態で場に出し、もう１枚をデッキの一番下に移す。,
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: h
+      num: '3'
+      output: ●
+      beta: ''
+      name: 激励
+      ability: |-
+        自分の♡兵士は以下の能力を得る。
+        ・この兵士がチャージ状態かつチャンスを持っている場合、ドライブして激励アクションを起こすことができる。
+      actName: 激励
+      actType: 兵士起因
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: 兵士１体を対象とする。
+      actEffect: 対象の兵士にこのアクションを起こした兵士の数字をターン終了時まで加算する。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: h
+      num: '4'
+      output: ●
+      beta: ●
+      name: 休戦
+      ability: 休戦アクションを起こすことができる。
+      actName: 休戦
+      actType: 速攻魔法
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: アタックアクションを対象とする。
+      actEffect: "・対象のアクションは効果を発揮しない。\n・自分の切札にある♡4を裏向きにする。 \n・自分の場にいるキャラクターを全てチャージ状態にす\
+        る。\n"
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: h
+      num: '5'
+      output: ●
+      beta: ●
+      name: 追撃
+      ability: 追撃アクションを起こすことができる。
+      actName: 追撃
+      actType: 通常魔法
+      actTime: メイン
+      actCost: BDD
+      actS: ●
+      actKey: ''
+      actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+      actTarget: ''
+      actEffect: |-
+        ・自分の場にいる兵士を全てチャージ状態にする。
+        ・アタックアクションを起こす。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: h, num: '6', output: '', beta: '', name: 施し, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: h
+      num: '7'
+      output: ●
+      beta: ''
+      name: ファントム
+      ability: |-
+        ・ファントムアクションを起こすことができる。
+        ・自分がエンドアクションを起こした場合、幻影アクションを誘発する。
+      actName: ファントム
+      actType: 通常魔法
+      actTime: メイン
+      actCost: B
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: 自分の場にいるキャラクター1体を対象とする。
+      actEffect: 「リバース」アクションをコストを支払わずに起こす。対象は対象の自分の場にいるキャラクター、キーカードは仮想的に♡7と♠7とする。アクションを起こした後、チャンスをパスする。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: 幻影
+      actType1: 誘発
+      actTime1: クイック
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget1: ''
+      actEffect1: |-
+        １．自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。
+        ２．自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: h, num: '8', output: ●, beta: '', name: 救済, ability: 救済アクションを起こすことができる。,
+      actName: 救済, actType: 通常魔法, actTime: メイン, actCost: B, actS: '', actKey: ♡A〜K, actNote: '',
+      actTarget: '', actEffect: キーカードの数字以上の全ての兵士をオーナーのデッキの一番上にオーナーの好きな順で移す。, charName: '',
+      charType: '', charKey: '', charNote: '', charAbility: '', actName1: '', actType1: '',
+      actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '', actTarget1: '',
+      actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '', actS2: '',
+      actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '', actType3: '',
+      actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '', actTarget3: '',
+      actEffect3: ''}
+    - {suit: h, num: '9', output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: h, num: '10', output: '', beta: '', name: 白旗, ability: 白旗アクションを起こすことができる。,
+      actName: 白旗, actType: '', actTime: クイック, actCost: '', actS: '', actKey: '', actNote: '',
+      actTarget: アタックアクション, actEffect: 手札が１枚以上ある場合、対戦相手に手札を見せ、対象のアタックアクションを無効化する, charName: '',
+      charType: '', charKey: '', charNote: '', charAbility: '', actName1: '', actType1: '',
+      actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '', actTarget1: '',
+      actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '', actS2: '',
+      actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '', actType3: '',
+      actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '', actTarget3: '',
+      actEffect3: ''}
+    - suit: h
+      num: J
+      output: ●
+      beta: ''
+      name: チャリオット
+      ability: チャリオット召喚アクションを起こすことができる。
+      actName: チャリオット召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: BL
+      actS: ''
+      actKey: ♢2〜10
+      actNote: ※コストを$BDとすればタイミングをクイックとして起こすことができる。
+      actTarget: ''
+      actEffect: |-
+        切札の♡Jが表の場合、次を行う。
+        １．防壁１体を選び墓地に移す。
+        ２．キーカードと切札の♡Jをあわせてチャリオットとしてチャージ状態で場に出す。
+      charName: チャリオット
+      charType: 兵士
+      charKey: ♡J と ♢2〜10
+      charNote: ''
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・準備（場に出たターンは、アタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地もしくは手札に行く場合、対象を♡Jとして切札再生アクションを誘発する。誘発については「誘発する場合」を参照。
+        ・数字は11として扱う。
+        ・♡兵士としても♢兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+        ・この兵士がチャージ状態でステージが空かつチャンスを持っている場合、ドライブして「防壁破壊」アクションをコストを支払わずに起こすことができる。アクションを起こした場合対象は任意に指定し、キーカードは仮想的に♡Jと♢Jとする。アクションを起こした後、チャンスをパスする。
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: h, num: Q, output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: h
+      num: K
+      output: ●
+      beta: ''
+      name: 巨人
+      ability: 巨人召喚アクションを起こすことができる。
+      actName: 巨人召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: SS
+      actS: ''
+      actKey: J〜K
+      actNote: ''
+      actTarget: ''
+      actEffect: |-
+        切札の♡Kが表の場合、次を行う。
+        １．キーカード、手札、デッキ、墓地、切札の中から♢Kを見つける。
+        ２．♢Kを見つけた場合、場にいるすべての防壁を墓地に移し、切札の♡Kと♢Kを合わせて巨人としてチャージ状態で場に出す。
+        ３．♢Kが無い場合、切札の♡Kを墓地に移す。
+        ４．デッキを切りなおす。
+      charName: 巨人
+      charType: 兵士
+      charKey: ♡K と ♢K
+      charNote: ''
+      charAbility: |-
+        ・アクションの対象にできない。
+        ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地に行く場合、世代交代アクションを２回誘発する。
+        ・自分のターンに可能な限りアタックアクションを起し、巨人がチャージ状態の場合、アタッカーに指定する。
+        ・防壁の効果によって墓地に移されない。
+        ・数字は２６として扱う。
+        ・♡兵士としても♢兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: d, num: A, output: ●, beta: '', name: 防壁追加, ability: 防壁追加アクションを起こすことができる。,
+      actName: 防壁追加, actType: 通常魔法, actTime: メイン, actCost: L, actS: ●, actKey: '', actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。,
+      actTarget: '', actEffect: 対戦相手の場にいる防壁の数が自分の場にいる防壁の数以上の場合、自分のデッキの一番上から１枚を防壁として裏向きかつチャージ状態で場に出す。,
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: d, num: '2', output: '', beta: '', name: バランス, ability: '', actName: '',
+      actType: '', actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '',
+      actEffect: '', charName: '', charType: '', charKey: '', charNote: '', charAbility: '',
+      actName1: '', actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '',
+      actNote1: '', actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '',
+      actCost2: '', actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '',
+      actName3: '', actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '',
+      actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: d
+      num: '3'
+      output: ●
+      beta: ''
+      name: 交渉
+      ability: |-
+        自分の♢兵士は以下の能力を得る。
+        ・この兵士がチャージ状態かつチャンスを持っている場合、ドライブして交渉アクションを起こすことができる。
+      actName: 交渉
+      actType: 兵士起因
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: キャラクター１体を対象とする。
+      actEffect: 対象のキャラクターをドライブする。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: d
+      num: '4'
+      output: ●
+      beta: ●
+      name: 相殺
+      ability: 相殺アクションを起こすことができる。
+      actName: 相殺
+      actType: 速攻魔法
+      actTime: クイック
+      actCost: D
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: キーカードがあるアクションを対象とする。
+      actEffect: |-
+        対象アクションのキーカードの数字の合計値が5以上の場合、次を行う。
+        1.対象アクションのキーカードの数字の合計値分ダメージを受ける。
+        2.対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: d
+      num: '5'
+      output: ●
+      beta: ●
+      name: 喪失
+      ability: |-
+        ・この能力が有効でありかつ、自分の場にチャージ状態の防壁が２枚以上存在する時にチャージアクションが効果を発揮した場合、以下のようにチャージアクションの効果を変更する。
+        -・ドローアクションを起こす。
+        ・自分がエンドアクションを起こした場合、疲弊アクションを誘発する。
+      actName: 疲弊
+      actType: 誘発
+      actTime: クイック
+      actCost: ''
+      actS: ''
+      actKey: ''
+      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget: ''
+      actEffect: 自分の切札にある♢5を表向きから裏向きにする。切札を裏向きにしたくない場合、2点のダメージを受ける。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: d, num: '6', output: '', beta: '', name: 天秤, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: d, num: '7', output: '', beta: '', name: 自活, ability: 補給アクションを起こすことができる。,
+      actName: 補給, actType: '', actTime: メイン, actCost: D, actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: 自分の場にいるキャラクターを２体チャージする, charName: '', charType: '', charKey: '',
+      charNote: '', charAbility: '', actName1: '', actType1: '', actTime1: '', actCost1: '',
+      actS1: '', actKey1: '', actNote1: '', actTarget1: '', actEffect1: '', actName2: '',
+      actType2: '', actTime2: '', actCost2: '', actS2: '', actKey2: '', actNote2: '',
+      actTarget2: '', actEffect2: '', actName3: '', actType3: '', actTime3: '', actCost3: '',
+      actS3: '', actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: d
+      num: '8'
+      output: ●
+      beta: ''
+      name: 修繕
+      ability: 修繕アクションを起こすことができる。
+      actName: 修繕
+      actType: 通常魔法
+      actTime: メイン
+      actCost: L
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: 自分の場にいる♢2〜10のカードを含んだ兵士１体を対象とする。
+      actEffect: |-
+        対象の兵士が装備アクションの対象とできる場合、次を行う。
+        １．自分の墓地から♢J〜Kを1枚選ぶ。
+        ２．選べた場合、「装備」アクションをコストを支払わずに起こす。対象は対象の兵士、キーカードは選んだカードとする。アクションを起こした後、チャンスをパスする。
+        ３．選べなかった場合、対象の兵士を墓地に移す。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: d
+      num: '9'
+      output: ●
+      beta: ''
+      name: 充足
+      ability: |-
+        ・休息アクションを起こすことができる。
+        ・自分がエンドアクションを起こした場合、充足アクションを誘発する。
+      actName: 休息
+      actType: 通常魔法
+      actTime: メイン
+      actCost: B
+      actS: ''
+      actKey: ''
+      actNote: ''
+      actTarget: ''
+      actEffect: 自分の場にいる全ての兵士をチャージ状態にする。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: 充足
+      actType1: 誘発
+      actTime1: クイック
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget1: ''
+      actEffect1: 自分の場にいる全てのキャラクターをチャージ状態にする。
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: d, num: '10', output: '', beta: '', name: 相続, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: d
+      num: J
+      output: ●
+      beta: ''
+      name: 策士
+      ability: 策士召喚アクションを起こすことができる。
+      actName: 策士召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: BL
+      actS: ''
+      actKey: ♣2〜10
+      actNote: ※コストを$BDとすればタイミングをクイックとして起こすことができる。
+      actTarget: ''
+      actEffect: |-
+        切札の♢Jが表の場合、次を行う。
+        １．ステージにあるアクションを１つ選び無効化しステージから取り除く。そのアクションは次のいずれかに該当するものとする。Xはこのアクションのキーカードの数字とする。
+        -・キーカードが１枚かつそのキーカードの数字がX以下
+        -・キーカードが２枚
+        ２．キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。
+      charName: 策士
+      charType: 兵士
+      charKey: ♢J と ♣2〜10
+      charNote: ''
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・準備（場に出たターンは、アタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地もしくは手札に行く場合、対象を♢Jとして切札再生アクションを誘発する。誘発については「誘発する場合」を参照。
+        ・数字は11として扱う。
+        ・♢兵士としても♣兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+        ・この兵士がチャージ状態かつチャンスを持っている場合、ドライブして先読みアクションを起こすことができる。
+      actName1: 先読み
+      actType1: 兵士起因
+      actTime1: クイック
+      actCost1: ''
+      actS1: ●
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: |-
+        １．デッキの一番上からカードを２枚引き手札に加える。
+        ２．手札から１枚選びデッキの一番上もしくは一番下に移す。
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: d, num: Q, output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: d, num: K, output: '', beta: '', name: 竜, ability: 竜召喚アクションと目覚めアクションを起こすことができる。,
+      actName: 竜召喚, actType: 召喚, actTime: メイン, actCost: '', actS: '', actKey: ♡K, actNote: '',
+      actTarget: '', actEffect: 切札にある♡Kが表の場合、切札にある♡Kとキーカードをあわせて竜としてドライブ状態で場に出す。, charName: 竜,
+      charType: '', charKey: ♠K と ♢K, charNote: '', charAbility: '', actName1: 目覚め, actType1: '',
+      actTime1: クイック, actCost1: DD, actS1: '', actKey1: '', actNote1: ・このアクションはステージに置かれた時に即効果を発揮する。,
+      actTarget1: '', actEffect1: 自分の場にいる光の王をチャージする。, actName2: '', actType2: '', actTime2: '',
+      actCost2: '', actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '',
+      actName3: '', actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '',
+      actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: c
+      num: A
+      output: ''
+      beta: ''
+      name: |-
+        情熱
+        野心
+        突撃
+        闘志
+      ability: 自分の奇数の兵士は速攻を得る。
+      actName: ''
+      actType: ''
+      actTime: ''
+      actCost: ''
+      actS: ''
+      actKey: ''
+      actNote: ''
+      actTarget: ''
+      actEffect: ''
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: c, num: '2', output: '', beta: '', name: 選択, ability: 選択アクションを起こすことができる。,
+      actName: 選択, actType: 通常魔法, actTime: メイン, actCost: B, actS: '', actKey: '', actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。,
+      actTarget: '', actEffect: デッキの一番上から２枚カードをめくり１枚を手札に加えもう１枚をデッキの一番下に移す。, charName: '',
+      charType: '', charKey: '', charNote: '', charAbility: '', actName1: '', actType1: '',
+      actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '', actTarget1: '',
+      actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '', actS2: '',
+      actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '', actType3: '',
+      actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '', actTarget3: '',
+      actEffect3: ''}
+    - {suit: c, num: '3', output: '', beta: '', name: 伏兵, ability: 伏兵アクションを起こすことができる。,
+      actName: 伏兵, actType: 速攻魔法, actTime: クイック, actCost: '', actS: ●, actKey: '', actNote: ※このアクションは対戦相手のターンのみ起こすことができる。,
+      actTarget: ダメージ判定アクション, actEffect: 自分の場にいるチャージ状態のかつブロッカーに指定している防壁を好きな数選び表にする。表にしたカードを兵士として扱う。,
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: c
+      num: '4'
+      output: ●
+      beta: ''
+      name: スイッチ
+      ability: |-
+        自分の♣兵士は以下の能力を得る。
+        ・この兵士がチャージ状態かつチャンスを持っている場合、ドライブしてスイッチアクションを起こすことができる。
+      actName: スイッチ
+      actType: 兵士起因
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: ''
+      actEffect: |-
+        1.手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
+        2.このアクションを起こした兵士を手札に戻す。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: c
+      num: '5'
+      output: ●
+      beta: ''
+      name: 内乱
+      ability: |-
+        ・内乱アクションを起こすことができる。
+        ・対戦相手が手札を捨てた場合、暴動アクションを誘発する。
+      actName: 内乱
+      actType: 通常魔法
+      actTime: メイン
+      actCost: B
+      actS: ''
+      actKey: ♣A〜K
+      actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+      actTarget: 対戦相手1人を対象とする。
+      actEffect: |-
+        対象の対戦相手の手札の枚数が自分の手札の枚数以上の場合、次を行う。
+        ・対象の対戦相手は手札を2枚捨てる。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: 暴動
+      actType1: 誘発
+      actTime1: クイック
+      actCost1: ''
+      actS1: ●
+      actKey1: ''
+      actNote1: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget1: ''
+      actEffect1: このアクションを誘発した時に捨てられた手札の枚数×2点のダメージを、手札を捨てたプレイヤーに与える。
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: c, num: '6', output: '', beta: '', name: 統制, ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - {suit: c, num: '7', output: ●, beta: '', name: 手札補充, ability: 自分がエンドアクションを起こした場合、手札補充アクションを誘発する。,
+      actName: 手札補充, actType: 誘発, actTime: クイック, actCost: '', actS: '', actKey: '', actNote: ※プレイヤーはこのアクションを直接起こすことができない。,
+      actTarget: '', actEffect: 自分の手札が２枚以下の場合、２枚カードを引き、３枚の場合１枚カードを引く。, charName: '', charType: '',
+      charKey: '', charNote: '', charAbility: '', actName1: '', actType1: '', actTime1: '',
+      actCost1: '', actS1: '', actKey1: '', actNote1: '', actTarget1: '', actEffect1: '',
+      actName2: '', actType2: '', actTime2: '', actCost2: '', actS2: '', actKey2: '',
+      actNote2: '', actTarget2: '', actEffect2: '', actName3: '', actType3: '', actTime3: '',
+      actCost3: '', actS3: '', actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: c
+      num: '8'
+      output: ●
+      beta: ●
+      name: リセット
+      ability: |-
+        ・この能力が有効になった時に前触れアクションを誘発する。
+        ・リセットアクションを起こすことができる。
+      actName: 前触れ
+      actType: 誘発
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget: ''
+      actEffect: ８点のダメージを受ける。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: リセット
+      actType1: 通常魔法
+      actTime1: メイン
+      actCost1: L
+      actS1: ''
+      actKey1: ♣A〜K
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: |-
+        ・全ての防壁と兵士を墓地に移す。
+        ・切札リセットアクションを誘発する。
+      actName2: 切札リセット
+      actType2: 誘発
+      actTime2: クイック
+      actCost2: ''
+      actS2: ●
+      actKey2: ''
+      actNote2: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTarget2: ''
+      actEffect2: 全ての切札を裏向きにする。
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: c, num: '9', output: ●, beta: '', name: 要塞, ability: 対戦相手がキーカードに♠を含むアクションの効果を発揮する直前に自分の場にキャラクターがいる場合、その効果によってあなたはダメージを受けない。,
+      actName: '', actType: '', actTime: '', actCost: '', actS: '', actKey: '', actNote: '',
+      actTarget: '', actEffect: '', charName: '', charType: '', charKey: '', charNote: '',
+      charAbility: '', actName1: '', actType1: '', actTime1: '', actCost1: '', actS1: '',
+      actKey1: '', actNote1: '', actTarget1: '', actEffect1: '', actName2: '', actType2: '',
+      actTime2: '', actCost2: '', actS2: '', actKey2: '', actNote2: '', actTarget2: '',
+      actEffect2: '', actName3: '', actType3: '', actTime3: '', actCost3: '', actS3: '',
+      actKey3: '', actNote3: '', actTarget3: '', actEffect3: ''}
+    - suit: c
+      num: '10'
+      output: ●
+      beta: ●
+      name: 悪あがき
+      ability: 悪あがきアクションを起こすことができる。
+      actName: 悪あがき
+      actType: 速攻魔法
+      actTime: クイック
+      actCost: ''
+      actS: ●
+      actKey: ''
+      actNote: ''
+      actTarget: キーカードがあるアクションを対象とする。
+      actEffect: |-
+        ・対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+        ・手札を全て捨てる。手札がない場合、自分の切札♣10を墓地に移す。
+      charName: ''
+      charType: ''
+      charKey: ''
+      charNote: ''
+      charAbility: ''
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - suit: c
+      num: J
+      output: ●
+      beta: ''
+      name: 騎士
+      ability: 騎士召喚アクションを起こすことができる。
+      actName: 騎士召喚
+      actType: 召喚
+      actTime: メイン
+      actCost: BL
+      actS: ''
+      actKey: ♠2〜10
+      actNote: ※コストを$BDとすればタイミングをクイックとして起こすことができる。
+      actTarget: ''
+      actEffect: |-
+        切札の♣Jが表の場合、次を行う。
+        １．対戦相手は自分の場にある兵士を１枚選び墓地に移す。
+        ２．キーカードと切札の♣Jをあわせて騎士としてチャージ状態で場に出す。
+      charName: 騎士
+      charType: 兵士
+      charKey: ♣J と ♠2〜10
+      charNote: ''
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・準備（場に出たターンは、アタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地もしくは手札に行く場合、対象を♣Jとして切札再生アクションを誘発する。誘発については「誘発する場合」を参照。
+        ・数字は11として扱う。
+        ・♠兵士としても♣兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+        ・この兵士がチャージ状態かつチャンスを持っている場合、ドライブして薙払アクションを起こすことができる。
+      actName1: 薙払
+      actType1: 兵士起因
+      actTime1: クイック
+      actCost1: ''
+      actS1: ●
+      actKey1: ''
+      actNote1: ''
+      actTarget1: 対戦相手１人を対象とする。
+      actEffect1: 対象の対戦相手は自分の場にいるキャラクターを１体墓地に移す。
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    - {suit: c, num: Q, output: '', beta: '', name: '', ability: '', actName: '', actType: '',
+      actTime: '', actCost: '', actS: '', actKey: '', actNote: '', actTarget: '', actEffect: '',
+      charName: '', charType: '', charKey: '', charNote: '', charAbility: '', actName1: '',
+      actType1: '', actTime1: '', actCost1: '', actS1: '', actKey1: '', actNote1: '',
+      actTarget1: '', actEffect1: '', actName2: '', actType2: '', actTime2: '', actCost2: '',
+      actS2: '', actKey2: '', actNote2: '', actTarget2: '', actEffect2: '', actName3: '',
+      actType3: '', actTime3: '', actCost3: '', actS3: '', actKey3: '', actNote3: '',
+      actTarget3: '', actEffect3: ''}
+    - suit: c
+      num: K
+      output: ''
+      beta: ''
+      name: 騎士
+      ability: 騎士召喚アクションを起こすことができる。
+      actName: 騎士召喚
+      actType: ''
+      actTime: メイン
+      actCost: SS
+      actS: ''
+      actKey: ♠K
+      actNote: ''
+      actTarget: ''
+      actEffect: 切札にあるcKとキーカードのsKをあわせて  騎士としてチャージ状態で場に出す。
+      charName: 騎士
+      charType: ''
+      charKey: ♠K と ♣K
+      charNote: ''
+      charAbility: |-
+        ・準備（場に出たターンは、アタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
+        ・場から墓地に行く場合、世代交代アクションを起こす。チャンスをもっていない場合、次にチャンスをもった時に世代交代アクションを起こす。
+        ・数字は２６として扱う。
+        ・♣兵士としても♠兵士としても扱う。
+      actName1: ''
+      actType1: ''
+      actTime1: ''
+      actCost1: ''
+      actS1: ''
+      actKey1: ''
+      actNote1: ''
+      actTarget1: ''
+      actEffect1: ''
+      actName2: ''
+      actType2: ''
+      actTime2: ''
+      actCost2: ''
+      actS2: ''
+      actKey2: ''
+      actNote2: ''
+      actTarget2: ''
+      actEffect2: ''
+      actName3: ''
+      actType3: ''
+      actTime3: ''
+      actCost3: ''
+      actS3: ''
+      actKey3: ''
+      actNote3: ''
+      actTarget3: ''
+      actEffect3: ''
+    list1list:
+    - - &id001
+        output: ●
+        etc: ''
+        beta: ''
+        type: ActionList
+        name: オープン
+        actId: open
+        actName: オープン
+        actType: 通常魔法
+        actTime: メイン
+        actCost: BBD
+        actS: ●
+        actKey: ''
+        actNote: ※コストを$DDとすればタイミングをクイックとして起こすことができる。
+        actTarget: ''
+        actEffect: "自分の切札を1枚表にし、切札に対応した能力を発揮する。 \n切札については「切札について」参照\n切札に対応する能力については「アビ\
+          リティリスト」参照"
+        story: ''
+        flavor: ''
+        flavorSpeaker: ''
+      - &id002
+        output: ●
+        etc: ''
+        beta: ''
+        type: ActionList
+        name: クローズ
+        actId: close
+        actName: クローズ
+        actType: 速攻魔法
+        actTime: クイック
+        actCost: B
+        actS: ''
+        actKey: 同じスート2枚
+        actNote: ''
+        actTarget: 切札1枚を対象とする。
+        actEffect: "対象の切札が表向きかつキーカードのスートと同じ場合、その切札を裏向きにする。対象の切札に対応した能力は無効になる。 \n切札について\
+          は「切札について」参照"
+        story: ''
+        flavor: ''
+        flavorSpeaker: ''
+      - &id003
+        output: ●
+        etc: ''
+        beta: ''
+        type: ActionList
+        name: 切札破壊
+        actId: trumpDestroy
+        actName: 切札破壊
+        actType: 速攻魔法
+        actTime: クイック
+        actCost: B
+        actS: ''
+        actKey: A〜K
+        actNote: ''
+        actTarget: 切札1枚を対象とする。
+        actEffect: "対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。 \n切札について\
+          は「切札について」参照"
+        story: ''
+        flavor: ''
+        flavorSpeaker: ''
+      - &id004
+        output: ●
+        etc: ''
+        beta: ''
+        type: ActionList
+        name: 切札再生
+        actId: trumpRegene
+        actName: 切札再生
+        actType: 誘発
+        actTime: クイック
+        actCost: ''
+        actS: ●
+        actKey: ''
+        actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+        actTarget: カード1枚を対象とする。
+        actEffect: "対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を発揮する。 \n切札につい\
+          ては「切札について」参照\n切札に対応する能力については「アビリティリスト」参照"
+        story: ''
+        flavor: ''
+        flavorSpeaker: ''
+    list1:
+    - *id001
+    - *id002
+    - *id003
+    - *id004
+    data: {ver: 第五版 extra, lastupdate: 2019/06/16, v: 5.30.0, pdfurl: /pdf/blackpoker-v5-extra,
+      qr: qr_blackpoker-support_v5-ex.pdf}

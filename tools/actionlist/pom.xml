@@ -70,9 +70,9 @@
 
     <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
     <dependency>
-        <groupId>org.yaml</groupId>
-        <artifactId>snakeyaml</artifactId>
-        <version>1.26</version>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.26</version>
     </dependency>
 
   </dependencies>
@@ -142,59 +142,21 @@
 
               <!-- <argument>-i</argument>
               <argument>original/v5-act.ods</argument> -->
-              <argument>-i</argument>
-                <argument>original/v6-act.yaml</argument>
-              <argument>-o</argument>
-              <argument>web-site/static/v6-std.html</argument>
-              <argument>-t</argument>
-              <argument>v6-std</argument>
-              <argument>-arg0</argument>
-              <argument>std</argument>
-              <argument>--texOutput</argument>
-              <argument>./tex/blackpoker-v6-std.tex</argument>
 
-            </arguments>
-            <systemProperties>
-              <systemProperty>
-                <key>myproperty</key>
-                <value>myvalue</value>
-              </systemProperty>
-            </systemProperties>
-          </configuration>
-        </plugin>
-
-
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>3.0.0</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>odsyaml</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <mainClass>com.github.blackpoker.actionlist.OdsYaml</mainClass>
-            <arguments>
+              <!-- std -->
+              <!-- <argument>-i original/v6-act.yaml -o web-site/static/v6-std.html -t v6-std -arg0 std -texOutput ./tex/blackpoker-v6-std.tex</argument> -->
+              <!-- extra -->
+              <argument>-i original/v6-extra.yaml -o web-site/static/v6-ex.html -t v6-extra -texOutput ./tex/blackpoker-v6-extra.tex</argument>
+              
+              <!-- extra -->
               <!-- <argument>-i</argument>
-              <argument>original/v5-QA.ods</argument>
+              <argument>original/v5-extra.ods</argument>
               <argument>-o</argument>
-              <argument>web-site/static/v5-QA.html</argument>
+              <argument>web-site/static/v5-ex.html</argument>
               <argument>-t</argument>
-              <argument>v5-QA</argument> -->
-
-              <argument>-i</argument>
-              <argument>original/v5-act.ods</argument>
-              <argument>-o</argument>
-              <argument>web-site/static/v5-std.html</argument>
-              <argument>-t</argument>
-              <argument>v5-std</argument>
-              <argument>-arg0</argument>
-              <argument>std</argument>
-              <argument>--texOutput</argument>
-              <argument>./tex/blackpoker-v5-std.tex</argument>
+              <argument>v5-extra</argument>
+              <argument>-texOutput</argument>
+              <argument>./tex/blackpoker-v5-extra.tex</argument> -->
 
             </arguments>
             <systemProperties>

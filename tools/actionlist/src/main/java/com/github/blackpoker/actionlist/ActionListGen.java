@@ -1,23 +1,13 @@
 package com.github.blackpoker.actionlist;
 
-import java.awt.Point;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
-
-import org.jopendocument.dom.spreadsheet.Sheet;
-import org.jopendocument.dom.spreadsheet.SpreadSheet;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.yaml.snakeyaml.Yaml;
@@ -68,7 +58,16 @@ public class ActionListGen {
 	// private String outPath
 	// ="/Users/iichico/Documents/BlackPoker関連/ルール検討/extra.html";
 	public static void main(String[] args) {
-		new ActionListGen().start(args);
+
+		for(String arg : args){
+			System.out.println("------------------------------args------------------------------");
+			System.out.println(arg);
+			
+			String[] ag = arg.split("[ ]+");
+			
+			System.out.println("------------------------------args------------------------------");	
+			new ActionListGen().start(ag);
+		}
 	}
 
 	private void start(String[] args) {
