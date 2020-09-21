@@ -757,7 +757,7 @@
               <div th:if="${not #lists.isEmpty(row.acts)}">
                 <h6 class="text-center">Action</h6>
                 <!-- Action -->
-                <div th:each="act : ${row.acts}" th:if="${not #strings.isEmpty(act.actName)}" class="panel panel-default blackpoker-action" th:attr="id='act-'+${act.suit}+${act.num}">
+                <div th:each="act,ast : ${row.acts}" th:if="${not #strings.isEmpty(act.actName)}" class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.suit}+${row.num}+${ast.index}">
                   <div class="panel-heading">
                     <span class="act-title" th:text="${act.actName}"></span> <span> <small>
                         <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${act.actType}"></span>
@@ -792,110 +792,10 @@
                 </div>
               </div>
 
-              <!-- SubAction -->
-              <!-- <div th:if="${not #strings.isEmpty(row.actName1)}" class="panel panel-default blackpoker-action" th:attr="id='act1-'+${row.suit1}+${row.num1}">
-                <div class="panel-heading">
-                  <span class="act-title" th:text="${row.actName1}"></span> <span> <small>
-                      <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType1}"></span>
-                    </small>
-                  </span>
-                  <div class="pull-right">
-                    &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime1}"></span>
-                    </small> <span th:if="${not #strings.isEmpty(row.actCost1)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost1)}">
-                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost1)}"></span>
-                    </small>
-                  </div>
-                  <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.actKey1)}"> <span class="glyphicon glyphicon-star"
-                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey1)}"></span><br>
-                    </small> <small th:if="${not #strings.isEmpty(row.actNote1)}"> <span th:each="str : ${#strings.listSplit(row.actNote1,'\n')}">
-                        <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                        <br>
-                      </span>
-                    </small>
-
-                  </div>
-                </div>
-                <div class="panel-body">
-                  <span th:if="${not #strings.isEmpty(row.actTarget1)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget1)}"
-                    th:text="${#sfn.cnvHtml(row.actTarget1)}"></span> <br th:if="${not #strings.isEmpty(row.actTarget1)}">
-                  <hr th:if="${not #strings.isEmpty(row.actTarget1)}">
-                  <p th:if="${not #strings.isEmpty(row.actS1)}">（即時効果）</p>
-                  <p th:if="${#strings.isEmpty(row.actS1)}">（通常効果）</p>
-                  <span th:utext="${#sfn.cnvHtml(row.actEffect1)}"></span>
-                </div>
-              </div>
-
-              <div th:if="${not #strings.isEmpty(row.actName2)}" class="panel panel-default blackpoker-action" th:attr="id='act1-'+${row.suit2}+${row.num2}">
-                <div class="panel-heading">
-                  <span class="act-title" th:text="${row.actName2}"></span> <span> <small>
-                      <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType2}"></span>
-                    </small>
-                  </span>
-                  <div class="pull-right">
-                    &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime2}"></span>
-                    </small> <span th:if="${not #strings.isEmpty(row.actCost2)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost2)}">
-                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost2)}"></span>
-                    </small>
-                  </div>
-                  <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.actKey2)}"> <span class="glyphicon glyphicon-star"
-                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey2)}"></span><br>
-                    </small> <small th:if="${not #strings.isEmpty(row.actNote2)}"> <span th:each="str : ${#strings.listSplit(row.actNote2,'\n')}">
-                        <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                        <br>
-                      </span>
-                    </small>
-
-                  </div>
-                </div>
-                <div class="panel-body">
-                  <span th:if="${not #strings.isEmpty(row.actTarget2)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget2)}"
-                    th:text="${#sfn.cnvHtml(row.actTarget2)}"></span> <br th:if="${not #strings.isEmpty(row.actTarget2)}">
-                  <hr th:if="${not #strings.isEmpty(row.actTarget2)}">
-                  <p th:if="${not #strings.isEmpty(row.actS2)}">（即時効果）</p>
-                  <p th:if="${#strings.isEmpty(row.actS2)}">（通常効果）</p>
-                  <span th:utext="${#sfn.cnvHtml(row.actEffect2)}"></span>
-                </div>
-              </div>
-
-              <div th:if="${not #strings.isEmpty(row.actName3)}" class="panel panel-default blackpoker-action" th:attr="id='act1-'+${row.suit3}+${row.num3}">
-                <div class="panel-heading">
-                  <span class="act-title" th:text="${row.actName3}"></span> <span> <small>
-                      <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType3}"></span>
-                    </small>
-                  </span>
-                  <div class="pull-right">
-                    &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime3}"></span>
-                    </small> <span th:if="${not #strings.isEmpty(row.actCost3)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost3)}">
-                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost3)}"></span>
-                    </small>
-                  </div>
-                  <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.actKey3)}"> <span class="glyphicon glyphicon-star"
-                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey3)}"></span><br>
-                    </small> <small th:if="${not #strings.isEmpty(row.actNote3)}"> <span th:each="str : ${#strings.listSplit(row.actNote3,'\n')}">
-                        <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                        <br>
-                      </span>
-                    </small>
-
-                  </div>
-                </div>
-                <div class="panel-body">
-                  <span th:if="${not #strings.isEmpty(row.actTarget3)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget3)}"
-                    th:text="${#sfn.cnvHtml(row.actTarget3)}"></span> <br th:if="${not #strings.isEmpty(row.actTarget3)}">
-                  <hr th:if="${not #strings.isEmpty(row.actTarget3)}">
-                  <p th:if="${not #strings.isEmpty(row.actS3)}">（即時効果）</p>
-                  <p th:if="${#strings.isEmpty(row.actS3)}">（通常効果）</p>
-                  <span th:utext="${#sfn.cnvHtml(row.actEffect3)}"></span>
-                </div>
-              </div> -->
-
               <!-- キャラクター -->
               <div th:if="${not #lists.isEmpty(row.chars)}">
               <h6 class="text-center">Character</h6>
-                <div th:each="char : ${row.chars}" th:if="${not #strings.isEmpty(char.charName)}" class="panel panel-default blackpoker-action" th:attr="id='char-'+${char.suit}+${char.num}">
+                <div th:each="char,cst : ${row.chars}" th:if="${not #strings.isEmpty(char.charName)}" class="panel panel-default blackpoker-action" th:attr="id='char-'+${row.suit}+${row.num}+${cst.index}">
                   <div class="panel-heading">
                     <span class="act-title" th:text="${char.charName}"></span> <span> <small>
                         <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${char.charType}"></span>
