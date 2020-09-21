@@ -32,7 +32,7 @@
 
     }
 
-    @import url( //fonts.googleapis.com/earlyaccess/notosansjp.css);
+    @import url(//fonts.googleapis.com/earlyaccess/notosansjp.css);
 
     @font-face {
       font-family: 'suit';
@@ -149,7 +149,8 @@
       font-size: 12px;
     }
 
-    #modal_trump_help .modal-body ul, ol {
+    #modal_trump_help .modal-body ul,
+    ol {
       padding-left: 20px;
     }
 
@@ -456,13 +457,14 @@
     <div class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed btn btn-default navbar-btn collapsed" data-target="#modal_sidebar"
-            data-toggle="modal">
+          <button type="button" class="navbar-toggle collapsed btn btn-default navbar-btn collapsed"
+            data-target="#modal_sidebar" data-toggle="modal">
             <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
           </button>
 
           <!-- logo -->
-          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button"> <img src="img/blackpoker.svg">
+          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button"> <img
+              src="img/blackpoker.svg">
           </a> <span class="navbar-brand nav-title text-center" data-toggle="tab">extra</span>
           <!-- 
             <a href="#abilitylist" class="navbar-brand nav-title text-center" data-toggle="tab">ExActionList</a>
@@ -494,7 +496,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
           <!-- Support Paper -->
           ExtraList
           <h5>
@@ -508,8 +511,8 @@
              -->
         </div>
         <div class="modal-body">
-          <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span class="glyphicon glyphicon-question-sign"
-              aria-hidden="true"></span>記号の意味</a> <br>
+          <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>記号の意味</a> <br>
           <!--  
             <input id="betaFlg" type="checkbox" checked data-size="mini">
             <span>第二版からの変更を青字にする</span>
@@ -521,21 +524,25 @@
 
           <h5>ActionList</h5>
           <div class="list-group">
-            <span th:each="list1 : ${actList}" >
-            <a th:each="row : ${list1.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action" th:if="${not #strings.isEmpty(row.output)}">
-              <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right">
-                <span class="time-mark"></span><b><span th:text="${row.actTime}"></span></b>
-              </span>
-            </a>
+            <span th:each="list1 : ${actList}">
+              <a th:each="row : ${list1.acts}" th:attr="href='#act-'+${row.actId}"
+                class="scroll-offset list-group-item list-group-item-action"
+                th:if="${not #strings.isEmpty(row.output)}">
+                <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span th:text="${row.actTime}"></span></b>
+                </span>
+              </a>
             </span>
           </div>
           <h5>AbilityList</h5>
           <div class="list-group">
-            <a th:each="row : ${abiList}" class="scroll-offset list-group-item list-group-item-action" th:attr="href='#abi-'+${row.suit}+${row.num}"
+            <a th:each="row : ${abiList}" class="scroll-offset list-group-item list-group-item-action"
+              th:attr="href='#abi-'+${row.suit}+${row.num}"
               th:if="${( (not #strings.isEmpty(beta)) && (not #strings.isEmpty(row.beta)) ) or (not #strings.isEmpty(row.output)) }">
-              <span th:if="${row.suit}=='s'" th:text="${' '+row.num}" class="spade-min"></span> <span th:if="${row.suit}=='h'"
-                th:text="${' '+row.num}" class="heart-min"></span> <span th:if="${row.suit}=='d'" th:text="${' '+row.num}"
-                class="diam-min"></span> <span th:if="${row.suit}=='c'" th:text="${' '+row.num}" class="club-min"></span>
+              <span th:if="${row.suit}=='s'" th:text="${' '+row.num}" class="spade-min"></span> <span
+                th:if="${row.suit}=='h'" th:text="${' '+row.num}" class="heart-min"></span> <span
+                th:if="${row.suit}=='d'" th:text="${' '+row.num}" class="diam-min"></span> <span
+                th:if="${row.suit}=='c'" th:text="${' '+row.num}" class="club-min"></span>
               <span th:text="${': '+#sfn.cnvHtml(row.name)}"></span>
             </a>
           </div>
@@ -559,7 +566,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
           <h5>
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>記号の意味</a>
             <h5>
@@ -567,11 +575,14 @@
         <div class="modal-body">
 
           <ul class="list-group">
-            <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ
+            </li>
             <li class="list-group-item"><span class="time-mark"></span>
               :&nbsp;タイミング</li>
-            <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト</li>
-            <li class="list-group-item"><span class="glyphicon glyphicon-star" aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
+            </li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-star"
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
             <li class="list-group-item"><span class="note-mark"></span>
               :&nbsp;特記事項</li>
             <!--
@@ -603,7 +614,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" id="modal_bulwork_help-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <button type="button" id="modal_bulwork_help-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
           <h5>
             <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>&nbsp;切札について</a>
             <h5>
@@ -632,7 +644,8 @@
       <h2 class="visible-print-block blackpoker-font">
         <img src="img/blackpoker.svg" width="35px"><br> BlackPoker extra
       </h2>
-      <small class="" th:text="${data.ver}+' v'+${data.v}"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
+      <small class="" th:text="${data.ver}+' v'+${data.v}"></small> <small class=""
+        th:text="' : '+${data.lastupdate}"></small>
     </div>
     <hr class="hidden-print">
 
@@ -643,8 +656,9 @@
           <small>
             <p>extraとは、BlackPokerの遊び方の一つです。</p>
             <p>
-              プレイヤーは切札を設置してからゲームを開始します。<br> 切札については <a href="#" data-toggle="modal" data-target="#modal_trump_help"><span
-                  class="glyphicon glyphicon-question-sign" aria-hidden="false"></span>切札について</a>を参照して下さい。
+              プレイヤーは切札を設置してからゲームを開始します。<br> 切札については <a href="#" data-toggle="modal"
+                data-target="#modal_trump_help"><span class="glyphicon glyphicon-question-sign"
+                  aria-hidden="false"></span>切札について</a>を参照して下さい。
             </p>
             <p>extraではプロ版のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。</p>
           </small>
@@ -659,16 +673,17 @@
          -->
     <div>
       <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
-      <div th:each="nestList : ${list1list}">
-        <h5 th:text="${nestList[0].type}" class="text-center"></h5>
+      <div th:each="nestList : ${actList}">
+        <h5 th:text="${nestList.type}" class="text-center"></h5>
         <div class="row">
 
-          <div th:each="row : ${nestList}" th:if="${not #strings.isEmpty(row.output)}" class="col-lg-4">
+          <div th:each="row : ${nestList.acts}" th:if="${not #strings.isEmpty(row.output)}" class="col-lg-4">
             <div class="bs-component">
               <div class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.actId}">
                 <div class="panel-heading">
 
-                  <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
+                  <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}"
+                    th:if="${not #strings.isEmpty(row.story)}">
                     <span class="act-title" th:text="${row.actName}"></span>
                   </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
                   <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType}"></span>
@@ -721,9 +736,9 @@
 
 
     <h5 class="text-center" id="abilitylist">AbilityList</h5>
-    <div class="row">
+    <div class="662">
 
-      <div th:each="row : ${list}" th:if="${( (not #strings.isEmpty(beta)) && (not #strings.isEmpty(row.beta)) ) or (not #strings.isEmpty(row.output)) }"
+      <div th:each="row : ${abiList}" th:if="${( (not #strings.isEmpty(beta)) && (not #strings.isEmpty(row.beta)) ) or (not #strings.isEmpty(row.output)) }"
         class="col-lg-4">
         <div class="bs-component">
 
@@ -738,45 +753,47 @@
             <div class="panel-body">
               (能力)<br> <span th:utext="${#sfn.cnvHtml(row.ability)}"></span>
 
-              <hr th:if="${(not #strings.isEmpty(row.actName)) or (not #strings.isEmpty(row.charName))}">
-              <h6 th:if="${not #strings.isEmpty(row.actName)}" class="text-center">Action</h6>
-              <!-- Action -->
-              <div th:if="${not #strings.isEmpty(row.actName)}" class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.suit}+${row.num}">
-                <div class="panel-heading">
-                  <span class="act-title" th:text="${row.actName}"></span> <span> <small>
-                      <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType}"></span>
-                    </small>
-                  </span>
-                  <div class="pull-right">
-                    &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime}"></span>
-                    </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
-                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
-                    </small>
-                  </div>
-                  <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                    </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                        <span class="note-mark"></span>
-                        <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                        <br>
-                      </span>
-                    </small>
+              <hr th:if="${(not #lists.isEmpty(row.acts)) or (not #lists.isEmpty(row.chars))}">
+              <div th:if="${not #lists.isEmpty(row.acts)}">
+                <h6 class="text-center">Action</h6>
+                <!-- Action -->
+                <div th:each="act : ${row.acts}" th:if="${not #strings.isEmpty(act.actName)}" class="panel panel-default blackpoker-action" th:attr="id='act-'+${act.suit}+${act.num}">
+                  <div class="panel-heading">
+                    <span class="act-title" th:text="${act.actName}"></span> <span> <small>
+                        <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${act.actType}"></span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span th:text="${act.actTime}"></span>
+                      </small> <span th:if="${not #strings.isEmpty(act.actCost)}">|</span> <small th:if="${not #strings.isEmpty(act.actCost)}">
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(act.actCost)}"></span>
+                      </small>
+                    </div>
+                    <div class="text-left">
+                      <small th:if="${not #strings.isEmpty(act.actKey)}"> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(act.actKey)}"></span><br>
+                      </small> <small th:if="${not #strings.isEmpty(act.actNote)}"> <span th:each="str : ${#strings.listSplit(act.actNote,'\n')}">
+                          <span class="note-mark"></span>
+                          <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                          <br>
+                        </span>
+                      </small>
 
+                    </div>
                   </div>
-                </div>
-                <div class="panel-body">
-                  <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
-                    th:utext="${#sfn.cnvHtml(row.actTarget)}"></span><br th:if="${not #strings.isEmpty(row.actTarget)}">
-                  <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                  <p th:if="${not #strings.isEmpty(row.actS)}">（即時効果）</p>
-                  <p th:if="${#strings.isEmpty(row.actS)}">（通常効果）</p>
-                  <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
+                  <div class="panel-body">
+                    <span th:if="${not #strings.isEmpty(act.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(act.actTarget)}"
+                      th:utext="${#sfn.cnvHtml(act.actTarget)}"></span><br th:if="${not #strings.isEmpty(act.actTarget)}">
+                    <hr th:if="${not #strings.isEmpty(act.actTarget)}">
+                    <p th:if="${not #strings.isEmpty(act.actS)}">（即時効果）</p>
+                    <p th:if="${#strings.isEmpty(act.actS)}">（通常効果）</p>
+                    <span th:utext="${#sfn.cnvHtml(act.actEffect)}"></span>
+                  </div>
                 </div>
               </div>
 
               <!-- SubAction -->
-              <div th:if="${not #strings.isEmpty(row.actName1)}" class="panel panel-default blackpoker-action" th:attr="id='act1-'+${row.suit1}+${row.num1}">
+              <!-- <div th:if="${not #strings.isEmpty(row.actName1)}" class="panel panel-default blackpoker-action" th:attr="id='act1-'+${row.suit1}+${row.num1}">
                 <div class="panel-heading">
                   <span class="act-title" th:text="${row.actName1}"></span> <span> <small>
                       <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType1}"></span>
@@ -873,33 +890,35 @@
                   <p th:if="${#strings.isEmpty(row.actS3)}">（通常効果）</p>
                   <span th:utext="${#sfn.cnvHtml(row.actEffect3)}"></span>
                 </div>
-              </div>
+              </div> -->
 
               <!-- キャラクター -->
-              <h6 th:if="${not #strings.isEmpty(row.charName)}" class="text-center">Character</h6>
-              <div th:if="${not #strings.isEmpty(row.charName)}" class="panel panel-default blackpoker-action" th:attr="id='char-'+${row.suit}+${row.num}">
-                <div class="panel-heading">
-                  <span class="act-title" th:text="${row.charName}"></span> <span> <small>
-                      <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.charType}"></span>
-                    </small>
-                  </span>
-                  <div class="pull-right">
-                    &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
-                    </small>
-                  </div>
-                  <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.charNote)}"> <span th:each="str : ${#strings.listSplit(row.charNote,'\n')}">
-                        <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                        <br>
-                      </span>
-                    </small>
+              <div th:if="${not #lists.isEmpty(row.chars)}">
+              <h6 class="text-center">Character</h6>
+                <div th:each="char : ${row.chars}" th:if="${not #strings.isEmpty(char.charName)}" class="panel panel-default blackpoker-action" th:attr="id='char-'+${char.suit}+${char.num}">
+                  <div class="panel-heading">
+                    <span class="act-title" th:text="${char.charName}"></span> <span> <small>
+                        <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${char.charType}"></span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(char.charKey)}"></span><br>
+                      </small>
+                    </div>
+                    <div class="text-left">
+                      <small th:if="${not #strings.isEmpty(char.charNote)}"> <span th:each="str : ${#strings.listSplit(char.charNote,'\n')}">
+                          <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                          <br>
+                        </span>
+                      </small>
 
+                    </div>
                   </div>
-                </div>
-                <div class="panel-body">
-                  （能力）<br> <span th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
-                </div>
+                  <div class="panel-body">
+                    （能力）<br> <span th:utext="${#sfn.cnvHtml(char.charAbility)}"></span>
+                  </div>
 
+                </div>
               </div>
 
             </div>
