@@ -324,12 +324,11 @@ abiList:
   - suit: h
     num: J
     output: ●
-    beta: ''
     name: チャリオット
     ability: チャリオット召喚アクションを起こすことができる。
-    actName: チャリオット召喚
     acts:
-    - actType: 召喚
+    - actName: チャリオット召喚
+      actType: 召喚
       actTime: メイン
       actCost: BL
       actS: ''
@@ -359,7 +358,6 @@ abiList:
   - suit: h
     num: K
     output: ●
-    beta: ''
     name: 巨人
     ability: 巨人召喚アクションを起こすことができる。
     acts:
@@ -395,7 +393,6 @@ abiList:
   - suit: d
     num: A
     output: ●
-    beta: ''
     name: 防壁追加
     ability: 防壁追加アクションを起こすことができる。
     acts:
@@ -433,7 +430,6 @@ abiList:
   - suit: d
     num: '4'
     output: ●
-    beta: ●
     name: 相殺
     ability: 相殺アクションを起こすことができる。
     acts:
@@ -476,7 +472,6 @@ abiList:
   - suit: d
     num: '8'
     output: ●
-    beta: ''
     name: 修繕
     ability: 修繕アクションを起こすことができる。
     acts:
@@ -527,7 +522,6 @@ abiList:
   - suit: d
     num: J
     output: ●
-    beta: ''
     name: 策士
     ability: 策士召喚アクションを起こすことができる。
     acts:
@@ -633,7 +627,6 @@ abiList:
   - suit: c
     num: '7'
     output: ●
-    beta: ''
     name: 手札補充
     ability: 自分がエンドアクションを起こした場合、手札補充アクションを誘発する。
     acts:
@@ -695,7 +688,6 @@ abiList:
   - suit: c
     num: '10'
     output: ●
-    beta: ●
     name: 悪あがき
     ability: 悪あがきアクションを起こすことができる。
     acts:
@@ -714,7 +706,6 @@ abiList:
   - suit: c
     num: J
     output: ●
-    beta: ''
     name: 騎士
     ability: 騎士召喚アクションを起こすことができる。
     acts:
@@ -756,7 +747,6 @@ abiList:
   - {suit: c, num: Q, output: ''}
   - {suit: c, num: K, output: ''}
 
-  # 9/20 ここまでやった
 actList:
   - type: 切札
     acts:

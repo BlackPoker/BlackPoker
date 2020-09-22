@@ -123,7 +123,8 @@ ex${data.v}
 \vspace{-1zh}%余白削除
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#foreach( $row in ${list1})
+#foreach( $acts in ${actList})
+#foreach( $row in ${acts.acts})
 #if(${row.output} != "")
 %%% Action %%%
 %\vspace{1zh} %余白追加
@@ -175,6 +176,7 @@ ${texFn.cnv(${row.actEffect})}
 #end
 #end
 #end
+#end
 
 %\newpage %改段
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -195,7 +197,7 @@ ${texFn.cnv(${row.actEffect})}
 \tcbset{colframe=black,coltitle=black!0!black,colbacktitle=white!0!white,colback=white!0!white,sharp corners,top=1mm, left=1mm, bottom=1mm, left=1mm,boxrule=0.2mm,toprule=0.2mm}
 
 ## Abilityループ
-#foreach( $row in ${list})
+#foreach( $row in ${abiList})
 #if(${row.output.trim()} != "")
 
 %%%%% Ability %%%%%
@@ -207,261 +209,98 @@ ${texFn.cnv(${row.actEffect})}
 
 ${texFn.cnv(${row.ability})}
 
-## Abilityアクション
-#if((${row.output.trim()} != "")&&(${row.actName} != ""))
-\begin{tcolorbox}[title={\small\bf【Action】${row.actName}}{\scriptsize （${row.actType}）}]
+%%%%% Abilityアクション %%%%%
+#if((${row.output.trim()} != "")&&(($row.acts)&&($row.acts.size() > 0)))
+#foreach($act in ${row.acts})
+\begin{tcolorbox}[title={\small\bf【Action】${act.actName}}{\scriptsize （${act.actType}）}]
 
-#if(${row.actTime} != "")
-{\scriptsize\bf @${row.actTime} }
+#if(${act.actTime} != "")
+{\scriptsize\bf @${act.actTime} }
 #end
-#if(${row.actCost} != "")
-  {\scriptsize\bf | \$ ${row.actCost} }
+#if(${act.actCost} != "")
+  {\scriptsize\bf | \$ ${act.actCost} }
 #end
-#if(${row.actKey.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${row.actKey})}}
+#if(${act.actKey.trim()} != "")
+  {\scriptsize\bf | ★${texFn.cnv(${act.actKey})}}
 #end
 
-#if(${row.actNote.trim()} != "")
+#if(${act.actNote.trim()} != "")
 %特記事項
 \vspace{1mm} %余白追加
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
-${texFn.cnv(${row.actNote})}
+${texFn.cnv(${act.actNote})}
 \vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
 \vspace{1zh}%余白追加
 #end
-#if(${row.actTarget.trim()} != "")
+#if(${act.actTarget.trim()} != "")
 \vspace{1mm} %余白追加  
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
 {\bf（対象）}
 
-${texFn.cnv(${row.actTarget})}
+${texFn.cnv(${act.actTarget})}
 
 #end
-#if(${row.actEffect.trim()} != "")
+#if(${act.actEffect.trim()} != "")
 \vspace{1mm} %余白追加
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
-#if(${row.actS.trim()} != "")
+#if(${act.actS.trim()} != "")
 {\bf（即時効果）}
 #end
-#if(${row.actS.trim()} == "")
+#if(${act.actS.trim()} == "")
 {\bf（通常効果）}
 #end
 
-${texFn.cnv(${row.actEffect})}
+${texFn.cnv(${act.actEffect})}
 #end
 
 \vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
 \end{tcolorbox}
 
 \vspace{-1zh}
-
+#end ##foreach end
 #end ##Abilityアクション end 
 
-## Abilityキャラクター 
-#if((${row.output.trim()} != "")&&(${row.charName} != ""))
+%%%%% Abilityキャラクター %%%%%
+#if((${row.output.trim()} != "")&&(($row.chars)&&($row.chars.size() > 0)))
+#foreach($char in ${row.chars})
 \vspace{2mm}
-\begin{tcolorbox}[title={\small\bf【Character】${row.charName}}{\scriptsize （${row.charType}）}]
+\begin{tcolorbox}[title={\small\bf【Character】${char.charName}}{\scriptsize （${char.charType}）}]
 
-#if(${row.actKey.trim()} != "")
-  {\scriptsize\bf ★${texFn.cnv(${row.charKey})}}
+#if(${char.actKey.trim()} != "")
+  {\scriptsize\bf ★${texFn.cnv(${char.charKey})}}
 #end
 
-#if(${row.charNote.trim()} != "")
+#if(${char.charNote.trim()} != "")
 %特記事項
 \vspace{1mm} %余白追加
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
-${texFn.cnv(${row.actNote})}
+${texFn.cnv(${char.actNote})}
 \vspace{1zh}%余白追加
 #end
-#if(${row.charAbility.trim()} != "")
+#if(${char.charAbility.trim()} != "")
 \vspace{1mm} %余白追加
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
 {\bf（能力）}
 
-${texFn.cnv(${row.charAbility})}
+${texFn.cnv(${char.charAbility})}
 #end
 
 \vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
 \end{tcolorbox}
 
 \vspace{-1zh}
-
+#end ##foreach end
 #end ##Abilityキャラクター end 
-
-#if((${row.output.trim()} != "")&&(${row.actName1} != ""))
-\begin{tcolorbox}[title={\small\bf【Action】${row.actName1}}{\scriptsize （${row.actType1}）}]
-
-#if(${row.actTime1} != "")
-{\scriptsize\bf @${row.actTime1} }
-#end
-#if(${row.actCost1} != "")
-  {\scriptsize\bf | \$ ${row.actCost1} }
-#end
-#if(${row.actKey1.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${row.actKey1})}}
-#end
-
-#if(${row.actNote1.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${row.actNote1})}
-\vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
-\vspace{1zh}%余白追加
-#end
-#if(${row.actTarget1.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget1})}
-
-#end
-#if(${row.actEffect1.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-#if(${row.actS1.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${row.actS1.trim()} == "")
-{\bf（通常効果）}
-#end
-
-${texFn.cnv(${row.actEffect1})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
-
-\vspace{-1zh}
-
-#end ##Abilityアクション1 end 
-
-#if((${row.output.trim()} != "")&&(${row.actName2} != ""))
-\begin{tcolorbox}[title={\small\bf【Action】${row.actName2}}{\scriptsize （${row.actType2}）}]
-
-#if(${row.actTime2} != "")
-{\scriptsize\bf @${row.actTime2} }
-#end
-#if(${row.actCost2} != "")
-  {\scriptsize\bf | \$ ${row.actCost2} }
-#end
-#if(${row.actKey2.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${row.actKey2})}}
-#end
-
-#if(${row.actNote2.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${row.actNote2})}
-\vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
-\vspace{1zh}%余白追加
-#end
-#if(${row.actTarget2.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget2})}
-
-#end
-#if(${row.actEffect2.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-#if(${row.actS2.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${row.actS2.trim()} == "")
-{\bf（通常効果）}
-#end
-
-${texFn.cnv(${row.actEffect2})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
-
-\vspace{-1zh}
-
-#end ##Abilityアクション2 end 
-
-#if((${row.output.trim()} != "")&&(${row.actName3} != ""))
-\begin{tcolorbox}[title={\small\bf【Action】${row.actName3}}{\scriptsize （${row.actType3}）}]
-
-#if(${row.actTime3} != "")
-{\scriptsize\bf @${row.actTime3} }
-#end
-#if(${row.actCost3} != "")
-  {\scriptsize\bf | \$ ${row.actCost3} }
-#end
-#if(${row.actKey3.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${row.actKey3})}}
-#end
-
-#if(${row.actNote3.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${row.actNote3})}
-\vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
-\vspace{1zh}%余白追加
-#end
-#if(${row.actTarget3.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget3})}
-
-#end
-#if(${row.actEffect3.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-#if(${row.actS3.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${row.actS3.trim()} == "")
-{\bf（通常効果）}
-#end
-
-${texFn.cnv(${row.actEffect3})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
-
-\vspace{-1zh}
-
-#end ##Abilityアクション3 end 
 
 #end
 #end ##Abilityループ end

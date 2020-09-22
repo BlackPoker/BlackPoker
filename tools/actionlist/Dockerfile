@@ -21,7 +21,7 @@ COPY original/* original/.
 COPY pom.xml .
 COPY web-site/* web-site/.
 
-RUN mvn compile exec:java
+RUN --mount=type=cache,target=/root/.m2 mvn compile exec:java
 
 # ------------------------------
 # 起動
@@ -55,4 +55,4 @@ COPY --from=builder /usr/local/src/actionlist/web-site web-site
 VOLUME /dist
 
 USER 1000:1000
-CMD ["sh", "/build.sh","blackpoker-v6-std"]
+CMD ["sh", "/build.sh","blackpoker-v6-extra"]
