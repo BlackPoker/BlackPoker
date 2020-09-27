@@ -11,3 +11,4 @@
    03-action
    04-character
    05-action_detail
+   06-extra
