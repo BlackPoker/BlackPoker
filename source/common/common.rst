@@ -12,3 +12,4 @@
    04-character
    05-action_detail
    06-extra
+   07-etc
