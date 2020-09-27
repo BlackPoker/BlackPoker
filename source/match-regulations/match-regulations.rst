@@ -38,5 +38,12 @@ BlackPokerはトランプだけで遊べるため、
    :maxdepth: 1
    :caption: 公式対戦レギュレーション:
 
+   light
+   light40
    standard 
+   standard40
+   pro 
+   pro40
+   master 
+   master40
 
