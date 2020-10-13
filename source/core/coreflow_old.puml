@@ -1,0 +1,41 @@
+@startuml
+|プレイヤーがチャンスを保持|
+start
+:ターンプレイヤー
+にチャンスを移動;
+if(ステージは空か？) then (YES)
+    :パス回数リセット;
+    :アクションを起こす;
+    if(即時?) then (YES)
+        :ステージに追加;
+    else (NO)
+        :効果解決;
+    endif
+    :誘発チェック;
+else
+    if(Actionを起こすか？) then (YES)
+        :パス回数リセット;
+        :アクションを起こす;
+        if(即時?) then (YES)
+            :ステージに追加;
+        else (NO)
+            :効果解決;
+        endif
+        :誘発チェック;
+    else
+        :パス回数+1;
+        if(パス回数=プレイヤー数か?) then (YES)
+            :ステージから問取出し;
+            :効果解決;
+            :誘発チェック;
+            (A)
+            detach
+        else
+            :チャンス移動;
+        endif
+    endif
+endif
+
+stop
+
+@enduml

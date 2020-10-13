@@ -16,6 +16,7 @@ Welcome to BlackPoker's documentation!
    match-regulations/match-regulations
    format/format
    common/common
+   core/core
 
 Indices and tables
 ==================
