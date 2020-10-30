@@ -1,0 +1,21 @@
+@startuml
+
+skinparam defaultTextAlignment center
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.2.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/font-awesome-5/chess_pawn.puml
+
+FA5_CHESS_PAWN(P1C,コンポーネント)
+:プレイヤー1: as Player1
+:プレイヤー2: as Player2
+(〇〇アクションを起こせる) as Act1 <<能力>>
+(●●アクションを起こせる) as Act2 <<能力>>
+(△△アクションを起こせる) as Act3 <<能力>>
+Player1 ---> (Act1) : "能力"
+Player1 ---> (Act2) : "能力"
+P1C --> (Act3) : "能力"
+Player2 ---> (Act1) : "能力"
+Player1 ..> P1C : "所有"
+
+@enduml
