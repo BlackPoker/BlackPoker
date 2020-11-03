@@ -36,6 +36,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="対戦レギュレーション" href="../match-regulations/match-regulations.html" />
     <link rel="prev" title="Welcome to BlackPoker&#39;s documentation!" href="../index.html" /> 
 </head>
 
@@ -83,9 +84,14 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">はじめに</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">文章の構成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">ルールの構成</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">付録</a></li>
 </ul>
 
             
@@ -157,24 +163,46 @@
 ゲームをプレイする際に全てを熟読する必要はありませんが、
 ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。</p>
 <div class="section" id="id2">
-<h2>文章の構成<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
-<p>文章の構成は次のようになっています。</p>
+<h2>ルールの構成<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>ルールの構成は次のようになっています。</p>
 <p class="plantuml">
-<img src="../_images/plantuml-9cefafff4aadf1c107aaa278ada0a99cbb39443a.svg" alt="
-    hide members
-    hide circle
+<img src="../_images/plantuml-539e0c031fa17f075d01c25c766b6741f05fab73.svg" alt="
+hide members
+hide circle
 
-    abstract class コアルール 
-    abstract class 共通ルール
+abstract class コアルール
+abstract class 共通ルール
 
-    コアルール &lt;|.. 共通ルール : 具体化
-    共通ルール ^-- 通常フォーマット : 拡張
-    通常フォーマット ^-- 拡張フォーマット : 拡張
+package フォーマット {
+    class 拡張フォーマット
+    class 通常フォーマット
+}
 
-    note right of コアルール : ターン制ゲームに適応できる抽象的なルール定義
-    note right of 共通ルール : コアルールを具体化したルール定義
-    note right of 通常フォーマット : ライト、スタンダードなどの具体的なフォーマット定義
-    note right of 拡張フォーマット : エクストラなどの通常フォーマットを拡張したフォーマット定義
+class 対戦レギュレーション 
+
+note right of 対戦レギュレーション
+    対戦する際に決める規則
+end note
+
+対戦レギュレーション ..&gt; フォーマット : 参照
+共通ルール ..|&gt; コアルール : 具体化
+フォーマット ..&gt; 共通ルール : 参照
+通常フォーマット ^- 拡張フォーマット : 拡張
+
+
+
+note right of コアルール : ターン制ゲームに適応できる抽象的なルール定義
+note right of 共通ルール : コアルールを具体化したルール定義
+note right of 通常フォーマット
+ライト、スタンダードなどの
+具体的なフォーマット定義
+end note
+note right of 拡張フォーマット
+エクストラなどの通常フォーマットを
+拡張したフォーマット定義
+
+
+end note
 
 "/></p>
 </div>
@@ -187,6 +215,8 @@
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../match-regulations/match-regulations.html" class="btn btn-neutral float-right" title="対戦レギュレーション" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to BlackPoker&#39;s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

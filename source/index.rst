@@ -17,6 +17,7 @@ Welcome to BlackPoker's documentation!
    format/format
    common/common
    core/core
+   appendix/appendix
 
 Indices and tables
 ==================

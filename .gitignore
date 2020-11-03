@@ -14,3 +14,4 @@ build/_html
 build/html
 build/doctrees
 build/latex
+**/.DS_Store
