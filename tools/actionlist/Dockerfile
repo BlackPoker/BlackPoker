@@ -55,4 +55,4 @@ COPY --from=builder /usr/local/src/actionlist/web-site web-site
 VOLUME /dist
 
 USER 1000:1000
-CMD ["sh", "/build.sh","blackpoker-v6-extra"]
+CMD ["sh", "/build.sh"]

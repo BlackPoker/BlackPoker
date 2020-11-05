@@ -1,9 +1,9 @@
 data: 
-  ver: 第五版 extra
-  lastupdate: 2019/06/16
-  v: 5.30.0
-  pdfurl: /pdf/blackpoker-v5-extra
-  qr: qr_blackpoker-support_v5-ex.pdf
+  ver: 第六版 extra
+  lastupdate: 2020/11/07
+  v: 6.30.0
+  pdfurl: /pdf/blackpoker-v6-extra
+  qr: qr_blackpoker-support_v6-ex.pdf
 
 abiList:
   - suit: s

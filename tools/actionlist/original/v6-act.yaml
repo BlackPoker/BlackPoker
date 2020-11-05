@@ -1,17 +1,19 @@
 data: 
-  ver: 第五版 act5.230
-  lastupdate: 2019/06/16
-  pdfurl_std: /pdf/blackpoker-v5-std
-  pdfurl_lite: /pdf/blackpoker-v5-lite
-  pdfurl_pro: /pdf/blackpoker-v5-pro
-  qrStd: qr_blackpoker-support_v5-std.pdf
-  qrLite: qr_blackpoker-support_v5-lite.pdf
-  qrPro: qr_blackpoker-support_v5-pro.pdf
+  ver: 第六版 act6.0
+  lastupdate: 2020/11/07
+  pdfurl_std: /pdf/blackpoker-v6-std
+  pdfurl_lite: /pdf/blackpoker-v6-lite
+  pdfurl_pro: /pdf/blackpoker-v6-pro
+  pdfurl_mast: /pdf/blackpoker-v6-mast
+  qrStd: qr_blackpoker-support_v6-std.pdf
+  qrLite: qr_blackpoker-support_v6-lite.pdf
+  qrPro: qr_blackpoker-support_v6-pro.pdf
+  qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
   - type: 展開系
     acts:
-    - format: lite,std,pro,master
+    - format: lite,std,pro,mast
       actName: 防壁設置
       actId: setBulwark
       actType: 召喚
@@ -27,7 +29,7 @@ actList:
         「まずは、防壁を出す。話はそれからだ。」
       flavorSpeaker: 再現の師より
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 兵士召喚
       actId: summonsSoldier
       actType: 召喚
@@ -42,7 +44,7 @@ actList:
       flavor: 「防壁の次は兵士を出します。これが戦術の基本です。」
       flavorSpeaker: 再現者の心得第二章より
       
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 英雄召喚
       actId: summonsHero
       actType: 召喚
@@ -57,7 +59,7 @@ actList:
       flavor: 「実力はわからんが一応英雄様の出陣じゃ。粗相のないようしっかりやれよ。」
       flavorSpeaker: 古参兵より
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       type: 展開系
       actName: エース召喚
       actId: summonsAce
@@ -73,7 +75,27 @@ actList:
       flavor: 「あいつ！何も持たずに飛び出して行きやがった！」
       flavorSpeaker: 親方より
 
-    - format: 'std,pro'
+    - format: 'pro,mast'
+      type: 展開系
+      actName: クイック召喚
+      actId: quickSummonsAce
+      actType: 召喚
+      actTime: クイック
+      actCost: D
+      actS: ''
+      actKey: A
+      actNote: '※ターンを持っていない時しかこのアクションを起こすことができない。'
+      actTarget: ''
+      actEffect: |-
+        キーカードをエースとして表向きかつチャージ状態で場に出す。
+        もしくは、キーカードを防壁として裏向きかつチャージ状態で場に出す。
+        エースの能力は、キャラクターリスト参照。
+        防壁の能力はキャラクターリスト参照。防壁の置き方は「防壁の置き方」参照。
+      story: 
+      flavor: 
+      flavorSpeaker: 
+
+    - format: 'std,pro,mast'
       actName: 魔術士召喚
       actId: summonsMagic
       actType: 召喚
@@ -90,7 +112,7 @@ actList:
       flavor: 「場に出れば強いんだよなぁ。場に出れば。」
       flavorSpeaker: 再現者見習いより
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 装備
       actId: mountSoldier
       actType: 召喚
@@ -105,7 +127,7 @@ actList:
       flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」
       flavorSpeaker: デッキよりの防壁より
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: 帰還
       actId: unsummons
       actType: 召喚
@@ -125,7 +147,7 @@ actList:
 
   - type: 展開系
     acts:
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       actName: チャージ
       actId: charge
       actType: ターン制御
@@ -142,7 +164,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       type: ターン制御系
       actName: ドロー
       actId: draw
@@ -161,7 +183,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       type: ターン制御系
       actName: エンド
       actId: end
@@ -182,7 +204,7 @@ actList:
 
   - type: 攻撃系
     acts:
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       type: 
       actName: アタック
       actId: attack
@@ -200,7 +222,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       type: 攻撃系
       actName: ブロック
       actId: block
@@ -218,7 +240,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       type: 攻撃系
       actName: ダメージ判定
       actId: damageJudge
@@ -240,7 +262,7 @@ actList:
 
   - type: 魔法系
     acts:  
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: アップ
       actId: up
       actType: 速攻魔法
@@ -255,7 +277,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: ダウン
       actId: down
       actType: 速攻魔法
@@ -270,7 +292,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: ツイスト
       actId: twist
       actType: 速攻魔法
@@ -285,7 +307,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       actName: カウンター
       actId: counter
       actType: 速攻魔法
@@ -303,7 +325,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,pro,mast'
       actName: 再会
       actId: reunion
       actType: 速攻魔法
@@ -318,7 +340,7 @@ actList:
       flavor: 「ねぇねぇ知ってた。この後ヒロインの願いが届いて死んだはずの主人公が登場して、二人で敵を全員やっつけちゃうの！ありがちよねぇ。」
       flavorSpeaker: ネタバレ娘より
 
-    - format: ',,pro'
+    - format: ',,pro,mast'
       actName: キル
       actId: kill
       actType: 速攻魔法
@@ -333,7 +355,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,pro,mast'
       actName: 停戦
       actId: truce
       actType: 速攻魔法
@@ -348,7 +370,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,pro,mast'
       actName: 対象変更
       actId: changeTarget
       actType: 速攻魔法
@@ -363,7 +385,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 防壁破壊
       actId: destroyBulwark
       actType: 通常魔法
@@ -378,7 +400,7 @@ actList:
       flavor: 「あれ？いつの間にかなくなってるよ？」
       flavorSpeaker: かくれんぼしていた子供より
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 投擲
       actId: throwing
       actType: 通常魔法
@@ -393,7 +415,7 @@ actList:
       flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」
       flavorSpeaker: 再現者の心得第十一章より
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: 死の槍
       actId: deathLance
       actType: 通常魔法
@@ -411,7 +433,7 @@ actList:
       flavor: 「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」
       flavorSpeaker: 再現者の心得第十二章より
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: 防壁補充
       actId: addBulwark
       actType: 通常魔法
@@ -428,7 +450,7 @@ actList:
       flavor: 「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」
       flavorSpeaker: 無能な指揮官より
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: リアニメイト
       actId: reanimate
       actType: 通常魔法
@@ -443,7 +465,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: ハンデス
       actId: handeth
       actType: 通常魔法
@@ -458,7 +480,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: フォース
       actId: force
       actType: 通常魔法
@@ -473,7 +495,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: 剣の雨
       actId: swordRain
       actType: 通常魔法
@@ -488,7 +510,7 @@ actList:
       flavor: 「え！助かる訳ないじゃん！！」
       flavorSpeaker: 平和主義の♣3一般兵より
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: 徴募
       actId: recruit
       actType: 通常魔法
@@ -508,7 +530,7 @@ actList:
         「はぁ。金がなけれりゃ誰も来やしねぇ」
       flavorSpeaker: 孤独な徴募兵より
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: 奇襲
       actId: surprise
       actType: 通常魔法
@@ -525,7 +547,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: サーチ
       actId: search
       actType: 速攻魔法
@@ -540,7 +562,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: B・J
       actId: bj
       actType: 通常魔法
@@ -555,7 +577,7 @@ actList:
       flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」
       flavorSpeaker: 革命者より
 
-    - format: ',,pro'
+    - format: ',,mast'
       actName: R・S・F
       actId: rsf
       actType: 通常魔法
@@ -570,7 +592,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       actName: リバース
       actId: reverse
       actType: 通常魔法
@@ -590,7 +612,7 @@ actList:
 
   - type: 誘発系
     acts:
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       actName: 世代交代
       actId: nextGeneration
       actType: 誘発
@@ -608,7 +630,7 @@ actList:
 charList:
   - type: 兵士
     chars:
-    - format: 'lite,std,pro'
+    - format: 'lite,std,pro,mast'
       charName: 一般兵
       charId: soldier
       charType: 兵士
@@ -620,7 +642,7 @@ charList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       charName: 英雄
       charId: hero
       charType: 兵士
@@ -633,7 +655,7 @@ charList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       charName: エース
       charId: ace
       charType: 兵士
@@ -646,7 +668,7 @@ charList:
       flavor: 「俺には、ちびですばしっこいだけにしか見えませんが？」
       flavorSpeaker: 再現者見習いより
 
-    - format: ',std,pro'
+    - format: ',std,pro,mast'
       charName: 魔術士
       charId: magician
       charType: 兵士
@@ -660,7 +682,7 @@ charList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       charName: 装備兵
       charId: soldier
       charType: 兵士
@@ -677,7 +699,7 @@ charList:
 
   - type: 防壁
     chars:
-    - format: lite,std,pro
+    - format: lite,std,pro,mast
       charName: 防壁
       charId: bulwark
       charType: 防壁
