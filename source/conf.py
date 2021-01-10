@@ -22,7 +22,7 @@ copyright = '2013, BlackPoker'
 author = 'BlackPoker'
 numfig = True
 # release = '2019/6/30'
-version = '5th'
+version = '第六版'
 
 # -- General configuration ---------------------------------------------------
 
@@ -72,7 +72,7 @@ html_theme_options = {
     # 'prev_next_buttons_location': 'bottom',
     # 'style_external_links': False,
     # 'vcs_pageview_mode': '',
-    # 'style_nav_header_background': 'black',
+    'style_nav_header_background': 'black',
     # Toc options
     # 'collapse_navigation': True,
     # 'sticky_navigation': True,
