@@ -1,0 +1,846 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>BlackPoker Q&amp;A</title>
+
+<link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
+
+<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+<link href="https://fonts.googleapis.com/css?family=Lusitana|Roboto+Slab" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Londrina+Sketch|Monofett|Ribeye+Marrow"
+  rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Arbutus+Slab|Monofett" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:500" rel="stylesheet">
+<link href="https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css" rel="stylesheet" />
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+<link href="css/blackpoker.css" rel="stylesheet">
+
+
+<style type="text/css">
+@import url(//fonts.googleapis.com/earlyaccess/notosansjp.css);
+
+@font-face {
+	font-family: 'suit';
+	src: url('fonts/suit-regular.woff') format('woff');
+}
+
+@font-face {
+	font-family: 'Garava';
+	src: url('fonts/Garava.woff') format('woff');
+}
+
+body {
+	padding-top: 50px;
+}
+
+body hr {
+	margin-top: 3px;
+	margin-bottom: 3px;
+}
+
+@media ( min-width : 768px ) {
+	#banner {
+		min-height: 300px;
+		border-bottom: none;
+	}
+	.bs-docs-section {
+		margin-top: 8em;
+	}
+	.bs-component {
+		position: relative;
+	}
+	.bs-component .modal {
+		position: relative;
+		top: auto;
+		right: auto;
+		left: auto;
+		bottom: auto;
+		z-index: 1;
+		display: block;
+	}
+	.bs-component .modal-dialog {
+		width: 90%;
+	}
+	.bs-component .popover {
+		position: relative;
+		display: inline-block;
+		width: 220px;
+		margin: 20px;
+	}
+	.nav-tabs {
+		margin-bottom: 15px;
+	}
+	.progress {
+		margin-bottom: 10px;
+	}
+}
+
+/* header */
+.navbar {
+	min-height: 40px !important
+}
+
+.navbar-brand {
+	height: 45px;
+	padding: 10px 15px;
+}
+
+.navbar-nav>li>a {
+	padding-top: 10px !important;
+	padding-bottom: 10px !important;
+}
+
+.navbar-text {
+	margin-top: 5px !important;
+	margin-bottom: 5px !important;
+}
+
+.navbar-btn {
+	margin-top: 10px !important;
+	margin-bottom: 0px !important;
+}
+
+.navbar-toggle {
+	padding: 6px 12px;
+}
+
+.nav-title {
+	font-family: 'Arbutus Slab', serif;
+	font-size: 150%;
+	font-weight: bold;
+	padding-top: 14px;
+	padding-bottom: 2px;
+	width: calc(100% - 130px);
+}
+
+.navbar-header>button {
+	margin-bottom: 0;
+}
+
+/* BlackPoker */
+.blackpoker-font {
+	font-family: "Times New Roman", 'Arbutus Slab', serif;
+	font-weight: blod;
+}
+
+/* blackpoker action panel margin */
+@media ( max-width : 768px ) {
+	.blackpoker-action .panel-heading {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+	.blackpoker-action .panel-body {
+		padding-top: 10px;
+		padding-bottom: 10px;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+	.blackpoker-action {
+		margin-bottom: 10px;
+	}
+}
+
+.blackpoker-ability .act-title:before {
+	content: "【";
+}
+
+.blackpoker-ability .act-title:after {
+	content: "】";
+}
+
+.blackpoker-ability .panel-body {
+	font-size: 12px;
+}
+
+.blackpoker-ability .panel-body ul {
+	padding-left: 20px;
+}
+
+.blackpoker-ability .panel-body ol {
+	padding-left: 20px;
+}
+
+.blackpoker-ability b {
+	font-family: "Roboto Slab", serif;
+}
+
+.blackpoker-ability hr {
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+.blackpoker-ability .blackpoker-action .act-title {
+	font-size: 15px;
+}
+
+.blackpoker-action .ans-title {
+	font-size: 16px;
+}
+
+.blackpoker-action .panel-body {
+	font-size: 12px;
+}
+
+.blackpoker-ability .panel-body .panel {
+	margin-bottom: 5px;
+}
+
+.blackpoker-ability .blackpoker-action small {
+	font-size: 12px;
+}
+
+.blackpoker-action .panel-body ul {
+	padding-left: 20px;
+}
+
+.blackpoker-action .panel-body ol {
+	padding-left: 20px;
+}
+
+.blackpoker-action b {
+	font-family: "Roboto Slab", serif;
+}
+
+.blackpoker-action hr {
+	margin-top: 4px;
+	margin-bottom: 4px;
+}
+
+.heart:before {
+	content: "♥";
+	color: #a22041;
+	font-size: 16px;
+	font-family: 'suit';
+}
+
+.heart-lg:before {
+	content: "♥ ";
+	font-size: 20px;
+	font-family: 'suit';
+}
+
+.heart-min:before {
+	content: "♥";
+	color: #a22041;
+	font-size: 12px;
+	font-family: 'suit';
+}
+
+.spade:before {
+	content: "♠";
+	color: #000;
+	font-size: 16px;
+	font-family: 'suit';
+}
+
+.spade-lg:before {
+	content: "♠ ";
+	font-size: 20px;
+	font-family: 'suit';
+}
+
+.spade-min:before {
+	content: "♠";
+	color: #000;
+	font-size: 12px;
+	font-family: 'suit';
+}
+
+.club:before {
+	content: "♣";
+	color: #000;
+	font-size: 16px;
+	font-family: 'suit';
+}
+
+.club-lg:before {
+	content: "♣ ";
+	font-size: 20px;
+	font-family: 'suit';
+}
+
+.club-min:before {
+	content: "♣";
+	color: #000;
+	font-size: 12px;
+	font-family: 'suit';
+}
+
+.diam:before {
+	content: "♦";
+	font-size: 16px;
+	font-family: 'suit';
+	color: #a22041;
+}
+
+.diam-lg:before {
+	content: "♦ ";
+	font-size: 20px;
+	font-family: 'suit';
+}
+
+.diam-min:before {
+	content: "♦";
+	font-size: 12px;
+	font-family: 'suit';
+	color: #a22041;
+}
+
+.cost-L:after {
+	content: "Ⓛ";
+	font-family: "Garava";
+	/*font-weight: bold;*/
+	font-size: 16px;
+}
+
+.cost-B:after {
+	content: "Ⓑ";
+	font-family: "Garava";
+	/*font-weight: bold;*/
+	font-size: 16px;
+}
+
+.cost-D:after {
+	content: "Ⓓ";
+	/*font-family: "Rounded Mplus 1c", "Noto Sans", "Noto Sans CJK JP", sans-serif; */
+	font-family: "Garava";
+	/*font-weight: bold;*/
+	font-size: 16px;
+}
+
+.cost-S:after {
+	content: "Ⓢ";
+	font-family: "Garava";
+	/*font-weight: bold;*/
+	font-size: 16px;
+}
+
+.time-M:after {
+	content: " M";
+	font-family: 'Arbutus Slab', serif;
+}
+
+.time-I:after {
+	content: " I";
+	font-family: 'Arbutus Slab', serif;
+}
+
+/* sidebar */
+#modal_sidebar .modal-header {
+	padding-bottom: 0;
+	font-size: 12px;
+}
+
+#modal_sidebar .modal-body {
+	padding-top: 0;
+	font-size: 12px;
+}
+
+#modal_sidebar .nav-pills li.active  a {
+	/*background-color:#c0c0c0;*/
+	/*background-color:#0000000;*/
+	
+}
+
+.modal-header>.nav>li>a {
+	padding-left: 12px;
+	padding-right: 12px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	font-size: 14px;
+}
+
+/* sidebar links */
+#modal_sidebar_links .modal-header {
+	padding-bottom: 0;
+	font-size: 12px;
+}
+
+#modal_sidebar_links .modal-body {
+	padding-top: 0;
+	font-size: 12px;
+}
+
+/* beta */
+.beta {
+	color: blue;
+}
+</style>
+
+<!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+<body>
+
+  <header>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed btn btn-default navbar-btn collapsed"
+            data-target="#modal_sidebar" data-toggle="modal">
+            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+          </button>
+
+          <!-- logo -->
+          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links"
+            role="button"> <img src="img/blackpoker.svg">
+          </a> <span class="navbar-brand nav-title text-center" data-toggle="tab"> Q&amp;A</span>
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
+          <button type="button" class="navbar-toggle" data-toggle="modal"
+            data-target="#modal_sidebar">
+            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+          </button>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <button type="button" class="btn btn-default navbar-btn collapsed"
+                data-target="#modal_sidebar" data-toggle="modal">
+                <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="modal fade slide left hidden-print" id="modal_sidebar_links">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+          <h4>
+            <span class="glyphicon glyphicon-link" aria-hidden="true"></span> Link</a>
+          </h4>
+          <h5>
+            <a href="https://sites.google.com/site/blackpoker000/">BlackPoker公式サイト</a>
+          </h5>
+        </div>
+        <div class="modal-body">
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第五版
+              <span class="tag tag-default tag-pill pull-right">
+                <span>
+                  <a target="_blank" href="/pdf/BlackPoker5th.pdf">
+                    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    &thinsp;[PDF]&thinsp;公式ルール</span>
+                </a>
+            </p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v5-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-pro">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> プロ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-changelog">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> ChangeLog：変更履歴
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v5-QA">
+              <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a>
+            <!--
+             <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a> <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+          -->
+          </div>
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第四版
+              <span class="tag tag-default tag-pill pull-right">
+                <span>
+                  <a target="_blank" href="/pdf/BlackPoker4th.pdf">
+                    <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    &thinsp;[PDF]&thinsp;公式ルール</span>
+                </a>
+            </p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v4-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v4-changelog">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> ChangeLog：変更履歴
+            </a>
+            <!--
+             <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a> <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+          -->
+          </div>
+
+          <div class="list-group">
+            <p class="list-group-item disabled">第三版</p>
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v3-lite">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> ライト版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-std">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-ex">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> エクストラ版
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-QA">
+              <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span> Q &amp; A
+            </a>
+            <a class="scroll-offset list-group-item list-group-item-action " href="/v3-decklib">
+              <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span> DeckLib：デッキ紹介
+            </a>
+
+          </div>
+          <div class="list-group">
+            <p class="list-group-item disabled">第二版</p>
+
+            <a class="scroll-offset list-group-item list-group-item-action" href="/v2-standard">
+              <span class="glyphicon glyphicon-bookmark" aria-hidden="true"></span> スタンダード版
+            </a>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="modal fade slide right hidden-print" id="modal_sidebar">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
+          <!-- Support Paper -->
+          <h5>Q &amp; A</h5>
+        </div>
+        <div class="modal-body">
+          ルールについてのご質問等ございましたら、twitterもしくは、メールにてご連絡下さい。<br>
+          twitterはダイレクトメッセージでも、リプライでも構いません。
+          <hr>
+          <p>
+            twitter: <a href="https://twitter.com/BlackPoker000">@BlackPoker000</a>
+          </p>
+          <p>
+            mail: <a href="mailto:blackpoker.official@gmail.com">blackpoker.official@gmail.com</a>
+          </p>
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="container">
+
+    <div class="text-center">
+      <a class="text-center" data-toggle="collapse" href="#what_decklib">What's "Q&amp;A"?</a>
+      <div id="what_decklib" class="panel-collapse collapse">
+        <div class="panel-body well">
+          <small>
+            <p>BlackPokerの質問集です。</p>
+            <p>Q&A形式で遊び方やルールの補足を記載しています。</p>
+          </small>
+        </div>
+      </div>
+    </div>
+    <hr>
+
+    <div class="row">
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-1">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:1】ターン開始時の２枚ドローについて </span></span><small>
+                <hr> <span>　ターン開始時にデッキから2枚引ける時に、1枚引いてカードを見てから2枚目を引くか決めてもいいですか？</span>
+              </small>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】大丈夫です。</p>
+              <span>
+                <hr> <span>　デッキ枚数が少なくなり勝敗を左右する局面で行ってください。</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-2">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:2】デッキをシャッフルする際に相手にもシャッフルしてもらう必要はありますか？ </span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】ありません。</p>
+              <span>
+                <hr> <span>　コンセプトにある「相手のカードに触らない」に反するため、対戦相手にカットをお願いする必要はありません。ただシャッフルしてほしいのであれば、お願いしても構いません。逆に、対戦相手があまりシャッフルしていない場合は、更にシャッフルをお願いすることができます。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-3">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:3】対戦相手の墓地にあるカードを確認することはできますか？</span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】できません。自分の墓地は確認することができます。 </p>
+              <span>
+                <hr> <span>　コンセプトの「相手のカードに触らない」に反するため対戦相手の墓地の一番上以外を確認することはできません。ただし自分の墓地は確認することができます。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-4">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:4】対戦相手の残りのデッキ枚数を確認することはできますか？ </span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】できません。</p>
+              <span>
+                <hr> <span>　デッキ枚数を数えるのには時間がかかり、コンセプトの「短く終わる」に反するので対戦相手に残りのデッキ枚数を確認することはできません。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-5">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:5】ダメージを受けた際にダメージとしてデッキから墓地に移すカードを都度表にして墓地に移す必要がありますか？</span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】ありません。 </p>
+              <span>
+                <hr> <span>　ダメージを受けた際は、対戦相手に受けたダメージ分のカードがデッキトップから墓地に移ったことが示せれば良いため、裏向きにしてデッキトップからダメージ分カードを数えてまとめて墓地に移しても構いません。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-6">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:6】指定した対象が効果を発揮する時にいなくなっていたらどうなりますか？ </span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】アクションは効果を発揮しません。</p>
+              <span>
+                <hr> <span>　例えば、「アップ」アクションを起こした時に対象の兵士は場に存在していましたが、効果を発揮する時に場に存在していなかったとしましょう。その場合、「アップ」アクションの対象とする条件を満たさないためアクションは効果を発揮せず解決されます。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-7">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:7】「ダメージ判定」前にブロッカーがいなくなったら対戦相手にダメージを与えられますか？ </span></span><small>
+                <hr> <span>　兵士でアタックし兵士でブロックされた場合、「ダメージ判定」アクション解決前にブロックした兵士を墓地に移せば、対戦相手にダメージを与えることはできますか？ </span>
+              </small>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】ダメージを与えることができます。 </p>
+              <span>
+                <hr> <span>　「ダメージ判定」アクションにてブロッカーがいないアタッカーは、ブロックされていないことになるため、対戦相手にダメージを与えることができます。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-8">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:8】「ダメージ判定」前にブロッカーをドライブされてブロックしたことになりますか？ </span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】なります。 </p>
+              <span>
+                <hr> <span>　ドライブされても「ブロック」アクションにてブロッカーに指定されておりかつ、場に存在していればブロックしていることになります。 </span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-9">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:9】防壁にブロックされた時に「アップ」などで兵士の数字を上げれば記載されている数字が同じでも墓地に移されませんか？ </span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】墓地に移されます。</p>
+              <span>
+                <hr> <span>　防壁でブロックした場合、記載されている数字が等しいかを判断します。「アップ」アクションなどで兵士の数字を一時的に上げても記載されている数字が等しいことに変わりがないため、墓地に移されます。</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-10">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:10】「防壁設置」アクションを起こすと相手にチャンスが移りますか？</span></span>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】移りません。</p>
+              <span>
+                <hr> <span>　「防壁設置」の様に特記事項に「このアクションはステージに置かれた時に即効果を発揮する。」と記載されているアクションをステージが空の状態で起こした場合、即効果が発揮されるため、相手にチャンスは移りません。</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-std" id="qa-11">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:11】効果を発揮した時に実行出来ない効果がある場合どうしたら良いでしょうか？</span></span><small>
+                <hr> <span>　例えば、手札が無い状態で「防壁設置」アクションを起こした場合、どうしたら良いでしょうか？</span>
+              </small>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】可能な部分だけ実行して下さい。</p>
+              <span>
+                <hr> <span>　手札がない状態で、「防壁設置」アクションを起こした場合、手札から防壁を置くことが出来ないので、行う必要はありません。また、「投擲」アクションにて13点ダメージを受ける時にデッキの枚数が10枚しか無かった場合、受けることが可能な点数だけダメージを受けて下さい。</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="bs-component">
+          <div class="panel panel-default blackpoker-action ver-3rd format-ex" id="qa-12">
+            <div class="panel-heading">
+              <span class="ques-title">【Q:12】extraの切札で有効になる1 ターンに 1 回制限のアクションについて</span></span><small>
+                <hr> <span>　「防壁追加」などの1ターンに1回しか起こせないアクションは、切札がクローズされ再度オープンしたとしても1回しか起こすことができないのでしょうか？</span>
+              </small>
+            </div>
+            <div class="panel-body">
+              <p class="ans-title">【A】1ターンに1回しか起こすことができません。</p>
+              <span>
+                <hr> <span>　切札がもたらすアクションの中には「プレイヤーは 1 ターンに 1 回しかこのアク ションを起こすことができない。」と特記事項に記載されているものがあります。この アクションは 1 ターンに 1 回しか起こすことができないため、切札が無効化され再度 オープンし有効となっても、そのターンを通して 1 回しか起こすことができません。</span>
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+  </div>
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+  <script type="text/javascript">
+			$(function() {
+
+				// format filter
+				$('.format-filter-checkbox').on('click', function() {
+					if ($(this).prop('checked')) {
+						$('.format-' + $(this).val()).removeClass('hidden');
+					} else {
+						$('.format-' + $(this).val()).addClass('hidden');
+					}
+				});
+
+			});
+		</script>
+  <script>
+		<!--
+			(function(i, s, o, g, r, a, m) {
+				i['GoogleAnalyticsObject'] = r;
+				i[r] = i[r] || function() {
+					(i[r].q = i[r].q || []).push(arguments)
+				}, i[r].l = 1 * new Date();
+				a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+				a.async = 1;
+				a.src = g;
+				m.parentNode.insertBefore(a, m)
+			})(window, document, 'script',
+					'https://www.google-analytics.com/analytics.js', 'ga');
+
+			ga('create', 'UA-66362035-2', 'auto');
+			ga('send', 'pageview');
+			-->
+		</script>
+  <div class="text-center blackpoker-font">
+    <small> &copy;2013 BlackPoker </small>
+  </div>
+</body>
+</html>
