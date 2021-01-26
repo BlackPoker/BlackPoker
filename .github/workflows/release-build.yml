@@ -1,4 +1,4 @@
-name: release build 3
+name: release build 4
 
 # vから始まるタグが付いたら実行する（例: v1, v1.2, v1.2.3）
 on:
