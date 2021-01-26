@@ -1,4 +1,4 @@
-name: release build 2
+name: release build 3
 
 # vから始まるタグが付いたら実行する（例: v1, v1.2, v1.2.3）
 on:
@@ -24,6 +24,8 @@ jobs:
       # アクションリスト生成
       - name: build builder image
         working-directory: ./tools/actionlist
+        env:
+          DOCKER_BUILDKIT: 1
         run: |
            docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
            docker run --rm -it --user $UID -v `pwd`:/dist:/dist actionlist:latest
