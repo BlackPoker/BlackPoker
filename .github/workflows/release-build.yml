@@ -28,7 +28,7 @@ jobs:
           DOCKER_BUILDKIT: 1
         run: |
            docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
-           docker run --rm --user $UID -v `pwd`:/dist:/dist actionlist:latest
+           docker run --rm --user $UID -v `pwd`/dist:/dist actionlist:latest
   
       # sphinx実行
       - name: Set up Python ${{ matrix.python-version }}
