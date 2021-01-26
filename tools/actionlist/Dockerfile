@@ -39,12 +39,16 @@ RUN pip3 install pdfrw
 WORKDIR /
 RUN mkdir tex && \
  chown 1000:1000 tex && \
+ chmod 777 tex && \
  mkdir python && \
  chown 1000:1000 python && \
+ chmod 777 python && \
  mkdir web-site && \
  chown 1000:1000 web-site && \
+ chmod 777 web-site && \
  mkdir dist && \
- chown 1000:1000 dist
+ chown 1000:1000 dist && \
+ chmod 777 dist
 
 COPY --from=builder /usr/local/src/actionlist/tex/* tex/.
 COPY ./python/* python/.
