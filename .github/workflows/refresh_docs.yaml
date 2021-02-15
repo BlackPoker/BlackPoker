@@ -31,7 +31,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: |
-           mkdir -r `pwd`/dist/web-site
+           mkdir - `pwd`/dist/web-site
            docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
            docker run --rm --user $UID -v `pwd`/dist:/dist actionlist:latest
   
