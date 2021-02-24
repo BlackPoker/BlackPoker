@@ -67,6 +67,9 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - run: |
+        git config --local user.email "blackpoker.official@gmail.com"
+        git config --local user.name "BlackPoker"
       - run: npm i @koumoul/gh-pages-multi
       - run: npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }}
 
