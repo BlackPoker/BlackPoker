@@ -17,6 +17,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.7]
+        node-version: [14.7]
 
     steps:
       # 準備
@@ -34,7 +35,7 @@ jobs:
            mkdir -p `pwd`/dist/web-site
            docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
            docker run --rm --user $UID -v `pwd`/dist:/dist actionlist:latest
-  
+            
       # sphinx実行
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -47,28 +48,48 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: execute sphinx
         run: sphinx-build -b html ./source ./docs  
-
+        
       # TODO PDF生成は別途追加
 
-      # HTMLはzipにまとめる
-      - name: create zip
+      # gh-pageに反映
+      - name: copy docs
         run: |
           mkdir -p ./docs/actionlist/html
           mkdir -p ./docs/actionlist/pdf
           cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
-          cp -r ./tools/actionlist/dist/blackpoker-v6*.pdf docs/actionlist/pdf
-          zip -r HTML.zip ./docs
-      # GitHubにリリースを作る
-      - name: create release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          cp -r ./tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
+
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+          node-version: ${{ matrix.node-version }}
+      - run: npm i @koumoul/gh-pages-multi
+      - run: npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }}
+
+
+      # # HTMLはzipにまとめる
+      # - name: create zip
+      #   run: |
+      #     mkdir -p ./docs/actionlist/html
+      #     mkdir -p ./docs/actionlist/pdf
+      #     cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
+      #     cp -r ./tools/actionlist/dist/blackpoker-v6*.pdf docs/actionlist/pdf
+      #     zip -r HTML.zip ./docs
+      # # GitHubにリリースを作る
+      # - name: create release
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     tag_name: ${{ github.ref }}
+      #     release_name: ${{ github.ref }}
+      #     draft: false
+      #     prerelease: false
 
       # PDFファイルをリリースページにアップロード
       # - name: upload PDF
