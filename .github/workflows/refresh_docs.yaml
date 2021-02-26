@@ -65,6 +65,9 @@ jobs:
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
+        env:
+          TZ: 'Asia/Tokyo'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
