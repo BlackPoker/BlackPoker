@@ -64,6 +64,12 @@ source .venv/bin/activate
 deactivate
 ```
 
+#### ライブラリの追加
+ライブラリの一覧をファイルに出力し、インストールするライブラリ一覧を更新する
+```
+pip freeze > requirements.txt
+```
+
 ## ドキュメント生成
 ### PDF生成方法
 ```
