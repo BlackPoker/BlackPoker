@@ -23,6 +23,8 @@ jobs:
       # 準備
       - name: checkout
         uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
       - name: clear
         run: rm -rf ./dist/*
     
