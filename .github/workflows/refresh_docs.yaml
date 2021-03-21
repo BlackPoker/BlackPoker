@@ -75,6 +75,7 @@ jobs:
       - run: |
           git config --global user.email "blackpoker.official@gmail.com"
           git config --global user.name "BlackPoker"
+          git remote add origin https://github.com/BlackPoker/BlackPoker.git
           npm i @koumoul/gh-pages-multi
           npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }}
 
