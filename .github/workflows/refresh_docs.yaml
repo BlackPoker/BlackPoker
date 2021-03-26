@@ -23,9 +23,9 @@ jobs:
       # 準備
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          ref: ${{ github.head_ref }}
-          ssh-key: ${{ secrets.DEPLOY_KEY }}
+#         with:
+#           ref: ${{ github.head_ref }}
+#           ssh-key: ${{ secrets.DEPLOY_KEY }}
       - name: clear
         run: rm -rf ./dist/*
     
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-node@v1
         env:
           TZ: 'Asia/Tokyo'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           node-version: ${{ matrix.node-version }}
       - run: |
