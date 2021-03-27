@@ -83,7 +83,7 @@ jobs:
           git add .
           git commit -m "refresh docs" -a
           git pull
-          git push origin master
+          git push origin :refs/heads/master
 
       # # HTMLはzipにまとめる
       # - name: create zip
