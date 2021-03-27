@@ -89,6 +89,12 @@ jobs:
           git checkout gh-pages
           mkdir -p ./${{ steps.vars.outputs.short_ref }}
           mv ../tmp_docs/* ./${{ steps.vars.outputs.short_ref }}/.
+          ls -la ../.
+          git status
+          git add .
+          git commit -m "refresh docs" -a
+          git pull
+          git push
 
       # # HTMLはzipにまとめる
       # - name: create zip
