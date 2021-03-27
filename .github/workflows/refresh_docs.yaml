@@ -84,11 +84,11 @@ jobs:
           git push
           pwd
           ls -la
-          mkdir /tmp_docs
-          mv ./docs/* /tmp_docs/.
+          mkdir ../tmp_docs
+          mv ./docs/* ../tmp_docs/.
           git checkout gh-pages
           mkdir -p ./${{ steps.vars.outputs.short_ref }}
-          mv /tmp_docs/* ./${{ steps.vars.outputs.short_ref }}/.
+          mv ../tmp_docs/* ./${{ steps.vars.outputs.short_ref }}/.
 
       # # HTMLはzipにまとめる
       # - name: create zip
