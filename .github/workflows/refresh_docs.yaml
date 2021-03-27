@@ -78,13 +78,12 @@ jobs:
           git config --global user.name "BlackPoker"
           git config -l
           npm i @koumoul/gh-pages-multi
-          npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} --dry-run -v
           git status
           git add .
           git commit -m "refresh docs" -a
           git pull
           git push
-          npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} --dry-run -v
+          npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} -v
 
       # # HTMLはzipにまとめる
       # - name: create zip
