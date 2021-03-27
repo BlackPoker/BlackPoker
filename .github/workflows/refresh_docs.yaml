@@ -117,12 +117,12 @@ jobs:
       #     asset_content_type: application/pdf
 
       # HTMLを固めたzipをリリースページにアップロード
-      - name: upload HTML
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./HTML.zip
-          asset_name: manual_HTML.zip
-          asset_content_type: application/zip
+      #- name: upload HTML
+      #  uses: actions/upload-release-asset@v1
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #  with:
+      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #    asset_path: ./HTML.zip
+      #    asset_name: manual_HTML.zip
+      #    asset_content_type: application/zip
