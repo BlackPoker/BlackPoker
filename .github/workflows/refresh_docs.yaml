@@ -79,6 +79,7 @@ jobs:
           git config -l
           npm i @koumoul/gh-pages-multi
           npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} --dry-run -v
+          git status
 
       # # HTMLはzipにまとめる
       # - name: create zip
