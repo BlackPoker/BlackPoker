@@ -82,6 +82,8 @@ jobs:
           git commit -m "refresh docs" -a
           git pull
           git push
+          pwd
+          ls -la
           mkdir /tmp_docs
           mv ./docs/* /tmp_docs/.
           git checkout gh-pages
