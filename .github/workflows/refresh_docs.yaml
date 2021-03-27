@@ -77,13 +77,16 @@ jobs:
           git config --global user.email "blackpoker.official@gmail.com"
           git config --global user.name "BlackPoker"
           git config -l
-          npm i @koumoul/gh-pages-multi
           git status
           git add .
           git commit -m "refresh docs" -a
           git pull
           git push
-          npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} -v
+          mkdir /tmp_docs
+          mv ./docs/* /tmp_docs/.
+          git checkout gh-pages
+          mkdir -p ./${{ steps.vars.outputs.short_ref }}
+          mv /tmp_docs/* ./${{ steps.vars.outputs.short_ref }}/.
 
       # # HTMLはzipにまとめる
       # - name: create zip
