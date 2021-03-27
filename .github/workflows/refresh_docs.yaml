@@ -80,6 +80,8 @@ jobs:
           npm i @koumoul/gh-pages-multi
           npx gh-pages-multi deploy -t ${{ steps.vars.outputs.short_ref }} --dry-run -v
           git status
+          git commit -a
+          git push
 
       # # HTMLはzipにまとめる
       # - name: create zip
