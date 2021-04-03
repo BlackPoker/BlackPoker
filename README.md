@@ -1,6 +1,6 @@
 # BlackPoker
 
-https://blackpoker.github.io/BlackPoker/
+https://blackpoker.github.io/BlackPoker/master/
 
 ## 修正環境構築方法
 
