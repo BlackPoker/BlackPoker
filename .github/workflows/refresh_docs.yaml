@@ -87,6 +87,7 @@ jobs:
           mkdir ../tmp_docs
           mv ./docs/* ../tmp_docs/.
           git checkout gh-pages
+          rm -rf ./${{ steps.vars.outputs.short_ref }}
           mkdir -p ./${{ steps.vars.outputs.short_ref }}
           mv ../tmp_docs/* ./${{ steps.vars.outputs.short_ref }}/.
           ls -la ../.
