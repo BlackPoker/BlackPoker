@@ -66,13 +66,13 @@ jobs:
         id: vars
         run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        env:
-          TZ: 'Asia/Tokyo'
+#      - name: Use Node.js ${{ matrix.node-version }}
+#        uses: actions/setup-node@v1
+#        env:
+#          TZ: 'Asia/Tokyo'
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          node-version: ${{ matrix.node-version }}
+#        with:
+#          node-version: ${{ matrix.node-version }}
       - run: |
           git config --global user.email "blackpoker.official@gmail.com"
           git config --global user.name "BlackPoker"
