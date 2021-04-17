@@ -51,5 +51,9 @@
 	},
 
 	// Comment out to connect as root instead.
-	"remoteUser": "vscode"
+	"remoteUser": "vscode",
+
+	"mounts": [
+		"source=${localEnv:HOME}/.ssh/,target=/root/.ssh/,type=bind,consistency=cached",
+    ]
 }
