@@ -84,15 +84,5 @@ html_theme_options = {
 
 html_show_sourcelink = True
 
-
-latex_elements = {
-    'preamble': '''
-\usepackage{pstricks}  % since the dash is rendered by pstricks!
-\usepackage[postscript]{ucs}
-\usepackage[utf8x]{inputenc}
-''',
-    'inputenc': '',
-}
-
 [extensions]
 todo_include_todos=True
