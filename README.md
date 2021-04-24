@@ -91,3 +91,9 @@ autobuildを起動するとブラウザで確認しながら執筆できます�
 (.venv) $ make livehtml
 ```
 
+## PDF生成コマンド
+```
+docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest "."
+docker run --rm -it -v `pwd`/docs:/docs blackpoker-doc:latest 
+```
+

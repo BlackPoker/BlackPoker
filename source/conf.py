@@ -33,6 +33,7 @@ extensions = ['sphinx_rtd_theme','sphinxcontrib.plantuml', 'sphinx.ext.mathjax',
 
 plantuml = 'plantuml'
 plantuml_output_format = 'svg_img'
+plantuml_latex_output_format = 'eps'
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -83,6 +84,15 @@ html_theme_options = {
 
 html_show_sourcelink = True
 
+
+latex_elements = {
+    'preamble': '''
+\usepackage{pstricks}  % since the dash is rendered by pstricks!
+\usepackage[postscript]{ucs}
+\usepackage[utf8x]{inputenc}
+''',
+    'inputenc': '',
+}
 
 [extensions]
 todo_include_todos=True
