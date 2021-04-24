@@ -3,7 +3,8 @@
 # ------------------------------
 # sphinx
 # ------------------------------
-FROM toshiara/alpine-texlive-ja-plus:2020
+# FROM toshiara/alpine-texlive-ja-plus:2020
+FROM pman0214/alpine-texlive-ja-epspdf
 
 # RUN apk update && apk add --no-chache --repository http://dl-cdn.alpinelinux.org/alpine/v3.10/main python3~=3.8
 # RUN apk --no-cache add texlive-full
