@@ -33,7 +33,7 @@ extensions = ['sphinx_rtd_theme','sphinxcontrib.plantuml', 'sphinx.ext.mathjax',
 
 plantuml = 'plantuml'
 plantuml_output_format = 'svg_img'
-plantuml_latex_output_format = 'eps'
+plantuml_latex_output_format = 'pdf'
 
 
 # Add any paths that contain templates here, relative to this directory.

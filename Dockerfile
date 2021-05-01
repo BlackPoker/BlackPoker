@@ -27,7 +27,7 @@ RUN mkdir /app
 RUN curl -L https://sourceforge.net/projects/plantuml/files/plantuml.${PLANTUML_VERSION}.jar/download -o /app/plantuml.jar 
 RUN apk del curl
 RUN cp /app/plantuml.jar /usr/local/bin
-RUN echo "#!/bin/bash\nexport LANG=ja_JP.UTF-8;\n/usr/bin/java -Djava.io.tmpdir=/var/tmp -Djava.awt.headless=true -jar /usr/local/bin/plantuml.jar  -charset UTF-8 \${@}" > /usr/bin/plantuml
+RUN echo -e "#!/bin/sh\nexport LANG=ja_JP.UTF-8;\n/usr/bin/java -Djava.io.tmpdir=/var/tmp -Djava.awt.headless=true -jar /usr/local/bin/plantuml.jar  -charset UTF-8 \${@}" > /usr/bin/plantuml
 RUN chmod 0755 /usr/bin/plantuml
 
 # ------------------------------
