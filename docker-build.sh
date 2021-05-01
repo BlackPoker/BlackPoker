@@ -15,6 +15,7 @@ sed -i -e 's/♢/{\\normalsize \$\\diamondsuit\$} /g' blackpoker.tex
 sed -i -e 's/♦/{\\normalsize \$\\diamondsuit\$} /g' blackpoker.tex
 sed -i -e 's/♣/{\\normalsize \$\\clubsuit\$} /g' blackpoker.tex
 
+# TODO 全面的に囲み数字は廃止する予定だが、action-beginに残っており今後修正予定
 sed -i -e 's/①/\raise0.2ex\hbox{\textcircled{\scriptsize{1}}} /g' blackpoker.tex
 sed -i -e 's/②/\raise0.2ex\hbox{\textcircled{\scriptsize{2}}} /g' blackpoker.tex
 sed -i -e 's/③/\raise0.2ex\hbox{\textcircled{\scriptsize{3}}} /g' blackpoker.tex
