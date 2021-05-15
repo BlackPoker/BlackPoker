@@ -8,6 +8,8 @@
 ライト
     URL 
         https://blackpoker.github.io/BlackPoker/actionlist/html/v6-lite.html
+        /actionlist/html/v6-lite.html
+        ./actionlist/html/v6-lite.html
 
     PDF 
         https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-v6-lite.pdf
