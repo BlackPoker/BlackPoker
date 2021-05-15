@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 06:44
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 07:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -500,8 +500,7 @@ File: l3backend-dvipdfmx.def 2020-08-07 L3 backend support: dvipdfmx
 \l__pdf_internal_box=\box81
 \g__pdf_backend_object_int=\count284
 \g__pdf_backend_annotation_int=\count285
-)
-No file blackpoker.aux.
+) (./blackpoker.aux)
 \openout1 = `blackpoker.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 46.
@@ -524,7 +523,7 @@ LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
 LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 46.
 LaTeX Font Info:    ... okay on input line 46.
-(I search kanjifont definition file: . . )
+ (I search kanjifont definition file: . . )
 \AtBeginShipoutBox=\box82
 
 *geometry* detected driver: dvipdfm
@@ -579,12 +578,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 46.
 LaTeX Info: Redefining \pageref on input line 46.
 LaTeX Info: Redefining \nameref on input line 46.
+ (./blackpoker.out) (./blackpoker.out)
 \@outlinefile=\write5
 \openout5 = `blackpoker.out'.
-
-
-
-Package hyperref Warning: Rerun to get /PageLabels entry.
 
 Package hyperref Info: Option `pageanchor' set `false' on input line 49.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
@@ -593,6 +589,7 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 9.60999pt on input line 49.
 LaTeX Font Info:    Trying to load font information for T1+phv on input line 49
 .
+
 (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
@@ -677,27 +674,31 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 23.90964pt on input line 51.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 23.90964pt on input line 51.
+
+(./blackpoker.toc
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 2.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 2.
+LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 159.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 159.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 159.
+LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 159.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 159.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 159.
+ [1
+
+])
 \tf@toc=\write6
 \openout6 = `blackpoker.toc'.
 
-LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 51.
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 51.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 51.
-LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 51.
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 51.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 51.
-
-[1
-
-] [2
-
-]
+ [2]
 第1章
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 19.9311pt on input line 57.
@@ -737,14 +738,11 @@ pdf)
 <plantuml-539e0c031fa17f075d01c25c766b6741f05fab73.pdf>
  [1
 
+
 ] [2
 
 ]
 第2章
-
-LaTeX Warning: Hyper reference `format/format::doc' on page 3 undefined on inpu
-t line 88.
-
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
 (Font)              Font shape `JT1/gt/m/n' tried instead on input line 88.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
@@ -756,10 +754,6 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 11.53198pt on input line 107.
 [3]
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 152.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 152.
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
 59.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
@@ -778,40 +772,16 @@ pdf)
 ]
 第4章
 [15]
-
-LaTeX Warning: Hyper reference `common/01-base:cardrank' on page 16 undefined o
-n input line 882.
-
-
-LaTeX Warning: Reference `common/01-base:cardrank' on page 16 undefined on inpu
-t line 882.
-
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 889.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 889.
-
-LaTeX Warning: Hyper reference `common/01-base:field-ex' on page 16 undefined o
-n input line 936.
-
-
-LaTeX Warning: Reference `common/01-base:field-ex' on page 16 undefined on inpu
-t line 936.
-
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
-[16] [17]
-
-LaTeX Warning: Hyper reference `common/01-base:chargedrive' on page 18 undefine
-d on input line 987.
-
-
-LaTeX Warning: Reference `common/01-base:chargedrive' on page 18 undefined on i
-nput line 987.
-
+ [16] [17]
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
-[18]
+ [18]
 
 LaTeX Warning: Hyper reference `common/02-turn:turn' on page 19 undefined on in
 put line 1084.
@@ -823,179 +793,27 @@ ne 1084.
 File: turn.pdf Graphic file (type pdf)
 <turn.pdf>
 [19]
-
-LaTeX Warning: Hyper reference `common/03-action::doc' on page 20 undefined on 
-input line 1119.
-
-
-LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 20 undefi
-ned on input line 1119.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-sample' on page 20 unde
-fined on input line 1125.
-
-
-LaTeX Warning: Reference `common/03-action:action-sample' on page 20 undefined 
-on input line 1125.
-
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
-[20]
-
-LaTeX Warning: Hyper reference `common/03-action:cost' on page 21 undefined on 
-input line 1154.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 21 unde
-fined on input line 1158.
-
-
-LaTeX Warning: Hyper reference `common/03-action:table-cost' on page 21 undefin
-ed on input line 1169.
-
-
-LaTeX Warning: Reference `common/03-action:table-cost' on page 21 undefined on 
-input line 1169.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-exe' on page 21 undefin
-ed on input line 1223.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-flow' on page 21 undefi
-ned on input line 1223.
-
-[21]
-
-LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 22 unde
-fined on input line 1237.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-flow' on page 22 undefi
-ned on input line 1241.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-sample2' on page 22 und
-efined on input line 1270.
-
-
-LaTeX Warning: Reference `common/03-action:action-sample2' on page 22 undefined
- on input line 1270.
-
+ [20] [21]
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
-[22]
-
-LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 23 unde
-fined on input line 1305.
-
-
-LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 23 undefi
-ned on input line 1308.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 23 unde
-fined on input line 1311.
-
-[23]
-
-LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 24 undefi
-ned on input line 1379.
-
-[24]
-
-LaTeX Warning: Hyper reference `common/03-action:chance' on page 25 undefined o
-n input line 1435.
-
-
-LaTeX Warning: Reference `common/03-action:chance' on page 25 undefined on inpu
-t line 1435.
-
+ [22] [23] [24]
 File: chance.pdf Graphic file (type pdf)
 <chance.pdf>
-[25] [26]
-
-LaTeX Warning: Hyper reference `common/03-action:timing' on page 27 undefined o
-n input line 1490.
-
-
-LaTeX Warning: Reference `common/03-action:timing' on page 27 undefined on inpu
-t line 1490.
-
+ [25] [26]
 File: timing.pdf Graphic file (type pdf)
 <timing.pdf>
-
-LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 27 undef
-ined on input line 1538.
-
-
-LaTeX Warning: Reference `common/03-action:action-begin' on page 27 undefined o
-n input line 1538.
-
-[27]
-
-LaTeX Warning: Hyper reference `common/03-action:action-howto' on page 28 undef
-ined on input line 1546.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 28 undef
-ined on input line 1546.
-
-
-LaTeX Warning: Reference `common/03-action:action-begin' on page 28 undefined o
-n input line 1546.
-
-
-LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 28 undef
-ined on input line 1562.
-
-
-LaTeX Warning: Reference `common/03-action:action-begin' on page 28 undefined o
-n input line 1562.
-
+ [27]
 File: action-begin.pdf Graphic file (type pdf)
 <action-begin.pdf>
-
-LaTeX Warning: Hyper reference `common/03-action:action-exe' on page 28 undefin
-ed on input line 1577.
-
-
-LaTeX Warning: Hyper reference `common/03-action:keycard-gy' on page 28 undefin
-ed on input line 1578.
-
-[28] [29]
-
-LaTeX Warning: Hyper reference `common/04-character:character' on page 30 undef
-ined on input line 1704.
-
-
-LaTeX Warning: Reference `common/04-character:character' on page 30 undefined o
-n input line 1704.
-
+ [28] [29]
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
-[30]
-
-LaTeX Warning: Hyper reference `common/04-character:character-sample' on page 3
-1 undefined on input line 1717.
-
-
-LaTeX Warning: Reference `common/04-character:character-sample' on page 31 unde
-fined on input line 1717.
-
+ [30]
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
-
-LaTeX Warning: Hyper reference `common/04-character:abi' on page 31 undefined o
-n input line 1736.
-
-[31] [32]
-
-LaTeX Warning: Hyper reference `core/core:component' on page 33 undefined on in
-put line 1874.
-
-[33]
+ [31] [32] [33]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 1887.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
@@ -1004,123 +822,44 @@ LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 (Font)              scaled to size 4.805pt on input line 1887.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 4.805pt on input line 1887.
- [34]
 
-LaTeX Warning: Hyper reference `common/05-action_detail:trigger' on page 35 und
-efined on input line 1992.
-
-
-LaTeX Warning: Reference `common/05-action_detail:trigger' on page 35 undefined
- on input line 1992.
-
+[34]
 File: trigger.pdf Graphic file (type pdf)
 <trigger.pdf>
-[35]
-
-LaTeX Warning: Hyper reference `common/05-action_detail:set-bulwork' on page 36
- undefined on input line 2031.
-
-
-LaTeX Warning: Reference `common/05-action_detail:set-bulwork' on page 36 undef
-ined on input line 2031.
-
+ [35]
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
-[36] [37]
-
-LaTeX Warning: Hyper reference `common/06-extra:ver-ex' on page 38 undefined on
- input line 2129.
-
-
-LaTeX Warning: Reference `common/06-extra:ver-ex' on page 38 undefined on input
- line 2129.
-
-
-LaTeX Warning: Hyper reference `common/06-extra:trump' on page 38 undefined on 
-input line 2179.
-
-
-LaTeX Warning: Reference `common/06-extra:trump' on page 38 undefined on input 
-line 2179.
-
+ [36] [37]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
-[38]
-
-LaTeX Warning: Hyper reference `common/06-extra:trump-open' on page 39 undefine
-d on input line 2219.
-
-
-LaTeX Warning: Reference `common/06-extra:trump-open' on page 39 undefined on i
-nput line 2219.
-
+ [38]
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
-[39] [40] [41] [42
+ [39] [40] [41] [42
 
 ]
 第5章
-
-LaTeX Warning: Hyper reference `core/core:coreflow-1' on page 43 undefined on i
-nput line 2342.
-
-
-LaTeX Warning: Reference `core/core:coreflow-1' on page 43 undefined on input l
-ine 2342.
-
 File: plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.pdf Graphic file (type 
 pdf)
 <plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.pdf>
 
 LaTeX Warning: Float too large for page by 24.20094pt on input line 2352.
 
-[43] [44]
-
-LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 45 undefined on i
-nput line 2403.
-
-
-LaTeX Warning: Reference `core/core:coreflow-2' on page 45 undefined on input l
-ine 2403.
-
-[45]
+[43] [44] [45]
 File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
 pdf)
 <plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
  [46]
-
-LaTeX Warning: Hyper reference `core/core:ability-image' on page 47 undefined o
-n input line 2491.
-
-
-LaTeX Warning: Reference `core/core:ability-image' on page 47 undefined on inpu
-t line 2491.
-
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
 <plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf>
-[47]
-
-LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 48 undefined on i
-nput line 2518.
-
-
-LaTeX Warning: Reference `core/core:coreflow-2' on page 48 undefined on input l
-ine 2518.
-
+ [47]
 File: plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.pdf Graphic file (type 
 pdf)
 <plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.pdf>
 
+
 LaTeX Warning: Float too large for page by 24.20094pt on input line 2526.
-
-
-LaTeX Warning: Hyper reference `core/core:trigger-flow' on page 48 undefined on
- input line 2582.
-
-
-LaTeX Warning: Reference `core/core:trigger-flow' on page 48 undefined on input
- line 2582.
 
 File: plantuml-a14f4e2815f7efd64c542f25b5493b3a7986c055.pdf Graphic file (type 
 pdf)
@@ -1133,13 +872,19 @@ LaTeX Warning: Float too large for page by 24.20094pt on input line 2589.
 ]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2666--2669
+Underfull \hbox (badness 10000) in paragraph at lines 2633--2637
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
+nlist / html / v6-[]lite . html$[][] /actionlist/html/v6-lite.html
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2668--2671
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
 nlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https : / / blackpoker .
  []
 
 [53]
-Underfull \hbox (badness 10000) in paragraph at lines 2681--2684
+Underfull \hbox (badness 10000) in paragraph at lines 2683--2686
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
 nlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpoker .
  []
@@ -1147,39 +892,30 @@ nlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpoker .
 [54]
 第7章
 No file blackpoker.ind.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2710.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2712.
 [55
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2710.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2712.
  (./blackpoker.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2710.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2710.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2712.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2712.
 
+Package rerunfilecheck Info: File `blackpoker.out' has not changed.
+(rerunfilecheck)             Checksum: FE80A0175768907BB02FCE9562378CFC;1979.
 
-
-Package rerunfilecheck Warning: File `blackpoker.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `blackpoker.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  FE80A0175768907BB02FCE9562378CFC;1979.
 
 LaTeX Warning: There were undefined references.
 
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2710.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2712.
  ) 
 Here is how much of TeX's memory you used:
- 9734 strings out of 482885
- 145853 string characters out of 5957543
- 424274 words of memory out of 5000000
- 25127 multiletter control sequences out of 15000+600000
+ 9749 strings out of 482885
+ 146041 string characters out of 5957543
+ 436003 words of memory out of 5000000
+ 25134 multiletter control sequences out of 15000+600000
  584091 words of font info for 125 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 145288 bytes).
+Output written on blackpoker.dvi (59 pages, 172424 bytes).
