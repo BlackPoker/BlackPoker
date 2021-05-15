@@ -155,6 +155,7 @@
 \contentsline {section}{\numberline {5.8}コアフロー}{48}{section.5.8}%
 \contentsline {section}{\numberline {5.9}まとめ}{51}{section.5.9}%
 \contentsline {chapter}{\numberline {第6章}付録}{53}{chapter.6}%
-\contentsline {section}{\numberline {6.1}アクションリスト}{53}{section.6.1}%
-\contentsline {section}{\numberline {6.2}エクストラリスト}{54}{section.6.2}%
+\contentsline {section}{\numberline {6.1}PDF版ルール}{53}{section.6.1}%
+\contentsline {section}{\numberline {6.2}アクションリスト}{53}{section.6.2}%
+\contentsline {section}{\numberline {6.3}エクストラリスト}{54}{section.6.3}%
 \contentsline {chapter}{\numberline {第7章}Indices and tables}{55}{chapter.7}%
