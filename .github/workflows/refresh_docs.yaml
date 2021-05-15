@@ -88,10 +88,6 @@ jobs:
           git config --global user.name "BlackPoker"
           git config -l
           git status
-          git add .
-          git commit -m "refresh docs" -a
-          git pull
-          git push
           pwd
           ls -la
           mkdir ../tmp_docs
