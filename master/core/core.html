@@ -184,43 +184,7 @@
 登場する用語はゲームに合わせて変更してください。
 まず、ターン等の用語について説明します。</p>
 <div class="figure align-default" id="id16">
-<span id="coreflow-1"></span><p class="plantuml">
-<img src="../_images/plantuml-d3bcb707914b08fbfae2123107d55455db190ecd.svg" alt="&#64;startuml
-(*) --&gt; &quot;①ゲーム開始&quot;
---&gt; &quot;②ターンプレイヤーにチャンスを移動&quot;
---&gt;&quot;③ステージが空か？&quot;
-
-if &quot;&quot; then
-    --&gt;[YES] &quot;④パス名簿リセット&quot;
-    --&gt; &quot;⑤アクション起こす&quot;
-    --&gt; &quot;⑥即時効果か？&quot;
-    if &quot;&quot; then
-        --&gt;[YES] &quot;⑦効果解決&quot;
-        --&gt; &quot;⑧勝敗判定&quot;
-        --&gt; &quot;⑩誘発チェック&quot;
-    else
-        --&gt;[NO] &quot;⑨ステージに追加&quot;
-        --&gt; &quot;⑩誘発チェック&quot;
-    endif
-    --&gt; &quot;③ステージが空か？&quot;
-else
-    --&gt;[NO] &quot;⑪アクションを起こすか？&quot;
-    if &quot;&quot; then
-        --&gt;[YES] &quot;④パス名簿リセット&quot;
-    else
-        --&gt; [NO] &quot;⑫パス名簿に登録&quot;
-        --&gt; &quot;⑬パス名簿の件数=プレイヤー数か？&quot;
-        if &quot;&quot; then
-            --&gt;[YES] ”⑭ステージから取出し”
-            --&gt; &quot;⑦効果解決&quot;
-        else
-            --&gt; [NO] &quot;⑮チャンス移動&quot;
-            --&gt; &quot;③ステージが空か？&quot;
-        endif
-    endif
-endif
-&#64;enduml"/></p>
-<p class="caption"><span class="caption-number">図 15 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id16" title="この画像へのパーマリンク">¶</a></p>
+<span id="coreflow-1"></span><p class="caption"><span class="caption-number">図 15 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id16" title="この画像へのパーマリンク">¶</a></p>
 </div>
 <div class="section" id="id2">
 <h2>ターン<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
@@ -383,37 +347,37 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。</p>
 <div class="figure align-default" id="id19">
 <span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-d3bcb707914b08fbfae2123107d55455db190ecd.svg" alt="&#64;startuml
-(*) --&gt; &quot;①ゲーム開始&quot;
---&gt; &quot;②ターンプレイヤーにチャンスを移動&quot;
---&gt;&quot;③ステージが空か？&quot;
+<img src="../_images/plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.svg" alt="&#64;startuml
+(*) --&gt; &quot;(1)ゲーム開始&quot;
+--&gt; &quot;(2)ターンプレイヤーにチャンスを移動&quot;
+--&gt;&quot;(3)ステージが空か？&quot;
 
 if &quot;&quot; then
-    --&gt;[YES] &quot;④パス名簿リセット&quot;
-    --&gt; &quot;⑤アクション起こす&quot;
-    --&gt; &quot;⑥即時効果か？&quot;
+    --&gt;[YES] &quot;(4)パス名簿リセット&quot;
+    --&gt; &quot;(5)アクション起こす&quot;
+    --&gt; &quot;(6)即時効果か？&quot;
     if &quot;&quot; then
-        --&gt;[YES] &quot;⑦効果解決&quot;
-        --&gt; &quot;⑧勝敗判定&quot;
-        --&gt; &quot;⑩誘発チェック&quot;
+        --&gt;[YES] &quot;(7)効果解決&quot;
+        --&gt; &quot;(8)勝敗判定&quot;
+        --&gt; &quot;(10)誘発チェック&quot;
     else
-        --&gt;[NO] &quot;⑨ステージに追加&quot;
-        --&gt; &quot;⑩誘発チェック&quot;
+        --&gt;[NO] &quot;(9)ステージに追加&quot;
+        --&gt; &quot;(10)誘発チェック&quot;
     endif
-    --&gt; &quot;③ステージが空か？&quot;
+    --&gt; &quot;(3)ステージが空か？&quot;
 else
-    --&gt;[NO] &quot;⑪アクションを起こすか？&quot;
+    --&gt;[NO] &quot;(11)アクションを起こすか？&quot;
     if &quot;&quot; then
-        --&gt;[YES] &quot;④パス名簿リセット&quot;
+        --&gt;[YES] &quot;(4)パス名簿リセット&quot;
     else
-        --&gt; [NO] &quot;⑫パス名簿に登録&quot;
-        --&gt; &quot;⑬パス名簿の件数=プレイヤー数か？&quot;
+        --&gt; [NO] &quot;(12)パス名簿に登録&quot;
+        --&gt; &quot;(13)パス名簿の件数=プレイヤー数か？&quot;
         if &quot;&quot; then
-            --&gt;[YES] ”⑭ステージから取出し”
-            --&gt; &quot;⑦効果解決&quot;
+            --&gt;[YES] ”(14)ステージから取出し”
+            --&gt; &quot;(7)効果解決&quot;
         else
-            --&gt; [NO] &quot;⑮チャンス移動&quot;
-            --&gt; &quot;③ステージが空か？&quot;
+            --&gt; [NO] &quot;(15)チャンス移動&quot;
+            --&gt; &quot;(3)ステージが空か？&quot;
         endif
     endif
 endif
@@ -421,37 +385,37 @@ endif
 <p class="caption"><span class="caption-number">図 18 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id19" title="この画像へのパーマリンク">¶</a></p>
 </div>
 <dl class="simple">
-<dt>①ゲーム開始</dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
+<dt>(1)ゲーム開始</dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
 </dd>
-<dt>②ターンプレイヤーにチャンスを移動</dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
+<dt>(2)ターンプレイヤーにチャンスを移動</dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
 </dd>
-<dt>③ステージが空か？</dt><dd><p>ステージにアクションが存在していないか判定します。</p>
+<dt>(3)ステージが空か？</dt><dd><p>ステージにアクションが存在していないか判定します。</p>
 </dd>
-<dt>④パス名簿リセット</dt><dd><p>パスしたプレイヤーを記録するパス名簿をリセットします。</p>
+<dt>(4)パス名簿リセット</dt><dd><p>パスしたプレイヤーを記録するパス名簿をリセットします。</p>
 </dd>
-<dt>⑤アクション起こす</dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
+<dt>(5)アクション起こす</dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
 </dd>
-<dt>⑥即時効果か？</dt><dd><p>起こしたアクションが即時効果か通常効果か判定します。</p>
+<dt>(6)即時効果か？</dt><dd><p>起こしたアクションが即時効果か通常効果か判定します。</p>
 </dd>
-<dt>⑦効果解決</dt><dd><p>アクションの効果に定義されている内容を実行します。</p>
+<dt>(7)効果解決</dt><dd><p>アクションの効果に定義されている内容を実行します。</p>
 </dd>
-<dt>⑧勝敗判定</dt><dd><p>ゲームの勝敗を判定します。判定の方法はゲームにより異なります。</p>
+<dt>(8)勝敗判定</dt><dd><p>ゲームの勝敗を判定します。判定の方法はゲームにより異なります。</p>
 </dd>
-<dt>⑨ステージに追加</dt><dd><p>ステージというアクションを貯めておける領域に追加します。</p>
+<dt>(9)ステージに追加</dt><dd><p>ステージというアクションを貯めておける領域に追加します。</p>
 </dd>
-<dt>⑩誘発チェック</dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <span class="xref std std-ref">trigger-check</span> を参照してください。</p>
+<dt>(10)誘発チェック</dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <span class="xref std std-ref">trigger-check</span> を参照してください。</p>
 </dd>
-<dt>⑪アクションを起こすか？</dt><dd><p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
+<dt>(11)アクションを起こすか？</dt><dd><p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
 </dd>
-<dt>⑫パス名簿に登録</dt><dd><p>パスしたプレイヤーを記録するパス名簿に登録します。同じプレイヤー名は2回登録されません。</p>
+<dt>(12)パス名簿に登録</dt><dd><p>パスしたプレイヤーを記録するパス名簿に登録します。同じプレイヤー名は2回登録されません。</p>
 </dd>
-<dt>⑬パス名簿の件数=プレイヤー数か？</dt><dd><p>パス名簿の件数がゲームに参加しているプレイヤーの数と一致しているか判定します。</p>
+<dt>(13)パス名簿の件数=プレイヤー数か？</dt><dd><p>パス名簿の件数がゲームに参加しているプレイヤーの数と一致しているか判定します。</p>
 </dd>
-<dt>⑭ステージから取出し</dt><dd><p>最後にステージに追加されたアクションをステージから取出します。</p>
+<dt>(14)ステージから取出し</dt><dd><p>最後にステージに追加されたアクションをステージから取出します。</p>
 </dd>
-<dt>⑮チャンス移動</dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
+<dt>(15)チャンス移動</dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。</p>
 </dd>
 </dl>
@@ -460,49 +424,24 @@ endif
 <p>誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">図 19</span></a>)</p>
 <div class="figure align-default" id="id20">
-<span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-cef12fd48a6f2fa48d948be4ab1170be4e967f3c.svg" alt="&#64;startuml
-(*) --&gt; &quot;⑩-1.誘発チェック&quot;
-
-if &quot;&quot; then
-    --&gt;[YES] &quot;⑩-2.即時誘発有無判定&quot;
-    if &quot;&quot; then
-        --&gt;[YES] &quot;⑩-3.効果解決&amp;勝敗判定&quot;
-        --&gt; &quot;⑩-4.誘発有無判定&quot;
-    else
-        --&gt;[NO] &quot;⑩-4.誘発有無判定&quot;
-    endif
-
-    if &quot;&quot; then
-        --&gt;[YES] &quot;⑩-5.ステージに追加&quot;
-        --&gt; &quot;⑩-1.誘発チェック&quot;
-    else
-        --&gt;[NO] &quot;⑩-1.誘発チェック&quot;
-    endif
-
-else
-    --&gt;[NO] (*)
-endif
-
-&#64;enduml"/></p>
-<p class="caption"><span class="caption-number">図 19 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
+<span id="trigger-flow"></span><p class="caption"><span class="caption-number">図 19 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
 </div>
 <dl>
-<dt>⑩-1.誘発チェック</dt><dd><p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認し、
+<dt>(10-1)誘発チェック</dt><dd><p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認し、
 アクションが誘発していないか判定します。</p>
 </dd>
-<dt>⑩-2.即時誘発有無判定</dt><dd><p>即時効果を持つアクション誘発していないか判定します。</p>
+<dt>(10-2)即時誘発有無判定</dt><dd><p>即時効果を持つアクション誘発していないか判定します。</p>
 </dd>
-<dt>⑩-3.効果解決&amp;勝敗判定</dt><dd><p>誘発した即時効果をプレイヤー毎に任意の順番で解決します。
+<dt>(10-3)効果解決&amp;勝敗判定</dt><dd><p>誘発した即時効果をプレイヤー毎に任意の順番で解決します。
 解決するプレイヤーの順序は、
 ターンプレイヤーがコントローラーとなっているアクションを全て解決してから、
 ターンプレイヤー以外がコントローラーとなっているアクションを解決します。
 この解決順序は、ゲームによって変更できます。</p>
 <p>効果を解決する毎に勝敗判定を行ってください。</p>
 </dd>
-<dt>⑩-4.誘発有無判定</dt><dd><p>通常効果を持つアクション誘発していないか判定します。</p>
+<dt>(10-4)誘発有無判定</dt><dd><p>通常効果を持つアクション誘発していないか判定します。</p>
 </dd>
-<dt>⑩-5.ステージに追加</dt><dd><p>誘発したアクションをプレイヤー毎に任意の順番でステージに追加します。
+<dt>(10-5)ステージに追加</dt><dd><p>誘発したアクションをプレイヤー毎に任意の順番でステージに追加します。
 ステージに追加するプレイヤーの順序は、
 ターンプレイヤーがコントローラーとなっているアクションを全てステージに追加してから、
 ターンプレイヤー以外がコントローラーとなっているアクションをステージに追加します。
