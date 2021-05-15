@@ -39,20 +39,28 @@ jobs:
            docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
            docker run --rm --user $UID -v `pwd`/dist:/dist actionlist:latest
             
-      # sphinx実行
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install flake8 pytest
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      - name: execute sphinx
-        run: sphinx-build -b html ./source ./docs  
+#       # sphinx実行
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: ${{ matrix.python-version }}
+#       - name: Install dependencies
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install flake8 pytest
+#           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#       - name: execute sphinx
+#         run: sphinx-build -b html ./source ./docs  
         
-      # TODO PDF生成は別途追加
+      # HTML,PDF生成(sphix実行)
+      - name: build builder image
+        working-directory: ./
+        env:
+          DOCKER_BUILDKIT: 1
+        run: |
+           mkdir -p `pwd`/docs
+           docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest "."
+           docker run --rm --user $UID -v `pwd`/docs:/docs blackpoker-doc:latest
 
       # gh-pageに反映
       - name: copy docs
