@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 08:48
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 08:57
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -874,13 +874,13 @@ LaTeX Warning: Float too large for page by 24.20094pt on input line 2589.
 
 Underfull \hbox (badness 10000) in paragraph at lines 2666--2669
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-ractionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
+r / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
  []
 
 [53]
 Underfull \hbox (badness 10000) in paragraph at lines 2681--2684
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-ractionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
+r / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
  []
 
 [54]
@@ -912,4 +912,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 172536 bytes).
+Output written on blackpoker.dvi (59 pages, 172568 bytes).
