@@ -20,6 +20,11 @@ jobs:
         node-version: [14.7]
 
     steps:
+      # 変数設定
+      - name: Set output
+        id: vars
+        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+
       # 準備
       - name: checkout
         uses: actions/checkout@v2
@@ -70,10 +75,6 @@ jobs:
           mkdir -p ./docs/actionlist/pdf
           cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
           cp -r ./tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
-
-      - name: Set output
-        id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
 
 #      - name: Use Node.js ${{ matrix.node-version }}
 #        uses: actions/setup-node@v1
