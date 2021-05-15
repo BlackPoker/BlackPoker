@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 07:09
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 07:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -873,20 +873,21 @@ LaTeX Warning: Float too large for page by 24.20094pt on input line 2589.
 第6章
 
 Underfull \hbox (badness 10000) in paragraph at lines 2633--2637
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
-nlist / html / v6-[]lite . html$[][] /actionlist/html/v6-lite.html
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / /acti
+onlist / html / v6-[]lite . html$[][] /actionlist/html/v6-lite.html
  []
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 2668--2671
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
-nlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https : / / blackpoker .
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / /acti
+onlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https : / / blackpoker .
  []
 
 [53]
 Underfull \hbox (badness 10000) in paragraph at lines 2683--2686
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / actio
-nlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpoker .
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / /acti
+onlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpoker .
+
  []
 
 [54]
@@ -918,4 +919,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 172424 bytes).
+Output written on blackpoker.dvi (59 pages, 172456 bytes).
