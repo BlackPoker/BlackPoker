@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 08:12
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  15 MAY 2021 08:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -872,52 +872,28 @@ LaTeX Warning: Float too large for page by 24.20094pt on input line 2589.
 ]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2633--2637
+Underfull \hbox (badness 10000) in paragraph at lines 2666--2669
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / html / v6-[]lite . html$[][] /actionlist/html/v6-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2638--2641
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2648--2651
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2658--2661
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2668--2671
-[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][]
+ractionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
  []
 
 [53]
-Underfull \hbox (badness 10000) in paragraph at lines 2683--2686
+Underfull \hbox (badness 10000) in paragraph at lines 2681--2684
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
-rmaster / /actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][]
+ractionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
  []
 
 [54]
 第7章
 No file blackpoker.ind.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2712.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2710.
 [55
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2712.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2710.
  (./blackpoker.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2712.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2712.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2710.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2710.
 
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
 (rerunfilecheck)             Checksum: FE80A0175768907BB02FCE9562378CFC;1979.
@@ -925,7 +901,7 @@ Package rerunfilecheck Info: File `blackpoker.out' has not changed.
 
 LaTeX Warning: There were undefined references.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2712.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2710.
  ) 
 Here is how much of TeX's memory you used:
  9749 strings out of 482885
@@ -936,4 +912,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 172836 bytes).
+Output written on blackpoker.dvi (59 pages, 172536 bytes).
