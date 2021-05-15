@@ -184,7 +184,43 @@
 登場する用語はゲームに合わせて変更してください。
 まず、ターン等の用語について説明します。</p>
 <div class="figure align-default" id="id16">
-<span id="coreflow-1"></span><p class="caption"><span class="caption-number">図 15 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id16" title="この画像へのパーマリンク">¶</a></p>
+<span id="coreflow-1"></span><p class="plantuml">
+<img src="../_images/plantuml-5f63efe9b90cb78e9faf5d7a504ff421a4350053.svg" alt="&#64;startuml
+(*) --&gt; &quot;(1)ゲーム開始&quot;
+--&gt; &quot;(2)ターンプレイヤーにチャンスを移動&quot;
+--&gt;&quot;(3)ステージが空か？&quot;
+
+if &quot;&quot; then
+    --&gt;[YES] &quot;(4)パス名簿リセット&quot;
+    --&gt; &quot;(5)アクション起こす&quot;
+    --&gt; &quot;(6)即時効果か？&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;(7)効果解決&quot;
+        --&gt; &quot;(8)勝敗判定&quot;
+        --&gt; &quot;(10)誘発チェック&quot;
+    else
+        --&gt;[NO] &quot;(9)ステージに追加&quot;
+        --&gt; &quot;(10)誘発チェック&quot;
+    endif
+    --&gt; &quot;(3)ステージが空か？&quot;
+else
+    --&gt;[NO] &quot;(11)アクションを起こすか？&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;(4)パス名簿リセット&quot;
+    else
+        --&gt; [NO] &quot;(12)パス名簿に登録&quot;
+        --&gt; &quot;(13)パス名簿の件数=プレイヤー数か？&quot;
+        if &quot;&quot; then
+            --&gt;[YES] ”(14)ステージから取出し”
+            --&gt; &quot;(7)効果解決&quot;
+        else
+            --&gt; [NO] &quot;(15)チャンス移動&quot;
+            --&gt; &quot;(3)ステージが空か？&quot;
+        endif
+    endif
+endif
+&#64;enduml"/></p>
+<p class="caption"><span class="caption-number">図 15 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id16" title="この画像へのパーマリンク">¶</a></p>
 </div>
 <div class="section" id="id2">
 <h2>ターン<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
@@ -424,7 +460,32 @@ endif
 <p>誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">図 19</span></a>)</p>
 <div class="figure align-default" id="id20">
-<span id="trigger-flow"></span><p class="caption"><span class="caption-number">図 19 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
+<span id="trigger-flow"></span><p class="plantuml">
+<img src="../_images/plantuml-a14f4e2815f7efd64c542f25b5493b3a7986c055.svg" alt="&#64;startuml
+(*) --&gt; &quot;(10-1)誘発チェック&quot;
+
+if &quot;&quot; then
+    --&gt;[YES] &quot;(10-2)即時誘発有無判定&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;(10-3)効果解決&amp;勝敗判定&quot;
+        --&gt; &quot;(10-4)誘発有無判定&quot;
+    else
+        --&gt;[NO] &quot;(10-4)誘発有無判定&quot;
+    endif
+
+    if &quot;&quot; then
+        --&gt;[YES] &quot;(10-5)ステージに追加&quot;
+        --&gt; &quot;(10-1)誘発チェック&quot;
+    else
+        --&gt;[NO] &quot;(10-1)誘発チェック&quot;
+    endif
+
+else
+    --&gt;[NO] (*)
+endif
+
+&#64;enduml"/></p>
+<p class="caption"><span class="caption-number">図 19 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
 </div>
 <dl>
 <dt>(10-1)誘発チェック</dt><dd><p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認し、
