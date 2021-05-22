@@ -2522,51 +2522,51 @@ BlackPokerでは
 \noindent\sphinxincludegraphics{{plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4}.pdf}
 \caption{コアフロー}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 \begin{description}
-\item[{(1)ゲーム開始}] \leavevmode
+\item[{{[}1{]}ゲーム開始}] \leavevmode
 先攻を決め、ゲームを始める準備を行います。
 
-\item[{(2)ターンプレイヤーにチャンスを移動}] \leavevmode
+\item[{{[}2{]}ターンプレイヤーにチャンスを移動}] \leavevmode
 ターンを持っているプレイヤーにチャンスを移動します。
 
-\item[{(3)ステージが空か？}] \leavevmode
+\item[{{[}3{]}ステージが空か？}] \leavevmode
 ステージにアクションが存在していないか判定します。
 
-\item[{(4)パス名簿リセット}] \leavevmode
+\item[{{[}4{]}パス名簿リセット}] \leavevmode
 パスしたプレイヤーを記録するパス名簿をリセットします。
 
-\item[{(5)アクション起こす}] \leavevmode
+\item[{{[}5{]}アクション起こす}] \leavevmode
 アクションを起こしこれからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。
 
-\item[{(6)即時効果か？}] \leavevmode
+\item[{{[}6{]}即時効果か？}] \leavevmode
 起こしたアクションが即時効果か通常効果か判定します。
 
-\item[{(7)効果解決}] \leavevmode
+\item[{{[}7{]}効果解決}] \leavevmode
 アクションの効果に定義されている内容を実行します。
 
-\item[{(8)勝敗判定}] \leavevmode
+\item[{{[}8{]}勝敗判定}] \leavevmode
 ゲームの勝敗を判定します。判定の方法はゲームにより異なります。
 
-\item[{(9)ステージに追加}] \leavevmode
+\item[{{[}9{]}ステージに追加}] \leavevmode
 ステージというアクションを貯めておける領域に追加します。
 
-\item[{(10)誘発チェック}] \leavevmode
+\item[{{[}10{]}誘発チェック}] \leavevmode
 ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは \DUrole{xref,std,std-ref}{trigger\sphinxhyphen{}check} を参照してください。
 
-\item[{(11)アクションを起こすか？}] \leavevmode
+\item[{{[}11{]}アクションを起こすか？}] \leavevmode
 チャンスを持っているプレイヤーはアクションを起こすかを判断します。
 
-\item[{(12)パス名簿に登録}] \leavevmode
+\item[{{[}12{]}パス名簿に登録}] \leavevmode
 パスしたプレイヤーを記録するパス名簿に登録します。同じプレイヤー名は2回登録されません。
 
-\item[{(13)パス名簿の件数=プレイヤー数か？}] \leavevmode
+\item[{{[}13{]}パス名簿の件数=プレイヤー数か？}] \leavevmode
 パス名簿の件数がゲームに参加しているプレイヤーの数と一致しているか判定します。
 
-\item[{(14)ステージから取出し}] \leavevmode
+\item[{{[}14{]}ステージから取出し}] \leavevmode
 最後にステージに追加されたアクションをステージから取出します。
 
-\item[{(15)チャンス移動}] \leavevmode
+\item[{{[}15{]}チャンス移動}] \leavevmode
 チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。
 
@@ -2582,17 +2582,17 @@ BlackPokerでは
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-a14f4e2815f7efd64c542f25b5493b3a7986c055}.pdf}
+\noindent\sphinxincludegraphics{{plantuml-a91828c766d562c760f38e1517ad1bbf09672f77}.pdf}
 \caption{誘発チェック}\label{\detokenize{core/core:id20}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
 \begin{description}
-\item[{(10\sphinxhyphen{}1)誘発チェック}] \leavevmode
+\item[{{[}10\sphinxhyphen{}1{]}誘発チェック}] \leavevmode
 全てのプレイヤー、コンポーネントが持っている誘発型能力を確認し、
 アクションが誘発していないか判定します。
 
-\item[{(10\sphinxhyphen{}2)即時誘発有無判定}] \leavevmode
+\item[{{[}10\sphinxhyphen{}2{]}即時誘発有無判定}] \leavevmode
 即時効果を持つアクション誘発していないか判定します。
 
-\item[{(10\sphinxhyphen{}3)効果解決\&勝敗判定}] \leavevmode
+\item[{{[}10\sphinxhyphen{}3{]}効果解決\&勝敗判定}] \leavevmode
 誘発した即時効果をプレイヤー毎に任意の順番で解決します。
 解決するプレイヤーの順序は、
 ターンプレイヤーがコントローラーとなっているアクションを全て解決してから、
@@ -2601,10 +2601,10 @@ BlackPokerでは
 
 効果を解決する毎に勝敗判定を行ってください。
 
-\item[{(10\sphinxhyphen{}4)誘発有無判定}] \leavevmode
+\item[{{[}10\sphinxhyphen{}4{]}誘発有無判定}] \leavevmode
 通常効果を持つアクション誘発していないか判定します。
 
-\item[{(10\sphinxhyphen{}5)ステージに追加}] \leavevmode
+\item[{{[}10\sphinxhyphen{}5{]}ステージに追加}] \leavevmode
 誘発したアクションをプレイヤー毎に任意の順番でステージに追加します。
 ステージに追加するプレイヤーの順序は、
 ターンプレイヤーがコントローラーとなっているアクションを全てステージに追加してから、
