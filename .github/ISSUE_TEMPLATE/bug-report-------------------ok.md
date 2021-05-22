@@ -1,7 +1,7 @@
 ---
 name: Bug report (バグレポート) ※内容は日本語でもOK
 about: Create a report to help us improve (改善に役立つレポートの作成)
-title: "[BUG]"
+title: "[BUG] "
 labels: bug
 assignees: BlackPoker
 
