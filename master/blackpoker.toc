@@ -71,19 +71,19 @@
 \contentsline {subsection}{\numberline {4.2.2}自分のターンの始め方}{19}{subsection.4.2.2}%
 \contentsline {subsection}{\numberline {4.2.3}自分のターンにできること}{19}{subsection.4.2.3}%
 \contentsline {subsection}{\numberline {4.2.4}ターンの流れ}{19}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}まとめ}{19}{subsection.4.2.5}%
+\contentsline {subsection}{\numberline {4.2.5}まとめ}{20}{subsection.4.2.5}%
 \contentsline {section}{\numberline {4.3}アクションの基本}{20}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}アクションが持つ項目}{20}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.1}アクションが持つ項目}{21}{subsection.4.3.1}%
 \contentsline {subsubsection}{コストの種類}{21}{subsubsection*.39}%
-\contentsline {subsubsection}{即時効果と通常効果}{21}{subsubsection*.40}%
+\contentsline {subsubsection}{即時効果と通常効果}{22}{subsubsection*.40}%
 \contentsline {paragraph}{記載されていないアクションの項目}{22}{paragraph*.41}%
 \contentsline {subsection}{\numberline {4.3.2}アクションの起こし方}{22}{subsection.4.3.2}%
 \contentsline {subsubsection}{アクションを起こすときの注意点}{23}{subsubsection*.42}%
 \contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{23}{paragraph*.43}%
 \contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{23}{paragraph*.44}%
 \contentsline {subsubsection}{アクションを起こした後}{23}{subsubsection*.45}%
-\contentsline {subsection}{\numberline {4.3.3}アクションの効果を発揮}{23}{subsection.4.3.3}%
-\contentsline {subsubsection}{アクションが効果を発揮するときの注意点}{23}{subsubsection*.46}%
+\contentsline {subsection}{\numberline {4.3.3}アクションの効果を発揮}{24}{subsection.4.3.3}%
+\contentsline {subsubsection}{アクションが効果を発揮するときの注意点}{24}{subsubsection*.46}%
 \contentsline {paragraph}{「アクションを解決する際に指定した対象が「対象」項目に記載された条件を満たしていない場合、効果は発揮せず解決されます」とは？}{24}{paragraph*.47}%
 \contentsline {paragraph}{「効果の中に実行不可能な部分がある場合、可能な部分のみ実行します」とは？}{24}{paragraph*.48}%
 \contentsline {subsubsection}{アクションが効果を発揮した後}{24}{subsubsection*.49}%
@@ -94,17 +94,17 @@
 \contentsline {paragraph}{チャンスの遷移と通常効果の発揮}{25}{paragraph*.53}%
 \contentsline {subsubsection}{タイミング}{26}{subsubsection*.54}%
 \contentsline {subsubsection}{メイン}{26}{subsubsection*.55}%
-\contentsline {paragraph}{クイック}{26}{paragraph*.56}%
+\contentsline {paragraph}{クイック}{27}{paragraph*.56}%
 \contentsline {paragraph}{タイミングとステージ}{27}{paragraph*.57}%
 \contentsline {subsection}{\numberline {4.3.5}効果を発揮するまでの流れ}{27}{subsection.4.3.5}%
 \contentsline {subsubsection}{通常効果が発揮されるまでの流れ}{27}{subsubsection*.58}%
-\contentsline {paragraph}{手順1. アクションを起こす}{27}{paragraph*.59}%
+\contentsline {paragraph}{手順1. アクションを起こす}{28}{paragraph*.59}%
 \contentsline {paragraph}{手順2. 対戦相手もアクションを起こすか聞く}{28}{paragraph*.60}%
 \contentsline {paragraph}{手順3. 効果を発揮}{28}{paragraph*.61}%
-\contentsline {paragraph}{手順4. キーカードを墓地に移す}{28}{paragraph*.62}%
-\contentsline {subsection}{\numberline {4.3.6}まとめ}{29}{subsection.4.3.6}%
+\contentsline {paragraph}{手順4. キーカードを墓地に移す}{29}{paragraph*.62}%
+\contentsline {subsection}{\numberline {4.3.6}まとめ}{30}{subsection.4.3.6}%
 \contentsline {section}{\numberline {4.4}キャラクターと能力}{30}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}キャラクターとは}{30}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.1}キャラクターとは}{31}{subsection.4.4.1}%
 \contentsline {subsection}{\numberline {4.4.2}キャラクターのもつ項目}{31}{subsection.4.4.2}%
 \contentsline {subsection}{\numberline {4.4.3}数字について}{31}{subsection.4.4.3}%
 \contentsline {subsection}{\numberline {4.4.4}能力とは}{32}{subsection.4.4.4}%
