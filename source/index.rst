@@ -10,6 +10,7 @@ Welcome to BlackPoker's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   :numbered:
 
 
    init/init
