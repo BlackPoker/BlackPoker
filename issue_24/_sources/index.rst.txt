@@ -6,12 +6,7 @@
 Welcome to BlackPoker's documentation!
 ======================================
 
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-   :numbered:
-
+.. section-numbering:
 
    init/init
    match-regulations/match-regulations
