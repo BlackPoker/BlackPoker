@@ -18,6 +18,8 @@ Welcome to BlackPoker's documentation!
    core/core
    appendix/appendix
 
+.. section-numbering::
+
 Indices and tables
 ==================
 
