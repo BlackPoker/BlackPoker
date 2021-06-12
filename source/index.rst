@@ -10,7 +10,6 @@ Welcome to BlackPoker's documentation!
    :maxdepth: 5
    :caption: Contents:
    :numbered: 5
-   :numfig_format: '%s'
 
    init/init
    match-regulations/match-regulations
