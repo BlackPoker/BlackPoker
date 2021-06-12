@@ -25,7 +25,7 @@ numfig_format = {
     'figure': 'Fig. %s',
     'table': 'Table %s',
     'code-block': 'Listing %s',
-    'section': '%s'
+    'section': '%s %r'
 }
 # release = '2019/6/30'
 version = '第六版'
