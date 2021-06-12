@@ -21,6 +21,12 @@ project = 'BlackPoker'
 copyright = '2013, BlackPoker'
 author = 'BlackPoker'
 numfig = True
+numfig_format = {
+    'figure': 'Fig. %s',
+    'table': 'Table %s',
+    'code-block': 'Listing %s',
+    'section': 'Section'
+}
 # release = '2019/6/30'
 version = '第六版'
 
