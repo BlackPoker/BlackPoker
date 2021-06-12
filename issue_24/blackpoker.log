@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  5 JUN 2021 09:01
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  12 JUN 2021 06:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -808,6 +808,10 @@ input line 960.
 LaTeX Warning: Reference `common/06-extra:extra' on page 16 undefined on input 
 line 960.
 
+
+LaTeX Warning: Hyper reference `common/06-extra:extra' on page 16 undefined on 
+input line 960.
+
 [16]
 
 LaTeX Warning: Hyper reference `common/04-character::doc' on page 17 undefined 
@@ -1213,7 +1217,7 @@ Package rerunfilecheck Warning: File `blackpoker.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `blackpoker.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  FA63F758609C18F51F38866E91113FB4;2041.
+(rerunfilecheck)             After:  8D903369BB6CCCAB76E4D8BD3366D5C0;13154.
 
 LaTeX Warning: There were undefined references.
 
@@ -1223,12 +1227,12 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2732.
  ) 
 Here is how much of TeX's memory you used:
- 9737 strings out of 482885
- 145940 string characters out of 5957543
+ 9739 strings out of 482885
+ 145976 string characters out of 5957543
  425274 words of memory out of 5000000
- 25130 multiletter control sequences out of 15000+600000
+ 25132 multiletter control sequences out of 15000+600000
  584091 words of font info for 125 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 146452 bytes).
+Output written on blackpoker.dvi (59 pages, 154164 bytes).
