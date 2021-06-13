@@ -1,0 +1,1237 @@
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  13 JUN 2021 10:13
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**blackpoker.tex
+(./blackpoker.tex
+pLaTeX2e <2020-04-12> (based on LaTeX2e <2020-02-02> patch level 5)
+L3 programming layer <2020-08-07> (./sphinxmanual.cls
+Document Class: sphinxmanual 2019/12/01 v2.3.0 Document class (Sphinx manual)
+(/usr/local/texlive/2020/texmf-dist/tex/platex/jsclasses/jsbook.cls
+Document Class: jsbook 2020/02/02 jsclasses (okumura, texjporg)
+\jsc@mpt=\dimen150
+\jsc@mmm=\dimen151
+\jsc@smallskipamount=\skip47
+LaTeX Info: Redefining \textmc on input line 501.
+LaTeX Info: Redefining \textgt on input line 503.
+\symmincho=\mathgroup4
+LaTeX Font Info:    Overwriting symbol font `mincho' in version `bold'
+(Font)                  JY1/mc/m/n --> JY1/gt/m/n on input line 565.
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 756.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 756.
+\fullwidth=\dimen152
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 7.68799pt on input line 917.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 7.68799pt on input line 917.
+\c@part=\count167
+\c@chapter=\count168
+\c@section=\count169
+\c@subsection=\count170
+\c@subsubsection=\count171
+\c@paragraph=\count172
+\c@subparagraph=\count173
+\c@figure=\count174
+\c@table=\count175
+\abovecaptionskip=\skip48
+\belowcaptionskip=\skip49
+\jsc@tocl@width=\dimen153
+\@lnumwidth=\dimen154
+\bibindent=\dimen155
+(/usr/local/texlive/2020/texmf-dist/tex/platex/jsclasses/jslogo.sty
+Package: jslogo 2019/07/25 okumura, texjporg
+LaTeX Info: Redefining \TeX on input line 94.
+LaTeX Info: Redefining \LaTeX on input line 147.
+LaTeX Info: Redefining \LaTeXe on input line 200.
+)
+\heisei=\count176
+)
+LaTeX Info: Redefining \and on input line 35.
+)
+\sphinxpxdimen=\dimen156
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/cmap/cmap.sty
+Package: cmap 2008/03/06 v1.0h CMap support: searchable PDF
+
+
+Package cmap Warning: pdftex not detected - exiting.
+
+) (/usr/local/texlive/2020/texmf-dist/tex/latex/base/fontenc.sty
+Package: fontenc 2020/02/11 v2.0o Standard LaTeX package
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amsmath.sty
+Package: amsmath 2020/01/20 v2.17e AMS math features
+\@mathmargin=\skip50
+
+For additional information on amsmath, use the `?' option.
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amstext.sty
+Package: amstext 2000/06/29 v2.01 AMS text
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amsgen.sty
+File: amsgen.sty 1999/11/30 v2.0 generic functions
+\@emptytoks=\toks16
+\ex@=\dimen157
+))
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amsbsy.sty
+Package: amsbsy 1999/11/29 v1.2d Bold Symbols
+\pmbraise@=\dimen158
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsmath/amsopn.sty
+Package: amsopn 2016/03/08 v2.02 operator names
+)
+\inf@bad=\count177
+LaTeX Info: Redefining \frac on input line 227.
+\uproot@=\count178
+\leftroot@=\count179
+LaTeX Info: Redefining \overline on input line 389.
+\classnum@=\count180
+\DOTSCASE@=\count181
+LaTeX Info: Redefining \ldots on input line 486.
+LaTeX Info: Redefining \dots on input line 489.
+LaTeX Info: Redefining \cdots on input line 610.
+\Mathstrutbox@=\box61
+\strutbox@=\box62
+\big@size=\dimen159
+LaTeX Font Info:    Redeclaring font encoding OML on input line 733.
+LaTeX Font Info:    Redeclaring font encoding OMS on input line 734.
+\macc@depth=\count182
+\c@MaxMatrixCols=\count183
+\dotsspace@=\muskip16
+\c@parentequation=\count184
+\dspbrk@lvl=\count185
+\tag@help=\toks17
+\row@=\count186
+\column@=\count187
+\maxfields@=\count188
+\andhelp@=\toks18
+\eqnshift@=\dimen160
+\alignsep@=\dimen161
+\tagshift@=\dimen162
+\tagwidth@=\dimen163
+\totwidth@=\dimen164
+\lineht@=\dimen165
+\@envbody=\toks19
+\multlinegap=\skip51
+\multlinetaggap=\skip52
+\mathdisplay@stack=\toks20
+LaTeX Info: Redefining \[ on input line 2859.
+LaTeX Info: Redefining \] on input line 2860.
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/amssymb.sty
+Package: amssymb 2013/01/14 v3.01 AMS font symbols
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/amsfonts.sty
+Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
+\symAMSa=\mathgroup5
+\symAMSb=\mathgroup6
+LaTeX Font Info:    Redeclaring math symbol \hbar on input line 98.
+LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
+(Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
+))
+(/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/times.sty
+Package: times 2020/03/25 PSNFSS-v9.3 (SPQR) 
+) (./sphinx.sty
+Package: sphinx 2019/09/02 v2.3.0 LaTeX package (Sphinx markup)
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
+Package: ltxcmds 2019/12/15 v1.24 LaTeX kernel commands for general use (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2019/11/30 v1.2a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks21
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2019/11/30 v1.4a Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: dvipdfmx.def on input line 105.
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics-def/dvipdfmx.def
+File: dvipdfmx.def 2017/06/24 v5.0g Graphics/color driver for dvipdfmx
+))
+\Gin@req@height=\dimen166
+\Gin@req@width=\dimen167
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
+Package: fancyhdr 2019/01/31 v3.10 Extensive control of page headers and footer
+s
+\f@nch@headwidth=\skip53
+\f@nch@O@elh=\skip54
+\f@nch@O@erh=\skip55
+\f@nch@O@olh=\skip56
+\f@nch@O@orh=\skip57
+\f@nch@O@elf=\skip58
+\f@nch@O@erf=\skip59
+\f@nch@O@olf=\skip60
+\f@nch@O@orf=\skip61
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/base/textcomp.sty
+Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/titlesec/titlesec.sty
+Package: titlesec 2019/10/16 v2.13 Sectioning titles
+\ttl@box=\box63
+\beforetitleunit=\skip62
+\aftertitleunit=\skip63
+\ttl@plus=\dimen168
+\ttl@minus=\dimen169
+\ttl@toksa=\toks22
+\titlewidth=\dimen170
+\titlewidthlast=\dimen171
+\titlewidthfirst=\dimen172
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/tabulary/tabulary.sty
+Package: tabulary 2014/06/11 v0.10 tabulary package (DPC)
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/tools/array.sty
+Package: array 2019/08/31 v2.4l Tabular extension package (FMi)
+\col@sep=\dimen173
+\ar@mcellbox=\box64
+\extrarowheight=\dimen174
+\NC@list=\toks23
+\extratabsurround=\skip64
+\backup@length=\skip65
+\ar@cellbox=\box65
+)
+\TY@count=\count189
+\TY@linewidth=\dimen175
+\tymin=\dimen176
+\tymax=\dimen177
+\TY@tablewidth=\dimen178
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/tools/longtable.sty
+Package: longtable 2020/01/07 v4.13 Multi-page Table package (DPC)
+\LTleft=\skip66
+\LTright=\skip67
+\LTpre=\skip68
+\LTpost=\skip69
+\LTchunksize=\count190
+\LTcapwidth=\dimen179
+\LT@head=\box66
+\LT@firsthead=\box67
+\LT@foot=\box68
+\LT@lastfoot=\box69
+\LT@cols=\count191
+\LT@rows=\count192
+\c@LT@tables=\count193
+\c@LT@chunks=\count194
+\LT@p@ftn=\toks24
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/varwidth/varwidth.sty
+Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
+\@vwid@box=\box70
+\sift@deathcycles=\count195
+\@vwid@loff=\dimen180
+\@vwid@roff=\dimen181
+)
+(./sphinxmulticell.sty
+Package: sphinxmulticell 2017/02/23 v1.6 better span rows and columns of a tabl
+e (Sphinx team)
+\sphinx@TY@tablewidth=\dimen182
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/base/makeidx.sty
+Package: makeidx 2014/09/29 v1.0m Standard LaTeX package
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/framed/framed.sty
+Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
+\OuterFrameSep=\skip70
+\fb@frw=\dimen183
+\fb@frh=\dimen184
+\FrameRule=\dimen185
+\FrameSep=\dimen186
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/xcolor/xcolor.sty
+Package: xcolor 2016/05/11 v2.12 LaTeX color extensions (UK)
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/graphics-cfg/color.cfg
+File: color.cfg 2016/01/02 v1.6 sample color configuration
+)
+Package xcolor Info: Driver file: dvipdfmx.def on input line 225.
+Package xcolor Info: Model `cmy' substituted by `cmy0' on input line 1348.
+Package xcolor Info: Model `RGB' extended on input line 1364.
+Package xcolor Info: Model `HTML' substituted by `rgb' on input line 1366.
+Package xcolor Info: Model `Hsb' substituted by `hsb' on input line 1367.
+Package xcolor Info: Model `tHsb' substituted by `hsb' on input line 1368.
+Package xcolor Info: Model `HSB' substituted by `hsb' on input line 1369.
+Package xcolor Info: Model `Gray' substituted by `gray' on input line 1370.
+Package xcolor Info: Model `wave' substituted by `hsb' on input line 1371.
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
+Package: fancyvrb 2020/05/03 v3.6 verbatim text (tvz,hv)
+\FV@CodeLineNo=\count196
+\FV@InFile=\read2
+\FV@TabBox=\box71
+\c@FancyVerbLine=\count197
+\FV@StepNumber=\count198
+\FV@OutFile=\write3
+)
+(./footnotehyper-sphinx.sty
+Package: footnotehyper-sphinx 2017/10/27 v1.7 hyperref aware footnote.sty for s
+phinx (JFB)
+\FNH@notes=\box72
+\FNH@width=\dimen187
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count199
+\float@exts=\toks25
+\float@box=\box73
+\@float@everytoks=\toks26
+\@floatcapt=\box74
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/wrapfig/wrapfig.sty
+\wrapoverhang=\dimen188
+\WF@size=\dimen189
+\c@WF@wrappedlines=\count266
+\WF@box=\box75
+\WF@everypar=\toks27
+Package: wrapfig 2003/01/31  v 3.6
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/parskip/parskip.sty
+Rollback for package 'parskip' requested -> version 'v1'.
+         This corresponds to the release introduced on 2001-04-09.
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/parskip/parskip-2001-04-09.sty
+Package: parskip 2001/04/09 non-zero parskip adjustments
+))
+(/usr/local/texlive/2020/texmf-dist/tex/latex/base/alltt.sty
+Package: alltt 1997/06/16 v2.0g defines alltt environment
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/upquote/upquote.sty
+Package: upquote 2012/04/19 v1.3 upright-quote and grave-accent glyphs in verba
+tim
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/capt-of/capt-of.sty
+Package: capt-of 2009/12/29 v0.2 standard captions outside of floats
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/needspace/needspace.sty
+Package: needspace 2010/09/12 v1.3d reserve vertical space
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/atbegshi/atbegshi.sty
+Package: atbegshi 2019/12/05 v1.19 At begin shipout hook (HO)
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/infwarerr/infwarerr.sty
+Package: infwarerr 2019/12/03 v1.5 Providing info/warning/error messages (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/iftex/iftex.sty
+Package: iftex 2020/03/06 v1.0d TeX engine tests
+))
+(./sphinxhighlight.sty
+Package: sphinxhighlight 2016/05/29 stylesheet for highlighting with pygments
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/kvoptions/kvoptions.sty
+Package: kvoptions 2019/11/29 v3.13 Key value format for package options (HO)
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/kvsetkeys/kvsetkeys.sty
+Package: kvsetkeys 2019/12/15 v1.18 Key value parser (HO)
+))
+\sphinxverbatimsep=\dimen190
+\sphinxverbatimborder=\dimen191
+\sphinxshadowsep=\dimen192
+\sphinxshadowsize=\dimen193
+\sphinxshadowrule=\dimen194
+\spx@notice@border=\dimen195
+LaTeX Font Info:    Trying to load font information for T1+ptm on input line 63
+2.
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1ptm.fd
+File: t1ptm.fd 2001/06/04 font definitions for T1/ptm.
+)
+\spx@image@maxheight=\dimen196
+\spx@image@box=\dimen197
+\c@literalblock=\count267
+\sphinxcontinuationbox=\box76
+\sphinxvisiblespacebox=\box77
+\sphinxVerbatim@TitleBox=\box78
+\sphinxVerbatim@ContentsBox=\box79
+\py@argswidth=\skip71
+\lineblockindentation=\skip72
+\DUlineblockindent=\skip73
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2020/01/02 v5.9 Page Geometry
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/iftex/ifvtex.sty
+Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
+)
+\Gm@cnth=\count268
+\Gm@cntv=\count269
+\c@Gm@tempcnt=\count270
+\Gm@bindingoffset=\dimen198
+\Gm@wd@mp=\dimen199
+\Gm@odd@mp=\dimen256
+\Gm@even@mp=\dimen257
+\Gm@layoutwidth=\dimen258
+\Gm@layoutheight=\dimen259
+\Gm@layouthoffset=\dimen260
+\Gm@layoutvoffset=\dimen261
+\Gm@dimlist=\toks28
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/hyperref.sty
+Package: hyperref 2020-05-15 v7.00e Hypertext links for LaTeX
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+Package: pdftexcmds 2020-06-27 v0.33 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode not found.
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.sty
+Package: kvdefinekeys 2019-12-19 v1.6 Define keys (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+Package: pdfescape 2019/12/09 v1.15 Implements pdfTeX's escape features (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/hycolor/hycolor.sty
+Package: hycolor 2020-01-27 v1.10 Color options for hyperref/bookmark (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/letltxmacro/letltxmacro.sty
+Package: letltxmacro 2019/12/03 v1.6 Let assignment for LaTeX macros (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/auxhook/auxhook.sty
+Package: auxhook 2019-12-17 v1.6 Hooks for auxiliary files (HO)
+)
+\@linkdim=\dimen262
+\Hy@linkcounter=\count271
+\Hy@pagecounter=\count272
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/pd1enc.def
+File: pd1enc.def 2020-05-15 v7.00e Hyperref: PDFDocEncoding definition (HO)
+Now handling font encoding PD1 ...
+... no UTF-8 mapping file for font encoding PD1
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/intcalc/intcalc.sty
+Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/etexcmds/etexcmds.sty
+Package: etexcmds 2019/12/15 v1.7 Avoid name clashes with e-TeX commands (HO)
+)
+\Hy@SavedSpaceFactor=\count273
+Package hyperref Info: Option `setpagesize' set `false' on input line 4338.
+Package hyperref Info: Option `colorlinks' set `true' on input line 4338.
+Package hyperref Info: Option `breaklinks' set `true' on input line 4338.
+Package hyperref Info: Hyper figures OFF on input line 4464.
+Package hyperref Info: Link nesting OFF on input line 4469.
+Package hyperref Info: Hyper index ON on input line 4472.
+Package hyperref Info: Plain pages OFF on input line 4479.
+Package hyperref Info: Backreferencing OFF on input line 4484.
+Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
+Package hyperref Info: Bookmarks ON on input line 4717.
+\c@Hy@tempcnt=\count274
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/url/url.sty
+\Urlmuskip=\muskip17
+Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
+)
+LaTeX Info: Redefining \url on input line 5076.
+\XeTeXLinkMargin=\dimen263
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/bitset/bitset.sty
+Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
+
+(/usr/local/texlive/2020/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
+Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO
+)
+))
+\Fld@menulength=\count275
+\Field@Width=\dimen264
+\Fld@charsize=\dimen265
+Package hyperref Info: Hyper figures OFF on input line 6347.
+Package hyperref Info: Link nesting OFF on input line 6352.
+Package hyperref Info: Hyper index ON on input line 6355.
+Package hyperref Info: backreferencing OFF on input line 6362.
+Package hyperref Info: Link coloring ON on input line 6365.
+Package hyperref Info: Link coloring with OCG OFF on input line 6372.
+Package hyperref Info: PDF/A mode OFF on input line 6377.
+LaTeX Info: Redefining \ref on input line 6417.
+LaTeX Info: Redefining \pageref on input line 6421.
+\Hy@abspage=\count276
+\c@Item=\count277
+\c@Hfootnote=\count278
+)
+Package hyperref Info: Driver: hdvipdfm.
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/hdvipdfm.def
+File: hdvipdfm.def 2020-05-15 v7.00e Hyperref driver for dvipdfm
+\pdfm@box=\box80
+\c@Hy@AnnotLevel=\count279
+\HyField@AnnotCount=\count280
+\Fld@listcount=\count281
+\c@bookmark@seq@number=\count282
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
+Package: rerunfilecheck 2019/12/05 v1.9 Rerun checks for auxiliary files (HO)
+(/usr/local/texlive/2020/texmf-dist/tex/latex/atveryend/atveryend.sty
+Package: atveryend 2019-12-11 v1.11 Hooks at the very end of document (HO)
+Package atveryend Info: \enddocument detected (standard20110627).
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
+Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
+)
+Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
+86.
+)
+\Hy@SectionHShift=\skip74
+) (/usr/local/texlive/2020/texmf-dist/tex/latex/oberdiek/hypcap.sty
+Package: hypcap 2016/05/16 v1.12 Adjusting the anchors of captions (HO)
+)
+(./sphinxmessages.sty
+Package: sphinxmessages 2019/01/04 v2.0 Localized LaTeX macros (Sphinx team)
+)
+\@indexfile=\write4
+\openout4 = `blackpoker.idx'.
+
+
+Writing index file blackpoker.idx
+(/usr/local/texlive/2020/texmf-dist/tex/latex/l3backend/l3backend-dvipdfmx.def
+File: l3backend-dvipdfmx.def 2020-08-07 L3 backend support: dvipdfmx
+\g__graphics_track_int=\count283
+\l__pdf_internal_box=\box81
+\g__pdf_backend_object_int=\count284
+\g__pdf_backend_annotation_int=\count285
+)
+No file blackpoker.aux.
+\openout1 = `blackpoker.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 46.
+LaTeX Font Info:    ... okay on input line 46.
+(I search kanjifont definition file: . . )
+\AtBeginShipoutBox=\box82
+
+*geometry* detected driver: dvipdfm
+*geometry* verbose mode - [ preamble ] result:
+* driver: dvipdfm
+* paper: letterpaper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* lines: 41
+* hratio: 1:1
+* vratio: 1:1
+* modes: twoside 
+* h-part:(L,W,R)=(71.35226pt, 471.59047pt, 71.35226pt)
+* v-part:(T,H,B)=(71.10463pt, 652.76073pt, 71.10463pt)
+* \paperwidth=614.295pt
+* \paperheight=794.96999pt
+* \textwidth=471.59047pt
+* \textheight=652.76073pt
+* \oddsidemargin=-0.91772pt
+* \evensidemargin=-0.91772pt
+* \topmargin=-35.4762pt
+* \headheight=20.0pt
+* \headsep=14.31084pt
+* \topskip=12.76073pt
+* \footskip=32.0pt
+* \marginparwidth=36.98749pt
+* \marginparsep=18.49374pt
+* \columnsep=18.49374pt
+* \skip\footins=16.0pt plus 5.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidetrue
+* \@mparswitchtrue
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+Package hyperref Info: Link coloring ON on input line 46.
+(/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/nameref.sty
+Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/refcount/refcount.sty
+Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
+)
+(/usr/local/texlive/2020/texmf-dist/tex/generic/gettitlestring/gettitlestring.s
+ty
+Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
+)
+\c@section@level=\count286
+)
+LaTeX Info: Redefining \ref on input line 46.
+LaTeX Info: Redefining \pageref on input line 46.
+LaTeX Info: Redefining \nameref on input line 46.
+\@outlinefile=\write5
+\openout5 = `blackpoker.out'.
+
+
+
+Package hyperref Warning: Rerun to get /PageLabels entry.
+
+Package hyperref Info: Option `pageanchor' set `false' on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 49.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 49
+.
+(/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1phv.fd
+File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
+)
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <10> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <10> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <24.88> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <24.88> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 23.90964pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <24.88> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <24.88> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 23.90964pt on input line 49.
+LaTeX Font Info:    Kanji font shape `JY1/gt/b/it' undefined
+(Font)              No change on input line 49.
+LaTeX Font Info:    Font shape `T1/phv/b/it' in size <10> not available
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <17.28> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <17.28> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 16.60605pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <17.28> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <17.28> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 16.60605pt on input line 49.
+LaTeX Font Info:    Font shape `T1/phv/b/it' in size <17.28> not available
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 16.60605pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 11.53198pt on input line 49.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 49.
+
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 49.
+
+
+(/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <12> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <12> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 11.53198pt on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <12> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <12> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 11.53198pt on input line 49.
+ [1
+
+
+] [2
+
+
+]
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 23.90964pt on input line 51.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 23.90964pt on input line 51.
+\tf@toc=\write6
+\openout6 = `blackpoker.toc'.
+
+LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 51.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 51.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 51.
+LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 51.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 51.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 51.
+
+[1
+
+] [2
+
+]
+第1章
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 19.9311pt on input line 57.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 19.9311pt on input line 57.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 19.9311pt on input line 57.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 19.9311pt on input line 57.
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 66.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 66.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 66.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 66.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 13.83836pt on input line 66.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 70
+.
+(/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1pcr.fd
+File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
+)
+File: plantuml-539e0c031fa17f075d01c25c766b6741f05fab73.pdf Graphic file (type 
+pdf)
+<plantuml-539e0c031fa17f075d01c25c766b6741f05fab73.pdf>
+ [1
+
+] [2
+
+]
+第2章
+
+LaTeX Warning: Hyper reference `format/format::doc' on page 3 undefined on inpu
+t line 88.
+
+LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 88.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 88.
+LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 88.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 88.
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 11.53198pt on input line 107.
+[3]
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 152.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 152.
+LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
+59.
+ (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
+File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
+) [4]
+[5] [6] [7] [8] [9] [10
+
+]
+第3章
+[11]
+File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
+pdf)
+<plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
+ [12] [13] [14
+
+]
+第4章
+[15]
+
+LaTeX Warning: Hyper reference `common/01-base:cardrank' on page 16 undefined o
+n input line 882.
+
+
+LaTeX Warning: Reference `common/01-base:cardrank' on page 16 undefined on inpu
+t line 882.
+
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 889.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 889.
+
+LaTeX Warning: Hyper reference `common/01-base:field-ex' on page 16 undefined o
+n input line 936.
+
+
+LaTeX Warning: Reference `common/01-base:field-ex' on page 16 undefined on inpu
+t line 936.
+
+File: field-ex.pdf Graphic file (type pdf)
+<field-ex.pdf>
+
+LaTeX Warning: Hyper reference `common/06-extra:extra' on page 16 undefined on 
+input line 960.
+
+
+LaTeX Warning: Reference `common/06-extra:extra' on page 16 undefined on input 
+line 960.
+
+
+LaTeX Warning: Reference `common/06-extra:extra' on page 16 undefined on input 
+line 960.
+
+[16]
+
+LaTeX Warning: Hyper reference `common/04-character::doc' on page 17 undefined 
+on input line 980.
+
+[17]
+
+LaTeX Warning: Hyper reference `common/01-base:chargedrive' on page 18 undefine
+d on input line 987.
+
+
+LaTeX Warning: Reference `common/01-base:chargedrive' on page 18 undefined on i
+nput line 987.
+
+File: charge&drive.pdf Graphic file (type pdf)
+<charge&drive.pdf>
+
+LaTeX Warning: Hyper reference `common/01-base:cardrank' on page 18 undefined o
+n input line 1030.
+
+[18]
+
+LaTeX Warning: Hyper reference `common/02-turn:turn' on page 19 undefined on in
+put line 1091.
+
+
+LaTeX Warning: Reference `common/02-turn:turn' on page 19 undefined on input li
+ne 1091.
+
+File: turn.pdf Graphic file (type pdf)
+<turn.pdf>
+[19]
+
+LaTeX Warning: Hyper reference `common/03-action::doc' on page 20 undefined on 
+input line 1126.
+
+
+LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 20 undefi
+ned on input line 1126.
+
+[20]
+
+LaTeX Warning: Hyper reference `common/03-action:action-sample' on page 21 unde
+fined on input line 1132.
+
+
+LaTeX Warning: Reference `common/03-action:action-sample' on page 21 undefined 
+on input line 1132.
+
+File: action-sample.pdf Graphic file (type pdf)
+<action-sample.pdf>
+
+LaTeX Warning: Hyper reference `common/03-action:cost' on page 21 undefined on 
+input line 1161.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 21 unde
+fined on input line 1165.
+
+
+LaTeX Warning: Hyper reference `common/03-action:table-cost' on page 21 undefin
+ed on input line 1176.
+
+
+LaTeX Warning: Reference `common/03-action:table-cost' on page 21 undefined on 
+input line 1176.
+
+[21]
+
+LaTeX Warning: Hyper reference `common/03-action:action-exe' on page 22 undefin
+ed on input line 1230.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-flow' on page 22 undefi
+ned on input line 1230.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 22 unde
+fined on input line 1244.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-flow' on page 22 undefi
+ned on input line 1248.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-sample2' on page 22 und
+efined on input line 1277.
+
+
+LaTeX Warning: Reference `common/03-action:action-sample2' on page 22 undefined
+ on input line 1277.
+
+File: action-sample2.pdf Graphic file (type pdf)
+<action-sample2.pdf>
+[22]
+
+LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 23 unde
+fined on input line 1312.
+
+
+LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 23 undefi
+ned on input line 1315.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-chance' on page 23 unde
+fined on input line 1318.
+
+[23]
+
+LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 24 undefi
+ned on input line 1386.
+
+[24] [25]
+
+LaTeX Warning: Hyper reference `common/03-action:chance' on page 26 undefined o
+n input line 1442.
+
+
+LaTeX Warning: Reference `common/03-action:chance' on page 26 undefined on inpu
+t line 1442.
+
+File: chance.pdf Graphic file (type pdf)
+<chance.pdf>
+[26]
+
+LaTeX Warning: Hyper reference `common/03-action:timing' on page 27 undefined o
+n input line 1497.
+
+
+LaTeX Warning: Reference `common/03-action:timing' on page 27 undefined on inpu
+t line 1497.
+
+File: timing.pdf Graphic file (type pdf)
+<timing.pdf>
+[27]
+
+LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 28 undef
+ined on input line 1545.
+
+
+LaTeX Warning: Reference `common/03-action:action-begin' on page 28 undefined o
+n input line 1545.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-howto' on page 28 undef
+ined on input line 1553.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 28 undef
+ined on input line 1553.
+
+
+LaTeX Warning: Reference `common/03-action:action-begin' on page 28 undefined o
+n input line 1553.
+
+
+LaTeX Warning: Hyper reference `common/03-action:action-begin' on page 28 undef
+ined on input line 1569.
+
+
+LaTeX Warning: Reference `common/03-action:action-begin' on page 28 undefined o
+n input line 1569.
+
+File: action-begin.pdf Graphic file (type pdf)
+<action-begin.pdf>
+[28]
+
+LaTeX Warning: Hyper reference `common/03-action:action-exe' on page 29 undefin
+ed on input line 1584.
+
+
+LaTeX Warning: Hyper reference `common/03-action:keycard-gy' on page 29 undefin
+ed on input line 1585.
+
+[29] [30]
+
+LaTeX Warning: Hyper reference `common/04-character:character' on page 31 undef
+ined on input line 1713.
+
+
+LaTeX Warning: Reference `common/04-character:character' on page 31 undefined o
+n input line 1713.
+
+File: character.pdf Graphic file (type pdf)
+<character.pdf>
+
+LaTeX Warning: Hyper reference `common/04-character:character-sample' on page 3
+1 undefined on input line 1726.
+
+
+LaTeX Warning: Reference `common/04-character:character-sample' on page 31 unde
+fined on input line 1726.
+
+File: character-sample.pdf Graphic file (type pdf)
+<character-sample.pdf>
+
+LaTeX Warning: Hyper reference `common/04-character:abi' on page 31 undefined o
+n input line 1745.
+
+[31] [32]
+
+LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 33 undefi
+ned on input line 1805.
+
+[33]
+
+LaTeX Warning: Hyper reference `core/core:component' on page 34 undefined on in
+put line 1883.
+
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 1896.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 1896.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 4.805pt on input line 1896.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 4.805pt on input line 1896.
+[34]
+
+LaTeX Warning: Hyper reference `common/05-action_detail:trigger' on page 35 und
+efined on input line 2001.
+
+
+LaTeX Warning: Reference `common/05-action_detail:trigger' on page 35 undefined
+ on input line 2001.
+
+File: trigger.pdf Graphic file (type pdf)
+<trigger.pdf>
+[35]
+
+LaTeX Warning: Hyper reference `common/05-action_detail:set-bulwork' on page 36
+ undefined on input line 2040.
+
+
+LaTeX Warning: Reference `common/05-action_detail:set-bulwork' on page 36 undef
+ined on input line 2040.
+
+File: set-bulwork.pdf Graphic file (type pdf)
+<set-bulwork.pdf>
+[36]
+
+LaTeX Warning: Hyper reference `common/05-action_detail:action-resolves' on pag
+e 37 undefined on input line 2088.
+
+[37]
+
+LaTeX Warning: Hyper reference `common/01-base:field-ex' on page 38 undefined o
+n input line 2120.
+
+
+LaTeX Warning: Hyper reference `common/06-extra:ver-ex' on page 38 undefined on
+ input line 2136.
+
+
+LaTeX Warning: Reference `common/06-extra:ver-ex' on page 38 undefined on input
+ line 2136.
+
+[38]
+
+LaTeX Warning: Hyper reference `common/06-extra:trump' on page 39 undefined on 
+input line 2186.
+
+
+LaTeX Warning: Reference `common/06-extra:trump' on page 39 undefined on input 
+line 2186.
+
+File: trump.pdf Graphic file (type pdf)
+<trump.pdf>
+
+LaTeX Warning: Hyper reference `common/06-extra:trump-open' on page 39 undefine
+d on input line 2226.
+
+
+LaTeX Warning: Reference `common/06-extra:trump-open' on page 39 undefined on i
+nput line 2226.
+
+File: trump-open.pdf Graphic file (type pdf)
+<trump-open.pdf>
+[39] [40] [41] [42
+
+]
+第5章
+
+LaTeX Warning: Hyper reference `core/core:coreflow-1' on page 43 undefined on i
+nput line 2359.
+
+
+LaTeX Warning: Reference `core/core:coreflow-1' on page 43 undefined on input l
+ine 2359.
+
+File: plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf Graphic file (type 
+pdf)
+<plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf>
+
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2369.
+
+[43] [44]
+
+LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 45 undefined on i
+nput line 2420.
+
+
+LaTeX Warning: Reference `core/core:coreflow-2' on page 45 undefined on input l
+ine 2420.
+
+[45]
+File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
+pdf)
+<plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
+ [46]
+
+LaTeX Warning: Hyper reference `core/core:ability-image' on page 47 undefined o
+n input line 2508.
+
+
+LaTeX Warning: Reference `core/core:ability-image' on page 47 undefined on inpu
+t line 2508.
+
+File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
+pdf)
+<plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf>
+[47]
+
+LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 48 undefined on i
+nput line 2535.
+
+
+LaTeX Warning: Reference `core/core:coreflow-2' on page 48 undefined on input l
+ine 2535.
+
+File: plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf Graphic file (type 
+pdf)
+<plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf>
+
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2543.
+
+
+LaTeX Warning: Hyper reference `core/core:trigger-flow' on page 48 undefined on
+ input line 2599.
+
+
+LaTeX Warning: Reference `core/core:trigger-flow' on page 48 undefined on input
+ line 2599.
+
+File: plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf Graphic file (type 
+pdf)
+<plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf>
+
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2606.
+
+[48] [49] [50] [51] [52
+
+]
+第6章
+
+Underfull \hbox (badness 10000) in paragraph at lines 2658--2661
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
+ _ 27 / actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][] [][]$https :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2668--2671
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
+ _ 27 / actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][] [][]$https :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2678--2681
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
+ _ 27 / actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][] [][]$https :
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2688--2691
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
+ _ 27 / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
+ []
+
+[53]
+Underfull \hbox (badness 10000) in paragraph at lines 2703--2706
+[][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
+ _ 27 / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
+ []
+
+[54]
+第7章
+No file blackpoker.ind.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2732.
+[55
+
+]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2732.
+ (./blackpoker.aux)
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2732.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2732.
+
+
+
+Package rerunfilecheck Warning: File `blackpoker.out' has changed.
+(rerunfilecheck)                Rerun to get outlines right
+(rerunfilecheck)                or use package `bookmark'.
+
+Package rerunfilecheck Info: Checksums for `blackpoker.out':
+(rerunfilecheck)             Before: <no file>
+(rerunfilecheck)             After:  8D903369BB6CCCAB76E4D8BD3366D5C0;13154.
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2732.
+ ) 
+Here is how much of TeX's memory you used:
+ 9739 strings out of 482885
+ 145976 string characters out of 5957543
+ 425288 words of memory out of 5000000
+ 25132 multiletter control sequences out of 15000+600000
+ 584091 words of font info for 125 fonts, out of 8000000 for 9000
+ 20 hyphenation exceptions out of 8191
+ 44i,12n,49p,350b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
+
+Output written on blackpoker.dvi (59 pages, 154108 bytes).
