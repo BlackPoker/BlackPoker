@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn compile exec:java
 
 FROM blackpoker/blackpoker-doc-base:latest
 
-RUN pip3 install --upgrade pip
+# RUN pip3 install --upgrade pip
 RUN pip3 install pdfrw
 
 WORKDIR /
