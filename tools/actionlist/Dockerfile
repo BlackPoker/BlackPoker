@@ -33,7 +33,7 @@ RUN --mount=type=cache,target=/root/.m2 mvn compile exec:java
 # RUN apk --no-cache add py3-pip
 # RUN apk --no-cache add texlive-full
 
-FROM blackpoker/blackpoker-doc-base:latest
+FROM blackpoker/actionlist-base:latest
 
 RUN pip3 install --upgrade pip
 RUN pip3 install pdfrw
