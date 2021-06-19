@@ -22,9 +22,9 @@ copyright = '2013, BlackPoker'
 author = 'BlackPoker'
 numfig = True
 numfig_format = {
-    'figure': 'Fig. {number}',
-    'table': 'Table {number}',
-    'code-block': 'Listing {number}',
+    'figure': 'Fig. %s',
+    'table': 'Table %s',
+    'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
 # release = '2019/6/30'
