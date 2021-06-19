@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  3 JUN 2021 23:41
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  19 JUN 2021 10:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -804,6 +804,14 @@ File: field-ex.pdf Graphic file (type pdf)
 LaTeX Warning: Hyper reference `common/06-extra:extra' on page 16 undefined on 
 input line 960.
 
+
+LaTeX Warning: Reference `common/06-extra:extra' on page 16 undefined on input 
+line 960.
+
+
+LaTeX Warning: Reference `common/06-extra:extra' on page 16 undefined on input 
+line 960.
+
 [16]
 
 LaTeX Warning: Hyper reference `common/04-character::doc' on page 17 undefined 
@@ -1003,17 +1011,16 @@ File: character-sample.pdf Graphic file (type pdf)
 LaTeX Warning: Hyper reference `common/04-character:abi' on page 31 undefined o
 n input line 1745.
 
-[31]
+[31] [32]
 
-LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 32 undefi
+LaTeX Warning: Hyper reference `common/05-action_detail::doc' on page 33 undefi
 ned on input line 1805.
 
-[32]
+[33]
 
-LaTeX Warning: Hyper reference `core/core:component' on page 33 undefined on in
+LaTeX Warning: Hyper reference `core/core:component' on page 34 undefined on in
 put line 1883.
 
-[33]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 1896.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
@@ -1022,7 +1029,7 @@ LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 (Font)              scaled to size 4.805pt on input line 1896.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 4.805pt on input line 1896.
- [34]
+[34]
 
 LaTeX Warning: Hyper reference `common/05-action_detail:trigger' on page 35 und
 efined on input line 2001.
@@ -1062,17 +1069,17 @@ LaTeX Warning: Hyper reference `common/06-extra:ver-ex' on page 38 undefined on
 LaTeX Warning: Reference `common/06-extra:ver-ex' on page 38 undefined on input
  line 2136.
 
+[38]
 
-LaTeX Warning: Hyper reference `common/06-extra:trump' on page 38 undefined on 
+LaTeX Warning: Hyper reference `common/06-extra:trump' on page 39 undefined on 
 input line 2186.
 
 
-LaTeX Warning: Reference `common/06-extra:trump' on page 38 undefined on input 
+LaTeX Warning: Reference `common/06-extra:trump' on page 39 undefined on input 
 line 2186.
 
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
-[38]
 
 LaTeX Warning: Hyper reference `common/06-extra:trump-open' on page 39 undefine
 d on input line 2226.
@@ -1095,11 +1102,11 @@ nput line 2359.
 LaTeX Warning: Reference `core/core:coreflow-1' on page 43 undefined on input l
 ine 2359.
 
-File: plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf Graphic file (type 
+File: plantuml-942436994c78ebc4f57ee559ac9488a100f8346a.pdf Graphic file (type 
 pdf)
-<plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf>
+<plantuml-942436994c78ebc4f57ee559ac9488a100f8346a.pdf>
 
-LaTeX Warning: Float too large for page by 24.20094pt on input line 2369.
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2369.
 
 [43] [44]
 
@@ -1135,11 +1142,11 @@ nput line 2535.
 LaTeX Warning: Reference `core/core:coreflow-2' on page 48 undefined on input l
 ine 2535.
 
-File: plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf Graphic file (type 
+File: plantuml-942436994c78ebc4f57ee559ac9488a100f8346a.pdf Graphic file (type 
 pdf)
-<plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4.pdf>
+<plantuml-942436994c78ebc4f57ee559ac9488a100f8346a.pdf>
 
-LaTeX Warning: Float too large for page by 24.20094pt on input line 2543.
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2543.
 
 
 LaTeX Warning: Hyper reference `core/core:trigger-flow' on page 48 undefined on
@@ -1153,7 +1160,7 @@ File: plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf Graphic file (type
 pdf)
 <plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf>
 
-LaTeX Warning: Float too large for page by 24.20094pt on input line 2606.
+LaTeX Warning: Float too large for page by 24.94843pt on input line 2606.
 
 [48] [49] [50] [51] [52
 
@@ -1191,7 +1198,7 @@ Package rerunfilecheck Warning: File `blackpoker.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `blackpoker.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  FA63F758609C18F51F38866E91113FB4;2041.
+(rerunfilecheck)             After:  8D903369BB6CCCAB76E4D8BD3366D5C0;13154.
 
 LaTeX Warning: There were undefined references.
 
@@ -1201,12 +1208,12 @@ LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2732.
  ) 
 Here is how much of TeX's memory you used:
- 9737 strings out of 482885
- 145940 string characters out of 5957543
- 424274 words of memory out of 5000000
- 25130 multiletter control sequences out of 15000+600000
+ 9739 strings out of 482885
+ 145976 string characters out of 5957543
+ 424288 words of memory out of 5000000
+ 25132 multiletter control sequences out of 15000+600000
  584091 words of font info for 125 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 44i,12n,49p,346b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 44i,12n,49p,350b,490s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (59 pages, 146388 bytes).
+Output written on blackpoker.dvi (59 pages, 154044 bytes).

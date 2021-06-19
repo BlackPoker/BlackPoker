@@ -32,12 +32,12 @@
 \renewcommand{\contentsname}{Contents:}
 
 \usepackage{sphinxmessages}
-\setcounter{tocdepth}{1}
-
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
 
 
 \title{BlackPoker}
-\date{2021年06月03日}
+\date{2021年06月19日}
 \release{}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -879,7 +879,7 @@ Jokerは2枚まで入れられる
 
 \subsection{トランプの数字}
 \label{\detokenize{common/01-base:id5}}
-ゲーム全体を通してトランプの数字は次のような数値として扱います。(\hyperref[\detokenize{common/01-base:cardrank}]{表 \ref{\detokenize{common/01-base:cardrank}}})
+ゲーム全体を通してトランプの数字は次のような数値として扱います。(\hyperref[\detokenize{common/01-base:cardrank}]{Table \ref{\detokenize{common/01-base:cardrank}}})
 
 
 \begin{savenotes}\sphinxattablestart
@@ -933,7 +933,7 @@ Joker
 
 \subsection{カードの配置}
 \label{\detokenize{common/01-base:id6}}
-カードの配置には次のような場所があります。(\hyperref[\detokenize{common/01-base:field-ex}]{図 \ref{\detokenize{common/01-base:field-ex}}})
+カードの配置には次のような場所があります。(\hyperref[\detokenize{common/01-base:field-ex}]{Fig.\@ \ref{\detokenize{common/01-base:field-ex}}})
 
 \begin{figure}[htbp]
 \centering
@@ -957,7 +957,7 @@ Joker
 
 \item[{切札}] \leavevmode
 能力が割り当てられたカードを置きます。エクストラフォーマットのみで使用します。
-エクストラのルールについては、 {\hyperref[\detokenize{common/06-extra:extra}]{\sphinxcrossref{\DUrole{std,std-ref}{エクストラ}}}} で説明します。
+エクストラのルールについては、 \hyperref[\detokenize{common/06-extra:extra}]{\ref{\detokenize{common/06-extra:extra}} \nameref{\detokenize{common/06-extra:extra}}} で説明します。
 
 \end{description}
 
@@ -984,7 +984,7 @@ BlackPokerは主に兵士と防壁の攻防で対戦相手にダメージを与�
 \label{\detokenize{common/01-base:id10}}
 キャラクターには、チャージ状態とドライブ状態が存在します。
 チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
-また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(\hyperref[\detokenize{common/01-base:chargedrive}]{図 \ref{\detokenize{common/01-base:chargedrive}}})
+また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(\hyperref[\detokenize{common/01-base:chargedrive}]{Fig.\@ \ref{\detokenize{common/01-base:chargedrive}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1088,7 +1088,7 @@ BlackPokerは主に兵士と防壁の攻防で対戦相手にダメージを与�
 \subsection{ターンの流れ}
 \label{\detokenize{common/02-turn:id5}}
 「自分のターンの始め方」、
-「自分のターンにできること」をまとめると次のような流れになります。(\hyperref[\detokenize{common/02-turn:turn}]{図 \ref{\detokenize{common/02-turn:turn}}})
+「自分のターンにできること」をまとめると次のような流れになります。(\hyperref[\detokenize{common/02-turn:turn}]{Fig.\@ \ref{\detokenize{common/02-turn:turn}}})
 「自分のターンの始め方」で行っているキャラクターをチャージしたり、
 デッキからカードを引いたりする行動もアクションとして定義されています。
 
@@ -1129,7 +1129,7 @@ BlackPokerではアクションを起こした後に、
 \subsection{アクションが持つ項目}
 \label{\detokenize{common/03-action:id2}}
 アクションが持つ項目について説明します。
-凡例の「サンプル」アクションを見てみましょう。(\hyperref[\detokenize{common/03-action:action-sample}]{図 \ref{\detokenize{common/03-action:action-sample}}})
+凡例の「サンプル」アクションを見てみましょう。(\hyperref[\detokenize{common/03-action:action-sample}]{Fig.\@ \ref{\detokenize{common/03-action:action-sample}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1173,7 +1173,7 @@ BlackPokerではアクションを起こした後に、
 \subsubsection{コストの種類}
 \label{\detokenize{common/03-action:cost}}\label{\detokenize{common/03-action:id3}}
 アクションによって支払うコストが異なります。
-コストには次の種類があり、それぞれ支払い方が異なります。(\hyperref[\detokenize{common/03-action:table-cost}]{表 \ref{\detokenize{common/03-action:table-cost}}})
+コストには次の種類があり、それぞれ支払い方が異なります。(\hyperref[\detokenize{common/03-action:table-cost}]{Table \ref{\detokenize{common/03-action:table-cost}}})
 
 
 \begin{savenotes}\sphinxattablestart
@@ -1274,7 +1274,7 @@ S (Sacrifice)
 
 \end{enumerate}
 
-「サンプル」アクションを起こす例を見てみましょう。(\hyperref[\detokenize{common/03-action:action-sample2}]{図 \ref{\detokenize{common/03-action:action-sample2}}})
+「サンプル」アクションを起こす例を見てみましょう。(\hyperref[\detokenize{common/03-action:action-sample2}]{Fig.\@ \ref{\detokenize{common/03-action:action-sample2}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1439,7 +1439,7 @@ S (Sacrifice)
 
 \end{itemize}
 
-図にまとめると次のようになります。(\hyperref[\detokenize{common/03-action:chance}]{図 \ref{\detokenize{common/03-action:chance}}})
+図にまとめると次のようになります。(\hyperref[\detokenize{common/03-action:chance}]{Fig.\@ \ref{\detokenize{common/03-action:chance}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1494,7 +1494,7 @@ S (Sacrifice)
 
 \paragraph{タイミングとステージ}
 \label{\detokenize{common/03-action:id24}}
-ステージと合わせて説明すると次のようになります。(\hyperref[\detokenize{common/03-action:timing}]{図 \ref{\detokenize{common/03-action:timing}}})
+ステージと合わせて説明すると次のようになります。(\hyperref[\detokenize{common/03-action:timing}]{Fig.\@ \ref{\detokenize{common/03-action:timing}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1542,14 +1542,14 @@ S (Sacrifice)
 通常効果のアクションを起こすと、ステージという
 アクションの効果を発揮する順番を整理する
 場所に置かれます。
-アクションを起こした時のステージの状態を図で見てみましょう。(\hyperref[\detokenize{common/03-action:action-begin}]{図 \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{1}}} )
+アクションを起こした時のステージの状態を図で見てみましょう。(\hyperref[\detokenize{common/03-action:action-begin}]{Fig.\@ \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{1}}} )
 
 
 \paragraph{手順2. 対戦相手もアクションを起こすか聞く}
 \label{\detokenize{common/03-action:id28}}
 通常効果のアクションを起こすと対戦相手にチャンスが移り、
 起こしたアクションに割込んでアクションを起こせるようになります。
-対戦相手がアクションを起こす場合も、 {\hyperref[\detokenize{common/03-action:action-howto}]{\sphinxcrossref{\DUrole{std,std-ref}{アクションの起こし方}}}} と同じ手順でアクションを起こします。(\hyperref[\detokenize{common/03-action:action-begin}]{図 \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{2}}} )
+対戦相手がアクションを起こす場合も、 {\hyperref[\detokenize{common/03-action:action-howto}]{\sphinxcrossref{\DUrole{std,std-ref}{アクションの起こし方}}}} と同じ手順でアクションを起こします。(\hyperref[\detokenize{common/03-action:action-begin}]{Fig.\@ \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{2}}} )
 
 自分が通常効果のアクションを起こした後、対戦相手に「とおりますか？」
 （自分の起こしたアクションに割込みしないで通してくれますか？）
@@ -1564,7 +1564,7 @@ S (Sacrifice)
 \label{\detokenize{common/03-action:id29}}
 両プレイヤーの起こすアクションがなくなったところで、
 最後にステージに積まれたアクションの効果を発揮させます。
-(\hyperref[\detokenize{common/03-action:action-begin}]{図 \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{3}}} )
+(\hyperref[\detokenize{common/03-action:action-begin}]{Fig.\@ \ref{\detokenize{common/03-action:action-begin}}} aise0.2exhbox{	extcircled{scriptsize{3}}} )
 
 \begin{figure}[htbp]
 \centering
@@ -1707,7 +1707,7 @@ S (Sacrifice)
 キャラクターとは、場に存在する兵士や防壁のことを指します。
 
 キャラクターは1枚のカードで1体を表すこともあれば、
-複数枚で1体を表すこともあります。(\hyperref[\detokenize{common/04-character:character}]{図 \ref{\detokenize{common/04-character:character}}})
+複数枚で1体を表すこともあります。(\hyperref[\detokenize{common/04-character:character}]{Fig.\@ \ref{\detokenize{common/04-character:character}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1720,7 +1720,7 @@ S (Sacrifice)
 \subsection{キャラクターのもつ項目}
 \label{\detokenize{common/04-character:id3}}
 キャラクターのもつ項目について説明します。
-凡例のキャラクター「一般兵」を見てみましょう。(\hyperref[\detokenize{common/04-character:character-sample}]{図 \ref{\detokenize{common/04-character:character-sample}}})
+凡例のキャラクター「一般兵」を見てみましょう。(\hyperref[\detokenize{common/04-character:character-sample}]{Fig.\@ \ref{\detokenize{common/04-character:character-sample}}})
 
 \begin{figure}[htbp]
 \centering
@@ -1995,7 +1995,7 @@ S (Sacrifice)
 
 \end{description}
 
-図にすると次のようになります。(\hyperref[\detokenize{common/05-action_detail:trigger}]{図 \ref{\detokenize{common/05-action_detail:trigger}}})
+図にすると次のようになります。(\hyperref[\detokenize{common/05-action_detail:trigger}]{Fig.\@ \ref{\detokenize{common/05-action_detail:trigger}}})
 
 \begin{figure}[htbp]
 \centering
@@ -2034,7 +2034,7 @@ S (Sacrifice)
 
 \subsubsection{防壁の置き方}
 \label{\detokenize{common/05-action_detail:id13}}
-防壁を場に出すときは次のルールにしたがって場に出して下さい。(\hyperref[\detokenize{common/05-action_detail:set-bulwork}]{図 \ref{\detokenize{common/05-action_detail:set-bulwork}}})
+防壁を場に出すときは次のルールにしたがって場に出して下さい。(\hyperref[\detokenize{common/05-action_detail:set-bulwork}]{Fig.\@ \ref{\detokenize{common/05-action_detail:set-bulwork}}})
 \begin{itemize}
 \item {} 
 防壁を置く時はデッキ側に詰めて置いて下さい。
@@ -2130,7 +2130,7 @@ S (Sacrifice)
 版数毎に使える切札の種類が異なります。
 たとえば、第一版、第二版ではエクストラで遊ぶことはできません。
 第三版以降は、次版が出るまでの間に公開された切札であれば
-使用することができます。(\hyperref[\detokenize{common/06-extra:ver-ex}]{表 \ref{\detokenize{common/06-extra:ver-ex}}})
+使用することができます。(\hyperref[\detokenize{common/06-extra:ver-ex}]{Table \ref{\detokenize{common/06-extra:ver-ex}}})
 
 
 \begin{savenotes}\sphinxattablestart
@@ -2180,7 +2180,7 @@ ex5.22.0 〜
 \subsection{ゲームのはじめ方}
 \label{\detokenize{common/06-extra:id6}}
 エクストラでは、切札を置いてからゲームを始めます。
-切札を置くルールは次のようになっています。(\hyperref[\detokenize{common/06-extra:trump}]{図 \ref{\detokenize{common/06-extra:trump}}})
+切札を置くルールは次のようになっています。(\hyperref[\detokenize{common/06-extra:trump}]{Fig.\@ \ref{\detokenize{common/06-extra:trump}}})
 \begin{itemize}
 \item {} 
 対戦前に裏向きで2枚まで切札を置くことができる。
@@ -2220,7 +2220,7 @@ ex5.22.0 〜
 \subsubsection{能力を発揮する}
 \label{\detokenize{common/06-extra:id8}}
 切札に割り当てられた能力は
-「オープン」アクションを起こし表にすることで発揮します。(\hyperref[\detokenize{common/06-extra:trump-open}]{図 \ref{\detokenize{common/06-extra:trump-open}}})
+「オープン」アクションを起こし表にすることで発揮します。(\hyperref[\detokenize{common/06-extra:trump-open}]{Fig.\@ \ref{\detokenize{common/06-extra:trump-open}}})
 「オープン」アクションの詳細は、
 「エクストラリスト」を参照して下さい。
 切札が表でいる限り、
@@ -2353,7 +2353,7 @@ BlackPokerでは
 \label{\detokenize{core/core:id1}}\label{\detokenize{core/core::doc}}
 コアルールでは、ターン制ゲームに適用できる割込み処理についてルールを定義します。
 
-コアルールは、次の図を中心に説明します。(\hyperref[\detokenize{core/core:coreflow-1}]{図 \ref{\detokenize{core/core:coreflow-1}}})
+コアルールは、次の図を中心に説明します。(\hyperref[\detokenize{core/core:coreflow-1}]{Fig.\@ \ref{\detokenize{core/core:coreflow-1}}})
 詳細は後ほど説明しますが、ゲーム開始から勝敗が決まるまでこの図に集約して説明します。
 登場する用語はゲームに合わせて変更してください。
 まず、ターン等の用語について説明します。
@@ -2362,7 +2362,7 @@ BlackPokerでは
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4}.pdf}
+\noindent\sphinxincludegraphics{{plantuml-942436994c78ebc4f57ee559ac9488a100f8346a}.pdf}
 \caption{コアフロー}\label{\detokenize{core/core:id16}}\label{\detokenize{core/core:coreflow-1}}\end{figure}
 
 
@@ -2414,7 +2414,7 @@ BlackPokerでは
 \label{\detokenize{core/core:id7}}
 効果とはその効果を発揮した際に、プレイヤーが行う行動です。
 効果の中には、通常効果と即時効果があります。
-違いについては、図(\hyperref[\detokenize{core/core:coreflow-2}]{図 \ref{\detokenize{core/core:coreflow-2}}})を説明する際に分岐条件として登場します。
+違いについては、図(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})を説明する際に分岐条件として登場します。
 
 
 \subsection{タイミング}
@@ -2502,7 +2502,7 @@ BlackPokerでは
 アクションを誘発したりすることができます。
 
 能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
-(\hyperref[\detokenize{core/core:ability-image}]{図 \ref{\detokenize{core/core:ability-image}}})
+(\hyperref[\detokenize{core/core:ability-image}]{Fig.\@ \ref{\detokenize{core/core:ability-image}}})
 
 \begin{figure}[htbp]
 \centering
@@ -2529,14 +2529,14 @@ BlackPokerでは
 
 \section{コアフロー}
 \label{\detokenize{core/core:id14}}
-ここまでの説明を踏まえて、冒頭に紹介した図を説明します。(\hyperref[\detokenize{core/core:coreflow-2}]{図 \ref{\detokenize{core/core:coreflow-2}}})
+ここまでの説明を踏まえて、冒頭に紹介した図を説明します。(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})
 この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-a9a3274db53de589cea7114f13b676cbeb24fbb4}.pdf}
+\noindent\sphinxincludegraphics{{plantuml-942436994c78ebc4f57ee559ac9488a100f8346a}.pdf}
 \caption{コアフロー}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 \begin{description}
 \item[{{[}1{]}ゲーム開始}] \leavevmode
@@ -2593,7 +2593,7 @@ BlackPokerでは
 誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。
 
 誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
-誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow}]{図 \ref{\detokenize{core/core:trigger-flow}}})
+誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow}}})
 
 \begin{figure}[htbp]
 \centering
@@ -2709,7 +2709,7 @@ URLを記載
 \end{sphinxadmonition}
 
 
-\chapter{Indices and tables}
+\chapter{2   Indices and tables}
 \label{\detokenize{index:indices-and-tables}}\begin{itemize}
 \item {} 
 \DUrole{xref,std,std-ref}{genindex}
