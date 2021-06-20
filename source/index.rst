@@ -7,15 +7,15 @@ Welcome to BlackPoker's documentation!
 ======================================
 
 .. toctree::
-   :maxdepth: 5
+   :maxdepth: 3
    :caption: Contents:
-   :numbered: 5
+   :numbered: 10
 
    init/init
-   match-regulations/match-regulations
-   format/format
-   common/common
    core/core
+   common/common
+   format/format
+   match-regulations/match-regulations
    appendix/appendix
 
 .. section-numbering::
