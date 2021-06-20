@@ -1,161 +1,169 @@
 \contentsline {chapter}{\numberline {第1章}はじめに}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}ルールの構成}{1}{section.1.1}%
-\contentsline {chapter}{\numberline {第2章}対戦レギュレーション}{3}{chapter.2}%
-\contentsline {section}{\numberline {2.1}定義項目}{3}{section.2.1}%
-\contentsline {section}{\numberline {2.2}レギュレーション定義}{3}{section.2.2}%
-\contentsline {subsection}{\numberline {2.2.1}ライト}{3}{subsection.2.2.1}%
-\contentsline {subsubsection}{\numberline {2.2.1.1}フォーマット}{3}{subsubsection.2.2.1.1}%
-\contentsline {subsubsection}{\numberline {2.2.1.2}デッキ条件}{4}{subsubsection.2.2.1.2}%
-\contentsline {subsubsection}{\numberline {2.2.1.3}対戦前準備事項}{4}{subsubsection.2.2.1.3}%
-\contentsline {subsubsection}{\numberline {2.2.1.4}その他制限事項}{4}{subsubsection.2.2.1.4}%
-\contentsline {subsection}{\numberline {2.2.2}ライト40}{4}{subsection.2.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.2.1}フォーマット}{4}{subsubsection.2.2.2.1}%
-\contentsline {subsubsection}{\numberline {2.2.2.2}デッキ条件}{4}{subsubsection.2.2.2.2}%
-\contentsline {subsubsection}{\numberline {2.2.2.3}対戦前準備事項}{5}{subsubsection.2.2.2.3}%
-\contentsline {subsubsection}{\numberline {2.2.2.4}その他制限事項}{5}{subsubsection.2.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.3}スタンダード}{5}{subsection.2.2.3}%
-\contentsline {subsubsection}{\numberline {2.2.3.1}フォーマット}{5}{subsubsection.2.2.3.1}%
-\contentsline {subsubsection}{\numberline {2.2.3.2}デッキ条件}{5}{subsubsection.2.2.3.2}%
-\contentsline {subsubsection}{\numberline {2.2.3.3}対戦前準備事項}{5}{subsubsection.2.2.3.3}%
-\contentsline {subsubsection}{\numberline {2.2.3.4}その他制限事項}{5}{subsubsection.2.2.3.4}%
-\contentsline {subsection}{\numberline {2.2.4}スタンダード40}{5}{subsection.2.2.4}%
-\contentsline {subsubsection}{\numberline {2.2.4.1}フォーマット}{5}{subsubsection.2.2.4.1}%
-\contentsline {subsubsection}{\numberline {2.2.4.2}デッキ条件}{6}{subsubsection.2.2.4.2}%
-\contentsline {subsubsection}{\numberline {2.2.4.3}対戦前準備事項}{6}{subsubsection.2.2.4.3}%
-\contentsline {subsubsection}{\numberline {2.2.4.4}その他制限事項}{6}{subsubsection.2.2.4.4}%
-\contentsline {subsection}{\numberline {2.2.5}プロ}{6}{subsection.2.2.5}%
-\contentsline {subsubsection}{\numberline {2.2.5.1}フォーマット}{6}{subsubsection.2.2.5.1}%
-\contentsline {subsubsection}{\numberline {2.2.5.2}デッキ条件}{6}{subsubsection.2.2.5.2}%
-\contentsline {subsubsection}{\numberline {2.2.5.3}対戦前準備事項}{7}{subsubsection.2.2.5.3}%
-\contentsline {subsubsection}{\numberline {2.2.5.4}その他制限事項}{7}{subsubsection.2.2.5.4}%
-\contentsline {subsection}{\numberline {2.2.6}プロ40}{7}{subsection.2.2.6}%
-\contentsline {subsubsection}{\numberline {2.2.6.1}フォーマット}{7}{subsubsection.2.2.6.1}%
-\contentsline {subsubsection}{\numberline {2.2.6.2}デッキ条件}{7}{subsubsection.2.2.6.2}%
-\contentsline {subsubsection}{\numberline {2.2.6.3}対戦前準備事項}{7}{subsubsection.2.2.6.3}%
-\contentsline {subsubsection}{\numberline {2.2.6.4}その他制限事項}{7}{subsubsection.2.2.6.4}%
-\contentsline {subsection}{\numberline {2.2.7}マスター}{7}{subsection.2.2.7}%
-\contentsline {subsubsection}{\numberline {2.2.7.1}フォーマット}{7}{subsubsection.2.2.7.1}%
-\contentsline {subsubsection}{\numberline {2.2.7.2}デッキ条件}{8}{subsubsection.2.2.7.2}%
-\contentsline {subsubsection}{\numberline {2.2.7.3}対戦前準備事項}{8}{subsubsection.2.2.7.3}%
-\contentsline {subsubsection}{\numberline {2.2.7.4}その他制限事項}{8}{subsubsection.2.2.7.4}%
-\contentsline {subsection}{\numberline {2.2.8}マスター40}{8}{subsection.2.2.8}%
-\contentsline {subsubsection}{\numberline {2.2.8.1}フォーマット}{8}{subsubsection.2.2.8.1}%
-\contentsline {subsubsection}{\numberline {2.2.8.2}デッキ条件}{8}{subsubsection.2.2.8.2}%
-\contentsline {subsubsection}{\numberline {2.2.8.3}対戦前準備事項}{9}{subsubsection.2.2.8.3}%
-\contentsline {subsubsection}{\numberline {2.2.8.4}その他制限事項}{9}{subsubsection.2.2.8.4}%
-\contentsline {chapter}{\numberline {第3章}フォーマット}{11}{chapter.3}%
-\contentsline {section}{\numberline {3.1}フォーマットとは}{11}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}対戦レギュレーションとの違い}{11}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}共通ルールとの関係}{12}{subsection.3.1.2}%
-\contentsline {section}{\numberline {3.2}種類}{12}{section.3.2}%
-\contentsline {section}{\numberline {3.3}定義項目}{13}{section.3.3}%
-\contentsline {section}{\numberline {3.4}フォーマット定義}{13}{section.3.4}%
-\contentsline {subsection}{\numberline {3.4.1}ライト}{13}{subsection.3.4.1}%
-\contentsline {subsubsection}{\numberline {3.4.1.1}アクションリスト}{13}{subsubsection.3.4.1.1}%
-\contentsline {subsubsection}{\numberline {3.4.1.2}エクストラリスト}{13}{subsubsection.3.4.1.2}%
-\contentsline {subsubsection}{\numberline {3.4.1.3}事前準備}{13}{subsubsection.3.4.1.3}%
-\contentsline {subsubsection}{\numberline {3.4.1.4}その他事項}{13}{subsubsection.3.4.1.4}%
-\contentsline {chapter}{\numberline {第4章}共通ルール}{15}{chapter.4}%
-\contentsline {section}{\numberline {4.1}基本ルール}{15}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}プレイ人数}{15}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}用意するもの}{15}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}使用できるトランプ}{15}{subsection.4.1.3}%
-\contentsline {subsection}{\numberline {4.1.4}トランプの数字}{16}{subsection.4.1.4}%
-\contentsline {subsection}{\numberline {4.1.5}カードの配置}{16}{subsection.4.1.5}%
-\contentsline {subsection}{\numberline {4.1.6}勝利条件}{17}{subsection.4.1.6}%
-\contentsline {subsection}{\numberline {4.1.7}ダメージ}{17}{subsection.4.1.7}%
-\contentsline {subsection}{\numberline {4.1.8}キャラクター}{17}{subsection.4.1.8}%
-\contentsline {subsection}{\numberline {4.1.9}チャージとドライブ}{18}{subsection.4.1.9}%
-\contentsline {section}{\numberline {4.2}ゲームの流れ}{18}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}ゲームの始め方}{18}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}自分のターンの始め方}{19}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}自分のターンにできること}{19}{subsection.4.2.3}%
-\contentsline {subsection}{\numberline {4.2.4}ターンの流れ}{19}{subsection.4.2.4}%
-\contentsline {subsection}{\numberline {4.2.5}まとめ}{20}{subsection.4.2.5}%
-\contentsline {section}{\numberline {4.3}アクションの基本}{20}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}アクションが持つ項目}{21}{subsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.1.1}コストの種類}{21}{subsubsection.4.3.1.1}%
-\contentsline {subsubsection}{\numberline {4.3.1.2}即時効果と通常効果}{22}{subsubsection.4.3.1.2}%
-\contentsline {paragraph}{\numberline {4.3.1.2.1}記載されていないアクションの項目}{22}{paragraph.4.3.1.2.1}%
-\contentsline {subsection}{\numberline {4.3.2}アクションの起こし方}{22}{subsection.4.3.2}%
-\contentsline {subsubsection}{\numberline {4.3.2.1}アクションを起こすときの注意点}{23}{subsubsection.4.3.2.1}%
-\contentsline {paragraph}{\numberline {4.3.2.1.1}対象を指定しないでアクションを起こせるか？}{23}{paragraph.4.3.2.1.1}%
-\contentsline {paragraph}{\numberline {4.3.2.1.2}アクションを対象とするアクションは自身を対象にできるか？}{23}{paragraph.4.3.2.1.2}%
-\contentsline {subsubsection}{\numberline {4.3.2.2}アクションを起こした後}{23}{subsubsection.4.3.2.2}%
-\contentsline {subsection}{\numberline {4.3.3}アクションの効果を発揮}{24}{subsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.3.1}アクションが効果を発揮するときの注意点}{24}{subsubsection.4.3.3.1}%
-\contentsline {paragraph}{\numberline {4.3.3.1.1}「アクションを解決する際に指定した対象が「対象」項目に記載された条件を満たしていない場合、効果は発揮せず解決されます」とは？}{24}{paragraph.4.3.3.1.1}%
-\contentsline {paragraph}{\numberline {4.3.3.1.2}「効果の中に実行不可能な部分がある場合、可能な部分のみ実行します」とは？}{24}{paragraph.4.3.3.1.2}%
-\contentsline {subsubsection}{\numberline {4.3.3.2}アクションが効果を発揮した後}{24}{subsubsection.4.3.3.2}%
-\contentsline {paragraph}{\numberline {4.3.3.2.1}「キーカードを墓地に移す」とは？}{25}{paragraph.4.3.3.2.1}%
-\contentsline {paragraph}{\numberline {4.3.3.2.2}「勝敗判定」とは？}{25}{paragraph.4.3.3.2.2}%
-\contentsline {subsection}{\numberline {4.3.4}アクションが起こせる時と効果を発揮する時}{25}{subsection.4.3.4}%
-\contentsline {subsubsection}{\numberline {4.3.4.1}チャンスとは}{25}{subsubsection.4.3.4.1}%
-\contentsline {paragraph}{\numberline {4.3.4.1.1}チャンスの遷移と通常効果の発揮}{25}{paragraph.4.3.4.1.1}%
-\contentsline {subsubsection}{\numberline {4.3.4.2}タイミング}{26}{subsubsection.4.3.4.2}%
-\contentsline {subsubsection}{\numberline {4.3.4.3}メイン}{26}{subsubsection.4.3.4.3}%
-\contentsline {paragraph}{\numberline {4.3.4.3.1}クイック}{27}{paragraph.4.3.4.3.1}%
-\contentsline {paragraph}{\numberline {4.3.4.3.2}タイミングとステージ}{27}{paragraph.4.3.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.5}効果を発揮するまでの流れ}{27}{subsection.4.3.5}%
-\contentsline {subsubsection}{\numberline {4.3.5.1}通常効果が発揮されるまでの流れ}{27}{subsubsection.4.3.5.1}%
-\contentsline {paragraph}{\numberline {4.3.5.1.1}手順1. アクションを起こす}{28}{paragraph.4.3.5.1.1}%
-\contentsline {paragraph}{\numberline {4.3.5.1.2}手順2. 対戦相手もアクションを起こすか聞く}{28}{paragraph.4.3.5.1.2}%
-\contentsline {paragraph}{\numberline {4.3.5.1.3}手順3. 効果を発揮}{28}{paragraph.4.3.5.1.3}%
-\contentsline {paragraph}{\numberline {4.3.5.1.4}手順4. キーカードを墓地に移す}{29}{paragraph.4.3.5.1.4}%
-\contentsline {subsection}{\numberline {4.3.6}まとめ}{30}{subsection.4.3.6}%
-\contentsline {section}{\numberline {4.4}キャラクターと能力}{30}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}キャラクターとは}{31}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}キャラクターのもつ項目}{31}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}数字について}{32}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}能力とは}{32}{subsection.4.4.4}%
-\contentsline {subsubsection}{\numberline {4.4.4.1}能力の種類}{32}{subsubsection.4.4.4.1}%
-\contentsline {paragraph}{\numberline {4.4.4.1.1}常在型能力}{32}{paragraph.4.4.4.1.1}%
-\contentsline {paragraph}{\numberline {4.4.4.1.2}誘発型能力}{32}{paragraph.4.4.4.1.2}%
-\contentsline {subsection}{\numberline {4.4.5}まとめ}{33}{subsection.4.4.5}%
-\contentsline {section}{\numberline {4.5}アクションの詳細}{33}{section.4.5}%
-\contentsline {subsection}{\numberline {4.5.1}コントローラーとオーナー}{33}{subsection.4.5.1}%
-\contentsline {subsubsection}{\numberline {4.5.1.1}コントローラー}{33}{subsubsection.4.5.1.1}%
-\contentsline {subsubsection}{\numberline {4.5.1.2}オーナー}{34}{subsubsection.4.5.1.2}%
-\contentsline {subsection}{\numberline {4.5.2}誘発}{34}{subsection.4.5.2}%
-\contentsline {subsubsection}{\numberline {4.5.2.1}誘発の条件と誘発するアクション}{34}{subsubsection.4.5.2.1}%
-\contentsline {paragraph}{\numberline {4.5.2.1.1}誘発したアクションのコントローラー}{34}{paragraph.4.5.2.1.1}%
-\contentsline {subsubsection}{\numberline {4.5.2.2}誘発したアクションの解決}{35}{subsubsection.4.5.2.2}%
-\contentsline {paragraph}{\numberline {4.5.2.2.1}誘発の有無判定}{35}{paragraph.4.5.2.2.1}%
-\contentsline {paragraph}{\numberline {4.5.2.2.2}アクションの解決順}{35}{paragraph.4.5.2.2.2}%
-\contentsline {subsection}{\numberline {4.5.3}その他補足事項}{36}{subsection.4.5.3}%
-\contentsline {subsubsection}{\numberline {4.5.3.1}防壁の置き方}{36}{subsubsection.4.5.3.1}%
-\contentsline {subsubsection}{\numberline {4.5.3.2}1ターンに1回制限}{37}{subsubsection.4.5.3.2}%
-\contentsline {subsubsection}{\numberline {4.5.3.3}直接起こせないアクション}{37}{subsubsection.4.5.3.3}%
-\contentsline {subsection}{\numberline {4.5.4}まとめ}{37}{subsection.4.5.4}%
-\contentsline {section}{\numberline {4.6}エクストラ}{38}{section.4.6}%
-\contentsline {subsection}{\numberline {4.6.1}エクストラとは}{38}{subsection.4.6.1}%
-\contentsline {subsection}{\numberline {4.6.2}切札とは}{38}{subsection.4.6.2}%
-\contentsline {subsection}{\numberline {4.6.3}バージョンについて}{38}{subsection.4.6.3}%
-\contentsline {subsubsection}{\numberline {4.6.3.1}版数との関係について}{38}{subsubsection.4.6.3.1}%
-\contentsline {subsection}{\numberline {4.6.4}ゲームのはじめ方}{39}{subsection.4.6.4}%
-\contentsline {subsection}{\numberline {4.6.5}切札の能力}{39}{subsection.4.6.5}%
-\contentsline {subsubsection}{\numberline {4.6.5.1}能力を発揮する}{39}{subsubsection.4.6.5.1}%
-\contentsline {subsubsection}{\numberline {4.6.5.2}能力を無効化する}{40}{subsubsection.4.6.5.2}%
-\contentsline {subsection}{\numberline {4.6.6}まとめ}{40}{subsection.4.6.6}%
-\contentsline {section}{\numberline {4.7}その他のルール}{40}{section.4.7}%
-\contentsline {subsection}{\numberline {4.7.1}公開・非公開情報}{40}{subsection.4.7.1}%
-\contentsline {subsection}{\numberline {4.7.2}デッキのシャッフルについて}{41}{subsection.4.7.2}%
-\contentsline {chapter}{\numberline {第5章}コアルール}{43}{chapter.5}%
-\contentsline {section}{\numberline {5.1}ターン}{43}{section.5.1}%
-\contentsline {section}{\numberline {5.2}アクション}{43}{section.5.2}%
-\contentsline {section}{\numberline {5.3}チャンス}{43}{section.5.3}%
-\contentsline {section}{\numberline {5.4}ステージ}{45}{section.5.4}%
-\contentsline {section}{\numberline {5.5}アクションの定義項目}{45}{section.5.5}%
-\contentsline {subsection}{\numberline {5.5.1}効果}{45}{subsection.5.5.1}%
-\contentsline {subsection}{\numberline {5.5.2}タイミング}{45}{subsection.5.5.2}%
-\contentsline {subsubsection}{\numberline {5.5.2.1}エンドアクションの定義}{46}{subsubsection.5.5.2.1}%
-\contentsline {subsubsection}{\numberline {5.5.2.2}アクションのコントローラー}{46}{subsubsection.5.5.2.2}%
-\contentsline {section}{\numberline {5.6}コンポーネント}{46}{section.5.6}%
-\contentsline {section}{\numberline {5.7}能力}{47}{section.5.7}%
-\contentsline {section}{\numberline {5.8}コアフロー}{48}{section.5.8}%
-\contentsline {section}{\numberline {5.9}まとめ}{51}{section.5.9}%
-\contentsline {chapter}{\numberline {第6章}付録}{53}{chapter.6}%
-\contentsline {section}{\numberline {6.1}PDF版ルール}{53}{section.6.1}%
-\contentsline {section}{\numberline {6.2}アクションリスト}{53}{section.6.2}%
-\contentsline {section}{\numberline {6.3}エクストラリスト}{54}{section.6.3}%
-\contentsline {chapter}{\numberline {第7章}2�^^a0�^^a0�^^a0Indices and tables}{55}{chapter.7}%
+\contentsline {chapter}{\numberline {第2章}コアルール}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}ターン}{3}{section.2.1}%
+\contentsline {section}{\numberline {2.2}アクション}{3}{section.2.2}%
+\contentsline {section}{\numberline {2.3}チャンス}{3}{section.2.3}%
+\contentsline {section}{\numberline {2.4}ステージ}{3}{section.2.4}%
+\contentsline {section}{\numberline {2.5}アクションの定義項目}{4}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}効果}{4}{subsection.2.5.1}%
+\contentsline {subsection}{\numberline {2.5.2}タイミング}{4}{subsection.2.5.2}%
+\contentsline {subsubsection}{エンドアクションの定義}{5}{subsubsection*.3}%
+\contentsline {subsubsection}{アクションのコントローラー}{5}{subsubsection*.4}%
+\contentsline {section}{\numberline {2.6}コンポーネント}{5}{section.2.6}%
+\contentsline {section}{\numberline {2.7}能力}{6}{section.2.7}%
+\contentsline {section}{\numberline {2.8}コアフロー}{7}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}{[}1{]}ゲーム開始}{7}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.2}{[}2{]}ターンプレイヤーにチャンスを移動}{7}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.3}{[}3{]}ステージが空か？}{7}{subsection.2.8.3}%
+\contentsline {subsection}{\numberline {2.8.4}{[}4{]}パス名簿リセット}{7}{subsection.2.8.4}%
+\contentsline {subsection}{\numberline {2.8.5}{[}5{]}アクション起こす}{7}{subsection.2.8.5}%
+\contentsline {subsection}{\numberline {2.8.6}{[}6{]}即時効果か？}{7}{subsection.2.8.6}%
+\contentsline {subsection}{\numberline {2.8.7}{[}7{]}効果解決}{9}{subsection.2.8.7}%
+\contentsline {subsection}{\numberline {2.8.8}{[}8{]}勝敗判定}{9}{subsection.2.8.8}%
+\contentsline {subsection}{\numberline {2.8.9}{[}9{]}ステージに追加}{9}{subsection.2.8.9}%
+\contentsline {subsection}{\numberline {2.8.10}{[}10{]}誘発チェック}{9}{subsection.2.8.10}%
+\contentsline {subsection}{\numberline {2.8.11}{[}11{]}アクションを起こすか？}{9}{subsection.2.8.11}%
+\contentsline {subsection}{\numberline {2.8.12}{[}12{]}パス名簿に登録}{9}{subsection.2.8.12}%
+\contentsline {subsection}{\numberline {2.8.13}{[}13{]}パス名簿の件数=プレイヤー数か？}{9}{subsection.2.8.13}%
+\contentsline {subsection}{\numberline {2.8.14}{[}14{]}ステージから取出し}{9}{subsection.2.8.14}%
+\contentsline {subsection}{\numberline {2.8.15}{[}15{]}チャンス移動}{10}{subsection.2.8.15}%
+\contentsline {subsection}{\numberline {2.8.16}誘発チェック}{10}{subsection.2.8.16}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}1{]}誘発チェック}{10}{subsubsection*.5}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}2{]}即時誘発有無判定}{10}{subsubsection*.6}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}3{]}効果解決\&勝敗判定}{10}{subsubsection*.7}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}4{]}誘発有無判定}{12}{subsubsection*.8}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}5{]}ステージに追加}{12}{subsubsection*.9}%
+\contentsline {section}{\numberline {2.9}まとめ}{12}{section.2.9}%
+\contentsline {chapter}{\numberline {第3章}共通ルール}{13}{chapter.3}%
+\contentsline {section}{\numberline {3.1}プレイ人数}{13}{section.3.1}%
+\contentsline {section}{\numberline {3.2}用意するもの}{13}{section.3.2}%
+\contentsline {section}{\numberline {3.3}使用できるトランプ}{13}{section.3.3}%
+\contentsline {section}{\numberline {3.4}トランプの数字}{14}{section.3.4}%
+\contentsline {section}{\numberline {3.5}カードの配置}{14}{section.3.5}%
+\contentsline {section}{\numberline {3.6}勝利条件}{15}{section.3.6}%
+\contentsline {section}{\numberline {3.7}ダメージ}{15}{section.3.7}%
+\contentsline {section}{\numberline {3.8}キャラクター}{15}{section.3.8}%
+\contentsline {subsection}{\numberline {3.8.1}キャラクターのもつ項目}{16}{subsection.3.8.1}%
+\contentsline {subsection}{\numberline {3.8.2}キャラクターの数字}{16}{subsection.3.8.2}%
+\contentsline {subsection}{\numberline {3.8.3}キャラクターの注意点}{16}{subsection.3.8.3}%
+\contentsline {subsubsection}{複数枚で1体となるキャラクターが防壁になったら？}{16}{subsubsection*.10}%
+\contentsline {subsection}{\numberline {3.8.4}チャージとドライブ}{17}{subsection.3.8.4}%
+\contentsline {section}{\numberline {3.9}ゲームの始め方}{17}{section.3.9}%
+\contentsline {section}{\numberline {3.10}アクション}{18}{section.3.10}%
+\contentsline {subsection}{\numberline {3.10.1}アクションが持つ項目}{18}{subsection.3.10.1}%
+\contentsline {subsubsection}{記載されていないアクションの項目}{18}{subsubsection*.11}%
+\contentsline {subsection}{\numberline {3.10.2}コストの種類}{19}{subsection.3.10.2}%
+\contentsline {subsection}{\numberline {3.10.3}アクションの起こし方}{19}{subsection.3.10.3}%
+\contentsline {subsubsection}{アクションを起こすときの注意点}{20}{subsubsection*.12}%
+\contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{20}{paragraph*.13}%
+\contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{20}{paragraph*.14}%
+\contentsline {subsection}{\numberline {3.10.4}アクションの効果解決}{20}{subsection.3.10.4}%
+\contentsline {subsubsection}{対象条件を満たしているか}{20}{subsubsection*.15}%
+\contentsline {subsubsection}{効果の中に実行不可能な部分があるか}{20}{subsubsection*.16}%
+\contentsline {subsection}{\numberline {3.10.5}アクションの効果解決後}{20}{subsection.3.10.5}%
+\contentsline {subsubsection}{キーカードを墓地に移す}{21}{subsubsection*.17}%
+\contentsline {subsection}{\numberline {3.10.6}勝敗判定}{21}{subsection.3.10.6}%
+\contentsline {subsection}{\numberline {3.10.7}その他補足事項}{21}{subsection.3.10.7}%
+\contentsline {subsubsection}{防壁の置き方}{21}{subsubsection*.18}%
+\contentsline {subsubsection}{1ターンに1回制限}{21}{subsubsection*.19}%
+\contentsline {subsubsection}{直接起こせないアクション}{22}{subsubsection*.20}%
+\contentsline {section}{\numberline {3.11}エクストラ}{22}{section.3.11}%
+\contentsline {subsection}{\numberline {3.11.1}切札}{22}{subsection.3.11.1}%
+\contentsline {subsection}{\numberline {3.11.2}バージョン}{22}{subsection.3.11.2}%
+\contentsline {subsection}{\numberline {3.11.3}版数との関係}{22}{subsection.3.11.3}%
+\contentsline {subsection}{\numberline {3.11.4}ゲームのはじめ方}{23}{subsection.3.11.4}%
+\contentsline {subsection}{\numberline {3.11.5}切札の能力}{23}{subsection.3.11.5}%
+\contentsline {subsubsection}{能力を発揮する}{23}{subsubsection*.21}%
+\contentsline {subsubsection}{能力を無効化する}{24}{subsubsection*.22}%
+\contentsline {subsection}{\numberline {3.11.6}エクストラ注意事項}{24}{subsection.3.11.6}%
+\contentsline {subsubsection}{1ターンに1回制限のアクションについて}{24}{subsubsection*.23}%
+\contentsline {section}{\numberline {3.12}その他のルール}{24}{section.3.12}%
+\contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{24}{subsection.3.12.1}%
+\contentsline {subsubsection}{残りのデッキ枚数を聞かれたらどうしたらいいの？}{25}{subsubsection*.24}%
+\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{25}{subsubsection*.25}%
+\contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{25}{subsection.3.12.2}%
+\contentsline {chapter}{\numberline {第4章}フォーマット}{27}{chapter.4}%
+\contentsline {section}{\numberline {4.1}フォーマットとは}{27}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}対戦レギュレーションとの違い}{27}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}共通ルールとの関係}{28}{subsection.4.1.2}%
+\contentsline {section}{\numberline {4.2}種類}{28}{section.4.2}%
+\contentsline {section}{\numberline {4.3}定義項目}{29}{section.4.3}%
+\contentsline {section}{\numberline {4.4}フォーマット定義}{29}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}ライト}{29}{subsection.4.4.1}%
+\contentsline {subsubsection}{アクションリスト}{29}{subsubsection*.26}%
+\contentsline {subsubsection}{エクストラリスト}{29}{subsubsection*.27}%
+\contentsline {subsubsection}{事前準備}{29}{subsubsection*.28}%
+\contentsline {subsubsection}{その他事項}{29}{subsubsection*.29}%
+\contentsline {subsection}{\numberline {4.4.2}スタンダード}{30}{subsection.4.4.2}%
+\contentsline {subsubsection}{アクションリスト}{30}{subsubsection*.30}%
+\contentsline {subsubsection}{エクストラリスト}{30}{subsubsection*.31}%
+\contentsline {subsubsection}{事前準備}{30}{subsubsection*.32}%
+\contentsline {subsubsection}{その他事項}{30}{subsubsection*.33}%
+\contentsline {subsection}{\numberline {4.4.3}プロ}{30}{subsection.4.4.3}%
+\contentsline {subsubsection}{アクションリスト}{30}{subsubsection*.34}%
+\contentsline {subsubsection}{エクストラリスト}{30}{subsubsection*.35}%
+\contentsline {subsubsection}{事前準備}{30}{subsubsection*.36}%
+\contentsline {subsubsection}{その他事項}{30}{subsubsection*.37}%
+\contentsline {subsection}{\numberline {4.4.4}マスター}{31}{subsection.4.4.4}%
+\contentsline {subsubsection}{アクションリスト}{31}{subsubsection*.38}%
+\contentsline {subsubsection}{エクストラリスト}{31}{subsubsection*.39}%
+\contentsline {subsubsection}{事前準備}{31}{subsubsection*.40}%
+\contentsline {subsubsection}{その他事項}{31}{subsubsection*.41}%
+\contentsline {subsection}{\numberline {4.4.5}エクストラ}{31}{subsection.4.4.5}%
+\contentsline {subsubsection}{アクションリスト}{31}{subsubsection*.42}%
+\contentsline {subsubsection}{エクストラリスト}{31}{subsubsection*.43}%
+\contentsline {subsubsection}{事前準備}{31}{subsubsection*.44}%
+\contentsline {subsubsection}{その他事項}{31}{subsubsection*.45}%
+\contentsline {chapter}{\numberline {第5章}対戦レギュレーション}{33}{chapter.5}%
+\contentsline {section}{\numberline {5.1}定義項目}{33}{section.5.1}%
+\contentsline {section}{\numberline {5.2}レギュレーション定義}{33}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}ライト}{33}{subsection.5.2.1}%
+\contentsline {subsubsection}{フォーマット}{33}{subsubsection*.46}%
+\contentsline {subsubsection}{デッキ条件}{34}{subsubsection*.47}%
+\contentsline {subsubsection}{対戦前準備事項}{34}{subsubsection*.48}%
+\contentsline {subsubsection}{その他制限事項}{34}{subsubsection*.49}%
+\contentsline {subsection}{\numberline {5.2.2}ライト40}{34}{subsection.5.2.2}%
+\contentsline {subsubsection}{フォーマット}{34}{subsubsection*.50}%
+\contentsline {subsubsection}{デッキ条件}{34}{subsubsection*.51}%
+\contentsline {subsubsection}{対戦前準備事項}{35}{subsubsection*.52}%
+\contentsline {subsubsection}{その他制限事項}{35}{subsubsection*.53}%
+\contentsline {subsection}{\numberline {5.2.3}スタンダード}{35}{subsection.5.2.3}%
+\contentsline {subsubsection}{フォーマット}{35}{subsubsection*.54}%
+\contentsline {subsubsection}{デッキ条件}{35}{subsubsection*.55}%
+\contentsline {subsubsection}{対戦前準備事項}{35}{subsubsection*.56}%
+\contentsline {subsubsection}{その他制限事項}{35}{subsubsection*.57}%
+\contentsline {subsection}{\numberline {5.2.4}スタンダード40}{35}{subsection.5.2.4}%
+\contentsline {subsubsection}{フォーマット}{35}{subsubsection*.58}%
+\contentsline {subsubsection}{デッキ条件}{36}{subsubsection*.59}%
+\contentsline {subsubsection}{対戦前準備事項}{36}{subsubsection*.60}%
+\contentsline {subsubsection}{その他制限事項}{36}{subsubsection*.61}%
+\contentsline {subsection}{\numberline {5.2.5}プロ}{36}{subsection.5.2.5}%
+\contentsline {subsubsection}{フォーマット}{36}{subsubsection*.62}%
+\contentsline {subsubsection}{デッキ条件}{36}{subsubsection*.63}%
+\contentsline {subsubsection}{対戦前準備事項}{37}{subsubsection*.64}%
+\contentsline {subsubsection}{その他制限事項}{37}{subsubsection*.65}%
+\contentsline {subsection}{\numberline {5.2.6}プロ40}{37}{subsection.5.2.6}%
+\contentsline {subsubsection}{フォーマット}{37}{subsubsection*.66}%
+\contentsline {subsubsection}{デッキ条件}{37}{subsubsection*.67}%
+\contentsline {subsubsection}{対戦前準備事項}{37}{subsubsection*.68}%
+\contentsline {subsubsection}{その他制限事項}{37}{subsubsection*.69}%
+\contentsline {subsection}{\numberline {5.2.7}マスター}{37}{subsection.5.2.7}%
+\contentsline {subsubsection}{フォーマット}{37}{subsubsection*.70}%
+\contentsline {subsubsection}{デッキ条件}{38}{subsubsection*.71}%
+\contentsline {subsubsection}{対戦前準備事項}{38}{subsubsection*.72}%
+\contentsline {subsubsection}{その他制限事項}{38}{subsubsection*.73}%
+\contentsline {subsection}{\numberline {5.2.8}マスター40}{38}{subsection.5.2.8}%
+\contentsline {subsubsection}{フォーマット}{38}{subsubsection*.74}%
+\contentsline {subsubsection}{デッキ条件}{38}{subsubsection*.75}%
+\contentsline {subsubsection}{対戦前準備事項}{39}{subsubsection*.76}%
+\contentsline {subsubsection}{その他制限事項}{39}{subsubsection*.77}%
+\contentsline {chapter}{\numberline {第6章}付録}{41}{chapter.6}%
+\contentsline {section}{\numberline {6.1}PDF版ルール}{41}{section.6.1}%
+\contentsline {section}{\numberline {6.2}アクションリスト}{41}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}ライト}{41}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}スタンダード}{41}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}プロ}{42}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}マスター}{42}{subsection.6.2.4}%
+\contentsline {section}{\numberline {6.3}エクストラリスト}{42}{section.6.3}%
+\contentsline {chapter}{\numberline {第7章}2�^^a0�^^a0�^^a0Indices and tables}{43}{chapter.7}%

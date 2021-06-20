@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="265px" preserveAspectRatio="none" style="width:764px;height:265px;" version="1.1" viewBox="0 0 764 265" width="764px" zoomAndPan="magnify"><defs><filter height="300%" id="f1g85hay7n9mih" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[7663f4622c0f2c435ab42eda539713f6]
+cluster format--><rect fill="#FFFFFF" filter="url(#f1g85hay7n9mih)" height="128" style="stroke: #000000; stroke-width: 1.5;" width="366" x="197" y="120.9531"/><path d="M291,121.9531 L291,132.2734 L281,142.2734 L197,142.2734 " fill="none" style="stroke: #000000; stroke-width: 1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacingAndGlyphs" textLength="84" x="200" y="136.5547">フォーマット</text><!--MD5=[afe7ad07184fbce48cbf52f31f19d296]
+entity アクションリスト--><rect fill="#FEFECE" filter="url(#f1g85hay7n9mih)" height="38.3203" style="stroke: #000000; stroke-width: 1.5;" width="132" x="407" y="186.9531"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="112" x="417" y="211.5547">アクションリスト</text><!--MD5=[3fc2418242b36956a79c1ddac69fccef]
+entity エクストラリスト--><rect fill="#FEFECE" filter="url(#f1g85hay7n9mih)" height="38.3203" style="stroke: #000000; stroke-width: 1.5;" width="132" x="240" y="186.9531"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="112" x="250" y="211.5547">エクストラリスト</text><!--MD5=[0d482ad21d5c7c11aa976e45da5ecfe6]
+entity core--><rect fill="#FEFECE" filter="url(#f1g85hay7n9mih)" height="38.3203" style="stroke: #000000; stroke-width: 1.5;" width="90" x="7" y="9.9531"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="70" x="17" y="34.5547">コアルール</text><!--MD5=[8274bfb416b6365278739ca5c48d26ea]
+entity common--><rect fill="#FEFECE" filter="url(#f1g85hay7n9mih)" height="38.3203" style="stroke: #000000; stroke-width: 1.5;" width="90" x="160" y="9.9531"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="70" x="170" y="34.5547">共通ルール</text><!--MD5=[4ce29d5cb3193d40f69bc8bb1641bb04]
+entity regulation--><rect fill="#FEFECE" filter="url(#f1g85hay7n9mih)" height="38.3203" style="stroke: #000000; stroke-width: 1.5;" width="160" x="587" y="186.9531"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacingAndGlyphs" textLength="140" x="597" y="211.5547">対戦レギュレーション</text><!--MD5=[0a423c99ee0ef137b5d99b7451b8d5db]
+reverse link core to common--><path d="M102.26,28.9531 C120.88,28.9531 141.86,28.9531 159.98,28.9531 " fill="none" id="core&lt;-common" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="97.08,28.9531,106.08,32.9531,102.08,28.9531,106.08,24.9531,97.08,28.9531" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="115.5" y="21.5117">参照</text><!--MD5=[6b333616153c8e36995af3be2b2c2717]
+reverse link common to format--><path d="M205,53.1831 C205,64.8906 205,80.02 205,96.1798 C205,104.2598 205,112.5973 205,120.8935 " fill="none" id="common&lt;-format" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="205,48.0231,201,57.0231,205,53.0231,209,57.0231,205,48.0231" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="206" y="92.5117">参照</text><!--MD5=[9e29b1bc8a65fccade3f1e1035d80255]
+reverse link format to regulation--><path d="M211.2746,120.9166 C211.3529,120.7693 211.4317,120.6223 211.5112,120.4757 C212.1465,119.3027 212.8183,118.1524 213.5283,117.0276 C216.3686,112.5286 219.8213,108.4394 224,104.9531 C252.24,81.3931 520.72,91.6231 555,104.9531 C597.46,121.4631 633.94,162.1831 652.96,186.5831 " fill="none" id="format&lt;-regulation" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#A80036" points="211.2746,120.9166,219.0298,114.8457,213.6207,116.5012,211.9651,111.092,211.2746,120.9166" style="stroke: #A80036; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="26" x="399" y="92.5117">参照</text><!--MD5=[fe694beaab40c334e3f0edbd69b1934c]
+@startuml
+rectangle コアルール as core
+rectangle 共通ルール as common
+
+frame フォーマット as format{
+    rectangle アクションリスト
+    rectangle エクストラリスト
+}
+
+rectangle 対戦レギュレーション as regulation
+
+core <- common : 参照
+common <- - format : 参照
+format <- regulation : 参照
+
+@enduml
+
+PlantUML version 1.2020.14(Sat Jun 20 14:14:34 GMT 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Default Encoding: UTF-8
+Language: ja
+Country: JP
+--></g></svg>
