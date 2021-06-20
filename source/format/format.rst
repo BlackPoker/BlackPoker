@@ -116,5 +116,6 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
    light
    standard 
    pro 
-   master 
+   master
+   extra
 
