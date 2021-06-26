@@ -20,11 +20,3 @@ Welcome to BlackPoker's documentation!
 
 .. section-numbering::
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
