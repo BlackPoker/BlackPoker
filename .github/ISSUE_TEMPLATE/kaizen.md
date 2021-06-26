@@ -6,10 +6,10 @@ labels: enhancement
 assignees: BlackPoker
 
 ---
-**　As-Iｓ　**（現状の問題）
+**　As-Iｓ　**(現状の問題)
 
 ** To-Be **(どうしたらいいか)
 
-**　Reason　** (理由)
+**　Reason　**(理由)
 
-**　Note　** (備考)
+**　Note　**(備考)
