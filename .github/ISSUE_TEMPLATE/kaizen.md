@@ -10,6 +10,6 @@ assignees: BlackPoker
 
 ** To-Be **(どうしたらいいか)
 
-＊＊　Reason　** (理由)
+**　Reason　** (理由)
 
-＊＊　Note　** (備考)
+**　Note　** (備考)
