@@ -6,7 +6,7 @@ labels: question
 assignees: BlackPoker
 
 ---
-**　Question　**（疑問・質問）
+**Question**(疑問・質問)
 
 
-**　Note　** (備考)
+**Note**(備考)
