@@ -74,15 +74,15 @@
 \contentsline {subsection}{\numberline {3.11.3}版数との関係}{22}{subsection.3.11.3}%
 \contentsline {subsection}{\numberline {3.11.4}ゲームのはじめ方}{23}{subsection.3.11.4}%
 \contentsline {subsection}{\numberline {3.11.5}切札の能力}{23}{subsection.3.11.5}%
-\contentsline {subsubsection}{能力を発揮する}{23}{subsubsection*.21}%
-\contentsline {subsubsection}{能力を無効化する}{24}{subsubsection*.22}%
+\contentsline {subsubsection}{能力を有効にする}{23}{subsubsection*.21}%
+\contentsline {subsubsection}{能力を無効する}{24}{subsubsection*.22}%
 \contentsline {subsection}{\numberline {3.11.6}エクストラ注意事項}{24}{subsection.3.11.6}%
 \contentsline {subsubsection}{1ターンに1回制限のアクションについて}{24}{subsubsection*.23}%
 \contentsline {section}{\numberline {3.12}その他のルール}{24}{section.3.12}%
 \contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{24}{subsection.3.12.1}%
 \contentsline {subsubsection}{残りのデッキ枚数を聞かれたらどうしたらいいの？}{25}{subsubsection*.24}%
 \contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{25}{subsubsection*.25}%
-\contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{25}{subsection.3.12.2}%
+\contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{26}{subsection.3.12.2}%
 \contentsline {chapter}{\numberline {第4章}フォーマット}{27}{chapter.4}%
 \contentsline {section}{\numberline {4.1}フォーマットとは}{27}{section.4.1}%
 \contentsline {subsection}{\numberline {4.1.1}対戦レギュレーションとの違い}{27}{subsection.4.1.1}%
@@ -128,42 +128,66 @@
 \contentsline {subsubsection}{デッキ条件}{34}{subsubsection*.51}%
 \contentsline {subsubsection}{対戦前準備事項}{35}{subsubsection*.52}%
 \contentsline {subsubsection}{その他制限事項}{35}{subsubsection*.53}%
-\contentsline {subsection}{\numberline {5.2.3}スタンダード}{35}{subsection.5.2.3}%
+\contentsline {subsection}{\numberline {5.2.3}ライトランダムハーフ}{35}{subsection.5.2.3}%
 \contentsline {subsubsection}{フォーマット}{35}{subsubsection*.54}%
 \contentsline {subsubsection}{デッキ条件}{35}{subsubsection*.55}%
 \contentsline {subsubsection}{対戦前準備事項}{35}{subsubsection*.56}%
-\contentsline {subsubsection}{その他制限事項}{35}{subsubsection*.57}%
-\contentsline {subsection}{\numberline {5.2.4}スタンダード40}{35}{subsection.5.2.4}%
-\contentsline {subsubsection}{フォーマット}{35}{subsubsection*.58}%
+\contentsline {subsubsection}{その他制限事項}{36}{subsubsection*.57}%
+\contentsline {subsection}{\numberline {5.2.4}スタンダード}{36}{subsection.5.2.4}%
+\contentsline {subsubsection}{フォーマット}{36}{subsubsection*.58}%
 \contentsline {subsubsection}{デッキ条件}{36}{subsubsection*.59}%
 \contentsline {subsubsection}{対戦前準備事項}{36}{subsubsection*.60}%
 \contentsline {subsubsection}{その他制限事項}{36}{subsubsection*.61}%
-\contentsline {subsection}{\numberline {5.2.5}プロ}{36}{subsection.5.2.5}%
+\contentsline {subsection}{\numberline {5.2.5}スタンダード40}{36}{subsection.5.2.5}%
 \contentsline {subsubsection}{フォーマット}{36}{subsubsection*.62}%
-\contentsline {subsubsection}{デッキ条件}{36}{subsubsection*.63}%
+\contentsline {subsubsection}{デッキ条件}{37}{subsubsection*.63}%
 \contentsline {subsubsection}{対戦前準備事項}{37}{subsubsection*.64}%
 \contentsline {subsubsection}{その他制限事項}{37}{subsubsection*.65}%
-\contentsline {subsection}{\numberline {5.2.6}プロ40}{37}{subsection.5.2.6}%
+\contentsline {subsection}{\numberline {5.2.6}スタンダードランダムハーフ}{37}{subsection.5.2.6}%
 \contentsline {subsubsection}{フォーマット}{37}{subsubsection*.66}%
 \contentsline {subsubsection}{デッキ条件}{37}{subsubsection*.67}%
-\contentsline {subsubsection}{対戦前準備事項}{37}{subsubsection*.68}%
-\contentsline {subsubsection}{その他制限事項}{37}{subsubsection*.69}%
-\contentsline {subsection}{\numberline {5.2.7}マスター}{37}{subsection.5.2.7}%
-\contentsline {subsubsection}{フォーマット}{37}{subsubsection*.70}%
+\contentsline {subsubsection}{対戦前準備事項}{38}{subsubsection*.68}%
+\contentsline {subsubsection}{その他制限事項}{38}{subsubsection*.69}%
+\contentsline {subsection}{\numberline {5.2.7}プロ}{38}{subsection.5.2.7}%
+\contentsline {subsubsection}{フォーマット}{38}{subsubsection*.70}%
 \contentsline {subsubsection}{デッキ条件}{38}{subsubsection*.71}%
-\contentsline {subsubsection}{対戦前準備事項}{38}{subsubsection*.72}%
-\contentsline {subsubsection}{その他制限事項}{38}{subsubsection*.73}%
-\contentsline {subsection}{\numberline {5.2.8}マスター40}{38}{subsection.5.2.8}%
-\contentsline {subsubsection}{フォーマット}{38}{subsubsection*.74}%
-\contentsline {subsubsection}{デッキ条件}{38}{subsubsection*.75}%
+\contentsline {subsubsection}{対戦前準備事項}{39}{subsubsection*.72}%
+\contentsline {subsubsection}{その他制限事項}{39}{subsubsection*.73}%
+\contentsline {subsection}{\numberline {5.2.8}プロ40}{39}{subsection.5.2.8}%
+\contentsline {subsubsection}{フォーマット}{39}{subsubsection*.74}%
+\contentsline {subsubsection}{デッキ条件}{39}{subsubsection*.75}%
 \contentsline {subsubsection}{対戦前準備事項}{39}{subsubsection*.76}%
 \contentsline {subsubsection}{その他制限事項}{39}{subsubsection*.77}%
-\contentsline {chapter}{\numberline {第6章}付録}{41}{chapter.6}%
-\contentsline {section}{\numberline {6.1}PDF版ルール}{41}{section.6.1}%
-\contentsline {section}{\numberline {6.2}アクションリスト}{41}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}ライト}{41}{subsection.6.2.1}%
-\contentsline {subsection}{\numberline {6.2.2}スタンダード}{41}{subsection.6.2.2}%
-\contentsline {subsection}{\numberline {6.2.3}プロ}{42}{subsection.6.2.3}%
-\contentsline {subsection}{\numberline {6.2.4}マスター}{42}{subsection.6.2.4}%
-\contentsline {section}{\numberline {6.3}エクストラリスト}{42}{section.6.3}%
-\contentsline {chapter}{\numberline {第7章}2�^^a0�^^a0�^^a0Indices and tables}{43}{chapter.7}%
+\contentsline {subsection}{\numberline {5.2.9}プロランダムハーフ}{39}{subsection.5.2.9}%
+\contentsline {subsubsection}{フォーマット}{39}{subsubsection*.78}%
+\contentsline {subsubsection}{デッキ条件}{40}{subsubsection*.79}%
+\contentsline {subsubsection}{対戦前準備事項}{40}{subsubsection*.80}%
+\contentsline {subsubsection}{その他制限事項}{40}{subsubsection*.81}%
+\contentsline {subsection}{\numberline {5.2.10}マスター}{41}{subsection.5.2.10}%
+\contentsline {subsubsection}{フォーマット}{41}{subsubsection*.82}%
+\contentsline {subsubsection}{デッキ条件}{41}{subsubsection*.83}%
+\contentsline {subsubsection}{対戦前準備事項}{41}{subsubsection*.84}%
+\contentsline {subsubsection}{その他制限事項}{41}{subsubsection*.85}%
+\contentsline {subsection}{\numberline {5.2.11}マスター40}{41}{subsection.5.2.11}%
+\contentsline {subsubsection}{フォーマット}{41}{subsubsection*.86}%
+\contentsline {subsubsection}{デッキ条件}{41}{subsubsection*.87}%
+\contentsline {subsubsection}{対戦前準備事項}{42}{subsubsection*.88}%
+\contentsline {subsubsection}{その他制限事項}{42}{subsubsection*.89}%
+\contentsline {subsection}{\numberline {5.2.12}マスターランダムハーフ}{42}{subsection.5.2.12}%
+\contentsline {subsubsection}{フォーマット}{42}{subsubsection*.90}%
+\contentsline {subsubsection}{デッキ条件}{42}{subsubsection*.91}%
+\contentsline {subsubsection}{対戦前準備事項}{42}{subsubsection*.92}%
+\contentsline {subsubsection}{その他制限事項}{43}{subsubsection*.93}%
+\contentsline {subsection}{\numberline {5.2.13}エクストラ}{43}{subsection.5.2.13}%
+\contentsline {subsubsection}{フォーマット}{43}{subsubsection*.94}%
+\contentsline {subsubsection}{デッキ条件}{43}{subsubsection*.95}%
+\contentsline {subsubsection}{対戦前準備事項}{43}{subsubsection*.96}%
+\contentsline {subsubsection}{その他制限事項}{43}{subsubsection*.97}%
+\contentsline {chapter}{\numberline {第6章}付録}{45}{chapter.6}%
+\contentsline {section}{\numberline {6.1}PDF版ルール}{45}{section.6.1}%
+\contentsline {section}{\numberline {6.2}アクションリスト}{45}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}ライト}{45}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}スタンダード}{45}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}プロ}{46}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}マスター}{46}{subsection.6.2.4}%
+\contentsline {section}{\numberline {6.3}エクストラリスト}{46}{section.6.3}%

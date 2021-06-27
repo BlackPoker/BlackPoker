@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  20 JUN 2021 11:09
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  27 JUN 2021 13:33
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -504,26 +504,26 @@ File: l3backend-dvipdfmx.def 2020-08-07 L3 backend support: dvipdfmx
 No file blackpoker.aux.
 \openout1 = `blackpoker.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 46.
-LaTeX Font Info:    ... okay on input line 46.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 45.
+LaTeX Font Info:    ... okay on input line 45.
 (I search kanjifont definition file: . . )
 \AtBeginShipoutBox=\box82
 
@@ -563,7 +563,7 @@ LaTeX Font Info:    ... okay on input line 46.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 46.
+Package hyperref Info: Link coloring ON on input line 45.
 (/usr/local/texlive/2020/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
 
@@ -576,9 +576,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count286
 )
-LaTeX Info: Redefining \ref on input line 46.
-LaTeX Info: Redefining \pageref on input line 46.
-LaTeX Info: Redefining \nameref on input line 46.
+LaTeX Info: Redefining \ref on input line 45.
+LaTeX Info: Redefining \pageref on input line 45.
+LaTeX Info: Redefining \nameref on input line 45.
 \@outlinefile=\write5
 \openout5 = `blackpoker.out'.
 
@@ -586,86 +586,86 @@ LaTeX Info: Redefining \nameref on input line 46.
 
 Package hyperref Warning: Rerun to get /PageLabels entry.
 
-Package hyperref Info: Option `pageanchor' set `false' on input line 49.
+Package hyperref Info: Option `pageanchor' set `false' on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 49.
+(Font)              scaled to size 9.60999pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 49.
-LaTeX Font Info:    Trying to load font information for T1+phv on input line 49
+(Font)              scaled to size 9.60999pt on input line 48.
+LaTeX Font Info:    Trying to load font information for T1+phv on input line 48
 .
 (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1phv.fd
 File: t1phv.fd 2020/03/25 scalable font definitions for T1/phv.
 )
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <10> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 49.
+(Font)              scaled to size 9.60999pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <10> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 49.
+(Font)              scaled to size 9.60999pt on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <24.88> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <24.88> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 49.
+(Font)              scaled to size 23.90964pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <24.88> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <24.88> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 49.
+(Font)              scaled to size 23.90964pt on input line 48.
 LaTeX Font Info:    Kanji font shape `JY1/gt/b/it' undefined
-(Font)              No change on input line 49.
+(Font)              No change on input line 48.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <10> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 49.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <17.28> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <17.28> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 49.
+(Font)              scaled to size 16.60605pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <17.28> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <17.28> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 49.
+(Font)              scaled to size 16.60605pt on input line 48.
 LaTeX Font Info:    Font shape `T1/phv/b/it' in size <17.28> not available
-(Font)              Font shape `T1/phv/b/sl' tried instead on input line 49.
+(Font)              Font shape `T1/phv/b/sl' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 49.
+(Font)              scaled to size 16.60605pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 49.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 49.
+(Font)              scaled to size 11.53198pt on input line 48.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 48.
 
 
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 49.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 48.
 
 
 (/usr/local/texlive/2020/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <12> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 49.
+(Font)              scaled to size 11.53198pt on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <12> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 49.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 48.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 49.
+(Font)              scaled to size 11.53198pt on input line 48.
  [1
 
 
@@ -674,24 +674,24 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 
 ]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 51.
+(Font)              scaled to size 23.90964pt on input line 50.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 51.
+(Font)              scaled to size 23.90964pt on input line 50.
 \tf@toc=\write6
 \openout6 = `blackpoker.toc'.
 
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 51.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 51.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 51.
+(Font)              scaled to size 9.60999pt on input line 50.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 51.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 51.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 50.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 51.
+(Font)              scaled to size 9.60999pt on input line 50.
 
 [1
 
@@ -700,34 +700,34 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 ]
 第1章
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 57.
+(Font)              scaled to size 19.9311pt on input line 56.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 57.
+(Font)              scaled to size 19.9311pt on input line 56.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 57.
+(Font)              scaled to size 19.9311pt on input line 56.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 57.
+(Font)              scaled to size 19.9311pt on input line 56.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
+(Font)              scaled to size 13.83836pt on input line 65.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
+(Font)              scaled to size 13.83836pt on input line 65.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
+(Font)              scaled to size 13.83836pt on input line 65.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
+(Font)              scaled to size 13.83836pt on input line 65.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 66.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 65.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 66.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 65.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
+(Font)              scaled to size 13.83836pt on input line 65.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 66.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 65.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 66.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 65.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 66.
-LaTeX Font Info:    Trying to load font information for T1+pcr on input line 70
+(Font)              scaled to size 13.83836pt on input line 65.
+LaTeX Font Info:    Trying to load font information for T1+pcr on input line 69
 .
 (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
@@ -743,37 +743,37 @@ pdf)
 第2章
 [3]
 LaTeX Font Info:    Trying to load font information for TS1+ptm on input line 1
-13.
+12.
  (/usr/local/texlive/2020/texmf-dist/tex/latex/psnfss/ts1ptm.fd
 File: ts1ptm.fd 2001/06/04 font definitions for TS1/ptm.
 )
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 122.
+(Font)              scaled to size 11.53198pt on input line 121.
 
 
 LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 4 undefined on in
-put line 126.
+put line 125.
 
 
 LaTeX Warning: Reference `core/core:coreflow-2' on page 4 undefined on input li
-ne 126.
+ne 125.
 
 [4]
 File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
 pdf)
 <plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 200.
+(Font)              scaled to size 8.64899pt on input line 199.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 200.
+(Font)              scaled to size 8.64899pt on input line 199.
  [5]
 
 LaTeX Warning: Hyper reference `core/core:ability-image' on page 6 undefined on
- input line 210.
+ input line 208.
 
 
 LaTeX Warning: Reference `core/core:ability-image' on page 6 undefined on input
- line 210.
+ line 208.
 
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
@@ -781,336 +781,373 @@ pdf)
 [6]
 
 LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 7 undefined on in
-put line 237.
+put line 235.
 
 
 LaTeX Warning: Reference `core/core:coreflow-2' on page 7 undefined on input li
-ne 237.
+ne 235.
 
 File: plantuml-1f7308387c9dc0dd58a0199510bada736a26d4e5.pdf Graphic file (type 
 pdf)
 <plantuml-1f7308387c9dc0dd58a0199510bada736a26d4e5.pdf>
 
-LaTeX Warning: Float too large for page by 24.94843pt on input line 244.
+LaTeX Warning: Float too large for page by 24.94843pt on input line 242.
 
 [7] [8]
 
 LaTeX Warning: Hyper reference `core/core:trigger-check' on page 9 undefined on
- input line 296.
+ input line 294.
 
 
 LaTeX Warning: Reference `core/core:trigger-check' on page 9 undefined on input
- line 296.
+ line 294.
 
 
 LaTeX Warning: Reference `core/core:trigger-check' on page 9 undefined on input
- line 296.
+ line 294.
 
 [9]
 
 LaTeX Warning: Hyper reference `core/core:trigger-flow' on page 10 undefined on
- input line 332.
+ input line 330.
 
 
 LaTeX Warning: Reference `core/core:trigger-flow' on page 10 undefined on input
- line 332.
+ line 330.
 
 File: plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf Graphic file (type 
 pdf)
 <plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf>
 
-LaTeX Warning: Float too large for page by 24.94843pt on input line 339.
+LaTeX Warning: Float too large for page by 24.94843pt on input line 337.
 
 [10] [11] [12]
 第3章
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 417.
+(Font)              scaled to size 6.72699pt on input line 415.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 417.
+(Font)              scaled to size 4.805pt on input line 415.
 [13
 
 ]
 
 LaTeX Warning: Hyper reference `common/common:cardrank' on page 14 undefined on
- input line 446.
+ input line 444.
 
 
 LaTeX Warning: Reference `common/common:cardrank' on page 14 undefined on input
- line 446.
+ line 444.
 
 
 LaTeX Warning: Hyper reference `common/common:field-ex' on page 14 undefined on
- input line 500.
+ input line 498.
 
 
 LaTeX Warning: Reference `common/common:field-ex' on page 14 undefined on input
- line 500.
+ line 498.
 
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
 [14]
 
 LaTeX Warning: Hyper reference `common/common:extra' on page 15 undefined on in
-put line 524.
+put line 522.
 
 
 LaTeX Warning: Reference `common/common:extra' on page 15 undefined on input li
-ne 524.
+ne 522.
 
 
 LaTeX Warning: Reference `common/common:extra' on page 15 undefined on input li
-ne 524.
+ne 522.
 
 
 LaTeX Warning: Hyper reference `common/common:character' on page 15 undefined o
-n input line 545.
+n input line 543.
 
 
 LaTeX Warning: Reference `common/common:character' on page 15 undefined on inpu
-t line 545.
+t line 543.
 
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
 [15]
 
 LaTeX Warning: Hyper reference `common/common:character-sample' on page 16 unde
-fined on input line 558.
+fined on input line 556.
 
 
 LaTeX Warning: Reference `common/common:character-sample' on page 16 undefined 
-on input line 558.
+on input line 556.
 
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
 [16]
 
 LaTeX Warning: Hyper reference `common/common:chargedrive' on page 17 undefined
- on input line 611.
+ on input line 609.
 
 
 LaTeX Warning: Reference `common/common:chargedrive' on page 17 undefined on in
-put line 611.
+put line 609.
 
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
 
 LaTeX Warning: Hyper reference `common/common:cardrank' on page 17 undefined on
- input line 637.
+ input line 635.
 
 
 LaTeX Warning: Reference `common/common:cardrank' on page 17 undefined on input
- line 637.
+ line 635.
 
 [17]
 
 LaTeX Warning: Hyper reference `common/common:action-sample' on page 18 undefin
-ed on input line 666.
+ed on input line 664.
 
 
 LaTeX Warning: Reference `common/common:action-sample' on page 18 undefined on 
-input line 666.
+input line 664.
 
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
 
 LaTeX Warning: Hyper reference `common/common:cost' on page 18 undefined on inp
-ut line 695.
+ut line 693.
 
 
 LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 695.
+e 693.
 
 
 LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 695.
+e 693.
 
 
 LaTeX Warning: Hyper reference `core/core:timing' on page 18 undefined on input
- line 699.
+ line 697.
 
 
 LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-699.
+697.
 
 
 LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-699.
+697.
 
 [18]
 
 LaTeX Warning: Hyper reference `common/common:table-cost' on page 19 undefined 
-on input line 717.
+on input line 715.
 
 
 LaTeX Warning: Reference `common/common:table-cost' on page 19 undefined on inp
-ut line 717.
+ut line 715.
 
 
 LaTeX Warning: Hyper reference `common/common:action-sample2' on page 19 undefi
-ned on input line 780.
+ned on input line 778.
 
 
 LaTeX Warning: Reference `common/common:action-sample2' on page 19 undefined on
- input line 780.
+ input line 778.
 
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
 [19]
 
 LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 20 undefined on 
-input line 809.
+input line 807.
 
 
 LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 809.
+line 807.
 
 
 LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 809.
+line 807.
 
 [20]
 
 LaTeX Warning: Hyper reference `core/core:winlose' on page 21 undefined on inpu
-t line 849.
+t line 847.
 
 
 LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 849.
+ 847.
 
 
 LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 849.
+ 847.
 
 
 LaTeX Warning: Hyper reference `common/common:set-bulwork' on page 21 undefined
- on input line 859.
+ on input line 857.
 
 
 LaTeX Warning: Reference `common/common:set-bulwork' on page 21 undefined on in
-put line 859.
+put line 857.
 
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
 [21]
 
 LaTeX Warning: Hyper reference `common/common:field-ex' on page 22 undefined on
- input line 904.
+ input line 902.
 
 
 LaTeX Warning: Reference `common/common:field-ex' on page 22 undefined on input
- line 904.
+ line 902.
 
 
 LaTeX Warning: Hyper reference `common/common:ver-ex' on page 22 undefined on i
-nput line 920.
+nput line 918.
 
 
 LaTeX Warning: Reference `common/common:ver-ex' on page 22 undefined on input l
-ine 920.
+ine 918.
 
 [22]
 
 LaTeX Warning: Hyper reference `common/common:trump' on page 23 undefined on in
-put line 970.
+put line 968.
 
 
 LaTeX Warning: Reference `common/common:trump' on page 23 undefined on input li
-ne 970.
+ne 968.
 
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
 
 LaTeX Warning: Hyper reference `common/common:trump-open' on page 23 undefined 
-on input line 1010.
+on input line 1008.
 
 
 LaTeX Warning: Reference `common/common:trump-open' on page 23 undefined on inp
-ut line 1010.
+ut line 1008.
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 23 undefin
+ed on input line 1009.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
+input line 1009.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
+input line 1009.
 
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
-[23] [24] [25] [26
+[23]
+
+LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 24 undefin
+ed on input line 1032.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
+input line 1032.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
+input line 1032.
+
+[24] [25] [26]
+第4章
+[27
 
 ]
-第4章
-[27]
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
  [28]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-lite' on page 29 u
-ndefined on input line 1291.
+ndefined on input line 1287.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1291.
+ed on input line 1287.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1291.
+ed on input line 1287.
 
 [29]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-std' on page 30 un
-defined on input line 1326.
+defined on input line 1322.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1326.
+d on input line 1322.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1326.
+d on input line 1322.
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-pro' on page 30 un
+defined on input line 1357.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
+d on input line 1357.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
+d on input line 1357.
 
 [30]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1396.
+ undefined on input line 1392.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1396.
+ined on input line 1392.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1396.
+ined on input line 1392.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1431.
+ undefined on input line 1427.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1431.
+ined on input line 1427.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1431.
+ined on input line 1427.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 31 undefin
-ed on input line 1439.
+ed on input line 1435.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1439.
+input line 1435.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1439.
+input line 1435.
 
 
 LaTeX Warning: Hyper reference `common/common:extra-start' on page 31 undefined
- on input line 1447.
+ on input line 1443.
 
 
 LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1447.
+put line 1443.
 
 
 LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1447.
+put line 1443.
 
 [31] [32
 
@@ -1118,43 +1155,205 @@ put line 1447.
 第5章
 
 LaTeX Warning: Hyper reference `format/format::doc' on page 33 undefined on inp
-ut line 1475.
+ut line 1471.
 
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1475.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1471.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1475.
+(Font)              scaled to size 9.60999pt on input line 1471.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1475.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1471.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1475.
-[33] [34] [35] [36] [37] [38] [39] [40
+(Font)              scaled to size 9.60999pt on input line 1471.
+
+LaTeX Warning: Hyper reference `format/lite:format-lite' on page 33 undefined o
+n input line 1495.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
+t line 1495.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
+t line 1495.
+
+[33]
+
+LaTeX Warning: Hyper reference `format/lite:format-lite' on page 34 undefined o
+n input line 1561.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
+t line 1561.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
+t line 1561.
+
+[34]
+
+LaTeX Warning: Hyper reference `format/lite:format-lite' on page 35 undefined o
+n input line 1627.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
+t line 1627.
+
+
+LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
+t line 1627.
+
+[35]
+
+LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
+efined on input line 1705.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
+ on input line 1705.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
+ on input line 1705.
+
+
+LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
+efined on input line 1771.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
+ on input line 1771.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
+ on input line 1771.
+
+[36]
+
+LaTeX Warning: Hyper reference `format/standard:format-standard' on page 37 und
+efined on input line 1837.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
+ on input line 1837.
+
+
+LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
+ on input line 1837.
+
+[37]
+
+LaTeX Warning: Hyper reference `format/pro:format-pro' on page 38 undefined on 
+input line 1915.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
+line 1915.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
+line 1915.
+
+[38]
+
+LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
+input line 1981.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
+line 1981.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
+line 1981.
+
+
+LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
+input line 2047.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
+line 2047.
+
+
+LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
+line 2047.
+
+[39]
+
+LaTeX Warning: Hyper reference `format/master:format-master' on page 40 undefin
+ed on input line 2125.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
+input line 2125.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
+input line 2125.
+
+[40]
+
+LaTeX Warning: Hyper reference `format/master:format-master' on page 41 undefin
+ed on input line 2191.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
+input line 2191.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
+input line 2191.
+
+[41]
+
+LaTeX Warning: Hyper reference `format/master:format-master' on page 42 undefin
+ed on input line 2257.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
+input line 2257.
+
+
+LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
+input line 2257.
+
+[42]
+
+LaTeX Warning: Hyper reference `format/extra:format-extra' on page 43 undefined
+ on input line 2335.
+
+
+LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
+put line 2335.
+
+
+LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
+put line 2335.
+
+[43] [44
 
 ]
 第6章
-[41]
-Underfull \hbox (badness 10000) in paragraph at lines 2081--2084
+[45]
+Underfull \hbox (badness 10000) in paragraph at lines 2455--2458
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
 r / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2095--2098
+Underfull \hbox (badness 10000) in paragraph at lines 2469--2472
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
 r / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
  []
 
-[42]
-第7章
 No file blackpoker.ind.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2120.
-[43
-
-]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2120.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2480.
+[46]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2480.
  (./blackpoker.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2120.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2120.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2480.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2480.
 
 
 
@@ -1164,22 +1363,22 @@ Package rerunfilecheck Warning: File `blackpoker.out' has changed.
 
 Package rerunfilecheck Info: Checksums for `blackpoker.out':
 (rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  8DFD33759B290CD8062E1CD3D117B86F;6598.
+(rerunfilecheck)             After:  98580C53A5ADBC3D6DF792CC70E5916B;6955.
 
 LaTeX Warning: There were undefined references.
 
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2120.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2480.
  ) 
 Here is how much of TeX's memory you used:
- 9701 strings out of 482885
- 144728 string characters out of 5957543
- 424288 words of memory out of 5000000
- 25104 multiletter control sequences out of 15000+600000
+ 9736 strings out of 482885
+ 146000 string characters out of 5957543
+ 424292 words of memory out of 5000000
+ 25139 multiletter control sequences out of 15000+600000
  582885 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 44i,12n,49p,327b,466s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 44i,12n,49p,327b,474s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (47 pages, 108404 bytes).
+Output written on blackpoker.dvi (50 pages, 121972 bytes).

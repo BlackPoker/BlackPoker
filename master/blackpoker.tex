@@ -29,7 +29,6 @@
 \usepackage{hypcap}% it must be loaded after hyperref.
 % Set up styles of URL: it should be placed after hyperref.
 \urlstyle{same}
-\renewcommand{\contentsname}{Contents:}
 
 \usepackage{sphinxmessages}
 \setcounter{tocdepth}{2}
@@ -37,7 +36,7 @@
 
 
 \title{BlackPoker}
-\date{2021年06月20日}
+\date{2021年06月27日}
 \release{}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -203,8 +202,7 @@
 
 \section{能力}
 \label{\detokenize{core/core:id12}}
-能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、
-アクションを誘発したりすることができます。
+能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。
 
 能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (\hyperref[\detokenize{core/core:ability-image}]{Fig.\@ \ref{\detokenize{core/core:ability-image}}})
@@ -902,7 +900,7 @@ S (Sacrifice)
 \label{\detokenize{common/common:id35}}
 切札とは、切札領域に置かれたカードを示します。
 具体的な切札の置き場所については、 \hyperref[\detokenize{common/common:field-ex}]{Fig.\@ \ref{\detokenize{common/common:field-ex}}} を参照して下さい。
-切札には各々能力が割り当てられており、表にするとその能力を発揮します。
+切札には各々能力が割り当てられており、表にするとその能力が有効になります。
 切札を操作するアクションは、「エクストラリスト」を参照して下さい。
 
 
@@ -982,7 +980,7 @@ ex5.22.0 〜
 デッキが0枚になった場合、切札が残っていても敗北する。
 
 \item {} 
-能力が割り当てられていないカードも切札とすることができるが、表になっても能力は発揮されない。
+能力が割り当てられていないカードも切札とすることができるが、表になっても能力が有効にならない。
 
 \end{itemize}
 
@@ -1000,18 +998,17 @@ ex5.22.0 〜
 \label{\detokenize{common/common:id39}}
 エクストラでは切札を使って能力を得ることができます。
 切札1枚1枚に異なった能力が割り当てられており、
-表にすることで能力を発揮します。
+表にすることで能力が有効になります。
 割り当てられている能力については、「エクストラリスト」を参照して下さい。
 
 
-\subsubsection{能力を発揮する}
+\subsubsection{能力を有効にする}
 \label{\detokenize{common/common:id40}}
 切札に割り当てられた能力は
-「オープン」アクションを起こし表にすることで発揮します。(\hyperref[\detokenize{common/common:trump-open}]{Fig.\@ \ref{\detokenize{common/common:trump-open}}})
-「オープン」アクションの詳細は、
-「エクストラリスト」を参照して下さい。
+「オープン」アクションを起こし表にすることで有効になります。(\hyperref[\detokenize{common/common:trump-open}]{Fig.\@ \ref{\detokenize{common/common:trump-open}}})
+「オープン」アクションの詳細は、 \hyperref[\detokenize{appendix/appendix:extralist}]{\ref{\detokenize{appendix/appendix:extralist}} \nameref{\detokenize{appendix/appendix:extralist}}} を参照して下さい。
 切札が表でいる限り、
-その切札の能力は持続的に発揮されます。
+その切札の能力は持続的に有効になります。
 また切札を表にする時は、
 対戦相手に有効となった能力が分かるように、
 能力の名称を言いスートと数字が見えるようにしましょう。
@@ -1024,16 +1021,15 @@ ex5.22.0 〜
 \caption{切札を表にする例}\label{\detokenize{common/common:id60}}\label{\detokenize{common/common:trump-open}}\end{figure}
 
 
-\subsubsection{能力を無効化する}
+\subsubsection{能力を無効する}
 \label{\detokenize{common/common:id41}}
 切札は裏向きもしくは、
-墓地に移されると能力を発揮しなくなります。
+墓地に移されると能力が無効になります。
 切札を無効化するためには、「クローズ」アクションを用い
 切札を裏向きにするか、
 「切札破壊」アクションを用いて切札を破壊しましょう。
 「クローズ」アクション、
-「切札破壊」アクションの詳細は、
-「エクストラリスト」を参照して下さい。
+「切札破壊」アクションの詳細は、 \hyperref[\detokenize{appendix/appendix:extralist}]{\ref{\detokenize{appendix/appendix:extralist}} \nameref{\detokenize{appendix/appendix:extralist}}} を参照して下さい。
 
 
 \subsection{エクストラ注意事項}
@@ -1283,10 +1279,10 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsection{ライト}
-\label{\detokenize{format/light:id1}}\label{\detokenize{format/light::doc}}
+\label{\detokenize{format/lite:format-lite}}\label{\detokenize{format/lite:id1}}\label{\detokenize{format/lite::doc}}
 
 \subsubsection{アクションリスト}
-\label{\detokenize{format/light:id2}}\begin{itemize}
+\label{\detokenize{format/lite:id2}}\begin{itemize}
 \item {} 
 \hyperref[\detokenize{appendix/appendix:actionlist-lite}]{\ref{\detokenize{appendix/appendix:actionlist-lite}} \nameref{\detokenize{appendix/appendix:actionlist-lite}}}
 
@@ -1294,7 +1290,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsubsection{エクストラリスト}
-\label{\detokenize{format/light:id3}}\begin{itemize}
+\label{\detokenize{format/lite:id3}}\begin{itemize}
 \item {} 
 なし
 
@@ -1302,7 +1298,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsubsection{事前準備}
-\label{\detokenize{format/light:id4}}\begin{itemize}
+\label{\detokenize{format/lite:id4}}\begin{itemize}
 \item {} 
 なし
 
@@ -1310,7 +1306,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsubsection{その他事項}
-\label{\detokenize{format/light:id5}}\begin{itemize}
+\label{\detokenize{format/lite:id5}}\begin{itemize}
 \item {} 
 なし
 
@@ -1318,7 +1314,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsection{スタンダード}
-\label{\detokenize{format/standard:id1}}\label{\detokenize{format/standard::doc}}
+\label{\detokenize{format/standard:format-standard}}\label{\detokenize{format/standard:id1}}\label{\detokenize{format/standard::doc}}
 
 \subsubsection{アクションリスト}
 \label{\detokenize{format/standard:id2}}\begin{itemize}
@@ -1353,12 +1349,12 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsection{プロ}
-\label{\detokenize{format/pro:id1}}\label{\detokenize{format/pro::doc}}
+\label{\detokenize{format/pro:format-pro}}\label{\detokenize{format/pro:id1}}\label{\detokenize{format/pro::doc}}
 
 \subsubsection{アクションリスト}
 \label{\detokenize{format/pro:id2}}\begin{itemize}
 \item {} 
-\sphinxcode{\sphinxupquote{actionlist\sphinxhyphen{}pro}}
+\hyperref[\detokenize{appendix/appendix:actionlist-pro}]{\ref{\detokenize{appendix/appendix:actionlist-pro}} \nameref{\detokenize{appendix/appendix:actionlist-pro}}}
 
 \end{itemize}
 
@@ -1388,7 +1384,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsection{マスター}
-\label{\detokenize{format/master:id1}}\label{\detokenize{format/master::doc}}
+\label{\detokenize{format/master:format-master}}\label{\detokenize{format/master:id1}}\label{\detokenize{format/master::doc}}
 
 \subsubsection{アクションリスト}
 \label{\detokenize{format/master:id2}}\begin{itemize}
@@ -1423,7 +1419,7 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 \subsection{エクストラ}
-\label{\detokenize{format/extra:id1}}\label{\detokenize{format/extra::doc}}
+\label{\detokenize{format/extra:format-extra}}\label{\detokenize{format/extra:id1}}\label{\detokenize{format/extra::doc}}
 
 \subsubsection{アクションリスト}
 \label{\detokenize{format/extra:id2}}\begin{itemize}
@@ -1492,15 +1488,15 @@ BlackPokerはトランプだけで遊べるため、
 
 
 \subsection{ライト}
-\label{\detokenize{match-regulations/light:id1}}\label{\detokenize{match-regulations/light::doc}}
+\label{\detokenize{match-regulations/lite:id1}}\label{\detokenize{match-regulations/lite::doc}}
 
 \subsubsection{フォーマット}
-\label{\detokenize{match-regulations/light:id2}}
-ライト
+\label{\detokenize{match-regulations/lite:id2}}
+\hyperref[\detokenize{format/lite:format-lite}]{\ref{\detokenize{format/lite:format-lite}} \nameref{\detokenize{format/lite:format-lite}}}
 
 
 \subsubsection{デッキ条件}
-\label{\detokenize{match-regulations/light:id3}}
+\label{\detokenize{match-regulations/lite:id3}}
 次のカードの中から54までカードを選びデッキとする
 
 
@@ -1542,7 +1538,7 @@ Joker x2
 
 
 \subsubsection{対戦前準備事項}
-\label{\detokenize{match-regulations/light:id4}}\begin{itemize}
+\label{\detokenize{match-regulations/lite:id4}}\begin{itemize}
 \item {} 
 なし
 
@@ -1550,7 +1546,7 @@ Joker x2
 
 
 \subsubsection{その他制限事項}
-\label{\detokenize{match-regulations/light:id5}}\begin{itemize}
+\label{\detokenize{match-regulations/lite:id5}}\begin{itemize}
 \item {} 
 なし
 
@@ -1558,15 +1554,15 @@ Joker x2
 
 
 \subsection{ライト40}
-\label{\detokenize{match-regulations/light40:id1}}\label{\detokenize{match-regulations/light40::doc}}
+\label{\detokenize{match-regulations/lite40:id1}}\label{\detokenize{match-regulations/lite40::doc}}
 
 \subsubsection{フォーマット}
-\label{\detokenize{match-regulations/light40:id2}}
-ライト
+\label{\detokenize{match-regulations/lite40:id2}}
+\hyperref[\detokenize{format/lite:format-lite}]{\ref{\detokenize{format/lite:format-lite}} \nameref{\detokenize{format/lite:format-lite}}}
 
 
 \subsubsection{デッキ条件}
-\label{\detokenize{match-regulations/light40:id3}}
+\label{\detokenize{match-regulations/lite40:id3}}
 次のカードの中から40までカードを選びデッキとする
 
 
@@ -1608,7 +1604,7 @@ Joker x2
 
 
 \subsubsection{対戦前準備事項}
-\label{\detokenize{match-regulations/light40:id4}}\begin{itemize}
+\label{\detokenize{match-regulations/lite40:id4}}\begin{itemize}
 \item {} 
 なし
 
@@ -1616,9 +1612,87 @@ Joker x2
 
 
 \subsubsection{その他制限事項}
-\label{\detokenize{match-regulations/light40:id5}}\begin{itemize}
+\label{\detokenize{match-regulations/lite40:id5}}\begin{itemize}
 \item {} 
 なし
+
+\end{itemize}
+
+
+\subsection{ライトランダムハーフ}
+\label{\detokenize{match-regulations/lite_randomhalf:id1}}\label{\detokenize{match-regulations/lite_randomhalf::doc}}
+
+\subsubsection{フォーマット}
+\label{\detokenize{match-regulations/lite_randomhalf:id2}}
+\hyperref[\detokenize{format/lite:format-lite}]{\ref{\detokenize{format/lite:format-lite}} \nameref{\detokenize{format/lite:format-lite}}}
+
+
+\subsubsection{デッキ条件}
+\label{\detokenize{match-regulations/lite_randomhalf:id3}}
+次のカードの中からランダムに27枚ずつ選び2つのデッキとする
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\hline
+
+{\normalsize $\spadesuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\heartsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\diamondsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\clubsuit$} 
+&
+A〜K
+\\
+\hline\sphinxstartmulticolumn{2}%
+\begin{varwidth}[t]{\sphinxcolwidth{2}{2}}
+Joker x2
+\par
+\vskip-\baselineskip\vbox{\hbox{\strut}}\end{varwidth}%
+\sphinxstopmulticolumn
+\\
+\hline
+\end{tabulary}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{対戦前準備事項}
+\label{\detokenize{match-regulations/lite_randomhalf:id4}}\begin{itemize}
+\item {} 
+デッキ条件に該当するようにデッキを2つ用意する。
+
+\item {} 
+試合毎にいずれか1つのデッキを使用する。
+
+\item {} 
+試合に使用しないデッキは重ねて左前方に横向きに置く。勝利した試合に使用したデッキであれば表向き、そうでなければ裏向きとする。
+
+\item {} 
+デッキは非公開である。つまり、カードのオーナーも見ることができない。ただし、試合に使用したデッキは試合の終了後に一時的に個人公開となり、次の試合の開始前に非公開となる。
+
+\end{itemize}
+
+
+\subsubsection{その他制限事項}
+\label{\detokenize{match-regulations/lite_randomhalf:id5}}\begin{itemize}
+\item {} 
+2試合以上を行って勝者を決める。この対戦をマッチと言う。マッチの勝利条件は2試合に勝つことである。
+
+\item {} 
+試合毎に使用するデッキを選択する。ただし、勝利した試合に使用したデッキはそれ以降使用できない。
 
 \end{itemize}
 
@@ -1628,7 +1702,7 @@ Joker x2
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/standard:id2}}
-スタンダード
+\hyperref[\detokenize{format/standard:format-standard}]{\ref{\detokenize{format/standard:format-standard}} \nameref{\detokenize{format/standard:format-standard}}}
 
 
 \subsubsection{デッキ条件}
@@ -1694,7 +1768,7 @@ Joker x2
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/standard40:id2}}
-スタンダード
+\hyperref[\detokenize{format/standard:format-standard}]{\ref{\detokenize{format/standard:format-standard}} \nameref{\detokenize{format/standard:format-standard}}}
 
 
 \subsubsection{デッキ条件}
@@ -1755,12 +1829,90 @@ Joker x2
 \end{itemize}
 
 
+\subsection{スタンダードランダムハーフ}
+\label{\detokenize{match-regulations/standard_randomhalf:id1}}\label{\detokenize{match-regulations/standard_randomhalf::doc}}
+
+\subsubsection{フォーマット}
+\label{\detokenize{match-regulations/standard_randomhalf:id2}}
+\hyperref[\detokenize{format/standard:format-standard}]{\ref{\detokenize{format/standard:format-standard}} \nameref{\detokenize{format/standard:format-standard}}}
+
+
+\subsubsection{デッキ条件}
+\label{\detokenize{match-regulations/standard_randomhalf:id3}}
+次のカードの中からランダムに27枚ずつ選び2つのデッキとする
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\hline
+
+{\normalsize $\spadesuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\heartsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\diamondsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\clubsuit$} 
+&
+A〜K
+\\
+\hline\sphinxstartmulticolumn{2}%
+\begin{varwidth}[t]{\sphinxcolwidth{2}{2}}
+Joker x2
+\par
+\vskip-\baselineskip\vbox{\hbox{\strut}}\end{varwidth}%
+\sphinxstopmulticolumn
+\\
+\hline
+\end{tabulary}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{対戦前準備事項}
+\label{\detokenize{match-regulations/standard_randomhalf:id4}}\begin{itemize}
+\item {} 
+デッキ条件に該当するようにデッキを2つ用意する。
+
+\item {} 
+試合毎にいずれか1つのデッキを使用する。
+
+\item {} 
+試合に使用しないデッキは重ねて左前方に横向きに置く。勝利した試合に使用したデッキであれば表向き、そうでなければ裏向きとする。
+
+\item {} 
+デッキは非公開である。つまり、カードのオーナーも見ることができない。ただし、試合に使用したデッキは試合の終了後に一時的に個人公開となり、次の試合の開始前に非公開となる。
+
+\end{itemize}
+
+
+\subsubsection{その他制限事項}
+\label{\detokenize{match-regulations/standard_randomhalf:id5}}\begin{itemize}
+\item {} 
+2試合以上を行って勝者を決める。この対戦をマッチと言う。マッチの勝利条件は2試合に勝つことである。
+
+\item {} 
+試合毎に使用するデッキを選択する。ただし、勝利した試合に使用したデッキはそれ以降使用できない。
+
+\end{itemize}
+
+
 \subsection{プロ}
 \label{\detokenize{match-regulations/pro:id1}}\label{\detokenize{match-regulations/pro::doc}}
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/pro:id2}}
-プロ
+\hyperref[\detokenize{format/pro:format-pro}]{\ref{\detokenize{format/pro:format-pro}} \nameref{\detokenize{format/pro:format-pro}}}
 
 
 \subsubsection{デッキ条件}
@@ -1826,7 +1978,7 @@ Joker x2
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/pro40:id2}}
-プロ
+\hyperref[\detokenize{format/pro:format-pro}]{\ref{\detokenize{format/pro:format-pro}} \nameref{\detokenize{format/pro:format-pro}}}
 
 
 \subsubsection{デッキ条件}
@@ -1887,12 +2039,90 @@ Joker x2
 \end{itemize}
 
 
+\subsection{プロランダムハーフ}
+\label{\detokenize{match-regulations/pro_randomhalf:id1}}\label{\detokenize{match-regulations/pro_randomhalf::doc}}
+
+\subsubsection{フォーマット}
+\label{\detokenize{match-regulations/pro_randomhalf:id2}}
+\hyperref[\detokenize{format/pro:format-pro}]{\ref{\detokenize{format/pro:format-pro}} \nameref{\detokenize{format/pro:format-pro}}}
+
+
+\subsubsection{デッキ条件}
+\label{\detokenize{match-regulations/pro_randomhalf:id3}}
+次のカードの中からランダムに27枚ずつ選び2つのデッキとする
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\hline
+
+{\normalsize $\spadesuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\heartsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\diamondsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\clubsuit$} 
+&
+A〜K
+\\
+\hline\sphinxstartmulticolumn{2}%
+\begin{varwidth}[t]{\sphinxcolwidth{2}{2}}
+Joker x2
+\par
+\vskip-\baselineskip\vbox{\hbox{\strut}}\end{varwidth}%
+\sphinxstopmulticolumn
+\\
+\hline
+\end{tabulary}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{対戦前準備事項}
+\label{\detokenize{match-regulations/pro_randomhalf:id4}}\begin{itemize}
+\item {} 
+デッキ条件に該当するようにデッキを2つ用意する。
+
+\item {} 
+試合毎にいずれか1つのデッキを使用する。
+
+\item {} 
+試合に使用しないデッキは重ねて左前方に横向きに置く。勝利した試合に使用したデッキであれば表向き、そうでなければ裏向きとする。
+
+\item {} 
+デッキは非公開である。つまり、カードのオーナーも見ることができない。ただし、試合に使用したデッキは試合の終了後に一時的に個人公開となり、次の試合の開始前に非公開となる。
+
+\end{itemize}
+
+
+\subsubsection{その他制限事項}
+\label{\detokenize{match-regulations/pro_randomhalf:id5}}\begin{itemize}
+\item {} 
+2試合以上を行って勝者を決める。この対戦をマッチと言う。マッチの勝利条件は2試合に勝つことである。
+
+\item {} 
+試合毎に使用するデッキを選択する。ただし、勝利した試合に使用したデッキはそれ以降使用できない。
+
+\end{itemize}
+
+
 \subsection{マスター}
 \label{\detokenize{match-regulations/master:id1}}\label{\detokenize{match-regulations/master::doc}}
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/master:id2}}
-マスター
+\hyperref[\detokenize{format/master:format-master}]{\ref{\detokenize{format/master:format-master}} \nameref{\detokenize{format/master:format-master}}}
 
 
 \subsubsection{デッキ条件}
@@ -1958,7 +2188,7 @@ Joker x2
 
 \subsubsection{フォーマット}
 \label{\detokenize{match-regulations/master40:id2}}
-マスター
+\hyperref[\detokenize{format/master:format-master}]{\ref{\detokenize{format/master:format-master}} \nameref{\detokenize{format/master:format-master}}}
 
 
 \subsubsection{デッキ条件}
@@ -2019,6 +2249,150 @@ Joker x2
 \end{itemize}
 
 
+\subsection{マスターランダムハーフ}
+\label{\detokenize{match-regulations/master_randomhalf:id1}}\label{\detokenize{match-regulations/master_randomhalf::doc}}
+
+\subsubsection{フォーマット}
+\label{\detokenize{match-regulations/master_randomhalf:id2}}
+\hyperref[\detokenize{format/master:format-master}]{\ref{\detokenize{format/master:format-master}} \nameref{\detokenize{format/master:format-master}}}
+
+
+\subsubsection{デッキ条件}
+\label{\detokenize{match-regulations/master_randomhalf:id3}}
+次のカードの中からランダムに27枚ずつ選び2つのデッキとする
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\hline
+
+{\normalsize $\spadesuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\heartsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\diamondsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\clubsuit$} 
+&
+A〜K
+\\
+\hline\sphinxstartmulticolumn{2}%
+\begin{varwidth}[t]{\sphinxcolwidth{2}{2}}
+Joker x2
+\par
+\vskip-\baselineskip\vbox{\hbox{\strut}}\end{varwidth}%
+\sphinxstopmulticolumn
+\\
+\hline
+\end{tabulary}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{対戦前準備事項}
+\label{\detokenize{match-regulations/master_randomhalf:id4}}\begin{itemize}
+\item {} 
+デッキ条件に該当するようにデッキを2つ用意する。
+
+\item {} 
+試合毎にいずれか1つのデッキを使用する。
+
+\item {} 
+試合に使用しないデッキは重ねて左前方に横向きに置く。勝利した試合に使用したデッキであれば表向き、そうでなければ裏向きとする。
+
+\item {} 
+デッキは非公開である。つまり、カードのオーナーも見ることができない。ただし、試合に使用したデッキは試合の終了後に一時的に個人公開となり、次の試合の開始前に非公開となる。
+
+\end{itemize}
+
+
+\subsubsection{その他制限事項}
+\label{\detokenize{match-regulations/master_randomhalf:id5}}\begin{itemize}
+\item {} 
+2試合以上を行って勝者を決める。この対戦をマッチと言う。マッチの勝利条件は2試合に勝つことである。
+
+\item {} 
+試合毎に使用するデッキを選択する。ただし、勝利した試合に使用したデッキはそれ以降使用できない。
+
+\end{itemize}
+
+
+\subsection{エクストラ}
+\label{\detokenize{match-regulations/extra:id1}}\label{\detokenize{match-regulations/extra::doc}}
+
+\subsubsection{フォーマット}
+\label{\detokenize{match-regulations/extra:id2}}
+\hyperref[\detokenize{format/extra:format-extra}]{\ref{\detokenize{format/extra:format-extra}} \nameref{\detokenize{format/extra:format-extra}}}
+
+
+\subsubsection{デッキ条件}
+\label{\detokenize{match-regulations/extra:id3}}
+次のカードの中から54までカードを選びデッキとする
+
+
+\begin{savenotes}\sphinxattablestart
+\centering
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\hline
+
+{\normalsize $\spadesuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\heartsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\diamondsuit$} 
+&
+A〜K
+\\
+\hline
+{\normalsize $\clubsuit$} 
+&
+A〜K
+\\
+\hline\sphinxstartmulticolumn{2}%
+\begin{varwidth}[t]{\sphinxcolwidth{2}{2}}
+Joker x2
+\par
+\vskip-\baselineskip\vbox{\hbox{\strut}}\end{varwidth}%
+\sphinxstopmulticolumn
+\\
+\hline
+\end{tabulary}
+\par
+\sphinxattableend\end{savenotes}
+
+
+\subsubsection{対戦前準備事項}
+\label{\detokenize{match-regulations/extra:id4}}\begin{itemize}
+\item {} 
+なし
+
+\end{itemize}
+
+
+\subsubsection{その他制限事項}
+\label{\detokenize{match-regulations/extra:id5}}\begin{itemize}
+\item {} 
+なし
+
+\end{itemize}
+
+
 \chapter{付録}
 \label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
 
@@ -2059,7 +2433,7 @@ Joker x2
 
 
 \subsection{プロ}
-\label{\detokenize{appendix/appendix:id5}}\begin{quote}
+\label{\detokenize{appendix/appendix:actionlist-pro}}\label{\detokenize{appendix/appendix:id5}}\begin{quote}
 \begin{description}
 \item[{URL}] \leavevmode
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-pro.html}
@@ -2098,20 +2472,6 @@ Joker x2
 
 \end{description}
 \end{quote}
-
-
-\chapter{2   Indices and tables}
-\label{\detokenize{index:indices-and-tables}}\begin{itemize}
-\item {} 
-\DUrole{xref,std,std-ref}{genindex}
-
-\item {} 
-\DUrole{xref,std,std-ref}{modindex}
-
-\item {} 
-\DUrole{xref,std,std-ref}{search}
-
-\end{itemize}
 
 
 

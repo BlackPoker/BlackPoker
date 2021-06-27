@@ -1,26 +1,27 @@
 ==============================
-プロ
+ライトランダムハーフ
 ==============================
 
 
 フォーマット
 ==============================
-:numref:`format-pro`
+:numref:`format-lite`
 
 
 デッキ条件
 ==============================
 
-.. include:: _deckfull.rst
+.. include:: _deck_randomhalf.rst
 
 
 対戦前準備事項
 ==============================
 
-.. include:: _none.rst
+.. include:: _half.rst
+
 
 
 その他制限事項
 ==============================
 
-.. include:: _none.rst
+.. include:: _etc_half.rst
