@@ -202,8 +202,7 @@
 
 \section{能力}
 \label{\detokenize{core/core:id12}}
-能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、
-アクションを誘発したりすることができます。
+能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。
 
 能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (\hyperref[\detokenize{core/core:ability-image}]{Fig.\@ \ref{\detokenize{core/core:ability-image}}})
@@ -901,7 +900,7 @@ S (Sacrifice)
 \label{\detokenize{common/common:id35}}
 切札とは、切札領域に置かれたカードを示します。
 具体的な切札の置き場所については、 \hyperref[\detokenize{common/common:field-ex}]{Fig.\@ \ref{\detokenize{common/common:field-ex}}} を参照して下さい。
-切札には各々能力が割り当てられており、表にするとその能力を発揮します。
+切札には各々能力が割り当てられており、表にするとその能力が有効になります。
 切札を操作するアクションは、「エクストラリスト」を参照して下さい。
 
 
@@ -981,7 +980,7 @@ ex5.22.0 〜
 デッキが0枚になった場合、切札が残っていても敗北する。
 
 \item {} 
-能力が割り当てられていないカードも切札とすることができるが、表になっても能力は発揮されない。
+能力が割り当てられていないカードも切札とすることができるが、表になっても能力が有効にならない。
 
 \end{itemize}
 
@@ -999,18 +998,18 @@ ex5.22.0 〜
 \label{\detokenize{common/common:id39}}
 エクストラでは切札を使って能力を得ることができます。
 切札1枚1枚に異なった能力が割り当てられており、
-表にすることで能力を発揮します。
+表にすることで能力が有効になります。
 割り当てられている能力については、「エクストラリスト」を参照して下さい。
 
 
-\subsubsection{能力を発揮する}
+\subsubsection{能力を有効にする}
 \label{\detokenize{common/common:id40}}
 切札に割り当てられた能力は
 「オープン」アクションを起こし表にすることで発揮します。(\hyperref[\detokenize{common/common:trump-open}]{Fig.\@ \ref{\detokenize{common/common:trump-open}}})
 「オープン」アクションの詳細は、
 「エクストラリスト」を参照して下さい。
 切札が表でいる限り、
-その切札の能力は持続的に発揮されます。
+その切札の能力は持続的に有効になります。
 また切札を表にする時は、
 対戦相手に有効となった能力が分かるように、
 能力の名称を言いスートと数字が見えるようにしましょう。
@@ -1023,10 +1022,10 @@ ex5.22.0 〜
 \caption{切札を表にする例}\label{\detokenize{common/common:id60}}\label{\detokenize{common/common:trump-open}}\end{figure}
 
 
-\subsubsection{能力を無効化する}
+\subsubsection{能力を無効する}
 \label{\detokenize{common/common:id41}}
 切札は裏向きもしくは、
-墓地に移されると能力を発揮しなくなります。
+墓地に移されると能力が無効になります。
 切札を無効化するためには、「クローズ」アクションを用い
 切札を裏向きにするか、
 「切札破壊」アクションを用いて切札を破壊しましょう。
