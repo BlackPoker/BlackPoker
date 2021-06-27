@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  27 JUN 2021 13:33
+This is e-pTeX, Version 3.14159265-p3.8.3-191112-2.6 (utf8.euc) (TeX Live 2020) (preloaded format=platex 2020.8.20)  27 JUN 2021 13:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -901,158 +901,170 @@ LaTeX Warning: Hyper reference `common/common:cardrank' on page 17 undefined on
 LaTeX Warning: Reference `common/common:cardrank' on page 17 undefined on input
  line 635.
 
+
+LaTeX Warning: Hyper reference `core/core:gamestart' on page 17 undefined on in
+put line 652.
+
+
+LaTeX Warning: Reference `core/core:gamestart' on page 17 undefined on input li
+ne 652.
+
+
+LaTeX Warning: Reference `core/core:gamestart' on page 17 undefined on input li
+ne 652.
+
 [17]
 
 LaTeX Warning: Hyper reference `common/common:action-sample' on page 18 undefin
-ed on input line 664.
+ed on input line 665.
 
 
 LaTeX Warning: Reference `common/common:action-sample' on page 18 undefined on 
-input line 664.
+input line 665.
 
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
 
 LaTeX Warning: Hyper reference `common/common:cost' on page 18 undefined on inp
-ut line 693.
+ut line 694.
 
 
 LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 693.
+e 694.
 
 
 LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 693.
+e 694.
 
 
 LaTeX Warning: Hyper reference `core/core:timing' on page 18 undefined on input
- line 697.
+ line 698.
 
 
 LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-697.
+698.
 
 
 LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-697.
+698.
 
 [18]
 
 LaTeX Warning: Hyper reference `common/common:table-cost' on page 19 undefined 
-on input line 715.
+on input line 716.
 
 
 LaTeX Warning: Reference `common/common:table-cost' on page 19 undefined on inp
-ut line 715.
+ut line 716.
 
 
 LaTeX Warning: Hyper reference `common/common:action-sample2' on page 19 undefi
-ned on input line 778.
+ned on input line 779.
 
 
 LaTeX Warning: Reference `common/common:action-sample2' on page 19 undefined on
- input line 778.
+ input line 779.
 
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
 [19]
 
 LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 20 undefined on 
-input line 807.
+input line 808.
 
 
 LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 807.
+line 808.
 
 
 LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 807.
+line 808.
 
 [20]
 
 LaTeX Warning: Hyper reference `core/core:winlose' on page 21 undefined on inpu
-t line 847.
+t line 848.
 
 
 LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 847.
+ 848.
 
 
 LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 847.
+ 848.
 
 
 LaTeX Warning: Hyper reference `common/common:set-bulwork' on page 21 undefined
- on input line 857.
+ on input line 858.
 
 
 LaTeX Warning: Reference `common/common:set-bulwork' on page 21 undefined on in
-put line 857.
+put line 858.
 
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
 [21]
 
 LaTeX Warning: Hyper reference `common/common:field-ex' on page 22 undefined on
- input line 902.
+ input line 903.
 
 
 LaTeX Warning: Reference `common/common:field-ex' on page 22 undefined on input
- line 902.
+ line 903.
 
 
 LaTeX Warning: Hyper reference `common/common:ver-ex' on page 22 undefined on i
-nput line 918.
+nput line 919.
 
 
 LaTeX Warning: Reference `common/common:ver-ex' on page 22 undefined on input l
-ine 918.
+ine 919.
 
 [22]
 
 LaTeX Warning: Hyper reference `common/common:trump' on page 23 undefined on in
-put line 968.
+put line 969.
 
 
 LaTeX Warning: Reference `common/common:trump' on page 23 undefined on input li
-ne 968.
+ne 969.
 
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
 
 LaTeX Warning: Hyper reference `common/common:trump-open' on page 23 undefined 
-on input line 1008.
+on input line 1009.
 
 
 LaTeX Warning: Reference `common/common:trump-open' on page 23 undefined on inp
-ut line 1008.
+ut line 1009.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 23 undefin
-ed on input line 1009.
+ed on input line 1010.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
-input line 1009.
+input line 1010.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
-input line 1009.
+input line 1010.
 
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
 [23]
 
 LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 24 undefin
-ed on input line 1032.
+ed on input line 1033.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
-input line 1032.
+input line 1033.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
-input line 1032.
+input line 1033.
 
 [24] [25] [26]
 第4章
@@ -1065,89 +1077,89 @@ pdf)
  [28]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-lite' on page 29 u
-ndefined on input line 1287.
+ndefined on input line 1288.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1287.
+ed on input line 1288.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1287.
+ed on input line 1288.
 
 [29]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-std' on page 30 un
-defined on input line 1322.
+defined on input line 1323.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1322.
+d on input line 1323.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1322.
+d on input line 1323.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-pro' on page 30 un
-defined on input line 1357.
+defined on input line 1358.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
-d on input line 1357.
+d on input line 1358.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
-d on input line 1357.
+d on input line 1358.
 
 [30]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1392.
+ undefined on input line 1393.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1392.
+ined on input line 1393.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1392.
+ined on input line 1393.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1427.
+ undefined on input line 1428.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1427.
+ined on input line 1428.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1427.
+ined on input line 1428.
 
 
 LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 31 undefin
-ed on input line 1435.
+ed on input line 1436.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1435.
+input line 1436.
 
 
 LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1435.
+input line 1436.
 
 
 LaTeX Warning: Hyper reference `common/common:extra-start' on page 31 undefined
- on input line 1443.
+ on input line 1444.
 
 
 LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1443.
+put line 1444.
 
 
 LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1443.
+put line 1444.
 
 [31] [32
 
@@ -1155,205 +1167,205 @@ put line 1443.
 第5章
 
 LaTeX Warning: Hyper reference `format/format::doc' on page 33 undefined on inp
-ut line 1471.
+ut line 1472.
 
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1471.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1472.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1471.
+(Font)              scaled to size 9.60999pt on input line 1472.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1471.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1472.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1471.
+(Font)              scaled to size 9.60999pt on input line 1472.
 
 LaTeX Warning: Hyper reference `format/lite:format-lite' on page 33 undefined o
-n input line 1495.
+n input line 1496.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
-t line 1495.
+t line 1496.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
-t line 1495.
+t line 1496.
 
 [33]
 
 LaTeX Warning: Hyper reference `format/lite:format-lite' on page 34 undefined o
-n input line 1561.
+n input line 1562.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
-t line 1561.
+t line 1562.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
-t line 1561.
+t line 1562.
 
 [34]
 
 LaTeX Warning: Hyper reference `format/lite:format-lite' on page 35 undefined o
-n input line 1627.
+n input line 1628.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
-t line 1627.
+t line 1628.
 
 
 LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
-t line 1627.
+t line 1628.
 
 [35]
 
 LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
-efined on input line 1705.
+efined on input line 1706.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 1705.
+ on input line 1706.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 1705.
+ on input line 1706.
 
 
 LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
-efined on input line 1771.
+efined on input line 1772.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 1771.
+ on input line 1772.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 1771.
+ on input line 1772.
 
 [36]
 
 LaTeX Warning: Hyper reference `format/standard:format-standard' on page 37 und
-efined on input line 1837.
+efined on input line 1838.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
- on input line 1837.
+ on input line 1838.
 
 
 LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
- on input line 1837.
+ on input line 1838.
 
 [37]
 
 LaTeX Warning: Hyper reference `format/pro:format-pro' on page 38 undefined on 
-input line 1915.
+input line 1916.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
-line 1915.
+line 1916.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
-line 1915.
+line 1916.
 
 [38]
 
 LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
-input line 1981.
+input line 1982.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 1981.
+line 1982.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 1981.
+line 1982.
 
 
 LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
-input line 2047.
+input line 2048.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2047.
+line 2048.
 
 
 LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2047.
+line 2048.
 
 [39]
 
 LaTeX Warning: Hyper reference `format/master:format-master' on page 40 undefin
-ed on input line 2125.
+ed on input line 2126.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
-input line 2125.
+input line 2126.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
-input line 2125.
+input line 2126.
 
 [40]
 
 LaTeX Warning: Hyper reference `format/master:format-master' on page 41 undefin
-ed on input line 2191.
+ed on input line 2192.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
-input line 2191.
+input line 2192.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
-input line 2191.
+input line 2192.
 
 [41]
 
 LaTeX Warning: Hyper reference `format/master:format-master' on page 42 undefin
-ed on input line 2257.
+ed on input line 2258.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
-input line 2257.
+input line 2258.
 
 
 LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
-input line 2257.
+input line 2258.
 
 [42]
 
 LaTeX Warning: Hyper reference `format/extra:format-extra' on page 43 undefined
- on input line 2335.
+ on input line 2336.
 
 
 LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
-put line 2335.
+put line 2336.
 
 
 LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
-put line 2335.
+put line 2336.
 
 [43] [44
 
 ]
 第6章
 [45]
-Underfull \hbox (badness 10000) in paragraph at lines 2455--2458
+Underfull \hbox (badness 10000) in paragraph at lines 2456--2459
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
 r / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2469--2472
+Underfull \hbox (badness 10000) in paragraph at lines 2470--2473
 [][][]$\T1/ptm/m/n/10 https : / / blackpoker . github . io / BlackPoker / maste
 r / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
  []
 
 No file blackpoker.ind.
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2480.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 2481.
 [46]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 2480.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 2481.
  (./blackpoker.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2480.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2480.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 2481.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 2481.
 
 
 
@@ -1370,15 +1382,15 @@ LaTeX Warning: There were undefined references.
 
 LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
 
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2480.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 2481.
  ) 
 Here is how much of TeX's memory you used:
- 9736 strings out of 482885
- 146000 string characters out of 5957543
+ 9737 strings out of 482885
+ 146021 string characters out of 5957543
  424292 words of memory out of 5000000
- 25139 multiletter control sequences out of 15000+600000
+ 25140 multiletter control sequences out of 15000+600000
  582885 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  44i,12n,49p,327b,474s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (50 pages, 121972 bytes).
+Output written on blackpoker.dvi (50 pages, 122024 bytes).
