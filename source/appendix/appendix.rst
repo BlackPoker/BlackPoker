@@ -35,7 +35,7 @@ https://blackpoker.github.io/BlackPoker/blackpoker.pdf
         https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-v6-std-2up.pdf
 
 
-.. _actionlist-pro
+.. _actionlist-pro:
 
 ------------------------------
 プロ
