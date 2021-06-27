@@ -778,8 +778,8 @@ actList:
       actName: クローズ
       actType: 速攻魔法
       actTime: クイック
-      actCost: B
-      actS: ''
+      actCost: D
+      actS: ●
       actKey: 同じスート2枚
       actNote: ''
       actTarget: 切札1枚を対象とする。
