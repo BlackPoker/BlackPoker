@@ -456,7 +456,8 @@
           <h5>
             <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small>
             <small class="" th:if="${'lite' == arg0}"th:text="${data.ver}+' ライト版'"></small>
-            <small class="" th:if="${'pro' == arg0}" th:text="${data.ver}+' プロ版'"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
+            <small class="" th:if="${'pro' == arg0}" th:text="${data.ver}+' プロ版'"></small> 
+            <small class="" th:if="${'mast' == arg0}" th:text="${data.ver}+' マスター版'"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
           </h5>
           <ul class="nav nav-pills">
             <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">Action</a></li>
@@ -614,7 +615,8 @@
           </h2>
           <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
             th:text="${data.ver}+' ライト版'"></small> <small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small><small class="" th:text="' : '+${data.lastupdate}"></small>
+            th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
+            th:text="${data.ver}+' マスター版'"></small><small class="" th:text="' : '+${data.lastupdate}"></small>
         </div>
         <hr>
 
@@ -693,7 +695,8 @@
           </h2>
           <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
             th:text="${data.ver}+' ライト版'"></small><small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small>  <small class="" th:text="' : '+${data.lastupdate}"></small>
+            th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
+            th:text="${data.ver}+' マスター版'"></small>  <small class="" th:text="' : '+${data.lastupdate}"></small>
         </div>
         <hr>
 
