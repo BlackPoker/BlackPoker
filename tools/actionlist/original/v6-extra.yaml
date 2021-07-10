@@ -1,6 +1,6 @@
 data: 
   ver: 第六版 extra
-  lastupdate: 2020/11/07
+  lastupdate: 2021/7/1
   v: 6.30.0
   pdfurl: /pdf/blackpoker-v6-extra
   qr: qr_blackpoker-support_v6-ex.pdf
@@ -764,7 +764,7 @@ actList:
       actKey: ''
       actNote: ※コストを$DDとすればタイミングをクイックとして起こすことができる。
       actTarget: ''
-      actEffect: "自分の切札を1枚表にし、切札に対応した能力を発揮する。 \n切札については「切札について」参照\n切札に対応する能力については「アビ\
+      actEffect: "自分の切札を1枚表にし、切札に対応した能力を有効にする。 \n切札については「切札について」参照\n切札に対応する能力については「アビ\
         リティリスト」参照"
       story: ''
       flavor: ''
@@ -778,8 +778,8 @@ actList:
       actName: クローズ
       actType: 速攻魔法
       actTime: クイック
-      actCost: B
-      actS: ''
+      actCost: D
+      actS: ●
       actKey: 同じスート2枚
       actNote: ''
       actTarget: 切札1枚を対象とする。
@@ -821,7 +821,7 @@ actList:
       actKey: ''
       actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: カード1枚を対象とする。
-      actEffect: "対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を発揮する。 \n切札につい\
+      actEffect: "対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 \n切札につい\
         ては「切札について」参照\n切札に対応する能力については「アビリティリスト」参照"
       story: ''
       flavor: ''
