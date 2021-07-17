@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  17 JUL 2021 18:04
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  17 JUL 2021 20:02
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -644,8 +644,7 @@ File: l3backend-dvipdfmx.def 2021-07-12 L3 backend support: dvipdfmx
 \g__pdf_backend_object_int=\count313
 \g__pdf_backend_annotation_int=\count314
 \g__pdf_backend_link_int=\count315
-)
-No file blackpoker.aux.
+) (./blackpoker.aux)
 \openout1 = `blackpoker.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 57.
@@ -671,6 +670,7 @@ LaTeX Font Info:    ... okay on input line 57.
 LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 57.
 LaTeX Font Info:    ... okay on input line 57.
 \c@literalblock=\count316
+
 *geometry* detected driver: dvipdfm
 *geometry* verbose mode - [ preamble ] result:
 * driver: dvipdfm
@@ -723,12 +723,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 LaTeX Info: Redefining \ref on input line 57.
 LaTeX Info: Redefining \pageref on input line 57.
 LaTeX Info: Redefining \nameref on input line 57.
+ (./blackpoker.out) (./blackpoker.out)
 \@outlinefile=\write5
 \openout5 = `blackpoker.out'.
-
-
-
-Package hyperref Warning: Rerun to get /PageLabels entry.
 
 Package hyperref Info: Option `pageanchor' set `false' on input line 60.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
@@ -737,6 +734,7 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 9.60999pt on input line 60.
 LaTeX Font Info:    Trying to load font information for T1+qhv on input line 60
 .
+
 (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
@@ -817,25 +815,31 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 23.90964pt on input line 62.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 23.90964pt on input line 62.
+
+(./blackpoker.toc
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 2.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 2.
+LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 40.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 40.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 40.
+LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 40.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 40.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 40.
+ [1
+
+] [2])
 \tf@toc=\write6
 \openout6 = `blackpoker.toc'.
 
-LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 62.
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 62.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 62.
-LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 62.
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 62.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 62.
-
-[1
-
-] [2
+ [3] [4
 
 ]
 第1章
@@ -889,16 +893,7 @@ File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
 )
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 11.53198pt on input line 145.
-
-
-LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 4 undefined on in
-put line 150.
-
-
-LaTeX Warning: Reference `core/core:coreflow-2' on page 4 undefined on input li
-ne 150.
-
-[4]
+ [4]
 File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
 pdf)
 <plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
@@ -906,291 +901,58 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 240.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 240.
- [5]
 
-LaTeX Warning: Hyper reference `core/core:ability-image' on page 6 undefined on
- input line 251.
-
-
-LaTeX Warning: Reference `core/core:ability-image' on page 6 undefined on input
- line 251.
-
+[5]
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
 <plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf>
-[6]
-
-LaTeX Warning: Hyper reference `core/core:coreflow-2' on page 7 undefined on in
-put line 283.
-
-
-LaTeX Warning: Reference `core/core:coreflow-2' on page 7 undefined on input li
-ne 283.
-
+ [6]
 File: plantuml-1f7308387c9dc0dd58a0199510bada736a26d4e5.pdf Graphic file (type 
 pdf)
 <plantuml-1f7308387c9dc0dd58a0199510bada736a26d4e5.pdf>
 
+
 LaTeX Warning: Float too large for page by 24.96199pt on input line 290.
 
-[7] [8]
-
-LaTeX Warning: Hyper reference `core/core:trigger-check' on page 9 undefined on
- input line 352.
-
-
-LaTeX Warning: Reference `core/core:trigger-check' on page 9 undefined on input
- line 352.
-
-
-LaTeX Warning: Reference `core/core:trigger-check' on page 9 undefined on input
- line 352.
-
-[9]
-
-LaTeX Warning: Hyper reference `core/core:trigger-flow' on page 10 undefined on
- input line 395.
-
-
-LaTeX Warning: Reference `core/core:trigger-flow' on page 10 undefined on input
- line 395.
-
+[7] [8] [9]
 File: plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf Graphic file (type 
 pdf)
 <plantuml-a91828c766d562c760f38e1517ad1bbf09672f77.pdf>
+
 
 LaTeX Warning: Float too large for page by 24.96199pt on input line 402.
 
 [10] [11] [12]
 第3章
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 494.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 494.
 [13
 
 ]
-
-LaTeX Warning: Hyper reference `common/common:field-ex' on page 14 undefined on
- input line 600.
-
-
-LaTeX Warning: Reference `common/common:field-ex' on page 14 undefined on input
- line 600.
-
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
-[14]
-
-LaTeX Warning: Hyper reference `common/common:extra' on page 15 undefined on in
-put line 629.
-
-
-LaTeX Warning: Reference `common/common:extra' on page 15 undefined on input li
-ne 629.
-
-
-LaTeX Warning: Reference `common/common:extra' on page 15 undefined on input li
-ne 629.
-
-
-LaTeX Warning: Hyper reference `common/common:character' on page 15 undefined o
-n input line 654.
-
-
-LaTeX Warning: Reference `common/common:character' on page 15 undefined on inpu
-t line 654.
-
+ [14]
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
-[15]
-
-LaTeX Warning: Hyper reference `common/common:character-sample' on page 16 unde
-fined on input line 668.
-
-
-LaTeX Warning: Reference `common/common:character-sample' on page 16 undefined 
-on input line 668.
-
+ [15]
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
-[16]
-
-LaTeX Warning: Hyper reference `common/common:chargedrive' on page 17 undefined
- on input line 729.
-
-
-LaTeX Warning: Reference `common/common:chargedrive' on page 17 undefined on in
-put line 729.
-
+ [16]
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
-
-LaTeX Warning: Hyper reference `core/core:gamestart' on page 17 undefined on in
-put line 782.
-
-
-LaTeX Warning: Reference `core/core:gamestart' on page 17 undefined on input li
-ne 782.
-
-
-LaTeX Warning: Reference `core/core:gamestart' on page 17 undefined on input li
-ne 782.
-
-[17]
-
-LaTeX Warning: Hyper reference `common/common:action-sample' on page 18 undefin
-ed on input line 797.
-
-
-LaTeX Warning: Reference `common/common:action-sample' on page 18 undefined on 
-input line 797.
-
+ [17]
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
-
-LaTeX Warning: Hyper reference `common/common:cost' on page 18 undefined on inp
-ut line 832.
-
-
-LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 832.
-
-
-LaTeX Warning: Reference `common/common:cost' on page 18 undefined on input lin
-e 832.
-
-
-LaTeX Warning: Hyper reference `core/core:timing' on page 18 undefined on input
- line 837.
-
-
-LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-837.
-
-
-LaTeX Warning: Reference `core/core:timing' on page 18 undefined on input line 
-837.
-
-[18]
-
-LaTeX Warning: Hyper reference `common/common:table-cost' on page 19 undefined 
-on input line 858.
-
-
-LaTeX Warning: Reference `common/common:table-cost' on page 19 undefined on inp
-ut line 858.
-
-
-LaTeX Warning: Hyper reference `common/common:action-sample2' on page 19 undefi
-ned on input line 938.
-
-
-LaTeX Warning: Reference `common/common:action-sample2' on page 19 undefined on
- input line 938.
-
+ [18]
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
-[19]
-
-LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 20 undefined on 
-input line 970.
-
-
-LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 970.
-
-
-LaTeX Warning: Reference `core/core:coreflowsec' on page 20 undefined on input 
-line 970.
-
-[20]
-
-LaTeX Warning: Hyper reference `core/core:winlose' on page 21 undefined on inpu
-t line 1017.
-
-
-LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 1017.
-
-
-LaTeX Warning: Reference `core/core:winlose' on page 21 undefined on input line
- 1017.
-
-
-LaTeX Warning: Hyper reference `common/common:set-bulwork' on page 21 undefined
- on input line 1029.
-
-
-LaTeX Warning: Reference `common/common:set-bulwork' on page 21 undefined on in
-put line 1029.
-
+ [19] [20]
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
-[21]
-
-LaTeX Warning: Hyper reference `common/common:field-ex' on page 22 undefined on
- input line 1081.
-
-
-LaTeX Warning: Reference `common/common:field-ex' on page 22 undefined on input
- line 1081.
-
-
-LaTeX Warning: Hyper reference `common/common:ver-ex' on page 22 undefined on i
-nput line 1099.
-
-
-LaTeX Warning: Reference `common/common:ver-ex' on page 22 undefined on input l
-ine 1099.
-
-[22]
-
-LaTeX Warning: Hyper reference `common/common:trump' on page 23 undefined on in
-put line 1162.
-
-
-LaTeX Warning: Reference `common/common:trump' on page 23 undefined on input li
-ne 1162.
-
+ [21] [22]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
-
-LaTeX Warning: Hyper reference `common/common:trump-open' on page 23 undefined 
-on input line 1210.
-
-
-LaTeX Warning: Reference `common/common:trump-open' on page 23 undefined on inp
-ut line 1210.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 23 undefin
-ed on input line 1211.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
-input line 1211.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 23 undefined on 
-input line 1211.
-
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
-[23]
-
-LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 24 undefin
-ed on input line 1235.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
-input line 1235.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 24 undefined on 
-input line 1235.
-
-[24] [25] [26]
+ [23] [24] [25] [26]
 第4章
 [27
 
@@ -1198,101 +960,10 @@ input line 1235.
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
- [28]
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-lite' on page 29 u
-ndefined on input line 1547.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1547.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 29 undefin
-ed on input line 1547.
-
-[29]
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-std' on page 30 un
-defined on input line 1586.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1586.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 30 undefine
-d on input line 1586.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-pro' on page 30 un
-defined on input line 1625.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
-d on input line 1625.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 30 undefine
-d on input line 1625.
-
-[30]
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1664.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1664.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1664.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 31
- undefined on input line 1703.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1703.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 31 undef
-ined on input line 1703.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 31 undefin
-ed on input line 1712.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1712.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 31 undefined on 
-input line 1712.
-
-
-LaTeX Warning: Hyper reference `common/common:extra-start' on page 31 undefined
- on input line 1721.
-
-
-LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1721.
-
-
-LaTeX Warning: Reference `common/common:extra-start' on page 31 undefined on in
-put line 1721.
-
-[31] [32
+ [28] [29] [30] [31] [32
 
 ]
 第5章
-
-LaTeX Warning: Hyper reference `format/format::doc' on page 33 undefined on inp
-ut line 1754.
-
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
 (Font)              Font shape `JT1/gt/m/n' tried instead on input line 1754.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
@@ -1301,173 +972,7 @@ LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
 (Font)              Font shape `JY1/gt/m/n' tried instead on input line 1754.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 9.60999pt on input line 1754.
-
-LaTeX Warning: Hyper reference `format/lite:format-lite' on page 33 undefined o
-n input line 1783.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
-t line 1783.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 33 undefined on inpu
-t line 1783.
-
-[33]
-
-LaTeX Warning: Hyper reference `format/lite:format-lite' on page 34 undefined o
-n input line 1862.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
-t line 1862.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 34 undefined on inpu
-t line 1862.
-
-[34]
-
-LaTeX Warning: Hyper reference `format/lite:format-lite' on page 35 undefined o
-n input line 1941.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
-t line 1941.
-
-
-LaTeX Warning: Reference `format/lite:format-lite' on page 35 undefined on inpu
-t line 1941.
-
-[35]
-
-LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
-efined on input line 2036.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 2036.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 2036.
-
-
-LaTeX Warning: Hyper reference `format/standard:format-standard' on page 36 und
-efined on input line 2115.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 2115.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 36 undefined
- on input line 2115.
-
-[36]
-
-LaTeX Warning: Hyper reference `format/standard:format-standard' on page 37 und
-efined on input line 2194.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
- on input line 2194.
-
-
-LaTeX Warning: Reference `format/standard:format-standard' on page 37 undefined
- on input line 2194.
-
-[37]
-
-LaTeX Warning: Hyper reference `format/pro:format-pro' on page 38 undefined on 
-input line 2289.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
-line 2289.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 38 undefined on input 
-line 2289.
-
-[38]
-
-LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
-input line 2368.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2368.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2368.
-
-
-LaTeX Warning: Hyper reference `format/pro:format-pro' on page 39 undefined on 
-input line 2447.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2447.
-
-
-LaTeX Warning: Reference `format/pro:format-pro' on page 39 undefined on input 
-line 2447.
-
-[39]
-
-LaTeX Warning: Hyper reference `format/master:format-master' on page 40 undefin
-ed on input line 2542.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
-input line 2542.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 40 undefined on 
-input line 2542.
-
-[40]
-
-LaTeX Warning: Hyper reference `format/master:format-master' on page 41 undefin
-ed on input line 2621.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
-input line 2621.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 41 undefined on 
-input line 2621.
-
-[41]
-
-LaTeX Warning: Hyper reference `format/master:format-master' on page 42 undefin
-ed on input line 2700.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
-input line 2700.
-
-
-LaTeX Warning: Reference `format/master:format-master' on page 42 undefined on 
-input line 2700.
-
-[42]
-
-LaTeX Warning: Hyper reference `format/extra:format-extra' on page 43 undefined
- on input line 2795.
-
-
-LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
-put line 2795.
-
-
-LaTeX Warning: Reference `format/extra:format-extra' on page 43 undefined on in
-put line 2795.
-
-[43] [44
+[33] [34] [35] [36] [37] [38] [39] [40] [41] [42] [43] [44
 
 ]
 第6章
@@ -1503,28 +1008,16 @@ Underfull \hbox (badness 10000) in paragraph at lines 2951--2955
 
 No file blackpoker.ind.
 [46] (./blackpoker.aux)
-
-LaTeX Warning: There were undefined references.
-
-
-LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
-
-
-Package rerunfilecheck Warning: File `blackpoker.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `blackpoker.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  807051B1F1B25420B83DC6E06C632FEF;15116.
+Package rerunfilecheck Info: File `blackpoker.out' has not changed.
+(rerunfilecheck)             Checksum: 807051B1F1B25420B83DC6E06C632FEF;15116.
  ) 
 Here is how much of TeX's memory you used:
- 13907 strings out of 480496
- 207616 string characters out of 5899437
- 526985 words of memory out of 5000000
- 31612 multiletter control sequences out of 15000+600000
+ 13962 strings out of 480496
+ 208491 string characters out of 5899437
+ 558066 words of memory out of 5000000
+ 31659 multiletter control sequences out of 15000+600000
  507208 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,12n,80p,329b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,12n,80p,327b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (50 pages, 122688 bytes).
+Output written on blackpoker.dvi (52 pages, 207176 bytes).
