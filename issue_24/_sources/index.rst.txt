@@ -3,28 +3,16 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to BlackPoker's documentation!
+BlackPoker公式ルール
 ======================================
 
 .. toctree::
-   :maxdepth: 5
-   :caption: Contents:
-   :numbered: 5
+   :maxdepth: 3
+   :numbered: 10
 
    init/init
-   match-regulations/match-regulations
-   format/format
-   common/common
    core/core
+   common/common
+   format/format
+   match-regulations/match-regulations
    appendix/appendix
-
-.. section-numbering::
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-

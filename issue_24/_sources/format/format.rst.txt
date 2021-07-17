@@ -113,8 +113,9 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
    :maxdepth: 1
    :caption: 公式フォーマット:
 
-   light
+   lite
    standard 
    pro 
-   master 
+   master
+   extra
 
