@@ -7,6 +7,7 @@ sphinx-build -b latex ./source ./docs
 cd ./docs
 
 echo "xxxxxxxxxxxxxxxxxxxxx"
+rm -f blackpoker.pdf
 
 sed -i -e 's/♡/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
 sed -i -e 's/♥/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
