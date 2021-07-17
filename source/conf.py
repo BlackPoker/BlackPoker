@@ -58,6 +58,10 @@ language = 'ja'
 
 import sphinx_rtd_theme
 
+
+[extensions]
+todo_include_todos=True
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -90,5 +94,8 @@ html_theme_options = {
 
 html_show_sourcelink = True
 
-[extensions]
-todo_include_todos=True
+
+# -- Options for HTML output -------------------------------------------------
+
+# LaTeX の docclass 設定
+latex_docclass = {'manual': 'jsbook'}
