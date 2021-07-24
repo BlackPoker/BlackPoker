@@ -28,21 +28,21 @@
 \contentsline {subsection}{\numberline {2.8.2}{[}2{]}ターンプレイヤーにチャンスを移動}{9}{subsection.2.8.2}%
 \contentsline {subsection}{\numberline {2.8.3}{[}3{]}ステージが空か？}{9}{subsection.2.8.3}%
 \contentsline {subsection}{\numberline {2.8.4}{[}4{]}パス名簿リセット}{9}{subsection.2.8.4}%
-\contentsline {subsection}{\numberline {2.8.5}{[}5{]}アクション起こす}{9}{subsection.2.8.5}%
+\contentsline {subsection}{\numberline {2.8.5}{[}5{]}アクションを起こす}{9}{subsection.2.8.5}%
 \contentsline {subsection}{\numberline {2.8.6}{[}6{]}即時効果か？}{9}{subsection.2.8.6}%
-\contentsline {subsection}{\numberline {2.8.7}{[}7{]}効果解決}{11}{subsection.2.8.7}%
+\contentsline {subsection}{\numberline {2.8.7}{[}7{]}アクションの解決}{11}{subsection.2.8.7}%
 \contentsline {subsection}{\numberline {2.8.8}{[}8{]}勝敗判定}{11}{subsection.2.8.8}%
 \contentsline {subsection}{\numberline {2.8.9}{[}9{]}ステージに追加}{11}{subsection.2.8.9}%
 \contentsline {subsection}{\numberline {2.8.10}{[}10{]}誘発チェック}{11}{subsection.2.8.10}%
 \contentsline {subsection}{\numberline {2.8.11}{[}11{]}アクションを起こすか？}{11}{subsection.2.8.11}%
 \contentsline {subsection}{\numberline {2.8.12}{[}12{]}パス名簿に登録}{11}{subsection.2.8.12}%
 \contentsline {subsection}{\numberline {2.8.13}{[}13{]}パス名簿の件数=プレイヤー数か？}{11}{subsection.2.8.13}%
-\contentsline {subsection}{\numberline {2.8.14}{[}14{]}ステージから取出し}{11}{subsection.2.8.14}%
+\contentsline {subsection}{\numberline {2.8.14}{[}14{]}ステージから取出し}{12}{subsection.2.8.14}%
 \contentsline {subsection}{\numberline {2.8.15}{[}15{]}チャンス移動}{12}{subsection.2.8.15}%
 \contentsline {subsection}{\numberline {2.8.16}誘発チェック}{12}{subsection.2.8.16}%
 \contentsline {subsubsection}{{[}10\sphinxhyphen {}1{]}誘発チェック}{12}{subsubsection*.5}%
 \contentsline {subsubsection}{{[}10\sphinxhyphen {}2{]}即時誘発有無判定}{12}{subsubsection*.6}%
-\contentsline {subsubsection}{{[}10\sphinxhyphen {}3{]}効果解決\&勝敗判定}{12}{subsubsection*.7}%
+\contentsline {subsubsection}{{[}10\sphinxhyphen {}3{]}アクションの解決\&勝敗判定}{12}{subsubsection*.7}%
 \contentsline {subsubsection}{{[}10\sphinxhyphen {}4{]}誘発有無判定}{14}{subsubsection*.8}%
 \contentsline {subsubsection}{{[}10\sphinxhyphen {}5{]}ステージに追加}{14}{subsubsection*.9}%
 \contentsline {section}{\numberline {2.9}まとめ}{14}{section.2.9}%
@@ -69,13 +69,12 @@
 \contentsline {subsubsection}{アクションを起こすときの注意点}{22}{subsubsection*.12}%
 \contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{22}{paragraph*.13}%
 \contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{22}{paragraph*.14}%
-\contentsline {subsection}{\numberline {3.10.4}アクションの効果解決}{22}{subsection.3.10.4}%
-\contentsline {subsubsection}{対象条件を満たしているか}{22}{subsubsection*.15}%
-\contentsline {subsubsection}{効果の中に実行不可能な部分があるか}{22}{subsubsection*.16}%
-\contentsline {subsection}{\numberline {3.10.5}アクションの効果解決後}{22}{subsection.3.10.5}%
+\contentsline {subsection}{\numberline {3.10.4}アクションの解決}{22}{subsection.3.10.4}%
+\contentsline {subsubsection}{対象条件を確認}{22}{subsubsection*.15}%
+\contentsline {subsubsection}{効果を発揮}{22}{subsubsection*.16}%
 \contentsline {subsubsection}{キーカードを墓地に移す}{23}{subsubsection*.17}%
-\contentsline {subsection}{\numberline {3.10.6}勝敗判定}{23}{subsection.3.10.6}%
-\contentsline {subsection}{\numberline {3.10.7}その他補足事項}{23}{subsection.3.10.7}%
+\contentsline {subsection}{\numberline {3.10.5}勝敗判定}{23}{subsection.3.10.5}%
+\contentsline {subsection}{\numberline {3.10.6}その他補足事項}{23}{subsection.3.10.6}%
 \contentsline {subsubsection}{防壁の置き方}{23}{subsubsection*.18}%
 \contentsline {subsubsection}{1ターンに1回制限}{23}{subsubsection*.19}%
 \contentsline {subsubsection}{直接起こせないアクション}{24}{subsubsection*.20}%
