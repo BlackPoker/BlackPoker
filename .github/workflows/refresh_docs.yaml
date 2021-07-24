@@ -10,7 +10,7 @@ on:
         default: warning
       tags:
   schedule:
-    - cron: '30 7 * * *'
+    - cron: '0 19 * * *'
 
 jobs:
   release:
