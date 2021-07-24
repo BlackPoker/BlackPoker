@@ -98,7 +98,7 @@ html_context = {
   'display_github': True,
   'github_user': 'BlackPoker',
   'github_repo': 'BlackPoker',
-  'github_version': 'master/docs/',
+  'github_version': 'master/source/',
 }
 
 html_show_sourcelink = True
