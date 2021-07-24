@@ -69,6 +69,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: |
+           sed -i -e 's,'github_version': 'master/source/','github_version': '${{ steps.vars.outputs.short_ref }}/source/',g' ./source/conf.py
            sed -i -e 's,https://blackpoker.github.io/BlackPoker/,https://blackpoker.github.io/BlackPoker/${{ steps.vars.outputs.short_ref }}/,g' ./source/appendix/appendix.rst
            mkdir -p `pwd`/docs
            docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest "."
