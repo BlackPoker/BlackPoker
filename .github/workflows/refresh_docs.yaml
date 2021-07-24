@@ -9,6 +9,9 @@ on:
         description: ログレベル
         default: warning
       tags:
+  schedule:
+    - cron:  '5 7 * * *'
+
 jobs:
   release:
     name: release build
