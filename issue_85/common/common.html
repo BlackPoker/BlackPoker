@@ -1,0 +1,918 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="ja" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="ja" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>3. 共通ルール &mdash; BlackPoker  ドキュメント</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="4. フォーマット" href="../format/format.html" />
+    <link rel="prev" title="2. コアルール" href="../core/core.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: black" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> BlackPoker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                6.0版
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">2. コアルール</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">3. 共通ルール</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">3.1. プレイ人数</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">3.2. 用意するもの</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">3.3. 使用できるトランプ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">3.4. トランプの数字</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">3.5. カードの配置</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id7">3.6. 勝利条件</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id8">3.7. ダメージ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">3.8. キャラクター</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">3.8.1. キャラクターのもつ項目</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">3.8.2. キャラクターの数字</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">3.8.3. キャラクターの注意点</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id13">3.8.3.1. 複数枚で1体となるキャラクターが防壁になったら？</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">3.8.4. チャージとドライブ</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">3.9. ゲームの始め方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">3.10. アクション</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id17">3.10.1. アクションが持つ項目</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id18">3.10.1.1. 記載されていないアクションの項目</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cost">3.10.2. コストの種類</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">3.10.3. アクションの起こし方</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id21">3.10.3.1. アクションを起こすときの注意点</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">3.10.4. アクションの効果解決</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id25">3.10.4.1. 対象条件を満たしているか</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id26">3.10.4.2. 効果の中に実行不可能な部分があるか</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id27">3.10.5. アクションの効果解決後</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#keycard-gy">3.10.5.1. キーカードを墓地に移す</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id29">3.10.6. 勝敗判定</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id30">3.10.7. その他補足事項</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id31">3.10.7.1. 防壁の置き方</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id32">3.10.7.2. 1ターンに1回制限</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">3.10.7.3. 直接起こせないアクション</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#extra">3.11. エクストラ</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id35">3.11.1. 切札</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id36">3.11.2. バージョン</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id37">3.11.3. 版数との関係</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extra-start">3.11.4. ゲームのはじめ方</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id39">3.11.5. 切札の能力</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id40">3.11.5.1. 能力を有効にする</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id41">3.11.5.2. 能力を無効する</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id42">3.11.6. エクストラ注意事項</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id43">3.11.6.1. 1ターンに1回制限のアクションについて</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id44">3.12. その他のルール</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id45">3.12.1. 公開・非公開情報</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id46">3.12.1.1. 残りのデッキ枚数を聞かれたらどうしたらいいの？</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id47">3.12.1.2. 墓地の一番上のカードはいつ決まるのか？</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#id48">3.12.2. デッキのシャッフルについて</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">5. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlackPoker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">3. </span>共通ルール</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/BlackPoker/BlackPoker/blob/issue_85/source/common/common.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="id1">
+<h1><span class="section-number">3. </span>共通ルール<a class="headerlink" href="#id1" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<p>この章では、カードの配置などコアルールで定義されていない内容を定義します。</p>
+<section id="id2">
+<h2><span class="section-number">3.1. </span>プレイ人数<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>フォーマット、対戦レギュレーションに定義されていない場合、2人です。
+プレイする際に確認してください。</p>
+</section>
+<section id="id3">
+<h2><span class="section-number">3.2. </span>用意するもの<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><p>1人1セットのトランプが必要です。</p></li>
+<li><p>覚えていない場合、フォーマットに応じてアクションリスト、エクストラリストがあると便利です。</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="id4">
+<h2><span class="section-number">3.3. </span>使用できるトランプ<a class="headerlink" href="#id4" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>BlackPokerでは次の条件を満たしたトランプを使うことができます。
+一般的なトランプなら満たす条件となっています。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>スートと数字が分かる</p></li>
+<li><p>スートの♠♡♢♣が判断できる</p></li>
+<li><p>数字のA-K（1-13）が判断できる</p></li>
+<li><p>スートと数字の組合せが重複していない</p></li>
+<li><p>裏から表がわからない</p></li>
+<li><p>縦向き横向きが判断できる</p></li>
+<li><p>Jokerは2枚まで入れられる</p></li>
+<li><p>54枚無くてもよい</p></li>
+</ul>
+<p>対戦レギュレーションにより使用できるトランプの枚数など異なる場合があるため、
+対戦する際に、対戦レギュレーション、フォーマットを確認してください。</p>
+</div></blockquote>
+</section>
+<section id="id5">
+<h2><span class="section-number">3.4. </span>トランプの数字<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>ゲーム全体を通してトランプの数字は次のような数値として扱います。(<code class="xref std std-numref docutils literal notranslate"><span class="pre">cardrank</span></code>)</p>
+<table class="docutils align-default" id="id49">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">トランプの数字</span><a class="headerlink" href="#id49" title="このテーブルへのパーマリンク">¶</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>カード</p></th>
+<th class="head"><p>数字</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>A</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>2〜10</p></td>
+<td><p>表記どおり</p></td>
+</tr>
+<tr class="row-even"><td><p>J</p></td>
+<td><p>11</p></td>
+</tr>
+<tr class="row-odd"><td><p>Q</p></td>
+<td><p>12</p></td>
+</tr>
+<tr class="row-even"><td><p>K</p></td>
+<td><p>13</p></td>
+</tr>
+<tr class="row-odd"><td><p>Joker</p></td>
+<td><p>0</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="id6">
+<h2><span class="section-number">3.5. </span>カードの配置<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>カードの配置には次のような場所があります。(<a class="reference internal" href="#field-ex"><span class="std std-numref">Fig. 3.1</span></a>)</p>
+<figure class="align-default" id="id50">
+<span id="field-ex"></span><img alt="../_images/field-ex.png" src="../_images/field-ex.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.1 </span><span class="caption-text">プレイ中のカードの配置</span><a class="headerlink" href="#id50" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt>デッキ</dt><dd><p>山札。ゲームを始める時に自分のトランプを裏向きに置く場所です。
+ダメージを受けるとデッキの一番上から墓地にカードを移します。</p>
+</dd>
+<dt>墓地</dt><dd><p>捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。</p>
+</dd>
+<dt>場</dt><dd><p>兵士や防壁などのキャラクターを置きます。</p>
+</dd>
+<dt>手札</dt><dd><p>デッキから引いたカードを持っておく場所です。相手から見えないようにしましょう。</p>
+</dd>
+<dt>切札</dt><dd><p>能力が割り当てられたカードを置きます。エクストラフォーマットのみで使用します。
+エクストラのルールについては、 <a class="reference internal" href="#extra"><span class="std std-numref">3.11 エクストラ</span></a> で説明します。</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h2><span class="section-number">3.6. </span>勝利条件<a class="headerlink" href="#id7" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>プレイヤーは順に対戦相手に対し攻撃を行い、ダメージを与え先に相手のデッキを0枚にした方が勝ちです。ダメージは1点につき1枚デッキが減ります。</p>
+</section>
+<section id="id8">
+<h2><span class="section-number">3.7. </span>ダメージ<a class="headerlink" href="#id8" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>プレイヤーがダメージを受けた場合、デッキの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。</p>
+</section>
+<section id="id9">
+<h2><span class="section-number">3.8. </span>キャラクター<a class="headerlink" href="#id9" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>キャラクターとは、場に存在する兵士や防壁のことを指します。
+コアルールのコンポーネントにあたります。</p>
+<p>キャラクターは1枚のカードで1体を表すこともあれば、
+複数枚で1体を表すこともあります。(<a class="reference internal" href="#character"><span class="std std-numref">Fig. 3.2</span></a>)</p>
+<figure class="align-default" id="id51">
+<span id="character"></span><img alt="../_images/character.png" src="../_images/character.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.2 </span><span class="caption-text">キャラクターの例</span><a class="headerlink" href="#id51" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="id10">
+<h3><span class="section-number">3.8.1. </span>キャラクターのもつ項目<a class="headerlink" href="#id10" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>キャラクターのもつ項目について説明します。
+凡例のキャラクター「一般兵」を見てみましょう。(<a class="reference internal" href="#character-sample"><span class="std std-numref">Fig. 3.3</span></a>)</p>
+<figure class="align-default" id="id52">
+<span id="character-sample"></span><img alt="../_images/character-sample.png" src="../_images/character-sample.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.3 </span><span class="caption-text">一般兵</span><a class="headerlink" href="#id52" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt>キャラクター名</dt><dd><p>キャラクターの名称を示します。</p>
+</dd>
+<dt>タイプ</dt><dd><p>キャラクターのタイプを示します。タイプは兵士と防壁の2種類が存在します。</p>
+</dd>
+<dt>キーカード</dt><dd><p>キャラクターを示すカードが記載されています。複数のカードで1体のキャラクターを示す場合もあります。</p>
+</dd>
+<dt>能力</dt><dd><p>キャラクターが持っている能力を記載しています。</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h3><span class="section-number">3.8.2. </span>キャラクターの数字<a class="headerlink" href="#id11" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>トランプの数字は、キャラクターの強さを示します。
+基本はカードに記載された数字を示しますが、魔法などのアクションを使うことで
+加算したり減算されたりします。</p>
+</section>
+<section id="id12">
+<h3><span class="section-number">3.8.3. </span>キャラクターの注意点<a class="headerlink" href="#id12" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<section id="id13">
+<h4><span class="section-number">3.8.3.1. </span>複数枚で1体となるキャラクターが防壁になったら？<a class="headerlink" href="#id13" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>アクションの効果で兵士を防壁にすることがあります。
+防壁は1枚で1体のキャラクターであるため、
+複数枚からなるキャラクターが防壁となった場合、
+複数体の防壁となります。</p>
+<p>なお、複数枚からなるキャラクターが
+墓地や手札に移った場合、
+1体のキャラクターとして
+扱うため複数枚合わせて移します。
+チャージ状態、ドライブ状態となった場合も同様に1体のキャラクター
+として扱います。</p>
+</section>
+</section>
+<section id="id14">
+<h3><span class="section-number">3.8.4. </span>チャージとドライブ<a class="headerlink" href="#id14" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>キャラクターには、チャージ状態とドライブ状態が存在します。
+チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
+また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(<a class="reference internal" href="#chargedrive"><span class="std std-numref">Fig. 3.4</span></a>)</p>
+<figure class="align-default" id="id53">
+<span id="chargedrive"></span><img alt="../_images/charge&amp;drive.png" src="../_images/charge&amp;drive.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.4 </span><span class="caption-text">チャージとドライブ</span><a class="headerlink" href="#id53" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="id15">
+<h2><span class="section-number">3.9. </span>ゲームの始め方<a class="headerlink" href="#id15" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<blockquote>
+<div><p>次の手順でゲームを始めます。</p>
+<ol class="arabic simple">
+<li><p>デッキをよく切る。</p></li>
+<li><p>デッキより7枚引き手札にする。</p></li>
+<li><p>両者デッキの一番上を表にする。</p></li>
+<li><p>大きい数字のプレイヤーが先攻。数字については、 <code class="xref std std-numref docutils literal notranslate"><span class="pre">cardrank</span></code> 参照。</p></li>
+<li><p>数字が同じ場合、さらにデッキの一番上を表にし同様のルールで比べる。</p></li>
+<li><p>表にしたカードを墓地へ移す。</p></li>
+<li><p>先攻プレイヤーはデッキより1枚引き手札に加える。</p></li>
+<li><p>先攻プレイヤーがターンとチャンスをもちゲームを開始する。</p></li>
+</ol>
+</div></blockquote>
+<p>この行動が <a class="reference internal" href="../core/core.html#gamestart"><span class="std std-numref">2.8.1 [1]ゲーム開始</span></a> に該当します。
+この後はコアフローに準じアクションを起こしてゲームを進行します。</p>
+<p>ゲーム内で起こせるアクションは対戦レギュレーション、フォーマットより異なります。
+対戦前に確認してください。</p>
+</section>
+<section id="id16">
+<h2><span class="section-number">3.10. </span>アクション<a class="headerlink" href="#id16" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<section id="id17">
+<h3><span class="section-number">3.10.1. </span>アクションが持つ項目<a class="headerlink" href="#id17" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>アクションが持つ項目について説明します。
+凡例の「サンプル」アクションを見てみましょう。(<a class="reference internal" href="#action-sample"><span class="std std-numref">Fig. 3.5</span></a>)</p>
+<figure class="align-default" id="id54">
+<span id="action-sample"></span><img alt="../_images/action-sample.png" src="../_images/action-sample.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.5 </span><span class="caption-text">サンプルアクション</span><a class="headerlink" href="#id54" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt>アクション名</dt><dd><p>アクションの名称を示します。</p>
+</dd>
+<dt>キーカード</dt><dd><p>アクションの核となるカードを示します。
+キーカードは★を使って表記します。
+凡例の場合、手札からコストとは別に♡A〜10に該当するカードを1枚
+キーカードとして使用します。</p>
+</dd>
+<dt>特記事項</dt><dd><p>特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。</p>
+</dd>
+<dt>対象</dt><dd><p>効果を発揮する対象を示します。</p>
+</dd>
+<dt>即時効果/通常効果</dt><dd><p>発揮する効果の内容を示します。</p>
+</dd>
+<dt>コスト</dt><dd><p>アクションを起こすのに必要な対価です。
+コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は <a class="reference internal" href="#cost"><span class="std std-numref">3.10.2 コストの種類</span></a> で説明します。</p>
+</dd>
+<dt>タイミング</dt><dd><p>アクションを起こせる時を示します。
+タイミングはコアルール <a class="reference internal" href="../core/core.html#timing"><span class="std std-numref">2.5.2 タイミング</span></a> を参照してください。</p>
+</dd>
+<dt>タイプ</dt><dd><p>アクションの種類を表します。アクション名の後に括弧書きで記載します。</p>
+</dd>
+</dl>
+<section id="id18">
+<h4><span class="section-number">3.10.1.1. </span>記載されていないアクションの項目<a class="headerlink" href="#id18" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>アクションによっては記載されていない項目もあります。
+記載されていない項目は無視して構いません。
+たとえばコスト項目がなければコストを支払う必要はありません。</p>
+</section>
+</section>
+<section id="cost">
+<span id="id19"></span><h3><span class="section-number">3.10.2. </span>コストの種類<a class="headerlink" href="#cost" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>アクションによって支払うコストが異なります。
+コストには次の種類があり、それぞれ支払い方が異なります。(<a class="reference internal" href="#table-cost"><span class="std std-numref">Table 3.2</span></a>)</p>
+<span id="table-cost"></span><table class="docutils align-default" id="id55">
+<caption><span class="caption-number">Table 3.2 </span><span class="caption-text">コストの種類</span><a class="headerlink" href="#id55" title="このテーブルへのパーマリンク">¶</a></caption>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>表記(名称)</p></th>
+<th class="head"><p>対価</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>B (Bulwark)</p></td>
+<td><p>防壁をドライブする</p></td>
+</tr>
+<tr class="row-odd"><td><p>L (Life)</p></td>
+<td><p>1点ダメージを受ける</p></td>
+</tr>
+<tr class="row-even"><td><p>D (Discard)</p></td>
+<td><p>手札を1枚捨てる</p></td>
+</tr>
+<tr class="row-odd"><td><p>S (Sacrifice)</p></td>
+<td><p>キャラクター1体を墓地に移す</p></td>
+</tr>
+</tbody>
+</table>
+<p>たとえばコストが <strong>「$BL」</strong> の場合、自分の場にいるチャージ状態の防壁を1体ドライブし、1点ダメージを受けることでコストが支払われたことになります。</p>
+</section>
+<section id="id20">
+<h3><span class="section-number">3.10.3. </span>アクションの起こし方<a class="headerlink" href="#id20" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>次の手順でアクションを起こします。</p>
+<ol class="arabic simple">
+<li><p>起こすアクションを対戦相手に伝える。</p></li>
+<li><p>アクションに応じたコストを支払う。</p></li>
+<li><p>必要なら手札からキーカードを出す。</p></li>
+<li><p>対象の指定が必要な場合、対象を指定する。</p></li>
+</ol>
+<p>「サンプル」アクションを起こす例を見てみましょう。(<a class="reference internal" href="#action-sample2"><span class="std std-numref">Fig. 3.6</span></a>)</p>
+<figure class="align-default" id="id56">
+<span id="action-sample2"></span><img alt="../_images/action-sample2.png" src="../_images/action-sample2.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.6 </span><span class="caption-text">アクションを起こす例</span><a class="headerlink" href="#id56" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="id21">
+<h4><span class="section-number">3.10.3.1. </span>アクションを起こすときの注意点<a class="headerlink" href="#id21" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id22">
+<h5><span class="section-number">3.10.3.1.1. </span>対象を指定しないでアクションを起こせるか？<a class="headerlink" href="#id22" title="このヘッドラインへのパーマリンク">¶</a></h5>
+<p>「サンプル」アクションのように対象を指定するアクションがあります。
+「対象」項目がある場合、記載された条件を満たした対象を指定できなければ、
+そのアクションを起こすことはできません。</p>
+</section>
+<section id="id23">
+<h5><span class="section-number">3.10.3.1.2. </span>アクションを対象とするアクションは自身を対象にできるか？<a class="headerlink" href="#id23" title="このヘッドラインへのパーマリンク">¶</a></h5>
+<p>アクションは、自分自身を対象とすることはできません。
+そのため、「カウンター」アクションのようにアクションを対象とするアクションは
+自身を対象とすることはできません。</p>
+</section>
+</section>
+</section>
+<section id="id24">
+<h3><span class="section-number">3.10.4. </span>アクションの効果解決<a class="headerlink" href="#id24" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p><a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">2.8 コアフロー</span></a> に準じ起こしたアクションの効果を解決します。
+解決する際の次のことを確認します。</p>
+<section id="id25">
+<h4><span class="section-number">3.10.4.1. </span>対象条件を満たしているか<a class="headerlink" href="#id25" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>対象を指定するアクションが効果を発揮しようとした時に
+対象が存在していない場合、効果を発揮する対象を失うため効果が発揮されず
+アクションが解決されます。</p>
+<p>たとえば兵士に対して「アップ」アクションを起こし、対応して「ダウン」
+アクションを起こされました。
+「ダウン」の方が先に解決されるため、「アップ」を解決する時には
+兵士が墓地に移っていたとします。その場合、「アップ」アクションは効果を発揮せず解決されます。</p>
+</section>
+<section id="id26">
+<h4><span class="section-number">3.10.4.2. </span>効果の中に実行不可能な部分があるか<a class="headerlink" href="#id26" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>効果の中に実行不可能な部分がある場合、可能な部分のみ実行します。</p>
+<p>たとえば、デッキの枚数が残1枚の時に5点のダメージを受けたとします。
+デッキは1枚しかないので5点ダメージを受けることはできませんが、
+1点までなら受けることが可能なため、
+この場合1点のダメージを受けることになります。</p>
+</section>
+</section>
+<section id="id27">
+<h3><span class="section-number">3.10.5. </span>アクションの効果解決後<a class="headerlink" href="#id27" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>アクションの効果を解決した後、次のことを行います。</p>
+<section id="keycard-gy">
+<span id="id28"></span><h4><span class="section-number">3.10.5.1. </span>キーカードを墓地に移す<a class="headerlink" href="#keycard-gy" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>1つのアクションが解決された後そのアクションをステージから取り除き、キーカードを墓地に移します。
+ただし効果によってキーカードを場に出した場合や手札に戻した場合、
+そのカードを移す先が明確になっているため、墓地には移しません。</p>
+</section>
+</section>
+<section id="id29">
+<h3><span class="section-number">3.10.6. </span>勝敗判定<a class="headerlink" href="#id29" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p><a class="reference internal" href="../core/core.html#winlose"><span class="std std-numref">2.8.8 [8]勝敗判定</span></a> で確認する内容は次になります。</p>
+<p>デッキを確認し0枚の場合そのプレイヤーは敗北となります。両プレイヤーのデッキが0枚の場合、引き分けとなります。</p>
+</section>
+<section id="id30">
+<h3><span class="section-number">3.10.7. </span>その他補足事項<a class="headerlink" href="#id30" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<section id="id31">
+<h4><span class="section-number">3.10.7.1. </span>防壁の置き方<a class="headerlink" href="#id31" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>防壁を場に出すときは次のルールにしたがって場に出して下さい。(<a class="reference internal" href="#set-bulwork"><span class="std std-numref">Fig. 3.7</span></a>)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>防壁を置く時はデッキ側に詰めて置いて下さい。</p></li>
+<li><p>防壁の左右の入れ替えは行わないでください。</p></li>
+</ul>
+</div></blockquote>
+<figure class="align-default" id="id57">
+<span id="set-bulwork"></span><img alt="../_images/set-bulwork.png" src="../_images/set-bulwork.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.7 </span><span class="caption-text">防壁の置き方</span><a class="headerlink" href="#id57" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id32">
+<h4><span class="section-number">3.10.7.2. </span>1ターンに1回制限<a class="headerlink" href="#id32" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>特記事項に「プレイヤーは1ターンに1回しかこのアクションを起こすことができない。」と記載されているアクションは、
+ターンを持っているプレイヤーが変わるまでの間に1回しか起こす
+ことができません。</p>
+<p>ターンを持っているプレイヤーが変わればまた起こすことができます。</p>
+</section>
+<section id="id33">
+<h4><span class="section-number">3.10.7.3. </span>直接起こせないアクション<a class="headerlink" href="#id33" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>特記事項に「プレイヤーはこのアクションを直接起こすことが出来ない。」
+と記載されているアクションは、
+プレイヤーがチャンスを持っていても
+アクションを起こすことができません。
+また、この特記事項が記載されたアクションが何らかの起因で起きても、プレイヤーが起こした訳ではないためパスは自動的に発生せず、チャンスは移りません。</p>
+</section>
+</section>
+</section>
+<section id="extra">
+<span id="id34"></span><h2><span class="section-number">3.11. </span>エクストラ<a class="headerlink" href="#extra" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>エクストラではアクションに加え切札の能力を使うことができます。
+使用できるアクション、切札は対戦レギュレーションを確認してください。</p>
+<section id="id35">
+<h3><span class="section-number">3.11.1. </span>切札<a class="headerlink" href="#id35" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>切札とは、切札領域に置かれたカードを示します。
+具体的な切札の置き場所については、 <a class="reference internal" href="#field-ex"><span class="std std-numref">Fig. 3.1</span></a> を参照して下さい。
+切札には各々能力が割り当てられており、表にするとその能力が有効になります。
+切札を操作するアクションは、「エクストラリスト」を参照して下さい。</p>
+</section>
+<section id="id36">
+<h3><span class="section-number">3.11.2. </span>バージョン<a class="headerlink" href="#id36" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>エクストラには、バージョンが存在します。
+対戦を開始する前に対戦相手とバージョンの確認をしましょう。</p>
+</section>
+<section id="id37">
+<h3><span class="section-number">3.11.3. </span>版数との関係<a class="headerlink" href="#id37" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>版数毎に使える切札の種類が異なります。
+たとえば、第一版、第二版ではエクストラで遊ぶことはできません。
+第三版以降は、次版が出るまでの間に公開された切札であれば
+使用することができます。(<a class="reference internal" href="#ver-ex"><span class="std std-numref">Table 3.3</span></a>)</p>
+<span id="ver-ex"></span><table class="docutils align-default" id="id58">
+<caption><span class="caption-number">Table 3.3 </span><span class="caption-text">版数とエクストラのバージョン</span><a class="headerlink" href="#id58" title="このテーブルへのパーマリンク">¶</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>版数</p></th>
+<th class="head"><p>エクストラのバージョン</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>第一版</p></td>
+<td><p>−</p></td>
+</tr>
+<tr class="row-odd"><td><p>第二版</p></td>
+<td><p>−</p></td>
+</tr>
+<tr class="row-even"><td><p>第三版</p></td>
+<td><p>ex3.4.0 〜 ex3.10.0</p></td>
+</tr>
+<tr class="row-odd"><td><p>第四版</p></td>
+<td><p>ex4.14.0 〜 ex4.22.0</p></td>
+</tr>
+<tr class="row-even"><td><p>第五版</p></td>
+<td><p>ex5.22.0 〜</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="extra-start">
+<span id="id38"></span><h3><span class="section-number">3.11.4. </span>ゲームのはじめ方<a class="headerlink" href="#extra-start" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>エクストラでは、切札を置いてからゲームを始めます。
+切札を置くルールは次のようになっています。(<a class="reference internal" href="#trump"><span class="std std-numref">Fig. 3.8</span></a>)</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>対戦前に裏向きで2枚まで切札を置くことができる。</p></li>
+<li><p>切札はデッキと角度を変えて交わるようにデッキの下に置く。</p></li>
+<li><p>切札を表にするときはスートと数字が見えるようにし、対応する能力の名称を言う。</p></li>
+<li><p>デッキが0枚になった場合、切札が残っていても敗北する。</p></li>
+<li><p>能力が割り当てられていないカードも切札とすることができるが、表になっても能力が有効にならない。</p></li>
+</ul>
+</div></blockquote>
+<figure class="align-default" id="id59">
+<span id="trump"></span><img alt="../_images/trump.png" src="../_images/trump.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.8 </span><span class="caption-text">切札の置き方</span><a class="headerlink" href="#id59" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>これ以降は、通常のゲームの始め方と同様です。</p>
+</section>
+<section id="id39">
+<h3><span class="section-number">3.11.5. </span>切札の能力<a class="headerlink" href="#id39" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>エクストラでは切札を使って能力を得ることができます。
+切札1枚1枚に異なった能力が割り当てられており、
+表にすることで能力が有効になります。
+割り当てられている能力については、「エクストラリスト」を参照して下さい。</p>
+<section id="id40">
+<h4><span class="section-number">3.11.5.1. </span>能力を有効にする<a class="headerlink" href="#id40" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>切札に割り当てられた能力は
+「オープン」アクションを起こし表にすることで有効になります。(<a class="reference internal" href="#trump-open"><span class="std std-numref">Fig. 3.9</span></a>)
+「オープン」アクションの詳細は、 <a class="reference internal" href="../appendix/appendix.html#extralist"><span class="std std-numref">6.3 エクストラリスト</span></a> を参照して下さい。
+切札が表でいる限り、
+その切札の能力は持続的に有効になります。
+また切札を表にする時は、
+対戦相手に有効となった能力が分かるように、
+能力の名称を言いスートと数字が見えるようにしましょう。</p>
+<figure class="align-default" id="id60">
+<span id="trump-open"></span><img alt="../_images/trump-open.png" src="../_images/trump-open.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 3.9 </span><span class="caption-text">切札を表にする例</span><a class="headerlink" href="#id60" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="id41">
+<h4><span class="section-number">3.11.5.2. </span>能力を無効する<a class="headerlink" href="#id41" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>切札は裏向きもしくは、
+墓地に移されると能力が無効になります。
+切札を無効化するためには、「クローズ」アクションを用い
+切札を裏向きにするか、
+「切札破壊」アクションを用いて切札を破壊しましょう。
+「クローズ」アクション、
+「切札破壊」アクションの詳細は、 <a class="reference internal" href="../appendix/appendix.html#extralist"><span class="std std-numref">6.3 エクストラリスト</span></a> を参照して下さい。</p>
+</section>
+</section>
+<section id="id42">
+<h3><span class="section-number">3.11.6. </span>エクストラ注意事項<a class="headerlink" href="#id42" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<section id="id43">
+<h4><span class="section-number">3.11.6.1. </span>1ターンに1回制限のアクションについて<a class="headerlink" href="#id43" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>切札がもたらすアクションの中には「プレイヤーは1ターンに1回しかこのアクションを起こすことができない。」
+と特記事項に記載されているものがあります。
+このアクションは1ターンに1回しか起こすことができないため、
+切札が無効化され再度オープンし有効となっても、そのターンを通して1回しか起こすことができません。</p>
+</section>
+</section>
+</section>
+<section id="id44">
+<h2><span class="section-number">3.12. </span>その他のルール<a class="headerlink" href="#id44" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>この章では、
+公開・非公開情報やシャッフルの仕方といった
+細かな決まりごとを説明します。</p>
+<section id="id45">
+<h3><span class="section-number">3.12.1. </span>公開・非公開情報<a class="headerlink" href="#id45" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>配置されているカードには、アクションの効果
+を使わなくても中身や枚数を知れるものがあります。
+知れる度合いには次の種類があります。</p>
+<dl class="simple">
+<dt>完全公開</dt><dd><p>全てのプレイヤーが知ることができ、
+聞かれたプレイヤーは正しく答える必要がある</p>
+</dd>
+<dt>個人公開</dt><dd><p>デッキの持ち主のみ知ることができる</p>
+</dd>
+<dt>非公開</dt><dd><p>全てのプレイヤーは知ることができない</p>
+</dd>
+</dl>
+<p>完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
+各カードの配置と公開・非公開の度合いは次のとおりです。</p>
+<dl>
+<dt>デッキ</dt><dd><div class="line-block">
+<div class="line">完全公開：10枚未満のデッキ枚数</div>
+<div class="line">個人公開：デッキの枚数</div>
+<div class="line">非公開：デッキの中身</div>
+</div>
+</dd>
+<dt>墓地</dt><dd><div class="line-block">
+<div class="line">完全公開：墓地の一番上のカード</div>
+<div class="line">個人公開：墓地の中身</div>
+<div class="line">非公開：なし</div>
+</div>
+</dd>
+<dt>場</dt><dd><div class="line-block">
+<div class="line">完全公開：表裏を変えずに見えるカード</div>
+<div class="line">個人公開：伏せてあるカード</div>
+<div class="line">非公開：なし</div>
+</div>
+</dd>
+<dt>手札</dt><dd><div class="line-block">
+<div class="line">完全公開：手札の枚数</div>
+<div class="line">個人公開：手札の中身</div>
+<div class="line">非公開：なし</div>
+</div>
+</dd>
+<dt>切札</dt><dd><div class="line-block">
+<div class="line">完全公開：表裏を変えずに見えるカード</div>
+<div class="line">個人公開：伏せてあるカード</div>
+<div class="line">非公開：なし</div>
+</div>
+</dd>
+</dl>
+<section id="id46">
+<h4><span class="section-number">3.12.1.1. </span>残りのデッキ枚数を聞かれたらどうしたらいいの？<a class="headerlink" href="#id46" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>対戦相手から残りのデッキ枚数を聞かれた場合、自分のデッキの枚数を上から10枚まで数え、相手に数えたカードの枚数が分かるように裏向きで見せます。
+10枚未満であれば枚数を答え、10枚以上の場合「10枚以上です」と答えて下さい。
+10枚以上の場合、正確な枚数を答える必要はありません。</p>
+</section>
+<section id="id47">
+<h4><span class="section-number">3.12.1.2. </span>墓地の一番上のカードはいつ決まるのか？<a class="headerlink" href="#id47" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>カードを墓地に移す際に移すカードの中から1枚を公開してください。
+すでに墓地にあるカードを改めて公開しないでください。</p>
+</section>
+</section>
+<section id="id48">
+<h3><span class="section-number">3.12.2. </span>デッキのシャッフルについて<a class="headerlink" href="#id48" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>BlackPokerでは
+コンセプトの1つに”相手のカードに触らない”があるため、
+対戦相手にデッキのシャッフルをお願いする必要はありません。</p>
+<p>ただシャッフルしてほしいのであれば、お願いしても構いません。
+逆に、対戦相手があまりシャッフルしていない場合は、
+さらにシャッフルをお願いすることができます。</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../format/format.html" class="btn btn-neutral float-right" title="4. フォーマット" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../core/core.html" class="btn btn-neutral float-left" title="2. コアルール" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013, BlackPoker
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-66362035-2', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+  
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+
+</body>
+</html>
