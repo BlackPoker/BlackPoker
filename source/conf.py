@@ -94,7 +94,8 @@ html_theme_options = {
 
 html_show_sourcelink = True
 
-html_favicon = 'favicon.png'
+html_favicon = 'favicon.ico'
+
 # -- Options for HTML output -------------------------------------------------
 
 # LaTeX の docclass 設定
