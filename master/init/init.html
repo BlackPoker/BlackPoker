@@ -91,6 +91,19 @@
               <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">1. はじめに</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#id2">1.1. ルールの構成</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">1.2. ルール指針</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id4">1.2.1. 誰とでも戦える ~目指すは老若男女~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">1.2.2. 個性が出せる ~オリジナルトランプ・デッキ構築~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">1.2.3. 短く終わる ~1戦15分~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">1.2.4. ずっと使えるデッキ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">1.2.5. 必要な物は最小限 ~トランプのみ~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">1.2.6. プレイング重視 ~5：3：2＝技：運：構築~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">1.2.7. ベースルールはトレーディングカードゲーム</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">1.2.8. カスタマイズ可能 ~基本と拡張の分離~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">1.2.9. ルールの更新 ~飽き防止＆不備改善~</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">1.2.10. 相手のカードに触らない</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../core/core.html">2. コアルール</a></li>
@@ -172,20 +185,66 @@
 <h2><span class="section-number">1.1. </span>ルールの構成<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>ルールの構成は次のようになっています。</p>
 <p class="plantuml">
-<img src="../_images/plantuml-d144433912d7de61d8f7772389281396a917cd98.svg" alt="rectangle コアルール as core
+<img src="../_images/plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.svg" alt="
+rectangle ルール指針
+
+frame ルール{
+rectangle コアルール as core
 rectangle 共通ルール as common
-
-frame フォーマット as format{
-    rectangle アクションリスト
-    rectangle エクストラリスト
-}
-
+rectangle フォーマット as format
 rectangle 対戦レギュレーション as regulation
 
 core &lt;- common : 参照
-common &lt;-- format : 参照
+common &lt;- format : 参照
 format &lt;- regulation : 参照
-"/></p>
+}
+
+ルール指針 --&gt; ルール : 具体化"/></p>
+</section>
+<section id="id3">
+<h2><span class="section-number">1.2. </span>ルール指針<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>ルールを作成・修正するための指針を示します。</p>
+<section id="id4">
+<h3><span class="section-number">1.2.1. </span>誰とでも戦える ~目指すは老若男女~<a class="headerlink" href="#id4" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ルールを知りトランプを持っていれば誰とでも遊べるゲームを目指します。</p>
+</section>
+<section id="id5">
+<h3><span class="section-number">1.2.2. </span>個性が出せる ~オリジナルトランプ・デッキ構築~<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>さまざまなトランプが使え見た目で個性を出せるのはもちろんのこと、
+デッキ構築の面でも自分のしたい戦い方が表現できることを目指します。</p>
+</section>
+<section id="id6">
+<h3><span class="section-number">1.2.3. </span>短く終わる ~1戦15分~<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>時間をかけずさっと遊べることを目指します。</p>
+</section>
+<section id="id7">
+<h3><span class="section-number">1.2.4. </span>ずっと使えるデッキ<a class="headerlink" href="#id7" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>愛着のあるカードがずっと使えるようなルールとします。</p>
+</section>
+<section id="id8">
+<h3><span class="section-number">1.2.5. </span>必要な物は最小限 ~トランプのみ~<a class="headerlink" href="#id8" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>用意するものはトランプのみ。それ以外の道具は必要ないルールとします。</p>
+</section>
+<section id="id9">
+<h3><span class="section-number">1.2.6. </span>プレイング重視 ~5：3：2＝技：運：構築~<a class="headerlink" href="#id9" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>運やデッキ構築より技量を重視したルールを目指します。</p>
+</section>
+<section id="id10">
+<h3><span class="section-number">1.2.7. </span>ベースルールはトレーディングカードゲーム<a class="headerlink" href="#id10" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>カードゲームプレイヤーが覚えやすいルールを目指します。</p>
+</section>
+<section id="id11">
+<h3><span class="section-number">1.2.8. </span>カスタマイズ可能 ~基本と拡張の分離~<a class="headerlink" href="#id11" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>基本ルールと拡張ルールを分離し、大富豪のようにローカルルールが作成できることを目指します。</p>
+</section>
+<section id="id12">
+<h3><span class="section-number">1.2.9. </span>ルールの更新 ~飽き防止＆不備改善~<a class="headerlink" href="#id12" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>新たなルールを度々公開し、飽きを防止します。またルールに不備がある場合、随時改善します。</p>
+</section>
+<section id="id13">
+<h3><span class="section-number">1.2.10. </span>相手のカードに触らない<a class="headerlink" href="#id13" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>盗難防止とネット対戦対応に努めます。</p>
+</section>
 </section>
 </section>
 
@@ -235,8 +294,31 @@ format &lt;- regulation : 参照
   
   
     
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-66362035-2', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
   
   
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
 <!--   
     <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
       <span class="rst-current-version" data-toggle="rst-current-version">
