@@ -10,6 +10,7 @@ on:
         default: warning
       tags:
   schedule:
+    # 日本時間AM4:00に動作
     - cron: '0 19 * * *'
 
 jobs:
