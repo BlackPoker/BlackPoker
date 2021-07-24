@@ -92,6 +92,15 @@ html_theme_options = {
     # 'titles_only': False
 }
 
+# replace "view page source" with "edit on github" in Read The Docs theme
+#  * https://github.com/readthedocs/sphinx_rtd_theme/issues/529
+html_context = {
+  'display_github': True,
+  'github_user': 'BlackPoker',
+  'github_repo': 'BlackPoker',
+  'github_version': 'master/docs/',
+}
+
 html_show_sourcelink = True
 
 html_favicon = 'favicon.ico'
