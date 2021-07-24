@@ -18,4 +18,5 @@ build/latex
 .DS_Store
 node_modules
 
+source/_build
 docs/*
