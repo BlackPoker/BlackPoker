@@ -4,8 +4,7 @@ REM Command file for Sphinx documentation
 
 pushd %~dp0
 
-REM latexmkrc is read then overridden by latexmkjarc
-set PDFLATEX=latexmk -r latexmkjarc -pdfdvi -dvi- -ps-
+set PDFLATEX=latexmk -pdf -dvi- -ps-
 
 set "LATEXOPTS= "
 
