@@ -1,13 +1,15 @@
+
+rectangle ルール指針
+
+frame ルール{
 rectangle コアルール as core
 rectangle 共通ルール as common
-
-frame フォーマット as format{
-    rectangle アクションリスト
-    rectangle エクストラリスト
-}
-
+rectangle フォーマット as format
 rectangle 対戦レギュレーション as regulation
 
 core <- common : 参照
-common <-- format : 参照
+common <- format : 参照
 format <- regulation : 参照
+}
+
+ルール指針 --> ルール : 具体化

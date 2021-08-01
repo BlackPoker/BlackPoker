@@ -7,6 +7,7 @@ sphinx-build -b latex ./source ./docs
 cd ./docs
 
 echo "xxxxxxxxxxxxxxxxxxxxx"
+rm -f blackpoker.pdf
 
 sed -i -e 's/♡/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
 sed -i -e 's/♥/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
@@ -39,7 +40,13 @@ sed -i -e 's/⑳/\raise0.2ex\hbox{\textcircled{\scriptsize{20}}} /g' blackpoker.
 
 
 # sphinx-build -M latexpdf ./source ./docs
+
+# 以下のwarn解消のため複数回実行
+# Package hyperref Warning: Rerun to get /PageLabels entry.
 platex "blackpoker.tex"
+platex "blackpoker.tex"
+platex "blackpoker.tex"
+
 dvipdfmx "blackpoker"
 
 # cd docs/latex

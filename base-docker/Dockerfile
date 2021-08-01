@@ -18,7 +18,7 @@ RUN apk add --no-cache ttf-droid
 RUN apk add --no-cache ttf-droid-nonlatin
 RUN apk add --no-cache curl
 RUN apk add --no-cache openjdk11
-RUN mkdir /app
+RUN mkdir -p /app
 RUN curl -L https://sourceforge.net/projects/plantuml/files/plantuml.${PLANTUML_VERSION}.jar/download -o /app/plantuml.jar 
 RUN apk del curl
 RUN cp /app/plantuml.jar /usr/local/bin

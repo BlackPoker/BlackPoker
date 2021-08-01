@@ -28,7 +28,7 @@ numfig_format = {
     'section': '{number} {name}'
 }
 # release = '2021/7/1'
-version = '6.0版'
+version = '6.1版'
 
 # -- General configuration ---------------------------------------------------
 
@@ -58,6 +58,10 @@ language = 'ja'
 
 import sphinx_rtd_theme
 
+
+[extensions]
+todo_include_todos=True
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -73,7 +77,7 @@ html_static_path = ['_static']
 
 html_theme_options = {
     # 'canonical_url': '',
-    # 'analytics_id': 'UA-XXXXXXX-1',  #  Provided by Google in your dashboard
+    'analytics_id': 'UA-66362035-2',  #  Provided by Google in your dashboard
     'logo_only': False,
     'display_version': True,
     # 'prev_next_buttons_location': 'bottom',
@@ -88,7 +92,20 @@ html_theme_options = {
     # 'titles_only': False
 }
 
+# replace "view page source" with "edit on github" in Read The Docs theme
+#  * https://github.com/readthedocs/sphinx_rtd_theme/issues/529
+html_context = {
+  'display_github': True,
+  'github_user': 'BlackPoker',
+  'github_repo': 'BlackPoker',
+  'github_version': 'master/source/',
+}
+
 html_show_sourcelink = True
 
-[extensions]
-todo_include_todos=True
+html_favicon = 'favicon.ico'
+
+# -- Options for HTML output -------------------------------------------------
+
+# LaTeX の docclass 設定
+latex_docclass = {'manual': 'jsbook'}
