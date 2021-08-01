@@ -8,16 +8,16 @@ assignees: BlackPoker
 ---
 **Action/ExtraList update**
 
-v6-extra.yaml
+https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/v6-act.yaml
 - [ ] ver 
 - [ ] lastupdate
 
-v6-act.yaml
-- [ ] ver 
+https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/v6-extra.yaml
+- [ ] v 
 - [ ] lastupdate
 
 **Document update**
-conf.py
+https://github.com/BlackPoker/BlackPoker/blob/master/source/conf.py
 - [ ] version
 
 **Release Note update**
@@ -29,6 +29,4 @@ wiki
 - [ ] 6th build
 - [ ] 6th tag
 - [ ] close milestone
-- [ ] clear the project's done
-
-
+- [ ] archive the project's done
