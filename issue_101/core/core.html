@@ -1,0 +1,706 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="ja" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="ja" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>2. コアルール &mdash; BlackPoker  ドキュメント</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/translations.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="3. 共通ルール" href="../common/common.html" />
+    <link rel="prev" title="1. はじめに" href="../init/init.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: black" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> BlackPoker
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                6.1版
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">2. コアルール</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">2.1. ターン</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id3">2.2. アクション</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id4">2.3. チャンス</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">2.4. ステージ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id6">2.5. アクションの定義項目</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">2.5.1. 効果</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timing">2.5.2. タイミング</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">2.5.2.1. エンドアクションの定義</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10">2.5.2.2. アクションのコントローラー</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#component">2.6. コンポーネント</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">2.7. 能力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">2.8. コアフロー</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gamestart">2.8.1. [1]ゲーム開始</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">2.8.2. [2]ターンプレイヤーにチャンスを移動</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">2.8.3. [3]ステージが空か？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">2.8.4. [4]パス名簿リセット</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">2.8.5. [5]アクションを起こす</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19">2.8.6. [6]即時効果か？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#actresolve">2.8.7. [7]アクションの解決</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#winlose">2.8.8. [8]勝敗判定</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">2.8.9. [9]ステージに追加</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">2.8.10. [10]誘発チェック</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">2.8.11. [11]アクションを起こすか？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25">2.8.12. [12]パス名簿に登録</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26">2.8.13. [13]パス名簿の件数=プレイヤー数か？</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id27">2.8.14. [14]ステージから取出し</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id28">2.8.15. [15]チャンス移動</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trigger-check">2.8.16. 誘発チェック</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id30">2.8.16.1. [10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id31">2.8.16.2. [10-2]ターンプレイヤーからターンが回る順にプレイヤー毎に誘発リストの即時効果のアクションを解決</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id32">2.8.16.3. [10-3]誘発リストから即時効果のアクションを1つ取り出す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">2.8.16.4. [10-4]即時効果のアクションを解決</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id34">2.8.16.5. [10-5]勝敗判定</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id35">2.8.16.6. [10-6]誘発したアクションをプレイヤー毎の誘発リストに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id36">2.8.16.7. [10-7]未解決の即時効果があれば繰り返す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id37">2.8.16.8. [10-8]プレイヤー毎に通常効果のアクションをステージに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id38">2.8.16.9. [10-9]通常効果のアクションを任意の順でステージに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id39">2.8.16.10. [10-10]未処理のプレイヤーがいれば繰り返す</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id40">2.9. まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">5. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BlackPoker</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li><span class="section-number">2. </span>コアルール</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            
+              <a href="https://github.com/BlackPoker/BlackPoker/blob/issue_101/source/core/core.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="corerule">
+<span id="id1"></span><h1><span class="section-number">2. </span>コアルール<a class="headerlink" href="#corerule" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<p>コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。</p>
+<section id="id2">
+<h2><span class="section-number">2.1. </span>ターン<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>このルールを説明する上でターンとは持つことができるものとします。
+ターンを持っているプレイヤーは先に行動することができます。
+ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
+</section>
+<section id="id3">
+<h2><span class="section-number">2.2. </span>アクション<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>アクションとは、プレイヤーの行動を示します。
+ターン制のゲームでは、プレイヤーは様々な行動を行います。
+チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
+それらをアクションと定義します。</p>
+</section>
+<section id="id4">
+<h2><span class="section-number">2.3. </span>チャンス<a class="headerlink" href="#id4" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>アクションを起こすことができる機会をチャンスといいます。
+チャンスを持っている間は何度でもアクションを起こすことができます。</p>
+</section>
+<section id="id5">
+<h2><span class="section-number">2.4. </span>ステージ<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>アクションの解決順を整理するために使う領域です。
+後入れ先出し方式で最後に積まれたアクションから順に解決されていきます。</p>
+</section>
+<section id="id6">
+<h2><span class="section-number">2.5. </span>アクションの定義項目<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>アクション、チャンス、ステージについて簡単に説明しました。
+これらの概念を用いて、アクションに定義する項目を説明します。</p>
+<p>アクションは次の項目を定義する必要があります。
+他の項目は具体的にアクションを定義する際に、ゲームに合わせて追加して下さい。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>効果（通常効果・即時効果）</p></li>
+<li><p>タイミング</p></li>
+</ul>
+</div></blockquote>
+<section id="id7">
+<h3><span class="section-number">2.5.1. </span>効果<a class="headerlink" href="#id7" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>効果とはアクションの解決時にプレイヤーが行う行動です。
+効果の中には、通常効果と即時効果があります。
+違いについては、図(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)を説明する際に分岐条件として登場します。</p>
+</section>
+<section id="timing">
+<span id="id8"></span><h3><span class="section-number">2.5.2. </span>タイミング<a class="headerlink" href="#timing" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>タイミングとは、アクションを起こすことができる時を示します。
+タイミングには「メイン」と「クイック」の2種類あります。</p>
+<dl>
+<dt>メイン</dt><dd><p>ターンプレイヤーかつステージが空の時に起こせるアクションです。</p>
+<p>条件をまとめると次のようになります。</p>
+<ul class="simple">
+<li><p>チャンスを持っている</p></li>
+<li><p>自分のターン</p></li>
+<li><p>ステージが空</p></li>
+</ul>
+</dd>
+<dt>クイック</dt><dd><p>いつでも起こせるため、アクションをステージに積み重ねることができます。</p>
+<p>条件をまとめると次のようになります。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>チャンスを持っている</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+<section id="id9">
+<h4><span class="section-number">2.5.2.1. </span>エンドアクションの定義<a class="headerlink" href="#id9" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>定義するアクションの中で最低１つは
+ターンを別のプレイヤーにわたす効果を定義してください。
+そうしないと、ターンが別のプレイヤーに渡らす、ゲームが進行しなくなります。</p>
+</section>
+<section id="id10">
+<h4><span class="section-number">2.5.2.2. </span>アクションのコントローラー<a class="headerlink" href="#id10" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>アクションを起こしたプレイヤーをそのアクションのコントローラーと呼びます。
+効果はこのコントローラー視点で解釈されることになります。</p>
+</section>
+</section>
+</section>
+<section id="component">
+<span id="id11"></span><h2><span class="section-number">2.6. </span>コンポーネント<a class="headerlink" href="#component" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
+コンポーネントは次の項目を持っています。</p>
+<dl class="simple">
+<dt>オーナー</dt><dd><p>コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。</p>
+</dd>
+<dt>コントローラー</dt><dd><p>現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>コンポーネントとアクションのコントローラー</p>
+<p>コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
+コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。</p>
+<figure class="align-default" id="id41">
+<p class="plantuml">
+<img src="../_images/plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.svg" alt="hide methods
+hide circle
+
+class コンポーネント {
+ オーナー
+ コントローラー
+}
+
+class アクション {
+ コントローラー
+}"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id41" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="id12">
+<h2><span class="section-number">2.7. </span>能力<a class="headerlink" href="#id12" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。</p>
+<p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
+(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
+<figure class="align-default" id="id42">
+<span id="ability-image"></span><p class="plantuml">
+<img src="../_images/plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.svg" alt="&#64;startuml
+
+skinparam defaultTextAlignment center
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.2.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/font-awesome-5/chess_pawn.puml
+
+FA5_CHESS_PAWN(P1C,コンポーネント)
+:プレイヤー1: as Player1
+:プレイヤー2: as Player2
+(〇〇アクションを起こせる) as Act1 &lt;&lt;能力&gt;&gt;
+(●●アクションを起こせる) as Act2 &lt;&lt;能力&gt;&gt;
+(△△アクションを起こせる) as Act3 &lt;&lt;能力&gt;&gt;
+Player1 ---&gt; (Act1) : &quot;能力&quot;
+Player1 ---&gt; (Act2) : &quot;能力&quot;
+P1C --&gt; (Act3) : &quot;能力&quot;
+Player2 ---&gt; (Act1) : &quot;能力&quot;
+Player1 ..&gt; P1C : &quot;所有&quot;
+
+&#64;enduml"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id42" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>能力には、次の種類があります。</p>
+<dl class="simple">
+<dt>常在型能力</dt><dd><p>能力が有効である場合、継続的に発揮される能力</p>
+</dd>
+<dt>誘発型能力</dt><dd><p>能力が有効である間に何かの契機でアクションを起こす能力</p>
+</dd>
+</dl>
+<p>概ねのゲームでは、
+ターン終了や駒をすすめるなどのアクションが定義されています。
+そして、そのアクションを起こせる能力（常在型能力）を
+プレイヤーは保持しています。</p>
+</section>
+<section id="coreflowsec">
+<span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
+<figure class="align-default" id="id43">
+<span id="coreflow-2"></span><p class="plantuml">
+<img src="../_images/plantuml-99df1f5e678d30c764e60b5f61af21bdfd270408.svg" alt="&#64;startuml
+(*) --&gt; &quot;[1]ゲーム開始&quot;
+--&gt; &quot;[2]ターンプレイヤーにチャンスを移動&quot;
+--&gt;&quot;[3]ステージが空か？&quot;
+
+if &quot;&quot; then
+    --&gt;[YES] &quot;[4]パス名簿リセット&quot;
+    --&gt; &quot;[5]アクションを起こす&quot;
+    --&gt; &quot;[6]即時効果か？&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;[7]アクションの解決&quot;
+        --&gt; &quot;[8]勝敗判定&quot;
+        if &quot;&quot; then
+            --&gt;[決着] (*)
+        else
+            --&gt;[それ以外] &quot;[10]誘発チェック&quot;
+        endif
+    else
+        --&gt;[NO] &quot;[9]ステージに追加&quot;
+        --&gt; &quot;[10]誘発チェック&quot;
+    endif
+    --&gt; &quot;[3]ステージが空か？&quot;
+else
+    --&gt;[NO] &quot;[11]アクションを起こすか？&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;[4]パス名簿リセット&quot;
+    else
+        --&gt; [NO] &quot;[12]パス名簿に登録&quot;
+        --&gt; &quot;[13]パス名簿の件数=プレイヤー数か？&quot;
+        if &quot;&quot; then
+            --&gt;[YES] ”[14]ステージから取出し”
+            --&gt; &quot;[7]アクションの解決&quot;
+        else
+            --&gt; [NO] &quot;[15]チャンス移動&quot;
+            --&gt; &quot;[3]ステージが空か？&quot;
+        endif
+    endif
+endif
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id43" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="gamestart">
+<span id="id14"></span><h3><span class="section-number">2.8.1. </span>[1]ゲーム開始<a class="headerlink" href="#gamestart" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>先攻を決め、ゲームを始める準備を行います。</p>
+</section>
+<section id="id15">
+<h3><span class="section-number">2.8.2. </span>[2]ターンプレイヤーにチャンスを移動<a class="headerlink" href="#id15" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ターンを持っているプレイヤーにチャンスを移動します。</p>
+</section>
+<section id="id16">
+<h3><span class="section-number">2.8.3. </span>[3]ステージが空か？<a class="headerlink" href="#id16" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ステージにアクションが存在していないか判定します。</p>
+</section>
+<section id="id17">
+<h3><span class="section-number">2.8.4. </span>[4]パス名簿リセット<a class="headerlink" href="#id17" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>パスしたプレイヤーを記録するパス名簿をリセットします。</p>
+</section>
+<section id="id18">
+<h3><span class="section-number">2.8.5. </span>[5]アクションを起こす<a class="headerlink" href="#id18" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>アクションを起こしこれからプレイヤーが行うことを宣言します。
+ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
+一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
+</section>
+<section id="id19">
+<h3><span class="section-number">2.8.6. </span>[6]即時効果か？<a class="headerlink" href="#id19" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>起こしたアクションが即時効果か通常効果か判定します。</p>
+</section>
+<section id="actresolve">
+<span id="id20"></span><h3><span class="section-number">2.8.7. </span>[7]アクションの解決<a class="headerlink" href="#actresolve" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>アクションの効果に定義されている内容を実行します。
+その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
+アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
+</section>
+<section id="winlose">
+<span id="id21"></span><h3><span class="section-number">2.8.8. </span>[8]勝敗判定<a class="headerlink" href="#winlose" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。</p>
+</section>
+<section id="id22">
+<h3><span class="section-number">2.8.9. </span>[9]ステージに追加<a class="headerlink" href="#id22" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ステージというアクションを貯めておける領域に追加します。</p>
+</section>
+<section id="id23">
+<h3><span class="section-number">2.8.10. </span>[10]誘発チェック<a class="headerlink" href="#id23" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">2.8.16 誘発チェック</span></a> を参照してください。</p>
+</section>
+<section id="id24">
+<h3><span class="section-number">2.8.11. </span>[11]アクションを起こすか？<a class="headerlink" href="#id24" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
+</section>
+<section id="id25">
+<h3><span class="section-number">2.8.12. </span>[12]パス名簿に登録<a class="headerlink" href="#id25" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>パスしたプレイヤーを記録するパス名簿に登録します。同じプレイヤー名は2回登録されません。</p>
+</section>
+<section id="id26">
+<h3><span class="section-number">2.8.13. </span>[13]パス名簿の件数=プレイヤー数か？<a class="headerlink" href="#id26" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>パス名簿の件数がゲームに参加しているプレイヤーの数と一致しているか判定します。</p>
+</section>
+<section id="id27">
+<h3><span class="section-number">2.8.14. </span>[14]ステージから取出し<a class="headerlink" href="#id27" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>最後にステージに追加されたアクションをステージから取出します。</p>
+</section>
+<section id="id28">
+<h3><span class="section-number">2.8.15. </span>[15]チャンス移動<a class="headerlink" href="#id28" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
+チャンスを移動するルールはゲームによって異なります。</p>
+</section>
+<section id="trigger-check">
+<span id="id29"></span><h3><span class="section-number">2.8.16. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>能力の中でも誘発型能力は、なにかをきっかけにしてアクションが起きる条件が定義されています。
+誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。</p>
+<p>誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
+誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーになります。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
+<figure class="align-default" id="id44">
+<span id="trigger-flow"></span><p class="plantuml">
+<img src="../_images/plantuml-e4de9d1d83e3edd8b00e01ce2a0552cdb2bbd5a6.svg" alt="&#64;startuml
+(*) --&gt; &quot;[10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる&quot;
+--&gt; &quot;誘発リスト全体の件数判定&quot;
+
+if &quot;&quot; then
+    --&gt;[1件以上] &quot;[10-2]ターンプレイヤーからターンが回る順に\nプレイヤー毎に誘発リストの即時効果のアクションを解決&quot;
+    --&gt;&quot;[10-3]誘発リストから即時効果のアクションを1つ取り出す&quot;
+    --&gt;&quot;[10-4]即時効果のアクションを解決&quot;
+    --&gt;&quot;[10-5]勝敗判定&quot;
+    --&gt;&quot;[10-6]誘発したアクションをプレイヤー毎の誘発リストに追加&quot;
+    --&gt;&quot;[10-7]未解決の即時効果があれば繰り返す&quot;
+    if &quot;&quot; then
+        --&gt;[YES] &quot;[10-4]即時効果のアクションを解決&quot;
+    else
+        --&gt;&quot;[10-2]誘発リストに即時効果のアクションがある\nプレイヤーがいれば繰り返す&quot;
+        if &quot;&quot; then
+            --&gt;[YES] &quot;[10-2]ターンプレイヤーからターンが回る順に\nプレイヤー毎に誘発リストの即時効果のアクションを解決&quot;
+        else
+            --&gt;&quot;[10-8]プレイヤー毎に通常効果のアクションをステージに追加&quot;
+            --&gt;&quot;[10-9]通常効果のアクションを任意の順でステージに追加&quot;
+            --&gt;&quot;[10-10]未処理のプレイヤーがいれば繰り返す&quot;
+            if &quot;&quot; then
+                --&gt;[YES] &quot;[10-8]プレイヤー毎に通常効果のアクションをステージに追加&quot;
+            else
+                --&gt;(*)
+            endif
+        endif
+    endif
+
+else
+    --&gt;[0件] (*)
+endif
+
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id44" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="id30">
+<h4><span class="section-number">2.8.16.1. </span>[10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる<a class="headerlink" href="#id30" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
+誘発したアクションをコントローラーのプレイヤー毎にリストにまとめます。</p>
+</section>
+<section id="id31">
+<h4><span class="section-number">2.8.16.2. </span>[10-2]ターンプレイヤーからターンが回る順にプレイヤー毎に誘発リストの即時効果のアクションを解決<a class="headerlink" href="#id31" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>プレイヤー毎に誘発リストの即時効果のアクションを解決を行います。
+順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
+</section>
+<section id="id32">
+<h4><span class="section-number">2.8.16.3. </span>[10-3]誘発リストから即時効果のアクションを1つ取り出す<a class="headerlink" href="#id32" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>順番のプレイヤーは、 プレイヤー毎の誘発リストから1つ即時効果のアクションを取り出します。
+取り出すアクションは任意に選択できます。</p>
+</section>
+<section id="id33">
+<h4><span class="section-number">2.8.16.4. </span>[10-4]即時効果のアクションを解決<a class="headerlink" href="#id33" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>アクションの効果を解決します。
+詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_actresolve</span></code> 参照。</p>
+</section>
+<section id="id34">
+<h4><span class="section-number">2.8.16.5. </span>[10-5]勝敗判定<a class="headerlink" href="#id34" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>勝敗を判定します。
+詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_winlose</span></code> 参照。</p>
+</section>
+<section id="id35">
+<h4><span class="section-number">2.8.16.6. </span>[10-6]誘発したアクションをプレイヤー毎の誘発リストに追加<a class="headerlink" href="#id35" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
+誘発したアクションをコントローラーに応じてプレイヤー毎の誘発リストに追加します。</p>
+</section>
+<section id="id36">
+<h4><span class="section-number">2.8.16.7. </span>[10-7]未解決の即時効果があれば繰り返す<a class="headerlink" href="#id36" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>プレイヤー毎の誘発リストに未解決の即時効果を持つアクションがある場合、
+再びプレイヤー毎に誘発リストの即時効果の解決を繰返します。</p>
+</section>
+<section id="id37">
+<h4><span class="section-number">2.8.16.8. </span>[10-8]プレイヤー毎に通常効果のアクションをステージに追加<a class="headerlink" href="#id37" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>プレイヤー毎に誘発リストの通常効果のアクションをステージに追加します。
+順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
+</section>
+<section id="id38">
+<h4><span class="section-number">2.8.16.9. </span>[10-9]通常効果のアクションを任意の順でステージに追加<a class="headerlink" href="#id38" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>順番のプレイヤーは、 プレイヤー毎の誘発リストから通常効果のアクションを任意の順でステージに追加します。</p>
+</section>
+<section id="id39">
+<h4><span class="section-number">2.8.16.10. </span>[10-10]未処理のプレイヤーがいれば繰り返す<a class="headerlink" href="#id39" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>プレイヤー毎の誘発リストに通常効果を持つアクションがある場合、
+順番を次のプレイヤーに渡し、再びプレイヤー毎に誘発リストのアクションをステージに追加します。</p>
+</section>
+</section>
+</section>
+<section id="id40">
+<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id40" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>コアルールについて説明しました。
+すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
+また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../common/common.html" class="btn btn-neutral float-right" title="3. 共通ルール" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../init/init.html" class="btn btn-neutral float-left" title="1. はじめに" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013, BlackPoker
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+    <!-- Theme Analytics -->
+    <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-66362035-2', 'auto');
+    ga('send', 'pageview');
+    </script>
+
+    
+  
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+
+</body>
+</html>
