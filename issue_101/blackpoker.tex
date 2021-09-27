@@ -48,7 +48,7 @@
 
 
 \title{BlackPoker}
-\date{2021年09月25日}
+\date{2021年09月27日}
 \release{}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -304,7 +304,7 @@
 \capstart
 
 \noindent\sphinxincludegraphics{{plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1}.pdf}
-\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id41}}\end{figure}
+\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id43}}\end{figure}
 \end{sphinxadmonition}
 
 
@@ -322,7 +322,7 @@
 \capstart
 
 \noindent\sphinxincludegraphics{{plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4}.pdf}
-\caption{能力のイメージ}\label{\detokenize{core/core:id42}}\label{\detokenize{core/core:ability-image}}\end{figure}
+\caption{能力のイメージ}\label{\detokenize{core/core:id44}}\label{\detokenize{core/core:ability-image}}\end{figure}
 
 \sphinxAtStartPar
 能力には、次の種類があります。
@@ -354,7 +354,7 @@
 \capstart
 
 \noindent\sphinxincludegraphics{{plantuml-99df1f5e678d30c764e60b5f61af21bdfd270408}.pdf}
-\caption{コアフロー}\label{\detokenize{core/core:id43}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
+\caption{コアフロー}\label{\detokenize{core/core:id45}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 
 
 \subsection{{[}1{]}ゲーム開始}
@@ -467,8 +467,8 @@
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-e4de9d1d83e3edd8b00e01ce2a0552cdb2bbd5a6}.pdf}
-\caption{誘発チェック}\label{\detokenize{core/core:id44}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
+\noindent\sphinxincludegraphics{{plantuml-60308430a4e20b5601674f0de6e59c14b9061ce7}.pdf}
+\caption{誘発チェック}\label{\detokenize{core/core:id46}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
 
 
 \subsubsection{{[}10\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎に誘発リストにまとめる}
@@ -478,70 +478,90 @@
 誘発したアクションをコントローラーのプレイヤー毎にリストにまとめます。
 
 
-\subsubsection{{[}10\sphinxhyphen{}2{]}ターンプレイヤーからターンが回る順にプレイヤー毎に誘発リストの即時効果のアクションを解決}
+\subsubsection{{[}10\sphinxhyphen{}2{]}誘発リスト全体の件数判定}
 \label{\detokenize{core/core:id31}}
+\sphinxAtStartPar
+プレイヤー毎の誘発リストの合計件数を判定します。
+
+
+\subsubsection{{[}10\sphinxhyphen{}3{]}プレイヤー毎に誘発リストの即時効果のアクションを解決}
+\label{\detokenize{core/core:id32}}
 \sphinxAtStartPar
 プレイヤー毎に誘発リストの即時効果のアクションを解決を行います。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
 
 
-\subsubsection{{[}10\sphinxhyphen{}3{]}誘発リストから即時効果のアクションを1つ取り出す}
-\label{\detokenize{core/core:id32}}
+\subsubsection{{[}10\sphinxhyphen{}4{]}誘発リストから即時効果のアクションを1つ取り出す}
+\label{\detokenize{core/core:id33}}
 \sphinxAtStartPar
 順番のプレイヤーは、 プレイヤー毎の誘発リストから1つ即時効果のアクションを取り出します。
 取り出すアクションは任意に選択できます。
 
 
-\subsubsection{{[}10\sphinxhyphen{}4{]}即時効果のアクションを解決}
-\label{\detokenize{core/core:id33}}
+\subsubsection{{[}10\sphinxhyphen{}5{]}即時効果のアクションを解決}
+\label{\detokenize{core/core:id34}}
 \sphinxAtStartPar
 アクションの効果を解決します。
 詳しくは \sphinxcode{\sphinxupquote{\_actresolve}} 参照。
 
 
-\subsubsection{{[}10\sphinxhyphen{}5{]}勝敗判定}
-\label{\detokenize{core/core:id34}}
+\subsubsection{{[}10\sphinxhyphen{}6{]}勝敗判定}
+\label{\detokenize{core/core:id35}}
 \sphinxAtStartPar
 勝敗を判定します。
 詳しくは \sphinxcode{\sphinxupquote{\_winlose}} 参照。
 
 
-\subsubsection{{[}10\sphinxhyphen{}6{]}誘発したアクションをプレイヤー毎の誘発リストに追加}
-\label{\detokenize{core/core:id35}}
+\subsubsection{{[}10\sphinxhyphen{}7{]}誘発したアクションをプレイヤー毎の誘発リストに追加}
+\label{\detokenize{core/core:id36}}
 \sphinxAtStartPar
 全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
 誘発したアクションをコントローラーに応じてプレイヤー毎の誘発リストに追加します。
 
 
-\subsubsection{{[}10\sphinxhyphen{}7{]}未解決の即時効果があれば繰り返す}
-\label{\detokenize{core/core:id36}}
+\subsubsection{{[}10\sphinxhyphen{}8{]}未解決の即時効果があれば繰り返す}
+\label{\detokenize{core/core:id37}}
+\sphinxAtStartPar
+順番のプレイヤーの誘発リストに未解決の即時効果がある場合、
+即時効果の解決を繰返します。
+
+
+\subsubsection{{[}10\sphinxhyphen{}9{]}誘発リストに即時効果のアクションがあれば繰り返す}
+\label{\detokenize{core/core:id38}}
 \sphinxAtStartPar
 プレイヤー毎の誘発リストに未解決の即時効果を持つアクションがある場合、
 再びプレイヤー毎に誘発リストの即時効果の解決を繰返します。
 
 
-\subsubsection{{[}10\sphinxhyphen{}8{]}プレイヤー毎に通常効果のアクションをステージに追加}
-\label{\detokenize{core/core:id37}}
+\subsubsection{{[}10\sphinxhyphen{}10{]}プレイヤー毎に通常効果nのアクションをステージに追加}
+\label{\detokenize{core/core:n}}
 \sphinxAtStartPar
 プレイヤー毎に誘発リストの通常効果のアクションをステージに追加します。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
 
 
-\subsubsection{{[}10\sphinxhyphen{}9{]}通常効果のアクションを任意の順でステージに追加}
-\label{\detokenize{core/core:id38}}
+\subsubsection{{[}10\sphinxhyphen{}11{]}通常効果のアクションを任意の順でステージに追加}
+\label{\detokenize{core/core:id39}}
 \sphinxAtStartPar
 順番のプレイヤーは、 プレイヤー毎の誘発リストから通常効果のアクションを任意の順でステージに追加します。
 
 
-\subsubsection{{[}10\sphinxhyphen{}10{]}未処理のプレイヤーがいれば繰り返す}
-\label{\detokenize{core/core:id39}}
+\subsubsection{{[}10\sphinxhyphen{}12{]}誘発したアクションをプレイヤー毎の誘発リストに追加}
+\label{\detokenize{core/core:id40}}
+\sphinxAtStartPar
+全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
+誘発したアクションをコントローラーに応じてプレイヤー毎の誘発リストに追加します。
+
+
+\subsubsection{{[}10\sphinxhyphen{}13{]}誘発リストに通常効果のアクションがあれば繰り返す}
+\label{\detokenize{core/core:id41}}
 \sphinxAtStartPar
 プレイヤー毎の誘発リストに通常効果を持つアクションがある場合、
 順番を次のプレイヤーに渡し、再びプレイヤー毎に誘発リストのアクションをステージに追加します。
 
 
 \section{まとめ}
-\label{\detokenize{core/core:id40}}
+\label{\detokenize{core/core:id42}}
 \sphinxAtStartPar
 コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。

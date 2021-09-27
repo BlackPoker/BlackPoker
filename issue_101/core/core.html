@@ -126,20 +126,23 @@
 <li class="toctree-l3"><a class="reference internal" href="#id28">2.8.15. [15]チャンス移動</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#trigger-check">2.8.16. 誘発チェック</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#id30">2.8.16.1. [10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id31">2.8.16.2. [10-2]ターンプレイヤーからターンが回る順にプレイヤー毎に誘発リストの即時効果のアクションを解決</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id32">2.8.16.3. [10-3]誘発リストから即時効果のアクションを1つ取り出す</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id33">2.8.16.4. [10-4]即時効果のアクションを解決</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id34">2.8.16.5. [10-5]勝敗判定</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id35">2.8.16.6. [10-6]誘発したアクションをプレイヤー毎の誘発リストに追加</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id36">2.8.16.7. [10-7]未解決の即時効果があれば繰り返す</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id37">2.8.16.8. [10-8]プレイヤー毎に通常効果のアクションをステージに追加</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id38">2.8.16.9. [10-9]通常効果のアクションを任意の順でステージに追加</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#id39">2.8.16.10. [10-10]未処理のプレイヤーがいれば繰り返す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id31">2.8.16.2. [10-2]誘発リスト全体の件数判定</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id32">2.8.16.3. [10-3]プレイヤー毎に誘発リストの即時効果のアクションを解決</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">2.8.16.4. [10-4]誘発リストから即時効果のアクションを1つ取り出す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id34">2.8.16.5. [10-5]即時効果のアクションを解決</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id35">2.8.16.6. [10-6]勝敗判定</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id36">2.8.16.7. [10-7]誘発したアクションをプレイヤー毎の誘発リストに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id37">2.8.16.8. [10-8]未解決の即時効果があれば繰り返す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id38">2.8.16.9. [10-9]誘発リストに即時効果のアクションがあれば繰り返す</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#n">2.8.16.10. [10-10]プレイヤー毎に通常効果nのアクションをステージに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id39">2.8.16.11. [10-11]通常効果のアクションを任意の順でステージに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id40">2.8.16.12. [10-12]誘発したアクションをプレイヤー毎の誘発リストに追加</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id41">2.8.16.13. [10-13]誘発リストに通常効果のアクションがあれば繰り返す</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#id40">2.9. まとめ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id42">2.9. まとめ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
@@ -306,7 +309,7 @@
 <p>コンポーネントとアクションのコントローラー</p>
 <p>コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
 コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。</p>
-<figure class="align-default" id="id41">
+<figure class="align-default" id="id43">
 <p class="plantuml">
 <img src="../_images/plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.svg" alt="hide methods
 hide circle
@@ -320,7 +323,7 @@ class アクション {
  コントローラー
 }"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id41" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id43" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </div>
@@ -330,7 +333,7 @@ class アクション {
 <p>能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。</p>
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
-<figure class="align-default" id="id42">
+<figure class="align-default" id="id44">
 <span id="ability-image"></span><p class="plantuml">
 <img src="../_images/plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.svg" alt="&#64;startuml
 
@@ -354,7 +357,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id42" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id44" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>能力には、次の種類があります。</p>
@@ -372,7 +375,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <section id="coreflowsec">
 <span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
-<figure class="align-default" id="id43">
+<figure class="align-default" id="id45">
 <span id="coreflow-2"></span><p class="plantuml">
 <img src="../_images/plantuml-99df1f5e678d30c764e60b5f61af21bdfd270408.svg" alt="&#64;startuml
 (*) --&gt; &quot;[1]ゲーム開始&quot;
@@ -415,7 +418,7 @@ endif
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id43" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id45" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <section id="gamestart">
@@ -490,45 +493,45 @@ endif
 <p>誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
 誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーになります。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
-<figure class="align-default" id="id44">
+<figure class="align-default" id="id46">
 <span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-e4de9d1d83e3edd8b00e01ce2a0552cdb2bbd5a6.svg" alt="&#64;startuml
-(*) --&gt; &quot;[10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる&quot;
---&gt; &quot;誘発リスト全体の件数判定&quot;
+<img src="../_images/plantuml-60308430a4e20b5601674f0de6e59c14b9061ce7.svg" alt="&#64;startuml
+start
+:[10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる;
+while([10-2]誘発リスト全体の件数判定) is (1件以上)
+    group 即時効果:プレイヤー単位に繰返し
+    note
+        順番はターンプレイヤーから
+        ターンが回る順に行う
+    end note
+    repeat :[10-3]プレイヤー毎に誘発リスト\nの即時効果のアクションを解決;
+        group 即時効果:アクション単位に繰返し
+        repeat :[10-4]誘発リストから即時効果の\nアクションを1つ取り出す;
+            :[10-5]即時効果のアクションを解決;
+            :[10-6]勝敗判定;
+            :[10-7]誘発したアクションを\nプレイヤー毎の誘発リストに追加;
+        repeat while ([10-8]未解決の即時効果があれば繰り返す) is (YES)
+        end group
+    repeat while([10-9]誘発リストに即時効果のアクションがあれば繰り返す) is (YES)
+    end group
 
-if &quot;&quot; then
-    --&gt;[1件以上] &quot;[10-2]ターンプレイヤーからターンが回る順に\nプレイヤー毎に誘発リストの即時効果のアクションを解決&quot;
-    --&gt;&quot;[10-3]誘発リストから即時効果のアクションを1つ取り出す&quot;
-    --&gt;&quot;[10-4]即時効果のアクションを解決&quot;
-    --&gt;&quot;[10-5]勝敗判定&quot;
-    --&gt;&quot;[10-6]誘発したアクションをプレイヤー毎の誘発リストに追加&quot;
-    --&gt;&quot;[10-7]未解決の即時効果があれば繰り返す&quot;
-    if &quot;&quot; then
-        --&gt;[YES] &quot;[10-4]即時効果のアクションを解決&quot;
-    else
-        --&gt;&quot;[10-2]誘発リストに即時効果のアクションがある\nプレイヤーがいれば繰り返す&quot;
-        if &quot;&quot; then
-            --&gt;[YES] &quot;[10-2]ターンプレイヤーからターンが回る順に\nプレイヤー毎に誘発リストの即時効果のアクションを解決&quot;
-        else
-            --&gt;&quot;[10-8]プレイヤー毎に通常効果のアクションをステージに追加&quot;
-            --&gt;&quot;[10-9]通常効果のアクションを任意の順でステージに追加&quot;
-            --&gt;&quot;[10-10]未処理のプレイヤーがいれば繰り返す&quot;
-            if &quot;&quot; then
-                --&gt;[YES] &quot;[10-8]プレイヤー毎に通常効果のアクションをステージに追加&quot;
-            else
-                --&gt;(*)
-            endif
-        endif
-    endif
+    group 通常効果:プレイヤー単位に繰返し
+    note
+        順番はターンプレイヤーから
+        ターンが回る順に行う
+    end note
+    repeat :[10-10]プレイヤー毎に通常効果\nのアクションをステージに追加;
+        :[10-11]通常効果のアクションを\n任意の順でステージに追加;
+        :[10-12]誘発したアクションを\nプレイヤー毎の誘発リストに追加;
+    repeat while ([10-13]誘発リストに通常効果のアクションがあれば繰り返す) is (YES)
+    end group
 
-else
-    --&gt;[0件] (*)
-endif
-
+endwhile (0件)
+    stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id44" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id46" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <section id="id30">
@@ -537,53 +540,67 @@ endif
 誘発したアクションをコントローラーのプレイヤー毎にリストにまとめます。</p>
 </section>
 <section id="id31">
-<h4><span class="section-number">2.8.16.2. </span>[10-2]ターンプレイヤーからターンが回る順にプレイヤー毎に誘発リストの即時効果のアクションを解決<a class="headerlink" href="#id31" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<h4><span class="section-number">2.8.16.2. </span>[10-2]誘発リスト全体の件数判定<a class="headerlink" href="#id31" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>プレイヤー毎の誘発リストの合計件数を判定します。</p>
+</section>
+<section id="id32">
+<h4><span class="section-number">2.8.16.3. </span>[10-3]プレイヤー毎に誘発リストの即時効果のアクションを解決<a class="headerlink" href="#id32" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>プレイヤー毎に誘発リストの即時効果のアクションを解決を行います。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
 </section>
-<section id="id32">
-<h4><span class="section-number">2.8.16.3. </span>[10-3]誘発リストから即時効果のアクションを1つ取り出す<a class="headerlink" href="#id32" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id33">
+<h4><span class="section-number">2.8.16.4. </span>[10-4]誘発リストから即時効果のアクションを1つ取り出す<a class="headerlink" href="#id33" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>順番のプレイヤーは、 プレイヤー毎の誘発リストから1つ即時効果のアクションを取り出します。
 取り出すアクションは任意に選択できます。</p>
 </section>
-<section id="id33">
-<h4><span class="section-number">2.8.16.4. </span>[10-4]即時効果のアクションを解決<a class="headerlink" href="#id33" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id34">
+<h4><span class="section-number">2.8.16.5. </span>[10-5]即時効果のアクションを解決<a class="headerlink" href="#id34" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>アクションの効果を解決します。
 詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_actresolve</span></code> 参照。</p>
 </section>
-<section id="id34">
-<h4><span class="section-number">2.8.16.5. </span>[10-5]勝敗判定<a class="headerlink" href="#id34" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id35">
+<h4><span class="section-number">2.8.16.6. </span>[10-6]勝敗判定<a class="headerlink" href="#id35" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>勝敗を判定します。
 詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_winlose</span></code> 参照。</p>
 </section>
-<section id="id35">
-<h4><span class="section-number">2.8.16.6. </span>[10-6]誘発したアクションをプレイヤー毎の誘発リストに追加<a class="headerlink" href="#id35" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id36">
+<h4><span class="section-number">2.8.16.7. </span>[10-7]誘発したアクションをプレイヤー毎の誘発リストに追加<a class="headerlink" href="#id36" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
 誘発したアクションをコントローラーに応じてプレイヤー毎の誘発リストに追加します。</p>
 </section>
-<section id="id36">
-<h4><span class="section-number">2.8.16.7. </span>[10-7]未解決の即時効果があれば繰り返す<a class="headerlink" href="#id36" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id37">
+<h4><span class="section-number">2.8.16.8. </span>[10-8]未解決の即時効果があれば繰り返す<a class="headerlink" href="#id37" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>順番のプレイヤーの誘発リストに未解決の即時効果がある場合、
+即時効果の解決を繰返します。</p>
+</section>
+<section id="id38">
+<h4><span class="section-number">2.8.16.9. </span>[10-9]誘発リストに即時効果のアクションがあれば繰り返す<a class="headerlink" href="#id38" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>プレイヤー毎の誘発リストに未解決の即時効果を持つアクションがある場合、
 再びプレイヤー毎に誘発リストの即時効果の解決を繰返します。</p>
 </section>
-<section id="id37">
-<h4><span class="section-number">2.8.16.8. </span>[10-8]プレイヤー毎に通常効果のアクションをステージに追加<a class="headerlink" href="#id37" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="n">
+<h4><span class="section-number">2.8.16.10. </span>[10-10]プレイヤー毎に通常効果nのアクションをステージに追加<a class="headerlink" href="#n" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>プレイヤー毎に誘発リストの通常効果のアクションをステージに追加します。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
 </section>
-<section id="id38">
-<h4><span class="section-number">2.8.16.9. </span>[10-9]通常効果のアクションを任意の順でステージに追加<a class="headerlink" href="#id38" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id39">
+<h4><span class="section-number">2.8.16.11. </span>[10-11]通常効果のアクションを任意の順でステージに追加<a class="headerlink" href="#id39" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>順番のプレイヤーは、 プレイヤー毎の誘発リストから通常効果のアクションを任意の順でステージに追加します。</p>
 </section>
-<section id="id39">
-<h4><span class="section-number">2.8.16.10. </span>[10-10]未処理のプレイヤーがいれば繰り返す<a class="headerlink" href="#id39" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<section id="id40">
+<h4><span class="section-number">2.8.16.12. </span>[10-12]誘発したアクションをプレイヤー毎の誘発リストに追加<a class="headerlink" href="#id40" title="このヘッドラインへのパーマリンク">¶</a></h4>
+<p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
+誘発したアクションをコントローラーに応じてプレイヤー毎の誘発リストに追加します。</p>
+</section>
+<section id="id41">
+<h4><span class="section-number">2.8.16.13. </span>[10-13]誘発リストに通常効果のアクションがあれば繰り返す<a class="headerlink" href="#id41" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>プレイヤー毎の誘発リストに通常効果を持つアクションがある場合、
 順番を次のプレイヤーに渡し、再びプレイヤー毎に誘発リストのアクションをステージに追加します。</p>
 </section>
 </section>
 </section>
-<section id="id40">
-<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id40" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<section id="id42">
+<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id42" title="このヘッドラインへのパーマリンク">¶</a></h2>
 <p>コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>

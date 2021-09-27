@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  25 SEP 2021 00:20
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 SEP 2021 06:31
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -916,9 +916,9 @@ pdf)
 LaTeX Warning: Float too large for page by 24.96199pt on input line 357.
 
 [9] [10] [11]
-File: plantuml-e4de9d1d83e3edd8b00e01ce2a0552cdb2bbd5a6.pdf Graphic file (type 
+File: plantuml-60308430a4e20b5601674f0de6e59c14b9061ce7.pdf Graphic file (type 
 pdf)
-<plantuml-e4de9d1d83e3edd8b00e01ce2a0552cdb2bbd5a6.pdf>
+<plantuml-60308430a4e20b5601674f0de6e59c14b9061ce7.pdf>
 
 
 LaTeX Warning: Float too large for page by 24.96199pt on input line 471.
@@ -966,43 +966,43 @@ pdf)
 ]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1845.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1865.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1845.
+(Font)              scaled to size 9.60999pt on input line 1865.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1845.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1865.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1845.
+(Font)              scaled to size 9.60999pt on input line 1865.
 [37] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48
 
 ]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2978--2982
+Underfull \hbox (badness 10000) in paragraph at lines 2998--3002
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
  _ 101 / actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][] [][]$https :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2994--2998
+Underfull \hbox (badness 10000) in paragraph at lines 3014--3018
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
  _ 101 / actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][] [][]$https :
  []
 
 [49]
-Underfull \hbox (badness 10000) in paragraph at lines 3010--3014
+Underfull \hbox (badness 10000) in paragraph at lines 3030--3034
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
  _ 101 / actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][] [][]$https :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3026--3030
+Underfull \hbox (badness 10000) in paragraph at lines 3046--3050
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
  _ 101 / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https :
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3042--3046
+Underfull \hbox (badness 10000) in paragraph at lines 3062--3066
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / issue
  _ 101 / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https :
  []
@@ -1010,15 +1010,15 @@ Underfull \hbox (badness 10000) in paragraph at lines 3042--3046
 No file blackpoker.ind.
 [50] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: A1408809AAC4BFFC306011DF2C386647;16986.
+(rerunfilecheck)             Checksum: 035F3024CB96718A66086F227D21713C;17347.
  ) 
 Here is how much of TeX's memory you used:
- 13979 strings out of 480496
- 208756 string characters out of 5899437
- 560390 words of memory out of 5000000
- 31676 multiletter control sequences out of 15000+600000
+ 13982 strings out of 480496
+ 208801 string characters out of 5899437
+ 560849 words of memory out of 5000000
+ 31679 multiletter control sequences out of 15000+600000
  507208 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,327b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (56 pages, 221672 bytes).
+Output written on blackpoker.dvi (56 pages, 222992 bytes).
