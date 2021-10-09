@@ -495,24 +495,24 @@ endif
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
 <figure class="align-default" id="id46">
 <span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-60308430a4e20b5601674f0de6e59c14b9061ce7.svg" alt="&#64;startuml
+<img src="../_images/plantuml-086e54827ebd6fc373dece6e836156ac9d2e2922.svg" alt="&#64;startuml
 start
-:[10-1]誘発したアクションをプレイヤー毎に誘発リストにまとめる;
-while([10-2]誘発リスト全体の件数判定) is (1件以上)
+:[10-1]誘発したアクションをプレイヤー毎に誘発即時リストと誘発通常リストにまとめる;
+while([10-2]誘発即時リスト、誘発通常リスト全体の件数判定) is (1件以上)
     group 即時効果:プレイヤー単位に繰返し
     note
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
-    repeat :[10-3]プレイヤー毎に誘発リスト\nの即時効果のアクションを解決;
+    repeat :[10-3]プレイヤー毎に誘発即時リスト\nの即時効果のアクションを解決;
         group 即時効果:アクション単位に繰返し
-        repeat :[10-4]誘発リストから即時効果の\nアクションを1つ取り出す;
+        repeat :[10-4]誘発即時リストから即時効果の\nアクションを1つ取り出す;
             :[10-5]即時効果のアクションを解決;
             :[10-6]勝敗判定;
-            :[10-7]誘発したアクションを\nプレイヤー毎の誘発リストに追加;
-        repeat while ([10-8]未解決の即時効果があれば繰り返す) is (YES)
+            :[10-7]誘発したアクションを\nプレイヤー毎の誘発即時リスト、誘発通常リストに追加;
+        repeat while ([10-8]誘発即時リストの件数が0件でなけば繰り返す) is (YES)
         end group
-    repeat while([10-9]誘発リストに即時効果のアクションがあれば繰り返す) is (YES)
+    repeat while([10-9]全ての誘発即時リストの件数が0件でなければ繰り返す) is (YES)
     end group
 
     group 通常効果:プレイヤー単位に繰返し
@@ -520,7 +520,7 @@ while([10-2]誘発リスト全体の件数判定) is (1件以上)
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
-    repeat :[10-10]プレイヤー毎に通常効果\nのアクションをステージに追加;
+    repeat :[10-10]プレイヤー毎に誘発通常リスト\nのアクションをステージに追加;
         :[10-11]通常効果のアクションを\n任意の順でステージに追加;
         :[10-12]誘発したアクションを\nプレイヤー毎の誘発リストに追加;
     repeat while ([10-13]誘発リストに通常効果のアクションがあれば繰り返す) is (YES)
@@ -556,12 +556,12 @@ endwhile (0件)
 <section id="id34">
 <h4><span class="section-number">2.8.16.5. </span>[10-5]即時効果のアクションを解決<a class="headerlink" href="#id34" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>アクションの効果を解決します。
-詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_actresolve</span></code> 参照。</p>
+詳しくは <a class="reference internal" href="#actresolve"><span class="std std-numref">2.8.7 [7]アクションの解決</span></a> 参照。</p>
 </section>
 <section id="id35">
 <h4><span class="section-number">2.8.16.6. </span>[10-6]勝敗判定<a class="headerlink" href="#id35" title="このヘッドラインへのパーマリンク">¶</a></h4>
 <p>勝敗を判定します。
-詳しくは <code class="xref std std-numref docutils literal notranslate"><span class="pre">_winlose</span></code> 参照。</p>
+詳しくは <a class="reference internal" href="#winlose"><span class="std std-numref">2.8.8 [8]勝敗判定</span></a> 参照。</p>
 </section>
 <section id="id36">
 <h4><span class="section-number">2.8.16.7. </span>[10-7]誘発したアクションをプレイヤー毎の誘発リストに追加<a class="headerlink" href="#id36" title="このヘッドラインへのパーマリンク">¶</a></h4>
