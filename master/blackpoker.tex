@@ -7,7 +7,7 @@
 \ifdefined\pdfimageresolution
     \pdfimageresolution= \numexpr \dimexpr1in\relax/\sphinxpxdimen\relax
 \fi
-%% let collapsable pdf bookmarks panel have high depth per default
+%% let collapsible pdf bookmarks panel have high depth per default
 \PassOptionsToPackage{bookmarksdepth=5}{hyperref}
 
 \PassOptionsToPackage{warn}{textcomp}
@@ -62,7 +62,10 @@
 \sphinxtableofcontents
 \pagestyle{normal}
 \phantomsection\label{\detokenize{index::doc}}
+\index{execution@\spxentry{execution}!context@\spxentry{context}}\index{pair  : loop@\spxentry{pair  : loop}!statement@\spxentry{statement}}\index{module@\spxentry{module}!search path@\spxentry{search} \spxentry{path}}\index{search@\spxentry{search}!path, module@\spxentry{path}, \spxentry{module}}\index{path@\spxentry{path}!module search@\spxentry{module} \spxentry{search}}\ignorespaces 
 
+
+\sphinxstepscope
 
 
 \chapter{はじめに}
@@ -150,6 +153,8 @@
 \sphinxAtStartPar
 盗難防止とネット対戦対応に努めます。
 
+\sphinxstepscope
+
 
 \chapter{コアルール}
 \label{\detokenize{core/core:corerule}}\label{\detokenize{core/core:id1}}\label{\detokenize{core/core::doc}}
@@ -223,7 +228,7 @@
 タイミングとは、アクションを起こすことができる時を示します。
 タイミングには「メイン」と「クイック」の2種類あります。
 \begin{description}
-\item[{メイン}] \leavevmode
+\sphinxlineitem{メイン}
 \sphinxAtStartPar
 ターンプレイヤーかつステージが空の時に起こせるアクションです。
 
@@ -244,7 +249,7 @@
 
 \end{itemize}
 
-\item[{クイック}] \leavevmode
+\sphinxlineitem{クイック}
 \sphinxAtStartPar
 いつでも起こせるため、アクションをステージに積み重ねることができます。
 
@@ -281,11 +286,11 @@
 ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
 コンポーネントは次の項目を持っています。
 \begin{description}
-\item[{オーナー}] \leavevmode
+\sphinxlineitem{オーナー}
 \sphinxAtStartPar
 コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。
 
-\item[{コントローラー}] \leavevmode
+\sphinxlineitem{コントローラー}
 \sphinxAtStartPar
 現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。
 
@@ -327,11 +332,11 @@
 \sphinxAtStartPar
 能力には、次の種類があります。
 \begin{description}
-\item[{常在型能力}] \leavevmode
+\sphinxlineitem{常在型能力}
 \sphinxAtStartPar
 能力が有効である場合、継続的に発揮される能力
 
-\item[{誘発型能力}] \leavevmode
+\sphinxlineitem{誘発型能力}
 \sphinxAtStartPar
 能力が有効である間に何かの契機でアクションを起こす能力
 
@@ -566,6 +571,8 @@
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。
 
+\sphinxstepscope
+
 
 \chapter{共通ルール}
 \label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
@@ -643,14 +650,14 @@ Jokerは2枚まで入れられる
 \section{トランプの数字}
 \label{\detokenize{common/common:id5}}
 \sphinxAtStartPar
-ゲーム全体を通してトランプの数字は次のような数値として扱います。(\sphinxcode{\sphinxupquote{cardrank}})
+ゲーム全体を通してトランプの数字は次のような数値として扱います。(\hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}})
 
 
 \begin{savenotes}\sphinxattablestart
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{トランプの数字}\label{\detokenize{common/common:id48}}
+\sphinxcaption{トランプの数字}\label{\detokenize{common/common:id48}}\label{\detokenize{common/common:cardrank}}
 \sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|}
 \hline
@@ -721,24 +728,24 @@ Joker
 \noindent\sphinxincludegraphics{{field-ex}.pdf}
 \caption{プレイ中のカードの配置}\label{\detokenize{common/common:id49}}\label{\detokenize{common/common:field-ex}}\end{figure}
 \begin{description}
-\item[{デッキ}] \leavevmode
+\sphinxlineitem{デッキ}
 \sphinxAtStartPar
 山札。ゲームを始める時に自分のトランプを裏向きに置く場所です。
 ダメージを受けるとデッキの一番上から墓地にカードを移します。
 
-\item[{墓地}] \leavevmode
+\sphinxlineitem{墓地}
 \sphinxAtStartPar
 捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。
 
-\item[{場}] \leavevmode
+\sphinxlineitem{場}
 \sphinxAtStartPar
 兵士や防壁などのキャラクターを置きます。
 
-\item[{手札}] \leavevmode
+\sphinxlineitem{手札}
 \sphinxAtStartPar
 デッキから引いたカードを持っておく場所です。相手から見えないようにしましょう。
 
-\item[{切札}] \leavevmode
+\sphinxlineitem{切札}
 \sphinxAtStartPar
 能力が割り当てられたカードを置きます。エクストラフォーマットのみで使用します。
 エクストラのルールについては、 \hyperref[\detokenize{common/common:extra}]{\ref{\detokenize{common/common:extra}} \nameref{\detokenize{common/common:extra}}} で説明します。
@@ -789,19 +796,19 @@ Joker
 \noindent\sphinxincludegraphics{{character-sample}.pdf}
 \caption{一般兵}\label{\detokenize{common/common:id51}}\label{\detokenize{common/common:character-sample}}\end{figure}
 \begin{description}
-\item[{キャラクター名}] \leavevmode
+\sphinxlineitem{キャラクター名}
 \sphinxAtStartPar
 キャラクターの名称を示します。
 
-\item[{タイプ}] \leavevmode
+\sphinxlineitem{タイプ}
 \sphinxAtStartPar
 キャラクターのタイプを示します。タイプは兵士と防壁の2種類が存在します。
 
-\item[{キーカード}] \leavevmode
+\sphinxlineitem{キーカード}
 \sphinxAtStartPar
 キャラクターを示すカードが記載されています。複数のカードで1体のキャラクターを示す場合もあります。
 
-\item[{能力}] \leavevmode
+\sphinxlineitem{能力}
 \sphinxAtStartPar
 キャラクターが持っている能力を記載しています。
 
@@ -872,7 +879,7 @@ Joker
 
 \item {} 
 \sphinxAtStartPar
-大きい数字のプレイヤーが先攻。数字については、 \sphinxcode{\sphinxupquote{cardrank}} 参照。
+大きい数字のプレイヤーが先攻。数字については、 \hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}} 参照。
 
 \item {} 
 \sphinxAtStartPar
@@ -918,40 +925,40 @@ Joker
 \noindent\sphinxincludegraphics{{action-sample}.pdf}
 \caption{サンプルアクション}\label{\detokenize{common/common:id53}}\label{\detokenize{common/common:action-sample}}\end{figure}
 \begin{description}
-\item[{アクション名}] \leavevmode
+\sphinxlineitem{アクション名}
 \sphinxAtStartPar
 アクションの名称を示します。
 
-\item[{キーカード}] \leavevmode
+\sphinxlineitem{キーカード}
 \sphinxAtStartPar
 アクションの核となるカードを示します。
 キーカードは★を使って表記します。
 凡例の場合、手札からコストとは別に{\normalsize $\heartsuit$} A〜10に該当するカードを1枚
 キーカードとして使用します。
 
-\item[{特記事項}] \leavevmode
+\sphinxlineitem{特記事項}
 \sphinxAtStartPar
 特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
 
-\item[{対象}] \leavevmode
+\sphinxlineitem{対象}
 \sphinxAtStartPar
 効果の対象を示します。
 
-\item[{即時効果/通常効果}] \leavevmode
+\sphinxlineitem{即時効果/通常効果}
 \sphinxAtStartPar
 効果の内容を示します。
 
-\item[{コスト}] \leavevmode
+\sphinxlineitem{コスト}
 \sphinxAtStartPar
 アクションを起こすのに必要な対価です。
 コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
 
-\item[{タイミング}] \leavevmode
+\sphinxlineitem{タイミング}
 \sphinxAtStartPar
 アクションを起こせる時を示します。
 タイミングはコアルール \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}} を参照してください。
 
-\item[{タイプ}] \leavevmode
+\sphinxlineitem{タイプ}
 \sphinxAtStartPar
 アクションの種類を表します。アクション名の後に括弧書きで記載します。
 
@@ -1372,16 +1379,16 @@ ex5.22.0 〜
 を使わなくても中身や枚数を知れるものがあります。
 知れる度合いには次の種類があります。
 \begin{description}
-\item[{完全公開}] \leavevmode
+\sphinxlineitem{完全公開}
 \sphinxAtStartPar
 全てのプレイヤーが知ることができ、
 聞かれたプレイヤーは正しく答える必要がある
 
-\item[{個人公開}] \leavevmode
+\sphinxlineitem{個人公開}
 \sphinxAtStartPar
 デッキの持ち主のみ知ることができる
 
-\item[{非公開}] \leavevmode
+\sphinxlineitem{非公開}
 \sphinxAtStartPar
 全てのプレイヤーは知ることができない
 
@@ -1391,35 +1398,35 @@ ex5.22.0 〜
 完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
 各カードの配置と公開・非公開の度合いは次のとおりです。
 \begin{description}
-\item[{デッキ}] \leavevmode
+\sphinxlineitem{デッキ}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：10枚未満のデッキ枚数
 \item[] 個人公開：デッキの枚数
 \item[] 非公開：デッキの中身
 \end{DUlineblock}
 
-\item[{墓地}] \leavevmode
+\sphinxlineitem{墓地}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：墓地の一番上のカード
 \item[] 個人公開：墓地の中身
 \item[] 非公開：なし
 \end{DUlineblock}
 
-\item[{場}] \leavevmode
+\sphinxlineitem{場}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：表裏を変えずに見えるカード
 \item[] 個人公開：伏せてあるカード
 \item[] 非公開：なし
 \end{DUlineblock}
 
-\item[{手札}] \leavevmode
+\sphinxlineitem{手札}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：手札の枚数
 \item[] 個人公開：手札の中身
 \item[] 非公開：なし
 \end{DUlineblock}
 
-\item[{切札}] \leavevmode
+\sphinxlineitem{切札}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：表裏を変えずに見えるカード
 \item[] 個人公開：伏せてあるカード
@@ -1455,6 +1462,8 @@ BlackPokerでは
 ただシャッフルしてほしいのであれば、お願いしても構いません。
 逆に、対戦相手があまりシャッフルしていない場合は、
 さらにシャッフルをお願いすることができます。
+
+\sphinxstepscope
 
 
 \chapter{フォーマット}
@@ -1622,19 +1631,19 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 \sphinxAtStartPar
 フォーマットには次の項目が定義されています。
 \begin{description}
-\item[{アクションリスト}] \leavevmode
+\sphinxlineitem{アクションリスト}
 \sphinxAtStartPar
 起こせるアクション、キャラクターのリスト
 
-\item[{エクストラリスト}] \leavevmode
+\sphinxlineitem{エクストラリスト}
 \sphinxAtStartPar
 切札のリスト
 
-\item[{事前準備}] \leavevmode
+\sphinxlineitem{事前準備}
 \sphinxAtStartPar
 対戦前に行う事項
 
-\item[{その他事項}] \leavevmode
+\sphinxlineitem{その他事項}
 \sphinxAtStartPar
 上記項目で説明できないルール
 
@@ -1645,6 +1654,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 \label{\detokenize{format/format:id7}}
 \sphinxAtStartPar
 公式として次のフォーマットを定義しています。
+
+\sphinxstepscope
 
 
 \subsection{ライト}
@@ -1685,6 +1696,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{スタンダード}
 \label{\detokenize{format/standard:format-standard}}\label{\detokenize{format/standard:id1}}\label{\detokenize{format/standard::doc}}
@@ -1723,6 +1736,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{プロ}
@@ -1763,6 +1778,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{マスター}
 \label{\detokenize{format/master:format-master}}\label{\detokenize{format/master:id1}}\label{\detokenize{format/master::doc}}
@@ -1801,6 +1818,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{エクストラ}
@@ -1841,6 +1860,8 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \chapter{対戦レギュレーション}
 \label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
@@ -1859,19 +1880,19 @@ BlackPokerはトランプだけで遊べるため、
 \sphinxAtStartPar
 各対戦レギュレーションには次の項目が定義されています。
 \begin{description}
-\item[{フォーマット}] \leavevmode
+\sphinxlineitem{フォーマット}
 \sphinxAtStartPar
 使用するフォーマット。詳しくは {\hyperref[\detokenize{format/format::doc}]{\sphinxcrossref{\DUrole{doc}{フォーマット}}}} 参照
 
-\item[{デッキ条件}] \leavevmode
+\sphinxlineitem{デッキ条件}
 \sphinxAtStartPar
 対戦に使用するデッキの条件
 
-\item[{対戦前準備事項}] \leavevmode
+\sphinxlineitem{対戦前準備事項}
 \sphinxAtStartPar
 切札の選定など対戦前に行う事項
 
-\item[{その他制約事項}] \leavevmode
+\sphinxlineitem{その他制約事項}
 \sphinxAtStartPar
 上記項目で説明できない制約事項
 
@@ -1882,6 +1903,8 @@ BlackPokerはトランプだけで遊べるため、
 \label{\detokenize{match-regulations/match-regulations:id3}}
 \sphinxAtStartPar
 公式として次の対戦レギュレーションを定義しています。
+
+\sphinxstepscope
 
 
 \subsection{ライト}
@@ -1962,6 +1985,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{ライト40}
 \label{\detokenize{match-regulations/lite40:id1}}\label{\detokenize{match-regulations/lite40::doc}}
@@ -2040,6 +2065,8 @@ Joker x2
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{ライトランダムハーフ}
@@ -2136,6 +2163,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{スタンダード}
 \label{\detokenize{match-regulations/standard:id1}}\label{\detokenize{match-regulations/standard::doc}}
@@ -2215,6 +2244,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{スタンダード40}
 \label{\detokenize{match-regulations/standard40:id1}}\label{\detokenize{match-regulations/standard40::doc}}
@@ -2293,6 +2324,8 @@ Joker x2
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{スタンダードランダムハーフ}
@@ -2389,6 +2422,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{プロ}
 \label{\detokenize{match-regulations/pro:id1}}\label{\detokenize{match-regulations/pro::doc}}
@@ -2468,6 +2503,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{プロ40}
 \label{\detokenize{match-regulations/pro40:id1}}\label{\detokenize{match-regulations/pro40::doc}}
@@ -2546,6 +2583,8 @@ Joker x2
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{プロランダムハーフ}
@@ -2642,6 +2681,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{マスター}
 \label{\detokenize{match-regulations/master:id1}}\label{\detokenize{match-regulations/master::doc}}
@@ -2721,6 +2762,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{マスター40}
 \label{\detokenize{match-regulations/master40:id1}}\label{\detokenize{match-regulations/master40::doc}}
@@ -2799,6 +2842,8 @@ Joker x2
 なし
 
 \end{itemize}
+
+\sphinxstepscope
 
 
 \subsection{マスターランダムハーフ}
@@ -2895,6 +2940,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \subsection{エクストラ}
 \label{\detokenize{match-regulations/extra:id1}}\label{\detokenize{match-regulations/extra::doc}}
@@ -2974,6 +3021,8 @@ Joker x2
 
 \end{itemize}
 
+\sphinxstepscope
+
 
 \chapter{付録}
 \label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
@@ -2990,11 +3039,11 @@ Joker x2
 \subsection{ライト}
 \label{\detokenize{appendix/appendix:actionlist-lite}}\label{\detokenize{appendix/appendix:id3}}\begin{quote}
 \begin{description}
-\item[{URL}] \leavevmode
+\sphinxlineitem{URL}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-lite.html}
 
-\item[{PDF}] \leavevmode
+\sphinxlineitem{PDF}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-lite.pdf}
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-lite-2up.pdf}
@@ -3006,11 +3055,11 @@ Joker x2
 \subsection{スタンダード}
 \label{\detokenize{appendix/appendix:actionlist-std}}\label{\detokenize{appendix/appendix:id4}}\begin{quote}
 \begin{description}
-\item[{URL}] \leavevmode
+\sphinxlineitem{URL}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-std.html}
 
-\item[{PDF}] \leavevmode
+\sphinxlineitem{PDF}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-std.pdf}
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-std-2up.pdf}
@@ -3022,11 +3071,11 @@ Joker x2
 \subsection{プロ}
 \label{\detokenize{appendix/appendix:actionlist-pro}}\label{\detokenize{appendix/appendix:id5}}\begin{quote}
 \begin{description}
-\item[{URL}] \leavevmode
+\sphinxlineitem{URL}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-pro.html}
 
-\item[{PDF}] \leavevmode
+\sphinxlineitem{PDF}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-pro.pdf}
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-pro-2up.pdf}
@@ -3038,11 +3087,11 @@ Joker x2
 \subsection{マスター}
 \label{\detokenize{appendix/appendix:actionlist-master}}\label{\detokenize{appendix/appendix:id6}}\begin{quote}
 \begin{description}
-\item[{URL}] \leavevmode
+\sphinxlineitem{URL}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-mast.html}
 
-\item[{PDF}] \leavevmode
+\sphinxlineitem{PDF}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-mast.pdf}
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-mast-2up.pdf}
@@ -3054,11 +3103,11 @@ Joker x2
 \section{エクストラリスト}
 \label{\detokenize{appendix/appendix:extralist}}\label{\detokenize{appendix/appendix:id7}}\begin{quote}
 \begin{description}
-\item[{URL}] \leavevmode
+\sphinxlineitem{URL}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-ex.html}
 
-\item[{PDF}] \leavevmode
+\sphinxlineitem{PDF}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-extra.pdf}
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-extra-2up.pdf}

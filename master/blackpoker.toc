@@ -71,11 +71,11 @@
 \contentsline {section}{\numberline {3.9}ゲームの始め方}{21}{section.3.9}%
 \contentsline {section}{\numberline {3.10}アクション}{22}{section.3.10}%
 \contentsline {subsection}{\numberline {3.10.1}アクションが持つ項目}{22}{subsection.3.10.1}%
-\contentsline {subsubsection}{記載されていないアクションの項目}{22}{subsubsection*.19}%
+\contentsline {subsubsection}{記載されていないアクションの項目}{23}{subsubsection*.19}%
 \contentsline {subsection}{\numberline {3.10.2}コストの種類}{23}{subsection.3.10.2}%
 \contentsline {subsection}{\numberline {3.10.3}アクションの起こし方}{23}{subsection.3.10.3}%
-\contentsline {subsubsection}{アクションを起こすときの注意点}{24}{subsubsection*.20}%
-\contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{24}{paragraph*.21}%
+\contentsline {subsubsection}{アクションを起こすときの注意点}{23}{subsubsection*.20}%
+\contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{23}{paragraph*.21}%
 \contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{24}{paragraph*.22}%
 \contentsline {subsection}{\numberline {3.10.4}アクションの解決}{24}{subsection.3.10.4}%
 \contentsline {subsubsection}{対象条件を確認}{24}{subsubsection*.23}%
@@ -99,7 +99,7 @@
 \contentsline {section}{\numberline {3.12}その他のルール}{28}{section.3.12}%
 \contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{28}{subsection.3.12.1}%
 \contentsline {subsubsection}{残りのデッキ枚数を聞かれたらどうしたらいいの？}{29}{subsubsection*.32}%
-\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{29}{subsubsection*.33}%
+\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{30}{subsubsection*.33}%
 \contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{30}{subsection.3.12.2}%
 \contentsline {chapter}{\numberline {第4章}フォーマット}{31}{chapter.4}%
 \contentsline {section}{\numberline {4.1}フォーマットとは}{31}{section.4.1}%
@@ -111,8 +111,8 @@
 \contentsline {subsection}{\numberline {4.4.1}ライト}{33}{subsection.4.4.1}%
 \contentsline {subsubsection}{アクションリスト}{33}{subsubsection*.34}%
 \contentsline {subsubsection}{エクストラリスト}{33}{subsubsection*.35}%
-\contentsline {subsubsection}{事前準備}{33}{subsubsection*.36}%
-\contentsline {subsubsection}{その他事項}{33}{subsubsection*.37}%
+\contentsline {subsubsection}{事前準備}{34}{subsubsection*.36}%
+\contentsline {subsubsection}{その他事項}{34}{subsubsection*.37}%
 \contentsline {subsection}{\numberline {4.4.2}スタンダード}{34}{subsection.4.4.2}%
 \contentsline {subsubsection}{アクションリスト}{34}{subsubsection*.38}%
 \contentsline {subsubsection}{エクストラリスト}{34}{subsubsection*.39}%
@@ -121,8 +121,8 @@
 \contentsline {subsection}{\numberline {4.4.3}プロ}{34}{subsection.4.4.3}%
 \contentsline {subsubsection}{アクションリスト}{34}{subsubsection*.42}%
 \contentsline {subsubsection}{エクストラリスト}{34}{subsubsection*.43}%
-\contentsline {subsubsection}{事前準備}{34}{subsubsection*.44}%
-\contentsline {subsubsection}{その他事項}{34}{subsubsection*.45}%
+\contentsline {subsubsection}{事前準備}{35}{subsubsection*.44}%
+\contentsline {subsubsection}{その他事項}{35}{subsubsection*.45}%
 \contentsline {subsection}{\numberline {4.4.4}マスター}{35}{subsection.4.4.4}%
 \contentsline {subsubsection}{アクションリスト}{35}{subsubsection*.46}%
 \contentsline {subsubsection}{エクストラリスト}{35}{subsubsection*.47}%
@@ -131,13 +131,13 @@
 \contentsline {subsection}{\numberline {4.4.5}エクストラ}{35}{subsection.4.4.5}%
 \contentsline {subsubsection}{アクションリスト}{35}{subsubsection*.50}%
 \contentsline {subsubsection}{エクストラリスト}{35}{subsubsection*.51}%
-\contentsline {subsubsection}{事前準備}{35}{subsubsection*.52}%
-\contentsline {subsubsection}{その他事項}{35}{subsubsection*.53}%
+\contentsline {subsubsection}{事前準備}{36}{subsubsection*.52}%
+\contentsline {subsubsection}{その他事項}{36}{subsubsection*.53}%
 \contentsline {chapter}{\numberline {第5章}対戦レギュレーション}{37}{chapter.5}%
 \contentsline {section}{\numberline {5.1}定義項目}{37}{section.5.1}%
 \contentsline {section}{\numberline {5.2}レギュレーション定義}{37}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}ライト}{37}{subsection.5.2.1}%
-\contentsline {subsubsection}{フォーマット}{37}{subsubsection*.54}%
+\contentsline {subsection}{\numberline {5.2.1}ライト}{38}{subsection.5.2.1}%
+\contentsline {subsubsection}{フォーマット}{38}{subsubsection*.54}%
 \contentsline {subsubsection}{デッキ条件}{38}{subsubsection*.55}%
 \contentsline {subsubsection}{対戦前準備事項}{38}{subsubsection*.56}%
 \contentsline {subsubsection}{その他制限事項}{38}{subsubsection*.57}%
