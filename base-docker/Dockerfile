@@ -11,7 +11,7 @@ RUN apk update
 # ------------------------------
 # plantuml
 # ------------------------------
-ENV PLANTUML_VERSION 1.2020.14
+ENV PLANTUML_VERSION 1.2023.0
 ENV LANG en_US.UTF-8
 RUN apk add --no-cache graphviz 
 RUN apk add --no-cache ttf-droid
