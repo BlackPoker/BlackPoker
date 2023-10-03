@@ -35,6 +35,6 @@ sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 tornado==6.1
 typing_extensions==4.3.0
-urllib3==1.26.10
+urllib3==1.26.17
 watchdog==0.10.2
 zipp==3.8.0
