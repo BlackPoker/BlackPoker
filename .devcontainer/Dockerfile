@@ -30,7 +30,7 @@ RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/l
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
 
 # install plantuml
-ENV PLANTUML_VERSION 1.2020.14
+ENV PLANTUML_VERSION 1.2023.0
 RUN sudo apt update
 RUN sudo apt-get install -y default-jdk graphviz fonts-ipafont fonts-ipaexfont
 RUN curl -L https://sourceforge.net/projects/plantuml/files/plantuml.${PLANTUML_VERSION}.jar/download -o ./plantuml.jar 

@@ -38,7 +38,7 @@ version = '6.1版'
 extensions = ['sphinx_rtd_theme','sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
 
 plantuml = 'plantuml'
-plantuml_output_format = 'svg_img'
+plantuml_output_format = 'svg_obj'
 plantuml_latex_output_format = 'pdf'
 
 
@@ -68,28 +68,40 @@ todo_include_todos=True
 # a list of builtin themes.
 #
 # html_theme = 'alabaster'
-html_theme = "sphinx_rtd_theme"
+# html_theme = "sphinx_rtd_theme"
+html_theme = 'insipid'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_logo = 'blackpoker.svg'
 
 html_theme_options = {
-    # 'canonical_url': '',
-    'analytics_id': 'UA-66362035-2',  #  Provided by Google in your dashboard
-    'logo_only': False,
-    'display_version': True,
-    # 'prev_next_buttons_location': 'bottom',
-    # 'style_external_links': False,
-    # 'vcs_pageview_mode': '',
-    'style_nav_header_background': 'black',
-    # Toc options
-    # 'collapse_navigation': True,
-    # 'sticky_navigation': True,
-    # 'navigation_depth': 4,
-    # 'includehidden': True,
-    # 'titles_only': False
+    # ----------
+    # insipid
+    # ----------
+    'body_centered': False,
+    'breadcrumbs': True,
+    'body_max_width' : None
+
+    # ----------
+    # redoc
+    # ----------
+    # # 'canonical_url': '',
+    # 'analytics_id': 'UA-66362035-2',  #  Provided by Google in your dashboard
+    # 'logo_only': False,
+    # 'display_version': True,
+    # # 'prev_next_buttons_location': 'bottom',
+    # # 'style_external_links': False,
+    # # 'vcs_pageview_mode': '',
+    # 'style_nav_header_background': 'black',
+    # # Toc options
+    # # 'collapse_navigation': True,
+    # # 'sticky_navigation': True,
+    # # 'navigation_depth': 4,
+    # # 'includehidden': True,
+    # # 'titles_only': False
 }
 
 # replace "view page source" with "edit on github" in Read The Docs theme
