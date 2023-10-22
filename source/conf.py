@@ -28,7 +28,7 @@ numfig_format = {
     'section': '{number} {name}'
 }
 # release = '2021/7/1'
-version = '6.1版'
+version = '6.2版'
 
 # -- General configuration ---------------------------------------------------
 
