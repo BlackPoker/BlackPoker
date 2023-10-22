@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  1 AUG 2021 15:00
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  22 OCT 2023 07:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -317,7 +317,7 @@ Package: framed 2011/10/22 v 0.96: framed or shaded text with page breaks
 \FrameSep=\dimen193
 ))
 (./sphinxlatexliterals.sty
-File: sphinxlatexliterals.sty 2021/01/27 code-blocks and parsed literals
+File: sphinxlatexliterals.sty 2021/12/06 code-blocks and parsed literals
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/fancyvrb/fancyvrb.sty
 Package: fancyvrb 2021/01/20 v3.7 verbatim text (tvz,hv)
@@ -404,16 +404,17 @@ Package: varwidth 2009/03/30 ver 0.92;  Variable-width minipages
 (./sphinxlatexnumfig.sty
 File: sphinxlatexnumfig.sty 2021/01/27 numbering
 ) (./sphinxlatexlists.sty
-File: sphinxlatexlists.sty 2021/01/27 lists
+File: sphinxlatexlists.sty 2021/12/20 lists
+\spx@lineitemlabel=\toks28
 )
 \c@sphinxscope=\count291
-\c@sphinxexplicit=\count292
  (./sphinxpackagefootnote.sty
-Package: sphinxpackagefootnote 2021/02/04 v1.1d footnotehyper adapted to sphinx
- (Sphinx team)
+Package: sphinxpackagefootnote 2022/02/12 v4.5.0 Sphinx custom footnotehyper pa
+ckage (Sphinx team)
 \FNH@notes=\box133
-\FNH@toks=\toks28
+\FNH@toks=\toks29
 \FNH@width=\dimen260
+\c@sphinxfootnotemark=\count292
 ) (./sphinxlatexindbibtoc.sty
 File: sphinxlatexindbibtoc.sty 2021/01/27 index, bib., toc
 
@@ -453,18 +454,19 @@ Package: titlesec 2021/07/05 v2.14 Sectioning titles
 \aftertitleunit=\skip72
 \ttl@plus=\dimen261
 \ttl@minus=\dimen262
-\ttl@toksa=\toks29
+\ttl@toksa=\toks30
 \titlewidth=\dimen263
 \titlewidthlast=\dimen264
 \titlewidthfirst=\dimen265
 ))
 (./sphinxlatexstyletext.sty
-File: sphinxlatexstyletext.sty 2021/01/27 text styling
+File: sphinxlatexstyletext.sty 2021/12/06 text styling
 ) (./sphinxlatexobjects.sty
-File: sphinxlatexobjects.sty 2021/01/27 documentation environments
-\py@argswidth=\skip73
-\lineblockindentation=\skip74
-\DUlineblockindent=\skip75
+File: sphinxlatexobjects.sty 2022/01/13 documentation environments
+\sphinxsignaturesep=\skip73
+\py@argswidth=\skip74
+\lineblockindentation=\skip75
+\DUlineblockindent=\skip76
 ))
 (/usr/local/texlive/2021/texmf-dist/tex/latex/geometry/geometry.sty
 Package: geometry 2020/01/02 v5.9 Page Geometry
@@ -486,7 +488,7 @@ Package: iftex 2020/03/06 v1.0d TeX engine tests
 \Gm@layoutheight=\dimen271
 \Gm@layouthoffset=\dimen272
 \Gm@layoutvoffset=\dimen273
-\Gm@dimlist=\toks30
+\Gm@dimlist=\toks31
 )
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2021-06-07 v7.00m Hypertext links for LaTeX
@@ -607,7 +609,7 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 2
 86.
 )
-\Hy@SectionHShift=\skip76
+\Hy@SectionHShift=\skip77
 ) (/usr/local/texlive/2021/texmf-dist/tex/latex/oberdiek/hypcap.sty
 Package: hypcap 2016/05/16 v1.12 Adjusting the anchors of captions (HO)
 )
@@ -844,35 +846,35 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 ]
 第1章
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 68.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 68.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 68.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 68.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 79.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 79.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 79.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 79.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 79.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 8
-4.
+7.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
@@ -883,7 +885,7 @@ pdf)
 
 ]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 93.
+(Font)              scaled to size 11.53198pt on input line 96.
  [2]
 [3] [4
 
@@ -891,139 +893,193 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 第2章
 [5]
 LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 2
-01.
+06.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
 File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
-) [6]
+)
+Underfull \hbox (badness 10000) in paragraph at lines 232--234
+[]
+ []
+
+[6]
 File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
 pdf)
 <plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 307.
+(Font)              scaled to size 8.64899pt on input line 312.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 307.
-
-[7]
+(Font)              scaled to size 8.64899pt on input line 312.
+ [7]
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
 <plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf>
  [8]
-File: plantuml-99df1f5e678d30c764e60b5f61af21bdfd270408.pdf Graphic file (type 
+File: plantuml-6ffd6bbf3c42408b4d7754731293c179bd76e166.pdf Graphic file (type 
 pdf)
-<plantuml-99df1f5e678d30c764e60b5f61af21bdfd270408.pdf>
+<plantuml-6ffd6bbf3c42408b4d7754731293c179bd76e166.pdf>
 
 
-LaTeX Warning: Float too large for page by 24.96199pt on input line 357.
+LaTeX Warning: Float too large for page by 24.96199pt on input line 362.
 
 [9] [10] [11]
-File: plantuml-65239f0d4c20782864ca83cac9316b4fa831ce76.pdf Graphic file (type 
+File: plantuml-8539752d4b269fd5d2cb708edac3b5defd3e41f1.pdf Graphic file (type 
 pdf)
-<plantuml-65239f0d4c20782864ca83cac9316b4fa831ce76.pdf>
+<plantuml-8539752d4b269fd5d2cb708edac3b5defd3e41f1.pdf>
 
 
-LaTeX Warning: Float too large for page by 24.96199pt on input line 471.
+LaTeX Warning: Float too large for page by 24.96199pt on input line 476.
 
-[12] [13] [14]
-第3章
-[15
+[12] [13] [14] [15] [16
 
 ]
+第3章
+[17]
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
- [16]
+ [18]
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
- [17]
+ [19]
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
- [18]
+ [20]
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
- [19]
+ [21]
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
- [20]
+ [22]
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
- [21] [22]
+ [23] [24]
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
- [23] [24]
+ [25] [26]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
- [25] [26] [27] [28]
+ [27] [28] [29] [30]
 第4章
-[29
+[31
 
 ]
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
- [30] [31] [32] [33] [34
-
-]
+ [32] [33] [34] [35] [36]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1818.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1885.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1818.
+(Font)              scaled to size 9.60999pt on input line 1885.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1818.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1885.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1818.
-[35] [36] [37] [38] [39] [40] [41] [42] [43] [44] [45] [46
+(Font)              scaled to size 9.60999pt on input line 1885.
+[37
+
+] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48
 
 ]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2951--2955
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th /
- actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][] [][]$https : / / blackpok
-er .
+Underfull \hbox (badness 10000) in paragraph at lines 3043--3045
+[]
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2967--2971
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th /
- actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][] [][]$https : / / blackpoke
+Underfull \hbox (badness 10000) in paragraph at lines 3047--3050
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3047--3050
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th / a
+ctionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][] [][]$https : / / blackpoker
+ .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3059--3061
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3063--3066
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3063--3066
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th / a
+ctionlist / pdf / blackpoker-[]v6-[]std . pdf$[][] [][]$https : / / blackpoker 
+.
+ []
+
+[49]
+Underfull \hbox (badness 10000) in paragraph at lines 3075--3077
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3079--3082
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3079--3082
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th / a
+ctionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][] [][]$https : / / blackpoker 
+.
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3091--3093
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3095--3098
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3095--3098
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th / a
+ctionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https : / / blackpoker
+ .
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3107--3109
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3111--3114
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3111--3114
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th / a
+ctionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpoke
 r .
- []
-
-[47]
-Underfull \hbox (badness 10000) in paragraph at lines 2983--2987
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th /
- actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][] [][]$https : / / blackpoke
-r .
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2999--3003
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th /
- actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][] [][]$https : / / blackpok
-er .
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 3015--3019
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 6th /
- actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][] [][]$https : / / blackpo
-ker .
  []
 
 No file blackpoker.ind.
-[48] (./blackpoker.aux)
+[50] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: B420D82EF0793825C5E304F223EE1331;16111.
+(rerunfilecheck)             Checksum: 44F9B8F408BE9E02EF33A3EE9A301630;17492.
  ) 
 Here is how much of TeX's memory you used:
- 13974 strings out of 480496
- 208676 string characters out of 5899437
- 559453 words of memory out of 5000000
- 31671 multiletter control sequences out of 15000+600000
+ 13999 strings out of 480496
+ 209210 string characters out of 5899437
+ 561322 words of memory out of 5000000
+ 31696 multiletter control sequences out of 15000+600000
  507208 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,12n,80p,327b,540s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,12n,80p,407b,485s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (54 pages, 218524 bytes).
+Output written on blackpoker.dvi (56 pages, 224792 bytes).
