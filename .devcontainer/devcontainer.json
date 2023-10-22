@@ -34,7 +34,9 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
-		"jebbs.plantuml"
+		"jebbs.plantuml",
+		"donjayamanne.githistory",
+		"mhutchie.git-graph"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
