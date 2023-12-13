@@ -35,7 +35,7 @@ version = '6.2版'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx_rtd_theme','sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
+extensions = ['sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
 
 plantuml = 'plantuml'
 plantuml_output_format = 'svg_obj'
@@ -56,7 +56,7 @@ language = 'ja'
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
 
 
 [extensions]
