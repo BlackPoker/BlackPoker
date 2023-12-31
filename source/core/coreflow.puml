@@ -26,6 +26,7 @@ else (No)
                 stop
             endif
             :[6]誘発チェック;
+            :[2]ターンプレイヤーにチャンスを移動;
         else (No)
         endif
     else (No)
