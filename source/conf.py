@@ -38,7 +38,7 @@ version = '6.2版'
 extensions = ['sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
 
 plantuml = 'plantuml'
-plantuml_output_format = 'svg_obj'
+plantuml_output_format = 'svg_img'
 plantuml_latex_output_format = 'pdf'
 
 
