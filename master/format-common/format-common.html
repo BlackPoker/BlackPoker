@@ -110,7 +110,19 @@
 <p>BlackPokerでは共通ルールとフォーマットに応じたアクションリストをあわせることで、
 対戦することが出来ます。</p>
 <p class="plantuml">
-<object data="../_images/plantuml-af8c04b37a4980d9c403b0e045e724208bb91a0c.svg" type="image/svg+xml" style="width:440px;height:165px;background:#FFFFFF;"></object></p>
+<img src="../_images/plantuml-af8c04b37a4980d9c403b0e045e724208bb91a0c.svg" alt="rectangle &quot;共通ルール&quot; as common
+
+frame &quot;フォーマット&quot; as format{
+    rectangle &quot;ライト&quot; as light
+    rectangle &quot;スタンダード&quot; as std
+    rectangle &quot;プロ&quot; as pro
+    rectangle &quot;マスター&quot; as master
+}
+
+common &lt;-- light
+common &lt;-- std
+common &lt;-- pro
+common &lt;-- master"/></p>
 <p>通常</p>
 <p>前提となるルールは、共通ルールを参照して下さい。</p>
 <p>通常フォーマットは次の３つのフォーマットがあります。</p>
