@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 JAN 2024 08:48
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 JAN 2024 14:28
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -844,63 +844,58 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 23.90964pt on input line 63.
 
-(./blackpoker.toc
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 2.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 2.
-LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 35.
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 35.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 35.
-LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 35.
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 35.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 35.
- [1
-
-] [2])
+(./blackpoker.toc)
 \tf@toc=\write6
 \openout6 = `blackpoker.toc'.
 
- [3] [4
+LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 63.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 63.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 63.
+LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 63.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 63.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 63.
+ [1
+
+] [2
 
 ]
 第1章
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 72.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 72.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 72.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 72.
+(Font)              scaled to size 19.9311pt on input line 71.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 83.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 83.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 83.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 83.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 82.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 83.
+(Font)              scaled to size 13.83836pt on input line 82.
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 8
-8.
+7.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
@@ -911,7 +906,7 @@ pdf)
 
 ]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 97.
+(Font)              scaled to size 11.53198pt on input line 96.
  [2]
 [3] [4
 
@@ -919,11 +914,11 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 第2章
 [5]
 LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 2
-07.
+06.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
 File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
 )
-Underfull \hbox (badness 10000) in paragraph at lines 233--235
+Underfull \hbox (badness 10000) in paragraph at lines 232--234
 []
  []
 
@@ -932,9 +927,9 @@ File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type
 pdf)
 <plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 313.
+(Font)              scaled to size 8.64899pt on input line 312.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 313.
+(Font)              scaled to size 8.64899pt on input line 312.
  [7]
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
@@ -949,12 +944,16 @@ pdf)
 <plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19.pdf>
 
 
-LaTeX Warning: Float too large for page by 24.96199pt on input line 477.
+LaTeX Warning: Float too large for page by 24.96199pt on input line 476.
 
 [12] [13] [14] [15] [16
 
 ]
 第3章
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 616.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 616.
 [17]
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
@@ -992,13 +991,13 @@ pdf)
  [32] [33] [34] [35] [36]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1894.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1893.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1894.
+(Font)              scaled to size 9.60999pt on input line 1893.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1894.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1893.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1894.
+(Font)              scaled to size 9.60999pt on input line 1893.
 [37
 
 ] [38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48
@@ -1006,88 +1005,103 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 ]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 3065--3067
+Underfull \hbox (badness 10000) in paragraph at lines 3064--3066
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3069--3072
+Underfull \hbox (badness 10000) in paragraph at lines 3068--3071
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3069--3072
+Underfull \hbox (badness 10000) in paragraph at lines 3068--3071
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][] [][]$https : / / blackpo
 ker .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3081--3083
+Underfull \hbox (badness 10000) in paragraph at lines 3080--3082
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3085--3088
+Underfull \hbox (badness 10000) in paragraph at lines 3084--3087
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3085--3088
+Underfull \hbox (badness 10000) in paragraph at lines 3084--3087
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][] [][]$https : / / blackpok
 er .
  []
 
 [49]
-Underfull \hbox (badness 10000) in paragraph at lines 3097--3099
+Underfull \hbox (badness 10000) in paragraph at lines 3096--3098
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3101--3104
+Underfull \hbox (badness 10000) in paragraph at lines 3100--3103
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3101--3104
+Underfull \hbox (badness 10000) in paragraph at lines 3100--3103
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][] [][]$https : / / blackpok
 er .
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3113--3115
+Underfull \hbox (badness 10000) in paragraph at lines 3112--3114
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3117--3120
+Underfull \hbox (badness 10000) in paragraph at lines 3116--3119
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3129--3131
+Underfull \hbox (badness 10000) in paragraph at lines 3128--3130
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 3133--3136
+Underfull \hbox (badness 10000) in paragraph at lines 3132--3135
 []
  []
 
-No file blackpoker.ind.
-[50] (./blackpoker.aux)
-Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: FAC0057E119C890E6FB1FB042E587ABC;17490.
- ) 
+[50]
+第7章
+
+! LaTeX Error: Something's wrong--perhaps a missing \item.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.3144 \end{description}
+                        
+? 
+! Emergency stop.
+ ...                                              
+                                                  
+l.3144 \end{description}
+                        
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+ 
 Here is how much of TeX's memory you used:
- 14641 strings out of 480496
- 226581 string characters out of 5899437
- 573149 words of memory out of 5000000
- 32332 multiletter control sequences out of 15000+600000
+ 14637 strings out of 480496
+ 226658 string characters out of 5899437
+ 567156 words of memory out of 5000000
+ 32330 multiletter control sequences out of 15000+600000
  507208 words of font info for 119 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,13n,80p,407b,487s stack positions out of 5000i,500n,10000p,200000b,80000s
-
-Output written on blackpoker.dvi (56 pages, 224840 bytes).
+ 72i,13n,80p,327b,482s stack positions out of 5000i,500n,10000p,200000b,80000s
+Output written on blackpoker.dvi (54 pages, 156204 bytes).
