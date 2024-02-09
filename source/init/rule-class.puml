@@ -1,0 +1,37 @@
+@startuml
+
+hide methods
+hide circle
+hide field
+
+abstract class "コアルール" as core
+
+abstract class "共通ルール" as common
+
+class "対戦レギュレーション" as match_reg
+
+class "フォーマット" as format
+
+class "フレーム" as frame
+
+class "オプション" as options
+
+class "プレイヤー" as player
+
+core <|-- common : 継承
+
+common <|-- format : 継承
+
+match_reg o-- format : 内包
+match_reg o-- frame : 内包
+match_reg o-- options : 内包
+
+player ..> match_reg : 選択
+
+note right on link #white
+プレイヤーは対戦する前に
+対戦レギュレーションを選択する
+end note
+
+format <.. options : 依存
+frame <.. options : 依存
