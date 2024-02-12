@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  9 FEB 2024 14:05
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  12 FEB 2024 15:24
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -902,9 +902,9 @@ File: t1txtt.fd 2000/12/15 v3.1
 File: plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.pdf Graphic file (type 
 pdf)
 <plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.pdf>
-File: plantuml-16c6b78e1b6aab1cb9cc440ed792fb689ee449ce.pdf Graphic file (type 
+File: plantuml-637acb300f9bae3db618e9d98ed7546ae001ecce.pdf Graphic file (type 
 pdf)
-<plantuml-16c6b78e1b6aab1cb9cc440ed792fb689ee449ce.pdf>
+<plantuml-637acb300f9bae3db618e9d98ed7546ae001ecce.pdf>
  [1
 
 ]
@@ -981,16 +981,117 @@ File: set-bulwork.pdf Graphic file (type pdf)
  [25] [26]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 27 undefin
+ed on input line 1340.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 27 undefined on 
+input line 1340.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 27 undefined on 
+input line 1340.
+
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
- [27] [28] [29] [30]
+[27]
+
+LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 28 undefin
+ed on input line 1364.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 28 undefined on 
+input line 1364.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 28 undefined on 
+input line 1364.
+
+[28] [29] [30]
 第4章
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
 [31
 
-] [32] [33] [34] [35] [36
+] [32]
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-lite' on page 33 u
+ndefined on input line 1678.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 33 undefin
+ed on input line 1678.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 33 undefin
+ed on input line 1678.
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-std' on page 33 un
+defined on input line 1719.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 33 undefine
+d on input line 1719.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 33 undefine
+d on input line 1719.
+
+[33]
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-pro' on page 34 un
+defined on input line 1760.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 34 undefine
+d on input line 1760.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 34 undefine
+d on input line 1760.
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 34
+ undefined on input line 1801.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 34 undef
+ined on input line 1801.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 34 undef
+ined on input line 1801.
+
+[34]
+
+LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 35
+ undefined on input line 1842.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 35 undef
+ined on input line 1842.
+
+
+LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 35 undef
+ined on input line 1842.
+
+
+LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 35 undefin
+ed on input line 1851.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 35 undefined on 
+input line 1851.
+
+
+LaTeX Warning: Reference `appendix/appendix:extralist' on page 35 undefined on 
+input line 1851.
+
+[35] [36
 
 ]
 第5章
@@ -1008,180 +1109,32 @@ LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 4.805pt on input line 1932.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1997--1999
-[]|$\OMS/cmsy/m/n/10 ^^?$ \T1/qtm/m/n/10 A2345 $\OMS/cmsy/m/n/10 ~$
- []
 
+! Package inputenc Error: Unicode character �^^9c^^97 (U+2717)
+(inputenc)                not set up for use with LaTeX.
 
-Underfull \hbox (badness 10000) in paragraph at lines 1997--1999
-\T1/qtm/m/n/10 A8910J $\OMS/cmsy/m/n/10 }$
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1997--1999
-\T1/qtm/m/n/10 A3710Q $\OMS/cmsy/m/n/10 |$
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1997--1999
-\T1/qtm/m/n/10 A5610K Joker
- []
-
-[38]
-Underfull \hbox (badness 10000) in paragraph at lines 2275--2277
-\T1/qtm/m/n/10 t3\JY1/mc/m/n/10 、 \T1/qtm/m/n/10 t4\JY1/mc/m/n/10 ） を
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2275--2277
-\JY1/mc/m/n/10 選択 、 残
- []
-
-
-Underfull \hbox (badness 8132) in paragraph at lines 2275--2277
-\JY1/mc/m/n/10 り \T1/qtm/m/n/10 50 \JY1/mc/m/n/10 枚
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2275--2277
-\JY1/mc/m/n/10 「\T1/qtm/m/n/10 t1+t2+A\JY1/mc/m/n/10 」
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2275--2277
-\JY1/mc/m/n/10 と
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2275--2277
-\JY1/mc/m/n/10 「\T1/qtm/m/n/10 t3+t4+B\JY1/mc/m/n/10 」
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2334--2337
-[]|\T1/qtm/m/n/10 (56-n) \JY1/mc/m/n/10 枚
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2359--2362
-[]|\T1/qtm/m/n/10 (56-n) \JY1/mc/m/n/10 枚
- []
-
-[39]
-Overfull \vbox (685.41954pt too high) has occurred while \output is active []
-
-
-[40] [41] [42] [43] [44
-
-]
-第6章
-
-Underfull \hbox (badness 10000) in paragraph at lines 2855--2857
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2859--2862
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2859--2862
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue143 / actionlist / pdf / blackpoker-[]v6-[]lite . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2871--2873
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2875--2878
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2875--2878
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue143 / actionlist / pdf / blackpoker-[]v6-[]std . pdf$[][]
- []
-
-[45]
-Underfull \hbox (badness 10000) in paragraph at lines 2887--2889
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2891--2894
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2891--2894
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue143 / actionlist / pdf / blackpoker-[]v6-[]pro . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2903--2905
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2907--2910
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2907--2910
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue143 / actionlist / pdf / blackpoker-[]v6-[]mast . pdf$[][]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2919--2921
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2923--2926
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2923--2926
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue143 / actionlist / pdf / blackpoker-[]v6-[]extra . pdf$[][]
- []
-
-[46]
-第7章
-
-! LaTeX Error: Something's wrong--perhaps a missing \item.
-
-See the LaTeX manual or LaTeX Companion for explanation.
+See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.2935 \end{description}
-                        
+l.2121 \end{tabulary}
+                     
 ? 
 ! Emergency stop.
  ...                                              
                                                   
-l.2935 \end{description}
-                        
-Try typing  <return>  to proceed.
-If that doesn't work, type  X <return>  to quit.
+l.2121 \end{tabulary}
+                     
+You may provide a definition with
+\DeclareUnicodeCharacter 
 
  
 Here is how much of TeX's memory you used:
- 14571 strings out of 480496
- 224845 string characters out of 5899437
- 579442 words of memory out of 5000000
- 32262 multiletter control sequences out of 15000+600000
+ 14548 strings out of 480496
+ 224184 string characters out of 5899437
+ 558501 words of memory out of 5000000
+ 32239 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,11n,80p,327b,615s stack positions out of 5000i,500n,10000p,200000b,80000s
-Output written on blackpoker.dvi (50 pages, 149440 bytes).
+ 72i,11n,80p,327b,484s stack positions out of 5000i,500n,10000p,200000b,80000s
+Output written on blackpoker.dvi (41 pages, 111460 bytes).
