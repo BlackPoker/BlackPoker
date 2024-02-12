@@ -34,4 +34,5 @@ note right on link #white
 end note
 
 format <.. options : 依存
+format <. frame : 依存
 frame <.. options : 依存
