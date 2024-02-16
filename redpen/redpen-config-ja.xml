@@ -47,7 +47,7 @@
 		<property name="max_num" value="1500" /> <!-- 試験的に致命傷っぽいラインに変更 -->
 	</validator>
 	<!-- <validator name="DuplicatedSection" /> --> <!-- 類似性がまるでわからなかった -->
-	<validator name="VoidSection" />
+	<!-- <validator name="VoidSection" /> -->
 	<!-- <validator name="SectionLevel" /> --> <!-- コラムの誤検出があったのと有用な指摘はなかったので一旦inactive -->
 
 	<!-- <validator name="InvalidSymbol" /> -->
