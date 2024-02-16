@@ -20,6 +20,7 @@ https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/blackpoker.pdf
 
     PDF 
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-lite.pdf
+
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-lite-2up.pdf
 
 
@@ -32,6 +33,7 @@ https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/blackpoker.pdf
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/html/v6-std.html
     PDF 
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-std.pdf
+
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-std-2up.pdf
 
 
@@ -44,6 +46,7 @@ https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/blackpoker.pdf
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/html/v6-pro.html
     PDF 
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-pro.pdf
+
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-pro-2up.pdf
 
 
@@ -56,6 +59,7 @@ https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/blackpoker.pdf
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/html/v6-mast.html
     PDF 
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-mast.pdf
+        
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-mast-2up.pdf
 
 
@@ -67,4 +71,5 @@ https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/blackpoker.pdf
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/html/v6-ex.html
     PDF 
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-extra.pdf
+
         https://blackpoker.github.io/BlackPoker/BlackPoker/issue143/actionlist/pdf/blackpoker-v6-extra-2up.pdf
