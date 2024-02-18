@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  16 FEB 2024 23:31
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  18 FEB 2024 03:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1019,95 +1019,15 @@ pdf)
 [31] [32]
 
 LaTeX Warning: Hyper reference `appendix/appendix:actionlist-lite' on page 33 u
-ndefined on input line 1681.
+ndefined on input line 1736.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 33 undefin
-ed on input line 1681.
+ed on input line 1736.
 
 
 LaTeX Warning: Reference `appendix/appendix:actionlist-lite' on page 33 undefin
-ed on input line 1681.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-std' on page 33 un
-defined on input line 1722.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 33 undefine
-d on input line 1722.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-std' on page 33 undefine
-d on input line 1722.
-
-[33]
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-pro' on page 34 un
-defined on input line 1763.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 34 undefine
-d on input line 1763.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-pro' on page 34 undefine
-d on input line 1763.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 34
- undefined on input line 1804.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 34 undef
-ined on input line 1804.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 34 undef
-ined on input line 1804.
-
-[34]
-
-LaTeX Warning: Hyper reference `appendix/appendix:actionlist-master' on page 35
- undefined on input line 1845.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 35 undef
-ined on input line 1845.
-
-
-LaTeX Warning: Reference `appendix/appendix:actionlist-master' on page 35 undef
-ined on input line 1845.
-
-
-LaTeX Warning: Hyper reference `appendix/appendix:extralist' on page 35 undefin
-ed on input line 1854.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 35 undefined on 
-input line 1854.
-
-
-LaTeX Warning: Reference `appendix/appendix:extralist' on page 35 undefined on 
-input line 1854.
-
-[35] [36
-
-]
-第5章
-LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1898.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1898.
-LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1898.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1898.
-[37]
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1935.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1935.
+ed on input line 1736.
 
 
 ! Package inputenc Error: Unicode character �^^9c^^97 (U+2717)
@@ -1117,24 +1037,24 @@ See the inputenc package documentation for explanation.
 Type  H <return>  for immediate help.
  ...                                              
                                                   
-l.2124 \end{tabulary}
+l.1736 \end{tabulary}
                      
 ? 
 ! Emergency stop.
  ...                                              
                                                   
-l.2124 \end{tabulary}
+l.1736 \end{tabulary}
                      
 You may provide a definition with
 \DeclareUnicodeCharacter 
 
  
 Here is how much of TeX's memory you used:
- 14548 strings out of 480496
- 224184 string characters out of 5899437
- 558501 words of memory out of 5000000
- 32239 multiletter control sequences out of 15000+600000
- 507811 words of font info for 122 fonts, out of 8000000 for 9000
+ 14487 strings out of 480496
+ 222916 string characters out of 5899437
+ 554975 words of memory out of 5000000
+ 32179 multiletter control sequences out of 15000+600000
+ 504393 words of font info for 118 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,11n,80p,327b,538s stack positions out of 5000i,500n,10000p,200000b,80000s
-Output written on blackpoker.dvi (41 pages, 111168 bytes).
+Output written on blackpoker.dvi (36 pages, 99128 bytes).
