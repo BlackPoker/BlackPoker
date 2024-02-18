@@ -133,7 +133,7 @@
 <section id="id2">
 <h2><span class="section-number">2.1. </span>ターン<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
 <p>このルールを説明する上でターンとは持つことができるものとします。
-ターンを持っているプレイヤーは先に行動することができます。
+ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
 </section>
 <section id="id3">
@@ -220,18 +220,6 @@
 <p>コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
 コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。</p>
 <figure class="align-default" id="id44">
-<p class="plantuml">
-<img src="../_images/plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.svg" alt="hide methods
-hide circle
-
-class コンポーネント {
- オーナー
- コントローラー
-}
-
-class アクション {
- コントローラー
-}"/></p>
 <figcaption>
 <p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id44" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
@@ -244,29 +232,7 @@ class アクション {
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
 <figure class="align-default" id="id45">
-<span id="ability-image"></span><p class="plantuml">
-<img src="../_images/plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.svg" alt="&#64;startuml
-
-skinparam defaultTextAlignment center
-
-!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.2.0
-!includeurl ICONURL/common.puml
-!includeurl ICONURL/font-awesome-5/chess_pawn.puml
-
-FA5_CHESS_PAWN(P1C,コンポーネント)
-:プレイヤー1: as Player1
-:プレイヤー2: as Player2
-(〇〇アクションを起こせる) as Act1 &lt;&lt;能力&gt;&gt;
-(●●アクションを起こせる) as Act2 &lt;&lt;能力&gt;&gt;
-(△△アクションを起こせる) as Act3 &lt;&lt;能力&gt;&gt;
-Player1 ---&gt; (Act1) : &quot;能力&quot;
-Player1 ---&gt; (Act2) : &quot;能力&quot;
-P1C --&gt; (Act3) : &quot;能力&quot;
-Player2 ---&gt; (Act1) : &quot;能力&quot;
-Player1 ..&gt; P1C : &quot;所有&quot;
-
-&#64;enduml"/></p>
-<figcaption>
+<span id="ability-image"></span><figcaption>
 <p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id45" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
@@ -286,45 +252,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
 <p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
 <figure class="align-default" id="id46">
-<span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17.svg" alt="&#64;startuml
-start
-:[1]ゲーム開始;
-:[2]ターンプレイヤーにチャンスを移動;
-repeat
-if ([3]アクションを起こすか？) then (Yes)
-    :[4]パス記録のリセット;
-    :[5]アクションを起こす;
-    :[6]誘発チェック;
-    if ([7]即時効果か？) then (Yes)
-        :[8]アクションの解決;
-        if ([9]勝敗判定) then (決着)
-            stop
-        endif
-        :[6]誘発チェック;
-    else (No)
-        :[10]ステージに追加;
-    endif
-else (No)
-    :[11]パス記録に登録;
-    if ([12]全員がパスしたか？) then (Yes)
-        if ([13]ステージにアクションが存在するか？) then (Yes)
-            :[14]ステージから取出し;
-            :[8]アクションの解決;
-            if ([9]勝敗判定) then (決着)
-                stop
-            endif
-            :[6]誘発チェック;
-            :[2]ターンプレイヤーにチャンスを移動;
-        else (No)
-        endif
-    else (No)
-        :[15]チャンス移動;
-    endif
-endif
-repeat while()
-&#64;enduml"/></p>
-<figcaption>
+<span id="coreflow-2"></span><figcaption>
 <p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id46" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
@@ -401,45 +329,7 @@ repeat while()
 誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーになります。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
 <figure class="align-default" id="id47">
-<span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19.svg" alt="&#64;startuml
-start
-:[6-1]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-while([6-2]誘発即時リスト、誘発通常リスト全体の件数判定) is (1件以上)
-    group 即時効果:プレイヤー単位に繰返し
-    note
-        順番はターンプレイヤーから
-        ターンが回る順に行う
-    end note
-    repeat :[6-3]プレイヤー毎に誘発即時リスト\nの即時効果のアクションを解決;
-        group 即時効果:アクション単位に繰返し
-        repeat :[6-4]誘発即時リストから即時効果の\nアクションを1つ取り出す;
-            :[6-5]即時効果のアクションを解決;
-            if([6-6]勝敗判定) then (決着)
-                stop
-            endif
-            :[6-7]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-        repeat while ([6-8]誘発即時リストの件数が0件でなけば繰り返す) is (YES)
-        end group
-    repeat while([6-9]全ての誘発即時リストの件数が0件でなければ繰り返す) is (YES)
-    end group
-
-    group 通常効果:プレイヤー単位に繰返し
-    note
-        順番はターンプレイヤーから
-        ターンが回る順に行う
-    end note
-    repeat :[6-10]プレイヤー毎に誘発通常リスト\nのアクションをステージに追加;
-        :[6-11]通常効果のアクションを\n任意の順でステージに追加;
-        :[6-12]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-    repeat while ([6-13]誘発リストに通常効果のアクションがあれば繰り返す) is (YES)
-    end group
-
-endwhile (0件)
-    stop
-&#64;enduml
-"/></p>
-<figcaption>
+<span id="trigger-flow"></span><figcaption>
 <p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id47" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
@@ -535,7 +425,6 @@ endwhile (0件)
 <li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">5. 対戦レギュレーション</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../glossary/glossary.html">7. 用語集</a></li>
 </ul>
 
 <div><hr class="docutils"></div>
