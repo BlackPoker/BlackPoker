@@ -1,7 +1,7 @@
 <redpen-conf lang="ja">
 	<validators>
 		<validator name="SentenceLength">
-			<property name="max_len" value="160"/>
+			<property name="max_len" value="200"/>
 		</validator>
 		<validator name="CommaNumber">
 			<property name="max_num" value="6" /> <!-- 列挙などの表現では3は短すぎる -->
