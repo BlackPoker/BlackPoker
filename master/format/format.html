@@ -151,6 +151,28 @@
 <p>フォーマットは共通ルールを参照しており、
 共通ルールにBlackPokerの主なルールが定義されています。</p>
 <p>フォーマット、対戦レギュレーション、共通ルールの関係は次の図のようになります。</p>
+<p class="plantuml">
+<img src="../_images/plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.svg" alt="rectangle &quot;共通ルール&quot; as common
+rectangle &quot;対戦レギュレーション&quot; as regulation
+
+frame &quot;フォーマット&quot; as format{
+    rectangle &quot;エクストラ&quot; as extra
+    rectangle &quot;マスター&quot; as master
+    rectangle &quot;プロ&quot; as pro
+    rectangle &quot;スタンダード&quot; as std
+    rectangle &quot;ライト&quot; as light
+}
+
+regulation --&gt; extra : 参照
+regulation --&gt; master : 参照
+regulation --&gt; std : 参照
+regulation --&gt; pro : 参照
+regulation --&gt; light : 参照
+ extra --&gt; common : 参照
+ master --&gt; common : 　参照
+ pro --&gt; common : 参照
+ std --&gt; common : 参照
+ light --&gt; common : 参照"/></p>
 </section>
 </section>
 <section id="id5">

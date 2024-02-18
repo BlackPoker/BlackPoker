@@ -136,8 +136,64 @@
 <section id="id2">
 <h2><span class="section-number">1.1. </span>ルールの構成<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
 <p>ルールの構成は次のようになっています。</p>
+<p class="plantuml">
+<img src="../_images/plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.svg" alt="
+rectangle ルール指針
+
+frame ルール{
+rectangle コアルール as core
+rectangle 共通ルール as common
+rectangle フォーマット as format
+rectangle 対戦レギュレーション as regulation
+
+core &lt;- common : 参照
+common &lt;- format : 参照
+format &lt;- regulation : 参照
+}
+
+ルール指針 --&gt; ルール : 具体化"/></p>
 <p>更にルールを詳しく記載すると次のようになります。
 専門的な表現になるので、理解出来なくても構いません。</p>
+<p class="plantuml">
+<img src="../_images/plantuml-637acb300f9bae3db618e9d98ed7546ae001ecce.svg" alt="&#64;startuml
+
+hide methods
+hide circle
+hide field
+
+abstract class &quot;コアルール&quot; as core
+
+abstract class &quot;共通ルール&quot; as common
+
+class &quot;対戦レギュレーション&quot; as match_reg
+
+class &quot;フォーマット&quot; as format
+
+class &quot;フレーム&quot; as frame
+
+class &quot;オプション&quot; as options
+
+class &quot;プレイヤー&quot; as player
+
+core &lt;|-- common : 継承
+
+common &lt;|-- format : 継承
+
+match_reg o-- format : 内包
+match_reg o-- frame : 内包
+match_reg o-- options : 内包
+
+player ..&gt; match_reg : 選択
+
+note right on link #white
+プレイヤーは対戦する前に
+対戦レギュレーションを選択する
+end note
+
+format &lt;.. options : 依存
+format &lt;. frame : 依存
+frame &lt;.. options : 依存
+"/></p>
 </section>
 <section id="id3">
 <h2><span class="section-number">1.2. </span>ルール指針<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
