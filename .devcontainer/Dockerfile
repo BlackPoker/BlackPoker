@@ -30,10 +30,10 @@ RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/l
 # RUN su vscode -c "source /usr/local/share/nvm/nvm.sh && npm install -g <your-package-here>" 2>&1
 
 # install plantuml
-ENV PLANTUML_VERSION 1.2023.0
+ENV PLANTUML_VERSION 1.2024.3
 RUN sudo apt update
 RUN sudo apt-get install -y default-jdk graphviz fonts-ipafont fonts-ipaexfont
-RUN curl -L https://sourceforge.net/projects/plantuml/files/plantuml.${PLANTUML_VERSION}.jar/download -o ./plantuml.jar 
+RUN curl -L https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar -o ./plantuml.jar 
 RUN sudo cp plantuml.jar /usr/local/bin
 RUN echo "#!/bin/bash\nexport LANG=ja_JP.UTF-8;\n/usr/bin/java -Djava.io.tmpdir=/var/tmp -Djava.awt.headless=true -jar /usr/local/bin/plantuml.jar  -charset UTF-8 \${@}" > /usr/bin/plantuml
 RUN sudo chmod 0755 /usr/bin/plantuml
