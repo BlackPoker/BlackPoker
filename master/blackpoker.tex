@@ -49,7 +49,7 @@
 
 
 \title{BlackPoker}
-\date{2024年02月18日}
+\date{2024年02月19日}
 \release{}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1807,7 +1807,7 @@ BlackPokerはトランプだけで遊べるため、
 \begin{description}
 \sphinxlineitem{対戦(マッチ)}
 \sphinxAtStartPar
-プレイヤー間の一連のゲーム（勝負）で構成される対戦全体を指します。
+プレイヤー間の一連のゲーム（試合）で構成される対戦全体を指します。
 
 \sphinxlineitem{ゲーム(試合)}
 \sphinxAtStartPar
@@ -1992,14 +1992,14 @@ x
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 \begin{description}
-\sphinxlineitem{1本勝負}\begin{itemize}
+\sphinxlineitem{1デッキマッチ}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-1ゲームを行い勝ったプレイヤーの対戦勝利とする対戦形式
+各プレイヤーが1つのデッキを使って1ゲームを行い勝ったプレイヤーのマッチ勝利とする対戦形式
 
 \end{itemize}
 
-\sphinxlineitem{3本勝負}\begin{itemize}
+\sphinxlineitem{2デッキマッチ}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
 各プレイヤーが2つのデッキを使い、最大3ゲームを行って2ゲームに勝ったプレイヤーの対戦勝利とする対戦形式
@@ -2022,10 +2022,10 @@ x
 
 \end{itemize}
 
-\sphinxlineitem{3本勝負の手順}\begin{itemize}
+\sphinxlineitem{2デッキマッチの手順}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-3本勝負のゲームの進め方と対戦勝敗を決める手順
+2デッキマッチのゲームの進め方と対戦勝敗を決める手順
 
 \item {} 
 \sphinxAtStartPar
@@ -2077,7 +2077,7 @@ x
 
 \item {} 
 \sphinxAtStartPar
-2ゲームに勝ったプレイヤーの対戦勝利とする
+2ゲーム勝ったプレイヤーの対戦勝利とする
 
 \end{itemize}
 
@@ -2111,7 +2111,10 @@ x
 \subsection{パック}
 \label{\detokenize{match-regulations/match-regulations:id9}}
 \sphinxAtStartPar
-デッキに入らなかったカードをパックとし利用するオプションルール
+ゲーム開始前にデッキに入らなかったカードをパックとして扱い、利用するオプションルール
+
+\sphinxAtStartPar
+パックはゲーム開始前に裏向きにして場の外に置く。
 
 \sphinxAtStartPar
 「パック開封」アクションの追加
@@ -2125,9 +2128,17 @@ x
 
 \sphinxAtStartPar
 （即時効果）
-
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
 \sphinxAtStartPar
-ランダムに抜いた14枚のカードの中から好きなカードを1枚選び対戦相手に見せ手札に加える。
+パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。
+
+\item {} 
+\sphinxAtStartPar
+パックを表向きにする。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 注）キーカードなし、コストなしのアクション

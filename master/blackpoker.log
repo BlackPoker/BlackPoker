@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  18 FEB 2024 19:06
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  19 FEB 2024 12:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1040,54 +1040,54 @@ Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
 [36] [37] [38] [39] [40]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2576--2578
+Underfull \hbox (badness 10000) in paragraph at lines 2587--2589
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2580--2582
+Underfull \hbox (badness 10000) in paragraph at lines 2591--2593
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2592--2594
+Underfull \hbox (badness 10000) in paragraph at lines 2603--2605
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2596--2598
+Underfull \hbox (badness 10000) in paragraph at lines 2607--2609
 []
  []
 
 [41
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2608--2610
+Underfull \hbox (badness 10000) in paragraph at lines 2619--2621
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2612--2614
+Underfull \hbox (badness 10000) in paragraph at lines 2623--2625
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2624--2626
+Underfull \hbox (badness 10000) in paragraph at lines 2635--2637
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2628--2630
+Underfull \hbox (badness 10000) in paragraph at lines 2639--2641
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2640--2642
+Underfull \hbox (badness 10000) in paragraph at lines 2651--2653
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2644--2646
+Underfull \hbox (badness 10000) in paragraph at lines 2655--2657
 []
  []
 
@@ -1099,10 +1099,10 @@ Package rerunfilecheck Info: File `blackpoker.out' has not changed.
 Here is how much of TeX's memory you used:
  14539 strings out of 480496
  224090 string characters out of 5899437
- 578381 words of memory out of 5000000
+ 572381 words of memory out of 5000000
  32228 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,12n,80p,400b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,11n,80p,400b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (48 pages, 196820 bytes).
+Output written on blackpoker.dvi (48 pages, 197244 bytes).
