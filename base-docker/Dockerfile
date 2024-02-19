@@ -19,7 +19,7 @@ RUN apk add --no-cache ttf-droid-nonlatin
 RUN apk add --no-cache curl
 RUN apk add --no-cache openjdk11
 RUN mkdir -p /app
-RUN curl -L https://sourceforge.net/projects/plantuml/files/plantuml.${PLANTUML_VERSION}.jar/download -o /app/plantuml.jar 
+RUN curl -L https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar -o /app/plantuml.jar
 RUN apk del curl
 RUN cp /app/plantuml.jar /usr/local/bin
 RUN echo -e "#!/bin/sh\nexport LANG=ja_JP.UTF-8;\n/usr/bin/java -Djava.io.tmpdir=/var/tmp -Djava.awt.headless=true -jar /usr/local/bin/plantuml.jar  -charset UTF-8 \${@}" > /usr/bin/plantuml
