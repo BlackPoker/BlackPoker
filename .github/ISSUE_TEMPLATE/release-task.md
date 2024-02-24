@@ -8,11 +8,11 @@ assignees: BlackPoker
 ---
 **Action/ExtraList update**
 
-https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/v6-act.yaml
+https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/act.yaml
 - [ ] ver 
 - [ ] lastupdate
 
-https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/v6-extra.yaml
+https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/extra.yaml
 - [ ] v 
 - [ ] lastupdate
 

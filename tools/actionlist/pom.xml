@@ -144,12 +144,12 @@
               <argument>original/v5-act.ods</argument> -->
 
               <!-- std -->
-              <argument>-i original/v6-act.yaml -o web-site/static/v6-std.html -t v6-std -arg0 std -texOutput ./tex/blackpoker-v6-std.tex</argument>
-              <argument>-i original/v6-act.yaml -o web-site/static/v6-lite.html -t v6-std -arg0 lite -texOutput ./tex/blackpoker-v6-lite.tex</argument>
-              <argument>-i original/v6-act.yaml -o web-site/static/v6-pro.html -t v6-std -arg0 pro -texOutput ./tex/blackpoker-v6-pro.tex</argument>
-              <argument>-i original/v6-act.yaml -o web-site/static/v6-mast.html -t v6-std -arg0 mast -texOutput ./tex/blackpoker-v6-mast.tex</argument>
+              <argument>-i original/act.yaml -o web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
+              <argument>-i original/act.yaml -o web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
+              <argument>-i original/act.yaml -o web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
+              <argument>-i original/act.yaml -o web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
               <!-- extra -->
-              <argument>-i original/v6-extra.yaml -o web-site/static/v6-ex.html -t v6-extra -texOutput ./tex/blackpoker-v6-extra.tex</argument>
+              <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument>
               
               <!-- extra -->
               <!-- <argument>-i</argument>

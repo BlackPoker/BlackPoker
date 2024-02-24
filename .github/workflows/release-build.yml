@@ -52,7 +52,7 @@ jobs:
           mkdir -p ./docs/actionlist/pdf
 
           cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
-          cp -r ./tools/actionlist/dist/blackpoker-v6*.pdf docs/actionlist/pdf
+          cp -r ./tools/actionlist/dist/blackpoker-v7*.pdf docs/actionlist/pdf
 
           zip -r HTML.zip ./docs
 
