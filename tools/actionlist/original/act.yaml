@@ -593,7 +593,7 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-    - format: ',std,pro,mast'
+    - format: 'pro,mast'
       actName: リバース
       actId: reverse
       actType: 速攻魔法
