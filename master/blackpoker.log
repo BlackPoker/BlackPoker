@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  23 FEB 2024 19:08
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  24 FEB 2024 19:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -982,112 +982,113 @@ File: set-bulwork.pdf Graphic file (type pdf)
  [25] [26]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
+ [27]
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
- [27] [28] [29] [30
-
-]
+ [28] [29] [30]
 第4章
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
-[31] [32] [33] [34
+[31
+
+] [32] [33] [34
 
 ]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1765.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1780.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1765.
+(Font)              scaled to size 9.60999pt on input line 1780.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1765.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1780.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1765.
+(Font)              scaled to size 9.60999pt on input line 1780.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1783.
+(Font)              scaled to size 4.805pt on input line 1798.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1783.
+(Font)              scaled to size 4.805pt on input line 1798.
 [35]
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\JY1/gt/m/n/10 構築タ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\JY1/gt/m/n/10 マ ッチ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\JY1/mc/m/n/10 ランダム
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1991--1991
+Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
 []\T1/qtm/m/n/10 (54-n) \JY1/mc/m/n/10 枚
  []
 
 [36] [37] [38] [39] [40]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2587--2589
+Underfull \hbox (badness 10000) in paragraph at lines 2602--2604
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2591--2593
+Underfull \hbox (badness 10000) in paragraph at lines 2606--2608
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2603--2605
+Underfull \hbox (badness 10000) in paragraph at lines 2618--2620
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2607--2609
+Underfull \hbox (badness 10000) in paragraph at lines 2622--2624
 []
  []
 
 [41
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2619--2621
+Underfull \hbox (badness 10000) in paragraph at lines 2634--2636
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2623--2625
+Underfull \hbox (badness 10000) in paragraph at lines 2638--2640
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2635--2637
+Underfull \hbox (badness 10000) in paragraph at lines 2650--2652
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2639--2641
+Underfull \hbox (badness 10000) in paragraph at lines 2654--2656
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2651--2653
+Underfull \hbox (badness 10000) in paragraph at lines 2666--2668
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2655--2657
+Underfull \hbox (badness 10000) in paragraph at lines 2670--2672
 []
  []
 
@@ -1105,4 +1106,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,11n,80p,400b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (48 pages, 197164 bytes).
+Output written on blackpoker.dvi (48 pages, 197796 bytes).

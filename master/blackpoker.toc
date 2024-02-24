@@ -79,12 +79,12 @@
 \contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{24}{paragraph*.22}%
 \contentsline {subsection}{\numberline {3.10.4}アクションの解決}{24}{subsection.3.10.4}%
 \contentsline {subsubsection}{対象条件を確認}{24}{subsubsection*.23}%
-\contentsline {subsubsection}{効果を発揮}{24}{subsubsection*.24}%
+\contentsline {subsubsection}{効果を発揮}{25}{subsubsection*.24}%
 \contentsline {subsubsection}{キーカードを墓地に移す}{25}{subsubsection*.25}%
 \contentsline {subsection}{\numberline {3.10.5}勝敗判定}{25}{subsection.3.10.5}%
 \contentsline {subsection}{\numberline {3.10.6}その他補足事項}{25}{subsection.3.10.6}%
 \contentsline {subsubsection}{防壁の置き方}{25}{subsubsection*.26}%
-\contentsline {subsubsection}{1ターンに1回制限}{25}{subsubsection*.27}%
+\contentsline {subsubsection}{1ターンに1回制限}{26}{subsubsection*.27}%
 \contentsline {subsubsection}{直接起こせないアクション}{26}{subsubsection*.28}%
 \contentsline {section}{\numberline {3.11}エクストラ}{26}{section.3.11}%
 \contentsline {subsection}{\numberline {3.11.1}切札}{26}{subsection.3.11.1}%
@@ -92,15 +92,15 @@
 \contentsline {subsection}{\numberline {3.11.3}版数との関係}{26}{subsection.3.11.3}%
 \contentsline {subsection}{\numberline {3.11.4}ゲームのはじめ方}{27}{subsection.3.11.4}%
 \contentsline {subsection}{\numberline {3.11.5}切札の能力}{27}{subsection.3.11.5}%
-\contentsline {subsubsection}{能力を有効にする}{27}{subsubsection*.29}%
+\contentsline {subsubsection}{能力を有効にする}{28}{subsubsection*.29}%
 \contentsline {subsubsection}{能力を無効する}{28}{subsubsection*.30}%
 \contentsline {subsection}{\numberline {3.11.6}エクストラ注意事項}{28}{subsection.3.11.6}%
 \contentsline {subsubsection}{1ターンに1回制限のアクションについて}{28}{subsubsection*.31}%
-\contentsline {section}{\numberline {3.12}その他のルール}{28}{section.3.12}%
-\contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{28}{subsection.3.12.1}%
-\contentsline {subsubsection}{残りのデッキ枚数を聞かれたらどうしたらいいの？}{29}{subsubsection*.32}%
-\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{29}{subsubsection*.33}%
-\contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{29}{subsection.3.12.2}%
+\contentsline {section}{\numberline {3.12}その他のルール}{29}{section.3.12}%
+\contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{29}{subsection.3.12.1}%
+\contentsline {subsubsection}{残りのデッキ枚数を聞かれたらどうしたらいいの？}{30}{subsubsection*.32}%
+\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{30}{subsubsection*.33}%
+\contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{30}{subsection.3.12.2}%
 \contentsline {chapter}{\numberline {第4章}フォーマット}{31}{chapter.4}%
 \contentsline {section}{\numberline {4.1}フォーマットとは}{31}{section.4.1}%
 \contentsline {subsection}{\numberline {4.1.1}対戦レギュレーションとの違い}{31}{subsection.4.1.1}%

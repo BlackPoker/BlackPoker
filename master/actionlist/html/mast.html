@@ -454,6 +454,9 @@
             <span class="glyphicon glyphicon-link" aria-hidden="true"></span> Link</a>
           </h4>
           <h5>
+            <a href="../../">BlackPoker公式ルール</a>
+          </h5>
+          <h5>
             <a href="https://sites.google.com/site/blackpoker000/">BlackPoker公式サイト</a>
           </h5>
 
@@ -479,8 +482,8 @@
           <h5>
             
             
-            <small class="">第六版 act6.2 プロ版</small> 
-             <small class=""> : 2023/10/22</small>
+             
+            <small class="">第七版 act7.0 マスター版</small> <small class=""> : 2024/4/1</small>
           </h5>
           <ul class="nav nav-pills">
             <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">Action</a></li>
@@ -613,11 +616,29 @@
                   </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-handeth">
                     <span>ハンデス</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
                     </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-force">
+                    <span>フォース</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-swordRain">
+                    <span>剣の雨</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-recruit">
+                    <span>徴募</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-surprise">
+                    <span>奇襲</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-search">
                     <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
                     </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-bj">
+                    <span>B・J</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-rsf">
+                    <span>R・S・F</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-reverse">
-                    <span>リバース</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>メイン</span></b>
+                    <span>リバース</span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span>クイック</span></b>
                     </span>
                   </a>
 
@@ -776,7 +797,7 @@
           <h2 class="visible-print-block blackpoker-font">
             BlackPoker <img src="img/blackpoker.svg" width="35px"> ActionList
           </h2>
-            <small class="">第六版 act6.2 プロ版</small><small class=""> : 2023/10/22</small>
+            <small class="">第七版 act7.0 マスター版</small><small class=""> : 2024/4/1</small>
         </div>
         <hr>
 
@@ -2107,13 +2128,223 @@
               </div>
             </div>
 
+            <div class="col-lg-4">
             
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-force">
+                  <div class="panel-heading">
 
-            
+                     <span class="act-title">フォース</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
 
-            
 
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="heart"></span>A〜10 を 2枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    
+                    <p>（通常効果）</p>
+                     <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
             
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-swordRain">
+                  <div class="panel-heading">
+
+                    <a data-toggle="collapse" href="#fla_swordRain">
+                      <span class="act-title">剣の雨</span>
+                    </a> 
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="spade"></span>A〜10 を 2枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    
+                    <p>（通常効果）</p>
+                     <span>キーカードの合計値以下の全ての兵士を墓地に移す。</span>
+
+                    <div class="panel-collapse collapse storyText" id="fla_swordRain">
+                      <hr>
+                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                      Flavor:Rule's<br> <span>死♠と剣♠が合わさり雨のように戦場に降り注いだ。</span>
+                      <div class="flavorText well well-sm">
+                        <span>「え！助かる訳ないじゃん！！」</span>
+                        <div class="text-right">平和主義の♣3一般兵より</div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+            
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-recruit">
+                  <div class="panel-heading">
+
+                    <a data-toggle="collapse" href="#fla_recruit">
+                      <span class="act-title">徴募</span>
+                    </a> 
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="diam"></span>A〜10 を 2枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    
+                    <p>（通常効果）</p>
+                     <span><ol>
+<li>デッキの一番上から4枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。</li>
+<li>残りのカードをデッキの一番下に好きな順で移す。</li></ol></span>
+
+                    <div class="panel-collapse collapse storyText" id="fla_recruit">
+                      <hr>
+                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                      Flavor:Rule's<br> <span>金♢が手元にたくさんあれば、戦力強化が定石だろう。</span>
+                      <div class="flavorText well well-sm">
+                        <span>「君はどう？兵士になる？...あっそう。」
+「君はどう？兵士になる？...あっそう。」
+「はぁ。金がなけれりゃ誰も来やしねぇ」</span>
+                        <div class="text-right">孤独な徴募兵より</div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+            
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-surprise">
+                  <div class="panel-heading">
+
+                     <span class="act-title">奇襲</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="club"></span>A〜10 を 2枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    
+                    <p>（通常効果）</p>
+                     <span><ol>
+<li>自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。</li>
+<li>自分の場にいる全ての兵士をチャージ状態にする。</li></ol></span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
 
             <div class="col-lg-4">
             
@@ -2155,9 +2386,111 @@
               </div>
             </div>
 
+            <div class="col-lg-4">
             
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-bj">
+                  <div class="panel-heading">
 
+                    <a data-toggle="collapse" href="#fla_bj">
+                      <span class="act-title">B・J</span>
+                    </a> 
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-S"></span>
+<span class="cost-S"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span>同じスートの A と J</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>コストの支払によって誘発したアクションより先にアクションの解決を行う。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    <p>（即時効果）</p>
+                    
+                     <span>デッキから好きなカードを2枚選び対戦相手に見せ手札に加える。その後デッキを切りなおす。</span>
+
+                    <div class="panel-collapse collapse storyText" id="fla_bj">
+                      <hr>
+                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                      Flavor:Rule's<br> <span>若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。</span>
+                      <div class="flavorText well well-sm">
+                        <span>「悪しき習慣を捨て去り、新しい風を吹き込む」</span>
+                        <div class="text-right">革命者より</div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
             
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-rsf">
+                  <div class="panel-heading">
+
+                     <span class="act-title">R・S・F</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span>同じスートのA,10〜K を 5枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                    <span> （対象）<br></span> <span>プレイヤー1人を対象とする。</span>
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    <hr>
+                    
+                    <p>（通常効果）</p>
+                     <span>対象のプレイヤーに40点のダメージを与える。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
 
             <div class="col-lg-4">
             
@@ -2166,11 +2499,11 @@
                   <div class="panel-heading">
 
                      <span class="act-title">リバース</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>速攻魔法</span>
                       </small>
                     </span>
                     <div class="pull-right">
-                      &thinsp; <small> <span class="time-mark"></span> <span>メイン</span>
+                      &thinsp; <small> <span class="time-mark"></span> <span>クイック</span>
                       </small>  
 
 
@@ -2192,7 +2525,8 @@
                      <span><ol>
 <li>必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。</li>
 <li>対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。防壁の置き方は<a href="#" data-toggle="modal" data-target="#modal_bulwark_help"><span class="glyphicon glyphicon-question-sign" aria-hidden="false"></span>防壁の置き方</a>参照</li>
-<li>対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。</li></ol></span>
+<li>対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。</li>
+<li>対象がアタッカーもしくは、ブロッカーの場合、それを解除する。</li></ol></span>
 
                     
 
@@ -2259,7 +2593,7 @@
           <h2 class="visible-print-block blackpoker-font">
             BlackPoker <img src="img/blackpoker.svg" width="35px"> CharacterList
           </h2>
-           <small class="">第六版 act6.2 プロ版</small>  <small class=""> : 2023/10/22</small>
+           <small class="">第七版 act7.0 マスター版</small>  <small class=""> : 2024/4/1</small>
         </div>
         <hr>
 

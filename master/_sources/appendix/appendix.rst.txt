@@ -18,12 +18,12 @@ https://blackpoker.github.io/BlackPoker/master/blackpoker.pdf
 ライト
 ------------------------------
 URL 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-lite.html
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/lite.html
 
 PDF 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-lite.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-lite.pdf
 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-lite-2up.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-lite-2up.pdf
 
 
 .. _actionlist-std:
@@ -32,11 +32,11 @@ PDF
 スタンダード
 ------------------------------
 URL
-    https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-std.html
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/std.html
 PDF 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-std.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-std.pdf
 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-std-2up.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-std-2up.pdf
 
 
 .. _actionlist-pro:
@@ -45,11 +45,11 @@ PDF
 プロ
 ------------------------------
 URL 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-pro.html
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/pro.html
 PDF 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-pro.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-pro.pdf
 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-pro-2up.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-pro-2up.pdf
 
 
 .. _actionlist-master:
@@ -58,11 +58,11 @@ PDF
 マスター
 ------------------------------
 URL 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-mast.html
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/mast.html
 PDF 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-mast.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-mast.pdf
 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-mast-2up.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-mast-2up.pdf
 
 
 .. _extralist:
@@ -70,8 +70,8 @@ PDF
 エクストラリスト
 ==============================
 URL 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/html/v6-ex.html
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/ex.html
 PDF 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-extra.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-extra.pdf
 
-    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-v6-extra-2up.pdf
+    https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-extra-2up.pdf
