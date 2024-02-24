@@ -31,8 +31,8 @@ create () {
     cp -r ./web-site ./dist/.
 }
 
-create blackpoker-v6-lite
-create blackpoker-v6-std
-create blackpoker-v6-pro
-create blackpoker-v6-mast
-create blackpoker-v6-extra
+create blackpoker-lite
+create blackpoker-std
+create blackpoker-pro
+create blackpoker-mast
+create blackpoker-extra

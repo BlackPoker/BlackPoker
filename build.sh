@@ -18,6 +18,6 @@ mkdir -p docs/actionlist/html
 mkdir -p docs/actionlist/pdf
 
 cp -r tools/actionlist/dist/web-site/static/* docs/actionlist/html
-cp -r tools/actionlist/dist/blackpoker-v6*.pdf docs/actionlist/pdf
+cp -r tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
 
 deactivate
