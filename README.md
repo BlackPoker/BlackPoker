@@ -9,6 +9,9 @@ https://github.com/BlackPoker/BlackPoker/wiki/6th-edition-changes
 ## 開発中最新公式ルール
 https://blackpoker.github.io/BlackPoker/master/
 
+### 第7版の主な変更点
+https://github.com/BlackPoker/BlackPoker/wiki/7th-edition-changes
+
 ## 疑問・質問・指摘・要望
 https://github.com/BlackPoker/BlackPoker/wiki
 
