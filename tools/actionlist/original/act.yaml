@@ -566,10 +566,10 @@ actList:
     - format: ',,mast'
       actName: B・J
       actId: bj
-      actType: 通常魔法
-      actTime: メイン
+      actType: 速攻魔法
+      actTime: クイック
       actCost: SS
-      actS: ●
+      actS: ''
       actKey: 同じスートの A と J
       actNote: ※コストの支払によって誘発したアクションより先にアクションの解決を行う。
       actTarget: ''
@@ -581,8 +581,8 @@ actList:
     - format: ',,mast'
       actName: R・S・F
       actId: rsf
-      actType: 通常魔法
-      actTime: メイン
+      actType: 速攻魔法
+      actTime: クイック
       actCost: BB
       actS: ''
       actKey: '同じスートのA,10〜K を 5枚'
