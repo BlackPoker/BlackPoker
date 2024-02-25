@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  24 FEB 2024 19:07
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  25 FEB 2024 13:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -962,9 +962,13 @@ LaTeX Warning: Float too large for page by 24.96199pt on input line 482.
 File: field-ex.pdf Graphic file (type pdf)
 <field-ex.pdf>
  [18]
+Underfull \hbox (badness 10000) in paragraph at lines 770--772
+[]
+ []
+
+[19]
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
- [19]
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
  [20]
@@ -982,128 +986,127 @@ File: set-bulwork.pdf Graphic file (type pdf)
  [25] [26]
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
- [27]
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
- [28] [29] [30]
+ [27] [28] [29] [30
+
+]
 第4章
 File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
 pdf)
 <plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
-[31
-
-] [32] [33] [34
+[31] [32] [33] [34
 
 ]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1780.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1763.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1780.
+(Font)              scaled to size 9.60999pt on input line 1763.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1780.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1763.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1780.
+(Font)              scaled to size 9.60999pt on input line 1763.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1798.
+(Font)              scaled to size 4.805pt on input line 1781.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1798.
+(Font)              scaled to size 4.805pt on input line 1781.
 [35]
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\JY1/gt/m/n/10 構築タ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\JY1/gt/m/n/10 マ ッチ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\JY1/mc/m/n/10 ランダム
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2006--2006
+Underfull \hbox (badness 10000) in paragraph at lines 1989--1989
 []\T1/qtm/m/n/10 (54-n) \JY1/mc/m/n/10 枚
  []
 
 [36] [37] [38] [39] [40]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2602--2604
+Underfull \hbox (badness 10000) in paragraph at lines 2585--2587
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2606--2608
+Underfull \hbox (badness 10000) in paragraph at lines 2589--2591
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2618--2620
+Underfull \hbox (badness 10000) in paragraph at lines 2601--2603
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2622--2624
+Underfull \hbox (badness 10000) in paragraph at lines 2605--2607
 []
  []
 
 [41
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2634--2636
+Underfull \hbox (badness 10000) in paragraph at lines 2617--2619
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2638--2640
+Underfull \hbox (badness 10000) in paragraph at lines 2621--2623
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2650--2652
+Underfull \hbox (badness 10000) in paragraph at lines 2633--2635
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2654--2656
+Underfull \hbox (badness 10000) in paragraph at lines 2637--2639
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2666--2668
+Underfull \hbox (badness 10000) in paragraph at lines 2649--2651
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2670--2672
+Underfull \hbox (badness 10000) in paragraph at lines 2653--2655
 []
  []
 
 No file blackpoker.ind.
 [42] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 335F331C73BE845A9BB64EAC66482B1B;10973.
+(rerunfilecheck)             Checksum: B3285542FF58525E051CAE3F5A9EBDE1;9961.
  ) 
 Here is how much of TeX's memory you used:
- 14539 strings out of 480496
- 224090 string characters out of 5899437
- 572381 words of memory out of 5000000
- 32228 multiletter control sequences out of 15000+600000
+ 14525 strings out of 480496
+ 223817 string characters out of 5899437
+ 571113 words of memory out of 5000000
+ 32214 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,11n,80p,400b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,12n,80p,400b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (48 pages, 197796 bytes).
+Output written on blackpoker.dvi (48 pages, 192964 bytes).
