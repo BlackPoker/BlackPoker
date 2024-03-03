@@ -3,8 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-BlackPoker公式ルール
+BlackPoker公式ルール |version|
 ======================================
+
+release: |release|
 
 .. toctree::
    :maxdepth: 3
