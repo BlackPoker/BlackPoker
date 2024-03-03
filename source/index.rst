@@ -16,4 +16,3 @@ BlackPoker公式ルール
    format/format
    match-regulations/match-regulations
    appendix/appendix
-   .. glossary/glossary
