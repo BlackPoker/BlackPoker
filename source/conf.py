@@ -115,7 +115,7 @@ html_context = {
 }
 
 html_show_sourcelink = True
-
+html_search_language = 'ja'
 html_favicon = 'favicon.ico'
 
 # -- Options for HTML output -------------------------------------------------
