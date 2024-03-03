@@ -170,11 +170,12 @@
 この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(:numref:`coreflow-2`)
 
 .. _coreflow-2:
+
 .. uml:: coreflow.puml
    :caption: コアフロー
 
 
-.. _gamestart:
+.. _core_gamestart:
 
 [1]ゲーム開始
 ------------------------------

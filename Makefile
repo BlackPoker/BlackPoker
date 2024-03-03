@@ -16,6 +16,10 @@ help:
 livehtml:
 	@$(SPHINXAUTO) "$(SOURCEDIR)" "$(BUILDDIR)/_html"
 
+buildhtml:
+	rm -rf "$(BUILDDIR)/_html"
+	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/_html"
+
 doc:
 	rm -rf "$(BUILDDIR)/../docs/*"
 	@$(SPHINXBUILD) -b html "$(SOURCEDIR)" "$(BUILDDIR)/../docs"
