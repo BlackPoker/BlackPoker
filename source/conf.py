@@ -27,8 +27,8 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-# release = '2021/7/1'
-version = '6.2版'
+release = '2024/4/1'
+version = '7.0版'
 
 # -- General configuration ---------------------------------------------------
 
@@ -69,6 +69,7 @@ todo_include_todos=True
 #
 # html_theme = 'alabaster'
 # html_theme = "sphinx_rtd_theme"
+html_title = 'BlackPoker'
 html_theme = 'insipid'
 
 # Add any paths that contain custom static files (such as style sheets) here,
