@@ -49,7 +49,7 @@
 
 
 \title{BlackPoker}
-\date{2024年03月04日}
+\date{2024年03月05日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -170,33 +170,37 @@ release: 2024/4/1
 \sphinxAtStartPar
 コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。
 
+\index{ターン@\spxentry{ターン}}\ignorespaces 
 
 \section{ターン}
-\label{\detokenize{core/core:id2}}
+\label{\detokenize{core/core:index-0}}\label{\detokenize{core/core:id2}}
 \sphinxAtStartPar
 このルールを説明する上でターンとは持つことができるものとします。
 ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。
 
+\index{アクション(コア)@\spxentry{アクション(コア)}}\ignorespaces 
 
 \section{アクション}
-\label{\detokenize{core/core:id3}}
+\label{\detokenize{core/core:index-1}}\label{\detokenize{core/core:id3}}
 \sphinxAtStartPar
 アクションとは、プレイヤーの行動を示します。
 ターン制のゲームでは、プレイヤーは様々な行動を行います。
 チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
 それらをアクションと定義します。
 
+\index{チャンス@\spxentry{チャンス}}\ignorespaces 
 
 \section{チャンス}
-\label{\detokenize{core/core:id4}}
+\label{\detokenize{core/core:index-2}}\label{\detokenize{core/core:id4}}
 \sphinxAtStartPar
 アクションを起こすことができる機会をチャンスといいます。
 チャンスを持っている間は何度でもアクションを起こすことができます。
 
+\index{ステージ@\spxentry{ステージ}}\ignorespaces 
 
 \section{ステージ}
-\label{\detokenize{core/core:id5}}
+\label{\detokenize{core/core:index-3}}\label{\detokenize{core/core:id5}}
 \sphinxAtStartPar
 アクションの解決順を整理するために使う領域です。
 後入れ先出し方式で最後に積まれたアクションから順に解決されていきます。
@@ -222,21 +226,24 @@ release: 2024/4/1
 
 \end{itemize}
 
+\index{つ\textbar{}通常効果(コア)@\spxentry{つ\textbar{}通常効果(コア)}!そ\textbar{}即時効果(コア)@\spxentry{そ\textbar{}即時効果(コア)}}\index{そ\textbar{}即時効果(コア)@\spxentry{そ\textbar{}即時効果(コア)}!つ\textbar{}通常効果(コア)@\spxentry{つ\textbar{}通常効果(コア)}}\ignorespaces 
 
 \subsection{効果}
-\label{\detokenize{core/core:id7}}
+\label{\detokenize{core/core:index-4}}\label{\detokenize{core/core:id7}}
 \sphinxAtStartPar
 効果とはアクションの解決時にプレイヤーが行う行動です。
 効果の中には、通常効果と即時効果があります。
 違いについては、図(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})を説明する際に分岐条件として登場します。
 
+\index{タイミング(コア)@\spxentry{タイミング(コア)}}\ignorespaces 
 
 \subsection{タイミング}
-\label{\detokenize{core/core:timing}}\label{\detokenize{core/core:id8}}
+\label{\detokenize{core/core:timing}}\label{\detokenize{core/core:index-5}}\label{\detokenize{core/core:id8}}
 \sphinxAtStartPar
 タイミングとは、アクションを起こすことができる時を示します。
 タイミングには「メイン」と「クイック」の2種類あります。
-\begin{description}
+
+\index{メイン@\spxentry{メイン}}\ignorespaces \begin{description}
 \sphinxlineitem{メイン}
 \sphinxAtStartPar
 ターンプレイヤーかつステージが空の時に起こせるアクションです。
@@ -258,6 +265,9 @@ release: 2024/4/1
 
 \end{itemize}
 
+\end{description}
+
+\index{クイック@\spxentry{クイック}}\ignorespaces \begin{description}
 \sphinxlineitem{クイック}
 \sphinxAtStartPar
 いつでも起こせるため、アクションをステージに積み重ねることができます。
@@ -288,17 +298,22 @@ release: 2024/4/1
 アクションを起こしたプレイヤーをそのアクションのコントローラーと呼びます。
 効果はこのコントローラー視点で解釈されることになります。
 
+\index{コンポーネント@\spxentry{コンポーネント}}\ignorespaces 
 
 \section{コンポーネント}
-\label{\detokenize{core/core:component}}\label{\detokenize{core/core:id11}}
+\label{\detokenize{core/core:component}}\label{\detokenize{core/core:index-8}}\label{\detokenize{core/core:id11}}
 \sphinxAtStartPar
 ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
 コンポーネントは次の項目を持っています。
-\begin{description}
+
+\index{オーナー@\spxentry{オーナー}}\ignorespaces \begin{description}
 \sphinxlineitem{オーナー}
 \sphinxAtStartPar
 コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。
 
+\end{description}
+
+\index{コントローラー@\spxentry{コントローラー}}\ignorespaces \begin{description}
 \sphinxlineitem{コントローラー}
 \sphinxAtStartPar
 現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。
@@ -321,9 +336,10 @@ release: 2024/4/1
 \caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id44}}\end{figure}
 \end{sphinxadmonition}
 
+\index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
 
 \section{能力}
-\label{\detokenize{core/core:id12}}
+\label{\detokenize{core/core:index-11}}\label{\detokenize{core/core:id12}}
 \sphinxAtStartPar
 能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。
 
@@ -340,11 +356,15 @@ release: 2024/4/1
 
 \sphinxAtStartPar
 能力には、次の種類があります。
-\begin{description}
+
+\index{じ\textbar{}常在型能力@\spxentry{じ\textbar{}常在型能力}}\ignorespaces \begin{description}
 \sphinxlineitem{常在型能力}
 \sphinxAtStartPar
 能力が有効である場合、継続的に発揮される能力
 
+\end{description}
+
+\index{ゆ\textbar{}誘発型能力@\spxentry{ゆ\textbar{}誘発型能力}}\ignorespaces \begin{description}
 \sphinxlineitem{誘発型能力}
 \sphinxAtStartPar
 能力が有効である間に何かの契機でアクションを起こす能力
@@ -357,9 +377,10 @@ release: 2024/4/1
 そして、そのアクションを起こせる能力（常在型能力）を
 プレイヤーは保持しています。
 
+\index{コアフロー@\spxentry{コアフロー}}\ignorespaces 
 
 \section{コアフロー}
-\label{\detokenize{core/core:coreflowsec}}\label{\detokenize{core/core:id13}}
+\label{\detokenize{core/core:coreflowsec}}\label{\detokenize{core/core:index-14}}\label{\detokenize{core/core:id13}}
 \sphinxAtStartPar
 この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})
 
@@ -738,24 +759,37 @@ Joker
 
 \noindent\sphinxincludegraphics{{field-ex}.pdf}
 \caption{プレイ中のカードの配置}\label{\detokenize{common/common:id50}}\label{\detokenize{common/common:field-ex}}\end{figure}
-\begin{description}
+
+\index{ライフ@\spxentry{ライフ}}\ignorespaces \begin{description}
 \sphinxlineitem{ライフ}
 \sphinxAtStartPar
 山札。ゲームを始める時に自分のトランプを裏向きに置く場所です。
 ダメージを受けるとライフの一番上から墓地にカードを移します。
 
+\end{description}
+
+\index{ぼ\textbar{}墓地@\spxentry{ぼ\textbar{}墓地}}\ignorespaces \begin{description}
 \sphinxlineitem{墓地}
 \sphinxAtStartPar
 捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。
 
+\end{description}
+
+\index{ば\textbar{}場@\spxentry{ば\textbar{}場}}\ignorespaces \begin{description}
 \sphinxlineitem{場}
 \sphinxAtStartPar
 兵士や防壁などのキャラクターを置きます。
 
+\end{description}
+
+\index{て\textbar{}手札@\spxentry{て\textbar{}手札}}\ignorespaces \begin{description}
 \sphinxlineitem{手札}
 \sphinxAtStartPar
 ライフから引いたカードを持っておく場所です。相手から見えないようにしましょう。
 
+\end{description}
+
+\index{き\textbar{}切札(場所)@\spxentry{き\textbar{}切札(場所)}}\ignorespaces \begin{description}
 \sphinxlineitem{切札}
 \sphinxAtStartPar
 能力が割り当てられたカードを置きます。エクストラフォーマットのみで使用します。
@@ -768,7 +802,8 @@ Joker
 \label{\detokenize{common/common:id7}}
 \sphinxAtStartPar
 対戦レギュレーションなどでデッキという表現が出てきます。
-\begin{description}
+
+\index{デッキ@\spxentry{デッキ}}\ignorespaces \begin{description}
 \sphinxlineitem{デッキ}
 \sphinxAtStartPar
 ゲーム開始前にゲームで使用するカードの束（カード構成）
@@ -784,15 +819,17 @@ Joker
 \sphinxAtStartPar
 プレイヤーは順に対戦相手に対し攻撃を行い、ダメージを与え先に相手のライフを0枚にした方が勝ちです。ダメージは1点につき1枚ライフが減ります。
 
+\index{ダメージ@\spxentry{ダメージ}}\ignorespaces 
 
 \section{ダメージ}
-\label{\detokenize{common/common:id9}}
+\label{\detokenize{common/common:index-6}}\label{\detokenize{common/common:id9}}
 \sphinxAtStartPar
 プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。
 
+\index{キャラクター@\spxentry{キャラクター}}\ignorespaces 
 
 \section{キャラクター}
-\label{\detokenize{common/common:id10}}
+\label{\detokenize{common/common:index-7}}\label{\detokenize{common/common:id10}}
 \sphinxAtStartPar
 キャラクターとは、場に存在する兵士や防壁のことを指します。
 コアルールのコンポーネントにあたります。
@@ -821,19 +858,29 @@ Joker
 
 \noindent\sphinxincludegraphics{{character-sample}.pdf}
 \caption{一般兵}\label{\detokenize{common/common:id52}}\label{\detokenize{common/common:character-sample}}\end{figure}
-\begin{description}
+
+\index{キャラクター名@\spxentry{キャラクター名}}\ignorespaces \begin{description}
 \sphinxlineitem{キャラクター名}
 \sphinxAtStartPar
 キャラクターの名称を示します。
 
+\end{description}
+
+\index{タイプ(キャラクター)@\spxentry{タイプ(キャラクター)}}\ignorespaces \begin{description}
 \sphinxlineitem{タイプ}
 \sphinxAtStartPar
 キャラクターのタイプを示します。タイプは兵士と防壁の2種類が存在します。
 
+\end{description}
+
+\index{キーカード@\spxentry{キーカード}}\ignorespaces \begin{description}
 \sphinxlineitem{キーカード}
 \sphinxAtStartPar
 キャラクターを示すカードが記載されています。複数のカードで1体のキャラクターを示す場合もあります。
 
+\end{description}
+
+\index{の\textbar{}能力(キャラクター)@\spxentry{の\textbar{}能力(キャラクター)}}\ignorespaces \begin{description}
 \sphinxlineitem{能力}
 \sphinxAtStartPar
 キャラクターが持っている能力を記載しています。
@@ -868,9 +915,10 @@ Joker
 チャージ状態、ドライブ状態となった場合も同様に1体のキャラクター
 として扱います。
 
+\index{チャージ@\spxentry{チャージ}}\index{ドライブ@\spxentry{ドライブ}}\ignorespaces 
 
 \subsection{チャージとドライブ}
-\label{\detokenize{common/common:id15}}
+\label{\detokenize{common/common:index-12}}\label{\detokenize{common/common:id15}}
 \sphinxAtStartPar
 キャラクターには、チャージ状態とドライブ状態が存在します。
 チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
@@ -936,9 +984,10 @@ Joker
 ゲーム内で起こせるアクションは対戦レギュレーション、フォーマットより異なります。
 対戦前に確認してください。
 
+\index{アクション@\spxentry{アクション}}\ignorespaces 
 
 \section{アクション}
-\label{\detokenize{common/common:id17}}
+\label{\detokenize{common/common:index-13}}\label{\detokenize{common/common:id17}}
 
 \subsection{アクションが持つ項目}
 \label{\detokenize{common/common:id18}}
@@ -952,11 +1001,15 @@ Joker
 
 \noindent\sphinxincludegraphics{{action-sample}.pdf}
 \caption{サンプルアクション}\label{\detokenize{common/common:id54}}\label{\detokenize{common/common:action-sample}}\end{figure}
-\begin{description}
+
+\index{アクション名@\spxentry{アクション名}}\ignorespaces \begin{description}
 \sphinxlineitem{アクション名}
 \sphinxAtStartPar
 アクションの名称を示します。
 
+\end{description}
+
+\index{キーカード(アクション)@\spxentry{キーカード(アクション)}}\ignorespaces \begin{description}
 \sphinxlineitem{キーカード}
 \sphinxAtStartPar
 アクションの核となるカードを示します。
@@ -964,28 +1017,46 @@ Joker
 凡例の場合、手札からコストとは別に{\normalsize $\heartsuit$} A〜10に該当するカードを1枚
 キーカードとして使用します。
 
+\end{description}
+
+\index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
 \sphinxlineitem{特記事項}
 \sphinxAtStartPar
 特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
 
+\end{description}
+
+\index{た\textbar{}対象@\spxentry{た\textbar{}対象}}\ignorespaces \begin{description}
 \sphinxlineitem{対象}
 \sphinxAtStartPar
 効果の対象を示します。
 
+\end{description}
+
+\index{つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}!そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}}\index{そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}!つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}}\ignorespaces \begin{description}
 \sphinxlineitem{即時効果/通常効果}
 \sphinxAtStartPar
 効果の内容を示します。
 
+\end{description}
+
+\index{コスト@\spxentry{コスト}}\ignorespaces \begin{description}
 \sphinxlineitem{コスト}
 \sphinxAtStartPar
 アクションを起こすのに必要な対価です。
 コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
 
+\end{description}
+
+\index{タイミング@\spxentry{タイミング}}\ignorespaces \begin{description}
 \sphinxlineitem{タイミング}
 \sphinxAtStartPar
 アクションを起こせる時を示します。
 タイミングはコアルール \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}} を参照してください。
 
+\end{description}
+
+\index{タイプ(アクション)@\spxentry{タイプ(アクション)}}\ignorespaces \begin{description}
 \sphinxlineitem{タイプ}
 \sphinxAtStartPar
 アクションの種類を表します。アクション名の後に括弧書きで記載します。
@@ -1228,16 +1299,18 @@ S (Sacrifice)
 アクションを起こすことができません。
 また、この特記事項が記載されたアクションが何らかの起因で起きても、プレイヤーが起こした訳ではないためパスは自動的に発生せず、チャンスは移りません。
 
+\index{エクストラ@\spxentry{エクストラ}}\ignorespaces 
 
 \section{エクストラ}
-\label{\detokenize{common/common:extra}}\label{\detokenize{common/common:id34}}
+\label{\detokenize{common/common:extra}}\label{\detokenize{common/common:index-22}}\label{\detokenize{common/common:id34}}
 \sphinxAtStartPar
 エクストラではアクションに加え切札の能力を使うことができます。
 使用できるアクション、切札は対戦レギュレーションを確認してください。
 
+\index{き\textbar{}切札@\spxentry{き\textbar{}切札}}\ignorespaces 
 
 \subsection{切札}
-\label{\detokenize{common/common:id35}}
+\label{\detokenize{common/common:index-23}}\label{\detokenize{common/common:id35}}
 \sphinxAtStartPar
 切札とは、切札領域に置かれたカードを示します。
 具体的な切札の置き場所については、 \hyperref[\detokenize{common/common:field-ex}]{Fig.\@ \ref{\detokenize{common/common:field-ex}}} を参照して下さい。
@@ -1512,9 +1585,10 @@ BlackPokerでは
 
 \sphinxstepscope
 
+\index{フォーマット@\spxentry{フォーマット}}\ignorespaces 
 
 \chapter{フォーマット}
-\label{\detokenize{format/format:id1}}\label{\detokenize{format/format::doc}}
+\label{\detokenize{format/format:index-0}}\label{\detokenize{format/format:id1}}\label{\detokenize{format/format::doc}}
 
 \section{フォーマットとは}
 \label{\detokenize{format/format:id2}}
@@ -1777,9 +1851,10 @@ x
 
 \sphinxstepscope
 
+\index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
 
 \chapter{対戦レギュレーション}
-\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
+\label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
 \sphinxAtStartPar
 対戦レギュレーションとは、
 BlackPokerで対戦する前にプレイヤー間で決定する
@@ -1794,15 +1869,22 @@ BlackPokerはトランプだけで遊べるため、
 \label{\detokenize{match-regulations/match-regulations:id2}}
 \sphinxAtStartPar
 対戦レギュレーションは次の各項目を決めることで決定します。
-\begin{description}
+
+\index{フォーマット(対戦レギュレーション)@\spxentry{フォーマット(対戦レギュレーション)}}\ignorespaces \begin{description}
 \sphinxlineitem{フォーマット}
 \sphinxAtStartPar
 使用するフォーマット。詳しくは {\hyperref[\detokenize{format/format::doc}]{\sphinxcrossref{\DUrole{doc}{フォーマット}}}} 参照
 
+\end{description}
+
+\index{フレーム@\spxentry{フレーム}}\ignorespaces \begin{description}
 \sphinxlineitem{フレーム}
 \sphinxAtStartPar
 デッキの構成方法、マッチ形式。
 
+\end{description}
+
+\index{オプション@\spxentry{オプション}}\ignorespaces \begin{description}
 \sphinxlineitem{オプション}
 \sphinxAtStartPar
 フレームとフォーマットで規定されていないルールを追加。複数指定することが出来ます。
@@ -1834,9 +1916,10 @@ BlackPokerはトランプだけで遊べるため、
 \PYG{n}{マスター}\PYG{o}{+}\PYG{n}{ランダム40}\PYG{o}{+}\PYG{n}{プリセット2}\PYG{o}{+}\PYG{n}{パック}
 \end{sphinxVerbatim}
 
+\index{た\textbar{}対戦@\spxentry{た\textbar{}対戦}!マッチ@\spxentry{マッチ}}\index{マッチ@\spxentry{マッチ}!た\textbar{}対戦@\spxentry{た\textbar{}対戦}}\index{ゲーム@\spxentry{ゲーム}!し\textbar{}試合@\spxentry{し\textbar{}試合}}\index{し\textbar{}試合@\spxentry{し\textbar{}試合}!ゲーム@\spxentry{ゲーム}}\ignorespaces 
 
 \subsection{対戦(マッチ)とゲーム(試合)}
-\label{\detokenize{match-regulations/match-regulations:id4}}
+\label{\detokenize{match-regulations/match-regulations:index-4}}\label{\detokenize{match-regulations/match-regulations:id4}}
 \sphinxAtStartPar
 対戦(マッチ)とゲーム(試合)について説明します。
 \begin{description}

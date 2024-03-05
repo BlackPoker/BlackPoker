@@ -130,26 +130,26 @@
 <section id="corerule">
 <span id="id1"></span><h1><span class="section-number">2. </span>コアルール<a class="headerlink" href="#corerule" title="この見出しへのパーマリンク">¶</a></h1>
 <p>コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。</p>
-<section id="id2">
-<h2><span class="section-number">2.1. </span>ターン<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-0">
+<span id="id2"></span><h2><span class="section-number">2.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h2>
 <p>このルールを説明する上でターンとは持つことができるものとします。
 ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
 </section>
-<section id="id3">
-<h2><span class="section-number">2.2. </span>アクション<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-1">
+<span id="id3"></span><h2><span class="section-number">2.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h2>
 <p>アクションとは、プレイヤーの行動を示します。
 ターン制のゲームでは、プレイヤーは様々な行動を行います。
 チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
 それらをアクションと定義します。</p>
 </section>
-<section id="id4">
-<h2><span class="section-number">2.3. </span>チャンス<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-2">
+<span id="id4"></span><h2><span class="section-number">2.3. </span>チャンス<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h2>
 <p>アクションを起こすことができる機会をチャンスといいます。
 チャンスを持っている間は何度でもアクションを起こすことができます。</p>
 </section>
-<section id="id5">
-<h2><span class="section-number">2.4. </span>ステージ<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-3">
+<span id="id5"></span><h2><span class="section-number">2.4. </span>ステージ<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h2>
 <p>アクションの解決順を整理するために使う領域です。
 後入れ先出し方式で最後に積まれたアクションから順に解決されていきます。</p>
 </section>
@@ -165,17 +165,17 @@
 <li><p>タイミング</p></li>
 </ul>
 </div></blockquote>
-<section id="id7">
-<h3><span class="section-number">2.5.1. </span>効果<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="index-4">
+<span id="id7"></span><h3><span class="section-number">2.5.1. </span>効果<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
 <p>効果とはアクションの解決時にプレイヤーが行う行動です。
 効果の中には、通常効果と即時効果があります。
 違いについては、図(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)を説明する際に分岐条件として登場します。</p>
 </section>
 <section id="timing">
-<span id="id8"></span><h3><span class="section-number">2.5.2. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="index-5"></span><span id="id8"></span><h3><span class="section-number">2.5.2. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h3>
 <p>タイミングとは、アクションを起こすことができる時を示します。
 タイミングには「メイン」と「クイック」の2種類あります。</p>
-<dl>
+<dl id="index-6">
 <dt>メイン</dt><dd><p>ターンプレイヤーかつステージが空の時に起こせるアクションです。</p>
 <p>条件をまとめると次のようになります。</p>
 <ul class="simple">
@@ -184,6 +184,8 @@
 <li><p>ステージが空</p></li>
 </ul>
 </dd>
+</dl>
+<dl id="index-7">
 <dt>クイック</dt><dd><p>いつでも起こせるため、アクションをステージに積み重ねることができます。</p>
 <p>条件をまとめると次のようになります。</p>
 <ul class="simple">
@@ -205,12 +207,14 @@
 </section>
 </section>
 <section id="component">
-<span id="id11"></span><h2><span class="section-number">2.6. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="index-8"></span><span id="id11"></span><h2><span class="section-number">2.6. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h2>
 <p>ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
 コンポーネントは次の項目を持っています。</p>
-<dl class="simple">
+<dl class="simple" id="index-9">
 <dt>オーナー</dt><dd><p>コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。</p>
 </dd>
+</dl>
+<dl class="simple" id="index-10">
 <dt>コントローラー</dt><dd><p>現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。</p>
 </dd>
 </dl>
@@ -238,8 +242,8 @@ class アクション {
 </figure>
 </div>
 </section>
-<section id="id12">
-<h2><span class="section-number">2.7. </span>能力<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-11">
+<span id="id12"></span><h2><span class="section-number">2.7. </span>能力<a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h2>
 <p>能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。</p>
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
@@ -271,9 +275,11 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 </figcaption>
 </figure>
 <p>能力には、次の種類があります。</p>
-<dl class="simple">
+<dl class="simple" id="index-12">
 <dt>常在型能力</dt><dd><p>能力が有効である場合、継続的に発揮される能力</p>
 </dd>
+</dl>
+<dl class="simple" id="index-13">
 <dt>誘発型能力</dt><dd><p>能力が有効である間に何かの契機でアクションを起こす能力</p>
 </dd>
 </dl>
@@ -283,7 +289,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 プレイヤーは保持しています。</p>
 </section>
 <section id="coreflowsec">
-<span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="index-14"></span><span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
 <p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
 <figure class="align-default" id="id46">
 <span id="coreflow-2"></span><p class="plantuml">
