@@ -1,5 +1,3 @@
-:tocdepth: 2
-
 .. index::
    single: た|対戦レギュレーション
 

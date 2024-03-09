@@ -1,6 +1,3 @@
-:tocdepth: 2
-
-
 .. index::
    single: フォーマット
 
