@@ -1,5 +1,7 @@
 .. @suppress Contraction WeakExpression
 
+.. _appendix.rst:
+
 ==============================
 付録
 ==============================

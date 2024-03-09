@@ -1,22 +1,14 @@
-@startuml
 
-hide methods
-hide circle
-hide field
+rectangle ルール指針
 
-abstract class "コアルール" as core
-
-abstract class "共通ルール" as common
-
-class "対戦レギュレーション" as match_reg
-
-class "フォーマット" as format
-
-class "フレーム" as frame
-
-class "オプション" as options
-
-class "プレイヤー" as player
+frame ルール{
+rectangle コアルール as core
+rectangle 共通ルール as common
+rectangle フォーマット as format
+rectangle 対戦レギュレーション as match_reg
+rectangle フレーム as frame
+rectangle オプション as options
+' rectangle プレイヤー as player
 
 core <|-- common : 継承
 
@@ -26,13 +18,17 @@ match_reg o-- format : 内包
 match_reg o-- frame : 内包
 match_reg o-- options : 内包
 
-player ..> match_reg : 選択
-
-note right on link #white
-プレイヤーは対戦する前に
-対戦レギュレーションを選択する
-end note
+' match_reg <. player : 選択
 
 format <.. options : 依存
 format <. frame : 依存
 frame <.. options : 依存
+
+}
+
+ルール指針 --> ルール : 具体化
+
+note right of match_reg #white
+プレイヤーは対戦する前に
+対戦レギュレーションを選択する
+end note
