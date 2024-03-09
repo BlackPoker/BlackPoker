@@ -138,6 +138,7 @@
 
   .. uml:: 
    :caption: コンポーネントとアクションの属性
+   :scale: 50%
 
    hide methods
    hide circle
@@ -173,6 +174,7 @@
 .. _ability_image:
 .. uml:: ability.puml
    :caption: 能力のイメージ
+   :scale: 50%
 
 
 能力には、次の種類があります。
