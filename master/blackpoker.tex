@@ -1355,71 +1355,43 @@ S (Sacrifice)
 対戦を開始する前に対戦相手とバージョンの確認をしましょう。
 
 
-\subsection{版数との関係}
+\subsubsection{版数との関係}
 \label{\detokenize{common/common:id37}}
 \sphinxAtStartPar
 版数毎に使える切札の種類が異なります。
 たとえば、第一版、第二版ではエクストラで遊ぶことはできません。
-第三版以降は、次版が出るまでの間に公開された切札であれば
-使用できます。(\hyperref[\detokenize{common/common:ver-ex}]{Table \ref{\detokenize{common/common:ver-ex}}})
+第三版以降は、次版が出るまでの間に公開された切札であれば使用できます。
 
+\sphinxAtStartPar
+バージョンは以下のような命名規則になっています。
 
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\sphinxcapstartof{table}
-\sphinxthecaptionisattop
-\sphinxcaption{版数とエクストラのバージョン}\label{\detokenize{common/common:id58}}\label{\detokenize{common/common:ver-ex}}
-\sphinxaftertopcaption
-\begin{tabulary}{\linewidth}[t]{|T|T|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{ex}\PYG{p}{\PYGZob{}}\PYG{n}{版数}\PYG{p}{\PYGZcb{}}\PYG{o}{.}\PYG{p}{\PYGZob{}}\PYG{n}{切札枚数}\PYG{p}{\PYGZcb{}}\PYG{o}{.}\PYG{p}{\PYGZob{}}\PYG{n}{更新回数}\PYG{p}{\PYGZcb{}}
+\end{sphinxVerbatim}
+
 \sphinxAtStartPar
-版数
-&\sphinxstyletheadfamily 
+各々は次の意味になります。
+\begin{description}
+\sphinxlineitem{版数}
 \sphinxAtStartPar
-エクストラのバージョン
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
+対応する版数
+
+\sphinxlineitem{切札枚数}
 \sphinxAtStartPar
-第一版
-&
+定義されている切札の枚数
+
+\sphinxlineitem{更新回数}
 \sphinxAtStartPar
-−
-\\
-\sphinxhline
+定義されてから時点から更新された回数。0始まりで、版数が更新されるたびにリセットされます。
+
+\end{description}
+
 \sphinxAtStartPar
-第二版
-&
-\sphinxAtStartPar
-−
-\\
-\sphinxhline
-\sphinxAtStartPar
-第三版
-&
-\sphinxAtStartPar
-ex3.4.0 〜 ex3.10.0
-\\
-\sphinxhline
-\sphinxAtStartPar
-第四版
-&
-\sphinxAtStartPar
-ex4.14.0 〜 ex4.22.0
-\\
-\sphinxhline
-\sphinxAtStartPar
-第五版
-&
-\sphinxAtStartPar
-ex5.22.0 〜
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
+例えば、次のように表記されています。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{ex5}\PYG{l+m+mf}{.30}\PYG{l+m+mf}{.2}
+\end{sphinxVerbatim}
 
 
 \subsection{ゲームのはじめ方}
@@ -1455,7 +1427,7 @@ ex5.22.0 〜
 \capstart
 
 \noindent\sphinxincludegraphics{{trump}.pdf}
-\caption{切札の置き方}\label{\detokenize{common/common:id59}}\label{\detokenize{common/common:trump}}\end{figure}
+\caption{切札の置き方}\label{\detokenize{common/common:id58}}\label{\detokenize{common/common:trump}}\end{figure}
 
 \sphinxAtStartPar
 これ以降は、通常のゲームの始め方と同様です。
@@ -1487,7 +1459,7 @@ ex5.22.0 〜
 \capstart
 
 \noindent\sphinxincludegraphics{{trump-open}.pdf}
-\caption{切札を表にする例}\label{\detokenize{common/common:id60}}\label{\detokenize{common/common:trump-open}}\end{figure}
+\caption{切札を表にする例}\label{\detokenize{common/common:id59}}\label{\detokenize{common/common:trump-open}}\end{figure}
 
 
 \subsubsection{能力を無効する}

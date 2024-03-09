@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  9 MAR 2024 07:53
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  9 MAR 2024 12:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1035,6 +1035,10 @@ File: action-sample2.pdf Graphic file (type pdf)
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
  [27] [28]
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 4.805pt on input line 1368.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 4.805pt on input line 1368.
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
  [29]
@@ -1052,51 +1056,64 @@ pdf)
 ]
 第5章
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1909.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1881.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1909.
+(Font)              scaled to size 9.60999pt on input line 1881.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1909.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1881.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1909.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1933.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1933.
+(Font)              scaled to size 9.60999pt on input line 1881.
 [37]
-Underfull \hbox (badness 6380) in paragraph at lines 2142--2142
+Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
 []\JY1/gt/m/n/10 構築タ
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2142--2142
+Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2142--2142
+Underfull \hbox (badness 10000) in paragraph at lines 2114--2114
 []\JY1/mc/m/n/10 ランダム
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2142--2142
+Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
 []\JY1/mc/m/n/10 ランダ
  []
 
 [38] [39] [40] [41] [42]
 第6章
 
-Underfull \hbox (badness 10000) in paragraph at lines 2741--2743
+Underfull \hbox (badness 10000) in paragraph at lines 2713--2715
 []
  []
 
 
+Underfull \hbox (badness 10000) in paragraph at lines 2717--2719
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2729--2731
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 2733--2735
+[]
+ []
+
+[43
+
+]
 Underfull \hbox (badness 10000) in paragraph at lines 2745--2747
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2757--2759
+Underfull \hbox (badness 10000) in paragraph at lines 2749--2751
 []
  []
 
@@ -1105,10 +1122,8 @@ Underfull \hbox (badness 10000) in paragraph at lines 2761--2763
 []
  []
 
-[43
 
-]
-Underfull \hbox (badness 10000) in paragraph at lines 2773--2775
+Underfull \hbox (badness 10000) in paragraph at lines 2765--2767
 []
  []
 
@@ -1118,37 +1133,22 @@ Underfull \hbox (badness 10000) in paragraph at lines 2777--2779
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2789--2791
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2793--2795
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2805--2807
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 2809--2811
+Underfull \hbox (badness 10000) in paragraph at lines 2781--2783
 []
  []
 
 No file blackpoker.ind.
 [44] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 44B6C01B485EC926F5774A28F2A2DCDA;10272.
+(rerunfilecheck)             Checksum: 3E07ED497A120D53D59B96CEC33CD716;10277.
  ) 
 Here is how much of TeX's memory you used:
- 14560 strings out of 480496
- 224724 string characters out of 5899437
- 567390 words of memory out of 5000000
- 32249 multiletter control sequences out of 15000+600000
+ 14561 strings out of 480496
+ 224719 string characters out of 5899437
+ 567329 words of memory out of 5000000
+ 32250 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,482b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (48 pages, 167896 bytes).
+Output written on blackpoker.dvi (48 pages, 167928 bytes).

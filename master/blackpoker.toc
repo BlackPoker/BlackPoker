@@ -82,17 +82,17 @@
 \contentsline {section}{\numberline {3.11}エクストラ}{28}{section.3.11}%
 \contentsline {subsection}{\numberline {3.11.1}切札}{28}{subsection.3.11.1}%
 \contentsline {subsection}{\numberline {3.11.2}バージョン}{29}{subsection.3.11.2}%
-\contentsline {subsection}{\numberline {3.11.3}版数との関係}{29}{subsection.3.11.3}%
-\contentsline {subsection}{\numberline {3.11.4}ゲームのはじめ方}{29}{subsection.3.11.4}%
-\contentsline {subsection}{\numberline {3.11.5}切札の能力}{30}{subsection.3.11.5}%
-\contentsline {subsubsection}{能力を有効にする}{30}{subsubsection*.29}%
-\contentsline {subsubsection}{能力を無効する}{30}{subsubsection*.30}%
-\contentsline {subsection}{\numberline {3.11.6}エクストラ注意事項}{30}{subsection.3.11.6}%
-\contentsline {subsubsection}{1ターンに1回制限のアクションについて}{30}{subsubsection*.31}%
+\contentsline {subsubsection}{版数との関係}{29}{subsubsection*.29}%
+\contentsline {subsection}{\numberline {3.11.3}ゲームのはじめ方}{29}{subsection.3.11.3}%
+\contentsline {subsection}{\numberline {3.11.4}切札の能力}{30}{subsection.3.11.4}%
+\contentsline {subsubsection}{能力を有効にする}{30}{subsubsection*.30}%
+\contentsline {subsubsection}{能力を無効する}{30}{subsubsection*.31}%
+\contentsline {subsection}{\numberline {3.11.5}エクストラ注意事項}{31}{subsection.3.11.5}%
+\contentsline {subsubsection}{1ターンに1回制限のアクションについて}{31}{subsubsection*.32}%
 \contentsline {section}{\numberline {3.12}その他のルール}{31}{section.3.12}%
 \contentsline {subsection}{\numberline {3.12.1}公開・非公開情報}{31}{subsection.3.12.1}%
-\contentsline {subsubsection}{残りライフを聞かれたらどうしたらいいの？}{32}{subsubsection*.32}%
-\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{32}{subsubsection*.33}%
+\contentsline {subsubsection}{残りライフを聞かれたらどうしたらいいの？}{32}{subsubsection*.33}%
+\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{32}{subsubsection*.34}%
 \contentsline {subsection}{\numberline {3.12.2}デッキのシャッフルについて}{32}{subsection.3.12.2}%
 \contentsline {chapter}{\numberline {第4章}フォーマット}{33}{chapter.4}%
 \contentsline {section}{\numberline {4.1}フォーマットとは}{33}{section.4.1}%
