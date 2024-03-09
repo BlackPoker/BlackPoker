@@ -26,7 +26,7 @@ frame <.. options : 依存
 
 }
 
-ルール指針 -> ルール : 具体化
+ルール指針 --> ルール : 具体化
 
 note right of match_reg #white
 プレイヤーは対戦する前に
