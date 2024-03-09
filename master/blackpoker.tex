@@ -44,12 +44,12 @@
 
 
 \usepackage{sphinxmessages}
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
 
 
 
 \title{BlackPoker}
-\date{2024年03月08日}
+\date{2024年03月09日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -72,7 +72,7 @@ release: 2024/4/1
 
 
 \chapter{はじめに}
-\label{\detokenize{init/init:id1}}\label{\detokenize{init/init::doc}}
+\label{\detokenize{init/init:init-rst}}\label{\detokenize{init/init:id1}}\label{\detokenize{init/init::doc}}
 \sphinxAtStartPar
 この文章はトランプゲーム「BlackPoker」の全てのルールをまとめた文章です。
 
@@ -82,10 +82,107 @@ release: 2024/4/1
 ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。
 
 
-\section{ルールの構成}
+\section{読み方}
 \label{\detokenize{init/init:id2}}
 \sphinxAtStartPar
-ルールの構成は次のようになっています。
+各章は次のことを説明しています。
+\begin{description}
+\sphinxlineitem{\hyperref[\detokenize{init/init:init-rst}]{\ref{\detokenize{init/init:init-rst}} \nameref{\detokenize{init/init:init-rst}}}}
+\sphinxAtStartPar
+ルールの指針や全体像を説明
+
+\sphinxlineitem{\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}}}
+\sphinxAtStartPar
+BlackPokerのコアであるターン制ゲームのルールを説明
+
+\sphinxlineitem{\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}}}
+\sphinxAtStartPar
+ゲームの開始方法など全体的なゲームの流れを説明
+
+\sphinxlineitem{\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}}}
+\sphinxAtStartPar
+ゲーム内で使えるアクションの定義方法を説明
+
+\sphinxlineitem{\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}}}
+\sphinxAtStartPar
+ゲーム開始時に決定する規則について説明
+
+\end{description}
+
+
+\subsection{用途別読み方}
+\label{\detokenize{init/init:id3}}
+\sphinxAtStartPar
+文章が複雑であるため、用途に合わせて読むことをおすすめします。
+\begin{description}
+\sphinxlineitem{ざっくりゲームの流れを理解したい方}
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} から読み、部分的に参照されている \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} を読む
+
+\sphinxlineitem{アクションの解決順で悩んでいる方}
+\sphinxAtStartPar
+\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} を熟読する
+
+\sphinxlineitem{BlackPokerとは何か理解した方}
+\sphinxAtStartPar
+\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} を軽く目を通し、\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} 、\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} と読み進める
+
+\end{description}
+
+
+\section{ルール指針}
+\label{\detokenize{init/init:id4}}
+\sphinxAtStartPar
+ルールを作成・修正するための指針を示します。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{誰とでも戦える \textasciitilde{}目指すは老若男女\textasciitilde{}}}
+\sphinxAtStartPar
+ルールを知りトランプを持っていれば誰とでも遊べるゲームを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{個性が出せる \textasciitilde{}オリジナルトランプ・デッキ構築\textasciitilde{}}}
+\sphinxAtStartPar
+さまざまなトランプが使え見た目で個性を出せるのはもちろんのこと、
+デッキ構築の面でも自分のしたい戦い方が表現できることを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{短く終わる \textasciitilde{}1戦15分\textasciitilde{}}}
+\sphinxAtStartPar
+時間をかけずさっと遊べることを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{ずっと使えるデッキ}}
+\sphinxAtStartPar
+愛着のあるカードがずっと使えるようなルールとします。
+
+\sphinxlineitem{\sphinxstylestrong{必要な物は最小限 \textasciitilde{}トランプのみ\textasciitilde{}}}
+\sphinxAtStartPar
+用意するものはトランプのみ。それ以外の道具は必要ないルールとします。
+
+\sphinxlineitem{\sphinxstylestrong{プレイング重視 \textasciitilde{}5：3：2＝技：運：構築\textasciitilde{}}}
+\sphinxAtStartPar
+運やデッキ構築より技量を重視したルールを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{ベースルールはトレーディングカードゲーム}}
+\sphinxAtStartPar
+カードゲームプレイヤーが覚えやすいルールを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{カスタマイズ可能 \textasciitilde{}基本と拡張の分離\textasciitilde{}}}
+\sphinxAtStartPar
+基本ルールと拡張ルールを分離し、大富豪のようにローカルルールが作成できることを目指します。
+
+\sphinxlineitem{\sphinxstylestrong{ルールの更新 \textasciitilde{}飽き防止＆不備改善\textasciitilde{}}}
+\sphinxAtStartPar
+新たなルールを度々公開し、飽きを防止します。またルールに不備がある場合、随時改善します。
+
+\sphinxlineitem{\sphinxstylestrong{相手のカードに触らない}}
+\sphinxAtStartPar
+盗難防止とネット対戦対応に努めます。
+
+\end{description}
+
+
+\section{ルールの構成}
+\label{\detokenize{init/init:id5}}
+\sphinxAtStartPar
+ルールの構成は次のようになっています。ルールを階層化し、ルール指針を具体化しています。
 
 \noindent\sphinxincludegraphics{{plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894}.pdf}
 
@@ -93,80 +190,13 @@ release: 2024/4/1
 更にルールを詳しく記載すると次のようになります。
 専門的な表現になるので、理解出来なくても構いません。
 
-\noindent\sphinxincludegraphics{{plantuml-637acb300f9bae3db618e9d98ed7546ae001ecce}.pdf}
-
-
-\section{ルール指針}
-\label{\detokenize{init/init:id3}}
-\sphinxAtStartPar
-ルールを作成・修正するための指針を示します。
-
-
-\subsection{誰とでも戦える \textasciitilde{}目指すは老若男女\textasciitilde{}}
-\label{\detokenize{init/init:id4}}
-\sphinxAtStartPar
-ルールを知りトランプを持っていれば誰とでも遊べるゲームを目指します。
-
-
-\subsection{個性が出せる \textasciitilde{}オリジナルトランプ・デッキ構築\textasciitilde{}}
-\label{\detokenize{init/init:id5}}
-\sphinxAtStartPar
-さまざまなトランプが使え見た目で個性を出せるのはもちろんのこと、
-デッキ構築の面でも自分のしたい戦い方が表現できることを目指します。
-
-
-\subsection{短く終わる \textasciitilde{}1戦15分\textasciitilde{}}
-\label{\detokenize{init/init:id6}}
-\sphinxAtStartPar
-時間をかけずさっと遊べることを目指します。
-
-
-\subsection{ずっと使えるデッキ}
-\label{\detokenize{init/init:id7}}
-\sphinxAtStartPar
-愛着のあるカードがずっと使えるようなルールとします。
-
-
-\subsection{必要な物は最小限 \textasciitilde{}トランプのみ\textasciitilde{}}
-\label{\detokenize{init/init:id8}}
-\sphinxAtStartPar
-用意するものはトランプのみ。それ以外の道具は必要ないルールとします。
-
-
-\subsection{プレイング重視 \textasciitilde{}5：3：2＝技：運：構築\textasciitilde{}}
-\label{\detokenize{init/init:id9}}
-\sphinxAtStartPar
-運やデッキ構築より技量を重視したルールを目指します。
-
-
-\subsection{ベースルールはトレーディングカードゲーム}
-\label{\detokenize{init/init:id10}}
-\sphinxAtStartPar
-カードゲームプレイヤーが覚えやすいルールを目指します。
-
-
-\subsection{カスタマイズ可能 \textasciitilde{}基本と拡張の分離\textasciitilde{}}
-\label{\detokenize{init/init:id11}}
-\sphinxAtStartPar
-基本ルールと拡張ルールを分離し、大富豪のようにローカルルールが作成できることを目指します。
-
-
-\subsection{ルールの更新 \textasciitilde{}飽き防止＆不備改善\textasciitilde{}}
-\label{\detokenize{init/init:id12}}
-\sphinxAtStartPar
-新たなルールを度々公開し、飽きを防止します。またルールに不備がある場合、随時改善します。
-
-
-\subsection{相手のカードに触らない}
-\label{\detokenize{init/init:id13}}
-\sphinxAtStartPar
-盗難防止とネット対戦対応に努めます。
+\noindent\sphinxincludegraphics{{plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036}.pdf}
 
 \sphinxstepscope
 
 
 \chapter{コアルール}
-\label{\detokenize{core/core:corerule}}\label{\detokenize{core/core:id1}}\label{\detokenize{core/core::doc}}
+\label{\detokenize{core/core:core-rst}}\label{\detokenize{core/core:id1}}\label{\detokenize{core/core::doc}}
 \sphinxAtStartPar
 コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。
 
@@ -605,7 +635,7 @@ release: 2024/4/1
 
 
 \chapter{共通ルール}
-\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
+\label{\detokenize{common/common:common-rst}}\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
 \sphinxAtStartPar
 この章では、カードの配置などコアルールで定義されていない内容を定義します。
 
@@ -1585,13 +1615,13 @@ BlackPokerでは
 
 \sphinxstepscope
 
-\index{フォーマット@\spxentry{フォーマット}}\ignorespaces 
 
 \chapter{フォーマット}
-\label{\detokenize{format/format:index-0}}\label{\detokenize{format/format:id1}}\label{\detokenize{format/format::doc}}
+\label{\detokenize{format/format:format-rst}}\label{\detokenize{format/format:id1}}\label{\detokenize{format/format::doc}}
+\index{フォーマット@\spxentry{フォーマット}}\ignorespaces 
 
 \section{フォーマットとは}
-\label{\detokenize{format/format:id2}}
+\label{\detokenize{format/format:index-0}}\label{\detokenize{format/format:id2}}
 \sphinxAtStartPar
 BlackPokerにはいくつかのフォーマットがあり、
 フォーマットによりゲーム内でできる行動が異なります。
@@ -1851,10 +1881,13 @@ x
 
 \sphinxstepscope
 
-\index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
 
 \chapter{対戦レギュレーション}
-\label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
+\label{\detokenize{match-regulations/match-regulations:match-regulations-rst}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
+\index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
+
+\section{対戦レギュレーションとは}
+\label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id2}}
 \sphinxAtStartPar
 対戦レギュレーションとは、
 BlackPokerで対戦する前にプレイヤー間で決定する
@@ -1866,7 +1899,7 @@ BlackPokerはトランプだけで遊べるため、
 
 
 \section{定義項目}
-\label{\detokenize{match-regulations/match-regulations:id2}}
+\label{\detokenize{match-regulations/match-regulations:id3}}
 \sphinxAtStartPar
 対戦レギュレーションは次の各項目を決めることで決定します。
 
@@ -1893,7 +1926,7 @@ BlackPokerはトランプだけで遊べるため、
 
 
 \subsection{対戦レギュレーションの表記}
-\label{\detokenize{match-regulations/match-regulations:id3}}
+\label{\detokenize{match-regulations/match-regulations:id4}}
 \sphinxAtStartPar
 対戦レギュレーションは次のように表記します。
 
@@ -1919,7 +1952,7 @@ BlackPokerはトランプだけで遊べるため、
 \index{た\textbar{}対戦@\spxentry{た\textbar{}対戦}!マッチ@\spxentry{マッチ}}\index{マッチ@\spxentry{マッチ}!た\textbar{}対戦@\spxentry{た\textbar{}対戦}}\index{ゲーム@\spxentry{ゲーム}!し\textbar{}試合@\spxentry{し\textbar{}試合}}\index{し\textbar{}試合@\spxentry{し\textbar{}試合}!ゲーム@\spxentry{ゲーム}}\ignorespaces 
 
 \subsection{対戦(マッチ)とゲーム(試合)}
-\label{\detokenize{match-regulations/match-regulations:index-4}}\label{\detokenize{match-regulations/match-regulations:id4}}
+\label{\detokenize{match-regulations/match-regulations:index-4}}\label{\detokenize{match-regulations/match-regulations:id5}}
 \sphinxAtStartPar
 対戦(マッチ)とゲーム(試合)について説明します。
 \begin{description}
@@ -1938,7 +1971,7 @@ BlackPokerはトランプだけで遊べるため、
 
 
 \section{フレーム定義}
-\label{\detokenize{match-regulations/match-regulations:id5}}
+\label{\detokenize{match-regulations/match-regulations:id6}}
 \sphinxAtStartPar
 公式として次のフレームを定義しています。
 
@@ -1948,7 +1981,7 @@ BlackPokerはトランプだけで遊べるため、
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{フレーム一覧}\label{\detokenize{match-regulations/match-regulations:id12}}\label{\detokenize{match-regulations/match-regulations:frame-table}}
+\sphinxcaption{フレーム一覧}\label{\detokenize{match-regulations/match-regulations:id13}}\label{\detokenize{match-regulations/match-regulations:frame-table}}
 \sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|T|T|T|T|}
 \sphinxtoprule
@@ -2112,7 +2145,7 @@ x
 
 
 \subsection{マッチ形式}
-\label{\detokenize{match-regulations/match-regulations:id6}}\begin{description}
+\label{\detokenize{match-regulations/match-regulations:id7}}\begin{description}
 \sphinxlineitem{1デッキマッチ}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
@@ -2206,13 +2239,13 @@ x
 
 
 \section{オプション定義}
-\label{\detokenize{match-regulations/match-regulations:id7}}
+\label{\detokenize{match-regulations/match-regulations:id8}}
 \sphinxAtStartPar
 公式として次のオプションを定義しています。
 
 
 \subsection{プリセット2}
-\label{\detokenize{match-regulations/match-regulations:id8}}
+\label{\detokenize{match-regulations/match-regulations:id9}}
 \sphinxAtStartPar
 各プレイヤーがゲーム開始時（切札配置後）にデッキからランダムにキャラクター2体を場に出すオプションルール
 
@@ -2221,7 +2254,7 @@ x
 
 
 \subsection{プリセット4}
-\label{\detokenize{match-regulations/match-regulations:id9}}
+\label{\detokenize{match-regulations/match-regulations:id10}}
 \sphinxAtStartPar
 各プレイヤーがゲーム開始時（切札配置後）にデッキからランダムにキャラクター4体を場に出すオプションルール
 
@@ -2230,7 +2263,7 @@ x
 
 
 \subsection{パック}
-\label{\detokenize{match-regulations/match-regulations:id10}}
+\label{\detokenize{match-regulations/match-regulations:id11}}
 \sphinxAtStartPar
 ゲーム開始前にデッキに入らなかったカードをパックとして扱い、利用するオプションルール
 
@@ -2267,7 +2300,7 @@ x
 
 
 \section{対戦レギュレーションの決め方}
-\label{\detokenize{match-regulations/match-regulations:id11}}
+\label{\detokenize{match-regulations/match-regulations:id12}}
 \sphinxAtStartPar
 対戦レギュレーションを決定する手順を記載します。
 
@@ -2298,7 +2331,7 @@ x
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{フレーム対応一覧}\label{\detokenize{match-regulations/match-regulations:id13}}\label{\detokenize{match-regulations/match-regulations:frame-format}}
+\sphinxcaption{フレーム対応一覧}\label{\detokenize{match-regulations/match-regulations:id14}}\label{\detokenize{match-regulations/match-regulations:frame-format}}
 \sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|T|T|T|T|}
 \sphinxtoprule
@@ -2478,7 +2511,7 @@ x
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{オプション対応一覧}\label{\detokenize{match-regulations/match-regulations:id14}}\label{\detokenize{match-regulations/match-regulations:options-depenson}}
+\sphinxcaption{オプション対応一覧}\label{\detokenize{match-regulations/match-regulations:id15}}\label{\detokenize{match-regulations/match-regulations:options-depenson}}
 \sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
@@ -2691,7 +2724,7 @@ x
 
 
 \chapter{付録}
-\label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
+\label{\detokenize{appendix/appendix:appendix-rst}}\label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
 
 \section{PDF版ルール}
 \label{\detokenize{appendix/appendix:pdf}}
