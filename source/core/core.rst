@@ -209,6 +209,7 @@
 
 .. uml:: coreflow.puml
     :caption: コアフロー
+    :scale: 50%
 
 
 .. _core_gamestart:
@@ -311,7 +312,7 @@
 .. _trigger-flow:
 .. uml:: triggerflow.puml
     :caption: 誘発チェック
-
+    :scale: 50%
 
 .. _trigger-act-gather:
 
