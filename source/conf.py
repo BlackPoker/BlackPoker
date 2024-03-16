@@ -122,3 +122,32 @@ html_favicon = 'favicon.ico'
 
 # LaTeX の docclass 設定
 latex_docclass = {'manual': 'jsbook'}
+
+latex_elements = {
+    'preamble': r'''
+\makeatletter
+\renewcommand\sphinxlineitem[2]{%
+  % safe test of whether #2 is \sphinxlineitem
+  \sphinx@gobto@sphinxlineitem#2\@gobbletwo\sphinxlineitem\unless
+  \iftrue
+    % Accumulate successive terms until actual definition or sub-list is found
+    \spx@lineitemlabel\expandafter{\the\spx@lineitemlabel\strut#1\\}%
+  \else
+    % Issue the \item command with possibly multi-line contents
+    \item[\kern\labelwidth\kern-\itemindent\kern-\leftmargin
+          {\parbox[t]{1.4\linewidth}{% <- ここで幅を調整
+          \raggedright
+          \the\spx@lineitemlabel% Accumulated terms before this one, CR separated
+          \strut#1}}% No \par token allowed here, but the \parbox will insert one tacitly at end
+          \kern-\labelsep]%
+    \spx@lineitemlabel{}%
+    % This causes the label to be typeset (filling up the line), clearing up
+    % things in case a nested list follows.
+    \leavevmode
+  \fi #2%
+}
+\makeatother
+'''
+}
+
+
