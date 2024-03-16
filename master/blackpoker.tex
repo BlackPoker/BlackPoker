@@ -47,9 +47,32 @@
 \setcounter{tocdepth}{1}
 
 
+\makeatletter
+\renewcommand\sphinxlineitem[2]{%
+  % safe test of whether #2 is \sphinxlineitem
+  \sphinx@gobto@sphinxlineitem#2\@gobbletwo\sphinxlineitem\unless
+  \iftrue
+    % Accumulate successive terms until actual definition or sub-list is found
+    \spx@lineitemlabel\expandafter{\the\spx@lineitemlabel\strut#1\\}%
+  \else
+    % Issue the \item command with possibly multi-line contents
+    \item[\kern\labelwidth\kern-\itemindent\kern-\leftmargin
+          {\parbox[t]{1.4\linewidth}{% <- ここで幅を調整
+          \raggedright
+          \the\spx@lineitemlabel% Accumulated terms before this one, CR separated
+          \strut#1}}% No \par token allowed here, but the \parbox will insert one tacitly at end
+          \kern-\labelsep]%
+    \spx@lineitemlabel{}%
+    % This causes the label to be typeset (filling up the line), clearing up
+    % things in case a nested list follows.
+    \leavevmode
+  \fi #2%
+}
+\makeatother
+
 
 \title{BlackPoker}
-\date{2024年03月15日}
+\date{2024年03月16日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -180,17 +203,28 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 \section{ルールの構成}
-\label{\detokenize{init/init:id5}}
+\label{\detokenize{init/init:rule-constract}}\label{\detokenize{init/init:id5}}
 \sphinxAtStartPar
-ルールの構成は次のようになっています。ルールを階層化し、ルール指針を具体化しています。
+ルールの構成は次のようになっています。
+ルールを階層化し、ルール指針を具体化しています。(\hyperref[\detokenize{init/init:rule-puml}]{Fig.\@ \ref{\detokenize{init/init:rule-puml}}})
 
-\noindent\sphinxincludegraphics{{plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894}.pdf}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894}.pdf}
+\caption{ルール構成}\label{\detokenize{init/init:id6}}\label{\detokenize{init/init:rule-puml}}\end{figure}
 
 \sphinxAtStartPar
 更にルールを詳しく記載すると次のようになります。
-専門的な表現になるので、理解出来なくても構いません。
+専門的な表現になるので、理解出来なくても構いません。(\hyperref[\detokenize{init/init:rule-class-puml}]{Fig.\@ \ref{\detokenize{init/init:rule-class-puml}}})
 
-\noindent\sphinxincludegraphics{{plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036}.pdf}
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036}.pdf}
+\caption{ルール構成(詳細)}\label{\detokenize{init/init:id7}}\label{\detokenize{init/init:rule-class-puml}}\end{figure}
 
 \sphinxstepscope
 
@@ -357,14 +391,14 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxAtStartPar
 コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
 コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。
+\end{sphinxadmonition}
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1}.pdf}
-\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id44}}\end{figure}
-\end{sphinxadmonition}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5973875432da5c6c9c30841afa726d28ed2ec522}.pdf}
+\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id16}}\end{figure}
 
 \index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
 
@@ -381,8 +415,8 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4}.pdf}
-\caption{能力のイメージ}\label{\detokenize{core/core:id45}}\label{\detokenize{core/core:ability-image}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4}.pdf}
+\caption{能力のイメージ}\label{\detokenize{core/core:id17}}\label{\detokenize{core/core:ability-image}}\end{figure}
 
 \sphinxAtStartPar
 能力には、次の種類があります。
@@ -418,107 +452,83 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17}.pdf}
-\caption{コアフロー}\label{\detokenize{core/core:id46}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
-
-
-\subsection{{[}1{]}ゲーム開始}
-\label{\detokenize{core/core:core-gamestart}}\label{\detokenize{core/core:id14}}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17}.pdf}
+\caption{コアフロー}\label{\detokenize{core/core:id18}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
+\phantomsection\label{\detokenize{core/core:core-gamestart}}\begin{description}
+\sphinxlineitem{{[}1{]}ゲーム開始}
 \sphinxAtStartPar
 先攻を決め、ゲームを始める準備を行います。
 
-
-\subsection{{[}2{]}ターンプレイヤーにチャンスを移動}
-\label{\detokenize{core/core:id15}}
+\sphinxlineitem{{[}2{]}ターンプレイヤーにチャンスを移動}
 \sphinxAtStartPar
 ターンを持っているプレイヤーにチャンスを移動します。
 
-
-\subsection{{[}3{]}アクションを起こすか？}
-\label{\detokenize{core/core:id16}}
+\sphinxlineitem{{[}3{]}アクションを起こすか？}
 \sphinxAtStartPar
 チャンスを持っているプレイヤーはアクションを起こすかを判断します。
 
-
-\subsection{{[}4{]}パス記録のリセット}
-\label{\detokenize{core/core:id17}}
+\sphinxlineitem{{[}4{]}パス記録のリセット}
 \sphinxAtStartPar
 パスしたプレイヤーの記録をリセットします。
 
-
-\subsection{{[}5{]}アクションを起こす}
-\label{\detokenize{core/core:id18}}
+\sphinxlineitem{{[}5{]}アクションを起こす}
 \sphinxAtStartPar
 アクションを起こしこれからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。
 
-
-\subsection{{[}6{]}誘発チェック}
-\label{\detokenize{core/core:id19}}
+\sphinxlineitem{{[}6{]}誘発チェック}
 \sphinxAtStartPar
 ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは \hyperref[\detokenize{core/core:trigger-check}]{\ref{\detokenize{core/core:trigger-check}} \nameref{\detokenize{core/core:trigger-check}}} を参照してください。
 
-
-\subsection{{[}7{]}即時効果か？}
-\label{\detokenize{core/core:id20}}
+\sphinxlineitem{{[}7{]}即時効果か？}
 \sphinxAtStartPar
 起こしたアクションが即時効果か通常効果か判定します。
 
-
-\subsection{{[}8{]}アクションの解決}
-\label{\detokenize{core/core:actresolve}}\label{\detokenize{core/core:id21}}
+\end{description}
+\phantomsection\label{\detokenize{core/core:actresolve}}\begin{description}
+\sphinxlineitem{{[}8{]}アクションの解決}
 \sphinxAtStartPar
 アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。
 
-
-\subsection{{[}9{]}勝敗判定}
-\label{\detokenize{core/core:winlose}}\label{\detokenize{core/core:id22}}
+\end{description}
+\phantomsection\label{\detokenize{core/core:winlose}}\begin{description}
+\sphinxlineitem{{[}9{]}勝敗判定}
 \sphinxAtStartPar
 ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。
 
-
-\subsection{{[}10{]}ステージに追加}
-\label{\detokenize{core/core:id23}}
+\sphinxlineitem{{[}10{]}ステージに追加}
 \sphinxAtStartPar
 ステージというアクションを貯めておける領域に追加します。
 
-
-\subsection{{[}11{]}パス記録に登録}
-\label{\detokenize{core/core:id24}}
+\sphinxlineitem{{[}11{]}パス記録に登録}
 \sphinxAtStartPar
 パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。
 
-
-\subsection{{[}12{]}全員がパスしたか？}
-\label{\detokenize{core/core:id25}}
+\sphinxlineitem{{[}12{]}全員がパスしたか？}
 \sphinxAtStartPar
 パス記録に全てのプレイヤー名が記録されているか判定します。
 
-
-\subsection{{[}13{]}ステージにアクションが存在するか？}
-\label{\detokenize{core/core:id26}}
+\sphinxlineitem{{[}13{]}ステージにアクションが存在するか？}
 \sphinxAtStartPar
 ステージにアクションが存在するか判定します。
 
-
-\subsection{{[}14{]}ステージから取出し}
-\label{\detokenize{core/core:id27}}
+\sphinxlineitem{{[}14{]}ステージから取出し}
 \sphinxAtStartPar
 最後にステージに追加されたアクションをステージから取出します。
 
-
-\subsection{{[}15{]}チャンス移動}
-\label{\detokenize{core/core:id28}}
+\sphinxlineitem{{[}15{]}チャンス移動}
 \sphinxAtStartPar
 チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。
 
+\end{description}
+
 
 \subsection{誘発チェック}
-\label{\detokenize{core/core:trigger-check}}\label{\detokenize{core/core:id29}}
+\label{\detokenize{core/core:trigger-check}}\label{\detokenize{core/core:id14}}
 \sphinxAtStartPar
 能力の中でも誘発型能力は、なにかをきっかけにしてアクションが起きる条件が定義されています。
 誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。
@@ -532,100 +542,76 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics{{plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19}.pdf}
-\caption{誘発チェック}\label{\detokenize{core/core:id47}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
-
-
-\subsubsection{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}
-\label{\detokenize{core/core:trigger-act-gather}}\label{\detokenize{core/core:id30}}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19}.pdf}
+\caption{誘発チェック}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
+\phantomsection\label{\detokenize{core/core:trigger-act-gather}}\begin{description}
+\sphinxlineitem{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}
 \sphinxAtStartPar
 全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
 誘発したアクションをコントローラーのプレイヤー毎に即時効果と通常効果に分け、
 プレイヤー毎の誘発即時リスト、誘発通常リストに追加します。
 
-
-\subsubsection{{[}6\sphinxhyphen{}2{]}誘発即時リスト、誘発通常リスト全体の件数判定}
-\label{\detokenize{core/core:id31}}
+\sphinxlineitem{{[}6\sphinxhyphen{}2{]}誘発即時リスト、誘発通常リスト全体の件数判定}
 \sphinxAtStartPar
 プレイヤー毎の誘発即時リスト、誘発通常リストの合計件数を判定します。
 
-
-\subsubsection{{[}6\sphinxhyphen{}3{]}プレイヤー毎に誘発即時リストの即時効果のアクションを解決}
-\label{\detokenize{core/core:id32}}
+\sphinxlineitem{{[}6\sphinxhyphen{}3{]}プレイヤー毎に誘発即時リストの即時効果のアクションを解決}
 \sphinxAtStartPar
 プレイヤー毎に誘発即時リストの即時効果のアクションを解決を行います。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
 
-
-\subsubsection{{[}6\sphinxhyphen{}4{]}誘発即時リストから即時効果のアクションを1つ取り出す}
-\label{\detokenize{core/core:id33}}
+\sphinxlineitem{{[}6\sphinxhyphen{}4{]}誘発即時リストから即時効果のアクションを1つ取り出す}
 \sphinxAtStartPar
 順番のプレイヤーは、 プレイヤー毎の誘発即時リストから1つ即時効果のアクションを取り出します。
 取り出すアクションは任意に選択できます。
 
-
-\subsubsection{{[}6\sphinxhyphen{}5{]}即時効果のアクションを解決}
-\label{\detokenize{core/core:id34}}
+\sphinxlineitem{{[}6\sphinxhyphen{}5{]}即時効果のアクションを解決}
 \sphinxAtStartPar
 アクションの効果を解決します。
-詳しくは \hyperref[\detokenize{core/core:actresolve}]{\ref{\detokenize{core/core:actresolve}} \nameref{\detokenize{core/core:actresolve}}} 参照。
+詳しくは {\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]}アクションの解決}}}} 参照。
 
-
-\subsubsection{{[}6\sphinxhyphen{}6{]}勝敗判定}
-\label{\detokenize{core/core:id35}}
+\sphinxlineitem{{[}6\sphinxhyphen{}6{]}勝敗判定}
 \sphinxAtStartPar
 勝敗を判定します。
-詳しくは \hyperref[\detokenize{core/core:winlose}]{\ref{\detokenize{core/core:winlose}} \nameref{\detokenize{core/core:winlose}}} 参照。
+詳しくは {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]}勝敗判定}}}} 参照。
 
-
-\subsubsection{{[}6\sphinxhyphen{}7{]}誘発したアクションをプレイヤー毎の誘発即時リスト、誘発通常リストに追加}
-\label{\detokenize{core/core:id36}}
+\sphinxlineitem{{[}6\sphinxhyphen{}7{]}誘発したアクションをプレイヤー毎の誘発即時リスト、誘発通常リストに追加}
 \sphinxAtStartPar
-詳しくは \hyperref[\detokenize{core/core:trigger-act-gather}]{\ref{\detokenize{core/core:trigger-act-gather}} \nameref{\detokenize{core/core:trigger-act-gather}}} 参照。
+詳しくは {\hyperref[\detokenize{core/core:trigger-act-gather}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}}}} 参照。
 
-
-\subsubsection{{[}6\sphinxhyphen{}8{]}誘発即時リストの件数が0件でなけば繰り返す}
-\label{\detokenize{core/core:id37}}
+\sphinxlineitem{{[}6\sphinxhyphen{}8{]}誘発即時リストの件数が0件でなけば繰り返す}
 \sphinxAtStartPar
 順番のプレイヤーの誘発即時リストに未解決の即時効果がある場合、
 即時効果の解決を繰返します。
 
-
-\subsubsection{{[}6\sphinxhyphen{}9{]}全ての誘発即時リストの件数が0件でなければ繰り返す}
-\label{\detokenize{core/core:id38}}
+\sphinxlineitem{{[}6\sphinxhyphen{}9{]}全ての誘発即時リストの件数が0件でなければ繰り返す}
 \sphinxAtStartPar
 プレイヤー毎の誘発即時リストに未解決のアクションがある場合、
 再びプレイヤー毎に誘発即時リストの即時効果の解決を繰返します。
 
-
-\subsubsection{{[}6\sphinxhyphen{}10{]}プレイヤー毎に誘発通常リストのアクションをステージに追加}
-\label{\detokenize{core/core:id39}}
+\sphinxlineitem{{[}6\sphinxhyphen{}10{]}プレイヤー毎に誘発通常リストのアクションをステージに追加}
 \sphinxAtStartPar
 プレイヤー毎に誘発通常リストのアクションをステージに追加します。
 順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
 
-
-\subsubsection{{[}6\sphinxhyphen{}11{]}通常効果のアクションを任意の順でステージに追加}
-\label{\detokenize{core/core:id40}}
+\sphinxlineitem{{[}6\sphinxhyphen{}11{]}通常効果のアクションを任意の順でステージに追加}
 \sphinxAtStartPar
 順番のプレイヤーは、 プレイヤー毎の誘発通常リストからアクションを任意の順でステージに追加します。
 
-
-\subsubsection{{[}6\sphinxhyphen{}12{]}誘発したアクションをプレイヤー毎に誘発即時リストと誘発通常リストにまとめる}
-\label{\detokenize{core/core:id41}}
+\sphinxlineitem{{[}6\sphinxhyphen{}12{]}誘発したアクションをプレイヤー毎に誘発即時リストと誘発通常リストにまとめる}
 \sphinxAtStartPar
-詳しくは \hyperref[\detokenize{core/core:trigger-act-gather}]{\ref{\detokenize{core/core:trigger-act-gather}} \nameref{\detokenize{core/core:trigger-act-gather}}} 参照。
+詳しくは {\hyperref[\detokenize{core/core:trigger-act-gather}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}}}} 参照。
 
-
-\subsubsection{{[}6\sphinxhyphen{}13{]}誘発通常リストにアクションがあれば繰り返す}
-\label{\detokenize{core/core:id42}}
+\sphinxlineitem{{[}6\sphinxhyphen{}13{]}誘発通常リストにアクションがあれば繰り返す}
 \sphinxAtStartPar
 プレイヤー毎の誘発通常リストにアクションがある場合、
 順番を次のプレイヤーに渡し、プレイヤー毎に誘発通常リストのアクションをステージに追加します。
 
+\end{description}
+
 
 \section{まとめ}
-\label{\detokenize{core/core:id43}}
+\label{\detokenize{core/core:id15}}
 \sphinxAtStartPar
 コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
@@ -1007,8 +993,12 @@ Joker
 \end{enumerate}
 
 \sphinxAtStartPar
-この行動が \hyperref[\detokenize{core/core:core-gamestart}]{\ref{\detokenize{core/core:core-gamestart}} \nameref{\detokenize{core/core:core-gamestart}}} に該当します。
-この後はコアフローに準じアクションを起こしてゲームを進行します。
+この行動が
+\hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の
+{\hyperref[\detokenize{core/core:core-gamestart}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}1{]}ゲーム開始}}}} に該当します。
+この後は
+\hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}}
+に準じアクションを起こしてゲームを進行します。
 
 \sphinxAtStartPar
 ゲーム内で起こせるアクションは対戦レギュレーション、フォーマットより異なります。
@@ -1221,7 +1211,7 @@ S (Sacrifice)
 \label{\detokenize{common/common:id25}}
 \sphinxAtStartPar
 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の
-\hyperref[\detokenize{core/core:actresolve}]{\ref{\detokenize{core/core:actresolve}} \nameref{\detokenize{core/core:actresolve}}} に行うことを順に示します。
+{\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]}アクションの解決}}}} に行うことを順に示します。
 
 
 \subsubsection{対象条件を確認}
@@ -1277,7 +1267,7 @@ S (Sacrifice)
 \subsection{勝敗判定}
 \label{\detokenize{common/common:id29}}
 \sphinxAtStartPar
-\hyperref[\detokenize{core/core:winlose}]{\ref{\detokenize{core/core:winlose}} \nameref{\detokenize{core/core:winlose}}} で確認する内容は次になります。
+{\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]}勝敗判定}}}} で確認する内容は次になります。
 
 \sphinxAtStartPar
 ライフを確認し0枚の場合そのプレイヤーは敗北となります。両プレイヤーのライフが0枚の場合、引き分けとなります。
@@ -1617,138 +1607,12 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 フォーマットはゲーム内でできるアクション等のできる行動を定義している
 のに対して、対戦レギュレーションはフォーマットを前提としてそれを加工している位置づけになります。
 
-
-\subsection{共通ルールとの関係}
-\label{\detokenize{format/format:id4}}
 \sphinxAtStartPar
-フォーマットは共通ルールを参照しており、
-共通ルールにBlackPokerの主なルールが定義されています。
-
-\sphinxAtStartPar
-フォーマット、対戦レギュレーション、共通ルールの関係は次の図のようになります。
-
-\noindent\sphinxincludegraphics{{plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5}.pdf}
-
-
-\section{種類}
-\label{\detokenize{format/format:id5}}
-\sphinxAtStartPar
-フォーマットは次の種類があります。
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\begin{tabulary}{\linewidth}[t]{|T|T|T|T|T|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-フォーマット名
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-難易度
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-アクション数
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-キャラクター数
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-切札有無
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-ライト
-&
-\sphinxAtStartPar
-★
-&
-\sphinxAtStartPar
-17
-&
-\sphinxAtStartPar
-5
-&
-\sphinxAtStartPar
-無
-\\
-\sphinxhline
-\sphinxAtStartPar
-スタンダード
-&
-\sphinxAtStartPar
-★★
-&
-\sphinxAtStartPar
-24
-&
-\sphinxAtStartPar
-6
-&
-\sphinxAtStartPar
-無
-\\
-\sphinxhline
-\sphinxAtStartPar
-プロ
-&
-\sphinxAtStartPar
-★★★
-&
-\sphinxAtStartPar
-29
-&
-\sphinxAtStartPar
-6
-&
-\sphinxAtStartPar
-無
-\\
-\sphinxhline
-\sphinxAtStartPar
-マスター
-&
-\sphinxAtStartPar
-★★★★
-&
-\sphinxAtStartPar
-35
-&
-\sphinxAtStartPar
-6
-&
-\sphinxAtStartPar
-無
-\\
-\sphinxhline
-\sphinxAtStartPar
-エクストラ
-&
-\sphinxAtStartPar
-★★★★★
-&
-\sphinxAtStartPar
-39〜
-&
-\sphinxAtStartPar
-6〜
-&
-\sphinxAtStartPar
-有
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
-\sphinxAtStartPar
-アクション数、キャラクター数の増加にともない覚える数が増えるため、難易度が上がります。
+各々の関係性は \hyperref[\detokenize{init/init:rule-constract}]{\ref{\detokenize{init/init:rule-constract}} \nameref{\detokenize{init/init:rule-constract}}} を参照してください。
 
 
 \section{定義項目}
-\label{\detokenize{format/format:id6}}
+\label{\detokenize{format/format:id4}}
 \sphinxAtStartPar
 フォーマットには次の項目が定義されています。
 \begin{description}
@@ -1760,19 +1624,11 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 \sphinxAtStartPar
 切札のリスト
 
-\sphinxlineitem{事前準備}
-\sphinxAtStartPar
-対戦前に行う事項
-
-\sphinxlineitem{その他事項}
-\sphinxAtStartPar
-上記項目で説明できないルール
-
 \end{description}
 
 
 \section{フォーマット定義}
-\label{\detokenize{format/format:id7}}
+\label{\detokenize{format/format:id5}}
 \sphinxAtStartPar
 公式として次のフォーマットを定義しています。
 
@@ -2283,13 +2139,16 @@ x
 \item {} 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマットの決定}
+\begin{quote}
 
 \sphinxAtStartPar
 「ライト」「スタンダード」などフォーマットを決めます。
+\end{quote}
 
 \item {} 
 \sphinxAtStartPar
 \sphinxstylestrong{フレームの決定}
+\begin{quote}
 
 \sphinxAtStartPar
 手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。
@@ -2463,10 +2322,12 @@ x
 \end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
+\end{quote}
 
 \item {} 
 \sphinxAtStartPar
 \sphinxstylestrong{オプションの選択}
+\begin{quote}
 
 \sphinxAtStartPar
 手順1,2で決定したフォーマット、フレームをもとに次のオプション対応一覧より、オプションを決めます。
@@ -2665,6 +2526,7 @@ x
 \end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
+\end{quote}
 
 \end{enumerate}
 

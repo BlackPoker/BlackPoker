@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  15 MAR 2024 19:06
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  16 MAR 2024 14:15
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -675,28 +675,28 @@ File: l3backend-dvipdfmx.def 2021-07-12 L3 backend support: dvipdfmx
 ) (./blackpoker.aux)
 \openout1 = `blackpoker.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 58.
-LaTeX Font Info:    ... okay on input line 58.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 81.
+LaTeX Font Info:    ... okay on input line 81.
 \c@literalblock=\count317
 
 *geometry* detected driver: dvipdfm
@@ -735,7 +735,7 @@ LaTeX Font Info:    ... okay on input line 58.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 58.
+Package hyperref Info: Link coloring ON on input line 81.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
 
@@ -748,90 +748,90 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count318
 )
-LaTeX Info: Redefining \ref on input line 58.
-LaTeX Info: Redefining \pageref on input line 58.
-LaTeX Info: Redefining \nameref on input line 58.
+LaTeX Info: Redefining \ref on input line 81.
+LaTeX Info: Redefining \pageref on input line 81.
+LaTeX Info: Redefining \nameref on input line 81.
  (./blackpoker.out) (./blackpoker.out)
 \@outlinefile=\write5
 \openout5 = `blackpoker.out'.
 
-Package hyperref Info: Option `pageanchor' set `false' on input line 61.
+Package hyperref Info: Option `pageanchor' set `false' on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 61.
+(Font)              scaled to size 9.60999pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 61.
-LaTeX Font Info:    Trying to load font information for T1+qhv on input line 61
+(Font)              scaled to size 9.60999pt on input line 84.
+LaTeX Font Info:    Trying to load font information for T1+qhv on input line 84
 .
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <10> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 61.
+(Font)              scaled to size 9.60999pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <10> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 61.
+(Font)              scaled to size 9.60999pt on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <24.88> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <24.88> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 61.
+(Font)              scaled to size 23.90964pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <24.88> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <24.88> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 61.
+(Font)              scaled to size 23.90964pt on input line 84.
 LaTeX Font Info:    Kanji font shape `JY1/gt/b/it' undefined
-(Font)              No change on input line 61.
+(Font)              No change on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <17.28> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <17.28> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 61.
+(Font)              scaled to size 16.60605pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <17.28> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <17.28> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 61.
+(Font)              scaled to size 16.60605pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 16.60605pt on input line 61.
+(Font)              scaled to size 16.60605pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 61.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 61.
+(Font)              scaled to size 11.53198pt on input line 84.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 84.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 61.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 84.
 
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <12> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 61.
+(Font)              scaled to size 11.53198pt on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <12> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 61.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 84.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 61.
+(Font)              scaled to size 11.53198pt on input line 84.
  [1
 
 
@@ -840,9 +840,9 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 
 ]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 63.
+(Font)              scaled to size 23.90964pt on input line 86.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 63.
+(Font)              scaled to size 23.90964pt on input line 86.
 
 (./blackpoker.toc
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
@@ -850,17 +850,17 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 4.805pt on input line 2.
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 103.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 74.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 103.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 74.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 103.
+(Font)              scaled to size 9.60999pt on input line 74.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 103.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 74.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 103.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 74.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 103.
+(Font)              scaled to size 9.60999pt on input line 74.
  [1
 
 ])
@@ -874,281 +874,706 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 ]
 第1章
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 74.
+(Font)              scaled to size 19.9311pt on input line 97.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 74.
+(Font)              scaled to size 19.9311pt on input line 97.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 74.
+(Font)              scaled to size 19.9311pt on input line 97.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 74.
+(Font)              scaled to size 19.9311pt on input line 97.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 85.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 108.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 85.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 108.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 85.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 108.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 85.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 108.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 85.
+(Font)              scaled to size 13.83836pt on input line 108.
 
-Underfull \hbox (badness 10000) in paragraph at lines 91--93
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 114--116
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 95--97
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 118--120
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 99--101
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 122--124
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 103--105
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 126--128
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 107--109
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 130--132
 []
  []
 
 [3]
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 113.
+(Font)              scaled to size 11.53198pt on input line 136.
 
-Underfull \hbox (badness 10000) in paragraph at lines 119--121
-[][][]\T1/qtm/m/n/10 3
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 123--125
-[][][]\T1/qtm/m/n/10 2
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 127--129
-[][][]\T1/qtm/m/n/10 2
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 139--141
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 142--144
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 164--166
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 146--148
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 150--152
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 162--164
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 166--169
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 171--173
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 175--177
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 179--181
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 183--185
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 187--189
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 191--193
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 195--197
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 199--201
 []
  []
 
 [4]
-LaTeX Font Info:    Trying to load font information for T1+txtt on input line 1
-87.
+LaTeX Font Info:    Trying to load font information for T1+txtt on input line 2
+15.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
 File: plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.pdf Graphic file (type 
 pdf)
 <plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894.pdf>
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 216.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 216.
 File: plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036.pdf Graphic file (type 
 pdf)
 <plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036.pdf>
  [5]
-[6]
-第2章
-[7
+[6
 
 ]
+第2章
+[7]
 LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 2
-49.
+83.
  (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
 File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
 )
-Underfull \hbox (badness 10000) in paragraph at lines 278--280
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 312--314
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 336--338
 []
  []
 
 [8]
-File: plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf Graphic file (type 
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 375--377
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 382--384
+[]
+ []
+
+File: plantuml-5973875432da5c6c9c30841afa726d28ed2ec522.pdf Graphic file (type 
 pdf)
-<plantuml-97eb2fb6ceaeae89223169fc6f937aee84be4fe1.pdf>
-LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 366.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 366.
- [9]
+<plantuml-5973875432da5c6c9c30841afa726d28ed2ec522.pdf>
+[9]
 File: plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf Graphic file (type 
 pdf)
 <plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.pdf>
- [10]
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 426--428
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 433--435
+[]
+ []
+
 File: plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17.pdf Graphic file (type 
 pdf)
 <plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17.pdf>
- [11] [12] [13]
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 459--461
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 463--465
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 467--469
+[]
+ []
+
+[10]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 471--473
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 475--479
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 481--483
+[]
+ []
+
+[11]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 485--487
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 491--495
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 499--501
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 503--505
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 507--509
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 511--513
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 515--517
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 519--521
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 523--526
+[]
+ []
+
 File: plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19.pdf Graphic file (type 
 pdf)
 <plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19.pdf>
 
-
-LaTeX Warning: Float too large for page by 24.96199pt on input line 536.
-
-[14] [15] [16] [17] [18
-
-]
-第3章
-[19]
-File: field-ex.pdf Graphic file (type pdf)
-<field-ex.pdf>
- [20]
-Underfull \hbox (badness 10000) in paragraph at lines 838--840
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 549--553
 []
  []
 
-[21]
+[12] [13]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 555--557
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 559--562
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 564--567
+[]
+ []
+
+LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 571.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 571.
+LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 571.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 571.
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 569--572
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 574--577
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 579--581
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 583--586
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 588--591
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 593--596
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 598--600
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 602--604
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 606--609
+[]
+ []
+
+[14] [15] [16
+
+]
+第3章
+[17]
+File: field-ex.pdf Graphic file (type pdf)
+<field-ex.pdf>
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 781--784
+[]
+ []
+
+[18]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 789--791
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 796--798
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 803--805
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 810--813
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 824--826
+[]
+ []
+
+[19]
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
 File: character-sample.pdf Graphic file (type pdf)
 <character-sample.pdf>
- [22]
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 880--882
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 887--889
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 894--896
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 901--903
+[]
+ []
+
+[20]
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
- [23]
+ [21]
 File: action-sample.pdf Graphic file (type pdf)
 <action-sample.pdf>
- [24] [25]
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1027--1029
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1034--1039
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1044--1046
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1051--1053
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1058--1060
+[]
+ []
+
+[22]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1065--1068
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1073--1076
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1081--1083
+[]
+ []
+
+[23]
 File: action-sample2.pdf Graphic file (type pdf)
 <action-sample2.pdf>
- [26]
+ [24]
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
- [27] [28]
+ [25] [26]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1368.
+(Font)              scaled to size 4.805pt on input line 1358.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 1368.
+(Font)              scaled to size 4.805pt on input line 1358.
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1366--1368
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1370--1372
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1374--1376
+[]
+ []
+
 File: trump.pdf Graphic file (type pdf)
 <trump.pdf>
- [29]
+[27]
 File: trump-open.pdf Graphic file (type pdf)
 <trump-open.pdf>
- [30] [31] [32]
+ [28]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1495--1498
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1500--1502
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1504--1506
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1514--1514
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1514--1514
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1521--1521
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1521--1521
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1528--1528
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1528--1528
+
+ []
+
+[29]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1535--1535
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1535--1535
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1542--1542
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1542--1542
+
+ []
+
+[30]
 第4章
-File: plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf Graphic file (type 
-pdf)
-<plantuml-c4b165770c9149e49e8be64e90ba8bbbafdb51b5.pdf>
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1620--1622
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1624--1626
+[]
+ []
+
+[31
+
+] [32]
+第5章
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1736--1738
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1743--1745
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1750--1752
+[]
+ []
+
 [33
 
-] [34] [35] [36
-
 ]
-第5章
-LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1881.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1881.
-LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1881.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1881.
-[37]
-Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1788--1790
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1792--1794
+[]
+ []
+
+
+Underfull \hbox (badness 6380) in paragraph at lines 1970--1970
 []\JY1/gt/m/n/10 構築タ
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
+Underfull \hbox (badness 6380) in paragraph at lines 1970--1970
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2114--2114
+Underfull \hbox (badness 10000) in paragraph at lines 1970--1970
 []\JY1/mc/m/n/10 ランダム
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2114--2114
+Underfull \hbox (badness 6380) in paragraph at lines 1970--1970
 []\JY1/mc/m/n/10 ランダ
  []
 
-[38] [39] [40] [41] [42]
-第6章
-
-Underfull \hbox (badness 10000) in paragraph at lines 2713--2715
+[34]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1977--1977
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2717--2719
+Underfull \hbox (badness 10000) in paragraph at lines 1977--1977
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1984--1984
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2729--2731
+Underfull \hbox (badness 10000) in paragraph at lines 1984--1984
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2007--2007
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2733--2735
-[]
+Underfull \hbox (badness 10000) in paragraph at lines 2007--2007
+
  []
 
-[43
+[35] [36] [37] [38] [39] [40
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 2745--2747
+第6章
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2575--2577
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2749--2751
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2579--2581
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2761--2763
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2591--2593
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2765--2767
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2595--2597
+[]
+ []
+
+[41]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2607--2609
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2777--2779
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2611--2613
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2781--2783
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2623--2625
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2627--2629
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2639--2641
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2643--2645
 []
  []
 
 No file blackpoker.ind.
-[44] (./blackpoker.aux)
+[42] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 3E07ED497A120D53D59B96CEC33CD716;10277.
+(rerunfilecheck)             Checksum: 2AE32D623A73CC896DBC9AA804667222;7058.
  ) 
 Here is how much of TeX's memory you used:
- 14561 strings out of 480496
- 224719 string characters out of 5899437
- 567329 words of memory out of 5000000
- 32250 multiletter control sequences out of 15000+600000
+ 14527 strings out of 480496
+ 223875 string characters out of 5899437
+ 575237 words of memory out of 5000000
+ 32218 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,12n,80p,482b,551s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,11n,80p,482b,566s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (48 pages, 167928 bytes).
+Output written on blackpoker.dvi (46 pages, 159232 bytes).
