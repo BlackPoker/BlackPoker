@@ -705,7 +705,6 @@ charList:
       charName: 防壁
       charId: bulwark
       charType: 防壁
-      charType: 防壁
       charKey: 全て(裏向き)
       charNote: ''
       charAbility: |-
