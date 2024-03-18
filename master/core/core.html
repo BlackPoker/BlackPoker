@@ -293,7 +293,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
 <figure class="align-default" id="id18">
 <span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-5610bc91072f4c0a9e055e42017e28d61d12ab17.svg" alt="&#64;startuml
+<img src="../_images/plantuml-06d74c8ca532cbff699e6d17eac527fc25dc81ee.svg" alt="&#64;startuml
 start
 :[1]ゲーム開始;
 :[2]ターンプレイヤーにチャンスを移動;
@@ -307,10 +307,10 @@ if ([3]アクションを起こすか？) then (Yes)
         if ([9]勝敗判定) then (決着)
             stop
         endif
-        :[6]誘発チェック;
     else (No)
         :[10]ステージに追加;
     endif
+    :[6]誘発チェック;
 else (No)
     :[11]パス記録に登録;
     if ([12]全員がパスしたか？) then (Yes)
