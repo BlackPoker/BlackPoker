@@ -20,3 +20,5 @@ node_modules
 
 source/_build
 docs/*
+out
+build
