@@ -72,7 +72,7 @@
 
 
 \title{BlackPoker}
-\date{2024年03月17日}
+\date{2024年03月18日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -105,8 +105,53 @@ release: 2024/4/1
 ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。
 
 
-\section{読み方}
+\section{BlackPokerとは}
+\label{\detokenize{init/init:blackpoker}}
+\sphinxAtStartPar
+当サークルが考案した1人1セットのトランプを使ったターン制の
+トレーディングカードゲームのようなトランプゲームです。
+自分だけのオリジナルトランプを使って友達と遊べます。
+プレイしている時のイメージは図のような感じです。(\hyperref[\detokenize{init/init:play-image}]{Fig.\@ \ref{\detokenize{init/init:play-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{play-image}.pdf}
+\caption{プレイ風景}\label{\detokenize{init/init:id8}}\label{\detokenize{init/init:play-image}}\end{figure}
+
+
+\section{きっかけ}
 \label{\detokenize{init/init:id2}}
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+「また昔みたいに友達とカードゲームがしたい」
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+けど、仕事に追われ時間もなく、お金もかけられないのでカード資産も抱えられない。
+昔のデッキを引っ張りだしてもカードパワーが違って平等に遊べないし、コミニティが狭い。
+そんな悩みを解消しようと誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。
+
+
+\section{ゲームのストーリー}
+\label{\detokenize{init/init:id3}}
+\sphinxAtStartPar
+あなたのトランプはただのトランプではありません。
+かつて大地を支配していた偉大な国々や強固な絆で結ばれた組織の魂が宿る遺産です。
+
+\sphinxAtStartPar
+これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、その物語たちはまるで時間を超えたタペストリーのように絡み合っています。
+
+\sphinxAtStartPar
+プレイヤーは歴史の再現者、リアニメーターとしてデッキに宿る過去の栄光を再現し、その国や組織がいかに素晴らしかったかを
+戦いを通して対戦相手に示してください。
+
+\sphinxAtStartPar
+え？そんな国知らない？でしたらあなたのカードから創造してみてはいかがでしょうか。
+
+
+\section{読み方}
+\label{\detokenize{init/init:id4}}
 \sphinxAtStartPar
 各章は次のことを説明しています。
 \begin{description}
@@ -134,7 +179,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 \subsection{用途別読み方}
-\label{\detokenize{init/init:id3}}
+\label{\detokenize{init/init:id5}}
 \sphinxAtStartPar
 文章が複雑であるため、用途に合わせて読むことをおすすめします。
 \begin{description}
@@ -154,7 +199,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 \section{ルール指針}
-\label{\detokenize{init/init:id4}}
+\label{\detokenize{init/init:id6}}
 \sphinxAtStartPar
 ルールを作成・修正するための指針を示します。
 \begin{description}
@@ -203,7 +248,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 \section{ルールの構成}
-\label{\detokenize{init/init:rule-constract}}\label{\detokenize{init/init:id5}}
+\label{\detokenize{init/init:rule-constract}}\label{\detokenize{init/init:id7}}
 \sphinxAtStartPar
 ルールの構成は次のようになっています。
 ルールを階層化し、ルール指針を具体化しています。(\hyperref[\detokenize{init/init:rule-puml}]{Fig.\@ \ref{\detokenize{init/init:rule-puml}}})
@@ -213,7 +258,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-0b4f05a00976af29a919ccd57da91a1d511d7894}.pdf}
-\caption{ルール構成}\label{\detokenize{init/init:id6}}\label{\detokenize{init/init:rule-puml}}\end{figure}
+\caption{ルール構成}\label{\detokenize{init/init:id9}}\label{\detokenize{init/init:rule-puml}}\end{figure}
 
 \sphinxAtStartPar
 更にルールを詳しく記載すると次のようになります。
@@ -224,7 +269,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-25d895c0cb10acacb2584c83ee11d0fe0b970036}.pdf}
-\caption{ルール構成(詳細)}\label{\detokenize{init/init:id7}}\label{\detokenize{init/init:rule-class-puml}}\end{figure}
+\caption{ルール構成(詳細)}\label{\detokenize{init/init:id10}}\label{\detokenize{init/init:rule-class-puml}}\end{figure}
 
 \sphinxstepscope
 
@@ -1630,12 +1675,16 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 \section{フォーマット定義}
 \label{\detokenize{format/format:id5}}
 \sphinxAtStartPar
-公式として次のフォーマットを定義しています。
+公式として次のフォーマットを定義しています。(\hyperref[\detokenize{format/format:format-list}]{Table \ref{\detokenize{format/format:format-list}}})
 
 
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{フォーマット一覧}\label{\detokenize{format/format:id6}}\label{\detokenize{format/format:format-list}}
+\sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
@@ -1734,7 +1783,7 @@ BlackPokerはトランプだけで遊べるため、
 \index{フォーマット(対戦レギュレーション)@\spxentry{フォーマット(対戦レギュレーション)}}\ignorespaces \begin{description}
 \sphinxlineitem{フォーマット}
 \sphinxAtStartPar
-使用するフォーマット。詳しくは {\hyperref[\detokenize{format/format::doc}]{\sphinxcrossref{\DUrole{doc}{フォーマット}}}} 参照
+使用するフォーマット。詳しくは \hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} 参照
 
 \end{description}
 
@@ -1801,7 +1850,7 @@ BlackPokerはトランプだけで遊べるため、
 \section{フレーム定義}
 \label{\detokenize{match-regulations/match-regulations:id6}}
 \sphinxAtStartPar
-公式として次のフレームを定義しています。
+公式として次のフレームを定義しています。(\hyperref[\detokenize{match-regulations/match-regulations:frame-table}]{Table \ref{\detokenize{match-regulations/match-regulations:frame-table}}})
 
 
 \begin{savenotes}\sphinxattablestart
@@ -2154,7 +2203,7 @@ x
 手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。
 
 \sphinxAtStartPar
-◯と表記されている組み合わせが選択出来ます。
+「◯」と表記されている組み合わせが選択出来ます。(\hyperref[\detokenize{match-regulations/match-regulations:frame-format}]{Table \ref{\detokenize{match-regulations/match-regulations:frame-format}}})
 
 
 \begin{savenotes}\sphinxattablestart
@@ -2333,7 +2382,7 @@ x
 手順1,2で決定したフォーマット、フレームをもとに次のオプション対応一覧より、オプションを決めます。
 
 \sphinxAtStartPar
-フォーマット、フレームの両方で◯と表記されている組み合わせが選択出来ます。
+フォーマット、フレームの両方で「◯」と表記されている組み合わせが選択出来ます。(\hyperref[\detokenize{match-regulations/match-regulations:options-depenson}]{Table \ref{\detokenize{match-regulations/match-regulations:options-depenson}}})
 
 \sphinxAtStartPar
 条件を満たせば複数のオプションを選択することも可能です。また、オプションは選択しなくても構いません。
