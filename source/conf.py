@@ -76,7 +76,7 @@ html_theme = 'insipid'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
-html_logo = 'blackpoker.svg'
+html_logo = '_static/blackpoker.svg'
 
 html_theme_options = {
     # ----------
@@ -116,7 +116,7 @@ html_context = {
 
 html_show_sourcelink = True
 html_search_language = 'ja'
-html_favicon = 'favicon.ico'
+html_favicon = '_static/favicon.ico'
 
 # -- Options for HTML output -------------------------------------------------
 
