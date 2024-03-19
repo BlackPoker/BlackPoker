@@ -168,13 +168,14 @@ BlackPoker
 ├── src                         :用途不明。不要？
 └── tools                       :ツール関連
     └── actionlist              :アクションリスト、エクストラリスト生成ツール
-        ├── Dockerfile          :用途不明。
+        ├── Dockerfile          :使用しているか不明。アクションリスト生成用
         ├── README.md
-        ├── base-docker         :actionlist-base用Dockerイメージ
+        ├── base-docker         :使用しているか不明。actionlist-base用Dockerイメージ
         ├── docker-resource     :Dockerfile内で利用するリソースファイル
         ├── original            :アクションリスト、エクストラリスト定義
         │   ├── act.yaml        :アクションリスト定義
-        │   └── extra.yaml      :エクストラリスト定義
+        │   ├── extra.yaml      :エクストラリスト定義
+        │   └ ...
         ├── pom.xml             :ツール用pom.xml
         ├── python              :pythonツール
         ├── src
