@@ -138,21 +138,18 @@ docker run --rm -it -v `pwd`/docs:/docs blackpoker-doc:latest
 BlackPoker
 ├── Dockerfile                  :公式ルール用HTML,PDF生成Dockerfile
 ├── Makefile                    :sphinxのビルド設定
-├── README.md                   : 
+├── README.md                   :GitHubでトップに表示されるMD
 ├── base-docker                 :blackpoker-doc-baseのイメージ
 ├── build                       :make livehtml/buildhtmlのビルド結果格納
-├── build.sh                    :不要か？
 ├── dev-notes                   :開発者用メモ
 ├── docker-build.sh             :公式ルール用Dockerfile内で利用
 ├── docs                        :公式ルール用Dockerfile内でマウントし結果を出力
-├── drawio                      :未使用
 ├── make.bat                    :windows用makeファイル。未使用、未メンテナンス
 ├── node_modules                :node.jsでダウンロードされたライブラリ郡
 ├── out                         :plantumlで画像出力した際の出力先
 ├── redpen                      :文書検証ツールredpen関連の設定など格納
 ├── requirements.txt            :pythonの必要ライブラリ郡
 ├── source                      :BlackPoker公式ルール
-│   ├── _build                  :不要か？
 │   ├── _static                 :静的ファイル
 │   ├── _templates              :レイアウトテンプレート
 │   ├── appendix                :章（付録）
@@ -160,16 +157,13 @@ BlackPoker
 │   ├── conf.py                 :sphinx設定ファイル
 │   ├── core                    :章（コアルール）
 │   ├── format                  :章（フォーマット）
-│   ├── glossary
-│   │   └── glossary._rst
 │   ├── index.rst               :章（目次）
 │   ├── init                    :章（はじめに）
 │   └── match-regulations       :章（対戦レギュレーション）
-├── src                         :用途不明。不要？
 └── tools                       :ツール関連
     └── actionlist              :アクションリスト、エクストラリスト生成ツール
         ├── Dockerfile          :GitHubActionsのrefresh_docsより実行されている。
-        ├── README.md
+        ├── README.md           :actionlistツールの説明
         ├── base-docker         :actionlist-base用Dockerイメージ。actionlist/Dockerfileにて使用。
         ├── docker-resource     :Dockerfile内で利用するリソースファイル
         ├── original            :アクションリスト、エクストラリスト定義
