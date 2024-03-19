@@ -168,9 +168,9 @@ BlackPoker
 ├── src                         :用途不明。不要？
 └── tools                       :ツール関連
     └── actionlist              :アクションリスト、エクストラリスト生成ツール
-        ├── Dockerfile          :使用しているか不明。アクションリスト生成用
+        ├── Dockerfile          :GitHubActionsのrefresh_docsより実行されている。
         ├── README.md
-        ├── base-docker         :使用しているか不明。actionlist-base用Dockerイメージ
+        ├── base-docker         :actionlist-base用Dockerイメージ。actionlist/Dockerfileにて使用。
         ├── docker-resource     :Dockerfile内で利用するリソースファイル
         ├── original            :アクションリスト、エクストラリスト定義
         │   ├── act.yaml        :アクションリスト定義
@@ -187,3 +187,4 @@ BlackPoker
         ├── tex                 :生成されたtexファイル
         └── web-site            :生成されたHTMLファイル
 ```
+
