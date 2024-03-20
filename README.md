@@ -4,7 +4,7 @@
 自分だけのオリジナルトランプを使って友達と遊べます。
 
 ## 第7版公式ルール（ドラフト版）
-https://blackpoker.github.io/BlackPoker/6th/
+https://blackpoker.github.io/BlackPoker/7th/
 
 ### 第7版の主な変更点
 https://github.com/BlackPoker/BlackPoker/wiki/7th-edition-changes
