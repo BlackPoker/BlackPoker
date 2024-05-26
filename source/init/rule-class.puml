@@ -23,6 +23,7 @@ match_reg o-- options : 内包
 format <.. options : 依存
 format <. frame : 依存
 frame <.. options : 依存
+options <.. options : 依存
 
 }
 
