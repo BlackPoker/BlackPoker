@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  26 MAY 2024 10:30
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  26 MAY 2024 11:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1522,33 +1522,33 @@ Underfull \hbox (badness 10000) in paragraph at lines 2259--2259
 [37] [38] [39] [40]
 第6章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2942--2944
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2945--2947
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2946--2948
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2949--2951
 []
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 2946--2948
+Underfull \hbox (badness 7613) in paragraph at lines 2949--2951
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 202-[]k
 aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係追
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2958--2960
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2961--2963
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2962--2964
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2965--2967
 []
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 2962--2964
+Underfull \hbox (badness 7613) in paragraph at lines 2965--2967
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 202-[]k
 aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係追
  []
@@ -1556,49 +1556,49 @@ aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係�
 [41
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2974--2976
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2977--2979
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2978--2980
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2981--2983
 []
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 2978--2980
+Underfull \hbox (badness 7613) in paragraph at lines 2981--2983
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 202-[]k
 aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係追
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2990--2992
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2993--2995
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2994--2996
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 2997--2999
 []
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 2994--2996
+Underfull \hbox (badness 7613) in paragraph at lines 2997--2999
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 202-[]k
 aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係追
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3006--3008
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 3009--3011
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3010--3012
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 3013--3015
 []
  []
 
 
-Underfull \hbox (badness 7613) in paragraph at lines 3010--3012
+Underfull \hbox (badness 7613) in paragraph at lines 3013--3015
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / 202-[]k
 aizen$[][]-\JY1/mc/m/n/10 オプシ ョンとオプシ ョン間の依存関係追
  []
@@ -1617,4 +1617,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,11n,80p,482b,570s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (46 pages, 175048 bytes).
+Output written on blackpoker.dvi (46 pages, 175176 bytes).
