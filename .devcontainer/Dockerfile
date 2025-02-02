@@ -36,29 +36,19 @@ RUN export DEBIAN_FRONTEND=noninteractive && apt-get update && \
     \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# # --- pip を最新にアップグレード ---
-# RUN su vscode -c "pip3 install --upgrade pip setuptools wheel"
-
-# # --- sphinxcontrib-plantuml のビルドに必要なパッケージをインストール ---
-# RUN apt-get update && apt-get install -y graphviz plantuml default-jdk
-
-# # --- Python パッケージのインストール (vscode ユーザーとして実行) ---
-# COPY requirements.txt /tmp/pip-tmp/requirements.txt
-# RUN su vscode -c "pip3 install --user --no-cache-dir -r /tmp/pip-tmp/requirements.txt" \
-#     && rm -rf /tmp/pip-tmp
-
-# # 作業ディレクトリを /workspace に設定
-# WORKDIR /workspace
-
-
-
 # --- 必要なツールをインストール ---
 RUN apt-get update && apt-get install -y \
     graphviz \
     plantuml \
     default-jdk \
     fontconfig \
+    maven \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# --- Maven の環境変数設定 ---
+ENV M2_HOME=/usr/share/maven
+ENV MAVEN_HOME=/usr/share/maven
+ENV PATH="${M2_HOME}/bin:${PATH}"
 
 # --- pip を最新にアップグレード ---
 RUN python3 -m pip install --upgrade pip setuptools wheel
