@@ -1,0 +1,6 @@
+!blackpoker_logo.pdf
+*.pdf
+*.aux
+*.dvi
+*.log
+*.tex
