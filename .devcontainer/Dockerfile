@@ -45,6 +45,10 @@ RUN apt-get update && apt-get install -y \
     maven \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# --- TeX Live (texlive-full) のインストール ---
+RUN apt-get update && apt-get install -y texlive-full \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # --- Maven の環境変数設定 ---
 ENV M2_HOME=/usr/share/maven
 ENV MAVEN_HOME=/usr/share/maven

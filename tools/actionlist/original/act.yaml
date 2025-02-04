@@ -1,6 +1,6 @@
 data: 
-  ver: 第七版 act7.0
-  lastupdate: 2024/4/9
+  ver: 第八版 act8.0
+  lastupdate: 2025/3/x
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -637,6 +637,7 @@ charList:
       charId: soldier
       charType: 兵士
       charKey: 2〜10
+      size: キーカードの数字と等しい。
       charNote: ''
       charAbility: |-
         ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
@@ -649,6 +650,7 @@ charList:
       charId: hero
       charType: 兵士
       charKey: J〜K
+      size: キーカードがJなら11,Qなら12,Kなら13となる。
       charNote: ''
       charAbility: |-
         ・準備（このキャラクターがこのターンに場に出たカードのみで構成されている場合、アタックアクションにて対戦相手を攻撃する兵士（アタッカー）に指定することができない。）
@@ -662,6 +664,7 @@ charList:
       charId: ace
       charType: 兵士
       charKey: A
+      size: 1とする
       charNote: ''
       charAbility: |-
         ・速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）
@@ -675,7 +678,7 @@ charList:
       charId: magician
       charType: 兵士
       charKey: Joker
-      charNote: ''
+      charNote: '0とする'
       charAbility: |-
         ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストが無しになる。）
         ・速攻（場に出たターンからアタックアクションにて、対戦相手を攻撃する兵士（アタッカー）に指定できる。この能力は準備より優先される。）
