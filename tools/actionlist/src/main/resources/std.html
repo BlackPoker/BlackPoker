@@ -721,6 +721,12 @@
                     <div class="pull-right">
                       &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
                       </small>
+                    </div>                  
+                    <div class="text-left">
+                      <small th:if="${#maps.containsKey(row, 'charSize') and not #strings.isEmpty(row.charSize)}">
+                        サイズ: 
+                        <span th:utext="${#sfn.cnvHtml(row.charSize)}"></span><br>
+                      </small>
                     </div>
                   </div>
                   <div class="panel-body">

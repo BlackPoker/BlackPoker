@@ -317,6 +317,10 @@ ${texFn.cnv(${row.actEffect})}
 {\footnotesize\bf ★${texFn.cnv(${row.charKey})} }
             #end
 
+            #if(${row.charSize})
+{\bf サイズ : ${texFn.cnv(${row.charSize})} }
+            #end
+
             #if(${row.charNote.trim()} != "")
 %特記事項
 \vspace{1mm}%余白削除

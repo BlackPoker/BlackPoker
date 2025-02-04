@@ -1,6 +1,11 @@
 #!/bin/bash
 
+# このファイルはローカル確認用
+
 set -e  # コマンドが失敗したらスクリプトを終了
+
+# yaml定義から生成
+mvn compile exec:java
 
 create () {
     cd ./tex
