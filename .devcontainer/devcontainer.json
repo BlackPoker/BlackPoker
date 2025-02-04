@@ -21,6 +21,7 @@
 	  "donjayamanne.githistory",
 	  "mhutchie.git-graph",
 	  "shd101wyy.markdown-preview-enhanced",
-	  "corschenzi.mermaid-graphical-editor"
+	  "corschenzi.mermaid-graphical-editor",
+	  "ms-vscode.live-server"
 	]
 }
