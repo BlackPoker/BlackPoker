@@ -133,15 +133,6 @@
           <configuration>
             <mainClass>com.github.blackpoker.actionlist.ActionListGen</mainClass>
             <arguments>
-              <!-- <argument>-i</argument>
-              <argument>original/v5-QA.ods</argument>
-              <argument>-o</argument>
-              <argument>web-site/static/v5-QA.html</argument>
-              <argument>-t</argument>
-              <argument>v5-QA</argument> -->
-
-              <!-- <argument>-i</argument>
-              <argument>original/v5-act.ods</argument> -->
 
               <!-- std -->
               <argument>-i original/act.yaml -o web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
@@ -151,16 +142,6 @@
               <!-- extra -->
               <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument>
               
-              <!-- extra -->
-              <!-- <argument>-i</argument>
-              <argument>original/v5-extra.ods</argument>
-              <argument>-o</argument>
-              <argument>web-site/static/v5-ex.html</argument>
-              <argument>-t</argument>
-              <argument>v5-extra</argument>
-              <argument>-texOutput</argument>
-              <argument>./tex/blackpoker-v5-extra.tex</argument> -->
-
             </arguments>
             <systemProperties>
               <systemProperty>

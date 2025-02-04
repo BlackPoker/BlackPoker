@@ -207,69 +207,69 @@
 {\scriptsize\bf ${nestList.type}}
 \end{tcolorbox}
 \vspace{-1zh}%余白削除
-#foreach( $row in ${nestList.acts})
-## arg0とがformatに含まれている行のみ出力する
-#if(${row.format.contains(${arg0})})
+    #foreach( $row in ${nestList.acts})
+        ## arg0とがformatに含まれている行のみ出力する
+        #if(${row.format.contains(${arg0})})
 %%% Action %%%
 %\vspace{1zh} %余白追加
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if(${row.format.contains(${arg0})})
-#if(${row.format.contains('lite')})
+            #if(${row.format.contains(${arg0})})
+                #if(${row.format.contains('lite')})
 {\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) [lite]}} %Actionタイトル
-#elseif(${row.format.contains('std')})
+                #elseif(${row.format.contains('std')})
 {\small\bf ○ ${row.actName} {\scriptsize (${row.actType}) [std]}} %Actionタイトル
-#elseif(${row.format.contains('pro')})
+                #elseif(${row.format.contains('pro')})
 {\small\bf ● ${row.actName} {\scriptsize (${row.actType}) [pro]}} %Actionタイトル
-#elseif(${row.format.contains('mast')})
+                #elseif(${row.format.contains('mast')})
 {\small\bf ◎ ${row.actName} {\scriptsize (${row.actType}) [mast]}} %Actionタイトル
-#end
-#end
+                #end
+            #end
 \hfill 
-#if(${row.actTime} != "")
+            #if(${row.actTime} != "")
 {\footnotesize\bf @${row.actTime} }
-#end
-#if(${row.actCost} != "")
+            #end
+            #if(${row.actCost} != "")
   {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
-#end
+            #end
 
-#if(${row.actKey.trim()} != "")
+            #if(${row.actKey.trim()} != "")
 {\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
-#end
+            #end
 
-#if(${row.actNote.trim()} != "")
+            #if(${row.actNote.trim()} != "")
 %特記事項
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 
 ${texFn.cnv(${row.actNote})}
-#end
-#if(${row.actTarget.trim()} != "")
+            #end
+            #if(${row.actTarget.trim()} != "")
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 {\bf（対象）}
 
 ${texFn.cnv(${row.actTarget})}
-#end
-#if(${row.actEffect.trim()} != "")
+            #end
+            #if(${row.actEffect.trim()} != "")
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 
-#if(${row.actS.trim()} != "")
+                #if(${row.actS.trim()} != "")
 {\bf（即時効果）}
-#end
-#if(${row.actS.trim()} == "")
+                #end
+                #if(${row.actS.trim()} == "")
 {\bf（通常効果）}
-#end
+                #end
 
 ${texFn.cnv(${row.actEffect})}
-#end
-#end
-#end
+            #end
+        #end
+    #end
 
 #end
 
@@ -295,37 +295,41 @@ ${texFn.cnv(${row.actEffect})}
 {\scriptsize\bf ${nestList.type}}
 \end{tcolorbox}
 \vspace{-1zh}%余白削除
-#foreach( $row in ${nestList.chars})
-## arg0とがformatに含まれている行のみ出力する
-#if(${row.format.contains(${arg0})})
+    #foreach( $row in ${nestList.chars})
+        ## arg0とがformatに含まれている行のみ出力する
+        #if(${row.format.contains(${arg0})})
 %%% Character %%%
 %\vspace{1zh} %余白追加
 \vspace{2mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-#if(${row.format.contains(${arg0})})
-#if(${row.format.contains('lite')})
+            #if(${row.format.contains(${arg0})})
+                #if(${row.format.contains('lite')})
 {\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) [lite]}} %Characterタイトル
-#elseif(${row.format.contains('std')})
+                #elseif(${row.format.contains('std')})
 {\small\bf ○ ${row.charName} {\scriptsize (${row.charType}) [std]}} %Characterタイトル
-#elseif(${row.format.contains('pro')})
+                #elseif(${row.format.contains('pro')})
 {\small\bf ● ${row.charName} {\scriptsize (${row.charType}) [pro]}} %Characterタイトル
-#end
-#end
+                #end
+            #end
 \hfill 
-#if(${row.charKey.trim()} != "")
+            #if(${row.charKey.trim()} != "")
 {\footnotesize\bf ★${texFn.cnv(${row.charKey})} }
-#end
+            #end
 
-#if(${row.charNote.trim()} != "")
+            #if(${row.charSize})
+{\bf サイズ : ${texFn.cnv(${row.charSize})} }
+            #end
+
+            #if(${row.charNote.trim()} != "")
 %特記事項
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 
 ${texFn.cnv(${row.charNote})}
-#end
-#if(${row.charAbility.trim()} != "")
+            #end
+            #if(${row.charAbility.trim()} != "")
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
@@ -333,9 +337,9 @@ ${texFn.cnv(${row.charNote})}
 {\bf（能力）}
 
 ${texFn.cnv(${row.charAbility})}
-#end
-#end
-#end
+            #end
+        #end
+    #end
 
 #end
 
