@@ -9,9 +9,9 @@ skinparam defaultTextAlignment center
 FA5_CHESS_PAWN(P1C,コンポーネント)
 :プレイヤー1: as Player1
 :プレイヤー2: as Player2
-(〇〇アクションを起こせる) as Act1 <<能力>>
-(●●アクションを起こせる) as Act2 <<能力>>
-(△△アクションを起こせる) as Act3 <<能力>>
+(あなたのすべての兵士を+1する) as Act1 <<能力>>
+(あなたはダメージを受けなくなる) as Act2 <<能力>>
+(速攻魔法を起こす際に\nコストを支払わなくてよい) as Act3 <<能力>>
 Player1 ---> (Act1) : "能力"
 Player1 ---> (Act2) : "能力"
 P1C --> (Act3) : "能力"
