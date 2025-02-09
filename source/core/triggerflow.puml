@@ -5,10 +5,10 @@
 |Main method|
 start
 :[6-1] 誘発したアクションを分類しバッファに追加;
-note left
+note right
     「即時/通常 × メイン/クイック」で分類
 end note
-note left
+note right
     誘発したアクションのコントローラーは
     起因となったアクションのコントローラー
     になります。
