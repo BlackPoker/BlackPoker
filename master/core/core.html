@@ -224,7 +224,7 @@
 <p>コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
 コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。</p>
 </div>
-<figure class="align-default" id="id16">
+<figure class="align-default" id="id18">
 <p class="plantuml">
 <img src="../_images/plantuml-5973875432da5c6c9c30841afa726d28ed2ec522.svg" alt="hide methods
 hide circle
@@ -238,7 +238,7 @@ class アクション {
 コントローラー
 }"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id16" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id18" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </section>
@@ -247,7 +247,7 @@ class アクション {
 <p>能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。</p>
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
 (<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
-<figure class="align-default" id="id17">
+<figure class="align-default" id="id19">
 <span id="ability-image"></span><p class="plantuml">
 <img src="../_images/plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.svg" alt="&#64;startuml
 
@@ -271,7 +271,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id17" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id19" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>能力には、次の種類があります。</p>
@@ -291,87 +291,87 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <section id="coreflowsec">
 <span id="index-14"></span><span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
 <p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
-<figure class="align-default" id="id18">
+<figure class="align-default" id="id20">
 <span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-06d74c8ca532cbff699e6d17eac527fc25dc81ee.svg" alt="&#64;startuml
+<img src="../_images/plantuml-6568b66a57f86ed02d142e8e9854ddebd01be8a1.svg" alt="&#64;startuml
 start
-:[1]ゲーム開始;
-:[2]ターンプレイヤーにチャンスを移動;
+:[1] ゲーム開始;
+:[2] ターンプレイヤーにチャンスを移動;
 repeat
-if ([3]アクションを起こすか？) then (Yes)
-    :[4]パス記録のリセット;
-    :[5]アクションを起こす;
-    :[6]誘発チェック;
-    if ([7]即時効果か？) then (Yes)
-        :[8]アクションの解決;
-        if ([9]勝敗判定) then (決着)
+if ([3] アクションを起こすか？) then (Yes)
+    :[4] パス記録のリセット;
+    :[5] アクションを起こす;
+    :[6] 誘発チェック;
+    if ([7] 即時効果か？) then (Yes)
+        :[8] アクションの解決;
+        if ([9] 勝敗判定) then (決着)
             stop
         endif
     else (No)
-        :[10]ステージに追加;
+        :[10] ステージに追加;
     endif
-    :[6]誘発チェック;
+    :[6] 誘発チェック;
 else (No)
-    :[11]パス記録に登録;
-    if ([12]全員がパスしたか？) then (Yes)
-        if ([13]ステージにアクションが存在するか？) then (Yes)
-            :[14]ステージから取出し;
-            :[8]アクションの解決;
-            if ([9]勝敗判定) then (決着)
+    :[11] パス記録に登録;
+    if ([12] 全員がパスしたか？) then (Yes)
+        if ([13] ステージにアクションが存在するか？) then (Yes)
+            :[14] ステージから取出し;
+            :[8] アクションの解決;
+            if ([9] 勝敗判定) then (決着)
                 stop
             endif
-            :[6]誘発チェック;
-            :[2]ターンプレイヤーにチャンスを移動;
+            :[6] 誘発チェック;
+            :[2] ターンプレイヤーにチャンスを移動;
         else (No)
         endif
     else (No)
-        :[15]チャンス移動;
+        :[15] チャンス移動;
     endif
 endif
 repeat while()
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id18" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="core-gamestart">
-<dt>[1]ゲーム開始</dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
+<dt><strong>[1] ゲーム開始</strong></dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
 </dd>
-<dt>[2]ターンプレイヤーにチャンスを移動</dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
+<dt><strong>[2] ターンプレイヤーにチャンスを移動</strong></dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
 </dd>
-<dt>[3]アクションを起こすか？</dt><dd><p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
+<dt><strong>[3] アクションを起こすか？</strong></dt><dd><p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
 </dd>
-<dt>[4]パス記録のリセット</dt><dd><p>パスしたプレイヤーの記録をリセットします。</p>
+<dt><strong>[4] パス記録のリセット</strong></dt><dd><p>パスしたプレイヤーの記録をリセットします。</p>
 </dd>
-<dt>[5]アクションを起こす</dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
+<dt><strong>[5] アクションを起こす</strong></dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
 </dd>
-<dt>[6]誘発チェック</dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">2.8.1 誘発チェック</span></a> を参照してください。</p>
+<dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">2.8.1 誘発チェック</span></a> を参照してください。</p>
 </dd>
-<dt>[7]即時効果か？</dt><dd><p>起こしたアクションが即時効果か通常効果か判定します。</p>
+<dt><strong>[7] 即時効果か？</strong></dt><dd><p>起こしたアクションが即時効果か通常効果か判定します。</p>
 </dd>
 </dl>
 <dl class="simple" id="actresolve">
-<dt>[8]アクションの解決</dt><dd><p>アクションの効果に定義されている内容を実行します。
+<dt><strong>[8] アクションの解決</strong></dt><dd><p>アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
 </dd>
 </dl>
 <dl class="simple" id="winlose">
-<dt>[9]勝敗判定</dt><dd><p>ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。</p>
+<dt><strong>[9] 勝敗判定</strong></dt><dd><p>ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。</p>
 </dd>
-<dt>[10]ステージに追加</dt><dd><p>ステージというアクションを貯めておける領域に追加します。</p>
+<dt><strong>[10] ステージに追加</strong></dt><dd><p>ステージというアクションを貯めておける領域に追加します。</p>
 </dd>
-<dt>[11]パス記録に登録</dt><dd><p>パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。</p>
+<dt><strong>[11] パス記録に登録</strong></dt><dd><p>パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。</p>
 </dd>
-<dt>[12]全員がパスしたか？</dt><dd><p>パス記録に全てのプレイヤー名が記録されているか判定します。</p>
+<dt><strong>[12] 全員がパスしたか？</strong></dt><dd><p>パス記録に全てのプレイヤー名が記録されているか判定します。</p>
 </dd>
-<dt>[13]ステージにアクションが存在するか？</dt><dd><p>ステージにアクションが存在するか判定します。</p>
+<dt><strong>[13] ステージにアクションが存在するか？</strong></dt><dd><p>ステージにアクションが存在するか判定します。</p>
 </dd>
-<dt>[14]ステージから取出し</dt><dd><p>最後にステージに追加されたアクションをステージから取出します。</p>
+<dt><strong>[14] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたアクションをステージから取出します。</p>
 </dd>
-<dt>[15]チャンス移動</dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
+<dt><strong>[15] チャンス移動</strong></dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。</p>
 </dd>
 </dl>
@@ -379,94 +379,269 @@ repeat while()
 <span id="id14"></span><h3><span class="section-number">2.8.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
 <p>能力の中でも誘発型能力は、なにかをきっかけにしてアクションが起きる条件が定義されています。
 誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。</p>
-<p>誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
-誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーになります。
+<p>誘発チェックでは、誘発したアクションの効果を解決またはステージに追加します。
+誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーとなります。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
-<figure class="align-default" id="id19">
+<figure class="align-default" id="id21">
 <span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19.svg" alt="&#64;startuml
+<img src="../_images/plantuml-6bf65596a98a1c6e0b4b6fd6138e06008a2ac831.svg" alt="&#64;startuml
+'==============================
+'【Main method】（アクション分類・プレイヤー毎処理）
+'==============================
+|Main method|
 start
-:[6-1]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-while([6-2]誘発即時リスト、誘発通常リスト全体の件数判定) is (1件以上)
-    group 即時効果:プレイヤー単位に繰返し
+:[6-1] 誘発したアクションを分類しバッファに追加;
+note right
+    「即時/通常 × メイン/クイック」で分類
+end note
+note right
+    誘発したアクションのコントローラーは
+    起因となったアクションのコントローラー
+    になります。
+end note
+
+while ([6-2] バッファは空か？) is (No) 
+  ' 外部ループ：バッファに何らかのアクションが残っている限り処理する
+
+  '-------------------------------------------
+  '【即時効果：プレイヤー毎に処理】
+  '-------------------------------------------
+  while ([6-3] バッファに即時効果はあるか？) is (Yes)
+
+    group 即時効果: プレイヤー毎に処理
     note
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
-    repeat :[6-3]プレイヤー毎に誘発即時リスト\nの即時効果のアクションを解決;
-        group 即時効果:アクション単位に繰返し
-        repeat :[6-4]誘発即時リストから即時効果の\nアクションを1つ取り出す;
-            :[6-5]即時効果のアクションを解決;
-            if([6-6]勝敗判定) then (決着)
-                stop
-            endif
-            :[6-7]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-        repeat while ([6-8]誘発即時リストの件数が0件でなけば繰り返す) is (YES)
-        end group
-    repeat while([6-9]全ての誘発即時リストの件数が0件でなければ繰り返す) is (YES)
-    end group
 
-    group 通常効果:プレイヤー単位に繰返し
+      while ([6-4] 該当プレイヤーに即時効果があるか？) is (Yes)
+        :[6-5] タイミング=メインの即時アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-6] タイミング=クイックの即時アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-7] 次のプレイヤーへ;
+      endwhile (No)
+    end group
+  endwhile (No)
+
+  '-------------------------------------------
+  '【通常効果：プレイヤー毎に処理】
+  '-------------------------------------------
+  while ([6-8] バッファに通常効果はあるか？) is (Yes)
+
+    group 通常効果: プレイヤー毎に処理
     note
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
-    repeat :[6-10]プレイヤー毎に誘発通常リスト\nのアクションをステージに追加;
-        :[6-11]通常効果のアクションを\n任意の順でステージに追加;
-        :[6-12]誘発したアクションをプレイヤー毎\nの誘発即時リストと誘発通常リストに追加;
-    repeat while ([6-13]誘発リストに通常効果のアクションがあれば繰り返す) is (YES)
-    end group
 
-endwhile (0件)
-    stop
+      while ([6-9] 該当プレイヤーに通常効果があるか？) is (Yes)
+        :[6-10] タイミング=メインの通常アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-11] タイミング=クイックの通常アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-12] 次のプレイヤーへ;
+      endwhile (No)
+    end group
+  endwhile (Yes)
+
+endwhile (Yes)
+stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id19" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id21" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="trigger-act-gather">
-<dt>[6-1]誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加</dt><dd><p>全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
-誘発したアクションをコントローラーのプレイヤー毎に即時効果と通常効果に分け、
-プレイヤー毎の誘発即時リスト、誘発通常リストに追加します。</p>
+<dt><strong>[6-1] 誘発したアクションを分類しバッファに追加</strong></dt><dd><p>各プレイヤーが発生させた誘発アクションを、効果の種類（即時効果または通常効果）および
+タイミング（メインまたはクイック）に基づいて分類し、一旦アクションバッファに追加します。</p>
 </dd>
-<dt>[6-2]誘発即時リスト、誘発通常リスト全体の件数判定</dt><dd><p>プレイヤー毎の誘発即時リスト、誘発通常リストの合計件数を判定します。</p>
+<dt><strong>[6-2] バッファは空か？</strong></dt><dd><p>アクションバッファが空であるかどうかを判定します。
+未処理のアクションが残っている場合は、以降の処理ループを継続します。</p>
 </dd>
-<dt>[6-3]プレイヤー毎に誘発即時リストの即時効果のアクションを解決</dt><dd><p>プレイヤー毎に誘発即時リストの即時効果のアクションを解決を行います。
-順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
+<dt><strong>[6-3] バッファに即時効果はあるか？</strong></dt><dd><p>アクションバッファ内に即時効果アクションが存在するかを判定します。
+未処理の即時効果アクションが残っている場合、
+ターンプレイヤーから順に即時効果の処理グループへ進みます。</p>
 </dd>
-<dt>[6-4]誘発即時リストから即時効果のアクションを1つ取り出す</dt><dd><p>順番のプレイヤーは、 プレイヤー毎の誘発即時リストから1つ即時効果のアクションを取り出します。
-取り出すアクションは任意に選択できます。</p>
+<dt><strong>[6-4] 該当プレイヤーに即時効果があるか？</strong></dt><dd><p>現在対象となっているプレイヤーのアクションバッファを確認し、
+即時効果アクションが存在するかを判定します。
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
-<dt>[6-5]即時効果のアクションを解決</dt><dd><p>アクションの効果を解決します。
-詳しくは <a class="reference internal" href="#actresolve"><span class="std std-ref">[8]アクションの解決</span></a> 参照。</p>
+<dt><strong>[6-5] タイミング=メインの即時アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」の即時効果アクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.8.1.1 誘発即時効果解決</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
-<dt>[6-6]勝敗判定</dt><dd><p>勝敗を判定します。
-詳しくは <a class="reference internal" href="#winlose"><span class="std std-ref">[9]勝敗判定</span></a> 参照。</p>
+<dt><strong>[6-6] タイミング=クイックの即時アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」の即時効果アクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.8.1.1 誘発即時効果解決</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
-<dt>[6-7]誘発したアクションをプレイヤー毎の誘発即時リスト、誘発通常リストに追加</dt><dd><p>詳しくは <a class="reference internal" href="#trigger-act-gather"><span class="std std-ref">[6-1]誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加</span></a> 参照。</p>
+<dt><strong>[6-7] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの即時効果アクションの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。</p>
 </dd>
-<dt>[6-8]誘発即時リストの件数が0件でなけば繰り返す</dt><dd><p>順番のプレイヤーの誘発即時リストに未解決の即時効果がある場合、
-即時効果の解決を繰返します。</p>
+<dt><strong>[6-8] バッファに通常効果はあるか？</strong></dt><dd><p>アクションバッファ内に通常効果アクションが存在するかを判定します。
+未処理の通常効果アクションが残っている場合、
+通常効果の処理グループへ進みます。</p>
 </dd>
-<dt>[6-9]全ての誘発即時リストの件数が0件でなければ繰り返す</dt><dd><p>プレイヤー毎の誘発即時リストに未解決のアクションがある場合、
-再びプレイヤー毎に誘発即時リストの即時効果の解決を繰返します。</p>
+<dt><strong>[6-9] 該当プレイヤーに通常効果があるか？</strong></dt><dd><p>現在対象となっているプレイヤーのアクションバッファを確認し、
+通常効果アクションが存在するかを判定します。
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
-<dt>[6-10]プレイヤー毎に誘発通常リストのアクションをステージに追加</dt><dd><p>プレイヤー毎に誘発通常リストのアクションをステージに追加します。
-順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。</p>
+<dt><strong>[6-10] タイミング=メインの通常アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」の通常効果アクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.8.1.2 通常効果：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
-<dt>[6-11]通常効果のアクションを任意の順でステージに追加</dt><dd><p>順番のプレイヤーは、 プレイヤー毎の誘発通常リストからアクションを任意の順でステージに追加します。</p>
+<dt><strong>[6-11] タイミング=クイックの通常アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」の通常効果アクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.8.1.2 通常効果：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
-<dt>[6-12]誘発したアクションをプレイヤー毎に誘発即時リストと誘発通常リストにまとめる</dt><dd><p>詳しくは <a class="reference internal" href="#trigger-act-gather"><span class="std std-ref">[6-1]誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加</span></a> 参照。</p>
+<dt><strong>[6-12] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの通常効果アクションの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。</p>
 </dd>
-<dt>[6-13]誘発通常リストにアクションがあれば繰り返す</dt><dd><p>プレイヤー毎の誘発通常リストにアクションがある場合、
-順番を次のプレイヤーに渡し、プレイヤー毎に誘発通常リストのアクションをステージに追加します。</p>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>各処理グループ内では、必ずターンプレイヤーから始まり、
+ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
+また、ループはアクションバッファに未処理のアクションが存在する限り繰り返されます。</p>
+</div>
+<section id="trigger-act-s">
+<span id="id15"></span><h4><span class="section-number">2.8.1.1. </span>誘発即時効果解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発した即時効果を処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 2.5</span></a>)</p>
+<figure class="align-default" id="id22">
+<span id="trigger-flow-s"></span><p class="plantuml">
+<img src="../_images/plantuml-76e4659c902dffbb18fa3b6ab9c06b2205b36339.svg" alt="&#64;startuml
+'==============================
+'【即時効果：アクション毎に処理】
+'==============================
+
+start
+while ([6-5-1] バッファから該当の即時効果アクションがあるか？) is (Yes)
+  :[6-5-2] バッファから即時効果アクションを取り出す;
+  :[6-5-3] 取り出した即時効果アクションの効果を解決する;
+  if ([6-5-4] 勝敗判定) then (決着)
+    stop
+  endif
+  if ([6-5-5] アクションが新たな誘発を発生させたか？) then (Yes)
+    :[6-5-6] 誘発したアクションをバッファに追加;
+    note left
+      誘発したアクションのコントローラーは
+      起因となったアクションのコントローラー
+      になります。
+    end note
+  endif
+endwhile
+stop
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.5 </span><span class="caption-text">誘発チェック-即時効果処理</span><a class="headerlink" href="#id22" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt><strong>[6-5-1] バッファから該当の即時効果アクションがあるか？</strong></dt><dd><p>アクションバッファから、対象プレイヤーおよび該当タイミングの即時効果アクションを1件取り出せるかを判定します。
+取り出し可能な場合、以降の処理へ進み、取り出せなくなるまでこのループを継続します。</p>
+</dd>
+<dt><strong>[6-5-2] バッファから即時効果アクションを取り出す</strong></dt><dd><p>条件を満たした即時効果アクションを、アクションバッファから実際に取り出します。
+取り出されたアクションは、解決処理の対象となります。</p>
+</dd>
+<dt><strong>[6-5-3] 取り出した即時効果アクションの効果を解決する</strong></dt><dd><p>取り出された即時効果アクションの効果（例えば、ダメージ処理や特殊効果など）を実行し、
+アクションの解決を行います。詳細な処理内容は、該当のアクション効果解決処理を参照してください。</p>
+</dd>
+<dt><strong>[6-5-4] 勝敗判定</strong></dt><dd><p>勝敗を判定します。
+詳しくは <a class="reference internal" href="#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> 参照。</p>
+</dd>
+<dt><strong>[6-5-5] アクションが新たな誘発を発生させたか？</strong></dt><dd><p>即時効果アクションの解決後、実行したアクションが新たな誘発を発生させたかどうかを確認します。
+発生している場合は、その誘発アクションを再度バッファに追加する必要があります。</p>
+</dd>
+<dt><strong>[6-5-6] 誘発したアクションをバッファに追加</strong></dt><dd><p>新たに発生した誘発アクションを、アクションバッファに追加します。
+これにより、再帰的なアクション処理が可能となり、次のループで該当アクションの取り出し処理が実行されます。</p>
+</dd>
+</dl>
+</section>
+<section id="trigger-act-n">
+<span id="id16"></span><h4><span class="section-number">2.8.1.2. </span>通常効果：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発した通常効果を処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 2.6</span></a>)</p>
+<figure class="align-default" id="id23">
+<span id="trigger-flow-n"></span><p class="plantuml">
+<img src="../_images/plantuml-1d96ac9119bd1817ae50ecebf9273d9f7a1e5adf.svg" alt="&#64;startuml
+'==============================
+'【通常効果：アクション毎に処理】
+'==============================
+
+start
+while ([6-10-1] バッファから該当の通常効果アクションがあるか？) is (Yes)
+  :[6-10-2] バッファから通常効果アクションを取り出す;
+  if ([6-10-3] 取り出した通常効果のタイミングがメインか判定) then (Yes)
+    if ([6-10-4] ステージが空か判定？) then (Yes)
+      :[6-10-5] 通常効果アクション\nをステージに追加;
+    else (No)
+      :[6-10-6] 通常効果アクションを破棄;
+    endif
+  else (No)
+    :[6-10-7] タイミングがクイックの場合、\n通常効果アクションをステージに追加;
+  endif
+  if ([6-10-8] アクションが誘発したかを判定) then (Yes)
+    :[6-10-9] 誘発したアクションをバッファに追加;
+    note left
+      誘発したアクションのコントローラーは
+      起因となったアクションのコントローラー
+      になります。
+    end note
+  else (No)
+  endif
+endwhile (No)
+stop
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.6 </span><span class="caption-text">誘発チェック-通常効果処理</span><a class="headerlink" href="#id23" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt><strong>[6-10-1] バッファから該当の通常効果アクションがあるか？</strong></dt><dd><p>アクションバッファから、呼び出し元から渡された対象プレイヤーおよび該当タイミングに合致する通常効果アクションが
+1件取り出せるかどうかを判定します。取り出し可能な場合は以降の処理に進み、
+取り出せなくなるまでこのループを継続します。</p>
+</dd>
+<dt><strong>[6-10-2] バッファから通常効果アクションを取り出す</strong></dt><dd><p>条件に合致する通常効果アクションを、アクションバッファから実際に取り出します。
+取り出されたアクションは、次のタイミング判定の対象となります。</p>
+</dd>
+<dt><strong>[6-10-3] 取り出した通常効果のタイミングがメインか判定</strong></dt><dd><p>取り出された通常効果アクションのタイミングが「メイン」であるかどうかを判定します。
+「Yes」と判定された場合は、ステージへの追加前に空き状況の確認へ進みます。
+「No」の場合は、クイックタイミングとして処理を行います。</p>
+</dd>
+<dt><strong>[6-10-4] ステージが空か判定？</strong></dt><dd><p>タイミングがメインの場合、アクションをステージに追加できるかどうか、
+すなわちステージに空きがあるかを判定します。</p>
+</dd>
+<dt><strong>[6-10-5] 通常効果アクションをステージに追加</strong></dt><dd><p>ステージが空いている場合、取り出した通常効果アクションをステージに追加します。
+これにより、通常効果が次のフェーズで適用されます。</p>
+</dd>
+<dt><strong>[6-10-6] 通常効果アクションを破棄</strong></dt><dd><p>ステージが埋まっている場合、取り出した通常効果アクションを破棄します。
+この処理により、ステージの状態に合わせた適切な処理が行われます。</p>
+</dd>
+<dt><strong>[6-10-7] タイミングがクイックの場合、通常効果アクションをステージに追加</strong></dt><dd><p>取り出した通常効果アクションのタイミングが「クイック」である場合、
+ステージの空き状況にかかわらず無条件でアクションをステージに追加します。</p>
+</dd>
+<dt><strong>[6-10-8] アクションが誘発したかを判定</strong></dt><dd><p>通常効果アクションの解決後、そのアクションが新たな誘発を発生させたかどうかを判定します。
+誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。</p>
+</dd>
+<dt><strong>[6-10-9] 誘発したアクションをアクションバッファに追加</strong></dt><dd><p>新たに誘発されたアクションが存在する場合、該当アクションをアクションバッファに追加します。
+これにより、誘発処理の再実行が可能となります。</p>
 </dd>
 </dl>
 </section>
 </section>
-<section id="id15">
-<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h2>
+</section>
+<section id="id17">
+<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h2>
 <p>コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
@@ -497,7 +672,7 @@ endwhile (0件)
 <li class="toctree-l2"><a class="reference internal" href="#component">2.6. コンポーネント</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#index-11">2.7. 能力</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coreflowsec">2.8. コアフロー</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id15">2.9. まとめ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id17">2.9. まとめ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>

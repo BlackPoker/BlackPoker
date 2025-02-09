@@ -72,7 +72,7 @@
 
 
 \title{BlackPoker}
-\date{2025年02月08日}
+\date{2025年02月09日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -443,7 +443,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5973875432da5c6c9c30841afa726d28ed2ec522}.pdf}
-\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id16}}\end{figure}
+\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id18}}\end{figure}
 
 \index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
 
@@ -461,7 +461,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4}.pdf}
-\caption{能力のイメージ}\label{\detokenize{core/core:id17}}\label{\detokenize{core/core:ability-image}}\end{figure}
+\caption{能力のイメージ}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:ability-image}}\end{figure}
 
 \sphinxAtStartPar
 能力には、次の種類があります。
@@ -497,42 +497,42 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-06d74c8ca532cbff699e6d17eac527fc25dc81ee}.pdf}
-\caption{コアフロー}\label{\detokenize{core/core:id18}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-6568b66a57f86ed02d142e8e9854ddebd01be8a1}.pdf}
+\caption{コアフロー}\label{\detokenize{core/core:id20}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 \phantomsection\label{\detokenize{core/core:core-gamestart}}\begin{description}
-\sphinxlineitem{{[}1{]}ゲーム開始}
+\sphinxlineitem{\sphinxstylestrong{{[}1{]} ゲーム開始}}
 \sphinxAtStartPar
 先攻を決め、ゲームを始める準備を行います。
 
-\sphinxlineitem{{[}2{]}ターンプレイヤーにチャンスを移動}
+\sphinxlineitem{\sphinxstylestrong{{[}2{]} ターンプレイヤーにチャンスを移動}}
 \sphinxAtStartPar
 ターンを持っているプレイヤーにチャンスを移動します。
 
-\sphinxlineitem{{[}3{]}アクションを起こすか？}
+\sphinxlineitem{\sphinxstylestrong{{[}3{]} アクションを起こすか？}}
 \sphinxAtStartPar
 チャンスを持っているプレイヤーはアクションを起こすかを判断します。
 
-\sphinxlineitem{{[}4{]}パス記録のリセット}
+\sphinxlineitem{\sphinxstylestrong{{[}4{]} パス記録のリセット}}
 \sphinxAtStartPar
 パスしたプレイヤーの記録をリセットします。
 
-\sphinxlineitem{{[}5{]}アクションを起こす}
+\sphinxlineitem{\sphinxstylestrong{{[}5{]} アクションを起こす}}
 \sphinxAtStartPar
 アクションを起こしこれからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。
 
-\sphinxlineitem{{[}6{]}誘発チェック}
+\sphinxlineitem{\sphinxstylestrong{{[}6{]} 誘発チェック}}
 \sphinxAtStartPar
 ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは \hyperref[\detokenize{core/core:trigger-check}]{\ref{\detokenize{core/core:trigger-check}} \nameref{\detokenize{core/core:trigger-check}}} を参照してください。
 
-\sphinxlineitem{{[}7{]}即時効果か？}
+\sphinxlineitem{\sphinxstylestrong{{[}7{]} 即時効果か？}}
 \sphinxAtStartPar
 起こしたアクションが即時効果か通常効果か判定します。
 
 \end{description}
 \phantomsection\label{\detokenize{core/core:actresolve}}\begin{description}
-\sphinxlineitem{{[}8{]}アクションの解決}
+\sphinxlineitem{\sphinxstylestrong{{[}8{]} アクションの解決}}
 \sphinxAtStartPar
 アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
@@ -540,31 +540,31 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 \end{description}
 \phantomsection\label{\detokenize{core/core:winlose}}\begin{description}
-\sphinxlineitem{{[}9{]}勝敗判定}
+\sphinxlineitem{\sphinxstylestrong{{[}9{]} 勝敗判定}}
 \sphinxAtStartPar
 ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。
 
-\sphinxlineitem{{[}10{]}ステージに追加}
+\sphinxlineitem{\sphinxstylestrong{{[}10{]} ステージに追加}}
 \sphinxAtStartPar
 ステージというアクションを貯めておける領域に追加します。
 
-\sphinxlineitem{{[}11{]}パス記録に登録}
+\sphinxlineitem{\sphinxstylestrong{{[}11{]} パス記録に登録}}
 \sphinxAtStartPar
 パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。
 
-\sphinxlineitem{{[}12{]}全員がパスしたか？}
+\sphinxlineitem{\sphinxstylestrong{{[}12{]} 全員がパスしたか？}}
 \sphinxAtStartPar
 パス記録に全てのプレイヤー名が記録されているか判定します。
 
-\sphinxlineitem{{[}13{]}ステージにアクションが存在するか？}
+\sphinxlineitem{\sphinxstylestrong{{[}13{]} ステージにアクションが存在するか？}}
 \sphinxAtStartPar
 ステージにアクションが存在するか判定します。
 
-\sphinxlineitem{{[}14{]}ステージから取出し}
+\sphinxlineitem{\sphinxstylestrong{{[}14{]} ステージから取出し}}
 \sphinxAtStartPar
 最後にステージに追加されたアクションをステージから取出します。
 
-\sphinxlineitem{{[}15{]}チャンス移動}
+\sphinxlineitem{\sphinxstylestrong{{[}15{]} チャンス移動}}
 \sphinxAtStartPar
 チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。
@@ -579,84 +579,204 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。
 
 \sphinxAtStartPar
-誘発チェックでは、誘発したアクションの効果を解決もしくは、ステージに追加します。
-誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーになります。
+誘発チェックでは、誘発したアクションの効果を解決またはステージに追加します。
+誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーとなります。
 誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow}}})
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-3706c977d1e3edc6c020c1b97b3098f0c6d32a19}.pdf}
-\caption{誘発チェック}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-6bf65596a98a1c6e0b4b6fd6138e06008a2ac831}.pdf}
+\caption{誘発チェック}\label{\detokenize{core/core:id21}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
 \phantomsection\label{\detokenize{core/core:trigger-act-gather}}\begin{description}
-\sphinxlineitem{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}1{]} 誘発したアクションを分類しバッファに追加}}
 \sphinxAtStartPar
-全てのプレイヤー、コンポーネントが持っている誘発型能力を確認します。
-誘発したアクションをコントローラーのプレイヤー毎に即時効果と通常効果に分け、
-プレイヤー毎の誘発即時リスト、誘発通常リストに追加します。
+各プレイヤーが発生させた誘発アクションを、効果の種類（即時効果または通常効果）および
+タイミング（メインまたはクイック）に基づいて分類し、一旦アクションバッファに追加します。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}2{]}誘発即時リスト、誘発通常リスト全体の件数判定}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}2{]} バッファは空か？}}
 \sphinxAtStartPar
-プレイヤー毎の誘発即時リスト、誘発通常リストの合計件数を判定します。
+アクションバッファが空であるかどうかを判定します。
+未処理のアクションが残っている場合は、以降の処理ループを継続します。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}3{]}プレイヤー毎に誘発即時リストの即時効果のアクションを解決}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}3{]} バッファに即時効果はあるか？}}
 \sphinxAtStartPar
-プレイヤー毎に誘発即時リストの即時効果のアクションを解決を行います。
-順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
+アクションバッファ内に即時効果アクションが存在するかを判定します。
+未処理の即時効果アクションが残っている場合、
+ターンプレイヤーから順に即時効果の処理グループへ進みます。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}4{]}誘発即時リストから即時効果のアクションを1つ取り出す}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}4{]} 該当プレイヤーに即時効果があるか？}}
 \sphinxAtStartPar
-順番のプレイヤーは、 プレイヤー毎の誘発即時リストから1つ即時効果のアクションを取り出します。
-取り出すアクションは任意に選択できます。
+現在対象となっているプレイヤーのアクションバッファを確認し、
+即時効果アクションが存在するかを判定します。
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}5{]}即時効果のアクションを解決}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5{]} タイミング=メインの即時アクションを処理}}
 \sphinxAtStartPar
-アクションの効果を解決します。
-詳しくは {\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]}アクションの解決}}}} 参照。
+該当プレイヤーについて、タイミングが「メイン」の即時効果アクションを実行します。
+詳細は \hyperref[\detokenize{core/core:trigger-act-s}]{\ref{\detokenize{core/core:trigger-act-s}} \nameref{\detokenize{core/core:trigger-act-s}}} をタイミング=メインとして参照してください。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}6{]}勝敗判定}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}6{]} タイミング=クイックの即時アクションを処理}}
+\sphinxAtStartPar
+同じプレイヤーについて、タイミングが「クイック」の即時効果アクションを実行します。
+詳細は \hyperref[\detokenize{core/core:trigger-act-s}]{\ref{\detokenize{core/core:trigger-act-s}} \nameref{\detokenize{core/core:trigger-act-s}}} をタイミング=クイックとして参照してください。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}7{]} 次のプレイヤーへ}}
+\sphinxAtStartPar
+現在のプレイヤーでの即時効果アクションの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}8{]} バッファに通常効果はあるか？}}
+\sphinxAtStartPar
+アクションバッファ内に通常効果アクションが存在するかを判定します。
+未処理の通常効果アクションが残っている場合、
+通常効果の処理グループへ進みます。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}9{]} 該当プレイヤーに通常効果があるか？}}
+\sphinxAtStartPar
+現在対象となっているプレイヤーのアクションバッファを確認し、
+通常効果アクションが存在するかを判定します。
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10{]} タイミング=メインの通常アクションを処理}}
+\sphinxAtStartPar
+該当プレイヤーについて、タイミングが「メイン」の通常効果アクションを実行します。
+詳細は \hyperref[\detokenize{core/core:trigger-act-n}]{\ref{\detokenize{core/core:trigger-act-n}} \nameref{\detokenize{core/core:trigger-act-n}}} をタイミング=メインとして参照してください。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}11{]} タイミング=クイックの通常アクションを処理}}
+\sphinxAtStartPar
+同じプレイヤーについて、タイミングが「クイック」の通常効果アクションを実行します。
+詳細は \hyperref[\detokenize{core/core:trigger-act-n}]{\ref{\detokenize{core/core:trigger-act-n}} \nameref{\detokenize{core/core:trigger-act-n}}} をタイミング=クイックとして参照してください。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}12{]} 次のプレイヤーへ}}
+\sphinxAtStartPar
+現在のプレイヤーでの通常効果アクションの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。
+
+\end{description}
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+各処理グループ内では、必ずターンプレイヤーから始まり、
+ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
+また、ループはアクションバッファに未処理のアクションが存在する限り繰り返されます。
+\end{sphinxadmonition}
+
+
+\subsubsection{誘発即時効果解決}
+\label{\detokenize{core/core:trigger-act-s}}\label{\detokenize{core/core:id15}}
+\sphinxAtStartPar
+誘発チェックで誘発した即時効果を処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow-s}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow-s}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-76e4659c902dffbb18fa3b6ab9c06b2205b36339}.pdf}
+\caption{誘発チェック\sphinxhyphen{}即時効果処理}\label{\detokenize{core/core:id22}}\label{\detokenize{core/core:trigger-flow-s}}\end{figure}
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}1{]} バッファから該当の即時効果アクションがあるか？}}
+\sphinxAtStartPar
+アクションバッファから、対象プレイヤーおよび該当タイミングの即時効果アクションを1件取り出せるかを判定します。
+取り出し可能な場合、以降の処理へ進み、取り出せなくなるまでこのループを継続します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}2{]} バッファから即時効果アクションを取り出す}}
+\sphinxAtStartPar
+条件を満たした即時効果アクションを、アクションバッファから実際に取り出します。
+取り出されたアクションは、解決処理の対象となります。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}3{]} 取り出した即時効果アクションの効果を解決する}}
+\sphinxAtStartPar
+取り出された即時効果アクションの効果（例えば、ダメージ処理や特殊効果など）を実行し、
+アクションの解決を行います。詳細な処理内容は、該当のアクション効果解決処理を参照してください。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}4{]} 勝敗判定}}
 \sphinxAtStartPar
 勝敗を判定します。
-詳しくは {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]}勝敗判定}}}} 参照。
+詳しくは {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]} 勝敗判定}}}} 参照。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}7{]}誘発したアクションをプレイヤー毎の誘発即時リスト、誘発通常リストに追加}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}5{]} アクションが新たな誘発を発生させたか？}}
 \sphinxAtStartPar
-詳しくは {\hyperref[\detokenize{core/core:trigger-act-gather}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}}}} 参照。
+即時効果アクションの解決後、実行したアクションが新たな誘発を発生させたかどうかを確認します。
+発生している場合は、その誘発アクションを再度バッファに追加する必要があります。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}8{]}誘発即時リストの件数が0件でなけば繰り返す}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}6{]} 誘発したアクションをバッファに追加}}
 \sphinxAtStartPar
-順番のプレイヤーの誘発即時リストに未解決の即時効果がある場合、
-即時効果の解決を繰返します。
+新たに発生した誘発アクションを、アクションバッファに追加します。
+これにより、再帰的なアクション処理が可能となり、次のループで該当アクションの取り出し処理が実行されます。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}9{]}全ての誘発即時リストの件数が0件でなければ繰り返す}
-\sphinxAtStartPar
-プレイヤー毎の誘発即時リストに未解決のアクションがある場合、
-再びプレイヤー毎に誘発即時リストの即時効果の解決を繰返します。
+\end{description}
 
-\sphinxlineitem{{[}6\sphinxhyphen{}10{]}プレイヤー毎に誘発通常リストのアクションをステージに追加}
-\sphinxAtStartPar
-プレイヤー毎に誘発通常リストのアクションをステージに追加します。
-順番はターンプレイヤーからターンが回る順にプレイヤー毎に行います。
 
-\sphinxlineitem{{[}6\sphinxhyphen{}11{]}通常効果のアクションを任意の順でステージに追加}
+\subsubsection{通常効果：アクション毎に処理}
+\label{\detokenize{core/core:trigger-act-n}}\label{\detokenize{core/core:id16}}
 \sphinxAtStartPar
-順番のプレイヤーは、 プレイヤー毎の誘発通常リストからアクションを任意の順でステージに追加します。
+誘発チェックで誘発した通常効果を処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow-n}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow-n}}})
 
-\sphinxlineitem{{[}6\sphinxhyphen{}12{]}誘発したアクションをプレイヤー毎に誘発即時リストと誘発通常リストにまとめる}
-\sphinxAtStartPar
-詳しくは {\hyperref[\detokenize{core/core:trigger-act-gather}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}6\sphinxhyphen{}1{]}誘発したアクションをプレイヤー毎の誘発即時リストと誘発通常リストに追加}}}} 参照。
+\begin{figure}[htbp]
+\centering
+\capstart
 
-\sphinxlineitem{{[}6\sphinxhyphen{}13{]}誘発通常リストにアクションがあれば繰り返す}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-1d96ac9119bd1817ae50ecebf9273d9f7a1e5adf}.pdf}
+\caption{誘発チェック\sphinxhyphen{}通常効果処理}\label{\detokenize{core/core:id23}}\label{\detokenize{core/core:trigger-flow-n}}\end{figure}
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}1{]} バッファから該当の通常効果アクションがあるか？}}
 \sphinxAtStartPar
-プレイヤー毎の誘発通常リストにアクションがある場合、
-順番を次のプレイヤーに渡し、プレイヤー毎に誘発通常リストのアクションをステージに追加します。
+アクションバッファから、呼び出し元から渡された対象プレイヤーおよび該当タイミングに合致する通常効果アクションが
+1件取り出せるかどうかを判定します。取り出し可能な場合は以降の処理に進み、
+取り出せなくなるまでこのループを継続します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}2{]} バッファから通常効果アクションを取り出す}}
+\sphinxAtStartPar
+条件に合致する通常効果アクションを、アクションバッファから実際に取り出します。
+取り出されたアクションは、次のタイミング判定の対象となります。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}3{]} 取り出した通常効果のタイミングがメインか判定}}
+\sphinxAtStartPar
+取り出された通常効果アクションのタイミングが「メイン」であるかどうかを判定します。
+「Yes」と判定された場合は、ステージへの追加前に空き状況の確認へ進みます。
+「No」の場合は、クイックタイミングとして処理を行います。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}4{]} ステージが空か判定？}}
+\sphinxAtStartPar
+タイミングがメインの場合、アクションをステージに追加できるかどうか、
+すなわちステージに空きがあるかを判定します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}5{]} 通常効果アクションをステージに追加}}
+\sphinxAtStartPar
+ステージが空いている場合、取り出した通常効果アクションをステージに追加します。
+これにより、通常効果が次のフェーズで適用されます。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}6{]} 通常効果アクションを破棄}}
+\sphinxAtStartPar
+ステージが埋まっている場合、取り出した通常効果アクションを破棄します。
+この処理により、ステージの状態に合わせた適切な処理が行われます。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}7{]} タイミングがクイックの場合、通常効果アクションをステージに追加}}
+\sphinxAtStartPar
+取り出した通常効果アクションのタイミングが「クイック」である場合、
+ステージの空き状況にかかわらず無条件でアクションをステージに追加します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}8{]} アクションが誘発したかを判定}}
+\sphinxAtStartPar
+通常効果アクションの解決後、そのアクションが新たな誘発を発生させたかどうかを判定します。
+誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。
+
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}9{]} 誘発したアクションをアクションバッファに追加}}
+\sphinxAtStartPar
+新たに誘発されたアクションが存在する場合、該当アクションをアクションバッファに追加します。
+これにより、誘発処理の再実行が可能となります。
 
 \end{description}
 
 
 \section{まとめ}
-\label{\detokenize{core/core:id15}}
+\label{\detokenize{core/core:id17}}
 \sphinxAtStartPar
 コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
@@ -1040,7 +1160,7 @@ Joker
 \sphinxAtStartPar
 この行動が
 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の
-{\hyperref[\detokenize{core/core:core-gamestart}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}1{]}ゲーム開始}}}} に該当します。
+{\hyperref[\detokenize{core/core:core-gamestart}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}1{]} ゲーム開始}}}} に該当します。
 この後は
 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}}
 に準じアクションを起こしてゲームを進行します。
@@ -1256,7 +1376,7 @@ S (Sacrifice)
 \label{\detokenize{common/common:id25}}
 \sphinxAtStartPar
 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の
-{\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]}アクションの解決}}}} に行うことを順に示します。
+{\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} アクションの解決}}}} に行うことを順に示します。
 
 
 \subsubsection{対象条件を確認}
@@ -1312,7 +1432,7 @@ S (Sacrifice)
 \subsection{勝敗判定}
 \label{\detokenize{common/common:id29}}
 \sphinxAtStartPar
-{\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]}勝敗判定}}}} で確認する内容は次になります。
+{\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]} 勝敗判定}}}} で確認する内容は次になります。
 
 \sphinxAtStartPar
 ライフを確認し0枚の場合そのプレイヤーは敗北となります。両プレイヤーのライフが0枚の場合、引き分けとなります。
