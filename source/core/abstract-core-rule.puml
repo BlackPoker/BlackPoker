@@ -1,0 +1,15 @@
+@startuml
+
+skinparam defaultTextAlignment center
+
+(一般的なトレーディングカードゲーム) as TCG
+(割込み可能なターン制ゲーム) as InterruptibleTurnGame
+note right of InterruptibleTurnGame
+これがコアルール
+end note
+(BlackPoker) as BlackPokerGame
+
+InterruptibleTurnGame <--- (TCG) : "抽象化"
+InterruptibleTurnGame ---> (BlackPokerGame) : "実装"
+
+@enduml

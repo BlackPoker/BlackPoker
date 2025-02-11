@@ -1,0 +1,22 @@
+
+left to right direction
+
+hide fields
+hide methods
+hide circle
+
+class アクション<<定義>> {
+}
+
+class リクエスト<<生成されたもの>> {
+}
+
+アクション --> リクエスト : 生成 
+
+class コンポーネント<<定義>> {
+}
+
+class コンポーネントインスタンス<<生成されたもの>> {
+}
+
+コンポーネント --> コンポーネントインスタンス : 生成 

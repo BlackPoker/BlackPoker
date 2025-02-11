@@ -1,11 +1,11 @@
 {
 	"name": "bp-dev",
 	"build": {
-	  "dockerfile": "Dockerfile",
-	  "context": "..", 
-	  "args": {
-		"VARIANT": "3.8"
-	  }
+		"dockerfile": "Dockerfile",
+		"context": "..",
+		"args": {
+			"VARIANT": "3.8"
+		}
 	},
 	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 	"workspaceFolder": "/workspace",
@@ -14,14 +14,22 @@
 		"source=${localEnv:HOME}/.ssh,target=/home/vscode/.ssh,type=bind,consistency=cached"
 	],
 	"postStartCommand": "chmod 700 /home/vscode/.ssh && chmod 600 /home/vscode/.ssh/* || true",
-	"extensions": [
-	  "ms-python.python",
-	  "vscjava.vscode-java-pack",
-	  "jebbs.plantuml",
-	  "donjayamanne.githistory",
-	  "mhutchie.git-graph",
-	  "shd101wyy.markdown-preview-enhanced",
-	  "corschenzi.mermaid-graphical-editor",
-	  "ms-vscode.live-server"
-	]
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-python.python",
+				"vscjava.vscode-java-pack",
+				"jebbs.plantuml",
+				"donjayamanne.githistory",
+				"mhutchie.git-graph",
+				"shd101wyy.markdown-preview-enhanced",
+				"corschenzi.mermaid-graphical-editor",
+				"ms-vscode.live-server",
+				"redhat.vscode-yaml"
+			],
+			"settings": {
+				"tools/actionlist/original/act.schema.json":"*act.yaml"
+			}
+		}
+	}
 }
