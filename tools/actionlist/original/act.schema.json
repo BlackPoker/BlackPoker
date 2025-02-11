@@ -97,6 +97,7 @@
                   "charKey": { "type": "string" },
                   "charSize": { "type": "string" },
                   "charNote": { "type": "string" },
+                  "charLabel": { "type": "string" },
                   "charAbility": { "type": "string" },
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
@@ -107,8 +108,7 @@
                   "charName",
                   "charId",
                   "charType",
-                  "charKey",
-                  "charAbility"
+                  "charKey"
                 ],
                 "additionalProperties": true
               }

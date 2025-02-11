@@ -199,7 +199,6 @@
 
     .act-title {
       color: black;
-      font-weight: bold;
     }
 
     .blackpoker-action .act-title:before {
@@ -734,14 +733,19 @@
                       </small>
                     </div>                  
                     <div class="text-left">
-                      <small th:if="${#maps.containsKey(row, 'charSize') and not #strings.isEmpty(row.charSize)}">
+                      <small th:if="${not #strings.isEmpty(row.charSize)}">
                         サイズ: 
                         <span th:utext="${#sfn.cnvHtml(row.charSize)}"></span><br>
                       </small>
                     </div>
                   </div>
                   <div class="panel-body">
-                    （能力）<br> <span th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
+                    <span th:if="${not #strings.isEmpty(row.charLabel)}"> （ラベル）<br></span>
+                    <span th:if="${not #strings.isEmpty(row.charLabel)}" th:utext="${#sfn.cnvHtml(row.charLabel)}"></span>
+                    <hr th:if="${not #strings.isEmpty(row.charLabel) and not #strings.isEmpty(row.charAbility)}">
+
+                    <span th:if="${not #strings.isEmpty(row.charAbility)}"> （能力）<br></span>
+                    <span th:if="${not #strings.isEmpty(row.charAbility)}" th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
 
                     <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.charId}" class="panel-collapse collapse storyText">
                       <hr>

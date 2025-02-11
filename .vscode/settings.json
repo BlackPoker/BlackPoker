@@ -1,7 +1,7 @@
 {
     "restructuredtext.confPath": "${workspaceFolder}/source",
     "yaml.schemas": {
-        "tools/actionlist/original/act.schema.json":"act.yaml"
+        "tools/actionlist/original/act.schema.json":"*act.yaml"
     },
 
 }
