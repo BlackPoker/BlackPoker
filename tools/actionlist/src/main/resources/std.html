@@ -666,6 +666,9 @@
 
                   </div>
                   <div class="panel-body">
+                    <span th:if="${not #strings.isEmpty(row.actActCond)}"> （起動条件）<br></span> <span th:if="${not #strings.isEmpty(row.actActCond)}"
+                      th:utext="${#sfn.cnvHtml(row.actActCond)}"></span>
+                    <hr th:if="${not #strings.isEmpty(row.actActCond)}">
                     <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"> （誘発条件）<br></span> <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"
                       th:utext="${#sfn.cnvHtml(row.actTriggerCond)}"></span>
                     <hr th:if="${not #strings.isEmpty(row.actTriggerCond)}">

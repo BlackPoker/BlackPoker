@@ -89,7 +89,7 @@ actList:
       actTime: クイック
       actCost: D
       actKey: A
-      actNote: '※ターンを持っていない時しかこのアクションを起こすことができない。'
+      actActCond: ターンを持っていない時しかこのアクションを起こすことができない。 
       actTarget: ''
       actEffect: |-
         キーカードをエースとして表向きかつチャージ状態で場に出す。
