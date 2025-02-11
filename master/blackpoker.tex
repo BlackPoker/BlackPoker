@@ -72,7 +72,7 @@
 
 
 \title{BlackPoker}
-\date{2025年02月10日}
+\date{2025年02月11日}
 \release{2024/4/1}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -277,228 +277,451 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \chapter{コアルール}
 \label{\detokenize{core/core:core-rst}}\label{\detokenize{core/core:id1}}\label{\detokenize{core/core::doc}}
 \sphinxAtStartPar
-コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。
+トランプのみでトレーディングカードゲームのように遊ぶためには、
+一般的なトレーディングカードゲームを抽象化し、トランプのみで遊べるように再構築しました。
+
+\sphinxAtStartPar
+コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(\hyperref[\detokenize{core/core:abstract-core-rule}]{Fig.\@ \ref{\detokenize{core/core:abstract-core-rule}}})
+
+\sphinxAtStartPar
+BlackPokerはコアルールを実装しているため、ルールを変更する場合は、コアルールに従う必要があります。
+
+\sphinxAtStartPar
+このルールは、割込みが可能なターン制ゲームの標準化したモデルとして構築されており、他のゲームへの応用も可能です。
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5869adc776d20b7021b88175e8de80f0f436330c}.pdf}
+\caption{コアルールのイメージ}\label{\detokenize{core/core:id28}}\label{\detokenize{core/core:abstract-core-rule}}\end{figure}
+
+
+\section{基礎概念}
+\label{\detokenize{core/core:id2}}
+\sphinxAtStartPar
+割込み可能なターン制ゲームでは、現実のゲーム盤面に影響を与える前に、
+どの行動を先に行うかを決める仮想的な場所があります。
+
+\sphinxAtStartPar
+割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。
+
+\sphinxAtStartPar
+つまり、プレイヤーは相手に許可を得て、自分の行動を実行できるかどうか確認しながら進める形式のゲームです。
+
+\sphinxAtStartPar
+いくつかの基礎概念を紹介します。
+その後、それらを組み合わせたイメージを説明します。
 
 \index{ターン@\spxentry{ターン}}\ignorespaces 
 
-\section{ターン}
-\label{\detokenize{core/core:index-0}}\label{\detokenize{core/core:id2}}
+\subsection{ターン}
+\label{\detokenize{core/core:index-0}}\label{\detokenize{core/core:id3}}
 \sphinxAtStartPar
-このルールを説明する上でターンとは持つことができるものとします。
+このルールでは、プレイヤーはターンを“持つ”ことができます。
 ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。
 
 \index{アクション(コア)@\spxentry{アクション(コア)}}\ignorespaces 
 
-\section{アクション}
-\label{\detokenize{core/core:index-1}}\label{\detokenize{core/core:id3}}
+\subsection{アクション}
+\label{\detokenize{core/core:index-1}}\label{\detokenize{core/core:id4}}
 \sphinxAtStartPar
-アクションとは、プレイヤーの行動を示します。
+アクションとは、プレイヤーの行動を示す定義です。
 ターン制のゲームでは、プレイヤーは様々な行動を行います。
 チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
 それらをアクションと定義します。
 
 \index{チャンス@\spxentry{チャンス}}\ignorespaces 
 
-\section{チャンス}
-\label{\detokenize{core/core:index-2}}\label{\detokenize{core/core:id4}}
+\subsection{チャンス}
+\label{\detokenize{core/core:index-2}}\label{\detokenize{core/core:id5}}
 \sphinxAtStartPar
 アクションを起こすことができる機会をチャンスといいます。
 チャンスを持っている間は何度でもアクションを起こすことができます。
+正式名称はアクションチャンスです。
 
 \index{ステージ@\spxentry{ステージ}}\ignorespaces 
 
-\section{ステージ}
-\label{\detokenize{core/core:index-3}}\label{\detokenize{core/core:id5}}
+\subsection{ステージ}
+\label{\detokenize{core/core:index-3}}\label{\detokenize{core/core:id6}}
 \sphinxAtStartPar
 アクションの解決順を整理するために使う領域です。
-後入れ先出し方式で最後に積まれたアクションから順に解決されていきます。
+後入れ先出し方式で、最後に積まれたアクションから順に解決されます。
+正確には、ステージにはアクションではなく、後述するリクエストが蓄積されます。
 
+\index{リクエスト@\spxentry{リクエスト}}\ignorespaces 
 
-\section{アクションの定義項目}
-\label{\detokenize{core/core:id6}}
+\subsection{リクエスト}
+\label{\detokenize{core/core:index-4}}\label{\detokenize{core/core:id7}}
 \sphinxAtStartPar
-アクション、チャンス、ステージについて簡単に説明しました。
-これらの概念を用いて、アクションに定義する項目を説明します。
+アクションを実行すると、ゲームシステム（コアフロー）に対して
+どのようなアクションを実行するかを要求します。
+この要求をリクエストと呼びます。正式名称はアクションリクエストです。
 
 \sphinxAtStartPar
-アクションは次の項目を定義する必要があります。
-他の項目は具体的にアクションを定義する際に、ゲームに合わせて追加して下さい。
+リクエストの種類によっては、ステージに蓄積されず、すぐに実行(解決)されるものもあります。
+
+\index{コンポーネント@\spxentry{コンポーネント}}\ignorespaces 
+
+\subsection{コンポーネント}
+\label{\detokenize{core/core:component}}\label{\detokenize{core/core:index-5}}\label{\detokenize{core/core:id8}}
+\sphinxAtStartPar
+コンポーネントとは、ゲーム盤面に配置されるモンスターや駒の定義を指します。
+例えば、将棋の「歩」は駒としては複数存在しますが、「歩」の定義は1つです。
+この定義をコンポーネントといいます。
+
+\index{コンポーネントインスタンス@\spxentry{コンポーネントインスタンス}}\ignorespaces 
+
+\subsection{コンポーネントインスタンス}
+\label{\detokenize{core/core:index-6}}\label{\detokenize{core/core:id9}}
+\sphinxAtStartPar
+コンポーネントの定義からインスタンス化されたものをコンポーネントインスタンスといいます。
+例えば、将棋の「歩」はコンポーネントとして定義されていますが、
+実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたコンポーネントインスタンスとなります。
+
+
+\subsection{コアフロー(ルールシステム)}
+\label{\detokenize{core/core:id10}}
+\sphinxAtStartPar
+リクエストはコアフロー(ルールシステム)によって整理され、処理されます。
+リクエストを即時解決するものと、ステージに蓄積されるものに分類され、順番に処理されます。
+
+\sphinxAtStartPar
+ゲームによって具体的に行う内容は異なりますが、処理する順番の制御順はコアフローが担います。
+
+\sphinxAtStartPar
+コアフローはゲームの開始から勝敗が決まるまで動作し続けます。
+
+
+\section{詳細}
+\label{\detokenize{core/core:id11}}
+\sphinxAtStartPar
+基礎概念を図で表すと次のようになります。(\hyperref[\detokenize{core/core:abstract-core-image}]{Fig.\@ \ref{\detokenize{core/core:abstract-core-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{abstract}.pdf}
+\caption{割込み可能なターン制ゲーム}\label{\detokenize{core/core:id29}}\label{\detokenize{core/core:abstract-core-image}}\end{figure}
+
+\sphinxAtStartPar
+仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。
+
+\sphinxAtStartPar
+リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。
+
+\sphinxAtStartPar
+さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(\hyperref[\detokenize{core/core:action-request-image}]{Fig.\@ \ref{\detokenize{core/core:action-request-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912}.pdf}
+\caption{リクエストとコンポーネントインスタンスの関係}\label{\detokenize{core/core:id30}}\label{\detokenize{core/core:action-request-image}}\end{figure}
+
+\sphinxAtStartPar
+ゲーム盤面には複数のコンポーネントインスタンスが生成されます。
+
+\sphinxAtStartPar
+リクエストが解決されるたびに、コンポーネントインスタンスが生成されたり、既存のコンポーネントインスタンスの状態が変化したりします。
+
+\sphinxAtStartPar
+ここからは、アクションとコンポーネントの各項目について説明します。
+
+
+\subsection{アクションの定義項目}
+\label{\detokenize{core/core:id12}}
+\sphinxAtStartPar
+アクションを定義する際には、次の項目を設定する必要があります。
+その他の項目は、具体的なアクションに応じて追加してください。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-効果（通常効果・即時効果）
+トリガー
+
+\item {} 
+\sphinxAtStartPar
+スピード
 
 \item {} 
 \sphinxAtStartPar
 タイミング
 
+\item {} 
+\sphinxAtStartPar
+起動条件
+
+\item {} 
+\sphinxAtStartPar
+誘発条件
+
+\item {} 
+\sphinxAtStartPar
+効果
+
 \end{itemize}
 
-\index{つ\textbar{}通常効果(コア)@\spxentry{つ\textbar{}通常効果(コア)}!そ\textbar{}即時効果(コア)@\spxentry{そ\textbar{}即時効果(コア)}}\index{そ\textbar{}即時効果(コア)@\spxentry{そ\textbar{}即時効果(コア)}!つ\textbar{}通常効果(コア)@\spxentry{つ\textbar{}通常効果(コア)}}\ignorespaces 
+\index{トリガー(コア)@\spxentry{トリガー(コア)}}\ignorespaces 
 
-\subsection{効果}
-\label{\detokenize{core/core:index-4}}\label{\detokenize{core/core:id7}}
+\subsubsection{トリガー}
+\label{\detokenize{core/core:trigger-core}}\label{\detokenize{core/core:index-7}}\label{\detokenize{core/core:id13}}
 \sphinxAtStartPar
-効果とはアクションの解決時にプレイヤーが行う行動です。
-効果の中には、通常効果と即時効果があります。
-違いについては、図(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})を説明する際に分岐条件として登場します。
+アクションが要求される方法は、大きく分けて次の2種類に分類されます。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{直接}}
+\sphinxAtStartPar
+プレイヤーがコストを支払うなどの手続きを経て実行するアクション。
+
+\sphinxlineitem{\sphinxstylestrong{誘発}}
+\sphinxAtStartPar
+条件が満たされた場合、自動で発動するアクション。
+
+\end{description}
+
+\sphinxAtStartPar
+トリガー項目には「直接」または「誘発」のいずれかが設定されます。
+
+\index{スピード(コア)@\spxentry{スピード(コア)}}\ignorespaces 
+
+\subsubsection{スピード}
+\label{\detokenize{core/core:speed-core}}\label{\detokenize{core/core:index-8}}\label{\detokenize{core/core:id14}}
+\sphinxAtStartPar
+リクエストが処理される速度は次の2種類に分類されます。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{即時}}
+\sphinxAtStartPar
+リクエストはステージを用いず解決されます。
+
+\sphinxlineitem{\sphinxstylestrong{通常}}
+\sphinxAtStartPar
+リクエストはステージを経由して解決されます。
+
+\end{description}
+
+\sphinxAtStartPar
+スポード項目には「即時」または「通常」のいずれかが設定されます。
 
 \index{タイミング(コア)@\spxentry{タイミング(コア)}}\ignorespaces 
 
-\subsection{タイミング}
-\label{\detokenize{core/core:timing}}\label{\detokenize{core/core:index-5}}\label{\detokenize{core/core:id8}}
+\subsubsection{タイミング}
+\label{\detokenize{core/core:timing}}\label{\detokenize{core/core:index-9}}\label{\detokenize{core/core:id15}}
 \sphinxAtStartPar
-タイミングとは、アクションを起こすことができる時を示します。
-タイミングには「メイン」と「クイック」の2種類あります。
+タイミングとは、アクションを実行できるタイミングを示します。
+タイミングには次の2種類があります。
 
 \index{メイン@\spxentry{メイン}}\ignorespaces \begin{description}
-\sphinxlineitem{メイン}
+\sphinxlineitem{\sphinxstylestrong{メイン}}
 \sphinxAtStartPar
-ターンプレイヤーかつステージが空の時に起こせるアクションです。
-
-\sphinxAtStartPar
-条件をまとめると次のようになります。
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-チャンスを持っている
-
-\item {} 
-\sphinxAtStartPar
-自分のターン
-
-\item {} 
-\sphinxAtStartPar
-ステージが空
-
-\end{itemize}
+ターンプレイヤーかつステージが空のときに起こせるアクション。
+実行条件：
+\sphinxhyphen{} チャンスを持っている
+\sphinxhyphen{} 自分のターンである
+\sphinxhyphen{} ステージが空である
 
 \end{description}
 
 \index{クイック@\spxentry{クイック}}\ignorespaces \begin{description}
-\sphinxlineitem{クイック}
+\sphinxlineitem{\sphinxstylestrong{クイック}}
 \sphinxAtStartPar
-いつでも起こせるため、アクションをステージに積み重ねることができます。
-
-\sphinxAtStartPar
-条件をまとめると次のようになります。
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-チャンスを持っている
-
-\end{itemize}
-
-\end{description}
-
-
-\subsubsection{エンドアクションの定義}
-\label{\detokenize{core/core:id9}}
-\sphinxAtStartPar
-定義するアクションの中で最低１つは
-ターンを別のプレイヤーにわたす効果を定義してください。
-そうしないと、ターンが別のプレイヤーに渡らす、ゲームが進行しなくなります。
-
-
-\subsubsection{アクションのコントローラー}
-\label{\detokenize{core/core:id10}}
-\sphinxAtStartPar
-アクションを起こしたプレイヤーをそのアクションのコントローラーと呼びます。
-効果はこのコントローラー視点で解釈されることになります。
-
-\index{コンポーネント@\spxentry{コンポーネント}}\ignorespaces 
-
-\section{コンポーネント}
-\label{\detokenize{core/core:component}}\label{\detokenize{core/core:index-8}}\label{\detokenize{core/core:id11}}
-\sphinxAtStartPar
-ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
-コンポーネントは次の項目を持っています。
-
-\index{オーナー@\spxentry{オーナー}}\ignorespaces \begin{description}
-\sphinxlineitem{オーナー}
-\sphinxAtStartPar
-コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。
-
-\end{description}
-
-\index{コントローラー@\spxentry{コントローラー}}\ignorespaces \begin{description}
-\sphinxlineitem{コントローラー}
-\sphinxAtStartPar
-現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。
+いつでも起こすことができ、アクションをステージに積み重ねることが可能。
+実行条件：
+\sphinxhyphen{} チャンスを持っている
 
 \end{description}
 
 \begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-コンポーネントとアクションのコントローラー
+エンドアクションの定義
 
 \sphinxAtStartPar
-コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
-コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。
+最低1つはターンを別のプレイヤーに渡すアクションを定義してください。
+これがないと、ターンが進行せずゲームが停止する可能性があります。
+\end{sphinxadmonition}
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+アクションのコントローラー
+
+\sphinxAtStartPar
+アクションを実行したプレイヤーを \sphinxstylestrong{アクションのコントローラー} と呼びます。
+効果の解釈は、このコントローラーの視点で行われます。
+\end{sphinxadmonition}
+
+\index{き\textbar{}起動条件(コア)@\spxentry{き\textbar{}起動条件(コア)}}\ignorespaces 
+
+\subsubsection{起動条件}
+\label{\detokenize{core/core:index-12}}\label{\detokenize{core/core:id16}}
+\sphinxAtStartPar
+アクションを起こすための条件を示します。
+
+\sphinxAtStartPar
+トリガーが「直接」の場合、起動条件が定義されます。
+コストの支払いや対象の指定など、様々な条件がアクションごとに設定されます。
+
+\sphinxAtStartPar
+BlackPokerでは、コストの支払いや対象の指定の記述が冗長にならないよう、省略されることが多いです。
+
+\index{ゆ\textbar{}誘発条件(コア)@\spxentry{ゆ\textbar{}誘発条件(コア)}}\ignorespaces 
+
+\subsubsection{誘発条件}
+\label{\detokenize{core/core:index-13}}\label{\detokenize{core/core:id17}}
+\sphinxAtStartPar
+アクションが誘発される条件を示します。
+条件が満たされると、アクションからリクエストが生成され、コアフローに渡されます。
+
+\sphinxAtStartPar
+トリガーが「誘発」の場合、この項目が定義されます。
+
+\sphinxAtStartPar
+例：
+\sphinxhyphen{} ダメージを受けたとき
+\sphinxhyphen{} カードが墓地に移動したとき
+
+\sphinxAtStartPar
+これらの状況で誘発するアクションが設定されることがあります。
+
+\index{こ\textbar{}効果(コア)@\spxentry{こ\textbar{}効果(コア)}}\ignorespaces 
+
+\subsubsection{効果}
+\label{\detokenize{core/core:index-14}}\label{\detokenize{core/core:id18}}
+\sphinxAtStartPar
+効果とは、アクションが解決された際に実行される処理を指します。
+
+
+\subsection{リクエストの定義項目}
+\label{\detokenize{core/core:id19}}\begin{description}
+\sphinxlineitem{\sphinxstylestrong{アクション定義}}
+\sphinxAtStartPar
+リクエストが解決された際に実行されるアクションの内容。
+
+\sphinxlineitem{\sphinxstylestrong{スピード}}
+\sphinxAtStartPar
+アクション定義のスピードとなります。
+
+\sphinxlineitem{\sphinxstylestrong{タイミング}}
+\sphinxAtStartPar
+アクション定義のタイミングとなります。
+
+\sphinxlineitem{\sphinxstylestrong{コントローラー}}
+\sphinxAtStartPar
+アクションを実行したプレイヤーがリクエストのコントローラーとなります。
+
+\end{description}
+
+
+\subsection{コンポーネントの定義項目}
+\label{\detokenize{core/core:id20}}
+\sphinxAtStartPar
+コンポーネントには、次の項目が定義されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{能力}}
+\sphinxAtStartPar
+能力の詳細については、後述のセクションを参照してください。(\hyperref[\detokenize{core/core:ability}]{\ref{\detokenize{core/core:ability}} \nameref{\detokenize{core/core:ability}}})
+
+\end{description}
+
+
+\subsection{コンポーネントインスタンスの定義項目}
+\label{\detokenize{core/core:id21}}
+\sphinxAtStartPar
+コンポーネントインスタンスには、次の項目が設定されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{コンポーネント定義}}
+\sphinxAtStartPar
+どのコンポーネント定義から生成されたのかを保持します。
+
+\end{description}
+
+\index{オーナー@\spxentry{オーナー}}\ignorespaces \begin{description}
+\sphinxlineitem{\sphinxstylestrong{オーナー}}
+\sphinxAtStartPar
+コンポーネントインスタンスの所有者。
+一般的なトランプゲームでは無視されることが多いですが、TCGのようにデッキを個人所有するゲームでは必要な情報です。
+
+\end{description}
+
+\index{コントローラー@\spxentry{コントローラー}}\ignorespaces \begin{description}
+\sphinxlineitem{\sphinxstylestrong{コントローラー}}
+\sphinxAtStartPar
+現在、そのコンポーネントインスタンスを操作しているプレイヤー。
+通常はオーナーとコントローラーは同じですが、コントロールを奪うアクションがある場合、異なることがあります。
+
+\end{description}
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+コンポーネントインスタンスとリクエストのコントローラー
+
+\sphinxAtStartPar
+コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
+コンポーネントインスタンスとリクエストの属性を次の図に示します。(\hyperref[\detokenize{core/core:controller-attr}]{Fig.\@ \ref{\detokenize{core/core:controller-attr}}})
 \end{sphinxadmonition}
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5973875432da5c6c9c30841afa726d28ed2ec522}.pdf}
-\caption{コンポーネントとアクションの属性}\label{\detokenize{core/core:id18}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-000d6e3da45d592e4f36469cbac5057f144db76e}.pdf}
+\caption{コントローラー属性}\label{\detokenize{core/core:id31}}\label{\detokenize{core/core:controller-attr}}\end{figure}
 
 \index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
 
 \section{能力}
-\label{\detokenize{core/core:index-11}}\label{\detokenize{core/core:id12}}
+\label{\detokenize{core/core:ability}}\label{\detokenize{core/core:index-17}}\label{\detokenize{core/core:id22}}
 \sphinxAtStartPar
-能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。
+アクション、コンポーネントの定義項目を見てきました。
+これらとは別の概念である \sphinxstylestrong{能力} について説明します。
 
 \sphinxAtStartPar
-能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
+能力とはアクションの効果とは異なる概念で、アクションを起こす際や効果を解釈する際に参照されます。
+
+\sphinxAtStartPar
+能力は解釈される際にコストは支払われず、ステージに置かれません。
+
+\sphinxAtStartPar
+能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも含まれます。
 (\hyperref[\detokenize{core/core:ability-image}]{Fig.\@ \ref{\detokenize{core/core:ability-image}}})
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4}.pdf}
-\caption{能力のイメージ}\label{\detokenize{core/core:id19}}\label{\detokenize{core/core:ability-image}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5c3b9d2c43d8740600145b89955601a615170288}.pdf}
+\caption{能力のイメージ}\label{\detokenize{core/core:id32}}\label{\detokenize{core/core:ability-image}}\end{figure}
 
+\begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-能力には、次の種類があります。
-
-\index{じ\textbar{}常在型能力@\spxentry{じ\textbar{}常在型能力}}\ignorespaces \begin{description}
-\sphinxlineitem{常在型能力}
-\sphinxAtStartPar
-能力が有効である場合、継続的に発揮される能力
-
-\end{description}
-
-\index{ゆ\textbar{}誘発型能力@\spxentry{ゆ\textbar{}誘発型能力}}\ignorespaces \begin{description}
-\sphinxlineitem{誘発型能力}
-\sphinxAtStartPar
-能力が有効である間に何かの契機でアクションを起こす能力
-
-\end{description}
-
-\sphinxAtStartPar
-概ねのゲームでは、
-ターン終了や駒をすすめるなどのアクションが定義されています。
-そして、そのアクションを起こせる能力（常在型能力）を
-プレイヤーは保持しています。
+7版までは、能力に誘発能力と常在型能力がありました。
+8版からは、誘発型能力とアクションを起こせる能力をアクションの定義側に移動しました。
+能力はそれ以外の常在型能力を示すものになりました。
+\end{sphinxadmonition}
 
 \index{コアフロー@\spxentry{コアフロー}}\ignorespaces 
 
 \section{コアフロー}
-\label{\detokenize{core/core:coreflowsec}}\label{\detokenize{core/core:index-14}}\label{\detokenize{core/core:id13}}
+\label{\detokenize{core/core:coreflowsec}}\label{\detokenize{core/core:index-18}}\label{\detokenize{core/core:id23}}
 \sphinxAtStartPar
-この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})
+今まで説明してきた概念を用いて \sphinxstylestrong{コアフローの具体的な処理} を説明します。
+この図は \sphinxstylestrong{ゲームの開始から勝敗が決まるまでの流れ(コアフロー)} を示しています。(\hyperref[\detokenize{core/core:coreflow-2}]{Fig.\@ \ref{\detokenize{core/core:coreflow-2}}})
+
+\sphinxAtStartPar
+BlackPokerはこのコアフローに則りリクエストが処理されます。
+
+\sphinxAtStartPar
+アナログゲーム用に作成したコアフローであるため、なるべく記憶する容量を減らすように設計しています。
+デジタルゲームに応用する場合は、細部をゲームに合わせて変更してください。
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-6568b66a57f86ed02d142e8e9854ddebd01be8a1}.pdf}
-\caption{コアフロー}\label{\detokenize{core/core:id20}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-1140d0c1b634f56cca0aee50c4f78d0b3cd09b8b}.pdf}
+\caption{コアフロー}\label{\detokenize{core/core:id33}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 \phantomsection\label{\detokenize{core/core:core-gamestart}}\begin{description}
 \sphinxlineitem{\sphinxstylestrong{{[}1{]} ゲーム開始}}
 \sphinxAtStartPar
@@ -526,13 +749,13 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxAtStartPar
 ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは \hyperref[\detokenize{core/core:trigger-check}]{\ref{\detokenize{core/core:trigger-check}} \nameref{\detokenize{core/core:trigger-check}}} を参照してください。
 
-\sphinxlineitem{\sphinxstylestrong{{[}7{]} 即時効果か？}}
+\sphinxlineitem{\sphinxstylestrong{{[}7{]} 即時か？}}
 \sphinxAtStartPar
-起こしたアクションが即時効果か通常効果か判定します。
+リクエストのスピードが即時か判定します。
 
 \end{description}
 \phantomsection\label{\detokenize{core/core:actresolve}}\begin{description}
-\sphinxlineitem{\sphinxstylestrong{{[}8{]} アクションの解決}}
+\sphinxlineitem{\sphinxstylestrong{{[}8{]} リクエストの解決}}
 \sphinxAtStartPar
 アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
@@ -546,7 +769,7 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 \sphinxlineitem{\sphinxstylestrong{{[}10{]} ステージに追加}}
 \sphinxAtStartPar
-ステージというアクションを貯めておける領域に追加します。
+リクエストをステージに追加します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}11{]} パス記録に登録}}
 \sphinxAtStartPar
@@ -556,13 +779,13 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxAtStartPar
 パス記録に全てのプレイヤー名が記録されているか判定します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}13{]} ステージにアクションが存在するか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}13{]} ステージにリクエストが存在するか？}}
 \sphinxAtStartPar
-ステージにアクションが存在するか判定します。
+ステージにリクエストが存在するか判定します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}14{]} ステージから取出し}}
 \sphinxAtStartPar
-最後にステージに追加されたアクションをステージから取出します。
+最後にステージに追加されたリクエストをステージから取出します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}15{]} チャンス移動}}
 \sphinxAtStartPar
@@ -573,85 +796,93 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 \subsection{誘発チェック}
-\label{\detokenize{core/core:trigger-check}}\label{\detokenize{core/core:id14}}
+\label{\detokenize{core/core:trigger-check}}\label{\detokenize{core/core:id24}}
 \sphinxAtStartPar
-能力の中でも誘発型能力は、なにかをきっかけにしてアクションが起きる条件が定義されています。
-誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。
+アクションの中には誘発条件を持っているアクションがあります。
+誘発条件に該当した場合、アクションからリクエストが誘発されます。
 
 \sphinxAtStartPar
-誘発チェックでは、誘発したアクションの効果を解決またはステージに追加します。
-誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーとなります。
+誘発チェックでは、誘発したリクエストを解決またはステージに追加します。
+誘発したリクエストのコントローラーは起因となったアクションのオーナーがコントローラーとなります。
 誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow}}})
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+バッファ
+
+\sphinxAtStartPar
+誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はアクションバッファです。
+\end{sphinxadmonition}
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-6bf65596a98a1c6e0b4b6fd6138e06008a2ac831}.pdf}
-\caption{誘発チェック}\label{\detokenize{core/core:id21}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-eee608891877368faed07321f0c2acff88d0963f}.pdf}
+\caption{誘発チェック}\label{\detokenize{core/core:id34}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
 \phantomsection\label{\detokenize{core/core:trigger-act-gather}}\begin{description}
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}1{]} 誘発したアクションを分類しバッファに追加}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}1{]} 誘発したリクエストを分類しバッファに追加}}
 \sphinxAtStartPar
-各プレイヤーが発生させた誘発アクションを、効果の種類（即時効果または通常効果）および
-タイミング（メインまたはクイック）に基づいて分類し、一旦アクションバッファに追加します。
+各プレイヤーが誘発させたリクエストを、スピードおよび
+タイミングに基づいて分類し、一旦バッファに追加します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}2{]} バッファは空か？}}
 \sphinxAtStartPar
-アクションバッファが空であるかどうかを判定します。
-未処理のアクションが残っている場合は、以降の処理ループを継続します。
+バッファが空であるかどうかを判定します。
+未処理のリクエストが残っている場合は、以降の処理ループを継続します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}3{]} バッファに即時効果はあるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}3{]} バッファに即時はあるか？}}
 \sphinxAtStartPar
-アクションバッファ内に即時効果アクションが存在するかを判定します。
-未処理の即時効果アクションが残っている場合、
-ターンプレイヤーから順に即時効果の処理グループへ進みます。
+バッファ内にスピードが即時のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}4{]} 該当プレイヤーに即時効果があるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}4{]} 該当プレイヤーに即時があるか？}}
 \sphinxAtStartPar
-現在対象となっているプレイヤーのアクションバッファを確認し、
-即時効果アクションが存在するかを判定します。
+現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5{]} タイミング=メインの即時アクションを処理}}
 \sphinxAtStartPar
-該当プレイヤーについて、タイミングが「メイン」の即時効果アクションを実行します。
+該当プレイヤーについて、タイミングが「メイン」、スピードが「即時」のアクションを実行します。
 詳細は \hyperref[\detokenize{core/core:trigger-act-s}]{\ref{\detokenize{core/core:trigger-act-s}} \nameref{\detokenize{core/core:trigger-act-s}}} をタイミング=メインとして参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}6{]} タイミング=クイックの即時アクションを処理}}
 \sphinxAtStartPar
-同じプレイヤーについて、タイミングが「クイック」の即時効果アクションを実行します。
+同じプレイヤーについて、タイミングが「クイック」、スピードが「即時」のアクションを実行します。
 詳細は \hyperref[\detokenize{core/core:trigger-act-s}]{\ref{\detokenize{core/core:trigger-act-s}} \nameref{\detokenize{core/core:trigger-act-s}}} をタイミング=クイックとして参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}7{]} 次のプレイヤーへ}}
 \sphinxAtStartPar
-現在のプレイヤーでの即時効果アクションの処理が完了した後、
+現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}8{]} バッファに通常効果はあるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}8{]} バッファに通常はあるか？}}
 \sphinxAtStartPar
-アクションバッファ内に通常効果アクションが存在するかを判定します。
-未処理の通常効果アクションが残っている場合、
-通常効果の処理グループへ進みます。
+バッファ内にスピードが通常のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}9{]} 該当プレイヤーに通常効果があるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}9{]} 該当プレイヤーに通常があるか？}}
 \sphinxAtStartPar
-現在対象となっているプレイヤーのアクションバッファを確認し、
-通常効果アクションが存在するかを判定します。
+現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10{]} タイミング=メインの通常アクションを処理}}
 \sphinxAtStartPar
-該当プレイヤーについて、タイミングが「メイン」の通常効果アクションを実行します。
+該当プレイヤーについて、タイミングが「メイン」、スピードが「通常」のアクションを実行します。
 詳細は \hyperref[\detokenize{core/core:trigger-act-n}]{\ref{\detokenize{core/core:trigger-act-n}} \nameref{\detokenize{core/core:trigger-act-n}}} をタイミング=メインとして参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}11{]} タイミング=クイックの通常アクションを処理}}
 \sphinxAtStartPar
-同じプレイヤーについて、タイミングが「クイック」の通常効果アクションを実行します。
+同じプレイヤーについて、タイミングが「クイック」、スピードが「通常」のアクションを実行します。
 詳細は \hyperref[\detokenize{core/core:trigger-act-n}]{\ref{\detokenize{core/core:trigger-act-n}} \nameref{\detokenize{core/core:trigger-act-n}}} をタイミング=クイックとして参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}12{]} 次のプレイヤーへ}}
 \sphinxAtStartPar
-現在のプレイヤーでの通常効果アクションの処理が完了した後、
+現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。
 
 \end{description}
@@ -660,14 +891,14 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxAtStartPar
 各処理グループ内では、必ずターンプレイヤーから始まり、
 ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
-また、ループはアクションバッファに未処理のアクションが存在する限り繰り返されます。
+また、ループはバッファに未処理のアクションが存在する限り繰り返されます。
 \end{sphinxadmonition}
 
 
-\subsubsection{誘発即時効果解決}
-\label{\detokenize{core/core:trigger-act-s}}\label{\detokenize{core/core:id15}}
+\subsubsection{誘発即時解決}
+\label{\detokenize{core/core:trigger-act-s}}\label{\detokenize{core/core:id25}}
 \sphinxAtStartPar
-誘発チェックで誘発した即時効果を処理します。
+誘発チェックで誘発したスピードが即時のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
 誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow-s}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow-s}}})
 
@@ -675,46 +906,47 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-76e4659c902dffbb18fa3b6ab9c06b2205b36339}.pdf}
-\caption{誘発チェック\sphinxhyphen{}即時効果処理}\label{\detokenize{core/core:id22}}\label{\detokenize{core/core:trigger-flow-s}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-b8a821d53f3ea7e07300f2f5805736d24ed87195}.pdf}
+\caption{誘発チェック\sphinxhyphen{}即時処理}\label{\detokenize{core/core:id35}}\label{\detokenize{core/core:trigger-flow-s}}\end{figure}
 \begin{description}
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}1{]} バッファから該当の即時効果アクションがあるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}1{]} バッファから該当の即時はあるか？}}
 \sphinxAtStartPar
-アクションバッファから、対象プレイヤーおよび該当タイミングの即時効果アクションを1件取り出せるかを判定します。
-取り出し可能な場合、以降の処理へ進み、取り出せなくなるまでこのループを継続します。
+バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが即時のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}2{]} バッファから即時効果アクションを取り出す}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}2{]} バッファからリクエストを取り出す}}
 \sphinxAtStartPar
-条件を満たした即時効果アクションを、アクションバッファから実際に取り出します。
-取り出されたアクションは、解決処理の対象となります。
+条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}3{]} 取り出した即時効果アクションの効果を解決する}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}3{]} 取り出したリクエストを解決する}}
 \sphinxAtStartPar
-取り出された即時効果アクションの効果（例えば、ダメージ処理や特殊効果など）を実行し、
-アクションの解決を行います。詳細な処理内容は、該当のアクション効果解決処理を参照してください。
+取り出されたリクエストの効果を実行し、解決します。
+詳しくは {\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} リクエストの解決}}}} 参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}4{]} 勝敗判定}}
 \sphinxAtStartPar
 勝敗を判定します。
 詳しくは {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]} 勝敗判定}}}} 参照。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}5{]} アクションが新たな誘発を発生させたか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}5{]} リクエストが新たな誘発を発生させたか？}}
 \sphinxAtStartPar
-即時効果アクションの解決後、実行したアクションが新たな誘発を発生させたかどうかを確認します。
+効果の解決後、それが起因となり新たな誘発を発生させたかどうかを確認します。
 発生している場合は、その誘発アクションを再度バッファに追加する必要があります。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}6{]} 誘発したアクションをバッファに追加}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}6{]} 誘発したリクエストをバッファに追加}}
 \sphinxAtStartPar
-新たに発生した誘発アクションを、アクションバッファに追加します。
-これにより、再帰的なアクション処理が可能となり、次のループで該当アクションの取り出し処理が実行されます。
+新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
+これにより、再帰的なアクション処理が可能となり、次のループで該当するリクエストの取り出し処理が実行されます。
 
 \end{description}
 
 
-\subsubsection{通常効果：アクション毎に処理}
-\label{\detokenize{core/core:trigger-act-n}}\label{\detokenize{core/core:id16}}
+\subsubsection{通常：アクション毎に処理}
+\label{\detokenize{core/core:trigger-act-n}}\label{\detokenize{core/core:id26}}
 \sphinxAtStartPar
-誘発チェックで誘発した通常効果を処理します。
+誘発チェックで誘発したスピードが通常のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
 誘発チェックは次の図のように行います。(\hyperref[\detokenize{core/core:trigger-flow-n}]{Fig.\@ \ref{\detokenize{core/core:trigger-flow-n}}})
 
@@ -722,61 +954,59 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-1d96ac9119bd1817ae50ecebf9273d9f7a1e5adf}.pdf}
-\caption{誘発チェック\sphinxhyphen{}通常効果処理}\label{\detokenize{core/core:id23}}\label{\detokenize{core/core:trigger-flow-n}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-cbf266ad23ec6ae782ddffbc9e5614fd4b366b03}.pdf}
+\caption{誘発チェック\sphinxhyphen{}通常処理}\label{\detokenize{core/core:id36}}\label{\detokenize{core/core:trigger-flow-n}}\end{figure}
 \begin{description}
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}1{]} バッファから該当の通常効果アクションがあるか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}1{]} バッファから該当の通常はあるか？}}
 \sphinxAtStartPar
-アクションバッファから、呼び出し元から渡された対象プレイヤーおよび該当タイミングに合致する通常効果アクションが
-1件取り出せるかどうかを判定します。取り出し可能な場合は以降の処理に進み、
-取り出せなくなるまでこのループを継続します。
+バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが通常のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}2{]} バッファから通常効果アクションを取り出す}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}2{]} バッファからリクエストを取り出す}}
 \sphinxAtStartPar
-条件に合致する通常効果アクションを、アクションバッファから実際に取り出します。
-取り出されたアクションは、次のタイミング判定の対象となります。
+条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}3{]} 取り出した通常効果のタイミングがメインか判定}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}3{]} 取り出したリクエストのタイミングがメインか判定}}
 \sphinxAtStartPar
-取り出された通常効果アクションのタイミングが「メイン」であるかどうかを判定します。
+取り出したリクエストのタイミングが「メイン」であるかどうかを判定します。
 「Yes」と判定された場合は、ステージへの追加前に空き状況の確認へ進みます。
 「No」の場合は、クイックタイミングとして処理を行います。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}4{]} ステージが空か判定？}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}4{]} ステージが空か判定}}
 \sphinxAtStartPar
-タイミングがメインの場合、アクションをステージに追加できるかどうか、
+タイミングがメインの場合、そのリクエストをステージに追加できるかどうか、
 すなわちステージに空きがあるかを判定します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}5{]} 通常効果アクションをステージに追加}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}5{]} リクエストをステージに追加}}
 \sphinxAtStartPar
-ステージが空いている場合、取り出した通常効果アクションをステージに追加します。
-これにより、通常効果が次のフェーズで適用されます。
+ステージが空いている場合、取り出したリクエストをステージに追加します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}6{]} 通常効果アクションを破棄}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}6{]} リクエストを破棄}}
 \sphinxAtStartPar
-ステージが埋まっている場合、取り出した通常効果アクションを破棄します。
-この処理により、ステージの状態に合わせた適切な処理が行われます。
+ステージが埋まっている場合、取り出したタイミングがメインのリクエストを破棄します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}7{]} タイミングがクイックの場合、通常効果アクションをステージに追加}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}7{]} リクエストをステージに追加}}
 \sphinxAtStartPar
-取り出した通常効果アクションのタイミングが「クイック」である場合、
-ステージの空き状況にかかわらず無条件でアクションをステージに追加します。
+取り出したリクエストのタイミングが「クイック」である場合、
+ステージの空き状況にかかわらず無条件でリクエストをステージに追加します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}8{]} アクションが誘発したかを判定}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}8{]} リクエストが新たな誘発を発生させたか？}}
 \sphinxAtStartPar
-通常効果アクションの解決後、そのアクションが新たな誘発を発生させたかどうかを判定します。
+リクエストをステージに追加した後、それが起因となり新たな誘発を発生させたかどうかを確認します。
 誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。
 
-\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}9{]} 誘発したアクションをアクションバッファに追加}}
+\sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}9{]} 誘発したリクエストをバッファに追加}}
 \sphinxAtStartPar
-新たに誘発されたアクションが存在する場合、該当アクションをアクションバッファに追加します。
+新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
 これにより、誘発処理の再実行が可能となります。
 
 \end{description}
 
 
 \section{まとめ}
-\label{\detokenize{core/core:id17}}
+\label{\detokenize{core/core:id27}}
 \sphinxAtStartPar
 コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
@@ -788,7 +1018,11 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \chapter{共通ルール}
 \label{\detokenize{common/common:common-rst}}\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
 \sphinxAtStartPar
-この章では、カードの配置などコアルールで定義されていない内容を定義します。
+BlackPokerには様々な対戦方法があります。
+個別の違いは対戦レギュレーションで定義されています。
+
+\sphinxAtStartPar
+この章では、BlackPokerの共通的なルールを説明します。
 
 
 \section{プレイ人数}
@@ -1031,14 +1265,6 @@ Joker
 \label{\detokenize{common/common:id11}}
 \sphinxAtStartPar
 キャラクターのもつ項目について説明します。
-凡例のキャラクター「一般兵」を見てみましょう。(\hyperref[\detokenize{common/common:character-sample}]{Fig.\@ \ref{\detokenize{common/common:character-sample}}})
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{character-sample}.pdf}
-\caption{一般兵}\label{\detokenize{common/common:id52}}\label{\detokenize{common/common:character-sample}}\end{figure}
 
 \index{キャラクター名@\spxentry{キャラクター名}}\ignorespaces \begin{description}
 \sphinxlineitem{キャラクター名}
@@ -1058,6 +1284,20 @@ Joker
 \sphinxlineitem{キーカード}
 \sphinxAtStartPar
 キャラクターを示すカードが記載されています。複数のカードで1体のキャラクターを示す場合もあります。
+
+\end{description}
+
+\index{ラベル@\spxentry{ラベル}}\ignorespaces \begin{description}
+\sphinxlineitem{ラベル}
+\sphinxAtStartPar
+キャラクターもつ属性を示します。「速攻」や「アタッカー」など様々なラベルがあります。
+
+\end{description}
+
+\index{サイズ@\spxentry{サイズ}}\ignorespaces \begin{description}
+\sphinxlineitem{サイズ}
+\sphinxAtStartPar
+兵士の持つ大きさを示します。
 
 \end{description}
 
@@ -1099,7 +1339,7 @@ Joker
 \index{チャージ@\spxentry{チャージ}}\index{ドライブ@\spxentry{ドライブ}}\ignorespaces 
 
 \subsection{チャージとドライブ}
-\label{\detokenize{common/common:index-12}}\label{\detokenize{common/common:id15}}
+\label{\detokenize{common/common:index-14}}\label{\detokenize{common/common:id15}}
 \sphinxAtStartPar
 キャラクターには、チャージ状態とドライブ状態が存在します。
 チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
@@ -1110,7 +1350,7 @@ Joker
 \capstart
 
 \noindent\sphinxincludegraphics{{charge&drive}.pdf}
-\caption{チャージとドライブ}\label{\detokenize{common/common:id53}}\label{\detokenize{common/common:chargedrive}}\end{figure}
+\caption{チャージとドライブ}\label{\detokenize{common/common:id52}}\label{\detokenize{common/common:chargedrive}}\end{figure}
 
 
 \section{ゲームの始め方}
@@ -1172,25 +1412,57 @@ Joker
 \index{アクション@\spxentry{アクション}}\ignorespaces 
 
 \section{アクション}
-\label{\detokenize{common/common:index-13}}\label{\detokenize{common/common:id17}}
+\label{\detokenize{common/common:index-15}}\label{\detokenize{common/common:id17}}
 
 \subsection{アクションが持つ項目}
 \label{\detokenize{common/common:id18}}
 \sphinxAtStartPar
 アクションが持つ項目について説明します。
-凡例の「サンプル」アクションを見てみましょう。(\hyperref[\detokenize{common/common:action-sample}]{Fig.\@ \ref{\detokenize{common/common:action-sample}}})
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{action-sample}.pdf}
-\caption{サンプルアクション}\label{\detokenize{common/common:id54}}\label{\detokenize{common/common:action-sample}}\end{figure}
 
 \index{アクション名@\spxentry{アクション名}}\ignorespaces \begin{description}
 \sphinxlineitem{アクション名}
 \sphinxAtStartPar
 アクションの名称を示します。
+
+\end{description}
+
+\index{タイプ(アクション)@\spxentry{タイプ(アクション)}}\ignorespaces \begin{description}
+\sphinxlineitem{タイプ}
+\sphinxAtStartPar
+アクションの種類を表します。アクション名の後に括弧書きで記載します。
+
+\end{description}
+
+\index{トリガー@\spxentry{トリガー}}\ignorespaces \begin{description}
+\sphinxlineitem{トリガー}
+\sphinxAtStartPar
+アクションには自分で起こせるアクションと誘発するアクションがあります。
+トリガー項目では「直接」か「誘発」が設定されています。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:trigger-core}]{\ref{\detokenize{core/core:trigger-core}} \nameref{\detokenize{core/core:trigger-core}}}
+
+\end{description}
+
+\index{スピード@\spxentry{スピード}}\ignorespaces \begin{description}
+\sphinxlineitem{スピード}
+\sphinxAtStartPar
+アクションはすぐに効果が解決されるものとそうでないものがあります。
+スピード項目では「即時」か「通常」が設定されています。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:speed-core}]{\ref{\detokenize{core/core:speed-core}} \nameref{\detokenize{core/core:speed-core}}}
+
+\end{description}
+
+\index{タイミング@\spxentry{タイミング}}\ignorespaces \begin{description}
+\sphinxlineitem{タイミング}
+\sphinxAtStartPar
+アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
+「クイック」はいつでも起こすことができます。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}}
 
 \end{description}
 
@@ -1204,10 +1476,11 @@ Joker
 
 \end{description}
 
-\index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
-\sphinxlineitem{特記事項}
+\index{コスト@\spxentry{コスト}}\ignorespaces \begin{description}
+\sphinxlineitem{コスト}
 \sphinxAtStartPar
-特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
+アクションを起こすのに必要な対価です。
+コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
 
 \end{description}
 
@@ -1218,35 +1491,36 @@ Joker
 
 \end{description}
 
+\index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
+\sphinxlineitem{特記事項}
+\sphinxAtStartPar
+特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
+
+\end{description}
+
 \index{つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}!そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}}\index{そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}!つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}}\ignorespaces \begin{description}
-\sphinxlineitem{即時効果/通常効果}
+\sphinxlineitem{効果}
 \sphinxAtStartPar
 効果の内容を示します。
 
 \end{description}
 
-\index{コスト@\spxentry{コスト}}\ignorespaces \begin{description}
-\sphinxlineitem{コスト}
+\begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-アクションを起こすのに必要な対価です。
-コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
+トリガー,スピード,タイミングの表記
 
-\end{description}
-
-\index{タイミング@\spxentry{タイミング}}\ignorespaces \begin{description}
-\sphinxlineitem{タイミング}
 \sphinxAtStartPar
-アクションを起こせる時を示します。
-タイミングはコアルール \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}} を参照してください。
+トリガー,スピード,タイミングは@を使って次のように表記されます。
 
-\end{description}
-
-\index{タイプ(アクション)@\spxentry{タイプ(アクション)}}\ignorespaces \begin{description}
-\sphinxlineitem{タイプ}
 \sphinxAtStartPar
-アクションの種類を表します。アクション名の後に括弧書きで記載します。
+@{[}トリガー{]}\sphinxhyphen{}{[}スピード{]},{[}タイミング{]}
 
-\end{description}
+\sphinxAtStartPar
+例えば次のようになります。
+
+\sphinxAtStartPar
+@誘発\sphinxhyphen{}即時\sphinxhyphen{}クイック
+\end{sphinxadmonition}
 
 
 \subsubsection{記載されていないアクションの項目}
@@ -1269,7 +1543,7 @@ Joker
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{コストの種類}\label{\detokenize{common/common:id55}}\label{\detokenize{common/common:table-cost}}
+\sphinxcaption{コストの種類}\label{\detokenize{common/common:id53}}\label{\detokenize{common/common:table-cost}}
 \sphinxaftertopcaption
 \begin{tabulary}{\linewidth}[t]{|T|T|}
 \sphinxtoprule
@@ -1350,7 +1624,7 @@ S (Sacrifice)
 \capstart
 
 \noindent\sphinxincludegraphics{{action-sample2}.pdf}
-\caption{アクションを起こす例}\label{\detokenize{common/common:id56}}\label{\detokenize{common/common:action-sample2}}\end{figure}
+\caption{アクションを起こす例}\label{\detokenize{common/common:id54}}\label{\detokenize{common/common:action-sample2}}\end{figure}
 
 
 \subsubsection{アクションを起こすときの注意点}
@@ -1376,7 +1650,7 @@ S (Sacrifice)
 \label{\detokenize{common/common:id25}}
 \sphinxAtStartPar
 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の
-{\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} アクションの解決}}}} に行うことを順に示します。
+{\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} リクエストの解決}}}} に行うことを順に示します。
 
 
 \subsubsection{対象条件を確認}
@@ -1461,7 +1735,7 @@ S (Sacrifice)
 \capstart
 
 \noindent\sphinxincludegraphics{{set-bulwork}.pdf}
-\caption{防壁の置き方}\label{\detokenize{common/common:id57}}\label{\detokenize{common/common:set-bulwork}}\end{figure}
+\caption{防壁の置き方}\label{\detokenize{common/common:id55}}\label{\detokenize{common/common:set-bulwork}}\end{figure}
 
 
 \subsubsection{1ターンに1回制限}
@@ -1487,7 +1761,7 @@ S (Sacrifice)
 \index{エクストラ@\spxentry{エクストラ}}\ignorespaces 
 
 \section{エクストラ}
-\label{\detokenize{common/common:extra}}\label{\detokenize{common/common:index-22}}\label{\detokenize{common/common:id34}}
+\label{\detokenize{common/common:extra}}\label{\detokenize{common/common:index-26}}\label{\detokenize{common/common:id34}}
 \sphinxAtStartPar
 エクストラではアクションに加え切札の能力を使うことができます。
 使用できるアクション、切札は対戦レギュレーションを確認してください。
@@ -1495,7 +1769,7 @@ S (Sacrifice)
 \index{き\textbar{}切札@\spxentry{き\textbar{}切札}}\ignorespaces 
 
 \subsection{切札}
-\label{\detokenize{common/common:index-23}}\label{\detokenize{common/common:id35}}
+\label{\detokenize{common/common:index-27}}\label{\detokenize{common/common:id35}}
 \sphinxAtStartPar
 切札とは、切札領域に置かれたカードを示します。
 具体的な切札の置き場所については、 \hyperref[\detokenize{common/common:field-ex}]{Fig.\@ \ref{\detokenize{common/common:field-ex}}} を参照して下さい。
@@ -1582,7 +1856,7 @@ S (Sacrifice)
 \capstart
 
 \noindent\sphinxincludegraphics{{trump}.pdf}
-\caption{切札の置き方}\label{\detokenize{common/common:id58}}\label{\detokenize{common/common:trump}}\end{figure}
+\caption{切札の置き方}\label{\detokenize{common/common:id56}}\label{\detokenize{common/common:trump}}\end{figure}
 
 \sphinxAtStartPar
 これ以降は、通常のゲームの始め方と同様です。
@@ -1614,7 +1888,7 @@ S (Sacrifice)
 \capstart
 
 \noindent\sphinxincludegraphics{{trump-open}.pdf}
-\caption{切札を表にする例}\label{\detokenize{common/common:id59}}\label{\detokenize{common/common:trump-open}}\end{figure}
+\caption{切札を表にする例}\label{\detokenize{common/common:id57}}\label{\detokenize{common/common:trump-open}}\end{figure}
 
 
 \subsubsection{能力を無効する}

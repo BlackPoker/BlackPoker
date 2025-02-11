@@ -129,127 +129,322 @@
 </nav>
 <section id="core-rst">
 <span id="id1"></span><h1><span class="section-number">2. </span>コアルール<a class="headerlink" href="#core-rst" title="この見出しへのパーマリンク">¶</a></h1>
-<p>コアルールは割込み処理が可能なターン制ゲームの開始から勝敗が決まるまでを定義します。</p>
+<p>トランプのみでトレーディングカードゲームのように遊ぶためには、
+一般的なトレーディングカードゲームを抽象化し、トランプのみで遊べるように再構築しました。</p>
+<p>コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(<a class="reference internal" href="#abstract-core-rule"><span class="std std-numref">Fig. 2.1</span></a>)</p>
+<p>BlackPokerはコアルールを実装しているため、ルールを変更する場合は、コアルールに従う必要があります。</p>
+<p>このルールは、割込みが可能なターン制ゲームの標準化したモデルとして構築されており、他のゲームへの応用も可能です。</p>
+<figure class="align-default" id="id28">
+<span id="abstract-core-rule"></span><p class="plantuml">
+<img src="../_images/plantuml-5869adc776d20b7021b88175e8de80f0f436330c.svg" alt="&#64;startuml
+
+skinparam defaultTextAlignment center
+
+(一般的なトレーディングカードゲーム) as TCG
+(割込み可能なターン制ゲーム) as InterruptibleTurnGame
+note right of InterruptibleTurnGame
+これがコアルール
+end note
+(BlackPoker) as BlackPokerGame
+
+InterruptibleTurnGame &lt;--- (TCG) : &quot;抽象化&quot;
+InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
+
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id28" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="id2">
+<h2><span class="section-number">2.1. </span>基礎概念<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<p>割込み可能なターン制ゲームでは、現実のゲーム盤面に影響を与える前に、
+どの行動を先に行うかを決める仮想的な場所があります。</p>
+<p>割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。</p>
+<p>つまり、プレイヤーは相手に許可を得て、自分の行動を実行できるかどうか確認しながら進める形式のゲームです。</p>
+<p>いくつかの基礎概念を紹介します。
+その後、それらを組み合わせたイメージを説明します。</p>
 <section id="index-0">
-<span id="id2"></span><h2><span class="section-number">2.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h2>
-<p>このルールを説明する上でターンとは持つことができるものとします。
+<span id="id3"></span><h3><span class="section-number">2.1.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h3>
+<p>このルールでは、プレイヤーはターンを“持つ”ことができます。
 ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
 </section>
 <section id="index-1">
-<span id="id3"></span><h2><span class="section-number">2.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h2>
-<p>アクションとは、プレイヤーの行動を示します。
+<span id="id4"></span><h3><span class="section-number">2.1.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションとは、プレイヤーの行動を示す定義です。
 ターン制のゲームでは、プレイヤーは様々な行動を行います。
 チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
 それらをアクションと定義します。</p>
 </section>
 <section id="index-2">
-<span id="id4"></span><h2><span class="section-number">2.3. </span>チャンス<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="id5"></span><h3><span class="section-number">2.1.3. </span>チャンス<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションを起こすことができる機会をチャンスといいます。
-チャンスを持っている間は何度でもアクションを起こすことができます。</p>
+チャンスを持っている間は何度でもアクションを起こすことができます。
+正式名称はアクションチャンスです。</p>
 </section>
 <section id="index-3">
-<span id="id5"></span><h2><span class="section-number">2.4. </span>ステージ<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="id6"></span><h3><span class="section-number">2.1.4. </span>ステージ<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションの解決順を整理するために使う領域です。
-後入れ先出し方式で最後に積まれたアクションから順に解決されていきます。</p>
+後入れ先出し方式で、最後に積まれたアクションから順に解決されます。
+正確には、ステージにはアクションではなく、後述するリクエストが蓄積されます。</p>
 </section>
-<section id="id6">
-<h2><span class="section-number">2.5. </span>アクションの定義項目<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h2>
-<p>アクション、チャンス、ステージについて簡単に説明しました。
-これらの概念を用いて、アクションに定義する項目を説明します。</p>
-<p>アクションは次の項目を定義する必要があります。
-他の項目は具体的にアクションを定義する際に、ゲームに合わせて追加して下さい。</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>効果（通常効果・即時効果）</p></li>
-<li><p>タイミング</p></li>
-</ul>
-</div></blockquote>
 <section id="index-4">
-<span id="id7"></span><h3><span class="section-number">2.5.1. </span>効果<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
-<p>効果とはアクションの解決時にプレイヤーが行う行動です。
-効果の中には、通常効果と即時効果があります。
-違いについては、図(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)を説明する際に分岐条件として登場します。</p>
-</section>
-<section id="timing">
-<span id="index-5"></span><span id="id8"></span><h3><span class="section-number">2.5.2. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h3>
-<p>タイミングとは、アクションを起こすことができる時を示します。
-タイミングには「メイン」と「クイック」の2種類あります。</p>
-<dl id="index-6">
-<dt>メイン</dt><dd><p>ターンプレイヤーかつステージが空の時に起こせるアクションです。</p>
-<p>条件をまとめると次のようになります。</p>
-<ul class="simple">
-<li><p>チャンスを持っている</p></li>
-<li><p>自分のターン</p></li>
-<li><p>ステージが空</p></li>
-</ul>
-</dd>
-</dl>
-<dl id="index-7">
-<dt>クイック</dt><dd><p>いつでも起こせるため、アクションをステージに積み重ねることができます。</p>
-<p>条件をまとめると次のようになります。</p>
-<ul class="simple">
-<li><p>チャンスを持っている</p></li>
-</ul>
-</dd>
-</dl>
-<section id="id9">
-<h4><span class="section-number">2.5.2.1. </span>エンドアクションの定義<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h4>
-<p>定義するアクションの中で最低１つは
-ターンを別のプレイヤーにわたす効果を定義してください。
-そうしないと、ターンが別のプレイヤーに渡らす、ゲームが進行しなくなります。</p>
-</section>
-<section id="id10">
-<h4><span class="section-number">2.5.2.2. </span>アクションのコントローラー<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h4>
-<p>アクションを起こしたプレイヤーをそのアクションのコントローラーと呼びます。
-効果はこのコントローラー視点で解釈されることになります。</p>
-</section>
-</section>
+<span id="id7"></span><h3><span class="section-number">2.1.5. </span>リクエスト<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションを実行すると、ゲームシステム（コアフロー）に対して
+どのようなアクションを実行するかを要求します。
+この要求をリクエストと呼びます。正式名称はアクションリクエストです。</p>
+<p>リクエストの種類によっては、ステージに蓄積されず、すぐに実行(解決)されるものもあります。</p>
 </section>
 <section id="component">
-<span id="index-8"></span><span id="id11"></span><h2><span class="section-number">2.6. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h2>
-<p>ゲームにてプレイヤーが保有する駒やカードのことをコンポーネントと定義します。
-コンポーネントは次の項目を持っています。</p>
-<dl class="simple" id="index-9">
-<dt>オーナー</dt><dd><p>コンポーネントの所有者を示します。大体のトランプゲームではトランプを1セットしか用いないため無視されますが、TCGのデッキなど個人所有のものを用いるゲームでは必要な項目となります。</p>
+<span id="index-5"></span><span id="id8"></span><h3><span class="section-number">2.1.6. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントとは、ゲーム盤面に配置されるモンスターや駒の定義を指します。
+例えば、将棋の「歩」は駒としては複数存在しますが、「歩」の定義は1つです。
+この定義をコンポーネントといいます。</p>
+</section>
+<section id="index-6">
+<span id="id9"></span><h3><span class="section-number">2.1.7. </span>コンポーネントインスタンス<a class="headerlink" href="#index-6" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントの定義からインスタンス化されたものをコンポーネントインスタンスといいます。
+例えば、将棋の「歩」はコンポーネントとして定義されていますが、
+実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたコンポーネントインスタンスとなります。</p>
+</section>
+<section id="id10">
+<h3><span class="section-number">2.1.8. </span>コアフロー(ルールシステム)<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<p>リクエストはコアフロー(ルールシステム)によって整理され、処理されます。
+リクエストを即時解決するものと、ステージに蓄積されるものに分類され、順番に処理されます。</p>
+<p>ゲームによって具体的に行う内容は異なりますが、処理する順番の制御順はコアフローが担います。</p>
+<p>コアフローはゲームの開始から勝敗が決まるまで動作し続けます。</p>
+</section>
+</section>
+<section id="id11">
+<h2><span class="section-number">2.2. </span>詳細<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h2>
+<p>基礎概念を図で表すと次のようになります。(<a class="reference internal" href="#abstract-core-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
+<figure class="align-default" id="id29">
+<span id="abstract-core-image"></span><img alt="../_images/abstract.png" src="../_images/abstract.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id29" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。</p>
+<p>リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。</p>
+<p>さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(<a class="reference internal" href="#action-request-image"><span class="std std-numref">Fig. 2.3</span></a>)</p>
+<figure class="align-default" id="id30">
+<span id="action-request-image"></span><p class="plantuml">
+<img src="../_images/plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.svg" alt="
+left to right direction
+
+hide fields
+hide methods
+hide circle
+
+class アクション&lt;&lt;定義&gt;&gt; {
+}
+
+class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
+}
+
+アクション --&gt; リクエスト : 生成 
+
+class コンポーネント&lt;&lt;定義&gt;&gt; {
+}
+
+class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+}
+
+コンポーネント --&gt; コンポーネントインスタンス : 生成 "/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">リクエストとコンポーネントインスタンスの関係</span><a class="headerlink" href="#id30" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>ゲーム盤面には複数のコンポーネントインスタンスが生成されます。</p>
+<p>リクエストが解決されるたびに、コンポーネントインスタンスが生成されたり、既存のコンポーネントインスタンスの状態が変化したりします。</p>
+<p>ここからは、アクションとコンポーネントの各項目について説明します。</p>
+<section id="id12">
+<h3><span class="section-number">2.2.1. </span>アクションの定義項目<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションを定義する際には、次の項目を設定する必要があります。
+その他の項目は、具体的なアクションに応じて追加してください。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>トリガー</p></li>
+<li><p>スピード</p></li>
+<li><p>タイミング</p></li>
+<li><p>起動条件</p></li>
+<li><p>誘発条件</p></li>
+<li><p>効果</p></li>
+</ul>
+</div></blockquote>
+<section id="trigger-core">
+<span id="index-7"></span><span id="id13"></span><h4><span class="section-number">2.2.1.1. </span>トリガー<a class="headerlink" href="#trigger-core" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションが要求される方法は、大きく分けて次の2種類に分類されます。</p>
+<dl class="simple">
+<dt><strong>直接</strong></dt><dd><p>プレイヤーがコストを支払うなどの手続きを経て実行するアクション。</p>
+</dd>
+<dt><strong>誘発</strong></dt><dd><p>条件が満たされた場合、自動で発動するアクション。</p>
 </dd>
 </dl>
+<p>トリガー項目には「直接」または「誘発」のいずれかが設定されます。</p>
+</section>
+<section id="speed-core">
+<span id="index-8"></span><span id="id14"></span><h4><span class="section-number">2.2.1.2. </span>スピード<a class="headerlink" href="#speed-core" title="この見出しへのパーマリンク">¶</a></h4>
+<p>リクエストが処理される速度は次の2種類に分類されます。</p>
+<dl class="simple">
+<dt><strong>即時</strong></dt><dd><p>リクエストはステージを用いず解決されます。</p>
+</dd>
+<dt><strong>通常</strong></dt><dd><p>リクエストはステージを経由して解決されます。</p>
+</dd>
+</dl>
+<p>スポード項目には「即時」または「通常」のいずれかが設定されます。</p>
+</section>
+<section id="timing">
+<span id="index-9"></span><span id="id15"></span><h4><span class="section-number">2.2.1.3. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h4>
+<p>タイミングとは、アクションを実行できるタイミングを示します。
+タイミングには次の2種類があります。</p>
 <dl class="simple" id="index-10">
-<dt>コントローラー</dt><dd><p>現在そのコンポーネントを操作しているプレイヤーを示します。オーナーとコントローラーは基本同じプレイヤーが設定されますが、コントロールを奪うアクションがある場合、オーナーとコントローラーは異なります。</p>
+<dt><strong>メイン</strong></dt><dd><p>ターンプレイヤーかつステージが空のときに起こせるアクション。
+実行条件：
+- チャンスを持っている
+- 自分のターンである
+- ステージが空である</p>
+</dd>
+</dl>
+<dl class="simple" id="index-11">
+<dt><strong>クイック</strong></dt><dd><p>いつでも起こすことができ、アクションをステージに積み重ねることが可能。
+実行条件：
+- チャンスを持っている</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>コンポーネントとアクションのコントローラー</p>
-<p>コントローラーは制御している人という意味になるため、コンポーネントとアクションのコントローラー制御する対象が異なることになります。
-コンポーネントとアクションの属性を次の図に示します。アクションにはオーナーがいない点が異なります。</p>
+<p>エンドアクションの定義</p>
+<p>最低1つはターンを別のプレイヤーに渡すアクションを定義してください。
+これがないと、ターンが進行せずゲームが停止する可能性があります。</p>
 </div>
-<figure class="align-default" id="id18">
-<p class="plantuml">
-<img src="../_images/plantuml-5973875432da5c6c9c30841afa726d28ed2ec522.svg" alt="hide methods
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>アクションのコントローラー</p>
+<p>アクションを実行したプレイヤーを <strong>アクションのコントローラー</strong> と呼びます。
+効果の解釈は、このコントローラーの視点で行われます。</p>
+</div>
+</section>
+<section id="index-12">
+<span id="id16"></span><h4><span class="section-number">2.2.1.4. </span>起動条件<a class="headerlink" href="#index-12" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションを起こすための条件を示します。</p>
+<p>トリガーが「直接」の場合、起動条件が定義されます。
+コストの支払いや対象の指定など、様々な条件がアクションごとに設定されます。</p>
+<p>BlackPokerでは、コストの支払いや対象の指定の記述が冗長にならないよう、省略されることが多いです。</p>
+</section>
+<section id="index-13">
+<span id="id17"></span><h4><span class="section-number">2.2.1.5. </span>誘発条件<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションが誘発される条件を示します。
+条件が満たされると、アクションからリクエストが生成され、コアフローに渡されます。</p>
+<p>トリガーが「誘発」の場合、この項目が定義されます。</p>
+<p>例：
+- ダメージを受けたとき
+- カードが墓地に移動したとき</p>
+<p>これらの状況で誘発するアクションが設定されることがあります。</p>
+</section>
+<section id="index-14">
+<span id="id18"></span><h4><span class="section-number">2.2.1.6. </span>効果<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h4>
+<p>効果とは、アクションが解決された際に実行される処理を指します。</p>
+</section>
+</section>
+<section id="id19">
+<h3><span class="section-number">2.2.2. </span>リクエストの定義項目<a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h3>
+<dl class="simple">
+<dt><strong>アクション定義</strong></dt><dd><p>リクエストが解決された際に実行されるアクションの内容。</p>
+</dd>
+<dt><strong>スピード</strong></dt><dd><p>アクション定義のスピードとなります。</p>
+</dd>
+<dt><strong>タイミング</strong></dt><dd><p>アクション定義のタイミングとなります。</p>
+</dd>
+<dt><strong>コントローラー</strong></dt><dd><p>アクションを実行したプレイヤーがリクエストのコントローラーとなります。</p>
+</dd>
+</dl>
+</section>
+<section id="id20">
+<h3><span class="section-number">2.2.3. </span>コンポーネントの定義項目<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントには、次の項目が定義されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。</p>
+<dl class="simple">
+<dt><strong>能力</strong></dt><dd><p>能力の詳細については、後述のセクションを参照してください。(<a class="reference internal" href="#ability"><span class="std std-numref">2.3 能力</span></a>)</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h3><span class="section-number">2.2.4. </span>コンポーネントインスタンスの定義項目<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントインスタンスには、次の項目が設定されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。</p>
+<dl class="simple">
+<dt><strong>コンポーネント定義</strong></dt><dd><p>どのコンポーネント定義から生成されたのかを保持します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-15">
+<dt><strong>オーナー</strong></dt><dd><p>コンポーネントインスタンスの所有者。
+一般的なトランプゲームでは無視されることが多いですが、TCGのようにデッキを個人所有するゲームでは必要な情報です。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-16">
+<dt><strong>コントローラー</strong></dt><dd><p>現在、そのコンポーネントインスタンスを操作しているプレイヤー。
+通常はオーナーとコントローラーは同じですが、コントロールを奪うアクションがある場合、異なることがあります。</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>コンポーネントインスタンスとリクエストのコントローラー</p>
+<p>コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
+コンポーネントインスタンスとリクエストの属性を次の図に示します。(<a class="reference internal" href="#controller-attr"><span class="std std-numref">Fig. 2.4</span></a>)</p>
+</div>
+<figure class="align-default" id="id31">
+<span id="controller-attr"></span><p class="plantuml">
+<img src="../_images/plantuml-000d6e3da45d592e4f36469cbac5057f144db76e.svg" alt="left to right direction
+
+hide methods
 hide circle
 
-class コンポーネント {
-オーナー
-コントローラー
+class コンポーネント&lt;&lt;定義&gt;&gt; {
+    能力
 }
 
-class アクション {
-コントローラー
-}"/></p>
+
+class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+    コンポーネント定義
+    オーナー
+    コントローラー
+}
+
+class アクション&lt;&lt;定義&gt;&gt; {
+    トリガー
+    スピード
+    タイミング
+    起動条件
+    誘発条件
+    効果
+}
+
+class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
+    アクション定義
+    コントローラー
+}
+
+アクション --&gt; リクエスト : 生成
+コンポーネント --&gt; コンポーネントインスタンス : 生成"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.1 </span><span class="caption-text">コンポーネントとアクションの属性</span><a class="headerlink" href="#id18" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id31" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </section>
-<section id="index-11">
-<span id="id12"></span><h2><span class="section-number">2.7. </span>能力<a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h2>
-<p>能力とはアクションの効果とは異なる概念で、アクションを起こすことができたり、 アクションを誘発したりすることがでる力です。</p>
-<p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも持つことができます。
-(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.2</span></a>)</p>
-<figure class="align-default" id="id19">
+</section>
+<section id="ability">
+<span id="index-17"></span><span id="id22"></span><h2><span class="section-number">2.3. </span>能力<a class="headerlink" href="#ability" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクション、コンポーネントの定義項目を見てきました。
+これらとは別の概念である <strong>能力</strong> について説明します。</p>
+<p>能力とはアクションの効果とは異なる概念で、アクションを起こす際や効果を解釈する際に参照されます。</p>
+<p>能力は解釈される際にコストは支払われず、ステージに置かれません。</p>
+<p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも含まれます。
+(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 2.5</span></a>)</p>
+<figure class="align-default" id="id32">
 <span id="ability-image"></span><p class="plantuml">
-<img src="../_images/plantuml-976f45327f77d4f4ee1da59bff1cd262ba402df4.svg" alt="&#64;startuml
+<img src="../_images/plantuml-5c3b9d2c43d8740600145b89955601a615170288.svg" alt="&#64;startuml
 
 skinparam defaultTextAlignment center
 
@@ -260,9 +455,9 @@ skinparam defaultTextAlignment center
 FA5_CHESS_PAWN(P1C,コンポーネント)
 :プレイヤー1: as Player1
 :プレイヤー2: as Player2
-(〇〇アクションを起こせる) as Act1 &lt;&lt;能力&gt;&gt;
-(●●アクションを起こせる) as Act2 &lt;&lt;能力&gt;&gt;
-(△△アクションを起こせる) as Act3 &lt;&lt;能力&gt;&gt;
+(あなたのすべての兵士を+1する) as Act1 &lt;&lt;能力&gt;&gt;
+(あなたはダメージを受けなくなる) as Act2 &lt;&lt;能力&gt;&gt;
+(速攻魔法を起こす際に\nコストを支払わなくてよい) as Act3 &lt;&lt;能力&gt;&gt;
 Player1 ---&gt; (Act1) : &quot;能力&quot;
 Player1 ---&gt; (Act2) : &quot;能力&quot;
 P1C --&gt; (Act3) : &quot;能力&quot;
@@ -271,29 +466,26 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.2 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id19" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id32" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
-<p>能力には、次の種類があります。</p>
-<dl class="simple" id="index-12">
-<dt>常在型能力</dt><dd><p>能力が有効である場合、継続的に発揮される能力</p>
-</dd>
-</dl>
-<dl class="simple" id="index-13">
-<dt>誘発型能力</dt><dd><p>能力が有効である間に何かの契機でアクションを起こす能力</p>
-</dd>
-</dl>
-<p>概ねのゲームでは、
-ターン終了や駒をすすめるなどのアクションが定義されています。
-そして、そのアクションを起こせる能力（常在型能力）を
-プレイヤーは保持しています。</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>7版までは、能力に誘発能力と常在型能力がありました。
+8版からは、誘発型能力とアクションを起こせる能力をアクションの定義側に移動しました。
+能力はそれ以外の常在型能力を示すものになりました。</p>
+</div>
 </section>
 <section id="coreflowsec">
-<span id="index-14"></span><span id="id13"></span><h2><span class="section-number">2.8. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
-<p>この図にゲームの開始から勝敗が決まるまでの流れが集約されいます。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.3</span></a>)</p>
-<figure class="align-default" id="id20">
+<span id="index-18"></span><span id="id23"></span><h2><span class="section-number">2.4. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
+<p>今まで説明してきた概念を用いて <strong>コアフローの具体的な処理</strong> を説明します。
+この図は <strong>ゲームの開始から勝敗が決まるまでの流れ(コアフロー)</strong> を示しています。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 2.6</span></a>)</p>
+<p>BlackPokerはこのコアフローに則りリクエストが処理されます。</p>
+<p>アナログゲーム用に作成したコアフローであるため、なるべく記憶する容量を減らすように設計しています。
+デジタルゲームに応用する場合は、細部をゲームに合わせて変更してください。</p>
+<figure class="align-default" id="id33">
 <span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-6568b66a57f86ed02d142e8e9854ddebd01be8a1.svg" alt="&#64;startuml
+<img src="../_images/plantuml-1140d0c1b634f56cca0aee50c4f78d0b3cd09b8b.svg" alt="&#64;startuml
 start
 :[1] ゲーム開始;
 :[2] ターンプレイヤーにチャンスを移動;
@@ -302,8 +494,8 @@ if ([3] アクションを起こすか？) then (Yes)
     :[4] パス記録のリセット;
     :[5] アクションを起こす;
     :[6] 誘発チェック;
-    if ([7] 即時効果か？) then (Yes)
-        :[8] アクションの解決;
+    if ([7] 即時か？) then (Yes)
+        :[8] リクエストの解決;
         if ([9] 勝敗判定) then (決着)
             stop
         endif
@@ -314,9 +506,9 @@ if ([3] アクションを起こすか？) then (Yes)
 else (No)
     :[11] パス記録に登録;
     if ([12] 全員がパスしたか？) then (Yes)
-        if ([13] ステージにアクションが存在するか？) then (Yes)
+        if ([13] ステージにリクエストが存在するか？) then (Yes)
             :[14] ステージから取出し;
-            :[8] アクションの解決;
+            :[8] リクエストの解決;
             if ([9] 勝敗判定) then (決着)
                 stop
             endif
@@ -331,7 +523,7 @@ endif
 repeat while()
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.3 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id33" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="core-gamestart">
@@ -347,13 +539,13 @@ repeat while()
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
 </dd>
-<dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">2.8.1 誘発チェック</span></a> を参照してください。</p>
+<dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">2.4.1 誘発チェック</span></a> を参照してください。</p>
 </dd>
-<dt><strong>[7] 即時効果か？</strong></dt><dd><p>起こしたアクションが即時効果か通常効果か判定します。</p>
+<dt><strong>[7] 即時か？</strong></dt><dd><p>リクエストのスピードが即時か判定します。</p>
 </dd>
 </dl>
 <dl class="simple" id="actresolve">
-<dt><strong>[8] アクションの解決</strong></dt><dd><p>アクションの効果に定義されている内容を実行します。
+<dt><strong>[8] リクエストの解決</strong></dt><dd><p>アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
 </dd>
@@ -361,30 +553,35 @@ repeat while()
 <dl class="simple" id="winlose">
 <dt><strong>[9] 勝敗判定</strong></dt><dd><p>ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。</p>
 </dd>
-<dt><strong>[10] ステージに追加</strong></dt><dd><p>ステージというアクションを貯めておける領域に追加します。</p>
+<dt><strong>[10] ステージに追加</strong></dt><dd><p>リクエストをステージに追加します。</p>
 </dd>
 <dt><strong>[11] パス記録に登録</strong></dt><dd><p>パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。</p>
 </dd>
 <dt><strong>[12] 全員がパスしたか？</strong></dt><dd><p>パス記録に全てのプレイヤー名が記録されているか判定します。</p>
 </dd>
-<dt><strong>[13] ステージにアクションが存在するか？</strong></dt><dd><p>ステージにアクションが存在するか判定します。</p>
+<dt><strong>[13] ステージにリクエストが存在するか？</strong></dt><dd><p>ステージにリクエストが存在するか判定します。</p>
 </dd>
-<dt><strong>[14] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたアクションをステージから取出します。</p>
+<dt><strong>[14] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたリクエストをステージから取出します。</p>
 </dd>
 <dt><strong>[15] チャンス移動</strong></dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。</p>
 </dd>
 </dl>
 <section id="trigger-check">
-<span id="id14"></span><h3><span class="section-number">2.8.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
-<p>能力の中でも誘発型能力は、なにかをきっかけにしてアクションが起きる条件が定義されています。
-誘発する条件は「〜の場合」、「〜時」などで記載されており、誘発するアクションは「〜を誘発する」と記載されています。</p>
-<p>誘発チェックでは、誘発したアクションの効果を解決またはステージに追加します。
-誘発したアクションのコントローラーは起因となった誘発型能力を持ったコンポーネントのコントローラーとなります。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.4</span></a>)</p>
-<figure class="align-default" id="id21">
+<span id="id24"></span><h3><span class="section-number">2.4.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションの中には誘発条件を持っているアクションがあります。
+誘発条件に該当した場合、アクションからリクエストが誘発されます。</p>
+<p>誘発チェックでは、誘発したリクエストを解決またはステージに追加します。
+誘発したリクエストのコントローラーは起因となったアクションのオーナーがコントローラーとなります。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 2.7</span></a>)</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>バッファ</p>
+<p>誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はアクションバッファです。</p>
+</div>
+<figure class="align-default" id="id34">
 <span id="trigger-flow"></span><p class="plantuml">
-<img src="../_images/plantuml-6bf65596a98a1c6e0b4b6fd6138e06008a2ac831.svg" alt="&#64;startuml
+<img src="../_images/plantuml-eee608891877368faed07321f0c2acff88d0963f.svg" alt="&#64;startuml
 '==============================
 '【Main method】（アクション分類・プレイヤー毎処理）
 '==============================
@@ -404,17 +601,17 @@ while ([6-2] バッファは空か？) is (No)
   ' 外部ループ：バッファに何らかのアクションが残っている限り処理する
 
   '-------------------------------------------
-  '【即時効果：プレイヤー毎に処理】
+  '【即時：プレイヤー毎に処理】
   '-------------------------------------------
-  while ([6-3] バッファに即時効果はあるか？) is (Yes)
+  while ([6-3] バッファに即時はあるか？) is (Yes)
 
-    group 即時効果: プレイヤー毎に処理
+    group 即時: プレイヤー毎に処理
     note
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
 
-      while ([6-4] 該当プレイヤーに即時効果があるか？) is (Yes)
+      while ([6-4] 該当プレイヤーに即時があるか？) is (Yes)
         :[6-5] タイミング=メインの即時アクションを処理;
         note right
           別フロー呼び出し
@@ -429,17 +626,17 @@ while ([6-2] バッファは空か？) is (No)
   endwhile (No)
 
   '-------------------------------------------
-  '【通常効果：プレイヤー毎に処理】
+  '【通常：プレイヤー毎に処理】
   '-------------------------------------------
-  while ([6-8] バッファに通常効果はあるか？) is (Yes)
+  while ([6-8] バッファに通常はあるか？) is (Yes)
 
-    group 通常効果: プレイヤー毎に処理
+    group 通常: プレイヤー毎に処理
     note
         順番はターンプレイヤーから
         ターンが回る順に行う
     end note
 
-      while ([6-9] 該当プレイヤーに通常効果があるか？) is (Yes)
+      while ([6-9] 該当プレイヤーに通常があるか？) is (Yes)
         :[6-10] タイミング=メインの通常アクションを処理;
         note right
           別フロー呼び出し
@@ -458,48 +655,48 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.4 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id21" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="trigger-act-gather">
-<dt><strong>[6-1] 誘発したアクションを分類しバッファに追加</strong></dt><dd><p>各プレイヤーが発生させた誘発アクションを、効果の種類（即時効果または通常効果）および
-タイミング（メインまたはクイック）に基づいて分類し、一旦アクションバッファに追加します。</p>
+<dt><strong>[6-1] 誘発したリクエストを分類しバッファに追加</strong></dt><dd><p>各プレイヤーが誘発させたリクエストを、スピードおよび
+タイミングに基づいて分類し、一旦バッファに追加します。</p>
 </dd>
-<dt><strong>[6-2] バッファは空か？</strong></dt><dd><p>アクションバッファが空であるかどうかを判定します。
-未処理のアクションが残っている場合は、以降の処理ループを継続します。</p>
+<dt><strong>[6-2] バッファは空か？</strong></dt><dd><p>バッファが空であるかどうかを判定します。
+未処理のリクエストが残っている場合は、以降の処理ループを継続します。</p>
 </dd>
-<dt><strong>[6-3] バッファに即時効果はあるか？</strong></dt><dd><p>アクションバッファ内に即時効果アクションが存在するかを判定します。
-未処理の即時効果アクションが残っている場合、
-ターンプレイヤーから順に即時効果の処理グループへ進みます。</p>
+<dt><strong>[6-3] バッファに即時はあるか？</strong></dt><dd><p>バッファ内にスピードが即時のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。</p>
 </dd>
-<dt><strong>[6-4] 該当プレイヤーに即時効果があるか？</strong></dt><dd><p>現在対象となっているプレイヤーのアクションバッファを確認し、
-即時効果アクションが存在するかを判定します。
+<dt><strong>[6-4] 該当プレイヤーに即時があるか？</strong></dt><dd><p>現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
-<dt><strong>[6-5] タイミング=メインの即時アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」の即時効果アクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.8.1.1 誘発即時効果解決</span></a> をタイミング=メインとして参照してください。</p>
+<dt><strong>[6-5] タイミング=メインの即時アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「即時」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.4.1.1 誘発即時解決</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
-<dt><strong>[6-6] タイミング=クイックの即時アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」の即時効果アクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.8.1.1 誘発即時効果解決</span></a> をタイミング=クイックとして参照してください。</p>
+<dt><strong>[6-6] タイミング=クイックの即時アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「即時」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">2.4.1.1 誘発即時解決</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
-<dt><strong>[6-7] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの即時効果アクションの処理が完了した後、
+<dt><strong>[6-7] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。</p>
 </dd>
-<dt><strong>[6-8] バッファに通常効果はあるか？</strong></dt><dd><p>アクションバッファ内に通常効果アクションが存在するかを判定します。
-未処理の通常効果アクションが残っている場合、
-通常効果の処理グループへ進みます。</p>
+<dt><strong>[6-8] バッファに通常はあるか？</strong></dt><dd><p>バッファ内にスピードが通常のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。</p>
 </dd>
-<dt><strong>[6-9] 該当プレイヤーに通常効果があるか？</strong></dt><dd><p>現在対象となっているプレイヤーのアクションバッファを確認し、
-通常効果アクションが存在するかを判定します。
+<dt><strong>[6-9] 該当プレイヤーに通常があるか？</strong></dt><dd><p>現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
-<dt><strong>[6-10] タイミング=メインの通常アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」の通常効果アクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.8.1.2 通常効果：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
+<dt><strong>[6-10] タイミング=メインの通常アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「通常」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.4.1.2 通常：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
-<dt><strong>[6-11] タイミング=クイックの通常アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」の通常効果アクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.8.1.2 通常効果：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
+<dt><strong>[6-11] タイミング=クイックの通常アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「通常」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">2.4.1.2 通常：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
-<dt><strong>[6-12] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの通常効果アクションの処理が完了した後、
+<dt><strong>[6-12] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。</p>
 </dd>
 </dl>
@@ -507,92 +704,93 @@ stop
 <p class="admonition-title">注釈</p>
 <p>各処理グループ内では、必ずターンプレイヤーから始まり、
 ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
-また、ループはアクションバッファに未処理のアクションが存在する限り繰り返されます。</p>
+また、ループはバッファに未処理のアクションが存在する限り繰り返されます。</p>
 </div>
 <section id="trigger-act-s">
-<span id="id15"></span><h4><span class="section-number">2.8.1.1. </span>誘発即時効果解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
-<p>誘発チェックで誘発した即時効果を処理します。
+<span id="id25"></span><h4><span class="section-number">2.4.1.1. </span>誘発即時解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発したスピードが即時のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 2.5</span></a>)</p>
-<figure class="align-default" id="id22">
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 2.8</span></a>)</p>
+<figure class="align-default" id="id35">
 <span id="trigger-flow-s"></span><p class="plantuml">
-<img src="../_images/plantuml-76e4659c902dffbb18fa3b6ab9c06b2205b36339.svg" alt="&#64;startuml
+<img src="../_images/plantuml-b8a821d53f3ea7e07300f2f5805736d24ed87195.svg" alt="&#64;startuml
 '==============================
-'【即時効果：アクション毎に処理】
+'【即時：アクション毎に処理】
 '==============================
 
 start
-while ([6-5-1] バッファから該当の即時効果アクションがあるか？) is (Yes)
-  :[6-5-2] バッファから即時効果アクションを取り出す;
-  :[6-5-3] 取り出した即時効果アクションの効果を解決する;
+while ([6-5-1] バッファから該当の即時はあるか？) is (Yes)
+  :[6-5-2] バッファからリクエストを取り出す;
+  :[6-5-3] 取り出したリクエストを解決する;
   if ([6-5-4] 勝敗判定) then (決着)
     stop
   endif
-  if ([6-5-5] アクションが新たな誘発を発生させたか？) then (Yes)
-    :[6-5-6] 誘発したアクションをバッファに追加;
+  if ([6-5-5] リクエストが新たな誘発を発生させたか？) then (Yes)
+    :[6-5-6] 誘発したリクエストをバッファに追加;
     note left
-      誘発したアクションのコントローラーは
+      誘発したリクエストのコントローラーは
       起因となったアクションのコントローラー
       になります。
     end note
   endif
-endwhile
+endwhile (No)
 stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.5 </span><span class="caption-text">誘発チェック-即時効果処理</span><a class="headerlink" href="#id22" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
-<dt><strong>[6-5-1] バッファから該当の即時効果アクションがあるか？</strong></dt><dd><p>アクションバッファから、対象プレイヤーおよび該当タイミングの即時効果アクションを1件取り出せるかを判定します。
-取り出し可能な場合、以降の処理へ進み、取り出せなくなるまでこのループを継続します。</p>
+<dt><strong>[6-5-1] バッファから該当の即時はあるか？</strong></dt><dd><p>バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが即時のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。</p>
 </dd>
-<dt><strong>[6-5-2] バッファから即時効果アクションを取り出す</strong></dt><dd><p>条件を満たした即時効果アクションを、アクションバッファから実際に取り出します。
-取り出されたアクションは、解決処理の対象となります。</p>
+<dt><strong>[6-5-2] バッファからリクエストを取り出す</strong></dt><dd><p>条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。</p>
 </dd>
-<dt><strong>[6-5-3] 取り出した即時効果アクションの効果を解決する</strong></dt><dd><p>取り出された即時効果アクションの効果（例えば、ダメージ処理や特殊効果など）を実行し、
-アクションの解決を行います。詳細な処理内容は、該当のアクション効果解決処理を参照してください。</p>
+<dt><strong>[6-5-3] 取り出したリクエストを解決する</strong></dt><dd><p>取り出されたリクエストの効果を実行し、解決します。
+詳しくは <a class="reference internal" href="#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> 参照してください。</p>
 </dd>
 <dt><strong>[6-5-4] 勝敗判定</strong></dt><dd><p>勝敗を判定します。
 詳しくは <a class="reference internal" href="#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> 参照。</p>
 </dd>
-<dt><strong>[6-5-5] アクションが新たな誘発を発生させたか？</strong></dt><dd><p>即時効果アクションの解決後、実行したアクションが新たな誘発を発生させたかどうかを確認します。
+<dt><strong>[6-5-5] リクエストが新たな誘発を発生させたか？</strong></dt><dd><p>効果の解決後、それが起因となり新たな誘発を発生させたかどうかを確認します。
 発生している場合は、その誘発アクションを再度バッファに追加する必要があります。</p>
 </dd>
-<dt><strong>[6-5-6] 誘発したアクションをバッファに追加</strong></dt><dd><p>新たに発生した誘発アクションを、アクションバッファに追加します。
-これにより、再帰的なアクション処理が可能となり、次のループで該当アクションの取り出し処理が実行されます。</p>
+<dt><strong>[6-5-6] 誘発したリクエストをバッファに追加</strong></dt><dd><p>新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
+これにより、再帰的なアクション処理が可能となり、次のループで該当するリクエストの取り出し処理が実行されます。</p>
 </dd>
 </dl>
 </section>
 <section id="trigger-act-n">
-<span id="id16"></span><h4><span class="section-number">2.8.1.2. </span>通常効果：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
-<p>誘発チェックで誘発した通常効果を処理します。
+<span id="id26"></span><h4><span class="section-number">2.4.1.2. </span>通常：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発したスピードが通常のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 2.6</span></a>)</p>
-<figure class="align-default" id="id23">
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 2.9</span></a>)</p>
+<figure class="align-default" id="id36">
 <span id="trigger-flow-n"></span><p class="plantuml">
-<img src="../_images/plantuml-1d96ac9119bd1817ae50ecebf9273d9f7a1e5adf.svg" alt="&#64;startuml
+<img src="../_images/plantuml-cbf266ad23ec6ae782ddffbc9e5614fd4b366b03.svg" alt="&#64;startuml
 '==============================
-'【通常効果：アクション毎に処理】
+'【通常：アクション毎に処理】
 '==============================
 
 start
-while ([6-10-1] バッファから該当の通常効果アクションがあるか？) is (Yes)
-  :[6-10-2] バッファから通常効果アクションを取り出す;
-  if ([6-10-3] 取り出した通常効果のタイミングがメインか判定) then (Yes)
-    if ([6-10-4] ステージが空か判定？) then (Yes)
-      :[6-10-5] 通常効果アクション\nをステージに追加;
+while ([6-10-1] バッファから該当の通常はあるか？) is (Yes)
+  :[6-10-2] バッファからリクエストを取り出す;
+  if ([6-10-3] 取り出したリクエストのタイミングがメインか判定) then (Yes)
+    if ([6-10-4] ステージが空か判定) then (Yes)
+      :[6-10-5] リクエストをステージに追加;
     else (No)
-      :[6-10-6] 通常効果アクションを破棄;
+      :[6-10-6] リクエストを破棄;
     endif
   else (No)
-    :[6-10-7] タイミングがクイックの場合、\n通常効果アクションをステージに追加;
+    :[6-10-7] リクエストをステージに追加;
   endif
-  if ([6-10-8] アクションが誘発したかを判定) then (Yes)
-    :[6-10-9] 誘発したアクションをバッファに追加;
+  if ([6-10-8] リクエストが新たな誘発を発生させたか？) then (Yes)
+    :[6-10-9] 誘発したリクエストをバッファに追加;
     note left
-      誘発したアクションのコントローラーは
+      誘発したリクエストのコントローラーは
       起因となったアクションのコントローラー
       になります。
     end note
@@ -603,45 +801,43 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 2.6 </span><span class="caption-text">誘発チェック-通常効果処理</span><a class="headerlink" href="#id23" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 2.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
-<dt><strong>[6-10-1] バッファから該当の通常効果アクションがあるか？</strong></dt><dd><p>アクションバッファから、呼び出し元から渡された対象プレイヤーおよび該当タイミングに合致する通常効果アクションが
-1件取り出せるかどうかを判定します。取り出し可能な場合は以降の処理に進み、
-取り出せなくなるまでこのループを継続します。</p>
+<dt><strong>[6-10-1] バッファから該当の通常はあるか？</strong></dt><dd><p>バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが通常のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。</p>
 </dd>
-<dt><strong>[6-10-2] バッファから通常効果アクションを取り出す</strong></dt><dd><p>条件に合致する通常効果アクションを、アクションバッファから実際に取り出します。
-取り出されたアクションは、次のタイミング判定の対象となります。</p>
+<dt><strong>[6-10-2] バッファからリクエストを取り出す</strong></dt><dd><p>条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。</p>
 </dd>
-<dt><strong>[6-10-3] 取り出した通常効果のタイミングがメインか判定</strong></dt><dd><p>取り出された通常効果アクションのタイミングが「メイン」であるかどうかを判定します。
+<dt><strong>[6-10-3] 取り出したリクエストのタイミングがメインか判定</strong></dt><dd><p>取り出したリクエストのタイミングが「メイン」であるかどうかを判定します。
 「Yes」と判定された場合は、ステージへの追加前に空き状況の確認へ進みます。
 「No」の場合は、クイックタイミングとして処理を行います。</p>
 </dd>
-<dt><strong>[6-10-4] ステージが空か判定？</strong></dt><dd><p>タイミングがメインの場合、アクションをステージに追加できるかどうか、
+<dt><strong>[6-10-4] ステージが空か判定</strong></dt><dd><p>タイミングがメインの場合、そのリクエストをステージに追加できるかどうか、
 すなわちステージに空きがあるかを判定します。</p>
 </dd>
-<dt><strong>[6-10-5] 通常効果アクションをステージに追加</strong></dt><dd><p>ステージが空いている場合、取り出した通常効果アクションをステージに追加します。
-これにより、通常効果が次のフェーズで適用されます。</p>
+<dt><strong>[6-10-5] リクエストをステージに追加</strong></dt><dd><p>ステージが空いている場合、取り出したリクエストをステージに追加します。</p>
 </dd>
-<dt><strong>[6-10-6] 通常効果アクションを破棄</strong></dt><dd><p>ステージが埋まっている場合、取り出した通常効果アクションを破棄します。
-この処理により、ステージの状態に合わせた適切な処理が行われます。</p>
+<dt><strong>[6-10-6] リクエストを破棄</strong></dt><dd><p>ステージが埋まっている場合、取り出したタイミングがメインのリクエストを破棄します。</p>
 </dd>
-<dt><strong>[6-10-7] タイミングがクイックの場合、通常効果アクションをステージに追加</strong></dt><dd><p>取り出した通常効果アクションのタイミングが「クイック」である場合、
-ステージの空き状況にかかわらず無条件でアクションをステージに追加します。</p>
+<dt><strong>[6-10-7] リクエストをステージに追加</strong></dt><dd><p>取り出したリクエストのタイミングが「クイック」である場合、
+ステージの空き状況にかかわらず無条件でリクエストをステージに追加します。</p>
 </dd>
-<dt><strong>[6-10-8] アクションが誘発したかを判定</strong></dt><dd><p>通常効果アクションの解決後、そのアクションが新たな誘発を発生させたかどうかを判定します。
+<dt><strong>[6-10-8] リクエストが新たな誘発を発生させたか？</strong></dt><dd><p>リクエストをステージに追加した後、それが起因となり新たな誘発を発生させたかどうかを確認します。
 誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。</p>
 </dd>
-<dt><strong>[6-10-9] 誘発したアクションをアクションバッファに追加</strong></dt><dd><p>新たに誘発されたアクションが存在する場合、該当アクションをアクションバッファに追加します。
+<dt><strong>[6-10-9] 誘発したリクエストをバッファに追加</strong></dt><dd><p>新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
 これにより、誘発処理の再実行が可能となります。</p>
 </dd>
 </dl>
 </section>
 </section>
 </section>
-<section id="id17">
-<h2><span class="section-number">2.9. </span>まとめ<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id27">
+<h2><span class="section-number">2.5. </span>まとめ<a class="headerlink" href="#id27" title="この見出しへのパーマリンク">¶</a></h2>
 <p>コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
@@ -664,15 +860,11 @@ stop
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">2. コアルール</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#index-0">2.1. ターン</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-1">2.2. アクション</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-2">2.3. チャンス</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-3">2.4. ステージ</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6">2.5. アクションの定義項目</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#component">2.6. コンポーネント</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-11">2.7. 能力</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">2.8. コアフロー</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id17">2.9. まとめ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id2">2.1. 基礎概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">2.2. 詳細</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ability">2.3. 能力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">2.4. コアフロー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id27">2.5. まとめ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
