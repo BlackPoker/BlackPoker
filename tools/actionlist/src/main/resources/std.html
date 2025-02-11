@@ -483,7 +483,7 @@
                   <a th:each="row : ${actList.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action"
                   th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
-                          th:text="${row.actTime}"></span></b>
+                          th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                     </span>
                   </a>
 
@@ -666,6 +666,9 @@
 
                   </div>
                   <div class="panel-body">
+                    <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"> （誘発条件）<br></span> <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"
+                      th:utext="${#sfn.cnvHtml(row.actTriggerCond)}"></span>
+                    <hr th:if="${not #strings.isEmpty(row.actTriggerCond)}">
                     <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
                       th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->

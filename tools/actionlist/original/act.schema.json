@@ -52,6 +52,8 @@
                   "actTime": { "type": "string" },
                   "actCost": { "type": "string" },
                   "actKey": { "type": "string" },
+                  "actActCond": { "type": "string" },
+                  "actTriggerCond": { "type": "string" },
                   "actNote": { "type": "string" },
                   "actTarget": { "type": "string" },
                   "actEffect": { "type": "string" },

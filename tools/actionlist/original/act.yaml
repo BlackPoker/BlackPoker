@@ -156,6 +156,25 @@ actList:
   - type: ターン制御系
     acts:
     - format: lite,std,pro,mast
+      actName: エンド
+      actId: end
+      actType: ターン制御
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: ''
+      actKey: ''
+      actNote: ''
+      actTarget: ''
+      actEffect: |-
+        １．手札が7枚を越えた場合、7枚になるよう手札を捨てる。
+        ２．自分のターンを終了し、対戦相手にターンを渡す。
+        ３．チャージアクションを起こす。
+      story: ''
+      flavor: ''
+      flavorSpeaker: ''
+
+    - format: lite,std,pro,mast
       actName: チャージ
       actId: charge
       actType: ターン制御
@@ -164,7 +183,7 @@ actList:
       actTime: メイン
       actCost: ''
       actKey: ''
-      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      actTriggerCond: エンドアクションが解決した時に誘発する。
       actTarget: ''
       actEffect: |-
         １．ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
@@ -182,31 +201,13 @@ actList:
       actTime: メイン
       actCost: ''
       actKey: ''
+      actTriggerCond: チャージアクションが解決した時に誘発する。
       # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
         ターンを持っているプレイヤーは次を行う。
         １．ライフの一番上からカードを１枚引き、手札に加える。
         ２．必要であれば、更にライフの一番上からカードを１枚引き、手札に加える。
-      story: ''
-      flavor: ''
-      flavorSpeaker: ''
-
-    - format: lite,std,pro,mast
-      actName: エンド
-      actId: end
-      actType: ターン制御
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: ''
-      actKey: ''
-      actNote: ''
-      actTarget: ''
-      actEffect: |-
-        １．手札が7枚を越えた場合、7枚になるよう手札を捨てる。
-        ２．自分のターンを終了し、対戦相手にターンを渡す。
-        ３．チャージアクションを起こす。
       story: ''
       flavor: ''
       flavorSpeaker: ''
@@ -240,6 +241,7 @@ actList:
       actTime: メイン
       actCost: ''
       actKey: ''
+      actTriggerCond: アタックアクションが解決した時にアタッカーが1体以上いる場合、誘発する。
       # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
@@ -258,6 +260,7 @@ actList:
       actTime: メイン
       actCost: ''
       actKey: ''
+      actTriggerCond: ブロックアクションが解決した時に誘発する。
       # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
@@ -654,6 +657,7 @@ actList:
       actTime: クイック
       actCost: ''
       actKey: ''
+      actTriggerCond: Joker,A,J,Q,Kのカードが場から墓地に行くたびに1枚につき1回誘発する。
       # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
