@@ -1,0 +1,127 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ACT YAML Schema",
+    "type": "object",
+    "properties": {
+      "data": {
+        "type": "object",
+        "properties": {
+          "ver": { "type": "string" },
+          "lastupdate": { "type": "string" },
+          "pdfurl_std": { "type": "string" },
+          "pdfurl_lite": { "type": "string" },
+          "pdfurl_pro": { "type": "string" },
+          "pdfurl_mast": { "type": "string" },
+          "qrStd": { "type": "string" },
+          "qrLite": { "type": "string" },
+          "qrPro": { "type": "string" },
+          "qrMast": { "type": "string" }
+        },
+        "required": [
+          "ver",
+          "lastupdate",
+          "pdfurl_std",
+          "pdfurl_lite",
+          "pdfurl_pro",
+          "pdfurl_mast",
+          "qrStd",
+          "qrLite",
+          "qrPro",
+          "qrMast"
+        ],
+        "additionalProperties": true
+      },
+      "actList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "acts": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "format": { "type": "string" },
+                  "actName": { "type": "string" },
+                  "actId": { "type": "string" },
+                  "actType": { "type": "string" },
+                  "actTrigger": { "type": "string" },
+                  "actS": { "type": "string" },
+                  "actSpeed": { "type": "string" },
+                  "actTime": { "type": "string" },
+                  "actCost": { "type": "string" },
+                  "actKey": { "type": "string" },
+                  "actNote": { "type": "string" },
+                  "actTarget": { "type": "string" },
+                  "actEffect": { "type": "string" },
+                  "story": { "type": "string" },
+                  "flavor": { "type": "string" },
+                  "flavorSpeaker": { "type": "string" }
+                },
+                "required": [
+                  "format",
+                  "actName",
+                  "actId",
+                  "actType",
+                  "actTrigger",
+                  "actSpeed",
+                  "actTime",
+                  "actEffect"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["type", "acts"],
+          "additionalProperties": true
+        }
+      },
+      "charList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "chars": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "format": { "type": "string" },
+                  "charName": { "type": "string" },
+                  "charId": { "type": "string" },
+                  "charType": { "type": "string" },
+                  "charKey": { "type": "string" },
+                  "charSize": { "type": "string" },
+                  "charNote": { "type": "string" },
+                  "charAbility": { "type": "string" },
+                  "story": { "type": "string" },
+                  "flavor": { "type": "string" },
+                  "flavorSpeaker": { "type": "string" }
+                },
+                "required": [
+                  "format",
+                  "charName",
+                  "charId",
+                  "charType",
+                  "charKey",
+                  "charNote",
+                  "charAbility",
+                  "story",
+                  "flavor",
+                  "flavorSpeaker"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["type", "chars"],
+          "additionalProperties": true
+        }
+      }
+    },
+    "required": ["data", "actList", "charList"],
+    "additionalProperties": true
+  }
+  

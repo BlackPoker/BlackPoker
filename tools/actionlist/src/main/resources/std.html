@@ -199,14 +199,15 @@
 
     .act-title {
       color: black;
+      font-weight: bold;
     }
 
     .blackpoker-action .act-title:before {
-      content: "【";
+      content: "";
     }
 
     .blackpoker-action .act-title:after {
-      content: "】";
+      content: "";
     }
 
     .blackpoker-action .panel-body {
@@ -636,11 +637,16 @@
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
                       <span class="act-title" th:text="${row.actName}"></span>
                     </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType}"></span>
+                    <!-- <span> -->
+                       <small> 
+                        <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                         <span th:text="'('+${row.actType}+')'"></span>
                       </small>
-                    </span>
+                    <!-- </span> -->
                     <div class="pull-right">
-                      &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime}"></span>
+                      &thinsp; <small>
+                        <span class="time-mark"></span> 
+                        <span th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span>
                       </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
                         <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
                       </small>
@@ -664,8 +670,7 @@
                       th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                    <p th:if="${not #strings.isEmpty(row.actS)}">（即時効果）</p>
-                    <p th:if="${#strings.isEmpty(row.actS)}">（通常効果）</p>
+                    <p>（効果）</p>
                      <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
 
                     <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">

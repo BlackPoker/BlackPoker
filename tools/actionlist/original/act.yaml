@@ -17,9 +17,10 @@ actList:
       actName: 防壁設置
       actId: setBulwark
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 即時
       actTime: メイン
       actCost: L
-      actS: ●
       actKey: ''
       actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
       actTarget: ''
@@ -33,9 +34,10 @@ actList:
       actName: 兵士召喚
       actId: summonsSoldier
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
-      actS: ''
       actKey: 2〜10
       actNote: ''
       actTarget: ''
@@ -48,9 +50,10 @@ actList:
       actName: 英雄召喚
       actId: summonsHero
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BBL
-      actS: ''
       actKey: J〜K
       actNote: ''
       actTarget: ''
@@ -64,9 +67,10 @@ actList:
       actName: エース召喚
       actId: summonsAce
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: L
-      actS: ''
       actKey: A
       actNote: ''
       actTarget: ''
@@ -80,9 +84,10 @@ actList:
       actName: クイック召喚
       actId: quickSummonsAce
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: D
-      actS: ''
       actKey: A
       actNote: '※ターンを持っていない時しかこのアクションを起こすことができない。'
       actTarget: ''
@@ -91,17 +96,18 @@ actList:
         もしくは、キーカードを防壁として裏向きかつチャージ状態で場に出す。
         エースの能力は、キャラクターリスト参照。
         防壁の能力はキャラクターリスト参照。防壁の置き方は「防壁の置き方」参照。
-      story: 
-      flavor: 
-      flavorSpeaker: 
+      story: ''
+      flavor: ''
+      flavorSpeaker: ''
 
     - format: 'std,pro,mast'
       actName: 魔術士召喚
       actId: summonsMagic
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BD
-      actS: ''
       actKey: Joker
       actNote: ''
       actTarget: ''
@@ -116,9 +122,10 @@ actList:
       actName: 装備
       actId: mountSoldier
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
-      actS: ''
       actKey: A〜K
       actNote: ''
       actTarget: 自分の場にいるキーカードと同じスートの兵士１体を対象とする。Jokerは対象にできない。
@@ -131,9 +138,10 @@ actList:
       actName: 帰還
       actId: unsummons
       actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: B
-      actS: ''
       actKey: 同じスートを2枚
       actNote: ''
       actTarget: |
@@ -145,17 +153,18 @@ actList:
       flavor: ''
       flavorSpeaker: ''
 
-  - type: 展開系
+  - type: ターン制御系
     acts:
     - format: lite,std,pro,mast
       actName: チャージ
       actId: charge
       actType: ターン制御
+      actTrigger: 誘発
+      actSpeed: 即時
       actTime: メイン
       actCost: ''
-      actS: ●
       actKey: ''
-      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
         １．ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
@@ -165,15 +174,15 @@ actList:
       flavorSpeaker: ''
 
     - format: lite,std,pro,mast
-      type: ターン制御系
       actName: ドロー
       actId: draw
       actType: ターン制御
+      actTrigger: 誘発
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ''
-      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
         ターンを持っているプレイヤーは次を行う。
@@ -184,13 +193,13 @@ actList:
       flavorSpeaker: ''
 
     - format: lite,std,pro,mast
-      type: ターン制御系
       actName: エンド
       actId: end
       actType: ターン制御
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ''
       actNote: ''
       actTarget: ''
@@ -205,13 +214,13 @@ actList:
   - type: 攻撃系
     acts:
     - format: lite,std,pro,mast
-      type: 
       actName: アタック
       actId: attack
       actType: 攻防
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ''
       actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
       actTarget: ''
@@ -223,15 +232,15 @@ actList:
       flavorSpeaker: ''
 
     - format: lite,std,pro,mast
-      type: 攻撃系
       actName: ブロック
       actId: block
       actType: 攻防
+      actTrigger: 誘発
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ''
-      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
         １．対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
@@ -241,15 +250,15 @@ actList:
       flavorSpeaker: ''
 
     - format: lite,std,pro,mast
-      type: 攻撃系
       actName: ダメージ判定
       actId: damageJudge
       actType: 攻防
+      actTrigger: 誘発
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ''
-      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: |-
         アタッカーとブロッカーを比較する
@@ -266,9 +275,10 @@ actList:
       actName: アップ
       actId: up
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: D
-      actS: ''
       actKey: ♡A〜10
       actNote: ''
       actTarget: 兵士1体を対象とする。
@@ -281,9 +291,10 @@ actList:
       actName: ダウン
       actId: down
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: D
-      actS: ''
       actKey: ♠A〜10
       actNote: ''
       actTarget: 兵士1体を対象とする。
@@ -296,9 +307,10 @@ actList:
       actName: ツイスト
       actId: twist
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: D
-      actS: ''
       actKey: ♢A〜10
       actNote: ''
       actTarget: キャラクター1体を対象とする。
@@ -311,9 +323,10 @@ actList:
       actName: カウンター
       actId: counter
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: D
-      actS: ''
       actKey: ♣A〜10
       actNote: ''
       actTarget: |-
@@ -330,9 +343,10 @@ actList:
       actName: 再会
       actId: reunion
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: ''
-      actS: ''
       actKey: ♡A〜10 を 2枚
       actNote: ''
       actTarget: ''
@@ -345,9 +359,10 @@ actList:
       actName: キル
       actId: kill
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: ''
-      actS: ''
       actKey: ♠A〜10 を 2枚
       actNote: ''
       actTarget: 兵士1体を対象とする。
@@ -360,9 +375,10 @@ actList:
       actName: 停戦
       actId: truce
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: ''
-      actS: ''
       actKey: ♢A〜10 を 2枚
       actNote: ''
       actTarget: ダメージ判定アクションを対象とする。
@@ -375,9 +391,10 @@ actList:
       actName: 対象変更
       actId: changeTarget
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: ''
-      actS: ''
       actKey: ♣A〜10 を 2枚
       actNote: ''
       actTarget: 対象が指定されているアクションを対象とする。
@@ -390,9 +407,10 @@ actList:
       actName: 防壁破壊
       actId: destroyBulwark
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♡A〜K と ♢A〜K
       actNote: ''
       actTarget: 防壁１体を対象とする。
@@ -405,9 +423,10 @@ actList:
       actName: 投擲
       actId: throwing
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♠A〜K と ♣A〜K
       actNote: ''
       actTarget: 対戦相手１人を対象とする。
@@ -420,9 +439,10 @@ actList:
       actName: 死の槍
       actId: deathLance
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♠A〜K と ♢A〜K
       actNote: ''
       actTarget: 兵士１体を対象とする。
@@ -438,9 +458,10 @@ actList:
       actName: 防壁補充
       actId: addBulwark
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♡A〜K と ♣A〜K
       actNote: ''
       actTarget: ''
@@ -455,9 +476,10 @@ actList:
       actName: リアニメイト
       actId: reanimate
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♠A〜K と ♡A〜K
       actNote: ''
       actTarget: 自分の場のキャラクター１体を対象とする。
@@ -470,9 +492,10 @@ actList:
       actName: ハンデス
       actId: handeth
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: ''
-      actS: ''
       actKey: ♢A〜K と ♣A〜K
       actNote: ''
       actTarget: 対戦相手１人を対象とする。
@@ -485,9 +508,10 @@ actList:
       actName: フォース
       actId: force
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
-      actS: ''
       actKey: ♡A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
@@ -500,9 +524,10 @@ actList:
       actName: 剣の雨
       actId: swordRain
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
-      actS: ''
       actKey: ♠A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
@@ -515,9 +540,10 @@ actList:
       actName: 徴募
       actId: recruit
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
-      actS: ''
       actKey: ♢A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
@@ -535,9 +561,10 @@ actList:
       actName: 奇襲
       actId: surprise
       actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
-      actS: ''
       actKey: ♣A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: ''
@@ -552,9 +579,10 @@ actList:
       actName: サーチ
       actId: search
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 即時
       actTime: クイック
       actCost: ''
-      actS: ●
       actKey: Joker
       actNote: ''
       actTarget: ''
@@ -567,9 +595,10 @@ actList:
       actName: B・J
       actId: bj
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: SS
-      actS: ''
       actKey: 同じスートの A と J
       actNote: ※コストの支払によって誘発したアクションより先にアクションの解決を行う。
       actTarget: ''
@@ -582,9 +611,10 @@ actList:
       actName: R・S・F
       actId: rsf
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: BB
-      actS: ''
       actKey: '同じスートのA,10〜K を 5枚'
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: プレイヤー１人を対象とする。
@@ -597,9 +627,10 @@ actList:
       actName: リバース
       actId: reverse
       actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
       actTime: クイック
       actCost: ''
-      actS: ''
       actKey: 同じ数字を２枚
       actNote: ''
       actTarget: キャラクター１体を対象とする。
@@ -618,11 +649,12 @@ actList:
       actName: 世代交代
       actId: nextGeneration
       actType: 誘発
+      actTrigger: 誘発
+      actSpeed: 即時
       actTime: クイック
       actCost: ''
-      actS: ●
       actKey: ''
-      actNote: ※プレイヤーはこのアクションを直接起こすことができない。
+      # actNote: ※プレイヤーはこのアクションを直接起こすことができない。
       actTarget: ''
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
       story: ''
