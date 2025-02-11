@@ -27,8 +27,8 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-release = '2024/4/1'
-version = '7.0版'
+release = '2025/3/x'
+version = '8.0版'
 
 # -- General configuration ---------------------------------------------------
 
