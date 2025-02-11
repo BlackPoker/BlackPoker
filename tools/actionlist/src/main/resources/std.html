@@ -530,7 +530,7 @@
           <ul class="list-group">
             <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ</li>
             <li class="list-group-item"><span class="time-mark"></span>
-              :&nbsp;タイミング</li>
+              :&nbsp;トリガー-スピード-タイミング</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star" aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
             <li class="list-group-item"><span class="note-mark"></span>
@@ -675,8 +675,8 @@
                       th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                    <p>（効果）</p>
-                     <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
+                    <span>（効果）<br></span>
+                    <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
 
                     <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">
                       <hr>

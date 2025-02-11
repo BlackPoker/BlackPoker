@@ -136,7 +136,7 @@
 \vspace{-3zh}%余白削除
 \subsection*{（補足）記号の意味}
 \vspace{-1zh}%余白削除
-{\small @:タイミング, 
+{\scriptsize @:トリガー-スピード-タイミング, 
 \$:コスト, 
 ★:キーカード}
 
@@ -217,28 +217,28 @@
 \vspace{1mm} %余白追加
             #if(${row.format.contains(${arg0})})
                 #if(${row.format.contains('lite')})
-{\small\bf ■ ${row.actName} {\scriptsize (${row.actType}) [lite]}} %Actionタイトル
+{\small\bf ■ ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
                 #elseif(${row.format.contains('std')})
-{\small\bf ○ ${row.actName} {\scriptsize (${row.actType}) [std]}} %Actionタイトル
+{\small\bf ○ ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
                 #elseif(${row.format.contains('pro')})
-{\small\bf ● ${row.actName} {\scriptsize (${row.actType}) [pro]}} %Actionタイトル
+{\small\bf ● ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
                 #elseif(${row.format.contains('mast')})
-{\small\bf ◎ ${row.actName} {\scriptsize (${row.actType}) [mast]}} %Actionタイトル
+{\small\bf ◎ ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
                 #end
             #end
 \hfill 
-            #if(${row.actTime} != "")
-{\footnotesize\bf @${row.actTime} }
+            #if(${row.actTime})
+{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
             #end
-            #if(${row.actCost} != "")
+            #if(${row.actCost})
   {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
             #end
 
-            #if(${row.actKey.trim()} != "")
+            #if(${row.actKey.trim()})
 {\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
             #end
 
-            #if(${row.actNote.trim()} != "")
+            #if(${row.actNote.trim()})
 %特記事項
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
@@ -246,7 +246,23 @@
 
 ${texFn.cnv(${row.actNote})}
             #end
-            #if(${row.actTarget.trim()} != "")
+            #if(${row.actActCond})
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（起動条件）}
+
+${texFn.cnv(${row.actActCond})}
+            #end
+            #if(${row.actTriggerCond})
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（誘発条件）}
+
+${texFn.cnv(${row.actTriggerCond})}
+            #end
+            #if(${row.actTarget})
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
@@ -254,17 +270,12 @@ ${texFn.cnv(${row.actNote})}
 
 ${texFn.cnv(${row.actTarget})}
             #end
-            #if(${row.actEffect.trim()} != "")
+            #if(${row.actEffect})
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 
-                #if(${row.actS.trim()} != "")
-{\bf（即時効果）}
-                #end
-                #if(${row.actS.trim()} == "")
-{\bf（通常効果）}
-                #end
+{\bf（効果）}
 
 ${texFn.cnv(${row.actEffect})}
             #end
@@ -305,15 +316,15 @@ ${texFn.cnv(${row.actEffect})}
 \vspace{1mm} %余白追加
             #if(${row.format.contains(${arg0})})
                 #if(${row.format.contains('lite')})
-{\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) [lite]}} %Characterタイトル
+{\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
                 #elseif(${row.format.contains('std')})
-{\small\bf ○ ${row.charName} {\scriptsize (${row.charType}) [std]}} %Characterタイトル
+{\small\bf ○ ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
                 #elseif(${row.format.contains('pro')})
-{\small\bf ● ${row.charName} {\scriptsize (${row.charType}) [pro]}} %Characterタイトル
+{\small\bf ● ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
                 #end
             #end
 \hfill 
-            #if(${row.charKey.trim()} != "")
+            #if(${row.charKey})
 {\footnotesize\bf ★${texFn.cnv(${row.charKey})} }
             #end
 
@@ -321,7 +332,7 @@ ${texFn.cnv(${row.actEffect})}
 {\bf サイズ : ${texFn.cnv(${row.charSize})} }
             #end
 
-            #if(${row.charNote.trim()} != "")
+            #if(${row.charNote})
 %特記事項
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
@@ -329,7 +340,16 @@ ${texFn.cnv(${row.actEffect})}
 
 ${texFn.cnv(${row.charNote})}
             #end
-            #if(${row.charAbility.trim()} != "")
+            #if(${row.charLabel})
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（ラベル）}
+
+${texFn.cnv(${row.charLabel})}
+            #end
+            #if(${row.charAbility})
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
@@ -342,6 +362,9 @@ ${texFn.cnv(${row.charAbility})}
     #end
 
 #end
+
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
 
 \thispagestyle{empty}
 \vspace*{\stretch{1}}
