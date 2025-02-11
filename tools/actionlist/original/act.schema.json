@@ -108,11 +108,7 @@
                   "charId",
                   "charType",
                   "charKey",
-                  "charNote",
-                  "charAbility",
-                  "story",
-                  "flavor",
-                  "flavorSpeaker"
+                  "charAbility"
                 ],
                 "additionalProperties": true
               }
