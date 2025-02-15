@@ -22,3 +22,5 @@ source/_build
 docs/*
 out
 build
+
+**/auto/*

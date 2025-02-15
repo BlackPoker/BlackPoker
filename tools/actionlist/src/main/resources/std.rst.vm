@@ -1,0 +1,72 @@
+================
+BlackPoker アクションリスト
+================
+
+本ドキュメントでは、BlackPokerのすべてのアクションについて記載します。
+
+.. contents:: 目次
+   :depth: 2
+   :local:
+
+#foreach( $nestList in $actList)
+
+${nestList.type}
+==================
+    #foreach( $row in ${nestList.acts})
+
+${row.actName} (${row.actType})
+-----------------
+**フォーマット:**
+
+.. csv-table::
+   :widths: 1, 1, 1, 1
+   :header-rows: 1
+
+   "ライト", "スタンダード", "プロ", "マスター"
+   "#if(${row.format.contains('lite')})◯#end", "#if(${row.format.contains('std')})◯#end", "#if(${row.format.contains('pro')})◯#end", "#if(${row.format.contains('mast')})◯#end"
+
+        #if(${row.actTime})
+**トリガー:** ${row.actTrigger}
+
+**スピード:** ${row.actSpeed}
+
+**タイミング:** ${row.actTime}
+
+        #end
+        #if(${row.actCost})
+**コスト:** ${row.actCost}
+
+        #end
+
+        #if(${row.actKey.trim()})
+**キーカード:** ${row.actKey}
+
+        #end
+        #if(${row.actNote.trim()})
+**特記事項:** ${row.actNote}
+
+        #end
+        #if(${row.actActCond})
+**起動条件:**  
+
+${row.actActCond}
+
+        #end
+        #if(${row.actTriggerCond})
+**誘発条件:**  
+
+${row.actTriggerCond}
+
+        #end
+        #if(${row.actTarget})
+**対象:**  
+
+${rstFn.cnv(${row.actTarget})}
+
+        #end
+**効果:**  
+
+${rstFn.cnv(${row.actEffect})}
+
+    #end
+#end
