@@ -87,23 +87,75 @@
 \BOOKMARK [2][-]{subsection.4.1.1}{対戦レギュレーションとの違い}{section.4.1}% 86
 \BOOKMARK [1][-]{section.4.2}{定義項目}{chapter.4}% 87
 \BOOKMARK [1][-]{section.4.3}{フォーマット定義}{chapter.4}% 88
-\BOOKMARK [0][-]{chapter.5}{対戦レギュレーション}{}% 89
-\BOOKMARK [1][-]{section.5.1}{対戦レギュレーションとは}{chapter.5}% 90
-\BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 91
-\BOOKMARK [2][-]{subsection.5.2.1}{対戦レギュレーションの表記}{section.5.2}% 92
-\BOOKMARK [2][-]{subsection.5.2.2}{対戦\(マッチ\)とゲーム\(試合\)}{section.5.2}% 93
-\BOOKMARK [1][-]{section.5.3}{フレーム定義}{chapter.5}% 94
-\BOOKMARK [2][-]{subsection.5.3.1}{マッチ形式}{section.5.3}% 95
-\BOOKMARK [1][-]{section.5.4}{オプション定義}{chapter.5}% 96
-\BOOKMARK [2][-]{subsection.5.4.1}{プリセット2}{section.5.4}% 97
-\BOOKMARK [2][-]{subsection.5.4.2}{プリセット4}{section.5.4}% 98
-\BOOKMARK [2][-]{subsection.5.4.3}{パック}{section.5.4}% 99
-\BOOKMARK [1][-]{section.5.5}{対戦レギュレーションの決め方}{chapter.5}% 100
-\BOOKMARK [0][-]{chapter.6}{付録}{}% 101
-\BOOKMARK [1][-]{section.6.1}{PDF版ルール}{chapter.6}% 102
-\BOOKMARK [1][-]{section.6.2}{アクションリスト}{chapter.6}% 103
-\BOOKMARK [2][-]{subsection.6.2.1}{ライト}{section.6.2}% 104
-\BOOKMARK [2][-]{subsection.6.2.2}{スタンダード}{section.6.2}% 105
-\BOOKMARK [2][-]{subsection.6.2.3}{プロ}{section.6.2}% 106
-\BOOKMARK [2][-]{subsection.6.2.4}{マスター}{section.6.2}% 107
-\BOOKMARK [1][-]{section.6.3}{エクストラリスト}{chapter.6}% 108
+\BOOKMARK [2][-]{subsection.4.3.1}{BlackPoker アクションリスト}{section.4.3}% 89
+\BOOKMARK [3][-]{subsubsection*.74}{展開系}{subsection.4.3.1}% 90
+\BOOKMARK [4][-]{paragraph*.75}{防壁設置 \(召喚\)}{subsubsection*.74}% 91
+\BOOKMARK [4][-]{paragraph*.76}{兵士召喚 \(召喚\)}{subsubsection*.74}% 92
+\BOOKMARK [4][-]{paragraph*.77}{英雄召喚 \(召喚\)}{subsubsection*.74}% 93
+\BOOKMARK [4][-]{paragraph*.78}{エース召喚 \(召喚\)}{subsubsection*.74}% 94
+\BOOKMARK [4][-]{paragraph*.79}{クイック召喚 \(召喚\)}{subsubsection*.74}% 95
+\BOOKMARK [4][-]{paragraph*.80}{魔術士召喚 \(召喚\)}{subsubsection*.74}% 96
+\BOOKMARK [4][-]{paragraph*.81}{装備 \(召喚\)}{subsubsection*.74}% 97
+\BOOKMARK [4][-]{paragraph*.82}{帰還 \(召喚\)}{subsubsection*.74}% 98
+\BOOKMARK [3][-]{subsubsection*.83}{ターン制御系}{subsection.4.3.1}% 99
+\BOOKMARK [4][-]{paragraph*.84}{エンド \(ターン制御\)}{subsubsection*.83}% 100
+\BOOKMARK [4][-]{paragraph*.85}{チャージ \(ターン制御\)}{subsubsection*.83}% 101
+\BOOKMARK [4][-]{paragraph*.86}{ドロー \(ターン制御\)}{subsubsection*.83}% 102
+\BOOKMARK [3][-]{subsubsection*.87}{攻撃系}{subsection.4.3.1}% 103
+\BOOKMARK [4][-]{paragraph*.88}{アタック \(攻防\)}{subsubsection*.87}% 104
+\BOOKMARK [4][-]{paragraph*.89}{ブロック \(攻防\)}{subsubsection*.87}% 105
+\BOOKMARK [4][-]{paragraph*.90}{ダメージ判定 \(攻防\)}{subsubsection*.87}% 106
+\BOOKMARK [3][-]{subsubsection*.91}{魔法系}{subsection.4.3.1}% 107
+\BOOKMARK [4][-]{paragraph*.92}{アップ \(速攻魔法\)}{subsubsection*.91}% 108
+\BOOKMARK [4][-]{paragraph*.93}{ダウン \(速攻魔法\)}{subsubsection*.91}% 109
+\BOOKMARK [4][-]{paragraph*.94}{ツイスト \(速攻魔法\)}{subsubsection*.91}% 110
+\BOOKMARK [4][-]{paragraph*.95}{カウンター \(速攻魔法\)}{subsubsection*.91}% 111
+\BOOKMARK [4][-]{paragraph*.96}{再会 \(速攻魔法\)}{subsubsection*.91}% 112
+\BOOKMARK [4][-]{paragraph*.97}{キル \(速攻魔法\)}{subsubsection*.91}% 113
+\BOOKMARK [4][-]{paragraph*.98}{停戦 \(速攻魔法\)}{subsubsection*.91}% 114
+\BOOKMARK [4][-]{paragraph*.99}{対象変更 \(速攻魔法\)}{subsubsection*.91}% 115
+\BOOKMARK [4][-]{paragraph*.100}{防壁破壊 \(通常魔法\)}{subsubsection*.91}% 116
+\BOOKMARK [4][-]{paragraph*.101}{投擲 \(通常魔法\)}{subsubsection*.91}% 117
+\BOOKMARK [4][-]{paragraph*.102}{死の槍 \(通常魔法\)}{subsubsection*.91}% 118
+\BOOKMARK [4][-]{paragraph*.103}{防壁補充 \(通常魔法\)}{subsubsection*.91}% 119
+\BOOKMARK [4][-]{paragraph*.104}{リアニメイト \(通常魔法\)}{subsubsection*.91}% 120
+\BOOKMARK [4][-]{paragraph*.105}{ハンデス \(通常魔法\)}{subsubsection*.91}% 121
+\BOOKMARK [4][-]{paragraph*.106}{フォース \(通常魔法\)}{subsubsection*.91}% 122
+\BOOKMARK [4][-]{paragraph*.107}{剣の雨 \(通常魔法\)}{subsubsection*.91}% 123
+\BOOKMARK [4][-]{paragraph*.108}{徴募 \(通常魔法\)}{subsubsection*.91}% 124
+\BOOKMARK [4][-]{paragraph*.109}{奇襲 \(通常魔法\)}{subsubsection*.91}% 125
+\BOOKMARK [4][-]{paragraph*.110}{サーチ \(速攻魔法\)}{subsubsection*.91}% 126
+\BOOKMARK [4][-]{paragraph*.111}{B・J \(速攻魔法\)}{subsubsection*.91}% 127
+\BOOKMARK [4][-]{paragraph*.112}{R・S・F \(速攻魔法\)}{subsubsection*.91}% 128
+\BOOKMARK [4][-]{paragraph*.113}{リバース \(速攻魔法\)}{subsubsection*.91}% 129
+\BOOKMARK [3][-]{subsubsection*.114}{誘発系}{subsection.4.3.1}% 130
+\BOOKMARK [4][-]{paragraph*.115}{世代交代 \(誘発\)}{subsubsection*.114}% 131
+\BOOKMARK [2][-]{subsection.4.3.2}{BlackPoker キャラクターリスト}{section.4.3}% 132
+\BOOKMARK [3][-]{subsubsection*.124}{兵士}{subsection.4.3.2}% 133
+\BOOKMARK [4][-]{paragraph*.125}{一般兵 \(兵士\)}{subsubsection*.124}% 134
+\BOOKMARK [4][-]{paragraph*.126}{英雄 \(兵士\)}{subsubsection*.124}% 135
+\BOOKMARK [4][-]{paragraph*.127}{エース \(兵士\)}{subsubsection*.124}% 136
+\BOOKMARK [4][-]{paragraph*.128}{魔術士 \(兵士\)}{subsubsection*.124}% 137
+\BOOKMARK [4][-]{paragraph*.129}{装備兵 \(兵士\)}{subsubsection*.124}% 138
+\BOOKMARK [3][-]{subsubsection*.130}{防壁}{subsection.4.3.2}% 139
+\BOOKMARK [4][-]{paragraph*.131}{防壁 \(防壁\)}{subsubsection*.130}% 140
+\BOOKMARK [0][-]{chapter.5}{対戦レギュレーション}{}% 141
+\BOOKMARK [1][-]{section.5.1}{対戦レギュレーションとは}{chapter.5}% 142
+\BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 143
+\BOOKMARK [2][-]{subsection.5.2.1}{対戦レギュレーションの表記}{section.5.2}% 144
+\BOOKMARK [2][-]{subsection.5.2.2}{対戦\(マッチ\)とゲーム\(試合\)}{section.5.2}% 145
+\BOOKMARK [1][-]{section.5.3}{フレーム定義}{chapter.5}% 146
+\BOOKMARK [2][-]{subsection.5.3.1}{マッチ形式}{section.5.3}% 147
+\BOOKMARK [1][-]{section.5.4}{オプション定義}{chapter.5}% 148
+\BOOKMARK [2][-]{subsection.5.4.1}{プリセット2}{section.5.4}% 149
+\BOOKMARK [2][-]{subsection.5.4.2}{プリセット4}{section.5.4}% 150
+\BOOKMARK [2][-]{subsection.5.4.3}{パック}{section.5.4}% 151
+\BOOKMARK [1][-]{section.5.5}{対戦レギュレーションの決め方}{chapter.5}% 152
+\BOOKMARK [0][-]{chapter.6}{付録}{}% 153
+\BOOKMARK [1][-]{section.6.1}{PDF版ルール}{chapter.6}% 154
+\BOOKMARK [1][-]{section.6.2}{アクションリスト}{chapter.6}% 155
+\BOOKMARK [2][-]{subsection.6.2.1}{ライト}{section.6.2}% 156
+\BOOKMARK [2][-]{subsection.6.2.2}{スタンダード}{section.6.2}% 157
+\BOOKMARK [2][-]{subsection.6.2.3}{プロ}{section.6.2}% 158
+\BOOKMARK [2][-]{subsection.6.2.4}{マスター}{section.6.2}% 159
+\BOOKMARK [1][-]{section.6.3}{エクストラリスト}{chapter.6}% 160

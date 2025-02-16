@@ -86,23 +86,75 @@
 \contentsline {subsection}{\numberline {4.1.1}対戦レギュレーションとの違い}{39}{subsection.4.1.1}%
 \contentsline {section}{\numberline {4.2}定義項目}{39}{section.4.2}%
 \contentsline {section}{\numberline {4.3}フォーマット定義}{40}{section.4.3}%
-\contentsline {chapter}{\numberline {第5章}対戦レギュレーション}{41}{chapter.5}%
-\contentsline {section}{\numberline {5.1}対戦レギュレーションとは}{41}{section.5.1}%
-\contentsline {section}{\numberline {5.2}定義項目}{41}{section.5.2}%
-\contentsline {subsection}{\numberline {5.2.1}対戦レギュレーションの表記}{41}{subsection.5.2.1}%
-\contentsline {subsection}{\numberline {5.2.2}対戦(マッチ)とゲーム(試合)}{42}{subsection.5.2.2}%
-\contentsline {section}{\numberline {5.3}フレーム定義}{42}{section.5.3}%
-\contentsline {subsection}{\numberline {5.3.1}マッチ形式}{43}{subsection.5.3.1}%
-\contentsline {section}{\numberline {5.4}オプション定義}{44}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}プリセット2}{44}{subsection.5.4.1}%
-\contentsline {subsection}{\numberline {5.4.2}プリセット4}{45}{subsection.5.4.2}%
-\contentsline {subsection}{\numberline {5.4.3}パック}{45}{subsection.5.4.3}%
-\contentsline {section}{\numberline {5.5}対戦レギュレーションの決め方}{45}{section.5.5}%
-\contentsline {chapter}{\numberline {第6章}付録}{49}{chapter.6}%
-\contentsline {section}{\numberline {6.1}PDF版ルール}{49}{section.6.1}%
-\contentsline {section}{\numberline {6.2}アクションリスト}{49}{section.6.2}%
-\contentsline {subsection}{\numberline {6.2.1}ライト}{49}{subsection.6.2.1}%
-\contentsline {subsection}{\numberline {6.2.2}スタンダード}{49}{subsection.6.2.2}%
-\contentsline {subsection}{\numberline {6.2.3}プロ}{50}{subsection.6.2.3}%
-\contentsline {subsection}{\numberline {6.2.4}マスター}{50}{subsection.6.2.4}%
-\contentsline {section}{\numberline {6.3}エクストラリスト}{50}{section.6.3}%
+\contentsline {subsection}{\numberline {4.3.1}BlackPoker アクションリスト}{40}{subsection.4.3.1}%
+\contentsline {subsubsection}{展開系}{42}{subsubsection*.74}%
+\contentsline {paragraph}{防壁設置 (召喚)}{42}{paragraph*.75}%
+\contentsline {paragraph}{兵士召喚 (召喚)}{43}{paragraph*.76}%
+\contentsline {paragraph}{英雄召喚 (召喚)}{43}{paragraph*.77}%
+\contentsline {paragraph}{エース召喚 (召喚)}{44}{paragraph*.78}%
+\contentsline {paragraph}{クイック召喚 (召喚)}{45}{paragraph*.79}%
+\contentsline {paragraph}{魔術士召喚 (召喚)}{45}{paragraph*.80}%
+\contentsline {paragraph}{装備 (召喚)}{46}{paragraph*.81}%
+\contentsline {paragraph}{帰還 (召喚)}{47}{paragraph*.82}%
+\contentsline {subsubsection}{ターン制御系}{47}{subsubsection*.83}%
+\contentsline {paragraph}{エンド (ターン制御)}{47}{paragraph*.84}%
+\contentsline {paragraph}{チャージ (ターン制御)}{48}{paragraph*.85}%
+\contentsline {paragraph}{ドロー (ターン制御)}{48}{paragraph*.86}%
+\contentsline {subsubsection}{攻撃系}{49}{subsubsection*.87}%
+\contentsline {paragraph}{アタック (攻防)}{49}{paragraph*.88}%
+\contentsline {paragraph}{ブロック (攻防)}{50}{paragraph*.89}%
+\contentsline {paragraph}{ダメージ判定 (攻防)}{50}{paragraph*.90}%
+\contentsline {subsubsection}{魔法系}{51}{subsubsection*.91}%
+\contentsline {paragraph}{アップ (速攻魔法)}{51}{paragraph*.92}%
+\contentsline {paragraph}{ダウン (速攻魔法)}{52}{paragraph*.93}%
+\contentsline {paragraph}{ツイスト (速攻魔法)}{52}{paragraph*.94}%
+\contentsline {paragraph}{カウンター (速攻魔法)}{53}{paragraph*.95}%
+\contentsline {paragraph}{再会 (速攻魔法)}{53}{paragraph*.96}%
+\contentsline {paragraph}{キル (速攻魔法)}{54}{paragraph*.97}%
+\contentsline {paragraph}{停戦 (速攻魔法)}{55}{paragraph*.98}%
+\contentsline {paragraph}{対象変更 (速攻魔法)}{55}{paragraph*.99}%
+\contentsline {paragraph}{防壁破壊 (通常魔法)}{56}{paragraph*.100}%
+\contentsline {paragraph}{投擲 (通常魔法)}{56}{paragraph*.101}%
+\contentsline {paragraph}{死の槍 (通常魔法)}{57}{paragraph*.102}%
+\contentsline {paragraph}{防壁補充 (通常魔法)}{58}{paragraph*.103}%
+\contentsline {paragraph}{リアニメイト (通常魔法)}{59}{paragraph*.104}%
+\contentsline {paragraph}{ハンデス (通常魔法)}{59}{paragraph*.105}%
+\contentsline {paragraph}{フォース (通常魔法)}{60}{paragraph*.106}%
+\contentsline {paragraph}{剣の雨 (通常魔法)}{60}{paragraph*.107}%
+\contentsline {paragraph}{徴募 (通常魔法)}{61}{paragraph*.108}%
+\contentsline {paragraph}{奇襲 (通常魔法)}{62}{paragraph*.109}%
+\contentsline {paragraph}{サーチ (速攻魔法)}{62}{paragraph*.110}%
+\contentsline {paragraph}{B・J (速攻魔法)}{63}{paragraph*.111}%
+\contentsline {paragraph}{R・S・F (速攻魔法)}{63}{paragraph*.112}%
+\contentsline {paragraph}{リバース (速攻魔法)}{64}{paragraph*.113}%
+\contentsline {subsubsection}{誘発系}{65}{subsubsection*.114}%
+\contentsline {paragraph}{世代交代 (誘発)}{65}{paragraph*.115}%
+\contentsline {subsection}{\numberline {4.3.2}BlackPoker キャラクターリスト}{65}{subsection.4.3.2}%
+\contentsline {subsubsection}{兵士}{66}{subsubsection*.124}%
+\contentsline {paragraph}{一般兵 (兵士)}{66}{paragraph*.125}%
+\contentsline {paragraph}{英雄 (兵士)}{66}{paragraph*.126}%
+\contentsline {paragraph}{エース (兵士)}{66}{paragraph*.127}%
+\contentsline {paragraph}{魔術士 (兵士)}{67}{paragraph*.128}%
+\contentsline {paragraph}{装備兵 (兵士)}{67}{paragraph*.129}%
+\contentsline {subsubsection}{防壁}{68}{subsubsection*.130}%
+\contentsline {paragraph}{防壁 (防壁)}{68}{paragraph*.131}%
+\contentsline {chapter}{\numberline {第5章}対戦レギュレーション}{69}{chapter.5}%
+\contentsline {section}{\numberline {5.1}対戦レギュレーションとは}{69}{section.5.1}%
+\contentsline {section}{\numberline {5.2}定義項目}{69}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}対戦レギュレーションの表記}{69}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}対戦(マッチ)とゲーム(試合)}{70}{subsection.5.2.2}%
+\contentsline {section}{\numberline {5.3}フレーム定義}{70}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}マッチ形式}{71}{subsection.5.3.1}%
+\contentsline {section}{\numberline {5.4}オプション定義}{72}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}プリセット2}{72}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}プリセット4}{73}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}パック}{73}{subsection.5.4.3}%
+\contentsline {section}{\numberline {5.5}対戦レギュレーションの決め方}{73}{section.5.5}%
+\contentsline {chapter}{\numberline {第6章}付録}{77}{chapter.6}%
+\contentsline {section}{\numberline {6.1}PDF版ルール}{77}{section.6.1}%
+\contentsline {section}{\numberline {6.2}アクションリスト}{77}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}ライト}{77}{subsection.6.2.1}%
+\contentsline {subsection}{\numberline {6.2.2}スタンダード}{77}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}プロ}{78}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}マスター}{78}{subsection.6.2.4}%
+\contentsline {section}{\numberline {6.3}エクストラリスト}{78}{section.6.3}%

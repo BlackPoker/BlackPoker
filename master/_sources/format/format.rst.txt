@@ -73,13 +73,9 @@ BlackPokerはアクションという行動を起こし、兵士などのキャ�
 
 
 
-.. .. toctree::
-..    :maxdepth: 1
-..    :caption: 公式フォーマット:
+.. toctree::
+   :maxdepth: 1
+   :caption: 公式フォーマット:
 
-..    lite
-..    standard 
-..    pro 
-..    master
-..    extra
+   ../auto/actionlist
 
