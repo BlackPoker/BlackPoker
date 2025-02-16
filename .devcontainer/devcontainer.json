@@ -25,7 +25,8 @@
 				"shd101wyy.markdown-preview-enhanced",
 				"corschenzi.mermaid-graphical-editor",
 				"ms-vscode.live-server",
-				"redhat.vscode-yaml"
+				"redhat.vscode-yaml",
+				"sodatea.velocity"
 			],
 			"settings": {
 				"tools/actionlist/original/act.schema.json":"*act.yaml"

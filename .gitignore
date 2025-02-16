@@ -22,3 +22,6 @@ source/_build
 docs/*
 out
 build
+
+**/auto/*
+!**/auto/.gitkeep

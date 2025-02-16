@@ -14,8 +14,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <!-- dockerイメージが11なので11 -->
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
   </properties>
 
   <repositories>
@@ -135,12 +136,13 @@
             <arguments>
 
               <!-- std -->
-              <argument>-i original/act.yaml -o web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
-              <argument>-i original/act.yaml -o web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
-              <argument>-i original/act.yaml -o web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
-              <argument>-i original/act.yaml -o web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
+              <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
+              <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
+              <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
+              <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
+              <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
               <!-- extra -->
-              <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument>
+              <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
               
             </arguments>
             <systemProperties>

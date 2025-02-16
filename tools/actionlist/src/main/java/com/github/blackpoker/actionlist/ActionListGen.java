@@ -13,6 +13,7 @@ import org.kohsuke.args4j.Option;
 import org.yaml.snakeyaml.Yaml;
 
 import com.github.blackpoker.actionlist.writer.HtmlWriter;
+import com.github.blackpoker.actionlist.writer.RstWriter;
 import com.github.blackpoker.actionlist.writer.TexWriter;
 
 public class ActionListGen {
@@ -22,24 +23,30 @@ public class ActionListGen {
 	// private static String inputPath;
 	@Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT YAML")
 	private static String inputPath;
-	// 入力ファイルのシート名
-	@Option(name = "-s", aliases = { "--sheet" }, metaVar = "sheetName", usage = "SheetName")
-	private static String sheetName = "list";
+	// // 入力ファイルのシート名
+	// @Option(name = "-s", aliases = { "--sheet" }, metaVar = "sheetName", usage = "SheetName")
+	// private static String sheetName = "list";
 	// テンプレートファイルのシート名
 	@Option(name = "-t", aliases = { "--template" }, metaVar = "templateName", required = true, usage = "TemplateName")
 	private static String templateName;
-	// 出力ファイルのパス
-	@Option(name = "-o", aliases = { "--output" }, metaVar = "outputPath", required = true, usage = "OUTPUT")
-	private static String outputPath;
+	// // HTML出力ファイルのパス
+	// @Option(name = "-o", aliases = { "--output" }, metaVar = "outputPath", required = true, usage = "OUTPUT")
+	// private static String outputPath;
 	// 出力ファイルのパス
 	@Option(name = "-b", aliases = { "--beta" }, usage = "BETA")
 	private static boolean betaFlg;
 	// HTML出力
-	@Option(name = "-html", aliases = { "--html" }, usage = "HTML OUTPUT")
-	private static boolean htmlOutFlg = true;
+	// @Option(name = "-html", aliases = { "--html" }, usage = "HTML OUTPUT")
+	// private static boolean htmlOutFlg;
+	// HTML出力
+	@Option(name = "-htmlOutput", aliases = { "--htmlOutput" }, usage = "HTML OUTPUT")
+	private static String htmlOutputPath;
 	// TeX出力
 	@Option(name = "-texOutput", aliases = { "--texOutput" }, usage = "TeX OUTPUT")
 	private static String texOutputPath;
+	// rst出力
+	@Option(name = "-rstOutput", aliases = { "--rstOutput" }, usage = "rst OUTPUT")
+	private static String rstOutputPath;
 	// パラメータ
 	@Option(name = "-arg0", aliases = { "--arg0" }, metaVar = "arg0", usage = "ARG0")
 	private static String arg0;
@@ -91,9 +98,9 @@ public class ActionListGen {
 		Map<String, Object> map = load(inputPath);
 
 		// HTML書き出し
-		if (htmlOutFlg) {
+		if (htmlOutputPath != null && !"".equals(htmlOutputPath)) {
 			Writer htmlWriter = new HtmlWriter();
-			htmlWriter.write(map, outputPath, templateName);
+			htmlWriter.write(map, htmlOutputPath, templateName);
 		}
 
 		// TeX書き出し
@@ -102,6 +109,12 @@ public class ActionListGen {
 			pdfWriter.write(map, texOutputPath, templateName);
 		}
 
+		// rst書き出し
+		if (rstOutputPath != null && !"".equals(rstOutputPath)) {
+			Writer rstWriter = new RstWriter();
+			rstWriter.write(map, rstOutputPath, templateName);
+		}
+		
 		// yaml書き出し
 		{
 			Yaml yaml = new Yaml();

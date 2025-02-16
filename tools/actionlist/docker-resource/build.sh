@@ -35,4 +35,20 @@ create blackpoker-lite
 create blackpoker-std
 create blackpoker-pro
 create blackpoker-mast
-create blackpoker-extra
+# create blackpoker-extra
+
+echo "ls -la ."
+ls -la .
+
+echo "ls -la .."
+ls -la ..
+
+echo "ls -la /usr/local/source/auto"
+ls -la /usr/local/source/auto
+
+mkdir -p ./dist/source/auto
+cp -r /usr/local/source/auto/* ./dist/source/auto/
+
+echo "ls -la ./dist/source/auto"
+ls -la ./dist/source/auto
+
