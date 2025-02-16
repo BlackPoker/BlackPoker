@@ -29,7 +29,6 @@ create () {
     python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
     cp ./tex/*.pdf ./dist
     cp -r ./web-site ./dist/.
-    cp -r ../../source/auto ./dist/.
 }
 
 create blackpoker-lite
@@ -37,3 +36,9 @@ create blackpoker-std
 create blackpoker-pro
 create blackpoker-mast
 # create blackpoker-extra
+
+ls -la .
+ls -la ..
+ls -la ../../source/auto
+
+cp -r ../../source/auto ./dist/source/auto
