@@ -36,9 +36,3 @@ create blackpoker-std
 create blackpoker-pro
 create blackpoker-mast
 # create blackpoker-extra
-
-ls -la .
-ls -la ..
-ls -la ../../source/auto
-
-cp -r ../../source/auto ./dist/source/auto
