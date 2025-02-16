@@ -14,7 +14,9 @@ RUN mkdir src && \
  mkdir original && \
  chown 1000:1000 original && \
  mkdir web-site && \
- chown 1000:1000 web-site
+ chown 1000:1000 web-site && \
+ mkdir ../../source/auto && \
+ chown 1000:1000 ../../source/auto
 
 COPY src/* src/.
 COPY original/* original/.
@@ -48,6 +50,9 @@ RUN mkdir tex && \
  mkdir web-site && \
  chown 1000:1000 web-site && \
  chmod 777 web-site && \
+ mkdir ../../source/auto && \
+ chown 1000:1000 ../../source/auto && \
+ chmod 777 ../../source/auto && \
  mkdir dist && \
  chown 1000:1000 dist && \
  chmod 777 dist
@@ -57,6 +62,7 @@ COPY ./python/* python/.
 COPY ./docker-resource/build.sh .
 COPY ./docker-resource/*.pdf ./tex/.
 COPY --from=builder /usr/local/src/actionlist/web-site web-site
+COPY --from=builder /usr/local/source/auto ../../source/auto
 
 VOLUME /dist
 

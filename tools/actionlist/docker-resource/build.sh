@@ -29,6 +29,7 @@ create () {
     python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
     cp ./tex/*.pdf ./dist
     cp -r ./web-site ./dist/.
+    cp -r ../../source/format/auto ./dist/.
 }
 
 create blackpoker-lite

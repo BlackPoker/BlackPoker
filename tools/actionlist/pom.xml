@@ -136,7 +136,7 @@
             <arguments>
 
               <!-- std -->
-              <argument>-i original/act.yaml -t std -rstOutput ../../source/format/auto/actionlist.rst</argument>
+              <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>

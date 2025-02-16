@@ -172,6 +172,7 @@ public class RstFn {
         
         if (matcher.find()) {
             int hyphenCount = matcher.group(1).length(); // `-` の個数を取得
+			// vmフォーマット側の都合で3としている
             String spaces = " ".repeat(hyphenCount * 3); // `-` の個数 × 3 のスペースを生成
             return spaces + str.substring(hyphenCount); // `-` をスペースに置換
         }
