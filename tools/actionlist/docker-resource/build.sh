@@ -48,3 +48,7 @@ ls -la /usr/local/source/auto
 
 mkdir -p ./dist/source/auto
 cp -r /usr/local/source/auto ./dist/source/auto
+
+echo "ls -la ./dist/source/auto"
+ls -la ./dist/source/auto
+
