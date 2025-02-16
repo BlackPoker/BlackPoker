@@ -69,7 +69,7 @@ jobs:
         env:
           DOCKER_BUILDKIT: 1
         run: |
-           cp -r ./tools/actionlist/dist/source/auto/* ./source/auto/.
+           cp -r ./tools/actionlist/dist/source/auto/* ./source/auto/
            sed -i -e 's,'\''github_version'\'': '\''master/source/'\'','\''github_version'\'': '\''${{ steps.vars.outputs.short_ref }}/source/'\'',g' ./source/conf.py
            cat ./source/conf.py
            sed -i -e 's,https://blackpoker.github.io/BlackPoker/,https://blackpoker.github.io/BlackPoker/${{ steps.vars.outputs.short_ref }}/,g' ./source/appendix/appendix.rst
