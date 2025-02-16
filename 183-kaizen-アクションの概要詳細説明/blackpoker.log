@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  16 FEB 2025 06:31
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  16 FEB 2025 07:09
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -850,17 +850,17 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 4.805pt on input line 2.
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 89.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 132.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 89.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 132.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 89.
+(Font)              scaled to size 9.60999pt on input line 132.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 89.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 132.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 89.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 132.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 89.
+(Font)              scaled to size 9.60999pt on input line 132.
  [1
 
 ])
@@ -1573,150 +1573,155 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 2063--2065
  []
 
 [39] [40]
-第5章
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2179--2181
-[]
- []
+Overfull \vbox (3.23927pt too high) has occurred while \output is active []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2186--2188
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2193--2195
-[]
- []
-
-[41
+[41] [42] [43] [44] [45] [46] [47] [48] [49] [50] [51] [52] [53] [54] [55]
+[56] [57] [58] [59] [60] [61] [62
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2231--2233
+第5章
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 4907--4909
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2235--2237
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 4914--4916
 []
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2413--2413
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 4921--4923
+[]
+ []
+
+[63]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 4959--4961
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 4963--4965
+[]
+ []
+
+
+Underfull \hbox (badness 6380) in paragraph at lines 5141--5141
 []\JY1/gt/m/n/10 構築タ
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2413--2413
+Underfull \hbox (badness 6380) in paragraph at lines 5141--5141
 []\JY1/mc/m/n/10 ランダ
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2413--2413
+Underfull \hbox (badness 10000) in paragraph at lines 5141--5141
 []\JY1/mc/m/n/10 ランダム
  []
 
 
-Underfull \hbox (badness 6380) in paragraph at lines 2413--2413
+Underfull \hbox (badness 6380) in paragraph at lines 5141--5141
 []\JY1/mc/m/n/10 ランダ
  []
 
-[42]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2420--2420
+[64]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5148--5148
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2420--2420
+Underfull \hbox (badness 10000) in paragraph at lines 5148--5148
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2427--2427
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5155--5155
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2427--2427
+Underfull \hbox (badness 10000) in paragraph at lines 5155--5155
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 2450--2450
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5178--5178
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 2450--2450
+Underfull \hbox (badness 10000) in paragraph at lines 5178--5178
 
  []
 
-[43] [44] [45] [46] [47] [48
+[65] [66] [67] [68] [69] [70
 
 ]
 第6章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3018--3020
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5746--5748
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3022--3024
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5750--5752
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3034--3036
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5762--5764
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3038--3040
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5766--5768
 []
  []
 
-[49]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3050--3052
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3054--3056
+[71]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5778--5780
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3066--3068
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5782--5784
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3070--3072
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5794--5796
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3082--3084
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5798--5800
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 3086--3088
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5810--5812
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5814--5816
 []
  []
 
 No file blackpoker.ind.
-[50] (./blackpoker.aux)
+[72] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 3FD0CD4EC290CB423FA3EBE63940D2F8;8234.
+(rerunfilecheck)             Checksum: 1D8E613BB82C0DBB52E3CE8160E6E1A0;11804.
  ) 
 Here is how much of TeX's memory you used:
- 14593 strings out of 480496
- 226264 string characters out of 5899437
- 577820 words of memory out of 5000000
- 32277 multiletter control sequences out of 15000+600000
+ 14686 strings out of 480496
+ 228278 string characters out of 5899437
+ 584709 words of memory out of 5000000
+ 32370 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,482b,570s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (54 pages, 187700 bytes).
+Output written on blackpoker.dvi (76 pages, 253916 bytes).
