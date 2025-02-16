@@ -43,7 +43,7 @@
     COPY ./docker-resource/build.sh .
     COPY ./docker-resource/*.pdf ./tex/
     COPY --from=builder /usr/local/src/actionlist/web-site/ web-site/
-    COPY --from=builder /usr/local/source/auto/ /dist/source/auto/
+    COPY --from=builder /usr/local/source/auto/ /usr/local/source/auto
     
     VOLUME /dist
     
