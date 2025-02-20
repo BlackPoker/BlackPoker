@@ -26,6 +26,7 @@
 				"corschenzi.mermaid-graphical-editor",
 				"ms-vscode.live-server",
 				"redhat.vscode-yaml",
+				"janisdd.vscode-edit-csv",
 				"sodatea.velocity"
 			],
 			"settings": {
