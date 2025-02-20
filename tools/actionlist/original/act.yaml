@@ -522,7 +522,7 @@ actList:
       actTrigger: 誘発
       actSpeed: 即時
       actTime: クイック
-      actTriggerCond: Joker,A,J,Q,Kのカードが場から墓地に行くたびに1枚につき1回誘発する。
+      actTriggerCond: Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
 
 charList:
