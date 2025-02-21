@@ -1,0 +1,974 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>コアルール &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="付録" href="../appendix/appendix.html" />
+    <link rel="prev" title="BlackPoker アクションリスト" href="../auto/actionlist.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="../index.html" accesskey="U">BlackPoker</a>
+            <a class="top" href="#">コアルール</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="../auto/actionlist.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            BlackPoker アクションリスト
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../appendix/appendix.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            付録
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="">コアルール</a></li> 
+  </ul>
+</nav>
+<section id="core-rst">
+<span id="id1"></span><h1><span class="section-number">5. </span>コアルール<a class="headerlink" href="#core-rst" title="この見出しへのパーマリンク">¶</a></h1>
+<p>トランプのみでトレーディングカードゲームのように遊ぶためには、
+一般的なトレーディングカードゲームを抽象化し、トランプのみで遊べるように再構築しました。</p>
+<p>コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(<a class="reference internal" href="#abstract-core-rule"><span class="std std-numref">Fig. 5.1</span></a>)</p>
+<p>BlackPokerはコアルールを実装しているため、ルールを変更する場合は、コアルールに従う必要があります。</p>
+<p>このルールは、割込みが可能なターン制ゲームの標準化したモデルとして構築されており、他のゲームへの応用も可能です。</p>
+<figure class="align-default" id="id29">
+<span id="abstract-core-rule"></span><p class="plantuml">
+<img src="../_images/plantuml-5869adc776d20b7021b88175e8de80f0f436330c.svg" alt="&#64;startuml
+
+skinparam defaultTextAlignment center
+
+(一般的なトレーディングカードゲーム) as TCG
+(割込み可能なターン制ゲーム) as InterruptibleTurnGame
+note right of InterruptibleTurnGame
+これがコアルール
+end note
+(BlackPoker) as BlackPokerGame
+
+InterruptibleTurnGame &lt;--- (TCG) : &quot;抽象化&quot;
+InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
+
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id29" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<section id="id2">
+<h2><span class="section-number">5.1. </span>基礎概念<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<p>割込み可能なターン制ゲームでは、現実のゲーム盤面に影響を与える前に、
+どの行動を先に行うかを決める仮想的な場所があります。</p>
+<p>割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。</p>
+<p>つまり、プレイヤーは相手に許可を得て、自分の行動を実行できるかどうか確認しながら進める形式のゲームです。</p>
+<p>いくつかの基礎概念を紹介します。
+その後、それらを組み合わせたイメージを説明します。</p>
+<section id="index-0">
+<span id="id3"></span><h3><span class="section-number">5.1.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h3>
+<p>このルールでは、プレイヤーはターンを“持つ”ことができます。
+ターンを持っているプレイヤーは先に行動できます。
+ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
+</section>
+<section id="index-1">
+<span id="id4"></span><h3><span class="section-number">5.1.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションとは、プレイヤーの行動を示す定義です。
+ターン制のゲームでは、プレイヤーは様々な行動を行います。
+チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引くなどがあります。
+それらをアクションと定義します。</p>
+</section>
+<section id="index-2">
+<span id="id5"></span><h3><span class="section-number">5.1.3. </span>チャンス<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションを起こすことができる機会をチャンスといいます。
+チャンスを持っている間は何度でもアクションを起こすことができます。
+正式名称はアクションチャンスです。</p>
+</section>
+<section id="index-3">
+<span id="id6"></span><h3><span class="section-number">5.1.4. </span>ステージ<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションの解決順を整理するために使う領域です。
+後入れ先出し方式で、最後に積まれたアクションから順に解決されます。
+正確には、ステージにはアクションではなく、後述するリクエストが蓄積されます。</p>
+</section>
+<section id="index-4">
+<span id="id7"></span><h3><span class="section-number">5.1.5. </span>リクエスト<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションを実行すると、ゲームシステム（コアフロー）に対して
+どのようなアクションを実行するかを要求します。
+この要求をリクエストと呼びます。正式名称はアクションリクエストです。</p>
+<p>リクエストの種類によっては、ステージに蓄積されず、すぐに実行(解決)されるものもあります。</p>
+</section>
+<section id="component">
+<span id="index-5"></span><span id="id8"></span><h3><span class="section-number">5.1.6. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントとは、ゲーム盤面に配置されるモンスターや駒の定義を指します。
+例えば、将棋の「歩」は駒としては複数存在しますが、「歩」の定義は1つです。
+この定義をコンポーネントといいます。</p>
+</section>
+<section id="index-6">
+<span id="id9"></span><h3><span class="section-number">5.1.7. </span>コンポーネントインスタンス<a class="headerlink" href="#index-6" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントの定義からインスタンス化されたものをコンポーネントインスタンスといいます。
+例えば、将棋の「歩」はコンポーネントとして定義されていますが、
+実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたコンポーネントインスタンスとなります。</p>
+</section>
+<section id="id10">
+<h3><span class="section-number">5.1.8. </span>コアフロー(ルールシステム)<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<p>リクエストはコアフロー(ルールシステム)によって整理され、処理されます。
+リクエストを即時解決するものと、ステージに蓄積されるものに分類され、順番に処理されます。</p>
+<p>ゲームによって具体的に行う内容は異なりますが、処理する順番の制御順はコアフローが担います。</p>
+<p>コアフローはゲームの開始から勝敗が決まるまで動作し続けます。</p>
+</section>
+</section>
+<section id="id11">
+<h2><span class="section-number">5.2. </span>詳細<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h2>
+<p>基礎概念を図で表すと次のようになります。(<a class="reference internal" href="#abstract-core-image"><span class="std std-numref">Fig. 5.2</span></a>)</p>
+<figure class="align-default" id="id30">
+<span id="abstract-core-image"></span><img alt="../_images/abstract.png" src="../_images/abstract.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id30" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。</p>
+<p>リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。</p>
+<p>さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(<a class="reference internal" href="#action-request-image"><span class="std std-numref">Fig. 5.3</span></a>)</p>
+<figure class="align-default" id="id31">
+<span id="action-request-image"></span><p class="plantuml">
+<img src="../_images/plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.svg" alt="
+left to right direction
+
+hide fields
+hide methods
+hide circle
+
+class アクション&lt;&lt;定義&gt;&gt; {
+}
+
+class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
+}
+
+アクション --&gt; リクエスト : 生成 
+
+class コンポーネント&lt;&lt;定義&gt;&gt; {
+}
+
+class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+}
+
+コンポーネント --&gt; コンポーネントインスタンス : 生成 "/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.3 </span><span class="caption-text">リクエストとコンポーネントインスタンスの関係</span><a class="headerlink" href="#id31" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>ゲーム盤面には複数のコンポーネントインスタンスが生成されます。</p>
+<p>リクエストが解決されるたびに、コンポーネントインスタンスが生成されたり、既存のコンポーネントインスタンスの状態が変化したりします。</p>
+<p>ここからは、アクションとコンポーネントの各項目について説明します。</p>
+<section id="id12">
+<h3><span class="section-number">5.2.1. </span>アクションの定義項目<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションを定義する際には、次の項目を設定する必要があります。
+その他の項目は、具体的なアクションに応じて追加してください。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>オーナー</p></li>
+<li><p>トリガー</p></li>
+<li><p>スピード</p></li>
+<li><p>タイミング</p></li>
+<li><p>起動条件</p></li>
+<li><p>誘発条件</p></li>
+<li><p>効果</p></li>
+</ul>
+</div></blockquote>
+<section id="index-7">
+<span id="id13"></span><h4><span class="section-number">5.2.1.1. </span>オーナー<a class="headerlink" href="#index-7" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションの所有者。
+アクションの定義はプレイヤー事に保持するため、同じ内容のアクションでもオーナーが異なります。</p>
+</section>
+<section id="trigger-core">
+<span id="index-8"></span><span id="id14"></span><h4><span class="section-number">5.2.1.2. </span>トリガー<a class="headerlink" href="#trigger-core" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションが要求される方法は、大きく分けて次の2種類に分類されます。</p>
+<dl class="simple">
+<dt><strong>直接</strong></dt><dd><p>プレイヤーがコストを支払うなどの手続きを経て実行するアクション。</p>
+</dd>
+<dt><strong>誘発</strong></dt><dd><p>条件が満たされた場合、自動で発動するアクション。</p>
+</dd>
+</dl>
+<p>トリガー項目には「直接」または「誘発」のいずれかが設定されます。</p>
+</section>
+<section id="speed-core">
+<span id="index-9"></span><span id="id15"></span><h4><span class="section-number">5.2.1.3. </span>スピード<a class="headerlink" href="#speed-core" title="この見出しへのパーマリンク">¶</a></h4>
+<p>リクエストが処理される速度は次の2種類に分類されます。</p>
+<dl class="simple">
+<dt><strong>即時</strong></dt><dd><p>リクエストはステージを用いず解決されます。</p>
+</dd>
+<dt><strong>通常</strong></dt><dd><p>リクエストはステージを経由して解決されます。</p>
+</dd>
+</dl>
+<p>スポード項目には「即時」または「通常」のいずれかが設定されます。</p>
+</section>
+<section id="timing">
+<span id="index-10"></span><span id="id16"></span><h4><span class="section-number">5.2.1.4. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h4>
+<p>タイミングとは、アクションを実行できるタイミングを示します。
+タイミングには次の2種類があります。</p>
+<dl class="simple" id="index-11">
+<dt><strong>メイン</strong></dt><dd><p>ターンプレイヤーかつステージが空のときに起こせるアクション。
+実行条件：
+- チャンスを持っている
+- 自分のターンである
+- ステージが空である</p>
+</dd>
+</dl>
+<dl class="simple" id="index-12">
+<dt><strong>クイック</strong></dt><dd><p>いつでも起こすことができ、アクションをステージに積み重ねることが可能。
+実行条件：
+- チャンスを持っている</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>エンドアクションの定義</p>
+<p>最低1つはターンを別のプレイヤーに渡すアクションを定義してください。
+これがないと、ターンが進行せずゲームが停止する可能性があります。</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>アクションのコントローラー</p>
+<p>アクションを実行したプレイヤーを <strong>アクションのコントローラー</strong> と呼びます。
+効果の解釈は、このコントローラーの視点で行われます。</p>
+</div>
+</section>
+<section id="index-13">
+<span id="id17"></span><h4><span class="section-number">5.2.1.5. </span>起動条件<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションを起こすための条件を示します。</p>
+<p>トリガーが「直接」の場合、起動条件が定義されます。
+コストの支払いや対象の指定など、様々な条件がアクションごとに設定されます。</p>
+<p>BlackPokerでは、コストの支払いや対象の指定の記述が冗長にならないよう、省略されることが多いです。</p>
+</section>
+<section id="index-14">
+<span id="id18"></span><h4><span class="section-number">5.2.1.6. </span>誘発条件<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションが誘発される条件を示します。
+条件が満たされると、アクションからリクエストが生成され、コアフローに渡されます。</p>
+<p>トリガーが「誘発」の場合、この項目が定義されます。</p>
+<p>例：
+- ダメージを受けたとき
+- カードが墓地に移動したとき</p>
+<p>これらの状況で誘発するアクションが設定されることがあります。</p>
+</section>
+<section id="index-15">
+<span id="id19"></span><h4><span class="section-number">5.2.1.7. </span>効果<a class="headerlink" href="#index-15" title="この見出しへのパーマリンク">¶</a></h4>
+<p>効果とは、アクションが解決された際に実行される処理を指します。</p>
+</section>
+</section>
+<section id="id20">
+<h3><span class="section-number">5.2.2. </span>リクエストの定義項目<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h3>
+<dl class="simple">
+<dt><strong>アクション定義</strong></dt><dd><p>リクエストが解決された際に実行されるアクションの内容。</p>
+</dd>
+<dt><strong>スピード</strong></dt><dd><p>アクション定義のスピードとなります。</p>
+</dd>
+<dt><strong>タイミング</strong></dt><dd><p>アクション定義のタイミングとなります。</p>
+</dd>
+<dt><strong>コントローラー</strong></dt><dd><p>アクションを実行したプレイヤーがリクエストのコントローラーとなります。</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h3><span class="section-number">5.2.3. </span>コンポーネントの定義項目<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントには、次の項目が定義されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。</p>
+<dl class="simple">
+<dt><strong>オーナー</strong></dt><dd><p>コンポーネンの所有者。
+コンポーネントの定義はプレイヤー事に保持するため、同じ内容のコンポーネントでもオーナーが異なります。</p>
+</dd>
+<dt><strong>能力</strong></dt><dd><p>能力の詳細については、後述のセクションを参照してください。(<a class="reference internal" href="#ability"><span class="std std-numref">5.3 能力</span></a>)</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h3><span class="section-number">5.2.4. </span>コンポーネントインスタンスの定義項目<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントインスタンスには、次の項目が設定されます。
+必要に応じて、ゲームに合わせた追加設定をしてください。</p>
+<dl class="simple">
+<dt><strong>コンポーネント定義</strong></dt><dd><p>どのコンポーネント定義から生成されたのかを保持します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-16">
+<dt><strong>オーナー</strong></dt><dd><p>コンポーネントインスタンスの所有者。
+一般的なトランプゲームでは無視されることが多いですが、TCGのようにデッキを個人所有するゲームでは必要な情報です。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-17">
+<dt><strong>コントローラー</strong></dt><dd><p>現在、そのコンポーネントインスタンスを操作しているプレイヤー。
+通常はオーナーとコントローラーは同じですが、コントロールを奪うアクションがある場合、異なることがあります。</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>コンポーネントインスタンスとリクエストのコントローラー</p>
+<p>コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
+コンポーネントインスタンスとリクエストの属性を次の図に示します。(<a class="reference internal" href="#controller-attr"><span class="std std-numref">Fig. 5.4</span></a>)</p>
+</div>
+<figure class="align-default" id="id32">
+<span id="controller-attr"></span><p class="plantuml">
+<img src="../_images/plantuml-601946f3f8eb470fbf97e87d640335e4c349780a.svg" alt="left to right direction
+
+hide methods
+hide circle
+
+class コンポーネント&lt;&lt;定義&gt;&gt; {
+    オーナー
+    能力
+}
+
+
+class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+    コンポーネント定義
+    オーナー
+    コントローラー
+}
+
+class アクション&lt;&lt;定義&gt;&gt; {
+    オーナー
+    トリガー
+    スピード
+    タイミング
+    起動条件
+    誘発条件
+    効果
+}
+
+class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
+    アクション定義
+    コントローラー
+}
+
+アクション --&gt; リクエスト : 生成
+コンポーネント --&gt; コンポーネントインスタンス : 生成"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id32" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</section>
+</section>
+<section id="ability">
+<span id="index-18"></span><span id="id23"></span><h2><span class="section-number">5.3. </span>能力<a class="headerlink" href="#ability" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクション、コンポーネントの定義項目を見てきました。
+これらとは別の概念である <strong>能力</strong> について説明します。</p>
+<p>能力とはアクションの効果とは異なる概念で、アクションを起こす際や効果を解釈する際に参照されます。</p>
+<p>能力は解釈される際にコストは支払われず、ステージに置かれません。</p>
+<p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも含まれます。
+(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 5.5</span></a>)</p>
+<figure class="align-default" id="id33">
+<span id="ability-image"></span><p class="plantuml">
+<img src="../_images/plantuml-5c3b9d2c43d8740600145b89955601a615170288.svg" alt="&#64;startuml
+
+skinparam defaultTextAlignment center
+
+!define ICONURL https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/v2.2.0
+!includeurl ICONURL/common.puml
+!includeurl ICONURL/font-awesome-5/chess_pawn.puml
+
+FA5_CHESS_PAWN(P1C,コンポーネント)
+:プレイヤー1: as Player1
+:プレイヤー2: as Player2
+(あなたのすべての兵士を+1する) as Act1 &lt;&lt;能力&gt;&gt;
+(あなたはダメージを受けなくなる) as Act2 &lt;&lt;能力&gt;&gt;
+(速攻魔法を起こす際に\nコストを支払わなくてよい) as Act3 &lt;&lt;能力&gt;&gt;
+Player1 ---&gt; (Act1) : &quot;能力&quot;
+Player1 ---&gt; (Act2) : &quot;能力&quot;
+P1C --&gt; (Act3) : &quot;能力&quot;
+Player2 ---&gt; (Act1) : &quot;能力&quot;
+Player1 ..&gt; P1C : &quot;所有&quot;
+
+&#64;enduml"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id33" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>7版までは、能力に誘発能力と常在型能力がありました。
+8版からは、誘発型能力とアクションを起こせる能力をアクションの定義側に移動しました。
+能力はそれ以外の常在型能力を示すものになりました。</p>
+</div>
+</section>
+<section id="coreflowsec">
+<span id="index-19"></span><span id="id24"></span><h2><span class="section-number">5.4. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
+<p>今まで説明してきた概念を用いて <strong>コアフローの具体的な処理</strong> を説明します。
+この図は <strong>ゲームの開始から勝敗が決まるまでの流れ(コアフロー)</strong> を示しています。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 5.6</span></a>)</p>
+<p>BlackPokerはこのコアフローに則りリクエストが処理されます。</p>
+<p>アナログゲーム用に作成したコアフローであるため、なるべく記憶する容量を減らすように設計しています。
+デジタルゲームに応用する場合は、細部をゲームに合わせて変更してください。</p>
+<figure class="align-default" id="id34">
+<span id="coreflow-2"></span><p class="plantuml">
+<img src="../_images/plantuml-1140d0c1b634f56cca0aee50c4f78d0b3cd09b8b.svg" alt="&#64;startuml
+start
+:[1] ゲーム開始;
+:[2] ターンプレイヤーにチャンスを移動;
+repeat
+if ([3] アクションを起こすか？) then (Yes)
+    :[4] パス記録のリセット;
+    :[5] アクションを起こす;
+    :[6] 誘発チェック;
+    if ([7] 即時か？) then (Yes)
+        :[8] リクエストの解決;
+        if ([9] 勝敗判定) then (決着)
+            stop
+        endif
+    else (No)
+        :[10] ステージに追加;
+    endif
+    :[6] 誘発チェック;
+else (No)
+    :[11] パス記録に登録;
+    if ([12] 全員がパスしたか？) then (Yes)
+        if ([13] ステージにリクエストが存在するか？) then (Yes)
+            :[14] ステージから取出し;
+            :[8] リクエストの解決;
+            if ([9] 勝敗判定) then (決着)
+                stop
+            endif
+            :[6] 誘発チェック;
+            :[2] ターンプレイヤーにチャンスを移動;
+        else (No)
+        endif
+    else (No)
+        :[15] チャンス移動;
+    endif
+endif
+repeat while()
+&#64;enduml"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple" id="core-gamestart">
+<dt><strong>[1] ゲーム開始</strong></dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
+</dd>
+<dt><strong>[2] ターンプレイヤーにチャンスを移動</strong></dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
+</dd>
+<dt><strong>[3] アクションを起こすか？</strong></dt><dd><p>チャンスを持っているプレイヤーはアクションを起こすかを判断します。</p>
+</dd>
+<dt><strong>[4] パス記録のリセット</strong></dt><dd><p>パスしたプレイヤーの記録をリセットします。</p>
+</dd>
+<dt><strong>[5] アクションを起こす</strong></dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
+ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
+一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
+</dd>
+<dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">5.4.1 誘発チェック</span></a> を参照してください。</p>
+</dd>
+<dt><strong>[7] 即時か？</strong></dt><dd><p>リクエストのスピードが即時か判定します。</p>
+</dd>
+</dl>
+<dl class="simple" id="actresolve">
+<dt><strong>[8] リクエストの解決</strong></dt><dd><p>アクションの効果に定義されている内容を実行します。
+その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
+アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
+</dd>
+</dl>
+<dl class="simple" id="winlose">
+<dt><strong>[9] 勝敗判定</strong></dt><dd><p>ゲームの勝敗を判定します。決着した場合ゲームが終了します。判定の方法はゲームにより異なります。</p>
+</dd>
+<dt><strong>[10] ステージに追加</strong></dt><dd><p>リクエストをステージに追加します。</p>
+</dd>
+<dt><strong>[11] パス記録に登録</strong></dt><dd><p>パスしたプレイヤーを記録します。パス記録がリセットされるため、同じプレイヤー名は2回登録されません。</p>
+</dd>
+<dt><strong>[12] 全員がパスしたか？</strong></dt><dd><p>パス記録に全てのプレイヤー名が記録されているか判定します。</p>
+</dd>
+<dt><strong>[13] ステージにリクエストが存在するか？</strong></dt><dd><p>ステージにリクエストが存在するか判定します。</p>
+</dd>
+<dt><strong>[14] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたリクエストをステージから取出します。</p>
+</dd>
+<dt><strong>[15] チャンス移動</strong></dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
+チャンスを移動するルールはゲームによって異なります。</p>
+</dd>
+</dl>
+<section id="trigger-check">
+<span id="id25"></span><h3><span class="section-number">5.4.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションの中には誘発条件を持っているアクションがあります。
+誘発条件に該当した場合、アクションからリクエストが誘発されます。</p>
+<p>誘発チェックでは、誘発したリクエストを解決またはステージに追加します。
+誘発したリクエストのコントローラーは起因となったアクションのオーナーがコントローラーとなります。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 5.7</span></a>)</p>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>バッファ</p>
+<p>誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はアクションバッファです。</p>
+</div>
+<figure class="align-default" id="id35">
+<span id="trigger-flow"></span><p class="plantuml">
+<img src="../_images/plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.svg" alt="&#64;startuml
+'==============================
+'【Main method】（アクション分類・プレイヤー毎処理）
+'==============================
+|Main method|
+start
+:[6-1] 誘発したアクションを分類しバッファに追加;
+note right
+    「即時/通常 × メイン/クイック」で分類
+end note
+note right
+    誘発したアクションのコントローラーは
+    起因となったアクションのオーナー
+    になります。
+end note
+
+while ([6-2] バッファは空か？) is (No) 
+  ' 外部ループ：バッファに何らかのアクションが残っている限り処理する
+
+  '-------------------------------------------
+  '【即時：プレイヤー毎に処理】
+  '-------------------------------------------
+  while ([6-3] バッファに即時はあるか？) is (Yes)
+
+    group 即時: プレイヤー毎に処理
+    note
+        順番はターンプレイヤーから
+        ターンが回る順に行う
+    end note
+
+      while ([6-4] 該当プレイヤーに即時があるか？) is (Yes)
+        :[6-5] タイミング=メインの即時アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-6] タイミング=クイックの即時アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-7] 次のプレイヤーへ;
+      endwhile (No)
+    end group
+  endwhile (No)
+
+  '-------------------------------------------
+  '【通常：プレイヤー毎に処理】
+  '-------------------------------------------
+  while ([6-8] バッファに通常はあるか？) is (Yes)
+
+    group 通常: プレイヤー毎に処理
+    note
+        順番はターンプレイヤーから
+        ターンが回る順に行う
+    end note
+
+      while ([6-9] 該当プレイヤーに通常があるか？) is (Yes)
+        :[6-10] タイミング=メインの通常アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-11] タイミング=クイックの通常アクションを処理;
+        note right
+          別フロー呼び出し
+        end note
+        :[6-12] 次のプレイヤーへ;
+      endwhile (No)
+    end group
+  endwhile (Yes)
+
+endwhile (Yes)
+stop
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple" id="trigger-act-gather">
+<dt><strong>[6-1] 誘発したリクエストを分類しバッファに追加</strong></dt><dd><p>各プレイヤーが誘発させたリクエストを、スピードおよび
+タイミングに基づいて分類し、一旦バッファに追加します。</p>
+</dd>
+<dt><strong>[6-2] バッファは空か？</strong></dt><dd><p>バッファが空であるかどうかを判定します。
+未処理のリクエストが残っている場合は、以降の処理ループを継続します。</p>
+</dd>
+<dt><strong>[6-3] バッファに即時はあるか？</strong></dt><dd><p>バッファ内にスピードが即時のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。</p>
+</dd>
+<dt><strong>[6-4] 該当プレイヤーに即時があるか？</strong></dt><dd><p>現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
+</dd>
+<dt><strong>[6-5] タイミング=メインの即時アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「即時」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">5.4.1.1 誘発即時解決</span></a> をタイミング=メインとして参照してください。</p>
+</dd>
+<dt><strong>[6-6] タイミング=クイックの即時アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「即時」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">5.4.1.1 誘発即時解決</span></a> をタイミング=クイックとして参照してください。</p>
+</dd>
+<dt><strong>[6-7] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。</p>
+</dd>
+<dt><strong>[6-8] バッファに通常はあるか？</strong></dt><dd><p>バッファ内にスピードが通常のリクエストが存在するかを判定します。
+存在する場合、
+ターンプレイヤーから順に即時の処理グループへ進みます。</p>
+</dd>
+<dt><strong>[6-9] 該当プレイヤーに通常があるか？</strong></dt><dd><p>現在処理対象となっているプレイヤーがコントローラーとなっているリクエストがバッファにあるかを確認します。
+スピードが即時のリクエストが存在するかを判定し、
+存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
+</dd>
+<dt><strong>[6-10] タイミング=メインの通常アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「通常」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">5.4.1.2 通常：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
+</dd>
+<dt><strong>[6-11] タイミング=クイックの通常アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「通常」のアクションを実行します。
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">5.4.1.2 通常：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
+</dd>
+<dt><strong>[6-12] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
+ターン順に次のプレイヤーへ処理を移行します。</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>各処理グループ内では、必ずターンプレイヤーから始まり、
+ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
+また、ループはバッファに未処理のアクションが存在する限り繰り返されます。</p>
+</div>
+<section id="trigger-act-s">
+<span id="id26"></span><h4><span class="section-number">5.4.1.1. </span>誘発即時解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発したスピードが即時のリクエストを処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 5.8</span></a>)</p>
+<figure class="align-default" id="id36">
+<span id="trigger-flow-s"></span><p class="plantuml">
+<img src="../_images/plantuml-caaca34586e95540adb102e9bc8309243f59b393.svg" alt="&#64;startuml
+'==============================
+'【即時：アクション毎に処理】
+'==============================
+
+start
+while ([6-5-1] バッファから該当の即時はあるか？) is (Yes)
+  :[6-5-2] バッファからリクエストを取り出す;
+  :[6-5-3] 取り出したリクエストを解決する;
+  if ([6-5-4] 勝敗判定) then (決着)
+    stop
+  endif
+  if ([6-5-5] リクエストが新たな誘発を発生させたか？) then (Yes)
+    :[6-5-6] 誘発したリクエストをバッファに追加;
+    note left
+      誘発したリクエストのコントローラーは
+      起因となったアクションのオーナー
+      になります。
+    end note
+  endif
+endwhile (No)
+stop
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt><strong>[6-5-1] バッファから該当の即時はあるか？</strong></dt><dd><p>バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが即時のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。</p>
+</dd>
+<dt><strong>[6-5-2] バッファからリクエストを取り出す</strong></dt><dd><p>条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。</p>
+</dd>
+<dt><strong>[6-5-3] 取り出したリクエストを解決する</strong></dt><dd><p>取り出されたリクエストの効果を実行し、解決します。
+詳しくは <a class="reference internal" href="#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> 参照してください。</p>
+</dd>
+<dt><strong>[6-5-4] 勝敗判定</strong></dt><dd><p>勝敗を判定します。
+詳しくは <a class="reference internal" href="#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> 参照。</p>
+</dd>
+<dt><strong>[6-5-5] リクエストが新たな誘発を発生させたか？</strong></dt><dd><p>効果の解決後、それが起因となり新たな誘発を発生させたかどうかを確認します。
+発生している場合は、その誘発アクションを再度バッファに追加する必要があります。</p>
+</dd>
+<dt><strong>[6-5-6] 誘発したリクエストをバッファに追加</strong></dt><dd><p>新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
+これにより、再帰的なアクション処理が可能となり、次のループで該当するリクエストの取り出し処理が実行されます。</p>
+</dd>
+</dl>
+</section>
+<section id="trigger-act-n">
+<span id="id27"></span><h4><span class="section-number">5.4.1.2. </span>通常：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
+<p>誘発チェックで誘発したスピードが通常のリクエストを処理します。
+呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 5.9</span></a>)</p>
+<figure class="align-default" id="id37">
+<span id="trigger-flow-n"></span><p class="plantuml">
+<img src="../_images/plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.svg" alt="&#64;startuml
+'==============================
+'【通常：アクション毎に処理】
+'==============================
+
+start
+while ([6-10-1] バッファから該当の通常はあるか？) is (Yes)
+  :[6-10-2] バッファからリクエストを取り出す;
+  if ([6-10-3] 取り出したリクエストのタイミングがメインか判定) then (Yes)
+    if ([6-10-4] ステージが空か判定) then (Yes)
+      :[6-10-5] リクエストをステージに追加;
+    else (No)
+      :[6-10-6] リクエストを破棄;
+    endif
+  else (No)
+    :[6-10-7] リクエストをステージに追加;
+  endif
+  if ([6-10-8] リクエストが新たな誘発を発生させたか？) then (Yes)
+    :[6-10-9] 誘発したリクエストをバッファに追加;
+    note left
+      誘発したリクエストのコントローラーは
+      起因となったアクションのオーナー
+      になります。
+    end note
+  else (No)
+  endif
+endwhile (No)
+stop
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 5.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id37" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<dl class="simple">
+<dt><strong>[6-10-1] バッファから該当の通常はあるか？</strong></dt><dd><p>バッファから対象プレイヤーかつ、該当するタイミングかつ、スピードが通常のリクエストが存在するかを判定します。
+存在する場合、以降の処理へ進み、存在しなくなるまでこのループを継続します。</p>
+</dd>
+<dt><strong>[6-10-2] バッファからリクエストを取り出す</strong></dt><dd><p>条件を満たしたリクエストを、バッファから1つ取り出します。
+どのリクエストを取り出すかは対象プレイヤーが決定します。
+取り出されたリクエストは、解決処理の対象となります。</p>
+</dd>
+<dt><strong>[6-10-3] 取り出したリクエストのタイミングがメインか判定</strong></dt><dd><p>取り出したリクエストのタイミングが「メイン」であるかどうかを判定します。
+「Yes」と判定された場合は、ステージへの追加前に空き状況の確認へ進みます。
+「No」の場合は、クイックタイミングとして処理を行います。</p>
+</dd>
+<dt><strong>[6-10-4] ステージが空か判定</strong></dt><dd><p>タイミングがメインの場合、そのリクエストをステージに追加できるかどうか、
+すなわちステージに空きがあるかを判定します。</p>
+</dd>
+<dt><strong>[6-10-5] リクエストをステージに追加</strong></dt><dd><p>ステージが空いている場合、取り出したリクエストをステージに追加します。</p>
+</dd>
+<dt><strong>[6-10-6] リクエストを破棄</strong></dt><dd><p>ステージが埋まっている場合、取り出したタイミングがメインのリクエストを破棄します。</p>
+</dd>
+<dt><strong>[6-10-7] リクエストをステージに追加</strong></dt><dd><p>取り出したリクエストのタイミングが「クイック」である場合、
+ステージの空き状況にかかわらず無条件でリクエストをステージに追加します。</p>
+</dd>
+<dt><strong>[6-10-8] リクエストが新たな誘発を発生させたか？</strong></dt><dd><p>リクエストをステージに追加した後、それが起因となり新たな誘発を発生させたかどうかを確認します。
+誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。</p>
+</dd>
+<dt><strong>[6-10-9] 誘発したリクエストをバッファに追加</strong></dt><dd><p>新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
+これにより、誘発処理の再実行が可能となります。</p>
+</dd>
+</dl>
+</section>
+</section>
+</section>
+<section id="id28">
+<h2><span class="section-number">5.5. </span>まとめ<a class="headerlink" href="#id28" title="この見出しへのパーマリンク">¶</a></h2>
+<p>コアルールについて説明しました。
+すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
+また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">2. 共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">3. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. コアルール</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">5.1. 基礎概念</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id11">5.2. 詳細</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ability">5.3. 能力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">5.4. コアフロー</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id28">5.5. まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="../auto/actionlist.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            BlackPoker アクションリスト
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../appendix/appendix.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            付録
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>
