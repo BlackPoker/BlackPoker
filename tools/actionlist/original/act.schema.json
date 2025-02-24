@@ -43,6 +43,7 @@
                 "type": "object",
                 "properties": {
                   "format": { "type": "string" },
+                  "frame": { "type": "string" },
                   "actName": { "type": "string" },
                   "actId": { "type": "string" },
                   "actType": { "type": "string" },

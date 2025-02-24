@@ -19,43 +19,32 @@ import com.github.blackpoker.actionlist.writer.TexWriter;
 public class ActionListGen {
 
 	// 入力ファイルのパス
-	// @Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT")
-	// private static String inputPath;
 	@Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT YAML")
-	private static String inputPath;
-	// // 入力ファイルのシート名
-	// @Option(name = "-s", aliases = { "--sheet" }, metaVar = "sheetName", usage = "SheetName")
-	// private static String sheetName = "list";
+	private String inputPath;
 	// テンプレートファイルのシート名
 	@Option(name = "-t", aliases = { "--template" }, metaVar = "templateName", required = true, usage = "TemplateName")
-	private static String templateName;
-	// // HTML出力ファイルのパス
-	// @Option(name = "-o", aliases = { "--output" }, metaVar = "outputPath", required = true, usage = "OUTPUT")
-	// private static String outputPath;
+	private String templateName;
 	// 出力ファイルのパス
 	@Option(name = "-b", aliases = { "--beta" }, usage = "BETA")
-	private static boolean betaFlg;
-	// HTML出力
-	// @Option(name = "-html", aliases = { "--html" }, usage = "HTML OUTPUT")
-	// private static boolean htmlOutFlg;
+	private boolean betaFlg;
 	// HTML出力
 	@Option(name = "-htmlOutput", aliases = { "--htmlOutput" }, usage = "HTML OUTPUT")
-	private static String htmlOutputPath;
+	private String htmlOutputPath;
 	// TeX出力
 	@Option(name = "-texOutput", aliases = { "--texOutput" }, usage = "TeX OUTPUT")
-	private static String texOutputPath;
+	private String texOutputPath;
 	// rst出力
 	@Option(name = "-rstOutput", aliases = { "--rstOutput" }, usage = "rst OUTPUT")
-	private static String rstOutputPath;
+	private String rstOutputPath;
 	// パラメータ
 	@Option(name = "-arg0", aliases = { "--arg0" }, metaVar = "arg0", usage = "ARG0")
-	private static String arg0;
+	private String arg0;
 	// パラメータ
 	@Option(name = "-arg1", aliases = { "--arg1" }, metaVar = "arg1", usage = "ARG1")
-	private static String arg1;
+	private String arg1;
 	// パラメータ
 	@Option(name = "-arg2", aliases = { "--arg2" }, metaVar = "arg2", usage = "ARG2")
-	private static String arg2;
+	private String arg2;
 
 	// シートの設定
 	private Map<String, String> conf;

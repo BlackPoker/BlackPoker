@@ -1,0 +1,74 @@
+data: 
+  ver: 第八版 act8.0 フレーム編
+  lastupdate: 2025/3/x
+  pdfurl_std: /pdf/blackpoker-v6-std
+  pdfurl_lite: /pdf/blackpoker-v6-lite
+  pdfurl_pro: /pdf/blackpoker-v6-pro
+  pdfurl_mast: /pdf/blackpoker-v6-mast
+  qrStd: qr_blackpoker-support_v6-std.pdf
+  qrLite: qr_blackpoker-support_v6-lite.pdf
+  qrPro: qr_blackpoker-support_v6-pro.pdf
+  qrMast: qr_blackpoker-support_v6-mast.pdf
+
+actList:
+  - type: パック系
+    acts:
+    - format: lite,std,pro,mast
+      frame: |-
+        ・パックランダム
+        ・パックストラテジー
+        ・レアパックストラテジー
+      actName: パック開封
+      actId: packopen
+      actType: パック
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: パックが開封済みでない場合のみこのアクションを起こすことができる。
+      actEffect: |-
+        1. パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。
+        2. パックを表向きにし、開封済みとする。
+
+    - format: 'lite,std,pro,mast'
+      frame: |-
+        ・パックランダム
+        ・パックストラテジー
+        ・レアパックストラテジー
+      actName: レアドロー
+      actId: raredraw
+      actType: パック
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
+      actEffect: レアカードを1枚手札に加える。
+      
+    - format: 'lite,std,pro,mast'
+      frame: |-
+        ・パックランダム
+        ・パックストラテジー
+        ・レアパックストラテジー
+      actName: レア召喚
+      actId: summonsRare
+      actType: パック
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
+      actEffect: キーカードを兵士として表向きかつチャージ状態で場に出す。
+
+    - format: 'lite,std,pro,mast'
+      frame: |-
+        ・パックランダム
+        ・パックストラテジー
+        ・レアパックストラテジー
+      actName: 罠カウンター
+      actId: trapCounter
+      actType: パック
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: クイック
+      actTarget: キーカードが1枚または2枚のアクションを対象とする。
+      actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
+      actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクソンをステージから取り除き、対象アクションのキーカードを墓地に移す。
+

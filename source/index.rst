@@ -16,5 +16,6 @@ release: |release|
     common/common
     match-regulations/match-regulations
     format/format
+    frame/frame
     core/core
     appendix/appendix
