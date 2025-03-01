@@ -357,7 +357,7 @@
 <p>割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。</p>
 <p>このアクションを実行したいとルールシステムに要求(リクエスト)し、相手に許可を得てリクエストが実行されます。もちろん相手はリクエストに対して割り込んでリクエストすることもできます。</p>
 <p>アクションには、プレイヤーのすべての行動を定義しており、従来のTCGでいう「魔法」や「ターン制御」が含まれています。</p>
-<p>参考: <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">5 コアルール</span></a></p>
+<p>参考: <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a></p>
 <section id="id18">
 <h3><span class="section-number">2.10.1. </span>アクションが持つ項目<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションが持つ項目について説明します。</p>
@@ -372,19 +372,19 @@
 <dl id="index-18">
 <dt>トリガー</dt><dd><p>アクションには自分で起こせるアクションと誘発するアクションがあります。
 トリガー項目では「直接」か「誘発」が設定されています。</p>
-<p>参考: <a class="reference internal" href="../core/core.html#trigger-core"><span class="std std-numref">5.2.1.2 トリガー</span></a></p>
+<p>参考: <a class="reference internal" href="../core/core.html#trigger-core"><span class="std std-numref">6.2.1.2 トリガー</span></a></p>
 </dd>
 </dl>
 <dl id="index-19">
 <dt>スピード</dt><dd><p>アクションはすぐに効果が解決されるものとそうでないものがあります。
 スピード項目では「即時」か「通常」が設定されています。</p>
-<p>参考: <a class="reference internal" href="../core/core.html#speed-core"><span class="std std-numref">5.2.1.3 スピード</span></a></p>
+<p>参考: <a class="reference internal" href="../core/core.html#speed-core"><span class="std std-numref">6.2.1.3 スピード</span></a></p>
 </dd>
 </dl>
 <dl id="index-20">
 <dt>タイミング</dt><dd><p>アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
 「クイック」はいつでも起こすことができます。</p>
-<p>参考: <a class="reference internal" href="../core/core.html#timing"><span class="std std-numref">5.2.1.4 タイミング</span></a></p>
+<p>参考: <a class="reference internal" href="../core/core.html#timing"><span class="std std-numref">6.2.1.4 タイミング</span></a></p>
 </dd>
 </dl>
 <dl class="simple" id="index-21">
@@ -524,9 +524,9 @@
 </figcaption>
 </figure>
 <p>大まかな流れは図の通りとなります。</p>
-<p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">5.4 コアフロー</span></a> を参照してください。</p>
+<p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">6.4 コアフロー</span></a> を参照してください。</p>
 <p>次に細かな部分を説明します。</p>
-<p>補足ですが次に説明する部分は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">5.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> で順に行われます。</p>
+<p>補足ですが次に説明する部分は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">6.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> で順に行われます。</p>
 <section id="id26">
 <h4><span class="section-number">2.10.4.1. </span>対象条件を確認<a class="headerlink" href="#id26" title="この見出しへのパーマリンク">¶</a></h4>
 <p>対象を指定するアクションが効果を発揮しようとした時に次の条件に該当する場合、効果を発揮する対象を失うため効果が発揮されず
@@ -568,7 +568,7 @@
 <p>勝敗はライフを確認し0枚の場合そのプレイヤーは敗北となります。</p>
 <p>勝敗判定はターンプレイヤーから行われます。
 もし、両プレイヤーのライフが0枚の場合、ターンプレイヤーの負けとなります。</p>
-<p>補足ですがこの勝敗判定は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">5.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> で確認されます。</p>
+<p>補足ですがこの勝敗判定は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">6.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> で確認されます。</p>
 </section>
 <section id="id30">
 <h3><span class="section-number">2.10.6. </span>誘発チェック<a class="headerlink" href="#id30" title="この見出しへのパーマリンク">¶</a></h3>
@@ -576,7 +576,7 @@
 アクションの誘発条件に該当するとアクションが誘発されることがあります。</p>
 <p>誘発とは、自動的にアクションがリクエストされることです。</p>
 <p>BlackPokerの基本的なルールでは、次の2つの誘発パターンがほとんどです。</p>
-<p>それ以外の場合は、<a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">5.4 コアフロー</span></a> を参照してください。</p>
+<p>それ以外の場合は、<a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">6.4 コアフロー</span></a> を参照してください。</p>
 <section id="id31">
 <h4><span class="section-number">2.10.6.1. </span>パターン1: ターン制御<a class="headerlink" href="#id31" title="この見出しへのパーマリンク">¶</a></h4>
 <p>ターン制御系のアクションでは対象のアクションが解決すると次のアクションが誘発します。</p>
@@ -723,8 +723,9 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">3. 対戦レギュレーション</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../core/core.html">5. コアルール</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">5. フレーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">6. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">7. 付録</a></li>
 </ul>
 
 <div><hr class="docutils"></div>

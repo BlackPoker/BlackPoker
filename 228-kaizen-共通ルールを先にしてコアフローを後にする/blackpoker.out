@@ -49,104 +49,107 @@
 \BOOKMARK [1][-]{section.3.1}{対戦レギュレーションとは}{chapter.3}% 48
 \BOOKMARK [1][-]{section.3.2}{定義項目}{chapter.3}% 49
 \BOOKMARK [2][-]{subsection.3.2.1}{対戦レギュレーションの表記}{section.3.2}% 50
-\BOOKMARK [2][-]{subsection.3.2.2}{対戦\(マッチ\)とゲーム\(試合\)}{section.3.2}% 51
-\BOOKMARK [1][-]{section.3.3}{フレーム定義}{chapter.3}% 52
-\BOOKMARK [2][-]{subsection.3.3.1}{マッチ形式}{section.3.3}% 53
-\BOOKMARK [1][-]{section.3.4}{オプション定義}{chapter.3}% 54
-\BOOKMARK [2][-]{subsection.3.4.1}{プリセット2}{section.3.4}% 55
-\BOOKMARK [2][-]{subsection.3.4.2}{プリセット4}{section.3.4}% 56
-\BOOKMARK [2][-]{subsection.3.4.3}{パック}{section.3.4}% 57
-\BOOKMARK [1][-]{section.3.5}{対戦レギュレーションの決め方}{chapter.3}% 58
-\BOOKMARK [0][-]{chapter.4}{フォーマット}{}% 59
-\BOOKMARK [1][-]{section.4.1}{フォーマットとは}{chapter.4}% 60
-\BOOKMARK [2][-]{subsection.4.1.1}{対戦レギュレーションとの違い}{section.4.1}% 61
-\BOOKMARK [1][-]{section.4.2}{定義項目}{chapter.4}% 62
-\BOOKMARK [1][-]{section.4.3}{フォーマット定義}{chapter.4}% 63
-\BOOKMARK [2][-]{subsection.4.3.1}{BlackPoker アクションリスト}{section.4.3}% 64
-\BOOKMARK [3][-]{subsubsection*.57}{展開系}{subsection.4.3.1}% 65
-\BOOKMARK [4][-]{paragraph*.58}{防壁設置 \(召喚\)}{subsubsection*.57}% 66
-\BOOKMARK [4][-]{paragraph*.59}{兵士召喚 \(召喚\)}{subsubsection*.57}% 67
-\BOOKMARK [4][-]{paragraph*.60}{英雄召喚 \(召喚\)}{subsubsection*.57}% 68
-\BOOKMARK [4][-]{paragraph*.61}{エース召喚 \(召喚\)}{subsubsection*.57}% 69
-\BOOKMARK [4][-]{paragraph*.62}{クイック召喚 \(召喚\)}{subsubsection*.57}% 70
-\BOOKMARK [4][-]{paragraph*.63}{魔術士召喚 \(召喚\)}{subsubsection*.57}% 71
-\BOOKMARK [4][-]{paragraph*.64}{装備 \(召喚\)}{subsubsection*.57}% 72
-\BOOKMARK [4][-]{paragraph*.65}{帰還 \(召喚\)}{subsubsection*.57}% 73
-\BOOKMARK [3][-]{subsubsection*.66}{ターン制御系}{subsection.4.3.1}% 74
-\BOOKMARK [4][-]{paragraph*.67}{エンド \(ターン制御\)}{subsubsection*.66}% 75
-\BOOKMARK [4][-]{paragraph*.68}{チャージ \(ターン制御\)}{subsubsection*.66}% 76
-\BOOKMARK [4][-]{paragraph*.69}{ドロー \(ターン制御\)}{subsubsection*.66}% 77
-\BOOKMARK [3][-]{subsubsection*.70}{攻撃系}{subsection.4.3.1}% 78
-\BOOKMARK [4][-]{paragraph*.71}{アタック \(攻防\)}{subsubsection*.70}% 79
-\BOOKMARK [4][-]{paragraph*.72}{ブロック \(攻防\)}{subsubsection*.70}% 80
-\BOOKMARK [4][-]{paragraph*.73}{ダメージ判定 \(攻防\)}{subsubsection*.70}% 81
-\BOOKMARK [3][-]{subsubsection*.74}{魔法系}{subsection.4.3.1}% 82
-\BOOKMARK [4][-]{paragraph*.75}{アップ \(速攻魔法\)}{subsubsection*.74}% 83
-\BOOKMARK [4][-]{paragraph*.76}{ダウン \(速攻魔法\)}{subsubsection*.74}% 84
-\BOOKMARK [4][-]{paragraph*.77}{ツイスト \(速攻魔法\)}{subsubsection*.74}% 85
-\BOOKMARK [4][-]{paragraph*.78}{カウンター \(速攻魔法\)}{subsubsection*.74}% 86
-\BOOKMARK [4][-]{paragraph*.79}{再会 \(速攻魔法\)}{subsubsection*.74}% 87
-\BOOKMARK [4][-]{paragraph*.80}{キル \(速攻魔法\)}{subsubsection*.74}% 88
-\BOOKMARK [4][-]{paragraph*.81}{停戦 \(速攻魔法\)}{subsubsection*.74}% 89
-\BOOKMARK [4][-]{paragraph*.82}{対象変更 \(速攻魔法\)}{subsubsection*.74}% 90
-\BOOKMARK [4][-]{paragraph*.83}{防壁破壊 \(通常魔法\)}{subsubsection*.74}% 91
-\BOOKMARK [4][-]{paragraph*.84}{投擲 \(通常魔法\)}{subsubsection*.74}% 92
-\BOOKMARK [4][-]{paragraph*.85}{死の槍 \(通常魔法\)}{subsubsection*.74}% 93
-\BOOKMARK [4][-]{paragraph*.86}{防壁補充 \(通常魔法\)}{subsubsection*.74}% 94
-\BOOKMARK [4][-]{paragraph*.87}{リアニメイト \(通常魔法\)}{subsubsection*.74}% 95
-\BOOKMARK [4][-]{paragraph*.88}{ハンデス \(通常魔法\)}{subsubsection*.74}% 96
-\BOOKMARK [4][-]{paragraph*.89}{フォース \(通常魔法\)}{subsubsection*.74}% 97
-\BOOKMARK [4][-]{paragraph*.90}{剣の雨 \(通常魔法\)}{subsubsection*.74}% 98
-\BOOKMARK [4][-]{paragraph*.91}{徴募 \(通常魔法\)}{subsubsection*.74}% 99
-\BOOKMARK [4][-]{paragraph*.92}{奇襲 \(通常魔法\)}{subsubsection*.74}% 100
-\BOOKMARK [4][-]{paragraph*.93}{サーチ \(速攻魔法\)}{subsubsection*.74}% 101
-\BOOKMARK [4][-]{paragraph*.94}{B・J \(速攻魔法\)}{subsubsection*.74}% 102
-\BOOKMARK [4][-]{paragraph*.95}{R・S・F \(速攻魔法\)}{subsubsection*.74}% 103
-\BOOKMARK [4][-]{paragraph*.96}{リバース \(速攻魔法\)}{subsubsection*.74}% 104
-\BOOKMARK [3][-]{subsubsection*.97}{誘発系}{subsection.4.3.1}% 105
-\BOOKMARK [4][-]{paragraph*.98}{世代交代 \(誘発\)}{subsubsection*.97}% 106
-\BOOKMARK [2][-]{subsection.4.3.2}{BlackPoker キャラクターリスト}{section.4.3}% 107
-\BOOKMARK [3][-]{subsubsection*.107}{兵士}{subsection.4.3.2}% 108
-\BOOKMARK [4][-]{paragraph*.108}{一般兵 \(兵士\)}{subsubsection*.107}% 109
-\BOOKMARK [4][-]{paragraph*.109}{英雄 \(兵士\)}{subsubsection*.107}% 110
-\BOOKMARK [4][-]{paragraph*.110}{エース \(兵士\)}{subsubsection*.107}% 111
-\BOOKMARK [4][-]{paragraph*.111}{魔術士 \(兵士\)}{subsubsection*.107}% 112
-\BOOKMARK [4][-]{paragraph*.112}{装備兵 \(兵士\)}{subsubsection*.107}% 113
-\BOOKMARK [3][-]{subsubsection*.113}{防壁}{subsection.4.3.2}% 114
-\BOOKMARK [4][-]{paragraph*.114}{防壁 \(防壁\)}{subsubsection*.113}% 115
-\BOOKMARK [0][-]{chapter.5}{コアルール}{}% 116
-\BOOKMARK [1][-]{section.5.1}{基礎概念}{chapter.5}% 117
-\BOOKMARK [2][-]{subsection.5.1.1}{ターン}{section.5.1}% 118
-\BOOKMARK [2][-]{subsection.5.1.2}{アクション}{section.5.1}% 119
-\BOOKMARK [2][-]{subsection.5.1.3}{チャンス}{section.5.1}% 120
-\BOOKMARK [2][-]{subsection.5.1.4}{ステージ}{section.5.1}% 121
-\BOOKMARK [2][-]{subsection.5.1.5}{リクエスト}{section.5.1}% 122
-\BOOKMARK [2][-]{subsection.5.1.6}{コンポーネント}{section.5.1}% 123
-\BOOKMARK [2][-]{subsection.5.1.7}{コンポーネントインスタンス}{section.5.1}% 124
-\BOOKMARK [2][-]{subsection.5.1.8}{コアフロー\(ルールシステム\)}{section.5.1}% 125
-\BOOKMARK [1][-]{section.5.2}{詳細}{chapter.5}% 126
-\BOOKMARK [2][-]{subsection.5.2.1}{アクションの定義項目}{section.5.2}% 127
-\BOOKMARK [3][-]{subsubsection*.115}{オーナー}{subsection.5.2.1}% 128
-\BOOKMARK [3][-]{subsubsection*.116}{トリガー}{subsection.5.2.1}% 129
-\BOOKMARK [3][-]{subsubsection*.117}{スピード}{subsection.5.2.1}% 130
-\BOOKMARK [3][-]{subsubsection*.118}{タイミング}{subsection.5.2.1}% 131
-\BOOKMARK [3][-]{subsubsection*.119}{起動条件}{subsection.5.2.1}% 132
-\BOOKMARK [3][-]{subsubsection*.120}{誘発条件}{subsection.5.2.1}% 133
-\BOOKMARK [3][-]{subsubsection*.121}{効果}{subsection.5.2.1}% 134
-\BOOKMARK [2][-]{subsection.5.2.2}{リクエストの定義項目}{section.5.2}% 135
-\BOOKMARK [2][-]{subsection.5.2.3}{コンポーネントの定義項目}{section.5.2}% 136
-\BOOKMARK [2][-]{subsection.5.2.4}{コンポーネントインスタンスの定義項目}{section.5.2}% 137
-\BOOKMARK [1][-]{section.5.3}{能力}{chapter.5}% 138
-\BOOKMARK [1][-]{section.5.4}{コアフロー}{chapter.5}% 139
-\BOOKMARK [2][-]{subsection.5.4.1}{誘発チェック}{section.5.4}% 140
-\BOOKMARK [3][-]{subsubsection*.126}{誘発即時解決}{subsection.5.4.1}% 141
-\BOOKMARK [3][-]{subsubsection*.127}{通常：アクション毎に処理}{subsection.5.4.1}% 142
-\BOOKMARK [1][-]{section.5.5}{まとめ}{chapter.5}% 143
-\BOOKMARK [0][-]{chapter.6}{付録}{}% 144
-\BOOKMARK [1][-]{section.6.1}{PDF版ルール}{chapter.6}% 145
-\BOOKMARK [1][-]{section.6.2}{アクションリスト}{chapter.6}% 146
-\BOOKMARK [2][-]{subsection.6.2.1}{ライト}{section.6.2}% 147
-\BOOKMARK [2][-]{subsection.6.2.2}{スタンダード}{section.6.2}% 148
-\BOOKMARK [2][-]{subsection.6.2.3}{プロ}{section.6.2}% 149
-\BOOKMARK [2][-]{subsection.6.2.4}{マスター}{section.6.2}% 150
-\BOOKMARK [1][-]{section.6.3}{エクストラリスト}{chapter.6}% 151
+\BOOKMARK [1][-]{section.3.3}{対戦レギュレーションの決め方}{chapter.3}% 51
+\BOOKMARK [0][-]{chapter.4}{フォーマット}{}% 52
+\BOOKMARK [1][-]{section.4.1}{フォーマットとは}{chapter.4}% 53
+\BOOKMARK [2][-]{subsection.4.1.1}{対戦レギュレーションとの違い}{section.4.1}% 54
+\BOOKMARK [1][-]{section.4.2}{定義項目}{chapter.4}% 55
+\BOOKMARK [1][-]{section.4.3}{フォーマット定義}{chapter.4}% 56
+\BOOKMARK [2][-]{subsection.4.3.1}{BlackPoker アクションリスト}{section.4.3}% 57
+\BOOKMARK [3][-]{subsubsection*.57}{展開系}{subsection.4.3.1}% 58
+\BOOKMARK [4][-]{paragraph*.58}{防壁設置 \(召喚\)}{subsubsection*.57}% 59
+\BOOKMARK [4][-]{paragraph*.59}{兵士召喚 \(召喚\)}{subsubsection*.57}% 60
+\BOOKMARK [4][-]{paragraph*.60}{英雄召喚 \(召喚\)}{subsubsection*.57}% 61
+\BOOKMARK [4][-]{paragraph*.61}{エース召喚 \(召喚\)}{subsubsection*.57}% 62
+\BOOKMARK [4][-]{paragraph*.62}{クイック召喚 \(召喚\)}{subsubsection*.57}% 63
+\BOOKMARK [4][-]{paragraph*.63}{魔術士召喚 \(召喚\)}{subsubsection*.57}% 64
+\BOOKMARK [4][-]{paragraph*.64}{装備 \(召喚\)}{subsubsection*.57}% 65
+\BOOKMARK [4][-]{paragraph*.65}{帰還 \(召喚\)}{subsubsection*.57}% 66
+\BOOKMARK [3][-]{subsubsection*.66}{ターン制御系}{subsection.4.3.1}% 67
+\BOOKMARK [4][-]{paragraph*.67}{エンド \(ターン制御\)}{subsubsection*.66}% 68
+\BOOKMARK [4][-]{paragraph*.68}{チャージ \(ターン制御\)}{subsubsection*.66}% 69
+\BOOKMARK [4][-]{paragraph*.69}{ドロー \(ターン制御\)}{subsubsection*.66}% 70
+\BOOKMARK [3][-]{subsubsection*.70}{攻撃系}{subsection.4.3.1}% 71
+\BOOKMARK [4][-]{paragraph*.71}{アタック \(攻防\)}{subsubsection*.70}% 72
+\BOOKMARK [4][-]{paragraph*.72}{ブロック \(攻防\)}{subsubsection*.70}% 73
+\BOOKMARK [4][-]{paragraph*.73}{ダメージ判定 \(攻防\)}{subsubsection*.70}% 74
+\BOOKMARK [3][-]{subsubsection*.74}{魔法系}{subsection.4.3.1}% 75
+\BOOKMARK [4][-]{paragraph*.75}{アップ \(速攻魔法\)}{subsubsection*.74}% 76
+\BOOKMARK [4][-]{paragraph*.76}{ダウン \(速攻魔法\)}{subsubsection*.74}% 77
+\BOOKMARK [4][-]{paragraph*.77}{ツイスト \(速攻魔法\)}{subsubsection*.74}% 78
+\BOOKMARK [4][-]{paragraph*.78}{カウンター \(速攻魔法\)}{subsubsection*.74}% 79
+\BOOKMARK [4][-]{paragraph*.79}{再会 \(速攻魔法\)}{subsubsection*.74}% 80
+\BOOKMARK [4][-]{paragraph*.80}{キル \(速攻魔法\)}{subsubsection*.74}% 81
+\BOOKMARK [4][-]{paragraph*.81}{停戦 \(速攻魔法\)}{subsubsection*.74}% 82
+\BOOKMARK [4][-]{paragraph*.82}{対象変更 \(速攻魔法\)}{subsubsection*.74}% 83
+\BOOKMARK [4][-]{paragraph*.83}{防壁破壊 \(通常魔法\)}{subsubsection*.74}% 84
+\BOOKMARK [4][-]{paragraph*.84}{投擲 \(通常魔法\)}{subsubsection*.74}% 85
+\BOOKMARK [4][-]{paragraph*.85}{死の槍 \(通常魔法\)}{subsubsection*.74}% 86
+\BOOKMARK [4][-]{paragraph*.86}{防壁補充 \(通常魔法\)}{subsubsection*.74}% 87
+\BOOKMARK [4][-]{paragraph*.87}{リアニメイト \(通常魔法\)}{subsubsection*.74}% 88
+\BOOKMARK [4][-]{paragraph*.88}{ハンデス \(通常魔法\)}{subsubsection*.74}% 89
+\BOOKMARK [4][-]{paragraph*.89}{フォース \(通常魔法\)}{subsubsection*.74}% 90
+\BOOKMARK [4][-]{paragraph*.90}{剣の雨 \(通常魔法\)}{subsubsection*.74}% 91
+\BOOKMARK [4][-]{paragraph*.91}{徴募 \(通常魔法\)}{subsubsection*.74}% 92
+\BOOKMARK [4][-]{paragraph*.92}{奇襲 \(通常魔法\)}{subsubsection*.74}% 93
+\BOOKMARK [4][-]{paragraph*.93}{サーチ \(速攻魔法\)}{subsubsection*.74}% 94
+\BOOKMARK [4][-]{paragraph*.94}{B・J \(速攻魔法\)}{subsubsection*.74}% 95
+\BOOKMARK [4][-]{paragraph*.95}{R・S・F \(速攻魔法\)}{subsubsection*.74}% 96
+\BOOKMARK [4][-]{paragraph*.96}{リバース \(速攻魔法\)}{subsubsection*.74}% 97
+\BOOKMARK [3][-]{subsubsection*.97}{誘発系}{subsection.4.3.1}% 98
+\BOOKMARK [4][-]{paragraph*.98}{世代交代 \(誘発\)}{subsubsection*.97}% 99
+\BOOKMARK [2][-]{subsection.4.3.2}{BlackPoker キャラクターリスト}{section.4.3}% 100
+\BOOKMARK [3][-]{subsubsection*.107}{兵士}{subsection.4.3.2}% 101
+\BOOKMARK [4][-]{paragraph*.108}{一般兵 \(兵士\)}{subsubsection*.107}% 102
+\BOOKMARK [4][-]{paragraph*.109}{英雄 \(兵士\)}{subsubsection*.107}% 103
+\BOOKMARK [4][-]{paragraph*.110}{エース \(兵士\)}{subsubsection*.107}% 104
+\BOOKMARK [4][-]{paragraph*.111}{魔術士 \(兵士\)}{subsubsection*.107}% 105
+\BOOKMARK [4][-]{paragraph*.112}{装備兵 \(兵士\)}{subsubsection*.107}% 106
+\BOOKMARK [3][-]{subsubsection*.113}{防壁}{subsection.4.3.2}% 107
+\BOOKMARK [4][-]{paragraph*.114}{防壁 \(防壁\)}{subsubsection*.113}% 108
+\BOOKMARK [0][-]{chapter.5}{フレーム}{}% 109
+\BOOKMARK [1][-]{section.5.1}{フレームとは}{chapter.5}% 110
+\BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 111
+\BOOKMARK [1][-]{section.5.3}{フレーム定義}{chapter.5}% 112
+\BOOKMARK [2][-]{subsection.5.3.1}{BlackPoker アクションリスト}{section.5.3}% 113
+\BOOKMARK [3][-]{subsubsection*.120}{パック系}{subsection.5.3.1}% 114
+\BOOKMARK [4][-]{paragraph*.121}{パック開封 \(パック\)}{subsubsection*.120}% 115
+\BOOKMARK [4][-]{paragraph*.122}{レアドロー \(パック\)}{subsubsection*.120}% 116
+\BOOKMARK [4][-]{paragraph*.123}{レア召喚 \(パック\)}{subsubsection*.120}% 117
+\BOOKMARK [4][-]{paragraph*.124}{罠カウンター \(パック\)}{subsubsection*.120}% 118
+\BOOKMARK [0][-]{chapter.6}{コアルール}{}% 119
+\BOOKMARK [1][-]{section.6.1}{基礎概念}{chapter.6}% 120
+\BOOKMARK [2][-]{subsection.6.1.1}{ターン}{section.6.1}% 121
+\BOOKMARK [2][-]{subsection.6.1.2}{アクション}{section.6.1}% 122
+\BOOKMARK [2][-]{subsection.6.1.3}{チャンス}{section.6.1}% 123
+\BOOKMARK [2][-]{subsection.6.1.4}{ステージ}{section.6.1}% 124
+\BOOKMARK [2][-]{subsection.6.1.5}{リクエスト}{section.6.1}% 125
+\BOOKMARK [2][-]{subsection.6.1.6}{コンポーネント}{section.6.1}% 126
+\BOOKMARK [2][-]{subsection.6.1.7}{コンポーネントインスタンス}{section.6.1}% 127
+\BOOKMARK [2][-]{subsection.6.1.8}{コアフロー\(ルールシステム\)}{section.6.1}% 128
+\BOOKMARK [1][-]{section.6.2}{詳細}{chapter.6}% 129
+\BOOKMARK [2][-]{subsection.6.2.1}{アクションの定義項目}{section.6.2}% 130
+\BOOKMARK [3][-]{subsubsection*.125}{オーナー}{subsection.6.2.1}% 131
+\BOOKMARK [3][-]{subsubsection*.126}{トリガー}{subsection.6.2.1}% 132
+\BOOKMARK [3][-]{subsubsection*.127}{スピード}{subsection.6.2.1}% 133
+\BOOKMARK [3][-]{subsubsection*.128}{タイミング}{subsection.6.2.1}% 134
+\BOOKMARK [3][-]{subsubsection*.129}{起動条件}{subsection.6.2.1}% 135
+\BOOKMARK [3][-]{subsubsection*.130}{誘発条件}{subsection.6.2.1}% 136
+\BOOKMARK [3][-]{subsubsection*.131}{効果}{subsection.6.2.1}% 137
+\BOOKMARK [2][-]{subsection.6.2.2}{リクエストの定義項目}{section.6.2}% 138
+\BOOKMARK [2][-]{subsection.6.2.3}{コンポーネントの定義項目}{section.6.2}% 139
+\BOOKMARK [2][-]{subsection.6.2.4}{コンポーネントインスタンスの定義項目}{section.6.2}% 140
+\BOOKMARK [1][-]{section.6.3}{能力}{chapter.6}% 141
+\BOOKMARK [1][-]{section.6.4}{コアフロー}{chapter.6}% 142
+\BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 143
+\BOOKMARK [3][-]{subsubsection*.136}{誘発即時解決}{subsection.6.4.1}% 144
+\BOOKMARK [3][-]{subsubsection*.137}{通常：アクション毎に処理}{subsection.6.4.1}% 145
+\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 146
+\BOOKMARK [0][-]{chapter.7}{付録}{}% 147
+\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 148
+\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 149
+\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 150
+\BOOKMARK [2][-]{subsection.7.2.2}{スタンダード}{section.7.2}% 151
+\BOOKMARK [2][-]{subsection.7.2.3}{プロ}{section.7.2}% 152
+\BOOKMARK [2][-]{subsection.7.2.4}{マスター}{section.7.2}% 153
+\BOOKMARK [1][-]{section.7.3}{エクストラリスト}{chapter.7}% 154

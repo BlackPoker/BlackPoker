@@ -140,352 +140,87 @@ BlackPokerで対戦する前にプレイヤー間で決定する
 <section id="id3">
 <h2><span class="section-number">3.2. </span>定義項目<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
 <p>対戦レギュレーションは次の各項目を決めることで決定します。</p>
-<dl class="simple" id="index-1">
-<dt>フォーマット</dt><dd><p>使用するフォーマット。詳しくは <a class="reference internal" href="../format/format.html#format-rst"><span class="std std-numref">4 フォーマット</span></a> 参照</p>
+<dl id="index-1">
+<dt>フォーマット</dt><dd><p>使用するフォーマット。</p>
+<p>フォーマットとは、使用できるアクションをまとめたセット。
+いくつか種類があり、プレイヤーの熟練度に合わせて選ぶことができる。</p>
+<p>詳しくは <a class="reference internal" href="../format/format.html#format-rst"><span class="std std-numref">4 フォーマット</span></a> 参照</p>
 </dd>
 </dl>
-<dl class="simple" id="index-2">
-<dt>フレーム</dt><dd><p>デッキの構成方法、マッチ形式。</p>
-</dd>
-</dl>
-<dl class="simple" id="index-3">
-<dt>オプション</dt><dd><p>フレームとフォーマットで規定されていないルールを追加。複数指定することが出来ます。</p>
+<dl id="index-2">
+<dt>フレーム</dt><dd><p>使用するフレーム。</p>
+<p>フレームとは、フォーマットとは異なる角度から使えるアクションや領域をまとめたセット。
+フォーマットは熟練度で選び、フレームは遊び方で選ぶイメージです。</p>
+<p>詳しくは <a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">5 フレーム</span></a> 参照</p>
 </dd>
 </dl>
 <section id="id4">
 <h3><span class="section-number">3.2.1. </span>対戦レギュレーションの表記<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
 <p>対戦レギュレーションは次のように表記します。</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">フォーマット</span><span class="o">+</span><span class="n">フレーム</span><span class="o">+</span><span class="n">オプション</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">フォーマット</span><span class="o">+</span><span class="n">フレーム</span>
 </pre></div>
 </div>
 <p>例えば、次のように表記します。</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">マスター</span><span class="o">+</span><span class="n">ランダムハーフ</span><span class="o">+</span><span class="n">プリセット2</span>
-</pre></div>
-</div>
-<p>オプションは複数指定することが出来ます。
-指定した例は次のようになります。</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">マスター</span><span class="o">+</span><span class="n">ランダム40</span><span class="o">+</span><span class="n">プリセット2</span><span class="o">+</span><span class="n">パック</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ライト</span><span class="o">+</span><span class="n">エントリー</span>
 </pre></div>
 </div>
 </section>
-<section id="index-4">
-<span id="id5"></span><h3><span class="section-number">3.2.2. </span>対戦(マッチ)とゲーム(試合)<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
-<p>対戦(マッチ)とゲーム(試合)について説明します。</p>
-<dl class="simple">
-<dt>対戦(マッチ)</dt><dd><p>プレイヤー間の一連のゲーム（試合）で構成される対戦全体を指します。</p>
-</dd>
-<dt>ゲーム(試合)</dt><dd><p>対戦の中で行われる個々の勝負のことを示します。各ゲームは対戦の結果に貢献し、ゲームの集合体が最終的に対戦の勝者を決定します。</p>
-</dd>
-</dl>
-<p>例えば、3回中2回先に勝った方を勝者とする場合、これ全体を対戦(マッチ)と呼び、個々の回をゲームと呼びます。</p>
 </section>
-</section>
-<section id="id6">
-<h2><span class="section-number">3.3. </span>フレーム定義<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h2>
-<p>公式として次のフレームを定義しています。(<a class="reference internal" href="#frame-table"><span class="std std-numref">Table 3.1</span></a>)</p>
-<span id="frame-table"></span><table class="docutils align-default" id="id13">
-<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">フレーム一覧</span><a class="headerlink" href="#id13" title="このテーブルへのパーマリンク">¶</a></caption>
-<thead>
-<tr class="row-odd"><th class="head"><p>フレーム</p></th>
-<th class="head"><p>構築タイプ</p></th>
-<th class="head"><p>マッチ形式</p></th>
-<th class="head"><p>デッキ構成方法</p></th>
-<th class="head"><p>デッキ1</p></th>
-<th class="head"><p>デッキ2</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>エントリー</p></td>
-<td><p>固定</p></td>
-<td><p>1デッキマッチ</p></td>
-<td><p>♠A2345 ♡A8910J ♢A3710Q ♣A5610K Jokerの21枚</p></td>
-<td><p>21枚</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-odd"><td><p>ランダム40</p></td>
-<td><p>ランダム</p></td>
-<td><p>1デッキマッチ</p></td>
-<td><p>54枚からランダムに14枚のカードを抜く</p></td>
-<td><p>40枚</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>ランダムハーフ</p></td>
-<td><p>ランダム</p></td>
-<td><p>3デッキマッチ</p></td>
-<td><p>54枚をランダムに2つに分ける（27枚ずつでなくてもよい）</p></td>
-<td><p>n枚</p></td>
-<td><p>(54-n)枚</p></td>
-</tr>
-<tr class="row-odd"><td><p>構築ハーフ</p></td>
-<td><p>構築</p></td>
-<td><p>3デッキマッチ</p></td>
-<td><p>54枚で2つのデッキを作る（カードを抜いてもよい）</p></td>
-<td><p>n枚</p></td>
-<td><p>(54-n)枚以下</p></td>
-</tr>
-<tr class="row-even"><td><p>構築40</p></td>
-<td><p>構築</p></td>
-<td><p>1デッキマッチ</p></td>
-<td><p>54枚から14枚以上のカードを抜く</p></td>
-<td><p>40枚以下</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-odd"><td><p>レギュラー</p></td>
-<td><p>構築</p></td>
-<td><p>1デッキマッチ</p></td>
-<td><p>54枚からカードを抜いてもよい</p></td>
-<td><p>54枚以下</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>フル</p></td>
-<td><p>固定</p></td>
-<td><p>1デッキマッチ</p></td>
-<td><p>54枚すべて</p></td>
-<td><p>54枚</p></td>
-<td><p>x</p></td>
-</tr>
-</tbody>
-</table>
-<section id="id7">
-<h3><span class="section-number">3.3.1. </span>マッチ形式<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h3>
-<dl class="simple">
-<dt>1デッキマッチ</dt><dd><ul class="simple">
-<li><p>各プレイヤーが1つのデッキを使って1ゲームを行い勝ったプレイヤーのマッチ勝利とする対戦形式</p></li>
-</ul>
-</dd>
-<dt>2デッキマッチ</dt><dd><ul class="simple">
-<li><p>各プレイヤーが2つのデッキを使い、最大3ゲームを行って2ゲームに勝ったプレイヤーの対戦勝利とする対戦形式</p></li>
-<li><p>各プレイヤーはゲームで使用するデッキを選択してよい</p></li>
-<li><p>ただし、一度ゲームに勝ったデッキはそれ以降使用できない</p></li>
-<li><p>デッキは非公開（自分のデッキも見ることができない）とする</p></li>
-<li><p>ただし、ゲーム終了直後のみ、そのゲームで使用したデッキは個人公開（自分だけ見てよい）となる</p></li>
-</ul>
-</dd>
-<dt>2デッキマッチの手順</dt><dd><ul class="simple">
-<li><p>2デッキマッチのゲームの進め方と対戦勝敗を決める手順</p></li>
-<li><p>各プレイヤーは使用するデッキを選び、使用しないデッキを左上に裏向き横向きに置く</p></li>
-<li><p>1ゲーム目を行う</p></li>
-<li><p>1ゲーム目が終わったら一時的に1ゲーム目で使用した自分のデッキを見てよい（個人公開）</p></li>
-<li><p>1ゲーム目で勝ったプレイヤーは1ゲーム目で使用したデッキを左上に表向き横向きに置く</p></li>
-<li><p>1ゲーム目で勝ったプレイヤーは2ゲーム目以降はもう1つのデッキを使用する</p></li>
-<li><p>1ゲーム目で負けたプレイヤーは2ゲーム目で使用するデッキを選び、使用しないデッキを左上に裏向き横向きに置く</p></li>
-<li><p>2ゲーム目を行う</p></li>
-<li><p>1ゲーム目に勝ったプレイヤーが勝った場合は、そのプレイヤーの対戦勝利とする</p></li>
-<li><p>1ゲーム目に勝ったプレイヤーが負けた場合は、3ゲーム目を行う</p></li>
-<li><p>3ゲーム目を行う前に一時的に2ゲーム目で使用した自分のデッキを見てよい（個人公開）</p></li>
-<li><p>両プレイヤーはゲームに勝ったことのないデッキを使用して3ゲーム目を行う</p></li>
-<li><p>使用しないデッキを左上に表向き横向きに置く</p></li>
-<li><p>2ゲーム勝ったプレイヤーの対戦勝利とする</p></li>
-</ul>
-</dd>
-</dl>
-</section>
-</section>
-<section id="id8">
-<h2><span class="section-number">3.4. </span>オプション定義<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h2>
-<p>公式として次のオプションを定義しています。</p>
-<section id="id9">
-<h3><span class="section-number">3.4.1. </span>プリセット2<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
-<p>各プレイヤーがゲーム開始時（切札配置後）にデッキからランダムにキャラクター2体を場に出すオプションルール</p>
-<p>切札配置後のデッキをシャッフルし上から1枚を防壁、次の1枚を兵士として場に出す</p>
-</section>
-<section id="id10">
-<h3><span class="section-number">3.4.2. </span>プリセット4<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
-<p>各プレイヤーがゲーム開始時（切札配置後）にデッキからランダムにキャラクター4体を場に出すオプションルール</p>
-<p>切札配置後のデッキをシャッフルし上から2枚を防壁、次の2枚を兵士として場に出す</p>
-</section>
-<section id="id11">
-<h3><span class="section-number">3.4.3. </span>パック<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
-<p>ゲーム開始前にデッキに入らなかったカードをパックとして扱い、利用するオプションルール</p>
-<p>パックはゲーム開始前に裏向きにして場の外に置く。</p>
-<p>「パック開封」アクションの追加</p>
-<blockquote>
-<div><p>【パック開封】&lt;速攻魔法&gt; &#64;クイック</p>
-<p>※プレイヤーは1ゲームに1回しかこのアクションを起こすことができない。</p>
-<p>（即時効果）</p>
-<ol class="arabic simple">
-<li><p>パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。</p></li>
-<li><p>パックを表向きにする。</p></li>
-</ol>
-<p>注）キーカードなし、コストなしのアクション</p>
-</div></blockquote>
-</section>
-</section>
-<section id="id12">
-<h2><span class="section-number">3.5. </span>対戦レギュレーションの決め方<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id5">
+<h2><span class="section-number">3.3. </span>対戦レギュレーションの決め方<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
 <p>対戦レギュレーションを決定する手順を記載します。</p>
 <p>公式では対応していない組み合わせが存在するため、手順に従って対戦レギュレーションを決定してください。</p>
 <ol class="arabic">
 <li><p><strong>フォーマットの決定</strong></p>
-<blockquote>
-<div><p>「ライト」「スタンダード」などフォーマットを決めます。</p>
-</div></blockquote>
+<p>「ライト」「スタンダード」などフォーマットを決めます。</p>
+<p>フォーマットが変わると覚えるアクションなどの量が大きく変わるので、プレイヤー同士の熟練度をもとに決定しましょう。</p>
 </li>
 <li><p><strong>フレームの決定</strong></p>
-<blockquote>
-<div><p>手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。</p>
-<p>「◯」と表記されている組み合わせが選択出来ます。(<a class="reference internal" href="#frame-format"><span class="std std-numref">Table 3.2</span></a>)</p>
-<span id="frame-format"></span><table class="docutils align-default" id="id14">
-<caption><span class="caption-number">Table 3.2 </span><span class="caption-text">フレーム対応一覧</span><a class="headerlink" href="#id14" title="このテーブルへのパーマリンク">¶</a></caption>
+<p>手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。</p>
+<p>「◯」と表記されている組み合わせが選択出来ます。(<a class="reference internal" href="#frame-format"><span class="std std-numref">Table 3.1</span></a>)</p>
+<span id="frame-format"></span><table class="docutils align-default" id="id6">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">フレーム対応一覧</span><a class="headerlink" href="#id6" title="このテーブルへのパーマリンク">¶</a></caption>
 <tbody>
 <tr class="row-odd"><td><p>【フレーム】</p></td>
 <td><p>ライト</p></td>
 <td><p>スタンダード</p></td>
 <td><p>プロ</p></td>
 <td><p>マスター</p></td>
-<td><p>エクストラ</p></td>
 </tr>
-<tr class="row-even"><td><p>エントリー</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
+<tr class="row-even"><td><p>エントリー20</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
 <td><p>x</p></td>
+<td><p>x</p></td>
 </tr>
-<tr class="row-odd"><td><p>ランダム40</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
+<tr class="row-odd"><td><p>エントリーストラテジー</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
 <td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>ランダムハーフ</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
 <td><p>x</p></td>
 </tr>
-<tr class="row-odd"><td><p>構築ハーフ</p></td>
+<tr class="row-even"><td><p>パックランダム</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
+</tr>
+<tr class="row-odd"><td><p>パックストラテジー</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+<tr class="row-even"><td><p>レアパックストラテジー</p></td>
 <td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>構築40</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
 <td><p>x</p></td>
-</tr>
-<tr class="row-odd"><td><p>レギュラー</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-even"><td><p>フル</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
 <td><p>◯</p></td>
 <td><p>◯</p></td>
 </tr>
 </tbody>
 </table>
-</div></blockquote>
-</li>
-<li><p><strong>オプションの選択</strong></p>
-<blockquote>
-<div><p>手順1,2で決定したフォーマット、フレームをもとに次のオプション対応一覧より、オプションを決めます。</p>
-<p>フォーマット、フレームの両方で「◯」と表記されている組み合わせが選択出来ます。(<a class="reference internal" href="#options-depenson"><span class="std std-numref">Table 3.3</span></a>)</p>
-<p>条件を満たせば複数のオプションを選択することも可能です。また、オプションは選択しなくても構いません。</p>
-<span id="options-depenson"></span><table class="docutils align-default" id="id15">
-<caption><span class="caption-number">Table 3.3 </span><span class="caption-text">オプション対応一覧</span><a class="headerlink" href="#id15" title="このテーブルへのパーマリンク">¶</a></caption>
-<tbody>
-<tr class="row-odd"><td></td>
-<td><p>プリセット2</p></td>
-<td><p>プリセット4</p></td>
-<td><p>パック</p></td>
-</tr>
-<tr class="row-even"><td><p>【フォーマット】</p></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>ライト</p></td>
-<td><p>x</p></td>
-<td><p>x</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-even"><td><p>スタンダード</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-odd"><td><p>プロ</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-even"><td><p>マスター</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-odd"><td><p>エクストラ</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>【フレーム】</p></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>エントリー</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>ランダム40</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-odd"><td><p>ランダムハーフ</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-even"><td><p>構築ハーフ</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-odd"><td><p>構築40</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-</tr>
-<tr class="row-even"><td><p>レギュラー</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-</tr>
-<tr class="row-odd"><td><p>フル</p></td>
-<td><p>◯</p></td>
-<td><p>◯</p></td>
-<td><p>x</p></td>
-</tr>
-</tbody>
-</table>
-</div></blockquote>
 </li>
 </ol>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p>対戦レギュレーション決定例</p>
-<ol class="arabic simple">
-<li><p>フォーマットを「スタンダード」に決めたとします。</p></li>
-<li><p><a class="reference internal" href="#frame-format"><span class="std std-numref">Table 3.2</span></a> より「スタンダード」で選択できるフォーマットを選びます。今回は「ランダムハーフ」を選択します。</p></li>
-<li><p><a class="reference internal" href="#options-depenson"><span class="std std-numref">Table 3.3</span></a> よりフォーマット「スタンダード」、フレーム「ランダムハーフ」として両方が◯となる列を確認します。すると「プリセット2」の列が該当しました。今回は「プリセット2」を選択します。</p></li>
-<li><p>これまでの選択より対戦レギュレーションは「スタンダード+ランダムハーフ+プリセット2」となります。</p></li>
-</ol>
-</div>
 </section>
 </section>
 
@@ -508,14 +243,13 @@ BlackPokerで対戦する前にプレイヤー間で決定する
 <li class="toctree-l1 current"><a class="current reference internal" href="#">3. 対戦レギュレーション</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#index-0">3.1. 対戦レギュレーションとは</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#id3">3.2. 定義項目</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id6">3.3. フレーム定義</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id8">3.4. オプション定義</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id12">3.5. 対戦レギュレーションの決め方</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">3.3. 対戦レギュレーションの決め方</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../core/core.html">5. コアルール</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">6. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">5. フレーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">6. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">7. 付録</a></li>
 </ul>
 
 <div><hr class="docutils"></div>
