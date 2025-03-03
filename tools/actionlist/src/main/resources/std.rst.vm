@@ -4,10 +4,8 @@
 #foreach( $nestList in $actList)
     #if($foreach.count == 1)
 ================================================================
-BlackPoker アクションリスト ${data.ver}
+アクションリスト ${data.ver}
 ================================================================
-
-本ドキュメントでは、BlackPokerのすべてのアクションについて記載します。
 
 .. contents:: 目次
    :depth: 2
@@ -18,6 +16,10 @@ BlackPoker アクションリスト ${data.ver}
 ${nestList.type}
 ======================================================
     #foreach( $row in ${nestList.acts})
+
+        #if($foreach.count != 1)
+----
+        #end
 
 .. _act-${row.actId}:
 
@@ -100,18 +102,14 @@ ${row.story}
             #end
         #end
 
-----
-
     #end
 #end
 
 #foreach( $nestList in $charList)
     #if($foreach.count == 1)
 ================================================================
-BlackPoker キャラクターリスト ${data.ver}
+キャラクターリスト ${data.ver}
 ================================================================
-
-本ドキュメントでは、BlackPokerのすべてのキャラクターについて記載します。
 
 .. contents:: 目次
    :depth: 2
@@ -122,6 +120,10 @@ BlackPoker キャラクターリスト ${data.ver}
 ${nestList.type}
 ======================================================
     #foreach( $char in ${nestList.chars})
+
+        #if($foreach.count != 1)
+----
+        #end
 
 .. _char-${char.charId}:
 
@@ -170,8 +172,6 @@ ${char.story}
 ~ ${char.flavorSpeaker} ~
             #end
         #end
-
-----
 
     #end
 #end

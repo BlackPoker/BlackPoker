@@ -11,6 +11,8 @@ BlackPoker フレームリスト
    :depth: 2
    :local:
 
+    #else
+----
     #end
 
 .. _frame-${frame.frameId}:
@@ -66,7 +68,4 @@ ${rstFn.cnv(${frame.actionList})}
 :numref:`act-act-frame` 
 
     #end
-
-----
-
 #end
