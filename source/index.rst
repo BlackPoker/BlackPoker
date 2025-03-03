@@ -13,8 +13,9 @@ release: |release|
     :numbered: 10
 
     init/init
-    core/core
     common/common
-    format/format
     match-regulations/match-regulations
+    format/format
+    frame/frame
+    core/core
     appendix/appendix

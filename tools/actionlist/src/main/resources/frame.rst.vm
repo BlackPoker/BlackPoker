@@ -1,0 +1,71 @@
+#set($x = "x")
+#foreach( $frame in $frames)
+    #if($foreach.count == 1)
+================================
+BlackPoker フレームリスト
+================================
+
+本ドキュメントでは、BlackPokerのすべてのフレームについて記載します。
+
+.. contents:: 目次
+   :depth: 2
+   :local:
+
+    #else
+----
+    #end
+
+.. _frame-${frame.frameId}:
+
+${frame.name}
+======================================================
+**配置図:**
+
+.. _frame-${frame.frameId}-image:
+.. figure:: ../frame/images/${frame.image}.*
+
+     配置図-${frame.name}
+
+
+**フォーマット:**
+
+.. csv-table::
+   :widths: 1, 1, 1, 1
+   :header-rows: 1
+
+   "ライト", "スタンダード", "プロ", "マスター"
+   "#if(${frame.format.contains('lite')})◯#else${x}#end", "#if(${frame.format.contains('std')})◯#else${x}#end", "#if(${frame.format.contains('pro')})◯#else${x}#end", "#if(${frame.format.contains('mast')})◯#else${x}#end"
+
+
+**デッキ条件:**
+
+    #if(${frame.deck})
+${rstFn.cnv(${frame.deck})}
+    #else
+なし
+    #end
+
+**ゲームの始め方:**
+
+    #if(${frame.start})
+
+${rstFn.cnv(${frame.start})}
+
+    #else
+:numref:`common_gamestart` に沿ってゲームを開始します。
+    #end
+
+
+    #if(${frame.actionList})
+**アクションリスト:**
+
+次のアクションが追加で利用可能です。
+
+${rstFn.cnv(${frame.actionList})}
+
+詳細は次を参照してください。
+
+:numref:`act-act-frame` 
+
+    #end
+#end
