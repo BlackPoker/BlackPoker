@@ -58,14 +58,16 @@ BlackPokerとは
 
 :numref:`init.rst`
     ルールの指針や全体像を説明
-:numref:`core.rst`
-    BlackPokerのコアであるターン制ゲームのルールを説明
 :numref:`common.rst`
     ゲームの開始方法など全体的なゲームの流れを説明
-:numref:`format.rst`
-    ゲーム内で使えるアクションの定義方法を説明
 :numref:`match-regulations.rst`
     ゲーム開始時に決定する規則について説明
+:numref:`format.rst`
+    対戦レギュレーションを決める際に選択できるフォーマットを紹介
+:numref:`frame.rst`
+    対戦レギュレーションを決める際に選択できるフレームを紹介
+:numref:`core.rst`
+    BlackPokerのコアであるターン制ゲームのルールを説明
 
 
 用途別読み方
@@ -73,14 +75,11 @@ BlackPokerとは
 
 文章が複雑であるため、用途に合わせて読むことをおすすめします。
 
-ざっくりゲームの流れを理解したい方
-    :numref:`common.rst` から読み、部分的に参照されている :numref:`core.rst` を読む
+ゲームの流れを理解したい方
+    :numref:`common.rst` から順に読んでください。 :numref:`core.rst` は飛ばしても大丈夫です。
 
 アクションの解決順で悩んでいる方
-    :numref:`core.rst` を熟読する
-
-BlackPokerとは何か理解した方
-    :numref:`core.rst` を軽く目を通し、:numref:`common.rst` 、:numref:`format.rst` と読み進める
+    :numref:`core.rst` を熟読してください。
 
 
 ルール指針
@@ -130,23 +129,23 @@ BlackPokerとは何か理解した方
     盗難防止とネット対戦対応に努めます。
 
 
-.. _rule_constract:
+.. .. _rule_constract:
 
-ルールの構成
-==============================
-ルールの構成は次のようになっています。
-ルールを階層化し、ルール指針を具体化しています。(:numref:`rule.puml`)
+.. ルールの構成
+.. ==============================
+.. ルールの構成は次のようになっています。
+.. ルールを階層化し、ルール指針を具体化しています。(:numref:`rule.puml`)
 
-.. _rule.puml:
-.. uml:: rule.puml
-    :caption: ルール構成
-    :scale: 50%
+.. .. _rule.puml:
+.. .. uml:: rule.puml
+..     :caption: ルール構成
+..     :scale: 50%
 
 
-更にルールを詳しく記載すると次のようになります。
-専門的な表現になるので、理解出来なくても構いません。(:numref:`rule-class.puml`)
+.. 更にルールを詳しく記載すると次のようになります。
+.. 専門的な表現になるので、理解出来なくても構いません。(:numref:`rule-class.puml`)
 
-.. _rule-class.puml:
-.. uml:: rule-class.puml
-    :caption: ルール構成(詳細)
-    :scale: 50%
+.. .. _rule-class.puml:
+.. .. uml:: rule-class.puml
+..     :caption: ルール構成(詳細)
+..     :scale: 50%
