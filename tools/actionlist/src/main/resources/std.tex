@@ -363,6 +363,66 @@ ${texFn.cnv(${row.charAbility})}
 
 #end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% FogList %%%%%
+\begin{center}
+\begin{center}
+\hrule height 1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\Large\bf \ruby{FogList}{フォグリスト}}
+\vspace{1mm}%余白削除
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\end{center}
+\end{center}
+\vspace{-1zh}%余白削除
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#foreach( $nestList in $fogList)
+
+%%% 大項目 %%%
+\tcbset{colframe=black,coltitle=black!0!black,coltext=white!0!white,colbacktitle=white!0!white,colback=black!0!black,sharp corners,top=0mm, left=0mm, bottom=0mm, right=0mm,boxrule=0mm,toprule=0mm,valign=center,halign=center}
+\begin{tcolorbox}
+{\scriptsize\bf ${nestList.type}}
+\end{tcolorbox}
+\vspace{-1zh}%余白削除
+    #foreach( $row in ${nestList.fogs})
+        ## arg0とがformatに含まれている行のみ出力する
+        #if(${row.format.contains(${arg0})})
+%%% Fog %%%
+%\vspace{1zh} %余白追加
+\vspace{2mm} %余白追加
+\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{1mm} %余白追加
+            #if(${row.format.contains(${arg0})})
+                #if(${row.format.contains('lite')})
+{\small\bf ■ ${row.fogName} {\scriptsize (${row.fogType}) }} %Fogタイトル
+                #elseif(${row.format.contains('std')})
+{\small\bf ○ ${row.fogName} {\scriptsize (${row.fogType}) }} %Fogタイトル
+                #elseif(${row.format.contains('pro')})
+{\small\bf ● ${row.fogName} {\scriptsize (${row.fogType}) }} %Fogタイトル
+                #end
+            #end
+\hfill 
+            #if(${row.fogKey})
+{\footnotesize\bf ★${texFn.cnv(${row.fogKey})} }
+            #end
+
+            #if(${row.fogAbility})
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+
+{\bf（能力）}
+
+${texFn.cnv(${row.fogAbility})}
+            #end
+        #end
+    #end
+
+#end
+
+
 \vspace{1mm}%余白削除
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 
