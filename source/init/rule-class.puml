@@ -7,7 +7,7 @@ rectangle 共通ルール as common
 rectangle フォーマット as format
 rectangle 対戦レギュレーション as match_reg
 rectangle フレーム as frame
-rectangle オプション as options
+' rectangle オプション as options
 ' rectangle プレイヤー as player
 
 core <|-- common : 継承
@@ -16,13 +16,13 @@ common <|-- format : 継承
 
 match_reg o-- format : 内包
 match_reg o-- frame : 内包
-match_reg o-- options : 内包
+' match_reg o-- options : 内包
 
 ' match_reg <. player : 選択
 
-format <.. options : 依存
+' format <.. options : 依存
 format <. frame : 依存
-frame <.. options : 依存
+' frame <.. options : 依存
 
 }
 
