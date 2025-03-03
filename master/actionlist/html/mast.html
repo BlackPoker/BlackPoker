@@ -422,9 +422,12 @@
           </button>
 
           <!-- logo -->
-          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button"> <img src="img/blackpoker.svg">
-          </a> <a href="#characterlist" class="navbar-brand nav-title text-center" data-toggle="tab">ActionList</a>
-          <a href="#actionlist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">CharacterList</a>
+          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button">
+            <img src="img/blackpoker.svg">
+          </a> 
+          <a href="#characterlist" class="navbar-brand nav-title text-center" data-toggle="tab">ActionList</a>
+          <a href="#foglist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">CharacterList</a>
+          <a href="#actionlist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">FogList</a>
         </div>
         <div class="navbar-collapse collapse" id="navbar-main">
           <button type="button" class="navbar-toggle" data-toggle="modal" data-target="#modal_sidebar">
@@ -488,6 +491,7 @@
           <ul class="nav nav-pills">
             <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">Action</a></li>
             <li><a class="btn btn-default btn-sm" href="#characterlist-summary" data-toggle="tab">Character</a></li>
+            <li><a class="btn btn-default btn-sm" href="#foglist-summary" data-toggle="tab">Fog</a></li>
           </ul>
         </div>
         <div class="modal-body">
@@ -499,6 +503,8 @@
             id="betaFlg" type="checkbox" checked data-size="mini"> <span>第二版からの変更を青字にする</span>
 */-->
           <div class="tab-content">
+
+            <!-- actionlist -->
             <div class="tab-pane active" id="actionlist-summary">
 
               <div>
@@ -658,6 +664,7 @@
              </div>
             </div>
             
+            <!-- characterlist -->
             <div class="tab-pane" id="characterlist-summary">
               <div>
                 <span>兵士</span>
@@ -681,6 +688,23 @@
                 <div class="list-group">
                   <a class="scroll-offset list-group-item list-group-item-action" href="#char-bulwark">
                     <span>防壁</span>
+                  </a>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- foglist -->
+            <div class="tab-pane" id="foglist-summary">
+              <div>
+                <span>魔法系</span>
+                <div class="list-group">
+                  <a class="scroll-offset list-group-item list-group-item-action" href="#fog-upFog">
+                    <span>アップ</span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#fog-downFog">
+                    <span>ダウン</span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action" href="#fog-forceFog">
+                    <span>フォース</span>
                   </a>
 
                 </div>
@@ -1637,7 +1661,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。</span>
+                    <span>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。</span>
 
                     
 
@@ -1688,7 +1712,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が0以下となった場合、対象を墓地に移す。</span>
+                    <span>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。<br>もし対象のサイズが0以下となった場合、対象を墓地に移す。<br>もし対象のサイズが0以下とならなかった場合、その印としてフォグにキーカードを置き、ダウンとする。</span>
 
                     
 
@@ -2380,7 +2404,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。</span>
+                    <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。<br>その印としてフォグにキーカードを置き、フォースとする。</span>
 
                     
 
@@ -3127,6 +3151,107 @@
       </div>
       <!-- characterlist end -->
 
+
+      <!-- foglist -->
+      <div class="tab-pane" id="foglist">
+
+        <div class="text-center">
+          <h2 class="visible-print-block blackpoker-font">
+            BlackPoker <img src="img/blackpoker.svg" width="35px"> FogList
+          </h2>
+           <small class="">第八版 act8.0 マスター版</small>  <small class=""> : 2025/3/x</small>
+        </div>
+        <hr>
+
+        <div>
+          <h5 class="text-center">魔法系</h5>
+          <div class="row">
+
+            <div class="col-lg-6">
+              <div class="bs-component">
+
+                <div class="panel panel-default blackpoker-action" id="fog-upFog">
+                  <div class="panel-heading">
+
+                     <span class="act-title">アップ</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>速攻魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span><span class="heart"></span>A〜10</span><br>
+                      </small>
+                    </div>                  
+                  </div>
+                  <div class="panel-body">
+                    <span> （能力）<br></span>
+                    <span>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="bs-component">
+
+                <div class="panel panel-default blackpoker-action" id="fog-downFog">
+                  <div class="panel-heading">
+
+                     <span class="act-title">ダウン</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>速攻魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span><span class="spade"></span>A〜10</span><br>
+                      </small>
+                    </div>                  
+                  </div>
+                  <div class="panel-body">
+                    <span> （能力）<br></span>
+                    <span>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="bs-component">
+
+                <div class="panel panel-default blackpoker-action" id="fog-forceFog">
+                  <div class="panel-heading">
+
+                     <span class="act-title">フォース</span>
+                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>通常魔法</span>
+                      </small>
+                    </span>
+                    <div class="pull-right">
+                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span><span class="heart"></span>A〜10 を 2枚</span><br>
+                      </small>
+                    </div>                  
+                  </div>
+                  <div class="panel-body">
+                    <span> （能力）<br></span>
+                    <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- foglist end -->
+
     </div>
   </div>
 
@@ -3136,22 +3261,34 @@
   <script type="text/javascript">
     $(function () {
 
-      // ActionList <-> CharacterList切り替え
+      // ActionList -> CharacterList切り替え
       $('a[href="#actionlist-summary"]').on('click', function () {
         $('a[href="#actionlist"]').click();
       });
 
+      // CharacterList -> FogList切り替え
       $('a[href="#characterlist-summary"]').on('click', function () {
         $('a[href="#characterlist"]').click();
       });
 
-      $('a[href="#characterlist"]').on('click', function () {
-        $(this).addClass("hidden");
-        $('a[href="#actionlist"]').removeClass("hidden");
+      // FogList -> ActionList切り替え
+      $('a[href="#foglist-summary"]').on('click', function () {
+        $('a[href="#foglist"]').click();
       });
+
       $('a[href="#actionlist"]').on('click', function () {
         $(this).addClass("hidden");
         $('a[href="#characterlist"]').removeClass("hidden");
+      });
+
+      $('a[href="#characterlist"]').on('click', function () {
+        $(this).addClass("hidden");
+        $('a[href="#foglist"]').removeClass("hidden");
+      });
+
+      $('a[href="#foglist"]').on('click', function () {
+        $(this).addClass("hidden");
+        $('a[href="#actionlist"]').removeClass("hidden");
       });
 
       $('#modal_sidebar').on('show.bs.modal', function (event) {

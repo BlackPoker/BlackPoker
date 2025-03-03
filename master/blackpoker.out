@@ -109,54 +109,59 @@
 \BOOKMARK [4][-]{paragraph*.112}{装備兵 \(兵士\)}{subsubsection*.107}% 108
 \BOOKMARK [3][-]{subsubsection*.113}{防壁}{subsection.4.3.2}% 109
 \BOOKMARK [4][-]{paragraph*.114}{防壁 \(防壁\)}{subsubsection*.113}% 110
-\BOOKMARK [0][-]{chapter.5}{フレーム}{}% 111
-\BOOKMARK [1][-]{section.5.1}{フレームとは}{chapter.5}% 112
-\BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 113
-\BOOKMARK [1][-]{section.5.3}{フレーム定義}{chapter.5}% 114
-\BOOKMARK [2][-]{subsection.5.3.1}{BlackPoker フレームリスト}{section.5.3}% 115
-\BOOKMARK [3][-]{subsubsection*.119}{エントリー20}{subsection.5.3.1}% 116
-\BOOKMARK [3][-]{subsubsection*.120}{パック}{subsection.5.3.1}% 117
-\BOOKMARK [3][-]{subsubsection*.121}{レアパック}{subsection.5.3.1}% 118
-\BOOKMARK [3][-]{subsubsection*.122}{レアパックストラテジー}{subsection.5.3.1}% 119
-\BOOKMARK [2][-]{subsection.5.3.2}{アクションリスト 第八版 act8.0 フレーム編}{section.5.3}% 120
-\BOOKMARK [3][-]{subsubsection*.128}{パック系}{subsection.5.3.2}% 121
-\BOOKMARK [4][-]{paragraph*.129}{パック開封 \(パック\)}{subsubsection*.128}% 122
-\BOOKMARK [4][-]{paragraph*.130}{レアドロー \(パック\)}{subsubsection*.128}% 123
-\BOOKMARK [4][-]{paragraph*.131}{レア召喚 \(パック\)}{subsubsection*.128}% 124
-\BOOKMARK [4][-]{paragraph*.132}{罠カウンター \(パック\)}{subsubsection*.128}% 125
-\BOOKMARK [0][-]{chapter.6}{コアルール}{}% 126
-\BOOKMARK [1][-]{section.6.1}{基礎概念}{chapter.6}% 127
-\BOOKMARK [2][-]{subsection.6.1.1}{ターン}{section.6.1}% 128
-\BOOKMARK [2][-]{subsection.6.1.2}{アクション}{section.6.1}% 129
-\BOOKMARK [2][-]{subsection.6.1.3}{チャンス}{section.6.1}% 130
-\BOOKMARK [2][-]{subsection.6.1.4}{ステージ}{section.6.1}% 131
-\BOOKMARK [2][-]{subsection.6.1.5}{リクエスト}{section.6.1}% 132
-\BOOKMARK [2][-]{subsection.6.1.6}{コンポーネント}{section.6.1}% 133
-\BOOKMARK [2][-]{subsection.6.1.7}{コンポーネントインスタンス}{section.6.1}% 134
-\BOOKMARK [2][-]{subsection.6.1.8}{コアフロー\(ルールシステム\)}{section.6.1}% 135
-\BOOKMARK [1][-]{section.6.2}{詳細}{chapter.6}% 136
-\BOOKMARK [2][-]{subsection.6.2.1}{アクションの定義項目}{section.6.2}% 137
-\BOOKMARK [3][-]{subsubsection*.133}{オーナー}{subsection.6.2.1}% 138
-\BOOKMARK [3][-]{subsubsection*.134}{トリガー}{subsection.6.2.1}% 139
-\BOOKMARK [3][-]{subsubsection*.135}{スピード}{subsection.6.2.1}% 140
-\BOOKMARK [3][-]{subsubsection*.136}{タイミング}{subsection.6.2.1}% 141
-\BOOKMARK [3][-]{subsubsection*.137}{起動条件}{subsection.6.2.1}% 142
-\BOOKMARK [3][-]{subsubsection*.138}{誘発条件}{subsection.6.2.1}% 143
-\BOOKMARK [3][-]{subsubsection*.139}{効果}{subsection.6.2.1}% 144
-\BOOKMARK [2][-]{subsection.6.2.2}{リクエストの定義項目}{section.6.2}% 145
-\BOOKMARK [2][-]{subsection.6.2.3}{コンポーネントの定義項目}{section.6.2}% 146
-\BOOKMARK [2][-]{subsection.6.2.4}{コンポーネントインスタンスの定義項目}{section.6.2}% 147
-\BOOKMARK [1][-]{section.6.3}{能力}{chapter.6}% 148
-\BOOKMARK [1][-]{section.6.4}{コアフロー}{chapter.6}% 149
-\BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 150
-\BOOKMARK [3][-]{subsubsection*.144}{誘発即時解決}{subsection.6.4.1}% 151
-\BOOKMARK [3][-]{subsubsection*.145}{通常：アクション毎に処理}{subsection.6.4.1}% 152
-\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 153
-\BOOKMARK [0][-]{chapter.7}{付録}{}% 154
-\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 155
-\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 156
-\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 157
-\BOOKMARK [2][-]{subsection.7.2.2}{スタンダード}{section.7.2}% 158
-\BOOKMARK [2][-]{subsection.7.2.3}{プロ}{section.7.2}% 159
-\BOOKMARK [2][-]{subsection.7.2.4}{マスター}{section.7.2}% 160
-\BOOKMARK [1][-]{section.7.3}{エクストラリスト}{chapter.7}% 161
+\BOOKMARK [2][-]{subsection.4.3.3}{フォグリスト 第八版 act8.0}{section.4.3}% 111
+\BOOKMARK [3][-]{subsubsection*.119}{魔法系}{subsection.4.3.3}% 112
+\BOOKMARK [4][-]{paragraph*.120}{アップ \(速攻魔法\)}{subsubsection*.119}% 113
+\BOOKMARK [4][-]{paragraph*.121}{ダウン \(速攻魔法\)}{subsubsection*.119}% 114
+\BOOKMARK [4][-]{paragraph*.122}{フォース \(通常魔法\)}{subsubsection*.119}% 115
+\BOOKMARK [0][-]{chapter.5}{フレーム}{}% 116
+\BOOKMARK [1][-]{section.5.1}{フレームとは}{chapter.5}% 117
+\BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 118
+\BOOKMARK [1][-]{section.5.3}{フレーム定義}{chapter.5}% 119
+\BOOKMARK [2][-]{subsection.5.3.1}{BlackPoker フレームリスト}{section.5.3}% 120
+\BOOKMARK [3][-]{subsubsection*.127}{エントリー20}{subsection.5.3.1}% 121
+\BOOKMARK [3][-]{subsubsection*.128}{パック}{subsection.5.3.1}% 122
+\BOOKMARK [3][-]{subsubsection*.129}{レアパック}{subsection.5.3.1}% 123
+\BOOKMARK [3][-]{subsubsection*.130}{レアパックストラテジー}{subsection.5.3.1}% 124
+\BOOKMARK [2][-]{subsection.5.3.2}{アクションリスト 第八版 act8.0 フレーム編}{section.5.3}% 125
+\BOOKMARK [3][-]{subsubsection*.136}{パック系}{subsection.5.3.2}% 126
+\BOOKMARK [4][-]{paragraph*.137}{パック開封 \(パック\)}{subsubsection*.136}% 127
+\BOOKMARK [4][-]{paragraph*.138}{レアドロー \(パック\)}{subsubsection*.136}% 128
+\BOOKMARK [4][-]{paragraph*.139}{レア召喚 \(パック\)}{subsubsection*.136}% 129
+\BOOKMARK [4][-]{paragraph*.140}{罠カウンター \(パック\)}{subsubsection*.136}% 130
+\BOOKMARK [0][-]{chapter.6}{コアルール}{}% 131
+\BOOKMARK [1][-]{section.6.1}{基礎概念}{chapter.6}% 132
+\BOOKMARK [2][-]{subsection.6.1.1}{ターン}{section.6.1}% 133
+\BOOKMARK [2][-]{subsection.6.1.2}{アクション}{section.6.1}% 134
+\BOOKMARK [2][-]{subsection.6.1.3}{チャンス}{section.6.1}% 135
+\BOOKMARK [2][-]{subsection.6.1.4}{ステージ}{section.6.1}% 136
+\BOOKMARK [2][-]{subsection.6.1.5}{リクエスト}{section.6.1}% 137
+\BOOKMARK [2][-]{subsection.6.1.6}{コンポーネント}{section.6.1}% 138
+\BOOKMARK [2][-]{subsection.6.1.7}{コンポーネントインスタンス}{section.6.1}% 139
+\BOOKMARK [2][-]{subsection.6.1.8}{コアフロー\(ルールシステム\)}{section.6.1}% 140
+\BOOKMARK [1][-]{section.6.2}{詳細}{chapter.6}% 141
+\BOOKMARK [2][-]{subsection.6.2.1}{アクションの定義項目}{section.6.2}% 142
+\BOOKMARK [3][-]{subsubsection*.141}{オーナー}{subsection.6.2.1}% 143
+\BOOKMARK [3][-]{subsubsection*.142}{トリガー}{subsection.6.2.1}% 144
+\BOOKMARK [3][-]{subsubsection*.143}{スピード}{subsection.6.2.1}% 145
+\BOOKMARK [3][-]{subsubsection*.144}{タイミング}{subsection.6.2.1}% 146
+\BOOKMARK [3][-]{subsubsection*.145}{起動条件}{subsection.6.2.1}% 147
+\BOOKMARK [3][-]{subsubsection*.146}{誘発条件}{subsection.6.2.1}% 148
+\BOOKMARK [3][-]{subsubsection*.147}{効果}{subsection.6.2.1}% 149
+\BOOKMARK [2][-]{subsection.6.2.2}{リクエストの定義項目}{section.6.2}% 150
+\BOOKMARK [2][-]{subsection.6.2.3}{コンポーネントの定義項目}{section.6.2}% 151
+\BOOKMARK [2][-]{subsection.6.2.4}{コンポーネントインスタンスの定義項目}{section.6.2}% 152
+\BOOKMARK [1][-]{section.6.3}{能力}{chapter.6}% 153
+\BOOKMARK [1][-]{section.6.4}{コアフロー}{chapter.6}% 154
+\BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 155
+\BOOKMARK [3][-]{subsubsection*.152}{誘発即時解決}{subsection.6.4.1}% 156
+\BOOKMARK [3][-]{subsubsection*.153}{通常：アクション毎に処理}{subsection.6.4.1}% 157
+\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 158
+\BOOKMARK [0][-]{chapter.7}{付録}{}% 159
+\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 160
+\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 161
+\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 162
+\BOOKMARK [2][-]{subsection.7.2.2}{スタンダード}{section.7.2}% 163
+\BOOKMARK [2][-]{subsection.7.2.3}{プロ}{section.7.2}% 164
+\BOOKMARK [2][-]{subsection.7.2.4}{マスター}{section.7.2}% 165
+\BOOKMARK [1][-]{section.7.3}{エクストラリスト}{chapter.7}% 166
