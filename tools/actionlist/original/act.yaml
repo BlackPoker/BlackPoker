@@ -228,7 +228,7 @@ actList:
       actCost: D
       actKey: ♡A〜10
       actTarget: 兵士1体を対象とする。
-      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分加算される。
+      actEffect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。
 
     - format: 'lite,std,pro,mast'
       actName: ダウン
@@ -240,7 +240,10 @@ actList:
       actCost: D
       actKey: ♠A〜10
       actTarget: 兵士1体を対象とする。
-      actEffect: 対象とした兵士の数字は、このターンが終わるまでキーカードの数字分減算される。もし対象の数字が０以下となった場合、対象を墓地に移す。
+      actEffect: |-
+        対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。
+        もし対象のサイズが０以下となった場合、対象を墓地に移す。
+        もし対象のサイズが０以下とならなかった場合、その印としてフォグにキーカードを置き、ダウンとする。
 
     - format: 'lite,std,pro,mast'
       actName: ツイスト
@@ -408,7 +411,10 @@ actList:
       actCost: BB
       actKey: ♡A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
+      actEffect: |-
+        このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
+        その印としてフォグにキーカードを置き、フォースとする。
+
 
     - format: ',,mast'
       actName: 剣の雨
@@ -580,3 +586,29 @@ charList:
       charType: 防壁
       charKey: 全て(裏向き)
       charLabel: 相打ち
+
+fogList:
+  - type: 魔法系
+    fogs:
+    - format: 'lite,std,pro,mast'
+      fogName: アップ
+      fogId: upFog
+      fogType: 速攻魔法
+      fogKey: ♡A〜10
+      fogTarget: アップアクションで対象となった兵士
+      fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
+
+    - format: 'lite,std,pro,mast'
+      fogName: ダウン
+      fogId: downFog
+      fogType: 速攻魔法
+      fogKey: ♠A〜10
+      fogTarget: ダウンアクションで対象となった兵士
+      fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。  
+
+    - format: ',,mast'
+      fogName: フォース
+      fogId: forceFog
+      fogType: 通常魔法
+      fogKey: ♡A〜10 を 2枚
+      fogAbility: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。

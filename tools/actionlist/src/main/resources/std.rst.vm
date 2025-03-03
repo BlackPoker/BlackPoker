@@ -175,3 +175,67 @@ ${char.story}
 
     #end
 #end
+
+
+#foreach( $nestList in $fogList)
+    #if($foreach.count == 1)
+================================================================
+フォグリスト ${data.ver}
+================================================================
+
+.. contents:: 目次
+   :depth: 2
+   :local:
+
+    #end
+
+${nestList.type}
+======================================================
+    #foreach( $fog in ${nestList.fogs})
+
+        #if($foreach.count != 1)
+----
+        #end
+
+.. _fog-${fog.fogId}:
+
+${fog.fogName} (${fog.fogType})
+---------------------------------------------------
+**フォーマット:**
+
+.. csv-table::
+   :widths: 1, 1, 1, 1
+   :header-rows: 1
+
+   "ライト", "スタンダード", "プロ", "マスター"
+   "#if(${fog.format.contains('lite')})◯#else${x}#end", "#if(${fog.format.contains('std')})◯#else${x}#end", "#if(${fog.format.contains('pro')})◯#else${x}#end", "#if(${fog.format.contains('mast')})◯#else${x}#end"
+
+        #if(${fog.fogKey.trim()})
+**キーカード:** ${fog.fogKey}
+
+        #end
+        #if(${fog.fogAbility})
+**能力:**  
+
+${rstFn.cnv(${fog.fogAbility})}
+
+
+        #end
+        #if(${fog.story})
+**ストーリー:**  
+
+${fog.story}
+
+        #end
+        #if(${fog.flavor})
+**フレーバー:**  
+
+*${fog.flavor}*
+            #if(${fog.flavorSpeaker})
+
+~ ${fog.flavorSpeaker} ~
+            #end
+        #end
+
+    #end
+#end

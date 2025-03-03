@@ -27,7 +27,8 @@
 				"ms-vscode.live-server",
 				"redhat.vscode-yaml",
 				"janisdd.vscode-edit-csv",
-				"sodatea.velocity"
+				"sodatea.velocity",
+				"eamodio.gitlens"
 			],
 			"settings": {
 				"tools/actionlist/original/act.schema.json":"act*.yaml",

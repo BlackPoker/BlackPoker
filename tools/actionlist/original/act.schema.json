@@ -119,6 +119,43 @@
           "required": ["type", "chars"],
           "additionalProperties": true
         }
+      },
+      "fogList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "fogs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "format": { "type": "string" },
+                  "fogName": { "type": "string" },
+                  "fogId": { "type": "string" },
+                  "fogType": { "type": "string" },
+                  "fogKey": { "type": "string" },
+                  "forTarget": { "type": "string" },
+                  "fogAbility": { "type": "string" },
+                  "story": { "type": "string" },
+                  "flavor": { "type": "string" },
+                  "flavorSpeaker": { "type": "string" }
+                },
+                "required": [
+                  "format",
+                  "fogName",
+                  "fogId",
+                  "fogType",
+                  "fogKey"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["type", "chars"],
+          "additionalProperties": true
+        }
       }
     },
     "required": ["data", "actList", "charList"],
