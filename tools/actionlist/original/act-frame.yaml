@@ -1,4 +1,5 @@
 data: 
+  id: act-frame
   ver: 第八版 act8.0 フレーム編
   lastupdate: 2025/3/x
   pdfurl_std: /pdf/blackpoker-v6-std
@@ -13,10 +14,10 @@ data:
 actList:
   - type: パック系
     acts:
-    - format: lite,std,pro,mast
+    - 
       frame: |-
-        ・パックランダム
-        ・パックストラテジー
+        ・パック
+        ・レアパック
         ・レアパックストラテジー
       actName: パック開封
       actId: packopen
@@ -29,10 +30,10 @@ actList:
         1. パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。
         2. パックを表向きにし、開封済みとする。
 
-    - format: 'lite,std,pro,mast'
+    - 
       frame: |-
-        ・パックランダム
-        ・パックストラテジー
+        ・パック
+        ・レアパック
         ・レアパックストラテジー
       actName: レアドロー
       actId: raredraw
@@ -43,10 +44,10 @@ actList:
       actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
       actEffect: レアカードを1枚手札に加える。
       
-    - format: 'lite,std,pro,mast'
+    - 
       frame: |-
-        ・パックランダム
-        ・パックストラテジー
+        ・パック
+        ・レアパック
         ・レアパックストラテジー
       actName: レア召喚
       actId: summonsRare
@@ -57,10 +58,10 @@ actList:
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: キーカードを兵士として表向きかつチャージ状態で場に出す。
 
-    - format: 'lite,std,pro,mast'
+    - 
       frame: |-
-        ・パックランダム
-        ・パックストラテジー
+        ・パック
+        ・レアパック
         ・レアパックストラテジー
       actName: 罠カウンター
       actId: trapCounter

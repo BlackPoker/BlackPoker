@@ -1,9 +1,11 @@
+.. _act-${data.id}:
+
 #set($x = "x")
 #foreach( $nestList in $actList)
     #if($foreach.count == 1)
-================================
-BlackPoker アクションリスト
-================================
+================================================================
+BlackPoker アクションリスト ${data.ver}
+================================================================
 
 本ドキュメントでは、BlackPokerのすべてのアクションについて記載します。
 
@@ -21,6 +23,7 @@ ${nestList.type}
 
 ${row.actName} (${row.actType})
 ---------------------------------------------------
+        #if(${row.format})
 **フォーマット:**
 
 .. csv-table::
@@ -29,6 +32,8 @@ ${row.actName} (${row.actType})
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${row.format.contains('lite')})◯#else${x}#end", "#if(${row.format.contains('std')})◯#else${x}#end", "#if(${row.format.contains('pro')})◯#else${x}#end", "#if(${row.format.contains('mast')})◯#else${x}#end"
+
+        #end
 
         #if(${row.frame})
 **フレーム:**  
@@ -102,9 +107,9 @@ ${row.story}
 
 #foreach( $nestList in $charList)
     #if($foreach.count == 1)
-================================
-BlackPoker キャラクターリスト
-================================
+================================================================
+BlackPoker キャラクターリスト ${data.ver}
+================================================================
 
 本ドキュメントでは、BlackPokerのすべてのキャラクターについて記載します。
 

@@ -1,0 +1,7 @@
+#set($x = "x")
+#foreach( $frame in $frames)
+    #if($foreach.count == 1)
+"【フレーム】",ライト,スタンダード,プロ,マスター
+    #end
+"${frame.name}","#if(${frame.format.contains('lite')})◯#else${x}#end", "#if(${frame.format.contains('std')})◯#else${x}#end", "#if(${frame.format.contains('pro')})◯#else${x}#end", "#if(${frame.format.contains('mast')})◯#else${x}#end"
+#end

@@ -30,7 +30,8 @@
 				"sodatea.velocity"
 			],
 			"settings": {
-				"tools/actionlist/original/act.schema.json":"*act.yaml"
+				"tools/actionlist/original/act.schema.json":"act*.yaml",
+				"tools/actionlist/original/frame.schema.json":"frame*.yaml"
 			}
 		}
 	}

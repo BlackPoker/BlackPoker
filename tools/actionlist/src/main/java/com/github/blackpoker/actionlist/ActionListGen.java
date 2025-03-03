@@ -12,6 +12,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.yaml.snakeyaml.Yaml;
 
+import com.github.blackpoker.actionlist.writer.CsvWriter;
 import com.github.blackpoker.actionlist.writer.HtmlWriter;
 import com.github.blackpoker.actionlist.writer.RstWriter;
 import com.github.blackpoker.actionlist.writer.TexWriter;
@@ -36,6 +37,10 @@ public class ActionListGen {
 	// rst出力
 	@Option(name = "-rstOutput", aliases = { "--rstOutput" }, usage = "rst OUTPUT")
 	private String rstOutputPath;
+	// rst出力
+	@Option(name = "-csvOutput", aliases = { "--csvOutput" }, usage = "csv OUTPUT")
+	private String csvOutputPath;
+
 	// パラメータ
 	@Option(name = "-arg0", aliases = { "--arg0" }, metaVar = "arg0", usage = "ARG0")
 	private String arg0;
@@ -102,6 +107,12 @@ public class ActionListGen {
 		if (rstOutputPath != null && !"".equals(rstOutputPath)) {
 			Writer rstWriter = new RstWriter();
 			rstWriter.write(map, rstOutputPath, templateName);
+		}
+
+		// csv書き出し
+		if (csvOutputPath != null && !"".equals(csvOutputPath)) {
+			Writer csvWriter = new CsvWriter();
+			csvWriter.write(map, csvOutputPath, templateName);
 		}
 		
 		// yaml書き出し

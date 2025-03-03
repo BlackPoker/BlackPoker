@@ -137,14 +137,19 @@
 
               <!-- std -->
               <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
-              <argument>-i original/act-frame.yaml -t std -rstOutput ../../source/auto/frameActionlist.rst</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
               <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
               <!-- extra -->
               <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
-              
+
+              <!-- frame -->
+              <argument>-i original/act-frame.yaml -t std -rstOutput ../../source/auto/frameActionlist.rst</argument>
+              <argument>-i original/frame.yaml -t frame -rstOutput ../../source/auto/framelist.rst</argument>
+              <argument>-i original/frame.yaml -t frame -csvOutput ../../source/auto/frame-format.csv</argument>
+
+
             </arguments>
             <systemProperties>
               <systemProperty>

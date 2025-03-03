@@ -182,7 +182,7 @@ BlackPokerはトランプだけで遊べるため、
    .. _frame-format:
    .. csv-table:: フレーム対応一覧
      :header-rows: 0
-     :file: frame-format.csv
+     :file: ../auto/frame-format.csv
 
 .. #. **オプションの選択**
 
