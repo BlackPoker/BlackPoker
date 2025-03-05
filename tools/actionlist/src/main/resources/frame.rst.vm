@@ -68,4 +68,14 @@ ${rstFn.cnv(${frame.actionList})}
 :numref:`act-act-frame` 
 
     #end
+
+    #if(${frame.accessLevel})
+**公開レベル:**
+
+このフレームで定義されている領域の公開レベルは次の通りです。
+
+${frame.accessLevel}
+
+    #end
+
 #end
