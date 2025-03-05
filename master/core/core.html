@@ -134,7 +134,7 @@
 <p>コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(<a class="reference internal" href="#abstract-core-rule"><span class="std std-numref">Fig. 6.1</span></a>)</p>
 <p>BlackPokerはコアルールを実装しているため、ルールを変更する場合は、コアルールに従う必要があります。</p>
 <p>このルールは、割込みが可能なターン制ゲームの標準化したモデルとして構築されており、他のゲームへの応用も可能です。</p>
-<figure class="align-default" id="id29">
+<figure class="align-default" id="id33">
 <span id="abstract-core-rule"></span><p class="plantuml">
 <img src="../_images/plantuml-5869adc776d20b7021b88175e8de80f0f436330c.svg" alt="&#64;startuml
 
@@ -153,7 +153,7 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id29" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id33" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <section id="id2">
@@ -219,16 +219,16 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 <section id="id11">
 <h2><span class="section-number">6.2. </span>詳細<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h2>
 <p>基礎概念を図で表すと次のようになります。(<a class="reference internal" href="#abstract-core-image"><span class="std std-numref">Fig. 6.2</span></a>)</p>
-<figure class="align-default" id="id30">
+<figure class="align-default" id="id34">
 <span id="abstract-core-image"></span><img alt="../_images/abstract.png" src="../_images/abstract.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id30" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。</p>
 <p>リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。</p>
 <p>さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(<a class="reference internal" href="#action-request-image"><span class="std std-numref">Fig. 6.3</span></a>)</p>
-<figure class="align-default" id="id31">
+<figure class="align-default" id="id35">
 <span id="action-request-image"></span><p class="plantuml">
 <img src="../_images/plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.svg" alt="
 left to right direction
@@ -253,7 +253,7 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 
 コンポーネント --&gt; コンポーネントインスタンス : 生成 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.3 </span><span class="caption-text">リクエストとコンポーネントインスタンスの関係</span><a class="headerlink" href="#id31" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.3 </span><span class="caption-text">リクエストとコンポーネントインスタンスの関係</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>ゲーム盤面には複数のコンポーネントインスタンスが生成されます。</p>
@@ -403,7 +403,7 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 <p>コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
 コンポーネントインスタンスとリクエストの属性を次の図に示します。(<a class="reference internal" href="#controller-attr"><span class="std std-numref">Fig. 6.4</span></a>)</p>
 </div>
-<figure class="align-default" id="id32">
+<figure class="align-default" id="id36">
 <span id="controller-attr"></span><p class="plantuml">
 <img src="../_images/plantuml-601946f3f8eb470fbf97e87d640335e4c349780a.svg" alt="left to right direction
 
@@ -440,7 +440,7 @@ class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
 アクション --&gt; リクエスト : 生成
 コンポーネント --&gt; コンポーネントインスタンス : 生成"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id32" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </section>
@@ -453,7 +453,7 @@ class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
 <p>能力は解釈される際にコストは支払われず、ステージに置かれません。</p>
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも含まれます。
 (<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 6.5</span></a>)</p>
-<figure class="align-default" id="id33">
+<figure class="align-default" id="id37">
 <span id="ability-image"></span><p class="plantuml">
 <img src="../_images/plantuml-5c3b9d2c43d8740600145b89955601a615170288.svg" alt="&#64;startuml
 
@@ -477,7 +477,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id33" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id37" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
@@ -494,9 +494,9 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <p>BlackPokerはこのコアフローに則りリクエストが処理されます。</p>
 <p>アナログゲーム用に作成したコアフローであるため、なるべく記憶する容量を減らすように設計しています。
 デジタルゲームに応用する場合は、細部をゲームに合わせて変更してください。</p>
-<figure class="align-default" id="id34">
+<figure class="align-default" id="id38">
 <span id="coreflow-2"></span><p class="plantuml">
-<img src="../_images/plantuml-1140d0c1b634f56cca0aee50c4f78d0b3cd09b8b.svg" alt="&#64;startuml
+<img src="../_images/plantuml-dfffbee06f7c7dce8f5c1e7cffc68344ee54e952.svg" alt="&#64;startuml
 start
 :[1] ゲーム開始;
 :[2] ターンプレイヤーにチャンスを移動;
@@ -517,27 +517,28 @@ if ([3] アクションを起こすか？) then (Yes)
 else (No)
     :[11] パス記録に登録;
     if ([12] 全員がパスしたか？) then (Yes)
-        if ([13] ステージにリクエストが存在するか？) then (Yes)
-            :[14] ステージから取出し;
+        :[13] ルールシステムにチャンスを移動;
+        if ([14] ステージにリクエストが存在するか？) then (Yes)
+            :[15] ステージから取出し;
             :[8] リクエストの解決;
             if ([9] 勝敗判定) then (決着)
                 stop
             endif
             :[6] 誘発チェック;
-            :[2] ターンプレイヤーにチャンスを移動;
         else (No)
         endif
+        :[2] ターンプレイヤーにチャンスを移動;
     else (No)
-        :[15] チャンス移動;
+        :[16] チャンス移動;
     endif
 endif
 repeat while()
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id38" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
-<dl class="simple" id="core-gamestart">
+<dl id="core-gamestart">
 <dt><strong>[1] ゲーム開始</strong></dt><dd><p>先攻を決め、ゲームを始める準備を行います。</p>
 </dd>
 <dt><strong>[2] ターンプレイヤーにチャンスを移動</strong></dt><dd><p>ターンを持っているプレイヤーにチャンスを移動します。</p>
@@ -546,19 +547,23 @@ repeat while()
 </dd>
 <dt><strong>[4] パス記録のリセット</strong></dt><dd><p>パスしたプレイヤーの記録をリセットします。</p>
 </dd>
-<dt><strong>[5] アクションを起こす</strong></dt><dd><p>アクションを起こしこれからプレイヤーが行うことを宣言します。
+<dt><strong>[5] アクションを起こす</strong></dt><dd><p>アクションを起こし、これからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。</p>
+<p>このときに有効になっている能力を考慮します。
+能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">6.4.2 能力の適応順</span></a> 参照してください。</p>
 </dd>
 <dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。誘発した場合、効果を解決するかスタックに追加します。詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">6.4.1 誘発チェック</span></a> を参照してください。</p>
 </dd>
 <dt><strong>[7] 即時か？</strong></dt><dd><p>リクエストのスピードが即時か判定します。</p>
 </dd>
 </dl>
-<dl class="simple" id="actresolve">
+<dl id="actresolve">
 <dt><strong>[8] リクエストの解決</strong></dt><dd><p>アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
+<p>このときに有効になっている能力を考慮します。
+能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">6.4.2 能力の適応順</span></a> 参照してください。</p>
 </dd>
 </dl>
 <dl class="simple" id="winlose">
@@ -570,11 +575,13 @@ repeat while()
 </dd>
 <dt><strong>[12] 全員がパスしたか？</strong></dt><dd><p>パス記録に全てのプレイヤー名が記録されているか判定します。</p>
 </dd>
-<dt><strong>[13] ステージにリクエストが存在するか？</strong></dt><dd><p>ステージにリクエストが存在するか判定します。</p>
+<dt><strong>[13] ルールシステムにチャンスを移動</strong></dt><dd><p>ルールシステムにチャンスを移動します。</p>
 </dd>
-<dt><strong>[14] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたリクエストをステージから取出します。</p>
+<dt><strong>[14] ステージにリクエストが存在するか？</strong></dt><dd><p>ステージにリクエストが存在するか判定します。</p>
 </dd>
-<dt><strong>[15] チャンス移動</strong></dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
+<dt><strong>[15] ステージから取出し</strong></dt><dd><p>最後にステージに追加されたリクエストをステージから取出します。</p>
+</dd>
+<dt><strong>[16] チャンス移動</strong></dt><dd><p>チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。</p>
 </dd>
 </dl>
@@ -590,7 +597,7 @@ repeat while()
 <p>バッファ</p>
 <p>誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はアクションバッファです。</p>
 </div>
-<figure class="align-default" id="id35">
+<figure class="align-default" id="id39">
 <span id="trigger-flow"></span><p class="plantuml">
 <img src="../_images/plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.svg" alt="&#64;startuml
 '==============================
@@ -666,7 +673,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id39" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="trigger-act-gather">
@@ -722,7 +729,7 @@ stop
 <p>誘発チェックで誘発したスピードが即時のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 6.8</span></a>)</p>
-<figure class="align-default" id="id36">
+<figure class="align-default" id="id40">
 <span id="trigger-flow-s"></span><p class="plantuml">
 <img src="../_images/plantuml-caaca34586e95540adb102e9bc8309243f59b393.svg" alt="&#64;startuml
 '==============================
@@ -749,7 +756,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id40" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -779,7 +786,7 @@ stop
 <p>誘発チェックで誘発したスピードが通常のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
 誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 6.9</span></a>)</p>
-<figure class="align-default" id="id37">
+<figure class="align-default" id="id41">
 <span id="trigger-flow-n"></span><p class="plantuml">
 <img src="../_images/plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.svg" alt="&#64;startuml
 '==============================
@@ -812,7 +819,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id37" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 6.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id41" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -846,9 +853,95 @@ stop
 </dl>
 </section>
 </section>
+<section id="ability-order">
+<span id="id28"></span><h3><span class="section-number">6.4.2. </span>能力の適応順<a class="headerlink" href="#ability-order" title="この見出しへのパーマリンク">¶</a></h3>
+<p>複数の能力が同時に有効になった場合、効果の内容によっては矛盾を引き起こす可能性があります。
+その場合は、次の <a class="reference internal" href="#ability-order-rule"><span class="std std-numref">6.4.2.2 能力の適用ルール</span></a> に沿って能力を解釈してください。</p>
+<p>なお、ゲームによって細部の裁定が異なる場合があります。ここでは BlackPoker を例に説明します。</p>
+<section id="id29">
+<h4><span class="section-number">6.4.2.1. </span>考え方の原則<a class="headerlink" href="#id29" title="この見出しへのパーマリンク">¶</a></h4>
+<p>影響範囲が広い能力ほど優先順位を低く扱い、影響範囲が狭い（個別の対象を限定する）能力ほど優先順位を高く扱います。
+つまり、「広く浅く影響する能力」は先に適用し、「狭く深く影響する能力」は後から適用します。</p>
 </section>
-<section id="id28">
-<h2><span class="section-number">6.5. </span>まとめ<a class="headerlink" href="#id28" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="ability-order-rule">
+<span id="id30"></span><h4><span class="section-number">6.4.2.2. </span>能力の適用ルール<a class="headerlink" href="#ability-order-rule" title="この見出しへのパーマリンク">¶</a></h4>
+<ol class="arabic">
+<li><p>能力を分類する
+各能力を「影響範囲」に注目して、次の 3 つに分類します。</p>
+<dl class="simple">
+<dt><strong>[1] 全ての (all)</strong></dt><dd><ul class="simple">
+<li><p>ゲームの場全体、または全プレイヤーなど「すべて」を有効範囲に含む能力です。</p></li>
+<li><p>例: 「全ての♠の兵士はサイズを1加算する」など。</p></li>
+</ul>
+</dd>
+<dt><strong>[2] あなたの (your)</strong></dt><dd><ul class="simple">
+<li><p>あなたの場や、あなたがコントロールしているコンポーネントだけを有効範囲にする能力です。</p></li>
+<li><p>例: 「あなたの兵士はドライブ状態でも攻撃できる」など。</p></li>
+</ul>
+</dd>
+<dt><strong>[3] この (this)</strong></dt><dd><ul class="simple">
+<li><p>対象のコンポーネントインスタンス 1 つを有効範囲にします。</p></li>
+<li><p>例: 「この兵士はサイズを3加算する」「対象の兵士のサイズを2減算する」など。</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>能力を適用する
+上記で分類した番号の小さい順、すなわち <strong>[1] → [2] → [3]</strong> の順で能力を適用します。</p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt><strong>[1] 全ての (all)</strong></dt><dd><p>まず「全ての ～」といった広範囲を対象とする能力を先に処理します。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>[2] あなたの (your)</strong></dt><dd><p>次に「あなたの ～」等、特定プレイヤーやその場を限定する能力を処理します。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>[3] この (this)</strong></dt><dd><p>最後に、個別のコンポーネント単位でより限定的な能力を処理し、必要に応じて上書きします。</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p><strong>同じ範囲で矛盾した能力がある場合</strong>
+それらの能力が発動（または有効化）された順番に応じて “タイムスタンプ” が古いものから適用し、
+新しいものが後から上書きする形で処理します。</p>
+<p>このように、同時に有効な効果が互いに矛盾する場合でも、最終的により限定的な効果が優先されます。</p>
+</li>
+</ol>
+</section>
+<section id="id31">
+<h4><span class="section-number">6.4.2.3. </span>運用上の注意<a class="headerlink" href="#id31" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>複数の「同じ範囲」の能力同士の扱い</strong></dt><dd><p>たとえば「全ての兵士は攻撃できない」という能力と、「全ての兵士のサイズはこのターン中1加算される」という能力が同じ “[1] 全ての (all)” 範囲に当たる場合、どちらも基本的には同時に成立し共存します。ただし、まったく相反する内容で整合が取れない場合は、対戦ルールやジャッジの裁定に従ってください。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>適用タイミング</strong></dt><dd><p>能力の適用は、コアフロー内の特定のステップでまとめて行います。何度か再適用が行われる場面があっても、適用のたびに「[1] → [2] → [3]」の順でまっさらな状態から再計算します。そのため、兵士のサイズが重複して加算され続けるようなことはありません。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>互いに矛盾しない場合</strong></dt><dd><p>たとえば「全ての兵士のサイズを -1」「あなたの兵士はさらに +2」「この兵士はさらに +3」という 3 つの効果が同時に有効なとき、BlackPoker ではサイズ 0 以下でも兵士が場に存在し続けられるため、最終的にその兵士には合計 +5 の修正が加わります。特に抵触しないかぎりすべて重複適用されます。</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>互いに矛盾する場合</strong></dt><dd><p>「全ての兵士は攻撃できない」と「この兵士は攻撃できる」というように真っ向から対立する効果が同時に発生した場合、最終的には範囲の狭い「この兵士は攻撃できる」の方が優先されます。</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>以上のルールが、複数の能力が同時に有効になった場合の処理基準となります。</p>
+</section>
+</section>
+</section>
+<section id="id32">
+<h2><span class="section-number">6.5. </span>まとめ<a class="headerlink" href="#id32" title="この見出しへのパーマリンク">¶</a></h2>
 <p>コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
@@ -879,7 +972,7 @@ stop
 <li class="toctree-l2"><a class="reference internal" href="#id11">6.2. 詳細</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ability">6.3. 能力</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#coreflowsec">6.4. コアフロー</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id28">6.5. まとめ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id32">6.5. まとめ</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">7. 付録</a></li>

@@ -72,7 +72,7 @@
 
 
 \title{BlackPoker}
-\date{2025年03月04日}
+\date{2025年03月05日}
 \release{2025/3/x}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1147,11 +1147,11 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 \label{\detokenize{common/common:id36}}
 \sphinxAtStartPar
 この章では、
-公開・非公開情報やシャッフルの仕方といった
+公開レベルやシャッフルの仕方といった
 細かな決まりごとを説明します。
 
 
-\subsection{公開・非公開情報}
+\subsection{公開レベル}
 \label{\detokenize{common/common:id37}}
 \sphinxAtStartPar
 配置されているカードには、アクションの効果
@@ -1205,7 +1205,7 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 \item[] 非公開：なし
 \end{DUlineblock}
 
-\sphinxlineitem{切札}
+\sphinxlineitem{フォグ}
 \begin{DUlineblock}{0em}
 \item[] 完全公開：表裏を変えずに見えるカード
 \item[] 個人公開：伏せてあるカード
@@ -5583,6 +5583,21 @@ x
 \sphinxAtStartPar
 \hyperref[\detokenize{auto/frameActionlist:act-act-frame}]{\ref{\detokenize{auto/frameActionlist:act-act-frame}} \nameref{\detokenize{auto/frameActionlist:act-act-frame}}}
 
+\sphinxAtStartPar
+\sphinxstylestrong{公開レベル:}
+
+\sphinxAtStartPar
+このフレームで定義されている領域の公開レベルは次の通りです。
+\begin{description}
+\sphinxlineitem{パック}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：開封済み・未開封
+\item[] 個人公開：開封後のパックの中身
+\item[] 非公開：未開封のパックの中身
+\end{DUlineblock}
+
+\end{description}
+
 
 \bigskip\hrule\bigskip
 
@@ -5704,6 +5719,28 @@ x
 
 \sphinxAtStartPar
 \hyperref[\detokenize{auto/frameActionlist:act-act-frame}]{\ref{\detokenize{auto/frameActionlist:act-act-frame}} \nameref{\detokenize{auto/frameActionlist:act-act-frame}}}
+
+\sphinxAtStartPar
+\sphinxstylestrong{公開レベル:}
+
+\sphinxAtStartPar
+このフレームで定義されている領域の公開レベルは次の通りです。
+\begin{description}
+\sphinxlineitem{パック}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：開封済み・未開封
+\item[] 個人公開：開封後のパックの中身
+\item[] 非公開：未開封のパックの中身
+\end{DUlineblock}
+
+\sphinxlineitem{レアカード}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：レアカードの枚数
+\item[] 個人公開：レアカードの中身
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\end{description}
 
 
 \bigskip\hrule\bigskip
@@ -5838,6 +5875,28 @@ x
 
 \sphinxAtStartPar
 \hyperref[\detokenize{auto/frameActionlist:act-act-frame}]{\ref{\detokenize{auto/frameActionlist:act-act-frame}} \nameref{\detokenize{auto/frameActionlist:act-act-frame}}}
+
+\sphinxAtStartPar
+\sphinxstylestrong{公開レベル:}
+
+\sphinxAtStartPar
+このフレームで定義されている領域の公開レベルは次の通りです。
+\begin{description}
+\sphinxlineitem{パック}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：開封済み・未開封
+\item[] 個人公開：開封後のパックの中身
+\item[] 非公開：未開封のパックの中身
+\end{DUlineblock}
+
+\sphinxlineitem{レアカード}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：レアカードの枚数
+\item[] 個人公開：レアカードの中身
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\end{description}
 
 \sphinxAtStartPar
 各フレームで追加で使えるアクションについては次を参照してください。
@@ -6065,7 +6124,7 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5869adc776d20b7021b88175e8de80f0f436330c}.pdf}
-\caption{コアルールのイメージ}\label{\detokenize{core/core:id29}}\label{\detokenize{core/core:abstract-core-rule}}\end{figure}
+\caption{コアルールのイメージ}\label{\detokenize{core/core:id33}}\label{\detokenize{core/core:abstract-core-rule}}\end{figure}
 
 
 \section{基礎概念}
@@ -6175,7 +6234,7 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 \capstart
 
 \noindent\sphinxincludegraphics{{abstract}.pdf}
-\caption{割込み可能なターン制ゲーム}\label{\detokenize{core/core:id30}}\label{\detokenize{core/core:abstract-core-image}}\end{figure}
+\caption{割込み可能なターン制ゲーム}\label{\detokenize{core/core:id34}}\label{\detokenize{core/core:abstract-core-image}}\end{figure}
 
 \sphinxAtStartPar
 仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。
@@ -6191,7 +6250,7 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912}.pdf}
-\caption{リクエストとコンポーネントインスタンスの関係}\label{\detokenize{core/core:id31}}\label{\detokenize{core/core:action-request-image}}\end{figure}
+\caption{リクエストとコンポーネントインスタンスの関係}\label{\detokenize{core/core:id35}}\label{\detokenize{core/core:action-request-image}}\end{figure}
 
 \sphinxAtStartPar
 ゲーム盤面には複数のコンポーネントインスタンスが生成されます。
@@ -6455,7 +6514,7 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-601946f3f8eb470fbf97e87d640335e4c349780a}.pdf}
-\caption{コントローラー属性}\label{\detokenize{core/core:id32}}\label{\detokenize{core/core:controller-attr}}\end{figure}
+\caption{コントローラー属性}\label{\detokenize{core/core:id36}}\label{\detokenize{core/core:controller-attr}}\end{figure}
 
 \index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
 
@@ -6480,7 +6539,7 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5c3b9d2c43d8740600145b89955601a615170288}.pdf}
-\caption{能力のイメージ}\label{\detokenize{core/core:id33}}\label{\detokenize{core/core:ability-image}}\end{figure}
+\caption{能力のイメージ}\label{\detokenize{core/core:id37}}\label{\detokenize{core/core:ability-image}}\end{figure}
 
 \begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
@@ -6508,8 +6567,8 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-1140d0c1b634f56cca0aee50c4f78d0b3cd09b8b}.pdf}
-\caption{コアフロー}\label{\detokenize{core/core:id34}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-dfffbee06f7c7dce8f5c1e7cffc68344ee54e952}.pdf}
+\caption{コアフロー}\label{\detokenize{core/core:id38}}\label{\detokenize{core/core:coreflow-2}}\end{figure}
 \phantomsection\label{\detokenize{core/core:core-gamestart}}\begin{description}
 \sphinxlineitem{\sphinxstylestrong{{[}1{]} ゲーム開始}}
 \sphinxAtStartPar
@@ -6529,9 +6588,13 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 
 \sphinxlineitem{\sphinxstylestrong{{[}5{]} アクションを起こす}}
 \sphinxAtStartPar
-アクションを起こしこれからプレイヤーが行うことを宣言します。
+アクションを起こし、これからプレイヤーが行うことを宣言します。
 ゲームによってアクションの起こし方は異なります。BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションを起こします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションが起きている場合もあります。
+
+\sphinxAtStartPar
+このときに有効になっている能力を考慮します。
+能力の適用順については \hyperref[\detokenize{core/core:ability-order}]{\ref{\detokenize{core/core:ability-order}} \nameref{\detokenize{core/core:ability-order}}} 参照してください。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6{]} 誘発チェック}}
 \sphinxAtStartPar
@@ -6548,6 +6611,10 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 アクションの効果に定義されている内容を実行します。
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。
+
+\sphinxAtStartPar
+このときに有効になっている能力を考慮します。
+能力の適用順については \hyperref[\detokenize{core/core:ability-order}]{\ref{\detokenize{core/core:ability-order}} \nameref{\detokenize{core/core:ability-order}}} 参照してください。
 
 \end{description}
 \phantomsection\label{\detokenize{core/core:winlose}}\begin{description}
@@ -6567,15 +6634,19 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \sphinxAtStartPar
 パス記録に全てのプレイヤー名が記録されているか判定します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}13{]} ステージにリクエストが存在するか？}}
+\sphinxlineitem{\sphinxstylestrong{{[}13{]} ルールシステムにチャンスを移動}}
+\sphinxAtStartPar
+ルールシステムにチャンスを移動します。
+
+\sphinxlineitem{\sphinxstylestrong{{[}14{]} ステージにリクエストが存在するか？}}
 \sphinxAtStartPar
 ステージにリクエストが存在するか判定します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}14{]} ステージから取出し}}
+\sphinxlineitem{\sphinxstylestrong{{[}15{]} ステージから取出し}}
 \sphinxAtStartPar
 最後にステージに追加されたリクエストをステージから取出します。
 
-\sphinxlineitem{\sphinxstylestrong{{[}15{]} チャンス移動}}
+\sphinxlineitem{\sphinxstylestrong{{[}16{]} チャンス移動}}
 \sphinxAtStartPar
 チャンスを持っているプレイヤーからチャンスを持っていないプレイヤーにチャンスを移動します。
 チャンスを移動するルールはゲームによって異なります。
@@ -6607,7 +6678,7 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44}.pdf}
-\caption{誘発チェック}\label{\detokenize{core/core:id35}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
+\caption{誘発チェック}\label{\detokenize{core/core:id39}}\label{\detokenize{core/core:trigger-flow}}\end{figure}
 \phantomsection\label{\detokenize{core/core:trigger-act-gather}}\begin{description}
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}1{]} 誘発したリクエストを分類しバッファに追加}}
 \sphinxAtStartPar
@@ -6695,7 +6766,7 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-caaca34586e95540adb102e9bc8309243f59b393}.pdf}
-\caption{誘発チェック\sphinxhyphen{}即時処理}\label{\detokenize{core/core:id36}}\label{\detokenize{core/core:trigger-flow-s}}\end{figure}
+\caption{誘発チェック\sphinxhyphen{}即時処理}\label{\detokenize{core/core:id40}}\label{\detokenize{core/core:trigger-flow-s}}\end{figure}
 \begin{description}
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}5\sphinxhyphen{}1{]} バッファから該当の即時はあるか？}}
 \sphinxAtStartPar
@@ -6743,7 +6814,7 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \capstart
 
 \noindent\sphinxincludegraphics[scale=0.5]{{plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1}.pdf}
-\caption{誘発チェック\sphinxhyphen{}通常処理}\label{\detokenize{core/core:id37}}\label{\detokenize{core/core:trigger-flow-n}}\end{figure}
+\caption{誘発チェック\sphinxhyphen{}通常処理}\label{\detokenize{core/core:id41}}\label{\detokenize{core/core:trigger-flow-n}}\end{figure}
 \begin{description}
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}1{]} バッファから該当の通常はあるか？}}
 \sphinxAtStartPar
@@ -6793,8 +6864,144 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \end{description}
 
 
+\subsection{能力の適応順}
+\label{\detokenize{core/core:ability-order}}\label{\detokenize{core/core:id28}}
+\sphinxAtStartPar
+複数の能力が同時に有効になった場合、効果の内容によっては矛盾を引き起こす可能性があります。
+その場合は、次の \hyperref[\detokenize{core/core:ability-order-rule}]{\ref{\detokenize{core/core:ability-order-rule}} \nameref{\detokenize{core/core:ability-order-rule}}} に沿って能力を解釈してください。
+
+\sphinxAtStartPar
+なお、ゲームによって細部の裁定が異なる場合があります。ここでは BlackPoker を例に説明します。
+
+
+\subsubsection{考え方の原則}
+\label{\detokenize{core/core:id29}}
+\sphinxAtStartPar
+影響範囲が広い能力ほど優先順位を低く扱い、影響範囲が狭い（個別の対象を限定する）能力ほど優先順位を高く扱います。
+つまり、「広く浅く影響する能力」は先に適用し、「狭く深く影響する能力」は後から適用します。
+
+
+\subsubsection{能力の適用ルール}
+\label{\detokenize{core/core:ability-order-rule}}\label{\detokenize{core/core:id30}}\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+能力を分類する
+各能力を「影響範囲」に注目して、次の 3 つに分類します。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}1{]} 全ての (all)}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ゲームの場全体、または全プレイヤーなど「すべて」を有効範囲に含む能力です。
+
+\item {} 
+\sphinxAtStartPar
+例: 「全ての{\normalsize $\spadesuit$} の兵士はサイズを1加算する」など。
+
+\end{itemize}
+
+\sphinxlineitem{\sphinxstylestrong{{[}2{]} あなたの (your)}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+あなたの場や、あなたがコントロールしているコンポーネントだけを有効範囲にする能力です。
+
+\item {} 
+\sphinxAtStartPar
+例: 「あなたの兵士はドライブ状態でも攻撃できる」など。
+
+\end{itemize}
+
+\sphinxlineitem{\sphinxstylestrong{{[}3{]} この (this)}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象のコンポーネントインスタンス 1 つを有効範囲にします。
+
+\item {} 
+\sphinxAtStartPar
+例: 「この兵士はサイズを3加算する」「対象の兵士のサイズを2減算する」など。
+
+\end{itemize}
+
+\end{description}
+
+\item {} 
+\sphinxAtStartPar
+能力を適用する
+上記で分類した番号の小さい順、すなわち \sphinxstylestrong{{[}1{]} \(\rightarrow\) {[}2{]} \(\rightarrow\) {[}3{]}} の順で能力を適用します。
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumii}{enumiii}{}{.}%
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}1{]} 全ての (all)}}
+\sphinxAtStartPar
+まず「全ての ～」といった広範囲を対象とする能力を先に処理します。
+
+\end{description}
+
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}2{]} あなたの (your)}}
+\sphinxAtStartPar
+次に「あなたの ～」等、特定プレイヤーやその場を限定する能力を処理します。
+
+\end{description}
+
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{{[}3{]} この (this)}}
+\sphinxAtStartPar
+最後に、個別のコンポーネント単位でより限定的な能力を処理し、必要に応じて上書きします。
+
+\end{description}
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{同じ範囲で矛盾した能力がある場合}
+それらの能力が発動（または有効化）された順番に応じて “タイムスタンプ” が古いものから適用し、
+新しいものが後から上書きする形で処理します。
+
+\sphinxAtStartPar
+このように、同時に有効な効果が互いに矛盾する場合でも、最終的により限定的な効果が優先されます。
+
+\end{enumerate}
+
+
+\subsubsection{運用上の注意}
+\label{\detokenize{core/core:id31}}\begin{itemize}
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{複数の「同じ範囲」の能力同士の扱い}}
+\sphinxAtStartPar
+たとえば「全ての兵士は攻撃できない」という能力と、「全ての兵士のサイズはこのターン中1加算される」という能力が同じ “{[}1{]} 全ての (all)” 範囲に当たる場合、どちらも基本的には同時に成立し共存します。ただし、まったく相反する内容で整合が取れない場合は、対戦ルールやジャッジの裁定に従ってください。
+
+\end{description}
+
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{適用タイミング}}
+\sphinxAtStartPar
+能力の適用は、コアフロー内の特定のステップでまとめて行います。何度か再適用が行われる場面があっても、適用のたびに「{[}1{]} \(\rightarrow\) {[}2{]} \(\rightarrow\) {[}3{]}」の順でまっさらな状態から再計算します。そのため、兵士のサイズが重複して加算され続けるようなことはありません。
+
+\end{description}
+
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{互いに矛盾しない場合}}
+\sphinxAtStartPar
+たとえば「全ての兵士のサイズを \sphinxhyphen{}1」「あなたの兵士はさらに +2」「この兵士はさらに +3」という 3 つの効果が同時に有効なとき、BlackPoker ではサイズ 0 以下でも兵士が場に存在し続けられるため、最終的にその兵士には合計 +5 の修正が加わります。特に抵触しないかぎりすべて重複適用されます。
+
+\end{description}
+
+\item {} \begin{description}
+\sphinxlineitem{\sphinxstylestrong{互いに矛盾する場合}}
+\sphinxAtStartPar
+「全ての兵士は攻撃できない」と「この兵士は攻撃できる」というように真っ向から対立する効果が同時に発生した場合、最終的には範囲の狭い「この兵士は攻撃できる」の方が優先されます。
+
+\end{description}
+
+\end{itemize}
+
+\sphinxAtStartPar
+以上のルールが、複数の能力が同時に有効になった場合の処理基準となります。
+
+
 \section{まとめ}
-\label{\detokenize{core/core:id28}}
+\label{\detokenize{core/core:id32}}
 \sphinxAtStartPar
 コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
@@ -6877,23 +7084,7 @@ BlackPokerはこのコアフローに則りリクエストが処理されます�
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-mast-2up.pdf}
 
 \end{description}
-
-
-\section{エクストラリスト}
-\label{\detokenize{appendix/appendix:extralist}}\label{\detokenize{appendix/appendix:id7}}\begin{description}
-\sphinxlineitem{URL}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/ex.html}
-
-\sphinxlineitem{PDF}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-extra.pdf}
-
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-extra-2up.pdf}
-
-\end{description}
-
+\phantomsection\label{\detokenize{appendix/appendix:extralist}}
 
 
 \renewcommand{\indexname}{索引}

@@ -42,7 +42,7 @@
 \BOOKMARK [3][-]{subsubsection*.11}{パターン1: ターン制御}{subsection.2.10.6}% 41
 \BOOKMARK [3][-]{subsubsection*.12}{パターン2: 世代交代}{subsection.2.10.6}% 42
 \BOOKMARK [1][-]{section.2.11}{その他のルール}{chapter.2}% 43
-\BOOKMARK [2][-]{subsection.2.11.1}{公開・非公開情報}{section.2.11}% 44
+\BOOKMARK [2][-]{subsection.2.11.1}{公開レベル}{section.2.11}% 44
 \BOOKMARK [3][-]{subsubsection*.13}{残りライフを聞かれたらどうしたらいいの？}{subsection.2.11.1}% 45
 \BOOKMARK [3][-]{subsubsection*.14}{墓地の一番上のカードはいつ決まるのか？}{subsection.2.11.1}% 46
 \BOOKMARK [2][-]{subsection.2.11.2}{デッキのシャッフルについて}{section.2.11}% 47
@@ -156,12 +156,15 @@
 \BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 155
 \BOOKMARK [3][-]{subsubsection*.152}{誘発即時解決}{subsection.6.4.1}% 156
 \BOOKMARK [3][-]{subsubsection*.153}{通常：アクション毎に処理}{subsection.6.4.1}% 157
-\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 158
-\BOOKMARK [0][-]{chapter.7}{付録}{}% 159
-\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 160
-\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 161
-\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 162
-\BOOKMARK [2][-]{subsection.7.2.2}{スタンダード}{section.7.2}% 163
-\BOOKMARK [2][-]{subsection.7.2.3}{プロ}{section.7.2}% 164
-\BOOKMARK [2][-]{subsection.7.2.4}{マスター}{section.7.2}% 165
-\BOOKMARK [1][-]{section.7.3}{エクストラリスト}{chapter.7}% 166
+\BOOKMARK [2][-]{subsection.6.4.2}{能力の適応順}{section.6.4}% 158
+\BOOKMARK [3][-]{subsubsection*.154}{考え方の原則}{subsection.6.4.2}% 159
+\BOOKMARK [3][-]{subsubsection*.155}{能力の適用ルール}{subsection.6.4.2}% 160
+\BOOKMARK [3][-]{subsubsection*.156}{運用上の注意}{subsection.6.4.2}% 161
+\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 162
+\BOOKMARK [0][-]{chapter.7}{付録}{}% 163
+\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 164
+\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 165
+\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 166
+\BOOKMARK [2][-]{subsection.7.2.2}{スタンダード}{section.7.2}% 167
+\BOOKMARK [2][-]{subsection.7.2.3}{プロ}{section.7.2}% 168
+\BOOKMARK [2][-]{subsection.7.2.4}{マスター}{section.7.2}% 169

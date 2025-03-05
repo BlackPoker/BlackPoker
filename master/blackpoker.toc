@@ -41,7 +41,7 @@
 \contentsline {subsubsection}{パターン1: ターン制御}{19}{subsubsection*.11}%
 \contentsline {subsubsection}{パターン2: 世代交代}{19}{subsubsection*.12}%
 \contentsline {section}{\numberline {2.11}その他のルール}{19}{section.2.11}%
-\contentsline {subsection}{\numberline {2.11.1}公開・非公開情報}{19}{subsection.2.11.1}%
+\contentsline {subsection}{\numberline {2.11.1}公開レベル}{19}{subsection.2.11.1}%
 \contentsline {subsubsection}{残りライフを聞かれたらどうしたらいいの？}{21}{subsubsection*.13}%
 \contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{21}{subsubsection*.14}%
 \contentsline {subsection}{\numberline {2.11.2}デッキのシャッフルについて}{21}{subsection.2.11.2}%
@@ -122,12 +122,12 @@
 \contentsline {subsubsection}{パック}{59}{subsubsection*.128}%
 \contentsline {subsubsection}{レアパック}{60}{subsubsection*.129}%
 \contentsline {subsubsection}{レアパックストラテジー}{62}{subsubsection*.130}%
-\contentsline {subsection}{\numberline {5.3.2}アクションリスト 第八版 act8.0 フレーム編}{63}{subsection.5.3.2}%
-\contentsline {subsubsection}{パック系}{63}{subsubsection*.136}%
-\contentsline {paragraph}{パック開封 (パック)}{63}{paragraph*.137}%
-\contentsline {paragraph}{レアドロー (パック)}{64}{paragraph*.138}%
-\contentsline {paragraph}{レア召喚 (パック)}{64}{paragraph*.139}%
-\contentsline {paragraph}{罠カウンター (パック)}{65}{paragraph*.140}%
+\contentsline {subsection}{\numberline {5.3.2}アクションリスト 第八版 act8.0 フレーム編}{64}{subsection.5.3.2}%
+\contentsline {subsubsection}{パック系}{64}{subsubsection*.136}%
+\contentsline {paragraph}{パック開封 (パック)}{64}{paragraph*.137}%
+\contentsline {paragraph}{レアドロー (パック)}{65}{paragraph*.138}%
+\contentsline {paragraph}{レア召喚 (パック)}{65}{paragraph*.139}%
+\contentsline {paragraph}{罠カウンター (パック)}{66}{paragraph*.140}%
 \contentsline {chapter}{\numberline {第6章}コアルール}{67}{chapter.6}%
 \contentsline {section}{\numberline {6.1}基礎概念}{67}{section.6.1}%
 \contentsline {subsection}{\numberline {6.1.1}ターン}{68}{subsection.6.1.1}%
@@ -153,14 +153,17 @@
 \contentsline {section}{\numberline {6.3}能力}{73}{section.6.3}%
 \contentsline {section}{\numberline {6.4}コアフロー}{75}{section.6.4}%
 \contentsline {subsection}{\numberline {6.4.1}誘発チェック}{77}{subsection.6.4.1}%
-\contentsline {subsubsection}{誘発即時解決}{79}{subsubsection*.152}%
-\contentsline {subsubsection}{通常：アクション毎に処理}{80}{subsubsection*.153}%
-\contentsline {section}{\numberline {6.5}まとめ}{82}{section.6.5}%
-\contentsline {chapter}{\numberline {第7章}付録}{83}{chapter.7}%
-\contentsline {section}{\numberline {7.1}PDF版ルール}{83}{section.7.1}%
-\contentsline {section}{\numberline {7.2}アクションリスト}{83}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}ライト}{83}{subsection.7.2.1}%
-\contentsline {subsection}{\numberline {7.2.2}スタンダード}{83}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}プロ}{84}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}マスター}{84}{subsection.7.2.4}%
-\contentsline {section}{\numberline {7.3}エクストラリスト}{84}{section.7.3}%
+\contentsline {subsubsection}{誘発即時解決}{80}{subsubsection*.152}%
+\contentsline {subsubsection}{通常：アクション毎に処理}{81}{subsubsection*.153}%
+\contentsline {subsection}{\numberline {6.4.2}能力の適応順}{82}{subsection.6.4.2}%
+\contentsline {subsubsection}{考え方の原則}{82}{subsubsection*.154}%
+\contentsline {subsubsection}{能力の適用ルール}{82}{subsubsection*.155}%
+\contentsline {subsubsection}{運用上の注意}{83}{subsubsection*.156}%
+\contentsline {section}{\numberline {6.5}まとめ}{84}{section.6.5}%
+\contentsline {chapter}{\numberline {第7章}付録}{85}{chapter.7}%
+\contentsline {section}{\numberline {7.1}PDF版ルール}{85}{section.7.1}%
+\contentsline {section}{\numberline {7.2}アクションリスト}{85}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}ライト}{85}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}スタンダード}{85}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}プロ}{86}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}マスター}{86}{subsection.7.2.4}%
