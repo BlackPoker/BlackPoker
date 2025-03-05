@@ -69,11 +69,14 @@ PDF
 
 .. _extralist:
 
-エクストラリスト
-==============================
-URL 
-    https://blackpoker.github.io/BlackPoker/actionlist/html/ex.html
-PDF 
-    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra.pdf
+.. エクストラリスト (第7版)
+.. ==============================
+.. URL 
+..     https://blackpoker.github.io/BlackPoker/actionlist/html/ex.html
+.. PDF 
+..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra.pdf
 
-    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra-2up.pdf
+..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra-2up.pdf
+
+
+.. 8.1版以降で修正する予定です。
