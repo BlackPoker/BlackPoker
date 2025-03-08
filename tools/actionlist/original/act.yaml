@@ -12,7 +12,99 @@ data:
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
-  - type: 展開系
+
+  - type: 基本
+    acts:
+    - format: lite,std,pro,mast
+      actName: エンド
+      actId: end
+      actType: 基本
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actEffect: |-
+        1. 手札が7枚を越えた場合、7枚になるよう手札を捨てる。
+        2. 自分のフォグにあるカードを全て墓地に移す。
+        3. 自分のターンを終了し、対戦相手にターンを渡す。
+
+    - format: lite,std,pro,mast
+      actName: チャージ
+      actId: charge
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: メイン
+      actTriggerCond: ターンプレイヤーかつ、エンドアクションが解決した時に誘発する。
+      actEffect: |-
+        ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
+
+    - format: lite,std,pro,mast
+      actName: ドロー
+      actId: draw
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: メイン
+      actTriggerCond: ターンプレイヤーかつ、チャージアクションが解決した時に誘発する。
+      actEffect: |-
+        1. ライフの一番上からカードを１枚引き、手札に加える。
+        2. 必要であれば、更にライフの一番上からカードを１枚引き、手札に加える。
+
+    - format: lite,std,pro,mast
+      actName: アタック
+      actId: attack
+      actType: 基本
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
+      actEffect: |-
+        対戦相手を攻撃するアタッカーをドライブして指定する。
+        ・アタッカーはラベルにアタッカーを持っているキャラクターを指定できる。
+        ・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
+        ・このターン場に出たキャラクターは指定できない、ただしラベルに速攻があるキャラクターは指定できる。
+
+    - format: lite,std,pro,mast
+      actName: ブロック
+      actId: block
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: メイン
+      actTriggerCond: ターンプレイヤーかつ、アタックアクションが解決した時にアタッカーが1体以上いる場合、誘発する。
+      actEffect: |-
+        対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 
+        ・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
+
+    - format: lite,std,pro,mast
+      actName: ダメージ判定
+      actId: damageJudge
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: メイン
+      actTriggerCond: ターンプレイヤーかつ、ブロックアクションが解決した時に誘発する。
+      actEffect: |-
+        アタッカーとブロッカーを比較する
+        1. 兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、少ない方を墓地に移す。同じ場合は両方を墓地に移動する。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+        2. 兵士（アタッカー）と防壁（ブロッカー）の場合、次を行う。
+        -1. 防壁を表にし、防壁が次の条件に当てはまる場合、アタッカーを墓地に移す。
+        --A. 防壁がJokerの場合
+        --B. 防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合
+        -2. 防壁を墓地に移す。
+        3. アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。
+
+    - format: 'lite,std,pro,mast'
+      actName: 世代交代
+      actId: nextGeneration
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
+      actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
+
+  - type: 召喚
     acts:
     - format: lite,std,pro,mast
       actName: 防壁設置
@@ -71,7 +163,6 @@ actList:
       flavorSpeaker: 親方より
 
     - format: 'pro,mast'
-      type: 展開系
       actName: クイック召喚
       actId: quickSummonsAce
       actType: 召喚
@@ -133,90 +224,7 @@ actList:
         1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
         2. キーカードを手札に戻す。
 
-  - type: ターン制御系
-    acts:
-    - format: lite,std,pro,mast
-      actName: エンド
-      actId: end
-      actType: ターン制御
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actEffect: |-
-        1. 手札が7枚を越えた場合、7枚になるよう手札を捨てる。
-        2. 自分のフォグにあるカードを全て墓地に移す。
-        3. 自分のターンを終了し、対戦相手にターンを渡す。
-
-    - format: lite,std,pro,mast
-      actName: チャージ
-      actId: charge
-      actType: ターン制御
-      actTrigger: 誘発
-      actSpeed: 即時
-      actTime: メイン
-      actTriggerCond: ターンプレイヤーかつ、エンドアクションが解決した時に誘発する。
-      actEffect: |-
-        ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
-
-    - format: lite,std,pro,mast
-      actName: ドロー
-      actId: draw
-      actType: ターン制御
-      actTrigger: 誘発
-      actSpeed: 通常
-      actTime: メイン
-      actTriggerCond: ターンプレイヤーかつ、チャージアクションが解決した時に誘発する。
-      actEffect: |-
-        1. ライフの一番上からカードを１枚引き、手札に加える。
-        2. 必要であれば、更にライフの一番上からカードを１枚引き、手札に加える。
-
-  - type: 攻撃系
-    acts:
-    - format: lite,std,pro,mast
-      actName: アタック
-      actId: attack
-      actType: 攻防
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actNote: ※プレイヤーは1ターンに1回しかこのアクションを起こすことができない。
-      actEffect: |-
-        対戦相手を攻撃するアタッカーをドライブして指定する。
-        ・アタッカーはラベルにアタッカーを持っているキャラクターを指定できる。
-        ・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
-        ・このターン場に出たキャラクターは指定できない、ただしラベルに速攻があるキャラクターは指定できる。
-
-    - format: lite,std,pro,mast
-      actName: ブロック
-      actId: block
-      actType: 攻防
-      actTrigger: 誘発
-      actSpeed: 通常
-      actTime: メイン
-      actTriggerCond: ターンプレイヤーかつ、アタックアクションが解決した時にアタッカーが1体以上いる場合、誘発する。
-      actEffect: |-
-        対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 
-        ・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
-
-    - format: lite,std,pro,mast
-      actName: ダメージ判定
-      actId: damageJudge
-      actType: 攻防
-      actTrigger: 誘発
-      actSpeed: 通常
-      actTime: メイン
-      actTriggerCond: ターンプレイヤーかつ、ブロックアクションが解決した時に誘発する。
-      actEffect: |-
-        アタッカーとブロッカーを比較する
-        1. 兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、少ない方を墓地に移す。同じ場合は両方を墓地に移動する。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
-        2. 兵士（アタッカー）と防壁（ブロッカー）の場合、次を行う。
-        -1. 防壁を表にし、防壁が次の条件に当てはまる場合、アタッカーを墓地に移す。
-        --A. 防壁がJokerの場合
-        --B. 防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合
-        -2. 防壁を墓地に移す。
-        3. アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。
-
-  - type: 魔法系
+  - type: 速攻魔法
     acts:  
     - format: 'lite,std,pro,mast'
       actName: アップ
@@ -320,6 +328,61 @@ actList:
       actEffect: 対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。
 
     - format: 'lite,std,pro,mast'
+      actName: サーチ
+      actId: search
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: Joker
+      actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
+
+    - format: ',,mast'
+      actName: B・J
+      actId: bj
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: SS
+      actKey: 同じスートの A と J
+      actNote: ※コストの支払によって誘発したアクションより先にアクションの解決を行う。
+      actEffect: ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
+      story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。
+      flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」
+      flavorSpeaker: 革命者より
+
+    - format: ',,mast'
+      actName: R・S・F
+      actId: rsf
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: BB
+      actKey: '同じスートのA,10〜K を 5枚'
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actTarget: プレイヤー１人を対象とする。
+      actEffect: 対象のプレイヤーに40点のダメージを与える。
+
+    - format: 'pro,mast'
+      actName: リバース
+      actId: reverse
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actKey: 同じ数字を２枚
+      actTarget: キャラクター１体を対象とする。
+      actEffect: |-
+        1. 必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。
+        2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
+        3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+        4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
+
+  - type: 通常魔法
+    acts:  
+    - format: 'lite,std,pro,mast'
       actName: 防壁破壊
       actId: destroyBulwark
       actType: 通常魔法
@@ -415,7 +478,6 @@ actList:
         このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
         その印としてフォグにキーカードを置き、フォースとする。
 
-
     - format: ',,mast'
       actName: 剣の雨
       actId: swordRain
@@ -464,71 +526,6 @@ actList:
       actEffect: |-
         1. 自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
         2. 自分の場にいる全ての兵士をチャージ状態にする。
-
-    - format: 'lite,std,pro,mast'
-      actName: サーチ
-      actId: search
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 即時
-      actTime: クイック
-      actKey: Joker
-      actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
-
-    - format: ',,mast'
-      actName: B・J
-      actId: bj
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actCost: SS
-      actKey: 同じスートの A と J
-      actNote: ※コストの支払によって誘発したアクションより先にアクションの解決を行う。
-      actEffect: ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
-      story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。
-      flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」
-      flavorSpeaker: 革命者より
-
-    - format: ',,mast'
-      actName: R・S・F
-      actId: rsf
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actCost: BB
-      actKey: '同じスートのA,10〜K を 5枚'
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actTarget: プレイヤー１人を対象とする。
-      actEffect: 対象のプレイヤーに40点のダメージを与える。
-
-    - format: 'pro,mast'
-      actName: リバース
-      actId: reverse
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actKey: 同じ数字を２枚
-      actTarget: キャラクター１体を対象とする。
-      actEffect: |-
-        1. 必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。
-        2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
-        3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
-        4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
-
-  - type: 誘発系
-    acts:
-    - format: 'lite,std,pro,mast'
-      actName: 世代交代
-      actId: nextGeneration
-      actType: 誘発
-      actTrigger: 誘発
-      actSpeed: 即時
-      actTime: クイック
-      actTriggerCond: Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
-      actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
 
 charList:
   - type: 兵士
@@ -588,7 +585,7 @@ charList:
       charLabel: 相打ち
 
 fogList:
-  - type: 魔法系
+  - type: 速攻魔法
     fogs:
     - format: 'lite,std,pro,mast'
       fogName: アップ
@@ -606,6 +603,8 @@ fogList:
       fogTarget: ダウンアクションで対象となった兵士
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。  
 
+  - type: 通常魔法
+    fogs:
     - format: ',,mast'
       fogName: フォース
       fogId: forceFog
