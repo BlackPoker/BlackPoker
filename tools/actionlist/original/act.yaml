@@ -209,21 +209,6 @@ actList:
       flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」
       flavorSpeaker: ライフよりの防壁より
 
-    - format: ',std,pro,mast'
-      actName: 帰還
-      actId: unsummons
-      actType: 召喚
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actCost: B
-      actKey: 同じスートを2枚
-      actTarget: |
-        自分の場のキャラクター１体を対象とする。
-      actEffect: |-
-        1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
-        2. キーカードを手札に戻す。
-
   - type: 速攻魔法
     acts:  
     - format: 'lite,std,pro,mast'
@@ -379,6 +364,21 @@ actList:
         2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
         3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
         4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
+
+    - format: ',std,pro,mast'
+      actName: 帰還
+      actId: unsummons
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: B
+      actKey: 同じスートを2枚
+      actTarget: |
+        自分の場のキャラクター１体を対象とする。
+      actEffect: |-
+        1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
+        2. キーカードを手札に戻す。
 
   - type: 通常魔法
     acts:  
