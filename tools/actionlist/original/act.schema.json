@@ -62,7 +62,10 @@
                   "actEffect": { "type": "string" },
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
-                  "flavorSpeaker": { "type": "string" }
+                  "flavorSpeaker": { "type": "string" },
+                  "since": { "type": "string" },
+                  "update": { "type": "string" },
+                  "devNote": { "type": "string" }
                 },
                 "required": [
                   "actName",
@@ -71,7 +74,8 @@
                   "actTrigger",
                   "actSpeed",
                   "actTime",
-                  "actEffect"
+                  "actEffect",
+                  "since"
                 ],
                 "additionalProperties": true
               }
@@ -103,14 +107,19 @@
                   "charAbility": { "type": "string" },
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
-                  "flavorSpeaker": { "type": "string" }
+                  "flavorSpeaker": { "type": "string" },
+                  "since": { "type": "string" },
+                  "update": { "type": "string" },
+                  "devNote": { "type": "string" }
+
                 },
                 "required": [
                   "format",
                   "charName",
                   "charId",
                   "charType",
-                  "charKey"
+                  "charKey",
+                  "since"
                 ],
                 "additionalProperties": true
               }
@@ -140,14 +149,18 @@
                   "fogAbility": { "type": "string" },
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
-                  "flavorSpeaker": { "type": "string" }
+                  "flavorSpeaker": { "type": "string" },
+                  "since": { "type": "string" },
+                  "update": { "type": "string" },
+                  "devNote": { "type": "string" }
                 },
                 "required": [
                   "format",
                   "fogName",
                   "fogId",
                   "fogType",
-                  "fogKey"
+                  "fogKey",
+                  "since"
                 ],
                 "additionalProperties": true
               }
