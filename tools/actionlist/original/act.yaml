@@ -565,7 +565,7 @@ charList:
       charSize: '0'
       charLabel: アタッカー, 速攻
       charAbility: |-
-        ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストが無しになる。）
+        ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストDが無しになる。）
 
     - format: lite,std,pro,mast
       charName: 装備兵
