@@ -17,7 +17,7 @@
 \BOOKMARK [1][-]{section.2.7}{ダメージ}{chapter.2}% 16
 \BOOKMARK [1][-]{section.2.8}{キャラクター}{chapter.2}% 17
 \BOOKMARK [2][-]{subsection.2.8.1}{キャラクターのもつ項目}{section.2.8}% 18
-\BOOKMARK [2][-]{subsection.2.8.2}{キャラクターの数字}{section.2.8}% 19
+\BOOKMARK [2][-]{subsection.2.8.2}{キャラクターのサイズ}{section.2.8}% 19
 \BOOKMARK [2][-]{subsection.2.8.3}{キャラクターの注意点}{section.2.8}% 20
 \BOOKMARK [3][-]{subsubsection*.3}{複数枚で1体となるキャラクターが防壁になったら？}{subsection.2.8.3}% 21
 \BOOKMARK [2][-]{subsection.2.8.4}{チャージとドライブ}{section.2.8}% 22
@@ -58,62 +58,62 @@
 \BOOKMARK [1][-]{section.4.2}{定義項目}{chapter.4}% 57
 \BOOKMARK [1][-]{section.4.3}{フォーマット定義}{chapter.4}% 58
 \BOOKMARK [2][-]{subsection.4.3.1}{アクションリスト 第八版 act8.0}{section.4.3}% 59
-\BOOKMARK [3][-]{subsubsection*.57}{展開系}{subsection.4.3.1}% 60
-\BOOKMARK [4][-]{paragraph*.58}{防壁設置 \(召喚\)}{subsubsection*.57}% 61
-\BOOKMARK [4][-]{paragraph*.59}{兵士召喚 \(召喚\)}{subsubsection*.57}% 62
-\BOOKMARK [4][-]{paragraph*.60}{英雄召喚 \(召喚\)}{subsubsection*.57}% 63
-\BOOKMARK [4][-]{paragraph*.61}{エース召喚 \(召喚\)}{subsubsection*.57}% 64
-\BOOKMARK [4][-]{paragraph*.62}{クイック召喚 \(召喚\)}{subsubsection*.57}% 65
-\BOOKMARK [4][-]{paragraph*.63}{魔術士召喚 \(召喚\)}{subsubsection*.57}% 66
-\BOOKMARK [4][-]{paragraph*.64}{装備 \(召喚\)}{subsubsection*.57}% 67
-\BOOKMARK [4][-]{paragraph*.65}{帰還 \(召喚\)}{subsubsection*.57}% 68
-\BOOKMARK [3][-]{subsubsection*.66}{ターン制御系}{subsection.4.3.1}% 69
-\BOOKMARK [4][-]{paragraph*.67}{エンド \(ターン制御\)}{subsubsection*.66}% 70
-\BOOKMARK [4][-]{paragraph*.68}{チャージ \(ターン制御\)}{subsubsection*.66}% 71
-\BOOKMARK [4][-]{paragraph*.69}{ドロー \(ターン制御\)}{subsubsection*.66}% 72
-\BOOKMARK [3][-]{subsubsection*.70}{攻撃系}{subsection.4.3.1}% 73
-\BOOKMARK [4][-]{paragraph*.71}{アタック \(攻防\)}{subsubsection*.70}% 74
-\BOOKMARK [4][-]{paragraph*.72}{ブロック \(攻防\)}{subsubsection*.70}% 75
-\BOOKMARK [4][-]{paragraph*.73}{ダメージ判定 \(攻防\)}{subsubsection*.70}% 76
-\BOOKMARK [3][-]{subsubsection*.74}{魔法系}{subsection.4.3.1}% 77
-\BOOKMARK [4][-]{paragraph*.75}{アップ \(速攻魔法\)}{subsubsection*.74}% 78
-\BOOKMARK [4][-]{paragraph*.76}{ダウン \(速攻魔法\)}{subsubsection*.74}% 79
-\BOOKMARK [4][-]{paragraph*.77}{ツイスト \(速攻魔法\)}{subsubsection*.74}% 80
-\BOOKMARK [4][-]{paragraph*.78}{カウンター \(速攻魔法\)}{subsubsection*.74}% 81
-\BOOKMARK [4][-]{paragraph*.79}{再会 \(速攻魔法\)}{subsubsection*.74}% 82
-\BOOKMARK [4][-]{paragraph*.80}{キル \(速攻魔法\)}{subsubsection*.74}% 83
-\BOOKMARK [4][-]{paragraph*.81}{停戦 \(速攻魔法\)}{subsubsection*.74}% 84
-\BOOKMARK [4][-]{paragraph*.82}{対象変更 \(速攻魔法\)}{subsubsection*.74}% 85
-\BOOKMARK [4][-]{paragraph*.83}{防壁破壊 \(通常魔法\)}{subsubsection*.74}% 86
-\BOOKMARK [4][-]{paragraph*.84}{投擲 \(通常魔法\)}{subsubsection*.74}% 87
-\BOOKMARK [4][-]{paragraph*.85}{死の槍 \(通常魔法\)}{subsubsection*.74}% 88
-\BOOKMARK [4][-]{paragraph*.86}{防壁補充 \(通常魔法\)}{subsubsection*.74}% 89
-\BOOKMARK [4][-]{paragraph*.87}{リアニメイト \(通常魔法\)}{subsubsection*.74}% 90
-\BOOKMARK [4][-]{paragraph*.88}{ハンデス \(通常魔法\)}{subsubsection*.74}% 91
-\BOOKMARK [4][-]{paragraph*.89}{フォース \(通常魔法\)}{subsubsection*.74}% 92
-\BOOKMARK [4][-]{paragraph*.90}{剣の雨 \(通常魔法\)}{subsubsection*.74}% 93
-\BOOKMARK [4][-]{paragraph*.91}{徴募 \(通常魔法\)}{subsubsection*.74}% 94
-\BOOKMARK [4][-]{paragraph*.92}{奇襲 \(通常魔法\)}{subsubsection*.74}% 95
-\BOOKMARK [4][-]{paragraph*.93}{サーチ \(速攻魔法\)}{subsubsection*.74}% 96
-\BOOKMARK [4][-]{paragraph*.94}{B・J \(速攻魔法\)}{subsubsection*.74}% 97
-\BOOKMARK [4][-]{paragraph*.95}{R・S・F \(速攻魔法\)}{subsubsection*.74}% 98
-\BOOKMARK [4][-]{paragraph*.96}{リバース \(速攻魔法\)}{subsubsection*.74}% 99
-\BOOKMARK [3][-]{subsubsection*.97}{誘発系}{subsection.4.3.1}% 100
-\BOOKMARK [4][-]{paragraph*.98}{世代交代 \(誘発\)}{subsubsection*.97}% 101
-\BOOKMARK [2][-]{subsection.4.3.2}{キャラクターリスト 第八版 act8.0}{section.4.3}% 102
-\BOOKMARK [3][-]{subsubsection*.107}{兵士}{subsection.4.3.2}% 103
-\BOOKMARK [4][-]{paragraph*.108}{一般兵 \(兵士\)}{subsubsection*.107}% 104
-\BOOKMARK [4][-]{paragraph*.109}{英雄 \(兵士\)}{subsubsection*.107}% 105
-\BOOKMARK [4][-]{paragraph*.110}{エース \(兵士\)}{subsubsection*.107}% 106
-\BOOKMARK [4][-]{paragraph*.111}{魔術士 \(兵士\)}{subsubsection*.107}% 107
-\BOOKMARK [4][-]{paragraph*.112}{装備兵 \(兵士\)}{subsubsection*.107}% 108
-\BOOKMARK [3][-]{subsubsection*.113}{防壁}{subsection.4.3.2}% 109
-\BOOKMARK [4][-]{paragraph*.114}{防壁 \(防壁\)}{subsubsection*.113}% 110
-\BOOKMARK [2][-]{subsection.4.3.3}{フォグリスト 第八版 act8.0}{section.4.3}% 111
-\BOOKMARK [3][-]{subsubsection*.119}{魔法系}{subsection.4.3.3}% 112
-\BOOKMARK [4][-]{paragraph*.120}{アップ \(速攻魔法\)}{subsubsection*.119}% 113
-\BOOKMARK [4][-]{paragraph*.121}{ダウン \(速攻魔法\)}{subsubsection*.119}% 114
-\BOOKMARK [4][-]{paragraph*.122}{フォース \(通常魔法\)}{subsubsection*.119}% 115
+\BOOKMARK [3][-]{subsubsection*.56}{基本}{subsection.4.3.1}% 60
+\BOOKMARK [4][-]{paragraph*.57}{エンド \(基本\)}{subsubsection*.56}% 61
+\BOOKMARK [4][-]{paragraph*.58}{チャージ \(基本\)}{subsubsection*.56}% 62
+\BOOKMARK [4][-]{paragraph*.59}{ドロー \(基本\)}{subsubsection*.56}% 63
+\BOOKMARK [4][-]{paragraph*.60}{アタック \(基本\)}{subsubsection*.56}% 64
+\BOOKMARK [4][-]{paragraph*.61}{ブロック \(基本\)}{subsubsection*.56}% 65
+\BOOKMARK [4][-]{paragraph*.62}{ダメージ判定 \(基本\)}{subsubsection*.56}% 66
+\BOOKMARK [4][-]{paragraph*.63}{世代交代 \(基本\)}{subsubsection*.56}% 67
+\BOOKMARK [3][-]{subsubsection*.64}{召喚}{subsection.4.3.1}% 68
+\BOOKMARK [4][-]{paragraph*.65}{防壁設置 \(召喚\)}{subsubsection*.64}% 69
+\BOOKMARK [4][-]{paragraph*.66}{兵士召喚 \(召喚\)}{subsubsection*.64}% 70
+\BOOKMARK [4][-]{paragraph*.67}{英雄召喚 \(召喚\)}{subsubsection*.64}% 71
+\BOOKMARK [4][-]{paragraph*.68}{エース召喚 \(召喚\)}{subsubsection*.64}% 72
+\BOOKMARK [4][-]{paragraph*.69}{クイック召喚 \(召喚\)}{subsubsection*.64}% 73
+\BOOKMARK [4][-]{paragraph*.70}{魔術士召喚 \(召喚\)}{subsubsection*.64}% 74
+\BOOKMARK [4][-]{paragraph*.71}{装備 \(召喚\)}{subsubsection*.64}% 75
+\BOOKMARK [3][-]{subsubsection*.72}{速攻魔法}{subsection.4.3.1}% 76
+\BOOKMARK [4][-]{paragraph*.73}{アップ \(速攻魔法\)}{subsubsection*.72}% 77
+\BOOKMARK [4][-]{paragraph*.74}{ダウン \(速攻魔法\)}{subsubsection*.72}% 78
+\BOOKMARK [4][-]{paragraph*.75}{ツイスト \(速攻魔法\)}{subsubsection*.72}% 79
+\BOOKMARK [4][-]{paragraph*.76}{カウンター \(速攻魔法\)}{subsubsection*.72}% 80
+\BOOKMARK [4][-]{paragraph*.77}{再会 \(速攻魔法\)}{subsubsection*.72}% 81
+\BOOKMARK [4][-]{paragraph*.78}{キル \(速攻魔法\)}{subsubsection*.72}% 82
+\BOOKMARK [4][-]{paragraph*.79}{停戦 \(速攻魔法\)}{subsubsection*.72}% 83
+\BOOKMARK [4][-]{paragraph*.80}{対象変更 \(速攻魔法\)}{subsubsection*.72}% 84
+\BOOKMARK [4][-]{paragraph*.81}{サーチ \(速攻魔法\)}{subsubsection*.72}% 85
+\BOOKMARK [4][-]{paragraph*.82}{B・J \(速攻魔法\)}{subsubsection*.72}% 86
+\BOOKMARK [4][-]{paragraph*.83}{R・S・F \(速攻魔法\)}{subsubsection*.72}% 87
+\BOOKMARK [4][-]{paragraph*.84}{リバース \(速攻魔法\)}{subsubsection*.72}% 88
+\BOOKMARK [4][-]{paragraph*.85}{帰還 \(速攻魔法\)}{subsubsection*.72}% 89
+\BOOKMARK [3][-]{subsubsection*.86}{通常魔法}{subsection.4.3.1}% 90
+\BOOKMARK [4][-]{paragraph*.87}{防壁破壊 \(通常魔法\)}{subsubsection*.86}% 91
+\BOOKMARK [4][-]{paragraph*.88}{投擲 \(通常魔法\)}{subsubsection*.86}% 92
+\BOOKMARK [4][-]{paragraph*.89}{死の槍 \(通常魔法\)}{subsubsection*.86}% 93
+\BOOKMARK [4][-]{paragraph*.90}{防壁補充 \(通常魔法\)}{subsubsection*.86}% 94
+\BOOKMARK [4][-]{paragraph*.91}{リアニメイト \(通常魔法\)}{subsubsection*.86}% 95
+\BOOKMARK [4][-]{paragraph*.92}{ハンデス \(通常魔法\)}{subsubsection*.86}% 96
+\BOOKMARK [4][-]{paragraph*.93}{フォース \(通常魔法\)}{subsubsection*.86}% 97
+\BOOKMARK [4][-]{paragraph*.94}{剣の雨 \(通常魔法\)}{subsubsection*.86}% 98
+\BOOKMARK [4][-]{paragraph*.95}{徴募 \(通常魔法\)}{subsubsection*.86}% 99
+\BOOKMARK [4][-]{paragraph*.96}{奇襲 \(通常魔法\)}{subsubsection*.86}% 100
+\BOOKMARK [2][-]{subsection.4.3.2}{キャラクターリスト 第八版 act8.0}{section.4.3}% 101
+\BOOKMARK [3][-]{subsubsection*.105}{兵士}{subsection.4.3.2}% 102
+\BOOKMARK [4][-]{paragraph*.106}{一般兵 \(兵士\)}{subsubsection*.105}% 103
+\BOOKMARK [4][-]{paragraph*.107}{英雄 \(兵士\)}{subsubsection*.105}% 104
+\BOOKMARK [4][-]{paragraph*.108}{エース \(兵士\)}{subsubsection*.105}% 105
+\BOOKMARK [4][-]{paragraph*.109}{魔術士 \(兵士\)}{subsubsection*.105}% 106
+\BOOKMARK [4][-]{paragraph*.110}{装備兵 \(兵士\)}{subsubsection*.105}% 107
+\BOOKMARK [3][-]{subsubsection*.111}{防壁}{subsection.4.3.2}% 108
+\BOOKMARK [4][-]{paragraph*.112}{防壁 \(防壁\)}{subsubsection*.111}% 109
+\BOOKMARK [2][-]{subsection.4.3.3}{フォグリスト 第八版 act8.0}{section.4.3}% 110
+\BOOKMARK [3][-]{subsubsection*.118}{速攻魔法}{subsection.4.3.3}% 111
+\BOOKMARK [4][-]{paragraph*.119}{アップ \(速攻魔法\)}{subsubsection*.118}% 112
+\BOOKMARK [4][-]{paragraph*.120}{ダウン \(速攻魔法\)}{subsubsection*.118}% 113
+\BOOKMARK [3][-]{subsubsection*.121}{通常魔法}{subsection.4.3.3}% 114
+\BOOKMARK [4][-]{paragraph*.122}{フォース \(通常魔法\)}{subsubsection*.121}% 115
 \BOOKMARK [0][-]{chapter.5}{フレーム}{}% 116
 \BOOKMARK [1][-]{section.5.1}{フレームとは}{chapter.5}% 117
 \BOOKMARK [1][-]{section.5.2}{定義項目}{chapter.5}% 118
