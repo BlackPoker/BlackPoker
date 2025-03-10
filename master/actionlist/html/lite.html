@@ -936,18 +936,14 @@
 
                     </div>
                     <div class="text-left">
-                       <small> <span>
-                          <span class="note-mark"></span> <span>プレイヤーは1ターンに1回しかこのアクションを起こすことができない。</span>
-                          <br>
-                        </span>
-                      </small>
+                       
 
                     </div>
 
                   </div>
                   <div class="panel-body">
-                     
-                    
+                    <span> （起動条件）<br></span> <span>プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</span>
+                    <hr>
                      
                     
                      
@@ -1003,7 +999,8 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。 <br><ul>
+                    <span>対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。<br><ul>
+<li>ブロッカーはラベルにブロッカーを持っているキャラクターを指定できる。 </li>
 <li>兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。</li></ul></span>
 
                     
@@ -1145,25 +1142,21 @@
 
                     </div>
                     <div class="text-left">
-                       <small> <span>
-                          <span class="note-mark"></span> <span>プレイヤーは1ターンに1回しかこのアクションを起こすことができない。</span>
-                          <br>
-                        </span>
-                      </small>
+                       
 
                     </div>
 
                   </div>
                   <div class="panel-body">
-                     
-                    
+                    <span> （起動条件）<br></span> <span>プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</span>
+                    <hr>
                      
                     
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の能力はキャラクターリスト参照。防壁の置き方は<a href="#" data-toggle="modal" data-target="#modal_bulwark_help"><span class="glyphicon glyphicon-question-sign" aria-hidden="false"></span>防壁の置き方</a>参照。</span>
+                    <span>手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は<a href="#" data-toggle="modal" data-target="#modal_bulwark_help"><span class="glyphicon glyphicon-question-sign" aria-hidden="false"></span>防壁の置き方</a>参照。</span>
 
                     <div class="panel-collapse collapse storyText" id="fla_setBulwark">
                       <hr>
@@ -1225,7 +1218,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。一般兵の能力は、キャラクターリスト参照。</span>
+                    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
 
                     <div class="panel-collapse collapse storyText" id="fla_summonsSoldier">
                       <hr>
@@ -1288,7 +1281,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>キーカードを英雄として表向きかつチャージ状態で場に出す。英雄の能力は、キャラクターリスト参照。</span>
+                    <span>キーカードを英雄として表向きかつチャージ状態で場に出す。</span>
 
                     <div class="panel-collapse collapse storyText" id="fla_summonsHero">
                       <hr>
@@ -1349,7 +1342,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>キーカードをエースとして表向きかつチャージ状態で場に出す。エースの能力は、キャラクターリスト参照。</span>
+                    <span>キーカードをエースとして表向きかつチャージ状態で場に出す。</span>
 
                     <div class="panel-collapse collapse storyText" id="fla_summonsAce">
                       <hr>
@@ -1870,7 +1863,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">一般兵</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>兵士</span>
+                    <span> <small> 
+                      <span>(兵士)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -1886,7 +1880,7 @@
                   </div>
                   <div class="panel-body">
                     <span> （ラベル）<br></span>
-                    <span>アタッカー</span>
+                    <span>アタッカー, ブロッカー</span>
                     
 
                     
@@ -1909,7 +1903,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">英雄</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>兵士</span>
+                    <span> <small> 
+                      <span>(兵士)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -1925,7 +1920,7 @@
                   </div>
                   <div class="panel-body">
                     <span> （ラベル）<br></span>
-                    <span>アタッカー</span>
+                    <span>アタッカー, ブロッカー</span>
                     
 
                     
@@ -1950,7 +1945,8 @@
                     <a data-toggle="collapse" href="#fla_ace">
                       <span class="act-title">エース</span>
                     </a> 
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>兵士</span>
+                    <span> <small> 
+                      <span>(兵士)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -1966,7 +1962,7 @@
                   </div>
                   <div class="panel-body">
                     <span> （ラベル）<br></span>
-                    <span>アタッカー, 速攻</span>
+                    <span>アタッカー, ブロッカー, 速攻</span>
                     
 
                     
@@ -1999,7 +1995,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">装備兵</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>兵士</span>
+                    <span> <small> 
+                      <span>(兵士)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -2015,7 +2012,7 @@
                   </div>
                   <div class="panel-body">
                     <span> （ラベル）<br></span>
-                    <span>アタッカー, 速攻(キーカードにAが含まれる場合のみ)</span>
+                    <span>アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)</span>
                     
 
                     
@@ -2044,7 +2041,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">防壁</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>防壁</span>
+                    <span> <small> 
+                      <span>(防壁)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -2057,7 +2055,7 @@
                   </div>
                   <div class="panel-body">
                     <span> （ラベル）<br></span>
-                    <span>相打ち</span>
+                    <span>ブロッカー</span>
                     
 
                     
@@ -2100,7 +2098,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">アップ</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>速攻魔法</span>
+                    <span> <small> 
+                      <span>(速攻魔法)</span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -2127,7 +2126,8 @@
                   <div class="panel-heading">
 
                      <span class="act-title">ダウン</span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span>速攻魔法</span>
+                    <span> <small> 
+                      <span>(速攻魔法)</span>
                       </small>
                     </span>
                     <div class="pull-right">

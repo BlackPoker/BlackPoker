@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  9 MAR 2025 19:07
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  10 MAR 2025 19:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -850,17 +850,17 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 4.805pt on input line 2.
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 131.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 135.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 131.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 135.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 131.
+(Font)              scaled to size 9.60999pt on input line 135.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 131.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 135.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 131.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 135.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 131.
+(Font)              scaled to size 9.60999pt on input line 135.
  [1
 
 ])
@@ -1015,39 +1015,39 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 244--246
 ]
 第2章
 LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 2
-71.
+70.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
 File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
 ) [7]
 File: field.pdf Graphic file (type pdf)
 <field.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 414--417
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 413--416
 []
  []
 
 [8]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 422--424
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 421--423
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 429--431
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 428--430
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 436--438
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 435--437
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 443--445
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 442--444
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 456--458
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 455--457
 []
  []
 
@@ -1055,32 +1055,32 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 456--458
 File: character.pdf Graphic file (type pdf)
 <character.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 504--506
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 503--505
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 511--513
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 510--512
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 518--520
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 517--519
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 525--527
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 524--526
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 532--534
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 531--533
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 539--541
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 538--540
 []
  []
 
@@ -1088,67 +1088,67 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 539--541
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
  [11] [12]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 711--713
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 710--712
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 718--720
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 717--719
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 725--728
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 724--727
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 736--739
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 735--738
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 747--750
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 746--749
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 758--763
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 757--762
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 768--771
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 767--770
 []
  []
 
 [13]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 776--778
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 775--777
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 783--785
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 782--784
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 790--792
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 789--791
 []
  []
 
 [14]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 946--948
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 945--947
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 950--952
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 949--951
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 954--956
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 953--955
 []
  []
 
@@ -1160,131 +1160,136 @@ File: action-request2.pdf Graphic file (type pdf)
 File: action-request3.pdf Graphic file (type pdf)
 <action-request3.pdf>
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1013.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1012.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1013.
+(Font)              scaled to size 9.60999pt on input line 1012.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1013.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1012.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1013.
+(Font)              scaled to size 9.60999pt on input line 1012.
  [16] [17] [18]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1162--1165
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1199--1202
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1167--1169
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1204--1206
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1171--1173
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1208--1210
 []
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1218--1218
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1218--1218
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1225--1225
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 1225--1225
+
  []
 
 [19]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1181--1181
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1232--1232
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1181--1181
+Underfull \hbox (badness 10000) in paragraph at lines 1232--1232
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1188--1188
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1239--1239
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1188--1188
+Underfull \hbox (badness 10000) in paragraph at lines 1239--1239
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1195--1195
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1246--1246
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 1195--1195
-
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1202--1202
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1202--1202
-
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1209--1209
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 1209--1209
+Underfull \hbox (badness 10000) in paragraph at lines 1246--1246
 
  []
 
 [20]
 File: set-bulwork.pdf Graphic file (type pdf)
 <set-bulwork.pdf>
- [21] [22
-
-]
+File: set-fog.pdf Graphic file (type pdf)
+<set-fog.pdf>
+ [21]
+File: set-stage.pdf Graphic file (type pdf)
+<set-stage.pdf>
+ [22]
 第3章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1294--1296
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1389--1391
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1308--1310
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1403--1405
 []
  []
 
-[23] [24]
+[23
+
+] [24]
 第4章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1493--1495
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1588--1590
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1497--1499
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1592--1594
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1501--1503
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1596--1598
 []
  []
 
 [25
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1513--1515
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1608--1610
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1517--1519
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1612--1614
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1521--1523
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1616--1618
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 1525--1527
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 1620--1622
 []
  []
 
@@ -1297,27 +1302,27 @@ Overfull \vbox (3.23927pt too high) has occurred while \output is active []
 [57] [58]
 第5章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5564--5566
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5662--5665
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5568--5570
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5667--5669
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5572--5574
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5671--5673
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5576--5578
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5675--5677
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5580--5582
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5679--5681
 []
  []
 
@@ -1330,60 +1335,60 @@ File: entry20.pdf Graphic file (type pdf)
 File: pack.pdf Graphic file (type pdf)
 <pack.pdf>
  [61]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5820--5820
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 5919--5919
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 5820--5820
+Underfull \hbox (badness 10000) in paragraph at lines 5919--5919
 
  []
 
 File: rarePack.pdf Graphic file (type pdf)
 <rarePack.pdf>
 [62] [63]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5957--5957
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6056--6056
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 5957--5957
+Underfull \hbox (badness 10000) in paragraph at lines 6056--6056
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 5964--5964
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6063--6063
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 5964--5964
+Underfull \hbox (badness 10000) in paragraph at lines 6063--6063
 
  []
 
 File: rarePack.pdf Graphic file (type pdf)
 <rarePack.pdf>
 [64]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6113--6113
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6204--6204
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 6113--6113
+Underfull \hbox (badness 10000) in paragraph at lines 6204--6204
 
  []
 
-[65]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6120--6120
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6211--6211
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 6120--6120
+Underfull \hbox (badness 10000) in paragraph at lines 6211--6211
 
  []
 
-[66] [67] [68]
+[65] [66] [67] [68]
 第6章
 File: plantuml-5869adc776d20b7021b88175e8de80f0f436330c.pdf Graphic file (type 
 pdf)
@@ -1393,171 +1398,173 @@ pdf)
 ] [70]
 File: abstract.pdf Graphic file (type pdf)
 <abstract.pdf>
+ [71]
 File: plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.pdf Graphic file (type 
 pdf)
 <plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.pdf>
- [71] [72]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6544--6546
+ [72]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6640--6642
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6548--6550
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6644--6646
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6564--6566
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6660--6662
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6568--6570
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6664--6666
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6586--6592
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6682--6688
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6597--6601
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6693--6697
 []
  []
 
 [73]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6666--6668
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6762--6764
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6670--6672
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6766--6768
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6674--6676
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6770--6772
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6678--6680
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6774--6776
 []
  []
 
 [74]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6691--6694
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6787--6790
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6696--6698
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6792--6794
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6709--6711
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6805--6807
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6716--6719
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6812--6815
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6724--6727
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6820--6823
 []
  []
 
 File: plantuml-601946f3f8eb470fbf97e87d640335e4c349780a.pdf Graphic file (type 
 pdf)
 <plantuml-601946f3f8eb470fbf97e87d640335e4c349780a.pdf>
+[75]
 File: plantuml-5c3b9d2c43d8740600145b89955601a615170288.pdf Graphic file (type 
 pdf)
 <plantuml-5c3b9d2c43d8740600145b89955601a615170288.pdf>
-[75] [76]
-File: plantuml-dfffbee06f7c7dce8f5c1e7cffc68344ee54e952.pdf Graphic file (type 
+ [76]
+File: plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf Graphic file (type 
 pdf)
-<plantuml-dfffbee06f7c7dce8f5c1e7cffc68344ee54e952.pdf>
+<plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6801--6803
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6897--6899
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6901--6903
 []
  []
 
 [77]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6805--6807
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6905--6907
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6809--6811
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6909--6911
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6813--6815
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6913--6918
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6817--6821
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6924--6928
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6827--6829
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6930--6932
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6831--6833
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6936--6940
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6837--6841
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6948--6950
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6849--6851
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6952--6954
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6853--6855
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6956--6958
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6857--6859
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6960--6962
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6861--6863
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6964--6966
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6865--6867
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6968--6970
 []
  []
 
 [78]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6869--6871
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6972--6976
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6873--6875
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6877--6880
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 6984--6987
 []
  []
 
@@ -1565,62 +1572,62 @@ File: plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf Graphic file (type
 pdf)
 <plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6911--6914
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7018--7021
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6916--6919
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7023--7026
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6921--6925
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7028--7032
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6927--6931
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7034--7038
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6933--6936
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7040--7043
 []
  []
 
 [79] [80]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6938--6941
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7045--7048
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6943--6946
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7050--7053
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6948--6952
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7055--7059
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6954--6958
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7061--7065
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6960--6963
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7067--7070
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6965--6968
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7072--7075
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6970--6973
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7077--7080
 []
  []
 
@@ -1629,32 +1636,32 @@ File: plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf Graphic file (type
 pdf)
 <plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 6999--7002
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7106--7109
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7004--7008
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7111--7115
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7010--7013
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7117--7120
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7015--7018
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7122--7125
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7020--7023
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7127--7130
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7025--7028
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7132--7135
 []
  []
 
@@ -1663,171 +1670,171 @@ File: plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf Graphic file (type
 pdf)
 <plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7047--7050
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7154--7157
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7052--7056
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7159--7163
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7058--7062
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7165--7169
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7064--7067
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7171--7174
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7069--7071
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7176--7178
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7073--7075
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7180--7182
 []
  []
 
 [83]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7077--7080
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7184--7187
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7082--7085
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7189--7192
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7087--7090
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7194--7197
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7119--7119
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7226--7226
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 7119--7119
+Underfull \hbox (badness 10000) in paragraph at lines 7226--7226
 
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7130--7130
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7237--7237
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 7130--7130
+Underfull \hbox (badness 10000) in paragraph at lines 7237--7237
 
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7141--7141
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7248--7248
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 7141--7141
+Underfull \hbox (badness 10000) in paragraph at lines 7248--7248
 
  []
 
 [84]
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 7162--7164
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 7269--7271
 []
  []
 
 
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 7169--7171
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 7276--7278
 []
  []
 
 
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 7176--7178
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 7283--7285
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7198--7200
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7305--7307
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7205--7207
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7312--7314
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7212--7214
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7319--7321
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 7219--7221
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 7326--7328
 []
  []
 
 [85] [86]
 第7章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7255--7257
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7362--7364
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7259--7261
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7366--7368
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7271--7273
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7378--7380
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7275--7277
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7382--7384
 []
  []
 
 [87
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7287--7289
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7394--7396
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7291--7293
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7398--7400
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7303--7305
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7410--7412
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 7307--7309
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7414--7416
 []
  []
 
 No file blackpoker.ind.
 [88] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: B0129F5D935359E20B9F0BD21888F988;13253.
+(rerunfilecheck)             Checksum: 0328E806D2D00F0FB0B368C2C9B7517B;13666.
  ) 
 Here is how much of TeX's memory you used:
- 14784 strings out of 480496
- 230468 string characters out of 5899437
- 574415 words of memory out of 5000000
- 32466 multiletter control sequences out of 15000+600000
+ 14807 strings out of 480496
+ 230944 string characters out of 5899437
+ 575117 words of memory out of 5000000
+ 32485 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,359b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (92 pages, 283964 bytes).
+Output written on blackpoker.dvi (92 pages, 289672 bytes).
