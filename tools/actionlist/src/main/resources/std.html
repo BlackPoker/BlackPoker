@@ -746,7 +746,8 @@
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}" th:if="${not #strings.isEmpty(row.story)}">
                       <span class="act-title" th:text="${row.charName}"></span>
                     </a> <span class="act-title" th:text="${row.charName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.charType}"></span>
+                    <span> <small> 
+                      <span th:text="'('+${row.charType}+')'"></span>
                       </small>
                     </span>
                     <div class="pull-right">
@@ -819,7 +820,8 @@
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}" th:if="${not #strings.isEmpty(row.story)}">
                       <span class="act-title" th:text="${row.fogName}"></span>
                     </a> <span class="act-title" th:text="${row.fogName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.fogType}"></span>
+                    <span> <small> 
+                      <span th:text="'('+${row.fogType}+')'"></span>
                       </small>
                     </span>
                     <div class="pull-right">
