@@ -72,7 +72,7 @@
 
 
 \title{BlackPoker}
-\date{2025年03月11日}
+\date{2025年03月12日}
 \release{2025/3/x}
 \author{BlackPoker}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -1571,36 +1571,28 @@ BlackPokerにはいくつかのフォーマットがあり、
 同じトランプでもフォーマットを変えることで様々な遊び方ができます。
 
 
-\subsection{対戦レギュレーションとの違い}
-\label{\detokenize{format/format:id3}}
-\sphinxAtStartPar
-フォーマットと対戦レギュレーションの違いは、
-フォーマットはゲーム内でできるアクション等のできる行動を定義している
-のに対して、対戦レギュレーションはフォーマットを前提としてそれを加工している位置づけになります。
-
-
 \section{定義項目}
-\label{\detokenize{format/format:id4}}
+\label{\detokenize{format/format:id3}}
 \sphinxAtStartPar
 フォーマットには次の項目が定義されています。
 \begin{description}
 \sphinxlineitem{アクションリスト}
 \sphinxAtStartPar
-起こせるアクションの一覧
+リクエスト可能なアクションの一覧
 
 \sphinxlineitem{キャラクターリスト}
 \sphinxAtStartPar
-アクションによって場に登場するキャラクターの一覧
+場に登場可能なキャラクターの一覧
 
 \sphinxlineitem{フォグリスト}
 \sphinxAtStartPar
-アクションによってフォグに置かれるコンポーネントの一覧
+アクションなどによってフォグに置かれるコンポーネントの一覧
 
 \end{description}
 
 
 \section{フォーマット定義}
-\label{\detokenize{format/format:id5}}
+\label{\detokenize{format/format:id4}}
 \sphinxAtStartPar
 公式として次のフォーマットを定義しています。
 \begin{description}
@@ -5885,6 +5877,10 @@ x
 \item {} 
 \sphinxAtStartPar
 ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+
+\item {} 
+\sphinxAtStartPar
+フォーマットがライトの場合、プリセットされた兵士カードがJokerならばそれを墓地に移し、次のカードを兵士として場に出す。（ライトに兵士「魔術士」がいないため。）
 
 \end{itemize}
 
