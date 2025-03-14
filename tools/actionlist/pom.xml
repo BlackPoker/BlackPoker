@@ -145,7 +145,7 @@
               <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
 
               <!-- frame -->
-              <argument>-i original/act-frame.yaml -t std -rstOutput ../../source/auto/frameActionlist.rst</argument>
+              <argument>-i original/act-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>
               <argument>-i original/frame.yaml -t frame -rstOutput ../../source/auto/framelist.rst</argument>
               <argument>-i original/frame.yaml -t frame -csvOutput ../../source/auto/frame-format.csv</argument>
 
