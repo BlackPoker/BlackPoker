@@ -119,48 +119,61 @@
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
         </plugin>
-
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>exec-maven-plugin</artifactId>
-          <version>3.0.0</version>
-          <executions>
-            <execution>
-              <goals>
-                <goal>java</goal>
-              </goals>
-            </execution>
-          </executions>
-          <configuration>
-            <mainClass>com.github.blackpoker.actionlist.ActionListGen</mainClass>
-            <arguments>
-
-              <!-- std -->
-              <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
-              <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
-              <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
-              <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
-              <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
-              <!-- extra -->
-              <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
-
-              <!-- frame -->
-              <argument>-i original/act-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>
-              <argument>-i original/frame.yaml -t frame -rstOutput ../../source/auto/framelist.rst</argument>
-              <argument>-i original/frame.yaml -t frame -csvOutput ../../source/auto/frame-format.csv</argument>
-
-
-            </arguments>
-            <systemProperties>
-              <systemProperty>
-                <key>myproperty</key>
-                <value>myvalue</value>
-              </systemProperty>
-            </systemProperties>
-          </configuration>
-        </plugin>
-
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <!-- 新規： YAML のマージ実行 -->
+          <execution>
+            <id>merge-yaml</id>
+            <phase>package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.github.blackpoker.actionlist.YamlMerger</mainClass>
+              <arguments>
+                <argument>original/act.yaml</argument>
+                <argument>original/act-frame.yaml</argument>
+                <argument>original/merged.yaml</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <!-- 既存の ActionListGen 実行（act.yaml を入力とする各種出力） -->
+          <execution>
+            <id>actionlist-gen-std-rst</id>
+            <phase>install</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.github.blackpoker.actionlist.ActionListGen</mainClass>
+              <arguments>
+                <!-- std -->
+                <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
+                <argument>-i original/merged.yaml -htmlOutput web-site/static/all.html -t std -arg0 mast -texOutput ./tex/blackpoker-all.tex</argument>
+                <!-- extra -->
+                <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
+
+                <!-- frame -->
+                <argument>-i original/act-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>
+                <argument>-i original/frame.yaml -t frame -rstOutput ../../source/auto/framelist.rst</argument>
+                <argument>-i original/frame.yaml -t frame -csvOutput ../../source/auto/frame-format.csv</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
   </build>
 </project>

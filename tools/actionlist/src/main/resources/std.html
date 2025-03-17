@@ -486,7 +486,7 @@
                 <div class="list-group">
 
                   <a th:each="row : ${actList.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action"
-                  th:if="${#strings.contains(row.format,arg0)}">
+                  th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                           th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                     </span>
@@ -648,10 +648,17 @@
           <div class="row">
 
             <div th:each="row : ${nestList.acts}" class="col-lg-4"
-            th:if="${#strings.contains(row.format,arg0)}">
-            
+            th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.actId}">
+                <div class="panel panel-default blackpoker-action"
+                  th:attr="
+                    id='act-'+${row.actId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                                                              .replace('std','スタンダード')
+                                                              .replace('pro','プロ')
+                                                              .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
+
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
