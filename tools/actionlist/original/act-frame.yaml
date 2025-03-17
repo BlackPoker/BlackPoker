@@ -12,7 +12,7 @@ data:
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
-  - type: パック系
+  - type: パック
     acts:
     - 
       frame: |-
