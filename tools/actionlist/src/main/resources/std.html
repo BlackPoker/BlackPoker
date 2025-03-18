@@ -374,6 +374,16 @@
 
     }
 
+    /* モーダルのヘッダー内の <h5> タグと、その下の .nav-pills の余白を詰める例 */
+      #modal_sidebar .modal-header h5 {
+      margin-bottom: 4px;  /* デフォルトより小さめにする */
+    }
+
+    #modal_sidebar .modal-header .nav.nav-pills {
+      margin-top: 0;       /* 上方向の余白をなくす */
+      margin-bottom: 0;    /* 下方向の余白も必要に応じて調整 */
+    }
+
     .modal-header>.nav>li>a {
       padding-left: 12px;
       padding-right: 12px;
