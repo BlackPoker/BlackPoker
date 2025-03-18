@@ -20,7 +20,7 @@
     COPY web-site/ web-site/
     
     # `mvn exec:java` 実行
-    RUN --mount=type=cache,target=/root/.m2 mvn compile exec:java
+    RUN --mount=type=cache,target=/root/.m2 mvn install
     
     # ------------------------------
     # 起動

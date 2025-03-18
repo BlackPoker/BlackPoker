@@ -5,7 +5,7 @@
 set -e  # コマンドが失敗したらスクリプトを終了
 
 # yaml定義から生成
-mvn compile exec:java
+mvn install
 
 create () {
     cd ./tex

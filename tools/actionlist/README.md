@@ -21,8 +21,8 @@ mvn compile exec:java -Dexec.args="'Hello World'"
 ## 実行方法
 
 ```
-# ods->html
-mvn compile exec:java
+# yaml -> html
+mvn install
 ```
 
 ```
