@@ -961,6 +961,50 @@
         return false;
       });
 
+
+      // ------------------------------------
+      // 1) URLパラメータから format / frame を取得する関数
+      // ------------------------------------
+      function getQueryParam(name) {
+        // 簡易的な例：URLSearchParams が使える環境ならそちらでもOK
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(window.location.href);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+      }
+
+      // ------------------------------------
+      // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
+      // ------------------------------------
+      function setActivePill(pillGroupSelector, btnClass, text) {
+        // いったん全ての li から active を外し
+        $(pillGroupSelector).removeClass('active');
+        // ボタンのテキストが一致するものを active に
+        $(pillGroupSelector + ' ' + btnClass).filter(function() {
+          return $(this).text().trim() === text;
+        }).closest('li').addClass('active');
+      }
+
+      // 初期値（active のボタンから取得）
+      selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
+      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
+
+      // URLパラメータを取得
+      var urlFormat = getQueryParam('format'); // 例: ?format=スタンダード
+      var urlFrame  = getQueryParam('frame');  // 例: ?frame=パック
+
+      // もしURLパラメータに指定があれば、変数を上書きし .active を付け替え
+      if (urlFormat) {
+        selectedFormat = urlFormat;
+        setActivePill('.nav-pills:has(a.format-btn)', '.format-btn', selectedFormat);
+      }
+      if (urlFrame) {
+        selectedFrame = urlFrame;
+        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
+      }
+
       function filterItems(){
         $('.blackpoker-action').each(function() {
           var $el = $(this);
@@ -989,7 +1033,6 @@
         });
       }
 
-
       function updateHeader() {
         // グローバル変数 selectedFormat, selectedFrame が設定されている前提
         var headerText = selectedFormat;
@@ -999,14 +1042,6 @@
         // ヘッダーの要素（例: id="selected-format"）のテキストを更新
         $('#selected-format').text(headerText);
       }
-
-      // 初期値（active のボタンから取得）
-      selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
-      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
-
-      
-      // 初期状態のフィルター実行
-      filterItems();
 
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function(){
