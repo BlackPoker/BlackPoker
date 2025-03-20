@@ -470,12 +470,9 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          ActionList
           <h5>
-            <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small>
-            <small class="" th:if="${'lite' == arg0}"th:text="${data.ver}+' ライト版'"></small>
-            <small class="" th:if="${'pro' == arg0}" th:text="${data.ver}+' プロ版'"></small> 
-            <small class="" th:if="${'mast' == arg0}" th:text="${data.ver}+' マスター版'"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
+            <small class="" th:text="${data.ver}"></small>
+            <small class="" th:text="' : '+${data.lastupdate}"></small>
           </h5>
           <h5><small>フォーマット</small></h5>
           <ul class="nav nav-pills">
@@ -693,10 +690,8 @@
 
     <div class="tab-content">
       <div class="text-center">
-        <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-          th:text="${data.ver}+' ライト版'"></small> <small class="" th:if="${'pro' == arg0}"
-          th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
-          th:text="${data.ver}+' マスター版'"></small><small class="" th:text="' : '+${data.lastupdate}"></small>
+        <small class="" th:text="${data.ver}"></small>
+        <small class="" th:text="' : '+${data.lastupdate}"></small>
       </div>
       <hr>
 
