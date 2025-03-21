@@ -12,13 +12,13 @@ data:
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
-  - type: パック系
+  - type: パック
     acts:
     - 
       frame: |-
         ・パック
         ・レアパック
-        ・レアパックストラテジー
+        ・ストラテジー
       actName: パック開封
       actId: packopen
       actType: パック
@@ -34,7 +34,7 @@ actList:
       frame: |-
         ・パック
         ・レアパック
-        ・レアパックストラテジー
+        ・ストラテジー
       actName: レアドロー
       actId: raredraw
       actType: パック
@@ -48,7 +48,7 @@ actList:
       frame: |-
         ・パック
         ・レアパック
-        ・レアパックストラテジー
+        ・ストラテジー
       actName: レア召喚
       actId: summonsRare
       actType: パック
@@ -63,7 +63,7 @@ actList:
       frame: |-
         ・パック
         ・レアパック
-        ・レアパックストラテジー
+        ・ストラテジー
       actName: 罠カウンター
       actId: trapCounter
       actType: パック

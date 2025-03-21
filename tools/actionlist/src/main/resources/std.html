@@ -1,11 +1,11 @@
 <html>
 
-<head>`
+<head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>BlackPoker ActionList</title>
+  <title>BlackPoker</title>
 
   <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
 
@@ -140,11 +140,18 @@
 
     .nav-title {
       font-family: 'Arbutus Slab', serif;
-      font-size: 150%;
+      font-size: 100%;
       font-weight: bold;
       padding-top: 14px;
       padding-bottom: 2px;
       width: calc(100% - 130px);
+    }
+
+    /* 768px以上の画面ではwidthを上書きして無効化 */
+    @media (min-width: 768px) {
+      .nav-title {
+        width: auto; /* 必要に応じて削除や別の値に変更 */
+      }
     }
 
     .navbar-header>button {
@@ -367,6 +374,16 @@
 
     }
 
+    /* モーダルのヘッダー内の <h5> タグと、その下の .nav-pills の余白を詰める例 */
+      #modal_sidebar .modal-header h5 {
+      margin-bottom: 4px;  /* デフォルトより小さめにする */
+    }
+
+    #modal_sidebar .modal-header .nav.nav-pills {
+      margin-top: 0;       /* 上方向の余白をなくす */
+      margin-bottom: 0;    /* 下方向の余白も必要に応じて調整 */
+    }
+
     .modal-header>.nav>li>a {
       padding-left: 12px;
       padding-right: 12px;
@@ -425,9 +442,7 @@
           <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button">
             <img src="img/blackpoker.svg">
           </a> 
-          <a href="#characterlist" class="navbar-brand nav-title text-center" data-toggle="tab">ActionList</a>
-          <a href="#foglist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">CharacterList</a>
-          <a href="#actionlist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">FogList</a>
+          <small id="selected-format" class="navbar-brand nav-title text-center" data-toggle="tab"></small>
         </div>
         <div class="navbar-collapse collapse" id="navbar-main">
           <button type="button" class="navbar-toggle" data-toggle="modal" data-target="#modal_sidebar">
@@ -455,17 +470,43 @@
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-          ActionList
           <h5>
-            <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small>
-            <small class="" th:if="${'lite' == arg0}"th:text="${data.ver}+' ライト版'"></small>
-            <small class="" th:if="${'pro' == arg0}" th:text="${data.ver}+' プロ版'"></small> 
-            <small class="" th:if="${'mast' == arg0}" th:text="${data.ver}+' マスター版'"></small> <small class="" th:text="' : '+${data.lastupdate}"></small>
+            <small class="" th:text="${data.ver}"></small>
+            <small class="" th:text="' : '+${data.lastupdate}"></small>
           </h5>
+          <h5><small>フォーマット</small></h5>
           <ul class="nav nav-pills">
-            <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">Action</a></li>
-            <li><a class="btn btn-default btn-sm" href="#characterlist-summary" data-toggle="tab">Character</a></li>
-            <li><a class="btn btn-default btn-sm" href="#foglist-summary" data-toggle="tab">Fog</a></li>
+            <li>
+              <a class="btn btn-default btn-sm format-btn" data-toggle="tab">ライト</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm format-btn" data-toggle="tab">スタンダード</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm format-btn" data-toggle="tab">プロ</a>
+            </li>
+            <li class="active">
+              <a class="btn btn-default btn-sm format-btn" data-toggle="tab">マスター</a>
+            </li>
+          </ul>
+          
+          <h5><small>フレーム</small></h5>
+          <ul class="nav nav-pills">
+            <li class="active">
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エントリー20</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">パック</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">レアパック</a>
+            </li>
+            <li>
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">ストラテジー</a>
+            </li>
           </ul>
         </div>
         <div class="modal-body">
@@ -476,50 +517,73 @@
              <input
             id="betaFlg" type="checkbox" checked data-size="mini"> <span>第二版からの変更を青字にする</span>
 */-->
-          <div class="tab-content">
+          <div class="tab-content" id="actionlist-summary">
 
             <!-- actionlist -->
-            <div class="tab-pane active" id="actionlist-summary">
-
-              <div th:each="actList:${actList}">
-                <span th:text="${actList.type}"></span>
+            <div class="blackpoker-type-group">
+              <h5>ActionList</h5>
+              <div th:each="actList:${actList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${actList.type}"></span>
                 <div class="list-group">
 
-                  <a th:each="row : ${actList.acts}" th:attr="href='#act-'+${row.actId}" class="scroll-offset list-group-item list-group-item-action"
-                  th:if="${#strings.contains(row.format,arg0)}">
+                  <a th:each="row : ${actList.acts}" 
+                    th:attr="
+                    href='#act-'+${row.actId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                  th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                           th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                     </span>
                   </a>
-
                 </div>
-             </div>
-            </div>
+              </div>
+              </div>
             
             <!-- characterlist -->
-            <div class="tab-pane" id="characterlist-summary">
-              <div th:each="charList:${charList}">
-                <span th:text="${charList.type}"></span>
+            <div class="blackpoker-type-group">
+              <h5>CharacterList</h5>
+              <div th:each="charList:${charList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${charList.type}"></span>
                 <div class="list-group">
-                  <a th:each="row : ${charList.chars}" th:attr="href='#char-'+${row.charId}" class="scroll-offset list-group-item list-group-item-action"
+                  <a th:each="row : ${charList.chars}" 
+                    th:attr="
+                    href='#char-'+${row.charId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                   th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.charName}"></span>
                   </a>
-
                 </div>
               </div>
-            </div>
+              </div>
 
             <!-- foglist -->
-            <div class="tab-pane" id="foglist-summary">
-              <div th:each="fogList:${fogList}">
-                <span th:text="${fogList.type}"></span>
+            <div>
+              <h5>FogList</h5>
+              <div th:each="fogList:${fogList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${fogList.type}"></span>
                 <div class="list-group">
-                  <a th:each="row : ${fogList.fogs}" th:attr="href='#fog-'+${row.fogId}" class="scroll-offset list-group-item list-group-item-action"
+                  <a th:each="row : ${fogList.fogs}"
+                    th:attr="
+                    href='#fog-'+${row.fogId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                   th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.fogName}"></span>
                   </a>
-
                 </div>
               </div>
             </div>
@@ -630,88 +694,91 @@
   <div class="container">
 
     <div class="tab-content">
-      <div class="tab-pane active" id="actionlist">
-        <div class="text-center">
-          <h2 class="visible-print-block blackpoker-font">
-            BlackPoker <img src="img/blackpoker.svg" width="35px"> ActionList
-          </h2>
-          <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-            th:text="${data.ver}+' ライト版'"></small> <small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
-            th:text="${data.ver}+' マスター版'"></small><small class="" th:text="' : '+${data.lastupdate}"></small>
-        </div>
-        <hr>
+      <div class="text-center">
+        <small class="" th:text="${data.ver}"></small>
+        <small class="" th:text="' : '+${data.lastupdate}"></small>
+      </div>
+      <hr>
 
-        <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
-        <div th:each="nestList : ${actList}">
-          <h5 th:text="${nestList.type}" class="text-center"></h5>
-          <div class="row">
+      <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
+      <div class="text-center">
+      <h4>ActionList</h4>
+      </div>
+      <div th:each="nestList : ${actList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+        <div class="row">
 
-            <div th:each="row : ${nestList.acts}" class="col-lg-4"
-            th:if="${#strings.contains(row.format,arg0)}">
-            
-              <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" th:attr="id='act-'+${row.actId}">
-                  <div class="panel-heading">
+          <div th:each="row : ${nestList.acts}" class="col-lg-4"
+          th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action"
+                th:attr="
+                  id='act-'+${row.actId},
+                  data-format=${row.format != null ? row.format.replace('lite','ライト')
+                                                            .replace('std','スタンダード')
+                                                            .replace('pro','プロ')
+                                                            .replace('mast','マスター') : null},
+                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
 
-                    <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.actName}"></span>
-                    </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <!-- <span> -->
-                       <small> 
-                        <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                         <span th:text="'('+${row.actType}+')'"></span>
-                      </small>
-                    <!-- </span> -->
-                    <div class="pull-right">
-                      &thinsp; <small>
-                        <span class="time-mark"></span> 
-                        <span th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span>
-                      </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
-                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
-                      </small>
+                <div class="panel-heading">
 
+                  <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}" th:if="${not #strings.isEmpty(row.story)}">
+                    <span class="act-title" th:text="${row.actName}"></span>
+                  </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
+                  <!-- <span> -->
+                      <small> 
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                        <span th:text="'('+${row.actType}+')'"></span>
+                    </small>
+                  <!-- </span> -->
+                  <div class="pull-right">
+                    &thinsp; <small>
+                      <span class="time-mark"></span> 
+                      <span th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span>
+                    </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
+                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
+                    </small>
 
-                    </div>
-                    <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                      </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                          <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                          <br>
-                        </span>
-                      </small>
-
-                    </div>
 
                   </div>
-                  <div class="panel-body">
-                    <span th:if="${not #strings.isEmpty(row.actActCond)}"> （起動条件）<br></span> <span th:if="${not #strings.isEmpty(row.actActCond)}"
-                      th:utext="${#sfn.cnvHtml(row.actActCond)}"></span>
-                    <hr th:if="${not #strings.isEmpty(row.actActCond)}">
-                    <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"> （誘発条件）<br></span> <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"
-                      th:utext="${#sfn.cnvHtml(row.actTriggerCond)}"></span>
-                    <hr th:if="${not #strings.isEmpty(row.actTriggerCond)}">
-                    <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
-                      th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
-                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
-                    <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                    <span>（効果）<br></span>
-                    <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
-
-                    <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">
-                      <hr>
-                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-                      Flavor:Rule's<br> <span th:text="${row.story}"></span>
-                      <div class="flavorText well well-sm">
-                        <span th:text="${row.flavor}"></span>
-                        <div class="text-right" th:text="${row.flavorSpeaker}"></div>
-                      </div>
-                    </div>
+                  <div class="text-left">
+                    <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
+                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
+                    </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
+                        <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                        <br>
+                      </span>
+                    </small>
 
                   </div>
 
                 </div>
+                <div class="panel-body">
+                  <span th:if="${not #strings.isEmpty(row.actActCond)}"> （起動条件）<br></span> <span th:if="${not #strings.isEmpty(row.actActCond)}"
+                    th:utext="${#sfn.cnvHtml(row.actActCond)}"></span>
+                  <hr th:if="${not #strings.isEmpty(row.actActCond)}">
+                  <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"> （誘発条件）<br></span> <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"
+                    th:utext="${#sfn.cnvHtml(row.actTriggerCond)}"></span>
+                  <hr th:if="${not #strings.isEmpty(row.actTriggerCond)}">
+                  <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
+                    th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
+                  <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                  <hr th:if="${not #strings.isEmpty(row.actTarget)}">
+                  <span>（効果）<br></span>
+                  <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
+
+                  <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">
+                    <hr>
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                    Flavor:Rule's<br> <span th:text="${row.story}"></span>
+                    <div class="flavorText well well-sm">
+                      <span th:text="${row.flavor}"></span>
+                      <div class="text-right" th:text="${row.flavorSpeaker}"></div>
+                    </div>
+                  </div>
+
+                </div>
+
               </div>
             </div>
           </div>
@@ -719,70 +786,56 @@
       </div>
 
       <!-- characterlist -->
-      <div class="tab-pane" id="characterlist">
+      <hr>
+      <div class="text-center">
+      <h4>CharacterList</h4>
+      </div>
+      <div th:each="nestList : ${charList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+        <div class="row">
 
-        <div class="text-center">
-          <h2 class="visible-print-block blackpoker-font">
-            BlackPoker <img src="img/blackpoker.svg" width="35px"> CharacterList
-          </h2>
-          <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-            th:text="${data.ver}+' ライト版'"></small><small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
-            th:text="${data.ver}+' マスター版'"></small>  <small class="" th:text="' : '+${data.lastupdate}"></small>
-        </div>
-        <hr>
+          <div th:each="row : ${nestList.chars}" th:if="${#strings.contains(row.format,arg0)}"
+            class="col-lg-6">
+            <div class="bs-component">
 
-        <div th:each="nestList : ${charList}">
-          <h5 th:text="${nestList.type}" class="text-center"></h5>
-          <div class="row">
+              <div class="panel panel-default blackpoker-action" th:attr="id='char-'+${row.charId}">
+                <div class="panel-heading">
 
-            <div th:each="row : ${nestList.chars}" th:if="${#strings.contains(row.format,arg0)}"
-              class="col-lg-6">
-              <div class="bs-component">
+                  <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}" th:if="${not #strings.isEmpty(row.story)}">
+                    <span class="act-title" th:text="${row.charName}"></span>
+                  </a> <span class="act-title" th:text="${row.charName}" th:if="${#strings.isEmpty(row.story)}"></span>
+                  <span> <small> 
+                    <span th:text="'('+${row.charType}+')'"></span>
+                    </small>
+                  </span>
+                  <div class="pull-right">
+                    &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
+                    </small>
+                  </div>                  
+                  <div class="text-left">
+                    <small th:if="${not #strings.isEmpty(row.charSize)}">
+                      サイズ: 
+                      <span th:utext="${#sfn.cnvHtml(row.charSize)}"></span><br>
+                    </small>
+                  </div>
+                </div>
+                <div class="panel-body">
+                  <span th:if="${not #strings.isEmpty(row.charLabel)}"> （ラベル）<br></span>
+                  <span th:if="${not #strings.isEmpty(row.charLabel)}" th:utext="${#sfn.cnvHtml(row.charLabel)}"></span>
+                  <hr th:if="${not #strings.isEmpty(row.charLabel) and not #strings.isEmpty(row.charAbility)}">
 
-                <div class="panel panel-default blackpoker-action" th:attr="id='char-'+${row.charId}">
-                  <div class="panel-heading">
+                  <span th:if="${not #strings.isEmpty(row.charAbility)}"> （能力）<br></span>
+                  <span th:if="${not #strings.isEmpty(row.charAbility)}" th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
 
-                    <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}" th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.charName}"></span>
-                    </a> <span class="act-title" th:text="${row.charName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> 
-                      <span th:text="'('+${row.charType}+')'"></span>
-                      </small>
-                    </span>
-                    <div class="pull-right">
-                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
-                      </small>
-                    </div>                  
-                    <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(row.charSize)}">
-                        サイズ: 
-                        <span th:utext="${#sfn.cnvHtml(row.charSize)}"></span><br>
-                      </small>
+                  <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.charId}" class="panel-collapse collapse storyText">
+                    <hr>
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                    Flavor:Rule's<br> <span th:text="${row.story}"></span>
+                    <div class="flavorText well well-sm">
+                      <span th:text="${row.flavor}"></span>
+                      <div class="text-right" th:text="${row.flavorSpeaker}"></div>
                     </div>
                   </div>
-                  <div class="panel-body">
-                    <span th:if="${not #strings.isEmpty(row.charLabel)}"> （ラベル）<br></span>
-                    <span th:if="${not #strings.isEmpty(row.charLabel)}" th:utext="${#sfn.cnvHtml(row.charLabel)}"></span>
-                    <hr th:if="${not #strings.isEmpty(row.charLabel) and not #strings.isEmpty(row.charAbility)}">
-
-                    <span th:if="${not #strings.isEmpty(row.charAbility)}"> （能力）<br></span>
-                    <span th:if="${not #strings.isEmpty(row.charAbility)}" th:utext="${#sfn.cnvHtml(row.charAbility)}"></span>
-
-                    <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.charId}" class="panel-collapse collapse storyText">
-                      <hr>
-                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-                      Flavor:Rule's<br> <span th:text="${row.story}"></span>
-                      <div class="flavorText well well-sm">
-                        <span th:text="${row.flavor}"></span>
-                        <div class="text-right" th:text="${row.flavorSpeaker}"></div>
-                      </div>
-                    </div>
-
-                  </div>
-
-
-
                 </div>
               </div>
             </div>
@@ -791,61 +844,50 @@
       </div>
       <!-- characterlist end -->
 
-
       <!-- foglist -->
-      <div class="tab-pane" id="foglist">
+      <hr>
+      <div class="text-center">
+      <h4>FogList</h4>
+      </div>
+      <div th:each="nestList : ${fogList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+        <div class="row">
 
-        <div class="text-center">
-          <h2 class="visible-print-block blackpoker-font">
-            BlackPoker <img src="img/blackpoker.svg" width="35px"> FogList
-          </h2>
-          <small class="" th:if="${'std' == arg0}" th:text="${data.ver}+' スタンダード版'"></small> <small class="" th:if="${'lite' == arg0}"
-            th:text="${data.ver}+' ライト版'"></small><small class="" th:if="${'pro' == arg0}"
-            th:text="${data.ver}+' プロ版'"></small><small class="" th:if="${'mast' == arg0}"
-            th:text="${data.ver}+' マスター版'"></small>  <small class="" th:text="' : '+${data.lastupdate}"></small>
-        </div>
-        <hr>
+          <div th:each="row : ${nestList.fogs}" th:if="${#strings.contains(row.format,arg0)}"
+            class="col-lg-6">
+            <div class="bs-component">
 
-        <div th:each="nestList : ${fogList}">
-          <h5 th:text="${nestList.type}" class="text-center"></h5>
-          <div class="row">
+              <div class="panel panel-default blackpoker-action" th:attr="id='fog-'+${row.fogId}">
+                <div class="panel-heading">
 
-            <div th:each="row : ${nestList.fogs}" th:if="${#strings.contains(row.format,arg0)}"
-              class="col-lg-6">
-              <div class="bs-component">
+                  <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}" th:if="${not #strings.isEmpty(row.story)}">
+                    <span class="act-title" th:text="${row.fogName}"></span>
+                  </a> <span class="act-title" th:text="${row.fogName}" th:if="${#strings.isEmpty(row.story)}"></span>
+                  <span> <small> 
+                    <span th:text="'('+${row.fogType}+')'"></span>
+                    </small>
+                  </span>
+                  <div class="pull-right">
+                    &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.fogKey)}"></span><br>
+                    </small>
+                  </div>                  
+                </div>
+                <div class="panel-body">
+                  <span th:if="${not #strings.isEmpty(row.fogAbility)}"> （能力）<br></span>
+                  <span th:if="${not #strings.isEmpty(row.fogAbility)}" th:utext="${#sfn.cnvHtml(row.fogAbility)}"></span>
 
-                <div class="panel panel-default blackpoker-action" th:attr="id='fog-'+${row.fogId}">
-                  <div class="panel-heading">
-
-                    <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}" th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.fogName}"></span>
-                    </a> <span class="act-title" th:text="${row.fogName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                    <span> <small> 
-                      <span th:text="'('+${row.fogType}+')'"></span>
-                      </small>
-                    </span>
-                    <div class="pull-right">
-                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.fogKey)}"></span><br>
-                      </small>
-                    </div>                  
-                  </div>
-                  <div class="panel-body">
-                    <span th:if="${not #strings.isEmpty(row.fogAbility)}"> （能力）<br></span>
-                    <span th:if="${not #strings.isEmpty(row.fogAbility)}" th:utext="${#sfn.cnvHtml(row.fogAbility)}"></span>
-
-                    <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.fogId}" class="panel-collapse collapse storyText">
-                      <hr>
-                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
-                      Flavor:Rule's<br> <span th:text="${row.story}"></span>
-                      <div class="flavorText well well-sm">
-                        <span th:text="${row.flavor}"></span>
-                        <div class="text-right" th:text="${row.flavorSpeaker}"></div>
-                      </div>
+                  <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.fogId}" class="panel-collapse collapse storyText">
+                    <hr>
+                    <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                    Flavor:Rule's<br> <span th:text="${row.story}"></span>
+                    <div class="flavorText well well-sm">
+                      <span th:text="${row.flavor}"></span>
+                      <div class="text-right" th:text="${row.flavorSpeaker}"></div>
                     </div>
-
                   </div>
 
                 </div>
+
               </div>
             </div>
           </div>
@@ -861,36 +903,6 @@
 
   <script type="text/javascript">
     $(function () {
-
-      // ActionList -> CharacterList切り替え
-      $('a[href="#actionlist-summary"]').on('click', function () {
-        $('a[href="#actionlist"]').click();
-      });
-
-      // CharacterList -> FogList切り替え
-      $('a[href="#characterlist-summary"]').on('click', function () {
-        $('a[href="#characterlist"]').click();
-      });
-
-      // FogList -> ActionList切り替え
-      $('a[href="#foglist-summary"]').on('click', function () {
-        $('a[href="#foglist"]').click();
-      });
-
-      $('a[href="#actionlist"]').on('click', function () {
-        $(this).addClass("hidden");
-        $('a[href="#characterlist"]').removeClass("hidden");
-      });
-
-      $('a[href="#characterlist"]').on('click', function () {
-        $(this).addClass("hidden");
-        $('a[href="#foglist"]').removeClass("hidden");
-      });
-
-      $('a[href="#foglist"]').on('click', function () {
-        $(this).addClass("hidden");
-        $('a[href="#actionlist"]').removeClass("hidden");
-      });
 
       $('#modal_sidebar').on('show.bs.modal', function (event) {
         // メニューが開く際に表示しているリストとずれている場合、補正
@@ -939,6 +951,136 @@
         }, 300, "swing");
         return false;
       });
+
+
+      // ------------------------------------
+      // 1) URLパラメータから format / frame を取得する関数
+      // ------------------------------------
+      function getQueryParam(name) {
+        // 簡易的な例：URLSearchParams が使える環境ならそちらでもOK
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(window.location.href);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+      }
+
+      // ------------------------------------
+      // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
+      // ------------------------------------
+      function setActivePill(pillGroupSelector, btnClass, text) {
+        // ul配下のliに付いているactiveを一括で外す
+        $(pillGroupSelector).find('li').removeClass('active');
+        // ボタンのテキストが一致するものを active に
+        $(pillGroupSelector + ' ' + btnClass).filter(function() {
+          return $(this).text().trim() === text;
+        }).closest('li').addClass('active');
+      }
+
+      // 初期値（active のボタンから取得）
+      selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
+      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
+
+      // URLパラメータを取得
+      var urlFormat = getQueryParam('format'); // 例: ?format=スタンダード
+      var urlFrame  = getQueryParam('frame');  // 例: ?frame=パック
+
+      // もしURLパラメータに指定があれば、変数を上書きし .active を付け替え
+      if (urlFormat) {
+        selectedFormat = urlFormat;
+        setActivePill('.nav-pills:has(a.format-btn)', '.format-btn', selectedFormat);
+      }
+
+      if (urlFrame) {
+        selectedFrame = urlFrame;
+        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
+      }
+
+      function filterItems(initFlg){
+        // $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
+        $('.blackpoker-action').each(function() {
+          var $el = $(this);
+          var formatAttr = ($el.data('format') || "").trim();
+          var frameAttr = ($el.data('frame') || "").trim();
+          
+          // data-formatが設定されている場合は、フォーマットフィルタを適用
+          if(formatAttr !== ""){
+            if(selectedFormat && selectedFormat !== ""){
+              var formats = formatAttr.split(',');
+              if(formats.indexOf(selectedFormat) !== -1){
+                $el.show();
+              } else {
+                $el.hide();
+              }
+            } else {
+              // 選択されたフォーマットがなければ表示
+              $el.show();
+            }
+          }
+          // data-formatがない（＝空）の場合、data-frameがある場合のみフレームフィルタを適用
+          else if(frameAttr !== ""){
+            if(selectedFrame && selectedFrame !== ""){
+              var frames = frameAttr.split(',');
+              if(frames.indexOf(selectedFrame) !== -1){
+                $el.show();
+              } else {
+                $el.hide();
+              }
+            } else {
+              $el.show();
+            }
+          }
+          // どちらの属性もない場合は表示
+          else {
+            $el.show();
+          }
+        });
+
+        // 各 <div> ブロックの中にある .list-group がすべて非表示なら、そのブロックごと隠す
+        $('.blackpoker-type-group').each(function() {
+          var $categoryBlock = $(this);
+          var $items = $categoryBlock.find('.blackpoker-action');
+          // インラインスタイルに "display: none" が含まれていない要素を抽出する
+          var visibleItems = $items.not('[style*="display: none"]');
+          var hasVisible = visibleItems.length != 0
+          if (!hasVisible) {
+            $categoryBlock.find('.blackpoker-type-group-title').hide();
+            console.log(initFlg,visibleItems.length,$items.length,hasVisible,$categoryBlock)
+          } else {
+            $categoryBlock.find('.blackpoker-type-group-title').show();
+            console.log(initFlg,visibleItems.length,$items.length,hasVisible,$categoryBlock)
+          }
+        });
+      }
+
+      function updateHeader() {
+        // グローバル変数 selectedFormat, selectedFrame が設定されている前提
+        var headerText = selectedFormat;
+        if (selectedFrame && selectedFrame !== "") {
+            headerText += "+" + selectedFrame;
+        }
+        // ヘッダーの要素（例: id="selected-format"）のテキストを更新
+        $('#selected-format').text(headerText);
+      }
+
+      // フォーマットボタンのクリックイベント
+      $('.format-btn').on('click', function(){
+        selectedFormat = $(this).text().trim();
+        updateHeader();  // ヘッダー表示の更新（前回の例参照）
+        filterItems();
+      });
+
+      // フレームボタンのクリックイベント
+      $('.frame-btn').on('click', function(){
+        selectedFrame = $(this).text().trim();
+        updateHeader();
+        filterItems();
+      });
+
+      // 初期表示時
+      updateHeader();
+      filterItems(true);
 
     });
   </script>

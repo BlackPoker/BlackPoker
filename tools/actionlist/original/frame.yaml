@@ -69,9 +69,9 @@ frames:
        | 個人公開：レアカードの中身
        | 非公開：なし
 
-  - name: レアパックストラテジー
+  - name: ストラテジー
     image: rarePack
-    frameId: rarePackStrategy
+    frameId: strategy
     format: pro,mast
     start: |-
       * デッキから最初の手札に入れる3枚を選ぶ。（ストラテジー）
