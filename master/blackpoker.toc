@@ -124,9 +124,9 @@
 \contentsline {subsubsection}{エントリー20}{60}{subsubsection*.129}%
 \contentsline {subsubsection}{パック}{61}{subsubsection*.130}%
 \contentsline {subsubsection}{レアパック}{63}{subsubsection*.131}%
-\contentsline {subsubsection}{レアパックストラテジー}{64}{subsubsection*.132}%
+\contentsline {subsubsection}{ストラテジー}{64}{subsubsection*.132}%
 \contentsline {subsection}{\numberline {5.3.2}フレームアクションリスト}{66}{subsection.5.3.2}%
-\contentsline {subsubsection}{パック系}{66}{subsubsection*.138}%
+\contentsline {subsubsection}{パック}{66}{subsubsection*.138}%
 \contentsline {paragraph}{パック開封 (パック)}{66}{paragraph*.139}%
 \contentsline {paragraph}{レアドロー (パック)}{67}{paragraph*.140}%
 \contentsline {paragraph}{レア召喚 (パック)}{67}{paragraph*.141}%

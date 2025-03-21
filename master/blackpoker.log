@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  20 MAR 2025 19:07
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  21 MAR 2025 10:52
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1823,15 +1823,15 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 7417--7419
 No file blackpoker.ind.
 [88] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: A133DA707B48FEDC1FAD13DCE1C78155;13486.
+(rerunfilecheck)             Checksum: 2784F6B00A296176AD6B099B0F2E8B72;13468.
  ) 
 Here is how much of TeX's memory you used:
  14805 strings out of 480496
- 230903 string characters out of 5899437
- 573116 words of memory out of 5000000
+ 230887 string characters out of 5899437
+ 573089 words of memory out of 5000000
  32483 multiletter control sequences out of 15000+600000
  507811 words of font info for 122 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,359b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (92 pages, 289004 bytes).
+Output written on blackpoker.dvi (92 pages, 288856 bytes).

@@ -205,16 +205,16 @@
 
 ----
 
-.. _frame-rarePackStrategy:
+.. _frame-strategy:
 
-レアパックストラテジー
+ストラテジー
 ======================================================
 **配置図:**
 
-.. _frame-rarePackStrategy-image:
+.. _frame-strategy-image:
 .. figure:: ../frame/images/rarePack.*
 
-     配置図-レアパックストラテジー
+     配置図-ストラテジー
 
 
 **フォーマット:**
