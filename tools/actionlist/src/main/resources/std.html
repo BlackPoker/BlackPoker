@@ -1,6 +1,6 @@
 <html>
 
-<head>`
+<head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -485,14 +485,14 @@
             <li>
               <a class="btn btn-default btn-sm format-btn" data-toggle="tab">プロ</a>
             </li>
-            <li>
+            <li class="active">
               <a class="btn btn-default btn-sm format-btn" data-toggle="tab">マスター</a>
             </li>
           </ul>
           
           <h5><small>フレーム</small></h5>
           <ul class="nav nav-pills">
-            <li>
+            <li class="active">
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
             </li>
             <li>
@@ -520,66 +520,71 @@
           <div class="tab-content" id="actionlist-summary">
 
             <!-- actionlist -->
-            <h5>ActionList</h5>
-            <div th:each="actList:${actList}">
-              <span th:text="${actList.type}"></span>
-              <div class="list-group">
+            <div class="blackpoker-type-group">
+              <h5>ActionList</h5>
+              <div th:each="actList:${actList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${actList.type}"></span>
+                <div class="list-group">
 
-                <a th:each="row : ${actList.acts}" 
-                  th:attr="
-                  href='#act-'+${row.actId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                  .replace('std','スタンダード')
-                  .replace('pro','プロ')
-                  .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                class="scroll-offset list-group-item list-group-item-action"
-                th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
-                  <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
-                        th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
-                  </span>
-                </a>
+                  <a th:each="row : ${actList.acts}" 
+                    th:attr="
+                    href='#act-'+${row.actId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action"
+                  th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
+                    <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
+                          th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
+                    </span>
+                  </a>
+                </div>
               </div>
-            </div>
+              </div>
             
             <!-- characterlist -->
-            <h5>CharacterList</h5>
-            <div th:each="charList:${charList}">
-              <span th:text="${charList.type}"></span>
-              <div class="list-group">
-                <a th:each="row : ${charList.chars}" 
-                  th:attr="
-                  href='#char-'+${row.charId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                  .replace('std','スタンダード')
-                  .replace('pro','プロ')
-                  .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                class="scroll-offset list-group-item list-group-item-action"
-                th:if="${#strings.contains(row.format,arg0)}">
-                  <span th:text="${row.charName}"></span>
-                </a>
-
+            <div class="blackpoker-type-group">
+              <h5>CharacterList</h5>
+              <div th:each="charList:${charList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${charList.type}"></span>
+                <div class="list-group">
+                  <a th:each="row : ${charList.chars}" 
+                    th:attr="
+                    href='#char-'+${row.charId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action"
+                  th:if="${#strings.contains(row.format,arg0)}">
+                    <span th:text="${row.charName}"></span>
+                  </a>
+                </div>
               </div>
-            </div>
+              </div>
 
             <!-- foglist -->
-            <h5>FogList</h5>
-            <div th:each="fogList:${fogList}">
-              <span th:text="${fogList.type}"></span>
-              <div class="list-group">
-                <a th:each="row : ${fogList.fogs}"
-                  th:attr="
-                  href='#fog-'+${row.fogId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                  .replace('std','スタンダード')
-                  .replace('pro','プロ')
-                  .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                class="scroll-offset list-group-item list-group-item-action"
-                th:if="${#strings.contains(row.format,arg0)}">
-                  <span th:text="${row.fogName}"></span>
-                </a>
+            <div>
+              <h5>FogList</h5>
+              <div th:each="fogList:${fogList}" class="blackpoker-type-group">
+                <span class="blackpoker-type-group-title" th:text="${fogList.type}"></span>
+                <div class="list-group">
+                  <a th:each="row : ${fogList.fogs}"
+                    th:attr="
+                    href='#fog-'+${row.fogId},
+                    data-format=${row.format != null ? row.format.replace('lite','ライト')
+                    .replace('std','スタンダード')
+                    .replace('pro','プロ')
+                    .replace('mast','マスター') : null},
+                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                  class="scroll-offset list-group-item list-group-item-action"
+                  th:if="${#strings.contains(row.format,arg0)}">
+                    <span th:text="${row.fogName}"></span>
+                  </a>
+                </div>
               </div>
             </div>
 
@@ -965,8 +970,8 @@
       // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
       // ------------------------------------
       function setActivePill(pillGroupSelector, btnClass, text) {
-        // いったん全ての li から active を外し
-        $(pillGroupSelector).removeClass('active');
+        // ul配下のliに付いているactiveを一括で外す
+        $(pillGroupSelector).find('li').removeClass('active');
         // ボタンのテキストが一致するものを active に
         $(pillGroupSelector + ' ' + btnClass).filter(function() {
           return $(this).text().trim() === text;
@@ -985,20 +990,16 @@
       if (urlFormat) {
         selectedFormat = urlFormat;
         setActivePill('.nav-pills:has(a.format-btn)', '.format-btn', selectedFormat);
-      }else{
-        selectedFormat = "マスター";
-        setActivePill('.nav-pills:has(a.format-btn)', '.format-btn', selectedFormat);
       }
+
       if (urlFrame) {
         selectedFrame = urlFrame;
-        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
-      }else{
-        selectedFrame = "指定なし";
         setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
       }
 
       function filterItems(){
         $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
+        // $('.blackpoker-action').each(function() {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
@@ -1039,12 +1040,14 @@
         // 各 <div> ブロックの中にある .list-group がすべて非表示なら、そのブロックごと隠す
         $('.blackpoker-type-group').each(function() {
           var $categoryBlock = $(this);
-          var hasVisible = $categoryBlock.find('.blackpoker-action:visible').length > 0;
+          // var hasVisible = $categoryBlock.find('.blackpoker-action:visible').length > 0;
+          var hasVisible = $categoryBlock.find('.list-group-item:visible, .blackpoker-action:visible').length > 0;
           if (!hasVisible) {
-            // row自体も隠す
             $categoryBlock.find('.blackpoker-type-group-title').hide();
+            console.log(hasVisible,$categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-type-group-title').show();
+            console.log(hasVisible,$categoryBlock)
           }
         });
       }
