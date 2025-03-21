@@ -534,7 +534,7 @@
                     .replace('pro','プロ')
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                  class="scroll-offset list-group-item list-group-item-action"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                   th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                           th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
@@ -558,7 +558,7 @@
                     .replace('pro','プロ')
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                  class="scroll-offset list-group-item list-group-item-action"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                   th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.charName}"></span>
                   </a>
@@ -580,7 +580,7 @@
                     .replace('pro','プロ')
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
-                  class="scroll-offset list-group-item list-group-item-action"
+                  class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                   th:if="${#strings.contains(row.format,arg0)}">
                     <span th:text="${row.fogName}"></span>
                   </a>
@@ -997,9 +997,9 @@
         setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
       }
 
-      function filterItems(){
-        $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
-        // $('.blackpoker-action').each(function() {
+      function filterItems(initFlg){
+        // $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
+        $('.blackpoker-action').each(function() {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
@@ -1040,14 +1040,16 @@
         // 各 <div> ブロックの中にある .list-group がすべて非表示なら、そのブロックごと隠す
         $('.blackpoker-type-group').each(function() {
           var $categoryBlock = $(this);
-          // var hasVisible = $categoryBlock.find('.blackpoker-action:visible').length > 0;
-          var hasVisible = $categoryBlock.find('.list-group-item:visible, .blackpoker-action:visible').length > 0;
+          var $items = $categoryBlock.find('.blackpoker-action');
+          // インラインスタイルに "display: none" が含まれていない要素を抽出する
+          var visibleItems = $items.not('[style*="display: none"]');
+          var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-type-group-title').hide();
-            console.log(hasVisible,$categoryBlock)
+            console.log(initFlg,visibleItems.length,$items.length,hasVisible,$categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-type-group-title').show();
-            console.log(hasVisible,$categoryBlock)
+            console.log(initFlg,visibleItems.length,$items.length,hasVisible,$categoryBlock)
           }
         });
       }
@@ -1078,7 +1080,7 @@
 
       // 初期表示時
       updateHeader();
-      filterItems();
+      filterItems(true);
 
     });
   </script>
