@@ -699,8 +699,8 @@
       <div class="text-center">
       <h4>ActionList</h4>
       </div>
-      <div th:each="nestList : ${actList}">
-        <h5 th:text="${nestList.type}" class="text-center"></h5>
+      <div th:each="nestList : ${actList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
         <div class="row">
 
           <div th:each="row : ${nestList.acts}" class="col-lg-4"
@@ -785,8 +785,8 @@
       <div class="text-center">
       <h4>CharacterList</h4>
       </div>
-      <div th:each="nestList : ${charList}">
-        <h5 th:text="${nestList.type}" class="text-center"></h5>
+      <div th:each="nestList : ${charList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
         <div class="row">
 
           <div th:each="row : ${nestList.chars}" th:if="${#strings.contains(row.format,arg0)}"
@@ -844,8 +844,8 @@
       <div class="text-center">
       <h4>FogList</h4>
       </div>
-      <div th:each="nestList : ${fogList}">
-        <h5 th:text="${nestList.type}" class="text-center"></h5>
+      <div th:each="nestList : ${fogList}" class="blackpoker-type-group">
+        <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
         <div class="row">
 
           <div th:each="row : ${nestList.fogs}" th:if="${#strings.contains(row.format,arg0)}"
@@ -1033,6 +1033,18 @@
           // どちらの属性もない場合は表示
           else {
             $el.show();
+          }
+        });
+
+        // 各 <div> ブロックの中にある .list-group がすべて非表示なら、そのブロックごと隠す
+        $('.blackpoker-type-group').each(function() {
+          var $categoryBlock = $(this);
+          var hasVisible = $categoryBlock.find('.blackpoker-action:visible').length > 0;
+          if (!hasVisible) {
+            // row自体も隠す
+            $categoryBlock.find('.blackpoker-type-group-title').hide();
+          } else {
+            $categoryBlock.find('.blackpoker-type-group-title').show();
           }
         });
       }
