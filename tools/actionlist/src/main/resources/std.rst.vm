@@ -13,6 +13,8 @@
 
     #end
 
+----
+
 ${nestList.type}
 ======================================================
     #foreach( $row in ${nestList.acts})
@@ -52,12 +54,12 @@ ${rstFn.cnv(${row.frame})}
 **タイミング:** ${row.actTime}
 
         #end
-        #if(${row.actCost})
-**コスト:** ${row.actCost}
-
-        #end
         #if(${row.actKey.trim()})
 **キーカード:** ${row.actKey}
+
+        #end
+        #if(${row.actCost})
+**コスト:** ${row.actCost}
 
         #end
         #if(${row.actNote.trim()})
@@ -101,9 +103,12 @@ ${row.story}
 ~ ${row.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${row.since})
 **導入バージョン:**  ${row.since}
         #end
+
 
         #if(${row.update})
 **更新バージョン:**  ${row.update}
@@ -123,6 +128,8 @@ ${row.story}
    :local:
 
     #end
+
+----
 
 ${nestList.type}
 ======================================================
@@ -179,9 +186,12 @@ ${char.story}
 ~ ${char.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${char.since})
 **導入バージョン:**  ${char.since}
         #end
+
 
         #if(${char.update})
 **更新バージョン:**  ${char.update}
@@ -202,6 +212,8 @@ ${char.story}
    :local:
 
     #end
+
+----
 
 ${nestList.type}
 ======================================================
@@ -250,9 +262,12 @@ ${fog.story}
 ~ ${fog.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${fog.since})
 **導入バージョン:**  ${fog.since}
         #end
+
 
         #if(${fog.update})
 **更新バージョン:**  ${fog.story}
