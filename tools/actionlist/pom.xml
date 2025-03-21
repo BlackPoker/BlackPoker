@@ -156,11 +156,12 @@
               <arguments>
                 <!-- std -->
                 <argument>-i original/act.yaml -t std -rstOutput ../../source/auto/actionlist.rst</argument>
-                <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
+                <!-- <argument>-i original/act.yaml -htmlOutput web-site/static/std.html -t std -arg0 std -texOutput ./tex/blackpoker-std.tex</argument>
                 <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
-                <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>
-                <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument>
-                <argument>-i original/merged.yaml -htmlOutput web-site/static/all.html -t std -arg0 mast -texOutput ./tex/blackpoker-all.tex</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/pro.html -t std -arg0 pro -texOutput ./tex/blackpoker-pro.tex</argument>-->
+                <argument>-i original/act.yaml -htmlOutput web-site/static/lite.html -t std -arg0 lite -texOutput ./tex/blackpoker-lite.tex</argument>
+                <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument> 
+                <argument>-i original/merged.yaml -htmlOutput web-site/static/all.html -t std -arg0 all -texOutput ./tex/blackpoker-all.tex</argument>
                 <!-- extra -->
                 <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
 
