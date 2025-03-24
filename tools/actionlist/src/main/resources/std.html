@@ -535,7 +535,8 @@
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
                   class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                  th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
+                  th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
+                  >
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                           th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                     </span>
@@ -559,7 +560,8 @@
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
                   class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                  th:if="${#strings.contains(row.format,arg0)}">
+                  th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
+                  >
                     <span th:text="${row.charName}"></span>
                   </a>
                 </div>
@@ -581,7 +583,8 @@
                     .replace('mast','マスター') : null},
                     data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
                   class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                  th:if="${#strings.contains(row.format,arg0)}">
+                  th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
+                  >
                     <span th:text="${row.fogName}"></span>
                   </a>
                 </div>
@@ -709,7 +712,8 @@
         <div class="row">
 
           <div th:each="row : ${nestList.acts}" class="col-lg-4"
-          th:if="${row.format == null ? true : #strings.contains(row.format, arg0)}">
+          th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
+          >
             <div class="bs-component">
               <div class="panel panel-default blackpoker-action"
                 th:attr="
@@ -794,7 +798,8 @@
         <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
         <div class="row">
 
-          <div th:each="row : ${nestList.chars}" th:if="${#strings.contains(row.format,arg0)}"
+          <div th:each="row : ${nestList.chars}" 
+            th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
             class="col-lg-6">
             <div class="bs-component">
 
@@ -853,7 +858,8 @@
         <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
         <div class="row">
 
-          <div th:each="row : ${nestList.fogs}" th:if="${#strings.contains(row.format,arg0)}"
+          <div th:each="row : ${nestList.fogs}" 
+            th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}"
             class="col-lg-6">
             <div class="bs-component">
 

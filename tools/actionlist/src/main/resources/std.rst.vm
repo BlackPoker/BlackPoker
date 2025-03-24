@@ -44,6 +44,7 @@ ${row.actName} (${row.actType})
 
 ${rstFn.cnv(${row.frame})}
 
+
         #end
 
         #if(${row.actTime})
@@ -143,6 +144,7 @@ ${nestList.type}
 
 ${char.charName} (${char.charType})
 ---------------------------------------------------
+        #if(${char.format})
 **フォーマット:**
 
 .. csv-table::
@@ -151,6 +153,16 @@ ${char.charName} (${char.charType})
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${char.format.contains('lite')})◯#else${x}#end", "#if(${char.format.contains('std')})◯#else${x}#end", "#if(${char.format.contains('pro')})◯#else${x}#end", "#if(${char.format.contains('mast')})◯#else${x}#end"
+
+        #end
+
+        #if(${char.frame})
+**フレーム:**  
+
+${rstFn.cnv(${char.frame})}
+
+
+        #end
 
         #if(${char.charKey.trim()})
 **キーカード:** ${char.charKey}
@@ -227,6 +239,7 @@ ${nestList.type}
 
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
+        #if(${row.format})
 **フォーマット:**
 
 .. csv-table::
@@ -235,6 +248,16 @@ ${fog.fogName} (${fog.fogType})
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${fog.format.contains('lite')})◯#else${x}#end", "#if(${fog.format.contains('std')})◯#else${x}#end", "#if(${fog.format.contains('pro')})◯#else${x}#end", "#if(${fog.format.contains('mast')})◯#else${x}#end"
+
+        #end
+
+        #if(${fog.frame})
+**フレーム:**  
+
+${rstFn.cnv(${fog.frame})}
+
+
+        #end
 
         #if(${fog.fogKey.trim()})
 **キーカード:** ${fog.fogKey}
