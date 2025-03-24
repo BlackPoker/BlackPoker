@@ -60,7 +60,7 @@ language = 'ja'
 
 
 [extensions]
-todo_include_todos=True
+todo_include_todos = True
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -125,7 +125,10 @@ latex_docclass = {'manual': 'jsbook'}
 
 latex_elements = {
     'preamble': r'''
+\makeindex
 \makeatletter
+% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
+\renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
   % safe test of whether #2 is \sphinxlineitem
   \sphinx@gobto@sphinxlineitem#2\@gobbletwo\sphinxlineitem\unless
@@ -147,7 +150,8 @@ latex_elements = {
   \fi #2%
 }
 \makeatother
-'''
+''',
+    'printindex': r'\printindex',
 }
 
 
