@@ -5,7 +5,7 @@ frames:
   - name: エントリー20
     image: entry20
     frameId: entry20
-    format: lite,std
+    format: lite
     deck: |-
       次のカードのみで構成された20枚のデッキを使う
       * ♠A, 2, 3, 4, 5
@@ -21,7 +21,7 @@ frames:
   - name: パック
     image: pack
     frameId: pack
-    format: lite,std,pro,mast
+    format: std,pro,mast
     start: |-
       * デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
       * 残りのデッキをライフとし配置図の場所に伏せておく。
