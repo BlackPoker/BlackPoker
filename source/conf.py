@@ -19,7 +19,7 @@
 
 project = 'BlackPoker'
 copyright = '2013, BlackPoker'
-author = 'BlackPoker'
+author = 'もりくま'
 numfig = True
 numfig_format = {
     'figure': 'Fig. %s',
@@ -27,8 +27,8 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-release = '2025/3/x'
-version = '8.0版'
+release = '2025/3/31'
+version = '第8.0版'
 
 # -- General configuration ---------------------------------------------------
 
@@ -123,29 +123,70 @@ html_favicon = '_static/favicon.ico'
 # LaTeX の docclass 設定
 latex_docclass = {'manual': 'jsbook'}
 
+# PDF ロゴをビルド時に取り込む設定
+latex_additional_files = [
+    '_static/blackpoker_logo.pdf',  # 実際のファイル名に合わせる
+]
+
 latex_elements = {
+    'maketitle': r'''
+\begin{titlepage}
+\begin{center}
+\vspace*{25mm}
+
+%% ロゴを PDF で中央配置
+\includegraphics[width=4cm]{blackpoker_logo.pdf}  %% ファイルパスは latex_additional_files に合わせる
+
+\vspace{20mm}
+{\Huge \textbf{BlackPoker 公式ルール}}\\[10mm]
+{\Large トランプだけでトレーディングカードゲームみたいに遊ぶ方法}\\[30mm]
+
+%% バージョン・リリース情報を埋め込む
+{\huge %(version)s}\\[20mm]
+
+{\Large %(author)s 著} \\[5mm]
+{\Large %(release)s 発行}\\[10mm]
+
+{\small copyright: %(copyright)s}
+
+\end{center}
+\end{titlepage}
+
+%% 表紙の次に空白ページを挟む
+\clearpage
+\thispagestyle{empty}  %% ページ番号などを非表示にする
+\phantomsection
+\null                  %% 何もないページを出力
+\clearpage             %% さらに改ページして本文へ
+''' % {
+    'project': project,
+    'version': version,
+    'author': author,
+    'release': release,
+    'copyright': copyright,
+},
     'preamble': r'''
 \makeindex
 \makeatletter
-% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
+%% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
 \renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
-  % safe test of whether #2 is \sphinxlineitem
+  %% safe test of whether #2 is \sphinxlineitem
   \sphinx@gobto@sphinxlineitem#2\@gobbletwo\sphinxlineitem\unless
   \iftrue
-    % Accumulate successive terms until actual definition or sub-list is found
+    %% Accumulate successive terms until actual definition or sub-list is found
     \spx@lineitemlabel\expandafter{\the\spx@lineitemlabel\strut#1\\}%
   \else
-    % Issue the \item command with possibly multi-line contents
+    %% Issue the \item command with possibly multi-line contents
     \item[\kern\labelwidth\kern-\itemindent\kern-\leftmargin
-          {\parbox[t]{1.4\linewidth}{% <- ここで幅を調整
+          {\parbox[t]{1.4\linewidth}{%% <- ここで幅を調整
           \raggedright
-          \the\spx@lineitemlabel% Accumulated terms before this one, CR separated
-          \strut#1}}% No \par token allowed here, but the \parbox will insert one tacitly at end
+          \the\spx@lineitemlabel%% Accumulated terms before this one, CR separated
+          \strut#1}}%% No \par token allowed here, but the \parbox will insert one tacitly at end
           \kern-\labelsep]%
     \spx@lineitemlabel{}%
-    % This causes the label to be typeset (filling up the line), clearing up
-    % things in case a nested list follows.
+    %% This causes the label to be typeset (filling up the line), clearing up
+    %% things in case a nested list follows.
     \leavevmode
   \fi #2%
 }
@@ -153,5 +194,4 @@ latex_elements = {
 ''',
     'printindex': r'\printindex',
 }
-
 
