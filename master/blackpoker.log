@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  28 MAR 2025 23:34
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  28 MAR 2025 23:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1792,9 +1792,8 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 7352--7354
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 7352--7354
-[][]$\T1/qtm/m/n/10 http : / / 127 . 0 . 0 . 1 : 3000 / tools / actionlist / we
-b-[]site / static / all . html ? format = %E3 % 83 % A9 % E3 % 82 % A4 % E3 % 8
-3 %
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
+/ actionlist / html / all . html ? format = %E3 % 83 % A9 % E3 % 82 %
  []
 
 
@@ -1811,9 +1810,8 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 7368--7370
 
 
 Underfull \hbox (badness 10000) in paragraph at lines 7368--7370
-[][]$\T1/qtm/m/n/10 http : / / 127 . 0 . 0 . 1 : 3000 / tools / actionlist / we
-b-[]site / static / all . html ? format = %E3 % 83 % 9E % E3 % 82 % B9 % E3 % 8
-2 %
+[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
+/ actionlist / html / all . html ? format = %E3 % 83 % 9E % E3 % 82 %
  []
 
 
@@ -1847,4 +1845,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,12n,80p,359b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (95 pages, 300668 bytes).
+Output written on blackpoker.dvi (95 pages, 300712 bytes).
