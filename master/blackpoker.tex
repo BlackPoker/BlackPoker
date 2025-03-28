@@ -47,24 +47,27 @@
 \setcounter{tocdepth}{1}
 
 
+\makeindex
 \makeatletter
+%% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
+\renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
-  % safe test of whether #2 is \sphinxlineitem
+  %% safe test of whether #2 is \sphinxlineitem
   \sphinx@gobto@sphinxlineitem#2\@gobbletwo\sphinxlineitem\unless
   \iftrue
-    % Accumulate successive terms until actual definition or sub-list is found
+    %% Accumulate successive terms until actual definition or sub-list is found
     \spx@lineitemlabel\expandafter{\the\spx@lineitemlabel\strut#1\\}%
   \else
-    % Issue the \item command with possibly multi-line contents
+    %% Issue the \item command with possibly multi-line contents
     \item[\kern\labelwidth\kern-\itemindent\kern-\leftmargin
-          {\parbox[t]{1.4\linewidth}{% <- ここで幅を調整
+          {\parbox[t]{1.4\linewidth}{%% <- ここで幅を調整
           \raggedright
-          \the\spx@lineitemlabel% Accumulated terms before this one, CR separated
-          \strut#1}}% No \par token allowed here, but the \parbox will insert one tacitly at end
+          \the\spx@lineitemlabel%% Accumulated terms before this one, CR separated
+          \strut#1}}%% No \par token allowed here, but the \parbox will insert one tacitly at end
           \kern-\labelsep]%
     \spx@lineitemlabel{}%
-    % This causes the label to be typeset (filling up the line), clearing up
-    % things in case a nested list follows.
+    %% This causes the label to be typeset (filling up the line), clearing up
+    %% things in case a nested list follows.
     \leavevmode
   \fi #2%
 }
@@ -72,16 +75,45 @@
 
 
 \title{BlackPoker}
-\date{2025年03月27日}
-\release{2025/3/x}
-\author{BlackPoker}
+\date{2025年03月28日}
+\release{2025/3/31}
+\author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{リリース}
 \makeindex
 \begin{document}
 
 \pagestyle{empty}
-\sphinxmaketitle
+
+\begin{titlepage}
+\begin{center}
+\vspace*{25mm}
+
+% ロゴを PDF で中央配置
+\includegraphics[width=4cm]{blackpoker_logo.pdf}  % ファイルパスは latex_additional_files に合わせる
+
+\vspace{20mm}
+{\Huge \textbf{BlackPoker 公式ルール}}\\[10mm]
+{\Large トランプだけでトレーディングカードゲームみたいに遊ぶ方法}\\[30mm]
+
+% バージョン・リリース情報を埋め込む
+{\huge 第8.0版}\\[20mm]
+
+{\Large もりくま 著} \\[5mm]
+{\Large 2025/3/31 発行}\\[10mm]
+
+{\small copyright: 2013, BlackPoker}
+
+\end{center}
+\end{titlepage}
+
+% 表紙の次に空白ページを挟む
+\clearpage
+\thispagestyle{empty}  % ページ番号などを非表示にする
+\phantomsection
+\null                  % 何もないページを出力
+\clearpage             % さらに改ページして本文へ
+
 \pagestyle{plain}
 \sphinxtableofcontents
 \pagestyle{normal}
@@ -89,7 +121,7 @@
 
 
 \sphinxAtStartPar
-release: 2025/3/x
+release: 2025/3/31
 
 \sphinxstepscope
 
@@ -770,17 +802,31 @@ BlackPokerは割込み可能なターン制ゲームです。
 
 \end{description}
 
-\index{た\textbar{}対象@\spxentry{た\textbar{}対象}}\ignorespaces \begin{description}
-\sphinxlineitem{対象}
-\sphinxAtStartPar
-効果の対象を示します。
-
-\end{description}
-
 \index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
 \sphinxlineitem{特記事項}
 \sphinxAtStartPar
 特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
+
+\end{description}
+
+\index{き\textbar{}起動条件@\spxentry{き\textbar{}起動条件}}\ignorespaces \begin{description}
+\sphinxlineitem{起動条件}
+\sphinxAtStartPar
+起動するための条件を示します。
+
+\end{description}
+
+\index{ゆ\textbar{}誘発条件@\spxentry{ゆ\textbar{}誘発条件}}\ignorespaces \begin{description}
+\sphinxlineitem{誘発条件}
+\sphinxAtStartPar
+誘発する条件を示します。
+
+\end{description}
+
+\index{た\textbar{}対象@\spxentry{た\textbar{}対象}}\ignorespaces \begin{description}
+\sphinxlineitem{対象}
+\sphinxAtStartPar
+効果の対象を示します。
 
 \end{description}
 
@@ -1493,7 +1539,7 @@ BlackPokerはトランプだけで遊べるため、
 ◯
 &
 \sphinxAtStartPar
-◯
+x
 &
 \sphinxAtStartPar
 x
@@ -1506,7 +1552,7 @@ x
 パック
 &
 \sphinxAtStartPar
-◯
+x
 &
 \sphinxAtStartPar
 ◯
@@ -1799,6 +1845,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 
 \end{itemize}
 \end{sphinxShadowBox}
+
+
+\bigskip\hrule\bigskip
+
 
 
 \subsubsection{基本}
@@ -2391,6 +2441,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \sphinxstylestrong{更新バージョン:}  8.0
 
 
+\bigskip\hrule\bigskip
+
+
+
 \subsubsection{召喚}
 \label{\detokenize{auto/actionlist:id11}}
 
@@ -2475,6 +2529,8 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 
 \sphinxAtStartPar
 \textasciitilde{} 再現の師より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  0.1
 
 \sphinxAtStartPar
@@ -2538,10 +2594,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BL
+\sphinxstylestrong{キーカード:} 2〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 2〜10
+\sphinxstylestrong{コスト:} BL
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -2563,6 +2619,8 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 
 \sphinxAtStartPar
 \textasciitilde{} 再現者の心得第二章より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -2626,10 +2684,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BBL
+\sphinxstylestrong{キーカード:} J〜K
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} J〜K
+\sphinxstylestrong{コスト:} BBL
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -2651,6 +2709,8 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 
 \sphinxAtStartPar
 \textasciitilde{} 古参兵より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -2714,10 +2774,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} L
+\sphinxstylestrong{キーカード:} A
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} A
+\sphinxstylestrong{コスト:} L
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -2739,6 +2799,8 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 
 \sphinxAtStartPar
 \textasciitilde{} 親方より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -2802,10 +2864,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} D
+\sphinxstylestrong{キーカード:} A
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} A
+\sphinxstylestrong{コスト:} D
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -2889,10 +2951,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BD
+\sphinxstylestrong{キーカード:} Joker
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} Joker
+\sphinxstylestrong{コスト:} BD
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -2915,6 +2977,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 再現者見習いより \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -2978,10 +3042,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BL
+\sphinxstylestrong{キーカード:} A〜K
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} A〜K
+\sphinxstylestrong{コスト:} BL
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -3009,10 +3073,16 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} ライフよりの防壁より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  0.1
 
 \sphinxAtStartPar
 \sphinxstylestrong{更新バージョン:}  8.0
+
+
+\bigskip\hrule\bigskip
+
 
 
 \subsubsection{速攻魔法}
@@ -3071,10 +3141,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} D
+\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10
+\sphinxstylestrong{コスト:} D
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -3152,10 +3222,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} D
+\sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10
+\sphinxstylestrong{コスト:} D
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -3239,10 +3309,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} D
+\sphinxstylestrong{キーカード:} {\normalsize $\diamondsuit$} A〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\diamondsuit$} A〜10
+\sphinxstylestrong{コスト:} D
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -3320,10 +3390,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} D
+\sphinxstylestrong{キーカード:} {\normalsize $\clubsuit$} A〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\clubsuit$} A〜10
+\sphinxstylestrong{コスト:} D
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -3429,6 +3499,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} ネタバレ娘より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  1.0
 
 \sphinxAtStartPar
@@ -3798,10 +3870,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} SS
+\sphinxstylestrong{キーカード:} 同じスートの A と J
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートの A と J
+\sphinxstylestrong{コスト:} SS
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3823,6 +3895,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 革命者より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  1.0
 
 \sphinxAtStartPar
@@ -3886,10 +3960,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BB
+\sphinxstylestrong{キーカード:} 同じスートのA,10〜K を 5枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートのA,10〜K を 5枚
+\sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
@@ -4064,10 +4138,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} B
+\sphinxstylestrong{キーカード:} 同じスートを2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートを2枚
+\sphinxstylestrong{コスト:} B
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -4094,6 +4168,10 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{更新バージョン:}  8.0
+
+
+\bigskip\hrule\bigskip
+
 
 
 \subsubsection{通常魔法}
@@ -4180,6 +4258,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} かくれんぼしていた子供より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  0.2
 
 \sphinxAtStartPar
@@ -4271,6 +4351,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 再現者の心得第十一章より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  0.1
 
 \sphinxAtStartPar
@@ -4373,6 +4455,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 再現者の心得第十二章より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  2.0
 
 \sphinxAtStartPar
@@ -4461,6 +4545,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 無能な指揮官より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -4680,10 +4766,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BB
+\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
+\sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
@@ -4761,10 +4847,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BB
+\sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10 を 2枚
+\sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
@@ -4789,6 +4875,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 平和主義の{\normalsize $\clubsuit$} 3一般兵より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -4852,10 +4940,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BB
+\sphinxstylestrong{キーカード:} {\normalsize $\diamondsuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\diamondsuit$} A〜10 を 2枚
+\sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
@@ -4890,6 +4978,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 孤独な徴募兵より \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  3.0
 
 \sphinxAtStartPar
@@ -4953,10 +5043,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} BB
+\sphinxstylestrong{キーカード:} {\normalsize $\clubsuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\clubsuit$} A〜10 を 2枚
+\sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
@@ -5025,6 +5115,10 @@ x
 
 \end{itemize}
 \end{sphinxShadowBox}
+
+
+\bigskip\hrule\bigskip
+
 
 
 \subsubsection{兵士}
@@ -5222,6 +5316,8 @@ x
 
 \sphinxAtStartPar
 \textasciitilde{} 再現者見習いより \textasciitilde{}
+
+\sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  1.0
 
 \sphinxAtStartPar
@@ -5360,6 +5456,10 @@ x
 \sphinxstylestrong{更新バージョン:}  8.0
 
 
+\bigskip\hrule\bigskip
+
+
+
 \subsubsection{防壁}
 \label{\detokenize{auto/actionlist:id50}}
 
@@ -5452,52 +5552,15 @@ x
 \end{sphinxShadowBox}
 
 
+\bigskip\hrule\bigskip
+
+
+
 \subsubsection{速攻魔法}
 \label{\detokenize{auto/actionlist:id54}}
 
 \paragraph{アップ (速攻魔法)}
 \label{\detokenize{auto/actionlist:fog-upfog}}\label{\detokenize{auto/actionlist:id55}}
-\sphinxAtStartPar
-\sphinxstylestrong{フォーマット:}
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-ライト
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-スタンダード
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-プロ
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-マスター
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxbottomrule
-\end{tabular}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
 \sphinxAtStartPar
 \sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10
 
@@ -5518,47 +5581,6 @@ x
 \paragraph{ダウン (速攻魔法)}
 \label{\detokenize{auto/actionlist:fog-downfog}}\label{\detokenize{auto/actionlist:id56}}
 \sphinxAtStartPar
-\sphinxstylestrong{フォーマット:}
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-ライト
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-スタンダード
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-プロ
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-マスター
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxbottomrule
-\end{tabular}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
-\sphinxAtStartPar
 \sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10
 
 \sphinxAtStartPar
@@ -5571,52 +5593,15 @@ x
 \sphinxstylestrong{導入バージョン:}  8.0
 
 
+\bigskip\hrule\bigskip
+
+
+
 \subsubsection{通常魔法}
 \label{\detokenize{auto/actionlist:id57}}
 
 \paragraph{フォース (通常魔法)}
 \label{\detokenize{auto/actionlist:fog-forcefog}}\label{\detokenize{auto/actionlist:id58}}
-\sphinxAtStartPar
-\sphinxstylestrong{フォーマット:}
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-ライト
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-スタンダード
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-プロ
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-マスター
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxbottomrule
-\end{tabular}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
 \sphinxAtStartPar
 \sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
 
@@ -5750,7 +5735,7 @@ x
 ◯
 &
 \sphinxAtStartPar
-◯
+x
 &
 \sphinxAtStartPar
 x
@@ -5845,7 +5830,7 @@ x
 \sphinxmidrule
 \sphinxtableatstartofbodyhook
 \sphinxAtStartPar
-◯
+x
 &
 \sphinxAtStartPar
 ◯
@@ -6253,6 +6238,10 @@ x
 \end{sphinxShadowBox}
 
 
+\bigskip\hrule\bigskip
+
+
+
 \subsubsection{パック}
 \label{\detokenize{auto/frameActionlist:id3}}
 
@@ -6310,9 +6299,6 @@ x
 \sphinxstylestrong{フレーム:}
 
 \sphinxAtStartPar
-・パック
-
-\sphinxAtStartPar
 ・レアパック
 
 \sphinxAtStartPar
@@ -6350,9 +6336,6 @@ x
 \sphinxstylestrong{フレーム:}
 
 \sphinxAtStartPar
-・パック
-
-\sphinxAtStartPar
 ・レアパック
 
 \sphinxAtStartPar
@@ -6388,9 +6371,6 @@ x
 \label{\detokenize{auto/frameActionlist:act-trapcounter}}\label{\detokenize{auto/frameActionlist:id7}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
-
-\sphinxAtStartPar
-・パック
 
 \sphinxAtStartPar
 ・レアパック
@@ -7351,9 +7331,16 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \label{\detokenize{appendix/appendix:appendix-rst}}\label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
 
 \section{PDF版ルール}
-\label{\detokenize{appendix/appendix:pdf}}
+\label{\detokenize{appendix/appendix:pdf}}\begin{description}
+\sphinxlineitem{通常版}
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/blackpoker.pdf}
+
+\sphinxlineitem{中綴じ印刷用}
+\sphinxAtStartPar
+\sphinxurl{https://blackpoker.github.io/BlackPoker/master/blackpoker\_a5-booklet.pdf}
+
+\end{description}
 
 
 \section{アクションリスト}
@@ -7363,7 +7350,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \label{\detokenize{appendix/appendix:actionlist-lite}}\label{\detokenize{appendix/appendix:id3}}\begin{description}
 \sphinxlineitem{URL}
 \sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/lite.html}
+\sphinxurl{http://127.0.0.1:3000/tools/actionlist/web-site/static/all.html?format=\%E3\%83\%A9\%E3\%82\%A4\%E3\%83\%88}
 
 \sphinxlineitem{PDF}
 \sphinxAtStartPar
@@ -7375,43 +7362,11 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \end{description}
 
 
-\subsection{スタンダード}
-\label{\detokenize{appendix/appendix:actionlist-std}}\label{\detokenize{appendix/appendix:id4}}\begin{description}
-\sphinxlineitem{URL}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/std.html}
-
-\sphinxlineitem{PDF}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-std.pdf}
-
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-std-2up.pdf}
-
-\end{description}
-
-
-\subsection{プロ}
-\label{\detokenize{appendix/appendix:actionlist-pro}}\label{\detokenize{appendix/appendix:id5}}\begin{description}
-\sphinxlineitem{URL}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/pro.html}
-
-\sphinxlineitem{PDF}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-pro.pdf}
-
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-pro-2up.pdf}
-
-\end{description}
-
-
 \subsection{マスター}
-\label{\detokenize{appendix/appendix:actionlist-master}}\label{\detokenize{appendix/appendix:id6}}\begin{description}
+\label{\detokenize{appendix/appendix:actionlist-master}}\label{\detokenize{appendix/appendix:id4}}\begin{description}
 \sphinxlineitem{URL}
 \sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/mast.html}
+\sphinxurl{http://127.0.0.1:3000/tools/actionlist/web-site/static/all.html?format=\%E3\%83\%9E\%E3\%82\%B9\%E3\%82\%BF\%E3\%83\%BC}
 
 \sphinxlineitem{PDF}
 \sphinxAtStartPar
@@ -7419,6 +7374,22 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \sphinxAtStartPar
 \sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-mast-2up.pdf}
+
+\end{description}
+
+
+\subsection{全フォーマット\&フレーム}
+\label{\detokenize{appendix/appendix:actionlist-all}}\label{\detokenize{appendix/appendix:id5}}\begin{description}
+\sphinxlineitem{URL}
+\sphinxAtStartPar
+\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/html/all.html}
+
+\sphinxlineitem{PDF}
+\sphinxAtStartPar
+\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-all.pdf}
+
+\sphinxAtStartPar
+\sphinxurl{https://blackpoker.github.io/BlackPoker/master/actionlist/pdf/blackpoker-all-2up.pdf}
 
 \end{description}
 \phantomsection\label{\detokenize{appendix/appendix:extralist}}
