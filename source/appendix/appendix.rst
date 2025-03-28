@@ -9,12 +9,8 @@
 PDF版ルール
 ==============================
 
-通常版(レターサイズ)
+通常版
  https://blackpoker.github.io/BlackPoker/blackpoker.pdf
-
-
-通常版(A5サイズ)
- https://blackpoker.github.io/BlackPoker/blackpoker_a5.pdf
 
 
 中綴じ印刷用

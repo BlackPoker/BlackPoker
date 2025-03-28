@@ -47,6 +47,7 @@
                   "format": { "type": "string" },
                   "frame": { "type": "string" },
                   "actName": { "type": "string" },
+                  "ruby": { "type": "string" },
                   "actId": { "type": "string" },
                   "actType": { "type": "string" },
                   "actTrigger": { "type": "string" },
@@ -98,6 +99,7 @@
                 "properties": {
                   "format": { "type": "string" },
                   "charName": { "type": "string" },
+                  "ruby": { "type": "string" },
                   "charId": { "type": "string" },
                   "charType": { "type": "string" },
                   "charKey": { "type": "string" },
@@ -142,6 +144,7 @@
                 "properties": {
                   "format": { "type": "string" },
                   "fogName": { "type": "string" },
+                  "ruby": { "type": "string" },
                   "fogId": { "type": "string" },
                   "fogType": { "type": "string" },
                   "fogKey": { "type": "string" },
