@@ -27,7 +27,7 @@ PDF版ルール
 ライト
 ------------------------------
 URL 
-    http://127.0.0.1:3000/tools/actionlist/web-site/static/all.html?format=%E3%83%A9%E3%82%A4%E3%83%88
+    https://blackpoker.github.io/BlackPoker/actionlist/html/all.html?format=%E3%83%A9%E3%82%A4%E3%83%88
 
 PDF 
     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-lite.pdf
@@ -41,7 +41,8 @@ PDF
 マスター
 ------------------------------
 URL 
-    http://127.0.0.1:3000/tools/actionlist/web-site/static/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC
+    https://blackpoker.github.io/BlackPoker/actionlist/html/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC
+
 PDF 
     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-mast.pdf
 
