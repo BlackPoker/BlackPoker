@@ -1,4 +1,16 @@
 #!/bin/bash
+# 利用可能な Python コマンドを自動で選択する
+if command -v python >/dev/null 2>&1; then
+    PYTHON=python
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v py >/dev/null 2>&1; then
+    PYTHON=py
+else
+    echo "Python interpreter not found. Please install Python."
+    exit 1
+fi
+
 sphinx-build -b html ./source ./docs
 sphinx-build -b latex ./source ./docs
 
@@ -80,7 +92,7 @@ gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
 
 # その後、冊子印刷用の再配置スクリプト（pdfrw等）を実行して、中綴じレイアウトのPDFを生成
 # python ../source/_mysetting/booklet_pdfrw.py blackpoker_a5.pdf blackpoker_book.pdf
-python ../source/_mysetting/booklet_pdfrw.py --padding blackpoker_a5.pdf
+$PYTHON ../source/_mysetting/booklet_pdfrw.py --padding blackpoker_a5.pdf
 
 # python ../source/_mysetting/booklet_pdfrw.py blackpoker.pdf blackpoker_book.pdf
 
