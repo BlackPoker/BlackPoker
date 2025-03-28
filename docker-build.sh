@@ -4,10 +4,14 @@ sphinx-build -b latex ./source ./docs
 
 # sed /①/\raise0.2ex\hbox{\textcircled{\scriptsize{1}}}/ *.tex
 
+# 索引設定
+# mendex -g -d ./source/_mysetting/mydict.dic -s ./source/_mysetting/mystyle.ist docs/blackpoker.idx
+
 cd ./docs
 
 echo "xxxxxxxxxxxxxxxxxxxxx"
 rm -f blackpoker.pdf
+rm -f blackpoker_book.pdf
 
 sed -i -e 's/♡/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
 sed -i -e 's/♥/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
@@ -39,15 +43,46 @@ sed -i -e 's/⑲/\raise0.2ex\hbox{\textcircled{\scriptsize{19}}} /g' blackpoker.
 sed -i -e 's/⑳/\raise0.2ex\hbox{\textcircled{\scriptsize{20}}} /g' blackpoker.tex
 
 
+# sphinx-build -b latex ./source ./docs で LaTeX ソースが生成された後
+# ここで画像の PDF を変換する
+for f in *.pdf; do
+  echo "Fixing bounding box for $f"
+  gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+     -dEPSCrop \
+     -dCompatibilityLevel=1.4 \
+     -sOutputFile="fixed_$f" "$f"
+  mv "fixed_$f" "$f"
+done
+
+
 # sphinx-build -M latexpdf ./source ./docs
 
 # 以下のwarn解消のため複数回実行
 # Package hyperref Warning: Rerun to get /PageLabels entry.
 platex "blackpoker.tex"
+
+#mendex -g -d ../source/_mysetting/mydict.dic -s ../source/_mysetting/mystyle.ist blackpoker.idx
+mendex -g -d ../source/_mysetting/mydict.dic blackpoker.idx
+
 platex "blackpoker.tex"
 platex "blackpoker.tex"
 
 dvipdfmx "blackpoker"
+
+
+# SphinxビルドでletterサイズのPDF (blackpoker.pdf) が生成された後
+
+# まず、ghostscriptでletterサイズのPDFをA5に縮小して出力する
+gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+   -dFIXEDMEDIA -dPDFFitPage \
+   -dDEVICEWIDTHPOINTS=420 -dDEVICEHEIGHTPOINTS=595 \
+   -sOutputFile=blackpoker_a5.pdf blackpoker.pdf
+
+# その後、冊子印刷用の再配置スクリプト（pdfrw等）を実行して、中綴じレイアウトのPDFを生成
+# python ../source/_mysetting/booklet_pdfrw.py blackpoker_a5.pdf blackpoker_book.pdf
+python ../source/_mysetting/booklet_pdfrw.py --padding blackpoker_a5.pdf
+
+# python ../source/_mysetting/booklet_pdfrw.py blackpoker.pdf blackpoker_book.pdf
 
 # cd docs/latex
 # make latexpdf

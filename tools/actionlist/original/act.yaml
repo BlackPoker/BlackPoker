@@ -111,6 +111,7 @@ actList:
 
     - format: 'lite,std,pro,mast'
       actName: 世代交代
+      ruby: せだいこうたい
       actId: nextGeneration
       actType: 基本
       actTrigger: 誘発
@@ -125,6 +126,7 @@ actList:
     acts:
     - format: lite,std,pro,mast
       actName: 防壁設置
+      ruby: ぼうへきせっち
       actId: setBulwark
       actType: 召喚
       actTrigger: 直接
@@ -141,6 +143,7 @@ actList:
 
     - format: 'lite,std,pro,mast'
       actName: 兵士召喚
+      ruby: へいししょうかん
       actId: summonsSoldier
       actType: 召喚
       actTrigger: 直接
@@ -159,6 +162,7 @@ actList:
       
     - format: 'lite,std,pro,mast'
       actName: 英雄召喚
+      ruby: えいゆうしょうかん
       actId: summonsHero
       actType: 召喚
       actTrigger: 直接
@@ -208,6 +212,7 @@ actList:
 
     - format: 'std,pro,mast'
       actName: 魔術士召喚
+      ruby: まじゅつししょうかん
       actId: summonsMagic
       actType: 召喚
       actTrigger: 直接
@@ -226,6 +231,7 @@ actList:
 
     - format: 'lite,std,pro,mast'
       actName: 装備
+      ruby: そうび
       actId: mountSoldier
       actType: 召喚
       actTrigger: 直接
@@ -311,6 +317,7 @@ actList:
 
     - format: ',,pro,mast'
       actName: 再会
+      ruby: さいかい
       actId: reunion
       actType: 速攻魔法
       actTrigger: 直接
@@ -339,6 +346,7 @@ actList:
 
     - format: ',,pro,mast'
       actName: 停戦
+      ruby: ていせん
       actId: truce
       actType: 速攻魔法
       actTrigger: 直接
@@ -352,6 +360,7 @@ actList:
 
     - format: ',,pro,mast'
       actName: 対象変更
+      ruby: たいしょうへんこう
       actId: changeTarget
       actType: 速攻魔法
       actTrigger: 直接
@@ -425,6 +434,7 @@ actList:
 
     - format: ',std,pro,mast'
       actName: 帰還
+      ruby: きかん
       actId: unsummons
       actType: 速攻魔法
       actTrigger: 直接
@@ -444,6 +454,7 @@ actList:
     acts:  
     - format: 'lite,std,pro,mast'
       actName: 防壁破壊
+      ruby: ぼうへきはかい
       actId: destroyBulwark
       actType: 通常魔法
       actTrigger: 直接
@@ -462,6 +473,7 @@ actList:
 
     - format: 'lite,std,pro,mast'
       actName: 投擲
+      ruby: とうてき
       actId: throwing
       actType: 通常魔法
       actTrigger: 直接
@@ -478,6 +490,7 @@ actList:
 
     - format: ',std,pro,mast'
       actName: 死の槍
+      ruby: しのやり
       actId: deathLance
       actType: 通常魔法
       actTrigger: 直接
@@ -497,6 +510,7 @@ actList:
 
     - format: ',std,pro,mast'
       actName: 防壁補充
+      ruby: ぼうへきほじゅう
       actId: addBulwark
       actType: 通常魔法
       actTrigger: 直接
@@ -556,6 +570,7 @@ actList:
 
     - format: ',,mast'
       actName: 剣の雨
+      ruby: つるぎのあめ
       actId: swordRain
       actType: 通常魔法
       actTrigger: 直接
@@ -573,6 +588,7 @@ actList:
 
     - format: ',,mast'
       actName: 徴募
+      ruby: ちょうぼ
       actId: recruit
       actType: 通常魔法
       actTrigger: 直接
@@ -595,6 +611,7 @@ actList:
 
     - format: ',,mast'
       actName: 奇襲
+      ruby: きしゅう
       actId: surprise
       actType: 通常魔法
       actTrigger: 直接
@@ -614,6 +631,7 @@ charList:
     chars:
     - format: 'lite,std,pro,mast'
       charName: 一般兵
+      ruby: いっぱんへい
       charId: soldier
       charType: 兵士
       charKey: 2〜10
@@ -626,6 +644,7 @@ charList:
 
     - format: lite,std,pro,mast
       charName: 英雄
+      ruby: えいゆう
       charId: hero
       charType: 兵士
       charKey: J〜K
@@ -649,6 +668,7 @@ charList:
 
     - format: ',std,pro,mast'
       charName: 魔術士
+      ruby: まじゅつし
       charId: magician
       charType: 兵士
       charKey: Joker
@@ -661,6 +681,7 @@ charList:
 
     - format: lite,std,pro,mast
       charName: 装備兵
+      ruby: そうびへい
       charId: armedsoldier
       charType: 兵士
       charKey: 同じスートを2枚以上
@@ -673,6 +694,7 @@ charList:
     chars:
     - format: lite,std,pro,mast
       charName: 防壁
+      ruby: ぼうへき
       charId: bulwark
       charType: 防壁
       charKey: 全て(裏向き)

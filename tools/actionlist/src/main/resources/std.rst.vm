@@ -13,6 +13,8 @@
 
     #end
 
+----
+
 ${nestList.type}
 ======================================================
     #foreach( $row in ${nestList.acts})
@@ -42,6 +44,7 @@ ${row.actName} (${row.actType})
 
 ${rstFn.cnv(${row.frame})}
 
+
         #end
 
         #if(${row.actTime})
@@ -52,12 +55,12 @@ ${rstFn.cnv(${row.frame})}
 **タイミング:** ${row.actTime}
 
         #end
-        #if(${row.actCost})
-**コスト:** ${row.actCost}
-
-        #end
         #if(${row.actKey.trim()})
 **キーカード:** ${row.actKey}
+
+        #end
+        #if(${row.actCost})
+**コスト:** ${row.actCost}
 
         #end
         #if(${row.actNote.trim()})
@@ -101,9 +104,12 @@ ${row.story}
 ~ ${row.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${row.since})
 **導入バージョン:**  ${row.since}
         #end
+
 
         #if(${row.update})
 **更新バージョン:**  ${row.update}
@@ -124,6 +130,8 @@ ${row.story}
 
     #end
 
+----
+
 ${nestList.type}
 ======================================================
     #foreach( $char in ${nestList.chars})
@@ -136,6 +144,7 @@ ${nestList.type}
 
 ${char.charName} (${char.charType})
 ---------------------------------------------------
+        #if(${char.format})
 **フォーマット:**
 
 .. csv-table::
@@ -144,6 +153,16 @@ ${char.charName} (${char.charType})
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${char.format.contains('lite')})◯#else${x}#end", "#if(${char.format.contains('std')})◯#else${x}#end", "#if(${char.format.contains('pro')})◯#else${x}#end", "#if(${char.format.contains('mast')})◯#else${x}#end"
+
+        #end
+
+        #if(${char.frame})
+**フレーム:**  
+
+${rstFn.cnv(${char.frame})}
+
+
+        #end
 
         #if(${char.charKey.trim()})
 **キーカード:** ${char.charKey}
@@ -179,9 +198,12 @@ ${char.story}
 ~ ${char.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${char.since})
 **導入バージョン:**  ${char.since}
         #end
+
 
         #if(${char.update})
 **更新バージョン:**  ${char.update}
@@ -203,6 +225,8 @@ ${char.story}
 
     #end
 
+----
+
 ${nestList.type}
 ======================================================
     #foreach( $fog in ${nestList.fogs})
@@ -215,6 +239,7 @@ ${nestList.type}
 
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
+        #if(${row.format})
 **フォーマット:**
 
 .. csv-table::
@@ -223,6 +248,16 @@ ${fog.fogName} (${fog.fogType})
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${fog.format.contains('lite')})◯#else${x}#end", "#if(${fog.format.contains('std')})◯#else${x}#end", "#if(${fog.format.contains('pro')})◯#else${x}#end", "#if(${fog.format.contains('mast')})◯#else${x}#end"
+
+        #end
+
+        #if(${fog.frame})
+**フレーム:**  
+
+${rstFn.cnv(${fog.frame})}
+
+
+        #end
 
         #if(${fog.fogKey.trim()})
 **キーカード:** ${fog.fogKey}
@@ -250,9 +285,12 @@ ${fog.story}
 ~ ${fog.flavorSpeaker} ~
             #end
         #end
+
+
         #if(${fog.since})
 **導入バージョン:**  ${fog.since}
         #end
+
 
         #if(${fog.update})
 **更新バージョン:**  ${fog.story}

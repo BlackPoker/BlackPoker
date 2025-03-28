@@ -32,7 +32,6 @@ actList:
 
     - 
       frame: |-
-        ・パック
         ・レアパック
         ・ストラテジー
       actName: レアドロー
@@ -46,7 +45,6 @@ actList:
       
     - 
       frame: |-
-        ・パック
         ・レアパック
         ・ストラテジー
       actName: レア召喚
@@ -61,7 +59,6 @@ actList:
 
     - 
       frame: |-
-        ・パック
         ・レアパック
         ・ストラテジー
       actName: 罠カウンター
