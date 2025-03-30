@@ -1,0 +1,189 @@
+\contentsline {chapter}{\numberline {第1章}はじめに}{3}{chapter.1}%
+\contentsline {section}{\numberline {1.1}BlackPokerとは}{3}{section.1.1}%
+\contentsline {section}{\numberline {1.2}きっかけ}{4}{section.1.2}%
+\contentsline {section}{\numberline {1.3}ゲームのストーリー}{4}{section.1.3}%
+\contentsline {section}{\numberline {1.4}読み方}{4}{section.1.4}%
+\contentsline {subsection}{\numberline {1.4.1}用途別読み方}{5}{subsection.1.4.1}%
+\contentsline {section}{\numberline {1.5}ルール指針}{5}{section.1.5}%
+\contentsline {chapter}{\numberline {第2章}共通ルール}{7}{chapter.2}%
+\contentsline {section}{\numberline {2.1}プレイ人数}{7}{section.2.1}%
+\contentsline {section}{\numberline {2.2}用意するもの}{7}{section.2.2}%
+\contentsline {section}{\numberline {2.3}使用できるトランプ}{7}{section.2.3}%
+\contentsline {section}{\numberline {2.4}トランプの数字}{8}{section.2.4}%
+\contentsline {section}{\numberline {2.5}カードの配置}{8}{section.2.5}%
+\contentsline {subsection}{\numberline {2.5.1}デッキとライフ}{9}{subsection.2.5.1}%
+\contentsline {section}{\numberline {2.6}勝利条件}{9}{section.2.6}%
+\contentsline {section}{\numberline {2.7}ダメージ}{10}{section.2.7}%
+\contentsline {section}{\numberline {2.8}キャラクター}{10}{section.2.8}%
+\contentsline {subsection}{\numberline {2.8.1}キャラクターのもつ項目}{10}{subsection.2.8.1}%
+\contentsline {subsection}{\numberline {2.8.2}キャラクターのサイズ}{11}{subsection.2.8.2}%
+\contentsline {subsection}{\numberline {2.8.3}キャラクターの注意点}{11}{subsection.2.8.3}%
+\contentsline {subsubsection}{複数枚で1体となるキャラクターが防壁になったら？}{11}{subsubsection*.4}%
+\contentsline {subsection}{\numberline {2.8.4}チャージとドライブ}{11}{subsection.2.8.4}%
+\contentsline {section}{\numberline {2.9}ゲームの始め方}{12}{section.2.9}%
+\contentsline {subsection}{\numberline {2.9.1}配置準備}{12}{subsection.2.9.1}%
+\contentsline {subsection}{\numberline {2.9.2}先攻決定}{12}{subsection.2.9.2}%
+\contentsline {subsection}{\numberline {2.9.3}ゲーム開始}{12}{subsection.2.9.3}%
+\contentsline {section}{\numberline {2.10}アクション}{12}{section.2.10}%
+\contentsline {subsection}{\numberline {2.10.1}アクションが持つ項目}{13}{subsection.2.10.1}%
+\contentsline {subsubsection}{記載されていないアクションの項目}{14}{subsubsection*.5}%
+\contentsline {subsection}{\numberline {2.10.2}コストの種類}{14}{subsection.2.10.2}%
+\contentsline {subsection}{\numberline {2.10.3}アクションの起こし方(リクエスト)}{15}{subsection.2.10.3}%
+\contentsline {subsubsection}{アクションを起こすときの注意点}{15}{subsubsection*.6}%
+\contentsline {paragraph}{対象を指定しないでアクションを起こせるか？}{15}{paragraph*.7}%
+\contentsline {paragraph}{アクションを対象とするアクションは自身を対象にできるか？}{15}{paragraph*.8}%
+\contentsline {subsection}{\numberline {2.10.4}アクションの解決}{16}{subsection.2.10.4}%
+\contentsline {subsubsection}{対象条件を確認}{17}{subsubsection*.9}%
+\contentsline {subsubsection}{効果を発揮}{18}{subsubsection*.10}%
+\contentsline {subsubsection}{解決は墓地移動までを含む}{18}{subsubsection*.11}%
+\contentsline {subsubsection}{ステージ上で効果を発揮}{18}{subsubsection*.12}%
+\contentsline {subsubsection}{キーカードを墓地に移す}{18}{subsubsection*.13}%
+\contentsline {subsection}{\numberline {2.10.5}勝敗判定}{18}{subsection.2.10.5}%
+\contentsline {subsection}{\numberline {2.10.6}誘発チェック}{19}{subsection.2.10.6}%
+\contentsline {subsubsection}{パターン1: フェイズ系}{19}{subsubsection*.14}%
+\contentsline {subsubsection}{パターン2: 世代交代}{19}{subsubsection*.15}%
+\contentsline {section}{\numberline {2.11}その他のルール}{19}{section.2.11}%
+\contentsline {subsection}{\numberline {2.11.1}公開レベル}{20}{subsection.2.11.1}%
+\contentsline {subsubsection}{残りライフを聞かれたらどうしたらいいの？}{21}{subsubsection*.16}%
+\contentsline {subsubsection}{墓地の一番上のカードはいつ決まるのか？}{21}{subsubsection*.17}%
+\contentsline {subsection}{\numberline {2.11.2}デッキのシャッフルについて}{21}{subsection.2.11.2}%
+\contentsline {subsection}{\numberline {2.11.3}防壁の置き方}{21}{subsection.2.11.3}%
+\contentsline {subsection}{\numberline {2.11.4}フォグの置き方}{22}{subsection.2.11.4}%
+\contentsline {subsection}{\numberline {2.11.5}ステージの置き方}{22}{subsection.2.11.5}%
+\contentsline {chapter}{\numberline {第3章}対戦レギュレーション}{25}{chapter.3}%
+\contentsline {section}{\numberline {3.1}対戦レギュレーションとは}{25}{section.3.1}%
+\contentsline {section}{\numberline {3.2}定義項目}{25}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}対戦レギュレーションの表記}{26}{subsection.3.2.1}%
+\contentsline {section}{\numberline {3.3}対戦レギュレーションの決め方}{26}{section.3.3}%
+\contentsline {chapter}{\numberline {第4章}フォーマット}{27}{chapter.4}%
+\contentsline {section}{\numberline {4.1}フォーマットとは}{27}{section.4.1}%
+\contentsline {section}{\numberline {4.2}定義項目}{27}{section.4.2}%
+\contentsline {section}{\numberline {4.3}フォーマット定義}{27}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}アクションリスト}{28}{subsection.4.3.1}%
+\contentsline {subsubsection}{基本}{30}{subsubsection*.59}%
+\contentsline {paragraph}{エンド (基本)}{30}{paragraph*.60}%
+\contentsline {paragraph}{チャージ (基本)}{30}{paragraph*.61}%
+\contentsline {paragraph}{ドロー (基本)}{31}{paragraph*.62}%
+\contentsline {paragraph}{アタック (基本)}{31}{paragraph*.63}%
+\contentsline {paragraph}{ブロック (基本)}{32}{paragraph*.64}%
+\contentsline {paragraph}{ダメージ判定 (基本)}{33}{paragraph*.65}%
+\contentsline {paragraph}{世代交代 (基本)}{34}{paragraph*.66}%
+\contentsline {subsubsection}{召喚}{34}{subsubsection*.67}%
+\contentsline {paragraph}{防壁設置 (召喚)}{34}{paragraph*.68}%
+\contentsline {paragraph}{兵士召喚 (召喚)}{35}{paragraph*.69}%
+\contentsline {paragraph}{英雄召喚 (召喚)}{36}{paragraph*.70}%
+\contentsline {paragraph}{エース召喚 (召喚)}{37}{paragraph*.71}%
+\contentsline {paragraph}{クイック召喚 (召喚)}{37}{paragraph*.72}%
+\contentsline {paragraph}{魔術士召喚 (召喚)}{38}{paragraph*.73}%
+\contentsline {paragraph}{装備 (召喚)}{39}{paragraph*.74}%
+\contentsline {subsubsection}{速攻魔法}{40}{subsubsection*.75}%
+\contentsline {paragraph}{アップ (速攻魔法)}{40}{paragraph*.76}%
+\contentsline {paragraph}{ダウン (速攻魔法)}{40}{paragraph*.77}%
+\contentsline {paragraph}{ツイスト (速攻魔法)}{41}{paragraph*.78}%
+\contentsline {paragraph}{カウンター (速攻魔法)}{42}{paragraph*.79}%
+\contentsline {paragraph}{再会 (速攻魔法)}{42}{paragraph*.80}%
+\contentsline {paragraph}{キル (速攻魔法)}{43}{paragraph*.81}%
+\contentsline {paragraph}{停戦 (速攻魔法)}{44}{paragraph*.82}%
+\contentsline {paragraph}{対象変更 (速攻魔法)}{44}{paragraph*.83}%
+\contentsline {paragraph}{サーチ (速攻魔法)}{45}{paragraph*.84}%
+\contentsline {paragraph}{B・J (速攻魔法)}{46}{paragraph*.85}%
+\contentsline {paragraph}{R・S・F (速攻魔法)}{46}{paragraph*.86}%
+\contentsline {paragraph}{リバース (速攻魔法)}{47}{paragraph*.87}%
+\contentsline {paragraph}{帰還 (速攻魔法)}{48}{paragraph*.88}%
+\contentsline {subsubsection}{通常魔法}{48}{subsubsection*.89}%
+\contentsline {paragraph}{防壁破壊 (通常魔法)}{48}{paragraph*.90}%
+\contentsline {paragraph}{投擲 (通常魔法)}{49}{paragraph*.91}%
+\contentsline {paragraph}{死の槍 (通常魔法)}{50}{paragraph*.92}%
+\contentsline {paragraph}{防壁補充 (通常魔法)}{51}{paragraph*.93}%
+\contentsline {paragraph}{リアニメイト (通常魔法)}{52}{paragraph*.94}%
+\contentsline {paragraph}{ハンデス (通常魔法)}{52}{paragraph*.95}%
+\contentsline {paragraph}{フォース (通常魔法)}{53}{paragraph*.96}%
+\contentsline {paragraph}{剣の雨 (通常魔法)}{54}{paragraph*.97}%
+\contentsline {paragraph}{徴募 (通常魔法)}{54}{paragraph*.98}%
+\contentsline {paragraph}{奇襲 (通常魔法)}{55}{paragraph*.99}%
+\contentsline {subsection}{\numberline {4.3.2}キャラクターリスト}{56}{subsection.4.3.2}%
+\contentsline {subsubsection}{兵士}{56}{subsubsection*.108}%
+\contentsline {paragraph}{一般兵 (兵士)}{56}{paragraph*.109}%
+\contentsline {paragraph}{英雄 (兵士)}{57}{paragraph*.110}%
+\contentsline {paragraph}{エース (兵士)}{57}{paragraph*.111}%
+\contentsline {paragraph}{魔術士 (兵士)}{58}{paragraph*.112}%
+\contentsline {paragraph}{装備兵 (兵士)}{58}{paragraph*.113}%
+\contentsline {subsubsection}{防壁}{59}{subsubsection*.114}%
+\contentsline {paragraph}{防壁 (防壁)}{59}{paragraph*.115}%
+\contentsline {subsection}{\numberline {4.3.3}フォグリスト}{59}{subsection.4.3.3}%
+\contentsline {subsubsection}{速攻魔法}{60}{subsubsection*.121}%
+\contentsline {paragraph}{アップ (速攻魔法)}{60}{paragraph*.122}%
+\contentsline {paragraph}{ダウン (速攻魔法)}{60}{paragraph*.123}%
+\contentsline {subsubsection}{通常魔法}{60}{subsubsection*.124}%
+\contentsline {paragraph}{フォース (通常魔法)}{60}{paragraph*.125}%
+\contentsline {chapter}{\numberline {第5章}フレーム}{61}{chapter.5}%
+\contentsline {section}{\numberline {5.1}フレームとは}{61}{section.5.1}%
+\contentsline {section}{\numberline {5.2}定義項目}{61}{section.5.2}%
+\contentsline {section}{\numberline {5.3}フレーム定義}{62}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}フレームリスト}{62}{subsection.5.3.1}%
+\contentsline {subsubsection}{エントリー20}{62}{subsubsection*.130}%
+\contentsline {subsubsection}{パック}{63}{subsubsection*.131}%
+\contentsline {subsubsection}{レアパック}{65}{subsubsection*.132}%
+\contentsline {subsubsection}{ストラテジー}{66}{subsubsection*.133}%
+\contentsline {subsection}{\numberline {5.3.2}フレームアクションリスト}{68}{subsection.5.3.2}%
+\contentsline {subsubsection}{パック}{68}{subsubsection*.139}%
+\contentsline {paragraph}{パック開封 (パック)}{68}{paragraph*.140}%
+\contentsline {paragraph}{レアドロー (パック)}{69}{paragraph*.141}%
+\contentsline {paragraph}{レア召喚 (パック)}{69}{paragraph*.142}%
+\contentsline {paragraph}{罠カウンター (パック)}{70}{paragraph*.143}%
+\contentsline {chapter}{\numberline {第6章}コアルール}{71}{chapter.6}%
+\contentsline {section}{\numberline {6.1}基礎概念}{71}{section.6.1}%
+\contentsline {subsection}{\numberline {6.1.1}ターン}{72}{subsection.6.1.1}%
+\contentsline {subsection}{\numberline {6.1.2}アクション}{72}{subsection.6.1.2}%
+\contentsline {subsection}{\numberline {6.1.3}リクエスト}{72}{subsection.6.1.3}%
+\contentsline {subsection}{\numberline {6.1.4}解決}{72}{subsection.6.1.4}%
+\contentsline {subsection}{\numberline {6.1.5}チャンス}{72}{subsection.6.1.5}%
+\contentsline {subsection}{\numberline {6.1.6}ステージ}{72}{subsection.6.1.6}%
+\contentsline {subsection}{\numberline {6.1.7}コンポーネント}{73}{subsection.6.1.7}%
+\contentsline {subsection}{\numberline {6.1.8}コンポーネントインスタンス}{73}{subsection.6.1.8}%
+\contentsline {subsection}{\numberline {6.1.9}コアフロー(ルールシステム)}{73}{subsection.6.1.9}%
+\contentsline {section}{\numberline {6.2}詳細}{73}{section.6.2}%
+\contentsline {subsection}{\numberline {6.2.1}アクションの定義項目}{74}{subsection.6.2.1}%
+\contentsline {subsubsection}{オーナー}{75}{subsubsection*.144}%
+\contentsline {subsubsection}{トリガー}{75}{subsubsection*.145}%
+\contentsline {subsubsection}{スピード}{75}{subsubsection*.146}%
+\contentsline {subsubsection}{タイミング}{75}{subsubsection*.147}%
+\contentsline {subsubsection}{起動条件}{76}{subsubsection*.148}%
+\contentsline {subsubsection}{誘発条件}{76}{subsubsection*.149}%
+\contentsline {subsubsection}{効果}{76}{subsubsection*.150}%
+\contentsline {subsection}{\numberline {6.2.2}リクエストの定義項目}{76}{subsection.6.2.2}%
+\contentsline {subsection}{\numberline {6.2.3}コンポーネントの定義項目}{77}{subsection.6.2.3}%
+\contentsline {subsection}{\numberline {6.2.4}コンポーネントインスタンスの定義項目}{77}{subsection.6.2.4}%
+\contentsline {section}{\numberline {6.3}能力}{78}{section.6.3}%
+\contentsline {section}{\numberline {6.4}コアフロー}{79}{section.6.4}%
+\contentsline {subsection}{\numberline {6.4.1}誘発チェック}{81}{subsection.6.4.1}%
+\contentsline {subsubsection}{誘発即時解決}{84}{subsubsection*.155}%
+\contentsline {subsubsection}{通常：アクション毎に処理}{85}{subsubsection*.156}%
+\contentsline {subsection}{\numberline {6.4.2}能力の適応順}{86}{subsection.6.4.2}%
+\contentsline {subsubsection}{考え方の原則}{86}{subsubsection*.157}%
+\contentsline {subsubsection}{能力の適用ルール}{86}{subsubsection*.158}%
+\contentsline {subsubsection}{運用上の注意}{87}{subsubsection*.159}%
+\contentsline {section}{\numberline {6.5}まとめ}{88}{section.6.5}%
+\contentsline {chapter}{\numberline {第7章}付録}{89}{chapter.7}%
+\contentsline {section}{\numberline {7.1}PDF版ルール}{89}{section.7.1}%
+\contentsline {section}{\numberline {7.2}アクションリスト}{89}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}ライト}{89}{subsection.7.2.1}%
+\contentsline {subsection}{\numberline {7.2.2}マスター}{90}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}全フォーマット\&フレーム}{90}{subsection.7.2.3}%
+\contentsline {chapter}{\numberline {第8章}変更履歴}{91}{chapter.8}%
+\contentsline {section}{\numberline {8.1}第8版の主な変更点}{91}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}能力の解釈を変更}{91}{subsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}フォグ領域追加}{91}{subsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.1.3}用語追加}{92}{subsection.8.1.3}%
+\contentsline {subsection}{\numberline {8.1.4}オプション削除とフレームへの統合}{92}{subsection.8.1.4}%
+\contentsline {subsection}{\numberline {8.1.5}曖昧なルールの明確化}{93}{subsection.8.1.5}%
+\contentsline {subsection}{\numberline {8.1.6}ルール外変更点}{93}{subsection.8.1.6}%
+\contentsline {section}{\numberline {8.2}第7版の主な変更点}{94}{section.8.2}%
+\contentsline {subsection}{\numberline {8.2.1}リバースのクイック化}{94}{subsection.8.2.1}%
+\contentsline {subsection}{\numberline {8.2.2}ゲーム中のデッキ名称をライフに変更}{94}{subsection.8.2.2}%
+\contentsline {subsection}{\numberline {8.2.3}対戦レギュレーションの定義方法変更}{94}{subsection.8.2.3}%
+\contentsline {subsection}{\numberline {8.2.4}コアフローをわかりやすく整理}{94}{subsection.8.2.4}%
+\contentsline {subsection}{\numberline {8.2.5}BJのクイック化}{94}{subsection.8.2.5}%
+\contentsline {subsection}{\numberline {8.2.6}引き分け廃止}{94}{subsection.8.2.6}%
+\contentsline {subsection}{\numberline {8.2.7}ルールの記載を微修正}{95}{subsection.8.2.7}%
+\contentsline {chapter}{索引}{97}{chapter*.161}%
