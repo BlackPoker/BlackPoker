@@ -1,6 +1,6 @@
 name: refresh_docs
 
-# vから始まるタグが付いたら実行する（例: v1, v1.2, v1.2.3）
+# vから始まるタグが付いたら実行する（例: v1, v1.2, v1.2.3）←現在動作していない
 on:
   workflow_dispatch:
     inputs:

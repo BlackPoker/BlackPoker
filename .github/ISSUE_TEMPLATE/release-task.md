@@ -23,11 +23,16 @@ https://github.com/BlackPoker/BlackPoker/blob/master/source/conf.py
 
 **Release Note update**
 wiki
-- [ ] https://github.com/BlackPoker/BlackPoker/wiki/7th-edition-changes
+- [ ] https://github.com/BlackPoker/BlackPoker/wiki/Xth-edition-changes
+
+or
+
+rst
+- [ ] https://blackpoker.github.io/BlackPoker/master/revision-history/revision-history.html
 
 **Finish**
-- [ ] merge(master->7th)
-- [ ] 7th build
-- [ ] 7th tag
+- [ ] merge(master->Xth)
+- [ ] Xth build
+- [ ] Xth tag
 - [ ] close milestone
 - [ ] archive the project's done
