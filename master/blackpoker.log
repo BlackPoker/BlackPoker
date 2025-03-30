@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2025 08:39
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2025 13:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1014,7 +1014,7 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 445--448
 []
  []
 
-[8]
+
 Overfull \hbox (140.54974pt too wide) in paragraph at lines 453--455
 []
  []
@@ -1034,7 +1034,7 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 474--476
 []
  []
 
-
+[8]
 Overfull \hbox (140.54974pt too wide) in paragraph at lines 487--489
 []
  []
@@ -1870,4 +1870,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,12n,80p,359b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (101 pages, 316836 bytes).
+Output written on blackpoker.dvi (101 pages, 316848 bytes).
