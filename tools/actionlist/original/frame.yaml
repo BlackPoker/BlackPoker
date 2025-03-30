@@ -1,6 +1,6 @@
 data:
-  ver: 第8版
-  lastupdate: 2025/3/x
+  ver: 第8.0版
+  lastupdate: 2025/3/31
 frames:
   - name: エントリー20
     image: entry20

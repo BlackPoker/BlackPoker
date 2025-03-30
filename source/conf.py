@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'BlackPoker'
-copyright = '2013, BlackPoker'
+copyright = '2013 BlackPoker'
 author = 'もりくま'
 numfig = True
 numfig_format = {
@@ -147,7 +147,7 @@ latex_elements = {
 {\Large %(author)s 著} \\[5mm]
 {\Large %(release)s 発行}\\[10mm]
 
-{\small copyright: %(copyright)s}
+{\small © %(copyright)s}
 
 \end{center}
 \end{titlepage}
