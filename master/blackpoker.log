@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  29 MAR 2025 19:07
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2025 08:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -785,7 +785,12 @@ LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 105.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 8.64899pt on input line 105.
- [1
+LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 1
+05.
+
+(/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
+File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
+) [1
 
 
 ] [2
@@ -1001,11 +1006,7 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 276--278
 
 ]
 第2章
-LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 3
-02.
-(/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
-File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
-) [7]
+[7]
 File: field.pdf Graphic file (type pdf)
 <field.pdf>
 
@@ -1829,20 +1830,44 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 7388--7390
 []
  []
 
-(./blackpoker.ind [90] [91
+[90]
+第8章
+[91
+
+]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7438--7438
+[]
+ []
 
 
-]) (./blackpoker.aux)
+Underfull \hbox (badness 10000) in paragraph at lines 7438--7438
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 7449--7449
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 7449--7449
+
+ []
+
+[92] [93] [94] (./blackpoker.ind [95] [96
+
+
+] [97]) (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 73408BF7FE5D29C31795D6A267A84CFD;13473.
+(rerunfilecheck)             Checksum: AE02A6B1619D0EFC8697B6059D2CEDF2;14781.
  ) 
 Here is how much of TeX's memory you used:
- 14788 strings out of 480496
- 230699 string characters out of 5899437
- 573026 words of memory out of 5000000
- 32466 multiletter control sequences out of 15000+600000
- 498046 words of font info for 105 fonts, out of 8000000 for 9000
+ 14812 strings out of 480496
+ 231287 string characters out of 5899437
+ 574913 words of memory out of 5000000
+ 32490 multiletter control sequences out of 15000+600000
+ 498422 words of font info for 106 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,359b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (95 pages, 300712 bytes).
+Output written on blackpoker.dvi (101 pages, 316836 bytes).

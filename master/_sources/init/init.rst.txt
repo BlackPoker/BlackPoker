@@ -61,7 +61,7 @@ BlackPokerとは
 :numref:`common.rst`
     ゲームの開始方法など全体的なゲームの流れを説明
 :numref:`match-regulations.rst`
-    ゲーム開始時に決定する規則について説明
+    遊び方（ゲーム中にできることの範囲）を決める方法について説明
 :numref:`format.rst`
     対戦レギュレーションを決める際に選択できるフォーマットを紹介
 :numref:`frame.rst`

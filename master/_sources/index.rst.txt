@@ -19,3 +19,4 @@ release: |release|
     frame/frame
     core/core
     appendix/appendix
+    revision-history/revision-history

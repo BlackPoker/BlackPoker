@@ -75,7 +75,7 @@
 
 
 \title{BlackPoker}
-\date{2025年03月29日}
+\date{2025年03月30日}
 \release{2025/3/31}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -102,7 +102,7 @@
 {\Large もりくま 著} \\[5mm]
 {\Large 2025/3/31 発行}\\[10mm]
 
-{\small copyright: 2013, BlackPoker}
+{\small © 2013 BlackPoker}
 
 \end{center}
 \end{titlepage}
@@ -197,7 +197,7 @@ release: 2025/3/31
 
 \sphinxlineitem{\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}}}
 \sphinxAtStartPar
-ゲーム開始時に決定する規則について説明
+遊び方（ゲーム中にできることの範囲）を決める方法について説明
 
 \sphinxlineitem{\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}}}
 \sphinxAtStartPar
@@ -7393,6 +7393,279 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \end{description}
 \phantomsection\label{\detokenize{appendix/appendix:extralist}}
+\sphinxstepscope
+
+
+\chapter{変更履歴}
+\label{\detokenize{revision-history/revision-history:id1}}\label{\detokenize{revision-history/revision-history::doc}}
+\sphinxstepscope
+
+
+\section{第8版の主な変更点}
+\label{\detokenize{revision-history/8th:id1}}\label{\detokenize{revision-history/8th::doc}}
+\sphinxAtStartPar
+次はBlackPoker第8版における主要な変更点です。
+
+
+\subsection{能力の解釈を変更}
+\label{\detokenize{revision-history/8th:id2}}
+\sphinxAtStartPar
+第7版では、能力は「常在型能力」と「誘発型能力」の2種類が定義されていました。
+
+\sphinxAtStartPar
+第8版では、能力の解釈を整理し、アクションに「起動条件」と「誘発条件」を追加することで、能力は常在型能力のみを指すものとしました。
+
+\sphinxAtStartPar
+この変更により、エクストラリストに大きな影響が生じたため、エクストラは一旦非表示としています。
+なお、コアルール内において能力の影響範囲についての記載を追加しています。
+
+
+\subsection{フォグ領域追加}
+\label{\detokenize{revision-history/8th:id3}}
+\sphinxAtStartPar
+新たに「フォグ領域」を追加しました。
+
+\sphinxAtStartPar
+この領域は、「アップ」や「ダウン」など、ターン終了時まで効果が持続する要素を配置するためのもので、効果が視認しやすくなっています。
+また、領域追加に伴い、新たにフォグリストも導入しました。
+
+
+\subsection{用語追加}
+\label{\detokenize{revision-history/8th:id4}}
+\sphinxAtStartPar
+ルールの分かりやすさ向上を目的として、以下の用語を新たに導入しました。
+\begin{description}
+\sphinxlineitem{【キャラクター関連】}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ラベル
+
+\item {} 
+\sphinxAtStartPar
+サイズ
+
+\end{itemize}
+
+\sphinxlineitem{【アクション関連】}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+リクエスト
+
+\item {} 
+\sphinxAtStartPar
+トリガー
+
+\item {} 
+\sphinxAtStartPar
+スピード
+
+\item {} 
+\sphinxAtStartPar
+起動条件
+
+\item {} 
+\sphinxAtStartPar
+誘発条件
+
+\end{itemize}
+
+\end{description}
+
+
+\subsection{オプション削除とフレームへの統合}
+\label{\detokenize{revision-history/8th:id5}}
+\sphinxAtStartPar
+第7版では対戦レギュレーションにオプションが存在していましたが、
+第8版ではオプションを削除し、各フレームに統合することで全体の遊び方の整理を図りました。
+
+\sphinxAtStartPar
+また、新たな構築要素として「ストラテジー」を導入しています。
+結果として、フレームは以下の4種類のみとし、その他は廃止しました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+エントリー20
+
+\item {} 
+\sphinxAtStartPar
+パック
+
+\item {} 
+\sphinxAtStartPar
+レアパック
+
+\item {} 
+\sphinxAtStartPar
+ストラテジー
+
+\end{itemize}
+
+\sphinxAtStartPar
+さらに、ハーフ系が廃止されたため、マッチに関する説明も削除しています。
+今後、エクストラをフレームとして復活させる予定です。
+
+
+\subsection{曖昧なルールの明確化}
+\label{\detokenize{revision-history/8th:id6}}
+\sphinxAtStartPar
+以下の点について、ルールの曖昧な部分を明確化しました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+能力の影響範囲をコアルールに明記
+
+\item {} 
+\sphinxAtStartPar
+誘発チェックのフローを詳細化
+
+\item {} 
+\sphinxAtStartPar
+コアフロー内で能力を確認するタイミングを追加
+
+\item {} 
+\sphinxAtStartPar
+共通ルールおよびコアルールにおいて、リクエストの解決が完了するまでリクエストがステージ上に残ることを明記
+
+\item {} 
+\sphinxAtStartPar
+フォグを配置する際のカードの向きを記載
+
+\item {} 
+\sphinxAtStartPar
+ステージ上にあるキーカードの配置方法を記載
+
+\item {} 
+\sphinxAtStartPar
+コンポーネントインスタンスの概念を導入
+
+\item {} 
+\sphinxAtStartPar
+共通ルールに記載されていた引き分けの記述を修正し、引き分けとならないよう変更
+
+\end{itemize}
+
+
+\subsection{ルール外変更点}
+\label{\detokenize{revision-history/8th:id7}}
+\sphinxAtStartPar
+ルール本体に直接関係しない部分について、以下の変更を実施しました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+コアルールの章を後ろに配置し、最初から読めばルール全体が理解できる章構成に変更
+
+\item {} 
+\sphinxAtStartPar
+新たにフレームの章を設け、フォーマットや章内にアクションリストなどを含む構成に変更
+
+\item {} 
+\sphinxAtStartPar
+HTML版のアクションリストで、フレーム依存のアクションも表示されるよう修正
+
+\item {} 
+\sphinxAtStartPar
+各アクション、キャラクター、フォグの導入バージョンなど、細かな情報を記載
+
+\item {} 
+\sphinxAtStartPar
+PDF版に索引を追加
+
+\item {} 
+\sphinxAtStartPar
+PDF版の表紙を、新ロゴをあしらった新デザインに変更
+
+\item {} 
+\sphinxAtStartPar
+アクションなどのyaml定義に対してjsonスキーマを作成
+
+\item {} 
+\sphinxAtStartPar
+変更履歴を公式ルール内に記載
+
+\item {} 
+\sphinxAtStartPar
+中綴じ印刷用のPDFを追加
+
+\end{itemize}
+
+\sphinxstepscope
+
+
+\section{第7版の主な変更点}
+\label{\detokenize{revision-history/7th:id1}}\label{\detokenize{revision-history/7th::doc}}
+\sphinxAtStartPar
+次はBlackPoker第7版における主要な変更点です。
+
+
+\subsection{リバースのクイック化}
+\label{\detokenize{revision-history/7th:id2}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+リバースがクイックタイミングで使用可能になりました。
+
+\item {} 
+\sphinxAtStartPar
+リバースはスタンダードではなく、プロ向けに提供されるようになりました。
+
+\end{itemize}
+
+
+\subsection{ゲーム中のデッキ名称をライフに変更}
+\label{\detokenize{revision-history/7th:id3}}
+\sphinxAtStartPar
+対戦レギュレーションで示されるデッキと、実際のゲーム中に使用するデッキでは意味が異なります。
+
+\sphinxAtStartPar
+その違いを明確にするため、ゲーム中のデッキ名称を「ライフ」に変更しました。
+
+
+\subsection{対戦レギュレーションの定義方法変更}
+\label{\detokenize{revision-history/7th:id4}}
+\sphinxAtStartPar
+対戦レギュレーションは、フレーム、オプション、フォーマットの3要素の決定により定まるようになりました。
+
+\sphinxAtStartPar
+この修正により、対戦レギュレーションの種類が大幅に増加し、決定事項が少なくてもルールが確定できるようになりました。
+
+
+\subsection{コアフローをわかりやすく整理}
+\label{\detokenize{revision-history/7th:id5}}
+\sphinxAtStartPar
+従来、複雑で分かりにくかったコアフローのフローチャートを整理し、より分かりやすいものに改訂しました。
+
+
+\subsection{BJのクイック化}
+\label{\detokenize{revision-history/7th:bj}}
+\sphinxAtStartPar
+BJがクイックタイミングで使用できるようになりました。
+
+
+\subsection{引き分け廃止}
+\label{\detokenize{revision-history/7th:id6}}
+\sphinxAtStartPar
+勝敗判定をターンプレイヤーから行う方式に変更されたため、引き分けが廃止されました。
+
+
+\subsection{ルールの記載を微修正}
+\label{\detokenize{revision-history/7th:id7}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+索引を追加しました。
+
+\item {} 
+\sphinxAtStartPar
+PDF版において、大きすぎる図のサイズを縮小しました。
+
+\item {} 
+\sphinxAtStartPar
+ストーリー部分を追加しました。
+
+\item {} 
+\sphinxAtStartPar
+エクストラの対応版数に関する記載を削除しました。
+
+\end{itemize}
+
 
 
 \renewcommand{\indexname}{索引}
