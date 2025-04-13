@@ -71,3 +71,107 @@ actList:
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
 
+  - type: 切札
+    acts:
+    -
+      frame: |-
+        ・エクストラ
+      actId: open
+      actName: オープン
+      actType: 切札
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: BBD
+      actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
+      actNote: ※コストを$DDとすればタイミングをクイックとして起こすことができる。
+      actEffect: |-
+        自分の切札を1枚表にし、切札に対応した能力を有効にする。
+        切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+    -
+      frame: |-
+        ・エクストラ
+      actId: close
+      actName: クローズ
+      actType: 切札
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: L
+      actKey: 同じスート2枚
+      actTarget: 切札1枚を対象とする。
+      actEffect: |-
+        対象の切札が表向きかつキーカードのスートと同じ場合、その切札を裏向きにする。対象の切札に対応した能力は無効になる。
+        切札については「切札について」参照
+
+    -
+      frame: |-
+        ・エクストラ
+      actId: trumpDestroy
+      actName: 切札破壊
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: B
+      actKey: A〜K
+      actTarget: 切札1枚を対象とする。
+      actEffect: |-
+        対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。
+        切札については「切札について」参照
+
+    -
+      frame: |-
+        ・エクストラ
+      actId: trumpRegene
+      actName: 切札再生
+      actType: 切札
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTarget: カード1枚を対象とする。
+      actEffect: |-
+        対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
+        切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+
+
+  - type: 切札♠2
+    acts:
+    - 
+      frame: |-
+        ・エクストラ
+      actName: スラッシュ
+      actId: slash
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actTarget: 兵士１体を対象とする。
+      actActCond: あなたの切札♠2が表になっている。
+      actEffect: 対象の兵士がこのアクションを起こした兵士の数字以下の場合、対象の兵士を墓地に移す。
+
+
+trumpList:
+  - type: エクストラ
+    trumps:
+    - frame: 
+      - エクストラ
+      trumpName: 革命
+      trumpId: sA
+      trumpType: 切札
+      trumpKey: ♠A
+      trumpAbility: |
+        この能力が有効である時にダメージ判定アクションが効果を発揮した場合、ダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。
+        １．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+        ---
+        自分の兵士は以下の能力を得る。
+        ・アタッカーかつダメージ判定アクションにてブロックされなかった場合、革命ドローアクションを起こす。
+      since: 8.0?
+
+    - frame: 
+      - エクストラ
+      trumpName: スラッシュ
+      trumpId: s2
+      trumpType: 立ち上がる兵士
+      trumpKey: ♠2
+      since: 8.0?
