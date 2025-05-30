@@ -521,7 +521,7 @@
 
             <!-- actionlist -->
             <div class="blackpoker-type-group">
-              <h5>ActionList</h5>
+              <h5>アクションリスト</h5>
               <div th:each="actList:${actList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${actList.type}"></span>
                 <div class="list-group">
@@ -547,7 +547,7 @@
             
             <!-- characterlist -->
             <div class="blackpoker-type-group">
-              <h5>CharacterList</h5>
+              <h5>キャラクターリスト</h5>
               <div th:each="charList:${charList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${charList.type}"></span>
                 <div class="list-group">
@@ -570,7 +570,7 @@
 
             <!-- foglist -->
             <div>
-              <h5>FogList</h5>
+              <h5>フォグリスト</h5>
               <div th:each="fogList:${fogList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${fogList.type}"></span>
                 <div class="list-group">
@@ -705,7 +705,7 @@
 
       <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
       <div class="text-center">
-      <h4>ActionList</h4>
+      <h5>アクションリスト</h5>
       </div>
       <div th:each="nestList : ${actList}" class="blackpoker-type-group">
         <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
@@ -792,7 +792,7 @@
       <!-- characterlist -->
       <hr>
       <div class="text-center">
-      <h4>CharacterList</h4>
+      <h5>キャラクターリスト</h5>
       </div>
       <div th:each="nestList : ${charList}" class="blackpoker-type-group">
         <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
@@ -852,7 +852,7 @@
       <!-- foglist -->
       <hr>
       <div class="text-center">
-      <h4>FogList</h4>
+      <h5>フォグリスト</h5>
       </div>
       <div th:each="nestList : ${fogList}" class="blackpoker-type-group">
         <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
