@@ -169,7 +169,7 @@
               }
             }
           },
-          "required": ["type", "chars"],
+          "required": ["type", "fogs"],
           "additionalProperties": true
         }
       },
@@ -215,7 +215,7 @@
               }
             }
           },
-          "required": ["type", "chars"],
+          "required": ["type", "trumps"],
           "additionalProperties": true
         }
       }
