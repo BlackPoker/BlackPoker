@@ -26,8 +26,8 @@ actList:
         1. 手札が7枚を越えた場合、7枚になるよう手札を捨てる。
         2. 自分のフォグにあるカードを全て墓地に移す。
         3. 自分のターンを終了し、対戦相手にターンを渡す。
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
 
     - format: lite,std,pro,mast
       actName: チャージ
@@ -39,8 +39,8 @@ actList:
       actTriggerCond: ターンプレイヤーかつ、エンドアクションが解決した時に誘発する。
       actEffect: |-
         ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
-      since: 4.0
-      update: 8.0
+      since: v4.0
+      update: v8.0
       devNote: |-
         今までチャージ&ドローという名称ターンの構成に含まれていましたが、4.0からアクションに分離
 
@@ -55,8 +55,8 @@ actList:
       actEffect: |-
         1. ライフの一番上からカードを１枚引き、手札に加える。
         2. 必要であれば、更にライフの一番上からカードを１枚引き、手札に加える。
-      since: 4.0
-      update: 8.0
+      since: v4.0
+      update: v8.0
 
     - format: lite,std,pro,mast
       actName: アタック
@@ -71,8 +71,8 @@ actList:
         ・アタッカーはラベルにアタッカーを持っているキャラクターを指定できる。
         ・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
         ・このターン場に出たキャラクターは指定できない、ただしラベルに速攻があるキャラクターは指定できる。
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
 
     - format: lite,std,pro,mast
       actName: ブロック
@@ -86,8 +86,8 @@ actList:
         対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。
         ・ブロッカーはラベルにブロッカーを持っているキャラクターを指定できる。 
         ・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
 
     - format: lite,std,pro,mast
       actName: ダメージ判定
@@ -106,8 +106,8 @@ actList:
         --B. 防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合
         -2. 防壁を墓地に移す。
         3. アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: 世代交代
@@ -119,8 +119,8 @@ actList:
       actTime: クイック
       actTriggerCond: Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
   - type: 召喚
     acts:
@@ -138,8 +138,8 @@ actList:
       story: どの国もいきなり攻撃はしません。自国を守るため、防衛拠点（防壁：bulwark）を作り、徐々に相手に攻め入ります。
       flavor: 「まずは、防壁を出す。話はそれからだ。」
       flavorSpeaker: 再現の師より
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: 兵士召喚
@@ -155,10 +155,10 @@ actList:
       story: 兵士をいきない戦場に出すことはできません。防衛拠点に受け入れてもらい、休息をとってから戦場に出ます。当然民の支援も必要です。
       flavor: 「防壁の次は兵士を出します。これが戦術の基本です。」
       flavorSpeaker: 再現者の心得第二章より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
       devNote: |-
-        0.1では召喚アクションしかなかったが、3.0から各キャラクターに分割された
+        v0.1では召喚アクションしかなかったが、3.0から各キャラクターに分割された
       
     - format: 'lite,std,pro,mast'
       actName: 英雄召喚
@@ -174,8 +174,8 @@ actList:
       story: 英雄の召喚には一般兵よりコストがかかります。防壁による厳重な警護。十分な休息。そして民の支援です。
       flavor: 「実力はわからんが一応英雄様の出陣じゃ。粗相のないようしっかりやれよ。」
       flavorSpeaker: 古参兵より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: エース召喚
@@ -190,8 +190,8 @@ actList:
       story: エースは素早く行動を起こします。いきなり戦場に登場し切り込んで行きます。
       flavor: 「あいつ！何も持たずに飛び出して行きやがった！」
       flavorSpeaker: 親方より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: 'pro,mast'
       actName: クイック召喚
@@ -207,8 +207,8 @@ actList:
         キーカードをエースとして表向きかつチャージ状態で場に出す。
         もしくは、キーカードを防壁として裏向きかつチャージ状態で場に出す。
         防壁の置き方は「防壁の置き方」参照。
-      since: 6.0
-      update: 8.0
+      since: v6.0
+      update: v8.0
 
     - format: 'std,pro,mast'
       actName: 魔術士召喚
@@ -226,8 +226,8 @@ actList:
         コストとして民の支援より手元の予定を狂わせることを要求するあたり捻くれ者であることが伺えます。
       flavor: 「場に出れば強いんだよなぁ。場に出れば。」
       flavorSpeaker: 再現者見習いより
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: 装備
@@ -244,8 +244,8 @@ actList:
       story: 兵士を強化することができます。強化した分強くなるのですが、弱点も増えるので要注意です。
       flavor: 「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」
       flavorSpeaker: ライフよりの防壁より
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
   - type: 速攻魔法
     acts:  
@@ -260,8 +260,8 @@ actList:
       actKey: ♡A〜10
       actTarget: 兵士1体を対象とする。
       actEffect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: ダウン
@@ -277,8 +277,8 @@ actList:
         対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。
         もし対象のサイズが０以下となった場合、対象を墓地に移す。
         もし対象のサイズが０以下とならなかった場合、その印としてフォグにキーカードを置き、ダウンとする。
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: ツイスト
@@ -291,10 +291,10 @@ actList:
       actKey: ♢A〜10
       actTarget: キャラクター1体を対象とする。
       actEffect: 対象のキャラクターをドライブ状態またはチャージ状態にする。
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
       devNote: |-
-        0.1でドライブという名称だったが、0.2からツイストとなった
+        v0.1でドライブという名称だったが、0.2からツイストとなった
 
 
     - format: lite,std,pro,mast
@@ -312,8 +312,8 @@ actList:
         次のいずれかの場合、対象のアクションを無効にする。その場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
         ・対象アクションのキーカードが1枚かつこのアクションのキーカードの数字が対象アクションのキーカードの数字以上
         ・対象アクションのキーカードが2枚
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: ',,pro,mast'
       actName: 再会
@@ -328,8 +328,8 @@ actList:
       story: 親愛な仲間との再会を強く強く願った。どんな手段も厭わないその願いが今叶った。
       flavor: 「ねぇねぇ知ってた。この後ヒロインの願いが届いて死んだはずの主人公が登場して、二人で敵を全員やっつけちゃうの！ありがちよねぇ。」
       flavorSpeaker: ネタバレ娘より
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: ',,pro,mast'
       actName: キル
@@ -341,8 +341,8 @@ actList:
       actKey: ♠A〜10 を 2枚
       actTarget: 兵士1体を対象とする。
       actEffect: 対象とした兵士を墓地に移す。
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: ',,pro,mast'
       actName: 停戦
@@ -355,8 +355,8 @@ actList:
       actKey: ♢A〜10 を 2枚
       actTarget: ダメージ判定アクションを対象とする。
       actEffect: 対象のアクションを無効にする。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: ',,pro,mast'
       actName: 対象変更
@@ -369,8 +369,8 @@ actList:
       actKey: ♣A〜10 を 2枚
       actTarget: 対象が指定されているアクションを対象とする。
       actEffect: 対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: 'lite,std,pro,mast'
       actName: サーチ
@@ -381,8 +381,8 @@ actList:
       actTime: クイック
       actKey: Joker
       actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: ',,mast'
       actName: B・J
@@ -397,8 +397,8 @@ actList:
       story: 若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。
       flavor: 「悪しき習慣を捨て去り、新しい風を吹き込む」
       flavorSpeaker: 革命者より
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: ',,mast'
       actName: R・S・F
@@ -412,8 +412,8 @@ actList:
       actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: プレイヤー１人を対象とする。
       actEffect: 対象のプレイヤーに40点のダメージを与える。
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: 'pro,mast'
       actName: リバース
@@ -429,8 +429,8 @@ actList:
         2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
         3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
         4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: ',std,pro,mast'
       actName: 帰還
@@ -447,8 +447,8 @@ actList:
       actEffect: |-
         1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
         2. キーカードを手札に戻す。
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
   - type: 通常魔法
     acts:  
@@ -466,8 +466,8 @@ actList:
       story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。
       flavor: 「あれ？いつの間にかなくなってるよ？」
       flavorSpeaker: かくれんぼしていた子供より
-      since: 0.2
-      update: 8.0
+      since: v0.2
+      update: v8.0
       devNote: |-
         v0.1ではアクション名が誤記で投擲となっていたため、0.2から登場
 
@@ -485,8 +485,8 @@ actList:
       story: 知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。
       flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」
       flavorSpeaker: 再現者の心得第十一章より
-      since: 0.1
-      update: 8.0
+      since: v0.1
+      update: v8.0
 
     - format: ',std,pro,mast'
       actName: 死の槍
@@ -505,8 +505,8 @@ actList:
       story: 死♠の槍♢。そのままだな。
       flavor: 「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」
       flavorSpeaker: 再現者の心得第十二章より
-      since: 2.0
-      update: 3.0,8.0
+      since: v2.0
+      update: v3.0,8.0
 
     - format: ',std,pro,mast'
       actName: 防壁補充
@@ -523,8 +523,8 @@ actList:
       story: 愛する人♡を守るため知恵♣を絞った結果守りを固めることにした。
       flavor: 「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」
       flavorSpeaker: 無能な指揮官より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',std,pro,mast'
       actName: リアニメイト
@@ -536,8 +536,8 @@ actList:
       actKey: ♠A〜K と ♡A〜K
       actTarget: 自分の場のキャラクター１体を対象とする。
       actEffect: 自分の墓地にあるカード１枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',std,pro,mast'
       actName: ハンデス
@@ -549,8 +549,8 @@ actList:
       actKey: ♢A〜K と ♣A〜K
       actTarget: 対戦相手１人を対象とする。
       actEffect: 対戦相手の手札を見て１枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',,mast'
       actName: フォース
@@ -565,8 +565,8 @@ actList:
       actEffect: |-
         このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
         その印としてフォグにキーカードを置き、フォースとする。
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',,mast'
       actName: 剣の雨
@@ -583,8 +583,8 @@ actList:
       story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
       flavor: 「え！助かる訳ないじゃん！！」
       flavorSpeaker: 平和主義の♣3一般兵より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',,mast'
       actName: 徴募
@@ -606,8 +606,8 @@ actList:
         「君はどう？兵士になる？...あっそう。」
         「はぁ。金がなけれりゃ誰も来やしねぇ」
       flavorSpeaker: 孤独な徴募兵より
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: ',,mast'
       actName: 奇襲
@@ -623,8 +623,8 @@ actList:
       actEffect: |-
         1. 自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
         2. 自分の場にいる全ての兵士をチャージ状態にする。
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
 charList:
   - type: 兵士
@@ -637,8 +637,8 @@ charList:
       charKey: 2〜10
       charSize: キーカードの数字
       charLabel: アタッカー, ブロッカー
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
       devNote: |-
         CharacterListが1.0から追加となった。
 
@@ -650,8 +650,8 @@ charList:
       charKey: J〜K
       charSize: キーカードがJなら11,Qなら12,Kなら13
       charLabel: アタッカー, ブロッカー
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: lite,std,pro,mast
       charName: エース
@@ -663,8 +663,8 @@ charList:
       story: エースは先駆者であり皆の先頭に立ち切り込んで行く力があります。一人では大きなダメージにはなりませんが、大きな力を持っています。あなたもエースがまさにエースであることに気づくでしょう。
       flavor: 「俺には、ちびですばしっこいだけにしか見えませんが？」
       flavorSpeaker: 再現者見習いより
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
     - format: ',std,pro,mast'
       charName: 魔術士
@@ -676,8 +676,8 @@ charList:
       charLabel: アタッカー, ブロッカー, 速攻
       charAbility: |-
         ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストDが無しになる。）
-      since: 3.0
-      update: 8.0
+      since: v3.0
+      update: v8.0
 
     - format: lite,std,pro,mast
       charName: 装備兵
@@ -687,8 +687,8 @@ charList:
       charKey: 同じスートを2枚以上
       charSize: キーカードの数字の合計
       charLabel: アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)
-      since: 5.0
-      update: 8.0
+      since: v5.0
+      update: v8.0
 
   - type: 防壁
     chars:
@@ -699,8 +699,8 @@ charList:
       charType: 防壁
       charKey: 全て(裏向き)
       charLabel: ブロッカー
-      since: 1.0
-      update: 8.0
+      since: v1.0
+      update: v8.0
 
 fogList:
   - type: 速攻魔法
@@ -712,7 +712,7 @@ fogList:
       fogKey: ♡A〜10
       fogTarget: アップアクションで対象となった兵士
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
-      since: 8.0
+      since: v8.0
 
     - format: 'lite,std,pro,mast'
       fogName: ダウン
@@ -721,7 +721,7 @@ fogList:
       fogKey: ♠A〜10
       fogTarget: ダウンアクションで対象となった兵士
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。  
-      since: 8.0
+      since: v8.0
 
   - type: 通常魔法
     fogs:
@@ -731,4 +731,4 @@ fogList:
       fogType: 通常魔法
       fogKey: ♡A〜10 を 2枚
       fogAbility: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
-      since: 8.0
+      since: v8.0
