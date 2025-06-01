@@ -137,8 +137,7 @@ actList:
 
   - type: 切札♠2
     acts:
-    - 
-      frame: |-
+    - frame: |-
         ・エクストラ
       actName: スラッシュ
       actId: slash
@@ -152,10 +151,10 @@ actList:
 
 
 trumpList:
-  - type: エクストラ
+  - type: スペード
     trumps:
-    - frame: 
-      - エクストラ
+    - frame: |-
+        ・エクストラ
       trumpName: 革命
       trumpId: sA
       trumpType: 切札
@@ -168,8 +167,8 @@ trumpList:
         ・アタッカーかつダメージ判定アクションにてブロックされなかった場合、革命ドローアクションを起こす。
       since: 8.0?
 
-    - frame: 
-      - エクストラ
+    - frame: |-
+        ・エクストラ
       trumpName: スラッシュ
       trumpId: s2
       trumpType: 立ち上がる兵士
