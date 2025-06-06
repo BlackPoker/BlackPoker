@@ -13,6 +13,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import com.github.blackpoker.actionlist.CustomDialect;
+import com.github.blackpoker.actionlist.StrFn;
 import com.github.blackpoker.actionlist.Writer;
 
 public class HtmlWriter implements Writer {
@@ -37,6 +38,7 @@ public class HtmlWriter implements Writer {
         for (Entry<String, Object> entry : map.entrySet()) {
             context.setVariable(entry.getKey(), entry.getValue());
         }
+        context.setVariable("strFn", new StrFn());
 
         // templateName が "std" なら templates/std.html を探す
         templateEngine.process(templateName, context, writer);

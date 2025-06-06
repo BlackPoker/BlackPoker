@@ -535,14 +535,10 @@
                 <span class="blackpoker-type-group-title" th:text="${actList.type}"></span>
                 <div class="list-group">
 
-                  <a th:each="row : ${actList.acts}"
-                    th:attr="
+                  <a th:each="row : ${actList.acts}" th:attr="
                     href='#act-'+${row.actId},
-                    data-format=${row.format != null ? row.format.replace('lite','ライト')
-                    .replace('std','スタンダード')
-                    .replace('pro','プロ')
-                    .replace('mast','マスター') : null},
-                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                    data-format=${strFn.formatDataFormat(row.format)},
+                    data-frame=${strFn.formatDataFrame(row.frame)},"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
@@ -560,14 +556,10 @@
               <div th:each="charList:${charList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${charList.type}"></span>
                 <div class="list-group">
-                  <a th:each="row : ${charList.chars}"
-                    th:attr="
+                  <a th:each="row : ${charList.chars}" th:attr="
                     href='#char-'+${row.charId},
-                    data-format=${row.format != null ? row.format.replace('lite','ライト')
-                    .replace('std','スタンダード')
-                    .replace('pro','プロ')
-                    .replace('mast','マスター') : null},
-                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                    data-format=${strFn.formatDataFormat(row.format)},
+                    data-frame=${strFn.formatDataFrame(row.frame)},"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.charName}"></span>
@@ -582,14 +574,10 @@
               <div th:each="fogList:${fogList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${fogList.type}"></span>
                 <div class="list-group">
-                  <a th:each="row : ${fogList.fogs}"
-                    th:attr="
+                  <a th:each="row : ${fogList.fogs}" th:attr="
                     href='#fog-'+${row.fogId},
-                    data-format=${row.format != null ? row.format.replace('lite','ライト')
-                    .replace('std','スタンダード')
-                    .replace('pro','プロ')
-                    .replace('mast','マスター') : null},
-                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                    data-format=${strFn.formatDataFormat(row.format)},
+                    data-frame=${strFn.formatDataFrame(row.frame)},"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.fogName}"></span>
@@ -604,14 +592,10 @@
               <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title" th:text="${trumpList.type}"></span>
                 <div class="list-group">
-                  <a th:each="row : ${trumpList.trumps}"
-                    th:attr="
+                  <a th:each="row : ${trumpList.trumps}" th:attr="
                     href='#trump-'+${row.trumpId},
-                    data-format=${row.format != null ? row.format.replace('lite','ライト')
-                    .replace('std','スタンダード')
-                    .replace('pro','プロ')
-                    .replace('mast','マスター') : null},
-                    data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}"
+                    data-format=${strFn.formatDataFormat(row.format)},
+                    data-frame=${strFn.formatDataFrame(row.frame)},"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.trumpName}"></span>
@@ -750,14 +734,10 @@
             <div th:each="row : ${nestList.acts}" class="col-lg-4"
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action"
-                  th:attr="
+                <div class="panel panel-default blackpoker-action" th:attr="
                   id='act-'+${row.actId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                                                            .replace('std','スタンダード')
-                                                            .replace('pro','プロ')
-                                                            .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
+                  data-format=${strFn.formatDataFormat(row.format)},
+                  data-frame=${strFn.formatDataFrame(row.frame)},">
 
                   <div class="panel-heading">
 
@@ -849,11 +829,8 @@
                 <div class="panel panel-default blackpoker-action"
                   th:attr="
                   id='char-'+${row.charId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                                                            .replace('std','スタンダード')
-                                                            .replace('pro','プロ')
-                                                            .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
+                  data-format=${strFn.formatDataFormat(row.format)},
+                  data-frame=${strFn.formatDataFrame(row.frame)},">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}"
@@ -922,11 +899,8 @@
 
                 <div class="panel panel-default blackpoker-action"
                   th:attr="id='fog'+${row.fogId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                                                            .replace('std','スタンダード')
-                                                            .replace('pro','プロ')
-                                                            .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
+                  data-format=${strFn.formatDataFormat(row.format)},
+                  data-frame=${strFn.formatDataFrame(row.frame)},">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}"
@@ -983,14 +957,11 @@
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" 
+                <div class="panel panel-default blackpoker-action"
                   th:attr="
                   id='trump-'+${row.trumpId},
-                  data-format=${row.format != null ? row.format.replace('lite','ライト')
-                                                            .replace('std','スタンダード')
-                                                            .replace('pro','プロ')
-                                                            .replace('mast','マスター') : null},
-                  data-frame=${row.frame != null ? #strings.replace(#strings.replace(row.frame, '・', ''), '\n', ',').trim() : null}">
+                  data-format=${strFn.formatDataFormat(row.format)},
+                  data-frame=${strFn.formatDataFrame(row.frame)},">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.trumpId}"
