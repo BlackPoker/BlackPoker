@@ -1,0 +1,2080 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>アクションリスト &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="フレーム" href="../frame/frame.html" />
+    <link rel="prev" title="フォーマット" href="../format/format.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="../format/format.html" accesskey="U">フォーマット</a>
+            <a class="top" href="#">アクションリスト</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="../format/format.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            フォーマット
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../frame/frame.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            フレーム
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="../format/format.html">フォーマット</a> &#187;</li>
+    <li><a href="">アクションリスト</a></li> 
+  </ul>
+</nav>
+<section id="act-act">
+<span id="id1"></span><h1><span class="section-number">4.3.1. </span>アクションリスト<a class="headerlink" href="#act-act" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id2">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id3" id="id59">基本</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-end" id="id60">エンド (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-charge" id="id61">チャージ (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-draw" id="id62">ドロー (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-attack" id="id63">アタック (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-block" id="id64">ブロック (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-damagejudge" id="id65">ダメージ判定 (基本)</a></p></li>
+<li><p><a class="reference internal" href="#act-nextgeneration" id="id66">世代交代 (基本)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id11" id="id67">召喚</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-setbulwark" id="id68">防壁設置 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-summonssoldier" id="id69">兵士召喚 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-summonshero" id="id70">英雄召喚 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-summonsace" id="id71">エース召喚 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonsace" id="id72">クイック召喚 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-summonsmagic" id="id73">魔術士召喚 (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#act-mountsoldier" id="id74">装備 (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id19" id="id75">速攻魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-up" id="id76">アップ (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-down" id="id77">ダウン (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-twist" id="id78">ツイスト (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-counter" id="id79">カウンター (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-reunion" id="id80">再会 (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-kill" id="id81">キル (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-truce" id="id82">停戦 (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-changetarget" id="id83">対象変更 (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-search" id="id84">サーチ (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#bj" id="id85">B・J (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#rsf" id="id86">R・S・F (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-reverse" id="id87">リバース (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-unsummons" id="id88">帰還 (速攻魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id31" id="id89">通常魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-destroybulwark" id="id90">防壁破壊 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-throwing" id="id91">投擲 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-deathlance" id="id92">死の槍 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-addbulwark" id="id93">防壁補充 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-reanimate" id="id94">リアニメイト (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-handeth" id="id95">ハンデス (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-force" id="id96">フォース (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-swordrain" id="id97">剣の雨 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-recruit" id="id98">徴募 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-surprise" id="id99">奇襲 (通常魔法)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id3">
+<h2><a class="toc-backref" href="#id59" role="doc-backlink"><span class="section-number">4.3.1.1. </span>基本</a><a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-end">
+<span id="id4"></span><h3><a class="toc-backref" href="#id60" role="doc-backlink"><span class="section-number">4.3.1.1.1. </span>エンド (基本)</a><a class="headerlink" href="#act-end" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>手札が7枚を越えた場合、7枚になるよう手札を捨てる。</p></li>
+<li><p>自分のフォグにあるカードを全て墓地に移す。</p></li>
+<li><p>自分のターンを終了し、対戦相手にターンを渡す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-charge">
+<span id="id5"></span><h3><a class="toc-backref" href="#id61" role="doc-backlink"><span class="section-number">4.3.1.1.2. </span>チャージ (基本)</a><a class="headerlink" href="#act-charge" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>誘発条件:</strong></p>
+<p>ターンプレイヤーかつ、エンドアクションが解決した時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。</p>
+<p><strong>導入バージョン:</strong>  v4.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-draw">
+<span id="id6"></span><h3><a class="toc-backref" href="#id62" role="doc-backlink"><span class="section-number">4.3.1.1.3. </span>ドロー (基本)</a><a class="headerlink" href="#act-draw" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>誘発条件:</strong></p>
+<p>ターンプレイヤーかつ、チャージアクションが解決した時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>ライフの一番上からカードを1枚引き、手札に加える。</p></li>
+<li><p>必要であれば、更にライフの一番上からカードを1枚引き、手札に加える。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v4.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-attack">
+<span id="id7"></span><h3><a class="toc-backref" href="#id63" role="doc-backlink"><span class="section-number">4.3.1.1.4. </span>アタック (基本)</a><a class="headerlink" href="#act-attack" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>起動条件:</strong></p>
+<p>プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<p>対戦相手を攻撃するアタッカーをドライブして指定する。</p>
+<p>・アタッカーはラベルにアタッカーを持っているキャラクターを指定できる。</p>
+<p>・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。</p>
+<p>・このターン場に出たキャラクターは指定できない、ただしラベルに速攻があるキャラクターは指定できる。</p>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-block">
+<span id="id8"></span><h3><a class="toc-backref" href="#id64" role="doc-backlink"><span class="section-number">4.3.1.1.5. </span>ブロック (基本)</a><a class="headerlink" href="#act-block" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>誘発条件:</strong></p>
+<p>ターンプレイヤーかつ、アタックアクションが解決した時にアタッカーが1体以上いる場合、誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。</p>
+<p>・ブロッカーはラベルにブロッカーを持っているキャラクターを指定できる。</p>
+<p>・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。</p>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-damagejudge">
+<span id="id9"></span><h3><a class="toc-backref" href="#id65" role="doc-backlink"><span class="section-number">4.3.1.1.6. </span>ダメージ判定 (基本)</a><a class="headerlink" href="#act-damagejudge" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>誘発条件:</strong></p>
+<p>ターンプレイヤーかつ、ブロックアクションが解決した時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>アタッカーとブロッカーを比較する</p>
+<ol class="arabic simple">
+<li><p>兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、少ない方を墓地に移す。同じ場合は両方を墓地に移動する。1アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。</p></li>
+<li><p>兵士（アタッカー）と防壁（ブロッカー）の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>防壁を表にし、防壁が次の条件に当てはまる場合、アタッカーを墓地に移す。</p>
+<ol class="upperalpha simple">
+<li><p>防壁がJokerの場合</p></li>
+<li><p>防壁のカードに記載されている数字と同じ数字がアタッカーのカードに含まれている場合</p></li>
+</ol>
+</li>
+<li><p>防壁を墓地に移す。</p></li>
+</ol>
+</li>
+<li><p>アタッカーをブロックするブロッカーが場に存在しない場合、アタッカーの数字だけ対戦相手にダメージを与える。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-nextgeneration">
+<span id="id10"></span><h3><a class="toc-backref" href="#id66" role="doc-backlink"><span class="section-number">4.3.1.1.7. </span>世代交代 (基本)</a><a class="headerlink" href="#act-nextgeneration" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id11">
+<h2><a class="toc-backref" href="#id67" role="doc-backlink"><span class="section-number">4.3.1.2. </span>召喚</a><a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-setbulwark">
+<span id="id12"></span><h3><a class="toc-backref" href="#id68" role="doc-backlink"><span class="section-number">4.3.1.2.1. </span>防壁設置 (召喚)</a><a class="headerlink" href="#act-setbulwark" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<p>手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は「防壁の置き方」参照。</p>
+<p><strong>ストーリー:</strong></p>
+<p>どの国もいきなり攻撃はしません。自国を守るため、防衛拠点（防壁：bulwark）を作り、徐々に相手に攻め入ります。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「まずは、防壁を出す。話はそれからだ。」</em></p>
+<p>~ 再現の師より ~</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-summonssoldier">
+<span id="id13"></span><h3><a class="toc-backref" href="#id69" role="doc-backlink"><span class="section-number">4.3.1.2.2. </span>兵士召喚 (召喚)</a><a class="headerlink" href="#act-summonssoldier" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> 2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを一般兵として表向きかつチャージ状態で場に出す。</p>
+<p><strong>ストーリー:</strong></p>
+<p>兵士をいきない戦場に出すことはできません。防衛拠点に受け入れてもらい、休息をとってから戦場に出ます。当然民の支援も必要です。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「防壁の次は兵士を出します。これが戦術の基本です。」</em></p>
+<p>~ 再現者の心得第二章より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-summonshero">
+<span id="id14"></span><h3><a class="toc-backref" href="#id70" role="doc-backlink"><span class="section-number">4.3.1.2.3. </span>英雄召喚 (召喚)</a><a class="headerlink" href="#act-summonshero" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> J〜K</p>
+<p><strong>コスト:</strong> BBL</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを英雄として表向きかつチャージ状態で場に出す。</p>
+<p><strong>ストーリー:</strong></p>
+<p>英雄の召喚には一般兵よりコストがかかります。防壁による厳重な警護。十分な休息。そして民の支援です。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「実力はわからんが一応英雄様の出陣じゃ。粗相のないようしっかりやれよ。」</em></p>
+<p>~ 古参兵より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-summonsace">
+<span id="id15"></span><h3><a class="toc-backref" href="#id71" role="doc-backlink"><span class="section-number">4.3.1.2.4. </span>エース召喚 (召喚)</a><a class="headerlink" href="#act-summonsace" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> A</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>効果:</strong></p>
+<p>キーカードをエースとして表向きかつチャージ状態で場に出す。</p>
+<p><strong>ストーリー:</strong></p>
+<p>エースは素早く行動を起こします。いきなり戦場に登場し切り込んで行きます。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「あいつ！何も持たずに飛び出して行きやがった！」</em></p>
+<p>~ 親方より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-quicksummonsace">
+<span id="id16"></span><h3><a class="toc-backref" href="#id72" role="doc-backlink"><span class="section-number">4.3.1.2.5. </span>クイック召喚 (召喚)</a><a class="headerlink" href="#act-quicksummonsace" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> A</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>ターンを持っていない時しかこのアクションを起こすことができない。</p>
+<p><strong>効果:</strong></p>
+<p>キーカードをエースとして表向きかつチャージ状態で場に出す。</p>
+<p>もしくは、キーカードを防壁として裏向きかつチャージ状態で場に出す。</p>
+<p>防壁の置き方は「防壁の置き方」参照。</p>
+<p><strong>導入バージョン:</strong>  v6.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-summonsmagic">
+<span id="id17"></span><h3><a class="toc-backref" href="#id73" role="doc-backlink"><span class="section-number">4.3.1.2.6. </span>魔術士召喚 (召喚)</a><a class="headerlink" href="#act-summonsmagic" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> Joker</p>
+<p><strong>コスト:</strong> BD</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを魔術士として表向きかつチャージ状態で場に出す。魔術士の能力は、キャラクターリスト参照。</p>
+<p><strong>ストーリー:</strong></p>
+<p>魔法使いは戦場では魔術士として戦いに臨みます。
+コストとして民の支援より手元の予定を狂わせることを要求するあたり捻くれ者であることが伺えます。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「場に出れば強いんだよなぁ。場に出れば。」</em></p>
+<p>~ 再現者見習いより ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-mountsoldier">
+<span id="id18"></span><h3><a class="toc-backref" href="#id74" role="doc-backlink"><span class="section-number">4.3.1.2.7. </span>装備 (召喚)</a><a class="headerlink" href="#act-mountsoldier" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> A〜K</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>対象:</strong></p>
+<p>自分の場にいるキーカードと同じスートの兵士1体を対象とする。Jokerは対象にできない。</p>
+<p><strong>効果:</strong></p>
+<p>対象とした兵士の上にキーカードを置き装備兵とする。装備兵の能力は、キャラクターリスト参照。</p>
+<p><strong>ストーリー:</strong></p>
+<p>兵士を強化することができます。強化した分強くなるのですが、弱点も増えるので要注意です。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「こんなにゴテゴテしてなんになるつもりだ？結局一人だろ？」</em></p>
+<p>~ ライフよりの防壁より ~</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id19">
+<h2><a class="toc-backref" href="#id75" role="doc-backlink"><span class="section-number">4.3.1.3. </span>速攻魔法</a><a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-up">
+<span id="id20"></span><h3><a class="toc-backref" href="#id76" role="doc-backlink"><span class="section-number">4.3.1.3.1. </span>アップ (速攻魔法)</a><a class="headerlink" href="#act-up" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♡A〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-down">
+<span id="id21"></span><h3><a class="toc-backref" href="#id77" role="doc-backlink"><span class="section-number">4.3.1.3.2. </span>ダウン (速攻魔法)</a><a class="headerlink" href="#act-down" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♠A〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。</p>
+<p>もし対象のサイズが0以下となった場合、対象を墓地に移す。</p>
+<p>もし対象のサイズが0以下とならなかった場合、その印としてフォグにキーカードを置き、ダウンとする。</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-twist">
+<span id="id22"></span><h3><a class="toc-backref" href="#id78" role="doc-backlink"><span class="section-number">4.3.1.3.3. </span>ツイスト (速攻魔法)</a><a class="headerlink" href="#act-twist" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♢A〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>キャラクター1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象のキャラクターをドライブ状態またはチャージ状態にする。</p>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-counter">
+<span id="id23"></span><h3><a class="toc-backref" href="#id79" role="doc-backlink"><span class="section-number">4.3.1.3.4. </span>カウンター (速攻魔法)</a><a class="headerlink" href="#act-counter" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♣A〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>キーカードが1枚または2枚のアクションを対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>次のいずれかの場合、対象のアクションを無効にする。その場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。</p>
+<p>・対象アクションのキーカードが1枚かつこのアクションのキーカードの数字が対象アクションのキーカードの数字以上</p>
+<p>・対象アクションのキーカードが2枚</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-reunion">
+<span id="id24"></span><h3><a class="toc-backref" href="#id80" role="doc-backlink"><span class="section-number">4.3.1.3.5. </span>再会 (速攻魔法)</a><a class="headerlink" href="#act-reunion" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♡A〜10 を 2枚</p>
+<p><strong>効果:</strong></p>
+<p>自分の墓地からカードを1枚選び対戦相手に見せ手札に加える。</p>
+<p><strong>ストーリー:</strong></p>
+<p>親愛な仲間との再会を強く強く願った。どんな手段も厭わないその願いが今叶った。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「ねぇねぇ知ってた。この後ヒロインの願いが届いて死んだはずの主人公が登場して、二人で敵を全員やっつけちゃうの！ありがちよねぇ。」</em></p>
+<p>~ ネタバレ娘より ~</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-kill">
+<span id="id25"></span><h3><a class="toc-backref" href="#id81" role="doc-backlink"><span class="section-number">4.3.1.3.6. </span>キル (速攻魔法)</a><a class="headerlink" href="#act-kill" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♠A〜10 を 2枚</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象とした兵士を墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-truce">
+<span id="id26"></span><h3><a class="toc-backref" href="#id82" role="doc-backlink"><span class="section-number">4.3.1.3.7. </span>停戦 (速攻魔法)</a><a class="headerlink" href="#act-truce" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♢A〜10 を 2枚</p>
+<p><strong>対象:</strong></p>
+<p>ダメージ判定アクションを対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象のアクションを無効にする。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-changetarget">
+<span id="id27"></span><h3><a class="toc-backref" href="#id83" role="doc-backlink"><span class="section-number">4.3.1.3.8. </span>対象変更 (速攻魔法)</a><a class="headerlink" href="#act-changetarget" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♣A〜10 を 2枚</p>
+<p><strong>対象:</strong></p>
+<p>対象が指定されているアクションを対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-search">
+<span id="id28"></span><h3><a class="toc-backref" href="#id84" role="doc-backlink"><span class="section-number">4.3.1.3.9. </span>サーチ (速攻魔法)</a><a class="headerlink" href="#act-search" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> Joker</p>
+<p><strong>効果:</strong></p>
+<p>ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="bj">
+<span id="act-bj"></span><h3><a class="toc-backref" href="#id85" role="doc-backlink"><span class="section-number">4.3.1.3.10. </span>B・J (速攻魔法)</a><a class="headerlink" href="#bj" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> 同じスートの A と J</p>
+<p><strong>コスト:</strong> SS</p>
+<p><strong>効果:</strong></p>
+<p>ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。</p>
+<p><strong>ストーリー:</strong></p>
+<p>若きジャックはエースの力をかり革命的な行動を起こした。自国の膿を排除し新しい風を送り込んだ。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「悪しき習慣を捨て去り、新しい風を吹き込む」</em></p>
+<p>~ 革命者より ~</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="rsf">
+<span id="act-rsf"></span><h3><a class="toc-backref" href="#id86" role="doc-backlink"><span class="section-number">4.3.1.3.11. </span>R・S・F (速攻魔法)</a><a class="headerlink" href="#rsf" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> 同じスートのA,10〜K を 5枚</p>
+<p><strong>コスト:</strong> BB</p>
+<p><strong>特記事項:</strong> ※このアクションはカウンターアクションの対象にならない。</p>
+<p><strong>対象:</strong></p>
+<p>プレイヤー1人を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象のプレイヤーに40点のダメージを与える。</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-reverse">
+<span id="id29"></span><h3><a class="toc-backref" href="#id87" role="doc-backlink"><span class="section-number">4.3.1.3.12. </span>リバース (速攻魔法)</a><a class="headerlink" href="#act-reverse" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> 同じ数字を２枚</p>
+<p><strong>対象:</strong></p>
+<p>キャラクター1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。</p></li>
+<li><p>対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照</p></li>
+<li><p>対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。</p></li>
+<li><p>対象がアタッカーもしくは、ブロッカーの場合、それを解除する。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-unsummons">
+<span id="id30"></span><h3><a class="toc-backref" href="#id88" role="doc-backlink"><span class="section-number">4.3.1.3.13. </span>帰還 (速攻魔法)</a><a class="headerlink" href="#act-unsummons" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> 同じスートを2枚</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>対象:</strong></p>
+<p>自分の場のキャラクター1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。</p></li>
+<li><p>キーカードを手札に戻す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id31">
+<h2><a class="toc-backref" href="#id89" role="doc-backlink"><span class="section-number">4.3.1.4. </span>通常魔法</a><a class="headerlink" href="#id31" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-destroybulwark">
+<span id="id32"></span><h3><a class="toc-backref" href="#id90" role="doc-backlink"><span class="section-number">4.3.1.4.1. </span>防壁破壊 (通常魔法)</a><a class="headerlink" href="#act-destroybulwark" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♡A〜K と ♢A〜K</p>
+<p><strong>対象:</strong></p>
+<p>防壁1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象の防壁を場から墓地に移す。</p>
+<p><strong>ストーリー:</strong></p>
+<p>防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「あれ？いつの間にかなくなってるよ？」</em></p>
+<p>~ かくれんぼしていた子供より ~</p>
+<p><strong>導入バージョン:</strong>  v0.2</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-throwing">
+<span id="id33"></span><h3><a class="toc-backref" href="#id91" role="doc-backlink"><span class="section-number">4.3.1.4.2. </span>投擲 (通常魔法)</a><a class="headerlink" href="#act-throwing" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♠A〜K と ♣A〜K</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。</p>
+<p><strong>ストーリー:</strong></p>
+<p>知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」</em></p>
+<p>~ 再現者の心得第十一章より ~</p>
+<p><strong>導入バージョン:</strong>  v0.1</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-deathlance">
+<span id="id34"></span><h3><a class="toc-backref" href="#id92" role="doc-backlink"><span class="section-number">4.3.1.4.3. </span>死の槍 (通常魔法)</a><a class="headerlink" href="#act-deathlance" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♠A〜K と ♢A〜K</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士の数字が0以外かつ、キーカードの♢カードの数字で割切れる場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>対象の兵士をオーナーのライフの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でライフの一番上に裏向きで移す。</p></li>
+<li><p>対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。</p></li>
+</ol>
+<p><strong>ストーリー:</strong></p>
+<p>死♠の槍♢。そのままだな。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」</em></p>
+<p>~ 再現者の心得第十二章より ~</p>
+<p><strong>導入バージョン:</strong>  v2.0</p>
+<p><strong>更新バージョン:</strong>  v3.0,8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-addbulwark">
+<span id="id35"></span><h3><a class="toc-backref" href="#id93" role="doc-backlink"><span class="section-number">4.3.1.4.4. </span>防壁補充 (通常魔法)</a><a class="headerlink" href="#act-addbulwark" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♡A〜K と ♣A〜K</p>
+<p><strong>効果:</strong></p>
+<p>自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。もしくは、自分のライフの一番上から2枚を防壁として裏向きかつドライブ状態で場に出す。防壁の能力はキャラクターリスト参照。</p>
+<p>防壁の置き方は「防壁の置き方」参照</p>
+<p><strong>ストーリー:</strong></p>
+<p>愛する人♡を守るため知恵♣を絞った結果守りを固めることにした。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」</em></p>
+<p>~ 無能な指揮官より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-reanimate">
+<span id="id36"></span><h3><a class="toc-backref" href="#id94" role="doc-backlink"><span class="section-number">4.3.1.4.5. </span>リアニメイト (通常魔法)</a><a class="headerlink" href="#act-reanimate" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♠A〜K と ♡A〜K</p>
+<p><strong>対象:</strong></p>
+<p>自分の場のキャラクター1体を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-handeth">
+<span id="id37"></span><h3><a class="toc-backref" href="#id95" role="doc-backlink"><span class="section-number">4.3.1.4.6. </span>ハンデス (通常魔法)</a><a class="headerlink" href="#act-handeth" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♢A〜K と ♣A〜K</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人を対象とする。</p>
+<p><strong>効果:</strong></p>
+<p>対戦相手の手札を見て1枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-force">
+<span id="id38"></span><h3><a class="toc-backref" href="#id96" role="doc-backlink"><span class="section-number">4.3.1.4.7. </span>フォース (通常魔法)</a><a class="headerlink" href="#act-force" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♡A〜10 を 2枚</p>
+<p><strong>コスト:</strong> BB</p>
+<p><strong>特記事項:</strong> ※このアクションはカウンターアクションの対象にならない。</p>
+<p><strong>効果:</strong></p>
+<p>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。</p>
+<p>その印としてフォグにキーカードを置き、フォースとする。</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-swordrain">
+<span id="id39"></span><h3><a class="toc-backref" href="#id97" role="doc-backlink"><span class="section-number">4.3.1.4.8. </span>剣の雨 (通常魔法)</a><a class="headerlink" href="#act-swordrain" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♠A〜10 を 2枚</p>
+<p><strong>コスト:</strong> BB</p>
+<p><strong>特記事項:</strong> ※このアクションはカウンターアクションの対象にならない。</p>
+<p><strong>効果:</strong></p>
+<p>キーカードの合計値以下の全ての兵士を墓地に移す。</p>
+<p><strong>ストーリー:</strong></p>
+<p>死♠と剣♠が合わさり雨のように戦場に降り注いだ。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「え！助かる訳ないじゃん！！」</em></p>
+<p>~ 平和主義の♣3一般兵より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-recruit">
+<span id="id40"></span><h3><a class="toc-backref" href="#id98" role="doc-backlink"><span class="section-number">4.3.1.4.9. </span>徴募 (通常魔法)</a><a class="headerlink" href="#act-recruit" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♢A〜10 を 2枚</p>
+<p><strong>コスト:</strong> BB</p>
+<p><strong>特記事項:</strong> ※このアクションはカウンターアクションの対象にならない。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>ライフの一番上から4枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。</p></li>
+<li><p>残りのカードをライフの一番下に好きな順で移す。</p></li>
+</ol>
+<p><strong>ストーリー:</strong></p>
+<p>金♢が手元にたくさんあれば、戦力強化が定石だろう。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「君はどう？兵士になる？...あっそう。」
+「君はどう？兵士になる？...あっそう。」
+「はぁ。金がなけれりゃ誰も来やしねぇ」</em></p>
+<p>~ 孤独な徴募兵より ~</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="act-surprise">
+<span id="id41"></span><h3><a class="toc-backref" href="#id99" role="doc-backlink"><span class="section-number">4.3.1.4.10. </span>奇襲 (通常魔法)</a><a class="headerlink" href="#act-surprise" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>x</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♣A〜10 を 2枚</p>
+<p><strong>コスト:</strong> BB</p>
+<p><strong>特記事項:</strong> ※このアクションはカウンターアクションの対象にならない。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。</p></li>
+<li><p>自分の場にいる全ての兵士をチャージ状態にする。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+</section>
+<section id="id42">
+<h1><span class="section-number">4.3.2. </span>キャラクターリスト<a class="headerlink" href="#id42" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id43">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id44" id="id100">兵士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#char-soldier" id="id101">一般兵 (兵士)</a></p></li>
+<li><p><a class="reference internal" href="#char-hero" id="id102">英雄 (兵士)</a></p></li>
+<li><p><a class="reference internal" href="#char-ace" id="id103">エース (兵士)</a></p></li>
+<li><p><a class="reference internal" href="#char-magician" id="id104">魔術士 (兵士)</a></p></li>
+<li><p><a class="reference internal" href="#char-armedsoldier" id="id105">装備兵 (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id50" id="id106">防壁</a></p>
+<ul>
+<li><p><a class="reference internal" href="#char-bulwark" id="id107">防壁 (防壁)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id44">
+<h2><a class="toc-backref" href="#id100" role="doc-backlink"><span class="section-number">4.3.2.1. </span>兵士</a><a class="headerlink" href="#id44" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="char-soldier">
+<span id="id45"></span><h3><a class="toc-backref" href="#id101" role="doc-backlink"><span class="section-number">4.3.2.1.1. </span>一般兵 (兵士)</a><a class="headerlink" href="#char-soldier" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> 2〜10</p>
+<p><strong>サイズ:</strong> キーカードの数字</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="char-hero">
+<span id="id46"></span><h3><a class="toc-backref" href="#id102" role="doc-backlink"><span class="section-number">4.3.2.1.2. </span>英雄 (兵士)</a><a class="headerlink" href="#char-hero" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> J〜K</p>
+<p><strong>サイズ:</strong> キーカードがJなら11,Qなら12,Kなら13</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="char-ace">
+<span id="id47"></span><h3><a class="toc-backref" href="#id103" role="doc-backlink"><span class="section-number">4.3.2.1.3. </span>エース (兵士)</a><a class="headerlink" href="#char-ace" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> A</p>
+<p><strong>サイズ:</strong> 1</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー, 速攻</p>
+<p><strong>ストーリー:</strong></p>
+<p>エースは先駆者であり皆の先頭に立ち切り込んで行く力があります。一人では大きなダメージにはなりませんが、大きな力を持っています。あなたもエースがまさにエースであることに気づくでしょう。</p>
+<p><strong>フレーバー:</strong></p>
+<p><em>「俺には、ちびですばしっこいだけにしか見えませんが？」</em></p>
+<p>~ 再現者見習いより ~</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="char-magician">
+<span id="id48"></span><h3><a class="toc-backref" href="#id104" role="doc-backlink"><span class="section-number">4.3.2.1.4. </span>魔術士 (兵士)</a><a class="headerlink" href="#char-magician" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>x</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> Joker</p>
+<p><strong>サイズ:</strong> 0</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー, 速攻</p>
+<p><strong>能力:</strong></p>
+<p>・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストDが無しになる。）</p>
+<p><strong>導入バージョン:</strong>  v3.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="char-armedsoldier">
+<span id="id49"></span><h3><a class="toc-backref" href="#id105" role="doc-backlink"><span class="section-number">4.3.2.1.5. </span>装備兵 (兵士)</a><a class="headerlink" href="#char-armedsoldier" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> 同じスートを2枚以上</p>
+<p><strong>サイズ:</strong> キーカードの数字の合計</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)</p>
+<p><strong>導入バージョン:</strong>  v5.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id50">
+<h2><a class="toc-backref" href="#id106" role="doc-backlink"><span class="section-number">4.3.2.2. </span>防壁</a><a class="headerlink" href="#id50" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="char-bulwark">
+<span id="id51"></span><h3><a class="toc-backref" href="#id107" role="doc-backlink"><span class="section-number">4.3.2.2.1. </span>防壁 (防壁)</a><a class="headerlink" href="#char-bulwark" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フォーマット:</strong></p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>ライト</p></th>
+<th class="head"><p>スタンダード</p></th>
+<th class="head"><p>プロ</p></th>
+<th class="head"><p>マスター</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>キーカード:</strong> 全て(裏向き)</p>
+<p><strong>ラベル:</strong> ブロッカー</p>
+<p><strong>導入バージョン:</strong>  v1.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+</section>
+</section>
+</section>
+<section id="id52">
+<h1><span class="section-number">4.3.3. </span>フォグリスト<a class="headerlink" href="#id52" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id53">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id54" id="id108">速攻魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#fog-upfog" id="id109">アップ (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#fog-downfog" id="id110">ダウン (速攻魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id57" id="id111">通常魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#fog-forcefog" id="id112">フォース (通常魔法)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id54">
+<h2><a class="toc-backref" href="#id108" role="doc-backlink"><span class="section-number">4.3.3.1. </span>速攻魔法</a><a class="headerlink" href="#id54" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="fog-upfog">
+<span id="id55"></span><h3><a class="toc-backref" href="#id109" role="doc-backlink"><span class="section-number">4.3.3.1.1. </span>アップ (速攻魔法)</a><a class="headerlink" href="#fog-upfog" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>キーカード:</strong> ♡A〜10</p>
+<p><strong>能力:</strong></p>
+<p>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
+<hr class="docutils" />
+</section>
+<section id="fog-downfog">
+<span id="id56"></span><h3><a class="toc-backref" href="#id110" role="doc-backlink"><span class="section-number">4.3.3.1.2. </span>ダウン (速攻魔法)</a><a class="headerlink" href="#fog-downfog" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>キーカード:</strong> ♠A〜10</p>
+<p><strong>能力:</strong></p>
+<p>対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id57">
+<h2><a class="toc-backref" href="#id111" role="doc-backlink"><span class="section-number">4.3.3.2. </span>通常魔法</a><a class="headerlink" href="#id57" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="fog-forcefog">
+<span id="id58"></span><h3><a class="toc-backref" href="#id112" role="doc-backlink"><span class="section-number">4.3.3.2.1. </span>フォース (通常魔法)</a><a class="headerlink" href="#fog-forcefog" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>キーカード:</strong> ♡A〜10 を 2枚</p>
+<p><strong>能力:</strong></p>
+<p>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
+</section>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">2. 共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">3. 対戦レギュレーション</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../format/format.html">4. フォーマット</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../format/format.html#index-0">4.1. フォーマットとは</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../format/format.html#id3">4.2. 定義項目</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../format/format.html#id4">4.3. フォーマット定義</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">5. フレーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">6. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">7. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">8. 変更履歴</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="../format/format.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            フォーマット
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../frame/frame.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            フレーム
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>
