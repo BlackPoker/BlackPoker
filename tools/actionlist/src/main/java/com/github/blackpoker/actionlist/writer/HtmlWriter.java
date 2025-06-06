@@ -38,8 +38,7 @@ public class HtmlWriter implements Writer {
         for (Entry<String, Object> entry : map.entrySet()) {
             context.setVariable(entry.getKey(), entry.getValue());
         }
-        context.setVariable("strFn", new StrFn());
-
+        
         // templateName が "std" なら templates/std.html を探す
         templateEngine.process(templateName, context, writer);
 
