@@ -86,12 +86,9 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actCost: BBD
-      actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
-      actNote: ※コストを$DDとすればタイミングをクイックとして起こすことができる。
+      actCost: DD
       actEffect: |-
-        自分の切札を1枚表にし、切札に対応した能力を有効にする。
-        切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+        自分の裏切札を1枚表にし切札とする。
     -
       frame: |-
         ・エクストラ
@@ -99,14 +96,13 @@ actList:
       actName: クローズ
       actType: 切札
       actTrigger: 直接
-      actSpeed: 即時
+      actSpeed: 通常
       actTime: クイック
-      actCost: L
-      actKey: 同じスート2枚
+      actCost: D
+      actKey: Q
       actTarget: 切札1枚を対象とする。
       actEffect: |-
-        対象の切札が表向きかつキーカードのスートと同じ場合、その切札を裏向きにする。対象の切札に対応した能力は無効になる。
-        切札については「切札について」参照
+        対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。
 
     -
       frame: |-
