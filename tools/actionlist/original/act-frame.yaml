@@ -213,21 +213,6 @@ trumpList:
       devNote: |-
         立ち上がる兵で追加された。
 
-  - type: ♢ダイヤ
-    trumps:
-    - frame: |-
-        ・エクストラ
-      trumpName: 交渉
-      trumpId: d3
-      trumpType: 立ち上がる兵
-      trumpKey: ♢3
-      trumpAbility: |
-        あなたの場にいる♢の兵士はラベル「交渉」を持つ。
-      since: ex3.4.0
-      update: v8.1
-      devNote: |-
-        立ち上がる兵で追加された。
-
   - type: ♣クラブ
     trumps:
     - frame: |-
