@@ -117,22 +117,21 @@ actList:
       actKey: A〜K
       actTarget: 切札1枚を対象とする。
       actEffect: |-
-        対象の切札が表向きかつキーカードとスートと数字が同じ場合、切札を墓地に移す。対象の切札に対応した能力は無効になる。
-        切札については「切札について」参照
+        対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。
 
-    -
-      frame: |-
-        ・エクストラ
-      actId: trumpRegene
-      actName: 切札再生
-      actType: 切札
-      actTrigger: 誘発
-      actSpeed: 即時
-      actTime: クイック
-      actTarget: カード1枚を対象とする。
-      actEffect: |-
-        対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
-        切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+    # -
+    #   frame: |-
+    #     ・エクストラ
+    #   actId: trumpRegene
+    #   actName: 切札再生
+    #   actType: 切札
+    #   actTrigger: 誘発
+    #   actSpeed: 即時
+    #   actTime: クイック
+    #   actTarget: カード1枚を対象とする。
+    #   actEffect: |-
+    #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
+    #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
 
 
   - type: 切札♠2
@@ -174,3 +173,5 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♠2
       since: 8.0?
+      devNote: |-
+        立ち上がる兵で追加された。
