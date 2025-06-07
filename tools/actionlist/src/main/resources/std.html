@@ -311,6 +311,20 @@
       color: #a22041;
     }
 
+    /* blackpoker-type-group-title 内のスートを 30pt に */
+    .blackpoker-type-group-title-main .heart:before,
+    .blackpoker-type-group-title-main .heart-min:before,
+    .blackpoker-type-group-title-main .spade:before,
+    .blackpoker-type-group-title-main .spade-min:before,
+    .blackpoker-type-group-title-main .club:before,
+    .blackpoker-type-group-title-main .club-min:before,
+    .blackpoker-type-group-title-main .diam:before,
+    .blackpoker-type-group-title-main .diam-min:before {
+      font-size: 24px !important;
+      line-height: 1;
+      /* 必要なら上下位置を微調整 */
+    }
+
     .cost-L:after {
       content: "Ⓛ";
       font-family: "Garava";
@@ -532,7 +546,7 @@
             <div class="blackpoker-section">
               <h5 class="blackpoker-section-title">アクションリスト</h5>
               <div th:each="actList:${actList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:text="${actList.type}"></span>
+                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(actList.type)}"></span>
                 <div class="list-group">
 
                   <a th:each="row : ${actList.acts}" th:attr="
@@ -599,6 +613,9 @@
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.trumpName}"></span>
+                    <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
+                          th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
+                    </span>
                   </a>
                 </div>
               </div>
@@ -728,7 +745,8 @@
           <h5 class="blackpoker-section-title">アクションリスト</h5>
         </div>
         <div th:each="nestList : ${actList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}"
+            class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.acts}" class="col-lg-4"
@@ -819,15 +837,14 @@
           <h5 class="blackpoker-section-title">キャラクターリスト</h5>
         </div>
         <div th:each="nestList : ${charList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.chars}"
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action"
-                  th:attr="
+                <div class="panel panel-default blackpoker-action" th:attr="
                   id='char-'+${row.charId},
                   data-format=${#sfn.formatDataFormat(row.format)},
                   data-frame=${#sfn.formatDataFrame(row.frame)},">
@@ -890,15 +907,14 @@
           <h5 class="blackpoker-section-title">フォグリスト</h5>
         </div>
         <div th:each="nestList : ${fogList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title  blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.fogs}"
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action"
-                  th:attr="id='fog'+${row.fogId},
+                <div class="panel panel-default blackpoker-action" th:attr="id='fog'+${row.fogId},
                   data-format=${#sfn.formatDataFormat(row.format)},
                   data-frame=${#sfn.formatDataFrame(row.frame)},">
                   <div class="panel-heading">
@@ -950,15 +966,14 @@
           <h5 class="blackpoker-section-title">切札リスト</h5>
         </div>
         <div th:each="nestList : ${trumpList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title"></h5>
+          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}" class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.trumps}"
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action"
-                  th:attr="
+                <div class="panel panel-default blackpoker-action" th:attr="
                   id='trump-'+${row.trumpId},
                   data-format=${#sfn.formatDataFormat(row.format)},
                   data-frame=${#sfn.formatDataFrame(row.frame)},">

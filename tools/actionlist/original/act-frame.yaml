@@ -19,6 +19,7 @@ actList:
         ・パック
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: パック開封
       actId: packopen
       actType: パック
@@ -34,6 +35,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レアドロー
       actId: raredraw
       actType: パック
@@ -47,6 +49,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レア召喚
       actId: summonsRare
       actType: パック
@@ -61,6 +64,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: 罠カウンター
       actId: trapCounter
       actType: パック
@@ -171,6 +175,6 @@ trumpList:
         ・エクストラ
       trumpName: スラッシュ
       trumpId: s2
-      trumpType: 立ち上がる兵士
+      trumpType: 立ち上がる兵
       trumpKey: ♠2
       since: 8.0?
