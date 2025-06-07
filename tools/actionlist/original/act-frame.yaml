@@ -133,7 +133,6 @@ actList:
     #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
     #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
 
-
   - type: 切札♠2
     acts:
     - frame: |-
@@ -152,6 +151,8 @@ actList:
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
         3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。 
+
+
 
 trumpList:
   - type: ♠スペード
@@ -177,7 +178,67 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♠2
       trumpAbility: |
-        あなたの場にいる♠の兵士はラベルにスラッシュを追加する。
+        あなたの場にいる♠の兵士はラベルに「スラッシュ」を持つ。
       since: 8.0?
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♡ハート
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 激励
+      trumpId: h3
+      trumpType: 立ち上がる兵
+      trumpKey: ♡3
+      trumpAbility: |
+        あなたの場にいる♡の兵士はラベル「激励」を持つ。
+      since: ex3.4.0
+      update: v8.1
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♢ダイヤ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 交渉
+      trumpId: d3
+      trumpType: 立ち上がる兵
+      trumpKey: ♢3
+      trumpAbility: |
+        あなたの場にいる♢の兵士はラベル「交渉」を持つ。
+      since: ex3.4.0
+      update: v8.1
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♢ダイヤ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 交渉
+      trumpId: d3
+      trumpType: 立ち上がる兵
+      trumpKey: ♢3
+      trumpAbility: |
+        あなたの場にいる♢の兵士はラベル「交渉」を持つ。
+      since: ex3.4.0
+      update: v8.1
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♣クラブ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: スイッチ
+      trumpId: c4
+      trumpType: 立ち上がる兵
+      trumpKey: ♣4
+      trumpAbility: |
+        あなたの場にいる♣の兵士はラベル「スイッチ」を持つ。
+      since: ex3.4.0
+      update: v8.1
       devNote: |-
         立ち上がる兵で追加された。
