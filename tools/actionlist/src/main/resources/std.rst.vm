@@ -387,7 +387,7 @@ ${trump.story}
 
 
         #if(${trump.update})
-**更新バージョン:**  ${trump.story}
+**更新バージョン:**  ${trump.update}
         #end
 
     #end

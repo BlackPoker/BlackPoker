@@ -1,7 +1,7 @@
 data: 
   id: act-frame
-  ver: 第8.0版 フレーム編
-  lastupdate: 2025/3/31
+  ver: 第8.1版 フレーム編
+  lastupdate: 2025/6/x
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -150,7 +150,9 @@ actList:
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
-        3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。 
+        3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。
+      since: ex3.4.0
+      update: v8.1
 
   - type: 切札♡3
     acts:
@@ -170,6 +172,8 @@ actList:
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
         3. 対象の兵士のサイズをこのターンが終わるまで X 加算する。
+      since: ex3.4.0
+      update: v8.1
 
   - type: 切札♢3
     acts:
@@ -188,7 +192,8 @@ actList:
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、対象のキャラクターをドライブする。
-
+      since: ex3.4.0
+      update: v8.1
 
   - type: 切札♣4
     acts:
@@ -207,7 +212,8 @@ actList:
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
         3. キーカードを手札に戻す。
-
+      since: ex3.4.0
+      update: v8.1
 
 trumpList:
   - type: ♠スペード
@@ -234,7 +240,8 @@ trumpList:
       trumpKey: ♠2
       trumpAbility: |
         あなたの場にいる♠の兵士は <スラッシュ> を持つ。
-      since: 8.0?
+      since: ex3.4.0
+      update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
       devNote: |-
         立ち上がる兵で追加された。
@@ -251,6 +258,7 @@ trumpList:
         あなたの場にいる♡の兵士は <激励> を持つ。
       since: ex3.4.0
       update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
         立ち上がる兵で追加された。
 
@@ -266,6 +274,7 @@ trumpList:
         あなたの場にいる♢の兵士は <交渉> を持つ。
       since: ex3.4.0
       update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
       devNote: |-
         立ち上がる兵で追加された。
 
@@ -281,5 +290,6 @@ trumpList:
         あなたの場にいる♣の兵士は <スイッチ> を持つ。
       since: ex3.4.0
       update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
       devNote: |-
         立ち上がる兵で追加された。
