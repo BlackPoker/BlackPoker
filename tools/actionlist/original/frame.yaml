@@ -102,7 +102,7 @@ frames:
        | 非公開：なし
 
   - name: エクストラ
-    image: rarePack
+    image: extra
     frameId: extra
     format: mast
     start: |-
