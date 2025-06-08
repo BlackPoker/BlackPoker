@@ -1007,6 +1007,11 @@
                     </div>
                   </div>
                   <div class="panel-body">
+                    <span th:if="${not #strings.isEmpty(row.trumpLabel)}"> （ラベル）<br></span>
+                    <span th:if="${not #strings.isEmpty(row.trumpLabel)}"
+                      th:utext="${#sfn.cnvHtml(row.trumpLabel)}"></span>
+                    <hr th:if="${not #strings.isEmpty(row.trumpLabel) and not #strings.isEmpty(row.trumpAbility)}">
+
                     <span th:if="${not #strings.isEmpty(row.trumpAbility)}"> （能力）<br></span>
                     <span th:if="${not #strings.isEmpty(row.trumpAbility)}"
                       th:utext="${#sfn.cnvHtml(row.trumpAbility)}"></span>
