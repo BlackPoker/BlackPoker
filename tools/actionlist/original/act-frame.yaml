@@ -143,15 +143,70 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: メイン
-      actKey: ラベルにスラッシュを持つ兵士1体
+      actKey: <スラッシュ> を持つ兵士1体
       actCost: K
       actTarget: 兵士1体
-      actActCond: あなたの切札にスラッシュがある
+      actActCond: あなたの切札に「スラッシュ」がある
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
         3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。 
 
+  - type: 切札♡3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 激励
+      actId: rally
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <激励> を持つ兵士1体
+      actCost: K
+      actTarget: 兵士1体
+      actActCond: あなたの切札に「激励」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、そのキーカードのサイズを X とする。  
+        3. 対象の兵士のサイズをこのターンが終わるまで X 加算する。
+
+  - type: 切札♢3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 交渉
+      actId: negotiate
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <交渉> を持つ兵士1体
+      actCost: K
+      actTarget: キャラクター1体
+      actActCond: あなたの切札に「交渉」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、対象のキャラクターをドライブする。
+
+
+  - type: 切札♣4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: スイッチ
+      actId: switch
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <スイッチ> を持つ兵士1体
+      actCost: K
+      actActCond: あなたの切札に「スイッチ」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
+        3. キーカードを手札に戻す。
 
 
 trumpList:
@@ -178,7 +233,7 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♠2
       trumpAbility: |
-        あなたの場にいる♠の兵士はラベルに「スラッシュ」を持つ。
+        あなたの場にいる♠の兵士は <スラッシュ> を持つ。
       since: 8.0?
       devNote: |-
         立ち上がる兵で追加された。
@@ -192,7 +247,7 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♡3
       trumpAbility: |
-        あなたの場にいる♡の兵士はラベル「激励」を持つ。
+        あなたの場にいる♡の兵士は <激励> を持つ。
       since: ex3.4.0
       update: v8.1
       devNote: |-
@@ -207,7 +262,7 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♢3
       trumpAbility: |
-        あなたの場にいる♢の兵士はラベル「交渉」を持つ。
+        あなたの場にいる♢の兵士は <交渉> を持つ。
       since: ex3.4.0
       update: v8.1
       devNote: |-
@@ -222,7 +277,7 @@ trumpList:
       trumpType: 立ち上がる兵
       trumpKey: ♣4
       trumpAbility: |
-        あなたの場にいる♣の兵士はラベル「スイッチ」を持つ。
+        あなたの場にいる♣の兵士は <スイッチ> を持つ。
       since: ex3.4.0
       update: v8.1
       devNote: |-
