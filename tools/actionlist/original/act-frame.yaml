@@ -1,7 +1,7 @@
 data: 
   id: act-frame
-  ver: 第8.0版 フレーム編
-  lastupdate: 2025/3/31
+  ver: 第8.1版 フレーム編
+  lastupdate: 2025/6/x
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -19,6 +19,7 @@ actList:
         ・パック
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: パック開封
       actId: packopen
       actType: パック
@@ -34,6 +35,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レアドロー
       actId: raredraw
       actType: パック
@@ -47,6 +49,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レア召喚
       actId: summonsRare
       actType: パック
@@ -61,6 +64,7 @@ actList:
       frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: 罠カウンター
       actId: trapCounter
       actType: パック
@@ -71,3 +75,221 @@ actList:
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
 
+  - type: 切札
+    acts:
+    -
+      frame: |-
+        ・エクストラ
+      actId: open
+      actName: オープン
+      actType: 切札
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: DD
+      actEffect: |-
+        自分の裏切札を1枚表にし切札とする。
+    -
+      frame: |-
+        ・エクストラ
+      actId: close
+      actName: クローズ
+      actType: 切札
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: Q
+      actTarget: 切札1枚を対象とする。
+      actEffect: |-
+        対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。
+
+    -
+      frame: |-
+        ・エクストラ
+      actId: trumpDestroy
+      actName: 切札破壊
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: B
+      actKey: A〜K
+      actTarget: 切札1枚を対象とする。
+      actEffect: |-
+        対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。
+
+    # -
+    #   frame: |-
+    #     ・エクストラ
+    #   actId: trumpRegene
+    #   actName: 切札再生
+    #   actType: 切札
+    #   actTrigger: 誘発
+    #   actSpeed: 即時
+    #   actTime: クイック
+    #   actTarget: カード1枚を対象とする。
+    #   actEffect: |-
+    #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
+    #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+
+  - type: 切札♠2
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: スラッシュ
+      actId: slash
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actKey: <スラッシュ> を持つ兵士1体
+      actCost: K
+      actTarget: 兵士1体
+      actActCond: あなたの切札に「スラッシュ」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、そのキーカードのサイズを X とする。  
+        3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。
+      since: ex3.4.0
+      update: v8.1
+
+  - type: 切札♡3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 激励
+      actId: rally
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <激励> を持つ兵士1体
+      actCost: K
+      actTarget: 兵士1体
+      actActCond: あなたの切札に「激励」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、そのキーカードのサイズを X とする。  
+        3. 対象の兵士のサイズをこのターンが終わるまで X 加算する。
+      since: ex3.4.0
+      update: v8.1
+
+  - type: 切札♢3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 交渉
+      actId: negotiate
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <交渉> を持つ兵士1体
+      actCost: K
+      actTarget: キャラクター1体
+      actActCond: あなたの切札に「交渉」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、対象のキャラクターをドライブする。
+      since: ex3.4.0
+      update: v8.1
+
+  - type: 切札♣4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: スイッチ
+      actId: switch
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <スイッチ> を持つ兵士1体
+      actCost: K
+      actActCond: あなたの切札に「スイッチ」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
+        3. キーカードを手札に戻す。
+      since: ex3.4.0
+      update: v8.1
+
+trumpList:
+  - type: ♠スペード
+    trumps:
+    # - frame: |-
+    #     ・エクストラ
+    #   trumpName: 革命
+    #   trumpId: sA
+    #   trumpType: 切札
+    #   trumpKey: ♠A
+    #   trumpAbility: |
+    #     この能力が有効である時にダメージ判定アクションが効果を発揮した場合、ダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。
+    #     １．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+    #     ---
+    #     自分の兵士は以下の能力を得る。
+    #     ・アタッカーかつダメージ判定アクションにてブロックされなかった場合、革命ドローアクションを起こす。
+    #   since: 8.0?
+
+    - frame: |-
+        ・エクストラ
+      trumpName: スラッシュ
+      trumpId: s2
+      trumpType: 立ち上がる兵
+      trumpKey: ♠2
+      trumpAbility: |
+        あなたの場にいる♠の兵士は <スラッシュ> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♡ハート
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 激励
+      trumpId: h3
+      trumpType: 立ち上がる兵
+      trumpKey: ♡3
+      trumpAbility: |
+        あなたの場にいる♡の兵士は <激励> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♢ダイヤ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 交渉
+      trumpId: d3
+      trumpType: 立ち上がる兵
+      trumpKey: ♢3
+      trumpAbility: |
+        あなたの場にいる♢の兵士は <交渉> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♣クラブ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: スイッチ
+      trumpId: c4
+      trumpType: 立ち上がる兵
+      trumpKey: ♣4
+      trumpAbility: |
+        あなたの場にいる♣の兵士は <スイッチ> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
+      devNote: |-
+        立ち上がる兵で追加された。

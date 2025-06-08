@@ -298,3 +298,97 @@ ${fog.story}
 
     #end
 #end
+
+#foreach( $nestList in $trumpList)
+    #if($foreach.count == 1)
+================================================================
+#if(${arg1})${arg1}#end切札リスト
+================================================================
+
+.. contents:: 目次
+   :depth: 2
+   :local:
+
+    #end
+
+----
+
+${nestList.type}
+======================================================
+    #foreach( $trump in ${nestList.trumps})
+
+        #if($foreach.count != 1)
+----
+        #end
+
+.. _trump-${trump.trumpId}:
+
+${trump.trumpName} (${trump.trumpType})
+---------------------------------------------------
+        #if(${row.format})
+**フォーマット:**
+
+.. csv-table::
+   :widths: 1, 1, 1, 1
+   :header-rows: 1
+
+   "ライト", "スタンダード", "プロ", "マスター"
+   "#if(${trump.format.contains('lite')})◯#else${x}#end", "#if(${trump.format.contains('std')})◯#else${x}#end", "#if(${trump.format.contains('pro')})◯#else${x}#end", "#if(${trump.format.contains('mast')})◯#else${x}#end"
+
+        #end
+
+        #if(${trump.frame})
+**フレーム:**  
+
+${rstFn.cnv(${trump.frame})}
+
+
+        #end
+
+        #if(${trump.trumpKey.trim()})
+**キーカード:** ${trump.trumpKey}
+
+        #end
+        #if(${trump.trumpAbility})
+**能力:**  
+
+${rstFn.cnv(${trump.trumpAbility})}
+
+
+        #end
+        #if(${trump.image})
+**イメージ:**  
+
+.. _frame-${trump.trumpId}-image:
+.. figure:: ../frame/images/${trump.image}.*
+   :height: 200px
+
+        #end
+        #if(${trump.story})
+**ストーリー:**  
+
+${trump.story}
+
+        #end
+        #if(${trump.flavor})
+**フレーバー:**  
+
+*${trump.flavor}*
+            #if(${trump.flavorSpeaker})
+
+~ ${trump.flavorSpeaker} ~
+            #end
+        #end
+
+
+        #if(${trump.since})
+**導入バージョン:**  ${trump.since}
+        #end
+
+
+        #if(${trump.update})
+**更新バージョン:**  ${trump.update}
+        #end
+
+    #end
+#end

@@ -14,11 +14,12 @@ public class StrFn {
 
 	private enum UlOl {
 		/** ・ */
-		Ul("<ul>", "</ul>", 1), 
+		Ul("<ul>", "</ul>", 1),
 		/** 1. 2. 3. */
-		Ol("<ol>", "</ol>", 2), 
+		Ol("<ol>", "</ol>", 2),
 		/** A. B. C. */
 		OlA("<ol type=\"A\">", "</ol>", 2);
+
 		private String stTag;
 		private String edTag;
 		private int length;
@@ -50,7 +51,7 @@ public class StrFn {
 		}
 
 		String ret = str;
-		
+
 		// スート
 		ret = ret.replaceAll("♡", "<span class=\"heart\"></span>");
 		ret = ret.replaceAll("♥", "<span class=\"heart\"></span>");
@@ -65,8 +66,8 @@ public class StrFn {
 		ret = ret.replaceAll("\r", "<br>");
 
 		// 罫線を置き換え
-		ret = ret.replaceAll("---","<hr>");
-		
+		ret = ret.replaceAll("---", "<hr>");
+
 		// 箇条書き
 		ret = cnvLi(ret);
 
@@ -84,7 +85,7 @@ public class StrFn {
 		ret = ret.replaceAll("７", "7");
 		ret = ret.replaceAll("８", "8");
 		ret = ret.replaceAll("９", "9");
-		
+
 		return ret;
 	}
 
@@ -171,6 +172,7 @@ public class StrFn {
 		ret = ret.replace("D", "<span class=\"cost-D\"></span>\n");
 		ret = ret.replace("L", "<span class=\"cost-L\"></span>\n");
 		ret = ret.replace("S", "<span class=\"cost-S\"></span>\n");
+		ret = ret.replace("K", "<span class=\"cost-K\"></span>\n");
 		return ret;
 	}
 
@@ -190,19 +192,45 @@ public class StrFn {
 		return ret;
 	}
 
+	/**
+	 * 「lite/std/pro/mast」を日本語に置き換える
+	 */
+	public String formatDataFormat(String raw) {
+		if (raw == null) {
+			return null;
+		}
+		return raw
+				.replace("lite", "ライト")
+				.replace("std", "スタンダード")
+				.replace("pro", "プロ")
+				.replace("mast", "マスター");
+	}
+
+	/**
+	 * 「改行をカンマにして余分な・を取り除く」
+	 */
+	public String formatDataFrame(String raw) {
+		if (raw == null) {
+			return null;
+		}
+		return raw.replace("・", "")
+				.replace("\n", ",")
+				.trim();
+	}
+
 	public static void main(String[] args) {
 
 		String input = ""
 				+ "この能力が有効である時にダメージ判定アクションが効果を発揮した場合、ダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。\n"
-				+"１．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーいる場合、ブロッカーの合計数字と比較する。\n"
-	+"自分の兵士は以下の能力を得る。\n"+
-"・アタッカーかつダメージ判定アクションにてブロックされなかった場合、歓喜アクションを起こす。\n"
+				+ "１．兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーいる場合、ブロッカーの合計数字と比較する。\n"
+				+ "自分の兵士は以下の能力を得る。\n" +
+				"・アタッカーかつダメージ判定アクションにてブロックされなかった場合、歓喜アクションを起こす。\n"
 				+ "";
 
 		String cnvHtml = (new StrFn()).cnvHtml(input);
-	
+
 		System.out.println(cnvHtml);
-		
+
 		// UlOl.check(input);
 
 		Pattern ptn = Pattern.compile("( *)(・|[１-９]．|[1-9].).*");
