@@ -235,6 +235,7 @@ trumpList:
       trumpAbility: |
         あなたの場にいる♠の兵士は <スラッシュ> を持つ。
       since: 8.0?
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
       devNote: |-
         立ち上がる兵で追加された。
 

@@ -356,6 +356,14 @@ ${rstFn.cnv(${trump.trumpAbility})}
 
 
         #end
+        #if(${trump.image})
+**イメージ:**  
+
+.. _frame-${trump.trumpId}-image:
+.. figure:: ../frame/images/${trump.image}.*
+   :height: 200px
+
+        #end
         #if(${trump.story})
 **ストーリー:**  
 
