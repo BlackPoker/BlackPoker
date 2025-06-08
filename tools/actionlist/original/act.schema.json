@@ -196,6 +196,7 @@
                   "trumpType": { "type": "string" },
                   "trumpKey": { "type": "string" },
                   "trumpAbility": { "type": "string" },
+                  "image": {"type": "string"},
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
                   "flavorSpeaker": { "type": "string" },
