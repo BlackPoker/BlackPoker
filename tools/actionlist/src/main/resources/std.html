@@ -575,7 +575,7 @@
             <div class="blackpoker-section">
               <h5 class="blackpoker-section-title">キャラクターリスト</h5>
               <div th:each="charList:${charList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:text="${charList.type}"></span>
+                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(charList.type)}"></span>
                 <div class="list-group">
                   <a th:each="row : ${charList.chars}" th:attr="
                     href='#char-'+${row.charId},
@@ -593,7 +593,7 @@
             <div class="blackpoker-section">
               <h5 class="blackpoker-section-title">フォグリスト</h5>
               <div th:each="fogList:${fogList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:text="${fogList.type}"></span>
+                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(fogList.type)}"></span>
                 <div class="list-group">
                   <a th:each="row : ${fogList.fogs}" th:attr="
                     href='#fog-'+${row.fogId},
@@ -611,7 +611,7 @@
             <div class="blackpoker-section">
               <h5 class="blackpoker-section-title">切札リスト</h5>
               <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:text="${trumpList.type}"></span>
+                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(trumpList.type)}"></span>
                 <div class="list-group">
                   <a th:each="row : ${trumpList.trumps}" th:attr="
                     href='#trump-'+${row.trumpId},
@@ -620,8 +620,9 @@
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.trumpName}"></span>
-                    <span class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
-                          th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
+                    <span class="tag tag-default tag-pill pull-right">
+                      <span class="glyphicon glyphicon-star"></span>
+                      <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
                     </span>
                   </a>
                 </div>
@@ -845,7 +846,8 @@
           <h5 class="blackpoker-section-title">キャラクターリスト</h5>
         </div>
         <div th:each="nestList : ${charList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
+          <h5 th:text="${nestList.type}"
+            class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.chars}"
@@ -915,7 +917,8 @@
           <h5 class="blackpoker-section-title">フォグリスト</h5>
         </div>
         <div th:each="nestList : ${fogList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}" class="text-center blackpoker-type-group-title  blackpoker-type-group-title-main"></h5>
+          <h5 th:text="${nestList.type}"
+            class="text-center blackpoker-type-group-title  blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.fogs}"
@@ -974,7 +977,8 @@
           <h5 class="blackpoker-section-title">切札リスト</h5>
         </div>
         <div th:each="nestList : ${trumpList}" class="blackpoker-type-group">
-          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}" class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
+          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}"
+            class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
             <div th:each="row : ${nestList.trumps}"
