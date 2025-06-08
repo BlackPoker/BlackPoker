@@ -144,68 +144,71 @@
 \BOOKMARK [4][-]{paragraph*.165}{交渉 \(兵士起因\)}{subsubsection*.164}% 143
 \BOOKMARK [3][-]{subsubsection*.166}{切札 4}{subsection.5.3.2}% 144
 \BOOKMARK [4][-]{paragraph*.167}{スイッチ \(兵士起因\)}{subsubsection*.166}% 145
-\BOOKMARK [2][-]{subsection.5.3.3}{フレーム切札リスト}{section.5.3}% 146
-\BOOKMARK [3][-]{subsubsection*.176}{ スペード}{subsection.5.3.3}% 147
-\BOOKMARK [4][-]{paragraph*.177}{スラッシュ \(立ち上がる兵\)}{subsubsection*.176}% 148
-\BOOKMARK [3][-]{subsubsection*.178}{ ハート}{subsection.5.3.3}% 149
-\BOOKMARK [4][-]{paragraph*.179}{激励 \(立ち上がる兵\)}{subsubsection*.178}% 150
-\BOOKMARK [3][-]{subsubsection*.180}{ ダイヤ}{subsection.5.3.3}% 151
-\BOOKMARK [4][-]{paragraph*.181}{交渉 \(立ち上がる兵\)}{subsubsection*.180}% 152
-\BOOKMARK [3][-]{subsubsection*.182}{ クラブ}{subsection.5.3.3}% 153
-\BOOKMARK [4][-]{paragraph*.183}{スイッチ \(立ち上がる兵\)}{subsubsection*.182}% 154
-\BOOKMARK [0][-]{chapter.6}{コアルール}{}% 155
-\BOOKMARK [1][-]{section.6.1}{基礎概念}{chapter.6}% 156
-\BOOKMARK [2][-]{subsection.6.1.1}{ターン}{section.6.1}% 157
-\BOOKMARK [2][-]{subsection.6.1.2}{アクション}{section.6.1}% 158
-\BOOKMARK [2][-]{subsection.6.1.3}{リクエスト}{section.6.1}% 159
-\BOOKMARK [2][-]{subsection.6.1.4}{解決}{section.6.1}% 160
-\BOOKMARK [2][-]{subsection.6.1.5}{チャンス}{section.6.1}% 161
-\BOOKMARK [2][-]{subsection.6.1.6}{ステージ}{section.6.1}% 162
-\BOOKMARK [2][-]{subsection.6.1.7}{コンポーネント}{section.6.1}% 163
-\BOOKMARK [2][-]{subsection.6.1.8}{コンポーネントインスタンス}{section.6.1}% 164
-\BOOKMARK [2][-]{subsection.6.1.9}{コアフロー\(ルールシステム\)}{section.6.1}% 165
-\BOOKMARK [1][-]{section.6.2}{詳細}{chapter.6}% 166
-\BOOKMARK [2][-]{subsection.6.2.1}{アクションの定義項目}{section.6.2}% 167
-\BOOKMARK [3][-]{subsubsection*.184}{オーナー}{subsection.6.2.1}% 168
-\BOOKMARK [3][-]{subsubsection*.185}{トリガー}{subsection.6.2.1}% 169
-\BOOKMARK [3][-]{subsubsection*.186}{スピード}{subsection.6.2.1}% 170
-\BOOKMARK [3][-]{subsubsection*.187}{タイミング}{subsection.6.2.1}% 171
-\BOOKMARK [3][-]{subsubsection*.188}{起動条件}{subsection.6.2.1}% 172
-\BOOKMARK [3][-]{subsubsection*.189}{誘発条件}{subsection.6.2.1}% 173
-\BOOKMARK [3][-]{subsubsection*.190}{効果}{subsection.6.2.1}% 174
-\BOOKMARK [2][-]{subsection.6.2.2}{リクエストの定義項目}{section.6.2}% 175
-\BOOKMARK [2][-]{subsection.6.2.3}{コンポーネントの定義項目}{section.6.2}% 176
-\BOOKMARK [2][-]{subsection.6.2.4}{コンポーネントインスタンスの定義項目}{section.6.2}% 177
-\BOOKMARK [1][-]{section.6.3}{能力}{chapter.6}% 178
-\BOOKMARK [1][-]{section.6.4}{コアフロー}{chapter.6}% 179
-\BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 180
-\BOOKMARK [3][-]{subsubsection*.195}{誘発即時解決}{subsection.6.4.1}% 181
-\BOOKMARK [3][-]{subsubsection*.196}{通常：アクション毎に処理}{subsection.6.4.1}% 182
-\BOOKMARK [2][-]{subsection.6.4.2}{能力の適応順}{section.6.4}% 183
-\BOOKMARK [3][-]{subsubsection*.197}{考え方の原則}{subsection.6.4.2}% 184
-\BOOKMARK [3][-]{subsubsection*.198}{能力の適用ルール}{subsection.6.4.2}% 185
-\BOOKMARK [3][-]{subsubsection*.199}{運用上の注意}{subsection.6.4.2}% 186
-\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 187
-\BOOKMARK [0][-]{chapter.7}{付録}{}% 188
-\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 189
-\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 190
-\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 191
-\BOOKMARK [2][-]{subsection.7.2.2}{マスター}{section.7.2}% 192
-\BOOKMARK [2][-]{subsection.7.2.3}{全フォーマット\046フレーム}{section.7.2}% 193
-\BOOKMARK [0][-]{chapter.8}{変更履歴}{}% 194
-\BOOKMARK [1][-]{section.8.1}{第8版の主な変更点}{chapter.8}% 195
-\BOOKMARK [2][-]{subsection.8.1.1}{能力の解釈を変更}{section.8.1}% 196
-\BOOKMARK [2][-]{subsection.8.1.2}{フォグ領域追加}{section.8.1}% 197
-\BOOKMARK [2][-]{subsection.8.1.3}{用語追加}{section.8.1}% 198
-\BOOKMARK [2][-]{subsection.8.1.4}{オプション削除とフレームへの統合}{section.8.1}% 199
-\BOOKMARK [2][-]{subsection.8.1.5}{曖昧なルールの明確化}{section.8.1}% 200
-\BOOKMARK [2][-]{subsection.8.1.6}{ルール外変更点}{section.8.1}% 201
-\BOOKMARK [1][-]{section.8.2}{第7版の主な変更点}{chapter.8}% 202
-\BOOKMARK [2][-]{subsection.8.2.1}{リバースのクイック化}{section.8.2}% 203
-\BOOKMARK [2][-]{subsection.8.2.2}{ゲーム中のデッキ名称をライフに変更}{section.8.2}% 204
-\BOOKMARK [2][-]{subsection.8.2.3}{対戦レギュレーションの定義方法変更}{section.8.2}% 205
-\BOOKMARK [2][-]{subsection.8.2.4}{コアフローをわかりやすく整理}{section.8.2}% 206
-\BOOKMARK [2][-]{subsection.8.2.5}{BJのクイック化}{section.8.2}% 207
-\BOOKMARK [2][-]{subsection.8.2.6}{引き分け廃止}{section.8.2}% 208
-\BOOKMARK [2][-]{subsection.8.2.7}{ルールの記載を微修正}{section.8.2}% 209
-\BOOKMARK [0][-]{chapter*.201}{索引}{}% 210
+\BOOKMARK [2][-]{subsection.5.3.3}{フレームフォグリスト}{section.5.3}% 146
+\BOOKMARK [3][-]{subsubsection*.170}{滞留魔法}{subsection.5.3.3}% 147
+\BOOKMARK [4][-]{paragraph*.171}{クローズ \(速攻魔法\)}{subsubsection*.170}% 148
+\BOOKMARK [2][-]{subsection.5.3.4}{フレーム切札リスト}{section.5.3}% 149
+\BOOKMARK [3][-]{subsubsection*.180}{ スペード}{subsection.5.3.4}% 150
+\BOOKMARK [4][-]{paragraph*.181}{スラッシュ \(立ち上がる兵\)}{subsubsection*.180}% 151
+\BOOKMARK [3][-]{subsubsection*.182}{ ハート}{subsection.5.3.4}% 152
+\BOOKMARK [4][-]{paragraph*.183}{激励 \(立ち上がる兵\)}{subsubsection*.182}% 153
+\BOOKMARK [3][-]{subsubsection*.184}{ ダイヤ}{subsection.5.3.4}% 154
+\BOOKMARK [4][-]{paragraph*.185}{交渉 \(立ち上がる兵\)}{subsubsection*.184}% 155
+\BOOKMARK [3][-]{subsubsection*.186}{ クラブ}{subsection.5.3.4}% 156
+\BOOKMARK [4][-]{paragraph*.187}{スイッチ \(立ち上がる兵\)}{subsubsection*.186}% 157
+\BOOKMARK [0][-]{chapter.6}{コアルール}{}% 158
+\BOOKMARK [1][-]{section.6.1}{基礎概念}{chapter.6}% 159
+\BOOKMARK [2][-]{subsection.6.1.1}{ターン}{section.6.1}% 160
+\BOOKMARK [2][-]{subsection.6.1.2}{アクション}{section.6.1}% 161
+\BOOKMARK [2][-]{subsection.6.1.3}{リクエスト}{section.6.1}% 162
+\BOOKMARK [2][-]{subsection.6.1.4}{解決}{section.6.1}% 163
+\BOOKMARK [2][-]{subsection.6.1.5}{チャンス}{section.6.1}% 164
+\BOOKMARK [2][-]{subsection.6.1.6}{ステージ}{section.6.1}% 165
+\BOOKMARK [2][-]{subsection.6.1.7}{コンポーネント}{section.6.1}% 166
+\BOOKMARK [2][-]{subsection.6.1.8}{コンポーネントインスタンス}{section.6.1}% 167
+\BOOKMARK [2][-]{subsection.6.1.9}{コアフロー\(ルールシステム\)}{section.6.1}% 168
+\BOOKMARK [1][-]{section.6.2}{詳細}{chapter.6}% 169
+\BOOKMARK [2][-]{subsection.6.2.1}{アクションの定義項目}{section.6.2}% 170
+\BOOKMARK [3][-]{subsubsection*.188}{オーナー}{subsection.6.2.1}% 171
+\BOOKMARK [3][-]{subsubsection*.189}{トリガー}{subsection.6.2.1}% 172
+\BOOKMARK [3][-]{subsubsection*.190}{スピード}{subsection.6.2.1}% 173
+\BOOKMARK [3][-]{subsubsection*.191}{タイミング}{subsection.6.2.1}% 174
+\BOOKMARK [3][-]{subsubsection*.192}{起動条件}{subsection.6.2.1}% 175
+\BOOKMARK [3][-]{subsubsection*.193}{誘発条件}{subsection.6.2.1}% 176
+\BOOKMARK [3][-]{subsubsection*.194}{効果}{subsection.6.2.1}% 177
+\BOOKMARK [2][-]{subsection.6.2.2}{リクエストの定義項目}{section.6.2}% 178
+\BOOKMARK [2][-]{subsection.6.2.3}{コンポーネントの定義項目}{section.6.2}% 179
+\BOOKMARK [2][-]{subsection.6.2.4}{コンポーネントインスタンスの定義項目}{section.6.2}% 180
+\BOOKMARK [1][-]{section.6.3}{能力}{chapter.6}% 181
+\BOOKMARK [1][-]{section.6.4}{コアフロー}{chapter.6}% 182
+\BOOKMARK [2][-]{subsection.6.4.1}{誘発チェック}{section.6.4}% 183
+\BOOKMARK [3][-]{subsubsection*.199}{誘発即時解決}{subsection.6.4.1}% 184
+\BOOKMARK [3][-]{subsubsection*.200}{通常：アクション毎に処理}{subsection.6.4.1}% 185
+\BOOKMARK [2][-]{subsection.6.4.2}{能力の適応順}{section.6.4}% 186
+\BOOKMARK [3][-]{subsubsection*.201}{考え方の原則}{subsection.6.4.2}% 187
+\BOOKMARK [3][-]{subsubsection*.202}{能力の適用ルール}{subsection.6.4.2}% 188
+\BOOKMARK [3][-]{subsubsection*.203}{運用上の注意}{subsection.6.4.2}% 189
+\BOOKMARK [1][-]{section.6.5}{まとめ}{chapter.6}% 190
+\BOOKMARK [0][-]{chapter.7}{付録}{}% 191
+\BOOKMARK [1][-]{section.7.1}{PDF版ルール}{chapter.7}% 192
+\BOOKMARK [1][-]{section.7.2}{アクションリスト}{chapter.7}% 193
+\BOOKMARK [2][-]{subsection.7.2.1}{ライト}{section.7.2}% 194
+\BOOKMARK [2][-]{subsection.7.2.2}{マスター}{section.7.2}% 195
+\BOOKMARK [2][-]{subsection.7.2.3}{全フォーマット\046フレーム}{section.7.2}% 196
+\BOOKMARK [0][-]{chapter.8}{変更履歴}{}% 197
+\BOOKMARK [1][-]{section.8.1}{第8版の主な変更点}{chapter.8}% 198
+\BOOKMARK [2][-]{subsection.8.1.1}{能力の解釈を変更}{section.8.1}% 199
+\BOOKMARK [2][-]{subsection.8.1.2}{フォグ領域追加}{section.8.1}% 200
+\BOOKMARK [2][-]{subsection.8.1.3}{用語追加}{section.8.1}% 201
+\BOOKMARK [2][-]{subsection.8.1.4}{オプション削除とフレームへの統合}{section.8.1}% 202
+\BOOKMARK [2][-]{subsection.8.1.5}{曖昧なルールの明確化}{section.8.1}% 203
+\BOOKMARK [2][-]{subsection.8.1.6}{ルール外変更点}{section.8.1}% 204
+\BOOKMARK [1][-]{section.8.2}{第7版の主な変更点}{chapter.8}% 205
+\BOOKMARK [2][-]{subsection.8.2.1}{リバースのクイック化}{section.8.2}% 206
+\BOOKMARK [2][-]{subsection.8.2.2}{ゲーム中のデッキ名称をライフに変更}{section.8.2}% 207
+\BOOKMARK [2][-]{subsection.8.2.3}{対戦レギュレーションの定義方法変更}{section.8.2}% 208
+\BOOKMARK [2][-]{subsection.8.2.4}{コアフローをわかりやすく整理}{section.8.2}% 209
+\BOOKMARK [2][-]{subsection.8.2.5}{BJのクイック化}{section.8.2}% 210
+\BOOKMARK [2][-]{subsection.8.2.6}{引き分け廃止}{section.8.2}% 211
+\BOOKMARK [2][-]{subsection.8.2.7}{ルールの記載を微修正}{section.8.2}% 212
+\BOOKMARK [0][-]{chapter*.205}{索引}{}% 213

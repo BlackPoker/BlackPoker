@@ -2181,17 +2181,13 @@
                       &thinsp; <small>
                         <span class="time-mark"></span>
                         <span>直接-通常-クイック</span>
-                      </small> <span>|</span> <small>
-                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-S"></span>
-<span class="cost-S"></span>
-</span>
-                      </small>
+                      </small>  
 
 
                     </div>
                     <div class="text-left">
                       <small> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span>同じスートの A と J</span><br>
+                          aria-hidden="true"></span> <span>A と J</span><br>
                       </small> 
 
                     </div>
@@ -2206,7 +2202,15 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。</span>
+                    <span><ol>
+<li> 合計点 を 0 とし、自分のライフの山札から1枚めくり表向きにする。公開したカードをまとめて 公開カード と呼ぶ。</li>
+<li> めくったカードの点数を合計点に加える。  </li><ul>
+<li>A は 11 点として扱う。ただし合計点が 22 点以上になる場合は 1 点として扱う。  </li>
+<li>J,Q,K は 10 点、Joker は 0 点、2〜10 は数字どおりとして扱う。</li></ul>
+<li> 合計点が 22 点以上になった場合、公開カードをすべて墓地に置き、効果を終了する。</li>
+<li> 合計点が 21 点以下の場合、ヒット もしくは、スタンドを行う。</li><ul>
+<li>ヒット: さらに 1 枚めくり、手順 2 に戻る。  </li>
+<li>スタンド: 公開カードすべてを手札に加え、効果を終了する。</li></ul></ol></span>
 
                     <div class="panel-collapse collapse storyText" id="fla_bj">
                       <hr>

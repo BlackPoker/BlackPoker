@@ -3907,16 +3907,41 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートの A と J
-
-\sphinxAtStartPar
-\sphinxstylestrong{コスト:} SS
+\sphinxstylestrong{キーカード:} A と J
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+合計点 を 0 とし、自分のライフの山札から1枚めくり表向きにする。公開したカードをまとめて 公開カード と呼ぶ。
+
+\item {} 
+\sphinxAtStartPar
+めくったカードの点数を合計点に加える。
 
 \sphinxAtStartPar
-ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
+・A は 11 点として扱う。ただし合計点が 22 点以上になる場合は 1 点として扱う。
+
+\sphinxAtStartPar
+・J,Q,K は 10 点、Joker は 0 点、2〜10 は数字どおりとして扱う。
+
+\item {} 
+\sphinxAtStartPar
+合計点が 22 点以上になった場合、公開カードをすべて墓地に置き、効果を終了する。
+
+\item {} 
+\sphinxAtStartPar
+合計点が 21 点以下の場合、ヒット もしくは、スタンドを行う。
+
+\sphinxAtStartPar
+・ヒット: さらに 1 枚めくり、手順 2 に戻る。
+
+\sphinxAtStartPar
+・スタンド: 公開カードすべてを手札に加え、効果を終了する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{ストーリー:}
@@ -3937,7 +3962,7 @@ x
 \sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  v8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -6413,81 +6438,81 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id30}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id34}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id31}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id35}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id32}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id36}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id33}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id37}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id34}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id38}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id35}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id39}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id36}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id37}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id38}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (速攻魔法)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id39}}{\hyperref[\detokenize{auto/frameActionlist:id12}]{\sphinxcrossref{切札{\normalsize $\spadesuit$} 2}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:id12}]{\sphinxcrossref{切札{\normalsize $\spadesuit$} 2}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:act-slash}]{\sphinxcrossref{スラッシュ (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-slash}]{\sphinxcrossref{スラッシュ (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:id14}]{\sphinxcrossref{切札{\normalsize $\heartsuit$} 3}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id14}]{\sphinxcrossref{切札{\normalsize $\heartsuit$} 3}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-rally}]{\sphinxcrossref{激励 (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-rally}]{\sphinxcrossref{激励 (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:id16}]{\sphinxcrossref{切札{\normalsize $\diamondsuit$} 3}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:id16}]{\sphinxcrossref{切札{\normalsize $\diamondsuit$} 3}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-negotiate}]{\sphinxcrossref{交渉 (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-negotiate}]{\sphinxcrossref{交渉 (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id18}]{\sphinxcrossref{切札{\normalsize $\clubsuit$} 4}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id49}}{\hyperref[\detokenize{auto/frameActionlist:id18}]{\sphinxcrossref{切札{\normalsize $\clubsuit$} 4}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-switch}]{\sphinxcrossref{スイッチ (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id50}}{\hyperref[\detokenize{auto/frameActionlist:act-switch}]{\sphinxcrossref{スイッチ (兵士起因)}}}
 
 \end{itemize}
 
@@ -7044,48 +7069,95 @@ x
 \sphinxstylestrong{更新バージョン:}  v8.1
 
 
-\subsection{フレーム切札リスト}
+\subsection{フレームフォグリスト}
 \label{\detokenize{auto/frameActionlist:id20}}
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:id22}]{\sphinxcrossref{{\normalsize $\spadesuit$} スペード}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id51}}{\hyperref[\detokenize{auto/frameActionlist:id22}]{\sphinxcrossref{滞留魔法}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id52}}{\hyperref[\detokenize{auto/frameActionlist:fog-closefog}]{\sphinxcrossref{クローズ (速攻魔法)}}}
+
+\end{itemize}
+
+\end{itemize}
+\end{sphinxShadowBox}
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{滞留魔法}
+\label{\detokenize{auto/frameActionlist:id22}}
+
+\paragraph{クローズ (速攻魔法)}
+\label{\detokenize{auto/frameActionlist:fog-closefog}}\label{\detokenize{auto/frameActionlist:id23}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} Q
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+対象とした切札はこのターンが終わるまで表向きにできない。
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  v8.1
+
+
+\subsection{フレーム切札リスト}
+\label{\detokenize{auto/frameActionlist:id24}}
+\begin{sphinxShadowBox}
+\sphinxstyletopictitle{目次}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id53}}{\hyperref[\detokenize{auto/frameActionlist:id26}]{\sphinxcrossref{{\normalsize $\spadesuit$} スペード}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id54}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (立ち上がる兵)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id49}}{\hyperref[\detokenize{auto/frameActionlist:id24}]{\sphinxcrossref{{\normalsize $\heartsuit$} ハート}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id55}}{\hyperref[\detokenize{auto/frameActionlist:id28}]{\sphinxcrossref{{\normalsize $\heartsuit$} ハート}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id50}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (立ち上がる兵)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id51}}{\hyperref[\detokenize{auto/frameActionlist:id26}]{\sphinxcrossref{{\normalsize $\diamondsuit$} ダイヤ}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id57}}{\hyperref[\detokenize{auto/frameActionlist:id30}]{\sphinxcrossref{{\normalsize $\diamondsuit$} ダイヤ}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id52}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (立ち上がる兵)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id53}}{\hyperref[\detokenize{auto/frameActionlist:id28}]{\sphinxcrossref{{\normalsize $\clubsuit$} クラブ}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id59}}{\hyperref[\detokenize{auto/frameActionlist:id32}]{\sphinxcrossref{{\normalsize $\clubsuit$} クラブ}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id54}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (立ち上がる兵)}}}
 
 \end{itemize}
 
@@ -7098,10 +7170,10 @@ x
 
 
 \subsubsection{{\normalsize $\spadesuit$} スペード}
-\label{\detokenize{auto/frameActionlist:id22}}
+\label{\detokenize{auto/frameActionlist:id26}}
 
 \paragraph{スラッシュ (立ち上がる兵)}
-\label{\detokenize{auto/frameActionlist:trump-s2}}\label{\detokenize{auto/frameActionlist:id23}}
+\label{\detokenize{auto/frameActionlist:trump-s2}}\label{\detokenize{auto/frameActionlist:id27}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -7138,10 +7210,10 @@ x
 
 
 \subsubsection{{\normalsize $\heartsuit$} ハート}
-\label{\detokenize{auto/frameActionlist:id24}}
+\label{\detokenize{auto/frameActionlist:id28}}
 
 \paragraph{激励 (立ち上がる兵)}
-\label{\detokenize{auto/frameActionlist:trump-h3}}\label{\detokenize{auto/frameActionlist:id25}}
+\label{\detokenize{auto/frameActionlist:trump-h3}}\label{\detokenize{auto/frameActionlist:id29}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -7178,10 +7250,10 @@ x
 
 
 \subsubsection{{\normalsize $\diamondsuit$} ダイヤ}
-\label{\detokenize{auto/frameActionlist:id26}}
+\label{\detokenize{auto/frameActionlist:id30}}
 
 \paragraph{交渉 (立ち上がる兵)}
-\label{\detokenize{auto/frameActionlist:trump-d3}}\label{\detokenize{auto/frameActionlist:id27}}
+\label{\detokenize{auto/frameActionlist:trump-d3}}\label{\detokenize{auto/frameActionlist:id31}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -7218,10 +7290,10 @@ x
 
 
 \subsubsection{{\normalsize $\clubsuit$} クラブ}
-\label{\detokenize{auto/frameActionlist:id28}}
+\label{\detokenize{auto/frameActionlist:id32}}
 
 \paragraph{スイッチ (立ち上がる兵)}
-\label{\detokenize{auto/frameActionlist:trump-c4}}\label{\detokenize{auto/frameActionlist:id29}}
+\label{\detokenize{auto/frameActionlist:trump-c4}}\label{\detokenize{auto/frameActionlist:id33}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
