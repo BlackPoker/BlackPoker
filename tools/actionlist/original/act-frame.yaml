@@ -215,6 +215,19 @@ actList:
       since: ex3.4.0
       update: v8.1
 
+fogList:
+  - type: 滞留魔法
+    fogs:
+    - frame: |-
+        ・エクストラ
+      fogName: クローズ
+      fogId: closeFog
+      fogType: 速攻魔法
+      fogKey: Q
+      fogTarget: 対象とした切札1枚
+      fogAbility: 対象とした切札はこのターンが終わるまで表向きにできない。
+      since: v8.1
+
 trumpList:
   - type: ♠スペード
     trumps:
