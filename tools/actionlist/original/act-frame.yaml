@@ -306,3 +306,15 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
       devNote: |-
         立ち上がる兵で追加された。
+
+  - type: その他
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 裏切札
+      trumpId: secretTrump
+      trumpType: 裏切札
+      trumpKey: 全て(裏向き)
+      trumpAbility: |
+        なし
+      since: v8.1

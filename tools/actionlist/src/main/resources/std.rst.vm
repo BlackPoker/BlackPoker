@@ -349,6 +349,10 @@ ${rstFn.cnv(${trump.frame})}
 **キーカード:** ${trump.trumpKey}
 
         #end
+        #if(${trump.trumpLabel})
+**ラベル:** ${trump.trumpLabel}
+
+        #end
         #if(${trump.trumpAbility})
 **能力:**  
 
