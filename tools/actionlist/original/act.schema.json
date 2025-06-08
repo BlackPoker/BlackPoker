@@ -195,6 +195,7 @@
                   "trumpId": { "type": "string" },
                   "trumpType": { "type": "string" },
                   "trumpKey": { "type": "string" },
+                  "trumpLabel": { "type": "string" },
                   "trumpAbility": { "type": "string" },
                   "image": {"type": "string"},
                   "story": { "type": "string" },
