@@ -112,9 +112,9 @@
 \contentsline {paragraph}{防壁 (防壁)}{59}{paragraph*.115}%
 \contentsline {subsection}{\numberline {4.3.3}フォグリスト}{60}{subsection.4.3.3}%
 \contentsline {subsubsection}{滞留魔法}{60}{subsubsection*.120}%
-\contentsline {paragraph}{アップ (速攻魔法)}{60}{paragraph*.121}%
-\contentsline {paragraph}{ダウン (速攻魔法)}{60}{paragraph*.122}%
-\contentsline {paragraph}{フォース (通常魔法)}{61}{paragraph*.123}%
+\contentsline {paragraph}{アップ (滞留魔法)}{60}{paragraph*.121}%
+\contentsline {paragraph}{ダウン (滞留魔法)}{60}{paragraph*.122}%
+\contentsline {paragraph}{フォース (滞留魔法)}{61}{paragraph*.123}%
 \contentsline {chapter}{\numberline {第5章}フレーム}{63}{chapter.5}%
 \contentsline {section}{\numberline {5.1}フレームとは}{63}{section.5.1}%
 \contentsline {section}{\numberline {5.2}定義項目}{63}{section.5.2}%
@@ -145,7 +145,7 @@
 \contentsline {paragraph}{スイッチ (兵士起因)}{79}{paragraph*.167}%
 \contentsline {subsection}{\numberline {5.3.3}フレームフォグリスト}{80}{subsection.5.3.3}%
 \contentsline {subsubsection}{滞留魔法}{80}{subsubsection*.170}%
-\contentsline {paragraph}{クローズ (速攻魔法)}{80}{paragraph*.171}%
+\contentsline {paragraph}{クローズ (滞留魔法)}{80}{paragraph*.171}%
 \contentsline {subsection}{\numberline {5.3.4}フレーム切札リスト}{80}{subsection.5.3.4}%
 \contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} スペード}{81}{subsubsection*.182}%
 \contentsline {paragraph}{スラッシュ (立ち上がる兵)}{81}{paragraph*.183}%
