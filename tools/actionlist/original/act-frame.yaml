@@ -222,7 +222,7 @@ fogList:
         ・エクストラ
       fogName: クローズ
       fogId: closeFog
-      fogType: 速攻魔法
+      fogType: 滞留魔法
       fogKey: Q
       fogTarget: 対象とした切札1枚
       fogAbility: 対象とした切札はこのターンが終わるまで表向きにできない。

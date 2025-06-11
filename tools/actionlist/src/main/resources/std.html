@@ -925,7 +925,7 @@
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" th:attr="id='fog'+${row.fogId},
+                <div class="panel panel-default blackpoker-action" th:attr="id='fog-'+${row.fogId},
                   data-format=${#sfn.formatDataFormat(row.format)},
                   data-frame=${#sfn.formatDataFrame(row.frame)},">
                   <div class="panel-heading">

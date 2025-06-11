@@ -717,7 +717,7 @@ fogList:
     - format: 'lite,std,pro,mast'
       fogName: アップ
       fogId: upFog
-      fogType: 速攻魔法
+      fogType: 滞留魔法
       fogKey: ♡A〜10
       fogTarget: アップアクションで対象となった兵士
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
@@ -726,7 +726,7 @@ fogList:
     - format: 'lite,std,pro,mast'
       fogName: ダウン
       fogId: downFog
-      fogType: 速攻魔法
+      fogType: 滞留魔法
       fogKey: ♠A〜10
       fogTarget: ダウンアクションで対象となった兵士
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。  
@@ -735,7 +735,7 @@ fogList:
     - format: ',,mast'
       fogName: フォース
       fogId: forceFog
-      fogType: 通常魔法
+      fogType: 滞留魔法
       fogKey: ♡A〜10 を 2枚
       fogAbility: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
       since: v8.0
