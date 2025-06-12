@@ -71,7 +71,7 @@ actList:
       actTrigger: 誘発
       actSpeed: 通常
       actTime: クイック
-      actTarget: キーカードが1枚または2枚のアクションを対象とする。
+      actTarget: キーカードが1枚または2枚のリクエスト
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
 
@@ -100,7 +100,7 @@ actList:
       actTime: クイック
       actCost: D
       actKey: Q
-      actTarget: 切札1枚を対象とする。
+      actTarget: 切札1枚
       actEffect: |-
         対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。
 
@@ -115,7 +115,7 @@ actList:
       actTime: クイック
       actCost: B
       actKey: A〜K
-      actTarget: 切札1枚を対象とする。
+      actTarget: 切札1枚
       actEffect: |-
         対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。
 
@@ -128,7 +128,7 @@ actList:
     #   actTrigger: 誘発
     #   actSpeed: 即時
     #   actTime: クイック
-    #   actTarget: カード1枚を対象とする。
+    #   actTarget: カード1枚
     #   actEffect: |-
     #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
     #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
