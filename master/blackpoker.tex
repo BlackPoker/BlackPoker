@@ -75,7 +75,7 @@
 
 
 \title{BlackPoker}
-\date{2025年06月14日}
+\date{2025年06月15日}
 \release{2025/6/x}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -129,21 +129,27 @@ release: 2025/6/x
 \chapter{はじめに}
 \label{\detokenize{init/init:init-rst}}\label{\detokenize{init/init:id1}}\label{\detokenize{init/init::doc}}
 \sphinxAtStartPar
-この文章はトランプゲーム「BlackPoker」の全てのルールをまとめた文章です。
+この文書は、トランプゲーム「BlackPoker」の公式ルールをまとめたものです。
 
 \sphinxAtStartPar
-詳細なルールが記載されており、初心者の方は文章の量に圧倒されます。
-ゲームをプレイする際に全てを熟読する必要はありませんが、
-ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。
+BlackPokerは、誰でも持っているトランプで遊べる、
+「トレーディングカードゲームのようなプレイ感」を目指した完全オリジナルのゲームです。
+
+\sphinxAtStartPar
+ルール文書には詳細な内容が含まれており、最初はその量に圧倒されるかもしれません。
+ゲームを始める際にすべてを暗記する必要はありませんが、ルールの仕組みや拡張性を深く知りたい方には
+ぜひ一度じっくり読み込んでいただくことをおすすめします。
 
 
 \section{BlackPokerとは}
 \label{\detokenize{init/init:blackpoker}}
 \sphinxAtStartPar
-当サークルが考案した1人1セットのトランプを使ったターン制の
-トレーディングカードゲームのようなトランプゲームです。
-自分だけのオリジナルトランプを使って友達と遊べます。
-プレイしている時のイメージは図のような感じです。(\hyperref[\detokenize{init/init:play-image}]{Fig.\@ \ref{\detokenize{init/init:play-image}}})
+当サークルが考案した、1人1セットのトランプを使って遊ぶ、
+ターン制かつ割込み可能な独自ルールのカードゲームです。
+自分だけのオリジナルトランプを使って、友達と本格的なカードバトルを楽しむことができます。
+
+\sphinxAtStartPar
+プレイしているときのイメージは次のような感じです。(\hyperref[\detokenize{init/init:play-image}]{Fig.\@ \ref{\detokenize{init/init:play-image}}})
 
 \begin{figure}[htbp]
 \centering
@@ -161,55 +167,56 @@ release: 2025/6/x
 
 \sphinxAtStartPar
 けど、仕事に追われ時間もなく、お金もかけられないのでカード資産も抱えられない。
-昔のデッキを引っ張りだしてもカードパワーが違って平等に遊べないし、コミニティが狭い。
-そんな悩みを解消しようと誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。
+昔のデッキを引っ張り出してもカードパワーが違って平等に遊べないし、コミュニティも狭い。
+そんな悩みを解消しようと、誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。
 
 
 \section{ゲームのストーリー}
 \label{\detokenize{init/init:id3}}
 \sphinxAtStartPar
-あなたのトランプはただのトランプではありません。
-かつて大地を支配していた偉大な国々や強固な絆で結ばれた組織の魂が宿る遺産です。
+あなたのトランプは、ただのトランプではありません。
+かつて大地を支配していた偉大な国々や、強固な絆で結ばれた組織の魂が宿る遺産です。
 
 \sphinxAtStartPar
-これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、その物語たちはまるで時間を超えたタペストリーのように絡み合っています。
+これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、
+その物語たちはまるで時間を超えたタペストリーのように絡み合っています。
 
 \sphinxAtStartPar
-プレイヤーは歴史の再現者、リアニメーターとしてデッキに宿る過去の栄光を再現し、その国や組織がいかに素晴らしかったかを
-戦いを通して対戦相手に示してください。
+プレイヤーは歴史の再現者、リアニメーターとして、
+デッキに宿る過去の栄光を再現し、戦いを通じてその魅力を相手に示してください。
 
 \sphinxAtStartPar
-え？そんな国知らない？でしたらあなたのカードから創造してみてはいかがでしょうか。
+え？そんな国知らない？でしたら、あなたのカードから創造してみてはいかがでしょうか。
 
 
 \section{読み方}
 \label{\detokenize{init/init:id4}}
 \sphinxAtStartPar
-各章は次のことを説明しています。
+各章は次のような内容を説明しています。
 \begin{description}
 \sphinxlineitem{\hyperref[\detokenize{init/init:init-rst}]{\ref{\detokenize{init/init:init-rst}} \nameref{\detokenize{init/init:init-rst}}}}
 \sphinxAtStartPar
-ルールの指針や全体像を説明
-
-\sphinxlineitem{\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}}}
-\sphinxAtStartPar
-ゲームの開始方法など全体的なゲームの流れを説明
+ルールの背景や構成、全体像を説明（この章）
 
 \sphinxlineitem{\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}}}
 \sphinxAtStartPar
-遊び方（ゲーム中にできることの範囲）を決める方法について説明
+対戦前にプレイヤー間で取り決める「遊び方のルール」（対戦レギュレーション）の選び方を説明
+
+\sphinxlineitem{\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}}}
+\sphinxAtStartPar
+BlackPokerの全ルールで共通して使う基本ルールを説明
 
 \sphinxlineitem{\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}}}
 \sphinxAtStartPar
-対戦レギュレーションを決める際に選択できるフォーマットを紹介
+難易度に応じたルール制限（フォーマット）の詳細を説明
 
 \sphinxlineitem{\hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}}}
 \sphinxAtStartPar
-対戦レギュレーションを決める際に選択できるフレームを紹介
+デッキ構成や初期配置など遊び方のパターン（フレーム）を説明
 
 \sphinxlineitem{\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}}}
 \sphinxAtStartPar
-BlackPokerのコアであるターン制ゲームのルールを説明
+アクションの処理や割込み、ステージの仕組みなどのコアシステムを説明
 
 \end{description}
 
@@ -217,15 +224,18 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \subsection{用途別読み方}
 \label{\detokenize{init/init:id5}}
 \sphinxAtStartPar
-文章が複雑であるため、用途に合わせて読むことをおすすめします。
+ルール文書はやや複雑な構成になっているため、用途に合わせて読むことをおすすめします。
 \begin{description}
-\sphinxlineitem{ゲームの流れを理解したい方}
+\sphinxlineitem{ゲームを始めたい方（初心者）}
 \sphinxAtStartPar
-\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} から順に読んでください。 \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} は飛ばしても大丈夫です。
+\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}} \(\rightarrow\) \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} の順に読むのがおすすめです。
 
-\sphinxlineitem{アクションの解決順で悩んでいる方}
 \sphinxAtStartPar
-\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} を熟読してください。
+\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} （高度なルール）は飛ばしても構いません。
+
+\sphinxlineitem{ゲーム中の処理で悩んでいる方}
+\sphinxAtStartPar
+アクションの起こし方や割込み、解決順などを \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} で確認してください。
 
 \end{description}
 
@@ -233,7 +243,8 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \section{ルール指針}
 \label{\detokenize{init/init:id6}}
 \sphinxAtStartPar
-ルールを作成・修正するための指針を示します。
+BlackPokerのルールは、\sphinxstylestrong{できるだけシンプルに、わかりやすく} を基本方針としています。
+そのうえで、より多くの人が楽しめるよう、以下の指針に基づいてルールを設計・調整しています。
 \begin{description}
 \sphinxlineitem{\sphinxstylestrong{誰とでも戦える \textasciitilde{}目指すは老若男女\textasciitilde{}}}
 \sphinxAtStartPar
@@ -281,14 +292,262 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxstepscope
 
 
+\chapter{対戦レギュレーション}
+\label{\detokenize{match-regulations/match-regulations:match-regulations-rst}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
+\index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
+
+\section{対戦レギュレーションとは}
+\label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id2}}
+\sphinxAtStartPar
+BlackPoker では、ゲームを始める前に「どのようなルールで遊ぶか」をプレイヤー同士で決める必要があります。
+
+\sphinxAtStartPar
+この事前に決めるルールの組み合わせを \sphinxstylestrong{対戦レギュレーション} と呼びます。
+
+\sphinxAtStartPar
+BlackPoker は、標準的なトランプだけを使って遊ぶゲームです。
+カードは同じでも、ルール（対戦レギュレーション）を変えることで、
+初心者から上級者まで、さまざまなプレイヤーが自分に合った難易度・遊び方で楽しめるようになっています。
+
+\sphinxAtStartPar
+この章では、対戦レギュレーションの構成や決め方について説明します。
+
+
+\section{定義項目}
+\label{\detokenize{match-regulations/match-regulations:id3}}
+\sphinxAtStartPar
+対戦レギュレーションは、次の2つの要素を組み合わせて構成されます。
+
+\index{フォーマット(対戦レギュレーション)@\spxentry{フォーマット(対戦レギュレーション)}}\ignorespaces \begin{description}
+\sphinxlineitem{フォーマット}
+\sphinxAtStartPar
+\sphinxstylestrong{プレイヤーの熟練度に応じて、使える行動（アクション）や登場キャラクターなどを制限した難易度の設定です。}
+
+\sphinxAtStartPar
+たとえば「ライト」は初心者向けに覚える行動を最小限に絞ったフォーマット、
+「スタンダード」は基本的な要素を一通り含んだ標準的なフォーマットです。
+
+\sphinxAtStartPar
+カードゲームでいう「カードプール」（どのカードを使ってよいか）に近い考え方です。
+
+\sphinxAtStartPar
+詳しくは \hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} を参照してください。
+
+\end{description}
+
+\index{フレーム(対戦レギュレーション)@\spxentry{フレーム(対戦レギュレーション)}}\ignorespaces \begin{description}
+\sphinxlineitem{フレーム}
+\sphinxAtStartPar
+\sphinxstylestrong{デッキの構成やカードの初期配置、場の使い方などを定めた、遊び方のパターンです。}
+
+\sphinxAtStartPar
+たとえば「エントリー20」は、決められた20枚のカードを使って手軽に遊べる入門向けフレームです。
+一方「パック」や「ストラテジー」では、構築や初期戦略の自由度が高く、プレイヤーの個性がより強く表れます。
+
+\sphinxAtStartPar
+フォーマットは「どのくらい覚えるか」で選び、
+フレームは「どのように遊びたいか」で選ぶイメージです。
+
+\sphinxAtStartPar
+詳しくは \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} を参照してください。
+
+\end{description}
+
+
+\subsection{対戦レギュレーションの表記}
+\label{\detokenize{match-regulations/match-regulations:id4}}
+\sphinxAtStartPar
+対戦レギュレーションは、 \sphinxstylestrong{フォーマット + フレーム} の形式で表記します。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{フォーマット}\PYG{o}{+}\PYG{n}{フレーム}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+たとえば、次のように記述されます。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+\PYG{n}{ライト}\PYG{o}{+}\PYG{n}{エントリー}
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+これは「ライトフォーマットで、エントリーフレームを使用して対戦する」ことを意味します。
+
+
+\section{対戦レギュレーションの決め方}
+\label{\detokenize{match-regulations/match-regulations:id5}}
+\sphinxAtStartPar
+以下の手順で、プレイヤー同士が合意して対戦レギュレーションを決めてください。
+
+\sphinxAtStartPar
+一部の組み合わせは公式に対応していないため、必ず以下の手順に従って選択してください。
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{フォーマットを決める}
+
+\sphinxAtStartPar
+「ライト」「スタンダード」「プロ」などのフォーマットから選びます。
+
+\sphinxAtStartPar
+フォーマットが変わると、使用可能なアクションの種類や難易度が大きく変わります。
+プレイヤーの経験や慣れ具合をもとに、無理のないフォーマットを選びましょう。
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{フレームを決める}
+
+\sphinxAtStartPar
+フォーマットを決めたら、次に使用するフレームを選びます。
+
+\sphinxAtStartPar
+各フレームが対応しているフォーマットの一覧は以下の表をご覧ください。
+「◯」と表記されている組み合わせが選択可能です。
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{フレーム対応一覧}\label{\detokenize{match-regulations/match-regulations:id6}}\label{\detokenize{match-regulations/match-regulations:frame-format}}
+\sphinxaftertopcaption
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|T|}
+\sphinxtoprule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+【フレーム】
+&
+\sphinxAtStartPar
+ライト
+&
+\sphinxAtStartPar
+スタンダード
+&
+\sphinxAtStartPar
+プロ
+&
+\sphinxAtStartPar
+マスター
+\\
+\sphinxhline
+\sphinxAtStartPar
+エントリー20
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+\\
+\sphinxhline
+\sphinxAtStartPar
+パック
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxhline
+\sphinxAtStartPar
+レアパック
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxhline
+\sphinxAtStartPar
+ストラテジー
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxhline
+\sphinxAtStartPar
+エクストラ
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{補足：} 初めての方には「ライト+エントリー20」がおすすめです。
+決められた20枚のカードを使って、最も手軽にBlackPokerを体験できます。
+
+
+\bigskip\hrule\bigskip
+
+
+\sphinxAtStartPar
+このあと、　\sphinxstylestrong{フォーマットやフレームに関係なく適用される「共通ルール」} を説明します。
+まずは次の \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} を読み進めてください。
+
+\sphinxAtStartPar
+フォーマットやフレームの詳細を知りたい方は、 \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} を読んだあとに
+\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} および \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} を参照するのがおすすめです。
+
+\sphinxstepscope
+
+
 \chapter{共通ルール}
 \label{\detokenize{common/common:common-rst}}\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
 \sphinxAtStartPar
-BlackPokerには様々な対戦方法があります。
-個別の違いは対戦レギュレーションで定義されています。
+この章では、BlackPokerのすべての対戦で共通して使用される共通ルールを説明します。
+フォーマットやフレームに関係なく、BlackPokerを遊ぶうえでの土台となるルールです。
 
 \sphinxAtStartPar
-この章では、BlackPokerの共通的なルールを説明します。
+プレイ人数、カードの種類、場の構成、アクションの処理など、ゲームの進行に必要な共通事項をまとめています。
+
+\sphinxAtStartPar
+※ フォーマットやフレームにより細かな違いがある場合は、フォーマットやフレーム側で補足されます。
 
 
 \section{プレイ人数}
@@ -485,7 +744,8 @@ Joker
 \index{デッキ@\spxentry{デッキ}}\ignorespaces \begin{description}
 \sphinxlineitem{デッキ}
 \sphinxAtStartPar
-ゲーム開始前にゲームで使用するカードの束（カード構成）
+ゲーム開始前にゲームで使用するカードの束（カード構成）。
+フレームに応じて使用できるデッキの条件が異なります。
 
 \end{description}
 
@@ -621,65 +881,83 @@ Joker
 \section{ゲームの始め方}
 \label{\detokenize{common/common:common-gamestart}}\label{\detokenize{common/common:id16}}
 \sphinxAtStartPar
-デッキをよく切り、次の手順でゲームを始めます。
+BlackPokerでは、選択した「フレーム」に応じてゲームの開始手順が異なります。
+各フレームでは、「デッキ構築」や「初期配置」、「防壁・兵士のプリセット状態」などが個別に定義されています。
+
+\sphinxAtStartPar
+そのため、ゲームを始める際は、まずフレームごとの「ゲームの始め方」に従って準備を行ってください。
+
+\sphinxAtStartPar
+その上で、次に記載する「共通手順」に沿って、先攻の決定およびゲーム開始処理を進めます。
+この共通手順は、すべてのフレームに共通です。
 
 
-\subsection{配置準備}
-\label{\detokenize{common/common:common-gamestart-field}}\label{\detokenize{common/common:id17}}\begin{enumerate}
+\subsection{共通手順：プリセット配置}
+\label{\detokenize{common/common:common-gamestart-preset}}\label{\detokenize{common/common:id17}}\begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-デッキをよく切る。
+ライフの一番上のカードを表向きにして「防壁」として場に出す。
 
 \item {} 
 \sphinxAtStartPar
-デッキより7枚引き手札にする。
-
-\item {} 
-\sphinxAtStartPar
-デッキをライフの場所に置き、ライフとする。
+続けてライフの次のカードを表向きにして「兵士」として場に出す。
 
 \end{enumerate}
 
+\sphinxAtStartPar
+この手順は「プリセット」と呼ばれています。
 
-\subsection{先攻決定}
+
+\subsection{共通手順：先攻決定}
 \label{\detokenize{common/common:common-gamestart-first}}\label{\detokenize{common/common:id18}}\begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-両者ライフの一番上を表にする。
+両者ライフの一番上のカードを表にする。
 
 \item {} 
 \sphinxAtStartPar
-大きい数字のプレイヤーが先攻。数字については、 \hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}} 参照。
+数字の大きいプレイヤーが先攻（数値は \hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}} を参照）。
 
 \item {} 
 \sphinxAtStartPar
-数字が同じ場合、さらにライフの一番上を表にし同様のルールで比べる。
+同じ数値の場合、さらにライフの一番上をめくって同様に比較。
 
 \item {} 
 \sphinxAtStartPar
-表にしたカードを墓地へ移す。
+表にしたカードはすべて墓地に移す。
 
 \end{enumerate}
 
 
-\subsection{ゲーム開始}
+\subsection{共通手順：ゲーム開始}
 \label{\detokenize{common/common:common-gamestart-start}}\label{\detokenize{common/common:id19}}\begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-先攻プレイヤーはライフより1枚引き手札に加える。
+先攻プレイヤーはライフから1枚引いて手札に加える。
 
 \item {} 
 \sphinxAtStartPar
-先攻プレイヤーがターンとチャンスをもちゲームを開始する。
+先攻プレイヤーがターンとチャンスを持ち、ゲームが開始される。
 
 \end{enumerate}
 
+\begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-ゲームの始め方は対戦レギュレーションによって異なることがあります。
-対戦前に確認してください。
+ゲームの始め方の補足
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+フレームによっては、上記の「プリセット」や「先攻決定」「ゲーム開始」に入る前に、特別な手順（例：ストラテジー選択や切札設定など）があります。
+
+\item {} 
+\sphinxAtStartPar
+必ず対戦前に、使用するフレームの内容を確認してください。
+
+\end{itemize}
+\end{sphinxadmonition}
 
 \index{アクション@\spxentry{アクション}}\ignorespaces 
 
@@ -1426,218 +1704,6 @@ BlackPokerでは
 
 \noindent\sphinxincludegraphics{{set-stage}.pdf}
 \caption{ステージの置き方}\label{\detokenize{common/common:id56}}\label{\detokenize{common/common:set-stage}}\end{figure}
-
-\sphinxstepscope
-
-
-\chapter{対戦レギュレーション}
-\label{\detokenize{match-regulations/match-regulations:match-regulations-rst}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
-\index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
-
-\section{対戦レギュレーションとは}
-\label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id2}}
-\sphinxAtStartPar
-対戦レギュレーションとは、
-BlackPokerで対戦する前にプレイヤー間で決定する
-規則のことです。
-
-\sphinxAtStartPar
-BlackPokerはトランプだけで遊べるため、
-対戦する前にプレイヤー間でルールのすり合わせをする必要があります。
-
-
-\section{定義項目}
-\label{\detokenize{match-regulations/match-regulations:id3}}
-\sphinxAtStartPar
-対戦レギュレーションは次の各項目を決めることで決定します。
-
-\index{フォーマット(対戦レギュレーション)@\spxentry{フォーマット(対戦レギュレーション)}}\ignorespaces \begin{description}
-\sphinxlineitem{フォーマット}
-\sphinxAtStartPar
-使用するフォーマット。
-
-\sphinxAtStartPar
-フォーマットとは、使用できるアクションなどをまとめたセット。
-いくつか種類があり、プレイヤーの熟練度に合わせて選ぶことができる。
-
-\sphinxAtStartPar
-詳しくは \hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} 参照
-
-\end{description}
-
-\index{フレーム(対戦レギュレーション)@\spxentry{フレーム(対戦レギュレーション)}}\ignorespaces \begin{description}
-\sphinxlineitem{フレーム}
-\sphinxAtStartPar
-使用するフレーム。
-
-\sphinxAtStartPar
-フレームとは、フォーマットとは異なる角度から使えるアクションや領域をまとめたセット。
-フォーマットは熟練度で選び、フレームは遊び方で選ぶイメージです。
-
-\sphinxAtStartPar
-詳しくは \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} 参照
-
-\end{description}
-
-
-\subsection{対戦レギュレーションの表記}
-\label{\detokenize{match-regulations/match-regulations:id4}}
-\sphinxAtStartPar
-対戦レギュレーションは次のように表記します。
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{フォーマット}\PYG{o}{+}\PYG{n}{フレーム}
-\end{sphinxVerbatim}
-
-\sphinxAtStartPar
-例えば、次のように表記します。
-
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{n}{ライト}\PYG{o}{+}\PYG{n}{エントリー}
-\end{sphinxVerbatim}
-
-
-\section{対戦レギュレーションの決め方}
-\label{\detokenize{match-regulations/match-regulations:id5}}
-\sphinxAtStartPar
-対戦レギュレーションを決定する手順を記載します。
-
-\sphinxAtStartPar
-公式では対応していない組み合わせが存在するため、手順に従って対戦レギュレーションを決定してください。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{フォーマットの決定}
-
-\sphinxAtStartPar
-「ライト」「スタンダード」などフォーマットを決めます。
-
-\sphinxAtStartPar
-フォーマットが変わると覚えるアクションなどの量が大きく変わるので、プレイヤー同士の熟練度をもとに決定しましょう。
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{フレームの決定}
-
-\sphinxAtStartPar
-手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。
-
-\sphinxAtStartPar
-「◯」と表記されている組み合わせが選択出来ます。(\hyperref[\detokenize{match-regulations/match-regulations:frame-format}]{Table \ref{\detokenize{match-regulations/match-regulations:frame-format}}})
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\sphinxcapstartof{table}
-\sphinxthecaptionisattop
-\sphinxcaption{フレーム対応一覧}\label{\detokenize{match-regulations/match-regulations:id6}}\label{\detokenize{match-regulations/match-regulations:frame-format}}
-\sphinxaftertopcaption
-\begin{tabulary}{\linewidth}[t]{|T|T|T|T|T|}
-\sphinxtoprule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-【フレーム】
-&
-\sphinxAtStartPar
-ライト
-&
-\sphinxAtStartPar
-スタンダード
-&
-\sphinxAtStartPar
-プロ
-&
-\sphinxAtStartPar
-マスター
-\\
-\sphinxhline
-\sphinxAtStartPar
-エントリー20
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-\\
-\sphinxhline
-\sphinxAtStartPar
-パック
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxhline
-\sphinxAtStartPar
-レアパック
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxhline
-\sphinxAtStartPar
-ストラテジー
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-◯
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxhline
-\sphinxAtStartPar
-エクストラ
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-x
-&
-\sphinxAtStartPar
-◯
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
-\end{enumerate}
 
 \sphinxstepscope
 
@@ -5831,19 +5897,33 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-デッキをライフとし配置図の場所に伏せておく。
+デッキをシャッフルする。
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+デッキをライフとし、配置図の場所に伏せておく。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-field}]{\ref{\detokenize{common/common:common-gamestart-field}} \nameref{\detokenize{common/common:common-gamestart-field}}} 以降に沿ってゲームを開始します。
+ライフの一番上のカード7枚引き手札とする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 
 \bigskip\hrule\bigskip
@@ -5911,10 +5991,19 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+デッキをシャッフルする。
+
 \item {} 
 \sphinxAtStartPar
 デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
+
+\item {} 
+\sphinxAtStartPar
+ライフの一番上のカード7枚引き手札とする。
 
 \item {} 
 \sphinxAtStartPar
@@ -5922,16 +6011,17 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
 
 \item {} 
 \sphinxAtStartPar
-フォーマットがライトの場合、プリセットされた兵士カードがJokerならばそれを墓地に移し、次のカードを兵士として場に出す。（ライトに兵士「魔術士」がいないため。）
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -6032,7 +6122,8 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
 デッキからレアカード1枚を選び配置図の場所に伏せておく。
@@ -6051,12 +6142,21 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカード7枚引き手札とする。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -6176,7 +6276,8 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
 デッキから最初の手札に入れる3枚を選ぶ。（ストラテジー）
@@ -6187,7 +6288,11 @@ x
 
 \item {} 
 \sphinxAtStartPar
-残りのデッキをシャッフルし、上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
+デッキをシャッフルする。
+
+\item {} 
+\sphinxAtStartPar
+デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
 
 \item {} 
 \sphinxAtStartPar
@@ -6195,16 +6300,21 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカードを4枚引いて手札を7枚とする。
 
 \item {} 
 \sphinxAtStartPar
-4枚引いて手札を7枚とする。
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -6324,7 +6434,8 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
 デッキから2枚選び切札として、配置図の場所に伏せておく。
@@ -6347,20 +6458,29 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカードを4枚引いて手札を7枚とする。
 
 \item {} 
 \sphinxAtStartPar
-4枚引いて手札を7枚とする。
+ライフの一番上のカードを防壁として場に出し、次のカードを兵士として裏向きで場に出す。（プリセット）
 
 \item {} 
 \sphinxAtStartPar
-対戦相手も手札を7枚用意でき、準備ができてから切札を1枚表向きにする。
+対戦相手も手札を7枚用意でき、準備ができてから \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+先攻プレイヤーは、プリセットで裏向きで出した兵士を表にし、切札を1枚表向きにする。
+
+\item {} 
+\sphinxAtStartPar
+後攻プレイヤーも同様に、プリセットで裏向きで出した兵士を表にし、切札を1枚表向きにする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}

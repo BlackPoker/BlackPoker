@@ -23,7 +23,7 @@
     <link rel="shortcut icon" href="../_static/favicon.ico"/>
     <link rel="index" title="索引" href="../genindex.html" />
     <link rel="search" title="検索" href="../search.html" />
-    <link rel="next" title="共通ルール" href="../common/common.html" />
+    <link rel="next" title="対戦レギュレーション" href="../match-regulations/match-regulations.html" />
     <link rel="prev" title="BlackPoker公式ルール 第8.1版" href="../index.html" />
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -103,11 +103,11 @@
           </span>
         </div>
       </a>
-      <a class="next" href="../common/common.html" aria-label="次のトピックへ" accesskey="N">
+      <a class="next" href="../match-regulations/match-regulations.html" aria-label="次のトピックへ" accesskey="N">
         <div class="title">
           <span class="text">
             <span class="direction">次へ</span>
-            共通ルール
+            対戦レギュレーション
           </span>
         </div>
         <div class="icon">
@@ -129,16 +129,18 @@
 </nav>
 <section id="init-rst">
 <span id="id1"></span><h1><span class="section-number">1. </span>はじめに<a class="headerlink" href="#init-rst" title="この見出しへのパーマリンク">¶</a></h1>
-<p>この文章はトランプゲーム「BlackPoker」の全てのルールをまとめた文章です。</p>
-<p>詳細なルールが記載されており、初心者の方は文章の量に圧倒されます。
-ゲームをプレイする際に全てを熟読する必要はありませんが、
-ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。</p>
+<p>この文書は、トランプゲーム「BlackPoker」の公式ルールをまとめたものです。</p>
+<p>BlackPokerは、誰でも持っているトランプで遊べる、
+「トレーディングカードゲームのようなプレイ感」を目指した完全オリジナルのゲームです。</p>
+<p>ルール文書には詳細な内容が含まれており、最初はその量に圧倒されるかもしれません。
+ゲームを始める際にすべてを暗記する必要はありませんが、ルールの仕組みや拡張性を深く知りたい方には
+ぜひ一度じっくり読み込んでいただくことをおすすめします。</p>
 <section id="blackpoker">
 <h2><span class="section-number">1.1. </span>BlackPokerとは<a class="headerlink" href="#blackpoker" title="この見出しへのパーマリンク">¶</a></h2>
-<p>当サークルが考案した1人1セットのトランプを使ったターン制の
-トレーディングカードゲームのようなトランプゲームです。
-自分だけのオリジナルトランプを使って友達と遊べます。
-プレイしている時のイメージは図のような感じです。(<a class="reference internal" href="#play-image"><span class="std std-numref">Fig. 1.1</span></a>)</p>
+<p>当サークルが考案した、1人1セットのトランプを使って遊ぶ、
+ターン制かつ割込み可能な独自ルールのカードゲームです。
+自分だけのオリジナルトランプを使って、友達と本格的なカードバトルを楽しむことができます。</p>
+<p>プレイしているときのイメージは次のような感じです。(<a class="reference internal" href="#play-image"><span class="std std-numref">Fig. 1.1</span></a>)</p>
 <figure class="align-default" id="id7">
 <span id="play-image"></span><img alt="../_images/play-image.png" src="../_images/play-image.png" />
 <figcaption>
@@ -152,49 +154,52 @@
 </pre></div>
 </div>
 <p>けど、仕事に追われ時間もなく、お金もかけられないのでカード資産も抱えられない。
-昔のデッキを引っ張りだしてもカードパワーが違って平等に遊べないし、コミニティが狭い。
-そんな悩みを解消しようと誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。</p>
+昔のデッキを引っ張り出してもカードパワーが違って平等に遊べないし、コミュニティも狭い。
+そんな悩みを解消しようと、誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。</p>
 </section>
 <section id="id3">
 <h2><span class="section-number">1.3. </span>ゲームのストーリー<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
-<p>あなたのトランプはただのトランプではありません。
-かつて大地を支配していた偉大な国々や強固な絆で結ばれた組織の魂が宿る遺産です。</p>
-<p>これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、その物語たちはまるで時間を超えたタペストリーのように絡み合っています。</p>
-<p>プレイヤーは歴史の再現者、リアニメーターとしてデッキに宿る過去の栄光を再現し、その国や組織がいかに素晴らしかったかを
-戦いを通して対戦相手に示してください。</p>
-<p>え？そんな国知らない？でしたらあなたのカードから創造してみてはいかがでしょうか。</p>
+<p>あなたのトランプは、ただのトランプではありません。
+かつて大地を支配していた偉大な国々や、強固な絆で結ばれた組織の魂が宿る遺産です。</p>
+<p>これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、
+その物語たちはまるで時間を超えたタペストリーのように絡み合っています。</p>
+<p>プレイヤーは歴史の再現者、リアニメーターとして、
+デッキに宿る過去の栄光を再現し、戦いを通じてその魅力を相手に示してください。</p>
+<p>え？そんな国知らない？でしたら、あなたのカードから創造してみてはいかがでしょうか。</p>
 </section>
 <section id="id4">
 <h2><span class="section-number">1.4. </span>読み方<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h2>
-<p>各章は次のことを説明しています。</p>
+<p>各章は次のような内容を説明しています。</p>
 <dl class="simple">
-<dt><a class="reference internal" href="#init-rst"><span class="std std-numref">1 はじめに</span></a></dt><dd><p>ルールの指針や全体像を説明</p>
+<dt><a class="reference internal" href="#init-rst"><span class="std std-numref">1 はじめに</span></a></dt><dd><p>ルールの背景や構成、全体像を説明（この章）</p>
 </dd>
-<dt><a class="reference internal" href="../common/common.html#common-rst"><span class="std std-numref">2 共通ルール</span></a></dt><dd><p>ゲームの開始方法など全体的なゲームの流れを説明</p>
+<dt><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a></dt><dd><p>対戦前にプレイヤー間で取り決める「遊び方のルール」（対戦レギュレーション）の選び方を説明</p>
 </dd>
-<dt><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">3 対戦レギュレーション</span></a></dt><dd><p>遊び方（ゲーム中にできることの範囲）を決める方法について説明</p>
+<dt><a class="reference internal" href="../common/common.html#common-rst"><span class="std std-numref">3 共通ルール</span></a></dt><dd><p>BlackPokerの全ルールで共通して使う基本ルールを説明</p>
 </dd>
-<dt><a class="reference internal" href="../format/format.html#format-rst"><span class="std std-numref">4 フォーマット</span></a></dt><dd><p>対戦レギュレーションを決める際に選択できるフォーマットを紹介</p>
+<dt><a class="reference internal" href="../format/format.html#format-rst"><span class="std std-numref">4 フォーマット</span></a></dt><dd><p>難易度に応じたルール制限（フォーマット）の詳細を説明</p>
 </dd>
-<dt><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">5 フレーム</span></a></dt><dd><p>対戦レギュレーションを決める際に選択できるフレームを紹介</p>
+<dt><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">5 フレーム</span></a></dt><dd><p>デッキ構成や初期配置など遊び方のパターン（フレーム）を説明</p>
 </dd>
-<dt><a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a></dt><dd><p>BlackPokerのコアであるターン制ゲームのルールを説明</p>
+<dt><a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a></dt><dd><p>アクションの処理や割込み、ステージの仕組みなどのコアシステムを説明</p>
 </dd>
 </dl>
 <section id="id5">
 <h3><span class="section-number">1.4.1. </span>用途別読み方<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
-<p>文章が複雑であるため、用途に合わせて読むことをおすすめします。</p>
-<dl class="simple">
-<dt>ゲームの流れを理解したい方</dt><dd><p><a class="reference internal" href="../common/common.html#common-rst"><span class="std std-numref">2 共通ルール</span></a> から順に読んでください。 <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a> は飛ばしても大丈夫です。</p>
+<p>ルール文書はやや複雑な構成になっているため、用途に合わせて読むことをおすすめします。</p>
+<dl>
+<dt>ゲームを始めたい方（初心者）</dt><dd><p><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a> → <a class="reference internal" href="../common/common.html#common-rst"><span class="std std-numref">3 共通ルール</span></a> の順に読むのがおすすめです。</p>
+<p><a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a> （高度なルール）は飛ばしても構いません。</p>
 </dd>
-<dt>アクションの解決順で悩んでいる方</dt><dd><p><a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a> を熟読してください。</p>
+<dt>ゲーム中の処理で悩んでいる方</dt><dd><p>アクションの起こし方や割込み、解決順などを <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">6 コアルール</span></a> で確認してください。</p>
 </dd>
 </dl>
 </section>
 </section>
 <section id="id6">
 <h2><span class="section-number">1.5. </span>ルール指針<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h2>
-<p>ルールを作成・修正するための指針を示します。</p>
+<p>BlackPokerのルールは、<strong>できるだけシンプルに、わかりやすく</strong> を基本方針としています。
+そのうえで、より多くの人が楽しめるよう、以下の指針に基づいてルールを設計・調整しています。</p>
 <dl class="simple">
 <dt><strong>誰とでも戦える ~目指すは老若男女~</strong></dt><dd><p>ルールを知りトランプを持っていれば誰とでも遊べるゲームを目指します。</p>
 </dd>
@@ -243,8 +248,8 @@
 <li class="toctree-l2"><a class="reference internal" href="#id6">1.5. ルール指針</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../common/common.html">2. 共通ルール</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">3. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">5. フレーム</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../core/core.html">6. コアルール</a></li>
@@ -274,11 +279,11 @@
           </span>
         </div>
       </a>
-      <a class="next" href="../common/common.html" aria-label="次のトピックへ" >
+      <a class="next" href="../match-regulations/match-regulations.html" aria-label="次のトピックへ" >
         <div class="title">
           <span class="text">
             <span class="direction">次へ</span>
-            共通ルール
+            対戦レギュレーション
           </span>
         </div>
         <div class="icon">

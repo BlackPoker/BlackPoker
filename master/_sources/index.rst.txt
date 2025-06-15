@@ -13,8 +13,8 @@ release: |release|
     :numbered: 10
 
     init/init
-    common/common
     match-regulations/match-regulations
+    common/common
     format/format
     frame/frame
     core/core
