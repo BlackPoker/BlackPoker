@@ -20,3 +20,8 @@ release: |release|
     core/core
     appendix/appendix
     revision-history/revision-history
+
+
+.. メモ
+    htmlのサイドバーに表示される見出しの深さを個別に変更することはできない。
+    ただし、各代表rstに:tocdepth: を定義することでその章はサイドバーに見出しを表示させなくする事はできる
