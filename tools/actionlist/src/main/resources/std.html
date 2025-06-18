@@ -621,7 +621,7 @@
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.trumpName}"></span>
                     <span class="tag tag-default tag-pill pull-right">
-                      <span class="glyphicon glyphicon-star"></span>
+                      <span class="glyphicon glyphicon-star-empty"></span>
                       <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
                     </span>
                   </a>
@@ -663,6 +663,8 @@
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
                 aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
+                aria-hidden="true"></span>&nbsp;:&nbsp;ユニットカード</li>
             <li class="list-group-item"><span class="note-mark"></span>
               :&nbsp;特記事項</li>
           </ul>
@@ -870,7 +872,7 @@
                       </small>
                     </span>
                     <div class="pull-right">
-                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span
+                      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span
                           th:utext="${#sfn.cnvHtml(row.charKey)}"></span><br>
                       </small>
                     </div>
@@ -939,7 +941,7 @@
                       </small>
                     </span>
                     <div class="pull-right">
-                      &thinsp; <small> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span
+                      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span
                           th:utext="${#sfn.cnvHtml(row.fogKey)}"></span><br>
                       </small>
                     </div>
