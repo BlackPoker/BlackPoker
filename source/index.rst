@@ -9,7 +9,7 @@ BlackPoker公式ルール |version|
 release: |release|
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 3
     :numbered: 10
 
     init/init
