@@ -3,6 +3,8 @@
 #set($x = "x")
 #foreach( $nestList in $actList)
     #if($foreach.count == 1)
+.. _actionlist-${data.id}:
+
 ================================================================
 #if(${arg1})${arg1}#endアクションリスト
 ================================================================
@@ -120,6 +122,8 @@ ${row.story}
 
 #foreach( $nestList in $charList)
     #if($foreach.count == 1)
+.. _characterlist-${data.id}:
+
 ================================================================
 #if(${arg1})${arg1}#endキャラクターリスト
 ================================================================
@@ -165,7 +169,7 @@ ${rstFn.cnv(${char.frame})}
         #end
 
         #if(${char.charKey.trim()})
-**キーカード:** ${char.charKey}
+**キャラクターカード:** ${char.charKey}
 
         #end
         #if(${char.charSize})
@@ -215,6 +219,8 @@ ${char.story}
 
 #foreach( $nestList in $fogList)
     #if($foreach.count == 1)
+.. _foglist-${data.id}:
+
 ================================================================
 #if(${arg1})${arg1}#endフォグリスト
 ================================================================
@@ -260,7 +266,7 @@ ${rstFn.cnv(${fog.frame})}
         #end
 
         #if(${fog.fogKey.trim()})
-**キーカード:** ${fog.fogKey}
+**フォグカード:** ${fog.fogKey}
 
         #end
         #if(${fog.fogAbility})
@@ -301,6 +307,8 @@ ${fog.story}
 
 #foreach( $nestList in $trumpList)
     #if($foreach.count == 1)
+.. _trumplist-${data.id}:
+
 ================================================================
 #if(${arg1})${arg1}#end切札リスト
 ================================================================
@@ -346,7 +354,7 @@ ${rstFn.cnv(${trump.frame})}
         #end
 
         #if(${trump.trumpKey.trim()})
-**キーカード:** ${trump.trumpKey}
+**切札カード:** ${trump.trumpKey}
 
         #end
         #if(${trump.trumpLabel})

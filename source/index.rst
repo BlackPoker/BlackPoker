@@ -15,6 +15,7 @@ release: |release|
     init/init
     match-regulations/match-regulations
     common/common
+    component/component
     format/format
     frame/frame
     core/core
