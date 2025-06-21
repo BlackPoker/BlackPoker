@@ -169,7 +169,7 @@ ${rstFn.cnv(${char.frame})}
         #end
 
         #if(${char.charKey.trim()})
-**キャラクターカード:** ${char.charKey}
+**キャラクターキーカード:** ${char.charKey}
 
         #end
         #if(${char.charSize})
@@ -266,7 +266,7 @@ ${rstFn.cnv(${fog.frame})}
         #end
 
         #if(${fog.fogKey.trim()})
-**フォグカード:** ${fog.fogKey}
+**フォグキーカード:** ${fog.fogKey}
 
         #end
         #if(${fog.fogAbility})
@@ -354,7 +354,7 @@ ${rstFn.cnv(${trump.frame})}
         #end
 
         #if(${trump.trumpKey.trim()})
-**切札カード:** ${trump.trumpKey}
+**切札キーカード:** ${trump.trumpKey}
 
         #end
         #if(${trump.trumpLabel})
