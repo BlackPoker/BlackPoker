@@ -370,10 +370,13 @@ ${rstFn.cnv(${trump.trumpAbility})}
         #end
         #if(${trump.image})
 **イメージ:**  
+${trump.trumpName}のイメージ (:numref:`frame-${trump.trumpId}-image`)
 
 .. _frame-${trump.trumpId}-image:
 .. figure:: ../frame/images/${trump.image}.*
    :height: 200px
+   
+   ${trump.trumpName}のイメージ
 
         #end
         #if(${trump.story})
