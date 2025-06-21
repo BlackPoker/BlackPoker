@@ -249,7 +249,7 @@ trumpList:
         ・エクストラ
       trumpName: スラッシュ
       trumpId: s2
-      trumpType: 立ち上がる兵
+      trumpType: 表切札
       trumpKey: ♠2
       trumpAbility: |
         あなたの場にいる♠の兵士は <スラッシュ> を持つ。
@@ -265,7 +265,7 @@ trumpList:
         ・エクストラ
       trumpName: 激励
       trumpId: h3
-      trumpType: 立ち上がる兵
+      trumpType: 表切札
       trumpKey: ♡3
       trumpAbility: |
         あなたの場にいる♡の兵士は <激励> を持つ。
@@ -281,7 +281,7 @@ trumpList:
         ・エクストラ
       trumpName: 交渉
       trumpId: d3
-      trumpType: 立ち上がる兵
+      trumpType: 表切札
       trumpKey: ♢3
       trumpAbility: |
         あなたの場にいる♢の兵士は <交渉> を持つ。
@@ -297,7 +297,7 @@ trumpList:
         ・エクストラ
       trumpName: スイッチ
       trumpId: c4
-      trumpType: 立ち上がる兵
+      trumpType: 表切札
       trumpKey: ♣4
       trumpAbility: |
         あなたの場にいる♣の兵士は <スイッチ> を持つ。
