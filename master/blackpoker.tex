@@ -75,7 +75,7 @@
 
 
 \title{BlackPoker}
-\date{2025年06月20日}
+\date{2025年06月21日}
 \release{2025/6/x}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -694,7 +694,8 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 
 \sphinxAtStartPar
 ゲーム中に実際に置かれたカードのまとまりを「ユニット」と呼びます。
-ユニットを構成する個々のカード群をまとめて扱う概念を「ユニットカード」と呼びます。
+そのユニットがどのコンポーネント定義に対応するかを示すカードを「コンポーネントキーカード」と呼びます。
+「コンポーネントキーカード」の呼称は、領域ごとに次のように定義されています。
 
 \sphinxAtStartPar
 領域ごとに存在するコンポーネントの一覧です。(\hyperref[\detokenize{common/common:zone-component}]{Table \ref{\detokenize{common/common:zone-component}}})
@@ -717,7 +718,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 存在するコンポーネント
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
-ユニットカードの名称
+コンポーネントキーカードの名称
 \\
 \sphinxmidrule
 \sphinxtableatstartofbodyhook
@@ -728,7 +729,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 キャラクター
 &
 \sphinxAtStartPar
-キャラクターカード
+キャラクターキーカード
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -738,7 +739,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 ライフ
 &
 \sphinxAtStartPar
-ライフカード
+\sphinxhyphen{}
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -748,7 +749,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 墓地
 &
 \sphinxAtStartPar
-墓地カード
+\sphinxhyphen{}
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -758,7 +759,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 フォグ
 &
 \sphinxAtStartPar
-フォグカード
+フォグキーカード
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -768,7 +769,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 手札
 &
 \sphinxAtStartPar
-手札カード
+\sphinxhyphen{}
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -778,7 +779,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 パック
 &
 \sphinxAtStartPar
-パックカード
+\sphinxhyphen{}
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -788,7 +789,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 レアカード
 &
 \sphinxAtStartPar
-レアカード
+\sphinxhyphen{}
 \\
 \sphinxhline
 \sphinxAtStartPar
@@ -798,7 +799,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 切札
 &
 \sphinxAtStartPar
-切札カード
+切札キーカード
 \\
 \sphinxbottomrule
 \end{tabular}
@@ -812,7 +813,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 各コンポーネントの詳細な定義や項目については、\hyperref[\detokenize{component/component:component-rst}]{\ref{\detokenize{component/component:component-rst}} \nameref{\detokenize{component/component:component-rst}}} で詳しく説明します。
 
 \sphinxAtStartPar
-ここまでで「どの領域に」「どんなコンポーネント（ユニットカード）が置かれるか」を整理しました。
+ここまでで「どの領域に」「どんなコンポーネントが置かれるか」を整理しました。
 次節では、実際のプレイ中にそれらがどのように配置されるかを図示して解説します。
 
 
@@ -832,7 +833,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 \caption{プレイ中のカードの配置}\label{\detokenize{common/common:id45}}\label{\detokenize{common/common:field}}\end{figure}
 
 \sphinxAtStartPar
-各領域で定義されたコンポーネント（ユニットカード）は、この配置図の対応する位置に置かれます。
+各領域で定義されたコンポーネントは、この配置図の対応する位置に置かれます。
 以下では主要な領域について説明します。
 
 \index{ライフ@\spxentry{ライフ}}\ignorespaces \begin{description}
@@ -868,7 +869,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 \sphinxlineitem{フォグ}
 \sphinxAtStartPar
 このターンのみ影響を与えるカードを置きます。
-領域定義で示したフォグカードは、すべてここに配置されます。
+領域定義で示したフォグキーカードは、すべてここに配置されます。
 
 \end{description}
 
@@ -973,8 +974,7 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 そのため、ゲームを始める際は、まずフレームごとの「ゲームの始め方」に従って準備を行ってください。
 
 \sphinxAtStartPar
-その上で、次に記載する「共通手順」に沿って、先攻の決定およびゲーム開始処理を進めます。
-この共通手順は、すべてのフレームに共通です。
+各フレームに共通する手順を次に示します。ただし、エクストラではプリセット配置の手順が異なります。
 
 
 \subsection{共通手順：プリセット配置}
@@ -1796,7 +1796,7 @@ BlackPokerでは
 \chapter{コンポーネント}
 \label{\detokenize{component/component:component-rst}}\label{\detokenize{component/component:id1}}\label{\detokenize{component/component::doc}}
 \sphinxAtStartPar
-この章では、各コンポーネント（ライフカード、キャラクターカードなど）の詳細な構造や振る舞いについて説明します。
+この章では、各コンポーネント（ライフカード、キャラクターキーカードなど）の詳細な構造や振る舞いについて説明します。
 
 \sphinxAtStartPar
 各コンポーネントは、配置先の「領域（ゾーン）」に置かれて使用されます。
@@ -1991,11 +1991,10 @@ BlackPokerでは
 
 \end{description}
 
-\index{キャラクターカード@\spxentry{キャラクターカード}}\ignorespaces \begin{description}
-\sphinxlineitem{キャラクターカード}
+\index{キャラクターキーカード@\spxentry{キャラクターキーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{キャラクターキーカード}
 \sphinxAtStartPar
 キャラクターを示すカードです。複数枚で１体を表現する場合もあります。
-複数枚で1体を表す場合、これらのまとめて1つの「キャラクターカード」または、「ユニットカード」と呼びます。
 
 \end{description}
 
@@ -2054,7 +2053,7 @@ BlackPokerでは
 \label{\detokenize{component/component:id12}}
 \index{フォグ@\spxentry{フォグ}}\ignorespaces 
 \sphinxAtStartPar
-フォグカードは、フォグ領域に一時的に置かれるコンポーネントです。
+フォグキーカードは、フォグ領域に一時的に置かれるコンポーネントです。
 ターン中のみ効果を発揮する一時的な魔法のような存在です。
 \begin{itemize}
 \item {} 
@@ -2085,11 +2084,10 @@ BlackPokerでは
 \sphinxAtStartPar
 フォグの持つ項目について説明します。
 
-\index{フォグカード@\spxentry{フォグカード}}\ignorespaces \begin{description}
-\sphinxlineitem{フォグカード}
+\index{フォグキーカード@\spxentry{フォグキーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{フォグキーカード}
 \sphinxAtStartPar
 フォグを示すカードです。複数枚で１つを表現する場合もあります。
-複数枚で1つを表す場合、これらのまとめて1つの「フォグカード」または、「ユニットカード」と呼びます。
 
 \end{description}
 
@@ -2171,8 +2169,8 @@ BlackPokerでは
 \sphinxAtStartPar
 切札の持つ項目について説明します。
 
-\index{切札カード@\spxentry{切札カード}}\ignorespaces \begin{description}
-\sphinxlineitem{切札カード}
+\index{切札キーカード@\spxentry{切札キーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{切札キーカード}
 \sphinxAtStartPar
 切札を示すカードです。スートと数字によって能力が異なります。
 裏向きで配置し、「オープン」アクションによって表にします。
@@ -5785,10 +5783,10 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} 2〜10
+\sphinxstylestrong{キャラクターキーカード:} 2〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードの数字
+\sphinxstylestrong{サイズ:} キャラクターキーカードの数字
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
@@ -5848,10 +5846,10 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} J〜K
+\sphinxstylestrong{キャラクターキーカード:} J〜K
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードがJなら11,Qなら12,Kなら13
+\sphinxstylestrong{サイズ:} キャラクターキーカードがJなら11,Qなら12,Kなら13
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
@@ -5911,7 +5909,7 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} A
+\sphinxstylestrong{キャラクターキーカード:} A
 
 \sphinxAtStartPar
 \sphinxstylestrong{サイズ:} 1
@@ -5989,7 +5987,7 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} Joker
+\sphinxstylestrong{キャラクターキーカード:} Joker
 
 \sphinxAtStartPar
 \sphinxstylestrong{サイズ:} 0
@@ -6058,10 +6056,10 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} 同じスートを2枚以上
+\sphinxstylestrong{キャラクターキーカード:} 同じスートを2枚以上
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードの数字の合計
+\sphinxstylestrong{サイズ:} キャラクターキーカードの数字の合計
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)
@@ -6124,7 +6122,7 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キャラクターカード:} 全て(裏向き)
+\sphinxstylestrong{キャラクターキーカード:} 全て(裏向き)
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} ブロッカー
@@ -6173,7 +6171,7 @@ x
 \paragraph{アップ (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-upfog}}\label{\detokenize{auto/actionlist:id55}}
 \sphinxAtStartPar
-\sphinxstylestrong{フォグカード:} {\normalsize $\heartsuit$} A〜10
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\heartsuit$} A〜10
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -6192,7 +6190,7 @@ x
 \paragraph{ダウン (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-downfog}}\label{\detokenize{auto/actionlist:id56}}
 \sphinxAtStartPar
-\sphinxstylestrong{フォグカード:} {\normalsize $\spadesuit$} A〜10
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\spadesuit$} A〜10
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -6211,7 +6209,7 @@ x
 \paragraph{フォース (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-forcefog}}\label{\detokenize{auto/actionlist:id57}}
 \sphinxAtStartPar
-\sphinxstylestrong{フォグカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -6492,11 +6490,11 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカード7枚引き手札とする。
+残りのデッキをライフとし配置図の場所に伏せておく。
 
 \item {} 
 \sphinxAtStartPar
-残りのデッキをライフとし配置図の場所に伏せておく。
+ライフの一番上のカード7枚引き手札とする。
 
 \item {} 
 \sphinxAtStartPar
@@ -6927,7 +6925,7 @@ x
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-デッキから2枚選び切札として、配置図の場所に伏せておく。
+デッキから2枚を切札として選び、2枚とも配置図の切札の場所に伏せておく。
 
 \item {} 
 \sphinxAtStartPar
@@ -6951,7 +6949,7 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として裏向きで場に出す。（プリセット）
+ライフの一番上のカードを防壁として場に出し、次のカードを兵士の場所に裏向きで出す。（プリセット）
 
 \item {} 
 \sphinxAtStartPar
@@ -6959,11 +6957,11 @@ x
 
 \item {} 
 \sphinxAtStartPar
-先攻プレイヤーは、プリセットで裏向きで出した兵士を表にし、切札を1枚表向きにする。
+先攻プレイヤーは、プリセットで兵士の場所に裏向きで出したカードを表にし、切札の場所の2枚のうち1枚を表向きにする。
 
 \item {} 
 \sphinxAtStartPar
-後攻プレイヤーも同様に、プリセットで裏向きで出した兵士を表にし、切札を1枚表向きにする。
+後攻プレイヤーも、プリセットで兵士の場所に裏向きで出したカードを表にし、切札の場所の2枚のうち1枚を表向きにする。
 
 \item {} 
 \sphinxAtStartPar
@@ -7713,7 +7711,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{フォグカード:} Q
+\sphinxstylestrong{フォグキーカード:} Q
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -7736,7 +7734,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (表切札)}}}
 
 \end{itemize}
 
@@ -7746,7 +7744,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (表切札)}}}
 
 \end{itemize}
 
@@ -7756,7 +7754,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (表切札)}}}
 
 \end{itemize}
 
@@ -7766,7 +7764,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id62}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (立ち上がる兵)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id62}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (表切札)}}}
 
 \end{itemize}
 
@@ -7791,7 +7789,7 @@ x
 \subsubsection{{\normalsize $\spadesuit$} スペード}
 \label{\detokenize{auto/frameActionlist:id26}}
 
-\paragraph{スラッシュ (立ち上がる兵)}
+\paragraph{スラッシュ (表切札)}
 \label{\detokenize{auto/frameActionlist:trump-s2}}\label{\detokenize{auto/frameActionlist:id27}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7800,7 +7798,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{切札カード:} {\normalsize $\spadesuit$} 2
+\sphinxstylestrong{切札キーカード:} {\normalsize $\spadesuit$} 2
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -7831,7 +7829,7 @@ x
 \subsubsection{{\normalsize $\heartsuit$} ハート}
 \label{\detokenize{auto/frameActionlist:id28}}
 
-\paragraph{激励 (立ち上がる兵)}
+\paragraph{激励 (表切札)}
 \label{\detokenize{auto/frameActionlist:trump-h3}}\label{\detokenize{auto/frameActionlist:id29}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7840,7 +7838,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{切札カード:} {\normalsize $\heartsuit$} 3
+\sphinxstylestrong{切札キーカード:} {\normalsize $\heartsuit$} 3
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -7871,7 +7869,7 @@ x
 \subsubsection{{\normalsize $\diamondsuit$} ダイヤ}
 \label{\detokenize{auto/frameActionlist:id30}}
 
-\paragraph{交渉 (立ち上がる兵)}
+\paragraph{交渉 (表切札)}
 \label{\detokenize{auto/frameActionlist:trump-d3}}\label{\detokenize{auto/frameActionlist:id31}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7880,7 +7878,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{切札カード:} {\normalsize $\diamondsuit$} 3
+\sphinxstylestrong{切札キーカード:} {\normalsize $\diamondsuit$} 3
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -7911,7 +7909,7 @@ x
 \subsubsection{{\normalsize $\clubsuit$} クラブ}
 \label{\detokenize{auto/frameActionlist:id32}}
 
-\paragraph{スイッチ (立ち上がる兵)}
+\paragraph{スイッチ (表切札)}
 \label{\detokenize{auto/frameActionlist:trump-c4}}\label{\detokenize{auto/frameActionlist:id33}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7920,7 +7918,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{切札カード:} {\normalsize $\clubsuit$} 4
+\sphinxstylestrong{切札キーカード:} {\normalsize $\clubsuit$} 4
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -7960,7 +7958,7 @@ x
 ・エクストラ
 
 \sphinxAtStartPar
-\sphinxstylestrong{切札カード:} 全て(裏向き)
+\sphinxstylestrong{切札キーカード:} 全て(裏向き)
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
