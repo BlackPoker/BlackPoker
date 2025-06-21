@@ -88,7 +88,7 @@ actList:
       actTime: クイック
       actCost: DD
       actEffect: |-
-        自分の裏切札を1枚表にし切札とする。
+        自分の裏切札を1枚表にし表切札とする。
     -
       frame: |-
         ・エクストラ
@@ -100,9 +100,9 @@ actList:
       actTime: クイック
       actCost: D
       actKey: Q
-      actTarget: 切札1枚
+      actTarget: 表切札1枚
       actEffect: |-
-        対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。
+        対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。
 
     -
       frame: |-
@@ -115,9 +115,9 @@ actList:
       actTime: クイック
       actCost: B
       actKey: A〜K
-      actTarget: 切札1枚
+      actTarget: 表切札1枚
       actEffect: |-
-        対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。
+        対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
 
     # -
     #   frame: |-
@@ -146,7 +146,7 @@ actList:
       actKey: <スラッシュ> を持つ兵士1体
       actCost: K
       actTarget: 兵士1体
-      actActCond: あなたの切札に「スラッシュ」がある
+      actActCond: 自分の表切札に「スラッシュ」がある
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
@@ -167,7 +167,7 @@ actList:
       actKey: <激励> を持つ兵士1体
       actCost: K
       actTarget: 兵士1体
-      actActCond: あなたの切札に「激励」がある
+      actActCond: 自分の表切札に「激励」がある
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、そのキーカードのサイズを X とする。  
@@ -188,7 +188,7 @@ actList:
       actKey: <交渉> を持つ兵士1体
       actCost: K
       actTarget: キャラクター1体
-      actActCond: あなたの切札に「交渉」がある
+      actActCond: 自分の表切札に「交渉」がある
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、対象のキャラクターをドライブする。
@@ -207,7 +207,7 @@ actList:
       actTime: クイック
       actKey: <スイッチ> を持つ兵士1体
       actCost: K
-      actActCond: あなたの切札に「スイッチ」がある
+      actActCond: 自分の表切札に「スイッチ」がある
       actEffect: |-
         1. キーカードで指定した自分の兵士をドライブする。
         2. ドライブできた場合、手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
@@ -252,7 +252,7 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♠2
       trumpAbility: |
-        あなたの場にいる♠の兵士は <スラッシュ> を持つ。
+        自分の場にいる♠の兵士は <スラッシュ> を持つ。
       since: ex3.4.0
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
@@ -268,7 +268,7 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♡3
       trumpAbility: |
-        あなたの場にいる♡の兵士は <激励> を持つ。
+        自分の場にいる♡の兵士は <激励> を持つ。
       since: ex3.4.0
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
@@ -284,7 +284,7 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♢3
       trumpAbility: |
-        あなたの場にいる♢の兵士は <交渉> を持つ。
+        自分の場にいる♢の兵士は <交渉> を持つ。
       since: ex3.4.0
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
@@ -300,14 +300,14 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♣4
       trumpAbility: |
-        あなたの場にいる♣の兵士は <スイッチ> を持つ。
+        自分の場にいる♣の兵士は <スイッチ> を持つ。
       since: ex3.4.0
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
       devNote: |-
         立ち上がる兵で追加された。
 
-  - type: その他
+  - type: 裏切札
     trumps:
     - frame: |-
         ・エクストラ
