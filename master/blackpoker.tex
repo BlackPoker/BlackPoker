@@ -692,10 +692,12 @@ Joker
 BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場所がいくつかあります。
 各領域には配置可能なカード種類（コンポーネント）が定義されています。
 
+\index{コンポーネントキーカード@\spxentry{コンポーネントキーカード}}\index{ユニットカード@\spxentry{ユニットカード}}\index{ユニット@\spxentry{ユニット}}\ignorespaces 
 \sphinxAtStartPar
-ゲーム中に実際に置かれたカードのまとまりを「ユニット」と呼びます。
-そのユニットがどのコンポーネント定義に対応するかを示すカードを「コンポーネントキーカード」と呼びます。
-「コンポーネントキーカード」の呼称は、領域ごとに次のように定義されています。
+ゲーム中に配置されたカードのまとまりを「ユニット」と呼びます。
+ユニットを構成する各カードを「ユニットカード」と呼びます。
+また、そのユニットがどのコンポーネント定義に対応するかを示すカードを
+「コンポーネントキーカード」と呼びます。
 
 \sphinxAtStartPar
 領域ごとに存在するコンポーネントの一覧です。(\hyperref[\detokenize{common/common:zone-component}]{Table \ref{\detokenize{common/common:zone-component}}})
@@ -922,14 +924,14 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 \index{ダメージ@\spxentry{ダメージ}}\ignorespaces 
 
 \section{ダメージ}
-\label{\detokenize{common/common:index-10}}\label{\detokenize{common/common:id10}}
+\label{\detokenize{common/common:index-11}}\label{\detokenize{common/common:id10}}
 \sphinxAtStartPar
 プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。
 
 \index{キャラクター@\spxentry{キャラクター}}\ignorespaces 
 
 \section{キャラクター}
-\label{\detokenize{common/common:index-11}}\label{\detokenize{common/common:id11}}
+\label{\detokenize{common/common:index-12}}\label{\detokenize{common/common:id11}}
 \sphinxAtStartPar
 キャラクターとは、場に存在する兵士や防壁のことを指し、TCGでいう「クリーチャー」や「モンスター」に相当します。
 
@@ -950,7 +952,7 @@ BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場�
 \index{チャージ@\spxentry{チャージ}}\index{ドライブ@\spxentry{ドライブ}}\ignorespaces 
 
 \subsection{チャージとドライブ}
-\label{\detokenize{common/common:index-12}}\label{\detokenize{common/common:id12}}
+\label{\detokenize{common/common:index-13}}\label{\detokenize{common/common:id12}}
 \sphinxAtStartPar
 キャラクターには、チャージ状態とドライブ状態が存在します。
 チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
@@ -1047,7 +1049,7 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 \index{アクション@\spxentry{アクション}}\ignorespaces 
 
 \section{アクション}
-\label{\detokenize{common/common:index-13}}\label{\detokenize{common/common:id17}}
+\label{\detokenize{common/common:index-14}}\label{\detokenize{common/common:id17}}
 \sphinxAtStartPar
 BlackPokerは割込み可能なターン制ゲームです。
 
@@ -2001,7 +2003,7 @@ BlackPokerでは
 \index{ラベル(キャラクター)@\spxentry{ラベル(キャラクター)}}\ignorespaces \begin{description}
 \sphinxlineitem{ラベル}
 \sphinxAtStartPar
-キャラクターもつ属性を示します。\textless{}速攻\textgreater{} や \textless{}アタッカー\textgreater{} など様々なラベルがあります。
+キャラクターに付与された属性を示します。\textless{}速攻\textgreater{} や \textless{}アタッカー\textgreater{} など様々なラベルがあります。
 ラベルは\textless{}\textgreater{}で括り記載されます。
 
 \end{description}
@@ -3016,7 +3018,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
+Joker,A,J,Q,Kのカードが自分の場から墓地に行くたびに1枚につき1回誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -5786,7 +5788,7 @@ x
 \sphinxstylestrong{キャラクターキーカード:} 2〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キャラクターキーカードの数字
+\sphinxstylestrong{サイズ:} ユニットカードの数字
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
@@ -5849,7 +5851,7 @@ x
 \sphinxstylestrong{キャラクターキーカード:} J〜K
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キャラクターキーカードがJなら11,Qなら12,Kなら13
+\sphinxstylestrong{サイズ:} ユニットカードがJなら11,Qなら12,Kなら13
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
@@ -6059,7 +6061,7 @@ x
 \sphinxstylestrong{キャラクターキーカード:} 同じスートを2枚以上
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キャラクターキーカードの数字の合計
+\sphinxstylestrong{サイズ:} ユニットカードの数字の合計
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)
@@ -7045,81 +7047,81 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id36}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id37}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id38}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id39}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (速攻魔法)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id12}]{\sphinxcrossref{切札{\normalsize $\spadesuit$} 2}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id49}}{\hyperref[\detokenize{auto/frameActionlist:id12}]{\sphinxcrossref{切札{\normalsize $\spadesuit$} 2}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-slash}]{\sphinxcrossref{スラッシュ (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id50}}{\hyperref[\detokenize{auto/frameActionlist:act-slash}]{\sphinxcrossref{スラッシュ (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:id14}]{\sphinxcrossref{切札{\normalsize $\heartsuit$} 3}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id51}}{\hyperref[\detokenize{auto/frameActionlist:id14}]{\sphinxcrossref{切札{\normalsize $\heartsuit$} 3}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-rally}]{\sphinxcrossref{激励 (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id52}}{\hyperref[\detokenize{auto/frameActionlist:act-rally}]{\sphinxcrossref{激励 (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id49}}{\hyperref[\detokenize{auto/frameActionlist:id16}]{\sphinxcrossref{切札{\normalsize $\diamondsuit$} 3}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id53}}{\hyperref[\detokenize{auto/frameActionlist:id16}]{\sphinxcrossref{切札{\normalsize $\diamondsuit$} 3}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id50}}{\hyperref[\detokenize{auto/frameActionlist:act-negotiate}]{\sphinxcrossref{交渉 (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id54}}{\hyperref[\detokenize{auto/frameActionlist:act-negotiate}]{\sphinxcrossref{交渉 (兵士起因)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id51}}{\hyperref[\detokenize{auto/frameActionlist:id18}]{\sphinxcrossref{切札{\normalsize $\clubsuit$} 4}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id55}}{\hyperref[\detokenize{auto/frameActionlist:id18}]{\sphinxcrossref{切札{\normalsize $\clubsuit$} 4}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id52}}{\hyperref[\detokenize{auto/frameActionlist:act-switch}]{\sphinxcrossref{スイッチ (兵士起因)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:act-switch}]{\sphinxcrossref{スイッチ (兵士起因)}}}
 
 \end{itemize}
 
@@ -7335,7 +7337,7 @@ x
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-自分の裏切札を1枚表にし切札とする。
+自分の裏切札を1枚表にし表切札とする。
 
 
 \bigskip\hrule\bigskip
@@ -7369,13 +7371,13 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-切札1枚
+表切札1枚
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。
+対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。
 
 
 \bigskip\hrule\bigskip
@@ -7409,13 +7411,13 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-切札1枚
+表切札1枚
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。
+対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
 
 
 \bigskip\hrule\bigskip
@@ -7452,7 +7454,7 @@ x
 \sphinxstylestrong{起動条件:}
 
 \sphinxAtStartPar
-あなたの切札に「スラッシュ」がある
+自分の表切札に「スラッシュ」がある
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -7519,7 +7521,7 @@ x
 \sphinxstylestrong{起動条件:}
 
 \sphinxAtStartPar
-あなたの切札に「激励」がある
+自分の表切札に「激励」がある
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -7586,7 +7588,7 @@ x
 \sphinxstylestrong{起動条件:}
 
 \sphinxAtStartPar
-あなたの切札に「交渉」がある
+自分の表切札に「交渉」がある
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -7649,7 +7651,7 @@ x
 \sphinxstylestrong{起動条件:}
 
 \sphinxAtStartPar
-あなたの切札に「スイッチ」がある
+自分の表切札に「スイッチ」がある
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -7683,11 +7685,11 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id53}}{\hyperref[\detokenize{auto/frameActionlist:id22}]{\sphinxcrossref{滞留魔法}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id57}}{\hyperref[\detokenize{auto/frameActionlist:id22}]{\sphinxcrossref{滞留魔法}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id54}}{\hyperref[\detokenize{auto/frameActionlist:fog-closefog}]{\sphinxcrossref{クローズ (滞留魔法)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:fog-closefog}]{\sphinxcrossref{クローズ (滞留魔法)}}}
 
 \end{itemize}
 
@@ -7730,51 +7732,51 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id55}}{\hyperref[\detokenize{auto/frameActionlist:id26}]{\sphinxcrossref{{\normalsize $\spadesuit$} スペード}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id59}}{\hyperref[\detokenize{auto/frameActionlist:id26}]{\sphinxcrossref{{\normalsize $\spadesuit$} スペード}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (表切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (表切札)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id57}}{\hyperref[\detokenize{auto/frameActionlist:id28}]{\sphinxcrossref{{\normalsize $\heartsuit$} ハート}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id61}}{\hyperref[\detokenize{auto/frameActionlist:id28}]{\sphinxcrossref{{\normalsize $\heartsuit$} ハート}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (表切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id62}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (表切札)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id59}}{\hyperref[\detokenize{auto/frameActionlist:id30}]{\sphinxcrossref{{\normalsize $\diamondsuit$} ダイヤ}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id63}}{\hyperref[\detokenize{auto/frameActionlist:id30}]{\sphinxcrossref{{\normalsize $\diamondsuit$} ダイヤ}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (表切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id64}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (表切札)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id61}}{\hyperref[\detokenize{auto/frameActionlist:id32}]{\sphinxcrossref{{\normalsize $\clubsuit$} クラブ}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id65}}{\hyperref[\detokenize{auto/frameActionlist:id32}]{\sphinxcrossref{{\normalsize $\clubsuit$} クラブ}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id62}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (表切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id66}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (表切札)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id63}}{\hyperref[\detokenize{auto/frameActionlist:id34}]{\sphinxcrossref{その他}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id67}}{\hyperref[\detokenize{auto/frameActionlist:id34}]{\sphinxcrossref{裏切札}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id64}}{\hyperref[\detokenize{auto/frameActionlist:trump-secrettrump}]{\sphinxcrossref{裏切札 (裏切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id68}}{\hyperref[\detokenize{auto/frameActionlist:trump-secrettrump}]{\sphinxcrossref{裏切札 (裏切札)}}}
 
 \end{itemize}
 
@@ -7804,16 +7806,18 @@ x
 \sphinxstylestrong{能力:}
 
 \sphinxAtStartPar
-あなたの場にいる{\normalsize $\spadesuit$} の兵士は \textless{}スラッシュ\textgreater{} を持つ。
+自分の場にいる{\normalsize $\spadesuit$} の兵士は \textless{}スラッシュ\textgreater{} を持つ。
 
 \sphinxAtStartPar
 \sphinxstylestrong{イメージ:}
+スラッシュのイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-s2-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-s2-image}}})
 
 \begin{figure}[htbp]
 \centering
+\capstart
 
 \noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Swords_02}.jpg}
-\end{figure}
+\caption{スラッシュのイメージ}\label{\detokenize{auto/frameActionlist:id36}}\label{\detokenize{auto/frameActionlist:frame-s2-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex3.4.0
@@ -7844,16 +7848,18 @@ x
 \sphinxstylestrong{能力:}
 
 \sphinxAtStartPar
-あなたの場にいる{\normalsize $\heartsuit$} の兵士は \textless{}激励\textgreater{} を持つ。
+自分の場にいる{\normalsize $\heartsuit$} の兵士は \textless{}激励\textgreater{} を持つ。
 
 \sphinxAtStartPar
 \sphinxstylestrong{イメージ:}
+激励のイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-h3-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-h3-image}}})
 
 \begin{figure}[htbp]
 \centering
+\capstart
 
 \noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Cups_03}.jpg}
-\end{figure}
+\caption{激励のイメージ}\label{\detokenize{auto/frameActionlist:id37}}\label{\detokenize{auto/frameActionlist:frame-h3-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex3.4.0
@@ -7884,16 +7890,18 @@ x
 \sphinxstylestrong{能力:}
 
 \sphinxAtStartPar
-あなたの場にいる{\normalsize $\diamondsuit$} の兵士は \textless{}交渉\textgreater{} を持つ。
+自分の場にいる{\normalsize $\diamondsuit$} の兵士は \textless{}交渉\textgreater{} を持つ。
 
 \sphinxAtStartPar
 \sphinxstylestrong{イメージ:}
+交渉のイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-d3-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-d3-image}}})
 
 \begin{figure}[htbp]
 \centering
+\capstart
 
 \noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Pentacles_03}.jpg}
-\end{figure}
+\caption{交渉のイメージ}\label{\detokenize{auto/frameActionlist:id38}}\label{\detokenize{auto/frameActionlist:frame-d3-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex3.4.0
@@ -7924,16 +7932,18 @@ x
 \sphinxstylestrong{能力:}
 
 \sphinxAtStartPar
-あなたの場にいる{\normalsize $\clubsuit$} の兵士は \textless{}スイッチ\textgreater{} を持つ。
+自分の場にいる{\normalsize $\clubsuit$} の兵士は \textless{}スイッチ\textgreater{} を持つ。
 
 \sphinxAtStartPar
 \sphinxstylestrong{イメージ:}
+スイッチのイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-c4-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-c4-image}}})
 
 \begin{figure}[htbp]
 \centering
+\capstart
 
 \noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Wands_04}.jpg}
-\end{figure}
+\caption{スイッチのイメージ}\label{\detokenize{auto/frameActionlist:id39}}\label{\detokenize{auto/frameActionlist:frame-c4-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex3.4.0
@@ -7946,7 +7956,7 @@ x
 
 
 
-\subsubsection{その他}
+\subsubsection{裏切札}
 \label{\detokenize{auto/frameActionlist:id34}}
 
 \paragraph{裏切札 (裏切札)}

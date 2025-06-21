@@ -170,7 +170,7 @@
 \contentsline {paragraph}{交渉 (表切札)}{90}{paragraph*.203}%
 \contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\clubsuit $} クラブ}{91}{subsubsection*.204}%
 \contentsline {paragraph}{スイッチ (表切札)}{91}{paragraph*.205}%
-\contentsline {subsubsection}{その他}{92}{subsubsection*.206}%
+\contentsline {subsubsection}{裏切札}{92}{subsubsection*.206}%
 \contentsline {paragraph}{裏切札 (裏切札)}{92}{paragraph*.207}%
 \contentsline {chapter}{\numberline {第7章}コアルール}{93}{chapter.7}%
 \contentsline {section}{\numberline {7.1}基礎概念}{93}{section.7.1}%

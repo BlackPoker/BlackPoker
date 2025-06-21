@@ -199,9 +199,10 @@
 <span id="index-0"></span><span id="id6"></span><h2><span class="section-number">3.5. </span>領域（ゾーン）<a class="headerlink" href="#zone-section" title="この見出しへのパーマリンク">¶</a></h2>
 <p>BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場所がいくつかあります。
 各領域には配置可能なカード種類（コンポーネント）が定義されています。</p>
-<p>ゲーム中に実際に置かれたカードのまとまりを「ユニット」と呼びます。
-そのユニットがどのコンポーネント定義に対応するかを示すカードを「コンポーネントキーカード」と呼びます。
-「コンポーネントキーカード」の呼称は、領域ごとに次のように定義されています。</p>
+<p id="index-1">ゲーム中に配置されたカードのまとまりを「ユニット」と呼びます。
+ユニットを構成する各カードを「ユニットカード」と呼びます。
+また、そのユニットがどのコンポーネント定義に対応するかを示すカードを
+「コンポーネントキーカード」と呼びます。</p>
 <p>領域ごとに存在するコンポーネントの一覧です。(<a class="reference internal" href="#zone-component"><span class="std std-numref">Table 3.2</span></a>)</p>
 <span id="zone-component"></span><table class="docutils align-default" id="id44">
 <caption><span class="caption-number">Table 3.2 </span><span class="caption-text">領域ごとに存在するコンポーネント一覧</span><a class="headerlink" href="#id44" title="このテーブルへのパーマリンク">¶</a></caption>
@@ -268,46 +269,46 @@
 </figure>
 <p>各領域で定義されたコンポーネントは、この配置図の対応する位置に置かれます。
 以下では主要な領域について説明します。</p>
-<dl class="simple" id="index-1">
+<dl class="simple" id="index-2">
 <dt>ライフ</dt><dd><p>山札。ゲームを始める時に自分のデッキを裏向きで置きます。
 ダメージを受けるとライフの一番上から墓地にカードを移します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-2">
+<dl class="simple" id="index-3">
 <dt>墓地</dt><dd><p>捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-3">
+<dl class="simple" id="index-4">
 <dt>場</dt><dd><p>兵士や防壁などのキャラクターを置きます。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-4">
+<dl class="simple" id="index-5">
 <dt>手札</dt><dd><p>ライフから引いたカードを持っておく場所です。相手から見えないようにしましょう。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-5">
+<dl class="simple" id="index-6">
 <dt>フォグ</dt><dd><p>このターンのみ影響を与えるカードを置きます。
 領域定義で示したフォグキーカードは、すべてここに配置されます。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-6">
+<dl class="simple" id="index-7">
 <dt>パック</dt><dd><p>一部のフレームで使用される領域です。デッキから一部のカードを取り分けて伏せて置きます。
 アクション（例：パック開封）によって順に使用されることがあります。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-7">
+<dl class="simple" id="index-8">
 <dt>レアカード</dt><dd><p>特別な1枚を配置するための領域です。主にゲーム開始時に選ばれ、フレームによって使い方が異なります。
 特定のアクション（例：レアドロー、レア召喚）と組み合わせて使われます。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-8">
+<dl class="simple" id="index-9">
 <dt>切札</dt><dd><p>切札領域に配置するコンポーネントです。各カードに割り当てられた能力を活用でき、使用可能なフレームは個別に定義されます。</p>
 </dd>
 </dl>
 <section id="id8">
 <h3><span class="section-number">3.6.1. </span>デッキとライフ<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h3>
 <p>対戦レギュレーションなどでデッキという表現が出てきます。</p>
-<dl class="simple" id="index-9">
+<dl class="simple" id="index-10">
 <dt>デッキ</dt><dd><p>ゲーム開始前にゲームで使用するカードの束（カード構成）。
 フレームに応じて使用できるデッキの条件が異なります。</p>
 </dd>
@@ -319,12 +320,12 @@
 <h2><span class="section-number">3.7. </span>勝利条件<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h2>
 <p>プレイヤーは順に対戦相手に対し攻撃を行い、ダメージを与え先に相手のライフを0枚にした方が勝ちです。ダメージは1点につき、ライフが1枚減ります。</p>
 </section>
-<section id="index-10">
-<span id="id10"></span><h2><span class="section-number">3.8. </span>ダメージ<a class="headerlink" href="#index-10" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-11">
+<span id="id10"></span><h2><span class="section-number">3.8. </span>ダメージ<a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h2>
 <p>プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。</p>
 </section>
-<section id="index-11">
-<span id="id11"></span><h2><span class="section-number">3.9. </span>キャラクター<a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-12">
+<span id="id11"></span><h2><span class="section-number">3.9. </span>キャラクター<a class="headerlink" href="#index-12" title="この見出しへのパーマリンク">¶</a></h2>
 <p>キャラクターとは、場に存在する兵士や防壁のことを指し、TCGでいう「クリーチャー」や「モンスター」に相当します。</p>
 <p>キャラクターは1枚のカードで1体を表すこともあれば、
 複数枚で1体を表すこともあります。(<a class="reference internal" href="#character"><span class="std std-numref">Fig. 3.2</span></a>)</p>
@@ -335,8 +336,8 @@
 </figcaption>
 </figure>
 <p>具体的なキャラクターの持つ項目やサイズ、能力などは、 <a class="reference internal" href="../component/component.html#character-component"><span class="std std-numref">4.4 キャラクター</span></a> を参照してください。</p>
-<section id="index-12">
-<span id="id12"></span><h3><span class="section-number">3.9.1. </span>チャージとドライブ<a class="headerlink" href="#index-12" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="index-13">
+<span id="id12"></span><h3><span class="section-number">3.9.1. </span>チャージとドライブ<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h3>
 <p>キャラクターには、チャージ状態とドライブ状態が存在します。
 チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
 また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(<a class="reference internal" href="#chargedrive"><span class="std std-numref">Fig. 3.3</span></a>)</p>
@@ -387,8 +388,8 @@
 </div>
 </section>
 </section>
-<section id="index-13">
-<span id="id17"></span><h2><span class="section-number">3.11. </span>アクション<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="index-14">
+<span id="id17"></span><h2><span class="section-number">3.11. </span>アクション<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h2>
 <p>BlackPokerは割込み可能なターン制ゲームです。</p>
 <p>例えば次の状況をイメージしてください。</p>
 <blockquote>
@@ -409,61 +410,61 @@
 <section id="id18">
 <h3><span class="section-number">3.11.1. </span>アクションが持つ項目<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションが持つ項目について説明します。</p>
-<dl class="simple" id="index-14">
+<dl class="simple" id="index-15">
 <dt>アクション名</dt><dd><p>アクションの名称を示します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-15">
+<dl class="simple" id="index-16">
 <dt>タイプ</dt><dd><p>アクションの種類を表します。アクション名の後に括弧書きで記載します。</p>
 </dd>
 </dl>
-<dl id="index-16">
+<dl id="index-17">
 <dt>トリガー</dt><dd><p>アクションには自分で起こせるアクションと誘発するアクションがあります。
 トリガー項目では「直接」か「誘発」が設定されています。</p>
 <p>参考: <a class="reference internal" href="../core/core.html#trigger-core"><span class="std std-numref">7.2.1.2 トリガー</span></a></p>
 </dd>
 </dl>
-<dl id="index-17">
+<dl id="index-18">
 <dt>スピード</dt><dd><p>アクションはすぐに効果が解決されるものとそうでないものがあります。
 スピード項目では「即時」か「通常」が設定されています。</p>
 <p>参考: <a class="reference internal" href="../core/core.html#speed-core"><span class="std std-numref">7.2.1.3 スピード</span></a></p>
 </dd>
 </dl>
-<dl id="index-18">
+<dl id="index-19">
 <dt>タイミング</dt><dd><p>アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
 「クイック」はいつでも起こすことができます。</p>
 <p>参考: <a class="reference internal" href="../core/core.html#timing"><span class="std std-numref">7.2.1.4 タイミング</span></a></p>
 </dd>
 </dl>
-<dl class="simple" id="index-19">
+<dl class="simple" id="index-20">
 <dt>キーカード</dt><dd><p>アクションの核となるカードを示します。
 キーカードは★で表記します。
 特に指定がない場合は、手札から選びます。
 兵士など場のカードを指定する場合は、その指定に従って選択してください。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-20">
+<dl class="simple" id="index-21">
 <dt>コスト</dt><dd><p>アクションを起こすのに必要な対価です。
 コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は <a class="reference internal" href="#cost"><span class="std std-numref">3.11.2 コストの種類</span></a> で説明します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-21">
+<dl class="simple" id="index-22">
 <dt>特記事項</dt><dd><p>特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-22">
+<dl class="simple" id="index-23">
 <dt>起動条件</dt><dd><p>起動するための条件を示します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-23">
+<dl class="simple" id="index-24">
 <dt>誘発条件</dt><dd><p>誘発する条件を示します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-24">
+<dl class="simple" id="index-25">
 <dt>対象</dt><dd><p>効果の対象を示します。</p>
 </dd>
 </dl>
-<dl class="simple" id="index-25">
+<dl class="simple" id="index-26">
 <dt>効果</dt><dd><p>効果の内容を示します。</p>
 </dd>
 </dl>
@@ -829,9 +830,9 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#id9">3.7. 勝利条件</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-10">3.8. ダメージ</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#index-11">3.9. キャラクター</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#index-12">3.9.1. チャージとドライブ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#index-11">3.8. ダメージ</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#index-12">3.9. キャラクター</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#index-13">3.9.1. チャージとドライブ</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#common-gamestart">3.10. ゲームの始め方</a><ul>
@@ -840,7 +841,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#common-gamestart-start">3.10.3. 共通手順：ゲーム開始</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#index-13">3.11. アクション</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#index-14">3.11. アクション</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id18">3.11.1. アクションが持つ項目</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#cost">3.11.2. コストの種類</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id21">3.11.3. アクションの起こし方(リクエスト)</a></li>

@@ -942,7 +942,7 @@
                 </div>
               </div>
               <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">その他</span>
+                <span class="blackpoker-type-group-title">裏切札</span>
                 <div class="list-group">
                   <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#trump-secretTrump" data-frame="エクストラ">
                     <span>裏切札</span>
@@ -1408,7 +1408,7 @@
                   <div class="panel-body">
                      
                     
-                    <span> （誘発条件）<br></span> <span>Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。</span>
+                    <span> （誘発条件）<br></span> <span>Joker,A,J,Q,Kのカードが自分の場から墓地に行くたびに1枚につき1回誘発する。</span>
                     <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
@@ -3370,7 +3370,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>自分の裏切札を1枚表にし切札とする。</span>
+                    <span>自分の裏切札を1枚表にし表切札とする。</span>
 
                     
 
@@ -3417,11 +3417,11 @@
                     
                      
                     
-                    <span> （対象）<br></span> <span>切札1枚</span>
+                    <span> （対象）<br></span> <span>表切札1枚</span>
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象の切札を裏向きにする。このターンが終わるまで、それは表向きにならない。その印としてフォグにキーカードを置く。</span>
+                    <span>対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。</span>
 
                     
 
@@ -3468,11 +3468,11 @@
                     
                      
                     
-                    <span> （対象）<br></span> <span>切札1枚</span>
+                    <span> （対象）<br></span> <span>表切札1枚</span>
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象の切札とキーカードのスートと数字が同じ場合、切札を墓地に移す。</span>
+                    <span>対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。</span>
 
                     
 
@@ -3520,7 +3520,7 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>あなたの切札に「スラッシュ」がある</span>
+                    <span> （起動条件）<br></span> <span>自分の表切札に「スラッシュ」がある</span>
                     <hr>
                      
                     
@@ -3579,7 +3579,7 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>あなたの切札に「激励」がある</span>
+                    <span> （起動条件）<br></span> <span>自分の表切札に「激励」がある</span>
                     <hr>
                      
                     
@@ -3638,7 +3638,7 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>あなたの切札に「交渉」がある</span>
+                    <span> （起動条件）<br></span> <span>自分の表切札に「交渉」がある</span>
                     <hr>
                      
                     
@@ -3696,7 +3696,7 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>あなたの切札に「スイッチ」がある</span>
+                    <span> （起動条件）<br></span> <span>自分の表切札に「スイッチ」がある</span>
                     <hr>
                      
                     
@@ -3748,7 +3748,7 @@
                     <div class="text-left">
                       <small>
                         サイズ:
-                        <span>キャラクターキーカードの数字</span><br>
+                        <span>ユニットカードの数字</span><br>
                       </small>
                     </div>
                   </div>
@@ -3784,7 +3784,7 @@
                     <div class="text-left">
                       <small>
                         サイズ:
-                        <span>キャラクターキーカードがJなら11,Qなら12,Kなら13</span><br>
+                        <span>ユニットカードがJなら11,Qなら12,Kなら13</span><br>
                       </small>
                     </div>
                   </div>
@@ -3903,7 +3903,7 @@
                     <div class="text-left">
                       <small>
                         サイズ:
-                        <span>キャラクターキーカードの数字の合計</span><br>
+                        <span>ユニットカードの数字の合計</span><br>
                       </small>
                     </div>
                   </div>
@@ -4121,7 +4121,7 @@
                     
 
                     <span> （能力）<br></span>
-                    <span>あなたの場にいる<span class="spade"></span>の兵士は <スラッシュ> を持つ。</span>
+                    <span>自分の場にいる<span class="spade"></span>の兵士は <スラッシュ> を持つ。</span>
 
                     
 
@@ -4158,7 +4158,7 @@
                     
 
                     <span> （能力）<br></span>
-                    <span>あなたの場にいる<span class="heart"></span>の兵士は <激励> を持つ。</span>
+                    <span>自分の場にいる<span class="heart"></span>の兵士は <激励> を持つ。</span>
 
                     
 
@@ -4195,7 +4195,7 @@
                     
 
                     <span> （能力）<br></span>
-                    <span>あなたの場にいる<span class="diam"></span>の兵士は <交渉> を持つ。</span>
+                    <span>自分の場にいる<span class="diam"></span>の兵士は <交渉> を持つ。</span>
 
                     
 
@@ -4232,7 +4232,7 @@
                     
 
                     <span> （能力）<br></span>
-                    <span>あなたの場にいる<span class="club"></span>の兵士は <スイッチ> を持つ。</span>
+                    <span>自分の場にいる<span class="club"></span>の兵士は <スイッチ> を持つ。</span>
 
                     
 
@@ -4244,7 +4244,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">その他</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">裏切札</h5>
           <div class="row">
 
             <div class="col-lg-6">

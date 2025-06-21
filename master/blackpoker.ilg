@@ -2,12 +2,12 @@ This is mendex version 3.2 [16-Jan-2020] (utf8.uptex) (TeX Live 2021).
 Scanning dictionary file ../source/_mysetting/mydict.dic....done.
 Scanning input file blackpoker.idx.
 Error: 領域 is no entry in dictionary file in blackpoker.idx, line 4.
-Error: 切札 is no entry in dictionary file in blackpoker.idx, line 13.
-Error: 能力(フォグ) is no entry in dictionary file in blackpoker.idx, line 45.
-Error: 切札 is no entry in dictionary file in blackpoker.idx, line 48.
-Error: 切札キーカード is no entry in dictionary file in blackpoker.idx, line 49.
-Error: 切札) is no entry in dictionary file in blackpoker.idx, line 50.
-Error: 能力(切札) is no entry in dictionary file in blackpoker.idx, line 51....done (66 entries accepted, 7 rejected).
-66 entries accepted, 7 rejected.
+Error: 切札 is no entry in dictionary file in blackpoker.idx, line 16.
+Error: 能力(フォグ) is no entry in dictionary file in blackpoker.idx, line 48.
+Error: 切札 is no entry in dictionary file in blackpoker.idx, line 51.
+Error: 切札キーカード is no entry in dictionary file in blackpoker.idx, line 52.
+Error: 切札) is no entry in dictionary file in blackpoker.idx, line 53.
+Error: 能力(切札) is no entry in dictionary file in blackpoker.idx, line 54....done (69 entries accepted, 7 rejected).
+69 entries accepted, 7 rejected.
 7 errors, written in blackpoker.ilg.
 Nothing written in output file.
