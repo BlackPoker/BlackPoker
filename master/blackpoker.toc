@@ -134,7 +134,7 @@
 \contentsline {section}{\numberline {6.1}フレームとは}{71}{section.6.1}%
 \contentsline {section}{\numberline {6.2}定義項目}{71}{section.6.2}%
 \contentsline {section}{\numberline {6.3}フレーム定義}{72}{section.6.3}%
-\contentsline {subsection}{\numberline {6.3.1}フレームリスト}{72}{subsection.6.3.1}%
+\contentsline {subsection}{\numberline {6.3.1}公式フレーム}{72}{subsection.6.3.1}%
 \contentsline {subsubsection}{エントリー20}{72}{subsubsection*.145}%
 \contentsline {subsubsection}{パック}{73}{subsubsection*.146}%
 \contentsline {subsubsection}{レアパック}{75}{subsubsection*.147}%
@@ -213,17 +213,19 @@
 \contentsline {subsection}{\numberline {8.2.3}全フォーマット\&フレーム}{114}{subsection.8.2.3}%
 \contentsline {chapter}{\numberline {第9章}変更履歴}{115}{chapter.9}%
 \contentsline {section}{\numberline {9.1}第8版の主な変更点}{115}{section.9.1}%
-\contentsline {subsection}{\numberline {9.1.1}能力の解釈を変更}{115}{subsection.9.1.1}%
-\contentsline {subsection}{\numberline {9.1.2}フォグ領域追加}{115}{subsection.9.1.2}%
-\contentsline {subsection}{\numberline {9.1.3}用語追加}{116}{subsection.9.1.3}%
-\contentsline {subsection}{\numberline {9.1.4}オプション削除とフレームへの統合}{116}{subsection.9.1.4}%
-\contentsline {subsection}{\numberline {9.1.5}曖昧なルールの明確化}{117}{subsection.9.1.5}%
-\contentsline {subsection}{\numberline {9.1.6}ルール外変更点}{117}{subsection.9.1.6}%
+\contentsline {subsection}{\numberline {9.1.1}アクションの定義の変更}{115}{subsection.9.1.1}%
+\contentsline {subsection}{\numberline {9.1.2}能力の解釈を変更}{115}{subsection.9.1.2}%
+\contentsline {subsection}{\numberline {9.1.3}フォグ領域追加}{115}{subsection.9.1.3}%
+\contentsline {subsection}{\numberline {9.1.4}用語追加}{116}{subsection.9.1.4}%
+\contentsline {subsection}{\numberline {9.1.5}オプション削除とフレームへの統合}{116}{subsection.9.1.5}%
+\contentsline {subsection}{\numberline {9.1.6}エクストラをフレーム化 (8.1)}{117}{subsection.9.1.6}%
+\contentsline {subsection}{\numberline {9.1.7}曖昧なルールの明確化}{117}{subsection.9.1.7}%
+\contentsline {subsection}{\numberline {9.1.8}ルール外変更点}{118}{subsection.9.1.8}%
 \contentsline {section}{\numberline {9.2}第7版の主な変更点}{118}{section.9.2}%
 \contentsline {subsection}{\numberline {9.2.1}リバースのクイック化}{118}{subsection.9.2.1}%
 \contentsline {subsection}{\numberline {9.2.2}ゲーム中のデッキ名称をライフに変更}{118}{subsection.9.2.2}%
-\contentsline {subsection}{\numberline {9.2.3}対戦レギュレーションの定義方法変更}{118}{subsection.9.2.3}%
-\contentsline {subsection}{\numberline {9.2.4}コアフローをわかりやすく整理}{118}{subsection.9.2.4}%
-\contentsline {subsection}{\numberline {9.2.5}BJのクイック化}{118}{subsection.9.2.5}%
-\contentsline {subsection}{\numberline {9.2.6}引き分け廃止}{118}{subsection.9.2.6}%
+\contentsline {subsection}{\numberline {9.2.3}対戦レギュレーションの定義方法変更}{119}{subsection.9.2.3}%
+\contentsline {subsection}{\numberline {9.2.4}コアフローをわかりやすく整理}{119}{subsection.9.2.4}%
+\contentsline {subsection}{\numberline {9.2.5}BJのクイック化}{119}{subsection.9.2.5}%
+\contentsline {subsection}{\numberline {9.2.6}引き分け廃止}{119}{subsection.9.2.6}%
 \contentsline {subsection}{\numberline {9.2.7}ルールの記載を微修正}{119}{subsection.9.2.7}%

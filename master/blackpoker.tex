@@ -6283,7 +6283,7 @@ x
 \sphinxstepscope
 
 
-\subsection{フレームリスト}
+\subsection{公式フレーム}
 \label{\detokenize{auto/framelist:id1}}\label{\detokenize{auto/framelist::doc}}
 \sphinxAtStartPar
 本ドキュメントでは、BlackPokerのすべてのフレームについて記載します。
@@ -8999,10 +8999,24 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \label{\detokenize{revision-history/8th:id1}}\label{\detokenize{revision-history/8th::doc}}
 \sphinxAtStartPar
 次はBlackPoker第8版における主要な変更点です。
+8.1の変更点はは (8.1) として記載しています。
+
+
+\subsection{アクションの定義の変更}
+\label{\detokenize{revision-history/8th:id2}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+B・Jのコスト、効果を見直し
+
+\item {} 
+\sphinxAtStartPar
+クローズのコスト、効果、キーカードを見直し
+
+\end{itemize}
 
 
 \subsection{能力の解釈を変更}
-\label{\detokenize{revision-history/8th:id2}}
+\label{\detokenize{revision-history/8th:id3}}
 \sphinxAtStartPar
 第7版では、能力は「常在型能力」と「誘発型能力」の2種類が定義されていました。
 
@@ -9015,17 +9029,21 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 
 \subsection{フォグ領域追加}
-\label{\detokenize{revision-history/8th:id3}}
+\label{\detokenize{revision-history/8th:id4}}\begin{itemize}
+\item {} 
 \sphinxAtStartPar
 新たに「フォグ領域」を追加しました。
+この領域は「アップ」「ダウン」などターン終了時まで持続する効果を配置するためのもので、効果が視認しやすくなります。
 
+\item {} 
 \sphinxAtStartPar
-この領域は、「アップ」や「ダウン」など、ターン終了時まで効果が持続する要素を配置するためのもので、効果が視認しやすくなっています。
-また、領域追加に伴い、新たにフォグリストも導入しました。
+領域追加に伴い、新たにフォグリストも導入しました。
+
+\end{itemize}
 
 
 \subsection{用語追加}
-\label{\detokenize{revision-history/8th:id4}}
+\label{\detokenize{revision-history/8th:id5}}
 \sphinxAtStartPar
 ルールの分かりやすさ向上を目的として、以下の用語を新たに導入しました。
 \begin{description}
@@ -9063,18 +9081,41 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \end{itemize}
 
+\sphinxlineitem{【コンポーネント関連】 (8.1)}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+コンポーネントキーカード
+
+\item {} 
+\sphinxAtStartPar
+ユニットカード
+
+\item {} 
+\sphinxAtStartPar
+キャラクターキーカード
+
+\item {} 
+\sphinxAtStartPar
+フォグキーカード
+
+\item {} 
+\sphinxAtStartPar
+切札キーカード
+
+\end{itemize}
+
 \end{description}
 
 
 \subsection{オプション削除とフレームへの統合}
-\label{\detokenize{revision-history/8th:id5}}
+\label{\detokenize{revision-history/8th:id6}}
 \sphinxAtStartPar
 第7版では対戦レギュレーションにオプションが存在していましたが、
 第8版ではオプションを削除し、各フレームに統合することで全体の遊び方の整理を図りました。
 
 \sphinxAtStartPar
 また、新たな構築要素として「ストラテジー」を導入しています。
-結果として、フレームは以下の4種類のみとし、その他は廃止しました。
+結果として、フレームは以下の4種類のみとし、その他は廃止しました (8.1でエクストラを追加)。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
@@ -9092,15 +9133,28 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \sphinxAtStartPar
 ストラテジー
 
+\item {} 
+\sphinxAtStartPar
+エクストラ (8.1)
+
 \end{itemize}
 
 \sphinxAtStartPar
 さらに、ハーフ系が廃止されたため、マッチに関する説明も削除しています。
-今後、エクストラをフレームとして復活させる予定です。
+
+
+\subsection{エクストラをフレーム化 (8.1)}
+\label{\detokenize{revision-history/8th:id7}}
+\sphinxAtStartPar
+第8.0版で削除したエクストラ関連ルールを、第8.1版ではフレーム化し、切札を復活させました。
+ゲーム開始の流れがこれまでと異なり、よりスピーディーな展開を楽しめます。
+
+\sphinxAtStartPar
+8.1版では「立ち上がる兵」の切札のみ復活し、ほかの切札は順次追加予定です。
 
 
 \subsection{曖昧なルールの明確化}
-\label{\detokenize{revision-history/8th:id6}}
+\label{\detokenize{revision-history/8th:id8}}
 \sphinxAtStartPar
 以下の点について、ルールの曖昧な部分を明確化しました。
 \begin{itemize}
@@ -9130,17 +9184,37 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \item {} 
 \sphinxAtStartPar
-コンポーネントインスタンスの概念を導入。8.1版でユニットに改名。
+コンポーネントインスタンスの概念を導入。
+
+\item {} 
+\sphinxAtStartPar
+コンポーネントインスタンスをユニットに改名。 (8.1)
 
 \item {} 
 \sphinxAtStartPar
 共通ルールに記載されていた引き分けの記述を修正し、引き分けとならないよう変更
 
+\item {} 
+\sphinxAtStartPar
+ゲームの始め方をフレーム単位で明確に記載できるよう修正 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+パック、切札などフレームを含めた全てのコンポーネントを説明する章を追加 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+デッキの構築条件を明確化 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+キーカードという単語はアクションだけのものになるよう修正 (8.1)
+
 \end{itemize}
 
 
 \subsection{ルール外変更点}
-\label{\detokenize{revision-history/8th:id7}}
+\label{\detokenize{revision-history/8th:id9}}
 \sphinxAtStartPar
 ルール本体に直接関係しない部分について、以下の変更を実施しました。
 \begin{itemize}
@@ -9179,6 +9253,14 @@ PDF版の表紙を、新ロゴをあしらった新デザインに変更
 \item {} 
 \sphinxAtStartPar
 中綴じ印刷用のPDFを追加
+
+\item {} 
+\sphinxAtStartPar
+対戦レギュレーションを第2章に移動し、ルール全体の流れを整理 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+切札リストにイラストを追加 (8.1)
 
 \end{itemize}
 

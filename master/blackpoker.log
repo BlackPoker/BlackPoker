@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  22 JUN 2025 10:41
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  22 JUN 2025 14:53
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2033,22 +2033,32 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 8982--8984
 [115
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 9032--9032
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 9050--9050
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 9032--9032
+Underfull \hbox (badness 10000) in paragraph at lines 9050--9050
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 9043--9043
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 9061--9061
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 9043--9043
+Underfull \hbox (badness 10000) in paragraph at lines 9061--9061
+
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 9084--9084
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 9084--9084
 
  []
 
@@ -2056,15 +2066,15 @@ Underfull \hbox (badness 10000) in paragraph at lines 9043--9043
 No file blackpoker.ind.
 [119] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 0062885C45335591DFBBE36903FCAF1D;17839.
+(rerunfilecheck)             Checksum: 47C68CA02A73A99F6164EF8B0AB4388D;18020.
  ) 
 Here is how much of TeX's memory you used:
- 14979 strings out of 480496
- 236297 string characters out of 5899437
- 582352 words of memory out of 5000000
- 32650 multiletter control sequences out of 15000+600000
+ 14981 strings out of 480496
+ 236349 string characters out of 5899437
+ 583592 words of memory out of 5000000
+ 32652 multiletter control sequences out of 15000+600000
  495570 words of font info for 105 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,629b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (125 pages, 422920 bytes).
+Output written on blackpoker.dvi (125 pages, 427144 bytes).
