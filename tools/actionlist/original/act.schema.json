@@ -173,6 +173,17 @@
           "additionalProperties": true
         }
       },
+      "trumpData": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "devNote": { "type": "string" }
+        },
+        "required": [
+          "description"
+        ],
+        "additionalProperties": true
+      },
       "trumpList": {
         "type": "array",
         "items": {

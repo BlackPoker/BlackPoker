@@ -313,6 +313,8 @@ ${fog.story}
 #if(${arg1})${arg1}#end切札リスト
 ================================================================
 
+$trumpData.description
+
 .. contents:: 目次
    :depth: 2
    :local:
