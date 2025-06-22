@@ -6260,9 +6260,17 @@ x
 \sphinxAtStartPar
 共通ルールに記載されているゲームの始め方（カードの初期配置）を変更する場合、定義されます。
 
-\sphinxlineitem{アクションリスト}
+\sphinxlineitem{フレームアクションリスト}
 \sphinxAtStartPar
 追加で起こせるアクション（フレーム依存アクション）がある場合、定義されます。
+
+\sphinxlineitem{フレームフォグリスト}
+\sphinxAtStartPar
+追加で起こせるフォグ（フレーム依存フォグ）がある場合、定義されます。
+
+\sphinxlineitem{フレーム切札リスト}
+\sphinxAtStartPar
+追加で起こせる切札（フレーム依存切札）がある場合、定義されます。
 
 \end{description}
 
@@ -7035,7 +7043,7 @@ x
 \end{description}
 
 \sphinxAtStartPar
-各フレームで追加で使えるアクションについては次を参照してください。
+各フレームで追加で使えるアクション、フォグ、切札については次を参照してください。
 
 \sphinxstepscope
 
@@ -7047,41 +7055,41 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id40}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック操作}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック操作)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:id8}]{\sphinxcrossref{切札操作}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (切札操作)}}}
 
 \end{itemize}
 
@@ -7133,10 +7141,10 @@ x
 
 
 
-\subsubsection{パック}
+\subsubsection{パック操作}
 \label{\detokenize{auto/frameActionlist:id3}}
 
-\paragraph{パック開封 (パック)}
+\paragraph{パック開封 (パック操作)}
 \label{\detokenize{auto/frameActionlist:act-packopen}}\label{\detokenize{auto/frameActionlist:id4}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7187,7 +7195,7 @@ x
 
 
 
-\paragraph{レアドロー (パック)}
+\paragraph{レアドロー (パック操作)}
 \label{\detokenize{auto/frameActionlist:act-raredraw}}\label{\detokenize{auto/frameActionlist:id5}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7227,7 +7235,7 @@ x
 
 
 
-\paragraph{レア召喚 (パック)}
+\paragraph{レア召喚 (パック操作)}
 \label{\detokenize{auto/frameActionlist:act-summonsrare}}\label{\detokenize{auto/frameActionlist:id6}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7267,7 +7275,7 @@ x
 
 
 
-\paragraph{罠カウンター (パック)}
+\paragraph{罠カウンター (パック操作)}
 \label{\detokenize{auto/frameActionlist:act-trapcounter}}\label{\detokenize{auto/frameActionlist:id7}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7310,10 +7318,10 @@ x
 
 
 
-\subsubsection{切札}
+\subsubsection{切札操作}
 \label{\detokenize{auto/frameActionlist:id8}}
 
-\paragraph{オープン (切札)}
+\paragraph{オープン (切札操作)}
 \label{\detokenize{auto/frameActionlist:act-open}}\label{\detokenize{auto/frameActionlist:id9}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7344,7 +7352,7 @@ x
 
 
 
-\paragraph{クローズ (切札)}
+\paragraph{クローズ (切札操作)}
 \label{\detokenize{auto/frameActionlist:act-close}}\label{\detokenize{auto/frameActionlist:id10}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7384,7 +7392,7 @@ x
 
 
 
-\paragraph{切札破壊 (速攻魔法)}
+\paragraph{切札破壊 (切札操作)}
 \label{\detokenize{auto/frameActionlist:act-trumpdestroy}}\label{\detokenize{auto/frameActionlist:id11}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -7734,7 +7742,7 @@ x
 それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。
 
 \sphinxAtStartPar
-また、覚えやすさを考慮し、各切札のイメージにはタロットの小アルカナを採用しています。
+また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。
 
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
