@@ -12,7 +12,7 @@ data:
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
-  - type: パック
+  - type: パック操作
     acts:
     - 
       frame: |-
@@ -22,7 +22,7 @@ actList:
         ・エクストラ
       actName: パック開封
       actId: packopen
-      actType: パック
+      actType: パック操作
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -38,7 +38,7 @@ actList:
         ・エクストラ
       actName: レアドロー
       actId: raredraw
-      actType: パック
+      actType: パック操作
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -52,7 +52,7 @@ actList:
         ・エクストラ
       actName: レア召喚
       actId: summonsRare
-      actType: パック
+      actType: パック操作
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -67,7 +67,7 @@ actList:
         ・エクストラ
       actName: 罠カウンター
       actId: trapCounter
-      actType: パック
+      actType: パック操作
       actTrigger: 誘発
       actSpeed: 通常
       actTime: クイック
@@ -75,14 +75,14 @@ actList:
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
 
-  - type: 切札
+  - type: 切札操作
     acts:
     -
       frame: |-
         ・エクストラ
       actId: open
       actName: オープン
-      actType: 切札
+      actType: 切札操作
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -94,7 +94,7 @@ actList:
         ・エクストラ
       actId: close
       actName: クローズ
-      actType: 切札
+      actType: 切札操作
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -109,7 +109,7 @@ actList:
         ・エクストラ
       actId: trumpDestroy
       actName: 切札破壊
-      actType: 速攻魔法
+      actType: 切札操作
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -124,7 +124,7 @@ actList:
     #     ・エクストラ
     #   actId: trumpRegene
     #   actName: 切札再生
-    #   actType: 切札
+    #   actType: 切札操作
     #   actTrigger: 誘発
     #   actSpeed: 即時
     #   actTime: クイック
@@ -234,7 +234,7 @@ trumpData:
 
     それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。
 
-    また、覚えやすさを考慮し、各切札のイメージにはタロットの小アルカナを採用しています。
+    また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。
   devNote: |-
     * v8.1 「立ち上がる兵」を再集録
 trumpList:
