@@ -6,6 +6,11 @@ labels: task
 assignees: BlackPoker
 
 ---
+**索引確認**
+pdfに索引が出力されているか確認する。  
+されていない場合、ローカル環境でPDFを作成し、おそらくエラーが発生しているので、
+mydict.dicに単語を追加して索引が出力されるよう修正する。
+
 **Action/ExtraList update**
 
 https://github.com/BlackPoker/BlackPoker/blob/master/tools/actionlist/original/act.yaml
@@ -29,6 +34,7 @@ or
 
 rst
 - [ ] https://blackpoker.github.io/BlackPoker/master/revision-history/revision-history.html
+
 
 **Finish**
 - [ ] merge(master->Xth)
