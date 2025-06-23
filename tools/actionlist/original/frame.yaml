@@ -32,7 +32,7 @@ frames:
       #. :numref:`common_gamestart_start` に従ってゲームを開始する。
 
     actionList: |-
-      * パック開封
+      * パック操作アクション
 
     accessLevel: |-
       パック
@@ -56,10 +56,8 @@ frames:
       #. :numref:`common_gamestart_start` に従ってゲームを開始する。
 
     actionList: |-
-      * パック開封
-      * レアドロー
-      * レア召喚
-      * 罠カウンター
+      * パック操作アクション
+      * レアカード操作アクション
 
     accessLevel: |-
       パック
@@ -89,10 +87,8 @@ frames:
       #. :numref:`common_gamestart_start` に従ってゲームを開始する。
 
     actionList: |-
-      * パック開封
-      * レアドロー
-      * レア召喚
-      * 罠カウンター
+      * パック操作アクション
+      * レアカード操作アクション
 
     accessLevel: |-
       パック
@@ -124,10 +120,9 @@ frames:
       #. :numref:`common_gamestart_start` に従ってゲームを開始する。
 
     actionList: |-
-      * パック開封
-      * レアドロー
-      * レア召喚
-      * 罠カウンター
+      * パック操作アクション
+      * レアカード操作アクション
+      * 切札操作アクション
       * 切札関連のアクション
 
     accessLevel: |-
