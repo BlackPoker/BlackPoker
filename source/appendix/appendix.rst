@@ -49,19 +49,27 @@ PDF
     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-mast-2up.pdf
 
 
-
-.. _actionlist-all:
+.. _actionlist-extra:
 
 ------------------------------
-全フォーマット&フレーム
+エクストラフレーム
 ------------------------------
-URL 
-    https://blackpoker.github.io/BlackPoker/actionlist/html/all.html
+URL
+    https://blackpoker.github.io/BlackPoker/master/actionlist/html/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC&frame=%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9
 
-PDF 
-    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-all.pdf
 
-    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-all-2up.pdf
+.. .. _actionlist-all:
+
+.. ------------------------------
+.. 全フォーマット&フレーム
+.. ------------------------------
+.. URL 
+..     https://blackpoker.github.io/BlackPoker/actionlist/html/all.html
+
+.. PDF 
+..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-all.pdf
+
+..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-all-2up.pdf
 
 
 
