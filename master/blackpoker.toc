@@ -144,9 +144,9 @@
 \contentsline {subsubsection}{パック操作}{81}{subsubsection*.168}%
 \contentsline {paragraph}{パック開封 (パック操作)}{81}{paragraph*.169}%
 \contentsline {subsubsection}{レアカード操作}{82}{subsubsection*.170}%
-\contentsline {paragraph}{レアドロー (パック操作)}{82}{paragraph*.171}%
-\contentsline {paragraph}{レア召喚 (パック操作)}{82}{paragraph*.172}%
-\contentsline {paragraph}{罠カウンター (パック操作)}{83}{paragraph*.173}%
+\contentsline {paragraph}{レアドロー (レアカード操作)}{82}{paragraph*.171}%
+\contentsline {paragraph}{レア召喚 (レアカード操作)}{82}{paragraph*.172}%
+\contentsline {paragraph}{罠カウンター (レアカード操作)}{83}{paragraph*.173}%
 \contentsline {subsubsection}{切札操作}{83}{subsubsection*.174}%
 \contentsline {paragraph}{オープン (切札操作)}{83}{paragraph*.175}%
 \contentsline {paragraph}{クローズ (切札操作)}{84}{paragraph*.176}%
@@ -211,7 +211,7 @@
 \contentsline {section}{\numberline {8.2}アクションリスト}{111}{section.8.2}%
 \contentsline {subsection}{\numberline {8.2.1}ライト}{111}{subsection.8.2.1}%
 \contentsline {subsection}{\numberline {8.2.2}マスター}{112}{subsection.8.2.2}%
-\contentsline {subsection}{\numberline {8.2.3}全フォーマット\&フレーム}{112}{subsection.8.2.3}%
+\contentsline {subsection}{\numberline {8.2.3}エクストラフレーム}{112}{subsection.8.2.3}%
 \contentsline {chapter}{\numberline {第9章}変更履歴}{113}{chapter.9}%
 \contentsline {section}{\numberline {9.1}第8版の主な変更点}{113}{section.9.1}%
 \contentsline {subsection}{\numberline {9.1.1}アクションの定義の変更}{113}{subsection.9.1.1}%

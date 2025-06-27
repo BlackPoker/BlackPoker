@@ -145,9 +145,9 @@
 \BOOKMARK [3][-]{subsubsection*.168}{パック操作}{subsection.6.3.2}% 144
 \BOOKMARK [4][-]{paragraph*.169}{パック開封 \(パック操作\)}{subsubsection*.168}% 145
 \BOOKMARK [3][-]{subsubsection*.170}{レアカード操作}{subsection.6.3.2}% 146
-\BOOKMARK [4][-]{paragraph*.171}{レアドロー \(パック操作\)}{subsubsection*.170}% 147
-\BOOKMARK [4][-]{paragraph*.172}{レア召喚 \(パック操作\)}{subsubsection*.170}% 148
-\BOOKMARK [4][-]{paragraph*.173}{罠カウンター \(パック操作\)}{subsubsection*.170}% 149
+\BOOKMARK [4][-]{paragraph*.171}{レアドロー \(レアカード操作\)}{subsubsection*.170}% 147
+\BOOKMARK [4][-]{paragraph*.172}{レア召喚 \(レアカード操作\)}{subsubsection*.170}% 148
+\BOOKMARK [4][-]{paragraph*.173}{罠カウンター \(レアカード操作\)}{subsubsection*.170}% 149
 \BOOKMARK [3][-]{subsubsection*.174}{切札操作}{subsection.6.3.2}% 150
 \BOOKMARK [4][-]{paragraph*.175}{オープン \(切札操作\)}{subsubsection*.174}% 151
 \BOOKMARK [4][-]{paragraph*.176}{クローズ \(切札操作\)}{subsubsection*.174}% 152
@@ -212,7 +212,7 @@
 \BOOKMARK [1][-]{section.8.2}{アクションリスト}{chapter.8}% 211
 \BOOKMARK [2][-]{subsection.8.2.1}{ライト}{section.8.2}% 212
 \BOOKMARK [2][-]{subsection.8.2.2}{マスター}{section.8.2}% 213
-\BOOKMARK [2][-]{subsection.8.2.3}{全フォーマット\046フレーム}{section.8.2}% 214
+\BOOKMARK [2][-]{subsection.8.2.3}{エクストラフレーム}{section.8.2}% 214
 \BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 215
 \BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 216
 \BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 217
