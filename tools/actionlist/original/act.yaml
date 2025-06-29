@@ -585,7 +585,7 @@ actList:
       actCost: BB
       actKey: ♠A〜10 を 2枚
       actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: キーカードの合計値以下の全ての兵士を墓地に移す。
+      actEffect: サイズがキーカードの合計値以下の全ての兵士を墓地に移す。
       story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
       flavor: 「え！助かる訳ないじゃん！！」
       flavorSpeaker: 平和主義の♣3一般兵より
