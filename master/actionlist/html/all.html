@@ -2212,7 +2212,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象のアクションを無効にする。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。</span>
+                    <span>対象のリクエストを無効にする。対象のリクエストをステージから取り除き、対象のリクエストのキーカードを墓地に移す。</span>
 
                     
 
@@ -2260,7 +2260,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。</span>
+                    <span>対象のリクエストで指定されている対象をそのアクションが指定できる範囲で変更する。リクエストの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。</span>
 
                     
 
@@ -2412,11 +2412,7 @@
                     <div class="text-left">
                       <small> <span class="glyphicon glyphicon-star"
                           aria-hidden="true"></span> <span>同じスートのA,10〜K を 5枚</span><br>
-                      </small> <small> <span>
-                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
-                          <br>
-                        </span>
-                      </small>
+                      </small> 
 
                     </div>
 
@@ -2706,7 +2702,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象の兵士の数字が0以外かつ、キーカードの<span class="diam"></span>カードの数字で割切れる場合、次を行う。<br><ol>
+                    <span>対象の兵士のサイズが0以外かつ、キーカードの<span class="diam"></span>カードの数字で割切れる場合、次を行う。<br><ol>
 <li> 対象の兵士をオーナーのライフの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でライフの一番上に裏向きで移す。</li>
 <li> 対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの<span class="spade"></span>カードの数字に等しい。</li></ol></span>
 
@@ -2984,7 +2980,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>キーカードの合計値以下の全ての兵士を墓地に移す。</span>
+                    <span>サイズがキーカードの合計値以下の全ての兵士を墓地に移す。</span>
 
                     <div class="panel-collapse collapse storyText" id="fla_swordRain">
                       <hr>
@@ -3259,7 +3255,9 @@
 
                     </div>
                     <div class="text-left">
-                       <small> <span>
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span>レアカード1枚</span><br>
+                      </small> <small> <span>
                           <span class="note-mark"></span> <span>このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</span>
                           <br>
                         </span>
@@ -3309,7 +3307,9 @@
 
                     </div>
                     <div class="text-left">
-                       <small> <span>
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span>レアカード1枚</span><br>
+                      </small> <small> <span>
                           <span class="note-mark"></span> <span>このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</span>
                           <br>
                         </span>
@@ -3327,7 +3327,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。</span>
+                    <span>対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</span>
 
                     
 
