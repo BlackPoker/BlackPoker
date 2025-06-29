@@ -6,15 +6,15 @@
 付録
 ==============================
 
-PDF版ルール
-==============================
+.. PDF版ルール
+.. ==============================
 
-通常版
- https://blackpoker.github.io/BlackPoker/blackpoker.pdf
+.. 通常版
+..  https://blackpoker.github.io/BlackPoker/blackpoker.pdf
 
 
-中綴じ印刷用
- https://blackpoker.github.io/BlackPoker/blackpoker_a5-booklet.pdf
+.. 中綴じ印刷用
+..  https://blackpoker.github.io/BlackPoker/blackpoker_a5-booklet.pdf
 
 
 アクションリスト
