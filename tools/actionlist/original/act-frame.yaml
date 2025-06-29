@@ -152,59 +152,59 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-  # - type: 切札♠5
-  #   acts:
-  #   - frame: |-
-  #       ・エクストラ
-  #     actName: 蘇生
-  #     actId: resurrection
-  #     actType: 通常魔法
-  #     actTrigger: 直接
-  #     actSpeed: 通常
-  #     actTime: メイン
-  #     actCost: BL
-  #     actActCond: 自分の表切札に「蘇生」がある
-  #     actEffect: |-
-  #       自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
-  #     since: ex3.10.0
-  #     update: v8.1
+  - type: 切札♠5
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 蘇生
+      actId: resurrection
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BL
+      actActCond: 自分の表切札に「蘇生」がある
+      actEffect: |-
+        自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
+      since: ex3.10.0
+      update: v8.1
 
-  # - type: 切札♠K
-  #   acts:
-  #   - frame: |-
-  #       ・エクストラ
-  #     actName: 魔王召喚
-  #     actId: summonDarkLord
-  #     actType: 通常魔法
-  #     actTrigger: 直接
-  #     actSpeed: 通常
-  #     actTime: メイン
-  #     actCost: SS
-  #     actKey: J〜K
-  #     actActCond: 自分の表切札に「魔王」がある
-  #     actEffect: |-
-  #       切札の♠Kが表の場合、次を行う。
-  #       １．キーカード、手札、ライフ、墓地、切札の中から♣Kを見つける。
-  #       ２．♣Kを見つけた場合、場にいるすべての兵士を墓地に移し、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
-  #       ３．♣Kが無い場合、切札の♠Kを墓地に移す。
-  #       ４．ライフを切りなおす。
-  #     since: ex3.10.0
-  #     update: v8.1
-    # - frame: |-
-    #     ・エクストラ
-    #   actName: 魔王の囁き
-    #   actId: darkWhisper
-    #   actType: 基本
-    #   actTrigger: 誘発
-    #   actSpeed: 即時
-    #   actTime: クイック
-    #   actActCond: 
-    #   actTriggerCond: |-
-    #     自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
-    #   actEffect: |-
-    #     ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
-    #   since: ex3.10.0
-    #   update: v8.1
+  - type: 切札♠K
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 魔王召喚
+      actId: summonDarkLord
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: SS
+      actKey: J〜K
+      actActCond: 自分の表切札に「魔王」がある
+      actEffect: |-
+        切札の♠Kが表の場合、次を行う。
+        １．キーカード、手札、ライフ、墓地、切札の中から♣Kを見つける。
+        ２．♣Kを見つけた場合、場にいるすべての兵士を墓地に移し、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
+        ３．♣Kが無い場合、切札の♠Kを墓地に移す。
+        ４．ライフを切りなおす。
+      since: ex3.10.0
+      update: v8.1
+    - frame: |-
+        ・エクストラ
+      actName: 魔王の囁き
+      actId: darkWhisper
+      actType: 基本
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: 
+      actTriggerCond: |-
+        自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
+      actEffect: |-
+        ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
+      since: ex3.10.0
+      update: v8.1
 
   - type: 切札♡3
     acts:
@@ -267,26 +267,25 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-# charList:
-#   - type: 切札♠K
-#     chars:
-#     - frame: |-
-#         ・エクストラ
-#       charName: 魔王
-#       ruby: まおう
-#       charId: darklord
-#       charType: 兵士
-#       charKey: ♠K と ♣K
-#       charSize: 26
-#       charLabel: アタッカー, ブロッカー
-#       charAbility: |-
-#         ・アクションの対象にできない。
-#         ・自分がエンドアクションを起こした場合、世代交代アクションを誘発する。
-#         ・数字は２６として扱う。
-#         ・♣兵士としても♠兵士としても扱う。
-#         ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
-#       since: ex3.10.0
-#       update: v8.1
+charList:
+  - type: 切札♠K
+    chars:
+    - frame: |-
+        ・エクストラ
+      charName: 魔王
+      ruby: まおう
+      charId: darklord
+      charType: 兵士
+      charKey: ♠K と ♣K
+      charSize: 26
+      charLabel: アタッカー, ブロッカー
+      charAbility: |-
+        ・アクションの対象にできない。
+        ・自分がエンドアクションを起こした場合、世代交代アクションを誘発する。
+        ・♣兵士としても♠兵士としても扱う。
+        ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+      since: ex3.10.0
+      update: v8.1
 
 
 fogList:
@@ -328,43 +327,43 @@ trumpList:
       devNote: |-
         立ち上がる兵で追加された。
 
-    # - frame: |-
-    #     ・エクストラ
-    #   trumpName: 蘇生
-    #   trumpId: s5
-    #   trumpType: 表切札
-    #   trumpKey: ♠5
-    #   since: ex3.10.0
-    #   update: v8.1
-    #   image: tarot/Pictorial_Key_to_the_Tarot_Swords_05
-    #   devNote: |-
-    #     「巨人と魔王」で追加された。
+    - frame: |-
+        ・エクストラ
+      trumpName: 蘇生
+      trumpId: s5
+      trumpType: 表切札
+      trumpKey: ♠5
+      since: ex3.10.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_05
+      devNote: |-
+        「巨人と魔王」で追加された。
 
-    # - frame: |-
-    #     ・エクストラ
-    #   trumpName: 魔王
-    #   trumpId: sK
-    #   trumpType: 表切札
-    #   trumpKey: ♠K
-    #   since: ex3.10.0
-    #   update: v8.1
-    #   image: tarot/Pictorial_Key_to_the_Tarot_04_The_Emperor
-    #   devNote: |-
-    #     「巨人と魔王」で追加された。
+    - frame: |-
+        ・エクストラ
+      trumpName: 魔王
+      trumpId: sK
+      trumpType: 表切札
+      trumpKey: ♠K
+      since: ex3.10.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_04_The_Emperor
+      devNote: |-
+        「巨人と魔王」で追加された。
 
   - type: ♡ハート
     trumps:
-    # - frame: |-
-    #     ・エクストラ
-    #   trumpName: 援軍
-    #   trumpId: h2
-    #   trumpType: 表切札
-    #   trumpKey: ♡2
-    #   since: ex3.10.0
-    #   update: v8.1
-    #   image: tarot/Pictorial_Key_to_the_Tarot_Cups_02
-    #   devNote: |-
-    #     「巨人と魔王」で追加された。
+    - frame: |-
+        ・エクストラ
+      trumpName: 援軍
+      trumpId: h2
+      trumpType: 表切札
+      trumpKey: ♡2
+      since: ex3.10.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_02
+      devNote: |-
+        「巨人と魔王」で追加された。
 
     - frame: |-
         ・エクストラ
