@@ -417,7 +417,6 @@ actList:
       actTime: クイック
       actCost: BB
       actKey: '同じスートのA,10〜K を 5枚'
-      actNote: ※このアクションはカウンターアクションの対象にならない。
       actTarget: プレイヤー1人
       actEffect: 対象のプレイヤーに40点のダメージを与える。
       since: v1.0
