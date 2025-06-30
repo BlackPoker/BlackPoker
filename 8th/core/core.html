@@ -128,10 +128,10 @@
   </ul>
 </nav>
 <section id="core-rst">
-<span id="id1"></span><h1><span class="section-number">6. </span>コアルール<a class="headerlink" href="#core-rst" title="この見出しへのパーマリンク">¶</a></h1>
+<span id="id1"></span><h1><span class="section-number">7. </span>コアルール<a class="headerlink" href="#core-rst" title="この見出しへのパーマリンク">¶</a></h1>
 <p>トランプのみでトレーディングカードゲームのように遊ぶために、
 一般的なトレーディングカードゲームを抽象化し、トランプのみで遊べるように再構築しました。</p>
-<p>コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(<a class="reference internal" href="#abstract-core-rule"><span class="std std-numref">Fig. 6.1</span></a>)</p>
+<p>コアルールは、割込みが可能なターン制ゲームの開始から勝敗が決まるまでを定義します。(<a class="reference internal" href="#abstract-core-rule"><span class="std std-numref">Fig. 7.1</span></a>)</p>
 <p>BlackPokerはコアルールを実装しているため、ルールを変更する場合は、コアルールに従う必要があります。</p>
 <p>このルールは、割込みが可能なターン制ゲームの標準化したモデルとして構築されており、他のゲームへの応用も可能です。</p>
 <figure class="align-default" id="id34">
@@ -153,11 +153,11 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.1 </span><span class="caption-text">コアルールのイメージ</span><a class="headerlink" href="#id34" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <section id="id2">
-<h2><span class="section-number">6.1. </span>基礎概念<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<h2><span class="section-number">7.1. </span>基礎概念<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
 <p>割込み可能なターン制ゲームでは、現実のゲーム盤面に影響を与える前に、
 どの行動を先に行うかを決める仮想的な場所があります。</p>
 <p>割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。</p>
@@ -165,54 +165,54 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 <p>いくつかの基礎概念を紹介します。
 その後、それらを組み合わせたイメージを説明します。</p>
 <section id="index-0">
-<span id="id3"></span><h3><span class="section-number">6.1.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id3"></span><h3><span class="section-number">7.1.1. </span>ターン<a class="headerlink" href="#index-0" title="この見出しへのパーマリンク">¶</a></h3>
 <p>プレイヤーはターンを“持つ”ことができます。
 ターンを持っているプレイヤーは先に行動できます。
 ターンを持っているプレイヤーをターンプレイヤーといいます。</p>
 </section>
 <section id="index-1">
-<span id="id4"></span><h3><span class="section-number">6.1.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id4"></span><h3><span class="section-number">7.1.2. </span>アクション<a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h3>
 <p>ターン制のゲームでは、プレイヤーは様々な行動を行います。
 チェスであればコマを進めたり、ババ抜きであれば隣の人からカードを引いたりします。
 また、ゲームのルールシステムが行う行動もあります。それらの行動をアクションと定義します。
 プレイヤーが行う行動を直接アクション、ルールシステムが行うアクションを誘発アクションといいます。</p>
 </section>
 <section id="index-2">
-<span id="id5"></span><h3><span class="section-number">6.1.3. </span>リクエスト<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id5"></span><h3><span class="section-number">7.1.3. </span>リクエスト<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションを実行するために、ゲームシステム（コアフロー）に対して
 どのようなアクションを実行するかを要求します。
 この要求をリクエストと呼びます。正式名称はアクションリクエストです。</p>
 <p>リクエストの種類によっては、ステージに蓄積されず、すぐに実行(解決)されるものもあります。</p>
 </section>
 <section id="id6">
-<h3><span class="section-number">6.1.4. </span>解決<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">7.1.4. </span>解決<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
 <p>リクエストを処理すること（要求されたアクションを実行すること）を解決と言います。</p>
 </section>
 <section id="index-3">
-<span id="id7"></span><h3><span class="section-number">6.1.5. </span>チャンス<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id7"></span><h3><span class="section-number">7.1.5. </span>チャンス<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
 <p>プレイヤーがリクエストできる機会をチャンスといいます。
 チャンスを持っている間は何度でもリクエストすることができます。
 正式名称はアクションチャンスです。</p>
 </section>
 <section id="index-4">
-<span id="id8"></span><h3><span class="section-number">6.1.6. </span>ステージ<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id8"></span><h3><span class="section-number">7.1.6. </span>ステージ<a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
 <p>ステージはリクエストの解決順を整理するために使う領域です。
 後入れ先出し方式で、最後に積まれたリクエストから順に解決されます。
 リクエストの種類によっては、ステージに蓄積されず、すぐに解決されるものもあります。</p>
 </section>
 <section id="component">
-<span id="index-5"></span><span id="id9"></span><h3><span class="section-number">6.1.7. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="index-5"></span><span id="id9"></span><h3><span class="section-number">7.1.7. </span>コンポーネント<a class="headerlink" href="#component" title="この見出しへのパーマリンク">¶</a></h3>
 <p>コンポーネントとは、ゲーム盤面に配置されるモンスターや駒の定義です。
 例えば、将棋の「歩」は駒としては複数存在しますが、「歩」の定義は1つです。
 この定義をコンポーネントといいます。</p>
 </section>
 <section id="index-6">
-<span id="id10"></span><h3><span class="section-number">6.1.8. </span>コンポーネントインスタンス<a class="headerlink" href="#index-6" title="この見出しへのパーマリンク">¶</a></h3>
-<p>コンポーネントとして定義されたものがゲーム盤面に配置されているとき、それをコンポーネントインスタンスといいます。
-例えば、将棋の「歩」はコンポーネントとして定義されていますが、 実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたコンポーネントインスタンスです。</p>
+<span id="id10"></span><h3><span class="section-number">7.1.8. </span>ユニット<a class="headerlink" href="#index-6" title="この見出しへのパーマリンク">¶</a></h3>
+<p>コンポーネントとして定義されたものがゲーム盤面に配置されているとき、それをユニットといいます。
+例えば、将棋の「歩」はコンポーネントとして定義されていますが、 実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたユニットです。</p>
 </section>
 <section id="id11">
-<h3><span class="section-number">6.1.9. </span>コアフロー(ルールシステム)<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">7.1.9. </span>コアフロー(ルールシステム)<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
 <p>リクエストはコアフロー(ルールシステム)によって整理され、処理（解決）されます。
 リクエストは即時解決されるものと、ステージに蓄積されるものに分類され、順番に処理されます。</p>
 <p>ゲームによって具体的に行う内容は異なりますが、処理する順番の制御はコアフローが担います。</p>
@@ -220,20 +220,20 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 </section>
 </section>
 <section id="id12">
-<h2><span class="section-number">6.2. </span>詳細<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
-<p>基礎概念を図で表すと次のようになります。(<a class="reference internal" href="#abstract-core-image"><span class="std std-numref">Fig. 6.2</span></a>)</p>
+<h2><span class="section-number">7.2. </span>詳細<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
+<p>基礎概念を図で表すと次のようになります。(<a class="reference internal" href="#abstract-core-image"><span class="std std-numref">Fig. 7.2</span></a>)</p>
 <figure class="align-default" id="id35">
 <span id="abstract-core-image"></span><img alt="../_images/abstract.png" src="../_images/abstract.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 6.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.2 </span><span class="caption-text">割込み可能なターン制ゲーム</span><a class="headerlink" href="#id35" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>仮想的な場所でリクエストを整理し、現実のゲーム盤面に承認された順で変更を反映します。</p>
 <p>リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。</p>
-<p>さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(<a class="reference internal" href="#action-request-image"><span class="std std-numref">Fig. 6.3</span></a>)</p>
+<p>さらに、アクションとリクエスト、コンポーネントとユニットの関係は次のようになります。(<a class="reference internal" href="#action-request-image"><span class="std std-numref">Fig. 7.3</span></a>)</p>
 <figure class="align-default" id="id36">
 <span id="action-request-image"></span><p class="plantuml">
-<img src="../_images/plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912.svg" alt="
+<img src="../_images/plantuml-b424b035f54a58f3126979e401d275cf680053a5.svg" alt="
 left to right direction
 
 hide fields
@@ -251,19 +251,19 @@ class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
 class コンポーネント&lt;&lt;定義&gt;&gt; {
 }
 
-class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+class ユニット&lt;&lt;生成されたもの&gt;&gt; {
 }
 
-コンポーネント --&gt; コンポーネントインスタンス : 生成 "/></p>
+コンポーネント --&gt; ユニット : 生成 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.3 </span><span class="caption-text">リクエストとコンポーネントインスタンスの関係</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.3 </span><span class="caption-text">リクエストとユニットの関係</span><a class="headerlink" href="#id36" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
-<p>ゲーム盤面には複数のコンポーネントインスタンスが生成されます。</p>
-<p>リクエストが解決されるたびに、コンポーネントインスタンスが生成されたり、既存のコンポーネントインスタンスの状態が変化したりします。</p>
+<p>ゲーム盤面には複数のユニットが生成されます。</p>
+<p>リクエストが解決されるたびに、ユニットが生成されたり、既存のユニットの状態が変化したりします。</p>
 <p>ここからは、アクションとコンポーネントの各項目について説明します。</p>
 <section id="id13">
-<h3><span class="section-number">6.2.1. </span>アクションの定義項目<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">7.2.1. </span>アクションの定義項目<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションを定義する際には、次の項目を設定する必要があります。
 その他の項目は、具体的なアクションに応じて追加してください。</p>
 <blockquote>
@@ -278,12 +278,12 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 </ul>
 </div></blockquote>
 <section id="index-7">
-<span id="id14"></span><h4><span class="section-number">6.2.1.1. </span>オーナー<a class="headerlink" href="#index-7" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id14"></span><h4><span class="section-number">7.2.1.1. </span>オーナー<a class="headerlink" href="#index-7" title="この見出しへのパーマリンク">¶</a></h4>
 <p>アクションの所有者。
-アクションの定義はプレイヤー事に保持するため、同じ内容のアクションでもオーナーが異なります。</p>
+アクションの定義はプレイヤー毎に保持するため、同じ内容のアクションでもオーナーが異なります。</p>
 </section>
 <section id="trigger-core">
-<span id="index-8"></span><span id="id15"></span><h4><span class="section-number">6.2.1.2. </span>トリガー<a class="headerlink" href="#trigger-core" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="index-8"></span><span id="id15"></span><h4><span class="section-number">7.2.1.2. </span>トリガー<a class="headerlink" href="#trigger-core" title="この見出しへのパーマリンク">¶</a></h4>
 <p>アクションが要求される方法は、大きく分けて次の2種類に分類されます。</p>
 <dl class="simple">
 <dt><strong>直接</strong></dt><dd><p>プレイヤーがコストを支払うなどの手続きを経てリクエストされるアクション。</p>
@@ -294,7 +294,7 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 <p>トリガー項目には「直接」または「誘発」のいずれかが設定されます。</p>
 </section>
 <section id="speed-core">
-<span id="index-9"></span><span id="id16"></span><h4><span class="section-number">6.2.1.3. </span>スピード<a class="headerlink" href="#speed-core" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="index-9"></span><span id="id16"></span><h4><span class="section-number">7.2.1.3. </span>スピード<a class="headerlink" href="#speed-core" title="この見出しへのパーマリンク">¶</a></h4>
 <p>リクエストが処理される速度は次の2種類に分類されます。</p>
 <dl class="simple">
 <dt><strong>即時</strong></dt><dd><p>リクエストはステージを用いず解決されます。</p>
@@ -305,7 +305,7 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 <p>スポード項目には「即時」または「通常」のいずれかが設定されます。</p>
 </section>
 <section id="timing">
-<span id="index-10"></span><span id="id17"></span><h4><span class="section-number">6.2.1.4. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="index-10"></span><span id="id17"></span><h4><span class="section-number">7.2.1.4. </span>タイミング<a class="headerlink" href="#timing" title="この見出しへのパーマリンク">¶</a></h4>
 <p>タイミングとは、アクションがリクエストされるタイミングを示します。
 タイミングには次の2種類があります。</p>
 <dl class="simple" id="index-11">
@@ -336,14 +336,14 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 </div>
 </section>
 <section id="index-13">
-<span id="id18"></span><h4><span class="section-number">6.2.1.5. </span>起動条件<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id18"></span><h4><span class="section-number">7.2.1.5. </span>起動条件<a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h4>
 <p>アクションを起こす（リクエストする）ための条件を示します。</p>
 <p>トリガーが「直接」の場合、起動条件が定義されます。
 コストの支払いや対象の指定など、様々な条件がアクションごとに設定されます。</p>
 <p>BlackPokerでは、コストの支払いや対象の指定の記述が冗長にならないよう、省略されることが多いです。</p>
 </section>
 <section id="index-14">
-<span id="id19"></span><h4><span class="section-number">6.2.1.6. </span>誘発条件<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id19"></span><h4><span class="section-number">7.2.1.6. </span>誘発条件<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h4>
 <p>アクションが誘発される条件を示します。
 条件が満たされると自動的にリクエストされます。</p>
 <p>トリガーが「誘発」の場合、この項目が定義されます。</p>
@@ -353,12 +353,12 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 <p>これらの状況で誘発するアクションが設定されることがあります。</p>
 </section>
 <section id="index-15">
-<span id="id20"></span><h4><span class="section-number">6.2.1.7. </span>効果<a class="headerlink" href="#index-15" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id20"></span><h4><span class="section-number">7.2.1.7. </span>効果<a class="headerlink" href="#index-15" title="この見出しへのパーマリンク">¶</a></h4>
 <p>効果とは、アクションが解決された際に実行される処理を指します。</p>
 </section>
 </section>
 <section id="id21">
-<h3><span class="section-number">6.2.2. </span>リクエストの定義項目<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">7.2.2. </span>リクエストの定義項目<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
 <dl class="simple">
 <dt><strong>アクション定義</strong></dt><dd><p>リクエストが解決された際に実行されるアクションの内容。</p>
 </dd>
@@ -371,44 +371,44 @@ class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&g
 </dl>
 </section>
 <section id="id22">
-<h3><span class="section-number">6.2.3. </span>コンポーネントの定義項目<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">7.2.3. </span>コンポーネントの定義項目<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h3>
 <p>コンポーネントには、次の項目が定義されます。
 必要に応じて、ゲームに合わせた追加設定をしてください。</p>
 <dl class="simple">
 <dt><strong>オーナー</strong></dt><dd><p>コンポーネンの所有者。
-コンポーネントの定義はプレイヤー事に保持するため、同じ内容のコンポーネントでもオーナーが異なります。</p>
+コンポーネントの定義はプレイヤー毎に保持するため、同じ内容のコンポーネントでもオーナーが異なります。</p>
 </dd>
-<dt><strong>能力</strong></dt><dd><p>能力の詳細については、後述のセクションを参照してください。(<a class="reference internal" href="#ability"><span class="std std-numref">6.3 能力</span></a>)</p>
+<dt><strong>能力</strong></dt><dd><p>能力の詳細については、後述のセクションを参照してください。(<a class="reference internal" href="#ability"><span class="std std-numref">7.3 能力</span></a>)</p>
 </dd>
 </dl>
 </section>
 <section id="id23">
-<h3><span class="section-number">6.2.4. </span>コンポーネントインスタンスの定義項目<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
-<p>コンポーネントインスタンスには、次の項目が設定されます。
+<h3><span class="section-number">7.2.4. </span>ユニットの定義項目<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
+<p>ユニットには、次の項目が設定されます。
 必要に応じて、ゲームに合わせた追加設定をしてください。</p>
 <dl class="simple">
 <dt><strong>コンポーネント定義</strong></dt><dd><p>どのコンポーネント定義から生成されたのかを保持します。</p>
 </dd>
 </dl>
 <dl class="simple" id="index-16">
-<dt><strong>オーナー</strong></dt><dd><p>コンポーネントインスタンスの所有者。
+<dt><strong>オーナー</strong></dt><dd><p>ユニットの所有者。
 一般的なトランプゲームでは無視されることが多いですが、TCGのようにデッキを個人所有するゲームでは必要な情報です。</p>
 </dd>
 </dl>
 <dl class="simple" id="index-17">
-<dt><strong>コントローラー</strong></dt><dd><p>現在、そのコンポーネントインスタンスを操作しているプレイヤー。
+<dt><strong>コントローラー</strong></dt><dd><p>現在、そのユニットを操作しているプレイヤー。
 通常はオーナーとコントローラーは同じですが、コントロールを奪うアクションがある場合、異なることがあります。</p>
 </dd>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
-<p>コンポーネントインスタンスとリクエストのコントローラー</p>
-<p>コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
-コンポーネントインスタンスとリクエストの属性を次の図に示します。(<a class="reference internal" href="#controller-attr"><span class="std std-numref">Fig. 6.4</span></a>)</p>
+<p>ユニットとリクエストのコントローラー</p>
+<p>コントローラーは制御している人という意味になるため、ユニットとリクエストのコントローラーは制御する対象が異なります。
+ユニットとリクエストの属性を次の図に示します。(<a class="reference internal" href="#controller-attr"><span class="std std-numref">Fig. 7.4</span></a>)</p>
 </div>
 <figure class="align-default" id="id37">
 <span id="controller-attr"></span><p class="plantuml">
-<img src="../_images/plantuml-601946f3f8eb470fbf97e87d640335e4c349780a.svg" alt="left to right direction
+<img src="../_images/plantuml-e3598ea29fb852c45136cb979c397a63a8586247.svg" alt="left to right direction
 
 hide methods
 hide circle
@@ -419,7 +419,7 @@ class コンポーネント&lt;&lt;定義&gt;&gt; {
 }
 
 
-class コンポーネントインスタンス&lt;&lt;生成されたもの&gt;&gt; {
+class ユニット&lt;&lt;生成されたもの&gt;&gt; {
     コンポーネント定義
     オーナー
     コントローラー
@@ -441,21 +441,21 @@ class リクエスト&lt;&lt;生成されたもの&gt;&gt; {
 }
 
 アクション --&gt; リクエスト : 生成
-コンポーネント --&gt; コンポーネントインスタンス : 生成"/></p>
+コンポーネント --&gt; ユニット : 生成"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id37" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.4 </span><span class="caption-text">コントローラー属性</span><a class="headerlink" href="#id37" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </section>
 </section>
 <section id="ability">
-<span id="index-18"></span><span id="id24"></span><h2><span class="section-number">6.3. </span>能力<a class="headerlink" href="#ability" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="index-18"></span><span id="id24"></span><h2><span class="section-number">7.3. </span>能力<a class="headerlink" href="#ability" title="この見出しへのパーマリンク">¶</a></h2>
 <p>アクション、コンポーネントの定義項目を見てきました。
 これらとは別の概念である <strong>能力</strong> について説明します。</p>
 <p>能力とはアクションの効果とは異なる概念で、アクションを起こす際や効果を解釈する際に参照されます。</p>
 <p>能力は解釈される際にコストは支払われず、ステージに置かれません。</p>
 <p>能力を持つことができるのは、プレイヤーの他に駒やカードなどのゲームに登場するコンポーネントも含まれます。
-(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 6.5</span></a>)</p>
+(<a class="reference internal" href="#ability-image"><span class="std std-numref">Fig. 7.5</span></a>)</p>
 <figure class="align-default" id="id38">
 <span id="ability-image"></span><p class="plantuml">
 <img src="../_images/plantuml-5c3b9d2c43d8740600145b89955601a615170288.svg" alt="&#64;startuml
@@ -480,7 +480,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id38" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.5 </span><span class="caption-text">能力のイメージ</span><a class="headerlink" href="#id38" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <div class="admonition note">
@@ -491,9 +491,9 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 </div>
 </section>
 <section id="coreflowsec">
-<span id="index-19"></span><span id="id25"></span><h2><span class="section-number">6.4. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
+<span id="index-19"></span><span id="id25"></span><h2><span class="section-number">7.4. </span>コアフロー<a class="headerlink" href="#coreflowsec" title="この見出しへのパーマリンク">¶</a></h2>
 <p>今まで説明してきた概念を用いて <strong>コアフローの具体的な処理</strong> を説明します。
-この図は <strong>ゲームの開始から勝敗が決まるまでの流れ(コアフロー)</strong> を示しています。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 6.6</span></a>)</p>
+この図は <strong>ゲームの開始から勝敗が決まるまでの流れ(コアフロー)</strong> を示しています。(<a class="reference internal" href="#coreflow-2"><span class="std std-numref">Fig. 7.6</span></a>)</p>
 <p>BlackPokerはこのコアフローに則りリクエストが処理されます。</p>
 <p>アナログゲーム用に作成したコアフローであるため、なるべく記憶する容量を減らすように設計しています。
 デジタルゲームに応用する場合は、細部をゲームに合わせて変更してください。</p>
@@ -537,7 +537,7 @@ endif
 repeat while()
 &#64;enduml"/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id39" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.6 </span><span class="caption-text">コアフロー</span><a class="headerlink" href="#id39" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl id="core-gamestart">
@@ -554,11 +554,11 @@ repeat while()
 BlackPokerではアクション名を言い、コストの支払や対象を指定しアクションをリクエストします。
 一方ババ抜きでは、隣のプレイヤーからカードを引く際に宣言せず暗黙にアクションがリクエストされている場合もあります。</p>
 <p>このときに有効になっている能力を考慮します。
-能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">6.4.2 能力の適応順</span></a> 参照してください。</p>
+能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">7.4.2 能力の適応順</span></a> 参照してください。</p>
 </dd>
 <dt><strong>[6] 誘発チェック</strong></dt><dd><p>ここに至るまでに誘発したアクションがないかチェックします。
 誘発した場合、対象のアクションをリクエストします。
-詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">6.4.1 誘発チェック</span></a> を参照してください。</p>
+詳しいフローは <a class="reference internal" href="#trigger-check"><span class="std std-numref">7.4.1 誘発チェック</span></a> を参照してください。</p>
 </dd>
 <dt><strong>[7] 即時か？</strong></dt><dd><p>リクエストのスピードが即時か判定します。</p>
 </dd>
@@ -568,7 +568,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 その他にコンポーネントを捨て山に移動するなどゲームによって決まった処理があれば行います。
 アクションの解決の中でも効果に定義されている内容を実行することのみを指す場合「効果を発揮する」と言います。</p>
 <p>このときに有効になっている能力を考慮します。
-能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">6.4.2 能力の適応順</span></a> 参照してください。</p>
+能力の適用順については <a class="reference internal" href="#ability-order"><span class="std std-numref">7.4.2 能力の適応順</span></a> 参照してください。</p>
 </dd>
 </dl>
 <dl class="simple" id="winlose">
@@ -596,12 +596,12 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 </dd>
 </dl>
 <section id="trigger-check">
-<span id="id26"></span><h3><span class="section-number">6.4.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id26"></span><h3><span class="section-number">7.4.1. </span>誘発チェック<a class="headerlink" href="#trigger-check" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションの中には誘発条件を持っているアクションがあります。
 誘発条件に該当した場合、アクションからリクエストが誘発されます。</p>
 <p>誘発チェックでは、誘発したリクエストを解決またはステージに追加します。
 誘発したリクエストのコントローラーは起因となったアクションのオーナーがコントローラーとなります。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 6.7</span></a>)</p>
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow"><span class="std std-numref">Fig. 7.7</span></a>)</p>
 <div class="admonition note">
 <p class="admonition-title">注釈</p>
 <p>バッファ</p>
@@ -683,7 +683,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id40" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.7 </span><span class="caption-text">誘発チェック</span><a class="headerlink" href="#id40" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple" id="trigger-act-gather">
@@ -702,10 +702,10 @@ stop
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
 <dt><strong>[6-5] タイミング=メインの即時アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「即時」のアクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">6.4.1.1 誘発即時解決</span></a> をタイミング=メインとして参照してください。</p>
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">7.4.1.1 誘発即時解決</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
 <dt><strong>[6-6] タイミング=クイックの即時アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「即時」のアクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">6.4.1.1 誘発即時解決</span></a> をタイミング=クイックとして参照してください。</p>
+詳細は <a class="reference internal" href="#trigger-act-s"><span class="std std-numref">7.4.1.1 誘発即時解決</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
 <dt><strong>[6-7] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。</p>
@@ -719,10 +719,10 @@ stop
 存在しない場合は、そのプレイヤーでの処理を終了し、次のプレイヤーへ移行します。</p>
 </dd>
 <dt><strong>[6-10] タイミング=メインの通常アクションを処理</strong></dt><dd><p>該当プレイヤーについて、タイミングが「メイン」、スピードが「通常」のアクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">6.4.1.2 通常：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">7.4.1.2 通常：アクション毎に処理</span></a> をタイミング=メインとして参照してください。</p>
 </dd>
 <dt><strong>[6-11] タイミング=クイックの通常アクションを処理</strong></dt><dd><p>同じプレイヤーについて、タイミングが「クイック」、スピードが「通常」のアクションを実行します。
-詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">6.4.1.2 通常：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
+詳細は <a class="reference internal" href="#trigger-act-n"><span class="std std-numref">7.4.1.2 通常：アクション毎に処理</span></a> をタイミング=クイックとして参照してください。</p>
 </dd>
 <dt><strong>[6-12] 次のプレイヤーへ</strong></dt><dd><p>現在のプレイヤーでの処理が完了した後、
 ターン順に次のプレイヤーへ処理を移行します。</p>
@@ -735,10 +735,10 @@ stop
 また、ループはバッファに未処理のアクションが存在する限り繰り返されます。</p>
 </div>
 <section id="trigger-act-s">
-<span id="id27"></span><h4><span class="section-number">6.4.1.1. </span>誘発即時解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id27"></span><h4><span class="section-number">7.4.1.1. </span>誘発即時解決<a class="headerlink" href="#trigger-act-s" title="この見出しへのパーマリンク">¶</a></h4>
 <p>誘発チェックで誘発したスピードが即時のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 6.8</span></a>)</p>
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-s"><span class="std std-numref">Fig. 7.8</span></a>)</p>
 <figure class="align-default" id="id41">
 <span id="trigger-flow-s"></span><p class="plantuml">
 <img src="../_images/plantuml-caaca34586e95540adb102e9bc8309243f59b393.svg" alt="&#64;startuml
@@ -766,7 +766,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id41" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.8 </span><span class="caption-text">誘発チェック-即時処理</span><a class="headerlink" href="#id41" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -792,10 +792,10 @@ stop
 </dl>
 </section>
 <section id="trigger-act-n">
-<span id="id28"></span><h4><span class="section-number">6.4.1.2. </span>通常：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id28"></span><h4><span class="section-number">7.4.1.2. </span>通常：アクション毎に処理<a class="headerlink" href="#trigger-act-n" title="この見出しへのパーマリンク">¶</a></h4>
 <p>誘発チェックで誘発したスピードが通常のリクエストを処理します。
 呼び出し元で指定されたプレイヤーおよびタイミングに基づいて処理します。
-誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 6.9</span></a>)</p>
+誘発チェックは次の図のように行います。(<a class="reference internal" href="#trigger-flow-n"><span class="std std-numref">Fig. 7.9</span></a>)</p>
 <figure class="align-default" id="id42">
 <span id="trigger-flow-n"></span><p class="plantuml">
 <img src="../_images/plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.svg" alt="&#64;startuml
@@ -829,7 +829,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 6.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id42" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 7.9 </span><span class="caption-text">誘発チェック-通常処理</span><a class="headerlink" href="#id42" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <dl class="simple">
@@ -864,17 +864,17 @@ stop
 </section>
 </section>
 <section id="ability-order">
-<span id="id29"></span><h3><span class="section-number">6.4.2. </span>能力の適応順<a class="headerlink" href="#ability-order" title="この見出しへのパーマリンク">¶</a></h3>
+<span id="id29"></span><h3><span class="section-number">7.4.2. </span>能力の適応順<a class="headerlink" href="#ability-order" title="この見出しへのパーマリンク">¶</a></h3>
 <p>複数の能力が同時に有効になった場合、効果の内容によっては矛盾を引き起こす可能性があります。
-その場合は、次の <a class="reference internal" href="#ability-order-rule"><span class="std std-numref">6.4.2.2 能力の適用ルール</span></a> に沿って能力を解釈してください。</p>
+その場合は、次の <a class="reference internal" href="#ability-order-rule"><span class="std std-numref">7.4.2.2 能力の適用ルール</span></a> に沿って能力を解釈してください。</p>
 <p>なお、ゲームによって細部の裁定が異なる場合があります。ここでは BlackPoker を例に説明します。</p>
 <section id="id30">
-<h4><span class="section-number">6.4.2.1. </span>考え方の原則<a class="headerlink" href="#id30" title="この見出しへのパーマリンク">¶</a></h4>
+<h4><span class="section-number">7.4.2.1. </span>考え方の原則<a class="headerlink" href="#id30" title="この見出しへのパーマリンク">¶</a></h4>
 <p>影響範囲が広い能力ほど優先順位を低く扱い、影響範囲が狭い（個別の対象を限定する）能力ほど優先順位を高く扱います。
 つまり、「広く浅く影響する能力」は先に適用し、「狭く深く影響する能力」は後から適用します。</p>
 </section>
 <section id="ability-order-rule">
-<span id="id31"></span><h4><span class="section-number">6.4.2.2. </span>能力の適用ルール<a class="headerlink" href="#ability-order-rule" title="この見出しへのパーマリンク">¶</a></h4>
+<span id="id31"></span><h4><span class="section-number">7.4.2.2. </span>能力の適用ルール<a class="headerlink" href="#ability-order-rule" title="この見出しへのパーマリンク">¶</a></h4>
 <ol class="arabic">
 <li><p>能力を分類する
 各能力を「影響範囲」に注目して、次の 3 つに分類します。</p>
@@ -890,7 +890,7 @@ stop
 </ul>
 </dd>
 <dt><strong>[3] この (this)</strong></dt><dd><ul class="simple">
-<li><p>対象のコンポーネントインスタンス 1 つを有効範囲にします。</p></li>
+<li><p>対象のユニット 1 つを有効範囲にします。</p></li>
 <li><p>例: 「この兵士はサイズを3加算する」「対象の兵士のサイズを2減算する」など。</p></li>
 </ul>
 </dd>
@@ -923,7 +923,7 @@ stop
 </ol>
 </section>
 <section id="id32">
-<h4><span class="section-number">6.4.2.3. </span>運用上の注意<a class="headerlink" href="#id32" title="この見出しへのパーマリンク">¶</a></h4>
+<h4><span class="section-number">7.4.2.3. </span>運用上の注意<a class="headerlink" href="#id32" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><dl class="simple">
 <dt><strong>複数の「同じ範囲」の能力同士の扱い</strong></dt><dd><p>たとえば「全ての兵士は攻撃できない」という能力と、「全ての兵士のサイズはこのターン中1加算される」という能力が同じ “[1] 全ての (all)” 範囲に当たる場合、どちらも基本的には同時に成立し共存します。ただし、まったく相反する内容で整合が取れない場合は、対戦ルールやジャッジの裁定に従ってください。</p>
@@ -951,7 +951,7 @@ stop
 </section>
 </section>
 <section id="id33">
-<h2><span class="section-number">6.5. </span>まとめ<a class="headerlink" href="#id33" title="この見出しへのパーマリンク">¶</a></h2>
+<h2><span class="section-number">7.5. </span>まとめ<a class="headerlink" href="#id33" title="この見出しへのパーマリンク">¶</a></h2>
 <p>コアルールについて説明しました。
 すでにあるターン制のゲームからアクションを洗い出し、能力を整理することで割込処理を可能としゲームの新しい遊び方が見つけられます。
 また、新しく作成するゲームに関してもコアルールを意識して作成することで、ルール追加がしやすいゲームが考えやすいと思います。</p>
@@ -973,20 +973,42 @@ stop
 <h3><a href="../index.html">目次</a></h3>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../common/common.html">2. 共通ルール</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">3. 対戦レギュレーション</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../format/format.html">4. フォーマット</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">5. フレーム</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">6. コアルール</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#id2">6.1. 基礎概念</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id12">6.2. 詳細</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ability">6.3. 能力</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">6.4. コアフロー</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#id33">6.5. まとめ</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../component/component.html">4. コンポーネント</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">5. フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">6. フレーム</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">7. コアルール</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">7.1. 基礎概念</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#index-0">7.1.1. ターン</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-1">7.1.2. アクション</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-2">7.1.3. リクエスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id6">7.1.4. 解決</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-3">7.1.5. チャンス</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-4">7.1.6. ステージ</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#component">7.1.7. コンポーネント</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#index-6">7.1.8. ユニット</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">7.1.9. コアフロー(ルールシステム)</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">7. 付録</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">8. 変更履歴</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id12">7.2. 詳細</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id13">7.2.1. アクションの定義項目</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id21">7.2.2. リクエストの定義項目</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">7.2.3. コンポーネントの定義項目</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">7.2.4. ユニットの定義項目</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#ability">7.3. 能力</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#coreflowsec">7.4. コアフロー</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trigger-check">7.4.1. 誘発チェック</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#ability-order">7.4.2. 能力の適応順</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id33">7.5. まとめ</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">8. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">9. 変更履歴</a></li>
 </ul>
 
 <div><hr class="docutils"></div>

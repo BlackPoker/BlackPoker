@@ -44,7 +44,7 @@
 
 
 \usepackage{sphinxmessages}
-\setcounter{tocdepth}{1}
+\setcounter{tocdepth}{2}
 
 
 \makeindex
@@ -75,8 +75,8 @@
 
 
 \title{BlackPoker}
-\date{2025年03月30日}
-\release{2025/3/31}
+\date{2025年06月30日}
+\release{2025/6/30}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{リリース}
@@ -97,10 +97,10 @@
 {\Large トランプだけでトレーディングカードゲームみたいに遊ぶ方法}\\[30mm]
 
 % バージョン・リリース情報を埋め込む
-{\huge 第8.0版}\\[20mm]
+{\huge 第8.1版}\\[20mm]
 
 {\Large もりくま 著} \\[5mm]
-{\Large 2025/3/31 発行}\\[10mm]
+{\Large 2025/6/30 発行}\\[10mm]
 
 {\small © 2013 BlackPoker}
 
@@ -121,7 +121,7 @@
 
 
 \sphinxAtStartPar
-release: 2025/3/31
+release: 2025/6/30
 
 \sphinxstepscope
 
@@ -129,21 +129,27 @@ release: 2025/3/31
 \chapter{はじめに}
 \label{\detokenize{init/init:init-rst}}\label{\detokenize{init/init:id1}}\label{\detokenize{init/init::doc}}
 \sphinxAtStartPar
-この文章はトランプゲーム「BlackPoker」の全てのルールをまとめた文章です。
+この文書は、トランプゲーム「BlackPoker」の公式ルールをまとめたものです。
 
 \sphinxAtStartPar
-詳細なルールが記載されており、初心者の方は文章の量に圧倒されます。
-ゲームをプレイする際に全てを熟読する必要はありませんが、
-ルールについて深く知りたい、または新しいルールに触れたい方はぜひ熟読してください。
+BlackPokerは、誰でも持っているトランプで遊べる、
+「トレーディングカードゲームのようなプレイ感」を目指した完全オリジナルのゲームです。
+
+\sphinxAtStartPar
+ルール文書には詳細な内容が含まれており、最初はその量に圧倒されるかもしれません。
+ゲームを始める際にすべてを暗記する必要はありませんが、ルールの仕組みや拡張性を深く知りたい方には
+ぜひ一度じっくり読み込んでいただくことをおすすめします。
 
 
 \section{BlackPokerとは}
 \label{\detokenize{init/init:blackpoker}}
 \sphinxAtStartPar
-当サークルが考案した1人1セットのトランプを使ったターン制の
-トレーディングカードゲームのようなトランプゲームです。
-自分だけのオリジナルトランプを使って友達と遊べます。
-プレイしている時のイメージは図のような感じです。(\hyperref[\detokenize{init/init:play-image}]{Fig.\@ \ref{\detokenize{init/init:play-image}}})
+当サークルが考案した、1人1セットのトランプを使って遊ぶ、
+ターン制かつ割込み可能な独自ルールのカードゲームです。
+自分だけのオリジナルトランプを使って、友達と本格的なカードバトルを楽しむことができます。
+
+\sphinxAtStartPar
+プレイしているときのイメージは次のような感じです。(\hyperref[\detokenize{init/init:play-image}]{Fig.\@ \ref{\detokenize{init/init:play-image}}})
 
 \begin{figure}[htbp]
 \centering
@@ -161,55 +167,56 @@ release: 2025/3/31
 
 \sphinxAtStartPar
 けど、仕事に追われ時間もなく、お金もかけられないのでカード資産も抱えられない。
-昔のデッキを引っ張りだしてもカードパワーが違って平等に遊べないし、コミニティが狭い。
-そんな悩みを解消しようと誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。
+昔のデッキを引っ張り出してもカードパワーが違って平等に遊べないし、コミュニティも狭い。
+そんな悩みを解消しようと、誰でも持っているトランプでカードゲーム風のルールを作ろうと思いました。
 
 
 \section{ゲームのストーリー}
 \label{\detokenize{init/init:id3}}
 \sphinxAtStartPar
-あなたのトランプはただのトランプではありません。
-かつて大地を支配していた偉大な国々や強固な絆で結ばれた組織の魂が宿る遺産です。
+あなたのトランプは、ただのトランプではありません。
+かつて大地を支配していた偉大な国々や、強固な絆で結ばれた組織の魂が宿る遺産です。
 
 \sphinxAtStartPar
-これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、その物語たちはまるで時間を超えたタペストリーのように絡み合っています。
+これらのカードには、世界の歴史を彩る多彩な物語が織り込まれており、
+その物語たちはまるで時間を超えたタペストリーのように絡み合っています。
 
 \sphinxAtStartPar
-プレイヤーは歴史の再現者、リアニメーターとしてデッキに宿る過去の栄光を再現し、その国や組織がいかに素晴らしかったかを
-戦いを通して対戦相手に示してください。
+プレイヤーは歴史の再現者、リアニメーターとして、
+デッキに宿る過去の栄光を再現し、戦いを通じてその魅力を相手に示してください。
 
 \sphinxAtStartPar
-え？そんな国知らない？でしたらあなたのカードから創造してみてはいかがでしょうか。
+え？そんな国知らない？でしたら、あなたのカードから創造してみてはいかがでしょうか。
 
 
 \section{読み方}
 \label{\detokenize{init/init:id4}}
 \sphinxAtStartPar
-各章は次のことを説明しています。
+各章は次のような内容を説明しています。
 \begin{description}
 \sphinxlineitem{\hyperref[\detokenize{init/init:init-rst}]{\ref{\detokenize{init/init:init-rst}} \nameref{\detokenize{init/init:init-rst}}}}
 \sphinxAtStartPar
-ルールの指針や全体像を説明
-
-\sphinxlineitem{\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}}}
-\sphinxAtStartPar
-ゲームの開始方法など全体的なゲームの流れを説明
+ルールの背景や構成、全体像を説明（この章）
 
 \sphinxlineitem{\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}}}
 \sphinxAtStartPar
-遊び方（ゲーム中にできることの範囲）を決める方法について説明
+対戦前にプレイヤー間で取り決める「遊び方のルール」（対戦レギュレーション）の選び方を説明
+
+\sphinxlineitem{\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}}}
+\sphinxAtStartPar
+BlackPokerの全ルールで共通して使う基本ルールを説明
 
 \sphinxlineitem{\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}}}
 \sphinxAtStartPar
-対戦レギュレーションを決める際に選択できるフォーマットを紹介
+難易度に応じたルール制限（フォーマット）の詳細を説明
 
 \sphinxlineitem{\hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}}}
 \sphinxAtStartPar
-対戦レギュレーションを決める際に選択できるフレームを紹介
+デッキ構成や初期配置など遊び方のパターン（フレーム）を説明
 
 \sphinxlineitem{\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}}}
 \sphinxAtStartPar
-BlackPokerのコアであるターン制ゲームのルールを説明
+アクションの処理や割込み、ステージの仕組みなどのコアシステムを説明
 
 \end{description}
 
@@ -217,15 +224,18 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \subsection{用途別読み方}
 \label{\detokenize{init/init:id5}}
 \sphinxAtStartPar
-文章が複雑であるため、用途に合わせて読むことをおすすめします。
+ルール文書はやや複雑な構成になっているため、用途に合わせて読むことをおすすめします。
 \begin{description}
-\sphinxlineitem{ゲームの流れを理解したい方}
+\sphinxlineitem{ゲームを始めたい方（初心者）}
 \sphinxAtStartPar
-\hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} から順に読んでください。 \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} は飛ばしても大丈夫です。
+\hyperref[\detokenize{match-regulations/match-regulations:match-regulations-rst}]{\ref{\detokenize{match-regulations/match-regulations:match-regulations-rst}} \nameref{\detokenize{match-regulations/match-regulations:match-regulations-rst}}} \(\rightarrow\) \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} の順に読むのがおすすめです。
 
-\sphinxlineitem{アクションの解決順で悩んでいる方}
 \sphinxAtStartPar
-\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} を熟読してください。
+\hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} （高度なルール）は飛ばしても構いません。
+
+\sphinxlineitem{ゲーム中の処理で悩んでいる方}
+\sphinxAtStartPar
+アクションの起こし方や割込み、解決順などを \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}} で確認してください。
 
 \end{description}
 
@@ -233,7 +243,8 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \section{ルール指針}
 \label{\detokenize{init/init:id6}}
 \sphinxAtStartPar
-ルールを作成・修正するための指針を示します。
+BlackPokerのルールは、\sphinxstylestrong{できるだけシンプルに、わかりやすく} を基本方針としています。
+そのうえで、より多くの人が楽しめるよう、以下の指針に基づいてルールを設計・調整しています。
 \begin{description}
 \sphinxlineitem{\sphinxstylestrong{誰とでも戦える \textasciitilde{}目指すは老若男女\textasciitilde{}}}
 \sphinxAtStartPar
@@ -281,1134 +292,6 @@ BlackPokerのコアであるターン制ゲームのルールを説明
 \sphinxstepscope
 
 
-\chapter{共通ルール}
-\label{\detokenize{common/common:common-rst}}\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
-\sphinxAtStartPar
-BlackPokerには様々な対戦方法があります。
-個別の違いは対戦レギュレーションで定義されています。
-
-\sphinxAtStartPar
-この章では、BlackPokerの共通的なルールを説明します。
-
-
-\section{プレイ人数}
-\label{\detokenize{common/common:id2}}
-\sphinxAtStartPar
-2人です。
-
-
-\section{用意するもの}
-\label{\detokenize{common/common:id3}}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-1人1セットのトランプが必要です。
-
-\item {} 
-\sphinxAtStartPar
-覚えていない場合、対戦レギュレーションに応じてアクションリストやキャラクターリストなどがあると便利です。
-
-\end{itemize}
-
-
-\section{使用できるトランプ}
-\label{\detokenize{common/common:id4}}
-\sphinxAtStartPar
-BlackPokerでは次の条件を満たしたトランプを使うことができます。
-一般的なトランプなら満たす条件となっています。
-\begin{quote}
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-スートと数字が分かる
-
-\item {} 
-\sphinxAtStartPar
-スートの{\normalsize $\spadesuit$} {\normalsize $\heartsuit$} {\normalsize $\diamondsuit$} {\normalsize $\clubsuit$} が判断できる
-
-\item {} 
-\sphinxAtStartPar
-数字のA\sphinxhyphen{}K（1\sphinxhyphen{}13）が判断できる
-
-\item {} 
-\sphinxAtStartPar
-スートと数字の組合せが重複していない
-
-\item {} 
-\sphinxAtStartPar
-裏から表がわからない
-
-\item {} 
-\sphinxAtStartPar
-縦向き横向きが判断できる
-
-\item {} 
-\sphinxAtStartPar
-Jokerは2枚まで入れられる
-
-\item {} 
-\sphinxAtStartPar
-54枚無くてもよい
-
-\end{itemize}
-
-\sphinxAtStartPar
-対戦レギュレーションにより使用できるトランプの枚数など異なる場合があるため、
-対戦する際に、対戦レギュレーションを確認してください。
-\end{quote}
-
-
-\section{トランプの数字}
-\label{\detokenize{common/common:id5}}
-\sphinxAtStartPar
-ゲーム全体を通してトランプの数字は次のような数値として扱います。(\hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}})
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\sphinxcapstartof{table}
-\sphinxthecaptionisattop
-\sphinxcaption{トランプの数字}\label{\detokenize{common/common:id46}}\label{\detokenize{common/common:cardrank}}
-\sphinxaftertopcaption
-\begin{tabulary}{\linewidth}[t]{|T|T|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-カード
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-数字
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-A
-&
-\sphinxAtStartPar
-1
-\\
-\sphinxhline
-\sphinxAtStartPar
-2〜10
-&
-\sphinxAtStartPar
-表記どおり
-\\
-\sphinxhline
-\sphinxAtStartPar
-J
-&
-\sphinxAtStartPar
-11
-\\
-\sphinxhline
-\sphinxAtStartPar
-Q
-&
-\sphinxAtStartPar
-12
-\\
-\sphinxhline
-\sphinxAtStartPar
-K
-&
-\sphinxAtStartPar
-13
-\\
-\sphinxhline
-\sphinxAtStartPar
-Joker
-&
-\sphinxAtStartPar
-0
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
-
-\section{カードの配置}
-\label{\detokenize{common/common:id6}}
-\sphinxAtStartPar
-カードの配置には次のような場所があります。(\hyperref[\detokenize{common/common:field}]{Fig.\@ \ref{\detokenize{common/common:field}}})
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{field}.pdf}
-\caption{プレイ中のカードの配置}\label{\detokenize{common/common:id47}}\label{\detokenize{common/common:field}}\end{figure}
-
-\index{ライフ@\spxentry{ライフ}}\ignorespaces \begin{description}
-\sphinxlineitem{ライフ}
-\sphinxAtStartPar
-山札。ゲームを始める時に自分のトランプを裏向きに置く場所です。
-ダメージを受けるとライフの一番上から墓地にカードを移します。
-
-\end{description}
-
-\index{ぼ\textbar{}墓地@\spxentry{ぼ\textbar{}墓地}}\ignorespaces \begin{description}
-\sphinxlineitem{墓地}
-\sphinxAtStartPar
-捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。
-
-\end{description}
-
-\index{ば\textbar{}場@\spxentry{ば\textbar{}場}}\ignorespaces \begin{description}
-\sphinxlineitem{場}
-\sphinxAtStartPar
-兵士や防壁などのキャラクターを置きます。
-
-\end{description}
-
-\index{て\textbar{}手札@\spxentry{て\textbar{}手札}}\ignorespaces \begin{description}
-\sphinxlineitem{手札}
-\sphinxAtStartPar
-ライフから引いたカードを持っておく場所です。相手から見えないようにしましょう。
-
-\end{description}
-
-\index{き\textbar{}切札(場所)@\spxentry{き\textbar{}切札(場所)}}\ignorespaces \begin{description}
-\sphinxlineitem{フォグ}
-\sphinxAtStartPar
-このターンのみ影響を与えるカードを置きます。
-
-\end{description}
-
-
-\subsection{デッキとライフ}
-\label{\detokenize{common/common:id7}}
-\sphinxAtStartPar
-対戦レギュレーションなどでデッキという表現が出てきます。
-
-\index{デッキ@\spxentry{デッキ}}\ignorespaces \begin{description}
-\sphinxlineitem{デッキ}
-\sphinxAtStartPar
-ゲーム開始前にゲームで使用するカードの束（カード構成）
-
-\end{description}
-
-\sphinxAtStartPar
-ゲームの始め方を経てデッキはライフとなります。詳細は \hyperref[\detokenize{common/common:common-gamestart}]{\ref{\detokenize{common/common:common-gamestart}} \nameref{\detokenize{common/common:common-gamestart}}} で説明します。
-
-
-\section{勝利条件}
-\label{\detokenize{common/common:id8}}
-\sphinxAtStartPar
-プレイヤーは順に対戦相手に対し攻撃を行い、ダメージを与え先に相手のライフを0枚にした方が勝ちです。ダメージは1点につき、ライフが1枚減ります。
-
-\index{ダメージ@\spxentry{ダメージ}}\ignorespaces 
-
-\section{ダメージ}
-\label{\detokenize{common/common:index-6}}\label{\detokenize{common/common:id9}}
-\sphinxAtStartPar
-プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。
-
-\index{キャラクター@\spxentry{キャラクター}}\ignorespaces 
-
-\section{キャラクター}
-\label{\detokenize{common/common:index-7}}\label{\detokenize{common/common:id10}}
-\sphinxAtStartPar
-キャラクターとは、場に存在する兵士や防壁のことを指します。
-コアルールのコンポーネントにあたります。
-
-\sphinxAtStartPar
-キャラクターは1枚のカードで1体を表すこともあれば、
-複数枚で1体を表すこともあります。(\hyperref[\detokenize{common/common:character}]{Fig.\@ \ref{\detokenize{common/common:character}}})
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{character}.pdf}
-\caption{キャラクターの例}\label{\detokenize{common/common:id48}}\label{\detokenize{common/common:character}}\end{figure}
-
-
-\subsection{キャラクターのもつ項目}
-\label{\detokenize{common/common:id11}}
-\sphinxAtStartPar
-キャラクターのもつ項目について説明します。
-
-\index{キャラクター名@\spxentry{キャラクター名}}\ignorespaces \begin{description}
-\sphinxlineitem{キャラクター名}
-\sphinxAtStartPar
-キャラクターの名称を示します。
-
-\end{description}
-
-\index{タイプ(キャラクター)@\spxentry{タイプ(キャラクター)}}\ignorespaces \begin{description}
-\sphinxlineitem{タイプ}
-\sphinxAtStartPar
-キャラクターのタイプを示します。タイプは兵士と防壁の2種類が存在します。
-
-\end{description}
-
-\index{キーカード@\spxentry{キーカード}}\ignorespaces \begin{description}
-\sphinxlineitem{キーカード}
-\sphinxAtStartPar
-キャラクターを示すカードが記載されています。複数のカードで1体のキャラクターを示す場合もあります。
-
-\end{description}
-
-\index{ラベル@\spxentry{ラベル}}\ignorespaces \begin{description}
-\sphinxlineitem{ラベル}
-\sphinxAtStartPar
-キャラクターもつ属性を示します。「速攻」や「アタッカー」など様々なラベルがあります。
-
-\end{description}
-
-\index{サイズ@\spxentry{サイズ}}\ignorespaces \begin{description}
-\sphinxlineitem{サイズ}
-\sphinxAtStartPar
-兵士の持つ大きさを示します。
-
-\end{description}
-
-\index{の\textbar{}能力(キャラクター)@\spxentry{の\textbar{}能力(キャラクター)}}\ignorespaces \begin{description}
-\sphinxlineitem{能力}
-\sphinxAtStartPar
-キャラクターが持っている能力を記載しています。
-
-\end{description}
-
-
-\subsection{キャラクターのサイズ}
-\label{\detokenize{common/common:id12}}
-\sphinxAtStartPar
-トランプの数字は、キャラクターの強さを示します。
-基本はカードに記載された数字に準じますが、魔法などのアクションを使うことで
-加算や減算されることがあります。
-
-
-\subsection{キャラクターの注意点}
-\label{\detokenize{common/common:id13}}
-
-\subsubsection{複数枚で1体となるキャラクターが防壁になったら？}
-\label{\detokenize{common/common:id14}}
-\sphinxAtStartPar
-アクションの効果で兵士を防壁にすることがあります。
-防壁は1枚で1体のキャラクターであるため、
-複数枚からなるキャラクターが防壁となった場合、
-複数体の防壁となります。
-
-\sphinxAtStartPar
-なお、複数枚からなるキャラクターが
-墓地や手札に移った場合、
-1体のキャラクターとして
-扱うため複数枚合わせて移します。
-チャージ状態、ドライブ状態となった場合も同様に1体のキャラクター
-として扱います。
-
-\index{チャージ@\spxentry{チャージ}}\index{ドライブ@\spxentry{ドライブ}}\ignorespaces 
-
-\subsection{チャージとドライブ}
-\label{\detokenize{common/common:index-14}}\label{\detokenize{common/common:id15}}
-\sphinxAtStartPar
-キャラクターには、チャージ状態とドライブ状態が存在します。
-チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
-また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(\hyperref[\detokenize{common/common:chargedrive}]{Fig.\@ \ref{\detokenize{common/common:chargedrive}}})
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{charge&drive}.pdf}
-\caption{チャージとドライブ}\label{\detokenize{common/common:id49}}\label{\detokenize{common/common:chargedrive}}\end{figure}
-
-
-\section{ゲームの始め方}
-\label{\detokenize{common/common:common-gamestart}}\label{\detokenize{common/common:id16}}
-\sphinxAtStartPar
-デッキをよく切り、次の手順でゲームを始めます。
-
-
-\subsection{配置準備}
-\label{\detokenize{common/common:common-gamestart-field}}\label{\detokenize{common/common:id17}}\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-デッキをよく切る。
-
-\item {} 
-\sphinxAtStartPar
-デッキより7枚引き手札にする。
-
-\item {} 
-\sphinxAtStartPar
-デッキをライフの場所に置き、ライフとする。
-
-\end{enumerate}
-
-
-\subsection{先攻決定}
-\label{\detokenize{common/common:common-gamestart-first}}\label{\detokenize{common/common:id18}}\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-両者ライフの一番上を表にする。
-
-\item {} 
-\sphinxAtStartPar
-大きい数字のプレイヤーが先攻。数字については、 \hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}} 参照。
-
-\item {} 
-\sphinxAtStartPar
-数字が同じ場合、さらにライフの一番上を表にし同様のルールで比べる。
-
-\item {} 
-\sphinxAtStartPar
-表にしたカードを墓地へ移す。
-
-\end{enumerate}
-
-
-\subsection{ゲーム開始}
-\label{\detokenize{common/common:common-gamestart-start}}\label{\detokenize{common/common:id19}}\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-先攻プレイヤーはライフより1枚引き手札に加える。
-
-\item {} 
-\sphinxAtStartPar
-先攻プレイヤーがターンとチャンスをもちゲームを開始する。
-
-\end{enumerate}
-
-\sphinxAtStartPar
-ゲームの始め方は対戦レギュレーションによって異なることがあります。
-対戦前に確認してください。
-
-\index{アクション@\spxentry{アクション}}\ignorespaces 
-
-\section{アクション}
-\label{\detokenize{common/common:index-15}}\label{\detokenize{common/common:id20}}
-\sphinxAtStartPar
-BlackPokerは割込み可能なターン制ゲームです。
-
-\sphinxAtStartPar
-例えば次の状況をイメージしてください。
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Aくん}：「この兵士アップします。」
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Bさん}：「その前にこの兵士ダウンします。」
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Aくん}：「じゃあそのダウンをカウンターします。」
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Bさん}：「それをさらにカウンターします。」
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Aくん}：「・・・（泣）」
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{Bさん}：「（どやっ！）」
-
-\end{itemize}
-
-\sphinxAtStartPar
-このやり取りの中で「アップします」や「ダウンします」などの1行1行がアクションになります。
-
-\sphinxAtStartPar
-割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。
-
-\sphinxAtStartPar
-このアクションを実行したいとルールシステムに要求(リクエスト)し、相手に許可を得てリクエストが実行されます。もちろん相手はリクエストに対して割り込んでリクエストすることもできます。
-
-\sphinxAtStartPar
-アクションには、プレイヤーのすべての行動を定義しており、従来のTCGでいう「魔法」や「ターン制御」が含まれています。
-
-\sphinxAtStartPar
-参考: \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}}
-
-
-\subsection{アクションが持つ項目}
-\label{\detokenize{common/common:id21}}
-\sphinxAtStartPar
-アクションが持つ項目について説明します。
-
-\index{アクション名@\spxentry{アクション名}}\ignorespaces \begin{description}
-\sphinxlineitem{アクション名}
-\sphinxAtStartPar
-アクションの名称を示します。
-
-\end{description}
-
-\index{タイプ(アクション)@\spxentry{タイプ(アクション)}}\ignorespaces \begin{description}
-\sphinxlineitem{タイプ}
-\sphinxAtStartPar
-アクションの種類を表します。アクション名の後に括弧書きで記載します。
-
-\end{description}
-
-\index{トリガー@\spxentry{トリガー}}\ignorespaces \begin{description}
-\sphinxlineitem{トリガー}
-\sphinxAtStartPar
-アクションには自分で起こせるアクションと誘発するアクションがあります。
-トリガー項目では「直接」か「誘発」が設定されています。
-
-\sphinxAtStartPar
-参考: \hyperref[\detokenize{core/core:trigger-core}]{\ref{\detokenize{core/core:trigger-core}} \nameref{\detokenize{core/core:trigger-core}}}
-
-\end{description}
-
-\index{スピード@\spxentry{スピード}}\ignorespaces \begin{description}
-\sphinxlineitem{スピード}
-\sphinxAtStartPar
-アクションはすぐに効果が解決されるものとそうでないものがあります。
-スピード項目では「即時」か「通常」が設定されています。
-
-\sphinxAtStartPar
-参考: \hyperref[\detokenize{core/core:speed-core}]{\ref{\detokenize{core/core:speed-core}} \nameref{\detokenize{core/core:speed-core}}}
-
-\end{description}
-
-\index{タイミング@\spxentry{タイミング}}\ignorespaces \begin{description}
-\sphinxlineitem{タイミング}
-\sphinxAtStartPar
-アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
-「クイック」はいつでも起こすことができます。
-
-\sphinxAtStartPar
-参考: \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}}
-
-\end{description}
-
-\index{キーカード(アクション)@\spxentry{キーカード(アクション)}}\ignorespaces \begin{description}
-\sphinxlineitem{キーカード}
-\sphinxAtStartPar
-アクションの核となるカードを示します。
-キーカードは★を使って表記します。
-凡例の場合、手札からコストとは別に{\normalsize $\heartsuit$} A〜10に該当するカードを1枚
-キーカードとして使用します。
-
-\end{description}
-
-\index{コスト@\spxentry{コスト}}\ignorespaces \begin{description}
-\sphinxlineitem{コスト}
-\sphinxAtStartPar
-アクションを起こすのに必要な対価です。
-コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
-
-\end{description}
-
-\index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
-\sphinxlineitem{特記事項}
-\sphinxAtStartPar
-特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
-
-\end{description}
-
-\index{き\textbar{}起動条件@\spxentry{き\textbar{}起動条件}}\ignorespaces \begin{description}
-\sphinxlineitem{起動条件}
-\sphinxAtStartPar
-起動するための条件を示します。
-
-\end{description}
-
-\index{ゆ\textbar{}誘発条件@\spxentry{ゆ\textbar{}誘発条件}}\ignorespaces \begin{description}
-\sphinxlineitem{誘発条件}
-\sphinxAtStartPar
-誘発する条件を示します。
-
-\end{description}
-
-\index{た\textbar{}対象@\spxentry{た\textbar{}対象}}\ignorespaces \begin{description}
-\sphinxlineitem{対象}
-\sphinxAtStartPar
-効果の対象を示します。
-
-\end{description}
-
-\index{つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}!そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}}\index{そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}!つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}}\ignorespaces \begin{description}
-\sphinxlineitem{効果}
-\sphinxAtStartPar
-効果の内容を示します。
-
-\end{description}
-
-\begin{sphinxadmonition}{note}{注釈:}
-\sphinxAtStartPar
-トリガー,スピード,タイミングの表記
-
-\sphinxAtStartPar
-トリガー,スピード,タイミングは@を使って次のように表記されます。
-
-\sphinxAtStartPar
-@{[}トリガー{]}\sphinxhyphen{}{[}スピード{]}\sphinxhyphen{}{[}タイミング{]}
-
-\sphinxAtStartPar
-例えば次のようになります。
-
-\sphinxAtStartPar
-@誘発\sphinxhyphen{}即時\sphinxhyphen{}クイック
-\end{sphinxadmonition}
-
-
-\subsubsection{記載されていないアクションの項目}
-\label{\detokenize{common/common:id22}}
-\sphinxAtStartPar
-アクションによっては記載されていない項目もあります。
-記載されていない項目は無視して構いません。
-たとえばコスト項目がなければコストを支払う必要はありません。
-
-
-\subsection{コストの種類}
-\label{\detokenize{common/common:cost}}\label{\detokenize{common/common:id23}}
-\sphinxAtStartPar
-アクションによって支払うコストが異なります。
-コストには次の種類があり、それぞれ支払い方が異なります。(\hyperref[\detokenize{common/common:table-cost}]{Table \ref{\detokenize{common/common:table-cost}}})
-
-
-\begin{savenotes}\sphinxattablestart
-\sphinxthistablewithglobalstyle
-\centering
-\sphinxcapstartof{table}
-\sphinxthecaptionisattop
-\sphinxcaption{コストの種類}\label{\detokenize{common/common:id50}}\label{\detokenize{common/common:table-cost}}
-\sphinxaftertopcaption
-\begin{tabulary}{\linewidth}[t]{|T|T|}
-\sphinxtoprule
-\sphinxstyletheadfamily 
-\sphinxAtStartPar
-表記(名称)
-&\sphinxstyletheadfamily 
-\sphinxAtStartPar
-対価
-\\
-\sphinxmidrule
-\sphinxtableatstartofbodyhook
-\sphinxAtStartPar
-B (Bulwark)
-&
-\sphinxAtStartPar
-防壁をドライブする
-\\
-\sphinxhline
-\sphinxAtStartPar
-L (Life)
-&
-\sphinxAtStartPar
-1点ダメージを受ける
-\\
-\sphinxhline
-\sphinxAtStartPar
-D (Discard)
-&
-\sphinxAtStartPar
-手札を1枚捨てる
-\\
-\sphinxhline
-\sphinxAtStartPar
-S (Sacrifice)
-&
-\sphinxAtStartPar
-キャラクター1体を墓地に移す
-\\
-\sphinxbottomrule
-\end{tabulary}
-\sphinxtableafterendhook\par
-\sphinxattableend\end{savenotes}
-
-\sphinxAtStartPar
-たとえばコストが \sphinxstylestrong{「\$BL」} の場合、自分の場にいるチャージ状態の防壁を1体ドライブし、1点ダメージを受けることでコストが支払われたことになります。
-
-
-\subsection{アクションの起こし方(リクエスト)}
-\label{\detokenize{common/common:id24}}
-\sphinxAtStartPar
-BlackPokerは実行したいアクションを要求(リクエスト)し、進める形式のゲームです。
-
-\sphinxAtStartPar
-アクションを要求することを「アクションを起こす」または「アクションをリクエストする」といいます。
-
-\sphinxAtStartPar
-次の手順でアクションをリクエストすることができます。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-起こすアクションを対戦相手に伝える。
-
-\item {} 
-\sphinxAtStartPar
-アクションに応じたコストを支払う。
-
-\item {} 
-\sphinxAtStartPar
-必要なら手札からキーカードを出す。
-
-\item {} 
-\sphinxAtStartPar
-対象の指定が必要な場合、対象を指定する。
-
-\end{enumerate}
-
-
-\subsubsection{アクションを起こすときの注意点}
-\label{\detokenize{common/common:id25}}
-
-\paragraph{対象を指定しないでアクションを起こせるか？}
-\label{\detokenize{common/common:id26}}
-\sphinxAtStartPar
-「対象」項目がある場合、記載された条件を満たした対象を指定できなければ、
-そのアクションを起こすことはできません。
-
-
-\paragraph{アクションを対象とするアクションは自身を対象にできるか？}
-\label{\detokenize{common/common:id27}}
-\sphinxAtStartPar
-アクションは、自分自身を対象とすることはできません。
-そのため、「カウンター」アクションのようにアクションを対象とするアクションは
-自身を対象とすることはできません。
-
-
-\subsection{アクションの解決}
-\label{\detokenize{common/common:id28}}
-\sphinxAtStartPar
-リクエストされたアクションを実行済みにすることを「アクションを解決する」といいます。
-
-\sphinxAtStartPar
-実際にアクションが解決される流れを見ていきましょう。
-
-\sphinxAtStartPar
-\sphinxstylestrong{用語}
-
-\sphinxAtStartPar
-登場する用語を説明します。
-\begin{description}
-\sphinxlineitem{\sphinxstylestrong{チャンス}}
-\sphinxAtStartPar
-アクションをリクエストする(ステージに積む)権利（他TCGの優先権）
-
-\sphinxlineitem{\sphinxstylestrong{ターン}}
-\sphinxAtStartPar
-手番を示す印
-
-\sphinxlineitem{\sphinxstylestrong{ステージ}}
-\sphinxAtStartPar
-アクションが蓄積される場所（他TCGのスタック）
-
-\end{description}
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-プレイヤーAがアクションを積む
-
-\end{enumerate}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{action-request1}.pdf}
-\caption{アクションの解決1}\label{\detokenize{common/common:id51}}\label{\detokenize{common/common:action-request1-image}}\end{figure}
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\setcounter{enumi}{1}
-\item {} 
-\sphinxAtStartPar
-プレイヤーBがアクションを積む
-
-\end{enumerate}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{action-request2}.pdf}
-\caption{アクションの解決2}\label{\detokenize{common/common:id52}}\label{\detokenize{common/common:action-request2-image}}\end{figure}
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\setcounter{enumi}{2}
-\item {} 
-\sphinxAtStartPar
-アクションを実行（解決）
-
-\end{enumerate}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{action-request3}.pdf}
-\caption{アクションの解決3}\label{\detokenize{common/common:id53}}\label{\detokenize{common/common:action-request3-image}}\end{figure}
-
-\sphinxAtStartPar
-大まかな流れは図の通りとなります。
-
-\sphinxAtStartPar
-更に厳密な処理は \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} を参照してください。
-
-\sphinxAtStartPar
-次に細かな部分を説明します。
-
-\sphinxAtStartPar
-補足ですが次に説明する部分は、 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の {\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} リクエストの解決}}}} で順に行われます。
-
-
-\subsubsection{対象条件を確認}
-\label{\detokenize{common/common:id29}}
-\sphinxAtStartPar
-対象を指定するアクションが効果を発揮しようとした時に次の条件に該当する場合、効果を発揮する対象を失うため効果が発揮されず
-アクションが解決されます。
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-対象が存在していない場合
-
-\item {} 
-\sphinxAtStartPar
-対象が分裂した場合
-
-\end{itemize}
-
-\sphinxAtStartPar
-たとえば兵士に対して「アップ」アクションを起こし、対応して「ダウン」
-アクションを起こされました。
-「ダウン」の方が先に解決されるため、「アップ」を解決する時には
-兵士が墓地に移っていたとします。その場合、「アップ」アクションは効果を発揮せず解決されます。
-
-\sphinxAtStartPar
-「リバース」による対象分裂も同様です。
-たとえば装備兵に対して「ツイスト」アクションを起こし、対応して「リバース」アクションを起こしたとします。
-この場合、「リバース」が先に解決され、装備兵が分裂します。
-その場合、「ツイスト」は対象を失いアクションの効果を発揮せず解決されます。
-
-
-\subsubsection{効果を発揮}
-\label{\detokenize{common/common:id30}}
-\sphinxAtStartPar
-リクエストが解決する際に、アクションの効果に定義されている内容を実行します。
-効果の中に実行不可能な部分がある場合、可能な部分のみ実行します。
-
-\sphinxAtStartPar
-たとえば、ライフの枚数が残1枚の時に5点のダメージを受けたとします。
-ライフは1枚しかないので5点ダメージを受けることはできませんが、
-1点までなら受けることが可能なため、
-この場合1点のダメージを受けることになります。
-
-
-\subsubsection{解決は墓地移動までを含む}
-\label{\detokenize{common/common:id31}}
-\sphinxAtStartPar
-「リクエストを解決する」という文言には、キーカードを墓地に移動し終えるまでが含まれています。
-
-\sphinxAtStartPar
-「リクエストを解決する」をまとめると次のようになります。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-ステージの一番上にあるリクエストを特定する
-
-\item {} 
-\sphinxAtStartPar
-リクエストの対象が正しいか確認する
-
-\item {} 
-\sphinxAtStartPar
-正しい場合、リクエストされたアクションの効果を可能な限り実行する
-
-\item {} 
-\sphinxAtStartPar
-リクエストをステージから取り除く
-
-\item {} 
-\sphinxAtStartPar
-キーカードがある場合、墓地に移す
-
-\end{enumerate}
-
-
-\subsubsection{ステージ上で効果を発揮}
-\label{\detokenize{common/common:id32}}
-\sphinxAtStartPar
-アクションの効果を実行する際にリクエストはまだステージ上にあります。
-
-\sphinxAtStartPar
-効果の実行が完了した後、ステージ上から取り除かれます。
-
-
-\subsubsection{キーカードを墓地に移す}
-\label{\detokenize{common/common:keycard-gy}}\label{\detokenize{common/common:id33}}
-\sphinxAtStartPar
-効果を発揮した後、そのアクションをステージから取り除き、キーカードを墓地に移します。
-ただし効果によってキーカードを場に出した場合や手札に戻した場合、
-そのカードを移す先が明確になっているため、墓地には移しません。
-
-
-\subsection{勝敗判定}
-\label{\detokenize{common/common:id34}}
-\sphinxAtStartPar
-アクションを解決するたびに勝敗判定が行われます。
-
-\sphinxAtStartPar
-勝敗はライフを確認し0枚の場合そのプレイヤーは敗北となります。
-
-\sphinxAtStartPar
-勝敗判定はターンプレイヤーから行われます。
-もし、両プレイヤーのライフが0枚の場合、ターンプレイヤーの負けとなります。
-
-\sphinxAtStartPar
-補足ですがこの勝敗判定は、 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]} 勝敗判定}}}} で確認されます。
-
-
-\subsection{誘発チェック}
-\label{\detokenize{common/common:id35}}
-\sphinxAtStartPar
-アクションが解決された際に、
-アクションの誘発条件に該当するとアクションが誘発されることがあります。
-
-\sphinxAtStartPar
-誘発とは、自動的にアクションがリクエストされることです。
-
-\sphinxAtStartPar
-BlackPokerの基本的なルールでは、次の2つの誘発パターンがほとんどです。
-
-\sphinxAtStartPar
-それ以外の場合は、\hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} を参照してください。
-
-
-\subsubsection{パターン1: フェイズ系}
-\label{\detokenize{common/common:id36}}
-\sphinxAtStartPar
-アタックアクションでは対象のアクションが解決すると次のアクションが誘発します。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-アタック
-
-\item {} 
-\sphinxAtStartPar
-ブロック
-
-\item {} 
-\sphinxAtStartPar
-ダメージ判定
-
-\end{enumerate}
-
-\sphinxAtStartPar
-アタックアクションが解決すると、ブロックアクションが誘発します。
-
-\sphinxAtStartPar
-ブロックアクションが解決するとダメージ判定アクションが誘発します。
-
-\sphinxAtStartPar
-BlackPokerでは一般的なTCGではフェイズとして扱われるものも全てアクションとして定義されています。
-
-\sphinxAtStartPar
-同様に、エンド、チャージ、ドローアクションも定義されています。
-
-
-\subsubsection{パターン2: 世代交代}
-\label{\detokenize{common/common:id37}}
-\sphinxAtStartPar
-BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合、世代交代というアクションが誘発します。
-
-\sphinxAtStartPar
-効果の内容はアクションリストを参照してください。
-
-\sphinxAtStartPar
-\hyperref[\detokenize{auto/actionlist:act-nextgeneration}]{\ref{\detokenize{auto/actionlist:act-nextgeneration}} \nameref{\detokenize{auto/actionlist:act-nextgeneration}}}
-
-
-\section{その他のルール}
-\label{\detokenize{common/common:id38}}
-\sphinxAtStartPar
-この章では、
-公開レベルやシャッフルの仕方といった
-細かな決まりごとを説明します。
-
-
-\subsection{公開レベル}
-\label{\detokenize{common/common:id39}}
-\sphinxAtStartPar
-配置されているカードには、アクションの効果
-を使わなくても中身や枚数を知れるものがあります。
-知れる度合いには次の種類があります。
-\begin{description}
-\sphinxlineitem{完全公開}
-\sphinxAtStartPar
-全てのプレイヤーが知ることができ、
-聞かれたプレイヤーは正しく答える必要がある
-
-\sphinxlineitem{個人公開}
-\sphinxAtStartPar
-ライフの持ち主のみ知ることができる
-
-\sphinxlineitem{非公開}
-\sphinxAtStartPar
-全てのプレイヤーは知ることができない
-
-\end{description}
-
-\sphinxAtStartPar
-完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
-各カードの配置と公開・非公開の度合いは次のとおりです。
-\begin{description}
-\sphinxlineitem{ライフ}
-\begin{DUlineblock}{0em}
-\item[] 完全公開：10枚未満のライフ枚数
-\item[] 個人公開：ライフの枚数
-\item[] 非公開：ライフの中身
-\end{DUlineblock}
-
-\sphinxlineitem{墓地}
-\begin{DUlineblock}{0em}
-\item[] 完全公開：墓地の一番上のカード
-\item[] 個人公開：墓地の中身
-\item[] 非公開：なし
-\end{DUlineblock}
-
-\sphinxlineitem{場}
-\begin{DUlineblock}{0em}
-\item[] 完全公開：表裏を変えずに見えるカード
-\item[] 個人公開：伏せてあるカード
-\item[] 非公開：なし
-\end{DUlineblock}
-
-\sphinxlineitem{手札}
-\begin{DUlineblock}{0em}
-\item[] 完全公開：手札の枚数
-\item[] 個人公開：手札の中身
-\item[] 非公開：なし
-\end{DUlineblock}
-
-\sphinxlineitem{フォグ}
-\begin{DUlineblock}{0em}
-\item[] 完全公開：表裏を変えずに見えるカード
-\item[] 個人公開：伏せてあるカード
-\item[] 非公開：なし
-\end{DUlineblock}
-
-\end{description}
-
-
-\subsubsection{残りライフを聞かれたらどうしたらいいの？}
-\label{\detokenize{common/common:id40}}
-\sphinxAtStartPar
-対戦相手から残りのライフを聞かれた場合、自分のライフの枚数を10枚まで数えます。
-10枚未満であれば枚数を答え、10枚以上の場合「10枚以上です」と答えて下さい。
-10枚以上の場合、正確な枚数を答える必要はありません。
-
-
-\subsubsection{墓地の一番上のカードはいつ決まるのか？}
-\label{\detokenize{common/common:id41}}
-\sphinxAtStartPar
-カードを墓地に移す際に移すカードの中から1枚を公開してください。
-すでに墓地にあるカードを改めて公開しないでください。
-
-
-\subsection{デッキのシャッフルについて}
-\label{\detokenize{common/common:id42}}
-\sphinxAtStartPar
-BlackPokerでは
-コンセプトの一つに「相手のカードに触らない」があるため、
-対戦相手にデッキのシャッフルをお願いする必要はありません。
-
-\sphinxAtStartPar
-ただし、シャッフルしてほしい場合は、対戦相手にお願いしても構いません。
-逆に、対戦相手があまりシャッフルしていない場合は、
-さらにシャッフルをお願いできます。
-
-
-\subsection{防壁の置き方}
-\label{\detokenize{common/common:id43}}
-\sphinxAtStartPar
-防壁を場に出す際は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-bulwork}]{Fig.\@ \ref{\detokenize{common/common:set-bulwork}}})
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-防壁を置く際は、ライフ側に寄せて配置してください。
-
-\item {} 
-\sphinxAtStartPar
-防壁の左右の入れ替えは行わないでください。
-
-\end{itemize}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{set-bulwork}.pdf}
-\caption{防壁の置き方}\label{\detokenize{common/common:id54}}\label{\detokenize{common/common:set-bulwork}}\end{figure}
-
-
-\subsection{フォグの置き方}
-\label{\detokenize{common/common:id44}}
-\sphinxAtStartPar
-フォグにアップなどのカードを置く場合は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-fog}]{Fig.\@ \ref{\detokenize{common/common:set-fog}}})
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-対象の向きにカードを傾けて置いてください。
-
-\item {} 
-\sphinxAtStartPar
-ダウンなど対戦相手のカードを対象とする場合も同様に置いてください。
-
-\item {} 
-\sphinxAtStartPar
-フォースなど対象を取らない場合は、対象がないため、傾ける必要はありません。
-
-\item {} 
-\sphinxAtStartPar
-フォグのカードは、場のカードと重ならないように間隔を空けて配置してください。
-
-\end{itemize}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{set-fog}.pdf}
-\caption{フォグの置き方}\label{\detokenize{common/common:id55}}\label{\detokenize{common/common:set-fog}}\end{figure}
-
-
-\subsection{ステージの置き方}
-\label{\detokenize{common/common:id45}}
-\sphinxAtStartPar
-ステージ上にあるリクエストのキーカードは、場のカードと区別できるように、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-stage}]{Fig.\@ \ref{\detokenize{common/common:set-stage}}})
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-ステージ上にあるリクエストのキーカードは傾けて置いてください。
-
-\item {} 
-\sphinxAtStartPar
-フォグと区別できるように置いてください。
-
-\item {} 
-\sphinxAtStartPar
-対象がある場合は、その方向に傾けることを推奨します。
-
-\end{itemize}
-
-\begin{figure}[htbp]
-\centering
-\capstart
-
-\noindent\sphinxincludegraphics{{set-stage}.pdf}
-\caption{ステージの置き方}\label{\detokenize{common/common:id56}}\label{\detokenize{common/common:set-stage}}\end{figure}
-
-\sphinxstepscope
-
-
 \chapter{対戦レギュレーション}
 \label{\detokenize{match-regulations/match-regulations:match-regulations-rst}}\label{\detokenize{match-regulations/match-regulations:id1}}\label{\detokenize{match-regulations/match-regulations::doc}}
 \index{た\textbar{}対戦レギュレーション@\spxentry{た\textbar{}対戦レギュレーション}}\ignorespaces 
@@ -1416,45 +299,57 @@ BlackPokerでは
 \section{対戦レギュレーションとは}
 \label{\detokenize{match-regulations/match-regulations:index-0}}\label{\detokenize{match-regulations/match-regulations:id2}}
 \sphinxAtStartPar
-対戦レギュレーションとは、
-BlackPokerで対戦する前にプレイヤー間で決定する
-規則のことです。
+BlackPoker では、ゲームを始める前に「どのようなルールで遊ぶか」をプレイヤー同士で決める必要があります。
 
 \sphinxAtStartPar
-BlackPokerはトランプだけで遊べるため、
-対戦する前にプレイヤー間でルールのすり合わせをする必要があります。
+この事前に決めるルールの組み合わせを \sphinxstylestrong{対戦レギュレーション} と呼びます。
+
+\sphinxAtStartPar
+BlackPoker は、標準的なトランプだけを使って遊ぶゲームです。
+カードは同じでも、ルール（対戦レギュレーション）を変えることで、
+初心者から上級者まで、さまざまなプレイヤーが自分に合った難易度・遊び方で楽しめるようになっています。
+
+\sphinxAtStartPar
+この章では、対戦レギュレーションの構成や決め方について説明します。
 
 
 \section{定義項目}
 \label{\detokenize{match-regulations/match-regulations:id3}}
 \sphinxAtStartPar
-対戦レギュレーションは次の各項目を決めることで決定します。
+対戦レギュレーションは、次の2つの要素を組み合わせて構成されます。
 
 \index{フォーマット(対戦レギュレーション)@\spxentry{フォーマット(対戦レギュレーション)}}\ignorespaces \begin{description}
 \sphinxlineitem{フォーマット}
 \sphinxAtStartPar
-使用するフォーマット。
+\sphinxstylestrong{プレイヤーの熟練度に応じて、使える行動（アクション）や登場キャラクターなどを制限した難易度の設定です。}
 
 \sphinxAtStartPar
-フォーマットとは、使用できるアクションなどをまとめたセット。
-いくつか種類があり、プレイヤーの熟練度に合わせて選ぶことができる。
+たとえば「ライト」は初心者向けに覚える行動を最小限に絞ったフォーマット、
+「スタンダード」は基本的な要素を一通り含んだ標準的なフォーマットです。
 
 \sphinxAtStartPar
-詳しくは \hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} 参照
+カードゲームでいう「カードプール」（どのカードを使ってよいか）に近い考え方です。
+
+\sphinxAtStartPar
+詳しくは \hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} を参照してください。
 
 \end{description}
 
 \index{フレーム(対戦レギュレーション)@\spxentry{フレーム(対戦レギュレーション)}}\ignorespaces \begin{description}
 \sphinxlineitem{フレーム}
 \sphinxAtStartPar
-使用するフレーム。
+\sphinxstylestrong{デッキの構成やカードの初期配置、場の使い方などを定めた、遊び方のパターンです。}
 
 \sphinxAtStartPar
-フレームとは、フォーマットとは異なる角度から使えるアクションや領域をまとめたセット。
-フォーマットは熟練度で選び、フレームは遊び方で選ぶイメージです。
+たとえば「エントリー20」は、決められた20枚のカードを使って手軽に遊べる入門向けフレームです。
+一方「パック」や「ストラテジー」では、構築や初期戦略の自由度が高く、プレイヤーの個性がより強く表れます。
 
 \sphinxAtStartPar
-詳しくは \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} 参照
+フォーマットは「どのくらい覚えるか」で選び、
+フレームは「どのように遊びたいか」で選ぶイメージです。
+
+\sphinxAtStartPar
+詳しくは \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} を参照してください。
 
 \end{description}
 
@@ -1462,48 +357,53 @@ BlackPokerはトランプだけで遊べるため、
 \subsection{対戦レギュレーションの表記}
 \label{\detokenize{match-regulations/match-regulations:id4}}
 \sphinxAtStartPar
-対戦レギュレーションは次のように表記します。
+対戦レギュレーションは、 \sphinxstylestrong{フォーマット + フレーム} の形式で表記します。
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{フォーマット}\PYG{o}{+}\PYG{n}{フレーム}
 \end{sphinxVerbatim}
 
 \sphinxAtStartPar
-例えば、次のように表記します。
+たとえば、次のように記述されます。
 
 \begin{sphinxVerbatim}[commandchars=\\\{\}]
 \PYG{n}{ライト}\PYG{o}{+}\PYG{n}{エントリー}
 \end{sphinxVerbatim}
 
+\sphinxAtStartPar
+これは「ライトフォーマットで、エントリーフレームを使用して対戦する」ことを意味します。
+
 
 \section{対戦レギュレーションの決め方}
 \label{\detokenize{match-regulations/match-regulations:id5}}
 \sphinxAtStartPar
-対戦レギュレーションを決定する手順を記載します。
+以下の手順で、プレイヤー同士が合意して対戦レギュレーションを決めてください。
 
 \sphinxAtStartPar
-公式では対応していない組み合わせが存在するため、手順に従って対戦レギュレーションを決定してください。
+一部の組み合わせは公式に対応していないため、必ず以下の手順に従って選択してください。
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-\sphinxstylestrong{フォーマットの決定}
+\sphinxstylestrong{フォーマットを決める}
 
 \sphinxAtStartPar
-「ライト」「スタンダード」などフォーマットを決めます。
+「ライト」「スタンダード」「プロ」などのフォーマットから選びます。
 
 \sphinxAtStartPar
-フォーマットが変わると覚えるアクションなどの量が大きく変わるので、プレイヤー同士の熟練度をもとに決定しましょう。
+フォーマットが変わると、使用可能なアクションの種類や難易度が大きく変わります。
+プレイヤーの経験や慣れ具合をもとに、無理のないフォーマットを選びましょう。
 
 \item {} 
 \sphinxAtStartPar
-\sphinxstylestrong{フレームの決定}
+\sphinxstylestrong{フレームを決める}
 
 \sphinxAtStartPar
-手順1で選択したフォーマットをもとに次のフレーム対応一覧より、フレームを決めます。
+フォーマットを決めたら、次に使用するフレームを選びます。
 
 \sphinxAtStartPar
-「◯」と表記されている組み合わせが選択出来ます。(\hyperref[\detokenize{match-regulations/match-regulations:frame-format}]{Table \ref{\detokenize{match-regulations/match-regulations:frame-format}}})
+各フレームが対応しているフォーマットの一覧は以下の表をご覧ください。
+「◯」と表記されている組み合わせが選択可能です。
 
 
 \begin{savenotes}\sphinxattablestart
@@ -1595,12 +495,1704 @@ x
 \sphinxAtStartPar
 ◯
 \\
+\sphinxhline
+\sphinxAtStartPar
+エクストラ
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+\\
 \sphinxbottomrule
 \end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
 \end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{補足：} 初めての方には「ライト+エントリー20」がおすすめです。
+決められた20枚のカードを使って、最も手軽にBlackPokerを体験できます。
+
+
+\bigskip\hrule\bigskip
+
+
+\sphinxAtStartPar
+このあと、　\sphinxstylestrong{フォーマットやフレームに関係なく適用される「共通ルール」} を説明します。
+まずは次の \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} を読み進めてください。
+
+\sphinxAtStartPar
+フォーマットやフレームの詳細を知りたい方は、 \hyperref[\detokenize{common/common:common-rst}]{\ref{\detokenize{common/common:common-rst}} \nameref{\detokenize{common/common:common-rst}}} を読んだあとに
+\hyperref[\detokenize{format/format:format-rst}]{\ref{\detokenize{format/format:format-rst}} \nameref{\detokenize{format/format:format-rst}}} および \hyperref[\detokenize{frame/frame:frame-rst}]{\ref{\detokenize{frame/frame:frame-rst}} \nameref{\detokenize{frame/frame:frame-rst}}} を参照するのがおすすめです。
+
+\sphinxstepscope
+
+
+\chapter{共通ルール}
+\label{\detokenize{common/common:common-rst}}\label{\detokenize{common/common:id1}}\label{\detokenize{common/common::doc}}
+\sphinxAtStartPar
+この章では、BlackPokerのすべての対戦で共通して使用される共通ルールを説明します。
+フォーマットやフレームに関係なく、BlackPokerを遊ぶうえでの土台となるルールです。
+
+\sphinxAtStartPar
+プレイ人数、カードの種類、場の構成、アクションの処理など、ゲームの進行に必要な共通事項をまとめています。
+
+\sphinxAtStartPar
+※ フォーマットやフレームにより細かな違いがある場合は、フォーマットやフレーム側で補足されます。
+
+
+\section{プレイ人数}
+\label{\detokenize{common/common:id2}}
+\sphinxAtStartPar
+2人です。
+
+
+\section{用意するもの}
+\label{\detokenize{common/common:id3}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+1人1セットのトランプが必要です。
+
+\item {} 
+\sphinxAtStartPar
+覚えていない場合、対戦レギュレーションに応じてアクションリストやキャラクターリストなどがあると便利です。
+
+\end{itemize}
+
+
+\section{使用できるトランプ}
+\label{\detokenize{common/common:id4}}
+\sphinxAtStartPar
+BlackPokerでは次の条件を満たしたトランプを使うことができます。
+一般的なトランプなら満たす条件となっています。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+スートと数字が分かる
+
+\item {} 
+\sphinxAtStartPar
+スートの{\normalsize $\spadesuit$} {\normalsize $\heartsuit$} {\normalsize $\diamondsuit$} {\normalsize $\clubsuit$} が判断できる
+
+\item {} 
+\sphinxAtStartPar
+数字のA\sphinxhyphen{}K（1\sphinxhyphen{}13）が判断できる
+
+\item {} 
+\sphinxAtStartPar
+スートと数字の組合せが重複していない
+
+\item {} 
+\sphinxAtStartPar
+裏から表がわからない
+
+\item {} 
+\sphinxAtStartPar
+縦向き横向きが判断できる
+
+\item {} 
+\sphinxAtStartPar
+Jokerは2枚まで入れられる
+
+\item {} 
+\sphinxAtStartPar
+54枚無くてもよい
+
+\end{itemize}
+
+\sphinxAtStartPar
+対戦レギュレーションにより使用できるトランプの枚数など異なる場合があるため、
+対戦する際に、対戦レギュレーションを確認してください。
+
+
+\section{トランプの数字}
+\label{\detokenize{common/common:id5}}
+\sphinxAtStartPar
+ゲーム全体を通してトランプの数字は次のような数値として扱います。(\hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}})
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{トランプの数字}\label{\detokenize{common/common:id43}}\label{\detokenize{common/common:cardrank}}
+\sphinxaftertopcaption
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+カード
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+数字
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+A
+&
+\sphinxAtStartPar
+1
+\\
+\sphinxhline
+\sphinxAtStartPar
+2〜10
+&
+\sphinxAtStartPar
+表記どおり
+\\
+\sphinxhline
+\sphinxAtStartPar
+J
+&
+\sphinxAtStartPar
+11
+\\
+\sphinxhline
+\sphinxAtStartPar
+Q
+&
+\sphinxAtStartPar
+12
+\\
+\sphinxhline
+\sphinxAtStartPar
+K
+&
+\sphinxAtStartPar
+13
+\\
+\sphinxhline
+\sphinxAtStartPar
+Joker
+&
+\sphinxAtStartPar
+0
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\index{り\textbar{}領域@\spxentry{り\textbar{}領域}}\index{ゾーン@\spxentry{ゾーン}}\ignorespaces 
+
+\section{領域（ゾーン）}
+\label{\detokenize{common/common:zone-section}}\label{\detokenize{common/common:index-0}}\label{\detokenize{common/common:id6}}
+\sphinxAtStartPar
+BlackPokerには、「領域（ゾーン）」と呼ぶ、カードを置く場所がいくつかあります。
+各領域には配置可能なカード種類（コンポーネント）が定義されています。
+
+\index{コンポーネントキーカード@\spxentry{コンポーネントキーカード}}\index{ユニットカード@\spxentry{ユニットカード}}\index{ユニット@\spxentry{ユニット}}\ignorespaces 
+\sphinxAtStartPar
+ゲーム中に配置されたカードのまとまりを「ユニット」と呼びます。
+ユニットを構成する各カードを「ユニットカード」と呼びます。
+また、そのユニットがどのコンポーネント定義に対応するかを示すカードを
+「コンポーネントキーカード」と呼びます。
+
+\sphinxAtStartPar
+領域ごとに存在するコンポーネントの一覧です。(\hyperref[\detokenize{common/common:zone-component}]{Table \ref{\detokenize{common/common:zone-component}}})
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{領域ごとに存在するコンポーネント一覧}\label{\detokenize{common/common:id44}}\label{\detokenize{common/common:zone-component}}
+\sphinxaftertopcaption
+\begin{tabular}[t]{|\X{1}{3}|\X{1}{3}|\X{1}{3}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+領域名
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+存在するコンポーネント
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+コンポーネントキーカードの名称
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+場
+&
+\sphinxAtStartPar
+キャラクター
+&
+\sphinxAtStartPar
+キャラクターキーカード
+\\
+\sphinxhline
+\sphinxAtStartPar
+ライフ
+&
+\sphinxAtStartPar
+ライフ
+&
+\sphinxAtStartPar
+\sphinxhyphen{}
+\\
+\sphinxhline
+\sphinxAtStartPar
+墓地
+&
+\sphinxAtStartPar
+墓地
+&
+\sphinxAtStartPar
+\sphinxhyphen{}
+\\
+\sphinxhline
+\sphinxAtStartPar
+フォグ
+&
+\sphinxAtStartPar
+フォグ
+&
+\sphinxAtStartPar
+フォグキーカード
+\\
+\sphinxhline
+\sphinxAtStartPar
+手札
+&
+\sphinxAtStartPar
+手札
+&
+\sphinxAtStartPar
+\sphinxhyphen{}
+\\
+\sphinxhline
+\sphinxAtStartPar
+パック
+&
+\sphinxAtStartPar
+パック
+&
+\sphinxAtStartPar
+\sphinxhyphen{}
+\\
+\sphinxhline
+\sphinxAtStartPar
+レアカード
+&
+\sphinxAtStartPar
+レアカード
+&
+\sphinxAtStartPar
+\sphinxhyphen{}
+\\
+\sphinxhline
+\sphinxAtStartPar
+切札
+&
+\sphinxAtStartPar
+切札
+&
+\sphinxAtStartPar
+切札キーカード
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxAtStartPar
+※ 表中では「ライフ」「墓地」「手札」などと記載しますが、「ライフ領域」「墓地領域」「手札領域」と呼んでも構いません。
+
+\sphinxAtStartPar
+各コンポーネントの詳細な定義や項目については、\hyperref[\detokenize{component/component:component-rst}]{\ref{\detokenize{component/component:component-rst}} \nameref{\detokenize{component/component:component-rst}}} で詳しく説明します。
+
+\sphinxAtStartPar
+ここまでで「どの領域に」「どんなコンポーネントが置かれるか」を整理しました。
+次節では、実際のプレイ中にそれらがどのように配置されるかを図示して解説します。
+
+
+\section{カードの配置}
+\label{\detokenize{common/common:id7}}
+\sphinxAtStartPar
+カードの配置には次のような場所があります。(\hyperref[\detokenize{common/common:field}]{Fig.\@ \ref{\detokenize{common/common:field}}})
+
+\sphinxAtStartPar
+※これらの領域は、フレームによって使用する領域が異なります。
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{extra}.pdf}
+\caption{プレイ中のカードの配置}\label{\detokenize{common/common:id45}}\label{\detokenize{common/common:field}}\end{figure}
+
+\sphinxAtStartPar
+各領域で定義されたコンポーネントは、この配置図の対応する位置に置かれます。
+以下では主要な領域について説明します。
+
+\index{ライフ@\spxentry{ライフ}}\ignorespaces \begin{description}
+\sphinxlineitem{ライフ}
+\sphinxAtStartPar
+山札。ゲームを始める時に自分のデッキを裏向きで置きます。
+ダメージを受けるとライフの一番上から墓地にカードを移します。
+
+\end{description}
+
+\index{ぼ\textbar{}墓地@\spxentry{ぼ\textbar{}墓地}}\ignorespaces \begin{description}
+\sphinxlineitem{墓地}
+\sphinxAtStartPar
+捨て札置き場。ダメージを受けた時などに表向きでカードを重ねて置きます。
+
+\end{description}
+
+\index{ば\textbar{}場@\spxentry{ば\textbar{}場}}\ignorespaces \begin{description}
+\sphinxlineitem{場}
+\sphinxAtStartPar
+兵士や防壁などのキャラクターを置きます。
+
+\end{description}
+
+\index{て\textbar{}手札@\spxentry{て\textbar{}手札}}\ignorespaces \begin{description}
+\sphinxlineitem{手札}
+\sphinxAtStartPar
+ライフから引いたカードを持っておく場所です。相手から見えないようにしましょう。
+
+\end{description}
+
+\index{フォグ@\spxentry{フォグ}}\ignorespaces \begin{description}
+\sphinxlineitem{フォグ}
+\sphinxAtStartPar
+このターンのみ影響を与えるカードを置きます。
+領域定義で示したフォグキーカードは、すべてここに配置されます。
+
+\end{description}
+
+\index{パック@\spxentry{パック}}\ignorespaces \begin{description}
+\sphinxlineitem{パック}
+\sphinxAtStartPar
+一部のフレームで使用される領域です。デッキから一部のカードを取り分けて伏せて置きます。
+アクション（例：パック開封）によって順に使用されることがあります。
+
+\end{description}
+
+\index{レアカード@\spxentry{レアカード}}\ignorespaces \begin{description}
+\sphinxlineitem{レアカード}
+\sphinxAtStartPar
+特別な1枚を配置するための領域です。主にゲーム開始時に選ばれ、フレームによって使い方が異なります。
+特定のアクション（例：レアドロー、レア召喚）と組み合わせて使われます。
+
+\end{description}
+
+\index{き\textbar{}切札@\spxentry{き\textbar{}切札}}\ignorespaces \begin{description}
+\sphinxlineitem{切札}
+\sphinxAtStartPar
+切札領域に配置するコンポーネントです。各カードに割り当てられた能力を活用でき、使用可能なフレームは個別に定義されます。
+
+\end{description}
+
+
+\subsection{デッキとライフ}
+\label{\detokenize{common/common:id8}}
+\sphinxAtStartPar
+対戦レギュレーションなどでデッキという表現が出てきます。
+
+\index{デッキ@\spxentry{デッキ}}\ignorespaces \begin{description}
+\sphinxlineitem{デッキ}
+\sphinxAtStartPar
+ゲーム開始前にゲームで使用するカードの束（カード構成）。
+フレームに応じて使用できるデッキの条件が異なります。
+
+\end{description}
+
+\sphinxAtStartPar
+ゲームの始め方を経てデッキはライフとなります。詳細は \hyperref[\detokenize{common/common:common-gamestart}]{\ref{\detokenize{common/common:common-gamestart}} \nameref{\detokenize{common/common:common-gamestart}}} で説明します。
+
+
+\section{勝利条件}
+\label{\detokenize{common/common:id9}}
+\sphinxAtStartPar
+プレイヤーは順に対戦相手に対し攻撃を行い、ダメージを与え先に相手のライフを0枚にした方が勝ちです。ダメージは1点につき、ライフが1枚減ります。
+
+\index{ダメージ@\spxentry{ダメージ}}\ignorespaces 
+
+\section{ダメージ}
+\label{\detokenize{common/common:index-11}}\label{\detokenize{common/common:id10}}
+\sphinxAtStartPar
+プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。
+
+\index{キャラクター@\spxentry{キャラクター}}\ignorespaces 
+
+\section{キャラクター}
+\label{\detokenize{common/common:index-12}}\label{\detokenize{common/common:id11}}
+\sphinxAtStartPar
+キャラクターとは、場に存在する兵士や防壁のことを指し、TCGでいう「クリーチャー」や「モンスター」に相当します。
+
+\sphinxAtStartPar
+キャラクターは1枚のカードで1体を表すこともあれば、
+複数枚で1体を表すこともあります。(\hyperref[\detokenize{common/common:character}]{Fig.\@ \ref{\detokenize{common/common:character}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{character}.pdf}
+\caption{キャラクターの例}\label{\detokenize{common/common:id46}}\label{\detokenize{common/common:character}}\end{figure}
+
+\sphinxAtStartPar
+具体的なキャラクターの持つ項目やサイズ、能力などは、 \hyperref[\detokenize{component/component:character-component}]{\ref{\detokenize{component/component:character-component}} \nameref{\detokenize{component/component:character-component}}} を参照してください。
+
+\index{チャージ@\spxentry{チャージ}}\index{ドライブ@\spxentry{ドライブ}}\ignorespaces 
+
+\subsection{チャージとドライブ}
+\label{\detokenize{common/common:index-13}}\label{\detokenize{common/common:id12}}
+\sphinxAtStartPar
+キャラクターには、チャージ状態とドライブ状態が存在します。
+チャージ状態は未使用状態を示し、ドライブ状態は使用済み状態を示しています。
+また、キャラクターを横向きにすることを「ドライブ」、縦向きにすることを「チャージ」と言います。(\hyperref[\detokenize{common/common:chargedrive}]{Fig.\@ \ref{\detokenize{common/common:chargedrive}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{charge&drive}.pdf}
+\caption{チャージとドライブ}\label{\detokenize{common/common:id47}}\label{\detokenize{common/common:chargedrive}}\end{figure}
+
+
+\section{ゲームの始め方}
+\label{\detokenize{common/common:common-gamestart}}\label{\detokenize{common/common:id13}}
+\sphinxAtStartPar
+BlackPokerでは、選択した「フレーム」に応じてゲームの開始手順が異なります。
+各フレームでは、「デッキ構築」や「初期配置」、「防壁・兵士のプリセット状態」などが個別に定義されています。
+
+\sphinxAtStartPar
+そのため、ゲームを始める際は、まずフレームごとの「ゲームの始め方」に従って準備を行ってください。
+
+\sphinxAtStartPar
+各フレームに共通する手順を次に示します。ただし、エクストラではプリセット配置の手順が異なります。
+
+
+\subsection{共通手順：プリセット配置}
+\label{\detokenize{common/common:common-gamestart-preset}}\label{\detokenize{common/common:id14}}\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+ライフの一番上のカードを表向きにして「防壁」として場に出す。
+
+\item {} 
+\sphinxAtStartPar
+続けてライフの次のカードを表向きにして「兵士」として場に出す。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+この手順は「プリセット」と呼ばれています。
+
+
+\subsection{共通手順：先攻決定}
+\label{\detokenize{common/common:common-gamestart-first}}\label{\detokenize{common/common:id15}}\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+両者ライフの一番上のカードを表にする。
+
+\item {} 
+\sphinxAtStartPar
+数字の大きいプレイヤーが先攻（数値は \hyperref[\detokenize{common/common:cardrank}]{Table \ref{\detokenize{common/common:cardrank}}} を参照）。
+
+\item {} 
+\sphinxAtStartPar
+同じ数値の場合、さらにライフの一番上をめくって同様に比較。
+
+\item {} 
+\sphinxAtStartPar
+表にしたカードはすべて墓地に移す。
+
+\end{enumerate}
+
+
+\subsection{共通手順：ゲーム開始}
+\label{\detokenize{common/common:common-gamestart-start}}\label{\detokenize{common/common:id16}}\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+先攻プレイヤーはライフから1枚引いて手札に加える。
+
+\item {} 
+\sphinxAtStartPar
+先攻プレイヤーがターンとチャンスを持ち、ゲームが開始される。
+
+\end{enumerate}
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+ゲームの始め方の補足
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+フレームによっては、上記の「プリセット」や「先攻決定」「ゲーム開始」に入る前に、特別な手順（例：ストラテジー選択や切札設定など）があります。
+
+\item {} 
+\sphinxAtStartPar
+必ず対戦前に、使用するフレームの内容を確認してください。
+
+\end{itemize}
+\end{sphinxadmonition}
+
+\index{アクション@\spxentry{アクション}}\ignorespaces 
+
+\section{アクション}
+\label{\detokenize{common/common:index-14}}\label{\detokenize{common/common:id17}}
+\sphinxAtStartPar
+BlackPokerは割込み可能なターン制ゲームです。
+
+\sphinxAtStartPar
+例えば次の状況をイメージしてください。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Aくん}：「この兵士アップします。」
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Bさん}：「その前にこの兵士ダウンします。」
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Aくん}：「じゃあそのダウンをカウンターします。」
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Bさん}：「それをさらにカウンターします。」
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Aくん}：「・・・（泣）」
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{Bさん}：「（どやっ！）」
+
+\end{itemize}
+
+\sphinxAtStartPar
+このやり取りの中で「アップします」や「ダウンします」などの1行1行がアクションになります。
+
+\sphinxAtStartPar
+割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。
+
+\sphinxAtStartPar
+このアクションを実行したいとルールシステムに要求(リクエスト)し、相手に許可を得てリクエストが実行されます。もちろん相手はリクエストに対して割り込んでリクエストすることもできます。
+
+\sphinxAtStartPar
+アクションには、プレイヤーのすべての行動を定義しており、従来のTCGでいう「魔法」や「ターン制御」が含まれています。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:core-rst}]{\ref{\detokenize{core/core:core-rst}} \nameref{\detokenize{core/core:core-rst}}}
+
+
+\subsection{アクションが持つ項目}
+\label{\detokenize{common/common:id18}}
+\sphinxAtStartPar
+アクションが持つ項目について説明します。
+
+\index{アクション名@\spxentry{アクション名}}\ignorespaces \begin{description}
+\sphinxlineitem{アクション名}
+\sphinxAtStartPar
+アクションの名称を示します。
+
+\end{description}
+
+\index{タイプ(アクション)@\spxentry{タイプ(アクション)}}\ignorespaces \begin{description}
+\sphinxlineitem{タイプ}
+\sphinxAtStartPar
+アクションの種類を表します。アクション名の後に括弧書きで記載します。
+
+\end{description}
+
+\index{トリガー@\spxentry{トリガー}}\ignorespaces \begin{description}
+\sphinxlineitem{トリガー}
+\sphinxAtStartPar
+アクションには自分で起こせるアクションと誘発するアクションがあります。
+トリガー項目では「直接」か「誘発」が設定されています。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:trigger-core}]{\ref{\detokenize{core/core:trigger-core}} \nameref{\detokenize{core/core:trigger-core}}}
+
+\end{description}
+
+\index{スピード@\spxentry{スピード}}\ignorespaces \begin{description}
+\sphinxlineitem{スピード}
+\sphinxAtStartPar
+アクションはすぐに効果が解決されるものとそうでないものがあります。
+スピード項目では「即時」か「通常」が設定されています。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:speed-core}]{\ref{\detokenize{core/core:speed-core}} \nameref{\detokenize{core/core:speed-core}}}
+
+\end{description}
+
+\index{タイミング@\spxentry{タイミング}}\ignorespaces \begin{description}
+\sphinxlineitem{タイミング}
+\sphinxAtStartPar
+アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
+「クイック」はいつでも起こすことができます。
+
+\sphinxAtStartPar
+参考: \hyperref[\detokenize{core/core:timing}]{\ref{\detokenize{core/core:timing}} \nameref{\detokenize{core/core:timing}}}
+
+\end{description}
+
+\index{キーカード@\spxentry{キーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{キーカード}
+\sphinxAtStartPar
+アクションの核となるカードを示します。
+キーカードは★で表記します。
+特に指定がない場合は、手札から選びます。
+兵士など場のカードを指定する場合は、その指定に従って選択してください。
+
+\end{description}
+
+\index{コスト@\spxentry{コスト}}\ignorespaces \begin{description}
+\sphinxlineitem{コスト}
+\sphinxAtStartPar
+アクションを起こすのに必要な対価です。
+コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は \hyperref[\detokenize{common/common:cost}]{\ref{\detokenize{common/common:cost}} \nameref{\detokenize{common/common:cost}}} で説明します。
+
+\end{description}
+
+\index{と\textbar{}特記事項@\spxentry{と\textbar{}特記事項}}\ignorespaces \begin{description}
+\sphinxlineitem{特記事項}
+\sphinxAtStartPar
+特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。
+
+\end{description}
+
+\index{き\textbar{}起動条件@\spxentry{き\textbar{}起動条件}}\ignorespaces \begin{description}
+\sphinxlineitem{起動条件}
+\sphinxAtStartPar
+起動するための条件を示します。
+
+\end{description}
+
+\index{ゆ\textbar{}誘発条件@\spxentry{ゆ\textbar{}誘発条件}}\ignorespaces \begin{description}
+\sphinxlineitem{誘発条件}
+\sphinxAtStartPar
+誘発する条件を示します。
+
+\end{description}
+
+\index{た\textbar{}対象@\spxentry{た\textbar{}対象}}\ignorespaces \begin{description}
+\sphinxlineitem{対象}
+\sphinxAtStartPar
+効果の対象を示します。
+
+\end{description}
+
+\index{つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}!そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}}\index{そ\textbar{}即時効果@\spxentry{そ\textbar{}即時効果}!つ\textbar{}通常効果@\spxentry{つ\textbar{}通常効果}}\ignorespaces \begin{description}
+\sphinxlineitem{効果}
+\sphinxAtStartPar
+効果の内容を示します。
+
+\end{description}
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+トリガー,スピード,タイミングの表記
+
+\sphinxAtStartPar
+トリガー,スピード,タイミングは@を使って次のように表記されます。
+
+\sphinxAtStartPar
+@{[}トリガー{]}\sphinxhyphen{}{[}スピード{]}\sphinxhyphen{}{[}タイミング{]}
+
+\sphinxAtStartPar
+例えば次のようになります。
+
+\sphinxAtStartPar
+@誘発\sphinxhyphen{}即時\sphinxhyphen{}クイック
+\end{sphinxadmonition}
+
+
+\subsubsection{記載されていないアクションの項目}
+\label{\detokenize{common/common:id19}}
+\sphinxAtStartPar
+アクションによっては記載されていない項目もあります。
+記載されていない項目は無視して構いません。
+たとえばコスト項目がなければコストを支払う必要はありません。
+
+
+\subsection{コストの種類}
+\label{\detokenize{common/common:cost}}\label{\detokenize{common/common:id20}}
+\sphinxAtStartPar
+アクションによって支払うコストが異なります。
+コストには次の種類があり、それぞれ支払い方が異なります。(\hyperref[\detokenize{common/common:table-cost}]{Table \ref{\detokenize{common/common:table-cost}}})
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{コストの種類}\label{\detokenize{common/common:id48}}\label{\detokenize{common/common:table-cost}}
+\sphinxaftertopcaption
+\begin{tabulary}{\linewidth}[t]{|T|T|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+表記(名称)
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+対価
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+B (Bulwark)
+&
+\sphinxAtStartPar
+防壁をドライブする
+\\
+\sphinxhline
+\sphinxAtStartPar
+L (Life)
+&
+\sphinxAtStartPar
+1点ダメージを受ける
+\\
+\sphinxhline
+\sphinxAtStartPar
+D (Discard)
+&
+\sphinxAtStartPar
+手札を1枚捨てる
+\\
+\sphinxhline
+\sphinxAtStartPar
+S (Sacrifice)
+&
+\sphinxAtStartPar
+キャラクター1体を墓地に移す
+\\
+\sphinxhline
+\sphinxAtStartPar
+K (KeyDrive)
+&
+\sphinxAtStartPar
+キーカードをドライブする
+\\
+\sphinxbottomrule
+\end{tabulary}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxAtStartPar
+たとえばコストが \sphinxstylestrong{「\$BL」} の場合、自分の場にいるチャージ状態の防壁を1体ドライブし、1点ダメージを受けることでコストが支払われたことになります。
+
+
+\subsection{アクションの起こし方(リクエスト)}
+\label{\detokenize{common/common:id21}}
+\sphinxAtStartPar
+BlackPokerは実行したいアクションを要求(リクエスト)し、進める形式のゲームです。
+
+\sphinxAtStartPar
+アクションを要求することを「アクションを起こす」または「アクションをリクエストする」といいます。
+
+\sphinxAtStartPar
+次の手順でアクションをリクエストすることができます。
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+起こすアクションを対戦相手に伝える。
+
+\item {} 
+\sphinxAtStartPar
+アクションに応じたコストを支払う。
+
+\item {} 
+\sphinxAtStartPar
+必要なら手札からキーカードを出す。
+
+\item {} 
+\sphinxAtStartPar
+対象の指定が必要な場合、対象を指定する。
+
+\end{enumerate}
+
+
+\subsubsection{アクションを起こすときの注意点}
+\label{\detokenize{common/common:id22}}
+
+\paragraph{対象を指定しないでアクションを起こせるか？}
+\label{\detokenize{common/common:id23}}
+\sphinxAtStartPar
+「対象」項目がある場合、記載された条件を満たした対象を指定できなければ、
+そのアクションを起こすことはできません。
+
+
+\paragraph{アクションを対象とするアクションは自身を対象にできるか？}
+\label{\detokenize{common/common:id24}}
+\sphinxAtStartPar
+アクションは、自分自身を対象とすることはできません。
+そのため、「カウンター」アクションのようにアクションを対象とするアクションは
+自身を対象とすることはできません。
+
+
+\subsection{アクションの解決}
+\label{\detokenize{common/common:id25}}
+\sphinxAtStartPar
+リクエストされたアクションを実行済みにすることを「アクションを解決する」といいます。
+
+\sphinxAtStartPar
+実際にアクションが解決される流れを見ていきましょう。
+
+\sphinxAtStartPar
+\sphinxstylestrong{用語}
+
+\sphinxAtStartPar
+登場する用語を説明します。
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{チャンス}}
+\sphinxAtStartPar
+アクションをリクエストする(ステージに積む)権利（他TCGの優先権）
+
+\sphinxlineitem{\sphinxstylestrong{ターン}}
+\sphinxAtStartPar
+手番を示す印
+
+\sphinxlineitem{\sphinxstylestrong{ステージ}}
+\sphinxAtStartPar
+アクションが蓄積される場所（他TCGのスタック）
+
+\end{description}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+プレイヤーAがアクションを積む
+
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{action-request1}.pdf}
+\caption{アクションの解決1}\label{\detokenize{common/common:id49}}\label{\detokenize{common/common:action-request1-image}}\end{figure}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\setcounter{enumi}{1}
+\item {} 
+\sphinxAtStartPar
+プレイヤーBがアクションを積む
+
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{action-request2}.pdf}
+\caption{アクションの解決2}\label{\detokenize{common/common:id50}}\label{\detokenize{common/common:action-request2-image}}\end{figure}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\setcounter{enumi}{2}
+\item {} 
+\sphinxAtStartPar
+アクションを実行（解決）
+
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{action-request3}.pdf}
+\caption{アクションの解決3}\label{\detokenize{common/common:id51}}\label{\detokenize{common/common:action-request3-image}}\end{figure}
+
+\sphinxAtStartPar
+大まかな流れは図の通りとなります。
+
+\sphinxAtStartPar
+更に厳密な処理は \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} を参照してください。
+
+\sphinxAtStartPar
+次に細かな部分を説明します。
+
+\sphinxAtStartPar
+補足ですが次に説明する部分は、 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の {\hyperref[\detokenize{core/core:actresolve}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}8{]} リクエストの解決}}}} で順に行われます。
+
+
+\subsubsection{対象条件を確認}
+\label{\detokenize{common/common:id26}}
+\sphinxAtStartPar
+対象を指定するアクションが効果を発揮しようとした時に次の条件に該当する場合、効果を発揮する対象を失うため効果が発揮されず
+アクションが解決されます。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象が存在していない場合
+
+\item {} 
+\sphinxAtStartPar
+対象が分裂した場合
+
+\end{itemize}
+
+\sphinxAtStartPar
+たとえば兵士に対して「アップ」アクションを起こし、対応して「ダウン」
+アクションを起こされました。
+「ダウン」の方が先に解決されるため、「アップ」を解決する時には
+兵士が墓地に移っていたとします。その場合、「アップ」アクションは効果を発揮せず解決されます。
+
+\sphinxAtStartPar
+「リバース」による対象分裂も同様です。
+たとえば装備兵に対して「ツイスト」アクションを起こし、対応して「リバース」アクションを起こしたとします。
+この場合、「リバース」が先に解決され、装備兵が分裂します。
+その場合、「ツイスト」は対象を失いアクションの効果を発揮せず解決されます。
+
+
+\subsubsection{効果を発揮}
+\label{\detokenize{common/common:id27}}
+\sphinxAtStartPar
+リクエストが解決する際に、アクションの効果に定義されている内容を実行します。
+効果の中に実行不可能な部分がある場合、可能な部分のみ実行します。
+
+\sphinxAtStartPar
+たとえば、ライフの枚数が残1枚の時に5点のダメージを受けたとします。
+ライフは1枚しかないので5点ダメージを受けることはできませんが、
+1点までなら受けることが可能なため、
+この場合1点のダメージを受けることになります。
+
+
+\subsubsection{解決は墓地移動までを含む}
+\label{\detokenize{common/common:id28}}
+\sphinxAtStartPar
+「リクエストを解決する」という文言には、キーカードを墓地に移動し終えるまでが含まれています。
+
+\sphinxAtStartPar
+「リクエストを解決する」をまとめると次のようになります。
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+ステージの一番上にあるリクエストを特定する
+
+\item {} 
+\sphinxAtStartPar
+リクエストの対象が正しいか確認する
+
+\item {} 
+\sphinxAtStartPar
+正しい場合、リクエストされたアクションの効果を可能な限り実行する
+
+\item {} 
+\sphinxAtStartPar
+リクエストをステージから取り除く
+
+\item {} 
+\sphinxAtStartPar
+キーカードを墓地に移す
+
+\end{enumerate}
+
+
+\subsubsection{ステージ上で効果を発揮}
+\label{\detokenize{common/common:id29}}
+\sphinxAtStartPar
+アクションの効果を実行する際にリクエストはまだステージ上にあります。
+
+\sphinxAtStartPar
+効果の実行が完了した後、ステージ上から取り除かれます。
+
+
+\subsubsection{キーカードを墓地に移す}
+\label{\detokenize{common/common:keycard-gy}}\label{\detokenize{common/common:id30}}
+\sphinxAtStartPar
+効果を発揮した後、そのアクションをステージから取り除き、キーカードを墓地に移します。
+ただし、次の場合はキーカードを墓地に移しません。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+効果の中でキーカードを場に出した場合
+
+\item {} 
+\sphinxAtStartPar
+効果の中でキーカードを手札に戻した場合
+
+\item {} 
+\sphinxAtStartPar
+支払いコストに K (KeyDrive) が含まれる場合は、キーカードをドライブ状態のままにする
+
+\end{itemize}
+
+
+\subsection{勝敗判定}
+\label{\detokenize{common/common:id31}}
+\sphinxAtStartPar
+アクションを解決するたびに勝敗判定が行われます。
+
+\sphinxAtStartPar
+勝敗はライフを確認し0枚の場合そのプレイヤーは敗北となります。
+
+\sphinxAtStartPar
+勝敗判定はターンプレイヤーから行われます。
+もし、両プレイヤーのライフが0枚の場合、ターンプレイヤーの負けとなります。
+
+\sphinxAtStartPar
+補足ですがこの勝敗判定は、 \hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} の {\hyperref[\detokenize{core/core:winlose}]{\sphinxcrossref{\DUrole{std,std-ref}{{[}9{]} 勝敗判定}}}} で確認されます。
+
+
+\subsection{誘発チェック}
+\label{\detokenize{common/common:id32}}
+\sphinxAtStartPar
+アクションが解決された際に、
+アクションの誘発条件に該当するとアクションが誘発されることがあります。
+
+\sphinxAtStartPar
+誘発とは、自動的にアクションがリクエストされることです。
+
+\sphinxAtStartPar
+BlackPokerの基本的なルールでは、次の2つの誘発パターンがほとんどです。
+
+\sphinxAtStartPar
+それ以外の場合は、\hyperref[\detokenize{core/core:coreflowsec}]{\ref{\detokenize{core/core:coreflowsec}} \nameref{\detokenize{core/core:coreflowsec}}} を参照してください。
+
+
+\subsubsection{パターン1: フェイズ系}
+\label{\detokenize{common/common:id33}}
+\sphinxAtStartPar
+アタックアクションでは対象のアクションが解決すると次のアクションが誘発します。
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+アタック
+
+\item {} 
+\sphinxAtStartPar
+ブロック
+
+\item {} 
+\sphinxAtStartPar
+ダメージ判定
+
+\end{enumerate}
+
+\sphinxAtStartPar
+アタックアクションが解決すると、ブロックアクションが誘発します。
+
+\sphinxAtStartPar
+ブロックアクションが解決するとダメージ判定アクションが誘発します。
+
+\sphinxAtStartPar
+BlackPokerでは一般的なTCGではフェイズとして扱われるものも全てアクションとして定義されています。
+
+\sphinxAtStartPar
+同様に、エンド、チャージ、ドローアクションも定義されています。
+
+
+\subsubsection{パターン2: 世代交代}
+\label{\detokenize{common/common:id34}}
+\sphinxAtStartPar
+BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合、世代交代というアクションが誘発します。
+
+\sphinxAtStartPar
+効果の内容はアクションリストを参照してください。
+
+\sphinxAtStartPar
+\hyperref[\detokenize{auto/actionlist:act-nextgeneration}]{\ref{\detokenize{auto/actionlist:act-nextgeneration}} \nameref{\detokenize{auto/actionlist:act-nextgeneration}}}
+
+
+\section{その他のルール}
+\label{\detokenize{common/common:id35}}
+\sphinxAtStartPar
+この章では、
+公開レベルやシャッフルの仕方といった
+細かな決まりごとを説明します。
+
+
+\subsection{公開レベル}
+\label{\detokenize{common/common:id36}}
+\sphinxAtStartPar
+配置されているカードには、アクションの効果
+を使わなくても中身や枚数を知れるものがあります。
+知れる度合いには次の種類があります。
+\begin{description}
+\sphinxlineitem{完全公開}
+\sphinxAtStartPar
+全てのプレイヤーが知ることができ、
+聞かれたプレイヤーは正しく答える必要がある
+
+\sphinxlineitem{個人公開}
+\sphinxAtStartPar
+ライフの持ち主のみ知ることができる
+
+\sphinxlineitem{非公開}
+\sphinxAtStartPar
+全てのプレイヤーは知ることができない
+
+\end{description}
+
+\sphinxAtStartPar
+完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
+各カードの配置と公開・非公開の度合いは次のとおりです。
+\begin{description}
+\sphinxlineitem{ライフ}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：10枚未満のライフ枚数
+\item[] 個人公開：ライフの枚数
+\item[] 非公開：ライフの中身
+\end{DUlineblock}
+
+\sphinxlineitem{墓地}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：墓地の一番上のカード
+\item[] 個人公開：墓地の中身
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\sphinxlineitem{場}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：表裏を変えずに見えるカード
+\item[] 個人公開：伏せてあるカード
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\sphinxlineitem{手札}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：手札の枚数
+\item[] 個人公開：手札の中身
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\sphinxlineitem{フォグ}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：表裏を変えずに見えるカード
+\item[] 個人公開：伏せてあるカード
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\end{description}
+
+
+\subsubsection{残りライフを聞かれたらどうしたらいいの？}
+\label{\detokenize{common/common:id37}}
+\sphinxAtStartPar
+対戦相手から残りのライフを聞かれた場合、自分のライフの枚数を10枚まで数えます。
+10枚未満であれば枚数を答え、10枚以上の場合「10枚以上です」と答えて下さい。
+10枚以上の場合、正確な枚数を答える必要はありません。
+
+
+\subsubsection{墓地の一番上のカードはいつ決まるのか？}
+\label{\detokenize{common/common:id38}}
+\sphinxAtStartPar
+カードを墓地に移す際に移すカードの中から1枚を公開してください。
+すでに墓地にあるカードを改めて公開しないでください。
+
+
+\subsection{デッキのシャッフルについて}
+\label{\detokenize{common/common:id39}}
+\sphinxAtStartPar
+BlackPokerでは
+コンセプトの一つに「相手のカードに触らない」があるため、
+対戦相手にデッキのシャッフルをお願いする必要はありません。
+
+\sphinxAtStartPar
+ただし、シャッフルしてほしい場合は、対戦相手にお願いしても構いません。
+逆に、対戦相手があまりシャッフルしていない場合は、
+さらにシャッフルをお願いできます。
+
+
+\subsection{防壁の置き方}
+\label{\detokenize{common/common:id40}}
+\sphinxAtStartPar
+防壁を場に出す際は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-bulwork}]{Fig.\@ \ref{\detokenize{common/common:set-bulwork}}})
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+防壁を置く際は、ライフ側に寄せて配置してください。
+
+\item {} 
+\sphinxAtStartPar
+防壁の左右の入れ替えは行わないでください。
+
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{set-bulwork}.pdf}
+\caption{防壁の置き方}\label{\detokenize{common/common:id52}}\label{\detokenize{common/common:set-bulwork}}\end{figure}
+
+
+\subsection{フォグの置き方}
+\label{\detokenize{common/common:id41}}
+\sphinxAtStartPar
+フォグにアップなどのカードを置く場合は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-fog}]{Fig.\@ \ref{\detokenize{common/common:set-fog}}})
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象の向きにカードを傾けて置いてください。
+
+\item {} 
+\sphinxAtStartPar
+ダウンなど対戦相手のカードを対象とする場合も同様に置いてください。
+
+\item {} 
+\sphinxAtStartPar
+フォースなど対象を取らない場合は、対象がないため、傾ける必要はありません。
+
+\item {} 
+\sphinxAtStartPar
+フォグのカードは、場のカードと重ならないように間隔を空けて配置してください。
+
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{set-fog}.pdf}
+\caption{フォグの置き方}\label{\detokenize{common/common:id53}}\label{\detokenize{common/common:set-fog}}\end{figure}
+
+
+\subsection{ステージの置き方}
+\label{\detokenize{common/common:id42}}
+\sphinxAtStartPar
+ステージ上にあるリクエストのキーカードは、場のカードと区別できるように、次のルールに従って配置してください。(\hyperref[\detokenize{common/common:set-stage}]{Fig.\@ \ref{\detokenize{common/common:set-stage}}})
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ステージ上にあるリクエストのキーカードは傾けて置いてください。
+
+\item {} 
+\sphinxAtStartPar
+フォグと区別できるように置いてください。
+
+\item {} 
+\sphinxAtStartPar
+対象がある場合は、その方向に傾けることを推奨します。
+
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{set-stage}.pdf}
+\caption{ステージの置き方}\label{\detokenize{common/common:id54}}\label{\detokenize{common/common:set-stage}}\end{figure}
+
+\sphinxstepscope
+
+
+\chapter{コンポーネント}
+\label{\detokenize{component/component:component-rst}}\label{\detokenize{component/component:id1}}\label{\detokenize{component/component::doc}}
+\sphinxAtStartPar
+この章では、各コンポーネント（ライフカード、キャラクターキーカードなど）の詳細な構造や振る舞いについて説明します。
+
+\sphinxAtStartPar
+各コンポーネントは、配置先の「領域（ゾーン）」に置かれて使用されます。
+詳細は共通ルール \hyperref[\detokenize{common/common:zone-section}]{\ref{\detokenize{common/common:zone-section}} \nameref{\detokenize{common/common:zone-section}}} を参照してください。
+
+\begin{sphinxShadowBox}
+\sphinxstyletopictitle{コンポーネント一覧}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id20}}{\hyperref[\detokenize{component/component:id3}]{\sphinxcrossref{ライフ}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id21}}{\hyperref[\detokenize{component/component:id4}]{\sphinxcrossref{墓地}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id22}}{\hyperref[\detokenize{component/component:id5}]{\sphinxcrossref{手札}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id23}}{\hyperref[\detokenize{component/component:character-component}]{\sphinxcrossref{キャラクター}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id24}}{\hyperref[\detokenize{component/component:id7}]{\sphinxcrossref{定義リスト}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id25}}{\hyperref[\detokenize{component/component:id8}]{\sphinxcrossref{キャラクターの持つ項目}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id26}}{\hyperref[\detokenize{component/component:id10}]{\sphinxcrossref{キャラクターの注意点}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id27}}{\hyperref[\detokenize{component/component:id12}]{\sphinxcrossref{フォグ}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id28}}{\hyperref[\detokenize{component/component:id13}]{\sphinxcrossref{定義リスト}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id29}}{\hyperref[\detokenize{component/component:id14}]{\sphinxcrossref{フォグの持つ項目}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id30}}{\hyperref[\detokenize{component/component:id15}]{\sphinxcrossref{パック}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id31}}{\hyperref[\detokenize{component/component:id16}]{\sphinxcrossref{レアカード}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id32}}{\hyperref[\detokenize{component/component:id17}]{\sphinxcrossref{切札}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id33}}{\hyperref[\detokenize{component/component:id18}]{\sphinxcrossref{定義リスト}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{component/component:id34}}{\hyperref[\detokenize{component/component:id19}]{\sphinxcrossref{切札の持つ項目}}}
+
+\end{itemize}
+
+\end{itemize}
+\end{sphinxShadowBox}
+
+
+\section{ライフ}
+\label{\detokenize{component/component:id3}}
+\index{ライフ@\spxentry{ライフ}}\ignorespaces 
+\sphinxAtStartPar
+ライフカードは、ゲーム開始時に「ライフ領域」に裏向きで配置されるカードです。
+プレイヤーの体力のようなもので、ダメージを受けるとライフが減っていきます。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+中身は非公開です。
+
+\item {} 
+\sphinxAtStartPar
+上から順に墓地へ移動します。
+
+\item {} 
+\sphinxAtStartPar
+定義リスト：なし
+
+\end{itemize}
+
+
+\section{墓地}
+\label{\detokenize{component/component:id4}}
+\index{ぼ\textbar{}墓地@\spxentry{ぼ\textbar{}墓地}}\ignorespaces 
+\sphinxAtStartPar
+墓地カードは、使用済みや破壊されたカードを表向きに重ねて配置するコンポーネントです。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ライフや場などから移動したカードが置かれます。
+
+\item {} 
+\sphinxAtStartPar
+墓地の一番上のカードは完全公開です。
+
+\item {} 
+\sphinxAtStartPar
+領域としては「表向きの捨て札置き場」です。
+
+\item {} 
+\sphinxAtStartPar
+定義リスト：なし
+
+\end{itemize}
+
+
+\section{手札}
+\label{\detokenize{component/component:id5}}
+\index{て\textbar{}手札@\spxentry{て\textbar{}手札}}\ignorespaces 
+\sphinxAtStartPar
+手札カードは、ライフから引いてプレイヤーの手元に保持されるカードです。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+枚数は完全公開、内容は個人公開です。
+
+\item {} 
+\sphinxAtStartPar
+対象の選択やアクションの起点としてよく使われます。
+
+\item {} 
+\sphinxAtStartPar
+定義リスト：なし
+
+\end{itemize}
+
+
+\section{キャラクター}
+\label{\detokenize{component/component:character-component}}\label{\detokenize{component/component:id6}}
+\index{キャラクター@\spxentry{キャラクター}}\ignorespaces 
+\sphinxAtStartPar
+「場」領域に置かれるコンポーネントです。兵士や防壁を表します。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+1枚または複数枚で構成
+
+\item {} 
+\sphinxAtStartPar
+ドライブ／チャージ状態を持つ
+
+\end{itemize}
+
+
+\subsection{定義リスト}
+\label{\detokenize{component/component:id7}}
+\sphinxAtStartPar
+次のリストで定義されています。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{auto/actionlist:characterlist-act}]{\ref{\detokenize{auto/actionlist:characterlist-act}} \nameref{\detokenize{auto/actionlist:characterlist-act}}}
+
+\end{itemize}
+
+
+\subsection{キャラクターの持つ項目}
+\label{\detokenize{component/component:id8}}
+\sphinxAtStartPar
+キャラクターの持つ項目について説明します。
+
+\index{キャラクター名@\spxentry{キャラクター名}}\ignorespaces \begin{description}
+\sphinxlineitem{キャラクター名}
+\sphinxAtStartPar
+キャラクターの名称を示します。
+
+\end{description}
+
+\index{タイプ(キャラクター)@\spxentry{タイプ(キャラクター)}}\ignorespaces \begin{description}
+\sphinxlineitem{タイプ}
+\sphinxAtStartPar
+キャラクターのタイプを示します。タイプは兵士と防壁の2種類が存在します。
+
+\end{description}
+
+\index{キャラクターキーカード@\spxentry{キャラクターキーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{キャラクターキーカード}
+\sphinxAtStartPar
+キャラクターを示すカードです。複数枚で１体を表現する場合もあります。
+
+\end{description}
+
+\index{ラベル(キャラクター)@\spxentry{ラベル(キャラクター)}}\ignorespaces \begin{description}
+\sphinxlineitem{ラベル}
+\sphinxAtStartPar
+キャラクターに付与された属性を示します。\textless{}速攻\textgreater{} や \textless{}アタッカー\textgreater{} など様々なラベルがあります。
+ラベルは\textless{}\textgreater{}で括り記載されます。
+
+\end{description}
+
+\index{サイズ@\spxentry{サイズ}}\ignorespaces \begin{description}
+\sphinxlineitem{サイズ}
+\sphinxAtStartPar
+兵士の持つ大きさを示します。
+
+\end{description}
+
+\index{の\textbar{}能力(キャラクター)@\spxentry{の\textbar{}能力(キャラクター)}}\ignorespaces \begin{description}
+\sphinxlineitem{能力}
+\sphinxAtStartPar
+キャラクターが持っている能力を記載しています。
+
+\end{description}
+
+
+\subsubsection{キャラクターのサイズ}
+\label{\detokenize{component/component:id9}}
+\sphinxAtStartPar
+トランプの数字は、キャラクターの強さを示します。
+基本はカードに記載された数字に準じますが、魔法などのアクションを使うことで
+加算や減算されることがあります。
+
+
+\subsection{キャラクターの注意点}
+\label{\detokenize{component/component:id10}}
+
+\subsubsection{複数枚で1体となるキャラクターが防壁になったら？}
+\label{\detokenize{component/component:id11}}
+\sphinxAtStartPar
+アクションの効果で兵士を防壁にすることがあります。
+防壁は1枚で1体のキャラクターであるため、
+複数枚からなるキャラクターが防壁となった場合、
+複数体の防壁となります。
+
+\sphinxAtStartPar
+なお、複数枚からなるキャラクターが
+墓地や手札に移った場合、
+1体のキャラクターとして
+扱うため複数枚合わせて移します。
+チャージ状態、ドライブ状態となった場合も同様に1体のキャラクター
+として扱います。
+
+
+\section{フォグ}
+\label{\detokenize{component/component:id12}}
+\index{フォグ@\spxentry{フォグ}}\ignorespaces 
+\sphinxAtStartPar
+フォグキーカードは、フォグ領域に一時的に置かれるコンポーネントです。
+ターン中のみ効果を発揮する一時的な魔法のような存在です。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+置かれるカードとタイミングは、アクションによって定義されます。
+
+\item {} 
+\sphinxAtStartPar
+効果はターン終了時に自然に失われます。
+
+\end{itemize}
+
+
+\subsection{定義リスト}
+\label{\detokenize{component/component:id13}}
+\sphinxAtStartPar
+次のリストで定義されています。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{auto/actionlist:foglist-act}]{\ref{\detokenize{auto/actionlist:foglist-act}} \nameref{\detokenize{auto/actionlist:foglist-act}}}
+
+\end{itemize}
+
+
+\subsection{フォグの持つ項目}
+\label{\detokenize{component/component:id14}}
+\sphinxAtStartPar
+フォグの持つ項目について説明します。
+
+\index{フォグキーカード@\spxentry{フォグキーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{フォグキーカード}
+\sphinxAtStartPar
+フォグを示すカードです。複数枚で１つを表現する場合もあります。
+
+\end{description}
+
+\index{の\textbar{}能力(フォグ)@\spxentry{の\textbar{}能力(フォグ)}}\ignorespaces \begin{description}
+\sphinxlineitem{能力}
+\sphinxAtStartPar
+フォグが持っている能力を記載しています。
+
+\end{description}
+
+
+\section{パック}
+\label{\detokenize{component/component:id15}}
+\index{パック@\spxentry{パック}}\ignorespaces 
+\sphinxAtStartPar
+パックカードは、ゲーム開始時にデッキから一部を抜き出してパック領域に置かれるカードです。
+特定のフレームでのみ使用されます。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+通常、非公開で裏向きに配置されます。
+
+\item {} 
+\sphinxAtStartPar
+アクション（例：パック開封）によって使用されます。
+
+\item {} 
+\sphinxAtStartPar
+定義リスト：なし
+
+\end{itemize}
+
+
+\section{レアカード}
+\label{\detokenize{component/component:id16}}
+\index{レアカード@\spxentry{レアカード}}\ignorespaces 
+\sphinxAtStartPar
+レアカードは、ゲーム開始時に1枚選ばれ、特別な領域に伏せて配置されるカードです。
+アクションで呼び出されるまで公開されないことが多いです。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象となるカードは1枚だけです。
+
+\item {} 
+\sphinxAtStartPar
+レアドローやレア召喚など、専用のアクションで使用されます。
+
+\item {} 
+\sphinxAtStartPar
+定義リスト：なし
+
+\end{itemize}
+
+
+\section{切札}
+\label{\detokenize{component/component:id17}}
+\index{き\textbar{}切札@\spxentry{き\textbar{}切札}}\ignorespaces 
+\sphinxAtStartPar
+切札は、切札領域に置かれたカードを示します。
+各切札には固有の能力が割り当てられており、表にするとその能力が発動します。
+一度表になった切札は、裏返すか破壊されるまで能力が持続します。
+
+
+\subsection{定義リスト}
+\label{\detokenize{component/component:id18}}
+\sphinxAtStartPar
+次のリストで定義されています。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{auto/frameActionlist:trumplist-act-frame}]{\ref{\detokenize{auto/frameActionlist:trumplist-act-frame}} \nameref{\detokenize{auto/frameActionlist:trumplist-act-frame}}}
+
+\end{itemize}
+
+
+\subsection{切札の持つ項目}
+\label{\detokenize{component/component:id19}}
+\sphinxAtStartPar
+切札の持つ項目について説明します。
+
+\index{き\textbar{}切札キーカード@\spxentry{き\textbar{}切札キーカード}}\ignorespaces \begin{description}
+\sphinxlineitem{切札キーカード}
+\sphinxAtStartPar
+切札を示すカードです。スートと数字によって能力が異なります。
+裏向きで配置し、「オープン」アクションによって表にします。
+
+\end{description}
+
+\index{ラベル(切札)@\spxentry{ラベル(切札)}}\ignorespaces \begin{description}
+\sphinxlineitem{ラベル}
+\sphinxAtStartPar
+切札に付与された属性を示します。
+
+\end{description}
+
+\index{の\textbar{}能力(切札)@\spxentry{の\textbar{}能力(切札)}}\ignorespaces \begin{description}
+\sphinxlineitem{能力}
+\sphinxAtStartPar
+切札が表になった際に発揮する特殊効果を記載します。
+能力の内容や発動条件は、エクストラリスト（切札リスト）に定義されています。
+
+\end{description}
 
 \sphinxstepscope
 
@@ -1667,179 +2259,179 @@ BlackPokerにはいくつかのフォーマットがあり、
 
 
 \subsection{アクションリスト}
-\label{\detokenize{auto/actionlist:act-act}}\label{\detokenize{auto/actionlist:id1}}\label{\detokenize{auto/actionlist::doc}}
+\label{\detokenize{auto/actionlist:actionlist-act}}\label{\detokenize{auto/actionlist:act-act}}\label{\detokenize{auto/actionlist:id1}}\label{\detokenize{auto/actionlist::doc}}
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id59}}{\hyperref[\detokenize{auto/actionlist:id3}]{\sphinxcrossref{基本}}}
+\phantomsection\label{\detokenize{auto/actionlist:id58}}{\hyperref[\detokenize{auto/actionlist:id3}]{\sphinxcrossref{基本}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id60}}{\hyperref[\detokenize{auto/actionlist:act-end}]{\sphinxcrossref{エンド (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id59}}{\hyperref[\detokenize{auto/actionlist:act-end}]{\sphinxcrossref{エンド (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id61}}{\hyperref[\detokenize{auto/actionlist:act-charge}]{\sphinxcrossref{チャージ (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id60}}{\hyperref[\detokenize{auto/actionlist:act-charge}]{\sphinxcrossref{チャージ (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id62}}{\hyperref[\detokenize{auto/actionlist:act-draw}]{\sphinxcrossref{ドロー (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id61}}{\hyperref[\detokenize{auto/actionlist:act-draw}]{\sphinxcrossref{ドロー (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id63}}{\hyperref[\detokenize{auto/actionlist:act-attack}]{\sphinxcrossref{アタック (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id62}}{\hyperref[\detokenize{auto/actionlist:act-attack}]{\sphinxcrossref{アタック (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id64}}{\hyperref[\detokenize{auto/actionlist:act-block}]{\sphinxcrossref{ブロック (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id63}}{\hyperref[\detokenize{auto/actionlist:act-block}]{\sphinxcrossref{ブロック (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id65}}{\hyperref[\detokenize{auto/actionlist:act-damagejudge}]{\sphinxcrossref{ダメージ判定 (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id64}}{\hyperref[\detokenize{auto/actionlist:act-damagejudge}]{\sphinxcrossref{ダメージ判定 (基本)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id66}}{\hyperref[\detokenize{auto/actionlist:act-nextgeneration}]{\sphinxcrossref{世代交代 (基本)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id65}}{\hyperref[\detokenize{auto/actionlist:act-nextgeneration}]{\sphinxcrossref{世代交代 (基本)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id67}}{\hyperref[\detokenize{auto/actionlist:id11}]{\sphinxcrossref{召喚}}}
+\phantomsection\label{\detokenize{auto/actionlist:id66}}{\hyperref[\detokenize{auto/actionlist:id11}]{\sphinxcrossref{召喚}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id68}}{\hyperref[\detokenize{auto/actionlist:act-setbulwark}]{\sphinxcrossref{防壁設置 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id67}}{\hyperref[\detokenize{auto/actionlist:act-setbulwark}]{\sphinxcrossref{防壁設置 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id69}}{\hyperref[\detokenize{auto/actionlist:act-summonssoldier}]{\sphinxcrossref{兵士召喚 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id68}}{\hyperref[\detokenize{auto/actionlist:act-summonssoldier}]{\sphinxcrossref{兵士召喚 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id70}}{\hyperref[\detokenize{auto/actionlist:act-summonshero}]{\sphinxcrossref{英雄召喚 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id69}}{\hyperref[\detokenize{auto/actionlist:act-summonshero}]{\sphinxcrossref{英雄召喚 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id71}}{\hyperref[\detokenize{auto/actionlist:act-summonsace}]{\sphinxcrossref{エース召喚 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id70}}{\hyperref[\detokenize{auto/actionlist:act-summonsace}]{\sphinxcrossref{エース召喚 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id72}}{\hyperref[\detokenize{auto/actionlist:act-quicksummonsace}]{\sphinxcrossref{クイック召喚 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id71}}{\hyperref[\detokenize{auto/actionlist:act-quicksummonsace}]{\sphinxcrossref{クイック召喚 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id73}}{\hyperref[\detokenize{auto/actionlist:act-summonsmagic}]{\sphinxcrossref{魔術士召喚 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id72}}{\hyperref[\detokenize{auto/actionlist:act-summonsmagic}]{\sphinxcrossref{魔術士召喚 (召喚)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id74}}{\hyperref[\detokenize{auto/actionlist:act-mountsoldier}]{\sphinxcrossref{装備 (召喚)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id73}}{\hyperref[\detokenize{auto/actionlist:act-mountsoldier}]{\sphinxcrossref{装備 (召喚)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id75}}{\hyperref[\detokenize{auto/actionlist:id19}]{\sphinxcrossref{速攻魔法}}}
+\phantomsection\label{\detokenize{auto/actionlist:id74}}{\hyperref[\detokenize{auto/actionlist:id19}]{\sphinxcrossref{速攻魔法}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id76}}{\hyperref[\detokenize{auto/actionlist:act-up}]{\sphinxcrossref{アップ (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id75}}{\hyperref[\detokenize{auto/actionlist:act-up}]{\sphinxcrossref{アップ (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id77}}{\hyperref[\detokenize{auto/actionlist:act-down}]{\sphinxcrossref{ダウン (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id76}}{\hyperref[\detokenize{auto/actionlist:act-down}]{\sphinxcrossref{ダウン (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id78}}{\hyperref[\detokenize{auto/actionlist:act-twist}]{\sphinxcrossref{ツイスト (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id77}}{\hyperref[\detokenize{auto/actionlist:act-twist}]{\sphinxcrossref{ツイスト (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id79}}{\hyperref[\detokenize{auto/actionlist:act-counter}]{\sphinxcrossref{カウンター (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id78}}{\hyperref[\detokenize{auto/actionlist:act-counter}]{\sphinxcrossref{カウンター (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id80}}{\hyperref[\detokenize{auto/actionlist:act-reunion}]{\sphinxcrossref{再会 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id79}}{\hyperref[\detokenize{auto/actionlist:act-reunion}]{\sphinxcrossref{再会 (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id81}}{\hyperref[\detokenize{auto/actionlist:act-kill}]{\sphinxcrossref{キル (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id80}}{\hyperref[\detokenize{auto/actionlist:act-kill}]{\sphinxcrossref{キル (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id82}}{\hyperref[\detokenize{auto/actionlist:act-truce}]{\sphinxcrossref{停戦 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id81}}{\hyperref[\detokenize{auto/actionlist:act-truce}]{\sphinxcrossref{停戦 (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id83}}{\hyperref[\detokenize{auto/actionlist:act-changetarget}]{\sphinxcrossref{対象変更 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id82}}{\hyperref[\detokenize{auto/actionlist:act-changetarget}]{\sphinxcrossref{対象変更 (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id84}}{\hyperref[\detokenize{auto/actionlist:act-search}]{\sphinxcrossref{サーチ (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id83}}{\hyperref[\detokenize{auto/actionlist:act-search}]{\sphinxcrossref{サーチ (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id85}}{\hyperref[\detokenize{auto/actionlist:bj}]{\sphinxcrossref{B・J (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id84}}{\hyperref[\detokenize{auto/actionlist:bj}]{\sphinxcrossref{B・J (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id86}}{\hyperref[\detokenize{auto/actionlist:rsf}]{\sphinxcrossref{R・S・F (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id85}}{\hyperref[\detokenize{auto/actionlist:rsf}]{\sphinxcrossref{R・S・F (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id87}}{\hyperref[\detokenize{auto/actionlist:act-reverse}]{\sphinxcrossref{リバース (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id86}}{\hyperref[\detokenize{auto/actionlist:act-reverse}]{\sphinxcrossref{リバース (速攻魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id88}}{\hyperref[\detokenize{auto/actionlist:act-unsummons}]{\sphinxcrossref{帰還 (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id87}}{\hyperref[\detokenize{auto/actionlist:act-unsummons}]{\sphinxcrossref{帰還 (速攻魔法)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id89}}{\hyperref[\detokenize{auto/actionlist:id31}]{\sphinxcrossref{通常魔法}}}
+\phantomsection\label{\detokenize{auto/actionlist:id88}}{\hyperref[\detokenize{auto/actionlist:id31}]{\sphinxcrossref{通常魔法}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id90}}{\hyperref[\detokenize{auto/actionlist:act-destroybulwark}]{\sphinxcrossref{防壁破壊 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id89}}{\hyperref[\detokenize{auto/actionlist:act-destroybulwark}]{\sphinxcrossref{防壁破壊 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id91}}{\hyperref[\detokenize{auto/actionlist:act-throwing}]{\sphinxcrossref{投擲 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id90}}{\hyperref[\detokenize{auto/actionlist:act-throwing}]{\sphinxcrossref{投擲 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id92}}{\hyperref[\detokenize{auto/actionlist:act-deathlance}]{\sphinxcrossref{死の槍 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id91}}{\hyperref[\detokenize{auto/actionlist:act-deathlance}]{\sphinxcrossref{死の槍 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id93}}{\hyperref[\detokenize{auto/actionlist:act-addbulwark}]{\sphinxcrossref{防壁補充 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id92}}{\hyperref[\detokenize{auto/actionlist:act-addbulwark}]{\sphinxcrossref{防壁補充 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id94}}{\hyperref[\detokenize{auto/actionlist:act-reanimate}]{\sphinxcrossref{リアニメイト (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id93}}{\hyperref[\detokenize{auto/actionlist:act-reanimate}]{\sphinxcrossref{リアニメイト (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id95}}{\hyperref[\detokenize{auto/actionlist:act-handeth}]{\sphinxcrossref{ハンデス (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id94}}{\hyperref[\detokenize{auto/actionlist:act-handeth}]{\sphinxcrossref{ハンデス (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id96}}{\hyperref[\detokenize{auto/actionlist:act-force}]{\sphinxcrossref{フォース (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id95}}{\hyperref[\detokenize{auto/actionlist:act-force}]{\sphinxcrossref{フォース (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id97}}{\hyperref[\detokenize{auto/actionlist:act-swordrain}]{\sphinxcrossref{剣の雨 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id96}}{\hyperref[\detokenize{auto/actionlist:act-swordrain}]{\sphinxcrossref{剣の雨 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id98}}{\hyperref[\detokenize{auto/actionlist:act-recruit}]{\sphinxcrossref{徴募 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id97}}{\hyperref[\detokenize{auto/actionlist:act-recruit}]{\sphinxcrossref{徴募 (通常魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id99}}{\hyperref[\detokenize{auto/actionlist:act-surprise}]{\sphinxcrossref{奇襲 (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id98}}{\hyperref[\detokenize{auto/actionlist:act-surprise}]{\sphinxcrossref{奇襲 (通常魔法)}}}
 
 \end{itemize}
 
@@ -1925,10 +2517,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2000,10 +2592,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 ターンを持っているプレイヤーの場にいるキャラクターを全てチャージ状態にする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  4.0
+\sphinxstylestrong{導入バージョン:}  v4.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2083,10 +2675,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  4.0
+\sphinxstylestrong{導入バージョン:}  v4.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2158,19 +2750,19 @@ BlackPokerにはいくつかのフォーマットがあり、
 対戦相手を攻撃するアタッカーをドライブして指定する。
 
 \sphinxAtStartPar
-・アタッカーはラベルにアタッカーを持っているキャラクターを指定できる。
+・アタッカーは \textless{}アタッカー\textgreater{} を持っているキャラクターを指定できる。
 
 \sphinxAtStartPar
 ・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
 
 \sphinxAtStartPar
-・このターン場に出たキャラクターは指定できない、ただしラベルに速攻があるキャラクターは指定できる。
+・このターン場に出たキャラクターは指定できない、ただし \textless{}速攻\textgreater{} があるキャラクターは指定できる。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -2242,16 +2834,16 @@ BlackPokerにはいくつかのフォーマットがあり、
 対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。
 
 \sphinxAtStartPar
-・ブロッカーはラベルにブロッカーを持っているキャラクターを指定できる。
+・ブロッカーは \textless{}ブロッカー\textgreater{} を持っているキャラクターを指定できる。
 
 \sphinxAtStartPar
 ・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -2360,10 +2952,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2426,7 +3018,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚につき1回誘発する。
+Joker,A,J,Q,Kのカードが自分の場から墓地に行くたびに1枚につき1回誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -2435,10 +3027,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2531,10 +3123,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \textasciitilde{} 再現の師より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2621,10 +3213,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \textasciitilde{} 再現者の心得第二章より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2711,10 +3303,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \textasciitilde{} 古参兵より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2801,10 +3393,10 @@ Joker,A,J,Q,Kのカードがあなたの場から墓地に行くたびに1枚に
 \textasciitilde{} 親方より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2888,10 +3480,10 @@ x
 防壁の置き方は「防壁の置き方」参照。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  6.0
+\sphinxstylestrong{導入バージョン:}  v6.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -2979,10 +3571,10 @@ x
 \textasciitilde{} 再現者見習いより \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -3051,7 +3643,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-自分の場にいるキーカードと同じスートの兵士1体を対象とする。Jokerは対象にできない。
+キーカードとスートが等しい自分の兵士1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3075,10 +3667,10 @@ x
 \textasciitilde{} ライフよりの防壁より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3150,7 +3742,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-兵士1体を対象とする。
+兵士1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3159,10 +3751,10 @@ x
 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3231,7 +3823,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-兵士1体を対象とする。
+兵士1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3246,10 +3838,10 @@ x
 もし対象のサイズが0以下とならなかった場合、その印としてフォグにキーカードを置き、ダウンとする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3318,7 +3910,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-キャラクター1体を対象とする。
+キャラクター1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3327,10 +3919,10 @@ x
 対象のキャラクターをドライブ状態またはチャージ状態にする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3399,7 +3991,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-キーカードが1枚または2枚のアクションを対象とする。
+キーカードが1枚または2枚のリクエスト
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3414,10 +4006,10 @@ x
 ・対象アクションのキーカードが2枚
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3501,10 +4093,10 @@ x
 \textasciitilde{} ネタバレ娘より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -3570,7 +4162,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-兵士1体を対象とする。
+兵士1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3579,10 +4171,10 @@ x
 対象とした兵士を墓地に移す。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3648,19 +4240,19 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-ダメージ判定アクションを対象とする。
+ダメージ判定アクションのリクエスト
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象のアクションを無効にする。対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+対象のリクエストを無効にする。対象のリクエストをステージから取り除き、対象のリクエストのキーカードを墓地に移す。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3726,19 +4318,19 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-対象が指定されているアクションを対象とする。
+対象が指定されているリクエスト
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象のアクションで指定されている対象をそのアクションが指定できる範囲で変更する。アクションを対象とするアクションの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。
+対象のリクエストで指定されている対象をそのアクションが指定できる範囲で変更する。リクエストの対象を対象変更に変更することは可能、アクションの対象にできないものへの対象の変更は不可能とする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3807,10 +4399,10 @@ x
 ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -3870,16 +4462,41 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートの A と J
-
-\sphinxAtStartPar
-\sphinxstylestrong{コスト:} SS
+\sphinxstylestrong{キーカード:} A と J
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+合計点 を 0 とし、自分のライフの山札から1枚めくり表向きにする。公開したカードをまとめて 公開カード と呼ぶ。
+
+\item {} 
+\sphinxAtStartPar
+めくったカードの点数を合計点に加える。
 
 \sphinxAtStartPar
-ライフから好きなカードを2枚まで選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
+・A は 11 点として扱う。ただし合計点が 22 点以上になる場合は 1 点として扱う。
+
+\sphinxAtStartPar
+・J,Q,K は 10 点、Joker は 0 点、2〜10 は数字どおりとして扱う。
+
+\item {} 
+\sphinxAtStartPar
+合計点が 22 点以上になった場合、公開カードをすべて墓地に置き、効果を終了する。
+
+\item {} 
+\sphinxAtStartPar
+合計点が 21 点以下の場合、ヒット もしくは、スタンドを行う。
+
+\sphinxAtStartPar
+・ヒット: さらに 1 枚めくり、手順 2 に戻る。
+
+\sphinxAtStartPar
+・スタンド: 公開カードすべてを手札に加え、効果を終了する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{ストーリー:}
@@ -3897,10 +4514,10 @@ x
 \textasciitilde{} 革命者より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -3966,13 +4583,10 @@ x
 \sphinxstylestrong{コスト:} BB
 
 \sphinxAtStartPar
-\sphinxstylestrong{特記事項:} ※このアクションはカウンターアクションの対象にならない。
-
-\sphinxAtStartPar
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-プレイヤー1人を対象とする。
+プレイヤー1人
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -3981,10 +4595,10 @@ x
 対象のプレイヤーに40点のダメージを与える。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4050,7 +4664,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-キャラクター1体を対象とする。
+キャラクター1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4075,10 +4689,10 @@ x
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4147,7 +4761,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-自分の場のキャラクター1体を対象とする。
+自分のキャラクター1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4164,10 +4778,10 @@ x
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4236,7 +4850,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-防壁1体を対象とする。
+防壁1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4260,10 +4874,10 @@ x
 \textasciitilde{} かくれんぼしていた子供より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.2
+\sphinxstylestrong{導入バージョン:}  v0.2
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4329,7 +4943,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-対戦相手1人を対象とする。
+対戦相手1人
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4353,10 +4967,10 @@ x
 \textasciitilde{} 再現者の心得第十一章より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  0.1
+\sphinxstylestrong{導入バージョン:}  v0.1
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4422,13 +5036,13 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-兵士1体を対象とする。
+兵士1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象の兵士の数字が0以外かつ、キーカードの{\normalsize $\diamondsuit$} カードの数字で割切れる場合、次を行う。
+対象の兵士のサイズが0以外かつ、キーカードの{\normalsize $\diamondsuit$} カードの数字で割切れる場合、次を行う。
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
@@ -4457,10 +5071,10 @@ x
 \textasciitilde{} 再現者の心得第十二章より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  2.0
+\sphinxstylestrong{導入バージョン:}  v2.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  3.0,8.0
+\sphinxstylestrong{更新バージョン:}  v3.0,8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4547,10 +5161,10 @@ x
 \textasciitilde{} 無能な指揮官より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -4616,7 +5230,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-自分の場のキャラクター1体を対象とする。
+自分のキャラクター1体
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4625,10 +5239,10 @@ x
 自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4694,7 +5308,7 @@ x
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-対戦相手1人を対象とする。
+対戦相手1人
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -4703,10 +5317,10 @@ x
 対戦相手の手札を見て1枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0,v8.1
 
 
 \bigskip\hrule\bigskip
@@ -4784,10 +5398,10 @@ x
 その印としてフォグにキーカードを置き、フォースとする。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -4859,7 +5473,7 @@ x
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-キーカードの合計値以下の全ての兵士を墓地に移す。
+サイズがキーカードの合計値以下の全ての兵士を墓地に移す。
 
 \sphinxAtStartPar
 \sphinxstylestrong{ストーリー:}
@@ -4877,10 +5491,10 @@ x
 \textasciitilde{} 平和主義の{\normalsize $\clubsuit$} 3一般兵より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -4980,10 +5594,10 @@ x
 \textasciitilde{} 孤独な徴募兵より \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5066,50 +5680,50 @@ x
 \end{enumerate}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \subsection{キャラクターリスト}
-\label{\detokenize{auto/actionlist:id42}}
+\label{\detokenize{auto/actionlist:characterlist-act}}\label{\detokenize{auto/actionlist:id42}}
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id100}}{\hyperref[\detokenize{auto/actionlist:id44}]{\sphinxcrossref{兵士}}}
+\phantomsection\label{\detokenize{auto/actionlist:id99}}{\hyperref[\detokenize{auto/actionlist:id44}]{\sphinxcrossref{兵士}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id101}}{\hyperref[\detokenize{auto/actionlist:char-soldier}]{\sphinxcrossref{一般兵 (兵士)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id100}}{\hyperref[\detokenize{auto/actionlist:char-soldier}]{\sphinxcrossref{一般兵 (兵士)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id102}}{\hyperref[\detokenize{auto/actionlist:char-hero}]{\sphinxcrossref{英雄 (兵士)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id101}}{\hyperref[\detokenize{auto/actionlist:char-hero}]{\sphinxcrossref{英雄 (兵士)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id103}}{\hyperref[\detokenize{auto/actionlist:char-ace}]{\sphinxcrossref{エース (兵士)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id102}}{\hyperref[\detokenize{auto/actionlist:char-ace}]{\sphinxcrossref{エース (兵士)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id104}}{\hyperref[\detokenize{auto/actionlist:char-magician}]{\sphinxcrossref{魔術士 (兵士)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id103}}{\hyperref[\detokenize{auto/actionlist:char-magician}]{\sphinxcrossref{魔術士 (兵士)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id105}}{\hyperref[\detokenize{auto/actionlist:char-armedsoldier}]{\sphinxcrossref{装備兵 (兵士)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id104}}{\hyperref[\detokenize{auto/actionlist:char-armedsoldier}]{\sphinxcrossref{装備兵 (兵士)}}}
 
 \end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id106}}{\hyperref[\detokenize{auto/actionlist:id50}]{\sphinxcrossref{防壁}}}
+\phantomsection\label{\detokenize{auto/actionlist:id105}}{\hyperref[\detokenize{auto/actionlist:id50}]{\sphinxcrossref{防壁}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id107}}{\hyperref[\detokenize{auto/actionlist:char-bulwark}]{\sphinxcrossref{防壁 (防壁)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id106}}{\hyperref[\detokenize{auto/actionlist:char-bulwark}]{\sphinxcrossref{防壁 (防壁)}}}
 
 \end{itemize}
 
@@ -5168,19 +5782,19 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 2〜10
+\sphinxstylestrong{キャラクターキーカード:} 2〜10
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードの数字
+\sphinxstylestrong{サイズ:} ユニットカードの数字
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5231,19 +5845,19 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} J〜K
+\sphinxstylestrong{キャラクターキーカード:} J〜K
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードがJなら11,Qなら12,Kなら13
+\sphinxstylestrong{サイズ:} ユニットカードがJなら11,Qなら12,Kなら13
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5294,7 +5908,7 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} A
+\sphinxstylestrong{キャラクターキーカード:} A
 
 \sphinxAtStartPar
 \sphinxstylestrong{サイズ:} 1
@@ -5318,10 +5932,10 @@ x
 \textasciitilde{} 再現者見習いより \textasciitilde{}
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5372,7 +5986,7 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} Joker
+\sphinxstylestrong{キャラクターキーカード:} Joker
 
 \sphinxAtStartPar
 \sphinxstylestrong{サイズ:} 0
@@ -5387,10 +6001,10 @@ x
 ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストDが無しになる。）
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  3.0
+\sphinxstylestrong{導入バージョン:}  v3.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5441,19 +6055,19 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 同じスートを2枚以上
+\sphinxstylestrong{キャラクターキーカード:} 同じスートを2枚以上
 
 \sphinxAtStartPar
-\sphinxstylestrong{サイズ:} キーカードの数字の合計
+\sphinxstylestrong{サイズ:} ユニットカードの数字の合計
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  5.0
+\sphinxstylestrong{導入バージョン:}  v5.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
@@ -5507,44 +6121,38 @@ x
 \sphinxattableend\end{savenotes}
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} 全て(裏向き)
+\sphinxstylestrong{キャラクターキーカード:} 全て(裏向き)
 
 \sphinxAtStartPar
 \sphinxstylestrong{ラベル:} ブロッカー
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  1.0
+\sphinxstylestrong{導入バージョン:}  v1.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  8.0
+\sphinxstylestrong{更新バージョン:}  v8.0
 
 
 \subsection{フォグリスト}
-\label{\detokenize{auto/actionlist:id52}}
+\label{\detokenize{auto/actionlist:foglist-act}}\label{\detokenize{auto/actionlist:id52}}
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id108}}{\hyperref[\detokenize{auto/actionlist:id54}]{\sphinxcrossref{速攻魔法}}}
+\phantomsection\label{\detokenize{auto/actionlist:id107}}{\hyperref[\detokenize{auto/actionlist:id54}]{\sphinxcrossref{滞留魔法}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id109}}{\hyperref[\detokenize{auto/actionlist:fog-upfog}]{\sphinxcrossref{アップ (速攻魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id108}}{\hyperref[\detokenize{auto/actionlist:fog-upfog}]{\sphinxcrossref{アップ (滞留魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id110}}{\hyperref[\detokenize{auto/actionlist:fog-downfog}]{\sphinxcrossref{ダウン (速攻魔法)}}}
-
-\end{itemize}
+\phantomsection\label{\detokenize{auto/actionlist:id109}}{\hyperref[\detokenize{auto/actionlist:fog-downfog}]{\sphinxcrossref{ダウン (滞留魔法)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id111}}{\hyperref[\detokenize{auto/actionlist:id57}]{\sphinxcrossref{通常魔法}}}
-\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/actionlist:id112}}{\hyperref[\detokenize{auto/actionlist:fog-forcefog}]{\sphinxcrossref{フォース (通常魔法)}}}
+\phantomsection\label{\detokenize{auto/actionlist:id110}}{\hyperref[\detokenize{auto/actionlist:fog-forcefog}]{\sphinxcrossref{フォース (滞留魔法)}}}
 
 \end{itemize}
 
@@ -5556,13 +6164,13 @@ x
 
 
 
-\subsubsection{速攻魔法}
+\subsubsection{滞留魔法}
 \label{\detokenize{auto/actionlist:id54}}
 
-\paragraph{アップ (速攻魔法)}
+\paragraph{アップ (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-upfog}}\label{\detokenize{auto/actionlist:id55}}
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\heartsuit$} A〜10
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -5571,17 +6179,17 @@ x
 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  8.0
+\sphinxstylestrong{導入バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
 
 
 
-\paragraph{ダウン (速攻魔法)}
+\paragraph{ダウン (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-downfog}}\label{\detokenize{auto/actionlist:id56}}
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\spadesuit$} A〜10
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\spadesuit$} A〜10
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -5590,20 +6198,17 @@ x
 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  8.0
+\sphinxstylestrong{導入バージョン:}  v8.0
 
 
 \bigskip\hrule\bigskip
 
 
 
-\subsubsection{通常魔法}
-\label{\detokenize{auto/actionlist:id57}}
-
-\paragraph{フォース (通常魔法)}
-\label{\detokenize{auto/actionlist:fog-forcefog}}\label{\detokenize{auto/actionlist:id58}}
+\paragraph{フォース (滞留魔法)}
+\label{\detokenize{auto/actionlist:fog-forcefog}}\label{\detokenize{auto/actionlist:id57}}
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
+\sphinxstylestrong{フォグキーカード:} {\normalsize $\heartsuit$} A〜10 を 2枚
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -5612,7 +6217,7 @@ x
 このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
 
 \sphinxAtStartPar
-\sphinxstylestrong{導入バージョン:}  8.0
+\sphinxstylestrong{導入バージョン:}  v8.0
 
 \sphinxstepscope
 
@@ -5652,9 +6257,17 @@ x
 \sphinxAtStartPar
 共通ルールに記載されているゲームの始め方（カードの初期配置）を変更する場合、定義されます。
 
-\sphinxlineitem{アクションリスト}
+\sphinxlineitem{フレームアクションリスト}
 \sphinxAtStartPar
 追加で起こせるアクション（フレーム依存アクション）がある場合、定義されます。
+
+\sphinxlineitem{フレームフォグリスト}
+\sphinxAtStartPar
+追加で起こせるフォグ（フレーム依存フォグ）がある場合、定義されます。
+
+\sphinxlineitem{フレーム切札リスト}
+\sphinxAtStartPar
+追加で起こせる切札（フレーム依存切札）がある場合、定義されます。
 
 \end{description}
 
@@ -5667,7 +6280,7 @@ x
 \sphinxstepscope
 
 
-\subsection{フレームリスト}
+\subsection{公式フレーム}
 \label{\detokenize{auto/framelist:id1}}\label{\detokenize{auto/framelist::doc}}
 \sphinxAtStartPar
 本ドキュメントでは、BlackPokerのすべてのフレームについて記載します。
@@ -5677,19 +6290,23 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/framelist:id11}}{\hyperref[\detokenize{auto/framelist:frame-entry20}]{\sphinxcrossref{エントリー20}}}
+\phantomsection\label{\detokenize{auto/framelist:id13}}{\hyperref[\detokenize{auto/framelist:frame-entry20}]{\sphinxcrossref{エントリー20}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/framelist:id12}}{\hyperref[\detokenize{auto/framelist:frame-pack}]{\sphinxcrossref{パック}}}
+\phantomsection\label{\detokenize{auto/framelist:id14}}{\hyperref[\detokenize{auto/framelist:frame-pack}]{\sphinxcrossref{パック}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/framelist:id13}}{\hyperref[\detokenize{auto/framelist:frame-rarepack}]{\sphinxcrossref{レアパック}}}
+\phantomsection\label{\detokenize{auto/framelist:id15}}{\hyperref[\detokenize{auto/framelist:frame-rarepack}]{\sphinxcrossref{レアパック}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/framelist:id14}}{\hyperref[\detokenize{auto/framelist:frame-strategy}]{\sphinxcrossref{ストラテジー}}}
+\phantomsection\label{\detokenize{auto/framelist:id16}}{\hyperref[\detokenize{auto/framelist:frame-strategy}]{\sphinxcrossref{ストラテジー}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/framelist:id17}}{\hyperref[\detokenize{auto/framelist:frame-extra}]{\sphinxcrossref{エクストラ}}}
 
 \end{itemize}
 \end{sphinxShadowBox}
@@ -5705,7 +6322,7 @@ x
 \capstart
 
 \noindent\sphinxincludegraphics{{entry20}.pdf}
-\caption{配置図\sphinxhyphen{}エントリー20}\label{\detokenize{auto/framelist:id7}}\label{\detokenize{auto/framelist:frame-entry20-image}}\end{figure}
+\caption{配置図\sphinxhyphen{}エントリー20}\label{\detokenize{auto/framelist:id8}}\label{\detokenize{auto/framelist:frame-entry20-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマット:}
@@ -5774,19 +6391,33 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-デッキをライフとし配置図の場所に伏せておく。
+デッキをシャッフルする。
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+デッキをライフとし、配置図の場所に伏せておく。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-field}]{\ref{\detokenize{common/common:common-gamestart-field}} \nameref{\detokenize{common/common:common-gamestart-field}}} 以降に沿ってゲームを開始します。
+ライフの一番上のカード7枚引き手札とする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 
 \bigskip\hrule\bigskip
@@ -5803,7 +6434,7 @@ x
 \capstart
 
 \noindent\sphinxincludegraphics{{pack}.pdf}
-\caption{配置図\sphinxhyphen{}パック}\label{\detokenize{auto/framelist:id8}}\label{\detokenize{auto/framelist:frame-pack-image}}\end{figure}
+\caption{配置図\sphinxhyphen{}パック}\label{\detokenize{auto/framelist:id9}}\label{\detokenize{auto/framelist:frame-pack-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマット:}
@@ -5850,11 +6481,16 @@ x
 \sphinxstylestrong{デッキ条件:}
 
 \sphinxAtStartPar
-なし
+40枚以上
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+デッキをシャッフルする。
+
 \item {} 
 \sphinxAtStartPar
 デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
@@ -5865,16 +6501,21 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカード7枚引き手札とする。
 
 \item {} 
 \sphinxAtStartPar
-フォーマットがライトの場合、プリセットされた兵士カードがJokerならばそれを墓地に移し、次のカードを兵士として場に出す。（ライトに兵士「魔術士」がいないため。）
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -5884,7 +6525,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-パック開封
+パック操作アクション
 
 \end{itemize}
 
@@ -5924,7 +6565,7 @@ x
 \capstart
 
 \noindent\sphinxincludegraphics{{rarePack}.pdf}
-\caption{配置図\sphinxhyphen{}レアパック}\label{\detokenize{auto/framelist:id9}}\label{\detokenize{auto/framelist:frame-rarepack-image}}\end{figure}
+\caption{配置図\sphinxhyphen{}レアパック}\label{\detokenize{auto/framelist:id10}}\label{\detokenize{auto/framelist:frame-rarepack-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマット:}
@@ -5971,11 +6612,12 @@ x
 \sphinxstylestrong{デッキ条件:}
 
 \sphinxAtStartPar
-なし
+40枚以上
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
 デッキからレアカード1枚を選び配置図の場所に伏せておく。
@@ -5994,12 +6636,21 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカード7枚引き手札とする。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -6009,19 +6660,11 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-パック開封
+パック操作アクション
 
 \item {} 
 \sphinxAtStartPar
-レアドロー
-
-\item {} 
-\sphinxAtStartPar
-レア召喚
-
-\item {} 
-\sphinxAtStartPar
-罠カウンター
+レアカード操作アクション
 
 \end{itemize}
 
@@ -6068,7 +6711,7 @@ x
 \capstart
 
 \noindent\sphinxincludegraphics{{rarePack}.pdf}
-\caption{配置図\sphinxhyphen{}ストラテジー}\label{\detokenize{auto/framelist:id10}}\label{\detokenize{auto/framelist:frame-strategy-image}}\end{figure}
+\caption{配置図\sphinxhyphen{}ストラテジー}\label{\detokenize{auto/framelist:id11}}\label{\detokenize{auto/framelist:frame-strategy-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマット:}
@@ -6115,11 +6758,12 @@ x
 \sphinxstylestrong{デッキ条件:}
 
 \sphinxAtStartPar
-なし
+40枚以上
 
 \sphinxAtStartPar
 \sphinxstylestrong{ゲームの始め方:}
-\begin{itemize}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
 デッキから最初の手札に入れる3枚を選ぶ。（ストラテジー）
@@ -6130,7 +6774,11 @@ x
 
 \item {} 
 \sphinxAtStartPar
-残りのデッキをシャッフルし、上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
+デッキをシャッフルする。
+
+\item {} 
+\sphinxAtStartPar
+デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
 
 \item {} 
 \sphinxAtStartPar
@@ -6138,16 +6786,21 @@ x
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上のカードを防壁として場に出し、次のカードを兵士として場に出す。（プリセット）
+ライフの一番上のカードを4枚引いて手札を7枚とする。
 
 \item {} 
 \sphinxAtStartPar
-4枚引いて手札を7枚とする。
+\hyperref[\detokenize{common/common:common-gamestart-preset}]{\ref{\detokenize{common/common:common-gamestart-preset}} \nameref{\detokenize{common/common:common-gamestart-preset}}} に従ってプリセットする。
 
-\end{itemize}
-
+\item {} 
 \sphinxAtStartPar
-以降は、 \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} 以降に沿ってゲームを開始します。
+\hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{アクションリスト:}
@@ -6157,19 +6810,11 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-パック開封
+パック操作アクション
 
 \item {} 
 \sphinxAtStartPar
-レアドロー
-
-\item {} 
-\sphinxAtStartPar
-レア召喚
-
-\item {} 
-\sphinxAtStartPar
-罠カウンター
+レアカード操作アクション
 
 \end{itemize}
 
@@ -6201,36 +6846,273 @@ x
 
 \end{description}
 
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{エクストラ}
+\label{\detokenize{auto/framelist:frame-extra}}\label{\detokenize{auto/framelist:id7}}
 \sphinxAtStartPar
-各フレームで追加で使えるアクションについては次を参照してください。
+\sphinxstylestrong{配置図:}
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics{{extra}.pdf}
+\caption{配置図\sphinxhyphen{}エクストラ}\label{\detokenize{auto/framelist:id12}}\label{\detokenize{auto/framelist:frame-extra-image}}\end{figure}
+
+\sphinxAtStartPar
+\sphinxstylestrong{フォーマット:}
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+ライト
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+スタンダード
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+プロ
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+マスター
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxAtStartPar
+\sphinxstylestrong{デッキ条件:}
+
+\sphinxAtStartPar
+40枚以上
+
+\sphinxAtStartPar
+\sphinxstylestrong{ゲームの始め方:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+デッキから2枚を切札として選び、2枚とも配置図の切札の場所に伏せておく。
+
+\item {} 
+\sphinxAtStartPar
+デッキから最初の手札に入れる3枚を選ぶ。（ストラテジー)
+
+\item {} 
+\sphinxAtStartPar
+デッキからレアカード1枚を選び配置図の場所に伏せておく。
+
+\item {} 
+\sphinxAtStartPar
+残りのデッキをシャッフルし、上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
+
+\item {} 
+\sphinxAtStartPar
+残りのデッキをライフとし配置図の場所に伏せておく。
+
+\item {} 
+\sphinxAtStartPar
+ライフの一番上のカードを4枚引いて手札を7枚とする。
+
+\item {} 
+\sphinxAtStartPar
+ライフの一番上のカードを防壁として場に出し、次のカードを兵士の場所に裏向きで出す。（プリセット）
+
+\item {} 
+\sphinxAtStartPar
+対戦相手も手札を7枚用意でき、準備ができてから \hyperref[\detokenize{common/common:common-gamestart-first}]{\ref{\detokenize{common/common:common-gamestart-first}} \nameref{\detokenize{common/common:common-gamestart-first}}} に従って先攻プレイヤーを決定する。
+
+\item {} 
+\sphinxAtStartPar
+先攻プレイヤーは、プリセットで兵士の場所に裏向きで出したカードを表にし、切札の場所の2枚のうち1枚を表向きにする。
+
+\item {} 
+\sphinxAtStartPar
+後攻プレイヤーも、プリセットで兵士の場所に裏向きで出したカードを表にし、切札の場所の2枚のうち1枚を表向きにする。
+
+\item {} 
+\sphinxAtStartPar
+\hyperref[\detokenize{common/common:common-gamestart-start}]{\ref{\detokenize{common/common:common-gamestart-start}} \nameref{\detokenize{common/common:common-gamestart-start}}} に従ってゲームを開始する。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{アクションリスト:}
+
+\sphinxAtStartPar
+次のアクションが追加で利用可能です。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+パック操作アクション
+
+\item {} 
+\sphinxAtStartPar
+レアカード操作アクション
+
+\item {} 
+\sphinxAtStartPar
+切札操作アクション
+
+\item {} 
+\sphinxAtStartPar
+切札関連のアクション
+
+\end{itemize}
+
+\sphinxAtStartPar
+詳細は次を参照してください。
+
+\sphinxAtStartPar
+\hyperref[\detokenize{auto/frameActionlist:act-act-frame}]{\ref{\detokenize{auto/frameActionlist:act-act-frame}} \nameref{\detokenize{auto/frameActionlist:act-act-frame}}}
+
+\sphinxAtStartPar
+\sphinxstylestrong{公開レベル:}
+
+\sphinxAtStartPar
+このフレームで定義されている領域の公開レベルは次の通りです。
+\begin{description}
+\sphinxlineitem{パック}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：開封済み・未開封
+\item[] 個人公開：開封後のパックの中身
+\item[] 非公開：未開封のパックの中身
+\end{DUlineblock}
+
+\sphinxlineitem{レアカード}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：レアカードの枚数
+\item[] 個人公開：レアカードの中身
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\sphinxlineitem{切札}
+\begin{DUlineblock}{0em}
+\item[] 完全公開：表裏を変えずに見えるカード
+\item[] 個人公開：伏せてあるカード
+\item[] 非公開：なし
+\end{DUlineblock}
+
+\end{description}
+
+\sphinxAtStartPar
+各フレームで追加で使えるアクション、フォグ、切札については次を参照してください。
 
 \sphinxstepscope
 
 
 \subsection{フレームアクションリスト}
-\label{\detokenize{auto/frameActionlist:act-act-frame}}\label{\detokenize{auto/frameActionlist:id1}}\label{\detokenize{auto/frameActionlist::doc}}
+\label{\detokenize{auto/frameActionlist:actionlist-act-frame}}\label{\detokenize{auto/frameActionlist:act-act-frame}}\label{\detokenize{auto/frameActionlist:id1}}\label{\detokenize{auto/frameActionlist::doc}}
 \begin{sphinxShadowBox}
 \sphinxstyletopictitle{目次}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id8}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id41}}{\hyperref[\detokenize{auto/frameActionlist:id3}]{\sphinxcrossref{パック操作}}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id9}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id42}}{\hyperref[\detokenize{auto/frameActionlist:act-packopen}]{\sphinxcrossref{パック開封 (パック操作)}}}
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id10}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id43}}{\hyperref[\detokenize{auto/frameActionlist:id5}]{\sphinxcrossref{レアカード操作}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id44}}{\hyperref[\detokenize{auto/frameActionlist:act-raredraw}]{\sphinxcrossref{レアドロー (レアカード操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id11}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id45}}{\hyperref[\detokenize{auto/frameActionlist:act-summonsrare}]{\sphinxcrossref{レア召喚 (レアカード操作)}}}
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id12}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (パック)}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id46}}{\hyperref[\detokenize{auto/frameActionlist:act-trapcounter}]{\sphinxcrossref{罠カウンター (レアカード操作)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id47}}{\hyperref[\detokenize{auto/frameActionlist:id9}]{\sphinxcrossref{切札操作}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id48}}{\hyperref[\detokenize{auto/frameActionlist:act-open}]{\sphinxcrossref{オープン (切札操作)}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id49}}{\hyperref[\detokenize{auto/frameActionlist:act-close}]{\sphinxcrossref{クローズ (切札操作)}}}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id50}}{\hyperref[\detokenize{auto/frameActionlist:act-trumpdestroy}]{\sphinxcrossref{切札破壊 (切札操作)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id51}}{\hyperref[\detokenize{auto/frameActionlist:id13}]{\sphinxcrossref{切札{\normalsize $\spadesuit$} 2}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id52}}{\hyperref[\detokenize{auto/frameActionlist:act-slash}]{\sphinxcrossref{スラッシュ (兵士起因)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id53}}{\hyperref[\detokenize{auto/frameActionlist:id15}]{\sphinxcrossref{切札{\normalsize $\heartsuit$} 3}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id54}}{\hyperref[\detokenize{auto/frameActionlist:act-rally}]{\sphinxcrossref{激励 (兵士起因)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id55}}{\hyperref[\detokenize{auto/frameActionlist:id17}]{\sphinxcrossref{切札{\normalsize $\diamondsuit$} 3}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id56}}{\hyperref[\detokenize{auto/frameActionlist:act-negotiate}]{\sphinxcrossref{交渉 (兵士起因)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id57}}{\hyperref[\detokenize{auto/frameActionlist:id19}]{\sphinxcrossref{切札{\normalsize $\clubsuit$} 4}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id58}}{\hyperref[\detokenize{auto/frameActionlist:act-switch}]{\sphinxcrossref{スイッチ (兵士起因)}}}
 
 \end{itemize}
 
@@ -6242,10 +7124,10 @@ x
 
 
 
-\subsubsection{パック}
+\subsubsection{パック操作}
 \label{\detokenize{auto/frameActionlist:id3}}
 
-\paragraph{パック開封 (パック)}
+\paragraph{パック開封 (パック操作)}
 \label{\detokenize{auto/frameActionlist:act-packopen}}\label{\detokenize{auto/frameActionlist:id4}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
@@ -6258,6 +7140,9 @@ x
 
 \sphinxAtStartPar
 ・ストラテジー
+
+\sphinxAtStartPar
+・エクストラ
 
 \sphinxAtStartPar
 \sphinxstylestrong{トリガー:} 直接
@@ -6293,8 +7178,11 @@ x
 
 
 
-\paragraph{レアドロー (パック)}
-\label{\detokenize{auto/frameActionlist:act-raredraw}}\label{\detokenize{auto/frameActionlist:id5}}
+\subsubsection{レアカード操作}
+\label{\detokenize{auto/frameActionlist:id5}}
+
+\paragraph{レアドロー (レアカード操作)}
+\label{\detokenize{auto/frameActionlist:act-raredraw}}\label{\detokenize{auto/frameActionlist:id6}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -6303,6 +7191,9 @@ x
 
 \sphinxAtStartPar
 ・ストラテジー
+
+\sphinxAtStartPar
+・エクストラ
 
 \sphinxAtStartPar
 \sphinxstylestrong{トリガー:} 直接
@@ -6330,8 +7221,8 @@ x
 
 
 
-\paragraph{レア召喚 (パック)}
-\label{\detokenize{auto/frameActionlist:act-summonsrare}}\label{\detokenize{auto/frameActionlist:id6}}
+\paragraph{レア召喚 (レアカード操作)}
+\label{\detokenize{auto/frameActionlist:act-summonsrare}}\label{\detokenize{auto/frameActionlist:id7}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -6342,6 +7233,9 @@ x
 ・ストラテジー
 
 \sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
 \sphinxstylestrong{トリガー:} 直接
 
 \sphinxAtStartPar
@@ -6349,6 +7243,9 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} レアカード1枚
 
 \sphinxAtStartPar
 \sphinxstylestrong{コスト:} S
@@ -6367,8 +7264,8 @@ x
 
 
 
-\paragraph{罠カウンター (パック)}
-\label{\detokenize{auto/frameActionlist:act-trapcounter}}\label{\detokenize{auto/frameActionlist:id7}}
+\paragraph{罠カウンター (レアカード操作)}
+\label{\detokenize{auto/frameActionlist:act-trapcounter}}\label{\detokenize{auto/frameActionlist:id8}}
 \sphinxAtStartPar
 \sphinxstylestrong{フレーム:}
 
@@ -6377,6 +7274,9 @@ x
 
 \sphinxAtStartPar
 ・ストラテジー
+
+\sphinxAtStartPar
+・エクストラ
 
 \sphinxAtStartPar
 \sphinxstylestrong{トリガー:} 誘発
@@ -6388,19 +7288,705 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
+\sphinxstylestrong{キーカード:} レアカード1枚
+
+\sphinxAtStartPar
 \sphinxstylestrong{特記事項:} ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
 
 \sphinxAtStartPar
-キーカードが1枚または2枚のアクションを対象とする。
+キーカードが1枚または2枚のリクエスト
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{切札操作}
+\label{\detokenize{auto/frameActionlist:id9}}
+
+\paragraph{オープン (切札操作)}
+\label{\detokenize{auto/frameActionlist:act-open}}\label{\detokenize{auto/frameActionlist:id10}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 即時
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} DD
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+
+\sphinxAtStartPar
+自分の裏切札を1枚表にし表切札とする。
+
+
+\bigskip\hrule\bigskip
+
+
+
+\paragraph{クローズ (切札操作)}
+\label{\detokenize{auto/frameActionlist:act-close}}\label{\detokenize{auto/frameActionlist:id11}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 通常
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} Q
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} D
+
+\sphinxAtStartPar
+\sphinxstylestrong{対象:}
+
+\sphinxAtStartPar
+表切札1枚
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+
+\sphinxAtStartPar
+対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。
+
+
+\bigskip\hrule\bigskip
+
+
+
+\paragraph{切札破壊 (切札操作)}
+\label{\detokenize{auto/frameActionlist:act-trumpdestroy}}\label{\detokenize{auto/frameActionlist:id12}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 通常
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} A〜K
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} B
+
+\sphinxAtStartPar
+\sphinxstylestrong{対象:}
+
+\sphinxAtStartPar
+表切札1枚
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+
+\sphinxAtStartPar
+対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{切札{\normalsize $\spadesuit$} 2}
+\label{\detokenize{auto/frameActionlist:id13}}
+
+\paragraph{スラッシュ (兵士起因)}
+\label{\detokenize{auto/frameActionlist:act-slash}}\label{\detokenize{auto/frameActionlist:id14}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 即時
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} メイン
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} \textless{}スラッシュ\textgreater{} を持つ兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} K
+
+\sphinxAtStartPar
+\sphinxstylestrong{起動条件:}
+
+\sphinxAtStartPar
+自分の表切札に「スラッシュ」がある
+
+\sphinxAtStartPar
+\sphinxstylestrong{対象:}
+
+\sphinxAtStartPar
+兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+キーカードで指定した自分の兵士をドライブする。
+
+\item {} 
+\sphinxAtStartPar
+ドライブできた場合、そのキーカードのサイズを X とする。
+
+\item {} 
+\sphinxAtStartPar
+対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{切札{\normalsize $\heartsuit$} 3}
+\label{\detokenize{auto/frameActionlist:id15}}
+
+\paragraph{激励 (兵士起因)}
+\label{\detokenize{auto/frameActionlist:act-rally}}\label{\detokenize{auto/frameActionlist:id16}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 即時
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} \textless{}激励\textgreater{} を持つ兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} K
+
+\sphinxAtStartPar
+\sphinxstylestrong{起動条件:}
+
+\sphinxAtStartPar
+自分の表切札に「激励」がある
+
+\sphinxAtStartPar
+\sphinxstylestrong{対象:}
+
+\sphinxAtStartPar
+兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+キーカードで指定した自分の兵士をドライブする。
+
+\item {} 
+\sphinxAtStartPar
+ドライブできた場合、そのキーカードのサイズを X とする。
+
+\item {} 
+\sphinxAtStartPar
+対象の兵士のサイズをこのターンが終わるまで X 加算する。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{切札{\normalsize $\diamondsuit$} 3}
+\label{\detokenize{auto/frameActionlist:id17}}
+
+\paragraph{交渉 (兵士起因)}
+\label{\detokenize{auto/frameActionlist:act-negotiate}}\label{\detokenize{auto/frameActionlist:id18}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 即時
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} \textless{}交渉\textgreater{} を持つ兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} K
+
+\sphinxAtStartPar
+\sphinxstylestrong{起動条件:}
+
+\sphinxAtStartPar
+自分の表切札に「交渉」がある
+
+\sphinxAtStartPar
+\sphinxstylestrong{対象:}
+
+\sphinxAtStartPar
+キャラクター1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+キーカードで指定した自分の兵士をドライブする。
+
+\item {} 
+\sphinxAtStartPar
+ドライブできた場合、対象のキャラクターをドライブする。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{切札{\normalsize $\clubsuit$} 4}
+\label{\detokenize{auto/frameActionlist:id19}}
+
+\paragraph{スイッチ (兵士起因)}
+\label{\detokenize{auto/frameActionlist:act-switch}}\label{\detokenize{auto/frameActionlist:id20}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{トリガー:} 直接
+
+\sphinxAtStartPar
+\sphinxstylestrong{スピード:} 即時
+
+\sphinxAtStartPar
+\sphinxstylestrong{タイミング:} クイック
+
+\sphinxAtStartPar
+\sphinxstylestrong{キーカード:} \textless{}スイッチ\textgreater{} を持つ兵士1体
+
+\sphinxAtStartPar
+\sphinxstylestrong{コスト:} K
+
+\sphinxAtStartPar
+\sphinxstylestrong{起動条件:}
+
+\sphinxAtStartPar
+自分の表切札に「スイッチ」がある
+
+\sphinxAtStartPar
+\sphinxstylestrong{効果:}
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+キーカードで指定した自分の兵士をドライブする。
+
+\item {} 
+\sphinxAtStartPar
+ドライブできた場合、手札からカードを1枚選び、兵士としてチャージ状態で場に出す。
+
+\item {} 
+\sphinxAtStartPar
+キーカードを手札に戻す。
+
+\end{enumerate}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\subsection{フレームフォグリスト}
+\label{\detokenize{auto/frameActionlist:foglist-act-frame}}\label{\detokenize{auto/frameActionlist:id21}}
+\begin{sphinxShadowBox}
+\sphinxstyletopictitle{目次}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id59}}{\hyperref[\detokenize{auto/frameActionlist:id23}]{\sphinxcrossref{滞留魔法}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id60}}{\hyperref[\detokenize{auto/frameActionlist:fog-closefog}]{\sphinxcrossref{クローズ (滞留魔法)}}}
+
+\end{itemize}
+
+\end{itemize}
+\end{sphinxShadowBox}
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{滞留魔法}
+\label{\detokenize{auto/frameActionlist:id23}}
+
+\paragraph{クローズ (滞留魔法)}
+\label{\detokenize{auto/frameActionlist:fog-closefog}}\label{\detokenize{auto/frameActionlist:id24}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{フォグキーカード:} Q
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+対象とした切札はこのターンが終わるまで表向きにできない。
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  v8.1
+
+
+\subsection{フレーム切札リスト}
+\label{\detokenize{auto/frameActionlist:trumplist-act-frame}}\label{\detokenize{auto/frameActionlist:id25}}
+\sphinxAtStartPar
+切札は、ゲームにさらなる戦略性と構築の自由度をもたらす拡張要素です。
+
+\sphinxAtStartPar
+それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。
+
+\sphinxAtStartPar
+また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。
+
+\begin{sphinxShadowBox}
+\sphinxstyletopictitle{目次}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id61}}{\hyperref[\detokenize{auto/frameActionlist:id27}]{\sphinxcrossref{{\normalsize $\spadesuit$} スペード}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id62}}{\hyperref[\detokenize{auto/frameActionlist:trump-s2}]{\sphinxcrossref{スラッシュ (表切札)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id63}}{\hyperref[\detokenize{auto/frameActionlist:id29}]{\sphinxcrossref{{\normalsize $\heartsuit$} ハート}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id64}}{\hyperref[\detokenize{auto/frameActionlist:trump-h3}]{\sphinxcrossref{激励 (表切札)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id65}}{\hyperref[\detokenize{auto/frameActionlist:id31}]{\sphinxcrossref{{\normalsize $\diamondsuit$} ダイヤ}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id66}}{\hyperref[\detokenize{auto/frameActionlist:trump-d3}]{\sphinxcrossref{交渉 (表切札)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id67}}{\hyperref[\detokenize{auto/frameActionlist:id33}]{\sphinxcrossref{{\normalsize $\clubsuit$} クラブ}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id68}}{\hyperref[\detokenize{auto/frameActionlist:trump-c4}]{\sphinxcrossref{スイッチ (表切札)}}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id69}}{\hyperref[\detokenize{auto/frameActionlist:id35}]{\sphinxcrossref{裏切札}}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\phantomsection\label{\detokenize{auto/frameActionlist:id70}}{\hyperref[\detokenize{auto/frameActionlist:trump-secrettrump}]{\sphinxcrossref{裏切札 (裏切札)}}}
+
+\end{itemize}
+
+\end{itemize}
+\end{sphinxShadowBox}
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{{\normalsize $\spadesuit$} スペード}
+\label{\detokenize{auto/frameActionlist:id27}}
+
+\paragraph{スラッシュ (表切札)}
+\label{\detokenize{auto/frameActionlist:trump-s2}}\label{\detokenize{auto/frameActionlist:id28}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{切札キーカード:} {\normalsize $\spadesuit$} 2
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+自分の場にいる{\normalsize $\spadesuit$} の兵士は \textless{}スラッシュ\textgreater{} を持つ。
+
+\sphinxAtStartPar
+\sphinxstylestrong{イメージ:}
+スラッシュのイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-s2-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-s2-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Swords_02}.jpg}
+\caption{スラッシュのイメージ}\label{\detokenize{auto/frameActionlist:id37}}\label{\detokenize{auto/frameActionlist:frame-s2-image}}\end{figure}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{{\normalsize $\heartsuit$} ハート}
+\label{\detokenize{auto/frameActionlist:id29}}
+
+\paragraph{激励 (表切札)}
+\label{\detokenize{auto/frameActionlist:trump-h3}}\label{\detokenize{auto/frameActionlist:id30}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{切札キーカード:} {\normalsize $\heartsuit$} 3
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+自分の場にいる{\normalsize $\heartsuit$} の兵士は \textless{}激励\textgreater{} を持つ。
+
+\sphinxAtStartPar
+\sphinxstylestrong{イメージ:}
+激励のイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-h3-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-h3-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Cups_03}.jpg}
+\caption{激励のイメージ}\label{\detokenize{auto/frameActionlist:id38}}\label{\detokenize{auto/frameActionlist:frame-h3-image}}\end{figure}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{{\normalsize $\diamondsuit$} ダイヤ}
+\label{\detokenize{auto/frameActionlist:id31}}
+
+\paragraph{交渉 (表切札)}
+\label{\detokenize{auto/frameActionlist:trump-d3}}\label{\detokenize{auto/frameActionlist:id32}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{切札キーカード:} {\normalsize $\diamondsuit$} 3
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+自分の場にいる{\normalsize $\diamondsuit$} の兵士は \textless{}交渉\textgreater{} を持つ。
+
+\sphinxAtStartPar
+\sphinxstylestrong{イメージ:}
+交渉のイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-d3-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-d3-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Pentacles_03}.jpg}
+\caption{交渉のイメージ}\label{\detokenize{auto/frameActionlist:id39}}\label{\detokenize{auto/frameActionlist:frame-d3-image}}\end{figure}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{{\normalsize $\clubsuit$} クラブ}
+\label{\detokenize{auto/frameActionlist:id33}}
+
+\paragraph{スイッチ (表切札)}
+\label{\detokenize{auto/frameActionlist:trump-c4}}\label{\detokenize{auto/frameActionlist:id34}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{切札キーカード:} {\normalsize $\clubsuit$} 4
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+自分の場にいる{\normalsize $\clubsuit$} の兵士は \textless{}スイッチ\textgreater{} を持つ。
+
+\sphinxAtStartPar
+\sphinxstylestrong{イメージ:}
+スイッチのイメージ (\hyperref[\detokenize{auto/frameActionlist:frame-c4-image}]{Fig.\@ \ref{\detokenize{auto/frameActionlist:frame-c4-image}}})
+
+\begin{figure}[htbp]
+\centering
+\capstart
+
+\noindent\sphinxincludegraphics[height=200\sphinxpxdimen]{{Pictorial_Key_to_the_Tarot_Wands_04}.jpg}
+\caption{スイッチのイメージ}\label{\detokenize{auto/frameActionlist:id40}}\label{\detokenize{auto/frameActionlist:frame-c4-image}}\end{figure}
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  ex3.4.0
+
+\sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v8.1
+
+
+\bigskip\hrule\bigskip
+
+
+
+\subsubsection{裏切札}
+\label{\detokenize{auto/frameActionlist:id35}}
+
+\paragraph{裏切札 (裏切札)}
+\label{\detokenize{auto/frameActionlist:trump-secrettrump}}\label{\detokenize{auto/frameActionlist:id36}}
+\sphinxAtStartPar
+\sphinxstylestrong{フレーム:}
+
+\sphinxAtStartPar
+・エクストラ
+
+\sphinxAtStartPar
+\sphinxstylestrong{切札キーカード:} 全て(裏向き)
+
+\sphinxAtStartPar
+\sphinxstylestrong{能力:}
+
+\sphinxAtStartPar
+なし
+
+\sphinxAtStartPar
+\sphinxstylestrong{導入バージョン:}  v8.1
 
 \sphinxstepscope
 
@@ -6508,13 +8094,13 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 例えば、将棋の「歩」は駒としては複数存在しますが、「歩」の定義は1つです。
 この定義をコンポーネントといいます。
 
-\index{コンポーネントインスタンス@\spxentry{コンポーネントインスタンス}}\ignorespaces 
+\index{ユニット@\spxentry{ユニット}}\ignorespaces 
 
-\subsection{コンポーネントインスタンス}
+\subsection{ユニット}
 \label{\detokenize{core/core:index-6}}\label{\detokenize{core/core:id10}}
 \sphinxAtStartPar
-コンポーネントとして定義されたものがゲーム盤面に配置されているとき、それをコンポーネントインスタンスといいます。
-例えば、将棋の「歩」はコンポーネントとして定義されていますが、 実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたコンポーネントインスタンスです。
+コンポーネントとして定義されたものがゲーム盤面に配置されているとき、それをユニットといいます。
+例えば、将棋の「歩」はコンポーネントとして定義されていますが、 実際の盤面に配置される「歩」は、コンポーネント定義という設計図から作られたユニットです。
 
 
 \subsection{コアフロー(ルールシステム)}
@@ -6549,20 +8135,20 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 リクエストを整理することで割込みを実現しています。どのようにリクエストを処理するかは、コアフローに従います。
 
 \sphinxAtStartPar
-さらに、アクションとリクエスト、コンポーネントとコンポーネントインスタンスの関係は次のようになります。(\hyperref[\detokenize{core/core:action-request-image}]{Fig.\@ \ref{\detokenize{core/core:action-request-image}}})
+さらに、アクションとリクエスト、コンポーネントとユニットの関係は次のようになります。(\hyperref[\detokenize{core/core:action-request-image}]{Fig.\@ \ref{\detokenize{core/core:action-request-image}}})
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-cef0f4720204bfabdb7f2ab72dc494cfa1172912}.pdf}
-\caption{リクエストとコンポーネントインスタンスの関係}\label{\detokenize{core/core:id36}}\label{\detokenize{core/core:action-request-image}}\end{figure}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-b424b035f54a58f3126979e401d275cf680053a5}.pdf}
+\caption{リクエストとユニットの関係}\label{\detokenize{core/core:id36}}\label{\detokenize{core/core:action-request-image}}\end{figure}
 
 \sphinxAtStartPar
-ゲーム盤面には複数のコンポーネントインスタンスが生成されます。
+ゲーム盤面には複数のユニットが生成されます。
 
 \sphinxAtStartPar
-リクエストが解決されるたびに、コンポーネントインスタンスが生成されたり、既存のコンポーネントインスタンスの状態が変化したりします。
+リクエストが解決されるたびに、ユニットが生成されたり、既存のユニットの状態が変化したりします。
 
 \sphinxAtStartPar
 ここからは、アクションとコンポーネントの各項目について説明します。
@@ -6610,7 +8196,7 @@ BlackPokerはコアルールを実装しているため、ルールを変更す�
 \label{\detokenize{core/core:index-7}}\label{\detokenize{core/core:id14}}
 \sphinxAtStartPar
 アクションの所有者。
-アクションの定義はプレイヤー事に保持するため、同じ内容のアクションでもオーナーが異なります。
+アクションの定義はプレイヤー毎に保持するため、同じ内容のアクションでもオーナーが異なります。
 
 \index{トリガー(コア)@\spxentry{トリガー(コア)}}\ignorespaces 
 
@@ -6769,7 +8355,7 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \sphinxlineitem{\sphinxstylestrong{オーナー}}
 \sphinxAtStartPar
 コンポーネンの所有者。
-コンポーネントの定義はプレイヤー事に保持するため、同じ内容のコンポーネントでもオーナーが異なります。
+コンポーネントの定義はプレイヤー毎に保持するため、同じ内容のコンポーネントでもオーナーが異なります。
 
 \sphinxlineitem{\sphinxstylestrong{能力}}
 \sphinxAtStartPar
@@ -6778,10 +8364,10 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \end{description}
 
 
-\subsection{コンポーネントインスタンスの定義項目}
+\subsection{ユニットの定義項目}
 \label{\detokenize{core/core:id23}}
 \sphinxAtStartPar
-コンポーネントインスタンスには、次の項目が設定されます。
+ユニットには、次の項目が設定されます。
 必要に応じて、ゲームに合わせた追加設定をしてください。
 \begin{description}
 \sphinxlineitem{\sphinxstylestrong{コンポーネント定義}}
@@ -6793,7 +8379,7 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \index{オーナー@\spxentry{オーナー}}\ignorespaces \begin{description}
 \sphinxlineitem{\sphinxstylestrong{オーナー}}
 \sphinxAtStartPar
-コンポーネントインスタンスの所有者。
+ユニットの所有者。
 一般的なトランプゲームでは無視されることが多いですが、TCGのようにデッキを個人所有するゲームでは必要な情報です。
 
 \end{description}
@@ -6801,25 +8387,25 @@ BlackPokerでは、コストの支払いや対象の指定の記述が冗長に�
 \index{コントローラー@\spxentry{コントローラー}}\ignorespaces \begin{description}
 \sphinxlineitem{\sphinxstylestrong{コントローラー}}
 \sphinxAtStartPar
-現在、そのコンポーネントインスタンスを操作しているプレイヤー。
+現在、そのユニットを操作しているプレイヤー。
 通常はオーナーとコントローラーは同じですが、コントロールを奪うアクションがある場合、異なることがあります。
 
 \end{description}
 
 \begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-コンポーネントインスタンスとリクエストのコントローラー
+ユニットとリクエストのコントローラー
 
 \sphinxAtStartPar
-コントローラーは制御している人という意味になるため、コンポーネントインスタンスとリクエストのコントローラーは制御する対象が異なります。
-コンポーネントインスタンスとリクエストの属性を次の図に示します。(\hyperref[\detokenize{core/core:controller-attr}]{Fig.\@ \ref{\detokenize{core/core:controller-attr}}})
+コントローラーは制御している人という意味になるため、ユニットとリクエストのコントローラーは制御する対象が異なります。
+ユニットとリクエストの属性を次の図に示します。(\hyperref[\detokenize{core/core:controller-attr}]{Fig.\@ \ref{\detokenize{core/core:controller-attr}}})
 \end{sphinxadmonition}
 
 \begin{figure}[htbp]
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-601946f3f8eb470fbf97e87d640335e4c349780a}.pdf}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-e3598ea29fb852c45136cb979c397a63a8586247}.pdf}
 \caption{コントローラー属性}\label{\detokenize{core/core:id37}}\label{\detokenize{core/core:controller-attr}}\end{figure}
 
 \index{の\textbar{}能力(コア)@\spxentry{の\textbar{}能力(コア)}}\ignorespaces 
@@ -7231,7 +8817,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \sphinxlineitem{\sphinxstylestrong{{[}3{]} この (this)}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-対象のコンポーネントインスタンス 1 つを有効範囲にします。
+対象のユニット 1 つを有効範囲にします。
 
 \item {} 
 \sphinxAtStartPar
@@ -7330,19 +8916,6 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \chapter{付録}
 \label{\detokenize{appendix/appendix:appendix-rst}}\label{\detokenize{appendix/appendix:id1}}\label{\detokenize{appendix/appendix::doc}}
 
-\section{PDF版ルール}
-\label{\detokenize{appendix/appendix:pdf}}\begin{description}
-\sphinxlineitem{通常版}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/blackpoker.pdf}
-
-\sphinxlineitem{中綴じ印刷用}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/blackpoker\_a5-booklet.pdf}
-
-\end{description}
-
-
 \section{アクションリスト}
 \label{\detokenize{appendix/appendix:id2}}
 
@@ -7378,18 +8951,11 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \end{description}
 
 
-\subsection{全フォーマット\&フレーム}
-\label{\detokenize{appendix/appendix:actionlist-all}}\label{\detokenize{appendix/appendix:id5}}\begin{description}
+\subsection{エクストラフレーム}
+\label{\detokenize{appendix/appendix:actionlist-extra}}\label{\detokenize{appendix/appendix:id5}}\begin{description}
 \sphinxlineitem{URL}
 \sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/actionlist/html/all.html}
-
-\sphinxlineitem{PDF}
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/actionlist/pdf/blackpoker-all.pdf}
-
-\sphinxAtStartPar
-\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/actionlist/pdf/blackpoker-all-2up.pdf}
+\sphinxurl{https://blackpoker.github.io/BlackPoker/8th/actionlist/html/all.html?format=\%E3\%83\%9E\%E3\%82\%B9\%E3\%82\%BF\%E3\%83\%BC\&frame=\%E3\%82\%A8\%E3\%82\%AF\%E3\%82\%B9\%E3\%83\%88\%E3\%83\%A9}
 
 \end{description}
 \phantomsection\label{\detokenize{appendix/appendix:extralist}}
@@ -7405,10 +8971,24 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \label{\detokenize{revision-history/8th:id1}}\label{\detokenize{revision-history/8th::doc}}
 \sphinxAtStartPar
 次はBlackPoker第8版における主要な変更点です。
+8.1の変更点は (8.1) として記載しています。
+
+
+\subsection{アクションの定義の変更}
+\label{\detokenize{revision-history/8th:id2}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+B・Jのコスト、効果を見直し
+
+\item {} 
+\sphinxAtStartPar
+クローズのコスト、効果、キーカードを見直し
+
+\end{itemize}
 
 
 \subsection{能力の解釈を変更}
-\label{\detokenize{revision-history/8th:id2}}
+\label{\detokenize{revision-history/8th:id3}}
 \sphinxAtStartPar
 第7版では、能力は「常在型能力」と「誘発型能力」の2種類が定義されていました。
 
@@ -7416,22 +8996,28 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 第8版では、能力の解釈を整理し、アクションに「起動条件」と「誘発条件」を追加することで、能力は常在型能力のみを指すものとしました。
 
 \sphinxAtStartPar
-この変更により、エクストラリストに大きな影響が生じたため、エクストラは一旦非表示としています。
-なお、コアルール内において能力の影響範囲についての記載を追加しています。
+この変更により、エクストラリストに大きな影響が生じたため、第8.0版ではエクストラは一旦非表示としています。 なお、コアルール内において能力の影響範囲についての記載を追加しています。
+
+\sphinxAtStartPar
+第8.1版では、エクストラをフレーム化して切札を復活させました。(8.1)
 
 
 \subsection{フォグ領域追加}
-\label{\detokenize{revision-history/8th:id3}}
+\label{\detokenize{revision-history/8th:id4}}\begin{itemize}
+\item {} 
 \sphinxAtStartPar
 新たに「フォグ領域」を追加しました。
+この領域は「アップ」「ダウン」などターン終了時まで持続する効果を配置するためのもので、効果が視認しやすくなります。
 
+\item {} 
 \sphinxAtStartPar
-この領域は、「アップ」や「ダウン」など、ターン終了時まで効果が持続する要素を配置するためのもので、効果が視認しやすくなっています。
-また、領域追加に伴い、新たにフォグリストも導入しました。
+領域追加に伴い、新たにフォグリストも導入しました。
+
+\end{itemize}
 
 
 \subsection{用語追加}
-\label{\detokenize{revision-history/8th:id4}}
+\label{\detokenize{revision-history/8th:id5}}
 \sphinxAtStartPar
 ルールの分かりやすさ向上を目的として、以下の用語を新たに導入しました。
 \begin{description}
@@ -7469,18 +9055,41 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \end{itemize}
 
+\sphinxlineitem{【コンポーネント関連】 (8.1)}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+コンポーネントキーカード
+
+\item {} 
+\sphinxAtStartPar
+ユニットカード
+
+\item {} 
+\sphinxAtStartPar
+キャラクターキーカード
+
+\item {} 
+\sphinxAtStartPar
+フォグキーカード
+
+\item {} 
+\sphinxAtStartPar
+切札キーカード
+
+\end{itemize}
+
 \end{description}
 
 
 \subsection{オプション削除とフレームへの統合}
-\label{\detokenize{revision-history/8th:id5}}
+\label{\detokenize{revision-history/8th:id6}}
 \sphinxAtStartPar
 第7版では対戦レギュレーションにオプションが存在していましたが、
 第8版ではオプションを削除し、各フレームに統合することで全体の遊び方の整理を図りました。
 
 \sphinxAtStartPar
 また、新たな構築要素として「ストラテジー」を導入しています。
-結果として、フレームは以下の4種類のみとし、その他は廃止しました。
+結果として、フレームは以下の4種類のみとし、その他は廃止しました (8.1でエクストラを追加)。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
@@ -7498,15 +9107,28 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \sphinxAtStartPar
 ストラテジー
 
+\item {} 
+\sphinxAtStartPar
+エクストラ (8.1)
+
 \end{itemize}
 
 \sphinxAtStartPar
 さらに、ハーフ系が廃止されたため、マッチに関する説明も削除しています。
-今後、エクストラをフレームとして復活させる予定です。
+
+
+\subsection{エクストラをフレーム化 (8.1)}
+\label{\detokenize{revision-history/8th:id7}}
+\sphinxAtStartPar
+第8.0版で削除したエクストラ関連ルールを、第8.1版ではフレーム化し、切札を復活させました。
+ゲーム開始の流れがこれまでと異なり、よりスピーディーな展開を楽しめます。
+
+\sphinxAtStartPar
+8.1版では「立ち上がる兵」の切札のみ復活し、ほかの切札は順次追加予定です。
 
 
 \subsection{曖昧なルールの明確化}
-\label{\detokenize{revision-history/8th:id6}}
+\label{\detokenize{revision-history/8th:id8}}
 \sphinxAtStartPar
 以下の点について、ルールの曖昧な部分を明確化しました。
 \begin{itemize}
@@ -7536,17 +9158,37 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 
 \item {} 
 \sphinxAtStartPar
-コンポーネントインスタンスの概念を導入
+コンポーネントインスタンスの概念を導入。
+
+\item {} 
+\sphinxAtStartPar
+コンポーネントインスタンスをユニットに改名。 (8.1)
 
 \item {} 
 \sphinxAtStartPar
 共通ルールに記載されていた引き分けの記述を修正し、引き分けとならないよう変更
 
+\item {} 
+\sphinxAtStartPar
+ゲームの始め方をフレーム単位で明確に記載できるよう修正 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+パック、切札などフレームを含めた全てのコンポーネントを説明する章を追加 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+デッキの構築条件を明確化 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+キーカードという単語はアクションだけのものになるよう修正 (8.1)
+
 \end{itemize}
 
 
 \subsection{ルール外変更点}
-\label{\detokenize{revision-history/8th:id7}}
+\label{\detokenize{revision-history/8th:id9}}
 \sphinxAtStartPar
 ルール本体に直接関係しない部分について、以下の変更を実施しました。
 \begin{itemize}
@@ -7585,6 +9227,14 @@ PDF版の表紙を、新ロゴをあしらった新デザインに変更
 \item {} 
 \sphinxAtStartPar
 中綴じ印刷用のPDFを追加
+
+\item {} 
+\sphinxAtStartPar
+対戦レギュレーションを第2章に移動し、ルール全体の流れを整理 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+切札リストにイラストを追加 (8.1)
 
 \end{itemize}
 
