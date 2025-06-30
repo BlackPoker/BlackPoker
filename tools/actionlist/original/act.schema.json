@@ -148,7 +148,7 @@
                   "fogId": { "type": "string" },
                   "fogType": { "type": "string" },
                   "fogKey": { "type": "string" },
-                  "forTarget": { "type": "string" },
+                  "fogTarget": { "type": "string" },
                   "fogAbility": { "type": "string" },
                   "story": { "type": "string" },
                   "flavor": { "type": "string" },
@@ -169,7 +169,66 @@
               }
             }
           },
-          "required": ["type", "chars"],
+          "required": ["type", "fogs"],
+          "additionalProperties": true
+        }
+      },
+      "trumpData": {
+        "type": "object",
+        "properties": {
+          "description": { "type": "string" },
+          "devNote": { "type": "string" }
+        },
+        "required": [
+          "description"
+        ],
+        "additionalProperties": true
+      },
+      "trumpList": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "trumps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "trumpName": { "type": "string" },
+                  "ruby": { "type": "string" },
+                  "trumpId": { "type": "string" },
+                  "trumpType": { "type": "string" },
+                  "trumpKey": { "type": "string" },
+                  "trumpLabel": { "type": "string" },
+                  "trumpAbility": { "type": "string" },
+                  "image": {"type": "string"},
+                  "story": { "type": "string" },
+                  "flavor": { "type": "string" },
+                  "flavorSpeaker": { "type": "string" },
+                  "since": { "type": "string" },
+                  "update": { "type": "string" },
+                  "devNote": { "type": "string" }
+                },
+                "required": [
+                  "format",
+                  "trumpName",
+                  "trumpId",
+                  "trumpType",
+                  "trumpKey",
+                  "since"
+                ],
+                "additionalProperties": true
+              }
+            }
+          },
+          "required": ["type", "trumps"],
           "additionalProperties": true
         }
       }

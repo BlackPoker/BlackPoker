@@ -1,7 +1,7 @@
 data: 
   id: act-frame
-  ver: 第8.0版 フレーム編
-  lastupdate: 2025/3/31
+  ver: 第8.1版 フレーム編
+  lastupdate: 2025/6/30
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -12,16 +12,16 @@ data:
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
 actList:
-  - type: パック
+  - type: パック操作
     acts:
-    - 
-      frame: |-
+    - frame: |-
         ・パック
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: パック開封
       actId: packopen
-      actType: パック
+      actType: パック操作
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -29,45 +29,399 @@ actList:
       actEffect: |-
         1. パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。
         2. パックを表向きにし、開封済みとする。
-
-    - 
-      frame: |-
+  
+  - type: レアカード操作
+    acts: 
+    - frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レアドロー
       actId: raredraw
-      actType: パック
+      actType: レアカード操作
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
       actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
       actEffect: レアカードを1枚手札に加える。
       
-    - 
-      frame: |-
+    - frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: レア召喚
       actId: summonsRare
-      actType: パック
+      actType: レアカード操作
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
       actCost: S
+      actKey: レアカード1枚
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: キーカードを兵士として表向きかつチャージ状態で場に出す。
 
-    - 
-      frame: |-
+    - frame: |-
         ・レアパック
         ・ストラテジー
+        ・エクストラ
       actName: 罠カウンター
       actId: trapCounter
-      actType: パック
+      actType: レアカード操作
       actTrigger: 誘発
       actSpeed: 通常
       actTime: クイック
-      actTarget: キーカードが1枚または2枚のアクションを対象とする。
+      actKey: レアカード1枚
+      actTarget: キーカードが1枚または2枚のリクエスト
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
-      actEffect: 対象アクションのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
+      actEffect: 対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
 
+  - type: 切札操作
+    acts:
+    -
+      frame: |-
+        ・エクストラ
+      actId: open
+      actName: オープン
+      actType: 切札操作
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: DD
+      actEffect: |-
+        自分の裏切札を1枚表にし表切札とする。
+    -
+      frame: |-
+        ・エクストラ
+      actId: close
+      actName: クローズ
+      actType: 切札操作
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: Q
+      actTarget: 表切札1枚
+      actEffect: |-
+        対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。
+
+    -
+      frame: |-
+        ・エクストラ
+      actId: trumpDestroy
+      actName: 切札破壊
+      actType: 切札操作
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: B
+      actKey: A〜K
+      actTarget: 表切札1枚
+      actEffect: |-
+        対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
+
+    # -
+    #   frame: |-
+    #     ・エクストラ
+    #   actId: trumpRegene
+    #   actName: 切札再生
+    #   actType: 切札操作
+    #   actTrigger: 誘発
+    #   actSpeed: 即時
+    #   actTime: クイック
+    #   actTarget: カード1枚
+    #   actEffect: |-
+    #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
+    #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+
+  - type: 切札♠2
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: スラッシュ
+      actId: slash
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actKey: <スラッシュ> を持つ兵士1体
+      actCost: K
+      actTarget: 兵士1体
+      actActCond: 自分の表切札に「スラッシュ」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、そのキーカードのサイズを X とする。  
+        3. 対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。
+      since: ex3.4.0
+      update: v8.1
+
+  # - type: 切札♠5
+  #   acts:
+  #   - frame: |-
+  #       ・エクストラ
+  #     actName: 蘇生
+  #     actId: resurrection
+  #     actType: 通常魔法
+  #     actTrigger: 直接
+  #     actSpeed: 通常
+  #     actTime: メイン
+  #     actCost: BL
+  #     actActCond: 自分の表切札に「蘇生」がある
+  #     actEffect: |-
+  #       自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
+  #     since: ex3.10.0
+  #     update: v8.1
+
+  # - type: 切札♠K
+  #   acts:
+  #   - frame: |-
+  #       ・エクストラ
+  #     actName: 魔王召喚
+  #     actId: summonDarkLord
+  #     actType: 通常魔法
+  #     actTrigger: 直接
+  #     actSpeed: 通常
+  #     actTime: メイン
+  #     actCost: SS
+  #     actKey: J〜K
+  #     actActCond: 自分の表切札に「魔王」がある
+  #     actEffect: |-
+  #       切札の♠Kが表の場合、次を行う。
+  #       １．キーカード、手札、ライフ、墓地、切札の中から♣Kを見つける。
+  #       ２．♣Kを見つけた場合、場にいるすべての兵士を墓地に移し、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
+  #       ３．♣Kが無い場合、切札の♠Kを墓地に移す。
+  #       ４．ライフを切りなおす。
+  #     since: ex3.10.0
+  #     update: v8.1
+    # - frame: |-
+    #     ・エクストラ
+    #   actName: 魔王の囁き
+    #   actId: darkWhisper
+    #   actType: 基本
+    #   actTrigger: 誘発
+    #   actSpeed: 即時
+    #   actTime: クイック
+    #   actActCond: 
+    #   actTriggerCond: |-
+    #     自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
+    #   actEffect: |-
+    #     ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
+    #   since: ex3.10.0
+    #   update: v8.1
+
+  - type: 切札♡3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 激励
+      actId: rally
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <激励> を持つ兵士1体
+      actCost: K
+      actTarget: 兵士1体
+      actActCond: 自分の表切札に「激励」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、そのキーカードのサイズを X とする。  
+        3. 対象の兵士のサイズをこのターンが終わるまで X 加算する。
+      since: ex3.4.0
+      update: v8.1
+
+  - type: 切札♢3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 交渉
+      actId: negotiate
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <交渉> を持つ兵士1体
+      actCost: K
+      actTarget: キャラクター1体
+      actActCond: 自分の表切札に「交渉」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、対象のキャラクターをドライブする。
+      since: ex3.4.0
+      update: v8.1
+
+  - type: 切札♣4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: スイッチ
+      actId: switch
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actKey: <スイッチ> を持つ兵士1体
+      actCost: K
+      actActCond: 自分の表切札に「スイッチ」がある
+      actEffect: |-
+        1. キーカードで指定した自分の兵士をドライブする。
+        2. ドライブできた場合、手札からカードを１枚選び、兵士としてチャージ状態で場に出す。
+        3. キーカードを手札に戻す。
+      since: ex3.4.0
+      update: v8.1
+
+# charList:
+#   - type: 切札♠K
+#     chars:
+#     - frame: |-
+#         ・エクストラ
+#       charName: 魔王
+#       ruby: まおう
+#       charId: darklord
+#       charType: 兵士
+#       charKey: ♠K と ♣K
+#       charSize: 26
+#       charLabel: アタッカー, ブロッカー
+#       charAbility: |-
+#         ・アクションの対象にできない。
+#         ・自分がエンドアクションを起こした場合、世代交代アクションを誘発する。
+#         ・数字は２６として扱う。
+#         ・♣兵士としても♠兵士としても扱う。
+#         ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
+#       since: ex3.10.0
+#       update: v8.1
+
+
+fogList:
+  - type: 滞留魔法
+    fogs:
+    - frame: |-
+        ・エクストラ
+      fogName: クローズ
+      fogId: closeFog
+      fogType: 滞留魔法
+      fogKey: Q
+      fogTarget: 対象とした切札1枚
+      fogAbility: 対象とした切札はこのターンが終わるまで表向きにできない。
+      since: v8.1
+
+trumpData:
+  description: |-
+    切札は、ゲームにさらなる戦略性と構築の自由度をもたらす拡張要素です。
+
+    それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。
+
+    また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。
+  devNote: |-
+    * v8.1 「立ち上がる兵」を再集録
+trumpList:
+  - type: ♠スペード
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: スラッシュ
+      trumpId: s2
+      trumpType: 表切札
+      trumpKey: ♠2
+      trumpAbility: |
+        自分の場にいる♠の兵士は <スラッシュ> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
+      devNote: |-
+        立ち上がる兵で追加された。
+
+    # - frame: |-
+    #     ・エクストラ
+    #   trumpName: 蘇生
+    #   trumpId: s5
+    #   trumpType: 表切札
+    #   trumpKey: ♠5
+    #   since: ex3.10.0
+    #   update: v8.1
+    #   image: tarot/Pictorial_Key_to_the_Tarot_Swords_05
+    #   devNote: |-
+    #     「巨人と魔王」で追加された。
+
+    # - frame: |-
+    #     ・エクストラ
+    #   trumpName: 魔王
+    #   trumpId: sK
+    #   trumpType: 表切札
+    #   trumpKey: ♠K
+    #   since: ex3.10.0
+    #   update: v8.1
+    #   image: tarot/Pictorial_Key_to_the_Tarot_04_The_Emperor
+    #   devNote: |-
+    #     「巨人と魔王」で追加された。
+
+  - type: ♡ハート
+    trumps:
+    # - frame: |-
+    #     ・エクストラ
+    #   trumpName: 援軍
+    #   trumpId: h2
+    #   trumpType: 表切札
+    #   trumpKey: ♡2
+    #   since: ex3.10.0
+    #   update: v8.1
+    #   image: tarot/Pictorial_Key_to_the_Tarot_Cups_02
+    #   devNote: |-
+    #     「巨人と魔王」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 激励
+      trumpId: h3
+      trumpType: 表切札
+      trumpKey: ♡3
+      trumpAbility: |
+        自分の場にいる♡の兵士は <激励> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♢ダイヤ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 交渉
+      trumpId: d3
+      trumpType: 表切札
+      trumpKey: ♢3
+      trumpAbility: |
+        自分の場にいる♢の兵士は <交渉> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: ♣クラブ
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: スイッチ
+      trumpId: c4
+      trumpType: 表切札
+      trumpKey: ♣4
+      trumpAbility: |
+        自分の場にいる♣の兵士は <スイッチ> を持つ。
+      since: ex3.4.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
+      devNote: |-
+        立ち上がる兵で追加された。
+
+  - type: 裏切札
+    trumps:
+    - frame: |-
+        ・エクストラ
+      trumpName: 裏切札
+      trumpId: secretTrump
+      trumpType: 裏切札
+      trumpKey: 全て(裏向き)
+      trumpAbility: |
+        なし
+      since: v8.1

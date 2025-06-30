@@ -11,46 +11,42 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class YamlMerger {
-
-    @SuppressWarnings("unchecked")
     public static void main(String[] args) {
         if (args.length < 2) {
-            System.err.println("Usage: java -jar <jarfile> <yamlFile1> <yamlFile2>");
+            System.err.println("Usage: java -jar <jarfile> <yaml1> <yaml2> [<out>]");
             System.exit(1);
         }
-
-        String yamlFile1 = args[0];
-        String yamlFile2 = args[1];
-
         Yaml yaml = new Yaml();
-        try (InputStream input1 = new FileInputStream(yamlFile1);
-             InputStream input2 = new FileInputStream(yamlFile2)) {
+        try (InputStream in1 = new FileInputStream(args[0]);
+                InputStream in2 = new FileInputStream(args[1])) {
 
-            Object obj1 = yaml.load(input1);
-            Object obj2 = yaml.load(input2);
+            // LinkedHashMap で読み込んで順序キープ
+            Map<String, Object> map1 = yaml.loadAs(in1, LinkedHashMap.class);
+            Map<String, Object> map2 = yaml.loadAs(in2, LinkedHashMap.class);
 
-            if (!(obj1 instanceof Map) || !(obj2 instanceof Map)) {
-                System.err.println("YAML のルートはマッピング（Map）である必要があります。");
-                System.exit(1);
-            }
+            // ① data を丸ごと退避し、両マップから取り除く
+            Object data1 = map1.remove("data");
+            map2.remove("data");
 
-            Map<String, Object> map1 = (Map<String, Object>) obj1;
-            Map<String, Object> map2 = (Map<String, Object>) obj2;
+            // ② 残りをマージ
+            Map<String, Object> mergedBody = mergeMaps(map1, map2);
 
-            Map<String, Object> merged = mergeMaps(map1, map2);
+            // ③ data を先頭に戻して最終結果を作成
+            LinkedHashMap<String, Object> finalMap = new LinkedHashMap<>();
+            finalMap.put("data", data1);
+            finalMap.putAll(mergedBody);
 
-            // 出力用のオプションを設定（順序を保持し、ブロック形式で出力）
-            DumperOptions options = new DumperOptions();
-            options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-            options.setPrettyFlow(true);
-            Yaml yamlDumper = new Yaml(options);
-            String output = yamlDumper.dump(merged);
-            System.out.println(output);
+            // Dump
+            DumperOptions opts = new DumperOptions();
+            opts.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
+            opts.setPrettyFlow(true);
+            Yaml dumper = new Yaml(opts);
+            String output = dumper.dump(finalMap);
 
+            System.out.print(output);
             if (args.length >= 3) {
-                String outputPath = args[2];
-                Files.write(Paths.get(outputPath), output.getBytes(StandardCharsets.UTF_8));
-                System.out.println("Merged YAML written to " + outputPath);
+                Files.write(Paths.get(args[2]), output.getBytes(StandardCharsets.UTF_8));
+                System.out.println("Merged YAML written to " + args[2]);
             }
 
         } catch (Exception e) {
@@ -59,43 +55,73 @@ public class YamlMerger {
         }
     }
 
-    /**
-     * map1 をベースにして、map2 の内容をマージする。
-     * ・両方の値がMapの場合は再帰的にマージ
-     * ・両方がListの場合は map1 のリストの末尾に map2 のリストを追加
-     * ・その他の場合は map1 の値をそのまま保持
-     */
     @SuppressWarnings("unchecked")
-    private static Map<String, Object> mergeMaps(Map<String, Object> map1, Map<String, Object> map2) {
-        // LinkedHashMap を利用して順序を保持
-        Map<String, Object> merged = new LinkedHashMap<>();
+    private static Map<String, Object> mergeMaps(Map<String, Object> m1, Map<String, Object> m2) {
+        Map<String, Object> result = new LinkedHashMap<>(m1);
 
-        // まず map1 の全エントリを追加
-        for (String key : map1.keySet()) {
-            merged.put(key, map1.get(key));
-        }
+        for (Map.Entry<String, Object> e : m2.entrySet()) {
+            String key = e.getKey();
+            Object v2 = e.getValue();
 
-        // 次に map2 の各エントリについて処理
-        for (String key : map2.keySet()) {
-            if (merged.containsKey(key)) {
-                Object value1 = merged.get(key);
-                Object value2 = map2.get(key);
-                if (value1 instanceof Map && value2 instanceof Map) {
-                    merged.put(key, mergeMaps((Map<String, Object>) value1, (Map<String, Object>) value2));
-                } else if (value1 instanceof List && value2 instanceof List) {
-                    List<Object> mergedList = new ArrayList<>();
-                    mergedList.addAll((List<Object>) value1);
-                    mergedList.addAll((List<Object>) value2);
-                    merged.put(key, mergedList);
-                } else {
-                    // 同一キーだがリストやMapでない場合は、元の値（map1側）を維持
-                    // 必要に応じてここで値を上書きする実装に変更可能
-                }
+            if (!result.containsKey(key)) {
+                // map1 にないキーはそのまま追加
+                result.put(key, v2);
+
             } else {
-                // map1 に存在しないキーはそのまま追加
-                merged.put(key, map2.get(key));
+                Object v1 = result.get(key);
+
+                // Map vs Map → 再帰マージ
+                if (v1 instanceof Map && v2 instanceof Map) {
+                    result.put(key, mergeMaps((Map<String, Object>) v1, (Map<String, Object>) v2));
+
+                    // List vs List → 要素が 'type' をキーに持つ Map ならキーごとにマージ、それ以外は連結
+                } else if (v1 instanceof List && v2 instanceof List) {
+                    List<Object> list1 = (List<Object>) v1;
+                    List<Object> list2 = (List<Object>) v2;
+                    if (isTypeKeyedList(list1) && isTypeKeyedList(list2)) {
+                        result.put(key, mergeByType(list1, list2));
+                    } else {
+                        List<Object> mergedList = new ArrayList<>(list1);
+                        mergedList.addAll(list2);
+                        result.put(key, mergedList);
+                    }
+
+                    // それ以外 → map2 で上書き（必要に応じて v1 を優先するよう変えてもOK）
+                } else {
+                    result.put(key, v2);
+                }
             }
         }
-        return merged;
+        return result;
+    }
+
+    /** リストの最初の要素が Map かつ 'type' キーを持つかどうか */
+    private static boolean isTypeKeyedList(List<Object> list) {
+        return !list.isEmpty()
+                && list.get(0) instanceof Map
+                && ((Map<?, ?>) list.get(0)).containsKey("type");
+    }
+
+    /**
+     * 'type' キーを持つ Map 要素のリストを、type 値ごとに再帰マージして返す。
+     */
+    @SuppressWarnings("unchecked")
+    private static List<Object> mergeByType(List<Object> l1, List<Object> l2) {
+        // type値 → 要素 Map の順序保持マップ
+        Map<Object, Map<String, Object>> temp = new LinkedHashMap<>();
+        for (Object o : l1) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            temp.put(m.get("type"), new LinkedHashMap<>(m));
+        }
+        for (Object o : l2) {
+            Map<String, Object> m = (Map<String, Object>) o;
+            Object type = m.get("type");
+            if (temp.containsKey(type)) {
+                temp.put(type, mergeMaps(temp.get(type), m));
+            } else {
+                temp.put(type, new LinkedHashMap<>(m));
+            }
+        }
+        return new ArrayList<>(temp.values());
     }
 }

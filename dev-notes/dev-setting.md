@@ -6,6 +6,7 @@
 
 - [修正環境構築方法](#修正環境構築方法)
 - [remote-container有り](#remote-container有り)
+  - [windowsの場合次を行いdevcontainerを起動する](#windowsの場合次を行いdevcontainerを起動する)
 - [remote-container無し](#remote-container無し)
   - [pythonインストール](#pythonインストール)
     - [window (choco使用時)](#window-choco使用時)
@@ -32,6 +33,12 @@
 1. vscodeインストール
 1. remote-containerプラグインインストール
 1. dockerを起動してremote-containerに入る
+
+## windowsの場合次を行いdevcontainerを起動する
+
+1. HOME環境変数を定義
+    HOME環境変数に `%USERPROFILE%` を設定
+1. ユーザのホームディレクトリに `.ssh` フォルダを作成
 
 
 # remote-container無し
