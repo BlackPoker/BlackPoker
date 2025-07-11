@@ -77,11 +77,10 @@ actList:
 
   - type: 切札操作
     acts:
-    -
-      frame: |-
+    - frame: |-
         ・エクストラ
       actId: open
-      actName: オープン
+      actName: クイックオープン
       actType: 切札操作
       actTrigger: 直接
       actSpeed: 即時
@@ -89,8 +88,20 @@ actList:
       actCost: DD
       actEffect: |-
         自分の裏切札を1枚表にし表切札とする。
-    -
-      frame: |-
+
+    - frame: |-
+        ・エクストラ
+      actId: open
+      actName: メインオープン
+      actType: 切札操作
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actCost: BBL
+      actEffect: |-
+        自分の裏切札を1枚表にし表切札とする。
+
+    - frame: |-
         ・エクストラ
       actId: close
       actName: クローズ
@@ -119,19 +130,23 @@ actList:
       actEffect: |-
         対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
 
-    # -
-    #   frame: |-
-    #     ・エクストラ
-    #   actId: trumpRegene
-    #   actName: 切札再生
-    #   actType: 切札操作
-    #   actTrigger: 誘発
-    #   actSpeed: 即時
-    #   actTime: クイック
-    #   actTarget: カード1枚
-    #   actEffect: |-
-    #     対象のカードを手札、墓地から見つけられた場合、それを自分の切札として表向きにして置き、切札に対応した能力を有効にする。 
-    #     切札については「切札について」参照\n切札に対応する能力については「アビリティリスト」参照
+  - type: 切札♠A
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 革命ドロー
+      actId: revolutionDraw
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: 自分の表切札に「スラッシュ」がある
+      actTriggerCond: |-
+        自分の <革命ドロー> を持つ兵士がアタッカーかつダメージ判定アクションにてブロックされなかった場合
+      actEffect: |-
+        ライフの一番上からカードを1枚引き手札に加える。
+      since: ex4.14.0
+      update: v8.2
 
   - type: 切札♠2
     acts:
@@ -152,6 +167,40 @@ actList:
       since: ex3.4.0
       update: v8.1
 
+  - type: 切札♠3
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: ドレイン
+      actId: drain
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actTarget: 対戦相手1人
+      actActCond: 自分の表切札に「ドレイン」がある
+      actEffect: |-
+        自分の場にいるキャラクター1体をライフの一番下に移す。移せた場合、対象の対戦相手に2点のダメージを与える。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♠4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 威圧
+      actId: intimidate
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: L
+      actActCond: 自分の表切札に「威圧」がある
+      actEffect: |-
+        サイズが10以下の兵士を全て墓地に移す。
+      since: ex4.18.0
+      update: v8.2
+
   - type: 切札♠5
     acts:
     - frame: |-
@@ -167,7 +216,88 @@ actList:
       actEffect: |-
         自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
+
+  - type: 切札♠7
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 瞬殺
+      actId: instantKill
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: 自分の表切札に「蘇生」がある
+      actTarget: 兵士1体
+      actEffect: |-
+        自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士のサイズの合計値が対象の兵士のサイズ以上の場合、対象の兵士を墓地に移す。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♠J
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: リアニメーター召喚
+      actId: summonReanimator
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BL
+      actKey: ♡2〜10
+      actActCond: 自分の表切札に「リアニメーター」がある
+      actEffect: |-
+        切札の♠Jが表の場合、次を行う。
+        1. 墓地にあるカードを1枚選び、兵士として表向きかつチャージ状態で場に出す。
+        2. キーカードと切札の♠Jをあわせてリアニメーターとしてチャージ状態で場に出す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: クイックリアニメーター召喚
+      actId: quickSummonReanimator
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♡2〜10
+      actActCond: 自分の表切札に「リアニメーター」がある
+      actEffect: |-
+        効果の内容は「リアニメーター召喚」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: リアニメーターリアニメイト
+      actId: quickSummonReanimator
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: K
+      actKey: 「リアニメーター」1体
+      actEffect: |-
+        効果の内容は「リアニメイト」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: リアニメーター再生
+      actId: reanimatorRevive
+      actType: 切札操作
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: |-
+        自分の 「リアニメーター」 が場から墓地に移る場合
+      actEffect: |-
+        墓地から♠Jを1枚選び、自分の切札として表向きにして置く。
 
   - type: 切札♠K
     acts:
@@ -180,16 +310,17 @@ actList:
       actSpeed: 通常
       actTime: メイン
       actCost: SS
-      actKey: J〜K
+      # actKey: J〜K
       actActCond: 自分の表切札に「魔王」がある
       actEffect: |-
         切札の♠Kが表の場合、次を行う。
-        １．キーカード、手札、ライフ、墓地、切札の中から♣Kを見つける。
-        ２．♣Kを見つけた場合、場にいるすべての兵士を墓地に移し、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
-        ３．♣Kが無い場合、切札の♠Kを墓地に移す。
-        ４．ライフを切りなおす。
+        1. 全ての兵士を墓地に移す。
+        2. 自分の全ての領域から♣Kを探す。非公開の領域を見た場合、その領域をシャッフルする。
+        3. ♣Kを見つけた場合、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
+        4. ♣Kが無い場合、切札の♠Kを墓地に移す。
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
+
     - frame: |-
         ・エクストラ
       actName: 魔王の囁き
@@ -204,7 +335,27 @@ actList:
       actEffect: |-
         ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
+
+  - type: 切札♡2
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 援軍
+      actId: summonReinforcement
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: <激励> を持つ兵士1体
+      actCost: BL
+      actActCond: |-
+        ・自分の表切札に「援軍」がある
+        ・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
+      actEffect: |-
+        ライフの一番上から2枚カードをめくり1枚を兵士としてチャージ状態で場に出し、もう1枚をライフの一番下に移す。
+      since: ex3.10.0
+      update: v8.2
 
   - type: 切札♡3
     acts:
@@ -224,6 +375,28 @@ actList:
         対象の兵士のサイズをこのターンが終わるまで X 加算する。X はキーカードのサイズに等しい。
       since: ex3.4.0
       update: v8.1
+
+  - type: 切札♡K
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 巨人召喚
+      actId: summonGiant
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: SS
+      # actKey: J〜K
+      actActCond: 自分の表切札に「巨人」がある
+      actEffect: |-
+        切札の♡Kが表の場合、次を行う。
+        1. 全ての防壁を墓地に移す。
+        2. 自分の全ての領域から♢Kを探す。非公開の領域を見た場合、その領域をシャッフルする。
+        3. ♢Kを見つけた場合、切札の♡Kと♢Kを合わせて魔王としてチャージ状態で場に出す。
+        4. ♢Kが無い場合、切札の♡Kを墓地に移す。
+      since: ex3.10.0
+      update: v8.2
 
   - type: 切札♢3
     acts:
@@ -264,6 +437,23 @@ actList:
       update: v8.1
 
 charList:
+  - type: 切札♠J
+    chars:
+    - frame: |-
+        ・エクストラ
+      charName: リアニメーター
+      ruby: りあにめーたー
+      charId: reanimator
+      charType: 兵士
+      charKey: ♠J と ♡2〜10
+      charSize: 11
+      charLabel: アタッカー, ブロッカー
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・♠兵士としても♡兵士としても扱う。
+      since: ex3.10.0
+      update: v8.2
+
   - type: 切札♠K
     chars:
     - frame: |-
@@ -281,7 +471,7 @@ charList:
         ・♣兵士としても♠兵士としても扱う。
         ・２枚で１体の兵士として扱い、墓地や手札など別の場所に移る場合２枚一緒に移す。防壁になる場合２体の防壁になる。
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
 
 
 fogList:
@@ -297,6 +487,10 @@ fogList:
       fogAbility: 対象とした切札はこのターンが終わるまで表向きにできない。
       since: v8.1
 
+
+# 第三版 ex3.4.0 〜 ex3.10.0
+# 第四版 ex4.14.0 〜 ex4.22.0
+# 第五版 ex5.22.0 〜
 trumpData:
   description: |-
     切札は、ゲームにさらなる戦略性と構築の自由度をもたらす拡張要素です。
@@ -311,6 +505,23 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
+      trumpName: 革命
+      trumpId: sA
+      trumpType: 表切札
+      trumpKey: ♠A
+      trumpAbility: |-
+        ・自分の兵士は <革命ドロー> を持つ。
+        ・この能力が有効で場合、対戦相手も含めた全てのダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。
+
+        1.兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。１アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。
+      since: ex4.14.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_01
+      devNote: |-
+        「弱者の反撃」で追加された。
+    
+    - frame: |-
+        ・エクストラ
       trumpName: スラッシュ
       trumpId: s2
       trumpType: 表切札
@@ -321,7 +532,35 @@ trumpList:
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Swords_02
       devNote: |-
-        立ち上がる兵で追加された。
+        「立ち上がる兵」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: ドレイン
+      trumpId: s3
+      trumpType: 表切札
+      trumpKey: ♠3
+      trumpAbility: |
+         なし
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_03
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 威圧
+      trumpId: s4
+      trumpType: 表切札
+      trumpKey: ♠4
+      trumpAbility: |
+         なし
+      since: ex4.18.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_04
+      devNote: |-
+        「自衛的戦術」で追加された。
 
     - frame: |-
         ・エクストラ
@@ -329,11 +568,41 @@ trumpList:
       trumpId: s5
       trumpType: 表切札
       trumpKey: ♠5
+      trumpAbility: |
+         なし
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Swords_05
       devNote: |-
         「巨人と魔王」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 瞬殺
+      trumpId: s7
+      trumpType: 表切札
+      trumpKey: ♠7
+      trumpAbility: |
+         なし
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Swords_07
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: リアニメーター
+      trumpId: sJ
+      trumpType: 表切札
+      trumpKey: ♠J
+      trumpAbility: |
+         なし
+      since: ex4.22.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_20_Judgement
+      devNote: |-
+        「for Jack」で追加された。
 
     - frame: |-
         ・エクストラ
@@ -341,8 +610,10 @@ trumpList:
       trumpId: sK
       trumpType: 表切札
       trumpKey: ♠K
+      trumpAbility: |
+         なし
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_04_The_Emperor
       devNote: |-
         「巨人と魔王」で追加された。
@@ -356,7 +627,7 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♡2
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_02
       devNote: |-
         「巨人と魔王」で追加された。
@@ -374,6 +645,30 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
         立ち上がる兵で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 休戦
+      trumpId: h4
+      trumpType: 表切札
+      trumpKey: ♡4
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_04
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 追撃
+      trumpId: h5
+      trumpType: 表切札
+      trumpKey: ♡5
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_05
+      devNote: |-
+        「苦渋の選択」で追加された。
 
   - type: ♢ダイヤ
     trumps:
