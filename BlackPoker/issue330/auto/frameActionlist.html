@@ -1,0 +1,1411 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>フレームアクションリスト &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="コアルール" href="../core/core.html" />
+    <link rel="prev" title="公式フレーム" href="framelist.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="../frame/frame.html" accesskey="U">フレーム</a>
+            <a class="top" href="#">フレームアクションリスト</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="framelist.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            公式フレーム
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../core/core.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            コアルール
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="../frame/frame.html">フレーム</a> &#187;</li>
+    <li><a href="">フレームアクションリスト</a></li> 
+  </ul>
+</nav>
+<section id="actionlist-act-frame">
+<span id="act-act-frame"></span><span id="id1"></span><h1><span class="section-number">6.3.2. </span>フレームアクションリスト<a class="headerlink" href="#actionlist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id2">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id3" id="id102">パック操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-packopen" id="id103">パック開封 (パック操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id5" id="id104">レアカード操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-raredraw" id="id105">レアドロー (レアカード操作)</a></p></li>
+<li><p><a class="reference internal" href="#act-summonsrare" id="id106">レア召喚 (レアカード操作)</a></p></li>
+<li><p><a class="reference internal" href="#act-trapcounter" id="id107">罠カウンター (レアカード操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id9" id="id108">切札操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-open" id="id109">クイックオープン (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#id11" id="id110">メインオープン (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#act-close" id="id111">クローズ (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#act-trumpdestroy" id="id112">切札破壊 (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#a" id="id113">切札♠A</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-revolutiondraw" id="id114">革命ドロー (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id16" id="id115">切札♠2</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-slash" id="id116">スラッシュ (兵士起因)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id18" id="id117">切札♠3</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-drain" id="id118">ドレイン (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id20" id="id119">切札♠4</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-intimidate" id="id120">威圧 (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id22" id="id121">切札♠5</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-resurrection" id="id122">蘇生 (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id24" id="id123">切札♠7</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-instantkill" id="id124">瞬殺 (速攻魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#j" id="id125">切札♠J</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-summonreanimator" id="id126">リアニメーター召喚 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonreanimator" id="id127">クイックリアニメーター召喚 (速攻魔法)</a></p></li>
+<li><p><a class="reference internal" href="#id28" id="id128">リアニメーターリアニメイト (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#act-reanimatorrevive" id="id129">リアニメーター再生 (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#k" id="id130">切札♠K</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-summondarklord" id="id131">魔王召喚 (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-darkwhisper" id="id132">魔王の囁き (基本)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id33" id="id133">切札♡2</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-summonreinforcement" id="id134">援軍 (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id35" id="id135">切札♡3</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-rally" id="id136">激励 (兵士起因)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id37" id="id137">切札♡4</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-retreat" id="id138">休戦 (速攻魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id39" id="id139">切札♡5</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-pursuit" id="id140">追撃 (速攻魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id41" id="id141">切札♡7</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-phantomreverse" id="id142">ファントムリバース (通常魔法)</a></p></li>
+<li><p><a class="reference internal" href="#act-illusion" id="id143">幻影 (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id44" id="id144">切札♡8</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-salvation" id="id145">救済 (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id46" id="id146">切札♡K</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-summongiant" id="id147">巨人召喚 (通常魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id48" id="id148">切札♢3</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-negotiate" id="id149">交渉 (兵士起因)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id50" id="id150">切札♣4</a></p>
+<ul>
+<li><p><a class="reference internal" href="#act-switch" id="id151">スイッチ (兵士起因)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id3">
+<h2><a class="toc-backref" href="#id102" role="doc-backlink"><span class="section-number">6.3.2.1. </span>パック操作</a><a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-packopen">
+<span id="id4"></span><h3><a class="toc-backref" href="#id103" role="doc-backlink"><span class="section-number">6.3.2.1.1. </span>パック開封 (パック操作)</a><a class="headerlink" href="#act-packopen" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・パック</p>
+<p>・レアパック</p>
+<p>・ストラテジー</p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>パックが開封済みでない場合のみこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。</p></li>
+<li><p>パックを表向きにし、開封済みとする。</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id5">
+<h2><a class="toc-backref" href="#id104" role="doc-backlink"><span class="section-number">6.3.2.2. </span>レアカード操作</a><a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-raredraw">
+<span id="id6"></span><h3><a class="toc-backref" href="#id105" role="doc-backlink"><span class="section-number">6.3.2.2.1. </span>レアドロー (レアカード操作)</a><a class="headerlink" href="#act-raredraw" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・レアパック</p>
+<p>・ストラテジー</p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</p>
+<p><strong>効果:</strong></p>
+<p>レアカードを1枚手札に加える。</p>
+<hr class="docutils" />
+</section>
+<section id="act-summonsrare">
+<span id="id7"></span><h3><a class="toc-backref" href="#id106" role="doc-backlink"><span class="section-number">6.3.2.2.2. </span>レア召喚 (レアカード操作)</a><a class="headerlink" href="#act-summonsrare" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・レアパック</p>
+<p>・ストラテジー</p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> レアカード1枚</p>
+<p><strong>コスト:</strong> S</p>
+<p><strong>特記事項:</strong> ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを兵士として表向きかつチャージ状態で場に出す。</p>
+<hr class="docutils" />
+</section>
+<section id="act-trapcounter">
+<span id="id8"></span><h3><a class="toc-backref" href="#id107" role="doc-backlink"><span class="section-number">6.3.2.2.3. </span>罠カウンター (レアカード操作)</a><a class="headerlink" href="#act-trapcounter" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・レアパック</p>
+<p>・ストラテジー</p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> レアカード1枚</p>
+<p><strong>特記事項:</strong> ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</p>
+<p><strong>対象:</strong></p>
+<p>キーカードが1枚または2枚のリクエスト</p>
+<p><strong>効果:</strong></p>
+<p>対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id9">
+<h2><a class="toc-backref" href="#id108" role="doc-backlink"><span class="section-number">6.3.2.3. </span>切札操作</a><a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-open">
+<span id="id10"></span><h3><a class="toc-backref" href="#id109" role="doc-backlink"><span class="section-number">6.3.2.3.1. </span>クイックオープン (切札操作)</a><a class="headerlink" href="#act-open" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>コスト:</strong> DD</p>
+<p><strong>効果:</strong></p>
+<p>自分の裏切札を1枚表にし表切札とする。</p>
+<hr class="docutils" />
+</section>
+<section id="id11">
+<span id="id12"></span><h3><a class="toc-backref" href="#id110" role="doc-backlink"><span class="section-number">6.3.2.3.2. </span>メインオープン (切札操作)</a><a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> BBL</p>
+<p><strong>効果:</strong></p>
+<p>自分の裏切札を1枚表にし表切札とする。</p>
+<hr class="docutils" />
+</section>
+<section id="act-close">
+<span id="id13"></span><h3><a class="toc-backref" href="#id111" role="doc-backlink"><span class="section-number">6.3.2.3.3. </span>クローズ (切札操作)</a><a class="headerlink" href="#act-close" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> Q</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>表切札1枚</p>
+<p><strong>効果:</strong></p>
+<p>対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。</p>
+<hr class="docutils" />
+</section>
+<section id="act-trumpdestroy">
+<span id="id14"></span><h3><a class="toc-backref" href="#id112" role="doc-backlink"><span class="section-number">6.3.2.3.4. </span>切札破壊 (切札操作)</a><a class="headerlink" href="#act-trumpdestroy" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> A〜K</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>対象:</strong></p>
+<p>表切札1枚</p>
+<p><strong>効果:</strong></p>
+<p>対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="a">
+<h2><a class="toc-backref" href="#id113" role="doc-backlink"><span class="section-number">6.3.2.4. </span>切札♠A</a><a class="headerlink" href="#a" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-revolutiondraw">
+<span id="id15"></span><h3><a class="toc-backref" href="#id114" role="doc-backlink"><span class="section-number">6.3.2.4.1. </span>革命ドロー (誘発魔法)</a><a class="headerlink" href="#act-revolutiondraw" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スラッシュ」がある</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の &lt;革命ドロー&gt; を持つ兵士がアタッカーかつダメージ判定アクションにてブロックされなかった場合</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からカードを1枚引き手札に加える。</p>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id16">
+<h2><a class="toc-backref" href="#id115" role="doc-backlink"><span class="section-number">6.3.2.5. </span>切札♠2</a><a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-slash">
+<span id="id17"></span><h3><a class="toc-backref" href="#id116" role="doc-backlink"><span class="section-number">6.3.2.5.1. </span>スラッシュ (兵士起因)</a><a class="headerlink" href="#act-slash" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> &lt;スラッシュ&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スラッシュ」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id18">
+<h2><a class="toc-backref" href="#id117" role="doc-backlink"><span class="section-number">6.3.2.6. </span>切札♠3</a><a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-drain">
+<span id="id19"></span><h3><a class="toc-backref" href="#id118" role="doc-backlink"><span class="section-number">6.3.2.6.1. </span>ドレイン (通常魔法)</a><a class="headerlink" href="#act-drain" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「ドレイン」がある</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいるキャラクター1体をライフの一番下に移す。移せた場合、対象の対戦相手に2点のダメージを与える。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id20">
+<h2><a class="toc-backref" href="#id119" role="doc-backlink"><span class="section-number">6.3.2.7. </span>切札♠4</a><a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-intimidate">
+<span id="id21"></span><h3><a class="toc-backref" href="#id120" role="doc-backlink"><span class="section-number">6.3.2.7.1. </span>威圧 (通常魔法)</a><a class="headerlink" href="#act-intimidate" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「威圧」がある</p>
+<p><strong>効果:</strong></p>
+<p>サイズが10以下の兵士を全て墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id22">
+<h2><a class="toc-backref" href="#id121" role="doc-backlink"><span class="section-number">6.3.2.8. </span>切札♠5</a><a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-resurrection">
+<span id="id23"></span><h3><a class="toc-backref" href="#id122" role="doc-backlink"><span class="section-number">6.3.2.8.1. </span>蘇生 (通常魔法)</a><a class="headerlink" href="#act-resurrection" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「蘇生」がある</p>
+<p><strong>効果:</strong></p>
+<p>自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id24">
+<h2><a class="toc-backref" href="#id123" role="doc-backlink"><span class="section-number">6.3.2.9. </span>切札♠7</a><a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-instantkill">
+<span id="id25"></span><h3><a class="toc-backref" href="#id124" role="doc-backlink"><span class="section-number">6.3.2.9.1. </span>瞬殺 (速攻魔法)</a><a class="headerlink" href="#act-instantkill" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「蘇生」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士のサイズの合計値が対象の兵士のサイズ以上の場合、対象の兵士を墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="j">
+<h2><a class="toc-backref" href="#id125" role="doc-backlink"><span class="section-number">6.3.2.10. </span>切札♠J</a><a class="headerlink" href="#j" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-summonreanimator">
+<span id="id26"></span><h3><a class="toc-backref" href="#id126" role="doc-backlink"><span class="section-number">6.3.2.10.1. </span>リアニメーター召喚 (通常魔法)</a><a class="headerlink" href="#act-summonreanimator" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♡2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「リアニメーター」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♠Jが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>墓地にあるカードを1枚選び、兵士として表向きかつチャージ状態で場に出す。</p></li>
+<li><p>キーカードと切札の♠Jをあわせてリアニメーターとしてチャージ状態で場に出す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="act-quicksummonreanimator">
+<span id="id27"></span><h3><a class="toc-backref" href="#id127" role="doc-backlink"><span class="section-number">6.3.2.10.2. </span>クイックリアニメーター召喚 (速攻魔法)</a><a class="headerlink" href="#act-quicksummonreanimator" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> ♡2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「リアニメーター」がある</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「リアニメーター召喚」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="id28">
+<span id="id29"></span><h3><a class="toc-backref" href="#id128" role="doc-backlink"><span class="section-number">6.3.2.10.3. </span>リアニメーターリアニメイト (兵士起因)</a><a class="headerlink" href="#id28" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> 「リアニメーター」1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「リアニメイト」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="act-reanimatorrevive">
+<span id="id30"></span><h3><a class="toc-backref" href="#id129" role="doc-backlink"><span class="section-number">6.3.2.10.4. </span>リアニメーター再生 (切札操作)</a><a class="headerlink" href="#act-reanimatorrevive" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の 「リアニメーター」 が場から墓地に移る場合</p>
+<p><strong>効果:</strong></p>
+<p>墓地から♠Jを1枚選び、自分の切札として表向きにして置く。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="k">
+<h2><a class="toc-backref" href="#id130" role="doc-backlink"><span class="section-number">6.3.2.11. </span>切札♠K</a><a class="headerlink" href="#k" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-summondarklord">
+<span id="id31"></span><h3><a class="toc-backref" href="#id131" role="doc-backlink"><span class="section-number">6.3.2.11.1. </span>魔王召喚 (通常魔法)</a><a class="headerlink" href="#act-summondarklord" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> SS</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「魔王」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♠Kが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>全ての兵士を墓地に移す。</p></li>
+<li><p>自分の全ての領域から♣Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</p></li>
+<li><p>♣Kを見つけた場合、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。</p></li>
+<li><p>♣Kが無い場合、切札の♠Kを墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="act-darkwhisper">
+<span id="id32"></span><h3><a class="toc-backref" href="#id132" role="doc-backlink"><span class="section-number">6.3.2.11.2. </span>魔王の囁き (基本)</a><a class="headerlink" href="#act-darkwhisper" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id33">
+<h2><a class="toc-backref" href="#id133" role="doc-backlink"><span class="section-number">6.3.2.12. </span>切札♡2</a><a class="headerlink" href="#id33" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-summonreinforcement">
+<span id="id34"></span><h3><a class="toc-backref" href="#id134" role="doc-backlink"><span class="section-number">6.3.2.12.1. </span>援軍 (通常魔法)</a><a class="headerlink" href="#act-summonreinforcement" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>・自分の表切札に「援軍」がある
+・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上から2枚カードをめくり1枚を兵士としてチャージ状態で場に出し、もう1枚をライフの一番下に移す。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id35">
+<h2><a class="toc-backref" href="#id135" role="doc-backlink"><span class="section-number">6.3.2.13. </span>切札♡3</a><a class="headerlink" href="#id35" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-rally">
+<span id="id36"></span><h3><a class="toc-backref" href="#id136" role="doc-backlink"><span class="section-number">6.3.2.13.1. </span>激励 (兵士起因)</a><a class="headerlink" href="#act-rally" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> &lt;激励&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「激励」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士のサイズをこのターンが終わるまで X 加算する。X はキーカードのサイズに等しい。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id37">
+<h2><a class="toc-backref" href="#id137" role="doc-backlink"><span class="section-number">6.3.2.14. </span>切札♡4</a><a class="headerlink" href="#id37" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-retreat">
+<span id="id38"></span><h3><a class="toc-backref" href="#id138" role="doc-backlink"><span class="section-number">6.3.2.14.1. </span>休戦 (速攻魔法)</a><a class="headerlink" href="#act-retreat" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> &lt;激励&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>・自分の表切札に「休戦」がある</p>
+<p><strong>対象:</strong></p>
+<p>アタックアクションのリクエスト</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>対象のリクエストを無効し、対象のリクエストをステージから取り除く。</p></li>
+<li><p>自分の切札にある♡4を裏向きにする。</p></li>
+<li><p>自分の場にいるキャラクターを全てチャージ状態にする。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id39">
+<h2><a class="toc-backref" href="#id139" role="doc-backlink"><span class="section-number">6.3.2.15. </span>切札♡5</a><a class="headerlink" href="#id39" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-pursuit">
+<span id="id40"></span><h3><a class="toc-backref" href="#id140" role="doc-backlink"><span class="section-number">6.3.2.15.1. </span>追撃 (速攻魔法)</a><a class="headerlink" href="#act-pursuit" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> BDD</p>
+<p><strong>起動条件:</strong></p>
+<p>・自分の表切札に「追撃」がある
+・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>自分の場にいる兵士を全てチャージ状態にする。</p></li>
+<li><p>アタックアクションをリクエストする。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id41">
+<h2><a class="toc-backref" href="#id141" role="doc-backlink"><span class="section-number">6.3.2.16. </span>切札♡7</a><a class="headerlink" href="#id41" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-phantomreverse">
+<span id="id42"></span><h3><a class="toc-backref" href="#id142" role="doc-backlink"><span class="section-number">6.3.2.16.1. </span>ファントムリバース (通常魔法)</a><a class="headerlink" href="#act-phantomreverse" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> &lt;ファントム&gt; を持つ防壁1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「ファントム」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードの防壁をチャージ状態の兵士にする。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="act-illusion">
+<span id="id43"></span><h3><a class="toc-backref" href="#id143" role="doc-backlink"><span class="section-number">6.3.2.16.2. </span>幻影 (誘発魔法)</a><a class="headerlink" href="#act-illusion" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 誘発</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「ファントム」があるかつ、
+エンドアクションをリクエストした時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>1．自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。</p>
+<p>2．自分の場にいる防壁の順番を任意の順番に並び替えてもよい。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id44">
+<h2><a class="toc-backref" href="#id144" role="doc-backlink"><span class="section-number">6.3.2.17. </span>切札♡8</a><a class="headerlink" href="#id44" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-salvation">
+<span id="id45"></span><h3><a class="toc-backref" href="#id145" role="doc-backlink"><span class="section-number">6.3.2.17.1. </span>救済 (通常魔法)</a><a class="headerlink" href="#act-salvation" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>キーカード:</strong> ♡A〜K</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「救済」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id46">
+<h2><a class="toc-backref" href="#id146" role="doc-backlink"><span class="section-number">6.3.2.18. </span>切札♡K</a><a class="headerlink" href="#id46" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-summongiant">
+<span id="id47"></span><h3><a class="toc-backref" href="#id147" role="doc-backlink"><span class="section-number">6.3.2.18.1. </span>巨人召喚 (通常魔法)</a><a class="headerlink" href="#act-summongiant" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 通常</p>
+<p><strong>タイミング:</strong> メイン</p>
+<p><strong>コスト:</strong> SS</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「巨人」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♡Kが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>全ての防壁を墓地に移す。</p></li>
+<li><p>自分の全ての領域から♢Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</p></li>
+<li><p>♢Kを見つけた場合、切札の♡Kと♢Kを合わせて魔王としてチャージ状態で場に出す。</p></li>
+<li><p>♢Kが無い場合、切札の♡Kを墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id48">
+<h2><a class="toc-backref" href="#id148" role="doc-backlink"><span class="section-number">6.3.2.19. </span>切札♢3</a><a class="headerlink" href="#id48" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-negotiate">
+<span id="id49"></span><h3><a class="toc-backref" href="#id149" role="doc-backlink"><span class="section-number">6.3.2.19.1. </span>交渉 (兵士起因)</a><a class="headerlink" href="#act-negotiate" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> &lt;交渉&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「交渉」がある</p>
+<p><strong>対象:</strong></p>
+<p>キャラクター1体</p>
+<p><strong>効果:</strong></p>
+<p>対象のキャラクターをドライブする。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id50">
+<h2><a class="toc-backref" href="#id150" role="doc-backlink"><span class="section-number">6.3.2.20. </span>切札♣4</a><a class="headerlink" href="#id50" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="act-switch">
+<span id="id51"></span><h3><a class="toc-backref" href="#id151" role="doc-backlink"><span class="section-number">6.3.2.20.1. </span>スイッチ (兵士起因)</a><a class="headerlink" href="#act-switch" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>トリガー:</strong> 直接</p>
+<p><strong>スピード:</strong> 即時</p>
+<p><strong>タイミング:</strong> クイック</p>
+<p><strong>キーカード:</strong> &lt;スイッチ&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スイッチ」がある</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>手札からカードを1枚選び、兵士としてチャージ状態で場に出す。</p></li>
+<li><p>キーカードを手札に戻す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+</section>
+<section id="characterlist-act-frame">
+<span id="id52"></span><h1><span class="section-number">6.3.3. </span>フレームキャラクターリスト<a class="headerlink" href="#characterlist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id53">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id54" id="id152">切札♠J</a></p>
+<ul>
+<li><p><a class="reference internal" href="#char-reanimator" id="id153">リアニメーター (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id56" id="id154">切札♠K</a></p>
+<ul>
+<li><p><a class="reference internal" href="#char-darklord" id="id155">魔王 (兵士)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id54">
+<h2><a class="toc-backref" href="#id152" role="doc-backlink"><span class="section-number">6.3.3.1. </span>切札♠J</a><a class="headerlink" href="#id54" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="char-reanimator">
+<span id="id55"></span><h3><a class="toc-backref" href="#id153" role="doc-backlink"><span class="section-number">6.3.3.1.1. </span>リアニメーター (兵士)</a><a class="headerlink" href="#char-reanimator" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>キャラクターキーカード:</strong> ♠J と ♡2〜10</p>
+<p><strong>サイズ:</strong> 11</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー</p>
+<p><strong>能力:</strong></p>
+<p>・装備アクションの対象にできない。</p>
+<p>・♠兵士としても♡兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id56">
+<h2><a class="toc-backref" href="#id154" role="doc-backlink"><span class="section-number">6.3.3.2. </span>切札♠K</a><a class="headerlink" href="#id56" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="char-darklord">
+<span id="id57"></span><h3><a class="toc-backref" href="#id155" role="doc-backlink"><span class="section-number">6.3.3.2.1. </span>魔王 (兵士)</a><a class="headerlink" href="#char-darklord" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>キャラクターキーカード:</strong> ♠K と ♣K</p>
+<p><strong>サイズ:</strong> 26</p>
+<p><strong>ラベル:</strong> アタッカー, ブロッカー</p>
+<p><strong>能力:</strong></p>
+<p>・アクションの対象にできない。</p>
+<p>・自分がエンドアクションを起こした場合、世代交代アクションを誘発する。</p>
+<p>・♣兵士としても♠兵士としても扱う。</p>
+<p>・2枚で1体の兵士として扱い、墓地や手札など別の場所に移る場合2枚一緒に移す。防壁になる場合2体の防壁になる。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+</section>
+<section id="foglist-act-frame">
+<span id="id58"></span><h1><span class="section-number">6.3.4. </span>フレームフォグリスト<a class="headerlink" href="#foglist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id59">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id60" id="id156">滞留魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#fog-closefog" id="id157">クローズ (滞留魔法)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id60">
+<h2><a class="toc-backref" href="#id156" role="doc-backlink"><span class="section-number">6.3.4.1. </span>滞留魔法</a><a class="headerlink" href="#id60" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="fog-closefog">
+<span id="id61"></span><h3><a class="toc-backref" href="#id157" role="doc-backlink"><span class="section-number">6.3.4.1.1. </span>クローズ (滞留魔法)</a><a class="headerlink" href="#fog-closefog" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>フォグキーカード:</strong> Q</p>
+<p><strong>能力:</strong></p>
+<p>対象とした切札はこのターンが終わるまで表向きにできない。</p>
+<p><strong>導入バージョン:</strong>  v8.1</p>
+</section>
+</section>
+</section>
+<section id="trumplist-act-frame">
+<span id="id62"></span><h1><span class="section-number">6.3.5. </span>フレーム切札リスト<a class="headerlink" href="#trumplist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<p>切札は、ゲームにさらなる戦略性と構築の自由度をもたらす拡張要素です。</p>
+<p>それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。</p>
+<p>また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。</p>
+<nav class="contents local" id="id63">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id64" id="id158">♠スペード</a></p>
+<ul>
+<li><p><a class="reference internal" href="#trump-sa" id="id159">革命 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-s2" id="id160">スラッシュ (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-s3" id="id161">ドレイン (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-s4" id="id162">威圧 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-s5" id="id163">蘇生 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-s7" id="id164">瞬殺 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-sj" id="id165">リアニメーター (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-sk" id="id166">魔王 (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id73" id="id167">♡ハート</a></p>
+<ul>
+<li><p><a class="reference internal" href="#trump-h2" id="id168">援軍 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-h3" id="id169">激励 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-h4" id="id170">休戦 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-h5" id="id171">追撃 (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-h7" id="id172">ファントム (表切札)</a></p></li>
+<li><p><a class="reference internal" href="#trump-h8" id="id173">救済 (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id80" id="id174">♢ダイヤ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#trump-d3" id="id175">交渉 (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id82" id="id176">♣クラブ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#trump-c4" id="id177">スイッチ (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id84" id="id178">裏切札</a></p>
+<ul>
+<li><p><a class="reference internal" href="#trump-secrettrump" id="id179">裏切札 (裏切札)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id64">
+<h2><a class="toc-backref" href="#id158" role="doc-backlink"><span class="section-number">6.3.5.1. </span>♠スペード</a><a class="headerlink" href="#id64" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="trump-sa">
+<span id="id65"></span><h3><a class="toc-backref" href="#id159" role="doc-backlink"><span class="section-number">6.3.5.1.1. </span>革命 (表切札)</a><a class="headerlink" href="#trump-sa" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠A</p>
+<p><strong>能力:</strong></p>
+<p>・自分の兵士は &lt;革命ドロー&gt; を持つ。</p>
+<p>・この能力が有効で場合、対戦相手も含めた全てのダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。</p>
+<p>1.兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。1アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。</p>
+<p><strong>イメージ:</strong>
+革命のイメージ (<a class="reference internal" href="#frame-sa-image"><span class="std std-numref">Fig. 6.6</span></a>)</p>
+<figure class="align-default" id="id86">
+<span id="frame-sa-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.6 </span><span class="caption-text">革命のイメージ</span><a class="headerlink" href="#id86" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-s2">
+<span id="id66"></span><h3><a class="toc-backref" href="#id160" role="doc-backlink"><span class="section-number">6.3.5.1.2. </span>スラッシュ (表切札)</a><a class="headerlink" href="#trump-s2" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠2</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♠の兵士は &lt;スラッシュ&gt; を持つ。</p>
+<p><strong>イメージ:</strong>
+スラッシュのイメージ (<a class="reference internal" href="#frame-s2-image"><span class="std std-numref">Fig. 6.7</span></a>)</p>
+<figure class="align-default" id="id87">
+<span id="frame-s2-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.7 </span><span class="caption-text">スラッシュのイメージ</span><a class="headerlink" href="#id87" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<hr class="docutils" />
+</section>
+<section id="trump-s3">
+<span id="id67"></span><h3><a class="toc-backref" href="#id161" role="doc-backlink"><span class="section-number">6.3.5.1.3. </span>ドレイン (表切札)</a><a class="headerlink" href="#trump-s3" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠3</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+ドレインのイメージ (<a class="reference internal" href="#frame-s3-image"><span class="std std-numref">Fig. 6.8</span></a>)</p>
+<figure class="align-default" id="id88">
+<span id="frame-s3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.8 </span><span class="caption-text">ドレインのイメージ</span><a class="headerlink" href="#id88" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-s4">
+<span id="id68"></span><h3><a class="toc-backref" href="#id162" role="doc-backlink"><span class="section-number">6.3.5.1.4. </span>威圧 (表切札)</a><a class="headerlink" href="#trump-s4" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠4</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+威圧のイメージ (<a class="reference internal" href="#frame-s4-image"><span class="std std-numref">Fig. 6.9</span></a>)</p>
+<figure class="align-default" id="id89">
+<span id="frame-s4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.9 </span><span class="caption-text">威圧のイメージ</span><a class="headerlink" href="#id89" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-s5">
+<span id="id69"></span><h3><a class="toc-backref" href="#id163" role="doc-backlink"><span class="section-number">6.3.5.1.5. </span>蘇生 (表切札)</a><a class="headerlink" href="#trump-s5" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠5</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+蘇生のイメージ (<a class="reference internal" href="#frame-s5-image"><span class="std std-numref">Fig. 6.10</span></a>)</p>
+<figure class="align-default" id="id90">
+<span id="frame-s5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.10 </span><span class="caption-text">蘇生のイメージ</span><a class="headerlink" href="#id90" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-s7">
+<span id="id70"></span><h3><a class="toc-backref" href="#id164" role="doc-backlink"><span class="section-number">6.3.5.1.6. </span>瞬殺 (表切札)</a><a class="headerlink" href="#trump-s7" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠7</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+瞬殺のイメージ (<a class="reference internal" href="#frame-s7-image"><span class="std std-numref">Fig. 6.11</span></a>)</p>
+<figure class="align-default" id="id91">
+<span id="frame-s7-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.11 </span><span class="caption-text">瞬殺のイメージ</span><a class="headerlink" href="#id91" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-sj">
+<span id="id71"></span><h3><a class="toc-backref" href="#id165" role="doc-backlink"><span class="section-number">6.3.5.1.7. </span>リアニメーター (表切札)</a><a class="headerlink" href="#trump-sj" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠J</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+リアニメーターのイメージ (<a class="reference internal" href="#frame-sj-image"><span class="std std-numref">Fig. 6.12</span></a>)</p>
+<figure class="align-default" id="id92">
+<span id="frame-sj-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg" src="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.12 </span><span class="caption-text">リアニメーターのイメージ</span><a class="headerlink" href="#id92" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-sk">
+<span id="id72"></span><h3><a class="toc-backref" href="#id166" role="doc-backlink"><span class="section-number">6.3.5.1.8. </span>魔王 (表切札)</a><a class="headerlink" href="#trump-sk" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♠K</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+魔王のイメージ (<a class="reference internal" href="#frame-sk-image"><span class="std std-numref">Fig. 6.13</span></a>)</p>
+<figure class="align-default" id="id93">
+<span id="frame-sk-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg" src="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.13 </span><span class="caption-text">魔王のイメージ</span><a class="headerlink" href="#id93" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id73">
+<h2><a class="toc-backref" href="#id167" role="doc-backlink"><span class="section-number">6.3.5.2. </span>♡ハート</a><a class="headerlink" href="#id73" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="trump-h2">
+<span id="id74"></span><h3><a class="toc-backref" href="#id168" role="doc-backlink"><span class="section-number">6.3.5.2.1. </span>援軍 (表切札)</a><a class="headerlink" href="#trump-h2" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡2</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+援軍のイメージ (<a class="reference internal" href="#frame-h2-image"><span class="std std-numref">Fig. 6.14</span></a>)</p>
+<figure class="align-default" id="id94">
+<span id="frame-h2-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.14 </span><span class="caption-text">援軍のイメージ</span><a class="headerlink" href="#id94" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-h3">
+<span id="id75"></span><h3><a class="toc-backref" href="#id169" role="doc-backlink"><span class="section-number">6.3.5.2.2. </span>激励 (表切札)</a><a class="headerlink" href="#trump-h3" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡3</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♡の兵士は &lt;激励&gt; を持つ。</p>
+<p><strong>イメージ:</strong>
+激励のイメージ (<a class="reference internal" href="#frame-h3-image"><span class="std std-numref">Fig. 6.15</span></a>)</p>
+<figure class="align-default" id="id95">
+<span id="frame-h3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.15 </span><span class="caption-text">激励のイメージ</span><a class="headerlink" href="#id95" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<hr class="docutils" />
+</section>
+<section id="trump-h4">
+<span id="id76"></span><h3><a class="toc-backref" href="#id170" role="doc-backlink"><span class="section-number">6.3.5.2.3. </span>休戦 (表切札)</a><a class="headerlink" href="#trump-h4" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡4</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+休戦のイメージ (<a class="reference internal" href="#frame-h4-image"><span class="std std-numref">Fig. 6.16</span></a>)</p>
+<figure class="align-default" id="id96">
+<span id="frame-h4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.16 </span><span class="caption-text">休戦のイメージ</span><a class="headerlink" href="#id96" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-h5">
+<span id="id77"></span><h3><a class="toc-backref" href="#id171" role="doc-backlink"><span class="section-number">6.3.5.2.4. </span>追撃 (表切札)</a><a class="headerlink" href="#trump-h5" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡5</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+追撃のイメージ (<a class="reference internal" href="#frame-h5-image"><span class="std std-numref">Fig. 6.17</span></a>)</p>
+<figure class="align-default" id="id97">
+<span id="frame-h5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.17 </span><span class="caption-text">追撃のイメージ</span><a class="headerlink" href="#id97" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-h7">
+<span id="id78"></span><h3><a class="toc-backref" href="#id172" role="doc-backlink"><span class="section-number">6.3.5.2.5. </span>ファントム (表切札)</a><a class="headerlink" href="#trump-h7" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡7</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる防壁は &lt;ファントム&gt; を持つ。</p>
+<p><strong>イメージ:</strong>
+ファントムのイメージ (<a class="reference internal" href="#frame-h7-image"><span class="std std-numref">Fig. 6.18</span></a>)</p>
+<figure class="align-default" id="id98">
+<span id="frame-h7-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.18 </span><span class="caption-text">ファントムのイメージ</span><a class="headerlink" href="#id98" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+</section>
+<section id="trump-h8">
+<span id="id79"></span><h3><a class="toc-backref" href="#id173" role="doc-backlink"><span class="section-number">6.3.5.2.6. </span>救済 (表切札)</a><a class="headerlink" href="#trump-h8" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♡8</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>イメージ:</strong>
+救済のイメージ (<a class="reference internal" href="#frame-h8-image"><span class="std std-numref">Fig. 6.19</span></a>)</p>
+<figure class="align-default" id="id99">
+<span id="frame-h8-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.19 </span><span class="caption-text">救済のイメージ</span><a class="headerlink" href="#id99" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id80">
+<h2><a class="toc-backref" href="#id174" role="doc-backlink"><span class="section-number">6.3.5.3. </span>♢ダイヤ</a><a class="headerlink" href="#id80" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="trump-d3">
+<span id="id81"></span><h3><a class="toc-backref" href="#id175" role="doc-backlink"><span class="section-number">6.3.5.3.1. </span>交渉 (表切札)</a><a class="headerlink" href="#trump-d3" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♢3</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♢の兵士は &lt;交渉&gt; を持つ。</p>
+<p><strong>イメージ:</strong>
+交渉のイメージ (<a class="reference internal" href="#frame-d3-image"><span class="std std-numref">Fig. 6.20</span></a>)</p>
+<figure class="align-default" id="id100">
+<span id="frame-d3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.20 </span><span class="caption-text">交渉のイメージ</span><a class="headerlink" href="#id100" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id82">
+<h2><a class="toc-backref" href="#id176" role="doc-backlink"><span class="section-number">6.3.5.4. </span>♣クラブ</a><a class="headerlink" href="#id82" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="trump-c4">
+<span id="id83"></span><h3><a class="toc-backref" href="#id177" role="doc-backlink"><span class="section-number">6.3.5.4.1. </span>スイッチ (表切札)</a><a class="headerlink" href="#trump-c4" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> ♣4</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♣の兵士は &lt;スイッチ&gt; を持つ。</p>
+<p><strong>イメージ:</strong>
+スイッチのイメージ (<a class="reference internal" href="#frame-c4-image"><span class="std std-numref">Fig. 6.21</span></a>)</p>
+<figure class="align-default" id="id101">
+<span id="frame-c4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 6.21 </span><span class="caption-text">スイッチのイメージ</span><a class="headerlink" href="#id101" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id84">
+<h2><a class="toc-backref" href="#id178" role="doc-backlink"><span class="section-number">6.3.5.5. </span>裏切札</a><a class="headerlink" href="#id84" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="trump-secrettrump">
+<span id="id85"></span><h3><a class="toc-backref" href="#id179" role="doc-backlink"><span class="section-number">6.3.5.5.1. </span>裏切札 (裏切札)</a><a class="headerlink" href="#trump-secrettrump" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<p>・エクストラ</p>
+<p><strong>切札キーカード:</strong> 全て(裏向き)</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>導入バージョン:</strong>  v8.1</p>
+</section>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../component/component.html">4. コンポーネント</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">5. フォーマット</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../frame/frame.html">6. フレーム</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../frame/frame.html#index-0">6.1. フレームとは</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frame/frame.html#id3">6.2. 定義項目</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../frame/frame.html#id4">6.3. フレーム定義</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="framelist.html">6.3.1. 公式フレーム</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">6.3.2. フレームアクションリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#characterlist-act-frame">6.3.3. フレームキャラクターリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foglist-act-frame">6.3.4. フレームフォグリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trumplist-act-frame">6.3.5. フレーム切札リスト</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">7. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">8. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">9. 変更履歴</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="framelist.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            公式フレーム
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../core/core.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            コアルール
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>
