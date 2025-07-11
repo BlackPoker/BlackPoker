@@ -347,7 +347,6 @@ actList:
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
-      actKey: <激励> を持つ兵士1体
       actCost: BL
       actActCond: |-
         ・自分の表切札に「援軍」がある
@@ -375,6 +374,104 @@ actList:
         対象の兵士のサイズをこのターンが終わるまで X 加算する。X はキーカードのサイズに等しい。
       since: ex3.4.0
       update: v8.1
+
+  - type: 切札♡4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 休戦
+      actId: retreat
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actKey: <激励> を持つ兵士1体
+      actCost: BL
+      actActCond: |-
+        ・自分の表切札に「休戦」がある
+      actTarget: アタックアクションのリクエスト
+      actEffect: |-
+        1. 対象のリクエストを無効し、対象のリクエストをステージから取り除く。
+        2. 自分の切札にある♡4を裏向きにする。
+        3. 自分の場にいるキャラクターを全てチャージ状態にする。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♡5
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 追撃
+      actId: pursuit
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BDD
+      actActCond: |-
+        ・自分の表切札に「追撃」がある
+        ・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
+      actEffect: |-
+        1. 自分の場にいる兵士を全てチャージ状態にする。
+        2. アタックアクションをリクエストする。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♡7
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: ファントムリバース
+      actId: phantomReverse
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: <ファントム> を持つ防壁1体
+      actCost: K
+      actActCond: |-
+        自分の表切札に「ファントム」がある
+      actEffect: |-
+        キーカードの防壁をチャージ状態の兵士にする。
+      since: ex5.30.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 幻影
+      actId: illusion
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: クイック
+      actCost: K
+      actActCond: |-
+        自分の表切札に「ファントム」があるかつ、
+        エンドアクションをリクエストした時に誘発する。
+      actEffect: |-
+        １．自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。
+        ２．自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♡8
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 救済
+      actId: salvation
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♡A〜K
+      actCost: B
+      actActCond: |-
+        自分の表切札に「救済」がある
+      actEffect: |-
+        キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。
+      since: ex5.30.0
+      update: v8.2
 
   - type: 切札♡K
     acts:
@@ -626,6 +723,8 @@ trumpList:
       trumpId: h2
       trumpType: 表切札
       trumpKey: ♡2
+      trumpAbility: |
+         なし
       since: ex3.10.0
       update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_02
@@ -652,6 +751,8 @@ trumpList:
       trumpId: h4
       trumpType: 表切札
       trumpKey: ♡4
+      trumpAbility: |
+         なし
       since: ex5.30.0
       update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_04
@@ -664,11 +765,41 @@ trumpList:
       trumpId: h5
       trumpType: 表切札
       trumpKey: ♡5
+      trumpAbility: |
+         なし
       since: ex5.30.0
       update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_05
       devNote: |-
         「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: ファントム
+      trumpId: h7
+      trumpType: 表切札
+      trumpKey: ♡7
+      trumpAbility: |
+         自分の場にいる防壁は <ファントム> を持つ。
+      since: ex4.18.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_07
+      devNote: |-
+        「自衛的戦術」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 救済
+      trumpId: h8
+      trumpType: 表切札
+      trumpKey: ♡8
+      trumpAbility: |
+         なし
+      since: ex4.14.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Cups_08
+      devNote: |-
+        「弱者の反撃」で追加された。
 
   - type: ♢ダイヤ
     trumps:
