@@ -298,7 +298,7 @@ actList:
       actTriggerCond: |-
         自分の 「リアニメーター」 が場から墓地に移る場合
       actEffect: |-
-        墓地から♠Jを1枚選び、自分の切札として表向きにして置く。
+        墓地から♠Jを1枚選び、自分の表切札として置く。
 
   - type: 切札♠K
     acts:
@@ -469,6 +469,71 @@ actList:
       since: ex5.30.0
       update: v8.2
 
+  - type: 切札♡J
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: チャリオット召喚
+      actId: summonChariot
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BL
+      actKey: ♢2〜10
+      actActCond: 自分の表切札に「チャリオット」がある
+      actEffect: |-
+        切札の♡Jが表の場合、次を行う。
+        1. 防壁１体を選び墓地に移す。
+        2. キーカードと切札の♢Jをあわせてチャリオットとしてチャージ状態で場に出す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: クイックチャリオット召喚
+      actId: quickSummonChariot
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♡2〜10
+      actActCond: 自分の表切札に「チャリオット」がある
+      actEffect: |-
+        効果の内容は「チャリオット召喚」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: チャリオット防壁破壊
+      actId: quickSummonReanimator
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: K
+      actKey: 「チャリオット」1体
+      actTarget: 防壁1体
+      actEffect: |-
+        効果の内容は「防壁破壊」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: チャリオット再生
+      actId: reanimatorRevive
+      actType: 切札操作
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: |-
+        自分の 「チャリオット」 が場から墓地に移る場合
+      actEffect: |-
+        墓地から♡Jを1枚選び、自分の表切札として置く。
+
   - type: 切札♡K
     acts:
     - frame: |-
@@ -544,7 +609,7 @@ charList:
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♠兵士としても♡兵士としても扱う。
-      since: ex3.10.0
+      since: ex4.22.0
       update: v8.2
 
   - type: 切札♠K
@@ -566,6 +631,22 @@ charList:
       since: ex3.10.0
       update: v8.2
 
+  - type: 切札♡J
+    chars:
+    - frame: |-
+        ・エクストラ
+      charName: チャリオット
+      ruby: ちゃりおっと
+      charId: chariot
+      charType: 兵士
+      charKey: ♡J と ♢2〜10
+      charSize: 11
+      charLabel: アタッカー, ブロッカー
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・♡兵士としても♢兵士としても扱う。
+      since: ex4.22.0
+      update: v8.2
 
 fogList:
   - type: 滞留魔法
@@ -796,6 +877,20 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_08
       devNote: |-
         「弱者の反撃」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: チャリオット
+      trumpId: hJ
+      trumpType: 表切札
+      trumpKey: ♡J
+      trumpAbility: |
+         なし
+      since: ex4.22.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_07_The_Chariot
+      devNote: |-
+        「for Jack」で追加された。
 
   - type: ♢ダイヤ
     trumps:
