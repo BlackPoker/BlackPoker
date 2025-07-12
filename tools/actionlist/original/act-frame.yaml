@@ -51,7 +51,7 @@ actList:
         ・エクストラ
       actName: レア召喚
       actId: summonsRare
-      actType: レアカード操作
+      actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -228,7 +228,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actActCond: 自分の表切札に「蘇生」がある
+      actActCond: 自分の表切札に「瞬殺」がある
       actTarget: 兵士1体
       actEffect: |-
         自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士のサイズの合計値が対象の兵士のサイズ以上の場合、対象の兵士を墓地に移す。
@@ -241,7 +241,7 @@ actList:
         ・エクストラ
       actName: リアニメーター召喚
       actId: summonReanimator
-      actType: 通常魔法
+      actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -259,7 +259,7 @@ actList:
         ・エクストラ
       actName: クイックリアニメーター召喚
       actId: quickSummonReanimator
-      actType: 速攻魔法
+      actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -281,6 +281,7 @@ actList:
       actTime: メイン
       actCost: K
       actKey: 「リアニメーター」1体
+      actTarget: 自分のキャラクター1体
       actEffect: |-
         効果の内容は「リアニメイト」を参照。
       since: ex4.22.0
@@ -305,7 +306,7 @@ actList:
         ・エクストラ
       actName: 魔王召喚
       actId: summonDarkLord
-      actType: 通常魔法
+      actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -325,13 +326,12 @@ actList:
         ・エクストラ
       actName: 魔王の囁き
       actId: darkWhisper
-      actType: 基本
+      actType: 誘発魔法
       actTrigger: 誘発
       actSpeed: 即時
       actTime: クイック
-      actActCond: 
       actTriggerCond: |-
-        自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
+        自分の表切札に「魔王」があるかつ、エンドアクションをリクエストした時に誘発する。
       actEffect: |-
         ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
       since: ex3.10.0
@@ -387,8 +387,7 @@ actList:
       actTime: クイック
       actKey: <激励> を持つ兵士1体
       actCost: BL
-      actActCond: |-
-        ・自分の表切札に「休戦」がある
+      actActCond: 自分の表切札に「休戦」がある
       actTarget: アタックアクションのリクエスト
       actEffect: |-
         1. 対象のリクエストを無効し、対象のリクエストをステージから取り除く。
@@ -429,8 +428,7 @@ actList:
       actTime: メイン
       actKey: <ファントム> を持つ防壁1体
       actCost: K
-      actActCond: |-
-        自分の表切札に「ファントム」がある
+      actActCond: 自分の表切札に「ファントム」がある
       actEffect: |-
         キーカードの防壁をチャージ状態の兵士にする。
       since: ex5.30.0
@@ -445,9 +443,8 @@ actList:
       actSpeed: 通常
       actTime: クイック
       actCost: K
-      actActCond: |-
-        自分の表切札に「ファントム」があるかつ、
-        エンドアクションをリクエストした時に誘発する。
+      actTriggerCond: |-
+        自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。
       actEffect: |-
         １．自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、１枚ずつ防壁にする。
         ２．自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
@@ -466,8 +463,7 @@ actList:
       actTime: メイン
       actKey: ♡A〜K
       actCost: B
-      actActCond: |-
-        自分の表切札に「救済」がある
+      actActCond: 自分の表切札に「救済」がある
       actEffect: |-
         キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。
       since: ex5.30.0
@@ -479,7 +475,7 @@ actList:
         ・エクストラ
       actName: 巨人召喚
       actId: summonGiant
-      actType: 通常魔法
+      actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン

@@ -11,6 +11,11 @@ data:
   qrPro: qr_blackpoker-support_v6-pro.pdf
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
+
+# 記述メモ
+# type: カテゴリ リストの順番を整理する目的 
+# actType: タイプ アクションの種類を示す。ゲームに関係がある。
+
 actList:
 
   - type: 基本
@@ -113,7 +118,7 @@ actList:
       actName: 世代交代
       ruby: せだいこうたい
       actId: nextGeneration
-      actType: 基本
+      actType: 誘発魔法
       actTrigger: 誘発
       actSpeed: 即時
       actTime: クイック
