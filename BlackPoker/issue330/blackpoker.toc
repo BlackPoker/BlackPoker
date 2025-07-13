@@ -82,7 +82,7 @@
 \contentsline {paragraph}{アタック (基本)}{39}{paragraph*.79}%
 \contentsline {paragraph}{ブロック (基本)}{40}{paragraph*.80}%
 \contentsline {paragraph}{ダメージ判定 (基本)}{41}{paragraph*.81}%
-\contentsline {paragraph}{世代交代 (基本)}{42}{paragraph*.82}%
+\contentsline {paragraph}{世代交代 (誘発魔法)}{42}{paragraph*.82}%
 \contentsline {subsubsection}{召喚}{42}{subsubsection*.83}%
 \contentsline {paragraph}{防壁設置 (召喚)}{42}{paragraph*.84}%
 \contentsline {paragraph}{兵士召喚 (召喚)}{43}{paragraph*.85}%
@@ -141,141 +141,149 @@
 \contentsline {subsubsection}{ストラテジー}{76}{subsubsection*.148}%
 \contentsline {subsubsection}{エクストラ}{78}{subsubsection*.149}%
 \contentsline {subsection}{\numberline {6.3.2}フレームアクションリスト}{80}{subsection.6.3.2}%
-\contentsline {subsubsection}{パック操作}{82}{subsubsection*.200}%
-\contentsline {paragraph}{パック開封 (パック操作)}{82}{paragraph*.201}%
-\contentsline {subsubsection}{レアカード操作}{83}{subsubsection*.202}%
-\contentsline {paragraph}{レアドロー (レアカード操作)}{83}{paragraph*.203}%
-\contentsline {paragraph}{レア召喚 (レアカード操作)}{83}{paragraph*.204}%
-\contentsline {paragraph}{罠カウンター (レアカード操作)}{84}{paragraph*.205}%
-\contentsline {subsubsection}{切札操作}{85}{subsubsection*.206}%
-\contentsline {paragraph}{クイックオープン (切札操作)}{85}{paragraph*.207}%
-\contentsline {paragraph}{メインオープン (切札操作)}{85}{paragraph*.208}%
-\contentsline {paragraph}{クローズ (切札操作)}{85}{paragraph*.209}%
-\contentsline {paragraph}{切札破壊 (切札操作)}{86}{paragraph*.210}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} A}{87}{subsubsection*.211}%
-\contentsline {paragraph}{革命ドロー (誘発魔法)}{87}{paragraph*.212}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 2}{87}{subsubsection*.213}%
-\contentsline {paragraph}{スラッシュ (兵士起因)}{87}{paragraph*.214}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 3}{88}{subsubsection*.215}%
-\contentsline {paragraph}{ドレイン (通常魔法)}{88}{paragraph*.216}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 4}{89}{subsubsection*.217}%
-\contentsline {paragraph}{威圧 (通常魔法)}{89}{paragraph*.218}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 5}{89}{subsubsection*.219}%
-\contentsline {paragraph}{蘇生 (通常魔法)}{89}{paragraph*.220}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 7}{90}{subsubsection*.221}%
-\contentsline {paragraph}{瞬殺 (速攻魔法)}{90}{paragraph*.222}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} J}{90}{subsubsection*.223}%
-\contentsline {paragraph}{リアニメーター召喚 (通常魔法)}{90}{paragraph*.224}%
-\contentsline {paragraph}{クイックリアニメーター召喚 (速攻魔法)}{91}{paragraph*.225}%
-\contentsline {paragraph}{リアニメーターリアニメイト (兵士起因)}{92}{paragraph*.226}%
-\contentsline {paragraph}{リアニメーター再生 (切札操作)}{92}{paragraph*.227}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} K}{93}{subsubsection*.228}%
-\contentsline {paragraph}{魔王召喚 (通常魔法)}{93}{paragraph*.229}%
-\contentsline {paragraph}{魔王の囁き (基本)}{93}{paragraph*.230}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 2}{94}{subsubsection*.231}%
-\contentsline {paragraph}{援軍 (通常魔法)}{94}{paragraph*.232}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 3}{95}{subsubsection*.233}%
-\contentsline {paragraph}{激励 (兵士起因)}{95}{paragraph*.234}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 4}{95}{subsubsection*.235}%
-\contentsline {paragraph}{休戦 (速攻魔法)}{95}{paragraph*.236}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 5}{96}{subsubsection*.237}%
-\contentsline {paragraph}{追撃 (速攻魔法)}{96}{paragraph*.238}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 7}{97}{subsubsection*.239}%
-\contentsline {paragraph}{ファントムリバース (通常魔法)}{97}{paragraph*.240}%
-\contentsline {paragraph}{幻影 (誘発魔法)}{97}{paragraph*.241}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 8}{98}{subsubsection*.242}%
-\contentsline {paragraph}{救済 (通常魔法)}{98}{paragraph*.243}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} K}{99}{subsubsection*.244}%
-\contentsline {paragraph}{巨人召喚 (通常魔法)}{99}{paragraph*.245}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\diamondsuit $} 3}{99}{subsubsection*.246}%
-\contentsline {paragraph}{交渉 (兵士起因)}{99}{paragraph*.247}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\clubsuit $} 4}{100}{subsubsection*.248}%
-\contentsline {paragraph}{スイッチ (兵士起因)}{100}{paragraph*.249}%
-\contentsline {subsection}{\numberline {6.3.3}フレームキャラクターリスト}{101}{subsection.6.3.3}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} J}{101}{subsubsection*.254}%
-\contentsline {paragraph}{リアニメーター (兵士)}{101}{paragraph*.255}%
-\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} K}{102}{subsubsection*.256}%
-\contentsline {paragraph}{魔王 (兵士)}{102}{paragraph*.257}%
-\contentsline {subsection}{\numberline {6.3.4}フレームフォグリスト}{102}{subsection.6.3.4}%
-\contentsline {subsubsection}{滞留魔法}{103}{subsubsection*.260}%
-\contentsline {paragraph}{クローズ (滞留魔法)}{103}{paragraph*.261}%
-\contentsline {subsection}{\numberline {6.3.5}フレーム切札リスト}{103}{subsection.6.3.5}%
-\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} スペード}{104}{subsubsection*.284}%
-\contentsline {paragraph}{革命 (表切札)}{104}{paragraph*.285}%
-\contentsline {paragraph}{スラッシュ (表切札)}{105}{paragraph*.286}%
-\contentsline {paragraph}{ドレイン (表切札)}{106}{paragraph*.287}%
-\contentsline {paragraph}{威圧 (表切札)}{106}{paragraph*.288}%
-\contentsline {paragraph}{蘇生 (表切札)}{107}{paragraph*.289}%
-\contentsline {paragraph}{瞬殺 (表切札)}{108}{paragraph*.290}%
-\contentsline {paragraph}{リアニメーター (表切札)}{108}{paragraph*.291}%
-\contentsline {paragraph}{魔王 (表切札)}{109}{paragraph*.292}%
-\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} ハート}{110}{subsubsection*.293}%
-\contentsline {paragraph}{援軍 (表切札)}{110}{paragraph*.294}%
-\contentsline {paragraph}{激励 (表切札)}{111}{paragraph*.295}%
-\contentsline {paragraph}{休戦 (表切札)}{111}{paragraph*.296}%
-\contentsline {paragraph}{追撃 (表切札)}{112}{paragraph*.297}%
-\contentsline {paragraph}{ファントム (表切札)}{113}{paragraph*.298}%
-\contentsline {paragraph}{救済 (表切札)}{113}{paragraph*.299}%
-\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\diamondsuit $} ダイヤ}{114}{subsubsection*.300}%
-\contentsline {paragraph}{交渉 (表切札)}{114}{paragraph*.301}%
-\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\clubsuit $} クラブ}{115}{subsubsection*.302}%
-\contentsline {paragraph}{スイッチ (表切札)}{115}{paragraph*.303}%
-\contentsline {subsubsection}{裏切札}{116}{subsubsection*.304}%
-\contentsline {paragraph}{裏切札 (裏切札)}{116}{paragraph*.305}%
-\contentsline {chapter}{\numberline {第7章}コアルール}{117}{chapter.7}%
-\contentsline {section}{\numberline {7.1}基礎概念}{117}{section.7.1}%
-\contentsline {subsection}{\numberline {7.1.1}ターン}{118}{subsection.7.1.1}%
-\contentsline {subsection}{\numberline {7.1.2}アクション}{118}{subsection.7.1.2}%
-\contentsline {subsection}{\numberline {7.1.3}リクエスト}{118}{subsection.7.1.3}%
-\contentsline {subsection}{\numberline {7.1.4}解決}{118}{subsection.7.1.4}%
-\contentsline {subsection}{\numberline {7.1.5}チャンス}{118}{subsection.7.1.5}%
-\contentsline {subsection}{\numberline {7.1.6}ステージ}{118}{subsection.7.1.6}%
-\contentsline {subsection}{\numberline {7.1.7}コンポーネント}{119}{subsection.7.1.7}%
-\contentsline {subsection}{\numberline {7.1.8}ユニット}{119}{subsection.7.1.8}%
-\contentsline {subsection}{\numberline {7.1.9}コアフロー(ルールシステム)}{119}{subsection.7.1.9}%
-\contentsline {section}{\numberline {7.2}詳細}{119}{section.7.2}%
-\contentsline {subsection}{\numberline {7.2.1}アクションの定義項目}{120}{subsection.7.2.1}%
-\contentsline {subsubsection}{オーナー}{121}{subsubsection*.306}%
-\contentsline {subsubsection}{トリガー}{121}{subsubsection*.307}%
-\contentsline {subsubsection}{スピード}{121}{subsubsection*.308}%
-\contentsline {subsubsection}{タイミング}{121}{subsubsection*.309}%
-\contentsline {subsubsection}{起動条件}{122}{subsubsection*.310}%
-\contentsline {subsubsection}{誘発条件}{122}{subsubsection*.311}%
-\contentsline {subsubsection}{効果}{122}{subsubsection*.312}%
-\contentsline {subsection}{\numberline {7.2.2}リクエストの定義項目}{122}{subsection.7.2.2}%
-\contentsline {subsection}{\numberline {7.2.3}コンポーネントの定義項目}{123}{subsection.7.2.3}%
-\contentsline {subsection}{\numberline {7.2.4}ユニットの定義項目}{123}{subsection.7.2.4}%
-\contentsline {section}{\numberline {7.3}能力}{124}{section.7.3}%
-\contentsline {section}{\numberline {7.4}コアフロー}{125}{section.7.4}%
-\contentsline {subsection}{\numberline {7.4.1}誘発チェック}{127}{subsection.7.4.1}%
-\contentsline {subsubsection}{誘発即時解決}{130}{subsubsection*.317}%
-\contentsline {subsubsection}{通常：アクション毎に処理}{131}{subsubsection*.318}%
-\contentsline {subsection}{\numberline {7.4.2}能力の適応順}{132}{subsection.7.4.2}%
-\contentsline {subsubsection}{考え方の原則}{132}{subsubsection*.319}%
-\contentsline {subsubsection}{能力の適用ルール}{132}{subsubsection*.320}%
-\contentsline {subsubsection}{運用上の注意}{133}{subsubsection*.321}%
-\contentsline {section}{\numberline {7.5}まとめ}{134}{section.7.5}%
-\contentsline {chapter}{\numberline {第8章}付録}{135}{chapter.8}%
-\contentsline {section}{\numberline {8.1}アクションリスト}{135}{section.8.1}%
-\contentsline {subsection}{\numberline {8.1.1}ライト}{135}{subsection.8.1.1}%
-\contentsline {subsection}{\numberline {8.1.2}マスター}{135}{subsection.8.1.2}%
-\contentsline {subsection}{\numberline {8.1.3}エクストラフレーム}{136}{subsection.8.1.3}%
-\contentsline {chapter}{\numberline {第9章}変更履歴}{137}{chapter.9}%
-\contentsline {section}{\numberline {9.1}第8版の主な変更点}{137}{section.9.1}%
-\contentsline {subsection}{\numberline {9.1.1}アクションの定義の変更}{137}{subsection.9.1.1}%
-\contentsline {subsection}{\numberline {9.1.2}能力の解釈を変更}{137}{subsection.9.1.2}%
-\contentsline {subsection}{\numberline {9.1.3}フォグ領域追加}{138}{subsection.9.1.3}%
-\contentsline {subsection}{\numberline {9.1.4}用語追加}{138}{subsection.9.1.4}%
-\contentsline {subsection}{\numberline {9.1.5}オプション削除とフレームへの統合}{139}{subsection.9.1.5}%
-\contentsline {subsection}{\numberline {9.1.6}エクストラをフレーム化 (8.1)}{139}{subsection.9.1.6}%
-\contentsline {subsection}{\numberline {9.1.7}曖昧なルールの明確化}{139}{subsection.9.1.7}%
-\contentsline {subsection}{\numberline {9.1.8}ルール外変更点}{140}{subsection.9.1.8}%
-\contentsline {section}{\numberline {9.2}第7版の主な変更点}{140}{section.9.2}%
-\contentsline {subsection}{\numberline {9.2.1}リバースのクイック化}{141}{subsection.9.2.1}%
-\contentsline {subsection}{\numberline {9.2.2}ゲーム中のデッキ名称をライフに変更}{141}{subsection.9.2.2}%
-\contentsline {subsection}{\numberline {9.2.3}対戦レギュレーションの定義方法変更}{141}{subsection.9.2.3}%
-\contentsline {subsection}{\numberline {9.2.4}コアフローをわかりやすく整理}{141}{subsection.9.2.4}%
-\contentsline {subsection}{\numberline {9.2.5}BJのクイック化}{141}{subsection.9.2.5}%
-\contentsline {subsection}{\numberline {9.2.6}引き分け廃止}{141}{subsection.9.2.6}%
-\contentsline {subsection}{\numberline {9.2.7}ルールの記載を微修正}{141}{subsection.9.2.7}%
-\contentsline {chapter}{索引}{143}{chapter*.323}%
+\contentsline {subsubsection}{パック操作}{82}{subsubsection*.205}%
+\contentsline {paragraph}{パック開封 (パック操作)}{82}{paragraph*.206}%
+\contentsline {subsubsection}{レアカード操作}{83}{subsubsection*.207}%
+\contentsline {paragraph}{レアドロー (レアカード操作)}{83}{paragraph*.208}%
+\contentsline {paragraph}{レア召喚 (召喚)}{84}{paragraph*.209}%
+\contentsline {paragraph}{罠カウンター (レアカード操作)}{84}{paragraph*.210}%
+\contentsline {subsubsection}{切札操作}{85}{subsubsection*.211}%
+\contentsline {paragraph}{クイックオープン (切札操作)}{85}{paragraph*.212}%
+\contentsline {paragraph}{メインオープン (切札操作)}{85}{paragraph*.213}%
+\contentsline {paragraph}{クローズ (切札操作)}{86}{paragraph*.214}%
+\contentsline {paragraph}{切札破壊 (切札操作)}{86}{paragraph*.215}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} A}{87}{subsubsection*.216}%
+\contentsline {paragraph}{革命ドロー (誘発魔法)}{87}{paragraph*.217}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 2}{87}{subsubsection*.218}%
+\contentsline {paragraph}{スラッシュ (兵士起因)}{87}{paragraph*.219}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 3}{88}{subsubsection*.220}%
+\contentsline {paragraph}{ドレイン (通常魔法)}{88}{paragraph*.221}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 4}{89}{subsubsection*.222}%
+\contentsline {paragraph}{威圧 (通常魔法)}{89}{paragraph*.223}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 5}{89}{subsubsection*.224}%
+\contentsline {paragraph}{蘇生 (通常魔法)}{89}{paragraph*.225}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} 7}{90}{subsubsection*.226}%
+\contentsline {paragraph}{瞬殺 (速攻魔法)}{90}{paragraph*.227}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} J}{90}{subsubsection*.228}%
+\contentsline {paragraph}{リアニメーター召喚 (召喚)}{90}{paragraph*.229}%
+\contentsline {paragraph}{クイックリアニメーター召喚 (召喚)}{91}{paragraph*.230}%
+\contentsline {paragraph}{リアニメーターリアニメイト (兵士起因)}{92}{paragraph*.231}%
+\contentsline {paragraph}{リアニメーター再生 (切札操作)}{92}{paragraph*.232}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} K}{93}{subsubsection*.233}%
+\contentsline {paragraph}{魔王召喚 (召喚)}{93}{paragraph*.234}%
+\contentsline {paragraph}{魔王の囁き (誘発魔法)}{93}{paragraph*.235}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 2}{94}{subsubsection*.236}%
+\contentsline {paragraph}{援軍 (通常魔法)}{94}{paragraph*.237}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 3}{95}{subsubsection*.238}%
+\contentsline {paragraph}{激励 (兵士起因)}{95}{paragraph*.239}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 4}{95}{subsubsection*.240}%
+\contentsline {paragraph}{休戦 (速攻魔法)}{95}{paragraph*.241}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 5}{96}{subsubsection*.242}%
+\contentsline {paragraph}{追撃 (速攻魔法)}{96}{paragraph*.243}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 7}{97}{subsubsection*.244}%
+\contentsline {paragraph}{ファントムリバース (通常魔法)}{97}{paragraph*.245}%
+\contentsline {paragraph}{幻影 (誘発魔法)}{97}{paragraph*.246}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} 8}{98}{subsubsection*.247}%
+\contentsline {paragraph}{救済 (通常魔法)}{98}{paragraph*.248}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} J}{99}{subsubsection*.249}%
+\contentsline {paragraph}{チャリオット召喚 (召喚)}{99}{paragraph*.250}%
+\contentsline {paragraph}{クイックチャリオット召喚 (召喚)}{99}{paragraph*.251}%
+\contentsline {paragraph}{チャリオット防壁破壊 (兵士起因)}{100}{paragraph*.252}%
+\contentsline {paragraph}{チャリオット再生 (切札操作)}{101}{paragraph*.253}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} K}{101}{subsubsection*.254}%
+\contentsline {paragraph}{巨人召喚 (召喚)}{101}{paragraph*.255}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\diamondsuit $} 3}{102}{subsubsection*.256}%
+\contentsline {paragraph}{交渉 (兵士起因)}{102}{paragraph*.257}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\clubsuit $} 4}{103}{subsubsection*.258}%
+\contentsline {paragraph}{スイッチ (兵士起因)}{103}{paragraph*.259}%
+\contentsline {subsection}{\numberline {6.3.3}フレームキャラクターリスト}{103}{subsection.6.3.3}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} J}{104}{subsubsection*.266}%
+\contentsline {paragraph}{リアニメーター (兵士)}{104}{paragraph*.267}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} K}{104}{subsubsection*.268}%
+\contentsline {paragraph}{魔王 (兵士)}{104}{paragraph*.269}%
+\contentsline {subsubsection}{切札{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} J}{105}{subsubsection*.270}%
+\contentsline {paragraph}{チャリオット (兵士)}{105}{paragraph*.271}%
+\contentsline {subsection}{\numberline {6.3.4}フレームフォグリスト}{105}{subsection.6.3.4}%
+\contentsline {subsubsection}{滞留魔法}{106}{subsubsection*.274}%
+\contentsline {paragraph}{クローズ (滞留魔法)}{106}{paragraph*.275}%
+\contentsline {subsection}{\numberline {6.3.5}フレーム切札リスト}{106}{subsection.6.3.5}%
+\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\spadesuit $} スペード}{107}{subsubsection*.299}%
+\contentsline {paragraph}{革命 (表切札)}{107}{paragraph*.300}%
+\contentsline {paragraph}{スラッシュ (表切札)}{108}{paragraph*.301}%
+\contentsline {paragraph}{ドレイン (表切札)}{109}{paragraph*.302}%
+\contentsline {paragraph}{威圧 (表切札)}{109}{paragraph*.303}%
+\contentsline {paragraph}{蘇生 (表切札)}{110}{paragraph*.304}%
+\contentsline {paragraph}{瞬殺 (表切札)}{111}{paragraph*.305}%
+\contentsline {paragraph}{リアニメーター (表切札)}{111}{paragraph*.306}%
+\contentsline {paragraph}{魔王 (表切札)}{112}{paragraph*.307}%
+\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\heartsuit $} ハート}{113}{subsubsection*.308}%
+\contentsline {paragraph}{援軍 (表切札)}{113}{paragraph*.309}%
+\contentsline {paragraph}{激励 (表切札)}{114}{paragraph*.310}%
+\contentsline {paragraph}{休戦 (表切札)}{114}{paragraph*.311}%
+\contentsline {paragraph}{追撃 (表切札)}{115}{paragraph*.312}%
+\contentsline {paragraph}{ファントム (表切札)}{116}{paragraph*.313}%
+\contentsline {paragraph}{救済 (表切札)}{116}{paragraph*.314}%
+\contentsline {paragraph}{チャリオット (表切札)}{117}{paragraph*.315}%
+\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\diamondsuit $} ダイヤ}{118}{subsubsection*.316}%
+\contentsline {paragraph}{交渉 (表切札)}{118}{paragraph*.317}%
+\contentsline {subsubsection}{{\fontsize {10\jsc@mpt }{16\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ $\clubsuit $} クラブ}{118}{subsubsection*.318}%
+\contentsline {paragraph}{スイッチ (表切札)}{118}{paragraph*.319}%
+\contentsline {subsubsection}{裏切札}{119}{subsubsection*.320}%
+\contentsline {paragraph}{裏切札 (裏切札)}{119}{paragraph*.321}%
+\contentsline {chapter}{\numberline {第7章}コアルール}{121}{chapter.7}%
+\contentsline {section}{\numberline {7.1}基礎概念}{121}{section.7.1}%
+\contentsline {subsection}{\numberline {7.1.1}ターン}{122}{subsection.7.1.1}%
+\contentsline {subsection}{\numberline {7.1.2}アクション}{122}{subsection.7.1.2}%
+\contentsline {subsection}{\numberline {7.1.3}リクエスト}{122}{subsection.7.1.3}%
+\contentsline {subsection}{\numberline {7.1.4}解決}{122}{subsection.7.1.4}%
+\contentsline {subsection}{\numberline {7.1.5}チャンス}{122}{subsection.7.1.5}%
+\contentsline {subsection}{\numberline {7.1.6}ステージ}{122}{subsection.7.1.6}%
+\contentsline {subsection}{\numberline {7.1.7}コンポーネント}{123}{subsection.7.1.7}%
+\contentsline {subsection}{\numberline {7.1.8}ユニット}{123}{subsection.7.1.8}%
+\contentsline {subsection}{\numberline {7.1.9}コアフロー(ルールシステム)}{123}{subsection.7.1.9}%
+\contentsline {section}{\numberline {7.2}詳細}{123}{section.7.2}%
+\contentsline {subsection}{\numberline {7.2.1}アクションの定義項目}{124}{subsection.7.2.1}%
+\contentsline {subsubsection}{オーナー}{125}{subsubsection*.322}%
+\contentsline {subsubsection}{トリガー}{125}{subsubsection*.323}%
+\contentsline {subsubsection}{スピード}{125}{subsubsection*.324}%
+\contentsline {subsubsection}{タイミング}{125}{subsubsection*.325}%
+\contentsline {subsubsection}{起動条件}{126}{subsubsection*.326}%
+\contentsline {subsubsection}{誘発条件}{126}{subsubsection*.327}%
+\contentsline {subsubsection}{効果}{126}{subsubsection*.328}%
+\contentsline {subsection}{\numberline {7.2.2}リクエストの定義項目}{126}{subsection.7.2.2}%
+\contentsline {subsection}{\numberline {7.2.3}コンポーネントの定義項目}{127}{subsection.7.2.3}%
+\contentsline {subsection}{\numberline {7.2.4}ユニットの定義項目}{127}{subsection.7.2.4}%
+\contentsline {section}{\numberline {7.3}能力}{128}{section.7.3}%
+\contentsline {section}{\numberline {7.4}コアフロー}{129}{section.7.4}%
+\contentsline {subsection}{\numberline {7.4.1}誘発チェック}{131}{subsection.7.4.1}%
+\contentsline {subsubsection}{誘発即時解決}{134}{subsubsection*.333}%
+\contentsline {subsubsection}{通常：アクション毎に処理}{135}{subsubsection*.334}%
+\contentsline {subsection}{\numberline {7.4.2}能力の適応順}{136}{subsection.7.4.2}%
+\contentsline {subsubsection}{考え方の原則}{136}{subsubsection*.335}%
+\contentsline {subsubsection}{能力の適用ルール}{136}{subsubsection*.336}%
+\contentsline {subsubsection}{運用上の注意}{137}{subsubsection*.337}%
+\contentsline {section}{\numberline {7.5}まとめ}{138}{section.7.5}%
+\contentsline {chapter}{\numberline {第8章}付録}{139}{chapter.8}%
+\contentsline {section}{\numberline {8.1}アクションリスト}{139}{section.8.1}%
+\contentsline {subsection}{\numberline {8.1.1}ライト}{139}{subsection.8.1.1}%
+\contentsline {subsection}{\numberline {8.1.2}マスター}{139}{subsection.8.1.2}%
+\contentsline {subsection}{\numberline {8.1.3}エクストラフレーム}{140}{subsection.8.1.3}%
+\contentsline {chapter}{\numberline {第9章}変更履歴}{141}{chapter.9}%
+\contentsline {section}{\numberline {9.1}第8版の主な変更点}{141}{section.9.1}%
+\contentsline {subsection}{\numberline {9.1.1}アクションの定義の変更}{141}{subsection.9.1.1}%
+\contentsline {subsection}{\numberline {9.1.2}能力の解釈を変更}{141}{subsection.9.1.2}%
+\contentsline {subsection}{\numberline {9.1.3}フォグ領域追加}{142}{subsection.9.1.3}%
+\contentsline {subsection}{\numberline {9.1.4}用語追加}{142}{subsection.9.1.4}%
+\contentsline {subsection}{\numberline {9.1.5}オプション削除とフレームへの統合}{143}{subsection.9.1.5}%
+\contentsline {subsection}{\numberline {9.1.6}エクストラをフレーム化 (8.1)}{143}{subsection.9.1.6}%
+\contentsline {subsection}{\numberline {9.1.7}曖昧なルールの明確化}{143}{subsection.9.1.7}%
+\contentsline {subsection}{\numberline {9.1.8}ルール外変更点}{144}{subsection.9.1.8}%
+\contentsline {section}{\numberline {9.2}第7版の主な変更点}{144}{section.9.2}%
+\contentsline {subsection}{\numberline {9.2.1}リバースのクイック化}{145}{subsection.9.2.1}%
+\contentsline {subsection}{\numberline {9.2.2}ゲーム中のデッキ名称をライフに変更}{145}{subsection.9.2.2}%
+\contentsline {subsection}{\numberline {9.2.3}対戦レギュレーションの定義方法変更}{145}{subsection.9.2.3}%
+\contentsline {subsection}{\numberline {9.2.4}コアフローをわかりやすく整理}{145}{subsection.9.2.4}%
+\contentsline {subsection}{\numberline {9.2.5}BJのクイック化}{145}{subsection.9.2.5}%
+\contentsline {subsection}{\numberline {9.2.6}引き分け廃止}{145}{subsection.9.2.6}%
+\contentsline {subsection}{\numberline {9.2.7}ルールの記載を微修正}{145}{subsection.9.2.7}%
+\contentsline {chapter}{索引}{147}{chapter*.339}%
