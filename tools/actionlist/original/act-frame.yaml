@@ -708,7 +708,7 @@ actList:
     - frame: |-
         ・エクストラ
       actName: クイック策士召喚
-      actId: quickSummonChariot
+      actId: quickSummonStrategist
       actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
@@ -821,6 +821,108 @@ actList:
       since: ex3.10.0
       update: v8.2
 
+  - type: 切札♣8
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: リセット
+      actId: reset
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: L
+      actKey: ♣A〜K
+      actActCond: 自分の表切札に「リセット」がある
+      actEffect: |-
+        1. 全ての防壁と兵士を墓地に移す。
+        2. 全ての切札を裏切札にする。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♣10
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 悪あがき
+      actId: lastDitch
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actActCond: 自分の表切札に「悪あがき」がある
+      actTarget: キーカードがあるリクエストを対象とする。
+      actEffect: |-
+        1. 対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
+        2. 手札を全て捨てる。手札がない場合、自分の切札♣10を墓地に移す。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♣J
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 騎士召喚
+      actId: summonKnight
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BL
+      actKey: ♠2〜10
+      actActCond: 自分の表切札に「騎士」がある
+      actEffect: |-
+        切札の♣Jが表の場合、次を行う。
+        1. 対戦相手は自分の場にある兵士を１枚選び墓地に移す。
+        2. キーカードと切札の♠Jをあわせて騎士としてチャージ状態で場に出す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: クイック騎士召喚
+      actId: quickSummonKnight
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♠2〜10
+      actActCond: 自分の表切札に「騎士」がある
+      actEffect: |-
+        効果の内容は「騎士召喚」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 薙払
+      actId: knightSweep
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: K
+      actKey: 「騎士」1体
+      actTarget: 対戦相手1人
+      actEffect: |-
+        対象の対戦相手は自分の場にいるキャラクターを1体墓地に移す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 騎士再生
+      actId: strategistRevive
+      actType: 切札操作
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: |-
+        自分の 「騎士」 が場から墓地に移る場合
+      actEffect: |-
+        墓地から♣Jを1枚選び、自分の表切札として置く。
+
 charList:
   - type: 切札♠J
     chars:
@@ -909,6 +1011,23 @@ charList:
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♢兵士としても♣兵士としても扱う。
+      since: ex4.22.0
+      update: v8.2
+
+  - type: 切札♣J
+    chars:
+    - frame: |-
+        ・エクストラ
+      charName: 騎士
+      ruby: きし
+      charId: knight
+      charType: 兵士
+      charKey: ♣J と ♠2〜10
+      charSize: 11
+      charLabel: アタッカー, ブロッカー
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・♣兵士としても♠兵士としても扱う。
       since: ex4.22.0
       update: v8.2
 
@@ -1295,7 +1414,7 @@ trumpList:
       trumpAbility: |
         なし
       since: ex4.14.0
-      update: v8.1
+      update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_05
       devNote: |-
         「弱者の反撃」で追加された。
@@ -1309,10 +1428,66 @@ trumpList:
       trumpAbility: |
         なし
       since: ex3.10.0
-      update: v8.1
+      update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_07
       devNote: |-
         「巨人と魔王」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 手札補充
+      trumpId: c8
+      trumpType: 表切札
+      trumpKey: ♣8
+      trumpAbility: |
+        なし
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_08
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 要塞
+      trumpId: c9
+      trumpType: 表切札
+      trumpKey: ♣9
+      trumpAbility: |
+        対戦相手がキーカードに♠を含むアクションの効果を発揮する直前に自分の場にキャラクターがいる場合、その効果によってあなたはダメージを受けない。
+      since: ex4.18.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_09
+      devNote: |-
+        「自衛的戦術」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 悪あがき
+      trumpId: c10
+      trumpType: 表切札
+      trumpKey: ♣10
+      trumpAbility: |
+        なし
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_10
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 騎士
+      trumpId: cJ
+      trumpType: 表切札
+      trumpKey: ♣J
+      trumpAbility: |
+         なし
+      since: ex4.22.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_13_Death
+      devNote: |-
+        「for Jack」で追加された。
 
   - type: 裏切札
     trumps:
