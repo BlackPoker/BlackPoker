@@ -507,7 +507,7 @@ actList:
     - frame: |-
         ・エクストラ
       actName: チャリオット防壁破壊
-      actId: quickSummonReanimator
+      actId: chariotDestroy
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
@@ -630,6 +630,126 @@ actList:
       since: ex5.30.0
       update: v8.2
 
+  - type: 切札♢8
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 修繕
+      actId: repair
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actCost: L
+      actTarget: 自分の場にいる♢2〜10のカードを含んだ兵士1体
+      actActCond: 自分の表切札に「修繕」がある
+      actEffect: |-
+        対象の兵士が装備アクションの対象にできる場合、次を行う。
+        1. 自分の墓地から♢J〜Kを1枚選ぶ。
+        2. 選べた場合、「装備」アクションをコストを支払わずにリクエストする。対象は対象の兵士、キーカードは選んだカードとする。
+        3. 選べなかった場合、対象の兵士を墓地に移す。
+      since: ex4.14.0
+      update: v8.2
+
+  - type: 切札♢9
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 休息
+      actId: rest
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: B
+      actActCond: 自分の表切札に「充足」がある
+      actEffect: |-
+        自分の場にいる全ての兵士をチャージ状態にする。
+      since: ex4.18.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 充足
+      actId: satisfaction
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: クイック
+      actTriggerCond: |-
+        自分の表切札に「充足」があるかつ、エンドアクションをリクエストした時に誘発する。
+      actEffect: |-
+        自分の場にいる全てのキャラクターをチャージ状態にする。
+      since: ex4.18.0
+      update: v8.2
+
+  - type: 切札♢J
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 策士召喚
+      actId: summonStrategist
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BL
+      actKey: ♣2〜10
+      actActCond: 自分の表切札に「策士」がある
+      actEffect: |-
+        切札の♢Jが表の場合、次を行う。
+        1. ステージ上にあるリクエストを1つ選び無効化しステージから取り除く。そのリクエストは次のいずれかに該当するものとする。Xはこのリクエストのキーカードの数字とする。
+        -・キーカードが1枚かつそのキーカードの数字がX以下
+        -・キーカードが2枚
+        2. キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: クイック策士召喚
+      actId: quickSummonChariot
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♣2〜10
+      actActCond: 自分の表切札に「策士」がある
+      actEffect: |-
+        効果の内容は「策士召喚」を参照。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 先読み
+      actId: strategistPredict
+      actType: 兵士起因
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: K
+      actKey: 「策士」1体
+      actEffect: |-
+        1. ライフの一番上からカードを2枚引き手札に加える。
+        2. 手札から1枚選びライフの一番上もしくは一番下に移す。
+      since: ex4.22.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 策士再生
+      actId: strategistRevive
+      actType: 切札操作
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: |-
+        自分の 「策士」 が場から墓地に移る場合
+      actEffect: |-
+        墓地から♢Jを1枚選び、自分の表切札として置く。
+
   - type: 切札♣4
     acts:
     - frame: |-
@@ -721,6 +841,23 @@ charList:
       devNote:
         ・2枚で1体の兵士として扱い、墓地や手札など別の場所に移る場合2枚一緒に移す。防壁になる場合2体の防壁になる。
       since: ex3.10.0
+      update: v8.2
+
+  - type: 切札♢J
+    chars:
+    - frame: |-
+        ・エクストラ
+      charName: 策士
+      ruby: さくし
+      charId: strategist
+      charType: 兵士
+      charKey: ♢J と ♣2〜10
+      charSize: 11
+      charLabel: アタッカー, ブロッカー
+      charAbility: |-
+        ・装備アクションの対象にできない。
+        ・♢兵士としても♣兵士としても扱う。
+      since: ex4.22.0
       update: v8.2
 
 fogList:
@@ -1038,6 +1175,48 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_05
       devNote: |-
         「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 修繕
+      trumpId: d8
+      trumpType: 表切札
+      trumpKey: ♢8
+      trumpAbility: |-
+        なし
+      since: ex4.14.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_08
+      devNote: |-
+        「弱者の反撃」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 充足
+      trumpId: d9
+      trumpType: 表切札
+      trumpKey: ♢9
+      trumpAbility: |-
+        なし
+      since: ex4.18.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_09
+      devNote: |-
+        「自衛的戦術」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 策士
+      trumpId: dJ
+      trumpType: 表切札
+      trumpKey: ♢J
+      trumpAbility: |
+         なし
+      since: ex4.22.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_02_The_High_Priestess
+      devNote: |-
+        「for Jack」で追加された。
 
   - type: ♣クラブ
     trumps:
