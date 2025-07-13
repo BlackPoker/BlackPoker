@@ -11,6 +11,11 @@ data:
   qrPro: qr_blackpoker-support_v6-pro.pdf
   qrMast: qr_blackpoker-support_v6-mast.pdf
 
+
+# 記述メモ
+# type: カテゴリ リストの順番を整理する目的 
+# actType: タイプ アクションの種類を示す。ゲームに関係がある。
+
 actList:
 
   - type: 基本
@@ -113,11 +118,11 @@ actList:
       actName: 世代交代
       ruby: せだいこうたい
       actId: nextGeneration
-      actType: 基本
+      actType: 誘発魔法
       actTrigger: 誘発
       actSpeed: 即時
       actTime: クイック
-      actTriggerCond: Joker,A,J,Q,Kのカードが自分の場から墓地に行くたびに1枚につき1回誘発する。
+      actTriggerCond: Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につき1回誘発する。
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
       since: v1.0
       update: v8.0
@@ -308,9 +313,9 @@ actList:
       actKey: ♣A〜10
       actTarget: キーカードが1枚または2枚のリクエスト
       actEffect: |-
-        次のいずれかの場合、対象のアクションを無効にする。その場合、対象アクションをステージから取り除き、対象アクションのキーカードを墓地に移す。
-        ・対象アクションのキーカードが1枚かつこのアクションのキーカードの数字が対象アクションのキーカードの数字以上
-        ・対象アクションのキーカードが2枚
+        次のいずれかの場合、対象のリクエストを無効にする。その場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
+        ・対象リクエストのキーカードが1枚かつこのリクエストのキーカードの数字が対象リクエストのキーカードの数字以上
+        ・対象リクエストのキーカードが2枚
       since: v0.1
       update: v8.0,v8.1
 
