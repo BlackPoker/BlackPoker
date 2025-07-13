@@ -593,6 +593,43 @@ actList:
       since: ex3.4.0
       update: v8.1
 
+  - type: 切札♢4
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 相殺
+      actId: reckoning
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: クイック
+      actCost: D
+      actActCond: 自分の表切札に「防壁追加」がある
+      actTarget: キーカードがあるリクエスト
+      actEffect: |-
+        対象リクエストのキーカードの数字の合計値が5以上の場合、次を行う。
+        1.対象リクエストのキーカードの数字の合計値分ダメージを受ける。
+        2.対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
+      since: ex5.30.0
+      update: v8.2
+
+  - type: 切札♢5
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 疲弊
+      actId: exhaust
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: クイック
+      actActCond: |-
+        自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。
+      actEffect: |-
+        自分の表切札にある「喪失」を裏切札にする。そうしたくない場合、2点のダメージを受ける。
+      since: ex5.30.0
+      update: v8.2
+
   - type: 切札♣4
     acts:
     - frame: |-
@@ -973,6 +1010,34 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
       devNote: |-
         「立ち上がる兵」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 相殺
+      trumpId: d4
+      trumpType: 表切札
+      trumpKey: ♢4
+      trumpAbility: |
+        なし
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_04
+      devNote: |-
+        「苦渋の選択」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 喪失
+      trumpId: d5
+      trumpType: 表切札
+      trumpKey: ♢5
+      trumpAbility: |
+        あなたの場にチャージ状態の防壁が2体以上存在する場合、全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。
+      since: ex5.30.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_05
+      devNote: |-
+        「苦渋の選択」で追加された。
 
   - type: ♣クラブ
     trumps:
