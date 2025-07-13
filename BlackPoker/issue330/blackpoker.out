@@ -198,93 +198,96 @@
 \BOOKMARK [3][-]{subsubsection*.258}{切札 4}{subsection.6.3.2}% 197
 \BOOKMARK [4][-]{paragraph*.259}{スイッチ \(兵士起因\)}{subsubsection*.258}% 198
 \BOOKMARK [2][-]{subsection.6.3.3}{フレームキャラクターリスト}{section.6.3}% 199
-\BOOKMARK [3][-]{subsubsection*.266}{切札 J}{subsection.6.3.3}% 200
-\BOOKMARK [4][-]{paragraph*.267}{リアニメーター \(兵士\)}{subsubsection*.266}% 201
-\BOOKMARK [3][-]{subsubsection*.268}{切札 K}{subsection.6.3.3}% 202
-\BOOKMARK [4][-]{paragraph*.269}{魔王 \(兵士\)}{subsubsection*.268}% 203
-\BOOKMARK [3][-]{subsubsection*.270}{切札 J}{subsection.6.3.3}% 204
-\BOOKMARK [4][-]{paragraph*.271}{チャリオット \(兵士\)}{subsubsection*.270}% 205
-\BOOKMARK [2][-]{subsection.6.3.4}{フレームフォグリスト}{section.6.3}% 206
-\BOOKMARK [3][-]{subsubsection*.274}{滞留魔法}{subsection.6.3.4}% 207
-\BOOKMARK [4][-]{paragraph*.275}{クローズ \(滞留魔法\)}{subsubsection*.274}% 208
-\BOOKMARK [2][-]{subsection.6.3.5}{フレーム切札リスト}{section.6.3}% 209
-\BOOKMARK [3][-]{subsubsection*.299}{ スペード}{subsection.6.3.5}% 210
-\BOOKMARK [4][-]{paragraph*.300}{革命 \(表切札\)}{subsubsection*.299}% 211
-\BOOKMARK [4][-]{paragraph*.301}{スラッシュ \(表切札\)}{subsubsection*.299}% 212
-\BOOKMARK [4][-]{paragraph*.302}{ドレイン \(表切札\)}{subsubsection*.299}% 213
-\BOOKMARK [4][-]{paragraph*.303}{威圧 \(表切札\)}{subsubsection*.299}% 214
-\BOOKMARK [4][-]{paragraph*.304}{蘇生 \(表切札\)}{subsubsection*.299}% 215
-\BOOKMARK [4][-]{paragraph*.305}{瞬殺 \(表切札\)}{subsubsection*.299}% 216
-\BOOKMARK [4][-]{paragraph*.306}{リアニメーター \(表切札\)}{subsubsection*.299}% 217
-\BOOKMARK [4][-]{paragraph*.307}{魔王 \(表切札\)}{subsubsection*.299}% 218
-\BOOKMARK [3][-]{subsubsection*.308}{ ハート}{subsection.6.3.5}% 219
-\BOOKMARK [4][-]{paragraph*.309}{援軍 \(表切札\)}{subsubsection*.308}% 220
-\BOOKMARK [4][-]{paragraph*.310}{激励 \(表切札\)}{subsubsection*.308}% 221
-\BOOKMARK [4][-]{paragraph*.311}{休戦 \(表切札\)}{subsubsection*.308}% 222
-\BOOKMARK [4][-]{paragraph*.312}{追撃 \(表切札\)}{subsubsection*.308}% 223
-\BOOKMARK [4][-]{paragraph*.313}{ファントム \(表切札\)}{subsubsection*.308}% 224
-\BOOKMARK [4][-]{paragraph*.314}{救済 \(表切札\)}{subsubsection*.308}% 225
-\BOOKMARK [4][-]{paragraph*.315}{チャリオット \(表切札\)}{subsubsection*.308}% 226
-\BOOKMARK [3][-]{subsubsection*.316}{ ダイヤ}{subsection.6.3.5}% 227
-\BOOKMARK [4][-]{paragraph*.317}{交渉 \(表切札\)}{subsubsection*.316}% 228
-\BOOKMARK [3][-]{subsubsection*.318}{ クラブ}{subsection.6.3.5}% 229
-\BOOKMARK [4][-]{paragraph*.319}{スイッチ \(表切札\)}{subsubsection*.318}% 230
-\BOOKMARK [3][-]{subsubsection*.320}{裏切札}{subsection.6.3.5}% 231
-\BOOKMARK [4][-]{paragraph*.321}{裏切札 \(裏切札\)}{subsubsection*.320}% 232
-\BOOKMARK [0][-]{chapter.7}{コアルール}{}% 233
-\BOOKMARK [1][-]{section.7.1}{基礎概念}{chapter.7}% 234
-\BOOKMARK [2][-]{subsection.7.1.1}{ターン}{section.7.1}% 235
-\BOOKMARK [2][-]{subsection.7.1.2}{アクション}{section.7.1}% 236
-\BOOKMARK [2][-]{subsection.7.1.3}{リクエスト}{section.7.1}% 237
-\BOOKMARK [2][-]{subsection.7.1.4}{解決}{section.7.1}% 238
-\BOOKMARK [2][-]{subsection.7.1.5}{チャンス}{section.7.1}% 239
-\BOOKMARK [2][-]{subsection.7.1.6}{ステージ}{section.7.1}% 240
-\BOOKMARK [2][-]{subsection.7.1.7}{コンポーネント}{section.7.1}% 241
-\BOOKMARK [2][-]{subsection.7.1.8}{ユニット}{section.7.1}% 242
-\BOOKMARK [2][-]{subsection.7.1.9}{コアフロー\(ルールシステム\)}{section.7.1}% 243
-\BOOKMARK [1][-]{section.7.2}{詳細}{chapter.7}% 244
-\BOOKMARK [2][-]{subsection.7.2.1}{アクションの定義項目}{section.7.2}% 245
-\BOOKMARK [3][-]{subsubsection*.322}{オーナー}{subsection.7.2.1}% 246
-\BOOKMARK [3][-]{subsubsection*.323}{トリガー}{subsection.7.2.1}% 247
-\BOOKMARK [3][-]{subsubsection*.324}{スピード}{subsection.7.2.1}% 248
-\BOOKMARK [3][-]{subsubsection*.325}{タイミング}{subsection.7.2.1}% 249
-\BOOKMARK [3][-]{subsubsection*.326}{起動条件}{subsection.7.2.1}% 250
-\BOOKMARK [3][-]{subsubsection*.327}{誘発条件}{subsection.7.2.1}% 251
-\BOOKMARK [3][-]{subsubsection*.328}{効果}{subsection.7.2.1}% 252
-\BOOKMARK [2][-]{subsection.7.2.2}{リクエストの定義項目}{section.7.2}% 253
-\BOOKMARK [2][-]{subsection.7.2.3}{コンポーネントの定義項目}{section.7.2}% 254
-\BOOKMARK [2][-]{subsection.7.2.4}{ユニットの定義項目}{section.7.2}% 255
-\BOOKMARK [1][-]{section.7.3}{能力}{chapter.7}% 256
-\BOOKMARK [1][-]{section.7.4}{コアフロー}{chapter.7}% 257
-\BOOKMARK [2][-]{subsection.7.4.1}{誘発チェック}{section.7.4}% 258
-\BOOKMARK [3][-]{subsubsection*.333}{誘発即時解決}{subsection.7.4.1}% 259
-\BOOKMARK [3][-]{subsubsection*.334}{通常：アクション毎に処理}{subsection.7.4.1}% 260
-\BOOKMARK [2][-]{subsection.7.4.2}{能力の適応順}{section.7.4}% 261
-\BOOKMARK [3][-]{subsubsection*.335}{考え方の原則}{subsection.7.4.2}% 262
-\BOOKMARK [3][-]{subsubsection*.336}{能力の適用ルール}{subsection.7.4.2}% 263
-\BOOKMARK [3][-]{subsubsection*.337}{運用上の注意}{subsection.7.4.2}% 264
-\BOOKMARK [1][-]{section.7.5}{まとめ}{chapter.7}% 265
-\BOOKMARK [0][-]{chapter.8}{付録}{}% 266
-\BOOKMARK [1][-]{section.8.1}{アクションリスト}{chapter.8}% 267
-\BOOKMARK [2][-]{subsection.8.1.1}{ライト}{section.8.1}% 268
-\BOOKMARK [2][-]{subsection.8.1.2}{マスター}{section.8.1}% 269
-\BOOKMARK [2][-]{subsection.8.1.3}{エクストラフレーム}{section.8.1}% 270
-\BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 271
-\BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 272
-\BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 273
-\BOOKMARK [2][-]{subsection.9.1.2}{能力の解釈を変更}{section.9.1}% 274
-\BOOKMARK [2][-]{subsection.9.1.3}{フォグ領域追加}{section.9.1}% 275
-\BOOKMARK [2][-]{subsection.9.1.4}{用語追加}{section.9.1}% 276
-\BOOKMARK [2][-]{subsection.9.1.5}{オプション削除とフレームへの統合}{section.9.1}% 277
-\BOOKMARK [2][-]{subsection.9.1.6}{エクストラをフレーム化 \(8.1\)}{section.9.1}% 278
-\BOOKMARK [2][-]{subsection.9.1.7}{曖昧なルールの明確化}{section.9.1}% 279
-\BOOKMARK [2][-]{subsection.9.1.8}{ルール外変更点}{section.9.1}% 280
-\BOOKMARK [1][-]{section.9.2}{第7版の主な変更点}{chapter.9}% 281
-\BOOKMARK [2][-]{subsection.9.2.1}{リバースのクイック化}{section.9.2}% 282
-\BOOKMARK [2][-]{subsection.9.2.2}{ゲーム中のデッキ名称をライフに変更}{section.9.2}% 283
-\BOOKMARK [2][-]{subsection.9.2.3}{対戦レギュレーションの定義方法変更}{section.9.2}% 284
-\BOOKMARK [2][-]{subsection.9.2.4}{コアフローをわかりやすく整理}{section.9.2}% 285
-\BOOKMARK [2][-]{subsection.9.2.5}{BJのクイック化}{section.9.2}% 286
-\BOOKMARK [2][-]{subsection.9.2.6}{引き分け廃止}{section.9.2}% 287
-\BOOKMARK [2][-]{subsection.9.2.7}{ルールの記載を微修正}{section.9.2}% 288
-\BOOKMARK [0][-]{chapter*.339}{索引}{}% 289
+\BOOKMARK [3][-]{subsubsection*.268}{切札 J}{subsection.6.3.3}% 200
+\BOOKMARK [4][-]{paragraph*.269}{リアニメーター \(兵士\)}{subsubsection*.268}% 201
+\BOOKMARK [3][-]{subsubsection*.270}{切札 K}{subsection.6.3.3}% 202
+\BOOKMARK [4][-]{paragraph*.271}{魔王 \(兵士\)}{subsubsection*.270}% 203
+\BOOKMARK [3][-]{subsubsection*.272}{切札 J}{subsection.6.3.3}% 204
+\BOOKMARK [4][-]{paragraph*.273}{チャリオット \(兵士\)}{subsubsection*.272}% 205
+\BOOKMARK [3][-]{subsubsection*.274}{切札 K}{subsection.6.3.3}% 206
+\BOOKMARK [4][-]{paragraph*.275}{巨人 \(兵士\)}{subsubsection*.274}% 207
+\BOOKMARK [2][-]{subsection.6.3.4}{フレームフォグリスト}{section.6.3}% 208
+\BOOKMARK [3][-]{subsubsection*.278}{滞留魔法}{subsection.6.3.4}% 209
+\BOOKMARK [4][-]{paragraph*.279}{クローズ \(滞留魔法\)}{subsubsection*.278}% 210
+\BOOKMARK [2][-]{subsection.6.3.5}{フレーム切札リスト}{section.6.3}% 211
+\BOOKMARK [3][-]{subsubsection*.304}{ スペード}{subsection.6.3.5}% 212
+\BOOKMARK [4][-]{paragraph*.305}{革命 \(表切札\)}{subsubsection*.304}% 213
+\BOOKMARK [4][-]{paragraph*.306}{スラッシュ \(表切札\)}{subsubsection*.304}% 214
+\BOOKMARK [4][-]{paragraph*.307}{ドレイン \(表切札\)}{subsubsection*.304}% 215
+\BOOKMARK [4][-]{paragraph*.308}{威圧 \(表切札\)}{subsubsection*.304}% 216
+\BOOKMARK [4][-]{paragraph*.309}{蘇生 \(表切札\)}{subsubsection*.304}% 217
+\BOOKMARK [4][-]{paragraph*.310}{瞬殺 \(表切札\)}{subsubsection*.304}% 218
+\BOOKMARK [4][-]{paragraph*.311}{リアニメーター \(表切札\)}{subsubsection*.304}% 219
+\BOOKMARK [4][-]{paragraph*.312}{魔王 \(表切札\)}{subsubsection*.304}% 220
+\BOOKMARK [3][-]{subsubsection*.313}{ ハート}{subsection.6.3.5}% 221
+\BOOKMARK [4][-]{paragraph*.314}{援軍 \(表切札\)}{subsubsection*.313}% 222
+\BOOKMARK [4][-]{paragraph*.315}{激励 \(表切札\)}{subsubsection*.313}% 223
+\BOOKMARK [4][-]{paragraph*.316}{休戦 \(表切札\)}{subsubsection*.313}% 224
+\BOOKMARK [4][-]{paragraph*.317}{追撃 \(表切札\)}{subsubsection*.313}% 225
+\BOOKMARK [4][-]{paragraph*.318}{ファントム \(表切札\)}{subsubsection*.313}% 226
+\BOOKMARK [4][-]{paragraph*.319}{救済 \(表切札\)}{subsubsection*.313}% 227
+\BOOKMARK [4][-]{paragraph*.320}{チャリオット \(表切札\)}{subsubsection*.313}% 228
+\BOOKMARK [4][-]{paragraph*.321}{巨人 \(表切札\)}{subsubsection*.313}% 229
+\BOOKMARK [3][-]{subsubsection*.322}{ ダイヤ}{subsection.6.3.5}% 230
+\BOOKMARK [4][-]{paragraph*.323}{交渉 \(表切札\)}{subsubsection*.322}% 231
+\BOOKMARK [3][-]{subsubsection*.324}{ クラブ}{subsection.6.3.5}% 232
+\BOOKMARK [4][-]{paragraph*.325}{スイッチ \(表切札\)}{subsubsection*.324}% 233
+\BOOKMARK [3][-]{subsubsection*.326}{裏切札}{subsection.6.3.5}% 234
+\BOOKMARK [4][-]{paragraph*.327}{裏切札 \(裏切札\)}{subsubsection*.326}% 235
+\BOOKMARK [0][-]{chapter.7}{コアルール}{}% 236
+\BOOKMARK [1][-]{section.7.1}{基礎概念}{chapter.7}% 237
+\BOOKMARK [2][-]{subsection.7.1.1}{ターン}{section.7.1}% 238
+\BOOKMARK [2][-]{subsection.7.1.2}{アクション}{section.7.1}% 239
+\BOOKMARK [2][-]{subsection.7.1.3}{リクエスト}{section.7.1}% 240
+\BOOKMARK [2][-]{subsection.7.1.4}{解決}{section.7.1}% 241
+\BOOKMARK [2][-]{subsection.7.1.5}{チャンス}{section.7.1}% 242
+\BOOKMARK [2][-]{subsection.7.1.6}{ステージ}{section.7.1}% 243
+\BOOKMARK [2][-]{subsection.7.1.7}{コンポーネント}{section.7.1}% 244
+\BOOKMARK [2][-]{subsection.7.1.8}{ユニット}{section.7.1}% 245
+\BOOKMARK [2][-]{subsection.7.1.9}{コアフロー\(ルールシステム\)}{section.7.1}% 246
+\BOOKMARK [1][-]{section.7.2}{詳細}{chapter.7}% 247
+\BOOKMARK [2][-]{subsection.7.2.1}{アクションの定義項目}{section.7.2}% 248
+\BOOKMARK [3][-]{subsubsection*.328}{オーナー}{subsection.7.2.1}% 249
+\BOOKMARK [3][-]{subsubsection*.329}{トリガー}{subsection.7.2.1}% 250
+\BOOKMARK [3][-]{subsubsection*.330}{スピード}{subsection.7.2.1}% 251
+\BOOKMARK [3][-]{subsubsection*.331}{タイミング}{subsection.7.2.1}% 252
+\BOOKMARK [3][-]{subsubsection*.332}{起動条件}{subsection.7.2.1}% 253
+\BOOKMARK [3][-]{subsubsection*.333}{誘発条件}{subsection.7.2.1}% 254
+\BOOKMARK [3][-]{subsubsection*.334}{効果}{subsection.7.2.1}% 255
+\BOOKMARK [2][-]{subsection.7.2.2}{リクエストの定義項目}{section.7.2}% 256
+\BOOKMARK [2][-]{subsection.7.2.3}{コンポーネントの定義項目}{section.7.2}% 257
+\BOOKMARK [2][-]{subsection.7.2.4}{ユニットの定義項目}{section.7.2}% 258
+\BOOKMARK [1][-]{section.7.3}{能力}{chapter.7}% 259
+\BOOKMARK [1][-]{section.7.4}{コアフロー}{chapter.7}% 260
+\BOOKMARK [2][-]{subsection.7.4.1}{誘発チェック}{section.7.4}% 261
+\BOOKMARK [3][-]{subsubsection*.339}{誘発即時解決}{subsection.7.4.1}% 262
+\BOOKMARK [3][-]{subsubsection*.340}{通常：アクション毎に処理}{subsection.7.4.1}% 263
+\BOOKMARK [2][-]{subsection.7.4.2}{能力の適応順}{section.7.4}% 264
+\BOOKMARK [3][-]{subsubsection*.341}{考え方の原則}{subsection.7.4.2}% 265
+\BOOKMARK [3][-]{subsubsection*.342}{能力の適用ルール}{subsection.7.4.2}% 266
+\BOOKMARK [3][-]{subsubsection*.343}{運用上の注意}{subsection.7.4.2}% 267
+\BOOKMARK [1][-]{section.7.5}{まとめ}{chapter.7}% 268
+\BOOKMARK [0][-]{chapter.8}{付録}{}% 269
+\BOOKMARK [1][-]{section.8.1}{アクションリスト}{chapter.8}% 270
+\BOOKMARK [2][-]{subsection.8.1.1}{ライト}{section.8.1}% 271
+\BOOKMARK [2][-]{subsection.8.1.2}{マスター}{section.8.1}% 272
+\BOOKMARK [2][-]{subsection.8.1.3}{エクストラフレーム}{section.8.1}% 273
+\BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 274
+\BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 275
+\BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 276
+\BOOKMARK [2][-]{subsection.9.1.2}{能力の解釈を変更}{section.9.1}% 277
+\BOOKMARK [2][-]{subsection.9.1.3}{フォグ領域追加}{section.9.1}% 278
+\BOOKMARK [2][-]{subsection.9.1.4}{用語追加}{section.9.1}% 279
+\BOOKMARK [2][-]{subsection.9.1.5}{オプション削除とフレームへの統合}{section.9.1}% 280
+\BOOKMARK [2][-]{subsection.9.1.6}{エクストラをフレーム化 \(8.1\)}{section.9.1}% 281
+\BOOKMARK [2][-]{subsection.9.1.7}{曖昧なルールの明確化}{section.9.1}% 282
+\BOOKMARK [2][-]{subsection.9.1.8}{ルール外変更点}{section.9.1}% 283
+\BOOKMARK [1][-]{section.9.2}{第7版の主な変更点}{chapter.9}% 284
+\BOOKMARK [2][-]{subsection.9.2.1}{リバースのクイック化}{section.9.2}% 285
+\BOOKMARK [2][-]{subsection.9.2.2}{ゲーム中のデッキ名称をライフに変更}{section.9.2}% 286
+\BOOKMARK [2][-]{subsection.9.2.3}{対戦レギュレーションの定義方法変更}{section.9.2}% 287
+\BOOKMARK [2][-]{subsection.9.2.4}{コアフローをわかりやすく整理}{section.9.2}% 288
+\BOOKMARK [2][-]{subsection.9.2.5}{BJのクイック化}{section.9.2}% 289
+\BOOKMARK [2][-]{subsection.9.2.6}{引き分け廃止}{section.9.2}% 290
+\BOOKMARK [2][-]{subsection.9.2.7}{ルールの記載を微修正}{section.9.2}% 291
+\BOOKMARK [0][-]{chapter*.345}{索引}{}% 292
