@@ -555,6 +555,25 @@ actList:
       since: ex3.10.0
       update: v8.2
 
+  - type: 切札♢A
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 防壁追加
+      actId: addBulwark
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 即時
+      actTime: メイン
+      actCost: L
+      actActCond: |-
+        ・自分の表切札に「防壁追加」がある
+        ・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
+      actEffect: |-
+        対戦相手の場にいる防壁の数が自分の場にいる防壁の数以上の場合、自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。
+      since: ex3.10.0
+      update: v8.2
+
   - type: 切札♢3
     acts:
     - frame: |-
@@ -839,7 +858,7 @@ trumpList:
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
-        立ち上がる兵で追加された。
+        「立ち上がる兵」で追加された。
 
     - frame: |-
         ・エクストラ
@@ -929,6 +948,20 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
+      trumpName: 防壁追加
+      trumpId: dA
+      trumpType: 表切札
+      trumpKey: ♢A
+      trumpAbility: |
+        なし
+      since: ex3.10.0
+      update: v8.2
+      image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_01
+      devNote: |-
+        「巨人と魔王」で追加された。
+
+    - frame: |-
+        ・エクストラ
       trumpName: 交渉
       trumpId: d3
       trumpType: 表切札
@@ -939,7 +972,7 @@ trumpList:
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_03
       devNote: |-
-        立ち上がる兵で追加された。
+        「立ち上がる兵」で追加された。
 
   - type: ♣クラブ
     trumps:
@@ -955,7 +988,7 @@ trumpList:
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
       devNote: |-
-        立ち上がる兵で追加された。
+        「立ち上がる兵」で追加された。
 
   - type: 裏切札
     trumps:
