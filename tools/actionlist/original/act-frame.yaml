@@ -769,6 +769,58 @@ actList:
       since: ex3.4.0
       update: v8.1
 
+  - type: 切札♣5
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 内乱
+      actId: civilWar
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♣A〜K
+      actCost: B
+      actActCond: 自分の表切札に「内乱」がある
+      actTarget: 対戦相手1人
+      actEffect: |-
+        対象の対戦相手の手札の枚数が自分の手札の枚数以上の場合、次を行う。
+        ・対象の対戦相手は手札を2枚捨てる。
+      since: ex4.14.0
+      update: v8.2
+
+    - frame: |-
+        ・エクストラ
+      actName: 暴動
+      actId: riot
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 即時
+      actTime: クイック
+      actTriggerCond: |-
+        自分の表切札に「内乱」があるかつ、対戦相手が手札を捨てた時に誘発する。
+      actEffect: |-
+        このアクションを誘発した時に捨てられた手札の枚数×2点のダメージを、手札を捨てたプレイヤーに与える。
+      since: ex4.14.0
+      update: v8.2
+
+  - type: 切札♣7
+    acts:
+    - frame: |-
+        ・エクストラ
+      actName: 手札補充
+      actId: handRefill
+      actType: 誘発魔法
+      actTrigger: 誘発
+      actSpeed: 通常
+      actTime: クイック
+      actTriggerCond: |-
+        自分の表切札に「手札補充」があるかつ、エンドアクションをリクエストした時に誘発する。
+      actEffect: |-
+        自分の手札が2枚以下の場合、2枚カードを引き、3枚の場合1枚カードを引く。
+      since: ex3.10.0
+      update: v8.2
+
 charList:
   - type: 切札♠J
     chars:
@@ -1233,6 +1285,34 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Wands_04
       devNote: |-
         「立ち上がる兵」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 内乱
+      trumpId: c5
+      trumpType: 表切札
+      trumpKey: ♣5
+      trumpAbility: |
+        なし
+      since: ex4.14.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_05
+      devNote: |-
+        「弱者の反撃」で追加された。
+
+    - frame: |-
+        ・エクストラ
+      trumpName: 手札補充
+      trumpId: c7
+      trumpType: 表切札
+      trumpKey: ♣7
+      trumpAbility: |
+        なし
+      since: ex3.10.0
+      update: v8.1
+      image: tarot/Pictorial_Key_to_the_Tarot_Wands_07
+      devNote: |-
+        「巨人と魔王」で追加された。
 
   - type: 裏切札
     trumps:
