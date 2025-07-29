@@ -93,10 +93,10 @@ URL
 ガイドライン
 ==============================
 
+ガイドラインは、BlackPokerのアクションやルールを設計・記述する際の共通基準を示すものです。
 
 .. toctree::
-    :maxdepth: 1
-    :numbered: 1
+    :maxdepth: 2
 
     guideline/fanworks
     guideline/customRule
