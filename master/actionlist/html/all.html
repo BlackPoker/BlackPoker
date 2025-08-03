@@ -1019,7 +1019,7 @@
                 <span class="blackpoker-type-group-title">切札<span class="diam"></span>A</span>
                 <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-addBulwark" data-frame="エクストラ">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-putBulwark" data-frame="エクストラ">
                     <span>防壁追加</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-即時-メイン</span></b>
                     </span>
@@ -5165,7 +5165,7 @@
                     <span>（効果）<br></span>
                     <span>切札の<span class="heart"></span>Jが表の場合、次を行う。<br><ol>
 <li> 防壁1体を選び墓地に移す。</li>
-<li> キーカードと切札の<span class="diam"></span>Jをあわせてチャリオットとしてチャージ状態で場に出す。</li></ol></span>
+<li> キーカードと切札の<span class="heart"></span>Jをあわせてチャリオットとしてチャージ状態で場に出す。</li></ol></span>
 
                     
 
@@ -5201,7 +5201,7 @@
                     </div>
                     <div class="text-left">
                       <small> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span><span class="heart"></span>2〜10</span><br>
+                          aria-hidden="true"></span> <span><span class="diam"></span>2〜10</span><br>
                       </small> 
 
                     </div>
@@ -5371,7 +5371,7 @@
                     <span>切札の<span class="heart"></span>Kが表の場合、次を行う。<br><ol>
 <li> 全ての防壁を墓地に移す。</li>
 <li> 自分の全ての領域から<span class="diam"></span>Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</li>
-<li> <span class="diam"></span>Kを見つけた場合、切札の<span class="heart"></span>Kと<span class="diam"></span>Kを合わせて魔王としてチャージ状態で場に出す。</li>
+<li> <span class="diam"></span>Kを見つけた場合、切札の<span class="heart"></span>Kと<span class="diam"></span>Kを合わせて巨人としてチャージ状態で場に出す。</li>
 <li> <span class="diam"></span>Kが無い場合、切札の<span class="heart"></span>Kを墓地に移す。</li></ol></span>
 
                     
@@ -5389,7 +5389,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-addBulwark" data-frame="エクストラ">
+                <div class="panel panel-default blackpoker-action" id="act-putBulwark" data-frame="エクストラ">
 
                   <div class="panel-heading">
 
@@ -6906,7 +6906,8 @@
                     <span><ul>
 <li>アクションの対象にできない。</li>
 <li><span class="heart"></span>兵士としても<span class="diam"></span>兵士としても扱う。</li>
-<li>自分のターンに可能な限りアタックアクションをリクエストし、巨人がチャージ状態の場合、アタッカーに指定する。</li></ul></span>
+<li>自分のターンに可能な限りアタックアクションをリクエストし、巨人がチャージ状態の場合、アタッカーに指定する。</li>
+<li>「ダメージ判定」にてブロッカーが防壁の場合、条件に該当してもこの巨人は墓地に移されない。</li></ul></span>
 
                     
                   </div>

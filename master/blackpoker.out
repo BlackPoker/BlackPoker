@@ -318,22 +318,41 @@
 \BOOKMARK [2][-]{subsection.8.1.1}{ライト}{section.8.1}% 317
 \BOOKMARK [2][-]{subsection.8.1.2}{マスター}{section.8.1}% 318
 \BOOKMARK [2][-]{subsection.8.1.3}{エクストラフレーム}{section.8.1}% 319
-\BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 320
-\BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 321
-\BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 322
-\BOOKMARK [2][-]{subsection.9.1.2}{能力の解釈を変更}{section.9.1}% 323
-\BOOKMARK [2][-]{subsection.9.1.3}{フォグ領域追加}{section.9.1}% 324
-\BOOKMARK [2][-]{subsection.9.1.4}{用語追加}{section.9.1}% 325
-\BOOKMARK [2][-]{subsection.9.1.5}{オプション削除とフレームへの統合}{section.9.1}% 326
-\BOOKMARK [2][-]{subsection.9.1.6}{エクストラをフレーム化 \(8.1\)}{section.9.1}% 327
-\BOOKMARK [2][-]{subsection.9.1.7}{曖昧なルールの明確化}{section.9.1}% 328
-\BOOKMARK [2][-]{subsection.9.1.8}{ルール外変更点}{section.9.1}% 329
-\BOOKMARK [1][-]{section.9.2}{第7版の主な変更点}{chapter.9}% 330
-\BOOKMARK [2][-]{subsection.9.2.1}{リバースのクイック化}{section.9.2}% 331
-\BOOKMARK [2][-]{subsection.9.2.2}{ゲーム中のデッキ名称をライフに変更}{section.9.2}% 332
-\BOOKMARK [2][-]{subsection.9.2.3}{対戦レギュレーションの定義方法変更}{section.9.2}% 333
-\BOOKMARK [2][-]{subsection.9.2.4}{コアフローをわかりやすく整理}{section.9.2}% 334
-\BOOKMARK [2][-]{subsection.9.2.5}{BJのクイック化}{section.9.2}% 335
-\BOOKMARK [2][-]{subsection.9.2.6}{引き分け廃止}{section.9.2}% 336
-\BOOKMARK [2][-]{subsection.9.2.7}{ルールの記載を微修正}{section.9.2}% 337
-\BOOKMARK [0][-]{chapter*.437}{索引}{}% 338
+\BOOKMARK [1][-]{section.8.2}{ガイドライン}{chapter.8}% 320
+\BOOKMARK [2][-]{subsection.8.2.1}{BlackPoker二次創作ガイドライン}{section.8.2}% 321
+\BOOKMARK [3][-]{subsubsection*.444}{はじめに}{subsection.8.2.1}% 322
+\BOOKMARK [3][-]{subsubsection*.445}{二次創作の範囲}{subsection.8.2.1}% 323
+\BOOKMARK [3][-]{subsubsection*.446}{創作の自由と制限}{subsection.8.2.1}% 324
+\BOOKMARK [3][-]{subsubsection*.447}{クレジット表記について}{subsection.8.2.1}% 325
+\BOOKMARK [3][-]{subsubsection*.448}{禁止事項}{subsection.8.2.1}% 326
+\BOOKMARK [3][-]{subsubsection*.449}{商用利用について}{subsection.8.2.1}% 327
+\BOOKMARK [3][-]{subsubsection*.450}{ガイドラインにないケースについて}{subsection.8.2.1}% 328
+\BOOKMARK [2][-]{subsection.8.2.2}{BlackPoker アクション・ルールガイドライン}{section.8.2}% 329
+\BOOKMARK [2][-]{subsection.8.2.3}{はじめに}{section.8.2}% 330
+\BOOKMARK [3][-]{subsubsection*.451}{アクションを追加する際のルール}{subsection.8.2.3}% 331
+\BOOKMARK [4][-]{paragraph*.452}{アクションの対象は単対象 \(必須\)}{subsubsection*.451}% 332
+\BOOKMARK [4][-]{paragraph*.453}{キーカードなしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.451}% 333
+\BOOKMARK [4][-]{paragraph*.454}{誘発アクションは即時 \(推奨\)}{subsubsection*.451}% 334
+\BOOKMARK [4][-]{paragraph*.455}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.451}% 335
+\BOOKMARK [4][-]{paragraph*.456}{誘発--メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.451}% 336
+\BOOKMARK [3][-]{subsubsection*.457}{キャラクターを追加する際のルール}{subsection.8.2.3}% 337
+\BOOKMARK [4][-]{paragraph*.458}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.457}% 338
+\BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 339
+\BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 340
+\BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 341
+\BOOKMARK [2][-]{subsection.9.1.2}{能力の解釈を変更}{section.9.1}% 342
+\BOOKMARK [2][-]{subsection.9.1.3}{フォグ領域追加}{section.9.1}% 343
+\BOOKMARK [2][-]{subsection.9.1.4}{用語追加}{section.9.1}% 344
+\BOOKMARK [2][-]{subsection.9.1.5}{オプション削除とフレームへの統合}{section.9.1}% 345
+\BOOKMARK [2][-]{subsection.9.1.6}{エクストラをフレーム化 \(8.1\)}{section.9.1}% 346
+\BOOKMARK [2][-]{subsection.9.1.7}{曖昧なルールの明確化}{section.9.1}% 347
+\BOOKMARK [2][-]{subsection.9.1.8}{ルール外変更点}{section.9.1}% 348
+\BOOKMARK [1][-]{section.9.2}{第7版の主な変更点}{chapter.9}% 349
+\BOOKMARK [2][-]{subsection.9.2.1}{リバースのクイック化}{section.9.2}% 350
+\BOOKMARK [2][-]{subsection.9.2.2}{ゲーム中のデッキ名称をライフに変更}{section.9.2}% 351
+\BOOKMARK [2][-]{subsection.9.2.3}{対戦レギュレーションの定義方法変更}{section.9.2}% 352
+\BOOKMARK [2][-]{subsection.9.2.4}{コアフローをわかりやすく整理}{section.9.2}% 353
+\BOOKMARK [2][-]{subsection.9.2.5}{BJのクイック化}{section.9.2}% 354
+\BOOKMARK [2][-]{subsection.9.2.6}{引き分け廃止}{section.9.2}% 355
+\BOOKMARK [2][-]{subsection.9.2.7}{ルールの記載を微修正}{section.9.2}% 356
+\BOOKMARK [0][-]{chapter*.459}{索引}{}% 357
