@@ -328,15 +328,15 @@
 \BOOKMARK [3][-]{subsubsection*.449}{商用利用について}{subsection.8.2.1}% 327
 \BOOKMARK [3][-]{subsubsection*.450}{ガイドラインにないケースについて}{subsection.8.2.1}% 328
 \BOOKMARK [2][-]{subsection.8.2.2}{BlackPoker アクション・ルールガイドライン}{section.8.2}% 329
-\BOOKMARK [2][-]{subsection.8.2.3}{はじめに}{section.8.2}% 330
-\BOOKMARK [3][-]{subsubsection*.451}{アクションを追加する際のルール}{subsection.8.2.3}% 331
-\BOOKMARK [4][-]{paragraph*.452}{アクションの対象は単対象 \(必須\)}{subsubsection*.451}% 332
-\BOOKMARK [4][-]{paragraph*.453}{キーカードなしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.451}% 333
-\BOOKMARK [4][-]{paragraph*.454}{誘発アクションは即時 \(推奨\)}{subsubsection*.451}% 334
-\BOOKMARK [4][-]{paragraph*.455}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.451}% 335
-\BOOKMARK [4][-]{paragraph*.456}{誘発--メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.451}% 336
-\BOOKMARK [3][-]{subsubsection*.457}{キャラクターを追加する際のルール}{subsection.8.2.3}% 337
-\BOOKMARK [4][-]{paragraph*.458}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.457}% 338
+\BOOKMARK [3][-]{subsubsection*.460}{はじめに}{subsection.8.2.2}% 330
+\BOOKMARK [4][-]{paragraph*.461}{アクションを追加する際のルール}{subsubsection*.460}% 331
+\BOOKMARK [3][-]{subsubsection*.462}{アクションの対象は単対象 \(必須\)}{subsection.8.2.2}% 332
+\BOOKMARK [3][-]{subsubsection*.463}{キーカードなしの通常-クイックアクションを作らない \(必須\)}{subsection.8.2.2}% 333
+\BOOKMARK [3][-]{subsubsection*.464}{誘発アクションは即時 \(推奨\)}{subsection.8.2.2}% 334
+\BOOKMARK [3][-]{subsubsection*.465}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsection.8.2.2}% 335
+\BOOKMARK [3][-]{subsubsection*.466}{誘発--メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsection.8.2.2}% 336
+\BOOKMARK [4][-]{paragraph*.467}{キャラクターを追加する際のルール}{subsubsection*.466}% 337
+\BOOKMARK [3][-]{subsubsection*.468}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsection.8.2.2}% 338
 \BOOKMARK [0][-]{chapter.9}{変更履歴}{}% 339
 \BOOKMARK [1][-]{section.9.1}{第8版の主な変更点}{chapter.9}% 340
 \BOOKMARK [2][-]{subsection.9.1.1}{アクションの定義の変更}{section.9.1}% 341
@@ -352,7 +352,7 @@
 \BOOKMARK [2][-]{subsection.9.2.2}{ゲーム中のデッキ名称をライフに変更}{section.9.2}% 351
 \BOOKMARK [2][-]{subsection.9.2.3}{対戦レギュレーションの定義方法変更}{section.9.2}% 352
 \BOOKMARK [2][-]{subsection.9.2.4}{コアフローをわかりやすく整理}{section.9.2}% 353
-\BOOKMARK [2][-]{subsection.9.2.5}{BJのクイック化}{section.9.2}% 354
+\BOOKMARK [2][-]{subsection.9.2.5}{B・Jのクイック化}{section.9.2}% 354
 \BOOKMARK [2][-]{subsection.9.2.6}{引き分け廃止}{section.9.2}% 355
 \BOOKMARK [2][-]{subsection.9.2.7}{ルールの記載を微修正}{section.9.2}% 356
-\BOOKMARK [0][-]{chapter*.459}{索引}{}% 357
+\BOOKMARK [0][-]{chapter*.469}{索引}{}% 357
