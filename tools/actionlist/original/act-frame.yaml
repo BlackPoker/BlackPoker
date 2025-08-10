@@ -79,7 +79,7 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-      actId: open
+      actId: quickOpen
       actName: クイックオープン
       actType: 切札操作
       actTrigger: 直接
@@ -273,7 +273,7 @@ actList:
     - frame: |-
         ・エクストラ
       actName: リアニメーターリアニメイト
-      actId: quickSummonReanimator
+      actId: reanimatorReanimate
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
@@ -523,7 +523,7 @@ actList:
     - frame: |-
         ・エクストラ
       actName: チャリオット再生
-      actId: reanimatorRevive
+      actId: chariotRevive
       actType: 切札操作
       actTrigger: 誘発
       actSpeed: 即時
@@ -913,7 +913,7 @@ actList:
     - frame: |-
         ・エクストラ
       actName: 騎士再生
-      actId: strategistRevive
+      actId: knightRevive
       actType: 切札操作
       actTrigger: 誘発
       actSpeed: 即時
