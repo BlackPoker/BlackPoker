@@ -67,7 +67,7 @@ actList:
       actName: 罠カウンター
       actId: trapCounter
       actType: レアカード操作
-      actTrigger: 誘発
+      actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
       actKey: レアカード1枚
