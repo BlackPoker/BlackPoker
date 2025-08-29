@@ -28,7 +28,8 @@
 				"redhat.vscode-yaml",
 				"janisdd.vscode-edit-csv",
 				"sodatea.velocity",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"GitHub.vscode-pull-request-github"
 			],
 			"settings": {
 				"tools/actionlist/original/act.schema.json":"act*.yaml",
