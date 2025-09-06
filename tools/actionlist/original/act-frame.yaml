@@ -1,7 +1,7 @@
 data: 
   id: act-frame
-  ver: 第8.1版 フレーム編
-  lastupdate: 2025/7/3
+  ver: 第8.2版 フレーム編
+  lastupdate: 2025/9/30
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -384,12 +384,10 @@ actList:
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
-      actKey: <激励> を持つ兵士1体
-      actCost: BL
       actActCond: 自分の表切札に「休戦」がある
       actTarget: アタックアクションのリクエスト
       actEffect: |-
-        1. 対象のリクエストを無効し、対象のリクエストをステージから取り除く。
+        1. 対象のリクエストを無効にしステージから取り除く。
         2. 自分の切札にある♡4を裏向きにする。
         3. 自分の場にいるキャラクターを全てチャージ状態にする。
       since: ex5.30.0
