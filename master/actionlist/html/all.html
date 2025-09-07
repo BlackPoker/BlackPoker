@@ -4601,7 +4601,7 @@
                   <div class="panel-body">
                      
                     
-                    <span> （誘発条件）<br></span> <span>自分の 「リアニメーター」 が場から墓地に移る場合</span>
+                    <span> （誘発条件）<br></span> <span>自分の 「リアニメーター」 が場から墓地に移った時に誘発する。</span>
                     <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
@@ -5301,7 +5301,7 @@
                   <div class="panel-body">
                      
                     
-                    <span> （誘発条件）<br></span> <span>自分の 「チャリオット」 が場から墓地に移る場合</span>
+                    <span> （誘発条件）<br></span> <span>自分の 「チャリオット」 が場から墓地に移った時に誘発する。</span>
                     <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
@@ -5799,11 +5799,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>切札の<span class="diam"></span>Jが表の場合、次を行う。<br><ol>
-<li> ステージ上にあるリクエストを1つ選び無効化しステージから取り除く。そのリクエストは次のいずれかに該当するものとする。Xはこのリクエストのキーカードの数字とする。</li><ul>
-<li>キーカードが1枚かつそのキーカードの数字がX以下</li>
-<li>キーカードが2枚</li></ul>
-<li> キーカードと切札の<span class="diam"></span>Jをあわせて策士としてチャージ状態で場に出す。</li></ol></span>
+                    <span>切札の<span class="diam"></span>Jが表の場合、キーカードと切札の<span class="diam"></span>Jをあわせて策士としてチャージ状態で場に出す。</span>
 
                     
 
@@ -5854,7 +5850,11 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>効果の内容は「策士召喚」を参照。</span>
+                    <span>切札の<span class="diam"></span>Jが表の場合、次を行う。<br><ol>
+<li> ステージ上にあるリクエストを1つ選び無効化しステージから取り除く。そのリクエストは次のいずれかに該当するものとする。Xはこのリクエストのキーカードの数字とする。</li><ul>
+<li>キーカードが1枚かつそのキーカードの数字がX以下</li>
+<li>キーカードが2枚</li></ul>
+<li> キーカードと切札の<span class="diam"></span>Jをあわせて策士としてチャージ状態で場に出す。</li></ol></span>
 
                     
 
@@ -5947,7 +5947,7 @@
                   <div class="panel-body">
                      
                     
-                    <span> （誘発条件）<br></span> <span>自分の 「策士」 が場から墓地に移る場合</span>
+                    <span> （誘発条件）<br></span> <span>自分の 「策士」 が場から墓地に移った時に誘発する。</span>
                     <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
@@ -6477,7 +6477,7 @@
                   <div class="panel-body">
                      
                     
-                    <span> （誘発条件）<br></span> <span>自分の 「騎士」 が場から墓地に移る場合</span>
+                    <span> （誘発条件）<br></span> <span>自分の 「騎士」 が場から墓地に移った時に誘発する。</span>
                     <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
