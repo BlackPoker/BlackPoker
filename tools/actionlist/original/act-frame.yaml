@@ -295,7 +295,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の 「リアニメーター」 が場から墓地に移る場合
+        自分の 「リアニメーター」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♠Jを1枚選び、自分の表切札として置く。
 
@@ -529,7 +529,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の 「チャリオット」 が場から墓地に移る場合
+        自分の 「チャリオット」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♡Jを1枚選び、自分の表切札として置く。
 
@@ -746,7 +746,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の 「策士」 が場から墓地に移る場合
+        自分の 「策士」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♢Jを1枚選び、自分の表切札として置く。
 
@@ -919,7 +919,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の 「騎士」 が場から墓地に移る場合
+        自分の 「騎士」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♣Jを1枚選び、自分の表切札として置く。
 
