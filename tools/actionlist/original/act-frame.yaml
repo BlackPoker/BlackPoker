@@ -382,7 +382,7 @@ actList:
       actId: retreat
       actType: 速攻魔法
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actActCond: 自分の表切札に「休戦」がある
       actTarget: アタックアクションのリクエスト
