@@ -49,6 +49,7 @@ create () {
 
 # 一括処理
 # for doc in blackpoker-lite blackpoker-std blackpoker-pro blackpoker-mast blackpoker-extra; do
-for doc in blackpoker-lite blackpoker-std blackpoker-pro blackpoker-mast blackpoker-all; do
+# for doc in blackpoker-lite blackpoker-std blackpoker-pro blackpoker-mast blackpoker-all; do
+for doc in blackpoker-lite blackpoker-mast; do
     create "$doc"
 done

@@ -354,8 +354,8 @@
       font-size: 16px;
     }
 
-    .cost-K:after {
-      content: "Ⓚ";
+    .cost-C:after {
+      content: "Ⓒ";
       font-family: "Garava";
       /*font-weight: bold;*/
       font-size: 16px;
@@ -662,7 +662,7 @@
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
-                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード条件</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード/キーユニット条件</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
                 aria-hidden="true"></span>&nbsp;:&nbsp;ユニット条件</li>
             <li class="list-group-item"><span class="note-mark"></span>
@@ -677,7 +677,7 @@
             <li class="list-group-item"><span class="cost-L"></span>&nbsp;:&nbsp;1点ダメージを受ける</li>
             <li class="list-group-item"><span class="cost-D"></span>&nbsp;:&nbsp;手札を1枚捨てる</li>
             <li class="list-group-item"><span class="cost-S"></span>&nbsp;:&nbsp;キャラクターを1体墓地に移す</li>
-            <li class="list-group-item"><span class="cost-K"></span>&nbsp;:&nbsp;キーカードをドライブする</li>
+            <li class="list-group-item"><span class="cost-C"></span>&nbsp;:&nbsp;キーユニットのキャラクターをドライブする</li>
           </ul>
         </div>
 
@@ -793,16 +793,23 @@
 
                     </div>
                     <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                      </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span
-                          th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                          <span class="note-mark"></span> <span
-                            th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                          <br>
-                        </span>
+                      <small th:if="${not #strings.isEmpty(row.actKey)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span>
+                        <br>
+                      </small> 
+                      <small th:if="${not #strings.isEmpty(row.actUnit)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span th:utext="${#sfn.cnvHtml(row.actUnit)}"></span>
+                        <br>
                       </small>
-
+                      <small th:if="${not #strings.isEmpty(row.actNote)}">
+                          <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
+                            <span class="note-mark"></span>
+                            <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                            <br>
+                          </span>
+                      </small>
                     </div>
 
                   </div>

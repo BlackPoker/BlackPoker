@@ -185,7 +185,7 @@ public class TexFn {
 		ret = ret.replace("D", "<span class=\"cost-D\"></span>\n");
 		ret = ret.replace("L", "<span class=\"cost-L\"></span>\n");
 		ret = ret.replace("S", "<span class=\"cost-S\"></span>\n");
-		ret = ret.replace("K", "<span class=\"cost-K\"></span>\n");
+		ret = ret.replace("C", "<span class=\"cost-C\"></span>\n");
 		return ret;
 	}
 
