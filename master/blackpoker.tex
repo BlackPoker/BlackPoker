@@ -1765,6 +1765,9 @@ BlackPokerは実行したいアクションを要求(リクエスト)し、進�
 アクションを要求することを「アクションを起こす」または「アクションをリクエストする」といいます。
 
 \sphinxAtStartPar
+個別のアクション定義をアクションスクリプトと呼びます。
+
+\sphinxAtStartPar
 次の手順でアクションをリクエストすることができます。
 \begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
@@ -1778,7 +1781,11 @@ BlackPokerは実行したいアクションを要求(リクエスト)し、進�
 
 \item {} 
 \sphinxAtStartPar
-必要なら手札からキーカード条件に合ったカードを出し、キーカードとする。
+アクションにキーカード条件があれば、条件に合ったカードを手札から出し、キーカードとする。
+
+\item {} 
+\sphinxAtStartPar
+アクションにキーユニット条件があれば、条件に合ったユニットを指定し、キーユニットとする。
 
 \item {} 
 \sphinxAtStartPar
@@ -1981,17 +1988,16 @@ BlackPokerは実行したいアクションを要求(リクエスト)し、進�
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-効果の中でキーカードを場に出した場合
+効果の中でキーカードを場などのゾーンに出した場合
 
 \item {} 
 \sphinxAtStartPar
 効果の中でキーカードを手札に戻した場合
 
-\item {} 
-\sphinxAtStartPar
-支払いコストに K (KeyDrive) が含まれる場合は、キーカードをドライブ状態のままにする
-
 \end{itemize}
+
+\sphinxAtStartPar
+※アクションの項目が \sphinxstylestrong{キーカード条件} ではなく \sphinxstylestrong{キーユニット条件} の場合、指定されたものは \sphinxstylestrong{キーユニット} となり、キーカードではないため、墓地に移しません。
 
 
 \section{勝敗判定}
@@ -6229,6 +6235,47 @@ x
 \paragraph{アップ (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-upfog}}\label{\detokenize{auto/actionlist:id55}}
 \sphinxAtStartPar
+\sphinxstylestrong{フォーマット:}
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+ライト
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+スタンダード
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+プロ
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+マスター
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxAtStartPar
 \sphinxstylestrong{ユニット条件:} {\normalsize $\heartsuit$} A〜10
 
 \sphinxAtStartPar
@@ -6248,6 +6295,47 @@ x
 \paragraph{ダウン (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-downfog}}\label{\detokenize{auto/actionlist:id56}}
 \sphinxAtStartPar
+\sphinxstylestrong{フォーマット:}
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+ライト
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+スタンダード
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+プロ
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+マスター
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
+\sphinxAtStartPar
 \sphinxstylestrong{ユニット条件:} {\normalsize $\spadesuit$} A〜10
 
 \sphinxAtStartPar
@@ -6266,6 +6354,47 @@ x
 
 \paragraph{フォース (滞留魔法)}
 \label{\detokenize{auto/actionlist:fog-forcefog}}\label{\detokenize{auto/actionlist:id57}}
+\sphinxAtStartPar
+\sphinxstylestrong{フォーマット:}
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+ライト
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+スタンダード
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+プロ
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+マスター
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+x
+&
+\sphinxAtStartPar
+◯
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
+
 \sphinxAtStartPar
 \sphinxstylestrong{ユニット条件:} {\normalsize $\heartsuit$} A〜10 を 2枚
 
