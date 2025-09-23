@@ -399,7 +399,7 @@ actList:
         ・エクストラ
       actName: 追撃
       actId: pursuit
-      actType: 速攻魔法
+      actType: 通常魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
