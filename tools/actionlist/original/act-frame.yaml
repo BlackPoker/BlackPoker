@@ -602,7 +602,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actCost: D
-      actActCond: 自分の表切札に「防壁追加」がある
+      actActCond: 自分の表切札に「相殺」がある
       actTarget: キーカードがあるリクエスト
       actEffect: |-
         対象リクエストのキーカードの数字の合計値が5以上の場合、次を行う。
