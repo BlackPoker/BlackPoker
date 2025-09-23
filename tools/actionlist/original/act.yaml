@@ -320,6 +320,19 @@ actList:
       update: v8.0,v8.1
 
     - format: ',,pro,mast'
+      actName: キル
+      actId: kill
+      actType: 速攻魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actKey: ♠A〜10 を 2枚
+      actTarget: 兵士1体
+      actEffect: 対象とした兵士を墓地に移す。
+      since: v1.0
+      update: v8.0,v8.1
+
+    - format: ',,pro,mast'
       actName: 再会
       ruby: さいかい
       actId: reunion
@@ -334,19 +347,6 @@ actList:
       flavorSpeaker: ネタバレ娘より
       since: v1.0
       update: v8.0
-
-    - format: ',,pro,mast'
-      actName: キル
-      actId: kill
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actKey: ♠A〜10 を 2枚
-      actTarget: 兵士1体
-      actEffect: 対象とした兵士を墓地に移す。
-      since: v1.0
-      update: v8.0,v8.1
 
     - format: ',,pro,mast'
       actName: 停戦
@@ -564,22 +564,6 @@ actList:
       update: v8.0,v8.1
 
     - format: ',,mast'
-      actName: フォース
-      actId: force
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: BB
-      actKey: ♡A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: |-
-        このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
-        その印としてフォグにキーカードを置き、フォースとする。
-      since: v3.0
-      update: v8.0
-
-    - format: ',,mast'
       actName: 剣の雨
       ruby: つるぎのあめ
       actId: swordRain
@@ -594,6 +578,22 @@ actList:
       story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
       flavor: 「え！助かる訳ないじゃん！！」
       flavorSpeaker: 平和主義の♣3一般兵より
+      since: v3.0
+      update: v8.0
+
+    - format: ',,mast'
+      actName: フォース
+      actId: force
+      actType: 通常魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BB
+      actKey: ♡A〜10 を 2枚
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actEffect: |-
+        このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
+        その印としてフォグにキーカードを置き、フォースとする。
       since: v3.0
       update: v8.0
 
