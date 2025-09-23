@@ -1434,7 +1434,7 @@ trumpList:
 
     - frame: |-
         ・エクストラ
-      trumpName: 手札補充
+      trumpName: リセット
       trumpId: c8
       trumpType: 表切札
       trumpKey: ♣8
