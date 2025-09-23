@@ -252,6 +252,9 @@
             #if(${row.actKey.trim()})
 {\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
             #end
+            #if(${row.actUnit.trim()})
+{\footnotesize\bf ★${texFn.cnv(${row.actUnit})}}
+            #end
 
             #if(${row.actNote.trim()})
 %特記事項

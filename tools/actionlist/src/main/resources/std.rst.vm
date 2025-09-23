@@ -61,6 +61,10 @@ ${rstFn.cnv(${row.frame})}
 **キーカード条件:** ${row.actKey}
 
         #end
+        #if(${row.actUnit.trim()})
+**キーユニット条件:** ${row.actUnit}
+
+        #end
         #if(${row.actCost})
 **コスト:** ${row.actCost}
 

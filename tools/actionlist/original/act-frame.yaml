@@ -157,7 +157,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: メイン
-      actKey: <スラッシュ> を持つ兵士1体
+      actUnit: <スラッシュ> を持つ兵士1体
       actCost: C
       actTarget: 兵士1体
       actActCond: 自分の表切札に「スラッシュ」がある
@@ -279,7 +279,7 @@ actList:
       actSpeed: 通常
       actTime: メイン
       actCost: C
-      actKey: 「リアニメーター」1体
+      actUnit: 「リアニメーター」1体
       actTarget: 自分のキャラクター1体
       actEffect: |-
         効果の内容は「リアニメイト」を参照。
@@ -365,7 +365,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actKey: <激励> を持つ兵士1体
+      actUnit: <激励> を持つ兵士1体
       actCost: C
       actTarget: 兵士1体
       actActCond: 自分の表切札に「激励」がある
@@ -423,7 +423,7 @@ actList:
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
-      actKey: <ファントム> を持つ防壁1体
+      actUnit: <ファントム> を持つ防壁1体
       actCost: C
       actActCond: 自分の表切札に「ファントム」がある
       actEffect: |-
@@ -439,7 +439,6 @@ actList:
       actTrigger: 誘発
       actSpeed: 通常
       actTime: クイック
-      actCost: C
       actTriggerCond: |-
         自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。
       actEffect: |-
@@ -511,7 +510,7 @@ actList:
       actSpeed: 通常
       actTime: メイン
       actCost: C
-      actKey: 「チャリオット」1体
+      actUnit: 「チャリオット」1体
       actTarget: 防壁1体
       actEffect: |-
         効果の内容は「防壁破壊」を参照。
@@ -582,7 +581,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actKey: <交渉> を持つ兵士1体
+      actUnit: <交渉> を持つ兵士1体
       actCost: C
       actTarget: キャラクター1体
       actActCond: 自分の表切札に「交渉」がある
@@ -728,7 +727,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actCost: C
-      actKey: 「策士」1体
+      actUnit: 「策士」1体
       actEffect: |-
         1. ライフの一番上からカードを2枚引き手札に加える。
         2. 手札から1枚選びライフの一番上もしくは一番下に移す。
@@ -758,7 +757,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actKey: <スイッチ> を持つ兵士1体
+      actUnit: <スイッチ> を持つ兵士1体
       actCost: C
       actActCond: 自分の表切札に「スイッチ」がある
       actEffect: |-
@@ -901,7 +900,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actCost: C
-      actKey: 「騎士」1体
+      actUnit: 「騎士」1体
       actTarget: 対戦相手1人
       actEffect: |-
         対象の対戦相手は自分の場にいるキャラクターを1体墓地に移す。
