@@ -668,12 +668,12 @@
                     <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-reunion" data-format=",,プロ,マスター">
-                    <span>再会</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
-                    </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-kill" data-format=",,プロ,マスター">
                     <span>キル</span> <span class="tag tag-default tag-pill pull-right"> <span
+                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-reunion" data-format=",,プロ,マスター">
+                    <span>再会</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-truce" data-format=",,プロ,マスター">
@@ -735,12 +735,12 @@
                     <span>ハンデス</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-force" data-format=",,マスター">
-                    <span>フォース</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-swordRain" data-format=",,マスター">
                     <span>剣の雨</span> <span class="tag tag-default tag-pill pull-right"> <span
+                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                    </span>
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-force" data-format=",,マスター">
+                    <span>フォース</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-recruit" data-format=",,マスター">
@@ -939,7 +939,7 @@
 
                   <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-retreat" data-frame="エクストラ">
                     <span>休戦</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                        class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                     </span>
                   </a>
                 </div>
@@ -1469,7 +1469,7 @@
                       <b><span><span class="club"></span>7</span></b>
                     </span>
                   </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#trump-c8" data-frame="エクストラ">
-                    <span>手札補充</span>
+                    <span>リセット</span>
                     <span class="tag tag-default tag-pill pull-right">
                       <span class="glyphicon glyphicon-star-empty"></span>
                       <b><span><span class="club"></span>8</span></b>
@@ -1542,9 +1542,9 @@
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
-                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード条件</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
-                aria-hidden="true"></span>&nbsp;:&nbsp;コンポーネントキーカード</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;ユニット条件</li>
             <li class="list-group-item"><span class="note-mark"></span>
               :&nbsp;特記事項</li>
           </ul>
@@ -2617,6 +2617,54 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-kill" data-format=",,プロ,マスター">
+
+                  <div class="panel-heading">
+
+                     <span class="act-title">キル</span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span>(速攻魔法)</span>
+                    </small>
+                    <!-- </span> -->
+                    <div class="pull-right">
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span>直接-通常-クイック</span>
+                      </small>  
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="spade"></span>A〜10 を 2枚</span><br>
+                      </small> 
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    
+                     
+                    
+                    <span> （対象）<br></span> <span>兵士1体</span>
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    <hr>
+                    <span>（効果）<br></span>
+                    <span>対象とした兵士を墓地に移す。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="bs-component">
                 <div class="panel panel-default blackpoker-action" id="act-reunion" data-format=",,プロ,マスター">
 
                   <div class="panel-heading">
@@ -2666,54 +2714,6 @@
                         <div class="text-right">ネタバレ娘より</div>
                       </div>
                     </div>
-
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-            <div class="col-lg-4">
-              <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-kill" data-format=",,プロ,マスター">
-
-                  <div class="panel-heading">
-
-                     <span class="act-title">キル</span>
-                    <!-- <span> -->
-                    <small>
-                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
-                    </small>
-                    <!-- </span> -->
-                    <div class="pull-right">
-                      &thinsp; <small>
-                        <span class="time-mark"></span>
-                        <span>直接-通常-クイック</span>
-                      </small>  
-
-
-                    </div>
-                    <div class="text-left">
-                      <small> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span><span class="spade"></span>A〜10 を 2枚</span><br>
-                      </small> 
-
-                    </div>
-
-                  </div>
-                  <div class="panel-body">
-                     
-                    
-                     
-                    
-                    <span> （対象）<br></span> <span>兵士1体</span>
-                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
-                    <hr>
-                    <span>（効果）<br></span>
-                    <span>対象とした兵士を墓地に移す。</span>
-
-                    
 
                   </div>
 
@@ -3425,62 +3425,6 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-force" data-format=",,マスター">
-
-                  <div class="panel-heading">
-
-                     <span class="act-title">フォース</span>
-                    <!-- <span> -->
-                    <small>
-                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(通常魔法)</span>
-                    </small>
-                    <!-- </span> -->
-                    <div class="pull-right">
-                      &thinsp; <small>
-                        <span class="time-mark"></span>
-                        <span>直接-通常-メイン</span>
-                      </small> <span>|</span> <small>
-                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
-<span class="cost-B"></span>
-</span>
-                      </small>
-
-
-                    </div>
-                    <div class="text-left">
-                      <small> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span><span class="heart"></span>A〜10 を 2枚</span><br>
-                      </small> <small> <span>
-                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
-                          <br>
-                        </span>
-                      </small>
-
-                    </div>
-
-                  </div>
-                  <div class="panel-body">
-                     
-                    
-                     
-                    
-                     
-                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
-                    
-                    <span>（効果）<br></span>
-                    <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。<br>その印としてフォグにキーカードを置き、フォースとする。</span>
-
-                    
-
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-            <div class="col-lg-4">
-              <div class="bs-component">
                 <div class="panel panel-default blackpoker-action" id="act-swordRain" data-format=",,マスター">
 
                   <div class="panel-heading">
@@ -3538,6 +3482,62 @@
                         <div class="text-right">平和主義の♣3一般兵より</div>
                       </div>
                     </div>
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-force" data-format=",,マスター">
+
+                  <div class="panel-heading">
+
+                     <span class="act-title">フォース</span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span>(通常魔法)</span>
+                    </small>
+                    <!-- </span> -->
+                    <div class="pull-right">
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span>直接-通常-メイン</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small> <span class="glyphicon glyphicon-star"
+                          aria-hidden="true"></span> <span><span class="heart"></span>A〜10 を 2枚</span><br>
+                      </small> <small> <span>
+                          <span class="note-mark"></span> <span>このアクションはカウンターアクションの対象にならない。</span>
+                          <br>
+                        </span>
+                      </small>
+
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    
+                     
+                    
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    <span>（効果）<br></span>
+                    <span>このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。<br>その印としてフォグにキーカードを置き、フォースとする。</span>
+
+                    
 
                   </div>
 
@@ -4856,7 +4856,7 @@
                     <div class="pull-right">
                       &thinsp; <small>
                         <span class="time-mark"></span>
-                        <span>直接-通常-クイック</span>
+                        <span>直接-即時-クイック</span>
                       </small>  
 
 
@@ -4904,7 +4904,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
+                      <span>(通常魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -5524,7 +5524,7 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>自分の表切札に「防壁追加」がある</span>
+                    <span> （起動条件）<br></span> <span>自分の表切札に「相殺」がある</span>
                     <hr>
                      
                     
@@ -7991,7 +7991,7 @@
                 <div class="panel panel-default blackpoker-action" id="trump-c8" data-frame="エクストラ">
                   <div class="panel-heading">
 
-                     <span class="act-title">手札補充</span>
+                     <span class="act-title">リセット</span>
                     <span> <small>
                         <span>(表切札)</span>
                       </small>
