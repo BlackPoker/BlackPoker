@@ -3,7 +3,8 @@ Scanning dictionary file ../source/_mysetting/mydict.dic....done.
 Scanning input file blackpoker.idx.
 Error: 条件 is no entry in dictionary file in blackpoker.idx, line 6.
 Error: 条件 is no entry in dictionary file in blackpoker.idx, line 22.
-Error: 条件 is no entry in dictionary file in blackpoker.idx, line 43....done (69 entries accepted, 3 rejected).
-69 entries accepted, 3 rejected.
-3 errors, written in blackpoker.ilg.
+Error: 条件 is no entry in dictionary file in blackpoker.idx, line 43.
+Error: 条件 is no entry in dictionary file in blackpoker.idx, line 44....done (69 entries accepted, 4 rejected).
+69 entries accepted, 4 rejected.
+4 errors, written in blackpoker.ilg.
 Nothing written in output file.

@@ -1605,9 +1605,17 @@ BlackPokerは割込み可能なターン制ゲームです。
 \sphinxlineitem{キーカード条件}
 \sphinxAtStartPar
 アクションの核となるカードを示します。
+手札から選びます。
 キーカード条件は★で表記します。
-特に指定がない場合は、手札から選びます。
-兵士など場のカードを指定する場合は、その指定に従って選択してください。
+
+\end{description}
+
+\index{キーユニット条件@\spxentry{キーユニット条件}}\ignorespaces \begin{description}
+\sphinxlineitem{キーユニット条件}
+\sphinxAtStartPar
+アクションの核となるカードを示します。
+場にいる兵士などユニットを指定します。
+キーユニット条件はキーカード条件と同じく★で表記します。
 
 \end{description}
 
@@ -1734,10 +1742,10 @@ S (Sacrifice)
 \\
 \sphinxhline
 \sphinxAtStartPar
-K (KeyDrive)
+C (CharacterDrive)
 &
 \sphinxAtStartPar
-キーカードをドライブする
+キーユニットのキャラクターをドライブする
 \\
 \sphinxbottomrule
 \end{tabulary}
@@ -7888,10 +7896,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} \textless{}スラッシュ\textgreater{} を持つ兵士1体
+\sphinxstylestrong{キーユニット条件:} \textless{}スラッシュ\textgreater{} を持つ兵士1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -8236,10 +8244,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} 「リアニメーター」1体
+\sphinxstylestrong{キーユニット条件:} 「リアニメーター」1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -8471,10 +8479,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} \textless{}激励\textgreater{} を持つ兵士1体
+\sphinxstylestrong{キーユニット条件:} \textless{}激励\textgreater{} を持つ兵士1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -8642,10 +8650,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} \textless{}ファントム\textgreater{} を持つ防壁1体
+\sphinxstylestrong{キーユニット条件:} \textless{}ファントム\textgreater{} を持つ防壁1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -8688,9 +8696,6 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
-
-\sphinxAtStartPar
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
@@ -8698,12 +8703,17 @@ x
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
-
+\begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\item {} 
 \sphinxAtStartPar
-1．自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。
+自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。
 
+\item {} 
 \sphinxAtStartPar
-2．自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
+自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
+
+\end{enumerate}
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex5.30.0
@@ -8889,10 +8899,10 @@ x
 \sphinxstylestrong{タイミング:} メイン
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} 「チャリオット」1体
+\sphinxstylestrong{キーユニット条件:} 「チャリオット」1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
@@ -9084,10 +9094,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} \textless{}交渉\textgreater{} を持つ兵士1体
+\sphinxstylestrong{キーユニット条件:} \textless{}交渉\textgreater{} を持つ兵士1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -9502,10 +9512,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} 「策士」1体
+\sphinxstylestrong{キーユニット条件:} 「策士」1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -9587,10 +9597,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} \textless{}スイッチ\textgreater{} を持つ兵士1体
+\sphinxstylestrong{キーユニット条件:} \textless{}スイッチ\textgreater{} を持つ兵士1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{起動条件:}
@@ -10002,10 +10012,10 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{キーカード条件:} 「騎士」1体
+\sphinxstylestrong{キーユニット条件:} 「騎士」1体
 
 \sphinxAtStartPar
-\sphinxstylestrong{コスト:} K
+\sphinxstylestrong{コスト:} C
 
 \sphinxAtStartPar
 \sphinxstylestrong{対象:}
