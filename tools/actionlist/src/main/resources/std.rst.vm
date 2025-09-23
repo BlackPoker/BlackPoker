@@ -249,7 +249,7 @@ ${nestList.type}
 
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
-        #if(${row.format})
+        #if(${fog.format})
 **フォーマット:**
 
 .. csv-table::
@@ -339,7 +339,7 @@ ${nestList.type}
 
 ${trump.trumpName} (${trump.trumpType})
 ---------------------------------------------------
-        #if(${row.format})
+        #if(${trump.format})
 **フォーマット:**
 
 .. csv-table::

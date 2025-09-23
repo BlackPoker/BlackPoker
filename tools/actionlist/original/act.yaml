@@ -716,7 +716,7 @@ charList:
 fogList:
   - type: 滞留魔法
     fogs:
-    - format: 'lite,std,pro,mast'
+    - format: lite,std,pro,mast
       fogName: アップ
       fogId: upFog
       fogType: 滞留魔法
@@ -725,7 +725,7 @@ fogList:
       fogAbility: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
       since: v8.0
 
-    - format: 'lite,std,pro,mast'
+    - format: lite,std,pro,mast
       fogName: ダウン
       fogId: downFog
       fogType: 滞留魔法
