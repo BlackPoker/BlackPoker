@@ -335,14 +335,14 @@
 \contentsline {subsubsection}{ガイドラインにないケースについて}{168}{subsubsection*.428}%
 \contentsline {subsection}{\numberline {10.2.2}BlackPoker アクション・ルールガイドライン}{169}{subsection.10.2.2}%
 \contentsline {subsubsection}{はじめに}{169}{subsubsection*.438}%
-\contentsline {paragraph}{アクションを追加する際のルール}{169}{paragraph*.439}%
-\contentsline {subsubsection}{アクションの対象は単対象 (必須)}{169}{subsubsection*.440}%
-\contentsline {subsubsection}{キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{170}{subsubsection*.441}%
-\contentsline {subsubsection}{誘発アクションは即時 (推奨)}{170}{subsubsection*.442}%
-\contentsline {subsubsection}{先行1ターン目に確実に勝利できる効果を作らない (必須)}{170}{subsubsection*.443}%
-\contentsline {subsubsection}{誘発\textendash {}メインは同時に2つ以上誘発しないように制限 (必須)}{170}{subsubsection*.444}%
-\contentsline {paragraph}{キャラクターを追加する際のルール}{171}{paragraph*.445}%
-\contentsline {subsubsection}{場のキャラクターは一目でわかるように定義 (必須)}{171}{subsubsection*.446}%
+\contentsline {subsubsection}{アクションを追加する際のルール}{169}{subsubsection*.439}%
+\contentsline {paragraph}{アクションの対象は単対象 (必須)}{169}{paragraph*.440}%
+\contentsline {paragraph}{キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{170}{paragraph*.441}%
+\contentsline {paragraph}{誘発アクションは即時 (推奨)}{170}{paragraph*.442}%
+\contentsline {paragraph}{先行1ターン目に確実に勝利できる効果を作らない (必須)}{170}{paragraph*.443}%
+\contentsline {paragraph}{誘発\textendash {}メインは同時に2つ以上誘発しないように制限 (必須)}{170}{paragraph*.444}%
+\contentsline {subsubsection}{キャラクターを追加する際のルール}{171}{subsubsection*.445}%
+\contentsline {paragraph}{場のキャラクターは一目でわかるように定義 (必須)}{171}{paragraph*.446}%
 \contentsline {chapter}{\numberline {第11章}変更履歴}{173}{chapter.11}%
 \contentsline {section}{\numberline {11.1}第8版の主な変更点}{173}{section.11.1}%
 \contentsline {subsection}{\numberline {11.1.1}アクションの定義の変更}{173}{subsection.11.1.1}%

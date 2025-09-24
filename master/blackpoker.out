@@ -336,14 +336,14 @@
 \BOOKMARK [3][-]{subsubsection*.428}{ガイドラインにないケースについて}{subsection.10.2.1}% 335
 \BOOKMARK [2][-]{subsection.10.2.2}{BlackPoker アクション・ルールガイドライン}{section.10.2}% 336
 \BOOKMARK [3][-]{subsubsection*.438}{はじめに}{subsection.10.2.2}% 337
-\BOOKMARK [4][-]{paragraph*.439}{アクションを追加する際のルール}{subsubsection*.438}% 338
-\BOOKMARK [3][-]{subsubsection*.440}{アクションの対象は単対象 \(必須\)}{subsection.10.2.2}% 339
-\BOOKMARK [3][-]{subsubsection*.441}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsection.10.2.2}% 340
-\BOOKMARK [3][-]{subsubsection*.442}{誘発アクションは即時 \(推奨\)}{subsection.10.2.2}% 341
-\BOOKMARK [3][-]{subsubsection*.443}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsection.10.2.2}% 342
-\BOOKMARK [3][-]{subsubsection*.444}{誘発--メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsection.10.2.2}% 343
-\BOOKMARK [4][-]{paragraph*.445}{キャラクターを追加する際のルール}{subsubsection*.444}% 344
-\BOOKMARK [3][-]{subsubsection*.446}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsection.10.2.2}% 345
+\BOOKMARK [3][-]{subsubsection*.439}{アクションを追加する際のルール}{subsection.10.2.2}% 338
+\BOOKMARK [4][-]{paragraph*.440}{アクションの対象は単対象 \(必須\)}{subsubsection*.439}% 339
+\BOOKMARK [4][-]{paragraph*.441}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.439}% 340
+\BOOKMARK [4][-]{paragraph*.442}{誘発アクションは即時 \(推奨\)}{subsubsection*.439}% 341
+\BOOKMARK [4][-]{paragraph*.443}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.439}% 342
+\BOOKMARK [4][-]{paragraph*.444}{誘発--メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.439}% 343
+\BOOKMARK [3][-]{subsubsection*.445}{キャラクターを追加する際のルール}{subsection.10.2.2}% 344
+\BOOKMARK [4][-]{paragraph*.446}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.445}% 345
 \BOOKMARK [0][-]{chapter.11}{変更履歴}{}% 346
 \BOOKMARK [1][-]{section.11.1}{第8版の主な変更点}{chapter.11}% 347
 \BOOKMARK [2][-]{subsection.11.1.1}{アクションの定義の変更}{section.11.1}% 348
