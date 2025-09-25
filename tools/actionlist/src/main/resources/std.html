@@ -538,6 +538,20 @@
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
             </li>
           </ul>
+          
+    <h5><small>グループフィルター</small></h5>
+    <select class="form-control" id="group-filter-1">
+      <option value="">指定なし</option>
+      <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+    </select>
+
+    or
+
+    <select class="form-control" id="group-filter-2">
+      <option value="">指定なし</option>
+      <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+    </select>
+
         </div>
         <div class="modal-body">
           <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span
@@ -794,21 +808,21 @@
                     </div>
                     <div class="text-left">
                       <small th:if="${not #strings.isEmpty(row.actKey)}">
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span>
                         <br>
-                      </small> 
+                      </small>
                       <small th:if="${not #strings.isEmpty(row.actUnit)}">
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span th:utext="${#sfn.cnvHtml(row.actUnit)}"></span>
                         <br>
                       </small>
                       <small th:if="${not #strings.isEmpty(row.actNote)}">
-                          <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                            <span class="note-mark"></span>
-                            <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                            <br>
-                          </span>
+                        <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
+                          <span class="note-mark"></span>
+                          <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                          <br>
+                        </span>
                       </small>
                     </div>
 
