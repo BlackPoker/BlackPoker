@@ -10,6 +10,7 @@
   <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
 
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lusitana|Roboto+Slab" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Londrina+Sketch|Monofett|Ribeye+Marrow" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Arbutus+Slab|Monofett" rel="stylesheet">
@@ -35,6 +36,8 @@
 
     body {
       padding-top: 50px;
+      font-family: 'Open Sans', sans-serif;
+      color: #000000;
     }
 
     body hr {
@@ -1143,6 +1146,15 @@
       }
 
       // ------------------------------------
+      // 追加: "指定なし" を空文字に正規化する関数（フィルター無効化）
+      // ------------------------------------
+      function normalizeSelected(text) {
+        if (!text) return "";
+        var t = ("" + text).trim();
+        return (t === "指定なし" || t.toLowerCase() === "none") ? "" : t;
+      }
+
+      // ------------------------------------
       // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
       // ------------------------------------
       function setActivePill(pillGroupSelector, btnClass, text) {
@@ -1156,11 +1168,11 @@
 
       // 初期値（active のボタンから取得）
       selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
-      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
+      selectedFrame  = normalizeSelected($('.nav.nav-pills li.active a.frame-btn').text().trim()); // ★ 正規化
 
       // URLパラメータを取得
       var urlFormat = getQueryParam('format'); // 例: ?format=スタンダード
-      var urlFrame = getQueryParam('frame');  // 例: ?frame=パック
+      var urlFrame  = getQueryParam('frame');  // 例: ?frame=パック
 
       // もしURLパラメータに指定があれば、変数を上書きし .active を付け替え
       if (urlFormat) {
@@ -1169,16 +1181,17 @@
       }
 
       if (urlFrame) {
-        selectedFrame = urlFrame;
-        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
+        // "指定なし" を選ばれたら空文字に変換してフィルター無効化
+        selectedFrame = normalizeSelected(urlFrame); // ★ 正規化
+        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', urlFrame);
       }
 
       function filterItems(initFlg) {
         $('.blackpoker-action').each(function () {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
-          var frameAttr = ($el.data('frame') || "").trim();
-          var typeAttr = ($el.data('type') || "").trim();
+          var frameAttr  = ($el.data('frame')  || "").trim();
+          var typeAttr   = ($el.data('type')   || "").trim();
           var shouldShow = true;
 
           // フォーマットフィルターの適用
@@ -1187,7 +1200,7 @@
             shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
 
-          // フレームフィルターの適用
+          // フレームフィルターの適用（selectedFrame が空文字なら無効）
           if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
             var frames = frameAttr.split(',');
             shouldShow = frames.indexOf(selectedFrame) !== -1;
@@ -1261,7 +1274,8 @@
 
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
-        selectedFrame = $(this).text().trim();
+        // ★ "指定なし" を空文字へ正規化（→ フィルター無効化）
+        selectedFrame = normalizeSelected($(this).text().trim());
         // グループフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
