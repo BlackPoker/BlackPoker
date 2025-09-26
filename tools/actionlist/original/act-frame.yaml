@@ -1056,7 +1056,7 @@ trumpData:
   devNote: |-
     * v8.1 「立ち上がる兵」を再集録
 trumpList:
-  - type: ♠スペード
+  - type: 切札♠A
     trumps:
     - frame: |-
         ・エクストラ
@@ -1074,7 +1074,9 @@ trumpList:
       image: tarot/Pictorial_Key_to_the_Tarot_Swords_01
       devNote: |-
         「弱者の反撃」で追加された。
-    
+
+  - type: 切札♠2
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: スラッシュ
@@ -1089,6 +1091,8 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
+  - type: 切札♠3
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: ドレイン
@@ -1103,6 +1107,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♠4
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 威圧
@@ -1117,6 +1123,8 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
+  - type: 切札♠5
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 蘇生
@@ -1131,6 +1139,8 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
+  - type: 切札♠7
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 瞬殺
@@ -1145,6 +1155,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♠J
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: リアニメーター
@@ -1159,6 +1171,8 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
+  - type: 切札♠K
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 魔王
@@ -1173,7 +1187,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: ♡ハート
+  - type: 切札♡2
     trumps:
     - frame: |-
         ・エクストラ
@@ -1189,6 +1203,8 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
+  - type: 切札♡3
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 激励
@@ -1203,6 +1219,8 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
+  - type: 切札♡4
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 休戦
@@ -1217,6 +1235,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♡5
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 追撃
@@ -1231,6 +1251,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♡7
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: ファントム
@@ -1245,6 +1267,8 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
+  - type: 切札♡8
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 救済
@@ -1259,6 +1283,8 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
+  - type: 切札♡J
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: チャリオット
@@ -1273,6 +1299,8 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
+  - type: 切札♡K
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 巨人
@@ -1287,7 +1315,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: ♢ダイヤ
+  - type: 切札♢A
     trumps:
     - frame: |-
         ・エクストラ
@@ -1303,6 +1331,8 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
+  - type: 切札♢3
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 交渉
@@ -1317,6 +1347,8 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
+  - type: 切札♢4
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 相殺
@@ -1331,6 +1363,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♢5
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 喪失
@@ -1345,6 +1379,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♢8
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 修繕
@@ -1359,6 +1395,8 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
+  - type: 切札♢9
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 充足
@@ -1373,6 +1411,8 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
+  - type: 切札♢J
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 策士
@@ -1387,7 +1427,7 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
-  - type: ♣クラブ
+  - type: 切札♣4
     trumps:
     - frame: |-
         ・エクストラ
@@ -1403,6 +1443,8 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
+  - type: 切札♣5
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 内乱
@@ -1417,6 +1459,8 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
+  - type: 切札♣7
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 手札補充
@@ -1431,6 +1475,8 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
+  - type: 切札♣8
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: リセット
@@ -1445,6 +1491,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♣9
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 要塞
@@ -1459,6 +1507,8 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
+  - type: 切札♣10
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 悪あがき
@@ -1473,6 +1523,8 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
+  - type: 切札♣J
+    trumps:
     - frame: |-
         ・エクストラ
       trumpName: 騎士
