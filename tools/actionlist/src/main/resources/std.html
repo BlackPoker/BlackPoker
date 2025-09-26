@@ -1076,6 +1076,9 @@
 
   <script type="text/javascript">
     $(function () {
+      // グループフィルターの状態を保持する変数
+      var selectedGroupFilter1 = "";
+      var selectedGroupFilter2 = "";
 
       $('#modal_sidebar').on('show.bs.modal', function (event) {
         // メニューが開く際に表示しているリストとずれている場合、補正
@@ -1176,36 +1179,32 @@
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
           var typeAttr = ($el.data('type') || "").trim();
+          var shouldShow = true;
 
-          // data-formatが設定されている場合は、フォーマットフィルタを適用
-          if (formatAttr !== "") {
-            if (selectedFormat && selectedFormat !== "") {
-              var formats = formatAttr.split(',');
-              if (formats.indexOf(selectedFormat) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              $el.show();
-            }
+          // フォーマットフィルターの適用
+          if (formatAttr !== "" && selectedFormat && selectedFormat !== "") {
+            var formats = formatAttr.split(',');
+            shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
-          // data-formatがない（＝空）の場合、data-frameがある場合のみフレームフィルタを適用
-          else if (frameAttr !== "") {
-            if (selectedFrame && selectedFrame !== "") {
-              var frames = frameAttr.split(',');
-              if (frames.indexOf(selectedFrame) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              $el.show();
-            }
+
+          // フレームフィルターの適用
+          if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
+            var frames = frameAttr.split(',');
+            shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
-          // どちらの属性もない場合は表示
-          else {
+
+          // グループフィルター1とグループフィルター2のOR条件による適用
+          if (shouldShow && typeAttr !== "" && 
+              (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
+            // いずれかのフィルターに一致する場合に表示
+            shouldShow = (selectedGroupFilter1 === typeAttr) || (selectedGroupFilter2 === typeAttr);
+          }
+
+          // 表示/非表示の設定
+          if (shouldShow) {
             $el.show();
+          } else {
+            $el.hide();
           }
         });
 
@@ -1252,6 +1251,10 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
+        // グループフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
         updateHeader();  // ヘッダー表示の更新
         filterItems();
       });
@@ -1259,7 +1262,23 @@
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
         selectedFrame = $(this).text().trim();
+        // グループフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
         updateHeader();
+        filterItems();
+      });
+
+      // グループフィルター1の変更イベント
+      $('#group-filter-1').on('change', function () {
+        selectedGroupFilter1 = $(this).val();
+        filterItems();
+      });
+
+      // グループフィルター2の変更イベント
+      $('#group-filter-2').on('change', function () {
+        selectedGroupFilter2 = $(this).val();
         filterItems();
       });
 
