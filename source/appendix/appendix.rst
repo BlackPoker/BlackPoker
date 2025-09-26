@@ -54,7 +54,7 @@ PDF
 .. _actionlist-extra:
 
 ------------------------------
-エクストラフレーム
+マスター+エクストラ
 ------------------------------
 URL
     https://blackpoker.github.io/BlackPoker/actionlist/html/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC&frame=%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9
