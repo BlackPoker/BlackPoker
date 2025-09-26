@@ -564,6 +564,32 @@
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
             </li>
           </ul>
+          
+    <h5><small>グループフィルター</small></h5>
+    <select class="form-control" id="group-filter-1">
+      <option value="">指定なし</option>
+      <option value="基本">基本</option>
+      <option value="召喚">召喚</option>
+      <option value="速攻魔法">速攻魔法</option>
+      <option value="滞留魔法">滞留魔法</option>
+      <option value="通常魔法">通常魔法</option>
+      <option value="兵士">兵士</option>
+      <option value="防壁">防壁</option>
+    </select>
+
+    <span aria-label="または">または</span>
+
+    <select class="form-control" id="group-filter-2">
+      <option value="">指定なし</option>
+      <option value="基本">基本</option>
+      <option value="召喚">召喚</option>
+      <option value="速攻魔法">速攻魔法</option>
+      <option value="滞留魔法">滞留魔法</option>
+      <option value="通常魔法">通常魔法</option>
+      <option value="兵士">兵士</option>
+      <option value="防壁">防壁</option>
+    </select>
+
         </div>
         <div class="modal-body">
           <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span
@@ -582,31 +608,31 @@
                 <span class="blackpoker-type-group-title">基本</span>
                 <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-end" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-end" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>エンド</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-charge" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-charge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>チャージ</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>誘発-即時-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-draw" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-draw" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>ドロー</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-attack" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-attack" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>アタック</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-block" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-block" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>ブロック</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-damageJudge" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-damageJudge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>ダメージ判定</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
                     <span>世代交代</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>誘発-即時-クイック</span></b>
                     </span>
@@ -617,23 +643,23 @@
                 <span class="blackpoker-type-group-title">召喚</span>
                 <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-setBulwark" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-setBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
                     <span>防壁設置</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-即時-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
                     <span>兵士召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsHero" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsHero" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
                     <span>英雄召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsAce" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsAce" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
                     <span>エース召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
                     <span>装備</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
@@ -644,23 +670,23 @@
                 <span class="blackpoker-type-group-title">速攻魔法</span>
                 <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
                     <span>アップ</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
                     <span>ダウン</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
                     <span>ツイスト</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
                     <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
                     <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                     </span>
@@ -671,11 +697,11 @@
                 <span class="blackpoker-type-group-title">通常魔法</span>
                 <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
                     <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
                     <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span
                         class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                     </span>
@@ -690,13 +716,13 @@
               <div class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title">兵士</span>
                 <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-soldier" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-soldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                     <span>一般兵</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-hero" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-hero" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                     <span>英雄</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-ace" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-ace" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                     <span>エース</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                     <span>装備兵</span>
                   </a>
                 </div>
@@ -704,7 +730,7 @@
               <div class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title">防壁</span>
                 <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-bulwark" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-bulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="防壁">
                     <span>防壁</span>
                   </a>
                 </div>
@@ -717,9 +743,9 @@
               <div class="blackpoker-type-group">
                 <span class="blackpoker-type-group-title">滞留魔法</span>
                 <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-upFog" data-format="ライト,スタンダード,プロ,マスター">
+                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-upFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
                     <span>アップ</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-downFog" data-format="ライト,スタンダード,プロ,マスター">
+                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-downFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
                     <span>ダウン</span>
                   </a>
                 </div>
@@ -864,7 +890,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-end" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-end" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -884,7 +910,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -914,7 +940,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-charge" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-charge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -934,7 +960,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -961,7 +987,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-draw" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-draw" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -981,7 +1007,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1010,7 +1036,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-attack" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-attack" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -1030,7 +1056,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1060,7 +1086,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-block" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-block" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -1080,7 +1106,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1109,7 +1135,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-damageJudge" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-damageJudge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -1129,7 +1155,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1163,7 +1189,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
 
                   <div class="panel-heading">
 
@@ -1183,7 +1209,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1215,7 +1241,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-setBulwark" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-setBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
 
                   <div class="panel-heading">
 
@@ -1240,7 +1266,7 @@
 
                     </div>
                     <div class="text-left">
-                       
+                      
                       
                       
                     </div>
@@ -1275,7 +1301,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
 
                   <div class="panel-heading">
 
@@ -1302,10 +1328,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span>2〜10</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1340,7 +1366,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-summonsHero" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-summonsHero" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
 
                   <div class="panel-heading">
 
@@ -1368,10 +1394,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span>J〜K</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1406,7 +1432,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-summonsAce" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-summonsAce" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
 
                   <div class="panel-heading">
 
@@ -1432,10 +1458,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span>A</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1474,7 +1500,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
 
                   <div class="panel-heading">
 
@@ -1501,10 +1527,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span>A〜K</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1544,7 +1570,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-up" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
 
                   <div class="panel-heading">
 
@@ -1568,10 +1594,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="heart"></span>A〜10</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1598,7 +1624,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-down" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
 
                   <div class="panel-heading">
 
@@ -1622,10 +1648,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="spade"></span>A〜10</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1652,7 +1678,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-twist" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
 
                   <div class="panel-heading">
 
@@ -1676,10 +1702,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="diam"></span>A〜10</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1706,7 +1732,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-counter" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
 
                   <div class="panel-heading">
 
@@ -1730,10 +1756,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="club"></span>A〜10</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1770,7 +1796,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-search" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
 
                   <div class="panel-heading">
 
@@ -1791,10 +1817,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span>Joker</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1834,7 +1860,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
 
                   <div class="panel-heading">
 
@@ -1857,10 +1883,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="heart"></span>A〜K と <span class="diam"></span>A〜K</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1895,7 +1921,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-throwing" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
 
                   <div class="panel-heading">
 
@@ -1918,10 +1944,10 @@
                     </div>
                     <div class="text-left">
                       <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span> 
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
                         <span><span class="spade"></span>A〜K と <span class="club"></span>A〜K</span>
                         <br>
-                      </small> 
+                      </small>
                       
                       
                     </div>
@@ -1986,7 +2012,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="char-soldier" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="char-soldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                   <div class="panel-heading">
 
                      <span class="act-title">一般兵</span>
@@ -2022,7 +2048,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="char-hero" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="char-hero" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                   <div class="panel-heading">
 
                      <span class="act-title">英雄</span>
@@ -2058,7 +2084,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="char-ace" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="char-ace" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" href="#fla_ace">
@@ -2106,7 +2132,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
                   <div class="panel-heading">
 
                      <span class="act-title">装備兵</span>
@@ -2147,7 +2173,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="char-bulwark" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="char-bulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="防壁">
                   <div class="panel-heading">
 
                      <span class="act-title">防壁</span>
@@ -2194,7 +2220,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="fog-upFog" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="fog-upFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
                   <div class="panel-heading">
 
                      <span class="act-title">アップ</span>
@@ -2222,7 +2248,7 @@
             <div class="col-lg-6">
               <div class="bs-component">
 
-                <div class="panel panel-default blackpoker-action" id="fog-downFog" data-format="ライト,スタンダード,プロ,マスター">
+                <div class="panel panel-default blackpoker-action" id="fog-downFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
                   <div class="panel-heading">
 
                      <span class="act-title">ダウン</span>
@@ -2271,6 +2297,9 @@
 
   <script type="text/javascript">
     $(function () {
+      // グループフィルターの状態を保持する変数
+      var selectedGroupFilter1 = "";
+      var selectedGroupFilter2 = "";
 
       $('#modal_sidebar').on('show.bs.modal', function (event) {
         // メニューが開く際に表示しているリストとずれている場合、補正
@@ -2322,7 +2351,7 @@
 
 
       // ------------------------------------
-      // 1) URLパラメータから format / frame を取得する関数
+      // 1) URLパラメータから format / frame / type を取得する関数
       // ------------------------------------
       function getQueryParam(name) {
         // 簡易的な例：URLSearchParams が使える環境ならそちらでもOK
@@ -2366,42 +2395,37 @@
       }
 
       function filterItems(initFlg) {
-        // $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
         $('.blackpoker-action').each(function () {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
+          var typeAttr = ($el.data('type') || "").trim();
+          var shouldShow = true;
 
-          // data-formatが設定されている場合は、フォーマットフィルタを適用
-          if (formatAttr !== "") {
-            if (selectedFormat && selectedFormat !== "") {
-              var formats = formatAttr.split(',');
-              if (formats.indexOf(selectedFormat) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              // 選択されたフォーマットがなければ表示
-              $el.show();
-            }
+          // フォーマットフィルターの適用
+          if (formatAttr !== "" && selectedFormat && selectedFormat !== "") {
+            var formats = formatAttr.split(',');
+            shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
-          // data-formatがない（＝空）の場合、data-frameがある場合のみフレームフィルタを適用
-          else if (frameAttr !== "") {
-            if (selectedFrame && selectedFrame !== "") {
-              var frames = frameAttr.split(',');
-              if (frames.indexOf(selectedFrame) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              $el.show();
-            }
+
+          // フレームフィルターの適用
+          if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
+            var frames = frameAttr.split(',');
+            shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
-          // どちらの属性もない場合は表示
-          else {
+
+          // グループフィルター1とグループフィルター2のOR条件による適用
+          if (shouldShow && typeAttr !== "" && 
+              (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
+            // いずれかのフィルターに一致する場合に表示
+            shouldShow = (selectedGroupFilter1 === typeAttr) || (selectedGroupFilter2 === typeAttr);
+          }
+
+          // 表示/非表示の設定
+          if (shouldShow) {
             $el.show();
+          } else {
+            $el.hide();
           }
         });
 
@@ -2409,7 +2433,6 @@
         $('.blackpoker-type-group').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-action');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
@@ -2424,7 +2447,6 @@
         $('.blackpoker-section').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-type-group-title');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
@@ -2450,14 +2472,34 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
-        updateHeader();  // ヘッダー表示の更新（前回の例参照）
+        // グループフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
+        updateHeader();  // ヘッダー表示の更新
         filterItems();
       });
 
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
         selectedFrame = $(this).text().trim();
+        // グループフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
         updateHeader();
+        filterItems();
+      });
+
+      // グループフィルター1の変更イベント
+      $('#group-filter-1').on('change', function () {
+        selectedGroupFilter1 = $(this).val();
+        filterItems();
+      });
+
+      // グループフィルター2の変更イベント
+      $('#group-filter-2').on('change', function () {
+        selectedGroupFilter2 = $(this).val();
         filterItems();
       });
 
