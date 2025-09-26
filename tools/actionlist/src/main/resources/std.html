@@ -522,7 +522,7 @@
 
           <h5><small>フレーム</small></h5>
           <ul class="nav nav-pills">
-            <li class="active">
+            <li>
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
             </li>
             <li>
@@ -537,23 +537,23 @@
             <li>
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">ストラテジー</a>
             </li>
-            <li>
+            <li class="active">
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
             </li>
           </ul>
-          
-    <h5><small>グループフィルター</small></h5>
-    <select class="form-control" id="group-filter-1">
-      <option value="">指定なし</option>
-      <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
-    </select>
 
-    <span aria-label="または">または</span>
+          <h5><small>グループフィルター</small></h5>
+          <select class="form-control" id="group-filter-1">
+            <option value="">指定なし</option>
+            <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+          </select>
 
-    <select class="form-control" id="group-filter-2">
-      <option value="">指定なし</option>
-      <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
-    </select>
+          <span aria-label="または">または</span>
+
+          <select class="form-control" id="group-filter-2">
+            <option value="">指定なし</option>
+            <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+          </select>
 
         </div>
         <div class="modal-body">
@@ -568,84 +568,117 @@
 
             <!-- actionlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">アクションリスト</h5>
-              <div th:each="actList:${actList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(actList.type)}"></span>
-                <div class="list-group">
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-actions-section" aria-expanded="true" role="button">
+                  アクションリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-actions-section" class="collapse in">
 
-                  <a th:each="row : ${actList.acts}" th:attr="
+                <div th:each="actList:${actList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(actList.type)}"></span>
+                  <div class="list-group">
+
+                    <a th:each="row : ${actList.acts}" th:attr="
                     href='#act-'+${row.actId},
                     data-format=${#sfn.formatDataFormat(row.format)},
                     data-frame=${#sfn.formatDataFrame(row.frame)},
                     data-type=${actList.type}"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span
-                          th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
-                    </span>
-                  </a>
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span
+                            th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
+
             </div>
 
             <!-- characterlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">キャラクターリスト</h5>
-              <div th:each="charList:${charList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(charList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${charList.chars}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-char-section" aria-expanded="true" role="button">
+                  キャラクターリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-char-section" class="collapse in">
+
+                <div th:each="charList:${charList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(charList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${charList.chars}" th:attr="
                     href='#char-'+${row.charId},
                     data-format=${#sfn.formatDataFormat(row.format)},
                     data-frame=${#sfn.formatDataFrame(row.frame)},
                     data-type=${charList.type}"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.charName}"></span>
-                  </a>
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.charName}"></span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- foglist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">フォグリスト</h5>
-              <div th:each="fogList:${fogList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(fogList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${fogList.fogs}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-fog-section" aria-expanded="true" role="button">
+                  フォグリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-fog-section" class="collapse in">
+
+                <div th:each="fogList:${fogList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(fogList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${fogList.fogs}" th:attr="
                     href='#fog-'+${row.fogId},
                     data-format=${#sfn.formatDataFormat(row.format)},
                     data-frame=${#sfn.formatDataFrame(row.frame)},
                     data-type=${fogList.type}"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.fogName}"></span>
-                  </a>
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.fogName}"></span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- trumplist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">切札リスト</h5>
-              <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(trumpList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${trumpList.trumps}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-trump-section" aria-expanded="true" role="button">
+                  切札リスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-trump-section" class="collapse in">
+
+                <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(trumpList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${trumpList.trumps}" th:attr="
                     href='#trump-'+${row.trumpId},
                     data-format=${#sfn.formatDataFormat(row.format)},
                     data-frame=${#sfn.formatDataFrame(row.frame)},
                     data-type=${trumpList.type}"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.trumpName}"></span>
-                    <span class="tag tag-default tag-pill pull-right">
-                      <span class="glyphicon glyphicon-star-empty"></span>
-                      <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
-                    </span>
-                  </a>
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.trumpName}"></span>
+                      <span class="tag tag-default tag-pill pull-right">
+                        <span class="glyphicon glyphicon-star-empty"></span>
+                        <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1146,15 +1179,6 @@
       }
 
       // ------------------------------------
-      // 追加: "指定なし" を空文字に正規化する関数（フィルター無効化）
-      // ------------------------------------
-      function normalizeSelected(text) {
-        if (!text) return "";
-        var t = ("" + text).trim();
-        return (t === "指定なし" || t.toLowerCase() === "none") ? "" : t;
-      }
-
-      // ------------------------------------
       // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
       // ------------------------------------
       function setActivePill(pillGroupSelector, btnClass, text) {
@@ -1168,11 +1192,11 @@
 
       // 初期値（active のボタンから取得）
       selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
-      selectedFrame  = normalizeSelected($('.nav.nav-pills li.active a.frame-btn').text().trim()); // ★ 正規化
+      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
 
       // URLパラメータを取得
       var urlFormat = getQueryParam('format'); // 例: ?format=スタンダード
-      var urlFrame  = getQueryParam('frame');  // 例: ?frame=パック
+      var urlFrame = getQueryParam('frame');  // 例: ?frame=パック
 
       // もしURLパラメータに指定があれば、変数を上書きし .active を付け替え
       if (urlFormat) {
@@ -1181,8 +1205,7 @@
       }
 
       if (urlFrame) {
-        // "指定なし" を選ばれたら空文字に変換してフィルター無効化
-        selectedFrame = normalizeSelected(urlFrame); // ★ 正規化
+        selectedFrame = urlFrame;
         setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', urlFrame);
       }
 
@@ -1190,8 +1213,8 @@
         $('.blackpoker-action').each(function () {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
-          var frameAttr  = ($el.data('frame')  || "").trim();
-          var typeAttr   = ($el.data('type')   || "").trim();
+          var frameAttr = ($el.data('frame') || "").trim();
+          var typeAttr = ($el.data('type') || "").trim();
           var shouldShow = true;
 
           // フォーマットフィルターの適用
@@ -1200,15 +1223,15 @@
             shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
 
-          // フレームフィルターの適用（selectedFrame が空文字なら無効）
+          // フレームフィルターの適用
           if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
             var frames = frameAttr.split(',');
             shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
 
           // グループフィルター1とグループフィルター2のOR条件による適用
-          if (shouldShow && typeAttr !== "" && 
-              (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
+          if (shouldShow && typeAttr !== "" &&
+            (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
             // いずれかのフィルターに一致する場合に表示
             shouldShow = (selectedGroupFilter1 === typeAttr) || (selectedGroupFilter2 === typeAttr);
           }
@@ -1229,9 +1252,11 @@
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-type-group-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-type-group-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
@@ -1243,9 +1268,11 @@
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-section-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-section-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
@@ -1274,8 +1301,7 @@
 
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
-        // ★ "指定なし" を空文字へ正規化（→ フィルター無効化）
-        selectedFrame = normalizeSelected($(this).text().trim());
+        selectedFrame = $(this).text().trim();
         // グループフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";

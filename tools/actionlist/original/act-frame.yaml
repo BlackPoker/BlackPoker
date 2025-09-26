@@ -130,7 +130,7 @@ actList:
       actEffect: |-
         対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。
 
-  - type: 切札♠A
+  - type: 切札♠A 革命
     acts:
     - frame: |-
         ・エクストラ
@@ -147,7 +147,7 @@ actList:
       since: ex4.14.0
       update: v8.2
 
-  - type: 切札♠2
+  - type: 切札♠2 スラッシュ
     acts:
     - frame: |-
         ・エクストラ
@@ -166,7 +166,7 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-  - type: 切札♠3
+  - type: 切札♠3 ドレイン
     acts:
     - frame: |-
         ・エクストラ
@@ -183,7 +183,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♠4
+  - type: 切札♠4 威圧
     acts:
     - frame: |-
         ・エクストラ
@@ -200,7 +200,7 @@ actList:
       since: ex4.18.0
       update: v8.2
 
-  - type: 切札♠5
+  - type: 切札♠5 蘇生
     acts:
     - frame: |-
         ・エクストラ
@@ -217,7 +217,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♠7
+  - type: 切札♠7 瞬殺
     acts:
     - frame: |-
         ・エクストラ
@@ -234,7 +234,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♠J
+  - type: 切札♠J リアニメーター
     acts:
     - frame: |-
         ・エクストラ
@@ -299,7 +299,7 @@ actList:
       actEffect: |-
         墓地から♠Jを1枚選び、自分の表切札として置く。
 
-  - type: 切札♠K
+  - type: 切札♠K 魔王
     acts:
     - frame: |-
         ・エクストラ
@@ -336,7 +336,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡2
+  - type: 切札♡2 援軍
     acts:
     - frame: |-
         ・エクストラ
@@ -355,7 +355,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡3
+  - type: 切札♡3 激励
     acts:
     - frame: |-
         ・エクストラ
@@ -374,7 +374,7 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-  - type: 切札♡4
+  - type: 切札♡4 休戦
     acts:
     - frame: |-
         ・エクストラ
@@ -393,7 +393,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♡5
+  - type: 切札♡5 追撃
     acts:
     - frame: |-
         ・エクストラ
@@ -413,7 +413,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♡7
+  - type: 切札♡7 ファントム
     acts:
     - frame: |-
         ・エクストラ
@@ -447,7 +447,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♡8
+  - type: 切札♡8 救済
     acts:
     - frame: |-
         ・エクストラ
@@ -465,7 +465,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♡J
+  - type: 切札♡J チャリオット
     acts:
     - frame: |-
         ・エクストラ
@@ -530,7 +530,7 @@ actList:
       actEffect: |-
         墓地から♡Jを1枚選び、自分の表切札として置く。
 
-  - type: 切札♡K
+  - type: 切札♡K 巨人
     acts:
     - frame: |-
         ・エクストラ
@@ -552,7 +552,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♢A
+  - type: 切札♢A 防壁追加
     acts:
     - frame: |-
         ・エクストラ
@@ -571,7 +571,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♢3
+  - type: 切札♢3 交渉
     acts:
     - frame: |-
         ・エクストラ
@@ -590,7 +590,7 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-  - type: 切札♢4
+  - type: 切札♢4 相殺
     acts:
     - frame: |-
         ・エクストラ
@@ -610,7 +610,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♢5
+  - type: 切札♢5 喪失
     acts:
     - frame: |-
         ・エクストラ
@@ -627,7 +627,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♢8
+  - type: 切札♢8 修繕
     acts:
     - frame: |-
         ・エクストラ
@@ -648,7 +648,7 @@ actList:
       since: ex4.14.0
       update: v8.2
 
-  - type: 切札♢9
+  - type: 切札♢9 充足
     acts:
     - frame: |-
         ・エクストラ
@@ -680,7 +680,7 @@ actList:
       since: ex4.18.0
       update: v8.2
 
-  - type: 切札♢J
+  - type: 切札♢J 策士
     acts:
     - frame: |-
         ・エクストラ
@@ -747,7 +747,7 @@ actList:
       actEffect: |-
         墓地から♢Jを1枚選び、自分の表切札として置く。
 
-  - type: 切札♣4
+  - type: 切札♣4 スイッチ
     acts:
     - frame: |-
         ・エクストラ
@@ -766,7 +766,7 @@ actList:
       since: ex3.4.0
       update: v8.1
 
-  - type: 切札♣5
+  - type: 切札♣5 内乱
     acts:
     - frame: |-
         ・エクストラ
@@ -801,7 +801,7 @@ actList:
       since: ex4.14.0
       update: v8.2
 
-  - type: 切札♣7
+  - type: 切札♣7 手札補充
     acts:
     - frame: |-
         ・エクストラ
@@ -818,7 +818,7 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♣8
+  - type: 切札♣8 リセット
     acts:
     - frame: |-
         ・エクストラ
@@ -837,7 +837,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♣10
+  - type: 切札♣10 悪あがき
     acts:
     - frame: |-
         ・エクストラ
@@ -855,7 +855,7 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♣J
+  - type: 切札♣J 騎士
     acts:
     - frame: |-
         ・エクストラ
@@ -921,7 +921,7 @@ actList:
         墓地から♣Jを1枚選び、自分の表切札として置く。
 
 charList:
-  - type: 切札♠J
+  - type: 切札♠J リアニメーター
     chars:
     - frame: |-
         ・エクストラ
@@ -938,7 +938,7 @@ charList:
       since: ex4.22.0
       update: v8.2
 
-  - type: 切札♠K
+  - type: 切札♠K 魔王
     chars:
     - frame: |-
         ・エクストラ
@@ -957,7 +957,7 @@ charList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡J
+  - type: 切札♡J チャリオット
     chars:
     - frame: |-
         ・エクストラ
@@ -974,7 +974,7 @@ charList:
       since: ex4.22.0
       update: v8.2
 
-  - type: 切札♡K
+  - type: 切札♡K 巨人
     chars:
     - frame: |-
         ・エクストラ
@@ -995,7 +995,7 @@ charList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♢J
+  - type: 切札♢J 策士
     chars:
     - frame: |-
         ・エクストラ
@@ -1012,7 +1012,7 @@ charList:
       since: ex4.22.0
       update: v8.2
 
-  - type: 切札♣J
+  - type: 切札♣J 騎士
     chars:
     - frame: |-
         ・エクストラ
@@ -1056,7 +1056,7 @@ trumpData:
   devNote: |-
     * v8.1 「立ち上がる兵」を再集録
 trumpList:
-  - type: 切札♠A
+  - type: 切札♠A 革命
     trumps:
     - frame: |-
         ・エクストラ
@@ -1075,7 +1075,7 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
-  - type: 切札♠2
+  - type: 切札♠2 スラッシュ
     trumps:
     - frame: |-
         ・エクストラ
@@ -1091,7 +1091,7 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
-  - type: 切札♠3
+  - type: 切札♠3 ドレイン
     trumps:
     - frame: |-
         ・エクストラ
@@ -1107,7 +1107,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♠4
+  - type: 切札♠4 威圧
     trumps:
     - frame: |-
         ・エクストラ
@@ -1123,7 +1123,7 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
-  - type: 切札♠5
+  - type: 切札♠5 蘇生
     trumps:
     - frame: |-
         ・エクストラ
@@ -1139,7 +1139,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♠7
+  - type: 切札♠7 瞬殺
     trumps:
     - frame: |-
         ・エクストラ
@@ -1155,7 +1155,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♠J
+  - type: 切札♠J リアニメーター
     trumps:
     - frame: |-
         ・エクストラ
@@ -1171,7 +1171,7 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
-  - type: 切札♠K
+  - type: 切札♠K 魔王
     trumps:
     - frame: |-
         ・エクストラ
@@ -1187,7 +1187,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♡2
+  - type: 切札♡2 援軍
     trumps:
     - frame: |-
         ・エクストラ
@@ -1203,7 +1203,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♡3
+  - type: 切札♡3 激励
     trumps:
     - frame: |-
         ・エクストラ
@@ -1219,7 +1219,7 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
-  - type: 切札♡4
+  - type: 切札♡4 休戦
     trumps:
     - frame: |-
         ・エクストラ
@@ -1235,7 +1235,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♡5
+  - type: 切札♡5 追撃
     trumps:
     - frame: |-
         ・エクストラ
@@ -1251,7 +1251,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♡7
+  - type: 切札♡7 ファントム
     trumps:
     - frame: |-
         ・エクストラ
@@ -1267,7 +1267,7 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
-  - type: 切札♡8
+  - type: 切札♡8 救済
     trumps:
     - frame: |-
         ・エクストラ
@@ -1283,7 +1283,7 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
-  - type: 切札♡J
+  - type: 切札♡J チャリオット
     trumps:
     - frame: |-
         ・エクストラ
@@ -1299,7 +1299,7 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
-  - type: 切札♡K
+  - type: 切札♡K 巨人
     trumps:
     - frame: |-
         ・エクストラ
@@ -1315,7 +1315,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♢A
+  - type: 切札♢A 防壁追加
     trumps:
     - frame: |-
         ・エクストラ
@@ -1331,7 +1331,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♢3
+  - type: 切札♢3 交渉
     trumps:
     - frame: |-
         ・エクストラ
@@ -1347,7 +1347,7 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
-  - type: 切札♢4
+  - type: 切札♢4 相殺
     trumps:
     - frame: |-
         ・エクストラ
@@ -1363,7 +1363,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♢5
+  - type: 切札♢5 喪失
     trumps:
     - frame: |-
         ・エクストラ
@@ -1379,7 +1379,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♢8
+  - type: 切札♢8 修繕
     trumps:
     - frame: |-
         ・エクストラ
@@ -1395,7 +1395,7 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
-  - type: 切札♢9
+  - type: 切札♢9 充足
     trumps:
     - frame: |-
         ・エクストラ
@@ -1411,7 +1411,7 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
-  - type: 切札♢J
+  - type: 切札♢J 策士
     trumps:
     - frame: |-
         ・エクストラ
@@ -1427,7 +1427,7 @@ trumpList:
       devNote: |-
         「for Jack」で追加された。
 
-  - type: 切札♣4
+  - type: 切札♣4 スイッチ
     trumps:
     - frame: |-
         ・エクストラ
@@ -1443,7 +1443,7 @@ trumpList:
       devNote: |-
         「立ち上がる兵」で追加された。
 
-  - type: 切札♣5
+  - type: 切札♣5 内乱
     trumps:
     - frame: |-
         ・エクストラ
@@ -1459,7 +1459,7 @@ trumpList:
       devNote: |-
         「弱者の反撃」で追加された。
 
-  - type: 切札♣7
+  - type: 切札♣7 手札補充
     trumps:
     - frame: |-
         ・エクストラ
@@ -1475,7 +1475,7 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♣8
+  - type: 切札♣8 リセット
     trumps:
     - frame: |-
         ・エクストラ
@@ -1491,7 +1491,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♣9
+  - type: 切札♣9 要塞
     trumps:
     - frame: |-
         ・エクストラ
@@ -1507,7 +1507,7 @@ trumpList:
       devNote: |-
         「自衛的戦術」で追加された。
 
-  - type: 切札♣10
+  - type: 切札♣10 悪あがき
     trumps:
     - frame: |-
         ・エクストラ
@@ -1523,7 +1523,7 @@ trumpList:
       devNote: |-
         「苦渋の選択」で追加された。
 
-  - type: 切札♣J
+  - type: 切札♣J 騎士
     trumps:
     - frame: |-
         ・エクストラ
