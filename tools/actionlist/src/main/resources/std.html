@@ -573,7 +573,8 @@
                   <a th:each="row : ${actList.acts}" th:attr="
                     href='#act-'+${row.actId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${actList.type}"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
@@ -594,7 +595,8 @@
                   <a th:each="row : ${charList.chars}" th:attr="
                     href='#char-'+${row.charId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${charList.type}"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.charName}"></span>
@@ -612,7 +614,8 @@
                   <a th:each="row : ${fogList.fogs}" th:attr="
                     href='#fog-'+${row.fogId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${fogList.type}"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.fogName}"></span>
@@ -630,7 +633,8 @@
                   <a th:each="row : ${trumpList.trumps}" th:attr="
                     href='#trump-'+${row.trumpId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${trumpList.type}"
                     class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                     th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                     <span th:text="${row.trumpName}"></span>
@@ -780,7 +784,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='act-'+${row.actId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
 
                   <div class="panel-heading">
 
@@ -880,7 +885,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='char-'+${row.charId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}"
@@ -950,7 +956,8 @@
 
                 <div class="panel panel-default blackpoker-action" th:attr="id='fog-'+${row.fogId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}"
@@ -1011,7 +1018,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='trump-'+${row.trumpId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.trumpId}"
@@ -1119,7 +1127,7 @@
 
 
       // ------------------------------------
-      // 1) URLパラメータから format / frame を取得する関数
+      // 1) URLパラメータから format / frame / type を取得する関数
       // ------------------------------------
       function getQueryParam(name) {
         // 簡易的な例：URLSearchParams が使える環境ならそちらでもOK
@@ -1163,11 +1171,11 @@
       }
 
       function filterItems(initFlg) {
-        // $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
         $('.blackpoker-action').each(function () {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
+          var typeAttr = ($el.data('type') || "").trim();
 
           // data-formatが設定されている場合は、フォーマットフィルタを適用
           if (formatAttr !== "") {
@@ -1179,7 +1187,6 @@
                 $el.hide();
               }
             } else {
-              // 選択されたフォーマットがなければ表示
               $el.show();
             }
           }
@@ -1206,7 +1213,6 @@
         $('.blackpoker-type-group').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-action');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
@@ -1221,7 +1227,6 @@
         $('.blackpoker-section').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-type-group-title');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
@@ -1247,7 +1252,7 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
-        updateHeader();  // ヘッダー表示の更新（前回の例参照）
+        updateHeader();  // ヘッダー表示の更新
         filterItems();
       });
 
