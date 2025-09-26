@@ -32,7 +32,7 @@ public class HtmlWriter implements Writer {
         // テンプレートリゾルバ設定
         ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
         resolver.setTemplateMode(TemplateMode.HTML);
-        resolver.setSuffix(".html");        
+        resolver.setSuffix(".html");
         resolver.setCharacterEncoding("UTF-8");
         resolver.setCacheable(false);
 
@@ -52,7 +52,7 @@ public class HtmlWriter implements Writer {
         // 重複除去・ソートしたリストを groupTypes としてテンプレートに渡す
         List<String> groupTypes = collectGroupTypes(map);
         context.setVariable("groupTypes", groupTypes);
-        
+
         // templateName が "std" なら templates/std.html を探す
         templateEngine.process(templateName, context, writer);
 
@@ -67,21 +67,21 @@ public class HtmlWriter implements Writer {
      * map の中の actList/charList/fogList/trumpList を走査し、各要素の "type" を
      * 集めて重複を取り除き、日本語ロケールでソートしたリストを返す。
      */
-    @SuppressWarnings("unchecked")
     private List<String> collectGroupTypes(Map<String, Object> map) {
         Set<String> set = new HashSet<>();
         String[] keys = { "actList", "charList", "fogList", "trumpList" };
         for (String k : keys) {
             Object obj = map.get(k);
-            if (obj instanceof Collection) {
+            if (obj instanceof Collection<?>) {
                 Collection<?> col = (Collection<?>) obj;
                 for (Object item : col) {
-                    if (item instanceof Map) {
-                        Map<String, Object> m = (Map<String, Object>) item;
-                        Object t = m.get("type");
+                    if (item instanceof Map<?, ?>) {
+                        Map<?, ?> rawMap = (Map<?, ?>) item;
+                        Object t = rawMap.get("type");
                         if (t != null) {
                             String s = String.valueOf(t).trim();
-                            if (!s.isEmpty()) set.add(s);
+                            if (!s.isEmpty())
+                                set.add(s);
                         }
                     }
                 }
