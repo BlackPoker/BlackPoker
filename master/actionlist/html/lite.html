@@ -10,6 +10,7 @@
   <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
 
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lusitana|Roboto+Slab" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Londrina+Sketch|Monofett|Ribeye+Marrow" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Arbutus+Slab|Monofett" rel="stylesheet">
@@ -35,6 +36,8 @@
 
     body {
       padding-top: 50px;
+      font-family: 'Open Sans', sans-serif;
+      color: #000000;
     }
 
     body hr {
@@ -545,7 +548,7 @@
 
           <h5><small>フレーム</small></h5>
           <ul class="nav nav-pills">
-            <li class="active">
+            <li>
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
             </li>
             <li>
@@ -560,35 +563,35 @@
             <li>
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">ストラテジー</a>
             </li>
-            <li>
+            <li class="active">
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
             </li>
           </ul>
-          
-    <h5><small>グループフィルター</small></h5>
-    <select class="form-control" id="group-filter-1">
-      <option value="">指定なし</option>
-      <option value="基本">基本</option>
-      <option value="召喚">召喚</option>
-      <option value="速攻魔法">速攻魔法</option>
-      <option value="滞留魔法">滞留魔法</option>
-      <option value="通常魔法">通常魔法</option>
-      <option value="兵士">兵士</option>
-      <option value="防壁">防壁</option>
-    </select>
 
-    <span aria-label="または">または</span>
+          <h5><small>グループフィルター</small></h5>
+          <select class="form-control" id="group-filter-1">
+            <option value="">指定なし</option>
+            <option value="基本">基本</option>
+            <option value="召喚">召喚</option>
+            <option value="速攻魔法">速攻魔法</option>
+            <option value="滞留魔法">滞留魔法</option>
+            <option value="通常魔法">通常魔法</option>
+            <option value="兵士">兵士</option>
+            <option value="防壁">防壁</option>
+          </select>
 
-    <select class="form-control" id="group-filter-2">
-      <option value="">指定なし</option>
-      <option value="基本">基本</option>
-      <option value="召喚">召喚</option>
-      <option value="速攻魔法">速攻魔法</option>
-      <option value="滞留魔法">滞留魔法</option>
-      <option value="通常魔法">通常魔法</option>
-      <option value="兵士">兵士</option>
-      <option value="防壁">防壁</option>
-    </select>
+          <span aria-label="または">または</span>
+
+          <select class="form-control" id="group-filter-2">
+            <option value="">指定なし</option>
+            <option value="基本">基本</option>
+            <option value="召喚">召喚</option>
+            <option value="速攻魔法">速攻魔法</option>
+            <option value="滞留魔法">滞留魔法</option>
+            <option value="通常魔法">通常魔法</option>
+            <option value="兵士">兵士</option>
+            <option value="防壁">防壁</option>
+          </select>
 
         </div>
         <div class="modal-body">
@@ -603,159 +606,196 @@
 
             <!-- actionlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">アクションリスト</h5>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">基本</span>
-                <div class="list-group">
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-actions-section" aria-expanded="true" role="button">
+                  アクションリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-actions-section" class="collapse in">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-end" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>エンド</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-charge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>チャージ</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>誘発-即時-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-draw" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>ドロー</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-attack" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>アタック</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-block" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>ブロック</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-damageJudge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>ダメージ判定</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
-                    <span>世代交代</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>誘発-即時-クイック</span></b>
-                    </span>
-                  </a>
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">基本</span>
+                  <div class="list-group">
+
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-end" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>エンド</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-charge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>チャージ</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>誘発-即時-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-draw" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>ドロー</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-attack" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>アタック</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-block" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>ブロック</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-damageJudge" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>ダメージ判定</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>誘発-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-nextGeneration" data-format="ライト,スタンダード,プロ,マスター" data-type="基本">
+                      <span>世代交代</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>誘発-即時-クイック</span></b>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">召喚</span>
+                  <div class="list-group">
+
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-setBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
+                      <span>防壁設置</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-即時-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
+                      <span>兵士召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsHero" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
+                      <span>英雄召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsAce" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
+                      <span>エース召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
+                      <span>装備</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">速攻魔法</span>
+                  <div class="list-group">
+
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                      <span>アップ</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                      <span>ダウン</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                      <span>ツイスト</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                      <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                      <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-即時-クイック</span></b>
+                      </span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">通常魔法</span>
+                  <div class="list-group">
+
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
+                      <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
+                      <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">召喚</span>
-                <div class="list-group">
 
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-setBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
-                    <span>防壁設置</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-即時-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
-                    <span>兵士召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsHero" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
-                    <span>英雄召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-summonsAce" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
-                    <span>エース召喚</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-mountSoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="召喚">
-                    <span>装備</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a>
-                </div>
-              </div>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">速攻魔法</span>
-                <div class="list-group">
-
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-                    <span>アップ</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-                    <span>ダウン</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-                    <span>ツイスト</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-                    <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-クイック</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-                    <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-即時-クイック</span></b>
-                    </span>
-                  </a>
-                </div>
-              </div>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">通常魔法</span>
-                <div class="list-group">
-
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
-                    <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
-                    <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                    </span>
-                  </a>
-                </div>
-              </div>
             </div>
 
             <!-- characterlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">キャラクターリスト</h5>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">兵士</span>
-                <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-soldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
-                    <span>一般兵</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-hero" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
-                    <span>英雄</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-ace" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
-                    <span>エース</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
-                    <span>装備兵</span>
-                  </a>
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-char-section" aria-expanded="true" role="button">
+                  キャラクターリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-char-section" class="collapse in">
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">兵士</span>
+                  <div class="list-group">
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-soldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
+                      <span>一般兵</span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-hero" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
+                      <span>英雄</span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-ace" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
+                      <span>エース</span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-armedsoldier" data-format="ライト,スタンダード,プロ,マスター" data-type="兵士">
+                      <span>装備兵</span>
+                    </a>
+                  </div>
                 </div>
-              </div>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">防壁</span>
-                <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-bulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="防壁">
-                    <span>防壁</span>
-                  </a>
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">防壁</span>
+                  <div class="list-group">
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#char-bulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="防壁">
+                      <span>防壁</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- foglist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">フォグリスト</h5>
-              <div class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title">滞留魔法</span>
-                <div class="list-group">
-                  <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-upFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
-                    <span>アップ</span>
-                  </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-downFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
-                    <span>ダウン</span>
-                  </a>
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-fog-section" aria-expanded="true" role="button">
+                  フォグリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-fog-section" class="collapse in">
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">滞留魔法</span>
+                  <div class="list-group">
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-upFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
+                      <span>アップ</span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#fog-downFog" data-format="ライト,スタンダード,プロ,マスター" data-type="滞留魔法">
+                      <span>ダウン</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- trumplist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">切札リスト</h5>
-              
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-trump-section" aria-expanded="true" role="button">
+                  切札リスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-trump-section" class="collapse in">
+
+                
+              </div>
             </div>
 
             <br>
@@ -2391,7 +2431,7 @@
 
       if (urlFrame) {
         selectedFrame = urlFrame;
-        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
+        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', urlFrame);
       }
 
       function filterItems(initFlg) {
@@ -2415,8 +2455,8 @@
           }
 
           // グループフィルター1とグループフィルター2のOR条件による適用
-          if (shouldShow && typeAttr !== "" && 
-              (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
+          if (shouldShow && typeAttr !== "" &&
+            (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
             // いずれかのフィルターに一致する場合に表示
             shouldShow = (selectedGroupFilter1 === typeAttr) || (selectedGroupFilter2 === typeAttr);
           }
@@ -2437,9 +2477,11 @@
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-type-group-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-type-group-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
@@ -2451,9 +2493,11 @@
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-section-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-section-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
