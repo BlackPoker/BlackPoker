@@ -1146,15 +1146,6 @@
       }
 
       // ------------------------------------
-      // 追加: "指定なし" を空文字に正規化する関数（フィルター無効化）
-      // ------------------------------------
-      function normalizeSelected(text) {
-        if (!text) return "";
-        var t = ("" + text).trim();
-        return (t === "指定なし" || t.toLowerCase() === "none") ? "" : t;
-      }
-
-      // ------------------------------------
       // 2) パラメータがあれば変数を上書きし、ボタンのアクティブを付け替え
       // ------------------------------------
       function setActivePill(pillGroupSelector, btnClass, text) {
@@ -1168,7 +1159,7 @@
 
       // 初期値（active のボタンから取得）
       selectedFormat = $('.nav.nav-pills li.active a.format-btn').text().trim();
-      selectedFrame  = normalizeSelected($('.nav.nav-pills li.active a.frame-btn').text().trim()); // ★ 正規化
+      selectedFrame = $('.nav.nav-pills li.active a.frame-btn').text().trim();
 
       // URLパラメータを取得
       var urlFormat = getQueryParam('format'); // 例: ?format=スタンダード
@@ -1181,8 +1172,7 @@
       }
 
       if (urlFrame) {
-        // "指定なし" を選ばれたら空文字に変換してフィルター無効化
-        selectedFrame = normalizeSelected(urlFrame); // ★ 正規化
+        selectedFrame = urlFrame;
         setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', urlFrame);
       }
 
@@ -1200,7 +1190,7 @@
             shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
 
-          // フレームフィルターの適用（selectedFrame が空文字なら無効）
+          // フレームフィルターの適用
           if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
             var frames = frameAttr.split(',');
             shouldShow = frames.indexOf(selectedFrame) !== -1;
@@ -1278,8 +1268,7 @@
 
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
-        // ★ "指定なし" を空文字へ正規化（→ フィルター無効化）
-        selectedFrame = normalizeSelected($(this).text().trim());
+        selectedFrame = $(this).text().trim();
         // グループフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
