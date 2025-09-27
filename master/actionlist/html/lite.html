@@ -568,7 +568,7 @@
             </li>
           </ul>
 
-          <h5><small>グループフィルター</small></h5>
+          <h5><small>カテゴリフィルター</small></h5>
           <select class="form-control" id="group-filter-1">
             <option value="">指定なし</option>
             <option value="基本">基本</option>
@@ -2337,7 +2337,7 @@
 
   <script type="text/javascript">
     $(function () {
-      // グループフィルターの状態を保持する変数
+      // カテゴリフィルターの状態を保持する変数
       var selectedGroupFilter1 = "";
       var selectedGroupFilter2 = "";
 
@@ -2454,7 +2454,7 @@
             shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
 
-          // グループフィルター1とグループフィルター2のOR条件による適用
+          // カテゴリフィルター1とカテゴリフィルター2のOR条件による適用
           if (shouldShow && typeAttr !== "" &&
             (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
             // いずれかのフィルターに一致する場合に表示
@@ -2516,7 +2516,7 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
-        // グループフィルターのリセット
+        // カテゴリフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
         $('#group-filter-1, #group-filter-2').val("");
@@ -2527,7 +2527,7 @@
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
         selectedFrame = $(this).text().trim();
-        // グループフィルターのリセット
+        // カテゴリフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
         $('#group-filter-1, #group-filter-2').val("");
@@ -2535,13 +2535,13 @@
         filterItems();
       });
 
-      // グループフィルター1の変更イベント
+      // カテゴリフィルター1の変更イベント
       $('#group-filter-1').on('change', function () {
         selectedGroupFilter1 = $(this).val();
         filterItems();
       });
 
-      // グループフィルター2の変更イベント
+      // カテゴリフィルター2の変更イベント
       $('#group-filter-2').on('change', function () {
         selectedGroupFilter2 = $(this).val();
         filterItems();

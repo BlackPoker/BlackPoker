@@ -311,7 +311,7 @@
 </section>
 <section id="index-11">
 <span id="id10"></span><h2><span class="section-number">3.8. </span>ダメージ<a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h2>
-<p>プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。</p>
+<p>プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移します。移す際は、カードの表を対戦相手に見せる必要はありません。</p>
 </section>
 <section id="common-gamestart">
 <span id="id11"></span><h2><span class="section-number">3.9. </span>ゲームの始め方<a class="headerlink" href="#common-gamestart" title="この見出しへのパーマリンク">¶</a></h2>
@@ -330,7 +330,7 @@
 <section id="common-gamestart-first">
 <span id="id13"></span><h3><span class="section-number">3.9.2. </span>共通手順：先攻決定<a class="headerlink" href="#common-gamestart-first" title="この見出しへのパーマリンク">¶</a></h3>
 <ol class="arabic simple">
-<li><p>両者ライフの一番上のカードを表にする。</p></li>
+<li><p>両者ライフの一番上のカードを表向きにする。</p></li>
 <li><p>数字の大きいプレイヤーが先攻（数値は <a class="reference internal" href="#cardrank"><span class="std std-numref">Table 3.1</span></a> を参照）。</p></li>
 <li><p>同じ数値の場合、さらにライフの一番上をめくって同様に比較。</p></li>
 <li><p>表にしたカードはすべて墓地に移す。</p></li>
@@ -358,25 +358,30 @@
 そして <strong>どこに何を置くか</strong> という場の構成（<a class="reference internal" href="#zone-section"><span class="std std-ref">領域（ゾーン）</span></a>）と <strong>ゲーム開始手順</strong> を確認しました。</p>
 <p>この節では、その土台の上でゲームを動かすための <strong>基本概念</strong> を「次に読むべき章」へつながる形で紹介します。</p>
 <section id="blackpoker">
-<h3><span class="section-number">3.10.1. </span>まず、BlackPokerとは<a class="headerlink" href="#blackpoker" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">3.10.1. </span>BlackPokerとは<a class="headerlink" href="#blackpoker" title="この見出しへのパーマリンク">¶</a></h3>
 <p>BlackPoker は、 <strong>標準的なトランプだけで遊べる、割込み可能なターン制のTCG風ゲーム</strong> です。
-プレイヤーは <strong>すること（アクション）</strong> を宣言し、 <strong>盤面に存在するもの（コンポーネント／ユニット）</strong> が増減・移動・状態変化していきます。</p>
+プレイヤーは <strong>すること（アクション）</strong> を宣言し、それをルールシステムが盤面に反映していきます。これにより、 <strong>盤面に存在するもの（コンポーネント／ユニット）</strong> が増えたり移動などしてゲームが進んできます。</p>
+<p>重要な2つの概念は次のとおりです。</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt><strong>アクション</strong></dt><dd><p>プレイヤーが起こす行為の定義。実行したいときに <strong>リクエスト</strong> を積み上げ、 <strong>解決</strong> された順で盤面に反映されます。
+<dt><strong>アクション</strong></dt><dd><p>アクションとは、プレイヤーが起こす行為(すること)をプレイヤーが要求して盤面に反映するまでを扱う概念です。
+プレイヤーは数多くあるアクションの定義から、ルールシステムに対して実行したいことを要求します。ルールシステムはその要求を実行して盤面に反映します。
+アクションの定義を <strong>アクションスクリプト</strong> と呼び、処理される要求することを <strong>リクエスト</strong> と呼びます。
 詳しくは、<a class="reference internal" href="common-action.html#common-action-rst"><span class="std std-ref">共通ルール: アクション</span></a> で説明します。</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>コンポーネント</strong></dt><dd><p>盤面に存在しうる対象の総称。定義に合致する <strong>ユニット</strong> （実体）が場に現れます。
+<dt><strong>コンポーネント</strong></dt><dd><p>コンポーネントとは、ゲーム盤面に配置されるキャラクターや切札などを扱う概念です。
+例えば、キャラクターの「一般兵」は場に複数体存在しますが、「一般兵」の定義は1つです。
+定義のことを <strong>コンポーネントスクリプト</strong> 、定義に合致する実態を <strong>ユニット</strong> と呼びます。
 詳しくは、<a class="reference internal" href="common-component.html#common-component-rst"><span class="std std-ref">共通ルール: コンポーネント</span></a> で説明します。</p>
 </dd>
 </dl>
 </li>
 </ul>
-<p>要するに、 <strong>アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態が次のアクションの条件や対象を決める</strong> ――この往復がゲームの心臓部です。
-この往復の <strong>全体像</strong> は <a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.2</span></a> を参照してください。リクエスト処理の厳密な流れはコアルール（<a class="reference internal" href="../core/core.html#core-rst"><span class="std std-ref">コアルール</span></a>）を参照します。</p>
+<p>要するに、 <strong>アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態を見て次のアクションを起こす</strong> ――この往復がゲームの心臓部です。
+この往復の全体的なイメージは <a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.2</span></a> を参照してください。登場する用語は後ほど説明します。ここでは大まかに全体像を把握してください。</p>
 <figure class="align-default" id="id22">
 <span id="abstract-overview"></span><a class="reference internal image-reference" href="../_images/abstract_editable_fixed.drawio.svg"><img alt="基礎概念の全体像（アクション／リクエストとコンポーネント／ユニット）" height="400px" src="../_images/abstract_editable_fixed.drawio.svg" /></a>
 <figcaption>
@@ -384,8 +389,9 @@
 </figcaption>
 </figure>
 <section id="id16">
-<h4><span class="section-number">3.10.1.1. </span>図の読み方<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h4>
+<h4><span class="section-number">3.10.1.1. </span>補足: 図の読み方<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h4>
 <p><a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.2</span></a> の読み方を説明します。</p>
+<p>詳しい説明は次の章以降で行いますが、ここでは全体像を把握するためにざっくりとした流れを説明します。</p>
 <p>図は大きく2つに分かれています。</p>
 <ul class="simple">
 <li><p><strong>上半分 仮想:アクション</strong> ：アクションとリクエストの流れ</p></li>
@@ -394,12 +400,12 @@
 <p>この点を踏まえて、図中の数字を順に見ていきましょう。</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt>[1] アクションを起こす</dt><dd><p>アクションを起こすと <strong>リクエスト</strong> が <strong>ステージ</strong> に積まれます。割込みが可能で、 <strong>後入れ先出し</strong> で解決します。</p>
+<dt>[1] アクションを起こす</dt><dd><p>アクションを起こすと <strong>リクエスト</strong> が <strong>ステージ</strong> に積まれます。リクエストは後に積まれたものから順に処理されます。</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>[2] 承認後リクエストを実行(解決)</dt><dd><p>ステージ上にある各リクエストは、1つずつ <strong>可能な部分だけ</strong> 処理します。対象喪失などは <strong>不発</strong> で解決されます。</p>
+<dt>[2] 承認後リクエストを実行(解決)</dt><dd><p>ステージ上にある各リクエストは、1つずつ盤面に反映されます。これを <strong>解決</strong> と呼びます。</p>
 </dd>
 </dl>
 </li>
@@ -413,13 +419,13 @@
 </section>
 <section id="id17">
 <h3><span class="section-number">3.10.2. </span>この後の読み方<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
-<p>基礎概念を理解したうえで、次の章を読むことをお勧めします。</p>
+<p>基礎概念を大まかに理解したうえで、次の章を読むことをお勧めします。</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="common-component.html#common-component-rst"><span class="std std-ref">共通ルール: コンポーネント</span></a>
 コンポーネントについて具体的にどのような種類があるか、どのようにユニットとコンポーネントを対応させるかを説明します。</p></li>
 <li><p><a class="reference internal" href="common-action.html#common-action-rst"><span class="std std-ref">共通ルール: アクション</span></a>
 アクションの <strong>起こし方（リクエスト）／割込み／解決</strong> の処理系を扱います。
-<strong>コスト・タイミング・対象</strong> の見方、解決時の不発・実行可能部分の扱いなど、プレイの運用面はここでまとまっています。</p></li>
+<strong>コスト・タイミング・対象</strong> の見方、解決時の不発・実行可能部分の扱いなど、アクション全般について説明します。</p></li>
 </ul>
 </section>
 <section id="id18">
@@ -472,7 +478,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#id15">3.10. 基礎概念</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#blackpoker">3.10.1. まず、BlackPokerとは</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#blackpoker">3.10.1. BlackPokerとは</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id17">3.10.2. この後の読み方</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id18">3.10.3. スクリプト</a></li>
 </ul>

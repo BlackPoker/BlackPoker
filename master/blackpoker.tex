@@ -75,7 +75,7 @@
 
 
 \title{BlackPoker}
-\date{2025年09月26日}
+\date{2025年09月27日}
 \release{2025/9/30}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -898,7 +898,7 @@ BlackPokerには、「領域(ゾーン)」と呼ぶ、カードを置く場所�
 \section{ダメージ}
 \label{\detokenize{common/common:index-11}}\label{\detokenize{common/common:id10}}
 \sphinxAtStartPar
-プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移動します。移動する際は、カードの表を対戦相手に見せる必要はありません。
+プレイヤーがダメージを受けた場合、ライフの一番上から受けた点数分墓地にカードを表向きで移します。移す際は、カードの表を対戦相手に見せる必要はありません。
 
 
 \section{ゲームの始め方}
@@ -936,7 +936,7 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-両者ライフの一番上のカードを表にする。
+両者ライフの一番上のカードを表向きにする。
 
 \item {} 
 \sphinxAtStartPar
@@ -992,16 +992,21 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 この節では、その土台の上でゲームを動かすための \sphinxstylestrong{基本概念} を「次に読むべき章」へつながる形で紹介します。
 
 
-\subsection{まず、BlackPokerとは}
+\subsection{BlackPokerとは}
 \label{\detokenize{common/common:blackpoker}}
 \sphinxAtStartPar
 BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる、割込み可能なターン制のTCG風ゲーム} です。
-プレイヤーは \sphinxstylestrong{すること（アクション）} を宣言し、 \sphinxstylestrong{盤面に存在するもの（コンポーネント／ユニット）} が増減・移動・状態変化していきます。
+プレイヤーは \sphinxstylestrong{すること（アクション）} を宣言し、それをルールシステムが盤面に反映していきます。これにより、 \sphinxstylestrong{盤面に存在するもの（コンポーネント／ユニット）} が増えたり移動などしてゲームが進んできます。
+
+\sphinxAtStartPar
+重要な2つの概念は次のとおりです。
 \begin{itemize}
 \item {} \begin{description}
 \sphinxlineitem{\sphinxstylestrong{アクション}}
 \sphinxAtStartPar
-プレイヤーが起こす行為の定義。実行したいときに \sphinxstylestrong{リクエスト} を積み上げ、 \sphinxstylestrong{解決} された順で盤面に反映されます。
+アクションとは、プレイヤーが起こす行為(すること)をプレイヤーが要求して盤面に反映するまでを扱う概念です。
+プレイヤーは数多くあるアクションの定義から、ルールシステムに対して実行したいことを要求します。ルールシステムはその要求を実行して盤面に反映します。
+アクションの定義を \sphinxstylestrong{アクションスクリプト} と呼び、処理される要求することを \sphinxstylestrong{リクエスト} と呼びます。
 詳しくは、{\hyperref[\detokenize{common/common-action:common-action-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{共通ルール: アクション}}}} で説明します。
 
 \end{description}
@@ -1009,7 +1014,9 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \item {} \begin{description}
 \sphinxlineitem{\sphinxstylestrong{コンポーネント}}
 \sphinxAtStartPar
-盤面に存在しうる対象の総称。定義に合致する \sphinxstylestrong{ユニット} （実体）が場に現れます。
+コンポーネントとは、ゲーム盤面に配置されるキャラクターや切札などを扱う概念です。
+例えば、キャラクターの「一般兵」は場に複数体存在しますが、「一般兵」の定義は1つです。
+定義のことを \sphinxstylestrong{コンポーネントスクリプト} 、定義に合致する実態を \sphinxstylestrong{ユニット} と呼びます。
 詳しくは、{\hyperref[\detokenize{common/common-component:common-component-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{共通ルール: コンポーネント}}}} で説明します。
 
 \end{description}
@@ -1017,8 +1024,8 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \end{itemize}
 
 \sphinxAtStartPar
-要するに、 \sphinxstylestrong{アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態が次のアクションの条件や対象を決める} ――この往復がゲームの心臓部です。
-この往復の \sphinxstylestrong{全体像} は \hyperref[\detokenize{common/common:abstract-overview}]{Fig.\@ \ref{\detokenize{common/common:abstract-overview}}} を参照してください。リクエスト処理の厳密な流れはコアルール（{\hyperref[\detokenize{core/core:core-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{コアルール}}}}）を参照します。
+要するに、 \sphinxstylestrong{アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態を見て次のアクションを起こす} ――この往復がゲームの心臓部です。
+この往復の全体的なイメージは \hyperref[\detokenize{common/common:abstract-overview}]{Fig.\@ \ref{\detokenize{common/common:abstract-overview}}} を参照してください。登場する用語は後ほど説明します。ここでは大まかに全体像を把握してください。
 
 \begin{figure}[htbp]
 \centering
@@ -1028,10 +1035,13 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \caption{基礎概念の全体像}\label{\detokenize{common/common:id22}}\label{\detokenize{common/common:abstract-overview}}\end{figure}
 
 
-\subsubsection{図の読み方}
+\subsubsection{補足: 図の読み方}
 \label{\detokenize{common/common:id16}}
 \sphinxAtStartPar
 \hyperref[\detokenize{common/common:abstract-overview}]{Fig.\@ \ref{\detokenize{common/common:abstract-overview}}} の読み方を説明します。
+
+\sphinxAtStartPar
+詳しい説明は次の章以降で行いますが、ここでは全体像を把握するためにざっくりとした流れを説明します。
 
 \sphinxAtStartPar
 図は大きく2つに分かれています。
@@ -1052,14 +1062,14 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \item {} \begin{description}
 \sphinxlineitem{{[}1{]} アクションを起こす}
 \sphinxAtStartPar
-アクションを起こすと \sphinxstylestrong{リクエスト} が \sphinxstylestrong{ステージ} に積まれます。割込みが可能で、 \sphinxstylestrong{後入れ先出し} で解決します。
+アクションを起こすと \sphinxstylestrong{リクエスト} が \sphinxstylestrong{ステージ} に積まれます。リクエストは後に積まれたものから順に処理されます。
 
 \end{description}
 
 \item {} \begin{description}
 \sphinxlineitem{{[}2{]} 承認後リクエストを実行(解決)}
 \sphinxAtStartPar
-ステージ上にある各リクエストは、1つずつ \sphinxstylestrong{可能な部分だけ} 処理します。対象喪失などは \sphinxstylestrong{不発} で解決されます。
+ステージ上にある各リクエストは、1つずつ盤面に反映されます。これを \sphinxstylestrong{解決} と呼びます。
 
 \end{description}
 
@@ -1076,7 +1086,7 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \subsection{この後の読み方}
 \label{\detokenize{common/common:id17}}
 \sphinxAtStartPar
-基礎概念を理解したうえで、次の章を読むことをお勧めします。
+基礎概念を大まかに理解したうえで、次の章を読むことをお勧めします。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
@@ -1087,7 +1097,7 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \sphinxAtStartPar
 {\hyperref[\detokenize{common/common-action:common-action-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{共通ルール: アクション}}}}
 アクションの \sphinxstylestrong{起こし方（リクエスト）／割込み／解決} の処理系を扱います。
-\sphinxstylestrong{コスト・タイミング・対象} の見方、解決時の不発・実行可能部分の扱いなど、プレイの運用面はここでまとまっています。
+\sphinxstylestrong{コスト・タイミング・対象} の見方、解決時の不発・実行可能部分の扱いなど、アクション全般について説明します。
 
 \end{itemize}
 
@@ -1613,7 +1623,7 @@ BlackPokerは割込み可能なターン制ゲームです。
 \index{キーユニット条件@\spxentry{キーユニット条件}}\ignorespaces \begin{description}
 \sphinxlineitem{キーユニット条件}
 \sphinxAtStartPar
-アクションの核となるカードを示します。
+アクションの核となるユニットを示します。
 場にいる兵士などユニットを指定します。
 キーユニット条件はキーカード条件と同じく★で表記します。
 
@@ -13145,7 +13155,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \end{description}
 
 
-\subsection{エクストラフレーム}
+\subsection{マスター+エクストラ}
 \label{\detokenize{appendix/appendix:actionlist-extra}}\label{\detokenize{appendix/appendix:id5}}\begin{description}
 \sphinxlineitem{URL}
 \sphinxAtStartPar

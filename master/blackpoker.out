@@ -26,8 +26,8 @@
 \BOOKMARK [2][-]{subsection.3.9.2}{共通手順：先攻決定}{section.3.9}% 25
 \BOOKMARK [2][-]{subsection.3.9.3}{共通手順：ゲーム開始}{section.3.9}% 26
 \BOOKMARK [1][-]{section.3.10}{基礎概念}{chapter.3}% 27
-\BOOKMARK [2][-]{subsection.3.10.1}{まず、BlackPokerとは}{section.3.10}% 28
-\BOOKMARK [3][-]{subsubsection*.4}{図の読み方}{subsection.3.10.1}% 29
+\BOOKMARK [2][-]{subsection.3.10.1}{BlackPokerとは}{section.3.10}% 28
+\BOOKMARK [3][-]{subsubsection*.4}{補足: 図の読み方}{subsection.3.10.1}% 29
 \BOOKMARK [2][-]{subsection.3.10.2}{この後の読み方}{section.3.10}% 30
 \BOOKMARK [2][-]{subsection.3.10.3}{スクリプト}{section.3.10}% 31
 \BOOKMARK [0][-]{chapter.4}{共通ルール: コンポーネント}{}% 32
@@ -350,7 +350,7 @@
 \BOOKMARK [1][-]{section.10.1}{アクションリスト}{chapter.10}% 349
 \BOOKMARK [2][-]{subsection.10.1.1}{ライト}{section.10.1}% 350
 \BOOKMARK [2][-]{subsection.10.1.2}{マスター}{section.10.1}% 351
-\BOOKMARK [2][-]{subsection.10.1.3}{エクストラフレーム}{section.10.1}% 352
+\BOOKMARK [2][-]{subsection.10.1.3}{マスター+エクストラ}{section.10.1}% 352
 \BOOKMARK [1][-]{section.10.2}{ガイドライン}{chapter.10}% 353
 \BOOKMARK [2][-]{subsection.10.2.1}{BlackPoker二次創作ガイドライン}{section.10.2}% 354
 \BOOKMARK [3][-]{subsubsection*.474}{はじめに}{subsection.10.2.1}% 355
@@ -388,3 +388,4 @@
 \BOOKMARK [2][-]{subsection.11.2.5}{B・Jのクイック化}{section.11.2}% 387
 \BOOKMARK [2][-]{subsection.11.2.6}{引き分け廃止}{section.11.2}% 388
 \BOOKMARK [2][-]{subsection.11.2.7}{ルールの記載を微修正}{section.11.2}% 389
+\BOOKMARK [0][-]{chapter*.499}{索引}{}% 390

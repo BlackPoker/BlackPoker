@@ -568,7 +568,7 @@
             </li>
           </ul>
 
-          <h5><small>グループフィルター</small></h5>
+          <h5><small>カテゴリフィルター</small></h5>
           <select class="form-control" id="group-filter-1">
             <option value="">指定なし</option>
             <option value="パック操作">パック操作</option>
@@ -7302,7 +7302,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♠J リアニメーター</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="spade"></span>J リアニメーター</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -7345,7 +7345,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♠K 魔王</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="spade"></span>K 魔王</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -7388,7 +7388,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♡J チャリオット</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="heart"></span>J チャリオット</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -7431,7 +7431,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♡K 巨人</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="heart"></span>K 巨人</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -7476,7 +7476,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♢J 策士</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="diam"></span>J 策士</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -7519,7 +7519,7 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札♣J 騎士</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">切札<span class="club"></span>J 騎士</h5>
           <div class="row">
 
             <div class="col-lg-6">
@@ -8857,7 +8857,7 @@
 
   <script type="text/javascript">
     $(function () {
-      // グループフィルターの状態を保持する変数
+      // カテゴリフィルターの状態を保持する変数
       var selectedGroupFilter1 = "";
       var selectedGroupFilter2 = "";
 
@@ -8974,7 +8974,7 @@
             shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
 
-          // グループフィルター1とグループフィルター2のOR条件による適用
+          // カテゴリフィルター1とカテゴリフィルター2のOR条件による適用
           if (shouldShow && typeAttr !== "" &&
             (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
             // いずれかのフィルターに一致する場合に表示
@@ -9036,7 +9036,7 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
-        // グループフィルターのリセット
+        // カテゴリフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
         $('#group-filter-1, #group-filter-2').val("");
@@ -9047,7 +9047,7 @@
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
         selectedFrame = $(this).text().trim();
-        // グループフィルターのリセット
+        // カテゴリフィルターのリセット
         selectedGroupFilter1 = "";
         selectedGroupFilter2 = "";
         $('#group-filter-1, #group-filter-2').val("");
@@ -9055,13 +9055,13 @@
         filterItems();
       });
 
-      // グループフィルター1の変更イベント
+      // カテゴリフィルター1の変更イベント
       $('#group-filter-1').on('change', function () {
         selectedGroupFilter1 = $(this).val();
         filterItems();
       });
 
-      // グループフィルター2の変更イベント
+      // カテゴリフィルター2の変更イベント
       $('#group-filter-2').on('change', function () {
         selectedGroupFilter2 = $(this).val();
         filterItems();
