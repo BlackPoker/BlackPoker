@@ -13445,7 +13445,8 @@ BlackPokerの世界は、ファンの皆さまのクリエイティブな発想�
 誘発アクションは、通常のアクションと異なり、特定の条件が満たされたときに即座に発動することが期待されます。
 そのため、即時に発動することで、プレイヤーの記憶領域を節約し、ゲームの進行がスムーズになります。
 すでに公式のフォーマットで「ブロック」など即時でない誘発アクションがありますが、それは
-ターンの大きな流れを作るために総設計しています。新たにオリジナルで誘発アクションを追加する場合は、即時\sphinxhyphen{}クイックにすることを推奨します。
+ターンの大きな流れを作るためにそう設計しています。新たにオリジナルで誘発アクションを追加する場合は、
+\sphinxstylestrong{@誘発\sphinxhyphen{}即時\sphinxhyphen{}クイック} にすることを推奨します。
 \end{quote}
 
 
@@ -13499,7 +13500,7 @@ BlackPokerの世界は、ファンの皆さまのクリエイティブな発想�
 \begin{quote}
 
 \sphinxAtStartPar
-場に出るキャラクターは、スート、数字、枚数、裏表などを考慮して一意に定義します。
+場に出るキャラクターは、スート、数字、枚数、裏表などを考慮して一意になるよう定義します。
 \end{quote}
 
 \sphinxAtStartPar
@@ -13507,7 +13508,7 @@ BlackPokerの世界は、ファンの皆さまのクリエイティブな発想�
 \begin{quote}
 
 \sphinxAtStartPar
-同じスート・数字や組み合わせでも能力や役割が異なる場合があるため、キャラクターを明確に特定できないと誤操作や解釈の混乱を招くためです。
+キャラクターを明確に特定できないと誤操作や解釈の混乱を招くためです。
 \end{quote}
 
 \sphinxstepscope
@@ -13522,7 +13523,7 @@ BlackPokerの世界は、ファンの皆さまのクリエイティブな発想�
 \label{\detokenize{revision-history/8th:id1}}\label{\detokenize{revision-history/8th::doc}}
 \sphinxAtStartPar
 次はBlackPoker第8版における主要な変更点です。
-8.1の変更点は (8.1) として記載しています。
+8.1の変更点は (8.1) 、8.2の変更点は (8.2) として記載しています。
 
 
 \subsection{アクションの定義の変更}
@@ -13567,10 +13568,10 @@ B・Jのコスト、効果を見直し
 \end{itemize}
 
 
-\subsection{用語追加}
+\subsection{用語追加/変更}
 \label{\detokenize{revision-history/8th:id5}}
 \sphinxAtStartPar
-ルールの分かりやすさ向上を目的として、以下の用語を新たに導入しました。
+ルールの分かりやすさ向上を目的として、以下の用語を新たに追加/変更しました。
 \begin{description}
 \sphinxlineitem{【キャラクター関連】}\begin{itemize}
 \item {} 
@@ -13604,12 +13605,20 @@ B・Jのコスト、効果を見直し
 \sphinxAtStartPar
 誘発条件
 
+\item {} 
+\sphinxAtStartPar
+キーユニット条件 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+コストC (8.2)
+
 \end{itemize}
 
 \sphinxlineitem{【コンポーネント関連】 (8.1)}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-コンポーネントキーカード \(\rightarrow\) ユニットカード条件に変更 (8.2)
+コンポーネントキーカード \(\rightarrow\) ユニット条件に変更 (8.2)
 
 \item {} 
 \sphinxAtStartPar
@@ -13617,15 +13626,22 @@ B・Jのコスト、効果を見直し
 
 \item {} 
 \sphinxAtStartPar
-キャラクターキーカード \(\rightarrow\) ユニットカード条件に変更 (8.2)
+キャラクターキーカード \(\rightarrow\) ユニット条件に変更 (8.2)
 
 \item {} 
 \sphinxAtStartPar
-フォグキーカード \(\rightarrow\) ユニットカード条件に変更 (8.2)
+フォグキーカード \(\rightarrow\) ユニット条件に変更 (8.2)
 
 \item {} 
 \sphinxAtStartPar
-切札キーカード \(\rightarrow\) ユニットカード条件に変更 (8.2)
+切札キーカード \(\rightarrow\) ユニット条件に変更 (8.2)
+
+\end{itemize}
+
+\sphinxlineitem{【全般】(8.2)}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+スクリプト
 
 \end{itemize}
 
@@ -13675,7 +13691,10 @@ B・Jのコスト、効果を見直し
 ゲーム開始の流れがこれまでと異なり、よりスピーディーな展開を楽しめます。
 
 \sphinxAtStartPar
-8.1版では「立ち上がる兵」の切札のみ復活し、ほかの切札は順次追加予定です。
+8.1版では「立ち上がる兵」の切札のみ復活しました。
+
+\sphinxAtStartPar
+8.2版では、今まで存在した切札を全て復活しました。(8.2)
 
 
 \subsection{曖昧なルールの明確化}
@@ -13735,6 +13754,14 @@ B・Jのコスト、効果を見直し
 \sphinxAtStartPar
 キーカードという単語はアクションだけのものになるよう修正 (8.1)
 
+\item {} 
+\sphinxAtStartPar
+キーカードという単語はリクエストで指定されるものとし、キーカードという単語が使われていたケースはキーカード条件、ユニット条件という単語に置き換えるよう修正 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+兵士起因のアクションはキーユニット条件で指定されるよう修正 (8.2)
+
 \end{itemize}
 
 
@@ -13786,6 +13813,26 @@ PDF版の表紙を、新ロゴをあしらった新デザインに変更
 \item {} 
 \sphinxAtStartPar
 切札リストにイラストを追加 (8.1)
+
+\item {} 
+\sphinxAtStartPar
+共通ルールを4つの章に分割 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+HTML版のアクションリストにカテゴリフィルターを追加 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+二次創作およびルール作成に関するガイドラインを追加 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+HTML版のアクションリストの文字色、フォントを公式ルール側と統一 (8.2)
+
+\item {} 
+\sphinxAtStartPar
+PDF版を非公開(8.2)
 
 \end{itemize}
 

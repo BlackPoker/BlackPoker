@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 SEP 2025 14:27
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 SEP 2025 19:07
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2873,49 +2873,59 @@ Underfull \hbox (badness 10000) in paragraph at lines 13161--13163
 ]
 第11章
 [177]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13575--13575
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13576--13576
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13575--13575
+Underfull \hbox (badness 10000) in paragraph at lines 13576--13576
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13586--13586
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13587--13587
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13586--13586
+Underfull \hbox (badness 10000) in paragraph at lines 13587--13587
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13609--13609
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13618--13618
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13609--13609
+Underfull \hbox (badness 10000) in paragraph at lines 13618--13618
 
  []
 
-[178] [179] [180] (./blackpoker.ind [181] [182
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13641--13641
+[]
+ []
 
 
-] [183]) (./blackpoker.aux)
+Underfull \hbox (badness 10000) in paragraph at lines 13641--13641
+
+ []
+
+[178] [179] [180] [181] (./blackpoker.ind [182] [183
+
+
+]) (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: F8A4A48600F04A76A07800576EA22F98;31839.
+(rerunfilecheck)             Checksum: FA61261ABC39E938D269D1BCC2E7EDC6;31846.
  ) 
 Here is how much of TeX's memory you used:
  15669 strings out of 480496
  260535 string characters out of 5899437
- 625344 words of memory out of 5000000
+ 625350 words of memory out of 5000000
  33284 multiletter control sequences out of 15000+600000
  498422 words of font info for 106 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,642b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (189 pages, 633560 bytes).
+Output written on blackpoker.dvi (189 pages, 635220 bytes).

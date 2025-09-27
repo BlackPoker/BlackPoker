@@ -131,7 +131,7 @@
 <section id="id1">
 <h1><span class="section-number">11.1. </span>第8版の主な変更点<a class="headerlink" href="#id1" title="この見出しへのパーマリンク">¶</a></h1>
 <p>次はBlackPoker第8版における主要な変更点です。
-8.1の変更点は (8.1) として記載しています。</p>
+8.1の変更点は (8.1) 、8.2の変更点は (8.2) として記載しています。</p>
 <section id="id2">
 <h2><span class="section-number">11.1.1. </span>アクションの定義の変更<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
 <ul class="simple">
@@ -155,8 +155,8 @@
 </ul>
 </section>
 <section id="id5">
-<h2><span class="section-number">11.1.4. </span>用語追加<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
-<p>ルールの分かりやすさ向上を目的として、以下の用語を新たに導入しました。</p>
+<h2><span class="section-number">11.1.4. </span>用語追加/変更<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
+<p>ルールの分かりやすさ向上を目的として、以下の用語を新たに追加/変更しました。</p>
 <dl class="simple">
 <dt>【キャラクター関連】</dt><dd><ul class="simple">
 <li><p>ラベル</p></li>
@@ -169,14 +169,20 @@
 <li><p>スピード</p></li>
 <li><p>起動条件</p></li>
 <li><p>誘発条件</p></li>
+<li><p>キーユニット条件 (8.2)</p></li>
+<li><p>コストC (8.2)</p></li>
 </ul>
 </dd>
 <dt>【コンポーネント関連】 (8.1)</dt><dd><ul class="simple">
-<li><p>コンポーネントキーカード → ユニットカード条件に変更 (8.2)</p></li>
+<li><p>コンポーネントキーカード → ユニット条件に変更 (8.2)</p></li>
 <li><p>ユニットカード</p></li>
-<li><p>キャラクターキーカード → ユニットカード条件に変更 (8.2)</p></li>
-<li><p>フォグキーカード → ユニットカード条件に変更 (8.2)</p></li>
-<li><p>切札キーカード → ユニットカード条件に変更 (8.2)</p></li>
+<li><p>キャラクターキーカード → ユニット条件に変更 (8.2)</p></li>
+<li><p>フォグキーカード → ユニット条件に変更 (8.2)</p></li>
+<li><p>切札キーカード → ユニット条件に変更 (8.2)</p></li>
+</ul>
+</dd>
+<dt>【全般】(8.2)</dt><dd><ul class="simple">
+<li><p>スクリプト</p></li>
 </ul>
 </dd>
 </dl>
@@ -200,7 +206,8 @@
 <h2><span class="section-number">11.1.6. </span>エクストラをフレーム化 (8.1)<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h2>
 <p>第8.0版で削除したエクストラ関連ルールを、第8.1版ではフレーム化し、切札を復活させました。
 ゲーム開始の流れがこれまでと異なり、よりスピーディーな展開を楽しめます。</p>
-<p>8.1版では「立ち上がる兵」の切札のみ復活し、ほかの切札は順次追加予定です。</p>
+<p>8.1版では「立ち上がる兵」の切札のみ復活しました。</p>
+<p>8.2版では、今まで存在した切札を全て復活しました。(8.2)</p>
 </section>
 <section id="id8">
 <h2><span class="section-number">11.1.7. </span>曖昧なルールの明確化<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h2>
@@ -219,6 +226,8 @@
 <li><p>パック、切札などフレームを含めた全てのコンポーネントを説明する章を追加 (8.1)</p></li>
 <li><p>デッキの構築条件を明確化 (8.1)</p></li>
 <li><p>キーカードという単語はアクションだけのものになるよう修正 (8.1)</p></li>
+<li><p>キーカードという単語はリクエストで指定されるものとし、キーカードという単語が使われていたケースはキーカード条件、ユニット条件という単語に置き換えるよう修正 (8.2)</p></li>
+<li><p>兵士起因のアクションはキーユニット条件で指定されるよう修正 (8.2)</p></li>
 </ul>
 </section>
 <section id="id9">
@@ -236,6 +245,11 @@
 <li><p>中綴じ印刷用のPDFを追加</p></li>
 <li><p>対戦レギュレーションを第2章に移動し、ルール全体の流れを整理 (8.1)</p></li>
 <li><p>切札リストにイラストを追加 (8.1)</p></li>
+<li><p>共通ルールを4つの章に分割 (8.2)</p></li>
+<li><p>HTML版のアクションリストにカテゴリフィルターを追加 (8.2)</p></li>
+<li><p>二次創作およびルール作成に関するガイドラインを追加 (8.2)</p></li>
+<li><p>HTML版のアクションリストの文字色、フォントを公式ルール側と統一 (8.2)</p></li>
+<li><p>PDF版を非公開(8.2)</p></li>
 </ul>
 </section>
 </section>
@@ -269,7 +283,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id2">11.1.1. アクションの定義の変更</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">11.1.2. 能力の解釈を変更</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">11.1.3. フォグ領域追加</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">11.1.4. 用語追加</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">11.1.4. 用語追加/変更</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id6">11.1.5. オプション削除とフレームへの統合</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id7">11.1.6. エクストラをフレーム化 (8.1)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id8">11.1.7. 曖昧なルールの明確化</a></li>
