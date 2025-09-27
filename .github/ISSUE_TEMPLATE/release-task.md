@@ -8,8 +8,14 @@ assignees: BlackPoker
 ---
 **索引確認**
 pdfに索引が出力されているか確認する。  
-されていない場合、ローカル環境でPDFを作成し、おそらくエラーが発生しているので、
-mydict.dicに単語を追加して索引が出力されるよう修正する。
+されていない場合、 `local-build-pdf.sh` を実行しローカル環境でPDFを作成します。
+次のようなエラーが発生しているので、 `mydict.dic` に単語を追加して索引が出力されるよう修正します。
+
+エラー例
+```
+Error: 条件 is no entry in dictionary file in blackpoker.idx, line 6.
+Error: 条件 is no entry in dictionary file in blackpoker.idx, line 22.
+```
 
 **Action/ExtraList update**
 
