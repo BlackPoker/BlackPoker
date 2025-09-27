@@ -910,7 +910,7 @@
           <h5 class="blackpoker-section-title">キャラクターリスト</h5>
         </div>
         <div th:each="nestList : ${charList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}"
+          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}"
             class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
