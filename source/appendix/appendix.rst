@@ -19,8 +19,13 @@
 ..  https://blackpoker.github.io/BlackPoker/blackpoker_a5-booklet.pdf
 
 
+.. _actionlist:
+
 アクションリスト
 ==============================
+
+BlackPokerで使用するアクション、キャラクター、フォグ、切札を定義するスクリプトの一覧を見ることができます。
+URL（HTML版）では、フォーマット、フレーム、カテゴリで絞って表示させることができます。
 
 
 .. _actionlist-lite:
