@@ -1,0 +1,570 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>共通ルール: アクション &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="共通ルール: その他" href="common-etc.html" />
+    <link rel="prev" title="共通ルール: コンポーネント" href="common-component.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="../index.html" accesskey="U">BlackPoker</a>
+            <a class="top" href="#">共通ルール: アクション</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="common-component.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            共通ルール: コンポーネント
+          </span>
+        </div>
+      </a>
+      <a class="next" href="common-etc.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            共通ルール: その他
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="">共通ルール: アクション</a></li> 
+  </ul>
+</nav>
+<section id="common-action-rst">
+<span id="index-0"></span><span id="id1"></span><h1><span class="section-number">5. </span>共通ルール: アクション<a class="headerlink" href="#common-action-rst" title="この見出しへのパーマリンク">¶</a></h1>
+<p>BlackPokerは割込み可能なターン制ゲームです。</p>
+<p>例えば次の状況をイメージしてください。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Aくん</strong>：「この兵士アップします。」</p></li>
+<li><p><strong>Bさん</strong>：「その前にこの兵士ダウンします。」</p></li>
+<li><p><strong>Aくん</strong>：「じゃあそのダウンをカウンターします。」</p></li>
+<li><p><strong>Bさん</strong>：「それをさらにカウンターします。」</p></li>
+<li><p><strong>Aくん</strong>：「・・・（泣）」</p></li>
+<li><p><strong>Bさん</strong>：「（どやっ！）」</p></li>
+</ul>
+</div></blockquote>
+<p>このやり取りの中で「アップします」や「ダウンします」などの1行1行がアクションになります。</p>
+<p>割込み可能なターン制ゲームは、見方を変えると“許可制のゲーム”とも表現できます。</p>
+<p>このアクションを実行したいとルールシステムに要求(リクエスト)し、相手に許可を得てリクエストが実行されます。もちろん相手はリクエストに対して割り込んでリクエストすることもできます。</p>
+<p>アクションには、プレイヤーのすべての行動を定義しており、従来のTCGでいう「魔法」や「ターン制御」が含まれています。</p>
+<p>参考: <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">9 コアルール</span></a></p>
+<section id="id2">
+<h2><span class="section-number">5.1. </span>アクションが持つ項目<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクションが持つ項目について説明します。</p>
+<dl class="simple" id="index-1">
+<dt>アクション名</dt><dd><p>アクションの名称を示します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-2">
+<dt>タイプ</dt><dd><p>アクションの種類を表します。アクション名の後に括弧書きで記載します。</p>
+</dd>
+</dl>
+<dl id="index-3">
+<dt>トリガー</dt><dd><p>アクションには自分で起こせるアクションと誘発するアクションがあります。
+トリガー項目では「直接」か「誘発」が設定されています。</p>
+<p>参考: <a class="reference internal" href="../core/core.html#trigger-core"><span class="std std-numref">9.2.1.2 トリガー</span></a></p>
+</dd>
+</dl>
+<dl id="index-4">
+<dt>スピード</dt><dd><p>アクションはすぐに効果が解決されるものとそうでないものがあります。
+スピード項目では「即時」か「通常」が設定されています。</p>
+<p>参考: <a class="reference internal" href="../core/core.html#speed-core"><span class="std std-numref">9.2.1.3 スピード</span></a></p>
+</dd>
+</dl>
+<dl id="index-5">
+<dt>タイミング</dt><dd><p>アクションは起こせるタイミングが2種類あります。「メイン」は自分のターンかつステージが空のときに起こせます。
+「クイック」はいつでも起こすことができます。</p>
+<p>参考: <a class="reference internal" href="../core/core.html#timing"><span class="std std-numref">9.2.1.4 タイミング</span></a></p>
+</dd>
+</dl>
+<dl class="simple" id="index-6">
+<dt>キーカード条件</dt><dd><p>アクションの核となるカードを示します。
+手札から選びます。
+キーカード条件は★で表記します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-7">
+<dt>キーユニット条件</dt><dd><p>アクションの核となるユニットを示します。
+場にいる兵士などユニットを指定します。
+キーユニット条件はキーカード条件と同じく★で表記します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-8">
+<dt>コスト</dt><dd><p>アクションを起こすのに必要な対価です。
+コストは＄を使って表記し、コストの支払いはアクションを起こすプレイヤーが行います。コストの種類は <a class="reference internal" href="#cost"><span class="std std-numref">5.2 コストの種類</span></a> で説明します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-9">
+<dt>特記事項</dt><dd><p>特記事項は※を使って表記し、その他の項目では書き表せない条件を示します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-10">
+<dt>起動条件</dt><dd><p>起動するための条件を示します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-11">
+<dt>誘発条件</dt><dd><p>誘発する条件を示します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-12">
+<dt>対象</dt><dd><p>効果の対象を示します。</p>
+</dd>
+</dl>
+<dl class="simple" id="index-13">
+<dt>効果</dt><dd><p>効果の内容を示します。</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p>トリガー,スピード,タイミングの表記</p>
+<p>トリガー,スピード,タイミングは&#64;を使って次のように表記されます。</p>
+<p>&#64;[トリガー]-[スピード]-[タイミング]</p>
+<p>例えば次のようになります。</p>
+<p>&#64;誘発-即時-クイック</p>
+</div>
+<section id="id3">
+<h3><span class="section-number">5.1.1. </span>記載されていないアクションの項目<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションによっては記載されていない項目もあります。
+記載されていない項目は無視して構いません。
+たとえばコスト項目がなければコストを支払う必要はありません。</p>
+</section>
+</section>
+<section id="cost">
+<span id="id4"></span><h2><span class="section-number">5.2. </span>コストの種類<a class="headerlink" href="#cost" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクションによって支払うコストが異なります。
+コストには次の種類があり、それぞれ支払い方が異なります。(<a class="reference internal" href="#table-cost"><span class="std std-numref">Table 5.1</span></a>)</p>
+<span id="table-cost"></span><table class="docutils align-default" id="id19">
+<caption><span class="caption-number">Table 5.1 </span><span class="caption-text">コストの種類</span><a class="headerlink" href="#id19" title="このテーブルへのパーマリンク">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>表記(名称)</p></th>
+<th class="head"><p>対価</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>B (Bulwark)</p></td>
+<td><p>防壁をドライブする</p></td>
+</tr>
+<tr class="row-odd"><td><p>L (Life)</p></td>
+<td><p>1点ダメージを受ける</p></td>
+</tr>
+<tr class="row-even"><td><p>D (Discard)</p></td>
+<td><p>手札を1枚捨てる</p></td>
+</tr>
+<tr class="row-odd"><td><p>S (Sacrifice)</p></td>
+<td><p>キャラクター1体を墓地に移す</p></td>
+</tr>
+<tr class="row-even"><td><p>C (CharacterDrive)</p></td>
+<td><p>キーユニットのキャラクターをドライブする</p></td>
+</tr>
+</tbody>
+</table>
+<p>たとえばコストが <strong>「$BL」</strong> の場合、自分の場にいるチャージ状態の防壁を1体ドライブし、1点ダメージを受けることでコストが支払われたことになります。</p>
+</section>
+<section id="id5">
+<h2><span class="section-number">5.3. </span>アクションの起こし方(リクエスト)<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
+<p>BlackPokerは実行したいアクションを要求(リクエスト)し、進める形式のゲームです。</p>
+<p>アクションを要求することを「アクションを起こす」または「アクションをリクエストする」といいます。</p>
+<p>個別のアクション定義をアクションスクリプトと呼びます。</p>
+<p>次の手順でアクションをリクエストすることができます。</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>起こすアクションを対戦相手に伝える。</p></li>
+<li><p>アクションに応じたコストを支払う。</p></li>
+<li><p>アクションにキーカード条件があれば、条件に合ったカードを手札から出し、キーカードとする。</p></li>
+<li><p>アクションにキーユニット条件があれば、条件に合ったユニットを指定し、キーユニットとする。</p></li>
+<li><p>対象の指定が必要な場合、対象を指定する。</p></li>
+</ol>
+</div></blockquote>
+<section id="id6">
+<h3><span class="section-number">5.3.1. </span>アクションを起こすときの注意点<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id7">
+<h4><span class="section-number">5.3.1.1. </span>対象を指定しないでアクションを起こせるか？<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h4>
+<p>「対象」項目がある場合、記載された条件を満たした対象を指定できなければ、
+そのアクションを起こすことはできません。</p>
+</section>
+<section id="id8">
+<h4><span class="section-number">5.3.1.2. </span>アクションを対象とするアクションは自身を対象にできるか？<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h4>
+<p>アクションは、自分自身を対象とすることはできません。
+そのため、「カウンター」アクションのようにアクションを対象とするアクションは
+自身を対象とすることはできません。</p>
+</section>
+</section>
+</section>
+<section id="id9">
+<h2><span class="section-number">5.4. </span>アクションの解決<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h2>
+<p>リクエストされたアクションを実行済みにすることを「アクションを解決する」といいます。</p>
+<p>実際にアクションが解決される流れを見ていきましょう。</p>
+<p><strong>用語</strong></p>
+<p>登場する用語を説明します。</p>
+<dl class="simple">
+<dt><strong>チャンス</strong></dt><dd><p>アクションをリクエストする(ステージに積む)権利（他TCGの優先権）</p>
+</dd>
+<dt><strong>ターン</strong></dt><dd><p>手番を示す印</p>
+</dd>
+<dt><strong>ステージ</strong></dt><dd><p>アクションが蓄積される場所（他TCGのスタック）</p>
+</dd>
+</dl>
+<ol class="arabic simple">
+<li><p>プレイヤーAがアクションを積む</p></li>
+</ol>
+<figure class="align-default" id="id20">
+<span id="action-request1-image"></span><img alt="../_images/action-request1.png" src="../_images/action-request1.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5.1 </span><span class="caption-text">アクションの解決1</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<ol class="arabic simple" start="2">
+<li><p>プレイヤーBがアクションを積む</p></li>
+</ol>
+<figure class="align-default" id="id21">
+<span id="action-request2-image"></span><img alt="../_images/action-request2.png" src="../_images/action-request2.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5.2 </span><span class="caption-text">アクションの解決2</span><a class="headerlink" href="#id21" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<ol class="arabic simple" start="3">
+<li><p>アクションを実行（解決）</p></li>
+</ol>
+<figure class="align-default" id="id22">
+<span id="action-request3-image"></span><img alt="../_images/action-request3.png" src="../_images/action-request3.png" />
+<figcaption>
+<p><span class="caption-number">Fig. 5.3 </span><span class="caption-text">アクションの解決3</span><a class="headerlink" href="#id22" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+<p>大まかな流れは図の通りとなります。</p>
+<p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> を参照してください。</p>
+<p>次に細かな部分を説明します。</p>
+<p>補足ですが次に説明する部分は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> で順に行われます。</p>
+<section id="id10">
+<h3><span class="section-number">5.4.1. </span>対象条件を確認<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<p>対象を指定するアクションが効果を発揮しようとした時に次の条件に該当する場合、効果を発揮する対象を失うため効果が発揮されず
+アクションが解決されます。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>対象が存在していない場合</p></li>
+<li><p>対象が分裂した場合</p></li>
+</ul>
+</div></blockquote>
+<p>たとえば兵士に対して「アップ」アクションを起こし、対応して「ダウン」
+アクションを起こされました。
+「ダウン」の方が先に解決されるため、「アップ」を解決する時には
+兵士が墓地に移っていたとします。その場合、「アップ」アクションは効果を発揮せず解決されます。</p>
+<p>「リバース」による対象分裂も同様です。
+たとえば装備兵に対して「ツイスト」アクションを起こし、対応して「リバース」アクションを起こしたとします。
+この場合、「リバース」が先に解決され、装備兵が分裂します。
+その場合、「ツイスト」は対象を失いアクションの効果を発揮せず解決されます。</p>
+</section>
+<section id="id11">
+<h3><span class="section-number">5.4.2. </span>効果を発揮<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<p>リクエストが解決する際に、アクションの効果に定義されている内容を実行します。
+効果の中に実行不可能な部分がある場合、可能な部分のみ実行します。</p>
+<p>たとえば、ライフの枚数が残1枚の時に5点のダメージを受けたとします。
+ライフは1枚しかないので5点ダメージを受けることはできませんが、
+1点までなら受けることが可能なため、
+この場合1点のダメージを受けることになります。</p>
+</section>
+<section id="id12">
+<h3><span class="section-number">5.4.3. </span>解決は墓地移動までを含む<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h3>
+<p>「リクエストを解決する」という文言には、キーカードを墓地に移動し終えるまでが含まれています。</p>
+<p>「リクエストを解決する」をまとめると次のようになります。</p>
+<ol class="arabic simple">
+<li><p>ステージの一番上にあるリクエストを特定する</p></li>
+<li><p>リクエストの対象が正しいか確認する</p></li>
+<li><p>正しい場合、リクエストされたアクションの効果を可能な限り実行する</p></li>
+<li><p>リクエストをステージから取り除く</p></li>
+<li><p>キーカードを墓地に移す</p></li>
+</ol>
+</section>
+<section id="id13">
+<h3><span class="section-number">5.4.4. </span>ステージ上で効果を発揮<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アクションの効果を実行する際にリクエストはまだステージ上にあります。</p>
+<p>効果の実行が完了した後、ステージ上から取り除かれます。</p>
+</section>
+<section id="keycard-gy">
+<span id="id14"></span><h3><span class="section-number">5.4.5. </span>キーカードを墓地に移す<a class="headerlink" href="#keycard-gy" title="この見出しへのパーマリンク">¶</a></h3>
+<p>効果を発揮した後、そのアクションをステージから取り除き、キーカードを墓地に移します。
+ただし、次の場合はキーカードを墓地に移しません。</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>効果の中でキーカードを場などのゾーンに出した場合</p></li>
+<li><p>効果の中でキーカードを手札に戻した場合</p></li>
+</ul>
+</div></blockquote>
+<p>※アクションの項目が <strong>キーカード条件</strong> ではなく <strong>キーユニット条件</strong> の場合、指定されたものは <strong>キーユニット</strong> となり、キーカードではないため、墓地に移しません。</p>
+</section>
+</section>
+<section id="id15">
+<h2><span class="section-number">5.5. </span>勝敗判定<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクションを解決するたびに勝敗判定が行われます。</p>
+<p>勝敗はライフを確認し0枚の場合そのプレイヤーは敗北となります。</p>
+<p>勝敗判定はターンプレイヤーから行われます。
+もし、両プレイヤーのライフが0枚の場合、ターンプレイヤーの負けとなります。</p>
+<p>補足ですがこの勝敗判定は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> で確認されます。</p>
+</section>
+<section id="id16">
+<h2><span class="section-number">5.6. </span>誘発チェック<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h2>
+<p>アクションが解決された際に、
+アクションの誘発条件に該当するとアクションが誘発されることがあります。</p>
+<p>誘発とは、自動的にアクションがリクエストされることです。</p>
+<p>BlackPokerの基本的なルールでは、次の2つの誘発パターンがほとんどです。</p>
+<p>それ以外の場合は、<a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> を参照してください。</p>
+<section id="id17">
+<h3><span class="section-number">5.6.1. </span>パターン1: フェイズ系<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
+<p>アタックアクションでは対象のアクションが解決すると次のアクションが誘発します。</p>
+<ol class="arabic simple">
+<li><p>アタック</p></li>
+<li><p>ブロック</p></li>
+<li><p>ダメージ判定</p></li>
+</ol>
+<p>アタックアクションが解決すると、ブロックアクションが誘発します。</p>
+<p>ブロックアクションが解決するとダメージ判定アクションが誘発します。</p>
+<p>BlackPokerでは一般的なTCGではフェイズとして扱われるものも全てアクションとして定義されています。</p>
+<p>同様に、エンド、チャージ、ドローアクションも定義されています。</p>
+</section>
+<section id="id18">
+<h3><span class="section-number">5.6.2. </span>パターン2: 世代交代<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
+<p>BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合、世代交代というアクションが誘発します。</p>
+<p>効果の内容はアクションリストを参照してください。</p>
+<p><a class="reference internal" href="../auto/actionlist.html#act-nextgeneration"><span class="std std-numref">7.3.1.1.7 世代交代 (誘発魔法)</span></a></p>
+</section>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common.html">3. 共通ルール: 基本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="common-component.html">4. 共通ルール: コンポーネント</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">5. 共通ルール: アクション</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id2">5.1. アクションが持つ項目</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">5.1.1. 記載されていないアクションの項目</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#cost">5.2. コストの種類</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id5">5.3. アクションの起こし方(リクエスト)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">5.3.1. アクションを起こすときの注意点</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id9">5.4. アクションの解決</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id10">5.4.1. 対象条件を確認</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id11">5.4.2. 効果を発揮</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">5.4.3. 解決は墓地移動までを含む</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">5.4.4. ステージ上で効果を発揮</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#keycard-gy">5.4.5. キーカードを墓地に移す</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#id15">5.5. 勝敗判定</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id16">5.6. 誘発チェック</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id17">5.6.1. パターン1: フェイズ系</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">5.6.2. パターン2: 世代交代</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="common-etc.html">6. 共通ルール: その他</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">7. フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">8. フレーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">9. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/appendix.html">10. 付録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">11. 変更履歴</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="common-component.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            共通ルール: コンポーネント
+          </span>
+        </div>
+      </a>
+      <a class="next" href="common-etc.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            共通ルール: その他
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>
