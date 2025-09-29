@@ -28,11 +28,13 @@
 				"redhat.vscode-yaml",
 				"janisdd.vscode-edit-csv",
 				"sodatea.velocity",
-				"eamodio.gitlens"
+				"eamodio.gitlens",
+				"GitHub.vscode-pull-request-github"
 			],
 			"settings": {
 				"tools/actionlist/original/act.schema.json":"act*.yaml",
-				"tools/actionlist/original/frame.schema.json":"frame*.yaml"
+				"tools/actionlist/original/frame.schema.json":"frame*.yaml",
+				"github.copilot.chat.localeOverride": "ja"
 			}
 		}
 	}

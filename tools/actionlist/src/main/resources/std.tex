@@ -149,8 +149,8 @@
 \vspace{-1zh}%余白削除
 {\scriptsize @:トリガー-スピード-タイミング, 
 \$:コスト, 
-★:キーカード,
-☆:コンポーネントキーカード}
+★:キーカード条件,
+☆:ユニット条件}
 
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
@@ -165,7 +165,7 @@
 \> D \> : \>手札を1枚捨てる \\
 #if(${arg0} != "lite")
 \> S \> : \>キャラクター1体を墓地に移す \\
-\> K \> : \>キーカードをドライブする \\
+\> C \> : \>キーユニットのキャラクターをドライブする \\
 #end
 \end{tabbing}
 
@@ -251,6 +251,9 @@
 
             #if(${row.actKey.trim()})
 {\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
+            #end
+            #if(${row.actUnit.trim()})
+{\footnotesize\bf ★${texFn.cnv(${row.actUnit})}}
             #end
 
             #if(${row.actNote.trim()})

@@ -1,0 +1,22 @@
+@startuml
+
+' 日本語は表示名、関係はASCIIエイリアスで接続（安全策）
+class "スクリプト\n(Script)" as Script
+class "コンポーネント\n(Component)" as Component <<abstract>>
+class "コンポーネントスクリプト\n(ComponentDef)" as ComponentDef
+class "ユニット\n(Unit)" as Unit
+class "ユニットカード\n(UnitCard)" as UnitCard
+class "ゾーン\n(Zone)" as Zone
+
+' 継承
+Script <|-- ComponentDef
+ComponentDef --|> Component
+
+' 関連
+Unit --> ComponentDef : refers
+Unit "1" o-- "1..*" UnitCard : consists
+
+Zone "1" o-- "0..*" Component
+Zone "1" o-- "0..*" Unit
+
+@enduml

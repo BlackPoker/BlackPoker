@@ -10,6 +10,7 @@
   <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
 
   <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Lusitana|Roboto+Slab" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Londrina+Sketch|Monofett|Ribeye+Marrow" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Arbutus+Slab|Monofett" rel="stylesheet">
@@ -35,6 +36,8 @@
 
     body {
       padding-top: 50px;
+      font-family: 'Open Sans', sans-serif;
+      color: #000000;
     }
 
     body hr {
@@ -354,8 +357,8 @@
       font-size: 16px;
     }
 
-    .cost-K:after {
-      content: "Ⓚ";
+    .cost-C:after {
+      content: "Ⓒ";
       font-family: "Garava";
       /*font-weight: bold;*/
       font-size: 16px;
@@ -538,6 +541,20 @@
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
             </li>
           </ul>
+
+          <h5><small>カテゴリフィルター</small></h5>
+          <select class="form-control" id="group-filter-1">
+            <option value="">指定なし</option>
+            <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+          </select>
+
+          <span aria-label="または">または</span>
+
+          <select class="form-control" id="group-filter-2">
+            <option value="">指定なし</option>
+            <option th:each="g : ${groupTypes}" th:value="${g}" th:text="${g}"></option>
+          </select>
+
         </div>
         <div class="modal-body">
           <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span
@@ -551,80 +568,117 @@
 
             <!-- actionlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">アクションリスト</h5>
-              <div th:each="actList:${actList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(actList.type)}"></span>
-                <div class="list-group">
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-actions-section" aria-expanded="true" role="button">
+                  アクションリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-actions-section" class="collapse in">
 
-                  <a th:each="row : ${actList.acts}" th:attr="
+                <div th:each="actList:${actList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(actList.type)}"></span>
+                  <div class="list-group">
+
+                    <a th:each="row : ${actList.acts}" th:attr="
                     href='#act-'+${row.actId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
-                        class="time-mark"></span><b><span
-                          th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
-                    </span>
-                  </a>
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${actList.type}"
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span
+                            th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
+
             </div>
 
             <!-- characterlist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">キャラクターリスト</h5>
-              <div th:each="charList:${charList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(charList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${charList.chars}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-char-section" aria-expanded="true" role="button">
+                  キャラクターリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-char-section" class="collapse in">
+
+                <div th:each="charList:${charList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(charList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${charList.chars}" th:attr="
                     href='#char-'+${row.charId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.charName}"></span>
-                  </a>
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${charList.type}"
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.charName}"></span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- foglist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">フォグリスト</h5>
-              <div th:each="fogList:${fogList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(fogList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${fogList.fogs}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-fog-section" aria-expanded="true" role="button">
+                  フォグリスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-fog-section" class="collapse in">
+
+                <div th:each="fogList:${fogList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(fogList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${fogList.fogs}" th:attr="
                     href='#fog-'+${row.fogId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.fogName}"></span>
-                  </a>
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${fogList.type}"
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.fogName}"></span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- trumplist -->
             <div class="blackpoker-section">
-              <h5 class="blackpoker-section-title">切札リスト</h5>
-              <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
-                <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(trumpList.type)}"></span>
-                <div class="list-group">
-                  <a th:each="row : ${trumpList.trumps}" th:attr="
+              <!-- 見出しをトグル化 -->
+              <h5 class="blackpoker-section-title">
+                <a data-toggle="collapse" href="#menu-trump-section" aria-expanded="true" role="button">
+                  切札リスト <span class="caret"></span>
+                </a>
+              </h5>
+              <div id="menu-trump-section" class="collapse in">
+
+                <div th:each="trumpList:${trumpList}" class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title" th:utext="${#sfn.cnvHtml(trumpList.type)}"></span>
+                  <div class="list-group">
+                    <a th:each="row : ${trumpList.trumps}" th:attr="
                     href='#trump-'+${row.trumpId},
                     data-format=${#sfn.formatDataFormat(row.format)},
-                    data-frame=${#sfn.formatDataFrame(row.frame)},"
-                    class="scroll-offset list-group-item list-group-item-action blackpoker-action"
-                    th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                    <span th:text="${row.trumpName}"></span>
-                    <span class="tag tag-default tag-pill pull-right">
-                      <span class="glyphicon glyphicon-star-empty"></span>
-                      <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
-                    </span>
-                  </a>
+                    data-frame=${#sfn.formatDataFrame(row.frame)},
+                    data-type=${trumpList.type}"
+                      class="scroll-offset list-group-item list-group-item-action blackpoker-action"
+                      th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
+                      <span th:text="${row.trumpName}"></span>
+                      <span class="tag tag-default tag-pill pull-right">
+                        <span class="glyphicon glyphicon-star-empty"></span>
+                        <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
+                      </span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
@@ -662,9 +716,9 @@
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
-                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード/キーユニット条件</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
-                aria-hidden="true"></span>&nbsp;:&nbsp;コンポーネントキーカード</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;ユニット条件</li>
             <li class="list-group-item"><span class="note-mark"></span>
               :&nbsp;特記事項</li>
           </ul>
@@ -677,7 +731,7 @@
             <li class="list-group-item"><span class="cost-L"></span>&nbsp;:&nbsp;1点ダメージを受ける</li>
             <li class="list-group-item"><span class="cost-D"></span>&nbsp;:&nbsp;手札を1枚捨てる</li>
             <li class="list-group-item"><span class="cost-S"></span>&nbsp;:&nbsp;キャラクターを1体墓地に移す</li>
-            <li class="list-group-item"><span class="cost-K"></span>&nbsp;:&nbsp;キーカードをドライブする</li>
+            <li class="list-group-item"><span class="cost-C"></span>&nbsp;:&nbsp;キーユニットのキャラクターをドライブする</li>
           </ul>
         </div>
 
@@ -766,7 +820,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='act-'+${row.actId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
 
                   <div class="panel-heading">
 
@@ -793,16 +848,23 @@
 
                     </div>
                     <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                      </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span
-                          th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
-                          <span class="note-mark"></span> <span
-                            th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                      <small th:if="${not #strings.isEmpty(row.actKey)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span>
+                        <br>
+                      </small>
+                      <small th:if="${not #strings.isEmpty(row.actUnit)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span th:utext="${#sfn.cnvHtml(row.actUnit)}"></span>
+                        <br>
+                      </small>
+                      <small th:if="${not #strings.isEmpty(row.actNote)}">
+                        <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
+                          <span class="note-mark"></span>
+                          <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
                           <br>
                         </span>
                       </small>
-
                     </div>
 
                   </div>
@@ -848,7 +910,7 @@
           <h5 class="blackpoker-section-title">キャラクターリスト</h5>
         </div>
         <div th:each="nestList : ${charList}" class="blackpoker-type-group">
-          <h5 th:text="${nestList.type}"
+          <h5 th:utext="${#sfn.cnvHtml(nestList.type)}"
             class="text-center blackpoker-type-group-title blackpoker-type-group-title-main"></h5>
           <div class="row">
 
@@ -859,7 +921,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='char-'+${row.charId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.charId}"
@@ -929,7 +992,8 @@
 
                 <div class="panel panel-default blackpoker-action" th:attr="id='fog-'+${row.fogId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}"
@@ -990,7 +1054,8 @@
                 <div class="panel panel-default blackpoker-action" th:attr="
                   id='trump-'+${row.trumpId},
                   data-format=${#sfn.formatDataFormat(row.format)},
-                  data-frame=${#sfn.formatDataFrame(row.frame)},">
+                  data-frame=${#sfn.formatDataFrame(row.frame)},
+                  data-type=${nestList.type}">
                   <div class="panel-heading">
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.trumpId}"
@@ -1047,6 +1112,9 @@
 
   <script type="text/javascript">
     $(function () {
+      // カテゴリフィルターの状態を保持する変数
+      var selectedGroupFilter1 = "";
+      var selectedGroupFilter2 = "";
 
       $('#modal_sidebar').on('show.bs.modal', function (event) {
         // メニューが開く際に表示しているリストとずれている場合、補正
@@ -1098,7 +1166,7 @@
 
 
       // ------------------------------------
-      // 1) URLパラメータから format / frame を取得する関数
+      // 1) URLパラメータから format / frame / type を取得する関数
       // ------------------------------------
       function getQueryParam(name) {
         // 簡易的な例：URLSearchParams が使える環境ならそちらでもOK
@@ -1138,46 +1206,41 @@
 
       if (urlFrame) {
         selectedFrame = urlFrame;
-        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', selectedFrame);
+        setActivePill('.nav-pills:has(a.frame-btn)', '.frame-btn', urlFrame);
       }
 
       function filterItems(initFlg) {
-        // $('.blackpoker-action, #actionlist-summary a[data-format], #actionlist-summary a[data-frame]').each(function() {
         $('.blackpoker-action').each(function () {
           var $el = $(this);
           var formatAttr = ($el.data('format') || "").trim();
           var frameAttr = ($el.data('frame') || "").trim();
+          var typeAttr = ($el.data('type') || "").trim();
+          var shouldShow = true;
 
-          // data-formatが設定されている場合は、フォーマットフィルタを適用
-          if (formatAttr !== "") {
-            if (selectedFormat && selectedFormat !== "") {
-              var formats = formatAttr.split(',');
-              if (formats.indexOf(selectedFormat) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              // 選択されたフォーマットがなければ表示
-              $el.show();
-            }
+          // フォーマットフィルターの適用
+          if (formatAttr !== "" && selectedFormat && selectedFormat !== "") {
+            var formats = formatAttr.split(',');
+            shouldShow = formats.indexOf(selectedFormat) !== -1;
           }
-          // data-formatがない（＝空）の場合、data-frameがある場合のみフレームフィルタを適用
-          else if (frameAttr !== "") {
-            if (selectedFrame && selectedFrame !== "") {
-              var frames = frameAttr.split(',');
-              if (frames.indexOf(selectedFrame) !== -1) {
-                $el.show();
-              } else {
-                $el.hide();
-              }
-            } else {
-              $el.show();
-            }
+
+          // フレームフィルターの適用
+          if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
+            var frames = frameAttr.split(',');
+            shouldShow = frames.indexOf(selectedFrame) !== -1;
           }
-          // どちらの属性もない場合は表示
-          else {
+
+          // カテゴリフィルター1とカテゴリフィルター2のOR条件による適用
+          if (shouldShow && typeAttr !== "" &&
+            (selectedGroupFilter1 !== "" || selectedGroupFilter2 !== "")) {
+            // いずれかのフィルターに一致する場合に表示
+            shouldShow = (selectedGroupFilter1 === typeAttr) || (selectedGroupFilter2 === typeAttr);
+          }
+
+          // 表示/非表示の設定
+          if (shouldShow) {
             $el.show();
+          } else {
+            $el.hide();
           }
         });
 
@@ -1185,14 +1248,15 @@
         $('.blackpoker-type-group').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-action');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-type-group-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-type-group-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
@@ -1200,14 +1264,15 @@
         $('.blackpoker-section').each(function () {
           var $categoryBlock = $(this);
           var $items = $categoryBlock.find('.blackpoker-type-group-title');
-          // インラインスタイルに "display: none" が含まれていない要素を抽出する
           var visibleItems = $items.not('[style*="display: none"]');
           var hasVisible = visibleItems.length != 0
           if (!hasVisible) {
             $categoryBlock.find('.blackpoker-section-title').hide();
+            $categoryBlock.hide();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           } else {
             $categoryBlock.find('.blackpoker-section-title').show();
+            $categoryBlock.show();
             console.log(initFlg, visibleItems.length, $items.length, hasVisible, $categoryBlock)
           }
         });
@@ -1226,14 +1291,34 @@
       // フォーマットボタンのクリックイベント
       $('.format-btn').on('click', function () {
         selectedFormat = $(this).text().trim();
-        updateHeader();  // ヘッダー表示の更新（前回の例参照）
+        // カテゴリフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
+        updateHeader();  // ヘッダー表示の更新
         filterItems();
       });
 
       // フレームボタンのクリックイベント
       $('.frame-btn').on('click', function () {
         selectedFrame = $(this).text().trim();
+        // カテゴリフィルターのリセット
+        selectedGroupFilter1 = "";
+        selectedGroupFilter2 = "";
+        $('#group-filter-1, #group-filter-2').val("");
         updateHeader();
+        filterItems();
+      });
+
+      // カテゴリフィルター1の変更イベント
+      $('#group-filter-1').on('change', function () {
+        selectedGroupFilter1 = $(this).val();
+        filterItems();
+      });
+
+      // カテゴリフィルター2の変更イベント
+      $('#group-filter-2').on('change', function () {
+        selectedGroupFilter2 = $(this).val();
         filterItems();
       });
 

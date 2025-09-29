@@ -58,7 +58,11 @@ ${rstFn.cnv(${row.frame})}
 
         #end
         #if(${row.actKey.trim()})
-**キーカード:** ${row.actKey}
+**キーカード条件:** ${row.actKey}
+
+        #end
+        #if(${row.actUnit.trim()})
+**キーユニット条件:** ${row.actUnit}
 
         #end
         #if(${row.actCost})
@@ -169,7 +173,7 @@ ${rstFn.cnv(${char.frame})}
         #end
 
         #if(${char.charKey.trim()})
-**キャラクターキーカード:** ${char.charKey}
+**ユニット条件:** ${char.charKey}
 
         #end
         #if(${char.charSize})
@@ -245,7 +249,7 @@ ${nestList.type}
 
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
-        #if(${row.format})
+        #if(${fog.format})
 **フォーマット:**
 
 .. csv-table::
@@ -266,7 +270,7 @@ ${rstFn.cnv(${fog.frame})}
         #end
 
         #if(${fog.fogKey.trim()})
-**フォグキーカード:** ${fog.fogKey}
+**ユニット条件:** ${fog.fogKey}
 
         #end
         #if(${fog.fogAbility})
@@ -335,7 +339,7 @@ ${nestList.type}
 
 ${trump.trumpName} (${trump.trumpType})
 ---------------------------------------------------
-        #if(${row.format})
+        #if(${trump.format})
 **フォーマット:**
 
 .. csv-table::
@@ -356,7 +360,7 @@ ${rstFn.cnv(${trump.frame})}
         #end
 
         #if(${trump.trumpKey.trim()})
-**切札キーカード:** ${trump.trumpKey}
+**ユニット条件:** ${trump.trumpKey}
 
         #end
         #if(${trump.trumpLabel})
