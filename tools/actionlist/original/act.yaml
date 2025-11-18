@@ -1,7 +1,7 @@
 data: 
   id: act
   ver: 第8.2版
-  lastupdate: 2025/9/30
+  lastupdate: 2025/11/19
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -358,7 +358,7 @@ actList:
       actTime: クイック
       actKey: ♢A〜10 を 2枚
       actTarget: ダメージ判定アクションのリクエスト
-      actEffect: 対象のリクエストを無効にする。対象のリクエストをステージから取り除き、対象のリクエストのキーカードを墓地に移す。
+      actEffect: 対象のリクエストを無効し、対象のリクエストをステージから取り除く。
       since: v1.0
       update: v8.0,v8.1
 

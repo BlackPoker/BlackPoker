@@ -1,7 +1,7 @@
 data: 
   id: act-frame
   ver: 第8.2版 フレーム編
-  lastupdate: 2025/9/30
+  lastupdate: 2025/11/19
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -57,6 +57,7 @@ actList:
       actTime: クイック
       actCost: S
       actKey: レアカード1枚
+      actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: キーカードを兵士として表向きかつチャージ状態で場に出す。
 
@@ -620,7 +621,7 @@ actList:
       actTrigger: 誘発
       actSpeed: 通常
       actTime: クイック
-      actActCond: |-
+      actTriggerCond: |-
         自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。
       actEffect: |-
         自分の表切札にある「喪失」を裏切札にする。そうしたくない場合、2点のダメージを受ける。
