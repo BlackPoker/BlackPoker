@@ -75,8 +75,8 @@
 
 
 \title{BlackPoker}
-\date{2025年09月29日}
-\release{2025/9/30}
+\date{2025年11月18日}
+\release{2025/11/19}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
 \renewcommand{\releasename}{リリース}
@@ -100,7 +100,7 @@
 {\huge 第8.2版}\\[20mm]
 
 {\Large もりくま 著} \\[5mm]
-{\Large 2025/9/30 発行}\\[10mm]
+{\Large 2025/11/19 発行}\\[10mm]
 
 {\small © 2013 BlackPoker}
 
@@ -121,7 +121,7 @@
 
 
 \sphinxAtStartPar
-release: 2025/9/30
+release: 2025/11/19
 
 \sphinxstepscope
 
@@ -4325,7 +4325,7 @@ x
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-対象のリクエストを無効にする。対象のリクエストをステージから取り除き、対象のリクエストのキーカードを墓地に移す。
+対象のリクエストを無効し、対象のリクエストをステージから取り除く。
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v1.0
@@ -7774,6 +7774,12 @@ x
 \sphinxstylestrong{特記事項:} ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
 
 \sphinxAtStartPar
+\sphinxstylestrong{起動条件:}
+
+\sphinxAtStartPar
+プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
+
+\sphinxAtStartPar
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
@@ -9350,7 +9356,7 @@ x
 \sphinxstylestrong{タイミング:} クイック
 
 \sphinxAtStartPar
-\sphinxstylestrong{起動条件:}
+\sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
 自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。
@@ -12781,7 +12787,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 バッファ
 
 \sphinxAtStartPar
-誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はアクションバッファです。
+誘発したリクエストを一時的に溜めておくバッファという領域があります。正式名称はリクエストバッファです。
 \end{sphinxadmonition}
 
 \begin{figure}[htbp]
@@ -12861,7 +12867,7 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \sphinxAtStartPar
 各処理グループ内では、必ずターンプレイヤーから始まり、
 ターンが回る順に全プレイヤーに対して確認およびアクションの処理を実施します。
-また、ループはバッファに未処理のアクションが存在する限り繰り返されます。
+また、ループはバッファに未処理のリクエストが存在する限り繰り返されます。
 \end{sphinxadmonition}
 
 
@@ -12965,11 +12971,11 @@ BlackPokerではアクション名を言い、コストの支払や対象を指�
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}8{]} リクエストが新たな誘発を発生させたか？}}
 \sphinxAtStartPar
 リクエストをステージに追加した後、それが起因となり新たな誘発を発生させたかどうかを確認します。
-誘発が発生している場合は、後続の処理でアクションバッファへの追加が行われます。
+誘発が発生している場合は、後続の処理でバッファへの追加が行われます。
 
 \sphinxlineitem{\sphinxstylestrong{{[}6\sphinxhyphen{}10\sphinxhyphen{}9{]} 誘発したリクエストをバッファに追加}}
 \sphinxAtStartPar
-新たに誘発されたリクエストが存在する場合、該当アクションをバッファに追加します。
+新たに誘発されたリクエストが存在する場合、該当するリクエストをバッファに追加します。
 これにより、誘発処理の再実行が可能となります。
 
 \end{description}

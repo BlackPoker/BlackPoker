@@ -447,6 +447,10 @@
     .beta {
       color: blue;
     }
+    /* Bootstrap の .panel-default > .panel-heading の color: #333 を上書きして黒にする */
+    .panel-default > .panel-heading {
+      color: #000;
+    }
   </style>
 
   <!--[if lt IE 9]>
@@ -528,7 +532,7 @@
             aria-hidden="true">×</button>
           <h5>
             <small class="">第8.2版</small>
-            <small class=""> : 2025/9/30</small>
+            <small class=""> : 2025/11/19</small>
           </h5>
           <h5><small>フォーマット</small></h5>
           <ul class="nav nav-pills">
@@ -1984,7 +1988,7 @@
     <div class="tab-content">
       <div class="text-center">
         <small class="">第8.2版</small>
-        <small class=""> : 2025/9/30</small>
+        <small class=""> : 2025/11/19</small>
       </div>
       <hr>
 
@@ -3164,7 +3168,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象のリクエストを無効にする。対象のリクエストをステージから取り除き、対象のリクエストのキーカードを墓地に移す。</span>
+                    <span>対象のリクエストを無効し、対象のリクエストをステージから取り除く。</span>
 
                     
 
@@ -4282,8 +4286,8 @@
 
                   </div>
                   <div class="panel-body">
-                     
-                    
+                    <span> （起動条件）<br></span> <span>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</span>
+                    <hr>
                      
                     
                      
@@ -6107,10 +6111,10 @@
 
                   </div>
                   <div class="panel-body">
-                    <span> （起動条件）<br></span> <span>自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。</span>
-                    <hr>
                      
                     
+                    <span> （誘発条件）<br></span> <span>自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。</span>
+                    <hr>
                      
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
