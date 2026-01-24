@@ -1,7 +1,7 @@
 data: 
   id: act-frame
-  ver: 第8.2版 フレーム編
-  lastupdate: 2025/11/19
+  ver: 第9.0版 フレーム編
+  lastupdate: 2026/03/31
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro
@@ -69,12 +69,15 @@ actList:
       actId: trapCounter
       actType: レアカード操作
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actKey: レアカード1枚
       actTarget: キーカードが1枚または2枚のリクエスト
       actNote: ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。
       actEffect: 対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
+      since: v8.0
+      update: v9.0
+      devNote: 罠カウンターをカウンターできていたのでv9.0で即時化
 
   - type: 切札操作
     acts:
