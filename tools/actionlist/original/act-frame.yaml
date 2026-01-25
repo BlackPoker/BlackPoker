@@ -614,23 +614,6 @@ actList:
       since: ex5.30.0
       update: v8.2
 
-  - type: 切札♢5 喪失
-    acts:
-    - frame: |-
-        ・エクストラ
-      actName: 疲弊
-      actId: exhaust
-      actType: 誘発魔法
-      actTrigger: 誘発
-      actSpeed: 通常
-      actTime: クイック
-      actTriggerCond: |-
-        自分の表切札に「喪失」があるかつ、エンドアクションをリクエストした時に誘発する。
-      actEffect: |-
-        自分の表切札にある「喪失」を裏切札にする。そうしたくない場合、2点のダメージを受ける。
-      since: ex5.30.0
-      update: v8.2
-
   - type: 切札♢8 修繕
     acts:
     - frame: |-
@@ -1378,12 +1361,13 @@ trumpList:
       trumpType: 表切札
       trumpKey: ♢5
       trumpAbility: |
-        あなたの場にチャージ状態の防壁が2体以上存在する場合、全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。
+        全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。
       since: ex5.30.0
-      update: v8.2
+      update: v8.2, v9.0
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_05
       devNote: |-
-        「苦渋の選択」で追加された。
+        ex5.30.0: 「苦渋の選択」で追加された。
+        v9.0: 複雑で使いづらいため、能力の条件緩和と疲弊アクションの廃止。
 
   - type: 切札♢8 修繕
     trumps:
