@@ -407,15 +407,16 @@ actList:
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
-      actCost: BDD
       actActCond: |-
         ・自分の表切札に「追撃」がある
-        ・プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
       actEffect: |-
         1. 自分の場にいる兵士を全てチャージ状態にする。
         2. アタックアクションをリクエストする。
+        3. 自分の切札にある♡5を裏向きにする。
       since: ex5.30.0
-      update: v8.2
+      update: v8.2, v9.0
+      devNote: |-
+        v9.0: コストを軽減し使いやすく修正。
 
   - type: 切札♡7 ファントム
     acts:
