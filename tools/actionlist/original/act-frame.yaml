@@ -460,14 +460,15 @@ actList:
       actType: 通常魔法
       actTrigger: 直接
       actSpeed: 通常
-      actTime: メイン
+      actTime: クイック
       actKey: ♡A〜K
-      actCost: B
       actActCond: 自分の表切札に「救済」がある
       actEffect: |-
         キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。
       since: ex5.30.0
-      update: v8.2
+      update: v8.2, v9.0
+      devNote: |-
+        v9.0: タイミングをメインからクイックに修正。コストもなしとし使いやすく修正。
 
   - type: 切札♡J チャリオット
     acts:
@@ -1272,7 +1273,7 @@ trumpList:
       update: v8.2
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_08
       devNote: |-
-        「弱者の反撃」で追加された。
+        ex4.14.0: 「弱者の反撃」で追加された。
 
   - type: 切札♡J チャリオット
     trumps:
