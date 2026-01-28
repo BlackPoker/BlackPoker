@@ -174,14 +174,14 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: クイック兵士召喚s
+      actName: クイック兵士召喚S
       actId: quickSoldierSummonS
       actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
       actCost: D
-      actKey: 2〜10
+      actKey: ♠2〜10
       actActCond: 自分の表切札に「スラッシュ」がある
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
@@ -378,24 +378,43 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡3 激励
+  - type: 切札♡3 ブレイク
     acts:
     - frame: |-
         ・エクストラ
-      actName: 激励
-      actId: rally
+      actName: ブレイク
+      actId: break
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actUnit: <激励> を持つ兵士1体
+      actUnit: <ブレイク> を持つ兵士1体
       actCost: C
       actTarget: 兵士1体
-      actActCond: 自分の表切札に「激励」がある
+      actActCond: 自分の表切札に「ブレイク」がある
       actEffect: |-
-        対象の兵士のサイズをこのターンが終わるまで X 加算する。X はキーカードのサイズに等しい。
+        対象の兵士をオーナー手札に戻す。
       since: ex3.4.0
-      update: v8.1
+      update: v8.1, v9.0
+      devNote: |-
+        v9.0: 効果を変更したので名前を「激励」から「ブレイク」に変更。激励の効果はフォグを用いておらず、可視化に問題があったため修正。
+
+    - frame: |-
+        ・エクストラ
+      actName: クイック兵士召喚H
+      actId: quickSoldierSummonH
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♡2〜10
+      actActCond: 自分の表切札に「ブレイク」がある
+      actEffect: |-
+        キーカードを一般兵として表向きかつチャージ状態で場に出す。
+      since: v9.0
+      devNote: |-
+        v9.0: 新規追加。
 
   - type: 切札♡4 休戦
     acts:
@@ -1216,21 +1235,22 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♡3 激励
+  - type: 切札♡3 ブレイク
     trumps:
     - frame: |-
         ・エクストラ
-      trumpName: 激励
+      trumpName: ブレイク
       trumpId: h3
       trumpType: 表切札
       trumpKey: ♡3
       trumpAbility: |
-        自分の場にいる♡の兵士は <激励> を持つ。
+        自分の場にいる♡の兵士は <ブレイク> を持つ。
       since: ex3.4.0
       update: v8.1
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
-        「立ち上がる兵」で追加された。
+        ex3.4.0: 「立ち上がる兵」で追加された。
+        v9.0: 効果を変更したので名前を「激励」から「ブレイク」に変更
 
   - type: 切札♡4 休戦
     trumps:
