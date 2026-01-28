@@ -160,7 +160,7 @@ actList:
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 即時
-      actTime: メイン
+      actTime: クイック
       actUnit: <スラッシュ> を持つ兵士1体
       actCost: C
       actTarget: 兵士1体
@@ -168,7 +168,26 @@ actList:
       actEffect: |-
         対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。
       since: ex3.4.0
-      update: v8.1
+      update: v8.1, v9.0
+      devNote: |-
+        v9.0: コストを軽減し使いやすく修正。
+
+    - frame: |-
+        ・エクストラ
+      actName: クイック兵士召喚s
+      actId: quickSoldierSummonS
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: 2〜10
+      actActCond: 自分の表切札に「スラッシュ」がある
+      actEffect: |-
+        キーカードを一般兵として表向きかつチャージ状態で場に出す。
+      since: v9.0
+      devNote: |-
+        v9.0: 新規追加。
 
   - type: 切札♠3 ドレイン
     acts:
