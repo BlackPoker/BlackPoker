@@ -820,15 +820,16 @@ actList:
       actType: 通常魔法
       actTrigger: 直接
       actSpeed: 通常
-      actTime: メイン
+      actTime: クイック
       actCost: L
-      actKey: ♣A〜K
       actActCond: 自分の表切札に「リセット」がある
       actEffect: |-
         1. 全ての防壁と兵士を墓地に移す。
         2. 全ての切札を裏切札にする。
       since: ex5.30.0
-      update: v8.2
+      update: v8.2, v9.0
+      devNote: |-
+        v9.0: タイミングをメインからクイックに変更。キーカードを廃止し使いやすく修正。
 
   - type: 切札♣10 悪あがき
     acts:
