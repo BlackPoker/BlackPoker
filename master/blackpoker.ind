@@ -1,34 +1,34 @@
 \begin{theindex}
 
   \item \spxentry{アクション}, \hyperpage{24}
-  \item \spxentry{アクション(コア)}, \hyperpage{148}
+  \item \spxentry{アクション(コア)}, \hyperpage{150}
   \item \spxentry{アクション名}, \hyperpage{26}
-  \item \spxentry{オーナー}, \hyperpage{153}
+  \item \spxentry{オーナー}, \hyperpage{155}
 
   \indexspace
 
   \item \spxentry{き\textbar{}起動条件}, \hyperpage{26}
-  \item \spxentry{き\textbar{}起動条件(コア)}, \hyperpage{152}
+  \item \spxentry{き\textbar{}起動条件(コア)}, \hyperpage{154}
   \item \spxentry{き\textbar{}切札}, \hyperpage{14}, \hyperpage{24}
   \item \spxentry{キーカード条件}, \hyperpage{26}
   \item \spxentry{キーユニット条件}, \hyperpage{26}
   \item \spxentry{キャラクター}, \hyperpage{21}
   \item \spxentry{キャラクター名}, \hyperpage{22}
-  \item \spxentry{クイック}, \hyperpage{151}
-  \item \spxentry{こ\textbar{}効果(コア)}, \hyperpage{152}
-  \item \spxentry{コアフロー}, \hyperpage{154}
+  \item \spxentry{クイック}, \hyperpage{153}
+  \item \spxentry{こ\textbar{}効果(コア)}, \hyperpage{154}
+  \item \spxentry{コアフロー}, \hyperpage{156}
   \item \spxentry{コスト}, \hyperpage{26}
-  \item \spxentry{コントローラー}, \hyperpage{153}
+  \item \spxentry{コントローラー}, \hyperpage{155}
   \item \spxentry{コンポーネント}, \hyperpage{19}, 
-		\hyperpage{148}
+		\hyperpage{150}
   \item \spxentry{コンポーネントスクリプト}, \hyperpage{19}
 
   \indexspace
 
   \item \spxentry{サイズ}, \hyperpage{22}
-  \item \spxentry{ステージ}, \hyperpage{148}
+  \item \spxentry{ステージ}, \hyperpage{150}
   \item \spxentry{スピード}, \hyperpage{26}
-  \item \spxentry{スピード(コア)}, \hyperpage{151}
+  \item \spxentry{スピード(コア)}, \hyperpage{153}
   \item \spxentry{そ\textbar{}即時効果}
     \subitem \spxentry{つ\textbar{}通常効果}, \hyperpage{27}
   \item \spxentry{ゾーン}, \hyperpage{12}, \hyperpage{19}
@@ -38,14 +38,14 @@
   \item \spxentry{た\textbar{}対象}, \hyperpage{26}
   \item \spxentry{た\textbar{}対戦レギュレーション}, 
 		\hyperpage{7}
-  \item \spxentry{ターン}, \hyperpage{147}
+  \item \spxentry{ターン}, \hyperpage{149}
   \item \spxentry{タイプ(アクション)}, \hyperpage{26}
   \item \spxentry{タイプ(キャラクター)}, \hyperpage{22}
   \item \spxentry{タイミング}, \hyperpage{26}
-  \item \spxentry{タイミング(コア)}, \hyperpage{151}
+  \item \spxentry{タイミング(コア)}, \hyperpage{153}
   \item \spxentry{ダメージ}, \hyperpage{15}
   \item \spxentry{チャージ}, \hyperpage{21}
-  \item \spxentry{チャンス}, \hyperpage{148}
+  \item \spxentry{チャンス}, \hyperpage{150}
   \item \spxentry{つ\textbar{}通常効果}
     \subitem \spxentry{そ\textbar{}即時効果}, \hyperpage{27}
   \item \spxentry{て\textbar{}手札}, \hyperpage{14}
@@ -53,15 +53,15 @@
   \item \spxentry{と\textbar{}特記事項}, \hyperpage{26}
   \item \spxentry{ドライブ}, \hyperpage{21}
   \item \spxentry{トリガー}, \hyperpage{26}
-  \item \spxentry{トリガー(アクション)}, \hyperpage{150}
-  \item \spxentry{トリガー(コア)}, \hyperpage{151}
+  \item \spxentry{トリガー(アクション)}, \hyperpage{152}
+  \item \spxentry{トリガー(コア)}, \hyperpage{153}
 
   \indexspace
 
   \item \spxentry{の\textbar{}能力(キャラクター)}, 
 		\hyperpage{22}
   \item \spxentry{の\textbar{}能力(切札)}, \hyperpage{24}
-  \item \spxentry{の\textbar{}能力(コア)}, \hyperpage{153}
+  \item \spxentry{の\textbar{}能力(コア)}, \hyperpage{155}
   \item \spxentry{の\textbar{}能力(フォグ)}, \hyperpage{23}
 
   \indexspace
@@ -79,14 +79,14 @@
 
   \indexspace
 
-  \item \spxentry{メイン}, \hyperpage{151}
+  \item \spxentry{メイン}, \hyperpage{153}
 
   \indexspace
 
   \item \spxentry{ゆ\textbar{}誘発条件}, \hyperpage{26}
-  \item \spxentry{ゆ\textbar{}誘発条件(コア)}, \hyperpage{152}
+  \item \spxentry{ゆ\textbar{}誘発条件(コア)}, \hyperpage{154}
   \item \spxentry{ユニット}, \hyperpage{12}, \hyperpage{19}, 
-		\hyperpage{149}
+		\hyperpage{151}
   \item \spxentry{ユニットカード}, \hyperpage{12}
   \item \spxentry{ユニット条件}, \hyperpage{12}, \hyperpage{19}
 
@@ -96,7 +96,7 @@
   \item \spxentry{ラベル(キャラクター)}, \hyperpage{22}
   \item \spxentry{ラベル(切札)}, \hyperpage{24}
   \item \spxentry{り\textbar{}領域}, \hyperpage{12}
-  \item \spxentry{リクエスト}, \hyperpage{148}
+  \item \spxentry{リクエスト}, \hyperpage{150}
   \item \spxentry{レアカード}, \hyperpage{14}
 
 \end{theindex}

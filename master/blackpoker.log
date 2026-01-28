@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 JAN 2026 19:14
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  28 JAN 2026 19:13
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1537,1116 +1537,1058 @@ Overfull \vbox (3.23927pt too high) has occurred while \output is active []
 [82] [83] [84] [85] [86] [87]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 7980.
+(hyperref)                removing `math shift' on input line 7988.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 7980.
+(hyperref)                removing `\spadesuit' on input line 7988.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 7980.
+(hyperref)                removing `math shift' on input line 7988.
 
 [88]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8023.
+(hyperref)                removing `math shift' on input line 8031.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8023.
+(hyperref)                removing `\spadesuit' on input line 8031.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8023.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8078.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8078.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8078.
+(hyperref)                removing `math shift' on input line 8031.
 
 [89]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8127.
+(hyperref)                removing `math shift' on input line 8129.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8127.
+(hyperref)                removing `\spadesuit' on input line 8129.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8127.
+(hyperref)                removing `math shift' on input line 8129.
 
 [90]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8173.
+(hyperref)                removing `math shift' on input line 8178.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8173.
+(hyperref)                removing `\spadesuit' on input line 8178.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8173.
+(hyperref)                removing `math shift' on input line 8178.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8219.
+(hyperref)                removing `math shift' on input line 8224.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8219.
+(hyperref)                removing `\spadesuit' on input line 8224.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8219.
+(hyperref)                removing `math shift' on input line 8224.
 
 [91]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8268.
+(hyperref)                removing `math shift' on input line 8270.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8268.
+(hyperref)                removing `\spadesuit' on input line 8270.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8268.
-
-[92] [93]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8454.
+(hyperref)                removing `math shift' on input line 8270.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8454.
+(hyperref)                removing `math shift' on input line 8319.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8454.
-
-[94]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8559.
+(hyperref)                removing `\spadesuit' on input line 8319.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8559.
+(hyperref)                removing `math shift' on input line 8319.
+
+[92] [93] [94]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 8505.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8559.
+(hyperref)                removing `\spadesuit' on input line 8505.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 8505.
 
 [95]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8606.
+(hyperref)                removing `math shift' on input line 8610.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8606.
+(hyperref)                removing `\heartsuit' on input line 8610.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8606.
+(hyperref)                removing `math shift' on input line 8610.
 
 [96]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8661.
+(hyperref)                removing `math shift' on input line 8657.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8661.
+(hyperref)                removing `\heartsuit' on input line 8657.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8661.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8722.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8722.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8722.
+(hyperref)                removing `math shift' on input line 8657.
 
 [97]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8777.
+(hyperref)                removing `math shift' on input line 8755.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8777.
+(hyperref)                removing `\heartsuit' on input line 8755.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8777.
+(hyperref)                removing `math shift' on input line 8755.
 
 [98]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8874.
+(hyperref)                removing `math shift' on input line 8816.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8874.
+(hyperref)                removing `\heartsuit' on input line 8816.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8874.
+(hyperref)                removing `math shift' on input line 8816.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 8871.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 8871.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 8871.
 
 [99]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8923.
+(hyperref)                removing `math shift' on input line 8968.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 8923.
+(hyperref)                removing `\heartsuit' on input line 8968.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 8923.
+(hyperref)                removing `math shift' on input line 8968.
 
-[100] [101]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9109.
-
+[100]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9109.
+(hyperref)                removing `math shift' on input line 9014.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9109.
-
-[102]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9174.
+(hyperref)                removing `\heartsuit' on input line 9014.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9174.
+(hyperref)                removing `math shift' on input line 9014.
+
+[101] [102]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9200.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9174.
+(hyperref)                removing `\heartsuit' on input line 9200.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9200.
 
 [103]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9221.
+(hyperref)                removing `math shift' on input line 9265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9221.
+(hyperref)                removing `\diamondsuit' on input line 9265.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9221.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9276.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9276.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9276.
+(hyperref)                removing `math shift' on input line 9265.
 
 [104]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9334.
+(hyperref)                removing `math shift' on input line 9312.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9334.
+(hyperref)                removing `\diamondsuit' on input line 9312.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9334.
+(hyperref)                removing `math shift' on input line 9312.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9367.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 9367.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9367.
 
 [105]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9401.
+(hyperref)                removing `math shift' on input line 9425.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9401.
+(hyperref)                removing `\diamondsuit' on input line 9425.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9401.
+(hyperref)                removing `math shift' on input line 9425.
 
 [106]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9487.
+(hyperref)                removing `math shift' on input line 9492.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 9487.
+(hyperref)                removing `\diamondsuit' on input line 9492.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9487.
+(hyperref)                removing `math shift' on input line 9492.
 
-[107] [108]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9681.
-
+[107]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9681.
+(hyperref)                removing `math shift' on input line 9578.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9681.
-
-[109]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9738.
+(hyperref)                removing `\diamondsuit' on input line 9578.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9738.
+(hyperref)                removing `math shift' on input line 9578.
+
+[108] [109]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9772.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9738.
+(hyperref)                removing `\clubsuit' on input line 9772.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 9772.
 
 [110]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9836.
+(hyperref)                removing `math shift' on input line 9829.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9836.
+(hyperref)                removing `\clubsuit' on input line 9829.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9836.
+(hyperref)                removing `math shift' on input line 9829.
 
 [111]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9879.
+(hyperref)                removing `math shift' on input line 9927.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9879.
+(hyperref)                removing `\clubsuit' on input line 9927.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9879.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9936.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9936.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9936.
+(hyperref)                removing `math shift' on input line 9927.
 
 [112]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9993.
+(hyperref)                removing `math shift' on input line 9970.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 9993.
+(hyperref)                removing `\clubsuit' on input line 9970.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 9993.
-
-[113] [114] [115]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10248.
+(hyperref)                removing `math shift' on input line 9970.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 10248.
+(hyperref)                removing `math shift' on input line 10024.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10248.
-
-[116]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10288.
+(hyperref)                removing `\clubsuit' on input line 10024.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 10288.
+(hyperref)                removing `math shift' on input line 10024.
+
+[113]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10081.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10288.
+(hyperref)                removing `\clubsuit' on input line 10081.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10328.
+(hyperref)                removing `math shift' on input line 10081.
+
+[114] [115] [116]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10336.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10328.
+(hyperref)                removing `\spadesuit' on input line 10336.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10328.
+(hyperref)                removing `math shift' on input line 10336.
 
 [117]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10368.
+(hyperref)                removing `math shift' on input line 10376.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10368.
+(hyperref)                removing `\spadesuit' on input line 10376.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10368.
+(hyperref)                removing `math shift' on input line 10376.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10414.
+(hyperref)                removing `math shift' on input line 10416.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10414.
+(hyperref)                removing `\heartsuit' on input line 10416.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10414.
+(hyperref)                removing `math shift' on input line 10416.
 
 [118]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10454.
+(hyperref)                removing `math shift' on input line 10456.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 10454.
+(hyperref)                removing `\heartsuit' on input line 10456.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10454.
+(hyperref)                removing `math shift' on input line 10456.
 
-[119] [120]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10502.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 10502.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10502.
+
+[119]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10542.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 10542.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10542.
+
+[120] [121]
 Overfull \vbox (3.23927pt too high) has occurred while \output is active []
 
 
-[121] [122]
+[122] [123]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10869.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 10869.
+(hyperref)                removing `math shift' on input line 10957.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10869.
+(hyperref)                removing `\spadesuit' on input line 10957.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 10957.
 
 File: Pictorial_Key_to_the_Tarot_Swords_01.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_01.jpg>
-[123]
+[124]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10917.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 10917.
+(hyperref)                removing `math shift' on input line 11005.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10917.
+(hyperref)                removing `\spadesuit' on input line 11005.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11005.
 
 File: Pictorial_Key_to_the_Tarot_Swords_02.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_02.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10959.
+(hyperref)                removing `math shift' on input line 11047.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 10959.
+(hyperref)                removing `\spadesuit' on input line 11047.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 10959.
+(hyperref)                removing `math shift' on input line 11047.
 
 File: Pictorial_Key_to_the_Tarot_Swords_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_03.jpg>
-[124]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11001.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 11001.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11001.
-
-File: Pictorial_Key_to_the_Tarot_Swords_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_04.jpg>
 [125]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11043.
+(hyperref)                removing `math shift' on input line 11089.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 11043.
+(hyperref)                removing `\spadesuit' on input line 11089.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11043.
+(hyperref)                removing `math shift' on input line 11089.
 
-File: Pictorial_Key_to_the_Tarot_Swords_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_05.jpg>
+File: Pictorial_Key_to_the_Tarot_Swords_04.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Swords_04.jpg>
 [126]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11085.
+(hyperref)                removing `math shift' on input line 11131.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 11085.
+(hyperref)                removing `\spadesuit' on input line 11131.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11085.
+(hyperref)                removing `math shift' on input line 11131.
+
+File: Pictorial_Key_to_the_Tarot_Swords_05.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Swords_05.jpg>
+[127]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11173.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 11173.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11173.
 
 File: Pictorial_Key_to_the_Tarot_Swords_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_07.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11127.
+(hyperref)                removing `math shift' on input line 11215.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 11127.
+(hyperref)                removing `\spadesuit' on input line 11215.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11127.
+(hyperref)                removing `math shift' on input line 11215.
 
 File: Pictorial_Key_to_the_Tarot_20_Judgement.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_20_Judgement.jpg>
-[127]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11169.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 11169.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11169.
-
-File: Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg>
 [128]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11211.
+(hyperref)                removing `math shift' on input line 11257.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11211.
+(hyperref)                removing `\spadesuit' on input line 11257.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11211.
+(hyperref)                removing `math shift' on input line 11257.
 
-File: Pictorial_Key_to_the_Tarot_Cups_02.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_02.jpg>
+File: Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg>
 [129]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11253.
+(hyperref)                removing `math shift' on input line 11299.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11253.
+(hyperref)                removing `\heartsuit' on input line 11299.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11253.
+(hyperref)                removing `math shift' on input line 11299.
+
+File: Pictorial_Key_to_the_Tarot_Cups_02.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Cups_02.jpg>
+[130]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11341.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 11341.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11341.
 
 File: Pictorial_Key_to_the_Tarot_Cups_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_03.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11295.
+(hyperref)                removing `math shift' on input line 11383.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11295.
+(hyperref)                removing `\heartsuit' on input line 11383.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11295.
+(hyperref)                removing `math shift' on input line 11383.
 
 File: Pictorial_Key_to_the_Tarot_Cups_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_04.jpg>
-[130]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11337.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11337.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11337.
-
-File: Pictorial_Key_to_the_Tarot_Cups_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_05.jpg>
 [131]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11379.
+(hyperref)                removing `math shift' on input line 11425.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11379.
+(hyperref)                removing `\heartsuit' on input line 11425.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11379.
+(hyperref)                removing `math shift' on input line 11425.
 
-File: Pictorial_Key_to_the_Tarot_Cups_07.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_07.jpg>
+File: Pictorial_Key_to_the_Tarot_Cups_05.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Cups_05.jpg>
 [132]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11421.
+(hyperref)                removing `math shift' on input line 11467.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11421.
+(hyperref)                removing `\heartsuit' on input line 11467.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11421.
+(hyperref)                removing `math shift' on input line 11467.
+
+File: Pictorial_Key_to_the_Tarot_Cups_07.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Cups_07.jpg>
+[133]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11509.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 11509.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11509.
 
 File: Pictorial_Key_to_the_Tarot_Cups_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_08.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11463.
+(hyperref)                removing `math shift' on input line 11551.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11463.
+(hyperref)                removing `\heartsuit' on input line 11551.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11463.
+(hyperref)                removing `math shift' on input line 11551.
 
 File: Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg>
-[133]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11505.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 11505.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11505.
-
-File: Pictorial_Key_to_the_Tarot_08_Strength.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_08_Strength.jpg>
 [134]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11547.
+(hyperref)                removing `math shift' on input line 11593.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11547.
+(hyperref)                removing `\heartsuit' on input line 11593.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11547.
+(hyperref)                removing `math shift' on input line 11593.
 
-File: Pictorial_Key_to_the_Tarot_Pentacles_01.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_01.jpg>
+File: Pictorial_Key_to_the_Tarot_08_Strength.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_08_Strength.jpg>
 [135]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11589.
+(hyperref)                removing `math shift' on input line 11635.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11589.
+(hyperref)                removing `\diamondsuit' on input line 11635.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11589.
+(hyperref)                removing `math shift' on input line 11635.
+
+File: Pictorial_Key_to_the_Tarot_Pentacles_01.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Pentacles_01.jpg>
+[136]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11677.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 11677.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11677.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_03.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11631.
+(hyperref)                removing `math shift' on input line 11719.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11631.
+(hyperref)                removing `\diamondsuit' on input line 11719.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11631.
+(hyperref)                removing `math shift' on input line 11719.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_04.jpg>
-[136]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11673.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11673.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11673.
-
-File: Pictorial_Key_to_the_Tarot_Pentacles_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_05.jpg>
 [137]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11715.
+(hyperref)                removing `math shift' on input line 11761.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11715.
+(hyperref)                removing `\diamondsuit' on input line 11761.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11715.
+(hyperref)                removing `math shift' on input line 11761.
 
-File: Pictorial_Key_to_the_Tarot_Pentacles_08.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_08.jpg>
+File: Pictorial_Key_to_the_Tarot_Pentacles_05.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Pentacles_05.jpg>
 [138]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11757.
+(hyperref)                removing `math shift' on input line 11803.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11757.
+(hyperref)                removing `\diamondsuit' on input line 11803.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11757.
+(hyperref)                removing `math shift' on input line 11803.
+
+File: Pictorial_Key_to_the_Tarot_Pentacles_08.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Pentacles_08.jpg>
+[139]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11845.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 11845.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 11845.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_09.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_09.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11799.
+(hyperref)                removing `math shift' on input line 11887.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11799.
+(hyperref)                removing `\diamondsuit' on input line 11887.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11799.
+(hyperref)                removing `math shift' on input line 11887.
 
 File: Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg Graphic file (type b
 mp)
 <Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg>
-[139]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11841.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11841.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11841.
-
-File: Pictorial_Key_to_the_Tarot_Wands_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_04.jpg>
 [140]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11883.
+(hyperref)                removing `math shift' on input line 11929.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11883.
+(hyperref)                removing `\clubsuit' on input line 11929.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11883.
+(hyperref)                removing `math shift' on input line 11929.
 
-File: Pictorial_Key_to_the_Tarot_Wands_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_05.jpg>
+File: Pictorial_Key_to_the_Tarot_Wands_04.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Wands_04.jpg>
 [141]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11925.
+(hyperref)                removing `math shift' on input line 11971.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11925.
+(hyperref)                removing `\clubsuit' on input line 11971.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11925.
+(hyperref)                removing `math shift' on input line 11971.
+
+File: Pictorial_Key_to_the_Tarot_Wands_05.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Wands_05.jpg>
+[142]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 12013.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 12013.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 12013.
 
 File: Pictorial_Key_to_the_Tarot_Wands_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_07.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11967.
+(hyperref)                removing `math shift' on input line 12055.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11967.
+(hyperref)                removing `\clubsuit' on input line 12055.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 11967.
+(hyperref)                removing `math shift' on input line 12055.
 
 File: Pictorial_Key_to_the_Tarot_Wands_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_08.jpg>
-[142]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12009.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12009.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12009.
-
-File: Pictorial_Key_to_the_Tarot_Wands_09.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_09.jpg>
 [143]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12051.
+(hyperref)                removing `math shift' on input line 12097.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12051.
+(hyperref)                removing `\clubsuit' on input line 12097.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12051.
+(hyperref)                removing `math shift' on input line 12097.
 
-File: Pictorial_Key_to_the_Tarot_Wands_10.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_10.jpg>
+File: Pictorial_Key_to_the_Tarot_Wands_09.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Wands_09.jpg>
 [144]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12093.
+(hyperref)                removing `math shift' on input line 12139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12093.
+(hyperref)                removing `\clubsuit' on input line 12139.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 12093.
+(hyperref)                removing `math shift' on input line 12139.
+
+File: Pictorial_Key_to_the_Tarot_Wands_10.jpg Graphic file (type bmp)
+<Pictorial_Key_to_the_Tarot_Wands_10.jpg>
+[145]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 12181.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 12181.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 12181.
 
 File: Pictorial_Key_to_the_Tarot_13_Death.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_13_Death.jpg>
-[145] [146]
+[146] [147] [148
+
+]
 第9章
 File: plantuml-5869adc776d20b7021b88175e8de80f0f436330c.pdf Graphic file (type 
 pdf)
 <plantuml-5869adc776d20b7021b88175e8de80f0f436330c.pdf>
-[147
-
-] [148]
+[149] [150]
 File: abstract.pdf Graphic file (type pdf)
 <abstract.pdf>
- [149]
+ [151]
 File: plantuml-b424b035f54a58f3126979e401d275cf680053a5.pdf Graphic file (type 
 pdf)
 <plantuml-b424b035f54a58f3126979e401d275cf680053a5.pdf>
- [150]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12376--12378
+ [152]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12464--12466
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12380--12382
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12468--12470
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12396--12398
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12484--12486
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12400--12402
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12488--12490
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12418--12424
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12506--12512
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12429--12433
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12517--12521
 []
  []
 
-[151]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12498--12500
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12502--12504
+[153]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12586--12588
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12506--12508
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12590--12592
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12510--12512
-[]
- []
-
-[152]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12523--12526
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12594--12596
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12528--12530
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12598--12600
+[]
+ []
+
+[154]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12611--12614
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12541--12543
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12616--12618
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12548--12551
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12629--12631
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12556--12559
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12636--12639
+[]
+ []
+
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12644--12647
 []
  []
 
 File: plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf Graphic file (type 
 pdf)
 <plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf>
-[153]
+[155]
 File: plantuml-5c3b9d2c43d8740600145b89955601a615170288.pdf Graphic file (type 
 pdf)
 <plantuml-5c3b9d2c43d8740600145b89955601a615170288.pdf>
- [154]
+ [156]
 File: plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf Graphic file (type 
 pdf)
 <plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf>
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12633--12635
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12721--12723
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12637--12639
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12725--12727
 []
  []
 
-[155]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12641--12643
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12645--12647
+[157]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12729--12731
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12649--12654
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12733--12735
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12660--12664
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12737--12742
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12666--12668
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12748--12752
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12672--12676
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12754--12756
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12684--12686
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12760--12764
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12688--12690
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12772--12774
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12692--12694
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12776--12778
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12696--12698
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12780--12782
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12700--12702
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12784--12786
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12704--12706
-[]
- []
-
-[156]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12708--12712
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12788--12790
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12720--12723
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12792--12794
 []
  []
 
-File: plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf Graphic file (type 
-pdf)
-<plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf>
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12754--12757
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12759--12762
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12764--12768
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12770--12774
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12776--12779
-[]
- []
-
-[157] [158]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12781--12784
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12786--12789
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12791--12795
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12797--12801
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12803--12806
+[158]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12796--12800
 []
  []
 
@@ -2655,270 +2597,328 @@ Overfull \hbox (140.54974pt too wide) in paragraph at lines 12808--12811
 []
  []
 
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12813--12816
-[]
- []
-
-[159]
-File: plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf Graphic file (type 
+File: plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf Graphic file (type 
 pdf)
-<plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf>
+<plantuml-6f625fd3091913318d2a09c4f5dda21eb1e08d44.pdf>
 
 Overfull \hbox (140.54974pt too wide) in paragraph at lines 12842--12845
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12847--12851
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12847--12850
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12853--12856
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12852--12856
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12858--12861
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12858--12862
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12863--12866
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12864--12867
+[]
+ []
+
+[159] [160]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12869--12872
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12868--12871
-[]
- []
-
-[160]
-File: plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf Graphic file (type 
-pdf)
-<plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf>
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12890--12893
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12874--12877
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12895--12899
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12879--12883
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12901--12905
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12885--12889
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12907--12910
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12891--12894
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12912--12914
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12896--12899
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12916--12918
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12901--12904
 []
  []
 
 [161]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12920--12923
-[]
- []
-
-
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 12925--12928
-[]
- []
-
+File: plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf Graphic file (type 
+pdf)
+<plantuml-caaca34586e95540adb102e9bc8309243f59b393.pdf>
 
 Overfull \hbox (140.54974pt too wide) in paragraph at lines 12930--12933
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 12962--12962
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12935--12939
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 12962--12962
-
- []
-
-
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 12973--12973
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12941--12944
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 12973--12973
-
- []
-
-
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 12984--12984
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12946--12949
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 12984--12984
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12951--12954
+[]
+ []
 
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12956--12959
+[]
  []
 
 [162]
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 13005--13007
+File: plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf Graphic file (type 
+pdf)
+<plantuml-5d2051ec7bb14a770950bcb23c25d203c53ec5f1.pdf>
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12978--12981
 []
  []
 
 
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 13012--13014
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12983--12987
 []
  []
 
 
-Overfull \hbox (135.00185pt too wide) in paragraph at lines 13019--13021
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12989--12993
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 13041--13043
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 12995--12998
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 13048--13050
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13000--13002
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 13055--13057
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13004--13006
+[]
+ []
+
+[163]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13008--13011
 []
  []
 
 
-Overfull \hbox (142.39923pt too wide) in paragraph at lines 13062--13064
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13013--13016
 []
  []
 
-[163] [164]
+
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13018--13021
+[]
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13050--13050
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13050--13050
+
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13061--13061
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13061--13061
+
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13072--13072
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 13072--13072
+
+ []
+
+[164]
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 13093--13095
+[]
+ []
+
+
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 13100--13102
+[]
+ []
+
+
+Overfull \hbox (135.00185pt too wide) in paragraph at lines 13107--13109
+[]
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13129--13131
+[]
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13136--13138
+[]
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13143--13145
+[]
+ []
+
+
+Overfull \hbox (142.39923pt too wide) in paragraph at lines 13150--13152
+[]
+ []
+
+[165] [166]
 第10章
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13096--13098
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13184--13186
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13096--13098
+Underfull \hbox (badness 10000) in paragraph at lines 13184--13186
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / html / all . html ? format = %E3 % 83 % A9 % E3 % 82 %
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13100--13102
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13188--13190
 []
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13112--13114
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13200--13202
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13112--13114
+Underfull \hbox (badness 10000) in paragraph at lines 13200--13202
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / html / all . html ? format = %E3 % 83 % 9E % E3 % 82 %
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13116--13118
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13204--13206
 []
  []
 
-[165
+[167
 
 ]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13132--13134
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13220--13222
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13132--13134
+Underfull \hbox (badness 10000) in paragraph at lines 13220--13222
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / master 
 / actionlist / html / all . html ? format = %E3 % 83 % 9E % E3 % 82 %
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13132--13134
+Underfull \hbox (badness 10000) in paragraph at lines 13220--13222
 \T1/qtm/m/n/10 B9 % E3 % 82 % BF % E3 % 83 % BC & frame = %E3 % 82 % A8 % E3 % 
 82 % AF % E3 % 82 % B9 % E3 % 83 % 88 % E3 % 83 %
  []
 
-[166] [167] [168] [169] [170] [171] [172
+[168] [169] [170] [171] [172] [173] [174
 
 ]
 第11章
-[173]
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13547--13547
+[175]
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13635--13635
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13547--13547
+Underfull \hbox (badness 10000) in paragraph at lines 13635--13635
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13558--13558
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13646--13646
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13558--13558
+Underfull \hbox (badness 10000) in paragraph at lines 13646--13646
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13589--13589
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13677--13677
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13589--13589
+Underfull \hbox (badness 10000) in paragraph at lines 13677--13677
 
  []
 
 
-Overfull \hbox (140.54974pt too wide) in paragraph at lines 13612--13612
+Overfull \hbox (140.54974pt too wide) in paragraph at lines 13700--13700
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 13612--13612
+Underfull \hbox (badness 10000) in paragraph at lines 13700--13700
 
  []
 
-[174] [175] [176] [177] (./blackpoker.ind [178] [179
+[176] [177] [178] [179] (./blackpoker.ind [180] [181
 
 
 ]) (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 6BAE3081394746BD682895948C8473E7;31686.
+(rerunfilecheck)             Checksum: 68344CCCC65460CBAC81DADAFA990EFC;31902.
  ) 
 Here is how much of TeX's memory you used:
- 15664 strings out of 480496
- 260400 string characters out of 5899437
- 625020 words of memory out of 5000000
- 33279 multiletter control sequences out of 15000+600000
+ 15670 strings out of 480496
+ 260596 string characters out of 5899437
+ 625469 words of memory out of 5000000
+ 33285 multiletter control sequences out of 15000+600000
  498422 words of font info for 106 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,642b,575s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (185 pages, 633836 bytes).
+Output written on blackpoker.dvi (187 pages, 636592 bytes).
