@@ -77,6 +77,7 @@ actList:
       actEffect: 対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。
       since: v8.0
       update: v9.0
+      changed: changed
       devNote: 罠カウンターをカウンターできていたのでv9.0で即時化
 
   - type: 切札操作
@@ -187,6 +188,7 @@ actList:
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
       since: v9.0
+      changed: changed
       devNote: |-
         v9.0: 新規追加。
 
@@ -397,6 +399,7 @@ actList:
         対象の兵士をオーナー手札に戻す。
       since: ex3.4.0
       update: v8.1, v9.0
+      changed: changed
       devNote: |-
         v9.0: 効果を変更したので名前を「激励」から「ブレイク」に変更。激励の効果はフォグを用いておらず、可視化に問題があったため修正。
 
@@ -414,6 +417,7 @@ actList:
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
       since: v9.0
+      changed: changed
       devNote: |-
         v9.0: 新規追加。
 
@@ -454,6 +458,7 @@ actList:
         3. 自分の切札にある♡5を裏向きにする。
       since: ex5.30.0
       update: v8.2, v9.0
+      changed: changed
       devNote: |-
         v9.0: コストを軽減し使いやすく修正。
 
@@ -507,6 +512,7 @@ actList:
         キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。
       since: ex5.30.0
       update: v8.2, v9.0
+      changed: changed
       devNote: |-
         v9.0: タイミングをメインからクイックに修正。コストもなしとし使いやすく修正。
 
@@ -649,6 +655,7 @@ actList:
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
       since: v9.0
+      changed: changed
       devNote: |-
         v9.0: 新規追加。
 
@@ -692,6 +699,7 @@ actList:
         3. 選べなかった場合、対象の兵士を墓地に移す。
       since: ex4.14.0
       update: v8.2, v9.0
+      changed: changed
       devNote: |-
         v9.0: 対象、効果を緩和し使いやすく修正。
 
@@ -827,6 +835,7 @@ actList:
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
       since: v9.0
+      changed: changed
       devNote: |-
         v9.0: 新規追加。
 
@@ -881,6 +890,7 @@ actList:
         ライフの一番上からカードを2枚引き、手札に加える。
       since: ex3.10.0
       update: v8.2, v9.0
+      changed: changed
       devNote: |-
         v9.0: 条件を緩和し、2枚固定ドローに変更。
 
@@ -901,6 +911,7 @@ actList:
         2. 全ての切札を裏切札にする。
       since: ex5.30.0
       update: v8.2, v9.0
+      changed: changed
       devNote: |-
         v9.0: タイミングをメインからクイックに変更。キーカードを廃止し使いやすく修正。
 
@@ -1281,7 +1292,8 @@ trumpList:
       trumpAbility: |
         自分の場にいる♡の兵士は <ブレイク> を持つ。
       since: ex3.4.0
-      update: v8.1
+      update: v8.1, v9.0
+      changed: changed
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
         ex3.4.0: 「立ち上がる兵」で追加された。
