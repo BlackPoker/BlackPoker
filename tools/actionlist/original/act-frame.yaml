@@ -169,6 +169,7 @@ actList:
         対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。
       since: ex3.4.0
       update: v8.1, v9.0
+      changed: changed
       devNote: |-
         v9.0: コストを軽減し使いやすく修正。
 
