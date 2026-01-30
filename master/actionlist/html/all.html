@@ -213,6 +213,11 @@
       color: black;
     }
 
+    span.changed {
+      color: #d9534f;
+      font-weight: bold;
+    }
+
     .blackpoker-action .act-title:before {
       content: "";
     }
@@ -531,8 +536,8 @@
           <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal"
             aria-hidden="true">×</button>
           <h5>
-            <small class="">第8.2版</small>
-            <small class=""> : 2025/11/19</small>
+            <small class="">第9.0版</small>
+            <small class=""> : 2026/03/31</small>
           </h5>
           <h5><small>フォーマット</small></h5>
           <ul class="nav nav-pills">
@@ -891,7 +896,7 @@
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
                     </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-trapCounter" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
-                      <span>罠カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">罠カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
                     </a>
@@ -939,11 +944,11 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-slash" data-frame="エクストラ" data-type="切札♠2 スラッシュ">
-                      <span>スラッシュ</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">スラッシュ</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
                     </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-quickSoldierSummonS" data-frame="エクストラ" data-type="切札♠2 スラッシュ">
-                      <span>クイック兵士召喚S</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">クイック兵士召喚<span class="spade"></span></span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
                     </a>
@@ -979,7 +984,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-resurrection" data-frame="エクストラ" data-type="切札♠5 蘇生">
-                      <span>蘇生</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">蘇生</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                       </span>
                     </a>
@@ -1055,11 +1060,11 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-break" data-frame="エクストラ" data-type="切札♡3 ブレイク">
-                      <span>ブレイク</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">ブレイク</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
                     </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-quickSoldierSummonH" data-frame="エクストラ" data-type="切札♡3 ブレイク">
-                      <span>クイック兵士召喚H</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">クイック兵士召喚<span class="heart"></span></span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
                     </a>
@@ -1083,7 +1088,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-pursuit" data-frame="エクストラ" data-type="切札♡5 追撃">
-                      <span>追撃</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">追撃</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-メイン</span></b>
                       </span>
                     </a>
@@ -1111,7 +1116,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-salvation" data-frame="エクストラ" data-type="切札♡8 救済">
-                      <span>救済</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">救済</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
                     </a>
@@ -1174,6 +1179,10 @@
                       <span>交渉</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-quickSoldierSummonD" data-frame="エクストラ" data-type="切札♢3 交渉">
+                      <span class="changed">クイック兵士召喚<span class="diam"></span></span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -1183,7 +1192,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-reckoning" data-frame="エクストラ" data-type="切札♢4 相殺">
-                      <span>相殺</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">相殺</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
                     </a>
@@ -1195,7 +1204,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-repair" data-frame="エクストラ" data-type="切札♢8 修繕">
-                      <span>修繕</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">修繕</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-メイン</span></b>
                       </span>
                     </a>
@@ -1250,6 +1259,10 @@
                       <span>スイッチ</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-quickSoldierSummonC" data-frame="エクストラ" data-type="切札♣4 スイッチ">
+                      <span class="changed">クイック兵士召喚<span class="club"></span></span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-クイック</span></b>
+                      </span>
                     </a>
                   </div>
                 </div>
@@ -1275,7 +1288,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-handRefill" data-frame="エクストラ" data-type="切札♣7 手札補充">
-                      <span>手札補充</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">手札補充</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>誘発-通常-クイック</span></b>
                       </span>
                     </a>
@@ -1287,7 +1300,7 @@
                   <div class="list-group">
 
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-reset" data-frame="エクストラ" data-type="切札♣8 リセット">
-                      <span>リセット</span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span class="changed">リセット</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
                     </a>
@@ -1583,7 +1596,7 @@
                   <span class="blackpoker-type-group-title">切札<span class="heart"></span>3 ブレイク</span>
                   <div class="list-group">
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#trump-h3" data-frame="エクストラ" data-type="切札♡3 ブレイク">
-                      <span>ブレイク</span>
+                      <span class="changed">ブレイク</span>
                       <span class="tag tag-default tag-pill pull-right">
                         <span class="glyphicon glyphicon-star-empty"></span>
                         <b><span><span class="heart"></span>3</span></b>
@@ -1713,7 +1726,7 @@
                   <span class="blackpoker-type-group-title">切札<span class="diam"></span>5 喪失</span>
                   <div class="list-group">
                     <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#trump-d5" data-frame="エクストラ" data-type="切札♢5 喪失">
-                      <span>喪失</span>
+                      <span class="changed">喪失</span>
                       <span class="tag tag-default tag-pill pull-right">
                         <span class="glyphicon glyphicon-star-empty"></span>
                         <b><span><span class="diam"></span>5</span></b>
@@ -1983,8 +1996,8 @@
 
     <div class="tab-content">
       <div class="text-center">
-        <small class="">第8.2版</small>
-        <small class=""> : 2025/11/19</small>
+        <small class="">第9.0版</small>
+        <small class=""> : 2026/03/31</small>
       </div>
       <hr>
 
@@ -4306,7 +4319,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">罠カウンター</span>
+                     <span class="act-title changed">罠カウンター</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -4636,7 +4649,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">スラッシュ</span>
+                     <span class="act-title changed">スラッシュ</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -4690,7 +4703,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">クイック兵士召喚S</span>
+                     <span class="act-title changed">クイック兵士召喚<span class="spade"></span></span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -4856,7 +4869,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">蘇生</span>
+                     <span class="act-title changed">蘇生</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -4891,7 +4904,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     
                     <span>（効果）<br></span>
-                    <span>自分の墓地にある<span class="spade"></span>2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。</span>
+                    <span>自分の墓地にある<span class="spade"></span>のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。</span>
 
                     
 
@@ -5346,7 +5359,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">ブレイク</span>
+                     <span class="act-title changed">ブレイク</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -5400,7 +5413,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">クイック兵士召喚H</span>
+                     <span class="act-title changed">クイック兵士召喚<span class="heart"></span></span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -5514,7 +5527,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">追撃</span>
+                     <span class="act-title changed">追撃</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -5678,7 +5691,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">救済</span>
+                     <span class="act-title changed">救済</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -6115,6 +6128,60 @@
                 </div>
               </div>
             </div>
+
+            <div class="col-lg-4">
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonD" data-frame="エクストラ" data-type="切札♢3 交渉">
+
+                  <div class="panel-heading">
+
+                     <span class="act-title changed">クイック兵士召喚<span class="diam"></span></span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span>(召喚)</span>
+                    </small>
+                    <!-- </span> -->
+                    <div class="pull-right">
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span>直接-通常-クイック</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small>
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span><span class="diam"></span>2〜10</span>
+                        <br>
+                      </small>
+                      
+                      
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                    <span> （起動条件）<br></span> <span>自分の表切札に「交渉」がある</span>
+                    <hr>
+                     
+                    
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    <span>（効果）<br></span>
+                    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="blackpoker-type-group">
@@ -6127,7 +6194,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">相殺</span>
+                     <span class="act-title changed">相殺</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -6161,7 +6228,7 @@
                     <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                     <hr>
                     <span>（効果）<br></span>
-                    <span>対象リクエストのキーカードの数字の合計値が5以上の場合、次を行う。<br><ol>
+                    <span><ol>
 <li>対象リクエストのキーカードの数字の合計値分ダメージを受ける。</li>
 <li>対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</li></ol></span>
 
@@ -6184,7 +6251,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">修繕</span>
+                     <span class="act-title changed">修繕</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -6614,6 +6681,60 @@
                 </div>
               </div>
             </div>
+
+            <div class="col-lg-4">
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonC" data-frame="エクストラ" data-type="切札♣4 スイッチ">
+
+                  <div class="panel-heading">
+
+                     <span class="act-title changed">クイック兵士召喚<span class="club"></span></span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span>(召喚)</span>
+                    </small>
+                    <!-- </span> -->
+                    <div class="pull-right">
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span>直接-通常-クイック</span>
+                      </small> <span>|</span> <small>
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+                      </small>
+
+
+                    </div>
+                    <div class="text-left">
+                      <small>
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span><span class="club"></span>2〜10</span>
+                        <br>
+                      </small>
+                      
+                      
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                    <span> （起動条件）<br></span> <span>自分の表切札に「スイッチ」がある</span>
+                    <hr>
+                     
+                    
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    <span>（効果）<br></span>
+                    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="blackpoker-type-group">
@@ -6733,7 +6854,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">手札補充</span>
+                     <span class="act-title changed">手札補充</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
@@ -6785,7 +6906,7 @@
 
                   <div class="panel-heading">
 
-                     <span class="act-title">リセット</span>
+                     <span class="act-title changed">リセット</span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
