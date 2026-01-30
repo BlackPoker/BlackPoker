@@ -1,7 +1,7 @@
 data: 
   id: act
-  ver: 第8.2版
-  lastupdate: 2025/11/19
+  ver: 第9.0版
+  lastupdate: 2026/03/31
   pdfurl_std: /pdf/blackpoker-v6-std
   pdfurl_lite: /pdf/blackpoker-v6-lite
   pdfurl_pro: /pdf/blackpoker-v6-pro

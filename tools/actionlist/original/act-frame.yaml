@@ -174,7 +174,7 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: クイック兵士召喚S
+      actName: クイック兵士召喚♠
       actId: quickSoldierSummonS
       actType: 召喚
       actTrigger: 直接
@@ -401,7 +401,7 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: クイック兵士召喚H
+      actName: クイック兵士召喚♡
       actId: quickSoldierSummonH
       actType: 召喚
       actTrigger: 直接
@@ -634,6 +634,23 @@ actList:
       since: ex3.4.0
       update: v8.1
 
+    - frame: |-
+        ・エクストラ
+      actName: クイック兵士召喚♢
+      actId: quickSoldierSummonD
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♢2〜10
+      actActCond: 自分の表切札に「交渉」がある
+      actEffect: |-
+        キーカードを一般兵として表向きかつチャージ状態で場に出す。
+      since: v9.0
+      devNote: |-
+        v9.0: 新規追加。
+
   - type: 切札♢4 相殺
     acts:
     - frame: |-
@@ -794,6 +811,23 @@ actList:
         2. キーカードを手札に戻す。
       since: ex3.4.0
       update: v8.1
+
+    - frame: |-
+        ・エクストラ
+      actName: クイック兵士召喚♣
+      actId: quickSoldierSummonC
+      actType: 召喚
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: D
+      actKey: ♣2〜10
+      actActCond: 自分の表切札に「スイッチ」がある
+      actEffect: |-
+        キーカードを一般兵として表向きかつチャージ状態で場に出す。
+      since: v9.0
+      devNote: |-
+        v9.0: 新規追加。
 
   - type: 切札♣5 内乱
     acts:

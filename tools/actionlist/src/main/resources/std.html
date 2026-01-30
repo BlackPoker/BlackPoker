@@ -591,7 +591,7 @@
                     data-type=${actList.type}"
                       class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                      <span th:text="${row.actName}"></span> <span class="tag tag-default tag-pill pull-right"> <span
+                      <span th:utext="${#sfn.cnvHtml(row.actName)}"></span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span
                             th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                       </span>
@@ -831,8 +831,8 @@
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}"
                       th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:text="${row.actName}"></span>
-                    </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
+                      <span class="act-title" th:utext="${#sfn.cnvHtml(row.actName)}"></span>
+                    </a> <span class="act-title" th:utext="${#sfn.cnvHtml(row.actName)}" th:if="${#strings.isEmpty(row.story)}"></span>
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
