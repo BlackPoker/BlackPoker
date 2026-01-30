@@ -239,9 +239,12 @@ actList:
       actCost: BL
       actActCond: 自分の表切札に「蘇生」がある
       actEffect: |-
-        自分の墓地にある♠2〜10のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
+        自分の墓地にある♠のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。
       since: ex3.10.0
-      update: v8.2
+      update: v8.2, v9.0
+      changed: changed
+      devNote: |-
+        v9.0: 墓地から選ぶカードの条件を緩和し使いやすく修正。
 
   - type: 切札♠7 瞬殺
     acts:
@@ -1455,6 +1458,7 @@ trumpList:
         全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。
       since: ex5.30.0
       update: v8.2, v9.0
+      changed: changed
       image: tarot/Pictorial_Key_to_the_Tarot_Pentacles_05
       devNote: |-
         ex5.30.0: 「苦渋の選択」で追加された。
