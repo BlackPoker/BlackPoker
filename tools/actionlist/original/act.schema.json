@@ -67,7 +67,8 @@
                   "flavorSpeaker": { "type": "string" },
                   "since": { "type": "string" },
                   "update": { "type": "string" },
-                  "devNote": { "type": "string" }
+                  "devNote": { "type": "string" },
+                  "changed": { "type": "string" }
                 },
                 "required": [
                   "actName",
@@ -113,8 +114,8 @@
                   "flavorSpeaker": { "type": "string" },
                   "since": { "type": "string" },
                   "update": { "type": "string" },
-                  "devNote": { "type": "string" }
-
+                  "devNote": { "type": "string" },
+                  "changed": { "type": "string" }
                 },
                 "required": [
                   "format",
@@ -156,7 +157,8 @@
                   "flavorSpeaker": { "type": "string" },
                   "since": { "type": "string" },
                   "update": { "type": "string" },
-                  "devNote": { "type": "string" }
+                  "devNote": { "type": "string" },
+                  "changed": { "type": "string" }
                 },
                 "required": [
                   "format",
@@ -215,7 +217,8 @@
                   "flavorSpeaker": { "type": "string" },
                   "since": { "type": "string" },
                   "update": { "type": "string" },
-                  "devNote": { "type": "string" }
+                  "devNote": { "type": "string" },
+                  "changed": { "type": "string" }
                 },
                 "required": [
                   "format",
