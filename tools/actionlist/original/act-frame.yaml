@@ -339,8 +339,7 @@ actList:
       actSpeed: 通常
       actTime: メイン
       actCost: SS
-      # actKey: J〜K
-      actActCond: 自分の場に「魔王」がいる
+      actActCond: 自分の表切札に「魔王」がある
       actEffect: |-
         切札の♠Kが表の場合、次を行う。
         1. 全ての兵士を墓地に移す。
@@ -359,7 +358,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の表切札に「魔王」があるかつ、エンドアクションをリクエストした時に誘発する。
+        自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
       actEffect: |-
         ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
       since: ex3.10.0
