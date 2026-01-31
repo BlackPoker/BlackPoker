@@ -340,7 +340,7 @@ actList:
       actTime: メイン
       actCost: SS
       # actKey: J〜K
-      actActCond: 自分の表切札に「魔王」がある
+      actActCond: 自分の場に「魔王」がいる
       actEffect: |-
         切札の♠Kが表の場合、次を行う。
         1. 全ての兵士を墓地に移す。
