@@ -905,7 +905,7 @@ actList:
       actId: reset
       actType: 通常魔法
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actCost: L
       actActCond: 自分の表切札に「リセット」がある
