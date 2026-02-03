@@ -22,7 +22,7 @@
 \contentsline {section}{\numberline {3.8}ダメージ}{15}{section.3.8}%
 \contentsline {section}{\numberline {3.9}ゲームの始め方}{15}{section.3.9}%
 \contentsline {subsection}{\numberline {3.9.1}共通手順：プリセット配置}{15}{subsection.3.9.1}%
-\contentsline {subsection}{\numberline {3.9.2}共通手順：先攻決定}{15}{subsection.3.9.2}%
+\contentsline {subsection}{\numberline {3.9.2}共通手順：先攻決定}{16}{subsection.3.9.2}%
 \contentsline {subsection}{\numberline {3.9.3}共通手順：ゲーム開始}{16}{subsection.3.9.3}%
 \contentsline {section}{\numberline {3.10}基礎概念}{16}{section.3.10}%
 \contentsline {subsection}{\numberline {3.10.1}BlackPokerとは}{16}{subsection.3.10.1}%

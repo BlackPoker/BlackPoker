@@ -75,7 +75,7 @@
 
 
 \title{BlackPoker}
-\date{2026年02月01日}
+\date{2026年02月03日}
 \release{2026/03/31}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -928,6 +928,34 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 \item {} 
 \sphinxAtStartPar
 続けてライフの次のカードを表向きにして「兵士」として場に出す。
+
+\item {} \begin{enumerate}
+\sphinxsetlistlabels{\arabic}{enumii}{enumiii}{}{.}%
+\setcounter{enumii}{1}
+\item {} 
+\sphinxAtStartPar
+のカードが、使用するフォーマット、フレームで \sphinxstylestrong{兵士として定義されていないキャラクター} （例：Joker 等）だった場合、次を行う。
+
+\end{enumerate}
+\begin{enumerate}
+\sphinxsetlistlabels{\alph}{enumii}{enumiii}{}{.}%
+\item {} 
+\sphinxAtStartPar
+そのカードを \sphinxstylestrong{表向きのまま墓地} に置く。
+
+\item {} 
+\sphinxAtStartPar
+ライフの一番上からカードを1枚取り、表向きにして \sphinxstylestrong{兵士として場に出す}。
+
+\item {} 
+\sphinxAtStartPar
+兵士として定義されていないキャラクターだった場合、a. から繰り返す。
+
+\item {} 
+\sphinxAtStartPar
+この処理により \sphinxstylestrong{ライフがなくなった場合、そのプレイヤーは敗北する。}
+
+\end{enumerate}
 
 \end{enumerate}
 
