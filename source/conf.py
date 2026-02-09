@@ -129,6 +129,11 @@ latex_additional_files = [
 ]
 
 latex_elements = {
+    # A5サイズ設定と余白調整
+'papersize': 'a5paper',
+    'pointsize': '10pt',
+    'geometry': r'\usepackage[a5paper, top=15mm, bottom=15mm, left=15mm, right=15mm]{geometry}',
+
     'maketitle': r'''
 \begin{titlepage}
 \begin{center}
@@ -194,4 +199,3 @@ latex_elements = {
 ''',
     'printindex': r'\printindex',
 }
-
