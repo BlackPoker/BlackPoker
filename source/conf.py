@@ -128,6 +128,46 @@ latex_additional_files = [
     '_static/blackpoker_logo.pdf',  # 実際のファイル名に合わせる
 ]
 
+# -- Options for LaTeX output (Colophon) ------------------------------------
+
+# 奥付(Colophon)のLaTeXコードを定義
+colophon_latex = r'''
+\cleardoublepage
+\thispagestyle{empty}
+\begin{center}
+\vspace*{\fill}
+
+\large
+\textbf{%(project)s %(version)s}
+
+\vspace{2cm}
+
+\begin{tabular}{ll}
+発行日 & %(release)s \\
+著　者 & %(author)s \\
+発行者 & %(author)s \\
+\end{tabular}
+
+\vspace{1cm}
+
+© %(copyright)s
+
+\vspace{2cm}
+
+\small
+本書の無断転載・複製を禁じます。\\
+落丁・乱丁本はお取り替えいたします。
+
+\vspace*{\fill}
+\end{center}
+''' % {
+    'project': project,
+    'version': version,
+    'author': author,
+    'release': release,
+    'copyright': copyright,
+}
+
 latex_elements = {
     # A5サイズ設定と余白調整
 'papersize': 'a5paper',
@@ -197,5 +237,5 @@ latex_elements = {
 }
 \makeatother
 ''',
-    'printindex': r'\printindex',
+    'printindex': r'\printindex' + colophon_latex,
 }
