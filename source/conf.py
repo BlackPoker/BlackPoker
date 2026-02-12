@@ -17,7 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'BlackPoker'
+project = 'BlackPoker 公式ルール'
+
+# Make the |project| substitution available in .rst files
+rst_epilog = f"""
+.. |project| replace:: {project}
+"""
+
 copyright = '2013 BlackPoker'
 author = 'もりくま'
 numfig = True
@@ -128,7 +134,52 @@ latex_additional_files = [
     '_static/blackpoker_logo.pdf',  # 実際のファイル名に合わせる
 ]
 
+# -- Options for LaTeX output (Colophon) ------------------------------------
+
+# 奥付(Colophon)のLaTeXコードを定義
+colophon_latex = r'''
+\cleardoublepage
+\thispagestyle{empty}
+\begin{center}
+\vspace*{\fill}
+
+\large
+\textbf{%(project)s %(version)s}
+
+\vspace{2cm}
+
+\begin{tabular}{ll}
+発行日 & %(release)s \\
+著　者 & %(author)s \\
+発行者 & %(author)s \\
+\end{tabular}
+
+\vspace{1cm}
+
+© %(copyright)s
+
+\vspace{2cm}
+
+\small
+本書の無断転載・複製を禁じます。\\
+落丁・乱丁本はお取り替えいたします。
+
+\vspace*{\fill}
+\end{center}
+''' % {
+    'project': project,
+    'version': version,
+    'author': author,
+    'release': release,
+    'copyright': copyright,
+}
+
 latex_elements = {
+    # A5サイズ設定と余白調整
+'papersize': 'a5paper',
+    'pointsize': '8pt',
+    'geometry': r'\usepackage[a5paper, top=15mm, bottom=15mm, left=15mm, right=15mm]{geometry}',
+
     'maketitle': r'''
 \begin{titlepage}
 \begin{center}
@@ -138,7 +189,7 @@ latex_elements = {
 \includegraphics[width=4cm]{blackpoker_logo.pdf}  %% ファイルパスは latex_additional_files に合わせる
 
 \vspace{20mm}
-{\Huge \textbf{BlackPoker 公式ルール}}\\[10mm]
+{\Huge \textbf{%(project)s}}\\[10mm]
 {\Large トランプだけでトレーディングカードゲームみたいに遊ぶ方法}\\[30mm]
 
 %% バージョン・リリース情報を埋め込む
@@ -192,6 +243,5 @@ latex_elements = {
 }
 \makeatother
 ''',
-    'printindex': r'\printindex',
+    'printindex': r'\printindex' + colophon_latex,
 }
-
