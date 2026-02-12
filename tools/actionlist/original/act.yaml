@@ -461,8 +461,6 @@ actList:
       since: v1.0
       update: v8.0,v8.1
 
-  - type: 魔法
-    acts:  
     - format: 'lite,std,pro,mast'
       actName: 防壁破壊
       ruby: ぼうへきはかい
