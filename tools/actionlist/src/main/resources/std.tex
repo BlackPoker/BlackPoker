@@ -147,7 +147,7 @@
 \vspace{-3zh}%余白削除
 \subsection*{（補足）記号の意味}
 \vspace{-1zh}%余白削除
-{\scriptsize @:トリガー-スピード-タイミング, 
+{\scriptsize @:トリガー-リゾルブ-タイミング, 
 \$:コスト, 
 ★:キーカード条件,
 ☆:ユニット条件}
@@ -243,7 +243,7 @@
             #end
 \hfill 
             #if(${row.actTime})
-{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
+{\footnotesize\bf @${row.actTrigger}-${row.actResolve}-${row.actTime} }
             #end
             #if(${row.actCost})
   {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}

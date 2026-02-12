@@ -598,7 +598,7 @@
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
                       <span th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(row.actName)}"></span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span
-                            th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
+                            th:text="${row.actTrigger}+'-'+${row.actResolve}+'-'+${row.actTime}"></span></b>
                       </span>
                     </a>
                   </div>
@@ -721,7 +721,7 @@
             <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ
             </li>
             <li class="list-group-item"><span class="time-mark"></span>
-              :&nbsp;トリガー-スピード-タイミング</li>
+              :&nbsp;トリガー-リゾルブ-タイミング</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
@@ -847,7 +847,7 @@
                     <div class="pull-right">
                       &thinsp; <small>
                         <span class="time-mark"></span>
-                        <span th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span>
+                        <span th:text="${row.actTrigger}+'-'+${row.actResolve}+'-'+${row.actTime}"></span>
                       </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small
                         th:if="${not #strings.isEmpty(row.actCost)}">
                         <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span
