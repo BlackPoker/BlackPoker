@@ -17,7 +17,13 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'BlackPoker'
+project = 'BlackPoker 公式ルール'
+
+# Make the |project| substitution available in .rst files
+rst_epilog = f"""
+.. |project| replace:: {project}
+"""
+
 copyright = '2013 BlackPoker'
 author = 'もりくま'
 numfig = True
@@ -183,7 +189,7 @@ latex_elements = {
 \includegraphics[width=4cm]{blackpoker_logo.pdf}  %% ファイルパスは latex_additional_files に合わせる
 
 \vspace{20mm}
-{\Huge \textbf{BlackPoker 公式ルール}}\\[10mm]
+{\Huge \textbf{%(project)s}}\\[10mm]
 {\Large トランプだけでトレーディングカードゲームみたいに遊ぶ方法}\\[30mm]
 
 %% バージョン・リリース情報を埋め込む
