@@ -71,7 +71,7 @@ BlackPokerは割込み可能なターン制ゲームです。
     スピード項目では解決される方式を示します。
     この項目では「即時」か「通常」が設定されています。
 
-    参考: :numref:`resolve_core`
+    参考: :numref:`speed_core`
 
 
 .. index::
