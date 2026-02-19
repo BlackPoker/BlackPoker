@@ -252,12 +252,12 @@ actList:
       since: v0.1
       update: v8.0,v8.1
 
-  - type: 速攻魔法
+  - type: 基礎魔法
     acts:  
     - format: 'lite,std,pro,mast'
       actName: アップ
       actId: up
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -271,7 +271,7 @@ actList:
     - format: 'lite,std,pro,mast'
       actName: ダウン
       actId: down
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -288,7 +288,7 @@ actList:
     - format: 'lite,std,pro,mast'
       actName: ツイスト
       actId: twist
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -301,11 +301,10 @@ actList:
       devNote: |-
         v0.1でドライブという名称だったが、0.2からツイストとなった
 
-
     - format: lite,std,pro,mast
       actName: カウンター
       actId: counter
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -319,10 +318,112 @@ actList:
       since: v0.1
       update: v8.0,v8.1
 
+  - type: 中級魔法
+    acts:  
+    - format: 'lite,std,pro,mast'
+      actName: 防壁破壊
+      ruby: ぼうへきはかい
+      actId: destroyBulwark
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♡A〜K と ♢A〜K
+      actTarget: 防壁1体
+      actEffect: 対象の防壁を場から墓地に移す。
+      story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。
+      flavor: 「あれ？いつの間にかなくなってるよ？」
+      flavorSpeaker: かくれんぼしていた子供より
+      since: v0.2
+      update: v8.0,v8.1
+      devNote: |-
+        v0.1ではアクション名が誤記で投擲となっていたため、0.2から登場
+
+    - format: 'lite,std,pro,mast'
+      actName: 投擲
+      ruby: とうてき
+      actId: throwing
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♠A〜K と ♣A〜K
+      actTarget: 対戦相手1人
+      actEffect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
+      story: 知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。
+      flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」
+      flavorSpeaker: 再現者の心得第十一章より
+      since: v0.1
+      update: v8.0,v8.1
+
+    - format: ',std,pro,mast'
+      actName: 死の槍
+      ruby: しのやり
+      actId: deathLance
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♠A〜K と ♢A〜K
+      actTarget: 兵士1体
+      actEffect: |-
+        対象の兵士のサイズが０以外かつ、キーカードの♢カードの数字で割切れる場合、次を行う。
+        1. 対象の兵士をオーナーのライフの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でライフの一番上に裏向きで移す。
+        2. 対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
+      story: 死♠の槍♢。そのままだな。
+      flavor: 「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」
+      flavorSpeaker: 再現者の心得第十二章より
+      since: v2.0
+      update: v3.0,8.0,v8.1
+
+    - format: ',std,pro,mast'
+      actName: 防壁補充
+      ruby: ぼうへきほじゅう
+      actId: addBulwark
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♡A〜K と ♣A〜K
+      actEffect: |-
+        自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。もしくは、自分のライフの一番上から2枚を防壁として裏向きかつドライブ状態で場に出す。防壁の能力はキャラクターリスト参照。
+        防壁の置き方は「防壁の置き方」参照
+      story: 愛する人♡を守るため知恵♣を絞った結果守りを固めることにした。
+      flavor: 「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」
+      flavorSpeaker: 無能な指揮官より
+      since: v3.0
+      update: v8.0
+
+    - format: ',std,pro,mast'
+      actName: リアニメイト
+      actId: reanimate
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♠A〜K と ♡A〜K
+      actTarget: 自分のキャラクター1体
+      actEffect: 自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
+      since: v3.0
+      update: v8.0,v8.1
+
+    - format: ',std,pro,mast'
+      actName: ハンデス
+      actId: handeth
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actKey: ♢A〜K と ♣A〜K
+      actTarget: 対戦相手1人
+      actEffect: 対戦相手の手札を見て1枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
+      since: v3.0
+      update: v8.0,v8.1
+
     - format: ',,pro,mast'
       actName: キル
       actId: kill
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -336,7 +437,7 @@ actList:
       actName: 再会
       ruby: さいかい
       actId: reunion
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -352,7 +453,7 @@ actList:
       actName: 停戦
       ruby: ていせん
       actId: truce
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -366,7 +467,7 @@ actList:
       actName: 対象変更
       ruby: たいしょうへんこう
       actId: changeTarget
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -379,7 +480,7 @@ actList:
     - format: 'lite,std,pro,mast'
       actName: サーチ
       actId: search
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -388,10 +489,120 @@ actList:
       since: v0.1
       update: v8.0
 
+    - format: 'pro,mast'
+      actName: リバース
+      actId: reverse
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actKey: 同じ数字を２枚
+      actTarget: キャラクター1体
+      actEffect: |-
+        1. 必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。
+        2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
+        3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+        4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
+      since: v0.1
+      update: v8.0,v8.1
+
+    - format: ',std,pro,mast'
+      actName: 帰還
+      ruby: きかん
+      actId: unsummons
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: クイック
+      actCost: B
+      actKey: 同じスートを2枚
+      actTarget: 自分のキャラクター1体
+      actEffect: |-
+        1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
+        2. キーカードを手札に戻す。
+      since: v1.0
+      update: v8.0,v8.1
+
+  - type: 上級魔法
+    acts:  
+    - format: ',,mast'
+      actName: 剣の雨
+      ruby: つるぎのあめ
+      actId: swordRain
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BB
+      actKey: ♠A〜10 を 2枚
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actEffect: サイズがキーカードの合計値以下の全ての兵士を墓地に移す。
+      story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
+      flavor: 「え！助かる訳ないじゃん！！」
+      flavorSpeaker: 平和主義の♣3一般兵より
+      since: v3.0
+      update: v8.0
+
+    - format: ',,mast'
+      actName: フォース
+      actId: force
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BB
+      actKey: ♡A〜10 を 2枚
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actEffect: |-
+        このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
+        その印としてフォグにキーカードを置き、フォースとする。
+      since: v3.0
+      update: v8.0
+
+    - format: ',,mast'
+      actName: 徴募
+      ruby: ちょうぼ
+      actId: recruit
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BB
+      actKey: ♢A〜10 を 2枚
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actEffect: |-
+        1. ライフの一番上から４枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。
+        2. 残りのカードをライフの一番下に好きな順で移す。
+      story: 金♢が手元にたくさんあれば、戦力強化が定石だろう。
+      flavor: |-
+        「君はどう？兵士になる？...あっそう。」
+        「君はどう？兵士になる？...あっそう。」
+        「はぁ。金がなけれりゃ誰も来やしねぇ」
+      flavorSpeaker: 孤独な徴募兵より
+      since: v3.0
+      update: v8.0
+
+    - format: ',,mast'
+      actName: 奇襲
+      ruby: きしゅう
+      actId: surprise
+      actType: 魔法
+      actTrigger: 直接
+      actSpeed: 通常
+      actTime: メイン
+      actCost: BB
+      actKey: ♣A〜10 を 2枚
+      actNote: ※このアクションはカウンターアクションの対象にならない。
+      actEffect: |-
+        1. 自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+        2. 自分の場にいる全ての兵士をチャージ状態にする。
+      since: v3.0
+      update: v8.0
+
     - format: ',,mast'
       actName: B・J
       actId: bj
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -416,7 +627,7 @@ actList:
     - format: ',,mast'
       actName: R・S・F
       actId: rsf
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -426,216 +637,6 @@ actList:
       actEffect: 対象のプレイヤーに40点のダメージを与える。
       since: v1.0
       update: v8.0,v8.1
-
-    - format: 'pro,mast'
-      actName: リバース
-      actId: reverse
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actKey: 同じ数字を２枚
-      actTarget: キャラクター1体
-      actEffect: |-
-        1. 必要であれば、対象のキャラクターをチャージ状態またはドライブ状態にする。
-        2. 対象が兵士の場合、兵士を防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。防壁の置き方は「防壁の置き方」参照
-        3. 対象が防壁の場合、防壁を兵士にする。防壁の時に受けた効果、能力は無くなる。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
-        4. 対象がアタッカーもしくは、ブロッカーの場合、それを解除する。
-      since: v0.1
-      update: v8.0,v8.1
-
-    - format: ',std,pro,mast'
-      actName: 帰還
-      ruby: きかん
-      actId: unsummons
-      actType: 速攻魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: クイック
-      actCost: B
-      actKey: 同じスートを2枚
-      actTarget: 自分のキャラクター1体
-      actEffect: |-
-        1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
-        2. キーカードを手札に戻す。
-      since: v1.0
-      update: v8.0,v8.1
-
-  - type: 通常魔法
-    acts:  
-    - format: 'lite,std,pro,mast'
-      actName: 防壁破壊
-      ruby: ぼうへきはかい
-      actId: destroyBulwark
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♡A〜K と ♢A〜K
-      actTarget: 防壁1体
-      actEffect: 対象の防壁を場から墓地に移す。
-      story: 防壁はとても後ろ向きで心が弱い。愛♡と金♢に目移りして簡単に籠絡してしまうことも。
-      flavor: 「あれ？いつの間にかなくなってるよ？」
-      flavorSpeaker: かくれんぼしていた子供より
-      since: v0.2
-      update: v8.0,v8.1
-      devNote: |-
-        v0.1ではアクション名が誤記で投擲となっていたため、0.2から登場
-
-    - format: 'lite,std,pro,mast'
-      actName: 投擲
-      ruby: とうてき
-      actId: throwing
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♠A〜K と ♣A〜K
-      actTarget: 対戦相手1人
-      actEffect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
-      story: 知恵♣と殺意♠をもってすれば兵士を出さずとも飛び道具で相手にダメージを負わすことができるでしょう。とにかく投げればいいのです。
-      flavor: 「この戦法は戦い方を一変させた。なぜなら兵がいなくても勝てるからだ。」
-      flavorSpeaker: 再現者の心得第十一章より
-      since: v0.1
-      update: v8.0,v8.1
-
-    - format: ',std,pro,mast'
-      actName: 死の槍
-      ruby: しのやり
-      actId: deathLance
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♠A〜K と ♢A〜K
-      actTarget: 兵士1体
-      actEffect: |-
-        対象の兵士のサイズが０以外かつ、キーカードの♢カードの数字で割切れる場合、次を行う。
-        1. 対象の兵士をオーナーのライフの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でライフの一番上に裏向きで移す。
-        2. 対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
-      story: 死♠の槍♢。そのままだな。
-      flavor: 「この槍は非常に厄介な槍だ。刺さったら急に自国に戻り力尽きるまで暴れ回る。迷惑にも程がある。」
-      flavorSpeaker: 再現者の心得第十二章より
-      since: v2.0
-      update: v3.0,8.0,v8.1
-
-    - format: ',std,pro,mast'
-      actName: 防壁補充
-      ruby: ぼうへきほじゅう
-      actId: addBulwark
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♡A〜K と ♣A〜K
-      actEffect: |-
-        自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。もしくは、自分のライフの一番上から2枚を防壁として裏向きかつドライブ状態で場に出す。防壁の能力はキャラクターリスト参照。
-        防壁の置き方は「防壁の置き方」参照
-      story: 愛する人♡を守るため知恵♣を絞った結果守りを固めることにした。
-      flavor: 「守れ！守れ！ひたすら守れ！防御は最大の防御？なり！」
-      flavorSpeaker: 無能な指揮官より
-      since: v3.0
-      update: v8.0
-
-    - format: ',std,pro,mast'
-      actName: リアニメイト
-      actId: reanimate
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♠A〜K と ♡A〜K
-      actTarget: 自分のキャラクター1体
-      actEffect: 自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
-      since: v3.0
-      update: v8.0,v8.1
-
-    - format: ',std,pro,mast'
-      actName: ハンデス
-      actId: handeth
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actKey: ♢A〜K と ♣A〜K
-      actTarget: 対戦相手1人
-      actEffect: 対戦相手の手札を見て1枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
-      since: v3.0
-      update: v8.0,v8.1
-
-    - format: ',,mast'
-      actName: 剣の雨
-      ruby: つるぎのあめ
-      actId: swordRain
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: BB
-      actKey: ♠A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: サイズがキーカードの合計値以下の全ての兵士を墓地に移す。
-      story: 死♠と剣♠が合わさり雨のように戦場に降り注いだ。
-      flavor: 「え！助かる訳ないじゃん！！」
-      flavorSpeaker: 平和主義の♣3一般兵より
-      since: v3.0
-      update: v8.0
-
-    - format: ',,mast'
-      actName: フォース
-      actId: force
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: BB
-      actKey: ♡A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: |-
-        このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
-        その印としてフォグにキーカードを置き、フォースとする。
-      since: v3.0
-      update: v8.0
-
-    - format: ',,mast'
-      actName: 徴募
-      ruby: ちょうぼ
-      actId: recruit
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: BB
-      actKey: ♢A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: |-
-        1. ライフの一番上から４枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。
-        2. 残りのカードをライフの一番下に好きな順で移す。
-      story: 金♢が手元にたくさんあれば、戦力強化が定石だろう。
-      flavor: |-
-        「君はどう？兵士になる？...あっそう。」
-        「君はどう？兵士になる？...あっそう。」
-        「はぁ。金がなけれりゃ誰も来やしねぇ」
-      flavorSpeaker: 孤独な徴募兵より
-      since: v3.0
-      update: v8.0
-
-    - format: ',,mast'
-      actName: 奇襲
-      ruby: きしゅう
-      actId: surprise
-      actType: 通常魔法
-      actTrigger: 直接
-      actSpeed: 通常
-      actTime: メイン
-      actCost: BB
-      actKey: ♣A〜10 を 2枚
-      actNote: ※このアクションはカウンターアクションの対象にならない。
-      actEffect: |-
-        1. 自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
-        2. 自分の場にいる全ての兵士をチャージ状態にする。
-      since: v3.0
-      update: v8.0
 
 charList:
   - type: 兵士
@@ -686,7 +687,7 @@ charList:
       charSize: '0'
       charLabel: アタッカー, ブロッカー, 速攻
       charAbility: |-
-        ・魔力増加（このキャラクターが場にいる間、タイプ：速攻魔法のコストDが無しになる。）
+        ・魔力増加（このキャラクターが場にいる間、タイプ：魔法かつ、タイミング：クイックのコストDが無しになる。）
       since: v3.0
       update: v8.0
 

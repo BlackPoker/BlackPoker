@@ -198,7 +198,7 @@ actList:
         ・エクストラ
       actName: ドレイン
       actId: drain
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -215,7 +215,7 @@ actList:
         ・エクストラ
       actName: 威圧
       actId: intimidate
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -232,7 +232,7 @@ actList:
         ・エクストラ
       actName: 蘇生
       actId: resurrection
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -252,7 +252,7 @@ actList:
         ・エクストラ
       actName: 瞬殺
       actId: instantKill
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -370,7 +370,7 @@ actList:
         ・エクストラ
       actName: 援軍
       actId: summonReinforcement
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -428,7 +428,7 @@ actList:
         ・エクストラ
       actName: 休戦
       actId: retreat
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -447,7 +447,7 @@ actList:
         ・エクストラ
       actName: 追撃
       actId: pursuit
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -469,7 +469,7 @@ actList:
         ・エクストラ
       actName: ファントムリバース
       actId: phantomReverse
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -503,7 +503,7 @@ actList:
         ・エクストラ
       actName: 救済
       actId: salvation
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
@@ -610,7 +610,7 @@ actList:
         ・エクストラ
       actName: 防壁追加
       actId: putBulwark
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: メイン
@@ -665,7 +665,7 @@ actList:
         ・エクストラ
       actName: 相殺
       actId: reckoning
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -687,7 +687,7 @@ actList:
         ・エクストラ
       actName: 修繕
       actId: repair
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: メイン
@@ -711,7 +711,7 @@ actList:
         ・エクストラ
       actName: 休息
       actId: rest
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -847,7 +847,7 @@ actList:
         ・エクストラ
       actName: 内乱
       actId: civilWar
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
@@ -902,7 +902,7 @@ actList:
         ・エクストラ
       actName: リセット
       actId: reset
-      actType: 通常魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
@@ -923,7 +923,7 @@ actList:
         ・エクストラ
       actName: 悪あがき
       actId: lastDitch
-      actType: 速攻魔法
+      actType: 魔法
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
