@@ -1,0 +1,98 @@
+\begin{theindex}
+
+  \item \spxentry{アクション}, \hyperpage{26}
+  \item \spxentry{アクション(コア)}, \hyperpage{150}
+  \item \spxentry{アクション名}, \hyperpage{28}
+  \item \spxentry{オーナー}, \hyperpage{155}
+
+  \indexspace
+
+  \item \spxentry{き\textbar{}起動条件}, \hyperpage{28}
+  \item \spxentry{き\textbar{}起動条件(コア)}, \hyperpage{154}
+  \item \spxentry{き\textbar{}切札}, \hyperpage{14}, \hyperpage{26}
+  \item \spxentry{キーカード条件}, \hyperpage{28}
+  \item \spxentry{キーユニット条件}, \hyperpage{28}
+  \item \spxentry{キャラクター}, \hyperpage{23}
+  \item \spxentry{キャラクター名}, \hyperpage{24}
+  \item \spxentry{クイック}, \hyperpage{153}
+  \item \spxentry{こ\textbar{}効果(コア)}, \hyperpage{154}
+  \item \spxentry{コアフロー}, \hyperpage{157}
+  \item \spxentry{コスト}, \hyperpage{28}
+  \item \spxentry{コントローラー}, \hyperpage{155}
+  \item \spxentry{コンポーネント}, \hyperpage{21}, 
+		\hyperpage{150}
+  \item \spxentry{コンポーネントスクリプト}, \hyperpage{21}
+
+  \indexspace
+
+  \item \spxentry{サイズ}, \hyperpage{24}
+  \item \spxentry{ステージ}, \hyperpage{150}
+  \item \spxentry{スピード}, \hyperpage{28}
+  \item \spxentry{スピード(コア)}, \hyperpage{153}
+  \item \spxentry{ゾーン}, \hyperpage{12}, \hyperpage{21}
+
+  \indexspace
+
+  \item \spxentry{た\textbar{}対象}, \hyperpage{28}
+  \item \spxentry{た\textbar{}対戦レギュレーション}, 
+		\hyperpage{7}
+  \item \spxentry{ターン}, \hyperpage{150}
+  \item \spxentry{タイプ(アクション)}, \hyperpage{28}
+  \item \spxentry{タイプ(キャラクター)}, \hyperpage{24}
+  \item \spxentry{タイミング}, \hyperpage{28}
+  \item \spxentry{タイミング(コア)}, \hyperpage{153}
+  \item \spxentry{ダメージ}, \hyperpage{15}
+  \item \spxentry{チャージ}, \hyperpage{23}
+  \item \spxentry{チャンス}, \hyperpage{150}
+  \item \spxentry{て\textbar{}手札}, \hyperpage{14}
+  \item \spxentry{デッキ}, \hyperpage{14}
+  \item \spxentry{と\textbar{}特記事項}, \hyperpage{28}
+  \item \spxentry{ドライブ}, \hyperpage{23}
+  \item \spxentry{トリガー}, \hyperpage{28}
+  \item \spxentry{トリガー(アクション)}, \hyperpage{152}
+  \item \spxentry{トリガー(コア)}, \hyperpage{153}
+
+  \indexspace
+
+  \item \spxentry{の\textbar{}能力(キャラクター)}, 
+		\hyperpage{24}
+  \item \spxentry{の\textbar{}能力(切札)}, \hyperpage{26}
+  \item \spxentry{の\textbar{}能力(コア)}, \hyperpage{155}
+  \item \spxentry{の\textbar{}能力(フォグ)}, \hyperpage{25}
+
+  \indexspace
+
+  \item \spxentry{ば\textbar{}場}, \hyperpage{14}
+  \item \spxentry{パック}, \hyperpage{14}
+  \item \spxentry{フォーマット}, \hyperpage{39}
+  \item \spxentry{フォーマット(対戦レギュレーション)}, 
+		\hyperpage{7}
+  \item \spxentry{フォグ}, \hyperpage{14}, \hyperpage{25}
+  \item \spxentry{フレーム}, \hyperpage{73}
+  \item \spxentry{フレーム(対戦レギュレーション)}, 
+		\hyperpage{7}
+  \item \spxentry{ぼ\textbar{}墓地}, \hyperpage{14}
+
+  \indexspace
+
+  \item \spxentry{メイン}, \hyperpage{153}
+
+  \indexspace
+
+  \item \spxentry{ゆ\textbar{}誘発条件}, \hyperpage{28}
+  \item \spxentry{ゆ\textbar{}誘発条件(コア)}, \hyperpage{154}
+  \item \spxentry{ユニット}, \hyperpage{12}, \hyperpage{21}, 
+		\hyperpage{151}
+  \item \spxentry{ユニットカード}, \hyperpage{12}
+  \item \spxentry{ユニット条件}, \hyperpage{12}, \hyperpage{21}
+
+  \indexspace
+
+  \item \spxentry{ライフ}, \hyperpage{14}
+  \item \spxentry{ラベル(キャラクター)}, \hyperpage{24}
+  \item \spxentry{ラベル(切札)}, \hyperpage{26}
+  \item \spxentry{り\textbar{}領域}, \hyperpage{12}
+  \item \spxentry{リクエスト}, \hyperpage{150}
+  \item \spxentry{レアカード}, \hyperpage{14}
+
+\end{theindex}
