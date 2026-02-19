@@ -52,7 +52,7 @@ ${rstFn.cnv(${row.frame})}
         #if(${row.actTime})
 **トリガー:** ${row.actTrigger}
 
-**スピード:** ${row.actResolve}
+**スピード:** ${row.actSpeed}
 
 **タイミング:** ${row.actTime}
 
