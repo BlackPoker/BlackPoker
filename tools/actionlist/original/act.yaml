@@ -25,7 +25,7 @@ actList:
       actId: end
       actType: 基本
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actEffect: |-
         1. 手札が7枚を越えた場合、7枚になるよう手札を捨てる。
@@ -39,7 +39,7 @@ actList:
       actId: charge
       actType: 基本
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: メイン
       actTriggerCond: ターンプレイヤーかつ、エンドアクションが解決した時に誘発する。
       actEffect: |-
@@ -54,7 +54,7 @@ actList:
       actId: draw
       actType: 基本
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actTriggerCond: ターンプレイヤーかつ、チャージアクションが解決した時に誘発する。
       actEffect: |-
@@ -68,7 +68,7 @@ actList:
       actId: attack
       actType: 基本
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actActCond: プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
       actEffect: |-
@@ -84,7 +84,7 @@ actList:
       actId: block
       actType: 基本
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actTriggerCond: ターンプレイヤーかつ、アタックアクションが解決した時にアタッカーが1体以上いる場合、誘発する。
       actEffect: |-
@@ -99,7 +99,7 @@ actList:
       actId: damageJudge
       actType: 基本
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actTriggerCond: ターンプレイヤーかつ、ブロックアクションが解決した時に誘発する。
       actEffect: |-
@@ -120,7 +120,7 @@ actList:
       actId: nextGeneration
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につき1回誘発する。
       actEffect: 'ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。'
@@ -135,7 +135,7 @@ actList:
       actId: setBulwark
       actType: 召喚
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: メイン
       actCost: L
       actActCond: プレイヤーは、1ターンに1回までこのアクションを起こすことができる。
@@ -152,7 +152,7 @@ actList:
       actId: summonsSoldier
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: 2〜10
@@ -171,7 +171,7 @@ actList:
       actId: summonsHero
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BBL
       actKey: J〜K
@@ -187,7 +187,7 @@ actList:
       actId: summonsAce
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: L
       actKey: A
@@ -203,7 +203,7 @@ actList:
       actId: quickSummonsAce
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: A
@@ -221,7 +221,7 @@ actList:
       actId: summonsMagic
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BD
       actKey: Joker
@@ -240,7 +240,7 @@ actList:
       actId: mountSoldier
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: A〜K
@@ -259,7 +259,7 @@ actList:
       actId: up
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♡A〜10
@@ -273,7 +273,7 @@ actList:
       actId: down
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♠A〜10
@@ -290,7 +290,7 @@ actList:
       actId: twist
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♢A〜10
@@ -307,7 +307,7 @@ actList:
       actId: counter
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♣A〜10
@@ -324,7 +324,7 @@ actList:
       actId: kill
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: ♠A〜10 を 2枚
       actTarget: 兵士1体
@@ -338,7 +338,7 @@ actList:
       actId: reunion
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: ♡A〜10 を 2枚
       actEffect: 自分の墓地からカードを1枚選び対戦相手に見せ手札に加える。
@@ -354,7 +354,7 @@ actList:
       actId: truce
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: ♢A〜10 を 2枚
       actTarget: ダメージ判定アクションのリクエスト
@@ -368,7 +368,7 @@ actList:
       actId: changeTarget
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: ♣A〜10 を 2枚
       actTarget: 対象が指定されているリクエスト
@@ -381,7 +381,7 @@ actList:
       actId: search
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actKey: Joker
       actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
@@ -393,7 +393,7 @@ actList:
       actId: bj
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: A と J
       actEffect: |-
@@ -418,7 +418,7 @@ actList:
       actId: rsf
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: BB
       actKey: '同じスートのA,10〜K を 5枚'
@@ -432,7 +432,7 @@ actList:
       actId: reverse
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: 同じ数字を２枚
       actTarget: キャラクター1体
@@ -450,7 +450,7 @@ actList:
       actId: unsummons
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: B
       actKey: 同じスートを2枚
@@ -467,7 +467,7 @@ actList:
       actId: destroyBulwark
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♡A〜K と ♢A〜K
       actTarget: 防壁1体
@@ -486,7 +486,7 @@ actList:
       actId: throwing
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♠A〜K と ♣A〜K
       actTarget: 対戦相手1人
@@ -503,7 +503,7 @@ actList:
       actId: deathLance
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♠A〜K と ♢A〜K
       actTarget: 兵士1体
@@ -523,7 +523,7 @@ actList:
       actId: addBulwark
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♡A〜K と ♣A〜K
       actEffect: |-
@@ -540,7 +540,7 @@ actList:
       actId: reanimate
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♠A〜K と ♡A〜K
       actTarget: 自分のキャラクター1体
@@ -553,7 +553,7 @@ actList:
       actId: handeth
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♢A〜K と ♣A〜K
       actTarget: 対戦相手1人
@@ -567,7 +567,7 @@ actList:
       actId: swordRain
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
       actKey: ♠A〜10 を 2枚
@@ -584,7 +584,7 @@ actList:
       actId: force
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
       actKey: ♡A〜10 を 2枚
@@ -601,7 +601,7 @@ actList:
       actId: recruit
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
       actKey: ♢A〜10 を 2枚
@@ -624,7 +624,7 @@ actList:
       actId: surprise
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BB
       actKey: ♣A〜10 を 2枚

@@ -23,7 +23,7 @@ actList:
       actId: packopen
       actType: パック操作
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actActCond: パックが開封済みでない場合のみこのアクションを起こすことができる。
       actEffect: |-
@@ -40,7 +40,7 @@ actList:
       actId: raredraw
       actType: レアカード操作
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actActCond: プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。
       actEffect: レアカードを1枚手札に加える。
@@ -53,7 +53,7 @@ actList:
       actId: summonsRare
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: S
       actKey: レアカード1枚
@@ -69,7 +69,7 @@ actList:
       actId: trapCounter
       actType: レアカード操作
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actKey: レアカード1枚
       actTarget: キーカードが1枚または2枚のリクエスト
@@ -88,7 +88,7 @@ actList:
       actName: クイックオープン
       actType: 切札操作
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actCost: DD
       actEffect: |-
@@ -100,7 +100,7 @@ actList:
       actName: メインオープン
       actType: 切札操作
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: メイン
       actCost: BBL
       actEffect: |-
@@ -112,7 +112,7 @@ actList:
       actName: クローズ
       actType: 切札操作
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: Q
@@ -127,7 +127,7 @@ actList:
       actName: 切札破壊
       actType: 切札操作
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: B
       actKey: A〜K
@@ -143,7 +143,7 @@ actList:
       actId: revolutionDraw
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「革命」があるかつ、自分の <革命ドロー> を持つ兵士がアタッカーかつ、ダメージ判定アクションにてブロックされていない時に誘発する。
@@ -160,7 +160,7 @@ actList:
       actId: slash
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actUnit: <スラッシュ> を持つ兵士1体
       actCost: C
@@ -180,7 +180,7 @@ actList:
       actId: quickSoldierSummonS
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♠2〜10
@@ -200,7 +200,7 @@ actList:
       actId: drain
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actTarget: 対戦相手1人
       actActCond: 自分の表切札に「ドレイン」がある
@@ -217,7 +217,7 @@ actList:
       actId: intimidate
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: L
       actActCond: 自分の表切札に「威圧」がある
@@ -234,7 +234,7 @@ actList:
       actId: resurrection
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actActCond: 自分の表切札に「蘇生」がある
@@ -254,7 +254,7 @@ actList:
       actId: instantKill
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actActCond: 自分の表切札に「瞬殺」がある
       actTarget: 兵士1体
@@ -271,7 +271,7 @@ actList:
       actId: summonReanimator
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: ♡2〜10
@@ -289,7 +289,7 @@ actList:
       actId: quickSummonReanimator
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♡2〜10
@@ -305,7 +305,7 @@ actList:
       actId: reanimatorReanimate
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: C
       actUnit: 「リアニメーター」1体
@@ -321,7 +321,7 @@ actList:
       actId: reanimatorRevive
       actType: 切札操作
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の 「リアニメーター」 が場から墓地に移った時に誘発する。
@@ -336,7 +336,7 @@ actList:
       actId: summonDarkLord
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: SS
       actActCond: 自分の表切札に「魔王」がある
@@ -355,7 +355,7 @@ actList:
       actId: darkWhisper
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
@@ -372,7 +372,7 @@ actList:
       actId: summonReinforcement
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actActCond: |-
@@ -390,7 +390,7 @@ actList:
       actId: break
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actUnit: <ブレイク> を持つ兵士1体
       actCost: C
@@ -410,7 +410,7 @@ actList:
       actId: quickSoldierSummonH
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♡2〜10
@@ -430,7 +430,7 @@ actList:
       actId: retreat
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actActCond: 自分の表切札に「休戦」がある
       actTarget: アタックアクションのリクエスト
@@ -449,7 +449,7 @@ actList:
       actId: pursuit
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actActCond: |-
         ・自分の表切札に「追撃」がある
@@ -471,7 +471,7 @@ actList:
       actId: phantomReverse
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actUnit: <ファントム> を持つ防壁1体
       actCost: C
@@ -487,7 +487,7 @@ actList:
       actId: illusion
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。
@@ -505,7 +505,7 @@ actList:
       actId: salvation
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actKey: ♡A〜K
       actActCond: 自分の表切札に「救済」がある
@@ -525,7 +525,7 @@ actList:
       actId: summonChariot
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: ♢2〜10
@@ -543,7 +543,7 @@ actList:
       actId: quickSummonChariot
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♢2〜10
@@ -559,7 +559,7 @@ actList:
       actId: chariotDestroy
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: C
       actUnit: 「チャリオット」1体
@@ -575,7 +575,7 @@ actList:
       actId: chariotRevive
       actType: 切札操作
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の 「チャリオット」 が場から墓地に移った時に誘発する。
@@ -590,7 +590,7 @@ actList:
       actId: summonGiant
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: SS
       # actKey: J〜K
@@ -612,7 +612,7 @@ actList:
       actId: putBulwark
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: メイン
       actCost: L
       actActCond: |-
@@ -630,7 +630,7 @@ actList:
       actId: negotiate
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actUnit: <交渉> を持つ兵士1体
       actCost: C
@@ -647,7 +647,7 @@ actList:
       actId: quickSoldierSummonD
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♢2〜10
@@ -667,7 +667,7 @@ actList:
       actId: reckoning
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actCost: D
       actActCond: 自分の表切札に「相殺」がある
@@ -689,7 +689,7 @@ actList:
       actId: repair
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: メイン
       actCost: L
       actTarget: 自分の場にいる兵士1体
@@ -713,7 +713,7 @@ actList:
       actId: rest
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: B
       actActCond: 自分の表切札に「充足」がある
@@ -728,7 +728,7 @@ actList:
       actId: satisfaction
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「充足」があるかつ、エンドアクションをリクエストした時に誘発する。
@@ -745,7 +745,7 @@ actList:
       actId: summonStrategist
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: ♣2〜10
@@ -761,7 +761,7 @@ actList:
       actId: quickSummonStrategist
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♣2〜10
@@ -781,7 +781,7 @@ actList:
       actId: strategistPredict
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actCost: C
       actUnit: 「策士」1体
@@ -797,7 +797,7 @@ actList:
       actId: strategistRevive
       actType: 切札操作
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の 「策士」 が場から墓地に移った時に誘発する。
@@ -812,7 +812,7 @@ actList:
       actId: switch
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actUnit: <スイッチ> を持つ兵士1体
       actCost: C
@@ -829,7 +829,7 @@ actList:
       actId: quickSoldierSummonC
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♣2〜10
@@ -849,7 +849,7 @@ actList:
       actId: civilWar
       actType: 魔法
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actKey: ♣A〜K
       actCost: B
@@ -867,7 +867,7 @@ actList:
       actId: riot
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「内乱」があるかつ、対戦相手が手札を捨てた時に誘発する。
@@ -884,7 +884,7 @@ actList:
       actId: handRefill
       actType: 誘発魔法
       actTrigger: 誘発
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「手札補充」があるかつ、エンドアクションをリクエストした時に誘発する。
@@ -904,7 +904,7 @@ actList:
       actId: reset
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actCost: L
       actActCond: 自分の表切札に「リセット」がある
@@ -925,7 +925,7 @@ actList:
       actId: lastDitch
       actType: 魔法
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actActCond: 自分の表切札に「悪あがき」がある
       actTarget: キーカードがあるリクエストを対象とする。
@@ -943,7 +943,7 @@ actList:
       actId: summonKnight
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: ♠2〜10
@@ -961,7 +961,7 @@ actList:
       actId: quickSummonKnight
       actType: 召喚
       actTrigger: 直接
-      actResolve: ステージ
+      actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♠2〜10
@@ -977,7 +977,7 @@ actList:
       actId: knightSweep
       actType: 兵士起因
       actTrigger: 直接
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actCost: C
       actUnit: 「騎士」1体
@@ -993,7 +993,7 @@ actList:
       actId: knightRevive
       actType: 切札操作
       actTrigger: 誘発
-      actResolve: 即時
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の 「騎士」 が場から墓地に移った時に誘発する。

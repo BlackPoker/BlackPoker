@@ -52,7 +52,7 @@
                   "actType": { "type": "string" },
                   "actTrigger": { "type": "string" },
                   "actS": { "type": "string" },
-                  "actResolve": { "type": "string" },
+                  "actSpeed": { "type": "string" },
                   "actTime": { "type": "string" },
                   "actCost": { "type": "string" },
                   "actKey": { "type": "string" },
@@ -75,7 +75,7 @@
                   "actId",
                   "actType",
                   "actTrigger",
-                  "actResolve",
+                  "actSpeed",
                   "actTime",
                   "actEffect",
                   "since"
