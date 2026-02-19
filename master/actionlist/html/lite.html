@@ -580,11 +580,12 @@
           <h5><small>カテゴリフィルター</small></h5>
           <select class="form-control" id="group-filter-1">
             <option value="">指定なし</option>
+            <option value="基礎魔法">基礎魔法</option>
             <option value="基本">基本</option>
             <option value="召喚">召喚</option>
-            <option value="速攻魔法">速攻魔法</option>
+            <option value="上級魔法">上級魔法</option>
             <option value="滞留魔法">滞留魔法</option>
-            <option value="通常魔法">通常魔法</option>
+            <option value="中級魔法">中級魔法</option>
             <option value="兵士">兵士</option>
             <option value="防壁">防壁</option>
           </select>
@@ -593,11 +594,12 @@
 
           <select class="form-control" id="group-filter-2">
             <option value="">指定なし</option>
+            <option value="基礎魔法">基礎魔法</option>
             <option value="基本">基本</option>
             <option value="召喚">召喚</option>
-            <option value="速攻魔法">速攻魔法</option>
+            <option value="上級魔法">上級魔法</option>
             <option value="滞留魔法">滞留魔法</option>
-            <option value="通常魔法">通常魔法</option>
+            <option value="中級魔法">中級魔法</option>
             <option value="兵士">兵士</option>
             <option value="防壁">防壁</option>
           </select>
@@ -688,26 +690,42 @@
                 </div>
 
                 <div class="blackpoker-type-group">
-                  <span class="blackpoker-type-group-title">速攻魔法</span>
+                  <span class="blackpoker-type-group-title">基礎魔法</span>
                   <div class="list-group">
 
-                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
                       <span>アップ</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
-                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
                       <span>ダウン</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
-                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
                       <span>ツイスト</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
-                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
                       <span>カウンター</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-通常-クイック</span></b>
                       </span>
-                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                    </a>
+                  </div>
+                </div>
+
+                <div class="blackpoker-type-group">
+                  <span class="blackpoker-type-group-title">中級魔法</span>
+                  <div class="list-group">
+
+                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
+                      <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
+                      <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span
+                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
+                      </span>
+                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
                       <span>サーチ</span> <span class="tag tag-default tag-pill pull-right"> <span
                           class="time-mark"></span><b><span>直接-即時-クイック</span></b>
                       </span>
@@ -716,18 +734,10 @@
                 </div>
 
                 <div class="blackpoker-type-group">
-                  <span class="blackpoker-type-group-title">通常魔法</span>
+                  <span class="blackpoker-type-group-title">上級魔法</span>
                   <div class="list-group">
 
-                    <a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
-                      <span>防壁破壊</span> <span class="tag tag-default tag-pill pull-right"> <span
-                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                      </span>
-                    </a><a class="scroll-offset list-group-item list-group-item-action blackpoker-action" href="#act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
-                      <span>投擲</span> <span class="tag tag-default tag-pill pull-right"> <span
-                          class="time-mark"></span><b><span>直接-通常-メイン</span></b>
-                      </span>
-                    </a>
+                    
                   </div>
                 </div>
               </div>
@@ -1614,12 +1624,12 @@
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">速攻魔法</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">基礎魔法</h5>
           <div class="row">
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                <div class="panel panel-default blackpoker-action" id="act-up" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
 
                   <div class="panel-heading">
 
@@ -1627,7 +1637,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -1673,7 +1683,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                <div class="panel panel-default blackpoker-action" id="act-down" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
 
                   <div class="panel-heading">
 
@@ -1681,7 +1691,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -1727,7 +1737,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                <div class="panel panel-default blackpoker-action" id="act-twist" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
 
                   <div class="panel-heading">
 
@@ -1735,7 +1745,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -1781,7 +1791,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
+                <div class="panel panel-default blackpoker-action" id="act-counter" data-format="ライト,スタンダード,プロ,マスター" data-type="基礎魔法">
 
                   <div class="panel-heading">
 
@@ -1789,7 +1799,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -1834,82 +1844,15 @@
                 </div>
               </div>
             </div>
-
-            
-
-            
-
-            
-
-            
-
-            <div class="col-lg-4">
-              <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="速攻魔法">
-
-                  <div class="panel-heading">
-
-                     <span class="act-title">サーチ</span>
-                    <!-- <span> -->
-                    <small>
-                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(速攻魔法)</span>
-                    </small>
-                    <!-- </span> -->
-                    <div class="pull-right">
-                      &thinsp; <small>
-                        <span class="time-mark"></span>
-                        <span>直接-即時-クイック</span>
-                      </small>  
-
-
-                    </div>
-                    <div class="text-left">
-                      <small>
-                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
-                        <span>Joker</span>
-                        <br>
-                      </small>
-                      
-                      
-                    </div>
-
-                  </div>
-                  <div class="panel-body">
-                     
-                    
-                     
-                    
-                     
-                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
-                    
-                    <span>（効果）<br></span>
-                    <span>ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。</span>
-
-                    
-
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
-            
-
-            
-
-            
-
-            
           </div>
         </div>
         <div class="blackpoker-type-group">
-          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">通常魔法</h5>
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">中級魔法</h5>
           <div class="row">
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
+                <div class="panel panel-default blackpoker-action" id="act-destroyBulwark" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
 
                   <div class="panel-heading">
 
@@ -1919,7 +1862,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(通常魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -1970,7 +1913,7 @@
 
             <div class="col-lg-4">
               <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="通常魔法">
+                <div class="panel panel-default blackpoker-action" id="act-throwing" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
 
                   <div class="panel-heading">
 
@@ -1980,7 +1923,7 @@
                     <!-- <span> -->
                     <small>
                       <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
-                      <span>(通常魔法)</span>
+                      <span>(魔法)</span>
                     </small>
                     <!-- </span> -->
                     <div class="pull-right">
@@ -2032,6 +1975,78 @@
             
 
             
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            
+
+            <div class="col-lg-4">
+              <div class="bs-component">
+                <div class="panel panel-default blackpoker-action" id="act-search" data-format="ライト,スタンダード,プロ,マスター" data-type="中級魔法">
+
+                  <div class="panel-heading">
+
+                     <span class="act-title">サーチ</span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span>(魔法)</span>
+                    </small>
+                    <!-- </span> -->
+                    <div class="pull-right">
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span>直接-即時-クイック</span>
+                      </small>  
+
+
+                    </div>
+                    <div class="text-left">
+                      <small>
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span>Joker</span>
+                        <br>
+                      </small>
+                      
+                      
+                    </div>
+
+                  </div>
+                  <div class="panel-body">
+                     
+                    
+                     
+                    
+                     
+                    <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
+                    
+                    <span>（効果）<br></span>
+                    <span>ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。</span>
+
+                    
+
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            
+
+            
+          </div>
+        </div>
+        <div class="blackpoker-type-group">
+          <h5 class="text-center blackpoker-type-group-title blackpoker-type-group-title-main">上級魔法</h5>
+          <div class="row">
 
             
 
