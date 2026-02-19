@@ -27,3 +27,11 @@ build
 !**/auto/.gitkeep
 
 *.log
+
+# tools/actionlist generated files
+tools/actionlist/tex/*.tex
+tools/actionlist/tex/*.aux
+tools/actionlist/tex/*.dvi
+tools/actionlist/tex/*.pdf
+tools/actionlist/dist/
+tools/actionlist/target/
