@@ -341,13 +341,12 @@
 \contentsline {section}{\numberline {9.3}能力}{156}{section.9.3}%
 \contentsline {section}{\numberline {9.4}コアフロー}{157}{section.9.4}%
 \contentsline {subsection}{\numberline {9.4.1}誘発チェック}{159}{subsection.9.4.1}%
-\contentsline {subsubsection}{誘発即時解決}{162}{subsubsection*.467}%
-\contentsline {subsubsection}{通常：アクション毎に処理}{163}{subsubsection*.468}%
-\contentsline {subsection}{\numberline {9.4.2}能力の適用順}{164}{subsection.9.4.2}%
-\contentsline {subsubsection}{考え方の原則}{164}{subsubsection*.469}%
-\contentsline {subsubsection}{能力の適用ルール}{164}{subsubsection*.470}%
-\contentsline {subsubsection}{運用上の注意}{165}{subsubsection*.471}%
-\contentsline {section}{\numberline {9.5}まとめ}{166}{section.9.5}%
+\contentsline {subsubsection}{誘発アクション処理}{162}{subsubsection*.467}%
+\contentsline {subsection}{\numberline {9.4.2}能力の適用順}{163}{subsection.9.4.2}%
+\contentsline {subsubsection}{考え方の原則}{163}{subsubsection*.468}%
+\contentsline {subsubsection}{能力の適用ルール}{164}{subsubsection*.469}%
+\contentsline {subsubsection}{運用上の注意}{165}{subsubsection*.470}%
+\contentsline {section}{\numberline {9.5}まとめ}{165}{section.9.5}%
 \contentsline {chapter}{\numberline {第10章}付録}{167}{chapter.10}%
 \contentsline {section}{\numberline {10.1}アクションリスト}{167}{section.10.1}%
 \contentsline {subsection}{\numberline {10.1.1}ライト}{167}{subsection.10.1.1}%
@@ -355,23 +354,23 @@
 \contentsline {subsection}{\numberline {10.1.3}マスター+エクストラ}{168}{subsection.10.1.3}%
 \contentsline {section}{\numberline {10.2}ガイドライン}{168}{section.10.2}%
 \contentsline {subsection}{\numberline {10.2.1}BlackPoker二次創作ガイドライン}{168}{subsection.10.2.1}%
-\contentsline {subsubsection}{はじめに}{168}{subsubsection*.480}%
-\contentsline {subsubsection}{二次創作の範囲}{169}{subsubsection*.481}%
-\contentsline {subsubsection}{創作の自由と制限}{169}{subsubsection*.482}%
-\contentsline {subsubsection}{クレジット表記について}{169}{subsubsection*.483}%
-\contentsline {subsubsection}{禁止事項}{170}{subsubsection*.484}%
-\contentsline {subsubsection}{商用利用について}{170}{subsubsection*.485}%
-\contentsline {subsubsection}{ガイドラインにないケースについて}{170}{subsubsection*.486}%
+\contentsline {subsubsection}{はじめに}{168}{subsubsection*.479}%
+\contentsline {subsubsection}{二次創作の範囲}{169}{subsubsection*.480}%
+\contentsline {subsubsection}{創作の自由と制限}{169}{subsubsection*.481}%
+\contentsline {subsubsection}{クレジット表記について}{169}{subsubsection*.482}%
+\contentsline {subsubsection}{禁止事項}{170}{subsubsection*.483}%
+\contentsline {subsubsection}{商用利用について}{170}{subsubsection*.484}%
+\contentsline {subsubsection}{ガイドラインにないケースについて}{170}{subsubsection*.485}%
 \contentsline {subsection}{\numberline {10.2.2}BlackPoker アクション・ルールガイドライン}{171}{subsection.10.2.2}%
-\contentsline {subsubsection}{はじめに}{171}{subsubsection*.496}%
-\contentsline {subsubsection}{アクションを追加する際のルール}{171}{subsubsection*.497}%
-\contentsline {paragraph}{アクションの対象は単対象 (必須)}{171}{paragraph*.498}%
-\contentsline {paragraph}{キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{172}{paragraph*.499}%
-\contentsline {paragraph}{誘発アクションは即時 (推奨)}{172}{paragraph*.500}%
-\contentsline {paragraph}{先行1ターン目に確実に勝利できる効果を作らない (必須)}{172}{paragraph*.501}%
-\contentsline {paragraph}{誘発\sphinxhyphen {}メインは同時に2つ以上誘発しないように制限 (必須)}{172}{paragraph*.502}%
-\contentsline {subsubsection}{キャラクターを追加する際のルール}{173}{subsubsection*.503}%
-\contentsline {paragraph}{場のキャラクターは一目でわかるように定義 (必須)}{173}{paragraph*.504}%
+\contentsline {subsubsection}{はじめに}{171}{subsubsection*.495}%
+\contentsline {subsubsection}{アクションを追加する際のルール}{171}{subsubsection*.496}%
+\contentsline {paragraph}{アクションの対象は単対象 (必須)}{171}{paragraph*.497}%
+\contentsline {paragraph}{キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{172}{paragraph*.498}%
+\contentsline {paragraph}{誘発アクションは即時 (推奨)}{172}{paragraph*.499}%
+\contentsline {paragraph}{先行1ターン目に確実に勝利できる効果を作らない (必須)}{172}{paragraph*.500}%
+\contentsline {paragraph}{誘発\sphinxhyphen {}メインは同時に2つ以上誘発しないように制限 (必須)}{172}{paragraph*.501}%
+\contentsline {subsubsection}{キャラクターを追加する際のルール}{173}{subsubsection*.502}%
+\contentsline {paragraph}{場のキャラクターは一目でわかるように定義 (必須)}{173}{paragraph*.503}%
 \contentsline {chapter}{\numberline {第11章}変更履歴}{175}{chapter.11}%
 \contentsline {section}{\numberline {11.1}第8版の主な変更点}{175}{section.11.1}%
 \contentsline {subsection}{\numberline {11.1.1}アクションの定義の変更}{175}{subsection.11.1.1}%
@@ -390,4 +389,3 @@
 \contentsline {subsection}{\numberline {11.2.5}B・Jのクイック化}{179}{subsection.11.2.5}%
 \contentsline {subsection}{\numberline {11.2.6}引き分け廃止}{180}{subsection.11.2.6}%
 \contentsline {subsection}{\numberline {11.2.7}ルールの記載を微修正}{180}{subsection.11.2.7}%
-\contentsline {chapter}{索引}{181}{chapter*.505}%
