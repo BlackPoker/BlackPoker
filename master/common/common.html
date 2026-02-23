@@ -166,8 +166,8 @@
 <section id="id5">
 <h2><span class="section-number">3.4. </span>トランプの数字<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h2>
 <p>ゲーム全体を通してトランプの数字は次のような数値として扱います。(<a class="reference internal" href="#cardrank"><span class="std std-numref">Table 3.1</span></a>)</p>
-<span id="cardrank"></span><table class="docutils align-default" id="id19">
-<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">トランプの数字</span><a class="headerlink" href="#id19" title="このテーブルへのパーマリンク">¶</a></caption>
+<span id="cardrank"></span><table class="docutils align-default" id="id17">
+<caption><span class="caption-number">Table 3.1 </span><span class="caption-text">トランプの数字</span><a class="headerlink" href="#id17" title="このテーブルへのパーマリンク">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>カード</p></th>
 <th class="head"><p>数字</p></th>
@@ -204,8 +204,8 @@
 そのユニットがどのコンポーネント定義（コンポーネントスクリプト）に対応するかはスクリプト側の
 「ユニット条件」を参照してください。</p>
 <p>領域ごとに存在するコンポーネントの一覧です。(<a class="reference internal" href="#zone-component"><span class="std std-numref">Table 3.2</span></a>)</p>
-<span id="zone-component"></span><table class="docutils align-default" id="id20">
-<caption><span class="caption-number">Table 3.2 </span><span class="caption-text">領域ごとに存在するコンポーネント一覧</span><a class="headerlink" href="#id20" title="このテーブルへのパーマリンク">¶</a></caption>
+<span id="zone-component"></span><table class="docutils align-default" id="id18">
+<caption><span class="caption-number">Table 3.2 </span><span class="caption-text">領域ごとに存在するコンポーネント一覧</span><a class="headerlink" href="#id18" title="このテーブルへのパーマリンク">¶</a></caption>
 <colgroup>
 <col style="width: 50.0%" />
 <col style="width: 50.0%" />
@@ -251,10 +251,10 @@
 <h2><span class="section-number">3.6. </span>カードの配置<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h2>
 <p>カードの配置には次のような場所があります。(<a class="reference internal" href="#field"><span class="std std-numref">Fig. 3.1</span></a>)</p>
 <p>※これらの領域は、フレームによって使用する領域が異なります。</p>
-<figure class="align-default" id="id21">
+<figure class="align-default" id="id19">
 <span id="field"></span><img alt="../_images/extra.png" src="../_images/extra.png" />
 <figcaption>
-<p><span class="caption-number">Fig. 3.1 </span><span class="caption-text">プレイ中のカードの配置</span><a class="headerlink" href="#id21" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 3.1 </span><span class="caption-text">プレイ中のカードの配置</span><a class="headerlink" href="#id19" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>各領域で定義されたコンポーネントは、この配置図の対応する位置に置かれます。
@@ -336,6 +336,38 @@
 </li>
 </ol>
 <p>この手順は「プリセット」と呼ばれています。</p>
+<p>フローチャートで示すと次のようになります。(<a class="reference internal" href="#preset-flow-image"><span class="std std-numref">Fig. 3.2</span></a>)</p>
+<figure class="align-default" id="id20">
+<span id="preset-flow-image"></span><p class="plantuml">
+<img src="../_images/plantuml-af7337e023c424b6cde285e4148ed1eb8039d94f.svg" alt="&#64;startuml preset-flow
+title プリセット配置
+
+start
+:ライフの一番上のカードを表向きにして
+「防壁」として場に出す;
+
+:ライフの次のカードを表向きにして
+「兵士」として場に出す;
+
+while (兵士として定義されていない\nキャラクターか？) is (Yes)
+    :そのカードを **表向きのまま墓地** に置く;
+    if (ライフがなくなったか？) then (Yes)
+        :そのプレイヤーは **敗北** する;
+        stop
+    else (No)
+    endif
+    :ライフの一番上からカードを1枚取り
+    表向きにして **兵士として場に出す** ;
+endwhile (No)
+
+stop
+
+&#64;enduml
+"/></p>
+<figcaption>
+<p><span class="caption-number">Fig. 3.2 </span><span class="caption-text">プリセット配置のフロー</span><a class="headerlink" href="#id20" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
 </section>
 <section id="common-gamestart-first">
 <span id="id13"></span><h3><span class="section-number">3.9.2. </span>共通手順：先攻決定<a class="headerlink" href="#common-gamestart-first" title="この見出しへのパーマリンク">¶</a></h3>
@@ -352,8 +384,8 @@
 <li><p>先攻プレイヤーはライフから1枚引いて手札に加える。</p></li>
 <li><p>先攻プレイヤーがターンとチャンスを持ち、ゲームが開始される。</p></li>
 </ol>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
 <p>ゲームの始め方の補足</p>
 <ul class="simple">
 <li><p>フレームによっては、上記の「プリセット」や「先攻決定」「ゲーム開始」に入る前に、特別な手順（例：ストラテジー選択や切札設定など）があります。</p></li>
@@ -391,16 +423,16 @@
 </li>
 </ul>
 <p>要するに、 <strong>アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態を見て次のアクションを起こす</strong> ――この往復がゲームの心臓部です。
-この往復の全体的なイメージは <a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.2</span></a> を参照してください。登場する用語は後ほど説明します。ここでは大まかに全体像を把握してください。</p>
-<figure class="align-default" id="id22">
+この往復の全体的なイメージは <a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.3</span></a> を参照してください。登場する用語は後ほど説明します。ここでは大まかに全体像を把握してください。</p>
+<figure class="align-default" id="id21">
 <span id="abstract-overview"></span><a class="reference internal image-reference" href="../_images/abstract_editable_fixed.drawio.svg"><img alt="基礎概念の全体像（アクション／リクエストとコンポーネント／ユニット）" height="400px" src="../_images/abstract_editable_fixed.drawio.svg" /></a>
 <figcaption>
-<p><span class="caption-number">Fig. 3.2 </span><span class="caption-text">基礎概念の全体像</span><a class="headerlink" href="#id22" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 3.3 </span><span class="caption-text">基礎概念の全体像</span><a class="headerlink" href="#id21" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
-<section id="id16">
-<h4><span class="section-number">3.10.1.1. </span>補足: 図の読み方<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h4>
-<p><a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.2</span></a> の読み方を説明します。</p>
+<div class="admonition- admonition">
+<p class="admonition-title">補足: 図の読み方</p>
+<p><a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.3</span></a> の読み方を説明します。</p>
 <p>詳しい説明は次の章以降で行いますが、ここでは全体像を把握するためにざっくりとした流れを説明します。</p>
 <p>図は大きく2つに分かれています。</p>
 <ul class="simple">
@@ -425,10 +457,9 @@
 </dl>
 </li>
 </ul>
-</section>
-</section>
-<section id="id17">
-<h3><span class="section-number">3.10.2. </span>この後の読み方<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
+</div>
+<div class="admonition- admonition">
+<p class="admonition-title">この後の読み方</p>
 <p>基礎概念を大まかに理解したうえで、次の章を読むことをお勧めします。</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="common-component.html#common-component-rst"><span class="std std-ref">共通ルール: コンポーネント</span></a>
@@ -437,9 +468,10 @@
 アクションの <strong>起こし方（リクエスト）／割込み／解決</strong> の処理系を扱います。
 <strong>コスト・タイミング・対象</strong> の見方、解決時の不発・実行可能部分の扱いなど、アクション全般について説明します。</p></li>
 </ul>
+</div>
 </section>
-<section id="id18">
-<h3><span class="section-number">3.10.3. </span>スクリプト<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id16">
+<h3><span class="section-number">3.10.2. </span>スクリプト<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h3>
 <p>アクションやコンポーネントの定義は <strong>スクリプト</strong> と呼ばれます。</p>
 <p>次のように分類されます。</p>
 <ul class="simple">
@@ -489,8 +521,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#id15">3.10. 基礎概念</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#blackpoker">3.10.1. BlackPokerとは</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id17">3.10.2. この後の読み方</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id18">3.10.3. スクリプト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">3.10.2. スクリプト</a></li>
 </ul>
 </li>
 </ul>
