@@ -161,8 +161,7 @@ colophon_latex = r'''
 \vspace{2cm}
 
 \small
-本書の無断転載・複製を禁じます。\\
-落丁・乱丁本はお取り替えいたします。
+本書の無断転載・複製を禁じます。
 
 \vspace*{\fill}
 \end{center}
