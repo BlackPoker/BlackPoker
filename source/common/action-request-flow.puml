@@ -1,0 +1,28 @@
+@startuml action-request-flow
+title アクションの起こし方（リクエスト）
+
+start
+:起こすアクションを対戦相手に伝える;
+:アクションに応じたコストを支払う;
+
+if (キーカード条件があるか？) then (Yes)
+    :条件に合ったカードを手札から出し
+    キーカードとする;
+else (No)
+endif
+
+if (キーユニット条件があるか？) then (Yes)
+    :条件に合ったユニットを指定し
+    キーユニットとする;
+else (No)
+endif
+
+if (対象の指定が必要か？) then (Yes)
+    :対象を指定する;
+else (No)
+endif
+
+:アクションのリクエスト完了;
+stop
+
+@enduml
