@@ -104,7 +104,7 @@ graph TD
 | `source/format/` | rst×1 | フォーマットルール |
 | `source/frame/` | rst×1 | フレームルール |
 | `source/frame/images/` | 8ファイル | フレーム関連画像 |
-| `source/core/` | rst×1, puml×5 | コアルール・PlantUMLフロー図 |
+| `source/core/` | rst×1, puml×6 | コアルール・PlantUMLフロー図 |
 | `source/appendix/` | rst×1 + guideline/ | 付録（カスタムルール・二次創作ガイドライン） |
 | `source/revision-history/` | rst×3 | 改版履歴(7th, 8th) |
 | `source/auto/` | rst×3, csv×1 | **自動生成**（ActionListGenの出力、gitignore対象） |
@@ -195,14 +195,13 @@ graph TD
 |---|---|
 | `source/common/memo.txt` | rstの下書き・概念整理メモ。ドキュメントソースに含まれておらず、index.rstから参照されていない。開発メモとして`dev-notes/`に移すか削除が適切 |
 | `tools/actionlist/python/qrcode-gen.py` | QRコード生成スクリプト。ビルドパイプラインで使われていない（`build.sh`・`local_build.sh`から呼ばれない）。生成済みQR PDFは`docker-resource/`に配置済み |
-| `tools/actionlist/original/v5-*.ods` (6ファイル) | v5時代のスプレッドシート。現在のビルドでは未使用（参照用の旧データ） |
+| `tools/actionlist/original/v5-*.ods` (7ファイル) | v5時代のスプレッドシート。現在のビルドでは未使用（参照用の旧データ） |
 | `tools/actionlist/original/v5-act_sample.yaml` | v5のサンプルYAML。現行ビルド未使用 |
 | `tools/actionlist/original/v5-extra.yaml` | v5のエクストラYAML。現行ビルド未使用 |
 | `tools/actionlist/original/v6-act.yaml` | v6アクションYAML。現行ビルドでは`act.yaml`が使用されている |
 | `tools/actionlist/original/v6-extra.yaml` | v6エクストラYAML。現行ビルドでは`extra.yaml`が使用されている |
 | `tools/actionlist/blackpoker-mast.rst` | ルートに直置きされたRSTファイル。ビルドフローで参照されていない |
 | `tools/actionlist/log.log` | ビルドログ。`.gitignore`に`*.log`があるがtools以下にはルールが掛からない可能性あり |
-| `tools/actionlist/.classpath`, `.project`, `.settings/` | Eclipse IDE設定ファイル。VSCode環境では不要 |
 | `redpen/` ディレクトリ全体 | RedPen（文章校正ツール）の設定。現在CI/ビルドフローで使われていない。ローカル校正用であれば`dev-notes/`等に統合可能 |
 | `base-docker/` ディレクトリ | Sphinxビルド用ベースイメージ定義。CIでは`pman0214/alpine-texlive-ja-epspdf`を直接参照しており、このDockerfileは古い参照用の可能性が高い |
 
