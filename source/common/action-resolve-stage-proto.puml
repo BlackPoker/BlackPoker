@@ -1,0 +1,41 @@
+@startuml action-resolve-stage-proto
+
+skinparam backgroundColor white
+skinparam rectangleBackgroundColor #FFFFFF
+skinparam rectangleBorderColor #000000
+skinparam rectangleRoundCorner 0
+skinparam nodesep 5
+skinparam ranksep 5
+skinparam padding 1
+
+title 1. プレイヤーAがアクションをステージに積む
+
+rectangle "プレイヤーA" as PA
+rectangle "プレイヤーB" as PB
+
+rectangle "ステージ" as stage {
+    rectangle "A: アップ" as c2 #EEEEEE
+    rectangle "A: ダメージ判定" as c1 #EEEEEE
+    c1 -[hidden]down- c2
+}
+
+PA -[hidden]right- stage
+stage -[hidden]right- PB
+
+note top of stage
+    チャンスがAにあるので
+    プレイヤーAがアクションを
+    ステージに積める
+    (クイックのみ重ねられる)
+end note
+
+note bottom of PA
+    ターン | チャンス
+end note
+
+note bottom of stage
+    積むアクションがなくなったら
+    「パス」してチャンスを移動
+end note
+
+@enduml

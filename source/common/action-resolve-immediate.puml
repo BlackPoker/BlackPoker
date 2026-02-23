@@ -1,0 +1,32 @@
+@startuml action-resolve-immediate
+title 即時アクションの解決
+
+actor "プレイヤーA" as A
+actor "プレイヤーB" as B
+participant "ルールシステム" as SYS
+
+== 即時アクションの場合 ==
+
+A -> SYS : 即時アクションをリクエスト
+note right of SYS : ステージに積まれない
+
+SYS -> SYS : すぐにリクエストを解決\n（効果を実行）
+note right of SYS : 相手の割り込みなし
+
+SYS --> A : 解決完了
+SYS --> B : 結果を反映
+
+== 通常アクションの場合（参考） ==
+
+A -> SYS : 通常アクションをリクエスト
+SYS -> SYS : ステージに追加
+note right of SYS : ステージに積まれる
+SYS --> B : チャンスを移動\n（割り込みの機会）
+
+B -> SYS : パス
+note right of SYS : 全員パスで解決へ
+
+SYS -> SYS : ステージのリクエストを解決\n（効果を実行）
+SYS --> A : 解決完了
+
+@enduml
