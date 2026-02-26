@@ -179,4 +179,24 @@ public class RstFn {
         
         return str; // `-` がなければそのまま返す
     }
+
+	/**
+	 * Sphinx索引エントリを生成する。
+	 * 名前の先頭が漢字の場合、ふりがなのプレフィックスを付与して正しくソートされるようにする。
+	 * 例: 漢字始まり → "い|一般兵（キャラクター）"
+	 * 例: カタカナ始まり → "エンド（アクション）"
+	 */
+	public String indexEntry(String name, String ruby, String category) {
+		if (name != null && !name.isEmpty()) {
+			char first = name.charAt(0);
+			if (Character.UnicodeBlock.of(first) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+				|| Character.UnicodeBlock.of(first) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+				|| Character.UnicodeBlock.of(first) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B) {
+				if (ruby != null && !ruby.isEmpty()) {
+					return ruby.substring(0, 1) + "|" + name + "（" + category + "）";
+				}
+			}
+		}
+		return name + "（" + category + "）";
+	}
 }
