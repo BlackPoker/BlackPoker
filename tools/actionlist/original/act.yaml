@@ -22,7 +22,6 @@ actList:
     acts:
     - format: lite,std,pro,mast
       actName: エンド
-      ruby: エンド
       actId: end
       actType: 基本
       actTrigger: 直接
@@ -37,7 +36,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: チャージ
-      ruby: チャージ
       actId: charge
       actType: 基本
       actTrigger: 誘発
@@ -53,7 +51,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: ドロー
-      ruby: ドロー
       actId: draw
       actType: 基本
       actTrigger: 誘発
@@ -68,7 +65,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: アタック
-      ruby: アタック
       actId: attack
       actType: 基本
       actTrigger: 直接
@@ -85,7 +81,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: ブロック
-      ruby: ブロック
       actId: block
       actType: 基本
       actTrigger: 誘発
@@ -264,7 +259,6 @@ actList:
     acts:  
     - format: lite,std,pro,mast
       actName: アップ
-      ruby: アップ
       actId: up
       actType: 魔法
       actTrigger: 直接
@@ -279,7 +273,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: ダウン
-      ruby: ダウン
       actId: down
       actType: 魔法
       actTrigger: 直接
@@ -297,7 +290,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: ツイスト
-      ruby: ツイスト
       actId: twist
       actType: 魔法
       actTrigger: 直接
@@ -314,7 +306,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: カウンター
-      ruby: カウンター
       actId: counter
       actType: 魔法
       actTrigger: 直接
@@ -408,7 +399,6 @@ actList:
 
     - format: std,pro,mast
       actName: リアニメイト
-      ruby: リアニメイト
       actId: reanimate
       actType: 魔法
       actTrigger: 直接
@@ -422,7 +412,6 @@ actList:
 
     - format: std,pro,mast
       actName: ハンデス
-      ruby: ハンデス
       actId: handeth
       actType: 魔法
       actTrigger: 直接
@@ -436,7 +425,6 @@ actList:
 
     - format: pro,mast
       actName: キル
-      ruby: キル
       actId: kill
       actType: 魔法
       actTrigger: 直接
@@ -494,7 +482,6 @@ actList:
 
     - format: lite,std,pro,mast
       actName: サーチ
-      ruby: サーチ
       actId: search
       actType: 魔法
       actTrigger: 直接
@@ -507,7 +494,6 @@ actList:
 
     - format: pro,mast
       actName: リバース
-      ruby: リバース
       actId: reverse
       actType: 魔法
       actTrigger: 直接
@@ -562,7 +548,6 @@ actList:
 
     - format: mast
       actName: フォース
-      ruby: フォース
       actId: force
       actType: 魔法
       actTrigger: 直接
@@ -687,7 +672,6 @@ charList:
 
     - format: lite,std,pro,mast
       charName: エース
-      ruby: エース
       charId: ace
       charType: 兵士
       charKey: A
@@ -740,7 +724,6 @@ fogList:
     fogs:
     - format: lite,std,pro,mast
       fogName: アップ
-      ruby: アップ
       fogId: upFog
       fogType: 滞留魔法
       fogKey: ♡A〜10
@@ -750,7 +733,6 @@ fogList:
 
     - format: lite,std,pro,mast
       fogName: ダウン
-      ruby: ダウン
       fogId: downFog
       fogType: 滞留魔法
       fogKey: ♠A〜10
@@ -760,7 +742,6 @@ fogList:
 
     - format: mast
       fogName: フォース
-      ruby: フォース
       fogId: forceFog
       fogType: 滞留魔法
       fogKey: ♡A〜10 を 2枚

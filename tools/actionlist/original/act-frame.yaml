@@ -38,7 +38,6 @@ actList:
         ・ストラテジー
         ・エクストラ
       actName: レアドロー
-      ruby: レアドロー
       actId: raredraw
       actType: レアカード操作
       actTrigger: 直接
@@ -90,7 +89,6 @@ actList:
         ・エクストラ
       actId: quickOpen
       actName: クイックオープン
-      ruby: クイックオープン
       actType: 切札操作
       actTrigger: 直接
       actSpeed: 即時
@@ -103,7 +101,6 @@ actList:
         ・エクストラ
       actId: open
       actName: メインオープン
-      ruby: メインオープン
       actType: 切札操作
       actTrigger: 直接
       actSpeed: 即時
@@ -116,7 +113,6 @@ actList:
         ・エクストラ
       actId: close
       actName: クローズ
-      ruby: クローズ
       actType: 切札操作
       actTrigger: 直接
       actSpeed: 通常
@@ -166,7 +162,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: スラッシュ
-      ruby: スラッシュ
       actId: slash
       actType: 兵士起因
       actTrigger: 直接
@@ -208,7 +203,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: ドレイン
-      ruby: ドレイン
       actId: drain
       actType: 魔法
       actTrigger: 直接
@@ -338,7 +332,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: リアニメーターリアニメイト
-      ruby: リアニメーターリアニメイト
       actId: reanimatorReanimate
       actType: 兵士起因
       actTrigger: 直接
@@ -428,7 +421,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: ブレイク
-      ruby: ブレイク
       actId: break
       actType: 兵士起因
       actTrigger: 直接
@@ -513,7 +505,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: ファントムリバース
-      ruby: ファントムリバース
       actId: phantomReverse
       actType: 魔法
       actTrigger: 直接
@@ -915,7 +906,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: スイッチ
-      ruby: スイッチ
       actId: switch
       actType: 兵士起因
       actTrigger: 直接
@@ -1012,7 +1002,6 @@ actList:
     - frame: |-
         ・エクストラ
       actName: リセット
-      ruby: リセット
       actId: reset
       actType: 魔法
       actTrigger: 直接
@@ -1252,7 +1241,6 @@ fogList:
     - frame: |-
         ・エクストラ
       fogName: クローズ
-      ruby: クローズ
       fogId: closeFog
       fogType: 滞留魔法
       fogKey: Q
@@ -1299,7 +1287,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: スラッシュ
-      ruby: スラッシュ
       trumpId: s2
       trumpType: 表切札
       trumpKey: ♠2
@@ -1316,7 +1303,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: ドレイン
-      ruby: ドレイン
       trumpId: s3
       trumpType: 表切札
       trumpKey: ♠3
@@ -1384,7 +1370,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: リアニメーター
-      ruby: リアニメーター
       trumpId: sJ
       trumpType: 表切札
       trumpKey: ♠J
@@ -1435,7 +1420,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: ブレイク
-      ruby: ブレイク
       trumpId: h3
       trumpType: 表切札
       trumpKey: ♡3
@@ -1488,7 +1472,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: ファントム
-      ruby: ファントム
       trumpId: h7
       trumpType: 表切札
       trumpKey: ♡7
@@ -1522,7 +1505,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: チャリオット
-      ruby: チャリオット
       trumpId: hJ
       trumpType: 表切札
       trumpKey: ♡J
@@ -1677,7 +1659,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: スイッチ
-      ruby: スイッチ
       trumpId: c4
       trumpType: 表切札
       trumpKey: ♣4
@@ -1728,7 +1709,6 @@ trumpList:
     - frame: |-
         ・エクストラ
       trumpName: リセット
-      ruby: リセット
       trumpId: c8
       trumpType: 表切札
       trumpKey: ♣8
