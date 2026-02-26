@@ -326,70 +326,71 @@
 \BOOKMARK [2][-]{subsection.9.1.3}{リクエスト}{section.9.1}% 325
 \BOOKMARK [2][-]{subsection.9.1.4}{解決}{section.9.1}% 326
 \BOOKMARK [2][-]{subsection.9.1.5}{チャンス}{section.9.1}% 327
-\BOOKMARK [2][-]{subsection.9.1.6}{ステージ}{section.9.1}% 328
-\BOOKMARK [2][-]{subsection.9.1.7}{コンポーネント}{section.9.1}% 329
-\BOOKMARK [2][-]{subsection.9.1.8}{ユニット}{section.9.1}% 330
-\BOOKMARK [2][-]{subsection.9.1.9}{コアフロー\(ルールシステム\)}{section.9.1}% 331
-\BOOKMARK [1][-]{section.9.2}{詳細}{chapter.9}% 332
-\BOOKMARK [2][-]{subsection.9.2.1}{アクションの定義項目}{section.9.2}% 333
-\BOOKMARK [3][-]{subsubsection*.465}{オーナー}{subsection.9.2.1}% 334
-\BOOKMARK [3][-]{subsubsection*.466}{トリガー}{subsection.9.2.1}% 335
-\BOOKMARK [3][-]{subsubsection*.467}{スピード}{subsection.9.2.1}% 336
-\BOOKMARK [3][-]{subsubsection*.468}{タイミング}{subsection.9.2.1}% 337
-\BOOKMARK [3][-]{subsubsection*.469}{起動条件}{subsection.9.2.1}% 338
-\BOOKMARK [3][-]{subsubsection*.470}{誘発条件}{subsection.9.2.1}% 339
-\BOOKMARK [3][-]{subsubsection*.471}{効果}{subsection.9.2.1}% 340
-\BOOKMARK [2][-]{subsection.9.2.2}{リクエストの定義項目}{section.9.2}% 341
-\BOOKMARK [2][-]{subsection.9.2.3}{コンポーネントの定義項目}{section.9.2}% 342
-\BOOKMARK [2][-]{subsection.9.2.4}{ユニットの定義項目}{section.9.2}% 343
-\BOOKMARK [1][-]{section.9.3}{能力}{chapter.9}% 344
-\BOOKMARK [1][-]{section.9.4}{コアフロー}{chapter.9}% 345
-\BOOKMARK [2][-]{subsection.9.4.1}{誘発チェック}{section.9.4}% 346
-\BOOKMARK [3][-]{subsubsection*.476}{誘発アクション処理}{subsection.9.4.1}% 347
-\BOOKMARK [2][-]{subsection.9.4.2}{能力の適用順}{section.9.4}% 348
-\BOOKMARK [3][-]{subsubsection*.477}{考え方の原則}{subsection.9.4.2}% 349
-\BOOKMARK [3][-]{subsubsection*.478}{能力の適用ルール}{subsection.9.4.2}% 350
-\BOOKMARK [3][-]{subsubsection*.479}{運用上の注意}{subsection.9.4.2}% 351
-\BOOKMARK [1][-]{section.9.5}{まとめ}{chapter.9}% 352
-\BOOKMARK [0][-]{chapter.10}{付録}{}% 353
-\BOOKMARK [1][-]{section.10.1}{アクションリスト}{chapter.10}% 354
-\BOOKMARK [2][-]{subsection.10.1.1}{ライト}{section.10.1}% 355
-\BOOKMARK [2][-]{subsection.10.1.2}{マスター}{section.10.1}% 356
-\BOOKMARK [2][-]{subsection.10.1.3}{マスター+エクストラ}{section.10.1}% 357
-\BOOKMARK [1][-]{section.10.2}{ガイドライン}{chapter.10}% 358
-\BOOKMARK [2][-]{subsection.10.2.1}{BlackPoker二次創作ガイドライン}{section.10.2}% 359
-\BOOKMARK [3][-]{subsubsection*.488}{はじめに}{subsection.10.2.1}% 360
-\BOOKMARK [3][-]{subsubsection*.489}{二次創作の範囲}{subsection.10.2.1}% 361
-\BOOKMARK [3][-]{subsubsection*.490}{創作の自由と制限}{subsection.10.2.1}% 362
-\BOOKMARK [3][-]{subsubsection*.491}{クレジット表記について}{subsection.10.2.1}% 363
-\BOOKMARK [3][-]{subsubsection*.492}{禁止事項}{subsection.10.2.1}% 364
-\BOOKMARK [3][-]{subsubsection*.493}{商用利用について}{subsection.10.2.1}% 365
-\BOOKMARK [3][-]{subsubsection*.494}{ガイドラインにないケースについて}{subsection.10.2.1}% 366
-\BOOKMARK [2][-]{subsection.10.2.2}{BlackPoker アクション・ルールガイドライン}{section.10.2}% 367
-\BOOKMARK [3][-]{subsubsection*.504}{はじめに}{subsection.10.2.2}% 368
-\BOOKMARK [3][-]{subsubsection*.505}{アクションを追加する際のルール}{subsection.10.2.2}% 369
-\BOOKMARK [4][-]{paragraph*.506}{アクションの対象は単対象 \(必須\)}{subsubsection*.505}% 370
-\BOOKMARK [4][-]{paragraph*.507}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.505}% 371
-\BOOKMARK [4][-]{paragraph*.508}{誘発アクションは即時 \(推奨\)}{subsubsection*.505}% 372
-\BOOKMARK [4][-]{paragraph*.509}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.505}% 373
-\BOOKMARK [4][-]{paragraph*.510}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.505}% 374
-\BOOKMARK [3][-]{subsubsection*.511}{キャラクターを追加する際のルール}{subsection.10.2.2}% 375
-\BOOKMARK [4][-]{paragraph*.512}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.511}% 376
-\BOOKMARK [0][-]{chapter.11}{変更履歴}{}% 377
-\BOOKMARK [1][-]{section.11.1}{第8版の主な変更点}{chapter.11}% 378
-\BOOKMARK [2][-]{subsection.11.1.1}{アクションの定義の変更}{section.11.1}% 379
-\BOOKMARK [2][-]{subsection.11.1.2}{能力の解釈を変更}{section.11.1}% 380
-\BOOKMARK [2][-]{subsection.11.1.3}{フォグ領域追加}{section.11.1}% 381
-\BOOKMARK [2][-]{subsection.11.1.4}{用語追加/変更}{section.11.1}% 382
-\BOOKMARK [2][-]{subsection.11.1.5}{オプション削除とフレームへの統合}{section.11.1}% 383
-\BOOKMARK [2][-]{subsection.11.1.6}{エクストラをフレーム化 \(8.1\)}{section.11.1}% 384
-\BOOKMARK [2][-]{subsection.11.1.7}{曖昧なルールの明確化}{section.11.1}% 385
-\BOOKMARK [2][-]{subsection.11.1.8}{ルール外変更点}{section.11.1}% 386
-\BOOKMARK [1][-]{section.11.2}{第7版の主な変更点}{chapter.11}% 387
-\BOOKMARK [2][-]{subsection.11.2.1}{リバースのクイック化}{section.11.2}% 388
-\BOOKMARK [2][-]{subsection.11.2.2}{ゲーム中のデッキ名称をライフに変更}{section.11.2}% 389
-\BOOKMARK [2][-]{subsection.11.2.3}{対戦レギュレーションの定義方法変更}{section.11.2}% 390
-\BOOKMARK [2][-]{subsection.11.2.4}{コアフローをわかりやすく整理}{section.11.2}% 391
-\BOOKMARK [2][-]{subsection.11.2.5}{B・Jのクイック化}{section.11.2}% 392
-\BOOKMARK [2][-]{subsection.11.2.6}{引き分け廃止}{section.11.2}% 393
-\BOOKMARK [2][-]{subsection.11.2.7}{ルールの記載を微修正}{section.11.2}% 394
+\BOOKMARK [2][-]{subsection.9.1.6}{パス}{section.9.1}% 328
+\BOOKMARK [2][-]{subsection.9.1.7}{ステージ}{section.9.1}% 329
+\BOOKMARK [2][-]{subsection.9.1.8}{コンポーネント}{section.9.1}% 330
+\BOOKMARK [2][-]{subsection.9.1.9}{ユニット}{section.9.1}% 331
+\BOOKMARK [2][-]{subsection.9.1.10}{コアフロー\(ルールシステム\)}{section.9.1}% 332
+\BOOKMARK [1][-]{section.9.2}{詳細}{chapter.9}% 333
+\BOOKMARK [2][-]{subsection.9.2.1}{アクションの定義項目}{section.9.2}% 334
+\BOOKMARK [3][-]{subsubsection*.465}{オーナー}{subsection.9.2.1}% 335
+\BOOKMARK [3][-]{subsubsection*.466}{トリガー}{subsection.9.2.1}% 336
+\BOOKMARK [3][-]{subsubsection*.467}{スピード}{subsection.9.2.1}% 337
+\BOOKMARK [3][-]{subsubsection*.468}{タイミング}{subsection.9.2.1}% 338
+\BOOKMARK [3][-]{subsubsection*.469}{起動条件}{subsection.9.2.1}% 339
+\BOOKMARK [3][-]{subsubsection*.470}{誘発条件}{subsection.9.2.1}% 340
+\BOOKMARK [3][-]{subsubsection*.471}{効果}{subsection.9.2.1}% 341
+\BOOKMARK [2][-]{subsection.9.2.2}{リクエストの定義項目}{section.9.2}% 342
+\BOOKMARK [2][-]{subsection.9.2.3}{コンポーネントの定義項目}{section.9.2}% 343
+\BOOKMARK [2][-]{subsection.9.2.4}{ユニットの定義項目}{section.9.2}% 344
+\BOOKMARK [1][-]{section.9.3}{能力}{chapter.9}% 345
+\BOOKMARK [1][-]{section.9.4}{コアフロー}{chapter.9}% 346
+\BOOKMARK [2][-]{subsection.9.4.1}{誘発チェック}{section.9.4}% 347
+\BOOKMARK [3][-]{subsubsection*.476}{誘発アクション処理}{subsection.9.4.1}% 348
+\BOOKMARK [2][-]{subsection.9.4.2}{能力の適用順}{section.9.4}% 349
+\BOOKMARK [3][-]{subsubsection*.477}{考え方の原則}{subsection.9.4.2}% 350
+\BOOKMARK [3][-]{subsubsection*.478}{能力の適用ルール}{subsection.9.4.2}% 351
+\BOOKMARK [3][-]{subsubsection*.479}{運用上の注意}{subsection.9.4.2}% 352
+\BOOKMARK [1][-]{section.9.5}{まとめ}{chapter.9}% 353
+\BOOKMARK [0][-]{chapter.10}{付録}{}% 354
+\BOOKMARK [1][-]{section.10.1}{アクションリスト}{chapter.10}% 355
+\BOOKMARK [2][-]{subsection.10.1.1}{ライト}{section.10.1}% 356
+\BOOKMARK [2][-]{subsection.10.1.2}{マスター}{section.10.1}% 357
+\BOOKMARK [2][-]{subsection.10.1.3}{マスター+エクストラ}{section.10.1}% 358
+\BOOKMARK [1][-]{section.10.2}{ガイドライン}{chapter.10}% 359
+\BOOKMARK [2][-]{subsection.10.2.1}{BlackPoker二次創作ガイドライン}{section.10.2}% 360
+\BOOKMARK [3][-]{subsubsection*.488}{はじめに}{subsection.10.2.1}% 361
+\BOOKMARK [3][-]{subsubsection*.489}{二次創作の範囲}{subsection.10.2.1}% 362
+\BOOKMARK [3][-]{subsubsection*.490}{創作の自由と制限}{subsection.10.2.1}% 363
+\BOOKMARK [3][-]{subsubsection*.491}{クレジット表記について}{subsection.10.2.1}% 364
+\BOOKMARK [3][-]{subsubsection*.492}{禁止事項}{subsection.10.2.1}% 365
+\BOOKMARK [3][-]{subsubsection*.493}{商用利用について}{subsection.10.2.1}% 366
+\BOOKMARK [3][-]{subsubsection*.494}{ガイドラインにないケースについて}{subsection.10.2.1}% 367
+\BOOKMARK [2][-]{subsection.10.2.2}{BlackPoker アクション・ルールガイドライン}{section.10.2}% 368
+\BOOKMARK [3][-]{subsubsection*.504}{はじめに}{subsection.10.2.2}% 369
+\BOOKMARK [3][-]{subsubsection*.505}{アクションを追加する際のルール}{subsection.10.2.2}% 370
+\BOOKMARK [4][-]{paragraph*.506}{アクションの対象は単対象 \(必須\)}{subsubsection*.505}% 371
+\BOOKMARK [4][-]{paragraph*.507}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.505}% 372
+\BOOKMARK [4][-]{paragraph*.508}{誘発アクションは即時 \(推奨\)}{subsubsection*.505}% 373
+\BOOKMARK [4][-]{paragraph*.509}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.505}% 374
+\BOOKMARK [4][-]{paragraph*.510}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.505}% 375
+\BOOKMARK [3][-]{subsubsection*.511}{キャラクターを追加する際のルール}{subsection.10.2.2}% 376
+\BOOKMARK [4][-]{paragraph*.512}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.511}% 377
+\BOOKMARK [0][-]{chapter.11}{変更履歴}{}% 378
+\BOOKMARK [1][-]{section.11.1}{第8版の主な変更点}{chapter.11}% 379
+\BOOKMARK [2][-]{subsection.11.1.1}{アクションの定義の変更}{section.11.1}% 380
+\BOOKMARK [2][-]{subsection.11.1.2}{能力の解釈を変更}{section.11.1}% 381
+\BOOKMARK [2][-]{subsection.11.1.3}{フォグ領域追加}{section.11.1}% 382
+\BOOKMARK [2][-]{subsection.11.1.4}{用語追加/変更}{section.11.1}% 383
+\BOOKMARK [2][-]{subsection.11.1.5}{オプション削除とフレームへの統合}{section.11.1}% 384
+\BOOKMARK [2][-]{subsection.11.1.6}{エクストラをフレーム化 \(8.1\)}{section.11.1}% 385
+\BOOKMARK [2][-]{subsection.11.1.7}{曖昧なルールの明確化}{section.11.1}% 386
+\BOOKMARK [2][-]{subsection.11.1.8}{ルール外変更点}{section.11.1}% 387
+\BOOKMARK [1][-]{section.11.2}{第7版の主な変更点}{chapter.11}% 388
+\BOOKMARK [2][-]{subsection.11.2.1}{リバースのクイック化}{section.11.2}% 389
+\BOOKMARK [2][-]{subsection.11.2.2}{ゲーム中のデッキ名称をライフに変更}{section.11.2}% 390
+\BOOKMARK [2][-]{subsection.11.2.3}{対戦レギュレーションの定義方法変更}{section.11.2}% 391
+\BOOKMARK [2][-]{subsection.11.2.4}{コアフローをわかりやすく整理}{section.11.2}% 392
+\BOOKMARK [2][-]{subsection.11.2.5}{B・Jのクイック化}{section.11.2}% 393
+\BOOKMARK [2][-]{subsection.11.2.6}{引き分け廃止}{section.11.2}% 394
+\BOOKMARK [2][-]{subsection.11.2.7}{ルールの記載を微修正}{section.11.2}% 395
