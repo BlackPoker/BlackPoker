@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 FEB 2026 19:15
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  27 FEB 2026 19:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3039,9 +3039,10 @@ Underfull \hbox (badness 10000) in paragraph at lines 14317--14317
 
  []
 
-[184] [185] [186] [187]
-No file blackpoker.ind.
-[188]
+[184] [185] [186] [187] (./blackpoker.ind [188] [189
+
+
+] [190])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
 (Font)              Font shape `JT1/mc/bx/n' tried instead on input line 14603.
 
@@ -3058,19 +3059,21 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 11.53198pt on input line 14603.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 5.76599pt on input line 14607.
- [189
+ [191
 
-] (./blackpoker.aux)
+
+]
+(./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 92BC1B300446E805D6D4218EAFEA2711;31866.
+(rerunfilecheck)             Checksum: EB2056A852B05DDCAC5104C5F1465208;31912.
  ) 
 Here is how much of TeX's memory you used:
- 15888 strings out of 480496
- 267324 string characters out of 5899437
- 634955 words of memory out of 5000000
- 33491 multiletter control sequences out of 15000+600000
- 503231 words of font info for 125 fonts, out of 8000000 for 9000
+ 15891 strings out of 480496
+ 267366 string characters out of 5899437
+ 641007 words of memory out of 5000000
+ 33492 multiletter control sequences out of 15000+600000
+ 506083 words of font info for 126 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,12n,80p,642b,636s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,12n,80p,642b,654s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (195 pages, 651804 bytes).
+Output written on blackpoker.dvi (197 pages, 695144 bytes).

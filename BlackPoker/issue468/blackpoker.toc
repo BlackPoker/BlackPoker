@@ -393,3 +393,4 @@
 \contentsline {subsection}{\numberline {11.2.5}B・Jのクイック化}{187}{subsection.11.2.5}%
 \contentsline {subsection}{\numberline {11.2.6}引き分け廃止}{188}{subsection.11.2.6}%
 \contentsline {subsection}{\numberline {11.2.7}ルールの記載を微修正}{188}{subsection.11.2.7}%
+\contentsline {chapter}{索引}{189}{chapter*.657}%
