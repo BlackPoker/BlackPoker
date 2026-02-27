@@ -1,7 +1,6 @@
 This is mendex version 3.2 [16-Jan-2020] (utf8.uptex) (TeX Live 2021).
 Scanning dictionary file ../source/_mysetting/mydict.dic....done.
 Scanning input file blackpoker.idx.
-Error: 効果 is no entry in dictionary file in blackpoker.idx, line 50.
 Error: 判定（アクション） is no entry in dictionary file in blackpoker.idx, line 58.
 Error: 世代交代（アクション） is no entry in dictionary file in blackpoker.idx, line 59.
 Error: 防壁設置（アクション） is no entry in dictionary file in blackpoker.idx, line 60.
@@ -102,7 +101,7 @@ Error: 補充（切札） is no entry in dictionary file in blackpoker.idx, line
 Error: 要塞（切札） is no entry in dictionary file in blackpoker.idx, line 194.
 Error: 悪あがき（切札） is no entry in dictionary file in blackpoker.idx, line 195.
 Error: 騎士（切札） is no entry in dictionary file in blackpoker.idx, line 196.
-Error: 裏切札（切札） is no entry in dictionary file in blackpoker.idx, line 197....done (116 entries accepted, 102 rejected).
-116 entries accepted, 102 rejected.
-102 errors, written in blackpoker.ilg.
+Error: 裏切札（切札） is no entry in dictionary file in blackpoker.idx, line 197....done (117 entries accepted, 101 rejected).
+117 entries accepted, 101 rejected.
+101 errors, written in blackpoker.ilg.
 Nothing written in output file.
