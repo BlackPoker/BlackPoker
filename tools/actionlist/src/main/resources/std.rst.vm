@@ -27,6 +27,9 @@ ${nestList.type}
 
 .. _act-${row.actId}:
 
+.. index::
+   single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
+
 ${row.actName} (${row.actType})
 ---------------------------------------------------
         #if(${row.format})
@@ -150,6 +153,9 @@ ${nestList.type}
 
 .. _char-${char.charId}:
 
+.. index::
+   single: ${rstFn.indexEntry(${char.charName}, ${char.ruby}, "キャラクター")}
+
 ${char.charName} (${char.charType})
 ---------------------------------------------------
         #if(${char.format})
@@ -247,6 +253,9 @@ ${nestList.type}
 
 .. _fog-${fog.fogId}:
 
+.. index::
+   single: ${rstFn.indexEntry(${fog.fogName}, ${fog.ruby}, "フォグ")}
+
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
         #if(${fog.format})
@@ -336,6 +345,9 @@ ${nestList.type}
         #end
 
 .. _trump-${trump.trumpId}:
+
+.. index::
+   single: ${rstFn.indexEntry(${trump.trumpName}, ${trump.ruby}, "切札")}
 
 ${trump.trumpName} (${trump.trumpType})
 ---------------------------------------------------

@@ -96,6 +96,7 @@ actList:
 
     - format: lite,std,pro,mast
       actName: ダメージ判定
+      ruby: ダメージはんてい
       actId: damageJudge
       actType: 基本
       actTrigger: 誘発
@@ -184,6 +185,7 @@ actList:
 
     - format: lite,std,pro,mast
       actName: エース召喚
+      ruby: エースしょうかん
       actId: summonsAce
       actType: 召喚
       actTrigger: 直接
@@ -200,6 +202,7 @@ actList:
 
     - format: pro,mast
       actName: クイック召喚
+      ruby: クイックしょうかん
       actId: quickSummonsAce
       actType: 召喚
       actTrigger: 直接
@@ -601,6 +604,7 @@ actList:
 
     - format: mast
       actName: B・J
+      ruby: ビージェー
       actId: bj
       actType: 魔法
       actTrigger: 直接
@@ -626,6 +630,7 @@ actList:
 
     - format: mast
       actName: R・S・F
+      ruby: アールエスエフ
       actId: rsf
       actType: 魔法
       actTrigger: 直接
