@@ -56,9 +56,15 @@ ${row.actName} (${row.actType})
    :header-rows: 1
 
 #if($frames)
-   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
-
-   #foreach($fr in $frames)"#if(${row.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#set($frameHeader = "")
+#set($frameRow = "")
+#foreach($fr in $frames)
+#if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
+#set($frameHeader = "${frameHeader}${fr.name}")
+#if(${row.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#end
+   ${frameHeader}
+   ${frameRow}
 #else
 ${rstFn.cnv(${row.frame})}
 #end
@@ -186,9 +192,15 @@ ${char.charName} (${char.charType})
    :header-rows: 1
 
 #if($frames)
-   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
-
-   #foreach($fr in $frames)"#if(${char.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#set($frameHeader = "")
+#set($frameRow = "")
+#foreach($fr in $frames)
+#if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
+#set($frameHeader = "${frameHeader}${fr.name}")
+#if(${char.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#end
+   ${frameHeader}
+   ${frameRow}
 #else
 ${rstFn.cnv(${char.frame})}
 #end
@@ -294,9 +306,15 @@ ${fog.fogName} (${fog.fogType})
    :header-rows: 1
 
 #if($frames)
-   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
-
-   #foreach($fr in $frames)"#if(${fog.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#set($frameHeader = "")
+#set($frameRow = "")
+#foreach($fr in $frames)
+#if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
+#set($frameHeader = "${frameHeader}${fr.name}")
+#if(${fog.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#end
+   ${frameHeader}
+   ${frameRow}
 #else
 ${rstFn.cnv(${fog.frame})}
 #end
@@ -395,9 +413,15 @@ ${trump.trumpName} (${trump.trumpType})
    :header-rows: 1
 
 #if($frames)
-   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
-
-   #foreach($fr in $frames)"#if(${trump.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#set($frameHeader = "")
+#set($frameRow = "")
+#foreach($fr in $frames)
+#if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
+#set($frameHeader = "${frameHeader}${fr.name}")
+#if(${trump.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#end
+   ${frameHeader}
+   ${frameRow}
 #else
 ${rstFn.cnv(${trump.frame})}
 #end
