@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  2 MAR 2026 19:21
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  4 MAR 2026 19:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2081,7 +2081,11 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11123.
 
-[128] [129] [130]
+[128] [129]
+Overfull \vbox (2.23927pt too high) has occurred while \output is active []
+
+
+[130]
 Overfull \vbox (2.23927pt too high) has occurred while \output is active []
 
 
@@ -2115,7 +2119,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Swords_02.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_02.jpg>
-[133]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11632.
@@ -2130,6 +2133,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Swords_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_03.jpg>
+[133]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11675.
@@ -2174,7 +2178,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Swords_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_07.jpg>
-[136]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11804.
@@ -2189,6 +2192,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_20_Judgement.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_20_Judgement.jpg>
+[136]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11847.
@@ -2233,7 +2237,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Cups_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_03.jpg>
-[139]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 11976.
@@ -2248,6 +2251,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Cups_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_04.jpg>
+[139]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12019.
@@ -2292,7 +2296,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Cups_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_08.jpg>
-[142]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12148.
@@ -2307,6 +2310,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg>
+[142]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12191.
@@ -2351,7 +2355,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_03.jpg>
-[145]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12320.
@@ -2366,6 +2369,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_04.jpg>
+[145]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12363.
@@ -2410,7 +2414,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_09.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_09.jpg>
-[148]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12492.
@@ -2426,6 +2429,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 File: Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg Graphic file (type b
 mp)
 <Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg>
+[148]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12535.
@@ -2470,7 +2474,6 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Wands_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_07.jpg>
-[151]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12664.
@@ -2485,6 +2488,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_Wands_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_08.jpg>
+[151]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 12707.
@@ -2529,20 +2533,20 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 File: Pictorial_Key_to_the_Tarot_13_Death.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_13_Death.jpg>
-[154] [155] [156
-
-]
+[154]
 第9章
 File: plantuml-5869adc776d20b7021b88175e8de80f0f436330c.pdf Graphic file (type 
 pdf)
 <plantuml-5869adc776d20b7021b88175e8de80f0f436330c.pdf>
-[157] [158]
+[155
+
+] [156]
 File: abstract.pdf Graphic file (type pdf)
 <abstract.pdf>
 File: plantuml-b424b035f54a58f3126979e401d275cf680053a5.pdf Graphic file (type 
 pdf)
 <plantuml-b424b035f54a58f3126979e401d275cf680053a5.pdf>
- [159] [160]
+ [157] [158]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13087--13089
 []
  []
@@ -2592,7 +2596,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 13156--13156
 
  []
 
-[161]
+[159]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13210--13210
 []
  []
@@ -2602,7 +2606,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 13210--13210
 
  []
 
-[162]
+[160]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13237--13239
 []
  []
@@ -2647,14 +2651,14 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13295--13298
 []
  []
 
-[163]
+[161]
 File: plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf Graphic file (type 
 pdf)
 <plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf>
 File: plantuml-a56dc106f9bf19e48b37a629de63c4cd975741da.pdf Graphic file (type 
 pdf)
 <plantuml-a56dc106f9bf19e48b37a629de63c4cd975741da.pdf>
- [164]
+ [162]
 File: plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf Graphic file (type 
 pdf)
 <plantuml-56e0b8d8835bda254d3bb4ae5813ef3482975b0f.pdf>
@@ -2683,7 +2687,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13387--13392
 []
  []
 
-[165]
+[163]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13398--13402
 []
  []
@@ -2698,7 +2702,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13410--13414
 []
  []
 
-[166]
+[164]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13422--13424
 []
  []
@@ -2738,7 +2742,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13458--13461
 []
  []
 
-[167]
+[165]
 File: plantuml-5a827bb0c6eb985b80d797683ca13498043f4a80.pdf Graphic file (type 
 pdf)
 <plantuml-5a827bb0c6eb985b80d797683ca13498043f4a80.pdf>
@@ -2797,7 +2801,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13546--13549
 []
  []
 
-[168] [169]
+[166] [167]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13551--13554
 []
  []
@@ -2815,7 +2819,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13585--13589
 []
  []
 
-[170]
+[168]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13591--13594
 []
  []
@@ -2865,7 +2869,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13635--13638
 []
  []
 
-[171]
+[169]
 Overfull \hbox (121.82932pt too wide) in paragraph at lines 13667--13667
 []
  []
@@ -2910,7 +2914,7 @@ Overfull \hbox (114.43193pt too wide) in paragraph at lines 13724--13726
 []
  []
 
-[172]
+[170]
 Overfull \hbox (121.82932pt too wide) in paragraph at lines 13746--13748
 []
  []
@@ -2930,7 +2934,7 @@ Overfull \hbox (121.82932pt too wide) in paragraph at lines 13767--13769
 []
  []
 
-[173] [174
+[171] [172
 
 ]
 第10章
@@ -2966,7 +2970,7 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 13821--13823
 []
  []
 
-[175]
+[173]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 13837--13839
 []
  []
@@ -2983,11 +2987,11 @@ Underfull \hbox (badness 10000) in paragraph at lines 13837--13839
 A8 % E3 % 82 % AF % E3 % 82 % B9 %
  []
 
-[176] [177] [178] [179] [180] [181] [182
+[174] [175] [176] [177] [178] [179] [180
 
 ]
 第11章
-[183]
+[181]
 Overfull \hbox (119.97983pt too wide) in paragraph at lines 14252--14252
 []
  []
@@ -3027,10 +3031,10 @@ Underfull \hbox (badness 10000) in paragraph at lines 14317--14317
 
  []
 
-[184] [185] [186] [187] (./blackpoker.ind [188] [189
+[182] [183] [184] [185] (./blackpoker.ind [186] [187
 
 
-] [190])
+] [188])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
 (Font)              Font shape `JT1/mc/bx/n' tried instead on input line 14603.
 
@@ -3047,7 +3051,7 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 11.53198pt on input line 14603.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 5.76599pt on input line 14607.
- [191
+ [189
 
 
 ]
@@ -3064,4 +3068,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,12n,80p,642b,654s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (197 pages, 694916 bytes).
+Output written on blackpoker.dvi (195 pages, 694104 bytes).
