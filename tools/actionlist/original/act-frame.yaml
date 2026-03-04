@@ -679,7 +679,7 @@ actList:
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actCost: L
+      actCost: DL
       actActCond: 自分の表切札に「防壁追加」がある
       actEffect: |-
         手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は「防壁の置き方」参照。
@@ -1032,7 +1032,7 @@ actList:
       actTriggerCond: |-
         自分の表切札に「要塞」があるかつ、自分の防壁がダメージ判定にてブロッカーとして墓地に移った時に誘発する。
       actEffect: |-
-        墓地に移った防壁のカードの数字に等しいダメージをアタッカーのオーナーに与える。Jokerの場合は0とする。
+        アタッカーのオーナーに2点のダメージを与える。
       since: v9.0
       changed: changed
       devNote: |-
