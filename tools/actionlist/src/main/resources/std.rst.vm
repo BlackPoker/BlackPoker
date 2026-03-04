@@ -9,6 +9,11 @@
 #if(${arg1})${arg1}#endアクションリスト
 ================================================================
 
+.. note::
+   **表記について**
+
+   - **@** はトリガー-スピード-タイミングの短縮表記です。（例: @直接-通常-クイック）
+
 .. contents:: 目次
    :depth: 2
    :local:
@@ -45,19 +50,23 @@ ${row.actName} (${row.actType})
         #end
 
         #if(${row.frame})
-**フレーム:**  
+**フレーム:**
 
+.. csv-table::
+   :header-rows: 1
+
+#if($frames)
+   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
+
+   #foreach($fr in $frames)"#if(${row.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#else
 ${rstFn.cnv(${row.frame})}
-
+#end
 
         #end
 
         #if(${row.actTime})
-**トリガー:** ${row.actTrigger}
-
-**スピード:** ${row.actSpeed}
-
-**タイミング:** ${row.actTime}
+**@** ${row.actTrigger}-${row.actSpeed}-${row.actTime}
 
         #end
         #if(${row.actKey.trim()})
@@ -171,10 +180,18 @@ ${char.charName} (${char.charType})
         #end
 
         #if(${char.frame})
-**フレーム:**  
+**フレーム:**
 
+.. csv-table::
+   :header-rows: 1
+
+#if($frames)
+   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
+
+   #foreach($fr in $frames)"#if(${char.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#else
 ${rstFn.cnv(${char.frame})}
-
+#end
 
         #end
 
@@ -271,10 +288,18 @@ ${fog.fogName} (${fog.fogType})
         #end
 
         #if(${fog.frame})
-**フレーム:**  
+**フレーム:**
 
+.. csv-table::
+   :header-rows: 1
+
+#if($frames)
+   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
+
+   #foreach($fr in $frames)"#if(${fog.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#else
 ${rstFn.cnv(${fog.frame})}
-
+#end
 
         #end
 
@@ -364,10 +389,18 @@ ${trump.trumpName} (${trump.trumpType})
         #end
 
         #if(${trump.frame})
-**フレーム:**  
+**フレーム:**
 
+.. csv-table::
+   :header-rows: 1
+
+#if($frames)
+   #foreach($fr in $frames)"${fr.name}"#if($foreach.hasNext), #end#end
+
+   #foreach($fr in $frames)"#if(${trump.frame.contains(${fr.name})})◯#else${x}#end"#if($foreach.hasNext), #end#end
+#else
 ${rstFn.cnv(${trump.frame})}
-
+#end
 
         #end
 
