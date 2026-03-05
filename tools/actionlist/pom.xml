@@ -144,6 +144,22 @@
               </arguments>
             </configuration>
           </execution>
+          <!-- frame.yaml を act-frame.yaml にマージ（フレーム名をテンプレートで参照するため） -->
+          <execution>
+            <id>merge-frame-yaml</id>
+            <phase>package</phase>
+            <goals>
+              <goal>java</goal>
+            </goals>
+            <configuration>
+              <mainClass>com.github.blackpoker.actionlist.YamlMerger</mainClass>
+              <arguments>
+                <argument>original/act-frame.yaml</argument>
+                <argument>original/frame.yaml</argument>
+                <argument>original/merged-frame.yaml</argument>
+              </arguments>
+            </configuration>
+          </execution>
           <!-- 既存の ActionListGen 実行（act.yaml を入力とする各種出力） -->
           <execution>
             <id>actionlist-gen-std-rst</id>
@@ -166,7 +182,7 @@
                 <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
 
                 <!-- frame -->
-                <argument>-i original/act-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>
+                <argument>-i original/merged-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>
                 <argument>-i original/frame.yaml -t frame -rstOutput ../../source/auto/framelist.rst</argument>
                 <argument>-i original/frame.yaml -t frame -csvOutput ../../source/auto/frame-format.csv</argument>
               </arguments>
