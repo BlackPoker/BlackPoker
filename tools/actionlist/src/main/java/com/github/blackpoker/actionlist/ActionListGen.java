@@ -6,7 +6,10 @@ import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -60,13 +63,13 @@ public class ActionListGen {
 	// ="/Users/iichico/Documents/BlackPoker関連/ルール検討/extra.html";
 	public static void main(String[] args) {
 
-		for(String arg : args){
+		for (String arg : args) {
 			System.out.println("------------------------------args------------------------------");
 			System.out.println(arg);
-			
+
 			String[] ag = arg.split("[ ]+");
-			
-			System.out.println("------------------------------args------------------------------");	
+
+			System.out.println("------------------------------args------------------------------");
 			new ActionListGen().start(ag);
 		}
 	}
@@ -114,7 +117,7 @@ public class ActionListGen {
 			Writer csvWriter = new CsvWriter();
 			csvWriter.write(map, csvOutputPath, templateName);
 		}
-		
+
 		// yaml書き出し
 		{
 			Yaml yaml = new Yaml();
@@ -132,17 +135,17 @@ public class ActionListGen {
 		Path input = Paths.get(filepath);
 		Yaml yaml = new Yaml();
 		try (InputStream in = Files.newInputStream(input)) {
-            
-			ret = (Map<String,Object>)yaml.load(in);
-			
+
+			ret = (Map<String, Object>) yaml.load(in);
+
 			System.out.println(ret);
 			System.out.println("読み込みました。" + filepath);
-        }
+		}
 
 		// // 設定値読み込み
 		// {
-		// 	Map<String, String> config = SheetUtil.loadConfig(sheet);
-		// 	this.conf = config;
+		// Map<String, String> config = SheetUtil.loadConfig(sheet);
+		// this.conf = config;
 		// }
 
 		// コマンドライン引数を設定
@@ -155,116 +158,74 @@ public class ActionListGen {
 			}
 		}
 
-		// // ------------------------------------
-		// // listX:"開始セル,必須列(0始まり),-r(逆順),リストにまとめる列数(0始まり)"
-		// for (int i = 0;; i++) {
-		// 	String key;
-		// 	if (i == 0) {
-		// 		key = "list";
-		// 	} else {
-		// 		key = "list" + i;
-		// 	}
+		// 切札→アクション/キャラクターのマッピングを構築
+		buildTrumpRelations(ret);
 
-		// 	// keyが存在しない場合、ループを抜ける
-		// 	if (!conf.containsKey(key)) {
-		// 		break;
-		// 	}
-
-		// 	String[] split = conf.get(key).split(",");
-
-		// 	Point point = SheetUtil.getPoint(split[0]);
-		// 	int stCol = (int) point.getX();
-		// 	int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
-
-		// 	int reqCol = stCol;
-		// 	if (1 < split.length) {
-		// 		reqCol = Integer.parseInt(split[1]);
-		// 	}
-
-		// 	List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
-
-		// 	for (Map<String, String> map : listMap) {
-		// 		for (Entry<String, String> entry : map.entrySet()) {
-		// 			System.out.println(entry.getKey() + ":" + entry.getValue());
-		// 		}
-		// 	}
-
-		// 	// reverse設定
-		// 	if (2 < split.length && "-r".equals(split[2])) {
-		// 		Collections.reverse(listMap);
-		// 	}
-
-		// 	// listにまとめる設定
-		// 	List<List<Map<String, String>>> wrapList = new ArrayList<>();
-		// 	if (3 < split.length && Pattern.matches("[0-9]+", split[3])) {
-		// 		int idx = Integer.parseInt(split[3]);
-
-		// 		String idxKey = (String) listMap.get(0).keySet().toArray()[idx];
-
-		// 		String listKeyVal = "";
-		// 		for (Map<String, String> m : listMap) {
-
-		// 			// リストにまとめる時のキー値と異なる場合、新しいリストに詰める
-		// 			if (!listKeyVal.equals(m.get(idxKey))) {
-		// 				listKeyVal = m.get(idxKey);
-		// 				List<Map<String, String>> _list = new ArrayList<>();
-		// 				wrapList.add(_list);
-		// 			}
-
-		// 			// 一番最後のリストに追加する
-		// 			wrapList.get(wrapList.size() - 1).add(m);
-		// 		}
-		// 	}
-
-		// 	// 結果を設定
-		// 	if (!wrapList.isEmpty()) {
-		// 		// ネストしたlistはlistlistというキーで設定する
-		// 		ret.put(key + "list", wrapList);
-		// 	}
-		// 	ret.put(key, listMap);
-
-		// }
-
-		// // ------------------------------------
-		// // dataX:"開始セル"
-		// for (int i = 0;; i++) {
-		// 	String key;
-		// 	if (i == 0) {
-		// 		key = "data";
-		// 	} else {
-		// 		key = "data" + i;
-		// 	}
-
-		// 	// keyが存在しない場合、ループを抜ける
-		// 	if (!conf.containsKey(key)) {
-		// 		break;
-		// 	}
-
-		// 	String[] split = conf.get(key).split(",");
-
-		// 	Point point = SheetUtil.getPoint(split[0]);
-		// 	int stCol = (int) point.getX();
-		// 	int stRow = (int) point.getY();// Integer.parseInt(conf.get("stCol"));
-
-		// 	int reqCol = stCol;
-		// 	if (1 < split.length) {
-		// 		reqCol = Integer.parseInt(split[1]);
-		// 	}
-
-		// 	List<Map<String, String>> listMap = SheetUtil.getListMap(sheet, stCol, stRow, reqCol);
-
-		// 	for (Map<String, String> map : listMap) {
-		// 		for (Entry<String, String> entry : map.entrySet()) {
-		// 			System.out.println(entry.getKey() + ":" + entry.getValue());
-		// 		}
-		// 	}
-
-		// 	if (!listMap.isEmpty()) {
-		// 		// 結果を設定
-		// 		ret.put(key, listMap.get(0));
-		// 	}
-		// }
 		return ret;
+	}
+
+	/**
+	 * actList / charList を走査し、type が「切札」で始まるエントリについて
+	 * type をキーとして関連アクション・キャラクターのリストをまとめた
+	 * trumpRelations マップを構築し、ret に追加する。
+	 *
+	 * trumpRelations: Map&lt;String, Map&lt;String, List&lt;Map&gt;&gt;&gt;
+	 * key = type (例: "切札♠A 革命")
+	 * value = { "acts": [...], "chars": [...] }
+	 */
+	@SuppressWarnings("unchecked")
+	private void buildTrumpRelations(Map<String, Object> ret) {
+		Map<String, Map<String, Object>> relations = new LinkedHashMap<>();
+
+		// actList から切札関連アクションを収集
+		Object actListObj = ret.get("actList");
+		if (actListObj instanceof Collection<?>) {
+			for (Object item : (Collection<?>) actListObj) {
+				if (item instanceof Map<?, ?>) {
+					Map<String, Object> group = (Map<String, Object>) item;
+					String type = (String) group.get("type");
+					if (type != null && type.startsWith("切札")) {
+						Map<String, Object> rel = relations.computeIfAbsent(type, k -> {
+							Map<String, Object> m = new LinkedHashMap<>();
+							m.put("acts", new ArrayList<Map<String, Object>>());
+							m.put("chars", new ArrayList<Map<String, Object>>());
+							return m;
+						});
+						Object acts = group.get("acts");
+						if (acts instanceof Collection<?>) {
+							((List<Map<String, Object>>) rel.get("acts"))
+									.addAll((Collection<Map<String, Object>>) acts);
+						}
+					}
+				}
+			}
+		}
+
+		// charList から切札関連キャラクターを収集
+		Object charListObj = ret.get("charList");
+		if (charListObj instanceof Collection<?>) {
+			for (Object item : (Collection<?>) charListObj) {
+				if (item instanceof Map<?, ?>) {
+					Map<String, Object> group = (Map<String, Object>) item;
+					String type = (String) group.get("type");
+					if (type != null && type.startsWith("切札")) {
+						Map<String, Object> rel = relations.computeIfAbsent(type, k -> {
+							Map<String, Object> m = new LinkedHashMap<>();
+							m.put("acts", new ArrayList<Map<String, Object>>());
+							m.put("chars", new ArrayList<Map<String, Object>>());
+							return m;
+						});
+						Object chars = group.get("chars");
+						if (chars instanceof Collection<?>) {
+							((List<Map<String, Object>>) rel.get("chars"))
+									.addAll((Collection<Map<String, Object>>) chars);
+						}
+					}
+				}
+			}
+		}
+
+		ret.put("trumpRelations", relations);
 	}
 
 }

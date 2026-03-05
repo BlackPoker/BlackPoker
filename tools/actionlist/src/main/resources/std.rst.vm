@@ -386,6 +386,31 @@ ${rstFn.cnv(${trump.trumpAbility})}
 
 
         #end
+#set($rel = $trumpRelations.get(${nestList.type}))
+#if($rel)
+#set($relActs = $rel.get("acts"))
+#set($relChars = $rel.get("chars"))
+#if($relActs.size() > 0 || $relChars.size() > 0)
+**関連:**  
+
+#if($relActs.size() > 0)
+*アクション*
+
+#foreach($relAct in $relActs)
+* :ref:`${relAct.actName} <act-${relAct.actId}>`
+#end
+
+#end
+#if($relChars.size() > 0)
+*キャラクター*
+
+#foreach($relChar in $relChars)
+* :ref:`${relChar.charName} <char-${relChar.charId}>`
+#end
+
+#end
+#end
+#end
         #if(${trump.image})
 **イメージ:**  
 ${trump.trumpName}のイメージ (:numref:`frame-${trump.trumpId}-image`)
