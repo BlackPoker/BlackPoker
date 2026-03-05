@@ -38,7 +38,9 @@ ${nestList.type}
 ${row.actName} (${row.actType})
 ---------------------------------------------------
         #if(${row.format})
-.. csv-table:: フォーマット
+**フォーマット:**
+
+.. csv-table::
    :widths: 1, 1, 1, 1
    :header-rows: 1
 
@@ -48,7 +50,9 @@ ${row.actName} (${row.actType})
         #end
 
         #if(${row.frame})
-.. csv-table:: フレーム
+**フレーム:**
+
+.. csv-table::
    :header-rows: 1
 
 #if($frames)
@@ -170,7 +174,9 @@ ${nestList.type}
 ${char.charName} (${char.charType})
 ---------------------------------------------------
         #if(${char.format})
-.. csv-table:: フォーマット
+**フォーマット:**
+
+.. csv-table::
    :widths: 1, 1, 1, 1
    :header-rows: 1
 
@@ -180,7 +186,9 @@ ${char.charName} (${char.charType})
         #end
 
         #if(${char.frame})
-.. csv-table:: フレーム
+**フレーム:**
+
+.. csv-table::
    :header-rows: 1
 
 #if($frames)
@@ -280,7 +288,9 @@ ${nestList.type}
 ${fog.fogName} (${fog.fogType})
 ---------------------------------------------------
         #if(${fog.format})
-.. csv-table:: フォーマット
+**フォーマット:**
+
+.. csv-table::
    :widths: 1, 1, 1, 1
    :header-rows: 1
 
@@ -290,7 +300,9 @@ ${fog.fogName} (${fog.fogType})
         #end
 
         #if(${fog.frame})
-.. csv-table:: フレーム
+**フレーム:**
+
+.. csv-table::
    :header-rows: 1
 
 #if($frames)
@@ -383,7 +395,9 @@ ${nestList.type}
 ${trump.trumpName} (${trump.trumpType})
 ---------------------------------------------------
         #if(${trump.format})
-.. csv-table:: フォーマット
+**フォーマット:**
+
+.. csv-table::
    :widths: 1, 1, 1, 1
    :header-rows: 1
 
@@ -393,7 +407,9 @@ ${trump.trumpName} (${trump.trumpType})
         #end
 
         #if(${trump.frame})
-.. csv-table:: フレーム
+**フレーム:**
+
+.. csv-table::
    :header-rows: 1
 
 #if($frames)
