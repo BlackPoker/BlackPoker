@@ -683,35 +683,60 @@
 
                   <a data-toggle="collapse" th:attr="href='#fla_'+${row.actId}"
                     th:if="${not #strings.isEmpty(row.story)}">
-                    <span class="act-title" th:text="${row.actName}"></span>
-                  </a> <span class="act-title" th:text="${row.actName}" th:if="${#strings.isEmpty(row.story)}"></span>
-                  <span> <small> <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${row.actType}"></span>
-                    </small>
-                  </span>
+                    <span class="act-title" th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(row.actName)}"></span>
+                  </a> <span class="act-title" th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(row.actName)}" th:if="${#strings.isEmpty(row.story)}"></span>
+                  <!-- <span> -->
+                  <small>
+                    <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                    <span th:text="'('+${row.actType}+')'"></span>
+                  </small>
+                  <!-- </span> -->
                   <div class="pull-right">
-                    &thinsp; <small> <span class="time-mark"></span> <span th:text="${row.actTime}"></span>
-                    </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small th:if="${not #strings.isEmpty(row.actCost)}">
-                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(row.actCost)}"></span>
+                    &thinsp; <small>
+                      <span class="time-mark"></span>
+                      <span th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span>
+                    </small> <span th:if="${not #strings.isEmpty(row.actCost)}">|</span> <small
+                      th:if="${not #strings.isEmpty(row.actCost)}">
+                      <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span
+                        th:utext="${#sfn.costHtml(row.actCost)}"></span>
                     </small>
 
 
                   </div>
                   <div class="text-left">
-                    <small th:if="${not #strings.isEmpty(row.actKey)}"> <span class="glyphicon glyphicon-star"
-                        aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span><br>
-                    </small> <small th:if="${not #strings.isEmpty(row.actNote)}"> <span th:utext="${#sfn.cnvHtml(row.actNote)}"></span>
+                    <small th:if="${not #strings.isEmpty(row.actKey)}">
+                      <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                      <span th:utext="${#sfn.cnvHtml(row.actKey)}"></span>
+                      <br>
                     </small>
-
+                    <small th:if="${not #strings.isEmpty(row.actUnit)}">
+                      <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                      <span th:utext="${#sfn.cnvHtml(row.actUnit)}"></span>
+                      <br>
+                    </small>
+                    <small th:if="${not #strings.isEmpty(row.actNote)}">
+                      <span th:each="str : ${#strings.listSplit(row.actNote,'\n')}">
+                        <span class="note-mark"></span>
+                        <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
+                        <br>
+                      </span>
+                    </small>
                   </div>
 
                 </div>
                 <div class="panel-body">
-                  <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(row.actTarget)}"
-                    th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
+                  <span th:if="${not #strings.isEmpty(row.actActCond)}"> （起動条件）<br></span> <span
+                    th:if="${not #strings.isEmpty(row.actActCond)}" th:utext="${#sfn.cnvHtml(row.actActCond)}"></span>
+                  <hr th:if="${not #strings.isEmpty(row.actActCond)}">
+                  <span th:if="${not #strings.isEmpty(row.actTriggerCond)}"> （誘発条件）<br></span> <span
+                    th:if="${not #strings.isEmpty(row.actTriggerCond)}"
+                    th:utext="${#sfn.cnvHtml(row.actTriggerCond)}"></span>
+                  <hr th:if="${not #strings.isEmpty(row.actTriggerCond)}">
+                  <span th:if="${not #strings.isEmpty(row.actTarget)}"> （対象）<br></span> <span
+                    th:if="${not #strings.isEmpty(row.actTarget)}" th:utext="${#sfn.cnvHtml(row.actTarget)}"></span>
                   <!-- <br th:if="${not #strings.isEmpty(row.actTarget)}">-->
                   <hr th:if="${not #strings.isEmpty(row.actTarget)}">
-                  <p th:if="${not #strings.isEmpty(row.actS)}">（即時効果）</p>
-                  <p th:if="${#strings.isEmpty(row.actS)}">（通常効果）</p>
+                  <span>（効果）<br></span>
                   <span th:utext="${#sfn.cnvHtml(row.actEffect)}"></span>
 
                   <div th:if="${not #strings.isEmpty(row.story)}" th:attr="id='fla_'+${row.actId}" class="panel-collapse collapse storyText">
@@ -762,35 +787,70 @@
                 <!-- Action -->
                 <div th:each="act,ast : ${rel.acts}" th:if="${act.frame != null and #strings.contains(act.frame, 'エクストラ')}" class="panel panel-default blackpoker-action" th:attr="id='act-'+${act.actId}">
                   <div class="panel-heading">
-                    <span class="act-title" th:text="${act.actName}"></span> <span> <small>
-                        <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${act.actType}"></span>
-                      </small>
-                    </span>
+                    <a data-toggle="collapse" th:attr="href='#fla_'+${act.actId}"
+                      th:if="${not #strings.isEmpty(act.story)}">
+                      <span class="act-title" th:classappend="${not #strings.isEmpty(act.changed) and act.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(act.actName)}"></span>
+                    </a> <span class="act-title" th:classappend="${not #strings.isEmpty(act.changed) and act.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(act.actName)}" th:if="${#strings.isEmpty(act.story)}"></span>
+                    <!-- <span> -->
+                    <small>
+                      <!-- <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> -->
+                      <span th:text="'('+${act.actType}+')'"></span>
+                    </small>
+                    <!-- </span> -->
                     <div class="pull-right">
-                      &thinsp; <small> <span class="time-mark"></span> <span th:text="${act.actTime}"></span>
-                      </small> <span th:if="${not #strings.isEmpty(act.actCost)}">|</span> <small th:if="${not #strings.isEmpty(act.actCost)}">
-                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span th:utext="${#sfn.costHtml(act.actCost)}"></span>
+                      &thinsp; <small>
+                        <span class="time-mark"></span>
+                        <span th:text="${act.actTrigger}+'-'+${act.actSpeed}+'-'+${act.actTime}"></span>
+                      </small> <span th:if="${not #strings.isEmpty(act.actCost)}">|</span> <small
+                        th:if="${not #strings.isEmpty(act.actCost)}">
+                        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span
+                          th:utext="${#sfn.costHtml(act.actCost)}"></span>
                       </small>
                     </div>
                     <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(act.actKey)}"> <span class="glyphicon glyphicon-star"
-                          aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(act.actKey)}"></span><br>
-                      </small> <small th:if="${not #strings.isEmpty(act.actNote)}"> <span th:each="str : ${#strings.listSplit(act.actNote,'\n')}">
+                      <small th:if="${not #strings.isEmpty(act.actKey)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span th:utext="${#sfn.cnvHtml(act.actKey)}"></span>
+                        <br>
+                      </small>
+                      <small th:if="${not #strings.isEmpty(act.actUnit)}">
+                        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+                        <span th:utext="${#sfn.cnvHtml(act.actUnit)}"></span>
+                        <br>
+                      </small>
+                      <small th:if="${not #strings.isEmpty(act.actNote)}">
+                        <span th:each="str : ${#strings.listSplit(act.actNote,'\n')}">
                           <span class="note-mark"></span>
                           <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
                           <br>
                         </span>
                       </small>
-
                     </div>
                   </div>
                   <div class="panel-body">
-                    <span th:if="${not #strings.isEmpty(act.actTarget)}"> （対象）<br></span> <span th:if="${not #strings.isEmpty(act.actTarget)}"
-                      th:utext="${#sfn.cnvHtml(act.actTarget)}"></span><br th:if="${not #strings.isEmpty(act.actTarget)}">
+                    <span th:if="${not #strings.isEmpty(act.actActCond)}"> （起動条件）<br></span> <span
+                      th:if="${not #strings.isEmpty(act.actActCond)}" th:utext="${#sfn.cnvHtml(act.actActCond)}"></span>
+                    <hr th:if="${not #strings.isEmpty(act.actActCond)}">
+                    <span th:if="${not #strings.isEmpty(act.actTriggerCond)}"> （誘発条件）<br></span> <span
+                      th:if="${not #strings.isEmpty(act.actTriggerCond)}"
+                      th:utext="${#sfn.cnvHtml(act.actTriggerCond)}"></span>
+                    <hr th:if="${not #strings.isEmpty(act.actTriggerCond)}">
+                    <span th:if="${not #strings.isEmpty(act.actTarget)}"> （対象）<br></span> <span
+                      th:if="${not #strings.isEmpty(act.actTarget)}" th:utext="${#sfn.cnvHtml(act.actTarget)}"></span>
+                    <!-- <br th:if="${not #strings.isEmpty(act.actTarget)}">-->
                     <hr th:if="${not #strings.isEmpty(act.actTarget)}">
-                    <p th:if="${not #strings.isEmpty(act.actS)}">（即時効果）</p>
-                    <p th:if="${#strings.isEmpty(act.actS)}">（通常効果）</p>
+                    <span>（効果）<br></span>
                     <span th:utext="${#sfn.cnvHtml(act.actEffect)}"></span>
+
+                    <div th:if="${not #strings.isEmpty(act.story)}" th:attr="id='fla_'+${act.actId}" class="panel-collapse collapse storyText">
+                      <hr>
+                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span> Flavor:Rule's<br>
+                      <span th:text="${act.story}"></span>
+                      <div class="flavorText well well-sm">
+                        <span th:text="${act.flavor}"></span>
+                        <div class="text-right" th:text="${act.flavorSpeaker}"></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -800,25 +860,48 @@
               <h6 class="text-center">Character</h6>
                 <div th:each="char,cst : ${rel.chars}" th:if="${char.frame != null and #strings.contains(char.frame, 'エクストラ')}" class="panel panel-default blackpoker-action" th:attr="id='char-'+${char.charId}">
                   <div class="panel-heading">
-                    <span class="act-title" th:text="${char.charName}"></span> <span> <small>
-                        <span class="glyphicon glyphicon-tag" aria-hidden="true"></span> <span th:text="${char.charType}"></span>
+
+                    <a data-toggle="collapse" th:attr="href='#fla_'+${char.charId}"
+                      th:if="${not #strings.isEmpty(char.story)}">
+                      <span class="act-title" th:classappend="${not #strings.isEmpty(char.changed) and char.changed == 'changed' ? 'changed' : ''}" th:text="${char.charName}"></span>
+                    </a> <span class="act-title" th:classappend="${not #strings.isEmpty(char.changed) and char.changed == 'changed' ? 'changed' : ''}" th:text="${char.charName}"
+                      th:if="${#strings.isEmpty(char.story)}"></span>
+                    <span> <small>
+                        <span th:text="'('+${char.charType}+')'"></span>
                       </small>
                     </span>
                     <div class="pull-right">
-                      &thinsp; <small th:if="${not #strings.isEmpty(char.charKey)}"> <span class="glyphicon glyphicon-star" aria-hidden="true"></span> <span th:utext="${#sfn.cnvHtml(char.charKey)}"></span><br>
+                      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span
+                          th:utext="${#sfn.cnvHtml(char.charKey)}"></span><br>
                       </small>
                     </div>
                     <div class="text-left">
-                      <small th:if="${not #strings.isEmpty(char.charNote)}"> <span th:each="str : ${#strings.listSplit(char.charNote,'\n')}">
-                          <span class="note-mark"></span> <span th:text="${#strings.startsWith(str,'※')} ?${#strings.substring(str,1)} :${str}"></span>
-                          <br>
-                        </span>
+                      <small th:if="${not #strings.isEmpty(char.charSize)}">
+                        サイズ:
+                        <span th:utext="${#sfn.cnvHtml(char.charSize)}"></span><br>
                       </small>
-
                     </div>
                   </div>
                   <div class="panel-body">
-                    （能力）<br> <span th:utext="${#sfn.cnvHtml(char.charAbility)}"></span>
+                    <span th:if="${not #strings.isEmpty(char.charLabel)}"> （ラベル）<br></span>
+                    <span th:if="${not #strings.isEmpty(char.charLabel)}"
+                      th:utext="${#sfn.cnvHtml(char.charLabel)}"></span>
+                    <hr th:if="${not #strings.isEmpty(char.charLabel) and not #strings.isEmpty(char.charAbility)}">
+
+                    <span th:if="${not #strings.isEmpty(char.charAbility)}"> （能力）<br></span>
+                    <span th:if="${not #strings.isEmpty(char.charAbility)}"
+                      th:utext="${#sfn.cnvHtml(char.charAbility)}"></span>
+
+                    <div th:if="${not #strings.isEmpty(char.story)}" th:attr="id='fla_'+${char.charId}"
+                      class="panel-collapse collapse storyText">
+                      <hr>
+                      <span class="glyphicon glyphicon-globe" aria-hidden="true"></span>
+                      Flavor:Rule's<br> <span th:text="${char.story}"></span>
+                      <div class="flavorText well well-sm">
+                        <span th:text="${char.flavor}"></span>
+                        <div class="text-right" th:text="${char.flavorSpeaker}"></div>
+                      </div>
+                    </div>
                   </div>
 
                 </div>

@@ -135,14 +135,17 @@ ex${data.v}
 {\normalsize\bf ■ ${row.actName} {\scriptsize (${row.actType}) [ex]}} %Actionタイトル
 \hfill 
 #if(${row.actTime} != "")
-{\small\bf @${row.actTime} }
+{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
 #end
 #if(${row.actCost} != "")
-  {\small\bf | } {\small\bf \$ ${row.actCost}}
+  {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
 #end
 
 #if(${row.actKey.trim()} != "")
-★${texFn.cnv(${row.actKey})}
+{\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
+#end
+#if(${row.actUnit.trim()} != "")
+{\footnotesize\bf ★${texFn.cnv(${row.actUnit})}}
 #end
 
 #if(${row.actNote.trim()} != "")
@@ -152,6 +155,22 @@ ex${data.v}
 \vspace{1mm}%余白削除
 
 ${texFn.cnv(${row.actNote})}
+#end
+#if(${row.actActCond} != "")
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（起動条件）}
+
+${texFn.cnv(${row.actActCond})}
+#end
+#if(${row.actTriggerCond} != "")
+\vspace{1mm}%余白削除
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白削除
+{\bf（誘発条件）}
+
+${texFn.cnv(${row.actTriggerCond})}
 #end
 #if(${row.actTarget.trim()} != "")
 \vspace{1mm}%余白削除
@@ -166,12 +185,7 @@ ${texFn.cnv(${row.actTarget})}
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 
-#if(${row.actS.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${row.actS.trim()} == "")
-{\bf（通常効果）}
-#end
+{\bf（効果）}
 
 ${texFn.cnv(${row.actEffect})}
 #end
@@ -220,13 +234,16 @@ ${texFn.cnv(${row.trumpAbility})}
 \begin{tcolorbox}[title={\small\bf【Action】${act.actName}}{\scriptsize （${act.actType}）}]
 
 #if(${act.actTime} != "")
-{\scriptsize\bf @${act.actTime} }
+{\scriptsize\bf @${act.actTrigger}-${act.actSpeed}-${act.actTime} }
 #end
 #if(${act.actCost} != "")
   {\scriptsize\bf | \$ ${act.actCost} }
 #end
 #if(${act.actKey.trim()} != "")
   {\scriptsize\bf | ★${texFn.cnv(${act.actKey})}}
+#end
+#if(${act.actUnit.trim()} != "")
+  {\scriptsize\bf | ★${texFn.cnv(${act.actUnit})}}
 #end
 
 #if(${act.actNote.trim()} != "")
@@ -238,6 +255,26 @@ ${texFn.cnv(${row.trumpAbility})}
 ${texFn.cnv(${act.actNote})}
 \vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
 \vspace{1zh}%余白追加
+#end
+#if(${act.actActCond})
+\vspace{1mm} %余白追加  
+\hrule height 0.1mm depth 0mm width 62mm %罫線
+\vspace{1mm} %余白追加
+
+{\bf（起動条件）}
+
+${texFn.cnv(${act.actActCond})}
+
+#end
+#if(${act.actTriggerCond})
+\vspace{1mm} %余白追加  
+\hrule height 0.1mm depth 0mm width 62mm %罫線
+\vspace{1mm} %余白追加
+
+{\bf（誘発条件）}
+
+${texFn.cnv(${act.actTriggerCond})}
+
 #end
 #if(${act.actTarget.trim()} != "")
 \vspace{1mm} %余白追加  
@@ -254,12 +291,7 @@ ${texFn.cnv(${act.actTarget})}
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
-#if(${act.actS.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${act.actS.trim()} == "")
-{\bf（通常効果）}
-#end
+{\bf（効果）}
 
 ${texFn.cnv(${act.actEffect})}
 #end
@@ -280,7 +312,10 @@ ${texFn.cnv(${act.actEffect})}
 \begin{tcolorbox}[title={\small\bf【Character】${char.charName}}{\scriptsize （${char.charType}）}]
 
 #if(${char.charKey.trim()} != "")
-  {\scriptsize\bf ★${texFn.cnv(${char.charKey})}}
+  {\scriptsize\bf ☆${texFn.cnv(${char.charKey})}}
+#end
+#if(${char.charSize.trim()} != "")
+  {\scriptsize\bf | サイズ : ${texFn.cnv(${char.charSize})}}
 #end
 
 #if(${char.charNote.trim()} != "")
@@ -291,6 +326,15 @@ ${texFn.cnv(${act.actEffect})}
 
 ${texFn.cnv(${char.charNote})}
 \vspace{1zh}%余白追加
+#end
+#if(${char.charLabel.trim()} != "")
+\vspace{1mm} %余白追加
+\hrule height 0.1mm depth 0mm width 62mm %罫線
+\vspace{1mm} %余白追加
+
+{\bf（ラベル）}
+
+${texFn.cnv(${char.charLabel})}
 #end
 #if(${char.charAbility.trim()} != "")
 \vspace{1mm} %余白追加
