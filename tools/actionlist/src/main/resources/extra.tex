@@ -124,8 +124,9 @@ ex${data.v}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #foreach( $acts in ${actList})
+#if(!$acts.type.startsWith("切札"))
 #foreach( $row in ${acts.acts})
-#if(${row.output} != "")
+#if(${row.frame} && ${row.frame.contains("エクストラ")})
 %%% Action %%%
 %\vspace{1zh} %余白追加
 \vspace{2mm} %余白追加
@@ -177,15 +178,16 @@ ${texFn.cnv(${row.actEffect})}
 #end
 #end
 #end
+#end
 
 %\newpage %改段
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%% AbilityList %%%%%
+%%%%% TrumpList %%%%%
 \begin{center}
 \begin{center}
 \hrule height 1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
-{\Large\bf \ruby{Ability List}{アビリティリスト}}
+{\Large\bf \ruby{Trump List}{切札リスト}}
 \vspace{1mm}%余白削除
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \end{center}
@@ -196,22 +198,25 @@ ${texFn.cnv(${row.actEffect})}
 %\tcbset{top=1mm, left=1mm, bottom=1mm, left=1mm}
 \tcbset{colframe=black,coltitle=black!0!black,colbacktitle=white!0!white,colback=white!0!white,sharp corners,top=1mm, left=1mm, bottom=1mm, left=1mm,boxrule=0.2mm,toprule=0.2mm}
 
-## Abilityループ
-#foreach( $row in ${abiList})
-#if(${row.output.trim()} != "")
+## Trumpループ
+#foreach( $nestList in ${trumpList})
+#foreach( $row in ${nestList.trumps})
+#if(${row.frame} && ${row.frame.contains("エクストラ")})
 
-%%%%% Ability %%%%%
+%%%%% Trump %%%%%
 \vspace{3mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-{\Large\bf ${texFn.cnvSimpleAlphabetSuit(${row.suit})} ${row.num}} {\normalsize\bf【${row.name}】} %Abilityタイトル
+{\Large\bf ${row.trumpKey}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
 \vspace{1mm} %余白追加
 
-${texFn.cnv(${row.ability})}
+${texFn.cnv(${row.trumpAbility})}
 
-%%%%% Abilityアクション %%%%%
-#if((${row.output.trim()} != "")&&(($row.acts)&&($row.acts.size() > 0)))
-#foreach($act in ${row.acts})
+#set($rel = $trumpRelations.get($nestList.type))
+%%%%% Trumpアクション %%%%%
+#if($rel && $rel.acts && $rel.acts.size() > 0)
+#foreach($act in $rel.acts)
+#if(${act.frame} && ${act.frame.contains("エクストラ")})
 \begin{tcolorbox}[title={\small\bf【Action】${act.actName}}{\scriptsize （${act.actType}）}]
 
 #if(${act.actTime} != "")
@@ -263,16 +268,18 @@ ${texFn.cnv(${act.actEffect})}
 \end{tcolorbox}
 
 \vspace{-1zh}
+#end ##エクストラ frame判定 end
 #end ##foreach end
-#end ##Abilityアクション end 
+#end ##Trumpアクション end 
 
-%%%%% Abilityキャラクター %%%%%
-#if((${row.output.trim()} != "")&&(($row.chars)&&($row.chars.size() > 0)))
-#foreach($char in ${row.chars})
+%%%%% Trumpキャラクター %%%%%
+#if($rel && $rel.chars && $rel.chars.size() > 0)
+#foreach($char in $rel.chars)
+#if(${char.frame} && ${char.frame.contains("エクストラ")})
 \vspace{2mm}
 \begin{tcolorbox}[title={\small\bf【Character】${char.charName}}{\scriptsize （${char.charType}）}]
 
-#if(${char.actKey.trim()} != "")
+#if(${char.charKey.trim()} != "")
   {\scriptsize\bf ★${texFn.cnv(${char.charKey})}}
 #end
 
@@ -282,7 +289,7 @@ ${texFn.cnv(${act.actEffect})}
 \hrule height 0.1mm depth 0mm width 62mm %罫線
 \vspace{1mm} %余白追加
 
-${texFn.cnv(${char.actNote})}
+${texFn.cnv(${char.charNote})}
 \vspace{1zh}%余白追加
 #end
 #if(${char.charAbility.trim()} != "")
@@ -299,11 +306,13 @@ ${texFn.cnv(${char.charAbility})}
 \end{tcolorbox}
 
 \vspace{-1zh}
+#end ## エクストラ frame判定 end
 #end ##foreach end
-#end ##Abilityキャラクター end 
+#end ##Trumpキャラクター end 
 
-#end
-#end ##Abilityループ end
+#end ## エクストラ frame判定 end
+#end ## Trump判定 end
+#end ## Trumpループ end
 
 %% 奥付 %%
 \thispagestyle{empty}
