@@ -184,7 +184,7 @@ public class ActionListGen {
 				if (item instanceof Map<?, ?>) {
 					Map<String, Object> group = (Map<String, Object>) item;
 					String type = (String) group.get("type");
-					if (type != null && type.startsWith("切札")) {
+					if (type != null && isTrumpType(type)) {
 						Map<String, Object> rel = relations.computeIfAbsent(type, k -> {
 							Map<String, Object> m = new LinkedHashMap<>();
 							m.put("acts", new ArrayList<Map<String, Object>>());
@@ -208,7 +208,7 @@ public class ActionListGen {
 				if (item instanceof Map<?, ?>) {
 					Map<String, Object> group = (Map<String, Object>) item;
 					String type = (String) group.get("type");
-					if (type != null && type.startsWith("切札")) {
+					if (type != null && isTrumpType(type)) {
 						Map<String, Object> rel = relations.computeIfAbsent(type, k -> {
 							Map<String, Object> m = new LinkedHashMap<>();
 							m.put("acts", new ArrayList<Map<String, Object>>());
@@ -226,6 +226,10 @@ public class ActionListGen {
 		}
 
 		ret.put("trumpRelations", relations);
+	}
+
+	private boolean isTrumpType(String type) {
+		return type.startsWith("切札♠") || type.startsWith("切札♡") || type.startsWith("切札♢") || type.startsWith("切札♣");
 	}
 
 }

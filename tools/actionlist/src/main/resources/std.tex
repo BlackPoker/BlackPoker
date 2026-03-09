@@ -55,6 +55,7 @@
     \includegraphics[width=1.2cm]{blackpoker_logo.pdf}
 \end{textblock*}
 
+#parse("_macros.tex")
 %%%%% QRコード第三版用 %%%%%
 #if((${arg0} == "lite") && (${data.qrLite} != ""))
 \begin{textblock*}{0.4\linewidth}(200pt, 135pt)
@@ -82,6 +83,7 @@
 %    \textcolor{black}{Web版}
 \end{textblock*}
 
+#parse("_macros.tex")
 %%%%% QRコード第三版用 %%%%%
 
 \section*{\textrm{\Large BlackPoker}}
@@ -219,92 +221,7 @@
     #foreach( $row in ${nestList.acts})
         ## arg0とがformatに含まれている行のみ出力する
         #if(${arg0}=='all' || ${row.format.contains(${arg0})})
-%%% Action %%%
-%\vspace{1zh} %余白追加
-\vspace{2mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{1mm} %余白追加
-            #if(${arg0}=='all' || ${row.format.contains(${arg0})})
-                #if(${row.format.contains('lite')})
-                    #if(${arg0}=='lite')
-{\small\bf ■ ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                    #else
-{\small\bf [1] ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                    #end
-                #elseif(${row.format.contains('std')})
-{\small\bf [2] ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                #elseif(${row.format.contains('pro')})
-{\small\bf [3] ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                #elseif(${row.format.contains('mast')})
-{\small\bf [4] ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                #else
-{\small\bf ■ ${row.actName} {\scriptsize (${row.actType})}} %Actionタイトル
-                #end
-            #end
-\hfill 
-            #if(${row.actTime})
-{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
-            #end
-            #if(${row.actCost})
-  {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
-            #end
-
-            #if(${row.actKey.trim()})
-{\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
-            #end
-            #if(${row.actUnit.trim()})
-{\footnotesize\bf ★${texFn.cnv(${row.actUnit})}}
-            #end
-
-            #if(${row.actNote.trim()})
-%特記事項
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-${texFn.cnv(${row.actNote})}
-            #end
-            #if(${row.frame})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（フレーム）}
-
-${texFn.cnv(${row.frame})}
-            #end
-            #if(${row.actActCond})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（起動条件）}
-
-${texFn.cnv(${row.actActCond})}
-            #end
-            #if(${row.actTriggerCond})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（誘発条件）}
-
-${texFn.cnv(${row.actTriggerCond})}
-            #end
-            #if(${row.actTarget})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget})}
-            #end
-            #if(${row.actEffect})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-{\bf（効果）}
-
-${texFn.cnv(${row.actEffect})}
-            #end
+#renderAction($row $arg0)
         #end
     #end
 
@@ -343,63 +260,7 @@ ${texFn.cnv(${row.actEffect})}
     #foreach( $row in ${nestList.chars})
         ## arg0とがformatに含まれている行のみ出力する
         #if(${arg0} == 'all' || ${row.format.contains(${arg0})})
-%%% Character %%%
-%\vspace{1zh} %余白追加
-\vspace{2mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{1mm} %余白追加
-            #if(${arg0} == 'all' || ${row.format.contains(${arg0})})
-                #if(${row.format.contains('lite')})
-                    #if(${arg0}=='lite')
-{\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                    #else
-{\small\bf [1] ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                    #end
-                #elseif(${row.format.contains('std')})
-{\small\bf [2] ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                #elseif(${row.format.contains('pro')})
-{\small\bf [3] ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                #elseif(${row.format.contains('mast')})
-{\small\bf [4] ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                #else
-{\small\bf ■ ${row.charName} {\scriptsize (${row.charType}) }} %Characterタイトル
-                #end
-            #end
-\hfill 
-            #if(${row.charKey})
-{\footnotesize\bf ☆${texFn.cnv(${row.charKey})} }
-            #end
-
-            #if(${row.charSize})
-{\bf サイズ : ${texFn.cnv(${row.charSize})} }
-            #end
-
-            #if(${row.charNote})
-%特記事項
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-${texFn.cnv(${row.charNote})}
-            #end
-            #if(${row.charLabel})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-{\bf（ラベル）}
-
-${texFn.cnv(${row.charLabel})}
-            #end
-            #if(${row.charAbility})
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-{\bf（能力）}
-
-${texFn.cnv(${row.charAbility})}
-            #end
+#renderCharacter($row $arg0)
         #end
     #end
 

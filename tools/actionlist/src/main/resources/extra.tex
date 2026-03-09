@@ -46,6 +46,7 @@
 \date{\empty}
 
 %%%%%%    TEXT START    %%%%%%
+#parse("_macros.tex")
 \begin{document}
 
 
@@ -72,8 +73,7 @@
 \noindent
 
 \begin{center}
-${data.ver}
-ex${data.v}
+{\footnotesize ${data.ver} エクストラ}
 
 {\scriptsize ${data.lastupdate}}
 
@@ -124,71 +124,10 @@ ex${data.v}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #foreach( $acts in ${actList})
-#if(!$acts.type.startsWith("切札"))
+#if(!${texFn.isTrumpType(${acts.type})})
 #foreach( $row in ${acts.acts})
 #if(${row.frame} && ${row.frame.contains("エクストラ")})
-%%% Action %%%
-%\vspace{1zh} %余白追加
-\vspace{2mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{1mm} %余白追加
-{\normalsize\bf ■ ${row.actName} {\scriptsize (${row.actType}) [ex]}} %Actionタイトル
-\hfill 
-#if(${row.actTime} != "")
-{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
-#end
-#if(${row.actCost} != "")
-  {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
-#end
-
-#if(${row.actKey.trim()} != "")
-{\footnotesize\bf ★${texFn.cnv(${row.actKey})}}
-#end
-#if(${row.actUnit.trim()} != "")
-{\footnotesize\bf ★${texFn.cnv(${row.actUnit})}}
-#end
-
-#if(${row.actNote.trim()} != "")
-%特記事項
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-${texFn.cnv(${row.actNote})}
-#end
-#if(${row.actActCond} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（起動条件）}
-
-${texFn.cnv(${row.actActCond})}
-#end
-#if(${row.actTriggerCond} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（誘発条件）}
-
-${texFn.cnv(${row.actTriggerCond})}
-#end
-#if(${row.actTarget.trim()} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget})}
-#end
-#if(${row.actEffect.trim()} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-{\bf（効果）}
-
-${texFn.cnv(${row.actEffect})}
-#end
+#renderAction($row "all")
 #end
 #end
 #end
@@ -221,7 +160,7 @@ ${texFn.cnv(${row.actEffect})}
 \vspace{3mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-{\Large\bf ${row.trumpKey}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
+{\Large\bf ${texFn.removeSuit(${row.trumpKey})}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
 \vspace{1mm} %余白追加
 
 ${texFn.cnv(${row.trumpAbility})}
@@ -231,73 +170,7 @@ ${texFn.cnv(${row.trumpAbility})}
 #if($rel && $rel.acts && $rel.acts.size() > 0)
 #foreach($act in $rel.acts)
 #if(${act.frame} && ${act.frame.contains("エクストラ")})
-\begin{tcolorbox}[title={\small\bf【Action】${act.actName}}{\scriptsize （${act.actType}）}]
-
-#if(${act.actTime} != "")
-{\scriptsize\bf @${act.actTrigger}-${act.actSpeed}-${act.actTime} }
-#end
-#if(${act.actCost} != "")
-  {\scriptsize\bf | \$ ${act.actCost} }
-#end
-#if(${act.actKey.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${act.actKey})}}
-#end
-#if(${act.actUnit.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${act.actUnit})}}
-#end
-
-#if(${act.actNote.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${act.actNote})}
-\vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
-\vspace{1zh}%余白追加
-#end
-#if(${act.actActCond})
-\vspace{1mm} %余白追加  
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（起動条件）}
-
-${texFn.cnv(${act.actActCond})}
-
-#end
-#if(${act.actTriggerCond})
-\vspace{1mm} %余白追加  
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（誘発条件）}
-
-${texFn.cnv(${act.actTriggerCond})}
-
-#end
-#if(${act.actTarget.trim()} != "")
-\vspace{1mm} %余白追加  
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（対象）}
-
-${texFn.cnv(${act.actTarget})}
-
-#end
-#if(${act.actEffect.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（効果）}
-
-${texFn.cnv(${act.actEffect})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
+#renderAction($act "all")
 
 \vspace{-1zh}
 #end ##エクストラ frame判定 end
@@ -309,45 +182,7 @@ ${texFn.cnv(${act.actEffect})}
 #foreach($char in $rel.chars)
 #if(${char.frame} && ${char.frame.contains("エクストラ")})
 \vspace{2mm}
-\begin{tcolorbox}[title={\small\bf【Character】${char.charName}}{\scriptsize （${char.charType}）}]
-
-#if(${char.charKey.trim()} != "")
-  {\scriptsize\bf ☆${texFn.cnv(${char.charKey})}}
-#end
-#if(${char.charSize.trim()} != "")
-  {\scriptsize\bf | サイズ : ${texFn.cnv(${char.charSize})}}
-#end
-
-#if(${char.charNote.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${char.charNote})}
-\vspace{1zh}%余白追加
-#end
-#if(${char.charLabel.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（ラベル）}
-
-${texFn.cnv(${char.charLabel})}
-#end
-#if(${char.charAbility.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（能力）}
-
-${texFn.cnv(${char.charAbility})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
+#renderCharacter($char "all")
 
 \vspace{-1zh}
 #end ## エクストラ frame判定 end
@@ -364,7 +199,7 @@ ${texFn.cnv(${char.charAbility})}
 \begin{flushright}
 \begin{minipage}{0.6\hsize}
 \begin{description}
-  \item{誌名：}BlackPoker ExtraList\\ \hspace{3pt} ${data.ver} v${data.v}
+  \item{誌名：}BlackPoker ExtraList\\ \hspace{3pt} {\footnotesize ${data.ver} エクストラ}
   \item{発行：}${data.lastupdate}
 \end{description}
 \end{minipage}

@@ -21,14 +21,20 @@ create () {
     #/Applications/TeXLive/Library/texlive/2016/bin/x86_64-darwin/platex "$1.tex"
     #/Applications/TeXLive/Library/texlive/2016/bin/x86_64-darwin/dvipdfmx "$1"
 
-    platex "$1.tex"
-    dvipdfmx "$1"
+    if [ -f "$1.tex" ]; then
+        platex "$1.tex"
+        dvipdfmx "$1"
 
-    cd ../
-
-    python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
-    cp ./tex/*.pdf ./dist
-    cp -r ./web-site ./dist/.
+        cd ../
+        if [ -f "./python/2up-pdf.1.py" ]; then
+            python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+        fi
+        cp "./tex/$1.pdf" ./dist/ 2>/dev/null || true
+    else
+        echo "File $1.tex not found, skipping."
+        cd ../
+    fi
+    cp -r ./web-site ./dist/ || true
 }
 
 create blackpoker-lite
@@ -36,7 +42,7 @@ create blackpoker-std
 create blackpoker-pro
 create blackpoker-mast
 create blackpoker-all
-# create blackpoker-extra
+create blackpoker-extra
 
 echo "ls -la ."
 ls -la .
