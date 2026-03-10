@@ -83,33 +83,22 @@
 \scriptsize%本文の文字サイズを小さく設定
 \renewcommand{\labelitemi}{・}%箇条書きのラベルを変更
 
-{\quad}extraとは、BlackPokerの遊び方の一つです。プレイヤーは切札を設置してからゲームを開始します。
-従来のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。
+{\quad}エクストラはフレームの一つです。詳しくは公式ルールを参照してください。
 
-{\quad}本誌はextraで使用できるアクションと切札を記載しています。
-
-\vspace{2mm}%余白削除
+\vspace{2mm}%余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{-3zh}%余白削除
-\subsection*{（補足）切札について}
-%\vspace{-2mm}%余白削除
-%\subsubsection*{切札について}
-\vspace{-1zh}%余白削除
+\vspace{1mm}%余白追加
+{\bf（記号の意味）}
+
 \begin{itemize}
 \setlength{\leftskip}{-0.3cm}%箇条書きを左詰め
-%\setlength{\itemsep}{0pt}      %2. ブロック間の余白
 \setlength{\parskip}{0pt}      %4. 段落間余白．
-%\setlength{\itemindent}{-10pt}   %5. 最初のインデント
-%\setlength{\labelsep}{15pt}     %6. item と文字の間
-
-\item 対戦前に裏向きで２枚まで切札を置くことができる。
-\item 切札はライフと直角に交わるようにライフの下に置く。
-\item 切札を表にするときはスートと数字が見えるようにし、対応する能力の名称を言う。
-\item ライフが０枚になった場合、切札が残っていても敗北する。
+\item ■：アクション
+\item 〇：キャラクター
+\item ＄：コスト
+\item ★：キーカード（アクション）
+\item ☆：キーカード（キャラクター）
 \end{itemize}
-※詳しくは、公式ルール参照。
-\vspace{-1zh}%余白削除
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% ActionList %%%%%
 \begin{center}
@@ -158,11 +147,17 @@
 #if(${row.frame} && ${row.frame.contains("エクストラ")})
 
 %%%%% Trump %%%%%
-\vspace{3mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
+\vspace{6mm} %余白追加
+\hrule height 1mm depth 0mm width 66.5mm %太い罫線
+\vspace{2mm} %余白追加
+{\Large\bf ${texFn.cnv(${row.trumpKey.replace('切札', '')}).replace('\normalsize', '\Large')}} {\Large\bf ${texFn.cnv(${row.trumpName})}} %Trumpタイトル
 \vspace{1mm} %余白追加
-{\Large\bf ${texFn.cnv(${row.trumpKey.replace('切札', '')})}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
-\vspace{1mm} %余白追加
+
+\vspace{1mm}%余白追加
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白追加
+
+{\bf（能力）}
 
 ${texFn.cnv(${row.trumpAbility})}
 
@@ -172,8 +167,6 @@ ${texFn.cnv(${row.trumpAbility})}
 #foreach($act in $rel.acts)
 #if(${act.frame} && ${act.frame.contains("エクストラ")})
 #renderAction($act "all")
-
-\vspace{-1zh}
 #end ##エクストラ frame判定 end
 #end ##foreach end
 #end ##Trumpアクション end 
@@ -184,8 +177,6 @@ ${texFn.cnv(${row.trumpAbility})}
 #if(${char.frame} && ${char.frame.contains("エクストラ")})
 \vspace{2mm}
 #renderCharacter($char "all")
-
-\vspace{-1zh}
 #end ## エクストラ frame判定 end
 #end ##foreach end
 #end ##Trumpキャラクター end 

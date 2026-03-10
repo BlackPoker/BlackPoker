@@ -227,6 +227,10 @@
       font-size: 12px;
     }
 
+    .blackpoker-ability .blackpoker-action .panel-heading {
+      font-size: 14px;
+    }
+
     .blackpoker-action .panel-body ul {
       padding-left: 20px;
     }
@@ -504,7 +508,7 @@
           <!-- Support Paper -->
           ExtraList
           <h5>
-            <span class="" th:text="${data.ver}+' v'+${data.v}"></span>
+            <span class="" th:text="${data.ver} + ' エクストラ'"></span>
           </h5>
           <!-- 
             <ul class="nav nav-pills">
@@ -647,28 +651,10 @@
       <h2 class="visible-print-block blackpoker-font">
         <img src="img/blackpoker.svg" width="35px"><br> BlackPoker extra
       </h2>
-      <small class="" th:text="${data.ver}+' v'+${data.v}"></small> <small class=""
+      <small class="" th:text="${data.ver} + ' エクストラ'"></small> <small class=""
         th:text="' : '+${data.lastupdate}"></small>
     </div>
     <hr class="hidden-print">
-
-    <div class="text-center hidden-print">
-      <a class="text-center" data-toggle="collapse" href="#what_extra">What's "extra"?</a>
-      <div id="what_extra" class="panel-collapse collapse">
-        <div class="panel-body well">
-          <small>
-            <p>extraとは、BlackPokerの遊び方の一つです。</p>
-            <p>
-              プレイヤーは切札を設置してからゲームを開始します。<br> 切札については <a href="#" data-toggle="modal"
-                data-target="#modal_trump_help"><span class="glyphicon glyphicon-question-sign"
-                  aria-hidden="false"></span>切札について</a>を参照して下さい。
-            </p>
-            <p>extraでは従来のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。</p>
-          </small>
-        </div>
-      </div>
-    </div>
-    <hr>
 
     <!-- 
       <div class="tab-content">

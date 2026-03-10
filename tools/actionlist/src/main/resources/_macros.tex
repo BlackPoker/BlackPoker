@@ -5,6 +5,9 @@
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
             #if(${arg0}=='all' || ${row.format.contains(${arg0})})
+                #if($isExtraDoc)
+{\small\bf ■ ${texFn.cnv(${row.actName})} {\scriptsize (${row.actType})}} %Actionタイトル
+                #else
                 #if(${row.format.contains('lite')})
                     #if(${arg0}=='lite')
 {\small\bf ■ ${texFn.cnv(${row.actName})} {\scriptsize (${row.actType})}} %Actionタイトル
@@ -20,13 +23,26 @@
                 #else
 {\small\bf ■ ${texFn.cnv(${row.actName})} {\scriptsize (${row.actType})}} %Actionタイトル
                 #end
+                #end
             #end
+            #if(${row.actName.length()} > 9)
+\\ \null \hfill 
+            #else
 \hfill 
+            #end
             #if(${row.actTime})
-{\footnotesize\bf @${row.actTrigger}-${row.actSpeed}-${row.actTime} }
+                #if($isExtraDoc)
+{\scriptsize\bf @${texFn.cnv(${row.actTrigger})}-${texFn.cnv(${row.actSpeed})}-${texFn.cnv(${row.actTime})} }
+                #else
+{\footnotesize\bf @${texFn.cnv(${row.actTrigger})}-${texFn.cnv(${row.actSpeed})}-${texFn.cnv(${row.actTime})} }
+                #end
             #end
             #if(${row.actCost})
-  {\footnotesize\bf | } {\footnotesize\bf \$ ${row.actCost}}
+                #if($isExtraDoc)
+  {\scriptsize\bf | } {\scriptsize\bf \$ ${texFn.cnv(${row.actCost})}}
+                #else
+  {\footnotesize\bf | } {\footnotesize\bf \$ ${texFn.cnv(${row.actCost})}}
+                #end
             #end
 
             #if(${row.actKey.trim()})
@@ -96,6 +112,9 @@ ${texFn.cnv(${row.actEffect})}
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
             #if(${arg0} == 'all' || ${row.format.contains(${arg0})})
+                #if($isExtraDoc)
+{\small\bf 〇 ${texFn.cnv(${row.charName})} {\scriptsize (${row.charType}) }} %Characterタイトル
+                #else
                 #if(${row.format.contains('lite')})
                     #if(${arg0}=='lite')
 {\small\bf ■ ${texFn.cnv(${row.charName})} {\scriptsize (${row.charType}) }} %Characterタイトル
@@ -111,8 +130,13 @@ ${texFn.cnv(${row.actEffect})}
                 #else
 {\small\bf ■ ${texFn.cnv(${row.charName})} {\scriptsize (${row.charType}) }} %Characterタイトル
                 #end
+                #end
             #end
+            #if(${row.charName.length()} > 9)
+\\ \null \hfill 
+            #else
 \hfill 
+            #end
             #if(${row.charKey})
 {\footnotesize\bf ☆${texFn.cnv(${row.charKey})} }
             #end
