@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  9 MAR 2026 18:06
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  10 MAR 2026 16:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -3009,47 +3009,63 @@ Underfull \hbox (badness 10000) in paragraph at lines 17770--17772
 me = %E3 % 82 % A8 % E3 % 82 %
  []
 
+
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 17782--17784
+[]
+ []
+
+
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 17786--17788
+[]
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 17789--17791
+[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
+Poker / issue481 / actionlist / pdf /
+ []
+
 [180] [181] [182] [183] [184] [185] [186
 
 ]
 第11章
 [187]
-Overfull \hbox (119.97983pt too wide) in paragraph at lines 18185--18185
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 18204--18204
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18185--18185
+Underfull \hbox (badness 10000) in paragraph at lines 18204--18204
 
  []
 
 
-Overfull \hbox (119.97983pt too wide) in paragraph at lines 18196--18196
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 18215--18215
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18196--18196
+Underfull \hbox (badness 10000) in paragraph at lines 18215--18215
 
  []
 
 
-Overfull \hbox (119.97983pt too wide) in paragraph at lines 18227--18227
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 18246--18246
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18227--18227
+Underfull \hbox (badness 10000) in paragraph at lines 18246--18246
 
  []
 
 
-Overfull \hbox (119.97983pt too wide) in paragraph at lines 18250--18250
+Overfull \hbox (119.97983pt too wide) in paragraph at lines 18269--18269
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18250--18250
+Underfull \hbox (badness 10000) in paragraph at lines 18269--18269
 
  []
 
@@ -3058,36 +3074,36 @@ Underfull \hbox (badness 10000) in paragraph at lines 18250--18250
 
 ] [194])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 18536.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 18555.
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 18536.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 18555.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 18536.
+(Font)              scaled to size 11.53198pt on input line 18555.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 18536.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 18555.
 
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 18536.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 18555.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 18536.
+(Font)              scaled to size 11.53198pt on input line 18555.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 18540.
+(Font)              scaled to size 5.76599pt on input line 18559.
  [195
 
 
 ]
 (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: EB2056A852B05DDCAC5104C5F1465208;31912.
+(rerunfilecheck)             Checksum: D27B845D2F168FE9D180D69AE461E189;31986.
  ) 
 Here is how much of TeX's memory you used:
- 15891 strings out of 480496
- 267366 string characters out of 5899437
- 642992 words of memory out of 5000000
- 33492 multiletter control sequences out of 15000+600000
+ 15892 strings out of 480496
+ 267389 string characters out of 5899437
+ 643090 words of memory out of 5000000
+ 33493 multiletter control sequences out of 15000+600000
  506083 words of font info for 126 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,642b,654s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (201 pages, 744016 bytes).
+Output written on blackpoker.dvi (201 pages, 746476 bytes).

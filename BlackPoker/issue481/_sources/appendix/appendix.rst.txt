@@ -86,14 +86,17 @@ URL
 
 .. _extralist:
 
-.. エクストラリスト (第7版)
-.. ==============================
-.. URL 
-..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/html/ex.html
-.. PDF 
-..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/pdf/blackpoker-extra.pdf
+エクストラリスト
+==============================
 
-..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/pdf/blackpoker-extra-2up.pdf
+エクストラでのみ使われるアクションおよび切札の情報を抽出した専用のリストです。（※マスター等の共通定義は含まれていません）
+
+URL 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/html/extra.html
+PDF 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/pdf/blackpoker-extra.pdf
+
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue481/actionlist/pdf/blackpoker-extra-2up.pdf
 
 
 .. 8.1版以降で修正する予定です。
