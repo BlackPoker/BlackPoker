@@ -22,8 +22,8 @@ create () {
     #/Applications/TeXLive/Library/texlive/2016/bin/x86_64-darwin/dvipdfmx "$1"
 
     if [ -f "$1.tex" ]; then
-        platex "$1.tex"
-        dvipdfmx "$1"
+        platex -interaction=batchmode "$1.tex"
+        dvipdfmx -q "$1"
 
         cd ../
         if [ -f "./python/2up-pdf.1.py" ]; then

@@ -5,7 +5,7 @@
 set -e  # コマンドが失敗したらスクリプトを終了
 
 # yaml定義から生成
-mvn install
+mvn install -q
 
 create () {
     cd ./tex
@@ -18,13 +18,13 @@ create () {
     rm -f "$1.dvi" "$1.pdf" "$1.aux" "$1.log"
 
     # LaTeX コンパイル
-    if ! platex "$1.tex"; then
+    if ! platex -interaction=batchmode "$1.tex"; then
         echo "Error: LaTeX compilation failed for $1.tex"
         exit 1
     fi
 
     # DVI から PDF 変換
-    if ! dvipdfmx "$1"; then
+    if ! dvipdfmx -q "$1"; then
         echo "Error: DVI to PDF conversion failed for $1.dvi"
         exit 1
     fi
