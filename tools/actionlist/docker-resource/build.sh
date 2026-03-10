@@ -26,8 +26,11 @@ create () {
         dvipdfmx -q "$1"
 
         cd ../
-        if [ -f "./python/2up-pdf.1.py" ]; then
-            python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+        if [ "$1" = "blackpoker-lite" ] || [ "$1" = "blackpoker-mast" ] || [ "$1" = "blackpoker-extra" ]; then
+            if [ -f "./python/2up-pdf.1.py" ]; then
+                python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+                cp "./tex/$1-2up.pdf" ./dist/ 2>/dev/null || true
+            fi
         fi
         cp "./tex/$1.pdf" ./dist/ 2>/dev/null || true
     else

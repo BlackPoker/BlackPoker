@@ -37,7 +37,9 @@ create () {
         exit 1
     fi
 
-    python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+    if [ "$1" = "blackpoker-lite" ] || [ "$1" = "blackpoker-mast" ] || [ "$1" = "blackpoker-extra" ]; then
+        python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+    fi
 
     # dist ディレクトリがない場合は作成
     mkdir -p ./dist
