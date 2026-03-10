@@ -45,12 +45,14 @@
 ${texFn.cnv(${row.actNote})}
             #end
             #if(${row.frame})
+#if(!$isExtraDoc)
 \vspace{1mm}%余白削除
 \hrule height 0.1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
 {\bf（フレーム）}
 
 ${texFn.cnv(${row.frame})}
+#end
             #end
             #if(${row.actActCond})
 \vspace{1mm}%余白削除

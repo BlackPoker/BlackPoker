@@ -47,6 +47,7 @@
 
 %%%%%%    TEXT START    %%%%%%
 #parse("_macros.tex")
+#set($isExtraDoc = true)
 \begin{document}
 
 
@@ -160,7 +161,7 @@
 \vspace{3mm} %余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \vspace{1mm} %余白追加
-{\Large\bf ${texFn.removeSuit(${row.trumpKey})}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
+{\Large\bf ${texFn.cnv(${row.trumpKey.replace('切札', '')})}} {\normalsize\bf【${texFn.cnv(${row.trumpName})}】} %Trumpタイトル
 \vspace{1mm} %余白追加
 
 ${texFn.cnv(${row.trumpAbility})}
