@@ -196,6 +196,8 @@
 
     .blackpoker-ability .panel-body {
       font-size: 12px;
+      padding: 8px;
+      /* Trump内のAction/Charの余白を減らし幅を限界まで広げる */
     }
 
     .blackpoker-ability .bs-component {
@@ -204,7 +206,8 @@
     }
 
     .blackpoker-ability .blackpoker-action {
-      margin-bottom: 5px; /* Trump内のAction間隔を詰める */
+      margin-bottom: 5px;
+      /* Trump内のAction間隔を詰める */
     }
 
     .blackpoker-ability .panel-body ul {
@@ -676,7 +679,8 @@
           <div th:each="row : ${nestList.acts}" th:if="${row.frame != null and #strings.contains(row.frame, 'エクストラ')}"
             class="col-lg-4">
             <div class="bs-component">
-                <div th:replace="~{_fragments :: action(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}"></div>
+              <div th:replace="~{_fragments :: action(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}">
+              </div>
             </div>
           </div>
         </div>
@@ -700,7 +704,8 @@
                 <span th:if="${#strings.contains(row.trumpKey, '♡')}" class="heart-lg"></span>
                 <span th:if="${#strings.contains(row.trumpKey, '♢')}" class="diam-lg"></span>
                 <span th:if="${#strings.contains(row.trumpKey, '♣')}" class="club-lg"></span>
-                <span th:text="${#sfn.removeSuit(row.trumpKey)}"></span> <span th:text="${row.trumpName}" class="act-title"></span>
+                <span th:text="${#sfn.removeSuit(row.trumpKey)}"></span> <span th:text="${row.trumpName}"
+                  class="act-title"></span>
               </div>
               <div class="panel-body">
                 (能力)<br> <span th:utext="${#sfn.cnvHtml(row.trumpAbility)}"></span>
@@ -712,7 +717,9 @@
                     <!-- Action -->
                     <div th:each="act,ast : ${rel.acts}"
                       th:if="${act.frame != null and #strings.contains(act.frame, 'エクストラ')}">
-                      <div th:replace="~{_fragments :: action(${act}, ${nestList != null ? nestList.type : null}, ${arg0})}"></div>
+                      <div
+                        th:replace="~{_fragments :: action(${act}, ${nestList != null ? nestList.type : null}, ${arg0})}">
+                      </div>
                     </div>
                   </div>
 
@@ -721,7 +728,9 @@
                     <h6 class="text-center">Character</h6>
                     <div th:each="char,cst : ${rel.chars}"
                       th:if="${char.frame != null and #strings.contains(char.frame, 'エクストラ')}">
-                      <div th:replace="~{_fragments :: character(${char}, ${nestList != null ? nestList.type : null}, ${arg0})}"></div>
+                      <div
+                        th:replace="~{_fragments :: character(${char}, ${nestList != null ? nestList.type : null}, ${arg0})}">
+                      </div>
                     </div>
                   </div>
                 </th:block>
