@@ -179,7 +179,7 @@
                 <argument>-i original/act.yaml -htmlOutput web-site/static/mast.html -t std -arg0 mast -texOutput ./tex/blackpoker-mast.tex</argument> 
                 <argument>-i original/merged.yaml -htmlOutput web-site/static/all.html -t std -arg0 all -texOutput ./tex/blackpoker-all.tex</argument>
                 <!-- extra -->
-                <!-- <argument>-i original/extra.yaml -o web-site/static/ex.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument> -->
+                <argument>-i original/act-frame.yaml -htmlOutput web-site/static/extra.html -t extra -texOutput ./tex/blackpoker-extra.tex</argument>
 
                 <!-- frame -->
                 <argument>-i original/merged-frame.yaml -t std -arg1 フレーム -rstOutput ../../source/auto/frameActionlist.rst</argument>

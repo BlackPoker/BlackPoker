@@ -5,6 +5,9 @@
 <!-- code_chunk_output -->
 
 - [修正環境構築方法](#修正環境構築方法)
+- [Docker経由のビルド（VS Codeタスク）](#docker経由のビルドvs-codeタスク)
+  - [Sphinx LiveHTML（ライブプレビュー）](#sphinx-livehtmlライブプレビュー)
+  - [Maven RST生成（actionlist）](#maven-rst生成actionlist)
 - [remote-container有り](#remote-container有り)
   - [windowsの場合次を行いdevcontainerを起動する](#windowsの場合次を行いdevcontainerを起動する)
 - [remote-container無し](#remote-container無し)
@@ -26,6 +29,51 @@
 
 <!-- /code_chunk_output -->
 
+
+
+# Docker経由のビルド（VS Codeタスク）
+
+ローカル環境にPythonやMavenをインストールせずに、Docker経由でビルドを実行できます。
+Dockerのみインストールされていれば動作します。
+
+以下のショートカットキーから実行できます:
+- `Ctrl+Shift+B` — ビルドタスクを実行（タスク選択画面が表示されます）
+- `Ctrl+Shift+P` → `Tasks: Run Task` — タスク一覧から選択して実行
+
+## Sphinx LiveHTML（ライブプレビュー）
+
+sphinx-autobuildをDocker経由で起動し、ブラウザでライブプレビューします。
+
+**VS Codeタスク名**: `Sphinx LiveHTML (Docker)`
+
+コマンドで直接実行する場合:
+```
+docker run --rm -v "${PWD}:/work" -w /work -p 8000:8000 python:3.9-slim bash -c 'pip install -r requirements.txt && sphinx-autobuild --host 0.0.0.0 --port 8000 ./source ./build/_html'
+```
+
+起動後、ブラウザで http://localhost:8000 にアクセスしてプレビューを確認できます。
+ソースファイルを保存すると自動でリビルドされ、ブラウザも自動リロードされます。
+
+停止するにはターミナルで `Ctrl+C` を押してください。
+
+## Maven RST生成（actionlist）
+
+actionlist定義（YAML）からRSTファイルを生成します。
+
+**VS Codeタスク名**: `Maven RST生成 (Docker)`
+
+コマンドで直接実行する場合:
+```
+docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests
+```
+
+生成結果は `source/auto/` 配下に出力されます:
+- `source/auto/actionlist.rst` — 標準アクションリスト
+- `source/auto/frameActionlist.rst` — フレームアクションリスト
+- `source/auto/framelist.rst` — フレームリスト
+- `source/auto/frame-format.csv` — フレームフォーマットCSV
+
+> **Note**: 通常の開発フローでは、まず **Maven RST生成** でRSTを生成してから **Sphinx LiveHTML** でプレビュー確認する流れになります。
 
 
 # remote-container有り

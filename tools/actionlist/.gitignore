@@ -3,4 +3,5 @@
 **/.DS_Store
 **/*.class
 /dist/
+/docker-dist/
 *.log

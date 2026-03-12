@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Sphinx LiveHTML (Docker)",
+            "type": "shell",
+            "command": "docker run --rm -v \"${workspaceFolder}:/work\" -w /work -p 8000:8000 python:3.9-slim bash -c 'pip install -r requirements.txt && sphinx-autobuild --host 0.0.0.0 --port 8000 ./source ./build/_html'",
+            "isBackground": true,
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(WARNING|ERROR):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^\\[sphinx-autobuild\\]",
+                    "endsPattern": "^.*Serving on.*$"
+                }
+            },
+            "detail": "Docker経由でsphinx-autobuildを起動し、http://localhost:8000 でライブプレビュー",
+            "group": "build"
+        },
+        {
+            "label": "Maven RST生成 (Docker)",
+            "type": "shell",
+            "command": "docker run --rm -v \"${workspaceFolder}:/project\" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests",
+            "problemMatcher": [],
+            "detail": "Docker経由でMavenを実行し、source/auto/ にactionlist RSTを生成",
+            "group": "build"
+        }
+    ]
+}

@@ -46,6 +46,8 @@
 \date{\empty}
 
 %%%%%%    TEXT START    %%%%%%
+#parse("_macros.tex")
+#set($isExtraDoc = true)
 \begin{document}
 
 
@@ -72,8 +74,7 @@
 \noindent
 
 \begin{center}
-${data.ver}
-ex${data.v}
+{\footnotesize ${data.ver} エクストラ}
 
 {\scriptsize ${data.lastupdate}}
 
@@ -82,33 +83,23 @@ ex${data.v}
 \scriptsize%本文の文字サイズを小さく設定
 \renewcommand{\labelitemi}{・}%箇条書きのラベルを変更
 
-{\quad}extraとは、BlackPokerの遊び方の一つです。プレイヤーは切札を設置してからゲームを開始します。
-従来のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。
+{\quad}エクストラはフレームの一つです。詳しくは公式ルールを参照してください。
 
-{\quad}本誌はextraで使用できるアクションと切札を記載しています。
-
-\vspace{2mm}%余白削除
+\vspace{2mm}%余白追加
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{-3zh}%余白削除
-\subsection*{（補足）切札について}
-%\vspace{-2mm}%余白削除
-%\subsubsection*{切札について}
-\vspace{-1zh}%余白削除
+\vspace{1mm}%余白追加
+{\bf（記号の意味）}
+
 \begin{itemize}
 \setlength{\leftskip}{-0.3cm}%箇条書きを左詰め
-%\setlength{\itemsep}{0pt}      %2. ブロック間の余白
 \setlength{\parskip}{0pt}      %4. 段落間余白．
-%\setlength{\itemindent}{-10pt}   %5. 最初のインデント
-%\setlength{\labelsep}{15pt}     %6. item と文字の間
-
-\item 対戦前に裏向きで２枚まで切札を置くことができる。
-\item 切札はライフと直角に交わるようにライフの下に置く。
-\item 切札を表にするときはスートと数字が見えるようにし、対応する能力の名称を言う。
-\item ライフが０枚になった場合、切札が残っていても敗北する。
+\item ■：アクション
+\item 〇：キャラクター
+\item ＠：トリガー-スピード-タイミング
+\item ＄：コスト
+\item ★：キーカード/キーユニット条件
+\item ☆：ユニット条件
 \end{itemize}
-※詳しくは、公式ルール参照。
-\vspace{-1zh}%余白削除
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% ActionList %%%%%
 \begin{center}
@@ -124,55 +115,10 @@ ex${data.v}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #foreach( $acts in ${actList})
+#if(!${texFn.isTrumpType(${acts.type})})
 #foreach( $row in ${acts.acts})
-#if(${row.output} != "")
-%%% Action %%%
-%\vspace{1zh} %余白追加
-\vspace{2mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{1mm} %余白追加
-{\normalsize\bf ■ ${row.actName} {\scriptsize (${row.actType}) [ex]}} %Actionタイトル
-\hfill 
-#if(${row.actTime} != "")
-{\small\bf @${row.actTime} }
-#end
-#if(${row.actCost} != "")
-  {\small\bf | } {\small\bf \$ ${row.actCost}}
-#end
-
-#if(${row.actKey.trim()} != "")
-★${texFn.cnv(${row.actKey})}
-#end
-
-#if(${row.actNote.trim()} != "")
-%特記事項
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-${texFn.cnv(${row.actNote})}
-#end
-#if(${row.actTarget.trim()} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-{\bf（対象）}
-
-${texFn.cnv(${row.actTarget})}
-#end
-#if(${row.actEffect.trim()} != "")
-\vspace{1mm}%余白削除
-\hrule height 0.1mm depth 0mm width 66.5mm %罫線
-\vspace{1mm}%余白削除
-
-#if(${row.actS.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${row.actS.trim()} == "")
-{\bf（通常効果）}
-#end
-
-${texFn.cnv(${row.actEffect})}
+#if(${row.frame} && ${row.frame.contains("エクストラ")})
+#renderAction($row "all")
 #end
 #end
 #end
@@ -180,12 +126,12 @@ ${texFn.cnv(${row.actEffect})}
 
 %\newpage %改段
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%% AbilityList %%%%%
+%%%%% TrumpList %%%%%
 \begin{center}
 \begin{center}
 \hrule height 1mm depth 0mm width 66.5mm %罫線
 \vspace{1mm}%余白削除
-{\Large\bf \ruby{Ability List}{アビリティリスト}}
+{\Large\bf \ruby{Trump List}{切札リスト}}
 \vspace{1mm}%余白削除
 \hrule height 0.5mm depth 0mm width 66.5mm %罫線
 \end{center}
@@ -196,122 +142,57 @@ ${texFn.cnv(${row.actEffect})}
 %\tcbset{top=1mm, left=1mm, bottom=1mm, left=1mm}
 \tcbset{colframe=black,coltitle=black!0!black,colbacktitle=white!0!white,colback=white!0!white,sharp corners,top=1mm, left=1mm, bottom=1mm, left=1mm,boxrule=0.2mm,toprule=0.2mm}
 
-## Abilityループ
-#foreach( $row in ${abiList})
-#if(${row.output.trim()} != "")
+## Trumpループ
+#foreach( $nestList in ${trumpList})
+#foreach( $row in ${nestList.trumps})
+#if(${row.frame} && ${row.frame.contains("エクストラ")})
 
-%%%%% Ability %%%%%
-\vspace{3mm} %余白追加
-\hrule height 0.5mm depth 0mm width 66.5mm %罫線
-\vspace{1mm} %余白追加
-{\Large\bf ${texFn.cnvSimpleAlphabetSuit(${row.suit})} ${row.num}} {\normalsize\bf【${row.name}】} %Abilityタイトル
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${row.ability})}
-
-%%%%% Abilityアクション %%%%%
-#if((${row.output.trim()} != "")&&(($row.acts)&&($row.acts.size() > 0)))
-#foreach($act in ${row.acts})
-\begin{tcolorbox}[title={\small\bf【Action】${act.actName}}{\scriptsize （${act.actType}）}]
-
-#if(${act.actTime} != "")
-{\scriptsize\bf @${act.actTime} }
-#end
-#if(${act.actCost} != "")
-  {\scriptsize\bf | \$ ${act.actCost} }
-#end
-#if(${act.actKey.trim()} != "")
-  {\scriptsize\bf | ★${texFn.cnv(${act.actKey})}}
-#end
-
-#if(${act.actNote.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
+%%%%% Trump %%%%%
+\vspace{6mm} %余白追加
+\hrule height 1mm depth 0mm width 66.5mm %太い罫線
+\vspace{2mm} %余白追加
+{\Large\bf ${texFn.cnv(${row.trumpKey.replace('切札', '')}).replace('\normalsize', '\Large')}} {\Large\bf ${texFn.cnv(${row.trumpName})}} %Trumpタイトル
 \vspace{1mm} %余白追加
 
-${texFn.cnv(${act.actNote})}
-\vspace{-2mm} %余白削除 能力のアクションは余白が大きく開くため、追加で余白を削除
-\vspace{1zh}%余白追加
-#end
-#if(${act.actTarget.trim()} != "")
-\vspace{1mm} %余白追加  
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-{\bf（対象）}
-
-${texFn.cnv(${act.actTarget})}
-
-#end
-#if(${act.actEffect.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-#if(${act.actS.trim()} != "")
-{\bf（即時効果）}
-#end
-#if(${act.actS.trim()} == "")
-{\bf（通常効果）}
-#end
-
-${texFn.cnv(${act.actEffect})}
-#end
-
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
-
-\vspace{-1zh}
-#end ##foreach end
-#end ##Abilityアクション end 
-
-%%%%% Abilityキャラクター %%%%%
-#if((${row.output.trim()} != "")&&(($row.chars)&&($row.chars.size() > 0)))
-#foreach($char in ${row.chars})
-\vspace{2mm}
-\begin{tcolorbox}[title={\small\bf【Character】${char.charName}}{\scriptsize （${char.charType}）}]
-
-#if(${char.actKey.trim()} != "")
-  {\scriptsize\bf ★${texFn.cnv(${char.charKey})}}
-#end
-
-#if(${char.charNote.trim()} != "")
-%特記事項
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
-
-${texFn.cnv(${char.actNote})}
-\vspace{1zh}%余白追加
-#end
-#if(${char.charAbility.trim()} != "")
-\vspace{1mm} %余白追加
-\hrule height 0.1mm depth 0mm width 62mm %罫線
-\vspace{1mm} %余白追加
+\vspace{1mm}%余白追加
+\hrule height 0.1mm depth 0mm width 66.5mm %罫線
+\vspace{1mm}%余白追加
 
 {\bf（能力）}
 
-${texFn.cnv(${char.charAbility})}
-#end
+${texFn.cnv(${row.trumpAbility})}
 
-\vspace{1mm} %余白追加　無いと箇条書きの場合、ギリギリになるので追加
-\end{tcolorbox}
-
-\vspace{-1zh}
+#set($rel = $trumpRelations.get($nestList.type))
+%%%%% Trumpアクション %%%%%
+#if($rel && $rel.acts && $rel.acts.size() > 0)
+#foreach($act in $rel.acts)
+#if(${act.frame} && ${act.frame.contains("エクストラ")})
+#renderAction($act "all")
+#end ##エクストラ frame判定 end
 #end ##foreach end
-#end ##Abilityキャラクター end 
+#end ##Trumpアクション end 
 
-#end
-#end ##Abilityループ end
+%%%%% Trumpキャラクター %%%%%
+#if($rel && $rel.chars && $rel.chars.size() > 0)
+#foreach($char in $rel.chars)
+#if(${char.frame} && ${char.frame.contains("エクストラ")})
+\vspace{2mm}
+#renderCharacter($char "all")
+#end ## エクストラ frame判定 end
+#end ##foreach end
+#end ##Trumpキャラクター end 
+
+#end ## エクストラ frame判定 end
+#end ## Trump判定 end
+#end ## Trumpループ end
 
 %% 奥付 %%
 \thispagestyle{empty}
 \vspace*{\stretch{1}}
 \begin{flushright}
-\begin{minipage}{0.6\hsize}
+\begin{minipage}{0.8\hsize}
 \begin{description}
-  \item{誌名：}BlackPoker ExtraList\\ \hspace{3pt} ${data.ver} v${data.v}
+  \item{誌名：}BlackPoker ExtraList\\ \hspace{3pt} {\footnotesize ${data.ver} エクストラ}
   \item{発行：}${data.lastupdate}
 \end{description}
 \end{minipage}

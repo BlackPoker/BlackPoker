@@ -218,6 +218,16 @@ public class StrFn {
 				.trim();
 	}
 
+	public String removeSuit(String str) {
+		if (str == null) return "";
+		return str.replaceAll("[♠♡♢♣]", "");
+	}
+
+	public boolean isTrumpType(String type) {
+		if (type == null) return false;
+		return type.startsWith("切札♠") || type.startsWith("切札♡") || type.startsWith("切札♢") || type.startsWith("切札♣");
+	}
+
 	public static void main(String[] args) {
 
 		String input = ""

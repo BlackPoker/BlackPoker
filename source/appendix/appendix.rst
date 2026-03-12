@@ -7,16 +7,15 @@
 ==============================
 
 
+PDF版ルール
+==============================
 
-.. PDF版ルール
-.. ==============================
-
-.. 通常版
-..  https://blackpoker.github.io/BlackPoker/blackpoker.pdf
+通常版
+ https://blackpoker.github.io/BlackPoker/blackpoker.pdf
 
 
-.. 中綴じ印刷用
-..  https://blackpoker.github.io/BlackPoker/blackpoker_a5-booklet.pdf
+中綴じ印刷用
+ https://blackpoker.github.io/BlackPoker/blackpoker_a5-booklet.pdf
 
 
 .. _actionlist:
@@ -86,14 +85,17 @@ URL
 
 .. _extralist:
 
-.. エクストラリスト (第7版)
-.. ==============================
-.. URL 
-..     https://blackpoker.github.io/BlackPoker/actionlist/html/ex.html
-.. PDF 
-..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra.pdf
+エクストラリスト
+==============================
 
-..     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra-2up.pdf
+エクストラでのみ使われるアクションおよび切札の情報を抽出した専用のリストです。（※マスター等の共通定義は含まれていません）
+
+URL 
+    https://blackpoker.github.io/BlackPoker/actionlist/html/extra.html
+PDF 
+    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra.pdf
+
+    https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra-2up.pdf
 
 
 .. 8.1版以降で修正する予定です。

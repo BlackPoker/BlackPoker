@@ -3,5 +3,6 @@
     "yaml.schemas": {
         "tools/actionlist/original/act.schema.json":"*act.yaml"
     },
-
+    "search.useIgnoreFiles": false,
+    "explorer.excludeGitIgnore": false
 }

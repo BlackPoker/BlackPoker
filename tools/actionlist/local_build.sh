@@ -5,7 +5,7 @@
 set -e  # コマンドが失敗したらスクリプトを終了
 
 # yaml定義から生成
-mvn install
+mvn install -q
 
 create () {
     cd ./tex
@@ -18,13 +18,13 @@ create () {
     rm -f "$1.dvi" "$1.pdf" "$1.aux" "$1.log"
 
     # LaTeX コンパイル
-    if ! platex "$1.tex"; then
+    if ! platex -interaction=batchmode "$1.tex"; then
         echo "Error: LaTeX compilation failed for $1.tex"
         exit 1
     fi
 
     # DVI から PDF 変換
-    if ! dvipdfmx "$1"; then
+    if ! dvipdfmx -q "$1"; then
         echo "Error: DVI to PDF conversion failed for $1.dvi"
         exit 1
     fi
@@ -37,7 +37,9 @@ create () {
         exit 1
     fi
 
-    python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+    if [ "$1" = "blackpoker-lite" ] || [ "$1" = "blackpoker-mast" ] || [ "$1" = "blackpoker-extra" ]; then
+        python3 ./python/2up-pdf.1.py "./tex/$1.pdf"
+    fi
 
     # dist ディレクトリがない場合は作成
     mkdir -p ./dist
@@ -50,6 +52,6 @@ create () {
 # 一括処理
 # for doc in blackpoker-lite blackpoker-std blackpoker-pro blackpoker-mast blackpoker-extra; do
 # for doc in blackpoker-lite blackpoker-std blackpoker-pro blackpoker-mast blackpoker-all; do
-for doc in blackpoker-lite blackpoker-mast; do
+for doc in blackpoker-lite blackpoker-mast blackpoker-extra; do
     create "$doc"
 done
