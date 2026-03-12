@@ -196,6 +196,18 @@
 
     .blackpoker-ability .panel-body {
       font-size: 12px;
+      padding: 8px;
+      /* Trump内のAction/Charの余白を減らし幅を限界まで広げる */
+    }
+
+    .blackpoker-ability .bs-component {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+
+    .blackpoker-ability .blackpoker-action {
+      margin-bottom: 5px;
+      /* Trump内のAction間隔を詰める */
     }
 
     .blackpoker-ability .panel-body ul {
@@ -225,6 +237,10 @@
 
     .blackpoker-action .panel-body {
       font-size: 12px;
+    }
+
+    .blackpoker-ability .blackpoker-action .panel-heading {
+      font-size: 14px;
     }
 
     .blackpoker-action .panel-body ul {
@@ -530,7 +546,7 @@
           <!-- Support Paper -->
           ExtraList
           <h5>
-            <span class="">第9.0版 フレーム編 vnull</span>
+            <span class="">第9.0版 フレーム編 エクストラ</span>
           </h5>
           <!-- 
             <ul class="nav nav-pills">
@@ -873,17 +889,15 @@
             <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ
             </li>
             <li class="list-group-item"><span class="time-mark"></span>
-              :&nbsp;タイミング</li>
+              :&nbsp;トリガー-スピード-タイミング</li>
             <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
             </li>
             <li class="list-group-item"><span class="glyphicon glyphicon-star"
-                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード</li>
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード/キーユニット条件</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
+                aria-hidden="true"></span>&nbsp;:&nbsp;ユニット条件</li>
             <li class="list-group-item"><span class="note-mark"></span>
               :&nbsp;特記事項</li>
-            <!--
-            <li class="list-group-item"><span class="glyphicon glyphicon-flash"
-              aria-hidden="true"></span>&nbsp;:&nbsp;オープンコスト</li>
-            -->
           </ul>
 
           <h5>
@@ -941,27 +955,9 @@
       <h2 class="visible-print-block blackpoker-font">
         <img src="img/blackpoker.svg" width="35px"><br> BlackPoker extra
       </h2>
-      <small class="">第9.0版 フレーム編 vnull</small> <small class=""> : 2026/03/31</small>
+      <small class="">第9.0版 フレーム編 エクストラ</small> <small class=""> : 2026/03/31</small>
     </div>
     <hr class="hidden-print">
-
-    <div class="text-center hidden-print">
-      <a class="text-center" data-toggle="collapse" href="#what_extra">What's "extra"?</a>
-      <div id="what_extra" class="panel-collapse collapse">
-        <div class="panel-body well">
-          <small>
-            <p>extraとは、BlackPokerの遊び方の一つです。</p>
-            <p>
-              プレイヤーは切札を設置してからゲームを開始します。<br> 切札については <a href="#" data-toggle="modal"
-                data-target="#modal_trump_help"><span class="glyphicon glyphicon-question-sign"
-                  aria-hidden="false"></span>切札について</a>を参照して下さい。
-            </p>
-            <p>extraでは従来のアクション、キャラクターに加え切札を操作するアクションとそれに対応する切札の能力を使うことが出来ます。</p>
-          </small>
-        </div>
-      </div>
-    </div>
-    <hr>
 
     <!-- 
       <div class="tab-content">
@@ -975,7 +971,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-packopen" data-frame="パック,レアパック,ストラテジー,エクストラ" data-type="パック操作">
+              <div class="panel panel-default blackpoker-action" id="act-packopen" data-frame="パック,レアパック,ストラテジー,エクストラ" data-type="パック操作">
   <div class="panel-heading">
     
     <span class="act-title">パック開封</span>
@@ -1019,7 +1015,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-raredraw" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+              <div class="panel panel-default blackpoker-action" id="act-raredraw" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
   <div class="panel-heading">
     
     <span class="act-title">レアドロー</span>
@@ -1056,7 +1052,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-summonsRare" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+              <div class="panel panel-default blackpoker-action" id="act-summonsRare" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
   <div class="panel-heading">
     
     <span class="act-title">レア召喚</span>
@@ -1106,7 +1102,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-trapCounter" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+              <div class="panel panel-default blackpoker-action" id="act-trapCounter" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
   <div class="panel-heading">
     
     <span class="act-title changed">罠カウンター</span>
@@ -1158,7 +1154,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-quickOpen" data-frame="エクストラ" data-type="切札操作">
+              <div class="panel panel-default blackpoker-action" id="act-quickOpen" data-frame="エクストラ" data-type="切札操作">
   <div class="panel-heading">
     
     <span class="act-title">クイックオープン</span>
@@ -1199,7 +1195,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-open" data-frame="エクストラ" data-type="切札操作">
+              <div class="panel panel-default blackpoker-action" id="act-open" data-frame="エクストラ" data-type="切札操作">
   <div class="panel-heading">
     
     <span class="act-title">メインオープン</span>
@@ -1241,7 +1237,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-close" data-frame="エクストラ" data-type="切札操作">
+              <div class="panel panel-default blackpoker-action" id="act-close" data-frame="エクストラ" data-type="切札操作">
   <div class="panel-heading">
     
     <span class="act-title">クローズ</span>
@@ -1285,7 +1281,7 @@
 
           <div class="col-lg-4">
             <div class="bs-component">
-                <div class="panel panel-default blackpoker-action" id="act-trumpDestroy" data-frame="エクストラ" data-type="切札操作">
+              <div class="panel panel-default blackpoker-action" id="act-trumpDestroy" data-frame="エクストラ" data-type="切札操作">
   <div class="panel-heading">
     
     <span class="act-title">切札破壊</span>
