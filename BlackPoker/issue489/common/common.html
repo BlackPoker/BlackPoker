@@ -339,7 +339,7 @@
 <p>フローチャートで示すと次のようになります。(<a class="reference internal" href="#preset-flow-image"><span class="std std-numref">Fig. 3.2</span></a>)</p>
 <figure class="align-default" id="id20">
 <span id="preset-flow-image"></span><p class="plantuml">
-<img src="../_images/plantuml-a8cab2661da13fa89b324fb057695fb60e2594af.svg" alt="&#64;startuml
+<img src="../_images/plantuml-e31b42c8f8493e6106f20090a26dc7a660698ffd.svg" alt="&#64;startuml
 start
 :ライフの一番上のカードを表向きにして
 「防壁」として場に出す;
@@ -348,14 +348,14 @@ start
 「兵士」として場に出す;
 
 while (兵士と定義されていないキャラクターか？) is (Yes)
-    :そのカードを **表向きのまま墓地** に置く;
+    :そのカードを表向きのまま墓地に置く;
     if (ライフがなくなったか？) then (Yes)
-        :そのプレイヤーは **敗北** する;
+        :そのプレイヤーは敗北する;
         stop
     else (No)
     endif
     :ライフの一番上からカードを1枚取り
-    表向きにして **兵士として場に出す** ;
+    表向きにして兵士として場に出す;
 endwhile (No)
 stop
 &#64;enduml
