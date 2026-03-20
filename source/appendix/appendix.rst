@@ -111,3 +111,4 @@ PDF
 
     guideline/fanworks
     guideline/customRule
+    guideline/shortcut
