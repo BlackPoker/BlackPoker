@@ -43,7 +43,7 @@ version = '第9.0版'
 # ones.
 extensions = ['sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
 
-plantuml = 'plantuml'
+plantuml = 'plantuml -charset UTF-8'
 plantuml_output_format = 'svg_img'
 plantuml_latex_output_format = 'pdf'
 
