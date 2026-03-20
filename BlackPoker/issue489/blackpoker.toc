@@ -377,22 +377,32 @@
 \contentsline {paragraph}{誘発\sphinxhyphen {}メインは同時に2つ以上誘発しないように制限 (必須)}{185}{paragraph*.653}%
 \contentsline {subsubsection}{キャラクターを追加する際のルール}{186}{subsubsection*.654}%
 \contentsline {paragraph}{場のキャラクターは一目でわかるように定義 (必須)}{186}{paragraph*.655}%
-\contentsline {chapter}{\numberline {第11章}変更履歴}{187}{chapter.11}%
-\contentsline {section}{\numberline {11.1}第8版の主な変更点}{187}{section.11.1}%
-\contentsline {subsection}{\numberline {11.1.1}アクションの定義の変更}{187}{subsection.11.1.1}%
-\contentsline {subsection}{\numberline {11.1.2}能力の解釈を変更}{187}{subsection.11.1.2}%
-\contentsline {subsection}{\numberline {11.1.3}フォグ領域追加}{188}{subsection.11.1.3}%
-\contentsline {subsection}{\numberline {11.1.4}用語追加/変更}{188}{subsection.11.1.4}%
-\contentsline {subsection}{\numberline {11.1.5}オプション削除とフレームへの統合}{189}{subsection.11.1.5}%
-\contentsline {subsection}{\numberline {11.1.6}エクストラをフレーム化 (8.1)}{189}{subsection.11.1.6}%
-\contentsline {subsection}{\numberline {11.1.7}曖昧なルールの明確化}{189}{subsection.11.1.7}%
-\contentsline {subsection}{\numberline {11.1.8}ルール外変更点}{190}{subsection.11.1.8}%
-\contentsline {section}{\numberline {11.2}第7版の主な変更点}{191}{section.11.2}%
-\contentsline {subsection}{\numberline {11.2.1}リバースのクイック化}{191}{subsection.11.2.1}%
-\contentsline {subsection}{\numberline {11.2.2}ゲーム中のデッキ名称をライフに変更}{191}{subsection.11.2.2}%
-\contentsline {subsection}{\numberline {11.2.3}対戦レギュレーションの定義方法変更}{191}{subsection.11.2.3}%
-\contentsline {subsection}{\numberline {11.2.4}コアフローをわかりやすく整理}{191}{subsection.11.2.4}%
-\contentsline {subsection}{\numberline {11.2.5}B・Jのクイック化}{191}{subsection.11.2.5}%
-\contentsline {subsection}{\numberline {11.2.6}引き分け廃止}{192}{subsection.11.2.6}%
-\contentsline {subsection}{\numberline {11.2.7}ルールの記載を微修正}{192}{subsection.11.2.7}%
-\contentsline {chapter}{索引}{193}{chapter*.656}%
+\contentsline {subsection}{\numberline {10.4.3}BlackPoker 対戦進行上のショートカット指針}{186}{subsection.10.4.3}%
+\contentsline {subsubsection}{目的}{186}{subsubsection*.656}%
+\contentsline {subsubsection}{本文ルールとの関係}{186}{subsubsection*.657}%
+\contentsline {subsubsection}{用語の定義}{186}{subsubsection*.658}%
+\contentsline {subsubsection}{ショートカットの基本理念}{186}{subsubsection*.659}%
+\contentsline {subsubsection}{「カットイン」の定義と割り込み宣言}{187}{subsubsection*.660}%
+\contentsline {subsubsection}{スムーズな進行例とルール上の効果}{187}{subsubsection*.661}%
+\contentsline {paragraph}{アタックからダメージ判定まで}{187}{paragraph*.662}%
+\contentsline {paragraph}{ターン終了時}{188}{paragraph*.663}%
+\contentsline {subsubsection}{運用上の注意}{188}{subsubsection*.664}%
+\contentsline {chapter}{\numberline {第11章}変更履歴}{189}{chapter.11}%
+\contentsline {section}{\numberline {11.1}第8版の主な変更点}{189}{section.11.1}%
+\contentsline {subsection}{\numberline {11.1.1}アクションの定義の変更}{189}{subsection.11.1.1}%
+\contentsline {subsection}{\numberline {11.1.2}能力の解釈を変更}{189}{subsection.11.1.2}%
+\contentsline {subsection}{\numberline {11.1.3}フォグ領域追加}{190}{subsection.11.1.3}%
+\contentsline {subsection}{\numberline {11.1.4}用語追加/変更}{190}{subsection.11.1.4}%
+\contentsline {subsection}{\numberline {11.1.5}オプション削除とフレームへの統合}{191}{subsection.11.1.5}%
+\contentsline {subsection}{\numberline {11.1.6}エクストラをフレーム化 (8.1)}{191}{subsection.11.1.6}%
+\contentsline {subsection}{\numberline {11.1.7}曖昧なルールの明確化}{191}{subsection.11.1.7}%
+\contentsline {subsection}{\numberline {11.1.8}ルール外変更点}{192}{subsection.11.1.8}%
+\contentsline {section}{\numberline {11.2}第7版の主な変更点}{193}{section.11.2}%
+\contentsline {subsection}{\numberline {11.2.1}リバースのクイック化}{193}{subsection.11.2.1}%
+\contentsline {subsection}{\numberline {11.2.2}ゲーム中のデッキ名称をライフに変更}{193}{subsection.11.2.2}%
+\contentsline {subsection}{\numberline {11.2.3}対戦レギュレーションの定義方法変更}{193}{subsection.11.2.3}%
+\contentsline {subsection}{\numberline {11.2.4}コアフローをわかりやすく整理}{193}{subsection.11.2.4}%
+\contentsline {subsection}{\numberline {11.2.5}B・Jのクイック化}{193}{subsection.11.2.5}%
+\contentsline {subsection}{\numberline {11.2.6}引き分け廃止}{194}{subsection.11.2.6}%
+\contentsline {subsection}{\numberline {11.2.7}ルールの記載を微修正}{194}{subsection.11.2.7}%
+\contentsline {chapter}{索引}{195}{chapter*.665}%
