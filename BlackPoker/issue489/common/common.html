@@ -339,29 +339,25 @@
 <p>フローチャートで示すと次のようになります。(<a class="reference internal" href="#preset-flow-image"><span class="std std-numref">Fig. 3.2</span></a>)</p>
 <figure class="align-default" id="id20">
 <span id="preset-flow-image"></span><p class="plantuml">
-<img src="../_images/plantuml-af7337e023c424b6cde285e4148ed1eb8039d94f.svg" alt="&#64;startuml preset-flow
-title プリセット配置
-
+<img src="../_images/plantuml-e8cd7b5fa454521a34d941ea2a7c2f75f23a20aa.svg" alt="&#64;startuml
 start
 :ライフの一番上のカードを表向きにして
-「防壁」として場に出す;
+防壁として場に出す;
 
 :ライフの次のカードを表向きにして
-「兵士」として場に出す;
+兵士として場に出す;
 
-while (兵士として定義されていない\nキャラクターか？) is (Yes)
-    :そのカードを **表向きのまま墓地** に置く;
+while (兵士として定義されていないキャラクターか？) is (Yes)
+    :そのカードを表向きのまま墓地に置く;
     if (ライフがなくなったか？) then (Yes)
-        :そのプレイヤーは **敗北** する;
+        :そのプレイヤーは敗北する;
         stop
     else (No)
     endif
     :ライフの一番上からカードを1枚取り
-    表向きにして **兵士として場に出す** ;
+    表向きにして兵士として場に出す;
 endwhile (No)
-
 stop
-
 &#64;enduml
 "/></p>
 <figcaption>

@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  20 MAR 2026 18:17
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  20 MAR 2026 19:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1083,9 +1083,9 @@ Overfull \hbox (119.97983pt too wide) in paragraph at lines 885--888
  []
 
 [14]
-File: plantuml-af7337e023c424b6cde285e4148ed1eb8039d94f.pdf Graphic file (type 
+File: plantuml-e8cd7b5fa454521a34d941ea2a7c2f75f23a20aa.pdf Graphic file (type 
 pdf)
-<plantuml-af7337e023c424b6cde285e4148ed1eb8039d94f.pdf>
+<plantuml-e8cd7b5fa454521a34d941ea2a7c2f75f23a20aa.pdf>
  [15] [16]
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
 (Font)              Font shape `JT1/gt/m/n' tried instead on input line 1031.
@@ -3116,4 +3116,4 @@ Here is how much of TeX's memory you used:
  20 hyphenation exceptions out of 8191
  72i,12n,80p,642b,654s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (201 pages, 748420 bytes).
+Output written on blackpoker.dvi (201 pages, 748412 bytes).
