@@ -30,6 +30,60 @@
             "problemMatcher": [],
             "detail": "Docker経由でMavenを実行し、source/auto/ にactionlist RSTを生成",
             "group": "build"
+        },
+        {
+            "label": "Sphinx PDF Build - Stage 1 (Maven)",
+            "type": "process",
+            "command": "docker",
+            "args": [
+                "run", "--rm", "-v", "${workspaceFolder}:/project", "-w", "/project/tools/actionlist", "maven:3.6.2-jdk-11", "mvn", "install", "-DskipTests"
+            ],
+            "presentation": { "reveal": "never" }
+        },
+        {
+            "label": "Sphinx PDF Build - Stage 2 (Actionlist)",
+            "type": "process",
+            "command": "docker",
+            "args": [
+                "run", "--rm", "-v", "${workspaceFolder}:/work", "-w", "/work/tools/actionlist", "blackpoker/actionlist-base:latest", "sh", "-c", "pip3 install pdfrw && tr -d '\\r' < local_build.sh > tmp_build.sh && sed -i 's/^mvn install/# mvn install/g' tmp_build.sh && sh tmp_build.sh && rm tmp_build.sh"
+            ],
+            "presentation": { "reveal": "never" }
+        },
+        {
+            "label": "Sphinx PDF Build - Stage 3 (Sphinx)",
+            "type": "process",
+            "command": "docker",
+            "args": [
+                "run", "--rm", "-v", "${workspaceFolder}:/work", "-w", "/work", "blackpoker/blackpoker-doc-base:latest", "sh", "-c", "pip3 install --upgrade pip && pip3 install -r requirements.txt && tr -d '\\r' < docker-build.sh > tmp_docker_build.sh && sh tmp_docker_build.sh && rm tmp_docker_build.sh"
+            ],
+            "presentation": { "reveal": "never" }
+        },
+        {
+            "label": "Sphinx PDF Build - Stage 4 (Sync)",
+            "type": "shell",
+            "command": "if (!(Test-Path 'docs/actionlist/pdf')) { New-Item -ItemType Directory -Force -Path 'docs/actionlist/pdf' | Out-Null } ; Copy-Item 'tools/actionlist/dist/*.pdf' 'docs/actionlist/pdf'",
+            "presentation": { "reveal": "never" }
+        },
+        {
+            "label": "Sphinx PDF Build (Docker)",
+            "dependsOn": [
+                "Sphinx PDF Build - Stage 1 (Maven)",
+                "Sphinx PDF Build - Stage 2 (Actionlist)",
+                "Sphinx PDF Build - Stage 3 (Sphinx)",
+                "Sphinx PDF Build - Stage 4 (Sync)"
+            ],
+            "dependsOrder": "sequence",
+            "problemMatcher": {
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):\\s+(WARNING|ERROR):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "severity": 3,
+                    "message": 4
+                }
+            },
+            "detail": "Actionlist生成とSphinx PDFビルドを一括実行 (エラー防止の順次実行版)",
+            "group": "build"
         }
     ]
 }
