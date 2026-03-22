@@ -217,7 +217,23 @@ latex_elements = {
 },
     'preamble': r'''
 \makeindex
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{0.8ex}{0.3ex}
+\titlespacing{\subsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subsubsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\paragraph}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
+\usepackage{enumitem}
+\setlist{nosep, itemsep=-0.5ex, parsep=0pt}
+\renewcommand{\chapterheadstartskip}{\vspace{0pt}}
+\renewcommand{\chapterheadendskip}{\vspace{10pt}}
 \makeatletter
+\AtBeginDocument{
+  \linespread{0.9}\selectfont
+  \setlength{\parskip}{0pt}
+  \setlength{\LTpre}{2pt}
+  \setlength{\LTpost}{2pt}
+}
 %% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
 \renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
@@ -237,7 +253,7 @@ latex_elements = {
     \spx@lineitemlabel{}%
     %% This causes the label to be typeset (filling up the line), clearing up
     %% things in case a nested list follows.
-    \leavevmode
+    \leavevmode\vspace{-1.5ex}%
   \fi #2%
 }
 \makeatother
