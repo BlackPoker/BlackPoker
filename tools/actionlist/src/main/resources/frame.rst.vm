@@ -30,7 +30,6 @@ ${frame.name}
 **フォーマット:**
 
 .. csv-table::
-   :widths: 1, 1, 1, 1
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
