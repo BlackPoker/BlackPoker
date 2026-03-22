@@ -41,7 +41,6 @@ ${row.actName} (${row.actType})
 **フォーマット:**
 
 .. csv-table::
-   :widths: 1, 1, 1, 1
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -177,7 +176,6 @@ ${char.charName} (${char.charType})
 **フォーマット:**
 
 .. csv-table::
-   :widths: 1, 1, 1, 1
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -291,7 +289,6 @@ ${fog.fogName} (${fog.fogType})
 **フォーマット:**
 
 .. csv-table::
-   :widths: 1, 1, 1, 1
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -398,7 +395,6 @@ ${trump.trumpName} (${trump.trumpType})
 **フォーマット:**
 
 .. csv-table::
-   :widths: 1, 1, 1, 1
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
