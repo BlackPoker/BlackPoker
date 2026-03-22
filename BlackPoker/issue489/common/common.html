@@ -400,24 +400,18 @@ stop
 <p>BlackPoker は、 <strong>標準的なトランプだけで遊べる、割込み可能なターン制のTCG風ゲーム</strong> です。
 プレイヤーは <strong>すること（アクション）</strong> を宣言し、それをルールシステムが盤面に反映していきます。これにより、 <strong>盤面に存在するもの（コンポーネント／ユニット）</strong> が増えたり移動などしてゲームが進んできます。</p>
 <p>重要な2つの概念は次のとおりです。</p>
-<ul class="simple">
-<li><dl class="simple">
+<dl class="simple">
 <dt><strong>アクション</strong></dt><dd><p>アクションとは、プレイヤーが起こす行為(すること)をプレイヤーが要求して盤面に反映するまでを扱う概念です。
 プレイヤーは数多くあるアクションの定義から、ルールシステムに対して実行したいことを要求します。ルールシステムはその要求を実行して盤面に反映します。
 アクションの定義を <strong>アクションスクリプト</strong> と呼び、処理される要求することを <strong>リクエスト</strong> と呼びます。
 詳しくは、<a class="reference internal" href="common-action.html#common-action-rst"><span class="std std-ref">共通ルール: アクション</span></a> で説明します。</p>
 </dd>
-</dl>
-</li>
-<li><dl class="simple">
 <dt><strong>コンポーネント</strong></dt><dd><p>コンポーネントとは、ゲーム盤面に配置されるキャラクターや切札などを扱う概念です。
 例えば、キャラクターの「一般兵」は場に複数体存在しますが、「一般兵」の定義は1つです。
 定義のことを <strong>コンポーネントスクリプト</strong> 、定義に合致する実態を <strong>ユニット</strong> と呼びます。
 詳しくは、<a class="reference internal" href="common-component.html#common-component-rst"><span class="std std-ref">共通ルール: コンポーネント</span></a> で説明します。</p>
 </dd>
 </dl>
-</li>
-</ul>
 <p>要するに、 <strong>アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態を見て次のアクションを起こす</strong> ――この往復がゲームの心臓部です。
 この往復の全体的なイメージは <a class="reference internal" href="#abstract-overview"><span class="std std-numref">Fig. 3.3</span></a> を参照してください。登場する用語は後ほど説明します。ここでは大まかに全体像を把握してください。</p>
 <figure class="align-default" id="id21">
@@ -436,23 +430,14 @@ stop
 <li><p><strong>下半分 現実:コンポーネント</strong> ：コンポーネントとユニットの関係</p></li>
 </ul>
 <p>この点を踏まえて、図中の数字を順に見ていきましょう。</p>
-<ul class="simple">
-<li><dl class="simple">
+<dl class="simple">
 <dt>[1] アクションを起こす</dt><dd><p>アクションを起こすと <strong>リクエスト</strong> が <strong>ステージ</strong> に積まれます。リクエストは後に積まれたものから順に処理されます。</p>
 </dd>
-</dl>
-</li>
-<li><dl class="simple">
 <dt>[2] 承認後リクエストを実行(解決)</dt><dd><p>ステージ上にある各リクエストは、1つずつ盤面に反映されます。これを <strong>解決</strong> と呼びます。</p>
 </dd>
-</dl>
-</li>
-<li><dl class="simple">
 <dt>[3] ユニットを出すなど盤面の状態を変更</dt><dd><p>解決結果が盤面に反映され、 <strong>ユニット</strong> の状態や有無が更新されます。各ユニットはいずれかのコンポーネントと紐づいています。</p>
 </dd>
 </dl>
-</li>
-</ul>
 </div>
 <div class="admonition- admonition">
 <p class="admonition-title">この後の読み方</p>
