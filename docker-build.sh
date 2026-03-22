@@ -54,10 +54,6 @@ sed -i -e 's/⑱/\raise0.2ex\hbox{\textcircled{\scriptsize{18}}} /g' blackpoker.
 sed -i -e 's/⑲/\raise0.2ex\hbox{\textcircled{\scriptsize{19}}} /g' blackpoker.tex
 sed -i -e 's/⑳/\raise0.2ex\hbox{\textcircled{\scriptsize{20}}} /g' blackpoker.tex
 
-# レイアウト微調整用の追加置換
-sed -i -e 's/\\bigskip\\hrule\\bigskip/\\vspace{0.5ex}\\hrule\\vspace{0.5ex}/g' blackpoker.tex
-sed -i -e 's/\\sphinxstylestrong{フォーマット:}/\\sphinxstylestrong{フォーマット:}\\vspace{-1.5ex}/g' blackpoker.tex
-
 
 # sphinx-build -b latex ./source ./docs で LaTeX ソースが生成された後
 # ここで画像の PDF を変換する
