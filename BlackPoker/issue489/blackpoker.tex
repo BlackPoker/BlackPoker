@@ -56,7 +56,9 @@
 \titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
 \usepackage{enumitem}
 \setlist{nosep, itemsep=-0.5ex, parsep=0pt}
+\providecommand{\chapterheadstartskip}{}
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
+\providecommand{\chapterheadendskip}{}
 \renewcommand{\chapterheadendskip}{\vspace{10pt}}
 \makeatletter
 \AtBeginDocument{
@@ -2249,52 +2251,25 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 \sphinxAtStartPar
 完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
 各カードの配置と公開・非公開の度合いは次のとおりです。
+
+\sphinxAtStartPar
+ライフ
+\sphinxhyphen{} 完全公開：10枚未満のライフ枚数
+\sphinxhyphen{} 個人公開：ライフの枚数
+\sphinxhyphen{} 非公開：ライフの中身
+
+\sphinxAtStartPar
+墓地
+\sphinxhyphen{} 完全公開：墓地の一番上のカード
+\sphinxhyphen{} 個人公開：墓地の中身
+\sphinxhyphen{} 非公開：なし
+
+\sphinxAtStartPar
+場
+\sphinxhyphen{} 完全公開：表裏を変えずに見えるカード
+\sphinxhyphen{} 個人公開：伏せてあるカード
+\sphinxhyphen{} 非公開：なし
 \begin{description}
-\sphinxlineitem{ライフ}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-完全公開：10枚未満のライフ枚数
-
-\item {} 
-\sphinxAtStartPar
-個人公開：ライフの枚数
-
-\item {} 
-\sphinxAtStartPar
-非公開：ライフの中身
-
-\end{itemize}
-
-\sphinxlineitem{墓地}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-完全公開：墓地の一番上のカード
-
-\item {} 
-\sphinxAtStartPar
-個人公開：墓地の中身
-
-\item {} 
-\sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\sphinxlineitem{場}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-完全公開：表裏を変えずに見えるカード
-
-\item {} 
-\sphinxAtStartPar
-個人公開：伏せてあるカード
-
-\item {} 
-\sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
 \sphinxlineitem{手札}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
