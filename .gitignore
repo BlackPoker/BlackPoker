@@ -20,6 +20,7 @@ node_modules
 
 source/_build
 docs/*
+docs_test/*
 out
 build
 

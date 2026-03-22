@@ -43,7 +43,7 @@ version = '第9.0版'
 # ones.
 extensions = ['sphinxcontrib.plantuml', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.githubpages']
 
-plantuml = 'plantuml'
+plantuml = 'plantuml -charset UTF-8'
 plantuml_output_format = 'svg_img'
 plantuml_latex_output_format = 'pdf'
 
@@ -217,7 +217,25 @@ latex_elements = {
 },
     'preamble': r'''
 \makeindex
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{0.8ex}{0.3ex}
+\titlespacing{\subsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subsubsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\paragraph}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
+\usepackage{enumitem}
+\setlist{nosep, itemsep=0.2ex, parsep=0pt}
+\providecommand{\chapterheadstartskip}{}
+\renewcommand{\chapterheadstartskip}{\vspace{0pt}}
+\providecommand{\chapterheadendskip}{}
+\renewcommand{\chapterheadendskip}{\vspace{10pt}}
 \makeatletter
+\AtBeginDocument{
+  \linespread{1.0}\selectfont
+  \setlength{\parskip}{0pt}
+  \setlength{\LTpre}{2pt}
+  \setlength{\LTpost}{2pt}
+}
 %% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
 \renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
@@ -237,7 +255,7 @@ latex_elements = {
     \spx@lineitemlabel{}%
     %% This causes the label to be typeset (filling up the line), clearing up
     %% things in case a nested list follows.
-    \leavevmode
+    \leavevmode\vspace{-0.2ex}%
   \fi #2%
 }
 \makeatother

@@ -1,14 +1,14 @@
 frames:
-  - name: エントリー20
+  - name: エントリー16
     image: entry20
-    frameId: entry20
+    frameId: entry16
     format: lite
     deck: |-
-      次のカードのみで構成された20枚のデッキを使う
-      * ♠A, 2, 3, 4, 5
-      * ♡A, 8, 9, 10, J
-      * ♢A, 3, 7, 10, Q
-      * ♣A, 5, 6, 10, K
+      次のカードのみで構成された16枚のデッキを使う
+      * ♠A, 2, 3, K
+      * ♡4, 7, J, Q
+      * ♢5, 8, 10, Q
+      * ♣A, 6, 9, K
     start: |-
       #. デッキをシャッフルする。
       #. デッキをライフとし、配置図の場所に伏せておく。
@@ -21,7 +21,7 @@ frames:
     image: pack
     frameId: pack
     deck: 40枚以上
-    format: std,pro,mast
+    format: lite,std,pro,mast
     start: |-
       #. デッキをシャッフルする。
       #. デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。

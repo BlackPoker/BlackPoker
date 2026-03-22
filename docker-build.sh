@@ -59,7 +59,7 @@ sed -i -e 's/⑳/\raise0.2ex\hbox{\textcircled{\scriptsize{20}}} /g' blackpoker.
 # ここで画像の PDF を変換する
 for f in *.pdf; do
   echo "Fixing bounding box for $f"
-  gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+  gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
      -dEPSCrop \
      -dCompatibilityLevel=1.4 \
      -sOutputFile="fixed_$f" "$f"
@@ -85,7 +85,7 @@ dvipdfmx "blackpoker"
 # SphinxビルドでletterサイズのPDF (blackpoker.pdf) が生成された後
 
 # まず、ghostscriptでletterサイズのPDFをA5に縮小して出力する
-gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
    -dFIXEDMEDIA -dPDFFitPage \
    -dDEVICEWIDTHPOINTS=420 -dDEVICEHEIGHTPOINTS=595 \
    -sOutputFile=blackpoker_a5.pdf blackpoker.pdf
