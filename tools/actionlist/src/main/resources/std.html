@@ -452,8 +452,9 @@
     .beta {
       color: blue;
     }
+
     /* Bootstrap の .panel-default > .panel-heading の color: #333 を上書きして黒にする */
-    .panel-default > .panel-heading {
+    .panel-default>.panel-heading {
       color: #000;
     }
   </style>
@@ -535,7 +536,7 @@
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
             </li>
             <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エントリー20</a>
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エントリー16</a>
             </li>
             <li>
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">パック</a>
@@ -596,8 +597,10 @@
                     data-type=${actList.type}"
                       class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                      <span th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:utext="${#sfn.cnvHtml(row.actName)}"></span> <span class="tag tag-default tag-pill pull-right"> <span
-                          class="time-mark"></span><b><span
+                      <span
+                        th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                        th:utext="${#sfn.cnvHtml(row.actName)}"></span> <span
+                        class="tag tag-default tag-pill pull-right"> <span class="time-mark"></span><b><span
                             th:text="${row.actTrigger}+'-'+${row.actSpeed}+'-'+${row.actTime}"></span></b>
                       </span>
                     </a>
@@ -627,7 +630,9 @@
                     data-type=${charList.type}"
                       class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                      <span th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:text="${row.charName}"></span>
+                      <span
+                        th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                        th:text="${row.charName}"></span>
                     </a>
                   </div>
                 </div>
@@ -654,7 +659,9 @@
                     data-type=${fogList.type}"
                       class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                      <span th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:text="${row.fogName}"></span>
+                      <span
+                        th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                        th:text="${row.fogName}"></span>
                     </a>
                   </div>
                 </div>
@@ -681,7 +688,9 @@
                     data-type=${trumpList.type}"
                       class="scroll-offset list-group-item list-group-item-action blackpoker-action"
                       th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
-                      <span th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:text="${row.trumpName}"></span>
+                      <span
+                        th:class="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                        th:text="${row.trumpName}"></span>
                       <span class="tag tag-default tag-pill pull-right">
                         <span class="glyphicon glyphicon-star-empty"></span>
                         <b><span th:utext="${#sfn.cnvHtml(row.trumpKey)}"></span></b>
@@ -826,7 +835,8 @@
             <div th:each="row : ${nestList.acts}" class="col-lg-4"
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}">
               <div class="bs-component">
-                <div th:replace="~{_fragments :: action(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}"></div>
+                <div th:replace="~{_fragments :: action(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}">
+                </div>
               </div>
             </div>
           </div>
@@ -848,7 +858,9 @@
               th:if="${row.format == null or arg0 == 'all' or #strings.contains(row.format, arg0)}" class="col-lg-6">
               <div class="bs-component">
 
-                <div th:replace="~{_fragments :: character(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}"></div>
+                <div
+                  th:replace="~{_fragments :: character(${row}, ${nestList != null ? nestList.type : null}, ${arg0})}">
+                </div>
               </div>
             </div>
           </div>
@@ -879,8 +891,12 @@
 
                     <a data-toggle="collapse" th:attr="href='#fla_'+${row.fogId}"
                       th:if="${not #strings.isEmpty(row.story)}">
-                      <span class="act-title" th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:text="${row.fogName}"></span>
-                    </a> <span class="act-title" th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}" th:text="${row.fogName}" th:if="${#strings.isEmpty(row.story)}"></span>
+                      <span class="act-title"
+                        th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                        th:text="${row.fogName}"></span>
+                    </a> <span class="act-title"
+                      th:classappend="${not #strings.isEmpty(row.changed) and row.changed == 'changed' ? 'changed' : ''}"
+                      th:text="${row.fogName}" th:if="${#strings.isEmpty(row.story)}"></span>
                     <span> <small>
                         <span th:text="'('+${row.fogType}+')'"></span>
                       </small>
