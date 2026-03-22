@@ -2250,57 +2250,140 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 
 \sphinxAtStartPar
 完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
-各カードの配置と公開・非公開の度合いは次のとおりです。
+各カードの配置と公開・非公開の度合いは \hyperref[\detokenize{common/common-etc:common-etc-publevel-table}]{Table \ref{\detokenize{common/common-etc:common-etc-publevel-table}}} のとおりです。
 
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{各カードの配置と公開・非公開の度合い}\label{\detokenize{common/common-etc:id8}}\label{\detokenize{common/common-etc:common-etc-publevel-table}}
+\sphinxaftertopcaption
+\begin{tabular}[t]{|\X{15}{100}|\X{30}{100}|\X{30}{100}|\X{25}{100}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
+\sphinxAtStartPar
+配置場所
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+完全公開
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+個人公開
+&\sphinxstyletheadfamily 
+\sphinxAtStartPar
+非公開
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
 \sphinxAtStartPar
 ライフ
-\sphinxhyphen{} 完全公開：10枚未満のライフ枚数
-\sphinxhyphen{} 個人公開：ライフの枚数
-\sphinxhyphen{} 非公開：ライフの中身
-
+&
+\sphinxAtStartPar
+10枚未満のライフの枚数
+&
+\sphinxAtStartPar
+ライフの枚数
+&
+\sphinxAtStartPar
+ライフの中身
+\\
+\sphinxhline
 \sphinxAtStartPar
 墓地
-\sphinxhyphen{} 完全公開：墓地の一番上のカード
-\sphinxhyphen{} 個人公開：墓地の中身
-\sphinxhyphen{} 非公開：なし
-
+&
+\sphinxAtStartPar
+墓地の一番上のカード
+&
+\sphinxAtStartPar
+墓地の中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
 \sphinxAtStartPar
 場
-\sphinxhyphen{} 完全公開：表裏を変えずに見えるカード
-\sphinxhyphen{} 個人公開：伏せてあるカード
-\sphinxhyphen{} 非公開：なし
-\begin{description}
-\sphinxlineitem{手札}\begin{itemize}
-\item {} 
+&
 \sphinxAtStartPar
-完全公開：手札の枚数
-
-\item {} 
+表裏を変えずに見えるカード
+&
 \sphinxAtStartPar
-個人公開：手札の中身
-
-\item {} 
+伏せてあるカード
+&
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\sphinxlineitem{フォグ}\begin{itemize}
-\item {} 
+なし
+\\
+\sphinxhline
 \sphinxAtStartPar
-完全公開：表裏を変えずに見えるカード
-
-\item {} 
+手札
+&
 \sphinxAtStartPar
-個人公開：伏せてあるカード
-
-\item {} 
+手札の枚数
+&
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\end{description}
+手札の中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+フォグ
+&
+\sphinxAtStartPar
+表裏を変えずに見えるカード
+&
+\sphinxAtStartPar
+なし
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+パック
+&
+\sphinxAtStartPar
+パックの枚数
+&
+\sphinxAtStartPar
+開封済みパックの中身
+&
+\sphinxAtStartPar
+未開封パックの中身
+\\
+\sphinxhline
+\sphinxAtStartPar
+レアカード
+&
+\sphinxAtStartPar
+レアカードの有無
+&
+\sphinxAtStartPar
+レアカードの中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+切札
+&
+\sphinxAtStartPar
+表になっている切札
+&
+\sphinxAtStartPar
+伏せてある切札の中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
 
 
 \section{デッキのシャッフルについて}
@@ -2336,7 +2419,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-bulwork}.pdf}
-\caption{防壁の置き方}\label{\detokenize{common/common-etc:id8}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
+\caption{防壁の置き方}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
 
 
 \section{フォグの置き方}
@@ -2367,7 +2450,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-fog}.pdf}
-\caption{フォグの置き方}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
+\caption{フォグの置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
 
 
 \section{ステージの置き方}
@@ -2394,7 +2477,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-stage}.pdf}
-\caption{ステージの置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
+\caption{ステージの置き方}\label{\detokenize{common/common-etc:id11}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
 
 
 \section{よくある質問}
