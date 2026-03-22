@@ -55,14 +55,14 @@
 \titlespacing{\paragraph}{0pt}{0.5ex}{0.2ex}
 \titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
 \usepackage{enumitem}
-\setlist{nosep, itemsep=-0.5ex, parsep=0pt}
+\setlist{nosep, itemsep=0.2ex, parsep=0pt}
 \providecommand{\chapterheadstartskip}{}
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
 \renewcommand{\chapterheadendskip}{\vspace{10pt}}
 \makeatletter
 \AtBeginDocument{
-  \linespread{0.9}\selectfont
+  \linespread{1.0}\selectfont
   \setlength{\parskip}{0pt}
   \setlength{\LTpre}{2pt}
   \setlength{\LTpost}{2pt}
@@ -86,7 +86,7 @@
     \spx@lineitemlabel{}%
     %% This causes the label to be typeset (filling up the line), clearing up
     %% things in case a nested list follows.
-    \leavevmode\vspace{-1.5ex}%
+    \leavevmode\vspace{-0.2ex}%
   \fi #2%
 }
 \makeatother
