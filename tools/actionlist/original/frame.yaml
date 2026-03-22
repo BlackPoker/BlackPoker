@@ -21,7 +21,7 @@ frames:
     image: pack
     frameId: pack
     deck: 40枚以上
-    format: std,pro,mast
+    format: lite,std,pro,mast
     start: |-
       #. デッキをシャッフルする。
       #. デッキの上から14枚を取り除いてパックとし、配置図の場所に伏せておく。
