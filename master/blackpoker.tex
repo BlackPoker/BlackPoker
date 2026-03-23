@@ -48,7 +48,25 @@
 
 
 \makeindex
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{0.8ex}{0.3ex}
+\titlespacing{\subsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subsubsection}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\paragraph}{0pt}{0.5ex}{0.2ex}
+\titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
+\usepackage{enumitem}
+\setlist{nosep, itemsep=0.2ex, parsep=0pt}
+\providecommand{\chapterheadstartskip}{}
+\renewcommand{\chapterheadstartskip}{\vspace{0pt}}
+\providecommand{\chapterheadendskip}{}
+\renewcommand{\chapterheadendskip}{\vspace{10pt}}
 \makeatletter
+\AtBeginDocument{
+  \linespread{1.0}\selectfont
+  \setlength{\parskip}{0pt}
+  \setlength{\LTpre}{2pt}
+  \setlength{\LTpost}{2pt}
+}
 %% 「\spxentry キーワード … ページ」をそのまま「\item キーワード … ページ」に置き換える
 \renewcommand{\spxentry}{\item}
 \renewcommand\sphinxlineitem[2]{%
@@ -68,14 +86,14 @@
     \spx@lineitemlabel{}%
     %% This causes the label to be typeset (filling up the line), clearing up
     %% things in case a nested list follows.
-    \leavevmode
+    \leavevmode\vspace{-0.2ex}%
   \fi #2%
 }
 \makeatother
 
 
 \title{BlackPoker 公式ルール}
-\date{2026年03月22日}
+\date{2026年03月23日}
 \release{2026/03/31}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -345,7 +363,7 @@ BlackPoker は、標準的なトランプだけを使って遊ぶゲームです
 \sphinxstylestrong{デッキの構成やカードの初期配置、場の使い方などを定めた、遊び方のパターンです。}
 
 \sphinxAtStartPar
-たとえば「エントリー20」は、決められた20枚のカードを使って手軽に遊べる入門向けフレームです。
+たとえば「エントリー16」は、決められた16枚のカードを使って手軽に遊べる入門向けフレームです。
 一方「パック」や「ストラテジー」では、構築や初期戦略の自由度が高く、プレイヤーの個性がより強く表れます。
 
 \sphinxAtStartPar
@@ -437,7 +455,7 @@ BlackPoker は、標準的なトランプだけを使って遊ぶゲームです
 \\
 \sphinxhline
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &
 \sphinxAtStartPar
 ◯
@@ -456,7 +474,7 @@ x
 パック
 &
 \sphinxAtStartPar
-x
+◯
 &
 \sphinxAtStartPar
 ◯
@@ -969,7 +987,7 @@ BlackPokerでは、選択した「フレーム」に応じてゲームの開始�
 \centering
 \capstart
 
-\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-af7337e023c424b6cde285e4148ed1eb8039d94f}.pdf}
+\noindent\sphinxincludegraphics[scale=0.5]{{plantuml-e31b42c8f8493e6106f20090a26dc7a660698ffd}.pdf}
 \caption{プリセット配置のフロー}\label{\detokenize{common/common:id20}}\label{\detokenize{common/common:preset-flow-image}}\end{figure}
 
 
@@ -1042,8 +1060,7 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 
 \sphinxAtStartPar
 重要な2つの概念は次のとおりです。
-\begin{itemize}
-\item {} \begin{description}
+\begin{description}
 \sphinxlineitem{\sphinxstylestrong{アクション}}
 \sphinxAtStartPar
 アクションとは、プレイヤーが起こす行為(すること)をプレイヤーが要求して盤面に反映するまでを扱う概念です。
@@ -1051,9 +1068,6 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 アクションの定義を \sphinxstylestrong{アクションスクリプト} と呼び、処理される要求することを \sphinxstylestrong{リクエスト} と呼びます。
 詳しくは、{\hyperref[\detokenize{common/common-action:common-action-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{共通ルール: アクション}}}} で説明します。
 
-\end{description}
-
-\item {} \begin{description}
 \sphinxlineitem{\sphinxstylestrong{コンポーネント}}
 \sphinxAtStartPar
 コンポーネントとは、ゲーム盤面に配置されるキャラクターや切札などを扱う概念です。
@@ -1062,8 +1076,6 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 詳しくは、{\hyperref[\detokenize{common/common-component:common-component-rst}]{\sphinxcrossref{\DUrole{std,std-ref}{共通ルール: コンポーネント}}}} で説明します。
 
 \end{description}
-
-\end{itemize}
 
 \sphinxAtStartPar
 要するに、 \sphinxstylestrong{アクションが盤面（コンポーネント／ユニット）を変え、盤面の状態を見て次のアクションを起こす} ――この往復がゲームの心臓部です。
@@ -1099,29 +1111,20 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 
 \sphinxAtStartPar
 この点を踏まえて、図中の数字を順に見ていきましょう。
-\begin{itemize}
-\item {} \begin{description}
+\begin{description}
 \sphinxlineitem{{[}1{]} アクションを起こす}
 \sphinxAtStartPar
 アクションを起こすと \sphinxstylestrong{リクエスト} が \sphinxstylestrong{ステージ} に積まれます。リクエストは後に積まれたものから順に処理されます。
 
-\end{description}
-
-\item {} \begin{description}
 \sphinxlineitem{{[}2{]} 承認後リクエストを実行(解決)}
 \sphinxAtStartPar
 ステージ上にある各リクエストは、1つずつ盤面に反映されます。これを \sphinxstylestrong{解決} と呼びます。
 
-\end{description}
-
-\item {} \begin{description}
 \sphinxlineitem{{[}3{]} ユニットを出すなど盤面の状態を変更}
 \sphinxAtStartPar
 解決結果が盤面に反映され、 \sphinxstylestrong{ユニット} の状態や有無が更新されます。各ユニットはいずれかのコンポーネントと紐づいています。
 
 \end{description}
-
-\end{itemize}
 \end{sphinxadmonition}
 
 \begin{sphinxadmonition}{note}{この後の読み方}
@@ -1223,19 +1226,17 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \label{\detokenize{common/common-component:id4}}
 \sphinxAtStartPar
 すべてのコンポーネントスクリプトは、次の 2 項目を \sphinxstylestrong{必ず} 持ちます。
-\begin{itemize}
-\item {} 
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{領域（ゾーン）}}
 \sphinxAtStartPar
-\sphinxstylestrong{領域（ゾーン）}
 このスクリプトが属する置き場（例：場／フォグ領域／切札領域）。ゾーンの一覧は \hyperref[\detokenize{common/common:zone-section}]{\ref{\detokenize{common/common:zone-section}} \nameref{\detokenize{common/common:zone-section}}} を参照。
 
-\item {} 
+\sphinxlineitem{\sphinxstylestrong{ユニット条件}}
 \sphinxAtStartPar
-\sphinxstylestrong{ユニット条件}
 盤面上のどのユニットをこのスクリプトの \sphinxstylestrong{コンポーネントとして扱うか} を定める条件。
 例：キャラクター《一般兵》なら「数字 2〜10」。
 
-\end{itemize}
+\end{description}
 
 
 \subsection{ユニットとコンポーネントスクリプトの対応（共通原則）}
@@ -1283,20 +1284,20 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \sphinxAtStartPar
 この先は、 \sphinxstylestrong{スクリプト一覧} を持つ \sphinxstylestrong{コンポーネント種別} のみを個別節で詳しく説明します。
 一方、 \sphinxstylestrong{スクリプト一覧} を持たない種別は、本節末の \sphinxstylestrong{補足：スクリプト一覧のない種別} にて、公開レベルや移動規則などの要点のみをまとめ、そこで説明を完結させます。
-\begin{itemize}
-\item {} 
+\begin{description}
+\sphinxlineitem{\sphinxstylestrong{ゾーン \sphinxhyphen{} コンポーネント種別}}
 \sphinxAtStartPar
-\sphinxstylestrong{ゾーン \sphinxhyphen{} コンポーネント種別} は 1 対 1 で対応します（対応表は \hyperref[\detokenize{common/common:zone-section}]{\ref{\detokenize{common/common:zone-section}} \nameref{\detokenize{common/common:zone-section}}} の \hyperref[\detokenize{common/common:zone-component}]{Table \ref{\detokenize{common/common:zone-component}}} を参照）。
+1 対 1 で対応します（対応表は \hyperref[\detokenize{common/common:zone-section}]{\ref{\detokenize{common/common:zone-section}} \nameref{\detokenize{common/common:zone-section}}} の \hyperref[\detokenize{common/common:zone-component}]{Table \ref{\detokenize{common/common:zone-component}}} を参照）。
 
-\item {} 
+\sphinxlineitem{\sphinxstylestrong{スクリプト一覧：あり}}
 \sphinxAtStartPar
-\sphinxstylestrong{スクリプト一覧：あり} の種別（例：キャラクター／フォグ／切札）は、共通項目（ \sphinxstylestrong{ゾーン} / \sphinxstylestrong{ユニット条件} ）に加えて、種別の \sphinxstylestrong{固有項目} と \sphinxstylestrong{スクリプト一覧} を示します。
+種別（例：キャラクター／フォグ／切札）は、共通項目（ \sphinxstylestrong{ゾーン} / \sphinxstylestrong{ユニット条件} ）に加えて、種別の \sphinxstylestrong{固有項目} と \sphinxstylestrong{スクリプト一覧} を示します。
 
-\item {} 
+\sphinxlineitem{\sphinxstylestrong{スクリプト一覧：なし}}
 \sphinxAtStartPar
-\sphinxstylestrong{スクリプト一覧：なし} の種別（例：ライフ／墓地／手札／パック／レアカード）は、 \sphinxstylestrong{公開レベルや移動規則などの枠組み} のみをルール化し、スクリプト一覧は持ちません。
+種別（例：ライフ／墓地／手札／パック／レアカード）は、 \sphinxstylestrong{公開レベルや移動規則などの枠組み} のみをルール化し、スクリプト一覧は持ちません。
 
-\end{itemize}
+\end{description}
 
 \sphinxAtStartPar
 それでは、各 \sphinxstylestrong{スクリプト一覧：あり} の \sphinxstylestrong{コンポーネント種別} を順に見ていきます。
@@ -1415,7 +1416,7 @@ BlackPoker は、 \sphinxstylestrong{標準的なトランプだけで遊べる�
 \index{ラベル(キャラクター)@\spxentry{ラベル(キャラクター)}}\ignorespaces \begin{description}
 \sphinxlineitem{ラベル}
 \sphinxAtStartPar
-キャラクターに付与された属性を示します。\textless{}速攻\textgreater{} や \textless{}アタッカー\textgreater{} など様々なラベルがあります。
+キャラクターに付与された属性を示します。\textless{}速攻\textgreater{} や \textless{}攻撃\textgreater{} など様々なラベルがあります。
 ラベルは\textless{}\textgreater{}で括り記載されます。
 
 \end{description}
@@ -1906,6 +1907,17 @@ BlackPokerは実行したいアクションを要求(リクエスト)し、進�
 \end{description}
 
 
+\sphinxstrong{参考:}
+\nopagebreak
+
+
+\sphinxAtStartPar
+実際の対戦では、多くのチャンスが暗黙にパスされテンポよく進行します。
+この省略進行の指針については {\hyperref[\detokenize{appendix/guideline/shortcut:shortcut-guideline}]{\sphinxcrossref{\DUrole{std,std-ref}{BlackPoker 対戦進行上のショートカット指針}}}} を参照してください。
+
+
+
+
 \subsection{通常の場合}
 \label{\detokenize{common/common-action:id8}}
 \sphinxAtStartPar
@@ -2249,84 +2261,140 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 
 \sphinxAtStartPar
 完全公開の情報であれば、ゲーム中いつでも対戦相手に聞くことができます。
-各カードの配置と公開・非公開の度合いは次のとおりです。
-\begin{description}
-\sphinxlineitem{ライフ}\begin{itemize}
-\item {} 
+各カードの配置と公開・非公開の度合いは \hyperref[\detokenize{common/common-etc:common-etc-publevel-table}]{Table \ref{\detokenize{common/common-etc:common-etc-publevel-table}}} のとおりです。
+
+
+\begin{savenotes}\sphinxattablestart
+\sphinxthistablewithglobalstyle
+\centering
+\sphinxcapstartof{table}
+\sphinxthecaptionisattop
+\sphinxcaption{各カードの配置と公開・非公開の度合い}\label{\detokenize{common/common-etc:id8}}\label{\detokenize{common/common-etc:common-etc-publevel-table}}
+\sphinxaftertopcaption
+\begin{tabular}[t]{|\X{15}{100}|\X{30}{100}|\X{30}{100}|\X{25}{100}|}
+\sphinxtoprule
+\sphinxstyletheadfamily 
 \sphinxAtStartPar
-完全公開：10枚未満のライフ枚数
-
-\item {} 
+配置場所
+&\sphinxstyletheadfamily 
 \sphinxAtStartPar
-個人公開：ライフの枚数
-
-\item {} 
+完全公開
+&\sphinxstyletheadfamily 
 \sphinxAtStartPar
-非公開：ライフの中身
-
-\end{itemize}
-
-\sphinxlineitem{墓地}\begin{itemize}
-\item {} 
+個人公開
+&\sphinxstyletheadfamily 
 \sphinxAtStartPar
-完全公開：墓地の一番上のカード
-
-\item {} 
+非公開
+\\
+\sphinxmidrule
+\sphinxtableatstartofbodyhook
 \sphinxAtStartPar
-個人公開：墓地の中身
-
-\item {} 
+ライフ
+&
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\sphinxlineitem{場}\begin{itemize}
-\item {} 
+10枚未満のライフの枚数
+&
 \sphinxAtStartPar
-完全公開：表裏を変えずに見えるカード
-
-\item {} 
+ライフの枚数
+&
 \sphinxAtStartPar
-個人公開：伏せてあるカード
-
-\item {} 
+ライフの中身
+\\
+\sphinxhline
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\sphinxlineitem{手札}\begin{itemize}
-\item {} 
+墓地
+&
 \sphinxAtStartPar
-完全公開：手札の枚数
-
-\item {} 
+墓地の一番上のカード
+&
 \sphinxAtStartPar
-個人公開：手札の中身
-
-\item {} 
+墓地の中身
+&
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\sphinxlineitem{フォグ}\begin{itemize}
-\item {} 
+なし
+\\
+\sphinxhline
 \sphinxAtStartPar
-完全公開：表裏を変えずに見えるカード
-
-\item {} 
+場
+&
 \sphinxAtStartPar
-個人公開：伏せてあるカード
-
-\item {} 
+表裏を変えずに見えるカード
+&
 \sphinxAtStartPar
-非公開：なし
-
-\end{itemize}
-
-\end{description}
+伏せてあるカード
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+手札
+&
+\sphinxAtStartPar
+手札の枚数
+&
+\sphinxAtStartPar
+手札の中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+フォグ
+&
+\sphinxAtStartPar
+表裏を変えずに見えるカード
+&
+\sphinxAtStartPar
+なし
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+パック
+&
+\sphinxAtStartPar
+パックの枚数
+&
+\sphinxAtStartPar
+開封済みパックの中身
+&
+\sphinxAtStartPar
+未開封パックの中身
+\\
+\sphinxhline
+\sphinxAtStartPar
+レアカード
+&
+\sphinxAtStartPar
+レアカードの有無
+&
+\sphinxAtStartPar
+レアカードの中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxhline
+\sphinxAtStartPar
+切札
+&
+\sphinxAtStartPar
+表になっている切札
+&
+\sphinxAtStartPar
+伏せてある切札の中身
+&
+\sphinxAtStartPar
+なし
+\\
+\sphinxbottomrule
+\end{tabular}
+\sphinxtableafterendhook\par
+\sphinxattableend\end{savenotes}
 
 
 \section{デッキのシャッフルについて}
@@ -2362,7 +2430,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-bulwork}.pdf}
-\caption{防壁の置き方}\label{\detokenize{common/common-etc:id8}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
+\caption{防壁の置き方}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
 
 
 \section{フォグの置き方}
@@ -2393,7 +2461,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-fog}.pdf}
-\caption{フォグの置き方}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
+\caption{フォグの置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
 
 
 \section{ステージの置き方}
@@ -2420,7 +2488,7 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-stage}.pdf}
-\caption{ステージの置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
+\caption{ステージの置き方}\label{\detokenize{common/common-etc:id11}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
 
 
 \section{よくある質問}
@@ -2724,7 +2792,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -2754,7 +2822,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -2800,7 +2868,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -2830,7 +2898,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -2870,7 +2938,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -2900,7 +2968,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -2915,23 +2983,18 @@ BlackPokerにはいくつかのフォーマットがあり、
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
-\item {} 
-\sphinxAtStartPar
-ライフの一番上からカードを1枚引き、手札に加える。
 
-\item {} 
 \sphinxAtStartPar
-必要であれば、更にライフの一番上からカードを1枚引き、手札に加える。
+ライフの一番上からカードを2枚引き、手札に加える。
 
-\end{enumerate}
+\sphinxAtStartPar
+ただし、ライフが2以下の場合はカードを1枚引き、手札に加える。
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v4.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  v8.0
+\sphinxstylestrong{更新バージョン:}  v8.0, v9.0
 
 
 \bigskip\hrule\bigskip
@@ -2948,7 +3011,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -2978,7 +3041,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -2998,10 +3061,10 @@ BlackPokerにはいくつかのフォーマットがあり、
 対戦相手を攻撃するアタッカーをドライブして指定する。
 
 \sphinxAtStartPar
-・アタッカーは \textless{}アタッカー\textgreater{} を持っているキャラクターを指定できる。
+・アタッカーは \textless{}攻撃\textgreater{} を持っているキャラクターを指定できる。
 
 \sphinxAtStartPar
-・アタッカーは複数指定可能。ドライブ状態の兵士は指定できない。
+・アタッカーは複数指定可能。ドライブ状態のキャラクターは指定できない。
 
 \sphinxAtStartPar
 ・このターン場に出たキャラクターは指定できない、ただし \textless{}速攻\textgreater{} があるキャラクターは指定できる。
@@ -3027,7 +3090,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3057,7 +3120,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3077,7 +3140,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 対戦相手はアタックアクションにて指定されたアタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。
 
 \sphinxAtStartPar
-・ブロッカーは \textless{}ブロッカー\textgreater{} を持っているキャラクターを指定できる。
+・ブロッカーは \textless{}防御\textgreater{} を持っているキャラクターを指定できる。
 
 \sphinxAtStartPar
 ・兵士でブロックする場合、1アタッカーに対して複数の兵士を指定できる。ドライブ状態のキャラクターは指定できない。
@@ -3103,7 +3166,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3133,7 +3196,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3210,7 +3273,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3240,7 +3303,7 @@ BlackPokerにはいくつかのフォーマットがあり、
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3283,7 +3346,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3313,7 +3376,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3371,7 +3434,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3401,7 +3464,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3456,7 +3519,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3486,7 +3549,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3541,7 +3604,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3571,7 +3634,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3626,7 +3689,7 @@ Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につ
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3656,7 +3719,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3708,7 +3771,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3738,7 +3801,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3794,7 +3857,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3824,7 +3887,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3888,7 +3951,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3918,7 +3981,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -3964,7 +4027,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -3994,7 +4057,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4046,7 +4109,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4076,7 +4139,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4122,7 +4185,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4152,7 +4215,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4207,7 +4270,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4237,7 +4300,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4295,7 +4358,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4325,7 +4388,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4383,7 +4446,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4413,7 +4476,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4482,7 +4545,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4512,7 +4575,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4567,7 +4630,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4597,7 +4660,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4640,7 +4703,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4670,7 +4733,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4713,7 +4776,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4743,7 +4806,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4786,7 +4849,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4816,7 +4879,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4868,7 +4931,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4898,7 +4961,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -4941,7 +5004,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -4971,7 +5034,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5014,7 +5077,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5044,7 +5107,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5081,7 +5144,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5111,7 +5174,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5170,7 +5233,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5200,7 +5263,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5257,7 +5320,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5287,7 +5350,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5345,7 +5408,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5375,7 +5438,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5421,7 +5484,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5451,7 +5514,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5519,7 +5582,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5549,7 +5612,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5600,7 +5663,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5630,7 +5693,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5710,7 +5773,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5740,7 +5803,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5834,7 +5897,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5864,7 +5927,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5875,7 +5938,7 @@ x
 \sphinxstylestrong{サイズ:} ユニットカードの数字
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v1.0
@@ -5898,7 +5961,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5928,7 +5991,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -5939,7 +6002,7 @@ x
 \sphinxstylestrong{サイズ:} ユニットカードがJなら11,Qなら12,Kなら13
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v1.0
@@ -5962,7 +6025,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -5992,7 +6055,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6003,7 +6066,7 @@ x
 \sphinxstylestrong{サイズ:} 1
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻
+\sphinxstylestrong{ラベル:} 攻撃, 防御, 速攻
 
 \sphinxAtStartPar
 \sphinxstylestrong{ストーリー:}
@@ -6041,7 +6104,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6071,7 +6134,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6082,7 +6145,7 @@ x
 \sphinxstylestrong{サイズ:} 0
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻
+\sphinxstylestrong{ラベル:} 攻撃, 防御, 速攻
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -6111,7 +6174,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6141,7 +6204,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6152,7 +6215,7 @@ x
 \sphinxstylestrong{サイズ:} ユニットカードの数字の合計
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー, 速攻(キーカードにAが含まれる場合のみ)
+\sphinxstylestrong{ラベル:} 攻撃, 防御, 速攻(キーカードにAが含まれる場合のみ)
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v5.0
@@ -6178,7 +6241,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6208,7 +6271,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6216,7 +6279,7 @@ x
 \sphinxstylestrong{ユニット条件:} 全て(裏向き)
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} ブロッカー
+\sphinxstylestrong{ラベル:} 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  v1.0
@@ -6269,7 +6332,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6299,7 +6362,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6330,7 +6393,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6360,7 +6423,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6391,7 +6454,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6421,7 +6484,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6508,7 +6571,7 @@ x
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/framelist:id13}}{\hyperref[\detokenize{auto/framelist:frame-entry20}]{\sphinxcrossref{エントリー20}}}
+\phantomsection\label{\detokenize{auto/framelist:id13}}{\hyperref[\detokenize{auto/framelist:frame-entry16}]{\sphinxcrossref{エントリー16}}}
 
 \item {} 
 \sphinxAtStartPar
@@ -6530,8 +6593,8 @@ x
 \end{sphinxShadowBox}
 
 
-\subsubsection{エントリー20}
-\label{\detokenize{auto/framelist:frame-entry20}}\label{\detokenize{auto/framelist:id3}}
+\subsubsection{エントリー16}
+\label{\detokenize{auto/framelist:frame-entry16}}\label{\detokenize{auto/framelist:id3}}
 \sphinxAtStartPar
 \sphinxstylestrong{配置図:}
 
@@ -6540,7 +6603,7 @@ x
 \capstart
 
 \noindent\sphinxincludegraphics{{entry20}.pdf}
-\caption{配置図\sphinxhyphen{}エントリー20}\label{\detokenize{auto/framelist:id8}}\label{\detokenize{auto/framelist:frame-entry20-image}}\end{figure}
+\caption{配置図\sphinxhyphen{}エントリー16}\label{\detokenize{auto/framelist:id8}}\label{\detokenize{auto/framelist:frame-entry16-image}}\end{figure}
 
 \sphinxAtStartPar
 \sphinxstylestrong{フォーマット:}
@@ -6549,7 +6612,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6579,7 +6642,7 @@ x
 x
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6587,23 +6650,23 @@ x
 \sphinxstylestrong{デッキ条件:}
 
 \sphinxAtStartPar
-次のカードのみで構成された20枚のデッキを使う
+次のカードのみで構成された16枚のデッキを使う
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-{\normalsize $\spadesuit$} A, 2, 3, 4, 5
+{\normalsize $\spadesuit$} A, 2, 3, K
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize $\heartsuit$} A, 8, 9, 10, J
+{\normalsize $\heartsuit$} 4, 7, J, Q
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize $\diamondsuit$} A, 3, 7, 10, Q
+{\normalsize $\diamondsuit$} 5, 8, 10, Q
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize $\clubsuit$} A, 5, 6, 10, K
+{\normalsize $\clubsuit$} A, 6, 9, K
 
 \end{itemize}
 
@@ -6661,7 +6724,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6679,7 +6742,7 @@ x
 \sphinxmidrule
 \sphinxtableatstartofbodyhook
 \sphinxAtStartPar
-x
+◯
 &
 \sphinxAtStartPar
 ◯
@@ -6691,7 +6754,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6792,7 +6855,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6822,7 +6885,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -6938,7 +7001,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -6968,7 +7031,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -7088,7 +7151,7 @@ x
 \begin{savenotes}\sphinxattablestart
 \sphinxthistablewithglobalstyle
 \centering
-\begin{tabular}[t]{|\X{1}{4}|\X{1}{4}|\X{1}{4}|\X{1}{4}|}
+\begin{tabulary}{\linewidth}[t]{|T|T|T|T|}
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
@@ -7118,7 +7181,7 @@ x
 ◯
 \\
 \sphinxbottomrule
-\end{tabular}
+\end{tabulary}
 \sphinxtableafterendhook\par
 \sphinxattableend\end{savenotes}
 
@@ -7722,7 +7785,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -7803,7 +7866,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -7873,7 +7936,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -7952,7 +8015,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8037,7 +8100,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8104,7 +8167,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8171,7 +8234,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8247,7 +8310,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8326,7 +8389,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8375,7 +8438,7 @@ x
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-ライフの一番上からカードを1枚引き手札に加える。
+ライフの一番上からカードを1枚引き、手札に加える。
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex4.14.0
@@ -8405,7 +8468,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8493,7 +8556,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8575,7 +8638,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8660,7 +8723,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8739,7 +8802,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8821,7 +8884,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8903,7 +8966,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -8988,7 +9051,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9081,7 +9144,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9163,7 +9226,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9245,7 +9308,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9318,7 +9381,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9416,7 +9479,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9495,7 +9558,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9577,7 +9640,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9665,7 +9728,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9747,7 +9810,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9844,7 +9907,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -9935,7 +9998,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10017,7 +10080,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10104,7 +10167,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10186,7 +10249,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10279,7 +10342,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10361,7 +10424,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10443,7 +10506,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10516,7 +10579,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10617,7 +10680,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10696,7 +10759,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10775,7 +10838,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10863,7 +10926,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -10945,7 +11008,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11036,7 +11099,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11121,7 +11184,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11224,7 +11287,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11303,7 +11366,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11382,7 +11445,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11464,7 +11527,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11563,7 +11626,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11614,7 +11677,7 @@ x
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
-ライフの一番上からカードを2枚引き手札に加える。
+ライフの一番上からカードを2枚引き、手札に加える。
 
 \item {} 
 \sphinxAtStartPar
@@ -11647,7 +11710,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11720,7 +11783,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11810,7 +11873,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11892,7 +11955,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -11983,7 +12046,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12062,7 +12125,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12141,7 +12204,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12231,7 +12294,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12307,7 +12370,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12400,7 +12463,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12493,7 +12556,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12575,7 +12638,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12657,7 +12720,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12799,7 +12862,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12842,7 +12905,7 @@ x
 \sphinxstylestrong{サイズ:} 11
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -12881,7 +12944,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -12924,7 +12987,7 @@ x
 \sphinxstylestrong{サイズ:} 26
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -12963,7 +13026,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13006,7 +13069,7 @@ x
 \sphinxstylestrong{サイズ:} 11
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -13045,7 +13108,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13088,7 +13151,7 @@ x
 \sphinxstylestrong{サイズ:} 26
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -13133,7 +13196,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13176,7 +13239,7 @@ x
 \sphinxstylestrong{サイズ:} 11
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -13215,7 +13278,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13258,7 +13321,7 @@ x
 \sphinxstylestrong{サイズ:} 11
 
 \sphinxAtStartPar
-\sphinxstylestrong{ラベル:} アタッカー, ブロッカー
+\sphinxstylestrong{ラベル:} 攻撃, 防御
 
 \sphinxAtStartPar
 \sphinxstylestrong{能力:}
@@ -13316,7 +13379,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13714,7 +13777,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13816,7 +13879,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -13916,7 +13979,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14012,7 +14075,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14112,7 +14175,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14208,7 +14271,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14304,7 +14367,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14421,7 +14484,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14530,7 +14593,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14626,7 +14689,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14726,7 +14789,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14822,7 +14885,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -14918,7 +14981,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15018,7 +15081,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15114,7 +15177,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15231,7 +15294,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15336,7 +15399,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15436,7 +15499,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15536,7 +15599,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15632,7 +15695,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15728,7 +15791,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15824,7 +15887,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -15924,7 +15987,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16041,7 +16104,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16141,7 +16204,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16241,7 +16304,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16337,7 +16400,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16433,7 +16496,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16529,7 +16592,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16625,7 +16688,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -16742,7 +16805,7 @@ x
 \sphinxtoprule
 \sphinxstyletheadfamily 
 \sphinxAtStartPar
-エントリー20
+エントリー16
 &\sphinxstyletheadfamily 
 \sphinxAtStartPar
 パック
@@ -18151,6 +18214,319 @@ BlackPokerの世界は、ファンの皆さまのクリエイティブな発想�
 \sphinxAtStartPar
 キャラクターを明確に特定できないと誤操作や解釈の混乱を招くためです。
 \end{quote}
+
+\sphinxstepscope
+
+
+\subsection{BlackPoker 対戦進行上のショートカット指針}
+\label{\detokenize{appendix/guideline/shortcut:blackpoker}}\label{\detokenize{appendix/guideline/shortcut:shortcut-guideline}}\label{\detokenize{appendix/guideline/shortcut::doc}}
+
+\subsubsection{目的}
+\label{\detokenize{appendix/guideline/shortcut:id1}}
+\sphinxAtStartPar
+BlackPokerは、相手の行動に対して割り込めるターン制ゲームです。
+ルール上、あらゆるアクションの前後で「チャンス」が発生し、
+プレイヤーには割り込みの機会が与えられます。
+
+\sphinxAtStartPar
+しかし、実際の対戦で毎回「何かありますか？」「パスします」とやり取りしていては、
+ゲームのテンポが損なわれます。
+そこで、多くの対戦では \sphinxstylestrong{暗黙の了解} によって一部のチャンスが自然に省略され、
+スムーズに進行しています。
+
+\sphinxAtStartPar
+本指針は、こうしたプレイヤー間で自然に育まれてきたプレイ文化を
+「ショートカット」として言語化し、テンポよく、かつ公平に対戦を進めるための
+共通認識を示すものです。
+
+
+\subsubsection{本文ルールとの関係}
+\label{\detokenize{appendix/guideline/shortcut:id2}}
+\sphinxAtStartPar
+本指針は、BlackPokerを円滑に進行するための推奨運用を示すものです。
+本指針の記述が、総合ルール（コアフロー等）の記述と矛盾する場合は、総合ルールの記述を優先して適用します。
+
+
+\subsubsection{用語の定義}
+\label{\detokenize{appendix/guideline/shortcut:id3}}
+\sphinxAtStartPar
+本指針では、解説を明確にするため、以下の呼称を使用します。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ターンプレイヤー（TP）}: 現在自身のターンを進行しているプレイヤー。
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{非ターンプレイヤー（NTP）}: 現在ターンを行っていない側の（相手のターン中の）プレイヤー。
+
+\end{itemize}
+
+
+\subsubsection{ショートカットの原則}
+\label{\detokenize{appendix/guideline/shortcut:id4}}
+\sphinxAtStartPar
+ショートカットは、以下の原則に基づいて成立します。
+個別に列挙されていない場面であっても、この原則に従って省略が行われます。
+
+
+\paragraph{原則1：反応がなければパスとみなす}
+\label{\detokenize{appendix/guideline/shortcut:id5}}
+\sphinxAtStartPar
+プレイヤーがアクションを宣言した後、相手が特に反応を示さなければ、
+相手はその時点のチャンスを \sphinxstylestrong{パスした} ものとみなします。
+
+\sphinxAtStartPar
+これはコアフローにおける「チャンス」と「パス」の仕組みに基づいています。
+コアフローでは、全員がパスするとステージ上のリクエストが解決されます。
+実際の対戦では、この「全員のパス」が暗黙に行われることで、
+宣言されたアクションが自然に解決へと進みます。
+
+
+\paragraph{原則2：連続する手順をまとめて進行できる}
+\label{\detokenize{appendix/guideline/shortcut:id6}}
+\sphinxAtStartPar
+プレイヤーは、互いに関連する一連の手順を \sphinxstylestrong{まとめて進行することを暗黙に提案} できます。
+相手がその進行を止めなければ、提案された手順がすべて完了したものとして扱います。
+
+\sphinxAtStartPar
+たとえば、あるアクションの解決後に誘発するアクションが明らかな場合、
+いちいち確認せずにまとめて処理を進めることができます。
+
+
+\paragraph{原則3：割り込みの権利は常に保障される}
+\label{\detokenize{appendix/guideline/shortcut:id7}}
+\sphinxAtStartPar
+ショートカットによって省略されるのは
+\sphinxstylestrong{「特に何もしない」という確認のやり取り} であり、
+\sphinxstylestrong{割り込みの権利そのものが失われるわけではありません。}
+
+\sphinxAtStartPar
+相手がショートカットで先に進もうとしたとしても、
+プレイヤーはいつでも「対応して」「待ってください」などと宣言して
+進行を止めることができます。
+
+\begin{sphinxadmonition}{note}{注釈:}
+\sphinxAtStartPar
+割り込みの宣言に特別なコール（掛け声）は強要しませんが、
+相手に \sphinxstylestrong{「進行を止めたい」} という意思が明確に伝わる言葉を用いることを推奨します。
+\end{sphinxadmonition}
+
+
+\paragraph{原則4：認識のずれは巻き戻す}
+\label{\detokenize{appendix/guideline/shortcut:id8}}
+\sphinxAtStartPar
+ショートカットによる省略が原因で、
+両者の認識にずれが生じた場合は、
+\sphinxstylestrong{直前の明確な地点まで巻き戻して} 確認・処理を行ってください。
+
+
+\subsubsection{運用上の注意}
+\label{\detokenize{appendix/guideline/shortcut:id9}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ショートカットは、 \sphinxstylestrong{両者の認識が一致している範囲でのみ有効} です。不明な点があれば、遠慮なく確認してください。
+
+\item {} 
+\sphinxAtStartPar
+リクエストの宣言と同時にいきなりカードを出す・ドライブするなど、 \sphinxstylestrong{相手の応答機会を奪う進行は避けてください。}
+
+\item {} 
+\sphinxAtStartPar
+割り込みたいプレイヤーも、相手が次の処理に進む前に明確な宣言を行うよう心がけてください。
+
+\item {} 
+\sphinxAtStartPar
+本指針は全てのショートカットを網羅するものではありません。ここに記載されていない場面でも、原則に基づきプレイヤー間の合意で省略は成立します。
+
+\end{itemize}
+
+
+\subsubsection{標準ショートカット}
+\label{\detokenize{appendix/guideline/shortcut:id10}}
+\sphinxAtStartPar
+原則に基づいて自然に成立するショートカットのうち、
+特に頻出するものを以下に示します。
+
+\sphinxAtStartPar
+これらはあくまで \sphinxstylestrong{代表的な例} です。
+原則に基づけば、ここに記載されていない場面でも省略は成立します。
+
+
+\paragraph{メインアクションの実行}
+\label{\detokenize{appendix/guideline/shortcut:id11}}
+\sphinxAtStartPar
+多くのメインアクション（兵士召喚、装備など）は、
+TPが宣言し、NTPが黙認することで解決に進みます。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「兵士召喚します」
+NTP: （特に反応なし）
+\(\rightarrow\) リクエストが解決される
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+NTPが割り込みたい場合は、解決前に宣言します。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「兵士召喚します」
+NTP: 「対応して、ダウンを使います」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+TPの宣言に対してNTPが反応しない場合、NTPはチャンスをパスしたものとみなされ、リクエストが解決されます（原則1）。
+
+\end{itemize}
+
+
+\paragraph{アタックの進行}
+\label{\detokenize{appendix/guideline/shortcut:id12}}
+\sphinxAtStartPar
+アタックからダメージ判定までは、誘発によって「アタック \(\rightarrow\) ブロック \(\rightarrow\) ダメージ判定」と連続して進行します。
+この区間にはチャンスが複数回発生しますが、実際の対戦では多くが暗黙にパスされます。
+
+\sphinxAtStartPar
+以下に、段階ごとの流れと省略のされ方を示します。
+
+\sphinxAtStartPar
+\sphinxstylestrong{1. アタックの宣言}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「アタックします」
+NTP: 「どうぞ」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+NTPの「どうぞ」は、アタック \sphinxstylestrong{リクエスト} に対してチャンスをパスする意思表示です（原則1）。NTPにはこの時点でクイックアクション（ツイストやダウンなど）で割り込む権利がありますが、それを行わないことを示しています。両者がパスするとアタックが解決され、TPがアタッカーを指定します。
+
+\end{itemize}
+
+\sphinxAtStartPar
+NTPがアタック解決前に割り込みたい場合：
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「アタックします」
+NTP: 「対応して、〇〇を使います」
+\end{sphinxVerbatim}
+
+\sphinxAtStartPar
+\sphinxstylestrong{2. ブロッカーの指定}
+
+\sphinxAtStartPar
+アタックが解決されアタッカーが指定されると、ブロックアクションが誘発します。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+NTP: 「{\normalsize $\spadesuit$} 10を{\normalsize $\diamondsuit$} 2でブロック」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+NTPはブロックアクションの効果として、アタッカーに対するブロッカーを指定しています。ブロッカー指定の前にTPにチャンスがありますが、TPが動きたい場合はすかさず「対応して」と宣言するのが通例で、何も言わなければパスとみなされます（原則1）。同様に、NTPがブロッカーを指定する前に自ら割り込みたい場合は、先にその旨を宣言します。
+
+\end{itemize}
+
+\sphinxAtStartPar
+\sphinxstylestrong{3. ダメージ判定}
+
+\sphinxAtStartPar
+ブロックが解決されると、ダメージ判定アクションが誘発します。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「ダメージ判定に入ります」
+NTP: （特に反応なし）
+\(\rightarrow\) ダメージ判定が解決される
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+ダメージ判定が解決される前に、TP・NTPの双方にチャンスがあります。TPが「何もありません」「パス」と言ったり、あるいは暗黙にパスした後、NTPにもチャンスが移ります。NTPも何もなければ、ダメージ判定が解決されます。どちらかが割り込みたい場合は「対応して」と宣言します（原則3）。
+
+\end{itemize}
+
+\sphinxAtStartPar
+\sphinxstylestrong{ブロックしない場合の省略}
+
+\sphinxAtStartPar
+NTPがブロッカーを指定せず、ダメージ判定まで一括して進行を認める場合もあります。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「アタックします」
+NTP: 「受けます」
+TP: 「では、\(\times\)ダメージで」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+NTPの「受けます」は、アタック解決の了承に加えて、 \sphinxstylestrong{ブロッカーを指定せず、ダメージ判定まで進行を認める} という意思表示として扱います。アタック解決後のチャンス、ブロッカー指定、ダメージ判定前のチャンスを一括でパスしたものとみなされます（原則2）。
+
+\end{itemize}
+
+
+\paragraph{ターンの受け渡し（エンド\(\rightarrow\)チャージ\(\rightarrow\)ドロー）}
+\label{\detokenize{appendix/guideline/shortcut:id13}}
+\sphinxAtStartPar
+ターンの受け渡しでは、エンド・チャージ・ドローの一連のアクションが
+誘発チェーンで連続します。
+
+\sphinxAtStartPar
+\sphinxstylestrong{何もない場合}
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「エンド」
+\(\rightarrow\) チャージ（即時解決） \(\rightarrow\) ドロー へ自動進行
+NTP(=新TP): 「ドロー」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+TPの「エンド」宣言に対してNTPが反応しなければ、エンドが解決されます。エンドの効果でターンが切り替わり、旧NTPが新TPとなります。チャージはスピード「即時」のため割り込みの余地なく自動的に解決されます。その後、ドロー（スピード「通常」）がステージに積まれます。ドローがステージに積まれた時点で新NTP（旧TP）にチャンスがありますが、ここで割り込むケースは稀で、何もなければそのままドローが解決されます。新TPが「ドロー」と発声することは、ターンの受け渡しからドローまでの進行を了承したことを示すショートカットです（原則2）。
+
+\end{itemize}
+
+\sphinxAtStartPar
+\sphinxstylestrong{エンドに対応する場合}
+
+\sphinxAtStartPar
+NTPがエンドに対してアクションを行いたい場合は、エンド解決前に宣言します。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「エンド」
+NTP: 「エンドの前に（または、エンドに対応して）、〇〇します」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+NTPはエンド解決前のチャンスで割り込みを宣言しています（原則3）。エンドはステージに積まれた状態で一時停止し、NTPのアクションから先に処理します。
+
+\end{itemize}
+
+\sphinxAtStartPar
+\sphinxstylestrong{ドローに対応する場合}
+
+\sphinxAtStartPar
+ドローがステージに積まれた時点で割り込みたい場合は、新NTP（旧TP）側から声掛けします。
+
+\begin{sphinxVerbatim}[commandchars=\\\{\}]
+TP: 「エンド」
+\(\rightarrow\) エンド解決（ターン切り替わり） \(\rightarrow\) チャージ（即時解決）
+新NTP(旧TP): 「ドローに対応して、〇〇します」
+\end{sphinxVerbatim}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{ルール上の効果}:
+チャージまでは自動進行しますが、ドローはスピード「通常」のためステージに積まれます。新NTP（旧TP）はこの時点のチャンスで割り込みを宣言しています（原則3）。
+
+\end{itemize}
 
 \sphinxstepscope
 

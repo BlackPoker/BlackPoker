@@ -156,13 +156,13 @@
 <section id="id4">
 <h3><span class="section-number">4.1.2. </span>コンポーネントスクリプトの共通・必須項目<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
 <p>すべてのコンポーネントスクリプトは、次の 2 項目を <strong>必ず</strong> 持ちます。</p>
-<ul class="simple">
-<li><p><strong>領域（ゾーン）</strong>
-このスクリプトが属する置き場（例：場／フォグ領域／切札領域）。ゾーンの一覧は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> を参照。</p></li>
-<li><p><strong>ユニット条件</strong>
-盤面上のどのユニットをこのスクリプトの <strong>コンポーネントとして扱うか</strong> を定める条件。
-例：キャラクター《一般兵》なら「数字 2〜10」。</p></li>
-</ul>
+<dl class="simple">
+<dt><strong>領域（ゾーン）</strong></dt><dd><p>このスクリプトが属する置き場（例：場／フォグ領域／切札領域）。ゾーンの一覧は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> を参照。</p>
+</dd>
+<dt><strong>ユニット条件</strong></dt><dd><p>盤面上のどのユニットをこのスクリプトの <strong>コンポーネントとして扱うか</strong> を定める条件。
+例：キャラクター《一般兵》なら「数字 2〜10」。</p>
+</dd>
+</dl>
 </section>
 <section id="id5">
 <h3><span class="section-number">4.1.3. </span>ユニットとコンポーネントスクリプトの対応（共通原則）<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
@@ -190,11 +190,14 @@
 <h3><span class="section-number">4.1.4. </span>この先の読み方<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h3>
 <p>この先は、 <strong>スクリプト一覧</strong> を持つ <strong>コンポーネント種別</strong> のみを個別節で詳しく説明します。
 一方、 <strong>スクリプト一覧</strong> を持たない種別は、本節末の <strong>補足：スクリプト一覧のない種別</strong> にて、公開レベルや移動規則などの要点のみをまとめ、そこで説明を完結させます。</p>
-<ul class="simple">
-<li><p><strong>ゾーン - コンポーネント種別</strong> は 1 対 1 で対応します（対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> を参照）。</p></li>
-<li><p><strong>スクリプト一覧：あり</strong> の種別（例：キャラクター／フォグ／切札）は、共通項目（ <strong>ゾーン</strong> / <strong>ユニット条件</strong> ）に加えて、種別の <strong>固有項目</strong> と <strong>スクリプト一覧</strong> を示します。</p></li>
-<li><p><strong>スクリプト一覧：なし</strong> の種別（例：ライフ／墓地／手札／パック／レアカード）は、 <strong>公開レベルや移動規則などの枠組み</strong> のみをルール化し、スクリプト一覧は持ちません。</p></li>
-</ul>
+<dl class="simple">
+<dt><strong>ゾーン - コンポーネント種別</strong></dt><dd><p>1 対 1 で対応します（対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> を参照）。</p>
+</dd>
+<dt><strong>スクリプト一覧：あり</strong></dt><dd><p>種別（例：キャラクター／フォグ／切札）は、共通項目（ <strong>ゾーン</strong> / <strong>ユニット条件</strong> ）に加えて、種別の <strong>固有項目</strong> と <strong>スクリプト一覧</strong> を示します。</p>
+</dd>
+<dt><strong>スクリプト一覧：なし</strong></dt><dd><p>種別（例：ライフ／墓地／手札／パック／レアカード）は、 <strong>公開レベルや移動規則などの枠組み</strong> のみをルール化し、スクリプト一覧は持ちません。</p>
+</dd>
+</dl>
 <p>それでは、各 <strong>スクリプト一覧：あり</strong> の <strong>コンポーネント種別</strong> を順に見ていきます。</p>
 <section id="components-no-script-note">
 <span id="id8"></span><h4><span class="section-number">4.1.4.1. </span>補足：スクリプト一覧のない種別<a class="headerlink" href="#components-no-script-note" title="この見出しへのパーマリンク">¶</a></h4>
@@ -261,7 +264,7 @@
 </dd>
 </dl>
 <dl class="simple" id="index-5">
-<dt>ラベル</dt><dd><p>キャラクターに付与された属性を示します。&lt;速攻&gt; や &lt;アタッカー&gt; など様々なラベルがあります。
+<dt>ラベル</dt><dd><p>キャラクターに付与された属性を示します。&lt;速攻&gt; や &lt;攻撃&gt; など様々なラベルがあります。
 ラベルは&lt;&gt;で括り記載されます。</p>
 </dd>
 </dl>
