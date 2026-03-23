@@ -1137,7 +1137,7 @@ charList:
       charType: 兵士
       charKey: ♠J と ♡2〜10
       charSize: 11
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♠兵士としても♡兵士としても扱う。
@@ -1154,7 +1154,7 @@ charList:
       charType: 兵士
       charKey: ♠K と ♣K
       charSize: 26
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・アクションの対象にできない。
         ・♠兵士としても♣兵士としても扱う。
@@ -1173,7 +1173,7 @@ charList:
       charType: 兵士
       charKey: ♡J と ♢2〜10
       charSize: 11
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♡兵士としても♢兵士としても扱う。
@@ -1190,7 +1190,7 @@ charList:
       charType: 兵士
       charKey: ♡K と ♢K
       charSize: 26
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・アクションの対象にできない。
         ・♡兵士としても♢兵士としても扱う。
@@ -1211,7 +1211,7 @@ charList:
       charType: 兵士
       charKey: ♢J と ♣2〜10
       charSize: 11
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♢兵士としても♣兵士としても扱う。
@@ -1228,7 +1228,7 @@ charList:
       charType: 兵士
       charKey: ♣J と ♠2〜10
       charSize: 11
-      charLabel: アタッカー, ブロッカー
+      charLabel: 攻撃, 防御
       charAbility: |-
         ・装備アクションの対象にできない。
         ・♣兵士としても♠兵士としても扱う。
