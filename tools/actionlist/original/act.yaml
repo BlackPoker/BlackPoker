@@ -490,7 +490,7 @@ actList:
       actSpeed: 即時
       actTime: クイック
       actKey: Joker
-      actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフを切りなおす。
+      actEffect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフをシャッフルする。
       since: v0.1
       update: v8.0
 
