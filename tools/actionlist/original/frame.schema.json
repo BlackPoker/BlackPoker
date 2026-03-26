@@ -41,9 +41,6 @@
             },
             "actionList": {
               "type": "string"
-            },
-            "accessLevel": {
-              "type": "string"
             }
           },
           "required": ["name", "image", "frameId"],

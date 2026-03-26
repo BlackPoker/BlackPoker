@@ -68,6 +68,11 @@ ${rstFn.cnv(${frame.actionList})}
 
     #end
 
+**公開レベル:**
+
+配置場所ごとの詳細な公開レベルについては、共通ルールの :numref:`common-etc-publevel-table` を参照してください。
+
+#*
     #if(${frame.accessLevel})
 **公開レベル:**
 
@@ -76,5 +81,6 @@ ${rstFn.cnv(${frame.actionList})}
 ${frame.accessLevel}
 
     #end
+*#
 
 #end
