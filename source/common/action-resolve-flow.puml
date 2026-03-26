@@ -1,5 +1,6 @@
 @startuml action-resolve-flow
 title リクエストの解決
+skinparam defaultFontName "Droid Sans Fallback"
 
 start
 :ステージの一番上にあるリクエストを特定する;
