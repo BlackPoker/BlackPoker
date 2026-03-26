@@ -1,6 +1,6 @@
 frames:
   - name: エントリー16
-    image: entry20
+    image: entry
     frameId: entry16
     format: lite
     deck: |-

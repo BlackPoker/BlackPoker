@@ -25,8 +25,8 @@ for f in $(find source -name "*.drawio"); do
         if [ ! -f "$target" ] || [ "$f" -nt "$target" ]; then
             echo "Updating $f -> $ext"
             # --crop でPDFの余白をカット
-            # -b 10 で少しだけ余白(10px)を追加
-            /opt/drawio-exporter/drawio-exporter -o . --remove-page-suffix --crop -b 10 --format "$ext" "$f" > /dev/null
+            # -b 5 で少しだけ余白(5px)を追加
+            /opt/drawio-exporter/drawio-exporter -o . --remove-page-suffix --crop -b 5 --format "$ext" "$f" > /dev/null
         fi
     done
 done
