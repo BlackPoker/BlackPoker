@@ -1,5 +1,6 @@
 @startuml action-request-flow
 title アクションの起こし方（リクエスト）
+skinparam defaultFontName "Droid Sans Fallback"
 
 start
 :起こすアクションを対戦相手に伝える;

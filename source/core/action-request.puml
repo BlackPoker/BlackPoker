@@ -1,3 +1,5 @@
+@startuml
+skinparam defaultFontName "Droid Sans Fallback"
 
 left to right direction
 
@@ -20,3 +22,4 @@ class ユニット<<生成されたもの>> {
 }
 
 コンポーネント --> ユニット : 生成 
+@enduml

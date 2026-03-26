@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName "Droid Sans Fallback"
 
 ' 日本語は表示名、関係はASCIIエイリアスで接続（安全策）
 class "スクリプト\n(Script)" as Script

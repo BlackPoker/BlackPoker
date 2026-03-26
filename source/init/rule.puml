@@ -1,3 +1,5 @@
+@startuml
+skinparam defaultFontName "Droid Sans Fallback"
 
 rectangle ルール指針
 
@@ -13,3 +15,4 @@ format <- regulation : 参照
 }
 
 ルール指針 --> ルール : 具体化
+@enduml

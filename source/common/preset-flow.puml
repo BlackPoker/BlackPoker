@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName "Droid Sans Fallback"
 start
 :ライフの一番上のカードを表向きにして
 「防壁」として場に出す;

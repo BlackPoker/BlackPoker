@@ -1,4 +1,5 @@
 @startuml action-resolve-stage-proto
+skinparam defaultFontName "Droid Sans Fallback"
 
 skinparam backgroundColor white
 skinparam rectangleBackgroundColor #FFFFFF
