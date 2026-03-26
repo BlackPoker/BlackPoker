@@ -1,0 +1,4678 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>BlackPoker extra</title>
+
+  <link type="image/vnd.microsoft.icon" rel="shortcut icon" href="icon/favicon.ico">
+
+  <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+  <link href="https://fonts.googleapis.com/css?family=Lusitana|Roboto+Slab" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Londrina+Sketch|Monofett|Ribeye+Marrow" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Arbutus+Slab|Monofett" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:500" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/earlyaccess/roundedmplus1c.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css?family=Concert+One" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <link href="css/blackpoker.css" rel="stylesheet">
+
+
+  <style type="text/css">
+    .noLight {
+      /*display: none;*/
+
+    }
+
+    .noPub {
+      /*display: none;*/
+
+    }
+
+    @import url(//fonts.googleapis.com/earlyaccess/notosansjp.css);
+
+    @font-face {
+      font-family: 'suit';
+      src: url('fonts/suit-regular.woff') format('woff');
+    }
+
+    @font-face {
+      font-family: 'Garava';
+      src: url('fonts/Garava.woff') format('woff');
+    }
+
+    body {
+      padding-top: 50px;
+    }
+
+    body hr {
+      margin-top: 3px;
+      margin-bottom: 3px;
+    }
+
+    @media (min-width : 768px) {
+      #banner {
+        min-height: 300px;
+        border-bottom: none;
+      }
+
+      .bs-docs-section {
+        margin-top: 8em;
+      }
+
+      .bs-component {
+        position: relative;
+      }
+
+      .bs-component .modal {
+        position: relative;
+        top: auto;
+        right: auto;
+        left: auto;
+        bottom: auto;
+        z-index: 1;
+        display: block;
+      }
+
+      .bs-component .modal-dialog {
+        width: 90%;
+      }
+
+      .bs-component .popover {
+        position: relative;
+        display: inline-block;
+        width: 220px;
+        margin: 20px;
+      }
+
+      .nav-tabs {
+        margin-bottom: 15px;
+      }
+
+      .progress {
+        margin-bottom: 10px;
+      }
+    }
+
+    /* header */
+    .navbar {
+      min-height: 40px !important
+    }
+
+    .navbar-brand {
+      height: 45px;
+      padding: 10px 15px;
+    }
+
+    .navbar-nav>li>a {
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
+    }
+
+    .navbar-text {
+      margin-top: 5px !important;
+      margin-bottom: 5px !important;
+    }
+
+    .navbar-btn {
+      margin-top: 10px !important;
+      margin-bottom: 0px !important;
+    }
+
+    .navbar-toggle {
+      padding: 6px 12px;
+    }
+
+    .nav-title {
+      font-family: 'Arbutus Slab', serif;
+      font-size: 150%;
+      font-weight: bold;
+      padding-top: 14px;
+      padding-bottom: 2px;
+      width: calc(100% - 130px);
+    }
+
+    .navbar-header>button {
+      margin-bottom: 0;
+    }
+
+    /* modal 切札について */
+    #modal_trump_help .modal-dialog {
+      max-width: 320;
+      margin: 30px auto;
+    }
+
+    #modal_trump_help .modal-body {
+      font-size: 12px;
+    }
+
+    #modal_trump_help .modal-body ul,
+    ol {
+      padding-left: 20px;
+    }
+
+    #modal_trump_help .modal-header {
+      padding-bottom: 0;
+      font-size: 12px;
+    }
+
+    /* BlackPoker */
+    .blackpoker-font {
+      font-family: "Times New Roman", 'Arbutus Slab', serif;
+      font-weight: blod;
+    }
+
+    /* blackpoker action panel margin */
+    @media (max-width : 768px) {
+      .blackpoker-action .panel-heading {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .blackpoker-action .panel-body {
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .blackpoker-action {
+        margin-bottom: 10px;
+      }
+    }
+
+    .blackpoker-ability .act-title:before {
+      content: "【";
+    }
+
+    .blackpoker-ability .act-title:after {
+      content: "】";
+    }
+
+    .blackpoker-ability .panel-body {
+      font-size: 12px;
+      padding: 8px;
+      /* Trump内のAction/Charの余白を減らし幅を限界まで広げる */
+    }
+
+    .blackpoker-ability .bs-component {
+      margin-left: -10px;
+      margin-right: -10px;
+    }
+
+    .blackpoker-ability .blackpoker-action {
+      margin-bottom: 5px;
+      /* Trump内のAction間隔を詰める */
+    }
+
+    .blackpoker-ability .panel-body ul {
+      padding-left: 20px;
+    }
+
+    .blackpoker-ability .panel-body ol {
+      padding-left: 20px;
+    }
+
+    .blackpoker-ability b {
+      font-family: "Roboto Slab", serif;
+    }
+
+    .blackpoker-ability hr {
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .blackpoker-action .act-title:before {
+      content: "";
+    }
+
+    .blackpoker-action .act-title:after {
+      content: "";
+    }
+
+    .blackpoker-action .panel-body {
+      font-size: 12px;
+    }
+
+    .blackpoker-ability .blackpoker-action .panel-heading {
+      font-size: 14px;
+    }
+
+    .blackpoker-action .panel-body ul {
+      padding-left: 20px;
+    }
+
+    .blackpoker-action .panel-body ol {
+      padding-left: 20px;
+    }
+
+    .blackpoker-action .panel-body ul {
+      padding-left: 20px;
+    }
+
+    .blackpoker-action .panel-body ol {
+      padding-left: 20px;
+    }
+
+    .blackpoker-action b {
+      font-family: "Roboto Slab", serif;
+    }
+
+    .blackpoker-action hr {
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .note-mark:before {
+      content: "※";
+      line-height: 14px;
+      color: #000;
+      font-size: 12px;
+      font-family: 'Concert One', cursive;
+    }
+
+    .time-mark:before {
+      content: "＠";
+      line-height: 14px;
+      color: #000;
+      font-size: 12px;
+      font-family: 'Concert One', cursive;
+    }
+
+    .heart:before {
+      content: "♥";
+      color: #a22041;
+      font-size: 16px;
+      font-family: 'suit';
+    }
+
+    .heart-lg:before {
+      content: "♥ ";
+      font-size: 20px;
+      font-family: 'suit';
+    }
+
+    .heart-min:before {
+      content: "♥";
+      color: #a22041;
+      font-size: 12px;
+      font-family: 'suit';
+    }
+
+    .spade:before {
+      content: "♠";
+      color: #000;
+      font-size: 16px;
+      font-family: 'suit';
+    }
+
+    .spade-lg:before {
+      content: "♠ ";
+      font-size: 20px;
+      font-family: 'suit';
+    }
+
+    .spade-min:before {
+      content: "♠";
+      color: #000;
+      font-size: 12px;
+      font-family: 'suit';
+    }
+
+    .club:before {
+      content: "♣";
+      color: #000;
+      font-size: 16px;
+      font-family: 'suit';
+    }
+
+    .club-lg:before {
+      content: "♣ ";
+      font-size: 20px;
+      font-family: 'suit';
+    }
+
+    .club-min:before {
+      content: "♣";
+      color: #000;
+      font-size: 12px;
+      font-family: 'suit';
+    }
+
+    .diam:before {
+      content: "♦";
+      font-size: 16px;
+      font-family: 'suit';
+      color: #a22041;
+    }
+
+    .diam-lg:before {
+      content: "♦ ";
+      font-size: 20px;
+      font-family: 'suit';
+    }
+
+    .diam-min:before {
+      content: "♦";
+      font-size: 12px;
+      font-family: 'suit';
+      color: #a22041;
+    }
+
+    .cost-L:after {
+      content: "Ⓛ";
+      font-family: "Garava";
+      /*font-weight: bold;*/
+      font-size: 16px;
+    }
+
+    .cost-B:after {
+      content: "Ⓑ";
+      font-family: "Garava";
+      /*font-weight: bold;*/
+      font-size: 16px;
+    }
+
+    .cost-D:after {
+      content: "Ⓓ";
+      /*font-family: "Rounded Mplus 1c", "Noto Sans", "Noto Sans CJK JP", sans-serif; */
+      font-family: "Garava";
+      /*font-weight: bold;*/
+      font-size: 16px;
+    }
+
+    .cost-S:after {
+      content: "Ⓢ";
+      font-family: "Garava";
+      /*font-weight: bold;*/
+      font-size: 16px;
+    }
+
+    .cost-C:after {
+      content: "Ⓒ";
+      font-family: "Garava";
+      /*font-weight: bold;*/
+      font-size: 16px;
+    }
+
+    .time-M:after {
+      content: " M";
+      font-family: 'Arbutus Slab', serif;
+    }
+
+    .time-I:after {
+      content: " I";
+      font-family: 'Arbutus Slab', serif;
+    }
+
+    /* sidebar */
+    #modal_sidebar .modal-header {
+      padding-bottom: 0;
+      font-size: 12px;
+    }
+
+    #modal_sidebar .modal-body {
+      padding-top: 0;
+      font-size: 12px;
+    }
+
+    #modal_sidebar .nav-pills li.active a {
+      /*background-color:#c0c0c0;*/
+      /*background-color:#0000000;*/
+
+    }
+
+    .modal-header>.nav>li>a {
+      padding-left: 12px;
+      padding-right: 12px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      font-size: 14px;
+    }
+
+    /* sidebar_help */
+    #modal_sidebar_help .modal-header {
+      padding-bottom: 0;
+      font-size: 12px;
+    }
+
+    #modal_sidebar_help .modal-body {
+      padding-top: 0;
+      font-size: 12px;
+    }
+
+    /* sidebar links */
+    #modal_sidebar_links .modal-header {
+      padding-bottom: 0;
+      font-size: 12px;
+    }
+
+    #modal_sidebar_links .modal-body {
+      padding-top: 0;
+      font-size: 12px;
+    }
+
+    /* beta */
+    .beta {
+      color: blue;
+    }
+  </style>
+
+  <!--[if lt IE 9]>
+      <script src="//oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="//oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+  <header>
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed btn btn-default navbar-btn collapsed"
+            data-target="#modal_sidebar" data-toggle="modal">
+            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+          </button>
+
+          <!-- logo -->
+          <a class="navbar-brand" data-toggle="modal" data-target="#modal_sidebar_links" role="button"> <img
+              src="img/blackpoker.svg">
+          </a> <span class="navbar-brand nav-title text-center" data-toggle="tab">extra</span>
+          <!-- 
+            <a href="#abilitylist" class="navbar-brand nav-title text-center" data-toggle="tab">ExActionList</a>
+            <a href="#actionlist" class="navbar-brand nav-title text-center hidden" data-toggle="tab">AbilityList</a>
+             -->
+        </div>
+        <div class="navbar-collapse collapse" id="navbar-main">
+          <button type="button" class="navbar-toggle" data-toggle="modal" data-target="#modal_sidebar">
+            <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+          </button>
+          <ul class="nav navbar-nav navbar-right">
+            <li>
+              <button type="button" class="btn btn-default navbar-btn collapsed" data-target="#modal_sidebar"
+                data-toggle="modal">
+                <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+              </button>
+            </li>
+          </ul>
+          <!--<span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true">test</span>-->
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="modal fade slide left hidden-print" id="modal_sidebar_links">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
+          <h4>
+            <span class="glyphicon glyphicon-link" aria-hidden="true"></span> Link</a>
+          </h4>
+          <h5>
+            <a href="../../">BlackPoker公式ルール</a>
+          </h5>
+          <h5>
+            <a href="https://sites.google.com/site/blackpoker000/">BlackPoker公式サイト</a>
+          </h5>
+
+          <h5>
+            <a href="https://github.com/BlackPoker/BlackPoker">GitHub</a>
+          </h5>
+
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="modal fade slide right hidden-print" id="modal_sidebar">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
+          <!-- Support Paper -->
+          ExtraList
+          <h5>
+            <span class="">第9.0版 フレーム編 エクストラ</span>
+          </h5>
+          <!-- 
+            <ul class="nav nav-pills">
+              <li class="active"><a class="btn btn-default btn-sm" href="#actionlist-summary" data-toggle="tab">ExAction</a></li>
+              <li><a class="btn btn-default btn-sm" href="#abilitylist-summary" data-toggle="tab">Ability</a></li>
+            </ul>
+             -->
+        </div>
+        <div class="modal-body">
+          <a href="#" data-toggle="modal" data-target="#modal_sidebar_help"><span
+              class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>記号の意味</a> <br>
+          <!--  
+            <input id="betaFlg" type="checkbox" checked data-size="mini">
+            <span>第二版からの変更を青字にする</span>
+-->
+          <!-- 
+            <div class="tab-content">
+              <div class="tab-pane active" id="actionlist-summary">
+               -->
+
+          <h5>ActionList</h5>
+          <div class="list-group">
+            <span>
+              <a class="scroll-offset list-group-item list-group-item-action" href="#act-packopen">
+                <span>パック開封</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a>
+            </span><span>
+              <a class="scroll-offset list-group-item list-group-item-action" href="#act-raredraw">
+                <span>レアドロー</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-summonsRare">
+                <span>レア召喚</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-trapCounter">
+                <span>罠カウンター</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a>
+            </span><span>
+              <a class="scroll-offset list-group-item list-group-item-action" href="#act-quickOpen">
+                <span>クイックオープン</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-open">
+                <span>メインオープン</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>メイン</span></b>
+                </span>
+              </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-close">
+                <span>クローズ</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a><a class="scroll-offset list-group-item list-group-item-action" href="#act-trumpDestroy">
+                <span>切札破壊</span> <span class="tag tag-default tag-pill pull-right">
+                  <span class="time-mark"></span><b><span>クイック</span></b>
+                </span>
+              </a>
+            </span>
+          </div>
+          <h5>TrumpList</h5>
+          <div class="list-group">
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-sA">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>A: 革命</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-s2">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>2: スラッシュ</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-s3">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>3: ドレイン</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-s4">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>4: 威圧</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-s5">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>5: 蘇生</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-s7">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>7: 瞬殺</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-sJ">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>J: リアニメーター</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-sK">
+                <span class="spade-min"></span>
+                
+                
+                
+                <span>K: 魔王</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h2">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>2: 援軍</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h3">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>3: ブレイク</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h4">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>4: 休戦</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h5">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>5: 追撃</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h7">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>7: ファントム</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-h8">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>8: 救済</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-hJ">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>J: チャリオット</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-hK">
+                
+                <span class="heart-min"></span>
+                
+                
+                <span>K: 巨人</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-dA">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>A: 防壁追加</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-d3">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>3: 交渉</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-d4">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>4: 相殺</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-d5">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>5: 喪失</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-d8">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>8: 修繕</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-d9">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>9: 充足</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-dJ">
+                
+                
+                <span class="diam-min"></span>
+                
+                <span>J: 策士</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c4">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>4: スイッチ</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c5">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>5: 内乱</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c7">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>7: 手札補充</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c8">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>8: リセット</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c9">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>9: 要塞</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-c10">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>10: 悪あがき</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-cJ">
+                
+                
+                
+                <span class="club-min"></span>
+                <span>J: 騎士</span>
+              </a>
+            
+              <a class="scroll-offset list-group-item list-group-item-action" href="#trump-secretTrump">
+                
+                
+                
+                
+                <span>全て(裏向き): 裏切札</span>
+              </a>
+            
+          </div>
+
+          <br>
+          <br>
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="modal fade slide right" id="modal_sidebar_help">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_sidebar_help-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
+          <h5>
+            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>記号の意味</a>
+            <h5>
+        </div>
+        <div class="modal-body">
+
+          <ul class="list-group">
+            <li class="list-group-item"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span>&nbsp;:&nbsp;タイプ
+            </li>
+            <li class="list-group-item"><span class="time-mark"></span>
+              :&nbsp;トリガー-スピード-タイミング</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-usd" aria-hidden="true"></span>&nbsp;:&nbsp;コスト
+            </li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-star"
+                aria-hidden="true"></span>&nbsp;:&nbsp;キーカード/キーユニット条件</li>
+            <li class="list-group-item"><span class="glyphicon glyphicon-star-empty"
+                aria-hidden="true"></span>&nbsp;:&nbsp;ユニット条件</li>
+            <li class="list-group-item"><span class="note-mark"></span>
+              :&nbsp;特記事項</li>
+          </ul>
+
+          <h5>
+            <span class="glyphicon glyphicon-usd" aria-hidden="true">コストの意味
+          </h5>
+          <ul class="list-group">
+            <li class="list-group-item"><span class="cost-B"></span>&nbsp;:&nbsp;防壁を1体ドライブする</li>
+            <li class="list-group-item"><span class="cost-L"></span>&nbsp;:&nbsp;1点ダメージを受ける</li>
+            <li class="list-group-item"><span class="cost-D"></span>&nbsp;:&nbsp;手札を1枚捨てる</li>
+            <li class="list-group-item"><span class="cost-S"></span>&nbsp;:&nbsp;キャラクターを1体墓地に移す</li>
+            <li class="list-group-item"><span class="cost-C"></span>&nbsp;:&nbsp;キーユニットのキャラクターをドライブする</li>
+          </ul>
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <!-- Exアクションルール -->
+  <div class="modal fade slide " id="modal_trump_help" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" id="modal_bulwork_help-close" class="close" data-dismiss="modal"
+            aria-hidden="true">×</button>
+          <h5>
+            <span class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>&nbsp;切札について</a>
+            <h5>
+        </div>
+        <div class="modal-body">
+          <ul>
+            <li>対戦前に裏向きで２枚まで切札を置くことができる。</li>
+            <li>切札はライフと直角に交わるようにライフの下に置く。</li>
+            <li>切札を表にするときはスートと数字が見えるようにし、対応する能力の名称を言う。</li>
+            <li>ライフが０枚になった場合、切札が残っていても敗北する。</li>
+          </ul>
+          <center>
+            <img src="../../_images/trump.png" width="260px" style="border: 0px #0c0c0c solid;">
+          </center>
+          ※詳しくは、公式ルール参照。
+        </div>
+
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="container">
+    <div class="text-center">
+      <h2 class="visible-print-block blackpoker-font">
+        <img src="img/blackpoker.svg" width="35px"><br> BlackPoker extra
+      </h2>
+      <small class="">第9.0版 フレーム編 エクストラ</small> <small class=""> : 2026/03/31</small>
+    </div>
+    <hr class="hidden-print">
+
+    <!-- 
+      <div class="tab-content">
+        <div class="tab-pane active" id="actionlist">
+         -->
+    <div>
+      <!-- /* ActionList 大項目があるので、nestList でループしています。 */ -->
+      <div>
+        <h5 class="text-center">パック操作</h5>
+        <div class="row">
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-packopen" data-frame="パック,レアパック,ストラテジー,エクストラ" data-type="パック操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">パック開封</span>
+    <small>
+      <span>(パック操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>パックが開封済みでない場合のみこのアクションを起こすことができる。</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。</li>
+<li> パックを表向きにし、開封済みとする。</li></ol></span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h5 class="text-center">レアカード操作</h5>
+        <div class="row">
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-raredraw" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">レアドロー</span>
+    <small>
+      <span>(レアカード操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>レアカードを1枚手札に加える。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-summonsRare" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">レア召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-S"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>レアカード1枚</span>
+        <br>
+      </small>
+      
+      <small>
+        <span>
+          <span class="note-mark"></span>
+          <span>このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</span>
+          <br>
+        </span>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードを兵士として表向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-trapCounter" data-frame="レアパック,ストラテジー,エクストラ" data-type="レアカード操作">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">罠カウンター</span>
+    <small>
+      <span>(レアカード操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>レアカード1枚</span>
+        <br>
+      </small>
+      
+      <small>
+        <span>
+          <span class="note-mark"></span>
+          <span>このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</span>
+          <br>
+        </span>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>キーカードが1枚または2枚のリクエスト</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <h5 class="text-center">切札操作</h5>
+        <div class="row">
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-quickOpen" data-frame="エクストラ" data-type="切札操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">クイックオープン</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+<span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>自分の裏切札を1枚表にし表切札とする。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-open" data-frame="エクストラ" data-type="切札操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">メインオープン</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>自分の裏切札を1枚表にし表切札とする。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-close" data-frame="エクストラ" data-type="切札操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">クローズ</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>Q</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>表切札1枚</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="bs-component">
+              <div class="panel panel-default blackpoker-action" id="act-trumpDestroy" data-frame="エクストラ" data-type="切札操作">
+  <div class="panel-heading">
+    
+    <span class="act-title">切札破壊</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>A〜K</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>表切札1枚</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。</span>
+
+    
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </div>
+
+
+    <h5 class="text-center" id="trumplist">TrumpList</h5>
+    <div class="662">
+
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-sA">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>A</span> <span class="act-title">革命</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span><ul>
+<li>自分の兵士は <革命ドロー> を持つ。</li>
+<li>この能力が有効で場合、対戦相手も含めた全てのダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。</li></ul><br><ol>
+<li>兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。1アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。</li></ol></span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-revolutionDraw" data-frame="エクストラ" data-type="切札♠A 革命">
+  <div class="panel-heading">
+    
+    <span class="act-title">革命ドロー</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「革命」があるかつ、自分の <革命ドロー> を持つ兵士がアタッカーかつ、ダメージ判定アクションにてブロックされていない時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>ライフの一番上からカードを1枚引き、手札に加える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-s2">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>2</span> <span class="act-title">スラッシュ</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>自分の場にいる<span class="spade"></span>の兵士は <スラッシュ> を持つ。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-slash" data-frame="エクストラ" data-type="切札♠2 スラッシュ">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">スラッシュ</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><スラッシュ> を持つ兵士1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「スラッシュ」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>兵士1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonS" data-frame="エクストラ" data-type="切札♠2 スラッシュ">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック兵士召喚<span class="spade"></span></span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="spade"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「スラッシュ」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-s3">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>3</span> <span class="act-title">ドレイン</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-drain" data-frame="エクストラ" data-type="切札♠3 ドレイン">
+  <div class="panel-heading">
+    
+    <span class="act-title">ドレイン</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「ドレイン」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>対戦相手1人</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>自分の場にいるキャラクター1体をライフの一番下に移す。移せた場合、対象の対戦相手に2点のダメージを与える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-s4">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>4</span> <span class="act-title">威圧</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-intimidate" data-frame="エクストラ" data-type="切札♠4 威圧">
+  <div class="panel-heading">
+    
+    <span class="act-title">威圧</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「威圧」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>サイズが10以下の兵士を全て墓地に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickIntimidate" data-frame="エクストラ" data-type="切札♠4 威圧">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック威圧</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="spade"></span>A〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「威圧」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>サイズが10以下の兵士を全て墓地に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-s5">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>5</span> <span class="act-title">蘇生</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-resurrection" data-frame="エクストラ" data-type="切札♠5 蘇生">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">蘇生</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「蘇生」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>自分の墓地にある<span class="spade"></span>のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-s7">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>7</span> <span class="act-title">瞬殺</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-instantKill" data-frame="エクストラ" data-type="切札♠7 瞬殺">
+  <div class="panel-heading">
+    
+    <span class="act-title">瞬殺</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「瞬殺」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>兵士1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士のサイズの合計値が対象の兵士のサイズ以上の場合、対象の兵士を墓地に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-sJ">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>J</span> <span class="act-title">リアニメーター</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonReanimator" data-frame="エクストラ" data-type="切札♠J リアニメーター">
+  <div class="panel-heading">
+    
+    <span class="act-title">リアニメーター召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="heart"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「リアニメーター」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="spade"></span>Jが表の場合、次を行う。<br><ol>
+<li> 墓地にあるカードを1枚選び、兵士として表向きかつチャージ状態で場に出す。</li>
+<li> キーカードと切札の<span class="spade"></span>Jをあわせてリアニメーターとしてチャージ状態で場に出す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSummonReanimator" data-frame="エクストラ" data-type="切札♠J リアニメーター">
+  <div class="panel-heading">
+    
+    <span class="act-title">クイックリアニメーター召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="heart"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「リアニメーター」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>効果の内容は「リアニメーター召喚」を参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-reanimatorReanimate" data-frame="エクストラ" data-type="切札♠J リアニメーター">
+  <div class="panel-heading">
+    
+    <span class="act-title">リアニメーターリアニメイト</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>「リアニメーター」1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>自分のキャラクター1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>効果の内容は「リアニメイト」を参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-reanimatorRevive" data-frame="エクストラ" data-type="切札♠J リアニメーター">
+  <div class="panel-heading">
+    
+    <span class="act-title">リアニメーター再生</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の 「リアニメーター」 が場から墓地に移った時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>墓地から<span class="spade"></span>Jを1枚選び、自分の表切札として置く。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-reanimator" data-frame="エクストラ" data-type="切札♠J リアニメーター">
+  <div class="panel-heading">
+     <span class="act-title">リアニメーター</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="spade"></span>J と <span class="heart"></span>2〜10</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>11</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>装備アクションの対象にできない。</li>
+<li><span class="spade"></span>兵士としても<span class="heart"></span>兵士としても扱う。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-primary" id="trump-sK">
+              <div class="panel-heading">
+                <span class="spade-lg"></span>
+                
+                
+                
+                <span>K</span> <span class="act-title">魔王</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonDarkLord" data-frame="エクストラ" data-type="切札♠K 魔王">
+  <div class="panel-heading">
+    
+    <span class="act-title">魔王召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-S"></span>
+<span class="cost-S"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「魔王」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="spade"></span>Kが表の場合、次を行う。<br><ol>
+<li> 全ての兵士を墓地に移す。</li>
+<li> 自分の全ての領域から<span class="club"></span>Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</li>
+<li> <span class="club"></span>Kを見つけた場合、切札の<span class="spade"></span>Kと<span class="club"></span>Kを合わせて魔王としてチャージ状態で場に出す。</li>
+<li> <span class="club"></span>Kが無い場合、切札の<span class="spade"></span>Kを墓地に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-darkWhisper" data-frame="エクストラ" data-type="切札♠K 魔王">
+  <div class="panel-heading">
+    
+    <span class="act-title">魔王の囁き</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-darklord" data-frame="エクストラ" data-type="切札♠K 魔王">
+  <div class="panel-heading">
+     <span class="act-title">魔王</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="spade"></span>K と <span class="club"></span>K</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>26</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>アクションの対象にできない。</li>
+<li><span class="spade"></span>兵士としても<span class="club"></span>兵士としても扱う。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h2">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>2</span> <span class="act-title">援軍</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonReinforcement" data-frame="エクストラ" data-type="切札♡2 援軍">
+  <div class="panel-heading">
+    
+    <span class="act-title">援軍</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「援軍」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>ライフの一番上から2枚カードをめくり1枚を兵士としてチャージ状態で場に出し、もう1枚をライフの一番下に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h3">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>3</span> <span class="act-title">ブレイク</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>自分の場にいる<span class="heart"></span>の兵士は <ブレイク> を持つ。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-break" data-frame="エクストラ" data-type="切札♡3 ブレイク">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">ブレイク</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><ブレイク> を持つ兵士1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「ブレイク」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>兵士1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の兵士をオーナー手札に戻す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonH" data-frame="エクストラ" data-type="切札♡3 ブレイク">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック兵士召喚<span class="heart"></span></span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="heart"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「ブレイク」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h4">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>4</span> <span class="act-title">休戦</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-retreat" data-frame="エクストラ" data-type="切札♡4 休戦">
+  <div class="panel-heading">
+    
+    <span class="act-title">休戦</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「休戦」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>アタックアクションのリクエスト</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 対象のリクエストを無効にしステージから取り除く。</li>
+<li> 自分の切札にある<span class="heart"></span>4を裏向きにする。</li>
+<li> 自分の場にいるキャラクターを全てチャージ状態にする。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h5">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>5</span> <span class="act-title">追撃</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-pursuit" data-frame="エクストラ" data-type="切札♡5 追撃">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">追撃</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「追撃」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 自分の場にいる兵士を全てチャージ状態にする。</li>
+<li> アタックアクションをリクエストする。</li>
+<li> 自分の切札にある<span class="heart"></span>5を裏向きにする。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h7">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>7</span> <span class="act-title">ファントム</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>自分の場にいる防壁は <ファントム> を持つ。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-phantomReverse" data-frame="エクストラ" data-type="切札♡7 ファントム">
+  <div class="panel-heading">
+    
+    <span class="act-title">ファントムリバース</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><ファントム> を持つ防壁1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「ファントム」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードの防壁をチャージ状態の兵士にする。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-illusion" data-frame="エクストラ" data-type="切札♡7 ファントム">
+  <div class="panel-heading">
+    
+    <span class="act-title">幻影</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-通常-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。</li>
+<li> 自分の場にいる防壁の順番を任意の順番に並び替えてもよい。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-h8">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>8</span> <span class="act-title">救済</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-salvation" data-frame="エクストラ" data-type="切札♡8 救済">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">救済</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="heart"></span>A〜K</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「救済」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-hJ">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>J</span> <span class="act-title">チャリオット</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonChariot" data-frame="エクストラ" data-type="切札♡J チャリオット">
+  <div class="panel-heading">
+    
+    <span class="act-title">チャリオット召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="diam"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「チャリオット」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="heart"></span>Jが表の場合、次を行う。<br><ol>
+<li> 防壁1体を選び墓地に移す。</li>
+<li> キーカードと切札の<span class="heart"></span>Jをあわせてチャリオットとしてチャージ状態で場に出す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSummonChariot" data-frame="エクストラ" data-type="切札♡J チャリオット">
+  <div class="panel-heading">
+    
+    <span class="act-title">クイックチャリオット召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="diam"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「チャリオット」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>効果の内容は「チャリオット召喚」を参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-chariotDestroy" data-frame="エクストラ" data-type="切札♡J チャリオット">
+  <div class="panel-heading">
+    
+    <span class="act-title">チャリオット防壁破壊</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>「チャリオット」1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>防壁1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>効果の内容は「防壁破壊」を参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-chariotRevive" data-frame="エクストラ" data-type="切札♡J チャリオット">
+  <div class="panel-heading">
+    
+    <span class="act-title">チャリオット再生</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の 「チャリオット」 が場から墓地に移った時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>墓地から<span class="heart"></span>Jを1枚選び、自分の表切札として置く。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-chariot" data-frame="エクストラ" data-type="切札♡J チャリオット">
+  <div class="panel-heading">
+     <span class="act-title">チャリオット</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="heart"></span>J と <span class="diam"></span>2〜10</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>11</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>装備アクションの対象にできない。</li>
+<li><span class="heart"></span>兵士としても<span class="diam"></span>兵士としても扱う。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-danger" id="trump-hK">
+              <div class="panel-heading">
+                
+                <span class="heart-lg"></span>
+                
+                
+                <span>K</span> <span class="act-title">巨人</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonGiant" data-frame="エクストラ" data-type="切札♡K 巨人">
+  <div class="panel-heading">
+    
+    <span class="act-title">巨人召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-S"></span>
+<span class="cost-S"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「巨人」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="heart"></span>Kが表の場合、次を行う。<br><ol>
+<li> 全ての防壁を墓地に移す。</li>
+<li> 自分の全ての領域から<span class="diam"></span>Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</li>
+<li> <span class="diam"></span>Kを見つけた場合、切札の<span class="heart"></span>Kと<span class="diam"></span>Kを合わせて巨人としてチャージ状態で場に出す。</li>
+<li> <span class="diam"></span>Kが無い場合、切札の<span class="heart"></span>Kを墓地に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-giant" data-frame="エクストラ" data-type="切札♡K 巨人">
+  <div class="panel-heading">
+     <span class="act-title">巨人</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="heart"></span>K と <span class="diam"></span>K</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>26</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>アクションの対象にできない。</li>
+<li><span class="heart"></span>兵士としても<span class="diam"></span>兵士としても扱う。</li>
+<li>自分のターンに可能な限りアタックアクションをリクエストし、巨人がチャージ状態の場合、アタッカーに指定する。</li>
+<li>「ダメージ判定」にてブロッカーが防壁の場合、条件に該当してもこの巨人は墓地に移されない。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-dA">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>A</span> <span class="act-title">防壁追加</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-putBulwark" data-frame="エクストラ" data-type="切札♢A 防壁追加">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">防壁追加</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「防壁追加」があるかつ、プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSetBulwark" data-frame="エクストラ" data-type="切札♢A 防壁追加">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック防壁設置</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「防壁追加」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は<a href="#" data-toggle="modal" data-target="#modal_bulwark_help"><span class="glyphicon glyphicon-question-sign" aria-hidden="false"></span>防壁の置き方</a>参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-d3">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>3</span> <span class="act-title">交渉</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>自分の場にいる<span class="diam"></span>の兵士は <交渉> を持つ。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-negotiate" data-frame="エクストラ" data-type="切札♢3 交渉">
+  <div class="panel-heading">
+    
+    <span class="act-title">交渉</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><交渉> を持つ兵士1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「交渉」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>キャラクター1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象のキャラクターをドライブする。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonD" data-frame="エクストラ" data-type="切札♢3 交渉">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック兵士召喚<span class="diam"></span></span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="diam"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「交渉」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-d4">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>4</span> <span class="act-title">相殺</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-reckoning" data-frame="エクストラ" data-type="切札♢4 相殺">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">相殺</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「相殺」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>キーカードがあるリクエスト</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span><ol>
+<li>対象リクエストのキーカードの数字の合計値分ダメージを受ける。</li>
+<li>対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-d5">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>5</span> <span class="act-title">喪失</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-lethargy" data-frame="エクストラ" data-type="切札♢5 喪失">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">虚脱</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="diam"></span>A〜K</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「喪失」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>ドライブ状態のキャラクター1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象のキャラクターを墓地に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-d8">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>8</span> <span class="act-title">修繕</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-repair" data-frame="エクストラ" data-type="切札♢8 修繕">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">修繕</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「修繕」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>自分の場にいる兵士1体</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の兵士が装備アクションの対象にできる場合、次を行う。<br><ol>
+<li> 対象とした兵士と同じスートのカードを自分の墓地から1枚選ぶ。</li>
+<li> 選べた場合、「装備」アクションをコストを支払わずにリクエストする。対象は対象の兵士、キーカードは選んだカードとする。</li>
+<li> 選べなかった場合、対象の兵士を墓地に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-d9">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>9</span> <span class="act-title">充足</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-rest" data-frame="エクストラ" data-type="切札♢9 充足">
+  <div class="panel-heading">
+    
+    <span class="act-title">休息</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「充足」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>自分の場にいる全ての兵士をチャージ状態にする。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-satisfaction" data-frame="エクストラ" data-type="切札♢9 充足">
+  <div class="panel-heading">
+    
+    <span class="act-title">充足</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-通常-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「充足」があるかつ、エンドアクションをリクエストした時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>自分の場にいる全てのキャラクターをチャージ状態にする。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-warning" id="trump-dJ">
+              <div class="panel-heading">
+                
+                
+                <span class="diam-lg"></span>
+                
+                <span>J</span> <span class="act-title">策士</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonStrategist" data-frame="エクストラ" data-type="切札♢J 策士">
+  <div class="panel-heading">
+    
+    <span class="act-title">策士召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="club"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「策士」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="diam"></span>Jが表の場合、キーカードと切札の<span class="diam"></span>Jをあわせて策士としてチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSummonStrategist" data-frame="エクストラ" data-type="切札♢J 策士">
+  <div class="panel-heading">
+    
+    <span class="act-title">クイック策士召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="club"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「策士」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="diam"></span>Jが表の場合、次を行う。<br><ol>
+<li> ステージ上にあるリクエストを1つ選び無効化しステージから取り除く。そのリクエストは次のいずれかに該当するものとする。Xはこのリクエストのキーカードの数字とする。</li><ul>
+<li>キーカードが1枚かつそのキーカードの数字がX以下</li>
+<li>キーカードが2枚</li></ul>
+<li> キーカードと切札の<span class="diam"></span>Jをあわせて策士としてチャージ状態で場に出す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-strategistPredict" data-frame="エクストラ" data-type="切札♢J 策士">
+  <div class="panel-heading">
+    
+    <span class="act-title">先読み</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>「策士」1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> ライフの一番上からカードを2枚引き、手札に加える。</li>
+<li> 手札から1枚選びライフの一番上もしくは一番下に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-strategistRevive" data-frame="エクストラ" data-type="切札♢J 策士">
+  <div class="panel-heading">
+    
+    <span class="act-title">策士再生</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の 「策士」 が場から墓地に移った時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>墓地から<span class="diam"></span>Jを1枚選び、自分の表切札として置く。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-strategist" data-frame="エクストラ" data-type="切札♢J 策士">
+  <div class="panel-heading">
+     <span class="act-title">策士</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="diam"></span>J と <span class="club"></span>2〜10</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>11</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>装備アクションの対象にできない。</li>
+<li><span class="diam"></span>兵士としても<span class="club"></span>兵士としても扱う。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c4">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>4</span> <span class="act-title">スイッチ</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>自分の場にいる<span class="club"></span>の兵士は <スイッチ> を持つ。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-switch" data-frame="エクストラ" data-type="切札♣4 スイッチ">
+  <div class="panel-heading">
+    
+    <span class="act-title">スイッチ</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><スイッチ> を持つ兵士1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「スイッチ」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 手札からカードを1枚選び、兵士としてチャージ状態で場に出す。</li>
+<li> キーカードを手札に戻す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSoldierSummonC" data-frame="エクストラ" data-type="切札♣4 スイッチ">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">クイック兵士召喚<span class="club"></span></span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="club"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「スイッチ」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>キーカードを一般兵として表向きかつチャージ状態で場に出す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c5">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>5</span> <span class="act-title">内乱</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-civilWar" data-frame="エクストラ" data-type="切札♣5 内乱">
+  <div class="panel-heading">
+    
+    <span class="act-title">内乱</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="club"></span>A〜K</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「内乱」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>対戦相手1人</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の対戦相手の手札の枚数が自分の手札の枚数以上の場合、次を行う。<br><ul>
+<li>対象の対戦相手は手札を2枚捨てる。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-riot" data-frame="エクストラ" data-type="切札♣5 内乱">
+  <div class="panel-heading">
+    
+    <span class="act-title">暴動</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「内乱」があるかつ、対戦相手が手札を捨てた時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>このアクションを誘発した時に捨てられた手札の枚数×2点のダメージを、手札を捨てたプレイヤーに与える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c7">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>7</span> <span class="act-title">手札補充</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-handRefill" data-frame="エクストラ" data-type="切札♣7 手札補充">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">手札補充</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-通常-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「手札補充」があるかつ、エンドアクションをリクエストした時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>ライフの一番上からカードを2枚引き、手札に加える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c8">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>8</span> <span class="act-title">リセット</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-reset" data-frame="エクストラ" data-type="切札♣8 リセット">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">リセット</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「リセット」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 全ての防壁と兵士を墓地に移す。</li>
+<li> 全ての切札を裏切札にする。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c9">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>9</span> <span class="act-title">要塞</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>対戦相手がキーカードに<span class="spade"></span>を含むアクションの効果を発揮する直前に自分の場にキャラクターがいる場合、その効果によってあなたはダメージを受けない。</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-counterattack" data-frame="エクストラ" data-type="切札♣9 要塞">
+  <div class="panel-heading">
+    
+    <span class="act-title changed">反撃</span>
+    <small>
+      <span>(誘発魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の表切札に「要塞」があるかつ、自分の防壁がダメージ判定にてブロッカーとして墓地に移った時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>アタッカーのオーナーに2点のダメージを与える。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-c10">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>10</span> <span class="act-title">悪あがき</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-lastDitch" data-frame="エクストラ" data-type="切札♣10 悪あがき">
+  <div class="panel-heading">
+    
+    <span class="act-title">悪あがき</span>
+    <small>
+      <span>(魔法)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「悪あがき」がある</span>
+    <hr>
+     
+    
+    <span> （対象）<br></span> <span>キーカードがあるリクエストを対象とする。</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span><ol>
+<li> 対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</li>
+<li> 手札を全て捨てる。手札がない場合、自分の切札<span class="club"></span>10を墓地に移す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-success" id="trump-cJ">
+              <div class="panel-heading">
+                
+                
+                
+                <span class="club-lg"></span>
+                <span>J</span> <span class="act-title">騎士</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  <hr>
+                  <div>
+                    <h6 class="text-center">Action</h6>
+                    <!-- Action -->
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-summonKnight" data-frame="エクストラ" data-type="切札♣J 騎士">
+  <div class="panel-heading">
+    
+    <span class="act-title">騎士召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-メイン</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-B"></span>
+<span class="cost-L"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="spade"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「騎士」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>切札の<span class="club"></span>Jが表の場合、次を行う。<br><ol>
+<li> 対戦相手は自分の場にある兵士を1枚選び墓地に移す。</li>
+<li> キーカードと切札の<span class="club"></span>Jをあわせて騎士としてチャージ状態で場に出す。</li></ol></span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-quickSummonKnight" data-frame="エクストラ" data-type="切札♣J 騎士">
+  <div class="panel-heading">
+    
+    <span class="act-title">クイック騎士召喚</span>
+    <small>
+      <span>(召喚)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-通常-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-D"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span><span class="spade"></span>2〜10</span>
+        <br>
+      </small>
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （起動条件）<br></span> <span>自分の表切札に「騎士」がある</span>
+    <hr>
+     
+    
+     
+    
+    <span>（効果）<br></span>
+    <span>効果の内容は「騎士召喚」を参照。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-knightSweep" data-frame="エクストラ" data-type="切札♣J 騎士">
+  <div class="panel-heading">
+    
+    <span class="act-title">薙払</span>
+    <small>
+      <span>(兵士起因)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>直接-即時-クイック</span>
+      </small> <span>|</span> <small>
+        <span class="glyphicon glyphicon-usd" aria-hidden="true"></span> <span><span class="cost-C"></span>
+</span>
+      </small>
+    </div>
+    <div class="text-left">
+      
+      <small>
+        <span class="glyphicon glyphicon-star" aria-hidden="true"></span>
+        <span>「騎士」1体</span>
+        <br>
+      </small>
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+     
+    
+    <span> （対象）<br></span> <span>対戦相手1人</span>
+    <hr>
+    <span>（効果）<br></span>
+    <span>対象の対戦相手は自分の場にいるキャラクターを1体墓地に移す。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="act-knightRevive" data-frame="エクストラ" data-type="切札♣J 騎士">
+  <div class="panel-heading">
+    
+    <span class="act-title">騎士再生</span>
+    <small>
+      <span>(切札操作)</span>
+    </small>
+    <div class="pull-right">
+      &thinsp; <small>
+        <span class="time-mark"></span>
+        <span>誘発-即時-クイック</span>
+      </small>  
+    </div>
+    <div class="text-left">
+      
+      
+      
+    </div>
+  </div>
+  <div class="panel-body">
+     
+    
+    <span> （誘発条件）<br></span> <span>自分の 「騎士」 が場から墓地に移った時に誘発する。</span>
+    <hr>
+     
+    
+    <span>（効果）<br></span>
+    <span>墓地から<span class="club"></span>Jを1枚選び、自分の表切札として置く。</span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+
+                  <!-- キャラクター -->
+                  <div>
+                    <h6 class="text-center">Character</h6>
+                    <div>
+                      <div class="panel panel-default blackpoker-action" id="char-knight" data-frame="エクストラ" data-type="切札♣J 騎士">
+  <div class="panel-heading">
+     <span class="act-title">騎士</span>
+    <span> <small>
+        <span>(兵士)</span>
+      </small>
+    </span>
+    <div class="pull-right">
+      &thinsp; <small> <span class="glyphicon glyphicon-star-empty" aria-hidden="true"></span> <span><span class="club"></span>J と <span class="spade"></span>2〜10</span><br>
+      </small>
+    </div>
+    <div class="text-left">
+      <small>
+        サイズ:
+        <span>11</span><br>
+      </small>
+    </div>
+  </div>
+  <div class="panel-body">
+    <span> （ラベル）<br></span>
+    <span>攻撃, 防御</span>
+    <hr>
+
+    <span> （能力）<br></span>
+    <span><ul>
+<li>装備アクションの対象にできない。</li>
+<li><span class="club"></span>兵士としても<span class="spade"></span>兵士としても扱う。</li></ul></span>
+
+    
+  </div>
+</div>
+                    </div>
+                  </div>
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+        <div class="col-lg-4">
+          <div class="bs-component">
+
+            <div
+              class="panel blackpoker-ability panel-default" id="trump-secretTrump">
+              <div class="panel-heading">
+                
+                
+                
+                
+                <span>全て(裏向き)</span> <span class="act-title">裏切札</span>
+              </div>
+              <div class="panel-body">
+                (能力)<br> <span>なし</span>
+
+                
+                  
+                  
+
+                  <!-- キャラクター -->
+                  
+                
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+      
+    </div>
+    <!--    
+        </div>
+         -->
+    <!-- abilitylist end -->
+
+    <!-- 
+      </div>
+       -->
+  </div>
+
+
+  <script src="js/jquery.min.js"></script>
+  <script src="js/bootstrap.min.js"></script>
+
+  <script type="text/javascript">
+    $(function () {
+
+      // ActionList <-> trumplist切り替え
+      $('a[href="#actionlist-summary"]').on('click', function () {
+        $('a[href="#actionlist"]').click();
+      });
+
+      $('a[href="#trumplist-summary"]').on('click', function () {
+        $('a[href="#trumplist"]').click();
+      });
+
+      $('a[href="#trumplist"]').on('click', function () {
+        $(this).addClass("hidden");
+        $('a[href="#actionlist"]').removeClass("hidden");
+      });
+      $('a[href="#actionlist"]').on('click', function () {
+        $(this).addClass("hidden");
+        $('a[href="#trumplist"]').removeClass("hidden");
+      });
+
+      // 変更箇所青字化
+      $('#betaFlg').on('click', function () {
+        if ($(this).prop('checked')) {
+          $('.beta').css('color', 'blue');
+        } else {
+          $('.beta').css('color', 'black');
+        }
+      });
+
+      // メニューよりアクション等を選んだ場合
+      var headerHight = 50;
+      $('a[href^=#].scroll-offset').on('click', function () {
+        var href = $(this).attr("href");
+        var target = $(href == "#" || href == "" ? 'html' : href);
+        var position = target.offset().top - headerHight; //ヘッダの高さ分位置をずらす
+        $("html, body").animate({
+          scrollTop: position
+        }, 300, "swing");
+        $('#modal_sidebar-close').click();
+        return false;
+      });
+
+      // キャラクターリストリンクを押した時にCharactorListに切り替え
+      $('.move_trumplist').on('click', function (e) {
+        var target = $("#trumplist");
+        var position = target.offset().top - headerHight; //ヘッダの高さ分位置をずらす
+        $("html, body").animate({
+          scrollTop: position
+        }, 300, "swing");
+        return false;
+      });
+
+    });
+  </script>
+  <script>
+    (function (i, s, o, g, r, a, m) {
+      i['GoogleAnalyticsObject'] = r;
+      i[r] = i[r] || function () {
+        (i[r].q = i[r].q || []).push(arguments)
+      }, i[r].l = 1 * new Date();
+      a = s.createElement(o), m = s.getElementsByTagName(o)[0];
+      a.async = 1;
+      a.src = g;
+      m.parentNode.insertBefore(a, m)
+    })(window, document, 'script',
+      'https://www.google-analytics.com/analytics.js', 'ga');
+
+    ga('create', 'UA-66362035-2', 'auto');
+    ga('send', 'pageview');
+  </script>
+  <div class="text-center blackpoker-font">
+    <small> &copy;2013 BlackPoker </small>
+  </div>
+</body>
+
+</html>
