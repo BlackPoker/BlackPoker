@@ -1,3 +1,5 @@
+@startuml
+skinparam defaultFontName "Droid Sans Fallback"
 
 rectangle ルール指針
 
@@ -32,3 +34,4 @@ note right of match_reg #white
 プレイヤーは対戦する前に
 対戦レギュレーションを選択する
 end note
+@enduml

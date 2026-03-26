@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName "Droid Sans Fallback"
 '==============================
 '【誘発アクション処理】（即時・通常 統合）
 '==============================

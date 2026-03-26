@@ -1,5 +1,6 @@
 @startuml action-resolve-immediate
 title 即時アクションの解決
+skinparam defaultFontName "Droid Sans Fallback"
 
 actor "プレイヤーA" as A
 actor "プレイヤーB" as B

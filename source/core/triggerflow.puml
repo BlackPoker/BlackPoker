@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName "Droid Sans Fallback"
 '==============================
 '【Main method】（アクション分類・プレイヤー毎処理）
 '==============================

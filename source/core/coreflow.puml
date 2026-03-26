@@ -1,4 +1,5 @@
 @startuml
+skinparam defaultFontName "Droid Sans Fallback"
 start
 :[1] ゲーム開始;
 :[2] ターンプレイヤーにチャンスを移動;
