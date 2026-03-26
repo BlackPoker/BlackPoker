@@ -25,7 +25,7 @@
   \item \spxentry{え\textbar{}英雄召喚（アクション）}, 
 		\hyperpage{43}
   \item \spxentry{え\textbar{}援軍（アクション）}, 
-		\hyperpage{80}
+		\hyperpage{79}
   \item \spxentry{え\textbar{}援軍（切札）}, \hyperpage{107}
   \item \spxentry{エース（キャラクター）}, \hyperpage{57}
   \item \spxentry{エース召喚（アクション）}, \hyperpage{43}
@@ -36,7 +36,7 @@
 
   \item \spxentry{か\textbar{}革命（切札）}, \hyperpage{101}
   \item \spxentry{か\textbar{}革命ドロー（アクション）}, 
-		\hyperpage{74}
+		\hyperpage{73}
   \item \spxentry{カウンター（アクション）}, \hyperpage{47}
   \item \spxentry{き\textbar{}帰還（アクション）}, 
 		\hyperpage{53}
@@ -52,10 +52,10 @@
   \item \spxentry{き\textbar{}起動条件}, \hyperpage{24}
   \item \spxentry{き\textbar{}起動条件(コア)}, \hyperpage{129}
   \item \spxentry{き\textbar{}救済（アクション）}, 
-		\hyperpage{83}
+		\hyperpage{82}
   \item \spxentry{き\textbar{}救済（切札）}, \hyperpage{111}
   \item \spxentry{き\textbar{}休戦（アクション）}, 
-		\hyperpage{81}
+		\hyperpage{80}
   \item \spxentry{き\textbar{}休戦（切札）}, \hyperpage{109}
   \item \spxentry{き\textbar{}休息（アクション）}, 
 		\hyperpage{88}
@@ -63,10 +63,10 @@
 		\hyperpage{97}
   \item \spxentry{き\textbar{}巨人（切札）}, \hyperpage{113}
   \item \spxentry{き\textbar{}巨人召喚（アクション）}, 
-		\hyperpage{85}
+		\hyperpage{84}
   \item \spxentry{き\textbar{}虚脱（アクション）}, 
 		\hyperpage{87}
-  \item \spxentry{き\textbar{}切札}, \hyperpage{11}, \hyperpage{20}
+  \item \spxentry{き\textbar{}切札}, \hyperpage{12}, \hyperpage{20}
   \item \spxentry{き\textbar{}切札破壊（アクション）}, 
 		\hyperpage{73}
   \item \spxentry{キーカード条件}, \hyperpage{24}
@@ -84,7 +84,7 @@
   \item \spxentry{クイック兵士召喚{\normalsize $\spadesuit$} （アクション）}, 
 		\hyperpage{74}
   \item \spxentry{クイック威圧（アクション）}, 
-		\hyperpage{76}
+		\hyperpage{75}
   \item \spxentry{クイックオープン（アクション）}, 
 		\hyperpage{72}
   \item \spxentry{クイック騎士召喚（アクション）}, 
@@ -99,7 +99,7 @@
 		\hyperpage{85}
   \item \spxentry{クイックリアニメーター召喚（アクション）}, 
 		\hyperpage{77}
-  \item \spxentry{クローズ（アクション）}, \hyperpage{73}
+  \item \spxentry{クローズ（アクション）}, \hyperpage{72}
   \item \spxentry{クローズ（フォグ）}, \hyperpage{99}
   \item \spxentry{げ\textbar{}幻影（アクション）}, 
 		\hyperpage{82}
@@ -120,7 +120,7 @@
   \item \spxentry{さ\textbar{}再会（アクション）}, 
 		\hyperpage{51}
   \item \spxentry{さ\textbar{}先読み（アクション）}, 
-		\hyperpage{90}
+		\hyperpage{89}
   \item \spxentry{さ\textbar{}策士（キャラクター）}, 
 		\hyperpage{98}
   \item \spxentry{さ\textbar{}策士（切札）}, \hyperpage{118}
@@ -133,15 +133,15 @@
   \item \spxentry{し\textbar{}死の槍（アクション）}, 
 		\hyperpage{48}
   \item \spxentry{し\textbar{}修繕（アクション）}, 
-		\hyperpage{88}
+		\hyperpage{87}
   \item \spxentry{し\textbar{}修繕（切札）}, \hyperpage{116}
   \item \spxentry{じ\textbar{}充足（アクション）}, 
 		\hyperpage{88}
   \item \spxentry{じ\textbar{}充足（切札）}, \hyperpage{117}
   \item \spxentry{し\textbar{}瞬殺（アクション）}, 
-		\hyperpage{77}
+		\hyperpage{76}
   \item \spxentry{し\textbar{}瞬殺（切札）}, \hyperpage{105}
-  \item \spxentry{スイッチ（アクション）}, \hyperpage{91}
+  \item \spxentry{スイッチ（アクション）}, \hyperpage{90}
   \item \spxentry{スイッチ（切札）}, \hyperpage{119}
   \item \spxentry{ステージ}, \hyperpage{126}
   \item \spxentry{スピード}, \hyperpage{23}
@@ -151,7 +151,7 @@
   \item \spxentry{せ\textbar{}世代交代（アクション）}, 
 		\hyperpage{41}
   \item \spxentry{そ\textbar{}相殺（アクション）}, 
-		\hyperpage{87}
+		\hyperpage{86}
   \item \spxentry{そ\textbar{}相殺（切札）}, \hyperpage{115}
   \item \spxentry{そ\textbar{}喪失（切札）}, \hyperpage{116}
   \item \spxentry{そ\textbar{}装備（アクション）}, 
@@ -192,7 +192,7 @@
   \item \spxentry{チャリオット召喚（アクション）}, 
 		\hyperpage{83}
   \item \spxentry{チャリオット防壁破壊（アクション）}, 
-		\hyperpage{84}
+		\hyperpage{83}
   \item \spxentry{チャンス}, \hyperpage{126}
   \item \spxentry{つ\textbar{}追撃（アクション）}, 
 		\hyperpage{81}
@@ -244,7 +244,7 @@
   \item \spxentry{ハンデス（アクション）}, \hyperpage{50}
   \item \spxentry{ファントム（切札）}, \hyperpage{110}
   \item \spxentry{ファントムリバース（アクション）}, 
-		\hyperpage{82}
+		\hyperpage{81}
   \item \spxentry{フォース（アクション）}, \hyperpage{54}
   \item \spxentry{フォース（フォグ）}, \hyperpage{59}
   \item \spxentry{フォーマット}, \hyperpage{37}
@@ -260,7 +260,7 @@
   \item \spxentry{へ\textbar{}兵士召喚（アクション）}, 
 		\hyperpage{42}
   \item \spxentry{ぼ\textbar{}暴動（アクション）}, 
-		\hyperpage{92}
+		\hyperpage{91}
   \item \spxentry{ぼ\textbar{}防壁（キャラクター）}, 
 		\hyperpage{58}
   \item \spxentry{ぼ\textbar{}防壁設置（アクション）}, 
@@ -281,7 +281,7 @@
 		\hyperpage{96}
   \item \spxentry{ま\textbar{}魔王（切札）}, \hyperpage{106}
   \item \spxentry{ま\textbar{}魔王召喚（アクション）}, 
-		\hyperpage{79}
+		\hyperpage{78}
   \item \spxentry{ま\textbar{}魔王の囁き（アクション）}, 
 		\hyperpage{79}
   \item \spxentry{ま\textbar{}魔術士（キャラクター）}, 
@@ -290,7 +290,7 @@
 		\hyperpage{44}
   \item \spxentry{メイン}, \hyperpage{128}
   \item \spxentry{メインオープン（アクション）}, 
-		\hyperpage{73}
+		\hyperpage{72}
 
   \indexspace
 
@@ -318,9 +318,9 @@
   \item \spxentry{リアニメーター召喚（アクション）}, 
 		\hyperpage{77}
   \item \spxentry{リアニメーターリアニメイト（アクション）}, 
-		\hyperpage{78}
+		\hyperpage{77}
   \item \spxentry{リクエスト}, \hyperpage{126}
-  \item \spxentry{リセット（アクション）}, \hyperpage{93}
+  \item \spxentry{リセット（アクション）}, \hyperpage{92}
   \item \spxentry{リセット（切札）}, \hyperpage{121}
   \item \spxentry{リバース（アクション）}, \hyperpage{52}
   \item \spxentry{レアカード}, \hyperpage{11}
