@@ -416,27 +416,27 @@ actList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡3 ブレイク
+  - type: 切札♡3 誘惑
     acts:
     - frame: |-
         ・エクストラ
-      actName: ブレイク
-      actId: break
+      actName: 誘惑
+      actId: allure
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 即時
       actTime: クイック
-      actUnit: <ブレイク> を持つ兵士1体
+      actUnit: <誘惑> を持つ兵士1体
       actCost: C
       actTarget: 兵士1体
-      actActCond: 自分の表切札に「ブレイク」がある
+      actActCond: 自分の表切札に「誘惑」がある
       actEffect: |-
         対象の兵士をオーナー手札に戻す。
       since: ex3.4.0
       update: v8.1, v9.0
       changed: changed
       devNote: |-
-        v9.0: 効果を変更したので名前を「激励」から「ブレイク」に変更。激励の効果はフォグを用いておらず、可視化に問題があったため修正。
+        v9.0: 効果を変更したので名前を「激励」から「誘惑」に変更。激励の効果はフォグを用いておらず、可視化に問題があったため修正。
 
     - frame: |-
         ・エクストラ
@@ -449,7 +449,7 @@ actList:
       actTime: クイック
       actCost: D
       actKey: ♡2〜10
-      actActCond: 自分の表切札に「ブレイク」がある
+      actActCond: 自分の表切札に「誘惑」がある
       actEffect: |-
         キーカードを一般兵として表向きかつチャージ状態で場に出す。
       since: v9.0
@@ -1416,23 +1416,23 @@ trumpList:
       devNote: |-
         「巨人と魔王」で追加された。
 
-  - type: 切札♡3 ブレイク
+  - type: 切札♡3 誘惑
     trumps:
     - frame: |-
         ・エクストラ
-      trumpName: ブレイク
+      trumpName: 誘惑
       trumpId: h3
       trumpType: 表切札
       trumpKey: ♡3
       trumpAbility: |
-        自分の場にいる♡の兵士は <ブレイク> を持つ。
+        自分の場にいる♡の兵士は <誘惑> を持つ。
       since: ex3.4.0
       update: v8.1, v9.0
       changed: changed
       image: tarot/Pictorial_Key_to_the_Tarot_Cups_03
       devNote: |-
         ex3.4.0: 「立ち上がる兵」で追加された。
-        v9.0: 効果を変更したので名前を「激励」から「ブレイク」に変更
+        v9.0: 効果を変更したので名前を「激励」から「誘惑」に変更
 
   - type: 切札♡4 休戦
     trumps:
