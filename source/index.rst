@@ -21,7 +21,9 @@ release: |release|
     format/format
     frame/frame
     core/core
-    appendix/appendix
+    appendix/pdf-links
+    appendix/anniversary
+    appendix/guidelines
     revision-history/revision-history
 
 

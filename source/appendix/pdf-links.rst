@@ -1,9 +1,7 @@
-.. @suppress Contraction WeakExpression
-
-.. _appendix.rst:
+.. _pdf-links:
 
 ==============================
-付録
+付録A: PDF版ルール・リスト
 ==============================
 
 
@@ -96,19 +94,3 @@ PDF
     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra.pdf
 
     https://blackpoker.github.io/BlackPoker/actionlist/pdf/blackpoker-extra-2up.pdf
-
-
-.. 8.1版以降で修正する予定です。
-
-
-ガイドライン
-==============================
-
-ガイドラインは、BlackPokerのアクションやルールを設計・記述する際の共通基準を示すものです。
-
-.. toctree::
-    :maxdepth: 2
-
-    guideline/fanworks
-    guideline/customRule
-    guideline/shortcut
