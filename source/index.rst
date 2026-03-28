@@ -26,6 +26,12 @@ release: |release|
     appendix/guidelines
     revision-history/revision-history
 
+.. toctree::
+    :maxdepth: 1
+
+    afterword
+
+
 
 .. メモ
     htmlのサイドバーに表示される見出しの深さを個別に変更することはできない。

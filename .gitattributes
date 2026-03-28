@@ -1,0 +1,3 @@
+# Git Attributes
+# シェルスクリプトは常に LF (Linux形式) で管理する設定
+*.sh text eol=lf
