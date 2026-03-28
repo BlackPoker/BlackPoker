@@ -393,47 +393,51 @@
 \contentsline {subsubsection}{アタックの進行}{151}{subsubsection*.651}%
 \contentsline {subsubsection}{ターンの受け渡し（エンド\(\rightarrow \)チャージ\(\rightarrow \)ドロー）}{152}{subsubsection*.652}%
 \contentsline {chapter}{変更履歴}{153}{chapter*.653}%
-\contentsline {section}{\numberline {12.4}第9版の主な変更点（第8.2版 \(\rightarrow \) 第9.0版）}{153}{section.12.4}%
-\contentsline {subsection}{\numberline {12.4.1}概要}{153}{subsection.12.4.1}%
-\contentsline {subsection}{\numberline {12.4.2}最重要変更（プレイヤー向け）}{153}{subsection.12.4.2}%
-\contentsline {subsubsection}{1. 魔法分類の整理変更}{153}{subsubsection*.654}%
-\contentsline {subsubsection}{2. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\heartsuit }}} 3 は「激励」から「誘惑」に変更}{154}{subsubsection*.655}%
-\contentsline {subsubsection}{3. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 5 は「疲弊」から「虚脱」に変更}{154}{subsubsection*.656}%
-\contentsline {subsubsection}{4. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 9 要塞に「反撃」が追加}{155}{subsubsection*.657}%
-\contentsline {subsubsection}{5. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} A「防壁追加」が使いやすく調整}{155}{subsubsection*.658}%
-\contentsline {subsubsection}{6. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 4「相殺」は発動条件が緩和}{155}{subsubsection*.659}%
-\contentsline {subsubsection}{7. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\spadesuit }}} 5「蘇生」は対象範囲が拡大}{156}{subsubsection*.660}%
-\contentsline {subsubsection}{8. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 8「修繕」は対象と素材条件が緩和}{156}{subsubsection*.661}%
-\contentsline {subsubsection}{9. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 7「手札補充」は強化}{156}{subsubsection*.662}%
-\contentsline {subsubsection}{10. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 8「リセット」はクイック化・簡略化}{156}{subsubsection*.663}%
-\contentsline {subsubsection}{11. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\heartsuit }}} 5「追撃」は使用後に閉じるよう変更}{157}{subsubsection*.664}%
-\contentsline {subsubsection}{12. 「魔王の囁き」の条件変更}{157}{subsubsection*.665}%
-\contentsline {subsubsection}{13. 新規のクイック展開手段が増加}{157}{subsubsection*.666}%
-\contentsline {subsection}{\numberline {12.4.3}文書構成・参照性の変更}{158}{subsection.12.4.3}%
-\contentsline {subsubsection}{1. 付録構成の拡張}{158}{subsubsection*.667}%
-\contentsline {subsubsection}{2. FAQ 的な小見出しが増加}{158}{subsubsection*.668}%
-\contentsline {subsubsection}{3. 見出し・用語の整理}{158}{subsubsection*.669}%
-\contentsline {subsection}{\numberline {12.4.4}差分早見表}{158}{subsection.12.4.4}%
-\contentsline {subsubsection}{名称変更}{158}{subsubsection*.670}%
-\contentsline {subsubsection}{新規追加}{158}{subsubsection*.671}%
-\contentsline {subsubsection}{性能変更}{159}{subsubsection*.672}%
-\contentsline {subsection}{\numberline {12.4.5}プレイヤー向け確認チェックリスト}{159}{subsection.12.4.5}%
-\contentsline {subsection}{\numberline {12.4.6}採用用の短縮版見出し案}{159}{subsection.12.4.6}%
-\contentsline {section}{\numberline {12.5}第8版の主な変更点}{159}{section.12.5}%
-\contentsline {subsection}{\numberline {12.5.1}アクションの定義の変更}{159}{subsection.12.5.1}%
-\contentsline {subsection}{\numberline {12.5.2}能力の解釈を変更}{160}{subsection.12.5.2}%
-\contentsline {subsection}{\numberline {12.5.3}フォグ領域追加}{160}{subsection.12.5.3}%
-\contentsline {subsection}{\numberline {12.5.4}用語追加/変更}{160}{subsection.12.5.4}%
-\contentsline {subsection}{\numberline {12.5.5}オプション削除とフレームへの統合}{161}{subsection.12.5.5}%
-\contentsline {subsection}{\numberline {12.5.6}エクストラをフレーム化 (8.1)}{161}{subsection.12.5.6}%
-\contentsline {subsection}{\numberline {12.5.7}曖昧なルールの明確化}{161}{subsection.12.5.7}%
-\contentsline {subsection}{\numberline {12.5.8}ルール外変更点}{162}{subsection.12.5.8}%
-\contentsline {section}{\numberline {12.6}第7版の主な変更点}{162}{section.12.6}%
-\contentsline {subsection}{\numberline {12.6.1}リバースのクイック化}{162}{subsection.12.6.1}%
-\contentsline {subsection}{\numberline {12.6.2}ゲーム中のデッキ名称をライフに変更}{162}{subsection.12.6.2}%
-\contentsline {subsection}{\numberline {12.6.3}対戦レギュレーションの定義方法変更}{162}{subsection.12.6.3}%
-\contentsline {subsection}{\numberline {12.6.4}コアフローをわかりやすく整理}{163}{subsection.12.6.4}%
-\contentsline {subsection}{\numberline {12.6.5}B・Jのクイック化}{163}{subsection.12.6.5}%
-\contentsline {subsection}{\numberline {12.6.6}引き分け廃止}{163}{subsection.12.6.6}%
-\contentsline {subsection}{\numberline {12.6.7}ルールの記載を微修正}{163}{subsection.12.6.7}%
-\contentsline {chapter}{あとがき}{165}{chapter*.673}%
+\contentsline {section}{第9版の主な変更点（第8.2版 \(\rightarrow \) 第9.0版）}{153}{section*.654}%
+\contentsline {subsection}{概要}{153}{subsection*.655}%
+\contentsline {subsection}{最重要変更（プレイヤー向け）}{153}{subsection*.656}%
+\contentsline {subsubsection}{1. 魔法分類の整理変更}{153}{subsubsection*.657}%
+\contentsline {subsubsection}{2. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\heartsuit }}} 3 は「激励」から「誘惑」に変更}{154}{subsubsection*.658}%
+\contentsline {subsubsection}{3. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 5 は「疲弊」から「虚脱」に変更}{154}{subsubsection*.659}%
+\contentsline {subsubsection}{4. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 9 要塞に「反撃」が追加}{155}{subsubsection*.660}%
+\contentsline {subsubsection}{5. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} A「防壁追加」が使いやすく調整}{155}{subsubsection*.661}%
+\contentsline {subsubsection}{6. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 4「相殺」は発動条件が緩和}{155}{subsubsection*.662}%
+\contentsline {subsubsection}{7. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\spadesuit }}} 5「蘇生」は対象範囲が拡大}{156}{subsubsection*.663}%
+\contentsline {subsubsection}{8. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\diamondsuit }}} 8「修繕」は対象と素材条件が緩和}{156}{subsubsection*.664}%
+\contentsline {subsubsection}{9. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 7「手札補充」は強化}{156}{subsubsection*.665}%
+\contentsline {subsubsection}{10. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\clubsuit }}} 8「リセット」はクイック化・簡略化}{156}{subsubsection*.666}%
+\contentsline {subsubsection}{11. 切札 {\fontsize {10\jsc@mpt }{15\jsc@mpt }\selectfont \kanjiskip =0zw plus .1zw minus .01zw \xkanjiskip =0.25em plus 0.15em minus 0.06em \abovedisplayskip 11\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \abovedisplayshortskip \z@ plus3\jsc@mpt \belowdisplayskip 9\jsc@mpt plus3\jsc@mpt minus4\jsc@mpt \belowdisplayshortskip \belowdisplayskip \let \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \leftmargin \leftmargini \topsep \z@ \parsep \parskip \itemsep \z@ \mbox {\ensuremath {\heartsuit }}} 5「追撃」は使用後に閉じるよう変更}{157}{subsubsection*.667}%
+\contentsline {subsubsection}{12. 「魔王の囁き」の条件変更}{157}{subsubsection*.668}%
+\contentsline {subsubsection}{13. 新規のクイック展開手段が増加}{157}{subsubsection*.669}%
+\contentsline {subsection}{文書構成・参照性の変更}{158}{subsection*.670}%
+\contentsline {subsubsection}{1. 付録構成の拡張}{158}{subsubsection*.671}%
+\contentsline {subsubsection}{2. FAQ 的な小見出しが増加}{158}{subsubsection*.672}%
+\contentsline {subsubsection}{3. 見出し・用語の整理}{158}{subsubsection*.673}%
+\contentsline {subsection}{差分早見表}{158}{subsection*.674}%
+\contentsline {subsubsection}{名称変更}{158}{subsubsection*.675}%
+\contentsline {subsubsection}{新規追加}{158}{subsubsection*.676}%
+\contentsline {subsubsection}{性能変更}{159}{subsubsection*.677}%
+\contentsline {subsection}{プレイヤー向け確認チェックリスト}{159}{subsection*.678}%
+\contentsline {subsection}{採用用の短縮版見出し案}{159}{subsection*.679}%
+\contentsline {section}{第8版の主な変更点}{159}{section*.680}%
+\contentsline {subsection}{アクションの定義の変更}{159}{subsection*.681}%
+\contentsline {subsection}{能力の解釈を変更}{160}{subsection*.682}%
+\contentsline {subsection}{フォグ領域追加}{160}{subsection*.683}%
+\contentsline {subsection}{用語追加/変更}{160}{subsection*.684}%
+\contentsline {subsection}{オプション削除とフレームへの統合}{161}{subsection*.685}%
+\contentsline {subsection}{エクストラをフレーム化 (8.1)}{161}{subsection*.686}%
+\contentsline {subsection}{曖昧なルールの明確化}{161}{subsection*.687}%
+\contentsline {subsection}{ルール外変更点}{162}{subsection*.688}%
+\contentsline {section}{第7版の主な変更点}{162}{section*.689}%
+\contentsline {subsection}{リバースのクイック化}{162}{subsection*.690}%
+\contentsline {subsection}{ゲーム中のデッキ名称をライフに変更}{162}{subsection*.691}%
+\contentsline {subsection}{対戦レギュレーションの定義方法変更}{162}{subsection*.692}%
+\contentsline {subsection}{コアフローをわかりやすく整理}{163}{subsection*.693}%
+\contentsline {subsection}{B・Jのクイック化}{163}{subsection*.694}%
+\contentsline {subsection}{引き分け廃止}{163}{subsection*.695}%
+\contentsline {subsection}{ルールの記載を微修正}{163}{subsection*.696}%
+\contentsline {chapter}{あとがき}{165}{chapter*.697}%
+\contentsline {section}{Ver 9.0 アップデートの要点}{165}{section*.698}%
+\contentsline {section}{ロゴと名前の由来}{165}{section*.699}%
+\contentsline {section}{さらなる楽しみ方}{166}{section*.700}%
+\contentsline {section}{最後に}{166}{section*.701}%
