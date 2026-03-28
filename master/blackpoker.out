@@ -182,8 +182,8 @@
 \BOOKMARK [4][-]{paragraph*.320}{魔王の囁き \(誘発魔法\)}{subsubsection*.316}% 181
 \BOOKMARK [3][-]{subsubsection*.321}{切札 2 援軍}{subsection.8.3.2}% 182
 \BOOKMARK [4][-]{paragraph*.323}{援軍 \(魔法\)}{subsubsection*.321}% 183
-\BOOKMARK [3][-]{subsubsection*.324}{切札 3 ブレイク}{subsection.8.3.2}% 184
-\BOOKMARK [4][-]{paragraph*.326}{ブレイク \(兵士起因\)}{subsubsection*.324}% 185
+\BOOKMARK [3][-]{subsubsection*.324}{切札 3 誘惑}{subsection.8.3.2}% 184
+\BOOKMARK [4][-]{paragraph*.326}{誘惑 \(兵士起因\)}{subsubsection*.324}% 185
 \BOOKMARK [4][-]{paragraph*.328}{クイック兵士召喚 \(召喚\)}{subsubsection*.324}% 186
 \BOOKMARK [3][-]{subsubsection*.329}{切札 4 休戦}{subsection.8.3.2}% 187
 \BOOKMARK [4][-]{paragraph*.331}{休戦 \(魔法\)}{subsubsection*.329}% 188
@@ -275,8 +275,8 @@
 \BOOKMARK [4][-]{paragraph*.539}{魔王 \(表切札\)}{subsubsection*.537}% 274
 \BOOKMARK [3][-]{subsubsection*.540}{切札 2 援軍}{subsection.8.3.5}% 275
 \BOOKMARK [4][-]{paragraph*.542}{援軍 \(表切札\)}{subsubsection*.540}% 276
-\BOOKMARK [3][-]{subsubsection*.543}{切札 3 ブレイク}{subsection.8.3.5}% 277
-\BOOKMARK [4][-]{paragraph*.545}{ブレイク \(表切札\)}{subsubsection*.543}% 278
+\BOOKMARK [3][-]{subsubsection*.543}{切札 3 誘惑}{subsection.8.3.5}% 277
+\BOOKMARK [4][-]{paragraph*.545}{誘惑 \(表切札\)}{subsubsection*.543}% 278
 \BOOKMARK [3][-]{subsubsection*.546}{切札 4 休戦}{subsection.8.3.5}% 279
 \BOOKMARK [4][-]{paragraph*.548}{休戦 \(表切札\)}{subsubsection*.546}% 280
 \BOOKMARK [3][-]{subsubsection*.549}{切札 5 追撃}{subsection.8.3.5}% 281
@@ -352,41 +352,42 @@
 \BOOKMARK [3][-]{subsubsection*.622}{能力の適用ルール}{subsection.9.4.2}% 351
 \BOOKMARK [3][-]{subsubsection*.623}{運用上の注意}{subsection.9.4.2}% 352
 \BOOKMARK [1][-]{section.9.5}{まとめ}{chapter.9}% 353
-\BOOKMARK [0][-]{chapter.10}{付録}{}% 354
+\BOOKMARK [0][-]{chapter.10}{付録A: PDF版ルール・リスト}{}% 354
 \BOOKMARK [1][-]{section.10.1}{PDF版ルール}{chapter.10}% 355
 \BOOKMARK [1][-]{section.10.2}{アクションリスト}{chapter.10}% 356
 \BOOKMARK [2][-]{subsection.10.2.1}{ライト}{section.10.2}% 357
 \BOOKMARK [2][-]{subsection.10.2.2}{マスター}{section.10.2}% 358
 \BOOKMARK [2][-]{subsection.10.2.3}{マスター+エクストラ}{section.10.2}% 359
 \BOOKMARK [1][-]{section.10.3}{エクストラリスト}{chapter.10}% 360
-\BOOKMARK [1][-]{section.10.4}{ガイドライン}{chapter.10}% 361
-\BOOKMARK [2][-]{subsection.10.4.1}{BlackPoker二次創作ガイドライン}{section.10.4}% 362
-\BOOKMARK [3][-]{subsubsection*.631}{はじめに}{subsection.10.4.1}% 363
-\BOOKMARK [3][-]{subsubsection*.632}{二次創作の範囲}{subsection.10.4.1}% 364
-\BOOKMARK [3][-]{subsubsection*.633}{創作の自由と制限}{subsection.10.4.1}% 365
-\BOOKMARK [3][-]{subsubsection*.634}{クレジット表記について}{subsection.10.4.1}% 366
-\BOOKMARK [3][-]{subsubsection*.635}{禁止事項}{subsection.10.4.1}% 367
-\BOOKMARK [3][-]{subsubsection*.636}{商用利用について}{subsection.10.4.1}% 368
-\BOOKMARK [3][-]{subsubsection*.637}{ガイドラインにないケースについて}{subsection.10.4.1}% 369
-\BOOKMARK [2][-]{subsection.10.4.2}{BlackPoker アクション・ルールガイドライン}{section.10.4}% 370
-\BOOKMARK [3][-]{subsubsection*.647}{はじめに}{subsection.10.4.2}% 371
-\BOOKMARK [3][-]{subsubsection*.648}{アクションを追加する際のルール}{subsection.10.4.2}% 372
-\BOOKMARK [4][-]{paragraph*.649}{アクションの対象は単対象 \(必須\)}{subsubsection*.648}% 373
-\BOOKMARK [4][-]{paragraph*.650}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsubsection*.648}% 374
-\BOOKMARK [4][-]{paragraph*.651}{誘発アクションは即時 \(推奨\)}{subsubsection*.648}% 375
-\BOOKMARK [4][-]{paragraph*.652}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsubsection*.648}% 376
-\BOOKMARK [4][-]{paragraph*.653}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsubsection*.648}% 377
-\BOOKMARK [3][-]{subsubsection*.654}{キャラクターを追加する際のルール}{subsection.10.4.2}% 378
-\BOOKMARK [4][-]{paragraph*.655}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsubsection*.654}% 379
-\BOOKMARK [2][-]{subsection.10.4.3}{BlackPoker 対戦進行上のショートカット指針}{section.10.4}% 380
-\BOOKMARK [3][-]{subsubsection*.656}{目的}{subsection.10.4.3}% 381
-\BOOKMARK [3][-]{subsubsection*.657}{本文ルールとの関係}{subsection.10.4.3}% 382
-\BOOKMARK [3][-]{subsubsection*.658}{用語の定義}{subsection.10.4.3}% 383
-\BOOKMARK [3][-]{subsubsection*.659}{ショートカットの原則}{subsection.10.4.3}% 384
-\BOOKMARK [4][-]{paragraph*.660}{原則1：反応がなければパスとみなす}{subsubsection*.659}% 385
-\BOOKMARK [4][-]{paragraph*.661}{原則2：連続する手順をまとめて進行できる}{subsubsection*.659}% 386
-\BOOKMARK [4][-]{paragraph*.662}{原則3：割り込みの権利は常に保障される}{subsubsection*.659}% 387
-\BOOKMARK [4][-]{paragraph*.663}{原則4：認識のずれは巻き戻す}{subsubsection*.659}% 388
-\BOOKMARK [3][-]{subsubsection*.664}{運用上の注意}{subsection.10.4.3}% 389
-\BOOKMARK [3][-]{subsubsection*.665}{標準ショートカット}{subsection.10.4.3}% 390
-\BOOKMARK [4][-]{paragraph*.666}{メインアクションの実行}{subsubsection*.665}% 391
+\BOOKMARK [0][-]{chapter.11}{付録B: 周年大会記録}{}% 361
+\BOOKMARK [0][-]{chapter.12}{付録C: ガイドライン}{}% 362
+\BOOKMARK [1][-]{section.12.1}{BlackPoker二次創作ガイドライン}{chapter.12}% 363
+\BOOKMARK [2][-]{subsection.12.1.1}{はじめに}{section.12.1}% 364
+\BOOKMARK [2][-]{subsection.12.1.2}{二次創作の範囲}{section.12.1}% 365
+\BOOKMARK [2][-]{subsection.12.1.3}{創作の自由と制限}{section.12.1}% 366
+\BOOKMARK [2][-]{subsection.12.1.4}{クレジット表記について}{section.12.1}% 367
+\BOOKMARK [2][-]{subsection.12.1.5}{禁止事項}{section.12.1}% 368
+\BOOKMARK [2][-]{subsection.12.1.6}{商用利用について}{section.12.1}% 369
+\BOOKMARK [2][-]{subsection.12.1.7}{ガイドラインにないケースについて}{section.12.1}% 370
+\BOOKMARK [1][-]{section.12.2}{BlackPoker アクション・ルールガイドライン}{chapter.12}% 371
+\BOOKMARK [2][-]{subsection.12.2.1}{はじめに}{section.12.2}% 372
+\BOOKMARK [2][-]{subsection.12.2.2}{アクションを追加する際のルール}{section.12.2}% 373
+\BOOKMARK [3][-]{subsubsection*.640}{アクションの対象は単対象 \(必須\)}{subsection.12.2.2}% 374
+\BOOKMARK [3][-]{subsubsection*.641}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsection.12.2.2}% 375
+\BOOKMARK [3][-]{subsubsection*.642}{誘発アクションは即時 \(推奨\)}{subsection.12.2.2}% 376
+\BOOKMARK [3][-]{subsubsection*.643}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsection.12.2.2}% 377
+\BOOKMARK [3][-]{subsubsection*.644}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsection.12.2.2}% 378
+\BOOKMARK [2][-]{subsection.12.2.3}{キャラクターを追加する際のルール}{section.12.2}% 379
+\BOOKMARK [3][-]{subsubsection*.645}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsection.12.2.3}% 380
+\BOOKMARK [1][-]{section.12.3}{BlackPoker 対戦進行上のショートカット指針}{chapter.12}% 381
+\BOOKMARK [2][-]{subsection.12.3.1}{目的}{section.12.3}% 382
+\BOOKMARK [2][-]{subsection.12.3.2}{本文ルールとの関係}{section.12.3}% 383
+\BOOKMARK [2][-]{subsection.12.3.3}{用語の定義}{section.12.3}% 384
+\BOOKMARK [2][-]{subsection.12.3.4}{ショートカットの原則}{section.12.3}% 385
+\BOOKMARK [3][-]{subsubsection*.646}{原則1：反応がなければパスとみなす}{subsection.12.3.4}% 386
+\BOOKMARK [3][-]{subsubsection*.647}{原則2：連続する手順をまとめて進行できる}{subsection.12.3.4}% 387
+\BOOKMARK [3][-]{subsubsection*.648}{原則3：割り込みの権利は常に保障される}{subsection.12.3.4}% 388
+\BOOKMARK [3][-]{subsubsection*.649}{原則4：認識のずれは巻き戻す}{subsection.12.3.4}% 389
+\BOOKMARK [2][-]{subsection.12.3.5}{運用上の注意}{section.12.3}% 390
+\BOOKMARK [2][-]{subsection.12.3.6}{標準ショートカット}{section.12.3}% 391
+\BOOKMARK [3][-]{subsubsection*.650}{メインアクションの実行}{subsection.12.3.6}% 392
