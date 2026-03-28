@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  28 MAR 2026 14:18
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  28 MAR 2026 15:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2267,114 +2267,118 @@ Overfull \hbox (131.07619pt too wide) in paragraph at lines 17709--17711
 [138] [139] [140
 
 ]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17738--17740
+第10章
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17736--17738
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17742--17744
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17740--17742
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17758--17760
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17756--17758
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17758--17760
+Underfull \hbox (badness 10000) in paragraph at lines 17756--17758
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue501 / actionlist / html / all . html ? format =
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17762--17764
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17760--17762
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17765--17767
+Underfull \hbox (badness 10000) in paragraph at lines 17763--17765
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue501 / actionlist / pdf / blackpoker-[]lite-[]2up .
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17774--17776
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17772--17774
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17774--17776
+Underfull \hbox (badness 10000) in paragraph at lines 17772--17774
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue501 / actionlist / html / all . html ? format =
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17778--17780
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17776--17778
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17781--17783
+Underfull \hbox (badness 10000) in paragraph at lines 17779--17781
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue501 / actionlist / pdf /
  []
 
-[141
-
-]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17794--17796
+[141]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17792--17794
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17794--17796
+Underfull \hbox (badness 10000) in paragraph at lines 17792--17794
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue501 / actionlist / html / all . html ? format =
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17794--17796
+Underfull \hbox (badness 10000) in paragraph at lines 17792--17794
 \T1/qtm/m/n/10 %E3 % 83 % 9E % E3 % 82 % B9 % E3 % 82 % BF % E3 % 83 % BC & fra
 me = %E3 % 82 % A8 % E3 % 82 %
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17806--17808
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17804--17806
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17810--17812
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17808--17810
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 17813--17815
+Underfull \hbox (badness 10000) in paragraph at lines 17811--17813
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue501 / actionlist / pdf /
  []
 
-[142] [143
+[142]
+第11章
+[143
 
 ] [144
 
-] [145] [146] [147] [148] [149] [150] [151]
+]
+第12章
+[145] [146] [147] [148] [149] [150] [151]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 18502.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 18502.
+(hyperref)                removing `math shift' on input line 18500.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 18502.
+(hyperref)                removing `\rightarrow' on input line 18500.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 18502.
+(hyperref)                removing `math shift' on input line 18500.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\rightarrow' on input line 18500.
 
 [152]
 
@@ -2406,6 +2410,7 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 18638--18643
  []
 
 [153
+
 
 ]
 
@@ -2690,15 +2695,15 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 5.76599pt on input line 19689.
  [167] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 436658A29C71CB396A3E7BD934333CA8;36010.
+(rerunfilecheck)             Checksum: 0E12486C753107863EB2C14B3D38177D;36016.
  ) 
 Here is how much of TeX's memory you used:
  16283 strings out of 480496
- 274691 string characters out of 5899437
- 652880 words of memory out of 5000000
+ 274689 string characters out of 5899437
+ 652912 words of memory out of 5000000
  33882 multiletter control sequences out of 15000+600000
  504776 words of font info for 131 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,686b,730s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (175 pages, 759224 bytes).
+Output written on blackpoker.dvi (175 pages, 759428 bytes).
