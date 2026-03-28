@@ -21,14 +21,18 @@ release: |release|
     format/format
     frame/frame
     core/core
-    appendix/pdf-links
-    appendix/anniversary
-    appendix/guidelines
-    revision-history/revision-history
+
+.. raw:: latex
+
+   \backmatter
 
 .. toctree::
     :maxdepth: 1
 
+    appendix/pdf-links
+    appendix/anniversary
+    appendix/guidelines
+    revision-history/revision-history
     afterword
 
 
