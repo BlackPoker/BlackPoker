@@ -331,8 +331,9 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: リアニメーターリアニメイト
-      actId: reanimatorReanimate
+      actName: 転生召喚
+      ruby: てんせいしょうかん
+      actId: reincarnationSummon
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
@@ -596,9 +597,9 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: 防壁破壊士防壁破壊
-      ruby: ぼうへきはかいしぼうへきはかい
-      actId: wallBreakerDestroy
+      actName: 粉砕
+      ruby: ふんさい
+      actId: pulverize
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
