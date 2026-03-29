@@ -437,7 +437,7 @@
 \contentsline {subsection}{引き分け廃止}{163}{subsection*.695}%
 \contentsline {subsection}{ルールの記載を微修正}{163}{subsection*.696}%
 \contentsline {chapter}{あとがき}{165}{chapter*.697}%
-\contentsline {section}{Ver 9.0 アップデートの要点}{165}{section*.698}%
+\contentsline {section}{第9.0版アップデートの要点}{165}{section*.698}%
 \contentsline {section}{ロゴと名前の由来}{165}{section*.699}%
 \contentsline {section}{さらなる楽しみ方}{166}{section*.700}%
 \contentsline {section}{最後に}{166}{section*.701}%
