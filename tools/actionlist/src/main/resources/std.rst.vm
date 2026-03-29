@@ -532,20 +532,19 @@ ${trump.story}
 
 
         #if(${trump.image} && ${trump.devNote})
-.. _frame-${trump.trumpId}-image:
-.. figure:: ../frame/images/${trump.image}.*
-   :height: 200px
-   :align: left
+.. list-table::
+   :widths: 35 65
+   :header-rows: 0
+   :class: borderless
 
-   ${trump.trumpName}のイメージ
+   * - .. _frame-${trump.trumpId}-image:
+       .. figure:: ../frame/images/${trump.image}.*
+          :height: 200px
+          
+          ${trump.trumpName}のイメージ
+     - **補足:**
 
-**補足:**
-
-${trump.devNote}
-
-.. raw:: html
-
-   <div style="clear: both;"></div>
+       ${trump.devNote}
 
         #elseif(${trump.devNote})
 **補足:**
