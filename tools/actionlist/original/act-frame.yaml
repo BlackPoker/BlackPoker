@@ -576,7 +576,7 @@ actList:
         1. 防壁1体を選び墓地に移す。
         2. キーカードと切札の♡Jをあわせて破砕士としてチャージ状態で場に出す。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: チャリオットから破砕士に名称変更。
@@ -596,7 +596,7 @@ actList:
       actEffect: |-
         効果の内容は「破砕士召喚」を参照。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: チャリオットから破砕士に名称変更。
@@ -616,7 +616,7 @@ actList:
       actEffect: |-
         効果の内容は「防壁破壊」を参照。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: チャリオットから破砕士に名称変更。
@@ -634,7 +634,7 @@ actList:
         自分の 「破砕士」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♡Jを1枚選び、自分の表切札として置く。
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: チャリオットから破砕士に名称変更。
@@ -863,7 +863,7 @@ actList:
         1. キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。
         2. ライフの一番上からカードを1枚引き、手札に加える。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: 召喚成功時にライフから1枚ドローする効果を追加。
@@ -906,7 +906,7 @@ actList:
         -・キーカードが2枚
         2. キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: クイック策士召喚から名称を変更。
@@ -1220,7 +1220,7 @@ charList:
         ・装備アクションの対象にできない。
         ・♡兵士としても♢兵士としても扱う。
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       devNote: |-
         v9.0: チャリオットから破砕士に名称変更。
@@ -1586,7 +1586,7 @@ trumpList:
       trumpAbility: |
          なし
       since: ex4.22.0
-      update: v9.0
+      update: v8.2, v9.0
       changed: changed
       image: tarot/Pictorial_Key_to_the_Tarot_07_The_Chariot
       devNote: |-

@@ -1,8 +1,45 @@
 {
     "restructuredtext.confPath": "${workspaceFolder}/source",
     "yaml.schemas": {
-        "tools/actionlist/original/act.schema.json":"*act.yaml"
+        "tools/actionlist/original/act.schema.json": "*act.yaml"
     },
     "search.useIgnoreFiles": false,
     "explorer.excludeGitIgnore": false
+    // どのコマンドを自動承認するか
+    // 読み取り専用や安全なローカル検証コマンドは true に、
+    // 状態を変更する破壊的・対話的なコマンドは false に設定します。
+    "chat.tools.terminal.autoApprove": {
+        // ✅ 自動実行する（true）
+        "git status": true,
+        "git branch": true,
+        "git diff": true,
+        "git log": true,
+        "ls": true,
+        "pwd": true,
+        "pnpm test": true,
+        "pnpm vitest": true, //vitestを利用
+        "pnpm lint": true,
+        "pnpm run type-check": true,
+        "pnpm tsc --noEmit": true,
+        "pnpm build": true,
+        "pnpm run build": true,
+        "pnpm dev": true,
+        "npm test": true,
+        "npm run dev": true,
+        "npm run build": true,
+        "docker run": true,
+        "docker build": true,
+        "docker compose": true,
+        "Select String": true,
+        "grep": true,
+        "cat": true,
+        // ❌ 自動実行しない（false）
+        "git push": false,
+        "git merge": false,
+        "git reset": false,
+        "pnpm i": false,
+        "pnpm install": false,
+        "npm install": false,
+        "gcloud auth login": false
+    }
 }
