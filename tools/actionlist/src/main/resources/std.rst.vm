@@ -1,6 +1,6 @@
 .. _act-${data.id}:
 
-#set($x = "-")
+#set($x = "×")
 #foreach( $nestList in $actList)
     #if($foreach.count == 1)
 .. _actionlist-${data.id}:

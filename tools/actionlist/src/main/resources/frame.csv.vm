@@ -1,4 +1,4 @@
-#set($x = "-")
+#set($x = "×")
 #foreach( $frame in $frames)
     #if($foreach.count == 1)
 "【フレーム】",ライト,スタンダード,プロ,マスター
