@@ -31,6 +31,7 @@
         "docker build": true,
         "docker compose": true,
         "Select String": true,
+        "Get-Content": true,
         "grep": true,
         "cat": true,
         // ❌ 自動実行しない（false）
