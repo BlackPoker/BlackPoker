@@ -16,10 +16,18 @@ public class TexFn {
 		/** ・ */
 		Ul("\r\n" + "\\vspace{-1zh}%余白削除\r\n" + "\\begin{itemize}\r\n" + "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\\vspace{-1zh}%余白削除\r\n\\end{itemize}", 1),
 		/** 1. 2. 3. */
-		Ol("\r\n" + "\\vspace{-1zh}%余白削除\r\n" + "\\begin{enumerate}\r\n" + "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\\vspace{-1zh}%余白削除\r\n\\end{enumerate}", 2),
+		Ol("\r\n" + "\\vspace{-1zh}%余白削除\r\n" + "\\begin{enumerate}\r\n"
+				+ "\\renewcommand{\\labelenumi}{\\arabic{enumi}.}\r\n"
+				+ "\\renewcommand{\\labelenumii}{\\arabic{enumii}.}\r\n"
+				+ "\\renewcommand{\\labelenumiii}{\\arabic{enumiii}.}\r\n"
+				+ "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\\vspace{-1zh}%余白削除\r\n\\end{enumerate}", 2),
 		/** A. B. C. */
 
-		OlA("\r\n" + "" + "\\begin{enumerate}\r\n" + "\\renewcommand{\\labelenumi}{\\Alph{enumi}}\r\n" + "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\r\n\\end{enumerate}", 2), AST("\r\n" + "\\vspace{-1zh}%余白削除\r\n" + "\\begin{enumerate}\r\n" + "\\renewcommand{\\labelenumi}{※}\r\n" + "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\itemsep}{0pt} %2. ブロック間の余白\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\r\n\\vspace{-3mm}%余白削除\r\n\\end{enumerate}", 1);
+		OlA("\r\n" + "" + "\\begin{enumerate}\r\n"
+				+ "\\renewcommand{\\labelenumi}{\\Alph{enumi}.}\r\n"
+				+ "\\renewcommand{\\labelenumii}{\\Alph{enumii}.}\r\n"
+				+ "\\renewcommand{\\labelenumiii}{\\Alph{enumiii}.}\r\n"
+				+ "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\r\n\\end{enumerate}", 2), AST("\r\n" + "\\vspace{-1zh}%余白削除\r\n" + "\\begin{enumerate}\r\n" + "\\renewcommand{\\labelenumi}{※}\r\n" + "\\setlength{\\leftskip}{-0.3cm}\r\n" + "\\setlength{\\itemsep}{0pt} %2. ブロック間の余白\r\n" + "\\setlength{\\parskip}{0pt} %4. 段落間余白．\r\n" + "", "\r\n\\vspace{-3mm}%余白削除\r\n\\end{enumerate}", 1);
 
 		private String stTag;
 		private String edTag;
