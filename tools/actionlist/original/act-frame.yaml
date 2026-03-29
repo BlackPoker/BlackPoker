@@ -556,55 +556,55 @@ actList:
       devNote: |-
         v9.0: タイミングをメインからクイックに修正。コストもなしとし使いやすく修正。
 
-  - type: 切札♡J チャリオット
+  - type: 切札♡J 防壁破壊士
     acts:
     - frame: |-
         ・エクストラ
-      actName: チャリオット召喚
-      ruby: チャリオットしょうかん
-      actId: summonChariot
+      actName: 防壁破壊士召喚
+      ruby: ぼうへきはかいししょうかん
+      actId: summonWallBreaker
       actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
       actCost: BL
       actKey: ♢2〜10
-      actActCond: 自分の表切札に「チャリオット」がある
+      actActCond: 自分の表切札に「防壁破壊士」がある
       actEffect: |-
         切札の♡Jが表の場合、次を行う。
         1. 防壁1体を選び墓地に移す。
-        2. キーカードと切札の♡Jをあわせてチャリオットとしてチャージ状態で場に出す。
+        2. キーカードと切札の♡Jをあわせて防壁破壊士としてチャージ状態で場に出す。
       since: ex4.22.0
       update: v8.2
 
     - frame: |-
         ・エクストラ
-      actName: クイックチャリオット召喚
-      ruby: クイックチャリオットしょうかん
-      actId: quickSummonChariot
+      actName: クイック防壁破壊士召喚
+      ruby: クイックぼうへきはかいししょうかん
+      actId: quickSummonWallBreaker
       actType: 召喚
       actTrigger: 直接
       actSpeed: 通常
       actTime: クイック
       actCost: D
       actKey: ♢2〜10
-      actActCond: 自分の表切札に「チャリオット」がある
+      actActCond: 自分の表切札に「防壁破壊士」がある
       actEffect: |-
-        効果の内容は「チャリオット召喚」を参照。
+        効果の内容は「防壁破壊士召喚」を参照。
       since: ex4.22.0
       update: v8.2
 
     - frame: |-
         ・エクストラ
-      actName: チャリオット防壁破壊
-      ruby: チャリオットぼうへきはかい
-      actId: chariotDestroy
+      actName: 防壁破壊士防壁破壊
+      ruby: ぼうへきはかいしぼうへきはかい
+      actId: wallBreakerDestroy
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
       actTime: メイン
       actCost: C
-      actUnit: 「チャリオット」1体
+      actUnit: 「防壁破壊士」1体
       actTarget: 防壁1体
       actEffect: |-
         効果の内容は「防壁破壊」を参照。
@@ -613,15 +613,15 @@ actList:
 
     - frame: |-
         ・エクストラ
-      actName: チャリオット再生
-      ruby: チャリオットさいせい
-      actId: chariotRevive
+      actName: 防壁破壊士再生
+      ruby: ぼうへきはかいしさいせい
+      actId: wallBreakerRevive
       actType: 切札操作
       actTrigger: 誘発
       actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
-        自分の 「チャリオット」 が場から墓地に移った時に誘発する。
+        自分の 「防壁破壊士」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♡Jを1枚選び、自分の表切札として置く。
 
@@ -1164,13 +1164,13 @@ charList:
       since: ex3.10.0
       update: v8.2
 
-  - type: 切札♡J チャリオット
+  - type: 切札♡J 防壁破壊士
     chars:
     - frame: |-
         ・エクストラ
-      charName: チャリオット
-      ruby: ちゃりおっと
-      charId: chariot
+      charName: 防壁破壊士
+      ruby: ぼうへきはかいし
+      charId: wallBreaker
       charType: 兵士
       charKey: ♡J と ♢2〜10
       charSize: 11
@@ -1501,11 +1501,11 @@ trumpList:
       devNote: |-
         ex4.14.0: 「弱者の反撃」で追加された。
 
-  - type: 切札♡J チャリオット
+  - type: 切札♡J 防壁破壊士
     trumps:
     - frame: |-
         ・エクストラ
-      trumpName: チャリオット
+      trumpName: 防壁破壊士
       trumpId: hJ
       trumpType: 表切札
       trumpKey: ♡J
