@@ -1,0 +1,96 @@
+.. _pdf-links:
+
+==============================
+付録A: PDF版ルール・リスト
+==============================
+
+
+PDF版ルール
+==============================
+
+通常版
+ https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/blackpoker.pdf
+
+
+中綴じ印刷用
+ https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/blackpoker_a5-booklet.pdf
+
+
+.. _actionlist:
+
+アクションリスト
+==============================
+
+BlackPokerで使用するアクション、キャラクター、フォグ、切札を定義するスクリプトの一覧を見ることができます。
+URL（HTML版）では、フォーマット、フレーム、カテゴリで絞って表示させることができます。
+
+
+.. _actionlist-lite:
+
+------------------------------
+ライト
+------------------------------
+URL 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/html/all.html?format=%E3%83%A9%E3%82%A4%E3%83%88
+
+PDF 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-lite.pdf
+
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-lite-2up.pdf
+
+
+.. _actionlist-master:
+
+------------------------------
+マスター
+------------------------------
+URL 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/html/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC
+
+PDF 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-mast.pdf
+
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-mast-2up.pdf
+
+
+.. _actionlist-extra:
+
+------------------------------------------------------------
+マスター+エクストラ
+------------------------------------------------------------
+
+**マスター+エクストラ** はBlackPokerのすべてのスクリプト（アクション、キャラクター、フォグ、切札の定義）を含んでいます。
+フォーマット、フレーム、カテゴリーで絞って表示させることができます。
+
+URL
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/html/all.html?format=%E3%83%9E%E3%82%B9%E3%82%BF%E3%83%BC&frame=%E3%82%A8%E3%82%AF%E3%82%B9%E3%83%88%E3%83%A9
+
+
+.. .. _actionlist-all:
+
+.. ------------------------------
+.. 全フォーマット&フレーム
+.. ------------------------------
+.. URL 
+..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/html/all.html
+
+.. PDF 
+..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-all.pdf
+
+..     https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-all-2up.pdf
+
+
+
+.. _extralist:
+
+エクストラリスト
+==============================
+
+エクストラでのみ使われるアクションおよび切札の情報を抽出した専用のリストです。（※マスター等の共通定義は含まれていません）
+
+URL 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/html/extra.html
+PDF 
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-extra.pdf
+
+    https://blackpoker.github.io/BlackPoker/BlackPoker/issue361/actionlist/pdf/blackpoker-extra-2up.pdf
