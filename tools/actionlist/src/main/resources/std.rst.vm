@@ -493,7 +493,7 @@ ${rstFn.cnv(${trump.trumpAbility})}
 #end
 #end
 #end
-        #if(${trump.image})
+        #if(${trump.image} && !${trump.devNote})
 **イメージ:**  
 ${trump.trumpName}のイメージ (:numref:`frame-${trump.trumpId}-image`)
 
@@ -531,7 +531,20 @@ ${trump.story}
         #end
 
 
-        #if(${trump.devNote})
+        #if(${trump.image} && ${trump.devNote})
+.. list-table::
+   :widths: 35 65
+   :header-rows: 0
+
+   * - .. _frame-${trump.trumpId}-image:
+       .. figure:: ../frame/images/${trump.image}.*
+          :height: 200px
+          
+          ${trump.trumpName}のイメージ
+     - **補足:**
+
+       ${trump.devNote}
+        #elseif(${trump.devNote})
 **補足:**
 
 ${trump.devNote}
