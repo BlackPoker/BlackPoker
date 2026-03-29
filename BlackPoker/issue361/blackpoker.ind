@@ -1,0 +1,76 @@
+\begin{theindex}
+
+  \item \spxentry{アクション}, \hyperpage{21}
+  \item \spxentry{アクション名}, \hyperpage{23}
+
+  \indexspace
+
+  \item \spxentry{き\textbar{}起動条件}, \hyperpage{24}
+  \item \spxentry{き\textbar{}切札}, \hyperpage{12}, \hyperpage{20}
+  \item \spxentry{キーカード条件}, \hyperpage{24}
+  \item \spxentry{キーユニット条件}, \hyperpage{24}
+  \item \spxentry{キャラクター}, \hyperpage{19}
+  \item \spxentry{キャラクター名}, \hyperpage{20}
+  \item \spxentry{こ\textbar{}効果}, \hyperpage{24}
+  \item \spxentry{コスト}, \hyperpage{24}
+  \item \spxentry{コンポーネント}, \hyperpage{17}
+  \item \spxentry{コンポーネントスクリプト}, \hyperpage{17}
+
+  \indexspace
+
+  \item \spxentry{サイズ}, \hyperpage{20}
+  \item \spxentry{スピード}, \hyperpage{23}
+  \item \spxentry{ゾーン}, \hyperpage{10}, \hyperpage{17}
+
+  \indexspace
+
+  \item \spxentry{た\textbar{}対象}, \hyperpage{24}
+  \item \spxentry{た\textbar{}対戦レギュレーション}, 
+		\hyperpage{7}
+  \item \spxentry{タイプ(アクション)}, \hyperpage{23}
+  \item \spxentry{タイプ(キャラクター)}, \hyperpage{20}
+  \item \spxentry{タイミング}, \hyperpage{24}
+  \item \spxentry{ダメージ}, \hyperpage{12}
+  \item \spxentry{チャージ}, \hyperpage{19}
+  \item \spxentry{て\textbar{}手札}, \hyperpage{11}
+  \item \spxentry{デッキ}, \hyperpage{12}
+  \item \spxentry{と\textbar{}特記事項}, \hyperpage{24}
+  \item \spxentry{ドライブ}, \hyperpage{19}
+  \item \spxentry{トリガー}, \hyperpage{23}
+
+  \indexspace
+
+  \item \spxentry{の\textbar{}能力(キャラクター)}, 
+		\hyperpage{20}
+  \item \spxentry{の\textbar{}能力(切札)}, \hyperpage{21}
+  \item \spxentry{の\textbar{}能力(フォグ)}, \hyperpage{20}
+
+  \indexspace
+
+  \item \spxentry{ば\textbar{}場}, \hyperpage{11}
+  \item \spxentry{パス}, \hyperpage{25}
+  \item \spxentry{パック}, \hyperpage{11}
+  \item \spxentry{フォーマット}, \hyperpage{37}
+  \item \spxentry{フォーマット(対戦レギュレーション)}, 
+		\hyperpage{7}
+  \item \spxentry{フォグ}, \hyperpage{11}, \hyperpage{20}
+  \item \spxentry{フレーム(対戦レギュレーション)}, 
+		\hyperpage{7}
+  \item \spxentry{ぼ\textbar{}墓地}, \hyperpage{11}
+
+  \indexspace
+
+  \item \spxentry{ゆ\textbar{}誘発条件}, \hyperpage{24}
+  \item \spxentry{ユニット}, \hyperpage{10}, \hyperpage{17}
+  \item \spxentry{ユニットカード}, \hyperpage{10}
+  \item \spxentry{ユニット条件}, \hyperpage{10}, \hyperpage{17}
+
+  \indexspace
+
+  \item \spxentry{ライフ}, \hyperpage{11}
+  \item \spxentry{ラベル(キャラクター)}, \hyperpage{20}
+  \item \spxentry{ラベル(切札)}, \hyperpage{21}
+  \item \spxentry{り\textbar{}領域}, \hyperpage{10}
+  \item \spxentry{レアカード}, \hyperpage{11}
+
+\end{theindex}

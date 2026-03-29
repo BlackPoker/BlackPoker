@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  29 MAR 2026 18:02
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  29 MAR 2026 19:06
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -663,6 +663,15 @@ Package: bxjatoucs 2019/10/20 v0.2
 (./sphinxmessages.sty
 Package: sphinxmessages 2019/01/04 v2.0 Localized LaTeX macros (Sphinx team)
 )
+(/usr/local/texlive/2021/texmf-dist/tex/platex/pxrubrica/pxrubrica.sty
+Package: pxrubrica 2021/03/06 v1.3d PX Japanese-style ruby
+\pxrr@cnta=\count310
+\pxrr@cntr=\count311
+\pxrr@dima=\dimen293
+\pxrr@boxa=\box137
+\pxrr@boxb=\box138
+\pxrr@boxr=\box139
+)
 \@indexfile=\write4
 \openout4 = `blackpoker.idx'.
 
@@ -671,50 +680,50 @@ Writing index file blackpoker.idx
 (/usr/local/texlive/2021/texmf-dist/tex/latex/enumitem/enumitem.sty
 Package: enumitem 2019/06/20 v3.9 Customized lists
 \labelindent=\skip79
-\enit@outerparindent=\dimen293
+\enit@outerparindent=\dimen294
 \enit@toks=\toks33
-\enit@inbox=\box137
-\enit@count@id=\count310
-\enitdp@description=\count311
+\enit@inbox=\box140
+\enit@count@id=\count312
+\enitdp@description=\count313
 )
 (/usr/local/texlive/2021/texmf-dist/tex/latex/l3backend/l3backend-dvipdfmx.def
 File: l3backend-dvipdfmx.def 2021-07-12 L3 backend support: dvipdfmx
 
 (|extractbb --version)
-\c__kernel_sys_dvipdfmx_version_int=\count312
-\l__color_backend_stack_int=\count313
-\g__color_backend_stack_int=\count314
-\g__graphics_track_int=\count315
-\l__pdf_internal_box=\box138
-\g__pdf_backend_object_int=\count316
-\g__pdf_backend_annotation_int=\count317
-\g__pdf_backend_link_int=\count318
+\c__kernel_sys_dvipdfmx_version_int=\count314
+\l__color_backend_stack_int=\count315
+\g__color_backend_stack_int=\count316
+\g__graphics_track_int=\count317
+\l__pdf_internal_box=\box141
+\g__pdf_backend_object_int=\count318
+\g__pdf_backend_annotation_int=\count319
+\g__pdf_backend_link_int=\count320
 ) (./blackpoker.aux)
 \openout1 = `blackpoker.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 102.
-LaTeX Font Info:    ... okay on input line 102.
-\c@literalblock=\count319
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for JY1/mc/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for JT1/mc/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 103.
+LaTeX Font Info:    ... okay on input line 103.
+\c@literalblock=\count321
 
 *geometry* detected driver: dvipdfm
 *geometry* verbose mode - [ preamble ] result:
@@ -752,7 +761,7 @@ LaTeX Font Info:    ... okay on input line 102.
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring ON on input line 102.
+Package hyperref Info: Link coloring ON on input line 103.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2021-04-02 v2.47 Cross-referencing by name of section
 
@@ -763,11 +772,11 @@ Package: refcount 2019/12/15 v3.6 Data extraction from label references (HO)
 ty
 Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
-\c@section@level=\count320
+\c@section@level=\count322
 )
-LaTeX Info: Redefining \ref on input line 102.
-LaTeX Info: Redefining \pageref on input line 102.
-LaTeX Info: Redefining \nameref on input line 102.
+LaTeX Info: Redefining \ref on input line 103.
+LaTeX Info: Redefining \pageref on input line 103.
+LaTeX Info: Redefining \nameref on input line 103.
  (./blackpoker.out) (./blackpoker.out)
 \@outlinefile=\write5
 \openout5 = `blackpoker.out'.
@@ -775,35 +784,35 @@ LaTeX Info: Redefining \nameref on input line 102.
 File: blackpoker_logo.pdf Graphic file (type pdf)
 <blackpoker_logo.pdf>
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 114.
+(Font)              scaled to size 23.90964pt on input line 115.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 114.
+(Font)              scaled to size 23.90964pt on input line 115.
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <24.88> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 114.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 115.
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <24.88> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 114.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 115.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 114.
+(Font)              scaled to size 23.90964pt on input line 115.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <24.88> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 114.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 115.
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <24.88> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 114.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 115.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 23.90964pt on input line 114.
+(Font)              scaled to size 23.90964pt on input line 115.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 115.
+(Font)              scaled to size 13.83836pt on input line 116.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 115.
+(Font)              scaled to size 13.83836pt on input line 116.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 118.
+(Font)              scaled to size 19.9311pt on input line 119.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 118.
+(Font)              scaled to size 19.9311pt on input line 119.
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 123.
+(Font)              scaled to size 8.64899pt on input line 124.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 8.64899pt on input line 123.
+(Font)              scaled to size 8.64899pt on input line 124.
 LaTeX Font Info:    Trying to load font information for TS1+qtm on input line 1
-23.
+24.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/ts1qtm.fd
 File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
@@ -814,91 +823,75 @@ File: ts1qtm.fd 2009/09/25 v1.2 font definition file for TS1/qtm
 
 ]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 136.
+(Font)              scaled to size 9.60999pt on input line 137.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 136.
+(Font)              scaled to size 9.60999pt on input line 137.
 LaTeX Font Info:    Trying to load font information for T1+qhv on input line 13
-6.
+7.
 
 (/usr/local/texlive/2021/texmf-dist/tex/latex/tex-gyre/t1qhv.fd
 File: t1qhv.fd 2009/09/25 v1.2 font definition file for T1/qhv
 )
-(./blackpoker.toc
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 6.72699pt on input line 2.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 4.805pt on input line 2.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 2.
-
-(/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 2.
-
-(/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-)
-LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 33.
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 33.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 33.
-LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 33.
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 33.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 33.
- [1
-
-
-]
-LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <10> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 77.
-LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 77.
-LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 77.
-LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <10> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 77.
-LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 77.
-LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 77.
- [2]
-[3] [4])
+(./blackpoker.toc)
 \tf@toc=\write6
 \openout6 = `blackpoker.toc'.
 
- [5] [6
+LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <10> not available
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 137.
+LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 137.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 137.
+LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <10> not available
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 137.
+LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 137.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 137.
+ [1
 
-] [1] [2
+
+] [2
+
+]
+LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <10> not available
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 148.
+LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <10> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 148.
+LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 148.
+LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <10> not available
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 148.
+LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <10> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 148.
+LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
+(Font)              scaled to size 9.60999pt on input line 148.
+ [1] [2
 
 ]
 第1章
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 147.
+(Font)              scaled to size 19.9311pt on input line 148.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 19.9311pt on input line 147.
+(Font)              scaled to size 19.9311pt on input line 148.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 162.
+(Font)              scaled to size 13.83836pt on input line 163.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 162.
+(Font)              scaled to size 13.83836pt on input line 163.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 162.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 163.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 162.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 163.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 162.
+(Font)              scaled to size 13.83836pt on input line 163.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 162.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 163.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <14.4> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 162.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 163.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 13.83836pt on input line 162.
+(Font)              scaled to size 13.83836pt on input line 163.
 LaTeX Font Info:    Trying to load font information for T1+txtt on input line 1
-76.
+77.
 (/usr/local/texlive/2021/texmf-dist/tex/latex/txfonts/t1txtt.fd
 File: t1txtt.fd 2000/12/15 v3.1
 )
@@ -906,121 +899,196 @@ File: play-image.pdf Graphic file (type pdf)
 <play-image.pdf>
  [3]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 182.
+(Font)              scaled to size 4.805pt on input line 183.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 182.
+(Font)              scaled to size 4.805pt on input line 183.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 183.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 183
+.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 216--218
+(/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsa.fd
+File: umsa.fd 2013/01/14 v3.01 AMS symbols A
+)
+LaTeX Font Info:    Trying to load font information for U+msb on input line 183
+.
+
+(/usr/local/texlive/2021/texmf-dist/tex/latex/amsfonts/umsb.fd
+File: umsb.fd 2013/01/14 v3.01 AMS symbols B
+)
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 217--219
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 220--222
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 221--223
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 224--226
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 225--227
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 228--230
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 229--231
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 232--234
+LaTeX Warning: Hyper reference `frame/frame:frame-rst' on page 4 undefined on i
+nput line 233.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 4 undefined on input l
+ine 233.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 4 undefined on input l
+ine 233.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 233--235
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 236--238
+LaTeX Warning: Hyper reference `core/core:core-rst' on page 4 undefined on inpu
+t line 237.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 237.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 237.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 237--239
 []
  []
 
 LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <12> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 242.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 243.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 242.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 243.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <12> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 242.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 243.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 242.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 243.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 242.
+(Font)              scaled to size 11.53198pt on input line 243.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 6.72699pt on input line 250.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 248--250
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 249--251
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 255--257
+LaTeX Warning: Hyper reference `core/core:core-rst' on page 4 undefined on inpu
+t line 253.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 253.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 253.
+
+
+LaTeX Warning: Hyper reference `core/core:core-rst' on page 4 undefined on inpu
+t line 257.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 257.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 4 undefined on input line
+ 257.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 256--258
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 259--261
+LaTeX Warning: Hyper reference `appendix/pdf-links:actionlist' on page 4 undefi
+ned on input line 261.
+
+
+LaTeX Warning: Reference `appendix/pdf-links:actionlist' on page 4 undefined on
+ input line 261.
+
+
+LaTeX Warning: Reference `appendix/pdf-links:actionlist' on page 4 undefined on
+ input line 261.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 260--262
 []
  []
 
 [4]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 272--274
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 273--275
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 276--279
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 277--280
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 281--283
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 282--284
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 285--287
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 286--288
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 289--291
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 290--292
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 293--295
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 294--296
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 297--299
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 298--300
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 301--303
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 302--304
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 305--307
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 306--308
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 309--311
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 310--312
 []
  []
 
@@ -1029,16 +1097,41 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 309--311
 ]
 第2章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 345--347
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 346--348
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 362--364
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 363--365
 []
  []
 
-[7] [8]
+
+LaTeX Warning: Hyper reference `frame/frame:frame-rst' on page 7 undefined on i
+nput line 375.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 7 undefined on input l
+ine 375.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 7 undefined on input l
+ine 375.
+
+[7]
+
+LaTeX Warning: Hyper reference `frame/frame:frame-rst' on page 8 undefined on i
+nput line 558.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 8 undefined on input l
+ine 558.
+
+
+LaTeX Warning: Reference `frame/frame:frame-rst' on page 8 undefined on input l
+ine 558.
+
+[8]
 第3章
 [9
 
@@ -1046,47 +1139,47 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 362--364
 File: extra.pdf Graphic file (type pdf)
 <extra.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 838--841
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 839--842
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 846--848
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 847--849
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 853--855
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 854--856
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 860--862
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 861--863
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 867--869
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 868--870
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 874--877
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 875--878
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 882--885
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 883--886
 []
  []
 
 [11]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 890--892
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 891--893
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 903--906
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 904--907
 []
  []
 
@@ -1095,37 +1188,37 @@ pdf)
 <plantuml-0277597f1fe8b18352cb5b3b41a13aa564f71311.pdf>
 [12] [13]
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <10> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1049.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 1050.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1049.
+(Font)              scaled to size 9.60999pt on input line 1050.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <10> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1049.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 1050.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 9.60999pt on input line 1049.
+(Font)              scaled to size 9.60999pt on input line 1050.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1065--1070
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1066--1071
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1072--1077
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1073--1078
 []
  []
 
 File: abstract_editable_fixed.drawio.pdf Graphic file (type pdf)
 <abstract_editable_fixed.drawio.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1116--1118
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1117--1119
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1120--1122
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1121--1123
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1124--1126
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1125--1127
 []
  []
 
@@ -1134,52 +1227,52 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 1124--1126
 ]
 第4章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1199--1203
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1200--1204
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1208--1210
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1209--1211
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1215--1218
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1216--1219
 []
  []
 
 [17]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1231--1233
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1232--1234
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1235--1238
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1236--1239
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1248--1252
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1249--1253
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1254--1257
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1255--1258
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1289--1291
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1290--1292
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1293--1295
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1294--1296
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1297--1299
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1298--1300
 []
  []
 
@@ -1189,42 +1282,80 @@ File: character.pdf Graphic file (type pdf)
 File: charge&drive.pdf Graphic file (type pdf)
 <charge&drive.pdf>
  [19]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1404--1406
+
+LaTeX Warning: Hyper reference `auto/actionlist:characterlist-act' on page 20 u
+ndefined on input line 1393.
+
+
+LaTeX Warning: Reference `auto/actionlist:characterlist-act' on page 20 undefin
+ed on input line 1393.
+
+
+LaTeX Warning: Reference `auto/actionlist:characterlist-act' on page 20 undefin
+ed on input line 1393.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1405--1407
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1411--1413
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1412--1414
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1418--1421
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1419--1422
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1426--1428
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1427--1429
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1433--1435
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1434--1436
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1484--1486
+LaTeX Warning: Hyper reference `auto/actionlist:foglist-act' on page 20 undefin
+ed on input line 1473.
+
+
+LaTeX Warning: Reference `auto/actionlist:foglist-act' on page 20 undefined on 
+input line 1473.
+
+
+LaTeX Warning: Reference `auto/actionlist:foglist-act' on page 20 undefined on 
+input line 1473.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1485--1487
 []
  []
 
 [20]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1518--1520
+
+LaTeX Warning: Hyper reference `auto/frameActionlist:trumplist-act-frame' on pa
+ge 21 undefined on input line 1507.
+
+
+LaTeX Warning: Reference `auto/frameActionlist:trumplist-act-frame' on page 21 
+undefined on input line 1507.
+
+
+LaTeX Warning: Reference `auto/frameActionlist:trumplist-act-frame' on page 21 
+undefined on input line 1507.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1519--1521
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1525--1528
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1526--1529
 []
  []
 
@@ -1233,77 +1364,125 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 1525--1528
 ]
 第5章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1616--1618
+LaTeX Warning: Hyper reference `core/core:core-rst' on page 23 undefined on inp
+ut line 1607.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 23 undefined on input lin
+e 1607.
+
+
+LaTeX Warning: Reference `core/core:core-rst' on page 23 undefined on input lin
+e 1607.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1617--1619
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1623--1625
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1624--1626
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1630--1633
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1631--1634
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1641--1645
+LaTeX Warning: Hyper reference `core/core:trigger-core' on page 23 undefined on
+ input line 1636.
+
+
+LaTeX Warning: Reference `core/core:trigger-core' on page 23 undefined on input
+ line 1636.
+
+
+LaTeX Warning: Reference `core/core:trigger-core' on page 23 undefined on input
+ line 1636.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1642--1646
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 1646--1649
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 1647--1650
 []
  []
 
 [23]
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 1651--1653
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 1652--1654
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1663--1666
+LaTeX Warning: Hyper reference `core/core:speed-core' on page 24 undefined on i
+nput line 1658.
+
+
+LaTeX Warning: Reference `core/core:speed-core' on page 24 undefined on input l
+ine 1658.
+
+
+LaTeX Warning: Reference `core/core:speed-core' on page 24 undefined on input l
+ine 1658.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1664--1667
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1674--1678
+LaTeX Warning: Hyper reference `core/core:timing' on page 24 undefined on input
+ line 1669.
+
+
+LaTeX Warning: Reference `core/core:timing' on page 24 undefined on input line 
+1669.
+
+
+LaTeX Warning: Reference `core/core:timing' on page 24 undefined on input line 
+1669.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1675--1679
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1683--1687
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1684--1688
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1692--1695
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1693--1696
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1700--1702
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1701--1703
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1707--1709
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1708--1710
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1714--1716
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1715--1717
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1721--1723
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1722--1724
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1728--1730
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1729--1731
 []
  []
 
@@ -1312,56 +1491,126 @@ File: plantuml-8fc2394adc50c732a67d8e146f59a878f83db7f6.pdf Graphic file (type
 pdf)
 <plantuml-8fc2394adc50c732a67d8e146f59a878f83db7f6.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1888--1890
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1889--1891
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1892--1894
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1893--1895
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1896--1898
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1897--1899
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 1903--1906
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 1904--1907
 []
  []
 
 [25]
+
+LaTeX Warning: Hyper reference `appendix/guideline/shortcut:shortcut-guideline'
+ on page 26 undefined on input line 1917.
+
+
+LaTeX Warning: Reference `appendix/guideline/shortcut:shortcut-guideline' on pa
+ge 26 undefined on input line 1917.
+
+
+LaTeX Warning: Reference `appendix/guideline/shortcut:shortcut-guideline' on pa
+ge 26 undefined on input line 1917.
+
 File: action-request1.pdf Graphic file (type pdf)
 <action-request1.pdf>
 File: action-request2.pdf Graphic file (type pdf)
 <action-request2.pdf>
 File: action-request3.pdf Graphic file (type pdf)
 <action-request3.pdf>
- [26] [27]
+[26] [27]
 File: plantuml-619e0def2bccbb05dc362b64ff42db19d7ed5f15.pdf Graphic file (type 
 pdf)
 <plantuml-619e0def2bccbb05dc362b64ff42db19d7ed5f15.pdf>
- [28]
+
+
+LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 28 undefined on 
+input line 2005.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 28 undefined on input 
+line 2005.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 28 undefined on input 
+line 2005.
+
+
+LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 28 undefined on 
+input line 2013.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 28 undefined on input 
+line 2013.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 28 undefined on input 
+line 2013.
+
+
+LaTeX Warning: Hyper reference `core/core:actresolve' on page 28 undefined on i
+nput line 2013.
+
+[28]
 File: plantuml-7a9b36752e6075b8875ba8580e620f32df549a3b.pdf Graphic file (type 
 pdf)
 <plantuml-7a9b36752e6075b8875ba8580e620f32df549a3b.pdf>
- [29] [30] [31] [32
+ [29]
+
+LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 30 undefined on 
+input line 2144.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 30 undefined on input 
+line 2144.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 30 undefined on input 
+line 2144.
+
+
+LaTeX Warning: Hyper reference `core/core:winlose' on page 30 undefined on inpu
+t line 2144.
+
+
+LaTeX Warning: Hyper reference `core/core:coreflowsec' on page 30 undefined on 
+input line 2160.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 30 undefined on input 
+line 2160.
+
+
+LaTeX Warning: Reference `core/core:coreflowsec' on page 30 undefined on input 
+line 2160.
+
+[30] [31] [32
 
 ]
 第6章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2248--2251
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2249--2252
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2253--2255
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2254--2256
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2257--2259
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2258--2260
 []
  []
 
@@ -1377,1332 +1626,104 @@ File: set-stage.pdf Graphic file (type pdf)
 ]
 第7章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2537--2539
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2538--2540
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2541--2543
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2542--2544
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2545--2547
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2546--2548
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2557--2559
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2558--2560
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2561--2563
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2562--2564
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2565--2567
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2566--2568
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 2569--2571
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 2570--2572
 []
  []
 
 [37]
-Underfull \vbox (badness 10000) detected at line 2775
- []
 
-[38] [39] [40] [41] [42] [43] [44] [45] [46] [47] [48] [49] [50] [51] [52]
-[53] [54] [55] [56] [57] [58] [59] [60]
-第8章
+LaTeX Warning: Hyper reference `auto/actionlist:id3' on page 38 undefined on in
+put line 2599.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6567--6570
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:index-0' on page 38 undefined o
+n input line 2603.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6572--6574
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:index-1' on page 38 undefined o
+n input line 2607.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6576--6578
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:index-2' on page 38 undefined o
+n input line 2611.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6580--6582
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:index-3' on page 38 undefined o
+n input line 2615.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6584--6586
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:index-4' on page 38 undefined o
+n input line 2619.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6588--6590
-[]
- []
 
+LaTeX Warning: Hyper reference `auto/actionlist:ruby-rt-rt-ruby-ruby' on page 3
+8 undefined on input line 2623.
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6592--6594
-[]
- []
-
-[61
-
-]
-File: entry.pdf Graphic file (type pdf)
-<entry.pdf>
- [62]
-File: pack.pdf Graphic file (type pdf)
-<pack.pdf>
- [63]
-File: rarePack.pdf Graphic file (type pdf)
-<rarePack.pdf>
- [64]
-File: rarePack.pdf Graphic file (type pdf)
-<rarePack.pdf>
- [65] [66]
-File: extra.pdf Graphic file (type pdf)
-<extra.pdf>
- [67] [68]
-Underfull \vbox (badness 10000) detected at line 7752
- []
-
-
-Underfull \vbox (badness 10000) detected at line 7752
- []
-
-
-Overfull \vbox (2.23927pt too high) has occurred while \output is active []
-
-
-[69] [70] [71] [72]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8369.
-
-[73]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8448.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8546.
-
-[74]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8630.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8715.
-
-[75]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8882.
-
-[76]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8970.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 9055.
-
-[77] [78]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 9385.
-
-[79]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9562.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9644.
-
-[80]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9742.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9826.
-
-[81]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9923.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10020.
-
-[82]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10189.
-
-[83]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10277.
-
-[84]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10634.
-
-[85]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10735.
-
-[86]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10905.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10997.
-
-[87]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11081.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11178.
-
-[88]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11269.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11378.
-
-[89]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11536.
-
-[90] [91]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11982.
-
-[92]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12076.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12160.
-
-[93]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12330.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12415.
-
-[94]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12515.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12597.
-
-[95]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12690.
-
-[96] [97]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 13089.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 13171.
-
-[98]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 13259.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 13347.
-
-[99]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 13441.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 13523.
-
-[100] [101]
-Underfull \vbox (badness 10000) detected at line 14084
- []
-
-
-Underfull \vbox (badness 10000) detected at line 14084
- []
-
-
-Overfull \vbox (2.23927pt too high) has occurred while \output is active []
-
-
-[102]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14091.
-
-File: Pictorial_Key_to_the_Tarot_Swords_01.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_01.jpg>
-[103]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14206.
-
-File: Pictorial_Key_to_the_Tarot_Swords_02.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_02.jpg>
-[104]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14319.
-
-File: Pictorial_Key_to_the_Tarot_Swords_03.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_03.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14428.
-
-[105]
-File: Pictorial_Key_to_the_Tarot_Swords_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_04.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14541.
-
-File: Pictorial_Key_to_the_Tarot_Swords_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_05.jpg>
-[106]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14650.
-
-File: Pictorial_Key_to_the_Tarot_Swords_07.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Swords_07.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14759.
-
-[107]
-File: Pictorial_Key_to_the_Tarot_20_Judgement.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_20_Judgement.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14889.
-
-File: Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg>
-[108]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15011.
-
-File: Pictorial_Key_to_the_Tarot_Cups_02.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_02.jpg>
-[109]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15120.
-
-File: Pictorial_Key_to_the_Tarot_Cups_03.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_03.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15236.
-
-[110]
-File: Pictorial_Key_to_the_Tarot_Cups_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_04.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15345.
-
-File: Pictorial_Key_to_the_Tarot_Cups_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_05.jpg>
-[111]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15454.
-
-File: Pictorial_Key_to_the_Tarot_Cups_07.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_07.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15567.
-
-[112]
-File: Pictorial_Key_to_the_Tarot_Cups_08.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Cups_08.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15676.
-
-File: Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg>
-[113]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15809.
-
-File: Pictorial_Key_to_the_Tarot_08_Strength.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_08_Strength.jpg>
-[114]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 15927.
-
-File: Pictorial_Key_to_the_Tarot_Pentacles_01.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_01.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16040.
-
-[115]
-File: Pictorial_Key_to_the_Tarot_Pentacles_03.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_03.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16153.
-
-File: Pictorial_Key_to_the_Tarot_Pentacles_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_04.jpg>
-[116]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16262.
-
-File: Pictorial_Key_to_the_Tarot_Pentacles_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_05.jpg>
-[117]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16374.
-
-File: Pictorial_Key_to_the_Tarot_Pentacles_08.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_08.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16483.
-
-[118]
-File: Pictorial_Key_to_the_Tarot_Pentacles_09.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Pentacles_09.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16596.
-
-File: Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg Graphic file (type b
-mp)
-<Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg>
-[119]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16730.
-
-File: Pictorial_Key_to_the_Tarot_Wands_04.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_04.jpg>
-[120]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16843.
-
-File: Pictorial_Key_to_the_Tarot_Wands_05.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_05.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16956.
-
-[121]
-File: Pictorial_Key_to_the_Tarot_Wands_07.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_07.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17065.
-
-File: Pictorial_Key_to_the_Tarot_Wands_08.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_08.jpg>
-[122]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17174.
-
-File: Pictorial_Key_to_the_Tarot_Wands_09.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_09.jpg>
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17283.
-
-[123]
-File: Pictorial_Key_to_the_Tarot_Wands_10.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_Wands_10.jpg>
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17392.
-
-File: Pictorial_Key_to_the_Tarot_13_Death.jpg Graphic file (type bmp)
-<Pictorial_Key_to_the_Tarot_13_Death.jpg>
-[124] [125] [126
-
-]
-第9章
-File: plantuml-a48ae812b7928018b87aae8625516edb5582f1c3.pdf Graphic file (type 
-pdf)
-<plantuml-a48ae812b7928018b87aae8625516edb5582f1c3.pdf>
-[127] [128]
-File: abstract.pdf Graphic file (type pdf)
-<abstract.pdf>
-File: plantuml-23dc00db4b4de1657caa1d69096791c744461298.pdf Graphic file (type 
-pdf)
-<plantuml-23dc00db4b4de1657caa1d69096791c744461298.pdf>
- [129]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17814--17816
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17818--17820
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17834--17836
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17838--17840
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17856--17859
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 17859--17860
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17880--17883
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 17883--17884
-[]
- []
-
-[130]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17937--17938
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17964--17966
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17968--17970
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17972--17974
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17976--17978
-[]
- []
-
-[131]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17989--17992
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17994--17996
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18007--18009
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18014--18017
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18022--18025
-[]
- []
-
-File: plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf Graphic file (type 
-pdf)
-<plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf>
-[132]
-File: plantuml-5e71291ebc7e6c2d8f01e965121a5a06f8f0bda4.pdf Graphic file (type 
-pdf)
-<plantuml-5e71291ebc7e6c2d8f01e965121a5a06f8f0bda4.pdf>
-File: plantuml-7c9994aa40110a332ad4ea7418609bbeec92151d.pdf Graphic file (type 
-pdf)
-<plantuml-7c9994aa40110a332ad4ea7418609bbeec92151d.pdf>
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18097--18099
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18101--18103
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18105--18108
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18110--18112
-[]
- []
-
-[133]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18114--18119
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18125--18129
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18131--18133
-[]
- []
-
-[134]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18137--18141
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18149--18151
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18153--18155
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18157--18159
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18161--18163
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18165--18167
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18169--18171
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18173--18178
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18185--18188
-[]
- []
-
-File: plantuml-db20683e56afd11564804a24593b1871a9c0a1d3.pdf Graphic file (type 
-pdf)
-<plantuml-db20683e56afd11564804a24593b1871a9c0a1d3.pdf>
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18219--18222
-[]
- []
-
-[135] [136]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18224--18227
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18229--18233
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18235--18239
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18241--18244
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18246--18249
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18251--18254
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18256--18260
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18262--18266
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18268--18271
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18273--18276
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18278--18281
-[]
- []
-
-[137]
-File: plantuml-02291886d50a3eb3c98eef25815b7b266ee92b52.pdf Graphic file (type 
-pdf)
-<plantuml-02291886d50a3eb3c98eef25815b7b266ee92b52.pdf>
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18307--18310
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18312--18316
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18318--18321
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18323--18326
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18328--18331
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18333--18337
-[]
- []
-
-[138]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18339--18342
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18344--18346
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18348--18350
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18352--18355
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18357--18360
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18362--18365
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18394--18395
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18405--18406
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18416--18417
-[]
- []
-
-[139]
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18437--18439
-[]
- []
-
-
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18444--18446
-[]
- []
-
-
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18451--18453
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18473--18475
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18480--18482
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18487--18489
-[]
- []
-
-
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18494--18496
-[]
- []
-
-[140] [141] [142
-
-]
-第10章
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18521--18523
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18525--18527
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18541--18543
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18541--18543
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue361 / actionlist / html / all . html ? format =
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18545--18547
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18548--18550
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
-Poker / issue361 / actionlist / pdf / blackpoker-[]lite-[]2up .
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18557--18559
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18557--18559
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue361 / actionlist / html / all . html ? format =
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18561--18563
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18564--18566
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
-Poker / issue361 / actionlist / pdf /
- []
-
-[143]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18577--18579
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18577--18579
-[][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
-ker / issue361 / actionlist / html / all . html ? format =
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18577--18579
-\T1/qtm/m/n/10 %E3 % 83 % 9E % E3 % 82 % B9 % E3 % 82 % BF % E3 % 83 % BC & fra
-me = %E3 % 82 % A8 % E3 % 82 %
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18589--18591
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18593--18595
-[]
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 18596--18598
-[][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
-Poker / issue361 / actionlist / pdf /
- []
-
-[144]
-第11章
-[145
-
-] [146
-
-]
-第12章
-[147] [148] [149] [150] [151] [152] [153]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19285.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19285.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19285.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19285.
-
-[154]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19355.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19355.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19397--19399
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19401--19403
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19404--19405
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19424--19429
-[]
- []
-
-[155
-
-
-]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19433.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19435--19436
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19450--19451
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19470--19476
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19480.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19482--19483
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19498--19499
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19514--19519
-[]
- []
-
-[156]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19523.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19526--19528
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19530--19535
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19537--19541
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19545.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19547--19548
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19562--19563
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19583--19587
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19591.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19594--19596
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19598--19602
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19604--19608
-[]
- []
-
-[157]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 19612.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19615--19617
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19619--19621
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19623--19626
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19630.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19632--19633
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19643--19644
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19655--19658
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19662.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19664--19665
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19675--19676
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19683--19686
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19690.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19692--19693
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19707--19708
-[]
- []
-
-[158]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19727--19731
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19735.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19737--19738
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19749--19752
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19759--19762
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19769--19771
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19773--19775
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19777--19781
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19817--19821
-[]
- []
-
-[159]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19831--19833
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19835--19838
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19857--19859
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19883--19885
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19909--19912
-[]
- []
-
-[160] [161]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20105--20106
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20116--20117
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20147--20148
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20170--20171
-[]
- []
-
-[162] [163] [164] [165] [166
-
-]
-File: blackpoker_logo.pdf Graphic file (type pdf)
-<blackpoker_logo.pdf>
- [167]
-No file blackpoker.ind.
-[168]
-LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 20575.
-
-LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 20575.
+LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <5> not available
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 2623.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20575.
-LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 20575.
-
-LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 20575.
+(Font)              scaled to size 4.805pt on input line 2623.
+LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <5> not available
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 2623.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20575.
-LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 20579.
- [169
+(Font)              scaled to size 4.805pt on input line 2623.
 
-] (./blackpoker.aux)
-Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 23DD781BBE55CE0885DB83E6B700EA21;36212.
- ) 
+! Package pxrubrica Error: Group count mismatch between the ruby and
+(pxrubrica)                the body (6 <> 1).
+
+See the pxrubrica package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.2623 ...ダメージ判定}{ダメージはんてい} (基本)}}
+                                                  }
+? 
+! Emergency stop.
+ ...                                              
+                                                  
+l.2623 ...ダメージ判定}{ダメージはんてい} (基本)}}
+                                                  }
+The whole ruby input was ignored.
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+ 
 Here is how much of TeX's memory you used:
- 16293 strings out of 480496
- 274938 string characters out of 5899437
- 653403 words of memory out of 5000000
- 33892 multiletter control sequences out of 15000+600000
- 504776 words of font info for 131 fonts, out of 8000000 for 9000
+ 15541 strings out of 480496
+ 241093 string characters out of 5899437
+ 575032 words of memory out of 5000000
+ 33228 multiletter control sequences out of 15000+600000
+ 498385 words of font info for 106 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,15n,80p,686b,730s stack positions out of 5000i,500n,10000p,200000b,80000s
-
-Output written on blackpoker.dvi (177 pages, 772672 bytes).
+ 72i,11n,80p,504b,612s stack positions out of 5000i,500n,10000p,200000b,80000s
+Output written on blackpoker.dvi (41 pages, 128888 bytes).
