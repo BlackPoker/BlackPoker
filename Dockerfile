@@ -21,7 +21,9 @@ COPY ./source/* source/.
 # ------------------------------
 # 実行設定
 # ------------------------------
-RUN apk add --no-cache make
+RUN apk add --no-cache make && \
+    tlmgr update --self && \
+    tlmgr install pxrubrica
 COPY ./docker-build.sh .
 
 # ------------------------------
