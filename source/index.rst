@@ -24,7 +24,18 @@ release: |release|
     appendix/pdf-links
     appendix/anniversary
     appendix/guidelines
+
+.. raw:: latex
+
+   \backmatter
+   \setcounter{secnumdepth}{-1}
+
+.. toctree::
+    :maxdepth: 1
+
     revision-history/revision-history
+    afterword
+
 
 
 .. メモ

@@ -25,12 +25,12 @@ echo "xxxxxxxxxxxxxxxxxxxxx"
 rm -f blackpoker.pdf
 rm -f blackpoker_book.pdf
 
-sed -i -e 's/♡/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
-sed -i -e 's/♥/{\\normalsize \$\\heartsuit\$} /g' blackpoker.tex
-sed -i -e 's/♠/{\\normalsize \$\\spadesuit\$} /g' blackpoker.tex
-sed -i -e 's/♢/{\\normalsize \$\\diamondsuit\$} /g' blackpoker.tex
-sed -i -e 's/♦/{\\normalsize \$\\diamondsuit\$} /g' blackpoker.tex
-sed -i -e 's/♣/{\\normalsize \$\\clubsuit\$} /g' blackpoker.tex
+sed -i -e 's/♡/{\\normalsize \\mbox{\\ensuremath{\\heartsuit}}} /g' blackpoker.tex
+sed -i -e 's/♥/{\\normalsize \\mbox{\\ensuremath{\\heartsuit}}} /g' blackpoker.tex
+sed -i -e 's/♠/{\\normalsize \\mbox{\\ensuremath{\\spadesuit}}} /g' blackpoker.tex
+sed -i -e 's/♢/{\\normalsize \\mbox{\\ensuremath{\\diamondsuit}}} /g' blackpoker.tex
+sed -i -e 's/♦/{\\normalsize \\mbox{\\ensuremath{\\diamondsuit}}} /g' blackpoker.tex
+sed -i -e 's/♣/{\\normalsize \\mbox{\\ensuremath{\\clubsuit}}} /g' blackpoker.tex
 
 # TODO 全面的に囲み数字は廃止する予定だが、action-beginに残っており今後修正予定
 sed -i -e 's/①/\raise0.2ex\hbox{\textcircled{\scriptsize{1}}} /g' blackpoker.tex
