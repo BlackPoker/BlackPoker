@@ -281,7 +281,8 @@ def ruby_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
     # HTML node
     html_node = nodes.raw('', f'<ruby>{base}<rt>{ruby}</rt></ruby>', format='html')
     # LaTeX node
-    latex_node = nodes.raw('', f'\\ruby{{{base}}}{{{ruby}}}', format='latex')
+    # [g]オプションで文字数不一致エラーを回避し、\protectで見出し内のエラーを防ぎます
+    latex_node = nodes.raw('', f'\\protect\\ruby[g]{{{base}}}{{{ruby}}}', format='latex')
     
     return [html_node, latex_node], []
 
