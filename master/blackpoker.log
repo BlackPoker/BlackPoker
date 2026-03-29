@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  29 MAR 2026 10:36
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  29 MAR 2026 19:18
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2680,15 +2680,15 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 
 ] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: E95653E08F4DEB77E8D1B4D24A221C12;36237.
+(rerunfilecheck)             Checksum: 1B507C02757F83360FA536B314252569;36162.
  ) 
 Here is how much of TeX's memory you used:
  16289 strings out of 480496
- 274790 string characters out of 5899437
- 653261 words of memory out of 5000000
+ 274801 string characters out of 5899437
+ 653165 words of memory out of 5000000
  33888 multiletter control sequences out of 15000+600000
  504776 words of font info for 131 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,12n,80p,686b,730s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (175 pages, 768780 bytes).
+Output written on blackpoker.dvi (175 pages, 768480 bytes).
