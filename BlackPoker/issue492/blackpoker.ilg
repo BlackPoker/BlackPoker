@@ -1,0 +1,15 @@
+This is mendex version 3.2 [16-Jan-2020] (utf8.uptex) (TeX Live 2021).
+Scanning dictionary file ../source/_mysetting/mydict.dic....done.
+Scanning input file blackpoker.idx.
+Error: 転生召喚（アクション） is no entry in dictionary file in blackpoker.idx, line 118.
+Error: 誘惑（アクション） is no entry in dictionary file in blackpoker.idx, line 123.
+Error: 破砕士召喚（アクション） is no entry in dictionary file in blackpoker.idx, line 130.
+Error: 破砕士召喚（アクション） is no entry in dictionary file in blackpoker.idx, line 131.
+Error: 粉砕（アクション） is no entry in dictionary file in blackpoker.idx, line 132.
+Error: 破砕士再生（アクション） is no entry in dictionary file in blackpoker.idx, line 133.
+Error: 破砕士（キャラクター） is no entry in dictionary file in blackpoker.idx, line 163.
+Error: 誘惑（切札） is no entry in dictionary file in blackpoker.idx, line 177.
+Error: 破砕士（切札） is no entry in dictionary file in blackpoker.idx, line 182....done (210 entries accepted, 9 rejected).
+210 entries accepted, 9 rejected.
+9 errors, written in blackpoker.ilg.
+Nothing written in output file.
