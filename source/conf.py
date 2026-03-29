@@ -216,6 +216,7 @@ latex_elements = {
     'copyright': copyright,
 },
     'preamble': r'''
+\usepackage{pxrubrica}
 \makeindex
 \usepackage{titlesec}
 \titlespacing{\section}{0pt}{0.8ex}{0.3ex}
@@ -262,3 +263,27 @@ latex_elements = {
 ''',
     'printindex': r'\printindex' + colophon_latex,
 }
+
+# -- Custom Ruby Role ---------------------------------------------------------
+from docutils import nodes
+
+def ruby_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
+    """
+    RST usage: :ruby:`漢字<かんじ>`
+    Outputs <ruby>漢字<rt>かんじ</rt></ruby> in HTML
+    Outputs \ruby{漢字}{かんじ} in LaTeX
+    """
+    if '<' in text and text.endswith('>'):
+        base, ruby = text[:-1].split('<', 1)
+    else:
+        base, ruby = text, ""
+    
+    # HTML node
+    html_node = nodes.raw('', f'<ruby>{base}<rt>{ruby}</rt></ruby>', format='html')
+    # LaTeX node
+    latex_node = nodes.raw('', f'\\ruby{{{base}}}{{{ruby}}}', format='latex')
+    
+    return [html_node, latex_node], []
+
+def setup(app):
+    app.add_role('ruby', ruby_role)

@@ -35,7 +35,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
-${row.actName} (${row.actType})
+${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
 ---------------------------------------------------
         #if(${row.format})
 **フォーマット:**
@@ -177,7 +177,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${char.charName}, ${char.ruby}, "キャラクター")}
 
-${char.charName} (${char.charType})
+${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
 ---------------------------------------------------
         #if(${char.format})
 **フォーマット:**
@@ -297,7 +297,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${fog.fogName}, ${fog.ruby}, "フォグ")}
 
-${fog.fogName} (${fog.fogType})
+${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
 ---------------------------------------------------
         #if(${fog.format})
 **フォーマット:**
@@ -418,7 +418,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${trump.trumpName}, ${trump.ruby}, "切札")}
 
-${trump.trumpName} (${trump.trumpType})
+${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
 ---------------------------------------------------
         #if(${trump.format})
 **フォーマット:**
