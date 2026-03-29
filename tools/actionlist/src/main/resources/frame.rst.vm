@@ -17,7 +17,7 @@
 
 .. _frame-${frame.frameId}:
 
-${frame.name}
+${rstFn.nameWithRuby(${frame.name}, ${frame.ruby})}
 ======================================================
 **配置図:**
 

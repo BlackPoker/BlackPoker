@@ -35,7 +35,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
-${row.actName} (${row.actType})
+${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
 ---------------------------------------------------
         #if(${row.format})
 **フォーマット:**
@@ -138,6 +138,13 @@ ${row.story}
 **更新バージョン:**  ${row.update}
         #end
 
+
+        #if(${row.devNote})
+**補足:**
+
+${row.devNote}
+        #end
+
     #end
 #end
 
@@ -170,7 +177,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${char.charName}, ${char.ruby}, "キャラクター")}
 
-${char.charName} (${char.charType})
+${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
 ---------------------------------------------------
         #if(${char.format})
 **フォーマット:**
@@ -250,6 +257,13 @@ ${char.story}
 **更新バージョン:**  ${char.update}
         #end
 
+
+        #if(${char.devNote})
+**補足:**
+
+${char.devNote}
+        #end
+
     #end
 #end
 
@@ -283,7 +297,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${fog.fogName}, ${fog.ruby}, "フォグ")}
 
-${fog.fogName} (${fog.fogType})
+${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
 ---------------------------------------------------
         #if(${fog.format})
 **フォーマット:**
@@ -352,7 +366,14 @@ ${fog.story}
 
 
         #if(${fog.update})
-**更新バージョン:**  ${fog.story}
+**更新バージョン:**  ${fog.update}
+        #end
+
+
+        #if(${fog.devNote})
+**補足:**
+
+${fog.devNote}
         #end
 
     #end
@@ -367,6 +388,14 @@ ${fog.story}
 ================================================================
 
 $trumpData.description
+
+#if($trumpData.devNote)
+
+**補足:**
+
+$trumpData.devNote
+
+#end
 
 .. contents:: 目次
    :depth: 2
@@ -389,7 +418,7 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${trump.trumpName}, ${trump.ruby}, "切札")}
 
-${trump.trumpName} (${trump.trumpType})
+${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
 ---------------------------------------------------
         #if(${trump.format})
 **フォーマット:**
@@ -464,7 +493,7 @@ ${rstFn.cnv(${trump.trumpAbility})}
 #end
 #end
 #end
-        #if(${trump.image})
+        #if(${trump.image} && !${trump.devNote})
 **イメージ:**  
 ${trump.trumpName}のイメージ (:numref:`frame-${trump.trumpId}-image`)
 
@@ -499,6 +528,28 @@ ${trump.story}
 
         #if(${trump.update})
 **更新バージョン:**  ${trump.update}
+        #end
+
+
+        #if(${trump.image} && ${trump.devNote})
+.. list-table::
+   :widths: 35 65
+   :header-rows: 0
+   :class: borderless
+
+   * - .. _frame-${trump.trumpId}-image:
+       .. figure:: ../frame/images/${trump.image}.*
+          :height: 200px
+          
+          ${trump.trumpName}のイメージ
+     - **補足:**
+
+       ${trump.devNote}
+
+        #elseif(${trump.devNote})
+**補足:**
+
+${trump.devNote}
         #end
 
     #end

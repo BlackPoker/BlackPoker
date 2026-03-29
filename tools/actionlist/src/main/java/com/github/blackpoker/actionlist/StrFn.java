@@ -254,4 +254,17 @@ public class StrFn {
 		}
 	}
 
+	/**
+	 * 名前とルビを受け取り、ルビが必要な場合は「名前（るび）」の形式で返す。
+	 * 名前とルビが同一、またはルビが空の場合は名前のみを返す。
+	 */
+	public String nameWithRuby(String name, String ruby) {
+		if (name == null || name.isEmpty()) {
+			return "";
+		}
+		if (ruby == null || ruby.isEmpty() || name.equals(ruby)) {
+			return name;
+		}
+		return name + "（" + ruby + "）";
+	}
 }
