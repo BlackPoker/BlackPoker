@@ -7,6 +7,4 @@
 .. toctree::
     :maxdepth: 1
 
-    9th
-    8th
-    7th
+    9.0th
