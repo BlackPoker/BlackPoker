@@ -303,7 +303,7 @@ BlackPoker は、 **標準的なトランプだけで遊べる、割込み可能
 
 .. _abstract-overview:
 
-.. figure:: images/abstract_editable_fixed.drawio.*
+.. figure:: images/abstract_editable_fixed.*
    :alt: 基礎概念の全体像（アクション／リクエストとコンポーネント／ユニット）
    :height: 400px
 
