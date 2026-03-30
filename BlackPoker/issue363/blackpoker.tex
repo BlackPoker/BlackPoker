@@ -18942,440 +18942,153 @@ TP: 「エンド」
 \sphinxstepscope
 
 
-\section{第9版の主な変更点（第8.2版 \(\rightarrow\) 第9.0版）}
+\section{第9版 変更履歴}
 \label{\detokenize{revision-history/9th:id1}}\label{\detokenize{revision-history/9th::doc}}
 \begin{sphinxadmonition}{note}{注釈:}
 \sphinxAtStartPar
-この文書は、第8.2版 PDF と第9.0版 PDF を比較して作成した変更履歴案です。
-ソースコードや YAML の差分ではなく、公開 PDF 上で確認できる変更をベースに整理しています。
-そのため、文言整理・章構成変更・表記統一も含みます。
+本文は、第8.2版 PDF と第9.0版 PDF の本文・目次・付録構成を比較して整理したものです。
 \end{sphinxadmonition}
 
 
-\subsection{概要}
-\label{\detokenize{revision-history/9th:id2}}
-\sphinxAtStartPar
-第9版は、単なる文言修正というより、次の3点が大きい版だと読み取れます。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\subsection{文書構成の変更}
+\label{\detokenize{revision-history/9th:id2}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-ルール文書全体の整理
-付録構成の見直し、FAQ の追加、参照先の整理が行われています。
+第10章の付録が再編され、\sphinxcode{\sphinxupquote{付録 A: PDF版ルール・リスト}}、\sphinxcode{\sphinxupquote{付録 B: 周年大会記録}}、\sphinxcode{\sphinxupquote{付録 C: ガイドライン}} の構成になりました。
 
 \item {} 
 \sphinxAtStartPar
-魔法体系の再整理
-これまでの「速攻魔法 / 通常魔法」という見せ方から、
-「基礎魔法 / 中級魔法 / 上級魔法」という難易度・習熟度寄りの整理へ移っています。
+付録Aに \sphinxcode{\sphinxupquote{PDF版ルール}} と \sphinxcode{\sphinxupquote{エクストラリスト}} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-エクストラの実戦調整
-特に切札まわりで、名称変更、新規アクション追加、条件緩和、クイック化が複数あります。
-エクストラを遊んでいるプレイヤーは重点確認が必要です。
-
-\end{enumerate}
-
-
-\subsection{最重要変更（プレイヤー向け）}
-\label{\detokenize{revision-history/9th:id3}}
-
-\subsubsection{1. 魔法分類の整理変更}
-\label{\detokenize{revision-history/9th:id4}}\begin{description}
-\sphinxlineitem{変更前}
-\sphinxAtStartPar
-7.3 のアクションリストは「速攻魔法」「通常魔法」で整理されていました。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-第9版では「基礎魔法」「中級魔法」「上級魔法」に再編されています。
-
-\sphinxlineitem{読み替えの目安}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-基礎魔法
-アップ / ダウン / ツイスト / カウンター
+第5章に \sphinxcode{\sphinxupquote{5.1.1 トリガー, スピード, タイミングの表記}} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-中級魔法
-防壁破壊 / 投擲 / 死の槍 / 防壁補充 / リアニメイト / ハンデス /
-キル / 再会 / 停戦 / 対象変更 / サーチ / リバース / 帰還
+第5章 \sphinxcode{\sphinxupquote{5.4 アクションの解決}} が \sphinxcode{\sphinxupquote{通常の場合}} と \sphinxcode{\sphinxupquote{即時の場合}} に分かれました。
 
 \item {} 
 \sphinxAtStartPar
-上級魔法
-剣の雨 / フォース / 徴募 / 奇襲 / B・J / R・S・F
+第5章に \sphinxcode{\sphinxupquote{5.6.3 よくある質問}} が追加されました。
+
+\item {} 
+\sphinxAtStartPar
+第9章基礎概念に \sphinxcode{\sphinxupquote{パス}} が独立した項目として追加されました。
+
+\item {} 
+\sphinxAtStartPar
+第3章では \sphinxcode{\sphinxupquote{3.10.2 この後の読み方}} がなくなり、\sphinxcode{\sphinxupquote{3.10.2 スクリプト}} に整理されました。
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{能力の適応順}} は \sphinxcode{\sphinxupquote{能力の適用順}} に表記修正されました。
 
 \end{itemize}
 
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-ここは主に分類名の変更です。
-ただし、第9版では「そのアクションが実際にいつ打てるか」は、
-種別名よりも \sphinxcode{\sphinxupquote{@直接\sphinxhyphen{}通常\sphinxhyphen{}メイン}} や \sphinxcode{\sphinxupquote{@直接\sphinxhyphen{}即時\sphinxhyphen{}クイック}} の表記を
-直接読む運用へ寄っています。
 
-\end{description}
-
-
-\subsubsection{2. 切札 {\normalsize \mbox{\ensuremath{\heartsuit}}} 3 は「激励」から「誘惑」に変更}
-\label{\detokenize{revision-history/9th:id5}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
+\subsection{共通ルールの変更}
+\label{\detokenize{revision-history/9th:id3}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-切札名: 激励
+\sphinxcode{\sphinxupquote{ドロー}} の効果が変更されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: 1枚引き、必要であればさらに1枚引く。
 
 \item {} 
 \sphinxAtStartPar
-兵士起因アクション: \sphinxcode{\sphinxupquote{激励}}
-
-\item {} 
-\sphinxAtStartPar
-効果: 対象兵士のサイズをこのターン中 X 加算する。
+新: 基本は2枚引く。ただし、ライフが2以下なら1枚引く。
 
 \end{itemize}
 
-\sphinxlineitem{変更後}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-切札名: 誘惑
+第5章の FAQ として、次の点が明文化されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{対象}} 項目があるアクションは、適法な対象を指定できなければ起こせません。
 
 \item {} 
 \sphinxAtStartPar
-兵士起因アクション: \sphinxcode{\sphinxupquote{誘惑}}
-
-\item {} 
-\sphinxAtStartPar
-効果: 対象の兵士をオーナーの手札に戻す。
-
-\item {} 
-\sphinxAtStartPar
-さらに \sphinxcode{\sphinxupquote{クイック兵士召喚 {\normalsize \mbox{\ensuremath{\heartsuit}}} }} が追加されました。
+アクションを対象とするアクションは、自分自身を対象にできません。
 
 \end{itemize}
 
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-これはかなり大きい変更です。
-旧版の{\normalsize \mbox{\ensuremath{\heartsuit}}} 3は「打点補助・戦闘補助」寄りでしたが、第9版の{\normalsize \mbox{\ensuremath{\heartsuit}}} 3は
-「盤面の兵士を剥がす」「相手兵士をテンポ損させる」方向に役割が変わっています。
-また、同時にクイック召喚手段も得ているため、
-{\normalsize \mbox{\ensuremath{\heartsuit}}} 系の切札としては一時強化よりも、差し戻しと展開補助を担う札として読むべきです。
-
-\end{description}
-
-
-\subsubsection{3. 切札 {\normalsize \mbox{\ensuremath{\diamondsuit}}} 5 は「疲弊」から「虚脱」に変更}
-\label{\detokenize{revision-history/9th:id6}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-アクション名: \sphinxcode{\sphinxupquote{疲弊}}
+\sphinxcode{\sphinxupquote{パス}} が本文で定義されたため、進行上の理解も明確になりました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+チャンスを持つプレイヤーがリクエストしないことを \sphinxcode{\sphinxupquote{パス}} とする。
 
 \item {} 
 \sphinxAtStartPar
-種別: 誘発魔法
-
-\item {} 
-\sphinxAtStartPar
-内容: エンドアクションをリクエストした時に誘発し、
-\sphinxcode{\sphinxupquote{喪失}} を裏返すか、そうしなければ 2 ダメージを受ける。
+全員が連続してパスした場合、ステージ上のリクエスト解決へ進む。
 
 \end{itemize}
 
-\sphinxlineitem{変更後}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-アクション名: \sphinxcode{\sphinxupquote{虚脱}}
+\end{itemize}
 
-\item {} 
-\sphinxAtStartPar
-種別: 魔法
 
+\subsection{アクションリスト・用語の変更}
+\label{\detokenize{revision-history/9th:id4}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-内容: \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  A～K}} を使い、ドライブ状態のキャラクター 1 体を墓地に移す。
+7.3.1 に \sphinxcode{\sphinxupquote{@}} 記法が追加されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+例: \sphinxcode{\sphinxupquote{@ 直接\sphinxhyphen{}通常\sphinxhyphen{}クイック}}
 
 \end{itemize}
 
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-旧版では「維持コスト / デメリット管理」寄りだったのに対し、
-第9版では明確な能動除去へ変わっています。
-名前だけでなく機能も別物と考えた方が安全です。
-旧来の \sphinxcode{\sphinxupquote{疲弊}} 前提でプレイすると誤解しやすい箇所です。
-
-\end{description}
-
-
-\subsubsection{4. 切札 {\normalsize \mbox{\ensuremath{\clubsuit}}} 9 要塞に「反撃」が追加}
-\label{\detokenize{revision-history/9th:id7}}\begin{description}
-\sphinxlineitem{変更前}
-\sphinxAtStartPar
-切札 \sphinxcode{\sphinxupquote{要塞}} 自体の能力のみでした。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{反撃}} という誘発アクションが追加されました。
-条件は「自分の表切札に要塞がある」かつ
-「自分の防壁がダメージ判定でブロッカーとして墓地に移った時」で、
-効果は「アタッカーのオーナーに 2 ダメージ」です。
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-要塞デッキの防壁運用に、明確な報復性能が追加されました。
-防壁が割られて終わりではなく、相手の攻撃側にも確定ダメージが返るため、
-防壁を挟んだ攻防の価値が上がっています。
-
-\end{description}
-
-
-\subsubsection{5. 切札 {\normalsize \mbox{\ensuremath{\diamondsuit}}} A「防壁追加」が使いやすく調整}
-\label{\detokenize{revision-history/9th:a}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-1ターン1回
+魔法分類が再編されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: \sphinxcode{\sphinxupquote{速攻魔法}} / \sphinxcode{\sphinxupquote{通常魔法}}
 
 \item {} 
 \sphinxAtStartPar
-相手の防壁数が自分以上である場合にのみ発動可能
-
-\item {} 
-\sphinxAtStartPar
-ライフの一番上から 1 枚を防壁として配置
+新: \sphinxcode{\sphinxupquote{基礎魔法}} / \sphinxcode{\sphinxupquote{中級魔法}} / \sphinxcode{\sphinxupquote{上級魔法}}
 
 \end{itemize}
 
-\sphinxlineitem{変更後}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-1ターン1回なのは同じ
+分類先の主な移動は次のとおりです。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{アップ}} \sphinxcode{\sphinxupquote{ダウン}} \sphinxcode{\sphinxupquote{ツイスト}} \sphinxcode{\sphinxupquote{カウンター}} は \sphinxcode{\sphinxupquote{基礎魔法}} へ。
 
 \item {} 
 \sphinxAtStartPar
-相手との防壁数比較条件が消えています
+\sphinxcode{\sphinxupquote{キル}} \sphinxcode{\sphinxupquote{再会}} \sphinxcode{\sphinxupquote{停戦}} \sphinxcode{\sphinxupquote{対象変更}} \sphinxcode{\sphinxupquote{サーチ}} \sphinxcode{\sphinxupquote{リバース}} \sphinxcode{\sphinxupquote{帰還}} は \sphinxcode{\sphinxupquote{中級魔法}} へ。
 
 \item {} 
 \sphinxAtStartPar
-ライフの一番上から 1 枚を防壁として配置
-
-\item {} 
-\sphinxAtStartPar
-さらに \sphinxcode{\sphinxupquote{クイック防壁設置}} が追加
-（コスト \sphinxcode{\sphinxupquote{DL}} で手札から防壁をクイック配置）
+\sphinxcode{\sphinxupquote{B・J}} \sphinxcode{\sphinxupquote{R・S・F}} は \sphinxcode{\sphinxupquote{上級魔法}} へ。
 
 \end{itemize}
 
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-第9版では、防壁追加がかなり素直な防御札になりました。
-盤面条件を待たずに使えるため腐りにくく、
-さらにクイック防壁設置により、防御の即応性まで上がっています。
-
-\end{description}
-
-
-\subsubsection{6. 切札 {\normalsize \mbox{\ensuremath{\diamondsuit}}} 4「相殺」は発動条件が緩和}
-\label{\detokenize{revision-history/9th:id8}}\begin{description}
-\sphinxlineitem{変更前}
-\sphinxAtStartPar
-対象リクエストのキーカード数字合計が \sphinxcode{\sphinxupquote{5 以上}} の場合にのみ成立しました。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-数字合計が 5 以上という条件が消え、
-対象リクエストのキーカード数字合計ぶんダメージを受けたうえで、
-そのリクエストを取り除けるようになっています。
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-低い数字のリクエストにも触れるようになったため、
-使える場面が増えました。
-反面、自傷コストは常に発生するので、ライフ管理はより重要です。
-
-\end{description}
-
-
-\subsubsection{7. 切札 {\normalsize \mbox{\ensuremath{\spadesuit}}} 5「蘇生」は対象範囲が拡大}
-\label{\detokenize{revision-history/9th:id9}}\begin{description}
-\sphinxlineitem{変更前}
-\sphinxAtStartPar
-墓地の \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}} 2～10}} を 1 枚選び、兵士として場に出す。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-墓地の \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}} のカード}} を 1 枚選び、兵士として場に出す。
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-数札限定から、より広い{\normalsize \mbox{\ensuremath{\spadesuit}}} カードへ対象が広がっています。
-デッキ構築と墓地利用の幅が増えたと見てよいです。
-
-\end{description}
-
-
-\subsubsection{8. 切札 {\normalsize \mbox{\ensuremath{\diamondsuit}}} 8「修繕」は対象と素材条件が緩和}
-\label{\detokenize{revision-history/9th:id10}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-対象: 自分の場にいる \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}} 2～10}} を含んだ兵士 1 体
-
-\item {} 
-\sphinxAtStartPar
-墓地から選ぶカード: \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}} J～K}}
-
 \end{itemize}
 
-\sphinxlineitem{変更後}\begin{itemize}
+
+\subsection{エクストラの変更}
+\label{\detokenize{revision-history/9th:id5}}
+
+\subsubsection{新規クイック展開・差し込み手段}
+\label{\detokenize{revision-history/9th:id6}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-対象: 自分の場にいる兵士 1 体
-
-\item {} 
-\sphinxAtStartPar
-墓地から選ぶカード: 対象兵士と \sphinxcode{\sphinxupquote{同じスート}} のカード 1 枚
-
-\end{itemize}
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-旧版よりかなり柔らかい条件になっています。
-{\normalsize \mbox{\ensuremath{\diamondsuit}}} 専用ギミック色が薄れ、同スート連携の装備支援札として扱いやすくなりました。
-
-\end{description}
-
-
-\subsubsection{9. 切札 {\normalsize \mbox{\ensuremath{\clubsuit}}} 7「手札補充」は強化}
-\label{\detokenize{revision-history/9th:id11}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-手札 2 枚以下なら 2 ドロー
-
-\item {} 
-\sphinxAtStartPar
-手札 3 枚なら 1 ドロー
-
-\end{itemize}
-
-\sphinxlineitem{変更後}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-条件文は同じ誘発条件ですが、効果は \sphinxcode{\sphinxupquote{2 枚ドロー}} に整理されています。
-
-\end{itemize}
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-旧版より期待値が上がっています。
-手札 3 枚時の弱い補充ではなく、明確なリソース回復札として見てよさそうです。
-
-\end{description}
-
-
-\subsubsection{10. 切札 {\normalsize \mbox{\ensuremath{\clubsuit}}} 8「リセット」はクイック化・簡略化}
-\label{\detokenize{revision-history/9th:id12}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-種別: 通常魔法
-
-\item {} 
-\sphinxAtStartPar
-タイミング: メイン
-
-\item {} 
-\sphinxAtStartPar
-キーカード条件: \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}} A～K}}
-
-\end{itemize}
-
-\sphinxlineitem{変更後}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-種別: 魔法
-
-\item {} 
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{@直接\sphinxhyphen{}即時\sphinxhyphen{}クイック}}
-
-\item {} 
-\sphinxAtStartPar
-キーカード条件の記載が見当たりません
-
-\item {} 
-\sphinxAtStartPar
-効果本体は同じ
-
-\end{itemize}
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-盤面更地の切り返し札として、かなり危険度が上がっています。
-特に「メインでしか打てない全体リセット」から
-「クイックで飛んでくる全体リセット」へ寄った点は、対戦感覚に大きく影響します。
-
-\end{description}
-
-
-\subsubsection{11. 切札 {\normalsize \mbox{\ensuremath{\heartsuit}}} 5「追撃」は使用後に閉じるよう変更}
-\label{\detokenize{revision-history/9th:id13}}\begin{description}
-\sphinxlineitem{変更前}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-兵士全体をチャージ
-
-\item {} 
-\sphinxAtStartPar
-アタックアクションをリクエスト
-
-\end{itemize}
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-上記 2 つに加え、
-* \sphinxcode{\sphinxupquote{自分の切札にある {\normalsize \mbox{\ensuremath{\heartsuit}}} 5 を裏向きにする}}
-\begin{quote}
-
-\sphinxAtStartPar
-が追加されました。
-\end{quote}
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-追撃の連発抑制、あるいは再起動までのテンポ調整が入ったと読めます。
-旧版より、使い切り寄りの一撃札になっています。
-
-\end{description}
-
-
-\subsubsection{12. 「魔王の囁き」の条件変更}
-\label{\detokenize{revision-history/9th:id14}}\begin{description}
-\sphinxlineitem{変更前}
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{自分の表切札に「魔王」がある}} ときに誘発。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-\sphinxcode{\sphinxupquote{自分の場に「魔王」がいる}} ときに誘発。
-
-\sphinxlineitem{プレイへの影響}
-\sphinxAtStartPar
-これは見逃しやすいですが重要です。
-第9版では、単に切札を表にしているだけではなく、
-実際に魔王ユニットが場にいることが要求されています。
-
-\end{description}
-
-
-\subsubsection{13. 新規のクイック展開手段が増加}
-\label{\detokenize{revision-history/9th:id15}}
-\sphinxAtStartPar
-第9版では、次の新規アクションが追加されています。
+次の新規アクションが追加されました。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
@@ -19402,238 +19115,471 @@ TP: 「エンド」
 \sphinxcode{\sphinxupquote{クイック威圧}}
 
 \end{itemize}
-\begin{description}
-\sphinxlineitem{プレイへの影響}
+
+\item {} 
 \sphinxAtStartPar
-エクストラは第8.2版よりも、相手ターン中の展開・応酬・差し込みが強くなっています。
-第9版を遊ぶ場合、相手の表切札を見た時点で、
-「そこからクイックで何が飛んでくるか」を旧版以上に意識する必要があります。
+第9版のエクストラは、旧版より相手ターン中の展開・応酬・差し込みを強く意識する必要があります。
 
-\end{description}
+\end{itemize}
 
 
-\subsection{文書構成・参照性の変更}
-\label{\detokenize{revision-history/9th:id16}}
-
-\subsubsection{1. 付録構成の拡張}
-\label{\detokenize{revision-history/9th:id17}}\begin{description}
-\sphinxlineitem{変更前}
+\subsubsection{スペード系}
+\label{\detokenize{revision-history/9th:id7}}\begin{itemize}
+\item {} 
 \sphinxAtStartPar
-第10章の付録は、主に \sphinxcode{\sphinxupquote{アクションリスト}} と \sphinxcode{\sphinxupquote{ガイドライン}} で構成されていました。
-
-\sphinxlineitem{変更後}
-\sphinxAtStartPar
-第10章は次のように整理されています。
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  2 スラッシュ}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-PDF版ルール
+\sphinxcode{\sphinxupquote{クイック兵士召喚 {\normalsize \mbox{\ensuremath{\spadesuit}}} }} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-アクションリスト
-
-\item {} 
-\sphinxAtStartPar
-エクストラリスト
-
-\item {} 
-\sphinxAtStartPar
-ガイドライン
+表切札が \sphinxcode{\sphinxupquote{スラッシュ}} の時、\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  2～10}} をコスト \sphinxcode{\sphinxupquote{D}} でクイック一般兵として出せます。
 
 \end{itemize}
 
-\sphinxlineitem{影響}
+\item {} 
 \sphinxAtStartPar
-参照先が明確になり、特にエクストラ関係を追いやすくなっています。
-
-\end{description}
-
-
-\subsubsection{2. FAQ 的な小見出しが増加}
-\label{\detokenize{revision-history/9th:faq}}
-\sphinxAtStartPar
-第9版では、共通ルールの中に \sphinxcode{\sphinxupquote{よくある質問}} が複数追加されています。
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  4 威圧}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-切札の持つ項目
+\sphinxcode{\sphinxupquote{クイック威圧}} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-誘発チェック
-
-\item {} 
-\sphinxAtStartPar
-共通ルール: その他
+\sphinxcode{\sphinxupquote{威圧}} と同じくサイズ10以下の兵士を一掃できますが、クイックで差し込めるようになりました。
 
 \end{itemize}
-\begin{description}
-\sphinxlineitem{影響}
+
+\item {} 
 \sphinxAtStartPar
-実戦中の疑問点に対して、本文中から直接たどりやすくなっています。
-
-\end{description}
-
-
-\subsubsection{3. 見出し・用語の整理}
-\label{\detokenize{revision-history/9th:id18}}
-\sphinxAtStartPar
-確認できる範囲では、次のような整理があります。
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  5 蘇生}}
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\sphinxcode{\sphinxupquote{能力の適応順}} \(\rightarrow\) \sphinxcode{\sphinxupquote{能力の適用順}}
+対象範囲が拡大しました。
 
 \item {} 
 \sphinxAtStartPar
-基本ルール中の一部補足節の統廃合
+旧: 自分の墓地の \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  2～10}} 1枚。
 
 \item {} 
 \sphinxAtStartPar
-付録やエクストラリストへの導線整理
+新: 自分の墓地の \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}} }} 1枚。
+
+\item {} 
+\sphinxAtStartPar
+A/J/Q/K を含めて蘇生対象にできます。
 
 \end{itemize}
-\begin{description}
-\sphinxlineitem{影響}
-\sphinxAtStartPar
-このあたりはルールそのものの変更というより、
-読みやすさ・参照性の改善として読むのがよさそうです。
-
-\end{description}
-
-
-\subsection{差分早見表}
-\label{\detokenize{revision-history/9th:id19}}
-
-\subsubsection{名称変更}
-\label{\detokenize{revision-history/9th:id20}}\begin{itemize}
-\item {} 
-\sphinxAtStartPar
-{\normalsize \mbox{\ensuremath{\heartsuit}}} 3 \sphinxcode{\sphinxupquote{激励}} \(\rightarrow\) \sphinxcode{\sphinxupquote{誘惑}}
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize \mbox{\ensuremath{\diamondsuit}}} 5 \sphinxcode{\sphinxupquote{疲弊}} \(\rightarrow\) \sphinxcode{\sphinxupquote{虚脱}}
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\spadesuit}}}  J リアニメーター}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{リアニメーターリアニメイト}} が \sphinxcode{\sphinxupquote{転生召喚}} に名称変更されました。
+
+\item {} 
+\sphinxAtStartPar
+効果参照先は引き続き \sphinxcode{\sphinxupquote{リアニメイト}} であるため、主には名称整理として読めます。
+
+\end{itemize}
 
 \end{itemize}
 
 
-\subsubsection{新規追加}
-\label{\detokenize{revision-history/9th:id21}}\begin{itemize}
+\subsubsection{ハート系}
+\label{\detokenize{revision-history/9th:id8}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-反撃
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  3}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+表切札名が \sphinxcode{\sphinxupquote{激励}} から \sphinxcode{\sphinxupquote{誘惑}} に変更されました。
 
 \item {} 
 \sphinxAtStartPar
-クイック兵士召喚 {\normalsize \mbox{\ensuremath{\spadesuit}}}  / {\normalsize \mbox{\ensuremath{\heartsuit}}}  / {\normalsize \mbox{\ensuremath{\diamondsuit}}}  / {\normalsize \mbox{\ensuremath{\clubsuit}}} 
+兵士起因アクションの内容も変更されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧 \sphinxcode{\sphinxupquote{激励}}: 対象の兵士のサイズを、キーユニットのサイズ分だけターン終了時まで上げる。
 
 \item {} 
 \sphinxAtStartPar
-クイック防壁設置
+新 \sphinxcode{\sphinxupquote{誘惑}}: 対象の兵士1体をオーナー手札に戻す。
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-クイック威圧
+さらに \sphinxcode{\sphinxupquote{クイック兵士召喚 {\normalsize \mbox{\ensuremath{\heartsuit}}} }} が追加されました。
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-PDF版ルール（付録項目）
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  5 追撃}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+効果末尾に \sphinxcode{\sphinxupquote{自分の切札にある {\normalsize \mbox{\ensuremath{\heartsuit}}}  5 を裏向きにする}} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-エクストラリスト（付録項目）
+旧版にあった \sphinxcode{\sphinxupquote{コスト: BDD}} と \sphinxcode{\sphinxupquote{1ターンに1回まで}} の記載はなくなっています。
 
 \item {} 
 \sphinxAtStartPar
-FAQ 小見出し
+旧版感覚の継続使用よりも、切札を閉じる代わりに使う札として読む必要があります。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  8 救済}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+タイミングが \sphinxcode{\sphinxupquote{メイン}} から \sphinxcode{\sphinxupquote{クイック}} に変更されました。
+
+\item {} 
+\sphinxAtStartPar
+旧版にあった \sphinxcode{\sphinxupquote{コスト: B}} の記載がなくなっています。
+
+\item {} 
+\sphinxAtStartPar
+兵士をライフ上へ退避させる動きが相手ターンでも使いやすくなりました。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  J}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{チャリオット}} が \sphinxcode{\sphinxupquote{防壁破壊士}} に名称変更されました。
+
+\item {} 
+\sphinxAtStartPar
+関連アクション名も次のように整理されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{チャリオット召喚}} \(\rightarrow\) \sphinxcode{\sphinxupquote{防壁破壊士召喚}}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{クイックチャリオット召喚}} \(\rightarrow\) \sphinxcode{\sphinxupquote{クイック防壁破壊士召喚}}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{チャリオット防壁破壊}} \(\rightarrow\) \sphinxcode{\sphinxupquote{粉砕}}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{チャリオット再生}} \(\rightarrow\) \sphinxcode{\sphinxupquote{防壁破壊士再生}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{粉砕}} の効果参照先は引き続き \sphinxcode{\sphinxupquote{防壁破壊}} であり、主眼は名称整理です。
+
+\end{itemize}
 
 \end{itemize}
 
 
-\subsubsection{性能変更}
-\label{\detokenize{revision-history/9th:id22}}\begin{itemize}
+\subsubsection{ダイヤ系}
+\label{\detokenize{revision-history/9th:id9}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-防壁追加: 発動条件緩和
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  A 防壁追加}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+発動条件が緩和されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: \sphinxcode{\sphinxupquote{自分の表切札に「防壁追加」がある}} かつ \sphinxcode{\sphinxupquote{対戦相手の防壁の数が自分以上}} かつ \sphinxcode{\sphinxupquote{1ターンに1回まで}}。
 
 \item {} 
 \sphinxAtStartPar
-相殺: 数字合計 5 以上条件を削除
+新: \sphinxcode{\sphinxupquote{自分の表切札に「防壁追加」がある}} かつ \sphinxcode{\sphinxupquote{1ターンに1回まで}}。
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-蘇生: 対象範囲拡大
+さらに \sphinxcode{\sphinxupquote{クイック防壁設置}} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-修繕: 対象と素材条件を緩和
+\sphinxcode{\sphinxupquote{クイック防壁設置}} は、コスト \sphinxcode{\sphinxupquote{DL}} で手札1枚をクイック防壁にできます。
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-手札補充: 固定 2 ドロー化
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  3 交渉}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{クイック兵士召喚 {\normalsize \mbox{\ensuremath{\diamondsuit}}} }} が追加されました。
 
 \item {} 
 \sphinxAtStartPar
-リセット: クイック化
+表切札が \sphinxcode{\sphinxupquote{交渉}} の時、\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  2～10}} をコスト \sphinxcode{\sphinxupquote{D}} でクイック一般兵として出せます。
+
+\end{itemize}
 
 \item {} 
 \sphinxAtStartPar
-追撃: 使用後クローズ追加
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  4 相殺}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象条件が緩和されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: 対象リクエストのキーカード数字合計が \sphinxcode{\sphinxupquote{5以上}} の場合のみ使用可能。
 
 \item {} 
 \sphinxAtStartPar
-魔王の囁き: 誘発条件変更
+新: その条件が削除されました。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+小さい数字のリクエストにも相殺を打てます。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  5 喪失}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+関連アクション名が \sphinxcode{\sphinxupquote{疲弊}} から \sphinxcode{\sphinxupquote{虚脱}} に変更されました。
+
+\item {} 
+\sphinxAtStartPar
+効果も大きく変更されています。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧 \sphinxcode{\sphinxupquote{疲弊}}: ターン終了時に \sphinxcode{\sphinxupquote{喪失}} を裏向きにするか、2点ダメージを受ける。
+
+\item {} 
+\sphinxAtStartPar
+新 \sphinxcode{\sphinxupquote{虚脱}}: ドライブ状態のキャラクター1体を対象にし、そのキャラクターを墓地に移す。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+維持圧をかける札から、クイック除去札へ性質が変わりました。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  8 修繕}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+対象条件と素材条件が大きく緩和されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: \sphinxcode{\sphinxupquote{自分の場にいる {\normalsize \mbox{\ensuremath{\diamondsuit}}}  2～10 を含んだ兵士 1体}} を対象とする。
+
+\item {} 
+\sphinxAtStartPar
+新: \sphinxcode{\sphinxupquote{自分の場にいる兵士 1体}} を対象とする。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+墓地から選ぶカードも変わりました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: ダイヤ高位札前提の専用条件。
+
+\item {} 
+\sphinxAtStartPar
+新: \sphinxcode{\sphinxupquote{対象兵士と同じスートのカード 1枚}}。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+選べた場合、\sphinxcode{\sphinxupquote{装備}} をコストなしでリクエストします。
+
+\item {} 
+\sphinxAtStartPar
+選べなかった場合、対象兵士は墓地に移ります。
+
+\item {} 
+\sphinxAtStartPar
+旧版よりダイヤ専用性が薄れ、同スート装備支援へ寄りました。
+
+\end{itemize}
+
+\end{itemize}
+
+
+\subsubsection{クラブ系}
+\label{\detokenize{revision-history/9th:id10}}\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  4 スイッチ}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{クイック兵士召喚 {\normalsize \mbox{\ensuremath{\clubsuit}}} }} が追加されました。
+
+\item {} 
+\sphinxAtStartPar
+表切札が \sphinxcode{\sphinxupquote{スイッチ}} の時、\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  2～10}} をコスト \sphinxcode{\sphinxupquote{D}} でクイック一般兵として出せます。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  7 手札補充}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+ドロー枚数が固定化されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: 手札2枚以下なら2枚、3枚なら1枚。
+
+\item {} 
+\sphinxAtStartPar
+新: 常に2枚引く。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+旧版より終盤でも安定してリソース回復できます。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  8 リセット}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+性質が大きく変わりました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+旧: \sphinxcode{\sphinxupquote{通常}} \sphinxcode{\sphinxupquote{メイン}}、\sphinxcode{\sphinxupquote{キーカード条件: {\normalsize \mbox{\ensuremath{\clubsuit}}}  A～K}}、効果は全兵士・全防壁破壊と全切札裏返し。
+
+\item {} 
+\sphinxAtStartPar
+新: \sphinxcode{\sphinxupquote{即時}} \sphinxcode{\sphinxupquote{クイック}}、\sphinxcode{\sphinxupquote{コスト: L}}、キーカード条件の記載なし。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+効果に次が追加されました。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{対戦相手は手札を2枚捨ててもよい。捨てた場合、あなたの裏切札にある {\normalsize \mbox{\ensuremath{\clubsuit}}}  8 を墓地に移す。}}
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+全面リセットをクイックで差し込める一方、相手にケア手段が追加されました。
+
+\end{itemize}
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  9 要塞}}
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+新規誘発アクション \sphinxcode{\sphinxupquote{反撃}} が追加されました。
+
+\item {} 
+\sphinxAtStartPar
+自分の防壁がダメージ判定でブロッカーとして墓地に移った時、アタッカーのオーナーに2点ダメージを与えます。
+
+\item {} 
+\sphinxAtStartPar
+要塞を見た時は、防壁突破そのものが反撃ダメージのリスクになります。
+
+\end{itemize}
 
 \end{itemize}
 
 
 \subsection{プレイヤー向け確認チェックリスト}
-\label{\detokenize{revision-history/9th:id23}}
-\sphinxAtStartPar
-エクストラを遊ぶプレイヤーは、最低でも次を確認することを推奨します。
-\begin{enumerate}
-\sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
+\label{\detokenize{revision-history/9th:id11}}\begin{itemize}
 \item {} 
 \sphinxAtStartPar
-{\normalsize \mbox{\ensuremath{\heartsuit}}} 3 の運用を旧 \sphinxcode{\sphinxupquote{激励}} ベースの感覚から切り替えたか
+\sphinxcode{\sphinxupquote{ドロー}} は旧版より増えている前提で、手札枚数感覚を見直す。
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize \mbox{\ensuremath{\diamondsuit}}} 5 を旧 \sphinxcode{\sphinxupquote{疲弊}} の維持札ではなく除去札として認識しているか
+7章の魔法分類名称を \sphinxcode{\sphinxupquote{基礎 / 中級 / 上級}} で読み替える。
 
 \item {} 
 \sphinxAtStartPar
-{\normalsize \mbox{\ensuremath{\clubsuit}}} 9 \sphinxcode{\sphinxupquote{要塞}} に \sphinxcode{\sphinxupquote{反撃}} が増えたことを前提に攻撃判断しているか
+\sphinxcode{\sphinxupquote{パス}} の扱いが本文で明文化されたことを踏まえ、ショートカット説明や対戦進行の認識を合わせる。
 
 \item {} 
 \sphinxAtStartPar
-防壁追加 / リセット / 相殺 / 手札補充 の挙動変化を反映したか
+エクストラでは、相手の表切札を見たら \sphinxcode{\sphinxupquote{クイック兵士召喚}} \sphinxcode{\sphinxupquote{クイック防壁設置}} \sphinxcode{\sphinxupquote{クイック威圧}} の有無を必ず意識する。
 
 \item {} 
 \sphinxAtStartPar
-クイック兵士召喚群とクイック防壁設置をケアした立ち回りになっているか
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  3}} は強化札ではなくバウンス札になった前提で使う。
 
 \item {} 
 \sphinxAtStartPar
-魔法の分類名を、旧 \sphinxcode{\sphinxupquote{速攻魔法 / 通常魔法}} のまま覚えていないか
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  5}} と \sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\heartsuit}}}  8}} は旧版より切り返し性能が高い前提で警戒する。
 
-\end{enumerate}
-
-
-\subsection{採用用の短縮版見出し案}
-\label{\detokenize{revision-history/9th:id24}}
+\item {} 
 \sphinxAtStartPar
-公式ルールの既存の変更履歴章に追記する場合は、例えば次のような節名で入れやすいと思います。
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  4}} は小さいリクエストにも打てる。
 
-\begin{sphinxVerbatim}[commandchars=\\\{\}]
-\PYG{l+m+mf}{11.0} \PYG{n}{第9版の主な変更点}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\diamondsuit}}}  5}} は維持圧ではなく除去札になった。
 
-\PYG{l+m+mf}{11.0}\PYG{l+m+mf}{.1} \PYG{n}{魔法分類の整理}
-\PYG{l+m+mf}{11.0}\PYG{l+m+mf}{.2} \PYG{n}{エクストラの主な調整}
-\PYG{l+m+mf}{11.0}\PYG{l+m+mf}{.3} \PYG{n}{文書構成の整理}
-\end{sphinxVerbatim}
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  8}} はクイック全体リセットになった。
+
+\item {} 
+\sphinxAtStartPar
+\sphinxcode{\sphinxupquote{{\normalsize \mbox{\ensuremath{\clubsuit}}}  9}} は防壁が割られた時の反撃ダメージを忘れない。
+
+\end{itemize}
 
 \sphinxstepscope
 

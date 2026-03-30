@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 16:29
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 17:05
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2391,278 +2391,21 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `\rightarrow' on input line 18875.
 
-[148]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 18945.
+[148] [149
 
 
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 18945.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18987--18989
+] [150] [151] [152]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 19641--19642
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18991--18993
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18994--18995
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19014--19019
-[]
- []
-
-[149
-
-
-]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19023.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19025--19026
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19040--19041
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19060--19066
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19070.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19072--19073
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19088--19089
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19104--19109
-[]
- []
-
-[150]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19113.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19116--19118
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19120--19125
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19127--19131
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19135.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19137--19138
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19152--19153
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19173--19177
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19181.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19184--19186
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19188--19192
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19194--19198
-[]
- []
-
-[151]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 19202.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19205--19207
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19209--19211
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19213--19216
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19220.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19222--19223
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19233--19234
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19245--19248
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19252.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19254--19255
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19265--19266
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19273--19276
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19280.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19282--19283
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19297--19298
-[]
- []
-
-[152]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19317--19321
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19325.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19327--19328
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19339--19342
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19349--19352
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19359--19361
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19363--19365
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19367--19371
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19407--19411
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 19652--19653
 []
  []
 
 [153]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19421--19423
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19425--19428
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19447--19449
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19473--19475
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19499--19502
-[]
- []
-
-[154] [155]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19695--19696
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 19683--19684
 []
  []
 
@@ -2671,56 +2414,46 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 19706--19707
 []
  []
 
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19737--19738
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19760--19761
-[]
- []
-
-[156] [157] [158] [159] [160
-
-]
+[154] [155] [156]
 File: blackpoker_logo.pdf Graphic file (type pdf)
 <blackpoker_logo.pdf>
- [161] (./blackpoker.ind [162] [163
+ [157
+
+] (./blackpoker.ind [158] [159
 
 
-] [164])
+] [160])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 20165.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 20111.
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 20165.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 20111.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20165.
+(Font)              scaled to size 11.53198pt on input line 20111.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 20165.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 20111.
 
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 20165.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 20111.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20165.
+(Font)              scaled to size 11.53198pt on input line 20111.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 20169.
+(Font)              scaled to size 5.76599pt on input line 20115.
+ [161
 
-[165
 
-
-] (./blackpoker.aux)
+]
+(./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 101A16D8906283EAAE58F64435B472AE;39430.
+(rerunfilecheck)             Checksum: ABBCBE43E5271004E08E292793ECC4CB;37774.
  ) 
 Here is how much of TeX's memory you used:
- 17176 strings out of 480496
- 291112 string characters out of 5899437
- 693203 words of memory out of 5000000
- 34769 multiletter control sequences out of 15000+600000
- 513368 words of font info for 134 fonts, out of 8000000 for 9000
+ 17153 strings out of 480496
+ 290596 string characters out of 5899437
+ 690944 words of memory out of 5000000
+ 34746 multiletter control sequences out of 15000+600000
+ 511823 words of font info for 128 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,15n,80p,760b,744s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (173 pages, 844128 bytes).
+Output written on blackpoker.dvi (169 pages, 834236 bytes).

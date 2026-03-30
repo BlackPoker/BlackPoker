@@ -395,52 +395,37 @@
 \BOOKMARK [3][-]{subsubsection*.654}{アタックの進行}{subsection.12.3.6}% 394
 \BOOKMARK [3][-]{subsubsection*.655}{ターンの受け渡し（エンドチャージドロー）}{subsection.12.3.6}% 395
 \BOOKMARK [0][-]{chapter*.656}{変更履歴}{}% 396
-\BOOKMARK [1][-]{section*.657}{第9版の主な変更点（第8.2版 \040第9.0版）}{chapter*.656}% 397
-\BOOKMARK [2][-]{subsection*.658}{概要}{section*.657}% 398
-\BOOKMARK [2][-]{subsection*.659}{最重要変更（プレイヤー向け）}{section*.657}% 399
-\BOOKMARK [3][-]{subsubsection*.660}{1. 魔法分類の整理変更}{subsection*.659}% 400
-\BOOKMARK [3][-]{subsubsection*.661}{2. 切札 \0403 は「激励」から「誘惑」に変更}{subsection*.659}% 401
-\BOOKMARK [3][-]{subsubsection*.662}{3. 切札 \0405 は「疲弊」から「虚脱」に変更}{subsection*.659}% 402
-\BOOKMARK [3][-]{subsubsection*.663}{4. 切札 \0409 要塞に「反撃」が追加}{subsection*.659}% 403
-\BOOKMARK [3][-]{subsubsection*.664}{5. 切札 \040A「防壁追加」が使いやすく調整}{subsection*.659}% 404
-\BOOKMARK [3][-]{subsubsection*.665}{6. 切札 \0404「相殺」は発動条件が緩和}{subsection*.659}% 405
-\BOOKMARK [3][-]{subsubsection*.666}{7. 切札 \0405「蘇生」は対象範囲が拡大}{subsection*.659}% 406
-\BOOKMARK [3][-]{subsubsection*.667}{8. 切札 \0408「修繕」は対象と素材条件が緩和}{subsection*.659}% 407
-\BOOKMARK [3][-]{subsubsection*.668}{9. 切札 \0407「手札補充」は強化}{subsection*.659}% 408
-\BOOKMARK [3][-]{subsubsection*.669}{10. 切札 \0408「リセット」はクイック化・簡略化}{subsection*.659}% 409
-\BOOKMARK [3][-]{subsubsection*.670}{11. 切札 \0405「追撃」は使用後に閉じるよう変更}{subsection*.659}% 410
-\BOOKMARK [3][-]{subsubsection*.671}{12. 「魔王の囁き」の条件変更}{subsection*.659}% 411
-\BOOKMARK [3][-]{subsubsection*.672}{13. 新規のクイック展開手段が増加}{subsection*.659}% 412
-\BOOKMARK [2][-]{subsection*.673}{文書構成・参照性の変更}{section*.657}% 413
-\BOOKMARK [3][-]{subsubsection*.674}{1. 付録構成の拡張}{subsection*.673}% 414
-\BOOKMARK [3][-]{subsubsection*.675}{2. FAQ 的な小見出しが増加}{subsection*.673}% 415
-\BOOKMARK [3][-]{subsubsection*.676}{3. 見出し・用語の整理}{subsection*.673}% 416
-\BOOKMARK [2][-]{subsection*.677}{差分早見表}{section*.657}% 417
-\BOOKMARK [3][-]{subsubsection*.678}{名称変更}{subsection*.677}% 418
-\BOOKMARK [3][-]{subsubsection*.679}{新規追加}{subsection*.677}% 419
-\BOOKMARK [3][-]{subsubsection*.680}{性能変更}{subsection*.677}% 420
-\BOOKMARK [2][-]{subsection*.681}{プレイヤー向け確認チェックリスト}{section*.657}% 421
-\BOOKMARK [2][-]{subsection*.682}{採用用の短縮版見出し案}{section*.657}% 422
-\BOOKMARK [1][-]{section*.683}{第8版の主な変更点}{chapter*.656}% 423
-\BOOKMARK [2][-]{subsection*.684}{アクションの定義の変更}{section*.683}% 424
-\BOOKMARK [2][-]{subsection*.685}{能力の解釈を変更}{section*.683}% 425
-\BOOKMARK [2][-]{subsection*.686}{フォグ領域追加}{section*.683}% 426
-\BOOKMARK [2][-]{subsection*.687}{用語追加/変更}{section*.683}% 427
-\BOOKMARK [2][-]{subsection*.688}{オプション削除とフレームへの統合}{section*.683}% 428
-\BOOKMARK [2][-]{subsection*.689}{エクストラをフレーム化 \(8.1\)}{section*.683}% 429
-\BOOKMARK [2][-]{subsection*.690}{曖昧なルールの明確化}{section*.683}% 430
-\BOOKMARK [2][-]{subsection*.691}{ルール外変更点}{section*.683}% 431
-\BOOKMARK [1][-]{section*.692}{第7版の主な変更点}{chapter*.656}% 432
-\BOOKMARK [2][-]{subsection*.693}{リバースのクイック化}{section*.692}% 433
-\BOOKMARK [2][-]{subsection*.694}{ゲーム中のデッキ名称をライフに変更}{section*.692}% 434
-\BOOKMARK [2][-]{subsection*.695}{対戦レギュレーションの定義方法変更}{section*.692}% 435
-\BOOKMARK [2][-]{subsection*.696}{コアフローをわかりやすく整理}{section*.692}% 436
-\BOOKMARK [2][-]{subsection*.697}{B・Jのクイック化}{section*.692}% 437
-\BOOKMARK [2][-]{subsection*.698}{引き分け廃止}{section*.692}% 438
-\BOOKMARK [2][-]{subsection*.699}{ルールの記載を微修正}{section*.692}% 439
-\BOOKMARK [0][-]{chapter*.700}{あとがき}{}% 440
-\BOOKMARK [1][-]{section*.701}{第9.0版アップデートの要点}{chapter*.700}% 441
-\BOOKMARK [1][-]{section*.702}{ロゴと名前の由来}{chapter*.700}% 442
-\BOOKMARK [1][-]{section*.703}{さらなる楽しみ方}{chapter*.700}% 443
-\BOOKMARK [1][-]{section*.704}{最後に}{chapter*.700}% 444
-\BOOKMARK [0][-]{chapter*.705}{索引}{}% 445
+\BOOKMARK [1][-]{section*.657}{第9版 変更履歴}{chapter*.656}% 397
+\BOOKMARK [2][-]{subsection*.658}{文書構成の変更}{section*.657}% 398
+\BOOKMARK [2][-]{subsection*.659}{共通ルールの変更}{section*.657}% 399
+\BOOKMARK [2][-]{subsection*.660}{アクションリスト・用語の変更}{section*.657}% 400
+\BOOKMARK [2][-]{subsection*.661}{エクストラの変更}{section*.657}% 401
+\BOOKMARK [3][-]{subsubsection*.662}{新規クイック展開・差し込み手段}{subsection*.661}% 402
+\BOOKMARK [3][-]{subsubsection*.663}{スペード系}{subsection*.661}% 403
+\BOOKMARK [3][-]{subsubsection*.664}{ハート系}{subsection*.661}% 404
+\BOOKMARK [3][-]{subsubsection*.665}{ダイヤ系}{subsection*.661}% 405
+\BOOKMARK [3][-]{subsubsection*.666}{クラブ系}{subsection*.661}% 406
+\BOOKMARK [2][-]{subsection*.667}{プレイヤー向け確認チェックリスト}{section*.657}% 407
+\BOOKMARK [1][-]{section*.668}{第8版の主な変更点}{chapter*.656}% 408
+\BOOKMARK [2][-]{subsection*.669}{アクションの定義の変更}{section*.668}% 409
+\BOOKMARK [2][-]{subsection*.670}{能力の解釈を変更}{section*.668}% 410
+\BOOKMARK [2][-]{subsection*.671}{フォグ領域追加}{section*.668}% 411
+\BOOKMARK [2][-]{subsection*.672}{用語追加/変更}{section*.668}% 412
+\BOOKMARK [2][-]{subsection*.673}{オプション削除とフレームへの統合}{section*.668}% 413
+\BOOKMARK [2][-]{subsection*.674}{エクストラをフレーム化 \(8.1\)}{section*.668}% 414
+\BOOKMARK [2][-]{subsection*.675}{曖昧なルールの明確化}{section*.668}% 415
+\BOOKMARK [2][-]{subsection*.676}{ルール外変更点}{section*.668}% 416
+\BOOKMARK [1][-]{section*.677}{第7版の主な変更点}{chapter*.656}% 417
+\BOOKMARK [2][-]{subsection*.678}{リバースのクイック化}{section*.677}% 418
+\BOOKMARK [2][-]{subsection*.679}{ゲーム中のデッキ名称をライフに変更}{section*.677}% 419
+\BOOKMARK [2][-]{subsection*.680}{対戦レギュレーションの定義方法変更}{section*.677}% 420
+\BOOKMARK [2][-]{subsection*.681}{コアフローをわかりやすく整理}{section*.677}% 421
+\BOOKMARK [2][-]{subsection*.682}{B・Jのクイック化}{section*.677}% 422
+\BOOKMARK [2][-]{subsection*.683}{引き分け廃止}{section*.677}% 423
+\BOOKMARK [2][-]{subsection*.684}{ルールの記載を微修正}{section*.677}% 424
+\BOOKMARK [0][-]{chapter*.685}{あとがき}{}% 425
+\BOOKMARK [1][-]{section*.686}{第9.0版アップデートの要点}{chapter*.685}% 426
+\BOOKMARK [1][-]{section*.687}{ロゴと名前の由来}{chapter*.685}% 427
+\BOOKMARK [1][-]{section*.688}{さらなる楽しみ方}{chapter*.685}% 428
+\BOOKMARK [1][-]{section*.689}{最後に}{chapter*.685}% 429
+\BOOKMARK [0][-]{chapter*.690}{索引}{}% 430
