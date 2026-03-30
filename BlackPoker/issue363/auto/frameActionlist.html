@@ -1,0 +1,4803 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>フレームアクションリスト &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="コアルール" href="../core/core.html" />
+    <link rel="prev" title="公式フレーム" href="framelist.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="../frame/frame.html" accesskey="U">フレーム</a>
+            <a class="top" href="#">フレームアクションリスト</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="framelist.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            公式フレーム
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../core/core.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            コアルール
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="../frame/frame.html">フレーム</a> &#187;</li>
+    <li><a href="">フレームアクションリスト</a></li> 
+  </ul>
+</nav>
+<section id="actionlist-act-frame">
+<span id="act-act-frame"></span><span id="id1"></span><h1><span class="section-number">8.3.2. </span>フレームアクションリスト<a class="headerlink" href="#actionlist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><strong>表記について</strong></p>
+<ul class="simple">
+<li><p><strong>&#64;</strong> はトリガー-スピード-タイミングの短縮表記です。（例: &#64;直接-通常-クイック）</p></li>
+</ul>
+</div>
+<nav class="contents local" id="id2">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id3" id="id205">パック操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#ruby-rt-rt-ruby-protect-ruby-g" id="id206"><ruby>パック開封<rt>パックかいふう</rt></ruby> (パック操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id4" id="id207">レアカード操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-1" id="id208">レアドロー (レアカード操作)</a></p></li>
+<li><p><a class="reference internal" href="#index-2" id="id209"><ruby>レア召喚<rt>レアしょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-3" id="id210"><ruby>罠カウンター<rt>わなカウンター</rt></ruby> (レアカード操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id8" id="id211">切札操作</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-4" id="id212">クイックオープン (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#index-5" id="id213">メインオープン (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#index-6" id="id214">クローズ (切札操作)</a></p></li>
+<li><p><a class="reference internal" href="#index-7" id="id215"><ruby>切札破壊<rt>きりふだはかい</rt></ruby> (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#a" id="id216">切札♠A 革命</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-8" id="id217"><ruby>革命ドロー<rt>かくめいドロー</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id14" id="id218">切札♠2 スラッシュ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-9" id="id219">スラッシュ (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-10" id="id220"><ruby>クイック兵士召喚♠<rt>クイックへいししょうかんスペード</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id17" id="id221">切札♠3 ドレイン</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-11" id="id222">ドレイン (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id19" id="id223">切札♠4 威圧</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-12" id="id224"><ruby>威圧<rt>いあつ</rt></ruby> (魔法)</a></p></li>
+<li><p><a class="reference internal" href="#index-13" id="id225"><ruby>クイック威圧<rt>クイックいあつ</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id22" id="id226">切札♠5 蘇生</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-14" id="id227"><ruby>蘇生<rt>そせい</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id24" id="id228">切札♠7 瞬殺</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-15" id="id229"><ruby>瞬殺<rt>しゅんさつ</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#j" id="id230">切札♠J リアニメーター</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-16" id="id231"><ruby>リアニメーター召喚<rt>リアニメーターしょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-17" id="id232"><ruby>クイックリアニメーター召喚<rt>クイックリアニメーターしょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-18" id="id233"><ruby>転生召喚<rt>てんせいしょうかん</rt></ruby> (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-19" id="id234"><ruby>リアニメーター再生<rt>リアニメーターさいせい</rt></ruby> (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#k" id="id235">切札♠K 魔王</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-20" id="id236"><ruby>魔王召喚<rt>まおうしょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-21" id="id237"><ruby>魔王の囁き<rt>まおうのささやき</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id32" id="id238">切札♡2 援軍</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-22" id="id239"><ruby>援軍<rt>えんぐん</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id34" id="id240">切札♡3 誘惑</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-23" id="id241">誘惑 (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-24" id="id242"><ruby>クイック兵士召喚♡<rt>クイックへいししょうかんハート</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id37" id="id243">切札♡4 休戦</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-25" id="id244"><ruby>休戦<rt>きゅうせん</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id39" id="id245">切札♡5 追撃</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-26" id="id246"><ruby>追撃<rt>ついげき</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id41" id="id247">切札♡7 ファントム</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-27" id="id248">ファントムリバース (魔法)</a></p></li>
+<li><p><a class="reference internal" href="#index-28" id="id249"><ruby>幻影<rt>げんえい</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id44" id="id250">切札♡8 救済</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-29" id="id251"><ruby>救済<rt>きゅうさい</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id46" id="id252">切札♡J 破砕士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-30" id="id253"><ruby>破砕士召喚<rt>はさいししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-31" id="id254"><ruby>クイック破砕士召喚<rt>クイックはさいししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-32" id="id255"><ruby>粉砕<rt>ふんさい</rt></ruby> (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-33" id="id256"><ruby>破砕士再生<rt>はさいしさいせい</rt></ruby> (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id51" id="id257">切札♡K 巨人</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-34" id="id258"><ruby>巨人召喚<rt>きょじんしょうかん</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id53" id="id259">切札♢A 防壁追加</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-35" id="id260"><ruby>防壁追加<rt>ぼうへきついか</rt></ruby> (魔法)</a></p></li>
+<li><p><a class="reference internal" href="#index-36" id="id261"><ruby>クイック防壁設置<rt>クイックぼうへきせっち</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id56" id="id262">切札♢3 交渉</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-37" id="id263"><ruby>交渉<rt>こうしょう</rt></ruby> (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-38" id="id264"><ruby>クイック兵士召喚♢<rt>クイックへいししょうかんダイヤ</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id59" id="id265">切札♢4 相殺</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-39" id="id266"><ruby>相殺<rt>そうさい</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id61" id="id267">切札♢5 喪失</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-40" id="id268"><ruby>虚脱<rt>きょだつ</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id63" id="id269">切札♢8 修繕</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-41" id="id270"><ruby>修繕<rt>しゅうぜん</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id65" id="id271">切札♢9 充足</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-42" id="id272"><ruby>休息<rt>きゅうそく</rt></ruby> (魔法)</a></p></li>
+<li><p><a class="reference internal" href="#index-43" id="id273"><ruby>充足<rt>じゅうそく</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id68" id="id274">切札♢J 策士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-44" id="id275"><ruby>策士召喚<rt>さくししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-45" id="id276"><ruby>クイック策士召喚<rt>クイックさくししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-46" id="id277"><ruby>カウンター策士召喚<rt>カウンターさくししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-47" id="id278"><ruby>先読み<rt>さきよみ</rt></ruby> (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-48" id="id279"><ruby>策士再生<rt>さくしさいせい</rt></ruby> (切札操作)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id74" id="id280">切札♣4 スイッチ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-49" id="id281">スイッチ (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-50" id="id282"><ruby>クイック兵士召喚♣<rt>クイックへいししょうかんクラブ</rt></ruby> (召喚)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id77" id="id283">切札♣5 内乱</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-51" id="id284"><ruby>内乱<rt>ないらん</rt></ruby> (魔法)</a></p></li>
+<li><p><a class="reference internal" href="#index-52" id="id285"><ruby>暴動<rt>ぼうどう</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id80" id="id286">切札♣7 手札補充</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-53" id="id287"><ruby>手札補充<rt>てふだほじゅう</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id82" id="id288">切札♣8 リセット</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-54" id="id289">リセット (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id84" id="id290">切札♣9 要塞</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-55" id="id291"><ruby>反撃<rt>はんげき</rt></ruby> (誘発魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id86" id="id292">切札♣10 悪あがき</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-56" id="id293"><ruby>悪あがき<rt>わるあがき</rt></ruby> (魔法)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id88" id="id294">切札♣J 騎士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-57" id="id295"><ruby>騎士召喚<rt>きししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-58" id="id296"><ruby>クイック騎士召喚<rt>クイックきししょうかん</rt></ruby> (召喚)</a></p></li>
+<li><p><a class="reference internal" href="#index-59" id="id297"><ruby>薙払<rt>なぎはらい</rt></ruby> (兵士起因)</a></p></li>
+<li><p><a class="reference internal" href="#index-60" id="id298"><ruby>騎士再生<rt>きしさいせい</rt></ruby> (切札操作)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id3">
+<h2><a class="toc-backref" href="#id205" role="doc-backlink"><span class="section-number">8.3.2.1. </span>パック操作</a><a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-packopen"></span><section id="ruby-rt-rt-ruby-protect-ruby-g">
+<span id="index-0"></span><h3><a class="toc-backref" href="#id206" role="doc-backlink"><span class="section-number">8.3.2.1.1. </span><ruby>パック開封<rt>パックかいふう</rt></ruby> (パック操作)</a><a class="headerlink" href="#ruby-rt-rt-ruby-protect-ruby-g" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>パックが開封済みでない場合のみこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>パックの中から好きなカードを1枚選び対戦相手に見せ手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。</p></li>
+<li><p>パックを表向きにし、開封済みとする。</p></li>
+</ol>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id4">
+<h2><a class="toc-backref" href="#id207" role="doc-backlink"><span class="section-number">8.3.2.2. </span>レアカード操作</a><a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-raredraw"></span><section id="index-1">
+<span id="id5"></span><h3><a class="toc-backref" href="#id208" role="doc-backlink"><span class="section-number">8.3.2.2.1. </span>レアドロー (レアカード操作)</a><a class="headerlink" href="#index-1" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</p>
+<p><strong>効果:</strong></p>
+<p>レアカードを1枚手札に加える。</p>
+<hr class="docutils" />
+<span class="target" id="act-summonsrare"></span></section>
+<section id="index-2">
+<span id="id6"></span><h3><a class="toc-backref" href="#id209" role="doc-backlink"><span class="section-number">8.3.2.2.2. </span><ruby>レア召喚<rt>レアしょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> レアカード1枚</p>
+<p><strong>コスト:</strong> S</p>
+<p><strong>特記事項:</strong> ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</p>
+<p><strong>起動条件:</strong></p>
+<p>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを兵士として表向きかつチャージ状態で場に出す。</p>
+<hr class="docutils" />
+<span class="target" id="act-trapcounter"></span></section>
+<section id="index-3">
+<span id="id7"></span><h3><a class="toc-backref" href="#id210" role="doc-backlink"><span class="section-number">8.3.2.2.3. </span><ruby>罠カウンター<rt>わなカウンター</rt></ruby> (レアカード操作)</a><a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーカード条件:</strong> レアカード1枚</p>
+<p><strong>特記事項:</strong> ※このアクションが起こされた時、キーカード(レアカード)はステージ上に置かれ完全公開となる。</p>
+<p><strong>対象:</strong></p>
+<p>キーカードが1枚または2枚のリクエスト</p>
+<p><strong>効果:</strong></p>
+<p>対象リクエストのキーカードのいずれかがこのアクションのキーカードと同じ場合、対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
+<p><strong>更新バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>罠カウンターをカウンターできていたのでv9.0で即時化</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id8">
+<h2><a class="toc-backref" href="#id211" role="doc-backlink"><span class="section-number">8.3.2.3. </span>切札操作</a><a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-quickopen"></span><section id="index-4">
+<span id="id9"></span><h3><a class="toc-backref" href="#id212" role="doc-backlink"><span class="section-number">8.3.2.3.1. </span>クイックオープン (切札操作)</a><a class="headerlink" href="#index-4" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>コスト:</strong> DD</p>
+<p><strong>効果:</strong></p>
+<p>自分の裏切札を1枚表にし表切札とする。</p>
+<hr class="docutils" />
+<span class="target" id="act-open"></span></section>
+<section id="index-5">
+<span id="id10"></span><h3><a class="toc-backref" href="#id213" role="doc-backlink"><span class="section-number">8.3.2.3.2. </span>メインオープン (切札操作)</a><a class="headerlink" href="#index-5" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-メイン</p>
+<p><strong>コスト:</strong> BBL</p>
+<p><strong>効果:</strong></p>
+<p>自分の裏切札を1枚表にし表切札とする。</p>
+<hr class="docutils" />
+<span class="target" id="act-close"></span></section>
+<section id="index-6">
+<span id="id11"></span><h3><a class="toc-backref" href="#id214" role="doc-backlink"><span class="section-number">8.3.2.3.3. </span>クローズ (切札操作)</a><a class="headerlink" href="#index-6" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> Q</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>対象:</strong></p>
+<p>表切札1枚</p>
+<p><strong>効果:</strong></p>
+<p>対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。</p>
+<hr class="docutils" />
+<span class="target" id="act-trumpdestroy"></span></section>
+<section id="index-7">
+<span id="id12"></span><h3><a class="toc-backref" href="#id215" role="doc-backlink"><span class="section-number">8.3.2.3.4. </span><ruby>切札破壊<rt>きりふだはかい</rt></ruby> (切札操作)</a><a class="headerlink" href="#index-7" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> A〜K</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>対象:</strong></p>
+<p>表切札1枚</p>
+<p><strong>効果:</strong></p>
+<p>対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="a">
+<h2><a class="toc-backref" href="#id216" role="doc-backlink"><span class="section-number">8.3.2.4. </span>切札♠A 革命</a><a class="headerlink" href="#a" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-revolutiondraw"></span><section id="index-8">
+<span id="id13"></span><h3><a class="toc-backref" href="#id217" role="doc-backlink"><span class="section-number">8.3.2.4.1. </span><ruby>革命ドロー<rt>かくめいドロー</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-8" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「革命」があるかつ、自分の &lt;革命ドロー&gt; を持つ兵士がアタッカーかつ、ダメージ判定アクションにてブロックされていない時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からカードを1枚引き、手札に加える。</p>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id14">
+<h2><a class="toc-backref" href="#id218" role="doc-backlink"><span class="section-number">8.3.2.5. </span>切札♠2 スラッシュ</a><a class="headerlink" href="#id14" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-slash"></span><section id="index-9">
+<span id="id15"></span><h3><a class="toc-backref" href="#id219" role="doc-backlink"><span class="section-number">8.3.2.5.1. </span>スラッシュ (兵士起因)</a><a class="headerlink" href="#index-9" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> &lt;スラッシュ&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スラッシュ」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: コストを軽減し使いやすく修正。</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksoldiersummons"></span></section>
+<section id="index-10">
+<span id="id16"></span><h3><a class="toc-backref" href="#id220" role="doc-backlink"><span class="section-number">8.3.2.5.2. </span><ruby>クイック兵士召喚♠<rt>クイックへいししょうかんスペード</rt></ruby> (召喚)</a><a class="headerlink" href="#index-10" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♠2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スラッシュ」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを一般兵として表向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id17">
+<h2><a class="toc-backref" href="#id221" role="doc-backlink"><span class="section-number">8.3.2.6. </span>切札♠3 ドレイン</a><a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-drain"></span><section id="index-11">
+<span id="id18"></span><h3><a class="toc-backref" href="#id222" role="doc-backlink"><span class="section-number">8.3.2.6.1. </span>ドレイン (魔法)</a><a class="headerlink" href="#index-11" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「ドレイン」がある</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいるキャラクター1体をライフの一番下に移す。移せた場合、対象の対戦相手に2点のダメージを与える。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id19">
+<h2><a class="toc-backref" href="#id223" role="doc-backlink"><span class="section-number">8.3.2.7. </span>切札♠4 威圧</a><a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-intimidate"></span><section id="index-12">
+<span id="id20"></span><h3><a class="toc-backref" href="#id224" role="doc-backlink"><span class="section-number">8.3.2.7.1. </span><ruby>威圧<rt>いあつ</rt></ruby> (魔法)</a><a class="headerlink" href="#index-12" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「威圧」がある</p>
+<p><strong>効果:</strong></p>
+<p>サイズが10以下の兵士を全て墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-quickintimidate"></span></section>
+<section id="index-13">
+<span id="id21"></span><h3><a class="toc-backref" href="#id225" role="doc-backlink"><span class="section-number">8.3.2.7.2. </span><ruby>クイック威圧<rt>クイックいあつ</rt></ruby> (魔法)</a><a class="headerlink" href="#index-13" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♠A〜10</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「威圧」がある</p>
+<p><strong>効果:</strong></p>
+<p>サイズが10以下の兵士を全て墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id22">
+<h2><a class="toc-backref" href="#id226" role="doc-backlink"><span class="section-number">8.3.2.8. </span>切札♠5 蘇生</a><a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-resurrection"></span><section id="index-14">
+<span id="id23"></span><h3><a class="toc-backref" href="#id227" role="doc-backlink"><span class="section-number">8.3.2.8.1. </span><ruby>蘇生<rt>そせい</rt></ruby> (魔法)</a><a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「蘇生」がある</p>
+<p><strong>効果:</strong></p>
+<p>自分の墓地にある♠のカードを1枚選ぶ。選んだカードを兵士としてチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 墓地から選ぶカードの条件を緩和し使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id24">
+<h2><a class="toc-backref" href="#id228" role="doc-backlink"><span class="section-number">8.3.2.9. </span>切札♠7 瞬殺</a><a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-instantkill"></span><section id="index-15">
+<span id="id25"></span><h3><a class="toc-backref" href="#id229" role="doc-backlink"><span class="section-number">8.3.2.9.1. </span><ruby>瞬殺<rt>しゅんさつ</rt></ruby> (魔法)</a><a class="headerlink" href="#index-15" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「瞬殺」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいる兵士を1体以上任意の数だけ墓地に移す。この方法で墓地に移した兵士のサイズの合計値が対象の兵士のサイズ以上の場合、対象の兵士を墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="j">
+<h2><a class="toc-backref" href="#id230" role="doc-backlink"><span class="section-number">8.3.2.10. </span>切札♠J リアニメーター</a><a class="headerlink" href="#j" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summonreanimator"></span><section id="index-16">
+<span id="id26"></span><h3><a class="toc-backref" href="#id231" role="doc-backlink"><span class="section-number">8.3.2.10.1. </span><ruby>リアニメーター召喚<rt>リアニメーターしょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-16" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーカード条件:</strong> ♡2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「リアニメーター」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♠Jが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>墓地にあるカードを1枚選び、兵士として表向きかつチャージ状態で場に出す。</p></li>
+<li><p>キーカードと切札の♠Jをあわせてリアニメーターとしてチャージ状態で場に出す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksummonreanimator"></span></section>
+<section id="index-17">
+<span id="id27"></span><h3><a class="toc-backref" href="#id232" role="doc-backlink"><span class="section-number">8.3.2.10.2. </span><ruby>クイックリアニメーター召喚<rt>クイックリアニメーターしょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-17" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♡2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「リアニメーター」がある</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「リアニメーター召喚」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-reincarnationsummon"></span></section>
+<section id="index-18">
+<span id="id28"></span><h3><a class="toc-backref" href="#id233" role="doc-backlink"><span class="section-number">8.3.2.10.3. </span><ruby>転生召喚<rt>てんせいしょうかん</rt></ruby> (兵士起因)</a><a class="headerlink" href="#index-18" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーユニット条件:</strong> 「リアニメーター」1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>対象:</strong></p>
+<p>自分のキャラクター1体</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「リアニメイト」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-reanimatorrevive"></span></section>
+<section id="index-19">
+<span id="id29"></span><h3><a class="toc-backref" href="#id234" role="doc-backlink"><span class="section-number">8.3.2.10.4. </span><ruby>リアニメーター再生<rt>リアニメーターさいせい</rt></ruby> (切札操作)</a><a class="headerlink" href="#index-19" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の 「リアニメーター」 が場から墓地に移った時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>墓地から♠Jを1枚選び、自分の表切札として置く。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="k">
+<h2><a class="toc-backref" href="#id235" role="doc-backlink"><span class="section-number">8.3.2.11. </span>切札♠K 魔王</a><a class="headerlink" href="#k" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summondarklord"></span><section id="index-20">
+<span id="id30"></span><h3><a class="toc-backref" href="#id236" role="doc-backlink"><span class="section-number">8.3.2.11.1. </span><ruby>魔王召喚<rt>まおうしょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-20" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> SS</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「魔王」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♠Kが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>全ての兵士を墓地に移す。</p></li>
+<li><p>自分の全ての領域から♣Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</p></li>
+<li><p>♣Kを見つけた場合、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。</p></li>
+<li><p>♣Kが無い場合、切札の♠Kを墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-darkwhisper"></span></section>
+<section id="index-21">
+<span id="id31"></span><h3><a class="toc-backref" href="#id237" role="doc-backlink"><span class="section-number">8.3.2.11.2. </span><ruby>魔王の囁き<rt>まおうのささやき</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-21" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id32">
+<h2><a class="toc-backref" href="#id238" role="doc-backlink"><span class="section-number">8.3.2.12. </span>切札♡2 援軍</a><a class="headerlink" href="#id32" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summonreinforcement"></span><section id="index-22">
+<span id="id33"></span><h3><a class="toc-backref" href="#id239" role="doc-backlink"><span class="section-number">8.3.2.12.1. </span><ruby>援軍<rt>えんぐん</rt></ruby> (魔法)</a><a class="headerlink" href="#index-22" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「援軍」がある</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上から2枚カードをめくり1枚を兵士としてチャージ状態で場に出し、もう1枚をライフの一番下に移す。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id34">
+<h2><a class="toc-backref" href="#id240" role="doc-backlink"><span class="section-number">8.3.2.13. </span>切札♡3 誘惑</a><a class="headerlink" href="#id34" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-allure"></span><section id="index-23">
+<span id="id35"></span><h3><a class="toc-backref" href="#id241" role="doc-backlink"><span class="section-number">8.3.2.13.1. </span>誘惑 (兵士起因)</a><a class="headerlink" href="#index-23" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> &lt;誘惑&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「誘惑」がある</p>
+<p><strong>対象:</strong></p>
+<p>兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士をオーナー手札に戻す。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 効果を変更したので名前を「激励」から「誘惑」に変更。激励の効果はフォグを用いておらず、可視化に問題があったため修正。</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksoldiersummonh"></span></section>
+<section id="index-24">
+<span id="id36"></span><h3><a class="toc-backref" href="#id242" role="doc-backlink"><span class="section-number">8.3.2.13.2. </span><ruby>クイック兵士召喚♡<rt>クイックへいししょうかんハート</rt></ruby> (召喚)</a><a class="headerlink" href="#index-24" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♡2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「誘惑」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを一般兵として表向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id37">
+<h2><a class="toc-backref" href="#id243" role="doc-backlink"><span class="section-number">8.3.2.14. </span>切札♡4 休戦</a><a class="headerlink" href="#id37" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-retreat"></span><section id="index-25">
+<span id="id38"></span><h3><a class="toc-backref" href="#id244" role="doc-backlink"><span class="section-number">8.3.2.14.1. </span><ruby>休戦<rt>きゅうせん</rt></ruby> (魔法)</a><a class="headerlink" href="#index-25" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「休戦」がある</p>
+<p><strong>対象:</strong></p>
+<p>アタックアクションのリクエスト</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>対象のリクエストを無効にしステージから取り除く。</p></li>
+<li><p>自分の切札にある♡4を裏向きにする。</p></li>
+<li><p>自分の場にいるキャラクターを全てチャージ状態にする。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id39">
+<h2><a class="toc-backref" href="#id245" role="doc-backlink"><span class="section-number">8.3.2.15. </span>切札♡5 追撃</a><a class="headerlink" href="#id39" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-pursuit"></span><section id="index-26">
+<span id="id40"></span><h3><a class="toc-backref" href="#id246" role="doc-backlink"><span class="section-number">8.3.2.15.1. </span><ruby>追撃<rt>ついげき</rt></ruby> (魔法)</a><a class="headerlink" href="#index-26" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「追撃」がある</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>自分の場にいる兵士を全てチャージ状態にする。</p></li>
+<li><p>アタックアクションをリクエストする。</p></li>
+<li><p>自分の切札にある♡5を裏向きにする。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: コストを軽減し使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id41">
+<h2><a class="toc-backref" href="#id247" role="doc-backlink"><span class="section-number">8.3.2.16. </span>切札♡7 ファントム</a><a class="headerlink" href="#id41" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-phantomreverse"></span><section id="index-27">
+<span id="id42"></span><h3><a class="toc-backref" href="#id248" role="doc-backlink"><span class="section-number">8.3.2.16.1. </span>ファントムリバース (魔法)</a><a class="headerlink" href="#index-27" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーユニット条件:</strong> &lt;ファントム&gt; を持つ防壁1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「ファントム」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードの防壁をチャージ状態の兵士にする。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-illusion"></span></section>
+<section id="index-28">
+<span id="id43"></span><h3><a class="toc-backref" href="#id249" role="doc-backlink"><span class="section-number">8.3.2.16.2. </span><ruby>幻影<rt>げんえい</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-28" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-通常-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。</p></li>
+<li><p>自分の場にいる防壁の順番を任意の順番に並び替えてもよい。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id44">
+<h2><a class="toc-backref" href="#id250" role="doc-backlink"><span class="section-number">8.3.2.17. </span>切札♡8 救済</a><a class="headerlink" href="#id44" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-salvation"></span><section id="index-29">
+<span id="id45"></span><h3><a class="toc-backref" href="#id251" role="doc-backlink"><span class="section-number">8.3.2.17.1. </span><ruby>救済<rt>きゅうさい</rt></ruby> (魔法)</a><a class="headerlink" href="#index-29" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♡A〜K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「救済」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードの数字以上の全ての兵士をオーナーのライフの一番上にオーナーの好きな順で移す。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: タイミングをメインからクイックに修正。コストもなしとし使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id46">
+<h2><a class="toc-backref" href="#id252" role="doc-backlink"><span class="section-number">8.3.2.18. </span>切札♡J 破砕士</a><a class="headerlink" href="#id46" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summonwallbreaker"></span><section id="index-30">
+<span id="id47"></span><h3><a class="toc-backref" href="#id253" role="doc-backlink"><span class="section-number">8.3.2.18.1. </span><ruby>破砕士召喚<rt>はさいししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-30" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーカード条件:</strong> ♢2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「破砕士」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♡Jが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>防壁1体を選び墓地に移す。</p></li>
+<li><p>キーカードと切札の♡Jをあわせて破砕士としてチャージ状態で場に出す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksummonwallbreaker"></span></section>
+<section id="index-31">
+<span id="id48"></span><h3><a class="toc-backref" href="#id254" role="doc-backlink"><span class="section-number">8.3.2.18.2. </span><ruby>クイック破砕士召喚<rt>クイックはさいししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-31" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♢2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「破砕士」がある</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「破砕士召喚」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+<hr class="docutils" />
+<span class="target" id="act-pulverize"></span></section>
+<section id="index-32">
+<span id="id49"></span><h3><a class="toc-backref" href="#id255" role="doc-backlink"><span class="section-number">8.3.2.18.3. </span><ruby>粉砕<rt>ふんさい</rt></ruby> (兵士起因)</a><a class="headerlink" href="#index-32" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーユニット条件:</strong> 「破砕士」1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>対象:</strong></p>
+<p>防壁1体</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「防壁破壊」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+<hr class="docutils" />
+<span class="target" id="act-wallbreakerrevive"></span></section>
+<section id="index-33">
+<span id="id50"></span><h3><a class="toc-backref" href="#id256" role="doc-backlink"><span class="section-number">8.3.2.18.4. </span><ruby>破砕士再生<rt>はさいしさいせい</rt></ruby> (切札操作)</a><a class="headerlink" href="#index-33" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の 「破砕士」 が場から墓地に移った時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>墓地から♡Jを1枚選び、自分の表切札として置く。</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id51">
+<h2><a class="toc-backref" href="#id257" role="doc-backlink"><span class="section-number">8.3.2.19. </span>切札♡K 巨人</a><a class="headerlink" href="#id51" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summongiant"></span><section id="index-34">
+<span id="id52"></span><h3><a class="toc-backref" href="#id258" role="doc-backlink"><span class="section-number">8.3.2.19.1. </span><ruby>巨人召喚<rt>きょじんしょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-34" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> SS</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「巨人」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♡Kが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>全ての防壁を墓地に移す。</p></li>
+<li><p>自分の全ての領域から♢Kを探す。非公開の領域を見た場合、その領域をシャッフルする。</p></li>
+<li><p>♢Kを見つけた場合、切札の♡Kと♢Kを合わせて巨人としてチャージ状態で場に出す。</p></li>
+<li><p>♢Kが無い場合、切札の♡Kを墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id53">
+<h2><a class="toc-backref" href="#id259" role="doc-backlink"><span class="section-number">8.3.2.20. </span>切札♢A 防壁追加</a><a class="headerlink" href="#id53" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-putbulwark"></span><section id="index-35">
+<span id="id54"></span><h3><a class="toc-backref" href="#id260" role="doc-backlink"><span class="section-number">8.3.2.20.1. </span><ruby>防壁追加<rt>ぼうへきついか</rt></ruby> (魔法)</a><a class="headerlink" href="#index-35" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-メイン</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「防壁追加」があるかつ、プレイヤーは、1ターンに1回までこのアクションを起こすことができる。</p>
+<p><strong>効果:</strong></p>
+<p>自分のライフの一番上から1枚を防壁として裏向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 防壁枚数の比較条件を削除し使いやすく修正。</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksetbulwark"></span></section>
+<section id="index-36">
+<span id="id55"></span><h3><a class="toc-backref" href="#id261" role="doc-backlink"><span class="section-number">8.3.2.20.2. </span><ruby>クイック防壁設置<rt>クイックぼうへきせっち</rt></ruby> (召喚)</a><a class="headerlink" href="#index-36" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>コスト:</strong> DL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「防壁追加」がある</p>
+<p><strong>効果:</strong></p>
+<p>手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は「防壁の置き方」参照。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id56">
+<h2><a class="toc-backref" href="#id262" role="doc-backlink"><span class="section-number">8.3.2.21. </span>切札♢3 交渉</a><a class="headerlink" href="#id56" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-negotiate"></span><section id="index-37">
+<span id="id57"></span><h3><a class="toc-backref" href="#id263" role="doc-backlink"><span class="section-number">8.3.2.21.1. </span><ruby>交渉<rt>こうしょう</rt></ruby> (兵士起因)</a><a class="headerlink" href="#index-37" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> &lt;交渉&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「交渉」がある</p>
+<p><strong>対象:</strong></p>
+<p>キャラクター1体</p>
+<p><strong>効果:</strong></p>
+<p>対象のキャラクターをドライブする。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksoldiersummond"></span></section>
+<section id="index-38">
+<span id="id58"></span><h3><a class="toc-backref" href="#id264" role="doc-backlink"><span class="section-number">8.3.2.21.2. </span><ruby>クイック兵士召喚♢<rt>クイックへいししょうかんダイヤ</rt></ruby> (召喚)</a><a class="headerlink" href="#index-38" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♢2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「交渉」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを一般兵として表向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id59">
+<h2><a class="toc-backref" href="#id265" role="doc-backlink"><span class="section-number">8.3.2.22. </span>切札♢4 相殺</a><a class="headerlink" href="#id59" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-reckoning"></span><section id="index-39">
+<span id="id60"></span><h3><a class="toc-backref" href="#id266" role="doc-backlink"><span class="section-number">8.3.2.22.1. </span><ruby>相殺<rt>そうさい</rt></ruby> (魔法)</a><a class="headerlink" href="#index-39" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「相殺」がある</p>
+<p><strong>対象:</strong></p>
+<p>キーカードがあるリクエスト</p>
+<p><strong>効果:</strong></p>
+<p>1.対象リクエストのキーカードの数字の合計値分ダメージを受ける。</p>
+<p>2.対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 効果の条件を緩和し、使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id61">
+<h2><a class="toc-backref" href="#id267" role="doc-backlink"><span class="section-number">8.3.2.23. </span>切札♢5 喪失</a><a class="headerlink" href="#id61" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-lethargy"></span><section id="index-40">
+<span id="id62"></span><h3><a class="toc-backref" href="#id268" role="doc-backlink"><span class="section-number">8.3.2.23.1. </span><ruby>虚脱<rt>きょだつ</rt></ruby> (魔法)</a><a class="headerlink" href="#index-40" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♢A〜K</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「喪失」がある</p>
+<p><strong>対象:</strong></p>
+<p>ドライブ状態のキャラクター1体</p>
+<p><strong>効果:</strong></p>
+<p>対象のキャラクターを墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id63">
+<h2><a class="toc-backref" href="#id269" role="doc-backlink"><span class="section-number">8.3.2.24. </span>切札♢8 修繕</a><a class="headerlink" href="#id63" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-repair"></span><section id="index-41">
+<span id="id64"></span><h3><a class="toc-backref" href="#id270" role="doc-backlink"><span class="section-number">8.3.2.24.1. </span><ruby>修繕<rt>しゅうぜん</rt></ruby> (魔法)</a><a class="headerlink" href="#index-41" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-メイン</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「修繕」がある</p>
+<p><strong>対象:</strong></p>
+<p>自分の場にいる兵士1体</p>
+<p><strong>効果:</strong></p>
+<p>対象の兵士が装備アクションの対象にできる場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>対象とした兵士と同じスートのカードを自分の墓地から1枚選ぶ。</p></li>
+<li><p>選べた場合、「装備」アクションをコストを支払わずにリクエストする。対象は対象の兵士、キーカードは選んだカードとする。</p></li>
+<li><p>選べなかった場合、対象の兵士を墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 対象、効果を緩和し使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id65">
+<h2><a class="toc-backref" href="#id271" role="doc-backlink"><span class="section-number">8.3.2.25. </span>切札♢9 充足</a><a class="headerlink" href="#id65" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-rest"></span><section id="index-42">
+<span id="id66"></span><h3><a class="toc-backref" href="#id272" role="doc-backlink"><span class="section-number">8.3.2.25.1. </span><ruby>休息<rt>きゅうそく</rt></ruby> (魔法)</a><a class="headerlink" href="#index-42" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「充足」がある</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいる全ての兵士をチャージ状態にする。</p>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-satisfaction"></span></section>
+<section id="index-43">
+<span id="id67"></span><h3><a class="toc-backref" href="#id273" role="doc-backlink"><span class="section-number">8.3.2.25.2. </span><ruby>充足<rt>じゅうそく</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-43" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-通常-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「充足」があるかつ、エンドアクションをリクエストした時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>自分の場にいる全てのキャラクターをチャージ状態にする。</p>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id68">
+<h2><a class="toc-backref" href="#id274" role="doc-backlink"><span class="section-number">8.3.2.26. </span>切札♢J 策士</a><a class="headerlink" href="#id68" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summonstrategist"></span><section id="index-44">
+<span id="id69"></span><h3><a class="toc-backref" href="#id275" role="doc-backlink"><span class="section-number">8.3.2.26.1. </span><ruby>策士召喚<rt>さくししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-44" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーカード条件:</strong> ♣2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「策士」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♢Jが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。</p></li>
+<li><p>ライフの一番上からカードを1枚引き、手札に加える。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 召喚成功時にライフから1枚ドローする効果を追加。</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksummonstrategist"></span></section>
+<section id="index-45">
+<span id="id70"></span><h3><a class="toc-backref" href="#id276" role="doc-backlink"><span class="section-number">8.3.2.26.2. </span><ruby>クイック策士召喚<rt>クイックさくししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-45" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♣2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「策士」がある</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「策士召喚」を参照。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+<hr class="docutils" />
+<span class="target" id="act-countersummonstrategist"></span></section>
+<section id="index-46">
+<span id="id71"></span><h3><a class="toc-backref" href="#id277" role="doc-backlink"><span class="section-number">8.3.2.26.3. </span><ruby>カウンター策士召喚<rt>カウンターさくししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-46" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♣2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「策士」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♢Jが表の場合、次を行う。</p>
+<ol class="arabic">
+<li><p>ステージ上にあるリクエストを1つ選び無効化しステージから取り除く。そのリクエストは次のいずれかに該当するものとする。Xはこのリクエストのキーカードの数字とする。</p>
+<p>・キーカードが1枚かつそのキーカードの数字がX以下</p>
+<p>・キーカードが2枚</p>
+</li>
+<li><p>キーカードと切札の♢Jをあわせて策士としてチャージ状態で場に出す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: クイック策士召喚から名称を変更。</p>
+<hr class="docutils" />
+<span class="target" id="act-strategistpredict"></span></section>
+<section id="index-47">
+<span id="id72"></span><h3><a class="toc-backref" href="#id278" role="doc-backlink"><span class="section-number">8.3.2.26.4. </span><ruby>先読み<rt>さきよみ</rt></ruby> (兵士起因)</a><a class="headerlink" href="#index-47" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> 「策士」1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>ライフの一番上からカードを2枚引き、手札に加える。</p></li>
+<li><p>手札から1枚選びライフの一番上もしくは一番下に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-strategistrevive"></span></section>
+<section id="index-48">
+<span id="id73"></span><h3><a class="toc-backref" href="#id279" role="doc-backlink"><span class="section-number">8.3.2.26.5. </span><ruby>策士再生<rt>さくしさいせい</rt></ruby> (切札操作)</a><a class="headerlink" href="#index-48" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の 「策士」 が場から墓地に移った時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>墓地から♢Jを1枚選び、自分の表切札として置く。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id74">
+<h2><a class="toc-backref" href="#id280" role="doc-backlink"><span class="section-number">8.3.2.27. </span>切札♣4 スイッチ</a><a class="headerlink" href="#id74" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-switch"></span><section id="index-49">
+<span id="id75"></span><h3><a class="toc-backref" href="#id281" role="doc-backlink"><span class="section-number">8.3.2.27.1. </span>スイッチ (兵士起因)</a><a class="headerlink" href="#index-49" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> &lt;スイッチ&gt; を持つ兵士1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スイッチ」がある</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>手札からカードを1枚選び、兵士としてチャージ状態で場に出す。</p></li>
+<li><p>キーカードを手札に戻す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksoldiersummonc"></span></section>
+<section id="index-50">
+<span id="id76"></span><h3><a class="toc-backref" href="#id282" role="doc-backlink"><span class="section-number">8.3.2.27.2. </span><ruby>クイック兵士召喚♣<rt>クイックへいししょうかんクラブ</rt></ruby> (召喚)</a><a class="headerlink" href="#index-50" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♣2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「スイッチ」がある</p>
+<p><strong>効果:</strong></p>
+<p>キーカードを一般兵として表向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id77">
+<h2><a class="toc-backref" href="#id283" role="doc-backlink"><span class="section-number">8.3.2.28. </span>切札♣5 内乱</a><a class="headerlink" href="#id77" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-civilwar"></span><section id="index-51">
+<span id="id78"></span><h3><a class="toc-backref" href="#id284" role="doc-backlink"><span class="section-number">8.3.2.28.1. </span><ruby>内乱<rt>ないらん</rt></ruby> (魔法)</a><a class="headerlink" href="#index-51" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーカード条件:</strong> ♣A〜K</p>
+<p><strong>コスト:</strong> B</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「内乱」がある</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人</p>
+<p><strong>効果:</strong></p>
+<p>対象の対戦相手の手札の枚数が自分の手札の枚数以上の場合、次を行う。</p>
+<p>・対象の対戦相手は手札を2枚捨てる。</p>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-riot"></span></section>
+<section id="index-52">
+<span id="id79"></span><h3><a class="toc-backref" href="#id285" role="doc-backlink"><span class="section-number">8.3.2.28.2. </span><ruby>暴動<rt>ぼうどう</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-52" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「内乱」があるかつ、対戦相手が手札を捨てた時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>このアクションを誘発した時に捨てられた手札の枚数×2点のダメージを、手札を捨てたプレイヤーに与える。</p>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id80">
+<h2><a class="toc-backref" href="#id286" role="doc-backlink"><span class="section-number">8.3.2.29. </span>切札♣7 手札補充</a><a class="headerlink" href="#id80" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-handrefill"></span><section id="index-53">
+<span id="id81"></span><h3><a class="toc-backref" href="#id287" role="doc-backlink"><span class="section-number">8.3.2.29.1. </span><ruby>手札補充<rt>てふだほじゅう</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-53" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-通常-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「手札補充」があるかつ、エンドアクションをリクエストした時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>ライフの一番上からカードを2枚引き、手札に加える。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 条件を緩和し、2枚固定ドローに変更。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id82">
+<h2><a class="toc-backref" href="#id288" role="doc-backlink"><span class="section-number">8.3.2.30. </span>切札♣8 リセット</a><a class="headerlink" href="#id82" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-reset"></span><section id="index-54">
+<span id="id83"></span><h3><a class="toc-backref" href="#id289" role="doc-backlink"><span class="section-number">8.3.2.30.1. </span>リセット (魔法)</a><a class="headerlink" href="#index-54" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>コスト:</strong> L</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「リセット」がある</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>全ての防壁と兵士を墓地に移す。</p></li>
+<li><p>全ての切札を裏切札にする。</p></li>
+<li><p>対戦相手は手札を2枚捨ててもよい。2枚捨てた場合、あなたの裏切札にある♣8を墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: タイミングをメインからクイックに変更。キーカードを廃止し使いやすく修正。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id84">
+<h2><a class="toc-backref" href="#id290" role="doc-backlink"><span class="section-number">8.3.2.31. </span>切札♣9 要塞</a><a class="headerlink" href="#id84" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-counterattack"></span><section id="index-55">
+<span id="id85"></span><h3><a class="toc-backref" href="#id291" role="doc-backlink"><span class="section-number">8.3.2.31.1. </span><ruby>反撃<rt>はんげき</rt></ruby> (誘発魔法)</a><a class="headerlink" href="#index-55" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の表切札に「要塞」があるかつ、自分の防壁がダメージ判定にてブロッカーとして墓地に移った時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>アタッカーのオーナーに2点のダメージを与える。</p>
+<p><strong>導入バージョン:</strong>  v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: 新規追加。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id86">
+<h2><a class="toc-backref" href="#id292" role="doc-backlink"><span class="section-number">8.3.2.32. </span>切札♣10 悪あがき</a><a class="headerlink" href="#id86" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-lastditch"></span><section id="index-56">
+<span id="id87"></span><h3><a class="toc-backref" href="#id293" role="doc-backlink"><span class="section-number">8.3.2.32.1. </span><ruby>悪あがき<rt>わるあがき</rt></ruby> (魔法)</a><a class="headerlink" href="#index-56" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「悪あがき」がある</p>
+<p><strong>対象:</strong></p>
+<p>キーカードがあるリクエストを対象とする。</p>
+<p><strong>効果:</strong></p>
+<ol class="arabic simple">
+<li><p>対象リクエストをステージから取り除き、対象リクエストのキーカードを墓地に移す。</p></li>
+<li><p>手札を全て捨てる。手札がない場合、自分の切札♣10を墓地に移す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id88">
+<h2><a class="toc-backref" href="#id294" role="doc-backlink"><span class="section-number">8.3.2.33. </span>切札♣J 騎士</a><a class="headerlink" href="#id88" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="act-summonknight"></span><section id="index-57">
+<span id="id89"></span><h3><a class="toc-backref" href="#id295" role="doc-backlink"><span class="section-number">8.3.2.33.1. </span><ruby>騎士召喚<rt>きししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-57" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-メイン</p>
+<p><strong>キーカード条件:</strong> ♠2〜10</p>
+<p><strong>コスト:</strong> BL</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「騎士」がある</p>
+<p><strong>効果:</strong></p>
+<p>切札の♣Jが表の場合、次を行う。</p>
+<ol class="arabic simple">
+<li><p>対戦相手は自分の場にある兵士を1枚選び墓地に移す。</p></li>
+<li><p>キーカードと切札の♣Jをあわせて騎士としてチャージ状態で場に出す。</p></li>
+</ol>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-quicksummonknight"></span></section>
+<section id="index-58">
+<span id="id90"></span><h3><a class="toc-backref" href="#id296" role="doc-backlink"><span class="section-number">8.3.2.33.2. </span><ruby>クイック騎士召喚<rt>クイックきししょうかん</rt></ruby> (召喚)</a><a class="headerlink" href="#index-58" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-通常-クイック</p>
+<p><strong>キーカード条件:</strong> ♠2〜10</p>
+<p><strong>コスト:</strong> D</p>
+<p><strong>起動条件:</strong></p>
+<p>自分の表切札に「騎士」がある</p>
+<p><strong>効果:</strong></p>
+<p>効果の内容は「騎士召喚」を参照。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-knightsweep"></span></section>
+<section id="index-59">
+<span id="id91"></span><h3><a class="toc-backref" href="#id297" role="doc-backlink"><span class="section-number">8.3.2.33.3. </span><ruby>薙払<rt>なぎはらい</rt></ruby> (兵士起因)</a><a class="headerlink" href="#index-59" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 直接-即時-クイック</p>
+<p><strong>キーユニット条件:</strong> 「騎士」1体</p>
+<p><strong>コスト:</strong> C</p>
+<p><strong>対象:</strong></p>
+<p>対戦相手1人</p>
+<p><strong>効果:</strong></p>
+<p>対象の対戦相手は自分の場にいるキャラクターを1体墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<hr class="docutils" />
+<span class="target" id="act-knightrevive"></span></section>
+<section id="index-60">
+<span id="id92"></span><h3><a class="toc-backref" href="#id298" role="doc-backlink"><span class="section-number">8.3.2.33.4. </span><ruby>騎士再生<rt>きしさいせい</rt></ruby> (切札操作)</a><a class="headerlink" href="#index-60" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>&#64;</strong> 誘発-即時-クイック</p>
+<p><strong>誘発条件:</strong></p>
+<p>自分の 「騎士」 が場から墓地に移った時に誘発する。</p>
+<p><strong>効果:</strong></p>
+<p>墓地から♣Jを1枚選び、自分の表切札として置く。</p>
+</section>
+</section>
+</section>
+<section id="characterlist-act-frame">
+<span id="id93"></span><h1><span class="section-number">8.3.3. </span>フレームキャラクターリスト<a class="headerlink" href="#characterlist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id94">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id95" id="id299">切札♠J リアニメーター</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-61" id="id300"><ruby>リアニメーター<rt>りあにめーたー</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id97" id="id301">切札♠K 魔王</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-62" id="id302"><ruby>魔王<rt>まおう</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id99" id="id303">切札♡J 破砕士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-63" id="id304"><ruby>破砕士<rt>はさいし</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id101" id="id305">切札♡K 巨人</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-64" id="id306"><ruby>巨人<rt>きょじん</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id103" id="id307">切札♢J 策士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-65" id="id308"><ruby>策士<rt>さくし</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id105" id="id309">切札♣J 騎士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-66" id="id310"><ruby>騎士<rt>きし</rt></ruby> (兵士)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id95">
+<h2><a class="toc-backref" href="#id299" role="doc-backlink"><span class="section-number">8.3.3.1. </span>切札♠J リアニメーター</a><a class="headerlink" href="#id95" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-reanimator"></span><section id="index-61">
+<span id="id96"></span><h3><a class="toc-backref" href="#id300" role="doc-backlink"><span class="section-number">8.3.3.1.1. </span><ruby>リアニメーター<rt>りあにめーたー</rt></ruby> (兵士)</a><a class="headerlink" href="#index-61" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠J と ♡2〜10</p>
+<p><strong>サイズ:</strong> 11</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・装備アクションの対象にできない。</p>
+<p>・♠兵士としても♡兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id97">
+<h2><a class="toc-backref" href="#id301" role="doc-backlink"><span class="section-number">8.3.3.2. </span>切札♠K 魔王</a><a class="headerlink" href="#id97" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-darklord"></span><section id="index-62">
+<span id="id98"></span><h3><a class="toc-backref" href="#id302" role="doc-backlink"><span class="section-number">8.3.3.2.1. </span><ruby>魔王<rt>まおう</rt></ruby> (兵士)</a><a class="headerlink" href="#index-62" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠K と ♣K</p>
+<p><strong>サイズ:</strong> 26</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・アクションの対象にできない。</p>
+<p>・♠兵士としても♣兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<p><strong>補足:</strong></p>
+<p>・2枚で1体の兵士として扱い、墓地や手札など別の場所に移る場合2枚一緒に移す。防壁になる場合2体の防壁になる。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id99">
+<h2><a class="toc-backref" href="#id303" role="doc-backlink"><span class="section-number">8.3.3.3. </span>切札♡J 破砕士</a><a class="headerlink" href="#id99" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-wallbreaker"></span><section id="index-63">
+<span id="id100"></span><h3><a class="toc-backref" href="#id304" role="doc-backlink"><span class="section-number">8.3.3.3.1. </span><ruby>破砕士<rt>はさいし</rt></ruby> (兵士)</a><a class="headerlink" href="#index-63" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡J と ♢2〜10</p>
+<p><strong>サイズ:</strong> 11</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・装備アクションの対象にできない。</p>
+<p>・♡兵士としても♢兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<p><strong>補足:</strong></p>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id101">
+<h2><a class="toc-backref" href="#id305" role="doc-backlink"><span class="section-number">8.3.3.4. </span>切札♡K 巨人</a><a class="headerlink" href="#id101" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-giant"></span><section id="index-64">
+<span id="id102"></span><h3><a class="toc-backref" href="#id306" role="doc-backlink"><span class="section-number">8.3.3.4.1. </span><ruby>巨人<rt>きょじん</rt></ruby> (兵士)</a><a class="headerlink" href="#index-64" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡K と ♢K</p>
+<p><strong>サイズ:</strong> 26</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・アクションの対象にできない。</p>
+<p>・♡兵士としても♢兵士としても扱う。</p>
+<p>・自分のターンに可能な限りアタックアクションをリクエストし、巨人がチャージ状態の場合、アタッカーに指定する。</p>
+<p>・「ダメージ判定」にてブロッカーが防壁の場合、条件に該当してもこの巨人は墓地に移されない。</p>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<p><strong>補足:</strong></p>
+<p>・2枚で1体の兵士として扱い、墓地や手札など別の場所に移る場合2枚一緒に移す。防壁になる場合2体の防壁になる。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id103">
+<h2><a class="toc-backref" href="#id307" role="doc-backlink"><span class="section-number">8.3.3.5. </span>切札♢J 策士</a><a class="headerlink" href="#id103" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-strategist"></span><section id="index-65">
+<span id="id104"></span><h3><a class="toc-backref" href="#id308" role="doc-backlink"><span class="section-number">8.3.3.5.1. </span><ruby>策士<rt>さくし</rt></ruby> (兵士)</a><a class="headerlink" href="#index-65" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢J と ♣2〜10</p>
+<p><strong>サイズ:</strong> 11</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・装備アクションの対象にできない。</p>
+<p>・♢兵士としても♣兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id105">
+<h2><a class="toc-backref" href="#id309" role="doc-backlink"><span class="section-number">8.3.3.6. </span>切札♣J 騎士</a><a class="headerlink" href="#id105" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="char-knight"></span><section id="index-66">
+<span id="id106"></span><h3><a class="toc-backref" href="#id310" role="doc-backlink"><span class="section-number">8.3.3.6.1. </span><ruby>騎士<rt>きし</rt></ruby> (兵士)</a><a class="headerlink" href="#index-66" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣J と ♠2〜10</p>
+<p><strong>サイズ:</strong> 11</p>
+<p><strong>ラベル:</strong> 攻撃, 防御</p>
+<p><strong>能力:</strong></p>
+<p>・装備アクションの対象にできない。</p>
+<p>・♣兵士としても♠兵士としても扱う。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+</section>
+</section>
+</section>
+<section id="foglist-act-frame">
+<span id="id107"></span><h1><span class="section-number">8.3.4. </span>フレームフォグリスト<a class="headerlink" href="#foglist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<nav class="contents local" id="id108">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id109" id="id311">滞留魔法</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-67" id="id312">クローズ (滞留魔法)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id109">
+<h2><a class="toc-backref" href="#id311" role="doc-backlink"><span class="section-number">8.3.4.1. </span>滞留魔法</a><a class="headerlink" href="#id109" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="fog-closefog"></span><section id="index-67">
+<span id="id110"></span><h3><a class="toc-backref" href="#id312" role="doc-backlink"><span class="section-number">8.3.4.1.1. </span>クローズ (滞留魔法)</a><a class="headerlink" href="#index-67" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> Q</p>
+<p><strong>能力:</strong></p>
+<p>対象とした切札はこのターンが終わるまで表向きにできない。</p>
+<p><strong>導入バージョン:</strong>  v8.1</p>
+</section>
+</section>
+</section>
+<section id="trumplist-act-frame">
+<span id="id111"></span><h1><span class="section-number">8.3.5. </span>フレーム切札リスト<a class="headerlink" href="#trumplist-act-frame" title="この見出しへのパーマリンク">¶</a></h1>
+<p>切札は、ゲームにさらなる戦略性と構築の自由度をもたらす拡張要素です。</p>
+<p>それぞれの切札にはスートと数字に応じた固有の能力が設定されており、多彩なコンボや戦術を可能にします。</p>
+<p>また、トランプとの関連性が深いタロットの象徴イメージを採り入れ、ビジュアル面からも覚えやすさを追求しています。</p>
+<p><strong>補足:</strong></p>
+<p>過去の切札のバージョンと名称：</p>
+<ul class="simple">
+<li><p>第三版 (ex3.4.0 〜 ex3.10.0)</p>
+<ul>
+<li><p>ex3.4.0 第一弾「立ち上がる兵」
+(♠2：スラッシュ、♡3：激励、♢3：交渉、♣4：スイッチ)</p></li>
+<li><p>ex3.10.0 第二弾「巨人と魔王」
+(♠5：蘇生、♡2：援軍、♢A：防壁追加、♣7：手札補充、♠K：魔王、♡K：巨人)</p></li>
+</ul>
+</li>
+<li><p>第四版 (ex4.14.0 〜 ex4.22.0)</p>
+<ul>
+<li><p>ex4.14.0 第三弾「弱者の反撃」
+(♠A：革命、♡8：救済、♢8：修繕、♣5：内乱)</p></li>
+<li><p>ex4.18.0 第四弾「自衛的戦術」
+(♠4：威圧、♡7：ファントム、♢9：充足、♣9：要塞)</p></li>
+<li><p>ex4.22.0 第五弾「for Jack」
+(♠J：リアニメーター、♡J：チャリオット、♢J：策士、♣J：騎士)</p></li>
+</ul>
+</li>
+<li><p>第五版 (ex5.30.0 〜)</p>
+<ul>
+<li><p>ex5.30.0 第六弾「苦渋の選択」
+(♠3：ドレイン、♠7：瞬殺、♡4：休戦、♡5：追撃、♢4：相殺、♢5：喪失、♣8：リセット、♣10：悪あがき)</p></li>
+</ul>
+</li>
+</ul>
+<p>再集録・移植履歴：</p>
+<ul class="simple">
+<li><p>v8.1: 第一弾「立ち上がる兵」を再集録</p></li>
+<li><p>v8.2: 過去の全切札を移植</p></li>
+</ul>
+<nav class="contents local" id="id112">
+<p class="topic-title">目次</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#id113" id="id313">切札♠A 革命</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-68" id="id314"><ruby>革命<rt>かくめい</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id115" id="id315">切札♠2 スラッシュ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-69" id="id316">スラッシュ (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id117" id="id317">切札♠3 ドレイン</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-70" id="id318">ドレイン (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id119" id="id319">切札♠4 威圧</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-71" id="id320"><ruby>威圧<rt>いあつ</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id121" id="id321">切札♠5 蘇生</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-72" id="id322"><ruby>蘇生<rt>そせい</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id123" id="id323">切札♠7 瞬殺</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-73" id="id324"><ruby>瞬殺<rt>しゅんさつ</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id125" id="id325">切札♠J リアニメーター</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-74" id="id326">リアニメーター (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id127" id="id327">切札♠K 魔王</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-75" id="id328"><ruby>魔王<rt>まおう</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id129" id="id329">切札♡2 援軍</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-76" id="id330"><ruby>援軍<rt>えんぐん</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id131" id="id331">切札♡3 誘惑</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-77" id="id332">誘惑 (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id133" id="id333">切札♡4 休戦</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-78" id="id334"><ruby>休戦<rt>きゅうせん</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id135" id="id335">切札♡5 追撃</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-79" id="id336"><ruby>追撃<rt>ついげき</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id137" id="id337">切札♡7 ファントム</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-80" id="id338">ファントム (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id139" id="id339">切札♡8 救済</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-81" id="id340"><ruby>救済<rt>きゅうさい</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id141" id="id341">切札♡J 破砕士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-82" id="id342"><ruby>破砕士<rt>はさいし</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id143" id="id343">切札♡K 巨人</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-83" id="id344"><ruby>巨人<rt>きょじん</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id145" id="id345">切札♢A 防壁追加</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-84" id="id346"><ruby>防壁追加<rt>ぼうへきついか</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id147" id="id347">切札♢3 交渉</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-85" id="id348"><ruby>交渉<rt>こうしょう</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id149" id="id349">切札♢4 相殺</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-86" id="id350"><ruby>相殺<rt>そうさい</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id151" id="id351">切札♢5 喪失</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-87" id="id352"><ruby>喪失<rt>そうしつ</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id153" id="id353">切札♢8 修繕</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-88" id="id354"><ruby>修繕<rt>しゅうぜん</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id155" id="id355">切札♢9 充足</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-89" id="id356"><ruby>充足<rt>じゅうそく</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id157" id="id357">切札♢J 策士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-90" id="id358"><ruby>策士<rt>さくし</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id159" id="id359">切札♣4 スイッチ</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-91" id="id360">スイッチ (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id161" id="id361">切札♣5 内乱</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-92" id="id362"><ruby>内乱<rt>ないらん</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id163" id="id363">切札♣7 手札補充</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-93" id="id364"><ruby>手札補充<rt>てふだほじゅう</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id165" id="id365">切札♣8 リセット</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-94" id="id366">リセット (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id167" id="id367">切札♣9 要塞</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-95" id="id368"><ruby>要塞<rt>ようさい</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id169" id="id369">切札♣10 悪あがき</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-96" id="id370"><ruby>悪あがき<rt>わるあがき</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id171" id="id371">切札♣J 騎士</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-97" id="id372"><ruby>騎士<rt>きし</rt></ruby> (表切札)</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#id173" id="id373">裏切札</a></p>
+<ul>
+<li><p><a class="reference internal" href="#index-98" id="id374"><ruby>裏切札<rt>うらきりふだ</rt></ruby> (裏切札)</a></p></li>
+</ul>
+</li>
+</ul>
+</nav>
+<hr class="docutils" />
+<section id="id113">
+<h2><a class="toc-backref" href="#id313" role="doc-backlink"><span class="section-number">8.3.5.1. </span>切札♠A 革命</a><a class="headerlink" href="#id113" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-sa"></span><section id="index-68">
+<span id="id114"></span><h3><a class="toc-backref" href="#id314" role="doc-backlink"><span class="section-number">8.3.5.1.1. </span><ruby>革命<rt>かくめい</rt></ruby> (表切札)</a><a class="headerlink" href="#index-68" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠A</p>
+<p><strong>能力:</strong></p>
+<p>・自分の兵士は &lt;革命ドロー&gt; を持つ。</p>
+<p>・この能力が有効で場合、対戦相手も含めた全てのダメージ判定アクションの「1.兵士（アタッカー）と兵士（ブロッカー）の場合」を以下のように変更する。</p>
+<p>1.兵士（アタッカー）と兵士（ブロッカー）の場合、アタッカーとブロッカーで数字を比較し、大きい方を墓地に移動する。同じ場合は両方を墓地に移動する。アタッカーとブロッカーを比較した数字の差をダメージとして兵士を墓地に移した方のプレイヤーに与える。1アタッカーに対して複数ブロッカーがいる場合、ブロッカーの合計数字と比較する。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-revolutiondraw"><span class="std std-ref">革命ドロー</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id175">
+<span id="frame-sa-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_01.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.6 </span><span class="caption-text">革命のイメージ</span><a class="headerlink" href="#id175" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「弱者の反撃」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id115">
+<h2><a class="toc-backref" href="#id315" role="doc-backlink"><span class="section-number">8.3.5.2. </span>切札♠2 スラッシュ</a><a class="headerlink" href="#id115" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-s2"></span><section id="index-69">
+<span id="id116"></span><h3><a class="toc-backref" href="#id316" role="doc-backlink"><span class="section-number">8.3.5.2.1. </span>スラッシュ (表切札)</a><a class="headerlink" href="#index-69" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠2</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♠の兵士は &lt;スラッシュ&gt; を持つ。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-slash"><span class="std std-ref">スラッシュ</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksoldiersummons"><span class="std std-ref">クイック兵士召喚♠</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id176">
+<span id="frame-s2-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_02.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.7 </span><span class="caption-text">スラッシュのイメージ</span><a class="headerlink" href="#id176" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「立ち上がる兵」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id117">
+<h2><a class="toc-backref" href="#id317" role="doc-backlink"><span class="section-number">8.3.5.3. </span>切札♠3 ドレイン</a><a class="headerlink" href="#id117" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-s3"></span><section id="index-70">
+<span id="id118"></span><h3><a class="toc-backref" href="#id318" role="doc-backlink"><span class="section-number">8.3.5.3.1. </span>ドレイン (表切札)</a><a class="headerlink" href="#index-70" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠3</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-drain"><span class="std std-ref">ドレイン</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id177">
+<span id="frame-s3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.8 </span><span class="caption-text">ドレインのイメージ</span><a class="headerlink" href="#id177" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id119">
+<h2><a class="toc-backref" href="#id319" role="doc-backlink"><span class="section-number">8.3.5.4. </span>切札♠4 威圧</a><a class="headerlink" href="#id119" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-s4"></span><section id="index-71">
+<span id="id120"></span><h3><a class="toc-backref" href="#id320" role="doc-backlink"><span class="section-number">8.3.5.4.1. </span><ruby>威圧<rt>いあつ</rt></ruby> (表切札)</a><a class="headerlink" href="#index-71" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠4</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-intimidate"><span class="std std-ref">威圧</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quickintimidate"><span class="std std-ref">クイック威圧</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id178">
+<span id="frame-s4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.9 </span><span class="caption-text">威圧のイメージ</span><a class="headerlink" href="#id178" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「自衛的戦術」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id121">
+<h2><a class="toc-backref" href="#id321" role="doc-backlink"><span class="section-number">8.3.5.5. </span>切札♠5 蘇生</a><a class="headerlink" href="#id121" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-s5"></span><section id="index-72">
+<span id="id122"></span><h3><a class="toc-backref" href="#id322" role="doc-backlink"><span class="section-number">8.3.5.5.1. </span><ruby>蘇生<rt>そせい</rt></ruby> (表切札)</a><a class="headerlink" href="#index-72" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠5</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-resurrection"><span class="std std-ref">蘇生</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id179">
+<span id="frame-s5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.10 </span><span class="caption-text">蘇生のイメージ</span><a class="headerlink" href="#id179" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id123">
+<h2><a class="toc-backref" href="#id323" role="doc-backlink"><span class="section-number">8.3.5.6. </span>切札♠7 瞬殺</a><a class="headerlink" href="#id123" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-s7"></span><section id="index-73">
+<span id="id124"></span><h3><a class="toc-backref" href="#id324" role="doc-backlink"><span class="section-number">8.3.5.6.1. </span><ruby>瞬殺<rt>しゅんさつ</rt></ruby> (表切札)</a><a class="headerlink" href="#index-73" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠7</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-instantkill"><span class="std std-ref">瞬殺</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id180">
+<span id="frame-s7-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Swords_07.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.11 </span><span class="caption-text">瞬殺のイメージ</span><a class="headerlink" href="#id180" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id125">
+<h2><a class="toc-backref" href="#id325" role="doc-backlink"><span class="section-number">8.3.5.7. </span>切札♠J リアニメーター</a><a class="headerlink" href="#id125" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-sj"></span><section id="index-74">
+<span id="id126"></span><h3><a class="toc-backref" href="#id326" role="doc-backlink"><span class="section-number">8.3.5.7.1. </span>リアニメーター (表切札)</a><a class="headerlink" href="#index-74" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠J</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summonreanimator"><span class="std std-ref">リアニメーター召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonreanimator"><span class="std std-ref">クイックリアニメーター召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-reincarnationsummon"><span class="std std-ref">転生召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-reanimatorrevive"><span class="std std-ref">リアニメーター再生</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-reanimator"><span class="std std-ref">リアニメーター</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id181">
+<span id="frame-sj-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg" src="../_images/Pictorial_Key_to_the_Tarot_20_Judgement.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.12 </span><span class="caption-text">リアニメーターのイメージ</span><a class="headerlink" href="#id181" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「for Jack」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id127">
+<h2><a class="toc-backref" href="#id327" role="doc-backlink"><span class="section-number">8.3.5.8. </span>切札♠K 魔王</a><a class="headerlink" href="#id127" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-sk"></span><section id="index-75">
+<span id="id128"></span><h3><a class="toc-backref" href="#id328" role="doc-backlink"><span class="section-number">8.3.5.8.1. </span><ruby>魔王<rt>まおう</rt></ruby> (表切札)</a><a class="headerlink" href="#index-75" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♠K</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summondarklord"><span class="std std-ref">魔王召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-darkwhisper"><span class="std std-ref">魔王の囁き</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-darklord"><span class="std std-ref">魔王</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id182">
+<span id="frame-sk-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg" src="../_images/Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.13 </span><span class="caption-text">魔王のイメージ</span><a class="headerlink" href="#id182" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id129">
+<h2><a class="toc-backref" href="#id329" role="doc-backlink"><span class="section-number">8.3.5.9. </span>切札♡2 援軍</a><a class="headerlink" href="#id129" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h2"></span><section id="index-76">
+<span id="id130"></span><h3><a class="toc-backref" href="#id330" role="doc-backlink"><span class="section-number">8.3.5.9.1. </span><ruby>援軍<rt>えんぐん</rt></ruby> (表切札)</a><a class="headerlink" href="#index-76" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡2</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summonreinforcement"><span class="std std-ref">援軍</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id183">
+<span id="frame-h2-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_02.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.14 </span><span class="caption-text">援軍のイメージ</span><a class="headerlink" href="#id183" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id131">
+<h2><a class="toc-backref" href="#id331" role="doc-backlink"><span class="section-number">8.3.5.10. </span>切札♡3 誘惑</a><a class="headerlink" href="#id131" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h3"></span><section id="index-77">
+<span id="id132"></span><h3><a class="toc-backref" href="#id332" role="doc-backlink"><span class="section-number">8.3.5.10.1. </span>誘惑 (表切札)</a><a class="headerlink" href="#index-77" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡3</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♡の兵士は &lt;誘惑&gt; を持つ。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-allure"><span class="std std-ref">誘惑</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksoldiersummonh"><span class="std std-ref">クイック兵士召喚♡</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1, v9.0</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id184">
+<span id="frame-h3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.15 </span><span class="caption-text">誘惑のイメージ</span><a class="headerlink" href="#id184" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>ex3.4.0: 「立ち上がる兵」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>v9.0: 効果を変更したので名前を「激励」から「誘惑」に変更</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id133">
+<h2><a class="toc-backref" href="#id333" role="doc-backlink"><span class="section-number">8.3.5.11. </span>切札♡4 休戦</a><a class="headerlink" href="#id133" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h4"></span><section id="index-78">
+<span id="id134"></span><h3><a class="toc-backref" href="#id334" role="doc-backlink"><span class="section-number">8.3.5.11.1. </span><ruby>休戦<rt>きゅうせん</rt></ruby> (表切札)</a><a class="headerlink" href="#index-78" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡4</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-retreat"><span class="std std-ref">休戦</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id185">
+<span id="frame-h4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.16 </span><span class="caption-text">休戦のイメージ</span><a class="headerlink" href="#id185" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id135">
+<h2><a class="toc-backref" href="#id335" role="doc-backlink"><span class="section-number">8.3.5.12. </span>切札♡5 追撃</a><a class="headerlink" href="#id135" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h5"></span><section id="index-79">
+<span id="id136"></span><h3><a class="toc-backref" href="#id336" role="doc-backlink"><span class="section-number">8.3.5.12.1. </span><ruby>追撃<rt>ついげき</rt></ruby> (表切札)</a><a class="headerlink" href="#index-79" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡5</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-pursuit"><span class="std std-ref">追撃</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id186">
+<span id="frame-h5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.17 </span><span class="caption-text">追撃のイメージ</span><a class="headerlink" href="#id186" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id137">
+<h2><a class="toc-backref" href="#id337" role="doc-backlink"><span class="section-number">8.3.5.13. </span>切札♡7 ファントム</a><a class="headerlink" href="#id137" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h7"></span><section id="index-80">
+<span id="id138"></span><h3><a class="toc-backref" href="#id338" role="doc-backlink"><span class="section-number">8.3.5.13.1. </span>ファントム (表切札)</a><a class="headerlink" href="#index-80" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡7</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる防壁は &lt;ファントム&gt; を持つ。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-phantomreverse"><span class="std std-ref">ファントムリバース</span></a></p></li>
+<li><p><a class="reference internal" href="#act-illusion"><span class="std std-ref">幻影</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id187">
+<span id="frame-h7-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_07.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.18 </span><span class="caption-text">ファントムのイメージ</span><a class="headerlink" href="#id187" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「自衛的戦術」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id139">
+<h2><a class="toc-backref" href="#id339" role="doc-backlink"><span class="section-number">8.3.5.14. </span>切札♡8 救済</a><a class="headerlink" href="#id139" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-h8"></span><section id="index-81">
+<span id="id140"></span><h3><a class="toc-backref" href="#id340" role="doc-backlink"><span class="section-number">8.3.5.14.1. </span><ruby>救済<rt>きゅうさい</rt></ruby> (表切札)</a><a class="headerlink" href="#index-81" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡8</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-salvation"><span class="std std-ref">救済</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id188">
+<span id="frame-h8-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Cups_08.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.19 </span><span class="caption-text">救済のイメージ</span><a class="headerlink" href="#id188" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>ex4.14.0: 「弱者の反撃」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id141">
+<h2><a class="toc-backref" href="#id341" role="doc-backlink"><span class="section-number">8.3.5.15. </span>切札♡J 破砕士</a><a class="headerlink" href="#id141" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-hj"></span><section id="index-82">
+<span id="id142"></span><h3><a class="toc-backref" href="#id342" role="doc-backlink"><span class="section-number">8.3.5.15.1. </span><ruby>破砕士<rt>はさいし</rt></ruby> (表切札)</a><a class="headerlink" href="#index-82" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡J</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summonwallbreaker"><span class="std std-ref">破砕士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonwallbreaker"><span class="std std-ref">クイック破砕士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-pulverize"><span class="std std-ref">粉砕</span></a></p></li>
+<li><p><a class="reference internal" href="#act-wallbreakerrevive"><span class="std std-ref">破砕士再生</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-wallbreaker"><span class="std std-ref">破砕士</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id189">
+<span id="frame-hj-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg" src="../_images/Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.20 </span><span class="caption-text">破砕士のイメージ</span><a class="headerlink" href="#id189" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「for Jack」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>v9.0: チャリオットから破砕士に名称変更。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id143">
+<h2><a class="toc-backref" href="#id343" role="doc-backlink"><span class="section-number">8.3.5.16. </span>切札♡K 巨人</a><a class="headerlink" href="#id143" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-hk"></span><section id="index-83">
+<span id="id144"></span><h3><a class="toc-backref" href="#id344" role="doc-backlink"><span class="section-number">8.3.5.16.1. </span><ruby>巨人<rt>きょじん</rt></ruby> (表切札)</a><a class="headerlink" href="#index-83" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♡K</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summongiant"><span class="std std-ref">巨人召喚</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-giant"><span class="std std-ref">巨人</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id190">
+<span id="frame-hk-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_08_Strength.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_08_Strength.jpg" src="../_images/Pictorial_Key_to_the_Tarot_08_Strength.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.21 </span><span class="caption-text">巨人のイメージ</span><a class="headerlink" href="#id190" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id145">
+<h2><a class="toc-backref" href="#id345" role="doc-backlink"><span class="section-number">8.3.5.17. </span>切札♢A 防壁追加</a><a class="headerlink" href="#id145" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-da"></span><section id="index-84">
+<span id="id146"></span><h3><a class="toc-backref" href="#id346" role="doc-backlink"><span class="section-number">8.3.5.17.1. </span><ruby>防壁追加<rt>ぼうへきついか</rt></ruby> (表切札)</a><a class="headerlink" href="#index-84" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢A</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-putbulwark"><span class="std std-ref">防壁追加</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksetbulwark"><span class="std std-ref">クイック防壁設置</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id191">
+<span id="frame-da-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_01.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_01.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_01.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.22 </span><span class="caption-text">防壁追加のイメージ</span><a class="headerlink" href="#id191" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id147">
+<h2><a class="toc-backref" href="#id347" role="doc-backlink"><span class="section-number">8.3.5.18. </span>切札♢3 交渉</a><a class="headerlink" href="#id147" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-d3"></span><section id="index-85">
+<span id="id148"></span><h3><a class="toc-backref" href="#id348" role="doc-backlink"><span class="section-number">8.3.5.18.1. </span><ruby>交渉<rt>こうしょう</rt></ruby> (表切札)</a><a class="headerlink" href="#index-85" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢3</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♢の兵士は &lt;交渉&gt; を持つ。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-negotiate"><span class="std std-ref">交渉</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksoldiersummond"><span class="std std-ref">クイック兵士召喚♢</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id192">
+<span id="frame-d3-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_03.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.23 </span><span class="caption-text">交渉のイメージ</span><a class="headerlink" href="#id192" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「立ち上がる兵」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id149">
+<h2><a class="toc-backref" href="#id349" role="doc-backlink"><span class="section-number">8.3.5.19. </span>切札♢4 相殺</a><a class="headerlink" href="#id149" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-d4"></span><section id="index-86">
+<span id="id150"></span><h3><a class="toc-backref" href="#id350" role="doc-backlink"><span class="section-number">8.3.5.19.1. </span><ruby>相殺<rt>そうさい</rt></ruby> (表切札)</a><a class="headerlink" href="#index-86" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢4</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-reckoning"><span class="std std-ref">相殺</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id193">
+<span id="frame-d4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.24 </span><span class="caption-text">相殺のイメージ</span><a class="headerlink" href="#id193" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id151">
+<h2><a class="toc-backref" href="#id351" role="doc-backlink"><span class="section-number">8.3.5.20. </span>切札♢5 喪失</a><a class="headerlink" href="#id151" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-d5"></span><section id="index-87">
+<span id="id152"></span><h3><a class="toc-backref" href="#id352" role="doc-backlink"><span class="section-number">8.3.5.20.1. </span><ruby>喪失<rt>そうしつ</rt></ruby> (表切札)</a><a class="headerlink" href="#index-87" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢5</p>
+<p><strong>能力:</strong></p>
+<p>全てのプレイヤーはチャージアクションの効果でキャラクターをチャージ状態にすることができない。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-lethargy"><span class="std std-ref">虚脱</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id194">
+<span id="frame-d5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.25 </span><span class="caption-text">喪失のイメージ</span><a class="headerlink" href="#id194" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>ex5.30.0: 「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>v9.0: 複雑で使いづらいため、能力の条件緩和と疲弊アクションの廃止。</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id153">
+<h2><a class="toc-backref" href="#id353" role="doc-backlink"><span class="section-number">8.3.5.21. </span>切札♢8 修繕</a><a class="headerlink" href="#id153" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-d8"></span><section id="index-88">
+<span id="id154"></span><h3><a class="toc-backref" href="#id354" role="doc-backlink"><span class="section-number">8.3.5.21.1. </span><ruby>修繕<rt>しゅうぜん</rt></ruby> (表切札)</a><a class="headerlink" href="#index-88" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢8</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-repair"><span class="std std-ref">修繕</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id195">
+<span id="frame-d8-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_08.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_08.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_08.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.26 </span><span class="caption-text">修繕のイメージ</span><a class="headerlink" href="#id195" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「弱者の反撃」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id155">
+<h2><a class="toc-backref" href="#id355" role="doc-backlink"><span class="section-number">8.3.5.22. </span>切札♢9 充足</a><a class="headerlink" href="#id155" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-d9"></span><section id="index-89">
+<span id="id156"></span><h3><a class="toc-backref" href="#id356" role="doc-backlink"><span class="section-number">8.3.5.22.1. </span><ruby>充足<rt>じゅうそく</rt></ruby> (表切札)</a><a class="headerlink" href="#index-89" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢9</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-rest"><span class="std std-ref">休息</span></a></p></li>
+<li><p><a class="reference internal" href="#act-satisfaction"><span class="std std-ref">充足</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id196">
+<span id="frame-d9-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Pentacles_09.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Pentacles_09.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Pentacles_09.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.27 </span><span class="caption-text">充足のイメージ</span><a class="headerlink" href="#id196" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「自衛的戦術」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id157">
+<h2><a class="toc-backref" href="#id357" role="doc-backlink"><span class="section-number">8.3.5.23. </span>切札♢J 策士</a><a class="headerlink" href="#id157" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-dj"></span><section id="index-90">
+<span id="id158"></span><h3><a class="toc-backref" href="#id358" role="doc-backlink"><span class="section-number">8.3.5.23.1. </span><ruby>策士<rt>さくし</rt></ruby> (表切札)</a><a class="headerlink" href="#index-90" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♢J</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summonstrategist"><span class="std std-ref">策士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonstrategist"><span class="std std-ref">クイック策士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-countersummonstrategist"><span class="std std-ref">カウンター策士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-strategistpredict"><span class="std std-ref">先読み</span></a></p></li>
+<li><p><a class="reference internal" href="#act-strategistrevive"><span class="std std-ref">策士再生</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-strategist"><span class="std std-ref">策士</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id197">
+<span id="frame-dj-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg" src="../_images/Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.28 </span><span class="caption-text">策士のイメージ</span><a class="headerlink" href="#id197" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「for Jack」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id159">
+<h2><a class="toc-backref" href="#id359" role="doc-backlink"><span class="section-number">8.3.5.24. </span>切札♣4 スイッチ</a><a class="headerlink" href="#id159" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c4"></span><section id="index-91">
+<span id="id160"></span><h3><a class="toc-backref" href="#id360" role="doc-backlink"><span class="section-number">8.3.5.24.1. </span>スイッチ (表切札)</a><a class="headerlink" href="#index-91" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣4</p>
+<p><strong>能力:</strong></p>
+<p>自分の場にいる♣の兵士は &lt;スイッチ&gt; を持つ。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-switch"><span class="std std-ref">スイッチ</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksoldiersummonc"><span class="std std-ref">クイック兵士召喚♣</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.1</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id198">
+<span id="frame-c4-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_04.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.29 </span><span class="caption-text">スイッチのイメージ</span><a class="headerlink" href="#id198" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「立ち上がる兵」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id161">
+<h2><a class="toc-backref" href="#id361" role="doc-backlink"><span class="section-number">8.3.5.25. </span>切札♣5 内乱</a><a class="headerlink" href="#id161" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c5"></span><section id="index-92">
+<span id="id162"></span><h3><a class="toc-backref" href="#id362" role="doc-backlink"><span class="section-number">8.3.5.25.1. </span><ruby>内乱<rt>ないらん</rt></ruby> (表切札)</a><a class="headerlink" href="#index-92" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣5</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-civilwar"><span class="std std-ref">内乱</span></a></p></li>
+<li><p><a class="reference internal" href="#act-riot"><span class="std std-ref">暴動</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.14.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id199">
+<span id="frame-c5-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_05.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_05.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_05.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.30 </span><span class="caption-text">内乱のイメージ</span><a class="headerlink" href="#id199" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「弱者の反撃」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id163">
+<h2><a class="toc-backref" href="#id363" role="doc-backlink"><span class="section-number">8.3.5.26. </span>切札♣7 手札補充</a><a class="headerlink" href="#id163" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c7"></span><section id="index-93">
+<span id="id164"></span><h3><a class="toc-backref" href="#id364" role="doc-backlink"><span class="section-number">8.3.5.26.1. </span><ruby>手札補充<rt>てふだほじゅう</rt></ruby> (表切札)</a><a class="headerlink" href="#index-93" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣7</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-handrefill"><span class="std std-ref">手札補充</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex3.10.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id200">
+<span id="frame-c7-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_07.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_07.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_07.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.31 </span><span class="caption-text">手札補充のイメージ</span><a class="headerlink" href="#id200" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「巨人と魔王」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id165">
+<h2><a class="toc-backref" href="#id365" role="doc-backlink"><span class="section-number">8.3.5.27. </span>切札♣8 リセット</a><a class="headerlink" href="#id165" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c8"></span><section id="index-94">
+<span id="id166"></span><h3><a class="toc-backref" href="#id366" role="doc-backlink"><span class="section-number">8.3.5.27.1. </span>リセット (表切札)</a><a class="headerlink" href="#index-94" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣8</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-reset"><span class="std std-ref">リセット</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id201">
+<span id="frame-c8-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_08.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_08.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_08.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.32 </span><span class="caption-text">リセットのイメージ</span><a class="headerlink" href="#id201" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id167">
+<h2><a class="toc-backref" href="#id367" role="doc-backlink"><span class="section-number">8.3.5.28. </span>切札♣9 要塞</a><a class="headerlink" href="#id167" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c9"></span><section id="index-95">
+<span id="id168"></span><h3><a class="toc-backref" href="#id368" role="doc-backlink"><span class="section-number">8.3.5.28.1. </span><ruby>要塞<rt>ようさい</rt></ruby> (表切札)</a><a class="headerlink" href="#index-95" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣9</p>
+<p><strong>能力:</strong></p>
+<p>対戦相手がキーカードに♠を含むアクションの効果を発揮する直前に自分の場にキャラクターがいる場合、その効果によってあなたはダメージを受けない。</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-counterattack"><span class="std std-ref">反撃</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.18.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id202">
+<span id="frame-c9-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_09.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_09.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_09.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.33 </span><span class="caption-text">要塞のイメージ</span><a class="headerlink" href="#id202" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「自衛的戦術」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id169">
+<h2><a class="toc-backref" href="#id369" role="doc-backlink"><span class="section-number">8.3.5.29. </span>切札♣10 悪あがき</a><a class="headerlink" href="#id169" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-c10"></span><section id="index-96">
+<span id="id170"></span><h3><a class="toc-backref" href="#id370" role="doc-backlink"><span class="section-number">8.3.5.29.1. </span><ruby>悪あがき<rt>わるあがき</rt></ruby> (表切札)</a><a class="headerlink" href="#index-96" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣10</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-lastditch"><span class="std std-ref">悪あがき</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex5.30.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id203">
+<span id="frame-c10-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_Wands_10.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_Wands_10.jpg" src="../_images/Pictorial_Key_to_the_Tarot_Wands_10.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.34 </span><span class="caption-text">悪あがきのイメージ</span><a class="headerlink" href="#id203" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「苦渋の選択」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id171">
+<h2><a class="toc-backref" href="#id371" role="doc-backlink"><span class="section-number">8.3.5.30. </span>切札♣J 騎士</a><a class="headerlink" href="#id171" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-cj"></span><section id="index-97">
+<span id="id172"></span><h3><a class="toc-backref" href="#id372" role="doc-backlink"><span class="section-number">8.3.5.30.1. </span><ruby>騎士<rt>きし</rt></ruby> (表切札)</a><a class="headerlink" href="#index-97" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> ♣J</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>関連:</strong></p>
+<p><em>アクション</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#act-summonknight"><span class="std std-ref">騎士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-quicksummonknight"><span class="std std-ref">クイック騎士召喚</span></a></p></li>
+<li><p><a class="reference internal" href="#act-knightsweep"><span class="std std-ref">薙払</span></a></p></li>
+<li><p><a class="reference internal" href="#act-knightrevive"><span class="std std-ref">騎士再生</span></a></p></li>
+</ul>
+<p><em>キャラクター</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#char-knight"><span class="std std-ref">騎士</span></a></p></li>
+</ul>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<table class="borderless docutils align-default">
+<colgroup>
+<col style="width: 35.0%" />
+<col style="width: 65.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><figure class="align-default" id="id204">
+<span id="frame-cj-image"></span><a class="reference internal image-reference" href="../_images/Pictorial_Key_to_the_Tarot_13_Death.jpg"><img alt="../_images/Pictorial_Key_to_the_Tarot_13_Death.jpg" src="../_images/Pictorial_Key_to_the_Tarot_13_Death.jpg" style="height: 200px;" /></a>
+<figcaption>
+<p><span class="caption-number">Fig. 8.35 </span><span class="caption-text">騎士のイメージ</span><a class="headerlink" href="#id204" title="この画像へのパーマリンク">¶</a></p>
+</figcaption>
+</figure>
+</td>
+<td><p><strong>補足:</strong></p>
+<p>「for Jack」で追加された。</p>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<hr class="docutils" />
+<section id="id173">
+<h2><a class="toc-backref" href="#id373" role="doc-backlink"><span class="section-number">8.3.5.31. </span>裏切札</a><a class="headerlink" href="#id173" title="この見出しへのパーマリンク">¶</a></h2>
+<span class="target" id="trump-secrettrump"></span><section id="index-98">
+<span id="id174"></span><h3><a class="toc-backref" href="#id374" role="doc-backlink"><span class="section-number">8.3.5.31.1. </span><ruby>裏切札<rt>うらきりふだ</rt></ruby> (裏切札)</a><a class="headerlink" href="#index-98" title="この見出しへのパーマリンク">¶</a></h3>
+<p><strong>フレーム:</strong></p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>エントリー16</p></th>
+<th class="head"><p>パック</p></th>
+<th class="head"><p>レアパック</p></th>
+<th class="head"><p>ストラテジー</p></th>
+<th class="head"><p>エクストラ</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>×</p></td>
+<td><p>◯</p></td>
+</tr>
+</tbody>
+</table>
+<p><strong>ユニット条件:</strong> 全て(裏向き)</p>
+<p><strong>能力:</strong></p>
+<p>なし</p>
+<p><strong>導入バージョン:</strong>  v8.1</p>
+</section>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker_logo.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール: 基本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-component.html">4. 共通ルール: コンポーネント</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-action.html">5. 共通ルール: アクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-etc.html">6. 共通ルール: その他</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">7. フォーマット</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../frame/frame.html">8. フレーム</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../frame/frame.html#index-0">8.1. フレームとは</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../frame/frame.html#id3">8.2. 定義項目</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../frame/frame.html#id4">8.3. フレーム定義</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="framelist.html">8.3.1. 公式フレーム</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">8.3.2. フレームアクションリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#characterlist-act-frame">8.3.3. フレームキャラクターリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#foglist-act-frame">8.3.4. フレームフォグリスト</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#trumplist-act-frame">8.3.5. フレーム切札リスト</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">9. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/pdf-links.html">10. 付録A: PDF版ルール・リスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/anniversary.html">11. 付録B: 周年大会記録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/guidelines.html">12. 付録C: ガイドライン</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">変更履歴</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../afterword.html">あとがき</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="framelist.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            公式フレーム
+          </span>
+        </div>
+      </a>
+      <a class="next" href="../core/core.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            コアルール
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>
