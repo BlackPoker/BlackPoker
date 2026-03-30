@@ -36,8 +36,9 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
-${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end
-------------------------------------------------------------------------------------------------------------------------------------------------------
+#set($actTitle = "${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end")
+${actTitle}
+--------------------------------------------------------------------------------
 
 #if(${row.format})
 .. csv-table:: フォーマット
@@ -163,8 +164,9 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${char.charName}, ${char.ruby}, "キャラクター")}
 
-${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
----------------------------------------------------
+#set($charTitle = "${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})")
+${charTitle}
+--------------------------------------------------------------------------------
 
 #if(${char.format})
 .. csv-table:: フォーマット
@@ -278,8 +280,9 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${fog.fogName}, ${fog.ruby}, "フォグ")}
 
-${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
----------------------------------------------------
+#set($fogTitle = "${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})")
+${fogTitle}
+--------------------------------------------------------------------------------
 
 #if(${fog.format})
 .. csv-table:: フォーマット
@@ -394,8 +397,9 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${trump.trumpName}, ${trump.ruby}, "切札")}
 
-${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
----------------------------------------------------
+#set($trumpTitle = "${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})")
+${trumpTitle}
+--------------------------------------------------------------------------------
 
 #if(${trump.format})
 .. csv-table:: フォーマット
