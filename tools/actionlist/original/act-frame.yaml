@@ -344,7 +344,10 @@ actList:
       actEffect: |-
         効果の内容は「リアニメイト」を参照。
       since: ex4.22.0
-      update: v8.2
+      update: v8.2,v9.0
+      changed: changed
+      devNote: |-
+        v9.0: 「リアニメーターリアニメイト」から「転生召喚」に名称変更。
 
     - frame: |-
         ・エクストラ
@@ -619,7 +622,7 @@ actList:
       update: v8.2, v9.0
       changed: changed
       devNote: |-
-        v9.0: チャリオットから破砕士に名称変更。
+        v9.0: チャリオット防壁破壊から粉砕に名称変更。
 
     - frame: |-
         ・エクストラ
@@ -941,6 +944,8 @@ actList:
         自分の 「策士」 が場から墓地に移った時に誘発する。
       actEffect: |-
         墓地から♢Jを1枚選び、自分の表切札として置く。
+      since: ex4.22.0
+      update: v8.2
 
   - type: 切札♣4 スイッチ
     acts:
