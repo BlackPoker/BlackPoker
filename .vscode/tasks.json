@@ -67,9 +67,9 @@
         {
             "label": "Draw.io Export (Docker)",
             "type": "shell",
-            "command": "docker run --rm -v \"${workspaceFolder}:/data\" -w /data --entrypoint sh rlespinasse/drawio-export tools/drawio_export.sh",
+            "command": "docker run --rm -v \"${workspaceFolder}:/data\" -v \"${workspaceFolder}/tools/fonts:/usr/share/fonts/Nishiki-teki\" -w /data --entrypoint sh rlespinasse/drawio-export tools/drawio_export.sh",
             "problemMatcher": [],
-            "detail": "rlespinasse/drawio-exportを使用して、更新された .drawio ファイルを SVG/PNG/PDF に変換します",
+            "detail": "rlespinasse/drawio-exportを使用して、更新された .drawio ファイルを SVG/PNG/PDF に変換します（カスタムフォント対応）",
             "group": "build"
         },
         {
