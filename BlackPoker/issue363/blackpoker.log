@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 11:55
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 16:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1381,9 +1381,7 @@ File: set-fog.pdf Graphic file (type pdf)
 <set-fog.pdf>
 File: set-stage.pdf Graphic file (type pdf)
 <set-stage.pdf>
- [34] [35] [36
-
-]
+ [34] [35] [36]
 第7章
 
 Overfull \hbox (129.2267pt too wide) in paragraph at lines 2538--2540
@@ -1420,7 +1418,9 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 2570--2572
 []
  []
 
-[37]
+[37
+
+]
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <5> not available
 (Font)              Font shape `JT1/gt/m/n' tried instead on input line 2627.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
@@ -2686,9 +2686,10 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 19760--19761
 ]
 File: blackpoker_logo.pdf Graphic file (type pdf)
 <blackpoker_logo.pdf>
- [161]
-No file blackpoker.ind.
-[162]
+ [161] (./blackpoker.ind [162] [163
+
+
+] [164])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
 (Font)              Font shape `JT1/mc/bx/n' tried instead on input line 20165.
 
@@ -2705,19 +2706,21 @@ LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
 (Font)              scaled to size 11.53198pt on input line 20165.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
 (Font)              scaled to size 5.76599pt on input line 20169.
- [163
+
+[165
+
 
 ] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 86183C76DCF95EB16CAB113D227A722E;39384.
+(rerunfilecheck)             Checksum: 101A16D8906283EAAE58F64435B472AE;39430.
  ) 
 Here is how much of TeX's memory you used:
- 17173 strings out of 480496
- 291070 string characters out of 5899437
- 693146 words of memory out of 5000000
- 34768 multiletter control sequences out of 15000+600000
- 510516 words of font info for 133 fonts, out of 8000000 for 9000
+ 17176 strings out of 480496
+ 291112 string characters out of 5899437
+ 693203 words of memory out of 5000000
+ 34769 multiletter control sequences out of 15000+600000
+ 513368 words of font info for 134 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
  72i,15n,80p,760b,744s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (171 pages, 800644 bytes).
+Output written on blackpoker.dvi (173 pages, 844128 bytes).

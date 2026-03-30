@@ -73,7 +73,7 @@
 \contentsline {section}{\numberline {6.3}防壁の置き方}{34}{section.6.3}%
 \contentsline {section}{\numberline {6.4}フォグの置き方}{34}{section.6.4}%
 \contentsline {section}{\numberline {6.5}ステージの置き方}{34}{section.6.5}%
-\contentsline {section}{\numberline {6.6}よくある質問}{34}{section.6.6}%
+\contentsline {section}{\numberline {6.6}よくある質問}{35}{section.6.6}%
 \contentsline {chapter}{\numberline {第7章}フォーマット}{37}{chapter.7}%
 \contentsline {section}{\numberline {7.1}フォーマットとは}{37}{section.7.1}%
 \contentsline {section}{\numberline {7.2}定義項目}{37}{section.7.2}%
@@ -442,3 +442,4 @@
 \contentsline {section}{ロゴと名前の由来}{161}{section*.702}%
 \contentsline {section}{さらなる楽しみ方}{162}{section*.703}%
 \contentsline {section}{最後に}{162}{section*.704}%
+\contentsline {chapter}{索引}{163}{chapter*.705}%
