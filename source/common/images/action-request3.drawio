@@ -1,0 +1,87 @@
+<mxfile host="65bd71144e">
+    <diagram id="action-request1-diagram" name="Page-1">
+        <mxGraphModel dx="1167" dy="363" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="270" pageHeight="170" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;gradientColor=none;movable=1;resizable=1;rotatable=1;deletable=1;editable=1;connectable=1;" parent="1" vertex="1">
+                    <mxGeometry width="340" height="182" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="&lt;span style=&quot;font-size: 9px;&quot;&gt;①互いに積むリクエストがなくなったらルールシステムがチャンスを持つ&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="10" y="10" width="320" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="ステージ" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="145" y="128" width="50" height="15" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="A：ダメージ判定" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=10;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="122.5" y="102" width="95" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="A：アップ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=10;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="122.5" y="84" width="95" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="" style="endArrow=classic;html=1;strokeColor=#000000;strokeWidth=2;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="104.66" y="110" as="sourcePoint"/>
+                        <mxPoint x="104.66" y="70" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="13" value="宣言順" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=8;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="87.5" y="111" width="35" height="10" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="ターン" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=9;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="10" y="133" width="30" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="チャンス" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=9;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="43" y="133" width="40" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="チャンス" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=9;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="133" width="40" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="&lt;span style=&quot;font-size: 9px;&quot;&gt;③1つ解決したらターンを持っているプレイヤーにチャンスを移す&lt;br style=&quot;font-size: 9px;&quot;&gt;④プレイヤーAがチャンスを持っている「1」に移りゲームが続く&lt;br style=&quot;font-size: 9px;&quot;&gt;&lt;/span&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontColor=#000000;fontSize=9;" parent="1" vertex="1">
+                    <mxGeometry x="70" y="149" width="275" height="31" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="" style="endArrow=none;html=1;fontFamily=Nishiki-teki;fontColor=#000000;strokeColor=#000000;strokeWidth=4;exitX=0.029;exitY=0.706;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.971;entryY=0.706;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="9.860000000000014" y="126.02000000000004" as="sourcePoint"/>
+                        <mxPoint x="330.1400000000001" y="126.02000000000004" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="24" value="&lt;font face=&quot;Helvetica&quot;&gt;②一番上のアクション&lt;br&gt;を実行（解決する）&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontFamily=Nishiki-teki;fontSize=8;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="240" y="32" width="90" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="B：ダウン" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=10;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="122.5" y="57" width="95" height="18" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="" style="endArrow=classic;html=1;strokeColor=#000000;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="24" target="25" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="140" y="125" as="sourcePoint"/>
+                        <mxPoint x="190" y="75" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="h6ZOtTQ0fKrsrQVsOgBx-27" value="ルールシステム" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;fillColor=#FFFFFF;strokeColor=#000000;fontColor=#000000;fontSize=11;fontStyle=1" parent="1" vertex="1">
+                    <mxGeometry x="110" y="30" width="120" height="20" as="geometry"/>
+                </mxCell>
+                <mxCell id="h6ZOtTQ0fKrsrQVsOgBx-28" value="チャンス" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=9;fontColor=#000000;" parent="1" vertex="1">
+                    <mxGeometry x="64" y="32" width="40" height="16" as="geometry"/>
+                </mxCell>
+                <mxCell id="h6ZOtTQ0fKrsrQVsOgBx-29" value="" style="endArrow=classic;html=1;fontColor=#000000;strokeColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;dashPattern=1 2;" parent="1" source="h6ZOtTQ0fKrsrQVsOgBx-28" target="16" edge="1">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="80" y="80" as="sourcePoint"/>
+                        <mxPoint x="200" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="5" y="40"/>
+                            <mxPoint x="5" y="170"/>
+                            <mxPoint x="63" y="170"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="28" value="&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#000000&quot;&gt;プレイヤーA&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="26" y="55" width="22" height="48" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="&lt;font style=&quot;font-size: 10px;&quot; color=&quot;#000000&quot;&gt;プレイヤーB&lt;/font&gt;" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#000000;" vertex="1" parent="1">
+                    <mxGeometry x="289" y="56" width="22" height="48" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

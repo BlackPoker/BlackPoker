@@ -13,6 +13,12 @@ Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
 export DISPLAY=:99
 sleep 1
 
+# Register custom fonts if any are mounted to /usr/share/fonts
+if [ -d "/usr/share/fonts" ]; then
+    echo "Updating font cache..."
+    fc-cache -f /usr/share/fonts > /dev/null 2>&1 || true
+fi
+
 # .drawio ファイルを再帰的に検索
 IFS='
 '

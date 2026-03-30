@@ -12,6 +12,7 @@
 .. note::
    **表記について**
 
+   - アクションは **名前 (タイプ) @トリガー-スピード-タイミング | $ コスト** の形式で集約表示しています。
    - **@** はトリガー-スピード-タイミングの短縮表記です。（例: @直接-通常-クイック）
 
 .. contents:: 目次
@@ -35,23 +36,20 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
-${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
----------------------------------------------------
-        #if(${row.format})
-**フォーマット:**
+#set($actTitle = "${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end")
+${actTitle}
+--------------------------------------------------------------------------------
 
-.. csv-table::
+#if(${row.format})
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${row.format.contains('lite')})◯#else${x}#end", "#if(${row.format.contains('std')})◯#else${x}#end", "#if(${row.format.contains('pro')})◯#else${x}#end", "#if(${row.format.contains('mast')})◯#else${x}#end"
+#end
 
-        #end
-
-        #if(${row.frame})
-**フレーム:**
-
-.. csv-table::
+#if(${row.frame})
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -67,23 +65,14 @@ ${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
 #else
 ${rstFn.cnv(${row.frame})}
 #end
+#end
 
-        #end
-
-        #if(${row.actTime})
-**@** ${row.actTrigger}-${row.actSpeed}-${row.actTime}
-
-        #end
         #if(${row.actKey.trim()})
 **キーカード条件:** ${row.actKey}
 
         #end
         #if(${row.actUnit.trim()})
 **キーユニット条件:** ${row.actUnit}
-
-        #end
-        #if(${row.actCost})
-**コスト:** ${row.actCost}
 
         #end
         #if(${row.actNote.trim()})
@@ -103,9 +92,7 @@ ${row.actTriggerCond}
 
         #end
         #if(${row.actTarget})
-**対象:**  
-
-${rstFn.cnv(${row.actTarget})}
+**対象:** ${rstFn.cnv(${row.actTarget})}
 
         #end
 **効果:**  
@@ -177,23 +164,20 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${char.charName}, ${char.ruby}, "キャラクター")}
 
-${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
----------------------------------------------------
-        #if(${char.format})
-**フォーマット:**
+#set($charTitle = "${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})")
+${charTitle}
+--------------------------------------------------------------------------------
 
-.. csv-table::
+#if(${char.format})
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${char.format.contains('lite')})◯#else${x}#end", "#if(${char.format.contains('std')})◯#else${x}#end", "#if(${char.format.contains('pro')})◯#else${x}#end", "#if(${char.format.contains('mast')})◯#else${x}#end"
+#end
 
-        #end
-
-        #if(${char.frame})
-**フレーム:**
-
-.. csv-table::
+#if(${char.frame})
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -209,8 +193,7 @@ ${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
 #else
 ${rstFn.cnv(${char.frame})}
 #end
-
-        #end
+#end
 
         #if(${char.charKey.trim()})
 **ユニット条件:** ${char.charKey}
@@ -297,23 +280,20 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${fog.fogName}, ${fog.ruby}, "フォグ")}
 
-${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
----------------------------------------------------
-        #if(${fog.format})
-**フォーマット:**
+#set($fogTitle = "${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})")
+${fogTitle}
+--------------------------------------------------------------------------------
 
-.. csv-table::
+#if(${fog.format})
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${fog.format.contains('lite')})◯#else${x}#end", "#if(${fog.format.contains('std')})◯#else${x}#end", "#if(${fog.format.contains('pro')})◯#else${x}#end", "#if(${fog.format.contains('mast')})◯#else${x}#end"
+#end
 
-        #end
-
-        #if(${fog.frame})
-**フレーム:**
-
-.. csv-table::
+#if(${fog.frame})
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -329,8 +309,7 @@ ${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
 #else
 ${rstFn.cnv(${fog.frame})}
 #end
-
-        #end
+#end
 
         #if(${fog.fogKey.trim()})
 **ユニット条件:** ${fog.fogKey}
@@ -418,23 +397,20 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${trump.trumpName}, ${trump.ruby}, "切札")}
 
-${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
----------------------------------------------------
-        #if(${trump.format})
-**フォーマット:**
+#set($trumpTitle = "${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})")
+${trumpTitle}
+--------------------------------------------------------------------------------
 
-.. csv-table::
+#if(${trump.format})
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
    "#if(${trump.format.contains('lite')})◯#else${x}#end", "#if(${trump.format.contains('std')})◯#else${x}#end", "#if(${trump.format.contains('pro')})◯#else${x}#end", "#if(${trump.format.contains('mast')})◯#else${x}#end"
+#end
 
-        #end
-
-        #if(${trump.frame})
-**フレーム:**
-
-.. csv-table::
+#if(${trump.frame})
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -450,8 +426,7 @@ ${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
 #else
 ${rstFn.cnv(${trump.frame})}
 #end
-
-        #end
+#end
 
         #if(${trump.trumpKey.trim()})
 **ユニット条件:** ${trump.trumpKey}
