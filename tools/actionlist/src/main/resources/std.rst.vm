@@ -12,6 +12,7 @@
 .. note::
    **表記について**
 
+   - アクションは **名前 (タイプ) @トリガー-スピード-タイミング | $ コスト** の形式で集約表示しています。
    - **@** はトリガー-スピード-タイミングの短縮表記です。（例: @直接-通常-クイック）
 
 .. contents:: 目次
@@ -35,12 +36,10 @@ ${nestList.type}
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
-${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
----------------------------------------------------
+${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end
+------------------------------------------------------------------------------------------------------------------------------------------------------
         #if(${row.format})
-**フォーマット:**
-
-.. csv-table::
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -49,9 +48,7 @@ ${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType})
         #end
 
         #if(${row.frame})
-**フレーム:**
-
-.. csv-table::
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -70,20 +67,12 @@ ${rstFn.cnv(${row.frame})}
 
         #end
 
-        #if(${row.actTime})
-**@** ${row.actTrigger}-${row.actSpeed}-${row.actTime}
-
-        #end
         #if(${row.actKey.trim()})
 **キーカード条件:** ${row.actKey}
 
         #end
         #if(${row.actUnit.trim()})
 **キーユニット条件:** ${row.actUnit}
-
-        #end
-        #if(${row.actCost})
-**コスト:** ${row.actCost}
 
         #end
         #if(${row.actNote.trim()})
@@ -103,9 +92,7 @@ ${row.actTriggerCond}
 
         #end
         #if(${row.actTarget})
-**対象:**  
-
-${rstFn.cnv(${row.actTarget})}
+**対象:** ${rstFn.cnv(${row.actTarget})}
 
         #end
 **効果:**  
@@ -180,9 +167,7 @@ ${nestList.type}
 ${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
 ---------------------------------------------------
         #if(${char.format})
-**フォーマット:**
-
-.. csv-table::
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -191,9 +176,7 @@ ${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})
         #end
 
         #if(${char.frame})
-**フレーム:**
-
-.. csv-table::
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -300,9 +283,7 @@ ${nestList.type}
 ${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
 ---------------------------------------------------
         #if(${fog.format})
-**フォーマット:**
-
-.. csv-table::
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -311,9 +292,7 @@ ${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})
         #end
 
         #if(${fog.frame})
-**フレーム:**
-
-.. csv-table::
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
@@ -421,9 +400,7 @@ ${nestList.type}
 ${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
 ---------------------------------------------------
         #if(${trump.format})
-**フォーマット:**
-
-.. csv-table::
+.. csv-table:: フォーマット
    :header-rows: 1
 
    "ライト", "スタンダード", "プロ", "マスター"
@@ -432,9 +409,7 @@ ${rstFn.nameWithRuby(${trump.trumpName}, ${trump.ruby})} (${trump.trumpType})
         #end
 
         #if(${trump.frame})
-**フレーム:**
-
-.. csv-table::
+.. csv-table:: フレーム
    :header-rows: 1
 
 #if($frames)
