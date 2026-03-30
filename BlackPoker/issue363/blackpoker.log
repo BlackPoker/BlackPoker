@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 06:51
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  30 MAR 2026 11:03
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1121,8 +1121,8 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 1073--1078
 []
  []
 
-File: abstract_editable_fixed.drawio.pdf Graphic file (type pdf)
-<abstract_editable_fixed.drawio.pdf>
+File: abstract_editable_fixed.pdf Graphic file (type pdf)
+<abstract_editable_fixed.pdf>
 
 Overfull \hbox (129.2267pt too wide) in paragraph at lines 1117--1119
 []
@@ -1421,613 +1421,773 @@ Overfull \hbox (129.2267pt too wide) in paragraph at lines 2570--2572
  []
 
 [37]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2638--2640
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2683--2685
+[]
+ []
+
+[38]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2728--2730
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2776--2778
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2824--2826
+[]
+ []
+
+[39]
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 4.805pt on input line 2864.
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2869--2871
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2945--2947
+[]
+ []
+
+[40]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 2987--2989
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3041--3043
+[]
+ []
+
+[41]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3098--3100
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3149--3151
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3200--3202
+[]
+ []
+
+[42]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3248--3250
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3300--3302
+[]
+ []
+
+[43]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3357--3359
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3396--3398
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3441--3443
+[]
+ []
+
+[44]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3486--3488
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3534--3536
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3594--3596
+[]
+ []
+
+[45]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3648--3650
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3713--3715
+[]
+ []
+
+[46]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3767--3769
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3806--3808
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3845--3847
+[]
+ []
+
+[47]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3884--3886
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3935--3937
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 3974--3976
+[]
+ []
+
+[48]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4013--4015
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4049--4051
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4104--4106
+[]
+ []
+
+[49]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4154--4156
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4208--4210
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4250--4252
+[]
+ []
+
+[50]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4314--4316
+[]
+ []
+
+
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4361--4363
+[]
+ []
+
+[51]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 4446--4448
+[]
+ []
+
 LaTeX Font Info:    Font shape `JT1/gt/m/it' in size <5> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 2623.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 4486.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 2623.
+(Font)              scaled to size 4.805pt on input line 4486.
 LaTeX Font Info:    Font shape `JY1/gt/m/it' in size <5> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 2623.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 4486.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 2623.
-
-Underfull \vbox (badness 10000) detected at line 2776
- []
-
-[38] [39] [40]
+(Font)              scaled to size 4.805pt on input line 4486.
+[52]
 LaTeX Font Info:    Font shape `JT1/gt/b/n' in size <5> not available
-(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 3173.
+(Font)              Font shape `JT1/gt/bx/n' tried instead on input line 4528.
 LaTeX Font Info:    Font shape `JT1/gt/bx/n' in size <5> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 3173.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 4528.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 3173.
+(Font)              scaled to size 4.805pt on input line 4528.
 LaTeX Font Info:    Font shape `JY1/gt/b/n' in size <5> not available
-(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 3173.
+(Font)              Font shape `JY1/gt/bx/n' tried instead on input line 4528.
 LaTeX Font Info:    Font shape `JY1/gt/bx/n' in size <5> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 3173.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 4528.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 4.805pt on input line 3173.
- [41] [42] [43] [44] [45] [46] [47] [48] [49] [50] [51] [52]
-[53] [54] [55] [56] [57] [58] [59] [60]
-第8章
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6568--6571
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6573--6575
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6577--6579
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6581--6583
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6585--6587
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6589--6591
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 6593--6595
-[]
- []
-
-[61
+(Font)              scaled to size 4.805pt on input line 4528.
+ [53] [54] [55] [56
 
 ]
+第8章
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5177--5180
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5182--5184
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5186--5188
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5190--5192
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5194--5196
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5198--5200
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 5202--5204
+[]
+ []
+
+[57]
 File: entry.pdf Graphic file (type pdf)
 <entry.pdf>
- [62]
+ [58]
 File: pack.pdf Graphic file (type pdf)
 <pack.pdf>
- [63]
+ [59]
 File: rarePack.pdf Graphic file (type pdf)
 <rarePack.pdf>
- [64]
+ [60]
 File: rarePack.pdf Graphic file (type pdf)
 <rarePack.pdf>
- [65] [66]
+ [61] [62]
 File: extra.pdf Graphic file (type pdf)
 <extra.pdf>
- [67] [68]
-Underfull \vbox (badness 10000) detected at line 7753
+ [63]
+Underfull \vbox (badness 10000) detected at line 6056
  []
 
-
-Underfull \vbox (badness 10000) detected at line 7753
- []
-
-
-Overfull \vbox (2.23927pt too high) has occurred while \output is active []
-
-
-[69] [70] [71] [72]
+[64] [65] [66] [67]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8370.
+(hyperref)                removing `\spadesuit' on input line 6633.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 6710.
+
+[68]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 6879.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 6959.
+
+[69]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 7116.
+
+[70]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 7199.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 7279.
+
+[71]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 7589.
+
+[72]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 7759.
 
 [73]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8449.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8547.
+(hyperref)                removing `\heartsuit' on input line 7836.
 
 [74]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8631.
+(hyperref)                removing `\heartsuit' on input line 8005.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8716.
+(hyperref)                removing `\heartsuit' on input line 8097.
 
 [75]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8883.
+(hyperref)                removing `\heartsuit' on input line 8192.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 8354.
 
 [76]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 8971.
+(hyperref)                removing `\heartsuit' on input line 8440.
 
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 9056.
-
-[77] [78]
+[77]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 9386.
+(hyperref)                removing `\heartsuit' on input line 8777.
+
+[78]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 8873.
 
 [79]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9563.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9645.
+(hyperref)                removing `\diamondsuit' on input line 9033.
 
 [80]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9743.
+(hyperref)                removing `\diamondsuit' on input line 9196.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9827.
+(hyperref)                removing `\diamondsuit' on input line 9285.
 
 [81]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 9924.
+(hyperref)                removing `\diamondsuit' on input line 9371.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10021.
+(hyperref)                removing `\diamondsuit' on input line 9472.
 
 [82]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10190.
+(hyperref)                removing `\diamondsuit' on input line 9623.
 
-[83]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10278.
-
-[84]
+[83] [84]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 10635.
+(hyperref)                removing `\clubsuit' on input line 10047.
 
 [85]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10736.
+(hyperref)                removing `\clubsuit' on input line 10215.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 10375.
 
 [86]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10906.
+(hyperref)                removing `\clubsuit' on input line 10458.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 10998.
+(hyperref)                removing `\clubsuit' on input line 10553.
 
 [87]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11082.
+(hyperref)                removing `\clubsuit' on input line 10633.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11179.
+(hyperref)                removing `\clubsuit' on input line 10721.
 
-[88]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11270.
-
+[88] [89]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11379.
+(hyperref)                removing `\spadesuit' on input line 11100.
 
-[89]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 11537.
-
-[90] [91]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 11983.
+(hyperref)                removing `\spadesuit' on input line 11183.
+
+[90]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 11272.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 11361.
+
+[91]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\diamondsuit' on input line 11456.
+
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 11539.
 
 [92]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12077.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12161.
+Overfull \vbox (0.7793pt too high) detected at line 12102
+ []
 
 [93]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12331.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12416.
-
-[94]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12516.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12598.
-
-[95]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 12691.
-
-[96] [97]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 13090.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 13172.
-
-[98]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 13260.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 13348.
-
-[99]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 13442.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 13524.
-
-[100] [101]
-Underfull \vbox (badness 10000) detected at line 14085
+Underfull \vbox (badness 10000) detected at line 12102
  []
 
 
-Underfull \vbox (badness 10000) detected at line 14085
+Underfull \vbox (badness 10000) detected at line 12102
  []
 
 
 Overfull \vbox (2.23927pt too high) has occurred while \output is active []
 
 
-[102]
+[94]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14092.
+(hyperref)                removing `\spadesuit' on input line 12109.
 
 File: Pictorial_Key_to_the_Tarot_Swords_01.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_01.jpg>
-[103]
+[95]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14207.
+(hyperref)                removing `\spadesuit' on input line 12225.
 
 File: Pictorial_Key_to_the_Tarot_Swords_02.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_02.jpg>
-[104]
+[96]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14320.
+(hyperref)                removing `\spadesuit' on input line 12339.
 
 File: Pictorial_Key_to_the_Tarot_Swords_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_03.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14429.
+(hyperref)                removing `\spadesuit' on input line 12449.
 
-[105]
+[97]
 File: Pictorial_Key_to_the_Tarot_Swords_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_04.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14542.
+(hyperref)                removing `\spadesuit' on input line 12563.
 
 File: Pictorial_Key_to_the_Tarot_Swords_05.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_05.jpg>
-[106]
+[98]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14651.
+(hyperref)                removing `\spadesuit' on input line 12673.
 
 File: Pictorial_Key_to_the_Tarot_Swords_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Swords_07.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14760.
+(hyperref)                removing `\spadesuit' on input line 12783.
 
-[107]
+[99]
 File: Pictorial_Key_to_the_Tarot_20_Judgement.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_20_Judgement.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 14890.
+(hyperref)                removing `\spadesuit' on input line 12914.
 
 File: Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_04_The_Emperor.jpg>
-[108]
+[100]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15012.
+(hyperref)                removing `\heartsuit' on input line 13037.
 
 File: Pictorial_Key_to_the_Tarot_Cups_02.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_02.jpg>
-[109]
+[101]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15121.
+(hyperref)                removing `\heartsuit' on input line 13147.
 
 File: Pictorial_Key_to_the_Tarot_Cups_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_03.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15237.
+(hyperref)                removing `\heartsuit' on input line 13264.
 
-[110]
+[102]
 File: Pictorial_Key_to_the_Tarot_Cups_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_04.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15346.
+(hyperref)                removing `\heartsuit' on input line 13374.
 
 File: Pictorial_Key_to_the_Tarot_Cups_05.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_05.jpg>
-[111]
+[103]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15455.
+(hyperref)                removing `\heartsuit' on input line 13484.
 
 File: Pictorial_Key_to_the_Tarot_Cups_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_07.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15568.
+(hyperref)                removing `\heartsuit' on input line 13598.
 
-[112]
+[104]
 File: Pictorial_Key_to_the_Tarot_Cups_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Cups_08.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15677.
+(hyperref)                removing `\heartsuit' on input line 13708.
 
 File: Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_07_The_Chariot.jpg>
-[113]
+[105]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 15810.
+(hyperref)                removing `\heartsuit' on input line 13842.
 
 File: Pictorial_Key_to_the_Tarot_08_Strength.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_08_Strength.jpg>
-[114]
+[106]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 15928.
+(hyperref)                removing `\diamondsuit' on input line 13961.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_01.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_01.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16041.
+(hyperref)                removing `\diamondsuit' on input line 14075.
 
-[115]
+[107]
 File: Pictorial_Key_to_the_Tarot_Pentacles_03.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_03.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16154.
+(hyperref)                removing `\diamondsuit' on input line 14189.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_04.jpg>
-[116]
+[108]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16263.
+(hyperref)                removing `\diamondsuit' on input line 14299.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_05.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_05.jpg>
-[117]
+[109]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16375.
+(hyperref)                removing `\diamondsuit' on input line 14412.
 
 File: Pictorial_Key_to_the_Tarot_Pentacles_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_08.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16484.
+(hyperref)                removing `\diamondsuit' on input line 14522.
 
-[118]
+[110]
 File: Pictorial_Key_to_the_Tarot_Pentacles_09.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Pentacles_09.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 16597.
+(hyperref)                removing `\diamondsuit' on input line 14636.
 
 File: Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg Graphic file (type b
 mp)
 <Pictorial_Key_to_the_Tarot_02_The_High_Priestess.jpg>
-[119]
+[111]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16731.
+(hyperref)                removing `\clubsuit' on input line 14771.
 
 File: Pictorial_Key_to_the_Tarot_Wands_04.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_04.jpg>
-[120]
+[112]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16844.
+(hyperref)                removing `\clubsuit' on input line 14885.
 
 File: Pictorial_Key_to_the_Tarot_Wands_05.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_05.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 16957.
+(hyperref)                removing `\clubsuit' on input line 14999.
 
-[121]
+[113]
 File: Pictorial_Key_to_the_Tarot_Wands_07.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_07.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17066.
+(hyperref)                removing `\clubsuit' on input line 15109.
 
 File: Pictorial_Key_to_the_Tarot_Wands_08.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_08.jpg>
-[122]
+[114]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17175.
+(hyperref)                removing `\clubsuit' on input line 15219.
 
 File: Pictorial_Key_to_the_Tarot_Wands_09.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_09.jpg>
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17284.
+(hyperref)                removing `\clubsuit' on input line 15329.
 
-[123]
+[115]
 File: Pictorial_Key_to_the_Tarot_Wands_10.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_Wands_10.jpg>
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 17393.
+(hyperref)                removing `\clubsuit' on input line 15439.
 
 File: Pictorial_Key_to_the_Tarot_13_Death.jpg Graphic file (type bmp)
 <Pictorial_Key_to_the_Tarot_13_Death.jpg>
-[124] [125] [126
+[116] [117] [118
 
 ]
 第9章
 File: plantuml-a48ae812b7928018b87aae8625516edb5582f1c3.pdf Graphic file (type 
 pdf)
 <plantuml-a48ae812b7928018b87aae8625516edb5582f1c3.pdf>
-[127] [128]
+[119] [120]
 File: abstract.pdf Graphic file (type pdf)
 <abstract.pdf>
 File: plantuml-23dc00db4b4de1657caa1d69096791c744461298.pdf Graphic file (type 
 pdf)
 <plantuml-23dc00db4b4de1657caa1d69096791c744461298.pdf>
- [129]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17815--17817
+ [121]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15863--15865
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17819--17821
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15867--15869
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17835--17837
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15883--15885
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17839--17841
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15887--15889
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17857--17860
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15905--15908
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 17860--17861
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 15908--15909
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17881--17884
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15929--15932
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 17884--17885
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 15932--15933
 []
  []
 
-[130]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17938--17939
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17965--17967
+[122]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 15986--15987
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17969--17971
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16013--16015
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17973--17975
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16017--16019
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17977--17979
-[]
- []
-
-[131]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17990--17993
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16021--16023
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 17995--17997
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16025--16027
+[]
+ []
+
+[123]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16038--16041
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18008--18010
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16043--16045
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18015--18018
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16056--16058
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18023--18026
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16063--16066
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16071--16074
 []
  []
 
 File: plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf Graphic file (type 
 pdf)
 <plantuml-e3598ea29fb852c45136cb979c397a63a8586247.pdf>
-[132]
+[124]
 File: plantuml-5e71291ebc7e6c2d8f01e965121a5a06f8f0bda4.pdf Graphic file (type 
 pdf)
 <plantuml-5e71291ebc7e6c2d8f01e965121a5a06f8f0bda4.pdf>
@@ -2035,82 +2195,82 @@ File: plantuml-7c9994aa40110a332ad4ea7418609bbeec92151d.pdf Graphic file (type
 pdf)
 <plantuml-7c9994aa40110a332ad4ea7418609bbeec92151d.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18098--18100
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16146--16148
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18102--18104
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16150--16152
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18106--18109
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16154--16157
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18111--18113
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16159--16161
 []
  []
 
-[133]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18115--18120
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18126--18130
+[125]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16163--16168
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18132--18134
-[]
- []
-
-[134]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18138--18142
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16174--16178
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18150--18152
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16180--16182
+[]
+ []
+
+[126]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16186--16190
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18154--18156
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16198--16200
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18158--18160
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16202--16204
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18162--18164
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16206--16208
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18166--18168
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16210--16212
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18170--18172
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16214--16216
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18174--18179
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16218--16220
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18186--18189
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16222--16227
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16234--16237
 []
  []
 
@@ -2118,622 +2278,622 @@ File: plantuml-db20683e56afd11564804a24593b1871a9c0a1d3.pdf Graphic file (type
 pdf)
 <plantuml-db20683e56afd11564804a24593b1871a9c0a1d3.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18220--18223
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16268--16271
 []
  []
 
-[135] [136]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18225--18228
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18230--18234
+[127] [128]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16273--16276
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18236--18240
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16278--16282
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18242--18245
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16284--16288
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18247--18250
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16290--16293
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18252--18255
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16295--16298
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18257--18261
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16300--16303
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18263--18267
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16305--16309
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18269--18272
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16311--16315
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18274--18277
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16317--16320
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18279--18282
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16322--16325
 []
  []
 
-[137]
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16327--16330
+[]
+ []
+
+[129]
 File: plantuml-02291886d50a3eb3c98eef25815b7b266ee92b52.pdf Graphic file (type 
 pdf)
 <plantuml-02291886d50a3eb3c98eef25815b7b266ee92b52.pdf>
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18308--18311
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16356--16359
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18313--18317
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16361--16365
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18319--18322
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16367--16370
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18324--18327
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16372--16375
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18329--18332
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16377--16380
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18334--18338
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16382--16386
 []
  []
 
-[138]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18340--18343
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18345--18347
+[130]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16388--16391
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18349--18351
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16393--16395
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18353--18356
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16397--16399
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18358--18361
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16401--16404
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18363--18366
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16406--16409
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18395--18396
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16411--16414
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18406--18407
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16443--16444
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18417--18418
-[]
- []
-
-[139]
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18438--18440
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16454--16455
 []
  []
 
 
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18445--18447
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16465--16466
+[]
+ []
+
+[131]
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 16486--16488
 []
  []
 
 
-Overfull \hbox (123.6788pt too wide) in paragraph at lines 18452--18454
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 16493--16495
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18474--18476
+Overfull \hbox (123.6788pt too wide) in paragraph at lines 16500--16502
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18481--18483
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16522--16524
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18488--18490
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16529--16531
 []
  []
 
 
-Overfull \hbox (131.07619pt too wide) in paragraph at lines 18495--18497
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16536--16538
 []
  []
 
-[140] [141] [142
+
+Overfull \hbox (131.07619pt too wide) in paragraph at lines 16543--16545
+[]
+ []
+
+[132] [133] [134
 
 ]
 第10章
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18522--18524
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16570--16572
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18526--18528
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16574--16576
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18542--18544
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16590--16592
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18542--18544
+Underfull \hbox (badness 10000) in paragraph at lines 16590--16592
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue363 / actionlist / html / all . html ? format =
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18546--18548
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16594--16596
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18549--18551
+Underfull \hbox (badness 10000) in paragraph at lines 16597--16599
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue363 / actionlist / pdf / blackpoker-[]lite-[]2up .
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18558--18560
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16606--16608
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18558--18560
+Underfull \hbox (badness 10000) in paragraph at lines 16606--16608
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue363 / actionlist / html / all . html ? format =
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18562--18564
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16610--16612
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18565--18567
+Underfull \hbox (badness 10000) in paragraph at lines 16613--16615
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue363 / actionlist / pdf /
  []
 
-[143]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18578--18580
+[135]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16626--16628
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18578--18580
+Underfull \hbox (badness 10000) in paragraph at lines 16626--16628
 [][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / BlackPo
 ker / issue363 / actionlist / html / all . html ? format =
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18578--18580
+Underfull \hbox (badness 10000) in paragraph at lines 16626--16628
 \T1/qtm/m/n/10 %E3 % 83 % 9E % E3 % 82 % B9 % E3 % 82 % BF % E3 % 83 % BC & fra
 me = %E3 % 82 % A8 % E3 % 82 %
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18590--18592
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16638--16640
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 18594--18596
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 16642--16644
 []
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 18597--18599
+Underfull \hbox (badness 10000) in paragraph at lines 16645--16647
 [][][]$\T1/qtm/m/n/10 https : / / blackpoker . github . io / BlackPoker / Black
 Poker / issue363 / actionlist / pdf /
  []
 
-[144]
+[136]
 第11章
-[145
+[137
 
-] [146
+] [138
 
 ]
 第12章
-[147] [148] [149] [150] [151] [152] [153]
+[139] [140] [141] [142] [143] [144] [145]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19286.
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19286.
+(hyperref)                removing `math shift' on input line 17334.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19286.
+(hyperref)                removing `\rightarrow' on input line 17334.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19286.
-
-[154]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 19356.
+(hyperref)                removing `math shift' on input line 17334.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 19356.
+(hyperref)                removing `\rightarrow' on input line 17334.
+
+[146]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `math shift' on input line 17404.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19398--19400
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\rightarrow' on input line 17404.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17446--17448
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19402--19404
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17450--17452
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19405--19406
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17453--17454
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19425--19430
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17473--17478
 []
  []
 
-[155
+[147
 
 
 ]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19434.
+(hyperref)                removing `\heartsuit' on input line 17482.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19436--19437
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17484--17485
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19451--19452
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17499--17500
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19471--19477
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19481.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19483--19484
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19499--19500
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19515--19520
-[]
- []
-
-[156]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19524.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19527--19529
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19531--19536
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19538--19542
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17519--17525
 []
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19546.
+(hyperref)                removing `\diamondsuit' on input line 17529.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19548--19549
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17531--17532
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19563--19564
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17547--17548
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19584--19588
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17563--17568
+[]
+ []
+
+[148]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 17572.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17575--17577
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17579--17584
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17586--17590
 []
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19592.
+(hyperref)                removing `\diamondsuit' on input line 17594.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19595--19597
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17596--17597
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19599--19603
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17611--17612
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19605--19609
-[]
- []
-
-[157]
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\spadesuit' on input line 19613.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19616--19618
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19620--19622
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19624--19627
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17632--17636
 []
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\diamondsuit' on input line 19631.
+(hyperref)                removing `\diamondsuit' on input line 17640.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19633--19634
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17643--17645
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19644--19645
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17647--17651
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19656--19659
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17653--17657
+[]
+ []
+
+[149]
+
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\spadesuit' on input line 17661.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17664--17666
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17668--17670
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17672--17675
 []
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19663.
+(hyperref)                removing `\diamondsuit' on input line 17679.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19665--19666
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17681--17682
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19676--19677
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17692--17693
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19684--19687
-[]
- []
-
-
-Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\clubsuit' on input line 19691.
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19693--19694
-[]
- []
-
-
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19708--19709
-[]
- []
-
-[158]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19728--19732
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17704--17707
 []
  []
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\heartsuit' on input line 19736.
+(hyperref)                removing `\clubsuit' on input line 17711.
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19738--19739
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17713--17714
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19750--19753
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17724--17725
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19760--19763
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17732--17735
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19770--19772
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\clubsuit' on input line 17739.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17741--17742
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19774--19776
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17756--17757
+[]
+ []
+
+[150]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17776--17780
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19778--19782
+Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
+(hyperref)                removing `\heartsuit' on input line 17784.
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17786--17787
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19818--19822
-[]
- []
-
-[159]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19832--19834
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17798--17801
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19836--19839
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17808--17811
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19858--19860
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17818--17820
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19884--19886
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17822--17824
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 19910--19913
-[]
- []
-
-[160] [161]
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20106--20107
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17826--17830
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20117--20118
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17866--17870
+[]
+ []
+
+[151]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17880--17882
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20148--20149
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17884--17887
 []
  []
 
 
-Overfull \hbox (129.2267pt too wide) in paragraph at lines 20171--20172
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17906--17908
 []
  []
 
-[162] [163] [164] [165] [166
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17932--17934
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 17958--17961
+[]
+ []
+
+[152] [153]
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 18154--18155
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 18165--18166
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 18196--18197
+[]
+ []
+
+
+Overfull \hbox (129.2267pt too wide) in paragraph at lines 18219--18220
+[]
+ []
+
+[154] [155] [156] [157] [158
 
 ]
 File: blackpoker_logo.pdf Graphic file (type pdf)
 <blackpoker_logo.pdf>
- [167]
+ [159]
 No file blackpoker.ind.
-[168]
+[160]
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 20576.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 18624.
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 20576.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 18624.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20576.
+(Font)              scaled to size 11.53198pt on input line 18624.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 20576.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 18624.
 
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 20576.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 18624.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 20576.
+(Font)              scaled to size 11.53198pt on input line 18624.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 20580.
- [169
+(Font)              scaled to size 5.76599pt on input line 18628.
+ [161
 
 ] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: A7ED2B9D74F7EEAE967CCE0ED7674917;36228.
+(rerunfilecheck)             Checksum: C666A9A3689C37B0DAC793E5CC48F6A9;27856.
  ) 
 Here is how much of TeX's memory you used:
- 17028 strings out of 480496
- 286895 string characters out of 5899437
- 674596 words of memory out of 5000000
- 34623 multiletter control sequences out of 15000+600000
- 510516 words of font info for 133 fonts, out of 8000000 for 9000
+ 16805 strings out of 480496
+ 281117 string characters out of 5899437
+ 651911 words of memory out of 5000000
+ 34400 multiletter control sequences out of 15000+600000
+ 513557 words of font info for 135 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,15n,80p,703b,744s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,15n,80p,2460b,744s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (177 pages, 782292 bytes).
+Output written on blackpoker.dvi (169 pages, 750772 bytes).
