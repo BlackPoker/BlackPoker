@@ -232,7 +232,7 @@ latex_elements = {
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
 \renewcommand{\chapterheadendskip}{\vspace{10pt}}
-\newenvironment{align-right}{\begin{flushright}}{\end{flushright}}
+\newenvironment{sphinxclassalignright}{\begin{flushright}}{\end{flushright}}
 \makeatletter
 \AtBeginDocument{
   \linespread{1.0}\selectfont
