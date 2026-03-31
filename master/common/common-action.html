@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -320,7 +321,30 @@ stop
 <section id="id7">
 <h2><span class="section-number">5.4. </span>アクションの解決<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h2>
 <p>リクエストされたアクションを実行済みにすることを「アクションを解決する」といいます。</p>
-<p>アクションのスピードによって解決の流れが異なります。以下ではそれぞれの場合を説明します。</p>
+<p>アクションのスピードによって解決の流れが異なります。
+主な違いは次の通りです。(<a class="reference internal" href="#table-speed-compare"><span class="std std-numref">Table 5.2</span></a>)</p>
+<span id="table-speed-compare"></span><table class="docutils align-default" id="id22">
+<caption><span class="caption-number">Table 5.2 </span><span class="caption-text">スピードによる解決フローの比較</span><a class="headerlink" href="#id22" title="このテーブルへのパーマリンク">¶</a></caption>
+<thead>
+<tr class="row-odd"><th class="head"><p>スピード</p></th>
+<th class="head"><p>ステージ（スタック）</p></th>
+<th class="head"><p>割り込みの可否</p></th>
+<th class="head"><p>解決のタイミング</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><strong>通常</strong></p></td>
+<td><p>使用する（積まれる）</p></td>
+<td><p><strong>可能</strong></p></td>
+<td><p>全員がパスした後</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>即時</strong></p></td>
+<td><p>使用しない（積まれない）</p></td>
+<td><p><strong>不可</strong></p></td>
+<td><p>リクエストした直後</p></td>
+</tr>
+</tbody>
+</table>
 <p><strong>用語</strong></p>
 <p>登場する用語を説明します。</p>
 <dl class="simple">
@@ -349,25 +373,25 @@ stop
 <ol class="arabic simple">
 <li><p>プレイヤーAがアクションを積む</p></li>
 </ol>
-<figure class="align-default" id="id22">
+<figure class="align-default" id="id23">
 <span id="action-request1-image"></span><img alt="../_images/action-request1.svg" src="../_images/action-request1.svg" /><figcaption>
-<p><span class="caption-number">Fig. 5.2 </span><span class="caption-text">アクションの解決1</span><a class="headerlink" href="#id22" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 5.2 </span><span class="caption-text">アクションの解決1</span><a class="headerlink" href="#id23" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <ol class="arabic simple" start="2">
 <li><p>プレイヤーBがアクションを積む</p></li>
 </ol>
-<figure class="align-default" id="id23">
+<figure class="align-default" id="id24">
 <span id="action-request2-image"></span><img alt="../_images/action-request2.svg" src="../_images/action-request2.svg" /><figcaption>
-<p><span class="caption-number">Fig. 5.3 </span><span class="caption-text">アクションの解決2</span><a class="headerlink" href="#id23" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 5.3 </span><span class="caption-text">アクションの解決2</span><a class="headerlink" href="#id24" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <ol class="arabic simple" start="3">
 <li><p>アクションを実行（解決）</p></li>
 </ol>
-<figure class="align-default" id="id24">
+<figure class="align-default" id="id25">
 <span id="action-request3-image"></span><img alt="../_images/action-request3.svg" src="../_images/action-request3.svg" /><figcaption>
-<p><span class="caption-number">Fig. 5.4 </span><span class="caption-text">アクションの解決3</span><a class="headerlink" href="#id24" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 5.4 </span><span class="caption-text">アクションの解決3</span><a class="headerlink" href="#id25" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 <p>大まかな流れは図の通りとなります。</p>
@@ -379,49 +403,35 @@ stop
 <h3><span class="section-number">5.4.2. </span>即時の場合<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
 <p>スピードが「即時」のアクションは、ステージに積まれずにすぐに解決されます。
 相手に割り込みの機会はありません。</p>
-<p>通常の場合との違いを次の図に示します。(<a class="reference internal" href="#action-resolve-immediate-image"><span class="std std-numref">Fig. 5.5</span></a>)</p>
-<figure class="align-default" id="id25">
+<p>解決の流れを次の図に示します。(<a class="reference internal" href="#action-resolve-immediate-image"><span class="std std-numref">Fig. 5.5</span></a>)</p>
+<figure class="align-default" id="id26">
 <span id="action-resolve-immediate-image"></span><p class="plantuml">
-<img src="../_images/plantuml-619e0def2bccbb05dc362b64ff42db19d7ed5f15.svg" alt="&#64;startuml action-resolve-immediate
-title 即時アクションの解決
+<img src="../_images/plantuml-cb9fd2d1334b3cabcd0fd4de0ac3ea76b2c5530d.svg" alt="&#64;startuml action-resolve-immediate
+title 即時アクションの解決フロー
 skinparam defaultFontName &quot;Droid Sans Fallback&quot;
 
-actor &quot;プレイヤーA&quot; as A
-actor &quot;プレイヤーB&quot; as B
+actor &quot;プレイヤーA\n(リクエスト者)&quot; as A
+actor &quot;プレイヤーB\n(相手)&quot; as B
 participant &quot;ルールシステム&quot; as SYS
 
-== 即時アクションの場合 ==
-
 A -&gt; SYS : 即時アクションをリクエスト
-note right of SYS : ステージに積まれない
+note right of SYS : ステージに積まず即座に進む
 
-SYS -&gt; SYS : すぐにリクエストを解決\n（効果を実行）
-note right of SYS : 相手の割り込みなし
+SYS -&gt; SYS : アクションの解決\n（効果の実行）
 
-SYS --&gt; A : 解決完了
-SYS --&gt; B : 結果を反映
-
-== 通常アクションの場合（参考） ==
-
-A -&gt; SYS : 通常アクションをリクエスト
-SYS -&gt; SYS : ステージに追加
-note right of SYS : ステージに積まれる
-SYS --&gt; B : チャンスを移動\n（割り込みの機会）
-
-B -&gt; SYS : パス
-note right of SYS : 全員パスで解決へ
-
-SYS -&gt; SYS : ステージのリクエストを解決\n（効果を実行）
-SYS --&gt; A : 解決完了
+SYS --&gt; A : 処理結果を盤面に反映
+SYS --&gt; B : 処理結果を盤面に反映
+note over A, B : 相手の割り込みチャンスはない
 
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 5.5 </span><span class="caption-text">即時と通常の解決フローの比較</span><a class="headerlink" href="#id25" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 5.5 </span><span class="caption-text">即時アクションの解決フロー</span><a class="headerlink" href="#id26" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
-<p>即時の場合は、リクエストされた時点でルールシステムがすぐにアクションを解決します。
-そのため、相手はそのアクションに対して割り込む（カウンターなど）ことができません。</p>
+<p>即時の場合は、リクエストされた時点でルールシステムがすぐにアクションを解決し、
+全プレイヤーに結果が反映されます。相手はそのアクションに対して割り込む
+（カウンターなど）ことができません。</p>
 <p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> を参照してください。</p>
 <div class="admonition seealso">
 <p class="admonition-title">参考</p>
@@ -468,7 +478,7 @@ SYS --&gt; A : 解決完了
 <li><p>キーカードを墓地に移す</p></li>
 </ol>
 <p>フローチャートで示すと次のようになります。(<a class="reference internal" href="#action-resolve-flow-image"><span class="std std-numref">Fig. 5.6</span></a>)</p>
-<figure class="align-default" id="id26">
+<figure class="align-default" id="id27">
 <span id="action-resolve-flow-image"></span><p class="plantuml">
 <img src="../_images/plantuml-7a9b36752e6075b8875ba8580e620f32df549a3b.svg" alt="&#64;startuml action-resolve-flow
 title リクエストの解決
@@ -495,7 +505,7 @@ stop
 &#64;enduml
 "/></p>
 <figcaption>
-<p><span class="caption-number">Fig. 5.6 </span><span class="caption-text">リクエスト解決のフロー</span><a class="headerlink" href="#id26" title="この画像へのパーマリンク">¶</a></p>
+<p><span class="caption-number">Fig. 5.6 </span><span class="caption-text">リクエスト解決のフロー</span><a class="headerlink" href="#id27" title="この画像へのパーマリンク">¶</a></p>
 </figcaption>
 </figure>
 </section>

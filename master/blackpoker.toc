@@ -55,13 +55,13 @@
 \contentsline {section}{\numberline {5.2}コストの種類}{25}{section.5.2}%
 \contentsline {section}{\numberline {5.3}アクションの起こし方(リクエスト)}{25}{section.5.3}%
 \contentsline {section}{\numberline {5.4}アクションの解決}{25}{section.5.4}%
-\contentsline {subsection}{\numberline {5.4.1}通常の場合}{26}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.1}通常の場合}{27}{subsection.5.4.1}%
 \contentsline {subsection}{\numberline {5.4.2}即時の場合}{28}{subsection.5.4.2}%
-\contentsline {subsection}{\numberline {5.4.3}対象条件を確認}{29}{subsection.5.4.3}%
+\contentsline {subsection}{\numberline {5.4.3}対象条件を確認}{28}{subsection.5.4.3}%
 \contentsline {subsection}{\numberline {5.4.4}効果を発揮}{29}{subsection.5.4.4}%
 \contentsline {subsection}{\numberline {5.4.5}解決は墓地移動までを含む}{29}{subsection.5.4.5}%
-\contentsline {subsection}{\numberline {5.4.6}ステージ上で効果を発揮}{29}{subsection.5.4.6}%
-\contentsline {subsection}{\numberline {5.4.7}キーカードを墓地に移す}{29}{subsection.5.4.7}%
+\contentsline {subsection}{\numberline {5.4.6}ステージ上で効果を発揮}{30}{subsection.5.4.6}%
+\contentsline {subsection}{\numberline {5.4.7}キーカードを墓地に移す}{30}{subsection.5.4.7}%
 \contentsline {section}{\numberline {5.5}勝敗判定}{30}{section.5.5}%
 \contentsline {section}{\numberline {5.6}誘発チェック}{30}{section.5.6}%
 \contentsline {subsection}{\numberline {5.6.1}パターン1: フェイズ系}{30}{subsection.5.6.1}%
