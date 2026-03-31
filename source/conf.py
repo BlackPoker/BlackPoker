@@ -216,6 +216,8 @@ latex_elements = {
     'copyright': copyright,
 },
     'preamble': r'''
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
 \usepackage{pxrubrica}
 \makeindex
 \usepackage{titlesec}

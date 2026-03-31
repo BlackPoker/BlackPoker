@@ -31,11 +31,10 @@ ${nestList.type}
 ----
         #end
 
-.. _act-${row.actId}:
-
 .. index::
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
+.. _act-${row.actId}:
 #set($actTitle = "${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end")
 ${actTitle}
 --------------------------------------------------------------------------------
