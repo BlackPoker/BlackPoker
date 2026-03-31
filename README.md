@@ -3,11 +3,11 @@
 トランプだけでトレーディングカードゲームみたいに遊べる、トランプゲームのルールです。  
 自分だけのオリジナルトランプを使って友達と遊べます。
 
-## 第8版公式ルール（安定版）
-https://blackpoker.github.io/BlackPoker/8th/
+## 第9版公式ルール（安定版）
+https://blackpoker.github.io/BlackPoker/9th/
 
-### 第8版の主な変更点
-https://blackpoker.github.io/BlackPoker/8th/revision-history/8th.html
+### 第9.0版 変更履歴
+https://blackpoker.github.io/BlackPoker/9th/revision-history/9.0th.html
 
 ## 開発中最新公式ルール
 https://blackpoker.github.io/BlackPoker/master/
@@ -18,6 +18,14 @@ https://github.com/BlackPoker/BlackPoker/wiki
 ---
 
 ## 過去版数
+
+## 第8版公式ルール（安定版）
+https://blackpoker.github.io/BlackPoker/8th/
+
+### 第8版の主な変更点
+https://blackpoker.github.io/BlackPoker/8th/revision-history/8th.html
+
+---
 
 ### 第7版公式ルール（安定版）
 https://blackpoker.github.io/BlackPoker/7th/

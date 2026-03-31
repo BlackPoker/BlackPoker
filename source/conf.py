@@ -232,6 +232,7 @@ latex_elements = {
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
 \renewcommand{\chapterheadendskip}{\vspace{10pt}}
+\newenvironment{align-right}{\begin{flushright}}{\end{flushright}}
 \makeatletter
 \AtBeginDocument{
   \linespread{1.0}\selectfont
@@ -290,3 +291,4 @@ def ruby_role(name, rawtext, text, lineno, inliner, options={}, content=[]):
 
 def setup(app):
     app.add_role('ruby', ruby_role)
+    app.add_css_file('custom.css')
