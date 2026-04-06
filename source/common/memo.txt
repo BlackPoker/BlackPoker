@@ -138,6 +138,7 @@
 .. uml::
 
    @startuml
+   skinparam defaultFontName "Droid Sans Fallback"
    ' 日本語表示名＋英語エイリアス（安全記法）
    class "ゾーン\n(Zone)" as Zone
    class "コンポーネント種別\n(ComponentKind)" as ComponentKind
