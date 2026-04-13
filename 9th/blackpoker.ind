@@ -145,7 +145,7 @@
   \item \spxentry{し\textbar{}瞬殺（切札）}, \hyperpage{101}
   \item \spxentry{スイッチ（アクション）}, \hyperpage{86}
   \item \spxentry{スイッチ（切札）}, \hyperpage{113}
-  \item \spxentry{ステージ}, \hyperpage{120}
+  \item \spxentry{ステージ}, \hyperpage{26}, \hyperpage{120}
   \item \spxentry{スピード}, \hyperpage{23}
   \item \spxentry{スピード(コア)}, \hyperpage{122}
   \item \spxentry{スラッシュ（アクション）}, \hyperpage{71}
@@ -172,7 +172,10 @@
 		\hyperpage{50}
   \item \spxentry{た\textbar{}対戦レギュレーション}, 
 		\hyperpage{7}
-  \item \spxentry{ターン}, \hyperpage{119}
+  \item \spxentry{ターン}, \hyperpage{25}
+  \item \spxentry{ターン(コア)}, \hyperpage{119}
+  \item \spxentry{ターンプレイヤー}, \hyperpage{26}
+  \item \spxentry{ターンプレイヤー(コア)}, \hyperpage{119}
   \item \spxentry{タイプ(アクション)}, \hyperpage{23}
   \item \spxentry{タイプ(キャラクター)}, \hyperpage{20}
   \item \spxentry{タイミング}, \hyperpage{24}
@@ -186,7 +189,7 @@
 		\hyperpage{52}
   \item \spxentry{チャージ}, \hyperpage{19}
   \item \spxentry{チャージ（アクション）}, \hyperpage{39}
-  \item \spxentry{チャンス}, \hyperpage{120}
+  \item \spxentry{チャンス}, \hyperpage{25}, \hyperpage{120}
   \item \spxentry{つ\textbar{}追撃（アクション）}, 
 		\hyperpage{78}
   \item \spxentry{つ\textbar{}追撃（切札）}, \hyperpage{105}
