@@ -33,7 +33,7 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-release = '2026/03/31'
+release = '2026/04/13'
 version = '第9.0版'
 
 # -- General configuration ---------------------------------------------------
