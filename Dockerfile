@@ -16,7 +16,7 @@ RUN mkdir source && \
  chown 1000:1000 source && \
  chmod 777 source
 
-COPY ./source/* source/.
+COPY source/ source/
 
 # ------------------------------
 # 実行設定
