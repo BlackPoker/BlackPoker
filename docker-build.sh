@@ -1,3 +1,15 @@
+#!/bin/bash
+# 利用可能な Python コマンドを自動で選択する
+if command -v python >/dev/null 2>&1; then
+    PYTHON=python
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON=python3
+elif command -v py >/dev/null 2>&1; then
+    PYTHON=py
+else
+    echo "Python interpreter not found. Please install Python."
+    exit 1
+fi
 set -e
 
 sphinx-build -b html ./source ./docs
