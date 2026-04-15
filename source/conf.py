@@ -262,6 +262,21 @@ latex_elements = {
     \leavevmode\vspace{-0.2ex}%
   \fi #2%
 }
+%% スート記号や囲み数字を安全に見出し等で使用するためのマクロ定義
+\DeclareRobustCommand{\spadesym}{{\normalsize \mbox{\ensuremath{\spadesuit}}}}
+\DeclareRobustCommand{\heartsym}{{\normalsize \mbox{\ensuremath{\heartsuit}}}}
+\DeclareRobustCommand{\diamondsym}{{\normalsize \mbox{\ensuremath{\diamondsuit}}}}
+\DeclareRobustCommand{\clobsym}{{\normalsize \mbox{\ensuremath{\clubsuit}}}}
+\DeclareRobustCommand{\circlednum}[1]{\raise0.2ex\hbox{\textcircled{\scriptsize{#1}}}}
+
+%% PDFブックマーク（しおり）出力時にマクロがそのまま表示される（あるいは警告が出る）のを防ぐフォールバック設定
+\pdfstringdefDisableCommands{
+  \def\spadesym{スペード}
+  \def\heartsym{ハート}
+  \def\diamondsym{ダイヤ}
+  \def\clobsym{クラブ}
+}
+
 \makeatother
 ''',
     'printindex': r'\printindex' + colophon_latex,

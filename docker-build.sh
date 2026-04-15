@@ -10,6 +10,7 @@ else
     echo "Python interpreter not found. Please install Python."
     exit 1
 fi
+set -e
 
 sphinx-build -b html ./source ./docs
 sphinx-build -b latex ./source ./docs
@@ -24,35 +25,36 @@ cd ./docs
 echo "xxxxxxxxxxxxxxxxxxxxx"
 rm -f blackpoker.pdf
 rm -f blackpoker_book.pdf
+rm -f *.toc *.aux *.out *.idx *.ind *.ilg
 
-sed -i -e 's/♡/{\\normalsize \\mbox{\\ensuremath{\\heartsuit}}} /g' blackpoker.tex
-sed -i -e 's/♥/{\\normalsize \\mbox{\\ensuremath{\\heartsuit}}} /g' blackpoker.tex
-sed -i -e 's/♠/{\\normalsize \\mbox{\\ensuremath{\\spadesuit}}} /g' blackpoker.tex
-sed -i -e 's/♢/{\\normalsize \\mbox{\\ensuremath{\\diamondsuit}}} /g' blackpoker.tex
-sed -i -e 's/♦/{\\normalsize \\mbox{\\ensuremath{\\diamondsuit}}} /g' blackpoker.tex
-sed -i -e 's/♣/{\\normalsize \\mbox{\\ensuremath{\\clubsuit}}} /g' blackpoker.tex
+sed -i -e 's/♡/\\heartsym{} /g' blackpoker.tex
+sed -i -e 's/♥/\\heartsym{} /g' blackpoker.tex
+sed -i -e 's/♠/\\spadesym{} /g' blackpoker.tex
+sed -i -e 's/♢/\\diamondsym{} /g' blackpoker.tex
+sed -i -e 's/♦/\\diamondsym{} /g' blackpoker.tex
+sed -i -e 's/♣/\\clobsym{} /g' blackpoker.tex
 
 # TODO 全面的に囲み数字は廃止する予定だが、action-beginに残っており今後修正予定
-sed -i -e 's/①/\raise0.2ex\hbox{\textcircled{\scriptsize{1}}} /g' blackpoker.tex
-sed -i -e 's/②/\raise0.2ex\hbox{\textcircled{\scriptsize{2}}} /g' blackpoker.tex
-sed -i -e 's/③/\raise0.2ex\hbox{\textcircled{\scriptsize{3}}} /g' blackpoker.tex
-sed -i -e 's/④/\raise0.2ex\hbox{\textcircled{\scriptsize{4}}} /g' blackpoker.tex
-sed -i -e 's/⑤/\raise0.2ex\hbox{\textcircled{\scriptsize{5}}} /g' blackpoker.tex
-sed -i -e 's/⑥/\raise0.2ex\hbox{\textcircled{\scriptsize{6}}} /g' blackpoker.tex
-sed -i -e 's/⑦/\raise0.2ex\hbox{\textcircled{\scriptsize{7}}} /g' blackpoker.tex
-sed -i -e 's/⑧/\raise0.2ex\hbox{\textcircled{\scriptsize{8}}} /g' blackpoker.tex
-sed -i -e 's/⑨/\raise0.2ex\hbox{\textcircled{\scriptsize{9}}} /g' blackpoker.tex
-sed -i -e 's/⑩/\raise0.2ex\hbox{\textcircled{\scriptsize{10}}} /g' blackpoker.tex
-sed -i -e 's/⑪/\raise0.2ex\hbox{\textcircled{\scriptsize{11}}} /g' blackpoker.tex
-sed -i -e 's/⑫/\raise0.2ex\hbox{\textcircled{\scriptsize{12}}} /g' blackpoker.tex
-sed -i -e 's/⑬/\raise0.2ex\hbox{\textcircled{\scriptsize{13}}} /g' blackpoker.tex
-sed -i -e 's/⑭/\raise0.2ex\hbox{\textcircled{\scriptsize{14}}} /g' blackpoker.tex
-sed -i -e 's/⑮/\raise0.2ex\hbox{\textcircled{\scriptsize{15}}} /g' blackpoker.tex
-sed -i -e 's/⑯/\raise0.2ex\hbox{\textcircled{\scriptsize{16}}} /g' blackpoker.tex
-sed -i -e 's/⑰/\raise0.2ex\hbox{\textcircled{\scriptsize{17}}} /g' blackpoker.tex
-sed -i -e 's/⑱/\raise0.2ex\hbox{\textcircled{\scriptsize{18}}} /g' blackpoker.tex
-sed -i -e 's/⑲/\raise0.2ex\hbox{\textcircled{\scriptsize{19}}} /g' blackpoker.tex
-sed -i -e 's/⑳/\raise0.2ex\hbox{\textcircled{\scriptsize{20}}} /g' blackpoker.tex
+sed -i -e 's/①/\\circlednum{1} /g' blackpoker.tex
+sed -i -e 's/②/\\circlednum{2} /g' blackpoker.tex
+sed -i -e 's/③/\\circlednum{3} /g' blackpoker.tex
+sed -i -e 's/④/\\circlednum{4} /g' blackpoker.tex
+sed -i -e 's/⑤/\\circlednum{5} /g' blackpoker.tex
+sed -i -e 's/⑥/\\circlednum{6} /g' blackpoker.tex
+sed -i -e 's/⑦/\\circlednum{7} /g' blackpoker.tex
+sed -i -e 's/⑧/\\circlednum{8} /g' blackpoker.tex
+sed -i -e 's/⑨/\\circlednum{9} /g' blackpoker.tex
+sed -i -e 's/⑩/\\circlednum{10} /g' blackpoker.tex
+sed -i -e 's/⑪/\\circlednum{11} /g' blackpoker.tex
+sed -i -e 's/⑫/\\circlednum{12} /g' blackpoker.tex
+sed -i -e 's/⑬/\\circlednum{13} /g' blackpoker.tex
+sed -i -e 's/⑭/\\circlednum{14} /g' blackpoker.tex
+sed -i -e 's/⑮/\\circlednum{15} /g' blackpoker.tex
+sed -i -e 's/⑯/\\circlednum{16} /g' blackpoker.tex
+sed -i -e 's/⑰/\\circlednum{17} /g' blackpoker.tex
+sed -i -e 's/⑱/\\circlednum{18} /g' blackpoker.tex
+sed -i -e 's/⑲/\\circlednum{19} /g' blackpoker.tex
+sed -i -e 's/⑳/\\circlednum{20} /g' blackpoker.tex
 
 
 # sphinx-build -b latex ./source ./docs で LaTeX ソースが生成された後
