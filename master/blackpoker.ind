@@ -77,13 +77,13 @@
   \item \spxentry{キャラクター名}, \hyperpage{20}
   \item \spxentry{キル（アクション）}, \hyperpage{49}
   \item \spxentry{クイック}, \hyperpage{122}
-  \item \spxentry{クイック兵士召喚{\normalsize \mbox{\ensuremath{\clubsuit}}} （アクション）}, 
+  \item \spxentry{クイック兵士召喚\clobsym{} （アクション）}, 
 		\hyperpage{87}
-  \item \spxentry{クイック兵士召喚{\normalsize \mbox{\ensuremath{\diamondsuit}}} （アクション）}, 
+  \item \spxentry{クイック兵士召喚\diamondsym{} （アクション）}, 
 		\hyperpage{82}
-  \item \spxentry{クイック兵士召喚{\normalsize \mbox{\ensuremath{\heartsuit}}} （アクション）}, 
+  \item \spxentry{クイック兵士召喚\heartsym{} （アクション）}, 
 		\hyperpage{77}
-  \item \spxentry{クイック兵士召喚{\normalsize \mbox{\ensuremath{\spadesuit}}} （アクション）}, 
+  \item \spxentry{クイック兵士召喚\spadesym{} （アクション）}, 
 		\hyperpage{72}
   \item \spxentry{クイック威圧（アクション）}, 
 		\hyperpage{73}

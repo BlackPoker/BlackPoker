@@ -1,5 +1,6 @@
 This is mendex version 3.2 [16-Jan-2020] (utf8.uptex) (TeX Live 2021).
-Scanning dictionary file ../source/_mysetting/mydict.dic....done.
+Scanning dictionary file ../source/_mysetting/mydict.dic.
+Error: 後方互換性および他のパターンのための予備 is no entry in dictionary file ...done.
 Scanning input file blackpoker.idx....done (224 entries accepted, 0 rejected).
 224 entries accepted, 0 rejected.
 Sorting index....done(1757 comparisons).
