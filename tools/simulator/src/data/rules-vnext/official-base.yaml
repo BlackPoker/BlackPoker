@@ -1,0 +1,33 @@
+components:
+  - id: character.soldier
+    name: 一般兵
+    ruby: いっぱんへい
+    type: character
+    zone: field
+
+    unitCondition:
+      cards:
+        count: 1
+        rank: "2..10"
+      face: up
+
+    properties:
+      characterType: soldier
+      size: unit.cards[0].rankValue
+      labels: [attack, defense]
+
+    text:
+      summary: 数字2〜10のカードは一般兵として扱う。
+
+  - id: fog.up
+    name: アップ
+    type: fog
+    zone: fog
+
+    text:
+      ability: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。
+
+    abilities:
+      - sizeModifier:
+          target: binding.target
+          amount: binding.amount

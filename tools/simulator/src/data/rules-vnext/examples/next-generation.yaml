@@ -1,0 +1,5 @@
+actions:
+  - id: action.nextGeneration
+    name: 世代交代
+    type: event
+    description: 世代交代のアクション定義（移行検証用プレースホルダ）
