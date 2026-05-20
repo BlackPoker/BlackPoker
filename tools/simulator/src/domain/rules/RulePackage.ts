@@ -29,6 +29,7 @@ export type ActionDefinition = {
     effect?: string;
     ability?: string;
   };
+  triggerCondition?: Record<string, any>;
   effect?: EffectCommand[];
 };
 

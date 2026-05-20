@@ -127,3 +127,115 @@ Phase 2 では、より複雑な効果処理の検証として「ダウン」ア
   - 兵士が自動的に墓地 (`grave`) へ移動し、作成された `fog.down` がフォグ領域から即座に除去されて残らないことを検証。
 
 これにより、状態変化に応じた動的なカード効果や連鎖処理が、新YAML DSLによって明確かつ簡潔に表現でき、実行エンジンが正しく解釈可能であることが証明されました。
+
+---
+
+## 6. Phase 2.5 検証結果: 実行エンジンの責務分離（リファクタリング）
+
+今後の Phase 3 （世代交代、要塞、誘発等）に向けた拡張性の確保、および保守性向上を目的として、`CommandRegistry.ts` に集中していたロジックを責務ごとに各専用モジュールへと分離・クリーンアップしました。
+
+### 分離されたモジュールの設計と責務
+1. **`CommandRegistry.ts` (軽量化)**
+   - 責務：コマンド名とハンドラー（`CommandHandler`）の登録および解決。
+   - `ExpressionEvaluator` などのインスタンスを管理し、`commandHandlers.ts` に実装された個別ハンドラーを起動時に登録します。
+   - **後方互換性（ファサード）**: 既存のテストコードや呼び出し側への破壊的変更を防ぐため、ブリッジメソッド（`calculateUnitSize`, `executeEffects`）をデリゲート（移譲）する形で維持しています。
+2. **`ExpressionEvaluator.ts` (新規作成)**
+   - 責務：条件式（例: `target.size <= 0`）の判定評価、およびバインディングされたキーカードの値解決（`key.rankValue`, `-key.rankValue` 等）。
+3. **`AbilityEvaluator.ts` (新規作成)**
+   - 責務：ゲーム状態における各種能力効果の集計（フォグ効果の `amount` 累積を反映したユニットサイズ計算など）。
+4. **`EffectInterpreter.ts` (新規作成)**
+   - 責務：効果コマンドリストの順次実行フロー、および `if-then-else` 等の制御ロジックの判定・フロー実行制御。
+5. **`commandHandlers.ts` (新規作成)**
+   - 責務：個別効果コマンド（`createFog`, `summonUnit`, `removeFog`, `moveToGraveyard`）の具体的な状態更新ロジックの実装。
+
+### リファクタリング検証結果
+本構成への分離後も、既存の `up.test.ts`, `down.test.ts`, `summonSoldier.test.ts` を含む**すべての Vitest テスト（計10ケース）が一切のコード修正なしで 100% 正常に通過**し、ビルドも正常終了することを確認しました。
+
+これにより、高レベル命令実行エンジンの機能拡張とメンテナンス性が大幅に向上し、Phase 3 以降の複雑なルール実装に向けたクリーンな土台が確立されました。
+
+---
+
+## 7. Phase 3 検証結果: イベント・トリガー（誘発アクション）と「世代交代」の実装
+
+Phase 3 では、イベントと誘発（triggered）アクションのモデル設計の検証として、「世代交代」を実装し、即時解決モデルの評価を行いました。
+
+### イベント・トリガー（誘発）の最小モデル
+- **イベント定義 (`GameEvent`)**
+  ゲーム状態の更新時に、何が起きたか（例: カード移動イベント `cardMoved`）を伝える以下の最小限のデータモデルを構築しました。
+  ```typescript
+  {
+    type: "cardMoved",
+    payload: {
+      card: any,
+      fromZone: "field",
+      toZone: "grave",
+      playerKey: "p1"
+    }
+  }
+  ```
+- **イベントのディスパッチと評価 (`EffectInterpreter.ts`)**
+  `EffectInterpreter` に `dispatchEvent` メソッドを実装し、登録されたアクションの中から `triggered` アクションを探索、`evaluateTrigger` によりイベントの条件判定（`fromZone`, `toZone`, `card.rank`, `card.owner` など）に合致するアクションをその場で即時に実行（即時解決モデル）する仕組みを構築しました。
+- **既存コマンドでのイベント発行**
+  `moveToGraveyardHandler` の内部から `EffectInterpreter.dispatchEvent` を呼び出し、場から墓地へ移動した各カードに対して `cardMoved` イベントを動的にディスパッチするよう拡張しました。
+
+### 「世代交代」アクションの YAML 定義
+`examples/next-generation.yaml` のプレースホルダを、以下のように実行可能な誘発アクションとしてアップデートしました。
+
+```yaml
+actions:
+  - id: action.nextGeneration
+    name: 世代交代
+    type: triggered
+    request:
+      trigger: triggered
+      speed: immediate # 即時解決
+      timing: always
+    triggerCondition:
+      event: cardMoved
+      condition:
+        fromZone: field
+        toZone: grave
+        card:
+          rank: ["Joker", "A", "J", "Q", "K"]
+          owner: self
+    effect:
+      - takeUntilLegacyCard:
+          player: self
+```
+
+### 高レベル命令 `takeUntilLegacyCard` の実装
+今回の実装負荷および DSL 表現力を考慮し、高レベル命令 `takeUntilLegacyCard` として実装しました。
+- プレイヤーのライフ（`life`）の上から1枚ずつめくり、`Joker,A,J,Q,K` 以外なら墓地に送り、該当カードが出たら手札に加えて処理を終了します（ライフが尽きた場合もそこで終了）。
+- **将来的な repeatUntil への分解可能性**:
+  今回は高レベル命令として処理を集約しましたが、将来的に YAML DSL 側に汎用ループ処理構文 `repeatUntil` や汎用移動命令が導入された場合、次のように YAML 側だけで同等のロジックを構成できるように分解・拡張が可能です。
+  ```yaml
+  effect:
+    - repeatUntil:
+        condition: "drawnCard.rank in ['Joker', 'A', 'J', 'Q', 'K'] || player.life.isEmpty"
+        do:
+          - drawCard: { from: life, id: drawnCard }
+          - if:
+              condition: "drawnCard.rank not in ['Joker', 'A', 'J', 'Q', 'K']"
+              then:
+                - moveToGraveyard: { card: drawnCard }
+              else:
+                - addToHand: { card: drawnCard }
+  ```
+
+### テストおよび検証結果 (`nextGeneration.test.ts`)
+Vitest により以下の 4 つのケースがすべて 100% 期待通り正常にパスすることを確認しました。
+- **ケースA (めくり手札追加)**: 場の J が墓地に移ると世代交代が誘発、ライフ `[ 2, 7, K, Joker ]` からめくり、正常に normal カードを墓地へ送り、`K` を手札に加えて終了すること。
+- **ケースB (非誘発)**: 場の普通のカード (2〜10) が墓地に送られた場合は誘発しないこと。
+- **ケースC (同時・複数誘発)**: 場の J と Q が同時に墓地へ移った際、カード枚数分（2回）誘発が走り、それぞれ正常にライフをめくること。
+- **ケースD (ライフ枯渇)**: ライフに対象カードが無い場合、めくったカードをすべて墓地に移して終了すること。
+
+### 将来のイベント連鎖（ループ防止）に関する方針
+本検証では、世代交代によってめくられたカードが墓地に落ちる際の `cardMoved` イベントは、最小実装のため追加の「世代交代」を再帰的に誘発させない（無限ループ防止など）シンプルな制御としています。
+将来的にイベント連鎖を実装する際は、「1つの効果解決中に発生したイベントはステージ上のキューに積まれ、同一アクションの二重発火は防止される」などの状態スタック制限（またはイベントソースが `life` から `grave` の場合は誘発条件 `fromZone: field` に合致しないため自然に連鎖が切れるといった、トリガー条件の厳密化）によって安全に制御する方針です。
+
+---
+
+## 8. CommandRegistry のブリッジメソッドの位置づけ
+
+`CommandRegistry.ts` に残されている `calculateUnitSize`, `executeEffects`, `dispatchEvent` といったメソッドは、既存の Vitest 統合テストコード、あるいは将来的な UI からの呼び出しに対する後方互換性を 100% 担保するための**ファサード・ブリッジメソッド**として機能しています。
+これらにより、内部構造がどれだけクリーンに責務分離されても、外部のインターフェースを変更することなく、安全にシステムを運用できる設計になっています。
