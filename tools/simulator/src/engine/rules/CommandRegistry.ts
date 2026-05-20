@@ -37,6 +37,63 @@ export class CommandRegistry {
   }
 
   /**
+   * ユニットに適用されているすべてのフォグの amount 累積値を反映したサイズ計算を行います。
+   */
+  calculateUnitSize(unit: any, player: any): number {
+    if (!unit) return 0;
+    let size = unit.cards ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0) : 0;
+    if (player && player.fog) {
+      for (const fog of player.fog) {
+        if (fog.bindings && fog.bindings.target === unit.unitId) {
+          size += fog.bindings.amount || 0;
+        }
+      }
+    }
+    return size;
+  }
+
+  /**
+   * 単一の効果コマンドを実行します（if分岐対応）。
+   */
+  executeEffect(effect: any, context: CommandContext) {
+    const keys = Object.keys(effect);
+    if (keys.length === 0) return;
+    const name = keys[0];
+    const args = effect[name];
+
+    if (name === "if") {
+      if (this.evaluateCondition(args.condition, context)) {
+        if (args.then && Array.isArray(args.then)) {
+          this.executeEffects(args.then, context);
+        }
+      }
+    } else {
+      this.execute(name, args, context);
+    }
+  }
+
+  /**
+   * 効果コマンドのリストを順次実行します。
+   */
+  executeEffects(effects: any[], context: CommandContext) {
+    for (const effect of effects) {
+      this.executeEffect(effect, context);
+    }
+  }
+
+  /**
+   * 条件判定を評価します。
+   */
+  private evaluateCondition(conditionStr: string, context: CommandContext): boolean {
+    if (conditionStr === "target.size <= 0") {
+      const player = context.state.players[context.playerKey];
+      const size = this.calculateUnitSize(context.targetComponent, player);
+      return size <= 0;
+    }
+    return false;
+  }
+
+  /**
    * デフォルトの検証用命令ハンドラーを登録
    */
   private registerDefaults() {
@@ -52,6 +109,8 @@ export class CommandRegistry {
         for (const [key, value] of Object.entries(bindings)) {
           if (value === "key.rankValue" && context.keyCard) {
             resolvedBindings[key] = context.keyCard.value;
+          } else if (value === "-key.rankValue" && context.keyCard) {
+            resolvedBindings[key] = -context.keyCard.value;
           } else if (value === "target" && context.targetComponent) {
             resolvedBindings[key] = context.targetComponent.unitId;
           } else {
@@ -92,6 +151,42 @@ export class CommandRegistry {
       }
 
       player.field.push(newUnit);
+    });
+
+    // removeFog: フォグの削除
+    this.register("removeFog", (args, context) => {
+      const { component, target } = args;
+      const player = context.state.players[context.playerKey];
+      if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+      const targetUnitId = target === "target" && context.targetComponent
+        ? context.targetComponent.unitId
+        : target;
+
+      player.fog = player.fog.filter((f: any) => {
+        const matchComponent = f.componentId === component;
+        const matchTarget = targetUnitId ? f.bindings.target === targetUnitId : true;
+        return !(matchComponent && matchTarget);
+      });
+    });
+
+    // moveToGraveyard: ユニットを墓地へ移動
+    this.register("moveToGraveyard", (args, context) => {
+      const { target } = args;
+      const player = context.state.players[context.playerKey];
+      if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+      const targetUnit = target === "target" ? context.targetComponent : null;
+      if (!targetUnit) return;
+
+      // フィールドから除外
+      player.field = player.field.filter((u: any) => u.unitId !== targetUnit.unitId);
+
+      // 墓地へ追加
+      if (!player.grave) {
+        player.grave = [];
+      }
+      player.grave.push(targetUnit);
     });
   }
 }

@@ -31,3 +31,16 @@ components:
       - sizeModifier:
           target: binding.target
           amount: binding.amount
+
+  - id: fog.down
+    name: ダウン
+    type: fog
+    zone: fog
+
+    text:
+      ability: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。
+
+    abilities:
+      - sizeModifier:
+          target: binding.target
+          amount: binding.amount
