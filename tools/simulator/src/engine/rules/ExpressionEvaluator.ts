@@ -38,4 +38,15 @@ export class ExpressionEvaluator {
     }
     return value;
   }
+
+  /**
+   * ユニットがターゲット条件を満たしているかを評価します。
+   */
+  evaluateTargetCondition(target: any, condition: Record<string, any>): boolean {
+    if (!target) return false;
+    if (condition.component) {
+      return target.componentId === condition.component;
+    }
+    return true;
+  }
 }

@@ -19,7 +19,9 @@ export type ActionDefinition = {
   cost?: string;
   key?: {
     id: string;
-    condition: Record<string, any>;
+    condition?: Record<string, any>;
+    conditions?: Array<Record<string, any>>;
+    count?: number;
   };
   targets?: Array<{
     id: string;

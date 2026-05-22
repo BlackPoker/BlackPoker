@@ -44,3 +44,23 @@ components:
       - sizeModifier:
           target: binding.target
           amount: binding.amount
+
+  - id: character.bulwark
+    name: 防壁
+    ruby: ぼうへき
+    type: character
+    zone: field
+
+    unitCondition:
+      cards:
+        count: 1
+        suit: ["heart", "diamond"]
+        rank: "A..K"
+      face: down
+
+    properties:
+      characterType: bulwark
+      labels: [defense]
+
+    text:
+      summary: ♡A〜Kと♢A〜Kのカードは防壁として扱う。

@@ -20,22 +20,37 @@ export function formatActionSummary(action: ActionDefinition): string {
 
   // キーカード条件の解析
   let keyStr = "";
-  if (action.key && action.key.condition && action.key.condition.card) {
-    const card = action.key.condition.card;
+  if (action.key) {
     const suitMap: Record<string, string> = { heart: "♡", spade: "♠", diamond: "♢", club: "♣" };
-    const suit = card.suit ? suitMap[card.suit] || card.suit : "";
-    const rank = (card.rank || "").replace(/\.\./g, "-");
-    keyStr = `★${suit}${rank}`;
+    if (action.key.condition && action.key.condition.card) {
+      const card = action.key.condition.card;
+      const suit = card.suit ? suitMap[card.suit] || card.suit : "";
+      const rank = (card.rank || "").replace(/\.\./g, "-");
+      keyStr = `★${suit}${rank}`;
+    } else if (action.key.conditions) {
+      // 複数キーカード条件の解析
+      const subKeys = action.key.conditions.map((cond: any) => {
+        const card = cond.card || cond;
+        const suit = card.suit ? suitMap[card.suit] || card.suit : "";
+        const rank = (card.rank || "").replace(/\.\./g, "-");
+        return `${suit}${rank}`;
+      });
+      keyStr = `★${subKeys.join(" + ")}`;
+    }
   }
 
   // 対象条件の解析
   let targetStr = "";
   if (action.targets && action.targets.length > 0) {
     const target = action.targets[0];
-    if (target.condition && target.condition.component === "character.soldier") {
-      targetStr = "対象: 兵士1体";
-    } else {
-      targetStr = `対象: ${target.condition?.component || "不明"}`;
+    if (target.condition) {
+      if (target.condition.component === "character.soldier") {
+        targetStr = "対象: 兵士1体";
+      } else if (target.condition.component === "character.bulwark") {
+        targetStr = "対象: 防壁1体";
+      } else {
+        targetStr = `対象: ${target.condition.component}`;
+      }
     }
   }
 
