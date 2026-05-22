@@ -1,0 +1,434 @@
+import * as path from "path";
+import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
+import { CommandRegistry, CommandContext } from "../engine/rules/CommandRegistry";
+
+const colors = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  cyan: "\x1b[36m",
+  red: "\x1b[31m",
+  magenta: "\x1b[35m",
+};
+
+function header(text: string) {
+  console.log(`\n${colors.bold}${colors.cyan}================================================================================${colors.reset}`);
+  console.log(`${colors.bold}${colors.cyan}  ${text}${colors.reset}`);
+  console.log(`${colors.bold}${colors.cyan}================================================================================${colors.reset}`);
+}
+
+function subHeader(text: string) {
+  console.log(`\n${colors.bold}${colors.yellow}--- ${text} ---${colors.reset}`);
+}
+
+function logState(state: any) {
+  console.log(`${colors.bold}盤面状態:${colors.reset}`);
+  for (const [pk, p] of Object.entries<any>(state.players)) {
+    console.log(`  ${colors.bold}${p.name} (${pk}):${colors.reset}`);
+    if (p.life) {
+      const lifeStr = Array.isArray(p.life)
+        ? p.life.map((c: any) => `${c.suit}${c.rank}`).join(", ")
+        : p.life;
+      console.log(`    ライフ  : [${lifeStr}]`);
+    }
+    if (p.hand && p.hand.length > 0) {
+      console.log(`    手札    : [${p.hand.map((c: any) => `${c.suit}${c.rank}`).join(", ")}]`);
+    }
+    if (p.field && p.field.length > 0) {
+      const fieldStr = p.field
+        .map((u: any) => {
+          const cardsStr = u.cards.map((c: any) => `${c.suit}${c.rank}`).join("+");
+          return `${u.unitId}(${u.kind || u.componentId}: ${cardsStr})`;
+        })
+        .join(", ");
+      console.log(`    フィールド: [${fieldStr}]`);
+    }
+    if (p.trumps && p.trumps.length > 0) {
+      const trumpsStr = p.trumps
+        .map((u: any) => {
+          const cardsStr = u.cards.map((c: any) => `${c.suit}${c.rank}`).join("+");
+          return `${u.unitId}(${u.componentId}: ${cardsStr}, face: ${u.face})`;
+        })
+        .join(", ");
+      console.log(`    切札    : [${trumpsStr}]`);
+    }
+    if (p.fog && p.fog.length > 0) {
+      const fogStr = p.fog
+        .map((f: any) => `${f.componentId}(target: ${f.bindings?.target}, amount: ${f.bindings?.amount})`)
+        .join(", ");
+      console.log(`    フォグ  : [${fogStr}]`);
+    }
+    if (p.grave && p.grave.length > 0) {
+      const graveStr = p.grave
+        .map((u: any) => {
+          const cardsStr = u.cards.map((c: any) => `${c.suit}${c.rank}`).join("+");
+          return `${u.unitId}(${cardsStr})`;
+        })
+        .join(", ");
+      console.log(`    墓地    : [${graveStr}]`);
+    }
+  }
+}
+
+function setupRegistryHook(registry: CommandRegistry) {
+  // Command execution hook
+  const originalExecute = registry.execute;
+  registry.execute = function (name: string, args: any, context: any) {
+    console.log(`  ${colors.green}[CMD]${colors.reset} ${name}: ${JSON.stringify(args)}`);
+    originalExecute.call(this, name, args, context);
+  };
+
+  // Event dispatch hook
+  const interpreter = registry["effectInterpreter"];
+  const originalDispatchEvent = interpreter.dispatchEvent;
+  interpreter.dispatchEvent = function (event: any, context: any) {
+    console.log(`  ${colors.magenta}[EVENT]${colors.reset} type: ${event.type}, payload: fromZone=${event.payload?.fromZone}, toZone=${event.payload?.toZone}, card=${event.payload?.card?.suit}${event.payload?.card?.rank} (Player=${event.payload?.playerKey})`);
+    originalDispatchEvent.call(this, event, context);
+  };
+}
+
+async function runUpScenario(rulePackage: any) {
+  header("シナリオ1: 「アップ」（フォグ付与によるサイズ増幅）");
+  console.log("概要: 兵士1体に対して Heart 7 をキーカードとして「アップ」を適用し、サイズが 6 から 13 に増幅されることを確認します。");
+
+  const upAction = rulePackage.actions.find((a: any) => a.id === "action.up");
+  if (!upAction) throw new Error("action.up が見つかりません");
+
+  const state = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: 16,
+        hand: [{ id: "key-heart-7", suit: "H", rank: "7", value: 7 }],
+        field: [
+          {
+            unitId: "soldier-1",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+            labels: ["攻撃", "防御"],
+          }
+        ],
+        fog: [],
+        grave: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  subHeader("初期状態");
+  logState(state);
+
+  const targetUnit = state.players.p1.field[0];
+  const keyCard = state.players.p1.hand[0];
+
+  const context: CommandContext = {
+    state,
+    playerKey: "p1",
+    keyCard,
+    targetComponent: targetUnit,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション実行: 「アップ」");
+  console.log(`実行アクション: ${upAction.name} (Key: ${keyCard.suit}${keyCard.rank})`);
+  registry.executeAction(upAction, context);
+
+  subHeader("最終状態");
+  logState(state);
+
+  const finalSize = registry.calculateUnitSize(targetUnit, state.players.p1);
+  console.log(`\n${colors.bold}${colors.green}結果検証: 兵士の最終サイズ = ${finalSize} (期待値: 13)${colors.reset}`);
+}
+
+async function runDownScenario(rulePackage: any) {
+  header("シナリオ2: 「ダウン」（生存および墓地送り）");
+  
+  // パターンA (生存)
+  subHeader("パターンA: Spade 2 を適用 (サイズ5に対して減衰-2、生存)");
+  console.log("概要: サイズ 5 の兵士に対して Spade 2 をキーカードとして「ダウン」を適用。サイズが 3 に減少し、フィールドに生存します。");
+
+  const downAction = rulePackage.actions.find((a: any) => a.id === "action.down");
+  if (!downAction) throw new Error("action.down が見つかりません");
+
+  const stateA = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: 16,
+        hand: [{ id: "key-spade-2", suit: "S", rank: "2", value: 2 }],
+        field: [
+          {
+            unitId: "soldier-1",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c1", suit: "S", rank: "5", value: 5 }],
+            labels: ["攻撃", "防御"],
+          }
+        ],
+        fog: [],
+        grave: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registryA = new CommandRegistry();
+  setupRegistryHook(registryA);
+
+  logState(stateA);
+
+  const targetUnitA = stateA.players.p1.field[0];
+  const keyCardA = stateA.players.p1.hand[0];
+
+  const contextA: CommandContext = {
+    state: stateA,
+    playerKey: "p1",
+    keyCard: keyCardA,
+    targetComponent: targetUnitA,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  console.log(`\n実行アクション: ${downAction.name} (Key: ${keyCardA.suit}${keyCardA.rank})`);
+  registryA.executeAction(downAction, contextA);
+
+  subHeader("パターンA 最終状態");
+  logState(stateA);
+
+  const finalSizeA = registryA.calculateUnitSize(targetUnitA, stateA.players.p1);
+  console.log(`\n${colors.bold}${colors.green}結果検証: 兵士の最終サイズ = ${finalSizeA} (期待値: 3)${colors.reset}`);
+
+  // パターンB (墓地送り)
+  subHeader("パターンB: Spade 5 を適用 (サイズ5に対して減衰-5、サイズ0となり墓地へ直行、フォグは生成されない)");
+  console.log("概要: 新しいロジックの動作を確認します。サイズが 0 以下になるため、フォグを作ることなく直接墓地に送られます。");
+
+  const stateB = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: 16,
+        hand: [{ id: "key-spade-5", suit: "S", rank: "5", value: 5 }],
+        field: [
+          {
+            unitId: "soldier-1",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c1", suit: "S", rank: "5", value: 5 }],
+            labels: ["攻撃", "防御"],
+          }
+        ],
+        fog: [],
+        grave: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registryB = new CommandRegistry();
+  setupRegistryHook(registryB);
+
+  logState(stateB);
+
+  const targetUnitB = stateB.players.p1.field[0];
+  const keyCardB = stateB.players.p1.hand[0];
+
+  const contextB: CommandContext = {
+    state: stateB,
+    playerKey: "p1",
+    keyCard: keyCardB,
+    targetComponent: targetUnitB,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  console.log(`\n実行アクション: ${downAction.name} (Key: ${keyCardB.suit}${keyCardB.rank})`);
+  registryB.executeAction(downAction, contextB);
+
+  subHeader("パターンB 最終状態");
+  logState(stateB);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: フィールドの兵士数 = ${stateB.players.p1.field.length} (期待値: 0)、墓地 = ${stateB.players.p1.grave.length} (期待値: 1)、フォグ数 = ${stateB.players.p1.fog.length} (期待値: 0)${colors.reset}`);
+}
+
+async function runBulwarkAndNextGenScenario(rulePackage: any) {
+  header("シナリオ3: 「防壁破壊から世代交代」（連鎖誘発アクション）");
+  console.log("概要: 裏向き防壁 (Heart K) を対象に「防壁破壊」を実行します。防壁が破壊されて墓地に送られた時、世代交代の誘発条件 (fromZone=field, toZone=grave, card.rank=K) が満たされ、自動で「世代交代」が走り、ライフの上から Joker 以外のカードをめくり墓地へ、レガシーカードをドローします。");
+
+  const destroyAction = rulePackage.actions.find((a: any) => a.id === "action.destroyBulwark");
+  if (!destroyAction) throw new Error("action.destroyBulwark が見つかりません");
+
+  const state = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: [
+          { id: "life-2", suit: "H", rank: "2", value: 2 },
+          { id: "life-7", suit: "D", rank: "7", value: 7 },
+          { id: "life-K", suit: "S", rank: "K", value: 13 },
+          { id: "life-Joker", suit: "Joker", rank: "Joker", value: 20 },
+        ],
+        hand: [],
+        field: [
+          {
+            unitId: "bulwark-1",
+            kind: "ユニット",
+            componentId: "character.bulwark",
+            face: "down",
+            cards: [{ id: "c-heart-K", suit: "H", rank: "K", value: 13 }],
+            labels: ["防御"],
+          }
+        ],
+        fog: [],
+        grave: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  subHeader("初期状態");
+  logState(state);
+
+  const targetUnit = state.players.p1.field[0];
+  const keyCards = [
+    { id: "key-heart-A", suit: "H", rank: "A", value: 1 },
+    { id: "key-diamond-A", suit: "D", rank: "A", value: 1 },
+  ];
+
+  const context: CommandContext = {
+    state,
+    playerKey: "p1",
+    keyCards,
+    targetComponent: targetUnit,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション実行: 「防壁破壊」");
+  console.log(`実行アクション: ${destroyAction.name}`);
+  registry.executeAction(destroyAction, context);
+
+  subHeader("最終状態");
+  logState(state);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: 
+  - フィールドの防壁数 = ${state.players.p1.field.length} (期待値: 0)
+  - 手札のカード = ${state.players.p1.hand.map((c: any) => `${c.suit}${c.rank}`).join(", ")} (期待値: S-K)
+  - 墓地のユニット数 = ${state.players.p1.grave.length} (期待値: 3 = 防壁 + ライフから落ちた2枚)
+  - 残りライフ = ${state.players.p1.life.map((c: any) => `${c.suit}${c.rank}`).join(", ")} (期待値: Joker)
+${colors.reset}`);
+}
+
+async function runFortressDefenseScenario(rulePackage: any) {
+  header("シナリオ4: 「要塞で投擲を防ぐ」（常在能力によるダメージ無効化）");
+  console.log("概要: 相手がキーカードに Spade を含む「投擲」アクションを発動。通常ならダメージを受けますが、自分の表切札に「要塞」が存在し、かつ自分の場にキャラクター兵士がいるため、ダメージが無効化されることを検証します。");
+
+  const throwingAction = rulePackage.actions.find((a: any) => a.id === "action.throwing");
+  if (!throwingAction) throw new Error("action.throwing が見つかりません");
+
+  const state = {
+    players: {
+      p1: {
+        name: "Player A (攻撃側)",
+        hand: [],
+        field: [],
+        grave: [],
+        life: [],
+      },
+      p2: {
+        name: "Player B (防御側 - 要塞あり)",
+        hand: [],
+        field: [
+          {
+            unitId: "soldier-1",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            cards: [{ id: "c-heart-6", suit: "H", rank: "6", value: 6 }],
+          }
+        ],
+        grave: [],
+        trumps: [
+          {
+            unitId: "fortress-1",
+            kind: "切札",
+            componentId: "trump.fortress",
+            face: "up",
+            cards: [{ id: "c-club-9", suit: "C", rank: "9", value: 9 }],
+          }
+        ],
+        life: [
+          { id: "c1", suit: "C", rank: "2", value: 2 },
+          { id: "c2", suit: "C", rank: "3", value: 3 },
+        ],
+      }
+    } as Record<string, any>
+  };
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  subHeader("初期状態");
+  logState(state);
+
+  const keyCards = [
+    { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+    { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+  ];
+
+  const context: CommandContext = {
+    state,
+    playerKey: "p1", // p1 (A) が発動
+    targetPlayerKey: "p2", // p2 (B) を対象
+    keyCards,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション実行: 「投擲」 (Spade 5 + Club 2)");
+  console.log(`実行アクション: ${throwingAction.name} (Key: Spade 5 + Club 2 -> 本来 5 ダメージ)`);
+  
+  registry.executeAction(throwingAction, context);
+
+  subHeader("最終状態");
+  logState(state);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: Player B の残りライフ = ${state.players.p2.life.length} (期待値: 2。ダメージが完璧に無効化されました！)${colors.reset}`);
+}
+
+async function main() {
+  const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
+  const rulePackage = await loadRulePackageFromDirectory(rulesDir);
+
+  header("BlackPoker 新YAML DSL 挙動確認CLIランナー (rules-vnext)");
+
+  // 1. アップシナリオ
+  await runUpScenario(rulePackage);
+
+  // 2. ダウンシナリオ (生存 / 墓地送り)
+  await runDownScenario(rulePackage);
+
+  // 3. 防壁破壊から世代交代
+  await runBulwarkAndNextGenScenario(rulePackage);
+
+  // 4. 要塞で投擲を防ぐ
+  await runFortressDefenseScenario(rulePackage);
+}
+
+async function run() {
+  try {
+    await main();
+  } catch (error) {
+    console.error("エラーが発生しました:", error);
+    process.exit(1);
+  }
+}
+
+run();

@@ -192,6 +192,12 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
     const dummyAction = {
       id: "action.dummyDamage",
       name: "ダミーダメージ",
+      type: "magic",
+      request: {
+        trigger: "direct",
+        speed: "normal",
+        timing: "main",
+      },
       effect: [
         {
           dealDamage: {

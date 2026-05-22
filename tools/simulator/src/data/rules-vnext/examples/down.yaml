@@ -27,17 +27,15 @@ actions:
       effect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。その印としてフォグにキーカードを置き、ダウンとする。減算の結果、サイズが0以下になった兵士は墓地へ移り、作成したダウンフォグを除去する。
 
     effect:
-      - createFog:
-          component: fog.down
-          card: key
-          bindings:
-            target: target
-            amount: -key.rankValue
       - if:
-          condition: "target.size <= 0"
+          condition: "target.size - key.rankValue <= 0"
           then:
             - moveToGraveyard:
                 target: target
-            - removeFog:
+          else:
+            - createFog:
                 component: fog.down
-                target: target
+                card: key
+                bindings:
+                  target: target
+                  amount: -key.rankValue

@@ -18,6 +18,12 @@ export class ExpressionEvaluator {
       const size = abilityEvaluator.calculateUnitSize(context.targetComponent, player);
       return size <= 0;
     }
+    if (conditionStr === "target.size - key.rankValue <= 0") {
+      const player = context.state.players[context.playerKey];
+      const size = abilityEvaluator.calculateUnitSize(context.targetComponent, player);
+      const keyVal = context.keyCard ? context.keyCard.value : 0;
+      return size - keyVal <= 0;
+    }
     return false;
   }
 

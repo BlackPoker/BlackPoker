@@ -57,6 +57,9 @@ export class AbilityEvaluator {
       if (!compDef && compId === "trump.fortress") {
         compDef = {
           id: "trump.fortress",
+          name: "要塞",
+          type: "trump",
+          zone: "trump",
           abilities: [
             {
               preventDamage: {

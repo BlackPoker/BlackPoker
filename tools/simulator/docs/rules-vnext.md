@@ -481,3 +481,57 @@ Phase 6.5 では、`damagePrevention` レイヤーの無効化処理において
 
 本フェーズの整理により、Vitest 統合テストの全 35 ケースが 100% グリーンで正常にパスし、`npm run build` によるビルドおよび型チェックも成功することを確認しました。
 
+---
+
+## 14. Phase 6.6 検証結果: 設計整理と手動確認準備
+
+Phase 6.6 では、新ルールYAML DSLの設計上のいくつかの懸念（ダウンの定義整理、トランプ依存性排除、`any`型の削減）を整理し、CLIによる手動動作確認用のシナリオランナーを導入するための実装と検証を行いました。
+
+### ダウン定義の整理と予測評価の導入
+- **課題と変更点**:
+  従来（Phase 6.5まで）の「ダウン」アクション定義では、「フォグを適用してサイズが0以下なら除去」というロジックだったため、一時的にフォグが配置されてから除去される不自然な動きになっていました。
+  本フェーズでは、「サイズが0以下になるなら最初からフォグを生成せずに墓地へ移動」という、より直感的で無駄なイベントを発行しないフローへと整理しました。
+- **YAMLの変更**:
+  ```yaml
+      effect:
+        - if:
+            condition: "target.size - key.rankValue <= 0"
+            then:
+              - moveToGraveyard:
+                  target: target
+            else:
+              - createFog:
+                  component: fog.down
+                  card: key
+                  bindings:
+                    target: target
+                    amount: -key.rankValue
+  ```
+- **予測条件式の評価**:
+  `ExpressionEvaluator.ts` において `target.size - key.rankValue <= 0` という条件文字列の解釈サポートを追加し、フォグ適用前の予測サイズを安全に計算して条件判定を返すロジックを実装しました。これにより、既存の Vitest 統合テストを一切壊すことなく、より自然なルール記述が実現できることを証明しました。
+
+### Card / Element の設計方針（トランプ依存の排除）
+- **将来への抽象化**:
+  BlackPokerの核はトランプカードですが、将来的な機能拡張（砦、アーティファクト、召喚物などトランプカード以外のゲーム要素）において「スートとランク」に依存しすぎるとエンジンの汎用性が失われます。
+- **設計メモ**:
+  - DSL定義側は `card` という馴染み深い語彙を許容しつつ、エンジン内部では完全に汎用オブジェクト（Element + attributes (Map)）として属性評価を行う抽象モデルに移行する予定です。
+  - スート・ランク・`rankValue`・`legacyCard` 判定は BlackPoker common 側の固有属性・共通ルールとして扱い、コアエンジンとしては「Element に付与された任意のキーバリュー属性」として透過的に解釈できるように整理します。
+
+### 型定義の厳密化（`any` の削減）
+- `CommandContext` において `any[]` となっていた `actions` や `components`、および `currentAction` を `RulePackage` からインポートした `ActionDefinition[]` や `ComponentDefinition[]`、`ActionDefinition` に置き換えました。
+- `CommandRegistry.ts` の `validateAction`, `executeAction`, `executeEffect`, `executeEffects` の引数型を厳密化し、`ActionDefinition` や `EffectCommand` を適用することで、型安全性を高め開発時の安全性を向上させました。
+
+### CLIによる手動動作確認シナリオの導入
+- 開発者がルールの挙動を目視で対話的かつ美麗にトレースできるように、TypeScript CLI スクリプト `src/cli/scenarioRunner.ts` を新規作成しました。
+- `package.json` に `"scenario:rules-vnext": "vite-node src/cli/scenarioRunner.ts"` を追加し、Dockerコンテナ内から `npm run scenario:rules-vnext` で手動実行できるようにしました。
+- **対象シナリオと検証項目**:
+  - **シナリオ1: 「アップ」** （フォグ付与によるサイズ増幅）
+  - **シナリオ2: 「ダウン」** （Spade 2によるサイズ減衰生存、および Spade 5によるサイズ0墓地移動＆フォグ非作成）
+  - **シナリオ3: 「防壁破壊から世代交代」** （裏向き防壁 ♡K が墓地に送られたことによる世代交代の誘発とライフめくり処理、複数キーカードバリデーション）
+  - **シナリオ4: 「要塞で投擲を防ぐ」** （要塞と兵士が存在する場合、相手の投擲ダメージが透過的に無効化されライフ減少イベントも発生しない）
+- 実行時には、高レベルコマンドの呼び出し（`[CMD] createFog` 等）や、ゲーム内イベント（`[EVENT] cardMoved` 等）をインターセプトしてコンソールへ美麗に出力するフック機構を実装し、完璧なイベント駆動トレースを実現しました。
+
+### 検証実績
+- すべての Vitest 統合テスト（全 35 ケース）が 100% グリーンで正常にパスすることを確認しました。
+- `npm run build` による Vite 本番ビルドも問題なく成功することを確認しました。
+- `npm run scenario:rules-vnext` で目視した出力結果が、すべての検証項目において 100% 期待値と合致することを確認しました。

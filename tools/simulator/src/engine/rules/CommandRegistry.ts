@@ -10,6 +10,7 @@ import {
   takeUntilLegacyCardHandler,
   dealDamageHandler,
 } from "./commandHandlers";
+import { ComponentDefinition, ActionDefinition, EffectCommand } from "../../domain/rules/RulePackage";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -18,9 +19,9 @@ export interface CommandContext {
   keyCards?: any[]; // 複数キーカード情報
   targetComponent?: any; // 対象となったコンポーネント/ユニット
   targetPlayerKey?: string; // 対象となったプレイヤー情報
-  actions?: any[]; // アクションの全定義（誘発アクションの検索用）
-  components?: any[]; // コンポーネントの全定義（常在能力の検索用）
-  currentAction?: any; // 現在実行中のアクション定義
+  actions?: ActionDefinition[]; // アクションの全定義（誘発アクションの検索用）
+  components?: ComponentDefinition[]; // コンポーネントの全定義（常在能力の検索用）
+  currentAction?: ActionDefinition; // 現在実行中のアクション定義
 }
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
@@ -66,14 +67,14 @@ export class CommandRegistry {
   /**
    * アクションのリクエスト妥当性を検証します。
    */
-  validateAction(action: any, context: CommandContext) {
+  validateAction(action: ActionDefinition, context: CommandContext) {
     this.actionRequestValidator.validateActionRequest(action, context);
   }
 
   /**
    * アクションを検証した上で、効果を実行します。
    */
-  executeAction(action: any, context: CommandContext) {
+  executeAction(action: ActionDefinition, context: CommandContext) {
     this.validateAction(action, context);
     if (action.effect) {
       const actionContext = {
@@ -94,14 +95,14 @@ export class CommandRegistry {
   /**
    * [後方互換ブリッジ] 単一の効果コマンドを実行します（if分岐対応）。
    */
-  executeEffect(effect: any, context: CommandContext) {
+  executeEffect(effect: EffectCommand, context: CommandContext) {
     this.effectInterpreter.executeEffect(effect, context);
   }
 
   /**
    * [後方互換ブリッジ] 効果コマンドのリストを順次実行します。
    */
-  executeEffects(effects: any[], context: CommandContext) {
+  executeEffects(effects: EffectCommand[], context: CommandContext) {
     this.effectInterpreter.executeEffects(effects, context);
   }
 
