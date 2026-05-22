@@ -635,7 +635,7 @@ npm run scenario:rules-vnext
 ### 比較ツールの実装と実行手順
 - **ツール**: [compareRunner.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/cli/compareRunner.ts) を新規追加。
 - **マッピングデータ**:
-  旧 `act.yaml` のファイルは、親ディレクトリから `tools/simulator` 配下の独立空間へ安全に配置（`src/data/rules-vnext/original-copy/act.yaml`）してロード。新定義は `RuleLoader` を通じてロードし、新旧の6アクション（「アップ」「ダウン」「兵士召喚」「防壁破壊」「投擲」「世代交代」）を完全にマッピングしました。
+  旧 `act.yaml` のファイルは、Dockerボリュームマウント（`compose.yaml`で`original-act`をリードオンリーマウント）およびローカルの相対パスを環境に応じて自動判別するパス解決を用いて、原本（`tools/actionlist/original`）を唯一の正本として直接参照してロード。新定義は `RuleLoader` を通じてロードし、新旧の6アクション（「アップ」「ダウン」「兵士召喚」「防壁破壊」「投擲」「世代交代」）を完全にマッピングしました。
 - **実行コマンド**:
   ```bash
   docker compose run --rm app npm run compare:rules-vnext

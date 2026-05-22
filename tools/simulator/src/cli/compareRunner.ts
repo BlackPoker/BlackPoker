@@ -63,9 +63,12 @@ async function main() {
   console.log("比較レポート生成を開始します...");
 
   // 1. 旧 act.yaml のロード
-  const oldActPath = path.resolve(__dirname, "../data/rules-vnext/original-copy/act.yaml");
+  const pathInContainer = path.resolve(__dirname, "../../original-act/act.yaml");
+  const pathInLocal = path.resolve(__dirname, "../../../actionlist/original/act.yaml");
+  const oldActPath = fs.existsSync(pathInContainer) ? pathInContainer : pathInLocal;
+
   if (!fs.existsSync(oldActPath)) {
-    throw new Error(`旧 act.yaml が見つかりません: ${oldActPath}`);
+    throw new Error(`旧 act.yaml が見つかりません。検索パス:\n - Container: ${pathInContainer}\n - Local: ${pathInLocal}`);
   }
   const oldActContent = fs.readFileSync(oldActPath, "utf-8");
   const oldYaml = yaml.parse(oldActContent);

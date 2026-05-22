@@ -6,6 +6,7 @@ services:
     working_dir: /workspace
     volumes:
       - .:/workspace
+      - ../actionlist/original:/workspace/original-act:ro
       - node_modules:/workspace/node_modules
     ports:
       - "5173:5173"
