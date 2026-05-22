@@ -19,6 +19,7 @@ export interface CommandContext {
   targetComponent?: any; // 対象となったコンポーネント/ユニット
   targetPlayerKey?: string; // 対象となったプレイヤー情報
   actions?: any[]; // アクションの全定義（誘発アクションの検索用）
+  currentAction?: any; // 現在実行中のアクション定義
 }
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
@@ -74,7 +75,11 @@ export class CommandRegistry {
   executeAction(action: any, context: CommandContext) {
     this.validateAction(action, context);
     if (action.effect) {
-      this.executeEffects(action.effect, context);
+      const actionContext = {
+        ...context,
+        currentAction: action,
+      };
+      this.executeEffects(action.effect, actionContext);
     }
   }
 
@@ -115,6 +120,6 @@ export class CommandRegistry {
     this.register("removeFog", removeFogHandler());
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
-    this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
   }
 }

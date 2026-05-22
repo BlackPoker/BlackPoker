@@ -1,6 +1,7 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { CommandHandler } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
+import { AbilityEvaluator } from "./AbilityEvaluator";
 
 /**
  * createFog: フォグの生成と配置
@@ -165,12 +166,18 @@ export function takeUntilLegacyCardHandler(): CommandHandler {
  */
 export function dealDamageHandler(
   expressionEvaluator: ExpressionEvaluator,
+  abilityEvaluator: AbilityEvaluator,
   effectInterpreter: EffectInterpreter
 ): CommandHandler {
   return (args, context) => {
     const { target, amount } = args;
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+    // 要塞などのダメージ無効化常在能力の適用チェック
+    if (abilityEvaluator.shouldPreventDamage(context)) {
+      return;
+    }
 
     const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, context);
     if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) {
