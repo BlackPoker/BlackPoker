@@ -69,6 +69,7 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       targetPlayerKey: "p2",
       keyCards,
       actions: rulePackage.actions,
+      components: rulePackage.components,
     };
 
     // アクションを実行
@@ -119,6 +120,7 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       targetPlayerKey: "p2",
       keyCards,
       actions: rulePackage.actions,
+      components: rulePackage.components,
     };
 
     registry.executeAction(throwingAction, context);
@@ -174,6 +176,7 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       targetPlayerKey: "p2",
       keyCards,
       actions: rulePackage.actions,
+      components: rulePackage.components,
     };
 
     registry.executeAction(throwingAction, contextWithDownFortress);
@@ -186,7 +189,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   // テストD: キーカードに♠を含まないアクションによるダメージは防がない。
   it("should NOT prevent damage when action key cards do NOT contain spade", () => {
     // ♠ を含まないダミーアクションによるダメージ処理をシミュレート
-    // 例えば、投擲アクションに似ているがキーカードが spade ではなく heart + club である架空アクション
     const dummyAction = {
       id: "action.dummyDamage",
       name: "ダミーダメージ",
@@ -242,6 +244,7 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       targetPlayerKey: "p2",
       keyCards,
       actions: rulePackage.actions,
+      components: rulePackage.components,
     };
 
     registry.executeAction(dummyAction, context);
@@ -255,11 +258,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should NOT trigger cardMoved event when damage is prevented by fortress", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
-    // 「世代交代」アクションが誘発しないことを、状態を監視して検証する
-    // p2 のライフの上から1枚目は Legacy Card (J) で、
-    // ダメージを受けたら墓地へ行き、もし cardMoved が発生し、かつ field からなら世代交代が誘発するかもしれない。
-    // しかし、そもそも要塞がダメージを防ぐため、カード移動自体が発生しないため、
-    // ライフは減らず、墓地も増えず、世代交代も走らない。
     const state = {
       players: {
         p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
@@ -301,6 +299,7 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       targetPlayerKey: "p2",
       keyCards,
       actions: rulePackage.actions,
+      components: rulePackage.components,
     };
 
     let eventFired = false;
@@ -323,5 +322,93 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
 
     // クリーンアップ
     registry["effectInterpreter"].dispatchEvent = originalDispatch;
+  });
+
+  // テストF (汎用アビリティ評価の検証):
+  // trump.fortress 以外の独自の防衛コンポーネント（trump.customShield）を用いて、
+  // アビリティ定義駆動で同様にスペードのダメージを無効化できるかを検証します。
+  it("should prevent throwing damage when using a custom shield component with preventDamage ability", () => {
+    const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
+
+    // プレイヤーBが customShield を持ち、場に兵士がいる
+    const state = {
+      players: {
+        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p2: {
+          name: "Player B",
+          hand: [],
+          field: [
+            {
+              unitId: "soldier-1",
+              componentId: "character.soldier",
+              cards: [{ id: "c-heart-6", suit: "H", rank: "6", value: 6 }],
+            }
+          ],
+          grave: [],
+          trumps: [
+            {
+              unitId: "shield-1",
+              componentId: "trump.customShield",
+              face: "up",
+              cards: [{ id: "c-club-9", suit: "C", rank: "9", value: 9 }],
+            }
+          ],
+          life: [
+            { id: "c1", suit: "C", rank: "2", value: 2 },
+            { id: "c2", suit: "C", rank: "3", value: 3 },
+          ],
+        }
+      } as Record<string, any>
+    };
+
+    const keyCards = [
+      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
+    // テスト用のコンポーネント定義リスト。trump.customShield を追加する
+    const customComponents = [
+      ...rulePackage.components,
+      {
+        id: "trump.customShield",
+        name: "カスタム盾",
+        type: "trump",
+        zone: "trump",
+        abilities: [
+          {
+            preventDamage: {
+              target: "self",
+              source: {
+                requestController: "opponent",
+                keyCardsIncludeSuit: "spade",
+              },
+              condition: {
+                exists: {
+                  zone: "field",
+                  controller: "self",
+                  componentType: "character",
+                },
+              },
+            },
+          },
+        ],
+      },
+    ];
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetPlayerKey: "p2",
+      keyCards,
+      actions: rulePackage.actions,
+      components: customComponents,
+    };
+
+    // アクションを実行
+    registry.executeAction(throwingAction, context);
+
+    // 検証：ダメージがカスタム盾に防がれ、p2 のライフは 2 のままであること
+    expect(state.players.p2.life.length).toBe(2);
+    expect(state.players.p2.grave.length).toBe(0);
   });
 });

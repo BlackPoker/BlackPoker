@@ -19,6 +19,7 @@ export interface CommandContext {
   targetComponent?: any; // 対象となったコンポーネント/ユニット
   targetPlayerKey?: string; // 対象となったプレイヤー情報
   actions?: any[]; // アクションの全定義（誘発アクションの検索用）
+  components?: any[]; // コンポーネントの全定義（常在能力の検索用）
   currentAction?: any; // 現在実行中のアクション定義
 }
 
