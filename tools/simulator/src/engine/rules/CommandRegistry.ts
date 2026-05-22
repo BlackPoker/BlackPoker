@@ -1,6 +1,7 @@
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { EffectInterpreter } from "./EffectInterpreter";
+import { ActionRequestValidator } from "./ActionRequestValidator";
 import {
   createFogHandler,
   summonUnitHandler,
@@ -30,6 +31,7 @@ export class CommandRegistry {
   private handlers = new Map<string, CommandHandler>();
   private expressionEvaluator = new ExpressionEvaluator();
   private abilityEvaluator = new AbilityEvaluator();
+  private actionRequestValidator = new ActionRequestValidator();
   private effectInterpreter: EffectInterpreter;
 
   constructor() {
@@ -57,6 +59,23 @@ export class CommandRegistry {
       throw new Error(`未定義の高レベル命令です: ${name}`);
     }
     handler(args, context);
+  }
+
+  /**
+   * アクションのリクエスト妥当性を検証します。
+   */
+  validateAction(action: any, context: CommandContext) {
+    this.actionRequestValidator.validateActionRequest(action, context);
+  }
+
+  /**
+   * アクションを検証した上で、効果を実行します。
+   */
+  executeAction(action: any, context: CommandContext) {
+    this.validateAction(action, context);
+    if (action.effect) {
+      this.executeEffects(action.effect, context);
+    }
   }
 
   /**

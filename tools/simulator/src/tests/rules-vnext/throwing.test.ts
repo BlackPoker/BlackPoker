@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { formatActionSummary } from "../../engine/rules/formatActionSummary";
+import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -123,8 +124,8 @@ describe("Throwing Action Integration Test (New YAML)", () => {
     expect(state.players.p2.grave.length).toBe(11);
   });
 
-  // テストC: キーカードに♠がない場合、amount を計算できない（0ダメージ）
-  it("should deal 0 damage when no spade card is present in key cards", () => {
+  // テストC: キーカードに♠がない場合、投擲リクエストが validation error になる
+  it("should throw validation error when no spade card is present in key cards", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
     const state = {
@@ -147,8 +148,6 @@ describe("Throwing Action Integration Test (New YAML)", () => {
       { id: "key-club-2", suit: "C", rank: "2", value: 2 },
     ];
 
-    const effectCmd = throwingAction.effect?.find((e: any) => e.dealDamage);
-
     const context: CommandContext = {
       state,
       playerKey: "p1",
@@ -157,11 +156,8 @@ describe("Throwing Action Integration Test (New YAML)", () => {
       actions: rulePackage.actions,
     };
 
-    registry.execute("dealDamage", (effectCmd as any).dealDamage, context);
-
-    // 検証：0ダメージのため、ライフは削られない
-    expect(state.players.p2.life.length).toBe(1);
-    expect(state.players.p2.grave.length).toBe(0);
+    // 検証：バリデーションエラーが発生すること
+    expect(() => registry.executeAction(throwingAction, context)).toThrow(ValidationError);
   });
 
   // テストD: ダメージによる移動（fromZone: life）では「世代交代」は誘発しない

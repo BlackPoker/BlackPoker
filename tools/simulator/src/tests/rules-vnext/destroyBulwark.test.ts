@@ -3,6 +3,7 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { formatActionSummary } from "../../engine/rules/formatActionSummary";
 import { ExpressionEvaluator } from "../../engine/rules/ExpressionEvaluator";
+import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -218,5 +219,49 @@ describe("Destroy Bulwark Action Integration Test (New YAML)", () => {
 
     expect(state.players.p1.hand.length).toBe(0);
     expect(state.players.p1.life.length).toBe(2);
+  });
+
+  // テストE: キーカード条件（♡A-K + ♢A-K）を満たさない場合は validation error になる
+  it("should throw validation error when key cards do not match required heart + diamond A-K", () => {
+    const destroyAction = rulePackage.actions.find((a) => a.id === "action.destroyBulwark")!;
+
+    const state = {
+      players: {
+        p1: {
+          name: "Player A",
+          hand: [],
+          field: [
+            {
+              unitId: "bulwark-1",
+              kind: "ユニット",
+              componentId: "character.bulwark",
+              face: "down",
+              cards: [{ id: "c-diamond-A", suit: "D", rank: "A", value: 1 }],
+              labels: ["防御"],
+            }
+          ],
+          grave: [],
+        }
+      } as Record<string, any>
+    };
+
+    const targetUnit = state.players.p1.field[0];
+    
+    // 不適切なキーカード (♢ がない、代わりに ♠ が入っている)
+    const keyCards = [
+      { id: "key-heart-5", suit: "H", rank: "5", value: 5 },
+      { id: "key-spade-2", suit: "S", rank: "2", value: 2 },
+    ];
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: targetUnit,
+      keyCards,
+      actions: rulePackage.actions,
+    };
+
+    // 検証：バリデーションエラーが発生すること
+    expect(() => registry.executeAction(destroyAction, context)).toThrow(ValidationError);
   });
 });
