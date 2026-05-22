@@ -329,7 +329,10 @@ ${colors.reset}`);
 
 async function runFortressDefenseScenario(rulePackage: any) {
   header("シナリオ4: 「要塞で投擲を防ぐ」（常在能力によるダメージ無効化）");
-  console.log("概要: 相手がキーカードに Spade を含む「投擲」アクションを発動。通常ならダメージを受けますが、自分の表切札に「要塞」が存在し、かつ自分の場にキャラクター兵士がいるため、ダメージが無効化されることを検証します。");
+  console.log("概要: 相手がキーカードに Spade を含む「投擲」アクションを発動。通常ならダメージを受けますが、自分の表切札に「要塞」が存在し、かつ自分の場にキャラクター（防壁設置した防壁など）がいるため、ダメージが無効化されることを検証します。");
+
+  const setBulwarkAction = rulePackage.actions.find((a: any) => a.id === "action.setBulwark");
+  if (!setBulwarkAction) throw new Error("action.setBulwark が見つかりません");
 
   const throwingAction = rulePackage.actions.find((a: any) => a.id === "action.throwing");
   if (!throwingAction) throw new Error("action.throwing が見つかりません");
@@ -345,15 +348,8 @@ async function runFortressDefenseScenario(rulePackage: any) {
       },
       p2: {
         name: "Player B (防御側 - 要塞あり)",
-        hand: [],
-        field: [
-          {
-            unitId: "soldier-1",
-            kind: "一般兵",
-            componentId: "character.soldier",
-            cards: [{ id: "c-heart-6", suit: "H", rank: "6", value: 6 }],
-          }
-        ],
+        hand: [{ id: "hand-h5", suit: "H", rank: "5", value: 5 }], // 手札にカードを持つ
+        field: [], // 初期状態はキャラクターが場にいない！
         grave: [],
         trumps: [
           {
@@ -378,29 +374,47 @@ async function runFortressDefenseScenario(rulePackage: any) {
   subHeader("初期状態");
   logState(state);
 
+  // 1. 防壁設置アクションの実行
+  subHeader("アクション実行: 「防壁設置」 (Player B)");
+  const bulwarkKeyCard = state.players.p2.hand[0];
+  console.log(`実行アクション: ${setBulwarkAction.name} (Key: ${bulwarkKeyCard.suit}${bulwarkKeyCard.rank} を手札から伏せる)`);
+
+  const setBulwarkContext: CommandContext = {
+    state,
+    playerKey: "p2", // Bが発動
+    keyCard: bulwarkKeyCard,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+  registry.executeAction(setBulwarkAction, setBulwarkContext);
+
+  subHeader("防壁設置後の状態");
+  logState(state);
+
+  // 2. 投擲アクションの実行
   const keyCards = [
     { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
     { id: "key-club-2", suit: "C", rank: "2", value: 2 },
   ];
 
-  const context: CommandContext = {
+  const throwingContext: CommandContext = {
     state,
-    playerKey: "p1", // p1 (A) が発動
-    targetPlayerKey: "p2", // p2 (B) を対象
+    playerKey: "p1", // Aが発動
+    targetPlayerKey: "p2", // Bを対象
     keyCards,
     actions: rulePackage.actions,
     components: rulePackage.components,
   };
 
-  subHeader("アクション実行: 「投擲」 (Spade 5 + Club 2)");
+  subHeader("アクション実行: 「投擲」 (Player A -> Player B)");
   console.log(`実行アクション: ${throwingAction.name} (Key: Spade 5 + Club 2 -> 本来 5 ダメージ)`);
   
-  registry.executeAction(throwingAction, context);
+  registry.executeAction(throwingAction, throwingContext);
 
   subHeader("最終状態");
   logState(state);
 
-  console.log(`\n${colors.bold}${colors.green}結果検証: Player B の残りライフ = ${state.players.p2.life.length} (期待値: 2。ダメージが完璧に無効化されました！)${colors.reset}`);
+  console.log(`\n${colors.bold}${colors.green}結果検証: Player B の残りライフ = ${state.players.p2.life.length} (期待値: 2。防壁設置した防壁が場にあるため、投擲ダメージが完璧に無効化されました！)${colors.reset}`);
 }
 
 async function main() {

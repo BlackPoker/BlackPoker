@@ -26,7 +26,7 @@ export function formatActionSummary(action: ActionDefinition): string {
       const card = action.key.condition.card;
       const suit = card.suit ? suitMap[card.suit] || card.suit : "";
       const rank = (card.rank || "").replace(/\.\./g, "-");
-      keyStr = `★${suit}${rank}`;
+      keyStr = (suit || rank) ? `★${suit}${rank}` : "";
     } else if (action.key.conditions) {
       // 複数キーカード条件の解析
       const subKeys = action.key.conditions.map((cond: any) => {

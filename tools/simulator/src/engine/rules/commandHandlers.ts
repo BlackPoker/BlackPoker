@@ -42,7 +42,7 @@ export function summonUnitHandler(): CommandHandler {
 
     const newUnit = {
       unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      kind: component === "character.soldier" ? "一般兵" : "ユニット",
+      kind: component === "character.soldier" ? "一般兵" : (component === "character.bulwark" ? "防壁" : "ユニット"),
       componentId: component,
       state: state || "charge",
       face: face || "up",

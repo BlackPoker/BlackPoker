@@ -8,6 +8,7 @@ const mappings = [
   { newId: "action.up", oldId: "up" },
   { newId: "action.down", oldId: "down" },
   { newId: "action.summonSoldier", oldId: "summonsSoldier" },
+  { newId: "action.setBulwark", oldId: "setBulwark" },
   { newId: "action.destroyBulwark", oldId: "destroyBulwark" },
   { newId: "action.throwing", oldId: "throwing" },
   { newId: "action.nextGeneration", oldId: "nextGeneration" },

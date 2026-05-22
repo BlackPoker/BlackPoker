@@ -656,3 +656,29 @@ npm run scenario:rules-vnext
 
 ### 移行に向けた今後の道筋
 代表的な6アクションにおいて仕様の互換性が自動的に証明されたため、このDSL設計方針をそのまま維持することで、既存の `act.yaml` に定義されている全てのアクション（アタックやブロックなどの戦闘プロセス、あるいは他の滞留魔法や装備など）についても、デグレーションを起こすことなく極めて安全に新システムへと段階移行できる確証が得られました。
+
+---
+
+## 17. Phase 6.9 検証結果: 新YAML DSLでの「防壁設置」の実装
+
+本セクションでは、手札から任意のカードを伏せて場に防壁（裏向き・チャージ状態）を構築する「防壁設置（`action.setBulwark`）」アクションの実装、およびそれを用いた要塞防衛シナリオの動的検証を行った結果を記述します。
+
+### 実施内容と設計上の対応
+- **YAML 定義**:
+  [set-bulwark.yaml](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/data/rules-vnext/examples/set-bulwark.yaml) を新規追加。コスト `L`、手札の任意のカード1枚をキー（具体的なスート・ランク制約なし）とし、`summonUnit` コマンドで `component: character.bulwark`, `face: down`, `state: charge` を解決する構造を宣言的に定義しました。
+- **エンジン機能の向上**:
+  - `commandHandlers.ts` を修正し、`summonUnit` 時のコンポーネントIDが防壁（`character.bulwark`）であれば、自動的にユニットの `kind` が `"防壁"` に変更されるようにアラインしました。
+  - `formatActionSummary.ts` を修正し、今回のようにスート・ランク制限がない任意のカード指定時に、星マーク `★` が単独でサマリーテキストに出力されるのを綺麗にガードしました（これにより、期待される旧仕様と同一のサマリー `防壁設置 @直接-即時-メイン | $L` が得られます）。
+- **比較対象マッピングの拡張**:
+  - `compareRunner.ts` のアライメントに `{ newId: "action.setBulwark", oldId: "setBulwark" }` を追加し、自動比較レポートに対比情報を掲載しました。
+
+### テストおよび検証実績
+- **統合テストの追加 (`setBulwark.test.ts`)**:
+  新規テスト [setBulwark.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/setBulwark.test.ts) を追加し、以下の4つの重要ケースを実証しました。
+  1. 手札から任意のカード（例: ♡5）を消費し、場に裏向き・チャージ状態で召喚できること。
+  2. 召喚された防壁の `componentId` が `character.bulwark` であり、`kind` が `"防壁"` になっていること。
+  3. 防壁を設置することで、場にキャラクターが存在すると判定され、要塞の `preventDamage` 条件（自分の場にキャラクターがいる）を満たして対戦相手からの Spade 投擲ダメージを透過的に無効化できること。
+  4. 事前バリデーション (`ActionRequestValidator`) が手札の任意カード条件を正しくパスすること。
+
+- **CLIシナリオ4の動的化**:
+  [scenarioRunner.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/cli/scenarioRunner.ts) 内のシナリオ4（要塞防衛）を拡張しました。場にあらかじめ一般兵ユニットを初期データとして配置しておくのではなく、Bが手札から「防壁設置」アクションを実行して防壁ユニットを作り、その設置した伏せ防壁カードが存在する状態で相手の投擲（ Spade 5 + Club 2 ）を無効化するという、実ゲームの連動フローを完璧に目視トレースできる仕組みを実現しました。
