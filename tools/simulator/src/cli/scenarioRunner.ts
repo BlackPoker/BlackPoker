@@ -259,7 +259,7 @@ async function runDownScenario(rulePackage: any) {
 
 async function runBulwarkAndNextGenScenario(rulePackage: any) {
   header("シナリオ3: 「防壁破壊から世代交代」（連鎖誘発アクション）");
-  console.log("概要: 裏向き防壁 (Heart K) を対象に「防壁破壊」を実行します。防壁が破壊されて墓地に送られた時、世代交代の誘発条件 (fromZone=field, toZone=grave, card.rank=K) が満たされ、自動で「世代交代」が走り、ライフの上から Joker 以外のカードをめくり墓地へ、レガシーカードをドローします。");
+  console.log("概要: 裏向き防壁 (Heart K) を対象に「防壁破壊」を実行します。防壁が破壊されて墓地に送られた時、世代交代の誘発条件 (fromZone=field, toZone=grave, card.rank=K) が満たされ、自動で「世代交代」が走り、ライフの上から Joker, A, J, Q, K のいずれかが出るまでめくり、それ以外を墓地へ移します。該当カードが出たら手札に加えます。");
 
   const destroyAction = rulePackage.actions.find((a: any) => a.id === "action.destroyBulwark");
   if (!destroyAction) throw new Error("action.destroyBulwark が見つかりません");
