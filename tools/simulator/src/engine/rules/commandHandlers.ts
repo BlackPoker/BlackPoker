@@ -159,3 +159,64 @@ export function takeUntilLegacyCardHandler(): CommandHandler {
     }
   };
 }
+
+/**
+ * dealDamage: プレイヤーへダメージを与える (cardMoved イベントを発行)
+ */
+export function dealDamageHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, amount } = args;
+    const player = context.state.players[context.playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+    const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, context);
+    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) {
+      return;
+    }
+
+    // 対象プレイヤーのキーを解決
+    const targetPlayerKey = target === "targetPlayer" && context.targetPlayerKey
+      ? context.targetPlayerKey
+      : (context.playerKey === "p1" ? "p2" : "p1");
+
+    const targetPlayer = context.state.players[targetPlayerKey];
+    if (!targetPlayer) throw new Error(`対象プレイヤーが見つかりません: ${targetPlayerKey}`);
+
+    if (!targetPlayer.life) {
+      targetPlayer.life = [];
+    }
+    if (!targetPlayer.grave) {
+      targetPlayer.grave = [];
+    }
+
+    // ライフの上から resolvedAmount 枚数を墓地へ移動
+    const damageAmount = Math.min(resolvedAmount, targetPlayer.life.length);
+    for (let i = 0; i < damageAmount; i++) {
+      const card = targetPlayer.life.shift();
+      if (!card) break;
+
+      // 墓地へ追加 (ダメージのカードとして追加)
+      targetPlayer.grave.push({
+        unitId: `unit-grave-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        kind: "ダメージ",
+        cards: [card],
+        labels: [],
+      });
+
+      // 各カードについて cardMoved イベントを発行 (fromZone: "life")
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card: card,
+          fromZone: "life",
+          toZone: "grave",
+          playerKey: targetPlayerKey,
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}

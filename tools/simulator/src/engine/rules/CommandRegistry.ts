@@ -7,13 +7,16 @@ import {
   removeFogHandler,
   moveToGraveyardHandler,
   takeUntilLegacyCardHandler,
+  dealDamageHandler,
 } from "./commandHandlers";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
   playerKey: string; // 実行するプレイヤー ("p1" | "p2")
   keyCard?: any; // キーカード情報
+  keyCards?: any[]; // 複数キーカード情報
   targetComponent?: any; // 対象となったコンポーネント/ユニット
+  targetPlayerKey?: string; // 対象となったプレイヤー情報
   actions?: any[]; // アクションの全定義（誘発アクションの検索用）
 }
 
@@ -93,5 +96,6 @@ export class CommandRegistry {
     this.register("removeFog", removeFogHandler());
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
+    this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

@@ -48,8 +48,10 @@ export function formatActionSummary(action: ActionDefinition): string {
         targetStr = "対象: 兵士1体";
       } else if (target.condition.component === "character.bulwark") {
         targetStr = "対象: 防壁1体";
+      } else if (target.condition.type === "player" && target.condition.relation === "opponent") {
+        targetStr = "対象: 対戦相手1人";
       } else {
-        targetStr = `対象: ${target.condition.component}`;
+        targetStr = `対象: ${target.condition.component || target.condition.type}`;
       }
     }
   }

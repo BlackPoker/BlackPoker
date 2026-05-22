@@ -32,6 +32,12 @@ export class ExpressionEvaluator {
       if (value === "-key.rankValue" && context.keyCard) {
         return -context.keyCard.value;
       }
+      if (value === "keyCards.spade.rankValue" && context.keyCards) {
+        const spadeCard = context.keyCards.find(
+          (c: any) => c.suit === "S" || c.suit === "spade" || c.suit?.toLowerCase() === "spade"
+        );
+        return spadeCard ? spadeCard.value : 0;
+      }
       if (value === "target" && context.targetComponent) {
         return context.targetComponent.unitId;
       }
