@@ -164,6 +164,7 @@ export class CostResolver {
           fromState: oldState,
           toState: "drive",
           playerKey: context.playerKey,
+          cause: { type: "cost", symbol: "B" },
         },
       };
       effectInterpreter.dispatchEvent(event, context);

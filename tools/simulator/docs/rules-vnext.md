@@ -963,3 +963,29 @@ npm run scenario:rules-vnext
   - 比較レポート生成スクリプトが正常に終了し、`docs/rules-vnext-compare.md` に twist が対比出力されることを確認しました。
 - **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
   - シナリオ6「ツイストでキャラクター状態を切り替える」において、期待した通りのログ順でトグルとイベント発行が行われることを確認しました。
+
+---
+
+## 25. Phase 10.1 検証結果: unitStateChanged イベントの発生原因（cause）追加と CLI ログ分類の修正
+
+本セクションでは、ツイスト等の効果によって発生する状態変化イベント（`unitStateChanged`）が、Bコストによるものと誤って分類される問題を解決するため、イベントに発生原因（`cause`）を付加し、CLI上のログ出力を適切に分類・整理した検証について記述します。
+
+### 実施内容と設計上の対応
+
+- **イベント発生原因（`cause`）メタ情報の統合**:
+  - ゲーム内の `unitStateChanged` イベントに、発生理由を表す `cause` プロパティを payload 内に付加する仕組みを導入しました。
+  - **Bコストによる消費**: `CostResolver.ts` 内でのBコスト支払い時に、`cause: { type: "cost", symbol: "B" }` を付与してイベントを発行します。
+  - **効果によるトグル**: `commandHandlers.ts` 内の `toggleUnitState` コマンド解決時に、`cause: { type: "effect", command: "toggleUnitState" }` を付与してイベントを発行します。
+- **CLIログ分類・出力ロジックの修正**:
+  - `scenarioRunner.ts` の `setupRegistryHook` において、`unitStateChanged` を一律に `[COST] B` として扱っていたロジックを修正しました。
+  - `cause` 情報を判定し、`cause.type === "cost" && cause.symbol === "B"` である場合（防壁のBコストドライブ時など）のみ `[COST] B: 防壁をドライブ (ユニット: <unitId>)` と出力し、効果によるトグルなどの場合は `[EVENT] unitStateChanged: <unitId> (<fromState> -> <toState>)` として美しく出力されるよう分類表示を修正しました。
+  - シナリオ6内に存在した、二重ログ出力の原因となる個別フックを完全に削除してフックを一元化しました。
+
+### 検証実績
+
+- **自動テストの実行結果 (`npm test`)**:
+  - すべてのイベントペイロード拡張後も、**全 12 ファイル・68 ケースの Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  - イベント構造の追加やフック修正後も、TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  - シナリオ6「ツイストでキャラクター状態を切り替える」を実行した際、一般兵（`soldier-1`）のトグルにおいて誤った `[COST] B` や「防壁をドライブ」という文言が一切出力されず、`[EVENT] unitStateChanged: soldier-1 (charge -> drive)` として正確かつ美麗にログ出力されることを目視確認しました。

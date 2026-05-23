@@ -303,6 +303,7 @@ export function toggleUnitStateHandler(
         fromState: oldState,
         toState: newState,
         playerKey: context.playerKey,
+        cause: { type: "effect", command: "toggleUnitState" },
       },
     };
     effectInterpreter.dispatchEvent(event, context);

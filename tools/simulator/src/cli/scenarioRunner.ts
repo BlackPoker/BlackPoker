@@ -114,7 +114,12 @@ function setupRegistryHook(registry: CommandRegistry) {
   const originalDispatchEvent = interpreter.dispatchEvent;
   interpreter.dispatchEvent = function (event: any, context: any) {
     if (event.type === "unitStateChanged") {
-      console.log(`  ${colors.yellow}[COST] B: 防壁をドライブ (ユニット: ${event.payload?.unitId})${colors.reset}`);
+      const cause = event.payload?.cause;
+      if (cause && cause.type === "cost" && cause.symbol === "B") {
+        console.log(`  ${colors.yellow}[COST] B: 防壁をドライブ (ユニット: ${event.payload?.unitId})${colors.reset}`);
+      } else {
+        console.log(`  ${colors.magenta}[EVENT]${colors.reset} unitStateChanged: ${event.payload?.unitId} (${event.payload?.fromState} -> ${event.payload?.toState})`);
+      }
     } else if (event.type === "cardMoved" && event.payload?.fromZone === "life" && context.currentAction?.cost?.includes("L")) {
       console.log(`  ${colors.yellow}[COST] L: ライフ1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
     } else if (event.type === "cardMoved" && event.payload?.fromZone === "hand" && context.currentAction?.cost?.includes("D")) {
@@ -599,15 +604,6 @@ async function runTwistScenario(rulePackage: any) {
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
-
-  const interpreter = registry["effectInterpreter"];
-  const originalDispatchEvent = interpreter.dispatchEvent;
-  interpreter.dispatchEvent = function (event: any, ctx: any) {
-    if (event.type === "unitStateChanged") {
-      console.log(`  ${colors.yellow}[EVENT] unitStateChanged: ${event.payload?.unitId} (${event.payload?.fromState} -> ${event.payload?.toState})${colors.reset}`);
-    }
-    originalDispatchEvent.call(this, event, ctx);
-  };
 
   subHeader("初期状態");
   logState(state);
