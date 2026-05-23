@@ -366,4 +366,183 @@ describe("Counter Action integration Tests (New YAML)", () => {
       "ターゲットリクエストのステータスが不適合です。期待: pending, 実際: cancelled"
     );
   });
+
+  it("should fail when targeting a resolved request", () => {
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
+    const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+    const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
+    const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
+    
+    const state: any = {
+      players: {
+        p1: {
+          name: "Player A",
+          life: [],
+          hand: [handCard, costCard],
+          field: [
+            {
+              unitId: "soldier-1",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+              labels: ["攻撃", "防御"],
+            }
+          ],
+          grave: [],
+          fog: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [],
+          hand: [counterCostCard],
+          field: [],
+          grave: [],
+          fog: [],
+        }
+      }
+    };
+
+    const registry = new CommandRegistry();
+    const context1: CommandContext = {
+      state,
+      playerKey: "p1",
+      keyCard: handCard,
+      targetComponent: state.players.p1.field[0],
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+    const req1 = registry.createRequest(upAction, context1);
+
+    // 1. 先にアップを解決する（正常解決されて resolved になる）
+    registry.resolveTopRequest(context1);
+    expect(req1.status).toBe("resolved");
+
+    // 2. 既に resolved になったリクエストを対象にカウンターを作ろうとすると ValidationError になること
+    const context2: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetRequest: req1, // すでに resolved 状態
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    expect(() => registry.createRequest(counterAction, context2)).toThrow(
+      "ターゲットリクエストのステータスが不適合です。期待: pending, 実際: resolved"
+    );
+  });
+
+  it("should fail when targeting counter request itself", () => {
+    const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+    const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
+    
+    const state: any = {
+      players: {
+        p2: {
+          name: "Player B",
+          life: [],
+          hand: [counterCostCard],
+          field: [],
+          grave: [],
+          fog: [],
+        }
+      }
+    };
+
+    const registry = new CommandRegistry();
+
+    // 解決コンテキストに自分自身 (currentRequest) と対象 (targetRequest = 自分自身) をバインドして検証
+    const selfContext: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetRequest: { id: "req-1", actionId: "action.counter", status: "pending" } as any, // 自分自身とみなす
+      currentRequest: { id: "req-1", actionId: "action.counter", status: "pending" } as any, // 自分自身
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    // 自分自身を対象に解決しようとすると ValidationError になること
+    expect(() => registry.validateAction(counterAction, selfContext)).toThrow(
+      "自分自身のリクエストを対象にすることはできません。"
+    );
+  });
+
+  it("should track resolved and cancelled requests in Stage.history and verify state", () => {
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
+    const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+    const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
+    const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
+    
+    const state: any = {
+      players: {
+        p1: {
+          name: "Player A",
+          life: [],
+          hand: [handCard, costCard],
+          field: [
+            {
+              unitId: "soldier-1",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+              labels: ["攻撃", "防御"],
+            }
+          ],
+          grave: [],
+          fog: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [],
+          hand: [counterCostCard],
+          field: [],
+          grave: [],
+          fog: [],
+        }
+      }
+    };
+
+    const registry = new CommandRegistry();
+    const context1: CommandContext = {
+      state,
+      playerKey: "p1",
+      keyCard: handCard,
+      targetComponent: state.players.p1.field[0],
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+    const req1 = registry.createRequest(upAction, context1);
+
+    const context2: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetRequest: req1,
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+    const req2 = registry.createRequest(counterAction, context2);
+
+    // 1. カウンターを解決する (resolved)
+    registry.resolveTopRequest(context2);
+
+    expect(req2.status).toBe("resolved");
+    expect(state.stage.history).toBeDefined();
+    expect(state.stage.history.length).toBe(1);
+    expect(state.stage.history[0]).toBe(req2); // カウンター自身が history に残る
+
+    // 2. キャンセルされたアップを解決しようとする (cancelled としてスキップ)
+    registry.resolveTopRequest(context1);
+
+    expect(req1.status).toBe("cancelled");
+    expect(state.stage.history.length).toBe(2);
+    expect(state.stage.history[1]).toBe(req1); // キャンセルされたアップも history に残る
+
+    // 3. キャンセルされたリクエストのコストと効果が本当に実行されていないことをアサート
+    expect(state.players.p1.hand.length).toBe(2); // 手札コスト未消費
+    expect(state.players.p1.fog.length).toBe(0); // 効果（フォグ生成）未発生
+    expect(state.players.p1.grave.length).toBe(0); // 墓地送りなし
+  });
 });
