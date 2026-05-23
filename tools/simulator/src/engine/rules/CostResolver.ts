@@ -1,77 +1,85 @@
 import { CommandContext } from "./CommandRegistry";
+import { CostSymbol, parseCost } from "./CostParser";
 
 /**
- * 新YAML DSLにおけるアクションコスト（D, L, B, BLなど）の判定・支払いを担当するクラス。
+ * 新YAML DSLにおけるアクションコスト（D, L, Bなど）の判定・支払いを担当するクラス。
+ * コスト文字列を正規化された CostSymbol[] にパースしてから処理します。
  */
 export class CostResolver {
   /**
-   * プレイヤーが指定されたコストを支払うことが可能か判定します。
+   * プレイヤーが指定されたコスト文字列を支払うことが可能か判定します。
    */
   canPay(cost: string, context: CommandContext): boolean {
+    try {
+      const symbols = parseCost(cost);
+      return this.canPaySymbols(symbols, context);
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * 正規化されたコストシンボル配列が支払えるか一括で事前検証します。
+   * 途中まで支払ってリソース不足で失敗するのを防ぐため、要求される総リソース数を集計してアサートします。
+   */
+  canPaySymbols(symbols: CostSymbol[], context: CommandContext): boolean {
     const player = context.state.players[context.playerKey];
     if (!player) return false;
 
-    const c = cost.trim().toUpperCase();
+    // 必要リソースの要求数を集計
+    let requiredD = 0;
+    let requiredL = 0;
+    let requiredB = 0;
 
-    if (c === "D") {
-      // 手札の枚数が「キーカード消費予定枚数 + 1枚」以上あるか。
-      // キーカードは context.keyCard (1枚) または context.keyCards (複数枚)。
-      const keyCardIds = new Set<string>();
-      if (context.keyCard) keyCardIds.add(context.keyCard.id);
-      if (context.keyCards) {
-        context.keyCards.forEach((card) => keyCardIds.add(card.id));
-      }
-
-      const remainingHand = player.hand.filter((card: any) => !keyCardIds.has(card.id));
-      return remainingHand.length >= 1;
+    for (const sym of symbols) {
+      if (sym === "D") requiredD++;
+      else if (sym === "L") requiredL++;
+      else if (sym === "B") requiredB++;
     }
 
-    if (c === "L") {
-      // ライフが1枚以上あるか
-      return player.life && player.life.length >= 1;
+    // 1. D (Discard) 手札リソース検証
+    const keyCardIds = new Set<string>();
+    if (context.keyCard) keyCardIds.add(context.keyCard.id);
+    if (context.keyCards) {
+      context.keyCards.forEach((card) => keyCardIds.add(card.id));
     }
+    const remainingHand = player.hand ? player.hand.filter((card: any) => !keyCardIds.has(card.id)) : [];
+    if (remainingHand.length < requiredD) return false;
 
-    if (c === "B") {
-      // チャージ状態の防壁が1体以上存在するか (Bulwark charge -> drive)
-      const bulwarks = player.field.filter(
-        (u: any) =>
-          (u.componentId === "character.bulwark" || u.kind === "防壁") &&
-          u.state === "charge"
-      );
-      return bulwarks.length >= 1;
-    }
+    // 2. L (Life) ライフリソース検証
+    const actualLife = player.life ? player.life.length : 0;
+    if (actualLife < requiredL) return false;
 
-    if (c === "BL") {
-      return this.canPay("B", context) && this.canPay("L", context);
-    }
+    // 3. B (Bulwark) チャージ防壁リソース検証
+    const bulwarks = player.field ? player.field.filter(
+      (u: any) =>
+        (u.componentId === "character.bulwark" || u.kind === "防壁") &&
+        u.state === "charge"
+    ) : [];
+    if (bulwarks.length < requiredB) return false;
 
-    if (c === "BB") {
-      const bulwarks = player.field.filter(
-        (u: any) =>
-          (u.componentId === "character.bulwark" || u.kind === "防壁") &&
-          u.state === "charge"
-      );
-      return bulwarks.length >= 2;
-    }
-
-    if (c === "BBL") {
-      return this.canPay("BB", context) && this.canPay("L", context);
-    }
-
-    return false;
+    return true;
   }
 
   /**
    * 実際に指定されたコストを支払います。
-   * プレイヤー状態（手札・ライフ・フィールド）を更新し、cardMoved や unitStateChanged などのイベントを発行します。
+   * コスト文字列をパースし、CostSymbolごとに順次状態変更とイベント発行を実行します。
    */
   pay(cost: string, context: CommandContext, effectInterpreter: any): void {
+    const symbols = parseCost(cost);
+    for (const sym of symbols) {
+      this.paySingleSymbol(sym, context, effectInterpreter);
+    }
+  }
+
+  /**
+   * 個々のコストシンボルに基づいて状態変更とイベント発行を実行します。
+   */
+  private paySingleSymbol(sym: CostSymbol, context: CommandContext, effectInterpreter: any): void {
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
 
-    const c = cost.trim().toUpperCase();
-
-    if (c === "D") {
+    if (sym === "D") {
       // 手札からキーカード以外のカードを1枚捨てる
       const keyCardIds = new Set<string>();
       if (context.keyCard) keyCardIds.add(context.keyCard.id);
@@ -106,10 +114,7 @@ export class CostResolver {
         },
       };
       effectInterpreter.dispatchEvent(event, context);
-      return;
-    }
-
-    if (c === "L") {
+    } else if (sym === "L") {
       // ライフの上から1枚を墓地へ送る
       if (!player.life || player.life.length === 0) {
         throw new Error("コストLを支払うためのライフが不足しています。");
@@ -136,10 +141,7 @@ export class CostResolver {
         },
       };
       effectInterpreter.dispatchEvent(event, context);
-      return;
-    }
-
-    if (c === "B") {
+    } else if (sym === "B") {
       // チャージ状態の防壁1体をドライブ状態にする
       const bulwark = player.field.find(
         (u: any) =>
@@ -165,26 +167,6 @@ export class CostResolver {
         },
       };
       effectInterpreter.dispatchEvent(event, context);
-      return;
-    }
-
-    if (c === "BL") {
-      this.pay("B", context, effectInterpreter);
-      this.pay("L", context, effectInterpreter);
-      return;
-    }
-
-    if (c === "BB") {
-      this.pay("B", context, effectInterpreter);
-      this.pay("B", context, effectInterpreter);
-      return;
-    }
-
-    if (c === "BBL") {
-      this.pay("B", context, effectInterpreter);
-      this.pay("B", context, effectInterpreter);
-      this.pay("L", context, effectInterpreter);
-      return;
     }
   }
 }

@@ -3,6 +3,7 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { ValidationError } from "../../engine/rules/ActionRequestValidator";
+import { parseCost } from "../../engine/rules/CostParser";
 import * as path from "path";
 
 describe("Cost Payment Integration Tests (New YAML)", () => {
@@ -263,5 +264,129 @@ describe("Cost Payment Integration Tests (New YAML)", () => {
 
     // チャージ防壁が無いので ValidationError になること
     expect(() => registry.executeAction(summonAction, context)).toThrow(ValidationError);
+  });
+
+  it("should successfully parse cost strings into normalized CostSymbol[]", () => {
+    expect(parseCost("D")).toEqual(["D"]);
+    expect(parseCost("L")).toEqual(["L"]);
+    expect(parseCost("B")).toEqual(["B"]);
+    expect(parseCost("BL")).toEqual(["B", "L"]);
+    expect(parseCost("BBL")).toEqual(["B", "B", "L"]);
+    expect(() => parseCost("X")).toThrow("未知のコストシンボルです: X");
+  });
+
+  it("should successfully validate and pay BBL cost (2 Bulwarks driven + 1 Life to grave)", () => {
+    const bblAction = {
+      id: "action.mockBBL",
+      name: "モックBBLアクション",
+      type: "direct",
+      cost: "BBL",
+      effect: []
+    };
+    
+    const state = {
+      players: {
+        p1: {
+          name: "Player A",
+          life: [
+            { id: "life-card", suit: "C", rank: "2", value: 2 },
+          ],
+          hand: [],
+          field: [
+            {
+              unitId: "bulwark-1",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              cards: [{ id: "bulwark-card-1", suit: "H", rank: "K", value: 13 }],
+              labels: ["防御"],
+            },
+            {
+              unitId: "bulwark-2",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              cards: [{ id: "bulwark-card-2", suit: "D", rank: "K", value: 13 }],
+              labels: ["防御"],
+            }
+          ],
+          grave: [],
+          fog: [],
+        }
+      } as Record<string, any>
+    };
+
+    const registry = new CommandRegistry();
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    // 1. バリデーションがパスすること
+    expect(() => registry.validateAction(bblAction as any, context)).not.toThrow();
+
+    // 2. 実行
+    registry.executeAction(bblAction as any, context);
+
+    // 防壁2体がドライブ状態になり、ライフが墓地（grave）へ送られていること
+    expect(state.players.p1.field[0].state).toBe("drive");
+    expect(state.players.p1.field[1].state).toBe("drive");
+    expect(state.players.p1.life.length).toBe(0);
+    expect(state.players.p1.grave.length).toBe(1);
+    expect(state.players.p1.grave[0].cards[0].id).toBe("life-card");
+  });
+
+  it("should throw ValidationError when BBL cost cannot be paid (only 1 charge bulwark)", () => {
+    const bblAction = {
+      id: "action.mockBBL",
+      name: "モックBBLアクション",
+      type: "direct",
+      cost: "BBL",
+      effect: []
+    };
+    
+    const state = {
+      players: {
+        p1: {
+          name: "Player A",
+          life: [
+            { id: "life-card", suit: "C", rank: "2", value: 2 },
+          ],
+          hand: [],
+          field: [
+            {
+              unitId: "bulwark-1",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              cards: [{ id: "bulwark-card-1", suit: "H", rank: "K", value: 13 }],
+              labels: ["防御"],
+            },
+            {
+              unitId: "bulwark-2",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "drive", // すでにドライブ状態！
+              cards: [{ id: "bulwark-card-2", suit: "D", rank: "K", value: 13 }],
+              labels: ["防御"],
+            }
+          ],
+          grave: [],
+          fog: [],
+        }
+      } as Record<string, any>
+    };
+
+    const registry = new CommandRegistry();
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    expect(() => registry.executeAction(bblAction as any, context)).toThrow(ValidationError);
   });
 });
