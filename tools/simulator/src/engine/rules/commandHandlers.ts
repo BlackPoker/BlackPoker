@@ -231,3 +231,27 @@ export function dealDamageHandler(
     }
   };
 }
+
+/**
+ * cancelRequest: 指定されたリクエストをキャンセルする
+ */
+export function cancelRequestHandler(expressionEvaluator: ExpressionEvaluator): CommandHandler {
+  return (args, context) => {
+    const { target } = args;
+    const requestId = expressionEvaluator.resolveBindingValue(target, context);
+    if (!requestId) {
+      throw new Error("キャンセル対象のリクエストIDが解決できません。");
+    }
+
+    if (!context.state.stage || !context.state.stage.requests) {
+      throw new Error("ステージまたはリクエストリストが存在しません。");
+    }
+
+    const request = context.state.stage.requests.find((r: any) => r.id === requestId);
+    if (!request) {
+      throw new Error(`キャンセル対象のリクエストが見つかりません: ${requestId}`);
+    }
+
+    request.status = "cancelled";
+  };
+}

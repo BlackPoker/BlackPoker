@@ -9,6 +9,7 @@ import {
   moveToGraveyardHandler,
   takeUntilLegacyCardHandler,
   dealDamageHandler,
+  cancelRequestHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -20,9 +21,11 @@ export interface CommandContext {
   keyCards?: any[]; // 複数キーカード情報
   targetComponent?: any; // 対象となったコンポーネント/ユニット
   targetPlayerKey?: string; // 対象となったプレイヤー情報
+  targetRequest?: ActionRequest; // 対象となったリクエスト情報
   actions?: ActionDefinition[]; // アクションの全定義（誘発アクションの検索用）
   components?: ComponentDefinition[]; // コンポーネントの全定義（常在能力の検索用）
   currentAction?: ActionDefinition; // 現在実行中のアクション定義
+  currentRequest?: ActionRequest; // 現在解決中のリクエスト情報
 }
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
@@ -93,13 +96,21 @@ export class CommandRegistry {
       : context.keyCard ? [context.keyCard] : [];
 
     // 4. 型安全なターゲット情報の構築
-    const targets: ActionRequestTarget[] | undefined = context.targetComponent
-      ? [{
-          unitId: context.targetComponent.unitId,
-          kind: context.targetComponent.kind || "ユニット",
-          componentId: context.targetComponent.componentId,
-        }]
-      : undefined;
+    let targets: ActionRequestTarget[] | undefined = undefined;
+    if (context.targetComponent) {
+      targets = [{
+        type: "unit",
+        unitId: context.targetComponent.unitId,
+        kind: context.targetComponent.kind || "ユニット",
+        componentId: context.targetComponent.componentId,
+      }];
+    } else if (context.targetRequest) {
+      targets = [{
+        type: "request",
+        requestId: context.targetRequest.id,
+        actionId: context.targetRequest.actionId,
+      }];
+    }
 
     // 5. リクエストの構築
     const request: ActionRequest = {
@@ -129,6 +140,18 @@ export class CommandRegistry {
 
     // 1. LIFO スタックから最新のリクエストを取り出す
     const request = context.state.stage.requests.pop()!;
+
+    // ステージ履歴 (history) の初期化
+    if (!context.state.stage.history) {
+      context.state.stage.history = [];
+    }
+
+    // キャンセル済みリクエストのスキップ
+    if (request.status === "cancelled") {
+      context.state.stage.history.push(request);
+      return;
+    }
+
     request.status = "resolving";
 
     // アクション定義の逆引き
@@ -142,9 +165,21 @@ export class CommandRegistry {
 
     // 2. リクエスト実行時のコンテキスト復元
     const player = context.state.players[request.controller];
-    const targetComponent = request.targets && request.targets.length > 0
-      ? (player.field ? player.field.find((u: any) => u.unitId === request.targets![0].unitId) : undefined) || request.targets[0]
-      : undefined;
+    let targetComponent = undefined;
+    let targetRequest = undefined;
+
+    if (request.targets && request.targets.length > 0) {
+      const firstTarget = request.targets[0];
+      if (firstTarget.type === "unit") {
+        targetComponent = (player.field ? player.field.find((u: any) => u.unitId === firstTarget.unitId) : undefined) || firstTarget;
+      } else if (firstTarget.type === "request") {
+        const allReqs = [
+          ...(context.state.stage.requests || []),
+          ...(context.state.stage.history || [])
+        ];
+        targetRequest = allReqs.find((r: any) => r.id === firstTarget.requestId);
+      }
+    }
 
     const resolveContext: CommandContext = {
       ...context,
@@ -152,7 +187,9 @@ export class CommandRegistry {
       keyCards: request.keyCards,
       keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
       targetComponent,
+      targetRequest,
       currentAction: action,
+      currentRequest: request,
     };
 
     // 3. 解決時におけるコストの2重チェック検証
@@ -160,6 +197,7 @@ export class CommandRegistry {
       const costResolver = new CostResolver();
       if (!costResolver.canPay(request.cost, resolveContext)) {
         request.status = "cancelled";
+        context.state.stage.history.push(request);
         throw new Error(`解決時にコスト [${request.cost}] を支払うリソースが不足しているため、解決できません。`);
       }
       // 実際の支払い実行
@@ -172,6 +210,7 @@ export class CommandRegistry {
     }
 
     request.status = "resolved";
+    context.state.stage.history.push(request);
   }
 
   /**
@@ -221,5 +260,6 @@ export class CommandRegistry {
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
     this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
+    this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator));
   }
 }

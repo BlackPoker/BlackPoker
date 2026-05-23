@@ -1,0 +1,17 @@
+actions:
+  - id: action.counter
+    name: カウンター
+    type: magic
+    request:
+      trigger: direct
+      speed: immediate
+      timing: quick
+    cost: D
+    targets:
+      - id: targetRequest
+        type: request
+        condition:
+          status: pending
+    effect:
+      - cancelRequest:
+          target: targetRequest

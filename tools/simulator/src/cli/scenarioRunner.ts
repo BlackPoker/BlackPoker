@@ -87,7 +87,11 @@ function setupRegistryHook(registry: CommandRegistry) {
     const req = context.state.stage?.requests[context.state.stage.requests.length - 1];
     if (req) {
       const action = context.actions?.find((a: any) => a.id === req.actionId) || req.action;
-      console.log(`  ${colors.bold}${colors.blue}[RESOLVE]${colors.reset} ${action?.name || req.actionId}を解決 (ID: ${req.id})`);
+      if (req.status === "cancelled") {
+        console.log(`  ${colors.bold}${colors.blue}[RESOLVE]${colors.reset} ${action?.name || req.actionId}はキャンセル済みのため解決しない (ID: ${req.id})`);
+      } else {
+        console.log(`  ${colors.bold}${colors.blue}[RESOLVE]${colors.reset} ${action?.name || req.actionId}を解決 (ID: ${req.id})`);
+      }
     }
     originalResolveTopRequest.call(this, context);
   };
@@ -454,6 +458,107 @@ async function runFortressDefenseScenario(rulePackage: any) {
   console.log(`\n${colors.bold}${colors.green}結果検証: Player B の残りライフ = ${state.players.p2.life.length} (期待値: 2。防壁設置した防壁が場にあるため、投擲ダメージが完璧に無効化されました！)${colors.reset}`);
 }
 
+async function runCounterScenario(rulePackage: any) {
+  header("シナリオ5: 「カウンターでアップを取り消す」（ステージ上リクエスト取消）");
+  console.log("概要: Player A が「アップ」をステージに積みます。解決される前に、Player B が「カウンター」を発動してステージに積み、アップを取り消します。その結果、アップの解決時には効果が適用されず、手札コスト D も支払われないことを検証します。");
+
+  const upAction = rulePackage.actions.find((a: any) => a.id === "action.up");
+  if (!upAction) throw new Error("action.up が見つかりません");
+
+  const counterAction = rulePackage.actions.find((a: any) => a.id === "action.counter");
+  if (!counterAction) throw new Error("action.counter が見つかりません");
+
+  const state = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: [
+          { id: "life-1", suit: "S", rank: "2", value: 2 },
+        ],
+        hand: [
+          { id: "key-heart-7", suit: "H", rank: "7", value: 7 }, // アップ発動カード
+          { id: "cost-spade-2", suit: "S", rank: "2", value: 2 }, // アップコスト用手札
+        ],
+        field: [
+          {
+            unitId: "soldier-1",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+            labels: ["攻撃", "防御"],
+          }
+        ],
+        fog: [],
+        grave: [],
+      },
+      p2: {
+        name: "Player B",
+        life: [],
+        hand: [
+          { id: "counter-cost", suit: "C", rank: "2", value: 2 }, // カウンターコスト用手札
+        ],
+        field: [],
+        grave: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  subHeader("初期状態");
+  logState(state);
+
+  // 1. Player A が「アップ」をステージに積む
+  const upKeyCard = state.players.p1.hand[0];
+  const targetUnit = state.players.p1.field[0];
+  const upContext: CommandContext = {
+    state,
+    playerKey: "p1",
+    keyCard: upKeyCard,
+    targetComponent: targetUnit,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：アップ をステージへ");
+  console.log(`Player A が ${upAction.name} をステージへ積みます。`);
+  const req1 = registry.createRequest(upAction, upContext);
+
+  // 2. Player B が「カウンター」をステージに積む
+  const counterContext: CommandContext = {
+    state,
+    playerKey: "p2",
+    targetRequest: req1, // アップを対象
+    keyCard: undefined,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：カウンター をステージへ");
+  console.log(`Player B が ${counterAction.name} をステージへ積みます（対象: ${req1.id}）。`);
+  const req2 = registry.createRequest(counterAction, counterContext);
+
+  subHeader("ステージ上のリクエストを順次解決");
+  // 最新のカウンターから解決 (LIFO)
+  console.log(`\n--- カウンター (ID: ${req2.id}) の解決 ---`);
+  registry.resolveTopRequest(counterContext);
+
+  // 次にアップの解決
+  console.log(`\n--- アップ (ID: ${req1.id}) の解決 ---`);
+  registry.resolveTopRequest(upContext);
+
+  subHeader("最終状態");
+  logState(state);
+
+  const finalSize = registry.calculateUnitSize(targetUnit, state.players.p1);
+  console.log(`\n${colors.bold}${colors.green}結果検証: 
+  - 兵士の最終サイズ = ${finalSize} (期待値: 6。アップがカウンターされたためサイズ増幅なし！)
+  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 2。アップのDコストは支払われていない！)
+  - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 0。カウンターのDコストは支払われている！)${colors.reset}`);
+}
+
 async function main() {
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const rulePackage = await loadRulePackageFromDirectory(rulesDir);
@@ -471,6 +576,9 @@ async function main() {
 
   // 4. 要塞で投擲を防ぐ
   await runFortressDefenseScenario(rulePackage);
+
+  // 5. カウンターでアップを取り消す
+  await runCounterScenario(rulePackage);
 }
 
 async function run() {

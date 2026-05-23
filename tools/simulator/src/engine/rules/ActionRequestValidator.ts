@@ -177,9 +177,10 @@ export class ActionRequestValidator {
     if (action.targets && Array.isArray(action.targets)) {
       for (const targetDef of action.targets) {
         const cond = targetDef.condition;
-        if (!cond) continue;
+        const targetType = targetDef.type || (cond ? cond.type : undefined);
 
-        if (cond.type === "player") {
+        if (targetType === "player") {
+          if (!cond) continue;
           // プレイヤーターゲットの検証
           if (!context.targetPlayerKey) {
             throw new ValidationError("ターゲットとなるプレイヤーが指定されていません。");
@@ -189,7 +190,28 @@ export class ActionRequestValidator {
               throw new ValidationError("ターゲットプレイヤーは対戦相手である必要があります。");
             }
           }
-        } else if (cond.component) {
+        } else if (targetType === "request") {
+          // リクエストターゲットの検証
+          const targetReq = context.targetRequest;
+          if (!targetReq) {
+            throw new ValidationError("ターゲットとなるリクエストが指定されていません。");
+          }
+          if (cond && cond.status && targetReq.status !== cond.status) {
+            throw new ValidationError(
+              `ターゲットリクエストのステータスが不適合です。期待: ${cond.status}, 実際: ${targetReq.status}`
+            );
+          }
+          if (context.currentRequest && targetReq.id === context.currentRequest.id) {
+            throw new ValidationError("自分自身のリクエストを対象にすることはできません。");
+          }
+          const stageReqs = context.state.stage?.requests || [];
+          const exists = stageReqs.some((r: any) => r.id === targetReq.id);
+          if (!exists) {
+            throw new ValidationError(
+              `ターゲットリクエスト ${targetReq.id} はステージ上に存在しません。`
+            );
+          }
+        } else if (cond && cond.component) {
           // コンポーネントターゲットの検証
           if (!context.targetComponent) {
             throw new ValidationError("ターゲットとなるコンポーネントが指定されていません。");

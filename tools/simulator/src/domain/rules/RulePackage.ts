@@ -56,11 +56,18 @@ export type EffectCommand =
   | { summonUnit: Record<string, any> }
   | { [commandName: string]: Record<string, any> };
 
-export type ActionRequestTarget = {
-  unitId: string;
-  kind: string;
-  componentId: string;
-};
+export type ActionRequestTarget =
+  | {
+      type: "unit";
+      unitId: string;
+      kind: string;
+      componentId: string;
+    }
+  | {
+      type: "request";
+      requestId: string;
+      actionId: string;
+    };
 
 export type ActionRequest = {
   id: string;
@@ -76,4 +83,5 @@ export type ActionRequest = {
 
 export type Stage = {
   requests: ActionRequest[];
+  history?: ActionRequest[];
 };

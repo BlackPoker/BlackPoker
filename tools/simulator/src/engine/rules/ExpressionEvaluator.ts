@@ -47,6 +47,9 @@ export class ExpressionEvaluator {
       if (value === "target" && context.targetComponent) {
         return context.targetComponent.unitId;
       }
+      if (value === "targetRequest" && context.targetRequest) {
+        return context.targetRequest.id;
+      }
     }
     return value;
   }
