@@ -14,6 +14,22 @@ Experimental / Prototype
 docker compose up
 ```
 
+### 主要検証コマンド
+
+```bash
+# 統合テスト (Vitest)
+docker compose run --rm app npm test
+
+# 本番ビルドおよび型チェック
+docker compose run --rm app npm run build
+
+# 新旧アクション定義の比較レポート再生成
+docker compose run --rm app npm run compare:rules-vnext
+
+# 新YAML DSL挙動確認CLIシナリオ実行
+docker compose run --rm app npm run scenario:rules-vnext
+```
+
 Open:
 
 ```text

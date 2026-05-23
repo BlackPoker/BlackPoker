@@ -117,6 +117,8 @@ describe("Counter Action integration Tests (New YAML)", () => {
 
     const req2 = registry.createRequest(counterAction, context2);
 
+    expect(counterAction.request?.speed).toBe("normal");
+
     expect(state.stage.requests.length).toBe(2);
     expect(state.stage.requests[0]).toBe(req1);
     expect(state.stage.requests[1]).toBe(req2);

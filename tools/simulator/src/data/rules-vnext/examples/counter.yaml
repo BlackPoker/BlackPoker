@@ -4,7 +4,7 @@ actions:
     type: magic
     request:
       trigger: direct
-      speed: immediate
+      speed: normal
       timing: quick
     cost: D
     targets:
