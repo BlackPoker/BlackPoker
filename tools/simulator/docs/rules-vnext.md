@@ -682,3 +682,41 @@ npm run scenario:rules-vnext
 
 - **CLIシナリオ4の動的化**:
   [scenarioRunner.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/cli/scenarioRunner.ts) 内のシナリオ4（要塞防衛）を拡張しました。場にあらかじめ一般兵ユニットを初期データとして配置しておくのではなく、Bが手札から「防壁設置」アクションを実行して防壁ユニットを作り、その設置した伏せ防壁カードが存在する状態で相手の投擲（ Spade 5 + Club 2 ）を無効化するという、実ゲームの連動フローを完璧に目視トレースできる仕組みを実現しました。
+
+---
+
+## 18. Phase 6.10 検証結果: ユニット表示名判定の ComponentDefinition メタデータ駆動への汎用化
+
+本セクションでは、`summonUnitHandler` などのエンジン実行部において、特定のコンポーネントID（`character.bulwark` 等）に依存するハードコード判定を完全に排除し、`ComponentDefinition` の表示メタデータ（`display.kind` や `properties.kind`）から種類名（`unit.kind`）を動的に解決する汎用化リファクタリングを行った結果について記述します。
+
+### 実施内容と設計上の対応
+- **型定義の拡張**:
+  `RulePackage.ts` の `ComponentDefinition` インターフェースに、表示用の `display` プロパティを追加しました：
+  ```typescript
+  display?: {
+    kind?: string;
+    [key: string]: any;
+  };
+  ```
+- **YAML 定義のメタデータ追加**:
+  [official-base.yaml](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/data/rules-vnext/official-base.yaml) において、一般兵（`character.soldier`）および防壁（`character.bulwark`）の定義に `display.kind` を定義追加しました。
+  - 一般兵: `display.kind: 一般兵`
+  - 防壁: `display.kind: 防壁`
+- **エンジン処理の汎用化**:
+  `commandHandlers.ts` の `summonUnitHandler` を修正し、`context.components` から現在召喚されようとしているコンポーネントの定義を逆引きし、以下の優先順位で `unit.kind` を動的に決定する汎用ロジックを実装しました。
+  1. `compDef.display.kind` が存在すればそれを適用
+  2. `compDef.properties.kind` が存在すればそれを適用
+  3. `compDef.name` が存在すればそれを適用
+  4. すべて存在しない場合はフォールバックとして `"ユニット"` を適用
+- **テストケースの修正**:
+  `summonSoldier.test.ts` において、`CommandRegistry.execute` 呼び出し時のコンテキストに `components` 定義が渡されていなかったため、`rulePackage.components` を context に渡すように修正しました。
+
+### テストおよび検証実績
+- **自動テストの実行結果 (`npm test`)**:
+  全8ファイル、39ケースすべての Vitest 統合テストが 100% グリーンでパスすることを確認しました。これにより、動的メタデータ解決へ移行した後も、ユニット種類名の期待値判定が完全に保証されていることを証明しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  静的型定義の変更を含め、TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **比較レポートの生成 (`npm run compare:rules-vnext`)**:
+  比較レポート生成スクリプトが正常に動作することを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  トレース出力において、召喚されたユニットの表示名（一般兵、防壁）が崩れることなく、従来と全く同様に正確に表示されることを確認しました。
