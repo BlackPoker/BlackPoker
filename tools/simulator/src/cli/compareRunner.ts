@@ -13,6 +13,7 @@ const mappings = [
   { newId: "action.throwing", oldId: "throwing" },
   { newId: "action.nextGeneration", oldId: "nextGeneration" },
   { newId: "action.counter", oldId: "counter" },
+  { newId: "action.twist", oldId: "twist" },
 ];
 
 function compareTrigger(newVal: string | undefined, oldVal: string | undefined) {

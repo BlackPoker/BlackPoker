@@ -77,7 +77,13 @@ function setupRegistryHook(registry: CommandRegistry) {
   const originalCreateRequest = registry.createRequest;
   registry.createRequest = function (action: any, context: any) {
     const req = originalCreateRequest.call(this, action, context);
-    console.log(`  ${colors.bold}${colors.cyan}[REQUEST]${colors.reset} ${action.name}をステージへ (ID: ${req.id})`);
+    let targetStr = "";
+    if (context.targetComponent) {
+      targetStr = `, 対象: ${context.targetComponent.unitId || context.targetComponent.componentId}`;
+    } else if (context.targetRequest) {
+      targetStr = `, 対象: ${context.targetRequest.id}`;
+    }
+    console.log(`  ${colors.bold}${colors.cyan}[REQUEST]${colors.reset} ${action.name}をステージへ (ID: ${req.id}${targetStr})`);
     return req;
   };
 
@@ -559,6 +565,77 @@ async function runCounterScenario(rulePackage: any) {
   - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 0。カウンターのDコストは支払われている！)${colors.reset}`);
 }
 
+async function runTwistScenario(rulePackage: any) {
+  header("シナリオ6: 「ツイスト」（キャラクターのチャージ/ドライブ状態切替）");
+  console.log("概要: Player A が「ツイスト」を一般兵（soldier-1, チャージ状態）を対象としてステージに積みます。解決時、コスト D を支払い、一般兵の状態がドライブ（drive）状態に切り替わることを検証します。");
+
+  const twistAction = rulePackage.actions.find((a: any) => a.id === "action.twist");
+  if (!twistAction) throw new Error("action.twist が見つかりません");
+
+  const twistKeyCard = { id: "twist-key", code: "♢5", suit: "D", rank: "5", value: 5 };
+  const twistCostCard = { id: "twist-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
+
+  const soldier = {
+    unitId: "soldier-1",
+    kind: "一般兵",
+    componentId: "character.soldier",
+    state: "charge",
+    cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+    labels: ["攻撃", "防御"],
+  };
+
+  const state = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: [],
+        hand: [twistKeyCard, twistCostCard],
+        field: [soldier],
+        grave: [],
+        fog: [],
+      }
+    } as Record<string, any>
+  };
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  const interpreter = registry["effectInterpreter"];
+  const originalDispatchEvent = interpreter.dispatchEvent;
+  interpreter.dispatchEvent = function (event: any, ctx: any) {
+    if (event.type === "unitStateChanged") {
+      console.log(`  ${colors.yellow}[EVENT] unitStateChanged: ${event.payload?.unitId} (${event.payload?.fromState} -> ${event.payload?.toState})${colors.reset}`);
+    }
+    originalDispatchEvent.call(this, event, ctx);
+  };
+
+  subHeader("初期状態");
+  logState(state);
+
+  const context: CommandContext = {
+    state,
+    playerKey: "p1",
+    keyCard: twistKeyCard,
+    targetComponent: soldier,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：ツイスト をステージへ (対象: 一般兵1)");
+  const req = registry.createRequest(twistAction, context);
+
+  subHeader("ステージ上のリクエストを解決");
+  console.log(`\n--- ツイスト (ID: ${req.id}) の解決 ---`);
+  registry.resolveTopRequest(context);
+
+  subHeader("最終状態");
+  logState(state);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: 
+  - 一般兵1の最終状態 = ${soldier.state} (期待値: drive)
+  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 1。ツイストのDコストは支払われた！)${colors.reset}`);
+}
+
 async function main() {
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const rulePackage = await loadRulePackageFromDirectory(rulesDir);
@@ -579,6 +656,9 @@ async function main() {
 
   // 5. カウンターでアップを取り消す
   await runCounterScenario(rulePackage);
+
+  // 6. ツイストでアップの対象を変更する
+  await runTwistScenario(rulePackage);
 }
 
 async function run() {

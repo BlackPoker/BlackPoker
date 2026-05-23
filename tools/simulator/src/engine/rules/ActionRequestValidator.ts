@@ -129,7 +129,14 @@ export class ActionRequestValidator {
       throw new ValidationError("アクションが指定されていません。");
     }
 
-    // 0. コスト (cost) の事前検証
+    // 0. リクエスト速度 (speed) の検証
+    if (action.request && action.request.speed) {
+      if (action.id === "action.twist" && action.request.speed !== "normal") {
+        throw new ValidationError("ツイストのリクエスト速度は通常である必要があります。");
+      }
+    }
+
+    // 0.5. コスト (cost) の事前検証
     if (action.cost) {
       const costResolver = new CostResolver();
       if (!costResolver.canPay(action.cost, context)) {
@@ -177,7 +184,10 @@ export class ActionRequestValidator {
     if (action.targets && Array.isArray(action.targets)) {
       for (const targetDef of action.targets) {
         const cond = targetDef.condition;
-        const targetType = targetDef.type || (cond ? cond.type : undefined);
+        let targetType = targetDef.type || (cond ? cond.type : undefined);
+        if (!targetType && (cond?.component || cond?.componentType || targetDef.id === "target")) {
+          targetType = "unit";
+        }
 
         if (targetType === "player") {
           if (!cond) continue;
@@ -211,19 +221,56 @@ export class ActionRequestValidator {
               `ターゲットリクエスト ${targetReq.id} はステージ上に存在しません。`
             );
           }
-        } else if (cond && cond.component) {
-          // コンポーネントターゲットの検証
-          if (!context.targetComponent) {
-            throw new ValidationError("ターゲットとなるコンポーネントが指定されていません。");
+          if (cond && cond.hasTarget) {
+            if (!targetReq.targets || targetReq.targets.length === 0) {
+              throw new ValidationError(
+                `ターゲットリクエスト ${targetReq.id} は変更可能なターゲットを持っていません。`
+              );
+            }
           }
-          const isMatch = this.expressionEvaluator.evaluateTargetCondition(
-            context.targetComponent,
-            cond
-          );
-          if (!isMatch) {
-            throw new ValidationError(
-              `ターゲットコンポーネントが条件を満たしていません。要求: ${cond.component}, 実際: ${context.targetComponent.componentId}`
-            );
+        } else if (targetType === "unit") {
+          // ツイストを含むユニットターゲットの検証
+          if (cond) {
+            if (!context.targetComponent) {
+              throw new ValidationError("ターゲットとなるコンポーネントが指定されていません。");
+            }
+
+            // キャラクタータイプの検証 (ツイストなど)
+            if (cond.componentType === "character") {
+              const compId = context.targetComponent.componentId || "";
+              const compDef = context.components?.find((c: any) => c.id === compId);
+
+              // 優先判定: ComponentDefinition.type === "character"
+              // フォールバック: componentId.startsWith("character.")
+              const isCharacter = compDef
+                ? compDef.type === "character"
+                : compId.startsWith("character.");
+
+              if (!isCharacter) {
+                throw new ValidationError("ターゲットがキャラクターではありません。");
+              }
+
+              // 状態の検証 (charge または drive であること)
+              const unitState = context.targetComponent.state;
+              if (unitState !== "charge" && unitState !== "drive") {
+                throw new ValidationError(
+                  `ターゲットユニットの状態が不適合です。期待: charge または drive, 実際: ${unitState}`
+                );
+              }
+            }
+
+            // 既存のコンポーネントターゲット検証 (cond.component がある場合)
+            if (cond.component) {
+              const isMatch = this.expressionEvaluator.evaluateTargetCondition(
+                context.targetComponent,
+                cond
+              );
+              if (!isMatch) {
+                throw new ValidationError(
+                  `ターゲットコンポーネントが条件を満たしていません。要求: ${cond.component}, 実際: ${context.targetComponent.componentId}`
+                );
+              }
+            }
           }
         }
       }

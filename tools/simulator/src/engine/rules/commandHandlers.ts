@@ -255,3 +255,56 @@ export function cancelRequestHandler(expressionEvaluator: ExpressionEvaluator): 
     request.status = "cancelled";
   };
 }
+
+/**
+ * toggleUnitState: 対象ユニットのチャージ/ドライブ状態をトグルする
+ */
+export function toggleUnitStateHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target } = args;
+    let targetUnit = context.targetComponent;
+
+    if (!targetUnit && target) {
+      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
+      if (resolvedTargetId) {
+        for (const pKey of Object.keys(context.state.players)) {
+          const player = context.state.players[pKey];
+          if (player.field) {
+            const u = player.field.find((unit: any) => unit.unitId === resolvedTargetId);
+            if (u) {
+              targetUnit = u;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!targetUnit) {
+      throw new Error("トグル対象のユニットが見つかりません。");
+    }
+
+    const oldState = targetUnit.state;
+    if (oldState !== "charge" && oldState !== "drive") {
+      throw new Error(`トグルできない状態です。期待: charge または drive, 実際: ${oldState}`);
+    }
+
+    const newState = oldState === "charge" ? "drive" : "charge";
+    targetUnit.state = newState;
+
+    // イベント発行 (unitStateChanged)
+    const event = {
+      type: "unitStateChanged",
+      payload: {
+        unitId: targetUnit.unitId,
+        fromState: oldState,
+        toState: newState,
+        playerKey: context.playerKey,
+      },
+    };
+    effectInterpreter.dispatchEvent(event, context);
+  };
+}

@@ -910,3 +910,56 @@ npm run scenario:rules-vnext
   - 比較レポート生成スクリプトが正常に終了することを確認しました。
 - **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
   - シナリオ5「カウンターでアップを取り消す」を含め、CLI上のログ出力および動作が完全に一貫していることを確認しました。
+
+---
+
+## 24. Phase 10 検証結果: 新YAML DSLシミュレーターにおける「ツイスト」の最小実装とキャラクター状態変更処理
+
+本セクションでは、旧 `act.yaml` の本来の仕様（「対象のキャラクターをドライブ状態またはチャージ状態にする」）に基づいた新YAML DSLでの「ツイスト」最小実装および検証・実証した結果について記述します。
+
+### 実施内容と設計上の対応
+
+- **「カットイン」用語の非採用（第9版公式手順アライン）**:
+  - 設計方針およびルール規定に合わせ、設計・コード・ドキュメント・アサーションから「カットイン」という用語を完全に排除しました。
+- **YAMLによるツイスト定義（`twist.yaml`）の追加**:
+  - `twist.yaml` を `tools/simulator/src/data/rules-vnext/examples/twist.yaml` に新規作成。
+  - アクションIDを `action.twist`、コストを `D`、キーカード条件を `♢A〜10`（suit: diamond, rank: "A..10"）、速度（`actSpeed`）を「通常（`normal`）」、タイミングを「クイック（`quick`）」と定義しました。
+  - 対象（`targets`）には、キャラクター1体（`componentType: character`）を指定し、効果として `toggleUnitState` コマンドを定義しました。
+- **キャラクター状態変更コマンド（`toggleUnitState`）の実装**:
+  - `commandHandlers.ts` に `toggleUnitState` を追加しました。対象ユニットの現在の状態（`state`）が `charge` であれば `drive` に、`drive` であれば `charge` に切り替えます（それ以外の無効な状態はエラーとします）。
+  - 状態変更後に、既存のBコストの仕様にアラインする形で、`unitStateChanged` イベント（`type: "unitStateChanged", payload: { unitId, fromState, toState, playerKey }`）を発行する仕組みを構築しました。
+- **一般化されたキャラクターターゲット判定（ActionRequestValidatorの拡張）**:
+  - `ActionRequestValidator.ts` にて、対象がキャラクターであることを検証する際に、`componentId` の prefix のみに依存せず、`ComponentDefinition.type === "character"` を優先して判定し、見つからない場合のフォールバックとして `componentId.startsWith("character.")` を使用する強固な一般判定ロジックを統合しました。
+  - これにより、防壁（`character.bulwark`）はキャラクターとして正常に処理され、フォグ（`fog.up`）や要塞（`trump.fortress`）といった非キャラクターコンポーネントが指定された場合には `ValidationError`（ターゲットがキャラクターではありません。）を正しくスローして処理を拒絶します。
+- **前回の request 対象変更関連ロジックの完全排除**:
+  - `changeRequestTarget` コマンドおよびそれに付随する validator アサーション、ExpressionEvaluator 解決ロジック、前回のドキュメント等をコードベースから完全に削除・修正しました。
+- **CLIシナリオ「ツイストでキャラクター状態を切り替える」の追加**:
+  - `scenarioRunner.ts` にシナリオ6を追加。Player A が一般兵（`soldier-1`, チャージ状態）を対象に「ツイスト」をステージに積み、解決時にコスト D を支払って一般兵の状態をドライブ（`drive`）状態へと正常にトグルさせ、`unitStateChanged` イベントが美麗に発火するプロセスを CLI ログ上で実証しました。
+- **比較レポート（`compareRunner.ts`）への追加**:
+  - 対応マッピングに `action.twist` <-> `twist` を追加し、`actSpeed` が `通常 / normal` で一致することを確認しました。
+
+> [!IMPORTANT]
+> **将来の設計・拡張方針について**
+> - **選択式状態変更コマンドへの拡張**:
+>   旧効果文「ドライブ状態またはチャージ状態にする」は本来選択式（チャージにするかドライブにするかをプレイヤーが選ぶ）にも読めます。今回は最小実装としてトグルを行う `toggleUnitState` を採用しましたが、将来的にはプレイヤーが状態を選択して適用できる `chooseState` / `setUnitState` などのより高度な高レベル命令コマンドへと拡張する方針とします。
+
+### テストおよび検証実績
+
+- **ツイスト専用の統合テストを追加 (`twist.test.ts`)**:
+  - [twist.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/twist.test.ts) を新規作成し、以下の振る舞いを網羅的にアサート検証しました。
+    1. チャージ（`charge`）状態の一般兵を対象にツイストするとドライブ（`drive`）状態になること（A）。
+    2. ドライブ（`drive`）状態の一般兵を対象にツイストするとチャージ（`charge`）状態になること（B）。
+    3. ツイストの D コストが正常に支払われること（C）。
+    4. `unitStateChanged` イベントが正常なパラメータで発行されること（D）。
+    5. 非キャラクター（フォグ `fog.up` や 要塞 `trump.fortress`）を指定した場合、`ValidationError` になること（E）。
+    6. `charge` / `drive` 以外の状態でツイストを適用しようとした場合、`ValidationError` になること（F）。
+    7. `actSpeed` が `normal`（通常）、`timing` が `quick` であること（G）。
+    8. 防壁 `character.bulwark` もキャラクターとして正常にツイスト対象にできること（H）。
+- **自動テストの実行結果 (`npm test`)**:
+  - 新規追加した `twist.test.ts`（5ケース）を含む、**全 12 ファイル・68 ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  - TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **比較レポートの生成 (`npm run compare:rules-vnext`)**:
+  - 比較レポート生成スクリプトが正常に終了し、`docs/rules-vnext-compare.md` に twist が対比出力されることを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  - シナリオ6「ツイストでキャラクター状態を切り替える」において、期待した通りのログ順でトグルとイベント発行が行われることを確認しました。

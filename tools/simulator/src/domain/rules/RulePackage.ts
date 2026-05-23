@@ -25,7 +25,9 @@ export type ActionDefinition = {
   };
   targets?: Array<{
     id: string;
-    condition: Record<string, any>;
+    type?: string;
+    condition?: Record<string, any>;
+    [key: string]: any;
   }>;
   text?: {
     effect?: string;

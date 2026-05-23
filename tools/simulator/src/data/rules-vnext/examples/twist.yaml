@@ -1,0 +1,27 @@
+actions:
+  - id: action.twist
+    name: ツイスト
+    type: magic
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+    cost: D
+    key:
+      id: key
+      count: 1
+      condition:
+        card:
+          suit: diamond
+          rank: "A..10"
+          zone: hand
+    targets:
+      - id: target
+        condition:
+          componentType: character
+    effect:
+      - toggleUnitState:
+          target: target
+          states:
+            - charge
+            - drive

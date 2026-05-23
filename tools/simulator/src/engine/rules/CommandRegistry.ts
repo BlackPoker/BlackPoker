@@ -10,6 +10,7 @@ import {
   takeUntilLegacyCardHandler,
   dealDamageHandler,
   cancelRequestHandler,
+  toggleUnitStateHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -97,19 +98,45 @@ export class CommandRegistry {
 
     // 4. 型安全なターゲット情報の構築
     let targets: ActionRequestTarget[] | undefined = undefined;
-    if (context.targetComponent) {
-      targets = [{
-        type: "unit",
-        unitId: context.targetComponent.unitId,
-        kind: context.targetComponent.kind || "ユニット",
-        componentId: context.targetComponent.componentId,
-      }];
-    } else if (context.targetRequest) {
-      targets = [{
-        type: "request",
-        requestId: context.targetRequest.id,
-        actionId: context.targetRequest.actionId,
-      }];
+    if (context.targetRequest || context.targetComponent) {
+      targets = [];
+      if (action.targets && Array.isArray(action.targets)) {
+        for (const tDef of action.targets) {
+          const tType = tDef.type || (tDef.condition ? tDef.condition.type : undefined);
+          if (tType === "request" && context.targetRequest) {
+            targets.push({
+              type: "request",
+              requestId: context.targetRequest.id,
+              actionId: context.targetRequest.actionId,
+            });
+          } else if ((tType === "unit" || tDef.condition?.component || tDef.condition?.componentType || tDef.type === "unit") && context.targetComponent) {
+            targets.push({
+              type: "unit",
+              unitId: context.targetComponent.unitId,
+              kind: context.targetComponent.kind || "ユニット",
+              componentId: context.targetComponent.componentId,
+            });
+          }
+        }
+      } else {
+        if (context.targetComponent) {
+          targets.push({
+            type: "unit",
+            unitId: context.targetComponent.unitId,
+            kind: context.targetComponent.kind || "ユニット",
+            componentId: context.targetComponent.componentId,
+          });
+        } else if (context.targetRequest) {
+          targets.push({
+            type: "request",
+            requestId: context.targetRequest.id,
+            actionId: context.targetRequest.actionId,
+          });
+        }
+      }
+      if (targets.length === 0) {
+        targets = undefined;
+      }
     }
 
     // 5. リクエストの構築
@@ -169,15 +196,20 @@ export class CommandRegistry {
     let targetRequest = undefined;
 
     if (request.targets && request.targets.length > 0) {
-      const firstTarget = request.targets[0];
-      if (firstTarget.type === "unit") {
-        targetComponent = (player.field ? player.field.find((u: any) => u.unitId === firstTarget.unitId) : undefined) || firstTarget;
-      } else if (firstTarget.type === "request") {
-        const allReqs = [
-          ...(context.state.stage.requests || []),
-          ...(context.state.stage.history || [])
-        ];
-        targetRequest = allReqs.find((r: any) => r.id === firstTarget.requestId);
+      for (const t of request.targets) {
+        if (t.type === "unit") {
+          if (!targetComponent) {
+            targetComponent = (player.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+          }
+        } else if (t.type === "request") {
+          if (!targetRequest) {
+            const allReqs = [
+              ...(context.state.stage.requests || []),
+              ...(context.state.stage.history || [])
+            ];
+            targetRequest = allReqs.find((r: any) => r.id === t.requestId);
+          }
+        }
       }
     }
 
@@ -261,5 +293,6 @@ export class CommandRegistry {
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
     this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
     this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator));
+    this.register("toggleUnitState", toggleUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }
