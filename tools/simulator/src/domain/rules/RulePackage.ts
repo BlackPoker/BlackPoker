@@ -55,3 +55,25 @@ export type EffectCommand =
   | { createFog: Record<string, any> }
   | { summonUnit: Record<string, any> }
   | { [commandName: string]: Record<string, any> };
+
+export type ActionRequestTarget = {
+  unitId: string;
+  kind: string;
+  componentId: string;
+};
+
+export type ActionRequest = {
+  id: string;
+  actionId: string;
+  controller: string; // "p1" | "p2"
+  keyCards: any[];
+  targets?: ActionRequestTarget[];
+  cost?: string;
+  status: "pending" | "resolving" | "resolved" | "cancelled";
+  sequence: number;
+  action?: ActionDefinition;
+};
+
+export type Stage = {
+  requests: ActionRequest[];
+};

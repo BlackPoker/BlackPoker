@@ -775,3 +775,52 @@ npm run scenario:rules-vnext
   全9ファイル、**全 48 ケース（新規3ケース追加）すべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。これにより、既存の全コストアサーションとの後方互換性が完全に証明されました。
 - **本番ビルドの成功 (`npm run build`)**:
   TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+
+---
+
+## 21. Phase 8 検証結果: 新YAML DSLシミュレーターにおける Stage / ActionRequest モデルの最小実装
+
+本セクションでは、将来的なカウンター、ツイスト、優先権の割り込み解決に向けた非同期「ステージ積載・段階解決」構造の土台として、`Stage` と `ActionRequest` モデルを最小実装し、エンジン実行部へ統合・検証した結果について記述します。
+
+### 実施内容と設計上の対応
+
+- **型定義の厳密化と `any` の排除**:
+  - `RulePackage.ts` に型安全な `ActionRequestTarget`、`ActionRequest`、および `Stage` の型定義を追加し、`targets` における `any[]` の使用を完全に排除しました。
+- **リクエスト積載と段階解決の分離**:
+  - **`createRequest` の実装**:
+    アクション定義の事前検証（支払い可能チェック `canPay` を含む）のみを行い、実際にはコストを支払わず、リクエストオブジェクトを作成してステージ（LIFOスタック）に `"pending"` 状態で積載します。
+  - **`resolveTopRequest` の実装**:
+    ステージの最上部（LIFO順）からリクエストを1つ取り出し、解決の瞬間にも再度コスト支払い可能か（`canPay`）を検証する2重チェック（Double-Check）を行った上で、実際にコストを支払い、効果を解決します。
+  - **再現性を重視した連番ID生成**:
+    `state.nextRequestSeq` による連番管理に基づき、リクエストに再現性の高い連番ID（`req-1`, `req-2`, ...）およびシーケンス番号（`sequence`）を付与するようにしました。
+- **状態遷移の厳密化 (`status`)**:
+  - `ActionRequest.status` の状態遷移を `"pending" | "resolving" | "resolved" | "cancelled"` として厳密に定義・管理。解決時の2重チェックでリソースが不足していた場合は状態を `"cancelled"` に変更して処理を中断します。
+- **後方互換ブリッジとしての `executeAction`**:
+  - `executeAction` は既存のテストや外部結合コードの互換性を担保するファサードとして残し、内部的には `createRequest` と `resolveTopRequest` を連続して同期的に解決する「ブリッジ処理」として再構成しました。
+  
+> [!IMPORTANT]  
+> **重要設計方針: ブリッジ自動解決と `actSpeed: 即時` の明確な分離**  
+> `executeAction` で行われる「作成直後の自動即時解決」は、あくまで既存互換性の維持およびテスト自動実行のための「ブリッジ機能（自動解決ブリッジ）」であり、ゲームシステム本来のルール定義である **`actSpeed: immediate`（即時）とは全く異なる別概念** です。  
+> `actSpeed` が「即時」か「通常」かに関わらず、システムの本質的な解決フローはすべて一度ステージに `ActionRequest` として登録され、段階的に `resolveTopRequest` で解決される構造へと統一されています。
+
+- **CLIシナリオランナーにおける美麗なログ出力**:
+  - `scenarioRunner.ts` を拡張し、ステージ積載時と解決時に `[REQUEST]` および `[RESOLVE]` のインフォメーションログを連番IDとともにコンソールへ出力するフックを追加しました。
+
+### テストおよび検証実績
+
+- **ステージモデル専用の統合テストを追加 (`stageModel.test.ts`)**:
+  - [stageModel.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/stageModel.test.ts) を新規追加し、以下の振る舞いを厳密に検証しました。
+    1. `createRequest` 時にコストが支払われず、ステージに `"pending"` 状態で積まれること。
+    2. リクエストIDが `req-1`, `req-2` のように連番かつ再現性高く生成されること。
+    3. `resolveTopRequest` 時に実際にコストが支払われ、効果が適用されて `"resolved"` になること。
+    4. 複数リクエストがステージに積まれた場合、LIFO（後入れ先出し）順で正しく解決されること。
+    5. 解決時にリソースが不足していた場合、2重チェックで失敗し状態が `"cancelled"` に変更されること。
+    6. 後方互換ブリッジである `executeAction` が従来通り1回の呼び出しで透過的に機能し、結果が変わらないこと。
+- **自動テストの実行結果 (`npm test`)**:
+  - 新規追加した `stageModel.test.ts`（6ケース）を含む、**全 10 ファイル・54 ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  - TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **比較レポートの生成 (`npm run compare:rules-vnext`)**:
+  - 比較レポートが正常に生成され、ドキュメント出力が問題なく完了することを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  - 各アクションの実行において、`[REQUEST] <アクション名> をステージへ (ID: req-x)` -> `[RESOLVE] <アクション名> を解決 (ID: req-x)` -> `[COST]` -> `[CMD]` の順で整合性の取れた美しいログがコンソール上に出力されることを確認しました。

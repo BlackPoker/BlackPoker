@@ -10,7 +10,7 @@ import {
   takeUntilLegacyCardHandler,
   dealDamageHandler,
 } from "./commandHandlers";
-import { ComponentDefinition, ActionDefinition, EffectCommand } from "../../domain/rules/RulePackage";
+import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
 
 export interface CommandContext {
@@ -73,25 +73,114 @@ export class CommandRegistry {
   }
 
   /**
-   * アクションを検証した上で、効果を実行します。
+   * アクションの事前検証を行い、リクエストオブジェクトを作成してステージ（LIFO）に積みます。
+   * ※この時点ではコストの支払いは行われません。
    */
-  executeAction(action: ActionDefinition, context: CommandContext) {
+  createRequest(action: ActionDefinition, context: CommandContext): ActionRequest {
+    // 1. 事前検証 (支払い可能チェック canPay を含む)
     this.validateAction(action, context);
 
-    const actionContext = {
+    // 2. Stageおよび連番Seqの初期化・インクリメント
+    if (!context.state.stage) {
+      context.state.stage = { requests: [] };
+    }
+    context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
+    const seq = context.state.nextRequestSeq;
+
+    // 3. 投入カードのリスト化
+    const actualCards = context.keyCards && context.keyCards.length > 0
+      ? context.keyCards
+      : context.keyCard ? [context.keyCard] : [];
+
+    // 4. 型安全なターゲット情報の構築
+    const targets: ActionRequestTarget[] | undefined = context.targetComponent
+      ? [{
+          unitId: context.targetComponent.unitId,
+          kind: context.targetComponent.kind || "ユニット",
+          componentId: context.targetComponent.componentId,
+        }]
+      : undefined;
+
+    // 5. リクエストの構築
+    const request: ActionRequest = {
+      id: `req-${seq}`,
+      actionId: action.id,
+      controller: context.playerKey,
+      keyCards: actualCards,
+      targets,
+      cost: action.cost,
+      status: "pending",
+      sequence: seq,
+      action,
+    };
+
+    // 6. ステージに積載
+    context.state.stage.requests.push(request);
+    return request;
+  }
+
+  /**
+   * ステージの一番上（最新）のリクエストを取り出し、実際にコストを支払った上で効果を解決します。
+   */
+  resolveTopRequest(context: CommandContext): void {
+    if (!context.state.stage || context.state.stage.requests.length === 0) {
+      return;
+    }
+
+    // 1. LIFO スタックから最新のリクエストを取り出す
+    const request = context.state.stage.requests.pop()!;
+    request.status = "resolving";
+
+    // アクション定義の逆引き
+    let action = context.actions?.find((a) => a.id === request.actionId);
+    if (!action) {
+      action = request.action;
+    }
+    if (!action) {
+      throw new Error(`アクションIDに対する定義が見つかりません: ${request.actionId}`);
+    }
+
+    // 2. リクエスト実行時のコンテキスト復元
+    const player = context.state.players[request.controller];
+    const targetComponent = request.targets && request.targets.length > 0
+      ? (player.field ? player.field.find((u: any) => u.unitId === request.targets![0].unitId) : undefined) || request.targets[0]
+      : undefined;
+
+    const resolveContext: CommandContext = {
       ...context,
+      playerKey: request.controller,
+      keyCards: request.keyCards,
+      keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
+      targetComponent,
       currentAction: action,
     };
 
-    // コストの支払い実行
-    if (action.cost) {
+    // 3. 解決時におけるコストの2重チェック検証
+    if (request.cost) {
       const costResolver = new CostResolver();
-      costResolver.pay(action.cost, actionContext, this.effectInterpreter);
+      if (!costResolver.canPay(request.cost, resolveContext)) {
+        request.status = "cancelled";
+        throw new Error(`解決時にコスト [${request.cost}] を支払うリソースが不足しているため、解決できません。`);
+      }
+      // 実際の支払い実行
+      costResolver.pay(request.cost, resolveContext, this.effectInterpreter);
     }
 
+    // 4. 効果（effect）の解決
     if (action.effect) {
-      this.executeEffects(action.effect, actionContext);
+      this.executeEffects(action.effect, resolveContext);
     }
+
+    request.status = "resolved";
+  }
+
+  /**
+   * アクションを検証した上で、効果を実行します。
+   * 後方互換ブリッジとして、事前検証・リクエスト作成 -> 即時ステージ解決を連続して実行します。
+   */
+  executeAction(action: ActionDefinition, context: CommandContext) {
+    this.createRequest(action, context);
+    this.resolveTopRequest(context);
   }
 
   /**

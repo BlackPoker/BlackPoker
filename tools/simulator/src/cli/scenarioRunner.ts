@@ -73,6 +73,25 @@ function logState(state: any) {
 }
 
 function setupRegistryHook(registry: CommandRegistry) {
+  // createRequest hook
+  const originalCreateRequest = registry.createRequest;
+  registry.createRequest = function (action: any, context: any) {
+    const req = originalCreateRequest.call(this, action, context);
+    console.log(`  ${colors.bold}${colors.cyan}[REQUEST]${colors.reset} ${action.name}をステージへ (ID: ${req.id})`);
+    return req;
+  };
+
+  // resolveTopRequest hook
+  const originalResolveTopRequest = registry.resolveTopRequest;
+  registry.resolveTopRequest = function (context: any) {
+    const req = context.state.stage?.requests[context.state.stage.requests.length - 1];
+    if (req) {
+      const action = context.actions?.find((a: any) => a.id === req.actionId) || req.action;
+      console.log(`  ${colors.bold}${colors.blue}[RESOLVE]${colors.reset} ${action?.name || req.actionId}を解決 (ID: ${req.id})`);
+    }
+    originalResolveTopRequest.call(this, context);
+  };
+
   // Command execution hook
   const originalExecute = registry.execute;
   registry.execute = function (name: string, args: any, context: any) {
