@@ -41,6 +41,10 @@ export type ComponentDefinition = {
   ruby?: string;
   type: "character" | "fog" | "trump" | string;
   zone: string;
+  display?: {
+    kind?: string;
+    [key: string]: any;
+  };
   unitCondition?: Record<string, any>;
   properties?: Record<string, any>;
   abilities?: Array<Record<string, any>>;

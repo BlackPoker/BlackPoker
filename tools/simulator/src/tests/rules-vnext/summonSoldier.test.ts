@@ -56,6 +56,7 @@ describe("Summon Soldier Action Integration Test (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard,
+      components: rulePackage.components,
     };
 
     registry.execute("summonUnit", (effectCmd as any).summonUnit, context);

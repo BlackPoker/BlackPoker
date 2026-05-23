@@ -4,6 +4,8 @@ components:
     ruby: いっぱんへい
     type: character
     zone: field
+    display:
+      kind: 一般兵
 
     unitCondition:
       cards:
@@ -50,6 +52,8 @@ components:
     ruby: ぼうへき
     type: character
     zone: field
+    display:
+      kind: 防壁
 
     unitCondition:
       cards:

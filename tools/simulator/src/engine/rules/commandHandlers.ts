@@ -40,9 +40,13 @@ export function summonUnitHandler(): CommandHandler {
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
 
+    // コンポーネント定義から kind を動的に解決
+    const compDef = context.components?.find((c: any) => c.id === component);
+    const kind = compDef?.display?.kind || compDef?.properties?.kind || compDef?.name || "ユニット";
+
     const newUnit = {
       unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      kind: component === "character.soldier" ? "一般兵" : (component === "character.bulwark" ? "防壁" : "ユニット"),
+      kind: kind,
       componentId: component,
       state: state || "charge",
       face: face || "up",
