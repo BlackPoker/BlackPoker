@@ -11,6 +11,7 @@ import {
   dealDamageHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand } from "../../domain/rules/RulePackage";
+import { CostResolver } from "./CostResolver";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -76,11 +77,19 @@ export class CommandRegistry {
    */
   executeAction(action: ActionDefinition, context: CommandContext) {
     this.validateAction(action, context);
+
+    const actionContext = {
+      ...context,
+      currentAction: action,
+    };
+
+    // コストの支払い実行
+    if (action.cost) {
+      const costResolver = new CostResolver();
+      costResolver.pay(action.cost, actionContext, this.effectInterpreter);
+    }
+
     if (action.effect) {
-      const actionContext = {
-        ...context,
-        currentAction: action,
-      };
       this.executeEffects(action.effect, actionContext);
     }
   }

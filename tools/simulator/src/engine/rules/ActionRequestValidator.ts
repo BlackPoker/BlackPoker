@@ -1,5 +1,6 @@
 import { CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
+import { CostResolver } from "./CostResolver";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -126,6 +127,14 @@ export class ActionRequestValidator {
   validateActionRequest(action: any, context: CommandContext): void {
     if (!action) {
       throw new ValidationError("アクションが指定されていません。");
+    }
+
+    // 0. コスト (cost) の事前検証
+    if (action.cost) {
+      const costResolver = new CostResolver();
+      if (!costResolver.canPay(action.cost, context)) {
+        throw new ValidationError(`コスト [${action.cost}] を支払うことができません。`);
+      }
     }
 
     // 1. キーカード (key) のバリデーション

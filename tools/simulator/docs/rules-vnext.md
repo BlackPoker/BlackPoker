@@ -720,3 +720,33 @@ npm run scenario:rules-vnext
   比較レポート生成スクリプトが正常に動作することを確認しました。
 - **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
   トレース出力において、召喚されたユニットの表示名（一般兵、防壁）が崩れることなく、従来と全く同様に正確に表示されることを確認しました。
+
+---
+
+## 19. Phase 7 検証結果: 新YAML DSLにおけるコスト支払い処理の基礎実装
+
+本セクションでは、新YAML DSLにおけるコスト（`D`, `L`, `B`, `BL`）の支払い処理を状態遷移およびイベント駆動モデルとして設計し、エンジン実行部へ統合・実証した結果について記述します。
+
+### 実施内容と設計上の対応
+- **コスト支払い専用コンポーネントの追加**:
+  [CostResolver.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/engine/rules/CostResolver.ts) を新規追加し、各コストの判定（`canPay`）および支払い処理（`pay`）を実装しました。
+  - **`D` (Discard)**: 発動カード以外の余剰手札から1枚を捨てて墓地に送り、`cardMoved` (fromZone: hand, toZone: grave) イベントを発行。
+  - **`L` (Life)**: ライフの山札の一番上から1枚を墓地に送り、`cardMoved` (fromZone: life, toZone: grave) イベントを発行。
+  - **`B` (Bulwark)**: フィールド上のチャージ状態の防壁を1体ドライブ状態にし、`unitStateChanged` (fromState: charge, toState: drive) イベントを発行。
+  - **`BL`**: BコストとLコストの複合支払い。
+- **バリデーションへの統合**:
+  `ActionRequestValidator.ts` の `validateActionRequest` の中で `CostResolver.canPay` を呼び出し、コストが不足している場合は `ValidationError` 例外を投げるように統合しました。
+- **エンジン解決フローへの統合**:
+  `CommandRegistry.ts` の `executeAction` の中で、効果（`effect`）を解決する直前に `CostResolver.pay` を呼び出し、実際にコストを消費して状態を書き換えた上でゲームイベントを発行するフローを構築しました。
+- **CLIシナリオランナーの調整**:
+  `scenarioRunner.ts` にイベント割り込みフックを追加し、コスト支払い時のカード移動や防壁状態変更をキャッチしてイエローカラーの `[COST] D:` / `[COST] L:` ログとして美麗にコンソール出力するように拡張しました。また、各シナリオの初期リソース（余剰手札、ライフカード数）を調整し、コスト支払いが正常に行えるようにアラインしました。
+
+### テストおよび検証実績
+- **新規コスト検証テストの追加 (`costPayment.test.ts`)**:
+  [costPayment.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/costPayment.test.ts) を新規作成し、D, L, B, BL コストの支払い成功時の状態遷移・イベント発行、およびコスト不足時の `ValidationError` のスロー判定を網羅する 6 ケースのテストを実装し、すべて 100% 正常パスすることを確認しました。
+- **自動テストの実行結果 (`npm test`)**:
+  全9ファイル、**全 45 ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  シナリオ1・2でのコストDの支払い（手札墓地送り）、およびシナリオ4でのコストLの支払い（ライフ墓地送り）が、コンソール上に期待通り `[COST]` ログとして美麗に出力されることを確認しました。

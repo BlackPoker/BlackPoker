@@ -84,7 +84,15 @@ function setupRegistryHook(registry: CommandRegistry) {
   const interpreter = registry["effectInterpreter"];
   const originalDispatchEvent = interpreter.dispatchEvent;
   interpreter.dispatchEvent = function (event: any, context: any) {
-    console.log(`  ${colors.magenta}[EVENT]${colors.reset} type: ${event.type}, payload: fromZone=${event.payload?.fromZone}, toZone=${event.payload?.toZone}, card=${event.payload?.card?.suit}${event.payload?.card?.rank} (Player=${event.payload?.playerKey})`);
+    if (event.type === "unitStateChanged") {
+      console.log(`  ${colors.yellow}[COST] B: 防壁をドライブ (ユニット: ${event.payload?.unitId})${colors.reset}`);
+    } else if (event.type === "cardMoved" && event.payload?.fromZone === "life" && context.currentAction?.cost?.includes("L")) {
+      console.log(`  ${colors.yellow}[COST] L: ライフ1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
+    } else if (event.type === "cardMoved" && event.payload?.fromZone === "hand" && context.currentAction?.cost?.includes("D")) {
+      console.log(`  ${colors.yellow}[COST] D: 手札1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
+    } else {
+      console.log(`  ${colors.magenta}[EVENT]${colors.reset} type: ${event.type}, payload: fromZone=${event.payload?.fromZone}, toZone=${event.payload?.toZone}, card=${event.payload?.card?.suit}${event.payload?.card?.rank} (Player=${event.payload?.playerKey})`);
+    }
     originalDispatchEvent.call(this, event, context);
   };
 }
@@ -101,7 +109,10 @@ async function runUpScenario(rulePackage: any) {
       p1: {
         name: "Player A",
         life: 16,
-        hand: [{ id: "key-heart-7", suit: "H", rank: "7", value: 7 }],
+        hand: [
+          { id: "key-heart-7", suit: "H", rank: "7", value: 7 },
+          { id: "cost-card", suit: "S", rank: "2", value: 2 }, // コストD用
+        ],
         field: [
           {
             unitId: "soldier-1",
@@ -162,7 +173,10 @@ async function runDownScenario(rulePackage: any) {
       p1: {
         name: "Player A",
         life: 16,
-        hand: [{ id: "key-spade-2", suit: "S", rank: "2", value: 2 }],
+        hand: [
+          { id: "key-spade-2", suit: "S", rank: "2", value: 2 },
+          { id: "cost-card", suit: "H", rank: "2", value: 2 }, // コストD用
+        ],
         field: [
           {
             unitId: "soldier-1",
@@ -214,7 +228,10 @@ async function runDownScenario(rulePackage: any) {
       p1: {
         name: "Player A",
         life: 16,
-        hand: [{ id: "key-spade-5", suit: "S", rank: "5", value: 5 }],
+        hand: [
+          { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+          { id: "cost-card", suit: "H", rank: "2", value: 2 }, // コストD用
+        ],
         field: [
           {
             unitId: "soldier-1",
@@ -363,6 +380,7 @@ async function runFortressDefenseScenario(rulePackage: any) {
         life: [
           { id: "c1", suit: "C", rank: "2", value: 2 },
           { id: "c2", suit: "C", rank: "3", value: 3 },
+          { id: "c3", suit: "C", rank: "4", value: 4 }, // コストL用
         ],
       }
     } as Record<string, any>

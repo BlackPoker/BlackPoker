@@ -38,7 +38,7 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
       players: {
         p1: {
           name: "Player A",
-          life: 16,
+          life: [{ id: "life-1", suit: "S", rank: "2", value: 2 }], // 配列としてのライフ
           hand: [handCard], // 手札にカードを持つ
           field: [],
           fog: [],
@@ -68,6 +68,9 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
 
     // 検証：手札からカードが消費されたこと
     expect(state.players.p1.hand.length).toBe(0);
+
+    // 検証：コストLによりライフが消費されたこと
+    expect(state.players.p1.life.length).toBe(0);
 
     // 検証：場に防壁が裏向き・チャージ状態で召喚されたこと
     expect(state.players.p1.field.length).toBe(1);
@@ -110,6 +113,7 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
           life: [
             { id: "c1", suit: "C", rank: "2", value: 2 },
             { id: "c2", suit: "C", rank: "3", value: 3 },
+            { id: "c3", suit: "C", rank: "4", value: 4 },
           ],
         }
       } as Record<string, any>
@@ -142,6 +146,7 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
     state.players.p2.life = [
       { id: "c1", suit: "C", rank: "2", value: 2 },
       { id: "c2", suit: "C", rank: "3", value: 3 },
+      { id: "c3", suit: "C", rank: "4", value: 4 },
     ];
     const bulwarkKeyCard = state.players.p2.hand[0];
 
