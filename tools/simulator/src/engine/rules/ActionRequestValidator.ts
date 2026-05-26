@@ -129,7 +129,32 @@ export class ActionRequestValidator {
       throw new ValidationError("アクションが指定されていません。");
     }
 
-    // 0. リクエスト速度 (speed) の検証
+    // 0.1. アクション使用タイミング (timing) の検証
+    if (action.request && action.request.timing) {
+      const state = context.state;
+      if (state && state.phase) {
+        const timing = action.request.timing;
+        const phase = state.phase;
+
+        if (timing === "main") {
+          if (phase !== "main") {
+            throw new ValidationError(
+              `メインタイミングのアクションはメインフェーズでのみ使用可能です。現在: ${phase}`
+            );
+          }
+        } else if (timing === "quick") {
+          // クイックアクションは Phase 12 では仮仕様とし、draw / main / end フェーズ等で広く仮許可する
+          const allowedPhases = ["draw", "main", "end"];
+          if (!allowedPhases.includes(phase)) {
+            throw new ValidationError(
+              `クイックタイミングのアクションは不正なフェーズで使用されました。現在: ${phase}`
+            );
+          }
+        }
+      }
+    }
+
+    // 0.2. リクエスト速度 (speed) の検証
     if (action.request && action.request.speed) {
       if (action.id === "action.twist" && action.request.speed !== "normal") {
         throw new ValidationError("ツイストのリクエスト速度は通常である必要があります。");

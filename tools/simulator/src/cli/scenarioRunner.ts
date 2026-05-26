@@ -1,6 +1,7 @@
 import * as path from "path";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../engine/rules/CommandRegistry";
+import { TurnManager } from "../engine/rules/TurnManager";
 
 const colors = {
   reset: "\x1b[0m",
@@ -24,6 +25,10 @@ function subHeader(text: string) {
 }
 
 function logState(state: any) {
+  if (state.turnPlayer) {
+    const turnPlayerName = state.players[state.turnPlayer]?.name || state.turnPlayer;
+    console.log(`  ${colors.bold}${colors.green}[TURN] Turn ${state.turnCount || 1}: ${turnPlayerName} / phase=${state.phase || "main"}${colors.reset}`);
+  }
   console.log(`${colors.bold}盤面状態:${colors.reset}`);
   for (const [pk, p] of Object.entries<any>(state.players)) {
     console.log(`  ${colors.bold}${p.name} (${pk}):${colors.reset}`);
@@ -162,6 +167,7 @@ async function runUpScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(state, "p1");
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
@@ -226,6 +232,7 @@ async function runDownScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(stateA, "p1");
 
   const registryA = new CommandRegistry();
   setupRegistryHook(registryA);
@@ -281,6 +288,7 @@ async function runDownScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(stateB, "p1");
 
   const registryB = new CommandRegistry();
   setupRegistryHook(registryB);
@@ -341,6 +349,7 @@ async function runBulwarkAndNextGenScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(state, "p1");
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
@@ -419,6 +428,7 @@ async function runFortressDefenseScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(state, "p1");
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
@@ -514,6 +524,7 @@ async function runCounterScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(state, "p1");
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
@@ -601,6 +612,7 @@ async function runTwistScenario(rulePackage: any) {
       }
     } as Record<string, any>
   };
+  TurnManager.initializeToMain(state, "p1");
 
   const registry = new CommandRegistry();
   setupRegistryHook(registry);
