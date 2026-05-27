@@ -1149,3 +1149,43 @@ npm run scenario:rules-vnext
   - 比較マッピングに `action.end` <-> `end` を追加し、`type` が `basic` (基本) で正常に適合することを確認しました。
 - **CLIシナリオランナーの実行 (`npm run scenario:rules-vnext`)**:
   - シナリオ1（アップ）の末尾において、「アップ」の解決（サイズ13）の後に「エンド」を実行し、`[CMD] cleanupFogs` -> `[EVENT] fogRemoved: fog.up` -> `[CMD] endTurn` -> `[TURN] Turn 2: Player B (Chance: Player B)` の順でログが出力され、兵士のサイズが6に戻り、手番交代する美麗なトレースフローを実証しました。
+
+## 29. Phase 13.1 検証結果: エンドアクション解決時の全プレイヤーフォグ墓地移動処理の修正
+
+本セクションでは、エンドアクション（`action.end`）解決時におけるフォグのクリーンアップ仕様を、BlackPoker本来の正しい仕様（**「ターン終了時に自分と相手双方のフォグがすべて各々の墓地へ移動する」**）へと適合させ、実証・検証した結果について記述します。
+
+### 実施内容と設計上の対応
+
+- **全プレイヤーのフォグ走査と墓地移動 (`cleanupFogs`)**:
+  - `commandHandlers.ts` の `cleanupFogsHandler` を修正し、全プレイヤー（`state.players`）をループ走査して、全プレイヤーのフォグを各々の墓地（`player.grave`）へと移動するロジックに変更しました。
+  - 墓地移動の際、一般兵やダメージカードと同様に、一貫して「墓地ユニットオブジェクト」として包んで `player.grave` に追加します。
+    ```typescript
+    player.grave.push({
+      unitId: fog.fogId,
+      kind: "フォグ",
+      componentId: fog.componentId,
+      cards: fog.card ? [fog.card] : [],
+      labels: [],
+    });
+    ```
+- **イベント発行仕様の厳密化と整合方針**:
+  - `fogRemoved` イベントは、フォグオブジェクト自身の消滅を表すメタイベントとして、フォグごとに必ず発行します。payload に `{ owner (playerKey), componentId, card, fromZone: "fog", toZone: "grave" }` を含めて拡張しました。
+  - `cardMoved` イベントは、トランプカードの物理的な移動を表す実イベントとして、`fog.card` が存在する場合のみ `fromZone: "fog" -> toZone: "grave"` として発行します。
+  - **二重イベントの整合方針**: `fogRemoved` はルール上のオブジェクト消滅のトリガーログであり、`cardMoved` はそれに伴う構成カードの領域移動を示すため、両イベントが別個に発行・記録される設計が正しく、CLI上のログ出力で双方が明確に区別されるため混同は生じません。
+- **世代交代（nextGeneration）の不誘発保証**:
+  - 世代交代の誘発条件は `fromZone: field -> toZone: grave` であるため、フォグ墓地送り時の `fromZone: fog -> toZone: grave` では、たとえ構成カードが Legacy Card（Joker, A, J, Q, K）であっても世代交代が誘発しないことを保証し、検証テストを追加しました。
+
+### テストおよび検証実績
+
+- **統合テストの全面改訂 (`endAction.test.ts`)**:
+  - テストを改訂し、以下の振る舞いを厳密にアサート検証しました。
+    1. **両プレイヤーのフォグ移動**: Player A の `fog.up` が Player A の `grave` へ、Player B の `fog.down` が Player B の `grave` へそれぞれ移動すること。
+    2. **フォグ領域の空化**: 両プレイヤーの `fog` 領域が完璧に空になり、付与されていたサイズ修正効果が消失して元のサイズに戻ること。
+    3. **一般兵・防壁の保護**: フォグ以外の召喚ユニット（一般兵など）は除去されずにフィールドに正しく残留すること。
+    4. **Legacy Card 移動時の世代交代不誘発**: Player A のフォグ構成カードを Legacy Card（Heart K）としてテストし、フォグから墓地への移動では世代交代（`nextGeneration`）が誘発せず、ライフ枚数が安全に維持されること。
+    5. **イベントペイロード検証**: `fogRemoved` と `cardMoved` に適切な属性（`playerKey`, `fromZone: "fog"`, `toZone: "grave"`, etc.）が含まれ、正しく発行されること。
+- **自動テストの実行結果 (`npm test`)**:
+  - 新規・改訂テストを含む、**全14ファイル・78ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **CLIシナリオランナーの実行 (`npm run scenario:rules-vnext`)**:
+  - シナリオ1の初期状態において Player B の場にあらかじめ一般兵を配置し、さらに Player B のフォグ領域に `fog.down` (Spade 2) をあらかじめ適用した状態に拡張しました。
+  - エンド解決時に Player A の `fog.up` と Player B の `fog.down` の双方がそれぞれの墓地（grave）へと移り、美麗に2行の `[EVENT] fogRemoved` ログが対照的に出力されるプロセスを実証しました。

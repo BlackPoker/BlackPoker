@@ -131,7 +131,8 @@ function setupRegistryHook(registry: CommandRegistry) {
     } else if (event.type === "cardMoved" && event.payload?.fromZone === "hand" && context.currentAction?.cost?.includes("D")) {
       console.log(`  ${colors.yellow}[COST] D: 手札1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
     } else if (event.type === "fogRemoved") {
-      console.log(`  ${colors.magenta}[EVENT]${colors.reset} fogRemoved: ${event.payload?.componentId} (Player=${event.payload?.playerKey})`);
+      const pName = context?.state?.players?.[event.payload?.playerKey]?.name || event.payload?.playerKey;
+      console.log(`  ${colors.magenta}[EVENT]${colors.reset} fogRemoved: ${pName} ${event.payload?.componentId} -> ${event.payload?.toZone}`);
     } else {
       console.log(`  ${colors.magenta}[EVENT]${colors.reset} type: ${event.type}, payload: fromZone=${event.payload?.fromZone}, toZone=${event.payload?.toZone}, card=${event.payload?.card?.suit}${event.payload?.card?.rank} (Player=${event.payload?.playerKey})`);
     }
@@ -166,6 +167,30 @@ async function runUpScenario(rulePackage: any) {
           }
         ],
         fog: [],
+        grave: [],
+      },
+      p2: {
+        name: "Player B",
+        life: 16,
+        hand: [],
+        field: [
+          {
+            unitId: "soldier-2",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c2", suit: "S", rank: "5", value: 5 }],
+            labels: ["攻撃", "防御"],
+          }
+        ],
+        fog: [
+          {
+            fogId: "fog-down-preset",
+            componentId: "fog.down",
+            card: { id: "down-card-preset", suit: "S", rank: "2", value: 2 },
+            bindings: { target: "soldier-2", amount: -2 }
+          }
+        ],
         grave: [],
       }
     } as Record<string, any>

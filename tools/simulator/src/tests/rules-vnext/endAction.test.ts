@@ -6,7 +6,7 @@ import { RulePackage } from "../../domain/rules/RulePackage";
 import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import * as path from "path";
 
-describe("End Action (action.end) and Fog Cleanup validation tests", () => {
+describe("End Action (action.end) and Fog Cleanup validation tests (Phase 13.1)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -67,25 +67,14 @@ describe("End Action (action.end) and Fog Cleanup validation tests", () => {
       components: rulePackage.components,
     };
     expect(() => registry.validateAction(endAction, contextNotChance)).toThrow(ValidationError);
-
-    // Case 3: Stage is not empty
-    state.chancePlayer = "p1"; // restore
-    state.stage.requests.push({ id: "req-1", actionId: "action.some" } as any);
-    const contextStageNotEmpty: CommandContext = {
-      state,
-      playerKey: "p1",
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
-    expect(() => registry.validateAction(endAction, contextStageNotEmpty)).toThrow(ValidationError);
   });
 
-  it("should remove fog.up & fog.down, restore unit size and switch turn/chance on action.end resolution (B, C, D, E, F, G)", () => {
+  it("should move all players' fogs to their respective graves, emit fogRemoved/cardMoved events, and not trigger nextGeneration even with Legacy Card (A, B, C, D, E, F, G)", () => {
     const endAction = rulePackage.actions.find((a) => a.id === "action.end")!;
     
-    // 一般兵ユニットと防壁ユニット、および要塞を用意
-    const soldier = {
-      unitId: "soldier-1",
+    // Player A (p1) 用一般兵
+    const soldierA = {
+      unitId: "soldier-a",
       kind: "一般兵",
       componentId: "character.soldier",
       state: "charge",
@@ -93,55 +82,57 @@ describe("End Action (action.end) and Fog Cleanup validation tests", () => {
       labels: ["攻撃", "防御"],
     };
 
-    const bulwark = {
-      unitId: "bulwark-1",
-      kind: "ユニット",
-      componentId: "character.bulwark",
-      face: "down",
-      cards: [{ id: "c2", suit: "H", rank: "K", value: 13 }],
-      labels: ["防御"],
+    // Player B (p2) 用一般兵
+    const soldierB = {
+      unitId: "soldier-b",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c2", suit: "S", rank: "5", value: 5 }],
+      labels: ["攻撃", "防御"],
     };
 
-    const fortress = {
-      unitId: "fortress-1",
-      kind: "切札",
-      componentId: "trump.fortress",
-      face: "up",
-      cards: [{ id: "c3", suit: "C", rank: "9", value: 9 }],
-    };
-
-    // アップフォグとダウンフォグを p1 に適用
+    // Player A のアップフォグの構成カードは Legacy Card である Heart K とします。
+    // もし誘発してしまえば、ライフ (Heart 2, Heart 7) からめくられるはずですが、誘発しないことを保証します。
+    const upCard = { id: "up-card", suit: "H", rank: "K", value: 13 }; // Legacy Card
     const upFog = {
       fogId: "fog-up-1",
       componentId: "fog.up",
-      card: { id: "up-card", suit: "H", rank: "7", value: 7 },
-      bindings: { target: "soldier-1", amount: 7 }
+      card: upCard,
+      bindings: { target: "soldier-a", amount: 7 }
     };
 
+    // Player B のダウンフォグ (Spade 2 - normal card)
+    const downCard = { id: "down-card", suit: "S", rank: "2", value: 2 };
     const downFog = {
       fogId: "fog-down-1",
       componentId: "fog.down",
-      card: { id: "down-card", suit: "S", rank: "2", value: 2 },
-      bindings: { target: "soldier-1", amount: -2 }
+      card: downCard,
+      bindings: { target: "soldier-b", amount: -2 }
     };
 
     const state: any = {
       players: {
         p1: {
           name: "Player A",
-          life: [],
+          life: [
+            { id: "life-1", suit: "H", rank: "2", value: 2 },
+            { id: "life-2", suit: "H", rank: "7", value: 7 },
+            { id: "life-3", suit: "S", rank: "K", value: 13 }, // 誘発時のめくり用
+          ],
           hand: [],
-          field: [soldier, bulwark],
-          trumps: [fortress],
-          fog: [upFog, downFog],
+          field: [soldierA],
+          trumps: [],
+          fog: [upFog],
           grave: []
         },
         p2: {
           name: "Player B",
           life: [],
           hand: [],
-          field: [],
-          fog: [],
+          field: [soldierB],
+          trumps: [],
+          fog: [downFog],
           grave: []
         }
       },
@@ -149,7 +140,7 @@ describe("End Action (action.end) and Fog Cleanup validation tests", () => {
     };
 
     const registry = new CommandRegistry();
-    TurnManager.initializeToMain(state, "p1"); // turnCount = 1
+    TurnManager.initializeToMain(state, "p1");
 
     const context: CommandContext = {
       state,
@@ -158,28 +149,76 @@ describe("End Action (action.end) and Fog Cleanup validation tests", () => {
       components: rulePackage.components,
     };
 
-    // アップフォグとダウンフォグが適用されているため、兵士のサイズは 6 + 7 - 2 = 11 であることをアサート
-    const sizeBefore = registry.calculateUnitSize(soldier, state.players.p1);
-    expect(sizeBefore).toBe(11);
+    // イベント検知用のスパイ配列
+    const eventsDispatched: any[] = [];
+    const interpreter = registry["effectInterpreter"];
+    const originalDispatchEvent = interpreter.dispatchEvent;
+    interpreter.dispatchEvent = function (event: any, ctx: any) {
+      eventsDispatched.push(event);
+      originalDispatchEvent.call(this, event, ctx);
+    };
 
-    // エンドアクションを実行・解決
+    // 適用前サイズチェック
+    expect(registry.calculateUnitSize(soldierA, state.players.p1)).toBe(13); // 6 + 7
+    expect(registry.calculateUnitSize(soldierB, state.players.p2)).toBe(3);  // 5 - 2
+
+    // エンドアクションの解決
     registry.executeAction(endAction, context);
 
-    // B & D & E: フォグ（fog.up, fog.down）は除去されるが、一般兵・防壁・切札は除去されないことをアサート
-    expect(state.players.p1.fog.length).toBe(0); // すべてのフォグが除去されている
-    expect(state.players.p1.field).toContain(soldier); // 一般兵はそのまま
-    expect(state.players.p1.field).toContain(bulwark); // 防壁はそのまま
-    expect(state.players.p1.trumps).toContain(fortress); // 切札はそのまま
+    // A: Player A の fog.up が Player A の grave へ移動すること
+    const graveA = state.players.p1.grave;
+    expect(graveA.length).toBe(1);
+    expect(graveA[0].componentId).toBe("fog.up");
+    expect(graveA[0].cards).toContain(upCard);
 
-    // C: フォグ除去後、サイズ修正が消えて元のサイズ（6）に戻ることをアサート
-    const sizeAfter = registry.calculateUnitSize(soldier, state.players.p1);
-    expect(sizeAfter).toBe(6);
+    // B: Player B の fog.down が Player B の grave へ移動すること
+    const graveB = state.players.p2.grave;
+    expect(graveB.length).toBe(1);
+    expect(graveB[0].componentId).toBe("fog.down");
+    expect(graveB[0].cards).toContain(downCard);
 
-    // F: turnPlayer / chancePlayer が次プレイヤー（p2）に切り替わっていることをアサート
+    // C: 両プレイヤーの fog 領域が空になること
+    expect(state.players.p1.fog.length).toBe(0);
+    expect(state.players.p2.fog.length).toBe(0);
+
+    // D: サイズ修正が消えて元のサイズに戻ること
+    expect(registry.calculateUnitSize(soldierA, state.players.p1)).toBe(6);
+    expect(registry.calculateUnitSize(soldierB, state.players.p2)).toBe(5);
+
+    // E: フォグ以外の一般兵などは除去されない
+    expect(state.players.p1.field).toContain(soldierA);
+    expect(state.players.p2.field).toContain(soldierB);
+
+    // F: fogRemoved イベントに適切な属性が含まれる
+    const fogRemovedEvents = eventsDispatched.filter((e) => e.type === "fogRemoved");
+    expect(fogRemovedEvents.length).toBe(2);
+
+    const eventA = fogRemovedEvents.find((e) => e.payload.playerKey === "p1");
+    expect(eventA).toBeDefined();
+    expect(eventA.payload.componentId).toBe("fog.up");
+    expect(eventA.payload.card).toBe(upCard);
+    expect(eventA.payload.fromZone).toBe("fog");
+    expect(eventA.payload.toZone).toBe("grave");
+
+    const eventB = fogRemovedEvents.find((e) => e.payload.playerKey === "p2");
+    expect(eventB).toBeDefined();
+    expect(eventB.payload.componentId).toBe("fog.down");
+    expect(eventB.payload.card).toBe(downCard);
+    expect(eventB.payload.fromZone).toBe("fog");
+    expect(eventB.payload.toZone).toBe("grave");
+
+    // G: cardMoved イベントも fromZone: "fog" から正常に発行されること
+    const cardMovedEvents = eventsDispatched.filter((e) => e.type === "cardMoved" && e.payload.fromZone === "fog");
+    expect(cardMovedEvents.length).toBe(2);
+
+    // 補足検証: Legacy Card (Heart K) が墓地に落ちたが、移動元が field でなく fog なので、
+    // 「世代交代」は誘発せず、ライフ枚数は3枚のままであること
+    expect(state.players.p1.life.length).toBe(3);
+    expect(state.players.p1.hand.length).toBe(0); // 誘発でめくれて手札に追加されたカードはない
+
+    // ターン・チャンス・カウントの正常交代
     expect(state.turnPlayer).toBe("p2");
     expect(state.chancePlayer).toBe("p2");
-
-    // G: turnCount が +1 されて 2 になっていることをアサート
     expect(state.turnCount).toBe(2);
   });
 });

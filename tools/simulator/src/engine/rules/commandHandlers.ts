@@ -312,46 +312,79 @@ export function toggleUnitStateHandler(
 }
 
 /**
- * cleanupFogs: 実行プレイヤーのフォグ領域から、フォグコンポーネントに該当するフォグをすべてクリアする最小実装 (fogRemoved イベント発行)
+ * cleanupFogs: 全プレイヤーのフォグ領域を走査し、フォグコンポーネントに該当するフォグをすべて各々の墓地へ移動する
  */
 export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    const player = context.state.players[context.playerKey];
-    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+    const state = context.state;
+    if (!state || !state.players) return;
 
-    if (!player.fog) {
-      player.fog = [];
-      return;
-    }
-
-    const removedFogs: any[] = [];
-
-    player.fog = player.fog.filter((f: any) => {
-      const compId = f.componentId;
-      const compDef = context.components?.find((c: any) => c.id === compId);
-      
-      const isFog = compDef
-        ? compDef.type === "fog"
-        : compId?.startsWith("fog.");
-
-      if (isFog) {
-        removedFogs.push(f);
+    for (const [playerKey, player] of Object.entries<any>(state.players)) {
+      if (!player.fog) {
+        player.fog = [];
+        continue;
       }
-      // フォグコンポーネントであれば除去する (filterで残さない)
-      return !isFog;
-    });
 
-    // 各除去されたフォグについて fogRemoved イベントを発行
-    for (const fog of removedFogs) {
-      const event = {
-        type: "fogRemoved",
-        payload: {
-          fogId: fog.fogId,
-          componentId: fog.componentId,
-          playerKey: context.playerKey,
+      const removedFogs: any[] = [];
+
+      player.fog = player.fog.filter((f: any) => {
+        const compId = f.componentId;
+        const compDef = context.components?.find((c: any) => c.id === compId);
+        
+        const isFog = compDef
+          ? compDef.type === "fog"
+          : compId?.startsWith("fog.");
+
+        if (isFog) {
+          removedFogs.push(f);
         }
-      };
-      effectInterpreter.dispatchEvent(event, context);
+        // フォグコンポーネントであれば除去する (filterで残さない)
+        return !isFog;
+      });
+
+      if (!player.grave) {
+        player.grave = [];
+      }
+
+      // 各除去されたフォグについて墓地移動およびイベント発行
+      for (const fog of removedFogs) {
+        // 墓地ユニットオブジェクトとして player.grave へ移動
+        player.grave.push({
+          unitId: fog.fogId,
+          kind: "フォグ",
+          componentId: fog.componentId,
+          cards: fog.card ? [fog.card] : [],
+          labels: [],
+        });
+
+        // fogRemoved イベントを必ず発行
+        const fogEvent = {
+          type: "fogRemoved",
+          payload: {
+            fogId: fog.fogId,
+            componentId: fog.componentId,
+            card: fog.card,
+            fromZone: "fog",
+            toZone: "grave",
+            playerKey: playerKey, // owner
+          }
+        };
+        effectInterpreter.dispatchEvent(fogEvent, context);
+
+        // fog.card が存在する場合のみ cardMoved イベントを発行
+        if (fog.card) {
+          const moveEvent = {
+            type: "cardMoved",
+            payload: {
+              card: fog.card,
+              fromZone: "fog",
+              toZone: "grave",
+              playerKey: playerKey,
+            }
+          };
+          effectInterpreter.dispatchEvent(moveEvent, context);
+        }
+      }
     }
   };
 }
