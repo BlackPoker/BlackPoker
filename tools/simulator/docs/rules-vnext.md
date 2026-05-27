@@ -1102,3 +1102,50 @@ npm run scenario:rules-vnext
   - `TurnManager` のフェーズ依存コード削除や `ActionRequestValidator` のタイミングロジック変更を含む、コンパイルおよびビルドがエラーなく成功することを確認しました。
 - **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
   - CLI上に `[TURN] Turn 1: Player A (Chance: Player A)` のようにターン・チャンス情報が美麗にログ出力され、すべてのシナリオ（シナリオ1〜6）がタイミング検証をパスして正常に実行完了することを確認しました。
+
+## 28. Phase 13 検証結果: エンドアクション（action.end）とフォグ除去処理の最小実装
+
+本セクションでは、第9.0版再現に向けた進行管理のさらなるアラインとして、エンド処理を一時的な「フェーズ」ではなく、BlackPoker本来のゲームシステム設計に沿った **「エンドアクション（`action.end`）」** として定義・実行し、その効果解決時にフォグ除去とターン交代を行う仕組みを最小実装・検証した結果について記述します。
+
+### 実施内容と設計上の対応
+
+- **「エンドアクション」としての定義と YAML 化**:
+  - `end.yaml` を `tools/simulator/src/data/rules-vnext/examples/end.yaml` に新規作成。
+  - アクションIDを `action.end`、名前を「エンド」、種類を「基本（`basic`）」と定義しました。
+  - タイミングはメイン（`timing: main`）とし、手番プレイヤー（`turnPlayer`）かつチャンスプレイヤー（`chancePlayer`）かつステージ空の状態でリクエスト可能にしました。
+  - 一時的な **`phase` 概念は一切再導入せず**、手番・チャンス・ステージ状態のみで厳密にリクエストバリデーションを行っています。
+  - 効果として、以下の2つの高レベルコマンドを順に実行するように定義しました。
+    ```yaml
+    effect:
+      - cleanupFogs: {}
+      - endTurn: {}
+    ```
+- **フォグ除去コマンド（`cleanupFogs`）の実装**:
+  - `commandHandlers.ts` に `cleanupFogs` を新規実装しました。
+  - 実行プレイヤーの `fog` 領域（`player.fog`）から、`ComponentDefinition.type === "fog"` を優先的に逆引きし、見つからない場合のフォールバックとして `componentId.startsWith("fog.")` を使用して「フォグコンポーネント」に該当するオブジェクトを特定し、すべて除去（フィルタアウト）します。
+  - **フォグ除去の動作**: 最小実装として `player.fog` から該当のフォグを削除します。これにより、`AbilityEvaluator` がサイズ計算を行う際にフォグの影響が自動的に消滅し、一般兵ユニットが「元のサイズ」に透過的かつ正常に復帰することを確認しました。
+  - **イベント駆動フックの統合**: フォグ除去時に `fogRemoved` イベント（`type: "fogRemoved", payload: { fogId, componentId, playerKey }`）をディスパッチする処理を統合しました。
+- **ターン交代コマンド（`endTurn`）の実装**:
+  - `commandHandlers.ts` に `endTurn` を新規実装しました。
+  - 内部で `TurnManager.endTurn(context.state)` を実行することで、手番（`turnPlayer`）を相手に切り替え、チャンスプレイヤー（`chancePlayer`）を次の `turnPlayer` に移行し、`turnCount` を `+1` インクリメントし、`actionCount` を `0` にリセットします。
+- **テストファイルのリネームと整理**:
+  - フェーズ概念を廃止した設計に合わせ、テストファイル `turnPhase.test.ts` を **`turnChance.test.ts`** にリネーム（`git mv`）し、フェーズ用語をファイル名から完全に排除しました。
+
+### テストおよび検証実績
+
+- **エンドアクション専用の統合テストを追加 (`endAction.test.ts`)**:
+  - [endAction.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/endAction.test.ts) を新規作成し、以下の振る舞いを網羅的にアサート検証しました。
+    1. エンドアクションを turnPlayer かつ chancePlayer が stage 空のタイミングで正常にリクエストできること (A)。
+    2. requester が turnPlayer または chancePlayer でない場合、またはステージに先行リクエストがある場合に `ValidationError` になること (H)。
+    3. エンドアクション解決時に、プレイヤーに適用されていた `fog.up` および `fog.down` が正常に除去されること (B, D)。
+    4. フォグ除去後、サイズ修正が完璧に消えて一般兵が元のサイズ（6）に戻ること (C)。
+    5. フォグ以外の一般兵・防壁・表切札（要塞）などのゲーム要素は一切除去されずフィールドに残留すること (E)。
+    6. エンド解決後、`turnPlayer` / `chancePlayer` が次プレイヤーへ正常に交代し、`turnCount` が `+1` されること (F, G)。
+- **自動テストの実行結果 (`npm test`)**:
+  - 新規追加した `endAction.test.ts` を含む、**全13ファイル・75ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  - コマンドやインポートの追加を含む、TypeScript コンパイルおよび Vite ビルドがエラーなく成功することを確認しました。
+- **比較レポートの生成 (`npm run compare:rules-vnext`)**:
+  - 比較マッピングに `action.end` <-> `end` を追加し、`type` が `basic` (基本) で正常に適合することを確認しました。
+- **CLIシナリオランナーの実行 (`npm run scenario:rules-vnext`)**:
+  - シナリオ1（アップ）の末尾において、「アップ」の解決（サイズ13）の後に「エンド」を実行し、`[CMD] cleanupFogs` -> `[EVENT] fogRemoved: fog.up` -> `[CMD] endTurn` -> `[TURN] Turn 2: Player B (Chance: Player B)` の順でログが出力され、兵士のサイズが6に戻り、手番交代する美麗なトレースフローを実証しました。

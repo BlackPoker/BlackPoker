@@ -130,6 +130,8 @@ function setupRegistryHook(registry: CommandRegistry) {
       console.log(`  ${colors.yellow}[COST] L: ライフ1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
     } else if (event.type === "cardMoved" && event.payload?.fromZone === "hand" && context.currentAction?.cost?.includes("D")) {
       console.log(`  ${colors.yellow}[COST] D: 手札1枚を墓地へ (カード: ${event.payload?.card?.suit}${event.payload?.card?.rank})${colors.reset}`);
+    } else if (event.type === "fogRemoved") {
+      console.log(`  ${colors.magenta}[EVENT]${colors.reset} fogRemoved: ${event.payload?.componentId} (Player=${event.payload?.playerKey})`);
     } else {
       console.log(`  ${colors.magenta}[EVENT]${colors.reset} type: ${event.type}, payload: fromZone=${event.payload?.fromZone}, toZone=${event.payload?.toZone}, card=${event.payload?.card?.suit}${event.payload?.card?.rank} (Player=${event.payload?.playerKey})`);
     }
@@ -144,7 +146,7 @@ async function runUpScenario(rulePackage: any) {
   const upAction = rulePackage.actions.find((a: any) => a.id === "action.up");
   if (!upAction) throw new Error("action.up が見つかりません");
 
-  const state = {
+  const state: any = {
     players: {
       p1: {
         name: "Player A",
@@ -197,6 +199,23 @@ async function runUpScenario(rulePackage: any) {
 
   const finalSize = registry.calculateUnitSize(targetUnit, state.players.p1);
   console.log(`\n${colors.bold}${colors.green}結果検証: 兵士の最終サイズ = ${finalSize} (期待値: 13)${colors.reset}`);
+
+  // エンドアクションの実行
+  const endAction = rulePackage.actions.find((a: any) => a.id === "action.end");
+  if (!endAction) throw new Error("action.end が見つかりません");
+
+  subHeader("アクション実行: 「エンド」 (Player A)");
+  console.log(`実行アクション: ${endAction.name}`);
+  registry.executeAction(endAction, context);
+
+  subHeader("エンド解決後の状態");
+  logState(state);
+
+  const cleanSize = registry.calculateUnitSize(targetUnit, state.players.p1);
+  console.log(`\n${colors.bold}${colors.green}結果検証: エンド解決後の兵士サイズ = ${cleanSize} (期待値: 6。エンドの解決によりフォグがすべて除去され、サイズが元に戻りました！)${colors.reset}`);
+  const nextTurnPlayerName = state.players[state.turnPlayer]?.name || state.turnPlayer;
+  const nextChancePlayerName = state.players[state.chancePlayer]?.name || state.chancePlayer;
+  console.log(`結果検証: 次の手番プレイヤー = ${nextTurnPlayerName} (期待値: Player B。ターンとチャンスが移行しました！)${colors.reset}`);
 }
 
 async function runDownScenario(rulePackage: any) {

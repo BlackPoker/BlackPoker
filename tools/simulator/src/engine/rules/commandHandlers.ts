@@ -2,6 +2,7 @@ import type { EffectInterpreter } from "./EffectInterpreter";
 import { CommandHandler } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
+import { TurnManager } from "./TurnManager";
 
 /**
  * createFog: フォグの生成と配置
@@ -307,5 +308,59 @@ export function toggleUnitStateHandler(
       },
     };
     effectInterpreter.dispatchEvent(event, context);
+  };
+}
+
+/**
+ * cleanupFogs: 実行プレイヤーのフォグ領域から、フォグコンポーネントに該当するフォグをすべてクリアする最小実装 (fogRemoved イベント発行)
+ */
+export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    const player = context.state.players[context.playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+    if (!player.fog) {
+      player.fog = [];
+      return;
+    }
+
+    const removedFogs: any[] = [];
+
+    player.fog = player.fog.filter((f: any) => {
+      const compId = f.componentId;
+      const compDef = context.components?.find((c: any) => c.id === compId);
+      
+      const isFog = compDef
+        ? compDef.type === "fog"
+        : compId?.startsWith("fog.");
+
+      if (isFog) {
+        removedFogs.push(f);
+      }
+      // フォグコンポーネントであれば除去する (filterで残さない)
+      return !isFog;
+    });
+
+    // 各除去されたフォグについて fogRemoved イベントを発行
+    for (const fog of removedFogs) {
+      const event = {
+        type: "fogRemoved",
+        payload: {
+          fogId: fog.fogId,
+          componentId: fog.componentId,
+          playerKey: context.playerKey,
+        }
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
+ * endTurn: ターン交代とチャンス移行を行う
+ */
+export function endTurnHandler(): CommandHandler {
+  return (args, context) => {
+    TurnManager.endTurn(context.state);
   };
 }

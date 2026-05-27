@@ -11,6 +11,8 @@ import {
   dealDamageHandler,
   cancelRequestHandler,
   toggleUnitStateHandler,
+  cleanupFogsHandler,
+  endTurnHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -294,5 +296,7 @@ export class CommandRegistry {
     this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
     this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator));
     this.register("toggleUnitState", toggleUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("cleanupFogs", cleanupFogsHandler(this.effectInterpreter));
+    this.register("endTurn", endTurnHandler());
   }
 }

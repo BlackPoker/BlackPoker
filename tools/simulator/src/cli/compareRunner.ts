@@ -14,6 +14,7 @@ const mappings = [
   { newId: "action.nextGeneration", oldId: "nextGeneration" },
   { newId: "action.counter", oldId: "counter" },
   { newId: "action.twist", oldId: "twist" },
+  { newId: "action.end", oldId: "end" },
 ];
 
 function compareTrigger(newVal: string | undefined, oldVal: string | undefined) {
@@ -49,6 +50,7 @@ function compareType(newVal: string | undefined, oldVal: string | undefined) {
     magic: "魔法",
     summon: "召喚",
     triggered: "誘発魔法",
+    basic: "基本",
   };
   const resolved = map[newVal] || newVal;
   if (resolved === oldVal) return { status: "OK", detail: `一致 ("${newVal}" -> "${oldVal}")` };
