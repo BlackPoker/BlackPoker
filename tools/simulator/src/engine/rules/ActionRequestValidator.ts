@@ -132,22 +132,22 @@ export class ActionRequestValidator {
     // 0.1. アクション使用タイミング (timing) の検証
     if (action.request && action.request.timing) {
       const state = context.state;
-      if (state && state.phase) {
+      if (state && state.turnPlayer !== undefined && state.chancePlayer !== undefined) {
         const timing = action.request.timing;
-        const phase = state.phase;
+        const requester = context.playerKey;
+        const stageRequests = state.stage?.requests || [];
+        const isStageEmpty = stageRequests.length === 0;
 
         if (timing === "main") {
-          if (phase !== "main") {
+          if (requester !== state.turnPlayer || requester !== state.chancePlayer || !isStageEmpty) {
             throw new ValidationError(
-              `メインタイミングのアクションはメインフェーズでのみ使用可能です。現在: ${phase}`
+              `メインタイミングのアクションは手番かつチャンス所持かつステージが空である必要があります。現在: turnPlayer=${state.turnPlayer}, chancePlayer=${state.chancePlayer}, requester=${requester}, stageEmpty=${isStageEmpty}`
             );
           }
         } else if (timing === "quick") {
-          // クイックアクションは Phase 12 では仮仕様とし、draw / main / end フェーズ等で広く仮許可する
-          const allowedPhases = ["draw", "main", "end"];
-          if (!allowedPhases.includes(phase)) {
+          if (requester !== state.chancePlayer) {
             throw new ValidationError(
-              `クイックタイミングのアクションは不正なフェーズで使用されました。現在: ${phase}`
+              `クイックタイミングのアクションはチャンスを所持している必要があります。現在: chancePlayer=${state.chancePlayer}, requester=${requester}`
             );
           }
         }

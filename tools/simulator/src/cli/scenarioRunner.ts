@@ -27,7 +27,8 @@ function subHeader(text: string) {
 function logState(state: any) {
   if (state.turnPlayer) {
     const turnPlayerName = state.players[state.turnPlayer]?.name || state.turnPlayer;
-    console.log(`  ${colors.bold}${colors.green}[TURN] Turn ${state.turnCount || 1}: ${turnPlayerName} / phase=${state.phase || "main"}${colors.reset}`);
+    const chancePlayerName = state.players[state.chancePlayer]?.name || state.chancePlayer || state.turnPlayer;
+    console.log(`  ${colors.bold}${colors.green}[TURN] Turn ${state.turnCount || 1}: ${turnPlayerName} (Chance: ${chancePlayerName})${colors.reset}`);
   }
   console.log(`${colors.bold}盤面状態:${colors.reset}`);
   for (const [pk, p] of Object.entries<any>(state.players)) {
@@ -438,6 +439,12 @@ async function runFortressDefenseScenario(rulePackage: any) {
 
   // 1. 防壁設置アクションの実行
   subHeader("アクション実行: 「防壁設置」 (Player B)");
+  // ※このシナリオでは、複数アクションの個別挙動を確認するため、
+  // 各アクションの実行前に turnPlayer / chancePlayer を明示的に整合させている。
+  // 完全なターン進行やチャンス自動受け渡しは今後対応。
+  // シナリオ4で Player B の防壁設置前に initializeToMain("p2")、Player A の投擲前に initializeToMain("p1") を呼ぶのは、
+  // 実ゲームの完全なターン進行を表すものではなく、個別アクションの実行条件を満たすためのシナリオ上の明示的な整合処理です。
+  TurnManager.initializeToMain(state, "p2");
   const bulwarkKeyCard = state.players.p2.hand[0];
   console.log(`実行アクション: ${setBulwarkAction.name} (Key: ${bulwarkKeyCard.suit}${bulwarkKeyCard.rank} を手札から伏せる)`);
 
@@ -454,6 +461,11 @@ async function runFortressDefenseScenario(rulePackage: any) {
   logState(state);
 
   // 2. 投擲アクションの実行
+  // ※このシナリオでは、複数アクションの個別挙動を確認するため、
+  // 各アクションの実行前に turnPlayer / chancePlayer を明示的に整合させている。
+  // 完全なターン進行やチャンス自動受け渡しは今後対応。
+  // Player A の投擲前に initializeToMain("p1") を呼ぶのは、個別アクションの実行条件を満たすためのシナリオ上の明示的な整合処理です。
+  TurnManager.initializeToMain(state, "p1");
   const keyCards = [
     { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
     { id: "key-club-2", suit: "C", rank: "2", value: 2 },
@@ -547,6 +559,9 @@ async function runCounterScenario(rulePackage: any) {
   subHeader("アクション：アップ をステージへ");
   console.log(`Player A が ${upAction.name} をステージへ積みます。`);
   const req1 = registry.createRequest(upAction, upContext);
+
+  // クイックタイミング（カウンター）を Player B が実行するため、チャンスを Player B に移行させる
+  TurnManager.passChance(state);
 
   // 2. Player B が「カウンター」をステージに積む
   const counterContext: CommandContext = {

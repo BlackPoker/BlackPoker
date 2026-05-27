@@ -1037,3 +1037,68 @@ npm run scenario:rules-vnext
 - **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
   - すべてのシナリオにおいて、`[TURN] Turn 1: Player A / phase=main` がコンソール上に出力され、タイミング検証に阻害されることなく美麗に完走することを確認しました。
 
+
+## 27. Phase 12.1 検証結果: ターン＆チャンスモデル（手番・チャンス管理）への移行とフェーズ概念の廃止
+
+本セクションでは、BlackPoker本来のゲームデザイン（公式ルール上に「フェーズ」概念は存在せず、ドロー、チャージ、アタック、エンドはすべて「アクション」である設計）へ回帰・再設計するため、Phase 12で一時的に導入した「フェーズ制（`draw/main/end`）」を完全に廃止し、**「ターン＆チャンスモデル（手番・チャンス管理）」** へと移行・実証した結果について記述します。
+
+### 実施内容と設計上の対応
+
+- **フェーズ概念の完全廃止とターン＆チャンスモデルへの回帰**:
+  - `GameState` から `phase` プロパティを完全に排除し、`TurnManager.movePhase` メソッドなどのフェーズ遷移状態管理コードを廃止しました。
+  - 代わりに、**手番（`turnPlayer`）** と **チャンス所持（`chancePlayer`）** を中心としたゲーム状態およびアクション可能条件判定へと移行しました。
+- **ターンマネージャー（`TurnManager.ts`）の再設計**:
+  - **`startTurn(state, playerKey)`**:
+    - 手番プレイヤー（`turnPlayer`）を `playerKey`、非手番プレイヤー（`nonTurnPlayer`）を相手プレイヤーに設定します。
+    - チャンスプレイヤー（`chancePlayer`）をターン開始時に手番プレイヤーに設定します。
+    - プレイヤーターン開始ごとに `turnCount` を `+1` 加算します。
+    - ターンごとのアクション数（`actionCount`）を `0` にリセットします（※`actionCount` のインクリメントタイミングは将来の「解決順・優先権自動受け渡し」段階で定義します）。
+  - **`passChance(state)`**:
+    - アクション実行権であるチャンスを相手プレイヤーに移行させます（`p1` <-> `p2`）。
+  - **`endTurn(state)`**:
+    - ターン交代を行い、次の手番プレイヤーで `startTurn` を実行します。
+    - ※ BlackPoker においてターン終了（エンド）は「フェーズ」ではなく、将来的に `action.end` アクションとして扱い、フォグ除去などはその効果解決時に行う方針とします。
+  - **`initializeToMain(state, playerKey)`**:
+    - 既存のテストコードやCLIシナリオとの互換性を完全に保証するための初期化ヘルパー。
+    - 指定プレイヤーで `startTurn` を呼び出して `turnCount` を `+1` し、手番プレイヤーがチャンスを持つ状態（「メインタイミングのアクションを起こせる状態」）にします。
+    - ※将来的にこのメソッドは `initializeForMainAction`, `startActionTurn`, `prepareMainActionWindow` などへ名称変更する予定ですが、今回のフェーズでは互換性維持のため現状の名称を維持します。
+- **タイミング（timing: main/quick）事前検証の再定義**:
+  - `ActionRequestValidator.ts` において、`timing` の検証ロジックをフェーズ依存から、手番・チャンス・ステージ状態依存へと変更しました。
+  - **`timing: "main"` の検証**:
+    - 実行者（`requester = context.playerKey`）が **手番プレイヤー（`turnPlayer`）かつチャンスプレイヤー（`chancePlayer`）** であり、かつ **ステージが空**（`state.stage.requests.length === 0`）であることを検証します。満たさない場合は **`ValidationError`** をスローしてリクエストを拒絶します。
+  - **`timing: "quick"` の検証（仮仕様）**:
+    - 実行者が **チャンスプレイヤー（`chancePlayer`）** であることを検証します（ステージに先行リクエストが積み重なっていても可）。満たさない場合は **`ValidationError`** をスローします。
+    - ※ チャンスの自動受け渡しルールは完全実装せず今後のフェーズ（解決順・応答手順の整理）で扱う方針とし、本フェーズでは手動または仮検証に留めます。
+  - **後方互換性の確保**:
+    - 既存の `turnPlayer` または `chancePlayer` を持たないテスト（`counter.test.ts` や `twist.test.ts`）等に対しては、タイミング検証を透過的にパス（スキップ）させる後方互換ブリッジ設計を徹底し、テストの破壊を完全に防止しました。
+
+### CLIシナリオの整合とログ表示の変更
+
+- **コンソール表示の変更**:
+  - `scenarioRunner.ts` を拡張し、`logState` でフェーズの代わりに `[TURN] Turn 1: Player A (Chance: Player A)` のように、現在のターン数、手番、チャンス所持者が美しく表示されるように出力形式を変更しました。
+- **シナリオ上の明示的な手番・チャンス整合処理**:
+  - 複数アクションが同一シナリオ内で連続して実行される挙動を確認するため、各アクション実行前に `TurnManager` を用いて明示的な整合処理を挿入しました。
+  - **シナリオ4（要塞防衛）**:
+    - Player B による防壁設置（`timing: main`）の前に `TurnManager.initializeToMain(state, "p2")` を実行。
+    - その後、Player A による投擲（`timing: main`）の前に `TurnManager.initializeToMain(state, "p1")` を実行。
+    - コメントに「これは実ゲームの完全なターン進行を表すものではなく、個別アクションの実行条件を満たすためのシナリオ上の明示的な整合処理であり、完全なターン進行やチャンス自動受け渡しは今後対応する」旨を追記しました。
+  - **シナリオ5（カウンター）**:
+    - Player A によるアップ（`timing: main`）のリクエストと、Player B によるカウンター（`timing: quick`）のリクエストの間で、`TurnManager.passChance(state)` を呼び出し、チャンスを Player B に移行させてタイミング検証を正常に通過させました。
+
+### テストおよび検証実績
+
+- **ターン＆チャンス検証用の統合テストの全面的再構築 (`turnPhase.test.ts`)**:
+  - 廃止されたフェーズ遷移に関するテストコードを削除し、ターン＆チャンスモデルに基づく以下のテスト（A〜G）へ全面的に書き換えました。
+    - A. `startTurn` による `turnPlayer` / `nonTurnPlayer` / `chancePlayer` / `turnCount` の初期化。
+    - B. `passChance` による `chancePlayer` の移行。
+    - C. `endTurn` によるターン交代と `turnCount` インクリメント。
+    - D. 手番プレイヤーかつチャンスプレイヤーかつステージ空での `timing: main` アクション（防壁設置）のリクエスト許可。
+    - E. 相手手番、チャンス不所持、ステージが空でないとき等における `timing: main` の `ValidationError` スロー。
+    - F. チャンスプレイヤーであればステージが空でなくても `timing: quick` アクション（ツイストなど）のリクエスト許可、非所持時の `ValidationError` スロー。
+    - G. ターン/チャンス情報未定義時のタイミング検証自動スキップ（後方互換性担保）。
+- **自動テストの実行結果 (`npm test`)**:
+  - 変更した `turnPhase.test.ts` を含む、**すべてのテスト（全 12 ファイル・全テスト）が 100% グリーンで正常にパス**することを確認しました。
+- **本番ビルドの成功 (`npm run build`)**:
+  - `TurnManager` のフェーズ依存コード削除や `ActionRequestValidator` のタイミングロジック変更を含む、コンパイルおよびビルドがエラーなく成功することを確認しました。
+- **CLIシナリオの動作確認 (`npm run scenario:rules-vnext`)**:
+  - CLI上に `[TURN] Turn 1: Player A (Chance: Player A)` のようにターン・チャンス情報が美麗にログ出力され、すべてのシナリオ（シナリオ1〜6）がタイミング検証をパスして正常に実行完了することを確認しました。
