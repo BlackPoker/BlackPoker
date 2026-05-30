@@ -397,3 +397,94 @@ export function endTurnHandler(): CommandHandler {
     TurnManager.endTurn(context.state);
   };
 }
+
+/**
+ * startAttack: アタックを宣言し、戦闘状態 (state.combat) を作成する
+ */
+export function startAttackHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, defender } = args;
+    const state = context.state;
+
+    // アタッカーユニットの解決
+    let attackerUnit = context.targetComponent;
+    if (!attackerUnit && target) {
+      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
+      if (resolvedTargetId) {
+        const player = state.players[context.playerKey];
+        if (player && player.field) {
+          attackerUnit = player.field.find((u: any) => u.unitId === resolvedTargetId);
+        }
+      }
+    }
+
+    if (!attackerUnit) {
+      throw new Error("アタッカーとなるユニットが見つかりません。");
+    }
+
+    // ディフェンダープレイヤーの解決
+    let defenderPlayerKey = undefined;
+    if (defender === "targetPlayer" && context.targetPlayerKey) {
+      defenderPlayerKey = context.targetPlayerKey;
+    } else if (defender === "opponent") {
+      defenderPlayerKey = context.playerKey === "p1" ? "p2" : "p1";
+    } else if (defender) {
+      defenderPlayerKey = expressionEvaluator.resolveBindingValue(defender, context);
+    }
+
+    if (!defenderPlayerKey || !state.players[defenderPlayerKey]) {
+      throw new Error(`ディフェンダーとなるプレイヤーが見つかりません: ${defenderPlayerKey}`);
+    }
+
+    // 1. アタッカーが実行プレイヤーの field に存在することの確認
+    const player = state.players[context.playerKey];
+    const exists = player?.field?.some((u: any) => u.unitId === attackerUnit.unitId);
+    if (!exists) {
+      throw new Error("アタッカーは自分のフィールドに存在するユニットである必要があります。");
+    }
+
+    // 2. アタッカーが character component であることの確認
+    const compId = attackerUnit.componentId || "";
+    const compDef = context.components?.find((c: any) => c.id === compId);
+    const isCharacter = compDef ? compDef.type === "character" : compId.startsWith("character.");
+    if (!isCharacter) {
+      throw new Error("アタッカーはキャラクターである必要があります。");
+    }
+
+    // 3. アタッカーが攻撃可能状態であることの確認 (チャージ状態)
+    if (attackerUnit.state !== "charge") {
+      throw new Error(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${attackerUnit.state}`);
+    }
+
+    // state.combat の作成
+    state.combat = {
+      attackRequestId: context.currentRequest?.id || null,
+      attackerUnitId: attackerUnit.unitId,
+      attackerPlayerKey: context.playerKey,
+      defenderPlayerKey: defenderPlayerKey,
+      blockerUnitId: undefined,
+      status: "attacking"
+    };
+
+    // アタッカーをドライブ状態に移行する
+    const oldState = attackerUnit.state;
+    attackerUnit.state = "drive";
+
+    // イベント発行 (unitStateChanged)
+    const event = {
+      type: "unitStateChanged",
+      payload: {
+        unitId: attackerUnit.unitId,
+        fromState: oldState,
+        toState: "drive",
+        playerKey: context.playerKey,
+        cause: { type: "effect", command: "startAttack" },
+      },
+    };
+    effectInterpreter.dispatchEvent(event, context);
+  };
+}
+

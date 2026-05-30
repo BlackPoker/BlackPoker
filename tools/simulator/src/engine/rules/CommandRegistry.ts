@@ -13,6 +13,7 @@ import {
   toggleUnitStateHandler,
   cleanupFogsHandler,
   endTurnHandler,
+  startAttackHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -298,5 +299,6 @@ export class CommandRegistry {
     this.register("toggleUnitState", toggleUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("cleanupFogs", cleanupFogsHandler(this.effectInterpreter));
     this.register("endTurn", endTurnHandler());
+    this.register("startAttack", startAttackHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

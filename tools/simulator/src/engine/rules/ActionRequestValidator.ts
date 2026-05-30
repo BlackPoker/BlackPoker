@@ -260,6 +260,19 @@ export class ActionRequestValidator {
               throw new ValidationError("ターゲットとなるコンポーネントが指定されていません。");
             }
 
+            // アタックアクション固有の検証 (アタッカーの所有とチャージ状態)
+            if (action.id === "action.attack") {
+              const player = context.state.players[context.playerKey];
+              const exists = player?.field?.some((u: any) => u.unitId === context.targetComponent.unitId);
+              if (!exists) {
+                throw new ValidationError("アタッカーは自分のフィールドに存在するユニットである必要があります。");
+              }
+
+              if (context.targetComponent.state !== "charge") {
+                throw new ValidationError(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${context.targetComponent.state}`);
+              }
+            }
+
             // キャラクタータイプの検証 (ツイストなど)
             if (cond.componentType === "character") {
               const compId = context.targetComponent.componentId || "";

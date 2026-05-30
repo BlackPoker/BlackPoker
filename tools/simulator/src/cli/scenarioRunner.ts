@@ -113,6 +113,14 @@ function setupRegistryHook(registry: CommandRegistry) {
   registry.execute = function (name: string, args: any, context: any) {
     console.log(`  ${colors.green}[CMD]${colors.reset} ${name}: ${JSON.stringify(args)}`);
     originalExecute.call(this, name, args, context);
+    if (name === "startAttack") {
+      const state = context.state;
+      if (state.combat) {
+        const attackerName = context.targetComponent?.kind || "キャラクター";
+        const defenderName = state.players[state.combat.defenderPlayerKey]?.name || state.combat.defenderPlayerKey;
+        console.log(`  ${colors.bold}${colors.red}[COMBAT]${colors.reset} attacker=${attackerName}, defender=${defenderName}`);
+      }
+    }
   };
 
   // Event dispatch hook
@@ -703,6 +711,75 @@ async function runTwistScenario(rulePackage: any) {
   - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 1。ツイストのDコストは支払われた！)${colors.reset}`);
 }
 
+async function runAttackScenario(rulePackage: any) {
+  header("シナリオ7: 「アタックを宣言して戦闘状態を作る」（アタックの最小実装）");
+  console.log("概要: Player A が自分の一般兵（soldier-1, チャージ状態）をアタッカーに、対戦相手である Player B をディフェンダーに指定して「アタック」を宣言します。アタック解決後、戦闘一時状態（state.combat）が構築され、アタッカーがドライブ状態に移行することを確認します。");
+
+  const attackAction = rulePackage.actions.find((a: any) => a.id === "action.attack");
+  if (!attackAction) throw new Error("action.attack が見つかりません");
+
+  const soldier = {
+    unitId: "soldier-1",
+    kind: "一般兵",
+    componentId: "character.soldier",
+    state: "charge",
+    cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+    labels: ["攻撃", "防御"],
+  };
+
+  const state: any = {
+    players: {
+      p1: {
+        name: "Player A",
+        life: [],
+        hand: [],
+        field: [soldier],
+        grave: [],
+        fog: [],
+      },
+      p2: {
+        name: "Player B",
+        life: [{ id: "l1", suit: "C", rank: "2", value: 2 }],
+        hand: [],
+        field: [],
+        grave: [],
+        fog: [],
+      }
+    }
+  };
+  TurnManager.initializeToMain(state, "p1");
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  subHeader("初期状態");
+  logState(state);
+
+  const context: CommandContext = {
+    state,
+    playerKey: "p1",
+    targetComponent: soldier,
+    targetPlayerKey: "p2",
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：アタック をステージへ");
+  console.log(`Player A が ${attackAction.name} をステージへ積みます（対象: ${soldier.unitId}, ディフェンダー: Player B）。`);
+  const req = registry.createRequest(attackAction, context);
+
+  subHeader("ステージ上のリクエストを解決");
+  console.log(`\n--- アタック (ID: ${req.id}) の解決 ---`);
+  registry.resolveTopRequest(context);
+
+  subHeader("最終状態");
+  logState(state);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: 
+  - 戦闘一時状態 (state.combat) = ${JSON.stringify(state.combat)}
+  - アタッカー状態 = ${soldier.state} (期待値: drive)${colors.reset}`);
+}
+
 async function main() {
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const rulePackage = await loadRulePackageFromDirectory(rulesDir);
@@ -726,6 +803,9 @@ async function main() {
 
   // 6. ツイストでアップの対象を変更する
   await runTwistScenario(rulePackage);
+
+  // 7. アタックで戦闘一時状態を作る
+  await runAttackScenario(rulePackage);
 }
 
 async function run() {
