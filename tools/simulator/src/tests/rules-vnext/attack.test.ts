@@ -20,7 +20,7 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     expect(attackAction.request.speed).toBe("normal");
     expect(attackAction.request.timing).toBe("main");
 
-    const soldier = {
+    const soldier: any = {
       unitId: "soldier-1",
       kind: "一般兵",
       componentId: "character.soldier",
@@ -69,20 +69,18 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     expect(req.status).toBe("pending");
 
     // 解決前の状態アサート
-    expect(state.combat).toBeUndefined();
+    expect(soldier.battle).toBeUndefined();
 
     // 解決
     registry.resolveTopRequest(context);
     expect(req.status).toBe("resolved");
 
-    // B. combat state が作成されることをアサート
-    expect(state.combat).toBeDefined();
-    expect(state.combat.status).toBe("attacking");
+    // B. アタッカーに battle 情報が作成されることをアサート
+    expect(soldier.battle).toBeDefined();
+    expect(soldier.battle.role).toBe("attacker");
 
-    // C. combat に情報が正しく記録されることをアサート
-    expect(state.combat.attackerUnitId).toBe("soldier-1");
-    expect(state.combat.attackerPlayerKey).toBe("p1");
-    expect(state.combat.defenderPlayerKey).toBe("p2");
+    // C. アタッカー戦闘情報に targetPlayerKey が正しく記録されることをアサート
+    expect(soldier.battle.targetPlayerKey).toBe("p2");
 
     // アタッカーがドライブ状態に移行していることをアサート
     expect(soldier.state).toBe("drive");

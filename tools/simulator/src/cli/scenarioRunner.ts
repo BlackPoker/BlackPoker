@@ -115,9 +115,11 @@ function setupRegistryHook(registry: CommandRegistry) {
     originalExecute.call(this, name, args, context);
     if (name === "startAttack") {
       const state = context.state;
-      if (state.combat) {
-        const attackerName = context.targetComponent?.kind || "キャラクター";
-        const defenderName = state.players[state.combat.defenderPlayerKey]?.name || state.combat.defenderPlayerKey;
+      const attackerUnit = context.targetComponent;
+      if (attackerUnit && attackerUnit.battle) {
+        const attackerName = attackerUnit.kind || "キャラクター";
+        const defenderPlayerKey = attackerUnit.battle.targetPlayerKey;
+        const defenderName = state.players[defenderPlayerKey]?.name || defenderPlayerKey;
         console.log(`  ${colors.bold}${colors.red}[COMBAT]${colors.reset} attacker=${attackerName}, defender=${defenderName}`);
       }
     }
@@ -713,12 +715,12 @@ async function runTwistScenario(rulePackage: any) {
 
 async function runAttackScenario(rulePackage: any) {
   header("シナリオ7: 「アタックを宣言して戦闘状態を作る」（アタックの最小実装）");
-  console.log("概要: Player A が自分の一般兵（soldier-1, チャージ状態）をアタッカーに、対戦相手である Player B をディフェンダーに指定して「アタック」を宣言します。アタック解決後、戦闘一時状態（state.combat）が構築され、アタッカーがドライブ状態に移行することを確認します。");
+  console.log("概要: Player A が自分の一般兵（soldier-1, チャージ状態）をアタッカーに、対戦相手である Player B をディフェンダーに指定して「アタック」を宣言します。アタック解決後、アタッカーユニットに戦闘情報（soldier.battle）が記録され、アタッカーがドライブ状態に移行することを確認します。");
 
   const attackAction = rulePackage.actions.find((a: any) => a.id === "action.attack");
   if (!attackAction) throw new Error("action.attack が見つかりません");
 
-  const soldier = {
+  const soldier: any = {
     unitId: "soldier-1",
     kind: "一般兵",
     componentId: "character.soldier",
@@ -776,7 +778,7 @@ async function runAttackScenario(rulePackage: any) {
   logState(state);
 
   console.log(`\n${colors.bold}${colors.green}結果検証: 
-  - 戦闘一時状態 (state.combat) = ${JSON.stringify(state.combat)}
+  - アタッカー戦闘情報 (soldier.battle) = ${JSON.stringify(soldier.battle)}
   - アタッカー状態 = ${soldier.state} (期待値: drive)${colors.reset}`);
 }
 

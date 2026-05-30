@@ -131,7 +131,7 @@
 | `takeUntilLegacyCard` | 世代交代実行 | `rules-vnext独自` | 完了 | あり | あり | ライフをめくり、特定カードが出たら手札へ追加 |
 | `cancelRequest` | リクエスト取消 | `rules-vnext独自` | 完了 | あり | あり | 指定リクエストのステータスを cancelled に変更 |
 | `toggleUnitState` | ユニット状態トグル | `rules-vnext独自` | 完了 | あり | あり | キャラクターの charge <-> drive 状態をトグル |
-| `startAttack` | 戦闘開始（アタック宣言） | `rules-vnext独自` | 完了 | あり | あり | アタッカーのドライブ移行と戦闘状態（state.combat）の構築 |
+| `startAttack` | 戦闘開始（アタック宣言） | `rules-vnext独自` | 完了 | あり | あり | アタッカーのドライブ移行とアタッカー戦闘一時情報（unit.battle）の記録 |
 
 ---
 

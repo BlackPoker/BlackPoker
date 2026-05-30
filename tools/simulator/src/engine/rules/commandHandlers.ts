@@ -459,14 +459,10 @@ export function startAttackHandler(
       throw new Error(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${attackerUnit.state}`);
     }
 
-    // state.combat の作成
-    state.combat = {
-      attackRequestId: context.currentRequest?.id || null,
-      attackerUnitId: attackerUnit.unitId,
-      attackerPlayerKey: context.playerKey,
-      defenderPlayerKey: defenderPlayerKey,
-      blockerUnitId: undefined,
-      status: "attacking"
+    // アタッカーユニットに戦闘一時情報を記録
+    attackerUnit.battle = {
+      role: "attacker",
+      targetPlayerKey: defenderPlayerKey
     };
 
     // アタッカーをドライブ状態に移行する
