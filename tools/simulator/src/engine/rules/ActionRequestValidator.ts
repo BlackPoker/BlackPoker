@@ -150,6 +150,26 @@ export class ActionRequestValidator {
               `クイックタイミングのアクションはチャンスを所持している必要があります。現在: chancePlayer=${state.chancePlayer}, requester=${requester}`
             );
           }
+        } else if (timing === "block") {
+          if (requester !== state.chancePlayer || !isStageEmpty) {
+            throw new ValidationError(
+              `ブロックタイミングのアクションはチャンス所持かつステージが空である必要があります。現在: chancePlayer=${state.chancePlayer}, requester=${requester}, stageEmpty=${isStageEmpty}`
+            );
+          }
+          // フィールド上に自分を攻撃対象とする「相手のアタッカー」が存在するか検証する
+          let hasValidOpponentAttacker = false;
+          for (const [pKey, p] of Object.entries<any>(state.players)) {
+            if (pKey === requester) continue; // 自分の所有するユニットは除外（自分自身のアタッカーをブロックできない）
+            if (p.field?.some((u: any) => u.battle?.role === "attacker" && u.battle?.targetPlayerKey === requester)) {
+              hasValidOpponentAttacker = true;
+              break;
+            }
+          }
+          if (!hasValidOpponentAttacker) {
+            throw new ValidationError(
+              `自分を攻撃している相手のアタッカーが存在しないため、ブロックできません。`
+            );
+          }
         }
       }
     }
@@ -270,6 +290,28 @@ export class ActionRequestValidator {
 
               if (context.targetComponent.state !== "charge") {
                 throw new ValidationError(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${context.targetComponent.state}`);
+              }
+            }
+
+            // ブロックアクション固有の検証 (ブロッカーの条件)
+            if (action.id === "action.block") {
+              const player = context.state.players[context.playerKey];
+              const exists = player?.field?.some((u: any) => u.unitId === context.targetComponent.unitId);
+              if (!exists) {
+                throw new ValidationError("ブロッカーは自分のフィールドに存在するユニットである必要があります。");
+              }
+
+              if (context.targetComponent.state !== "charge") {
+                throw new ValidationError(`ドライブ状態のキャラクターはブロッカーに指定できません。現在: ${context.targetComponent.state}`);
+              }
+
+              // 防御ラベルを持っていることの検証
+              const compId = context.targetComponent.componentId || "";
+              const compDef = context.components?.find((c: any) => c.id === compId);
+              const labels = (compDef as any)?.labels || context.targetComponent.labels || [];
+              const hasDefenseLabel = labels.includes("防御") || labels.includes("defense");
+              if (!hasDefenseLabel) {
+                throw new ValidationError("防御ラベルを持たないキャラクターはブロッカーに指定できません。");
               }
             }
 

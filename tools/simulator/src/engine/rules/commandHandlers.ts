@@ -484,3 +484,59 @@ export function startAttackHandler(
   };
 }
 
+/**
+ * declareBlock: ブロックを宣言し、ブロッカーに戦闘一時情報を記録する
+ */
+export function declareBlockHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const state = context.state;
+    const blockerUnit = context.targetComponent;
+
+    if (!blockerUnit) {
+      throw new Error("ブロッカーとなるユニットが見つかりません。");
+    }
+
+    // 自分を攻撃対象とする「相手のアタッカー」を厳密に特定する
+    let attackerUnit: any = null;
+    for (const [pKey, p] of Object.entries<any>(state.players)) {
+      if (pKey === context.playerKey) continue; // 自分のアタッカーはブロックできない
+      if (p.field) {
+        attackerUnit = p.field.find(
+          (u: any) => u.battle?.role === "attacker" && u.battle?.targetPlayerKey === context.playerKey
+        );
+        if (attackerUnit) break;
+      }
+    }
+
+    if (!attackerUnit) {
+      throw new Error("ブロック対象となる相手のアタッカーが見つかりません。");
+    }
+
+    // ブロッカーユニットに一時戦闘情報を記録
+    blockerUnit.battle = {
+      role: "blocker",
+      blocksUnitId: attackerUnit.unitId
+    };
+
+    // ブロッカーをドライブ状態に移行する
+    const oldState = blockerUnit.state;
+    blockerUnit.state = "drive";
+
+    // イベント発行 (unitStateChanged)
+    const event = {
+      type: "unitStateChanged",
+      payload: {
+        unitId: blockerUnit.unitId,
+        fromState: oldState,
+        toState: "drive",
+        playerKey: context.playerKey,
+        cause: { type: "effect", command: "declareBlock" },
+      },
+    };
+    effectInterpreter.dispatchEvent(event, context);
+  };
+}
+

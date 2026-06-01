@@ -14,6 +14,7 @@ const mappings = [
   { newId: "action.nextGeneration", oldId: "nextGeneration" },
   { newId: "action.counter", oldId: "counter" },
   { newId: "action.twist", oldId: "twist" },
+  { newId: "action.block", oldId: "block" },
   { newId: "action.end", oldId: "end" },
 ];
 
@@ -35,7 +36,7 @@ function compareSpeed(newVal: string | undefined, oldVal: string | undefined) {
 
 function compareTiming(newVal: string | undefined, oldVal: string | undefined) {
   if (!newVal || !oldVal) return { status: "DIFF", detail: `未定義 ("${newVal}" / "${oldVal}")` };
-  const map: Record<string, string> = { main: "メイン", quick: "クイック", always: "クイック" };
+  const map: Record<string, string> = { main: "メイン", quick: "クイック", always: "クイック", block: "メイン" };
   const resolved = map[newVal] || resolvedMap(newVal);
   function resolvedMap(val: string) {
     return val === "always" ? "クイック" : val;

@@ -1,0 +1,24 @@
+actions:
+  - id: action.block
+    name: ブロック
+    ruby: ぶろっく
+    type: basic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: block
+
+    targets:
+      - id: targetUnit
+        type: unit
+        condition:
+          componentType: character
+          relation: self
+
+    text:
+      effect: アタッカーをブロックするキャラクター（ブロッカー）を指定する。
+
+    effect:
+      - declareBlock:
+          blocker: targetUnit

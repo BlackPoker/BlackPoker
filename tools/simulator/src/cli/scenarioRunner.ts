@@ -122,6 +122,26 @@ function setupRegistryHook(registry: CommandRegistry) {
         const defenderName = state.players[defenderPlayerKey]?.name || defenderPlayerKey;
         console.log(`  ${colors.bold}${colors.red}[COMBAT]${colors.reset} attacker=${attackerName}, defender=${defenderName}`);
       }
+    } else if (name === "declareBlock") {
+      const state = context.state;
+      // フィールドからブロッカーユニットを探す
+      let blockerUnit: any = null;
+      for (const player of Object.values<any>(state.players)) {
+        blockerUnit = player.field?.find((u: any) => u.battle?.role === "blocker");
+        if (blockerUnit) break;
+      }
+      if (blockerUnit && blockerUnit.battle) {
+        const blockerName = blockerUnit.kind || "防壁";
+        let attackerName = "アタッカー";
+        for (const player of Object.values<any>(state.players)) {
+          const attacker = player.field?.find((u: any) => u.unitId === blockerUnit.battle.blocksUnitId);
+          if (attacker) {
+            attackerName = attacker.kind || "一般兵";
+            break;
+          }
+        }
+        console.log(`  ${colors.bold}${colors.cyan}[BLOCK]${colors.reset} blocker=${blockerName}, attacker=${attackerName}`);
+      }
     }
   };
 
@@ -714,11 +734,13 @@ async function runTwistScenario(rulePackage: any) {
 }
 
 async function runAttackScenario(rulePackage: any) {
-  header("シナリオ7: 「アタックを宣言して戦闘状態を作る」（アタックの最小実装）");
-  console.log("概要: Player A が自分の一般兵（soldier-1, チャージ状態）をアタッカーに、対戦相手である Player B をディフェンダーに指定して「アタック」を宣言します。アタック解決後、アタッカーユニットに戦闘情報（soldier.battle）が記録され、アタッカーがドライブ状態に移行することを確認します。");
+  header("シナリオ7: 「アタックを宣言して戦闘状態を作り、ブロックで対応付ける」（アタック＆ブロック最小実装）");
+  console.log("概要: Player A が一般兵（soldier-1, チャージ状態）でアタックを宣言し、解決してドライブ状態へ移行。その後、チャンスを Player B（防御側）に移し、Player B は防壁（bulwark-1, チャージ状態）でアタッカーをブロックします。アタッカー・ブロッカー双方に戦闘情報が記録されることを検証します。");
 
   const attackAction = rulePackage.actions.find((a: any) => a.id === "action.attack");
+  const blockAction = rulePackage.actions.find((a: any) => a.id === "action.block");
   if (!attackAction) throw new Error("action.attack が見つかりません");
+  if (!blockAction) throw new Error("action.block が見つかりません");
 
   const soldier: any = {
     unitId: "soldier-1",
@@ -727,6 +749,15 @@ async function runAttackScenario(rulePackage: any) {
     state: "charge",
     cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
     labels: ["攻撃", "防御"],
+  };
+
+  const bulwark: any = {
+    unitId: "bulwark-1",
+    kind: "防壁",
+    componentId: "character.bulwark",
+    state: "charge",
+    cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }],
+    labels: ["防御"],
   };
 
   const state: any = {
@@ -743,7 +774,7 @@ async function runAttackScenario(rulePackage: any) {
         name: "Player B",
         life: [{ id: "l1", suit: "C", rank: "2", value: 2 }],
         hand: [],
-        field: [],
+        field: [bulwark],
         grave: [],
         fog: [],
       }
@@ -757,7 +788,7 @@ async function runAttackScenario(rulePackage: any) {
   subHeader("初期状態");
   logState(state);
 
-  const context: CommandContext = {
+  const contextP1: CommandContext = {
     state,
     playerKey: "p1",
     targetComponent: soldier,
@@ -768,18 +799,41 @@ async function runAttackScenario(rulePackage: any) {
 
   subHeader("アクション：アタック をステージへ");
   console.log(`Player A が ${attackAction.name} をステージへ積みます（対象: ${soldier.unitId}, ディフェンダー: Player B）。`);
-  const req = registry.createRequest(attackAction, context);
+  const reqAttack = registry.createRequest(attackAction, contextP1);
 
-  subHeader("ステージ上のリクエストを解決");
-  console.log(`\n--- アタック (ID: ${req.id}) の解決 ---`);
-  registry.resolveTopRequest(context);
+  subHeader("ステージ上のアタックリクエストを解決");
+  console.log(`\n--- アタック (ID: ${reqAttack.id}) の解決 ---`);
+  registry.resolveTopRequest(contextP1);
+
+  subHeader("チャンスの移行");
+  console.log("アタック解決後、チャンスを Player B へ移します。");
+  TurnManager.passChance(state);
+  logState(state);
+
+  const contextP2: CommandContext = {
+    state,
+    playerKey: "p2",
+    targetComponent: bulwark,
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：ブロック をステージへ");
+  console.log(`Player B が ${blockAction.name} をステージへ積みます（対象ブロッカー: ${bulwark.unitId}）。`);
+  const reqBlock = registry.createRequest(blockAction, contextP2);
+
+  subHeader("ステージ上のブロックリクエストを解決");
+  console.log(`\n--- ブロック (ID: ${reqBlock.id}) の解決 ---`);
+  registry.resolveTopRequest(contextP2);
 
   subHeader("最終状態");
   logState(state);
 
   console.log(`\n${colors.bold}${colors.green}結果検証: 
   - アタッカー戦闘情報 (soldier.battle) = ${JSON.stringify(soldier.battle)}
-  - アタッカー状態 = ${soldier.state} (期待値: drive)${colors.reset}`);
+  - アタッカー状態 = ${soldier.state} (期待値: drive)
+  - ブロッカー戦闘情報 (bulwark.battle) = ${JSON.stringify(bulwark.battle)}
+  - ブロッカー状態 = ${bulwark.state} (期待値: drive)${colors.reset}`);
 }
 
 async function main() {
