@@ -14,7 +14,7 @@ export type ActionDefinition = {
   request: {
     trigger: "direct" | "triggered" | string;
     speed: "normal" | "immediate" | string;
-    timing: "main" | "quick" | "block" | string;
+    timing: "main" | "quick" | "block" | "damageJudge" | string;
   };
   cost?: string;
   key?: {

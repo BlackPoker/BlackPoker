@@ -170,6 +170,48 @@ export class ActionRequestValidator {
               `自分を攻撃している相手のアタッカーが存在しないため、ブロックできません。`
             );
           }
+        } else if (timing === "damageJudge") {
+          if (requester !== state.turnPlayer || requester !== state.chancePlayer || !isStageEmpty) {
+            throw new ValidationError(
+              `ダメージ判定タイミングのアクションは手番かつチャンス所持かつステージが空である必要があります。現在: turnPlayer=${state.turnPlayer}, chancePlayer=${state.chancePlayer}, requester=${requester}, stageEmpty=${isStageEmpty}`
+            );
+          }
+
+          // アタッカーの検索とカウント
+          const attackers: any[] = [];
+          for (const player of Object.values<any>(state.players)) {
+            if (player.field) {
+              const uList = player.field.filter((u: any) => u.battle?.role === "attacker");
+              attackers.push(...uList);
+            }
+          }
+
+          if (attackers.length === 0) {
+            throw new ValidationError("戦闘中のアタッカーが存在しないため、ダメージ判定を行えません。");
+          }
+          if (attackers.length > 1) {
+            throw new ValidationError(`戦闘中のアタッカーが複数（${attackers.length}体）存在するため、ダメージ判定を行えません。`);
+          }
+
+          const attacker = attackers[0];
+
+          // ブロッカーの検索とカウント
+          const blockers: any[] = [];
+          for (const player of Object.values<any>(state.players)) {
+            if (player.field) {
+              const uList = player.field.filter(
+                (u: any) => u.battle?.role === "blocker" && u.battle?.blocksUnitId === attacker.unitId
+              );
+              blockers.push(...uList);
+            }
+          }
+
+          if (blockers.length === 0) {
+            throw new ValidationError("アタッカーに対するブロッカーが存在しないため、ダメージ判定を行えません。");
+          }
+          if (blockers.length > 1) {
+            throw new ValidationError(`アタッカーに対するブロッカーが複数（${blockers.length}体）存在するため、ダメージ判定を行えません。`);
+          }
         }
       }
     }

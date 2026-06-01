@@ -826,14 +826,40 @@ async function runAttackScenario(rulePackage: any) {
   console.log(`\n--- ブロック (ID: ${reqBlock.id}) の解決 ---`);
   registry.resolveTopRequest(contextP2);
 
+  subHeader("チャンスを手番プレイヤーへ戻す");
+  console.log("ブロック解決後、ダメージ判定を行うためチャンスを手番プレイヤー (Player A) へ戻します。");
+  TurnManager.initializeToMain(state, "p1"); // 手番かつチャンス所持
+  logState(state);
+
+  const damageJudgeAction = rulePackage.actions.find((a: any) => a.id === "action.damageJudge");
+  if (!damageJudgeAction) throw new Error("action.damageJudge が見つかりません");
+
+  const contextDamage: CommandContext = {
+    state,
+    playerKey: "p1",
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  subHeader("アクション：ダメージ判定 をステージへ");
+  console.log(`Player A が ${damageJudgeAction.name} をステージへ積みます。`);
+  const reqDamage = registry.createRequest(damageJudgeAction, contextDamage);
+
+  subHeader("ステージ上のダメージ判定リクエストを解決");
+  console.log(`\n--- ダメージ判定 (ID: ${reqDamage.id}) の解決 ---`);
+  registry.resolveTopRequest(contextDamage);
+
   subHeader("最終状態");
   logState(state);
 
-  console.log(`\n${colors.bold}${colors.green}結果検証: 
-  - アタッカー戦闘情報 (soldier.battle) = ${JSON.stringify(soldier.battle)}
+  console.log(`\n${colors.bold}${colors.green}結果検証 (ダメージ判定後): 
+  - フィールド上の一般兵1 (soldier-1) の数 = ${state.players.p1.field.length} (期待値: 1。アタッカー生存)
+  - 生存した一般兵1の戦闘情報 (soldier.battle) = ${JSON.stringify(soldier.battle)} (期待値: undefined。クリア済み)
+  - フィールド上の防壁1 (bulwark-1) の数 = ${state.players.p2.field.length} (期待値: 0。敗北して墓地へ)
+  - 墓地上の防壁1 (bulwark-1) の数 = ${state.players.p2.grave.length} (期待値: 1)
+  - 墓地に送られた防壁1の戦闘情報 (bulwark.battle) = ${JSON.stringify(state.players.p2.grave[0].battle)} (期待値: undefined。クリア済み)
   - アタッカー状態 = ${soldier.state} (期待値: drive)
-  - ブロッカー戦闘情報 (bulwark.battle) = ${JSON.stringify(bulwark.battle)}
-  - ブロッカー状態 = ${bulwark.state} (期待値: drive)${colors.reset}`);
+  - 墓地へ送られた防壁1の状態 = ${state.players.p2.grave[0].state} (期待値: drive)${colors.reset}`);
 }
 
 async function main() {

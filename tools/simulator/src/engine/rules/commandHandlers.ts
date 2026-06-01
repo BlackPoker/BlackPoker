@@ -540,3 +540,126 @@ export function declareBlockHandler(
   };
 }
 
+/**
+ * ユニットをフィールドから墓地へ移動する共通処理
+ * 墓地に移動する前に unit.battle を完全に削除し、カードごとに cardMoved イベントを発行する
+ */
+export function moveUnitToGraveyard(
+  unit: any,
+  playerKey: string,
+  state: any,
+  effectInterpreter: EffectInterpreter,
+  context: any
+) {
+  const player = state.players[playerKey];
+  if (!player) return;
+
+  // フィールドから除外
+  if (player.field) {
+    player.field = player.field.filter((u: any) => u.unitId !== unit.unitId);
+  }
+
+  // 墓地に送る前に battle 情報を完全に削除する
+  if (unit.battle) {
+    delete unit.battle;
+  }
+
+  // 墓地へ追加
+  if (!player.grave) {
+    player.grave = [];
+  }
+  player.grave.push(unit);
+
+  // 各カードについて cardMoved イベントを発行
+  if (unit.cards && Array.isArray(unit.cards)) {
+    for (const card of unit.cards) {
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card: card,
+          fromZone: "field",
+          toZone: "grave",
+          playerKey: playerKey,
+        }
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  }
+}
+
+/**
+ * judgeDamage: アタッカーとブロッカーの現在サイズを比較し、敗北したユニットを墓地へ移動する
+ */
+export function judgeDamageHandler(
+  abilityEvaluator: AbilityEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const state = context.state;
+
+    // 1. アタッカーを探す (battle.role === "attacker")
+    let attackerUnit: any = null;
+    let attackerPlayerKey: string = "";
+    for (const [pKey, p] of Object.entries<any>(state.players)) {
+      if (p.field) {
+        attackerUnit = p.field.find((u: any) => u.battle?.role === "attacker");
+        if (attackerUnit) {
+          attackerPlayerKey = pKey;
+          break;
+        }
+      }
+    }
+
+    if (!attackerUnit) {
+      throw new Error("戦闘中のアタッカーが見つかりません。");
+    }
+
+    // 2. ブロッカーを探す (battle.blocksUnitId === attackerUnit.unitId)
+    let blockerUnit: any = null;
+    let blockerPlayerKey: string = "";
+    for (const [pKey, p] of Object.entries<any>(state.players)) {
+      if (p.field) {
+        blockerUnit = p.field.find(
+          (u: any) => u.battle?.role === "blocker" && u.battle?.blocksUnitId === attackerUnit.unitId
+        );
+        if (blockerUnit) {
+          blockerPlayerKey = pKey;
+          break;
+        }
+      }
+    }
+
+    if (!blockerUnit) {
+      throw new Error("アタッカーに対するブロッカーが見つかりません。");
+    }
+
+    // 3. AbilityEvaluator を用いて attacker と blocker のサイズを計算
+    const attackerSize = abilityEvaluator.calculateUnitSize(attackerUnit, state.players[attackerPlayerKey]);
+    const blockerSize = abilityEvaluator.calculateUnitSize(blockerUnit, state.players[blockerPlayerKey]);
+
+    // 4. サイズ比較と墓地送り
+    if (attackerSize > blockerSize) {
+      // ブロッカーが敗北、墓地へ移動
+      moveUnitToGraveyard(blockerUnit, blockerPlayerKey, state, effectInterpreter, context);
+      
+      // アタッカーは生存するため、battle 情報をクリアするのみ
+      if (attackerUnit.battle) {
+        delete attackerUnit.battle;
+      }
+    } else if (attackerSize < blockerSize) {
+      // アタッカーが敗北、墓地へ移動
+      moveUnitToGraveyard(attackerUnit, attackerPlayerKey, state, effectInterpreter, context);
+      
+      // ブロッカーは生存するため、battle 情報をクリアするのみ
+      if (blockerUnit.battle) {
+        delete blockerUnit.battle;
+      }
+    } else {
+      // 引き分け、双方が墓地へ移動
+      // 順序はアタッカー -> ブロッカーの順で墓地へ送る
+      moveUnitToGraveyard(attackerUnit, attackerPlayerKey, state, effectInterpreter, context);
+      moveUnitToGraveyard(blockerUnit, blockerPlayerKey, state, effectInterpreter, context);
+    }
+  };
+}
+

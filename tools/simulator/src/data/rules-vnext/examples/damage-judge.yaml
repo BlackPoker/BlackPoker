@@ -1,0 +1,16 @@
+actions:
+  - id: action.damageJudge
+    name: ダメージ判定
+    ruby: だめーじはんてい
+    type: basic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: damageJudge
+
+    text:
+      effect: ブロック済み戦闘のダメージ判定を行い、サイズ比較に基づいて敗北したユニットを墓地へ送る。
+
+    effect:
+      - judgeDamage: {}

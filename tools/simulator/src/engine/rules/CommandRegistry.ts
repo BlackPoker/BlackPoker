@@ -15,6 +15,7 @@ import {
   endTurnHandler,
   startAttackHandler,
   declareBlockHandler,
+  judgeDamageHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -302,5 +303,6 @@ export class CommandRegistry {
     this.register("endTurn", endTurnHandler());
     this.register("startAttack", startAttackHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("declareBlock", declareBlockHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("judgeDamage", judgeDamageHandler(this.abilityEvaluator, this.effectInterpreter));
   }
 }
