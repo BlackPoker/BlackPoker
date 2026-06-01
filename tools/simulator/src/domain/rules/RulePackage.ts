@@ -33,7 +33,7 @@ export type ActionDefinition = {
     effect?: string;
     ability?: string;
   };
-  triggerCondition?: Record<string, any>;
+  triggerCondition?: TriggerCondition;
   effect?: EffectCommand[];
 };
 
@@ -86,4 +86,42 @@ export type ActionRequest = {
 export type Stage = {
   requests: ActionRequest[];
   history?: ActionRequest[];
+};
+
+export type TriggerCondition = {
+  event: string;
+  condition?: {
+    fromZone?: string;
+    toZone?: string;
+    actionId?: string;
+    hasAttacker?: boolean;
+    hasAttackerAndBlocker?: boolean;
+    card?: {
+      rank?: string | string[];
+      owner?: "self" | string;
+    };
+  };
+};
+
+export type TriggeredActionRequest = {
+  id: string;
+  actionId: string;
+  controller: string;
+  keyCards: unknown[]; // anyを徹底排除
+  status: "pending" | "resolving" | "resolved" | "cancelled";
+  sequence: number;
+  action: ActionDefinition;
+  sourceEvent?: unknown; // anyを徹底排除
+};
+
+export type TriggerHistory = {
+  actionId: string;
+  status: "triggered" | "discarded";
+  reason?: string;
+  sourceEvent?: unknown; // anyを徹底排除
+};
+
+export type RequestBuffer = {
+  requests: TriggeredActionRequest[];
+  history: TriggerHistory[];
 };

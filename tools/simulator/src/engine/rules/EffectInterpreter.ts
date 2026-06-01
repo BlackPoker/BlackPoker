@@ -64,6 +64,11 @@ export class EffectInterpreter {
         }
       }
     }
+
+    // 誘発条件評価エンジンを呼び出し、リクエストバッファへ蓄積
+    if ((this.registry as any).triggerResolver) {
+      (this.registry as any).triggerResolver.resolveTriggers(event, context);
+    }
   }
 
   /**

@@ -19,6 +19,7 @@ import {
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
+import { TriggerResolver } from "./TriggerResolver";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -46,6 +47,7 @@ export class CommandRegistry {
   private abilityEvaluator = new AbilityEvaluator();
   private actionRequestValidator = new ActionRequestValidator();
   private effectInterpreter: EffectInterpreter;
+  public triggerResolver = new TriggerResolver();
 
   constructor() {
     this.effectInterpreter = new EffectInterpreter(
@@ -248,6 +250,18 @@ export class CommandRegistry {
 
     request.status = "resolved";
     context.state.stage.history.push(request);
+
+    // 5. アクション解決イベントの発行（resolved ステータス時限定。キャンセル時等は発行しない）
+    if (request.status === "resolved") {
+      const resolveEvent = {
+        type: "actionResolved",
+        payload: {
+          actionId: request.actionId,
+          playerKey: request.controller,
+        }
+      };
+      this.dispatchEvent(resolveEvent, context);
+    }
   }
 
   /**
@@ -284,6 +298,7 @@ export class CommandRegistry {
    * [イベント配信ブリッジ] ゲームイベントを発行し、誘発アクションをチェック・実行します。
    */
   dispatchEvent(event: any, context: CommandContext) {
+    // 既存のイベント解決を優先して走らせる
     this.effectInterpreter.dispatchEvent(event, context);
   }
 

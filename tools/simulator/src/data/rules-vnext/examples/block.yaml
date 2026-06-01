@@ -9,6 +9,12 @@ actions:
       speed: normal
       timing: block
 
+    triggerCondition:
+      event: actionResolved
+      condition:
+        actionId: action.attack
+        hasAttacker: true
+
     targets:
       - id: targetUnit
         type: unit
