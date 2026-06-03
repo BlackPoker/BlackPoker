@@ -81,6 +81,10 @@ export type ActionRequest = {
   status: "pending" | "resolving" | "resolved" | "cancelled";
   sequence: number;
   action?: ActionDefinition;
+  triggered?: boolean;
+  source?: "requestBuffer";
+  sourceEvent?: unknown;
+  definitionOwner?: string;
 };
 
 export type Stage = {
@@ -112,11 +116,12 @@ export type TriggeredActionRequest = {
   sequence: number;
   action: ActionDefinition;
   sourceEvent?: unknown; // anyを徹底排除
+  definitionOwner?: string;
 };
 
 export type TriggerHistory = {
   actionId: string;
-  status: "triggered" | "discarded";
+  status: "triggered" | "discarded" | "movedToStage";
   reason?: string;
   sourceEvent?: unknown; // anyを徹底排除
 };

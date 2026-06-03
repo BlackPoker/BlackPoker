@@ -80,14 +80,17 @@ export class TriggerResolver {
 
         // リクエスト実行者の初期解決（デフォルトはイベント発生源のプレイヤー）
         let controller = context.playerKey;
+        let definitionOwner = context.playerKey;
 
         // アタッカー・ブロッカー等の整合
         if (action.id === "action.block") {
           // ブロックは防御側プレイヤー（アタックを受けた側）がコントローラーとなる
           controller = context.playerKey === "p1" ? "p2" : "p1";
+          definitionOwner = state.turnPlayer;
         } else if (action.id === "action.damageJudge") {
           // ダメージ判定はターンプレイヤー
           controller = state.turnPlayer;
+          definitionOwner = state.turnPlayer;
         }
 
         const req: TriggeredActionRequest = {
@@ -98,7 +101,8 @@ export class TriggerResolver {
           status: "pending",
           sequence: seq,
           action,
-          sourceEvent: event
+          sourceEvent: event,
+          definitionOwner
         };
 
         requestBuffer.requests.push(req);
@@ -108,7 +112,7 @@ export class TriggerResolver {
           sourceEvent: event
         });
 
-        console.log(`[TRIGGER] ${action.name || action.id} が誘発しました (ID: ${req.id}, コントローラー: ${controller})`);
+        console.log(`[TRIGGER] ${action.name || action.id} が誘発しました (ID: ${req.id}, コントローラー: ${controller}, 所有者: ${definitionOwner})`);
 
         if (isMain) {
           hasMainTriggered = true;

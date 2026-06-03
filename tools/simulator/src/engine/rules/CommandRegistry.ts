@@ -20,6 +20,7 @@ import {
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
 import { TriggerResolver } from "./TriggerResolver";
+import { RequestBufferProcessor } from "./RequestBufferProcessor";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -33,6 +34,8 @@ export interface CommandContext {
   components?: ComponentDefinition[]; // コンポーネントの全定義（常在能力の検索用）
   currentAction?: ActionDefinition; // 現在実行中のアクション定義
   currentRequest?: ActionRequest; // 現在解決中のリクエスト情報
+  triggered?: boolean; // 新規追加：誘発リクエスト判定
+  source?: string; // 新規追加：移送ソース
 }
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
@@ -48,6 +51,7 @@ export class CommandRegistry {
   private actionRequestValidator = new ActionRequestValidator();
   private effectInterpreter: EffectInterpreter;
   public triggerResolver = new TriggerResolver();
+  public requestBufferProcessor = new RequestBufferProcessor();
 
   constructor() {
     this.effectInterpreter = new EffectInterpreter(
@@ -199,8 +203,8 @@ export class CommandRegistry {
 
     // 2. リクエスト実行時のコンテキスト復元
     const player = context.state.players[request.controller];
-    let targetComponent = undefined;
-    let targetRequest = undefined;
+    let targetComponent = context.targetComponent;
+    let targetRequest = context.targetRequest;
 
     if (request.targets && request.targets.length > 0) {
       for (const t of request.targets) {
@@ -262,6 +266,13 @@ export class CommandRegistry {
       };
       this.dispatchEvent(resolveEvent, context);
     }
+  }
+
+  /**
+   * リクエストバッファから次のリクエストを1件取り出し、ステージ（state.stage.requests）へ移送します。
+   */
+  moveNextBufferedRequestToStage(context: CommandContext): ActionRequest | undefined {
+    return this.requestBufferProcessor.moveNextToStage(context);
   }
 
   /**

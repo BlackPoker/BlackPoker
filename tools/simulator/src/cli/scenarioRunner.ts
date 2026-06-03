@@ -818,9 +818,12 @@ async function runAttackScenario(rulePackage: any) {
     components: rulePackage.components,
   };
 
-  subHeader("アクション：ブロック をステージへ");
-  console.log(`Player B が ${blockAction.name} をステージへ積みます（対象ブロッカー: ${bulwark.unitId}）。`);
-  const reqBlock = registry.createRequest(blockAction, contextP2);
+  subHeader("アクション：ブロック をバッファからステージへ移送");
+  console.log(`[TRIGGER] ${blockAction.name} がリクエストバッファに積まれていることを確認します。`);
+  console.log(`[BUFFER] 現在のバッファ:`, JSON.stringify(state.requestBuffer?.requests.map((r: any) => r.actionId)));
+  console.log("ブロックリクエストをバッファからステージへ移動します。");
+  const reqBlock = registry.moveNextBufferedRequestToStage(contextP2)!;
+  console.log(`[BUFFER] ${blockAction.name} をリクエストバッファからステージへ移動 (ID: ${reqBlock.id}, controller: ${reqBlock.controller}, definitionOwner: ${reqBlock.definitionOwner})`);
 
   subHeader("ステージ上のブロックリクエストを解決");
   console.log(`\n--- ブロック (ID: ${reqBlock.id}) の解決 ---`);
@@ -841,9 +844,12 @@ async function runAttackScenario(rulePackage: any) {
     components: rulePackage.components,
   };
 
-  subHeader("アクション：ダメージ判定 をステージへ");
-  console.log(`Player A が ${damageJudgeAction.name} をステージへ積みます。`);
-  const reqDamage = registry.createRequest(damageJudgeAction, contextDamage);
+  subHeader("アクション：ダメージ判定 をバッファからステージへ移送");
+  console.log(`[TRIGGER] ${damageJudgeAction.name} がリクエストバッファに積まれていることを確認します。`);
+  console.log(`[BUFFER] 現在のバッファ:`, JSON.stringify(state.requestBuffer?.requests.map((r: any) => r.actionId)));
+  console.log("ダメージ判定リクエストをバッファからステージへ移動します。");
+  const reqDamage = registry.moveNextBufferedRequestToStage(contextDamage)!;
+  console.log(`[BUFFER] ${damageJudgeAction.name} をリクエストバッファからステージへ移動 (ID: ${reqDamage.id}, controller: ${reqDamage.controller}, definitionOwner: ${reqDamage.definitionOwner})`);
 
   subHeader("ステージ上のダメージ判定リクエストを解決");
   console.log(`\n--- ダメージ判定 (ID: ${reqDamage.id}) の解決 ---`);

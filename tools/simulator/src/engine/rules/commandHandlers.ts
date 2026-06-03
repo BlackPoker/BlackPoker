@@ -630,7 +630,28 @@ export function judgeDamageHandler(
     }
 
     if (!blockerUnit) {
-      throw new Error("アタッカーに対するブロッカーが見つかりません。");
+      // ブロッカー不在時は、アタッカーのサイズ分の直接ダメージを対戦相手に与える
+      const attackerSize = abilityEvaluator.calculateUnitSize(attackerUnit, state.players[attackerPlayerKey]);
+      const targetPlayerKey = attackerUnit.battle?.targetPlayerKey || (attackerPlayerKey === "p1" ? "p2" : "p1");
+      
+      const damageContext = {
+        ...context,
+        playerKey: attackerPlayerKey,
+        targetPlayerKey,
+      };
+
+      // dealDamage 効果コマンドを呼び出し
+      ((effectInterpreter as any).registry).execute(
+        "dealDamage",
+        { target: "targetPlayer", amount: attackerSize },
+        damageContext
+      );
+
+      // アタッカーの戦闘状態をクリア
+      if (attackerUnit.battle) {
+        delete attackerUnit.battle;
+      }
+      return;
     }
 
     // 3. AbilityEvaluator を用いて attacker と blocker のサイズを計算

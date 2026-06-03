@@ -130,7 +130,7 @@ export class ActionRequestValidator {
     }
 
     // 0.1. アクション使用タイミング (timing) の検証
-    if (action.request && action.request.timing) {
+    if (!context.triggered && action.request && action.request.timing) {
       const state = context.state;
       if (state && state.turnPlayer !== undefined && state.chancePlayer !== undefined) {
         const timing = action.request.timing;
@@ -268,7 +268,7 @@ export class ActionRequestValidator {
     }
 
     // 2. 対象 (targets) のバリデーション
-    if (action.targets && Array.isArray(action.targets)) {
+    if (!context.triggered && action.targets && Array.isArray(action.targets)) {
       for (const targetDef of action.targets) {
         const cond = targetDef.condition;
         let targetType = targetDef.type || (cond ? cond.type : undefined);

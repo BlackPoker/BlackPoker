@@ -13,7 +13,6 @@ actions:
       event: actionResolved
       condition:
         actionId: action.block
-        hasAttackerAndBlocker: true
 
     text:
       effect: ブロック済み戦闘のダメージ判定を行い、サイズ比較に基づいて敗北したユニットを墓地へ送る。
