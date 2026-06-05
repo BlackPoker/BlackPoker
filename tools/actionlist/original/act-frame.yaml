@@ -437,7 +437,7 @@ actList:
       actTarget: 兵士1体
       actActCond: 自分の表切札に「誘惑」がある
       actEffect: |-
-        対象の兵士をオーナー手札に戻す。
+        対象の兵士をオーナーの手札に戻す。
       since: ex3.4.0
       update: v8.1, v9.0
       changed: changed
