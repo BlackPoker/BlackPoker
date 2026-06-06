@@ -42,15 +42,22 @@ release = 'XXXX/XX/XX'
 version = '第X.X版'
 
 # version.json からバージョンと日付をロード
-_version_json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools/actionlist/original/version.json'))
-if os.path.exists(_version_json_path):
-    try:
-        with open(_version_json_path, 'r', encoding='utf-8') as _f:
-            _data = json.load(_f)
-            version = _data.get('ver', version)
-            release = _data.get('lastupdate', release)
-    except Exception as _e:
-        print(f"Warning: Failed to read version.json: {_e}")
+# コンテナ内（source/version.json）とローカル（../tools/actionlist/original/version.json）の両方を探索
+_version_paths = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), 'version.json')),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools/actionlist/original/version.json'))
+]
+
+for _path in _version_paths:
+    if os.path.exists(_path):
+        try:
+            with open(_path, 'r', encoding='utf-8') as _f:
+                _data = json.load(_f)
+                version = _data.get('ver', version)
+                release = _data.get('lastupdate', release)
+                break
+        except Exception as _e:
+            print(f"Warning: Failed to read version.json at {_path}: {_e}")
 
 
 # -- General configuration ---------------------------------------------------
