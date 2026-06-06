@@ -33,8 +33,25 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-release = '2026/04/13'
-version = '第9.0版'
+
+import os
+import json
+
+# デフォルト値（フォールバック）
+release = 'XXXX/XX/XX'
+version = '第X.X版'
+
+# version.json からバージョンと日付をロード
+_version_json_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools/actionlist/original/version.json'))
+if os.path.exists(_version_json_path):
+    try:
+        with open(_version_json_path, 'r', encoding='utf-8') as _f:
+            _data = json.load(_f)
+            version = _data.get('ver', version)
+            release = _data.get('lastupdate', release)
+    except Exception as _e:
+        print(f"Warning: Failed to read version.json: {_e}")
+
 
 # -- General configuration ---------------------------------------------------
 
