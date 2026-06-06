@@ -142,6 +142,9 @@ public class ActionListGen {
 			System.out.println("読み込みました。" + filepath);
 		}
 
+		// version.json を読み込んで data セクションにマージ
+		VersionLoader.applyVersion(ret);
+
 		// // 設定値読み込み
 		// {
 		// Map<String, String> config = SheetUtil.loadConfig(sheet);
