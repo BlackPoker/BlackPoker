@@ -142,6 +142,20 @@ public class ActionListGen {
 			System.out.println("読み込みました。" + filepath);
 		}
 
+		// frames 定義が含まれていない場合、元の frame.yaml から読み込む
+		if (!ret.containsKey("frames")) {
+			Path framePath = Paths.get("original/frame.yaml");
+			if (Files.exists(framePath)) {
+				try (InputStream frameIn = Files.newInputStream(framePath)) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> frameMap = (Map<String, Object>) yaml.load(frameIn);
+					if (frameMap != null && frameMap.containsKey("frames")) {
+						ret.put("frames", frameMap.get("frames"));
+					}
+				}
+			}
+		}
+
 		// version.json を読み込んで data セクションにマージ
 		VersionLoader.applyVersion(ret);
 
