@@ -18,7 +18,6 @@ actList:
         ・レアパック
         ・ストラテジー
         ・エクストラ
-        ・ドラフト
       actName: パック開封
       ruby: パックかいふう
       actId: packopen
@@ -37,7 +36,6 @@ actList:
         ・レアパック
         ・ストラテジー
         ・エクストラ
-        ・ドラフト
       actName: レアドロー
       actId: raredraw
       actType: レアカード操作
@@ -51,7 +49,6 @@ actList:
         ・レアパック
         ・ストラテジー
         ・エクストラ
-        ・ドラフト
       actName: レア召喚
       ruby: レアしょうかん
       actId: summonsRare
@@ -69,7 +66,6 @@ actList:
         ・レアパック
         ・ストラテジー
         ・エクストラ
-        ・ドラフト
       actName: 罠カウンター
       ruby: わなカウンター
       actId: trapCounter
@@ -90,7 +86,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actId: quickOpen
       actName: クイックオープン
       actType: 切札操作
@@ -103,7 +98,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actId: open
       actName: メインオープン
       actType: 切札操作
@@ -116,7 +110,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actId: close
       actName: クローズ
       actType: 切札操作
@@ -132,7 +125,6 @@ actList:
     -
       frame: |-
         ・エクストラ
-        ・ドラフト
       actId: trumpDestroy
       actName: 切札破壊
       ruby: きりふだはかい
@@ -150,7 +142,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 革命ドロー
       ruby: かくめいドロー
       actId: revolutionDraw
@@ -169,7 +160,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: スラッシュ
       actId: slash
       actType: 兵士起因
@@ -190,7 +180,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック兵士召喚♠
       ruby: クイックへいししょうかんスペード
       actId: quickSoldierSummonS
@@ -212,7 +201,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: ドレイン
       actId: drain
       actType: 魔法
@@ -230,7 +218,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 威圧
       ruby: いあつ
       actId: intimidate
@@ -247,7 +234,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック威圧
       ruby: クイックいあつ
       actId: quickIntimidate
@@ -269,7 +255,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 蘇生
       ruby: そせい
       actId: resurrection
@@ -291,7 +276,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 瞬殺
       ruby: しゅんさつ
       actId: instantKill
@@ -310,7 +294,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: リアニメーター召喚
       ruby: リアニメーターしょうかん
       actId: summonReanimator
@@ -330,7 +313,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイックリアニメーター召喚
       ruby: クイックリアニメーターしょうかん
       actId: quickSummonReanimator
@@ -348,7 +330,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 転生召喚
       ruby: てんせいしょうかん
       actId: reincarnationSummon
@@ -369,7 +350,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: リアニメーター再生
       ruby: リアニメーターさいせい
       actId: reanimatorRevive
@@ -386,7 +366,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 魔王召喚
       ruby: まおうしょうかん
       actId: summonDarkLord
@@ -410,7 +389,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 魔王の囁き
       ruby: まおうのささやき
       actId: darkWhisper
@@ -428,7 +406,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 援軍
       ruby: えんぐん
       actId: summonReinforcement
@@ -448,7 +425,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 誘惑
       actId: allure
       actType: 兵士起因
@@ -469,7 +445,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック兵士召喚♡
       ruby: クイックへいししょうかんハート
       actId: quickSoldierSummonH
@@ -491,7 +466,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 休戦
       ruby: きゅうせん
       actId: retreat
@@ -512,7 +486,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 追撃
       ruby: ついげき
       actId: pursuit
@@ -536,7 +509,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: ファントムリバース
       actId: phantomReverse
       actType: 魔法
@@ -553,7 +525,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 幻影
       ruby: げんえい
       actId: illusion
@@ -573,7 +544,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 救済
       ruby: きゅうさい
       actId: salvation
@@ -595,7 +565,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 破砕士召喚
       ruby: はさいししょうかん
       actId: summonWallBreaker
@@ -618,7 +587,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック破砕士召喚
       ruby: クイックはさいししょうかん
       actId: quickSummonWallBreaker
@@ -639,7 +607,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 粉砕
       ruby: ふんさい
       actId: pulverize
@@ -660,7 +627,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 破砕士再生
       ruby: はさいしさいせい
       actId: wallBreakerRevive
@@ -681,7 +647,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 巨人召喚
       ruby: きょじんしょうかん
       actId: summonGiant
@@ -707,7 +672,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 防壁追加
       ruby: ぼうへきついか
       actId: putBulwark
@@ -728,7 +692,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック防壁設置
       ruby: クイックぼうへきせっち
       actId: quickSetBulwark
@@ -749,7 +712,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 交渉
       ruby: こうしょう
       actId: negotiate
@@ -768,7 +730,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック兵士召喚♢
       ruby: クイックへいししょうかんダイヤ
       actId: quickSoldierSummonD
@@ -790,7 +751,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 相殺
       ruby: そうさい
       actId: reckoning
@@ -814,7 +774,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 虚脱
       ruby: きょだつ
       actId: lethargy
@@ -836,7 +795,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 修繕
       ruby: しゅうぜん
       actId: repair
@@ -862,7 +820,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 休息
       ruby: きゅうそく
       actId: rest
@@ -879,7 +836,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 充足
       ruby: じゅうそく
       actId: satisfaction
@@ -898,7 +854,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 策士召喚
       ruby: さくししょうかん
       actId: summonStrategist
@@ -921,7 +876,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック策士召喚
       ruby: クイックさくししょうかん
       actId: quickSummonStrategist
@@ -941,7 +895,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: カウンター策士召喚
       ruby: カウンターさくししょうかん
       actId: counterSummonStrategist
@@ -966,7 +919,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 先読み
       ruby: さきよみ
       actId: strategistPredict
@@ -984,7 +936,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 策士再生
       ruby: さくしさいせい
       actId: strategistRevive
@@ -1003,7 +954,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: スイッチ
       actId: switch
       actType: 兵士起因
@@ -1021,7 +971,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック兵士召喚♣
       ruby: クイックへいししょうかんクラブ
       actId: quickSoldierSummonC
@@ -1043,7 +992,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 内乱
       ruby: ないらん
       actId: civilWar
@@ -1063,7 +1011,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 暴動
       ruby: ぼうどう
       actId: riot
@@ -1082,7 +1029,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 手札補充
       ruby: てふだほじゅう
       actId: handRefill
@@ -1104,7 +1050,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: リセット
       actId: reset
       actType: 魔法
@@ -1127,7 +1072,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 反撃
       ruby: はんげき
       actId: counterattack
@@ -1148,7 +1092,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 悪あがき
       ruby: わるあがき
       actId: lastDitch
@@ -1168,7 +1111,6 @@ actList:
     acts:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 騎士召喚
       ruby: きししょうかん
       actId: summonKnight
@@ -1188,7 +1130,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: クイック騎士召喚
       ruby: クイックきししょうかん
       actId: quickSummonKnight
@@ -1206,7 +1147,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 薙払
       ruby: なぎはらい
       actId: knightSweep
@@ -1224,7 +1164,6 @@ actList:
 
     - frame: |-
         ・エクストラ
-        ・ドラフト
       actName: 騎士再生
       ruby: きしさいせい
       actId: knightRevive
@@ -1242,7 +1181,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: リアニメーター
       ruby: りあにめーたー
       charId: reanimator
@@ -1260,7 +1198,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: 魔王
       ruby: まおう
       charId: darklord
@@ -1280,7 +1217,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: 破砕士
       ruby: はさいし
       charId: wallBreaker
@@ -1301,7 +1237,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: 巨人
       ruby: きょじん
       charId: giant
@@ -1323,7 +1258,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: 策士
       ruby: さくし
       charId: strategist
@@ -1341,7 +1275,6 @@ charList:
     chars:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       charName: 騎士
       ruby: きし
       charId: knight
@@ -1360,7 +1293,6 @@ fogList:
     fogs:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       fogName: クローズ
       fogId: closeFog
       fogType: 滞留魔法
@@ -1416,7 +1348,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 革命
       ruby: かくめい
       trumpId: sA
@@ -1437,7 +1368,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: スラッシュ
       trumpId: s2
       trumpType: 表切札
@@ -1454,7 +1384,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: ドレイン
       trumpId: s3
       trumpType: 表切札
@@ -1471,7 +1400,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 威圧
       ruby: いあつ
       trumpId: s4
@@ -1489,7 +1417,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 蘇生
       ruby: そせい
       trumpId: s5
@@ -1507,7 +1434,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 瞬殺
       ruby: しゅんさつ
       trumpId: s7
@@ -1525,7 +1451,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: リアニメーター
       trumpId: sJ
       trumpType: 表切札
@@ -1542,7 +1467,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 魔王
       ruby: まおう
       trumpId: sK
@@ -1560,7 +1484,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 援軍
       ruby: えんぐん
       trumpId: h2
@@ -1578,7 +1501,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 誘惑
       trumpId: h3
       trumpType: 表切札
@@ -1597,7 +1519,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 休戦
       ruby: きゅうせん
       trumpId: h4
@@ -1615,7 +1536,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 追撃
       ruby: ついげき
       trumpId: h5
@@ -1633,7 +1553,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: ファントム
       trumpId: h7
       trumpType: 表切札
@@ -1650,7 +1569,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 救済
       ruby: きゅうさい
       trumpId: h8
@@ -1668,7 +1586,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 破砕士
       ruby: はさいし
       trumpId: hJ
@@ -1688,7 +1605,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 巨人
       ruby: きょじん
       trumpId: hK
@@ -1706,7 +1622,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 防壁追加
       ruby: ぼうへきついか
       trumpId: dA
@@ -1724,7 +1639,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 交渉
       ruby: こうしょう
       trumpId: d3
@@ -1742,7 +1656,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 相殺
       ruby: そうさい
       trumpId: d4
@@ -1760,7 +1673,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 喪失
       ruby: そうしつ
       trumpId: d5
@@ -1780,7 +1692,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 修繕
       ruby: しゅうぜん
       trumpId: d8
@@ -1798,7 +1709,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 充足
       ruby: じゅうそく
       trumpId: d9
@@ -1816,7 +1726,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 策士
       ruby: さくし
       trumpId: dJ
@@ -1834,7 +1743,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: スイッチ
       trumpId: c4
       trumpType: 表切札
@@ -1851,7 +1759,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 内乱
       ruby: ないらん
       trumpId: c5
@@ -1869,7 +1776,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 手札補充
       ruby: てふだほじゅう
       trumpId: c7
@@ -1887,7 +1793,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: リセット
       trumpId: c8
       trumpType: 表切札
@@ -1904,7 +1809,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 要塞
       ruby: ようさい
       trumpId: c9
@@ -1922,7 +1826,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 悪あがき
       ruby: わるあがき
       trumpId: c10
@@ -1940,7 +1843,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 騎士
       ruby: きし
       trumpId: cJ
@@ -1958,7 +1860,6 @@ trumpList:
     trumps:
     - frame: |-
         ・エクストラ
-        ・ドラフト
       trumpName: 裏切札
       ruby: うらきりふだ
       trumpId: secretTrump

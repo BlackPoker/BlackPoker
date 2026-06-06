@@ -267,4 +267,12 @@ public class StrFn {
 		}
 		return name + "（" + ruby + "）";
 	}
+
+	public boolean isAvailable(java.util.Map<String, Object> row, java.util.Map<String, Object> fr, java.util.List<java.util.Map<String, Object>> frames) {
+		return FrameUtil.isAvailable(row, fr, frames);
+	}
+
+	public boolean isAvailable(java.util.Map<String, Object> row, String frameName, java.util.List<java.util.Map<String, Object>> frames) {
+		return FrameUtil.isAvailable(row, frameName, frames);
+	}
 }

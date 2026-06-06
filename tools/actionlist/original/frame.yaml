@@ -37,6 +37,7 @@ frames:
   - name: レアパック
     image: rarePack
     frameId: rarePack
+    inherits: パック
     format: std,pro,mast
     deck: 40枚以上
     start: |-
@@ -57,6 +58,7 @@ frames:
   - name: ストラテジー
     image: rarePack
     frameId: strategy
+    inherits: レアパック
     format: pro,mast
     deck: 40枚以上
     start: |-
@@ -78,6 +80,7 @@ frames:
   - name: エクストラ
     image: extra
     frameId: extra
+    inherits: ストラテジー
     format: mast
     deck: 40枚以上
     start: |-
@@ -103,6 +106,7 @@ frames:
   - name: ドラフト
     image: extra
     frameId: draft
+    inherits: エクストラ
     format: mast
     deck: 40枚以上
     start: |-

@@ -64,7 +64,7 @@ ${actTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${row.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${row}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -203,7 +203,7 @@ ${charTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${char.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${char}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -330,7 +330,7 @@ ${fogTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${fog.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${fog}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -458,7 +458,7 @@ ${trumpTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${trump.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${trump}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
