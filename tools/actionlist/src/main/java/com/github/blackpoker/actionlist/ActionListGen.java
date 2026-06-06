@@ -25,6 +25,9 @@ public class ActionListGen {
 	// 入力ファイルのパス
 	@Option(name = "-i", aliases = { "--input" }, metaVar = "inputPath", required = true, usage = "INPUT YAML")
 	private String inputPath;
+	// フレーム定義ファイルのパス
+	@Option(name = "-f", aliases = { "--frameInput" }, metaVar = "frameInputPath", usage = "FRAME YAML INPUT")
+	private String frameInputPath;
 	// テンプレートファイルのシート名
 	@Option(name = "-t", aliases = { "--template" }, metaVar = "templateName", required = true, usage = "TemplateName")
 	private String templateName;
@@ -140,6 +143,21 @@ public class ActionListGen {
 
 			System.out.println(ret);
 			System.out.println("読み込みました。" + filepath);
+		}
+
+		// frames 定義が含まれていない場合、元の frame.yaml から読み込む
+		if (!ret.containsKey("frames")) {
+			String pathStr = this.frameInputPath != null ? this.frameInputPath : "original/frame.yaml";
+			Path framePath = Paths.get(pathStr);
+			if (Files.exists(framePath)) {
+				try (InputStream frameIn = Files.newInputStream(framePath)) {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> frameMap = (Map<String, Object>) yaml.load(frameIn);
+					if (frameMap != null && frameMap.containsKey("frames")) {
+						ret.put("frames", frameMap.get("frames"));
+					}
+				}
+			}
 		}
 
 		// version.json を読み込んで data セクションにマージ
