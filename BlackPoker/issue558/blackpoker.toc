@@ -400,8 +400,7 @@
 \contentsline {subsubsection}{\numberline {12.3.6.2}アタックの進行}{149}{subsubsection.12.3.6.2}%
 \contentsline {subsubsection}{\numberline {12.3.6.3}ターンの受け渡し（エンド\(\rightarrow \)チャージ\(\rightarrow \)ドロー）}{150}{subsubsection.12.3.6.3}%
 \contentsline {chapter}{\numberline {第13章}付録D: BlackPoker設計ノート}{151}{chapter.13}%
-\contentsline {section}{\numberline {13.1}D.1 シナリオ構築を公式概念として扱う理由}{151}{section.13.1}%
-\contentsline {section}{\numberline {13.2}D.2 BDR\sphinxhyphen {}001: デッキ構築とシナリオ構築を分離する}{151}{section.13.2}%
+\contentsline {section}{\numberline {13.1}BDR\sphinxhyphen {}20260630: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化}{151}{section.13.1}%
 \contentsline {chapter}{変更履歴}{153}{chapter*.301}%
 \contentsline {section}{第9.1版 変更履歴}{153}{section*.302}%
 \contentsline {subsection}{新規概念・構築要素の整理}{153}{subsection*.303}%
