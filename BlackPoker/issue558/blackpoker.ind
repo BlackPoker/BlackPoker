@@ -132,8 +132,6 @@
 		\hyperpage{88}
   \item \spxentry{サーチ（アクション）}, \hyperpage{52}
   \item \spxentry{サイズ}, \hyperpage{22}
-  \item \spxentry{し\textbar{}シナリオ構築}, \hyperpage{9}
-  \item \spxentry{し\textbar{}シナリオ手札}, \hyperpage{9}
   \item \spxentry{し\textbar{}死の槍（アクション）}, 
 		\hyperpage{49}
   \item \spxentry{し\textbar{}修繕（アクション）}, 
@@ -145,6 +143,8 @@
   \item \spxentry{し\textbar{}瞬殺（アクション）}, 
 		\hyperpage{77}
   \item \spxentry{し\textbar{}瞬殺（切札）}, \hyperpage{104}
+  \item \spxentry{シナリオ構築}, \hyperpage{9}
+  \item \spxentry{シナリオ手札}, \hyperpage{9}
   \item \spxentry{スイッチ（アクション）}, \hyperpage{90}
   \item \spxentry{スイッチ（切札）}, \hyperpage{116}
   \item \spxentry{ステージ}, \hyperpage{28}, \hyperpage{124}
@@ -200,7 +200,6 @@
   \item \spxentry{ツイスト（アクション）}, \hyperpage{47}
   \item \spxentry{て\textbar{}停戦（アクション）}, 
 		\hyperpage{51}
-  \item \spxentry{で\textbar{}デッキ構築}, \hyperpage{8}
   \item \spxentry{て\textbar{}手札}, \hyperpage{13}
   \item \spxentry{て\textbar{}手札補充（アクション）}, 
 		\hyperpage{91}
@@ -209,6 +208,7 @@
   \item \spxentry{て\textbar{}転生召喚（アクション）}, 
 		\hyperpage{78}
   \item \spxentry{デッキ}, \hyperpage{14}
+  \item \spxentry{デッキ構築}, \hyperpage{8}
   \item \spxentry{と\textbar{}投擲（アクション）}, 
 		\hyperpage{49}
   \item \spxentry{と\textbar{}特記事項}, \hyperpage{26}
@@ -317,6 +317,7 @@
   \item \spxentry{ライフ}, \hyperpage{13}
   \item \spxentry{ラベル(キャラクター)}, \hyperpage{22}
   \item \spxentry{ラベル(切札)}, \hyperpage{23}
+  \item \spxentry{ランダム手札}, \hyperpage{9}
   \item \spxentry{り\textbar{}領域}, \hyperpage{12}
   \item \spxentry{リアニメイト（アクション）}, 
 		\hyperpage{50}

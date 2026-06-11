@@ -134,8 +134,20 @@
 これらの記録をBDR（BlackPoker Design Record）と呼びます。</p>
 <p>BDRは、ルール本文の背景にある判断を説明するためのものです。
 対戦中の裁定は、本文ルールおよび各フレーム・アクションの定義に従います。</p>
-<section id="bdr-20260630">
-<h2><span class="section-number">13.1. </span>BDR-20260630: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化<a class="headerlink" href="#bdr-20260630" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="bdr">
+<h2><span class="section-number">13.1. </span>BDRの採番規則<a class="headerlink" href="#bdr" title="この見出しへのパーマリンク">¶</a></h2>
+<p>BDRは以下の規則に従って管理・追加されます。</p>
+<ul class="simple">
+<li><p><strong>識別子の形式</strong>: <code class="docutils literal notranslate"><span class="pre">BDR-[番号]</span></code> とします（例: <code class="docutils literal notranslate"><span class="pre">BDR-1</span></code>, <code class="docutils literal notranslate"><span class="pre">BDR-2</span></code>）。前ゼロ埋め（パディング）は行いません。</p></li>
+<li><p><strong>時系列順</strong>: 設計判断が行われた、あるいはコンセプトが誕生した時系列順に番号を割り当てます。</p></li>
+<li><p><strong>不変性（Immutable）</strong>: 一度割り当てられたIDは、後のバージョンで内容が更新された場合でも変更しません。</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">注釈</p>
+<p><code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> （トランプだけでTCGのように遊ぶ根底の設計思想）は別タスクで追加予定のため、本ドキュメントは <code class="docutils literal notranslate"><span class="pre">BDR-2</span></code> から開始しています。</p>
+</div>
+<section id="bdr-2">
+<h3><span class="section-number">13.1.1. </span>BDR-2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化<a class="headerlink" href="#bdr-2" title="この見出しへのパーマリンク">¶</a></h3>
 <dl>
 <dt>状態</dt><dd><p>採用</p>
 </dd>
@@ -165,11 +177,12 @@
 </ul>
 </dd>
 <dt>本文ルールとの関係</dt><dd><ul class="simple">
-<li><p><strong>第2章「対戦レギュレーション」</strong>: デッキ構築とシナリオ構築の分離、対戦準備の流れ、およびシナリオ手札の定義を記述。</p></li>
-<li><p><strong>第8章「フレーム」</strong>: 各フレームがシナリオ構築の土台となる（どの戦略要素を決定・選択可能にするか）ことを記述。</p></li>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a>: デッキ構築とシナリオ構築の分離、対戦準備の流れ、およびシナリオ手札の定義を記述。</p></li>
+<li><p><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">8 フレーム</span></a>: 各フレームがシナリオ構築の土台となる（どの戦略要素を決定・選択可能にするか）ことを記述。</p></li>
 </ul>
 </dd>
 </dl>
+</section>
 </section>
 </section>
 
@@ -200,7 +213,10 @@
 <li class="toctree-l1"><a class="reference internal" href="anniversary.html">11. 付録B: 周年大会記録</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guidelines.html">12. 付録C: ガイドライン</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">13. 付録D: BlackPoker設計ノート</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#bdr-20260630">13.1. BDR-20260630: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#bdr">13.1. BDRの採番規則</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bdr-2">13.1.1. BDR-2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
