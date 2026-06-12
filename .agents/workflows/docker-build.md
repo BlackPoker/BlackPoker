@@ -13,7 +13,7 @@ description: Docker経由でMavenビルド（actionlist RST生成）とSphinx HT
 
 // turbo
 ```
-docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q
+docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q -B
 ```
 
 生成結果は `source/auto/` 配下に出力される:
