@@ -12,8 +12,8 @@ else
 fi
 set -e
 
-sphinx-build -b html ./source ./docs
-sphinx-build -b latex ./source ./docs
+sphinx-build -q -b html ./source ./docs
+sphinx-build -q -b latex ./source ./docs
 
 # sed /①/\raise0.2ex\hbox{\textcircled{\scriptsize{1}}}/ *.tex
 
@@ -61,7 +61,7 @@ sed -i -e 's/⑳/\\circlednum{20} /g' blackpoker.tex
 # ここで画像の PDF を変換する
 for f in *.pdf; do
   echo "Fixing bounding box for $f"
-  gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+  gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
      -dEPSCrop \
      -dCompatibilityLevel=1.4 \
      -sOutputFile="fixed_$f" "$f"
@@ -73,21 +73,21 @@ done
 
 # 以下のwarn解消のため複数回実行
 # Package hyperref Warning: Rerun to get /PageLabels entry.
-platex "blackpoker.tex"
+platex -interaction=batchmode "blackpoker.tex"
 
 #mendex -g -d ../source/_mysetting/mydict.dic -s ../source/_mysetting/mystyle.ist blackpoker.idx
 mendex -g -d ../source/_mysetting/mydict.dic blackpoker.idx
 
-platex "blackpoker.tex"
-platex "blackpoker.tex"
+platex -interaction=batchmode "blackpoker.tex"
+platex -interaction=batchmode "blackpoker.tex"
 
-dvipdfmx "blackpoker"
+dvipdfmx -q "blackpoker"
 
 
 # SphinxビルドでletterサイズのPDF (blackpoker.pdf) が生成された後
 
 # まず、ghostscriptでletterサイズのPDFをA5に縮小して出力する
-gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
+gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite \
    -dFIXEDMEDIA -dPDFFitPage \
    -dDEVICEWIDTHPOINTS=420 -dDEVICEHEIGHTPOINTS=595 \
    -sOutputFile=blackpoker_a5.pdf blackpoker.pdf
