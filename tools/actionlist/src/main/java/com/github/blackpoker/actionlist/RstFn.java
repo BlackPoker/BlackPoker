@@ -221,4 +221,99 @@ public class RstFn {
 	public boolean isAvailable(java.util.Map<String, Object> row, String frameName, java.util.List<java.util.Map<String, Object>> frames) {
 		return FrameUtil.isAvailable(row, frameName, frames);
 	}
+
+	@SuppressWarnings("unchecked")
+	public String getTrumpText(java.util.Map<String, Object> trump, java.util.Map<String, Object> relations, int spaceCount) {
+		StringBuilder sb = new StringBuilder();
+		String spaces = " ".repeat(spaceCount);
+
+		// 各項目の追加
+		// ユニット条件
+		String key = (String) trump.get("trumpKey");
+		if (key != null && !key.trim().isEmpty()) {
+			sb.append("**ユニット条件:** ").append(key.trim()).append("\n\n");
+		}
+
+		// ラベル
+		String label = (String) trump.get("trumpLabel");
+		if (label != null && !label.trim().isEmpty()) {
+			sb.append("**ラベル:** ").append(label.trim()).append("\n\n");
+		}
+
+		// 能力
+		String ability = (String) trump.get("trumpAbility");
+		if (ability != null && !ability.trim().isEmpty()) {
+			sb.append("**能力:**  \n\n").append(cnv(ability)).append("\n\n");
+		}
+
+		// 関連
+		if (relations != null) {
+			List<java.util.Map<String, Object>> relActs = (List<java.util.Map<String, Object>>) relations.get("acts");
+			List<java.util.Map<String, Object>> relChars = (List<java.util.Map<String, Object>>) relations.get("chars");
+			boolean hasActs = relActs != null && !relActs.isEmpty();
+			boolean hasChars = relChars != null && !relChars.isEmpty();
+
+			if (hasActs || hasChars) {
+				sb.append("**関連:**  \n\n");
+				if (hasActs) {
+					sb.append("*アクション*\n\n");
+					for (java.util.Map<String, Object> act : relActs) {
+						sb.append("* :ref:`").append(act.get("actName")).append(" <act-").append(act.get("actId")).append(">`\n");
+					}
+					sb.append("\n");
+				}
+				if (hasChars) {
+					sb.append("*キャラクター*\n\n");
+					for (java.util.Map<String, Object> ch : relChars) {
+						sb.append("* :ref:`").append(ch.get("charName")).append(" <char-").append(ch.get("charId")).append(">`\n");
+					}
+					sb.append("\n");
+				}
+			}
+		}
+
+		// 導入バージョン
+		String since = (String) trump.get("since");
+		if (since != null && !since.trim().isEmpty()) {
+			sb.append("**導入バージョン:**  ").append(since.trim()).append("\n\n");
+		}
+
+		// 更新バージョン
+		String update = (String) trump.get("update");
+		if (update != null && !update.trim().isEmpty()) {
+			sb.append("**更新バージョン:**  ").append(update.trim()).append("\n\n");
+		}
+
+		// 補足
+		String devNote = (String) trump.get("devNote");
+		if (devNote != null && !devNote.trim().isEmpty()) {
+			sb.append("**補足:**\n\n").append(devNote.trim()).append("\n\n");
+		}
+
+		// 最後にインデントを適用する
+		String result = sb.toString().trim(); // 余分な末尾の改行などを削除
+		if (result.isEmpty()) {
+			return "";
+		}
+
+		// 各行にインデントを追加（1行目は Velocity 側で "   * - " の直後に展開されるため、インデントを付けない）
+		String[] lines = result.split("\\r?\\n");
+		StringBuilder indented = new StringBuilder();
+		for (int i = 0; i < lines.length; i++) {
+			if (i > 0) {
+				indented.append("\r\n");
+			}
+			if (!lines[i].trim().isEmpty()) {
+				if (i > 0) {
+					indented.append(spaces).append(lines[i]);
+				} else {
+					indented.append(lines[i]);
+				}
+			} else {
+				indented.append(lines[i]); // 空行をそのまま
+			}
+		}
+
+		return indented.toString();
+	}
 }
