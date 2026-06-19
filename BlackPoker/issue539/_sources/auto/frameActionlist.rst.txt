@@ -2946,7 +2946,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「弱者の反撃」で追加された。
-     - .. _frame-sA-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-sA-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_01.*
           :height: 200px
           
@@ -3009,7 +3013,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「立ち上がる兵」で追加された。
-     - .. _frame-s2-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-s2-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_02.*
           :height: 200px
           
@@ -3071,7 +3079,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-s3-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-s3-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_03.*
           :height: 200px
           
@@ -3134,7 +3146,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「自衛的戦術」で追加された。
-     - .. _frame-s4-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-s4-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_04.*
           :height: 200px
           
@@ -3196,7 +3212,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-s5-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-s5-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_05.*
           :height: 200px
           
@@ -3258,7 +3278,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-s7-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-s7-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Swords_07.*
           :height: 200px
           
@@ -3327,7 +3351,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「for Jack」で追加された。
-     - .. _frame-sJ-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-sJ-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_20_Judgement.*
           :height: 200px
           
@@ -3394,7 +3422,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-sK-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-sK-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_04_The_Emperor.*
           :height: 200px
           
@@ -3456,7 +3488,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-h2-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h2-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_02.*
           :height: 200px
           
@@ -3520,7 +3556,11 @@ v9.0: チャリオットから破砕士に名称変更。
 
        ex3.4.0: 「立ち上がる兵」で追加された。
        v9.0: 効果を変更したので名前を「激励」から「誘惑」に変更
-     - .. _frame-h3-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h3-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_03.*
           :height: 200px
           
@@ -3582,7 +3622,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-h4-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h4-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_04.*
           :height: 200px
           
@@ -3644,7 +3688,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-h5-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h5-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_05.*
           :height: 200px
           
@@ -3707,7 +3755,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「自衛的戦術」で追加された。
-     - .. _frame-h7-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h7-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_07.*
           :height: 200px
           
@@ -3769,7 +3821,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        ex4.14.0: 「弱者の反撃」で追加された。
-     - .. _frame-h8-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-h8-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Cups_08.*
           :height: 200px
           
@@ -3839,7 +3895,11 @@ v9.0: チャリオットから破砕士に名称変更。
 
        「for Jack」で追加された。
        v9.0: チャリオットから破砕士に名称変更。
-     - .. _frame-hJ-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-hJ-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_07_The_Chariot.*
           :height: 200px
           
@@ -3905,7 +3965,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-hK-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-hK-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_08_Strength.*
           :height: 200px
           
@@ -3968,7 +4032,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-dA-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-dA-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_01.*
           :height: 200px
           
@@ -4031,7 +4099,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「立ち上がる兵」で追加された。
-     - .. _frame-d3-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-d3-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_03.*
           :height: 200px
           
@@ -4093,7 +4165,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-d4-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-d4-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_04.*
           :height: 200px
           
@@ -4156,7 +4232,11 @@ v9.0: チャリオットから破砕士に名称変更。
 
        ex5.30.0: 「苦渋の選択」で追加された。
        v9.0: 複雑で使いづらいため、能力の条件緩和と疲弊アクションの廃止。
-     - .. _frame-d5-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-d5-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_05.*
           :height: 200px
           
@@ -4218,7 +4298,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「弱者の反撃」で追加された。
-     - .. _frame-d8-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-d8-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_08.*
           :height: 200px
           
@@ -4281,7 +4365,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「自衛的戦術」で追加された。
-     - .. _frame-d9-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-d9-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Pentacles_09.*
           :height: 200px
           
@@ -4351,7 +4439,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「for Jack」で追加された。
-     - .. _frame-dJ-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-dJ-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_02_The_High_Priestess.*
           :height: 200px
           
@@ -4414,7 +4506,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「立ち上がる兵」で追加された。
-     - .. _frame-c4-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c4-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_04.*
           :height: 200px
           
@@ -4477,7 +4573,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「弱者の反撃」で追加された。
-     - .. _frame-c5-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c5-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_05.*
           :height: 200px
           
@@ -4539,7 +4639,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「巨人と魔王」で追加された。
-     - .. _frame-c7-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c7-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_07.*
           :height: 200px
           
@@ -4601,7 +4705,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-c8-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c8-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_08.*
           :height: 200px
           
@@ -4663,7 +4771,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「自衛的戦術」で追加された。
-     - .. _frame-c9-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c9-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_09.*
           :height: 200px
           
@@ -4725,7 +4837,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「苦渋の選択」で追加された。
-     - .. _frame-c10-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-c10-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_Wands_10.*
           :height: 200px
           
@@ -4794,7 +4910,11 @@ v9.0: チャリオットから破砕士に名称変更。
        **補足:**
 
        「for Jack」で追加された。
-     - .. _frame-cJ-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-cJ-image:
        .. figure:: ../frame/images/tarot/Pictorial_Key_to_the_Tarot_13_Death.*
           :height: 200px
           
