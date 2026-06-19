@@ -244,6 +244,9 @@ latex_elements = {
 \setcounter{tocdepth}{5}
 \usepackage{pxrubrica}
 \makeindex
+\usepackage[export]{adjustbox}
+\let\oldsphinxincludegraphics\sphinxincludegraphics
+\renewcommand{\sphinxincludegraphics}[2][]{\oldsphinxincludegraphics[valign=t,#1]{#2}}
 \usepackage{titlesec}
 \titlespacing{\section}{0pt}{0.8ex}{0.3ex}
 \titlespacing{\subsection}{0pt}{0.5ex}{0.2ex}

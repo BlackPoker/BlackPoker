@@ -227,7 +227,7 @@ public class RstFn {
 			return "";
 		}
 		String spaces = " ".repeat(spaceCount);
-		String[] lines = text.split("\\r?\\n");
+		String[] lines = text.trim().split("\\r?\\n");
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < lines.length; i++) {
 			if (i > 0) {
