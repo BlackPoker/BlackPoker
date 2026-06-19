@@ -530,7 +530,11 @@ ${trump.devNote}
    :class: trump-table borderless
 
    * - $rstFn.indent($trumpContent, 7)
-     - .. _frame-${trump.trumpId}-image:
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-${trump.trumpId}-image:
        .. figure:: ../frame/images/${trump.image}.*
           :height: 200px
           
