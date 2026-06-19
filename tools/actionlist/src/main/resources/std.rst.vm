@@ -467,6 +467,61 @@ ${rstFn.cnv(${trump.frame})}
 #end
 #end
 
+#define( $trumpContent )
+#if(${trump.trumpKey.trim()})
+**ユニット条件:** ${trump.trumpKey}
+
+#end
+#if(${trump.trumpLabel})
+**ラベル:** ${trump.trumpLabel}
+
+#end
+#if(${trump.trumpAbility})
+**能力:**  
+
+${rstFn.cnv(${trump.trumpAbility})}
+
+
+#end
+#set($rel = $trumpRelations.get(${nestList.type}))
+#if($rel)
+#set($relActs = $rel.get("acts"))
+#set($relChars = $rel.get("chars"))
+#if($relActs.size() > 0 || $relChars.size() > 0)
+**関連:**  
+
+#if($relActs.size() > 0)
+*アクション*
+
+#foreach($relAct in $relActs)
+* :ref:`${relAct.actName} <act-${relAct.actId}>`
+#end
+
+#end
+#if($relChars.size() > 0)
+*キャラクター*
+
+#foreach($relChar in $relChars)
+* :ref:`${relChar.charName} <char-${relChar.charId}>`
+#end
+
+#end
+#end
+#end
+#if(${trump.since})
+**導入バージョン:**  ${trump.since}
+
+#end
+#if(${trump.update})
+**更新バージョン:**  ${trump.update}
+
+#end
+#if(${trump.devNote})
+**補足:**
+
+${trump.devNote}
+#end
+#end
 #set($rel = $trumpRelations.get(${nestList.type}))
 #if(${trump.image})
 .. list-table::
@@ -474,23 +529,23 @@ ${rstFn.cnv(${trump.frame})}
    :header-rows: 0
    :class: trump-table borderless
 
-   * - $rstFn.getTrumpText(${trump}, $rel, 7)
+   * - $rstFn.indent($trumpContent, 7)
      - .. _frame-${trump.trumpId}-image:
        .. figure:: ../frame/images/${trump.image}.*
           :height: 200px
           
           ${trump.trumpName}のイメージ
 #else
-$rstFn.getTrumpText(${trump}, $rel, 0)
+$trumpContent
 #end
 
-        #if(${trump.story})
+#if(${trump.story})
 **ストーリー:**  
 
 ${trump.story}
 
-        #end
-        #if(${trump.flavor})
+#end
+#if(${trump.flavor})
 **フレーバー:**  
 
 *${trump.flavor}*
@@ -498,7 +553,7 @@ ${trump.story}
 
 ~ ${trump.flavorSpeaker} ~
             #end
-        #end
+#end
 
 
 
