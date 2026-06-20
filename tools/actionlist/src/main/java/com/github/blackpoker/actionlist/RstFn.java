@@ -221,4 +221,28 @@ public class RstFn {
 	public boolean isAvailable(java.util.Map<String, Object> row, String frameName, java.util.List<java.util.Map<String, Object>> frames) {
 		return FrameUtil.isAvailable(row, frameName, frames);
 	}
+
+	public String indent(String text, int spaceCount) {
+		if (text == null || text.isEmpty()) {
+			return "";
+		}
+		String spaces = " ".repeat(spaceCount);
+		String[] lines = text.trim().split("\\r?\\n");
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < lines.length; i++) {
+			if (i > 0) {
+				sb.append("\r\n");
+			}
+			if (!lines[i].trim().isEmpty()) {
+				if (i > 0) {
+					sb.append(spaces).append(lines[i]);
+				} else {
+					sb.append(lines[i]);
+				}
+			} else {
+				sb.append(lines[i]); // 空行をそのまま
+			}
+		}
+		return sb.toString();
+	}
 }
