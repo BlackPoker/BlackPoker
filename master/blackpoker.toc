@@ -269,185 +269,185 @@
 \contentsline {paragraph}{\numberline {8.3.5.2.1}スラッシュ (表切札)}{101}{paragraph.8.3.5.2.1}%
 \contentsline {subsubsection}{\numberline {8.3.5.3}切札\spadesym {} 3 ドレイン}{102}{subsubsection.8.3.5.3}%
 \contentsline {paragraph}{\numberline {8.3.5.3.1}ドレイン (表切札)}{102}{paragraph.8.3.5.3.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.4}切札\spadesym {} 4 威圧}{103}{subsubsection.8.3.5.4}%
-\contentsline {paragraph}{\numberline {8.3.5.4.1}\ruby [g]{威圧}{いあつ} (表切札)}{103}{paragraph.8.3.5.4.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.4}切札\spadesym {} 4 威圧}{102}{subsubsection.8.3.5.4}%
+\contentsline {paragraph}{\numberline {8.3.5.4.1}\ruby [g]{威圧}{いあつ} (表切札)}{102}{paragraph.8.3.5.4.1}%
 \contentsline {subsubsection}{\numberline {8.3.5.5}切札\spadesym {} 5 蘇生}{103}{subsubsection.8.3.5.5}%
 \contentsline {paragraph}{\numberline {8.3.5.5.1}\ruby [g]{蘇生}{そせい} (表切札)}{103}{paragraph.8.3.5.5.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.6}切札\spadesym {} 7 瞬殺}{104}{subsubsection.8.3.5.6}%
-\contentsline {paragraph}{\numberline {8.3.5.6.1}\ruby [g]{瞬殺}{しゅんさつ} (表切札)}{104}{paragraph.8.3.5.6.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.7}切札\spadesym {} J リアニメーター}{105}{subsubsection.8.3.5.7}%
-\contentsline {paragraph}{\numberline {8.3.5.7.1}リアニメーター (表切札)}{105}{paragraph.8.3.5.7.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.8}切札\spadesym {} K 魔王}{105}{subsubsection.8.3.5.8}%
-\contentsline {paragraph}{\numberline {8.3.5.8.1}\ruby [g]{魔王}{まおう} (表切札)}{105}{paragraph.8.3.5.8.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.9}切札\heartsym {} 2 援軍}{106}{subsubsection.8.3.5.9}%
-\contentsline {paragraph}{\numberline {8.3.5.9.1}\ruby [g]{援軍}{えんぐん} (表切札)}{106}{paragraph.8.3.5.9.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.10}切札\heartsym {} 3 誘惑}{107}{subsubsection.8.3.5.10}%
-\contentsline {paragraph}{\numberline {8.3.5.10.1}誘惑 (表切札)}{107}{paragraph.8.3.5.10.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.11}切札\heartsym {} 4 休戦}{108}{subsubsection.8.3.5.11}%
-\contentsline {paragraph}{\numberline {8.3.5.11.1}\ruby [g]{休戦}{きゅうせん} (表切札)}{108}{paragraph.8.3.5.11.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.12}切札\heartsym {} 5 追撃}{108}{subsubsection.8.3.5.12}%
-\contentsline {paragraph}{\numberline {8.3.5.12.1}\ruby [g]{追撃}{ついげき} (表切札)}{108}{paragraph.8.3.5.12.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.13}切札\heartsym {} 7 ファントム}{109}{subsubsection.8.3.5.13}%
-\contentsline {paragraph}{\numberline {8.3.5.13.1}ファントム (表切札)}{109}{paragraph.8.3.5.13.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.14}切札\heartsym {} 8 救済}{110}{subsubsection.8.3.5.14}%
-\contentsline {paragraph}{\numberline {8.3.5.14.1}\ruby [g]{救済}{きゅうさい} (表切札)}{110}{paragraph.8.3.5.14.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.15}切札\heartsym {} J 破砕士}{110}{subsubsection.8.3.5.15}%
-\contentsline {paragraph}{\numberline {8.3.5.15.1}\ruby [g]{破砕士}{はさいし} (表切札)}{110}{paragraph.8.3.5.15.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.16}切札\heartsym {} K 巨人}{111}{subsubsection.8.3.5.16}%
-\contentsline {paragraph}{\numberline {8.3.5.16.1}\ruby [g]{巨人}{きょじん} (表切札)}{111}{paragraph.8.3.5.16.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.17}切札\diamondsym {} A 防壁追加}{112}{subsubsection.8.3.5.17}%
-\contentsline {paragraph}{\numberline {8.3.5.17.1}\ruby [g]{防壁追加}{ぼうへきついか} (表切札)}{112}{paragraph.8.3.5.17.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.18}切札\diamondsym {} 3 交渉}{113}{subsubsection.8.3.5.18}%
-\contentsline {paragraph}{\numberline {8.3.5.18.1}\ruby [g]{交渉}{こうしょう} (表切札)}{113}{paragraph.8.3.5.18.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.19}切札\diamondsym {} 4 相殺}{113}{subsubsection.8.3.5.19}%
-\contentsline {paragraph}{\numberline {8.3.5.19.1}\ruby [g]{相殺}{そうさい} (表切札)}{113}{paragraph.8.3.5.19.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.20}切札\diamondsym {} 5 喪失}{114}{subsubsection.8.3.5.20}%
-\contentsline {paragraph}{\numberline {8.3.5.20.1}\ruby [g]{喪失}{そうしつ} (表切札)}{114}{paragraph.8.3.5.20.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.21}切札\diamondsym {} 8 修繕}{115}{subsubsection.8.3.5.21}%
-\contentsline {paragraph}{\numberline {8.3.5.21.1}\ruby [g]{修繕}{しゅうぜん} (表切札)}{115}{paragraph.8.3.5.21.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.22}切札\diamondsym {} 9 充足}{115}{subsubsection.8.3.5.22}%
-\contentsline {paragraph}{\numberline {8.3.5.22.1}\ruby [g]{充足}{じゅうそく} (表切札)}{115}{paragraph.8.3.5.22.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.23}切札\diamondsym {} J 策士}{116}{subsubsection.8.3.5.23}%
-\contentsline {paragraph}{\numberline {8.3.5.23.1}\ruby [g]{策士}{さくし} (表切札)}{116}{paragraph.8.3.5.23.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.24}切札\clobsym {} 4 スイッチ}{117}{subsubsection.8.3.5.24}%
-\contentsline {paragraph}{\numberline {8.3.5.24.1}スイッチ (表切札)}{117}{paragraph.8.3.5.24.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.25}切札\clobsym {} 5 内乱}{118}{subsubsection.8.3.5.25}%
-\contentsline {paragraph}{\numberline {8.3.5.25.1}\ruby [g]{内乱}{ないらん} (表切札)}{118}{paragraph.8.3.5.25.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.26}切札\clobsym {} 7 手札補充}{118}{subsubsection.8.3.5.26}%
-\contentsline {paragraph}{\numberline {8.3.5.26.1}\ruby [g]{手札補充}{てふだほじゅう} (表切札)}{118}{paragraph.8.3.5.26.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.27}切札\clobsym {} 8 リセット}{119}{subsubsection.8.3.5.27}%
-\contentsline {paragraph}{\numberline {8.3.5.27.1}リセット (表切札)}{119}{paragraph.8.3.5.27.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.28}切札\clobsym {} 9 要塞}{120}{subsubsection.8.3.5.28}%
-\contentsline {paragraph}{\numberline {8.3.5.28.1}\ruby [g]{要塞}{ようさい} (表切札)}{120}{paragraph.8.3.5.28.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.29}切札\clobsym {} 10 悪あがき}{120}{subsubsection.8.3.5.29}%
-\contentsline {paragraph}{\numberline {8.3.5.29.1}\ruby [g]{悪あがき}{わるあがき} (表切札)}{120}{paragraph.8.3.5.29.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.30}切札\clobsym {} J 騎士}{121}{subsubsection.8.3.5.30}%
-\contentsline {paragraph}{\numberline {8.3.5.30.1}\ruby [g]{騎士}{きし} (表切札)}{121}{paragraph.8.3.5.30.1}%
-\contentsline {subsubsection}{\numberline {8.3.5.31}裏切札}{122}{subsubsection.8.3.5.31}%
-\contentsline {paragraph}{\numberline {8.3.5.31.1}\ruby [g]{裏切札}{うらきりふだ} (裏切札)}{122}{paragraph.8.3.5.31.1}%
-\contentsline {chapter}{\numberline {第9章}コアルール}{123}{chapter.9}%
-\contentsline {section}{\numberline {9.1}基礎概念}{123}{section.9.1}%
-\contentsline {subsection}{\numberline {9.1.1}ターン}{124}{subsection.9.1.1}%
-\contentsline {subsection}{\numberline {9.1.2}アクション}{124}{subsection.9.1.2}%
-\contentsline {subsection}{\numberline {9.1.3}リクエスト}{124}{subsection.9.1.3}%
-\contentsline {subsection}{\numberline {9.1.4}解決}{124}{subsection.9.1.4}%
-\contentsline {subsection}{\numberline {9.1.5}チャンス}{124}{subsection.9.1.5}%
-\contentsline {subsection}{\numberline {9.1.6}パス}{124}{subsection.9.1.6}%
-\contentsline {subsection}{\numberline {9.1.7}ステージ}{124}{subsection.9.1.7}%
-\contentsline {subsection}{\numberline {9.1.8}コンポーネント}{124}{subsection.9.1.8}%
-\contentsline {subsection}{\numberline {9.1.9}ユニット}{124}{subsection.9.1.9}%
-\contentsline {subsection}{\numberline {9.1.10}コアフロー(ルールシステム)}{125}{subsection.9.1.10}%
-\contentsline {section}{\numberline {9.2}詳細}{125}{section.9.2}%
-\contentsline {subsection}{\numberline {9.2.1}アクションの定義項目}{126}{subsection.9.2.1}%
-\contentsline {subsubsection}{\numberline {9.2.1.1}オーナー}{126}{subsubsection.9.2.1.1}%
-\contentsline {subsubsection}{\numberline {9.2.1.2}トリガー}{126}{subsubsection.9.2.1.2}%
-\contentsline {subsubsection}{\numberline {9.2.1.3}スピード}{126}{subsubsection.9.2.1.3}%
-\contentsline {subsubsection}{\numberline {9.2.1.4}タイミング}{126}{subsubsection.9.2.1.4}%
-\contentsline {subsubsection}{\numberline {9.2.1.5}起動条件}{127}{subsubsection.9.2.1.5}%
-\contentsline {subsubsection}{\numberline {9.2.1.6}誘発条件}{127}{subsubsection.9.2.1.6}%
-\contentsline {subsubsection}{\numberline {9.2.1.7}効果}{127}{subsubsection.9.2.1.7}%
-\contentsline {subsection}{\numberline {9.2.2}リクエストの定義項目}{127}{subsection.9.2.2}%
-\contentsline {subsection}{\numberline {9.2.3}コンポーネントの定義項目}{128}{subsection.9.2.3}%
-\contentsline {subsection}{\numberline {9.2.4}ユニットの定義項目}{128}{subsection.9.2.4}%
-\contentsline {section}{\numberline {9.3}能力}{129}{section.9.3}%
-\contentsline {section}{\numberline {9.4}コアフロー}{129}{section.9.4}%
-\contentsline {subsection}{\numberline {9.4.1}誘発チェック}{132}{subsection.9.4.1}%
-\contentsline {subsubsection}{\numberline {9.4.1.1}誘発アクション処理}{134}{subsubsection.9.4.1.1}%
-\contentsline {subsection}{\numberline {9.4.2}能力の適用順}{135}{subsection.9.4.2}%
-\contentsline {subsubsection}{\numberline {9.4.2.1}考え方の原則}{136}{subsubsection.9.4.2.1}%
-\contentsline {subsubsection}{\numberline {9.4.2.2}能力の適用ルール}{136}{subsubsection.9.4.2.2}%
-\contentsline {subsubsection}{\numberline {9.4.2.3}運用上の注意}{136}{subsubsection.9.4.2.3}%
-\contentsline {section}{\numberline {9.5}まとめ}{137}{section.9.5}%
-\contentsline {chapter}{\numberline {第10章}付録A: PDF版ルール・リスト}{139}{chapter.10}%
-\contentsline {section}{\numberline {10.1}PDF版ルール}{139}{section.10.1}%
-\contentsline {section}{\numberline {10.2}アクションリスト}{139}{section.10.2}%
-\contentsline {subsection}{\numberline {10.2.1}ライト}{139}{subsection.10.2.1}%
-\contentsline {subsection}{\numberline {10.2.2}マスター}{139}{subsection.10.2.2}%
-\contentsline {subsection}{\numberline {10.2.3}マスター+エクストラ}{140}{subsection.10.2.3}%
-\contentsline {section}{\numberline {10.3}エクストラリスト}{140}{section.10.3}%
-\contentsline {chapter}{\numberline {第11章}付録B: 周年大会記録}{141}{chapter.11}%
-\contentsline {chapter}{\numberline {第12章}付録C: ガイドライン}{143}{chapter.12}%
-\contentsline {section}{\numberline {12.1}BlackPoker二次創作ガイドライン}{143}{section.12.1}%
-\contentsline {subsection}{\numberline {12.1.1}はじめに}{143}{subsection.12.1.1}%
-\contentsline {subsection}{\numberline {12.1.2}二次創作の範囲}{143}{subsection.12.1.2}%
-\contentsline {subsection}{\numberline {12.1.3}創作の自由と制限}{144}{subsection.12.1.3}%
-\contentsline {subsection}{\numberline {12.1.4}クレジット表記について}{144}{subsection.12.1.4}%
-\contentsline {subsection}{\numberline {12.1.5}禁止事項}{144}{subsection.12.1.5}%
-\contentsline {subsection}{\numberline {12.1.6}商用利用について}{145}{subsection.12.1.6}%
-\contentsline {subsection}{\numberline {12.1.7}ガイドラインにないケースについて}{145}{subsection.12.1.7}%
-\contentsline {section}{\numberline {12.2}BlackPoker アクション・ルールガイドライン}{145}{section.12.2}%
-\contentsline {subsection}{\numberline {12.2.1}はじめに}{145}{subsection.12.2.1}%
-\contentsline {subsection}{\numberline {12.2.2}アクションを追加する際のルール}{146}{subsection.12.2.2}%
-\contentsline {subsubsection}{\numberline {12.2.2.1}アクションの対象は単対象 (必須)}{146}{subsubsection.12.2.2.1}%
-\contentsline {subsubsection}{\numberline {12.2.2.2}キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{146}{subsubsection.12.2.2.2}%
-\contentsline {subsubsection}{\numberline {12.2.2.3}誘発アクションは即時 (推奨)}{146}{subsubsection.12.2.2.3}%
-\contentsline {subsubsection}{\numberline {12.2.2.4}先行1ターン目に確実に勝利できる効果を作らない (必須)}{146}{subsubsection.12.2.2.4}%
-\contentsline {subsubsection}{\numberline {12.2.2.5}誘発\sphinxhyphen {}メインは同時に2つ以上誘発しないように制限 (必須)}{146}{subsubsection.12.2.2.5}%
-\contentsline {subsection}{\numberline {12.2.3}キャラクターを追加する際のルール}{147}{subsection.12.2.3}%
-\contentsline {subsubsection}{\numberline {12.2.3.1}場のキャラクターは一目でわかるように定義 (必須)}{147}{subsubsection.12.2.3.1}%
-\contentsline {section}{\numberline {12.3}BlackPoker 対戦進行上のショートカット指針}{147}{section.12.3}%
-\contentsline {subsection}{\numberline {12.3.1}目的}{147}{subsection.12.3.1}%
-\contentsline {subsection}{\numberline {12.3.2}本文ルールとの関係}{147}{subsection.12.3.2}%
-\contentsline {subsection}{\numberline {12.3.3}用語の定義}{147}{subsection.12.3.3}%
-\contentsline {subsection}{\numberline {12.3.4}ショートカットの原則}{147}{subsection.12.3.4}%
-\contentsline {subsubsection}{\numberline {12.3.4.1}原則1：反応がなければパスとみなす}{147}{subsubsection.12.3.4.1}%
-\contentsline {subsubsection}{\numberline {12.3.4.2}原則2：連続する手順をまとめて進行できる}{148}{subsubsection.12.3.4.2}%
-\contentsline {subsubsection}{\numberline {12.3.4.3}原則3：割り込みの権利は常に保障される}{148}{subsubsection.12.3.4.3}%
-\contentsline {subsubsection}{\numberline {12.3.4.4}原則4：認識のずれは巻き戻す}{148}{subsubsection.12.3.4.4}%
-\contentsline {subsection}{\numberline {12.3.5}運用上の注意}{148}{subsection.12.3.5}%
-\contentsline {subsection}{\numberline {12.3.6}標準ショートカット}{148}{subsection.12.3.6}%
-\contentsline {subsubsection}{\numberline {12.3.6.1}メインアクションの実行}{148}{subsubsection.12.3.6.1}%
-\contentsline {subsubsection}{\numberline {12.3.6.2}アタックの進行}{149}{subsubsection.12.3.6.2}%
-\contentsline {subsubsection}{\numberline {12.3.6.3}ターンの受け渡し（エンド\(\rightarrow \)チャージ\(\rightarrow \)ドロー）}{150}{subsubsection.12.3.6.3}%
-\contentsline {chapter}{\numberline {第13章}付録D: BlackPoker設計ノート}{151}{chapter.13}%
-\contentsline {section}{\numberline {13.1}BDRの採番規則}{151}{section.13.1}%
-\contentsline {subsection}{\numberline {13.1.1}BDR\sphinxhyphen {}2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化}{151}{subsection.13.1.1}%
-\contentsline {chapter}{変更履歴}{153}{chapter*.302}%
-\contentsline {section}{第9.1版 変更履歴}{153}{section*.303}%
-\contentsline {subsection}{新規概念・構築要素の整理}{153}{subsection*.304}%
-\contentsline {section}{第9.0版 変更履歴}{153}{section*.305}%
-\contentsline {subsection}{文書構成の変更}{154}{subsection*.306}%
-\contentsline {subsection}{対戦レギュレーション・入門導線の変更}{154}{subsection*.307}%
-\contentsline {subsection}{フレーム定義の変更}{155}{subsection*.308}%
-\contentsline {subsubsection}{エントリー}{155}{subsubsection*.309}%
-\contentsline {subsection}{共通ルールの変更}{155}{subsection*.310}%
-\contentsline {subsubsection}{プリセット配置}{155}{subsubsection*.311}%
-\contentsline {subsubsection}{ドロー}{155}{subsubsection*.312}%
-\contentsline {subsubsection}{攻撃・防御ラベル}{156}{subsubsection*.313}%
-\contentsline {subsubsection}{パス}{156}{subsubsection*.314}%
-\contentsline {subsubsection}{FAQで明文化された点}{156}{subsubsection*.315}%
-\contentsline {subsection}{アクションリスト・用語体系の変更}{156}{subsection*.316}%
-\contentsline {subsubsection}{@ 記法の追加}{156}{subsubsection*.317}%
-\contentsline {subsubsection}{魔法分類の再編}{156}{subsubsection*.318}%
-\contentsline {subsection}{レアカード操作・切札操作の変更}{157}{subsection*.319}%
-\contentsline {subsubsection}{罠カウンター}{157}{subsubsection*.320}%
-\contentsline {subsection}{エクストラ全体の傾向}{157}{subsection*.321}%
-\contentsline {subsection}{スペード系の変更}{158}{subsection*.322}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 2 スラッシュ}}}{158}{subsubsection*.323}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 4 威圧}}}{158}{subsubsection*.324}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 5 蘇生}}}{158}{subsubsection*.325}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} J リアニメーター}}}{158}{subsubsection*.326}%
-\contentsline {subsection}{ハート系の変更}{158}{subsection*.327}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 激励}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 誘惑}}}{158}{subsubsection*.328}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 5 追撃}}}{158}{subsubsection*.329}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 8 救済}}}{159}{subsubsection*.330}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J チャリオット}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J 破砕士}}}{159}{subsubsection*.331}%
-\contentsline {subsection}{ダイヤ系の変更}{159}{subsection*.332}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} A 防壁追加}}}{159}{subsubsection*.333}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 3 交渉}}}{159}{subsubsection*.334}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 4 相殺}}}{159}{subsubsection*.335}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 5 喪失}}}{160}{subsubsection*.336}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 8 修繕}}}{160}{subsubsection*.337}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} J 策士}}}{160}{subsubsection*.338}%
-\contentsline {subsection}{クラブ系の変更}{160}{subsection*.339}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 4 スイッチ}}}{160}{subsubsection*.340}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 7 手札補充}}}{160}{subsubsection*.341}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 8 リセット}}}{161}{subsubsection*.342}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 9 要塞}}}{161}{subsubsection*.343}%
-\contentsline {subsection}{プレイヤー向け確認チェックリスト}{161}{subsection*.344}%
-\contentsline {chapter}{あとがき}{163}{chapter*.345}%
-\contentsline {section}{第9.0版アップデートの要点}{163}{section*.346}%
-\contentsline {section}{ロゴと名前の由来}{163}{section*.347}%
-\contentsline {section}{さらなる楽しみ方}{164}{section*.348}%
-\contentsline {section}{最後に}{164}{section*.349}%
-\contentsline {chapter}{索引}{165}{chapter*.350}%
+\contentsline {subsubsection}{\numberline {8.3.5.6}切札\spadesym {} 7 瞬殺}{103}{subsubsection.8.3.5.6}%
+\contentsline {paragraph}{\numberline {8.3.5.6.1}\ruby [g]{瞬殺}{しゅんさつ} (表切札)}{103}{paragraph.8.3.5.6.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.7}切札\spadesym {} J リアニメーター}{104}{subsubsection.8.3.5.7}%
+\contentsline {paragraph}{\numberline {8.3.5.7.1}リアニメーター (表切札)}{104}{paragraph.8.3.5.7.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.8}切札\spadesym {} K 魔王}{104}{subsubsection.8.3.5.8}%
+\contentsline {paragraph}{\numberline {8.3.5.8.1}\ruby [g]{魔王}{まおう} (表切札)}{104}{paragraph.8.3.5.8.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.9}切札\heartsym {} 2 援軍}{105}{subsubsection.8.3.5.9}%
+\contentsline {paragraph}{\numberline {8.3.5.9.1}\ruby [g]{援軍}{えんぐん} (表切札)}{105}{paragraph.8.3.5.9.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.10}切札\heartsym {} 3 誘惑}{105}{subsubsection.8.3.5.10}%
+\contentsline {paragraph}{\numberline {8.3.5.10.1}誘惑 (表切札)}{105}{paragraph.8.3.5.10.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.11}切札\heartsym {} 4 休戦}{106}{subsubsection.8.3.5.11}%
+\contentsline {paragraph}{\numberline {8.3.5.11.1}\ruby [g]{休戦}{きゅうせん} (表切札)}{106}{paragraph.8.3.5.11.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.12}切札\heartsym {} 5 追撃}{106}{subsubsection.8.3.5.12}%
+\contentsline {paragraph}{\numberline {8.3.5.12.1}\ruby [g]{追撃}{ついげき} (表切札)}{106}{paragraph.8.3.5.12.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.13}切札\heartsym {} 7 ファントム}{107}{subsubsection.8.3.5.13}%
+\contentsline {paragraph}{\numberline {8.3.5.13.1}ファントム (表切札)}{107}{paragraph.8.3.5.13.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.14}切札\heartsym {} 8 救済}{107}{subsubsection.8.3.5.14}%
+\contentsline {paragraph}{\numberline {8.3.5.14.1}\ruby [g]{救済}{きゅうさい} (表切札)}{107}{paragraph.8.3.5.14.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.15}切札\heartsym {} J 破砕士}{108}{subsubsection.8.3.5.15}%
+\contentsline {paragraph}{\numberline {8.3.5.15.1}\ruby [g]{破砕士}{はさいし} (表切札)}{108}{paragraph.8.3.5.15.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.16}切札\heartsym {} K 巨人}{108}{subsubsection.8.3.5.16}%
+\contentsline {paragraph}{\numberline {8.3.5.16.1}\ruby [g]{巨人}{きょじん} (表切札)}{108}{paragraph.8.3.5.16.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.17}切札\diamondsym {} A 防壁追加}{109}{subsubsection.8.3.5.17}%
+\contentsline {paragraph}{\numberline {8.3.5.17.1}\ruby [g]{防壁追加}{ぼうへきついか} (表切札)}{109}{paragraph.8.3.5.17.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.18}切札\diamondsym {} 3 交渉}{109}{subsubsection.8.3.5.18}%
+\contentsline {paragraph}{\numberline {8.3.5.18.1}\ruby [g]{交渉}{こうしょう} (表切札)}{109}{paragraph.8.3.5.18.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.19}切札\diamondsym {} 4 相殺}{110}{subsubsection.8.3.5.19}%
+\contentsline {paragraph}{\numberline {8.3.5.19.1}\ruby [g]{相殺}{そうさい} (表切札)}{110}{paragraph.8.3.5.19.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.20}切札\diamondsym {} 5 喪失}{110}{subsubsection.8.3.5.20}%
+\contentsline {paragraph}{\numberline {8.3.5.20.1}\ruby [g]{喪失}{そうしつ} (表切札)}{110}{paragraph.8.3.5.20.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.21}切札\diamondsym {} 8 修繕}{111}{subsubsection.8.3.5.21}%
+\contentsline {paragraph}{\numberline {8.3.5.21.1}\ruby [g]{修繕}{しゅうぜん} (表切札)}{111}{paragraph.8.3.5.21.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.22}切札\diamondsym {} 9 充足}{111}{subsubsection.8.3.5.22}%
+\contentsline {paragraph}{\numberline {8.3.5.22.1}\ruby [g]{充足}{じゅうそく} (表切札)}{111}{paragraph.8.3.5.22.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.23}切札\diamondsym {} J 策士}{112}{subsubsection.8.3.5.23}%
+\contentsline {paragraph}{\numberline {8.3.5.23.1}\ruby [g]{策士}{さくし} (表切札)}{112}{paragraph.8.3.5.23.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.24}切札\clobsym {} 4 スイッチ}{112}{subsubsection.8.3.5.24}%
+\contentsline {paragraph}{\numberline {8.3.5.24.1}スイッチ (表切札)}{112}{paragraph.8.3.5.24.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.25}切札\clobsym {} 5 内乱}{113}{subsubsection.8.3.5.25}%
+\contentsline {paragraph}{\numberline {8.3.5.25.1}\ruby [g]{内乱}{ないらん} (表切札)}{113}{paragraph.8.3.5.25.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.26}切札\clobsym {} 7 手札補充}{113}{subsubsection.8.3.5.26}%
+\contentsline {paragraph}{\numberline {8.3.5.26.1}\ruby [g]{手札補充}{てふだほじゅう} (表切札)}{113}{paragraph.8.3.5.26.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.27}切札\clobsym {} 8 リセット}{114}{subsubsection.8.3.5.27}%
+\contentsline {paragraph}{\numberline {8.3.5.27.1}リセット (表切札)}{114}{paragraph.8.3.5.27.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.28}切札\clobsym {} 9 要塞}{114}{subsubsection.8.3.5.28}%
+\contentsline {paragraph}{\numberline {8.3.5.28.1}\ruby [g]{要塞}{ようさい} (表切札)}{114}{paragraph.8.3.5.28.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.29}切札\clobsym {} 10 悪あがき}{115}{subsubsection.8.3.5.29}%
+\contentsline {paragraph}{\numberline {8.3.5.29.1}\ruby [g]{悪あがき}{わるあがき} (表切札)}{115}{paragraph.8.3.5.29.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.30}切札\clobsym {} J 騎士}{115}{subsubsection.8.3.5.30}%
+\contentsline {paragraph}{\numberline {8.3.5.30.1}\ruby [g]{騎士}{きし} (表切札)}{115}{paragraph.8.3.5.30.1}%
+\contentsline {subsubsection}{\numberline {8.3.5.31}裏切札}{116}{subsubsection.8.3.5.31}%
+\contentsline {paragraph}{\numberline {8.3.5.31.1}\ruby [g]{裏切札}{うらきりふだ} (裏切札)}{116}{paragraph.8.3.5.31.1}%
+\contentsline {chapter}{\numberline {第9章}コアルール}{117}{chapter.9}%
+\contentsline {section}{\numberline {9.1}基礎概念}{117}{section.9.1}%
+\contentsline {subsection}{\numberline {9.1.1}ターン}{118}{subsection.9.1.1}%
+\contentsline {subsection}{\numberline {9.1.2}アクション}{118}{subsection.9.1.2}%
+\contentsline {subsection}{\numberline {9.1.3}リクエスト}{118}{subsection.9.1.3}%
+\contentsline {subsection}{\numberline {9.1.4}解決}{118}{subsection.9.1.4}%
+\contentsline {subsection}{\numberline {9.1.5}チャンス}{118}{subsection.9.1.5}%
+\contentsline {subsection}{\numberline {9.1.6}パス}{118}{subsection.9.1.6}%
+\contentsline {subsection}{\numberline {9.1.7}ステージ}{118}{subsection.9.1.7}%
+\contentsline {subsection}{\numberline {9.1.8}コンポーネント}{118}{subsection.9.1.8}%
+\contentsline {subsection}{\numberline {9.1.9}ユニット}{118}{subsection.9.1.9}%
+\contentsline {subsection}{\numberline {9.1.10}コアフロー(ルールシステム)}{119}{subsection.9.1.10}%
+\contentsline {section}{\numberline {9.2}詳細}{119}{section.9.2}%
+\contentsline {subsection}{\numberline {9.2.1}アクションの定義項目}{120}{subsection.9.2.1}%
+\contentsline {subsubsection}{\numberline {9.2.1.1}オーナー}{120}{subsubsection.9.2.1.1}%
+\contentsline {subsubsection}{\numberline {9.2.1.2}トリガー}{120}{subsubsection.9.2.1.2}%
+\contentsline {subsubsection}{\numberline {9.2.1.3}スピード}{120}{subsubsection.9.2.1.3}%
+\contentsline {subsubsection}{\numberline {9.2.1.4}タイミング}{120}{subsubsection.9.2.1.4}%
+\contentsline {subsubsection}{\numberline {9.2.1.5}起動条件}{121}{subsubsection.9.2.1.5}%
+\contentsline {subsubsection}{\numberline {9.2.1.6}誘発条件}{121}{subsubsection.9.2.1.6}%
+\contentsline {subsubsection}{\numberline {9.2.1.7}効果}{121}{subsubsection.9.2.1.7}%
+\contentsline {subsection}{\numberline {9.2.2}リクエストの定義項目}{121}{subsection.9.2.2}%
+\contentsline {subsection}{\numberline {9.2.3}コンポーネントの定義項目}{122}{subsection.9.2.3}%
+\contentsline {subsection}{\numberline {9.2.4}ユニットの定義項目}{122}{subsection.9.2.4}%
+\contentsline {section}{\numberline {9.3}能力}{123}{section.9.3}%
+\contentsline {section}{\numberline {9.4}コアフロー}{123}{section.9.4}%
+\contentsline {subsection}{\numberline {9.4.1}誘発チェック}{126}{subsection.9.4.1}%
+\contentsline {subsubsection}{\numberline {9.4.1.1}誘発アクション処理}{128}{subsubsection.9.4.1.1}%
+\contentsline {subsection}{\numberline {9.4.2}能力の適用順}{129}{subsection.9.4.2}%
+\contentsline {subsubsection}{\numberline {9.4.2.1}考え方の原則}{130}{subsubsection.9.4.2.1}%
+\contentsline {subsubsection}{\numberline {9.4.2.2}能力の適用ルール}{130}{subsubsection.9.4.2.2}%
+\contentsline {subsubsection}{\numberline {9.4.2.3}運用上の注意}{130}{subsubsection.9.4.2.3}%
+\contentsline {section}{\numberline {9.5}まとめ}{131}{section.9.5}%
+\contentsline {chapter}{\numberline {第10章}付録A: PDF版ルール・リスト}{133}{chapter.10}%
+\contentsline {section}{\numberline {10.1}PDF版ルール}{133}{section.10.1}%
+\contentsline {section}{\numberline {10.2}アクションリスト}{133}{section.10.2}%
+\contentsline {subsection}{\numberline {10.2.1}ライト}{133}{subsection.10.2.1}%
+\contentsline {subsection}{\numberline {10.2.2}マスター}{133}{subsection.10.2.2}%
+\contentsline {subsection}{\numberline {10.2.3}マスター+エクストラ}{134}{subsection.10.2.3}%
+\contentsline {section}{\numberline {10.3}エクストラリスト}{134}{section.10.3}%
+\contentsline {chapter}{\numberline {第11章}付録B: 周年大会記録}{135}{chapter.11}%
+\contentsline {chapter}{\numberline {第12章}付録C: ガイドライン}{137}{chapter.12}%
+\contentsline {section}{\numberline {12.1}BlackPoker二次創作ガイドライン}{137}{section.12.1}%
+\contentsline {subsection}{\numberline {12.1.1}はじめに}{137}{subsection.12.1.1}%
+\contentsline {subsection}{\numberline {12.1.2}二次創作の範囲}{137}{subsection.12.1.2}%
+\contentsline {subsection}{\numberline {12.1.3}創作の自由と制限}{138}{subsection.12.1.3}%
+\contentsline {subsection}{\numberline {12.1.4}クレジット表記について}{138}{subsection.12.1.4}%
+\contentsline {subsection}{\numberline {12.1.5}禁止事項}{138}{subsection.12.1.5}%
+\contentsline {subsection}{\numberline {12.1.6}商用利用について}{139}{subsection.12.1.6}%
+\contentsline {subsection}{\numberline {12.1.7}ガイドラインにないケースについて}{139}{subsection.12.1.7}%
+\contentsline {section}{\numberline {12.2}BlackPoker アクション・ルールガイドライン}{139}{section.12.2}%
+\contentsline {subsection}{\numberline {12.2.1}はじめに}{139}{subsection.12.2.1}%
+\contentsline {subsection}{\numberline {12.2.2}アクションを追加する際のルール}{140}{subsection.12.2.2}%
+\contentsline {subsubsection}{\numberline {12.2.2.1}アクションの対象は単対象 (必須)}{140}{subsubsection.12.2.2.1}%
+\contentsline {subsubsection}{\numberline {12.2.2.2}キーカード条件なしの通常\sphinxhyphen {}クイックアクションを作らない (必須)}{140}{subsubsection.12.2.2.2}%
+\contentsline {subsubsection}{\numberline {12.2.2.3}誘発アクションは即時 (推奨)}{140}{subsubsection.12.2.2.3}%
+\contentsline {subsubsection}{\numberline {12.2.2.4}先行1ターン目に確実に勝利できる効果を作らない (必須)}{140}{subsubsection.12.2.2.4}%
+\contentsline {subsubsection}{\numberline {12.2.2.5}誘発\sphinxhyphen {}メインは同時に2つ以上誘発しないように制限 (必須)}{140}{subsubsection.12.2.2.5}%
+\contentsline {subsection}{\numberline {12.2.3}キャラクターを追加する際のルール}{141}{subsection.12.2.3}%
+\contentsline {subsubsection}{\numberline {12.2.3.1}場のキャラクターは一目でわかるように定義 (必須)}{141}{subsubsection.12.2.3.1}%
+\contentsline {section}{\numberline {12.3}BlackPoker 対戦進行上のショートカット指針}{141}{section.12.3}%
+\contentsline {subsection}{\numberline {12.3.1}目的}{141}{subsection.12.3.1}%
+\contentsline {subsection}{\numberline {12.3.2}本文ルールとの関係}{141}{subsection.12.3.2}%
+\contentsline {subsection}{\numberline {12.3.3}用語の定義}{141}{subsection.12.3.3}%
+\contentsline {subsection}{\numberline {12.3.4}ショートカットの原則}{141}{subsection.12.3.4}%
+\contentsline {subsubsection}{\numberline {12.3.4.1}原則1：反応がなければパスとみなす}{141}{subsubsection.12.3.4.1}%
+\contentsline {subsubsection}{\numberline {12.3.4.2}原則2：連続する手順をまとめて進行できる}{142}{subsubsection.12.3.4.2}%
+\contentsline {subsubsection}{\numberline {12.3.4.3}原則3：割り込みの権利は常に保障される}{142}{subsubsection.12.3.4.3}%
+\contentsline {subsubsection}{\numberline {12.3.4.4}原則4：認識のずれは巻き戻す}{142}{subsubsection.12.3.4.4}%
+\contentsline {subsection}{\numberline {12.3.5}運用上の注意}{142}{subsection.12.3.5}%
+\contentsline {subsection}{\numberline {12.3.6}標準ショートカット}{142}{subsection.12.3.6}%
+\contentsline {subsubsection}{\numberline {12.3.6.1}メインアクションの実行}{142}{subsubsection.12.3.6.1}%
+\contentsline {subsubsection}{\numberline {12.3.6.2}アタックの進行}{143}{subsubsection.12.3.6.2}%
+\contentsline {subsubsection}{\numberline {12.3.6.3}ターンの受け渡し（エンド\(\rightarrow \)チャージ\(\rightarrow \)ドロー）}{144}{subsubsection.12.3.6.3}%
+\contentsline {chapter}{\numberline {第13章}付録D: BlackPoker設計ノート}{145}{chapter.13}%
+\contentsline {section}{\numberline {13.1}BDRの採番規則}{145}{section.13.1}%
+\contentsline {subsection}{\numberline {13.1.1}BDR\sphinxhyphen {}2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化}{145}{subsection.13.1.1}%
+\contentsline {chapter}{変更履歴}{147}{chapter*.302}%
+\contentsline {section}{第9.1版 変更履歴}{147}{section*.303}%
+\contentsline {subsection}{新規概念・構築要素の整理}{147}{subsection*.304}%
+\contentsline {section}{第9.0版 変更履歴}{147}{section*.305}%
+\contentsline {subsection}{文書構成の変更}{148}{subsection*.306}%
+\contentsline {subsection}{対戦レギュレーション・入門導線の変更}{148}{subsection*.307}%
+\contentsline {subsection}{フレーム定義の変更}{149}{subsection*.308}%
+\contentsline {subsubsection}{エントリー}{149}{subsubsection*.309}%
+\contentsline {subsection}{共通ルールの変更}{149}{subsection*.310}%
+\contentsline {subsubsection}{プリセット配置}{149}{subsubsection*.311}%
+\contentsline {subsubsection}{ドロー}{149}{subsubsection*.312}%
+\contentsline {subsubsection}{攻撃・防御ラベル}{150}{subsubsection*.313}%
+\contentsline {subsubsection}{パス}{150}{subsubsection*.314}%
+\contentsline {subsubsection}{FAQで明文化された点}{150}{subsubsection*.315}%
+\contentsline {subsection}{アクションリスト・用語体系の変更}{150}{subsection*.316}%
+\contentsline {subsubsection}{@ 記法の追加}{150}{subsubsection*.317}%
+\contentsline {subsubsection}{魔法分類の再編}{150}{subsubsection*.318}%
+\contentsline {subsection}{レアカード操作・切札操作の変更}{151}{subsection*.319}%
+\contentsline {subsubsection}{罠カウンター}{151}{subsubsection*.320}%
+\contentsline {subsection}{エクストラ全体の傾向}{151}{subsection*.321}%
+\contentsline {subsection}{スペード系の変更}{152}{subsection*.322}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 2 スラッシュ}}}{152}{subsubsection*.323}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 4 威圧}}}{152}{subsubsection*.324}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 5 蘇生}}}{152}{subsubsection*.325}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} J リアニメーター}}}{152}{subsubsection*.326}%
+\contentsline {subsection}{ハート系の変更}{152}{subsection*.327}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 激励}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 誘惑}}}{152}{subsubsection*.328}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 5 追撃}}}{152}{subsubsection*.329}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 8 救済}}}{153}{subsubsection*.330}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J チャリオット}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J 破砕士}}}{153}{subsubsection*.331}%
+\contentsline {subsection}{ダイヤ系の変更}{153}{subsection*.332}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} A 防壁追加}}}{153}{subsubsection*.333}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 3 交渉}}}{153}{subsubsection*.334}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 4 相殺}}}{153}{subsubsection*.335}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 5 喪失}}}{154}{subsubsection*.336}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 8 修繕}}}{154}{subsubsection*.337}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} J 策士}}}{154}{subsubsection*.338}%
+\contentsline {subsection}{クラブ系の変更}{154}{subsection*.339}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 4 スイッチ}}}{154}{subsubsection*.340}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 7 手札補充}}}{154}{subsubsection*.341}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 8 リセット}}}{155}{subsubsection*.342}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 9 要塞}}}{155}{subsubsection*.343}%
+\contentsline {subsection}{プレイヤー向け確認チェックリスト}{155}{subsection*.344}%
+\contentsline {chapter}{あとがき}{157}{chapter*.345}%
+\contentsline {section}{第9.0版アップデートの要点}{157}{section*.346}%
+\contentsline {section}{ロゴと名前の由来}{157}{section*.347}%
+\contentsline {section}{さらなる楽しみ方}{158}{section*.348}%
+\contentsline {section}{最後に}{158}{section*.349}%
+\contentsline {chapter}{索引}{159}{chapter*.350}%
