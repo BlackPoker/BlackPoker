@@ -387,6 +387,7 @@
 <li><p>パックの中から好きなカードを1枚選び対戦相手に見せ、手札に加える。レアカードがある場合、代わりにそれを対戦相手に見せ手札に加えてもよい。</p></li>
 <li><p>パックを表向きにし、開封済みとする。</p></li>
 </ol>
+<p><strong>導入バージョン:</strong>  v8.0</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -418,6 +419,7 @@
 <p>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</p>
 <p><strong>効果:</strong></p>
 <p>レアカードを1枚手札に加える。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
 <hr class="docutils" />
 </section>
 <section id="ruby-rt-rt-ruby-protect-ruby-g-s">
@@ -448,6 +450,7 @@
 <p>プレイヤーのライフが9以下の場合にしかこのアクションを起こすことができない。</p>
 <p><strong>効果:</strong></p>
 <p>キーカードを兵士として表向きかつチャージ状態で場に出す。</p>
+<p><strong>導入バージョン:</strong>  v8.0</p>
 <hr class="docutils" />
 </section>
 <section id="act-trapcounter">
@@ -510,6 +513,10 @@
 </table>
 <p><strong>効果:</strong></p>
 <p>自分の裏切札を1枚表にし表切札とする。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<p><strong>補足:</strong></p>
+<p>v8.0: クイックオープンとメインオープンに分かれた。</p>
 <hr class="docutils" />
 </section>
 <section id="bbl">
@@ -536,6 +543,10 @@
 </table>
 <p><strong>効果:</strong></p>
 <p>自分の裏切札を1枚表にし表切札とする。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>更新バージョン:</strong>  v8.0</p>
+<p><strong>補足:</strong></p>
+<p>v8.0: クイックオープンとメインオープンに分かれた。</p>
 <hr class="docutils" />
 </section>
 <section id="d">
@@ -564,6 +575,11 @@
 <p><strong>対象:</strong> 表切札1枚</p>
 <p><strong>効果:</strong></p>
 <p>対象の表切札を裏向きにする。このターンが終わるまで、それは表切札にならない。その印としてフォグにキーカードを置く。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
+<p><strong>補足:</strong></p>
+<p>ex3.4.0: 当初はキーカードが同じスート2枚、コストBが必要だった。
+v6.0: コストをLに変更し即時化。
+v8.0: 刷新。キーカードをQの1枚に変更、コストをDに変更し、このターン中オープンできなくなる効果を追加。</p>
 <hr class="docutils" />
 </section>
 <section id="ruby-rt-rt-ruby-protect-ruby-g-b">
@@ -592,6 +608,7 @@
 <p><strong>対象:</strong> 表切札1枚</p>
 <p><strong>効果:</strong></p>
 <p>対象の表切札とキーカードのスートと数字が同じ場合、対象の表切札を墓地に移す。</p>
+<p><strong>導入バージョン:</strong>  ex3.4.0</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -960,7 +977,7 @@
 <p><strong>効果:</strong></p>
 <p>効果の内容は「リアニメイト」を参照。</p>
 <p><strong>導入バージョン:</strong>  ex4.22.0</p>
-<p><strong>更新バージョン:</strong>  v8.2,v9.0</p>
+<p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
 <p><strong>補足:</strong></p>
 <p>v9.0: 「リアニメーターリアニメイト」から「転生召喚」に名称変更。</p>
 <hr class="docutils" />
@@ -991,6 +1008,10 @@
 <p>自分の 「リアニメーター」 が場から墓地に移った時に誘発する。</p>
 <p><strong>効果:</strong></p>
 <p>墓地から♠Jを1枚選び、自分の表切札として置く。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<p><strong>補足:</strong></p>
+<p>v8.2: 切札再生より分離。</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -1476,9 +1497,11 @@
 <p>自分の 「破砕士」 が場から墓地に移った時に誘発する。</p>
 <p><strong>効果:</strong></p>
 <p>墓地から♡Jを1枚選び、自分の表切札として置く。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
 <p><strong>更新バージョン:</strong>  v8.2, v9.0</p>
 <p><strong>補足:</strong></p>
-<p>v9.0: チャリオットから破砕士に名称変更。</p>
+<p>v8.2: 切札再生より分離。
+v9.0: チャリオットから破砕士に名称変更。</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -2004,6 +2027,8 @@
 <p>墓地から♢Jを1枚選び、自分の表切札として置く。</p>
 <p><strong>導入バージョン:</strong>  ex4.22.0</p>
 <p><strong>更新バージョン:</strong>  v8.2</p>
+<p><strong>補足:</strong></p>
+<p>v8.2: 切札再生より分離。</p>
 </section>
 </section>
 <hr class="docutils" />
@@ -2411,6 +2436,10 @@
 <p>自分の 「騎士」 が場から墓地に移った時に誘発する。</p>
 <p><strong>効果:</strong></p>
 <p>墓地から♣Jを1枚選び、自分の表切札として置く。</p>
+<p><strong>導入バージョン:</strong>  ex4.22.0</p>
+<p><strong>更新バージョン:</strong>  v8.2</p>
+<p><strong>補足:</strong></p>
+<p>v8.2: 切札再生より分離。</p>
 </section>
 </section>
 </section>

@@ -351,13 +351,13 @@
 \BOOKMARK [2][-]{subsection.9.2.3}{コンポーネントの定義項目}{section.9.2}% 350
 \BOOKMARK [2][-]{subsection.9.2.4}{ユニットの定義項目}{section.9.2}% 351
 \BOOKMARK [1][-]{section.9.3}{能力}{chapter.9}% 352
-\BOOKMARK [1][-]{section.9.4}{コアフロー}{chapter.9}% 353
-\BOOKMARK [2][-]{subsection.9.4.1}{誘発チェック}{section.9.4}% 354
-\BOOKMARK [3][-]{subsubsection.9.4.1.1}{誘発アクション処理}{subsection.9.4.1}% 355
-\BOOKMARK [2][-]{subsection.9.4.2}{能力の適用順}{section.9.4}% 356
-\BOOKMARK [3][-]{subsubsection.9.4.2.1}{考え方の原則}{subsection.9.4.2}% 357
-\BOOKMARK [3][-]{subsubsection.9.4.2.2}{能力の適用ルール}{subsection.9.4.2}% 358
-\BOOKMARK [3][-]{subsubsection.9.4.2.3}{運用上の注意}{subsection.9.4.2}% 359
+\BOOKMARK [2][-]{subsection.9.3.1}{能力の適用順}{section.9.3}% 353
+\BOOKMARK [3][-]{subsubsection.9.3.1.1}{考え方の原則}{subsection.9.3.1}% 354
+\BOOKMARK [3][-]{subsubsection.9.3.1.2}{能力の適用ルール}{subsection.9.3.1}% 355
+\BOOKMARK [3][-]{subsubsection.9.3.1.3}{運用上の注意}{subsection.9.3.1}% 356
+\BOOKMARK [1][-]{section.9.4}{コアフロー}{chapter.9}% 357
+\BOOKMARK [2][-]{subsection.9.4.1}{誘発チェック}{section.9.4}% 358
+\BOOKMARK [3][-]{subsubsection.9.4.1.1}{誘発アクション処理}{subsection.9.4.1}% 359
 \BOOKMARK [1][-]{section.9.5}{まとめ}{chapter.9}% 360
 \BOOKMARK [0][-]{chapter.10}{付録A: PDF版ルール・リスト}{}% 361
 \BOOKMARK [1][-]{section.10.1}{PDF版ルール}{chapter.10}% 362
