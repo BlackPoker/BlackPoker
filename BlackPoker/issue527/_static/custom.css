@@ -32,3 +32,11 @@ ol {
     padding-left: 1.2em;
     /* デフォルト 40px を 1.5文字分に縮小 */
 }
+
+/* ブロッククォート（インデントされた文章）の左右マージンを調整 */
+blockquote {
+    margin-left: 1.2em; /* デフォルト 40px から縮小 */
+    margin-right: 0;    /* 右側の余白は不要なので 0 に */
+    margin-top: 0.5em;  /* 上下の余白を適正化 */
+    margin-bottom: 0.5em;
+}

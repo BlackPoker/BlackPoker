@@ -391,7 +391,7 @@
 \contentsline {subsection}{\numberline {12.3.3}用語の定義}{141}{subsection.12.3.3}%
 \contentsline {subsection}{\numberline {12.3.4}ショートカットの原則}{141}{subsection.12.3.4}%
 \contentsline {subsubsection}{\numberline {12.3.4.1}原則1：反応がなければパスとみなす}{141}{subsubsection.12.3.4.1}%
-\contentsline {subsubsection}{\numberline {12.3.4.2}原則2：連続する手順をまとめて進行できる}{142}{subsubsection.12.3.4.2}%
+\contentsline {subsubsection}{\numberline {12.3.4.2}原則2：連続する手順をまとめて進行できる}{141}{subsubsection.12.3.4.2}%
 \contentsline {subsubsection}{\numberline {12.3.4.3}原則3：割り込みの権利は常に保障される}{142}{subsubsection.12.3.4.3}%
 \contentsline {subsubsection}{\numberline {12.3.4.4}原則4：認識のずれは巻き戻す}{142}{subsubsection.12.3.4.4}%
 \contentsline {subsection}{\numberline {12.3.5}運用上の注意}{142}{subsection.12.3.5}%
