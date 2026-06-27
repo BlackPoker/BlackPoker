@@ -252,9 +252,9 @@ latex_elements = {
 \titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
 \usepackage{enumitem}
 \setlist{nosep, itemsep=0.2ex, parsep=0pt}
-\setlist[itemize]{leftmargin=1.5zw}
-\setlist[enumerate]{leftmargin=1.5zw}
-\setlist[description]{leftmargin=1.5zw}
+\setlist[itemize]{leftmargin=1.2zw}
+\setlist[enumerate]{leftmargin=1.2zw}
+\setlist[description]{leftmargin=1.2zw}
 \providecommand{\chapterheadstartskip}{}
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
