@@ -255,6 +255,9 @@ latex_elements = {
 \setlist[itemize]{leftmargin=1.2zw}
 \setlist[enumerate]{leftmargin=1.2zw}
 \setlist[description]{leftmargin=1.2zw}
+\renewenvironment{quote}
+  {\list{}{\leftmargin=1.2zw\rightmargin=0pt}\item[]}
+  {\endlist}
 \providecommand{\chapterheadstartskip}{}
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
