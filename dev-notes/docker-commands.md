@@ -51,7 +51,7 @@ docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jd
 docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest .
 
 # 3. ビルド実行（HTMLおよびPDFが docs/ ディレクトリに出力されます）
-docker run --rm -it -v "${PWD}/docs:/docs" blackpoker-doc:latest
+docker run --rm -it -u root -v "${PWD}/docs:/docs" blackpoker-doc:latest
 ```
 
 **一括実行コマンド (bash用):**
@@ -63,7 +63,7 @@ docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jd
 docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest .
 
 # 3. ビルド実行
-docker run --rm -it -v "$(pwd)/docs:/docs" blackpoker-doc:latest
+docker run --rm -it -u root -v "$(pwd)/docs:/docs" blackpoker-doc:latest
 ```
 
 **出力成果物:**
