@@ -5,8 +5,12 @@ FROM blackpoker/blackpoker-doc-base:latest
 # ------------------------------
 # pip
 # ------------------------------
+RUN apk update && \
+    apk del python3 py3-pip && \
+    apk add --no-cache python3 py3-pip
+
 COPY ./requirements.txt .
-RUN pip3 install -q -r requirements.txt
+RUN pip3 install -I -q -r requirements.txt
 
 # ------------------------------
 # source
