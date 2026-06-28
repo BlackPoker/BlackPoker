@@ -3,18 +3,40 @@
 }
 
 @media (max-width: 768px) {
+
     /* 切札テーブルをスマホや画面幅が狭いときに縦並び（1列）にする */
-    table.trump-table, 
-    table.trump-table > tbody, 
-    table.trump-table > tbody > tr, 
-    table.trump-table > tbody > tr > td {
+    table.trump-table,
+    table.trump-table>tbody,
+    table.trump-table>tbody>tr,
+    table.trump-table>tbody>tr>td {
         display: block !important;
         width: 100% !important;
         box-sizing: border-box;
     }
-    
+
     /* 縦並びのときのマージン調整 */
-    table.trump-table > tbody > tr > td {
+    table.trump-table>tbody>tr>td {
         padding: 8px 0 !important;
     }
 }
+
+/* 定義リスト（一段下がった説明文）の左余白を狭める */
+dd {
+    margin-left: 1.2em;
+    /* デフォルト 40px を 1.5文字分に縮小 */
+}
+
+/* 箇条書き（ul, ol）の左余白を狭める */
+ul,
+ol {
+    padding-left: 1.2em;
+    /* デフォルト 40px を 1.5文字分に縮小 */
+}
+
+/* ブロッククォート（インデントされた文章）の左右マージンを調整 */
+blockquote {
+    margin-left: 1.2em; /* デフォルト 40px から縮小 */
+    margin-right: 0;    /* 右側の余白は不要なので 0 に */
+    margin-top: 0.5em;  /* 上下の余白を適正化 */
+    margin-bottom: 0.5em;
+}
