@@ -30,7 +30,7 @@ docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jd
 
 **実行コマンド (PowerShell / bash 共通):**
 ```bash
-docker run --rm -it -v "${PWD}:/work" -w /work -p 8000:8000 python:3.9-slim bash -c "pip install -q -r requirements.txt && sphinx-autobuild -q --host 0.0.0.0 --port 8000 source build/_html"
+docker run --rm -it -v "${PWD}:/work" -w /work -p 8000:8000 python:3.8-slim bash -c "pip install -q -r requirements.txt && sphinx-autobuild -q --host 0.0.0.0 --port 8000 source build/_html"
 ```
 起動後、ブラウザで [http://localhost:8000](http://localhost:8000) にアクセスすることで、リアルタイムにプレビューを確認できます。
 
