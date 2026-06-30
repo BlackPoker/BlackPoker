@@ -181,14 +181,14 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 </section>
 <section id="index-2">
 <span id="id5"></span><h3><span class="section-number">9.1.3. </span>リクエスト<a class="headerlink" href="#index-2" title="この見出しへのパーマリンク">¶</a></h3>
-<p>アクションを実行するために、ゲームシステム（コアフロー）に対して
+<p>アクションを実行するために、ゲームシステム(コアフロー)に対して
 どのようなアクションを実行するかを要求します。
 この要求をリクエストと呼びます。正式名称はアクションリクエストです。</p>
 <p>リクエストの種類によっては、ステージに蓄積されず、すぐに実行(解決)されるものもあります。</p>
 </section>
 <section id="id6">
 <h3><span class="section-number">9.1.4. </span>解決<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
-<p>リクエストを処理すること（要求されたアクションを実行すること）を解決と言います。</p>
+<p>リクエストを処理すること(要求されたアクションを実行すること)を解決と言います。</p>
 </section>
 <section id="index-3">
 <span id="id7"></span><h3><span class="section-number">9.1.5. </span>チャンス<a class="headerlink" href="#index-3" title="この見出しへのパーマリンク">¶</a></h3>
@@ -221,7 +221,7 @@ InterruptibleTurnGame ---&gt; (BlackPokerGame) : &quot;実装&quot;
 </section>
 <section id="id12">
 <h3><span class="section-number">9.1.10. </span>コアフロー(ルールシステム)<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h3>
-<p>リクエストはコアフロー(ルールシステム)によって整理され、処理（解決）されます。
+<p>リクエストはコアフロー(ルールシステム)によって整理され、処理(解決)されます。
 リクエストは即時解決されるものと、ステージに蓄積されるものに分類され、順番に処理されます。</p>
 <p>ゲームによって具体的に行う内容は異なりますが、処理する順番の制御はコアフローが担います。</p>
 <p>コアフローはゲームの開始から勝敗が決まるまで動作し続けます。</p>
@@ -355,7 +355,7 @@ class ユニット&lt;&lt;生成されたもの&gt;&gt; {
 </section>
 <section id="index-14">
 <span id="id19"></span><h4><span class="section-number">9.2.1.5. </span>起動条件<a class="headerlink" href="#index-14" title="この見出しへのパーマリンク">¶</a></h4>
-<p>アクションを起こす（リクエストする）ための条件を示します。</p>
+<p>アクションを起こす(リクエストする)ための条件を示します。</p>
 <p>トリガーが「直接」の場合、起動条件が定義されます。
 コストの支払いや対象の指定など、様々な条件がアクションごとに設定されます。</p>
 <p>BlackPokerでは、コストの支払いや対象の指定の記述が冗長にならないよう、省略されることが多いです。</p>
@@ -509,10 +509,10 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 </figcaption>
 </figure>
 <div class="note admonition">
-<p class="admonition-title">第8版での仕様変更（ルールの整理）</p>
+<p class="admonition-title">第8版での仕様変更(ルールの整理)</p>
 <p>第7版以前は、「能力」の中に「誘発能力」と「常在型能力」が分類されていました。
 第8版からは、ルール構成をより明確にするため、 <strong>誘発型能力およびアクションを起こせる能力</strong> を「アクション」の定義側へと整理・統合しました。
-現在の「能力」は、これらを除いた純粋な <strong>常在型能力</strong> （常時発揮される効果）のみを指す定義となっています。</p>
+現在の「能力」は、これらを除いた純粋な <strong>常在型能力</strong> (常時発揮される効果)のみを指す定義となっています。</p>
 </div>
 <section id="ability-order">
 <span id="id26"></span><h3><span class="section-number">9.3.1. </span>能力の適用順<a class="headerlink" href="#ability-order" title="この見出しへのパーマリンク">¶</a></h3>
@@ -521,7 +521,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <p>なお、ゲームによって細部の裁定が異なる場合があります。ここでは BlackPoker を例に説明します。</p>
 <section id="id27">
 <h4><span class="section-number">9.3.1.1. </span>考え方の原則<a class="headerlink" href="#id27" title="この見出しへのパーマリンク">¶</a></h4>
-<p>影響範囲が広い能力ほど優先順位を低く扱い、影響範囲が狭い（個別の対象を限定する）能力ほど優先順位を高く扱います。
+<p>影響範囲が広い能力ほど優先順位を低く扱い、影響範囲が狭い(個別の対象を限定する)能力ほど優先順位を高く扱います。
 つまり、「広く浅く影響する能力」は先に適用し、「狭く深く影響する能力」は後から適用します。</p>
 </section>
 <section id="ability-order-rule">
@@ -569,7 +569,7 @@ Player1 ..&gt; P1C : &quot;所有&quot;
 <blockquote>
 <div><ul class="simple">
 <li><p><strong>同じ範囲で矛盾した能力がある場合</strong>:
-それらの能力が発動（または有効化）された順番に応じて <strong>タイムスタンプ</strong> が古いものから適用し、
+それらの能力が発動(または有効化)された順番に応じて <strong>タイムスタンプ</strong> が古いものから適用し、
 新しいものが後から上書きする形で処理します。</p></li>
 </ul>
 </div></blockquote>

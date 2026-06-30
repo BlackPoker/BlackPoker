@@ -138,8 +138,8 @@
 <li><p><strong>Bさん</strong>：「その前にこの兵士ダウンします。」</p></li>
 <li><p><strong>Aくん</strong>：「じゃあそのダウンをカウンターします。」</p></li>
 <li><p><strong>Bさん</strong>：「それをさらにカウンターします。」</p></li>
-<li><p><strong>Aくん</strong>：「・・・（泣）」</p></li>
-<li><p><strong>Bさん</strong>：「（どやっ！）」</p></li>
+<li><p><strong>Aくん</strong>：「・・・(泣)」</p></li>
+<li><p><strong>Bさん</strong>：「(どやっ！)」</p></li>
 </ul>
 </div></blockquote>
 <p>このやり取りの中で「アップします」や「ダウンします」などの1行1行がアクションになります。</p>
@@ -327,19 +327,19 @@ stop
 <caption><span class="caption-number">Table 5.2 </span><span class="caption-text">スピードによる解決フローの比較</span><a class="headerlink" href="#id22" title="このテーブルへのパーマリンク">¶</a></caption>
 <thead>
 <tr class="row-odd"><th class="head"><p>スピード</p></th>
-<th class="head"><p>ステージ（スタック）</p></th>
+<th class="head"><p>ステージ(スタック)</p></th>
 <th class="head"><p>割り込みの可否</p></th>
 <th class="head"><p>解決のタイミング</p></th>
 </tr>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><strong>通常</strong></p></td>
-<td><p>使用する（積まれる）</p></td>
+<td><p>使用する(積まれる)</p></td>
 <td><p><strong>可能</strong></p></td>
 <td><p>全員がパスした後</p></td>
 </tr>
 <tr class="row-odd"><td><p><strong>即時</strong></p></td>
-<td><p>使用しない（積まれない）</p></td>
+<td><p>使用しない(積まれない)</p></td>
 <td><p><strong>不可</strong></p></td>
 <td><p>リクエストした直後</p></td>
 </tr>
@@ -348,7 +348,7 @@ stop
 <p><strong>用語</strong></p>
 <p>登場する用語を説明します。</p>
 <dl class="simple" id="index-14">
-<dt><strong>チャンス</strong></dt><dd><p>アクションをリクエストする(ステージに積む)権利（他TCGの優先権）</p>
+<dt><strong>チャンス</strong></dt><dd><p>アクションをリクエストする(ステージに積む)権利(他TCGの優先権)</p>
 </dd>
 </dl>
 <dl class="simple" id="index-15">
@@ -360,7 +360,7 @@ stop
 </dd>
 </dl>
 <dl class="simple" id="index-17">
-<dt><strong>ステージ</strong></dt><dd><p>アクションが蓄積される場所（他TCGのスタック）</p>
+<dt><strong>ステージ</strong></dt><dd><p>アクションが蓄積される場所(他TCGのスタック)</p>
 </dd>
 </dl>
 <dl class="simple" id="index-18">
@@ -395,7 +395,7 @@ stop
 </figcaption>
 </figure>
 <ol class="arabic simple" start="3">
-<li><p>アクションを実行（解決）</p></li>
+<li><p>アクションを実行(解決)</p></li>
 </ol>
 <figure class="align-default" id="id25">
 <span id="action-request3-image"></span><img alt="../_images/action-request3.svg" src="../_images/action-request3.svg" /><figcaption>
@@ -439,7 +439,7 @@ note over A, B : 相手の割り込みチャンスはない
 </figure>
 <p>即時の場合は、リクエストされた時点でルールシステムがすぐにアクションを解決し、
 全プレイヤーに結果が反映されます。相手はそのアクションに対して割り込む
-（カウンターなど）ことができません。</p>
+(カウンターなど)ことができません。</p>
 <p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> を参照してください。</p>
 <div class="admonition seealso">
 <p class="admonition-title">参考</p>
@@ -450,12 +450,10 @@ note over A, B : 相手の割り込みチャンスはない
 <h3><span class="section-number">5.4.3. </span>対象条件を確認<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
 <p>対象を指定するアクションが効果を発揮しようとした時に次の条件に該当する場合、効果を発揮する対象を失うため効果が発揮されず
 アクションが解決されます。</p>
-<blockquote>
-<div><ul class="simple">
+<ul class="simple">
 <li><p>対象が存在していない場合</p></li>
 <li><p>対象が分裂した場合</p></li>
 </ul>
-</div></blockquote>
 <p>たとえば兵士に対して「アップ」アクションを起こし、対応して「ダウン」
 アクションを起こされました。
 「ダウン」の方が先に解決されるため、「アップ」を解決する時には

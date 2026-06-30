@@ -131,66 +131,184 @@
 <section id="d-blackpoker">
 <span id="design-notes"></span><h1><span class="section-number">13. </span>付録D: BlackPoker設計ノート<a class="headerlink" href="#d-blackpoker" title="この見出しへのパーマリンク">¶</a></h1>
 <p>この付録では、BlackPokerの設計上の判断や考え方を記録します。
-これらの記録をBDR（BlackPoker Design Record）と呼びます。</p>
+これらの記録をBDR(BlackPoker Design Record)と呼びます。</p>
 <p>BDRは、ルール本文の背景にある判断を説明するためのものです。
 対戦中の裁定は、本文ルールおよび各フレーム・アクションの定義に従います。</p>
 <div class="admonition-bdr admonition">
 <p class="admonition-title">BDRの採番規則</p>
 <p>BDRは次の規則に従って管理・追加されます。</p>
 <ul class="simple">
-<li><p><strong>識別子の形式</strong>: <code class="docutils literal notranslate"><span class="pre">BDR-[番号]</span></code> とします（例: <code class="docutils literal notranslate"><span class="pre">BDR-1</span></code>, <code class="docutils literal notranslate"><span class="pre">BDR-2</span></code>）。前ゼロ埋め（パディング）は行いません。</p></li>
+<li><p><strong>識別子の形式</strong>: <code class="docutils literal notranslate"><span class="pre">BDR-[番号]</span></code> とします(例: <code class="docutils literal notranslate"><span class="pre">BDR-1</span></code>, <code class="docutils literal notranslate"><span class="pre">BDR-2</span></code>)。前ゼロ埋め(パディング)は行いません。</p></li>
 <li><p><strong>時系列順</strong>: 設計判断が行われた、あるいはコンセプトが誕生した時系列順に番号を割り当てます。</p></li>
-<li><p><strong>不変性（Immutable）</strong>: 一度割り当てられたIDは、後のバージョンで内容が更新された場合でも変更しません。</p></li>
+<li><p><strong>不変性(Immutable)</strong>: 一度割り当てられたIDは、後のバージョンで内容が更新された場合でも変更しません。</p></li>
 </ul>
 </div>
-<div class="admonition note">
-<p class="admonition-title">注釈</p>
-<p><code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> （トランプだけでTCGのように遊ぶ根底の設計思想）は別タスクで追加予定のため、本ドキュメントは <code class="docutils literal notranslate"><span class="pre">BDR-2</span></code> から開始しています。</p>
-</div>
-<section id="bdr-2">
-<h2><span class="section-number">13.1. </span>BDR-2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化<a class="headerlink" href="#bdr-2" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="bdr-1">
+<h2><span class="section-number">13.1. </span>BDR-1: カードと効果の分離(スクリプトベースの採用)<a class="headerlink" href="#bdr-1" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id1">
 <h3><span class="section-number">13.1.1. </span>状態<a class="headerlink" href="#id1" title="この見出しへのパーマリンク">¶</a></h3>
 <p>採用</p>
 </section>
 <section id="id2">
 <h3><span class="section-number">13.1.2. </span>背景<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h3>
-<p>一般的なTCGでは、カードを集めてデッキを構築することがゲーム前の主要な準備であり、シャッフルしたデッキから引いたカードで戦う「デッキ構築」が中心となります。</p>
-<p>一方で、BlackPokerは誰でも持っている標準的なトランプを使うため、カード資産の差で個性を出す設計ではありません。
-トランプという同じリソースから多様な対戦体験を生み出すために、デッキに入れるカードを決定するだけでなく、ゲーム開始前に「どのような戦い方をするか」という戦略要素をあらかじめ選ぶことが極めて重要になります。</p>
-<p>従来は、これらのゲーム前の準備要素が明確に分離されておらず、プレイヤーの混乱や、ルール説明上の不整合（特にフレーム名「ストラテジー」と最初の手札「ストラテジー」の用語重複）を招いていました。</p>
+<p>一般的なTCGでは、カード1枚1枚に固有の名称と効果が紐づいている「カードベース」の設計が基本です。
+トランプだけでTCGを再現しようと考えた場合、最初は「ダイヤのAは山、クラブのAは特定の兵士」のようにトランプにTCGのカードを1対1で割り当てる方法が思い浮かびます。しかし、この方法では「どのトランプがどのカードだったか」をすべて記憶する必要があり、プレイヤーの脳のメモリ(記憶量)を著しく圧迫してしまいます。</p>
 </section>
 <section id="id3">
 <h3><span class="section-number">13.1.3. </span>判断<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h3>
-<p>ゲーム前の準備要素を「デッキ構築」と「シナリオ構築」の2つに明確に分離します。</p>
-<ol class="arabic simple">
-<li><p><strong>デッキ構築</strong>: ゲームで使用するカードの母集団（トランプから使用するカードを選択すること）を決める行為。</p></li>
-<li><p><strong>シナリオ構築</strong>: デッキ構築で決めたカードの中から、ゲーム開始前に固定する戦略要素（切札、レアカード、シナリオ手札）を選び、その対戦での戦い方や展開を設計する行為。</p></li>
-</ol>
-<p>また、従来「ストラテジー」と呼んでいた最初の手札3枚 of カード群は、フレーム名との混同を避けるため「シナリオ手札」と定義します。シナリオ構築を公式ルール上の概念として位置づけ、対戦準備の流れを統一します。</p>
+<p>カードと効果を明確に分離し、効果を「アクション(スクリプト)」として独立して定義します。
+トランプ自体は効果を持たず、「乱数発生器」およびアクションを起こすための「キーカード(コスト)」としてのみ機能させます。</p>
 </section>
 <section id="id4">
 <h3><span class="section-number">13.1.4. </span>理由<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
-<p>この分離と公式概念化により、次のメリットが生じます。</p>
 <ul class="simple">
-<li><p><strong>構築体験の再設計</strong>: 「カードを集めること」ではなく、「同じトランプをどのようなルール・初期状態・戦略で使うか」を設計する楽しさとして構築要素を体系化できます。</p></li>
-<li><p><strong>ルールの説明性向上</strong>: FRAME名（ルールセット）と積み込み手札（カード群）を別用語にすることで、説明の混同がなくなります。</p></li>
-<li><p><strong>遊び方のバリエーションの整理</strong>: エントリー16（固定シナリオ）からマスター＋エクストラ（自由度の高い構築）までの遊び方の難易度マップを体系的に整理できます。</p></li>
+<li><p><strong>脳のメモリの節約</strong>: 54枚のトランプの組み合わせに対して、自分たちのレベルに合った数(ライト版であれば12種類程度)のアクションリストだけを用意して覚えればよいため、記憶の負担が劇的に減ります。</p></li>
+<li><p><strong>少ない手札からの豊富な選択肢</strong>: トランプは単なるコストであるため、手札の組み合わせ次第で、手札の枚数以上の多様なアクション(選択肢)を生み出すことができ、TCGとしての深い戦略性が生まれます。</p></li>
+<li><p><strong>難易度の調整と拡張性</strong>: 試合ごとに使用するアクションリストを変更することで、初心者向けから上級者向けまで自由に難易度やルールをカスタマイズできます。</p></li>
 </ul>
 </section>
 <section id="id5">
 <h3><span class="section-number">13.1.5. </span>影響<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
 <ul class="simple">
-<li><p><strong>エントリー16</strong>: デッキ構築とシナリオ構築をあらかじめ固定することで、初心者がすぐに遊べるようにします。</p></li>
-<li><p><strong>マスター＋エクストラ</strong>: デッキ構築とシナリオ構築の両方をプレイヤーが考え、TCG的な高い自由度の構築体験を提供します。</p></li>
-<li><p><strong>用語の改名</strong>: 最初の手札に積み込む3枚 of カード（旧ストラテジー）は「シナリオ手札」とし、ゲーム開始後は通常の手札として扱う仕様を明文化します。</p></li>
+<li><p>TCGの「カード名」に相当するものは「アクション」となります。</p></li>
+<li><p>プレイヤーは特定のカードを引くことを祈るのではなく、「現在の手札でどのアクションが実行可能か」を起点に戦略を組み立てるゲーム性になります。</p></li>
 </ul>
 </section>
+</section>
+<section id="bdr-2">
+<h2><span class="section-number">13.2. </span>BDR-2: フェイズ概念の廃止とコアフロー(ステージ)の採用<a class="headerlink" href="#bdr-2" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id6">
-<h3><span class="section-number">13.1.6. </span>本文ルールとの関係<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">13.2.1. </span>状態<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<p>採用</p>
+</section>
+<section id="id7">
+<h3><span class="section-number">13.2.2. </span>背景<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h3>
+<p>TCGにおいて最も面白い醍醐味は、相手の行動に対して意表を突く「割り込みや打ち消し」のやり取りです。
+しかし、従来のTCGでは「開始時の準備(リソース回復など)」「メインフェイズ」「戦闘フェイズ」といったターン内の期間を区切るルールが存在し、これが割り込み処理のタイミングを複雑にしてプレイヤーの混乱を招いています。</p>
+</section>
+<section id="id8">
+<h3><span class="section-number">13.2.3. </span>判断<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h3>
+<p>ターン内を区切る「フェイズ」という概念を完全に廃止し、ターンは「印(アクティブプレイヤーの手番を示すもの)」としてのみ扱います。
+ドロー、アタック、ブロック、エンドなど、従来のフェイズで行われていた行動もすべて同列の「アクション」として定義し、それらの解決順序を「コアフロー」と「ステージ(先入れ後出しの処理領域)」という仕組みで統一して管理します。</p>
+</section>
+<section id="id9">
+<h3><span class="section-number">13.2.4. </span>理由<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><strong>ルールのシンプル化</strong>: コアフローという1つのフローチャートと、ステージ上での「チャンス(優先権)」のやり取りさえ理解すれば、フェイズごとの細かな例外ルールを覚える必要がなくなり、複雑な割り込み処理も論理的に解決できます。</p></li>
+<li><p><strong>プレイヤーの自由度の確保</strong>: フェイズに縛られないため、ターン内でプレイヤーが自由に行動を選択できる余地が広がり、TCGとしての奥深さを維持しつつルールを整理できます。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3><span class="section-number">13.2.5. </span>影響<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>従来のTCGに見られた特定の開始時ステップなどは廃止し、対応するアクション(例：ドローアクション)がステージに置かれた時などを誘発条件として処理します。</p></li>
+<li><p>ターンで必ず行う定型処理も「アクションリスト」の一部として記述されます。</p></li>
+</ul>
+</section>
+</section>
+<section id="bdr-3">
+<h2><span class="section-number">13.3. </span>BDR-3: ダメージのプレイヤー限定化とキャラクターへのダメージ廃止<a class="headerlink" href="#bdr-3" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id11">
+<h3><span class="section-number">13.3.1. </span>状態<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<p>採用</p>
+</section>
+<section id="id12">
+<h3><span class="section-number">13.3.2. </span>背景<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h3>
+<p>一般的なTCGでは、キャラクターがダメージを受けると、そのターン中ダメージを記憶しておく必要があったり、ダメージカウンターを乗せて管理したりします。
+しかし、トランプのみで遊ぶBlackPokerでは、カウンター等の追加コンポーネントを使用しないルール指針(必要な物は最小限)があり、かつダメージ量を暗記することは「脳のメモリ」を圧迫し口論の原因にもなります。</p>
+</section>
+<section id="id13">
+<h3><span class="section-number">13.3.3. </span>判断<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<p>ダメージは「プレイヤーのライフを減らすもの(デッキライフの減少)」のみに適用し、キャラクター(兵士)がダメージを受けるという概念を廃止します。
+兵士の攻防においては、ダメージを蓄積させるのではなく、「ダウン」等のアクションによってサイズを下げ、条件を満たした(0や閾値を下回った)場合に即座に墓地へ移す(破壊する)という一連の処理として定義します。</p>
+</section>
+<section id="id14">
+<h3><span class="section-number">13.3.4. </span>理由<a class="headerlink" href="#id14" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><strong>「見て状態が分かる」ことの徹底</strong>: 余計なダメージカウンターを置いたり、目に見えないダメージ蓄積値を記憶したりする必要がなくなり、場のトランプと適用中のアクションを見るだけで状況を即座に把握できます。</p></li>
+<li><p><strong>ルールの明確化とトラブル防止</strong>: 耐久値の計算や回復処理(クリーンアップでのダメージリセット等)が不要になり、ゲームの進行がシンプルかつスピーディになります。</p></li>
+</ul>
+</section>
+<section id="id15">
+<h3><span class="section-number">13.3.5. </span>影響<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>キャラクターの除去は、ダメージではなくサイズ変更(ダウン等)や破壊効果を持つアクションによって行われます。</p></li>
+<li><p>ダメージ軽減やライフ回復といったゲームを長引かせる要素は原則として採用せず、1戦15分という短時間で決着がつくシーソーゲームを目指す方針を支えます。</p></li>
+</ul>
+</section>
+</section>
+<section id="bdr-4">
+<h2><span class="section-number">13.4. </span>BDR-4: 「世代交代」ルールによるストーリー性とデッキ枚数差の緩和<a class="headerlink" href="#bdr-4" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id16">
+<h3><span class="section-number">13.4.1. </span>状態<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h3>
+<p>採用</p>
+</section>
+<section id="id17">
+<h3><span class="section-number">13.4.2. </span>背景<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
+<p>トランプをTCGとして遊ぶうえで、ゲームへの没入感を高める「ストーリー性」が必要でした。また、初期設計において「思い出のトランプ(枚数が欠けているもの、地域ごとの枚数構成の違いがあるもの)」でも遊べるようにしたいというコンセプトがありましたが、デッキ枚数そのものがライフとなるシステム上、枚数差が有利不利に直結する課題がありました。</p>
+</section>
+<section id="id18">
+<h3><span class="section-number">13.4.3. </span>判断<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
+<p>キャラクター(K, Q, J, A, Jokerなど)が墓地へ送られた際に、山札から次のキャラクターが出るまでカードを墓地へ送り続ける「世代交代」ルールを導入しました。</p>
+</section>
+<section id="id19">
+<h3><span class="section-number">13.4.4. </span>理由<a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><strong>ストーリー性の演出</strong>: 王や英雄が倒れた際に、国(デッキ)が悲しみ次の英雄を求めるというシナリオをルールで表現し、ゲームの世界観への没入感を高めました。</p></li>
+<li><p><strong>デッキ枚数差の緩和</strong>: 特定カードが出るまで山札を削るランダム要素を導入することで、多少のデッキ枚数の違いが勝敗に与える直接的な影響を緩和します。また、山札の積み込みを防ぐセキュリティ的な効果(積み込み防止など)も兼ねています。</p></li>
+</ul>
+</section>
+<section id="id20">
+<h3><span class="section-number">13.4.5. </span>影響<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><strong>逆転要素の発生</strong>: 世代交代によって山札が想定以上に削れるリスクや、欲しいキャラクターが早く登場するチャンス(ワクワク感)が生まれ、対戦にドラマチックな変化をもたらします。</p></li>
+</ul>
+</section>
+</section>
+<section id="bdr-5">
+<h2><span class="section-number">13.5. </span>BDR-5: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化<a class="headerlink" href="#bdr-5" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id21">
+<h3><span class="section-number">13.5.1. </span>状態<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<p>採用</p>
+</section>
+<section id="id22">
+<h3><span class="section-number">13.5.2. </span>背景<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h3>
+<p>一般的なTCGでは、カードを集めてデッキを構築することがゲーム前の主要な準備であり、シャッフルしたデッキから引いたカードで戦う「デッキ構築」が中心となります。</p>
+<p>一方で、BlackPokerは誰でも持っている標準的なトランプを使うため、カード資産の差で個性を出す設計ではありません。
+トランプという同じリソースから多様な対戦体験を生み出すために、デッキに入れるカードを決定するだけでなく、ゲーム開始前に「どのような戦い方をするか」という戦略要素をあらかじめ選ぶことが極めて重要になります。</p>
+<p>従来は、これらのゲーム前の準備要素が明確に分離されておらず、プレイヤーの混乱や、ルール説明上の不整合(特にフレーム名「ストラテジー」と最初の手札「ストラテジー」の用語重複)を招いていました。</p>
+</section>
+<section id="id23">
+<h3><span class="section-number">13.5.3. </span>判断<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
+<p>ゲーム前の準備要素を「デッキ構築」と「シナリオ構築」の2つに明確に分離します。</p>
+<ol class="arabic simple">
+<li><p><strong>デッキ構築</strong>: ゲームで使用するカードの母集団(トランプから使用するカードを選択すること)を決める行為。</p></li>
+<li><p><strong>シナリオ構築</strong>: デッキ構築で決めたカードの中から、ゲーム開始前に固定する戦略要素(切札、レアカード、シナリオ手札)を選び、その対戦での戦い方や展開を設計する行為。</p></li>
+</ol>
+<p>また、従来「ストラテジー」と呼んでいた最初の手札3枚 of カード群は、フレーム名との混同を避けるため「シナリオ手札」と定義します。シナリオ構築を公式ルール上の概念として位置づけ、対戦準備の流れを統一します。</p>
+</section>
+<section id="id24">
+<h3><span class="section-number">13.5.4. </span>理由<a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h3>
+<p>この分離と公式概念化により、次のメリットが生じます。</p>
+<ul class="simple">
+<li><p><strong>構築体験の再設計</strong>: 「カードを集めること」ではなく、「同じトランプをどのようなルール・初期状態・戦略で使うか」を設計する楽しさとして構築要素を体系化できます。</p></li>
+<li><p><strong>ルールの説明性向上</strong>: FRAME名(ルールセット)と積み込み手札(カード群)を別用語にすることで、説明の混同がなくなります。</p></li>
+<li><p><strong>遊び方のバリエーションの整理</strong>: エントリー16(固定シナリオ)からマスター＋エクストラ(自由度の高い構築)までの遊び方の難易度マップを体系的に整理できます。</p></li>
+</ul>
+</section>
+<section id="id25">
+<h3><span class="section-number">13.5.5. </span>影響<a class="headerlink" href="#id25" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><strong>エントリー16</strong>: デッキ構築とシナリオ構築をあらかじめ固定することで、初心者がすぐに遊べるようにします。</p></li>
+<li><p><strong>マスター＋エクストラ</strong>: デッキ構築とシナリオ構築の両方をプレイヤーが考え、TCG的な高い自由度の構築体験を提供します。</p></li>
+<li><p><strong>用語の改名</strong>: 最初の手札に積み込む3枚 of カード(旧ストラテジー)は「シナリオ手札」とし、ゲーム開始後は通常の手札として扱う仕様を明文化します。</p></li>
+</ul>
+</section>
+<section id="id26">
+<h3><span class="section-number">13.5.6. </span>本文ルールとの関係<a class="headerlink" href="#id26" title="この見出しへのパーマリンク">¶</a></h3>
 <ul class="simple">
 <li><p><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a>: デッキ構築とシナリオ構築 of 分離、対戦準備の流れ、およびシナリオ手札の定義を記述。</p></li>
-<li><p><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">8 フレーム</span></a>: 各フレームがシナリオ構築の土台となる（どの戦略要素を決定・選択可能にするか）ことを記述。</p></li>
+<li><p><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">8 フレーム</span></a>: 各フレームがシナリオ構築の土台となる(どの戦略要素を決定・選択可能にするか)ことを記述。</p></li>
 </ul>
 </section>
 </section>
@@ -223,13 +341,45 @@
 <li class="toctree-l1"><a class="reference internal" href="anniversary.html">11. 付録B: 周年大会記録</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guidelines.html">12. 付録C: ガイドライン</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">13. 付録D: BlackPoker設計ノート</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#bdr-2">13.1. BDR-2: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#bdr-1">13.1. BDR-1: カードと効果の分離(スクリプトベースの採用)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id1">13.1.1. 状態</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id2">13.1.2. 背景</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">13.1.3. 判断</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">13.1.4. 理由</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">13.1.5. 影響</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id6">13.1.6. 本文ルールとの関係</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bdr-2">13.2. BDR-2: フェイズ概念の廃止とコアフロー(ステージ)の採用</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id6">13.2.1. 状態</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">13.2.2. 背景</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id8">13.2.3. 判断</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id9">13.2.4. 理由</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id10">13.2.5. 影響</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bdr-3">13.3. BDR-3: ダメージのプレイヤー限定化とキャラクターへのダメージ廃止</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id11">13.3.1. 状態</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">13.3.2. 背景</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">13.3.3. 判断</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id14">13.3.4. 理由</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id15">13.3.5. 影響</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bdr-4">13.4. BDR-4: 「世代交代」ルールによるストーリー性とデッキ枚数差の緩和</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id16">13.4.1. 状態</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id17">13.4.2. 背景</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id18">13.4.3. 判断</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id19">13.4.4. 理由</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id20">13.4.5. 影響</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#bdr-5">13.5. BDR-5: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">13.5.1. 状態</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id22">13.5.2. 背景</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id23">13.5.3. 判断</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id24">13.5.4. 理由</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id25">13.5.5. 影響</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id26">13.5.6. 本文ルールとの関係</a></li>
 </ul>
 </li>
 </ul>
