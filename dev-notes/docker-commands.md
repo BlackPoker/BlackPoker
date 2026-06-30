@@ -10,9 +10,15 @@
 YAMLの定義ファイルからアクションリスト（RSTファイルなど）を自動生成するコマンドです。
 `tools/actionlist` 内のMavenプロジェクトを実行し、`source/auto/` 配下に成果物を出力します。
 
-**実行コマンド (PowerShell / bash 共通):**
+**実行コマンド (PowerShell / macOS・Linux bash):**
 ```bash
 docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q -B
+```
+
+**Git Bash (Windows) で実行する場合:**
+Git Bashのパス自動変換によるエラーを防ぐため、先頭に `MSYS_NO_PATHCONV=1` を付与して実行してください。
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q -B
 ```
 
 **生成される主なファイル:**
@@ -28,9 +34,14 @@ docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jd
 ローカルのRSTファイルの変更を検知して自動ビルドし、ホストのブラウザでプレビューするためのコマンドです。
 コンテナのポート `8000` をホストにマッピングします。
 
-**実行コマンド (PowerShell / bash 共通):**
+**実行コマンド (PowerShell / macOS・Linux bash):**
 ```bash
 docker run --rm -it -v "${PWD}:/work" -w /work -p 8000:8000 python:3.8-slim bash -c "pip install -q -r requirements.txt && sphinx-autobuild -q --host 0.0.0.0 --port 8000 source build/_html"
+```
+
+**Git Bash (Windows) で実行する場合:**
+```bash
+MSYS_NO_PATHCONV=1 docker run --rm -it -v "${PWD}:/work" -w /work -p 8000:8000 python:3.8-slim bash -c "pip install -q -r requirements.txt && sphinx-autobuild -q --host 0.0.0.0 --port 8000 source build/_html"
 ```
 起動後、ブラウザで [http://localhost:8000](http://localhost:8000) にアクセスすることで、リアルタイムにプレビューを確認できます。
 
@@ -54,7 +65,7 @@ docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest .
 docker run --rm -it -u root -v "${PWD}/docs:/docs" blackpoker-doc:latest
 ```
 
-**一括実行コマンド (bash用):**
+**一括実行コマンド (macOS・Linux bash用):**
 ```bash
 # 1. アクションリスト自動生成
 docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q -B
@@ -64,6 +75,18 @@ docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest .
 
 # 3. ビルド実行
 docker run --rm -it -u root -v "$(pwd)/docs:/docs" blackpoker-doc:latest
+```
+
+**一括実行コマンド (Git Bash on Windows用):**
+```bash
+# 1. アクションリスト自動生成
+MSYS_NO_PATHCONV=1 docker run --rm -v "${PWD}:/project" -w /project/tools/actionlist maven:3.6.2-jdk-11 mvn clean install -DskipTests -q -B
+
+# 2. ドキュメントビルド用Dockerイメージの構築
+docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest .
+
+# 3. ビルド実行
+MSYS_NO_PATHCONV=1 docker run --rm -it -u root -v "/$(pwd)/docs:/docs" blackpoker-doc:latest
 ```
 
 **出力成果物:**
