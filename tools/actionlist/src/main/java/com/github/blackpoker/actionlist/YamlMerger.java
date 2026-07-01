@@ -25,8 +25,15 @@ public class YamlMerger {
             Map<String, Object> map2 = yaml.loadAs(in2, LinkedHashMap.class);
 
             // ① data を丸ごと退避し、両マップから取り除く
-            Object data1 = map1.remove("data");
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data1 = (Map<String, Object>) map1.remove("data");
             map2.remove("data");
+
+            if (data1 == null) {
+                data1 = new LinkedHashMap<>();
+            }
+            // version.json を読み込んで data1 にマージ
+            VersionLoader.applyVersionToData(data1);
 
             // ② 残りをマージ
             Map<String, Object> mergedBody = mergeMaps(map1, map2);

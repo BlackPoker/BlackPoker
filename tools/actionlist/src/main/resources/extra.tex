@@ -117,7 +117,7 @@
 #foreach( $acts in ${actList})
 #if(!${texFn.isTrumpType(${acts.type})})
 #foreach( $row in ${acts.acts})
-#if(${row.frame} && ${row.frame.contains("エクストラ")})
+#if(${texFn.isAvailable(${row}, 'エクストラ', $frames)})
 #renderAction($row "all")
 #end
 #end
@@ -145,7 +145,7 @@
 ## Trumpループ
 #foreach( $nestList in ${trumpList})
 #foreach( $row in ${nestList.trumps})
-#if(${row.frame} && ${row.frame.contains("エクストラ")})
+#if(${texFn.isAvailable(${row}, 'エクストラ', $frames)})
 
 %%%%% Trump %%%%%
 \vspace{6mm} %余白追加
@@ -166,7 +166,7 @@ ${texFn.cnv(${row.trumpAbility})}
 %%%%% Trumpアクション %%%%%
 #if($rel && $rel.acts && $rel.acts.size() > 0)
 #foreach($act in $rel.acts)
-#if(${act.frame} && ${act.frame.contains("エクストラ")})
+#if(${texFn.isAvailable(${act}, 'エクストラ', $frames)})
 #renderAction($act "all")
 #end ##エクストラ frame判定 end
 #end ##foreach end
@@ -175,7 +175,7 @@ ${texFn.cnv(${row.trumpAbility})}
 %%%%% Trumpキャラクター %%%%%
 #if($rel && $rel.chars && $rel.chars.size() > 0)
 #foreach($char in $rel.chars)
-#if(${char.frame} && ${char.frame.contains("エクストラ")})
+#if(${texFn.isAvailable(${char}, 'エクストラ', $frames)})
 \vspace{2mm}
 #renderCharacter($char "all")
 #end ## エクストラ frame判定 end

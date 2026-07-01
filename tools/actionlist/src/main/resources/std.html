@@ -535,20 +535,8 @@
             <li class="active">
               <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">指定なし</a>
             </li>
-            <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エントリー16</a>
-            </li>
-            <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">パック</a>
-            </li>
-            <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">レアパック</a>
-            </li>
-            <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">ストラテジー</a>
-            </li>
-            <li>
-              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab">エクストラ</a>
+            <li th:each="fr : ${frames}">
+              <a class="btn btn-default btn-sm frame-btn" data-toggle="tab" th:text="${fr.name}">フレーム名</a>
             </li>
           </ul>
 
@@ -1007,6 +995,19 @@
   <script src="js/jquery.min.js"></script>
   <script src="js/bootstrap.min.js"></script>
 
+  <script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+    var frameInheritance = {};
+    var framesList = /*[[${frames}]]*/ [];
+    if (framesList) {
+      for (var i = 0; i < framesList.length; i++) {
+        var fr = framesList[i];
+        frameInheritance[fr.name] = fr.inherits || null;
+      }
+    }
+    /*]]>*/
+  </script>
+
   <script type="text/javascript">
     $(function () {
       // カテゴリフィルターの状態を保持する変数
@@ -1123,7 +1124,17 @@
           // フレームフィルターの適用
           if (shouldShow && frameAttr !== "" && selectedFrame && selectedFrame !== "") {
             var frames = frameAttr.split(',');
-            shouldShow = frames.indexOf(selectedFrame) !== -1;
+            function isFrameMatch(selected, list) {
+              if (list.indexOf(selected) !== -1) {
+                return true;
+              }
+              var parent = frameInheritance[selected];
+              if (parent) {
+                return isFrameMatch(parent, list);
+              }
+              return false;
+            }
+            shouldShow = isFrameMatch(selectedFrame, frames);
           }
 
           // カテゴリフィルター1とカテゴリフィルター2のOR条件による適用
