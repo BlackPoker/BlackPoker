@@ -1,0 +1,511 @@
+
+<!DOCTYPE html>
+
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>第9.1版 変更履歴 &#8212; BlackPoker</title>
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/insipid.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script defer src="../_static/insipid.js"></script>
+    <script defer src="../_static/insipid-sidebar.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="第9.0版 変更履歴" href="9.0th.html" />
+    <link rel="prev" title="変更履歴" href="revision-history.html" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+  </head><body>
+    <script type="text/javascript">
+        document.body.classList.add('js');
+    </script>
+    <input type="checkbox" id="sidebar-checkbox" style="display: none;">
+    <label id="overlay" for="sidebar-checkbox"></label>
+    <div class="sidebar-resize-handle"></div>
+    <script type="text/javascript">
+        try {
+            let sidebar = localStorage.getItem('sphinx-sidebar');
+            const sidebar_width = localStorage.getItem('sphinx-sidebar-width');
+            if (sidebar_width) {
+                document.documentElement.style.setProperty('--sidebar-width', sidebar_width);
+            }
+            // show sidebar on wide screen
+            if (!sidebar && window.matchMedia('(min-width: 100rem)').matches) {
+                sidebar = 'visible';
+                // NB: We don't store the value in localStorage!
+            }
+            if (sidebar === 'visible') {
+                document.getElementById('sidebar-checkbox').checked = true;
+            }
+        } catch(e) {
+            console.info(e);
+        }
+    </script>
+    <header id="topbar-placeholder">
+      <div id="topbar">
+        <div id="titlebar">
+          <div class="buttons">
+            <label for="sidebar-checkbox" id="sidebar-button" role="button" tabindex="0" aria-controls="sphinxsidebar" accesskey="M">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"/></svg>
+            </label>
+            <button id="search-button" type="button" title="検索" aria-label="検索" aria-expanded="false" aria-controls="search-form" accesskey="S">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"/></svg>
+            </button>
+          </div>
+          <div class="title">
+            <a class="parent" href="revision-history.html" accesskey="U">変更履歴</a>
+            <a class="top" href="#">第9.1版 変更履歴</a>
+          </div>
+          <div class="buttons">
+            <button id="fullscreen-button" type="button" aria-hidden="true">
+              <span class="enable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M212.686 315.314L120 408l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C10.697 480 0 469.255 0 456V344c0-21.382 25.803-32.09 40.922-16.971L72 360l92.686-92.686c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.249 6.248 6.249 16.378 0 22.627zm22.628-118.628L328 104l-32.922-31.029C279.958 57.851 290.666 32 312.048 32h112C437.303 32 448 42.745 448 56v112c0 21.382-25.803 32.09-40.922 16.971L376 152l-92.686 92.686c-6.248 6.248-16.379 6.248-22.627 0l-25.373-25.373c-6.249-6.248-6.249-16.378 0-22.627z"/></svg>
+              </span>
+              <span class="disable">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M4.686 427.314L104 328l-32.922-31.029C55.958 281.851 66.666 256 88.048 256h112C213.303 256 224 266.745 224 280v112c0 21.382-25.803 32.09-40.922 16.971L152 376l-99.314 99.314c-6.248 6.248-16.379 6.248-22.627 0L4.686 449.941c-6.248-6.248-6.248-16.379 0-22.627zM443.314 84.686L344 184l32.922 31.029c15.12 15.12 4.412 40.971-16.97 40.971h-112C234.697 256 224 245.255 224 232V120c0-21.382 25.803-32.09 40.922-16.971L296 136l99.314-99.314c6.248-6.248 16.379-6.248 22.627 0l25.373 25.373c6.248 6.248 6.248 16.379 0 22.627z"/></svg>
+              </span>
+            </button>
+            <a href="https://github.com/BlackPoker/BlackPoker/" title="Github">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+            </a>
+          </div>
+        </div>
+        <div id="searchbox" role="search">
+          <form id="search-form" class="search" style="display: none" action="../search.html" method="get">
+            <input type="search" name="q" placeholder="検索 ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            <button>検索</button>
+          </form>
+        </div>
+      </div>
+    </header>
+
+    <nav class="relbar">
+      <a class="previous" href="revision-history.html" aria-label="前のトピックへ" accesskey="P">
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            変更履歴
+          </span>
+        </div>
+      </a>
+      <a class="next" href="9.0th.html" aria-label="次のトピックへ" accesskey="N">
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            第9.0版 変更履歴
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+<nav class="crumbs">
+  <ul>
+    <li><a href="../index.html" aria-label="BlackPoker"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z"/></svg></a> &#187;</li>
+    <li><a href="revision-history.html">変更履歴</a> &#187;</li>
+    <li><a href="">第9.1版 変更履歴</a></li> 
+  </ul>
+</nav>
+<section id="id1">
+<h1>第9.1版 変更履歴<a class="headerlink" href="#id1" title="この見出しへのパーマリンク">¶</a></h1>
+<section id="id2">
+<h2>第9.1版アップデートの要点<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<ul class="simple">
+<li><p>構築の考え方を <code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> に分け、BlackPokerにおける構築体験の位置づけを明確化しました。</p></li>
+<li><p>最初の手札に固定して入れる3枚のカード群を、旧称 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> から <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> に改名し、フレーム名 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と区別できるよう整理しました。</p></li>
+<li><p>新しい公式フレームとして <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> を追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> で墓地に移す <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> の範囲を <code class="docutils literal notranslate"><span class="pre">自分のフォグ</span></code> から <code class="docutils literal notranslate"><span class="pre">すべてのフォグ</span></code> に修正しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を、<code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> 配下から <code class="docutils literal notranslate"><span class="pre">能力</span></code> 配下へ移動し、参照しやすい構成に整理しました。</p></li>
+<li><p><a class="reference internal" href="../appendix/design-notes.html#design-notes"><span class="std std-numref">13 付録D: BlackPoker設計ノート</span></a> を追加し、<code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> から <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> までの設計判断記録を収録しました。</p></li>
+</ul>
+</section>
+<section id="id3">
+<h2>文書構成の変更<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id4">
+<h3>対戦レギュレーション章の増補<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a> に <a class="reference internal" href="../match-regulations/match-regulations.html#concept-of-construction"><span class="std std-numref">2.4 構築の考え方</span></a> を追加しました。</p></li>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#concept-of-construction"><span class="std std-numref">2.4 構築の考え方</span></a> には、次の項目を追加しました。</p>
+<ul>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#deck-construction"><span class="std std-numref">2.4.1 デッキ構築</span></a></p></li>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#scenario-construction"><span class="std std-numref">2.4.2 シナリオ構築</span></a></p></li>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#preparation-flow"><span class="std std-numref">2.4.3 対戦準備の流れ</span></a></p></li>
+<li><p><a class="reference internal" href="../match-regulations/match-regulations.html#scenario-deck"><span class="std std-numref">2.4.4 シナリオ手札の定義</span></a></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">対戦レギュレーション</span></code> を決めた後に、プレイヤーが何を構築し、何を選択するのかを説明できるようにしました。</p></li>
+<li><p>一般的なTCGに近い「デッキを作る楽しさ」と、BlackPoker固有の「同じトランプから対戦体験を作る楽しさ」を分けて説明できるようにしました。</p></li>
+</ul>
+</section>
+<section id="id5">
+<h3>フレーム章の増補<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">8 フレーム</span></a> に、フレームが <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の土台になることを反映しました。</p></li>
+<li><p>公式フレーム一覧に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> を追加しました。</p></li>
+<li><p><a class="reference internal" href="../auto/framelist.html#frame-draft"><span class="std std-numref">8.3.1.6 ドラフト</span></a> を新規追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code>、<code class="docutils literal notranslate"><span class="pre">エクストラ</span></code>、<code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> など、ゲーム開始前に選ぶカード群の説明を <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> という用語で統一しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">フレームアクションリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームキャラクターリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札リスト</span></code> の対応表に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> を追加しました。</p></li>
+</ul>
+</section>
+<section id="id6">
+<h3>コアルール章の整理<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> を <a class="reference internal" href="../core/core.html#ability"><span class="std std-numref">9.3 能力</span></a> 配下へ移動し、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> としました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> 内で <code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を参照する箇所も、旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span></code> から新 <a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> へ変更しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> の内容自体は維持しつつ、能力に関する説明を能力章へまとめることで、参照しやすい構成にしました。</p></li>
+</ul>
+</section>
+<section id="d">
+<h3>付録Dの追加<a class="headerlink" href="#d" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><a class="reference internal" href="../appendix/design-notes.html#design-notes"><span class="std std-numref">13 付録D: BlackPoker設計ノート</span></a> を追加しました。</p></li>
+<li><p>BlackPokerの設計判断記録を、<code class="docutils literal notranslate"><span class="pre">BDR</span></code> (BlackPoker Design Record) として整理する方針を追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR</span></code> の採番規則として、識別子形式、時系列順、不変性を定義しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">付録D</span></code> には、次の <code class="docutils literal notranslate"><span class="pre">BDR</span></code> を収録しました。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-1:</span> <span class="pre">カードと効果の分離（スクリプトベースの採用）</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-2:</span> <span class="pre">フェイズ概念の廃止とコアフロー（ステージ）の採用</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-3:</span> <span class="pre">ダメージのプレイヤー限定化とキャラクターへのダメージ廃止</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-4:</span> <span class="pre">「世代交代」ルールによるストーリー性とデッキ枚数差の緩和</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-5:</span> <span class="pre">デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR</span></code> は本文ルールの背景を説明するための記録であり、対戦中の裁定は本文ルールおよび各スクリプト定義に従うことを明記しました。</p></li>
+</ul>
+</section>
+</section>
+<section id="id7">
+<h2>対戦レギュレーション・構築概念の変更<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id8">
+<h3>デッキ構築の定義追加<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> を、ゲームで使用するカードの集合を決めることとして定義しました。</p></li>
+<li><p>BlackPokerでは、使用するフレームによって、トランプから使用するカードを選び、ゲームで使用するカードの母集団を決める準備として整理しました。</p></li>
+<li><p>使用するカードの枚数、含めるスート、含める数字によって、ゲーム中に引けるカードや使える戦略が変わることを説明しました。</p></li>
+</ul>
+</section>
+<section id="id9">
+<h3>シナリオ構築の定義追加<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> を、ゲーム開始前に固定する戦略要素を選び、どのような遊び方・戦い方・体験を作るかを設計する考え方として定義しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> で扱う主な要素として、<code class="docutils literal notranslate"><span class="pre">切札</span></code>、<code class="docutils literal notranslate"><span class="pre">レアカード</span></code>、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> を整理しました。</p></li>
+<li><p>同じトランプを使っていても、対戦前の選択によって、初心者向けの短い対戦、戦略性の高い対戦、大会向けの対戦、物語性を重視した対戦などを作れることを説明しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">エントリー16</span></code> は、<code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> があらかじめ固定された入門向けの遊び方として位置づけました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">マスター＋エクストラ</span></code> は、<code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の両方をプレイヤーが考える、自由度の高い遊び方として位置づけました。</p></li>
+</ul>
+</section>
+<section id="id10">
+<h3>対戦準備の流れの整理<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">対戦準備の流れ</span></code> の基本的な手順を明文化しました。</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">対戦レギュレーション</span></code> を決める。</p></li>
+<li><p>必要に応じて <code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> を行う。</p></li>
+<li><p>必要に応じて <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> を行う。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> で取り分けたカードを除いたデッキをシャッフルする。</p></li>
+<li><p>フレームに従って、ライフ、手札、<code class="docutils literal notranslate"><span class="pre">パック</span></code>、<code class="docutils literal notranslate"><span class="pre">プリセット</span></code> などを配置する。</p></li>
+<li><p>先攻を決め、ゲームを開始する。</p></li>
+</ol>
+</li>
+<li><p>使用するフレームによって、一部の手順が固定されている場合や、一部の手順が不要になる場合があることを補足しました。</p></li>
+</ul>
+</section>
+<section id="id11">
+<h3>シナリオ手札の定義追加<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> を、<code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> によってあらかじめデッキから選んでおくカード群として定義しました。</p></li>
+<li><p>標準的には3枚を想定しています。</p></li>
+<li><p>ゲーム開始前の準備段階では、デッキから取り分け、ゲーム開始時に最初の手札の一部として手元に積み込みます。</p></li>
+<li><p>ゲーム開始後は通常の手札として扱います。</p></li>
+<li><p>ゲーム開始時に山札からランダムに引いて手札に加えるカードは <code class="docutils literal notranslate"><span class="pre">ランダム手札</span></code> として区別しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">マスター＋エクストラ</span></code> では、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> 3枚と <code class="docutils literal notranslate"><span class="pre">ランダム手札</span></code> 4枚を合わせ、合計7枚の手札でゲームを開始する例を追加しました。</p></li>
+</ul>
+</section>
+</section>
+<section id="id12">
+<h2>用語の変更<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id13">
+<h3><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> から <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> への改名<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>従来、最初の手札に固定して入れる3枚のカード群を <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と呼んでいましたが、第9.1版では <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> として整理しました。</p></li>
+<li><p>理由は、フレーム名としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と、最初の手札として選ぶカード群としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> が同じ語になっており、説明上の混乱があったためです。</p></li>
+<li><p>第9.1版では、フレーム名としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> は維持しつつ、カード群としての旧ストラテジーを <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と呼び分けます。</p></li>
+<li><p>旧版の説明資料、サマリー、動画台本、口頭説明では、次のように読み替えてください。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">最初の手札に入れる3枚をストラテジーとして選ぶ。</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">最初の手札に入れる3枚をシナリオ手札として選ぶ。</span></code></p></li>
+</ul>
+</li>
+<li><p>ゲーム開始後の <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> は通常の手札として扱うため、手札制限、<code class="docutils literal notranslate"><span class="pre">ハンデス</span></code>、手札を参照する効果の対象になります。</p></li>
+</ul>
+</section>
+</section>
+<section id="id14">
+<h2>フレームの変更<a class="headerlink" href="#id14" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id15">
+<h3>フレーム対応表の変更<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>フレーム対応表に「ドラフト」を追加しました。</p></li>
+<li><p>ドラフトの対応フォーマットは、ライト、スタンダード、プロが非対応、マスターのみ対応です。</p></li>
+<li><p>ドラフトは、切札、レアカード、パック、シナリオ手札を使うため、マスター向けの上級フレームとして扱います。</p></li>
+</ul>
+</section>
+<section id="id16">
+<h3>ドラフトフレームの追加<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>新フレーム「ドラフト」を追加しました。</p></li>
+<li><p>ドラフトは、デッキの上から作った6個のミニパックを使い、各ミニパックから1枚ずつ選んだ6枚を、レアカード1枚、切札2枚、シナリオ手札3枚に割り振るフレームです。</p></li>
+<li><p>ドラフトの基本手順は次の通りです。</p>
+<ol class="arabic simple">
+<li><p>デッキをシャッフルし、上から3枚ずつ取って6個のミニパックを作成する。</p></li>
+<li><p>各ミニパックを見て1枚を選び、合計6枚を脇に置く。</p></li>
+<li><p>選んだ6枚を、レアカード1枚、切札2枚、シナリオ手札3枚に分ける。</p></li>
+<li><p>ミニパックの残り12枚と残りのデッキを混ぜてシャッフルする。</p></li>
+<li><p>切札、シナリオ手札、レアカード、パック、ライフ、プリセットを配置する。</p></li>
+<li><p>先攻決定後、各プレイヤーはプリセット兵士と表切札1枚を公開してゲームを開始する。</p></li>
+</ol>
+</li>
+<li><p>ドラフトにより、完全な自由選択ではなく、提示されたカードから戦略を組み立てる対戦体験が追加されました。</p></li>
+<li><p>マスター＋エクストラが事前に自由に構築する遊び方であるのに対し、ドラフトはその場で提示されたカードからシナリオを組む遊び方として差別化できます。</p></li>
+</ul>
+</section>
+<section id="id17">
+<h3>ストラテジーフレームの表記変更<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> フレームのゲーム開始手順で、最初の手札に入れる3枚を <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と表記しました。</p></li>
+<li><p>これにより、フレーム名としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と、最初の手札に入れるカード群の名称が混同しないようになりました。</p></li>
+</ul>
+</section>
+<section id="id18">
+<h3>エクストラフレームの表記変更<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> フレームのゲーム開始手順で、最初の手札に入れる3枚を <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と表記しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> では、<code class="docutils literal notranslate"><span class="pre">切札</span></code> 2枚、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> 3枚、<code class="docutils literal notranslate"><span class="pre">レアカード</span></code> 1枚を事前に選択するため、<code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の代表的なフレームとして位置づけが明確になりました。</p></li>
+</ul>
+</section>
+<section id="id19">
+<h3>フレームアクション・コンポーネント対応表の変更<a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">フレームアクションリスト</span></code> の対応表に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> 列を追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">パック操作</span></code>、<code class="docutils literal notranslate"><span class="pre">レアカード操作</span></code>、<code class="docutils literal notranslate"><span class="pre">切札操作</span></code>、<code class="docutils literal notranslate"><span class="pre">切札関連アクション</span></code> は、<code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> でも使用できるように整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">フレームキャラクターリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札リスト</span></code> についても、<code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> で使用できるものを対応表に反映しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> は、使用できるアクション・切札 of 範囲としては <code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> に近く、準備方法が異なるフレームとして扱えます。</p></li>
+</ul>
+</section>
+</section>
+<section id="id20">
+<h2>共通ルールの変更<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id21">
+<h3><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> 処理修正<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の効果を修正しました。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">自分のフォグにあるカードを全て墓地に移す。</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">すべてのフォグにあるカードを全て墓地に移す。</span></code></p></li>
+</ul>
+</li>
+<li><p>これにより、自分の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> だけでなく、対戦相手側の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> もエンド時に墓地へ移ることが明確になりました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">アップ</span></code>、<code class="docutils literal notranslate"><span class="pre">ダウン</span></code>、<code class="docutils literal notranslate"><span class="pre">フォース</span></code>、<code class="docutils literal notranslate"><span class="pre">クローズ</span></code> など、このターンのみ影響する <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> は、ターン終了時にまとめて消える前提で扱います。</p></li>
+<li><p>実戦時は、エンド解決時に両プレイヤーの <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> 領域を確認し、残っている <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> をすべて墓地に移してください。</p></li>
+</ul>
+</section>
+</section>
+<section id="id22">
+<h2>コアルールの変更<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id23">
+<h3><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> の配置変更<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を、<a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> 配下から <a class="reference internal" href="../core/core.html#ability"><span class="std std-numref">9.3 能力</span></a> 配下へ移動しました。</p></li>
+<li><p>第9.0版では <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> でしたが、第9.1版では <a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> となります。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> 内で <code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を参照する箇所も、旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span></code> から新 <a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> へ変更しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> の内容自体は維持しつつ、能力に関する説明を能力章へまとめることで、参照しやすい構成にしました。</p></li>
+<li><p>旧版の資料で <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> と案内している場合は、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> に修正してください。</p></li>
+</ul>
+</section>
+</section>
+<section id="id24">
+<h2>設計ノートの追加<a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="bdr">
+<h3>BDRの追加<a class="headerlink" href="#bdr" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">付録D:</span> <span class="pre">BlackPoker設計ノート</span></code> に、<code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> から <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> までを追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> では、カードそのものと効果を分離し、スクリプトベースで定義する方針を整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-2</span></code> では、フェイズ概念を廃止し、<code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> (ステージ) を採用する判断を整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-3</span></code> では、ダメージをプレイヤー限定とし、キャラクターへのダメージを廃止する判断を整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-4</span></code> では、<code class="docutils literal notranslate"><span class="pre">世代交代</span></code> ルールによるストーリー性とデッキ枚数差の緩和を整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> では、<code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> を分離し、<code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> を公式化する判断を整理しました。</p></li>
+<li><p>第9.1版における構築概念の変更は、主に <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> の設計判断に対応します。</p></li>
+</ul>
+</section>
+</section>
+<section id="id25">
+<h2>プレイヤー向け確認チェックリスト<a class="headerlink" href="#id25" title="この見出しへのパーマリンク">¶</a></h2>
+<ul class="simple">
+<li><p>第9.1版では、構築を <code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> に分けて考えます。</p></li>
+<li><p>旧称 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> として積み込んでいた最初の3枚は、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と呼びます。</p></li>
+<li><p>ゲーム開始後の <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> は通常の手札として扱います。</p></li>
+<li><p>フレーム名 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と、カード群としての旧称 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> を混同しないようにします。</p></li>
+<li><p>新フレーム <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> は <code class="docutils literal notranslate"><span class="pre">マスター</span></code> 専用です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> では、6個の <code class="docutils literal notranslate"><span class="pre">ミニパック</span></code> から選んだ6枚で、<code class="docutils literal notranslate"><span class="pre">レアカード</span></code>、<code class="docutils literal notranslate"><span class="pre">切札</span></code>、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> を構築します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> では、使用できるアクションや切札の範囲は <code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> に近いですが、対戦前の選び方が異なります。</p></li>
+<li><p>エンド時には、自分の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> だけでなく、すべての <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> を墓地へ移します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を確認する場合は、旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span></code> ではなく、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> を参照します。</p></li>
+<li><p>第9.1版の設計背景を確認する場合は、<code class="docutils literal notranslate"><span class="pre">付録D</span></code>、特に <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> を参照します。</p></li>
+</ul>
+</section>
+<section id="id26">
+<h2>関連資料の更新ポイント<a class="headerlink" href="#id26" title="この見出しへのパーマリンク">¶</a></h2>
+<ul class="simple">
+<li><p>旧資料で <code class="docutils literal notranslate"><span class="pre">最初の手札3枚をストラテジーとして選ぶ</span></code> と説明している箇所は、<code class="docutils literal notranslate"><span class="pre">最初の手札3枚をシナリオ手札として選ぶ</span></code> に差し替えてください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> という語を使う場合は、フレーム名を指すのか、旧称のカード群を指しているのか確認してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の説明は、<code class="docutils literal notranslate"><span class="pre">すべてのフォグにあるカードを全て墓地に移す</span></code> に統一してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> 追加に伴い、<code class="docutils literal notranslate"><span class="pre">フレーム対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームアクション対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームキャラクター対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグ対応表</span></code> を更新してください。</p></li>
+<li><p>旧版で <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> と案内している箇所は、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> へ修正してください。</p></li>
+</ul>
+</section>
+</section>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+
+            <p class="logo"><a href="../index.html">
+              <img class="logo" src="../_static/blackpoker_logo.svg" alt="Logo"/>
+            </a></p>
+          <div class="sidebar-resize-handle"></div>
+
+<h3><a href="../index.html">目次</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../init/init.html">1. はじめに</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../match-regulations/match-regulations.html">2. 対戦レギュレーション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common.html">3. 共通ルール: 基本</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-component.html">4. 共通ルール: コンポーネント</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-action.html">5. 共通ルール: アクション</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../common/common-etc.html">6. 共通ルール: その他</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../format/format.html">7. フォーマット</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frame/frame.html">8. フレーム</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../core/core.html">9. コアルール</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/pdf-links.html">10. 付録A: PDF版ルール・リスト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/anniversary.html">11. 付録B: 周年大会記録</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/guidelines.html">12. 付録C: ガイドライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/design-notes.html">13. 付録D: BlackPoker設計ノート</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="revision-history.html">変更履歴</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../afterword.html">あとがき</a></li>
+</ul>
+
+<div><hr class="docutils"></div>
+<ul>
+  <li class="toctree-l1"><a class="reference internal" href="../genindex.html" accesskey="I">総合索引</a></li>
+</ul>
+<div id="ethical-ad-placement"></div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+    <nav class="relbar">
+      <a class="previous" href="revision-history.html" aria-label="前のトピックへ" >
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M257.5 445.1l-22.2 22.2c-9.4 9.4-24.6 9.4-33.9 0L7 273c-9.4-9.4-9.4-24.6 0-33.9L201.4 44.7c9.4-9.4 24.6-9.4 33.9 0l22.2 22.2c9.5 9.5 9.3 25-.4 34.3L136.6 216H424c13.3 0 24 10.7 24 24v32c0 13.3-10.7 24-24 24H136.6l120.5 114.8c9.8 9.3 10 24.8.4 34.3z"/></svg>
+        </div>
+        <div class="title">
+          <span class="text">
+            <span class="direction">前へ</span>
+            変更履歴
+          </span>
+        </div>
+      </a>
+      <a class="next" href="9.0th.html" aria-label="次のトピックへ" >
+        <div class="title">
+          <span class="text">
+            <span class="direction">次へ</span>
+            第9.0版 変更履歴
+          </span>
+        </div>
+        <div class="icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!-- Font Awesome Free 5.15.4 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) --><path d="M190.5 66.9l22.2-22.2c9.4-9.4 24.6-9.4 33.9 0L441 239c9.4 9.4 9.4 24.6 0 33.9L246.6 467.3c-9.4 9.4-24.6 9.4-33.9 0l-22.2-22.2c-9.5-9.5-9.3-25 .4-34.3L311.4 296H24c-13.3 0-24-10.7-24-24v-32c0-13.3 10.7-24 24-24h287.4L190.9 101.2c-9.8-9.3-10-24.8-.4-34.3z"/></svg>
+        </div>
+      </a>
+    </nav>
+  
+
+  <style>
+    /* Sidebar header (and topbar for mobile) */
+    .wy-side-nav-search, .wy-nav-top {
+      background: black;
+    }
+    .wy-side-nav-search>div.version {
+      color: #fff;
+    }
+
+  </style>
+<!--   
+    <div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+      <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Read the Docs</span>
+        v: latest
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+          
+            <dd><a href="#">latest</a></dd>
+            <dd><a href="#">1.0</a></dd>
+            <dd><a href="#">1.1</a></dd>
+          
+        </dl>
+        <dl>
+          <dt>Downloads</dt>
+          <dd><a href="#">PDF</a></dd>
+          <dd><a href="#">ePub</a></dd>
+          <dd><a href="#">HTML</a></dd>
+        </dl>
+        <dl>
+          
+          <dt>On Read the Docs</dt>
+            <dd>
+              <a href="#">Project Home</a>
+            </dd>
+            <dd>
+              <a href="#">Builds</a>
+            </dd>
+        </dl>
+        <dl>
+          <dt>Debug</dt>
+          <dd><a href="#" data-toggle="rst-debug-badge">Swap badge position</a></dd>
+        </dl>
+      </div>
+    </div> -->
+  
+
+  </body>
+</html>

@@ -131,21 +131,21 @@
 <section id="common-component-rst">
 <span id="id1"></span><h1><span class="section-number">4. </span>共通ルール: コンポーネント<a class="headerlink" href="#common-component-rst" title="この見出しへのパーマリンク">¶</a></h1>
 <p>この章では、各コンポーネントの詳細な構造や振る舞いについて説明します。</p>
-<p>各コンポーネントは、配置先の「領域（ゾーン）」に置かれて使用されます。
-詳細は共通ルール <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> を参照してください。</p>
+<p>各コンポーネントは、配置先の「領域(ゾーン)」に置かれて使用されます。
+詳細は共通ルール <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域(ゾーン)</span></a> を参照してください。</p>
 <section id="id2">
 <h2><span class="section-number">4.1. </span>コンポーネントの概要<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
-<p id="index-0"><strong>コンポーネント</strong> は、各 <strong>領域（ゾーン）</strong> に「何が置かれ、どう扱うか」を決める <strong>対象の種類</strong> の総称です。
-将棋の比喩で言えば、盤上に歩が何枚あっても“歩という定義は 1 つ”であるのと同じで、BlackPoker でも <strong>定義（= コンポーネントスクリプト）</strong> があり、その定義に合致する <strong>ユニット（盤面の実体）</strong> が複数存在し得ます。</p>
+<p id="index-0"><strong>コンポーネント</strong> は、各 <strong>領域(ゾーン)</strong> に「何が置かれ、どう扱うか」を決める <strong>対象の種類</strong> の総称です。
+将棋の比喩で言えば、盤上に歩が何枚あっても“歩という定義は 1 つ”であるのと同じで、BlackPoker でも <strong>定義(= コンポーネントスクリプト)</strong> があり、その定義に合致する <strong>ユニット(盤面の実体)</strong> が複数存在し得ます。</p>
 <section id="id3">
 <h3><span class="section-number">4.1.1. </span>用語の要点<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h3>
 <dl>
 <dt><strong>コンポーネント種別</strong></dt><dd><p>各 <strong>ゾーン</strong> に置かれる要素の “種類” を表す分類です。
-ゾーンと 1 対 1 で対応し（対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> ）、
-その種別の中に個々の <strong>コンポーネントスクリプト</strong> （定義）が並びます。</p>
+ゾーンと 1 対 1 で対応し(対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域(ゾーン)</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> )、
+その種別の中に個々の <strong>コンポーネントスクリプト</strong> (定義)が並びます。</p>
 <p>例：場 - <strong>キャラクター</strong> 、フォグ領域 - <strong>フォグ</strong> 、切札領域 - <strong>切札</strong> 、ライフ領域 - <strong>ライフ</strong> など。</p>
 </dd>
-<dt><strong>コンポーネントスクリプト（= 定義）</strong></dt><dd><p>種別の中にある個別の定義です。</p>
+<dt><strong>コンポーネントスクリプト(= 定義)</strong></dt><dd><p>種別の中にある個別の定義です。</p>
 <p>例：キャラクター種別の中の《一般兵》《防壁》など</p>
 </dd>
 <dt><strong>ユニット</strong></dt><dd><p>盤面に存在する <strong>実体</strong> ( 1 体 = 1 枚以上のカードのまとまり)。
@@ -158,7 +158,7 @@
 <h3><span class="section-number">4.1.2. </span>コンポーネントスクリプトの共通・必須項目<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
 <p>すべてのコンポーネントスクリプトは、次の 2 項目を <strong>必ず</strong> 持ちます。</p>
 <dl class="simple">
-<dt><strong>領域（ゾーン）</strong></dt><dd><p>このスクリプトが属する置き場（例：場／フォグ領域／切札領域）。ゾーンの一覧は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> を参照。</p>
+<dt><strong>領域(ゾーン)</strong></dt><dd><p>このスクリプトが属する置き場(例：場／フォグ領域／切札領域)。ゾーンの一覧は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域(ゾーン)</span></a> を参照。</p>
 </dd>
 <dt><strong>ユニット条件</strong></dt><dd><p>盤面上のどのユニットをこのスクリプトの <strong>コンポーネントとして扱うか</strong> を定める条件。
 例：キャラクター《一般兵》なら「数字 2〜10」。</p>
@@ -166,10 +166,10 @@
 </dl>
 </section>
 <section id="id5">
-<h3><span class="section-number">4.1.3. </span>ユニットとコンポーネントスクリプトの対応（共通原則）<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
+<h3><span class="section-number">4.1.3. </span>ユニットとコンポーネントスクリプトの対応(共通原則)<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
 <p>ユニットとスクリプトの <strong>対応が決まる仕組み</strong> を説明します。</p>
 <dl class="simple">
-<dt><strong>対応の判定（常時・自動）</strong></dt><dd><p>ルールは盤面上の全 <strong>ユニット</strong> について、各スクリプトの <strong>ゾーン</strong> と <strong>ユニット条件</strong> を常時評価します。
+<dt><strong>対応の判定(常時・自動)</strong></dt><dd><p>ルールは盤面上の全 <strong>ユニット</strong> について、各スクリプトの <strong>ゾーン</strong> と <strong>ユニット条件</strong> を常時評価します。
 <strong>ゾーン</strong> が一致し、かつ <strong>ユニット条件</strong> を満たしたユニットは、そのスクリプトの <strong>コンポーネントとして扱います</strong> 。
 どちらかを満たさないユニットは、そのスクリプトとしては扱いません。</p>
 </dd>
@@ -178,12 +178,12 @@
 </dd>
 </dl>
 <section id="id6">
-<h4><span class="section-number">4.1.3.1. </span>例：一般兵（キャラクター）<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h4>
+<h4><span class="section-number">4.1.3.1. </span>例：一般兵(キャラクター)<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><strong>ゾーン</strong> ：場</p></li>
 <li><p><strong>コンポーネントスクリプト名</strong> ：一般兵</p></li>
 <li><p><strong>ユニット条件</strong> ：数字 2〜10</p></li>
-<li><p><strong>解釈</strong> ：盤面のユニットが数字 2〜10 のとき、そのユニットは「一般兵（種別：キャラクター）」として扱われ、アクションや能力で「一般兵」を参照する際の対象になります。</p></li>
+<li><p><strong>解釈</strong> ：盤面のユニットが数字 2〜10 のとき、そのユニットは「一般兵(種別：キャラクター)」として扱われ、アクションや能力で「一般兵」を参照する際の対象になります。</p></li>
 </ul>
 </section>
 </section>
@@ -192,11 +192,11 @@
 <p>この先は、 <strong>スクリプト一覧</strong> を持つ <strong>コンポーネント種別</strong> のみを個別節で詳しく説明します。
 一方、 <strong>スクリプト一覧</strong> を持たない種別は、本節末の <strong>補足：スクリプト一覧のない種別</strong> にて、公開レベルや移動規則などの要点のみをまとめ、そこで説明を完結させます。</p>
 <dl class="simple">
-<dt><strong>ゾーン - コンポーネント種別</strong></dt><dd><p>1 対 1 で対応します（対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> を参照）。</p>
+<dt><strong>ゾーン - コンポーネント種別</strong></dt><dd><p>1 対 1 で対応します(対応表は <a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域(ゾーン)</span></a> の <a class="reference internal" href="common.html#zone-component"><span class="std std-numref">Table 3.2</span></a> を参照)。</p>
 </dd>
-<dt><strong>スクリプト一覧：あり</strong></dt><dd><p>種別（例：キャラクター／フォグ／切札）は、共通項目（ <strong>ゾーン</strong> / <strong>ユニット条件</strong> ）に加えて、種別の <strong>固有項目</strong> と <strong>スクリプト一覧</strong> を示します。</p>
+<dt><strong>スクリプト一覧：あり</strong></dt><dd><p>種別(例：キャラクター／フォグ／切札)は、共通項目( <strong>ゾーン</strong> / <strong>ユニット条件</strong> )に加えて、種別の <strong>固有項目</strong> と <strong>スクリプト一覧</strong> を示します。</p>
 </dd>
-<dt><strong>スクリプト一覧：なし</strong></dt><dd><p>種別（例：ライフ／墓地／手札／パック／レアカード）は、 <strong>公開レベルや移動規則などの枠組み</strong> のみをルール化し、スクリプト一覧は持ちません。</p>
+<dt><strong>スクリプト一覧：なし</strong></dt><dd><p>種別(例：ライフ／墓地／手札／パック／レアカード)は、 <strong>公開レベルや移動規則などの枠組み</strong> のみをルール化し、スクリプト一覧は持ちません。</p>
 </dd>
 </dl>
 <p>それでは、各 <strong>スクリプト一覧：あり</strong> の <strong>コンポーネント種別</strong> を順に見ていきます。</p>
@@ -211,11 +211,11 @@
 <li><p>レアカード</p></li>
 </ul>
 <p>ここでは、 <strong>スクリプト一覧</strong> を持たないコンポーネント種別の運用だけを簡潔にまとめます。
-各ゾーンの役割は共通ルールの <strong>領域（ゾーン）</strong> (<a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域（ゾーン）</span></a>) を、公開／非公開の扱いは (<a class="reference internal" href="common-etc.html#common-etc-publevel"><span class="std std-numref">6.1 公開レベル</span></a>) を参照してください。</p>
+各ゾーンの役割は共通ルールの <strong>領域(ゾーン)</strong> (<a class="reference internal" href="common.html#zone-section"><span class="std std-numref">3.5 領域(ゾーン)</span></a>) を、公開／非公開の扱いは (<a class="reference internal" href="common-etc.html#common-etc-publevel"><span class="std std-numref">6.1 公開レベル</span></a>) を参照してください。</p>
 <section id="id9">
 <h5><span class="section-number">4.1.4.1.1. </span>共通原則<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h5>
 <ul class="simple">
-<li><p>これらの種別には <strong>個別のコンポーネントスクリプト（定義）</strong> は存在しません。
+<li><p>これらの種別には <strong>個別のコンポーネントスクリプト(定義)</strong> は存在しません。
 したがって <strong>ユニット条件</strong> による一致・不一致の概念は適用されません。</p></li>
 </ul>
 </section>
@@ -330,7 +330,7 @@
 </dl>
 <dl class="simple" id="index-12">
 <dt>能力</dt><dd><p>切札が表になった際に発揮する特殊効果を記載します。
-能力の内容や発動条件は、エクストラリスト（切札リスト）に定義されています。</p>
+能力の内容や発動条件は、エクストラリスト(切札リスト)に定義されています。</p>
 </dd>
 </dl>
 </section>
@@ -375,7 +375,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#id2">4.1. コンポーネントの概要</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id3">4.1.1. 用語の要点</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id4">4.1.2. コンポーネントスクリプトの共通・必須項目</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id5">4.1.3. ユニットとコンポーネントスクリプトの対応（共通原則）</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id5">4.1.3. ユニットとコンポーネントスクリプトの対応(共通原則)</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id7">4.1.4. この先の読み方</a></li>
 </ul>
 </li>
@@ -406,6 +406,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../appendix/pdf-links.html">10. 付録A: PDF版ルール・リスト</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix/anniversary.html">11. 付録B: 周年大会記録</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../appendix/guidelines.html">12. 付録C: ガイドライン</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../appendix/design-notes.html">13. 付録D: BlackPoker設計ノート</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../revision-history/revision-history.html">変更履歴</a></li>

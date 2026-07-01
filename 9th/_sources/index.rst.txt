@@ -24,6 +24,7 @@ release: |release|
     appendix/pdf-links
     appendix/anniversary
     appendix/guidelines
+    appendix/design-notes
 
 .. raw:: latex
 
