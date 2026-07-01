@@ -59,10 +59,10 @@ sequenceDiagram
 ## パターンA：新規の版数（例: 9.0版）を作成し、新しいブランチを作る場合
 もともと `9th` のようなリリース用ブランチが存在しない場合の操作手順です。
 
-1. **変更箇所のドキュメント・ページの作成**
-    * Wikiに「9th edition changes」など変更箇所をまとめたページを作成します。
-2. **README.mdに新版のリンクを追加**
-    * 変更箇所をまとめたWikiページへのリンクを `README.md` に追加します。
+1. **変更履歴RSTファイルの作成**
+    * `source/revision-history/` 配下に新しく `9.2th.rst` などの変更履歴RSTファイルを作成し、変更箇所をまとめます（前バージョンのファイルをコピーして流用すると便利です）。
+2. **変更履歴一覧（toctree）への追加**
+    * `source/revision-history/revision-history.rst` の `toctree` ディレクティブの先頭に、新しく作成したファイル名（例: `9.2th`）を追記してリストに登録します。
 3. **GitHub上での新ブランチ作成**
     * GitHubのリポジトリトップページ（ [BlackPoker/BlackPoker](https://github.com/BlackPoker/BlackPoker) ）にアクセスします。
     * 左上にあるブランチ選択ドロップダウン（通常は `master` が選択されています）をクリックします。
@@ -76,7 +76,12 @@ sequenceDiagram
 ## パターンB：既存の版数（例: 9.1版）をリリースし、既存ブランチに反映する場合
 すでに `9th` のようなリリース用ブランチが存在し、`master` に加えた複数の修正をそのブランチに反映（マージ）する場合の操作手順です。
 
-1. **GitHubでPull Request（PR）を作成する**
+1. **バージョン情報の更新 (version.json)**
+    * `tools/actionlist/original/version.json` を開き、以下の内容を編集して `master` ブランチにコミットします。
+      * `ver`: 新しいバージョン名（例: `第9.1.0版`）
+      * `lastupdate`: リリース日（例: `2026/07/02`）
+      * ※これにより、ビルドされるHTML/PDFドキュメントやアクションリスト内のバージョン情報が自動的に一括更新されます。
+2. **GitHubでPull Request（PR）を作成する**
     * GitHubの [Pull Requests タブ](https://github.com/BlackPoker/BlackPoker/pulls) を開きます。
     * 右上の **「New pull request」** ボタンをクリックします。
     * 比較対象となるブランチを選択します：
@@ -84,7 +89,7 @@ sequenceDiagram
         * 右側の **compare:** に、反映元となる `master` を選択します。
     * **「Create pull request」** ボタンをクリックします。
     * タイトル（例: `Release 9.1`）を入力し、再度 **「Create pull request」** をクリックしてPRを起票します。
-2. **PRをマージする**
+3. **PRをマージする**
     * 自動ビルド・テストがパスしたことを確認します。
     * PRページの下部にある **「Merge pull request」** をクリックし、**「Confirm merge」** をクリックしてマージを完了します。
 
