@@ -54,24 +54,72 @@ sequenceDiagram
 
 # リリース手順
 
-リリースする際は、次の手順を行います。
+リリース作業には、新しいブランチ（例：`9th`）を**新規作成する場合（パターンA）**と、すでに存在するブランチに**マージする場合（パターンB）**の2つのパターンがあります。それぞれGitHub上での操作手順が異なります。
 
-## 新版作成時
+## パターンA：新規の版数（例: 9.0版）を作成し、新しいブランチを作る場合
+もともと `9th` のようなリリース用ブランチが存在しない場合の操作手順です。
 
-新しい版数を制定する際は、次の手順を追加で行います。
+1. **変更履歴RSTファイルの作成**
+    * `source/revision-history/` 配下に新しく `9.2th.rst` などの変更履歴RSTファイルを作成し、変更箇所をまとめます（前バージョンのファイルをコピーして流用すると便利です）。
+2. **変更履歴一覧（toctree）への追加**
+    * `source/revision-history/revision-history.rst` の `toctree` ディレクティブの先頭に、新しく作成したファイル名（例: `9.2th`）を追記してリストに登録します。
+3. **GitHub上での新ブランチ作成**
+    * GitHubのリポジトリトップページ（ [BlackPoker/BlackPoker](https://github.com/BlackPoker/BlackPoker) ）にアクセスします。
+    * 左上にあるブランチ選択ドロップダウン（通常は `master` が選択されています）をクリックします。
+    * 入力欄に新しいブランチ名（例: `9th`）を入力します。
+    * ドロップダウンの下部に表示される **「Create branch: 9th from 'master'」** をクリックします。これで `master` の最新状態を引き継いだ `9th` ブランチが作成されます。
+4. **Issueテンプレートの更新**
+    * 新しいリリース用ブランチに合わせて、`.github/ISSUE_TEMPLATE/release-task.md` 内に記載されている `Xth` などのブランチ名の記述箇所を新しいブランチ名に書き換えて `master` にコミットします。
 
-1. 変更箇所のページを作成
-    * wikiに「7th edition changes」など変更箇所をまとめたページを作成
-1. README.mdに新版のリンクを追加
-    * 変更箇所をまとめたページへのリンクを追加
-1. ブランチ作成
-    * 6thや7thなど新版のブランチを作成
-    * release-task.mdの6thなどを新版に更新
+---
 
-## リリース時
+## パターンB：既存の版数（例: 9.1版）をリリースし、既存ブランチに反映する場合
+すでに `9th` のようなリリース用ブランチが存在し、`master` に加えた複数の修正をそのブランチに反映（マージ）する場合の操作手順です。
 
-リリース作業は、次のissueを発行して行います。
+1. **バージョン情報の更新 (version.json)**
+    * `tools/actionlist/original/version.json` を開き、以下の内容を編集して `master` ブランチにコミットします。
+      * `ver`: 新しいバージョン名（例: `第9.1.0版`）
+      * `lastupdate`: リリース日（例: `2026/07/02`）
+      * ※これにより、ビルドされるHTML/PDFドキュメントやアクションリスト内のバージョン情報が自動的に一括更新されます。
+2. **GitHubでPull Request（PR）を作成する**
+    * GitHubの [Pull Requests タブ](https://github.com/BlackPoker/BlackPoker/pulls) を開きます。
+    * 右上の **「New pull request」** ボタンをクリックします。
+    * 比較対象となるブランチを選択します：
+        * 左側の **base:** に、反映先となるリリースブランチ（例: `9th`）を選択します。
+        * 右側の **compare:** に、反映元となる `master` を選択します。
+    * **「Create pull request」** ボタンをクリックします。
+    * タイトル（例: `Release 9.1`）を入力し、再度 **「Create pull request」** をクリックしてPRを起票します。
+3. **PRをマージする**
+    * 自動ビルド・テストがパスしたことを確認します。
+    * PRページの下部にある **「Merge pull request」** をクリックし、**「Confirm merge」** をクリックしてマージを完了します。
+
+### 💡 注意：マージ後の「recent pushes」表示について
+PRをマージした直後、GitHubのトップページ等に **「`Xth had recent pushes XX minutes ago`」** という黄色いバナーが表示されることがあります。
+
+* **原因**: GitHubが「更新されたブランチ（`Xth`）からデフォルトブランチへの逆向きのPull Requestを作りませんか？」と自動でリコメンドしている表示です。
+* **対応**: 今回のリリース作業では、`master` から `Xth` への反映が目的であり、逆向きのPRは不要です。したがって、この表示は**完全に無視（スルー）**して問題ありません。（「Compare & pull request」ボタンは押さずに無視してください）
+
+---
+
+## GitHubでのリリース（タグ）作成手順
+マージ完了後、または新ブランチ作成後に正式なリリースバージョン（例：`v9.0.1` などのタグ）を発行する手順です。
+
+1. **Releases ページを開く**
+    * GitHubの [Releases ページ](https://github.com/BlackPoker/BlackPoker/releases) を開きます。
+2. **ドラフトの作成開始**
+    * 右上にある **「Draft a new release」** ボタンをクリックします。
+3. **リリースの設定入力**
+    * **Choose a tag**: 新しいバージョンタグを入力します（例: `v9.0.1` や `v9.1.0`）。入力後、直下に表示される **「Create new tag: vX.Y.Z on publish」** をクリックします。
+    * **Target**: リリース対象のブランチを選択します。
+      * デフォルトは `master` になっていますが、必ず**リリース用ブランチ（例: `9th` などの対象ブランチ）**に変更してください。
+    * **Release title**: リリース名を入力します。通常はタグ名と同じ `vX.Y.Z` で問題ありません。
+    * **Description**: リリース内容の説明を記載します（例: 変更内容や対応したIssueへのリンクなど）。
+4. **リリースの発行**
+    * ページ最下部にある緑色の **「Publish release」** ボタンをクリックします。これでタグが作成され、リリースが公開されます。
+
+---
+
+## リリース用Issueの起票
+実際のリリース作業は、以下のリンクからIssueを発行し、そのチェックリストに沿って進めます。手順の全体像はIssue内にすべて記載されています。
 
 [Release-issue作成リンク](https://github.com/BlackPoker/BlackPoker/issues/new?assignees=BlackPoker&labels=task&projects=&template=release-task.md&title=%5BReleaseTask%5D+)
-
-issue内に必要な作業は記載されています。
