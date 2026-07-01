@@ -43,8 +43,11 @@ rst
 
 
 **Finish**
-- [ ] merge(master->Xth)
-- [ ] Xth build
-- [ ] Xth tag
+- [ ] masterの変更をリリース用ブランチ（Xth）に反映（マージ）する
+  * ※具体的な画面操作手順は [github-setting.md (リリース手順)](https://github.com/BlackPoker/BlackPoker/blob/master/dev-notes/github-setting.md#%E3%83%AA%E3%83%AA%E3%83%BC%E3%83%B9%E6%89%8B%E9%A0%86) を参照してください。
+  * **PR作成用ショートカット**: [master から Xth への PR を作成する](https://github.com/BlackPoker/BlackPoker/compare/Xth...master?expand=1)
+- [ ] Xth build (マージ後の自動ビルド確認)
+- [ ] Xth tag (GitHub上でリリースタグを作成する)
+  * **リリース作成ページ**: [Releases ページ](https://github.com/BlackPoker/BlackPoker/releases) の「Draft a new release」から、タグ名（例: `v9.1`）を入力し、Targetブランチに `Xth` を指定してリリースを発行します。
 - [ ] close milestone
 - [ ] archive the project's done
