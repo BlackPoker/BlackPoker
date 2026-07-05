@@ -1,4 +1,6 @@
 {
   "ver": "第9.1版",
-  "lastupdate": "2026/06/30"
+  "lastupdate": "2026/06/30",
+  "target_ver": "9.1",
+  "beta": false
 }
