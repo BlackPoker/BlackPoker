@@ -188,7 +188,7 @@ actList:
       actTarget: 兵士1体
       actActCond: 自分の表切札に「スラッシュ」がある
       actEffect: |-
-        対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーカードのサイズに等しい。
+        対象の兵士のサイズが X 以下なら、その兵士を墓地に移す。X はキーユニットのサイズに等しい。
       since: ex3.4.0
       update: v8.1, v9.0
       changed: changed
@@ -540,7 +540,7 @@ actList:
       actCost: C
       actActCond: 自分の表切札に「ファントム」がある
       actEffect: |-
-        キーカードの防壁をチャージ状態の兵士にする。
+        キーユニットの防壁をチャージ状態の兵士にする。
       since: ex5.30.0
       update: v8.2
 
@@ -990,7 +990,7 @@ actList:
       actActCond: 自分の表切札に「スイッチ」がある
       actEffect: |-
         1. 手札からカードを1枚選び、兵士としてチャージ状態で場に出す。
-        2. キーカードを手札に戻す。
+        2. キーユニットを手札に戻す。
       since: ex3.4.0
       update: v8.1
 
