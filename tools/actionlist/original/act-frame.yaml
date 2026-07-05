@@ -1183,7 +1183,6 @@ charList:
     - frame: |-
         ・エクストラ
       charName: リアニメーター
-      ruby: りあにめーたー
       charId: reanimator
       charType: 兵士
       charKey: ♠J と ♡2〜10
