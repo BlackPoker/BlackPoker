@@ -180,7 +180,7 @@
 \contentsline {subsubsection}{\numberline {8.3.2.10}切札\spadesym {} J リアニメーター}{78}{subsubsection.8.3.2.10}%
 \contentsline {paragraph}{\numberline {8.3.2.10.1}\ruby [g]{リアニメーター召喚}{リアニメーターしょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ BL}{78}{paragraph.8.3.2.10.1}%
 \contentsline {paragraph}{\numberline {8.3.2.10.2}\ruby [g]{クイックリアニメーター召喚}{クイックリアニメーターしょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}クイック | \$ D}{78}{paragraph.8.3.2.10.2}%
-\contentsline {paragraph}{\numberline {8.3.2.10.3}\ruby [g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ C}{79}{paragraph.8.3.2.10.3}%
+\contentsline {paragraph}{\numberline {8.3.2.10.3}\ruby [g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ C}{78}{paragraph.8.3.2.10.3}%
 \contentsline {paragraph}{\numberline {8.3.2.10.4}\ruby [g]{リアニメーター再生}{リアニメーターさいせい} (切札操作) @誘発\sphinxhyphen {}即時\sphinxhyphen {}クイック}{79}{paragraph.8.3.2.10.4}%
 \contentsline {subsubsection}{\numberline {8.3.2.11}切札\spadesym {} K 魔王}{79}{subsubsection.8.3.2.11}%
 \contentsline {paragraph}{\numberline {8.3.2.11.1}\ruby [g]{魔王召喚}{まおうしょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ SS}{79}{paragraph.8.3.2.11.1}%
@@ -192,8 +192,8 @@
 \contentsline {paragraph}{\numberline {8.3.2.13.2}\ruby [g]{クイック兵士召喚\heartsym {} }{クイックへいししょうかんハート} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}クイック | \$ D}{81}{paragraph.8.3.2.13.2}%
 \contentsline {subsubsection}{\numberline {8.3.2.14}切札\heartsym {} 4 休戦}{81}{subsubsection.8.3.2.14}%
 \contentsline {paragraph}{\numberline {8.3.2.14.1}\ruby [g]{休戦}{きゅうせん} (魔法) @直接\sphinxhyphen {}即時\sphinxhyphen {}クイック}{81}{paragraph.8.3.2.14.1}%
-\contentsline {subsubsection}{\numberline {8.3.2.15}切札\heartsym {} 5 追撃}{82}{subsubsection.8.3.2.15}%
-\contentsline {paragraph}{\numberline {8.3.2.15.1}\ruby [g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン}{82}{paragraph.8.3.2.15.1}%
+\contentsline {subsubsection}{\numberline {8.3.2.15}切札\heartsym {} 5 追撃}{81}{subsubsection.8.3.2.15}%
+\contentsline {paragraph}{\numberline {8.3.2.15.1}\ruby [g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン}{81}{paragraph.8.3.2.15.1}%
 \contentsline {subsubsection}{\numberline {8.3.2.16}切札\heartsym {} 7 ファントム}{82}{subsubsection.8.3.2.16}%
 \contentsline {paragraph}{\numberline {8.3.2.16.1}ファントムリバース (魔法) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ C}{82}{paragraph.8.3.2.16.1}%
 \contentsline {paragraph}{\numberline {8.3.2.16.2}\ruby [g]{幻影}{げんえい} (誘発魔法) @誘発\sphinxhyphen {}通常\sphinxhyphen {}クイック}{82}{paragraph.8.3.2.16.2}%
@@ -201,7 +201,7 @@
 \contentsline {paragraph}{\numberline {8.3.2.17.1}\ruby [g]{救済}{きゅうさい} (魔法) @直接\sphinxhyphen {}通常\sphinxhyphen {}クイック}{83}{paragraph.8.3.2.17.1}%
 \contentsline {subsubsection}{\numberline {8.3.2.18}切札\heartsym {} J 破砕士}{83}{subsubsection.8.3.2.18}%
 \contentsline {paragraph}{\numberline {8.3.2.18.1}\ruby [g]{破砕士召喚}{はさいししょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ BL}{83}{paragraph.8.3.2.18.1}%
-\contentsline {paragraph}{\numberline {8.3.2.18.2}\ruby [g]{クイック破砕士召喚}{クイックはさいししょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}クイック | \$ D}{84}{paragraph.8.3.2.18.2}%
+\contentsline {paragraph}{\numberline {8.3.2.18.2}\ruby [g]{クイック破砕士召喚}{クイックはさいししょうかん} (召喚) @直接\sphinxhyphen {}通常\sphinxhyphen {}クイック | \$ D}{83}{paragraph.8.3.2.18.2}%
 \contentsline {paragraph}{\numberline {8.3.2.18.3}\ruby [g]{粉砕}{ふんさい} (兵士起因) @直接\sphinxhyphen {}通常\sphinxhyphen {}メイン | \$ C}{84}{paragraph.8.3.2.18.3}%
 \contentsline {paragraph}{\numberline {8.3.2.18.4}\ruby [g]{破砕士再生}{はさいしさいせい} (切札操作) @誘発\sphinxhyphen {}即時\sphinxhyphen {}クイック}{84}{paragraph.8.3.2.18.4}%
 \contentsline {subsubsection}{\numberline {8.3.2.19}切札\heartsym {} K 巨人}{85}{subsubsection.8.3.2.19}%
@@ -248,7 +248,7 @@
 \contentsline {paragraph}{\numberline {8.3.2.33.4}\ruby [g]{騎士再生}{きしさいせい} (切札操作) @誘発\sphinxhyphen {}即時\sphinxhyphen {}クイック}{95}{paragraph.8.3.2.33.4}%
 \contentsline {subsection}{\numberline {8.3.3}フレームキャラクターリスト}{95}{subsection.8.3.3}%
 \contentsline {subsubsection}{\numberline {8.3.3.1}切札\spadesym {} J リアニメーター}{96}{subsubsection.8.3.3.1}%
-\contentsline {paragraph}{\numberline {8.3.3.1.1}\ruby [g]{リアニメーター}{りあにめーたー} (兵士)}{96}{paragraph.8.3.3.1.1}%
+\contentsline {paragraph}{\numberline {8.3.3.1.1}リアニメーター (兵士)}{96}{paragraph.8.3.3.1.1}%
 \contentsline {subsubsection}{\numberline {8.3.3.2}切札\spadesym {} K 魔王}{96}{subsubsection.8.3.3.2}%
 \contentsline {paragraph}{\numberline {8.3.3.2.1}\ruby [g]{魔王}{まおう} (兵士)}{96}{paragraph.8.3.3.2.1}%
 \contentsline {subsubsection}{\numberline {8.3.3.3}切札\heartsym {} J 破砕士}{96}{subsubsection.8.3.3.3}%
