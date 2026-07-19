@@ -118,7 +118,7 @@
 
 
 \title{BlackPoker 公式ルール}
-\date{2026年07月18日}
+\date{2026年07月19日}
 \release{2026/06/30}
 \author{もりくま}
 \newcommand{\sphinxlogo}{\vbox{}}
@@ -2487,7 +2487,7 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 \centering
 \sphinxcapstartof{table}
 \sphinxthecaptionisattop
-\sphinxcaption{各カードの配置と公開・非公開の度合い}\label{\detokenize{common/common-etc:id8}}\label{\detokenize{common/common-etc:common-etc-publevel-table}}
+\sphinxcaption{各カードの配置と公開・非公開の度合い}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:common-etc-publevel-table}}
 \sphinxaftertopcaption
 \begin{tabular}[t]{|\X{15}{100}|\X{30}{100}|\X{30}{100}|\X{25}{100}|}
 \sphinxtoprule
@@ -2615,8 +2615,26 @@ BlackPokerでは、Joker,A,J,Q,Kのカードが場から墓地に移った場合
 \sphinxattableend\end{savenotes}
 
 
-\section{デッキのシャッフルについて}
+\subsection{墓地の一番上のカードの扱い}
 \label{\detokenize{common/common-etc:id3}}
+\sphinxAtStartPar
+墓地の一番上にあるカードは常に公開です。
+\begin{itemize}
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{カードを墓地へ移すとき}:
+複数のカードを同時に墓地へ移す場合は、移動するカードの中から任意の1枚を選んで一番上に置いて公開してください。
+
+\item {} 
+\sphinxAtStartPar
+\sphinxstylestrong{墓地からカードを別の領域に移したとき}:
+墓地に残ったカードの中から任意の1枚を選んで一番上に置くことができます。
+
+\end{itemize}
+
+
+\section{デッキのシャッフルについて}
+\label{\detokenize{common/common-etc:id4}}
 \sphinxAtStartPar
 BlackPokerでは
 コンセプトの一つに「相手のカードに触らない」があるため、
@@ -2629,7 +2647,7 @@ BlackPokerでは
 
 
 \section{防壁の置き方}
-\label{\detokenize{common/common-etc:id4}}
+\label{\detokenize{common/common-etc:id5}}
 \sphinxAtStartPar
 防壁を場に出す際は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common-etc:set-bulwork}]{Fig.\@ \ref{\detokenize{common/common-etc:set-bulwork}}})
 \begin{itemize}
@@ -2648,11 +2666,11 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-bulwork}.pdf}
-\caption{防壁の置き方}\label{\detokenize{common/common-etc:id9}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
+\caption{防壁の置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-bulwork}}\end{figure}
 
 
 \section{フォグの置き方}
-\label{\detokenize{common/common-etc:id5}}
+\label{\detokenize{common/common-etc:id6}}
 \sphinxAtStartPar
 フォグにアップなどのカードを置く場合は、次のルールに従って配置してください。(\hyperref[\detokenize{common/common-etc:set-fog}]{Fig.\@ \ref{\detokenize{common/common-etc:set-fog}}})
 \begin{itemize}
@@ -2679,11 +2697,11 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-fog}.pdf}
-\caption{フォグの置き方}\label{\detokenize{common/common-etc:id10}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
+\caption{フォグの置き方}\label{\detokenize{common/common-etc:id11}}\label{\detokenize{common/common-etc:set-fog}}\end{figure}
 
 
 \section{ステージの置き方}
-\label{\detokenize{common/common-etc:id6}}
+\label{\detokenize{common/common-etc:id7}}
 \sphinxAtStartPar
 ステージ上にあるリクエストのキーカードは、場のカードと区別できるように、次のルールに従って配置してください。(\hyperref[\detokenize{common/common-etc:set-stage}]{Fig.\@ \ref{\detokenize{common/common-etc:set-stage}}})
 \begin{itemize}
@@ -2706,11 +2724,11 @@ BlackPokerでは
 \capstart
 
 \noindent\sphinxincludegraphics{{set-stage}.pdf}
-\caption{ステージの置き方}\label{\detokenize{common/common-etc:id11}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
+\caption{ステージの置き方}\label{\detokenize{common/common-etc:id12}}\label{\detokenize{common/common-etc:set-stage}}\end{figure}
 
 
 \section{よくある質問}
-\label{\detokenize{common/common-etc:id7}}\begin{enumerate}
+\label{\detokenize{common/common-etc:id8}}\begin{enumerate}
 \sphinxsetlistlabels{\arabic}{enumi}{enumii}{}{.}%
 \item {} 
 \sphinxAtStartPar
@@ -2720,14 +2738,6 @@ BlackPokerでは
 対戦相手から残りのライフを聞かれた場合、自分のライフの枚数を10枚まで数えます。
 10枚未満であれば枚数を答え、10枚以上の場合「10枚以上です」と答えて下さい。
 10枚以上の場合、正確な枚数を答える必要はありません。
-
-\item {} 
-\sphinxAtStartPar
-\sphinxstylestrong{墓地の一番上のカードはいつ決まるのか？}
-
-\sphinxAtStartPar
-カードを墓地に移す際に移すカードの中から1枚を公開してください。
-すでに墓地にあるカードを改めて公開しないでください。
 
 \end{enumerate}
 
@@ -7692,7 +7702,7 @@ CharacterListが1.0から追加となった。
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id220}}{\hyperref[\detokenize{auto/frameActionlist:ruby-rt-rt-ruby-protect-ruby-g-c}]{\sphinxcrossref{\protect\ruby[g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン | \$ C}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id220}}{\hyperref[\detokenize{auto/frameActionlist:ruby-rt-rt-ruby-protect-ruby-g-c}]{\sphinxcrossref{\protect\ruby[g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック | \$ C}}}
 
 \item {} 
 \sphinxAtStartPar
@@ -7754,7 +7764,7 @@ CharacterListが1.0から追加となった。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id233}}{\hyperref[\detokenize{auto/frameActionlist:act-pursuit}]{\sphinxcrossref{\protect\ruby[g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id233}}{\hyperref[\detokenize{auto/frameActionlist:act-pursuit}]{\sphinxcrossref{\protect\ruby[g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen{}即時\sphinxhyphen{}メイン}}}
 
 \end{itemize}
 
@@ -7796,7 +7806,7 @@ CharacterListが1.0から追加となった。
 
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id242}}{\hyperref[\detokenize{auto/frameActionlist:act-pulverize}]{\sphinxcrossref{\protect\ruby[g]{粉砕}{ふんさい} (兵士起因) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン | \$ C}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id242}}{\hyperref[\detokenize{auto/frameActionlist:act-pulverize}]{\sphinxcrossref{\protect\ruby[g]{粉砕}{ふんさい} (兵士起因) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック | \$ C}}}
 
 \item {} 
 \sphinxAtStartPar
@@ -7858,7 +7868,7 @@ CharacterListが1.0から追加となった。
 \begin{itemize}
 \item {} 
 \sphinxAtStartPar
-\phantomsection\label{\detokenize{auto/frameActionlist:id255}}{\hyperref[\detokenize{auto/frameActionlist:act-lethargy}]{\sphinxcrossref{\protect\ruby[g]{虚脱}{きょだつ} (魔法) @直接\sphinxhyphen{}通常\sphinxhyphen{}クイック}}}
+\phantomsection\label{\detokenize{auto/frameActionlist:id255}}{\hyperref[\detokenize{auto/frameActionlist:act-lethargy}]{\sphinxcrossref{\protect\ruby[g]{虚脱}{きょだつ} (魔法) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック}}}
 
 \end{itemize}
 
@@ -9475,7 +9485,7 @@ v9.0: 墓地から選ぶカードの条件を緩和し使いやすく修正。
 
 \index{て\textbar{}転生召喚（アクション）@\spxentry{て\textbar{}転生召喚（アクション）}}\ignorespaces 
 
-\paragraph{\protect\ruby[g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン | \$ C}
+\paragraph{\protect\ruby[g]{転生召喚}{てんせいしょうかん} (兵士起因) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック | \$ C}
 \label{\detokenize{auto/frameActionlist:ruby-rt-rt-ruby-protect-ruby-g-c}}\label{\detokenize{auto/frameActionlist:act-reincarnationsummon}}\label{\detokenize{auto/frameActionlist:index-18}}
 
 \begin{savenotes}\sphinxattablestart
@@ -9537,19 +9547,20 @@ v9.0: 墓地から選ぶカードの条件を緩和し使いやすく修正。
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-効果の内容は「リアニメイト」を参照。
+自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex4.22.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  v8.2, v9.0
+\sphinxstylestrong{更新バージョン:}  v8.2, v9.0, v9.1
 
 \sphinxAtStartPar
 \sphinxstylestrong{補足:}
 
 \sphinxAtStartPar
 v9.0: 「リアニメーターリアニメイト」から「転生召喚」に名称変更。
+v9.1: タイミングをメインからクイックに、速度を通常から即時に修正。効果の記述を参照方式から直接記述に変更。
 
 
 \bigskip\hrule\bigskip
@@ -9799,7 +9810,7 @@ v8.2: キーカードを廃止
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-自分の場に「魔王」がいるかつ、エンドアクションをリクエストした時に誘発する。
+自分の場に「魔王」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -10165,7 +10176,7 @@ v9.0: 新規追加。
 \label{\detokenize{auto/frameActionlist:id28}}
 \index{つ\textbar{}追撃（アクション）@\spxentry{つ\textbar{}追撃（アクション）}}\ignorespaces 
 
-\paragraph{\protect\ruby[g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン}
+\paragraph{\protect\ruby[g]{追撃}{ついげき} (魔法) @直接\sphinxhyphen{}即時\sphinxhyphen{}メイン}
 \label{\detokenize{auto/frameActionlist:act-pursuit}}\label{\detokenize{auto/frameActionlist:index-26}}\label{\detokenize{auto/frameActionlist:id29}}
 
 \begin{savenotes}\sphinxattablestart
@@ -10245,13 +10256,14 @@ v9.0: 新規追加。
 \sphinxstylestrong{導入バージョン:}  ex5.30.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  v8.2, v9.0
+\sphinxstylestrong{更新バージョン:}  v8.2, v9.0, v9.1
 
 \sphinxAtStartPar
 \sphinxstylestrong{補足:}
 
 \sphinxAtStartPar
 v9.0: コストを軽減し使いやすく修正。
+v9.1: 追撃からリクエストされるアタックが通常アタックであることを考慮し、追撃を即時に変更。
 
 
 \bigskip\hrule\bigskip
@@ -10397,7 +10409,7 @@ v9.0: コストを軽減し使いやすく修正。
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-自分の表切札に「ファントム」があるかつ、自分のエンドアクションのリクエストがステージに追加された時に誘発する。
+自分の表切札に「ファントム」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -10697,7 +10709,7 @@ v9.0: チャリオットから破砕士に名称変更。
 
 \index{ふ\textbar{}粉砕（アクション）@\spxentry{ふ\textbar{}粉砕（アクション）}}\ignorespaces 
 
-\paragraph{\protect\ruby[g]{粉砕}{ふんさい} (兵士起因) @直接\sphinxhyphen{}通常\sphinxhyphen{}メイン | \$ C}
+\paragraph{\protect\ruby[g]{粉砕}{ふんさい} (兵士起因) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック | \$ C}
 \label{\detokenize{auto/frameActionlist:act-pulverize}}\label{\detokenize{auto/frameActionlist:index-32}}\label{\detokenize{auto/frameActionlist:id38}}
 
 \begin{savenotes}\sphinxattablestart
@@ -10759,19 +10771,20 @@ v9.0: チャリオットから破砕士に名称変更。
 \sphinxstylestrong{効果:}
 
 \sphinxAtStartPar
-効果の内容は「防壁破壊」を参照。
+対象の防壁を場から墓地に移す。
 
 \sphinxAtStartPar
 \sphinxstylestrong{導入バージョン:}  ex4.22.0
 
 \sphinxAtStartPar
-\sphinxstylestrong{更新バージョン:}  v8.2, v9.0
+\sphinxstylestrong{更新バージョン:}  v8.2, v9.0, v9.1
 
 \sphinxAtStartPar
 \sphinxstylestrong{補足:}
 
 \sphinxAtStartPar
 v9.0: チャリオット防壁破壊から粉砕に名称変更。
+v9.1: タイミングをメインからクイックに、速度を通常から即時に修正。効果の記述を参照方式から直接記述に変更。
 
 
 \bigskip\hrule\bigskip
@@ -11391,7 +11404,7 @@ v9.0: 効果の条件を緩和し、使いやすく修正。
 \label{\detokenize{auto/frameActionlist:id49}}
 \index{き\textbar{}虚脱（アクション）@\spxentry{き\textbar{}虚脱（アクション）}}\ignorespaces 
 
-\paragraph{\protect\ruby[g]{虚脱}{きょだつ} (魔法) @直接\sphinxhyphen{}通常\sphinxhyphen{}クイック}
+\paragraph{\protect\ruby[g]{虚脱}{きょだつ} (魔法) @直接\sphinxhyphen{}即時\sphinxhyphen{}クイック}
 \label{\detokenize{auto/frameActionlist:act-lethargy}}\label{\detokenize{auto/frameActionlist:index-40}}\label{\detokenize{auto/frameActionlist:id50}}
 
 \begin{savenotes}\sphinxattablestart
@@ -11465,10 +11478,14 @@ v9.0: 効果の条件を緩和し、使いやすく修正。
 \sphinxstylestrong{導入バージョン:}  v9.0
 
 \sphinxAtStartPar
+\sphinxstylestrong{更新バージョン:}  v9.1
+
+\sphinxAtStartPar
 \sphinxstylestrong{補足:}
 
 \sphinxAtStartPar
 v9.0: 新規追加。
+v9.1: 追撃の即時化に伴うバランス調整のため、虚脱も即時に変更。
 
 
 \bigskip\hrule\bigskip
@@ -11714,7 +11731,7 @@ v9.0: 対象、効果を緩和し使いやすく修正。
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-自分の表切札に「充足」があり、かつ、エンドアクションをリクエストした時に誘発する。
+自分の表切札に「充足」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
@@ -12575,7 +12592,7 @@ v9.0: 新規追加。
 \sphinxstylestrong{誘発条件:}
 
 \sphinxAtStartPar
-自分の表切札に「手札補充」があり、かつ、エンドアクションをリクエストした時に誘発する。
+自分の表切札に「手札補充」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
 
 \sphinxAtStartPar
 \sphinxstylestrong{効果:}
