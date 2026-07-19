@@ -504,7 +504,7 @@ actList:
       actId: pursuit
       actType: 魔法
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: メイン
       actActCond: |-
         自分の表切札に「追撃」がある
@@ -513,9 +513,10 @@ actList:
         2. アタックアクションをリクエストする。
         3. 自分の切札にある♡5を裏向きにする。
       since: ex5.30.0
-      update: v8.2, v9.0
+      update: v8.2, v9.0, v9.1
       devNote: |-
         v9.0: コストを軽減し使いやすく修正。
+        v9.1: 追撃からリクエストされるアタックが通常アタックであることを考慮し、追撃を即時に変更。
 
   - type: 切札♡7 ファントム
     acts:
@@ -785,7 +786,7 @@ actList:
       actId: lethargy
       actType: 魔法
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actKey: ♢A〜K
       actTarget: ドライブ状態のキャラクター1体
@@ -793,8 +794,10 @@ actList:
       actEffect: |-
         対象のキャラクターを墓地に移す。
       since: v9.0
+      update: v9.1
       devNote: |-
         v9.0: 新規追加。
+        v9.1: 追撃の即時化に伴うバランス調整のため、虚脱も即時に変更。
 
   - type: 切札♢8 修繕
     acts:
