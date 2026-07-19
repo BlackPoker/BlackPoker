@@ -346,18 +346,18 @@ actList:
       actId: reincarnationSummon
       actType: 兵士起因
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actCost: C
       actUnit: 「リアニメーター」1体
       actTarget: 自分のキャラクター1体
       actEffect: |-
-        効果の内容は「リアニメイト」を参照。
+        自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
       since: ex4.22.0
       update: v8.2, v9.0, v9.1
       devNote: |-
         v9.0: 「リアニメーターリアニメイト」から「転生召喚」に名称変更。
-        v9.1: タイミングをメインからクイックに修正。
+        v9.1: タイミングをメインからクイックに、速度を通常から即時に修正。効果の記述を参照方式から直接記述に変更。
 
     - frame: |-
         ・エクストラ
@@ -621,18 +621,18 @@ actList:
       actId: pulverize
       actType: 兵士起因
       actTrigger: 直接
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actCost: C
       actUnit: 「破砕士」1体
       actTarget: 防壁1体
       actEffect: |-
-        効果の内容は「防壁破壊」を参照。
+        対象の防壁を場から墓地に移す。
       since: ex4.22.0
       update: v8.2, v9.0, v9.1
       devNote: |-
         v9.0: チャリオット防壁破壊から粉砕に名称変更。
-        v9.1: タイミングをメインからクイックに修正。
+        v9.1: タイミングをメインからクイックに、速度を通常から即時に修正。効果の記述を参照方式から直接記述に変更。
 
     - frame: |-
         ・エクストラ
