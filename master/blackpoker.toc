@@ -367,6 +367,10 @@
 \contentsline {subsection}{\numberline {10.2.3}マスター+エクストラ}{134}{subsection.10.2.3}%
 \contentsline {section}{\numberline {10.3}エクストラリスト}{134}{section.10.3}%
 \contentsline {chapter}{\numberline {第11章}付録B: 周年大会記録}{135}{chapter.11}%
+\contentsline {section}{\numberline {11.1}12周年記念交流会 大会ルール}{135}{section.11.1}%
+\contentsline {subsection}{\numberline {11.1.1}対戦レギュレーション}{135}{subsection.11.1.1}%
+\contentsline {subsubsection}{\numberline {11.1.1.1}レギュレーションの決定}{136}{subsubsection.11.1.1.1}%
+\contentsline {subsection}{\numberline {11.1.2}対戦および勝点}{136}{subsection.11.1.2}%
 \contentsline {chapter}{\numberline {第12章}付録C: ガイドライン}{137}{chapter.12}%
 \contentsline {section}{\numberline {12.1}BlackPoker二次創作ガイドライン}{137}{section.12.1}%
 \contentsline {subsection}{\numberline {12.1.1}はじめに}{137}{subsection.12.1.1}%
@@ -434,76 +438,92 @@
 \contentsline {subsection}{\numberline {13.5.6}本文ルールとの関係}{149}{subsection.13.5.6}%
 \contentsline {chapter}{変更履歴}{151}{chapter*.301}%
 \contentsline {section}{第9.1版 変更履歴}{151}{section*.302}%
-\contentsline {subsection}{第9.1版アップデートの要点}{151}{subsection*.303}%
-\contentsline {subsection}{文書構成の変更}{151}{subsection*.304}%
-\contentsline {subsubsection}{対戦レギュレーション章の増補}{151}{subsubsection*.305}%
-\contentsline {subsubsection}{フレーム章の増補}{152}{subsubsection*.306}%
-\contentsline {subsubsection}{コアルール章の整理}{152}{subsubsection*.307}%
-\contentsline {subsubsection}{付録Dの追加}{152}{subsubsection*.308}%
-\contentsline {subsection}{対戦レギュレーション・構築概念の変更}{152}{subsection*.309}%
-\contentsline {subsubsection}{デッキ構築の定義追加}{152}{subsubsection*.310}%
-\contentsline {subsubsection}{シナリオ構築の定義追加}{153}{subsubsection*.311}%
-\contentsline {subsubsection}{対戦準備の流れの整理}{153}{subsubsection*.312}%
-\contentsline {subsubsection}{シナリオ手札の定義追加}{153}{subsubsection*.313}%
-\contentsline {subsection}{用語の変更}{153}{subsection*.314}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {ストラテジー}} から \sphinxstyleliteralintitle {\sphinxupquote {シナリオ手札}} への改名}{153}{subsubsection*.315}%
-\contentsline {subsection}{フレームの変更}{154}{subsection*.316}%
-\contentsline {subsubsection}{フレーム対応表の変更}{154}{subsubsection*.317}%
-\contentsline {subsubsection}{ドラフトフレームの追加}{154}{subsubsection*.318}%
-\contentsline {subsubsection}{ストラテジーフレームの表記変更}{154}{subsubsection*.319}%
-\contentsline {subsubsection}{エクストラフレームの表記変更}{154}{subsubsection*.320}%
-\contentsline {subsubsection}{フレームアクション・コンポーネント対応表の変更}{155}{subsubsection*.321}%
-\contentsline {subsection}{共通ルールの変更}{155}{subsection*.322}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {エンドアクション}} の \sphinxstyleliteralintitle {\sphinxupquote {フォグ}} 処理修正}{155}{subsubsection*.323}%
-\contentsline {subsection}{コアルールの変更}{155}{subsection*.324}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {能力の適用順}} の配置変更}{155}{subsubsection*.325}%
-\contentsline {subsection}{設計ノートの追加}{155}{subsection*.326}%
-\contentsline {subsubsection}{BDRの追加}{155}{subsubsection*.327}%
-\contentsline {subsection}{プレイヤー向け確認チェックリスト}{156}{subsection*.328}%
-\contentsline {subsection}{関連資料の更新ポイント}{156}{subsection*.329}%
-\contentsline {section}{第9.0版 変更履歴}{156}{section*.330}%
-\contentsline {subsection}{文書構成の変更}{156}{subsection*.331}%
-\contentsline {subsection}{対戦レギュレーション・入門導線の変更}{157}{subsection*.332}%
-\contentsline {subsection}{フレーム定義の変更}{157}{subsection*.333}%
-\contentsline {subsubsection}{エントリー}{157}{subsubsection*.334}%
-\contentsline {subsection}{共通ルールの変更}{158}{subsection*.335}%
-\contentsline {subsubsection}{プリセット配置}{158}{subsubsection*.336}%
-\contentsline {subsubsection}{ドロー}{158}{subsubsection*.337}%
-\contentsline {subsubsection}{攻撃・防御ラベル}{158}{subsubsection*.338}%
-\contentsline {subsubsection}{パス}{158}{subsubsection*.339}%
-\contentsline {subsubsection}{FAQで明文化された点}{159}{subsubsection*.340}%
-\contentsline {subsection}{アクションリスト・用語体系の変更}{159}{subsection*.341}%
-\contentsline {subsubsection}{@ 記法の追加}{159}{subsubsection*.342}%
-\contentsline {subsubsection}{魔法分類の再編}{159}{subsubsection*.343}%
-\contentsline {subsection}{レアカード操作・切札操作の変更}{160}{subsection*.344}%
-\contentsline {subsubsection}{罠カウンター}{160}{subsubsection*.345}%
-\contentsline {subsection}{エクストラ全体の傾向}{160}{subsection*.346}%
-\contentsline {subsection}{スペード系の変更}{160}{subsection*.347}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 2 スラッシュ}}}{160}{subsubsection*.348}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 4 威圧}}}{160}{subsubsection*.349}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 5 蘇生}}}{161}{subsubsection*.350}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} J リアニメーター}}}{161}{subsubsection*.351}%
-\contentsline {subsection}{ハート系の変更}{161}{subsection*.352}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 激励}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 誘惑}}}{161}{subsubsection*.353}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 5 追撃}}}{161}{subsubsection*.354}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 8 救済}}}{161}{subsubsection*.355}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J チャリオット}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J 破砕士}}}{161}{subsubsection*.356}%
-\contentsline {subsection}{ダイヤ系の変更}{162}{subsection*.357}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} A 防壁追加}}}{162}{subsubsection*.358}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 3 交渉}}}{162}{subsubsection*.359}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 4 相殺}}}{162}{subsubsection*.360}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 5 喪失}}}{162}{subsubsection*.361}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 8 修繕}}}{162}{subsubsection*.362}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} J 策士}}}{163}{subsubsection*.363}%
-\contentsline {subsection}{クラブ系の変更}{163}{subsection*.364}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 4 スイッチ}}}{163}{subsubsection*.365}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 7 手札補充}}}{163}{subsubsection*.366}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 8 リセット}}}{163}{subsubsection*.367}%
-\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 9 要塞}}}{163}{subsubsection*.368}%
-\contentsline {subsection}{プレイヤー向け確認チェックリスト}{164}{subsection*.369}%
-\contentsline {chapter}{あとがき}{165}{chapter*.370}%
-\contentsline {section}{第9.0版アップデートの要点}{165}{section*.371}%
-\contentsline {section}{ロゴと名前の由来}{165}{section*.372}%
-\contentsline {section}{さらなる楽しみ方}{166}{section*.373}%
-\contentsline {section}{最後に}{166}{section*.374}%
-\contentsline {chapter}{索引}{167}{chapter*.375}%
+\contentsline {subsection}{第9.1版}{151}{subsection*.303}%
+\contentsline {subsubsection}{第9.1版アップデートの要点}{151}{subsubsection*.304}%
+\contentsline {subsubsection}{文書構成の変更}{151}{subsubsection*.305}%
+\contentsline {paragraph}{対戦レギュレーション章の増補}{151}{paragraph*.306}%
+\contentsline {paragraph}{フレーム章の増補}{152}{paragraph*.307}%
+\contentsline {paragraph}{コアルール章の整理}{152}{paragraph*.308}%
+\contentsline {paragraph}{付録Dの追加}{152}{paragraph*.309}%
+\contentsline {subsubsection}{対戦レギュレーション・構築概念の変更}{152}{subsubsection*.310}%
+\contentsline {paragraph}{デッキ構築の定義追加}{152}{paragraph*.311}%
+\contentsline {paragraph}{シナリオ構築の定義追加}{153}{paragraph*.312}%
+\contentsline {paragraph}{対戦準備の流れの整理}{153}{paragraph*.313}%
+\contentsline {paragraph}{シナリオ手札の定義追加}{153}{paragraph*.314}%
+\contentsline {subsubsection}{用語の変更}{153}{subsubsection*.315}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {ストラテジー}} から \sphinxstyleliteralintitle {\sphinxupquote {シナリオ手札}} への改名}{153}{paragraph*.316}%
+\contentsline {subsubsection}{フレームの変更}{154}{subsubsection*.317}%
+\contentsline {paragraph}{フレーム対応表の変更}{154}{paragraph*.318}%
+\contentsline {paragraph}{ドラフトフレームの追加}{154}{paragraph*.319}%
+\contentsline {paragraph}{ストラテジーフレームの表記変更}{154}{paragraph*.320}%
+\contentsline {paragraph}{エクストラフレームの表記変更}{154}{paragraph*.321}%
+\contentsline {paragraph}{フレームアクション・コンポーネント対応表の変更}{155}{paragraph*.322}%
+\contentsline {subsubsection}{共通ルールの変更}{155}{subsubsection*.323}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {エンドアクション}} の \sphinxstyleliteralintitle {\sphinxupquote {フォグ}} 処理修正}{155}{paragraph*.324}%
+\contentsline {subsubsection}{コアルールの変更}{155}{subsubsection*.325}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {能力の適用順}} の配置変更}{155}{paragraph*.326}%
+\contentsline {subsubsection}{設計ノートの追加}{155}{subsubsection*.327}%
+\contentsline {paragraph}{BDRの追加}{155}{paragraph*.328}%
+\contentsline {subsubsection}{プレイヤー向け確認チェックリスト}{156}{subsubsection*.329}%
+\contentsline {subsubsection}{関連資料の更新ポイント}{156}{subsubsection*.330}%
+\contentsline {subsection}{第9.1.1版}{156}{subsection*.331}%
+\contentsline {subsubsection}{第9.1.1版アップデートの要点}{156}{subsubsection*.332}%
+\contentsline {subsubsection}{共通ルールの変更}{157}{subsubsection*.333}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {墓地の一番上のカードの扱い}} の追加}{157}{paragraph*.334}%
+\contentsline {subsubsection}{エクストラアクションの変更}{157}{subsubsection*.335}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {転生召喚}} の即時・クイック化}{157}{paragraph*.336}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {追撃}} の即時化}{157}{paragraph*.337}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {粉砕}} の即時・クイック化}{158}{paragraph*.338}%
+\contentsline {paragraph}{\sphinxstyleliteralintitle {\sphinxupquote {虚脱}} の即時化}{158}{paragraph*.339}%
+\contentsline {subsubsection}{付録の変更}{158}{subsubsection*.340}%
+\contentsline {paragraph}{周年大会記録へのルール追加}{158}{paragraph*.341}%
+\contentsline {subsubsection}{表記揺れの修正}{158}{subsubsection*.342}%
+\contentsline {paragraph}{全角括弧および比較演算子の半角統一}{158}{paragraph*.343}%
+\contentsline {subsubsection}{プレイヤー向け確認チェックリスト}{158}{subsubsection*.344}%
+\contentsline {subsubsection}{関連資料の更新ポイント}{159}{subsubsection*.345}%
+\contentsline {section}{第9.0版 変更履歴}{159}{section*.346}%
+\contentsline {subsection}{文書構成の変更}{159}{subsection*.347}%
+\contentsline {subsection}{対戦レギュレーション・入門導線の変更}{160}{subsection*.348}%
+\contentsline {subsection}{フレーム定義の変更}{160}{subsection*.349}%
+\contentsline {subsubsection}{エントリー}{160}{subsubsection*.350}%
+\contentsline {subsection}{共通ルールの変更}{161}{subsection*.351}%
+\contentsline {subsubsection}{プリセット配置}{161}{subsubsection*.352}%
+\contentsline {subsubsection}{ドロー}{161}{subsubsection*.353}%
+\contentsline {subsubsection}{攻撃・防御ラベル}{161}{subsubsection*.354}%
+\contentsline {subsubsection}{パス}{161}{subsubsection*.355}%
+\contentsline {subsubsection}{FAQで明文化された点}{161}{subsubsection*.356}%
+\contentsline {subsection}{アクションリスト・用語体系の変更}{162}{subsection*.357}%
+\contentsline {subsubsection}{@ 記法の追加}{162}{subsubsection*.358}%
+\contentsline {subsubsection}{魔法分類の再編}{162}{subsubsection*.359}%
+\contentsline {subsection}{レアカード操作・切札操作の変更}{163}{subsection*.360}%
+\contentsline {subsubsection}{罠カウンター}{163}{subsubsection*.361}%
+\contentsline {subsection}{エクストラ全体の傾向}{163}{subsection*.362}%
+\contentsline {subsection}{スペード系の変更}{163}{subsection*.363}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 2 スラッシュ}}}{163}{subsubsection*.364}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 4 威圧}}}{163}{subsubsection*.365}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} 5 蘇生}}}{163}{subsubsection*.366}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\spadesym {} J リアニメーター}}}{164}{subsubsection*.367}%
+\contentsline {subsection}{ハート系の変更}{164}{subsection*.368}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 激励}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 3 誘惑}}}{164}{subsubsection*.369}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 5 追撃}}}{164}{subsubsection*.370}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} 8 救済}}}{164}{subsubsection*.371}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J チャリオット}} \(\rightarrow \) \sphinxstyleliteralintitle {\sphinxupquote {\heartsym {} J 破砕士}}}{164}{subsubsection*.372}%
+\contentsline {subsection}{ダイヤ系の変更}{165}{subsection*.373}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} A 防壁追加}}}{165}{subsubsection*.374}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 3 交渉}}}{165}{subsubsection*.375}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 4 相殺}}}{165}{subsubsection*.376}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 5 喪失}}}{165}{subsubsection*.377}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} 8 修繕}}}{165}{subsubsection*.378}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\diamondsym {} J 策士}}}{166}{subsubsection*.379}%
+\contentsline {subsection}{クラブ系の変更}{166}{subsection*.380}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 4 スイッチ}}}{166}{subsubsection*.381}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 7 手札補充}}}{166}{subsubsection*.382}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 8 リセット}}}{166}{subsubsection*.383}%
+\contentsline {subsubsection}{\sphinxstyleliteralintitle {\sphinxupquote {\clobsym {} 9 要塞}}}{166}{subsubsection*.384}%
+\contentsline {subsection}{プレイヤー向け確認チェックリスト}{167}{subsection*.385}%
+\contentsline {chapter}{あとがき}{169}{chapter*.386}%
+\contentsline {section}{第9.0版アップデートの要点}{169}{section*.387}%
+\contentsline {section}{ロゴと名前の由来}{169}{section*.388}%
+\contentsline {section}{さらなる楽しみ方}{170}{section*.389}%
+\contentsline {section}{最後に}{170}{section*.390}%
+\contentsline {chapter}{索引}{171}{chapter*.391}%

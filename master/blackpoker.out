@@ -368,143 +368,163 @@
 \BOOKMARK [2][-]{subsection.10.2.3}{マスター+エクストラ}{section.10.2}% 367
 \BOOKMARK [1][-]{section.10.3}{エクストラリスト}{chapter.10}% 368
 \BOOKMARK [0][-]{chapter.11}{付録B: 周年大会記録}{}% 369
-\BOOKMARK [0][-]{chapter.12}{付録C: ガイドライン}{}% 370
-\BOOKMARK [1][-]{section.12.1}{BlackPoker二次創作ガイドライン}{chapter.12}% 371
-\BOOKMARK [2][-]{subsection.12.1.1}{はじめに}{section.12.1}% 372
-\BOOKMARK [2][-]{subsection.12.1.2}{二次創作の範囲}{section.12.1}% 373
-\BOOKMARK [2][-]{subsection.12.1.3}{創作の自由と制限}{section.12.1}% 374
-\BOOKMARK [2][-]{subsection.12.1.4}{クレジット表記について}{section.12.1}% 375
-\BOOKMARK [2][-]{subsection.12.1.5}{禁止事項}{section.12.1}% 376
-\BOOKMARK [2][-]{subsection.12.1.6}{商用利用について}{section.12.1}% 377
-\BOOKMARK [2][-]{subsection.12.1.7}{ガイドラインにないケースについて}{section.12.1}% 378
-\BOOKMARK [1][-]{section.12.2}{BlackPoker アクション・ルールガイドライン}{chapter.12}% 379
-\BOOKMARK [2][-]{subsection.12.2.1}{はじめに}{section.12.2}% 380
-\BOOKMARK [2][-]{subsection.12.2.2}{アクションを追加する際のルール}{section.12.2}% 381
-\BOOKMARK [3][-]{subsubsection.12.2.2.1}{アクションの対象は単対象 \(必須\)}{subsection.12.2.2}% 382
-\BOOKMARK [3][-]{subsubsection.12.2.2.2}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsection.12.2.2}% 383
-\BOOKMARK [3][-]{subsubsection.12.2.2.3}{誘発アクションは即時 \(推奨\)}{subsection.12.2.2}% 384
-\BOOKMARK [3][-]{subsubsection.12.2.2.4}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsection.12.2.2}% 385
-\BOOKMARK [3][-]{subsubsection.12.2.2.5}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsection.12.2.2}% 386
-\BOOKMARK [2][-]{subsection.12.2.3}{キャラクターを追加する際のルール}{section.12.2}% 387
-\BOOKMARK [3][-]{subsubsection.12.2.3.1}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsection.12.2.3}% 388
-\BOOKMARK [1][-]{section.12.3}{BlackPoker 対戦進行上のショートカット指針}{chapter.12}% 389
-\BOOKMARK [2][-]{subsection.12.3.1}{目的}{section.12.3}% 390
-\BOOKMARK [2][-]{subsection.12.3.2}{本文ルールとの関係}{section.12.3}% 391
-\BOOKMARK [2][-]{subsection.12.3.3}{用語の定義}{section.12.3}% 392
-\BOOKMARK [2][-]{subsection.12.3.4}{ショートカットの原則}{section.12.3}% 393
-\BOOKMARK [3][-]{subsubsection.12.3.4.1}{原則1：反応がなければパスとみなす}{subsection.12.3.4}% 394
-\BOOKMARK [3][-]{subsubsection.12.3.4.2}{原則2：連続する手順をまとめて進行できる}{subsection.12.3.4}% 395
-\BOOKMARK [3][-]{subsubsection.12.3.4.3}{原則3：割り込みの権利は常に保障される}{subsection.12.3.4}% 396
-\BOOKMARK [3][-]{subsubsection.12.3.4.4}{原則4：認識のずれは巻き戻す}{subsection.12.3.4}% 397
-\BOOKMARK [2][-]{subsection.12.3.5}{運用上の注意}{section.12.3}% 398
-\BOOKMARK [2][-]{subsection.12.3.6}{標準ショートカット}{section.12.3}% 399
-\BOOKMARK [3][-]{subsubsection.12.3.6.1}{メインアクションの実行}{subsection.12.3.6}% 400
-\BOOKMARK [3][-]{subsubsection.12.3.6.2}{アタックの進行}{subsection.12.3.6}% 401
-\BOOKMARK [3][-]{subsubsection.12.3.6.3}{ターンの受け渡し\(エンドチャージドロー\)}{subsection.12.3.6}% 402
-\BOOKMARK [0][-]{chapter.13}{付録D: BlackPoker設計ノート}{}% 403
-\BOOKMARK [1][-]{section.13.1}{BDR-1: カードと効果の分離\(スクリプトベースの採用\)}{chapter.13}% 404
-\BOOKMARK [2][-]{subsection.13.1.1}{状態}{section.13.1}% 405
-\BOOKMARK [2][-]{subsection.13.1.2}{背景}{section.13.1}% 406
-\BOOKMARK [2][-]{subsection.13.1.3}{判断}{section.13.1}% 407
-\BOOKMARK [2][-]{subsection.13.1.4}{理由}{section.13.1}% 408
-\BOOKMARK [2][-]{subsection.13.1.5}{影響}{section.13.1}% 409
-\BOOKMARK [1][-]{section.13.2}{BDR-2: フェイズ概念の廃止とコアフロー\(ステージ\)の採用}{chapter.13}% 410
-\BOOKMARK [2][-]{subsection.13.2.1}{状態}{section.13.2}% 411
-\BOOKMARK [2][-]{subsection.13.2.2}{背景}{section.13.2}% 412
-\BOOKMARK [2][-]{subsection.13.2.3}{判断}{section.13.2}% 413
-\BOOKMARK [2][-]{subsection.13.2.4}{理由}{section.13.2}% 414
-\BOOKMARK [2][-]{subsection.13.2.5}{影響}{section.13.2}% 415
-\BOOKMARK [1][-]{section.13.3}{BDR-3: ダメージのプレイヤー限定化とキャラクターへのダメージ廃止}{chapter.13}% 416
-\BOOKMARK [2][-]{subsection.13.3.1}{状態}{section.13.3}% 417
-\BOOKMARK [2][-]{subsection.13.3.2}{背景}{section.13.3}% 418
-\BOOKMARK [2][-]{subsection.13.3.3}{判断}{section.13.3}% 419
-\BOOKMARK [2][-]{subsection.13.3.4}{理由}{section.13.3}% 420
-\BOOKMARK [2][-]{subsection.13.3.5}{影響}{section.13.3}% 421
-\BOOKMARK [1][-]{section.13.4}{BDR-4: 「世代交代」ルールによるストーリー性とデッキ枚数差の緩和}{chapter.13}% 422
-\BOOKMARK [2][-]{subsection.13.4.1}{状態}{section.13.4}% 423
-\BOOKMARK [2][-]{subsection.13.4.2}{背景}{section.13.4}% 424
-\BOOKMARK [2][-]{subsection.13.4.3}{判断}{section.13.4}% 425
-\BOOKMARK [2][-]{subsection.13.4.4}{理由}{section.13.4}% 426
-\BOOKMARK [2][-]{subsection.13.4.5}{影響}{section.13.4}% 427
-\BOOKMARK [1][-]{section.13.5}{BDR-5: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化}{chapter.13}% 428
-\BOOKMARK [2][-]{subsection.13.5.1}{状態}{section.13.5}% 429
-\BOOKMARK [2][-]{subsection.13.5.2}{背景}{section.13.5}% 430
-\BOOKMARK [2][-]{subsection.13.5.3}{判断}{section.13.5}% 431
-\BOOKMARK [2][-]{subsection.13.5.4}{理由}{section.13.5}% 432
-\BOOKMARK [2][-]{subsection.13.5.5}{影響}{section.13.5}% 433
-\BOOKMARK [2][-]{subsection.13.5.6}{本文ルールとの関係}{section.13.5}% 434
-\BOOKMARK [0][-]{chapter*.301}{変更履歴}{}% 435
-\BOOKMARK [1][-]{section*.302}{第9.1版 変更履歴}{chapter*.301}% 436
-\BOOKMARK [2][-]{subsection*.303}{第9.1版アップデートの要点}{section*.302}% 437
-\BOOKMARK [2][-]{subsection*.304}{文書構成の変更}{section*.302}% 438
-\BOOKMARK [3][-]{subsubsection*.305}{対戦レギュレーション章の増補}{subsection*.304}% 439
-\BOOKMARK [3][-]{subsubsection*.306}{フレーム章の増補}{subsection*.304}% 440
-\BOOKMARK [3][-]{subsubsection*.307}{コアルール章の整理}{subsection*.304}% 441
-\BOOKMARK [3][-]{subsubsection*.308}{付録Dの追加}{subsection*.304}% 442
-\BOOKMARK [2][-]{subsection*.309}{対戦レギュレーション・構築概念の変更}{section*.302}% 443
-\BOOKMARK [3][-]{subsubsection*.310}{デッキ構築の定義追加}{subsection*.309}% 444
-\BOOKMARK [3][-]{subsubsection*.311}{シナリオ構築の定義追加}{subsection*.309}% 445
-\BOOKMARK [3][-]{subsubsection*.312}{対戦準備の流れの整理}{subsection*.309}% 446
-\BOOKMARK [3][-]{subsubsection*.313}{シナリオ手札の定義追加}{subsection*.309}% 447
-\BOOKMARK [2][-]{subsection*.314}{用語の変更}{section*.302}% 448
-\BOOKMARK [3][-]{subsubsection*.315}{ストラテジー から シナリオ手札 への改名}{subsection*.314}% 449
-\BOOKMARK [2][-]{subsection*.316}{フレームの変更}{section*.302}% 450
-\BOOKMARK [3][-]{subsubsection*.317}{フレーム対応表の変更}{subsection*.316}% 451
-\BOOKMARK [3][-]{subsubsection*.318}{ドラフトフレームの追加}{subsection*.316}% 452
-\BOOKMARK [3][-]{subsubsection*.319}{ストラテジーフレームの表記変更}{subsection*.316}% 453
-\BOOKMARK [3][-]{subsubsection*.320}{エクストラフレームの表記変更}{subsection*.316}% 454
-\BOOKMARK [3][-]{subsubsection*.321}{フレームアクション・コンポーネント対応表の変更}{subsection*.316}% 455
-\BOOKMARK [2][-]{subsection*.322}{共通ルールの変更}{section*.302}% 456
-\BOOKMARK [3][-]{subsubsection*.323}{エンドアクション の フォグ 処理修正}{subsection*.322}% 457
-\BOOKMARK [2][-]{subsection*.324}{コアルールの変更}{section*.302}% 458
-\BOOKMARK [3][-]{subsubsection*.325}{能力の適用順 の配置変更}{subsection*.324}% 459
-\BOOKMARK [2][-]{subsection*.326}{設計ノートの追加}{section*.302}% 460
-\BOOKMARK [3][-]{subsubsection*.327}{BDRの追加}{subsection*.326}% 461
-\BOOKMARK [2][-]{subsection*.328}{プレイヤー向け確認チェックリスト}{section*.302}% 462
-\BOOKMARK [2][-]{subsection*.329}{関連資料の更新ポイント}{section*.302}% 463
-\BOOKMARK [1][-]{section*.330}{第9.0版 変更履歴}{chapter*.301}% 464
-\BOOKMARK [2][-]{subsection*.331}{文書構成の変更}{section*.330}% 465
-\BOOKMARK [2][-]{subsection*.332}{対戦レギュレーション・入門導線の変更}{section*.330}% 466
-\BOOKMARK [2][-]{subsection*.333}{フレーム定義の変更}{section*.330}% 467
-\BOOKMARK [3][-]{subsubsection*.334}{エントリー}{subsection*.333}% 468
-\BOOKMARK [2][-]{subsection*.335}{共通ルールの変更}{section*.330}% 469
-\BOOKMARK [3][-]{subsubsection*.336}{プリセット配置}{subsection*.335}% 470
-\BOOKMARK [3][-]{subsubsection*.337}{ドロー}{subsection*.335}% 471
-\BOOKMARK [3][-]{subsubsection*.338}{攻撃・防御ラベル}{subsection*.335}% 472
-\BOOKMARK [3][-]{subsubsection*.339}{パス}{subsection*.335}% 473
-\BOOKMARK [3][-]{subsubsection*.340}{FAQで明文化された点}{subsection*.335}% 474
-\BOOKMARK [2][-]{subsection*.341}{アクションリスト・用語体系の変更}{section*.330}% 475
-\BOOKMARK [3][-]{subsubsection*.342}{@ 記法の追加}{subsection*.341}% 476
-\BOOKMARK [3][-]{subsubsection*.343}{魔法分類の再編}{subsection*.341}% 477
-\BOOKMARK [2][-]{subsection*.344}{レアカード操作・切札操作の変更}{section*.330}% 478
-\BOOKMARK [3][-]{subsubsection*.345}{罠カウンター}{subsection*.344}% 479
-\BOOKMARK [2][-]{subsection*.346}{エクストラ全体の傾向}{section*.330}% 480
-\BOOKMARK [2][-]{subsection*.347}{スペード系の変更}{section*.330}% 481
-\BOOKMARK [3][-]{subsubsection*.348}{スペード 2 スラッシュ}{subsection*.347}% 482
-\BOOKMARK [3][-]{subsubsection*.349}{スペード 4 威圧}{subsection*.347}% 483
-\BOOKMARK [3][-]{subsubsection*.350}{スペード 5 蘇生}{subsection*.347}% 484
-\BOOKMARK [3][-]{subsubsection*.351}{スペード J リアニメーター}{subsection*.347}% 485
-\BOOKMARK [2][-]{subsection*.352}{ハート系の変更}{section*.330}% 486
-\BOOKMARK [3][-]{subsubsection*.353}{ハート 3 激励 \040ハート 3 誘惑}{subsection*.352}% 487
-\BOOKMARK [3][-]{subsubsection*.354}{ハート 5 追撃}{subsection*.352}% 488
-\BOOKMARK [3][-]{subsubsection*.355}{ハート 8 救済}{subsection*.352}% 489
-\BOOKMARK [3][-]{subsubsection*.356}{ハート J チャリオット \040ハート J 破砕士}{subsection*.352}% 490
-\BOOKMARK [2][-]{subsection*.357}{ダイヤ系の変更}{section*.330}% 491
-\BOOKMARK [3][-]{subsubsection*.358}{ダイヤ A 防壁追加}{subsection*.357}% 492
-\BOOKMARK [3][-]{subsubsection*.359}{ダイヤ 3 交渉}{subsection*.357}% 493
-\BOOKMARK [3][-]{subsubsection*.360}{ダイヤ 4 相殺}{subsection*.357}% 494
-\BOOKMARK [3][-]{subsubsection*.361}{ダイヤ 5 喪失}{subsection*.357}% 495
-\BOOKMARK [3][-]{subsubsection*.362}{ダイヤ 8 修繕}{subsection*.357}% 496
-\BOOKMARK [3][-]{subsubsection*.363}{ダイヤ J 策士}{subsection*.357}% 497
-\BOOKMARK [2][-]{subsection*.364}{クラブ系の変更}{section*.330}% 498
-\BOOKMARK [3][-]{subsubsection*.365}{クラブ 4 スイッチ}{subsection*.364}% 499
-\BOOKMARK [3][-]{subsubsection*.366}{クラブ 7 手札補充}{subsection*.364}% 500
-\BOOKMARK [3][-]{subsubsection*.367}{クラブ 8 リセット}{subsection*.364}% 501
-\BOOKMARK [3][-]{subsubsection*.368}{クラブ 9 要塞}{subsection*.364}% 502
-\BOOKMARK [2][-]{subsection*.369}{プレイヤー向け確認チェックリスト}{section*.330}% 503
-\BOOKMARK [0][-]{chapter*.370}{あとがき}{}% 504
-\BOOKMARK [1][-]{section*.371}{第9.0版アップデートの要点}{chapter*.370}% 505
-\BOOKMARK [1][-]{section*.372}{ロゴと名前の由来}{chapter*.370}% 506
-\BOOKMARK [1][-]{section*.373}{さらなる楽しみ方}{chapter*.370}% 507
-\BOOKMARK [1][-]{section*.374}{最後に}{chapter*.370}% 508
-\BOOKMARK [0][-]{chapter*.375}{索引}{}% 509
+\BOOKMARK [1][-]{section.11.1}{12周年記念交流会 大会ルール}{chapter.11}% 370
+\BOOKMARK [2][-]{subsection.11.1.1}{対戦レギュレーション}{section.11.1}% 371
+\BOOKMARK [3][-]{subsubsection.11.1.1.1}{レギュレーションの決定}{subsection.11.1.1}% 372
+\BOOKMARK [2][-]{subsection.11.1.2}{対戦および勝点}{section.11.1}% 373
+\BOOKMARK [0][-]{chapter.12}{付録C: ガイドライン}{}% 374
+\BOOKMARK [1][-]{section.12.1}{BlackPoker二次創作ガイドライン}{chapter.12}% 375
+\BOOKMARK [2][-]{subsection.12.1.1}{はじめに}{section.12.1}% 376
+\BOOKMARK [2][-]{subsection.12.1.2}{二次創作の範囲}{section.12.1}% 377
+\BOOKMARK [2][-]{subsection.12.1.3}{創作の自由と制限}{section.12.1}% 378
+\BOOKMARK [2][-]{subsection.12.1.4}{クレジット表記について}{section.12.1}% 379
+\BOOKMARK [2][-]{subsection.12.1.5}{禁止事項}{section.12.1}% 380
+\BOOKMARK [2][-]{subsection.12.1.6}{商用利用について}{section.12.1}% 381
+\BOOKMARK [2][-]{subsection.12.1.7}{ガイドラインにないケースについて}{section.12.1}% 382
+\BOOKMARK [1][-]{section.12.2}{BlackPoker アクション・ルールガイドライン}{chapter.12}% 383
+\BOOKMARK [2][-]{subsection.12.2.1}{はじめに}{section.12.2}% 384
+\BOOKMARK [2][-]{subsection.12.2.2}{アクションを追加する際のルール}{section.12.2}% 385
+\BOOKMARK [3][-]{subsubsection.12.2.2.1}{アクションの対象は単対象 \(必須\)}{subsection.12.2.2}% 386
+\BOOKMARK [3][-]{subsubsection.12.2.2.2}{キーカード条件なしの通常-クイックアクションを作らない \(必須\)}{subsection.12.2.2}% 387
+\BOOKMARK [3][-]{subsubsection.12.2.2.3}{誘発アクションは即時 \(推奨\)}{subsection.12.2.2}% 388
+\BOOKMARK [3][-]{subsubsection.12.2.2.4}{先行1ターン目に確実に勝利できる効果を作らない \(必須\)}{subsection.12.2.2}% 389
+\BOOKMARK [3][-]{subsubsection.12.2.2.5}{誘発-メインは同時に2つ以上誘発しないように制限 \(必須\)}{subsection.12.2.2}% 390
+\BOOKMARK [2][-]{subsection.12.2.3}{キャラクターを追加する際のルール}{section.12.2}% 391
+\BOOKMARK [3][-]{subsubsection.12.2.3.1}{場のキャラクターは一目でわかるように定義 \(必須\)}{subsection.12.2.3}% 392
+\BOOKMARK [1][-]{section.12.3}{BlackPoker 対戦進行上のショートカット指針}{chapter.12}% 393
+\BOOKMARK [2][-]{subsection.12.3.1}{目的}{section.12.3}% 394
+\BOOKMARK [2][-]{subsection.12.3.2}{本文ルールとの関係}{section.12.3}% 395
+\BOOKMARK [2][-]{subsection.12.3.3}{用語の定義}{section.12.3}% 396
+\BOOKMARK [2][-]{subsection.12.3.4}{ショートカットの原則}{section.12.3}% 397
+\BOOKMARK [3][-]{subsubsection.12.3.4.1}{原則1：反応がなければパスとみなす}{subsection.12.3.4}% 398
+\BOOKMARK [3][-]{subsubsection.12.3.4.2}{原則2：連続する手順をまとめて進行できる}{subsection.12.3.4}% 399
+\BOOKMARK [3][-]{subsubsection.12.3.4.3}{原則3：割り込みの権利は常に保障される}{subsection.12.3.4}% 400
+\BOOKMARK [3][-]{subsubsection.12.3.4.4}{原則4：認識のずれは巻き戻す}{subsection.12.3.4}% 401
+\BOOKMARK [2][-]{subsection.12.3.5}{運用上の注意}{section.12.3}% 402
+\BOOKMARK [2][-]{subsection.12.3.6}{標準ショートカット}{section.12.3}% 403
+\BOOKMARK [3][-]{subsubsection.12.3.6.1}{メインアクションの実行}{subsection.12.3.6}% 404
+\BOOKMARK [3][-]{subsubsection.12.3.6.2}{アタックの進行}{subsection.12.3.6}% 405
+\BOOKMARK [3][-]{subsubsection.12.3.6.3}{ターンの受け渡し\(エンドチャージドロー\)}{subsection.12.3.6}% 406
+\BOOKMARK [0][-]{chapter.13}{付録D: BlackPoker設計ノート}{}% 407
+\BOOKMARK [1][-]{section.13.1}{BDR-1: カードと効果の分離\(スクリプトベースの採用\)}{chapter.13}% 408
+\BOOKMARK [2][-]{subsection.13.1.1}{状態}{section.13.1}% 409
+\BOOKMARK [2][-]{subsection.13.1.2}{背景}{section.13.1}% 410
+\BOOKMARK [2][-]{subsection.13.1.3}{判断}{section.13.1}% 411
+\BOOKMARK [2][-]{subsection.13.1.4}{理由}{section.13.1}% 412
+\BOOKMARK [2][-]{subsection.13.1.5}{影響}{section.13.1}% 413
+\BOOKMARK [1][-]{section.13.2}{BDR-2: フェイズ概念の廃止とコアフロー\(ステージ\)の採用}{chapter.13}% 414
+\BOOKMARK [2][-]{subsection.13.2.1}{状態}{section.13.2}% 415
+\BOOKMARK [2][-]{subsection.13.2.2}{背景}{section.13.2}% 416
+\BOOKMARK [2][-]{subsection.13.2.3}{判断}{section.13.2}% 417
+\BOOKMARK [2][-]{subsection.13.2.4}{理由}{section.13.2}% 418
+\BOOKMARK [2][-]{subsection.13.2.5}{影響}{section.13.2}% 419
+\BOOKMARK [1][-]{section.13.3}{BDR-3: ダメージのプレイヤー限定化とキャラクターへのダメージ廃止}{chapter.13}% 420
+\BOOKMARK [2][-]{subsection.13.3.1}{状態}{section.13.3}% 421
+\BOOKMARK [2][-]{subsection.13.3.2}{背景}{section.13.3}% 422
+\BOOKMARK [2][-]{subsection.13.3.3}{判断}{section.13.3}% 423
+\BOOKMARK [2][-]{subsection.13.3.4}{理由}{section.13.3}% 424
+\BOOKMARK [2][-]{subsection.13.3.5}{影響}{section.13.3}% 425
+\BOOKMARK [1][-]{section.13.4}{BDR-4: 「世代交代」ルールによるストーリー性とデッキ枚数差の緩和}{chapter.13}% 426
+\BOOKMARK [2][-]{subsection.13.4.1}{状態}{section.13.4}% 427
+\BOOKMARK [2][-]{subsection.13.4.2}{背景}{section.13.4}% 428
+\BOOKMARK [2][-]{subsection.13.4.3}{判断}{section.13.4}% 429
+\BOOKMARK [2][-]{subsection.13.4.4}{理由}{section.13.4}% 430
+\BOOKMARK [2][-]{subsection.13.4.5}{影響}{section.13.4}% 431
+\BOOKMARK [1][-]{section.13.5}{BDR-5: デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化}{chapter.13}% 432
+\BOOKMARK [2][-]{subsection.13.5.1}{状態}{section.13.5}% 433
+\BOOKMARK [2][-]{subsection.13.5.2}{背景}{section.13.5}% 434
+\BOOKMARK [2][-]{subsection.13.5.3}{判断}{section.13.5}% 435
+\BOOKMARK [2][-]{subsection.13.5.4}{理由}{section.13.5}% 436
+\BOOKMARK [2][-]{subsection.13.5.5}{影響}{section.13.5}% 437
+\BOOKMARK [2][-]{subsection.13.5.6}{本文ルールとの関係}{section.13.5}% 438
+\BOOKMARK [0][-]{chapter*.301}{変更履歴}{}% 439
+\BOOKMARK [1][-]{section*.302}{第9.1版 変更履歴}{chapter*.301}% 440
+\BOOKMARK [2][-]{subsection*.303}{第9.1版}{section*.302}% 441
+\BOOKMARK [3][-]{subsubsection*.304}{第9.1版アップデートの要点}{subsection*.303}% 442
+\BOOKMARK [3][-]{subsubsection*.305}{文書構成の変更}{subsection*.303}% 443
+\BOOKMARK [4][-]{paragraph*.306}{対戦レギュレーション章の増補}{subsubsection*.305}% 444
+\BOOKMARK [4][-]{paragraph*.307}{フレーム章の増補}{subsubsection*.305}% 445
+\BOOKMARK [4][-]{paragraph*.308}{コアルール章の整理}{subsubsection*.305}% 446
+\BOOKMARK [4][-]{paragraph*.309}{付録Dの追加}{subsubsection*.305}% 447
+\BOOKMARK [3][-]{subsubsection*.310}{対戦レギュレーション・構築概念の変更}{subsection*.303}% 448
+\BOOKMARK [4][-]{paragraph*.311}{デッキ構築の定義追加}{subsubsection*.310}% 449
+\BOOKMARK [4][-]{paragraph*.312}{シナリオ構築の定義追加}{subsubsection*.310}% 450
+\BOOKMARK [4][-]{paragraph*.313}{対戦準備の流れの整理}{subsubsection*.310}% 451
+\BOOKMARK [4][-]{paragraph*.314}{シナリオ手札の定義追加}{subsubsection*.310}% 452
+\BOOKMARK [3][-]{subsubsection*.315}{用語の変更}{subsection*.303}% 453
+\BOOKMARK [4][-]{paragraph*.316}{ストラテジー から シナリオ手札 への改名}{subsubsection*.315}% 454
+\BOOKMARK [3][-]{subsubsection*.317}{フレームの変更}{subsection*.303}% 455
+\BOOKMARK [4][-]{paragraph*.318}{フレーム対応表の変更}{subsubsection*.317}% 456
+\BOOKMARK [4][-]{paragraph*.319}{ドラフトフレームの追加}{subsubsection*.317}% 457
+\BOOKMARK [4][-]{paragraph*.320}{ストラテジーフレームの表記変更}{subsubsection*.317}% 458
+\BOOKMARK [4][-]{paragraph*.321}{エクストラフレームの表記変更}{subsubsection*.317}% 459
+\BOOKMARK [4][-]{paragraph*.322}{フレームアクション・コンポーネント対応表の変更}{subsubsection*.317}% 460
+\BOOKMARK [3][-]{subsubsection*.323}{共通ルールの変更}{subsection*.303}% 461
+\BOOKMARK [4][-]{paragraph*.324}{エンドアクション の フォグ 処理修正}{subsubsection*.323}% 462
+\BOOKMARK [3][-]{subsubsection*.325}{コアルールの変更}{subsection*.303}% 463
+\BOOKMARK [4][-]{paragraph*.326}{能力の適用順 の配置変更}{subsubsection*.325}% 464
+\BOOKMARK [3][-]{subsubsection*.327}{設計ノートの追加}{subsection*.303}% 465
+\BOOKMARK [4][-]{paragraph*.328}{BDRの追加}{subsubsection*.327}% 466
+\BOOKMARK [3][-]{subsubsection*.329}{プレイヤー向け確認チェックリスト}{subsection*.303}% 467
+\BOOKMARK [3][-]{subsubsection*.330}{関連資料の更新ポイント}{subsection*.303}% 468
+\BOOKMARK [2][-]{subsection*.331}{第9.1.1版}{section*.302}% 469
+\BOOKMARK [3][-]{subsubsection*.332}{第9.1.1版アップデートの要点}{subsection*.331}% 470
+\BOOKMARK [3][-]{subsubsection*.333}{共通ルールの変更}{subsection*.331}% 471
+\BOOKMARK [4][-]{paragraph*.334}{墓地の一番上のカードの扱い の追加}{subsubsection*.333}% 472
+\BOOKMARK [3][-]{subsubsection*.335}{エクストラアクションの変更}{subsection*.331}% 473
+\BOOKMARK [4][-]{paragraph*.336}{転生召喚 の即時・クイック化}{subsubsection*.335}% 474
+\BOOKMARK [4][-]{paragraph*.337}{追撃 の即時化}{subsubsection*.335}% 475
+\BOOKMARK [4][-]{paragraph*.338}{粉砕 の即時・クイック化}{subsubsection*.335}% 476
+\BOOKMARK [4][-]{paragraph*.339}{虚脱 の即時化}{subsubsection*.335}% 477
+\BOOKMARK [3][-]{subsubsection*.340}{付録の変更}{subsection*.331}% 478
+\BOOKMARK [4][-]{paragraph*.341}{周年大会記録へのルール追加}{subsubsection*.340}% 479
+\BOOKMARK [3][-]{subsubsection*.342}{表記揺れの修正}{subsection*.331}% 480
+\BOOKMARK [4][-]{paragraph*.343}{全角括弧および比較演算子の半角統一}{subsubsection*.342}% 481
+\BOOKMARK [3][-]{subsubsection*.344}{プレイヤー向け確認チェックリスト}{subsection*.331}% 482
+\BOOKMARK [3][-]{subsubsection*.345}{関連資料の更新ポイント}{subsection*.331}% 483
+\BOOKMARK [1][-]{section*.346}{第9.0版 変更履歴}{chapter*.301}% 484
+\BOOKMARK [2][-]{subsection*.347}{文書構成の変更}{section*.346}% 485
+\BOOKMARK [2][-]{subsection*.348}{対戦レギュレーション・入門導線の変更}{section*.346}% 486
+\BOOKMARK [2][-]{subsection*.349}{フレーム定義の変更}{section*.346}% 487
+\BOOKMARK [3][-]{subsubsection*.350}{エントリー}{subsection*.349}% 488
+\BOOKMARK [2][-]{subsection*.351}{共通ルールの変更}{section*.346}% 489
+\BOOKMARK [3][-]{subsubsection*.352}{プリセット配置}{subsection*.351}% 490
+\BOOKMARK [3][-]{subsubsection*.353}{ドロー}{subsection*.351}% 491
+\BOOKMARK [3][-]{subsubsection*.354}{攻撃・防御ラベル}{subsection*.351}% 492
+\BOOKMARK [3][-]{subsubsection*.355}{パス}{subsection*.351}% 493
+\BOOKMARK [3][-]{subsubsection*.356}{FAQで明文化された点}{subsection*.351}% 494
+\BOOKMARK [2][-]{subsection*.357}{アクションリスト・用語体系の変更}{section*.346}% 495
+\BOOKMARK [3][-]{subsubsection*.358}{@ 記法の追加}{subsection*.357}% 496
+\BOOKMARK [3][-]{subsubsection*.359}{魔法分類の再編}{subsection*.357}% 497
+\BOOKMARK [2][-]{subsection*.360}{レアカード操作・切札操作の変更}{section*.346}% 498
+\BOOKMARK [3][-]{subsubsection*.361}{罠カウンター}{subsection*.360}% 499
+\BOOKMARK [2][-]{subsection*.362}{エクストラ全体の傾向}{section*.346}% 500
+\BOOKMARK [2][-]{subsection*.363}{スペード系の変更}{section*.346}% 501
+\BOOKMARK [3][-]{subsubsection*.364}{スペード 2 スラッシュ}{subsection*.363}% 502
+\BOOKMARK [3][-]{subsubsection*.365}{スペード 4 威圧}{subsection*.363}% 503
+\BOOKMARK [3][-]{subsubsection*.366}{スペード 5 蘇生}{subsection*.363}% 504
+\BOOKMARK [3][-]{subsubsection*.367}{スペード J リアニメーター}{subsection*.363}% 505
+\BOOKMARK [2][-]{subsection*.368}{ハート系の変更}{section*.346}% 506
+\BOOKMARK [3][-]{subsubsection*.369}{ハート 3 激励 \040ハート 3 誘惑}{subsection*.368}% 507
+\BOOKMARK [3][-]{subsubsection*.370}{ハート 5 追撃}{subsection*.368}% 508
+\BOOKMARK [3][-]{subsubsection*.371}{ハート 8 救済}{subsection*.368}% 509
+\BOOKMARK [3][-]{subsubsection*.372}{ハート J チャリオット \040ハート J 破砕士}{subsection*.368}% 510
+\BOOKMARK [2][-]{subsection*.373}{ダイヤ系の変更}{section*.346}% 511
+\BOOKMARK [3][-]{subsubsection*.374}{ダイヤ A 防壁追加}{subsection*.373}% 512
+\BOOKMARK [3][-]{subsubsection*.375}{ダイヤ 3 交渉}{subsection*.373}% 513
+\BOOKMARK [3][-]{subsubsection*.376}{ダイヤ 4 相殺}{subsection*.373}% 514
+\BOOKMARK [3][-]{subsubsection*.377}{ダイヤ 5 喪失}{subsection*.373}% 515
+\BOOKMARK [3][-]{subsubsection*.378}{ダイヤ 8 修繕}{subsection*.373}% 516
+\BOOKMARK [3][-]{subsubsection*.379}{ダイヤ J 策士}{subsection*.373}% 517
+\BOOKMARK [2][-]{subsection*.380}{クラブ系の変更}{section*.346}% 518
+\BOOKMARK [3][-]{subsubsection*.381}{クラブ 4 スイッチ}{subsection*.380}% 519
+\BOOKMARK [3][-]{subsubsection*.382}{クラブ 7 手札補充}{subsection*.380}% 520
+\BOOKMARK [3][-]{subsubsection*.383}{クラブ 8 リセット}{subsection*.380}% 521
+\BOOKMARK [3][-]{subsubsection*.384}{クラブ 9 要塞}{subsection*.380}% 522
+\BOOKMARK [2][-]{subsection*.385}{プレイヤー向け確認チェックリスト}{section*.346}% 523
+\BOOKMARK [0][-]{chapter*.386}{あとがき}{}% 524
+\BOOKMARK [1][-]{section*.387}{第9.0版アップデートの要点}{chapter*.386}% 525
+\BOOKMARK [1][-]{section*.388}{ロゴと名前の由来}{chapter*.386}% 526
+\BOOKMARK [1][-]{section*.389}{さらなる楽しみ方}{chapter*.386}% 527
+\BOOKMARK [1][-]{section*.390}{最後に}{chapter*.386}% 528
+\BOOKMARK [0][-]{chapter*.391}{索引}{}% 529

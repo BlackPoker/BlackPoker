@@ -132,7 +132,9 @@
 <section id="id1">
 <h1>第9.1版 変更履歴<a class="headerlink" href="#id1" title="この見出しへのパーマリンク">¶</a></h1>
 <section id="id2">
-<h2>第9.1版アップデートの要点<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<h2>第9.1版<a class="headerlink" href="#id2" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id3">
+<h3>第9.1版アップデートの要点<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h3>
 <ul class="simple">
 <li><p>構築の考え方を <code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> に分け、BlackPokerにおける構築体験の位置づけを明確化しました。</p></li>
 <li><p>最初の手札に固定して入れる3枚のカード群を、旧称 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> から <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> に改名し、フレーム名 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と区別できるよう整理しました。</p></li>
@@ -140,12 +142,14 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> で墓地に移す <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> の範囲を <code class="docutils literal notranslate"><span class="pre">自分のフォグ</span></code> から <code class="docutils literal notranslate"><span class="pre">すべてのフォグ</span></code> に修正しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を、<code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> 配下から <code class="docutils literal notranslate"><span class="pre">能力</span></code> 配下へ移動し、参照しやすい構成に整理しました。</p></li>
 <li><p><a class="reference internal" href="../appendix/design-notes.html#design-notes"><span class="std std-numref">13 付録D: BlackPoker設計ノート</span></a> を追加し、<code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> から <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> までの設計判断記録を収録しました。</p></li>
+<li><p>第9.1.1版の変更として、墓地の一番上の公開ルールを明文化しました。</p></li>
+<li><p>第9.1.1版の変更として、<code class="docutils literal notranslate"><span class="pre">転生召喚</span></code>、<code class="docutils literal notranslate"><span class="pre">追撃</span></code>、<code class="docutils literal notranslate"><span class="pre">粉砕</span></code>、<code class="docutils literal notranslate"><span class="pre">虚脱</span></code> の速度・タイミングを調整しました。</p></li>
 </ul>
 </section>
-<section id="id3">
-<h2>文書構成の変更<a class="headerlink" href="#id3" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id4">
-<h3>対戦レギュレーション章の増補<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>文書構成の変更<a class="headerlink" href="#id4" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id5">
+<h4>対戦レギュレーション章の増補<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><a class="reference internal" href="../match-regulations/match-regulations.html#match-regulations-rst"><span class="std std-numref">2 対戦レギュレーション</span></a> に <a class="reference internal" href="../match-regulations/match-regulations.html#concept-of-construction"><span class="std std-numref">2.4 構築の考え方</span></a> を追加しました。</p></li>
 <li><p><a class="reference internal" href="../match-regulations/match-regulations.html#concept-of-construction"><span class="std std-numref">2.4 構築の考え方</span></a> には、次の項目を追加しました。</p>
@@ -160,8 +164,8 @@
 <li><p>一般的なTCGに近い「デッキを作る楽しさ」と、BlackPoker固有の「同じトランプから対戦体験を作る楽しさ」を分けて説明できるようにしました。</p></li>
 </ul>
 </section>
-<section id="id5">
-<h3>フレーム章の増補<a class="headerlink" href="#id5" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id6">
+<h4>フレーム章の増補<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><a class="reference internal" href="../frame/frame.html#frame-rst"><span class="std std-numref">8 フレーム</span></a> に、フレームが <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の土台になることを反映しました。</p></li>
 <li><p>公式フレーム一覧に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> を追加しました。</p></li>
@@ -170,8 +174,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">フレームアクションリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームキャラクターリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札リスト</span></code> の対応表に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> を追加しました。</p></li>
 </ul>
 </section>
-<section id="id6">
-<h3>コアルール章の整理<a class="headerlink" href="#id6" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id7">
+<h4>コアルール章の整理<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p>旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> を <a class="reference internal" href="../core/core.html#ability"><span class="std std-numref">9.3 能力</span></a> 配下へ移動し、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> としました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">コアフロー</span></code> 内で <code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を参照する箇所も、旧 <code class="docutils literal notranslate"><span class="pre">9.4.2</span></code> から新 <a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> へ変更しました。</p></li>
@@ -179,15 +183,15 @@
 </ul>
 </section>
 <section id="d">
-<h3>付録Dの追加<a class="headerlink" href="#d" title="この見出しへのパーマリンク">¶</a></h3>
+<h4>付録Dの追加<a class="headerlink" href="#d" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><a class="reference internal" href="../appendix/design-notes.html#design-notes"><span class="std std-numref">13 付録D: BlackPoker設計ノート</span></a> を追加しました。</p></li>
 <li><p>BlackPokerの設計判断記録を、<code class="docutils literal notranslate"><span class="pre">BDR</span></code> (BlackPoker Design Record) として整理する方針を追加しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BDR</span></code> の採番規則として、識別子形式、時系列順、不変性を定義しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">付録D</span></code> には、次の <code class="docutils literal notranslate"><span class="pre">BDR</span></code> を収録しました。</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">BDR-1:</span> <span class="pre">カードと効果の分離（スクリプトベースの採用）</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BDR-2:</span> <span class="pre">フェイズ概念の廃止とコアフロー（ステージ）の採用</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-1:</span> <span class="pre">カードと効果の分離(スクリプトベース</span> <span class="pre">of</span> <span class="pre">採用)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BDR-2:</span> <span class="pre">フェイズ概念の廃止とコアフロー(ステージ)の採用</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BDR-3:</span> <span class="pre">ダメージのプレイヤー限定化とキャラクターへのダメージ廃止</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BDR-4:</span> <span class="pre">「世代交代」ルールによるストーリー性とデッキ枚数差の緩和</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BDR-5:</span> <span class="pre">デッキ構築とシナリオ構築の分離、およびシナリオ構築の公式化</span></code></p></li>
@@ -197,18 +201,18 @@
 </ul>
 </section>
 </section>
-<section id="id7">
-<h2>対戦レギュレーション・構築概念の変更<a class="headerlink" href="#id7" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id8">
-<h3>デッキ構築の定義追加<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>対戦レギュレーション・構築概念の変更<a class="headerlink" href="#id8" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id9">
+<h4>デッキ構築の定義追加<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> を、ゲームで使用するカードの集合を決めることとして定義しました。</p></li>
 <li><p>BlackPokerでは、使用するフレームによって、トランプから使用するカードを選び、ゲームで使用するカードの母集団を決める準備として整理しました。</p></li>
 <li><p>使用するカードの枚数、含めるスート、含める数字によって、ゲーム中に引けるカードや使える戦略が変わることを説明しました。</p></li>
 </ul>
 </section>
-<section id="id9">
-<h3>シナリオ構築の定義追加<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id10">
+<h4>シナリオ構築の定義追加<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> を、ゲーム開始前に固定する戦略要素を選び、どのような遊び方・戦い方・体験を作るかを設計する考え方として定義しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> で扱う主な要素として、<code class="docutils literal notranslate"><span class="pre">切札</span></code>、<code class="docutils literal notranslate"><span class="pre">レアカード</span></code>、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> を整理しました。</p></li>
@@ -217,8 +221,8 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">マスター＋エクストラ</span></code> は、<code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の両方をプレイヤーが考える、自由度の高い遊び方として位置づけました。</p></li>
 </ul>
 </section>
-<section id="id10">
-<h3>対戦準備の流れの整理<a class="headerlink" href="#id10" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id11">
+<h4>対戦準備の流れの整理<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">対戦準備の流れ</span></code> の基本的な手順を明文化しました。</p>
 <ol class="arabic simple">
@@ -233,8 +237,8 @@
 <li><p>使用するフレームによって、一部の手順が固定されている場合や、一部の手順が不要になる場合があることを補足しました。</p></li>
 </ul>
 </section>
-<section id="id11">
-<h3>シナリオ手札の定義追加<a class="headerlink" href="#id11" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id12">
+<h4>シナリオ手札の定義追加<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> を、<code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> によってあらかじめデッキから選んでおくカード群として定義しました。</p></li>
 <li><p>標準的には3枚を想定しています。</p></li>
@@ -245,10 +249,10 @@
 </ul>
 </section>
 </section>
-<section id="id12">
-<h2>用語の変更<a class="headerlink" href="#id12" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id13">
-<h3><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> から <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> への改名<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>用語の変更<a class="headerlink" href="#id13" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id14">
+<h4><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> から <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> への改名<a class="headerlink" href="#id14" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p>従来、最初の手札に固定して入れる3枚のカード群を <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と呼んでいましたが、第9.1版では <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> として整理しました。</p></li>
 <li><p>理由は、フレーム名としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と、最初の手札として選ぶカード群としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> が同じ語になっており、説明上の混乱があったためです。</p></li>
@@ -263,18 +267,18 @@
 </ul>
 </section>
 </section>
-<section id="id14">
-<h2>フレームの変更<a class="headerlink" href="#id14" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id15">
-<h3>フレーム対応表の変更<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>フレームの変更<a class="headerlink" href="#id15" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id16">
+<h4>フレーム対応表の変更<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p>フレーム対応表に「ドラフト」を追加しました。</p></li>
 <li><p>ドラフトの対応フォーマットは、ライト、スタンダード、プロが非対応、マスターのみ対応です。</p></li>
 <li><p>ドラフトは、切札、レアカード、パック、シナリオ手札を使うため、マスター向けの上級フレームとして扱います。</p></li>
 </ul>
 </section>
-<section id="id16">
-<h3>ドラフトフレームの追加<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id17">
+<h4>ドラフトフレームの追加<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p>新フレーム「ドラフト」を追加しました。</p></li>
 <li><p>ドラフトは、デッキの上から作った6個のミニパックを使い、各ミニパックから1枚ずつ選んだ6枚を、レアカード1枚、切札2枚、シナリオ手札3枚に割り振るフレームです。</p></li>
@@ -292,34 +296,34 @@
 <li><p>マスター＋エクストラが事前に自由に構築する遊び方であるのに対し、ドラフトはその場で提示されたカードからシナリオを組む遊び方として差別化できます。</p></li>
 </ul>
 </section>
-<section id="id17">
-<h3>ストラテジーフレームの表記変更<a class="headerlink" href="#id17" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id18">
+<h4>ストラテジーフレームの表記変更<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> フレームのゲーム開始手順で、最初の手札に入れる3枚を <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> ではなく <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と表記しました。</p></li>
 <li><p>これにより、フレーム名としての <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> と、最初の手札に入れるカード群の名称が混同しないようになりました。</p></li>
 </ul>
 </section>
-<section id="id18">
-<h3>エクストラフレームの表記変更<a class="headerlink" href="#id18" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id19">
+<h4>エクストラフレームの表記変更<a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> フレームのゲーム開始手順で、最初の手札に入れる3枚を <code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と表記しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> では、<code class="docutils literal notranslate"><span class="pre">切札</span></code> 2枚、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> 3枚、<code class="docutils literal notranslate"><span class="pre">レアカード</span></code> 1枚を事前に選択するため、<code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> の代表的なフレームとして位置づけが明確になりました。</p></li>
 </ul>
 </section>
-<section id="id19">
-<h3>フレームアクション・コンポーネント対応表の変更<a class="headerlink" href="#id19" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id20">
+<h4>フレームアクション・コンポーネント対応表の変更<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">フレームアクションリスト</span></code> の対応表に <code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> 列を追加しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">パック操作</span></code>、<code class="docutils literal notranslate"><span class="pre">レアカード操作</span></code>、<code class="docutils literal notranslate"><span class="pre">切札操作</span></code>、<code class="docutils literal notranslate"><span class="pre">切札関連アクション</span></code> は、<code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> でも使用できるように整理しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">フレームキャラクターリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグリスト</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札リスト</span></code> についても、<code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> で使用できるものを対応表に反映しました。</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> は、使用できるアクション・切札 of 範囲としては <code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> に近く、準備方法が異なるフレームとして扱えます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> は、使用できるアクション・切札の範囲としては <code class="docutils literal notranslate"><span class="pre">エクストラ</span></code> に近く、準備方法が異なるフレームとして扱えます。</p></li>
 </ul>
 </section>
 </section>
-<section id="id20">
-<h2>共通ルールの変更<a class="headerlink" href="#id20" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id21">
-<h3><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> 処理修正<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>共通ルールの変更<a class="headerlink" href="#id21" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id22">
+<h4><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の <code class="docutils literal notranslate"><span class="pre">フォグ</span></code> 処理修正<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">エンドアクション</span></code> の効果を修正しました。</p>
 <ul>
@@ -333,10 +337,10 @@
 </ul>
 </section>
 </section>
-<section id="id22">
-<h2>コアルールの変更<a class="headerlink" href="#id22" title="この見出しへのパーマリンク">¶</a></h2>
 <section id="id23">
-<h3><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> の配置変更<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
+<h3>コアルールの変更<a class="headerlink" href="#id23" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id24">
+<h4><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> の配置変更<a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">能力の適用順</span></code> を、<a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> 配下から <a class="reference internal" href="../core/core.html#ability"><span class="std std-numref">9.3 能力</span></a> 配下へ移動しました。</p></li>
 <li><p>第9.0版では <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> でしたが、第9.1版では <a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> となります。</p></li>
@@ -346,10 +350,10 @@
 </ul>
 </section>
 </section>
-<section id="id24">
-<h2>設計ノートの追加<a class="headerlink" href="#id24" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id25">
+<h3>設計ノートの追加<a class="headerlink" href="#id25" title="この見出しへのパーマリンク">¶</a></h3>
 <section id="bdr">
-<h3>BDRの追加<a class="headerlink" href="#bdr" title="この見出しへのパーマリンク">¶</a></h3>
+<h4>BDRの追加<a class="headerlink" href="#bdr" title="この見出しへのパーマリンク">¶</a></h4>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">付録D:</span> <span class="pre">BlackPoker設計ノート</span></code> に、<code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> から <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> までを追加しました。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BDR-1</span></code> では、カードそのものと効果を分離し、スクリプトベースで定義する方針を整理しました。</p></li>
@@ -361,8 +365,8 @@
 </ul>
 </section>
 </section>
-<section id="id25">
-<h2>プレイヤー向け確認チェックリスト<a class="headerlink" href="#id25" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id26">
+<h3>プレイヤー向け確認チェックリスト<a class="headerlink" href="#id26" title="この見出しへのパーマリンク">¶</a></h3>
 <ul class="simple">
 <li><p>第9.1版では、構築を <code class="docutils literal notranslate"><span class="pre">デッキ構築</span></code> と <code class="docutils literal notranslate"><span class="pre">シナリオ構築</span></code> に分けて考えます。</p></li>
 <li><p>旧称 <code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> として積み込んでいた最初の3枚は、<code class="docutils literal notranslate"><span class="pre">シナリオ手札</span></code> と呼びます。</p></li>
@@ -376,8 +380,8 @@
 <li><p>第9.1版の設計背景を確認する場合は、<code class="docutils literal notranslate"><span class="pre">付録D</span></code>、特に <code class="docutils literal notranslate"><span class="pre">BDR-5</span></code> を参照します。</p></li>
 </ul>
 </section>
-<section id="id26">
-<h2>関連資料の更新ポイント<a class="headerlink" href="#id26" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id27">
+<h3>関連資料の更新ポイント<a class="headerlink" href="#id27" title="この見出しへのパーマリンク">¶</a></h3>
 <ul class="simple">
 <li><p>旧資料で <code class="docutils literal notranslate"><span class="pre">最初の手札3枚をストラテジーとして選ぶ</span></code> と説明している箇所は、<code class="docutils literal notranslate"><span class="pre">最初の手札3枚をシナリオ手札として選ぶ</span></code> に差し替えてください。</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">ストラテジー</span></code> という語を使う場合は、フレーム名を指すのか、旧称のカード群を指しているのか確認してください。</p></li>
@@ -385,6 +389,152 @@
 <li><p><code class="docutils literal notranslate"><span class="pre">ドラフト</span></code> 追加に伴い、<code class="docutils literal notranslate"><span class="pre">フレーム対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームアクション対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレーム切札対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームキャラクター対応表</span></code>、<code class="docutils literal notranslate"><span class="pre">フレームフォグ対応表</span></code> を更新してください。</p></li>
 <li><p>旧版で <code class="docutils literal notranslate"><span class="pre">9.4.2</span> <span class="pre">能力の適用順</span></code> と案内している箇所は、<a class="reference internal" href="../core/core.html#ability-order"><span class="std std-numref">9.3.1 能力の適用順</span></a> へ修正してください。</p></li>
 </ul>
+</section>
+</section>
+<section id="id28">
+<h2>第9.1.1版<a class="headerlink" href="#id28" title="この見出しへのパーマリンク">¶</a></h2>
+<section id="id29">
+<h3>第9.1.1版アップデートの要点<a class="headerlink" href="#id29" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">墓地の一番上のカード</span></code> を常に公開するルールを、公開レベル表と独立したルール項目として明文化しました。</p></li>
+<li><p>墓地へ複数枚を同時に移す場合と、墓地からカードを別の領域へ移す場合に、墓地の一番上へ置くカードを選ぶ手順を整理しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code>、<code class="docutils literal notranslate"><span class="pre">追撃</span></code>、<code class="docutils literal notranslate"><span class="pre">粉砕</span></code>、<code class="docutils literal notranslate"><span class="pre">虚脱</span></code> のスピードまたはタイミングを調整しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code> と <code class="docutils literal notranslate"><span class="pre">粉砕</span></code> は、他のアクションを参照する記述から、実際に行う処理を直接記載する方式へ変更しました。</p></li>
+<li><p>周年大会記録(付録B)に、「12周年記念交流会 大会ルール」を追加しました。</p></li>
+<li><p>ドキュメント全体の表記揺れを解消するため、全角の括弧( <code class="docutils literal notranslate"><span class="pre">（</span></code> <code class="docutils literal notranslate"><span class="pre">）</span></code> )および比較演算子( <code class="docutils literal notranslate"><span class="pre">＜</span></code> <code class="docutils literal notranslate"><span class="pre">＞</span></code> )を、半角の括弧( <code class="docutils literal notranslate"><span class="pre">(</span></code> <code class="docutils literal notranslate"><span class="pre">)</span></code> )および比較演算子( <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> )に統一しました。</p></li>
+</ul>
+</section>
+<section id="id30">
+<h3>共通ルールの変更<a class="headerlink" href="#id30" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id31">
+<h4><code class="docutils literal notranslate"><span class="pre">墓地の一番上のカードの扱い</span></code> の追加<a class="headerlink" href="#id31" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="../common/common-etc.html#common-etc-publevel"><span class="std std-numref">6.1 公開レベル</span></a> に <code class="docutils literal notranslate"><span class="pre">墓地の一番上のカードの扱い</span></code> を追加しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">墓地の一番上にあるカードは常に公開</span></code> と明記しました。</p></li>
+<li><p>公開レベル表における墓地の扱いを、次のように整理しました。</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">墓地の一番上のカード</span></code> は <code class="docutils literal notranslate"><span class="pre">完全公開</span></code> とする。</p></li>
+<li><p>一番上以外を含む <code class="docutils literal notranslate"><span class="pre">墓地の中身</span></code> は、その墓地の持ち主だけが確認できる <code class="docutils literal notranslate"><span class="pre">個人公開</span></code> とする。</p></li>
+</ul>
+</li>
+<li><p>複数のカードを同時に墓地へ移す場合は、移動するカードの中から任意の1枚を選び、墓地の一番上に置いて公開します。</p></li>
+<li><p>墓地からカードを別の領域へ移した場合は、墓地に残ったカードの中から任意の1枚を選び、墓地の一番上に置くことができます。</p></li>
+<li><p>従来FAQに記載していた <code class="docutils literal notranslate"><span class="pre">墓地の一番上のカードはいつ決まるのか</span></code> は、この独立項目へ統合しました。</p></li>
+<li><p>旧ルールでは、墓地からカードを移した後に既存の墓地から改めて公開するカードを選ばない扱いでしたが、第9.1.1版では残ったカードから一番上を選べるようになりました。</p></li>
+</ul>
+</section>
+</section>
+<section id="id32">
+<h3>エクストラアクションの変更<a class="headerlink" href="#id32" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id33">
+<h4><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code> の即時・クイック化<a class="headerlink" href="#id33" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code> のスピードとタイミングを変更しました。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">&#64;直接-通常-メイン</span> <span class="pre">|</span> <span class="pre">$</span> <span class="pre">C</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">&#64;直接-即時-クイック</span> <span class="pre">|</span> <span class="pre">$</span> <span class="pre">C</span></code></p></li>
+</ul>
+</li>
+<li><p>自分のターンのメイン時だけでなく、クイックタイミングで起こせるようになりました。</p></li>
+<li><p>通常アクションから即時アクションへ変更し、リクエスト後ただちに解決するアクションとして整理しました。</p></li>
+<li><p>効果の記述を <code class="docutils literal notranslate"><span class="pre">リアニメイト</span></code> 参照から、次の処理を直接記載する方式へ変更しました。</p>
+<ol class="arabic simple">
+<li><p>自分の墓地にあるカード1枚を選ぶ。</p></li>
+<li><p>対象の自分のキャラクターを墓地に移す。</p></li>
+<li><p>対象を墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。</p></li>
+<li><p>対象を墓地に移せなかった場合、選んだカードを墓地に戻す。</p></li>
+</ol>
+</li>
+</ul>
+</section>
+<section id="id34">
+<h4><code class="docutils literal notranslate"><span class="pre">追撃</span></code> の即時化<a class="headerlink" href="#id34" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">追撃</span></code> のスピードを変更しました。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">&#64;直接-通常-メイン</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">&#64;直接-即時-メイン</span></code></p></li>
+</ul>
+</li>
+<li><p>タイミングは引き続き <code class="docutils literal notranslate"><span class="pre">メイン</span></code> ですが、<code class="docutils literal notranslate"><span class="pre">追撃</span></code> 自体は即時に解決するようになりました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">追撃</span></code> の効果によってリクエストされる <code class="docutils literal notranslate"><span class="pre">アタック</span></code> は通常アクションのため、割込みの確認は生成された <code class="docutils literal notranslate"><span class="pre">アタック</span></code> のリクエストに対して行います。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">追撃</span></code> の効果内容と、解決後に切札を裏向きにする処理は変更していません。</p></li>
+</ul>
+</section>
+<section id="id35">
+<h4><code class="docutils literal notranslate"><span class="pre">粉砕</span></code> の即時・クイック化<a class="headerlink" href="#id35" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">粉砕</span></code> のスピードとタイミングを変更しました。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">&#64;直接-通常-メイン</span> <span class="pre">|</span> <span class="pre">$</span> <span class="pre">C</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">&#64;直接-即時-クイック</span> <span class="pre">|</span> <span class="pre">$</span> <span class="pre">C</span></code></p></li>
+</ul>
+</li>
+<li><p>自分のターンのメイン時だけでなく、クイックタイミングで防壁を破壊できるようになりました。</p></li>
+<li><p>通常アクションから即時アクションへ変更し、リクエスト後ただちに解決するアクションとして整理しました。</p></li>
+<li><p>効果の記述を <code class="docutils literal notranslate"><span class="pre">防壁破壊</span></code> 参照から、<code class="docutils literal notranslate"><span class="pre">対象の防壁を場から墓地に移す</span></code> という直接記述へ変更しました。</p></li>
+</ul>
+</section>
+<section id="id36">
+<h4><code class="docutils literal notranslate"><span class="pre">虚脱</span></code> の即時化<a class="headerlink" href="#id36" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">虚脱</span></code> のスピードを変更しました。</p>
+<ul>
+<li><p>旧: <code class="docutils literal notranslate"><span class="pre">&#64;直接-通常-クイック</span></code></p></li>
+<li><p>新: <code class="docutils literal notranslate"><span class="pre">&#64;直接-即時-クイック</span></code></p></li>
+</ul>
+</li>
+<li><p>クイックタイミングで使用する点は維持しつつ、通常アクションから即時アクションへ変更しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">追撃</span></code> の即時化に伴うバランス調整として変更しました。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ドライブ状態のキャラクター1体を墓地に移す</span></code> 効果、キーカード条件、起動条件は変更していません。</p></li>
+</ul>
+</section>
+</section>
+<section id="id37">
+<h3>付録の変更<a class="headerlink" href="#id37" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id38">
+<h4>周年大会記録へのルール追加<a class="headerlink" href="#id38" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p><a class="reference internal" href="../appendix/anniversary.html#anniversary"><span class="std std-numref">11 付録B: 周年大会記録</span></a> (付録B: 周年大会記録)に、新たに「12周年記念交流会 大会ルール」の項目を追加しました。</p></li>
+<li><p>大会における対戦レギュレーションの決定手順や、勝敗に応じた勝点(pt)の加算ルールを明文化しました。</p></li>
+</ul>
+</section>
+</section>
+<section id="id39">
+<h3>表記揺れの修正<a class="headerlink" href="#id39" title="この見出しへのパーマリンク">¶</a></h3>
+<section id="id40">
+<h4>全角括弧および比較演算子の半角統一<a class="headerlink" href="#id40" title="この見出しへのパーマリンク">¶</a></h4>
+<ul class="simple">
+<li><p>ドキュメント全体(RSTファイル)およびアクション・フレーム定義(YAMLファイル)に含まれる全角括弧 <code class="docutils literal notranslate"><span class="pre">（</span></code> <code class="docutils literal notranslate"><span class="pre">）</span></code> を半角括弧 <code class="docutils literal notranslate"><span class="pre">(</span></code> <code class="docutils literal notranslate"><span class="pre">)</span></code> に統一しました。</p></li>
+<li><p>ドキュメント全体および定義ファイルに含まれる全角の比較演算子 <code class="docutils literal notranslate"><span class="pre">＜</span></code> <code class="docutils literal notranslate"><span class="pre">＞</span></code> を半角の <code class="docutils literal notranslate"><span class="pre">&lt;</span></code> <code class="docutils literal notranslate"><span class="pre">&gt;</span></code> に統一しました。</p></li>
+</ul>
+</section>
+</section>
+<section id="id41">
+<h3>プレイヤー向け確認チェックリスト<a class="headerlink" href="#id41" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>墓地の一番上のカードは、常に表を見せた状態にします。</p></li>
+<li><p>複数枚を同時に墓地へ移す場合は、その中から一番上にする1枚を選びます。</p></li>
+<li><p>墓地からカードが移動した場合は、残った墓地から新しく一番上にするカードを選べます。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code> と <code class="docutils literal notranslate"><span class="pre">粉砕</span></code> は <code class="docutils literal notranslate"><span class="pre">即時-クイック</span></code> です。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">追撃</span></code> は <code class="docutils literal notranslate"><span class="pre">即時-メイン</span></code> です。効果でリクエストされる <code class="docutils literal notranslate"><span class="pre">アタック</span></code> は通常アクションです。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">虚脱</span></code> は <code class="docutils literal notranslate"><span class="pre">即時-クイック</span></code> です。</p></li>
+<li><p>第9.1版公開時のアクション早見表を使用している場合は、上記4アクションの表記を更新してください。</p></li>
+<li><p>12周年記念交流会では、レギュレーションの話し合いがまとまらない場合、より左側のレギュレーション(ライト &gt; スタンダード &gt; プロ &gt; マスター)を希望するプレイヤーに決定権があります。</p></li>
+<li><p>12周年記念交流会では、勝点は勝利 3pt、敗北 0pt、引き分け 1pt(両者合意の場合)、不戦勝 3pt となります。</p></li>
+<li><p>今後ドキュメントや定義ファイルを追加・修正する際は、括弧や比較演算子は全角ではなく半角( <code class="docutils literal notranslate"><span class="pre">()</span></code> や <code class="docutils literal notranslate"><span class="pre">&lt;&gt;</span></code> )を使用してください。</p></li>
+</ul>
+</section>
+<section id="id42">
+<h3>関連資料の更新ポイント<a class="headerlink" href="#id42" title="この見出しへのパーマリンク">¶</a></h3>
+<ul class="simple">
+<li><p>公開レベル表の墓地欄に、<code class="docutils literal notranslate"><span class="pre">墓地の一番上のカード</span></code> が <code class="docutils literal notranslate"><span class="pre">完全公開</span></code> であることを反映してください。</p></li>
+<li><p>旧FAQ <code class="docutils literal notranslate"><span class="pre">墓地の一番上のカードはいつ決まるのか</span></code> は、独立した <code class="docutils literal notranslate"><span class="pre">墓地の一番上のカードの扱い</span></code> の説明へ差し替えてください。</p></li>
+<li><p>アクション一覧、エクストラ一覧、早見表、インスト資料にある <code class="docutils literal notranslate"><span class="pre">転生召喚</span></code>、<code class="docutils literal notranslate"><span class="pre">追撃</span></code>、<code class="docutils literal notranslate"><span class="pre">粉砕</span></code>、<code class="docutils literal notranslate"><span class="pre">虚脱</span></code> のスピード・タイミング表記を更新してください。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">転生召喚</span></code> と <code class="docutils literal notranslate"><span class="pre">粉砕</span></code> の効果説明は、参照先だけを書く方式ではなく、処理内容を直接記載してください。</p></li>
+<li><p>12周年記念交流会の大会ルールについて、必要に応じて関連する紹介ページや告知資料に反映してください。</p></li>
+</ul>
+</section>
 </section>
 </section>
 
