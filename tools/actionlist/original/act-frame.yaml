@@ -347,16 +347,17 @@ actList:
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
-      actTime: メイン
+      actTime: クイック
       actCost: C
       actUnit: 「リアニメーター」1体
       actTarget: 自分のキャラクター1体
       actEffect: |-
         効果の内容は「リアニメイト」を参照。
       since: ex4.22.0
-      update: v8.2, v9.0
+      update: v8.2, v9.0, v9.1
       devNote: |-
         v9.0: 「リアニメーターリアニメイト」から「転生召喚」に名称変更。
+        v9.1: タイミングをメインからクイックに修正。
 
     - frame: |-
         ・エクストラ
@@ -621,16 +622,17 @@ actList:
       actType: 兵士起因
       actTrigger: 直接
       actSpeed: 通常
-      actTime: メイン
+      actTime: クイック
       actCost: C
       actUnit: 「破砕士」1体
       actTarget: 防壁1体
       actEffect: |-
         効果の内容は「防壁破壊」を参照。
       since: ex4.22.0
-      update: v8.2, v9.0
+      update: v8.2, v9.0, v9.1
       devNote: |-
         v9.0: チャリオット防壁破壊から粉砕に名称変更。
+        v9.1: タイミングをメインからクイックに修正。
 
     - frame: |-
         ・エクストラ
