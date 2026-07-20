@@ -1,0 +1,29 @@
+actions:
+  - id: action.attack
+    name: アタック
+    ruby: あたっく
+    type: basic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    targets:
+      - id: targetUnit
+        type: unit
+        condition:
+          componentType: character
+          relation: self
+      - id: targetPlayer
+        type: player
+        condition:
+          relation: opponent
+
+    text:
+      effect: 対戦相手を攻撃するアタッカーをドライブして指定する。
+
+    effect:
+      - startAttack:
+          target: targetUnit
+          defender: targetPlayer

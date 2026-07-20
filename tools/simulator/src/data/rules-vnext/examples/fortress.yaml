@@ -1,0 +1,22 @@
+components:
+  - id: trump.fortress
+    name: 要塞
+    ruby: ようさい
+    type: trump
+    zone: trump
+    card:
+      suit: club
+      rank: "9"
+    face: up
+
+    abilities:
+      - preventDamage:
+          source:
+            requestController: opponent
+            keyCardsIncludeSuit: spade
+          condition:
+            exists:
+              zone: field
+              controller: self
+              componentType: character
+          target: self

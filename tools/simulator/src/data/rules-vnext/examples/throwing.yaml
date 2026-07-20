@@ -1,0 +1,36 @@
+actions:
+  - id: action.throwing
+    name: 投擲
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: spade
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: club
+            rank: "A..K"
+            zone: hand
+
+    targets:
+      - id: targetPlayer
+        condition:
+          type: player
+          relation: opponent
+
+    text:
+      effect: 対象の対戦相手にX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
+
+    effect:
+      - dealDamage:
+          target: targetPlayer
+          amount: keyCards.spade.rankValue

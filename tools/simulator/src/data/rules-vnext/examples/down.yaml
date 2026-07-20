@@ -1,0 +1,41 @@
+actions:
+  - id: action.down
+    name: ダウン
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: D
+
+    key:
+      id: key
+      condition:
+        card:
+          suit: spade
+          rank: "2..10"
+          zone: hand
+
+    targets:
+      - id: target
+        condition:
+          component: character.soldier
+
+    text:
+      effect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分減算される。その印としてフォグにキーカードを置き、ダウンとする。減算の結果、サイズが0以下になった兵士は墓地へ移り、作成したダウンフォグを除去する。
+
+    effect:
+      - if:
+          condition: "target.size - key.rankValue <= 0"
+          then:
+            - moveToGraveyard:
+                target: target
+          else:
+            - createFog:
+                component: fog.down
+                card: key
+                bindings:
+                  target: target
+                  amount: -key.rankValue
