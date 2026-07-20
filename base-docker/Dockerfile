@@ -29,5 +29,4 @@ RUN chmod 0755 /usr/bin/plantuml
 # python
 # ------------------------------
 # RUN apk update
-RUN apk update && apk add --no-chache --repository http://dl-cdn.alpinelinux.org/alpine/v3.10/main python3~=3.7
-RUN apk add --no-cache py3-pip
+RUN apk update && apk add --no-cache python3 py3-pip

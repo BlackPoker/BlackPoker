@@ -42,9 +42,10 @@ ${nestList.type}
    single: ${rstFn.indexEntry(${row.actName}, ${row.ruby}, "アクション")}
 
 .. _act-${row.actId}:
+
 #set($actTitle = "${rstFn.nameWithRuby(${row.actName}, ${row.ruby})} (${row.actType}) #if(${row.actTime})@${row.actTrigger}-${row.actSpeed}-${row.actTime}#end #if(${row.actCost})| $ ${row.actCost}#end")
 ${actTitle}
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #if(${row.format})
 .. csv-table::
@@ -64,7 +65,7 @@ ${actTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${row.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${row}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -183,7 +184,7 @@ ${nestList.type}
 
 #set($charTitle = "${rstFn.nameWithRuby(${char.charName}, ${char.ruby})} (${char.charType})")
 ${charTitle}
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #if(${char.format})
 .. csv-table::
@@ -203,7 +204,7 @@ ${charTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${char.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${char}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -310,7 +311,7 @@ ${nestList.type}
 
 #set($fogTitle = "${rstFn.nameWithRuby(${fog.fogName}, ${fog.ruby})} (${fog.fogType})")
 ${fogTitle}
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #if(${fog.format})
 .. csv-table::
@@ -330,7 +331,7 @@ ${fogTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${fog.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${fog}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -458,7 +459,7 @@ ${trumpTitle}
 #foreach($fr in $frames)
 #if($foreach.count > 1)#set($frameHeader = "${frameHeader}, ")#set($frameRow = "${frameRow}, ")#end
 #set($frameHeader = "${frameHeader}${fr.name}")
-#if(${trump.frame.contains(${fr.name})})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
+#if(${rstFn.isAvailable(${trump}, ${fr}, $frames)})#set($frameRow = "${frameRow}◯")#else#set($frameRow = "${frameRow}${x}")#end
 #end
    ${frameHeader}
    ${frameRow}
@@ -467,21 +468,22 @@ ${rstFn.cnv(${trump.frame})}
 #end
 #end
 
-        #if(${trump.trumpKey.trim()})
+#define( $trumpContent )
+#if(${trump.trumpKey.trim()})
 **ユニット条件:** ${trump.trumpKey}
 
-        #end
-        #if(${trump.trumpLabel})
+#end
+#if(${trump.trumpLabel})
 **ラベル:** ${trump.trumpLabel}
 
-        #end
-        #if(${trump.trumpAbility})
+#end
+#if(${trump.trumpAbility})
 **能力:**  
 
 ${rstFn.cnv(${trump.trumpAbility})}
 
 
-        #end
+#end
 #set($rel = $trumpRelations.get(${nestList.type}))
 #if($rel)
 #set($relActs = $rel.get("acts"))
@@ -507,24 +509,48 @@ ${rstFn.cnv(${trump.trumpAbility})}
 #end
 #end
 #end
-        #if(${trump.image} && !${trump.devNote})
-**イメージ:**  
-${trump.trumpName}のイメージ (:numref:`frame-${trump.trumpId}-image`)
+#if(${trump.since})
+**導入バージョン:**  ${trump.since}
 
-.. _frame-${trump.trumpId}-image:
-.. figure:: ../frame/images/${trump.image}.*
-   :height: 200px
-   
-   ${trump.trumpName}のイメージ
+#end
+#if(${trump.update})
+**更新バージョン:**  ${trump.update}
 
-        #end
-        #if(${trump.story})
+#end
+#if(${trump.devNote})
+**補足:**
+
+${trump.devNote}
+#end
+#end
+#set($rel = $trumpRelations.get(${nestList.type}))
+#if(${trump.image})
+.. list-table::
+   :widths: 65 35
+   :header-rows: 0
+   :class: trump-table borderless
+
+   * - $rstFn.indent($trumpContent, 7)
+     - .. raw:: latex
+
+          \vspace{0pt}
+
+       .. _frame-${trump.trumpId}-image:
+       .. figure:: ../frame/images/${trump.image}.*
+          :height: 200px
+          
+          ${trump.trumpName}のイメージ
+#else
+$trumpContent
+#end
+
+#if(${trump.story})
 **ストーリー:**  
 
 ${trump.story}
 
-        #end
-        #if(${trump.flavor})
+#end
+#if(${trump.flavor})
 **フレーバー:**  
 
 *${trump.flavor}*
@@ -532,39 +558,15 @@ ${trump.story}
 
 ~ ${trump.flavorSpeaker} ~
             #end
-        #end
+#end
 
 
-        #if(${trump.since})
-**導入バージョン:**  ${trump.since}
-        #end
 
 
-        #if(${trump.update})
-**更新バージョン:**  ${trump.update}
-        #end
 
 
-        #if(${trump.image} && ${trump.devNote})
-.. list-table::
-   :widths: 35 65
-   :header-rows: 0
-   :class: borderless
 
-   * - .. _frame-${trump.trumpId}-image:
-       .. figure:: ../frame/images/${trump.image}.*
-          :height: 200px
-          
-          ${trump.trumpName}のイメージ
-     - **補足:**
 
-       ${trump.devNote}
-
-        #elseif(${trump.devNote})
-**補足:**
-
-${trump.devNote}
-        #end
 
     #end
 #end

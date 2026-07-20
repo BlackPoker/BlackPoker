@@ -9,6 +9,9 @@ https://blackpoker.github.io/BlackPoker/9th/
 ### 第9.0版 変更履歴
 https://blackpoker.github.io/BlackPoker/9th/revision-history/9.0th.html
 
+### 第9.1版 変更履歴
+https://blackpoker.github.io/BlackPoker/9th/revision-history/9.1th.html
+
 ## 開発中最新公式ルール
 https://blackpoker.github.io/BlackPoker/master/
 

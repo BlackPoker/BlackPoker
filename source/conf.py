@@ -33,8 +33,32 @@ numfig_format = {
     'code-block': 'Listing %s',
     'section': '{number} {name}'
 }
-release = '2026/04/13'
-version = '第9.0版'
+
+import os
+import json
+
+# デフォルト値（フォールバック）
+release = 'XXXX/XX/XX'
+version = '第X.X版'
+
+# version.json からバージョンと日付をロード
+# コンテナ内（source/version.json）とローカル（../tools/actionlist/original/version.json）の両方を探索
+_version_paths = [
+    os.path.abspath(os.path.join(os.path.dirname(__file__), 'version.json')),
+    os.path.abspath(os.path.join(os.path.dirname(__file__), '../tools/actionlist/original/version.json'))
+]
+
+for _path in _version_paths:
+    if os.path.exists(_path):
+        try:
+            with open(_path, 'r', encoding='utf-8') as _f:
+                _data = json.load(_f)
+                version = _data.get('ver', version)
+                release = _data.get('lastupdate', release)
+                break
+        except Exception as _e:
+            print(f"Warning: Failed to read version.json at {_path}: {_e}")
+
 
 # -- General configuration ---------------------------------------------------
 
@@ -228,6 +252,12 @@ latex_elements = {
 \titlespacing{\subparagraph}{0pt}{0.5ex}{0.2ex}
 \usepackage{enumitem}
 \setlist{nosep, itemsep=0.2ex, parsep=0pt}
+\setlist[itemize]{leftmargin=1.2zw}
+\setlist[enumerate]{leftmargin=1.2zw}
+\setlist[description]{leftmargin=1.2zw}
+\renewenvironment{quote}
+  {\list{}{\leftmargin=1.2zw\rightmargin=0pt}\item[]}
+  {\endlist}
 \providecommand{\chapterheadstartskip}{}
 \renewcommand{\chapterheadstartskip}{\vspace{0pt}}
 \providecommand{\chapterheadendskip}{}
