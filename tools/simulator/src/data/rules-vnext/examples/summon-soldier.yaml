@@ -1,0 +1,29 @@
+actions:
+  - id: action.summonSoldier
+    name: 兵士召喚
+    ruby: へいししょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BL
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "2..10"
+          zone: hand
+
+    text:
+      effect: キーカードを一般兵として表向きかつチャージ状態で場に出す。
+
+    effect:
+      - summonUnit:
+          card: key
+          component: character.soldier
+          face: up
+          state: charge

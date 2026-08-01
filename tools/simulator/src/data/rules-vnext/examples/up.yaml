@@ -1,0 +1,35 @@
+actions:
+  - id: action.up
+    name: アップ
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: D
+
+    key:
+      id: key
+      condition:
+        card:
+          suit: heart
+          rank: "A..10"
+          zone: hand
+
+    targets:
+      - id: target
+        condition:
+          component: character.soldier
+
+    text:
+      effect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。
+
+    effect:
+      - createFog:
+          component: fog.up
+          card: key
+          bindings:
+            target: target
+            amount: key.rankValue

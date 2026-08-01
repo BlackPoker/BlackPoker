@@ -1,0 +1,25 @@
+actions:
+  - id: action.nextGeneration
+    name: 世代交代
+    type: triggered
+
+    request:
+      trigger: triggered
+      speed: immediate
+      timing: always
+
+    triggerCondition:
+      event: cardMoved
+      condition:
+        fromZone: field
+        toZone: grave
+        card:
+          rank: ["Joker", "A", "J", "Q", "K"]
+          owner: self
+
+    text:
+      effect: Joker,A,J,Q,Kのカードが自分の場から墓地に移るたびに1枚につき1回誘発する。ライフの一番上からJoker,A,J,Q,Kのいずれかが出るまで墓地にカードを移動し、出たら手札に加える。
+
+    effect:
+      - takeUntilLegacyCard:
+          player: self

@@ -1,0 +1,29 @@
+actions:
+  - id: action.setBulwark
+    name: 防壁設置
+    ruby: ぼうへきせっち
+    type: summon
+
+    request:
+      trigger: direct
+      speed: immediate
+      timing: main
+
+    cost: L
+
+    key:
+      id: key
+      count: 1
+      condition:
+        card:
+          zone: hand
+
+    text:
+      effect: 手札からカード1枚を防壁として裏向きかつチャージ状態で場に出す。防壁の置き方は「防壁の置き方」参照。
+
+    effect:
+      - summonUnit:
+          card: key
+          component: character.bulwark
+          face: down
+          state: charge

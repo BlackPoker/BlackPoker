@@ -1,0 +1,34 @@
+actions:
+  - id: action.destroyBulwark
+    name: 防壁破壊
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: heart
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: diamond
+            rank: "A..K"
+            zone: hand
+
+    targets:
+      - id: target
+        condition:
+          component: character.bulwark
+
+    text:
+      effect: 対象とした防壁を場から墓地に移す。
+
+    effect:
+      - moveToGraveyard:
+          target: target

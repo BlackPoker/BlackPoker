@@ -1,0 +1,11 @@
+actions:
+  - id: action.end
+    name: エンド
+    type: basic
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+    effect:
+      - cleanupFogs: {}
+      - endTurn: {}

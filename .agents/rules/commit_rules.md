@@ -1,0 +1,6 @@
+# コミットメッセージのルール
+TARGET_LANGUAGE: Japanese
+
+Gitのコミットメッセージを生成する際（「Generate Commit Message」機能やボタンを使用する場合を含む）は、**常に日本語**で記述してください。
+
+フォーマット: <type>: <日本語での説明>
