@@ -368,10 +368,12 @@
 \contentsline {subsection}{\numberline {10.2.3}マスター+エクストラ}{136}{subsection.10.2.3}%
 \contentsline {section}{\numberline {10.3}エクストラリスト}{136}{section.10.3}%
 \contentsline {chapter}{\numberline {第11章}付録B: 周年大会記録}{137}{chapter.11}%
-\contentsline {section}{\numberline {11.1}12周年記念交流会 大会ルール}{137}{section.11.1}%
+\contentsline {section}{\numberline {11.1}13周年記念交流会 大会ルール}{137}{section.11.1}%
 \contentsline {subsection}{\numberline {11.1.1}対戦レギュレーション}{137}{subsection.11.1.1}%
 \contentsline {subsubsection}{\numberline {11.1.1.1}レギュレーションの決定}{138}{subsubsection.11.1.1.1}%
 \contentsline {subsection}{\numberline {11.1.2}対戦および勝点}{138}{subsection.11.1.2}%
+\contentsline {subsubsection}{\numberline {11.1.2.1}参加人数6名以下の場合}{138}{subsubsection.11.1.2.1}%
+\contentsline {subsubsection}{\numberline {11.1.2.2}参加人数7名以上の場合}{138}{subsubsection.11.1.2.2}%
 \contentsline {chapter}{\numberline {第12章}付録C: ガイドライン}{139}{chapter.12}%
 \contentsline {section}{\numberline {12.1}BlackPoker二次創作ガイドライン}{139}{section.12.1}%
 \contentsline {subsection}{\numberline {12.1.1}はじめに}{139}{subsection.12.1.1}%
