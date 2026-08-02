@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  1 AUG 2026 19:31
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  2 AUG 2026 06:21
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -2055,20 +2055,20 @@ LaTeX Font Info:    Font shape `T1/txtt/b/n' in size <10> not available
 [155] [156] [157] [158] [159] [160] [161] [162] [163] [164] [165]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 22114.
+(hyperref)                removing `math shift' on input line 22084.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 22114.
+(hyperref)                removing `\rightarrow' on input line 22084.
 
 [166]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 22195.
+(hyperref)                removing `math shift' on input line 22165.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 22195.
+(hyperref)                removing `\rightarrow' on input line 22165.
 
 [167] [168] [169] [170
 
@@ -2080,35 +2080,35 @@ File: blackpoker_logo.pdf Graphic file (type pdf)
 
 ] [174])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 22687.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 22657.
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 22687.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 22657.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 22687.
+(Font)              scaled to size 11.53198pt on input line 22657.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 22687.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 22657.
 
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 22687.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 22657.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 22687.
+(Font)              scaled to size 11.53198pt on input line 22657.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 22691.
+(Font)              scaled to size 5.76599pt on input line 22661.
 [175
 
 
 ] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 6E456A04DA8866BBBC6E142A3614AE4F;49196.
+(rerunfilecheck)             Checksum: DCCCF52954F3FDD9C0C9E5E6EB2B4F56;49190.
  ) 
 Here is how much of TeX's memory you used:
- 17185 strings out of 480496
- 291623 string characters out of 5899437
- 703081 words of memory out of 5000000
- 34777 multiletter control sequences out of 15000+600000
+ 17186 strings out of 480496
+ 291643 string characters out of 5899437
+ 703079 words of memory out of 5000000
+ 34778 multiletter control sequences out of 15000+600000
  515199 words of font info for 131 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,15n,80p,586b,734s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,15n,80p,586b,724s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (191 pages, 1171340 bytes).
+Output written on blackpoker.dvi (191 pages, 1169320 bytes).
