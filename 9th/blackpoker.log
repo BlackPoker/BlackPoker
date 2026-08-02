@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  1 AUG 2026 14:37
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.14)  2 AUG 2026 10:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1964,81 +1964,81 @@ Overfull \hbox (152.52876pt too wide) in paragraph at lines 19198--19200
 [139
 
 ] [140] [141]
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19715--19717
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19713--19715
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19719--19721
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19717--19719
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19728--19730
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19726--19728
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19732--19734
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19730--19732
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19741--19743
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19739--19741
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19745--19751
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19743--19749
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19758--19760
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19756--19758
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19762--19764
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19760--19762
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19771--19773
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19769--19771
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19775--19779
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19773--19777
 []
  []
 
 [142]
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19789--19791
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19787--19789
 []
  []
 
 
-Overfull \hbox (152.52876pt too wide) in paragraph at lines 19793--19795
+Overfull \hbox (152.52876pt too wide) in paragraph at lines 19791--19793
 []
  []
 
 [143] [144] [145]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 20052.
+(hyperref)                removing `math shift' on input line 20050.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 20052.
+(hyperref)                removing `\rightarrow' on input line 20050.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 20052.
+(hyperref)                removing `math shift' on input line 20050.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 20052.
+(hyperref)                removing `\rightarrow' on input line 20050.
 
 [146]
 第13章
@@ -2050,25 +2050,25 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 
 ] [154]
 LaTeX Font Info:    Font shape `T1/txtt/b/n' in size <10> not available
-(Font)              Font shape `T1/txtt/bx/n' tried instead on input line 20732
+(Font)              Font shape `T1/txtt/bx/n' tried instead on input line 20730
 .
 [155] [156] [157] [158] [159] [160] [161] [162] [163] [164] [165]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 22114.
+(hyperref)                removing `math shift' on input line 22082.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 22114.
+(hyperref)                removing `\rightarrow' on input line 22082.
 
 [166]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 22195.
+(hyperref)                removing `math shift' on input line 22163.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\rightarrow' on input line 22195.
+(hyperref)                removing `\rightarrow' on input line 22163.
 
 [167] [168] [169] [170
 
@@ -2080,35 +2080,35 @@ File: blackpoker_logo.pdf Graphic file (type pdf)
 
 ] [174])
 LaTeX Font Info:    Font shape `JT1/mc/b/n' in size <12> not available
-(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 22687.
+(Font)              Font shape `JT1/mc/bx/n' tried instead on input line 22655.
 
 LaTeX Font Info:    Font shape `JT1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JT1/gt/m/n' tried instead on input line 22687.
+(Font)              Font shape `JT1/gt/m/n' tried instead on input line 22655.
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 22687.
+(Font)              scaled to size 11.53198pt on input line 22655.
 LaTeX Font Info:    Font shape `JY1/mc/b/n' in size <12> not available
-(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 22687.
+(Font)              Font shape `JY1/mc/bx/n' tried instead on input line 22655.
 
 LaTeX Font Info:    Font shape `JY1/mc/bx/n' in size <12> not available
-(Font)              Font shape `JY1/gt/m/n' tried instead on input line 22687.
+(Font)              Font shape `JY1/gt/m/n' tried instead on input line 22655.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 22687.
+(Font)              scaled to size 11.53198pt on input line 22655.
 LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
-(Font)              scaled to size 5.76599pt on input line 22691.
+(Font)              scaled to size 5.76599pt on input line 22659.
 [175
 
 
 ] (./blackpoker.aux)
 Package rerunfilecheck Info: File `blackpoker.out' has not changed.
-(rerunfilecheck)             Checksum: 6E456A04DA8866BBBC6E142A3614AE4F;49196.
+(rerunfilecheck)             Checksum: DCCCF52954F3FDD9C0C9E5E6EB2B4F56;49190.
  ) 
 Here is how much of TeX's memory you used:
- 17185 strings out of 480496
- 291623 string characters out of 5899437
- 703081 words of memory out of 5000000
- 34777 multiletter control sequences out of 15000+600000
+ 17186 strings out of 480496
+ 291643 string characters out of 5899437
+ 703079 words of memory out of 5000000
+ 34778 multiletter control sequences out of 15000+600000
  515199 words of font info for 131 fonts, out of 8000000 for 9000
  20 hyphenation exceptions out of 8191
- 72i,15n,80p,586b,734s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 72i,15n,80p,586b,724s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on blackpoker.dvi (191 pages, 1171240 bytes).
+Output written on blackpoker.dvi (191 pages, 1168888 bytes).
