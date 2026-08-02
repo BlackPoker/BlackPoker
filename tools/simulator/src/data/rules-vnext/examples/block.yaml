@@ -23,7 +23,7 @@ actions:
           relation: self
 
     text:
-      effect: アタッカーをブロックするキャラクター（ブロッカー）を指定する。
+      effect: アタッカーをブロックするキャラクター(ブロッカー)を指定する。
 
     effect:
       - declareBlock:

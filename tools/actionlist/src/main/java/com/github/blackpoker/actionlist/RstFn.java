@@ -193,11 +193,11 @@ public class RstFn {
 				|| Character.UnicodeBlock.of(first) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
 				|| Character.UnicodeBlock.of(first) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_B) {
 				if (ruby != null && !ruby.isEmpty()) {
-					return ruby.substring(0, 1) + "|" + name + "（" + category + "）";
+					return ruby.substring(0, 1) + "|" + name + "(" + category + ")";
 				}
 			}
 		}
-		return name + "（" + category + "）";
+		return name + "(" + category + ")";
 	}
 
 	/**
