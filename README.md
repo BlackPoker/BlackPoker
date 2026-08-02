@@ -14,13 +14,6 @@
 
 ---
 
-## 💬 コミュニティ・開発
-
-- **疑問・質問・指摘・要望**: [GitHub Wiki](https://github.com/BlackPoker/BlackPoker/wiki)
-- **開発者向け（環境構築）**: [修正環境構築ガイド](https://github.com/BlackPoker/BlackPoker/blob/master/dev-notes/dev-setting.md)
-
----
-
 <details>
 <summary><b>📚 過去の版数（アーカイブ）</b></summary>
 
