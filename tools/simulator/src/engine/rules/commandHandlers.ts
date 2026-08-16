@@ -493,6 +493,8 @@ export function declareBlockHandler(
 ): CommandHandler {
   return (args, context) => {
     const state = context.state;
+    // 現時点では既存の targetComponent を流用して効果解決時のブロッカーを受け取るが、
+    // 将来的には context.selection / choiceProvider などの効果解決時選択モデルへ移行する。
     const blockerUnit = context.targetComponent;
 
     if (!blockerUnit) {

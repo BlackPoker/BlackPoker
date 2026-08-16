@@ -1432,10 +1432,10 @@ npm run scenario:rules-vnext
   - 現在は共通 of `actions` 定義リストを参照していますが、TCGではカード効果などによるアクションやコンポーネントの参照可能リストの変化は本来プレイヤー側に閉じるべきです。
   - そのため、将来的には各プレイヤーが個別にアクション/コンポーネント定義リストを保持するモデル（`state.players[p1].actionList` / `state.players[p1].componentList` 等）へ分離する設計方針とします。
 - **起動タイミング・対象バリデーションのバイパスと将来の対象選択設計**:
-  - `context.triggered === true` の場合、`ActionRequestValidator` における「起動タイミング検証（手番、チャンス、ステージ空）」およびリクエスト時点では未確定の「対象検証（targets）」をバイパスするよう調整しました。
-  - ブロックアクション（`action.block`）はリクエスト（移送）時点ではブロッカー（`targetUnit`）を指定せず、効果解決時に選択します。既存 `block.yaml` に `targetUnit` の targets 定義が残っている点については、将来的に「効果解決時選択（selection / choiceProvider / context.selection）」へ整理する課題とします。
-  - `declareBlock` が現在 `targetUnit` 前提になっている部分については、次フェーズ以降で効果解決時にブロッカーを選択する方式へ移行する設計方針とします。
-  - 効果解決時に必要な盤面整合性（アタッカー・ブロッカーの存在、状態など）は、`startAttack` / `declareBlock` / `judgeDamage` の解決コマンドハンドラー側で厳密に検証します。
+  - `context.triggered === true` の場合、`ActionRequestValidator` における「起動タイミング検証（手番、チャンス、ステージ空）」およびリクエスト時点では未確定の「対象検証（targets）」をバイパスします。
+  - 将来的には、アクション定義ごとに「リクエスト時に必要な対象（request targets）」と「効果解決時に選ぶ対象（effect selection）」を明確に区別し、解決時に選択プロバイダーやコンテキストセレクション（`context.selection` / `choiceProvider`）を介して選択するモデルへ移行します。
+  - 現時点では、既存のターゲット指定機構（`context.targetComponent`）を一時利用して効果解決時のブロッカーを受け取ります。
+  - 効果解決時に必要な盤面整合性（ブロッカーが自軍フィールドに存在すること、チャージ状態であること、防御ラベルを所持していること等）は、各解決コマンドハンドラー（`declareBlockHandler` / `startAttackHandler` / `judgeDamageHandler`）側で厳密に検証し、不正な場合はエラーをスローして解決を中断します。
 - **damageJudge の誘発条件修正と解決時分岐（ブロッカー不在処理）**:
   - `damage-judge.yaml` の誘発条件から `hasAttackerAndBlocker: true` を削除し、単に「ブロックアクション解決時（かつターンプレイヤー）」に誘発するように修正しました。
   - ブロッカーの有無による分岐は効果解決側（`judgeDamageHandler`）に寄せ、ブロッカー不在時にはエラーとせず、アタッカーサイズ分の直接ダメージを防御側に適用（`dealDamage`）し、アタッカーの `battle` 状態を削除して正常終了するロジックを実装・検証しました。
@@ -1443,14 +1443,16 @@ npm run scenario:rules-vnext
 ### テストおよび検証実績
 
 - **網羅的な統合テストの追加 (`requestBufferProcessor.test.ts`)**:
-  - [requestBufferProcessor.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/requestBufferProcessor.test.ts) を新規追加し、ケース A〜H（アサーションを含む）を実装しました。
+  - [requestBufferProcessor.test.ts](file:///c:/Users/black/git/github/BlackPoker/tools/simulator/src/tests/rules-vnext/requestBufferProcessor.test.ts) を新規追加し、ケース A〜K（アサーションを含む）を実装しました。
     - **ケースA/B**: `action.block` / `action.damageJudge` が正常にバッファからステージへ移送され、`definitionOwner` / `controller` の分離（p1/p2）および同一（p1/p1）が正しくステージ上の `ActionRequest` に引き継がれていること。
     - **ケースC/D**: バッファ空時の安全処理（`undefined` 返却）、および移送完了時に `requestBuffer.history` にステータス `"movedToStage"` が記録されること。
     - **ケースE**: ステージ移送時点ではコストや効果の解決（自動解決）が実行されないこと。
     - **ケースF/G**: 既存の世代交代二重解決防止、およびキャンセルされたアタックからの誤誘発防止が維持されていること。
     - **ケースH**: ブロッカー不在時に `damageJudge` がエラーなく正常解決され、防御側にアタッカーサイズ分の直接ダメージが適用され、`attacker.battle` が正常にクリアされること。
+    - **ケースI**: 効果解決時に正常なブロッカー（チャージ状態、防御ラベルあり）を指定して解決した場合、正常にブロックが成立すること。
+    - **ケースJ/K**: 効果解決時にドライブ状態のブロッカーや、防御ラベルを持たないユニットを指定してブロックを解決しようとした場合、厳密にエラーがスローされること。
 - **自動テストの実行結果 (`npm test`)**:
-  - 新規追加した `requestBufferProcessor.test.ts` を含む、**全19ファイル・113ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
+  - 新規追加した `requestBufferProcessor.test.ts` を含む、**全19ファイル・116ケースすべての Vitest 統合テストが 100% グリーンで正常にパス**することを確認しました。
 - **CLIシナリオランナーの拡張と実行 (`npm run scenario:rules-vnext`)**:
   - シナリオ7を手動解決フローから、アタック解決 → ブロック誘発・移送 → ブロック解決 → ダメージ判定誘発・移送 → ダメージ判定解決の一連の「バッファ移送・解決フロー」へ拡張しました。
   - バッファからステージへの移送ログ（`[BUFFER-MOVE] ...`）および解決ログ（`[BUFFER] ... をリクエストバッファからステージへ移動`）が期待通りにフック出力され、既存の手動実行シナリオの挙動を破壊せず正常に完走することを確認しました。
