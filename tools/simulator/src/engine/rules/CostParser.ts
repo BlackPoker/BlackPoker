@@ -10,6 +10,12 @@ export function parseCost(costStr: string): CostSymbol[] {
   const normalized = costStr.trim().toUpperCase();
   let i = 0;
   while (i < normalized.length) {
+    const char = normalized[i];
+    if (char === "+" || char === " " || char === "," || char === "\t") {
+      i++;
+      continue;
+    }
+
     let matched = false;
     for (const sym of VALID_COST_SYMBOLS) {
       if (normalized.startsWith(sym, i)) {
