@@ -1,11 +1,143 @@
 import { CommandContext } from "./CommandRegistry";
 import { CostSymbol, parseCost } from "./CostParser";
+import { CostPayment } from "../../domain/decision/DecisionCatalog";
 
 /**
  * 新YAML DSLにおけるアクションコスト（D, L, Bなど）の判定・支払いを担当するクラス。
  * コスト文字列を正規化された CostSymbol[] にパースしてから処理します。
  */
 export class CostResolver {
+  /**
+   * 選択済みの具体的な CostPayment が支払えるか検証します。
+   */
+  canPaySelection(costPayment: CostPayment, context: CommandContext): boolean {
+    const player = context.state.players[context.playerKey];
+    if (!player) return false;
+
+    // 1. 手札カードの存在確認
+    if (costPayment.discardedCardIds && costPayment.discardedCardIds.length > 0) {
+      if (!player.hand) return false;
+      const handIds = new Set(player.hand.map((c: any) => c.id));
+      for (const cardId of costPayment.discardedCardIds) {
+        if (!handIds.has(cardId)) return false;
+      }
+    }
+
+    // 2. 防壁ユニットの存在とチャージ状態確認
+    if (costPayment.drivenBulwarkUnitIds && costPayment.drivenBulwarkUnitIds.length > 0) {
+      if (!player.field) return false;
+      for (const unitId of costPayment.drivenBulwarkUnitIds) {
+        const bulwark = player.field.find((u: any) => u.unitId === unitId);
+        if (!bulwark || bulwark.state !== "charge") return false;
+      }
+    }
+
+    // 3. ライフ残数確認
+    if (costPayment.lifeCount > 0) {
+      const actualLife = player.life
+        ? (Array.isArray(player.life) ? player.life.length : Number(player.life))
+        : 0;
+      if (actualLife < costPayment.lifeCount) return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * 選択済みの具体的な CostPayment を支払います。
+   */
+  paySelection(costPayment: CostPayment, context: CommandContext, effectInterpreter: any): void {
+    const player = context.state.players[context.playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+    // 1. 指定された手札カードを捨てる
+    if (costPayment.discardedCardIds && costPayment.discardedCardIds.length > 0) {
+      for (const cardId of costPayment.discardedCardIds) {
+        const index = player.hand.findIndex((c: any) => c.id === cardId);
+        if (index === -1) {
+          throw new Error(`コストとして指定された手札カードが見つかりません: ${cardId}`);
+        }
+        const [costCard] = player.hand.splice(index, 1);
+
+        if (!player.grave) player.grave = [];
+        const graveUnit = {
+          unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          kind: "コスト",
+          cards: [costCard],
+          labels: [],
+        };
+        player.grave.push(graveUnit);
+
+        const event = {
+          type: "cardMoved",
+          payload: {
+            card: costCard,
+            fromZone: "hand",
+            toZone: "grave",
+            playerKey: context.playerKey,
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
+    }
+
+    // 2. 指定された防壁をドライブする
+    if (costPayment.drivenBulwarkUnitIds && costPayment.drivenBulwarkUnitIds.length > 0) {
+      for (const unitId of costPayment.drivenBulwarkUnitIds) {
+        const bulwark = player.field?.find((u: any) => u.unitId === unitId);
+        if (!bulwark) {
+          throw new Error(`コストとして指定された防壁が見つかりません: ${unitId}`);
+        }
+        if (bulwark.state !== "charge") {
+          throw new Error(`コストとして指定された防壁がチャージ状態ではありません: ${unitId}`);
+        }
+
+        const oldState = bulwark.state;
+        bulwark.state = "drive";
+
+        const event = {
+          type: "unitStateChanged",
+          payload: {
+            unitId: bulwark.unitId,
+            fromState: oldState,
+            toState: "drive",
+            playerKey: context.playerKey,
+            cause: { type: "cost", symbol: "B" },
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
+    }
+
+    // 3. ライフを消費する
+    if (costPayment.lifeCount > 0) {
+      for (let i = 0; i < costPayment.lifeCount; i++) {
+        if (!player.life || player.life.length === 0) {
+          throw new Error("コストLを支払うためのライフが不足しています。");
+        }
+        const costCard = player.life.shift();
+        if (!player.grave) player.grave = [];
+        const graveUnit = {
+          unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          kind: "コスト",
+          cards: [costCard],
+          labels: [],
+        };
+        player.grave.push(graveUnit);
+
+        const event = {
+          type: "cardMoved",
+          payload: {
+            card: costCard,
+            fromZone: "life",
+            toZone: "grave",
+            playerKey: context.playerKey,
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
+    }
+  }
   /**
    * プレイヤーが指定されたコスト文字列を支払うことが可能か判定します。
    */

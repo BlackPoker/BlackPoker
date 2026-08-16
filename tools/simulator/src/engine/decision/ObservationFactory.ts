@@ -1,0 +1,156 @@
+import {
+  PlayerObservation,
+  PlayerObservationView,
+  CardView,
+  UnitView,
+  FogView,
+  RequestView,
+} from "../../domain/decision/PlayerObservation";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
+
+/**
+ * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
+ * 非公開情報（対戦相手の手札カード詳細など）は HIDDEN に変換されます。
+ */
+export class ObservationFactory {
+  /**
+   * 観戦プレイヤー視点の PlayerObservation を生成
+   */
+  static createObservation(state: any, viewerPlayerId: PlayerKey): PlayerObservation {
+    const playersView: PlayerObservationView[] = [];
+
+    if (state.players) {
+      for (const [pKey, p] of Object.entries<any>(state.players)) {
+        const isViewer = pKey === viewerPlayerId;
+
+        // ライフカードの処理
+        const lifeCards = Array.isArray(p.life)
+          ? p.life.map((c: any) => this.mapCard(c, false)) // ライフは基本非公開（または裏向き）
+          : undefined;
+        const lifeCount = Array.isArray(p.life) ? p.life.length : (typeof p.life === "number" ? p.life : 0);
+
+        // 手札カードの処理（自分は KNOWN、相手は HIDDEN）
+        const handCards = Array.isArray(p.hand)
+          ? p.hand.map((c: any) => (isViewer ? this.mapCard(c, true) : this.hideCard(c)))
+          : [];
+        const handCount = Array.isArray(p.hand) ? p.hand.length : 0;
+
+        // フィールドユニットの処理
+        const field: UnitView[] = Array.isArray(p.field)
+          ? p.field.map((u: any) => this.mapUnit(u))
+          : [];
+
+        // フォグの処理
+        const fog: FogView[] = Array.isArray(p.fog)
+          ? p.fog.map((f: any) => ({
+              fogId: f.fogId || "",
+              componentId: f.componentId || "",
+              card: f.card ? this.mapCard(f.card, true) : undefined,
+              bindings: f.bindings || {},
+            }))
+          : [];
+
+        // 切札の処理
+        const trumps: UnitView[] = Array.isArray(p.trumps || p.trump)
+          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t))
+          : [];
+
+        // 墓地の処理
+        const grave: UnitView[] = Array.isArray(p.grave)
+          ? p.grave.map((g: any) => this.mapUnit(g))
+          : [];
+
+        playersView.push({
+          playerId: pKey,
+          name: p.name || pKey,
+          lifeCount,
+          lifeCards,
+          handCount,
+          handCards,
+          field,
+          fog,
+          trumps,
+          grave,
+        });
+      }
+    }
+
+    // ステージリクエストの処理
+    const stageRequests: RequestView[] = [];
+    const stageRequestRefs: string[] = [];
+
+    if (state.stage?.requests && Array.isArray(state.stage.requests)) {
+      for (const req of state.stage.requests) {
+        stageRequestRefs.push(req.id);
+        stageRequests.push({
+          requestId: req.id,
+          actionId: req.actionId,
+          actionName: req.action?.name || req.actionId,
+          controller: req.controller,
+          status: req.status,
+          sequence: req.sequence,
+          definitionOwner: req.definitionOwner,
+        });
+      }
+    }
+
+    return {
+      viewerPlayerId,
+      turnPlayerId: state.turnPlayer,
+      chancePlayerId: state.chancePlayer,
+      players: playersView,
+      stageRequestRefs,
+      stageRequests,
+      recentEvents: [],
+    };
+  }
+
+  private static mapCard(card: any, faceUp: boolean = true): CardView {
+    if (!card) {
+      return {
+        visibility: "HIDDEN",
+        faceUp: false,
+      };
+    }
+    return {
+      visibility: "KNOWN",
+      cardInstanceId: card.id || `${card.suit}${card.rank}`,
+      suit: card.suit,
+      rank: card.rank,
+      value: card.value ?? 0,
+      faceUp,
+      code: card.code || `${card.suit}${card.rank}`,
+    };
+  }
+
+  private static hideCard(card: any): CardView {
+    return {
+      visibility: "HIDDEN",
+      opaqueCardId: card?.id ? `hidden-${card.id}` : undefined,
+      faceUp: false,
+    };
+  }
+
+  private static mapUnit(unit: any): UnitView {
+    const cards: CardView[] = Array.isArray(unit.cards)
+      ? unit.cards.map((c: any) => this.mapCard(c, unit.face !== "down"))
+      : [];
+
+    return {
+      unitId: unit.unitId || "",
+      kind: unit.kind || unit.componentId || "ユニット",
+      componentId: unit.componentId,
+      state: unit.state || "charge",
+      face: unit.face || "up",
+      cards,
+      labels: unit.labels || [],
+      battle: unit.battle
+        ? {
+            role: unit.battle.role,
+            targetPlayerKey: unit.battle.targetPlayerKey,
+            blocksUnitId: unit.battle.blocksUnitId,
+          }
+        : undefined,
+    };
+  }
+}

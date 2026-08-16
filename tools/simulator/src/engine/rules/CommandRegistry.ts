@@ -236,7 +236,15 @@ export class CommandRegistry {
     };
 
     // 3. 解決時におけるコストの2重チェック検証
-    if (request.cost) {
+    if (request.selectedCostPayment) {
+      const costResolver = new CostResolver();
+      if (!costResolver.canPaySelection(request.selectedCostPayment, resolveContext)) {
+        request.status = "cancelled";
+        context.state.stage.history.push(request);
+        throw new Error(`解決時に選択されたコスト [${request.selectedCostPayment.summary || "payment"}] を支払うリソースが不足しているため、解決できません。`);
+      }
+      costResolver.paySelection(request.selectedCostPayment, resolveContext, this.effectInterpreter);
+    } else if (request.cost) {
       const costResolver = new CostResolver();
       if (!costResolver.canPay(request.cost, resolveContext)) {
         request.status = "cancelled";

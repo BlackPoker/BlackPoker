@@ -112,8 +112,9 @@ TCGシステムとしての拡張性を担保するため、アクションリ�
   - `moveNextToStage(context: CommandContext)` をシグネチャとし、`GameState` / `CommandContext` 型を適用（`state: any` は使わず `context.state` を参照）。
   - `definitionOwner` (定義所有者) と `controller` (解決操作者) を導入し、リクエストバッファからステージへ移送された `ActionRequest` へと確実に引き継ぐロジックを実装。
   - `context.triggered === true` （または `source: "requestBuffer"`）である場合に、タイミングバリデーション（timing）および移送時点では未確定の対象バリデーション（targets）を安全にバイパスさせる処理を `ActionRequestValidator` に実装。
+  - 効果解決時における盤面整合性（ブロッカーが自軍フィールドに存在し、チャージ状態で防御ラベルを持つこと）の検証を `declareBlockHandler` 側で実施。
   - `action.damageJudge` の誘発条件を「ブロックアクション解決時」に修正し（`hasAttackerAndBlocker` は削除）、ブロッカー不在時の処理（アタッカーのサイズ分の直接ダメージを防御側に適用）を効果解決側（`judgeDamageHandler`）に実装。
-  - 統合テスト `requestBufferProcessor.test.ts` (ケース A〜H) を新規追加し、CLI シナリオ7を手動解決フローからバッファ移送解決フローへと拡張・実証。
+  - 統合テスト `requestBufferProcessor.test.ts` (ケース A〜K) を新規追加し、CLI シナリオ7を手動解決フローからバッファ移送解決フローへと拡張・実証。
 
 ---
 
@@ -123,9 +124,9 @@ TCGシステムとしての拡張性を担保するため、アクションリ�
 
 1. **プレイヤー別 actionList / componentList の分離**:
    - 現状は共通の `actions` 定義を参照していますが、将来的には各プレイヤーが個別にアクション/コンポーネント定義リストを保持するモデル（`state.players[p1].actionList` / `state.players[p1].componentList` 等）へ分離します。
-2. **対象選択（ブロック宣言時ブロッカー指定）の整理**:
+2. **対象選択（ブロック宣言時ブロッカー指定）の整理と「効果解決時選択」モデルへの移行**:
    - `action.block` は本来、リクエスト（ステージ移行）時点では対象を必要とせず、効果解決時（`declareBlock` コマンド実行時）に選択されます。
-   - 既存 `block.yaml` に `targetUnit` の targets 定義が残っている点や、`declareBlock` が現在 `targetUnit` 前提になっている部分については、将来的に「効果解決時選択（selection / choiceProvider / context.selection）」へ移行・整理します。
+   - 現時点では既存の `targetComponent` を流用して受け渡していますが、将来的にアクション定義上で「リクエスト時に必要な対象（request targets）」と「効果解決時に選ぶ対象（effect selection）」を分離し、`selection` / `choiceProvider` / `context.selection` を介して選択するモデルへ移行します。
 3. **リクエストバッファの完全自動解決統合**:
    - 現在はバッファからステージへ手動・明示的に移送していますが、最終的にはコアフロー側で自動的にバッファをフラッシュ（消費・自動解決）し、既存の即時イベント解決（世代交代など）の消費フローと安全に統合する必要があります。
 4. **戦闘割り込み時のアタッカー状態変化の裁定**:

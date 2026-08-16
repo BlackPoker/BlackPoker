@@ -493,10 +493,33 @@ export function declareBlockHandler(
 ): CommandHandler {
   return (args, context) => {
     const state = context.state;
+    // 現時点では既存の targetComponent を流用して効果解決時のブロッカーを受け取るが、
+    // 将来的には context.selection / choiceProvider などの効果解決時選択モデルへ移行する。
     const blockerUnit = context.targetComponent;
 
     if (!blockerUnit) {
       throw new Error("ブロッカーとなるユニットが見つかりません。");
+    }
+
+    // 1. ブロッカーが実行プレイヤーの field に存在することの確認
+    const player = state.players[context.playerKey];
+    const exists = player?.field?.some((u: any) => u.unitId === blockerUnit.unitId);
+    if (!exists) {
+      throw new Error("ブロッカーは自分のフィールドに存在するユニットである必要があります。");
+    }
+
+    // 2. ブロッカーが charge 状態であることの確認
+    if (blockerUnit.state !== "charge") {
+      throw new Error(`ドライブ状態のキャラクターはブロッカーに指定できません。現在: ${blockerUnit.state}`);
+    }
+
+    // 3. ブロッカーが防御ラベルを持っていることの確認
+    const compId = blockerUnit.componentId || "";
+    const compDef = context.components?.find((c: any) => c.id === compId);
+    const labels = (compDef as any)?.labels || blockerUnit.labels || [];
+    const hasDefenseLabel = labels.includes("防御") || labels.includes("defense");
+    if (!hasDefenseLabel) {
+      throw new Error("防御ラベルを持たないキャラクターはブロッカーに指定できません。");
     }
 
     // 自分を攻撃対象とする「相手のアタッカー」を厳密に特定する

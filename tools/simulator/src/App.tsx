@@ -1,7 +1,13 @@
-import React, { useMemo, useRef, useState } from "react";
-
-// Canvas のサンドボックスで外部アイコン取得に失敗することがあるため、
-// lucide-react などの外部 UI アイコンには依存しない実装にしています。
+import React, { useMemo, useRef, useState, useEffect } from "react";
+import { DecisionPanel } from "./ui/decision/DecisionPanel";
+import { LegalPatternGenerator } from "./engine/decision/LegalPatternGenerator";
+import { PatternExecutor } from "./engine/decision/PatternExecutor";
+import { PatternExpander } from "./engine/decision/PatternExpander";
+import { DecisionRequest } from "./domain/decision/DecisionRequest";
+import { DecisionResponse } from "./domain/decision/DecisionResponse";
+import { CommandRegistry } from "./engine/rules/CommandRegistry";
+import { FirstLegalPatternPolicy } from "./controller/FirstLegalPatternPolicy";
+import { RandomPolicy } from "./controller/RandomPolicy";
 
 const suits: Record<string, string> = {
   S: "♠",
@@ -16,13 +22,6 @@ const newId = () => {
     return globalThis.crypto.randomUUID();
   }
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
-};
-
-const cloneState = (value: any) => {
-  if (typeof structuredClone === "function") {
-    return structuredClone(value);
-  }
-  return JSON.parse(JSON.stringify(value));
 };
 
 const nowText = () => new Date().toLocaleTimeString();
@@ -51,9 +50,10 @@ const parseCard = (raw: string) => {
   return { id: `${suit}${rank}-${newId()}`, code: `${suits[suit]}${rank}`, suit, rank, value };
 };
 
-const createUnit = ({ kind, card, state = "charge", labels = [] }: any) => ({
+const createUnit = ({ kind, card, state = "charge", labels = [], componentId }: any) => ({
   unitId: newId(),
   kind,
+  componentId: componentId || (kind === "防壁" ? "character.bulwark" : "character.soldier"),
   state,
   cards: [card],
   labels,
@@ -63,19 +63,25 @@ const initialPlayer = (name: string) => ({
   name,
   life: 16,
   hand: [parseCard("H3"), parseCard("S5"), parseCard("D7")],
-  grave: [],
+  grave: [] as any[],
   field: [
-    createUnit({ kind: "防壁", card: parseCard("C4"), labels: ["防御"] }),
-    createUnit({ kind: "兵士", card: parseCard("S6"), labels: ["攻撃", "防御"] }),
+    createUnit({ kind: "防壁", card: parseCard("C4"), labels: ["防御"], componentId: "character.bulwark" }),
+    createUnit({ kind: "兵士", card: parseCard("S6"), labels: ["攻撃", "防御"], componentId: "character.soldier" }),
   ],
-  fog: [],
-  trump: [],
+  fog: [] as any[],
+  trump: [] as any[],
 });
 
 const createInitialState = () => ({
-  activePlayer: "p1",
+  turnPlayer: "p1",
   chancePlayer: "p1",
+  activePlayer: "p1",
   phaseText: "メイン / ステージ空",
+  stateVersion: 1,
+  stage: {
+    requests: [] as any[],
+    history: [] as any[],
+  },
   stack: [] as any[],
   players: {
     p1: initialPlayer("Player A"),
@@ -85,52 +91,68 @@ const createInitialState = () => ({
 
 const makeLog = (level: string, message: string) => ({ id: newId(), level, message, at: nowText() });
 
-function runSelfTests() {
-  const results: any[] = [];
-  const test = (name: string, fn: Function) => {
-    try {
-      fn();
-      results.push({ name, ok: true });
-    } catch (error: any) {
-      results.push({ name, ok: false, error: error?.message || String(error) });
-    }
-  };
-
-  test("parseCard parses H3", () => {
-    const card = parseCard("H3");
-    if (!card || card.code !== "♡3" || card.value !== 3) throw new Error("H3 parse failed");
-  });
-
-  test("parseCard parses Joker", () => {
-    const card = parseCard("joker");
-    if (!card || card.code !== "Joker" || card.value !== 0) throw new Error("Joker parse failed");
-  });
-
-  test("damage reduces life", () => {
-    const base = createInitialState();
-    const { state } = applyCommand(base, "damage p2 3");
-    if (state.players.p2.life !== 13) throw new Error(`expected 13, got ${state.players.p2.life}`);
-  });
-
-  test("summon adds a soldier", () => {
-    const base = createInitialState();
-    const before = base.players.p1.field.length;
-    const { state } = applyCommand(base, "summon p1 H7");
-    if (state.players.p1.field.length !== before + 1) throw new Error("soldier was not added");
-  });
-
-  test("request pushes stack", () => {
-    const base = createInitialState();
-    const { state } = applyCommand(base, "request p1 アップ");
-    if (state.stack.length !== 1 || state.stack[0].actionName !== "アップ") throw new Error("request failed");
-  });
-
-  return results;
-}
+// 基本組み込みルール定義
+const builtinRulePackage = {
+  id: "blackpoker-official-base",
+  version: "1.0.0",
+  actions: [
+    {
+      id: "action.up",
+      name: "アップ",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "quick" },
+      cost: "D",
+      key: { id: "key", condition: { card: { suit: "heart", rank: "A..10", zone: "hand" } } },
+      targets: [{ id: "target", condition: { component: "character.soldier" } }],
+      effect: [{ createFog: { component: "fog.up", card: "key", bindings: { target: "target", amount: "key.rankValue" } } }],
+    },
+    {
+      id: "action.down",
+      name: "ダウン",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "quick" },
+      cost: "D",
+      key: { id: "key", condition: { card: { suit: "spade", rank: "2..10", zone: "hand" } } },
+      targets: [{ id: "target", condition: { component: "character.soldier" } }],
+      effect: [{ createFog: { component: "fog.down", card: "key", bindings: { target: "target", amount: "-key.rankValue" } } }],
+    },
+    {
+      id: "action.twist",
+      name: "ツイスト",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "quick" },
+      cost: "D",
+      key: { id: "key", condition: { card: { suit: "club", rank: "A..10", zone: "hand" } } },
+      targets: [{ id: "target", condition: { componentType: "character" } }],
+      effect: [{ toggleUnitState: { target: "target" } }],
+    },
+    {
+      id: "action.attack",
+      name: "アタック",
+      type: "normal",
+      request: { trigger: "direct", speed: "normal", timing: "main" },
+      targets: [{ id: "target", type: "unit", condition: { owner: "self", componentType: "character" } }],
+      effect: [{ startAttack: { attacker: "target" } }],
+    },
+    {
+      id: "action.end",
+      name: "エンド",
+      type: "normal",
+      request: { trigger: "direct", speed: "normal", timing: "main" },
+      effect: [{ endTurn: {} }],
+    },
+  ],
+  components: [
+    { id: "character.soldier", name: "兵士", type: "character" },
+    { id: "character.bulwark", name: "防壁", type: "character" },
+    { id: "fog.up", name: "アップ", type: "fog" },
+    { id: "fog.down", name: "ダウン", type: "fog" },
+  ],
+};
 
 function Icon({ children }: any) {
   return (
-    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-slate-800 text-xs text-slate-300">
+    <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-slate-800 text-xs text-slate-300 font-mono">
       {children}
     </span>
   );
@@ -140,10 +162,10 @@ function CardChip({ card, compact = false }: any) {
   const red = card?.suit === "H" || card?.suit === "D";
   return (
     <span
-      className={`inline-flex items-center justify-center rounded-md border px-2 py-1 font-mono text-sm ${
+      className={`inline-flex items-center justify-center rounded-md border px-2 py-1 font-mono text-sm shadow-sm ${
         red
-          ? "border-rose-400/50 bg-rose-950/40 text-rose-200"
-          : "border-slate-400/40 bg-slate-800/80 text-slate-100"
+          ? "border-rose-500/40 bg-rose-950/40 text-rose-200"
+          : "border-slate-600/50 bg-slate-800/90 text-slate-100"
       } ${compact ? "px-1.5 py-0.5 text-xs" : ""}`}
     >
       {card?.code ?? "?"}
@@ -151,326 +173,425 @@ function CardChip({ card, compact = false }: any) {
   );
 }
 
-function UnitCard({ unit, index }: any) {
-  const total = unit.cards.reduce((sum: number, card: any) => sum + card.value, 0);
+function UnitCard({ unit }: { unit: any }) {
+  const stateColor =
+    unit.state === "charge"
+      ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-200"
+      : "bg-amber-950/60 border-amber-500/40 text-amber-200";
+
   return (
-    <div className="rounded-xl border border-slate-700 bg-slate-900/80 p-3 shadow-lg shadow-black/20">
-      <div className="mb-2 flex items-center justify-between gap-2">
-        <div className="text-sm font-semibold text-slate-100">
-          #{index + 1} {unit.kind}
-        </div>
-        <div
-          className={`rounded-full px-2 py-0.5 text-xs ${
-            unit.state === "charge" ? "bg-emerald-500/20 text-emerald-200" : "bg-amber-500/20 text-amber-200"
-          }`}
-        >
-          {unit.state === "charge" ? "チャージ" : "ドライブ"}
-        </div>
+    <div className={`rounded-xl border p-2.5 text-xs shadow-sm ${stateColor}`}>
+      <div className="flex items-center justify-between font-bold">
+        <span>{unit.kind}</span>
+        <span className="rounded px-1.5 py-0.5 text-[10px] uppercase font-mono bg-black/40">
+          {unit.state}
+        </span>
       </div>
-      <div className="mb-2 flex flex-wrap gap-1">
-        {unit.cards.map((card: any) => (
-          <CardChip key={card.id} card={card} compact />
+      <div className="mt-1.5 flex flex-wrap gap-1">
+        {unit.cards?.map((c: any, i: number) => (
+          <CardChip key={i} card={c} compact />
         ))}
       </div>
-      <div className="flex items-center justify-between text-xs text-slate-400">
-        <span>{unit.labels.join(" / ") || "ラベルなし"}</span>
-        <span>size {total}</span>
-      </div>
+      {unit.labels && unit.labels.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1 text-[10px] text-slate-400">
+          {unit.labels.map((l: string, i: number) => (
+            <span key={i} className="rounded bg-slate-800/80 px-1 py-0.5">
+              {l}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-function ZoneSummary({ icon, label, count }: any) {
+function PlayerBoard({
+  playerKey,
+  player,
+  isActive,
+  controllerType,
+}: {
+  playerKey: string;
+  player: any;
+  isActive: boolean;
+  controllerType: "HUMAN" | "AI";
+}) {
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-sm text-slate-300">
-      <Icon>{icon}</Icon>
-      <span className="text-slate-400">{label}</span>
-      <span className="ml-auto font-mono text-slate-100">{count}</span>
-    </div>
-  );
-}
-
-function PlayerBoard({ playerKey, player, isActive }: any) {
-  return (
-    <section className={`rounded-2xl border p-4 ${isActive ? "border-cyan-500/50 bg-cyan-950/10" : "border-slate-800 bg-slate-950/40"}`}>
+    <section
+      className={`rounded-2xl border p-4 transition ${
+        isActive
+          ? "border-indigo-500/60 bg-slate-900/90 shadow-lg ring-1 ring-indigo-500/30"
+          : "border-slate-800 bg-slate-900/40"
+      }`}
+    >
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-100">{player.name}</h2>
-        <span className="rounded-full bg-slate-800 px-2 py-1 text-xs text-slate-300">{playerKey}</span>
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${
+              isActive ? "bg-indigo-400 shadow-sm shadow-indigo-400" : "bg-slate-600"
+            }`}
+          />
+          <h2 className="font-bold text-slate-200">
+            {player.name} ({playerKey})
+          </h2>
+          <span className="rounded bg-slate-800 px-2 py-0.5 text-[11px] font-semibold text-slate-400">
+            {controllerType === "HUMAN" ? "Human" : "AI"}
+          </span>
+        </div>
+        <div className="flex items-center gap-3 text-sm">
+          <div className="rounded-lg bg-rose-950/50 border border-rose-800/40 px-2.5 py-1 font-bold text-rose-300">
+            Life: {Array.isArray(player.life) ? player.life.length : player.life}
+          </div>
+          <div className="text-xs text-slate-400">
+            墓地: <span className="font-mono">{player.grave?.length || 0}</span>
+          </div>
+        </div>
       </div>
-      <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-5">
-        <ZoneSummary icon="♥" label="ライフ" count={player.life} />
-        <ZoneSummary icon="手" label="手札" count={player.hand.length} />
-        <ZoneSummary icon="墓" label="墓地" count={player.grave.length} />
-        <ZoneSummary icon="霧" label="フォグ" count={player.fog.length} />
-        <ZoneSummary icon="切" label="切札" count={player.trump.length} />
-      </div>
+
+      {/* 手札 */}
       <div className="mb-3">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Field / 場</div>
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {player.field.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-700 p-4 text-center text-sm text-slate-500">場にユニットなし</div>
-          ) : (
-            player.field.map((unit: any, index: number) => <UnitCard key={unit.unitId} unit={unit} index={index} />)
+        <div className="mb-1 text-xs font-semibold text-slate-400">
+          手札 ({player.hand?.length || 0})
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {player.hand?.map((c: any, i: number) => (
+            <CardChip key={c.id || i} card={c} />
+          ))}
+          {(!player.hand || player.hand.length === 0) && (
+            <span className="text-xs text-slate-500 italic">なし</span>
           )}
         </div>
       </div>
+
+      {/* フィールド */}
       <div>
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">Hand / 手札</div>
-        <div className="flex flex-wrap gap-2">
-          {player.hand.map((card: any) => (
-            <CardChip key={card.id} card={card} />
+        <div className="mb-1 text-xs font-semibold text-slate-400">
+          フィールド ({player.field?.length || 0})
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {player.field?.map((u: any) => (
+            <UnitCard key={u.unitId} unit={u} />
           ))}
+          {(!player.field || player.field.length === 0) && (
+            <span className="text-xs text-slate-500 italic col-span-2">ユニットなし</span>
+          )}
         </div>
       </div>
+
+      {/* フォグ */}
+      {player.fog && player.fog.length > 0 && (
+        <div className="mt-2.5 pt-2 border-t border-slate-800">
+          <div className="mb-1 text-xs font-semibold text-indigo-300">フォグ効果</div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            {player.fog.map((f: any, i: number) => (
+              <div key={i} className="rounded bg-indigo-950/40 border border-indigo-500/30 px-2 py-1 text-indigo-200">
+                {f.componentId} (Card: {f.card?.code || f.card?.suit + f.card?.rank})
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
 
-function applyCommand(state: any, command: string) {
-  const next = cloneState(state);
-  const logs: any[] = [];
-  const parts = command.trim().split(/\s+/);
-  const [name, p, arg1, ...restArgs] = parts;
-  const player = next.players[p];
-
-  const addLog = (level: string, message: string) => logs.push(makeLog(level, message));
-
-  if (!name) return { state: next, logs };
-
-  if (name === "help") {
-    addLog(
-      "info",
-      "commands: help / reset / draw p1 1 / damage p2 3 / summon p1 H7 / bulwark p1 C2 / drive p1 1 / charge p1 1 / request p1 アップ / pass / resolve / test"
-    );
-    return { state: next, logs };
-  }
-
-  if (name === "test") {
-    const results = runSelfTests();
-    const failed = results.filter((r) => !r.ok);
-    if (failed.length === 0) {
-      addLog("info", `Self tests passed: ${results.length}/${results.length}`);
-    } else {
-      failed.forEach((r) => addLog("error", `Self test failed: ${r.name}: ${r.error}`));
-    }
-    return { state: next, logs };
-  }
-
-  if (name === "reset") {
-    return { state: createInitialState(), logs: [makeLog("info", "ゲーム状態を初期化しました。")] };
-  }
-
-  if (!player && !["pass", "resolve"].includes(name)) {
-    addLog("error", "プレイヤーは p1 または p2 を指定してください。例: summon p1 H7");
-    return { state: next, logs };
-  }
-
-  switch (name) {
-    case "draw": {
-      const count = Math.max(1, Number(arg1 || 1));
-      let actual = 0;
-      for (let i = 0; i < count; i += 1) {
-        if (player.life <= 0) break;
-        player.life -= 1;
-        actual += 1;
-        const randomSuit = ["S", "H", "D", "C"][Math.floor(Math.random() * 4)];
-        const randomRank = String(Math.floor(Math.random() * 9) + 2);
-        player.hand.push(parseCard(randomSuit + randomRank));
-      }
-      addLog("info", `${player.name} が ${actual} 枚ドローしました。`);
-      break;
-    }
-    case "damage": {
-      const amount = Math.max(0, Number(arg1 || 0));
-      player.life = Math.max(0, player.life - amount);
-      addLog("warn", `${player.name} は ${amount} 点ダメージを受けました。`);
-      if (player.life === 0) addLog("error", `${player.name} のライフが 0 です。勝敗判定が必要です。`);
-      break;
-    }
-    case "summon": {
-      const card = parseCard(arg1 || "");
-      if (!card) {
-        addLog("error", "カード指定が読み取れません。例: summon p1 H7");
-        break;
-      }
-      player.field.push(createUnit({ kind: "兵士", card, labels: ["攻撃", "防御"] }));
-      addLog("info", `${player.name} は ${card.code} を兵士として場に出しました。`);
-      break;
-    }
-    case "bulwark": {
-      const card = parseCard(arg1 || "");
-      if (!card) {
-        addLog("error", "カード指定が読み取れません。例: bulwark p1 C2");
-        break;
-      }
-      player.field.push(createUnit({ kind: "防壁", card, labels: ["防御"] }));
-      addLog("info", `${player.name} は ${card.code} を防壁として場に出しました。`);
-      break;
-    }
-    case "drive":
-    case "charge": {
-      const index = Number(arg1) - 1;
-      const unit = player.field[index];
-      if (!unit) {
-        addLog("error", "ユニット番号が存在しません。例: drive p1 1");
-        break;
-      }
-      unit.state = name === "drive" ? "drive" : "charge";
-      addLog("info", `${player.name} の ${index + 1} 番目のユニットを ${unit.state === "drive" ? "ドライブ" : "チャージ"}しました。`);
-      break;
-    }
-    case "request": {
-      const actionName = [arg1, ...restArgs].filter(Boolean).join(" ") || "未定義アクション";
-      next.stack.push({ id: newId(), controller: p, actionName });
-      next.phaseText = "ステージ処理中";
-      next.chancePlayer = p === "p1" ? "p2" : "p1";
-      addLog("info", `${player.name} が「${actionName}」をリクエストしました。チャンスは ${next.chancePlayer} へ。`);
-      break;
-    }
-    case "pass": {
-      next.chancePlayer = next.chancePlayer === "p1" ? "p2" : "p1";
-      addLog("info", `パスしました。チャンスは ${next.chancePlayer} へ。`);
-      break;
-    }
-    case "resolve": {
-      const request = next.stack.pop();
-      if (!request) {
-        next.phaseText = "メイン / ステージ空";
-        addLog("info", "ステージは空です。解決するリクエストはありません。");
-      } else {
-        addLog("info", `「${request.actionName}」を解決しました。※現段階では効果は手動反映です。`);
-      }
-      if (next.stack.length === 0) next.phaseText = "メイン / ステージ空";
-      break;
-    }
-    default:
-      addLog("error", `未対応コマンドです: ${name}. help を入力してください。`);
-  }
-
-  return { state: next, logs };
-}
-
-export default function BlackPokerSimulatorPrototype() {
+export default function BlackPokerSimulator() {
+  const [activeTab, setActiveTab] = useState<"decision" | "debug">("decision");
   const [game, setGame] = useState(createInitialState);
-  const [logs, setLogs] = useState([makeLog("info", "BlackPoker Web Simulator Prototype を起動しました。help でコマンド一覧。")]);
-  const [command, setCommand] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [logs, setLogs] = useState([
+    makeLog("info", "BlackPoker Simulator: Decision & Debug Interface 起動完了"),
+  ]);
+  const [controllers, setControllers] = useState<{ p1: "HUMAN" | "AI"; p2: "HUMAN" | "AI" }>({
+    p1: "HUMAN",
+    p2: "AI",
+  });
+  const [aiPolicyType, setAiPolicyType] = useState<"first" | "random">("first");
 
-  const stackText = useMemo(() => {
-    return game.stack.map((r, index) => `${index + 1}. ${r.actionName} (${r.controller})`).join("\n") || "ステージ空";
-  }, [game.stack]);
+  const registry = useMemo(() => new CommandRegistry(), []);
 
-  const run = () => {
-    const trimmed = command.trim();
-    if (!trimmed) return;
-    const { state, logs: newLogs } = applyCommand(game, trimmed);
-    setGame(state);
-    setLogs((prev) => [...prev, makeLog("cmd", `> ${trimmed}`), ...newLogs]);
-    setCommand("");
-    requestAnimationFrame(() => inputRef.current?.focus());
+  // 現在のチャンスプレイヤーに対する DecisionRequest 生成
+  const currentDecision = useMemo(() => {
+    try {
+      const chance = game.chancePlayer || game.turnPlayer || "p1";
+      const { request } = LegalPatternGenerator.generateActionRequestDecision(
+        game,
+        chance,
+        builtinRulePackage as any,
+        { stateVersion: game.stateVersion }
+      );
+      return request;
+    } catch {
+      return null;
+    }
+  }, [game]);
+
+  const currentController = currentDecision ? controllers[currentDecision.playerId as "p1" | "p2"] : "HUMAN";
+
+  // Decision 確定時の適用処理
+  const handleDecisionSubmit = (response: DecisionResponse) => {
+    if (!currentDecision) return;
+    try {
+      const nextState = JSON.parse(JSON.stringify(game));
+      const { actionRequest } = PatternExecutor.executeResponse(
+        currentDecision,
+        response,
+        nextState,
+        builtinRulePackage as any,
+        registry
+      );
+
+      nextState.stateVersion = (nextState.stateVersion || 1) + 1;
+      setGame(nextState);
+
+      const chosenPattern = currentDecision.patterns[response.selectedPatternRef];
+      const expanded = PatternExpander.expandPattern(
+        chosenPattern,
+        currentDecision.catalog,
+        response.selectedPatternRef
+      );
+
+      setLogs((prev) => [
+        ...prev,
+        makeLog(
+          "decision",
+          `[${currentDecision.playerId === "p1" ? "Player A" : "Player B"}] ${expanded.summary} (Ref: #${
+            response.selectedPatternRef
+          })`
+        ),
+      ]);
+    } catch (err: any) {
+      setLogs((prev) => [...prev, makeLog("error", `実行エラー: ${err.message || String(err)}`)]);
+    }
   };
 
-  const runReset = () => {
-    const { state, logs: newLogs } = applyCommand(game, "reset");
-    setGame(state);
-    setLogs((prev) => [...prev, ...newLogs]);
-    requestAnimationFrame(() => inputRef.current?.focus());
+  // AI に1手を打たせる
+  const handleAiStep = async () => {
+    if (!currentDecision || currentDecision.patterns.length === 0) return;
+    const policy = aiPolicyType === "first" ? new FirstLegalPatternPolicy() : new RandomPolicy();
+    const response = await policy.decide(currentDecision);
+    handleDecisionSubmit(response);
   };
 
-  const runTests = () => {
-    const { state, logs: newLogs } = applyCommand(game, "test");
-    setGame(state);
-    setLogs((prev) => [...prev, makeLog("cmd", "> test"), ...newLogs]);
+  const handleReset = () => {
+    setGame(createInitialState());
+    setLogs((prev) => [...prev, makeLog("info", "ゲーム盤面を初期化しました。")]);
   };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex h-screen flex-col overflow-hidden">
+        {/* ヘッダー */}
         <header className="flex items-center justify-between border-b border-slate-800 bg-slate-950 px-4 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan-500/15 text-cyan-200">BP</div>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 font-bold">
+              BP
+            </div>
             <div>
-              <h1 className="text-base font-semibold">BlackPoker Simulator</h1>
-              <p className="text-xs text-slate-500">VSCode風 / Web prototype / command driven</p>
+              <h1 className="text-base font-bold text-slate-100">BlackPoker Simulator</h1>
+              <p className="text-xs text-slate-500">Universal Decision Interface & Simulator</p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2 text-xs text-slate-400">
-            <span className="rounded-full border border-slate-800 px-3 py-1">Turn: {game.activePlayer}</span>
-            <span className="rounded-full border border-slate-800 px-3 py-1">Chance: {game.chancePlayer}</span>
-            <span className="rounded-full border border-slate-800 px-3 py-1">{game.phaseText}</span>
+
+          <div className="flex items-center gap-3">
+            {/* モード切替タブ */}
+            <div className="flex rounded-lg bg-slate-900 p-1 border border-slate-800 text-xs">
+              <button
+                onClick={() => setActiveTab("decision")}
+                className={`rounded px-3 py-1.5 font-bold transition ${
+                  activeTab === "decision"
+                    ? "bg-indigo-600 text-white shadow"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                🎮 通常対戦モード (Decision)
+              </button>
+              <button
+                onClick={() => setActiveTab("debug")}
+                className={`rounded px-3 py-1.5 font-bold transition ${
+                  activeTab === "debug"
+                    ? "bg-indigo-600 text-white shadow"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                🛠️ デバッグ / コマンド
+              </button>
+            </div>
+
+            <button
+              onClick={handleReset}
+              className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300 hover:bg-slate-900 transition"
+            >
+              リセット
+            </button>
           </div>
         </header>
 
-        <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[1fr_360px]">
-          <div className="flex min-h-0 flex-col">
-            <div className="min-h-0 flex-1 overflow-auto p-4">
-              <div className="grid gap-4">
-                <PlayerBoard playerKey="p2" player={game.players.p2} isActive={game.activePlayer === "p2"} />
-                <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-4">
-                  <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
-                    <Icon>積</Icon>
-                    Stage / ステージ
-                  </div>
-                  <pre className="min-h-16 whitespace-pre-wrap rounded-xl bg-slate-950 p-3 font-mono text-sm text-slate-400">{stackText}</pre>
+        <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[1fr_380px]">
+          <div className="flex min-h-0 flex-col overflow-auto p-4 space-y-4">
+            {/* プレイヤーB (上部) */}
+            <PlayerBoard
+              playerKey="p2"
+              player={game.players.p2}
+              isActive={game.chancePlayer === "p2"}
+              controllerType={controllers.p2}
+            />
+
+            {/* ステージ / 中央情報 */}
+            <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-sm font-bold text-slate-300">
+                  <Icon>積</Icon>
+                  <span>ステージ & マッチ情報</span>
                 </div>
-                <PlayerBoard playerKey="p1" player={game.players.p1} isActive={game.activePlayer === "p1"} />
+                <div className="flex gap-2 text-xs">
+                  <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-400">
+                    Turn: <b className="text-slate-200">{game.turnPlayer}</b>
+                  </span>
+                  <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-400">
+                    Chance: <b className="text-indigo-300">{game.chancePlayer}</b>
+                  </span>
+                  <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-400">
+                    Ver: <b className="text-emerald-300">{game.stateVersion}</b>
+                  </span>
+                </div>
               </div>
+
+              {game.stage?.requests && game.stage.requests.length > 0 ? (
+                <div className="space-y-1">
+                  {game.stage.requests.map((r: any, idx: number) => (
+                    <div
+                      key={r.id || idx}
+                      className="rounded-lg bg-indigo-950/40 border border-indigo-500/30 p-2 text-xs flex justify-between"
+                    >
+                      <span>
+                        #{r.sequence} <b>{r.action?.name || r.actionId}</b> ({r.controller})
+                      </span>
+                      <span className="text-indigo-400">{r.status}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-xl bg-slate-950/60 p-3 text-xs text-slate-500 italic">
+                  ステージ空（リクエストなし）
+                </div>
+              )}
             </div>
 
-            <section className="border-t border-slate-800 bg-slate-950 p-4">
-              <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-300">
-                <Icon>&gt;</Icon>
-                Console / コマンド入力
+            {/* プレイヤーA (下部) */}
+            <PlayerBoard
+              playerKey="p1"
+              player={game.players.p1}
+              isActive={game.chancePlayer === "p1"}
+              controllerType={controllers.p1}
+            />
+
+            {/* DecisionPanel (人間手番時) または AI 操作バー */}
+            {activeTab === "decision" && (
+              <div className="pt-2">
+                {currentController === "HUMAN" && currentDecision && currentDecision.patterns.length > 0 && (
+                  <DecisionPanel
+                    request={currentDecision}
+                    onSubmit={handleDecisionSubmit}
+                  />
+                )}
+
+                {currentController === "AI" && currentDecision && currentDecision.patterns.length > 0 && (
+                  <div className="rounded-xl border border-amber-500/30 bg-slate-900/90 p-4 flex items-center justify-between">
+                    <div>
+                      <span className="rounded bg-amber-600 px-2 py-0.5 text-xs font-bold text-white uppercase">
+                        AI Turn
+                      </span>
+                      <p className="mt-1 text-sm font-semibold text-slate-200">
+                        {currentDecision.playerId === "p1" ? "Player A" : "Player B"} (AI) の判断待機中
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        合法手: {currentDecision.patterns.length}件 / 方針: {aiPolicyType}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleAiStep}
+                      className="rounded-lg bg-amber-600 px-5 py-2.5 font-bold text-white shadow-lg hover:bg-amber-500 transition active:scale-95"
+                    >
+                      AIに1手実行させる
+                    </button>
+                  </div>
+                )}
+
+                {currentDecision && currentDecision.patterns.length === 0 && (
+                  <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-center text-sm text-slate-400">
+                    現在のプレイヤーに選択可能な合法手がありません。
+                  </div>
+                )}
               </div>
-              <div className="flex gap-2">
-                <input
-                  ref={inputRef}
-                  value={command}
-                  onChange={(e) => setCommand(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") run();
-                  }}
-                  placeholder="例: summon p1 H7 / request p1 アップ / resolve / help"
-                  className="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 font-mono text-sm text-slate-100 outline-none ring-cyan-500/30 placeholder:text-slate-600 focus:ring-4"
-                />
-                <button onClick={run} className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-semibold text-slate-950 hover:bg-cyan-400">
-                  実行
-                </button>
-                <button onClick={runReset} className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-900">
-                  Reset
-                </button>
-                <button onClick={runTests} className="hidden rounded-xl border border-slate-700 px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-900 md:inline-flex">
-                  Test
-                </button>
-              </div>
-            </section>
+            )}
           </div>
 
-          <aside className="min-h-0 border-l border-slate-800 bg-slate-950">
-            <div className="flex items-center gap-2 border-b border-slate-800 px-4 py-3 text-sm font-semibold text-slate-300">
-              <Icon>log</Icon>
-              Log / 履歴
-            </div>
-            <div className="h-full overflow-auto p-3 pb-20">
-              <div className="space-y-2">
-                {[...logs].reverse().map((log) => (
-                  <div
-                    key={log.id}
-                    className={`rounded-xl border p-3 text-sm ${
-                      log.level === "error"
-                        ? "border-rose-500/30 bg-rose-950/30 text-rose-100"
-                        : log.level === "warn"
-                          ? "border-amber-500/30 bg-amber-950/30 text-amber-100"
-                          : log.level === "cmd"
-                            ? "border-cyan-500/20 bg-cyan-950/20 font-mono text-cyan-100"
-                            : "border-slate-800 bg-slate-900/70 text-slate-300"
-                    }`}
-                  >
-                    <div className="mb-1 text-xs text-slate-500">{log.at}</div>
-                    {log.message}
-                  </div>
-                ))}
+          {/* 右サイドバー: 設定 & ログ */}
+          <aside className="min-h-0 border-l border-slate-800 bg-slate-950 flex flex-col">
+            {/* コントローラー設定パネル */}
+            <div className="p-4 border-b border-slate-800 space-y-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                座席・AI設定
               </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <label className="block text-slate-400 mb-1">Player A</label>
+                  <select
+                    value={controllers.p1}
+                    onChange={(e) => setControllers((prev) => ({ ...prev, p1: e.target.value as any }))}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-slate-200 font-semibold"
+                  >
+                    <option value="HUMAN">Human (人間)</option>
+                    <option value="AI">AI (自動)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-slate-400 mb-1">Player B</label>
+                  <select
+                    value={controllers.p2}
+                    onChange={(e) => setControllers((prev) => ({ ...prev, p2: e.target.value as any }))}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-slate-200 font-semibold"
+                  >
+                    <option value="HUMAN">Human (人間)</option>
+                    <option value="AI">AI (自動)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-slate-400 mb-1">AI アルゴリズム方針</label>
+                <select
+                  value={aiPolicyType}
+                  onChange={(e) => setAiPolicyType(e.target.value as any)}
+                  className="w-full rounded-lg border border-slate-700 bg-slate-900 p-2 text-xs text-slate-200 font-semibold"
+                >
+                  <option value="first">FirstLegalPatternPolicy (最初の合法手)</option>
+                  <option value="random">RandomPolicy (ランダム選択)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* ログ一覧 */}
+            <div className="flex items-center justify-between border-b border-slate-800 px-4 py-2.5 text-xs font-bold text-slate-400">
+              <span>実行ログ & 履歴</span>
+              <span>{logs.length}件</span>
+            </div>
+            <div className="flex-1 overflow-auto p-3 space-y-2">
+              {[...logs].reverse().map((log) => (
+                <div
+                  key={log.id}
+                  className={`rounded-xl border p-2.5 text-xs ${
+                    log.level === "error"
+                      ? "border-rose-500/30 bg-rose-950/30 text-rose-200"
+                      : log.level === "decision"
+                      ? "border-indigo-500/30 bg-indigo-950/30 text-indigo-200"
+                      : "border-slate-800 bg-slate-900/60 text-slate-300"
+                  }`}
+                >
+                  <div className="text-[10px] text-slate-500 mb-0.5">{log.at}</div>
+                  <div className="font-semibold">{log.message}</div>
+                </div>
+              ))}
             </div>
           </aside>
         </main>

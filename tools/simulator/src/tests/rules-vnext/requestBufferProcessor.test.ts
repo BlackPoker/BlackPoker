@@ -431,4 +431,196 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     // - アタッカーの battle 状態がクリアされること
     expect(state.players.p1.field[0].battle).toBeUndefined();
   });
+
+  it("should successfully resolve block with valid blocker at resolution time (I)", () => {
+    const soldier: any = {
+      unitId: "soldier-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+      battle: { role: "attacker", targetPlayerKey: "p2" }
+    };
+
+    const bulwark: any = {
+      unitId: "bulwark-1",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      state: "charge",
+      cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }],
+      labels: ["防御"],
+    };
+
+    const state = {
+      players: {
+        p1: { name: "Player A", field: [soldier], hand: [], grave: [], life: [] },
+        p2: { name: "Player B", field: [bulwark], hand: [], grave: [], life: [] }
+      },
+      stage: { requests: [] },
+      requestBuffer: {
+        requests: [
+          {
+            id: "req-trg-1",
+            actionId: "action.block",
+            controller: "p2",
+            definitionOwner: "p1",
+            keyCards: [],
+            status: "pending",
+            sequence: 1,
+            action: rulePackage.actions.find((a) => a.id === "action.block")!
+          }
+        ],
+        history: []
+      }
+    } as Record<string, any>;
+
+    const registry = new CommandRegistry();
+    TurnManager.initializeToMain(state, "p1");
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetComponent: bulwark, // 解決時に選択されたブロッカー
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    // 1. バッファからステージへ移送（この時点では targetComponent が未設定でもバイパスされる）
+    const actionReq = registry.moveNextBufferedRequestToStage(context);
+    expect(actionReq).toBeDefined();
+
+    // 2. 効果解決時にブロッカー妥当性が検証され、正常解決される
+    registry.resolveTopRequest(context);
+
+    expect(actionReq!.status).toBe("resolved");
+    expect(bulwark.state).toBe("drive");
+    expect(bulwark.battle).toEqual({
+      role: "blocker",
+      blocksUnitId: "soldier-1"
+    });
+  });
+
+  it("should fail to resolve block when blocker is not in charge state (J)", () => {
+    const soldier: any = {
+      unitId: "soldier-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+      battle: { role: "attacker", targetPlayerKey: "p2" }
+    };
+
+    const bulwark: any = {
+      unitId: "bulwark-1",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      state: "drive", // 不正：ドライブ状態
+      cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }],
+      labels: ["防御"],
+    };
+
+    const state = {
+      players: {
+        p1: { name: "Player A", field: [soldier], hand: [], grave: [], life: [] },
+        p2: { name: "Player B", field: [bulwark], hand: [], grave: [], life: [] }
+      },
+      stage: { requests: [] },
+      requestBuffer: {
+        requests: [
+          {
+            id: "req-trg-1",
+            actionId: "action.block",
+            controller: "p2",
+            definitionOwner: "p1",
+            keyCards: [],
+            status: "pending",
+            sequence: 1,
+            action: rulePackage.actions.find((a) => a.id === "action.block")!
+          }
+        ],
+        history: []
+      }
+    } as Record<string, any>;
+
+    const registry = new CommandRegistry();
+    TurnManager.initializeToMain(state, "p1");
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetComponent: bulwark,
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const actionReq = registry.moveNextBufferedRequestToStage(context);
+    expect(actionReq).toBeDefined();
+
+    // ドライブ状態のため解決時にエラー
+    expect(() => {
+      registry.resolveTopRequest(context);
+    }).toThrow("ドライブ状態のキャラクターはブロッカーに指定できません。");
+  });
+
+  it("should fail to resolve block when blocker does not have defense label (K)", () => {
+    const soldier: any = {
+      unitId: "soldier-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+      battle: { role: "attacker", targetPlayerKey: "p2" }
+    };
+
+    const soldier2: any = {
+      unitId: "soldier-2",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }],
+      labels: ["攻撃"], // 不正：防御ラベルなし
+    };
+
+    const state = {
+      players: {
+        p1: { name: "Player A", field: [soldier], hand: [], grave: [], life: [] },
+        p2: { name: "Player B", field: [soldier2], hand: [], grave: [], life: [] }
+      },
+      stage: { requests: [] },
+      requestBuffer: {
+        requests: [
+          {
+            id: "req-trg-1",
+            actionId: "action.block",
+            controller: "p2",
+            definitionOwner: "p1",
+            keyCards: [],
+            status: "pending",
+            sequence: 1,
+            action: rulePackage.actions.find((a) => a.id === "action.block")!
+          }
+        ],
+        history: []
+      }
+    } as Record<string, any>;
+
+    const registry = new CommandRegistry();
+    TurnManager.initializeToMain(state, "p1");
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p2",
+      targetComponent: soldier2,
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const actionReq = registry.moveNextBufferedRequestToStage(context);
+    expect(actionReq).toBeDefined();
+
+    // 防御ラベルを持たないため解決時にエラー
+    expect(() => {
+      registry.resolveTopRequest(context);
+    }).toThrow("防御ラベルを持たないキャラクターはブロッカーに指定できません。");
+  });
 });

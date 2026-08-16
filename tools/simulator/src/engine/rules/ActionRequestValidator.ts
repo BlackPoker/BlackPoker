@@ -268,6 +268,8 @@ export class ActionRequestValidator {
     }
 
     // 2. 対象 (targets) のバリデーション
+    // context.triggered === true の場合、リクエスト時点では未確定の targets 検証をバイパスする。
+    // （効果解決時に必要な盤面整合性は各 command handler で検証する）
     if (!context.triggered && action.targets && Array.isArray(action.targets)) {
       for (const targetDef of action.targets) {
         const cond = targetDef.condition;

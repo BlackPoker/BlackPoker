@@ -1,3 +1,5 @@
+import type { CostPayment } from "../decision/DecisionCatalog";
+
 export type RulePackage = {
   id: string;
   version: string;
@@ -85,6 +87,8 @@ export type ActionRequest = {
   source?: "requestBuffer";
   sourceEvent?: unknown;
   definitionOwner?: string;
+  selectedCostPayment?: CostPayment;
+  sourcePatternId?: string;
 };
 
 export type Stage = {
