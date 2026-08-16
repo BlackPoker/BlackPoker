@@ -62,6 +62,10 @@ export class CommandRegistry {
     this.registerDefaults();
   }
 
+  getEffectInterpreter(): EffectInterpreter {
+    return this.effectInterpreter;
+  }
+
   /**
    * 新しい高レベル命令ハンドラーを登録する
    */

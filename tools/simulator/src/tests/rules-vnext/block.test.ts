@@ -18,7 +18,8 @@ describe("Block Action Integration Tests (New YAML)", () => {
     const blockAction = rulePackage.actions.find((a) => a.id === "action.block")!;
 
     expect(blockAction.request.speed).toBe("normal");
-    expect(blockAction.request.timing).toBe("block");
+    expect(blockAction.request.timing).toBe("main");
+    expect(blockAction.request.trigger).toBe("triggered");
 
     const soldier: any = {
       unitId: "soldier-1",

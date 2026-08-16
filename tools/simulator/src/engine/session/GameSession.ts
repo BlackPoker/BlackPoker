@@ -6,6 +6,7 @@ import { CommandRegistry } from "../rules/CommandRegistry";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
 import { PassTracker } from "./PassTracker";
+import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordinator";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -61,6 +62,7 @@ export class GameSession {
   public pendingDecision?: DecisionRequest;
   public continuation?: EffectContinuation;
   public passTracker: PassTracker;
+  private triggerCoordinator: TriggerProcessingCoordinator;
 
   constructor(
     state: any,
@@ -72,6 +74,7 @@ export class GameSession {
     this.registry = options?.registry || new CommandRegistry();
     this.matchId = options?.matchId || `match-${Date.now()}`;
     this.passTracker = options?.passTracker || new PassTracker();
+    this.triggerCoordinator = new TriggerProcessingCoordinator();
   }
 
   /**
@@ -116,7 +119,31 @@ export class GameSession {
       }
     }
 
-    // 3. 現在のチャンスプレイヤーの判断要求を生成
+    // 3. 誘発リクエストバッファの処理（公式ルール9.4.1順序）
+    const triggerResult = this.triggerCoordinator.processPendingTriggers(
+      this.state,
+      this.rulePackage,
+      this.registry
+    );
+
+    if (triggerResult.immediateResolvedCount > 0) {
+      const postTriggerFinishCheck = this.checkGameFinished();
+      if (postTriggerFinishCheck) {
+        this.pendingDecision = undefined;
+        return {
+          type: "FINISHED",
+          result: postTriggerFinishCheck,
+        };
+      }
+    }
+
+    if (triggerResult.stagedRequests.length > 0) {
+      // 通常誘発アクションがステージに積まれた場合、そのコントローラーへチャンスを設定
+      const topStagedReq = triggerResult.stagedRequests[triggerResult.stagedRequests.length - 1];
+      this.state.chancePlayer = topStagedReq.controller;
+    }
+
+    // 4. 現在のチャンスプレイヤーの判断要求を生成
     const chancePlayer: PlayerKey = this.state.chancePlayer || this.state.turnPlayer || "p1";
     const { request } = LegalPatternGenerator.generateActionRequestDecision(
       this.state,

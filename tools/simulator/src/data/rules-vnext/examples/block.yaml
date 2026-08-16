@@ -5,9 +5,9 @@ actions:
     type: basic
 
     request:
-      trigger: direct
+      trigger: triggered
       speed: normal
-      timing: block
+      timing: main
 
     triggerCondition:
       event: actionResolved

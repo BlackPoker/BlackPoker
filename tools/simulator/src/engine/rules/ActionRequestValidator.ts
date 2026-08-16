@@ -129,8 +129,9 @@ export class ActionRequestValidator {
       throw new ValidationError("アクションが指定されていません。");
     }
 
-    // 0.1. アクション使用タイミング (timing) の検証
-    if (!context.triggered && action.request && action.request.timing) {
+    // 0.1. アクション使用タイミング (timing) の検証（直接リクエスト時のみ）
+    const isTriggered = context.triggered || action.type === "triggered" || action.request?.trigger === "triggered";
+    if (!isTriggered && action.request && action.request.timing) {
       const state = context.state;
       if (state && state.turnPlayer !== undefined && state.chancePlayer !== undefined) {
         const timing = action.request.timing;
@@ -150,14 +151,18 @@ export class ActionRequestValidator {
               `クイックタイミングのアクションはチャンスを所持している必要があります。現在: chancePlayer=${state.chancePlayer}, requester=${requester}`
             );
           }
-        } else if (timing === "block") {
-          if (requester !== state.chancePlayer || !isStageEmpty) {
-            throw new ValidationError(
-              `ブロックタイミングのアクションはチャンス所持かつステージが空である必要があります。現在: chancePlayer=${state.chancePlayer}, requester=${requester}, stageEmpty=${isStageEmpty}`
-            );
-          }
-          // フィールド上に自分を攻撃対象とする「相手のアタッカー」が存在するか検証する
-          let hasValidOpponentAttacker = false;
+        }
+      }
+    }
+
+    // 0.1.1 ブロックアクション (action.block) の検証
+    if (action.id === "action.block") {
+      const state = context.state;
+      const requester = context.playerKey;
+      // ブロッカー指定時（targetComponent 指定時）または直接リクエスト時はアタッカー存在を厳格検証
+      if (context.targetComponent || !context.triggered) {
+        let hasValidOpponentAttacker = false;
+        if (state && state.players) {
           for (const [pKey, p] of Object.entries<any>(state.players)) {
             if (pKey === requester) continue; // 自分の所有するユニットは除外（自分自身のアタッカーをブロックできない）
             if (p.field?.some((u: any) => u.battle?.role === "attacker" && u.battle?.targetPlayerKey === requester)) {
@@ -165,53 +170,46 @@ export class ActionRequestValidator {
               break;
             }
           }
-          if (!hasValidOpponentAttacker) {
-            throw new ValidationError(
-              `自分を攻撃している相手のアタッカーが存在しないため、ブロックできません。`
+        }
+        if (!hasValidOpponentAttacker) {
+          throw new ValidationError(
+            `自分を攻撃している相手のアタッカーが存在しないため、ブロックできません。`
+          );
+        }
+      }
+    }
+
+    // 0.1.2 ダメージ判定アクション (action.damageJudge) の検証
+    if (action.id === "action.damageJudge") {
+      const state = context.state;
+      if (state && state.players) {
+        const attackers: any[] = [];
+        for (const player of Object.values<any>(state.players)) {
+          if (player.field) {
+            const uList = player.field.filter((u: any) => u.battle?.role === "attacker");
+            attackers.push(...uList);
+          }
+        }
+
+        if (attackers.length === 0) {
+          throw new ValidationError("戦闘中のアタッカーが存在しないため、ダメージ判定を行えません。");
+        }
+        if (attackers.length > 1) {
+          throw new ValidationError(`戦闘中のアタッカーが複数（${attackers.length}体）存在するため、ダメージ判定を行えません。`);
+        }
+
+        const attacker = attackers[0];
+        const blockers: any[] = [];
+        for (const player of Object.values<any>(state.players)) {
+          if (player.field) {
+            const uList = player.field.filter(
+              (u: any) => u.battle?.role === "blocker" && u.battle?.blocksUnitId === attacker.unitId
             );
+            blockers.push(...uList);
           }
-        } else if (timing === "damageJudge") {
-          if (requester !== state.turnPlayer || requester !== state.chancePlayer || !isStageEmpty) {
-            throw new ValidationError(
-              `ダメージ判定タイミングのアクションは手番かつチャンス所持かつステージが空である必要があります。現在: turnPlayer=${state.turnPlayer}, chancePlayer=${state.chancePlayer}, requester=${requester}, stageEmpty=${isStageEmpty}`
-            );
-          }
-
-          // アタッカーの検索とカウント
-          const attackers: any[] = [];
-          for (const player of Object.values<any>(state.players)) {
-            if (player.field) {
-              const uList = player.field.filter((u: any) => u.battle?.role === "attacker");
-              attackers.push(...uList);
-            }
-          }
-
-          if (attackers.length === 0) {
-            throw new ValidationError("戦闘中のアタッカーが存在しないため、ダメージ判定を行えません。");
-          }
-          if (attackers.length > 1) {
-            throw new ValidationError(`戦闘中のアタッカーが複数（${attackers.length}体）存在するため、ダメージ判定を行えません。`);
-          }
-
-          const attacker = attackers[0];
-
-          // ブロッカーの検索とカウント
-          const blockers: any[] = [];
-          for (const player of Object.values<any>(state.players)) {
-            if (player.field) {
-              const uList = player.field.filter(
-                (u: any) => u.battle?.role === "blocker" && u.battle?.blocksUnitId === attacker.unitId
-              );
-              blockers.push(...uList);
-            }
-          }
-
-          if (blockers.length === 0) {
-            throw new ValidationError("アタッカーに対するブロッカーが存在しないため、ダメージ判定を行えません。");
-          }
-          if (blockers.length > 1) {
-            throw new ValidationError(`アタッカーに対するブロッカーが複数（${blockers.length}体）存在するため、ダメージ判定を行えません。`);
-          }
+        }
+        if (blockers.length > 1) {
+          throw new ValidationError(`アタッカーに対するブロッカーが複数（${blockers.length}体）存在するため、ダメージ判定を行えません。`);
         }
       }
     }

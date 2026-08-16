@@ -142,11 +142,14 @@ export interface LegalPattern {
    - プレイヤーがパスを選択した場合のみ、チャンスを次のプレイヤー（相手）へ移動。
    - 連続PASSカウントを +1。
 
-### 4.2 全員連続パスとステージ解決
-1. 全プレイヤーが連続してパス（2人対戦なら 2 回連続 PASS）した場合、全員連続パスが成立。
-2. ルールシステムが自動的に `stage` 最上段（トップ）のリクエストを **1件だけ解決**。
-3. 連続PASSカウントを 0 にリセット。
-4. チャンスプレイヤーを手番プレイヤー（`turnPlayer`）へ戻す。
+### 4.3 誘発リクエストバッファの処理（公式ルール9.4.1）
+1. `actionResolved` や `cardMoved` 等のイベントによって `requestBuffer` に誘発リクエストが格納されます。
+2. `GameSession.advance()` 内で以下の公式順序に従って処理されます：
+   - **スピード**: `speed: immediate` (即時) → `speed: normal` (通常)
+   - **プレイヤー順**: `turnPlayer` からターン順
+   - **タイミング**: `timing: main` → `timing: quick`
+3. **即時誘発**: stage を経由せず直接解決。
+4. **通常誘発**: stage へ積載（未解決）。その後、コントローラーにチャンスが移り、クイック割り込みまたはパスの機会が与えられます。
 
 ---
 
@@ -156,6 +159,7 @@ export interface LegalPattern {
 
 | テストファイル | 検証項目 | 結果 |
 |:---|:---|:---:|
+| `triggerBufferFlow.test.ts` | 公式ルール9.4.1順序処理（即時先行、ターン順、main→quick）、block/damageJudgeの直接Decision除外、bufferからstageへの移送・未解決保持、アタック時アタッカー存在チェック、二重解決防止 | PASS |
 | `coreFlow.test.ts` | 通常アクション積載（未解決）、チャンス維持、PASSによるチャンス移動、全員連続PASSでのstageトップ1件解決、即時アクション即解決、PASSの非アクション性 | PASS |
 | `legalPatternGenerator.test.ts` | アップアクションの8パターン/12パターン完全生成、カタログ参照、ソート再現性、PASSパターン付与 | PASS |
 | `costPaymentEnumerator.test.ts` | Dコスト（キーカード除外）、Bコスト（防壁ドライブ）、複合コスト（D+B）の列挙 | PASS |
@@ -164,7 +168,7 @@ export interface LegalPattern {
 | `humanAiParity.test.ts` | 人間とAIが同一パターンを選択した場合の盤面完全一致 | PASS |
 | `observation.test.ts` | 対戦相手の手札非公開情報保護（HIDDEN化） | PASS |
 
-- **全テスト結果**: 26テストファイル、135テスト 全件成功
+- **全テスト結果**: 27テストファイル、142テスト 全件成功
 - **TypeScript ビルド**: エラー 0 件 (`tsc && vite build`)
 - **シナリオ実行**: 全シナリオ（アップ、ダウン、ツイスト、アタック、ブロック、ダメージ判定等）正常完了
 - **新旧YAML比較**: 差分なし

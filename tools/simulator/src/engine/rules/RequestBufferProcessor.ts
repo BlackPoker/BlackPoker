@@ -1,12 +1,14 @@
 import { CommandContext } from "./CommandRegistry";
 import { ActionRequest, RequestBuffer, TriggeredActionRequest } from "../../domain/rules/RulePackage";
 import { ActionRequestValidator } from "./ActionRequestValidator";
+import { TriggerProcessingCoordinator } from "./TriggerProcessingCoordinator";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
 
 export class RequestBufferProcessor {
   private validator = new ActionRequestValidator();
 
   /**
-   * リクエストバッファから次のリクエストを1件取り出し、ステージ（state.stage.requests）へ移送します。
+   * リクエストバッファから次の最優先リクエストを1件取り出し、ステージ（state.stage.requests）へ移送します。
    */
   moveNextToStage(context: CommandContext): ActionRequest | undefined {
     const state = context.state;
@@ -17,7 +19,13 @@ export class RequestBufferProcessor {
       return undefined;
     }
 
-    // 1. 先頭のリクエストを取り出す (FIFO)
+    // 1. 公式ルール9.4.1優先度順で最優先のリクエストを取り出す
+    const turnPlayer: PlayerKey = state.turnPlayer || "p1";
+    const allPlayerIds: PlayerKey[] = Object.keys(state.players || {}) as PlayerKey[];
+    requestBuffer.requests.sort((a, b) =>
+      TriggerProcessingCoordinator.compareRequests(a, b, turnPlayer, allPlayerIds)
+    );
+
     const triggeredReq = requestBuffer.requests.shift()!;
 
     // 2. IDと連番の発行
