@@ -8,6 +8,8 @@ import { DecisionResponse } from "./domain/decision/DecisionResponse";
 import { CommandRegistry } from "./engine/rules/CommandRegistry";
 import { FirstLegalPatternPolicy } from "./controller/FirstLegalPatternPolicy";
 import { RandomPolicy } from "./controller/RandomPolicy";
+import { GameSession } from "./engine/session/GameSession";
+import { PassTracker } from "./engine/session/PassTracker";
 
 const suits: Record<string, string> = {
   S: "♠",
@@ -308,22 +310,23 @@ export default function BlackPokerSimulator() {
   const [aiPolicyType, setAiPolicyType] = useState<"first" | "random">("first");
 
   const registry = useMemo(() => new CommandRegistry(), []);
+  const passTracker = useMemo(() => new PassTracker(), []);
+  const session = useMemo(() => {
+    return new GameSession(game, builtinRulePackage as any, { registry, passTracker });
+  }, [game, registry, passTracker]);
 
   // 現在のチャンスプレイヤーに対する DecisionRequest 生成
   const currentDecision = useMemo(() => {
     try {
-      const chance = game.chancePlayer || game.turnPlayer || "p1";
-      const { request } = LegalPatternGenerator.generateActionRequestDecision(
-        game,
-        chance,
-        builtinRulePackage as any,
-        { stateVersion: game.stateVersion }
-      );
-      return request;
+      const step = session.advance();
+      if (step.type === "WAITING_FOR_DECISION") {
+        return step.request;
+      }
+      return null;
     } catch {
       return null;
     }
-  }, [game]);
+  }, [session]);
 
   const currentController = currentDecision ? controllers[currentDecision.playerId as "p1" | "p2"] : "HUMAN";
 
@@ -331,24 +334,16 @@ export default function BlackPokerSimulator() {
   const handleDecisionSubmit = (response: DecisionResponse) => {
     if (!currentDecision) return;
     try {
-      const nextState = JSON.parse(JSON.stringify(game));
-      const { actionRequest } = PatternExecutor.executeResponse(
-        currentDecision,
-        response,
-        nextState,
-        builtinRulePackage as any,
-        registry
-      );
-
-      nextState.stateVersion = (nextState.stateVersion || 1) + 1;
-      setGame(nextState);
-
       const chosenPattern = currentDecision.patterns[response.selectedPatternRef];
       const expanded = PatternExpander.expandPattern(
         chosenPattern,
         currentDecision.catalog,
         response.selectedPatternRef
       );
+
+      const step = session.submitDecision(response);
+
+      setGame({ ...session.state });
 
       setLogs((prev) => [
         ...prev,
@@ -359,6 +354,14 @@ export default function BlackPokerSimulator() {
           })`
         ),
       ]);
+
+      if (step.type === "WAITING_FOR_DECISION" && step.lastEvent && step.lastEvent.type === "STAGE_TOP_RESOLVED") {
+        const lastEv = step.lastEvent;
+        setLogs((prev) => [
+          ...prev,
+          makeLog("info", `⚡ 全員連続パス成立: ステージ最上段のアクション [${lastEv.actionRequest.action?.name || lastEv.actionRequest.actionId}] を1件解決しました。`),
+        ]);
+      }
     } catch (err: any) {
       setLogs((prev) => [...prev, makeLog("error", `実行エラー: ${err.message || String(err)}`)]);
     }

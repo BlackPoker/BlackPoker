@@ -7,14 +7,15 @@ import { CostResolver } from "../rules/CostResolver";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 
 /**
- * 選択された LegalPattern を実行し、ステージへのリクエスト積載および解決を行うクラス。
+ * 選択された LegalPattern の検証、復元、および ActionRequest の構築を行うクラス。
  */
 export class PatternExecutor {
   private static validator = new ActionRequestValidator();
   private static costResolver = new CostResolver();
 
   /**
-   * DecisionResponse に基づいてパターンを実行（ステージ積載 → 解決）します。
+   * 【後方互換・単体テスト用ラッパー】
+   * パターンを即座に解決まで実行します（コアフローでは GameSession / CoreFlowCoordinator を使用してください）。
    */
   static executeResponse(
     request: DecisionRequest,
@@ -22,16 +23,19 @@ export class PatternExecutor {
     state: any,
     rulePackage: RulePackage,
     registry: CommandRegistry
-  ): { actionRequest: ActionRequest; context: CommandContext } {
+  ): { actionRequest?: ActionRequest; context?: CommandContext } {
     // 1. レスポンスの検証
     this.validateResponse(request, response);
 
     const pattern = request.patterns[response.selectedPatternRef];
+    if (pattern.kind === "PASS") {
+      return {};
+    }
     return this.executePattern(pattern, request, state, rulePackage, registry);
   }
 
   /**
-   * LegalPattern に基づいてパターンを実行（ステージ積載 → 解決）します。
+   * 【後方互換・単体テスト用ラッパー】
    */
   static executePattern(
     pattern: LegalPattern,
@@ -56,7 +60,7 @@ export class PatternExecutor {
   }
 
   /**
-   * LegalPattern から ActionRequest を構築してステージに積載します（解決は行わない）。
+   * LegalPattern から ActionRequest を構築してステージに積載します（解決は行いません）。
    */
   static createRequestFromPattern(
     pattern: LegalPattern,

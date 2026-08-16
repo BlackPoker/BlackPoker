@@ -86,7 +86,7 @@ export class LegalPatternGenerator {
     state: any,
     playerId: PlayerKey,
     rulePackage: RulePackage,
-    options?: { stateVersion?: number; matchId?: string; decisionId?: string }
+    options?: { stateVersion?: number; matchId?: string; decisionId?: string; includePass?: boolean }
   ): { request: DecisionRequest; metrics: DecisionGenerationMetrics } {
     const startTime = typeof performance !== "undefined" ? performance.now() : Date.now();
 
@@ -257,6 +257,7 @@ export class LegalPatternGenerator {
 
       return {
         patternId,
+        kind: "ACTION" as const,
         actionSelectionRef: actionRef,
         keyCardSelectionRef: keyCardRef,
         costPaymentRef: costRef,
@@ -284,6 +285,14 @@ export class LegalPatternGenerator {
 
       return a.patternId.localeCompare(b.patternId);
     });
+
+    // PASS パターンの付与（Decision でのパス選択肢）
+    if (options?.includePass !== false) {
+      patterns.push({
+        patternId: "pat-pass",
+        kind: "PASS",
+      });
+    }
 
     const catalog: DecisionCatalog = {
       actions: Object.freeze(actionCatalog),

@@ -171,9 +171,9 @@ export class CommandRegistry {
   /**
    * ステージの一番上（最新）のリクエストを取り出し、実際にコストを支払った上で効果を解決します。
    */
-  resolveTopRequest(context: CommandContext): void {
+  resolveTopRequest(context: CommandContext): ActionRequest | undefined {
     if (!context.state.stage || context.state.stage.requests.length === 0) {
-      return;
+      return undefined;
     }
 
     // 1. LIFO スタックから最新のリクエストを取り出す
@@ -274,6 +274,8 @@ export class CommandRegistry {
       };
       this.dispatchEvent(resolveEvent, context);
     }
+
+    return request;
   }
 
   /**

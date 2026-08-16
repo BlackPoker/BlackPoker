@@ -105,7 +105,7 @@ function setupRegistryHook(registry: CommandRegistry) {
         console.log(`  ${colors.bold}${colors.blue}[RESOLVE]${colors.reset} ${action?.name || req.actionId}を解決 (ID: ${req.id})`);
       }
     }
-    originalResolveTopRequest.call(this, context);
+    return originalResolveTopRequest.call(this, context);
   };
 
   // Command execution hook

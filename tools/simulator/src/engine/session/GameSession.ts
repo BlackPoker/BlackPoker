@@ -4,8 +4,8 @@ import { PlayerKey, RequestRef } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry } from "../rules/CommandRegistry";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
-import { PatternExecutor } from "../decision/PatternExecutor";
-import { TurnManager } from "../rules/TurnManager";
+import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
+import { PassTracker } from "./PassTracker";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -37,11 +37,12 @@ export interface GameResult {
 export type GameSessionStep =
   | {
       readonly type: "PROGRESSED";
-      readonly events?: readonly any[];
+      readonly events?: readonly CoreFlowEvent[];
     }
   | {
       readonly type: "WAITING_FOR_DECISION";
       readonly request: DecisionRequest;
+      readonly lastEvent?: CoreFlowEvent;
     }
   | {
       readonly type: "FINISHED";
@@ -59,12 +60,18 @@ export class GameSession {
   public matchId: string;
   public pendingDecision?: DecisionRequest;
   public continuation?: EffectContinuation;
+  public passTracker: PassTracker;
 
-  constructor(state: any, rulePackage: RulePackage, options?: { matchId?: string; registry?: CommandRegistry }) {
+  constructor(
+    state: any,
+    rulePackage: RulePackage,
+    options?: { matchId?: string; registry?: CommandRegistry; passTracker?: PassTracker }
+  ) {
     this.state = state;
     this.rulePackage = rulePackage;
     this.registry = options?.registry || new CommandRegistry();
     this.matchId = options?.matchId || `match-${Date.now()}`;
+    this.passTracker = options?.passTracker || new PassTracker();
   }
 
   /**
@@ -89,7 +96,27 @@ export class GameSession {
       };
     }
 
-    // 2. 現在のチャンスプレイヤーの判断要求を生成
+    // 2. 全員連続PASS成立時の自動処理（ステージ最上段を1件だけ解決）
+    const stageResolveEvent = CoreFlowCoordinator.tryResolveStageTop(
+      this.state,
+      this.rulePackage,
+      this.registry,
+      this.passTracker
+    );
+
+    if (stageResolveEvent) {
+      // 解決後の勝敗判定
+      const postFinishCheck = this.checkGameFinished();
+      if (postFinishCheck) {
+        this.pendingDecision = undefined;
+        return {
+          type: "FINISHED",
+          result: postFinishCheck,
+        };
+      }
+    }
+
+    // 3. 現在のチャンスプレイヤーの判断要求を生成
     const chancePlayer: PlayerKey = this.state.chancePlayer || this.state.turnPlayer || "p1";
     const { request } = LegalPatternGenerator.generateActionRequestDecision(
       this.state,
@@ -98,6 +125,7 @@ export class GameSession {
       {
         stateVersion: this.stateVersion,
         matchId: this.matchId,
+        includePass: true,
       }
     );
 
@@ -106,13 +134,13 @@ export class GameSession {
       return {
         type: "WAITING_FOR_DECISION",
         request,
+        lastEvent: stageResolveEvent || undefined,
       };
     }
 
-    // 合法手がない場合（パス / チャンス移行 / ターン進行等）
-    // 本フェーズでは手動進行やパス可能な状態としてプログレスを返す
     return {
       type: "PROGRESSED",
+      events: stageResolveEvent ? [stageResolveEvent] : [],
     };
   }
 
@@ -124,13 +152,14 @@ export class GameSession {
       throw new Error("現在待機中の判断要求が存在しません。");
     }
 
-    // 回答の検証と実行
-    PatternExecutor.executeResponse(
+    // コアフローコーディネーターによる回答適用
+    const flowEvent = CoreFlowCoordinator.applyDecision(
       this.pendingDecision,
       response,
       this.state,
       this.rulePackage,
-      this.registry
+      this.registry,
+      this.passTracker
     );
 
     // 適用成功後、判断をクリアしてバージョンをインクリメント

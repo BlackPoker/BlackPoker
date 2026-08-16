@@ -124,6 +124,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     });
   }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
 
+  const passPatternIndex = useMemo(() => {
+    return patterns.findIndex((p) => p.kind === "PASS");
+  }, [patterns]);
+
+  // パス送信ハンドラ
+  const handlePassSubmit = () => {
+    if (passPatternIndex === -1) return;
+    const response: DecisionResponse = {
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: passPatternIndex,
+    };
+    onSubmit(response);
+  };
+
   // 決定ハンドラ
   const handleSubmit = () => {
     if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
@@ -146,18 +161,33 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
             判断要求: {request.playerId === "p1" ? "Player A" : "Player B"} ({request.playerId})
           </h2>
         </div>
-        <div className="text-right text-xs text-slate-400">
-          <div>合法パターン数: <span className="font-mono font-bold text-indigo-400">{patterns.length}件</span></div>
-          <div>Ver: {request.stateVersion}</div>
+        <div className="flex items-center gap-3">
+          {passPatternIndex !== -1 && (
+            <button
+              onClick={handlePassSubmit}
+              className="rounded-lg border border-amber-500/50 bg-amber-950/50 px-4 py-2 text-xs font-bold text-amber-200 hover:bg-amber-900/70 hover:border-amber-400 transition active:scale-95 shadow-md"
+            >
+              ⏭️ パスする (PASS)
+            </button>
+          )}
+          <div className="text-right text-xs text-slate-400">
+            <div>合法パターン: <span className="font-mono font-bold text-indigo-400">{patterns.length}件</span></div>
+            <div>Ver: {request.stateVersion}</div>
+          </div>
         </div>
       </div>
 
       <div className="mt-4 space-y-4">
         {/* ステップ1: アクション選択 */}
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-            1. アクションの選択
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+              1. アクションの選択
+            </label>
+            {availableActionRefs.length === 0 && (
+              <span className="text-xs text-slate-500 italic">利用可能なアクションはありません（パスのみ可能）</span>
+            )}
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {availableActionRefs.map((actRef) => {
               const act = catalog.actions[actRef];

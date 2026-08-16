@@ -102,11 +102,14 @@ export interface CostPayment {
 
 ### 3.3 合法完成パターン (`LegalPattern`)
 
-1つの合法な手（キーカード、コスト支払い、対象選択がすべて確定したもの）を表します。
+1つの合法な手（キーカード、コスト支払い、対象選択がすべて確定したもの、またはパスなどの特殊選択）を表します。
 
 ```typescript
+export type LegalPatternKind = "ACTION" | "PASS" | "EFFECT_SELECTION";
+
 export interface LegalPattern {
   readonly patternId: string;
+  readonly kind: LegalPatternKind; // "ACTION" | "PASS" | "EFFECT_SELECTION"
   readonly actionSelectionRef?: ActionSelectionRef;
   readonly keyCardSelectionRef?: CardSelectionRef;
   readonly keyUnitSelectionRef?: UnitSelectionRef;
@@ -115,6 +118,8 @@ export interface LegalPattern {
 }
 ```
 
+- **`PASS` の扱い**: PASS はアクション（`ActionDefinition`）ではなく、Decision 上の選択肢種別（`kind: "PASS"`）として表現されます。架空の `action.pass` を YAML や `RulePackage` に追加することなく、人間と AI が統一してパスを選択できます。
+
 ### 3.4 プレイヤー視点盤面 (`PlayerObservation`)
 
 観戦・判断を行うプレイヤー視点の読み取り専用盤面です。
@@ -122,22 +127,26 @@ export interface LegalPattern {
 
 ---
 
-## 4. 人間・AI共通の判断フロー
+## 4. コアフロー統合と判断サイクル
 
-1. **判断要求の生成 (`LegalPatternGenerator`)**:
-   - チャンスプレイヤーの実行可能アクションを抽出
-   - キーカード候補、コスト支払い候補（キーカードは除外）、対象候補の直積を生成
-   - `ActionRequestValidator` で各組み合わせを検証し、合法なもののみを `patterns` に登録
-   - 再現性確保のため、`actionId`, `keyCardId`, `costPayment`, `target`, `patternId` で安定ソート
+### 4.1 チャンスとリクエストのフロー
+1. **通常アクション（`speed: normal`）**:
+   - `ActionRequest` を生成して `stage` に積載（**未解決**のまま保持）。
+   - **チャンスは現在のプレイヤーが維持**（相手へ移さない）。
+   - 連続PASSカウントをリセット。
+   - 同じプレイヤーに次の `DecisionRequest`（さらに積めるアクション ＋ PASS）を提示。
+2. **即時アクション（`speed: immediate`）**:
+   - リクエスト生成後ただちに解決（`resolveTopRequest`）。
+   - **チャンスは現在のプレイヤーが維持**。
+3. **パス（`kind: "PASS"`）**:
+   - プレイヤーがパスを選択した場合のみ、チャンスを次のプレイヤー（相手）へ移動。
+   - 連続PASSカウントを +1。
 
-2. **判断の実行**:
-   - **人間 (UI)**: `DecisionPanel` コンポーネントが `patterns` をメモリ内で段階的に絞り込み（アクション → キーカード → コスト支払い → 対象 → 最終確認）、1件の `selectedPatternRef` を決定
-   - **AI (Policy)**: `BlackPokerPolicy.decide(request)` が `selectedPatternRef` を直接決定
-
-3. **回答の適用 (`PatternExecutor`)**:
-   - `decisionId`、`stateVersion`、範囲内インデックスを厳格に検証
-   - `createRequestFromPattern` でステージ上にリクエストを積載し、`selectedCostPayment` を関連付け
-   - `resolveTopRequest` 時に `CostResolver.paySelection` を実行し、選択されたカード・防壁を正確に消費して効果を解決
+### 4.2 全員連続パスとステージ解決
+1. 全プレイヤーが連続してパス（2人対戦なら 2 回連続 PASS）した場合、全員連続パスが成立。
+2. ルールシステムが自動的に `stage` 最上段（トップ）のリクエストを **1件だけ解決**。
+3. 連続PASSカウントを 0 にリセット。
+4. チャンスプレイヤーを手番プレイヤー（`turnPlayer`）へ戻す。
 
 ---
 
@@ -147,14 +156,15 @@ export interface LegalPattern {
 
 | テストファイル | 検証項目 | 結果 |
 |:---|:---|:---:|
-| `legalPatternGenerator.test.ts` | アップアクションの8パターン/12パターン完全生成、カタログ参照、ソート再現性 | PASS |
+| `coreFlow.test.ts` | 通常アクション積載（未解決）、チャンス維持、PASSによるチャンス移動、全員連続PASSでのstageトップ1件解決、即時アクション即解決、PASSの非アクション性 | PASS |
+| `legalPatternGenerator.test.ts` | アップアクションの8パターン/12パターン完全生成、カタログ参照、ソート再現性、PASSパターン付与 | PASS |
 | `costPaymentEnumerator.test.ts` | Dコスト（キーカード除外）、Bコスト（防壁ドライブ）、複合コスト（D+B）の列挙 | PASS |
 | `patternExecutor.test.ts` | 選択したコストカード（♣2）のみが消費され他の手札（♢3）が残ること、効果解決 | PASS |
 | `gameSession.test.ts` | 進行ループ、古いバージョンや不正インデックスの拒否 | PASS |
 | `humanAiParity.test.ts` | 人間とAIが同一パターンを選択した場合の盤面完全一致 | PASS |
 | `observation.test.ts` | 対戦相手の手札非公開情報保護（HIDDEN化） | PASS |
 
-- **全テスト結果**: 25テストファイル、129テスト 全件成功
+- **全テスト結果**: 26テストファイル、135テスト 全件成功
 - **TypeScript ビルド**: エラー 0 件 (`tsc && vite build`)
 - **シナリオ実行**: 全シナリオ（アップ、ダウン、ツイスト、アタック、ブロック、ダメージ判定等）正常完了
 - **新旧YAML比較**: 差分なし

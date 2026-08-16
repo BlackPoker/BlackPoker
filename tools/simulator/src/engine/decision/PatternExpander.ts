@@ -25,6 +25,15 @@ export class PatternExpander {
     catalog: DecisionCatalog,
     patternRef: number
   ): PatternView {
+    if (pattern.kind === "PASS") {
+      return {
+        patternRef,
+        patternId: pattern.patternId,
+        actionName: "パス (PASS)",
+        summary: "パス (PASS)",
+      };
+    }
+
     const action = pattern.actionSelectionRef !== undefined ? catalog.actions[pattern.actionSelectionRef] : undefined;
     const keyCards = pattern.keyCardSelectionRef !== undefined ? catalog.cardSelections[pattern.keyCardSelectionRef] : undefined;
     const keyUnits = pattern.keyUnitSelectionRef !== undefined ? catalog.unitSelections[pattern.keyUnitSelectionRef] : undefined;
