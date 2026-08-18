@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TurnManager } from "../../engine/rules/TurnManager";
+import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage, RequestBuffer } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -56,7 +57,7 @@ describe("Trigger Resolver and Request Buffer Integration Tests (Phase 14.4)", (
     // 初期状態では requestBuffer は未定義
     expect(state.requestBuffer).toBeUndefined();
 
-    // 既存の即時解決（J を墓地に送ることで 1回 世代交代が走る）を呼び出す
+    // 既存の即時解決（J を墓地に送ることで 世代交代がバッファへ積まれる）を呼び出す
     registry.execute("moveToGraveyard", { target: "target" }, context);
 
     // 検証：
@@ -69,13 +70,19 @@ describe("Trigger Resolver and Request Buffer Integration Tests (Phase 14.4)", (
     expect(requestBuffer.history[0].actionId).toBe("action.nextGeneration");
     expect(requestBuffer.history[0].status).toBe("triggered");
 
-    // 2. 二重解決防止の検証：
-    // 既存の即時解決のみが動作し、バッファ蓄積リクエストは自動消費されないため、手札に入る Legacy Card は [K] の 1枚のみ
+    // 2. dispatchEvent 直後は盤面効果が一切発生していないこと（一本化の仕様検証）
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.life.length).toBe(4);
+
+    // 3. TriggerProcessingCoordinator で解決すると初めて盤面へ反映されること
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
+
     expect(state.players.p1.hand.length).toBe(1);
     expect(state.players.p1.hand[0].rank).toBe("K");
-    // ライフには [Joker] が残り、めくりが二重に実行されてライフが空になっていないことをアサート
     expect(state.players.p1.life.length).toBe(1);
     expect(state.players.p1.life[0].rank).toBe("Joker");
+    expect(requestBuffer.requests.length).toBe(0);
   });
 
   it("should NOT trigger nextGeneration when card goes fog -> grave (B)", () => {

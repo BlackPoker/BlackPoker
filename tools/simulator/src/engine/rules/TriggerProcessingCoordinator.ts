@@ -135,6 +135,8 @@ export class TriggerProcessingCoordinator {
 
       if (isImmediate) {
         // 1. スピード: 即時 → stage を経由せず直接解決
+        // TODO: CommandRegistry.resolveTopRequest() と共通の request resolution ロジック
+        // （コスト支払い、status変更、stage.history記録、actionResolvedイベント発行等）への統合を将来的に検討
         if (triggeredReq.action.cost) {
           this.costResolver.pay(triggeredReq.action.cost, context, registry.getEffectInterpreter());
         }

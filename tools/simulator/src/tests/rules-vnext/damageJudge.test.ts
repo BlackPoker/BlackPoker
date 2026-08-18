@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TurnManager } from "../../engine/rules/TurnManager";
+import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import * as path from "path";
@@ -407,6 +408,10 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
     };
 
     registry.executeAction(damageJudgeAction, context);
+
+    // TriggerProcessingCoordinator で即時誘発アクションを解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
 
     // 検証：
     // - アタッカー（J）が墓地へ

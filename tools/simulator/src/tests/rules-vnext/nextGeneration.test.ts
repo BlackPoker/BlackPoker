@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
+import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -22,7 +23,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
 
   it("should trigger nextGeneration when a legacy card (J) goes to grave (Test A)", () => {
     // モックシミュレーター状態
-    const state = {
+    const state: any = {
       players: {
         p1: {
           name: "Player A",
@@ -46,7 +47,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
           fog: [],
           grave: [],
         }
-      } as Record<string, any>
+      }
     };
 
     const registry = new CommandRegistry();
@@ -61,6 +62,14 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
 
     // 場の J を墓地に移動する（これにより誘発イベントが発生）
     registry.execute("moveToGraveyard", { target: "target" }, context);
+
+    // 1. dispatchEvent 直後は未実行でバッファに積まれていること
+    expect(state.requestBuffer?.requests?.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0);
+
+    // 2. TriggerProcessingCoordinator で即時誘発アクションを解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
 
     // 検証：
     // 1. 場の J を含むユニットが墓地へ移動していること
@@ -85,7 +94,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
 
   it("should NOT trigger nextGeneration when a normal card (5) goes to grave (Test B)", () => {
     // モックシミュレーター状態
-    const state = {
+    const state: any = {
       players: {
         p1: {
           name: "Player A",
@@ -107,7 +116,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
           fog: [],
           grave: [],
         }
-      } as Record<string, any>
+      }
     };
 
     const registry = new CommandRegistry();
@@ -136,7 +145,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
   it("should trigger nextGeneration multiple times for each legacy card simultaneously (Test C)", () => {
     // モックシミュレーター状態
     // 1つのユニットに J と Q が含まれている場合
-    const state = {
+    const state: any = {
       players: {
         p1: {
           name: "Player A",
@@ -163,7 +172,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
           fog: [],
           grave: [],
         }
-      } as Record<string, any>
+      }
     };
 
     const registry = new CommandRegistry();
@@ -179,6 +188,14 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
     // 移動実行（J と Q の2枚分、2回誘発が走る）
     registry.execute("moveToGraveyard", { target: "target" }, context);
 
+    // 1. dispatchEvent 直後は未実行でバッファに2件積まれていること
+    expect(state.requestBuffer?.requests?.length).toBe(2);
+    expect(state.players.p1.hand.length).toBe(0);
+
+    // 2. TriggerProcessingCoordinator で即時誘発アクションを解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
+
     // 検証：
     // J と Q で2回誘発が走るため：
     // - 1回目：[2] が墓地へ、[K] が手札へ。
@@ -193,7 +210,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
 
   it("should empty life into grave when legacy card is not found in life (Test D)", () => {
     // モックシミュレーター状態
-    const state = {
+    const state: any = {
       players: {
         p1: {
           name: "Player A",
@@ -216,7 +233,7 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
           fog: [],
           grave: [],
         }
-      } as Record<string, any>
+      }
     };
 
     const registry = new CommandRegistry();
@@ -231,6 +248,14 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
 
     // A が墓地に移動（誘発）
     registry.execute("moveToGraveyard", { target: "target" }, context);
+
+    // 1. dispatchEvent 直後は未実行でバッファに積まれていること
+    expect(state.requestBuffer?.requests?.length).toBe(1);
+    expect(state.players.p1.life.length).toBe(3);
+
+    // 2. TriggerProcessingCoordinator で即時誘発アクションを解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
 
     // 検証：
     // ライフは空になり、すべて墓地へと移動していること。手札は空であること。

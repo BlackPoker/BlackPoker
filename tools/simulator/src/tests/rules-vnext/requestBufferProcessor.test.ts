@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TurnManager } from "../../engine/rules/TurnManager";
+import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage, RequestBuffer } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -303,8 +304,19 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
       components: rulePackage.components,
     };
 
-    // 既存の即時解決を呼び出す
+    // 世代交代イベントを発火
     registry.execute("moveToGraveyard", { target: "target" }, context);
+
+    // 1. dispatchEvent 直後は未実行でバッファに積まれていること
+    const requestBuffer = state.requestBuffer as RequestBuffer;
+    expect(requestBuffer.requests.length).toBe(1);
+    expect(requestBuffer.requests[0].actionId).toBe("action.nextGeneration");
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.life.length).toBe(4);
+
+    // 2. TriggerProcessingCoordinator で解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
 
     // 1回だけ解決され手札は [K]
     expect(state.players.p1.hand.length).toBe(1);
@@ -312,11 +324,7 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     // ライフには [Joker] が残る
     expect(state.players.p1.life.length).toBe(1);
     expect(state.players.p1.life[0].rank).toBe("Joker");
-
-    // バッファには積まれているが未消費
-    const requestBuffer = state.requestBuffer as RequestBuffer;
-    expect(requestBuffer.requests.length).toBe(1);
-    expect(requestBuffer.requests[0].actionId).toBe("action.nextGeneration");
+    expect(requestBuffer.requests.length).toBe(0);
   });
 
   it("should maintain cancelled request prevention of mis-triggers (G)", () => {

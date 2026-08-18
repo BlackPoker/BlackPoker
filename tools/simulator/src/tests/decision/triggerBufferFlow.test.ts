@@ -302,8 +302,18 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     expect(requests[2].actionId).toBe("p2-main");
   });
 
-  it("L: should not double execute triggered actions between old and new paths", () => {
+  it("L: should not double execute triggered actions between old and new paths and only resolve upon advance()", () => {
     const state = createBattleState();
+    // ライフをカード配列 [2, 7, K, Joker] に設定し、手札・墓地を空にする
+    state.players.p1.life = [
+      { id: "l-2", suit: "C", rank: "2", value: 2 },
+      { id: "l-7", suit: "D", rank: "7", value: 7 },
+      { id: "l-K", suit: "H", rank: "K", value: 13 }, // Legacy Card
+      { id: "l-Joker", suit: "X", rank: "Joker", value: 0 }, // Legacy Card
+    ];
+    state.players.p1.hand = [];
+    state.players.p1.grave = [];
+
     const session = new GameSession(state, rulePackage);
 
     // 世代交代カード（J）を墓地へ送るイベントを発火
@@ -327,14 +337,34 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
       context
     );
 
-    // バッファに 1件だけ積まれていること
+    // 1. dispatchEvent 直後:
+    // 世代交代の効果はまだ一切実行されておらず、requestBuffer への登録のみが行われていること
+    expect(state.players.p1.life.length).toBe(4);
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.grave.length).toBe(0);
+
     expect(state.requestBuffer.requests.length).toBe(1);
     expect(state.requestBuffer.requests[0].actionId).toBe("action.nextGeneration");
 
-    // advance() で解決
+    // 2. advance() で解決
     session.advance();
 
-    // 解決履歴に 1件だけ記録され、二重実行されていないこと
+    // 3. advance() 後:
+    // 世代交代の効果が「ちょうど1回だけ」実行された状態になっていること
+    // - hand には Legacy Card の K (1枚)
+    // - grave の展開カードには 2 と 7 (2枚)
+    // - life には Joker (1枚) が残る
+    expect(state.players.p1.hand.length).toBe(1);
+    expect(state.players.p1.hand[0].rank).toBe("K");
+
+    const graveCards = state.players.p1.grave.flatMap((u: any) => u.cards);
+    expect(graveCards.length).toBe(2);
+    expect(graveCards.map((c: any) => c.rank)).toEqual(["2", "7"]);
+
+    expect(state.players.p1.life.length).toBe(1);
+    expect(state.players.p1.life[0].rank).toBe("Joker");
+
+    // 解決履歴に 1件だけ記録されていること
     const resolvedNextGen = state.requestBuffer.history.filter(
       (h: any) => h.actionId === "action.nextGeneration" && h.status === "resolvedImmediately"
     );

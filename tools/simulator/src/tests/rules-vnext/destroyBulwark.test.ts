@@ -4,6 +4,7 @@ import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegis
 import { formatActionSummary } from "../../engine/rules/formatActionSummary";
 import { ExpressionEvaluator } from "../../engine/rules/ExpressionEvaluator";
 import { ValidationError } from "../../engine/rules/ActionRequestValidator";
+import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import * as path from "path";
 
@@ -108,7 +109,7 @@ describe("Destroy Bulwark Action Integration Test (New YAML)", () => {
 
     // プレイヤーAの状態：場に防壁があり、その構成カードが J (Legacy) である。
     // ライフには [ 2, 7, K, Joker ] が入っている。
-    const state = {
+    const state: any = {
       players: {
         p1: {
           name: "Player A",
@@ -131,7 +132,7 @@ describe("Destroy Bulwark Action Integration Test (New YAML)", () => {
             { id: "c-joker", suit: "X", rank: "Joker", value: 0 },
           ],
         }
-      } as Record<string, any>
+      }
     };
 
     const targetUnit = state.players.p1.field[0];
@@ -146,6 +147,13 @@ describe("Destroy Bulwark Action Integration Test (New YAML)", () => {
 
     // moveToGraveyard を実行
     registry.execute("moveToGraveyard", (effectCmd as any).moveToGraveyard, context);
+
+    // 1. dispatchEvent 直後はバッファ積載のみ
+    expect(state.requestBuffer?.requests?.length).toBe(1);
+
+    // 2. TriggerProcessingCoordinator で即時誘発アクションを解決
+    const coordinator = new TriggerProcessingCoordinator();
+    coordinator.processPendingTriggers(state, rulePackage, registry);
 
     // 検証：
     // J が墓地へ移ったため「世代交代」が誘発され、ライフがめくられる

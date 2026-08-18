@@ -44,69 +44,11 @@ export class EffectInterpreter {
   }
 
   /**
-   * ゲームイベントを発行し、合致する誘発アクションを実行します（即時解決）。
+   * ゲームイベントを発行し、TriggerResolver に伝達してリクエストバッファへ蓄積します。
    */
   dispatchEvent(event: any, context: CommandContext) {
-    if (!context.actions) return;
-
-    for (const action of context.actions) {
-      if (action.type === "triggered" && action.triggerCondition) {
-        if (this.evaluateTrigger(action, event, context)) {
-          // 誘発アクション用の新しいコンテキストを作成し、実行する
-          const newContext: CommandContext = {
-            ...context,
-            keyCard: event.payload.card, // イベント対象のカードを keyCard にバインド
-            targetComponent: null
-          };
-          if (action.effect) {
-            this.executeEffects(action.effect, newContext);
-          }
-        }
-      }
+    if (this.registry.triggerResolver) {
+      this.registry.triggerResolver.resolveTriggers(event, context);
     }
-
-    // 誘発条件評価エンジンを呼び出し、リクエストバッファへ蓄積
-    if ((this.registry as any).triggerResolver) {
-      (this.registry as any).triggerResolver.resolveTriggers(event, context);
-    }
-  }
-
-  /**
-   * アクションの誘発条件とイベントがマッチするか判定します。
-   */
-  private evaluateTrigger(action: any, event: any, context: CommandContext): boolean {
-    const cond = action.triggerCondition;
-    if (!cond || cond.event !== event.type) return false;
-
-    const payload = event.payload;
-    if (cond.condition) {
-      if (cond.condition.fromZone && cond.condition.fromZone !== payload.fromZone) {
-        return false;
-      }
-      if (cond.condition.toZone && cond.condition.toZone !== payload.toZone) {
-        return false;
-      }
-
-      if (cond.condition.card && payload.card) {
-        const cardCond = cond.condition.card;
-
-        // rank条件の評価 (文字列または配列)
-        if (cardCond.rank) {
-          const ranks = Array.isArray(cardCond.rank) ? cardCond.rank : [cardCond.rank];
-          if (!ranks.includes(payload.card.rank)) {
-            return false;
-          }
-        }
-
-        // owner条件の評価
-        if (cardCond.owner === "self") {
-          // プレイヤーキーが一致することを確認
-          if (payload.playerKey !== context.playerKey) {
-            return false;
-          }
-        }
-      }
-    }
-    return true;
   }
 }
