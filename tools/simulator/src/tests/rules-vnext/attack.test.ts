@@ -57,13 +57,13 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetComponent: soldier,
       targetPlayerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
+      selections: { attackers: ["soldier-1"] }, // 解決時アタッカー指定
     };
 
-    // A. リクエスト可能であることをアサート
+    // A. リクエスト可能であることをアサート（ターゲットはtargetPlayerのみ）
     const req = registry.createRequest(attackAction, context);
     expect(state.stage.requests.length).toBe(1);
     expect(req.status).toBe("pending");
@@ -90,36 +90,13 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     expect(state.players.p1.grave.length).toBe(0); // 墓地移動も発生しない
   });
 
-  it("should fail when targeting a unit not owned by the requester (D)", () => {
+  it("should fail when targetPlayer is not opponent (D)", () => {
     const attackAction = rulePackage.actions.find((a) => a.id === "action.attack")!;
-
-    const soldierOfP2 = {
-      unitId: "soldier-2",
-      kind: "一般兵",
-      componentId: "character.soldier",
-      state: "charge",
-      cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
-      labels: ["攻撃", "防御"],
-    };
 
     const state: any = {
       players: {
-        p1: {
-          name: "Player A",
-          life: [],
-          hand: [],
-          field: [], // 自分のフィールドにはいない
-          grave: [],
-          fog: [],
-        },
-        p2: {
-          name: "Player B",
-          life: [],
-          hand: [],
-          field: [soldierOfP2],
-          grave: [],
-          fog: [],
-        }
+        p1: { name: "Player A", life: [], hand: [], field: [], grave: [], fog: [] },
+        p2: { name: "Player B", life: [], hand: [], field: [], grave: [], fog: [] },
       },
       stage: { requests: [] }
     };
@@ -127,120 +104,16 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     const registry = new CommandRegistry();
     TurnManager.initializeToMain(state, "p1");
 
+    // 自分自身（p1）をターゲットに指定した場合はエラー
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetComponent: soldierOfP2,
-      targetPlayerKey: "p2",
+      targetPlayerKey: "p1",
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    // D. 自分のキャラクターでない場合 ValidationError
-    expect(() => registry.createRequest(attackAction, context)).toThrow(
-      "アタッカーは自分のフィールドに存在するユニットである必要があります。"
-    );
-  });
-
-  it("should fail when targeting a non-character component (D)", () => {
-    const attackAction = rulePackage.actions.find((a) => a.id === "action.attack")!;
-
-    const nonCharTarget = {
-      unitId: "fog-1",
-      componentId: "fog.up",
-      state: "charge",
-    };
-
-    const state: any = {
-      players: {
-        p1: {
-          name: "Player A",
-          life: [],
-          hand: [],
-          field: [nonCharTarget],
-          grave: [],
-          fog: [],
-        },
-        p2: {
-          name: "Player B",
-          life: [],
-          hand: [],
-          field: [],
-          grave: [],
-          fog: [],
-        }
-      },
-      stage: { requests: [] }
-    };
-
-    const registry = new CommandRegistry();
-    TurnManager.initializeToMain(state, "p1");
-
-    const context: CommandContext = {
-      state,
-      playerKey: "p1",
-      targetComponent: nonCharTarget as any,
-      targetPlayerKey: "p2",
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
-
-    // D. キャラクターでない場合 ValidationError
-    expect(() => registry.createRequest(attackAction, context)).toThrow(
-      "ターゲットがキャラクターではありません。"
-    );
-  });
-
-  it("should fail when targeting a unit in drive state (D)", () => {
-    const attackAction = rulePackage.actions.find((a) => a.id === "action.attack")!;
-
-    const driveSoldier = {
-      unitId: "soldier-1",
-      kind: "一般兵",
-      componentId: "character.soldier",
-      state: "drive", // ドライブ状態！
-      cards: [],
-      labels: [],
-    };
-
-    const state: any = {
-      players: {
-        p1: {
-          name: "Player A",
-          life: [],
-          hand: [],
-          field: [driveSoldier],
-          grave: [],
-          fog: [],
-        },
-        p2: {
-          name: "Player B",
-          life: [],
-          hand: [],
-          field: [],
-          grave: [],
-          fog: [],
-        }
-      },
-      stage: { requests: [] }
-    };
-
-    const registry = new CommandRegistry();
-    TurnManager.initializeToMain(state, "p1");
-
-    const context: CommandContext = {
-      state,
-      playerKey: "p1",
-      targetComponent: driveSoldier,
-      targetPlayerKey: "p2",
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
-
-    // D. ドライブ状態の場合 ValidationError
-    expect(() => registry.createRequest(attackAction, context)).toThrow(
-      "ドライブ状態のキャラクターはアタッカーに指定できません。現在: drive"
-    );
+    expect(() => registry.createRequest(attackAction, context)).toThrow(ValidationError);
   });
 
   it("should fail when requester is not turnPlayer or not chancePlayer (E)", () => {

@@ -436,6 +436,95 @@ export class LegalPatternGenerator {
     return results;
   }
 
+  /**
+   * 効果解決時の選択（EFFECT_SELECTION）用 DecisionRequest を生成します。
+   */
+  static generateEffectSelectionDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: any,
+    effectStepId: string,
+    candidates: any[],
+    options?: { stateVersion?: number; matchId?: string; decisionId?: string; selectionId?: string }
+  ): DecisionRequest {
+    const stateVersion = options?.stateVersion ?? (state.stateVersion || 1);
+    const matchId = options?.matchId ?? (state.matchId || "match-1");
+    const decisionId = options?.decisionId ?? `dec-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    // 候補ユニット群から空集合を含む 2^N 通りの組み合わせ（全部分集合）を列挙
+    const powerSet = this.getPowerSet(candidates);
+
+    const effectSelections: any[] = [];
+    const patterns: LegalPattern[] = [];
+
+    powerSet.forEach((subset, index) => {
+      const selectedValues = subset.map((u) => u.unitId);
+      const summary = subset.length === 0
+        ? "アタッカーなし (0体)"
+        : `アタッカー: ${subset.map((u) => u.kind || u.unitId).join(", ")}`;
+
+      const effSel = {
+        selectionType: "unit",
+        selectedValues,
+        summary,
+      };
+      effectSelections.push(effSel);
+
+      const pattern: LegalPattern = {
+        patternId: `effect-select-${index}-${selectedValues.join("_") || "none"}`,
+        kind: "EFFECT_SELECTION",
+        effectSelectionRef: index,
+      };
+      patterns.push(pattern);
+    });
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections: [],
+      effectSelections,
+      orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    return {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+  }
+
+  /**
+   * 配列の全部分集合（空集合を含む 2^N 通り）を生成
+   */
+  private static getPowerSet<T>(array: readonly T[]): T[][] {
+    const result: T[][] = [[]];
+    for (const elem of array) {
+      const len = result.length;
+      for (let i = 0; i < len; i++) {
+        result.push([...result[i], elem]);
+      }
+    }
+    // ソート: 要素数昇順、同要素数なら元の順序を維持
+    return result.sort((a, b) => a.length - b.length);
+  }
+
   private static getCombinations<T>(array: readonly T[], k: number): T[][] {
     if (k === 0) return [[]];
     if (array.length < k) return [];

@@ -26,6 +26,13 @@ export type CoreFlowEvent =
       readonly type: "STAGE_TOP_RESOLVED";
       readonly actionRequest: ActionRequest;
       readonly nextChancePlayerId: PlayerKey;
+    }
+  | {
+      readonly type: "STAGE_RESOLUTION_INTERRUPTED";
+      readonly actionRequest: ActionRequest;
+      readonly decisionRequest: DecisionRequest;
+      readonly continuation: any;
+      readonly context: CommandContext;
     };
 
 /**
@@ -99,7 +106,16 @@ export class CoreFlowCoordinator {
 
     if (isImmediate) {
       // 即時アクション: ただちに解決。チャンスは現在のプレイヤーが維持
-      registry.resolveTopRequest(context);
+      const resolveResult = registry.resolveTopRequest(context);
+      if (resolveResult.type === "WAITING_FOR_DECISION") {
+        return {
+          type: "STAGE_RESOLUTION_INTERRUPTED",
+          actionRequest,
+          decisionRequest: resolveResult.decisionRequest,
+          continuation: resolveResult.continuation,
+          context: resolveResult.context!,
+        };
+      }
       return {
         type: "IMMEDIATE_ACTION_RESOLVED",
         playerId,
@@ -142,7 +158,21 @@ export class CoreFlowCoordinator {
         components: rulePackage.components,
       };
 
-      const resolvedRequest = registry.resolveTopRequest(context);
+      const resolveResult = registry.resolveTopRequest(context);
+      if (!resolveResult) {
+        return null;
+      }
+
+      if (resolveResult.type === "WAITING_FOR_DECISION") {
+        // 効果解決中に判断が必要になったため中断
+        return {
+          type: "STAGE_RESOLUTION_INTERRUPTED",
+          actionRequest: resolveResult.request,
+          decisionRequest: resolveResult.decisionRequest,
+          continuation: resolveResult.continuation,
+          context: resolveResult.context!,
+        };
+      }
 
       // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
       const turnPlayer: PlayerKey = state.turnPlayer || "p1";
@@ -150,7 +180,7 @@ export class CoreFlowCoordinator {
 
       return {
         type: "STAGE_TOP_RESOLVED",
-        actionRequest: resolvedRequest,
+        actionRequest: resolveResult.request,
         nextChancePlayerId: turnPlayer,
       };
     } else {

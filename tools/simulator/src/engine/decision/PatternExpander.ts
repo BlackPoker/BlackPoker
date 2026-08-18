@@ -34,6 +34,17 @@ export class PatternExpander {
       };
     }
 
+    if (pattern.kind === "EFFECT_SELECTION") {
+      const effSel = pattern.effectSelectionRef !== undefined ? catalog.effectSelections[pattern.effectSelectionRef] : undefined;
+      const summary = effSel?.summary || "効果解決の選択";
+      return {
+        patternRef,
+        patternId: pattern.patternId,
+        effectSelectionText: summary,
+        summary,
+      };
+    }
+
     const action = pattern.actionSelectionRef !== undefined ? catalog.actions[pattern.actionSelectionRef] : undefined;
     const keyCards = pattern.keyCardSelectionRef !== undefined ? catalog.cardSelections[pattern.keyCardSelectionRef] : undefined;
     const keyUnits = pattern.keyUnitSelectionRef !== undefined ? catalog.unitSelections[pattern.keyUnitSelectionRef] : undefined;

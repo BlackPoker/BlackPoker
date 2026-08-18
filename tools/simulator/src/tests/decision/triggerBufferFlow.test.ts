@@ -108,10 +108,10 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetComponent: state.players.p1.field[0],
       targetPlayerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
+      selections: { attackers: [state.players.p1.field[0].unitId] },
     };
 
     const req = registry.createRequest(attackAction, context);
@@ -143,10 +143,10 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetComponent: state.players.p1.field[0],
       targetPlayerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
+      selections: { attackers: [state.players.p1.field[0].unitId] },
     };
     session.registry.createRequest(attackAction, context);
     session.registry.resolveTopRequest(context);
@@ -179,10 +179,10 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     const atkContext: CommandContext = {
       state,
       playerKey: "p1",
-      targetComponent: state.players.p1.field[0],
       targetPlayerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
+      selections: { attackers: [state.players.p1.field[0].unitId] },
     };
     session.registry.createRequest(attackAction, atkContext);
     session.registry.resolveTopRequest(atkContext);

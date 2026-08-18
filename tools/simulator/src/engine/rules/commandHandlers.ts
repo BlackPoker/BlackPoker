@@ -406,24 +406,8 @@ export function startAttackHandler(
   effectInterpreter: EffectInterpreter
 ): CommandHandler {
   return (args, context) => {
-    const { target, defender } = args;
+    const { target, attackers, defender } = args;
     const state = context.state;
-
-    // アタッカーユニットの解決
-    let attackerUnit = context.targetComponent;
-    if (!attackerUnit && target) {
-      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
-      if (resolvedTargetId) {
-        const player = state.players[context.playerKey];
-        if (player && player.field) {
-          attackerUnit = player.field.find((u: any) => u.unitId === resolvedTargetId);
-        }
-      }
-    }
-
-    if (!attackerUnit) {
-      throw new Error("アタッカーとなるユニットが見つかりません。");
-    }
 
     // ディフェンダープレイヤーの解決
     let defenderPlayerKey = undefined;
@@ -439,48 +423,81 @@ export function startAttackHandler(
       throw new Error(`ディフェンダーとなるプレイヤーが見つかりません: ${defenderPlayerKey}`);
     }
 
-    // 1. アタッカーが実行プレイヤーの field に存在することの確認
+    // アタッカーユニット群の解決
+    let attackerUnits: any[] = [];
+    if (attackers !== undefined) {
+      const resolved = expressionEvaluator.resolveBindingValue(attackers, context);
+      if (Array.isArray(resolved)) {
+        const player = state.players[context.playerKey];
+        for (const val of resolved) {
+          const unitId = typeof val === "string" ? val : val?.unitId;
+          const u = player?.field?.find((unit: any) => unit.unitId === unitId);
+          if (u) attackerUnits.push(u);
+        }
+      }
+    } else if (context.targetComponent) {
+      attackerUnits.push(context.targetComponent);
+    } else if (target) {
+      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
+      if (resolvedTargetId) {
+        const player = state.players[context.playerKey];
+        if (player && player.field) {
+          const u = player.field.find((unit: any) => unit.unitId === resolvedTargetId);
+          if (u) attackerUnits.push(u);
+        }
+      }
+    }
+
+    // 0体アタックの場合は何もせず正常終了（戦闘状態をセットしない）
+    if (attackerUnits.length === 0) {
+      return;
+    }
+
     const player = state.players[context.playerKey];
-    const exists = player?.field?.some((u: any) => u.unitId === attackerUnit.unitId);
-    if (!exists) {
-      throw new Error("アタッカーは自分のフィールドに存在するユニットである必要があります。");
+
+    for (const attackerUnit of attackerUnits) {
+      // 1. アタッカーが実行プレイヤーの field に存在することの確認
+      const exists = player?.field?.some((u: any) => u.unitId === attackerUnit.unitId);
+      if (!exists) {
+        throw new Error(`アタッカー (${attackerUnit.unitId}) は自分のフィールドに存在するユニットである必要があります。`);
+      }
+
+      // 2. アタッカーが character component であることの確認
+      const compId = attackerUnit.componentId || "";
+      const compDef = context.components?.find((c: any) => c.id === compId);
+      const isCharacter = compDef ? compDef.type === "character" : compId.startsWith("character.");
+      if (!isCharacter) {
+        throw new Error(`アタッカー (${attackerUnit.unitId}) はキャラクターである必要があります。`);
+      }
+
+      // 3. アタッカーが攻撃可能状態であることの確認 (チャージ状態)
+      if (attackerUnit.state !== "charge") {
+        throw new Error(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${attackerUnit.state}`);
+      }
+
+      // アタッカーユニットに戦闘一時情報を記録
+      attackerUnit.battle = {
+        role: "attacker",
+        targetPlayerKey: defenderPlayerKey,
+      };
+
+      // アタッカーをドライブ状態に移行する
+      const oldState = attackerUnit.state;
+      attackerUnit.state = "drive";
+
+      // イベント発行 (unitStateChanged)
+      const event = {
+        type: "unitStateChanged",
+        payload: {
+          unitId: attackerUnit.unitId,
+          fromState: oldState,
+          toState: "drive",
+          playerKey: context.playerKey,
+          cause: { type: "effect", command: "startAttack" },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
     }
-
-    // 2. アタッカーが character component であることの確認
-    const compId = attackerUnit.componentId || "";
-    const compDef = context.components?.find((c: any) => c.id === compId);
-    const isCharacter = compDef ? compDef.type === "character" : compId.startsWith("character.");
-    if (!isCharacter) {
-      throw new Error("アタッカーはキャラクターである必要があります。");
-    }
-
-    // 3. アタッカーが攻撃可能状態であることの確認 (チャージ状態)
-    if (attackerUnit.state !== "charge") {
-      throw new Error(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${attackerUnit.state}`);
-    }
-
-    // アタッカーユニットに戦闘一時情報を記録
-    attackerUnit.battle = {
-      role: "attacker",
-      targetPlayerKey: defenderPlayerKey
-    };
-
-    // アタッカーをドライブ状態に移行する
-    const oldState = attackerUnit.state;
-    attackerUnit.state = "drive";
-
-    // イベント発行 (unitStateChanged)
-    const event = {
-      type: "unitStateChanged",
-      payload: {
-        unitId: attackerUnit.unitId,
-        fromState: oldState,
-        toState: "drive",
-        playerKey: context.playerKey,
-        cause: { type: "effect", command: "startAttack" },
-      },
-    };
-    effectInterpreter.dispatchEvent(event, context);
   };
 }
 

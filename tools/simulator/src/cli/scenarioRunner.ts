@@ -778,7 +778,9 @@ async function runAttackScenario(rulePackage: any) {
         grave: [],
         fog: [],
       }
-    }
+    },
+    stage: { requests: [], history: [] },
+    requestBuffer: { requests: [], history: [] },
   };
   TurnManager.initializeToMain(state, "p1");
 
@@ -791,14 +793,14 @@ async function runAttackScenario(rulePackage: any) {
   const contextP1: CommandContext = {
     state,
     playerKey: "p1",
-    targetComponent: soldier,
     targetPlayerKey: "p2",
     actions: rulePackage.actions,
     components: rulePackage.components,
+    selections: { attackers: ["soldier-1"] },
   };
 
   subHeader("アクション：アタック をステージへ");
-  console.log(`Player A が ${attackAction.name} をステージへ積みます（対象: ${soldier.unitId}, ディフェンダー: Player B）。`);
+  console.log(`Player A が ${attackAction.name} をステージへ積みます（ディフェンダー: Player B）。`);
   const reqAttack = registry.createRequest(attackAction, contextP1);
 
   subHeader("ステージ上のアタックリクエストを解決");

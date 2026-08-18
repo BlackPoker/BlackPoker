@@ -21,6 +21,7 @@ import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, Ac
 import { CostResolver } from "./CostResolver";
 import { TriggerResolver } from "./TriggerResolver";
 import { RequestBufferProcessor } from "./RequestBufferProcessor";
+import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -36,6 +37,7 @@ export interface CommandContext {
   currentRequest?: ActionRequest; // 現在解決中のリクエスト情報
   triggered?: boolean; // 新規追加：誘発リクエスト判定
   source?: string; // 新規追加：移送ソース
+  selections?: Record<string, any>; // 効果解決時の選択結果マップ
 }
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
@@ -113,7 +115,7 @@ export class CommandRegistry {
 
     // 4. 型安全なターゲット情報の構築
     let targets: ActionRequestTarget[] | undefined = undefined;
-    if (context.targetRequest || context.targetComponent) {
+    if (context.targetRequest || context.targetComponent || context.targetPlayerKey) {
       targets = [];
       if (action.targets && Array.isArray(action.targets)) {
         for (const tDef of action.targets) {
@@ -124,6 +126,12 @@ export class CommandRegistry {
               requestId: context.targetRequest.id,
               actionId: context.targetRequest.actionId,
             });
+          } else if (tType === "player" && context.targetPlayerKey) {
+            targets.push({
+              type: "player",
+              targetPlayerKey: context.targetPlayerKey,
+              name: context.state.players?.[context.targetPlayerKey]?.name || context.targetPlayerKey,
+            } as any);
           } else if ((tType === "unit" || tDef.condition?.component || tDef.condition?.componentType || tDef.type === "unit") && context.targetComponent) {
             targets.push({
               type: "unit",
@@ -141,6 +149,12 @@ export class CommandRegistry {
             kind: context.targetComponent.kind || "ユニット",
             componentId: context.targetComponent.componentId,
           });
+        } else if (context.targetPlayerKey) {
+          targets.push({
+            type: "player",
+            targetPlayerKey: context.targetPlayerKey,
+            name: context.state.players?.[context.targetPlayerKey]?.name || context.targetPlayerKey,
+          } as any);
         } else if (context.targetRequest) {
           targets.push({
             type: "request",
@@ -175,7 +189,7 @@ export class CommandRegistry {
   /**
    * ステージの一番上（最新）のリクエストを取り出し、実際にコストを支払った上で効果を解決します。
    */
-  resolveTopRequest(context: CommandContext): ActionRequest | undefined {
+  resolveTopRequest(context: CommandContext): { type: "COMPLETED" | "WAITING_FOR_DECISION"; request: ActionRequest; decisionRequest?: any; continuation?: any; context?: CommandContext } | undefined {
     if (!context.state.stage || context.state.stage.requests.length === 0) {
       return undefined;
     }
@@ -191,7 +205,10 @@ export class CommandRegistry {
     // キャンセル済みリクエストのスキップ
     if (request.status === "cancelled") {
       context.state.stage.history.push(request);
-      return;
+      return {
+        type: "COMPLETED",
+        request,
+      };
     }
 
     request.status = "resolving";
@@ -209,12 +226,17 @@ export class CommandRegistry {
     const player = context.state.players[request.controller];
     let targetComponent = context.targetComponent;
     let targetRequest = context.targetRequest;
+    let targetPlayerKey = context.targetPlayerKey;
 
     if (request.targets && request.targets.length > 0) {
       for (const t of request.targets) {
         if (t.type === "unit") {
           if (!targetComponent) {
             targetComponent = (player.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+          }
+        } else if (t.type === "player") {
+          if (!targetPlayerKey) {
+            targetPlayerKey = (t as any).targetPlayerKey || (t as any).playerId || (t as any).playerKey;
           }
         } else if (t.type === "request") {
           if (!targetRequest) {
@@ -235,6 +257,7 @@ export class CommandRegistry {
       keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
       targetComponent,
       targetRequest,
+      targetPlayerKey,
       currentAction: action,
       currentRequest: request,
     };
@@ -259,9 +282,43 @@ export class CommandRegistry {
       costResolver.pay(request.cost, resolveContext, this.effectInterpreter);
     }
 
-    // 4. 効果（effect）の解決
+    // 4. 効果（effect）の解決（中断対応）
     if (action.effect) {
-      this.executeEffects(action.effect, resolveContext);
+      const execResult = this.effectInterpreter.executeEffectsWithInterruption(
+        action.effect,
+        resolveContext,
+        0
+      );
+
+      if ("interrupted" in execResult && execResult.interrupted) {
+        // 効果の途中でユーザー判断が必要なため中断
+        const continuation = {
+          sourceRequestId: request.id,
+          effectPath: [execResult.effectIndex],
+          effectStepId: execResult.effectStepId,
+        };
+
+        const decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
+          context.state,
+          request.controller,
+          request,
+          execResult.effectStepId,
+          execResult.candidates,
+          {
+            selectionId: execResult.selectionId,
+            stateVersion: context.state.stateVersion,
+            matchId: context.state.matchId,
+          }
+        );
+
+        return {
+          type: "WAITING_FOR_DECISION" as const,
+          request,
+          decisionRequest,
+          continuation,
+          context: resolveContext,
+        };
+      }
     }
 
     request.status = "resolved";
@@ -279,7 +336,127 @@ export class CommandRegistry {
       this.dispatchEvent(resolveEvent, context);
     }
 
-    return request;
+    return {
+      type: "COMPLETED" as const,
+      request,
+    };
+  }
+
+  /**
+   * 中断されたアクションリクエストの効果解決を再開します。
+   */
+  resumeRequest(
+    request: ActionRequest,
+    continuation: { effectPath: readonly number[]; effectStepId: string },
+    selectedValues: readonly string[],
+    context: CommandContext
+  ): { type: "COMPLETED" | "WAITING_FOR_DECISION"; request: ActionRequest; decisionRequest?: any; continuation?: any; context?: CommandContext } {
+    const action = request.action;
+    if (!action || !action.effect) {
+      request.status = "resolved";
+      context.state.stage.history.push(request);
+      return { type: "COMPLETED", request };
+    }
+
+    const selectionKey = continuation.effectStepId === "selectUnits" ? "attackers" : continuation.effectStepId;
+    const selections = {
+      ...(context.selections || {}),
+      [selectionKey]: selectedValues,
+    };
+
+    const player = context.state.players[request.controller];
+    let targetComponent = context.targetComponent;
+    let targetRequest = context.targetRequest;
+    let targetPlayerKey = context.targetPlayerKey;
+
+    if (request.targets && request.targets.length > 0) {
+      for (const t of request.targets) {
+        if (t.type === "unit") {
+          if (!targetComponent) {
+            targetComponent = (player?.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+          }
+        } else if (t.type === "player") {
+          if (!targetPlayerKey) {
+            targetPlayerKey = (t as any).targetPlayerKey || (t as any).playerId || (t as any).playerKey;
+          }
+        } else if (t.type === "request") {
+          if (!targetRequest) {
+            const allReqs = [
+              ...(context.state.stage?.requests || []),
+              ...(context.state.stage?.history || [])
+            ];
+            targetRequest = allReqs.find((r: any) => r.id === t.requestId);
+          }
+        }
+      }
+    }
+
+    const resolveContext: CommandContext = {
+      ...context,
+      playerKey: request.controller,
+      keyCards: request.keyCards,
+      keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
+      targetComponent,
+      targetRequest,
+      targetPlayerKey,
+      currentAction: action,
+      currentRequest: request,
+      selections,
+    };
+
+    const startIndex = (continuation.effectPath[0] ?? 0) + 1;
+    const execResult = this.effectInterpreter.executeEffectsWithInterruption(
+      action.effect,
+      resolveContext,
+      startIndex
+    );
+
+    if ("interrupted" in execResult && execResult.interrupted) {
+      const nextContinuation = {
+        sourceRequestId: request.id,
+        effectPath: [execResult.effectIndex],
+        effectStepId: execResult.effectStepId,
+      };
+
+      const decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
+        context.state,
+        request.controller,
+        request,
+        execResult.effectStepId,
+        execResult.candidates,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion,
+          matchId: context.state.matchId,
+        }
+      );
+
+      return {
+        type: "WAITING_FOR_DECISION",
+        request,
+        decisionRequest,
+        continuation: nextContinuation,
+        context: resolveContext,
+      };
+    }
+
+    request.status = "resolved";
+    context.state.stage.history.push(request);
+
+    // アクション解決イベントの発行
+    const resolveEvent = {
+      type: "actionResolved",
+      payload: {
+        actionId: request.actionId,
+        playerKey: request.controller,
+      }
+    };
+    this.dispatchEvent(resolveEvent, context);
+
+    return {
+      type: "COMPLETED",
+      request,
+    };
   }
 
   /**

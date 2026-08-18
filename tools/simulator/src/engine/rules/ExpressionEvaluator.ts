@@ -50,6 +50,10 @@ export class ExpressionEvaluator {
       if (value === "targetRequest" && context.targetRequest) {
         return context.targetRequest.id;
       }
+      if (value.startsWith("selection.")) {
+        const selectionId = value.substring("selection.".length);
+        return context.selections?.[selectionId];
+      }
     }
     return value;
   }

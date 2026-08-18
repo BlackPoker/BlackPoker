@@ -71,6 +71,11 @@ export type ActionRequestTarget =
       type: "request";
       requestId: string;
       actionId: string;
+    }
+  | {
+      type: "player";
+      targetPlayerKey: string;
+      name?: string;
     };
 
 export type ActionRequest = {

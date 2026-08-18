@@ -123,10 +123,94 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
       return matchAction && matchKey && matchCost && matchTarget;
     });
   }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
+  const isEffectResolution = request.source.type === "EFFECT_RESOLUTION";
+  const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
 
+  // パス（PASS）パターンの取得
   const passPatternIndex = useMemo(() => {
     return patterns.findIndex((p) => p.kind === "PASS");
   }, [patterns]);
+
+  const handlePass = () => {
+    if (passPatternIndex !== -1) {
+      onSubmit({
+        decisionId: request.decisionId,
+        stateVersion: request.stateVersion,
+        selectedPatternRef: passPatternIndex,
+      });
+    }
+  };
+
+  const handleEffectSubmit = () => {
+    if (selectedEffectPatternRef !== null) {
+      onSubmit({
+        decisionId: request.decisionId,
+        stateVersion: request.stateVersion,
+        selectedPatternRef: selectedEffectPatternRef,
+      });
+    }
+  };
+
+  if (isEffectResolution) {
+    return (
+      <div className="rounded-xl border border-amber-500/40 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md">
+        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+              Effect Decision (効果解決時の選択)
+            </span>
+            <h3 className="text-lg font-black text-slate-100 mt-0.5">
+              アタッカー / 対象の選択
+            </h3>
+          </div>
+          <div className="text-xs text-slate-400">
+            Player: <span className="font-bold text-amber-300">{request.playerId}</span>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            選択肢（複数指定可能 / 0体も可）
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {patternViews.map((pv, idx) => {
+              const isSelected = selectedEffectPatternRef === idx;
+              return (
+                <button
+                  key={pv.patternId || idx}
+                  onClick={() => setSelectedEffectPatternRef(idx)}
+                  className={`rounded-lg border px-3.5 py-2.5 text-left text-sm transition ${
+                    isSelected
+                      ? "border-amber-500 bg-amber-950/60 text-amber-200 shadow-md ring-1 ring-amber-500"
+                      : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                  }`}
+                >
+                  <div className="font-bold">{pv.summary}</div>
+                </button>
+              );
+            })}
+          </div>
+
+          {selectedEffectPatternRef !== null && (
+            <div className="pt-3 border-t border-slate-700 mt-4 bg-slate-800/50 p-3 rounded-lg flex items-center justify-between">
+              <div>
+                <div className="text-xs text-slate-400 font-semibold">選択中:</div>
+                <div className="text-sm font-bold text-amber-300 mt-0.5">
+                  {patternViews[selectedEffectPatternRef]?.summary}
+                </div>
+              </div>
+              <button
+                onClick={handleEffectSubmit}
+                className="rounded-lg bg-amber-600 px-5 py-2.5 font-bold text-white shadow-lg hover:bg-amber-500 transition active:scale-95"
+              >
+                決定して再開
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // パス送信ハンドラ
   const handlePassSubmit = () => {

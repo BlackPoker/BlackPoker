@@ -4,6 +4,7 @@ import { PlayerKey, RequestRef } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry } from "../rules/CommandRegistry";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
+import { PatternExecutor } from "../decision/PatternExecutor";
 import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
 import { PassTracker } from "./PassTracker";
 import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordinator";
@@ -61,6 +62,8 @@ export class GameSession {
   public matchId: string;
   public pendingDecision?: DecisionRequest;
   public continuation?: EffectContinuation;
+  public resolvingRequest?: any;
+  public resolvingContext?: any;
   public passTracker: PassTracker;
   private triggerCoordinator: TriggerProcessingCoordinator;
 
@@ -108,6 +111,19 @@ export class GameSession {
     );
 
     if (stageResolveEvent) {
+      if (stageResolveEvent.type === "STAGE_RESOLUTION_INTERRUPTED") {
+        // 効果解決途中で判断が必要になったため待機
+        this.pendingDecision = stageResolveEvent.decisionRequest;
+        this.continuation = stageResolveEvent.continuation;
+        this.resolvingRequest = stageResolveEvent.actionRequest;
+        this.resolvingContext = stageResolveEvent.context;
+
+        return {
+          type: "WAITING_FOR_DECISION",
+          request: this.pendingDecision,
+        };
+      }
+
       // 解決後の勝敗判定
       const postFinishCheck = this.checkGameFinished();
       if (postFinishCheck) {
@@ -179,7 +195,55 @@ export class GameSession {
       throw new Error("現在待機中の判断要求が存在しません。");
     }
 
-    // コアフローコーディネーターによる回答適用
+    PatternExecutor.validateResponse(this.pendingDecision, response);
+
+    // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
+    if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {
+      const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
+      let selectedValues: readonly string[] = [];
+
+      if (pattern.effectSelectionRef !== undefined) {
+        const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
+        if (effSel) {
+          selectedValues = effSel.selectedValues || [];
+        }
+      }
+
+      const resumeResult = this.registry.resumeRequest(
+        this.resolvingRequest!,
+        this.continuation!,
+        selectedValues,
+        this.resolvingContext!
+      );
+
+      if (resumeResult.type === "WAITING_FOR_DECISION") {
+        this.pendingDecision = resumeResult.decisionRequest;
+        this.continuation = resumeResult.continuation;
+        this.resolvingRequest = resumeResult.request;
+        this.resolvingContext = resumeResult.context;
+        this.stateVersion++;
+
+        return {
+          type: "WAITING_FOR_DECISION",
+          request: this.pendingDecision!,
+        };
+      }
+
+      // 解決完了
+      this.pendingDecision = undefined;
+      this.continuation = undefined;
+      this.resolvingRequest = undefined;
+      this.resolvingContext = undefined;
+
+      // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+      const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+      this.state.chancePlayer = turnPlayer;
+
+      this.stateVersion++;
+      return this.advance();
+    }
+
+    // 2. 通常の行動要求 (ACTION_REQUEST) の場合
     const flowEvent = CoreFlowCoordinator.applyDecision(
       this.pendingDecision,
       response,
@@ -188,6 +252,19 @@ export class GameSession {
       this.registry,
       this.passTracker
     );
+
+    if (flowEvent.type === "STAGE_RESOLUTION_INTERRUPTED") {
+      this.pendingDecision = flowEvent.decisionRequest;
+      this.continuation = flowEvent.continuation;
+      this.resolvingRequest = flowEvent.actionRequest;
+      this.resolvingContext = flowEvent.context;
+      this.stateVersion++;
+
+      return {
+        type: "WAITING_FOR_DECISION",
+        request: this.pendingDecision,
+      };
+    }
 
     // 適用成功後、判断をクリアしてバージョンをインクリメント
     this.pendingDecision = undefined;
