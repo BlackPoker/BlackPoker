@@ -16,6 +16,7 @@ export interface EffectContinuation {
   readonly sourceRequestId: RequestRef;
   readonly effectPath: readonly number[];
   readonly effectStepId: string;
+  readonly selectionId: string;
 }
 
 /**
@@ -58,7 +59,6 @@ export class GameSession {
   public state: any;
   public rulePackage: RulePackage;
   public registry: CommandRegistry;
-  public stateVersion: number = 1;
   public matchId: string;
   public pendingDecision?: DecisionRequest;
   public continuation?: EffectContinuation;
@@ -67,12 +67,24 @@ export class GameSession {
   public passTracker: PassTracker;
   private triggerCoordinator: TriggerProcessingCoordinator;
 
+  public get stateVersion(): number {
+    return this.state.stateVersion ?? this.state.version ?? 1;
+  }
+
+  public set stateVersion(v: number) {
+    this.state.stateVersion = v;
+    this.state.version = v;
+  }
+
   constructor(
     state: any,
     rulePackage: RulePackage,
     options?: { matchId?: string; registry?: CommandRegistry; passTracker?: PassTracker }
   ) {
     this.state = state;
+    if (this.state.stateVersion === undefined) {
+      this.state.stateVersion = this.state.version || 1;
+    }
     this.rulePackage = rulePackage;
     this.registry = options?.registry || new CommandRegistry();
     this.matchId = options?.matchId || `match-${Date.now()}`;
@@ -195,7 +207,7 @@ export class GameSession {
       throw new Error("現在待機中の判断要求が存在しません。");
     }
 
-    PatternExecutor.validateResponse(this.pendingDecision, response);
+    PatternExecutor.validateResponse(this.pendingDecision, response, this.stateVersion);
 
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {

@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { RulePackage } from "../../domain/rules/RulePackage";
-import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import * as path from "path";
 
 describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
@@ -13,10 +12,20 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
     rulePackage = await loadRulePackageFromDirectory(rulesDir);
   });
 
-  it("should create ActionRequest on stage with pending status and without cost payment", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+  it("should create ActionRequest on stage with pending status and paid cost upon request", () => {
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard = { id: "hand-card", code: "♡5", suit: "H", rank: "5", value: 5 };
+    const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
     
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
+
     const state: any = {
       players: {
         p1: {
@@ -24,8 +33,8 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
           ],
-          hand: [handCard],
-          field: [],
+          hand: [handCard, costCard],
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -37,26 +46,38 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
     // 1. リクエストの作成
-    const req = registry.createRequest(setAction, context);
+    const req = registry.createRequest(upAction, context);
 
-    // 検証：リクエストがステージに積まれ、かつコストがまだ支払われていない（ライフが減っていない、墓地が空）
+    // 検証：リクエストがステージに積まれ、かつコストDはリクエスト時に消費済み (Rule 5.3)
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0]).toBe(req);
     expect(req.status).toBe("pending");
-    expect(req.cost).toBe("L");
-    expect(state.players.p1.life.length).toBe(1); // ライフは減っていない！
-    expect(state.players.p1.grave.length).toBe(0); // 墓地にも移動していない！
+    expect(req.cost).toBe("D");
+    expect(state.players.p1.hand.length).toBe(1); // costCard が消費された
+    expect(state.players.p1.grave.length).toBe(1); // 墓地に送られた
   });
 
   it("should generate sequential IDs and sequence numbers for reproducibility", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard1 = { id: "hand-card-1", code: "♡5", suit: "H", rank: "5", value: 5 };
-    const handCard2 = { id: "hand-card-2", code: "♢6", suit: "D", rank: "6", value: 6 };
+    const handCard2 = { id: "hand-card-2", code: "♡6", suit: "H", rank: "6", value: 6 };
+    const costCard1 = { id: "cost-1", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const costCard2 = { id: "cost-2", code: "♣3", suit: "C", rank: "3", value: 3 };
+
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
     
     const state: any = {
       players: {
@@ -64,10 +85,9 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           name: "Player A",
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
-            { id: "life-2", suit: "S", rank: "3", value: 3 },
           ],
-          hand: [handCard1, handCard2],
-          field: [],
+          hand: [handCard1, handCard2, costCard1, costCard2],
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -79,6 +99,7 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard1,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
@@ -86,12 +107,13 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard2,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    const req1 = registry.createRequest(setAction, context1);
-    const req2 = registry.createRequest(setAction, context2);
+    const req1 = registry.createRequest(upAction, context1);
+    const req2 = registry.createRequest(upAction, context2);
 
     // 検証：連番IDとシーケンスが再現性高く生成されていること
     expect(req1.id).toBe("req-1");
@@ -101,9 +123,19 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
     expect(state.nextRequestSeq).toBe(2);
   });
 
-  it("should pay cost and apply effects upon resolveTopRequest", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+  it("should apply effects upon resolveTopRequest without double paying cost", () => {
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard = { id: "hand-card", code: "♡5", suit: "H", rank: "5", value: 5 };
+    const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
     
     const state: any = {
       players: {
@@ -112,8 +144,8 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
           ],
-          hand: [handCard],
-          field: [],
+          hand: [handCard, costCard],
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -125,27 +157,40 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    const req = registry.createRequest(setAction, context);
+    const req = registry.createRequest(upAction, context);
     expect(req.status).toBe("pending");
+    expect(state.players.p1.hand.length).toBe(1); // コスト消費済み
 
     // 解決の実行
     registry.resolveTopRequest(context);
 
-    // 検証：コストLが支払われてライフが減り、墓地へ移動し、防壁が召喚され、リクエスト状態が resolved になること
+    // 検証：リクエスト状態が resolved になり、フォグが生成され、手札は二重消費されない
     expect(req.status).toBe("resolved");
     expect(state.stage.requests.length).toBe(0); // ステージから削除されていること
-    expect(state.players.p1.life.length).toBe(0); // コスト消費
-    expect(state.players.p1.field.length).toBe(1); // 防壁召喚
+    expect(state.players.p1.hand.length).toBe(1); // keyCard は手札に残ったまま fog 参照
+    expect(state.players.p1.fog.length).toBe(1); // フォグ生成
   });
 
   it("should resolve multiple requests in LIFO (stack) order", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard1 = { id: "hand-card-1", code: "♡5", suit: "H", rank: "5", value: 5 };
-    const handCard2 = { id: "hand-card-2", code: "♢6", suit: "D", rank: "6", value: 6 };
+    const handCard2 = { id: "hand-card-2", code: "♡6", suit: "H", rank: "6", value: 6 };
+    const costCard1 = { id: "cost-1", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const costCard2 = { id: "cost-2", code: "♣3", suit: "C", rank: "3", value: 3 };
+
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
     
     const state: any = {
       players: {
@@ -153,10 +198,9 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           name: "Player A",
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
-            { id: "life-2", suit: "S", rank: "3", value: 3 },
           ],
-          hand: [handCard1, handCard2],
-          field: [],
+          hand: [handCard1, handCard2, costCard1, costCard2],
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -168,6 +212,7 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard1,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
@@ -175,13 +220,14 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard2,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
     // リクエストを2つ積む (req1 -> req2)
-    const req1 = registry.createRequest(setAction, context1);
-    const req2 = registry.createRequest(setAction, context2);
+    const req1 = registry.createRequest(upAction, context1);
+    const req2 = registry.createRequest(upAction, context2);
 
     expect(state.stage.requests.length).toBe(2);
 
@@ -200,19 +246,26 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
     expect(state.stage.requests.length).toBe(0);
   });
 
-  it("should fail and update status to cancelled if canPay fails at resolution time (double-check)", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+  it("should fail to createRequest if cost cannot be paid (Rule 5.3)", () => {
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard = { id: "hand-card", code: "♡5", suit: "H", rank: "5", value: 5 };
+
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
     
     const state: any = {
       players: {
         p1: {
           name: "Player A",
-          life: [
-            { id: "life-1", suit: "S", rank: "2", value: 2 },
-          ],
-          hand: [handCard],
-          field: [],
+          life: [],
+          hand: [handCard], // コストD用の手札カードがない（手札1枚のみでkeyCardとして指定）
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -224,37 +277,38 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    // 1. 作成（この時はライフがあるので canPay は成功する）
-    const req = registry.createRequest(setAction, context);
-    expect(req.status).toBe("pending");
-
-    // 2. 解決前に、割り込み効果などでライフが消失した状態をモック
-    state.players.p1.life = [];
-
-    // 3. 解決の実行（2重チェック canPay でエラーとなり、cancelled になること）
-    expect(() => registry.resolveTopRequest(context)).toThrow(
-      "解決時にコスト [L] を支払うリソースが不足しているため、解決できません。"
+    // コスト D を支払えないため createRequest 時点でエラーとなり、リクエストは作成されない
+    expect(() => registry.createRequest(upAction, context)).toThrow(
+      "コスト [D] を支払うことができません。"
     );
-    expect(req.status).toBe("cancelled");
   });
 
   it("should transparently resolve via executeAction (backward compatibility façade)", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
+    const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const handCard = { id: "hand-card", code: "♡5", suit: "H", rank: "5", value: 5 };
+    const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+
+    const targetUnit = {
+      unitId: "unit-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [],
+      labels: ["攻撃", "防御"],
+    };
     
     const state: any = {
       players: {
         p1: {
           name: "Player A",
-          life: [
-            { id: "life-1", suit: "S", rank: "2", value: 2 },
-          ],
-          hand: [handCard],
-          field: [],
+          life: [],
+          hand: [handCard, costCard],
+          field: [targetUnit],
           grave: [],
           fog: [],
         }
@@ -266,15 +320,15 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
       state,
       playerKey: "p1",
       keyCard: handCard,
+      targetComponent: targetUnit,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
     // 後方互換 executeAction の呼び出し
-    registry.executeAction(setAction, context);
+    registry.executeAction(upAction, context);
 
     // 連続して解決されていることの検証
-    expect(state.players.p1.life.length).toBe(0); // コスト消費
-    expect(state.players.p1.field.length).toBe(1); // 防壁召喚
+    expect(state.players.p1.fog.length).toBe(1); // フォグ生成
   });
 });

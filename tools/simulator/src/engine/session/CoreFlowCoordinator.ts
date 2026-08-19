@@ -105,8 +105,8 @@ export class CoreFlowCoordinator {
     );
 
     if (isImmediate) {
-      // 即時アクション: ただちに解決。チャンスは現在のプレイヤーが維持
-      const resolveResult = registry.resolveTopRequest(context);
+      // 即時アクション: stage を経由せず直接解決。チャンスは現在のプレイヤーが維持
+      const resolveResult = registry.resolveRequest(actionRequest, context);
       if (resolveResult.type === "WAITING_FOR_DECISION") {
         return {
           type: "STAGE_RESOLUTION_INTERRUPTED",

@@ -2,7 +2,6 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { RulePackage } from "../../domain/rules/RulePackage";
-import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import * as path from "path";
 
 describe("Counter Action integration Tests (New YAML)", () => {
@@ -55,7 +54,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0]).toBe(req);
     expect(req.status).toBe("pending");
-    expect(state.players.p1.hand.length).toBe(2); // コストDは未払い
+    expect(state.players.p1.hand.length).toBe(1); // コストDはリクエスト時に消費済み (Rule 5.3)
   });
 
   it("should stack Counter action request on stage with reference (B)", () => {
@@ -258,8 +257,8 @@ describe("Counter Action integration Tests (New YAML)", () => {
     registry.resolveTopRequest(context1);
 
     expect(req1.status).toBe("cancelled"); // 変わらず cancelled のまま
-    expect(state.players.p1.hand.length).toBe(2); // アップの D コスト（costCard）は支払われず、手札に残る！ (D)
-    expect(state.players.p1.fog.length).toBe(0); // アップの効果であるフォグも生成されない！ (D)
+    expect(state.players.p1.hand.length).toBe(1); // リクエスト時に消費された D コストは返還されない (Rule 5.3)
+    expect(state.players.p1.fog.length).toBe(0); // アップの効果であるフォグは生成されていないこと！ (D)
   });
 
   it("should fail when targeting a non-existent request (F)", () => {
@@ -542,9 +541,10 @@ describe("Counter Action integration Tests (New YAML)", () => {
     expect(state.stage.history.length).toBe(2);
     expect(state.stage.history[1]).toBe(req1); // キャンセルされたアップも history に残る
 
-    // 3. キャンセルされたリクエストのコストと効果が本当に実行されていないことをアサート
-    expect(state.players.p1.hand.length).toBe(2); // 手札コスト未消費
-    expect(state.players.p1.fog.length).toBe(0); // 効果（フォグ生成）未発生
-    expect(state.players.p1.grave.length).toBe(0); // 墓地送りなし
+    // 3. キャンセルされたリクエストのコストはリクエスト時に消費済みだが効果は未実行であることを検証
+    expect(state.players.p1.hand.length).toBe(1); // リクエスト時に消費された D コストは返還されない (Rule 5.3)
+    expect(state.players.p1.fog.length).toBe(0); // 効果（フォグ生成）は未実行
+    expect(state.players.p1.grave.length).toBe(1); // アップのDコスト(1枚)
+    expect(state.players.p2.grave.length).toBe(1); // カウンターのDコスト(1枚)
   });
 });

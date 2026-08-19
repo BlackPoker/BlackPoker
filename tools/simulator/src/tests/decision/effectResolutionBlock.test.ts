@@ -378,8 +378,9 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Block Action Assignment 
 
     const req6 = getReq(step6);
     const singleAttackerRef = req6.patterns.findIndex((p: any) => {
-      const effSel = req6.catalog.effectSelections[p.effectSelectionRef!];
-      return effSel.selectedValues?.length === 1;
+      if (p.effectSelectionRef === undefined) return false;
+      const effSel = req6.catalog.effectSelections[p.effectSelectionRef];
+      return effSel?.selectedValues?.length === 1;
     });
     session.submitDecision({ decisionId: req6.decisionId, stateVersion: req6.stateVersion, selectedPatternRef: singleAttackerRef });
 

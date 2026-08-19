@@ -518,6 +518,8 @@ export class LegalPatternGenerator {
 
   /**
    * ブロック効果解決時（EFFECT_RESOLUTION）のアタッカー毎のブロッカー割当てDecisionRequestを生成
+   * TODO: 将来、ActionDefinition を変更する能力や別アクションの assignment が追加された場合、
+   * DSL 制約定義を直接解釈する汎用 assignment generator へ移行すること。
    */
   public static generateBlockAssignmentDecision(
     state: any,
@@ -530,7 +532,7 @@ export class LegalPatternGenerator {
   ): { request: DecisionRequest; metrics: BlockAssignmentMetrics } {
     const startTime = Date.now();
     const decisionId = `dec-eff-${sourceRequest.id}-${effectStepId}-${Date.now()}`;
-    const stateVersion = state?.version ?? 1;
+    const stateVersion = state?.stateVersion ?? state?.version ?? 1;
     const matchId = state?.matchId ?? "match-local";
     const observation = ObservationFactory.createObservation(state, playerId);
 

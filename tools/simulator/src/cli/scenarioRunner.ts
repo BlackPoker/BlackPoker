@@ -666,7 +666,7 @@ async function runCounterScenario(rulePackage: any) {
   const finalSize = registry.calculateUnitSize(targetUnit, state.players.p1);
   console.log(`\n${colors.bold}${colors.green}結果検証: 
   - 兵士の最終サイズ = ${finalSize} (期待値: 6。アップがカウンターされたためサイズ増幅なし！)
-  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 2。アップのDコストは支払われていない！)
+  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 1。アップのDコストはリクエスト時に消費済み！)
   - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 0。カウンターのDコストは支払われている！)${colors.reset}`);
 }
 

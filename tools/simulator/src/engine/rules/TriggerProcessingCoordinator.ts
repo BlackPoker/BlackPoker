@@ -69,6 +69,28 @@ export class TriggerProcessingCoordinator {
   /**
    * バッファ内の次の最優先リクエストを1件取り出します。
    */
+  /**
+   * バッファ内の次の最優先リクエストを非破壊で参照します（取り出しません）。
+   */
+  peekNextRequest(state: any): TriggeredActionRequest | undefined {
+    if (!state || !state.requestBuffer) return undefined;
+    const requestBuffer = state.requestBuffer as RequestBuffer;
+    if (!requestBuffer.requests || requestBuffer.requests.length === 0) return undefined;
+
+    const turnPlayer: PlayerKey = state.turnPlayer || "p1";
+    const allPlayerIds: PlayerKey[] = Object.keys(state.players || {}) as PlayerKey[];
+
+    // 優先度順でソート
+    requestBuffer.requests.sort((a, b) =>
+      TriggerProcessingCoordinator.compareRequests(a, b, turnPlayer, allPlayerIds)
+    );
+
+    return requestBuffer.requests[0];
+  }
+
+  /**
+   * バッファ内の次の最優先リクエストを1件取り出します。
+   */
   takeNextRequest(state: any): TriggeredActionRequest | undefined {
     if (!state || !state.requestBuffer) return undefined;
     const requestBuffer = state.requestBuffer as RequestBuffer;
@@ -87,6 +109,8 @@ export class TriggerProcessingCoordinator {
 
   /**
    * リクエストバッファ内の全誘発リクエストを公式ルール9.4.1順序で処理します。
+   * validation 成功確認後に buffer 削除 & sequence 確定 & stage 積載/即時解決を行い、
+   * validation 失敗時は buffer や sequence を破壊しません。
    * - immediate: stage を経由せず直接解決
    * - normal: stage へ積載 (未解決)
    */
@@ -100,11 +124,27 @@ export class TriggerProcessingCoordinator {
     const stagedRequests: ActionRequest[] = [];
 
     while (state.requestBuffer && state.requestBuffer.requests && state.requestBuffer.requests.length > 0) {
-      const triggeredReq = this.takeNextRequest(state);
+      // 1. 最優先候補を peek（バッファはまだ破壊しない）
+      const triggeredReq = this.peekNextRequest(state);
       if (!triggeredReq) break;
 
       const isImmediate = triggeredReq.action.request?.speed === "immediate";
 
+      // 2. validation 用の仮 context
+      const tempContext: CommandContext = {
+        state,
+        playerKey: triggeredReq.controller,
+        keyCards: triggeredReq.keyCards,
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+        triggered: true,
+      };
+
+      // 3. validation（失敗時はここで例外がスローされ、buffer/sequence/stage は一切変更されない）
+      this.validator.validateActionRequest(triggeredReq.action, tempContext);
+
+      // 4. validation 成功後、正式に buffer から取り出し sequence を確定
+      this.takeNextRequest(state);
       state.nextRequestSeq = (state.nextRequestSeq || 0) + 1;
       const seq = state.nextRequestSeq;
       const actionRequestId = `req-${seq}`;
@@ -124,19 +164,12 @@ export class TriggerProcessingCoordinator {
       };
 
       const context: CommandContext = {
-        state,
-        playerKey: actionReq.controller,
-        keyCards: actionReq.keyCards,
+        ...tempContext,
         currentRequest: actionReq,
-        actions: rulePackage.actions,
-        components: rulePackage.components,
-        triggered: true,
       };
 
       if (isImmediate) {
-        // 1. スピード: 即時 → stage を経由せず直接解決
-        // TODO: CommandRegistry.resolveTopRequest() と共通の request resolution ロジック
-        // （コスト支払い、status変更、stage.history記録、actionResolvedイベント発行等）への統合を将来的に検討
+        // 即時誘発: stage を経由せず直接解決
         if (triggeredReq.action.cost) {
           this.costResolver.pay(triggeredReq.action.cost, context, registry.getEffectInterpreter());
         }
@@ -156,7 +189,6 @@ export class TriggerProcessingCoordinator {
           sourceEvent: triggeredReq.sourceEvent,
         });
 
-        // 解決イベントの発行（これにより新たな誘発が発生した場合はバッファに積まれ次ループで処理される）
         const resolveEvent = {
           type: "actionResolved",
           payload: {
@@ -169,9 +201,7 @@ export class TriggerProcessingCoordinator {
         immediateResolvedCount++;
         console.log(`[BUFFER-IMMEDIATE-RESOLVE] 即時誘発アクションを直接解決: ${triggeredReq.actionId} (ID: ${actionReq.id})`);
       } else {
-        // 2. スピード: 通常 → stage へ積載（未解決）
-        this.validator.validateActionRequest(triggeredReq.action, context);
-
+        // 通常誘発: stage へ積載（未解決）
         if (!state.stage) state.stage = { requests: [], history: [] };
         if (!state.stage.requests) state.stage.requests = [];
         state.stage.requests.push(actionReq);

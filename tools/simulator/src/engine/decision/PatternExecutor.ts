@@ -139,16 +139,17 @@ export class PatternExecutor {
       components: rulePackage.components,
     };
 
-    // 実行直前の再バリデーション
+    // 実行直前の再バリデーション（validateActionRequest / canPaySelection は createRequest 内でも実行される）
     this.validator.validateActionRequest(actionDef, context);
     if (costPayment && !this.costResolver.canPaySelection(costPayment, context)) {
       throw new Error(`選択されたコストを支払うことができません: ${costPayment.summary}`);
     }
 
-    // リクエストの生成
-    const actionRequest = registry.createRequest(actionDef, context);
-    actionRequest.selectedCostPayment = costPayment;
-    actionRequest.sourcePatternId = pattern.patternId;
+    // リクエストの生成とコスト支払い
+    const actionRequest = registry.createRequest(actionDef, context, {
+      selectedCostPayment: costPayment,
+      sourcePatternId: pattern.patternId,
+    });
 
     return { actionRequest, context };
   }
@@ -156,7 +157,11 @@ export class PatternExecutor {
   /**
    * DecisionResponse の妥当性を検証
    */
-  static validateResponse(request: DecisionRequest, response: DecisionResponse): void {
+  static validateResponse(
+    request: DecisionRequest,
+    response: DecisionResponse,
+    currentStateVersion?: number
+  ): void {
     if (response.decisionId !== request.decisionId) {
       throw new Error(
         `Decision ID が一致しません。要求: ${request.decisionId}, 回答: ${response.decisionId}`
@@ -165,6 +170,11 @@ export class PatternExecutor {
     if (response.stateVersion !== request.stateVersion) {
       throw new Error(
         `State Version が一致しません。要求: ${request.stateVersion}, 回答: ${response.stateVersion}`
+      );
+    }
+    if (currentStateVersion !== undefined && response.stateVersion !== currentStateVersion) {
+      throw new Error(
+        `State Version が現在の盤面状態と一致しません。現在: ${currentStateVersion}, 回答: ${response.stateVersion}`
       );
     }
     if (

@@ -21,7 +21,15 @@ import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, Ac
 import { CostResolver } from "./CostResolver";
 import { TriggerResolver } from "./TriggerResolver";
 import { RequestBufferProcessor } from "./RequestBufferProcessor";
+import { CostPayment } from "../../domain/decision/DecisionCatalog";
+import { EffectContinuation } from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
+
+export interface CreateRequestOptions {
+  readonly selectedCostPayment?: CostPayment;
+  readonly sourcePatternId?: string;
+  readonly placement?: "stage" | "none";
+}
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -94,26 +102,49 @@ export class CommandRegistry {
   }
 
   /**
-   * アクションの事前検証を行い、リクエストオブジェクトを作成してステージ（LIFO）に積みます。
-   * ※この時点ではコストの支払いは行われません。
+   * アクションの事前検証を行い、コストを支払った上でリクエストオブジェクトを作成します。
+   * 通常アクションはステージ（LIFO）に積まれ、即時アクション（placement === "none"）はステージに積まれません。
    */
-  createRequest(action: ActionDefinition, context: CommandContext): ActionRequest {
-    // 1. 事前検証 (支払い可能チェック canPay を含む)
+  createRequest(
+    action: ActionDefinition,
+    context: CommandContext,
+    options?: CreateRequestOptions
+  ): ActionRequest {
+    // 1. 事前検証
     this.validateAction(action, context);
 
-    // 2. Stageおよび連番Seqの初期化・インクリメント
+    // 2. コスト支払い（リクエスト成立時に即時消費）
+    const costResolver = new CostResolver();
+    if (options?.selectedCostPayment) {
+      if (!costResolver.canPaySelection(options.selectedCostPayment, context)) {
+        throw new Error(
+          `選択されたコスト [${options.selectedCostPayment.summary || "payment"}] を支払うことができません。`
+        );
+      }
+      costResolver.paySelection(options.selectedCostPayment, context, this.effectInterpreter);
+    } else if (action.cost) {
+      if (!costResolver.canPay(action.cost, context)) {
+        throw new Error(`コスト [${action.cost}] を支払うことができません。`);
+      }
+      costResolver.pay(action.cost, context, this.effectInterpreter);
+    }
+
+    // 3. Stageおよび連番Seqの初期化・インクリメント
     if (!context.state.stage) {
-      context.state.stage = { requests: [] };
+      context.state.stage = { requests: [], history: [] };
     }
     context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
     const seq = context.state.nextRequestSeq;
 
-    // 3. 投入カードのリスト化
-    const actualCards = context.keyCards && context.keyCards.length > 0
-      ? context.keyCards
-      : context.keyCard ? [context.keyCard] : [];
+    // 4. 投入カードのリスト化
+    const actualCards =
+      context.keyCards && context.keyCards.length > 0
+        ? context.keyCards
+        : context.keyCard
+        ? [context.keyCard]
+        : [];
 
-    // 4. 型安全なターゲット情報の構築
+    // 5. 型安全なターゲット情報の構築
     let targets: ActionRequestTarget[] | undefined = undefined;
     if (context.targetRequest || context.targetComponent || context.targetPlayerKey) {
       targets = [];
@@ -132,7 +163,13 @@ export class CommandRegistry {
               targetPlayerKey: context.targetPlayerKey,
               name: context.state.players?.[context.targetPlayerKey]?.name || context.targetPlayerKey,
             } as any);
-          } else if ((tType === "unit" || tDef.condition?.component || tDef.condition?.componentType || tDef.type === "unit") && context.targetComponent) {
+          } else if (
+            (tType === "unit" ||
+              tDef.condition?.component ||
+              tDef.condition?.componentType ||
+              tDef.type === "unit") &&
+            context.targetComponent
+          ) {
             targets.push({
               type: "unit",
               unitId: context.targetComponent.unitId,
@@ -168,7 +205,8 @@ export class CommandRegistry {
       }
     }
 
-    // 5. リクエストの構築
+    // 6. リクエストの構築
+    const isImmediate = action.request?.speed === "immediate";
     const request: ActionRequest = {
       id: `req-${seq}`,
       actionId: action.id,
@@ -176,28 +214,40 @@ export class CommandRegistry {
       keyCards: actualCards,
       targets,
       cost: action.cost,
+      selectedCostPayment: options?.selectedCostPayment,
+      sourcePatternId: options?.sourcePatternId,
       status: "pending",
       sequence: seq,
       action,
     };
 
-    // 6. ステージに積載
-    context.state.stage.requests.push(request);
+    // 7. ステージに積載（即時アクションまたは明示的 none の場合は積載しない）
+    const shouldPlaceOnStage = options?.placement !== "none" && !isImmediate;
+    if (shouldPlaceOnStage) {
+      if (!context.state.stage.requests) context.state.stage.requests = [];
+      context.state.stage.requests.push(request);
+    }
+
     return request;
   }
 
   /**
-   * ステージの一番上（最新）のリクエストを取り出し、実際にコストを支払った上で効果を解決します。
+   * 単一のアクションリクエストを解決する共通プリミティブ。
+   * stage 上の通常アクション・直接即時アクションの双方から共通利用されます。
    */
-  resolveTopRequest(context: CommandContext): { type: "COMPLETED" | "WAITING_FOR_DECISION"; request: ActionRequest; decisionRequest?: any; continuation?: any; context?: CommandContext } | undefined {
-    if (!context.state.stage || context.state.stage.requests.length === 0) {
-      return undefined;
+  resolveRequest(
+    request: ActionRequest,
+    context: CommandContext
+  ): {
+    type: "COMPLETED" | "WAITING_FOR_DECISION";
+    request: ActionRequest;
+    decisionRequest?: any;
+    continuation?: EffectContinuation;
+    context?: CommandContext;
+  } {
+    if (!context.state.stage) {
+      context.state.stage = { requests: [], history: [] };
     }
-
-    // 1. LIFO スタックから最新のリクエストを取り出す
-    const request = context.state.stage.requests.pop()!;
-
-    // ステージ履歴 (history) の初期化
     if (!context.state.stage.history) {
       context.state.stage.history = [];
     }
@@ -214,16 +264,13 @@ export class CommandRegistry {
     request.status = "resolving";
 
     // アクション定義の逆引き
-    let action = context.actions?.find((a) => a.id === request.actionId);
-    if (!action) {
-      action = request.action;
-    }
+    let action = context.actions?.find((a) => a.id === request.actionId) || request.action;
     if (!action) {
       throw new Error(`アクションIDに対する定義が見つかりません: ${request.actionId}`);
     }
 
-    // 2. リクエスト実行時のコンテキスト復元
-    const player = context.state.players[request.controller];
+    // リクエスト実行時のコンテキスト復元
+    const player = context.state.players?.[request.controller];
     let targetComponent = context.targetComponent;
     let targetRequest = context.targetRequest;
     let targetPlayerKey = context.targetPlayerKey;
@@ -232,7 +279,7 @@ export class CommandRegistry {
       for (const t of request.targets) {
         if (t.type === "unit") {
           if (!targetComponent) {
-            targetComponent = (player.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+            targetComponent = (player?.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
           }
         } else if (t.type === "player") {
           if (!targetPlayerKey) {
@@ -242,7 +289,7 @@ export class CommandRegistry {
           if (!targetRequest) {
             const allReqs = [
               ...(context.state.stage.requests || []),
-              ...(context.state.stage.history || [])
+              ...(context.state.stage.history || []),
             ];
             targetRequest = allReqs.find((r: any) => r.id === t.requestId);
           }
@@ -254,7 +301,7 @@ export class CommandRegistry {
       ...context,
       playerKey: request.controller,
       keyCards: request.keyCards,
-      keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
+      keyCard: request.keyCards && request.keyCards.length === 1 ? request.keyCards[0] : undefined,
       targetComponent,
       targetRequest,
       targetPlayerKey,
@@ -262,27 +309,9 @@ export class CommandRegistry {
       currentRequest: request,
     };
 
-    // 3. 解決時におけるコストの2重チェック検証
-    if (request.selectedCostPayment) {
-      const costResolver = new CostResolver();
-      if (!costResolver.canPaySelection(request.selectedCostPayment, resolveContext)) {
-        request.status = "cancelled";
-        context.state.stage.history.push(request);
-        throw new Error(`解決時に選択されたコスト [${request.selectedCostPayment.summary || "payment"}] を支払うリソースが不足しているため、解決できません。`);
-      }
-      costResolver.paySelection(request.selectedCostPayment, resolveContext, this.effectInterpreter);
-    } else if (request.cost) {
-      const costResolver = new CostResolver();
-      if (!costResolver.canPay(request.cost, resolveContext)) {
-        request.status = "cancelled";
-        context.state.stage.history.push(request);
-        throw new Error(`解決時にコスト [${request.cost}] を支払うリソースが不足しているため、解決できません。`);
-      }
-      // 実際の支払い実行
-      costResolver.pay(request.cost, resolveContext, this.effectInterpreter);
-    }
+    // コストはリクエスト成立時に支払い済みのため、解決時には支払わない
 
-    // 4. 効果（effect）の解決（中断対応）
+    // 効果（effect）の解決（中断対応）
     if (action.effect) {
       const execResult = this.effectInterpreter.executeEffectsWithInterruption(
         action.effect,
@@ -291,11 +320,11 @@ export class CommandRegistry {
       );
 
       if ("interrupted" in execResult && execResult.interrupted) {
-        // 効果の途中でユーザー判断が必要なため中断
-        const continuation = {
+        const continuation: EffectContinuation = {
           sourceRequestId: request.id,
           effectPath: [execResult.effectIndex],
           effectStepId: execResult.effectStepId,
+          selectionId: execResult.selectionId,
         };
 
         let decisionRequest: any;
@@ -326,7 +355,7 @@ export class CommandRegistry {
         }
 
         return {
-          type: "WAITING_FOR_DECISION" as const,
+          type: "WAITING_FOR_DECISION",
           request,
           decisionRequest,
           continuation,
@@ -338,22 +367,41 @@ export class CommandRegistry {
     request.status = "resolved";
     context.state.stage.history.push(request);
 
-    // 5. アクション解決イベントの発行（resolved ステータス時限定。キャンセル時等は発行しない）
-    if (request.status === "resolved") {
-      const resolveEvent = {
-        type: "actionResolved",
-        payload: {
-          actionId: request.actionId,
-          playerKey: request.controller,
-        }
-      };
-      this.dispatchEvent(resolveEvent, context);
-    }
+    // アクション解決イベントの発行
+    const resolveEvent = {
+      type: "actionResolved",
+      payload: {
+        actionId: request.actionId,
+        playerKey: request.controller,
+      },
+    };
+    this.dispatchEvent(resolveEvent, context);
 
     return {
-      type: "COMPLETED" as const,
+      type: "COMPLETED",
       request,
     };
+  }
+
+  /**
+   * ステージの一番上（最新）のリクエストを取り出し、効果を解決します。
+   */
+  resolveTopRequest(
+    context: CommandContext
+  ): {
+    type: "COMPLETED" | "WAITING_FOR_DECISION";
+    request: ActionRequest;
+    decisionRequest?: any;
+    continuation?: EffectContinuation;
+    context?: CommandContext;
+  } | undefined {
+    if (!context.state.stage || !context.state.stage.requests || context.state.stage.requests.length === 0) {
+      return undefined;
+    }
+
+    // LIFO スタックから最新のリクエストを取り出す
+    const request = context.state.stage.requests.pop()!;
+    return this.resolveRequest(request, context);
   }
 
   /**
@@ -361,11 +409,17 @@ export class CommandRegistry {
    */
   resumeRequest(
     request: ActionRequest,
-    continuation: { effectPath: readonly number[]; effectStepId: string },
+    continuation: EffectContinuation,
     selectedValues: readonly string[] | undefined,
     context: CommandContext,
     assignments?: readonly any[]
-  ): { type: "COMPLETED" | "WAITING_FOR_DECISION"; request: ActionRequest; decisionRequest?: any; continuation?: any; context?: CommandContext } {
+  ): {
+    type: "COMPLETED" | "WAITING_FOR_DECISION";
+    request: ActionRequest;
+    decisionRequest?: any;
+    continuation?: EffectContinuation;
+    context?: CommandContext;
+  } {
     const action = request.action;
     if (!action || !action.effect) {
       request.status = "resolved";
@@ -373,23 +427,21 @@ export class CommandRegistry {
       return { type: "COMPLETED", request };
     }
 
-    let selectionKey = continuation.effectStepId;
-    let valueToStore: any = selectedValues;
+    // continuation.selectionId を正として汎用バインド
+    const selectionKey = continuation.selectionId || continuation.effectStepId;
+    const valueToStore: any = assignments !== undefined ? assignments : selectedValues;
 
-    if (continuation.effectStepId === "selectUnits") {
-      selectionKey = "attackers";
-      valueToStore = selectedValues;
-    } else if (continuation.effectStepId === "selectBlockAssignments" || continuation.effectStepId === "selectUnitAssignments") {
-      selectionKey = "blocks";
-      valueToStore = assignments || selectedValues;
+    if (!context.selections) {
+      context.selections = {};
     }
+    context.selections[selectionKey] = valueToStore;
 
     const selections = {
-      ...(context.selections || {}),
+      ...context.selections,
       [selectionKey]: valueToStore,
     };
 
-    const player = context.state.players[request.controller];
+    const player = context.state.players?.[request.controller];
     let targetComponent = context.targetComponent;
     let targetRequest = context.targetRequest;
     let targetPlayerKey = context.targetPlayerKey;
@@ -408,7 +460,7 @@ export class CommandRegistry {
           if (!targetRequest) {
             const allReqs = [
               ...(context.state.stage?.requests || []),
-              ...(context.state.stage?.history || [])
+              ...(context.state.stage?.history || []),
             ];
             targetRequest = allReqs.find((r: any) => r.id === t.requestId);
           }
@@ -420,7 +472,7 @@ export class CommandRegistry {
       ...context,
       playerKey: request.controller,
       keyCards: request.keyCards,
-      keyCard: request.keyCards.length === 1 ? request.keyCards[0] : undefined,
+      keyCard: request.keyCards && request.keyCards.length === 1 ? request.keyCards[0] : undefined,
       targetComponent,
       targetRequest,
       targetPlayerKey,
@@ -437,10 +489,11 @@ export class CommandRegistry {
     );
 
     if ("interrupted" in execResult && execResult.interrupted) {
-      const nextContinuation = {
+      const nextContinuation: EffectContinuation = {
         sourceRequestId: request.id,
         effectPath: [execResult.effectIndex],
         effectStepId: execResult.effectStepId,
+        selectionId: execResult.selectionId,
       };
 
       const decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
@@ -493,11 +546,16 @@ export class CommandRegistry {
 
   /**
    * アクションを検証した上で、効果を実行します。
-   * 後方互換ブリッジとして、事前検証・リクエスト作成 -> 即時ステージ解決を連続して実行します。
+   * 後方互換ブリッジとして、事前検証・リクエスト作成 -> 解決を連続して実行します。
    */
   executeAction(action: ActionDefinition, context: CommandContext) {
-    this.createRequest(action, context);
-    this.resolveTopRequest(context);
+    const isImmediate = action.request?.speed === "immediate";
+    const req = this.createRequest(action, context);
+    if (isImmediate) {
+      this.resolveRequest(req, context);
+    } else {
+      this.resolveTopRequest(context);
+    }
   }
 
   /**

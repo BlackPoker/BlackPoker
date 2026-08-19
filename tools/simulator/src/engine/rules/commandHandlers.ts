@@ -1,7 +1,7 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey } from "./playerUtils";
-import { isSoldierType, isLegalBlockerCandidate } from "./characterUtils";
+import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel } from "./characterUtils";
 import { CommandHandler } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
@@ -466,16 +466,18 @@ export function startAttackHandler(
       }
 
       // 2. アタッカーが character component であることの確認
-      const compId = attackerUnit.componentId || "";
-      const compDef = context.components?.find((c: any) => c.id === compId);
-      const isCharacter = compDef ? compDef.type === "character" : compId.startsWith("character.");
-      if (!isCharacter) {
+      if (!isCharacterComponent(attackerUnit, context.components)) {
         throw new Error(`アタッカー (${attackerUnit.unitId}) はキャラクターである必要があります。`);
       }
 
       // 3. アタッカーが攻撃可能状態であることの確認 (チャージ状態)
       if (attackerUnit.state !== "charge") {
         throw new Error(`ドライブ状態のキャラクターはアタッカーに指定できません。現在: ${attackerUnit.state}`);
+      }
+
+      // 4. アタッカーが「攻撃」ラベルを保持していることの確認
+      if (!hasUnitLabel(attackerUnit, "攻撃", context.components)) {
+        throw new Error(`攻撃ラベルを持たないキャラクターはアタッカーに指定できません。 (${attackerUnit.unitId})`);
       }
 
       // アタッカーユニットに戦闘一時情報を記録
