@@ -78,8 +78,10 @@ export type ActionRequestTarget =
       name?: string;
     };
 
+import type { DamageJudgeResult } from "./DamageJudgeResult";
+
 export type ActionResolutionResult = {
-  damageJudge?: any;
+  damageJudge?: DamageJudgeResult;
   [key: string]: unknown;
 };
 

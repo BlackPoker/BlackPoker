@@ -1,4 +1,4 @@
-import { EffectInterpreter } from "./EffectInterpreter";
+import type { EffectInterpreter } from "./EffectInterpreter";
 import { getCharacterType } from "./characterUtils";
 
 export interface MoveUnitMetadata {

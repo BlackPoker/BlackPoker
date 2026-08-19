@@ -76,6 +76,10 @@ export class CommandRegistry {
     return this.effectInterpreter;
   }
 
+  getAbilityEvaluator(): AbilityEvaluator {
+    return this.abilityEvaluator;
+  }
+
   /**
    * 新しい高レベル命令ハンドラーを登録する
    */

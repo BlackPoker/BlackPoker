@@ -1,33 +1,14 @@
 import { CommandContext } from "./CommandRegistry";
 import { AbilityEvaluator } from "./AbilityEvaluator";
-import { EffectInterpreter } from "./EffectInterpreter";
+import type { EffectInterpreter } from "./EffectInterpreter";
 import { isSoldierType, isBulwarkType } from "./characterUtils";
 import { isJokerCard, matchesPrintedRank } from "./cardUtils";
 import { getOpponentPlayerKey } from "./playerUtils";
-import { moveUnitToGraveyard, MoveUnitMetadata } from "./unitMovementUtils";
+import { moveUnitToGraveyard } from "./unitMovementUtils";
+import type { MoveUnitMetadata } from "./unitMovementUtils";
+import type { CombatResult, DamageJudgeResult } from "../../domain/rules/DamageJudgeResult";
 
-export interface CombatResult {
-  readonly attackerUnitId: string;
-  readonly attackerPlayerKey: string;
-  readonly combatType: "unblocked" | "soldierVsSoldiers" | "soldierVsBulwark" | "unsupported";
-  readonly blockerUnitIds: readonly string[];
-  readonly blockerPlayerKey?: string;
-  readonly attackerInitialSize: number;
-  readonly blockerInitialTotalSize?: number;
-  readonly attackerMovedToGrave: boolean;
-  readonly blockersMovedToGrave: readonly string[];
-  readonly directDamageAmount?: number;
-  /** @deprecated directDamageAmount を使用してください */
-  readonly directDamageDealt?: number;
-  readonly targetPlayerKey?: string;
-  readonly bulwarkRevealed?: boolean;
-  readonly bulwarkMatched?: boolean;
-}
-
-export interface DamageJudgeResult {
-  readonly combats: readonly CombatResult[];
-  readonly orphanBlockerUnitIds: readonly { blockerUnitId: string; blockerPlayerKey: string }[];
-}
+export type { CombatResult, DamageJudgeResult } from "../../domain/rules/DamageJudgeResult";
 
 /**
  * 1. 未ブロック戦闘（ブロッカー不在）の計算
@@ -151,31 +132,34 @@ export function calculateDamageJudge(
   const handledAttackerIds = new Set<string>();
   const handledBlockerIds = new Set<string>();
 
-  // 1. 盤面上の全アタッカーを収集 (field走査順)
-  const attackers: { unit: any; playerKey: string }[] = [];
-  for (const [pKey, player] of Object.entries<any>(state.players || {})) {
-    if (player.field) {
-      for (const unit of player.field) {
-        if (unit.battle?.role === "attacker") {
-          attackers.push({ unit, playerKey: pKey });
-        }
+  // 1. ターンプレイヤー（アタッカー側）の決定とアタッカー収集（他プレイヤーのstale attackerは走査しない）
+  const attackerPlayerKey = context.playerKey || state.turnPlayer;
+  const attackerPlayer = state.players?.[attackerPlayerKey];
+  const attackers: any[] = [];
+  if (attackerPlayer?.field) {
+    for (const unit of attackerPlayer.field) {
+      if (unit.battle?.role === "attacker") {
+        attackers.push(unit);
       }
     }
   }
 
   // 2. 各アタッカーについての戦闘計算
-  for (const { unit: attacker, playerKey: attackerPlayerKey } of attackers) {
+  for (const attacker of attackers) {
     handledAttackerIds.add(attacker.unitId);
 
-    // 当該アタッカーをブロックしている盤面上のブロッカー群を収集
-    const blockers: { unit: any; playerKey: string }[] = [];
-    for (const [pKey, player] of Object.entries<any>(state.players || {})) {
-      if (player.field) {
-        for (const u of player.field) {
-          if (u.battle?.role === "blocker" && u.battle?.blocksUnitId === attacker.unitId) {
-            blockers.push({ unit: u, playerKey: pKey });
-            handledBlockerIds.add(u.unitId);
-          }
+    // 防御側プレイヤーの決定 (attacker.battle.targetPlayerKey を優先し、fallback として getOpponentPlayerKey)
+    const blockerPlayerKey =
+      attacker.battle?.targetPlayerKey || getOpponentPlayerKey(attackerPlayerKey, state);
+    const blockerPlayer = state.players?.[blockerPlayerKey];
+
+    // 当該アタッカーをブロックしている盤面上のブロッカー群を防御側フィールドから収集
+    const blockers: any[] = [];
+    if (blockerPlayer?.field) {
+      for (const u of blockerPlayer.field) {
+        if (u.battle?.role === "blocker" && u.battle?.blocksUnitId === attacker.unitId) {
+          blockers.push(u);
+          handledBlockerIds.add(u.unitId);
         }
       }
     }
@@ -185,8 +169,7 @@ export function calculateDamageJudge(
       const result = resolveUnblockedCombat(attacker, attackerPlayerKey, context, abilityEvaluator);
       combats.push(result);
     } else {
-      const blockerUnits = blockers.map((b) => b.unit);
-      const blockerPlayerKey = blockers[0].playerKey;
+      const blockerUnits = blockers;
 
       const isSingleBulwark =
         blockerUnits.length === 1 && isBulwarkType(blockerUnits[0], context.components);
@@ -221,7 +204,7 @@ export function calculateDamageJudge(
             attackerUnitId: attacker.unitId,
             attackerPlayerKey,
             combatType: "unsupported",
-            blockerUnitIds: blockerUnits.map((b) => b.unitId),
+            blockerUnitIds: blockerUnits.map((b: any) => b.unitId),
             blockerPlayerKey,
             attackerInitialSize: abilityEvaluator.calculateUnitSize(attacker, state.players[attackerPlayerKey]),
             attackerMovedToGrave: false,
@@ -232,14 +215,14 @@ export function calculateDamageJudge(
     }
   }
 
-  // 3. Orphan Blockers（対応するアタッカーが盤面に存在しないブロッカー）の収集
+  // 3. Orphan Blockers（今回の戦闘対象の相手プレイヤーのフィールドで、対応アタッカーが存在しないブロッカー）
+  const opponentPlayerKey = getOpponentPlayerKey(attackerPlayerKey, state);
+  const opponentPlayer = state.players?.[opponentPlayerKey];
   const orphanBlockers: { blockerUnitId: string; blockerPlayerKey: string }[] = [];
-  for (const [pKey, player] of Object.entries<any>(state.players || {})) {
-    if (player.field) {
-      for (const u of player.field) {
-        if (u.battle?.role === "blocker" && !handledBlockerIds.has(u.unitId)) {
-          orphanBlockers.push({ blockerUnitId: u.unitId, blockerPlayerKey: pKey });
-        }
+  if (opponentPlayer?.field) {
+    for (const u of opponentPlayer.field) {
+      if (u.battle?.role === "blocker" && !handledBlockerIds.has(u.unitId)) {
+        orphanBlockers.push({ blockerUnitId: u.unitId, blockerPlayerKey: opponentPlayerKey });
       }
     }
   }

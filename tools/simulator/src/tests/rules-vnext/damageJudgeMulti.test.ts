@@ -1293,8 +1293,8 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
       battle: { role: "blocker", blocksUnitId: "att-1" },
     };
 
-    // Attacker 2: 兵士 (size 8 at start) vs Blocker 2 (size 6)
-    // 盤面上のフォグにより att-2 は +3 されている (5 + 3 = 8)
+    // Attacker 2: 兵士 vs Blocker 2 (size 6)
+    // 盤面に att-1 が存在している間だけ att-2 のサイズは 8、att-1 が墓地へ行くと 5 に下がる
     const att2 = {
       unitId: "att-2",
       componentId: "character.soldier",
@@ -1312,14 +1312,22 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
       battle: { role: "blocker", blocksUnitId: "att-2" },
     };
 
-    state.players.p1.fog.push({
-      fogId: "fog-up-att2",
-      componentId: "fog.up",
-      bindings: { target: "att-2", amount: 3 }, // 5 + 3 = 8
-    });
-
     state.players.p1.field.push(att1, att2);
     state.players.p2.field.push(blk1, blk2);
+
+    const abilityEvaluator = registry.getAbilityEvaluator();
+    const originalCalculate = abilityEvaluator.calculateUnitSize.bind(abilityEvaluator);
+    let att2CalculateCount = 0;
+
+    abilityEvaluator.calculateUnitSize = (unit: any, player: any) => {
+      if (unit.unitId === "att-2") {
+        att2CalculateCount++;
+        // att-1 が盤面に存在すれば 8、墓地へ送られた後なら 5
+        const att1ExistsOnField = state.players.p1.field.some((u: any) => u.unitId === "att-1");
+        return att1ExistsOnField ? 8 : 5;
+      }
+      return originalCalculate(unit, player);
+    };
 
     const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
     const context: CommandContext = {
@@ -1332,8 +1340,9 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     const req = registry.createRequest(damageJudgeAction, context);
     registry.resolveTopRequest(context);
 
+    // Calculate フェーズで全戦闘のサイズが確定するため:
     // Combat 1: att1 (4) vs blk1 (6) -> att1 敗北で墓地へ
-    // Combat 2: att2 (8) vs blk2 (6) -> att2 勝利で blk2 が墓地へ (att2 生存)
+    // Combat 2: att2 (初期判定サイズ 8) vs blk2 (6) -> att2 勝利で blk2 が墓地へ、att2 は生存
     expect(state.players.p1.field.map((u: any) => u.unitId)).toEqual(["att-2"]);
     expect(state.players.p1.grave.map((u: any) => u.unitId)).toEqual(["att-1"]);
     expect(state.players.p2.field.map((u: any) => u.unitId)).toEqual(["blk-1"]);
@@ -1341,8 +1350,63 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
 
     // req.result の判定情報が Calculate 時点のものであることを検証
     const djResult = req.result!.damageJudge!;
+    expect(djResult.combats.length).toBe(2);
+    expect(djResult.combats[1].attackerUnitId).toBe("att-2");
     expect(djResult.combats[1].attackerInitialSize).toBe(8);
     expect(djResult.combats[1].blockerInitialTotalSize).toBe(6);
     expect(djResult.combats[1].attackerMovedToGrave).toBe(false);
+    expect(djResult.combats[1].blockersMovedToGrave).toEqual(["blk-2"]);
+  });
+
+  it("Test AF: opponent stale attacker is ignored by damageJudge", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    // p1 (turnPlayer / attacker): 正当なアタッカー
+    const attA = {
+      unitId: "att-A",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-A", suit: "S", rank: "5", value: 5 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    state.players.p1.field.push(attA);
+
+    // p2: 過去のターン等の stale な attacker 情報が誤って残っているユニット
+    const staleAttX = {
+      unitId: "stale-att-X",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-X", suit: "H", rank: "9", value: 9 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p1" },
+    };
+    state.players.p2.field.push(staleAttX);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 1. damageJudge の結果には p1 の att-A のみが含まれること
+    const djResult = req.result!.damageJudge!;
+    expect(djResult.combats.length).toBe(1);
+    expect(djResult.combats[0].attackerUnitId).toBe("att-A");
+    expect(djResult.combats[0].attackerPlayerKey).toBe("p1");
+
+    // 2. p2 の stale-att-X は damageJudge の対象外であり、direct damage 等は発生しない
+    expect(state.players.p1.life.length).toBe(3); // p1 のライフは初期3枚のまま減らない
+    expect(state.players.p2.life.length).toBe(1); // p2 は初期6枚から att-A (size 5) の unblocked 直接ダメージで 1枚になる
+
+    // 3. stale attacker は勝手に削除されずそのまま保持
+    expect(staleAttX.battle).toBeDefined();
+    expect(staleAttX.battle.role).toBe("attacker");
   });
 });
