@@ -1,6 +1,6 @@
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
-import { EffectInterpreter } from "./EffectInterpreter";
+import { EffectInterpreter, EffectInterruption } from "./EffectInterpreter";
 import { ActionRequestValidator } from "./ActionRequestValidator";
 import {
   createFogHandler,
@@ -327,32 +327,11 @@ export class CommandRegistry {
           selectionId: execResult.selectionId,
         };
 
-        let decisionRequest: any;
-        if (execResult.selectionType === "unitAssignment") {
-          const res = LegalPatternGenerator.generateBlockAssignmentDecision(
-            context.state,
-            request.controller,
-            request,
-            execResult.effectStepId,
-            execResult.attackers || [],
-            execResult.candidates || [],
-            context.components || []
-          );
-          decisionRequest = res.request;
-        } else {
-          decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
-            context.state,
-            request.controller,
-            request,
-            execResult.effectStepId,
-            execResult.candidates,
-            {
-              selectionId: execResult.selectionId,
-              stateVersion: context.state.stateVersion,
-              matchId: context.state.matchId,
-            }
-          );
-        }
+        const decisionRequest = this.createEffectDecisionRequest(
+          execResult,
+          request,
+          context
+        );
 
         return {
           type: "WAITING_FOR_DECISION",
@@ -496,17 +475,10 @@ export class CommandRegistry {
         selectionId: execResult.selectionId,
       };
 
-      const decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
-        context.state,
-        request.controller,
+      const decisionRequest = this.createEffectDecisionRequest(
+        execResult,
         request,
-        execResult.effectStepId,
-        execResult.candidates,
-        {
-          selectionId: execResult.selectionId,
-          stateVersion: context.state.stateVersion,
-          matchId: context.state.matchId,
-        }
+        context
       );
 
       return {
@@ -555,6 +527,41 @@ export class CommandRegistry {
       this.resolveRequest(req, context);
     } else {
       this.resolveTopRequest(context);
+    }
+  }
+
+  /**
+   * 中断（EffectInterruption）から種別に応じたDecisionRequestを生成する共通関数
+   */
+  private createEffectDecisionRequest(
+    execResult: EffectInterruption,
+    request: ActionRequest,
+    context: CommandContext
+  ): any {
+    if (execResult.selectionType === "unitAssignment") {
+      const res = LegalPatternGenerator.generateBlockAssignmentDecision(
+        context.state,
+        request.controller,
+        request,
+        execResult.effectStepId,
+        execResult.attackers || [],
+        execResult.candidates || [],
+        context.components || []
+      );
+      return res.request;
+    } else {
+      return LegalPatternGenerator.generateEffectSelectionDecision(
+        context.state,
+        request.controller,
+        request,
+        execResult.effectStepId,
+        execResult.candidates,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+        }
+      );
     }
   }
 

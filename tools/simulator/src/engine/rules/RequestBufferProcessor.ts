@@ -9,7 +9,7 @@ export class RequestBufferProcessor {
 
   /**
    * リクエストバッファから次の最優先リクエストを1件取り出し、ステージ（state.stage.requests）へ移送します。
-   * バリデーション失敗時はバッファや連番を変更しません。
+   * バリデーション失敗時はバッファの配列順序・件数や連番を一切変更しません。
    */
   moveNextToStage(context: CommandContext): ActionRequest | undefined {
     const state = context.state;
@@ -20,14 +20,14 @@ export class RequestBufferProcessor {
       return undefined;
     }
 
-    // 1. 公式ルール9.4.1優先度順で最優先のリクエストを peek
+    // 1. 元配列を変更しないようシャローコピーして公式ルール9.4.1優先度順で最優先のリクエストを peek
     const turnPlayer: PlayerKey = state.turnPlayer || "p1";
     const allPlayerIds: PlayerKey[] = Object.keys(state.players || {}) as PlayerKey[];
-    requestBuffer.requests.sort((a, b) =>
+    const sorted = [...requestBuffer.requests].sort((a, b) =>
       TriggerProcessingCoordinator.compareRequests(a, b, turnPlayer, allPlayerIds)
     );
 
-    const triggeredReq = requestBuffer.requests[0];
+    const triggeredReq = sorted[0];
     if (!triggeredReq) return undefined;
 
     // 2. 移送先の検証用 context の構築とバリデーション（非破壊で検証）
@@ -40,8 +40,11 @@ export class RequestBufferProcessor {
 
     this.validator.validateActionRequest(triggeredReq.action, validateContext);
 
-    // 3. バリデーション成功後に初めてバッファから取り出し、IDと連番を発行
-    requestBuffer.requests.shift();
+    // 3. バリデーション成功後に初めてバッファから特定要素を削除し、IDと連番を発行
+    const index = requestBuffer.requests.indexOf(triggeredReq);
+    if (index !== -1) {
+      requestBuffer.requests.splice(index, 1);
+    }
     state.nextRequestSeq = (state.nextRequestSeq || 0) + 1;
     const seq = state.nextRequestSeq;
     const actionRequestId = `req-${seq}`;

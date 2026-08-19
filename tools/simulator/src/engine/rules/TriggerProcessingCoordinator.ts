@@ -67,10 +67,7 @@ export class TriggerProcessingCoordinator {
   }
 
   /**
-   * バッファ内の次の最優先リクエストを1件取り出します。
-   */
-  /**
-   * バッファ内の次の最優先リクエストを非破壊で参照します（取り出しません）。
+   * バッファ内の次の最優先リクエストを非破壊で参照します（元の配列順序や要素を変更しません）。
    */
   peekNextRequest(state: any): TriggeredActionRequest | undefined {
     if (!state || !state.requestBuffer) return undefined;
@@ -80,31 +77,32 @@ export class TriggerProcessingCoordinator {
     const turnPlayer: PlayerKey = state.turnPlayer || "p1";
     const allPlayerIds: PlayerKey[] = Object.keys(state.players || {}) as PlayerKey[];
 
-    // 優先度順でソート
-    requestBuffer.requests.sort((a, b) =>
+    // 元配列を変更しないようシャローコピーしてソート
+    const sorted = [...requestBuffer.requests].sort((a, b) =>
       TriggerProcessingCoordinator.compareRequests(a, b, turnPlayer, allPlayerIds)
     );
 
-    return requestBuffer.requests[0];
+    return sorted[0];
   }
 
   /**
-   * バッファ内の次の最優先リクエストを1件取り出します。
+   * バッファ内の指定されたリクエスト（または最優先リクエスト）を1件取り出します。
    */
-  takeNextRequest(state: any): TriggeredActionRequest | undefined {
+  takeNextRequest(state: any, targetReq?: TriggeredActionRequest): TriggeredActionRequest | undefined {
     if (!state || !state.requestBuffer) return undefined;
     const requestBuffer = state.requestBuffer as RequestBuffer;
     if (!requestBuffer.requests || requestBuffer.requests.length === 0) return undefined;
 
-    const turnPlayer: PlayerKey = state.turnPlayer || "p1";
-    const allPlayerIds: PlayerKey[] = Object.keys(state.players || {}) as PlayerKey[];
+    const reqToTake = targetReq || this.peekNextRequest(state);
+    if (!reqToTake) return undefined;
 
-    // 優先度順でソート
-    requestBuffer.requests.sort((a, b) =>
-      TriggerProcessingCoordinator.compareRequests(a, b, turnPlayer, allPlayerIds)
-    );
+    const index = requestBuffer.requests.indexOf(reqToTake);
+    if (index !== -1) {
+      requestBuffer.requests.splice(index, 1);
+      return reqToTake;
+    }
 
-    return requestBuffer.requests.shift();
+    return undefined;
   }
 
   /**
@@ -144,7 +142,7 @@ export class TriggerProcessingCoordinator {
       this.validator.validateActionRequest(triggeredReq.action, tempContext);
 
       // 4. validation 成功後、正式に buffer から取り出し sequence を確定
-      this.takeNextRequest(state);
+      this.takeNextRequest(state, triggeredReq);
       state.nextRequestSeq = (state.nextRequestSeq || 0) + 1;
       const seq = state.nextRequestSeq;
       const actionRequestId = `req-${seq}`;

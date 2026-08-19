@@ -2,6 +2,7 @@ import { CommandRegistry, CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { getOpponentPlayerKey } from "./playerUtils";
+import { hasUnitLabel, isCharacterComponent } from "./characterUtils";
 
 export interface EffectInterruption {
   readonly interrupted: true;
@@ -179,28 +180,25 @@ export class EffectInterpreter {
       // 状態チェック (例: charge)
       if (condition.state && unit.state !== condition.state) return false;
 
-      // ラベルチェック (例: 攻撃 / attack)
+      // ラベルチェック (例: 攻撃 / attack, 防御 / defense)
       if (condition.label) {
         const expectedLabels = Array.isArray(condition.label) ? condition.label : [condition.label];
-        const unitLabels = unit.labels || [];
-        const hasLabel = expectedLabels.some((l: string) => {
-          if (l === "攻撃" || l === "attack") {
-            return unitLabels.includes("攻撃") || unitLabels.includes("attack");
-          }
-          if (l === "防御" || l === "defense") {
-            return unitLabels.includes("防御") || unitLabels.includes("defense");
-          }
-          return unitLabels.includes(l);
-        });
+        const hasLabel = expectedLabels.some((l: string) =>
+          hasUnitLabel(unit, l, context.components)
+        );
         if (!hasLabel) return false;
       }
 
       // componentType チェック (例: character)
-      if (condition.componentType) {
+      if (condition.componentType === "character") {
+        if (!isCharacterComponent(unit, context.components)) {
+          return false;
+        }
+      } else if (condition.componentType) {
         const compId = unit.componentId || "";
         const compDef = context.components?.find((c: any) => c.id === compId);
-        const isCharacter = compDef ? compDef.type === condition.componentType : compId.startsWith("character.");
-        if (!isCharacter) return false;
+        const matchType = compDef ? compDef.type === condition.componentType : compId.startsWith(`${condition.componentType}.`);
+        if (!matchType) return false;
       }
 
       return true;

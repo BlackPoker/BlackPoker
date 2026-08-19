@@ -209,6 +209,9 @@ export class GameSession {
 
     PatternExecutor.validateResponse(this.pendingDecision, response, this.stateVersion);
 
+    // 判断回答が受理されたため、盤面バージョンを進める
+    this.stateVersion++;
+
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {
       const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
@@ -236,7 +239,6 @@ export class GameSession {
         this.continuation = resumeResult.continuation;
         this.resolvingRequest = resumeResult.request;
         this.resolvingContext = resumeResult.context;
-        this.stateVersion++;
 
         return {
           type: "WAITING_FOR_DECISION",
@@ -254,7 +256,6 @@ export class GameSession {
       const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
       this.state.chancePlayer = turnPlayer;
 
-      this.stateVersion++;
       return this.advance();
     }
 
@@ -273,7 +274,6 @@ export class GameSession {
       this.continuation = flowEvent.continuation;
       this.resolvingRequest = flowEvent.actionRequest;
       this.resolvingContext = flowEvent.context;
-      this.stateVersion++;
 
       return {
         type: "WAITING_FOR_DECISION",
@@ -281,11 +281,8 @@ export class GameSession {
       };
     }
 
-    // 適用成功後、判断をクリアしてバージョンをインクリメント
+    // 適用成功後、判断をクリアして次のステップへ自動進行
     this.pendingDecision = undefined;
-    this.stateVersion++;
-
-    // 次のステップへ自動進行
     return this.advance();
   }
 
