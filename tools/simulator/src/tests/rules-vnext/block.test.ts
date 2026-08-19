@@ -149,8 +149,9 @@ describe("Block Action Integration Tests (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    // D. 自分の所有でないためエラー
-    expect(() => registry.createRequest(blockAction, context)).toThrow(
+    // D. 自分の所有でないため解決時にエラー
+    registry.createRequest(blockAction, context);
+    expect(() => registry.resolveTopRequest(context)).toThrow(
       "ブロッカーは自分のフィールドに存在するユニットである必要があります。"
     );
   });
@@ -200,8 +201,9 @@ describe("Block Action Integration Tests (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    // E. 防御ラベルなしのためエラー
-    expect(() => registry.createRequest(blockAction, context)).toThrow(
+    // E. 防御ラベルなしのため解決時にエラー
+    registry.createRequest(blockAction, context);
+    expect(() => registry.resolveTopRequest(context)).toThrow(
       "防御ラベルを持たないキャラクターはブロッカーに指定できません。"
     );
   });
@@ -245,8 +247,9 @@ describe("Block Action Integration Tests (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    // F. ドライブ状態のためエラー
-    expect(() => registry.createRequest(blockAction, context)).toThrow(
+    // F. ドライブ状態のため解決時にエラー
+    registry.createRequest(blockAction, context);
+    expect(() => registry.resolveTopRequest(context)).toThrow(
       "ドライブ状態のキャラクターはブロッカーに指定できません。現在: drive"
     );
   });

@@ -298,18 +298,32 @@ export class CommandRegistry {
           effectStepId: execResult.effectStepId,
         };
 
-        const decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
-          context.state,
-          request.controller,
-          request,
-          execResult.effectStepId,
-          execResult.candidates,
-          {
-            selectionId: execResult.selectionId,
-            stateVersion: context.state.stateVersion,
-            matchId: context.state.matchId,
-          }
-        );
+        let decisionRequest: any;
+        if (execResult.selectionType === "unitAssignment") {
+          const res = LegalPatternGenerator.generateBlockAssignmentDecision(
+            context.state,
+            request.controller,
+            request,
+            execResult.effectStepId,
+            execResult.attackers || [],
+            execResult.candidates || [],
+            context.components || []
+          );
+          decisionRequest = res.request;
+        } else {
+          decisionRequest = LegalPatternGenerator.generateEffectSelectionDecision(
+            context.state,
+            request.controller,
+            request,
+            execResult.effectStepId,
+            execResult.candidates,
+            {
+              selectionId: execResult.selectionId,
+              stateVersion: context.state.stateVersion,
+              matchId: context.state.matchId,
+            }
+          );
+        }
 
         return {
           type: "WAITING_FOR_DECISION" as const,
@@ -348,8 +362,9 @@ export class CommandRegistry {
   resumeRequest(
     request: ActionRequest,
     continuation: { effectPath: readonly number[]; effectStepId: string },
-    selectedValues: readonly string[],
-    context: CommandContext
+    selectedValues: readonly string[] | undefined,
+    context: CommandContext,
+    assignments?: readonly any[]
   ): { type: "COMPLETED" | "WAITING_FOR_DECISION"; request: ActionRequest; decisionRequest?: any; continuation?: any; context?: CommandContext } {
     const action = request.action;
     if (!action || !action.effect) {
@@ -358,10 +373,20 @@ export class CommandRegistry {
       return { type: "COMPLETED", request };
     }
 
-    const selectionKey = continuation.effectStepId === "selectUnits" ? "attackers" : continuation.effectStepId;
+    let selectionKey = continuation.effectStepId;
+    let valueToStore: any = selectedValues;
+
+    if (continuation.effectStepId === "selectUnits") {
+      selectionKey = "attackers";
+      valueToStore = selectedValues;
+    } else if (continuation.effectStepId === "selectBlockAssignments" || continuation.effectStepId === "selectUnitAssignments") {
+      selectionKey = "blocks";
+      valueToStore = assignments || selectedValues;
+    }
+
     const selections = {
       ...(context.selections || {}),
-      [selectionKey]: selectedValues,
+      [selectionKey]: valueToStore,
     };
 
     const player = context.state.players[request.controller];

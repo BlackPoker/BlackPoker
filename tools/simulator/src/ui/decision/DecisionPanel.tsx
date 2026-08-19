@@ -156,11 +156,11 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
       <div className="rounded-xl border border-amber-500/40 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md">
         <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+            <span className="inline-block rounded bg-amber-600 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-white">
               Effect Decision (効果解決時の選択)
             </span>
             <h3 className="text-lg font-black text-slate-100 mt-0.5">
-              アタッカー / 対象の選択
+              アタッカー / ブロッカー割当ての選択
             </h3>
           </div>
           <div className="text-xs text-slate-400">
@@ -170,7 +170,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
 
         <div className="space-y-3">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-            選択肢（複数指定可能 / 0体も可）
+            選択肢（全合法パターン）
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {patternViews.map((pv, idx) => {

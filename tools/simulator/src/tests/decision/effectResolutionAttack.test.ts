@@ -49,7 +49,10 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Attack Action (Phase 15)
       players: {
         p1: {
           name: "Player A",
-          life: 16,
+          life: [
+            { id: "l1-1", suit: "S", rank: "A", value: 1 },
+            { id: "l1-2", suit: "H", rank: "2", value: 2 },
+          ],
           hand: [
             { id: "key-s8", suit: "S", rank: "8", value: 8 },
             { id: "cost-c2", suit: "C", rank: "2", value: 2 },
@@ -60,7 +63,10 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Attack Action (Phase 15)
         },
         p2: {
           name: "Player B",
-          life: 16,
+          life: [
+            { id: "l2-1", suit: "D", rank: "K", value: 13 },
+            { id: "l2-2", suit: "C", rank: "Q", value: 12 },
+          ],
           hand: [],
           field: [bulwark1],
           fog: [],
@@ -79,7 +85,7 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Attack Action (Phase 15)
     return step.request;
   };
 
-  it("A: action.attack ACTION_REQUEST patterns should NOT contain attacker units (targetPlayer only)", () => {
+  it("A: action.attack ACTION_REQUEST patterns should NOT contain attacker units or targetPlayer (targetType: none)", () => {
     const state = createBattleState();
     const { request } = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
 
@@ -90,12 +96,11 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Attack Action (Phase 15)
     });
 
     expect(attackPatterns.length).toBeGreaterThan(0);
-    // すべてのアタックパターンの target は player (targetPlayer) であり、unit ではないこと
+    // すべてのアタックパターンの target は "none"（対象なし）であること
     for (const p of attackPatterns) {
       expect(p.targetSelectionRef).toBeDefined();
       const target = request.catalog.targetSelections[p.targetSelectionRef!];
-      expect(target.targetType).toBe("player");
-      expect(target.targetPlayerKey).toBe("p2");
+      expect(target.targetType).toBe("none");
     }
   });
 

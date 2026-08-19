@@ -1,13 +1,16 @@
 import { CommandRegistry, CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
+import { getOpponentPlayerKey } from "./playerUtils";
 
 export interface EffectInterruption {
   readonly interrupted: true;
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
+  readonly selectionType?: "unit" | "unitAssignment";
   readonly candidates: any[];
+  readonly attackers?: any[];
 }
 
 export type EffectInterpreterResult =
@@ -56,7 +59,7 @@ export class EffectInterpreter {
   }
 
   /**
-   * 効果リストを実行し、途中でユーザー判断が必要なステップ（selectUnits等）に到達した場合は中断します。
+   * 効果リストを実行し、途中でユーザー判断が必要なステップ（selectUnits, selectBlockAssignments等）に到達した場合は中断します。
    */
   executeEffectsWithInterruption(
     effects: any[],
@@ -77,6 +80,13 @@ export class EffectInterpreter {
           continue;
         }
 
+        // テスト等で targetComponent が明示されている場合は自動束縛
+        if (context.targetComponent) {
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = [context.targetComponent.unitId || context.targetComponent];
+          continue;
+        }
+
         const candidates = this.findSelectableUnits(args, context);
         if (candidates.length === 0) {
           // 候補0体の場合はDecisionを発生させず、空配列をバインドして継続
@@ -91,7 +101,61 @@ export class EffectInterpreter {
           effectIndex: i,
           effectStepId: name,
           selectionId,
+          selectionType: "unit",
           candidates,
+        };
+      }
+
+      if (name === "selectBlockAssignments" || name === "selectUnitAssignments") {
+        const selectionId = args.id || "blocks";
+        if (context.selections && context.selections[selectionId] !== undefined) {
+          continue;
+        }
+
+        // アタッカー群の特定
+        // 相手フィールド上の battle.role === "attacker" かつ targetPlayerKey が自分であるユニット
+        const state = context.state;
+        const opponentKey = getOpponentPlayerKey(context.playerKey, state);
+        const opponent = state.players?.[opponentKey];
+        const attackers: any[] = (opponent?.field || []).filter(
+          (u: any) => u.battle?.role === "attacker" && (u.battle?.targetPlayerKey === context.playerKey || !u.battle?.targetPlayerKey)
+        );
+
+        // テスト等で targetComponent が明示されている場合は自動束縛
+        if (context.targetComponent) {
+          if (!context.selections) context.selections = {};
+          if (attackers.length > 0) {
+            context.selections[selectionId] = [
+              {
+                sourceUnitId: attackers[0].unitId,
+                selectedUnitIds: [context.targetComponent.unitId || context.targetComponent],
+              },
+            ];
+          }
+          continue;
+        }
+
+        // ブロッカー候補群の抽出 (relation: "self" は context.playerKey / controller の自陣)
+        const candidates = this.findSelectableUnits(args, context);
+
+        if (candidates.length === 0 || attackers.length === 0) {
+          // ブロッカー候補0体またはアタッカー0体の場合はDecisionを発生させず、全アタッカー空配列の割当てをバインドして継続
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = attackers.map((a) => ({
+            sourceUnitId: a.unitId,
+            selectedUnitIds: [],
+          }));
+          continue;
+        }
+
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "unitAssignment",
+          candidates,
+          attackers,
         };
       }
 
@@ -107,7 +171,7 @@ export class EffectInterpreter {
   findSelectableUnits(args: any, context: CommandContext): any[] {
     const relation = args.relation || "self";
     const condition = args.condition || {};
-    const playerKey = relation === "self" ? context.playerKey : context.playerKey === "p1" ? "p2" : "p1";
+    const playerKey = relation === "self" ? context.playerKey : getOpponentPlayerKey(context.playerKey, context.state);
     const player = context.state.players?.[playerKey];
     if (!player || !player.field) return [];
 

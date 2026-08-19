@@ -9,12 +9,6 @@ actions:
       speed: normal
       timing: main
 
-    targets:
-      - id: targetPlayer
-        type: player
-        condition:
-          relation: opponent
-
     text:
       effect: 対戦相手を攻撃するアタッカーをドライブして指定する。
 
@@ -28,4 +22,4 @@ actions:
             componentType: character
       - startAttack:
           attackers: selection.attackers
-          defender: targetPlayer
+          defender: opponent

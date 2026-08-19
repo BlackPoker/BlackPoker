@@ -57,16 +57,16 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetPlayerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
       selections: { attackers: ["soldier-1"] }, // 解決時アタッカー指定
     };
 
-    // A. リクエスト可能であることをアサート（ターゲットはtargetPlayerのみ）
+    // A. リクエスト可能であることをアサート（ターゲットなし）
     const req = registry.createRequest(attackAction, context);
     expect(state.stage.requests.length).toBe(1);
     expect(req.status).toBe("pending");
+    expect(req.targets).toBeUndefined();
 
     // 解決前の状態アサート
     expect(soldier.battle).toBeUndefined();
@@ -79,7 +79,7 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     expect(soldier.battle).toBeDefined();
     expect(soldier.battle.role).toBe("attacker");
 
-    // C. アタッカー戦闘情報に targetPlayerKey が正しく記録されることをアサート
+    // C. アタッカー戦闘情報に 対戦相手(p2) が defender (targetPlayerKey) として正しく記録されることをアサート
     expect(soldier.battle.targetPlayerKey).toBe("p2");
 
     // アタッカーがドライブ状態に移行していることをアサート
@@ -90,7 +90,7 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     expect(state.players.p1.grave.length).toBe(0); // 墓地移動も発生しない
   });
 
-  it("should fail when targetPlayer is not opponent (D)", () => {
+  it("should create attack request without any target (D)", () => {
     const attackAction = rulePackage.actions.find((a) => a.id === "action.attack")!;
 
     const state: any = {
@@ -104,16 +104,17 @@ describe("Attack Action Integration Tests (New YAML)", () => {
     const registry = new CommandRegistry();
     TurnManager.initializeToMain(state, "p1");
 
-    // 自分自身（p1）をターゲットに指定した場合はエラー
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      targetPlayerKey: "p1",
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    expect(() => registry.createRequest(attackAction, context)).toThrow(ValidationError);
+    // ターゲット指定なしで正常にリクエスト作成可能
+    const req = registry.createRequest(attackAction, context);
+    expect(req).toBeDefined();
+    expect(req.targets).toBeUndefined();
   });
 
   it("should fail when requester is not turnPlayer or not chancePlayer (E)", () => {

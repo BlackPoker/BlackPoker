@@ -1,13 +1,14 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
-import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection } from "../../domain/decision/DecisionCatalog";
+import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection, EffectSelection, UnitAssignment } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { PlayerKey, DecisionSource } from "../../domain/decision/DecisionSource";
-import { RulePackage, ActionDefinition } from "../../domain/rules/RulePackage";
+import { RulePackage, ActionDefinition, ComponentDefinition, ActionRequest } from "../../domain/rules/RulePackage";
 import { ObservationFactory } from "./ObservationFactory";
 import { CostPaymentEnumerator } from "./CostPaymentEnumerator";
 import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { CommandContext } from "../rules/CommandRegistry";
+import { isSoldierType } from "../rules/characterUtils";
 
 /**
  * ランクを数値にマッピング
@@ -511,6 +512,169 @@ export class LegalPatternGenerator {
   }
 
   /**
+   * 最新のブロック割当て生成メトリクス
+   */
+  public static latestBlockAssignmentMetrics?: BlockAssignmentMetrics;
+
+  /**
+   * ブロック効果解決時（EFFECT_RESOLUTION）のアタッカー毎のブロッカー割当てDecisionRequestを生成
+   */
+  public static generateBlockAssignmentDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: ActionRequest,
+    effectStepId: string,
+    attackers: any[],
+    candidateBlockers: any[],
+    components: readonly ComponentDefinition[] = []
+  ): { request: DecisionRequest; metrics: BlockAssignmentMetrics } {
+    const startTime = Date.now();
+    const decisionId = `dec-eff-${sourceRequest.id}-${effectStepId}-${Date.now()}`;
+    const stateVersion = state?.version ?? 1;
+    const matchId = state?.matchId ?? "match-local";
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    // アタッカー群に対するブロッカー割当ての全合法パターンをバックトラッキングで列挙
+    const allAssignments: UnitAssignment[][] = [];
+
+    const backtrack = (
+      attackerIndex: number,
+      currentAssignments: UnitAssignment[],
+      usedBlockerIds: Set<string>
+    ) => {
+      if (attackerIndex === attackers.length) {
+        allAssignments.push([...currentAssignments]);
+        return;
+      }
+
+      const attacker = attackers[attackerIndex];
+      const available = candidateBlockers.filter((b) => !usedBlockerIds.has(b.unitId));
+
+      // 1. 0体ブロック (常に合法)
+      currentAssignments.push({
+        sourceUnitId: attacker.unitId,
+        selectedUnitIds: [],
+      });
+      backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+      currentAssignments.pop();
+
+      // 2. 単一ブロッカー (任意の利用可能ブロッカー1体)
+      for (const blocker of available) {
+        currentAssignments.push({
+          sourceUnitId: attacker.unitId,
+          selectedUnitIds: [blocker.unitId],
+        });
+        usedBlockerIds.add(blocker.unitId);
+        backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+        usedBlockerIds.delete(blocker.unitId);
+        currentAssignments.pop();
+      }
+
+      // 3. 複数兵士ブロッカー (利用可能な兵士ユニットのみから 2体以上の組み合わせ)
+      const availableSoldiers = available.filter((b) => isSoldierType(b, components));
+      if (availableSoldiers.length >= 2) {
+        for (let k = 2; k <= availableSoldiers.length; k++) {
+          const soldierCombos = this.getCombinations(availableSoldiers, k);
+          for (const combo of soldierCombos) {
+            const soldierIds = combo.map((s) => s.unitId);
+            currentAssignments.push({
+              sourceUnitId: attacker.unitId,
+              selectedUnitIds: soldierIds,
+            });
+            for (const id of soldierIds) usedBlockerIds.add(id);
+            backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+            for (const id of soldierIds) usedBlockerIds.delete(id);
+            currentAssignments.pop();
+          }
+        }
+      }
+    };
+
+    if (attackers.length > 0) {
+      backtrack(0, [], new Set());
+    } else {
+      allAssignments.push([]);
+    }
+
+    // カタログと LegalPattern を生成
+    const effectSelections: EffectSelection[] = [];
+    const patterns: LegalPattern[] = [];
+
+    for (let i = 0; i < allAssignments.length; i++) {
+      const assignments = allAssignments[i];
+      const effectSelectionRef = i;
+
+      // 概要サマリーの生成
+      const summaryParts = assignments.map((a) => {
+        const attackerUnit = attackers.find((u) => u.unitId === a.sourceUnitId);
+        const attackerName = attackerUnit?.kind || a.sourceUnitId;
+        if (a.selectedUnitIds.length === 0) {
+          return `${attackerName} -> [ブロックなし]`;
+        }
+        const blockerNames = a.selectedUnitIds.map((bid) => {
+          const u = candidateBlockers.find((b) => b.unitId === bid);
+          return u?.kind || bid;
+        });
+        return `${attackerName} -> [${blockerNames.join(", ")}]`;
+      });
+
+      const summary = summaryParts.length > 0 ? summaryParts.join(" | ") : "全アタッカー ブロックなし";
+
+      effectSelections.push({
+        selectionType: "unitAssignment",
+        assignments,
+        summary,
+      });
+
+      patterns.push({
+        patternId: `pat-block-${i}`,
+        kind: "EFFECT_SELECTION",
+        effectSelectionRef,
+      });
+    }
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections: [],
+      effectSelections,
+      orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    const elapsedMs = Date.now() - startTime;
+    const metrics: BlockAssignmentMetrics = {
+      attackersCount: attackers.length,
+      blockersCount: candidateBlockers.length,
+      patternCount: patterns.length,
+      elapsedMs,
+    };
+    this.latestBlockAssignmentMetrics = metrics;
+
+    const request: DecisionRequest = {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+
+    return { request, metrics };
+  }
+
+  /**
    * 配列の全部分集合（空集合を含む 2^N 通り）を生成
    */
   private static getPowerSet<T>(array: readonly T[]): T[][] {
@@ -556,4 +720,11 @@ export class LegalPatternGenerator {
     }
     return result;
   }
+}
+
+export interface BlockAssignmentMetrics {
+  readonly attackersCount: number;
+  readonly blockersCount: number;
+  readonly patternCount: number;
+  readonly elapsedMs: number;
 }

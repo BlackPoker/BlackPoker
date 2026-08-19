@@ -15,16 +15,17 @@ actions:
         actionId: action.attack
         hasAttacker: true
 
-    targets:
-      - id: targetUnit
-        type: unit
-        condition:
-          componentType: character
-          relation: self
-
     text:
-      effect: アタッカーをブロックするキャラクター（ブロッカー）を指定する。
+      effect: アタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。
 
     effect:
+      - selectBlockAssignments:
+          id: blocks
+          attackers: battle.attackers
+          relation: self
+          condition:
+            label: 防御
+            state: charge
+            componentType: character
       - declareBlock:
-          blocker: targetUnit
+          assignments: selection.blocks

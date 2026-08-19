@@ -200,12 +200,14 @@ export class GameSession {
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {
       const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
-      let selectedValues: readonly string[] = [];
+      let selectedValues: readonly string[] | undefined = undefined;
+      let assignments: readonly any[] | undefined = undefined;
 
       if (pattern.effectSelectionRef !== undefined) {
         const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
         if (effSel) {
-          selectedValues = effSel.selectedValues || [];
+          selectedValues = effSel.selectedValues;
+          assignments = effSel.assignments;
         }
       }
 
@@ -213,7 +215,8 @@ export class GameSession {
         this.resolvingRequest!,
         this.continuation!,
         selectedValues,
-        this.resolvingContext!
+        this.resolvingContext!,
+        assignments
       );
 
       if (resumeResult.type === "WAITING_FOR_DECISION") {

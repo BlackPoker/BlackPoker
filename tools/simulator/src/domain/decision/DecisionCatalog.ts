@@ -58,11 +58,20 @@ export interface TargetSelection {
 }
 
 /**
- * 効果解決時選択要素（将来拡張用）
+ * ユニット割当て要素（アタッカーとブロッカーの対応付け等）
+ */
+export interface UnitAssignment {
+  readonly sourceUnitId: string;
+  readonly selectedUnitIds: readonly string[];
+}
+
+/**
+ * 効果解決時選択要素
  */
 export interface EffectSelection {
-  readonly selectionType: string;
-  readonly selectedValues: readonly string[];
+  readonly selectionType: "unit" | "unitAssignment" | string;
+  readonly selectedValues?: readonly string[];
+  readonly assignments?: readonly UnitAssignment[];
   readonly summary?: string;
 }
 

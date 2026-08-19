@@ -472,7 +472,9 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    // 複数アタッカーのため ValidationError
-    expect(() => registry.createRequest(damageJudgeAction, context)).toThrow(ValidationError);
+    // 複数アタッカー・ブロッカー存在時でも damageJudge リクエストは正常作成可能
+    const req = registry.createRequest(damageJudgeAction, context);
+    expect(req).toBeDefined();
+    expect(req.actionId).toBe("action.damageJudge");
   });
 });

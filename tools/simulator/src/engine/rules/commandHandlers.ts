@@ -1,4 +1,7 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
+import { ActionDefinition } from "../../domain/rules/RulePackage";
+import { getOpponentPlayerKey } from "./playerUtils";
+import { isSoldierType, isLegalBlockerCandidate } from "./characterUtils";
 import { CommandHandler } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
@@ -409,14 +412,14 @@ export function startAttackHandler(
     const { target, attackers, defender } = args;
     const state = context.state;
 
-    // ディフェンダープレイヤーの解決
-    let defenderPlayerKey = undefined;
-    if (defender === "targetPlayer" && context.targetPlayerKey) {
+    // ディフェンダープレイヤーの解決（指定がない場合や "opponent" の場合は対戦相手を自動解決）
+    let defenderPlayerKey: string | undefined = undefined;
+    if (defender === "opponent" || !defender) {
+      defenderPlayerKey = getOpponentPlayerKey(context.playerKey, state);
+    } else if (defender === "targetPlayer" && context.targetPlayerKey) {
       defenderPlayerKey = context.targetPlayerKey;
-    } else if (defender === "opponent") {
-      defenderPlayerKey = context.playerKey === "p1" ? "p2" : "p1";
-    } else if (defender) {
-      defenderPlayerKey = expressionEvaluator.resolveBindingValue(defender, context);
+    } else {
+      defenderPlayerKey = expressionEvaluator.resolveBindingValue(defender, context) || getOpponentPlayerKey(context.playerKey, state);
     }
 
     if (!defenderPlayerKey || !state.players[defenderPlayerKey]) {
@@ -510,73 +513,100 @@ export function declareBlockHandler(
 ): CommandHandler {
   return (args, context) => {
     const state = context.state;
-    // 現時点では既存の targetComponent を流用して効果解決時のブロッカーを受け取るが、
-    // 将来的には context.selection / choiceProvider などの効果解決時選択モデルへ移行する。
-    const blockerUnit = context.targetComponent;
+    const { assignments: rawAssignments, blocker } = args;
 
-    if (!blockerUnit) {
-      throw new Error("ブロッカーとなるユニットが見つかりません。");
-    }
-
-    // 1. ブロッカーが実行プレイヤーの field に存在することの確認
-    const player = state.players[context.playerKey];
-    const exists = player?.field?.some((u: any) => u.unitId === blockerUnit.unitId);
-    if (!exists) {
-      throw new Error("ブロッカーは自分のフィールドに存在するユニットである必要があります。");
-    }
-
-    // 2. ブロッカーが charge 状態であることの確認
-    if (blockerUnit.state !== "charge") {
-      throw new Error(`ドライブ状態のキャラクターはブロッカーに指定できません。現在: ${blockerUnit.state}`);
-    }
-
-    // 3. ブロッカーが防御ラベルを持っていることの確認
-    const compId = blockerUnit.componentId || "";
-    const compDef = context.components?.find((c: any) => c.id === compId);
-    const labels = (compDef as any)?.labels || blockerUnit.labels || [];
-    const hasDefenseLabel = labels.includes("防御") || labels.includes("defense");
-    if (!hasDefenseLabel) {
-      throw new Error("防御ラベルを持たないキャラクターはブロッカーに指定できません。");
-    }
-
-    // 自分を攻撃対象とする「相手のアタッカー」を厳密に特定する
-    let attackerUnit: any = null;
-    for (const [pKey, p] of Object.entries<any>(state.players)) {
-      if (pKey === context.playerKey) continue; // 自分のアタッカーはブロックできない
-      if (p.field) {
-        attackerUnit = p.field.find(
-          (u: any) => u.battle?.role === "attacker" && u.battle?.targetPlayerKey === context.playerKey
-        );
-        if (attackerUnit) break;
+    let assignments: any[] = [];
+    if (rawAssignments !== undefined) {
+      const resolved = expressionEvaluator.resolveBindingValue(rawAssignments, context);
+      if (Array.isArray(resolved)) {
+        assignments = resolved;
+      }
+    } else if (context.selections?.blocks) {
+      assignments = context.selections.blocks;
+    } else if (context.targetComponent || blocker) {
+      // 後方互換性（単体指定）
+      const singleBlocker = context.targetComponent || (typeof blocker === "string" ? expressionEvaluator.resolveBindingValue(blocker, context) : blocker);
+      if (singleBlocker) {
+        const opponentKey = getOpponentPlayerKey(context.playerKey, state);
+        const opponent = state.players[opponentKey];
+        const attacker = opponent?.field?.find((u: any) => u.battle?.role === "attacker");
+        if (attacker) {
+          assignments = [{ sourceUnitId: attacker.unitId, selectedUnitIds: [singleBlocker.unitId || singleBlocker] }];
+        }
       }
     }
 
-    if (!attackerUnit) {
-      throw new Error("ブロック対象となる相手のアタッカーが見つかりません。");
+    const player = state.players[context.playerKey];
+    const usedBlockerIds = new Set<string>();
+
+    for (const assignment of assignments) {
+      const { sourceUnitId, selectedUnitIds } = assignment;
+      if (!selectedUnitIds || selectedUnitIds.length === 0) {
+        continue;
+      }
+
+      // 相手アタッカーの存在確認
+      const opponentKey = getOpponentPlayerKey(context.playerKey, state);
+      const opponent = state.players[opponentKey];
+      const attackerUnit = opponent?.field?.find((u: any) => u.unitId === sourceUnitId);
+      if (!attackerUnit || attackerUnit.battle?.role !== "attacker") {
+        throw new Error(`ブロック対象のアタッカーが見つかりません: ${sourceUnitId}`);
+      }
+
+      const blockerUnits: any[] = [];
+      for (const blockerId of selectedUnitIds) {
+        if (usedBlockerIds.has(blockerId)) {
+          throw new Error(`同一ブロッカーが重複して割り当てられています: ${blockerId}`);
+        }
+        usedBlockerIds.add(blockerId);
+
+        const unit = player?.field?.find((u: any) => u.unitId === blockerId);
+        if (!unit) {
+          throw new Error(`ブロッカーは自分のフィールドに存在するユニットである必要があります。 (${blockerId})`);
+        }
+
+        if (unit.state !== "charge") {
+          throw new Error(`ドライブ状態のキャラクターはブロッカーに指定できません。現在: ${unit.state}`);
+        }
+
+        if (!isLegalBlockerCandidate(unit, context.components)) {
+          throw new Error(`防御ラベルを持たないキャラクターはブロッカーに指定できません。`);
+        }
+
+        blockerUnits.push(unit);
+      }
+
+      // 複数ブロッカーの場合、全員が soldier タイプであることを検証
+      if (blockerUnits.length >= 2) {
+        const allSoldiers = blockerUnits.every((u) => isSoldierType(u, context.components));
+        if (!allSoldiers) {
+          throw new Error(`1アタッカーに対する複数ブロックは全員兵士タイプである必要があります。`);
+        }
+      }
+
+      // 各ブロッカーに戦闘情報を設定して drive に移行し、イベント発行
+      for (const blockerUnit of blockerUnits) {
+        blockerUnit.battle = {
+          role: "blocker",
+          blocksUnitId: sourceUnitId,
+        };
+
+        const oldState = blockerUnit.state;
+        blockerUnit.state = "drive";
+
+        const event = {
+          type: "unitStateChanged",
+          payload: {
+            unitId: blockerUnit.unitId,
+            fromState: oldState,
+            toState: "drive",
+            playerKey: context.playerKey,
+            cause: { type: "effect", command: "declareBlock" },
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
     }
-
-    // ブロッカーユニットに一時戦闘情報を記録
-    blockerUnit.battle = {
-      role: "blocker",
-      blocksUnitId: attackerUnit.unitId
-    };
-
-    // ブロッカーをドライブ状態に移行する
-    const oldState = blockerUnit.state;
-    blockerUnit.state = "drive";
-
-    // イベント発行 (unitStateChanged)
-    const event = {
-      type: "unitStateChanged",
-      payload: {
-        unitId: blockerUnit.unitId,
-        fromState: oldState,
-        toState: "drive",
-        playerKey: context.playerKey,
-        cause: { type: "effect", command: "declareBlock" },
-      },
-    };
-    effectInterpreter.dispatchEvent(event, context);
   };
 }
 

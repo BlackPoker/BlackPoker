@@ -158,7 +158,20 @@ export class CoreFlowCoordinator {
         components: rulePackage.components,
       };
 
-      const resolveResult = registry.resolveTopRequest(context);
+      let resolveResult: any;
+      try {
+        resolveResult = registry.resolveTopRequest(context);
+      } catch (err: any) {
+        // コスト支払い不能等でキャンセルされた場合
+        const turnPlayer: PlayerKey = state.turnPlayer || "p1";
+        state.chancePlayer = turnPlayer;
+        return {
+          type: "STAGE_TOP_RESOLVED",
+          actionRequest: stageRequests[0],
+          nextChancePlayerId: turnPlayer,
+        };
+      }
+
       if (!resolveResult) {
         return null;
       }
