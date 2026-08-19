@@ -1,11 +1,12 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey } from "./playerUtils";
-import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel } from "./characterUtils";
+import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
 import { CommandHandler } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
+import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
 
 /**
  * createFog: フォグの生成と配置
@@ -612,6 +613,13 @@ export function declareBlockHandler(
   };
 }
 
+export interface MoveUnitMetadata {
+  cause?: { type: string; command?: string; actionId?: string; [key: string]: any };
+  combatSnapshot?: { role?: string; blocksUnitId?: string; targetPlayerKey?: string; [key: string]: any };
+  characterType?: string;
+  [key: string]: any;
+}
+
 /**
  * ユニットをフィールドから墓地へ移動する共通処理
  * 墓地に移動する前に unit.battle を完全に削除し、カードごとに cardMoved イベントを発行する
@@ -621,10 +629,15 @@ export function moveUnitToGraveyard(
   playerKey: string,
   state: any,
   effectInterpreter: EffectInterpreter,
-  context: any
+  context: any,
+  metadata?: MoveUnitMetadata
 ) {
   const player = state.players[playerKey];
   if (!player) return;
+
+  // 移動前に battle snapshot を保持
+  const combatSnapshot = metadata?.combatSnapshot || (unit.battle ? { ...unit.battle } : undefined);
+  const characterType = metadata?.characterType || getCharacterType(unit, context?.components);
 
   // フィールドから除外
   if (player.field) {
@@ -652,6 +665,9 @@ export function moveUnitToGraveyard(
           fromZone: "field",
           toZone: "grave",
           playerKey: playerKey,
+          cause: metadata?.cause,
+          combat: combatSnapshot,
+          characterType: characterType,
         }
       };
       effectInterpreter.dispatchEvent(event, context);
@@ -660,99 +676,20 @@ export function moveUnitToGraveyard(
 }
 
 /**
- * judgeDamage: アタッカーとブロッカーの現在サイズを比較し、敗北したユニットを墓地へ移動する
+ * judgeDamage: 全アタッカーおよびブロッカーの戦闘を判定し、直接ダメージおよび敗北ユニットの墓地移動を行う
+ * （アタッカー0体の場合は no-op で正常終了）
  */
 export function judgeDamageHandler(
   abilityEvaluator: AbilityEvaluator,
   effectInterpreter: EffectInterpreter
 ): CommandHandler {
   return (args, context) => {
-    const state = context.state;
+    // 1. Calculate Phase: effect-time 盤面を基準に全戦闘結果を確定
+    const damageJudgeResult = calculateDamageJudge(context, abilityEvaluator);
 
-    // 1. アタッカーを探す (battle.role === "attacker")
-    let attackerUnit: any = null;
-    let attackerPlayerKey: string = "";
-    for (const [pKey, p] of Object.entries<any>(state.players)) {
-      if (p.field) {
-        attackerUnit = p.field.find((u: any) => u.battle?.role === "attacker");
-        if (attackerUnit) {
-          attackerPlayerKey = pKey;
-          break;
-        }
-      }
-    }
-
-    if (!attackerUnit) {
-      throw new Error("戦闘中のアタッカーが見つかりません。");
-    }
-
-    // 2. ブロッカーを探す (battle.blocksUnitId === attackerUnit.unitId)
-    let blockerUnit: any = null;
-    let blockerPlayerKey: string = "";
-    for (const [pKey, p] of Object.entries<any>(state.players)) {
-      if (p.field) {
-        blockerUnit = p.field.find(
-          (u: any) => u.battle?.role === "blocker" && u.battle?.blocksUnitId === attackerUnit.unitId
-        );
-        if (blockerUnit) {
-          blockerPlayerKey = pKey;
-          break;
-        }
-      }
-    }
-
-    if (!blockerUnit) {
-      // ブロッカー不在時は、アタッカーのサイズ分の直接ダメージを対戦相手に与える
-      const attackerSize = abilityEvaluator.calculateUnitSize(attackerUnit, state.players[attackerPlayerKey]);
-      const targetPlayerKey = attackerUnit.battle?.targetPlayerKey || (attackerPlayerKey === "p1" ? "p2" : "p1");
-      
-      const damageContext = {
-        ...context,
-        playerKey: attackerPlayerKey,
-        targetPlayerKey,
-      };
-
-      // dealDamage 効果コマンドを呼び出し
-      ((effectInterpreter as any).registry).execute(
-        "dealDamage",
-        { target: "targetPlayer", amount: attackerSize },
-        damageContext
-      );
-
-      // アタッカーの戦闘状態をクリア
-      if (attackerUnit.battle) {
-        delete attackerUnit.battle;
-      }
-      return;
-    }
-
-    // 3. AbilityEvaluator を用いて attacker と blocker のサイズを計算
-    const attackerSize = abilityEvaluator.calculateUnitSize(attackerUnit, state.players[attackerPlayerKey]);
-    const blockerSize = abilityEvaluator.calculateUnitSize(blockerUnit, state.players[blockerPlayerKey]);
-
-    // 4. サイズ比較と墓地送り
-    if (attackerSize > blockerSize) {
-      // ブロッカーが敗北、墓地へ移動
-      moveUnitToGraveyard(blockerUnit, blockerPlayerKey, state, effectInterpreter, context);
-      
-      // アタッカーは生存するため、battle 情報をクリアするのみ
-      if (attackerUnit.battle) {
-        delete attackerUnit.battle;
-      }
-    } else if (attackerSize < blockerSize) {
-      // アタッカーが敗北、墓地へ移動
-      moveUnitToGraveyard(attackerUnit, attackerPlayerKey, state, effectInterpreter, context);
-      
-      // ブロッカーは生存するため、battle 情報をクリアするのみ
-      if (blockerUnit.battle) {
-        delete blockerUnit.battle;
-      }
-    } else {
-      // 引き分け、双方が墓地へ移動
-      // 順序はアタッカー -> ブロッカーの順で墓地へ送る
-      moveUnitToGraveyard(attackerUnit, attackerPlayerKey, state, effectInterpreter, context);
-      moveUnitToGraveyard(blockerUnit, blockerPlayerKey, state, effectInterpreter, context);
-    }
+    // 2. Apply Phase: 確定結果を盤面に適用（直接ダメージ、墓地移動、battle cleanup）
+    applyDamageJudgeResult(damageJudgeResult, context, effectInterpreter);
   };
 }
+
 

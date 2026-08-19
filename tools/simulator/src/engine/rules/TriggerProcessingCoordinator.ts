@@ -133,6 +133,7 @@ export class TriggerProcessingCoordinator {
         state,
         playerKey: triggeredReq.controller,
         keyCards: triggeredReq.keyCards,
+        targetComponent: (triggeredReq as any).targetComponent,
         actions: rulePackage.actions,
         components: rulePackage.components,
         triggered: true,

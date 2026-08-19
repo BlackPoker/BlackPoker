@@ -278,12 +278,13 @@ describe("Core Architecture Consistency Tests (Phase 16.5)", () => {
     const coordinator = new TriggerProcessingCoordinator();
     const registry = new CommandRegistry();
 
-    // 不正な条件の誘発リクエストをバッファに積む（例: アタッカーがいないのに damageJudge）
+    // 不正な条件の誘発リクエストをバッファに積む（例: 相手アタッカーがいないのにブロッカー指定付き action.block）
     const invalidTriggeredReq = {
-      actionId: "action.damageJudge",
-      controller: "p1",
-      action: rulePackage.actions.find((a) => a.id === "action.damageJudge")!,
+      actionId: "action.block",
+      controller: "p2",
+      action: rulePackage.actions.find((a) => a.id === "action.block")!,
       sourceEvent: { type: "actionResolved", payload: {} },
+      targetComponent: { unitId: "non-existent" },
     };
     state.requestBuffer.requests.push(invalidTriggeredReq);
     state.nextRequestSeq = 10;

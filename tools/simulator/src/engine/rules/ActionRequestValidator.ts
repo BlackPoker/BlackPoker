@@ -1,6 +1,7 @@
 import { CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { CostResolver } from "./CostResolver";
+import { matchesSuit, rankToValue, matchesRank } from "./cardUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -12,61 +13,6 @@ export class ValidationError extends Error {
     // TypeScriptでの例外クラス継承のためのボイラープレート
     Object.setPrototypeOf(this, ValidationError.prototype);
   }
-}
-
-/**
- * スートが一致するかどうかを検証
- */
-function matchesSuit(cardSuit: string, expectedSuit: string): boolean {
-  if (!expectedSuit) return true;
-  const cs = cardSuit.toLowerCase();
-  const es = expectedSuit.toLowerCase();
-  if (cs === es) return true;
-  if (es === "spade" && cs === "s") return true;
-  if (es === "club" && cs === "c") return true;
-  if (es === "heart" && cs === "h") return true;
-  if (es === "diamond" && cs === "d") return true;
-  if (es === "joker" && cs === "x") return true;
-  return false;
-}
-
-/**
- * ランクを数値にマッピング
- */
-function rankToValue(rank: string): number {
-  const r = rank.toUpperCase();
-  if (r === "A") return 1;
-  if (r === "J") return 11;
-  if (r === "Q") return 12;
-  if (r === "K") return 13;
-  if (r === "JOKER") return 0;
-  const num = parseInt(r, 10);
-  if (!isNaN(num)) return num;
-  return 0;
-}
-
-/**
- * ランクが一致するかどうかを検証 (範囲指定 "A..K" などのパースに対応)
- */
-function matchesRank(cardRank: string, cardValue: number, expectedRank: any): boolean {
-  if (!expectedRank) return true;
-  
-  if (Array.isArray(expectedRank)) {
-    return expectedRank.some((r) => r.toLowerCase() === cardRank.toLowerCase());
-  }
-  
-  if (typeof expectedRank === "string") {
-    if (expectedRank.includes("..")) {
-      const [start, end] = expectedRank.split("..");
-      const startVal = rankToValue(start);
-      const endVal = rankToValue(end);
-      return cardValue >= startVal && cardValue <= endVal;
-    } else {
-      return cardRank.toLowerCase() === expectedRank.toLowerCase();
-    }
-  }
-  
-  return false;
 }
 
 /**
@@ -179,23 +125,7 @@ export class ActionRequestValidator {
       }
     }
 
-    // 0.1.2 ダメージ判定アクション (action.damageJudge) の検証
-    if (action.id === "action.damageJudge") {
-      const state = context.state;
-      if (state && state.players) {
-        const attackers: any[] = [];
-        for (const player of Object.values<any>(state.players)) {
-          if (player.field) {
-            const uList = player.field.filter((u: any) => u.battle?.role === "attacker");
-            attackers.push(...uList);
-          }
-        }
 
-        if (attackers.length === 0) {
-          throw new ValidationError("戦闘中のアタッカーが存在しないため、ダメージ判定を行えません。");
-        }
-      }
-    }
 
     // 0.2. リクエスト速度 (speed) の検証
     if (action.request && action.request.speed) {

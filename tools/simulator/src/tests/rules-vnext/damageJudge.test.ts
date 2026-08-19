@@ -34,8 +34,8 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
 
     const bulwark: any = {
       unitId: "bulwark-1",
-      kind: "防壁",
-      componentId: "character.bulwark",
+      kind: "一般兵",
+      componentId: "character.soldier",
       state: "drive",
       cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }], // Size 5
       labels: ["防御"],
@@ -117,8 +117,8 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
 
     const bulwark: any = {
       unitId: "bulwark-1",
-      kind: "防壁",
-      componentId: "character.bulwark",
+      kind: "一般兵",
+      componentId: "character.soldier",
       state: "drive",
       cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }], // Size 5
       labels: ["防御"],
@@ -193,8 +193,8 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
 
     const bulwark: any = {
       unitId: "bulwark-1",
-      kind: "防壁",
-      componentId: "character.bulwark",
+      kind: "一般兵",
+      componentId: "character.soldier",
       state: "drive",
       cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }], // Size 5
       labels: ["防御"],
@@ -281,8 +281,8 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
 
     const bulwark: any = {
       unitId: "bulwark-1",
-      kind: "防壁",
-      componentId: "character.bulwark",
+      kind: "一般兵",
+      componentId: "character.soldier",
       state: "drive",
       cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }], // Base 5
       labels: ["防御"],
@@ -360,8 +360,8 @@ describe("Damage Judge Action Integration Tests (New YAML)", () => {
 
     const bulwark: any = {
       unitId: "bulwark-1",
-      kind: "防壁",
-      componentId: "character.bulwark",
+      kind: "一般兵",
+      componentId: "character.soldier",
       state: "drive",
       cards: [{ id: "c2", suit: "H", rank: "K", value: 13 }], // K (13) でアタッカーに勝つ
       labels: ["防御"],
