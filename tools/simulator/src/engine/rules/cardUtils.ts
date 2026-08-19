@@ -77,30 +77,37 @@ export function matchesRank(cardRank: string, cardValue: number, expectedRank: a
 }
 
 /**
- * アタッカーのカード群のいずれかが、防壁カードの「記載された数字（printed rank/value）」と一致するかを判定
- * アップ/ダウン等のサイズ補正は無視し、カード記載の rank / value を照合する
+ * アタッカーを構成するカード群のいずれかと、防壁カードの「記載ランク（printed rank）」が一致するかを判定
+ * アップ/ダウン/フォグ/能力等のサイズ補正は無視し、カード記載の rank (A, 2〜10, J, Q, K) を照合する
+ * (Joker は本関数とは別に isJokerCard() で無条件成功として処理する)
  */
-export function matchesCardNumber(attackerCards: readonly any[], bulwarkCard: any): boolean {
+export function matchesPrintedRank(attackerCards: readonly any[], bulwarkCard: any): boolean {
   if (!bulwarkCard || !attackerCards || attackerCards.length === 0) return false;
 
   const bulwarkRank = normalizeRank(bulwarkCard.rank);
-  const bulwarkVal = bulwarkCard.value !== undefined ? bulwarkCard.value : rankToValue(bulwarkRank);
+  const bulwarkVal = bulwarkCard.value !== undefined ? bulwarkCard.value : (bulwarkRank ? rankToValue(bulwarkRank) : undefined);
 
   for (const attackerCard of attackerCards) {
     if (!attackerCard) continue;
     const attRank = normalizeRank(attackerCard.rank);
-    const attVal = attackerCard.value !== undefined ? attackerCard.value : rankToValue(attRank);
+    const attVal = attackerCard.value !== undefined ? attackerCard.value : (attRank ? rankToValue(attRank) : undefined);
 
-    // 1. ランク文字列の一致 (例: "8" === "8", "A" === "A")
+    // 1. ランク文字列（記載ランク）の一致を優先 (例: "8" === "8", "A" === "A", "J" === "J", "Q" === "Q", "K" === "K")
     if (attRank !== "" && bulwarkRank !== "" && attRank === bulwarkRank) {
       return true;
     }
 
-    // 2. 数値の一致 (例: value 8 === value 8)
-    if (attVal > 0 && bulwarkVal > 0 && attVal === bulwarkVal) {
-      return true;
+    // 2. rank 欠落時用の value fallback (例: mockデータで rank がなく value のみの場合)
+    if (attRank === "" || bulwarkRank === "") {
+      if (attVal !== undefined && bulwarkVal !== undefined && attVal > 0 && bulwarkVal > 0 && attVal === bulwarkVal) {
+        return true;
+      }
     }
   }
 
   return false;
 }
+
+/** 後方互換用エイリアス */
+export const matchesCardNumber = matchesPrintedRank;
+

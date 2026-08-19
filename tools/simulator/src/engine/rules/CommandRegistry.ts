@@ -352,6 +352,8 @@ export class CommandRegistry {
       payload: {
         actionId: request.actionId,
         playerKey: request.controller,
+        requestId: request.id,
+        result: request.result,
       },
     };
     this.dispatchEvent(resolveEvent, context);
@@ -499,7 +501,9 @@ export class CommandRegistry {
       payload: {
         actionId: request.actionId,
         playerKey: request.controller,
-      }
+        requestId: request.id,
+        result: request.result,
+      },
     };
     this.dispatchEvent(resolveEvent, context);
 

@@ -613,67 +613,8 @@ export function declareBlockHandler(
   };
 }
 
-export interface MoveUnitMetadata {
-  cause?: { type: string; command?: string; actionId?: string; [key: string]: any };
-  combatSnapshot?: { role?: string; blocksUnitId?: string; targetPlayerKey?: string; [key: string]: any };
-  characterType?: string;
-  [key: string]: any;
-}
-
-/**
- * ユニットをフィールドから墓地へ移動する共通処理
- * 墓地に移動する前に unit.battle を完全に削除し、カードごとに cardMoved イベントを発行する
- */
-export function moveUnitToGraveyard(
-  unit: any,
-  playerKey: string,
-  state: any,
-  effectInterpreter: EffectInterpreter,
-  context: any,
-  metadata?: MoveUnitMetadata
-) {
-  const player = state.players[playerKey];
-  if (!player) return;
-
-  // 移動前に battle snapshot を保持
-  const combatSnapshot = metadata?.combatSnapshot || (unit.battle ? { ...unit.battle } : undefined);
-  const characterType = metadata?.characterType || getCharacterType(unit, context?.components);
-
-  // フィールドから除外
-  if (player.field) {
-    player.field = player.field.filter((u: any) => u.unitId !== unit.unitId);
-  }
-
-  // 墓地に送る前に battle 情報を完全に削除する
-  if (unit.battle) {
-    delete unit.battle;
-  }
-
-  // 墓地へ追加
-  if (!player.grave) {
-    player.grave = [];
-  }
-  player.grave.push(unit);
-
-  // 各カードについて cardMoved イベントを発行
-  if (unit.cards && Array.isArray(unit.cards)) {
-    for (const card of unit.cards) {
-      const event = {
-        type: "cardMoved",
-        payload: {
-          card: card,
-          fromZone: "field",
-          toZone: "grave",
-          playerKey: playerKey,
-          cause: metadata?.cause,
-          combat: combatSnapshot,
-          characterType: characterType,
-        }
-      };
-      effectInterpreter.dispatchEvent(event, context);
-    }
-  }
-}
+export type { MoveUnitMetadata } from "./unitMovementUtils";
+export { moveUnitToGraveyard } from "./unitMovementUtils";
 
 /**
  * judgeDamage: 全アタッカーおよびブロッカーの戦闘を判定し、直接ダメージおよび敗北ユニットの墓地移動を行う
@@ -687,7 +628,15 @@ export function judgeDamageHandler(
     // 1. Calculate Phase: effect-time 盤面を基準に全戦闘結果を確定
     const damageJudgeResult = calculateDamageJudge(context, abilityEvaluator);
 
-    // 2. Apply Phase: 確定結果を盤面に適用（直接ダメージ、墓地移動、battle cleanup）
+    // 2. ActionRequest に解決結果 (DamageJudgeResult) を保持
+    if (context.currentRequest) {
+      context.currentRequest.result = {
+        ...context.currentRequest.result,
+        damageJudge: damageJudgeResult,
+      };
+    }
+
+    // 3. Apply Phase: 確定結果を盤面に適用（直接ダメージ、墓地移動、battle cleanup）
     applyDamageJudgeResult(damageJudgeResult, context, effectInterpreter);
   };
 }

@@ -2,9 +2,9 @@ import { CommandContext } from "./CommandRegistry";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { EffectInterpreter } from "./EffectInterpreter";
 import { isSoldierType, isBulwarkType } from "./characterUtils";
-import { isJokerCard, matchesCardNumber } from "./cardUtils";
+import { isJokerCard, matchesPrintedRank } from "./cardUtils";
 import { getOpponentPlayerKey } from "./playerUtils";
-import { moveUnitToGraveyard, MoveUnitMetadata } from "./commandHandlers";
+import { moveUnitToGraveyard, MoveUnitMetadata } from "./unitMovementUtils";
 
 export interface CombatResult {
   readonly attackerUnitId: string;
@@ -16,6 +16,8 @@ export interface CombatResult {
   readonly blockerInitialTotalSize?: number;
   readonly attackerMovedToGrave: boolean;
   readonly blockersMovedToGrave: readonly string[];
+  readonly directDamageAmount?: number;
+  /** @deprecated directDamageAmount を使用してください */
   readonly directDamageDealt?: number;
   readonly targetPlayerKey?: string;
   readonly bulwarkRevealed?: boolean;
@@ -47,6 +49,7 @@ export function resolveUnblockedCombat(
     attackerInitialSize: attackerSize,
     attackerMovedToGrave: false,
     blockersMovedToGrave: [],
+    directDamageAmount: attackerSize,
     directDamageDealt: attackerSize,
     targetPlayerKey,
   };
@@ -114,7 +117,7 @@ export function resolveSoldierVsBulwarkCombat(
   const bulwarkCard = bulwark.cards?.[0];
 
   const isJoker = isJokerCard(bulwarkCard);
-  const isMatched = isJoker || matchesCardNumber(attacker.cards || [], bulwarkCard);
+  const isMatched = isJoker || matchesPrintedRank(attacker.cards || [], bulwarkCard);
 
   // 防壁は判定結果に関わらず必ず墓地へ移動する
   const blockersMovedToGrave = [bulwark.unitId];
@@ -275,7 +278,8 @@ export function applyDamageJudgeResult(
     }
 
     // 1-2. 未ブロック時の直接ダメージ
-    if (combat.directDamageDealt !== undefined && combat.directDamageDealt > 0) {
+    const damageAmount = combat.directDamageAmount ?? combat.directDamageDealt;
+    if (damageAmount !== undefined && damageAmount > 0) {
       const targetPlayerKey = combat.targetPlayerKey || getOpponentPlayerKey(combat.attackerPlayerKey, state);
       const damageContext: CommandContext = {
         ...context,
@@ -286,7 +290,7 @@ export function applyDamageJudgeResult(
       // dealDamage コマンドの実行 (life -> grave 移動と cardMoved イベント発行)
       ((effectInterpreter as any).registry).execute(
         "dealDamage",
-        { target: "targetPlayer", amount: combat.directDamageDealt },
+        { target: "targetPlayer", amount: damageAmount },
         damageContext
       );
     }

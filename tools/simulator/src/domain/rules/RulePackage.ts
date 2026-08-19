@@ -78,6 +78,11 @@ export type ActionRequestTarget =
       name?: string;
     };
 
+export type ActionResolutionResult = {
+  damageJudge?: any;
+  [key: string]: unknown;
+};
+
 export type ActionRequest = {
   id: string;
   actionId: string;
@@ -94,6 +99,7 @@ export type ActionRequest = {
   definitionOwner?: string;
   selectedCostPayment?: CostPayment;
   sourcePatternId?: string;
+  result?: ActionResolutionResult;
 };
 
 export type Stage = {

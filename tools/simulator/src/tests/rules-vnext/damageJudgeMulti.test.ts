@@ -1060,4 +1060,289 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
       validator.validateActionRequest(damageJudgeAction, context);
     }).not.toThrow();
   });
+
+  it("Test AA: Bulwark printed rank matching for A, J, Q, K and mismatch cases", () => {
+    const registry = new CommandRegistry();
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+
+    const testCases = [
+      { bulwarkRank: "A", attackerRank: "A", expectedMatch: true },
+      { bulwarkRank: "J", attackerRank: "J", expectedMatch: true },
+      { bulwarkRank: "Q", attackerRank: "Q", expectedMatch: true },
+      { bulwarkRank: "K", attackerRank: "K", expectedMatch: true },
+      { bulwarkRank: "A", attackerRank: "2", expectedMatch: false },
+      { bulwarkRank: "K", attackerRank: "Q", expectedMatch: false },
+    ];
+
+    for (const tc of testCases) {
+      const state = createBaseState();
+      const attacker = {
+        unitId: `att-${tc.bulwarkRank}-${tc.attackerRank}`,
+        componentId: "character.soldier",
+        state: "drive",
+        cards: [{ id: "c-att", suit: "S", rank: tc.attackerRank, value: 5 }],
+        labels: ["攻撃"],
+        battle: { role: "attacker", targetPlayerKey: "p2" },
+      };
+      const bulwark = {
+        unitId: `bw-${tc.bulwarkRank}-${tc.attackerRank}`,
+        kind: "防壁",
+        componentId: "character.bulwark",
+        face: "down",
+        state: "drive",
+        cards: [{ id: "c-bw", suit: "H", rank: tc.bulwarkRank, value: 10 }],
+        labels: ["防御"],
+        battle: { role: "blocker", blocksUnitId: attacker.unitId },
+      };
+      state.players.p1.field.push(attacker);
+      state.players.p2.field.push(bulwark);
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+      };
+
+      const req = registry.createRequest(damageJudgeAction, context);
+      registry.resolveTopRequest(context);
+
+      if (tc.expectedMatch) {
+        // 一致: アタッカー死亡、防壁死亡
+        expect(state.players.p1.field.length).toBe(0);
+        expect(state.players.p1.grave.length).toBe(1);
+        expect(state.players.p2.field.length).toBe(0);
+        expect(state.players.p2.grave.length).toBe(1);
+        expect(req.result?.damageJudge?.combats[0].bulwarkMatched).toBe(true);
+      } else {
+        // 不一致: アタッカー生存、防壁死亡
+        expect(state.players.p1.field.length).toBe(1);
+        expect(state.players.p1.grave.length).toBe(0);
+        expect(state.players.p2.field.length).toBe(0);
+        expect(state.players.p2.grave.length).toBe(1);
+        expect(req.result?.damageJudge?.combats[0].bulwarkMatched).toBe(false);
+      }
+    }
+  });
+
+  it("Test AB & AC: resolved ActionRequest and stage.history preserve structured DamageJudgeResult with unblocked and bulwark info", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    // Attacker 1: Unblocked (size 3)
+    const att1 = {
+      unitId: "att-unblocked-1",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-1", suit: "S", rank: "3", value: 3 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+
+    // Attacker 2: vs Bulwark (matched 8)
+    const att2 = {
+      unitId: "att-bulwark-2",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-2", suit: "H", rank: "8", value: 8 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const bulwark2 = {
+      unitId: "bw-2",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      face: "down",
+      state: "drive",
+      cards: [{ id: "c-bw-2", suit: "D", rank: "8", value: 8 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-bulwark-2" },
+    };
+
+    // Attacker 3: vs Soldier (size 5 vs 7 -> loses)
+    const att3 = {
+      unitId: "att-soldier-3",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-3", suit: "C", rank: "5", value: 5 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blk3 = {
+      unitId: "blk-3",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-3", suit: "C", rank: "7", value: 7 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-soldier-3" },
+    };
+
+    state.players.p1.field.push(att1, att2, att3);
+    state.players.p2.field.push(bulwark2, blk3);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 1. resolved request に result.damageJudge が存在すること
+    expect(req.result).toBeDefined();
+    expect(req.result?.damageJudge).toBeDefined();
+    const djResult = req.result!.damageJudge!;
+
+    // 2. stage.history 内の request にも同じ result が残っていること
+    const historyReq = state.stage.history.find((r: any) => r.id === req.id);
+    expect(historyReq).toBeDefined();
+    expect(historyReq.result?.damageJudge).toEqual(djResult);
+
+    // 3. 各戦闘の詳細情報が保持されていること（battle cleanup 後・grave 移動後でも参照可能）
+    expect(djResult.combats.length).toBe(3);
+
+    // Combat 1: Unblocked
+    const c1 = djResult.combats.find((c: any) => c.attackerUnitId === "att-unblocked-1")!;
+    expect(c1.combatType).toBe("unblocked");
+    expect(c1.directDamageAmount).toBe(3);
+    expect(c1.attackerMovedToGrave).toBe(false);
+
+    // Combat 2: Soldier vs Bulwark
+    const c2 = djResult.combats.find((c: any) => c.attackerUnitId === "att-bulwark-2")!;
+    expect(c2.combatType).toBe("soldierVsBulwark");
+    expect(c2.bulwarkRevealed).toBe(true);
+    expect(c2.bulwarkMatched).toBe(true);
+    expect(c2.attackerMovedToGrave).toBe(true);
+    expect(c2.blockersMovedToGrave).toEqual(["bw-2"]);
+
+    // Combat 3: Soldier vs Soldier
+    const c3 = djResult.combats.find((c: any) => c.attackerUnitId === "att-soldier-3")!;
+    expect(c3.combatType).toBe("soldierVsSoldiers");
+    expect(c3.attackerInitialSize).toBe(5);
+    expect(c3.blockerInitialTotalSize).toBe(7);
+    expect(c3.attackerMovedToGrave).toBe(true);
+    expect(c3.blockersMovedToGrave).toEqual([]);
+  });
+
+  it("Test AD: actionResolved event payload contains requestId and result.damageJudge", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    const attacker = {
+      unitId: "u-att-1",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-att-1", suit: "S", rank: "4", value: 4 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    state.players.p1.field.push(attacker);
+
+    let capturedEvent: any = null;
+    const originalDispatch = registry.getEffectInterpreter().dispatchEvent.bind(registry.getEffectInterpreter());
+    registry.getEffectInterpreter().dispatchEvent = (event: any, ctx: any) => {
+      if (event.type === "actionResolved" && event.payload.actionId === "action.damageJudge") {
+        capturedEvent = event;
+      }
+      originalDispatch(event, ctx);
+    };
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // actionResolved payload に requestId と result が含まれること
+    expect(capturedEvent).toBeDefined();
+    expect(capturedEvent.payload.actionId).toBe("action.damageJudge");
+    expect(capturedEvent.payload.playerKey).toBe("p1");
+    expect(capturedEvent.payload.requestId).toBe(req.id);
+    expect(capturedEvent.payload.result).toBeDefined();
+    expect(capturedEvent.payload.result.damageJudge).toBeDefined();
+    expect(capturedEvent.payload.result.damageJudge.combats[0].combatType).toBe("unblocked");
+  });
+
+  it("Test AE: Board-dependent size calculation is frozen at Calculate phase (preceding combat Apply does not mutate succeeding combat evaluation)", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    // Attacker 1: 兵士 (size 4) vs Blocker 1 (size 6 -> att1 loses and moves to grave)
+    const att1 = {
+      unitId: "att-1",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-1", suit: "S", rank: "4", value: 4 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blk1 = {
+      unitId: "blk-1",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-1", suit: "C", rank: "6", value: 6 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-1" },
+    };
+
+    // Attacker 2: 兵士 (size 8 at start) vs Blocker 2 (size 6)
+    // 盤面上のフォグにより att-2 は +3 されている (5 + 3 = 8)
+    const att2 = {
+      unitId: "att-2",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-2", suit: "S", rank: "5", value: 5 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blk2 = {
+      unitId: "blk-2",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-2", suit: "H", rank: "6", value: 6 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-2" },
+    };
+
+    state.players.p1.fog.push({
+      fogId: "fog-up-att2",
+      componentId: "fog.up",
+      bindings: { target: "att-2", amount: 3 }, // 5 + 3 = 8
+    });
+
+    state.players.p1.field.push(att1, att2);
+    state.players.p2.field.push(blk1, blk2);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // Combat 1: att1 (4) vs blk1 (6) -> att1 敗北で墓地へ
+    // Combat 2: att2 (8) vs blk2 (6) -> att2 勝利で blk2 が墓地へ (att2 生存)
+    expect(state.players.p1.field.map((u: any) => u.unitId)).toEqual(["att-2"]);
+    expect(state.players.p1.grave.map((u: any) => u.unitId)).toEqual(["att-1"]);
+    expect(state.players.p2.field.map((u: any) => u.unitId)).toEqual(["blk-1"]);
+    expect(state.players.p2.grave.map((u: any) => u.unitId)).toEqual(["blk-2"]);
+
+    // req.result の判定情報が Calculate 時点のものであることを検証
+    const djResult = req.result!.damageJudge!;
+    expect(djResult.combats[1].attackerInitialSize).toBe(8);
+    expect(djResult.combats[1].blockerInitialTotalSize).toBe(6);
+    expect(djResult.combats[1].attackerMovedToGrave).toBe(false);
+  });
 });
