@@ -1409,4 +1409,134 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     expect(staleAttX.battle).toBeDefined();
     expect(staleAttX.battle.role).toBe("attacker");
   });
+
+  it("Test AG: Equipped soldier (multi-card) vs bulwark: matches when one of the equipped cards matches bulwark printed rank", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    // 装備兵: 2枚のカードで構成（rank 3, rank 8）
+    const equippedAttacker = {
+      unitId: "equipped-attacker-match",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [
+        { id: "c-att-base", suit: "S", rank: "3", value: 3 },
+        { id: "c-att-equip", suit: "D", rank: "8", value: 8 },
+      ],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const bulwark = {
+      unitId: "bw-8",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      face: "down",
+      state: "drive",
+      cards: [{ id: "c-bw", suit: "H", rank: "8", value: 8 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "equipped-attacker-match" },
+    };
+
+    state.players.p1.field.push(equippedAttacker);
+    state.players.p2.field.push(bulwark);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 1. CombatResult の検証
+    const djResult = req.result!.damageJudge!;
+    expect(djResult.combats.length).toBe(1);
+    const combat = djResult.combats[0];
+    expect(combat.combatType).toBe("soldierVsBulwark");
+    expect(combat.bulwarkRevealed).toBe(true);
+    expect(combat.bulwarkMatched).toBe(true); // 2枚目のカード (rank 8) が防壁 (rank 8) と一致
+    expect(combat.attackerMovedToGrave).toBe(true);
+    expect(combat.blockersMovedToGrave).toEqual(["bw-8"]);
+
+    // 2. 盤面および墓地移動の検証
+    expect(state.players.p1.field.length).toBe(0);
+    expect(state.players.p1.grave.length).toBe(1);
+    const deadAttacker = state.players.p1.grave[0];
+    expect(deadAttacker.unitId).toBe("equipped-attacker-match");
+    expect(deadAttacker.cards.length).toBe(2); // 2枚とも同一ユニットとして墓地へ保持
+    expect(deadAttacker.cards.map((c: any) => c.rank)).toEqual(["3", "8"]);
+    expect(deadAttacker.battle).toBeUndefined(); // battle cleanup 済み
+
+    expect(state.players.p2.field.length).toBe(0);
+    expect(state.players.p2.grave.length).toBe(1);
+    expect(state.players.p2.grave[0].unitId).toBe("bw-8");
+  });
+
+  it("Test AH: Equipped soldier (multi-card) vs bulwark: does NOT match when no equipped card matches printed rank (size is ignored)", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    // 装備兵: 2枚のカードで構成（rank 3, rank 8 -> 合計サイズ 11）
+    const equippedAttacker = {
+      unitId: "equipped-attacker-nomatch",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [
+        { id: "c-att-base", suit: "S", rank: "3", value: 3 },
+        { id: "c-att-equip", suit: "D", rank: "8", value: 8 },
+      ],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    // 防壁: rank 5 (3にも8にも一致しない)
+    const bulwark = {
+      unitId: "bw-5",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      face: "down",
+      state: "drive",
+      cards: [{ id: "c-bw", suit: "H", rank: "5", value: 5 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "equipped-attacker-nomatch" },
+    };
+
+    state.players.p1.field.push(equippedAttacker);
+    state.players.p2.field.push(bulwark);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const req = registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 1. CombatResult の検証 (不一致)
+    const djResult = req.result!.damageJudge!;
+    expect(djResult.combats.length).toBe(1);
+    const combat = djResult.combats[0];
+    expect(combat.combatType).toBe("soldierVsBulwark");
+    expect(combat.bulwarkRevealed).toBe(true);
+    expect(combat.bulwarkMatched).toBe(false); // printed rank 3, 8 のいずれも 5 と不一致
+    expect(combat.attackerMovedToGrave).toBe(false);
+    expect(combat.blockersMovedToGrave).toEqual(["bw-5"]);
+
+    // 2. 盤面および墓地の検証 (アタッカー生存、防壁は常に墓地)
+    expect(state.players.p1.field.length).toBe(1);
+    expect(state.players.p1.grave.length).toBe(0);
+    const survivingAttacker = state.players.p1.field[0];
+    expect(survivingAttacker.unitId).toBe("equipped-attacker-nomatch");
+    expect(survivingAttacker.cards.length).toBe(2);
+    expect(survivingAttacker.battle).toBeUndefined(); // battle cleanup 済み
+
+    expect(state.players.p2.field.length).toBe(0);
+    expect(state.players.p2.grave.length).toBe(1);
+    expect(state.players.p2.grave[0].unitId).toBe("bw-5");
+  });
 });
