@@ -1,4 +1,20 @@
 import { CommandContext } from "./CommandRegistry";
+import { getOpponentPlayerKey } from "./playerUtils";
+
+export interface PreventDamageAbility {
+  target?: string;
+  source?: {
+    requestController?: string;
+    keyCardsIncludeSuit?: string;
+  };
+  condition?: {
+    exists?: {
+      zone?: string;
+      controller?: string;
+      componentType?: string;
+    };
+  };
+}
 
 /**
  * ゲーム状態における能力効果（フォグの sizeModifier 等）の集計・計算を行います。
@@ -28,113 +44,71 @@ export class AbilityEvaluator {
     const action = context.currentAction;
     if (!action) return false;
 
-    // ダメージ対象プレイヤーの解決 (targetPlayerKey があればそれ、無ければ playerKey ではない方)
-    const targetPlayerKey = context.targetPlayerKey || (context.playerKey === "p1" ? "p2" : "p1");
-    const targetPlayer = context.state.players[targetPlayerKey];
+    // ダメージ対象プレイヤーの解決 (targetPlayerKey があればそれ、無ければ playerKey の対戦相手)
+    const targetPlayerKey = context.targetPlayerKey || getOpponentPlayerKey(context.playerKey, context.state);
+    const targetPlayer = context.state.players?.[targetPlayerKey];
     if (!targetPlayer) return false;
 
-    // 1. 盤面上の有効なコンポーネント（trumps, field など）の収集
-    const activeInstances: any[] = [];
-    if (targetPlayer.trumps) {
-      activeInstances.push(...targetPlayer.trumps.filter((t: any) => t.face === "up"));
-    }
-    if (targetPlayer.field) {
-      activeInstances.push(...targetPlayer.field.filter((u: any) => u.face === undefined || u.face === "up"));
-    }
-
-    // 2. 有効なコンポーネント定義の解決と preventDamage 能力の走査
     const componentsList = context.components || [];
 
-    for (const inst of activeInstances) {
-      const compId = inst.componentId;
-      if (!compId) continue;
+    // findActiveAbilities を利用して対象プレイヤーの有効な preventDamage 能力一覧を取得
+    const activeAbilities = this.findActiveAbilities<PreventDamageAbility>(
+      "preventDamage",
+      context.state,
+      componentsList,
+      targetPlayerKey
+    );
 
-      // コンポーネント定義の検索
-      let compDef = componentsList.find((c: any) => c.id === compId);
+    for (const entry of activeAbilities) {
+      const pd = entry.ability;
+      if (!pd) continue;
 
-      // フォールバック: もし context.components に定義が見つからないが、特定の要塞（trump.fortress）であれば
-      // テストの互換性、あるいはローダーが components を渡していない場合に備えて動的に補完する
-      if (!compDef && compId === "trump.fortress") {
-        compDef = {
-          id: "trump.fortress",
-          name: "要塞",
-          type: "trump",
-          zone: "trump",
-          abilities: [
-            {
-              preventDamage: {
-                target: "self",
-                source: {
-                  requestController: "opponent",
-                  keyCardsIncludeSuit: "spade",
-                },
-                condition: {
-                  exists: {
-                    zone: "field",
-                    controller: "self",
-                    componentType: "character",
-                  },
-                },
-              },
-            },
-          ],
-        };
-      }
+      // target の評価
+      if (pd.target !== "self") continue;
 
-      if (!compDef || !compDef.abilities) continue;
+      // source の評価
+      if (pd.source) {
+        const { requestController, keyCardsIncludeSuit } = pd.source;
 
-      for (const abilityDef of compDef.abilities) {
-        if (!abilityDef.preventDamage) continue;
-
-        const pd = abilityDef.preventDamage;
-
-        // target の評価
-        if (pd.target !== "self") continue;
-
-        // source の評価
-        if (pd.source) {
-          const { requestController, keyCardsIncludeSuit } = pd.source;
-
-          // requestController: opponent
-          if (requestController === "opponent") {
-            const isOpponent = context.playerKey !== targetPlayerKey;
-            if (!isOpponent) continue;
-          }
-
-          // keyCardsIncludeSuit: spade
-          if (keyCardsIncludeSuit === "spade") {
-            const actualCards = context.keyCards && context.keyCards.length > 0
-              ? context.keyCards
-              : context.keyCard ? [context.keyCard] : [];
-            const hasSpade = actualCards.some(
-              (c: any) => c.suit === "S" || c.suit?.toLowerCase() === "spade"
-            );
-            if (!hasSpade) continue;
-          }
+        // requestController: opponent
+        if (requestController === "opponent") {
+          const opponentPlayerKey = getOpponentPlayerKey(targetPlayerKey, context.state);
+          if (context.playerKey !== opponentPlayerKey) continue;
         }
 
-        // condition.exists の評価
-        if (pd.condition && pd.condition.exists) {
-          const { zone, controller, componentType } = pd.condition.exists;
-          
-          if (zone === "field" && controller === "self") {
-            const existsMatch = targetPlayer.field?.some((u: any) => {
-              if (!u.componentId) return false;
-              if (componentType === "character") {
-                if (u.componentId.startsWith("character.")) return true;
-                const uDef = componentsList.find((c: any) => c.id === u.componentId);
-                return uDef && uDef.type === "character";
-              }
-              return u.componentId === componentType;
-            });
-
-            if (!existsMatch) continue;
-          }
+        // keyCardsIncludeSuit: spade
+        if (keyCardsIncludeSuit === "spade") {
+          const actualCards = context.keyCards && context.keyCards.length > 0
+            ? context.keyCards
+            : context.keyCard ? [context.keyCard] : [];
+          const hasSpade = actualCards.some(
+            (c: any) => c.suit === "S" || c.suit?.toLowerCase() === "spade"
+          );
+          if (!hasSpade) continue;
         }
-
-        // すべての条件を満たした場合、ダメージを無効化
-        return true;
       }
+
+      // condition.exists の評価
+      if (pd.condition && pd.condition.exists) {
+        const { zone, controller, componentType } = pd.condition.exists;
+
+        if (zone === "field" && controller === "self") {
+          const existsMatch = targetPlayer.field?.some((u: any) => {
+            if (!u.componentId) return false;
+            if (componentType === "character") {
+              if (u.componentId.startsWith("character.")) return true;
+              const uDef = componentsList.find((c: any) => c.id === u.componentId);
+              return uDef && uDef.type === "character";
+            }
+            return u.componentId === componentType;
+          });
+
+          if (!existsMatch) continue;
+        }
+      }
+
+      // すべての条件を満たした場合、ダメージを無効化
+      return true;
     }
 
     return false;
