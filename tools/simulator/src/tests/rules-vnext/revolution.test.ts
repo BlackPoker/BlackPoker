@@ -1051,4 +1051,307 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     expect(state.players.p1.hand.length).toBe(0); // 0枚ドロー
     expect(emittedEvents.filter((id) => id === "action.revolutionDraw").length).toBe(1);
   });
+
+  // ==========================================
+  // 3. Phase 19.1 Hotfix テスト (Test 19.1-A 〜 Test 19.1-F)
+  // ==========================================
+
+  it("Test 19.1-A: differenceDamage dealDamage context should maintain playerKey=p1 and targetPlayerKey=p2", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-rev-p1",
+      componentId: "trump.revolution",
+      face: "up",
+      zone: "trump",
+    });
+
+    const attacker = {
+      unitId: "att-5",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-att-5", suit: "S", rank: "5", value: 5 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blocker = {
+      unitId: "blk-7",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-7", suit: "H", rank: "7", value: 7 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-5" },
+    };
+
+    state.players.p1.field.push(attacker);
+    state.players.p2.field.push(blocker);
+
+    let executedDamageContext: CommandContext | undefined = undefined;
+    let executedDamageArgs: any = undefined;
+    const origExecute = registry.execute.bind(registry);
+    registry.execute = (name: string, args: any, ctx: CommandContext) => {
+      if (name === "dealDamage") {
+        executedDamageContext = { ...ctx };
+        executedDamageArgs = { ...args };
+      }
+      origExecute(name, args, ctx);
+    };
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 差分ダメージの実行 context を確認
+    expect(executedDamageArgs).toEqual({ target: "targetPlayer", amount: 2 });
+    expect(executedDamageContext).toBeDefined();
+    expect(executedDamageContext!.playerKey).toBe("p1"); // damageJudge controller
+    expect(executedDamageContext!.targetPlayerKey).toBe("p2"); // ダメージ対象
+  });
+
+  it("Test 19.1-B: self damage case (attacker 8 vs blocker 5) -> context has playerKey=p1 and targetPlayerKey=p1", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-rev-p1",
+      componentId: "trump.revolution",
+      face: "up",
+      zone: "trump",
+    });
+
+    const attacker = {
+      unitId: "att-8",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-att-8", suit: "S", rank: "8", value: 8 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blocker = {
+      unitId: "blk-5",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-5", suit: "H", rank: "5", value: 5 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-8" },
+    };
+
+    state.players.p1.field.push(attacker);
+    state.players.p2.field.push(blocker);
+
+    let executedDamageContext: CommandContext | undefined = undefined;
+    const origExecute = registry.execute.bind(registry);
+    registry.execute = (name: string, args: any, ctx: CommandContext) => {
+      if (name === "dealDamage") {
+        executedDamageContext = { ...ctx };
+      }
+      origExecute(name, args, ctx);
+    };
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    expect(executedDamageContext).toBeDefined();
+    expect(executedDamageContext!.playerKey).toBe("p1"); // damageJudge controller
+    expect(executedDamageContext!.targetPlayerKey).toBe("p1"); // self damage
+  });
+
+  it("Test 19.1-C: Casualty grave movement happens BEFORE difference damage application", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-rev-p1",
+      componentId: "trump.revolution",
+      face: "up",
+      zone: "trump",
+    });
+
+    const attacker = {
+      unitId: "att-8",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-att-8", suit: "S", rank: "8", value: 8 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const blocker = {
+      unitId: "blk-5",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-5", suit: "H", rank: "5", value: 5 }],
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-8" },
+    };
+
+    state.players.p1.field.push(attacker);
+    state.players.p2.field.push(blocker);
+
+    const cardMovedEvents: { fromZone: string; toZone: string; rank: string }[] = [];
+    const origDispatch = registry.getEffectInterpreter().dispatchEvent.bind(registry.getEffectInterpreter());
+    registry.getEffectInterpreter().dispatchEvent = (event: any, ctx: any) => {
+      if (event.type === "cardMoved") {
+        cardMovedEvents.push({
+          fromZone: event.payload.fromZone,
+          toZone: event.payload.toZone,
+          rank: event.payload.card?.rank,
+        });
+      }
+      origDispatch(event, ctx);
+    };
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // イベント順序の確認: 死亡アタッカーの field -> grave が先、差分ダメージの life -> grave が後
+    expect(cardMovedEvents.length).toBe(4); // 1 (att死亡) + 3 (差分ダメージ 3枚)
+    expect(cardMovedEvents[0].fromZone).toBe("field");
+    expect(cardMovedEvents[0].toZone).toBe("grave");
+    expect(cardMovedEvents[0].rank).toBe("8");
+
+    expect(cardMovedEvents[1].fromZone).toBe("life");
+    expect(cardMovedEvents[1].toZone).toBe("grave");
+    expect(cardMovedEvents[2].fromZone).toBe("life");
+    expect(cardMovedEvents[2].toZone).toBe("grave");
+    expect(cardMovedEvents[3].fromZone).toBe("life");
+    expect(cardMovedEvents[3].toZone).toBe("grave");
+  });
+
+  it("Test 19.1-D: Defender legacy blocker dies under Revolution + takes difference damage", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-rev-p1",
+      componentId: "trump.revolution",
+      face: "up",
+      zone: "trump",
+    });
+
+    const attacker = {
+      unitId: "att-5",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-att-5", suit: "S", rank: "5", value: 5 }],
+      labels: ["攻撃"],
+      battle: { role: "attacker", targetPlayerKey: "p2" },
+    };
+    const legacyBlocker = {
+      unitId: "blk-J",
+      componentId: "character.soldier",
+      state: "drive",
+      cards: [{ id: "c-blk-J", suit: "H", rank: "J", value: 11 }], // Legacy card J
+      labels: ["防御"],
+      battle: { role: "blocker", blocksUnitId: "att-5" },
+    };
+
+    state.players.p1.field.push(attacker);
+    state.players.p2.field.push(legacyBlocker);
+
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // 1. p2 の J 兵士死亡により nextGeneration が requestBuffer に積まれる
+    const nextGenRequests = state.requestBuffer.requests.filter((r: any) => r.actionId === "action.nextGeneration");
+    expect(nextGenRequests.length).toBe(1);
+    expect(nextGenRequests[0].controller).toBe("p2");
+
+    // 2. 差分ダメージ (11 - 5 = 6点) が p2 に適用される (初期4枚 -> 0枚)
+    expect(state.players.p2.life.length).toBe(0);
+
+    // 3. life -> grave では nextGeneration は誘発しない（nextGeneration は依然として 1件のみ）
+    expect(state.requestBuffer.requests.filter((r: any) => r.actionId === "action.nextGeneration").length).toBe(1);
+  });
+
+  it("Test 19.1-E: AbilityEvaluator does NOT synthesize Revolution without ComponentDefinition", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-rev-p1",
+      componentId: "trump.revolution",
+      face: "up",
+      zone: "trump",
+    });
+
+    const abilityEvaluator = registry.getAbilityEvaluator();
+    // components に何も渡さない場合、勝手に補完せず false を返すこと
+    const hasModifier = abilityEvaluator.hasDamageJudgeModifier(
+      "soldierVsSoldiers",
+      "revolution",
+      state,
+      []
+    );
+    expect(hasModifier).toBe(false);
+  });
+
+  it("Test 19.1-F: Generic modifier test: works with custom ComponentDefinition regardless of componentId", () => {
+    const registry = new CommandRegistry();
+    const state = createBaseState();
+
+    state.players.p1.trump.push({
+      id: "trump-custom-modifier",
+      componentId: "trump.testModifier",
+      face: "up",
+      zone: "trump",
+    });
+
+    const customComponents = [
+      {
+        id: "trump.testModifier",
+        name: "テスト能力",
+        type: "trump",
+        zone: "trump",
+        abilities: [
+          {
+            damageJudgeModifier: {
+              matchup: "soldierVsSoldiers",
+              rule: "revolution",
+            },
+          },
+        ],
+      },
+    ];
+
+    const abilityEvaluator = registry.getAbilityEvaluator();
+    const hasModifier = abilityEvaluator.hasDamageJudgeModifier(
+      "soldierVsSoldiers",
+      "revolution",
+      state,
+      customComponents as any
+    );
+    expect(hasModifier).toBe(true);
+  });
 });

@@ -174,18 +174,7 @@ export class AbilityEvaluator {
         const compId = inst.componentId || inst.id;
         if (!compId) continue;
 
-        let compDef = components.find((c: any) => c.id === compId);
-        // フォールバック（定義が渡されなかったテスト環境用）
-        if (!compDef && compId === "trump.revolution") {
-          compDef = {
-            id: "trump.revolution",
-            abilities: [
-              { damageJudgeModifier: { matchup: "soldierVsSoldiers", rule: "revolution" } },
-              { grantAbility: { target: { relation: "self", characterType: "soldier" }, ability: "revolutionDraw" } }
-            ]
-          };
-        }
-
+        const compDef = components.find((c: any) => c.id === compId);
         if (!compDef || !compDef.abilities) continue;
 
         for (const abilityDef of compDef.abilities) {

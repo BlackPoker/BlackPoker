@@ -316,21 +316,6 @@ export function applyDamageJudgeResult(
       );
     }
 
-    // 1-2b. 革命時の差分ダメージ
-    if (combat.differenceDamage && combat.differenceDamage.amount > 0) {
-      const diffDamageContext: CommandContext = {
-        ...context,
-        playerKey: combat.differenceDamage.targetPlayerKey,
-        targetPlayerKey: combat.differenceDamage.targetPlayerKey,
-      };
-
-      ((effectInterpreter as any).registry).execute(
-        "dealDamage",
-        { target: "targetPlayer", amount: combat.differenceDamage.amount },
-        diffDamageContext
-      );
-    }
-
     // 1-3. アタッカーの墓地移動
     if (combat.attackerMovedToGrave) {
       if (attackerUnit) {
@@ -383,7 +368,21 @@ export function applyDamageJudgeResult(
       }
     }
 
-    // 1-5. 生存ブロッカーの battle cleanup
+    // 1-5. 革命時の差分ダメージ (兵士の墓地移動後に適用)
+    if (combat.differenceDamage && combat.differenceDamage.amount > 0) {
+      const diffDamageContext: CommandContext = {
+        ...context,
+        targetPlayerKey: combat.differenceDamage.targetPlayerKey,
+      };
+
+      ((effectInterpreter as any).registry).execute(
+        "dealDamage",
+        { target: "targetPlayer", amount: combat.differenceDamage.amount },
+        diffDamageContext
+      );
+    }
+
+    // 1-6. 生存ブロッカーの battle cleanup
     if (combat.blockerPlayerKey) {
       const blockerPlayer = state.players[combat.blockerPlayerKey];
       for (const blockerId of combat.blockerUnitIds) {
