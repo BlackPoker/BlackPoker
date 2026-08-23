@@ -180,4 +180,45 @@ export class AbilityEvaluator {
       (m) => m.ability.matchup === matchup && m.ability.rule === rule
     );
   }
+
+  /**
+   * 特定のユニット/コンポーネント instance 自身の ComponentDefinition から、
+   * 指定した能力キー（例: "damageJudgeModifier"）を持つ能力定義リストを取得します。
+   */
+  findComponentAbilities<T = any>(
+    instance: any,
+    abilityKey: string,
+    components: readonly any[] = []
+  ): T[] {
+    if (!instance) return [];
+    const compId = instance.componentId || instance.id;
+    if (!compId) return [];
+
+    const compDef = components.find((c: any) => c.id === compId);
+    if (!compDef || !compDef.abilities) return [];
+
+    const results: T[] = [];
+    for (const abilityDef of compDef.abilities) {
+      if (abilityDef[abilityKey]) {
+        results.push(abilityDef[abilityKey]);
+      }
+    }
+    return results;
+  }
+
+  /**
+   * 特定のユニット自身が、指定した matchup（例: "soldierVsBulwark"）に対する
+   * damageJudgeModifier ルール（例: "preserveAttackerOnMatchedBulwark"）を持っているかを判定します。
+   */
+  hasUnitDamageJudgeModifier(
+    unit: any,
+    matchup: string,
+    rule: string,
+    components: readonly any[] = []
+  ): boolean {
+    const modifiers = this.findComponentAbilities<any>(unit, "damageJudgeModifier", components);
+    return modifiers.some(
+      (m) => m.matchup === matchup && m.rule === rule
+    );
+  }
 }

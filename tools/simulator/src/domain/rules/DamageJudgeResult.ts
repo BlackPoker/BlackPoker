@@ -17,6 +17,7 @@ export interface CombatResult {
   readonly ruleVariant?: "normal" | "revolution";
   readonly differenceDamage?: { readonly amount: number; readonly targetPlayerKey: string };
   readonly attackerCharacterType?: string;
+  readonly attackerGravePrevented?: boolean;
 }
 
 export interface DamageJudgeResult {

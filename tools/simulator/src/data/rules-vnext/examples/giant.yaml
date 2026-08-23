@@ -1,0 +1,20 @@
+components:
+  - id: character.giant
+    name: 巨人
+    ruby: きょじん
+    type: character
+    zone: field
+
+    properties:
+      characterType: soldier
+
+    display:
+      kind: 巨人
+      labels:
+        - 攻撃
+        - 防御
+
+    abilities:
+      - damageJudgeModifier:
+          matchup: soldierVsBulwark
+          rule: preserveAttackerOnMatchedBulwark

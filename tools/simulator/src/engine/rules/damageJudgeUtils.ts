@@ -137,9 +137,18 @@ export function resolveSoldierVsBulwarkCombat(
   const isJoker = isJokerCard(bulwarkCard);
   const isMatched = isJoker || matchesPrintedRank(attacker.cards || [], bulwarkCard);
 
+  // ユニット固有の防壁耐性能力（例: 巨人）を評価
+  const preserveAttacker = isMatched && abilityEvaluator.hasUnitDamageJudgeModifier(
+    attacker,
+    "soldierVsBulwark",
+    "preserveAttackerOnMatchedBulwark",
+    context.components
+  );
+
   // 防壁は判定結果に関わらず必ず墓地へ移動する
   const blockersMovedToGrave = [bulwark.unitId];
-  const attackerMovedToGrave = isMatched;
+  const attackerMovedToGrave = isMatched && !preserveAttacker;
+  const attackerGravePrevented = isMatched && preserveAttacker ? true : undefined;
 
   return {
     attackerUnitId: attacker.unitId,
@@ -152,6 +161,7 @@ export function resolveSoldierVsBulwarkCombat(
     blockersMovedToGrave,
     bulwarkRevealed: true,
     bulwarkMatched: isMatched,
+    attackerGravePrevented,
     attackerCharacterType,
   };
 }
