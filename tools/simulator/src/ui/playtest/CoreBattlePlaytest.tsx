@@ -3,6 +3,8 @@ import { GameSession, GameSessionStep } from "../../engine/session/GameSession";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { loadRulePackageForBrowser, getPlaytestRulePackage } from "../../engine/rules/BrowserRuleLoader";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../../engine/session/playtest/createCoreBattlePlaytest";
+import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
+import { GameEventFormatter } from "../../engine/session/playtest/GameEventFormatter";
 import { GameStatusBar } from "../game/GameStatusBar";
 import { PlayerBoard } from "../game/PlayerBoard";
 import { StagePanel } from "../game/StagePanel";
@@ -13,8 +15,12 @@ import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel } from "../debug/DebugPanel";
 
 export const CoreBattlePlaytest: React.FC = () => {
-  const [rulePackage] = useState(() => getPlaytestRulePackage(loadRulePackageForBrowser()));
+  const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
+  const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
+
+  // プリセットバリデーションエラー
+  const [presetValidationErrors, setPresetValidationErrors] = useState<string[]>([]);
 
   // 表示用 UI スナップショット
   const [gameState, setGameState] = useState<any>(null);
@@ -44,6 +50,15 @@ export const CoreBattlePlaytest: React.FC = () => {
   // 新しい対戦の開始
   const startNewGame = useCallback(() => {
     const initialState = createCoreBattlePresetState();
+
+    // プリセットバリデーション
+    const validation = validatePlaytestPreset(initialState, fullRulePackage);
+    if (!validation.valid) {
+      setPresetValidationErrors(validation.errors);
+      return;
+    }
+    setPresetValidationErrors([]);
+
     const session = new GameSession(initialState, rulePackage);
     sessionRef.current = session;
 
@@ -60,7 +75,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       lastActivePlayerRef.current = step.request.playerId;
       setIsPassAndPlayWaiting(false); // 初回は直接表示
     }
-  }, [rulePackage, addLog]);
+  }, [fullRulePackage, rulePackage, addLog]);
 
   // 初回マウント時にゲームを開始
   useEffect(() => {
@@ -71,6 +86,8 @@ export const CoreBattlePlaytest: React.FC = () => {
   const handleDecisionSubmit = (response: DecisionResponse) => {
     const session = sessionRef.current;
     if (!session) return;
+
+    const prevState = JSON.parse(JSON.stringify(session.state));
 
     // 行動ログの記録
     if (currentStep?.type === "WAITING_FOR_DECISION") {
@@ -85,7 +102,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         addLog(`${player} が選択: ${effSel?.summary || "効果対象決定"}`, "action");
       } else if (selectedPattern?.actionSelectionRef !== undefined) {
         const act = req.catalog.actions[selectedPattern.actionSelectionRef];
-        addLog(`${player} が ${act.actionName || act.actionId} をリクエスト`, "action");
+        addLog(`${player} が「${act.actionName || act.actionId}」をリクエスト`, "action");
       }
     }
 
@@ -95,13 +112,19 @@ export const CoreBattlePlaytest: React.FC = () => {
       nextStep = session.advance();
     }
 
+    const nextState = JSON.parse(JSON.stringify(session.state));
     setCurrentStep(nextStep);
-    setGameState(JSON.parse(JSON.stringify(session.state)));
+    setGameState(nextState);
+
+    // State 遷移からイベントログを自動生成・蓄積
+    const generatedEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+    for (const ev of generatedEvents) {
+      addLog(ev.message, ev.level);
+    }
 
     // 誘発アクションや状態変化のログ
     if (nextStep.type === "WAITING_FOR_DECISION") {
       const nextPlayer = nextStep.request.playerId;
-      const nextPlayerName = nextPlayer === "p1" ? "Player A" : "Player B";
 
       // ターン交代やチャンス移動の検知
       if (session.state.stage?.requests?.length > 0) {
@@ -126,6 +149,30 @@ export const CoreBattlePlaytest: React.FC = () => {
   const handlePassAndPlayReady = () => {
     setIsPassAndPlayWaiting(false);
   };
+
+  if (presetValidationErrors.length > 0) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-slate-100 p-6">
+        <div className="max-w-xl w-full bg-red-950/60 border-2 border-red-500 rounded-2xl p-6 shadow-2xl">
+          <h1 className="text-2xl font-black text-red-400 mb-2">❌ Playtest Preset Error</h1>
+          <p className="text-sm text-slate-300 mb-4">
+            初期盤面プリセットの整合性チェックでエラーが検出されました。ゲームを開始できません。
+          </p>
+          <ul className="list-disc list-inside space-y-1 text-xs font-mono text-red-200 bg-red-900/40 p-3 rounded-lg mb-6">
+            {presetValidationErrors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+          <button
+            onClick={startNewGame}
+            className="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition"
+          >
+            再試行 (Retry)
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const activePlayerKey = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 

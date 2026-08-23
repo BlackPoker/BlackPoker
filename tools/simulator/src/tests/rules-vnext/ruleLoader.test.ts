@@ -21,6 +21,19 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     const nodeCompIds = nodePackage.components.map((c) => c.id).sort();
     const browserCompIds = browserPackage.components.map((c) => c.id).sort();
     expect(browserCompIds).toEqual(nodeCompIds);
+
+    // 重要コンポーネントの存在確認
+    expect(browserCompIds).toContain("character.soldier");
+    expect(browserCompIds).toContain("character.bulwark");
+    expect(browserCompIds).toContain("trump.fortress");
+    expect(browserCompIds).toContain("trump.revolution");
+    expect(browserCompIds).toContain("character.giant");
+    expect(browserCompIds).toContain("fog.up");
+    expect(browserCompIds).toContain("fog.down");
+
+    // 実総数の確認 (全17アクション、全7コンポーネント)
+    expect(browserActionIds.length).toBe(17);
+    expect(browserCompIds.length).toBe(7);
   });
 
   it("should extract valid Playtest RulePackage with supported action list", () => {
@@ -41,5 +54,6 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
 
     // 全コンポーネント定義が維持されていること
     expect(playtestPackage.components.length).toBe(browserPackage.components.length);
+    expect(playtestPackage.components.length).toBe(7);
   });
 });

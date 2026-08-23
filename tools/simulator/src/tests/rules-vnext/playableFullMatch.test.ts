@@ -6,12 +6,15 @@ import { GameSession } from "../../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../../engine/session/playtest/createCoreBattlePlaytest";
 import { getPlaytestRulePackage } from "../../engine/rules/BrowserRuleLoader";
 
+import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
+
 describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => {
+  let fullPackage: RulePackage;
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
     const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
-    const fullPackage = await loadRulePackageFromDirectory(rulesDir);
+    fullPackage = await loadRulePackageFromDirectory(rulesDir);
     rulePackage = getPlaytestRulePackage(fullPackage);
   });
 
@@ -31,6 +34,12 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
 
   it("Full Match: Turn 1 (Attack/Block/DamageJudge/End) -> Turn 2 (Charge/Draw/Quick Twist/Attack/End) -> Turn 3 (Direct Damage -> Life 0 -> FINISHED)", () => {
     const state = createCoreBattlePresetState();
+
+    // 試合開始前に Playtest Preset の整合性を厳格に検証 (Phase 21B.1)
+    const validation = validatePlaytestPreset(state, fullPackage);
+    expect(validation.valid).toBe(true);
+    expect(validation.errors).toEqual([]);
+
     const session = new GameSession(state, rulePackage);
 
     // =========================================================================

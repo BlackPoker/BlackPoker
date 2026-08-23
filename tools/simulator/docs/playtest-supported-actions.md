@@ -9,76 +9,85 @@ BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）お�
 
 ---
 
-## 2. 起動方法
+## 2. 既知の制限事項 (Known Limitations)
 
-### ローカル開発サーバー (推奨)
-```bash
-cd tools/simulator
-npm install
-npm run dev
-```
-ブラウザで `http://localhost:5173/` にアクセスしてください。
+> [!IMPORTANT]
+> **【重要】エンド時の手札7枚超過ディスカードは未実装です**
+> 現在のエンジンでは、手札が8枚以上あってもエンド時に自動ディスカードされません。本プレイテストでは手札が7枚以下となるよう初期手札2枚・ドロー枚数を設計しています。
 
-### Docker 環境での起動
-```bash
-cd tools/simulator
-docker compose up app
-```
-
-### コマンドラインでの 1戦自動完走チェック
-```bash
-docker compose run --rm app npm run playable:check
-```
+1. **エンド時の手札7枚超過ディスカード**:
+   - 現在のエンジンでは未実装です（Known Limitation）。
+2. **アタックの「1ターン1回」制限 & 「このターン出た兵士」の制限**:
+   - コアフローの検証を優先しているため、召喚酔い等の高度な制約は今後のフェイズで導入されます。
+3. **切札・キャラクター固有能力の一部**:
+   - 巨人召喚・要塞・革命等の特殊キャラクター展開は今回の短縮プリセットには配置されていません（基本戦闘ルールに集中）。
 
 ---
 
 ## 3. Playtest プリセット仕様 (`CORE-BATTLE-001`)
 
-- **ライフ**: 各プレイヤー 8枚（`Card[]` 形式）
+- **ライフ**: 各プレイヤー 8枚（`Card[]` 形式、全カード通常トランプ範囲内でユニーク）
 - **Player A (p1)**:
   - 手札: 2枚（♢5, ♣2 - ツイスト用コスト）
   - フィールド: 一般兵 2体（♠6, ♡5 - charge状態）、防壁 1体（♢4 - charge状態, 裏向き）
   - 墓地: 0枚
 - **Player B (p2)**:
   - 手札: 2枚（♢6, ♣3 - ツイスト用コスト）
-  - フィールド: 一般兵 2体（♣6, ♢5 - charge状態）、防壁 1体（♠5 - charge状態, 裏向き）
+  - フィールド: 一般兵 2体（♣6, ♢5 - charge状態）、防壁 1体（♡5 - charge状態, 裏向き）
   - 墓地: 0枚
 
 ---
 
-## 4. 全アクション棚卸し & サポート状況
+## 4. 全アクション棚卸し & サポートステータス
 
-| Action ID | Name | Trigger | Speed | Timing | Effect Command | E2E Test | Playtest Status | 備考 |
-|---|---|---|---|---|---|---|---|---|
-| `action.attack` | アタック | direct | normal | main | `startAttack` | PASS | **SUPPORTED** | 複数アタッカー指定、0体アタック対応 |
-| `action.block` | ブロック | triggered | normal | main | `selectBlockAssignments`, `declareBlock` | PASS | **SUPPORTED** | 複数ブロッカー指定、防壁ブロック対応 |
-| `action.damageJudge` | ダメージ判定 | triggered | normal | main | `judgeDamage` | PASS | **SUPPORTED** | 兵士相打ち、防壁照合、未ブロック直接ダメージ |
-| `action.end` | エンド | direct | normal | main | `cleanupFogs`, `endTurn` | PASS | **SUPPORTED** | ターン交代処理（7枚超過discardは未実装） |
-| `action.charge` | チャージ | triggered | immediate | main | `setAllUnitState` | PASS | **SUPPORTED** | End解決後、新TPの全キャラクターがchargeへ復帰 |
-| `action.draw` | ドロー | triggered | normal | main | `drawFromLife` | PASS | **SUPPORTED** | 解決時ライフに応じた枚数（>2なら2枚、<=2なら1枚） |
-| `action.twist` | ツイスト | direct | normal | quick | `toggleUnitState` | PASS | **SUPPORTED** | Stage積載中の通常アクションへのQuick割り込み |
-| `action.counterattack` | 反撃 | triggered | immediate | main | `dealDamage` | PASS | **SUPPORTED** | 要塞によるダメージ無効化時の即時反撃 |
-| `action.nextGeneration` | 世代交代 | triggered | immediate | quick | `takeUntilLegacyCard`, `summonUnit` | PASS | **SUPPORTED** | レガシーカード死亡時の即時ユニット召喚 |
-| `action.revolutionDraw` | 革命ドロー | triggered | immediate | quick | `drawFromLife` | PASS | **SUPPORTED** | 革命下での未ブロック兵士による即時ドロー |
-| `action.up` | アップ | direct | normal | quick | `createFog` | PASS | **PARTIAL** | Fogエンジン実装済、Core盤面では非手札 |
-| `action.down` | ダウン | direct | normal | quick | `createFog` | PASS | **PARTIAL** | Fogエンジン実装済、Core盤面では非手札 |
-| `action.throwing` | 投擲 | direct | normal | quick | `dealDamage` | PASS | **PARTIAL** | ダメージエンジン実装済 |
-| `action.destroyBulwark` | 防壁破壊 | direct | normal | quick | `moveToGraveyard` | PASS | **PARTIAL** | 墓地移動エンジン実装済 |
-| `action.counter` | カウンター | direct | normal | quick | `cancelRequest` | PASS | **PARTIAL** | リクエストキャンセルエンジン実装済 |
+ルールパッケージには **全17アクション**、**全7コンポーネント** がロードされます。
+
+### A. SUPPORTED (Core Playtest Ready: 通常対戦で即座に体験可能)
+
+| Action ID | Name | Trigger | Speed | Timing | Effect Command | Playtest Status |
+|---|---|---|---|---|---|---|
+| `action.attack` | アタック | direct | normal | main | `startAttack` | **SUPPORTED** |
+| `action.block` | ブロック | triggered | normal | main | `selectBlockAssignments`, `declareBlock` | **SUPPORTED** |
+| `action.damageJudge` | ダメージ判定 | triggered | normal | main | `judgeDamage` | **SUPPORTED** |
+| `action.end` | エンド | direct | normal | main | `cleanupFogs`, `endTurn` | **SUPPORTED** |
+| `action.charge` | チャージ | triggered | immediate | main | `setAllUnitState` | **SUPPORTED** |
+| `action.draw` | ドロー | triggered | normal | main | `drawFromLife` | **SUPPORTED** |
+| `action.twist` | ツイスト | direct | normal | quick | `toggleUnitState` | **SUPPORTED** |
+
+### B. ENGINE SUPPORTED (Preset Dormant: エンジン実装済・固定盤面では条件非配置)
+
+| Action ID | Name | Trigger | Speed | Timing | 状態 | 備考 |
+|---|---|---|---|---|---|---|
+| `action.counterattack` | 反撃 | triggered | immediate | main | **ENGINE SUPPORTED** | 要塞によるダメージ無効化時に即時誘発 |
+| `action.nextGeneration` | 世代交代 | triggered | immediate | quick | **ENGINE SUPPORTED** | レガシーカード死亡時に即時誘発 |
+| `action.revolutionDraw` | 革命ドロー | triggered | immediate | quick | **ENGINE SUPPORTED** | 革命下での未ブロック兵士による即時ドロー |
+
+### C. PARTIAL / NOT PLAYABLE IN PRESET (エンジンコマンド実装済・本プリセット対象外)
+
+| Action ID | Name | Trigger | Speed | Timing | 状態 |
+|---|---|---|---|---|---|
+| `action.up` | アップ | direct | normal | quick | **PARTIAL** |
+| `action.down` | ダウン | direct | normal | quick | **PARTIAL** |
+| `action.throwing` | 投擲 | direct | normal | quick | **PARTIAL** |
+| `action.destroyBulwark` | 防壁破壊 | direct | normal | quick | **PARTIAL** |
+| `action.counter` | カウンター | direct | normal | quick | **PARTIAL** |
+| `action.setBulwark` | 防壁配置 | direct | normal | main | **PARTIAL** |
+| `action.summonSoldier` | 兵士召喚 | direct | normal | main | **PARTIAL** |
 
 ---
 
-## 5. 既知の制限事項 (Known Limitations)
+## 5. コンポーネント一覧 (全7件)
 
-1. **エンド時の手札7枚超過ディスカード**:
-   - 現在のエンジンでは未実装です。プレイテスト用プリセットでは手札が7枚以下となるように設計されています。
-2. **アタックの「1ターン1回」制限 & 「このターン出た兵士」の制限**:
-   - コアフローの検証を優先しているため、召喚酔い等の高度な制約は今後のフェイズで導入されます。
-3. **切札・キャラクター固有能力の一部**:
-   - 巨人召喚・強制アタック等の特殊キャラクター展開は今回のプリセットには含まれません（基本戦闘ルールに集中）。
+1. `character.soldier` (一般兵: ランク 2..10)
+2. `character.bulwark` (防壁: スーツ heart/diamond, ランク A..K, 初期 face: down)
+3. `character.giant` (巨人: 防壁相打ち無効化能力)
+4. `trump.fortress` (要塞: ダメージ無効化能力)
+5. `trump.revolution` (革命: ダメージ判定ルール反転能力)
+6. `fog.up` (アップ霧)
+7. `fog.down` (ダウン霧)
 
 ---
 
-## 6. バグ報告方法
+## 6. 不具合報告方法
 
 不具合を発見した場合は、画面右上の「**デバッグ表示**」ボタンから「**📋 デバッグ情報をコピー**」をクリックし、取得された JSON ログを添えて Issue までご報告ください。

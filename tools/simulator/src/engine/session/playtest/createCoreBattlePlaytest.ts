@@ -3,8 +3,9 @@
  *
  * 【特徴】
  * - 各プレイヤー Life 8枚 (Card[] 形式)
- * - 各プレイヤー: charge 状態の兵士2体、裏向き防壁1体
+ * - 各プレイヤー: charge 状態の兵士2体、裏向き防壁1体 (防壁は公式規則通り ♡ / ♢)
  * - 各プレイヤー: ツイスト等の Quick アクションを試せるコスト手札
+ * - 同一プレイヤー内でのカード（suit + rank）重複なし
  * - 最初のターンから Attack / Block / DamageJudge / Quick / End / Charge / Draw を短時間で体験可能
  */
 
@@ -25,7 +26,7 @@ export function createCoreBattlePresetState(): any {
         life: [
           { id: "p1-l1", suit: "S", rank: "2", value: 2 },
           { id: "p1-l2", suit: "H", rank: "3", value: 3 },
-          { id: "p1-l3", suit: "D", rank: "4", value: 4 },
+          { id: "p1-l3", suit: "D", rank: "3", value: 3 }, // 重複解消: D3
           { id: "p1-l4", suit: "C", rank: "5", value: 5 },
           { id: "p1-l5", suit: "S", rank: "7", value: 7 },
           { id: "p1-l6", suit: "H", rank: "8", value: 8 },
@@ -59,7 +60,7 @@ export function createCoreBattlePresetState(): any {
             kind: "防壁",
             face: "down",
             state: "charge",
-            cards: [{ id: "p1-c3", suit: "D", rank: "4", value: 4 }],
+            cards: [{ id: "p1-c3", suit: "D", rank: "4", value: 4 }], // 防壁: ♢4
             labels: ["防御"],
           },
         ],
@@ -106,7 +107,7 @@ export function createCoreBattlePresetState(): any {
             kind: "防壁",
             face: "down",
             state: "charge",
-            cards: [{ id: "p2-c3", suit: "S", rank: "5", value: 5 }],
+            cards: [{ id: "p2-c3", suit: "H", rank: "5", value: 5 }], // 合法な防壁: ♡5
             labels: ["防御"],
           },
         ],

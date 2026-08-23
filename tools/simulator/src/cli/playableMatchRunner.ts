@@ -37,6 +37,8 @@ function findPassPatternIndex(req: any): number {
   return req.patterns.findIndex((p: any) => p.kind === "PASS");
 }
 
+import { validatePlaytestPreset } from "../engine/session/playtest/validatePlaytestPreset";
+
 async function runPlayableMatch() {
   header("CORE BATTLE PLAYTEST MATCH CHECK (rules-vnext / GameSession / Decision)");
 
@@ -45,6 +47,15 @@ async function runPlayableMatch() {
   const rulePackage = getPlaytestRulePackage(fullPackage);
 
   const state = createCoreBattlePresetState();
+
+  // プリセットの整合性バリデーション
+  const validation = validatePlaytestPreset(state, fullPackage);
+  if (!validation.valid) {
+    console.error(`${colors.red}[VALIDATION ERROR] Preset が不正です:${colors.reset}`, validation.errors);
+    process.exit(1);
+  }
+  console.log(`${colors.green}[PRESET VALIDATION OK] ${state.presetId} の整合性を確認しました。${colors.reset}`);
+
   const session = new GameSession(state, rulePackage);
 
   console.log(`初期プリセット: ${state.presetId}`);
