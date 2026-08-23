@@ -1,0 +1,58 @@
+components:
+  - id: trump.revolution
+    name: 革命
+    ruby: かくめい
+    type: trump
+    zone: trump
+
+    card:
+      suit: spade
+      rank: A
+
+    abilities:
+      - damageJudgeModifier:
+          matchup: soldierVsSoldiers
+          rule: revolution
+
+      - grantAbility:
+          target:
+            relation: self
+            characterType: soldier
+          ability: revolutionDraw
+
+actions:
+  - id: action.revolutionDraw
+    name: 革命ドロー
+    ruby: かくめいどろー
+    type: triggered
+
+    request:
+      trigger: triggered
+      speed: immediate
+      timing: quick
+
+    triggerCondition:
+      event: actionResolved
+      condition:
+        actionId: action.damageJudge
+
+        activeComponent:
+          relation: self
+          zone: trump
+          component: trump.revolution
+          face: up
+
+        forEach:
+          path: payload.result.damageJudge.combats
+          as: combat
+          where:
+            combatType: unblocked
+            attackerPlayerKey: self
+            attackerCharacterType: soldier
+
+    text:
+      effect: ライフの一番上からカードを1枚引き、手札に加える。
+
+    effect:
+      - drawFromLife:
+          amount: 1

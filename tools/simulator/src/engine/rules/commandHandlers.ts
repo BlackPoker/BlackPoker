@@ -143,6 +143,57 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
 }
 
 /**
+ * drawFromLife: ライフの上からカードを指定枚数手札へ引く (汎用ドロー)
+ */
+export function drawFromLifeHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { amount = 1, target } = args;
+    const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, context);
+    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) return;
+
+    let targetPlayerKey = context.playerKey;
+    if (target) {
+      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+      if (typeof resolvedTarget === "string" && context.state.players?.[resolvedTarget]) {
+        targetPlayerKey = resolvedTarget;
+      }
+    }
+
+    const player = context.state.players[targetPlayerKey];
+    if (!player) return;
+
+    if (!player.life) player.life = [];
+    if (!player.hand) player.hand = [];
+
+    const drawCount = Math.min(resolvedAmount, player.life.length);
+    for (let i = 0; i < drawCount; i++) {
+      const card = player.life.shift();
+      if (!card) break;
+
+      player.hand.push(card);
+
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card,
+          fromZone: "life",
+          toZone: "hand",
+          playerKey: targetPlayerKey,
+          cause: {
+            type: "action",
+            actionId: context.currentAction?.id || context.currentRequest?.actionId,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
  * takeUntilLegacyCard: Joker,A,J,Q,Kが出るまでライフをめくる
  */
 export function takeUntilLegacyCardHandler(): CommandHandler {

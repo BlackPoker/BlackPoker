@@ -1,5 +1,5 @@
 import { CommandContext } from "./CommandRegistry";
-import { ActionDefinition, RequestBuffer, TriggeredActionRequest } from "../../domain/rules/RulePackage";
+import { ActionDefinition, RequestBuffer, TriggeredActionRequest, TriggerMatch } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey } from "./playerUtils";
 
 function isEventLike(event: unknown): event is { type: string; payload?: any } {
@@ -43,16 +43,15 @@ export class TriggerResolver {
     if (!context.actions) return;
     if (!isEventLike(event)) return;
 
-    // 今回の同一誘発処理（resolveTriggers 呼び出し内）で誘発したアクション候補
-    const newlyTriggered: ActionDefinition[] = [];
+    // 今回の同一誘発処理（resolveTriggers 呼び出し内）で誘発したアクション候補（1アクションにつき0〜N件の一致）
+    const newlyTriggered: TriggerMatch[] = [];
 
     for (const action of context.actions) {
       const cond = action.triggerCondition;
       if (!cond || cond.event !== event.type) continue;
 
-      if (this.evaluateTriggerCondition(action, event, context)) {
-        newlyTriggered.push(action);
-      }
+      const matches = this.findTriggerMatches(action, event, context);
+      newlyTriggered.push(...matches);
     }
 
     if (newlyTriggered.length === 0) return;
@@ -61,7 +60,8 @@ export class TriggerResolver {
     let hasMainTriggered = false;
     const requestBuffer = state.requestBuffer as RequestBuffer;
 
-    for (const action of newlyTriggered) {
+    for (const match of newlyTriggered) {
+      const action = match.action;
       const isMain = this.isMainTriggeredRequest(action);
 
       if (isMain && hasMainTriggered) {
@@ -96,6 +96,10 @@ export class TriggerResolver {
           // cardMoved 起因の誘発アクションは、移動したカード/ユニットのオーナーがコントローラー・所有者となる
           controller = event.payload.playerKey;
           definitionOwner = event.payload.playerKey;
+        } else if (event.type === "actionResolved" && event.payload?.playerKey) {
+          // actionResolved 起因の誘発アクションは、アクション解決プレイヤーがコントローラー・所有者となる
+          controller = event.payload.playerKey;
+          definitionOwner = event.payload.playerKey;
         }
 
         const req: TriggeredActionRequest = {
@@ -107,7 +111,8 @@ export class TriggerResolver {
           sequence: seq,
           action,
           sourceEvent: event,
-          definitionOwner
+          definitionOwner,
+          triggerBindings: match.bindings,
         };
 
         requestBuffer.requests.push(req);
@@ -127,16 +132,87 @@ export class TriggerResolver {
   }
 
   /**
-   * 誘発条件の評価
+   * 単一アクション定義に対するイベント一致結果を検索します（0〜N件）。
+   * forEach が設定されている場合は、配列要素ごとに条件一致した match を生成します。
    */
-  private evaluateTriggerCondition(action: ActionDefinition, event: { type: string; payload?: any }, context: CommandContext): boolean {
+  findTriggerMatches(
+    action: ActionDefinition,
+    event: { type: string; payload?: any },
+    context: CommandContext
+  ): TriggerMatch[] {
     const cond = action.triggerCondition;
-    if (!cond) return false;
+    if (!cond) return [];
     const payload = event.payload || {};
 
-    if (event.type === "cardMoved") {
-      const selfPlayerKey = payload.playerKey ?? context.playerKey;
+    if (!this.evaluateBaseCondition(cond, event, context)) {
+      return [];
+    }
 
+    if (cond.condition?.forEach) {
+      const forEachDef = cond.condition.forEach;
+      const path = forEachDef.path;
+      const asKey = forEachDef.as || "item";
+      const whereCond = forEachDef.where || {};
+
+      const items = this.resolvePathValue(path, event);
+      if (!Array.isArray(items) || items.length === 0) {
+        return [];
+      }
+
+      const selfPlayerKey = payload.playerKey ?? context.playerKey;
+      const matches: TriggerMatch[] = [];
+
+      for (const item of items) {
+        let isMatch = true;
+        for (const [key, expectedVal] of Object.entries(whereCond)) {
+          const actualVal = item[key];
+          const resolvedExpected = expectedVal === "self" ? selfPlayerKey : expectedVal;
+          if (actualVal !== resolvedExpected) {
+            isMatch = false;
+            break;
+          }
+        }
+
+        if (isMatch) {
+          matches.push({
+            action,
+            bindings: { [asKey]: item },
+          });
+        }
+      }
+
+      return matches;
+    }
+
+    return [{ action }];
+  }
+
+  private resolvePathValue(pathStr: string, rootObj: any): any {
+    const path = pathStr.startsWith("payload.")
+      ? pathStr.substring("payload.".length)
+      : pathStr;
+    const segments = path.split(".");
+
+    let current = pathStr.startsWith("payload.") ? rootObj.payload : rootObj;
+    for (const seg of segments) {
+      if (current === undefined || current === null) return undefined;
+      current = current[seg];
+    }
+    return current;
+  }
+
+  /**
+   * 基本的な誘発条件の評価
+   */
+  private evaluateBaseCondition(
+    cond: { event: string; condition?: any },
+    event: { type: string; payload?: any },
+    context: CommandContext
+  ): boolean {
+    const payload = event.payload || {};
+    const selfPlayerKey = payload.playerKey ?? context.playerKey;
+
+    if (event.type === "cardMoved") {
       if (cond.condition) {
         if (cond.condition.fromZone && cond.condition.fromZone !== payload.fromZone) return false;
         if (cond.condition.toZone && cond.condition.toZone !== payload.toZone) return false;
@@ -166,27 +242,11 @@ export class TriggerResolver {
           }
         }
 
-        // activeComponent 条件の評価 (例: 自分の表切札に要塞が存在すること)
+        // activeComponent 条件の評価
         if (cond.condition.activeComponent) {
-          const actCond = cond.condition.activeComponent;
-          const targetPlayerKey = actCond.relation === "self"
-            ? selfPlayerKey
-            : getOpponentPlayerKey(selfPlayerKey, context.state);
-          const targetPlayer = context.state.players?.[targetPlayerKey];
-          if (!targetPlayer) return false;
-
-          const zoneName = actCond.zone || "trump";
-          const componentList = targetPlayer[zoneName] || targetPlayer[`${zoneName}s`] || [];
-          const targetCompId = actCond.component || actCond.componentId;
-          const expectedFace = actCond.face || "up";
-
-          const hasActive = Array.isArray(componentList) && componentList.some((comp: any) => {
-            const matchId = targetCompId ? comp.componentId === targetCompId || comp.id === targetCompId : true;
-            const matchFace = expectedFace ? comp.face === expectedFace : true;
-            return matchId && matchFace;
-          });
-
-          if (!hasActive) return false;
+          if (!this.evaluateActiveComponent(cond.condition.activeComponent, selfPlayerKey, context)) {
+            return false;
+          }
         }
       }
       return true;
@@ -198,6 +258,13 @@ export class TriggerResolver {
 
       if (cond.condition) {
         if (cond.condition.actionId && cond.condition.actionId !== targetActionId) return false;
+
+        // activeComponent 条件の評価
+        if (cond.condition.activeComponent) {
+          if (!this.evaluateActiveComponent(cond.condition.activeComponent, selfPlayerKey, context)) {
+            return false;
+          }
+        }
 
         // hasAttacker の検証
         if (cond.condition.hasAttacker) {
@@ -247,5 +314,28 @@ export class TriggerResolver {
       return Object.keys(cond.condition).length === 0;
     }
     return true;
+  }
+
+  private evaluateActiveComponent(
+    actCond: any,
+    selfPlayerKey: string,
+    context: CommandContext
+  ): boolean {
+    const targetPlayerKey = actCond.relation === "self"
+      ? selfPlayerKey
+      : getOpponentPlayerKey(selfPlayerKey, context.state);
+    const targetPlayer = context.state.players?.[targetPlayerKey];
+    if (!targetPlayer) return false;
+
+    const zoneName = actCond.zone || "trump";
+    const componentList = targetPlayer[zoneName] || targetPlayer[`${zoneName}s`] || [];
+    const targetCompId = actCond.component || actCond.componentId;
+    const expectedFace = actCond.face || "up";
+
+    return Array.isArray(componentList) && componentList.some((comp: any) => {
+      const matchId = targetCompId ? comp.componentId === targetCompId || comp.id === targetCompId : true;
+      const matchFace = expectedFace ? comp.face === expectedFace : true;
+      return matchId && matchFace;
+    });
   }
 }

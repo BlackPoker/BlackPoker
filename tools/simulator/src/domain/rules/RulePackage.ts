@@ -102,6 +102,7 @@ export type ActionRequest = {
   selectedCostPayment?: CostPayment;
   sourcePatternId?: string;
   result?: ActionResolutionResult;
+  triggerBindings?: Record<string, any>;
 };
 
 export type Stage = {
@@ -138,7 +139,17 @@ export type TriggerCondition = {
       rank?: string | string[];
       owner?: "self" | string;
     };
+    forEach?: {
+      path: string;
+      as?: string;
+      where?: Record<string, any>;
+    };
   };
+};
+
+export type TriggerMatch = {
+  action: ActionDefinition;
+  bindings?: Record<string, any>;
 };
 
 export type TriggeredActionRequest = {
@@ -151,6 +162,7 @@ export type TriggeredActionRequest = {
   action: ActionDefinition;
   sourceEvent?: unknown; // anyを徹底排除
   definitionOwner?: string;
+  triggerBindings?: Record<string, any>;
 };
 
 export type TriggerHistory = {

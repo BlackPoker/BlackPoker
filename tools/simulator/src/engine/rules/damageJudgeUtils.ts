@@ -1,7 +1,7 @@
 import { CommandContext } from "./CommandRegistry";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import type { EffectInterpreter } from "./EffectInterpreter";
-import { isSoldierType, isBulwarkType } from "./characterUtils";
+import { isSoldierType, isBulwarkType, getCharacterType } from "./characterUtils";
 import { isJokerCard, matchesPrintedRank } from "./cardUtils";
 import { getOpponentPlayerKey } from "./playerUtils";
 import { moveUnitToGraveyard } from "./unitMovementUtils";
@@ -21,6 +21,7 @@ export function resolveUnblockedCombat(
 ): CombatResult {
   const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
   const targetPlayerKey = attacker.battle?.targetPlayerKey || getOpponentPlayerKey(attackerPlayerKey, context.state);
+  const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
 
   return {
     attackerUnitId: attacker.unitId,
@@ -33,11 +34,12 @@ export function resolveUnblockedCombat(
     directDamageAmount: attackerSize,
     directDamageDealt: attackerSize,
     targetPlayerKey,
+    attackerCharacterType,
   };
 }
 
 /**
- * 2. 兵士アタッカー vs 複数兵士ブロッカーの戦闘計算（サイズ比較）
+ * 2. 兵士アタッカー vs 複数兵士ブロッカーの戦闘計算（サイズ比較 / 革命対応）
  */
 export function resolveSoldierVsSoldiersCombat(
   attacker: any,
@@ -47,27 +49,58 @@ export function resolveSoldierVsSoldiersCombat(
   context: CommandContext,
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
+  const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
   const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
   const blockerSizes = blockers.map((b) =>
     abilityEvaluator.calculateUnitSize(b, context.state.players[blockerPlayerKey])
   );
   const blockerTotalSize = blockerSizes.reduce((sum, s) => sum + s, 0);
 
+  const isRevolution = abilityEvaluator.hasDamageJudgeModifier(
+    "soldierVsSoldiers",
+    "revolution",
+    context.state,
+    context.components
+  );
+
   let attackerMovedToGrave = false;
   let blockersMovedToGrave: string[] = [];
+  let differenceDamage: { amount: number; targetPlayerKey: string } | undefined = undefined;
 
-  if (attackerSize > blockerTotalSize) {
-    // ブロッカー側敗北 -> ブロッカー全員墓地へ
-    attackerMovedToGrave = false;
-    blockersMovedToGrave = blockers.map((b) => b.unitId);
-  } else if (attackerSize < blockerTotalSize) {
-    // アタッカー側敗北 -> アタッカーのみ墓地へ、ブロッカー全員生存
-    attackerMovedToGrave = true;
-    blockersMovedToGrave = [];
+  if (isRevolution) {
+    // 革命ルール: 大きい方が墓地へ、差分ダメージを墓地へ送ったプレイヤーに与える。同値なら両方墓地へ（差分0）。
+    if (attackerSize > blockerTotalSize) {
+      attackerMovedToGrave = true;
+      blockersMovedToGrave = [];
+      const diff = attackerSize - blockerTotalSize;
+      if (diff > 0) {
+        differenceDamage = { amount: diff, targetPlayerKey: attackerPlayerKey };
+      }
+    } else if (attackerSize < blockerTotalSize) {
+      attackerMovedToGrave = false;
+      blockersMovedToGrave = blockers.map((b) => b.unitId);
+      const diff = blockerTotalSize - attackerSize;
+      if (diff > 0) {
+        differenceDamage = { amount: diff, targetPlayerKey: blockerPlayerKey };
+      }
+    } else {
+      // 同値: 両方墓地へ
+      attackerMovedToGrave = true;
+      blockersMovedToGrave = blockers.map((b) => b.unitId);
+      differenceDamage = undefined;
+    }
   } else {
-    // 同値 -> アタッカーおよびブロッカー全員墓地へ
-    attackerMovedToGrave = true;
-    blockersMovedToGrave = blockers.map((b) => b.unitId);
+    // 通常ルール: 小さい方が墓地へ。
+    if (attackerSize > blockerTotalSize) {
+      attackerMovedToGrave = false;
+      blockersMovedToGrave = blockers.map((b) => b.unitId);
+    } else if (attackerSize < blockerTotalSize) {
+      attackerMovedToGrave = true;
+      blockersMovedToGrave = [];
+    } else {
+      attackerMovedToGrave = true;
+      blockersMovedToGrave = blockers.map((b) => b.unitId);
+    }
   }
 
   return {
@@ -80,6 +113,9 @@ export function resolveSoldierVsSoldiersCombat(
     blockerInitialTotalSize: blockerTotalSize,
     attackerMovedToGrave,
     blockersMovedToGrave,
+    ruleVariant: isRevolution ? "revolution" : "normal",
+    differenceDamage,
+    attackerCharacterType,
   };
 }
 
@@ -94,6 +130,7 @@ export function resolveSoldierVsBulwarkCombat(
   context: CommandContext,
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
+  const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
   const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
   const bulwarkCard = bulwark.cards?.[0];
 
@@ -115,6 +152,7 @@ export function resolveSoldierVsBulwarkCombat(
     blockersMovedToGrave,
     bulwarkRevealed: true,
     bulwarkMatched: isMatched,
+    attackerCharacterType,
   };
 }
 
@@ -275,6 +313,21 @@ export function applyDamageJudgeResult(
         "dealDamage",
         { target: "targetPlayer", amount: damageAmount },
         damageContext
+      );
+    }
+
+    // 1-2b. 革命時の差分ダメージ
+    if (combat.differenceDamage && combat.differenceDamage.amount > 0) {
+      const diffDamageContext: CommandContext = {
+        ...context,
+        playerKey: combat.differenceDamage.targetPlayerKey,
+        targetPlayerKey: combat.differenceDamage.targetPlayerKey,
+      };
+
+      ((effectInterpreter as any).registry).execute(
+        "dealDamage",
+        { target: "targetPlayer", amount: combat.differenceDamage.amount },
+        diffDamageContext
       );
     }
 

@@ -160,6 +160,7 @@ export class TriggerProcessingCoordinator {
         source: "requestBuffer",
         sourceEvent: triggeredReq.sourceEvent,
         definitionOwner: triggeredReq.definitionOwner,
+        triggerBindings: triggeredReq.triggerBindings,
       };
 
       const context: CommandContext = {
