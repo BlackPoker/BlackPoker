@@ -54,6 +54,15 @@ export class ExpressionEvaluator {
         const selectionId = value.substring("selection.".length);
         return context.selections?.[selectionId];
       }
+      if (value.startsWith("sourceEvent.")) {
+        const path = value.substring("sourceEvent.".length).split(".");
+        let current: any = context.sourceEvent;
+        for (const segment of path) {
+          if (current === undefined || current === null) return undefined;
+          current = current[segment];
+        }
+        return current;
+      }
     }
     return value;
   }

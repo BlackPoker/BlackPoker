@@ -165,6 +165,7 @@ export class TriggerProcessingCoordinator {
       const context: CommandContext = {
         ...tempContext,
         currentRequest: actionReq,
+        sourceEvent: triggeredReq.sourceEvent,
       };
 
       if (isImmediate) {

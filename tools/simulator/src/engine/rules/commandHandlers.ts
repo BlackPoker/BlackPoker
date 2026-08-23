@@ -95,14 +95,25 @@ export function removeFogHandler(): CommandHandler {
 export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): CommandHandler {
   return (args, context) => {
     const { target } = args;
-    const player = context.state.players[context.playerKey];
-    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
-
     const targetUnit = target === "target" ? context.targetComponent : null;
     if (!targetUnit) return;
 
+    // targetUnit が存在するプレイヤーを特定
+    let ownerPlayerKey = context.playerKey;
+    for (const [pKey, p] of Object.entries<any>(context.state.players || {})) {
+      if (p.field && p.field.some((u: any) => u.unitId === targetUnit.unitId)) {
+        ownerPlayerKey = pKey;
+        break;
+      }
+    }
+
+    const player = context.state.players[ownerPlayerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${ownerPlayerKey}`);
+
     // フィールドから除外
-    player.field = player.field.filter((u: any) => u.unitId !== targetUnit.unitId);
+    if (player.field) {
+      player.field = player.field.filter((u: any) => u.unitId !== targetUnit.unitId);
+    }
 
     // 墓地へ追加
     if (!player.grave) {
@@ -119,7 +130,9 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
             card: card,
             fromZone: "field",
             toZone: "grave",
-            playerKey: context.playerKey,
+            playerKey: ownerPlayerKey,
+            cause: { type: "action", actionId: context.currentAction?.id || context.currentRequest?.actionId },
+            characterType: targetUnit.kind === "防壁" || targetUnit.componentId === "character.bulwark" ? "bulwark" : undefined,
           }
         };
         effectInterpreter.dispatchEvent(event, context);
@@ -194,9 +207,20 @@ export function dealDamageHandler(
     }
 
     // 対象プレイヤーのキーを解決
-    const targetPlayerKey = target === "targetPlayer" && context.targetPlayerKey
-      ? context.targetPlayerKey
-      : (context.playerKey === "p1" ? "p2" : "p1");
+    let targetPlayerKey = "";
+    if (target) {
+      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+      if (typeof resolvedTarget === "string") {
+        if (resolvedTarget === "targetPlayer" && context.targetPlayerKey) {
+          targetPlayerKey = context.targetPlayerKey;
+        } else if (context.state.players?.[resolvedTarget]) {
+          targetPlayerKey = resolvedTarget;
+        }
+      }
+    }
+    if (!targetPlayerKey) {
+      targetPlayerKey = context.targetPlayerKey || (context.playerKey === "p1" ? "p2" : "p1");
+    }
 
     const targetPlayer = context.state.players[targetPlayerKey];
     if (!targetPlayer) throw new Error(`対象プレイヤーが見つかりません: ${targetPlayerKey}`);

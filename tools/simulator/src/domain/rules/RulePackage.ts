@@ -117,6 +117,23 @@ export type TriggerCondition = {
     actionId?: string;
     hasAttacker?: boolean;
     hasAttackerAndBlocker?: boolean;
+    characterType?: string;
+    cause?: {
+      actionId?: string;
+      command?: string;
+      [key: string]: any;
+    };
+    combat?: {
+      role?: string;
+      [key: string]: any;
+    };
+    activeComponent?: {
+      relation?: "self" | "opponent";
+      zone?: string;
+      component?: string;
+      componentId?: string;
+      face?: "up" | "down";
+    };
     card?: {
       rank?: string | string[];
       owner?: "self" | string;

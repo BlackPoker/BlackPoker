@@ -91,6 +91,10 @@ export class TriggerResolver {
           // ダメージ判定はターンプレイヤー
           controller = state.turnPlayer;
           definitionOwner = state.turnPlayer;
+        } else if (event.type === "cardMoved" && event.payload?.playerKey) {
+          // cardMoved 起因の誘発アクションは、移動したカード/ユニットのオーナーがコントローラー・所有者となる
+          controller = event.payload.playerKey;
+          definitionOwner = event.payload.playerKey;
         }
 
         const req: TriggeredActionRequest = {
@@ -127,22 +131,59 @@ export class TriggerResolver {
   private evaluateTriggerCondition(action: ActionDefinition, event: { type: string; payload?: any }, context: CommandContext): boolean {
     const cond = action.triggerCondition;
     if (!cond) return false;
-    const payload = event.payload;
+    const payload = event.payload || {};
 
     if (event.type === "cardMoved") {
       if (cond.condition) {
         if (cond.condition.fromZone && cond.condition.fromZone !== payload.fromZone) return false;
         if (cond.condition.toZone && cond.condition.toZone !== payload.toZone) return false;
+        if (cond.condition.characterType && cond.condition.characterType !== payload.characterType) return false;
 
-        if (cond.condition.card && payload.card) {
+        // cause 条件の評価
+        if (cond.condition.cause) {
+          if (cond.condition.cause.actionId && cond.condition.cause.actionId !== payload.cause?.actionId) return false;
+          if (cond.condition.cause.command && cond.condition.cause.command !== payload.cause?.command) return false;
+        }
+
+        // combat 条件の評価
+        if (cond.condition.combat) {
+          if (cond.condition.combat.role && cond.condition.combat.role !== payload.combat?.role) return false;
+        }
+
+        // card 条件の評価
+        if (cond.condition.card) {
           const cardCond = cond.condition.card;
-          if (cardCond.rank) {
+          if (cardCond.rank && payload.card) {
             const ranks = Array.isArray(cardCond.rank) ? cardCond.rank : [cardCond.rank];
             if (!ranks.includes(payload.card.rank)) return false;
           }
           if (cardCond.owner === "self") {
             if (payload.playerKey !== context.playerKey) return false;
           }
+        }
+
+        // activeComponent 条件の評価 (例: 自分の表切札に要塞が存在すること)
+        if (cond.condition.activeComponent) {
+          const actCond = cond.condition.activeComponent;
+          const ownerPlayerKey = payload.playerKey || context.playerKey;
+          const targetPlayerKey = actCond.relation === "self"
+            ? ownerPlayerKey
+            : (ownerPlayerKey === "p1" ? "p2" : "p1");
+          const targetPlayer = context.state.players?.[targetPlayerKey];
+          if (!targetPlayer) return false;
+
+          const zoneName = actCond.zone || "trump";
+          const componentList = targetPlayer[zoneName] || targetPlayer[`${zoneName}s`] || [];
+          const targetCompId = actCond.component || actCond.componentId;
+          const expectedFace = actCond.face || "up";
+
+          const hasActive = Array.isArray(componentList) && componentList.some((comp: any) => {
+            const matchId = targetCompId ? comp.componentId === targetCompId || comp.id === targetCompId : true;
+            const matchFace = expectedFace ? comp.face === expectedFace : true;
+            return matchId && matchFace;
+          });
+
+          if (!hasActive) return false;
         }
       }
       return true;

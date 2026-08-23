@@ -45,6 +45,7 @@ export interface CommandContext {
   currentRequest?: ActionRequest; // 現在解決中のリクエスト情報
   triggered?: boolean; // 新規追加：誘発リクエスト判定
   source?: string; // 新規追加：移送ソース
+  sourceEvent?: any; // 誘発元イベント
   selections?: Record<string, any>; // 効果解決時の選択結果マップ
 }
 
@@ -311,6 +312,7 @@ export class CommandRegistry {
       targetPlayerKey,
       currentAction: action,
       currentRequest: request,
+      sourceEvent: request.sourceEvent,
     };
 
     // コストはリクエスト成立時に支払い済みのため、解決時には支払わない
@@ -463,6 +465,7 @@ export class CommandRegistry {
       targetPlayerKey,
       currentAction: action,
       currentRequest: request,
+      sourceEvent: request.sourceEvent,
       selections,
     };
 

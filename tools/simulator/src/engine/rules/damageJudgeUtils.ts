@@ -311,7 +311,11 @@ export function applyDamageJudgeResult(
           const isBulwark = isBulwarkType(blockerUnit, context.components);
           const metadata: MoveUnitMetadata = {
             cause: { type: "effect", command: "judgeDamage", actionId: "action.damageJudge" },
-            combatSnapshot: { role: "blocker", blocksUnitId: combat.attackerUnitId },
+            combatSnapshot: {
+              role: "blocker",
+              blocksUnitId: combat.attackerUnitId,
+              attackerPlayerKey: combat.attackerPlayerKey,
+            },
             characterType: isBulwark ? "bulwark" : "soldier",
           };
           moveUnitToGraveyard(

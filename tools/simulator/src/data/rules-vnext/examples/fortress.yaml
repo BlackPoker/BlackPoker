@@ -20,3 +20,38 @@ components:
               controller: self
               componentType: character
           target: self
+
+actions:
+  - id: action.counterattack
+    name: 反撃
+    ruby: はんげき
+    type: triggered
+
+    request:
+      trigger: triggered
+      speed: immediate
+      timing: quick
+
+    triggerCondition:
+      event: cardMoved
+      condition:
+        fromZone: field
+        toZone: grave
+        characterType: bulwark
+        cause:
+          actionId: action.damageJudge
+        combat:
+          role: blocker
+        activeComponent:
+          relation: self
+          zone: trump
+          component: trump.fortress
+          face: up
+
+    text:
+      effect: アタッカーのオーナーに2点のダメージを与える。
+
+    effect:
+      - dealDamage:
+          target: sourceEvent.payload.combat.attackerPlayerKey
+          amount: 2

@@ -3,7 +3,7 @@ import { getCharacterType } from "./characterUtils";
 
 export interface MoveUnitMetadata {
   cause?: { type: string; command?: string; actionId?: string; [key: string]: any };
-  combatSnapshot?: { role?: string; blocksUnitId?: string; targetPlayerKey?: string; [key: string]: any };
+  combatSnapshot?: { role?: string; blocksUnitId?: string; targetPlayerKey?: string; attackerPlayerKey?: string; [key: string]: any };
   characterType?: string;
   [key: string]: any;
 }
