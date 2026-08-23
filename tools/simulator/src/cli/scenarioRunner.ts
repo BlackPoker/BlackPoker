@@ -2,6 +2,7 @@ import * as path from "path";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../engine/rules/CommandRegistry";
 import { TurnManager } from "../engine/rules/TurnManager";
+import { TriggerProcessingCoordinator } from "../engine/rules/TriggerProcessingCoordinator";
 
 const colors = {
   reset: "\x1b[0m",
@@ -870,6 +871,109 @@ async function runAttackScenario(rulePackage: any) {
   - 墓地へ送られた防壁1の状態 = ${state.players.p2.grave[0].state} (期待値: drive)${colors.reset}`);
 }
 
+async function runTurnCycleScenario(rulePackage: any) {
+  header("シナリオ8: 「ターンサイクル」（エンド → チャージ → ドロー）");
+  console.log("概要: Player A がエンドを宣言してターンを終了。ターンが Player B に移り、チャージが即時誘発して Player B の全キャラクターがチャージ状態に復帰。その後ドローがステージに積まれ、PASS/PASS で解決してライフから2枚引くことを検証します。");
+
+  const registry = new CommandRegistry();
+  setupRegistryHook(registry);
+
+  const soldier = {
+    unitId: "soldier-p2",
+    kind: "一般兵",
+    componentId: "character.soldier",
+    state: "drive",
+    cards: [{ id: "c-p2-1", suit: "H", rank: "6", value: 6 }],
+    labels: ["攻撃", "防御"],
+  };
+  const bulwark = {
+    unitId: "bulwark-p2",
+    kind: "防壁",
+    componentId: "character.bulwark",
+    face: "down",
+    state: "drive",
+    cards: [{ id: "c-p2-2", suit: "D", rank: "4", value: 4 }],
+    labels: ["防御"],
+  };
+
+  const state = {
+    stateVersion: 1,
+    turnPlayer: "p1",
+    chancePlayer: "p1",
+    turnCount: 1,
+    players: {
+      p1: {
+        name: "Player A",
+        life: [{ id: "l1-1", suit: "S", rank: "2", value: 2 }],
+        hand: [],
+        field: [],
+        grave: [],
+      },
+      p2: {
+        name: "Player B",
+        life: [
+          { id: "l2-1", suit: "C", rank: "5", value: 5 },
+          { id: "l2-2", suit: "S", rank: "6", value: 6 },
+          { id: "l2-3", suit: "H", rank: "7", value: 7 },
+        ],
+        hand: [],
+        field: [soldier, bulwark],
+        grave: [],
+      },
+    },
+    stage: { requests: [] },
+    requestBuffer: { requests: [], history: [] },
+  };
+
+  subHeader("初期状態");
+  logState(state);
+
+  subHeader("アクション：エンド をステージへ");
+  const endAction = rulePackage.actions.find((a: any) => a.id === "action.end")!;
+  const contextEnd: CommandContext = {
+    state,
+    playerKey: "p1",
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+  const reqEnd = registry.createRequest(endAction, contextEnd);
+
+  subHeader("エンド (ID: " + reqEnd.id + ") の解決");
+  registry.resolveTopRequest(contextEnd);
+
+  subHeader("エンド解決後の状態 (ターン交代とチャージ即時解決・ドロー積載)");
+  // エンド解決により turnPlayer が p2 へ交代し、チャージがバッファへ誘発
+  // バッファ処理によりチャージが即時解決され、続いてドローが誘発してステージへ積載される
+  const coordinator = new TriggerProcessingCoordinator();
+  coordinator.processPendingTriggers(state, rulePackage, registry);
+
+  const contextDraw: CommandContext = {
+    state,
+    playerKey: "p2",
+    actions: rulePackage.actions,
+    components: rulePackage.components,
+  };
+
+  const reqDraw = state.stage.requests[0];
+  state.chancePlayer = "p1"; // 対応機会として相手プレイヤーへチャンス設定
+  logState(state);
+
+  subHeader("ドロー (ID: " + reqDraw.id + ") の解決 (PASS/PASS成立後)");
+  registry.resolveTopRequest(contextDraw);
+  state.chancePlayer = "p2"; // 解決後は手番プレイヤーへチャンスが戻る
+
+  subHeader("最終状態");
+  logState(state);
+
+  console.log(`\n${colors.bold}${colors.green}結果検証: 
+  - 現在のターンプレイヤー = ${state.turnPlayer} (期待値: p2。ターン交代成功！)
+  - Player B の一般兵状態 = ${soldier.state} (期待値: charge。チャージ成功！)
+  - Player B の防壁状態 = ${bulwark.state} (期待値: charge。チャージ成功！)
+  - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 2。2枚ドロー成功！)
+  - Player B の残りライフ数 = ${state.players.p2.life.length} (期待値: 1)
+  - 現在のチャンスプレイヤー = ${state.chancePlayer} (期待値: p2)${colors.reset}`);
+}
+
 async function main() {
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const rulePackage = await loadRulePackageFromDirectory(rulesDir);
@@ -896,6 +1000,9 @@ async function main() {
 
   // 7. アタックで戦闘一時状態を作る
   await runAttackScenario(rulePackage);
+
+  // 8. ターンサイクル (エンド → チャージ → ドロー)
+  await runTurnCycleScenario(rulePackage);
 }
 
 async function run() {

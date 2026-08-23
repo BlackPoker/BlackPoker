@@ -78,28 +78,33 @@ export class TriggerResolver {
         // リクエストバッファへ積む
         state.nextRequestSeq = (state.nextRequestSeq || 0) + 1;
         const seq = state.nextRequestSeq;
-
-        // リクエスト実行者の初期解決（デフォルトはイベント発生源のプレイヤー）
+        // リクエスト実行者 (controller) および定義所有者 (definitionOwner) の解決
         let controller = context.playerKey;
         let definitionOwner = context.playerKey;
 
-        // アタッカー・ブロッカー等の整合
-        if (action.id === "action.block") {
-          // ブロックは防御側プレイヤー（アタックを受けた側）がコントローラーとなる
-          controller = context.playerKey === "p1" ? "p2" : "p1";
-          definitionOwner = state.turnPlayer;
-        } else if (action.id === "action.damageJudge") {
-          // ダメージ判定はターンプレイヤー
-          controller = state.turnPlayer;
-          definitionOwner = state.turnPlayer;
-        } else if (event.type === "cardMoved" && event.payload?.playerKey) {
+        // 1. ActionDefinition に明示的な指定がある場合 (DSL駆動)
+        const reqCtrl = action.request?.controller;
+        const reqOwner = action.request?.definitionOwner;
+
+        const resolvePlayerRef = (ref: string | undefined, defaultPlayer: string): string => {
+          if (!ref) return defaultPlayer;
+          if (ref === "turnPlayer") return state.turnPlayer;
+          if (ref === "nonTurnPlayer" || ref === "opponent") return getOpponentPlayerKey(state.turnPlayer, state);
+          if (ref === "eventPlayer" || ref === "self") return (event as any).payload?.playerKey ?? defaultPlayer;
+          return ref;
+        };
+
+        if (reqCtrl || reqOwner) {
+          controller = resolvePlayerRef(reqCtrl, context.playerKey);
+          definitionOwner = resolvePlayerRef(reqOwner, context.playerKey);
+        } else if (event.type === "cardMoved" && (event as any).payload?.playerKey) {
           // cardMoved 起因の誘発アクションは、移動したカード/ユニットのオーナーがコントローラー・所有者となる
-          controller = event.payload.playerKey;
-          definitionOwner = event.payload.playerKey;
-        } else if (event.type === "actionResolved" && event.payload?.playerKey) {
+          controller = (event as any).payload.playerKey;
+          definitionOwner = (event as any).payload.playerKey;
+        } else if (event.type === "actionResolved" && (event as any).payload?.playerKey) {
           // actionResolved 起因の誘発アクションは、アクション解決プレイヤーがコントローラー・所有者となる
-          controller = event.payload.playerKey;
-          definitionOwner = event.payload.playerKey;
+          controller = (event as any).payload.playerKey;
+          definitionOwner = (event as any).payload.playerKey;
         }
 
         const req: TriggeredActionRequest = {

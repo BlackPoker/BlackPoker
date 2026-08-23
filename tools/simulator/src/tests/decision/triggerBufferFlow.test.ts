@@ -166,8 +166,8 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     // B. stage に積まれただけで未解決（status: "pending"）(Test F)
     expect(state.stage.requests[0].status).toBe("pending");
 
-    // C. チャンスが block のコントローラー（防御側 p2）になっている
-    expect(state.chancePlayer).toBe("p2");
+    // C. チャンスが block のコントローラーの相手（対応機会を持つ p1）になっている
+    expect(state.chancePlayer).toBe("p1");
   });
 
   it("G & H: should trigger damageJudge upon block resolve regardless of blocker presence and move to stage via buffer", () => {

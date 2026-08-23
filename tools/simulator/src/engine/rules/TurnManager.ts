@@ -1,3 +1,5 @@
+import { getOpponentPlayerKey } from "./playerUtils";
+
 /**
  * ゲームのターンおよびチャンス（手番・アクション実行権）状態遷移を管理する静的ヘルパークラス。
  */
@@ -12,7 +14,7 @@ export class TurnManager {
       state.players = {};
     }
     state.turnPlayer = playerKey;
-    state.nonTurnPlayer = playerKey === "p1" ? "p2" : "p1";
+    state.nonTurnPlayer = getOpponentPlayerKey(playerKey, state);
     state.chancePlayer = playerKey;
     state.turnCount = (state.turnCount || 0) + 1;
     state.actionCount = 0; // ターンごとのアクション数をリセット
@@ -23,14 +25,14 @@ export class TurnManager {
    */
   static passChance(state: any) {
     if (!state.chancePlayer) return;
-    state.chancePlayer = state.chancePlayer === "p1" ? "p2" : "p1";
+    state.chancePlayer = getOpponentPlayerKey(state.chancePlayer, state);
   }
 
   /**
    * 現在のターンを終了し、次のプレイヤーのターンを開始します。
    */
   static endTurn(state: any) {
-    const nextPlayer = state.turnPlayer === "p1" ? "p2" : "p1";
+    const nextPlayer = getOpponentPlayerKey(state.turnPlayer, state);
     this.startTurn(state, nextPlayer);
   }
 

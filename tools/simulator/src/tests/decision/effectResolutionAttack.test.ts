@@ -262,10 +262,10 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Attack Action (Phase 15)
     expect(state.stage.history[0].actionId).toBe("action.attack");
     expect(state.stage.history[0].status).toBe("resolved");
 
-    // M: アタッカーが1体以上存在するため block が requestBuffer に入り、通常誘発として stage へ積まれて p2 にチャンスが渡る
+    // M: アタッカーが1体以上存在するため block が requestBuffer に入り、通常誘発として stage へ積まれて相手 (p1) に対応機会のチャンスが渡る
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0].actionId).toBe("action.block");
-    expect(state.chancePlayer).toBe("p2");
+    expect(state.chancePlayer).toBe("p1");
   });
 
   it("N: selecting 0 attackers ([]) should resolve attack normally without triggering block", () => {

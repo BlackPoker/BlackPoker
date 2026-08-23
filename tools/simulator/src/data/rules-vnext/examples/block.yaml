@@ -8,6 +8,8 @@ actions:
       trigger: triggered
       speed: normal
       timing: main
+      controller: nonTurnPlayer
+      definitionOwner: turnPlayer
 
     triggerCondition:
       event: actionResolved

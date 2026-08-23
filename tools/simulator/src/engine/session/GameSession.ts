@@ -8,6 +8,7 @@ import { PatternExecutor } from "../decision/PatternExecutor";
 import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
 import { PassTracker } from "./PassTracker";
 import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordinator";
+import { getOpponentPlayerKey } from "../rules/playerUtils";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -166,9 +167,9 @@ export class GameSession {
     }
 
     if (triggerResult.stagedRequests.length > 0) {
-      // 通常誘発アクションがステージに積まれた場合、そのコントローラーへチャンスを設定
+      // 通常誘発アクションがステージに積まれた場合、そのコントローラーの対戦相手へチャンスを設定（対応機会の提供）
       const topStagedReq = triggerResult.stagedRequests[triggerResult.stagedRequests.length - 1];
-      this.state.chancePlayer = topStagedReq.controller;
+      this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
     }
 
     // 4. 現在のチャンスプレイヤーの判断要求を生成

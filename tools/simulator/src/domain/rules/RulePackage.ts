@@ -17,6 +17,8 @@ export type ActionDefinition = {
     trigger: "direct" | "triggered" | string;
     speed: "normal" | "immediate" | string;
     timing: "main" | "quick" | "block" | "damageJudge" | string;
+    controller?: "turnPlayer" | "nonTurnPlayer" | "eventPlayer" | "self" | string;
+    definitionOwner?: "turnPlayer" | "nonTurnPlayer" | "eventPlayer" | "self" | string;
   };
   cost?: string;
   key?: {

@@ -1,0 +1,27 @@
+actions:
+  - id: action.charge
+    name: チャージ
+    ruby: ちゃーじ
+    type: basic
+
+    request:
+      trigger: triggered
+      speed: immediate
+      timing: main
+      controller: turnPlayer
+      definitionOwner: turnPlayer
+
+    triggerCondition:
+      event: actionResolved
+      condition:
+        actionId: action.end
+
+    text:
+      effect: ターンを持っているプレイヤーの場にいる全てのキャラクターをチャージ状態にする。
+
+    effect:
+      - setAllUnitState:
+          relation: self
+          zone: field
+          componentType: character
+          state: charge

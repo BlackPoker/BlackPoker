@@ -150,13 +150,9 @@ export function drawFromLifeHandler(
   effectInterpreter: EffectInterpreter
 ): CommandHandler {
   return (args, context) => {
-    const { amount = 1, target } = args;
-    const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, context);
-    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) return;
-
     let targetPlayerKey = context.playerKey;
-    if (target) {
-      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+    if (args.target) {
+      const resolvedTarget = expressionEvaluator.resolveBindingValue(args.target, context);
       if (typeof resolvedTarget === "string" && context.state.players?.[resolvedTarget]) {
         targetPlayerKey = resolvedTarget;
       }
@@ -168,7 +164,19 @@ export function drawFromLifeHandler(
     if (!player.life) player.life = [];
     if (!player.hand) player.hand = [];
 
-    const drawCount = Math.min(resolvedAmount, player.life.length);
+    const currentLifeCount = player.life.length;
+    let baseAmount = args.amount !== undefined ? args.amount : 1;
+    let resolvedAmount = expressionEvaluator.resolveBindingValue(baseAmount, context);
+    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) return;
+
+    // 条件付き枚数判定 (解決時のライフ枚数を基準)
+    if (args.whenLifeAtMost && typeof args.whenLifeAtMost.count === "number") {
+      if (currentLifeCount <= args.whenLifeAtMost.count) {
+        resolvedAmount = args.whenLifeAtMost.amount;
+      }
+    }
+
+    const drawCount = Math.min(resolvedAmount, currentLifeCount);
     for (let i = 0; i < drawCount; i++) {
       const card = player.life.shift();
       if (!card) break;
@@ -189,6 +197,56 @@ export function drawFromLifeHandler(
         },
       };
       effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
+ * setAllUnitState: 指定領域のすべてのユニットの状態 (state: charge / drive) を一括更新
+ */
+export function setAllUnitStateHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { relation = "self", zone = "field", componentType = "character", state: targetState } = args;
+    if (!targetState) return;
+
+    let targetPlayerKey = context.playerKey;
+    if (relation === "opponent") {
+      targetPlayerKey = getOpponentPlayerKey(context.playerKey, context.state);
+    }
+
+    const player = context.state.players[targetPlayerKey];
+    if (!player) return;
+
+    const units = player[zone];
+    if (!Array.isArray(units)) return;
+
+    const components = context.components || [];
+
+    for (const unit of units) {
+      if (componentType === "character") {
+        const isChar = isCharacterComponent(unit, components);
+        if (!isChar) continue;
+      } else if (unit.componentId !== componentType) {
+        continue;
+      }
+
+      if (unit.state !== targetState) {
+        const prevState = unit.state;
+        unit.state = targetState;
+        const event = {
+          type: "unitStateChanged",
+          payload: {
+            unitId: unit.unitId,
+            fromState: prevState,
+            toState: targetState,
+            playerKey: targetPlayerKey,
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
     }
   };
 }

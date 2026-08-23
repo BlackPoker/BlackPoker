@@ -1,0 +1,27 @@
+actions:
+  - id: action.draw
+    name: ドロー
+    ruby: どろー
+    type: basic
+
+    request:
+      trigger: triggered
+      speed: normal
+      timing: main
+      controller: turnPlayer
+      definitionOwner: turnPlayer
+
+    triggerCondition:
+      event: actionResolved
+      condition:
+        actionId: action.charge
+
+    text:
+      effect: ライフの一番上から2枚引いて手札へ（ライフが2以下の場合は1枚）。
+
+    effect:
+      - drawFromLife:
+          amount: 2
+          whenLifeAtMost:
+            count: 2
+            amount: 1

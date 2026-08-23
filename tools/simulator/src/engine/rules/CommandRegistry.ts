@@ -17,6 +17,7 @@ import {
   declareBlockHandler,
   judgeDamageHandler,
   drawFromLifeHandler,
+  setAllUnitStateHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -625,5 +626,6 @@ export class CommandRegistry {
     this.register("judgeDamage", judgeDamageHandler(this.abilityEvaluator, this.effectInterpreter));
     this.register("drawFromLife", drawFromLifeHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("drawCards", drawFromLifeHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("setAllUnitState", setAllUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }
