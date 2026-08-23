@@ -194,6 +194,8 @@ export class TriggerProcessingCoordinator {
           payload: {
             actionId: actionReq.actionId,
             playerKey: actionReq.controller,
+            requestId: actionReq.id,
+            result: actionReq.result,
           },
         };
         registry.dispatchEvent(resolveEvent, context);

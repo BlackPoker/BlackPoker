@@ -1,5 +1,6 @@
 import { CommandContext } from "./CommandRegistry";
 import { ActionDefinition, RequestBuffer, TriggeredActionRequest } from "../../domain/rules/RulePackage";
+import { getOpponentPlayerKey } from "./playerUtils";
 
 function isEventLike(event: unknown): event is { type: string; payload?: any } {
   return (
@@ -134,6 +135,8 @@ export class TriggerResolver {
     const payload = event.payload || {};
 
     if (event.type === "cardMoved") {
+      const selfPlayerKey = payload.playerKey ?? context.playerKey;
+
       if (cond.condition) {
         if (cond.condition.fromZone && cond.condition.fromZone !== payload.fromZone) return false;
         if (cond.condition.toZone && cond.condition.toZone !== payload.toZone) return false;
@@ -158,17 +161,17 @@ export class TriggerResolver {
             if (!ranks.includes(payload.card.rank)) return false;
           }
           if (cardCond.owner === "self") {
-            if (payload.playerKey !== context.playerKey) return false;
+            const cardOwner = payload.card?.owner || payload.playerKey;
+            if (cardOwner !== selfPlayerKey) return false;
           }
         }
 
         // activeComponent 条件の評価 (例: 自分の表切札に要塞が存在すること)
         if (cond.condition.activeComponent) {
           const actCond = cond.condition.activeComponent;
-          const ownerPlayerKey = payload.playerKey || context.playerKey;
           const targetPlayerKey = actCond.relation === "self"
-            ? ownerPlayerKey
-            : (ownerPlayerKey === "p1" ? "p2" : "p1");
+            ? selfPlayerKey
+            : getOpponentPlayerKey(selfPlayerKey, context.state);
           const targetPlayer = context.state.players?.[targetPlayerKey];
           if (!targetPlayer) return false;
 

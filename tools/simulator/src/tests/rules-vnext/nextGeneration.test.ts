@@ -267,4 +267,162 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
     expect(graveCards.some((c: any) => c.rank === "7")).toBe(true);
     expect(graveCards.some((c: any) => c.rank === "5")).toBe(true);
   });
+
+  it("should trigger nextGeneration for defender (p2) when defender legacy blocker dies in damageJudge (Test E)", () => {
+    const state: any = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          name: "Player A",
+          life: [{ id: "l1", suit: "H", rank: "5", value: 5 }],
+          hand: [],
+          field: [
+            {
+              unitId: "att-soldier-8",
+              componentId: "character.soldier",
+              state: "drive",
+              cards: [{ id: "c-att-8", suit: "S", rank: "8", value: 8 }],
+              labels: ["攻撃"],
+              battle: { role: "attacker", targetPlayerKey: "p2" },
+            },
+          ],
+          fog: [],
+          grave: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [
+            { id: "l2-1", suit: "D", rank: "3", value: 3 },
+            { id: "l2-2", suit: "C", rank: "4", value: 4 },
+            { id: "l2-legacy", suit: "H", rank: "K", value: 13 },
+          ],
+          hand: [],
+          field: [
+            {
+              unitId: "blk-soldier-J",
+              componentId: "character.soldier",
+              state: "drive",
+              cards: [{ id: "c-blk-J", suit: "D", rank: "J", value: 11 }], // Legacy card J
+              labels: ["防御"],
+              battle: { role: "blocker", blocksUnitId: "att-soldier-8" },
+            },
+          ],
+          fog: [],
+          grave: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: { requests: [], history: [] },
+    };
+
+    const registry = new CommandRegistry();
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    // damageJudge の実行 (p1 アタッカー size 8 vs p2 ブロッカー size 11 -> p2 勝利、p1 死亡)
+    // ここでは p1 が勝つケースをテストするため、p1 size 12 vs p2 size 11 にする
+    state.players.p1.field[0].cards[0] = { id: "c-att-K", suit: "S", rank: "K", value: 13 }; // size 13 > 11
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // p2 の J 兵士が死亡して墓地へ移動
+    expect(state.players.p2.field.length).toBe(0);
+    expect(state.players.p2.grave.length).toBe(1);
+
+    // 防御側 (p2) の世代交代が誘発していること
+    expect(state.requestBuffer.requests.length).toBe(1);
+    const nextGenReq = state.requestBuffer.requests[0];
+    expect(nextGenReq.actionId).toBe("action.nextGeneration");
+    expect(nextGenReq.controller).toBe("p2");
+    expect(nextGenReq.definitionOwner).toBe("p2");
+  });
+
+  it("should resolve nextGeneration for defender (p2) exclusively without affecting attacker (p1) (Test F)", () => {
+    const state: any = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          name: "Player A",
+          life: [
+            { id: "l1-1", suit: "H", rank: "5", value: 5 },
+            { id: "l1-2", suit: "S", rank: "6", value: 6 },
+          ],
+          hand: [],
+          field: [
+            {
+              unitId: "att-soldier-K",
+              componentId: "character.soldier",
+              state: "drive",
+              cards: [{ id: "c-att-K", suit: "S", rank: "K", value: 13 }],
+              labels: ["攻撃"],
+              battle: { role: "attacker", targetPlayerKey: "p2" },
+            },
+          ],
+          fog: [],
+          grave: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [
+            { id: "l2-1", suit: "D", rank: "2", value: 2 },
+            { id: "l2-2", suit: "C", rank: "7", value: 7 },
+            { id: "l2-legacy", suit: "H", rank: "Joker", value: 20 },
+          ],
+          hand: [],
+          field: [
+            {
+              unitId: "blk-soldier-Q",
+              componentId: "character.soldier",
+              state: "drive",
+              cards: [{ id: "c-blk-Q", suit: "D", rank: "Q", value: 12 }], // Legacy card Q (size 12 < 13)
+              labels: ["防御"],
+              battle: { role: "blocker", blocksUnitId: "att-soldier-K" },
+            },
+          ],
+          fog: [],
+          grave: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: { requests: [], history: [] },
+    };
+
+    const registry = new CommandRegistry();
+    const coordinator = new TriggerProcessingCoordinator();
+    const damageJudgeAction = rulePackage.actions.find((a) => a.id === "action.damageJudge")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    registry.createRequest(damageJudgeAction, context);
+    registry.resolveTopRequest(context);
+
+    // p2 の世代交代が誘発
+    expect(state.requestBuffer.requests.length).toBe(1);
+
+    // 即時解決
+    coordinator.processPendingTriggers(state, rulePackage, registry);
+
+    // p2 側のライフ・手札検証:
+    // [2, 7] が墓地へ、[Joker] が手札へ
+    expect(state.players.p2.hand.length).toBe(1);
+    expect(state.players.p2.hand[0].rank).toBe("Joker");
+    expect(state.players.p2.life.length).toBe(0);
+
+    // p1 側は影響を受けないこと
+    expect(state.players.p1.life.length).toBe(2);
+    expect(state.players.p1.hand.length).toBe(0);
+  });
 });

@@ -123,6 +123,7 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
 
     // 各カードについて cardMoved イベントを発行
     if (targetUnit.cards && Array.isArray(targetUnit.cards)) {
+      const charType = getCharacterType(targetUnit, context?.components);
       for (const card of targetUnit.cards) {
         const event = {
           type: "cardMoved",
@@ -132,7 +133,7 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
             toZone: "grave",
             playerKey: ownerPlayerKey,
             cause: { type: "action", actionId: context.currentAction?.id || context.currentRequest?.actionId },
-            characterType: targetUnit.kind === "防壁" || targetUnit.componentId === "character.bulwark" ? "bulwark" : undefined,
+            characterType: charType || undefined,
           }
         };
         effectInterpreter.dispatchEvent(event, context);
