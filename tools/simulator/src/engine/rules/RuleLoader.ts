@@ -2,42 +2,18 @@ import { parse } from "yaml";
 import { RulePackage, ActionDefinition, ComponentDefinition } from "../../domain/rules/RulePackage";
 
 /**
- * 指定されたディレクトリ配下のすべての YAML ファイルを再帰的に読み込み、
- * 1つの RulePackage に統合します。
+ * 複数のパース済みドキュメントオブジェクト（YAMLからパースされたオブジェクトの配列）を
+ * 1つの RulePackage に統合・検証します。
  */
-export async function loadRulePackageFromDirectory(dirPath: string): Promise<RulePackage> {
-  // Node.js 標準モジュールを動的インポートすることで、ブラウザビルド環境での静的エラーを防止する
-  const fs = await import("fs");
-  const path = await import("path");
-
+export function mergeRuleDefinitions(parsedDocs: any[]): RulePackage {
   const actions: ActionDefinition[] = [];
   const components: ComponentDefinition[] = [];
 
-  const readDirRecursive = (dir: string): string[] => {
-    let results: string[] = [];
-    const list = fs.readdirSync(dir);
-    list.forEach((file) => {
-      const fullPath = path.resolve(dir, file);
-      const stat = fs.statSync(fullPath);
-      if (stat && stat.isDirectory()) {
-        results = results.concat(readDirRecursive(fullPath));
-      } else {
-        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-          results.push(fullPath);
-        }
-      }
-    });
-    return results;
-  };
-
-  const yamlFiles = readDirRecursive(dirPath);
   let id = "vnext-rules";
   let version = "1.0.0";
   let description = "Rules Next Generation";
 
-  for (const filePath of yamlFiles) {
-    const content = fs.readFileSync(filePath, "utf-8");
-    const parsed = parse(content) as any;
+  for (const parsed of parsedDocs) {
     if (!parsed) continue;
 
     if (parsed.id && parsed.version) {
@@ -54,7 +30,7 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
     }
   }
 
-  // 簡易整合性バリデーション
+  // 重複IDバリデーション
   const actionIds = new Set<string>();
   for (const action of actions) {
     if (actionIds.has(action.id)) {
@@ -79,3 +55,44 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
     components,
   };
 }
+
+/**
+ * 指定されたディレクトリ配下のすべての YAML ファイルを再帰的に読み込み、
+ * 1つの RulePackage に統合します（Node.js環境用）。
+ */
+export async function loadRulePackageFromDirectory(dirPath: string): Promise<RulePackage> {
+  // Node.js 標準モジュールを動的インポートすることで、ブラウザビルド環境での静的エラーを防止する
+  const fs = await import("fs");
+  const path = await import("path");
+
+  const readDirRecursive = (dir: string): string[] => {
+    let results: string[] = [];
+    const list = fs.readdirSync(dir);
+    list.forEach((file) => {
+      const fullPath = path.resolve(dir, file);
+      const stat = fs.statSync(fullPath);
+      if (stat && stat.isDirectory()) {
+        results = results.concat(readDirRecursive(fullPath));
+      } else {
+        if (file.endsWith(".yaml") || file.endsWith(".yml")) {
+          results.push(fullPath);
+        }
+      }
+    });
+    return results;
+  };
+
+  const yamlFiles = readDirRecursive(dirPath);
+  const parsedDocs: any[] = [];
+
+  for (const filePath of yamlFiles) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    const parsed = parse(content) as any;
+    if (parsed) {
+      parsedDocs.push(parsed);
+    }
+  }
+
+  return mergeRuleDefinitions(parsedDocs);
+}
+
