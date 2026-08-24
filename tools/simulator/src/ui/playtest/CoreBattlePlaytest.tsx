@@ -19,6 +19,9 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
 
+  // レギュレーション選択状態
+  const [selectedRegulation, setSelectedRegulation] = useState<string>("core-battle");
+
   // プリセットバリデーションエラー
   const [presetValidationErrors, setPresetValidationErrors] = useState<string[]>([]);
 
@@ -82,12 +85,15 @@ export const CoreBattlePlaytest: React.FC = () => {
     startNewGame();
   }, [startNewGame]);
 
-  // 判断の送信とゲーム進行
-  const handleDecisionSubmit = (response: DecisionResponse) => {
+  // 判断の送信とゲーム進行（リクエスト＆PASS 対応）
+  const handleDecisionSubmit = (
+    response: DecisionResponse,
+    options?: { autoPass?: boolean }
+  ) => {
     const session = sessionRef.current;
     if (!session) return;
 
-    const prevState = JSON.parse(JSON.stringify(session.state));
+    let prevState = JSON.parse(JSON.stringify(session.state));
 
     // 行動ログの記録
     if (currentStep?.type === "WAITING_FOR_DECISION") {
@@ -112,7 +118,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       nextStep = session.advance();
     }
 
-    const nextState = JSON.parse(JSON.stringify(session.state));
+    let nextState = JSON.parse(JSON.stringify(session.state));
     setCurrentStep(nextStep);
     setGameState(nextState);
 
@@ -122,14 +128,45 @@ export const CoreBattlePlaytest: React.FC = () => {
       addLog(ev.message, ev.level);
     }
 
+    // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS
+    if (
+      options?.autoPass &&
+      nextStep.type === "WAITING_FOR_DECISION" &&
+      currentStep?.type === "WAITING_FOR_DECISION" &&
+      nextStep.request.playerId === currentStep.request.playerId
+    ) {
+      const autoPassIndex = nextStep.request.patterns.findIndex((p) => p.kind === "PASS");
+      if (autoPassIndex !== -1) {
+        const autoPassPlayer = nextStep.request.playerId === "p1" ? "Player A" : "Player B";
+        addLog(`⏩ ${autoPassPlayer} が自動 PASS しました (リクエスト＆PASS)`, "action");
+
+        prevState = JSON.parse(JSON.stringify(session.state));
+        nextStep = session.submitDecision({
+          decisionId: nextStep.request.decisionId,
+          stateVersion: nextStep.request.stateVersion,
+          selectedPatternRef: autoPassIndex,
+        });
+        if (nextStep.type === "PROGRESSED") {
+          nextStep = session.advance();
+        }
+        nextState = JSON.parse(JSON.stringify(session.state));
+        setCurrentStep(nextStep);
+        setGameState(nextState);
+
+        const passEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+        for (const ev of passEvents) {
+          addLog(ev.message, ev.level);
+        }
+      }
+    }
+
     // 誘発アクションや状態変化のログ
     if (nextStep.type === "WAITING_FOR_DECISION") {
       const nextPlayer = nextStep.request.playerId;
 
-      // ターン交代やチャンス移動の検知
       if (session.state.stage?.requests?.length > 0) {
         const topReq = session.state.stage.requests[session.state.stage.requests.length - 1];
-        setLatestEventMessage(`Stage: ${topReq.action?.name || topReq.actionId} (発動: ${topReq.controller})`);
+        setLatestEventMessage(`Stage TOP: ${topReq.action?.name || topReq.actionId} (発動: ${topReq.controller})`);
       } else {
         setLatestEventMessage("");
       }
@@ -174,65 +211,72 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
-  const activePlayerKey = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
+  const activePlayerKey =
+    currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-6 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 text-xs font-black rounded bg-indigo-600 text-white">
-              PLAYTEST
-            </span>
-            <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-              Core Battle Playtest
-            </h1>
-            <span className="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-              Preset: {CORE_BATTLE_PRESET_ID}
-            </span>
+      <header className="flex flex-wrap items-center justify-between px-5 py-2.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-30">
+        <div className="flex items-center gap-3">
+          <span className="px-2 py-0.5 text-xs font-black rounded bg-indigo-600 text-white shadow-sm">
+            PLAYTEST
+          </span>
+          <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
+            Core Battle Playtest
+          </h1>
+
+          {/* Regulation Selector 枠 */}
+          <div className="flex items-center gap-1.5 ml-2">
+            <span className="text-[11px] font-bold text-slate-500">Regulation:</span>
+            <select
+              value={selectedRegulation}
+              onChange={(e) => setSelectedRegulation(e.target.value)}
+              className="text-xs font-bold py-1 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            >
+              <option value="core-battle">Core Battle (Preset 001) [Active]</option>
+              <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
+              <option value="entry-16" disabled>Entry 16 (Coming Soon)</option>
+            </select>
           </div>
-          <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-0.5">
-            ※ 実装済みコアルール確認用の短縮プレイテスト版です（BlackPoker 9.1.2 完全実装版ではありません）
-          </p>
         </div>
 
         {/* コントロールボタン */}
         <div className="flex items-center gap-3 mt-2 sm:mt-0">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer">
+          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={enablePassAndPlay}
               onChange={(e) => setEnablePassAndPlay(e.target.checked)}
               className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
             />
-            Pass-and-Play (交代画面)
+            Pass-and-Play
           </label>
 
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className={`px-3 py-1.5 text-xs font-bold rounded-lg border transition ${
+            className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition ${
               showDebug
                 ? "bg-slate-800 text-emerald-400 border-emerald-500"
                 : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
             }`}
           >
-            {showDebug ? "デバッグ非表示" : "🔧 デバッグ表示"}
+            {showDebug ? "デバッグ非表示" : "🔧 Raw Debug"}
           </button>
 
           <button
             onClick={startNewGame}
-            className="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow transition active:scale-95"
+            className="px-3 py-1 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow transition"
           >
-            🔄 最初からやり直す
+            🔄 Reset Match
           </button>
         </div>
       </header>
 
-      {/* メイン対戦エリア */}
-      <main className="flex-1 p-4 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-4">
-        {/* 左〜中央列: ステータス、盤面、ステージ、判断パネル (8/12) */}
-        <div className="lg:col-span-8 flex flex-col gap-4">
+      {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
+      <main className="flex-1 p-3.5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+        {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
+        <div className="lg:col-span-7 flex flex-col gap-3">
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar
@@ -270,24 +314,32 @@ export const CoreBattlePlaytest: React.FC = () => {
               showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p1" || showDebug}
             />
           )}
-
-          {/* 判断要求パネル (Decision Panel) */}
-          {currentStep?.type === "WAITING_FOR_DECISION" && (
-            <DecisionPanel
-              request={currentStep.request}
-              onSubmit={handleDecisionSubmit}
-            />
-          )}
         </div>
 
-        {/* 右列: 対戦ログ / デバッグパネル (4/12) */}
-        <div className="lg:col-span-4 flex flex-col gap-4 min-h-[500px]">
-          <div className="flex-1 min-h-[300px]">
+        {/* 右ペイン: 操作パネル / 対戦ログ */}
+        <div className="lg:col-span-5 flex flex-col gap-3 sticky top-16 max-h-[calc(100vh-5rem)]">
+          {/* 判断要求パネル (Decision Panel) */}
+          {currentStep?.type === "WAITING_FOR_DECISION" ? (
+            <div className="shrink-0">
+              <DecisionPanel
+                request={currentStep.request}
+                onSubmit={handleDecisionSubmit}
+              />
+            </div>
+          ) : (
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
+              現在待機中の判断要求はありません
+            </div>
+          )}
+
+          {/* 対戦ログ (Game Log) */}
+          <div className="flex-1 min-h-[220px] overflow-hidden flex flex-col">
             <GameLog logs={logs} />
           </div>
 
+          {/* Raw Debug パネル */}
           {showDebug && (
-            <div className="h-[400px]">
+            <div className="h-64 shrink-0">
               <DebugPanel
                 state={gameState}
                 currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
@@ -314,6 +366,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           winnerKey={currentStep.result.winner}
           winnerName={gameState?.players?.[currentStep.result.winner || ""]?.name || currentStep.result.winner}
           reason={currentStep.result.reason}
+          logs={logs}
           onRestart={startNewGame}
         />
       )}

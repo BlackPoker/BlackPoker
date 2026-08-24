@@ -1,5 +1,6 @@
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { parseCost, CostSymbol } from "../rules/CostParser";
+import { formatSuitSymbol } from "../rules/cardUtils";
 
 /**
  * コスト支払い候補の全列挙を行うクラス。
@@ -78,19 +79,35 @@ export class CostPaymentEnumerator {
       return []; // ライフ不足
     }
 
+    // カードマップ作成
+    const handCardMap = new Map<string, any>();
+    if (player?.hand && Array.isArray(player.hand)) {
+      for (const c of player.hand) {
+        handCardMap.set(c.id, c);
+      }
+    }
+
     // 4. 直積の生成
     const results: CostPayment[] = [];
     for (const discarded of discardCombinations) {
       for (const driven of bulwarkCombinations) {
         const parts: string[] = [];
         if (discarded.length > 0) {
-          parts.push(`手札破棄: [${discarded.join(", ")}]`);
+          const cardLabels = discarded.map((id) => {
+            const card = handCardMap.get(id);
+            return card ? `${formatSuitSymbol(card.suit)}${card.rank}` : id;
+          });
+          parts.push(`$D (${cardLabels.join(", ")} 破棄)`);
         }
         if (driven.length > 0) {
-          parts.push(`防壁ドライブ: [${driven.join(", ")}]`);
+          const bulwarkLabels = driven.map((id) => {
+            const u = availableBulwarks.find((b: any) => b.unitId === id);
+            return u ? `防壁 #${id.slice(-4)}` : id;
+          });
+          parts.push(`$B (${bulwarkLabels.join(", ")} ドライブ)`);
         }
         if (requiredL > 0) {
-          parts.push(`ライフ消費: ${requiredL}点`);
+          parts.push(`$L (${requiredL}点 ライフ消費)`);
         }
 
         results.push({

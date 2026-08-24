@@ -9,61 +9,7 @@ import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
-
-/**
- * ランクを数値にマッピング
- */
-function rankToValue(rank: string): number {
-  const r = rank.toUpperCase();
-  if (r === "A") return 1;
-  if (r === "J") return 11;
-  if (r === "Q") return 12;
-  if (r === "K") return 13;
-  if (r === "JOKER") return 0;
-  const num = parseInt(r, 10);
-  if (!isNaN(num)) return num;
-  return 0;
-}
-
-/**
- * スートが一致するかどうかを検証
- */
-function matchesSuit(cardSuit: string, expectedSuit: string): boolean {
-  if (!expectedSuit) return true;
-  const cs = cardSuit.toLowerCase();
-  const es = expectedSuit.toLowerCase();
-  if (cs === es) return true;
-  if (es === "spade" && (cs === "s" || cs === "♠")) return true;
-  if (es === "club" && (cs === "c" || cs === "♣")) return true;
-  if (es === "heart" && (cs === "h" || cs === "♡" || cs === "♥")) return true;
-  if (es === "diamond" && (cs === "d" || cs === "♢" || cs === "♦")) return true;
-  if (es === "joker" && (cs === "j" || cs === "x")) return true;
-  return false;
-}
-
-/**
- * ランクが一致するかどうかを検証 (範囲指定 "A..K", "A..10" 等に対応)
- */
-function matchesRank(cardRank: string, cardValue: number, expectedRank: any): boolean {
-  if (!expectedRank) return true;
-
-  if (Array.isArray(expectedRank)) {
-    return expectedRank.some((r) => r.toLowerCase() === cardRank.toLowerCase());
-  }
-
-  if (typeof expectedRank === "string") {
-    if (expectedRank.includes("..")) {
-      const [start, end] = expectedRank.split("..");
-      const startVal = rankToValue(start);
-      const endVal = rankToValue(end);
-      return cardValue >= startVal && cardValue <= endVal;
-    } else {
-      return cardRank.toLowerCase() === expectedRank.toLowerCase();
-    }
-  }
-
-  return false;
-}
+import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue } from "../rules/cardUtils";
 
 export interface DecisionGenerationMetrics {
   actionCount: number;
@@ -220,7 +166,7 @@ export class LegalPatternGenerator {
       const ref = cardSelectionCatalog.length;
       cardSelectionCatalog.push({
         cardIds: cards.map((c) => c.id),
-        displayCodes: cards.map((c) => c.code || `${c.suit}${c.rank}`),
+        displayCodes: cards.map((c) => `${formatSuitSymbol(c.suit)}${c.rank}`),
       });
       cardMap.set(key, ref);
       return ref;

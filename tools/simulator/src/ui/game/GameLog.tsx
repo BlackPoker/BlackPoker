@@ -20,15 +20,32 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
     system: "text-slate-500 dark:text-slate-400 italic",
   };
 
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    const text = logs.map((l) => `[${l.timestamp}] ${l.message}`).join("\n");
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="flex flex-col h-full p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
       <div className="flex items-center justify-between border-b pb-2 mb-2 border-slate-200 dark:border-slate-800">
-        <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
-          📜 対戦ログ (Game Log)
-        </span>
-        <span className="text-[10px] text-slate-400 font-mono">
-          {logs.length} 件
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-extrabold text-slate-700 dark:text-slate-300">
+            📜 対戦ログ (Game Log)
+          </span>
+          <span className="text-[10px] text-slate-400 font-mono">
+            {logs.length} 件
+          </span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="px-2 py-0.5 text-[10px] font-bold rounded bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 transition"
+        >
+          {copied ? "✓ コピー完了" : "📋 コピー"}
+        </button>
       </div>
 
       <div className="flex flex-col-reverse gap-1.5 overflow-y-auto flex-1 text-xs pr-1 font-sans">

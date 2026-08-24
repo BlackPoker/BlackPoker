@@ -286,7 +286,16 @@ export class CommandRegistry {
       for (const t of request.targets) {
         if (t.type === "unit") {
           if (!targetComponent) {
-            targetComponent = (player?.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+            for (const p of Object.values<any>(context.state.players || {})) {
+              const u = p.field?.find((unit: any) => unit.unitId === t.unitId);
+              if (u) {
+                targetComponent = u;
+                break;
+              }
+            }
+            if (!targetComponent) {
+              targetComponent = t;
+            }
           }
         } else if (t.type === "player") {
           if (!targetPlayerKey) {
@@ -352,6 +361,12 @@ export class CommandRegistry {
     }
 
     request.status = "resolved";
+    if (!context.state.stage) {
+      context.state.stage = { requests: [], history: [] };
+    }
+    if (!context.state.stage.history) {
+      context.state.stage.history = [];
+    }
     context.state.stage.history.push(request);
 
     // アクション解決イベントの発行

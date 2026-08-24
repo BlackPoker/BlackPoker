@@ -20,28 +20,39 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showCardDetails = true
 
   return (
     <div
-      className={`relative flex flex-col items-center p-2 rounded-lg border-2 transition-all shadow-sm ${
-        isDrive
+      className={`relative flex flex-col items-center p-2 rounded-xl border-2 transition-all shadow-sm ${
+        isBulwark
+          ? isDrive
+            ? "bg-amber-100/50 border-amber-400/60 opacity-80 dark:bg-amber-950/30 dark:border-amber-700"
+            : "bg-amber-50/90 border-amber-500 dark:bg-amber-950/40 dark:border-amber-400 shadow-md ring-1 ring-amber-400/30"
+          : isDrive
           ? "bg-slate-200/80 border-slate-400 opacity-75 dark:bg-slate-800/80 dark:border-slate-600"
           : "bg-white border-indigo-400 dark:bg-slate-700 dark:border-indigo-500 shadow-md"
       }`}
       style={{
-        minWidth: "100px",
+        minWidth: "110px",
       }}
     >
-      {/* 状態バッジ (CHARGE / DRIVE) */}
+      {/* ユニット種別 & 状態バッジ */}
       <div className="flex items-center justify-between w-full mb-1">
         <span
-          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+          className={`text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm ${
+            isBulwark
+              ? "bg-amber-500 text-slate-900 font-extrabold"
+              : "bg-indigo-600 text-white"
+          }`}
+        >
+          {isBulwark ? "🛡 防壁" : "⚔ 兵士"}
+        </span>
+
+        <span
+          className={`text-[9px] font-bold px-1 py-0.5 rounded ${
             isDrive
               ? "bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-200"
               : "bg-emerald-500 text-white animate-pulse"
           }`}
         >
           {isDrive ? "DRIVE (横)" : "CHARGE (縦)"}
-        </span>
-        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-          {unit.kind || (isBulwark ? "防壁" : "一般兵")}
         </span>
       </div>
 
@@ -76,12 +87,12 @@ export const UnitCard: React.FC<UnitCardProps> = ({ unit, showCardDetails = true
       </div>
 
       {/* ユニット情報フッター */}
-      <div className="w-full flex items-center justify-between text-[11px] font-mono mt-1 pt-1 border-t border-slate-200 dark:border-slate-600">
+      <div className="w-full flex items-center justify-between text-[10px] font-mono mt-1 pt-1 border-t border-slate-200 dark:border-slate-600">
         <span className="text-slate-500" title={`ID: ${unit.unitId}`}>
-          {unit.unitId.slice(-5)}
+          #{unit.unitId.slice(-5)}
         </span>
         <span className="font-bold text-slate-800 dark:text-slate-200">
-          Size: {isBulwark && isFaceDown && !showCardDetails ? "?" : totalSize}
+          {isBulwark && isFaceDown && !showCardDetails ? "Size: ?" : `Size: ${totalSize}`}
         </span>
       </div>
     </div>

@@ -30,7 +30,43 @@ export class GameEventFormatter {
       });
     }
 
-    // 2. ライフ変化 (ダメージ / ドロー被弾) の検知
+    // 2. Stage リクエスト解決の検知
+    const prevStageHistory = prevState.stage?.history || [];
+    const nextStageHistory = nextState.stage?.history || [];
+    if (nextStageHistory.length > prevStageHistory.length) {
+      // 解決されたリクエスト
+      const newlyResolved = nextStageHistory.slice(prevStageHistory.length);
+      for (const res of newlyResolved) {
+        const actName = res.action?.name || res.actionId;
+        const cName = getPlayerName(res.controller);
+        logs.push({
+          message: `✨ 「${actName}」が解決されました (発動者: ${cName})`,
+          level: "event",
+        });
+      }
+    }
+
+    // 3. ユニット状態トグル (ツイスト等) の検知 (同ターン内)
+    if (prevState.turnPlayer === nextState.turnPlayer) {
+      for (const pKey of ["p1", "p2"]) {
+        const prevUnits = prevState.players?.[pKey]?.field || [];
+        const nextUnits = nextState.players?.[pKey]?.field || [];
+        const pName = getPlayerName(pKey);
+
+        for (const nu of nextUnits) {
+          const pu = prevUnits.find((u: any) => u.unitId === nu.unitId);
+          if (pu && pu.state !== nu.state) {
+            const unitLabel = nu.kind || (nu.componentId === "character.bulwark" ? "防壁" : "一般兵");
+            logs.push({
+              message: `🌀 ${pName} の ${unitLabel} (#${nu.unitId.slice(-4)}) が ${pu.state} → ${nu.state} に切り替わりました`,
+              level: "event",
+            });
+          }
+        }
+      }
+    }
+
+    // 4. ライフ変化 (ダメージ / ドロー) の検知
     for (const pKey of ["p1", "p2"]) {
       const prevLife = Array.isArray(prevState.players?.[pKey]?.life) ? prevState.players[pKey].life.length : 0;
       const nextLife = Array.isArray(nextState.players?.[pKey]?.life) ? nextState.players[pKey].life.length : 0;
@@ -57,7 +93,7 @@ export class GameEventFormatter {
       }
     }
 
-    // 3. フィールド -> 墓地移動の検知 (ユニット破壊/相打ち)
+    // 5. フィールド -> 墓地移動の検知 (ユニット破壊/相打ち)
     for (const pKey of ["p1", "p2"]) {
       const prevGrave = Array.isArray(prevState.players?.[pKey]?.grave) ? prevState.players[pKey].grave.length : 0;
       const nextGrave = Array.isArray(nextState.players?.[pKey]?.grave) ? nextState.players[pKey].grave.length : 0;
@@ -70,9 +106,9 @@ export class GameEventFormatter {
 
         for (const u of prevState.players?.[pKey]?.field || []) {
           if (!nextFieldIds.has(u.unitId)) {
-            const unitLabel = u.kind || (u.componentId === "character.bulwark" ? "防壁" : "兵士");
+            const unitLabel = u.kind || (u.componentId === "character.bulwark" ? "防壁" : "一般兵");
             logs.push({
-              message: `☠️ ${pName} の ${unitLabel} (${u.unitId.slice(-5)}) が墓地へ送られました`,
+              message: `☠️ ${pName} の ${unitLabel} (#${u.unitId.slice(-4)}) が墓地へ送られました`,
               level: "event",
             });
           }
@@ -80,7 +116,7 @@ export class GameEventFormatter {
       }
     }
 
-    // 4. チャージ状態への復帰検知
+    // 6. チャージ状態への復帰検知 (ターン開始時)
     for (const pKey of ["p1", "p2"]) {
       const prevUnits = prevState.players?.[pKey]?.field || [];
       const nextUnits = nextState.players?.[pKey]?.field || [];
@@ -99,12 +135,11 @@ export class GameEventFormatter {
       }
     }
 
-    // 5. Stage リクエスト積載 / 解決の検知
+    // 7. Stage リクエスト積載の検知
     const prevStageReqs = prevState.stage?.requests || [];
     const nextStageReqs = nextState.stage?.requests || [];
 
     if (nextStageReqs.length > prevStageReqs.length) {
-      // 新しく積載されたリクエスト
       const newReq = nextStageReqs[nextStageReqs.length - 1];
       const actName = newReq.action?.name || newReq.actionId;
       const cName = getPlayerName(newReq.controller);

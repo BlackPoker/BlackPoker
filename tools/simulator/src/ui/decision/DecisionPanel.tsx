@@ -1,15 +1,15 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander, PatternView } from "../../engine/decision/PatternExpander";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
-  readonly onSubmit: (response: DecisionResponse) => void;
+  readonly onSubmit: (response: DecisionResponse, options?: { autoPass?: boolean }) => void;
   readonly onCancel?: () => void;
 }
 
-export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit, onCancel }) => {
+export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit }) => {
   const catalog = request.catalog;
   const patterns = request.patterns;
 
@@ -33,14 +33,6 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     return Array.from(refs);
   }, [patterns]);
 
-  // アクション選択変更ハンドラ
-  const handleSelectAction = (actRef: number) => {
-    setSelectedActionRef(actRef);
-    setSelectedKeyRef(null);
-    setSelectedCostRef(null);
-    setSelectedTargetRef(null);
-  };
-
   // 2. 選択中アクションで絞り込まれたパターン
   const patternsFilteredByAction = useMemo(() => {
     if (selectedActionRef === null) return [];
@@ -55,13 +47,6 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     }
     return Array.from(refs);
   }, [patternsFilteredByAction]);
-
-  // キーカード選択変更ハンドラ
-  const handleSelectKey = (keyRef: number | null) => {
-    setSelectedKeyRef(keyRef);
-    setSelectedCostRef(null);
-    setSelectedTargetRef(null);
-  };
 
   // 3. 選択中アクション + キーカードで絞り込まれたパターン
   const patternsFilteredByKey = useMemo(() => {
@@ -82,12 +67,6 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     return Array.from(refs);
   }, [patternsFilteredByKey]);
 
-  // コスト選択変更ハンドラ
-  const handleSelectCost = (costRef: number) => {
-    setSelectedCostRef(costRef);
-    setSelectedTargetRef(null);
-  };
-
   // 4. 選択中アクション + キーカード + コストで絞り込まれたパターン
   const patternsFilteredByCost = useMemo(() => {
     if (selectedCostRef === null) return [];
@@ -103,9 +82,42 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     return Array.from(refs);
   }, [patternsFilteredByCost]);
 
-  // 対象選択変更ハンドラ
-  const handleSelectTarget = (targetRef: number) => {
-    setSelectedTargetRef(targetRef);
+  // アクション選択ハンドラ（自動選択ヘルパー連動）
+  const handleSelectAction = (actRef: number) => {
+    setSelectedActionRef(actRef);
+
+    // そのアクションで選べるキーカードをチェック
+    const acts = patterns.filter((p) => p.actionSelectionRef === actRef);
+    const keyRefs = Array.from(new Set(acts.map((p) => p.keyCardSelectionRef)));
+    let nextKeyRef: number | null = null;
+    if (keyRefs.length === 1) {
+      nextKeyRef = keyRefs[0] !== undefined ? keyRefs[0] : null;
+    }
+    setSelectedKeyRef(nextKeyRef);
+
+    // コスト候補をチェック
+    const keys = acts.filter((p) =>
+      nextKeyRef === null ? p.keyCardSelectionRef === undefined : p.keyCardSelectionRef === nextKeyRef
+    );
+    const costRefs = Array.from(new Set(keys.map((p) => p.costPaymentRef).filter((r): r is number => r !== undefined)));
+    let nextCostRef: number | null = null;
+    if (costRefs.length === 1) {
+      nextCostRef = costRefs[0];
+    }
+    setSelectedCostRef(nextCostRef);
+
+    // 対象候補をチェック
+    if (nextCostRef !== null) {
+      const costs = keys.filter((p) => p.costPaymentRef === nextCostRef);
+      const tgtRefs = Array.from(new Set(costs.map((p) => p.targetSelectionRef).filter((r): r is number => r !== undefined)));
+      let nextTgtRef: number | null = null;
+      if (tgtRefs.length === 1) {
+        nextTgtRef = tgtRefs[0];
+      }
+      setSelectedTargetRef(nextTgtRef);
+    } else {
+      setSelectedTargetRef(null);
+    }
   };
 
   // 5. 最終的に確定した 1 件のパターン
@@ -115,14 +127,14 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     }
     return patterns.findIndex((p) => {
       const matchAction = p.actionSelectionRef === selectedActionRef;
-      const matchKey = selectedKeyRef === null
-        ? p.keyCardSelectionRef === undefined
-        : p.keyCardSelectionRef === selectedKeyRef;
+      const matchKey =
+        selectedKeyRef === null ? p.keyCardSelectionRef === undefined : p.keyCardSelectionRef === selectedKeyRef;
       const matchCost = p.costPaymentRef === selectedCostRef;
       const matchTarget = p.targetSelectionRef === selectedTargetRef;
       return matchAction && matchKey && matchCost && matchTarget;
     });
   }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
+
   const isEffectResolution = request.source.type === "EFFECT_RESOLUTION";
   const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
 
@@ -151,59 +163,76 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     }
   };
 
+  const handleActionSubmit = (autoPass: boolean) => {
+    if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
+    onSubmit(
+      {
+        decisionId: request.decisionId,
+        stateVersion: request.stateVersion,
+        selectedPatternRef: finalMatchedPatternIndex,
+      },
+      { autoPass }
+    );
+  };
+
   if (isEffectResolution) {
+    const isAttackSelection = request.source.effectStepId === "selectUnits";
+
     return (
-      <div className="rounded-xl border border-amber-500/40 bg-slate-900/95 p-5 shadow-2xl backdrop-blur-md">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+      <div className="rounded-xl border-2 border-amber-500/80 bg-slate-900/95 p-4 shadow-xl text-slate-100">
+        <div className="flex items-center justify-between border-b border-slate-700/80 pb-2.5 mb-3">
           <div>
-            <span className="inline-block rounded bg-amber-600 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-white">
-              Effect Decision (効果解決時の選択)
+            <span className="inline-block rounded bg-amber-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              EFFECT RESOLUTION
             </span>
-            <h3 className="text-lg font-black text-slate-100 mt-0.5">
-              アタッカー / ブロッカー割当ての選択
+            <h3 className="text-base font-black text-amber-300 mt-0.5">
+              {isAttackSelection ? "⚔ アタッカーの選択" : "🛡 ブロッカー割当ての選択"}
             </h3>
           </div>
           <div className="text-xs text-slate-400">
-            Player: <span className="font-bold text-amber-300">{request.playerId}</span>
+            Player: <span className="font-bold text-amber-300">{request.playerId === "p1" ? "Player A" : "Player B"}</span>
           </div>
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-            選択肢（全合法パターン）
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+            選択肢（全 {patterns.length} 通り）:
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+
+          <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
             {patternViews.map((pv, idx) => {
               const isSelected = selectedEffectPatternRef === idx;
               return (
                 <button
                   key={pv.patternId || idx}
                   onClick={() => setSelectedEffectPatternRef(idx)}
-                  className={`rounded-lg border px-3.5 py-2.5 text-left text-sm transition ${
+                  className={`rounded-xl border-2 p-3 text-left transition flex items-center justify-between ${
                     isSelected
-                      ? "border-amber-500 bg-amber-950/60 text-amber-200 shadow-md ring-1 ring-amber-500"
-                      : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                      ? "border-amber-400 bg-amber-950/80 text-amber-100 shadow-md ring-2 ring-amber-400/50"
+                      : "border-slate-700 bg-slate-800/60 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
                   }`}
                 >
-                  <div className="font-bold">{pv.summary}</div>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-full border flex items-center justify-center text-[8px] ${isSelected ? "bg-amber-400 border-amber-300 text-slate-950 font-bold" : "border-slate-500"}`}>
+                      {isSelected ? "✓" : ""}
+                    </span>
+                    <span className="font-bold text-sm leading-snug">{pv.summary}</span>
+                  </div>
                 </button>
               );
             })}
           </div>
 
           {selectedEffectPatternRef !== null && (
-            <div className="pt-3 border-t border-slate-700 mt-4 bg-slate-800/50 p-3 rounded-lg flex items-center justify-between">
-              <div>
-                <div className="text-xs text-slate-400 font-semibold">選択中:</div>
-                <div className="text-sm font-bold text-amber-300 mt-0.5">
-                  {patternViews[selectedEffectPatternRef]?.summary}
-                </div>
+            <div className="pt-3 border-t border-slate-700 mt-3 flex items-center justify-between gap-3">
+              <div className="text-xs text-slate-400 truncate">
+                選択中: <span className="font-bold text-amber-300">{patternViews[selectedEffectPatternRef]?.summary}</span>
               </div>
               <button
                 onClick={handleEffectSubmit}
-                className="rounded-lg bg-amber-600 px-5 py-2.5 font-bold text-white shadow-lg hover:bg-amber-500 transition active:scale-95"
+                className="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black shadow-lg transition text-sm shrink-0"
               >
-                決定して再開
+                決定して解決する
               </button>
             </div>
           )}
@@ -212,67 +241,52 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
     );
   }
 
-  // パス送信ハンドラ
-  const handlePassSubmit = () => {
-    if (passPatternIndex === -1) return;
-    const response: DecisionResponse = {
-      decisionId: request.decisionId,
-      stateVersion: request.stateVersion,
-      selectedPatternRef: passPatternIndex,
-    };
-    onSubmit(response);
-  };
-
-  // 決定ハンドラ
-  const handleSubmit = () => {
-    if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
-    const response: DecisionResponse = {
-      decisionId: request.decisionId,
-      stateVersion: request.stateVersion,
-      selectedPatternRef: finalMatchedPatternIndex,
-    };
-    onSubmit(response);
-  };
+  const selectedAction = selectedActionRef !== null ? catalog.actions[selectedActionRef] : null;
+  const selectedKey = selectedKeyRef !== null ? catalog.cardSelections[selectedKeyRef] : null;
+  const selectedCost = selectedCostRef !== null ? catalog.costPayments[selectedCostRef] : null;
+  const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
 
   return (
-    <div className="rounded-xl border border-indigo-500/30 bg-slate-900/95 p-5 text-slate-100 shadow-2xl backdrop-blur-md">
-      <div className="flex items-center justify-between border-b border-slate-700/60 pb-3">
+    <div className="rounded-xl border-2 border-indigo-500/40 bg-slate-900/95 p-4 text-slate-100 shadow-xl">
+      {/* ヘッダー */}
+      <div className="flex items-center justify-between border-b border-slate-700/60 pb-2.5 mb-3">
         <div>
-          <span className="inline-block rounded bg-indigo-600 px-2 py-0.5 text-xs font-semibold uppercase tracking-wider text-white">
-            Decision Request
+          <span className="inline-block rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+            DECISION PANEL
           </span>
-          <h2 className="mt-1 text-lg font-bold text-slate-100">
-            判断要求: {request.playerId === "p1" ? "Player A" : "Player B"} ({request.playerId})
+          <h2 className="text-base font-bold text-slate-100 mt-0.5">
+            {request.playerId === "p1" ? "Player A" : "Player B"} の行動選択
           </h2>
         </div>
-        <div className="flex items-center gap-3">
-          {passPatternIndex !== -1 && (
-            <button
-              onClick={handlePassSubmit}
-              className="rounded-lg border border-amber-500/50 bg-amber-950/50 px-4 py-2 text-xs font-bold text-amber-200 hover:bg-amber-900/70 hover:border-amber-400 transition active:scale-95 shadow-md"
-            >
-              ⏭️ パスする (PASS)
-            </button>
-          )}
-          <div className="text-right text-xs text-slate-400">
-            <div>合法パターン: <span className="font-mono font-bold text-indigo-400">{patterns.length}件</span></div>
-            <div>Ver: {request.stateVersion}</div>
-          </div>
-        </div>
+
+        {passPatternIndex !== -1 && (
+          <button
+            onClick={handlePass}
+            className="rounded-xl border border-amber-500/60 bg-amber-950/60 px-3.5 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-900/80 hover:border-amber-400 transition active:scale-95 shadow-md flex items-center gap-1"
+          >
+            <span>⏭️</span>
+            <span>PASS (パスする)</span>
+          </button>
+        )}
       </div>
 
-      <div className="mt-4 space-y-4">
+      {/* 選択済みサマリーバナー */}
+      {selectedAction && (
+        <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-800/80 rounded-lg border border-slate-700 text-xs mb-3 font-mono">
+          <span className="font-bold text-indigo-300">Action: {selectedAction.actionName || selectedAction.actionId}</span>
+          {selectedKey && <span className="text-slate-400">| Key: {selectedKey.displayCodes.join("+")}</span>}
+          {selectedCost && <span className="text-emerald-400">| Cost: {selectedCost.summary}</span>}
+          {selectedTarget && <span className="text-amber-300">| Target: {selectedTarget.displayName}</span>}
+        </div>
+      )}
+
+      <div className="space-y-3.5">
         {/* ステップ1: アクション選択 */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-              1. アクションの選択
-            </label>
-            {availableActionRefs.length === 0 && (
-              <span className="text-xs text-slate-500 italic">利用可能なアクションはありません（パスのみ可能）</span>
-            )}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            1. アクション
+          </label>
+          <div className="grid grid-cols-2 gap-2">
             {availableActionRefs.map((actRef) => {
               const act = catalog.actions[actRef];
               const isSelected = selectedActionRef === actRef;
@@ -280,15 +294,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
                 <button
                   key={actRef}
                   onClick={() => handleSelectAction(actRef)}
-                  className={`rounded-lg border px-3 py-2 text-left transition ${
+                  className={`rounded-xl border-2 p-2.5 text-left transition ${
                     isSelected
-                      ? "border-indigo-500 bg-indigo-950/60 text-indigo-200 shadow-md ring-1 ring-indigo-500"
-                      : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                      ? "border-indigo-500 bg-indigo-950/80 text-indigo-100 shadow-md ring-2 ring-indigo-400/40"
+                      : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500 hover:bg-slate-800"
                   }`}
                 >
-                  <div className="font-bold text-sm">{act.actionName || act.actionId}</div>
-                  <div className="text-xs text-slate-400 mt-0.5">
-                    {act.timing ? `Timing: ${act.timing}` : ""} {act.cost ? `Cost: ${act.cost}` : ""}
+                  <div className="font-black text-sm">{act.actionName || act.actionId}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                    {act.timing ? `[${act.timing}]` : ""} {act.cost ? `Cost: ${act.cost}` : ""}
                   </div>
                 </button>
               );
@@ -296,10 +310,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
           </div>
         </div>
 
-        {/* ステップ2: キーカード選択（選択中アクションにキーカード候補がある場合） */}
+        {/* ステップ2: キーカード選択 */}
         {selectedActionRef !== null && availableKeyRefs.length > 0 && availableKeyRefs.some((r) => r !== undefined) && (
           <div className="pt-2 border-t border-slate-800">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               2. キーカードの選択
             </label>
             <div className="flex flex-wrap gap-2">
@@ -309,12 +323,12 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
                 const isSelected = selectedKeyRef === keyRef;
                 return (
                   <button
-                    key={idx}
-                    onClick={() => handleSelectKey(keyRef)}
-                    className={`rounded-lg border px-3 py-1.5 font-mono text-sm font-semibold transition ${
+                    key={keyRef ?? idx}
+                    onClick={() => setSelectedKeyRef(keyRef)}
+                    className={`rounded-lg border-2 px-3 py-1.5 text-xs font-bold transition font-mono ${
                       isSelected
-                        ? "border-amber-500 bg-amber-950/60 text-amber-200 shadow-md ring-1 ring-amber-500"
-                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                        ? "border-indigo-400 bg-indigo-900 text-white shadow ring-2 ring-indigo-400/50"
+                        : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500"
                     }`}
                   >
                     {cardSel.displayCodes.join("+")}
@@ -325,27 +339,27 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
           </div>
         )}
 
-        {/* ステップ3: コスト支払い方法の選択 */}
-        {selectedActionRef !== null && (availableKeyRefs.length === 0 || selectedKeyRef !== null || availableKeyRefs.every(r => r === undefined)) && (
+        {/* ステップ3: コスト選択 */}
+        {selectedActionRef !== null && (availableKeyRefs.length === 0 || selectedKeyRef !== null || availableKeyRefs.every((r) => r === undefined)) && availableCostRefs.length > 1 && (
           <div className="pt-2 border-t border-slate-800">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               3. コストの支払い方法
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-1.5">
               {availableCostRefs.map((costRef) => {
                 const cost = catalog.costPayments[costRef];
                 const isSelected = selectedCostRef === costRef;
                 return (
                   <button
                     key={costRef}
-                    onClick={() => handleSelectCost(costRef)}
-                    className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
+                    onClick={() => setSelectedCostRef(costRef)}
+                    className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-950/60 text-emerald-200 shadow-md ring-1 ring-emerald-500"
-                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                        ? "border-emerald-500 bg-emerald-950/70 text-emerald-100 shadow ring-1 ring-emerald-500"
+                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
                     }`}
                   >
-                    <div className="font-semibold">{cost.summary || "コストなし"}</div>
+                    <div className="font-bold">{cost.summary || "コストなし"}</div>
                   </button>
                 );
               })}
@@ -353,27 +367,27 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
           </div>
         )}
 
-        {/* ステップ4: 対象の選択 */}
-        {selectedCostRef !== null && (
+        {/* ステップ4: 対象選択 */}
+        {selectedCostRef !== null && availableTargetRefs.length > 1 && (
           <div className="pt-2 border-t border-slate-800">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
               4. 対象の選択
             </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1">
               {availableTargetRefs.map((tgtRef) => {
                 const target = catalog.targetSelections[tgtRef];
                 const isSelected = selectedTargetRef === tgtRef;
                 return (
                   <button
                     key={tgtRef}
-                    onClick={() => handleSelectTarget(tgtRef)}
-                    className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
+                    onClick={() => setSelectedTargetRef(tgtRef)}
+                    className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
                       isSelected
-                        ? "border-cyan-500 bg-cyan-950/60 text-cyan-200 shadow-md ring-1 ring-cyan-500"
-                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-600 hover:bg-slate-800"
+                        ? "border-amber-500 bg-amber-950/70 text-amber-100 shadow ring-1 ring-amber-500"
+                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
                     }`}
                   >
-                    <div className="font-semibold">{target.displayName || "対象なし"}</div>
+                    <div className="font-bold">{target.displayName}</div>
                   </button>
                 );
               })}
@@ -381,20 +395,22 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit,
           </div>
         )}
 
-        {/* ステップ5: 最終確認と送信 */}
+        {/* 決定ボタン (リクエスト / リクエスト＆PASS) */}
         {finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1 && (
-          <div className="pt-3 border-t border-slate-700 mt-4 bg-slate-800/50 p-3 rounded-lg flex items-center justify-between">
-            <div>
-              <div className="text-xs text-slate-400 font-semibold">選択されたパターン [Ref: #{finalMatchedPatternIndex}]:</div>
-              <div className="text-sm font-bold text-indigo-300 mt-0.5">
-                {patternViews[finalMatchedPatternIndex]?.summary}
-              </div>
-            </div>
+          <div className="pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-2 mt-3">
             <button
-              onClick={handleSubmit}
-              className="rounded-lg bg-indigo-600 px-5 py-2.5 font-bold text-white shadow-lg hover:bg-indigo-500 transition active:scale-95"
+              onClick={() => handleActionSubmit(false)}
+              className="flex-1 py-2.5 px-4 rounded-xl border border-indigo-400 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-100 font-bold transition text-xs shadow flex items-center justify-center gap-1"
             >
-              確定して実行
+              <span>📥</span>
+              <span>リクエストのみ</span>
+            </button>
+            <button
+              onClick={() => handleActionSubmit(true)}
+              className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-black transition text-xs shadow-lg ring-2 ring-indigo-400/40 flex items-center justify-center gap-1.5"
+            >
+              <span>🚀</span>
+              <span>リクエスト＆PASS (推奨)</span>
             </button>
           </div>
         )}

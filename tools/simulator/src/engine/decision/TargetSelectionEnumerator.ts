@@ -1,6 +1,7 @@
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { ExpressionEvaluator } from "../rules/ExpressionEvaluator";
+import { formatSuitSymbol } from "../rules/cardUtils";
 
 /**
  * アクション定義と盤面状態から、合法なターゲット候補を列挙するクラス。
@@ -92,13 +93,22 @@ export class TargetSelectionEnumerator {
               if (!isMatch) continue;
             }
 
-            const pName = player.name || pKey;
-            const unitCardCode = unit.cards?.[0]?.code || unit.cards?.[0]?.rank || "";
+            const pName = player.name || (pKey === "p1" ? "Player A" : "Player B");
+            const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
+            const isFaceDown = unit.face === "down";
+            const cardDisplay = isBulwark && isFaceDown
+              ? "🂠"
+              : unit.cards && unit.cards.length > 0
+              ? unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+")
+              : "カードなし";
+            const stateLabel = unit.state === "drive" ? "drive" : "charge";
+            const unitLabel = unit.kind || (isBulwark ? "防壁" : "一般兵");
+
             results.push({
               targetType: "unit",
               targetPlayerKey: pKey,
               targetUnitId: unit.unitId,
-              displayName: `${pName}の${unit.kind || "ユニット"} [${unitCardCode}] (${unit.unitId})`,
+              displayName: `${pName} の ${unitLabel} [${cardDisplay}] (${stateLabel}) (#${unit.unitId.slice(-6)})`,
             });
           }
         }

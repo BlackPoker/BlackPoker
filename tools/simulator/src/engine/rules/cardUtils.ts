@@ -1,25 +1,69 @@
 /**
- * カード・スート・ランク・数字の比較および正規化ユーティリティ
+ * カードのスート記号・表示形式を統一するユーティリティ。
  */
 
-/**
- * スートが一致するかどうかを検証
- */
-export function matchesSuit(cardSuit: string, expectedSuit: string): boolean {
-  if (!expectedSuit) return true;
-  const cs = cardSuit.toLowerCase();
-  const es = expectedSuit.toLowerCase();
-  if (cs === es) return true;
-  if (es === "spade" && cs === "s") return true;
-  if (es === "club" && cs === "c") return true;
-  if (es === "heart" && cs === "h") return true;
-  if (es === "diamond" && cs === "d") return true;
-  if (es === "joker" && cs === "x") return true;
-  return false;
+export function normalizeSuit(suit?: string): string {
+  if (!suit) return "";
+  const s = suit.toLowerCase();
+  if (s === "h" || s === "heart" || s === "hearts" || s === "♡" || s === "♥") return "heart";
+  if (s === "d" || s === "diamond" || s === "diamonds" || s === "♢" || s === "♦") return "diamond";
+  if (s === "s" || s === "spade" || s === "spades" || s === "♠") return "spade";
+  if (s === "c" || s === "club" || s === "clubs" || s === "♣") return "club";
+  if (s === "j" || s === "joker" || s === "★") return "joker";
+  return s;
+}
+
+export function formatSuitSymbol(suit?: string): string {
+  const norm = normalizeSuit(suit);
+  switch (norm) {
+    case "spade":
+      return "♠";
+    case "heart":
+      return "♡";
+    case "diamond":
+      return "♢";
+    case "club":
+      return "♣";
+    case "joker":
+      return "★";
+    default:
+      return suit || "";
+  }
+}
+
+export function isJokerCard(card?: any): boolean {
+  if (!card) return false;
+  return (
+    card.suit === "J" ||
+    card.rank === "0" ||
+    normalizeSuit(card.suit) === "joker" ||
+    card.code?.toUpperCase().includes("JOKER") ||
+    false
+  );
+}
+
+export function formatCardDisplay(card?: {
+  id?: string;
+  suit?: string;
+  rank?: string;
+  value?: number;
+  code?: string;
+}): string {
+  if (!card) return "";
+  if (isJokerCard(card)) return "Joker";
+
+  const symbol = formatSuitSymbol(card.suit);
+  const rank = card.rank !== undefined ? String(card.rank) : "";
+  return `${symbol}${rank}`;
+}
+
+export function formatCardList(cards?: any[]): string {
+  if (!Array.isArray(cards) || cards.length === 0) return "";
+  return cards.map(formatCardDisplay).join(", ");
 }
 
 /**
- * ランクを数値にマッピング (A=1, J=11, Q=12, K=13, Joker=0/20)
+ * ランク文字列を数値 (1〜13) に変換
  */
 export function rankToValue(rank: string | number): number {
   if (typeof rank === "number") return rank;
@@ -35,31 +79,21 @@ export function rankToValue(rank: string | number): number {
 }
 
 /**
- * ランクの文字列表現を正規化
+ * スートの一致判定
  */
-export function normalizeRank(rank: string | number | undefined): string {
-  if (rank === undefined || rank === null) return "";
-  return String(rank).trim().toUpperCase();
+export function matchesSuit(cardSuit: string, expectedSuit: string): boolean {
+  if (!expectedSuit) return true;
+  return normalizeSuit(cardSuit) === normalizeSuit(expectedSuit);
 }
 
 /**
- * カードが Joker かどうかを判定
- */
-export function isJokerCard(card: any): boolean {
-  if (!card) return false;
-  const rank = normalizeRank(card.rank);
-  const suit = normalizeRank(card.suit);
-  return rank === "JOKER" || suit === "JOKER" || suit === "X";
-}
-
-/**
- * ランクが一致するかどうかを検証 (範囲指定 "A..K" などのパースに対応)
+ * ランクの一致判定 (単一文字列、配列、範囲 "A..K" 等)
  */
 export function matchesRank(cardRank: string, cardValue: number, expectedRank: any): boolean {
   if (!expectedRank) return true;
 
   if (Array.isArray(expectedRank)) {
-    return expectedRank.some((r) => String(r).toLowerCase() === cardRank.toLowerCase());
+    return expectedRank.some((r) => String(r).toLowerCase() === String(cardRank).toLowerCase());
   }
 
   if (typeof expectedRank === "string") {
@@ -67,47 +101,21 @@ export function matchesRank(cardRank: string, cardValue: number, expectedRank: a
       const [start, end] = expectedRank.split("..");
       const startVal = rankToValue(start);
       const endVal = rankToValue(end);
-      return cardValue >= startVal && cardValue <= endVal;
+      const val = cardValue || rankToValue(cardRank);
+      return val >= startVal && val <= endVal;
     } else {
-      return cardRank.toLowerCase() === expectedRank.toLowerCase();
+      return expectedRank.toLowerCase() === cardRank.toLowerCase();
     }
   }
 
-  return false;
+  return true;
 }
 
 /**
- * アタッカーを構成するカード群のいずれかと、防壁カードの「記載ランク（printed rank）」が一致するかを判定
- * アップ/ダウン/フォグ/能力等のサイズ補正は無視し、カード記載の rank (A, 2〜10, J, Q, K) を照合する
- * (Joker は本関数とは別に isJokerCard() で無条件成功として処理する)
+ * 兵士の構成カードのいずれかの rank と 防壁カードの rank が一致するかどうか
  */
-export function matchesPrintedRank(attackerCards: readonly any[], bulwarkCard: any): boolean {
-  if (!bulwarkCard || !attackerCards || attackerCards.length === 0) return false;
-
-  const bulwarkRank = normalizeRank(bulwarkCard.rank);
-  const bulwarkVal = bulwarkCard.value !== undefined ? bulwarkCard.value : (bulwarkRank ? rankToValue(bulwarkRank) : undefined);
-
-  for (const attackerCard of attackerCards) {
-    if (!attackerCard) continue;
-    const attRank = normalizeRank(attackerCard.rank);
-    const attVal = attackerCard.value !== undefined ? attackerCard.value : (attRank ? rankToValue(attRank) : undefined);
-
-    // 1. ランク文字列（記載ランク）の一致を優先 (例: "8" === "8", "A" === "A", "J" === "J", "Q" === "Q", "K" === "K")
-    if (attRank !== "" && bulwarkRank !== "" && attRank === bulwarkRank) {
-      return true;
-    }
-
-    // 2. rank 欠落時用の value fallback (例: mockデータで rank がなく value のみの場合)
-    if (attRank === "" || bulwarkRank === "") {
-      if (attVal !== undefined && bulwarkVal !== undefined && attVal > 0 && bulwarkVal > 0 && attVal === bulwarkVal) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+export function matchesPrintedRank(attackerCards: any[], bulwarkCard?: any): boolean {
+  if (!bulwarkCard || !Array.isArray(attackerCards)) return false;
+  const bulwarkRank = String(bulwarkCard.rank).toUpperCase();
+  return attackerCards.some((c: any) => String(c.rank).toUpperCase() === bulwarkRank);
 }
-
-/** 後方互換用エイリアス */
-export const matchesCardNumber = matchesPrintedRank;
-
