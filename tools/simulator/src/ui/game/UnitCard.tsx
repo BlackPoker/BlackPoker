@@ -24,7 +24,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   const blocksUnitId = unit.battle?.blocksUnitId;
 
   // サイズ合計の計算
-  const totalSize = Array.isArray(unit.cards)
+  const isHiddenFromViewer = isFaceDown && !showCardDetails;
+  const totalSize = Array.isArray(unit.cards) && !isHiddenFromViewer
     ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0)
     : 0;
 
@@ -49,7 +50,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           : "bg-white border-indigo-400 dark:bg-slate-700 dark:border-indigo-500 shadow-md"
       }`}
       style={{
-        minWidth: "110px",
+        minWidth: "115px",
       }}
     >
       {/* 選択可能・選択中バッジ (①, ②) */}
@@ -82,11 +83,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         <span
           className={`text-[9px] font-bold px-1 py-0.5 rounded ${
             isDrive
-              ? "bg-slate-400 text-slate-900 dark:bg-slate-600 dark:text-slate-200"
-              : "bg-emerald-500 text-white animate-pulse"
+              ? "bg-amber-600/80 text-white font-bold"
+              : "bg-emerald-500 text-white animate-pulse font-bold"
           }`}
         >
-          {isDrive ? "DRIVE (横)" : "CHARGE (縦)"}
+          {isDrive ? "🔄 DRIVE (横)" : "⚡ CHARGE (縦)"}
         </span>
       </div>
 
@@ -102,28 +103,26 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         </div>
       )}
 
-      {/* カード本体表示 */}
-      {showCardDetails ? (
-        <div className="flex flex-col gap-1 my-1">
-          {Array.isArray(unit.cards) && unit.cards.length > 0 ? (
+      {/* カード本体表示 (DRIVE時は横向き rotate-90) */}
+      <div className={`flex flex-col items-center justify-center my-1.5 transition-transform duration-200 ${isDrive ? "rotate-90 scale-90 my-3" : ""}`}>
+        {showCardDetails || !isFaceDown ? (
+          Array.isArray(unit.cards) && unit.cards.length > 0 ? (
             unit.cards.map((card: any, idx: number) => (
-              <CardView key={card.id || idx} card={card} faceDown={isFaceDown} size="sm" />
+              <CardView key={card.id || idx} card={card} faceDown={isFaceDown && !showCardDetails} size="sm" />
             ))
           ) : (
             <div className="text-xs text-slate-400 italic py-2">カードなし</div>
-          )}
-        </div>
-      ) : (
-        <div className="text-xs text-slate-500 py-1 font-mono">
-          {unit.cards?.length || 0} cards
-        </div>
-      )}
+          )
+        ) : (
+          <CardView faceDown={true} size="sm" />
+        )}
+      </div>
 
-      {/* 合計サイズ表示 */}
+      {/* 合計サイズ表示 (相手の裏向き防壁は秘匿) */}
       <div className="mt-1 pt-1 border-t border-slate-200 dark:border-slate-600 w-full flex items-center justify-between text-[11px]">
         <span className="text-slate-500 dark:text-slate-400 font-bold">SIZE:</span>
         <span className="font-extrabold text-indigo-600 dark:text-indigo-400">
-          {totalSize}
+          {isHiddenFromViewer ? "?" : totalSize}
         </span>
       </div>
     </div>

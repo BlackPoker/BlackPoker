@@ -660,20 +660,23 @@ export function declareBlockHandler(
       }
     } else if (context.selections?.blocks) {
       assignments = context.selections.blocks;
-    } else if (context.targetComponent || blocker) {
-      // 後方互換性（単体指定）
-      const singleBlocker = context.targetComponent || (typeof blocker === "string" ? expressionEvaluator.resolveBindingValue(blocker, context) : blocker);
-      if (singleBlocker) {
-        const opponentKey = getOpponentPlayerKey(context.playerKey, state);
-        const opponent = state.players[opponentKey];
-        const attacker = opponent?.field?.find((u: any) => u.battle?.role === "attacker");
-        if (attacker) {
-          assignments = [{ sourceUnitId: attacker.unitId, selectedUnitIds: [singleBlocker.unitId || singleBlocker] }];
-        }
+    }
+
+    // 防御側プレイヤー (defender) と攻撃側プレイヤー (attacker) の特定
+    const defenderPlayerKey = state.nonTurnPlayer || (state.turnPlayer ? getOpponentPlayerKey(state.turnPlayer, state) : (context.playerKey === "p1" ? "p2" : "p1"));
+    const defenderPlayer = state.players[defenderPlayerKey];
+    const attackerPlayerKey = getOpponentPlayerKey(defenderPlayerKey, state);
+    const attackerPlayer = state.players[attackerPlayerKey];
+
+    const singleBlocker = context.targetComponent || (typeof blocker === "string" ? expressionEvaluator.resolveBindingValue(blocker, context) : blocker);
+    if (singleBlocker) {
+      const singleId = singleBlocker.unitId || singleBlocker;
+      const attacker = attackerPlayer?.field?.find((u: any) => u.battle?.role === "attacker");
+      if (attacker) {
+        assignments = [{ sourceUnitId: attacker.unitId, selectedUnitIds: [singleId] }];
       }
     }
 
-    const player = state.players[context.playerKey];
     const usedBlockerIds = new Set<string>();
 
     for (const assignment of assignments) {
@@ -683,9 +686,7 @@ export function declareBlockHandler(
       }
 
       // 相手アタッカーの存在確認
-      const opponentKey = getOpponentPlayerKey(context.playerKey, state);
-      const opponent = state.players[opponentKey];
-      const attackerUnit = opponent?.field?.find((u: any) => u.unitId === sourceUnitId);
+      const attackerUnit = attackerPlayer?.field?.find((u: any) => u.unitId === sourceUnitId);
       if (!attackerUnit || attackerUnit.battle?.role !== "attacker") {
         throw new Error(`ブロック対象のアタッカーが見つかりません: ${sourceUnitId}`);
       }
@@ -697,7 +698,7 @@ export function declareBlockHandler(
         }
         usedBlockerIds.add(blockerId);
 
-        const unit = player?.field?.find((u: any) => u.unitId === blockerId);
+        const unit = defenderPlayer?.field?.find((u: any) => u.unitId === blockerId);
         if (!unit) {
           throw new Error(`ブロッカーは自分のフィールドに存在するユニットである必要があります。 (${blockerId})`);
         }

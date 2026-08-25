@@ -4,6 +4,7 @@ import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../../engine/session/playtest/createCoreBattlePlaytest";
+import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
 import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
 import { GameEventFormatter } from "../../engine/session/playtest/GameEventFormatter";
 import { GameStatusBar } from "../game/GameStatusBar";
@@ -59,17 +60,20 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   // 新しい対戦の開始
   const startNewGame = useCallback(() => {
-    const initialState = createCoreBattlePresetState();
+    const rawState = createCoreBattlePresetState();
 
     // プリセットバリデーション
-    const validation = validatePlaytestPreset(initialState, fullRulePackage);
+    const validation = validatePlaytestPreset(rawState, fullRulePackage);
     if (!validation.valid) {
       setPresetValidationErrors(validation.errors);
       return;
     }
     setPresetValidationErrors([]);
 
-    const session = new GameSession(initialState, rulePackage);
+    // 公式ゲーム開始手順 (先攻決定・公開カード墓地送り・先攻1枚ドロー)
+    const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+
+    const session = new GameSession(setupResult.state, rulePackage);
     sessionRef.current = session;
 
     setLogs([]);
@@ -77,6 +81,26 @@ export const CoreBattlePlaytest: React.FC = () => {
     setSelectedUnitIds([]);
     addLog(`🚀 Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info");
     addLog(`🛡 レギュレーション: Core Battle (Preset 001)`, "info");
+
+    // 先攻決定プロセスのログ出力
+    for (const round of setupResult.rounds) {
+      const p1Code = `${round.p1Card.suit}${round.p1Card.rank}`;
+      const p2Code = `${round.p2Card.suit}${round.p2Card.rank}`;
+      if (round.result === "tie") {
+        addLog(`🎲 [先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action");
+      } else {
+        const winnerName = round.result === "p1" ? "Player A" : "Player B";
+        addLog(`🎲 [先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定！`, "action");
+      }
+    }
+    addLog(`🪦 公開された比較カードを両者の墓地へ移動しました`, "info");
+    if (setupResult.drawnCard) {
+      const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
+      const drawnCode = `${setupResult.drawnCard.suit}${setupResult.drawnCard.rank}`;
+      addLog(`🃏 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action");
+    }
+    const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
+    addLog(`⚡ ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info");
 
     const step = session.advance();
     setCurrentStep(step);

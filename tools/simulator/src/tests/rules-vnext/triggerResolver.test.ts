@@ -163,11 +163,11 @@ describe("Trigger Resolver and Request Buffer Integration Tests (Phase 14.4)", (
     registry.dispatchEvent(event, context);
 
     // 検証：action.block がリクエストバッファに積まれていること
-    // コントローラーが p2 (相手プレイヤー＝防御側) に自動バインドされていること
+    // Block の controller は turnPlayer (p1) であること (Phase 21B.4)
     const requestBuffer = state.requestBuffer as RequestBuffer;
     expect(requestBuffer.requests.length).toBe(1);
     expect(requestBuffer.requests[0].actionId).toBe("action.block");
-    expect(requestBuffer.requests[0].controller).toBe("p2");
+    expect(requestBuffer.requests[0].controller).toBe("p1");
   });
 
   it("should NOT trigger action.block when action.attack resolves but no attacker is present (D)", () => {

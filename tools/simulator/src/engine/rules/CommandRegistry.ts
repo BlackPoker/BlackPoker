@@ -23,6 +23,7 @@ import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, Ac
 import { CostResolver } from "./CostResolver";
 import { TriggerResolver } from "./TriggerResolver";
 import { RequestBufferProcessor } from "./RequestBufferProcessor";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { EffectContinuation } from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
@@ -575,10 +576,12 @@ export class CommandRegistry {
     request: ActionRequest,
     context: CommandContext
   ): any {
+    const decisionPlayerId: PlayerKey = execResult.decisionPlayerKey || request.controller;
+
     if (execResult.selectionType === "unitAssignment") {
       const res = LegalPatternGenerator.generateBlockAssignmentDecision(
         context.state,
-        request.controller,
+        decisionPlayerId,
         request,
         execResult.effectStepId,
         execResult.attackers || [],
@@ -589,7 +592,7 @@ export class CommandRegistry {
     } else {
       return LegalPatternGenerator.generateEffectSelectionDecision(
         context.state,
-        request.controller,
+        decisionPlayerId,
         request,
         execResult.effectStepId,
         execResult.candidates,

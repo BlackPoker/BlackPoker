@@ -24,12 +24,12 @@ export function createCoreBattlePresetState(): any {
       p1: {
         name: "Player A",
         life: [
-          { id: "p1-l1", suit: "S", rank: "2", value: 2 },
+          { id: "p1-l6", suit: "H", rank: "8", value: 8 }, // 先攻決定用 (Round 1: 8 vs 5 -> Player A 先攻)
+          { id: "p1-l1", suit: "S", rank: "2", value: 2 }, // 先攻1枚ドロー用
           { id: "p1-l2", suit: "H", rank: "3", value: 3 },
-          { id: "p1-l3", suit: "D", rank: "3", value: 3 }, // 重複解消: D3
+          { id: "p1-l3", suit: "D", rank: "3", value: 3 },
           { id: "p1-l4", suit: "C", rank: "5", value: 5 },
           { id: "p1-l5", suit: "S", rank: "7", value: 7 },
-          { id: "p1-l6", suit: "H", rank: "8", value: 8 },
           { id: "p1-l7", suit: "D", rank: "9", value: 9 },
           { id: "p1-l8", suit: "C", rank: "10", value: 10 },
         ],
@@ -71,10 +71,10 @@ export function createCoreBattlePresetState(): any {
       p2: {
         name: "Player B",
         life: [
+          { id: "p2-l4", suit: "S", rank: "5", value: 5 }, // 先攻決定用 (Round 1: 8 vs 5)
           { id: "p2-l1", suit: "C", rank: "2", value: 2 },
           { id: "p2-l2", suit: "D", rank: "3", value: 3 },
           { id: "p2-l3", suit: "H", rank: "4", value: 4 },
-          { id: "p2-l4", suit: "S", rank: "5", value: 5 },
           { id: "p2-l5", suit: "C", rank: "7", value: 7 },
           { id: "p2-l6", suit: "D", rank: "8", value: 8 },
           { id: "p2-l7", suit: "H", rank: "9", value: 9 },

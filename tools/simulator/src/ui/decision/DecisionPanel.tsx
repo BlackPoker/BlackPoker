@@ -480,6 +480,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
                 3. コストの支払い方法
               </label>
+              {/* キーカードとして使用中のカードがある場合の説明 */}
+              {selectedKey && selectedKey.displayCodes && selectedKey.displayCodes.length > 0 && (
+                <div className="mb-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1.5">
+                  <span className="font-bold text-amber-400">🔑 キーカード使用中:</span>
+                  <span className="font-mono font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-800/60">
+                    {selectedKey.displayCodes.join(", ")}
+                  </span>
+                  <span className="text-slate-400 text-[10px] ml-1">(※コスト破棄には使用不可)</span>
+                </div>
+              )}
               <div className="grid grid-cols-1 gap-1.5">
                 {availableCostRefs.map((costRef) => {
                   const cost = catalog.costPayments[costRef];

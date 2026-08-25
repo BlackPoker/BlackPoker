@@ -118,14 +118,12 @@ export class ActionRequestValidator {
     // 0.1.1 ブロックアクション (action.block) の検証
     if (action.id === "action.block") {
       const state = context.state;
-      const requester = context.playerKey;
       // ブロッカー指定時（targetComponent 指定時）または直接リクエスト時はアタッカー存在を厳格検証
       if (context.targetComponent || !context.triggered) {
         let hasValidOpponentAttacker = false;
         if (state && state.players) {
           for (const [pKey, p] of Object.entries<any>(state.players)) {
-            if (pKey === requester) continue; // 自分の所有するユニットは除外（自分自身のアタッカーをブロックできない）
-            if (p.field?.some((u: any) => u.battle?.role === "attacker" && u.battle?.targetPlayerKey === requester)) {
+            if (p.field?.some((u: any) => u.battle?.role === "attacker")) {
               hasValidOpponentAttacker = true;
               break;
             }
@@ -133,7 +131,7 @@ export class ActionRequestValidator {
         }
         if (!hasValidOpponentAttacker) {
           throw new ValidationError(
-            `自分を攻撃している相手のアタッカーが存在しないため、ブロックできません。`
+            `有効なアタッカーが存在しないため、ブロックできません。`
           );
         }
       }

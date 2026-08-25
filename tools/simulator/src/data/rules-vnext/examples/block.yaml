@@ -8,8 +8,9 @@ actions:
       trigger: triggered
       speed: normal
       timing: main
-      controller: nonTurnPlayer
+      controller: turnPlayer
       definitionOwner: turnPlayer
+      initialChance: turnPlayer
 
     triggerCondition:
       event: actionResolved
@@ -23,8 +24,9 @@ actions:
     effect:
       - selectBlockAssignments:
           id: blocks
+          decisionPlayer: opponent
+          relation: decisionPlayer
           attackers: battle.attackers
-          relation: self
           condition:
             label: 防御
             state: charge

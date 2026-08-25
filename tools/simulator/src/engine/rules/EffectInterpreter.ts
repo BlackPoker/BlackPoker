@@ -3,6 +3,7 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { getOpponentPlayerKey } from "./playerUtils";
 import { hasUnitLabel, isCharacterComponent } from "./characterUtils";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
 
 export interface EffectInterruption {
   readonly interrupted: true;
@@ -12,6 +13,7 @@ export interface EffectInterruption {
   readonly selectionType?: "unit" | "unitAssignment";
   readonly candidates: any[];
   readonly attackers?: any[];
+  readonly decisionPlayerKey?: PlayerKey;
 }
 
 export type EffectInterpreterResult =
@@ -60,6 +62,25 @@ export class EffectInterpreter {
   }
 
   /**
+   * DSL に基づいて判断権を持つプレイヤー（DecisionPlayer）を解決します。
+   */
+  private resolveDecisionPlayerKey(spec: string | undefined, context: CommandContext): PlayerKey {
+    if (!spec || spec === "controller" || spec === "self") {
+      return context.playerKey;
+    }
+    if (spec === "opponent") {
+      return getOpponentPlayerKey(context.playerKey, context.state);
+    }
+    if (spec === "turnPlayer") {
+      return context.state.turnPlayer || context.playerKey;
+    }
+    if (spec === "nonTurnPlayer") {
+      return context.state.nonTurnPlayer || getOpponentPlayerKey(context.state.turnPlayer || context.playerKey, context.state);
+    }
+    return context.playerKey;
+  }
+
+  /**
    * 効果リストを実行し、途中でユーザー判断が必要なステップ（selectUnits, selectBlockAssignments等）に到達した場合は中断します。
    */
   executeEffectsWithInterruption(
@@ -81,6 +102,8 @@ export class EffectInterpreter {
           continue;
         }
 
+        const decisionPlayerKey = this.resolveDecisionPlayerKey(args.decisionPlayer || args.chooser, context);
+
         // テスト等で targetComponent が明示されている場合は自動束縛
         if (context.targetComponent) {
           if (!context.selections) context.selections = {};
@@ -88,7 +111,7 @@ export class EffectInterpreter {
           continue;
         }
 
-        const candidates = this.findSelectableUnits(args, context);
+        const candidates = this.findSelectableUnits(args, context, decisionPlayerKey);
         if (candidates.length === 0) {
           // 候補0体の場合はDecisionを発生させず、空配列をバインドして継続
           if (!context.selections) context.selections = {};
@@ -104,6 +127,7 @@ export class EffectInterpreter {
           selectionId,
           selectionType: "unit",
           candidates,
+          decisionPlayerKey,
         };
       }
 
@@ -113,13 +137,17 @@ export class EffectInterpreter {
           continue;
         }
 
-        // アタッカー群の特定
-        // 相手フィールド上の battle.role === "attacker" かつ targetPlayerKey が自分であるユニット
+        const decisionPlayerKey = args.decisionPlayer || args.chooser
+          ? this.resolveDecisionPlayerKey(args.decisionPlayer || args.chooser, context)
+          : (context.state.nonTurnPlayer || (context.state.turnPlayer ? getOpponentPlayerKey(context.state.turnPlayer, context.state) : context.playerKey));
+
+        // アタッカー群の特定（ディフェンダー側から見た攻撃側のユニット）
         const state = context.state;
-        const opponentKey = getOpponentPlayerKey(context.playerKey, state);
-        const opponent = state.players?.[opponentKey];
-        const attackers: any[] = (opponent?.field || []).filter(
-          (u: any) => u.battle?.role === "attacker" && (u.battle?.targetPlayerKey === context.playerKey || !u.battle?.targetPlayerKey)
+        const defenderKey = decisionPlayerKey;
+        const attackerPlayerKey = getOpponentPlayerKey(defenderKey, state);
+        const attackerPlayer = state.players?.[attackerPlayerKey];
+        const attackers: any[] = (attackerPlayer?.field || []).filter(
+          (u: any) => u.battle?.role === "attacker" && (u.battle?.targetPlayerKey === defenderKey || !u.battle?.targetPlayerKey)
         );
 
         // テスト等で targetComponent が明示されている場合は自動束縛
@@ -136,8 +164,8 @@ export class EffectInterpreter {
           continue;
         }
 
-        // ブロッカー候補群の抽出 (relation: "self" は context.playerKey / controller の自陣)
-        const candidates = this.findSelectableUnits(args, context);
+        // ブロッカー候補群の抽出 (relation: "decisionPlayer" は防御側プレイヤーの自陣)
+        const candidates = this.findSelectableUnits(args, context, decisionPlayerKey);
 
         if (candidates.length === 0 || attackers.length === 0) {
           // ブロッカー候補0体またはアタッカー0体の場合はDecisionを発生させず、全アタッカー空配列の割当てをバインドして継続
@@ -157,6 +185,7 @@ export class EffectInterpreter {
           selectionType: "unitAssignment",
           candidates,
           attackers,
+          decisionPlayerKey,
         };
       }
 
@@ -169,10 +198,19 @@ export class EffectInterpreter {
   /**
    * 盤面から選択可能なユニット群を抽出します。
    */
-  findSelectableUnits(args: any, context: CommandContext): any[] {
+  findSelectableUnits(args: any, context: CommandContext, decisionPlayerKey?: PlayerKey): any[] {
     const relation = args.relation || "self";
     const condition = args.condition || {};
-    const playerKey = relation === "self" ? context.playerKey : getOpponentPlayerKey(context.playerKey, context.state);
+
+    let playerKey: PlayerKey = context.playerKey;
+    if (relation === "decisionPlayer") {
+      playerKey = decisionPlayerKey || context.playerKey;
+    } else if (relation === "opponent") {
+      playerKey = getOpponentPlayerKey(context.playerKey, context.state);
+    } else if (relation === "self") {
+      playerKey = context.playerKey;
+    }
+
     const player = context.state.players?.[playerKey];
     if (!player || !player.field) return [];
 

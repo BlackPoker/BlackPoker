@@ -10,7 +10,7 @@ import { PlayerKey } from "../../domain/decision/DecisionSource";
 
 /**
  * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
- * 非公開情報（対戦相手の手札カード詳細など）は HIDDEN に変換されます。
+ * 非公開情報（対戦相手の手札カード詳細や対戦相手の裏向き防壁など）は HIDDEN に変換されます。
  */
 export class ObservationFactory {
   /**
@@ -35,9 +35,9 @@ export class ObservationFactory {
           : [];
         const handCount = Array.isArray(p.hand) ? p.hand.length : 0;
 
-        // フィールドユニットの処理
+        // フィールドユニットの処理（自分の裏向き防壁は KNOWN、相手の裏向き防壁は HIDDEN）
         const field: UnitView[] = Array.isArray(p.field)
-          ? p.field.map((u: any) => this.mapUnit(u))
+          ? p.field.map((u: any) => this.mapUnit(u, isViewer))
           : [];
 
         // フォグの処理
@@ -52,12 +52,12 @@ export class ObservationFactory {
 
         // 切札の処理
         const trumps: UnitView[] = Array.isArray(p.trumps || p.trump)
-          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t))
+          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer))
           : [];
 
-        // 墓地の処理
+        // 墓地の処理 (墓地は公開情報)
         const grave: UnitView[] = Array.isArray(p.grave)
-          ? p.grave.map((g: any) => this.mapUnit(g))
+          ? p.grave.map((g: any) => this.mapUnit(g, true))
           : [];
 
         playersView.push({
@@ -131,9 +131,19 @@ export class ObservationFactory {
     };
   }
 
-  private static mapUnit(unit: any): UnitView {
+  private static mapUnit(unit: any, isViewerOwner: boolean = false): UnitView {
+    const isFaceDown = unit.face === "down";
+
     const cards: CardView[] = Array.isArray(unit.cards)
-      ? unit.cards.map((c: any) => this.mapCard(c, unit.face !== "down"))
+      ? unit.cards.map((c: any) => {
+          if (isFaceDown) {
+            // 自分の裏向き防壁: KNOWN だが faceUp: false
+            // 相手の裏向き防壁: HIDDEN
+            return isViewerOwner ? this.mapCard(c, false) : this.hideCard(c);
+          } else {
+            return this.mapCard(c, true);
+          }
+        })
       : [];
 
     return {

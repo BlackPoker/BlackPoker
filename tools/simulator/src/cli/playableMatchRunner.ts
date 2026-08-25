@@ -38,6 +38,7 @@ function findPassPatternIndex(req: any): number {
 }
 
 import { validatePlaytestPreset } from "../engine/session/playtest/validatePlaytestPreset";
+import { MatchSetupCoordinator } from "../engine/session/setup/MatchSetupCoordinator";
 
 async function runPlayableMatch() {
   header("CORE BATTLE PLAYTEST MATCH CHECK (rules-vnext / GameSession / Decision)");
@@ -46,21 +47,27 @@ async function runPlayableMatch() {
   const fullPackage = await loadRulePackageFromDirectory(rulesDir);
   const rulePackage = getPlaytestRulePackage(fullPackage);
 
-  const state = createCoreBattlePresetState();
+  const rawState = createCoreBattlePresetState();
 
   // プリセットの整合性バリデーション
-  const validation = validatePlaytestPreset(state, fullPackage);
+  const validation = validatePlaytestPreset(rawState, fullPackage);
   if (!validation.valid) {
     console.error(`${colors.red}[VALIDATION ERROR] Preset が不正です:${colors.reset}`, validation.errors);
     process.exit(1);
   }
-  console.log(`${colors.green}[PRESET VALIDATION OK] ${state.presetId} の整合性を確認しました。${colors.reset}`);
+  console.log(`${colors.green}[PRESET VALIDATION OK] ${rawState.presetId} の整合性を確認しました。${colors.reset}`);
 
-  const session = new GameSession(state, rulePackage);
+  // 公式ゲーム開始手順 (先攻決定・公開カード墓地送り・先攻1枚ドロー)
+  const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+  console.log(`${colors.cyan}[SETUP] 先攻決定 Round 1: Player A (${setupResult.rounds[0].p1Card.suit}${setupResult.rounds[0].p1Card.rank}) vs Player B (${setupResult.rounds[0].p2Card.suit}${setupResult.rounds[0].p2Card.rank}) -> ${setupResult.firstPlayer === "p1" ? "Player A" : "Player B"} 先攻${colors.reset}`);
+  console.log(`${colors.cyan}[SETUP] 公開カードを墓地へ送り、先攻がライフから1枚引いてゲーム開始${colors.reset}`);
 
-  console.log(`初期プリセット: ${state.presetId}`);
-  console.log(`Player A (p1) Life: ${state.players.p1.life.length}枚, Field: ${state.players.p1.field.length}体`);
-  console.log(`Player B (p2) Life: ${state.players.p2.life.length}枚, Field: ${state.players.p2.field.length}体`);
+  const session = new GameSession(setupResult.state, rulePackage);
+  const state = session.state;
+
+  console.log(`初期プリセット: ${setupResult.state.presetId}`);
+  console.log(`Player A (p1) Life: ${setupResult.state.players.p1.life.length}枚, Field: ${setupResult.state.players.p1.field.length}体, Grave: ${setupResult.state.players.p1.grave.length}枚, Hand: ${setupResult.state.players.p1.hand.length}枚`);
+  console.log(`Player B (p2) Life: ${setupResult.state.players.p2.life.length}枚, Field: ${setupResult.state.players.p2.field.length}体, Grave: ${setupResult.state.players.p2.grave.length}枚, Hand: ${setupResult.state.players.p2.hand.length}枚`);
 
   // =========================================================================
   // Turn 1

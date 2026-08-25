@@ -4,9 +4,9 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { GameSession } from "../../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../../engine/session/playtest/createCoreBattlePlaytest";
-import { getPlaytestRulePackage } from "../../engine/rules/BrowserRuleLoader";
-
+import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
+import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
 
 describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => {
   let fullPackage: RulePackage;
@@ -33,14 +33,19 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
   };
 
   it("Full Match: Turn 1 (Attack/Block/DamageJudge/End) -> Turn 2 (Charge/Draw/Quick Twist/Attack/End) -> Turn 3 (Direct Damage -> Life 0 -> FINISHED)", () => {
-    const state = createCoreBattlePresetState();
+    const rawState = createCoreBattlePresetState();
 
     // 試合開始前に Playtest Preset の整合性を厳格に検証 (Phase 21B.1)
-    const validation = validatePlaytestPreset(state, fullPackage);
+    const validation = validatePlaytestPreset(rawState, fullPackage);
     expect(validation.valid).toBe(true);
     expect(validation.errors).toEqual([]);
 
-    const session = new GameSession(state, rulePackage);
+    // 公式ゲーム開始手順 (先攻決定・公開カード墓地送り・先攻1枚ドロー)
+    const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+    expect(setupResult.firstPlayer).toBe("p1");
+
+    const session = new GameSession(setupResult.state, rulePackage);
+    const state = session.state;
 
     // =========================================================================
     // TURN 1: Player A (p1)
@@ -100,8 +105,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
     });
 
     // アタック解決完了 -> Block が Stage に積まれ、チャンスは p1 (対応機会)
-    expect(state.stage.requests.length).toBe(1);
-    expect(state.stage.requests[0].actionId).toBe("action.block");
+    expect(session.state.stage.requests.length).toBe(1);
+    expect(session.state.stage.requests[0].actionId).toBe("action.block");
     if (step.type !== "WAITING_FOR_DECISION") return;
     const reqBlockPass1 = step.request;
     expect(reqBlockPass1.playerId).toBe("p1");
@@ -174,8 +179,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
     // 1. soldier-p1-1 (6) vs soldier-p2-1 (6) -> 相打ちで双方が墓地へ
     expect(state.players.p1.grave.some((u: any) => u.unitId === "soldier-p1-1")).toBe(true);
     expect(state.players.p2.grave.some((u: any) => u.unitId === "soldier-p2-1")).toBe(true);
-    // 2. soldier-p1-2 (5) vs 未ブロック -> p2 への直接ダメージ (Life 8 - 5 = 3枚)
-    expect(state.players.p2.life.length).toBe(3);
+    // 2. soldier-p1-2 (5) vs 未ブロック -> p2 への直接ダメージ (Life 7 - 5 = 2枚)
+    expect(state.players.p2.life.length).toBe(2);
     expect(state.stage.requests.length).toBe(0);
 
     // p1 が End をリクエスト
@@ -282,8 +287,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
       selectedPatternRef: findPassPatternIndex(reqDrawPass2),
     });
 
-    // Draw 解決後: p2 のライフは 3枚 (>2) だったので 2枚引いて残り 1枚、手札 4枚 (初期2枚 + 2枚)
-    expect(state.players.p2.hand.length).toBe(4);
+    // Draw 解決後: p2 のライフは 2枚 (<=2) だったので 1枚引いて残り 1枚、手札 3枚 (初期2枚 + 1枚)
+    expect(state.players.p2.hand.length).toBe(3);
     expect(state.players.p2.life.length).toBe(1);
     expect(state.chancePlayer).toBe("p2");
 
@@ -340,8 +345,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
       selectedPatternRef: findPassPatternIndex(reqDrawPass4),
     });
 
-    // p1 の手札増加 & ライフ 6枚
-    expect(state.players.p1.life.length).toBe(6);
+    // p1 の手札増加 & ライフ 4枚 (6 - 2 = 4枚)
+    expect(state.players.p1.life.length).toBe(4);
 
     // p1 が アタック をリクエスト
     if (step.type !== "WAITING_FOR_DECISION") return;

@@ -167,9 +167,24 @@ export class GameSession {
     }
 
     if (triggerResult.stagedRequests.length > 0) {
-      // 通常誘発アクションがステージに積まれた場合、そのコントローラーの対戦相手へチャンスを設定（対応機会の提供）
+      // 通常誘発アクションがステージに積まれた場合、DSL (initialChance) またはコントローラーの対戦相手へチャンスを設定
       const topStagedReq = triggerResult.stagedRequests[triggerResult.stagedRequests.length - 1];
-      this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
+      const actionDef = this.rulePackage.actions.find((a) => a.id === topStagedReq.actionId);
+      const initialChanceSpec = actionDef?.request?.initialChance;
+
+      if (initialChanceSpec === "turnPlayer") {
+        this.state.chancePlayer = this.state.turnPlayer || topStagedReq.controller;
+      } else if (initialChanceSpec === "nonTurnPlayer") {
+        this.state.chancePlayer =
+          this.state.nonTurnPlayer ||
+          getOpponentPlayerKey(this.state.turnPlayer || topStagedReq.controller, this.state);
+      } else if (initialChanceSpec === "controller") {
+        this.state.chancePlayer = topStagedReq.controller;
+      } else if (initialChanceSpec === "opponent") {
+        this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
+      } else {
+        this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
+      }
     }
 
     // 4. 現在のチャンスプレイヤーの判断要求を生成
