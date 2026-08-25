@@ -120,8 +120,8 @@ describe("Triggered Request Buffer & Core Flow Integration Tests", () => {
     // アタッカーが存在するため、block が requestBuffer に入る (Test C)
     expect(state.requestBuffer.requests.length).toBe(1);
     expect(state.requestBuffer.requests[0].actionId).toBe("action.block");
-    expect(state.requestBuffer.requests[0].controller).toBe("p1");
-    expect(state.requestBuffer.requests[0].definitionOwner).toBe("p1");
+    expect(state.requestBuffer.requests[0].controller).toBe("p2");
+    expect(state.requestBuffer.requests[0].definitionOwner).toBe("p2");
 
     // アタッカーが存在しない状態で actionResolved(action.attack) を投げた場合は誘発しない (Test D)
     state.requestBuffer.requests = [];

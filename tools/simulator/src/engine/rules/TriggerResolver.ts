@@ -34,6 +34,19 @@ export class TriggerResolver {
   }
 
   /**
+   * プレイヤー参照文字列（DSL）を実際のプレイヤーキーに解決します。
+   */
+  resolvePlayerRef(ref: string | undefined, defaultPlayer: string, state: any, event?: any): string {
+    if (!ref) return defaultPlayer;
+    if (ref === "turnPlayer") return state.turnPlayer || defaultPlayer;
+    if (ref === "nonTurnPlayer") return state.nonTurnPlayer || (state.turnPlayer ? getOpponentPlayerKey(state.turnPlayer, state) : defaultPlayer);
+    if (ref === "opponent") return getOpponentPlayerKey(state.turnPlayer || defaultPlayer, state);
+    if (ref === "eventPlayer") return event?.payload?.playerKey ?? defaultPlayer;
+    if (ref === "self") return defaultPlayer;
+    return ref;
+  }
+
+  /**
    * イベント（またはアクション解決）を検知し、誘発条件に合うアクションを評価してリクエストバッファに積みます。
    */
   resolveTriggers(event: unknown, context: CommandContext): void {
@@ -50,8 +63,29 @@ export class TriggerResolver {
       const cond = action.triggerCondition;
       if (!cond || cond.event !== event.type) continue;
 
-      const matches = this.findTriggerMatches(action, event, context);
-      newlyTriggered.push(...matches);
+      // 1. candidateController / definitionOwner を先行解決
+      const candidateController = this.resolvePlayerRef(
+        action.request?.controller,
+        event.payload?.playerKey ?? context.playerKey,
+        state,
+        event
+      );
+      const candidateOwner = this.resolvePlayerRef(
+        action.request?.definitionOwner,
+        candidateController,
+        state,
+        event
+      );
+
+      // 2. triggerCondition 評価 (sourceController 含む)
+      const matches = this.findTriggerMatches(action, event, context, candidateController);
+      for (const m of matches) {
+        newlyTriggered.push({
+          ...m,
+          resolvedController: candidateController,
+          resolvedDefinitionOwner: candidateOwner,
+        } as any);
+      }
     }
 
     if (newlyTriggered.length === 0) return;
@@ -78,34 +112,8 @@ export class TriggerResolver {
         // リクエストバッファへ積む
         state.nextRequestSeq = (state.nextRequestSeq || 0) + 1;
         const seq = state.nextRequestSeq;
-        // リクエスト実行者 (controller) および定義所有者 (definitionOwner) の解決
-        let controller = context.playerKey;
-        let definitionOwner = context.playerKey;
-
-        // 1. ActionDefinition に明示的な指定がある場合 (DSL駆動)
-        const reqCtrl = action.request?.controller;
-        const reqOwner = action.request?.definitionOwner;
-
-        const resolvePlayerRef = (ref: string | undefined, defaultPlayer: string): string => {
-          if (!ref) return defaultPlayer;
-          if (ref === "turnPlayer") return state.turnPlayer;
-          if (ref === "nonTurnPlayer" || ref === "opponent") return getOpponentPlayerKey(state.turnPlayer, state);
-          if (ref === "eventPlayer" || ref === "self") return (event as any).payload?.playerKey ?? defaultPlayer;
-          return ref;
-        };
-
-        if (reqCtrl || reqOwner) {
-          controller = resolvePlayerRef(reqCtrl, context.playerKey);
-          definitionOwner = resolvePlayerRef(reqOwner, context.playerKey);
-        } else if (event.type === "cardMoved" && (event as any).payload?.playerKey) {
-          // cardMoved 起因の誘発アクションは、移動したカード/ユニットのオーナーがコントローラー・所有者となる
-          controller = (event as any).payload.playerKey;
-          definitionOwner = (event as any).payload.playerKey;
-        } else if (event.type === "actionResolved" && (event as any).payload?.playerKey) {
-          // actionResolved 起因の誘発アクションは、アクション解決プレイヤーがコントローラー・所有者となる
-          controller = (event as any).payload.playerKey;
-          definitionOwner = (event as any).payload.playerKey;
-        }
+        const controller = (match as any).resolvedController ?? context.playerKey;
+        const definitionOwner = (match as any).resolvedDefinitionOwner ?? context.playerKey;
 
         const req: TriggeredActionRequest = {
           id: `req-trg-${seq}`,
@@ -143,13 +151,21 @@ export class TriggerResolver {
   findTriggerMatches(
     action: ActionDefinition,
     event: { type: string; payload?: any },
-    context: CommandContext
+    context: CommandContext,
+    candidateController?: string
   ): TriggerMatch[] {
     const cond = action.triggerCondition;
     if (!cond) return [];
     const payload = event.payload || {};
 
-    if (!this.evaluateBaseCondition(cond, event, context)) {
+    const ctrl = candidateController ?? this.resolvePlayerRef(
+      action.request?.controller,
+      payload.playerKey ?? context.playerKey,
+      context.state,
+      event
+    );
+
+    if (!this.evaluateBaseCondition(cond, event, context, ctrl)) {
       return [];
     }
 
@@ -212,10 +228,12 @@ export class TriggerResolver {
   private evaluateBaseCondition(
     cond: { event: string; condition?: any },
     event: { type: string; payload?: any },
-    context: CommandContext
+    context: CommandContext,
+    candidateController: string
   ): boolean {
     const payload = event.payload || {};
-    const selfPlayerKey = payload.playerKey ?? context.playerKey;
+    const state = context.state;
+    const selfPlayerKey = candidateController;
 
     if (event.type === "cardMoved") {
       if (cond.condition) {
@@ -258,11 +276,32 @@ export class TriggerResolver {
     }
 
     if (event.type === "actionResolved") {
-      const state = context.state;
       const targetActionId = payload.actionId;
 
       if (cond.condition) {
         if (cond.condition.actionId && cond.condition.actionId !== targetActionId) return false;
+
+        // sourceController (generic relation) の評価
+        if (cond.condition.sourceController) {
+          const sourcePlayerKey = payload.playerKey ?? payload.controller ?? context.playerKey;
+          const expectedRelation = cond.condition.sourceController;
+          let isSourceMatch = false;
+
+          if (expectedRelation === "opponent") {
+            isSourceMatch = sourcePlayerKey === getOpponentPlayerKey(candidateController, state);
+          } else if (expectedRelation === "self") {
+            isSourceMatch = sourcePlayerKey === candidateController;
+          } else if (expectedRelation === "turnPlayer") {
+            isSourceMatch = sourcePlayerKey === state.turnPlayer;
+          } else if (expectedRelation === "nonTurnPlayer") {
+            const ntp = state.nonTurnPlayer || getOpponentPlayerKey(state.turnPlayer, state);
+            isSourceMatch = sourcePlayerKey === ntp;
+          } else {
+            isSourceMatch = sourcePlayerKey === expectedRelation;
+          }
+
+          if (!isSourceMatch) return false;
+        }
 
         // activeComponent 条件の評価
         if (cond.condition.activeComponent) {

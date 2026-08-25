@@ -3,6 +3,7 @@ import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
 import { formatCardDisplay, formatCardList } from "../../engine/rules/cardUtils";
+import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
@@ -303,6 +304,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   // EFFECT_RESOLUTION 時の UI
   if (request.source.type === "EFFECT_RESOLUTION") {
+    const isBlockAssignment = catalog.effectSelections.some(
+      (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
+    );
+
     return (
       <div className="rounded-xl border-2 border-amber-500/50 bg-slate-900/95 p-4 text-slate-100 shadow-xl">
         <div className="flex items-center justify-between border-b border-slate-700 pb-2.5 mb-3">
@@ -311,63 +316,77 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               EFFECT SELECTION
             </span>
             <h2 className="text-base font-bold text-slate-100 mt-0.5">
-              {request.playerId === "p1" ? "Player A" : "Player B"} の対象・割当て指定
+              {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "対象・割当て指定"}
             </h2>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            選択肢（盤面の ①, ② をタップまたは下記から選択）:
-          </label>
+        {isBlockAssignment ? (
+          <BlockAssignmentEditor
+            request={request}
+            onSelectPattern={(patternRef) => {
+              onSubmit({
+                decisionId: request.decisionId,
+                stateVersion: request.stateVersion,
+                selectedPatternRef: patternRef,
+              });
+            }}
+            unitNumberMap={unitNumberMap}
+          />
+        ) : (
+          <div className="space-y-3">
+            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              選択肢（盤面の ①, ② をタップまたは下記から選択）:
+            </label>
 
-          <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
-            {humanReadableEffectPatterns.map((hp, idx) => {
-              const isSelected = selectedEffectPatternRef === idx;
-              return (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedEffectPatternRef(idx)}
-                  className={`rounded-xl border-2 p-3 text-left transition flex items-center justify-between ${
-                    isSelected
-                      ? "border-amber-400 bg-amber-950/80 text-amber-100 shadow-md ring-2 ring-amber-400/50"
-                      : "border-slate-700 bg-slate-800/60 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
-                        isSelected
-                          ? "bg-amber-400 border-amber-300 text-slate-950 font-black"
-                          : "border-slate-500 text-transparent"
-                      }`}
-                    >
-                      ✓
-                    </span>
-                    <span className="font-bold text-sm leading-snug">{hp.label}</span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {selectedEffectPatternRef !== null && (
-            <div className="pt-3 border-t border-slate-700 mt-3 flex items-center justify-between gap-3">
-              <div className="text-xs text-slate-400 truncate">
-                選択中:{" "}
-                <span className="font-bold text-amber-300">
-                  {humanReadableEffectPatterns[selectedEffectPatternRef]?.label}
-                </span>
-              </div>
-              <button
-                onClick={handleEffectSubmit}
-                className="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black shadow-lg transition text-sm shrink-0"
-              >
-                決定して解決する
-              </button>
+            <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
+              {humanReadableEffectPatterns.map((hp, idx) => {
+                const isSelected = selectedEffectPatternRef === idx;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedEffectPatternRef(idx)}
+                    className={`rounded-xl border-2 p-3 text-left transition flex items-center justify-between ${
+                      isSelected
+                        ? "border-amber-400 bg-amber-950/80 text-amber-100 shadow-md ring-2 ring-amber-400/50"
+                        : "border-slate-700 bg-slate-800/60 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
+                          isSelected
+                            ? "bg-amber-400 border-amber-300 text-slate-950 font-black"
+                            : "border-slate-500 text-transparent"
+                        }`}
+                      >
+                        ✓
+                      </span>
+                      <span className="font-bold text-sm leading-snug">{hp.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          )}
-        </div>
+
+            {selectedEffectPatternRef !== null && (
+              <div className="pt-3 border-t border-slate-700 mt-3 flex items-center justify-between gap-3">
+                <div className="text-xs text-slate-400 truncate">
+                  選択中:{" "}
+                  <span className="font-bold text-amber-300">
+                    {humanReadableEffectPatterns[selectedEffectPatternRef]?.label}
+                  </span>
+                </div>
+                <button
+                  onClick={handleEffectSubmit}
+                  className="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black shadow-lg transition text-sm shrink-0"
+                >
+                  決定して解決する
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     );
   }

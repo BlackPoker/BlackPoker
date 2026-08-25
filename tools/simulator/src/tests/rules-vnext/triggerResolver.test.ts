@@ -163,11 +163,12 @@ describe("Trigger Resolver and Request Buffer Integration Tests (Phase 14.4)", (
     registry.dispatchEvent(event, context);
 
     // 検証：action.block がリクエストバッファに積まれていること
-    // Block の controller は turnPlayer (p1) であること (Phase 21B.4)
+    // 9.2仕様: Block の controller は nonTurnPlayer (p2)
     const requestBuffer = state.requestBuffer as RequestBuffer;
     expect(requestBuffer.requests.length).toBe(1);
     expect(requestBuffer.requests[0].actionId).toBe("action.block");
-    expect(requestBuffer.requests[0].controller).toBe("p1");
+    expect(requestBuffer.requests[0].controller).toBe("p2");
+    expect(requestBuffer.requests[0].definitionOwner).toBe("p2");
   });
 
   it("should NOT trigger action.block when action.attack resolves but no attacker is present (D)", () => {

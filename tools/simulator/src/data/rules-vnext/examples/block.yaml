@@ -8,14 +8,14 @@ actions:
       trigger: triggered
       speed: normal
       timing: main
-      controller: turnPlayer
-      definitionOwner: turnPlayer
-      initialChance: turnPlayer
+      controller: nonTurnPlayer
+      definitionOwner: nonTurnPlayer
 
     triggerCondition:
       event: actionResolved
       condition:
         actionId: action.attack
+        sourceController: opponent
         hasAttacker: true
 
     text:
@@ -24,8 +24,7 @@ actions:
     effect:
       - selectBlockAssignments:
           id: blocks
-          decisionPlayer: opponent
-          relation: decisionPlayer
+          relation: self
           attackers: battle.attackers
           condition:
             label: 防御

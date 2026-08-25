@@ -56,9 +56,9 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     expect(requestBuffer).toBeDefined();
     expect(requestBuffer.requests.length).toBe(1);
     expect(requestBuffer.requests[0].actionId).toBe("action.block");
-    // definitionOwner と controller の検証
-    expect(requestBuffer.requests[0].definitionOwner).toBe("p1");
-    expect(requestBuffer.requests[0].controller).toBe("p1");
+    // definitionOwner と controller の検証 (9.2仕様: p2)
+    expect(requestBuffer.requests[0].definitionOwner).toBe("p2");
+    expect(requestBuffer.requests[0].controller).toBe("p2");
 
     // 2. ステージへの移送を実行
     const actionReq = registry.moveNextBufferedRequestToStage(context);
@@ -68,8 +68,8 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     expect(actionReq!.actionId).toBe("action.block");
     expect(actionReq!.triggered).toBe(true);
     expect(actionReq!.source).toBe("requestBuffer");
-    expect(actionReq!.definitionOwner).toBe("p1"); // 引き継ぎ確認
-    expect(actionReq!.controller).toBe("p1");      // 引き継ぎ確認
+    expect(actionReq!.definitionOwner).toBe("p2"); // 引き継ぎ確認
+    expect(actionReq!.controller).toBe("p2");      // 引き継ぎ確認
     expect(actionReq!.status).toBe("pending");
 
     // バッファからは削除されている
