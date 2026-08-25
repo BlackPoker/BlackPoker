@@ -9,6 +9,8 @@ export interface PlayerBoardProps {
   isTurnPlayer: boolean;
   isChancePlayer: boolean;
   showPrivateInfo: boolean;
+  unitSelectionMarkers?: Map<string, { badge: string; isSelected: boolean }>;
+  onUnitClick?: (unitId: string) => void;
 }
 
 export const PlayerBoard: React.FC<PlayerBoardProps> = ({
@@ -18,6 +20,8 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   isTurnPlayer,
   isChancePlayer,
   showPrivateInfo,
+  unitSelectionMarkers,
+  onUnitClick,
 }) => {
   const [showGraveModal, setShowGraveModal] = useState(false);
   const [showLifeCards, setShowLifeCards] = useState(false);
@@ -58,110 +62,97 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
         {/* ライフ表示 */}
         <div className="flex items-center gap-2">
-          <div
-            onClick={() => setShowLifeCards(!showLifeCards)}
-            className="flex items-center gap-1.5 px-3 py-1 bg-red-100 border border-red-300 dark:bg-red-950/50 dark:border-red-800 rounded-lg cursor-pointer hover:bg-red-200 transition"
-            title="クリックでライフカード一覧を展開"
-          >
-            <span className="text-sm font-bold text-red-700 dark:text-red-300">Playtest Life:</span>
-            <span className="text-lg font-extrabold text-red-600 dark:text-red-400 font-mono">
-              {lifeCount}
-            </span>
-            <span className="text-xs text-red-500">枚</span>
+          <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-950/60 px-3 py-1 rounded-lg border border-red-300 dark:border-red-800">
+            <span className="text-sm">❤️</span>
+            <span className="text-xs font-bold text-red-800 dark:text-red-300">LIFE:</span>
+            <span className="text-sm font-black text-red-600 dark:text-red-400">{lifeCount}</span>
           </div>
 
-          {/* 墓地ボタン */}
           <button
             onClick={() => setShowGraveModal(!showGraveModal)}
-            className="px-2.5 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:hover:bg-slate-700 transition"
+            className="text-xs font-bold px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
           >
-            墓地: {graveCards.length}
+            🪦 墓地 ({graveCards.length})
           </button>
         </div>
       </div>
 
-      {/* ライフカード詳細 (折りたたみ) */}
-      {showLifeCards && Array.isArray(player.life) && player.life.length > 0 && (
-        <div className="mb-2 p-2 bg-red-50/50 dark:bg-red-950/20 rounded border border-red-200 dark:border-red-900/40">
-          <div className="text-xs text-red-600 font-bold mb-1">ライフ山 (先頭が次ドロー/被弾):</div>
-          <div className="flex flex-wrap gap-1">
-            {player.life.map((c: any, i: number) => (
-              <CardView key={c.id || i} card={c} faceDown={!showPrivateInfo} size="sm" />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 墓地モーダル/ドロップダウン */}
-      {showGraveModal && (
-        <div className="mb-2 p-2 bg-slate-100 dark:bg-slate-800 rounded border border-slate-300 dark:border-slate-700">
-          <div className="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            <span>墓地カード一覧 ({graveCards.length}枚):</span>
-            <button
-              onClick={() => setShowGraveModal(false)}
-              className="text-slate-500 hover:text-slate-800 text-xs"
-            >
-              ✕ 閉じる
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-            {graveCards.length === 0 ? (
-              <span className="text-xs text-slate-400">墓地にカードはありません</span>
-            ) : (
-              graveCards.map((item: any, i: number) => {
-                const cards = item.cards || (item.suit ? [item] : []);
-                return cards.map((c: any, ci: number) => (
-                  <CardView key={c.id || `${i}-${ci}`} card={c} size="sm" />
-                ));
-              })
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* フィールドエリア */}
+      {/* フィールド (Units) */}
       <div className="mb-3">
-        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-          フィールド (キャラクター):
+        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+          <span>FIELD (ユニット: {fieldUnits.length}体)</span>
         </div>
-        <div className="flex flex-wrap gap-2 min-h-[90px] p-2 bg-white/70 dark:bg-slate-800/40 rounded-lg border border-dashed border-slate-300 dark:border-slate-700">
-          {fieldUnits.length === 0 ? (
-            <div className="w-full flex items-center justify-center text-xs text-slate-400 py-4">
-              フィールドにユニットがいません
-            </div>
-          ) : (
-            fieldUnits.map((u: any) => (
-              <UnitCard key={u.unitId} unit={u} showCardDetails={showPrivateInfo} />
-            ))
-          )}
-        </div>
-      </div>
 
-      {/* 手札エリア */}
-      <div>
-        <div className="flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1">
-          <span>手札 ({handCards.length}枚):</span>
-          {!showPrivateInfo && handCards.length > 0 && (
-            <span className="text-[10px] text-slate-400 font-normal">※ 非公開 (枚数のみ表示)</span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-1.5 min-h-[50px] p-2 bg-white/70 dark:bg-slate-800/40 rounded-lg border border-dashed border-slate-300 dark:border-slate-700">
-          {handCards.length === 0 ? (
-            <div className="w-full flex items-center justify-center text-xs text-slate-400 py-2">
-              手札なし
-            </div>
-          ) : (
-            handCards.map((c: any, i: number) => (
-              <CardView
-                key={c.id || i}
-                card={c}
-                faceDown={!showPrivateInfo}
-                size="md"
+        <div className="flex flex-wrap gap-2 min-h-[120px] p-2 rounded-lg bg-slate-100/70 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+          {fieldUnits.length > 0 ? (
+            fieldUnits.map((unit: any) => (
+              <UnitCard
+                key={unit.unitId}
+                unit={unit}
+                showCardDetails={showPrivateInfo || unit.face !== "down"}
+                selectionMarker={unitSelectionMarkers?.get(unit.unitId)}
+                onClick={onUnitClick ? () => onUnitClick(unit.unitId) : undefined}
               />
             ))
+          ) : (
+            <div className="flex items-center justify-center w-full text-xs text-slate-400 italic">
+              ユニットなし
+            </div>
           )}
         </div>
       </div>
+
+      {/* 手札 (Hand) */}
+      <div>
+        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+          <span>HAND (手札: {handCards.length}枚)</span>
+          {!showPrivateInfo && <span className="text-[10px] text-amber-500">※ 非公開情報 (裏向き)</span>}
+        </div>
+
+        <div className="flex flex-wrap gap-1.5 min-h-[60px] p-2 rounded-lg bg-slate-100/50 dark:bg-slate-950/30 border border-slate-200 dark:border-slate-800">
+          {handCards.length > 0 ? (
+            handCards.map((card: any, idx: number) => (
+              <CardView key={card.id || idx} card={card} faceDown={!showPrivateInfo} size="sm" />
+            ))
+          ) : (
+            <div className="flex items-center justify-center w-full text-xs text-slate-400 italic">
+              手札なし
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 墓地モーダル */}
+      {showGraveModal && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-4 max-w-md w-full shadow-2xl text-slate-100">
+            <div className="flex items-center justify-between border-b border-slate-700 pb-2 mb-3">
+              <h3 className="text-sm font-bold flex items-center gap-1.5">
+                <span>🪦</span>
+                <span>{player.name || playerKey} の墓地 ({graveCards.length}枚)</span>
+              </h3>
+              <button
+                onClick={() => setShowGraveModal(false)}
+                className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800">
+              {graveCards.length > 0 ? (
+                graveCards.map((c: any, idx: number) => (
+                  <CardView key={c.id || idx} card={c} size="sm" />
+                ))
+              ) : (
+                <div className="text-xs text-slate-500 py-4 text-center w-full italic">
+                  墓地にカードはありません
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

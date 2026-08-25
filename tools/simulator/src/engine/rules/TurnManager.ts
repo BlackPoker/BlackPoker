@@ -18,6 +18,7 @@ export class TurnManager {
     state.chancePlayer = playerKey;
     state.turnCount = (state.turnCount || 0) + 1;
     state.actionCount = 0; // ターンごとのアクション数をリセット
+    state.turnUsage = {}; // ターンごとのアクション使用回数をリセット
   }
 
   /**

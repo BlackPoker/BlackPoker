@@ -101,6 +101,20 @@ export class ActionRequestValidator {
       }
     }
 
+    // 0.1 使用回数制限 (usageLimit) の検証
+    if (action.request?.usageLimit) {
+      const { scope = "turn", max = 1 } = action.request.usageLimit;
+      const state = context.state;
+      if (scope === "turn" && state) {
+        const usedCount = state.turnUsage?.[context.playerKey]?.[action.id] || 0;
+        if (usedCount >= max) {
+          throw new ValidationError(
+            `アクション '${action.id}' はこのターンすでに上限回数 (${max}回) 使用されています。`
+          );
+        }
+      }
+    }
+
     // 0.1.1 ブロックアクション (action.block) の検証
     if (action.id === "action.block") {
       const state = context.state;

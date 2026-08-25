@@ -140,6 +140,15 @@ export class CommandRegistry {
     if (!context.state.stage) {
       context.state.stage = { requests: [], history: [] };
     }
+    if (!context.state.turnUsage) {
+      context.state.turnUsage = {};
+    }
+    if (!context.state.turnUsage[context.playerKey]) {
+      context.state.turnUsage[context.playerKey] = {};
+    }
+    context.state.turnUsage[context.playerKey][action.id] =
+      (context.state.turnUsage[context.playerKey][action.id] || 0) + 1;
+
     context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
     const seq = context.state.nextRequestSeq;
 

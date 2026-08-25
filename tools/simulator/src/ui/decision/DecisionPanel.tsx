@@ -1,28 +1,32 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
-import { PatternExpander, PatternView } from "../../engine/decision/PatternExpander";
+import { PatternExpander } from "../../engine/decision/PatternExpander";
+import { formatCardDisplay, formatCardList } from "../../engine/rules/cardUtils";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
   readonly onSubmit: (response: DecisionResponse, options?: { autoPass?: boolean }) => void;
   readonly onCancel?: () => void;
+  readonly onSelectionMarkersChange?: (markers: Map<string, { badge: string; isSelected: boolean }>) => void;
+  readonly selectedUnitIdsFromBoard?: string[];
 }
 
-export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit }) => {
+export const DecisionPanel: React.FC<DecisionPanelProps> = ({
+  request,
+  onSubmit,
+  onSelectionMarkersChange,
+  selectedUnitIdsFromBoard,
+}) => {
   const catalog = request.catalog;
   const patterns = request.patterns;
-
-  // 各パターンの表示用展開モデル
-  const patternViews = useMemo(() => {
-    return PatternExpander.expandAll(patterns, catalog);
-  }, [patterns, catalog]);
 
   // 選択状態
   const [selectedActionRef, setSelectedActionRef] = useState<number | null>(null);
   const [selectedKeyRef, setSelectedKeyRef] = useState<number | null>(null);
   const [selectedCostRef, setSelectedCostRef] = useState<number | null>(null);
   const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(null);
+  const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
 
   // 1. 選択可能なアクション一覧
   const availableActionRefs = useMemo(() => {
@@ -82,11 +86,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
     return Array.from(refs);
   }, [patternsFilteredByCost]);
 
-  // アクション選択ハンドラ（自動選択ヘルパー連動）
+  // アクション選択ハンドラ
   const handleSelectAction = (actRef: number) => {
     setSelectedActionRef(actRef);
 
-    // そのアクションで選べるキーカードをチェック
     const acts = patterns.filter((p) => p.actionSelectionRef === actRef);
     const keyRefs = Array.from(new Set(acts.map((p) => p.keyCardSelectionRef)));
     let nextKeyRef: number | null = null;
@@ -95,75 +98,179 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
     }
     setSelectedKeyRef(nextKeyRef);
 
-    // コスト候補をチェック
     const keys = acts.filter((p) =>
       nextKeyRef === null ? p.keyCardSelectionRef === undefined : p.keyCardSelectionRef === nextKeyRef
     );
-    const costRefs = Array.from(new Set(keys.map((p) => p.costPaymentRef).filter((r): r is number => r !== undefined)));
+    const costRefs = Array.from(new Set(keys.map((p) => p.costPaymentRef).filter((r) => r !== undefined)));
     let nextCostRef: number | null = null;
     if (costRefs.length === 1) {
-      nextCostRef = costRefs[0];
+      nextCostRef = costRefs[0] as number;
     }
     setSelectedCostRef(nextCostRef);
 
-    // 対象候補をチェック
-    if (nextCostRef !== null) {
-      const costs = keys.filter((p) => p.costPaymentRef === nextCostRef);
-      const tgtRefs = Array.from(new Set(costs.map((p) => p.targetSelectionRef).filter((r): r is number => r !== undefined)));
-      let nextTgtRef: number | null = null;
-      if (tgtRefs.length === 1) {
-        nextTgtRef = tgtRefs[0];
-      }
-      setSelectedTargetRef(nextTgtRef);
-    } else {
-      setSelectedTargetRef(null);
+    const costs = keys.filter((p) => (nextCostRef === null ? true : p.costPaymentRef === nextCostRef));
+    const targetRefs = Array.from(new Set(costs.map((p) => p.targetSelectionRef).filter((r) => r !== undefined)));
+    let nextTargetRef: number | null = null;
+    if (targetRefs.length === 1) {
+      nextTargetRef = targetRefs[0] as number;
     }
+    setSelectedTargetRef(nextTargetRef);
   };
 
-  // 5. 最終的に確定した 1 件のパターン
-  const finalMatchedPatternIndex = useMemo(() => {
-    if (selectedActionRef === null || selectedCostRef === null || selectedTargetRef === null) {
-      return null;
+  // 唯一のアクションがある場合は自動選択
+  useEffect(() => {
+    if (availableActionRefs.length === 1 && selectedActionRef === null) {
+      handleSelectAction(availableActionRefs[0]);
     }
+  }, [availableActionRefs]);
+
+  // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & ①/② 番号マッピング
+  const unitNumberMap = useMemo(() => {
+    const map = new Map<string, { badge: string; label: string; unitView: any }>();
+    const digits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
+
+    // Observation から全フィールドユニットを収集
+    const allUnits: any[] = [];
+    if (request.observation?.players) {
+      for (const p of Object.values<any>(request.observation.players)) {
+        if (p.field && Array.isArray(p.field)) {
+          allUnits.push(...p.field);
+        }
+      }
+    }
+
+    // catalog.effectSelections に含まれる unitId を収集
+    const candidateUnitIds = new Set<string>();
+    for (const eff of catalog.effectSelections) {
+      if (eff.selectedValues) {
+        for (const uId of eff.selectedValues) {
+          candidateUnitIds.add(uId);
+        }
+      }
+      if (eff.assignments) {
+        for (const asgn of eff.assignments) {
+          if (asgn.sourceUnitId) candidateUnitIds.add(asgn.sourceUnitId);
+          if (asgn.selectedUnitIds) {
+            for (const bId of asgn.selectedUnitIds) candidateUnitIds.add(bId);
+          }
+        }
+      }
+    }
+
+    let count = 0;
+    for (const unit of allUnits) {
+      if (candidateUnitIds.has(unit.unitId)) {
+        const badge = digits[count] || `[${count + 1}]`;
+        const cardStr = formatCardList(unit.cards || []);
+        const label = `${badge} ${cardStr} ${unit.kind || "ユニット"}`;
+        map.set(unit.unitId, { badge, label, unitView: unit });
+        count++;
+      }
+    }
+
+    return map;
+  }, [catalog, request.observation]);
+
+  // EFFECT_RESOLUTION 用の人間可読パターンリスト
+  const humanReadableEffectPatterns = useMemo(() => {
+    return patterns.map((p, idx) => {
+      const eff = p.effectSelectionRef !== undefined ? catalog.effectSelections[p.effectSelectionRef] : undefined;
+      if (!eff) return { patternIndex: idx, label: "効果の選択", selectedValues: [] };
+
+      // 1. アタッカー選択 (selectedValues)
+      if (eff.selectedValues !== undefined) {
+        if (eff.selectedValues.length === 0) {
+          return { patternIndex: idx, label: "アタッカーなし (0体)", selectedValues: [] };
+        }
+        const unitLabels = eff.selectedValues.map((uId: string) => {
+          const info = unitNumberMap.get(uId);
+          return info ? info.label : uId;
+        });
+        const isSingle = eff.selectedValues.length === 1;
+        const label = isSingle ? `${unitLabels[0]} のみ` : unitLabels.join(" + ");
+        return { patternIndex: idx, label, selectedValues: eff.selectedValues };
+      }
+
+      // 2. ブロッカー割当て (assignments)
+      if (eff.assignments && eff.assignments.length > 0) {
+        const asgnStrs = eff.assignments.map((asgn: any) => {
+          const srcInfo = unitNumberMap.get(asgn.sourceUnitId);
+          const srcLabel = srcInfo ? srcInfo.label : asgn.sourceUnitId;
+          if (!asgn.selectedUnitIds || asgn.selectedUnitIds.length === 0) {
+            return `${srcLabel} (ブロックなし)`;
+          }
+          const blkLabels = asgn.selectedUnitIds.map((bId: string) => {
+            const bInfo = unitNumberMap.get(bId);
+            return bInfo ? bInfo.label : bId;
+          });
+          return `${srcLabel} ← ${blkLabels.join(", ")}`;
+        });
+        return { patternIndex: idx, label: asgnStrs.join(" / "), selectedValues: [] };
+      }
+
+      return {
+        patternIndex: idx,
+        label: eff.summary || "選択肢",
+        selectedValues: [],
+      };
+    });
+  }, [patterns, catalog, unitNumberMap]);
+
+  // 盤面クリック選択 (selectedUnitIdsFromBoard) との連動
+  useEffect(() => {
+    if (selectedUnitIdsFromBoard && selectedUnitIdsFromBoard.length > 0) {
+      // 選択された unitIds と一致する pattern を検索
+      const targetIds = new Set(selectedUnitIdsFromBoard);
+      const matchIdx = humanReadableEffectPatterns.findIndex((hp) => {
+        if (hp.selectedValues.length !== targetIds.size) return false;
+        return hp.selectedValues.every((id) => targetIds.has(id));
+      });
+      if (matchIdx !== -1) {
+        setSelectedEffectPatternRef(matchIdx);
+      }
+    }
+  }, [selectedUnitIdsFromBoard, humanReadableEffectPatterns]);
+
+  // 盤面マーカー（①, ②）と選択状態の通知
+  useEffect(() => {
+    if (!onSelectionMarkersChange) return;
+
+    const markers = new Map<string, { badge: string; isSelected: boolean }>();
+    const currentSelectedPattern =
+      selectedEffectPatternRef !== null ? humanReadableEffectPatterns[selectedEffectPatternRef] : undefined;
+    const currentSelectedValues = new Set(currentSelectedPattern?.selectedValues || []);
+
+    unitNumberMap.forEach((info, unitId) => {
+      markers.set(unitId, {
+        badge: info.badge,
+        isSelected: currentSelectedValues.has(unitId),
+      });
+    });
+
+    onSelectionMarkersChange(markers);
+  }, [unitNumberMap, selectedEffectPatternRef, humanReadableEffectPatterns, onSelectionMarkersChange]);
+
+  // パターン一致検索
+  const finalMatchedPatternIndex = useMemo(() => {
+    if (selectedActionRef === null) return null;
     return patterns.findIndex((p) => {
-      const matchAction = p.actionSelectionRef === selectedActionRef;
-      const matchKey =
-        selectedKeyRef === null ? p.keyCardSelectionRef === undefined : p.keyCardSelectionRef === selectedKeyRef;
-      const matchCost = p.costPaymentRef === selectedCostRef;
-      const matchTarget = p.targetSelectionRef === selectedTargetRef;
-      return matchAction && matchKey && matchCost && matchTarget;
+      if (p.actionSelectionRef !== selectedActionRef) return false;
+      if (selectedKeyRef !== null) {
+        if (p.keyCardSelectionRef !== selectedKeyRef) return false;
+      } else {
+        if (p.keyCardSelectionRef !== undefined) return false;
+      }
+      if (selectedCostRef !== null) {
+        if (p.costPaymentRef !== selectedCostRef) return false;
+      }
+      if (selectedTargetRef !== null) {
+        if (p.targetSelectionRef !== selectedTargetRef) return false;
+      }
+      return true;
     });
   }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
 
-  const isEffectResolution = request.source.type === "EFFECT_RESOLUTION";
-  const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
-
-  // パス（PASS）パターンの取得
-  const passPatternIndex = useMemo(() => {
-    return patterns.findIndex((p) => p.kind === "PASS");
-  }, [patterns]);
-
-  const handlePass = () => {
-    if (passPatternIndex !== -1) {
-      onSubmit({
-        decisionId: request.decisionId,
-        stateVersion: request.stateVersion,
-        selectedPatternRef: passPatternIndex,
-      });
-    }
-  };
-
-  const handleEffectSubmit = () => {
-    if (selectedEffectPatternRef !== null) {
-      onSubmit({
-        decisionId: request.decisionId,
-        stateVersion: request.stateVersion,
-        selectedPatternRef: selectedEffectPatternRef,
-      });
-    }
-  };
-
-  const handleActionSubmit = (autoPass: boolean) => {
+  const handleActionSubmit = (autoPass: boolean = false) => {
     if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
     onSubmit(
       {
@@ -175,36 +282,51 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
     );
   };
 
-  if (isEffectResolution) {
-    const isAttackSelection = request.source.effectStepId === "selectUnits";
+  const handleEffectSubmit = () => {
+    if (selectedEffectPatternRef === null) return;
+    onSubmit({
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: selectedEffectPatternRef,
+    });
+  };
 
+  const passPatternIndex = patterns.findIndex((p) => p.kind === "PASS");
+  const handlePass = () => {
+    if (passPatternIndex === -1) return;
+    onSubmit({
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: passPatternIndex,
+    });
+  };
+
+  // EFFECT_RESOLUTION 時の UI
+  if (request.source.type === "EFFECT_RESOLUTION") {
     return (
-      <div className="rounded-xl border-2 border-amber-500/80 bg-slate-900/95 p-4 shadow-xl text-slate-100">
-        <div className="flex items-center justify-between border-b border-slate-700/80 pb-2.5 mb-3">
+      <div className="rounded-xl border-2 border-amber-500/50 bg-slate-900/95 p-4 text-slate-100 shadow-xl">
+        <div className="flex items-center justify-between border-b border-slate-700 pb-2.5 mb-3">
           <div>
-            <span className="inline-block rounded bg-amber-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-              EFFECT RESOLUTION
+            <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-950">
+              EFFECT SELECTION
             </span>
-            <h3 className="text-base font-black text-amber-300 mt-0.5">
-              {isAttackSelection ? "⚔ アタッカーの選択" : "🛡 ブロッカー割当ての選択"}
-            </h3>
-          </div>
-          <div className="text-xs text-slate-400">
-            Player: <span className="font-bold text-amber-300">{request.playerId === "p1" ? "Player A" : "Player B"}</span>
+            <h2 className="text-base font-bold text-slate-100 mt-0.5">
+              {request.playerId === "p1" ? "Player A" : "Player B"} の対象・割当て指定
+            </h2>
           </div>
         </div>
 
         <div className="space-y-3">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
-            選択肢（全 {patterns.length} 通り）:
+          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            選択肢（盤面の ①, ② をタップまたは下記から選択）:
           </label>
 
           <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
-            {patternViews.map((pv, idx) => {
+            {humanReadableEffectPatterns.map((hp, idx) => {
               const isSelected = selectedEffectPatternRef === idx;
               return (
                 <button
-                  key={pv.patternId || idx}
+                  key={idx}
                   onClick={() => setSelectedEffectPatternRef(idx)}
                   className={`rounded-xl border-2 p-3 text-left transition flex items-center justify-between ${
                     isSelected
@@ -213,10 +335,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <span className={`w-3 h-3 rounded-full border flex items-center justify-center text-[8px] ${isSelected ? "bg-amber-400 border-amber-300 text-slate-950 font-bold" : "border-slate-500"}`}>
-                      {isSelected ? "✓" : ""}
+                    <span
+                      className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
+                        isSelected
+                          ? "bg-amber-400 border-amber-300 text-slate-950 font-black"
+                          : "border-slate-500 text-transparent"
+                      }`}
+                    >
+                      ✓
                     </span>
-                    <span className="font-bold text-sm leading-snug">{pv.summary}</span>
+                    <span className="font-bold text-sm leading-snug">{hp.label}</span>
                   </div>
                 </button>
               );
@@ -226,7 +354,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
           {selectedEffectPatternRef !== null && (
             <div className="pt-3 border-t border-slate-700 mt-3 flex items-center justify-between gap-3">
               <div className="text-xs text-slate-400 truncate">
-                選択中: <span className="font-bold text-amber-300">{patternViews[selectedEffectPatternRef]?.summary}</span>
+                選択中:{" "}
+                <span className="font-bold text-amber-300">
+                  {humanReadableEffectPatterns[selectedEffectPatternRef]?.label}
+                </span>
               </div>
               <button
                 onClick={handleEffectSubmit}
@@ -340,32 +471,36 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({ request, onSubmit 
         )}
 
         {/* ステップ3: コスト選択 */}
-        {selectedActionRef !== null && (availableKeyRefs.length === 0 || selectedKeyRef !== null || availableKeyRefs.every((r) => r === undefined)) && availableCostRefs.length > 1 && (
-          <div className="pt-2 border-t border-slate-800">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-              3. コストの支払い方法
-            </label>
-            <div className="grid grid-cols-1 gap-1.5">
-              {availableCostRefs.map((costRef) => {
-                const cost = catalog.costPayments[costRef];
-                const isSelected = selectedCostRef === costRef;
-                return (
-                  <button
-                    key={costRef}
-                    onClick={() => setSelectedCostRef(costRef)}
-                    className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
-                      isSelected
-                        ? "border-emerald-500 bg-emerald-950/70 text-emerald-100 shadow ring-1 ring-emerald-500"
-                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
-                    }`}
-                  >
-                    <div className="font-bold">{cost.summary || "コストなし"}</div>
-                  </button>
-                );
-              })}
+        {selectedActionRef !== null &&
+          (availableKeyRefs.length === 0 ||
+            selectedKeyRef !== null ||
+            availableKeyRefs.every((r) => r === undefined)) &&
+          availableCostRefs.length > 1 && (
+            <div className="pt-2 border-t border-slate-800">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                3. コストの支払い方法
+              </label>
+              <div className="grid grid-cols-1 gap-1.5">
+                {availableCostRefs.map((costRef) => {
+                  const cost = catalog.costPayments[costRef];
+                  const isSelected = selectedCostRef === costRef;
+                  return (
+                    <button
+                      key={costRef}
+                      onClick={() => setSelectedCostRef(costRef)}
+                      className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
+                        isSelected
+                          ? "border-emerald-500 bg-emerald-950/70 text-emerald-100 shadow ring-1 ring-emerald-500"
+                          : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
+                      }`}
+                    >
+                      <div className="font-bold">{cost.summary || "コストなし"}</div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {/* ステップ4: 対象選択 */}
         {selectedCostRef !== null && availableTargetRefs.length > 1 && (

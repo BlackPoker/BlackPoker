@@ -2,7 +2,7 @@ import * as path from "path";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
 import { GameSession } from "../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../engine/session/playtest/createCoreBattlePlaytest";
-import { getPlaytestRulePackage } from "../engine/rules/BrowserRuleLoader";
+import { getPlaytestRulePackage } from "../engine/rules/RulePackageSelector";
 
 const colors = {
   reset: "\x1b[0m",

@@ -298,6 +298,17 @@ export class LegalPatternGenerator {
         return false;
       }
 
+      // 使用回数制限 (usageLimit) の判定
+      if (action.request?.usageLimit) {
+        const { scope = "turn", max = 1 } = action.request.usageLimit;
+        if (scope === "turn" && state.turnUsage) {
+          const usedCount = state.turnUsage?.[playerId]?.[action.id] || 0;
+          if (usedCount >= max) {
+            return false;
+          }
+        }
+      }
+
       const timing = action.request?.timing || "main";
 
       if (timing === "main") {

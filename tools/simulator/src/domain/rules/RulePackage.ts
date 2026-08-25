@@ -19,6 +19,10 @@ export type ActionDefinition = {
     timing: "main" | "quick" | "block" | "damageJudge" | string;
     controller?: "turnPlayer" | "nonTurnPlayer" | "eventPlayer" | "self" | string;
     definitionOwner?: "turnPlayer" | "nonTurnPlayer" | "eventPlayer" | "self" | string;
+    usageLimit?: {
+      scope?: "turn" | "match" | string;
+      max?: number;
+    };
   };
   cost?: string;
   key?: {

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { GameSession, GameSessionStep } from "../../engine/session/GameSession";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
-import { loadRulePackageForBrowser, getPlaytestRulePackage } from "../../engine/rules/BrowserRuleLoader";
+import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
+import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../../engine/session/playtest/createCoreBattlePlaytest";
 import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
 import { GameEventFormatter } from "../../engine/session/playtest/GameEventFormatter";
@@ -30,6 +31,12 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<GameSessionStep | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [latestEventMessage, setLatestEventMessage] = useState<string>("");
+
+  // ユニット選択マーカー（①, ②）および盤面クリック選択状態
+  const [unitSelectionMarkers, setUnitSelectionMarkers] = useState<Map<string, { badge: string; isSelected: boolean }>>(
+    new Map()
+  );
+  const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
 
   // Pass-and-Play 制御
   const [enablePassAndPlay, setEnablePassAndPlay] = useState(true);
@@ -66,136 +73,131 @@ export const CoreBattlePlaytest: React.FC = () => {
     sessionRef.current = session;
 
     setLogs([]);
-    addLog(`対戦を開始しました (Preset: ${CORE_BATTLE_PRESET_ID})`, "system");
-    addLog(`手番: Player A, チャンス: Player A`, "info");
+    setLatestEventMessage("");
+    setSelectedUnitIds([]);
+    addLog(`🚀 Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info");
+    addLog(`🛡 レギュレーション: Core Battle (Preset 001)`, "info");
 
     const step = session.advance();
     setCurrentStep(step);
     setGameState(JSON.parse(JSON.stringify(session.state)));
 
     if (step.type === "WAITING_FOR_DECISION") {
-      setPendingPlayerKey(step.request.playerId);
       lastActivePlayerRef.current = step.request.playerId;
-      setIsPassAndPlayWaiting(false); // 初回は直接表示
+      setPendingPlayerKey(step.request.playerId);
+      if (enablePassAndPlay) {
+        setIsPassAndPlayWaiting(true);
+      }
     }
-  }, [fullRulePackage, rulePackage, addLog]);
+  }, [fullRulePackage, rulePackage, enablePassAndPlay, addLog]);
 
-  // 初回マウント時にゲームを開始
+  // 初回マウント時にゲーム初期化
   useEffect(() => {
     startNewGame();
   }, [startNewGame]);
 
-  // 判断の送信とゲーム進行（リクエスト＆PASS 対応）
-  const handleDecisionSubmit = (
-    response: DecisionResponse,
-    options?: { autoPass?: boolean }
-  ) => {
-    const session = sessionRef.current;
-    if (!session) return;
+  // 盤面ユニットクリック時のトグルハンドラ
+  const handleUnitClick = useCallback(
+    (unitId: string) => {
+      if (!unitSelectionMarkers.has(unitId)) return; // 選択可能でないユニットは無視
 
-    let prevState = JSON.parse(JSON.stringify(session.state));
-
-    // 行動ログの記録
-    if (currentStep?.type === "WAITING_FOR_DECISION") {
-      const req = currentStep.request;
-      const player = req.playerId === "p1" ? "Player A" : "Player B";
-      const selectedPattern = req.patterns[response.selectedPatternRef];
-
-      if (selectedPattern?.kind === "PASS") {
-        addLog(`${player} が PASS しました`, "action");
-      } else if (selectedPattern?.kind === "EFFECT_SELECTION") {
-        const effSel = req.catalog.effectSelections[selectedPattern.effectSelectionRef!];
-        addLog(`${player} が選択: ${effSel?.summary || "効果対象決定"}`, "action");
-      } else if (selectedPattern?.actionSelectionRef !== undefined) {
-        const act = req.catalog.actions[selectedPattern.actionSelectionRef];
-        addLog(`${player} が「${act.actionName || act.actionId}」をリクエスト`, "action");
-      }
-    }
-
-    // 判断を提出してステップを進める
-    let nextStep = session.submitDecision(response);
-    if (nextStep.type === "PROGRESSED") {
-      nextStep = session.advance();
-    }
-
-    let nextState = JSON.parse(JSON.stringify(session.state));
-    setCurrentStep(nextStep);
-    setGameState(nextState);
-
-    // State 遷移からイベントログを自動生成・蓄積
-    const generatedEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
-    for (const ev of generatedEvents) {
-      addLog(ev.message, ev.level);
-    }
-
-    // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS
-    if (
-      options?.autoPass &&
-      nextStep.type === "WAITING_FOR_DECISION" &&
-      currentStep?.type === "WAITING_FOR_DECISION" &&
-      nextStep.request.playerId === currentStep.request.playerId
-    ) {
-      const autoPassIndex = nextStep.request.patterns.findIndex((p) => p.kind === "PASS");
-      if (autoPassIndex !== -1) {
-        const autoPassPlayer = nextStep.request.playerId === "p1" ? "Player A" : "Player B";
-        addLog(`⏩ ${autoPassPlayer} が自動 PASS しました (リクエスト＆PASS)`, "action");
-
-        prevState = JSON.parse(JSON.stringify(session.state));
-        nextStep = session.submitDecision({
-          decisionId: nextStep.request.decisionId,
-          stateVersion: nextStep.request.stateVersion,
-          selectedPatternRef: autoPassIndex,
-        });
-        if (nextStep.type === "PROGRESSED") {
-          nextStep = session.advance();
+      setSelectedUnitIds((prev) => {
+        if (prev.includes(unitId)) {
+          return prev.filter((id) => id !== unitId);
+        } else {
+          return [...prev, unitId];
         }
-        nextState = JSON.parse(JSON.stringify(session.state));
-        setCurrentStep(nextStep);
-        setGameState(nextState);
+      });
+    },
+    [unitSelectionMarkers]
+  );
 
-        const passEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
-        for (const ev of passEvents) {
-          addLog(ev.message, ev.level);
+  // プレイヤーが判断（DecisionResponse）を提出したときの処理
+  const handleDecisionSubmit = useCallback(
+    (response: DecisionResponse, options?: { autoPass?: boolean }) => {
+      const session = sessionRef.current;
+      if (!session) return;
+
+      let prevState = JSON.parse(JSON.stringify(session.state));
+      let nextStep = session.submitDecision(response);
+      let nextState = JSON.parse(JSON.stringify(session.state));
+
+      // 選択状態をリセット
+      setSelectedUnitIds([]);
+
+      // State 遷移からイベントログを自動生成・蓄積
+      const generatedEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+      for (const ev of generatedEvents) {
+        addLog(ev.message, ev.level);
+      }
+
+      // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS
+      if (
+        options?.autoPass &&
+        nextStep.type === "WAITING_FOR_DECISION" &&
+        currentStep?.type === "WAITING_FOR_DECISION" &&
+        nextStep.request.playerId === currentStep.request.playerId
+      ) {
+        const autoPassIndex = nextStep.request.patterns.findIndex((p) => p.kind === "PASS");
+        if (autoPassIndex !== -1) {
+          const autoPassPlayer = nextStep.request.playerId === "p1" ? "Player A" : "Player B";
+          addLog(`⏩ ${autoPassPlayer} が自動 PASS しました (リクエスト＆PASS)`, "action");
+
+          prevState = JSON.parse(JSON.stringify(session.state));
+          nextStep = session.submitDecision({
+            decisionId: nextStep.request.decisionId,
+            stateVersion: nextStep.request.stateVersion,
+            selectedPatternRef: autoPassIndex,
+          });
+          nextState = JSON.parse(JSON.stringify(session.state));
+
+          const autoEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+          for (const ev of autoEvents) {
+            addLog(ev.message, ev.level);
+          }
         }
       }
-    }
 
-    // 誘発アクションや状態変化のログ
-    if (nextStep.type === "WAITING_FOR_DECISION") {
-      const nextPlayer = nextStep.request.playerId;
+      setCurrentStep(nextStep);
+      setGameState(nextState);
 
-      if (session.state.stage?.requests?.length > 0) {
-        const topReq = session.state.stage.requests[session.state.stage.requests.length - 1];
-        setLatestEventMessage(`Stage TOP: ${topReq.action?.name || topReq.actionId} (発動: ${topReq.controller})`);
-      } else {
-        setLatestEventMessage("");
+      // 最新の重要なイベントをステータスバーに表示
+      if (generatedEvents.length > 0) {
+        setLatestEventMessage(generatedEvents[generatedEvents.length - 1].message);
       }
 
-      // Pass-and-Play 切り替え
-      if (enablePassAndPlay && lastActivePlayerRef.current !== nextPlayer) {
-        setPendingPlayerKey(nextPlayer);
-        setIsPassAndPlayWaiting(true);
-        lastActivePlayerRef.current = nextPlayer;
+      // プレイヤー交代時の Pass-and-Play オーバーレイ制御
+      if (nextStep.type === "WAITING_FOR_DECISION") {
+        const newPlayerId = nextStep.request.playerId;
+        if (enablePassAndPlay && newPlayerId !== lastActivePlayerRef.current) {
+          setPendingPlayerKey(newPlayerId);
+          setIsPassAndPlayWaiting(true);
+        }
+        lastActivePlayerRef.current = newPlayerId;
+      } else if (nextStep.type === "FINISHED") {
+        const winnerName =
+          nextState.players?.[nextStep.result.winner || ""]?.name ||
+          (nextStep.result.winner === "p1" ? "Player A" : "Player B");
+        addLog(`🏆 ゲーム終了: 勝者【${winnerName}】(${nextStep.result.reason})`, "system");
       }
-    } else if (nextStep.type === "FINISHED") {
-      const winnerName = session.state.players[nextStep.result.winner || ""]?.name || nextStep.result.winner;
-      addLog(`★ 勝者: ${winnerName} (${nextStep.result.reason})`, "system");
-    }
-  };
+    },
+    [enablePassAndPlay, currentStep, addLog]
+  );
 
-  const handlePassAndPlayReady = () => {
+  // Pass-and-Play 準備完了ハンドラ
+  const handlePassAndPlayReady = useCallback(() => {
     setIsPassAndPlayWaiting(false);
-  };
+  }, []);
 
   if (presetValidationErrors.length > 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-900 text-slate-100 p-6">
-        <div className="max-w-xl w-full bg-red-950/60 border-2 border-red-500 rounded-2xl p-6 shadow-2xl">
-          <h1 className="text-2xl font-black text-red-400 mb-2">❌ Playtest Preset Error</h1>
-          <p className="text-sm text-slate-300 mb-4">
-            初期盤面プリセットの整合性チェックでエラーが検出されました。ゲームを開始できません。
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-100">
+        <div className="max-w-lg rounded-2xl border-2 border-red-500 bg-slate-900 p-6 shadow-2xl">
+          <h2 className="text-xl font-black text-red-400 mb-2">❌ プリセットバリデーションエラー</h2>
+          <p className="text-xs text-slate-300 mb-4">
+            初期盤面プリセットの整合性チェックに失敗しました。定義を確認してください。
           </p>
-          <ul className="list-disc list-inside space-y-1 text-xs font-mono text-red-200 bg-red-900/40 p-3 rounded-lg mb-6">
+          <ul className="list-disc list-inside space-y-1 text-xs text-red-300 font-mono bg-red-950/40 p-3 rounded-lg border border-red-800 mb-4">
             {presetValidationErrors.map((err, i) => (
               <li key={i}>{err}</li>
             ))}
@@ -297,6 +299,8 @@ export const CoreBattlePlaytest: React.FC = () => {
               isTurnPlayer={gameState.turnPlayer === "p2"}
               isChancePlayer={gameState.chancePlayer === "p2"}
               showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p2" || showDebug}
+              unitSelectionMarkers={unitSelectionMarkers}
+              onUnitClick={handleUnitClick}
             />
           )}
 
@@ -312,6 +316,8 @@ export const CoreBattlePlaytest: React.FC = () => {
               isTurnPlayer={gameState.turnPlayer === "p1"}
               isChancePlayer={gameState.chancePlayer === "p1"}
               showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p1" || showDebug}
+              unitSelectionMarkers={unitSelectionMarkers}
+              onUnitClick={handleUnitClick}
             />
           )}
         </div>
@@ -324,6 +330,8 @@ export const CoreBattlePlaytest: React.FC = () => {
               <DecisionPanel
                 request={currentStep.request}
                 onSubmit={handleDecisionSubmit}
+                onSelectionMarkersChange={setUnitSelectionMarkers}
+                selectedUnitIdsFromBoard={selectedUnitIds}
               />
             </div>
           ) : (
