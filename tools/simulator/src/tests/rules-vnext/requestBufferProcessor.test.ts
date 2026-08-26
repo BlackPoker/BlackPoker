@@ -501,7 +501,7 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     registry.resolveTopRequest(context);
 
     expect(actionReq!.status).toBe("resolved");
-    expect(bulwark.state).toBe("drive");
+    expect(bulwark.state).toBe("charge");
     expect(bulwark.battle).toEqual({
       role: "blocker",
       blocksUnitId: "soldier-1"

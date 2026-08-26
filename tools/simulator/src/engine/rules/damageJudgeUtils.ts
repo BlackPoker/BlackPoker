@@ -23,6 +23,8 @@ export function resolveUnblockedCombat(
   const targetPlayerKey = attacker.battle?.targetPlayerKey || getOpponentPlayerKey(attackerPlayerKey, context.state);
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
 
+  const attackerCardCode = Array.isArray(attacker.cards) ? attacker.cards.map((c: any) => `${c.suit || ""}${c.rank || ""}`).join("+") : "";
+
   return {
     attackerUnitId: attacker.unitId,
     attackerPlayerKey,
@@ -35,6 +37,7 @@ export function resolveUnblockedCombat(
     directDamageDealt: attackerSize,
     targetPlayerKey,
     attackerCharacterType,
+    attackerCardCode,
   };
 }
 
@@ -103,6 +106,9 @@ export function resolveSoldierVsSoldiersCombat(
     }
   }
 
+  const attackerCardCode = Array.isArray(attacker.cards) ? attacker.cards.map((c: any) => `${c.suit || ""}${c.rank || ""}`).join("+") : "";
+  const blockerCardCodes = blockers.map((b) => Array.isArray(b.cards) ? b.cards.map((c: any) => `${c.suit || ""}${c.rank || ""}`).join("+") : "");
+
   return {
     attackerUnitId: attacker.unitId,
     attackerPlayerKey,
@@ -116,6 +122,8 @@ export function resolveSoldierVsSoldiersCombat(
     ruleVariant: isRevolution ? "revolution" : "normal",
     differenceDamage,
     attackerCharacterType,
+    attackerCardCode,
+    blockerCardCodes,
   };
 }
 
@@ -150,6 +158,9 @@ export function resolveSoldierVsBulwarkCombat(
   const attackerMovedToGrave = isMatched && !preserveAttacker;
   const attackerGravePrevented = isMatched && preserveAttacker ? true : undefined;
 
+  const attackerCardCode = Array.isArray(attacker.cards) ? attacker.cards.map((c: any) => `${c.suit || ""}${c.rank || ""}`).join("+") : "";
+  const bulwarkCardCode = bulwarkCard ? `${bulwarkCard.suit || ""}${bulwarkCard.rank || ""}` : "";
+
   return {
     attackerUnitId: attacker.unitId,
     attackerPlayerKey,
@@ -161,8 +172,11 @@ export function resolveSoldierVsBulwarkCombat(
     blockersMovedToGrave,
     bulwarkRevealed: true,
     bulwarkMatched: isMatched,
+    bulwarkRank: bulwarkCard?.rank || (isJoker ? "Joker" : undefined),
     attackerGravePrevented,
     attackerCharacterType,
+    attackerCardCode,
+    blockerCardCodes: [bulwarkCardCode],
   };
 }
 

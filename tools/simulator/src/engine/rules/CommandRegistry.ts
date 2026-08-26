@@ -626,10 +626,22 @@ export class CommandRegistry {
     this.effectInterpreter.executeEffects(effects, context);
   }
 
+  private eventListeners: ((event: any) => void)[] = [];
+
+  /**
+   * イベントリスナーを登録します。
+   */
+  onEvent(listener: (event: any) => void) {
+    this.eventListeners.push(listener);
+  }
+
   /**
    * [イベント配信ブリッジ] ゲームイベントを発行し、誘発アクションをチェック・実行します。
    */
   dispatchEvent(event: any, context: CommandContext) {
+    for (const l of this.eventListeners) {
+      l(event);
+    }
     // 既存のイベント解決を優先して走らせる
     this.effectInterpreter.dispatchEvent(event, context);
   }

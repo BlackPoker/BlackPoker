@@ -127,7 +127,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & ①/② 番号マッピング
   const unitNumberMap = useMemo(() => {
-    const map = new Map<string, { badge: string; label: string; unitView: any }>();
+    const map = new Map<string, { badge: string; label: string; fullLabel: string; unitView: any }>();
     const digits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
 
     // Observation から全フィールドユニットを収集
@@ -163,8 +163,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       if (candidateUnitIds.has(unit.unitId)) {
         const badge = digits[count] || `[${count + 1}]`;
         const cardStr = formatCardList(unit.cards || []);
-        const label = `${badge} ${cardStr} ${unit.kind || "ユニット"}`;
-        map.set(unit.unitId, { badge, label, unitView: unit });
+        const unitType = unit.kind || (unit.componentId === "character.bulwark" ? "防壁" : "一般兵");
+        const label = `${cardStr} ${unitType}`;
+        const fullLabel = `${badge} ${cardStr} ${unitType}`;
+        map.set(unit.unitId, { badge, label, fullLabel, unitView: unit });
         count++;
       }
     }
@@ -185,7 +187,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         }
         const unitLabels = eff.selectedValues.map((uId: string) => {
           const info = unitNumberMap.get(uId);
-          return info ? info.label : uId;
+          return info ? (info as any).fullLabel || info.label : uId;
         });
         const isSingle = eff.selectedValues.length === 1;
         const label = isSingle ? `${unitLabels[0]} のみ` : unitLabels.join(" + ");
@@ -196,15 +198,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       if (eff.assignments && eff.assignments.length > 0) {
         const asgnStrs = eff.assignments.map((asgn: any) => {
           const srcInfo = unitNumberMap.get(asgn.sourceUnitId);
-          const srcLabel = srcInfo ? srcInfo.label : asgn.sourceUnitId;
+          const srcLabel = srcInfo ? (srcInfo as any).fullLabel || srcInfo.label : asgn.sourceUnitId;
           if (!asgn.selectedUnitIds || asgn.selectedUnitIds.length === 0) {
             return `${srcLabel} (ブロックなし)`;
           }
           const blkLabels = asgn.selectedUnitIds.map((bId: string) => {
             const bInfo = unitNumberMap.get(bId);
-            return bInfo ? bInfo.label : bId;
+            return bInfo ? (bInfo as any).fullLabel || bInfo.label : bId;
           });
-          return `${srcLabel} ← ${blkLabels.join(", ")}`;
+          return `${srcLabel} ← ${blkLabels.join(" + ")}`;
         });
         return { patternIndex: idx, label: asgnStrs.join(" / "), selectedValues: [] };
       }
@@ -527,6 +529,17 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     </button>
                   );
                 })}
+
+                {/* 使用不可（キーカード使用中）のカードを disabled 候補として明示 */}
+                {selectedKey && selectedKey.displayCodes && selectedKey.displayCodes.length > 0 && selectedAction?.cost?.includes("$D") && (
+                  <div className="rounded-lg border-2 border-dashed border-slate-800 bg-slate-900/40 p-2 text-xs text-slate-500 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-mono">
+                      <span>{selectedKey.displayCodes.join(", ")}</span>
+                      <span className="text-[10px] text-amber-500/80 font-sans font-bold">（🔑 キーカード使用中のためコスト破棄不可）</span>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">UNAVAILABLE</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

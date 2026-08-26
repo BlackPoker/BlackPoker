@@ -92,8 +92,8 @@ describe("Block Action Integration Tests (New YAML)", () => {
     expect(bulwark.battle.role).toBe("blocker");
     expect(bulwark.battle.blocksUnitId).toBe("soldier-1");
 
-    // C. ブロッカーがドライブ状態に移行していることをアサート
-    expect(bulwark.state).toBe("drive");
+    // C. ブロッカーはドライブ状態にならずチャージ状態を維持することをアサート (Phase 21B.6 / P0-1)
+    expect(bulwark.state).toBe("charge");
   });
 
   it("should fail when targeting a unit not owned by the requester (D)", () => {

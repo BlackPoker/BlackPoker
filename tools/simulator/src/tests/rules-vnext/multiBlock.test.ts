@@ -104,8 +104,8 @@ describe("Multi-Soldier Block and DamageJudge Integration Tests (Phase 21B.5)", 
     registry.createRequest(blockAction, context);
     registry.resolveTopRequest(context);
 
-    expect(soldierB1.state).toBe("drive");
-    expect(soldierB2.state).toBe("drive");
+    expect(soldierB1.state).toBe("charge");
+    expect(soldierB2.state).toBe("charge");
     expect(soldierB1.battle?.role).toBe("blocker");
     expect(soldierB2.battle?.role).toBe("blocker");
 

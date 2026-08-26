@@ -14,6 +14,9 @@ export interface CombatResult {
   readonly targetPlayerKey?: string;
   readonly bulwarkRevealed?: boolean;
   readonly bulwarkMatched?: boolean;
+  readonly bulwarkRank?: string;
+  readonly attackerCardCode?: string;
+  readonly blockerCardCodes?: readonly string[];
   readonly ruleVariant?: "normal" | "revolution";
   readonly differenceDamage?: { readonly amount: number; readonly targetPlayerKey: string };
   readonly attackerCharacterType?: string;

@@ -9,7 +9,7 @@ import {
 interface BlockAssignmentEditorProps {
   request: DecisionRequest;
   onSelectPattern: (patternRef: number) => void;
-  unitNumberMap: Map<string, { badge: string; label: string; unitView: any }>;
+  unitNumberMap: Map<string, { badge: string; label: string; fullLabel?: string; unitView: any }>;
 }
 
 export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
@@ -198,7 +198,9 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                             ✓
                           </span>
                           {blkInfo.badge && (
-                            <span className="text-amber-400 font-bold">{blkInfo.badge}</span>
+                            <span className="w-5 h-5 rounded-full bg-slate-900 text-amber-300 border border-amber-500/60 text-xs font-black flex items-center justify-center">
+                              {blkInfo.badge}
+                            </span>
                           )}
                           <span className="font-bold">{blkInfo.label}</span>
                         </div>
@@ -231,11 +233,14 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
             {attackers.map((attacker) => {
               const atkInfo = getUnitDisplay(attacker.unitId);
               const blkIds = assignments[attacker.unitId] || [];
-              const blkLabels = blkIds.map((id) => getUnitDisplay(id).label);
+              const blkLabels = blkIds.map((id) => {
+                const info = getUnitDisplay(id);
+                return `${info.badge} ${info.label}`;
+              });
 
               return (
                 <div key={attacker.unitId} className="flex items-center gap-1.5 text-slate-200">
-                  <span className="font-bold text-red-400">{atkInfo.badge || "⚔️"} {atkInfo.label}</span>
+                  <span className="font-bold text-red-400">{atkInfo.badge} {atkInfo.label}</span>
                   <span className="text-slate-500">←</span>
                   {blkLabels.length > 0 ? (
                     <span className="font-bold text-amber-300">{blkLabels.join(" + ")}</span>

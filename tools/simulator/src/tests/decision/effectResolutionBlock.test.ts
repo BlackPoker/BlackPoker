@@ -335,13 +335,13 @@ describe("EFFECT_RESOLUTION Decision Integration Tests: Block Action Assignment 
       selectedPatternRef: multiBlockRef,
     });
 
-    // M: 選択されたブロッカーが drive になる
+    // M: ブロッカーは drive にならず charge のまま battle 情報が付与される (Phase 21B.6 / P0-1)
     const sb1 = state.players.p2.field.find((u: any) => u.unitId === "soldier-b1");
     const sb2 = state.players.p2.field.find((u: any) => u.unitId === "soldier-b2");
     const bulwark = state.players.p2.field.find((u: any) => u.unitId === "bulwark-1");
-    expect(sb1.state).toBe("drive");
-    expect(sb2.state).toBe("drive");
-    // 未選択の防壁は charge のまま
+    expect(sb1.state).toBe("charge");
+    expect(sb2.state).toBe("charge");
+    // 未選択の防壁も charge のまま
     expect(bulwark.state).toBe("charge");
 
     // N: battle.blocksUnitId が正しい attacker ("soldier-1") を指す

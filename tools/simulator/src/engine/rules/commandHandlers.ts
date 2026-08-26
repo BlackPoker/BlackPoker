@@ -722,27 +722,12 @@ export function declareBlockHandler(
         }
       }
 
-      // 各ブロッカーに戦闘情報を設定して drive に移行し、イベント発行
+      // 各ブロッカーに戦闘情報を設定（※ブロッカーはdrive化せずcharge状態を維持）
       for (const blockerUnit of blockerUnits) {
         blockerUnit.battle = {
           role: "blocker",
           blocksUnitId: sourceUnitId,
         };
-
-        const oldState = blockerUnit.state;
-        blockerUnit.state = "drive";
-
-        const event = {
-          type: "unitStateChanged",
-          payload: {
-            unitId: blockerUnit.unitId,
-            fromState: oldState,
-            toState: "drive",
-            playerKey: context.playerKey,
-            cause: { type: "effect", command: "declareBlock" },
-          },
-        };
-        effectInterpreter.dispatchEvent(event, context);
       }
     }
   };

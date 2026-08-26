@@ -868,7 +868,7 @@ async function runAttackScenario(rulePackage: any) {
   - 墓地上の防壁1 (bulwark-1) の数 = ${state.players.p2.grave.length} (期待値: 1)
   - 墓地に送られた防壁1の戦闘情報 (bulwark.battle) = ${JSON.stringify(state.players.p2.grave[0].battle)} (期待値: undefined。クリア済み)
   - アタッカー状態 = ${soldier.state} (期待値: drive)
-  - 墓地へ送られた防壁1の状態 = ${state.players.p2.grave[0].state} (期待値: drive)${colors.reset}`);
+  - 墓地へ送られた防壁1の状態 = ${state.players.p2.grave[0].state} (期待値: charge)${colors.reset}`);
 }
 
 async function runTurnCycleScenario(rulePackage: any) {

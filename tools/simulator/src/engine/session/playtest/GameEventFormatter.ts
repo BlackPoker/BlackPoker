@@ -1,6 +1,17 @@
+import { CombatResult } from "../../../domain/rules/DamageJudgeResult";
+
 export interface FormattedLogEntry {
   message: string;
   level: "info" | "event" | "action" | "trigger" | "system";
+}
+
+function formatCardCodeDisplay(code?: string): string {
+  if (!code) return "";
+  return code
+    .replace(/S/g, "♠")
+    .replace(/H/g, "♡")
+    .replace(/D/g, "♢")
+    .replace(/C/g, "♣");
 }
 
 /**
@@ -43,6 +54,82 @@ export class GameEventFormatter {
           message: `✨ 「${actName}」が解決されました (発動者: ${cName})`,
           level: "event",
         });
+
+        // ダメージ判定の詳細ログを出力
+        if (res.actionId === "action.damageJudge" && res.result?.damageJudge?.combats) {
+          const combats: CombatResult[] = res.result.damageJudge.combats;
+          let combatIdx = 1;
+          for (const combat of combats) {
+            const atkPlayerName = getPlayerName(combat.attackerPlayerKey);
+            const atkCard = formatCardCodeDisplay(combat.attackerCardCode);
+            const atkLabel = `${atkPlayerName} の一般兵 [${atkCard}]`;
+
+            if (combat.combatType === "unblocked") {
+              logs.push({
+                message: `⚔ ダメージ判定: ${combats.length > 1 ? `(${combatIdx}) ` : ""}${atkLabel} は未ブロック`,
+                level: "action",
+              });
+              logs.push({
+                message: `💥 ${getPlayerName(combat.targetPlayerKey || "")} に ${combat.directDamageAmount ?? combat.attackerInitialSize} ダメージ`,
+                level: "event",
+              });
+            } else if (combat.combatType === "soldierVsSoldiers") {
+              const blkPlayerName = getPlayerName(combat.blockerPlayerKey || "");
+              const blkLabels = (combat.blockerCardCodes || []).map(
+                (code) => `${blkPlayerName} の一般兵 [${formatCardCodeDisplay(code)}]`
+              );
+              logs.push({
+                message: `⚔ ダメージ判定: ${combats.length > 1 ? `(${combatIdx}) ` : ""}${atkLabel} vs ${blkLabels.join(" + ")}`,
+                level: "action",
+              });
+              logs.push({
+                message: `📏 サイズ比較: attacker ${combat.attackerInitialSize} vs blockers ${combat.blockerInitialTotalSize ?? 0}`,
+                level: "info",
+              });
+
+              if (combat.attackerMovedToGrave && combat.blockersMovedToGrave.length > 0) {
+                logs.push({
+                  message: `☠️ 結果: 両者死亡 (相打ち)`,
+                  level: "event",
+                });
+              } else if (combat.attackerMovedToGrave) {
+                logs.push({
+                  message: `☠️ 結果: アタッカー死亡 / ブロッカー生存`,
+                  level: "event",
+                });
+              } else if (combat.blockersMovedToGrave.length > 0) {
+                logs.push({
+                  message: `☠️ 結果: ブロッカー死亡 / アタッカー生存`,
+                  level: "event",
+                });
+              }
+            } else if (combat.combatType === "soldierVsBulwark") {
+              const blkPlayerName = getPlayerName(combat.blockerPlayerKey || "");
+              const bulwarkCode = formatCardCodeDisplay(combat.blockerCardCodes?.[0]);
+              logs.push({
+                message: `⚔ ダメージ判定: ${combats.length > 1 ? `(${combatIdx}) ` : ""}${atkLabel} vs ${blkPlayerName} の防壁 [${bulwarkCode}]`,
+                level: "action",
+              });
+              logs.push({
+                message: `🔍 防壁判定: printed rank ${combat.bulwarkRank || "?"} ${combat.bulwarkMatched ? "一致" : "不一致"}`,
+                level: "info",
+              });
+
+              if (combat.attackerMovedToGrave) {
+                logs.push({
+                  message: `☠️ 結果: アタッカー死亡 / 防壁死亡`,
+                  level: "event",
+                });
+              } else {
+                logs.push({
+                  message: `☠️ 結果: 防壁死亡 / アタッカー生存`,
+                  level: "event",
+                });
+              }
+            }
+            combatIdx++;
+          }
+        }
       }
     }
 
@@ -101,7 +188,6 @@ export class GameEventFormatter {
 
       if (nextGrave > prevGrave) {
         // 新しく墓地に入ったユニット
-        const prevFieldIds = new Set(prevState.players?.[pKey]?.field?.map((u: any) => u.unitId) || []);
         const nextFieldIds = new Set(nextState.players?.[pKey]?.field?.map((u: any) => u.unitId) || []);
 
         for (const u of prevState.players?.[pKey]?.field || []) {
@@ -122,31 +208,17 @@ export class GameEventFormatter {
       const nextUnits = nextState.players?.[pKey]?.field || [];
       const pName = getPlayerName(pKey);
 
-      const chargedUnits = nextUnits.filter((nu: any) => {
+      const chargedCount = nextUnits.filter((nu: any) => {
         const pu = prevUnits.find((u: any) => u.unitId === nu.unitId);
         return pu && pu.state === "drive" && nu.state === "charge";
-      });
+      }).length;
 
-      if (chargedUnits.length > 0 && prevState.turnPlayer !== nextState.turnPlayer && nextState.turnPlayer === pKey) {
+      if (chargedCount > 0 && prevState.turnPlayer !== nextState.turnPlayer) {
         logs.push({
-          message: `⚡ ${pName} のフィールド全キャラクター (${chargedUnits.length}体) がチャージ状態に復帰しました`,
+          message: `⚡ ${pName} のユニット ${chargedCount}体が CHARGE (縦向き) に復帰しました`,
           level: "info",
         });
       }
-    }
-
-    // 7. Stage リクエスト積載の検知
-    const prevStageReqs = prevState.stage?.requests || [];
-    const nextStageReqs = nextState.stage?.requests || [];
-
-    if (nextStageReqs.length > prevStageReqs.length) {
-      const newReq = nextStageReqs[nextStageReqs.length - 1];
-      const actName = newReq.action?.name || newReq.actionId;
-      const cName = getPlayerName(newReq.controller);
-      logs.push({
-        message: `📥 「${actName}」がステージに積載されました (発動者: ${cName})`,
-        level: "trigger",
-      });
     }
 
     return logs;

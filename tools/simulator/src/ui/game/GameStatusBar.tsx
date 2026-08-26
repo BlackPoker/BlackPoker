@@ -20,44 +20,50 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-      {/* チャンス表示バナー (最重要) */}
-      <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 rounded-lg shadow text-white">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">★</span>
-          <span className="text-lg font-extrabold tracking-wide">
-            {chancePlayerName} のチャンスです
-          </span>
-          <span className="text-xs font-mono opacity-80">({chancePlayer})</span>
+      {/* 主要ステータスバッジ群 */}
+      <div className="flex flex-wrap items-center justify-between gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* ターン数バッジ */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm">
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">TURN</span>
+            <span className="text-sm font-black text-slate-900 dark:text-slate-100 font-mono">
+              {turnCount || 1}
+            </span>
+          </div>
+
+          {/* ターンプレイヤーバッジ */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 shadow-sm">
+            <span className="text-xs text-indigo-700 dark:text-indigo-300 font-bold">手番:</span>
+            <span className="text-sm font-black text-indigo-900 dark:text-indigo-200">
+              {turnPlayerName}
+            </span>
+            <span className="text-[10px] font-mono text-indigo-500 dark:text-indigo-400 font-bold">
+              ({turnPlayer})
+            </span>
+          </div>
+
+          {/* チャンスプレイヤーバッジ (最重要・強調) */}
+          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md ring-2 ring-amber-400/60 animate-in fade-in">
+            <span className="text-sm">★</span>
+            <span className="text-xs font-black uppercase tracking-wider">チャンス:</span>
+            <span className="text-sm font-black">
+              {chancePlayerName} ({chancePlayer})
+            </span>
+          </div>
         </div>
-        <div className="text-xs font-bold bg-white/20 px-2.5 py-1 rounded-full">
+
+        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 italic">
           アクション選択または PASS を行ってください
         </div>
       </div>
 
-      {/* 進行基本情報 (手番 / ターン) */}
-      <div className="flex items-center justify-between text-xs px-2 text-slate-600 dark:text-slate-400">
-        <div className="flex items-center gap-4">
-          <div>
-            <span className="font-bold text-slate-500">ターン数:</span>{" "}
-            <span className="font-extrabold text-slate-800 dark:text-slate-200 font-mono">
-              Turn {turnCount || 1}
-            </span>
-          </div>
-          <div>
-            <span className="font-bold text-slate-500">現在の手番 (Turn Player):</span>{" "}
-            <span className="font-bold text-indigo-600 dark:text-indigo-400">
-              {turnPlayerName} ({turnPlayer})
-            </span>
-          </div>
+      {/* 最新イベントメッセージ */}
+      {latestEventMessage && (
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-900 dark:text-amber-300 font-medium">
+          <span className="text-sm">📢</span>
+          <span className="font-sans break-all">{latestEventMessage}</span>
         </div>
-
-        {latestEventMessage && (
-          <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-medium">
-            <span>📢</span>
-            <span>{latestEventMessage}</span>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 };

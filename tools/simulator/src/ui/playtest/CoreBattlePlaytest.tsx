@@ -213,6 +213,42 @@ export const CoreBattlePlaytest: React.FC = () => {
     setIsPassAndPlayWaiting(false);
   }, []);
 
+  // キーボードショートカット (P: PASS, Shift+P: リクエスト＆PASS)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // オーバーレイ表示中、またはフォーム入力フォーカス中は無視
+      if (isPassAndPlayWaiting) return;
+      const target = e.target as HTMLElement;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT")) {
+        return;
+      }
+
+      if (currentStep?.type === "WAITING_FOR_DECISION") {
+        const passIndex = currentStep.request.patterns.findIndex((p) => p.kind === "PASS");
+
+        if (e.key === "p" || e.key === "P") {
+          if (passIndex !== -1) {
+            e.preventDefault();
+            const autoPass = e.shiftKey;
+            handleDecisionSubmit(
+              {
+                decisionId: currentStep.request.decisionId,
+                stateVersion: currentStep.request.stateVersion,
+                selectedPatternRef: passIndex,
+              },
+              { autoPass }
+            );
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [currentStep, isPassAndPlayWaiting, handleDecisionSubmit]);
+
   if (presetValidationErrors.length > 0) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-100">

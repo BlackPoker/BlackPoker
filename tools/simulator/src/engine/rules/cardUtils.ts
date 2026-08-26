@@ -48,8 +48,10 @@ export function formatCardDisplay(card?: {
   rank?: string;
   value?: number;
   code?: string;
+  visibility?: string;
 }): string {
   if (!card) return "";
+  if (card.visibility === "HIDDEN" || (!card.suit && !card.rank)) return "🂠";
   if (isJokerCard(card)) return "Joker";
 
   const symbol = formatSuitSymbol(card.suit);
