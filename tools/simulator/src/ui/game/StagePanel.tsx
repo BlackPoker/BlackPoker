@@ -4,6 +4,15 @@ export interface StagePanelProps {
   requests: any[];
 }
 
+function formatCardCodeDisplay(code?: string): string {
+  if (!code) return "";
+  return code
+    .replace(/S/g, "♠")
+    .replace(/H/g, "♡")
+    .replace(/D/g, "♢")
+    .replace(/C/g, "♣");
+}
+
 export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
   return (
     <div className="flex flex-col p-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 dark:bg-indigo-950/20 dark:border-indigo-900 shadow-sm">
@@ -16,7 +25,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
             {requests.length} 件
           </span>
         </div>
-        <span className="text-[11px] text-indigo-600 dark:text-indigo-400">
+        <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
           ※ 上 (TOP) から順に解決されます
         </span>
       </div>
@@ -36,46 +45,96 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
               const actionName = req.action?.name || req.actionId;
               const controllerName = req.controller === "p1" ? "Player A" : "Player B";
 
+              // Key カードの整形
+              const keyCodes = Array.isArray(req.keyCards) && req.keyCards.length > 0
+                ? req.keyCards.map((c: any) => formatCardCodeDisplay(c.code || `${c.suit}${c.rank}`)).join(", ")
+                : undefined;
+
+              // コスト表示の判定 (ユーザー指示: コストがある場合のみ「Cost: $D ♢7（支払い済み）」、ない場合は「Cost: なし」)
+              const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
+              const costLabel = costSummary
+                ? `Cost: ${costSummary}（支払い済み）`
+                : (req.cost ? `Cost: ${req.cost}（支払い済み）` : "Cost: なし");
+
+              // ターゲット情報の整形
+              const targetLabels: string[] = [];
+              if (req.targets && Array.isArray(req.targets)) {
+                for (const t of req.targets) {
+                  if (t.type === "unit") {
+                    const shortId = t.unitId ? `#${t.unitId.slice(-4)}` : "";
+                    targetLabels.push(`${t.kind || "ユニット"} ${shortId}`);
+                  } else if (t.type === "player") {
+                    targetLabels.push(t.name || t.targetPlayerKey || "プレイヤー");
+                  }
+                }
+              }
+              const targetStr = targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
+
+              const statusText = (req.status || "pending").toUpperCase();
+
               return (
                 <div
                   key={req.id || revIdx}
-                  className={`flex items-center justify-between p-2.5 rounded-lg border transition-all ${
+                  className={`flex flex-col p-2.5 rounded-lg border transition-all ${
                     isTop
                       ? "bg-white border-indigo-500 shadow-md dark:bg-slate-800 dark:border-indigo-400 ring-2 ring-indigo-400/30"
                       : "bg-white/70 border-slate-300 dark:bg-slate-800/60 dark:border-slate-700 opacity-85"
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`text-xs font-bold px-2 py-0.5 rounded ${
-                        isTop
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      {isTop ? "TOP (次に解決)" : `STACK #${requests.length - revIdx}`}
-                    </span>
-                    <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
-                      {actionName}
-                    </span>
-                    <span className="text-xs text-slate-500 font-mono">
-                      (ID: {req.id})
-                    </span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-bold px-2 py-0.5 rounded ${
+                          isTop
+                            ? "bg-indigo-600 text-white"
+                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {isTop ? "TOP (次に解決)" : `STACK #${requests.length - revIdx}`}
+                      </span>
+                      <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                        {actionName}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono">
+                        (ID: {req.id})
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
+                        発動者: {controllerName} ({req.controller})
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                          req.status === "resolving"
+                            ? "bg-amber-500 text-white animate-pulse"
+                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {statusText}
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                      発動者: {controllerName} ({req.controller})
+                  {/* 詳細メタデータ行 (Key, Cost, Target) */}
+                  <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400 font-mono">
+                    {keyCodes && (
+                      <span className="flex items-center gap-1">
+                        <span className="text-amber-500 dark:text-amber-400 font-bold">Key:</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 px-1 py-0.2 rounded">
+                          {keyCodes}
+                        </span>
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{costLabel}</span>
                     </span>
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                        req.status === "resolving"
-                          ? "bg-amber-500 text-white animate-pulse"
-                          : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
-                      }`}
-                    >
-                      {req.status || "pending"}
-                    </span>
+                    {targetStr && (
+                      <span className="flex items-center gap-1">
+                        <span className="text-amber-600 dark:text-amber-400 font-bold">Target:</span>
+                        <span className="text-slate-700 dark:text-slate-300">{targetStr}</span>
+                      </span>
+                    )}
                   </div>
                 </div>
               );

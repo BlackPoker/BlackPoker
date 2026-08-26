@@ -107,6 +107,7 @@ export type ActionRequest = {
   sourceEvent?: unknown;
   definitionOwner?: string;
   selectedCostPayment?: CostPayment;
+  paidCostSummary?: string;
   sourcePatternId?: string;
   result?: ActionResolutionResult;
   triggerBindings?: Record<string, any>;

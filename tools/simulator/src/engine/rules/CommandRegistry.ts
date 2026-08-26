@@ -232,6 +232,7 @@ export class CommandRegistry {
       targets,
       cost: action.cost,
       selectedCostPayment: options?.selectedCostPayment,
+      paidCostSummary: options?.selectedCostPayment?.summary,
       sourcePatternId: options?.sourcePatternId,
       status: "pending",
       sequence: seq,

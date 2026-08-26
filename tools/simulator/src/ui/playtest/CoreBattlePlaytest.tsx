@@ -227,7 +227,12 @@ export const CoreBattlePlaytest: React.FC = () => {
     return fogs;
   }, [gameState]);
 
-  // キーボードショートカット (P: PASS, Shift+P: リクエスト＆PASS)
+  // decisionId 切替時の盤面選択リセット
+  useEffect(() => {
+    setSelectedUnitIds([]);
+  }, [currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.decisionId : null]);
+
+  // キーボードショートカット (P: PASS)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // オーバーレイ表示中、またはフォーム入力フォーカス中は無視
@@ -240,18 +245,15 @@ export const CoreBattlePlaytest: React.FC = () => {
       if (currentStep?.type === "WAITING_FOR_DECISION") {
         const passIndex = currentStep.request.patterns.findIndex((p) => p.kind === "PASS");
 
-        if (e.key === "p" || e.key === "P") {
+        // P キーで PASS
+        if ((e.key === "p" || e.key === "P") && !e.ctrlKey && !e.metaKey && !e.altKey) {
           if (passIndex !== -1) {
             e.preventDefault();
-            const autoPass = e.shiftKey;
-            handleDecisionSubmit(
-              {
-                decisionId: currentStep.request.decisionId,
-                stateVersion: currentStep.request.stateVersion,
-                selectedPatternRef: passIndex,
-              },
-              { autoPass }
-            );
+            handleDecisionSubmit({
+              decisionId: currentStep.request.decisionId,
+              stateVersion: currentStep.request.stateVersion,
+              selectedPatternRef: passIndex,
+            });
           }
         }
       }
@@ -404,6 +406,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           {currentStep?.type === "WAITING_FOR_DECISION" ? (
             <div className="shrink-0">
               <DecisionPanel
+                key={currentStep.request.decisionId}
                 request={currentStep.request}
                 onSubmit={handleDecisionSubmit}
                 onSelectionMarkersChange={setUnitSelectionMarkers}

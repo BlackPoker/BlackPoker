@@ -29,6 +29,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(null);
   const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
 
+  // decisionId 切替時の選択状態リセット (Defense-in-depth)
+  useEffect(() => {
+    setSelectedActionRef(null);
+    setSelectedKeyRef(null);
+    setSelectedCostRef(null);
+    setSelectedTargetRef(null);
+    setSelectedEffectPatternRef(null);
+  }, [request.decisionId]);
+
   // 1. 選択可能なアクション一覧
   const availableActionRefs = useMemo(() => {
     const refs = new Set<number>();
@@ -118,12 +127,12 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     setSelectedTargetRef(nextTargetRef);
   };
 
-  // 唯一のアクションがある場合は自動選択
+  // 唯一のアクションがある場合は自動選択 (既存UXの維持)
   useEffect(() => {
     if (availableActionRefs.length === 1 && selectedActionRef === null) {
       handleSelectAction(availableActionRefs[0]);
     }
-  }, [availableActionRefs]);
+  }, [availableActionRefs, selectedActionRef]);
 
   // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & ①/② 番号マッピング
   const unitNumberMap = useMemo(() => {
@@ -403,9 +412,14 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       {/* ヘッダー */}
       <div className="flex items-center justify-between border-b border-slate-700/60 pb-2.5 mb-3">
         <div>
-          <span className="inline-block rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-            DECISION PANEL
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="inline-block rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+              DECISION PANEL
+            </span>
+            <span className="inline-block rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">
+              未リクエスト (編集中)
+            </span>
+          </div>
           <h2 className="text-base font-bold text-slate-100 mt-0.5">
             {request.playerId === "p1" ? "Player A" : "Player B"} の行動選択
           </h2>
@@ -414,10 +428,11 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         {passPatternIndex !== -1 && (
           <button
             onClick={handlePass}
-            className="rounded-xl border border-amber-500/60 bg-amber-950/60 px-3.5 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-900/80 hover:border-amber-400 transition active:scale-95 shadow-md flex items-center gap-1"
+            title="Pキーを押してもPASSできます"
+            className="rounded-xl border border-amber-500/60 bg-amber-950/60 px-3.5 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-900/80 hover:border-amber-400 transition active:scale-95 shadow-md flex items-center gap-1.5"
           >
             <span>⏭️</span>
-            <span>PASS (パスする)</span>
+            <span>PASS [P]</span>
           </button>
         )}
       </div>
@@ -591,6 +606,12 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             </button>
           </div>
         )}
+
+        {/* ショートカット操作ガイド */}
+        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 flex items-center justify-between">
+          <span>⌨️ ショートカット: <strong className="text-slate-200 font-mono bg-slate-800 px-1 py-0.5 rounded border border-slate-700">P</strong> = PASS</span>
+          <span className="text-slate-500">BlackPoker Core Battle</span>
+        </div>
       </div>
     </div>
   );

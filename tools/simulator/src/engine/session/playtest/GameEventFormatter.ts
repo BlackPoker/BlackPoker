@@ -41,6 +41,22 @@ export class GameEventFormatter {
       });
     }
 
+    // 1.5. 新規 Stage リクエスト積載 & コスト支払いの検知
+    const prevStageReqIds = new Set(prevState.stage?.requests?.map((r: any) => r.id) || []);
+    const nextStageReqs = nextState.stage?.requests || [];
+    for (const req of nextStageReqs) {
+      if (!prevStageReqIds.has(req.id)) {
+        const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
+        if (costSummary) {
+          const cName = getPlayerName(req.controller);
+          logs.push({
+            message: `💰 ${cName} がコストを支払いました: ${costSummary} → 墓地`,
+            level: "action",
+          });
+        }
+      }
+    }
+
     // 2. Stage リクエスト解決の検知
     const prevStageHistory = prevState.stage?.history || [];
     const nextStageHistory = nextState.stage?.history || [];
@@ -54,6 +70,16 @@ export class GameEventFormatter {
           message: `✨ 「${actName}」が解決されました (発動者: ${cName})`,
           level: "event",
         });
+
+        const remainingCount = nextState.stage?.requests?.length || 0;
+        if (remainingCount > 0) {
+          const topRemaining = nextState.stage.requests[nextState.stage.requests.length - 1];
+          const topRemainingName = topRemaining.action?.name || topRemaining.actionId;
+          logs.push({
+            message: `📤 Stage TOP から「${actName}」を除去 (残りStage: ${remainingCount}件 - 「${topRemainingName}」)`,
+            level: "info",
+          });
+        }
 
         // ダメージ判定の詳細ログを出力
         if (res.actionId === "action.damageJudge" && res.result?.damageJudge?.combats) {
