@@ -21,19 +21,36 @@ export interface PreventDamageAbility {
  */
 export class AbilityEvaluator {
   /**
-   * ユニットに適用されているすべてのフォグの amount 累積値を反映したサイズ計算を行います。
+   * ユニットに適用されているすべてのフォグ（全プレイヤーの fog 領域）の amount 累積値を反映したサイズ計算を行います。
+   * Fog の所有者が誰であるかに関わらず、bindings.target === unit.unitId の Fog を合算します。
    */
-  calculateUnitSize(unit: any, player: any): number {
+  calculateUnitSize(unit: any, stateOrPlayer?: any): number {
     if (!unit) return 0;
     const cardsSum = unit.cards ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0) : 0;
     let size = cardsSum;
-    if (player && player.fog) {
-      for (const fog of player.fog) {
-        if (fog.bindings && fog.bindings.target === unit.unitId) {
-          size += fog.bindings.amount || 0;
+
+    if (stateOrPlayer) {
+      if (stateOrPlayer.players && typeof stateOrPlayer.players === "object") {
+        // state 全体の全プレイヤーの fog を走査
+        for (const p of Object.values<any>(stateOrPlayer.players)) {
+          if (p && Array.isArray(p.fog)) {
+            for (const fog of p.fog) {
+              if (fog.bindings && fog.bindings.target === unit.unitId) {
+                size += fog.bindings.amount || 0;
+              }
+            }
+          }
+        }
+      } else if (Array.isArray(stateOrPlayer.fog)) {
+        // 単一 player オブジェクトの場合のフォールバック
+        for (const fog of stateOrPlayer.fog) {
+          if (fog.bindings && fog.bindings.target === unit.unitId) {
+            size += fog.bindings.amount || 0;
+          }
         }
       }
     }
+
     return size;
   }
 

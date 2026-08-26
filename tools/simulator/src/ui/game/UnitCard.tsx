@@ -3,6 +3,7 @@ import { CardView } from "./CardView";
 
 export interface UnitCardProps {
   unit: any;
+  fogs?: readonly any[];
   showCardDetails?: boolean;
   selectionMarker?: {
     badge: string; // "①", "②" 等
@@ -13,6 +14,7 @@ export interface UnitCardProps {
 
 export const UnitCard: React.FC<UnitCardProps> = ({
   unit,
+  fogs,
   showCardDetails = true,
   selectionMarker,
   onClick,
@@ -25,9 +27,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
   // サイズ合計の計算（兵士のみ）
   const isHiddenFromViewer = isFaceDown && !showCardDetails;
-  const totalSize = Array.isArray(unit.cards) && !isHiddenFromViewer
+  const baseSize = Array.isArray(unit.cards) && !isHiddenFromViewer
     ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0)
     : 0;
+
+  // Engine の calculateUnitSize 結果 (currentSize) があればそれを最優先
+  const displaySize = unit.currentSize !== undefined
+    ? unit.currentSize
+    : (isHiddenFromViewer ? "?" : baseSize);
 
   // 防壁の記載数字（本人には見える、相手には秘匿）
   const bulwarkRank = Array.isArray(unit.cards) && unit.cards.length > 0 && !isHiddenFromViewer
@@ -127,6 +134,46 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         )}
       </div>
 
+      {/* Fog バッジ一覧表示 (兵士のみ) */}
+      {!isBulwark && fogs && fogs.length > 0 && (
+        <div className="w-full my-1 flex flex-col gap-1">
+          {fogs.map((f, idx) => {
+            const amount = f.bindings?.amount || 0;
+            const isUp = amount > 0;
+            const cardCode = f.card?.code || (f.card?.suit && f.card?.rank ? `${f.card.suit}${f.card.rank}` : "");
+            const formattedCard = cardCode
+              .replace(/S/g, "♠")
+              .replace(/H/g, "♡")
+              .replace(/D/g, "♢")
+              .replace(/C/g, "♣");
+            const ownerLabel = f.ownerPlayerId === "p1" ? "Player A" : f.ownerPlayerId === "p2" ? "Player B" : "";
+
+            return (
+              <div
+                key={f.fogId || idx}
+                className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between border ${
+                  isUp
+                    ? "bg-rose-950/40 border-rose-500/60 text-rose-300 dark:bg-rose-950/60 dark:border-rose-400"
+                    : "bg-cyan-950/40 border-cyan-500/60 text-cyan-300 dark:bg-cyan-950/60 dark:border-cyan-400"
+                }`}
+                title={`Fog: ${isUp ? "アップ" : "ダウン"} (${amount >= 0 ? `+${amount}` : amount}) ${ownerLabel ? `by ${ownerLabel}` : ""}`}
+              >
+                <span className="flex items-center gap-0.5">
+                  <span>{isUp ? "↑" : "↓"}</span>
+                  <span className="font-extrabold">{amount >= 0 ? `+${amount}` : amount}</span>
+                  {formattedCard && <span className="font-mono ml-0.5 font-bold">[{formattedCard}]</span>}
+                </span>
+                {ownerLabel && (
+                  <span className="text-[8px] opacity-75 font-sans">
+                    {ownerLabel === "Player A" ? "A" : "B"}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
       {/* 下部情報表示: 兵士にはSIZE、防壁にはSIZEを出さず数字のみまたは防壁バッジを表示 */}
       <div className="mt-1 pt-1 border-t border-slate-200 dark:border-slate-700 w-full flex items-center justify-between text-[11px]">
         {isBulwark ? (
@@ -140,7 +187,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           <>
             <span className="text-slate-500 dark:text-slate-400 font-bold">SIZE:</span>
             <span className="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">
-              {isHiddenFromViewer ? "?" : totalSize}
+              {isHiddenFromViewer ? "?" : displaySize}
             </span>
           </>
         )}

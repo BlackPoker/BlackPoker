@@ -4,9 +4,9 @@
  * 【特徴】
  * - 各プレイヤー Life 8枚 (Card[] 形式)
  * - 各プレイヤー: charge 状態の兵士2体、裏向き防壁1体 (防壁は公式規則通り ♡ / ♢)
- * - 各プレイヤー: ツイスト等の Quick アクションを試せるコスト手札
+ * - 各プレイヤー: Up / Down / ツイスト等の Quick アクションを試せるキーカードおよび $D コスト手札3枚
  * - 同一プレイヤー内でのカード（suit + rank）重複なし
- * - 最初のターンから Attack / Block / DamageJudge / Quick / End / Charge / Draw を短時間で体験可能
+ * - 最初のターンから Attack / Block / DamageJudge / Up / Down / Quick / End / Charge / Draw を短時間で体験可能
  */
 
 export const CORE_BATTLE_PRESET_ID = "CORE-BATTLE-001";
@@ -26,7 +26,7 @@ export function createCoreBattlePresetState(): any {
         life: [
           { id: "p1-l6", suit: "H", rank: "8", value: 8 }, // 先攻決定用 (Round 1: 8 vs 5 -> Player A 先攻)
           { id: "p1-l1", suit: "S", rank: "2", value: 2 }, // 先攻1枚ドロー用
-          { id: "p1-l2", suit: "H", rank: "3", value: 3 },
+          { id: "p1-l2", suit: "H", rank: "4", value: 4 },
           { id: "p1-l3", suit: "D", rank: "3", value: 3 },
           { id: "p1-l4", suit: "C", rank: "5", value: 5 },
           { id: "p1-l5", suit: "S", rank: "7", value: 7 },
@@ -34,8 +34,9 @@ export function createCoreBattlePresetState(): any {
           { id: "p1-l8", suit: "C", rank: "10", value: 10 },
         ],
         hand: [
-          { id: "p1-h1", suit: "D", rank: "5", value: 5 }, // ツイストコスト用
-          { id: "p1-h2", suit: "C", rank: "2", value: 2 },
+          { id: "p1-h-up", suit: "H", rank: "3", value: 3 }, // Up用キーカード (♡3: +3)
+          { id: "p1-h1", suit: "D", rank: "5", value: 5 }, // ツイスト / $Dコスト用
+          { id: "p1-h2", suit: "C", rank: "2", value: 2 }, // $Dコスト用
         ],
         field: [
           {
@@ -72,17 +73,18 @@ export function createCoreBattlePresetState(): any {
         name: "Player B",
         life: [
           { id: "p2-l4", suit: "S", rank: "5", value: 5 }, // 先攻決定用 (Round 1: 8 vs 5)
-          { id: "p2-l1", suit: "C", rank: "2", value: 2 },
-          { id: "p2-l2", suit: "D", rank: "3", value: 3 },
-          { id: "p2-l3", suit: "H", rank: "4", value: 4 },
-          { id: "p2-l5", suit: "C", rank: "7", value: 7 },
+          { id: "p2-l1", suit: "C", rank: "4", value: 4 },
+          { id: "p2-l2", suit: "D", rank: "7", value: 7 },
+          { id: "p2-l3", suit: "H", rank: "7", value: 7 },
+          { id: "p2-l5", suit: "C", rank: "8", value: 8 },
           { id: "p2-l6", suit: "D", rank: "8", value: 8 },
           { id: "p2-l7", suit: "H", rank: "9", value: 9 },
           { id: "p2-l8", suit: "S", rank: "10", value: 10 },
         ],
         hand: [
-          { id: "p2-h1", suit: "D", rank: "6", value: 6 }, // ツイストコスト用
-          { id: "p2-h2", suit: "C", rank: "3", value: 3 },
+          { id: "p2-h-down", suit: "S", rank: "2", value: 2 }, // Down用キーカード (♠2: -2)
+          { id: "p2-h1", suit: "D", rank: "6", value: 6 }, // ツイスト / $Dコスト用
+          { id: "p2-h2", suit: "C", rank: "3", value: 3 }, // $Dコスト用
         ],
         field: [
           {

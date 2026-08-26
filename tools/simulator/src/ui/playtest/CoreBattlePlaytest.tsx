@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { GameSession, GameSessionStep } from "../../engine/session/GameSession";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
@@ -213,6 +213,20 @@ export const CoreBattlePlaytest: React.FC = () => {
     setIsPassAndPlayWaiting(false);
   }, []);
 
+  const allPlayersFog = useMemo(() => {
+    const fogs: any[] = [];
+    if (gameState?.players) {
+      for (const [pKey, p] of Object.entries<any>(gameState.players)) {
+        if (Array.isArray(p.fog)) {
+          for (const f of p.fog) {
+            fogs.push({ ...f, ownerPlayerId: pKey });
+          }
+        }
+      }
+    }
+    return fogs;
+  }, [gameState]);
+
   // キーボードショートカット (P: PASS, Shift+P: リクエスト＆PASS)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -355,6 +369,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             <PlayerBoard
               playerKey="p2"
               player={gameState.players.p2}
+              allPlayersFog={allPlayersFog}
               isCurrentDecisionPlayer={activePlayerKey === "p2"}
               isTurnPlayer={gameState.turnPlayer === "p2"}
               isChancePlayer={gameState.chancePlayer === "p2"}
@@ -372,6 +387,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             <PlayerBoard
               playerKey="p1"
               player={gameState.players.p1}
+              allPlayersFog={allPlayersFog}
               isCurrentDecisionPlayer={activePlayerKey === "p1"}
               isTurnPlayer={gameState.turnPlayer === "p1"}
               isChancePlayer={gameState.chancePlayer === "p1"}

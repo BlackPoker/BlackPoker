@@ -169,10 +169,10 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
     // 解決の実行
     registry.resolveTopRequest(context);
 
-    // 検証：リクエスト状態が resolved になり、フォグが生成され、手札は二重消費されない
+    // 検証：リクエスト状態が resolved になり、フォグが生成され、キーカードが手札からフォグ領域へ移動
     expect(req.status).toBe("resolved");
     expect(state.stage.requests.length).toBe(0); // ステージから削除されていること
-    expect(state.players.p1.hand.length).toBe(1); // keyCard は手札に残ったまま fog 参照
+    expect(state.players.p1.hand.length).toBe(0); // keyCard は手札から fog 領域へ移動
     expect(state.players.p1.fog.length).toBe(1); // フォグ生成
   });
 

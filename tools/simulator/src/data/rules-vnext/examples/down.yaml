@@ -15,7 +15,7 @@ actions:
       condition:
         card:
           suit: spade
-          rank: "2..10"
+          rank: "A..10"
           zone: hand
 
     targets:

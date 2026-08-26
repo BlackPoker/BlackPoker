@@ -7,6 +7,9 @@ import {
   RequestView,
 } from "../../domain/decision/PlayerObservation";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+import { AbilityEvaluator } from "../rules/AbilityEvaluator";
+
+const abilityEvaluator = new AbilityEvaluator();
 
 /**
  * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
@@ -37,31 +40,32 @@ export class ObservationFactory {
 
         // フィールドユニットの処理（自分の裏向き防壁は KNOWN、相手の裏向き防壁は HIDDEN）
         const field: UnitView[] = Array.isArray(p.field)
-          ? p.field.map((u: any) => this.mapUnit(u, isViewer))
+          ? p.field.map((u: any) => this.mapUnit(u, isViewer, state))
           : [];
 
-        // フォグの処理
+        // フォグの処理（全フォグは公開情報、ownerPlayerId を付与）
         const fog: FogView[] = Array.isArray(p.fog)
           ? p.fog.map((f: any) => ({
               fogId: f.fogId || "",
               componentId: f.componentId || "",
               card: f.card ? this.mapCard(f.card, true) : undefined,
               bindings: f.bindings || {},
+              ownerPlayerId: pKey as PlayerKey,
             }))
           : [];
 
         // 切札の処理
         const trumps: UnitView[] = Array.isArray(p.trumps || p.trump)
-          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer))
+          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer, state))
           : [];
 
         // 墓地の処理 (墓地は公開情報)
         const grave: UnitView[] = Array.isArray(p.grave)
-          ? p.grave.map((g: any) => this.mapUnit(g, true))
+          ? p.grave.map((g: any) => this.mapUnit(g, true, state))
           : [];
 
         playersView.push({
-          playerId: pKey,
+          playerId: pKey as PlayerKey,
           name: p.name || pKey,
           lifeCount,
           lifeCards,
@@ -131,8 +135,9 @@ export class ObservationFactory {
     };
   }
 
-  private static mapUnit(unit: any, isViewerOwner: boolean = false): UnitView {
+  private static mapUnit(unit: any, isViewerOwner: boolean = false, state?: any): UnitView {
     const isFaceDown = unit.face === "down";
+    const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
 
     const cards: CardView[] = Array.isArray(unit.cards)
       ? unit.cards.map((c: any) => {
@@ -146,6 +151,11 @@ export class ObservationFactory {
         })
       : [];
 
+    // 防壁には currentSize を設定せず、兵士などのユニットには state 全体評価の現在サイズを設定
+    const currentSize = !isBulwark && state
+      ? abilityEvaluator.calculateUnitSize(unit, state)
+      : undefined;
+
     return {
       unitId: unit.unitId || "",
       kind: unit.kind || unit.componentId || "ユニット",
@@ -154,6 +164,7 @@ export class ObservationFactory {
       face: unit.face || "up",
       cards,
       labels: unit.labels || [],
+      currentSize,
       battle: unit.battle
         ? {
             role: unit.battle.role,

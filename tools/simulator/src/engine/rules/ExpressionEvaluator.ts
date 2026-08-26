@@ -14,14 +14,12 @@ export class ExpressionEvaluator {
     abilityEvaluator: AbilityEvaluator
   ): boolean {
     if (conditionStr === "target.size <= 0") {
-      const player = context.state.players[context.playerKey];
-      const size = abilityEvaluator.calculateUnitSize(context.targetComponent, player);
+      const size = abilityEvaluator.calculateUnitSize(context.targetComponent, context.state);
       return size <= 0;
     }
     if (conditionStr === "target.size - key.rankValue <= 0") {
-      const player = context.state.players[context.playerKey];
-      const size = abilityEvaluator.calculateUnitSize(context.targetComponent, player);
-      const keyVal = context.keyCard ? context.keyCard.value : 0;
+      const size = abilityEvaluator.calculateUnitSize(context.targetComponent, context.state);
+      const keyVal = context.keyCard ? (context.keyCard.value !== undefined ? context.keyCard.value : 0) : 0;
       return size - keyVal <= 0;
     }
     return false;

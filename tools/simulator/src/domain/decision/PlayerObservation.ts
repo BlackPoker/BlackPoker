@@ -26,6 +26,7 @@ export interface UnitView {
   readonly face: "up" | "down" | string;
   readonly cards: readonly CardView[];
   readonly labels: readonly string[];
+  readonly currentSize?: number;
   readonly battle?: {
     readonly role: "attacker" | "blocker" | string;
     readonly targetPlayerKey?: string;
@@ -38,6 +39,7 @@ export interface FogView {
   readonly componentId: string;
   readonly card?: CardView;
   readonly bindings?: Record<string, any>;
+  readonly ownerPlayerId?: PlayerKey;
 }
 
 export interface PlayerObservationView {

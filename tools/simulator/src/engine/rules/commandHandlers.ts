@@ -11,7 +11,10 @@ import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils
 /**
  * createFog: フォグの生成と配置
  */
-export function createFogHandler(expressionEvaluator: ExpressionEvaluator): CommandHandler {
+export function createFogHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
   return (args, context) => {
     const { component, bindings } = args;
     const player = context.state.players[context.playerKey];
@@ -25,13 +28,40 @@ export function createFogHandler(expressionEvaluator: ExpressionEvaluator): Comm
       }
     }
 
+    const keyCard = context.keyCard;
+
+    // 手札からキーカードを取り除き、fog 領域へ移動
+    if (keyCard && Array.isArray(player.hand)) {
+      const idx = player.hand.findIndex((c: any) => c.id === keyCard.id);
+      if (idx !== -1) {
+        player.hand.splice(idx, 1);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card: keyCard,
+                fromZone: "hand",
+                toZone: "fog",
+                playerKey: context.playerKey,
+              },
+            },
+            context
+          );
+        }
+      }
+    }
+
     const newFog = {
       fogId: `fog-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       componentId: component,
-      card: context.keyCard, // キーカードを配置
+      card: keyCard, // キーカードを配置
       bindings: resolvedBindings,
     };
 
+    if (!Array.isArray(player.fog)) {
+      player.fog = [];
+    }
     player.fog.push(newFog);
   };
 }

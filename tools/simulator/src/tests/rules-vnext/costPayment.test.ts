@@ -128,10 +128,10 @@ describe("Cost Payment Integration Tests (New YAML)", () => {
     // 2. 実行
     registry.executeAction(upAction, context);
 
-    // 手札から cost-card が消費され、墓地へ送られていること
-    // キーカードはフォグ領域へ
-    expect(state.players.p1.hand.length).toBe(1); // キーカードは executeAction の中では自動消費されない（createFog自体がキーカードを消費しない仕様、手札に残る仕様になっているため。手札には keyCard のみが残るはず）
-    expect(state.players.p1.hand[0].id).toBe("key-card");
+    // 手札から cost-card が消費され墓地へ送られ、キーカードはフォグ領域へ移動
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.fog.length).toBe(1);
+    expect(state.players.p1.fog[0].card.id).toBe("key-card");
     expect(state.players.p1.grave.length).toBe(1);
     expect(state.players.p1.grave[0].cards[0].id).toBe("cost-card");
   });

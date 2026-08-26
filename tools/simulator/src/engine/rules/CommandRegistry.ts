@@ -326,8 +326,13 @@ export class CommandRegistry {
     const resolveContext: CommandContext = {
       ...context,
       playerKey: request.controller,
-      keyCards: request.keyCards,
-      keyCard: request.keyCards && request.keyCards.length === 1 ? request.keyCards[0] : undefined,
+      keyCards: request.keyCards && request.keyCards.length > 0 ? request.keyCards : context.keyCards,
+      keyCard:
+        request.keyCards && request.keyCards.length === 1
+          ? request.keyCards[0]
+          : request.keyCards && request.keyCards.length > 0
+          ? request.keyCards[0]
+          : context.keyCard,
       targetComponent,
       targetRequest,
       targetPlayerKey,
@@ -636,12 +641,19 @@ export class CommandRegistry {
   }
 
   /**
-   * [イベント配信ブリッジ] ゲームイベントを発行し、誘発アクションをチェック・実行します。
+   * 登録されたリスナーへイベントを通知します。
    */
-  dispatchEvent(event: any, context: CommandContext) {
+  emitEvent(event: any) {
     for (const l of this.eventListeners) {
       l(event);
     }
+  }
+
+  /**
+   * [イベント配信ブリッジ] ゲームイベントを発行し、誘発アクションをチェック・実行します。
+   */
+  dispatchEvent(event: any, context: CommandContext) {
+    this.emitEvent(event);
     // 既存のイベント解決を優先して走らせる
     this.effectInterpreter.dispatchEvent(event, context);
   }
@@ -650,7 +662,7 @@ export class CommandRegistry {
    * デフォルトの検証用命令ハンドラーを登録
    */
   private registerDefaults() {
-    this.register("createFog", createFogHandler(this.expressionEvaluator));
+    this.register("createFog", createFogHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("summonUnit", summonUnitHandler());
     this.register("removeFog", removeFogHandler());
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));

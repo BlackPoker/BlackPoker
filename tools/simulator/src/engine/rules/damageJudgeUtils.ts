@@ -19,7 +19,7 @@ export function resolveUnblockedCombat(
   context: CommandContext,
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
   const targetPlayerKey = attacker.battle?.targetPlayerKey || getOpponentPlayerKey(attackerPlayerKey, context.state);
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
 
@@ -53,9 +53,9 @@ export function resolveSoldierVsSoldiersCombat(
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
   const blockerSizes = blockers.map((b) =>
-    abilityEvaluator.calculateUnitSize(b, context.state.players[blockerPlayerKey])
+    abilityEvaluator.calculateUnitSize(b, context.state)
   );
   const blockerTotalSize = blockerSizes.reduce((sum, s) => sum + s, 0);
 
@@ -139,7 +139,7 @@ export function resolveSoldierVsBulwarkCombat(
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state.players[attackerPlayerKey]);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
   const bulwarkCard = bulwark.cards?.[0];
 
   const isJoker = isJokerCard(bulwarkCard);

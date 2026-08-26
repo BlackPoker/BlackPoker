@@ -287,8 +287,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
       selectedPatternRef: findPassPatternIndex(reqDrawPass2),
     });
 
-    // Draw 解決後: p2 のライフは 2枚 (<=2) だったので 1枚引いて残り 1枚、手札 3枚 (初期2枚 + 1枚)
-    expect(state.players.p2.hand.length).toBe(3);
+    // Draw 解決後: p2 のライフは 2枚 (<=2) だったので 1枚引いて残り 1枚、手札 4枚 (初期3枚 + 1枚)
+    expect(state.players.p2.hand.length).toBe(4);
     expect(state.players.p2.life.length).toBe(1);
     expect(state.chancePlayer).toBe("p2");
 

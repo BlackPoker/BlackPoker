@@ -2,7 +2,7 @@
 
 ## 1. 目的
 
-BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）および決定基盤（`GameSession` / `Decision`）をブラウザ上で Human vs Human として実際にプレイし、戦闘コアフロー（Attack, Block, DamageJudge, End, Charge, Draw, Quick, 勝敗判定）が公式仕様通りに動作することを確認・レビューするためのプレイテスト版です。
+BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）および決定基盤（`GameSession` / `Decision`）をブラウザ上で Human vs Human として実際にプレイし、戦闘コアフロー（Attack, Block, DamageJudge, End, Charge, Draw, Quick, Up, Down, 勝敗判定）が公式仕様通りに動作することを確認・レビューするためのプレイテスト版です。
 
 > [!WARNING]
 > 本プレイテストは BlackPoker 9.1.2 完全実装版ではありません。コアルールの検証を目的とした短縮・固定盤面（Preset: `CORE-BATTLE-001`）でのプレイテストとなります。
@@ -13,7 +13,7 @@ BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）お�
 
 > [!IMPORTANT]
 > **【重要】エンド時の手札7枚超過ディスカードは未実装です**
-> 現在のエンジンでは、手札が8枚以上あってもエンド時に自動ディスカードされません。本プレイテストでは手札が7枚以下となるよう初期手札2枚・ドロー枚数を設計しています。
+> 現在のエンジンでは、手札が8枚以上あってもエンド時に自動ディスカードされません。本プレイテストでは手札が7枚以下となるよう初期手札3枚・ドロー枚数を設計しています。
 
 1. **エンド時の手札7枚超過ディスカード**:
    - 現在のエンジンでは未実装です（Known Limitation）。
@@ -28,11 +28,11 @@ BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）お�
 
 - **ライフ**: 各プレイヤー 8枚（`Card[]` 形式、全カード通常トランプ範囲内でユニーク）
 - **Player A (p1)**:
-  - 手札: 2枚（♢5, ♣2 - ツイスト用コスト）
+  - 手札: 3枚（♡3 - Up用キーカード, ♢5 - ツイスト/$Dコスト用, ♣2 - $Dコスト用）
   - フィールド: 一般兵 2体（♠6, ♡5 - charge状態）、防壁 1体（♢4 - charge状態, 裏向き）
   - 墓地: 0枚
 - **Player B (p2)**:
-  - 手札: 2枚（♢6, ♣3 - ツイスト用コスト）
+  - 手札: 3枚（♠2 - Down用キーカード, ♢6 - ツイスト/$Dコスト用, ♣3 - $Dコスト用）
   - フィールド: 一般兵 2体（♣6, ♢5 - charge状態）、防壁 1体（♡5 - charge状態, 裏向き）
   - 墓地: 0枚
 
@@ -53,6 +53,8 @@ BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）お�
 | `action.charge` | チャージ | triggered | immediate | main | `setAllUnitState` | **SUPPORTED** |
 | `action.draw` | ドロー | triggered | normal | main | `drawFromLife` | **SUPPORTED** |
 | `action.twist` | ツイスト | direct | normal | quick | `toggleUnitState` | **SUPPORTED** |
+| `action.up` | アップ | direct | normal | quick | `createFog` (fog.up) | **SUPPORTED** |
+| `action.down` | ダウン | direct | normal | quick | `createFog` (fog.down) / `moveToGraveyard` | **SUPPORTED** |
 
 ### B. ENGINE SUPPORTED (Preset Dormant: エンジン実装済・固定盤面では条件非配置)
 
@@ -66,8 +68,6 @@ BlackPoker の新ルールエンジン（`rules-vnext` YAML 定義駆動）お�
 
 | Action ID | Name | Trigger | Speed | Timing | 状態 |
 |---|---|---|---|---|---|
-| `action.up` | アップ | direct | normal | quick | **PARTIAL** |
-| `action.down` | ダウン | direct | normal | quick | **PARTIAL** |
 | `action.throwing` | 投擲 | direct | normal | quick | **PARTIAL** |
 | `action.destroyBulwark` | 防壁破壊 | direct | normal | quick | **PARTIAL** |
 | `action.counter` | カウンター | direct | normal | quick | **PARTIAL** |

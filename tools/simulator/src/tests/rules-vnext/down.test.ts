@@ -26,7 +26,7 @@ describe("Down Action Integration Test (New YAML)", () => {
   it("should format action summary for Down action correctly", () => {
     const downAction = rulePackage.actions.find((a) => a.id === "action.down")!;
     const summary = formatActionSummary(downAction);
-    expect(summary).toBe("ダウン @直接-通常-クイック | $D | ★♠2-10 | 対象: 兵士1体");
+    expect(summary).toBe("ダウン @直接-通常-クイック | $D | ★♠A-10 | 対象: 兵士1体");
   });
 
   it("should apply down fog, reduce size, and keep soldier on field (Case A: Spade 2 against Size 5)", () => {

@@ -5,6 +5,7 @@ import { UnitCard } from "./UnitCard";
 export interface PlayerBoardProps {
   playerKey: string;
   player: any;
+  allPlayersFog?: any[];
   isCurrentDecisionPlayer: boolean;
   isTurnPlayer: boolean;
   isChancePlayer: boolean;
@@ -16,6 +17,7 @@ export interface PlayerBoardProps {
 export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   playerKey,
   player,
+  allPlayersFog = [],
   isCurrentDecisionPlayer,
   isTurnPlayer,
   isChancePlayer,
@@ -30,6 +32,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const handCards = Array.isArray(player.hand) ? player.hand : [];
   const fieldUnits = Array.isArray(player.field) ? player.field : [];
   const graveCards = Array.isArray(player.grave) ? player.grave : [];
+  const playerFog = Array.isArray(player.fog) ? player.fog : [];
 
   return (
     <div
@@ -60,12 +63,17 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
           )}
         </div>
 
-        {/* ライフ表示 */}
+        {/* ライフ・Fog・墓地表示 */}
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-1.5 bg-red-100 dark:bg-red-950/60 px-3 py-1 rounded-lg border border-red-300 dark:border-red-800">
             <span className="text-sm">❤️</span>
             <span className="text-xs font-bold text-red-800 dark:text-red-300">LIFE:</span>
             <span className="text-sm font-black text-red-600 dark:text-red-400">{lifeCount}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/60 px-2.5 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800 text-xs font-bold text-indigo-900 dark:text-indigo-300">
+            <span>🌫</span>
+            <span>FOG: {playerFog.length}</span>
           </div>
 
           <button
@@ -85,15 +93,23 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
         <div className="flex flex-wrap gap-2 min-h-[120px] p-2 rounded-lg bg-slate-100/70 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
           {fieldUnits.length > 0 ? (
-            fieldUnits.map((unit: any) => (
-              <UnitCard
-                key={unit.unitId}
-                unit={unit}
-                showCardDetails={showPrivateInfo || unit.face !== "down"}
-                selectionMarker={unitSelectionMarkers?.get(unit.unitId)}
-                onClick={onUnitClick ? () => onUnitClick(unit.unitId) : undefined}
-              />
-            ))
+            fieldUnits.map((unit: any) => {
+              // 全プレイヤーの Fog からこのユニットを対象とするものを集約
+              const unitFogs = allPlayersFog.filter(
+                (f: any) => f.bindings && f.bindings.target === unit.unitId
+              );
+
+              return (
+                <UnitCard
+                  key={unit.unitId}
+                  unit={unit}
+                  fogs={unitFogs}
+                  showCardDetails={showPrivateInfo || unit.face !== "down"}
+                  selectionMarker={unitSelectionMarkers?.get(unit.unitId)}
+                  onClick={onUnitClick ? () => onUnitClick(unit.unitId) : undefined}
+                />
+              );
+            })
           ) : (
             <div className="flex items-center justify-center w-full text-xs text-slate-400 italic">
               ユニットなし
@@ -106,47 +122,48 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       <div>
         <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
           <span>HAND (手札: {handCards.length}枚)</span>
-          {!showPrivateInfo && <span className="text-[10px] text-amber-500">※ 非公開情報 (裏向き)</span>}
         </div>
 
-        <div className="flex flex-wrap gap-1.5 min-h-[60px] p-2 rounded-lg bg-slate-100/50 dark:bg-slate-950/30 border border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap gap-2 min-h-[80px] p-2 rounded-lg bg-slate-100/70 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 items-center">
           {handCards.length > 0 ? (
             handCards.map((card: any, idx: number) => (
-              <CardView key={card.id || idx} card={card} faceDown={!showPrivateInfo} size="sm" />
+              <CardView
+                key={card.id || card.cardInstanceId || idx}
+                card={card}
+                faceDown={!showPrivateInfo}
+                size="md"
+              />
             ))
           ) : (
-            <div className="flex items-center justify-center w-full text-xs text-slate-400 italic">
-              手札なし
-            </div>
+            <div className="text-xs text-slate-400 italic py-2 pl-1">手札なし</div>
           )}
         </div>
       </div>
 
       {/* 墓地モーダル */}
       {showGraveModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-slate-900 border-2 border-slate-700 rounded-2xl p-4 max-w-md w-full shadow-2xl text-slate-100">
-            <div className="flex items-center justify-between border-b border-slate-700 pb-2 mb-3">
-              <h3 className="text-sm font-bold flex items-center gap-1.5">
-                <span>🪦</span>
-                <span>{player.name || playerKey} の墓地 ({graveCards.length}枚)</span>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
+          <div className="w-full max-w-md rounded-2xl border-2 border-slate-700 bg-slate-900 p-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+              <h3 className="font-extrabold text-sm text-slate-100">
+                🪦 {player.name} の墓地 ({graveCards.length}枚)
               </h3>
               <button
                 onClick={() => setShowGraveModal(false)}
-                className="text-slate-400 hover:text-white text-sm font-bold px-2 py-1"
+                className="text-xs font-bold text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800"
               >
-                ✕
+                ✕ 閉じる
               </button>
             </div>
 
-            <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto p-2 bg-slate-950/60 rounded-xl border border-slate-800">
+            <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2">
               {graveCards.length > 0 ? (
-                graveCards.map((c: any, idx: number) => (
-                  <CardView key={c.id || idx} card={c} size="sm" />
+                graveCards.map((card: any, idx: number) => (
+                  <CardView key={card.id || idx} card={card} faceDown={false} size="sm" />
                 ))
               ) : (
-                <div className="text-xs text-slate-500 py-4 text-center w-full italic">
-                  墓地にカードはありません
+                <div className="text-xs text-slate-500 italic py-4 text-center w-full">
+                  墓地は空です
                 </div>
               )}
             </div>

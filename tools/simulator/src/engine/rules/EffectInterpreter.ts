@@ -247,6 +247,7 @@ export class EffectInterpreter {
    * ゲームイベントを発行し、TriggerResolver に伝達してリクエストバッファへ蓄積します。
    */
   dispatchEvent(event: any, context: CommandContext) {
+    this.registry.emitEvent(event);
     if (this.registry.triggerResolver) {
       this.registry.triggerResolver.resolveTriggers(event, context);
     }
