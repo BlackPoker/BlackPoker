@@ -20,14 +20,13 @@ jobs:
   release:
     name: release build
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
       # 変数設定
       - name: Set output
         id: vars
-        run: |
-          echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-          echo "::set-output name=short_ref::${GITHUB_REF#refs/*/}"
+        run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       # 準備
       - name: checkout
@@ -95,17 +94,29 @@ jobs:
           cache: npm
           cache-dependency-path: ./main/tools/simulator/package-lock.json
 
-      - name: Test, verify and build Simulator
+      - name: Install Simulator dependencies
         working-directory: ./main/tools/simulator
+        timeout-minutes: 10
+        run: npm ci
+
+      - name: Test Simulator
+        working-directory: ./main/tools/simulator
+        timeout-minutes: 10
+        run: npm test
+
+      - name: Check playable match
+        working-directory: ./main/tools/simulator
+        timeout-minutes: 10
+        run: npm run playable:check
+
+      - name: Build Simulator
+        working-directory: ./main/tools/simulator
+        timeout-minutes: 10
         env:
           VITE_BASE_PATH: /BlackPoker/${{ steps.vars.outputs.short_ref }}/playtest/
           VITE_BUILD_SHA: ${{ github.sha }}
           VITE_BUILD_REF: ${{ steps.vars.outputs.short_ref }}
-        run: |
-          npm ci
-          npm test
-          npm run playable:check
-          npm run build
+        run: npm run build
 
       - name: copy simulator to docs
         working-directory: ./main
