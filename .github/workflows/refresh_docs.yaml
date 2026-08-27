@@ -13,25 +13,25 @@ on:
     # 日本時間AM4:00に動作
     - cron: '0 19 * * *'
 
+permissions:
+  contents: write
+
 jobs:
   release:
     name: release build
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        python-version: [3.7]
-        node-version: [14.7]
-
     steps:
       # 変数設定
       - name: Set output
         id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
+        run: |
+          echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+          echo "::set-output name=short_ref::${GITHUB_REF#refs/*/}"
 
       # 準備
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           path: main
 #         with:
@@ -78,8 +78,8 @@ jobs:
            docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest "."
            docker run --rm --user $UID -v `pwd`/docs:/docs blackpoker-doc:latest
 
-      # gh-pageに反映
-      - name: copy docs
+      # gh-pageに反映 (ActionList)
+      - name: copy actionlist docs
         working-directory: ./main
         run: |
           mkdir -p ./docs/actionlist/html
@@ -87,16 +87,34 @@ jobs:
           cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
           cp -r ./tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
 
-#      - name: Use Node.js ${{ matrix.node-version }}
-#        uses: actions/setup-node@v1
-#        env:
-#          TZ: 'Asia/Tokyo'
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          node-version: ${{ matrix.node-version }}
+      # Simulator のビルド & docs/playtest への反映
+      - name: Setup Node.js for Simulator
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ./main/tools/simulator/package-lock.json
 
-      - name: checkout
-        uses: actions/checkout@v2
+      - name: Test, verify and build Simulator
+        working-directory: ./main/tools/simulator
+        env:
+          VITE_BASE_PATH: /BlackPoker/${{ steps.vars.outputs.short_ref }}/playtest/
+          VITE_BUILD_SHA: ${{ github.sha }}
+          VITE_BUILD_REF: ${{ steps.vars.outputs.short_ref }}
+        run: |
+          npm ci
+          npm test
+          npm run playable:check
+          npm run build
+
+      - name: copy simulator to docs
+        working-directory: ./main
+        run: |
+          mkdir -p ./docs/playtest
+          cp -r ./tools/simulator/dist/* ./docs/playtest/
+
+      - name: checkout gh-pages
+        uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: pages
@@ -119,9 +137,17 @@ jobs:
           git config -l
           git status
           git add .
-          git commit -m "refresh docs" -a
-          git pull
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes in docs."
+          else
+            git commit -m "refresh docs" -a
+            for i in {1..5}; do
+              git pull --rebase origin gh-pages && git push origin gh-pages && break || {
+                echo "Push failed, retrying in 3s... (attempt $i)"
+                sleep 3
+              }
+            done
+          fi
 
       # # HTMLはzipにまとめる
       # - name: create zip

@@ -316,6 +316,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           </h1>
           <span className="text-[10px] font-mono text-slate-400">
             Build: {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
+            {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
           </span>
 
           {/* Regulation Selector 枠 */}

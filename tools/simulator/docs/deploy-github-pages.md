@@ -2,97 +2,44 @@
 
 BlackPoker シミュレータ / Core Battle Playtest は、サーバーサイドの実行環境を必要とせず、クライアントサイド（ブラウザ内）の TypeScript / Vite 環境のみで完全動作するように設計されています。
 
----
-
-## 1. 静的ビルドの仕組み
-
-- **Rule Loader**: `BrowserRuleLoader.ts` が Vite の `import.meta.glob` を使用して YAML 定義（`src/data/rules-vnext/**/*.yaml`）を直接バンドルします。
-- **Game Engine**: `GameSession`, `CoreFlowCoordinator`, `LegalPatternGenerator` などのコアエンジンはすべて純粋な JavaScript/TypeScript で動作します。
-- **UI**: React + Tailwind CSS によるシングルページアプリケーション（SPA）です。
+公式ルール HTML / PDF / ActionList と同様に、既存の `.github/workflows/refresh_docs.yaml` パイプライン内で一括ビルドされ、`gh-pages` ブランチの各 revision 配下に配置されます。
 
 ---
 
-## 2. ビルドと配備手順
+## 1. 静的ビルドとアーキテクチャ
 
-### (1) ローカルでの本番ビルド
-```bash
-cd tools/simulator
-npm run build
-```
-`tools/simulator/dist/` ディレクトリに HTML / CSS / JS アセットが出力されます。
-
-### (2) Vite の Base パス設定 (`vite.config.ts`)
-GitHub Pages のサブディレクトリ（例: `https://<user>.github.io/<repo>/`）へ配備する場合は、`vite.config.ts` で `base` パスを指定します。
-
-```typescript
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-
-export default defineConfig({
-  base: process.env.GITHUB_PAGES ? '/BlackPoker/' : './',
-  plugins: [react()],
-});
-```
+- **Rule Loader**: `BrowserRuleLoader.ts` が Vite の `import.meta.glob` を使用して YAML 定義（`src/data/rules-vnext/**/*.yaml`）を直接バンドル。
+- **Game Engine**: `GameSession`, `CoreFlowCoordinator`, `LegalPatternGenerator` などのコアエンジンはすべて純粋な JavaScript/TypeScript で動作。
+- **UI**: React + Tailwind CSS によるシングルページアプリケーション（SPA）。
 
 ---
 
-## 3. GitHub Actions による自動配備例
+## 2. 公開 URL 構造 (Branch-specific subpath)
 
-リポジトリ直下の `.github/workflows/deploy-playtest.yml` に以下のワークフローを追加することで、`main` または指定ブランチへのプッシュ時に自動的に GitHub Pages へ配備可能です。
+Simulator は各ブランチ・リビジョンの公式ドキュメント群のサブパス `/playtest/` 配下に公開されます。
 
-```yaml
-name: Deploy Playtest to GitHub Pages
+### (1) master ブランチ (canonical)
+- **公式ルール**: `https://blackpoker.github.io/BlackPoker/master/`
+- **ActionList Web**: `https://blackpoker.github.io/BlackPoker/master/actionlist/html/`
+- **Playtest Simulator**: `https://blackpoker.github.io/BlackPoker/master/playtest/`
 
-on:
-  push:
-    branches: [ main, BlackPoker/issue551-core-flow ]
+> ※ 毎日 AM 4:00 (JST) の cron スケジュールまたは手動 `workflow_dispatch` により、同一リビジョンから一括生成されます。
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+### (2) 開発ブランチ (Playtest 検証)
+- **Playtest Simulator**: `https://blackpoker.github.io/BlackPoker/<branch-name>/playtest/`
+  - 例: `https://blackpoker.github.io/BlackPoker/BlackPoker/issue551-core-flow/playtest/`
 
-concurrency:
-  group: "pages"
-  cancel-in-progress: true
+> ※ GitHub Actions の「Actions」タブ $\rightarrow$ 「refresh_docs」 $\rightarrow$ 「Run workflow」で対象ブランチを選択して手動実行することで即座に配備されます。
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+---
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: tools/simulator/package-lock.json
+## 3. CI/CD ワークフロー (`.github/workflows/refresh_docs.yaml`)
 
-      - name: Install dependencies
-        working-directory: tools/simulator
-        run: npm ci
+Simulator は独立したデプロイワークフローを持たず、既存の `refresh_docs.yaml` 内で以下のステップとして実行されます：
 
-      - name: Build
-        working-directory: tools/simulator
-        env:
-          GITHUB_PAGES: "true"
-        run: npm run build
+1. **セットアップ**: Node.js 20 をセットアップし `npm ci` を実行。
+2. **自動検証**: `npm test` および `npm run playable:check` でコアフロー完走を確認。
+3. **バンドル生成**: `VITE_BASE_PATH=/BlackPoker/${short_ref}/playtest/`、`VITE_BUILD_SHA`、`VITE_BUILD_REF` を付与して `npm run build`。
+4. **Docs 統合**: `tools/simulator/dist/*` を `main/docs/playtest/` へコピー。
+5. **gh-pages 反映**: 既存の Sphinx HTML / PDF / ActionList とともに `gh-pages/${short_ref}/` へ 1 回のコミット＆プッシュで公開。
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: tools/simulator/dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-```
