@@ -1,4 +1,4 @@
-name: Deploy Core Battle Playtest to GitHub Pages
+name: Deploy Core Battle Playtest to gh-pages branch
 
 on:
   push:
@@ -7,26 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
   build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: tools/simulator
 
     steps:
-      - name: Checkout repository
+      - name: Checkout source repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -37,28 +25,51 @@ jobs:
           cache-dependency-path: tools/simulator/package-lock.json
 
       - name: Install dependencies
+        working-directory: tools/simulator
         run: npm ci
 
       - name: Run automated test suite
+        working-directory: tools/simulator
         run: npm test
 
       - name: Run playable match check
+        working-directory: tools/simulator
         run: npm run playable:check
 
-      - name: Build simulator bundle for GitHub Pages
+      - name: Build simulator bundle for /playtest/
+        working-directory: tools/simulator
         run: npm run build
         env:
-          VITE_BASE_PATH: /BlackPoker/
+          VITE_BASE_PATH: /BlackPoker/playtest/
           VITE_BUILD_SHA: ${{ github.sha }}
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
         with:
-          path: tools/simulator/dist
+          ref: gh-pages
+          path: gh-pages-branch
 
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy to playtest directory on gh-pages
+        run: |
+          rm -rf gh-pages-branch/playtest
+          mkdir -p gh-pages-branch/playtest
+          cp -r tools/simulator/dist/* gh-pages-branch/playtest/
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd gh-pages-branch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add playtest/
+          if git diff --staged --quiet; then
+            echo "No changes in playtest bundle."
+          else
+            git commit -m "deploy: update playtest simulator (${GITHUB_SHA:0:7})"
+            for i in {1..5}; do
+              git pull --rebase origin gh-pages && git push origin gh-pages && break || {
+                echo "Push failed, retrying in 3s... (attempt $i)"
+                sleep 3
+              }
+            done
+          fi
+
