@@ -87,6 +87,7 @@ export function summonUnitHandler(): CommandHandler {
       face: face || "up",
       cards: context.keyCard ? [context.keyCard] : [],
       labels: ["攻撃", "防御"],
+      enteredTurn: context.state.turnCount ?? 1,
     };
 
     // 手札からキーカードを消費（手札にある場合のみ）
@@ -227,6 +228,54 @@ export function drawFromLifeHandler(
         },
       };
       effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
+ * discardCards: 指定されたカード群（手札等）を墓地へ送る
+ */
+export function discardCardsHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { player: targetPlayer = "self", cards, cause = "action" } = args;
+    const playerKey = targetPlayer === "opponent"
+      ? getOpponentPlayerKey(context.playerKey, context.state)
+      : context.playerKey;
+    const player = context.state.players[playerKey];
+    if (!player || !Array.isArray(player.hand)) return;
+
+    const resolvedCardIds: string[] = expressionEvaluator.resolveBindingValue(cards, context) || [];
+    if (!Array.isArray(resolvedCardIds) || resolvedCardIds.length === 0) return;
+
+    if (!Array.isArray(player.grave)) player.grave = [];
+
+    const discarded: any[] = [];
+    player.hand = player.hand.filter((c: any) => {
+      if (resolvedCardIds.includes(c.id)) {
+        discarded.push(c);
+        return false;
+      }
+      return true;
+    });
+
+    for (const card of discarded) {
+      player.grave.push(card);
+      effectInterpreter.dispatchEvent(
+        {
+          type: "cardMoved",
+          payload: {
+            card,
+            fromZone: "hand",
+            toZone: "grave",
+            playerKey,
+            cause: typeof cause === "string" ? cause : { type: "action", actionId: context.currentAction?.id },
+          },
+        },
+        context
+      );
     }
   };
 }

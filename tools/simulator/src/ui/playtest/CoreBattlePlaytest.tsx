@@ -16,6 +16,8 @@ import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel } from "../debug/DebugPanel";
 
+import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
+
 export const CoreBattlePlaytest: React.FC = () => {
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
@@ -227,6 +229,12 @@ export const CoreBattlePlaytest: React.FC = () => {
     return fogs;
   }, [gameState]);
 
+  // 戦闘関係番号プレゼンテーション (①, ②, ...) の生成
+  const battleRelationMap = useMemo(() => {
+    const obs = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
+    return BattleRelationPresenter.buildPresentationMap(gameState, obs);
+  }, [gameState, currentStep]);
+
   // decisionId 切替時の盤面選択リセット
   useEffect(() => {
     setSelectedUnitIds([]);
@@ -295,22 +303,28 @@ export const CoreBattlePlaytest: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-5 py-2.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-30">
-        <div className="flex items-center gap-3">
+      <header className="flex flex-wrap items-center justify-between px-4 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-30">
+        <div className="flex items-center gap-2.5">
           <span className="px-2 py-0.5 text-xs font-black rounded bg-indigo-600 text-white shadow-sm">
             PLAYTEST
           </span>
-          <h1 className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
-            Core Battle Playtest
+          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
+            PREVIEW / 開発中
+          </span>
+          <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-slate-100">
+            Core Battle
           </h1>
+          <span className="text-[10px] font-mono text-slate-400">
+            Build: {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
+          </span>
 
           {/* Regulation Selector 枠 */}
-          <div className="flex items-center gap-1.5 ml-2">
-            <span className="text-[11px] font-bold text-slate-500">Regulation:</span>
+          <div className="flex items-center gap-1 ml-2">
+            <span className="text-[10px] font-bold text-slate-500">Reg:</span>
             <select
               value={selectedRegulation}
               onChange={(e) => setSelectedRegulation(e.target.value)}
-              className="text-xs font-bold py-1 px-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="text-xs font-bold py-0.5 px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
             >
               <option value="core-battle">Core Battle (Preset 001) [Active]</option>
               <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
@@ -320,7 +334,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
 
         {/* コントロールボタン */}
-        <div className="flex items-center gap-3 mt-2 sm:mt-0">
+        <div className="flex items-center gap-2 mt-1 sm:mt-0">
           <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -333,7 +347,7 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition ${
+            className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition ${
               showDebug
                 ? "bg-slate-800 text-emerald-400 border-emerald-500"
                 : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
@@ -344,17 +358,17 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           <button
             onClick={startNewGame}
-            className="px-3 py-1 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow transition"
+            className="px-2.5 py-0.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow transition"
           >
-            🔄 Reset Match
+            🔄 Reset
           </button>
         </div>
       </header>
 
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
-      <main className="flex-1 p-3.5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-3.5">
+      <main className="flex-1 p-2.5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2.5">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-        <div className="lg:col-span-7 flex flex-col gap-3">
+        <div className="lg:col-span-7 flex flex-col gap-2">
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar
@@ -377,6 +391,7 @@ export const CoreBattlePlaytest: React.FC = () => {
               isChancePlayer={gameState.chancePlayer === "p2"}
               showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p2" || showDebug}
               unitSelectionMarkers={unitSelectionMarkers}
+              battleRelationMap={battleRelationMap}
               onUnitClick={handleUnitClick}
             />
           )}
@@ -395,13 +410,14 @@ export const CoreBattlePlaytest: React.FC = () => {
               isChancePlayer={gameState.chancePlayer === "p1"}
               showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p1" || showDebug}
               unitSelectionMarkers={unitSelectionMarkers}
+              battleRelationMap={battleRelationMap}
               onUnitClick={handleUnitClick}
             />
           )}
         </div>
 
         {/* 右ペイン: 操作パネル / 対戦ログ */}
-        <div className="lg:col-span-5 flex flex-col gap-3 sticky top-16 max-h-[calc(100vh-5rem)]">
+        <div className="lg:col-span-5 flex flex-col gap-2 sticky top-14 max-h-[calc(100vh-4rem)]">
           {/* 判断要求パネル (Decision Panel) */}
           {currentStep?.type === "WAITING_FOR_DECISION" ? (
             <div className="shrink-0">

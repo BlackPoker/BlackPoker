@@ -17,8 +17,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const [activeTab, setActiveTab] = useState<"state" | "stage" | "buffer" | "decision">("state");
 
   const handleCopy = () => {
+    const env = (import.meta as any).env || {};
     const debugInfo = {
-      presetId: state?.presetId,
+      buildSha: env.VITE_BUILD_SHA || "local",
+      presetId: state?.presetId || "CORE-BATTLE-001",
       rulePackageId: rulePackage?.id,
       rulePackageVersion: rulePackage?.version,
       stateVersion: state?.stateVersion,
@@ -49,13 +51,16 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const env = (import.meta as any).env || {};
+  const buildSha = env.VITE_BUILD_SHA ? String(env.VITE_BUILD_SHA).slice(0, 7) : "local";
+
   return (
     <div className="flex flex-col h-full p-3 bg-slate-900 text-slate-200 rounded-xl border border-slate-700 shadow-md font-mono text-xs">
       <div className="flex items-center justify-between border-b pb-2 mb-2 border-slate-700">
         <div className="flex items-center gap-2">
           <span className="font-bold text-emerald-400">🔧 Raw Debug Panel</span>
           <span className="text-[10px] text-slate-400">
-            StateVer: {state?.stateVersion}
+            Build: {buildSha} | StateVer: {state?.stateVersion}
           </span>
         </div>
 

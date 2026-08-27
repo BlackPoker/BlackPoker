@@ -1,5 +1,6 @@
 import React from "react";
 import { CardView } from "./CardView";
+import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 
 export interface UnitCardProps {
   unit: any;
@@ -9,6 +10,7 @@ export interface UnitCardProps {
     badge: string; // "①", "②" 等
     isSelected: boolean;
   };
+  battleDisplayInfo?: UnitBattleDisplayInfo;
   onClick?: () => void;
 }
 
@@ -17,13 +19,13 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   fogs,
   showCardDetails = true,
   selectionMarker,
+  battleDisplayInfo,
   onClick,
 }) => {
   const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
   const isFaceDown = unit.face === "down";
   const isDrive = unit.state === "drive";
-  const battleRole = unit.battle?.role;
-  const blocksUnitId = unit.battle?.blocksUnitId;
+  const battleRole = battleDisplayInfo?.role || unit.battle?.role;
 
   // サイズ合計の計算（兵士のみ）
   const isHiddenFromViewer = isFaceDown && !showCardDetails;
@@ -46,6 +48,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   return (
     <div
       onClick={isClickable ? onClick : undefined}
+      title={`Debug ID: ${unit.unitId}`}
       className={`relative flex flex-col items-center p-2 rounded-xl border-2 transition-all shadow-sm ${
         isClickable ? "cursor-pointer hover:scale-105 active:scale-95" : ""
       } ${
@@ -62,7 +65,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           : "bg-white border-indigo-400 dark:bg-slate-700 dark:border-indigo-500 shadow-md"
       }`}
       style={{
-        minWidth: "118px",
+        minWidth: "112px",
       }}
     >
       {/* 選択可能・選択中バッジ (①, ②) */}
@@ -89,7 +92,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               : "bg-indigo-600 text-white"
           }`}
         >
-          {isBulwark ? "🛡 防壁" : "⚔ 兵士"}
+          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark ? "🛡 防壁" : "⚔ 兵士"}
         </span>
 
         <span
@@ -99,19 +102,29 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               : "bg-emerald-600 text-white font-bold"
           }`}
         >
-          {isDrive ? "🔄 DRIVE (横)" : "⚡ CHARGE (縦)"}
+          {isDrive ? "🔄 DRIVE" : "⚡ CHARGE"}
         </span>
       </div>
 
       {/* バトルロールマーカー */}
       {battleRole === "attacker" && (
-        <div className="w-full bg-red-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm">
-          ⚔ 攻撃中
+        <div className="w-full bg-red-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1">
+          <span>⚔ 攻撃中</span>
+          {battleDisplayInfo?.blockedByBadges && battleDisplayInfo.blockedByBadges.length > 0 && (
+            <span className="bg-red-950/80 px-1 rounded text-red-200 font-mono">
+              ← {battleDisplayInfo.blockedByBadges.join(" ")}
+            </span>
+          )}
         </div>
       )}
       {battleRole === "blocker" && (
-        <div className="w-full bg-blue-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm">
-          🛡 防御中 {blocksUnitId ? `(vs #${blocksUnitId.slice(-4)})` : ""}
+        <div className="w-full bg-blue-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1">
+          <span>🛡 防御中</span>
+          {battleDisplayInfo?.targetBadge && (
+            <span className="bg-blue-950/80 px-1 rounded text-blue-200 font-mono">
+              → {battleDisplayInfo.targetBadge}
+            </span>
+          )}
         </div>
       )}
 

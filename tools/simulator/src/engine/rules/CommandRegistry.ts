@@ -18,6 +18,7 @@ import {
   judgeDamageHandler,
   drawFromLifeHandler,
   setAllUnitStateHandler,
+  discardCardsHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -595,6 +596,20 @@ export class CommandRegistry {
         context.components || []
       );
       return res.request;
+    } else if (execResult.selectionType === "card") {
+      return LegalPatternGenerator.generateCardSelectionDecision(
+        context.state,
+        decisionPlayerId,
+        request,
+        execResult.effectStepId,
+        execResult.candidates || [],
+        execResult.requiredCount ?? 1,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+        }
+      );
     } else {
       return LegalPatternGenerator.generateEffectSelectionDecision(
         context.state,
@@ -679,5 +694,6 @@ export class CommandRegistry {
     this.register("drawFromLife", drawFromLifeHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("drawCards", drawFromLifeHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("setAllUnitState", setAllUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("discardCards", discardCardsHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

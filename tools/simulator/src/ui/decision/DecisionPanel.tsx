@@ -127,13 +127,6 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     setSelectedTargetRef(nextTargetRef);
   };
 
-  // 唯一のアクションがある場合は自動選択 (既存UXの維持)
-  useEffect(() => {
-    if (availableActionRefs.length === 1 && selectedActionRef === null) {
-      handleSelectAction(availableActionRefs[0]);
-    }
-  }, [availableActionRefs, selectedActionRef]);
-
   // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & ①/② 番号マッピング
   const unitNumberMap = useMemo(() => {
     const map = new Map<string, { badge: string; label: string; fullLabel: string; unitView: any }>();
@@ -188,6 +181,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     return patterns.map((p, idx) => {
       const eff = p.effectSelectionRef !== undefined ? catalog.effectSelections[p.effectSelectionRef] : undefined;
       if (!eff) return { patternIndex: idx, label: "効果の選択", selectedValues: [] };
+
+      // 0. カード選択 (selectionType === "card" / 手札破棄等)
+      if (eff.selectionType === "card") {
+        return {
+          patternIndex: idx,
+          label: eff.summary || `カード選択: ${(eff.selectedValues || []).join(", ")}`,
+          selectedValues: eff.selectedValues || [],
+        };
+      }
 
       // 1. アタッカー選択 (selectedValues)
       if (eff.selectedValues !== undefined) {

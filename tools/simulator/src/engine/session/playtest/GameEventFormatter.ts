@@ -46,13 +46,38 @@ export class GameEventFormatter {
     const nextStageReqs = nextState.stage?.requests || [];
     for (const req of nextStageReqs) {
       if (!prevStageReqIds.has(req.id)) {
-        const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
-        if (costSummary) {
+        const costPayment = req.selectedCostPayment;
+        if (costPayment) {
           const cName = getPlayerName(req.controller);
-          logs.push({
-            message: `💰 ${cName} がコストを支払いました: ${costSummary} → 墓地`,
-            level: "action",
-          });
+          const parts: string[] = [];
+
+          if (costPayment.discardedCardIds && costPayment.discardedCardIds.length > 0) {
+            const prevHand = prevState.players?.[req.controller]?.hand || [];
+            const discardedCodes = costPayment.discardedCardIds.map((cId: string) => {
+              const c = prevHand.find((card: any) => card.id === cId);
+              return formatCardCodeDisplay(c?.code || (c?.suit && c?.rank ? `${c.suit}${c.rank}` : cId));
+            });
+            parts.push(`手札破棄: ${discardedCodes.join(", ")} → 墓地`);
+          }
+
+          if (costPayment.drivenBulwarkUnitIds && costPayment.drivenBulwarkUnitIds.length > 0) {
+            parts.push(`防壁 ${costPayment.drivenBulwarkUnitIds.length}枚をdrive`);
+          }
+
+          if (costPayment.lifeCount && costPayment.lifeCount > 0) {
+            parts.push(`ライフ ${costPayment.lifeCount}枚支払い`);
+          }
+
+          if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
+            parts.push(`ユニット ${costPayment.sacrificedUnitIds.length}体破壊`);
+          }
+
+          if (parts.length > 0) {
+            logs.push({
+              message: `💰 ${cName} がコストを支払いました: ${parts.join(" / ")}`,
+              level: "action",
+            });
+          }
         }
       }
     }

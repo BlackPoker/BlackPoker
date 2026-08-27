@@ -1,0 +1,64 @@
+name: Deploy Core Battle Playtest to GitHub Pages
+
+on:
+  push:
+    branches:
+      - "BlackPoker/issue551-core-flow"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: tools/simulator
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: tools/simulator/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run automated test suite
+        run: npm test
+
+      - name: Run playable match check
+        run: npm run playable:check
+
+      - name: Build simulator bundle for GitHub Pages
+        run: npm run build
+        env:
+          VITE_BASE_PATH: /BlackPoker/
+          VITE_BUILD_SHA: ${{ github.sha }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: tools/simulator/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -59,9 +59,6 @@ export const CardView: React.FC<CardViewProps> = ({
       <div className={`text-center leading-none ${suitInfo.color} text-base my-auto`}>
         {isJoker ? "★" : suitInfo.symbol}
       </div>
-      <div className={`text-right leading-none ${suitInfo.color} text-[10px]`}>
-        {displayRank}
-      </div>
     </div>
   );
 };

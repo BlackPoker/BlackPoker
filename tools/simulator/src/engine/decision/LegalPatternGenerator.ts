@@ -469,6 +469,84 @@ export class LegalPatternGenerator {
   }
 
   /**
+   * カード選択（EFFECT_SELECTION - card / discardDownTo 等）用 DecisionRequest を生成します。
+   */
+  static generateCardSelectionDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: any,
+    effectStepId: string,
+    candidates: any[],
+    requiredCount: number = 1,
+    options?: { stateVersion?: number; matchId?: string; decisionId?: string; selectionId?: string }
+  ): DecisionRequest {
+    const stateVersion = options?.stateVersion ?? (state.stateVersion || 1);
+    const matchId = options?.matchId ?? (state.matchId || "match-1");
+    const decisionId = options?.decisionId ?? `dec-card-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    // candidates から requiredCount 枚の組み合わせ（k-combinations）を生成
+    const combos = this.getCombinations(candidates, Math.min(requiredCount, candidates.length));
+
+    const effectSelections: any[] = [];
+    const patterns: LegalPattern[] = [];
+
+    combos.forEach((combo, index) => {
+      const selectedValues = combo.map((c) => c.id);
+      const cardNames = combo.map((c) => {
+        const code = c.code || `${c.suit || ""}${c.rank || ""}`;
+        return formatSuitSymbol(code);
+      }).join(", ");
+
+      const summary = `手札破棄 (${requiredCount}枚): [${cardNames}]`;
+
+      const effSel = {
+        selectionType: "card",
+        selectedValues,
+        summary,
+      };
+      effectSelections.push(effSel);
+
+      const pattern: LegalPattern = {
+        patternId: `effect-card-select-${index}-${selectedValues.join("_") || "none"}`,
+        kind: "EFFECT_SELECTION",
+        effectSelectionRef: index,
+      };
+      patterns.push(pattern);
+    });
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections: [],
+      effectSelections,
+      orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    return {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+  }
+
+  /**
    * 最新のブロック割当て生成メトリクス
    */
   public static latestBlockAssignmentMetrics?: BlockAssignmentMetrics;

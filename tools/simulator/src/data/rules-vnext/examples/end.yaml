@@ -7,5 +7,13 @@ actions:
       speed: normal
       timing: main
     effect:
+      - selectDiscardCards:
+          player: self
+          zone: hand
+          max: 7
+      - discardCards:
+          player: self
+          cards: selection.discardCards
+          cause: endHandLimit
       - cleanupFogs: {}
       - endTurn: {}

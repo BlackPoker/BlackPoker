@@ -127,3 +127,26 @@ export function isLegalBlockerCandidate(unit: any, components: readonly Componen
   if (!isCharacterComponent(unit, components)) return false;
   return hasUnitLabel(unit, "防御", components);
 }
+
+/**
+ * ユニットが「速攻 (haste)」能力を持っているかを判定します。
+ */
+export function hasHaste(unit: any, components: readonly ComponentDefinition[] = []): boolean {
+  if (!unit) return false;
+  const compDef = components.find((c) => c.id === unit.componentId);
+
+  const rawAbilities: string[] = [
+    ...(compDef?.display?.labels || []),
+    ...((compDef as any)?.labels || []),
+    ...((compDef as any)?.abilities || []),
+    ...(unit.abilities || []),
+    ...(unit.labels || []),
+  ];
+
+  for (const ab of rawAbilities) {
+    const l = String(ab).toLowerCase();
+    if (l === "速攻" || l === "haste" || l === "quickattack" || l === "<速攻>") return true;
+  }
+  return false;
+}
+

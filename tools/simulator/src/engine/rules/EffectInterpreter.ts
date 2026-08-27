@@ -2,7 +2,7 @@ import { CommandRegistry, CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { getOpponentPlayerKey } from "./playerUtils";
-import { hasUnitLabel, isCharacterComponent } from "./characterUtils";
+import { hasUnitLabel, isCharacterComponent, hasHaste } from "./characterUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 
 export interface EffectInterruption {
@@ -10,9 +10,10 @@ export interface EffectInterruption {
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
-  readonly selectionType?: "unit" | "unitAssignment";
+  readonly selectionType?: "unit" | "unitAssignment" | "card";
   readonly candidates: any[];
   readonly attackers?: any[];
+  readonly requiredCount?: number;
   readonly decisionPlayerKey?: PlayerKey;
 }
 
@@ -189,6 +190,31 @@ export class EffectInterpreter {
         };
       }
 
+      if (name === "selectDiscardCards" || name === "discardDownTo") {
+        const selectionId = args.id || "discardCards";
+        const max = args.max ?? 7;
+        const playerKey = this.resolveDecisionPlayerKey(args.player, context);
+        const player = context.state.players?.[playerKey];
+        const hand = Array.isArray(player?.hand) ? player.hand : [];
+
+        // 手札枚数チェック: max 以下の場合は中断せず次ステップへ
+        if (hand.length <= max) {
+          continue;
+        }
+
+        const requiredCount = hand.length - max;
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "card",
+          candidates: [...hand],
+          requiredCount,
+          decisionPlayerKey: playerKey,
+        };
+      }
+
       this.executeEffect(effect, context);
     }
 
@@ -237,6 +263,15 @@ export class EffectInterpreter {
         const compDef = context.components?.find((c: any) => c.id === compId);
         const matchType = compDef ? compDef.type === condition.componentType : compId.startsWith(`${condition.componentType}.`);
         if (!matchType) return false;
+      }
+
+      // 召喚酔いチェック (アタッカー指定時: このターン場に出たキャラクターは <速攻> を持たない限りアタッカー指定不可)
+      const isAttackerSelection = args.id === "attackers" || condition.canAttack === true;
+      if (isAttackerSelection) {
+        const currentTurn = context.state.turnCount ?? 1;
+        if (unit.enteredTurn === currentTurn && !hasHaste(unit, context.components)) {
+          return false;
+        }
       }
 
       return true;
