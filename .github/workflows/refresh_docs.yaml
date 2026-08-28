@@ -4,10 +4,15 @@ name: refresh_docs
 on:
   workflow_dispatch:
     inputs:
-      verify_simulator:
-        description: "Simulatorも検証・ビルドして公開する"
-        type: boolean
-        default: false
+      simulator_mode:
+        description: "Simulatorの処理"
+        required: true
+        type: choice
+        options:
+          - skip
+          - build-only
+          - verify-and-build
+        default: skip
       logLevel:
         required: false
         description: ログレベル
@@ -110,7 +115,7 @@ jobs:
     name: test & build simulator
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name != 'workflow_dispatch' || inputs.verify_simulator == true
+    if: github.event_name != 'workflow_dispatch' || inputs.simulator_mode != 'skip'
 
     steps:
       - name: Set output
@@ -133,11 +138,13 @@ jobs:
         run: npm ci
 
       - name: Test Simulator
+        if: github.event_name != 'workflow_dispatch' || inputs.simulator_mode == 'verify-and-build'
         working-directory: ./tools/simulator
         timeout-minutes: 10
         run: npm test
 
       - name: Check playable match
+        if: github.event_name != 'workflow_dispatch' || inputs.simulator_mode == 'verify-and-build'
         working-directory: ./tools/simulator
         timeout-minutes: 10
         run: npm run playable:check
