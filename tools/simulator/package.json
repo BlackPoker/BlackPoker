@@ -8,8 +8,10 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:diagnose": "vitest run --reporter verbose",
+    "test": "node test-runner.js run",
+    "test:diagnose": "node test-runner.js run --reporter verbose",
+    "test:raw": "vitest run",
+
     "scenario:rules-vnext": "vite-node src/cli/scenarioRunner.ts",
 
     "compare:rules-vnext": "vite-node src/cli/compareRunner.ts",

@@ -7,9 +7,13 @@ export default defineConfig({
   test: {
     environment: "node",
     pool: "forks",
-    maxWorkers: 6,
-    minWorkers: 2,
+    poolOptions: {
+      forks: {
+        singleFork: true,
+      },
+    },
     isolate: false,
+    silent: true,
     testTimeout: 15000,
     hookTimeout: 15000,
     teardownTimeout: 2000,

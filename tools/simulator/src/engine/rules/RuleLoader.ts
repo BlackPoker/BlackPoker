@@ -80,6 +80,7 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
     return rulePackageCache.get(normalizedPath)!;
   }
 
+
   const readDirRecursive = (dir: string): string[] => {
     let results: string[] = [];
     const list = fs.readdirSync(dir);
@@ -112,5 +113,7 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
   rulePackageCache.set(normalizedPath, merged);
   return merged;
 }
+
+
 
 
