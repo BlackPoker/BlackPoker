@@ -59,6 +59,24 @@ export function mergeRuleDefinitions(parsedDocs: any[]): RulePackage {
 const rulePackageCache = new Map<string, RulePackage>();
 
 /**
+ * オブジェクトおよびその子要素を再帰的に凍結（Object.freeze）し、
+ * ランタイムでのあらゆる mutation を確実に防御します。
+ */
+export function deepFreeze<T>(obj: T): Readonly<T> {
+  if (obj === null || typeof obj !== "object") {
+    return obj;
+  }
+  Object.freeze(obj);
+  for (const key of Object.keys(obj)) {
+    const val = (obj as any)[key];
+    if (val !== null && typeof val === "object" && !Object.isFrozen(val)) {
+      deepFreeze(val);
+    }
+  }
+  return obj;
+}
+
+/**
  * ルールパッケージのインメモリキャッシュをクリアします（テスト用）。
  */
 export function clearRulePackageCache(): void {
@@ -68,7 +86,7 @@ export function clearRulePackageCache(): void {
 /**
  * 指定されたディレクトリ配下のすべての YAML ファイルを再帰的に読み込み、
  * 1つの RulePackage に統合します（Node.js環境用）。
- * 同一ディレクトリに対する再帰読み込みとYAMLパース結果はインメモリキャッシュされます。
+ * 同一ディレクトリに対する再帰読み込みとYAMLパース結果は deepFreeze された状態でインメモリキャッシュされます。
  */
 export async function loadRulePackageFromDirectory(dirPath: string): Promise<RulePackage> {
   // Node.js 標準モジュールを動的インポートすることで、ブラウザビルド環境での静的エラーを防止する
@@ -79,7 +97,6 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
   if (rulePackageCache.has(normalizedPath)) {
     return rulePackageCache.get(normalizedPath)!;
   }
-
 
   const readDirRecursive = (dir: string): string[] => {
     let results: string[] = [];
@@ -110,9 +127,11 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
   }
 
   const merged = mergeRuleDefinitions(parsedDocs);
-  rulePackageCache.set(normalizedPath, merged);
-  return merged;
+  const frozen = deepFreeze(merged) as RulePackage;
+  rulePackageCache.set(normalizedPath, frozen);
+  return frozen;
 }
+
 
 
 

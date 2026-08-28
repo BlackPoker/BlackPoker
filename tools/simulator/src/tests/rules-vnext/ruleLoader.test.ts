@@ -56,4 +56,32 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(playtestPackage.components.length).toBe(browserPackage.components.length);
     expect(playtestPackage.components.length).toBe(7);
   });
+
+  it("should return deepFrozen RulePackage that strictly prevents runtime mutation", async () => {
+    const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
+    const pkg = await loadRulePackageFromDirectory(rulesDir);
+
+    // ルートオブジェクトの凍結確認
+    expect(Object.isFrozen(pkg)).toBe(true);
+    expect(Object.isFrozen(pkg.actions)).toBe(true);
+    expect(Object.isFrozen(pkg.components)).toBe(true);
+
+    // 子要素（ActionDefinition等）の凍結確認
+    if (pkg.actions.length > 0) {
+      expect(Object.isFrozen(pkg.actions[0])).toBe(true);
+    }
+    if (pkg.components.length > 0) {
+      expect(Object.isFrozen(pkg.components[0])).toBe(true);
+    }
+
+    // mutation を試みた場合にエラーになること（Strict mode）
+    expect(() => {
+      (pkg as any).id = "mutated-id";
+    }).toThrow();
+
+    expect(() => {
+      (pkg.actions as any).push({ id: "action.invalid" });
+    }).toThrow();
+  });
 });
+
