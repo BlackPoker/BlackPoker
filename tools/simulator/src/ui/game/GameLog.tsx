@@ -30,16 +30,17 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
   };
 
   return (
-    <div className="flex flex-col h-full p-2.5 bg-[#0e0e12] rounded-xl border border-zinc-800 shadow-sm font-sans">
+    <div className="flex flex-col h-full p-2.5 bg-[#141414] rounded border border-zinc-800 shadow-sm font-sans">
       <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
         <div className="flex items-center gap-1.5 font-mono">
           <span className="text-xs font-bold text-zinc-200">
-            LOG
+            LOG 対戦履歴
           </span>
           <span className="text-[10px] text-zinc-500 font-mono">
             ({logs.length})
           </span>
         </div>
+
         <button
           onClick={handleCopy}
           className="px-2 py-0.5 text-[10px] font-mono font-bold rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 transition"

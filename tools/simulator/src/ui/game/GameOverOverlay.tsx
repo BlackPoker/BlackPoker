@@ -56,17 +56,24 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
-      <div className="flex flex-col items-center max-w-md w-full p-6 bg-[#121216] rounded-2xl shadow-2xl border border-zinc-600 text-center animate-in zoom-in-90 duration-200">
+      <div className="flex flex-col items-center max-w-md w-full p-6 bg-[#141414] rounded border border-zinc-600 text-center animate-in zoom-in-90 duration-200">
         <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-mono font-black text-white mb-2 shadow-inner">
           WIN
         </div>
 
-        <h2 className="text-lg font-serif font-black tracking-widest text-white mb-0.5">
+        <h2
+          style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
+          className="text-lg tracking-widest text-white mb-0.5"
+        >
           MATCH FINISHED
         </h2>
-        <div className="text-xl font-serif font-black text-white mb-2 tracking-wide">
-          {winnerName || winnerKey} WIN!
+        <div
+          style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
+          className="text-xl text-white mb-2 tracking-wide"
+        >
+          {winnerName || winnerKey} WIN
         </div>
+
 
         <p className="text-xs text-zinc-300 bg-zinc-950/80 border border-zinc-800 p-2.5 rounded-lg mb-3 w-full font-mono">
           {reason}

@@ -40,38 +40,38 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   return (
     <div
-      className={`flex flex-col p-2 rounded-xl border transition-all ${
+      className={`flex flex-col p-2 rounded border transition-all ${
         isChancePlayer
-          ? "bg-[#141418] border-zinc-300 shadow-md ring-1 ring-zinc-400/40"
+          ? "bg-[#161616] border-zinc-200 shadow-md ring-1 ring-white/30"
           : isTurnPlayer
-          ? "bg-[#121215] border-zinc-600 shadow-sm"
-          : "bg-[#0e0e12] border-zinc-800/80"
+          ? "bg-[#141414] border-zinc-500 shadow-sm"
+          : "bg-[#101010] border-zinc-800"
       }`}
     >
       {/* プレイヤーヘッダー */}
       <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-serif font-black text-white tracking-wide">
+          <span className="text-xs font-bold text-white tracking-wide">
             {player.name || (playerKey === "p1" ? "Player A" : "Player B")}
           </span>
           <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
             {playerKey.toUpperCase()}
           </span>
           {isTurnPlayer && (
-            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-700 text-zinc-100 border border-zinc-600">
+            <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-700 text-zinc-100 border border-zinc-600">
               TURN
             </span>
           )}
           {isChancePlayer && (
             <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-white text-zinc-950 shadow-sm">
-              ★ CHANCE
+              CHANCE
             </span>
           )}
         </div>
 
         {/* ライフ・Fog・墓地表示 */}
         <div className="flex items-center gap-1.5 font-mono">
-          <div className="flex items-center gap-1 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700 text-white">
+          <div className="flex items-center gap-1 bg-[#1a1a1a] px-2 py-0.5 rounded border border-zinc-700 text-white">
             <span className="text-[10px] font-bold text-zinc-400">LIFE:</span>
             <span className="text-xs font-black text-white">{lifeCount}</span>
           </div>
@@ -79,19 +79,20 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
           <button
             onClick={() => setShowFogModal(true)}
             title="クリックして Fog 詳細を確認"
-            className="flex items-center gap-1 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700 text-[10px] font-bold text-zinc-200 cursor-pointer transition"
+            className="flex items-center gap-1 bg-[#1a1a1a] hover:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700 text-[10px] font-bold text-zinc-200 cursor-pointer transition"
           >
             <span>FOG: {playerFog.length}</span>
           </button>
 
           <button
             onClick={() => setShowGraveModal(!showGraveModal)}
-            className="text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
+            className="text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 bg-[#1a1a1a] text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
           >
             墓地 ({graveCards.length})
           </button>
         </div>
       </div>
+
 
       {/* Fog 詳細モーダル */}
       {showFogModal && (

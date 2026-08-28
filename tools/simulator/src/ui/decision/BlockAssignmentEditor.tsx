@@ -130,21 +130,23 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
           return (
             <div
               key={attacker.unitId}
-              className="rounded-xl border-2 border-slate-700/80 bg-slate-800/40 p-3 shadow-inner"
+              className="rounded border border-zinc-700 bg-[#161616] p-3 shadow-inner"
             >
               {/* アタッカー情報ヘッダー */}
-              <div className="flex items-center justify-between border-b border-slate-700/60 pb-2 mb-2.5">
+              <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
+
                 <div className="flex items-center gap-2">
                   {atkInfo.badge && (
-                    <span className="w-5 h-5 rounded-full bg-red-950 text-red-400 border border-red-800 text-xs font-black flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-white text-zinc-950 border border-zinc-300 text-xs font-black flex items-center justify-center">
                       {atkInfo.badge}
                     </span>
                   )}
-                  <div className="font-bold text-sm text-slate-100 flex items-center gap-1.5">
-                    <span className="text-red-400 font-black">⚔️ アタッカー:</span>
+                  <div className="font-bold text-sm text-zinc-100 flex items-center gap-1.5 font-mono">
+                    <span className="text-white font-black">[ATTACKER]</span>
                     <span>{atkInfo.label}</span>
                   </div>
                 </div>
+
 
                 {currentBlockers.length > 0 && (
                   <button

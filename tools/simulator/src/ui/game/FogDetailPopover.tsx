@@ -26,14 +26,15 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
 }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
-      <div className="w-full max-w-md bg-[#121216] border border-zinc-700 rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between px-3.5 py-2.5 bg-zinc-900 border-b border-zinc-800 text-white">
+      <div className="w-full max-w-md bg-[#141414] border border-zinc-700 rounded shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#181818] border-b border-zinc-800 text-white">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] font-mono font-bold bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded text-zinc-300">FOG</span>
-            <h3 className="font-serif font-black text-xs tracking-wide">
+            <h3 className="font-bold text-xs tracking-wide text-white">
               {playerName} の FOG 詳細 ({fogs.length}件)
             </h3>
           </div>
+
 
           <button
             onClick={onClose}

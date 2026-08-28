@@ -322,17 +322,18 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     );
 
     return (
-      <div className="rounded-xl border border-zinc-700 bg-[#121216] p-3.5 text-zinc-100 shadow-xl font-sans">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
+      <div className="rounded border border-zinc-700 bg-[#141414] p-3 text-zinc-100 shadow-xl font-sans">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
           <div>
             <span className="inline-block rounded bg-white text-zinc-950 px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
               EFFECT SELECTION
             </span>
-            <h2 className="text-sm font-serif font-black text-white mt-0.5 tracking-wide">
+            <h2 className="text-sm font-bold text-white mt-0.5 tracking-wide">
               {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "対象・割当て指定"}
             </h2>
           </div>
         </div>
+
 
         {isBlockAssignment ? (
           <BlockAssignmentEditor
@@ -411,9 +412,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
 
   return (
-    <div className="rounded-xl border border-zinc-700/80 bg-[#121216] p-3.5 text-zinc-100 shadow-xl font-sans">
+    <div className="rounded border border-zinc-700 bg-[#141414] p-3 text-zinc-100 shadow-xl font-sans">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
         <div>
           <div className="flex items-center gap-1.5 font-mono">
             <span className="inline-block rounded bg-zinc-800 border border-zinc-700 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-zinc-300">
@@ -423,7 +424,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               未リクエスト
             </span>
           </div>
-          <h2 className="text-sm font-serif font-black text-white mt-0.5 tracking-wide">
+          <h2 className="text-sm font-bold text-white mt-0.5 tracking-wide">
             {request.playerId === "p1" ? "Player A" : "Player B"} の行動選択
           </h2>
         </div>
@@ -432,12 +433,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           <button
             onClick={handlePass}
             title="Pキーを押してもPASSできます"
-            className="rounded-lg border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 hover:border-zinc-400 px-3 py-1 text-xs font-mono font-bold text-white transition active:scale-95 shadow"
+            className="rounded border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 hover:border-zinc-400 px-3 py-1 text-xs font-mono font-bold text-white transition active:scale-95 shadow"
           >
             <span>PASS [P]</span>
           </button>
         )}
       </div>
+
 
       {/* 選択済みサマリーバナー */}
       {selectedAction && (

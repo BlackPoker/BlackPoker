@@ -57,7 +57,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const buildRef = env.VITE_BUILD_REF ? String(env.VITE_BUILD_REF) : "local";
 
   return (
-    <div className="flex flex-col h-full p-2.5 bg-[#0e0e12] text-zinc-300 rounded-xl border border-zinc-800 shadow-md font-mono text-xs">
+    <div className="flex flex-col h-full p-2.5 bg-[#141414] text-zinc-300 rounded border border-zinc-800 shadow-md font-mono text-xs">
       <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
         <div className="flex items-center gap-2">
           <span className="font-bold text-white">Raw Debug</span>
@@ -65,6 +65,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             Build: {buildSha} ({buildRef}) | Ver: {state?.stateVersion}
           </span>
         </div>
+
 
         <button
           onClick={handleCopy}

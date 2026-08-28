@@ -49,32 +49,32 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     <div
       onClick={isClickable ? onClick : undefined}
       title={`Debug ID: ${unit.unitId}`}
-      className={`relative flex flex-col items-center p-1.5 rounded-lg border transition-all shadow-sm ${
+      className={`relative flex flex-col items-center p-1.5 rounded border transition-all select-none ${
         isClickable ? "cursor-pointer hover:border-white hover:scale-[1.02] active:scale-[0.98]" : ""
       } ${
         selectionMarker?.isSelected
-          ? "bg-zinc-800 border-white ring-2 ring-white shadow-lg"
+          ? "bg-[#1f1f1f] border-white ring-2 ring-white shadow-lg"
           : selectionMarker
-          ? "bg-zinc-900/90 border-zinc-400 ring-1 ring-zinc-400/60"
+          ? "bg-[#181818] border-zinc-400 ring-1 ring-zinc-400"
           : isBulwark
           ? isDrive
-            ? "bg-zinc-900/70 border-zinc-600 border-dashed opacity-75"
-            : "bg-zinc-900 border-2 border-zinc-300 shadow-md ring-1 ring-zinc-400/30"
+            ? "bg-[#121212] border-2 border-zinc-600 border-dashed opacity-75"
+            : "bg-[#161616] border-2 border-zinc-300 shadow"
           : isDrive
-          ? "bg-zinc-900/60 border-zinc-700 opacity-70"
-          : "bg-zinc-900 border border-zinc-700 shadow"
+          ? "bg-[#121212] border border-zinc-700 opacity-75"
+          : "bg-[#161616] border border-zinc-700 shadow-sm"
       }`}
       style={{
-        minWidth: "108px",
+        minWidth: "104px",
       }}
     >
       {/* 選択可能・選択中バッジ (①, ②) */}
       {selectionMarker && (
         <div className="absolute -top-2.5 -left-1.5 z-10">
           <span
-            className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-mono font-black shadow-md border ${
+            className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-mono font-black shadow border ${
               selectionMarker.isSelected
-                ? "bg-white border-zinc-900 text-zinc-950 ring-2 ring-white"
+                ? "bg-white border-zinc-950 text-zinc-950 ring-2 ring-white"
                 : "bg-zinc-800 border-zinc-400 text-zinc-100"
             }`}
           >
@@ -82,6 +82,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           </span>
         </div>
       )}
+
 
       {/* ユニット種別 & 状態バッジ */}
       <div className="flex items-center justify-between w-full mb-1 gap-1">

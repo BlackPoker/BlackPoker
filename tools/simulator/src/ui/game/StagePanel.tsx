@@ -90,7 +90,8 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                             : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                         }`}
                       >
-                        {isTop ? "TOP (次に解決)" : `STACK #${requests.length - revIdx}`}
+                        {isTop ? "TOP (次に解決)" : `STAGE #${requests.length - revIdx}`}
+
                       </span>
                       <span className="text-xs font-black text-white font-serif tracking-wide">
                         {actionName}

@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0b0b0b] text-[#e5e5e5] font-sans antialiased selection:bg-white selection:text-black;
+    color-scheme: dark;
+  }
+}
+
+/* BlackPoker Title Typography */
+.bp-brand-title {
+  font-family: "Times New Roman", Times, serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbar for Dark Monotone Theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333333;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555555;
+}
+
+/* Focus outline for accessibility */
+*:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+

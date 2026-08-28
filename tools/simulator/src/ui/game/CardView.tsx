@@ -29,38 +29,38 @@ export const CardView: React.FC<CardViewProps> = ({
 }) => {
   const sizeClasses = {
     sm: "w-8 h-11 text-xs",
-    md: "w-11 h-15 text-sm",
+    md: "w-10 h-14 text-sm",
     lg: "w-14 h-20 text-base",
   }[size];
 
   if (faceDown || !card) {
     return (
       <div
-        className={`inline-flex flex-col items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-500 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
+        className={`inline-flex flex-col items-center justify-center rounded border border-zinc-700 bg-[#141414] text-zinc-500 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
         title="裏向きカード"
       >
-        <span className="text-[10px] tracking-tighter opacity-60">BP</span>
+        <span className="text-[9px] tracking-tighter opacity-50 font-serif">BP</span>
       </div>
     );
   }
 
-
   const isJoker = card.suit === "J" || card.rank === "0" || card.code?.toUpperCase().includes("JOKER");
-  const suitInfo = suitSymbols[card.suit || ""] || { symbol: card.suit || "", color: "text-zinc-900" };
+  const suitInfo = suitSymbols[card.suit || ""] || { symbol: card.suit || "", color: "text-zinc-950" };
   const displayRank = isJoker ? "JK" : card.rank || "";
 
   return (
     <div
-      className={`inline-flex flex-col justify-between p-1 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-100 text-zinc-950 shadow-sm font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
-      title={`${card.suit}${card.rank} (id: ${card.id})`}
+      className={`inline-flex flex-col justify-between p-1 rounded border border-zinc-300 bg-white text-zinc-950 shadow-sm font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
+      title={`${card.suit || ""}${card.rank || ""} (id: ${card.id || ""})`}
     >
-      <div className={`text-left leading-none ${suitInfo.color} text-[10px] font-mono font-black`}>
+      <div className="text-left leading-none text-zinc-950 text-[10px] font-mono font-black">
         {displayRank}
       </div>
-      <div className={`text-center leading-none ${suitInfo.color} text-base my-auto`}>
+      <div className="text-center leading-none text-zinc-950 text-sm my-auto">
         {isJoker ? "★" : suitInfo.symbol}
       </div>
     </div>
   );
 };
+
 

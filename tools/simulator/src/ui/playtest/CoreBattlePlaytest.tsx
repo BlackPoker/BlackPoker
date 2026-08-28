@@ -304,25 +304,25 @@ export const CoreBattlePlaytest: React.FC = () => {
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0d] text-zinc-100 font-sans selection:bg-zinc-700 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-white selection:text-black">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-4 py-2 bg-[#121216] border-b border-zinc-800 shadow-md sticky top-0 z-30">
+      <header className="flex flex-wrap items-center justify-between px-3 py-1.5 bg-[#141414] border-b border-zinc-800 shadow-sm sticky top-0 z-30">
         <div className="flex items-center gap-3">
           {/* ロゴ + ブランドタイトル (Times New Roman Bold 明示) */}
           <div className="flex items-center gap-2">
             <img
               src={logoUrl}
               alt="BlackPoker Logo"
-              className="w-7 h-7 filter brightness-0 invert opacity-90 transition-transform hover:scale-105"
+              className="w-6 h-6 filter brightness-0 invert opacity-90 transition-transform hover:scale-105"
             />
             <div className="flex flex-col">
               <span
                 style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
-                className="text-base tracking-widest text-white uppercase leading-none"
+                className="text-sm tracking-widest text-white uppercase leading-none"
               >
                 BlackPoker
               </span>
-              <span className="text-[9px] font-mono text-zinc-400 font-semibold tracking-wider leading-none mt-0.5">
+              <span className="text-[8px] font-mono text-zinc-400 font-bold tracking-wider leading-none mt-0.5">
                 CORE BATTLE PLAYTEST
               </span>
             </div>
@@ -391,11 +391,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       </header>
 
-
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
       <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
         <div className="lg:col-span-7 flex flex-col gap-1.5">
+
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar

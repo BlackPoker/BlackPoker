@@ -43,14 +43,14 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           </div>
 
           {/* チャンスプレイヤーバッジ (最重要・反転白地黒文字で強調) */}
-          <div className="flex items-center gap-1 px-3 py-1 rounded bg-white text-zinc-950 shadow-md ring-1 ring-zinc-300 font-bold animate-in fade-in">
-            <span className="text-xs">★</span>
+          <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-white text-zinc-950 shadow-md font-bold">
             <span className="text-[10px] font-black uppercase tracking-wider">CHANCE:</span>
             <span className="text-xs font-black">
               {chancePlayerName} ({chancePlayer.toUpperCase()})
             </span>
           </div>
         </div>
+
 
         <div className="text-[11px] text-zinc-400 font-mono italic">
           Action Request or PASS
