@@ -27,70 +27,70 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
 
   if (minimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-3 p-4 bg-slate-900/95 border-2 border-amber-500 rounded-2xl shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200">
-        <div className="text-xl">🏆</div>
+      <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2.5 p-3 bg-zinc-900/95 border border-zinc-500 rounded-xl shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom duration-200 font-mono">
         <div>
-          <div className="text-xs font-bold text-amber-400">対戦終了</div>
-          <div className="text-sm font-extrabold text-white">{winnerName || winnerKey} WIN!</div>
+          <div className="text-[10px] text-zinc-400 font-bold uppercase">MATCH END</div>
+          <div className="text-xs font-black text-white font-serif">{winnerName || winnerKey} WIN!</div>
         </div>
         <button
           onClick={handleCopyLogs}
-          className="px-2.5 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition"
+          className="px-2 py-1 text-[10px] font-bold bg-zinc-800 hover:bg-zinc-700 text-zinc-200 rounded border border-zinc-700 transition"
         >
-          {copied ? "✓ コピー済" : "📋 ログコピー"}
+          {copied ? "✓ COPIED" : "COPY"}
         </button>
         <button
           onClick={() => setMinimized(false)}
-          className="px-3 py-1.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition"
+          className="px-2.5 py-1 text-[10px] font-bold bg-zinc-800 hover:bg-zinc-700 text-white rounded border border-zinc-600 transition"
         >
-          結果を表示
+          結果表示
         </button>
         <button
           onClick={onRestart}
-          className="px-3 py-1.5 text-xs font-bold bg-amber-600 hover:bg-amber-500 text-white rounded-lg transition"
+          className="px-2.5 py-1 text-[10px] font-black bg-white hover:bg-zinc-100 text-zinc-950 rounded transition"
         >
-          🔄 Replay
+          Replay
         </button>
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4">
-      <div className="flex flex-col items-center max-w-md w-full p-6 bg-white dark:bg-slate-800 rounded-3xl shadow-2xl border-4 border-amber-500 text-center animate-in zoom-in-90 duration-300">
-        <div className="w-16 h-16 rounded-full bg-amber-100 dark:bg-amber-950 flex items-center justify-center text-3xl text-amber-500 mb-3 shadow-inner">
-          🏆
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
+      <div className="flex flex-col items-center max-w-md w-full p-6 bg-[#121216] rounded-2xl shadow-2xl border border-zinc-600 text-center animate-in zoom-in-90 duration-200">
+        <div className="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-xs font-mono font-black text-white mb-2 shadow-inner">
+          WIN
         </div>
 
-        <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-1">
+        <h2 className="text-lg font-serif font-black tracking-widest text-white mb-0.5">
           MATCH FINISHED
         </h2>
-        <div className="text-xl font-extrabold text-amber-600 dark:text-amber-400 mb-2">
+        <div className="text-xl font-serif font-black text-white mb-2 tracking-wide">
           {winnerName || winnerKey} WIN!
         </div>
 
-        <p className="text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900/60 p-3 rounded-xl mb-4 w-full font-medium">
+        <p className="text-xs text-zinc-300 bg-zinc-950/80 border border-zinc-800 p-2.5 rounded-lg mb-3 w-full font-mono">
           {reason}
         </p>
 
-        <div className="flex gap-2 w-full mb-3">
+        <div className="flex gap-2 w-full mb-3 font-mono">
           <button
             onClick={handleCopyLogs}
-            className="flex-1 py-2 px-3 text-xs font-bold bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl transition flex items-center justify-center gap-1 border border-slate-300 dark:border-slate-600"
+            className="flex-1 py-1.5 px-3 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-200 rounded-lg transition flex items-center justify-center gap-1 border border-zinc-700"
           >
-            {copied ? "✓ コピー完了" : "📋 対戦ログをコピー"}
+            {copied ? "✓ コピー完了" : "対戦ログコピー"}
           </button>
           <button
             onClick={() => setMinimized(true)}
-            className="py-2 px-3 text-xs font-bold bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-xl transition border border-slate-300 dark:border-slate-600"
+            className="py-1.5 px-3 text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg transition border border-zinc-700"
           >
-            👀 盤面・ログを見る
+            盤面を見る
           </button>
         </div>
 
+
         <button
           onClick={onRestart}
-          className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-black rounded-xl shadow-xl transition-all text-base"
+          className="w-full py-2.5 px-6 bg-white hover:bg-zinc-100 active:scale-95 text-zinc-950 font-black rounded-lg shadow-xl transition-all text-sm ring-1 ring-zinc-300"
         >
           もう一度対戦する (Replay)
         </button>
@@ -98,3 +98,4 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
     </div>
   );
 };
+

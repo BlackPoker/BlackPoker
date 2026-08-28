@@ -57,84 +57,82 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const buildRef = env.VITE_BUILD_REF ? String(env.VITE_BUILD_REF) : "local";
 
   return (
-    <div className="flex flex-col h-full p-3 bg-slate-900 text-slate-200 rounded-xl border border-slate-700 shadow-md font-mono text-xs">
-      <div className="flex items-center justify-between border-b pb-2 mb-2 border-slate-700">
+    <div className="flex flex-col h-full p-2.5 bg-[#0e0e12] text-zinc-300 rounded-xl border border-zinc-800 shadow-md font-mono text-xs">
+      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-emerald-400">🔧 Raw Debug Panel</span>
-          <span className="text-[10px] text-slate-400">
-            Build: {buildSha} ({buildRef}) | StateVer: {state?.stateVersion}
+          <span className="font-bold text-white">Raw Debug</span>
+          <span className="text-[9px] text-zinc-500">
+            Build: {buildSha} ({buildRef}) | Ver: {state?.stateVersion}
           </span>
         </div>
 
         <button
           onClick={handleCopy}
-          className="px-2.5 py-1 text-[11px] font-bold rounded bg-slate-700 hover:bg-slate-600 text-slate-100 transition flex items-center gap-1"
+          className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 transition flex items-center gap-1"
         >
-          {copied ? "✓ コピー完了" : "📋 デバッグ情報をコピー"}
+          {copied ? "✓ COPIED" : "COPY"}
         </button>
+
       </div>
 
       {/* タブナビゲーション */}
-      <div className="flex gap-1 mb-2 border-b border-slate-800 pb-1">
+      <div className="flex gap-1 mb-1.5 border-b border-zinc-800/80 pb-1 text-[10px]">
         <button
           onClick={() => setActiveTab("state")}
-          className={`px-2 py-1 rounded text-[11px] ${
-            activeTab === "state" ? "bg-slate-700 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "state" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
           Full State
         </button>
         <button
           onClick={() => setActiveTab("stage")}
-          className={`px-2 py-1 rounded text-[11px] ${
-            activeTab === "stage" ? "bg-slate-700 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "stage" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
           Stage ({state?.stage?.requests?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab("buffer")}
-          className={`px-2 py-1 rounded text-[11px] ${
-            activeTab === "buffer" ? "bg-slate-700 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "buffer" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          RequestBuffer ({state?.requestBuffer?.requests?.length || 0})
+          Buffer ({state?.requestBuffer?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab("decision")}
-          className={`px-2 py-1 rounded text-[11px] ${
-            activeTab === "decision" ? "bg-slate-700 text-emerald-400 font-bold" : "text-slate-400 hover:text-slate-200"
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "decision" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
           }`}
         >
-          Current Decision
+          Decision ({currentDecisionRequest?.patterns?.length || 0})
         </button>
       </div>
 
-      {/* タブコンテンツ */}
-      <div className="flex-1 overflow-auto bg-slate-950 p-2 rounded border border-slate-800 font-mono text-[11px] leading-tight">
+      {/* コンテンツ表示エリア */}
+      <div className="flex-1 overflow-auto bg-zinc-950 p-2 rounded border border-zinc-900 text-[11px] leading-relaxed">
         {activeTab === "state" && (
-          <pre className="text-slate-300">{JSON.stringify(state, null, 2)}</pre>
+          <pre className="text-zinc-300">{JSON.stringify(state, null, 2)}</pre>
         )}
         {activeTab === "stage" && (
-          <div>
-            <div className="text-emerald-400 font-bold mb-1">// Active Requests:</div>
-            <pre className="text-slate-300 mb-3">{JSON.stringify(state?.stage?.requests || [], null, 2)}</pre>
-            <div className="text-amber-400 font-bold mb-1">// Resolved History:</div>
-            <pre className="text-slate-400">{JSON.stringify(state?.stage?.history || [], null, 2)}</pre>
-          </div>
+          <pre className="text-zinc-300">
+            {JSON.stringify(state?.stage || { requests: [] }, null, 2)}
+          </pre>
         )}
         {activeTab === "buffer" && (
-          <div>
-            <div className="text-emerald-400 font-bold mb-1">// Buffer Requests:</div>
-            <pre className="text-slate-300 mb-3">{JSON.stringify(state?.requestBuffer?.requests || [], null, 2)}</pre>
-            <div className="text-amber-400 font-bold mb-1">// Buffer History:</div>
-            <pre className="text-slate-400">{JSON.stringify(state?.requestBuffer?.history || [], null, 2)}</pre>
-          </div>
+          <pre className="text-zinc-300">
+            {JSON.stringify(state?.requestBuffer || [], null, 2)}
+          </pre>
         )}
         {activeTab === "decision" && (
-          <pre className="text-slate-300">{JSON.stringify(currentDecisionRequest || "No Decision Pending", null, 2)}</pre>
+          <pre className="text-zinc-300">
+            {JSON.stringify(currentDecisionRequest || "No Decision Pending", null, 2)}
+          </pre>
         )}
       </div>
     </div>
   );
 };
+

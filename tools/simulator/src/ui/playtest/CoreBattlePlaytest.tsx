@@ -17,8 +17,10 @@ import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel } from "../debug/DebugPanel";
 
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
+import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
+
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
@@ -81,28 +83,29 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs([]);
     setLatestEventMessage("");
     setSelectedUnitIds([]);
-    addLog(`🚀 Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info");
-    addLog(`🛡 レギュレーション: Core Battle (Preset 001)`, "info");
+    addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info");
+    addLog(`[REGULATION] Core Battle (Preset 001)`, "info");
 
     // 先攻決定プロセスのログ出力
     for (const round of setupResult.rounds) {
       const p1Code = `${round.p1Card.suit}${round.p1Card.rank}`;
       const p2Code = `${round.p2Card.suit}${round.p2Card.rank}`;
       if (round.result === "tie") {
-        addLog(`🎲 [先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action");
+        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action");
       } else {
         const winnerName = round.result === "p1" ? "Player A" : "Player B";
-        addLog(`🎲 [先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定！`, "action");
+        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定`, "action");
       }
     }
-    addLog(`🪦 公開された比較カードを両者の墓地へ移動しました`, "info");
+    addLog(`[SETUP] 公開された比較カードを両者の墓地へ移動しました`, "info");
     if (setupResult.drawnCard) {
       const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
       const drawnCode = `${setupResult.drawnCard.suit}${setupResult.drawnCard.rank}`;
-      addLog(`🃏 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action");
+      addLog(`[DRAW] 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action");
     }
     const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
-    addLog(`⚡ ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info");
+    addLog(`[TURN] ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info");
+
 
     const step = session.advance();
     setCurrentStep(step);
@@ -301,33 +304,55 @@ export const CoreBattlePlaytest: React.FC = () => {
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+    <div className="flex flex-col min-h-screen bg-[#0a0a0d] text-zinc-100 font-sans selection:bg-zinc-700 selection:text-white">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-4 py-2 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm sticky top-0 z-30">
-        <div className="flex items-center gap-2.5">
-          <span className="px-2 py-0.5 text-xs font-black rounded bg-indigo-600 text-white shadow-sm">
-            PLAYTEST
-          </span>
-          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-amber-500/20 border border-amber-500/40 text-amber-300">
-            PREVIEW / 開発中
-          </span>
-          <h1 className="text-base font-black tracking-tight text-slate-900 dark:text-slate-100">
-            Core Battle
-          </h1>
-          <span className="text-[10px] font-mono text-slate-400">
-            Build: {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
-            {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
-          </span>
+      <header className="flex flex-wrap items-center justify-between px-4 py-2 bg-[#121216] border-b border-zinc-800 shadow-md sticky top-0 z-30">
+        <div className="flex items-center gap-3">
+          {/* ロゴ + ブランドタイトル (Times New Roman Bold 明示) */}
+          <div className="flex items-center gap-2">
+            <img
+              src={logoUrl}
+              alt="BlackPoker Logo"
+              className="w-7 h-7 filter brightness-0 invert opacity-90 transition-transform hover:scale-105"
+            />
+            <div className="flex flex-col">
+              <span
+                style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
+                className="text-base tracking-widest text-white uppercase leading-none"
+              >
+                BlackPoker
+              </span>
+              <span className="text-[9px] font-mono text-zinc-400 font-semibold tracking-wider leading-none mt-0.5">
+                CORE BATTLE PLAYTEST
+              </span>
+            </div>
+          </div>
 
-          {/* Regulation Selector 枠 */}
-          <div className="flex items-center gap-1 ml-2">
-            <span className="text-[10px] font-bold text-slate-500">Reg:</span>
+          <div className="h-4 w-px bg-zinc-700 mx-1 hidden sm:block" />
+
+          {/* バッジ群 */}
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-white text-zinc-950 uppercase tracking-wider">
+              PLAYTEST
+            </span>
+            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-zinc-900 border border-zinc-700 text-zinc-300">
+              PREVIEW
+            </span>
+            <span className="text-[9px] text-zinc-500 font-mono hidden md:inline">
+              {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
+              {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
+            </span>
+          </div>
+
+          {/* Regulation Selector */}
+          <div className="flex items-center gap-1 ml-1 font-mono">
+            <span className="text-[9px] font-bold text-zinc-500">Reg:</span>
             <select
               value={selectedRegulation}
               onChange={(e) => setSelectedRegulation(e.target.value)}
-              className="text-xs font-bold py-0.5 px-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-700 bg-zinc-900 text-zinc-200 focus:ring-1 focus:ring-white focus:outline-none cursor-pointer"
             >
-              <option value="core-battle">Core Battle (Preset 001) [Active]</option>
+              <option value="core-battle">Core Battle (Preset 001)</option>
               <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
               <option value="entry-16" disabled>Entry 16 (Coming Soon)</option>
             </select>
@@ -335,41 +360,42 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
 
         {/* コントロールボタン */}
-        <div className="flex items-center gap-2 mt-1 sm:mt-0">
-          <label className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer select-none">
+        <div className="flex items-center gap-2 mt-1 sm:mt-0 font-mono">
+          <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-400 hover:text-zinc-200 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={enablePassAndPlay}
               onChange={(e) => setEnablePassAndPlay(e.target.checked)}
-              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+              className="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-zinc-400"
             />
             Pass-and-Play
           </label>
 
           <button
             onClick={() => setShowDebug(!showDebug)}
-            className={`px-2 py-0.5 text-xs font-bold rounded-lg border transition ${
+            className={`px-2 py-0.5 text-[11px] font-bold rounded border transition ${
               showDebug
-                ? "bg-slate-800 text-emerald-400 border-emerald-500"
-                : "bg-white text-slate-700 border-slate-300 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700"
+                ? "bg-zinc-800 text-white border-zinc-400"
+                : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:text-white hover:border-zinc-500"
             }`}
           >
-            {showDebug ? "デバッグ非表示" : "🔧 Raw Debug"}
+            {showDebug ? "Debug ON" : "Debug"}
           </button>
 
           <button
             onClick={startNewGame}
-            className="px-2.5 py-0.5 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white shadow transition"
+            className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-white border border-zinc-600 shadow transition"
           >
-            🔄 Reset
+            Reset
           </button>
         </div>
       </header>
 
+
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
-      <main className="flex-1 p-2.5 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2.5">
+      <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-        <div className="lg:col-span-7 flex flex-col gap-2">
+        <div className="lg:col-span-7 flex flex-col gap-1.5">
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar
@@ -418,7 +444,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
 
         {/* 右ペイン: 操作パネル / 対戦ログ */}
-        <div className="lg:col-span-5 flex flex-col gap-2 sticky top-14 max-h-[calc(100vh-4rem)]">
+        <div className="lg:col-span-5 flex flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
           {/* 判断要求パネル (Decision Panel) */}
           {currentStep?.type === "WAITING_FOR_DECISION" ? (
             <div className="shrink-0">
@@ -431,19 +457,19 @@ export const CoreBattlePlaytest: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500">
+            <div className="p-3 bg-[#121216] rounded-xl border border-zinc-800 text-center text-xs text-zinc-500 font-mono">
               現在待機中の判断要求はありません
             </div>
           )}
 
           {/* 対戦ログ (Game Log) */}
-          <div className="flex-1 min-h-[220px] overflow-hidden flex flex-col">
+          <div className="flex-1 min-h-[200px] overflow-hidden flex flex-col">
             <GameLog logs={logs} />
           </div>
 
           {/* Raw Debug パネル */}
           {showDebug && (
-            <div className="h-64 shrink-0">
+            <div className="h-56 shrink-0">
               <DebugPanel
                 state={gameState}
                 currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
@@ -477,3 +503,4 @@ export const CoreBattlePlaytest: React.FC = () => {
     </div>
   );
 };
+

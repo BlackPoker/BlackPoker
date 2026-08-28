@@ -1,11 +1,11 @@
 import React from "react";
 
 const suitSymbols: Record<string, { symbol: string; color: string }> = {
-  S: { symbol: "♠", color: "text-slate-900 dark:text-slate-100" },
-  H: { symbol: "♡", color: "text-red-600 dark:text-red-400" },
-  D: { symbol: "♢", color: "text-red-600 dark:text-red-400" },
-  C: { symbol: "♣", color: "text-slate-900 dark:text-slate-100" },
-  J: { symbol: "★", color: "text-purple-600 dark:text-purple-400" },
+  S: { symbol: "♠", color: "text-zinc-950 dark:text-zinc-100" },
+  H: { symbol: "♡", color: "text-zinc-800 dark:text-zinc-200" },
+  D: { symbol: "♢", color: "text-zinc-800 dark:text-zinc-200" },
+  C: { symbol: "♣", color: "text-zinc-950 dark:text-zinc-100" },
+  J: { symbol: "★", color: "text-zinc-900 dark:text-zinc-100" },
 };
 
 export interface CardViewProps {
@@ -29,31 +29,32 @@ export const CardView: React.FC<CardViewProps> = ({
 }) => {
   const sizeClasses = {
     sm: "w-8 h-11 text-xs",
-    md: "w-12 h-16 text-sm",
-    lg: "w-16 h-22 text-base",
+    md: "w-11 h-15 text-sm",
+    lg: "w-14 h-20 text-base",
   }[size];
 
   if (faceDown || !card) {
     return (
       <div
-        className={`inline-flex flex-col items-center justify-center rounded-md border-2 border-indigo-300 bg-indigo-800 text-indigo-200 shadow font-mono select-none ${sizeClasses} ${className}`}
+        className={`inline-flex flex-col items-center justify-center rounded-md border border-zinc-700 bg-zinc-900 text-zinc-500 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
         title="裏向きカード"
       >
-        <span className="text-base">🂠</span>
+        <span className="text-[10px] tracking-tighter opacity-60">BP</span>
       </div>
     );
   }
 
+
   const isJoker = card.suit === "J" || card.rank === "0" || card.code?.toUpperCase().includes("JOKER");
-  const suitInfo = suitSymbols[card.suit || ""] || { symbol: card.suit || "", color: "text-slate-800" };
-  const displayRank = isJoker ? "Joker" : card.rank || "";
+  const suitInfo = suitSymbols[card.suit || ""] || { symbol: card.suit || "", color: "text-zinc-900" };
+  const displayRank = isJoker ? "JK" : card.rank || "";
 
   return (
     <div
-      className={`inline-flex flex-col justify-between p-1 rounded-md border-2 border-slate-300 bg-white dark:bg-slate-800 shadow font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
+      className={`inline-flex flex-col justify-between p-1 rounded-md border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-100 text-zinc-950 shadow-sm font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
       title={`${card.suit}${card.rank} (id: ${card.id})`}
     >
-      <div className={`text-left leading-none ${suitInfo.color} text-[10px]`}>
+      <div className={`text-left leading-none ${suitInfo.color} text-[10px] font-mono font-black`}>
         {displayRank}
       </div>
       <div className={`text-center leading-none ${suitInfo.color} text-base my-auto`}>
@@ -62,3 +63,4 @@ export const CardView: React.FC<CardViewProps> = ({
     </div>
   );
 };
+

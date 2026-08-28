@@ -30,7 +30,6 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   onUnitClick,
 }) => {
   const [showGraveModal, setShowGraveModal] = useState(false);
-  const [showLifeCards, setShowLifeCards] = useState(false);
   const [showFogModal, setShowFogModal] = useState(false);
 
   const lifeCount = Array.isArray(player.life) ? player.life.length : Number(player.life || 0);
@@ -41,56 +40,55 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   return (
     <div
-      className={`flex flex-col p-2.5 rounded-xl border-2 transition-all ${
+      className={`flex flex-col p-2 rounded-xl border transition-all ${
         isChancePlayer
-          ? "bg-amber-50/60 border-amber-500 shadow-md dark:bg-amber-950/20 dark:border-amber-500"
-          : "bg-slate-50 border-slate-200 dark:bg-slate-900/60 dark:border-slate-800"
+          ? "bg-[#141418] border-zinc-300 shadow-md ring-1 ring-zinc-400/40"
+          : isTurnPlayer
+          ? "bg-[#121215] border-zinc-600 shadow-sm"
+          : "bg-[#0e0e12] border-zinc-800/80"
       }`}
     >
       {/* プレイヤーヘッダー */}
-      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-slate-200 dark:border-slate-700">
+      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
         <div className="flex items-center gap-1.5">
-          <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+          <span className="text-xs font-serif font-black text-white tracking-wide">
             {player.name || (playerKey === "p1" ? "Player A" : "Player B")}
           </span>
-          <span className="text-[10px] font-mono px-1 py-0.2 rounded bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-            {playerKey}
+          <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+            {playerKey.toUpperCase()}
           </span>
           {isTurnPlayer && (
-            <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-indigo-600 text-white">
-              手番
+            <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-700 text-zinc-100 border border-zinc-600">
+              TURN
             </span>
           )}
           {isChancePlayer && (
-            <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-amber-500 text-slate-900 animate-pulse">
-              ★ チャンス
+            <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-white text-zinc-950 shadow-sm">
+              ★ CHANCE
             </span>
           )}
         </div>
 
         {/* ライフ・Fog・墓地表示 */}
-        <div className="flex items-center gap-1.5">
-          <div className="flex items-center gap-1 bg-red-100 dark:bg-red-950/60 px-2 py-0.5 rounded-lg border border-red-300 dark:border-red-800">
-            <span className="text-xs">❤️</span>
-            <span className="text-[10px] font-bold text-red-800 dark:text-red-300">LIFE:</span>
-            <span className="text-xs font-black text-red-600 dark:text-red-400">{lifeCount}</span>
+        <div className="flex items-center gap-1.5 font-mono">
+          <div className="flex items-center gap-1 bg-zinc-900 px-2 py-0.5 rounded border border-zinc-700 text-white">
+            <span className="text-[10px] font-bold text-zinc-400">LIFE:</span>
+            <span className="text-xs font-black text-white">{lifeCount}</span>
           </div>
 
           <button
             onClick={() => setShowFogModal(true)}
             title="クリックして Fog 詳細を確認"
-            className="flex items-center gap-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/80 px-2 py-0.5 rounded-lg border border-indigo-200 dark:border-indigo-800 text-[10px] font-bold text-indigo-900 dark:text-indigo-300 cursor-pointer transition"
+            className="flex items-center gap-1 bg-zinc-900 hover:bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700 text-[10px] font-bold text-zinc-200 cursor-pointer transition"
           >
-            <span>🌫</span>
             <span>FOG: {playerFog.length}</span>
-            <span className="text-[9px] opacity-60">🔍</span>
           </button>
 
           <button
             onClick={() => setShowGraveModal(!showGraveModal)}
-            className="text-[10px] font-bold px-2 py-0.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition"
+            className="text-[10px] font-bold px-2 py-0.5 rounded border border-zinc-700 bg-zinc-900 text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
           >
-            🪦 墓地 ({graveCards.length})
+            墓地 ({graveCards.length})
           </button>
         </div>
       </div>
@@ -106,13 +104,42 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
         />
       )}
 
+      {/* 墓地一覧モーダル */}
+      {showGraveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-zinc-900 border border-zinc-600 rounded-xl p-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-3">
+              <h3 className="text-sm font-bold text-white font-serif">
+                {player.name || playerKey} の墓地 ({graveCards.length}枚)
+              </h3>
+
+              <button
+                onClick={() => setShowGraveModal(false)}
+                className="w-6 h-6 flex items-center justify-center rounded bg-zinc-800 text-zinc-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto p-2 bg-zinc-950 rounded border border-zinc-800">
+              {graveCards.length > 0 ? (
+                graveCards.map((c: any, i: number) => (
+                  <CardView key={c.id || i} card={c} size="sm" />
+                ))
+              ) : (
+                <div className="text-xs text-zinc-500 italic py-4 w-full text-center">墓地は空です</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* フィールド (Units) */}
-      <div className="mb-2">
-        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
+      <div className="mb-1.5">
+        <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-0.5 flex items-center justify-between">
           <span>FIELD (ユニット: {fieldUnits.length}体)</span>
         </div>
 
-        <div className="flex flex-wrap gap-1.5 min-h-[90px] p-1.5 rounded-lg bg-slate-100/70 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800">
+        <div className="flex flex-wrap gap-1.5 min-h-[75px] p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 items-center">
           {fieldUnits.length > 0 ? (
             fieldUnits.map((unit: any) => {
               // 全プレイヤーの Fog からこのユニットを対象とするものを集約
@@ -133,7 +160,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
               );
             })
           ) : (
-            <div className="flex items-center justify-center w-full text-xs text-slate-400 italic">
+            <div className="flex items-center justify-center w-full text-xs text-zinc-600 italic py-1">
               ユニットなし
             </div>
           )}
@@ -142,11 +169,11 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
       {/* 手札 (Hand) */}
       <div>
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1.5 flex items-center justify-between">
+        <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-0.5 flex items-center justify-between">
           <span>HAND (手札: {handCards.length}枚)</span>
         </div>
 
-        <div className="flex flex-wrap gap-2 min-h-[80px] p-2 rounded-lg bg-slate-100/70 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-800 items-center">
+        <div className="flex flex-wrap gap-1.5 min-h-[65px] p-1.5 rounded-lg bg-zinc-950/60 border border-zinc-800/80 items-center">
           {handCards.length > 0 ? (
             handCards.map((card: any, idx: number) => (
               <CardView
@@ -157,41 +184,11 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
               />
             ))
           ) : (
-            <div className="text-xs text-slate-400 italic py-2 pl-1">手札なし</div>
+            <div className="text-xs text-zinc-600 italic py-1 pl-1">手札なし</div>
           )}
         </div>
       </div>
-
-      {/* 墓地モーダル */}
-      {showGraveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
-          <div className="w-full max-w-md rounded-2xl border-2 border-slate-700 bg-slate-900 p-4 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
-              <h3 className="font-extrabold text-sm text-slate-100">
-                🪦 {player.name} の墓地 ({graveCards.length}枚)
-              </h3>
-              <button
-                onClick={() => setShowGraveModal(false)}
-                className="text-xs font-bold text-slate-400 hover:text-white px-2 py-1 rounded bg-slate-800"
-              >
-                ✕ 閉じる
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2 max-h-[300px] overflow-y-auto p-2">
-              {graveCards.length > 0 ? (
-                graveCards.map((card: any, idx: number) => (
-                  <CardView key={card.id || idx} card={card} faceDown={false} size="sm" />
-                ))
-              ) : (
-                <div className="text-xs text-slate-500 italic py-4 text-center w-full">
-                  墓地は空です
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
+

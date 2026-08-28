@@ -19,51 +19,53 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
   const chancePlayerName = players[chancePlayer]?.name || (chancePlayer === "p1" ? "Player A" : "Player B");
 
   return (
-    <div className="flex flex-col gap-2 p-3 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+    <div className="flex flex-col gap-1.5 p-2 bg-[#0e0e12] rounded-xl border border-zinc-800 shadow-sm">
       {/* 主要ステータスバッジ群 */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-1.5 font-mono">
           {/* ターン数バッジ */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-sm">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">TURN</span>
-            <span className="text-sm font-black text-slate-900 dark:text-slate-100 font-mono">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-700 shadow-sm">
+            <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">TURN</span>
+            <span className="text-xs font-black text-white font-mono">
               {turnCount || 1}
             </span>
           </div>
 
           {/* ターンプレイヤーバッジ */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 shadow-sm">
-            <span className="text-xs text-indigo-700 dark:text-indigo-300 font-bold">手番:</span>
-            <span className="text-sm font-black text-indigo-900 dark:text-indigo-200">
+          <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 border border-zinc-600 shadow-sm">
+            <span className="text-[10px] text-zinc-400 font-bold">手番:</span>
+            <span className="text-xs font-bold text-zinc-200">
               {turnPlayerName}
             </span>
-            <span className="text-[10px] font-mono text-indigo-500 dark:text-indigo-400 font-bold">
-              ({turnPlayer})
+            <span className="text-[9px] font-mono text-zinc-500 font-bold">
+              ({turnPlayer.toUpperCase()})
             </span>
           </div>
 
-          {/* チャンスプレイヤーバッジ (最重要・強調) */}
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 shadow-md ring-2 ring-amber-400/60 animate-in fade-in">
-            <span className="text-sm">★</span>
-            <span className="text-xs font-black uppercase tracking-wider">チャンス:</span>
-            <span className="text-sm font-black">
-              {chancePlayerName} ({chancePlayer})
+          {/* チャンスプレイヤーバッジ (最重要・反転白地黒文字で強調) */}
+          <div className="flex items-center gap-1 px-3 py-1 rounded bg-white text-zinc-950 shadow-md ring-1 ring-zinc-300 font-bold animate-in fade-in">
+            <span className="text-xs">★</span>
+            <span className="text-[10px] font-black uppercase tracking-wider">CHANCE:</span>
+            <span className="text-xs font-black">
+              {chancePlayerName} ({chancePlayer.toUpperCase()})
             </span>
           </div>
         </div>
 
-        <div className="text-xs font-bold text-slate-500 dark:text-slate-400 italic">
-          アクション選択または PASS を行ってください
+        <div className="text-[11px] text-zinc-400 font-mono italic">
+          Action Request or PASS
         </div>
       </div>
 
       {/* 最新イベントメッセージ */}
       {latestEventMessage && (
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs text-amber-900 dark:text-amber-300 font-medium">
-          <span className="text-sm">📢</span>
-          <span className="font-sans break-all">{latestEventMessage}</span>
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 font-mono">
+          <span className="text-[10px] font-bold text-zinc-400 border border-zinc-700 px-1 py-0.2 rounded bg-zinc-950">EVENT</span>
+          <span className="font-sans break-all text-zinc-200">{latestEventMessage}</span>
         </div>
       )}
+
     </div>
   );
 };
+

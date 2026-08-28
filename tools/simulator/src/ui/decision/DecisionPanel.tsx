@@ -322,13 +322,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     );
 
     return (
-      <div className="rounded-xl border-2 border-amber-500/50 bg-slate-900/95 p-4 text-slate-100 shadow-xl">
-        <div className="flex items-center justify-between border-b border-slate-700 pb-2.5 mb-3">
+      <div className="rounded-xl border border-zinc-700 bg-[#121216] p-3.5 text-zinc-100 shadow-xl font-sans">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
           <div>
-            <span className="inline-block rounded bg-amber-500 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-slate-950">
+            <span className="inline-block rounded bg-white text-zinc-950 px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
               EFFECT SELECTION
             </span>
-            <h2 className="text-base font-bold text-slate-100 mt-0.5">
+            <h2 className="text-sm font-serif font-black text-white mt-0.5 tracking-wide">
               {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "対象・割当て指定"}
             </h2>
           </div>
@@ -347,35 +347,35 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             unitNumberMap={unitNumberMap}
           />
         ) : (
-          <div className="space-y-3">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          <div className="space-y-2.5">
+            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400">
               選択肢（盤面の ①, ② をタップまたは下記から選択）:
             </label>
 
-            <div className="grid grid-cols-1 gap-2 max-h-64 overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-1">
               {humanReadableEffectPatterns.map((hp, idx) => {
                 const isSelected = selectedEffectPatternRef === idx;
                 return (
                   <button
                     key={idx}
                     onClick={() => setSelectedEffectPatternRef(idx)}
-                    className={`rounded-xl border-2 p-3 text-left transition flex items-center justify-between ${
+                    className={`rounded-lg border p-2.5 text-left transition flex items-center justify-between ${
                       isSelected
-                        ? "border-amber-400 bg-amber-950/80 text-amber-100 shadow-md ring-2 ring-amber-400/50"
-                        : "border-slate-700 bg-slate-800/60 text-slate-200 hover:border-slate-500 hover:bg-slate-800"
+                        ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                        : "border-zinc-800 bg-zinc-900/80 text-zinc-200 hover:border-zinc-600 hover:bg-zinc-800"
                     }`}
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 font-mono">
                       <span
                         className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
                           isSelected
-                            ? "bg-amber-400 border-amber-300 text-slate-950 font-black"
-                            : "border-slate-500 text-transparent"
+                            ? "bg-white border-zinc-900 text-zinc-950 font-black"
+                            : "border-zinc-600 text-transparent"
                         }`}
                       >
                         ✓
                       </span>
-                      <span className="font-bold text-sm leading-snug">{hp.label}</span>
+                      <span className="font-bold text-xs leading-snug">{hp.label}</span>
                     </div>
                   </button>
                 );
@@ -383,16 +383,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             </div>
 
             {selectedEffectPatternRef !== null && (
-              <div className="pt-3 border-t border-slate-700 mt-3 flex items-center justify-between gap-3">
-                <div className="text-xs text-slate-400 truncate">
+              <div className="pt-2.5 border-t border-zinc-800 mt-2 flex items-center justify-between gap-2">
+                <div className="text-xs text-zinc-400 font-mono truncate">
                   選択中:{" "}
-                  <span className="font-bold text-amber-300">
+                  <span className="font-bold text-white">
                     {humanReadableEffectPatterns[selectedEffectPatternRef]?.label}
                   </span>
                 </div>
                 <button
                   onClick={handleEffectSubmit}
-                  className="py-2.5 px-6 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 font-black shadow-lg transition text-sm shrink-0"
+                  className="py-2 px-4 rounded-lg bg-white hover:bg-zinc-100 active:scale-95 text-zinc-950 font-black shadow transition text-xs shrink-0 ring-1 ring-zinc-300"
                 >
                   決定して解決する
                 </button>
@@ -404,25 +404,26 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     );
   }
 
+
   const selectedAction = selectedActionRef !== null ? catalog.actions[selectedActionRef] : null;
   const selectedKey = selectedKeyRef !== null ? catalog.cardSelections[selectedKeyRef] : null;
   const selectedCost = selectedCostRef !== null ? catalog.costPayments[selectedCostRef] : null;
   const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
 
   return (
-    <div className="rounded-xl border-2 border-indigo-500/40 bg-slate-900/95 p-4 text-slate-100 shadow-xl">
+    <div className="rounded-xl border border-zinc-700/80 bg-[#121216] p-3.5 text-zinc-100 shadow-xl font-sans">
       {/* ヘッダー */}
-      <div className="flex items-center justify-between border-b border-slate-700/60 pb-2.5 mb-3">
+      <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2.5">
         <div>
-          <div className="flex items-center gap-1.5">
-            <span className="inline-block rounded bg-indigo-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-              DECISION PANEL
+          <div className="flex items-center gap-1.5 font-mono">
+            <span className="inline-block rounded bg-zinc-800 border border-zinc-700 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-zinc-300">
+              DECISION
             </span>
-            <span className="inline-block rounded bg-amber-500/20 border border-amber-500/40 text-amber-300 px-1.5 py-0.5 text-[10px] font-bold">
-              未リクエスト (編集中)
+            <span className="inline-block rounded bg-zinc-900 border border-zinc-700 text-zinc-400 px-1.5 py-0.2 text-[9px] font-bold">
+              未リクエスト
             </span>
           </div>
-          <h2 className="text-base font-bold text-slate-100 mt-0.5">
+          <h2 className="text-sm font-serif font-black text-white mt-0.5 tracking-wide">
             {request.playerId === "p1" ? "Player A" : "Player B"} の行動選択
           </h2>
         </div>
@@ -431,9 +432,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           <button
             onClick={handlePass}
             title="Pキーを押してもPASSできます"
-            className="rounded-xl border border-amber-500/60 bg-amber-950/60 px-3.5 py-1.5 text-xs font-bold text-amber-200 hover:bg-amber-900/80 hover:border-amber-400 transition active:scale-95 shadow-md flex items-center gap-1.5"
+            className="rounded-lg border border-zinc-600 bg-zinc-800 hover:bg-zinc-700 hover:border-zinc-400 px-3 py-1 text-xs font-mono font-bold text-white transition active:scale-95 shadow"
           >
-            <span>⏭️</span>
             <span>PASS [P]</span>
           </button>
         )}
@@ -441,21 +441,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
       {/* 選択済みサマリーバナー */}
       {selectedAction && (
-        <div className="flex flex-wrap items-center gap-2 p-2 bg-slate-800/80 rounded-lg border border-slate-700 text-xs mb-3 font-mono">
-          <span className="font-bold text-indigo-300">Action: {selectedAction.actionName || selectedAction.actionId}</span>
-          {selectedKey && <span className="text-slate-400">| Key: {selectedKey.displayCodes.join("+")}</span>}
-          {selectedCost && <span className="text-emerald-400">| Cost: {selectedCost.summary}</span>}
-          {selectedTarget && <span className="text-amber-300">| Target: {selectedTarget.displayName}</span>}
+        <div className="flex flex-wrap items-center gap-2 p-1.5 bg-zinc-950 rounded-lg border border-zinc-800 text-[11px] mb-2.5 font-mono text-zinc-300">
+          <span className="font-bold text-white">Action: {selectedAction.actionName || selectedAction.actionId}</span>
+          {selectedKey && <span className="text-zinc-400">| Key: {selectedKey.displayCodes.join("+")}</span>}
+          {selectedCost && <span className="text-zinc-300">| Cost: {selectedCost.summary}</span>}
+          {selectedTarget && <span className="text-zinc-300">| Target: {selectedTarget.displayName}</span>}
         </div>
       )}
 
-      <div className="space-y-3.5">
+      <div className="space-y-2.5">
         {/* ステップ1: アクション選択 */}
         <div>
-          <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+          <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-1">
             1. アクション
           </label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
             {availableActionRefs.map((actRef) => {
               const act = catalog.actions[actRef];
               const isSelected = selectedActionRef === actRef;
@@ -463,14 +463,14 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                 <button
                   key={actRef}
                   onClick={() => handleSelectAction(actRef)}
-                  className={`rounded-xl border-2 p-2.5 text-left transition ${
+                  className={`rounded-lg border p-2 text-left transition ${
                     isSelected
-                      ? "border-indigo-500 bg-indigo-950/80 text-indigo-100 shadow-md ring-2 ring-indigo-400/40"
-                      : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500 hover:bg-slate-800"
+                      ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                      : "border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:border-zinc-600 hover:bg-zinc-800/90"
                   }`}
                 >
-                  <div className="font-black text-sm">{act.actionName || act.actionId}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 font-mono">
+                  <div className="font-black text-xs font-serif">{act.actionName || act.actionId}</div>
+                  <div className="text-[9px] text-zinc-400 mt-0.5 font-mono">
                     {act.timing ? `[${act.timing}]` : ""} {act.cost ? `Cost: ${act.cost}` : ""}
                   </div>
                 </button>
@@ -481,11 +481,11 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
         {/* ステップ2: キーカード選択 */}
         {selectedActionRef !== null && availableKeyRefs.length > 0 && availableKeyRefs.some((r) => r !== undefined) && (
-          <div className="pt-2 border-t border-slate-800">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-1">
               2. キーカードの選択
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {availableKeyRefs.map((keyRef, idx) => {
                 if (keyRef === undefined) return null;
                 const cardSel = catalog.cardSelections[keyRef];
@@ -494,10 +494,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   <button
                     key={keyRef ?? idx}
                     onClick={() => setSelectedKeyRef(keyRef)}
-                    className={`rounded-lg border-2 px-3 py-1.5 text-xs font-bold transition font-mono ${
+                    className={`rounded-lg border px-2.5 py-1 text-xs font-bold transition font-mono ${
                       isSelected
-                        ? "border-indigo-400 bg-indigo-900 text-white shadow ring-2 ring-indigo-400/50"
-                        : "border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-500"
+                        ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                        : "border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500"
                     }`}
                   >
                     {cardSel.displayCodes.join("+")}
@@ -514,21 +514,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             selectedKeyRef !== null ||
             availableKeyRefs.every((r) => r === undefined)) &&
           availableCostRefs.length > 1 && (
-            <div className="pt-2 border-t border-slate-800">
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            <div className="pt-2 border-t border-zinc-800">
+              <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-1">
                 3. コストの支払い方法
               </label>
               {/* キーカードとして使用中のカードがある場合の説明 */}
               {selectedKey && selectedKey.displayCodes && selectedKey.displayCodes.length > 0 && (
-                <div className="mb-2 p-2 rounded-lg bg-slate-800/80 border border-slate-700 text-[11px] text-slate-300 flex items-center gap-1.5">
-                  <span className="font-bold text-amber-400">🔑 キーカード使用中:</span>
-                  <span className="font-mono font-bold text-amber-300 bg-amber-950/60 px-1.5 py-0.5 rounded border border-amber-800/60">
+                <div className="mb-1.5 p-1.5 rounded bg-zinc-950 border border-zinc-800 text-[10px] text-zinc-300 flex items-center gap-1 font-mono">
+                  <span className="font-bold text-zinc-300">[KEY] キーカード使用中:</span>
+                  <span className="font-bold text-white bg-zinc-800 px-1 py-0.2 rounded border border-zinc-700">
                     {selectedKey.displayCodes.join(", ")}
                   </span>
-                  <span className="text-slate-400 text-[10px] ml-1">(※コスト破棄には使用不可)</span>
+                  <span className="text-zinc-500 text-[9px] ml-0.5">(コスト破棄不可)</span>
                 </div>
               )}
-              <div className="grid grid-cols-1 gap-1.5">
+              <div className="grid grid-cols-1 gap-1">
                 {availableCostRefs.map((costRef) => {
                   const cost = catalog.costPayments[costRef];
                   const isSelected = selectedCostRef === costRef;
@@ -536,10 +536,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     <button
                       key={costRef}
                       onClick={() => setSelectedCostRef(costRef)}
-                      className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
+                      className={`rounded-lg border px-2.5 py-1.5 text-left text-xs transition font-mono ${
                         isSelected
-                          ? "border-emerald-500 bg-emerald-950/70 text-emerald-100 shadow ring-1 ring-emerald-500"
-                          : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
+                          ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                          : "border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:border-zinc-600"
                       }`}
                     >
                       <div className="font-bold">{cost.summary || "コストなし"}</div>
@@ -549,12 +549,12 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
                 {/* 使用不可（キーカード使用中）のカードを disabled 候補として明示 */}
                 {selectedKey && selectedKey.displayCodes && selectedKey.displayCodes.length > 0 && selectedAction?.cost?.includes("$D") && (
-                  <div className="rounded-lg border-2 border-dashed border-slate-800 bg-slate-900/40 p-2 text-xs text-slate-500 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-mono">
+                  <div className="rounded-lg border border-dashed border-zinc-800 bg-zinc-950/40 p-1.5 text-xs text-zinc-600 flex items-center justify-between font-mono">
+                    <div className="flex items-center gap-1 text-[10px]">
                       <span>{selectedKey.displayCodes.join(", ")}</span>
-                      <span className="text-[10px] text-amber-500/80 font-sans font-bold">（🔑 キーカード使用中のためコスト破棄不可）</span>
+                      <span className="text-[9px] text-zinc-600 font-sans">（[KEY] キーカード使用中のためコスト破棄不可）</span>
                     </div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-600">UNAVAILABLE</span>
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-zinc-600">UNAVAILABLE</span>
                   </div>
                 )}
               </div>
@@ -563,11 +563,11 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
         {/* ステップ4: 対象選択 */}
         {selectedCostRef !== null && availableTargetRefs.length > 1 && (
-          <div className="pt-2 border-t border-slate-800">
-            <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+          <div className="pt-2 border-t border-zinc-800">
+            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 mb-1">
               4. 対象の選択
             </label>
-            <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 gap-1 max-h-36 overflow-y-auto pr-1">
               {availableTargetRefs.map((tgtRef) => {
                 const target = catalog.targetSelections[tgtRef];
                 const isSelected = selectedTargetRef === tgtRef;
@@ -575,10 +575,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   <button
                     key={tgtRef}
                     onClick={() => setSelectedTargetRef(tgtRef)}
-                    className={`rounded-lg border-2 px-3 py-2 text-left text-xs transition ${
+                    className={`rounded-lg border px-2.5 py-1.5 text-left text-xs transition ${
                       isSelected
-                        ? "border-amber-500 bg-amber-950/70 text-amber-100 shadow ring-1 ring-amber-500"
-                        : "border-slate-700 bg-slate-800/60 text-slate-300 hover:border-slate-500"
+                        ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                        : "border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:border-zinc-600"
                     }`}
                   >
                     <div className="font-bold">{target.displayName}</div>
@@ -591,30 +591,30 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
         {/* 決定ボタン (リクエスト / リクエスト＆PASS) */}
         {finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1 && (
-          <div className="pt-3 border-t border-slate-700 flex flex-col sm:flex-row gap-2 mt-3">
+          <div className="pt-2.5 border-t border-zinc-800 flex flex-col sm:flex-row gap-1.5 mt-2">
             <button
               onClick={() => handleActionSubmit(false)}
-              className="flex-1 py-2.5 px-4 rounded-xl border border-indigo-400 bg-indigo-900/60 hover:bg-indigo-800 text-indigo-100 font-bold transition text-xs shadow flex items-center justify-center gap-1"
+              className="flex-1 py-2 px-3 rounded-lg border border-zinc-700 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold transition text-xs shadow flex items-center justify-center gap-1 font-mono"
             >
-              <span>📥</span>
               <span>リクエストのみ</span>
             </button>
             <button
               onClick={() => handleActionSubmit(true)}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 active:scale-95 text-white font-black transition text-xs shadow-lg ring-2 ring-indigo-400/40 flex items-center justify-center gap-1.5"
+              className="flex-1 py-2 px-3 rounded-lg bg-white hover:bg-zinc-100 active:scale-95 text-zinc-950 font-black transition text-xs shadow-md ring-1 ring-zinc-300 flex items-center justify-center gap-1 font-mono"
             >
-              <span>🚀</span>
               <span>リクエスト＆PASS (推奨)</span>
             </button>
           </div>
         )}
 
         {/* ショートカット操作ガイド */}
-        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-slate-400 flex items-center justify-between">
-          <span>⌨️ ショートカット: <strong className="text-slate-200 font-mono bg-slate-800 px-1 py-0.5 rounded border border-slate-700">P</strong> = PASS</span>
-          <span className="text-slate-500">BlackPoker Core Battle</span>
+        <div className="pt-1.5 border-t border-zinc-800/80 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+          <span>SHORTCUT: <strong className="text-zinc-300 bg-zinc-800 px-1 py-0.2 rounded border border-zinc-700">P</strong> = PASS</span>
+          <span className="text-zinc-600">BlackPoker Core Battle</span>
         </div>
       </div>
     </div>
   );
+
 };
+

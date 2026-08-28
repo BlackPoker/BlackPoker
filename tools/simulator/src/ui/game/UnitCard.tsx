@@ -49,33 +49,33 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     <div
       onClick={isClickable ? onClick : undefined}
       title={`Debug ID: ${unit.unitId}`}
-      className={`relative flex flex-col items-center p-2 rounded-xl border-2 transition-all shadow-sm ${
-        isClickable ? "cursor-pointer hover:scale-105 active:scale-95" : ""
+      className={`relative flex flex-col items-center p-1.5 rounded-lg border transition-all shadow-sm ${
+        isClickable ? "cursor-pointer hover:border-white hover:scale-[1.02] active:scale-[0.98]" : ""
       } ${
         selectionMarker?.isSelected
-          ? "bg-amber-100 border-amber-500 ring-4 ring-amber-400/80 shadow-lg dark:bg-amber-950/60 dark:border-amber-400"
+          ? "bg-zinc-800 border-white ring-2 ring-white shadow-lg"
           : selectionMarker
-          ? "bg-emerald-50 border-emerald-400 ring-2 ring-emerald-400/50 hover:border-amber-400 dark:bg-emerald-950/30 dark:border-emerald-500"
+          ? "bg-zinc-900/90 border-zinc-400 ring-1 ring-zinc-400/60"
           : isBulwark
           ? isDrive
-            ? "bg-amber-950/30 border-amber-500/80 opacity-85 shadow"
-            : "bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-400/50 dark:bg-amber-950/50 dark:border-amber-400"
+            ? "bg-zinc-900/70 border-zinc-600 border-dashed opacity-75"
+            : "bg-zinc-900 border-2 border-zinc-300 shadow-md ring-1 ring-zinc-400/30"
           : isDrive
-          ? "bg-slate-200/80 border-slate-400 opacity-75 dark:bg-slate-800/80 dark:border-slate-600"
-          : "bg-white border-indigo-400 dark:bg-slate-700 dark:border-indigo-500 shadow-md"
+          ? "bg-zinc-900/60 border-zinc-700 opacity-70"
+          : "bg-zinc-900 border border-zinc-700 shadow"
       }`}
       style={{
-        minWidth: "112px",
+        minWidth: "108px",
       }}
     >
       {/* 選択可能・選択中バッジ (①, ②) */}
       {selectionMarker && (
-        <div className="absolute -top-3 -left-2 z-10">
+        <div className="absolute -top-2.5 -left-1.5 z-10">
           <span
-            className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-black shadow-md border ${
+            className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-mono font-black shadow-md border ${
               selectionMarker.isSelected
-                ? "bg-amber-400 border-amber-300 text-slate-950 ring-2 ring-amber-300 animate-bounce"
-                : "bg-emerald-500 border-emerald-300 text-white"
+                ? "bg-white border-zinc-900 text-zinc-950 ring-2 ring-white"
+                : "bg-zinc-800 border-zinc-400 text-zinc-100"
             }`}
           >
             {selectionMarker.badge}
@@ -86,42 +86,42 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       {/* ユニット種別 & 状態バッジ */}
       <div className="flex items-center justify-between w-full mb-1 gap-1">
         <span
-          className={`text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5 ${
+          className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-0.5 uppercase tracking-wider ${
             isBulwark
-              ? "bg-gradient-to-r from-amber-500 to-amber-600 text-slate-950 font-black border border-amber-300"
-              : "bg-indigo-600 text-white"
+              ? "bg-white text-zinc-950 font-black border border-zinc-300"
+              : "bg-zinc-800 text-zinc-200 border border-zinc-700"
           }`}
         >
-          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark ? "🛡 防壁" : "⚔ 兵士"}
+          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark ? "防壁" : "兵士"}
         </span>
 
         <span
-          className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
+          className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ${
             isDrive
-              ? "bg-amber-600/80 text-white font-bold"
-              : "bg-emerald-600 text-white font-bold"
+              ? "bg-zinc-800/90 text-zinc-400 border-zinc-700"
+              : "bg-zinc-100 text-zinc-900 border-zinc-300 font-black"
           }`}
         >
-          {isDrive ? "🔄 DRIVE" : "⚡ CHARGE"}
+          {isDrive ? "DRIVE" : "CHARGE"}
         </span>
       </div>
 
       {/* バトルロールマーカー */}
       {battleRole === "attacker" && (
-        <div className="w-full bg-red-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1">
-          <span>⚔ 攻撃中</span>
+        <div className="w-full bg-white text-zinc-950 text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-300">
+          <span>ATTACK 攻撃中</span>
           {battleDisplayInfo?.blockedByBadges && battleDisplayInfo.blockedByBadges.length > 0 && (
-            <span className="bg-red-950/80 px-1 rounded text-red-200 font-mono">
+            <span className="bg-zinc-900 text-zinc-100 px-1 rounded text-[8px] font-mono font-bold">
               ← {battleDisplayInfo.blockedByBadges.join(" ")}
             </span>
           )}
         </div>
       )}
       {battleRole === "blocker" && (
-        <div className="w-full bg-blue-600 text-white text-[10px] font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1">
-          <span>🛡 防御中</span>
+        <div className="w-full bg-zinc-800 text-zinc-100 text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-600">
+          <span>BLOCK 防御中</span>
           {battleDisplayInfo?.targetBadge && (
-            <span className="bg-blue-950/80 px-1 rounded text-blue-200 font-mono">
+            <span className="bg-zinc-950 text-zinc-300 px-1 rounded text-[8px] font-mono font-bold border border-zinc-700">
               → {battleDisplayInfo.targetBadge}
             </span>
           )}
@@ -131,7 +131,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       {/* カード本体表示 (DRIVE時は横向き rotate-90 & scale-95) */}
       <div
         className={`flex flex-col items-center justify-center transition-transform duration-200 ${
-          isDrive ? "rotate-90 scale-95 my-3.5" : "my-1"
+          isDrive ? "rotate-90 scale-95 my-3" : "my-1"
         }`}
       >
         {showCardDetails || !isFaceDown ? (
@@ -140,7 +140,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               <CardView key={card.id || idx} card={card} faceDown={isFaceDown && !showCardDetails} size="sm" />
             ))
           ) : (
-            <div className="text-xs text-slate-400 italic py-2">カードなし</div>
+            <div className="text-xs text-zinc-500 italic py-2">カードなし</div>
           )
         ) : (
           <CardView faceDown={true} size="sm" />
@@ -149,7 +149,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
       {/* Fog バッジ一覧表示 (兵士のみ) */}
       {!isBulwark && fogs && fogs.length > 0 && (
-        <div className="w-full my-1 flex flex-col gap-1">
+        <div className="w-full my-1 flex flex-col gap-0.5">
           {fogs.map((f, idx) => {
             const amount = f.bindings?.amount || 0;
             const isUp = amount > 0;
@@ -159,26 +159,22 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               .replace(/H/g, "♡")
               .replace(/D/g, "♢")
               .replace(/C/g, "♣");
-            const ownerLabel = f.ownerPlayerId === "p1" ? "Player A" : f.ownerPlayerId === "p2" ? "Player B" : "";
+            const ownerLabel = f.ownerPlayerId === "p1" ? "A" : f.ownerPlayerId === "p2" ? "B" : "";
 
             return (
               <div
                 key={f.fogId || idx}
-                className={`text-[9px] font-bold px-1.5 py-0.5 rounded flex items-center justify-between border ${
-                  isUp
-                    ? "bg-rose-950/40 border-rose-500/60 text-rose-300 dark:bg-rose-950/60 dark:border-rose-400"
-                    : "bg-cyan-950/40 border-cyan-500/60 text-cyan-300 dark:bg-cyan-950/60 dark:border-cyan-400"
-                }`}
-                title={`Fog: ${isUp ? "アップ" : "ダウン"} (${amount >= 0 ? `+${amount}` : amount}) ${ownerLabel ? `by ${ownerLabel}` : ""}`}
+                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded flex items-center justify-between border bg-zinc-950/80 border-zinc-700 text-zinc-200"
+                title={`Fog: ${isUp ? "アップ" : "ダウン"} (${amount >= 0 ? `+${amount}` : amount}) ${ownerLabel ? `by Player ${ownerLabel}` : ""}`}
               >
                 <span className="flex items-center gap-0.5">
-                  <span>{isUp ? "↑" : "↓"}</span>
-                  <span className="font-extrabold">{amount >= 0 ? `+${amount}` : amount}</span>
-                  {formattedCard && <span className="font-mono ml-0.5 font-bold">[{formattedCard}]</span>}
+                  <span className="font-extrabold">{isUp ? "↑" : "↓"}</span>
+                  <span className="font-black">{amount >= 0 ? `+${amount}` : amount}</span>
+                  {formattedCard && <span className="font-bold ml-0.5 text-zinc-300">[{formattedCard}]</span>}
                 </span>
                 {ownerLabel && (
-                  <span className="text-[8px] opacity-75 font-sans">
-                    {ownerLabel === "Player A" ? "A" : "B"}
+                  <span className="text-[8px] text-zinc-400 font-mono">
+                    {ownerLabel}
                   </span>
                 )}
               </div>
@@ -187,24 +183,26 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         </div>
       )}
 
-      {/* 下部情報表示: 兵士にはSIZE、防壁にはSIZEを出さず数字のみまたは防壁バッジを表示 */}
-      <div className="mt-1 pt-1 border-t border-slate-200 dark:border-slate-700 w-full flex items-center justify-between text-[11px]">
+      {/* 下部情報表示: 兵士にはSIZE、防壁には防壁数字を表示 */}
+      <div className="mt-1 pt-1 border-t border-zinc-800 w-full flex items-center justify-between text-[11px] font-mono">
         {isBulwark ? (
           <>
-            <span className="text-amber-500 dark:text-amber-400 font-bold">防壁数字:</span>
-            <span className="font-extrabold text-amber-600 dark:text-amber-300 font-mono">
-              {isHiddenFromViewer ? "🂠" : bulwarkRank || "—"}
+            <span className="text-zinc-400 text-[10px] font-bold">防壁数字:</span>
+            <span className="font-black text-white text-xs">
+              {isHiddenFromViewer ? "?" : bulwarkRank || "—"}
             </span>
           </>
         ) : (
           <>
-            <span className="text-slate-500 dark:text-slate-400 font-bold">SIZE:</span>
-            <span className="font-extrabold text-indigo-600 dark:text-indigo-400 font-mono">
+            <span className="text-zinc-400 text-[10px] font-bold">SIZE:</span>
+            <span className="font-black text-white text-xs">
               {isHiddenFromViewer ? "?" : displaySize}
             </span>
           </>
         )}
       </div>
+
     </div>
   );
 };
+

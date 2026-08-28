@@ -56,14 +56,29 @@ export function mergeRuleDefinitions(parsedDocs: any[]): RulePackage {
   };
 }
 
+const rulePackageCache = new Map<string, RulePackage>();
+
+/**
+ * ルールパッケージのインメモリキャッシュをクリアします（テスト用）。
+ */
+export function clearRulePackageCache(): void {
+  rulePackageCache.clear();
+}
+
 /**
  * 指定されたディレクトリ配下のすべての YAML ファイルを再帰的に読み込み、
  * 1つの RulePackage に統合します（Node.js環境用）。
+ * 同一ディレクトリに対する再帰読み込みとYAMLパース結果はインメモリキャッシュされます。
  */
 export async function loadRulePackageFromDirectory(dirPath: string): Promise<RulePackage> {
   // Node.js 標準モジュールを動的インポートすることで、ブラウザビルド環境での静的エラーを防止する
   const fs = await import("fs");
   const path = await import("path");
+
+  const normalizedPath = path.resolve(dirPath);
+  if (rulePackageCache.has(normalizedPath)) {
+    return rulePackageCache.get(normalizedPath)!;
+  }
 
   const readDirRecursive = (dir: string): string[] => {
     let results: string[] = [];
@@ -93,6 +108,9 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
     }
   }
 
-  return mergeRuleDefinitions(parsedDocs);
+  const merged = mergeRuleDefinitions(parsedDocs);
+  rulePackageCache.set(normalizedPath, merged);
+  return merged;
 }
+
 

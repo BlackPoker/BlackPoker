@@ -15,27 +15,27 @@ function formatCardCodeDisplay(code?: string): string {
 
 export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
   return (
-    <div className="flex flex-col p-3 rounded-xl border-2 border-indigo-200 bg-indigo-50/50 dark:bg-indigo-950/20 dark:border-indigo-900 shadow-sm">
-      <div className="flex items-center justify-between border-b pb-2 mb-2 border-indigo-200 dark:border-indigo-800">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-extrabold text-indigo-900 dark:text-indigo-200">
+    <div className="flex flex-col p-2.5 rounded-xl border border-zinc-800 bg-[#0d0d11] shadow-sm">
+      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-mono font-black text-white tracking-wider">
             STAGE (LIFO)
           </span>
-          <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 font-bold">
+          <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
             {requests.length} 件
           </span>
         </div>
-        <span className="text-[11px] text-indigo-600 dark:text-indigo-400 font-medium">
-          ※ 上 (TOP) から順に解決されます
+        <span className="text-[10px] text-zinc-500 font-mono">
+          ※ 上 (TOP) から順に解決
         </span>
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex items-center justify-center py-4 text-xs text-indigo-400 dark:text-indigo-500 font-medium">
+        <div className="flex items-center justify-center py-2.5 text-xs text-zinc-500 font-mono">
           ステージは空です (全員PASSで次の処理へ)
         </div>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           {/* LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示 */}
           {requests
             .slice()
@@ -50,7 +50,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                 ? req.keyCards.map((c: any) => formatCardCodeDisplay(c.code || `${c.suit}${c.rank}`)).join(", ")
                 : undefined;
 
-              // コスト表示の判定 (ユーザー指示: コストがある場合のみ「Cost: $D ♢7（支払い済み）」、ない場合は「Cost: なし」)
+              // コスト表示の判定
               const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
               const costLabel = costSummary
                 ? `Cost: ${costSummary}（支払い済み）`
@@ -75,40 +75,40 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
               return (
                 <div
                   key={req.id || revIdx}
-                  className={`flex flex-col p-2.5 rounded-lg border transition-all ${
+                  className={`flex flex-col p-2 rounded-lg border transition-all ${
                     isTop
-                      ? "bg-white border-indigo-500 shadow-md dark:bg-slate-800 dark:border-indigo-400 ring-2 ring-indigo-400/30"
-                      : "bg-white/70 border-slate-300 dark:bg-slate-800/60 dark:border-slate-700 opacity-85"
+                      ? "bg-zinc-900 border-zinc-400 shadow-md ring-1 ring-white/20 text-white"
+                      : "bg-zinc-950/80 border-zinc-800 text-zinc-300 opacity-80"
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`text-xs font-bold px-2 py-0.5 rounded ${
+                        className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
                           isTop
-                            ? "bg-indigo-600 text-white"
-                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                            ? "bg-white text-zinc-950 shadow-sm"
+                            : "bg-zinc-800 text-zinc-400 border border-zinc-700"
                         }`}
                       >
                         {isTop ? "TOP (次に解決)" : `STACK #${requests.length - revIdx}`}
                       </span>
-                      <span className="text-sm font-extrabold text-slate-800 dark:text-slate-100">
+                      <span className="text-xs font-black text-white font-serif tracking-wide">
                         {actionName}
                       </span>
-                      <span className="text-xs text-slate-500 font-mono">
+                      <span className="text-[10px] text-zinc-500 font-mono">
                         (ID: {req.id})
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                        発動者: {controllerName} ({req.controller})
+                    <div className="flex items-center gap-1.5 font-mono text-[10px]">
+                      <span className="text-zinc-400">
+                        {controllerName}
                       </span>
                       <span
-                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
+                        className={`font-bold px-1 py-0.2 rounded border ${
                           req.status === "resolving"
-                            ? "bg-amber-500 text-white animate-pulse"
-                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300"
+                            ? "bg-white text-zinc-950 border-white font-black animate-pulse"
+                            : "bg-zinc-800 text-zinc-400 border-zinc-700"
                         }`}
                       >
                         {statusText}
@@ -117,22 +117,22 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                   </div>
 
                   {/* 詳細メタデータ行 (Key, Cost, Target) */}
-                  <div className="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-700/60 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 dark:text-slate-400 font-mono">
+                  <div className="mt-1 pt-1 border-t border-zinc-800/80 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-zinc-400 font-mono">
                     {keyCodes && (
                       <span className="flex items-center gap-1">
-                        <span className="text-amber-500 dark:text-amber-400 font-bold">Key:</span>
-                        <span className="font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 px-1 py-0.2 rounded">
+                        <span className="text-zinc-300 font-bold">Key:</span>
+                        <span className="font-bold text-white bg-zinc-800 px-1 py-0.2 rounded border border-zinc-700">
                           {keyCodes}
                         </span>
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">{costLabel}</span>
+                      <span className="font-bold text-zinc-300">{costLabel}</span>
                     </span>
                     {targetStr && (
                       <span className="flex items-center gap-1">
-                        <span className="text-amber-600 dark:text-amber-400 font-bold">Target:</span>
-                        <span className="text-slate-700 dark:text-slate-300">{targetStr}</span>
+                        <span className="text-zinc-400 font-bold">Target:</span>
+                        <span className="text-zinc-200">{targetStr}</span>
                       </span>
                     )}
                   </div>
@@ -144,3 +144,4 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
     </div>
   );
 };
+
