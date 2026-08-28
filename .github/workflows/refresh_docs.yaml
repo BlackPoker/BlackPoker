@@ -7,7 +7,7 @@ on:
       verify_simulator:
         description: "Simulatorも検証・ビルドして公開する"
         type: boolean
-        default: true
+        default: false
       logLevel:
         required: false
         description: ログレベル
@@ -110,7 +110,7 @@ jobs:
     name: test & build simulator
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: github.event_name != 'workflow_dispatch' || inputs.verify_simulator != false
+    if: github.event_name != 'workflow_dispatch' || inputs.verify_simulator == true
 
     steps:
       - name: Set output
@@ -198,6 +198,11 @@ jobs:
         run: |
           pwd
           ls -la
+          # Simulator が成功していない場合、既存の正常な playtest があれば temp_docs/playtest に退避して維持
+          if [ "${{ needs.test-and-build-simulator.result }}" != "success" ] && [ -d "./pages/${{ steps.vars.outputs.short_ref }}/playtest" ]; then
+            echo "Preserving existing playtest directory..."
+            cp -r "./pages/${{ steps.vars.outputs.short_ref }}/playtest" temp_docs/
+          fi
           rm -rf ./pages/${{ steps.vars.outputs.short_ref }}
           mkdir -p ./pages/${{ steps.vars.outputs.short_ref }}
           mv temp_docs/* ./pages/${{ steps.vars.outputs.short_ref }}/.
