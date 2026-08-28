@@ -4,11 +4,17 @@ name: refresh_docs
 on:
   workflow_dispatch:
     inputs:
+      verify_simulator:
+        description: "Simulatorも検証・ビルドして公開する"
+        type: boolean
+        default: true
       logLevel:
-        required: true
+        required: false
         description: ログレベル
         default: warning
       tags:
+        required: false
+        description: タグ
   schedule:
     # 日本時間AM4:00に動作
     - cron: '0 19 * * *'
@@ -17,13 +23,16 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: release build
+  # =========================================================================
+  # 1. 公式ルール・ActionList のビルドジョブ
+  # =========================================================================
+  build-rules:
+    name: build rules & actionlist
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
 
     steps:
-      # 変数設定
+      # 変数設定 (short_ref)
       - name: Set output
         id: vars
         run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
@@ -86,31 +95,55 @@ jobs:
           cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
           cp -r ./tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
 
-      # Simulator のビルド & docs/playtest への反映
+      # rules docs artifact のアップロード
+      - name: upload rules docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rules-docs
+          path: ./main/docs
+          retention-days: 1
+
+  # =========================================================================
+  # 2. Simulator の検証・ビルドジョブ
+  # =========================================================================
+  test-and-build-simulator:
+    name: test & build simulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name != 'workflow_dispatch' || inputs.verify_simulator != false
+
+    steps:
+      - name: Set output
+        id: vars
+        run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: checkout
+        uses: actions/checkout@v4
+
       - name: Setup Node.js for Simulator
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: ./main/tools/simulator/package-lock.json
+          cache-dependency-path: ./tools/simulator/package-lock.json
 
       - name: Install Simulator dependencies
-        working-directory: ./main/tools/simulator
+        working-directory: ./tools/simulator
         timeout-minutes: 10
         run: npm ci
 
       - name: Test Simulator
-        working-directory: ./main/tools/simulator
+        working-directory: ./tools/simulator
         timeout-minutes: 10
         run: npm test
 
       - name: Check playable match
-        working-directory: ./main/tools/simulator
+        working-directory: ./tools/simulator
         timeout-minutes: 10
         run: npm run playable:check
 
       - name: Build Simulator
-        working-directory: ./main/tools/simulator
+        working-directory: ./tools/simulator
         timeout-minutes: 10
         env:
           VITE_BASE_PATH: /BlackPoker/${{ steps.vars.outputs.short_ref }}/playtest/
@@ -118,30 +151,57 @@ jobs:
           VITE_BUILD_REF: ${{ steps.vars.outputs.short_ref }}
         run: npm run build
 
-      - name: copy simulator to docs
-        working-directory: ./main
-        run: |
-          mkdir -p ./docs/playtest
-          cp -r ./tools/simulator/dist/* ./docs/playtest/
+      # simulator docs artifact のアップロード
+      - name: upload simulator artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: simulator-docs
+          path: ./tools/simulator/dist
+          retention-days: 1
+
+  # =========================================================================
+  # 3. gh-pages への一括デプロイジョブ
+  # =========================================================================
+  publish:
+    name: publish to gh-pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [build-rules, test-and-build-simulator]
+    if: always() && needs.build-rules.result == 'success'
+
+    steps:
+      - name: Set output
+        id: vars
+        run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       - name: checkout gh-pages
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: pages
-          
-      - name: copy docs
+
+      - name: download rules docs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: rules-docs
+          path: temp_docs
+
+      - name: download simulator artifact (if simulator succeeded)
+        if: needs.test-and-build-simulator.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: simulator-docs
+          path: temp_docs/playtest
+
+      - name: copy docs to gh-pages and push
         working-directory: ./
         run: |
           pwd
           ls -la
-          mkdir ../tmp_docs
-          mv ./main/docs/* ../tmp_docs/.
           rm -rf ./pages/${{ steps.vars.outputs.short_ref }}
           mkdir -p ./pages/${{ steps.vars.outputs.short_ref }}
-          mv ../tmp_docs/* ./pages/${{ steps.vars.outputs.short_ref }}/.
-          ls -la ./main
-          ls -la ./pages
+          mv temp_docs/* ./pages/${{ steps.vars.outputs.short_ref }}/.
+          ls -la ./pages/${{ steps.vars.outputs.short_ref }}
           cd ./pages
           git config --global user.email "blackpoker.official@gmail.com"
           git config --global user.name "BlackPoker"
