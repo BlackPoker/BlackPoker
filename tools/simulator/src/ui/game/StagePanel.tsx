@@ -15,13 +15,13 @@ function formatCardCodeDisplay(code?: string): string {
 
 export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
   return (
-    <div className="flex flex-col p-2.5 rounded-xl border border-zinc-800 bg-[#0d0d11] shadow-sm">
-      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
+    <div className="flex flex-col p-2.5 rounded border border-zinc-200 bg-white shadow-sm font-sans">
+      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-200">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-mono font-black text-white tracking-wider">
+          <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
             STAGE (LIFO)
           </span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
+          <span className="text-[10px] px-1.5 py-0.2 rounded font-mono font-bold bg-zinc-100 text-zinc-700 border border-zinc-300">
             {requests.length} 件
           </span>
         </div>
@@ -31,7 +31,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex items-center justify-center py-2.5 text-xs text-zinc-500 font-mono">
+        <div className="flex items-center justify-center py-2.5 text-xs text-zinc-400 font-mono">
           ステージは空です (全員PASSで次の処理へ)
         </div>
       ) : (
@@ -75,10 +75,10 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
               return (
                 <div
                   key={req.id || revIdx}
-                  className={`flex flex-col p-2 rounded-lg border transition-all ${
+                  className={`flex flex-col p-2 rounded border transition-all ${
                     isTop
-                      ? "bg-zinc-900 border-zinc-400 shadow-md ring-1 ring-white/20 text-white"
-                      : "bg-zinc-950/80 border-zinc-800 text-zinc-300 opacity-80"
+                      ? "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950"
+                      : "bg-white border-zinc-200 text-zinc-800"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -86,30 +86,29 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                       <span
                         className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
                           isTop
-                            ? "bg-white text-zinc-950 shadow-sm"
-                            : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                            ? "bg-zinc-950 text-white shadow-sm"
+                            : "bg-zinc-100 text-zinc-700 border border-zinc-300"
                         }`}
                       >
                         {isTop ? "TOP (次に解決)" : `STAGE #${requests.length - revIdx}`}
-
                       </span>
-                      <span className="text-xs font-black text-white font-serif tracking-wide">
+                      <span className="text-xs font-bold text-zinc-950 tracking-wide">
                         {actionName}
                       </span>
-                      <span className="text-[10px] text-zinc-500 font-mono">
+                      <span className="text-[10px] text-zinc-400 font-mono">
                         (ID: {req.id})
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5 font-mono text-[10px]">
-                      <span className="text-zinc-400">
+                      <span className="text-zinc-600">
                         {controllerName}
                       </span>
                       <span
                         className={`font-bold px-1 py-0.2 rounded border ${
                           req.status === "resolving"
-                            ? "bg-white text-zinc-950 border-white font-black animate-pulse"
-                            : "bg-zinc-800 text-zinc-400 border-zinc-700"
+                            ? "bg-zinc-950 text-white border-zinc-950 font-black animate-pulse"
+                            : "bg-zinc-100 text-zinc-600 border-zinc-300"
                         }`}
                       >
                         {statusText}
@@ -118,22 +117,22 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                   </div>
 
                   {/* 詳細メタデータ行 (Key, Cost, Target) */}
-                  <div className="mt-1 pt-1 border-t border-zinc-800/80 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-zinc-400 font-mono">
+                  <div className="mt-1 pt-1 border-t border-zinc-200 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-zinc-600 font-mono">
                     {keyCodes && (
                       <span className="flex items-center gap-1">
-                        <span className="text-zinc-300 font-bold">Key:</span>
-                        <span className="font-bold text-white bg-zinc-800 px-1 py-0.2 rounded border border-zinc-700">
+                        <span className="text-zinc-500 font-bold">Key:</span>
+                        <span className="font-bold text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">
                           {keyCodes}
                         </span>
                       </span>
                     )}
                     <span className="flex items-center gap-1">
-                      <span className="font-bold text-zinc-300">{costLabel}</span>
+                      <span className="font-bold text-zinc-800">{costLabel}</span>
                     </span>
                     {targetStr && (
                       <span className="flex items-center gap-1">
-                        <span className="text-zinc-400 font-bold">Target:</span>
-                        <span className="text-zinc-200">{targetStr}</span>
+                        <span className="text-zinc-500 font-bold">Target:</span>
+                        <span className="text-zinc-800">{targetStr}</span>
                       </span>
                     )}
                   </div>
@@ -142,6 +141,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
             })}
         </div>
       )}
+
     </div>
   );
 };

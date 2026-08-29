@@ -32,10 +32,12 @@ export function hasUnitLabel(
   const compDef = components.find((c) => c.id === unit.componentId);
 
   const rawLabels: string[] = [
+    ...(compDef?.properties?.labels || []),
     ...(compDef?.display?.labels || []),
     ...((compDef as any)?.labels || []),
     ...(unit.labels || []),
   ];
+
 
   const normalizedTarget = targetLabel.toLowerCase();
   const isAttackTarget = normalizedTarget === "攻撃" || normalizedTarget === "attack";
@@ -136,6 +138,8 @@ export function hasHaste(unit: any, components: readonly ComponentDefinition[] =
   const compDef = components.find((c) => c.id === unit.componentId);
 
   const rawAbilities: string[] = [
+    ...(compDef?.properties?.labels || []),
+    ...(compDef?.properties?.abilities || []),
     ...(compDef?.display?.labels || []),
     ...((compDef as any)?.labels || []),
     ...((compDef as any)?.abilities || []),
@@ -149,4 +153,5 @@ export function hasHaste(unit: any, components: readonly ComponentDefinition[] =
   }
   return false;
 }
+
 

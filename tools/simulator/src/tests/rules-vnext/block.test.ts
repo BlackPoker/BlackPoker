@@ -169,11 +169,12 @@ describe("Block Action Integration Tests (New YAML)", () => {
 
     const attackerOnlySoldier: any = {
       unitId: "soldier-2",
-      kind: "一般兵",
-      componentId: "character.soldier",
+      kind: "攻撃兵",
+      componentId: "character.attacker",
       state: "charge",
-      labels: ["攻撃"], // 防御ラベルなし！
+      labels: ["攻撃"], // 防御ラベルなし
     };
+
 
     const state: any = {
       players: {

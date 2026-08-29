@@ -278,20 +278,23 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   if (presetValidationErrors.length > 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-slate-100">
-        <div className="max-w-lg rounded-2xl border-2 border-red-500 bg-slate-900 p-6 shadow-2xl">
-          <h2 className="text-xl font-black text-red-400 mb-2">❌ プリセットバリデーションエラー</h2>
-          <p className="text-xs text-slate-300 mb-4">
+      <div className="flex min-h-screen items-center justify-center bg-zinc-100 p-4 text-zinc-950 font-sans">
+        <div className="max-w-lg rounded-lg border-2 border-red-600 bg-white p-6 shadow-xl">
+          <div className="flex items-center gap-2 mb-2 font-mono">
+            <span className="px-2 py-0.5 rounded bg-red-600 text-white text-xs font-black">[ERROR]</span>
+            <h2 className="text-base font-bold text-zinc-950">プリセットバリデーションエラー</h2>
+          </div>
+          <p className="text-xs text-zinc-600 mb-4">
             初期盤面プリセットの整合性チェックに失敗しました。定義を確認してください。
           </p>
-          <ul className="list-disc list-inside space-y-1 text-xs text-red-300 font-mono bg-red-950/40 p-3 rounded-lg border border-red-800 mb-4">
+          <ul className="list-disc list-inside space-y-1 text-xs text-red-700 font-mono bg-red-50 p-3 rounded border border-red-200 mb-4">
             {presetValidationErrors.map((err, i) => (
               <li key={i}>{err}</li>
             ))}
           </ul>
           <button
             onClick={startNewGame}
-            className="w-full py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition"
+            className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold rounded shadow transition text-xs font-mono"
           >
             再試行 (Retry)
           </button>
@@ -304,41 +307,41 @@ export const CoreBattlePlaytest: React.FC = () => {
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-zinc-100 font-sans selection:bg-white selection:text-black">
+    <div className="flex flex-col min-h-screen bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-3 py-1.5 bg-[#141414] border-b border-zinc-800 shadow-sm sticky top-0 z-30">
+      <header className="flex flex-wrap items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">
         <div className="flex items-center gap-3">
-          {/* ロゴ + ブランドタイトル (Times New Roman Bold 明示) */}
+          {/* ロゴ + ブランドタイトル (Times New Roman Bold 明示 / uppercase 削除で大文字小文字正確) */}
           <div className="flex items-center gap-2">
             <img
               src={logoUrl}
               alt="BlackPoker Logo"
-              className="w-6 h-6 filter brightness-0 invert opacity-90 transition-transform hover:scale-105"
+              className="w-6 h-6 opacity-95 transition-transform hover:scale-105"
             />
             <div className="flex flex-col">
               <span
                 style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
-                className="text-sm tracking-widest text-white uppercase leading-none"
+                className="text-base tracking-wide text-zinc-950 leading-none"
               >
                 BlackPoker
               </span>
-              <span className="text-[8px] font-mono text-zinc-400 font-bold tracking-wider leading-none mt-0.5">
+              <span className="text-[8px] font-mono text-zinc-500 font-bold tracking-wider leading-none mt-0.5">
                 CORE BATTLE PLAYTEST
               </span>
             </div>
           </div>
 
-          <div className="h-4 w-px bg-zinc-700 mx-1 hidden sm:block" />
+          <div className="h-4 w-px bg-zinc-300 mx-1 hidden sm:block" />
 
           {/* バッジ群 */}
           <div className="flex items-center gap-1.5 font-mono">
-            <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-white text-zinc-950 uppercase tracking-wider">
+            <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-zinc-950 text-white uppercase tracking-wider">
               PLAYTEST
             </span>
-            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-zinc-900 border border-zinc-700 text-zinc-300">
+            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-zinc-100 border border-zinc-300 text-zinc-700">
               PREVIEW
             </span>
-            <span className="text-[9px] text-zinc-500 font-mono hidden md:inline">
+            <span className="text-[9px] text-zinc-400 font-mono hidden md:inline">
               {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
               {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
             </span>
@@ -346,11 +349,11 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           {/* Regulation Selector */}
           <div className="flex items-center gap-1 ml-1 font-mono">
-            <span className="text-[9px] font-bold text-zinc-500">Reg:</span>
+            <span className="text-[9px] font-bold text-zinc-400">Reg:</span>
             <select
               value={selectedRegulation}
               onChange={(e) => setSelectedRegulation(e.target.value)}
-              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-700 bg-zinc-900 text-zinc-200 focus:ring-1 focus:ring-white focus:outline-none cursor-pointer"
+              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
               <option value="core-battle">Core Battle (Preset 001)</option>
               <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
@@ -361,12 +364,12 @@ export const CoreBattlePlaytest: React.FC = () => {
 
         {/* コントロールボタン */}
         <div className="flex items-center gap-2 mt-1 sm:mt-0 font-mono">
-          <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-400 hover:text-zinc-200 cursor-pointer select-none">
+          <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={enablePassAndPlay}
               onChange={(e) => setEnablePassAndPlay(e.target.checked)}
-              className="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-zinc-400"
+              className="rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
             />
             Pass-and-Play
           </label>
@@ -375,8 +378,8 @@ export const CoreBattlePlaytest: React.FC = () => {
             onClick={() => setShowDebug(!showDebug)}
             className={`px-2 py-0.5 text-[11px] font-bold rounded border transition ${
               showDebug
-                ? "bg-zinc-800 text-white border-zinc-400"
-                : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:text-white hover:border-zinc-500"
+                ? "bg-zinc-950 text-white border-zinc-950"
+                : "bg-white text-zinc-700 border-zinc-300 hover:text-zinc-950 hover:border-zinc-500"
             }`}
           >
             {showDebug ? "Debug ON" : "Debug"}
@@ -384,12 +387,13 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           <button
             onClick={startNewGame}
-            className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-800 hover:bg-zinc-700 active:scale-95 text-white border border-zinc-600 shadow transition"
+            className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
           >
             Reset
           </button>
         </div>
       </header>
+
 
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
       <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2">
@@ -457,9 +461,10 @@ export const CoreBattlePlaytest: React.FC = () => {
               />
             </div>
           ) : (
-            <div className="p-3 bg-[#121216] rounded-xl border border-zinc-800 text-center text-xs text-zinc-500 font-mono">
+            <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm">
               現在待機中の判断要求はありません
             </div>
+
           )}
 
           {/* 対戦ログ (Game Log) */}

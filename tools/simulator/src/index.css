@@ -4,8 +4,8 @@
 
 @layer base {
   body {
-    @apply bg-[#0b0b0b] text-[#e5e5e5] font-sans antialiased selection:bg-white selection:text-black;
-    color-scheme: dark;
+    @apply bg-white text-zinc-950 font-sans antialiased selection:bg-zinc-950 selection:text-white;
+    color-scheme: light;
   }
 }
 
@@ -13,31 +13,32 @@
 .bp-brand-title {
   font-family: "Times New Roman", Times, serif;
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.03em;
 }
 
-/* Custom Scrollbar for Dark Monotone Theme */
+/* Custom Scrollbar for Light Monotone Theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #111111;
+  background: #f4f4f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333333;
+  background: #d4d4d8;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #555555;
+  background: #a1a1aa;
 }
 
 /* Focus outline for accessibility */
 *:focus-visible {
-  outline: 2px solid #ffffff;
+  outline: 2px solid #18181b;
   outline-offset: 2px;
 }
+
 

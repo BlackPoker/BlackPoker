@@ -3,7 +3,9 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { getOpponentPlayerKey } from "./playerUtils";
 import { hasUnitLabel, isCharacterComponent, hasHaste } from "./characterUtils";
+import { matchesSuit, matchesRank } from "./cardUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+
 
 export interface EffectInterruption {
   readonly interrupted: true;
@@ -190,6 +192,34 @@ export class EffectInterpreter {
         };
       }
 
+      if (name === "selectCards" || name === "selectCard") {
+        const selectionId = args.id || "selectedCards";
+        if (context.selections && context.selections[selectionId] !== undefined) {
+          continue;
+        }
+
+        const count = args.count ?? 1;
+        const playerKey = this.resolveDecisionPlayerKey(args.player || args.chooser, context);
+        const candidates = this.findSelectableCards(args, context, playerKey);
+
+        if (candidates.length === 0) {
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = [];
+          continue;
+        }
+
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "card",
+          candidates,
+          requiredCount: count,
+          decisionPlayerKey: playerKey,
+        };
+      }
+
       if (name === "selectDiscardCards" || name === "discardDownTo") {
         const selectionId = args.id || "discardCards";
         const max = args.max ?? 7;
@@ -220,6 +250,62 @@ export class EffectInterpreter {
 
     return { completed: true };
   }
+
+  /**
+   * 手札等から選択可能なカード群を抽出します。
+   */
+  findSelectableCards(args: any, context: CommandContext, playerKey: PlayerKey): any[] {
+    const zone = args.zone || "hand";
+    const condition = args.condition || {};
+    const player = context.state.players?.[playerKey];
+    if (!player) return [];
+
+    let cardPool: any[] = [];
+    if (zone === "hand") {
+      cardPool = Array.isArray(player.hand) ? [...player.hand] : [];
+    } else if (zone === "grave") {
+      cardPool = Array.isArray(player.grave) ? [...player.grave] : [];
+    }
+
+    // 候補カードの絞り込み
+    return cardPool.filter((card) => {
+      // 1. component (例: character.bulwark) 定義からの判定
+      if (condition.component) {
+        const compDef = context.components?.find((c) => c.id === condition.component);
+        if (compDef?.unitCondition?.cards) {
+          const uCards = compDef.unitCondition.cards;
+          if (uCards.suit && !matchesSuit(card.suit, uCards.suit)) {
+            return false;
+          }
+          if (uCards.rank && !matchesRank(card.rank, card.value || 0, uCards.rank)) {
+            return false;
+          }
+        }
+      }
+
+      // 2. card 条件の直接指定
+      if (condition.card) {
+        const condCard = condition.card;
+        if (condCard.suit && !matchesSuit(card.suit, condCard.suit)) {
+          return false;
+        }
+        if (condCard.rank && !matchesRank(card.rank, card.value || 0, condCard.rank)) {
+          return false;
+        }
+      }
+
+      // 3. suit / rank の直接指定
+      if (condition.suit && !matchesSuit(card.suit, condition.suit)) {
+        return false;
+      }
+      if (condition.rank && !matchesRank(card.rank, card.value || 0, condition.rank)) {
+        return false;
+      }
+
+      return true;
+    });
+  }
+
 
   /**
    * 盤面から選択可能なユニット群を抽出します。

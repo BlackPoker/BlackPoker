@@ -71,13 +71,31 @@ export function createFogHandler(
  */
 export function summonUnitHandler(): CommandHandler {
   return (args, context) => {
-    const { component, face, state } = args;
+    const { component, face, state, card } = args;
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
 
-    // コンポーネント定義から kind を動的に解決
+    // コンポーネント定義から kind, labels を動的に解決
     const compDef = context.components?.find((c: any) => c.id === component);
     const kind = compDef?.display?.kind || compDef?.properties?.kind || compDef?.name || "ユニット";
+    const labels = compDef?.properties?.labels || compDef?.display?.labels || ["攻撃", "防御"];
+
+    // 召喚に使用するカードの解決 (keyCard または selection.<id>)
+    let unitCard: any = undefined;
+    if (typeof card === "string" && card.startsWith("selection.")) {
+      const selId = card.replace("selection.", "");
+      const selected = context.selections?.[selId];
+      if (Array.isArray(selected) && selected.length > 0) {
+        const val = selected[0];
+        if (typeof val === "string") {
+          unitCard = player.hand?.find((c: any) => c.id === val);
+        } else {
+          unitCard = val;
+        }
+      }
+    } else if (context.keyCard) {
+      unitCard = context.keyCard;
+    }
 
     const newUnit = {
       unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -85,19 +103,23 @@ export function summonUnitHandler(): CommandHandler {
       componentId: component,
       state: state || "charge",
       face: face || "up",
-      cards: context.keyCard ? [context.keyCard] : [],
-      labels: ["攻撃", "防御"],
+      cards: unitCard ? [unitCard] : [],
+      labels: [...labels],
       enteredTurn: context.state.turnCount ?? 1,
     };
 
-    // 手札からキーカードを消費（手札にある場合のみ）
-    if (context.keyCard) {
-      player.hand = player.hand.filter((c: any) => c.id !== context.keyCard.id);
+    // 手札から召喚カードを消費（手札にある場合のみ）
+    if (unitCard && Array.isArray(player.hand)) {
+      player.hand = player.hand.filter((c: any) => c.id !== unitCard.id);
     }
 
+    if (!Array.isArray(player.field)) {
+      player.field = [];
+    }
     player.field.push(newUnit);
   };
 }
+
 
 /**
  * removeFog: フォグの削除

@@ -499,7 +499,12 @@ export class LegalPatternGenerator {
         return formatSuitSymbol(code);
       }).join(", ");
 
-      const summary = `手札破棄 (${requiredCount}枚): [${cardNames}]`;
+      let summary = `カード選択 (${requiredCount}枚): [${cardNames}]`;
+      if (options?.selectionId === "bulwarkCard" || sourceRequest?.actionId === "action.setBulwark" || sourceRequest?.action?.id === "action.setBulwark") {
+        summary = `防壁カード選択: [${cardNames}]`;
+      } else if (effectStepId === "discardDownTo" || options?.selectionId === "discardCards") {
+        summary = `手札破棄 (${requiredCount}枚): [${cardNames}]`;
+      }
 
       const effSel = {
         selectionType: "card",
@@ -507,6 +512,7 @@ export class LegalPatternGenerator {
         summary,
       };
       effectSelections.push(effSel);
+
 
       const pattern: LegalPattern = {
         patternId: `effect-card-select-${index}-${selectedValues.join("_") || "none"}`,

@@ -25,20 +25,19 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
   onClose,
 }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 font-sans">
-      <div className="w-full max-w-md bg-[#141414] border border-zinc-700 rounded shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#181818] border-b border-zinc-800 text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 font-sans">
+      <div className="w-full max-w-md bg-white border border-zinc-300 rounded shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="flex items-center justify-between px-3.5 py-2.5 bg-zinc-100 border-b border-zinc-200 text-zinc-950">
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] font-mono font-bold bg-zinc-800 border border-zinc-700 px-1 py-0.2 rounded text-zinc-300">FOG</span>
-            <h3 className="font-bold text-xs tracking-wide text-white">
+            <span className="text-[10px] font-mono font-bold bg-zinc-200 border border-zinc-300 px-1 py-0.2 rounded text-zinc-800">FOG</span>
+            <h3 className="font-bold text-xs tracking-wide text-zinc-950">
               {playerName} の FOG 詳細 ({fogs.length}件)
             </h3>
           </div>
 
-
           <button
             onClick={onClose}
-            className="w-6 h-6 flex items-center justify-center rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-mono text-xs transition"
+            className="w-6 h-6 flex items-center justify-center rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-mono text-xs transition"
           >
             ✕
           </button>
@@ -46,7 +45,7 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
 
         <div className="p-3 max-h-96 overflow-y-auto space-y-1.5 font-mono">
           {fogs.length === 0 ? (
-            <div className="text-center py-6 text-xs text-zinc-500 italic">
+            <div className="text-center py-6 text-xs text-zinc-400 italic">
               現在配置されている Fog はありません
             </div>
           ) : (
@@ -63,30 +62,30 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
               return (
                 <div
                   key={f.fogId || idx}
-                  className="p-2 rounded-lg border border-zinc-800 bg-zinc-950/80 flex flex-col gap-1 text-zinc-200"
+                  className="p-2 rounded border border-zinc-200 bg-zinc-50 flex flex-col gap-1 text-zinc-900"
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-xs flex items-center gap-1">
                       <span>{isUp ? "↑ アップ" : "↓ ダウン"}</span>
                       {formattedCard && (
-                        <span className="bg-zinc-800 px-1 py-0.2 rounded text-[10px] border border-zinc-700 text-white font-bold">
+                        <span className="bg-white px-1 py-0.2 rounded text-[10px] border border-zinc-300 text-zinc-950 font-bold">
                           {formattedCard}
                         </span>
                       )}
                     </span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-zinc-900 border border-zinc-700 text-white">
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded bg-zinc-950 text-white">
                       SIZE {amount >= 0 ? `+${amount}` : amount}
                     </span>
                   </div>
 
-                  <div className="text-[10px] text-zinc-400 grid grid-cols-2 gap-2 pt-1 border-t border-zinc-900">
+                  <div className="text-[10px] text-zinc-600 grid grid-cols-2 gap-2 pt-1 border-t border-zinc-200">
                     <div>
-                      <span className="text-zinc-500 font-bold block text-[9px]">対象:</span>
-                      <span className="font-semibold text-zinc-200">{targetLabel}</span>
+                      <span className="text-zinc-400 font-bold block text-[9px]">対象:</span>
+                      <span className="font-semibold text-zinc-900">{targetLabel}</span>
                     </div>
                     <div>
-                      <span className="text-zinc-500 font-bold block text-[9px]">作成者:</span>
-                      <span className="font-semibold text-zinc-200">{ownerName}</span>
+                      <span className="text-zinc-400 font-bold block text-[9px]">作成者:</span>
+                      <span className="font-semibold text-zinc-900">{ownerName}</span>
                     </div>
                   </div>
                 </div>
@@ -95,10 +94,10 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
           )}
         </div>
 
-        <div className="p-2 bg-zinc-950 border-t border-zinc-800 text-center">
+        <div className="p-2 bg-zinc-50 border-t border-zinc-200 text-center">
           <button
             onClick={onClose}
-            className="w-full py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono font-bold transition"
+            className="w-full py-1.5 rounded bg-zinc-950 hover:bg-zinc-800 text-white text-xs font-mono font-bold transition"
           >
             閉じる
           </button>
@@ -107,3 +106,4 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
     </div>
   );
 };
+

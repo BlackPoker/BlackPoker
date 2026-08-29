@@ -3,9 +3,11 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { formatActionSummary } from "../../engine/rules/formatActionSummary";
 import { RulePackage } from "../../domain/rules/RulePackage";
+import { GameSession } from "../../engine/session/GameSession";
+import { TurnManager } from "../../engine/rules/TurnManager";
 import * as path from "path";
 
-describe("Set Bulwark Action Integration Test (New YAML)", () => {
+describe("Set Bulwark Action Integration Test (Phase 21B.8.1)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -13,12 +15,14 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
     rulePackage = await loadRulePackageFromDirectory(rulesDir);
   });
 
-  it("should load setBulwark action and bulwark component correctly", () => {
+  it("should load setBulwark action with usageLimit and bulwark component correctly", () => {
     const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark");
     const bulwarkComponent = rulePackage.components.find((c) => c.id === "character.bulwark");
 
     expect(setAction).toBeDefined();
     expect(setAction?.name).toBe("防壁設置");
+    expect(setAction?.request?.usageLimit).toEqual({ scope: "turn", max: 1 });
+    expect(setAction?.request?.speed).toBe("immediate");
     expect(bulwarkComponent).toBeDefined();
     expect(bulwarkComponent?.name).toBe("防壁");
   });
@@ -29,156 +33,163 @@ describe("Set Bulwark Action Integration Test (New YAML)", () => {
     expect(summary).toBe("防壁設置 @直接-即時-メイン | $L");
   });
 
-  it("should summon bulwark unit face-down and consume hand card via CommandRegistry (Case A & B)", () => {
+  it("should enforce usageLimit: 1 per turn (fail on 2nd attempt in same turn, allowed on next turn)", () => {
     const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
-    
-    // モックシミュレーター状態
-    const handCard = { id: "h5-uuid", code: "♡5", suit: "H", rank: "5", value: 5 };
-    const state = {
+    const registry = new CommandRegistry();
+
+    const state: any = {
+      turnCount: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
       players: {
         p1: {
           name: "Player A",
-          life: [{ id: "life-1", suit: "S", rank: "2", value: 2 }], // 配列としてのライフ
-          hand: [handCard], // 手札にカードを持つ
+          life: [
+            { id: "l1", suit: "S", rank: "2", value: 2 },
+            { id: "l2", suit: "S", rank: "3", value: 3 },
+          ],
+          hand: [
+            { id: "h1", suit: "H", rank: "5", value: 5 },
+            { id: "h2", suit: "D", rank: "8", value: 8 },
+          ],
           field: [],
+          grave: [],
           fog: [],
-        }
-      } as Record<string, any>
+        },
+      },
+      turnUsage: {},
+      stage: { requests: [], history: [] },
     };
 
-    const registry = new CommandRegistry();
-
-    // summonUnit 命令の抽出
-    const effectCmd = setAction.effect?.find((e: any) => e.summonUnit);
-    expect(effectCmd).toBeDefined();
-
-    const context: CommandContext = {
+    const context1: CommandContext = {
       state,
       playerKey: "p1",
-      keyCard: handCard,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
 
-    // アクションの事前検証
-    expect(() => registry.validateAction(setAction, context)).not.toThrow();
+    // 1回目のリクエスト生成（成功）
+    const req1 = registry.createRequest(setAction, context1);
+    expect(req1).toBeDefined();
+    expect(state.turnUsage.p1["action.setBulwark"]).toBe(1);
 
-    // アクション全体の実行 (事前検証 -> コマンド実行)
-    registry.executeAction(setAction, context);
+    // 2回目のリクエスト生成（同ターン内はエラー）
+    const context2: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+    expect(() => registry.createRequest(setAction, context2)).toThrow(/上限回数/);
 
-    // 検証：手札からカードが消費されたこと
-    expect(state.players.p1.hand.length).toBe(0);
+    // ターン交代で turnUsage がリセットされる
+    TurnManager.endTurn(state);
+    expect(state.turnUsage.p1).toBeUndefined();
 
-    // 検証：コストLによりライフが消費されたこと
-    expect(state.players.p1.life.length).toBe(0);
-
-    // 検証：場に防壁が裏向き・チャージ状態で召喚されたこと
-    expect(state.players.p1.field.length).toBe(1);
-    const summonedBulwark = state.players.p1.field[0];
-    expect(summonedBulwark.kind).toBe("防壁");
-    expect(summonedBulwark.componentId).toBe("character.bulwark");
-    expect(summonedBulwark.state).toBe("charge"); // チャージ状態
-    expect(summonedBulwark.face).toBe("down"); // 裏向き
-    expect(summonedBulwark.cards.length).toBe(1);
-    expect(summonedBulwark.cards[0].id).toBe("h5-uuid");
+    // ターン経過後（Player Aの手番再来時）は再度使用可能
+    state.turnPlayer = "p1";
+    state.chancePlayer = "p1";
+    const context3: CommandContext = {
+      state,
+      playerKey: "p1",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+    expect(() => registry.createRequest(setAction, context3)).not.toThrow();
   });
 
-  it("should dynamically satisfy Fortress preventDamage condition after installing Bulwark (Case C)", () => {
-    const setAction = rulePackage.actions.find((a) => a.id === "action.setBulwark")!;
-    const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
+  it("should interrupt and request card selection Decision, then summon bulwark face-down in charge state", () => {
+    const handCardH5 = { id: "h5-uuid", code: "♡5", suit: "H", rank: "5", value: 5 };
+    const handCardS2 = { id: "s2-uuid", code: "♠2", suit: "S", rank: "2", value: 2 }; // スペードは防壁不可 (character.bulwark は ♡/♢ のみ)
 
-    // モックシミュレーター状態: Player B (防御側) は最初場にキャラクターを持たないが、手札に防壁用カードと要塞を持つ
-    const state = {
+    const state: any = {
+      matchId: "test-match",
+      stateVersion: 1,
+      turnCount: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      phase: "main",
       players: {
         p1: {
-          name: "Player A (攻撃側)",
+          name: "Player A",
+          life: [
+            { id: "life-1", suit: "S", rank: "2", value: 2 },
+            { id: "life-2", suit: "S", rank: "3", value: 3 },
+          ],
+          hand: [handCardH5, handCardS2],
+          field: [],
+          grave: [],
+          fog: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [{ id: "life-p2", suit: "S", rank: "3", value: 3 }],
           hand: [],
           field: [],
           grave: [],
-          life: [],
+          fog: [],
         },
-        p2: {
-          name: "Player B (防御側)",
-          hand: [{ id: "c-diamond-6", suit: "D", rank: "6", value: 6 }], // 手札に防壁設置用カード
-          field: [], // 初期状態はキャラクターが場にいない！
-          grave: [],
-          trumps: [
-            {
-              unitId: "fortress-1",
-              componentId: "trump.fortress",
-              face: "up",
-              cards: [{ id: "c-club-9", suit: "C", rank: "9", value: 9 }],
-            }
-          ],
-          life: [
-            { id: "c1", suit: "C", rank: "2", value: 2 },
-            { id: "c2", suit: "C", rank: "3", value: 3 },
-            { id: "c3", suit: "C", rank: "4", value: 4 },
-          ],
-        }
-      } as Record<string, any>
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: [],
     };
 
-    const registry = new CommandRegistry();
+    const session = new GameSession(state, rulePackage);
+    const initialStep = session.advance();
+    expect(initialStep.type).toBe("WAITING_FOR_DECISION");
 
-    // 1. 防壁が無い状態での投擲ダメージ検証 (要塞が防がないためダメージが通る)
-    const keyCardsSpade = [
-      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
 
-    const contextPre: CommandContext = {
-      state,
-      playerKey: "p1", // Aが発動
-      targetPlayerKey: "p2", // Bが対象
-      keyCards: keyCardsSpade,
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
+    if (initialStep.type === "WAITING_FOR_DECISION") {
+      const decReq = initialStep.request;
+      // 防壁設置アクションのパターンを見つける（キーカード不要）
+      const setBulwarkPatIdx = decReq.patterns.findIndex(
+        (p) => p.kind === "ACTION" && decReq.catalog.actions[p.actionSelectionRef!].actionId === "action.setBulwark"
+      );
+      expect(setBulwarkPatIdx).toBeGreaterThanOrEqual(0);
 
-    // 投擲実行
-    registry.executeAction(throwingAction, contextPre);
+      // 防壁設置をリクエスト
+      const nextStep = session.submitDecision({
+        decisionId: decReq.decisionId,
+        stateVersion: decReq.stateVersion,
+        selectedPatternRef: setBulwarkPatIdx,
+      });
 
-    // 検証：キャラクターがいないため防ぎきれず、Bのライフが 2 減る (ライフ残り 2枚 -> 0枚)
-    expect(state.players.p2.life.length).toBe(0);
+      // 効果解決時 Decision（EFFECT_SELECTION: 手札から防壁カード選択）が発生すること
+      expect(nextStep.type).toBe("WAITING_FOR_DECISION");
+      if (nextStep.type === "WAITING_FOR_DECISION") {
+        expect(nextStep.request.source.type).toBe("EFFECT_RESOLUTION");
+        expect(nextStep.request.patterns.length).toBe(1); // ♡5 のみが候補（♠2は除外）
+        const effSelection = nextStep.request.catalog.effectSelections[0];
+        expect(effSelection.selectedValues).toEqual(["h5-uuid"]);
+        expect(effSelection.summary).toContain("防壁カード選択");
 
-    // 2. ライフを回復し、Player B が「防壁設置」を実行
-    state.players.p2.life = [
-      { id: "c1", suit: "C", rank: "2", value: 2 },
-      { id: "c2", suit: "C", rank: "3", value: 3 },
-      { id: "c3", suit: "C", rank: "4", value: 4 },
-    ];
-    const bulwarkKeyCard = state.players.p2.hand[0];
+        // カードを選択して解決
+        const finishStep = session.submitDecision({
+          decisionId: nextStep.request.decisionId,
+          stateVersion: nextStep.request.stateVersion,
+          selectedPatternRef: 0,
+        });
 
-    const contextSetBulwark: CommandContext = {
-      state,
-      playerKey: "p2", // Bが防壁を設置
-      keyCard: bulwarkKeyCard,
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
+        // 検証：手札から ♡5 が消費され、♠2 のみが残る
+        expect(state.players.p1.hand.length).toBe(1);
+        expect(state.players.p1.hand[0].id).toBe("s2-uuid");
 
-    // 防壁設置実行
-    registry.executeAction(setAction, contextSetBulwark);
+        // 検証：コストLによりライフが1消費されたこと (2枚 -> 1枚)
+        expect(state.players.p1.life.length).toBe(1);
 
-    // 検証：場に防壁（キャラクター）が誕生していること
-    expect(state.players.p2.field.length).toBe(1);
-    expect(state.players.p2.field[0].kind).toBe("防壁");
 
-    // 3. 防壁がある状態で、再度相手が投擲を発動
-    const contextPost: CommandContext = {
-      state,
-      playerKey: "p1",
-      targetPlayerKey: "p2",
-      keyCards: keyCardsSpade,
-      actions: rulePackage.actions,
-      components: rulePackage.components,
-    };
-
-    // 再度投擲実行
-    registry.executeAction(throwingAction, contextPost);
-
-    // 検証：防壁（キャラクター）が場に存在するため、要塞がダメージを無効化！ライフは2のまま維持される
-    expect(state.players.p2.life.length).toBe(2);
+        // 検証：場に防壁が裏向き・チャージ状態で召喚されたこと
+        expect(state.players.p1.field.length).toBe(1);
+        const summonedBulwark = state.players.p1.field[0];
+        expect(summonedBulwark.kind).toBe("防壁");
+        expect(summonedBulwark.componentId).toBe("character.bulwark");
+        expect(summonedBulwark.state).toBe("charge");
+        expect(summonedBulwark.face).toBe("down");
+        expect(summonedBulwark.cards.length).toBe(1);
+        expect(summonedBulwark.cards[0].id).toBe("h5-uuid");
+        expect(summonedBulwark.labels).toEqual(["defense"]); // 攻撃ラベルを持たない
+      }
+    }
   });
 });
+

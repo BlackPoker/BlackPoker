@@ -13,6 +13,9 @@ export default defineConfig({
       },
     },
     isolate: false,
+
+
+
     silent: true,
     testTimeout: 15000,
     hookTimeout: 15000,

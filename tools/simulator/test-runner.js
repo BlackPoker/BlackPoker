@@ -6,7 +6,8 @@ const timeoutMs = process.env.TEST_TIMEOUT_SEC
   : DEFAULT_TIMEOUT_MS;
 
 const args = process.argv.slice(2);
-const vitestArgs = args.length > 0 ? args : ["run"];
+const vitestArgs = args.includes("run") ? args : ["run", ...args];
+
 
 const t0 = Date.now();
 const isWin = process.platform === "win32";

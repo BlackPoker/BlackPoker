@@ -36,10 +36,10 @@ export const CardView: React.FC<CardViewProps> = ({
   if (faceDown || !card) {
     return (
       <div
-        className={`inline-flex flex-col items-center justify-center rounded border border-zinc-700 bg-[#141414] text-zinc-500 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
+        className={`inline-flex flex-col items-center justify-center rounded border border-zinc-900 bg-zinc-900 text-zinc-300 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
         title="裏向きカード"
       >
-        <span className="text-[9px] tracking-tighter opacity-50 font-serif">BP</span>
+        <span className="text-[9px] tracking-tighter opacity-70 font-serif text-white">BP</span>
       </div>
     );
   }
@@ -50,7 +50,7 @@ export const CardView: React.FC<CardViewProps> = ({
 
   return (
     <div
-      className={`inline-flex flex-col justify-between p-1 rounded border border-zinc-300 bg-white text-zinc-950 shadow-sm font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
+      className={`inline-flex flex-col justify-between p-1 rounded border border-zinc-400 bg-white text-zinc-950 shadow-sm font-bold select-none transition-transform hover:-translate-y-0.5 ${sizeClasses} ${className}`}
       title={`${card.suit || ""}${card.rank || ""} (id: ${card.id || ""})`}
     >
       <div className="text-left leading-none text-zinc-950 text-[10px] font-mono font-black">
@@ -62,5 +62,6 @@ export const CardView: React.FC<CardViewProps> = ({
     </div>
   );
 };
+
 
 

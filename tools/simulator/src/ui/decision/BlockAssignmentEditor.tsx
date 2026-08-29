@@ -117,7 +117,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="text-xs text-slate-300 font-medium">
+      <div className="text-xs text-zinc-600 font-medium">
         各アタッカーをブロックするキャラクター（ブロッカー）を選択してください。
       </div>
 
@@ -130,28 +130,26 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
           return (
             <div
               key={attacker.unitId}
-              className="rounded border border-zinc-700 bg-[#161616] p-3 shadow-inner"
+              className="rounded border border-zinc-300 bg-zinc-50 p-3 shadow-sm"
             >
               {/* アタッカー情報ヘッダー */}
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-2 mb-2">
-
+              <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
                 <div className="flex items-center gap-2">
                   {atkInfo.badge && (
-                    <span className="w-5 h-5 rounded-full bg-white text-zinc-950 border border-zinc-300 text-xs font-black flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-zinc-950 text-white text-xs font-black flex items-center justify-center">
                       {atkInfo.badge}
                     </span>
                   )}
-                  <div className="font-bold text-sm text-zinc-100 flex items-center gap-1.5 font-mono">
-                    <span className="text-white font-black">[ATTACKER]</span>
+                  <div className="font-bold text-sm text-zinc-950 flex items-center gap-1.5 font-mono">
+                    <span className="text-zinc-950 font-black">[ATTACKER]</span>
                     <span>{atkInfo.label}</span>
                   </div>
                 </div>
 
-
                 {currentBlockers.length > 0 && (
                   <button
                     onClick={() => handleClearAttacker(attacker.unitId)}
-                    className="text-[10px] font-mono text-zinc-400 hover:text-white px-2 py-0.5 rounded border border-zinc-700 hover:border-zinc-500 transition"
+                    className="text-[10px] font-mono text-zinc-600 hover:text-zinc-950 px-2 py-0.5 rounded border border-zinc-300 hover:border-zinc-500 bg-white transition"
                   >
                     解除
                   </button>
@@ -160,7 +158,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
 
               {/* ブロッカー選択肢 */}
               <div className="space-y-1">
-                <div className="text-[10px] uppercase font-mono font-bold tracking-wider text-zinc-400">
+                <div className="text-[10px] uppercase font-mono font-bold tracking-wider text-zinc-500">
                   ブロッカーを指定:
                 </div>
 
@@ -181,12 +179,12 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                         key={blocker.unitId}
                         disabled={isDisabled}
                         onClick={() => handleToggleBlocker(attacker.unitId, blocker.unitId)}
-                        className={`rounded-lg border p-2 text-left text-xs transition flex items-center justify-between ${
+                        className={`rounded border p-2 text-left text-xs transition flex items-center justify-between ${
                           isSelected
-                            ? "border-white bg-zinc-800 text-white shadow ring-1 ring-white"
+                            ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
                             : isDisabled
-                            ? "border-zinc-800/80 bg-zinc-950/40 text-zinc-600 opacity-40 cursor-not-allowed"
-                            : "border-zinc-700 bg-zinc-900/80 text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800"
+                            ? "border-zinc-200 bg-zinc-100 text-zinc-400 opacity-50 cursor-not-allowed"
+                            : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
                         }`}
                       >
                         <div className="flex items-center gap-1.5">
@@ -194,13 +192,13 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                             className={`w-4 h-4 rounded border flex items-center justify-center text-[10px] font-mono font-bold ${
                               isSelected
                                 ? "bg-white border-zinc-900 text-zinc-950 font-black"
-                                : "border-zinc-600 text-transparent"
+                                : "border-zinc-400 text-transparent"
                             }`}
                           >
                             ✓
                           </span>
                           {blkInfo.badge && (
-                            <span className="w-5 h-5 rounded-full bg-zinc-950 text-white border border-zinc-500 text-xs font-mono font-black flex items-center justify-center">
+                            <span className="w-5 h-5 rounded-full bg-zinc-100 text-zinc-900 border border-zinc-300 text-xs font-mono font-black flex items-center justify-center">
                               {blkInfo.badge}
                             </span>
                           )}
@@ -208,7 +206,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                         </div>
 
                         {isSelected && (
-                          <span className="text-[9px] font-mono font-bold bg-zinc-950 px-1 py-0.2 rounded border border-zinc-600 text-white">BLOCK</span>
+                          <span className="text-[9px] font-mono font-bold bg-white px-1 py-0.2 rounded text-zinc-950">BLOCK</span>
                         )}
                       </button>
                     );
@@ -217,7 +215,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
 
                 {/* ブロックなし状態の表示 */}
                 {currentBlockers.length === 0 && (
-                  <div className="text-[10px] text-zinc-400 italic py-0.5 pl-1 font-mono">
+                  <div className="text-[10px] text-zinc-500 italic py-0.5 pl-1 font-mono">
                     （ブロックせず直接ダメージを受けます）
                   </div>
                 )}
@@ -228,9 +226,9 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
       </div>
 
       {/* 現在の割当てサマリー & 決定ボタン */}
-      <div className="pt-2.5 border-t border-zinc-800">
-        <div className="mb-2.5 p-2 rounded-lg bg-zinc-950/80 border border-zinc-800 text-xs">
-          <div className="font-mono font-bold text-zinc-400 text-[10px] uppercase mb-1">現在の割当て:</div>
+      <div className="pt-2.5 border-t border-zinc-200">
+        <div className="mb-2.5 p-2 rounded bg-zinc-50 border border-zinc-200 text-xs">
+          <div className="font-mono font-bold text-zinc-500 text-[10px] uppercase mb-1">現在の割当て:</div>
           <div className="space-y-1">
             {attackers.map((attacker) => {
               const atkInfo = getUnitDisplay(attacker.unitId);
@@ -241,13 +239,13 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
               });
 
               return (
-                <div key={attacker.unitId} className="flex items-center gap-1.5 text-zinc-200 font-mono text-xs">
-                  <span className="font-bold text-white">{atkInfo.badge} {atkInfo.label}</span>
-                  <span className="text-zinc-500">←</span>
+                <div key={attacker.unitId} className="flex items-center gap-1.5 text-zinc-800 font-mono text-xs">
+                  <span className="font-bold text-zinc-950">{atkInfo.badge} {atkInfo.label}</span>
+                  <span className="text-zinc-400">←</span>
                   {blkLabels.length > 0 ? (
-                    <span className="font-bold text-zinc-100">{blkLabels.join(" + ")}</span>
+                    <span className="font-bold text-zinc-950">{blkLabels.join(" + ")}</span>
                   ) : (
-                    <span className="text-zinc-500 italic">ブロックなし</span>
+                    <span className="text-zinc-400 italic">ブロックなし</span>
                   )}
                 </div>
               );
@@ -258,10 +256,10 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
         <button
           disabled={exactPatternRef === null}
           onClick={handleSubmit}
-          className={`w-full py-2.5 px-4 rounded-xl font-bold text-xs transition shadow-md flex items-center justify-center gap-2 font-mono ${
+          className={`w-full py-2.5 px-4 rounded font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 font-mono ${
             exactPatternRef !== null
-              ? "bg-white hover:bg-zinc-100 active:scale-95 text-zinc-950 ring-1 ring-zinc-300 cursor-pointer font-black"
-              : "bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed"
+              ? "bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white cursor-pointer font-black"
+              : "bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed"
           }`}
         >
           <span>この割当てで決定</span>
@@ -269,6 +267,6 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
       </div>
     </div>
   );
-
 };
+
 

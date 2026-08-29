@@ -582,12 +582,13 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
 
     const soldier2: any = {
       unitId: "soldier-2",
-      kind: "一般兵",
-      componentId: "character.soldier",
+      kind: "攻撃兵",
+      componentId: "character.attacker",
       state: "charge",
       cards: [{ id: "c2", suit: "H", rank: "5", value: 5 }],
-      labels: ["攻撃"], // 不正：防御ラベルなし
+      labels: ["攻撃"], // 防御ラベルなし
     };
+
 
     const state = {
       players: {

@@ -81,12 +81,18 @@ export function rankToValue(rank: string | number): number {
 }
 
 /**
- * スートの一致判定
+ * スートの一致判定 (単一文字列または配列)
  */
-export function matchesSuit(cardSuit: string, expectedSuit: string): boolean {
+export function matchesSuit(cardSuit?: string, expectedSuit?: string | readonly string[]): boolean {
   if (!expectedSuit) return true;
-  return normalizeSuit(cardSuit) === normalizeSuit(expectedSuit);
+  const normCard = normalizeSuit(cardSuit);
+  if (Array.isArray(expectedSuit)) {
+    return expectedSuit.some((s) => normalizeSuit(s) === normCard);
+  }
+  return normCard === normalizeSuit(typeof expectedSuit === "string" ? expectedSuit : undefined);
 }
+
+
 
 /**
  * ランクの一致判定 (単一文字列、配列、範囲 "A..K" 等)

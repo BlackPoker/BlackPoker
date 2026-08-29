@@ -57,31 +57,29 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const buildRef = env.VITE_BUILD_REF ? String(env.VITE_BUILD_REF) : "local";
 
   return (
-    <div className="flex flex-col h-full p-2.5 bg-[#141414] text-zinc-300 rounded border border-zinc-800 shadow-md font-mono text-xs">
-      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-800">
+    <div className="flex flex-col h-full p-2.5 bg-white text-zinc-800 rounded border border-zinc-200 shadow-sm font-mono text-xs">
+      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-200">
         <div className="flex items-center gap-2">
-          <span className="font-bold text-white">Raw Debug</span>
+          <span className="font-bold text-zinc-950">Raw Debug</span>
           <span className="text-[9px] text-zinc-500">
             Build: {buildSha} ({buildRef}) | Ver: {state?.stateVersion}
           </span>
         </div>
 
-
         <button
           onClick={handleCopy}
-          className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700 transition flex items-center gap-1"
+          className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 transition flex items-center gap-1"
         >
           {copied ? "✓ COPIED" : "COPY"}
         </button>
-
       </div>
 
       {/* タブナビゲーション */}
-      <div className="flex gap-1 mb-1.5 border-b border-zinc-800/80 pb-1 text-[10px]">
+      <div className="flex gap-1 mb-1.5 border-b border-zinc-200 pb-1 text-[10px]">
         <button
           onClick={() => setActiveTab("state")}
           className={`px-2 py-0.5 rounded transition ${
-            activeTab === "state" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
+            activeTab === "state" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Full State
@@ -89,7 +87,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         <button
           onClick={() => setActiveTab("stage")}
           className={`px-2 py-0.5 rounded transition ${
-            activeTab === "stage" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
+            activeTab === "stage" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Stage ({state?.stage?.requests?.length || 0})
@@ -97,7 +95,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         <button
           onClick={() => setActiveTab("buffer")}
           className={`px-2 py-0.5 rounded transition ${
-            activeTab === "buffer" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
+            activeTab === "buffer" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Buffer ({state?.requestBuffer?.length || 0})
@@ -105,7 +103,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         <button
           onClick={() => setActiveTab("decision")}
           className={`px-2 py-0.5 rounded transition ${
-            activeTab === "decision" ? "bg-zinc-800 text-white font-bold" : "text-zinc-500 hover:text-zinc-300"
+            activeTab === "decision" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
           Decision ({currentDecisionRequest?.patterns?.length || 0})
@@ -113,22 +111,22 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
       </div>
 
       {/* コンテンツ表示エリア */}
-      <div className="flex-1 overflow-auto bg-zinc-950 p-2 rounded border border-zinc-900 text-[11px] leading-relaxed">
+      <div className="flex-1 overflow-auto bg-zinc-50 p-2 rounded border border-zinc-200 text-[11px] leading-relaxed">
         {activeTab === "state" && (
-          <pre className="text-zinc-300">{JSON.stringify(state, null, 2)}</pre>
+          <pre className="text-zinc-800">{JSON.stringify(state, null, 2)}</pre>
         )}
         {activeTab === "stage" && (
-          <pre className="text-zinc-300">
+          <pre className="text-zinc-800">
             {JSON.stringify(state?.stage || { requests: [] }, null, 2)}
           </pre>
         )}
         {activeTab === "buffer" && (
-          <pre className="text-zinc-300">
+          <pre className="text-zinc-800">
             {JSON.stringify(state?.requestBuffer || [], null, 2)}
           </pre>
         )}
         {activeTab === "decision" && (
-          <pre className="text-zinc-300">
+          <pre className="text-zinc-800">
             {JSON.stringify(currentDecisionRequest || "No Decision Pending", null, 2)}
           </pre>
         )}
@@ -136,4 +134,5 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     </div>
   );
 };
+
 

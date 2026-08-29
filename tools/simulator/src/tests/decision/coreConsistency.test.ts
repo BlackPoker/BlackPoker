@@ -256,9 +256,14 @@ describe("Core Architecture Consistency Tests (Phase 16.5)", () => {
     // componentDefinition 側からも攻撃ラベルなしのモック
     const componentsWithoutAttack = rulePackage.components.map((c) =>
       c.id === "character.soldier"
-        ? { ...c, display: { ...c.display, labels: ["防御"] } }
+        ? {
+            ...c,
+            display: { ...c.display, labels: ["防御"] },
+            properties: { ...c.properties, labels: ["defense"] },
+          }
         : c
     );
+
 
     const context: CommandContext = {
       state,
