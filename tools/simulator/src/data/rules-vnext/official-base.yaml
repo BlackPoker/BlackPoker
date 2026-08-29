@@ -58,8 +58,6 @@ components:
     unitCondition:
       cards:
         count: 1
-        suit: ["heart", "diamond"]
-        rank: "A..K"
       face: down
 
     properties:
@@ -67,4 +65,5 @@ components:
       labels: [defense]
 
     text:
-      summary: ♡A〜Kと♢A〜Kのカードは防壁として扱う。
+      summary: 任意のカード1枚を裏向きにしたユニットは防壁として扱う。
+

@@ -53,11 +53,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     return patterns.filter((p) => p.actionSelectionRef === selectedActionRef);
   }, [patterns, selectedActionRef]);
 
-  // 選択可能なキーカード一覧
+  // 選択可能なキーカード一覧 (keyCardSelectionRef が実際に存在するもののみ)
   const availableKeyRefs = useMemo(() => {
-    const refs = new Set<number | undefined>();
+    const refs = new Set<number>();
     for (const p of patternsFilteredByAction) {
-      refs.add(p.keyCardSelectionRef);
+      if (p.keyCardSelectionRef !== undefined) {
+        refs.add(p.keyCardSelectionRef);
+      }
     }
     return Array.from(refs);
   }, [patternsFilteredByAction]);
@@ -101,12 +103,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     setSelectedActionRef(actRef);
 
     const acts = patterns.filter((p) => p.actionSelectionRef === actRef);
-    const keyRefs = Array.from(new Set(acts.map((p) => p.keyCardSelectionRef)));
+    const keyRefs = Array.from(
+      new Set(acts.map((p) => p.keyCardSelectionRef).filter((r): r is number => r !== undefined))
+    );
     let nextKeyRef: number | null = null;
     if (keyRefs.length === 1) {
-      nextKeyRef = keyRefs[0] !== undefined ? keyRefs[0] : null;
+      nextKeyRef = keyRefs[0];
     }
     setSelectedKeyRef(nextKeyRef);
+
 
     const keys = acts.filter((p) =>
       nextKeyRef === null ? p.keyCardSelectionRef === undefined : p.keyCardSelectionRef === nextKeyRef

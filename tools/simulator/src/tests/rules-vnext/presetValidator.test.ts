@@ -13,17 +13,18 @@ describe("Playtest Preset Validator Tests (Phase 21B.1)", () => {
     rulePackage = await loadRulePackageFromDirectory(rulesDir);
   });
 
-  it("Test A: should detect invalid bulwark card suit (e.g. ♠5) as validator error", () => {
+  it("Test A: should detect invalid soldier card rank (e.g. SK) as validator error", () => {
     const state = createCoreBattlePresetState();
-    // Player B の防壁を不正な ♠5 (spade) に書き換え
-    state.players.p2.field.find((u: any) => u.unitId === "bw-p2").cards = [
-      { id: "bad-bw", suit: "S", rank: "5", value: 5 },
+    // Player A の一般兵を不正な ♠K (rank: "K") に書き換え (soldier は "2..10")
+    state.players.p1.field.find((u: any) => u.unitId === "soldier-p1-1").cards = [
+      { id: "bad-soldier", suit: "S", rank: "K", value: 13 },
     ];
 
     const result = validatePlaytestPreset(state, rulePackage);
     expect(result.valid).toBe(false);
-    expect(result.errors.some((e) => e.includes("スーツ") && e.includes("character.bulwark"))).toBe(true);
+    expect(result.errors.some((e) => e.includes("ランク") && e.includes("character.soldier"))).toBe(true);
   });
+
 
   it("Test B: should detect duplicate card (e.g. D4 in both life and field) in the same player as validator error", () => {
     const state = createCoreBattlePresetState();

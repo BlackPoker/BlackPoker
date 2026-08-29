@@ -472,4 +472,40 @@ describe("Phase 16.5 Hotfix Consistency Tests", () => {
     expect(state.requestBuffer.requests[0]).toBe(originalRequestsSnapshot[0]);
     expect(state.requestBuffer.requests[1]).toBe(originalRequestsSnapshot[1]);
   });
+
+  it("I: Action without key (e.g. setBulwark) generates DecisionPattern without keyCardSelectionRef and skips key selection", () => {
+    const state = createBaseState();
+    state.players.p1.life = [{ id: "l1", suit: "S", rank: "2", value: 2 }];
+    state.players.p1.hand = [{ id: "h1", suit: "H", rank: "5", value: 5 }];
+
+    const { request: decisionReq } = LegalPatternGenerator.generateActionRequestDecision(
+      state,
+      "p1",
+      rulePackage
+    );
+
+
+    // setBulwark アクションのパターンを検索
+    const setBulwarkActionRef = decisionReq.catalog.actions.findIndex(
+      (a) => a.actionId === "action.setBulwark"
+    );
+    expect(setBulwarkActionRef).toBeGreaterThanOrEqual(0);
+
+    const bulwarkPatterns = decisionReq.patterns.filter(
+      (p) => p.actionSelectionRef === setBulwarkActionRef
+    );
+    expect(bulwarkPatterns.length).toBeGreaterThan(0);
+
+    // C: 全ての setBulwark パターンで keyCardSelectionRef が undefined であること
+    for (const p of bulwarkPatterns) {
+      expect(p.keyCardSelectionRef).toBeUndefined();
+    }
+
+    // D & E: DecisionPanel 側の availableKeyRefs 導出ロジックで keyCardSelectionRef !== undefined のみ抽出されると空配列になること
+    const availableKeyRefs = Array.from(
+      new Set(bulwarkPatterns.map((p) => p.keyCardSelectionRef).filter((r): r is number => r !== undefined))
+    );
+    expect(availableKeyRefs.length).toBe(0);
+  });
 });
+

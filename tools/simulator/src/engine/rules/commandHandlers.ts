@@ -97,7 +97,13 @@ export function summonUnitHandler(): CommandHandler {
       unitCard = context.keyCard;
     }
 
+    // card が指定されているにもかかわらずカードが解決できない場合は、cards: [] の空ユニット生成を阻止
+    if (card && !unitCard) {
+      return;
+    }
+
     const newUnit = {
+
       unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       kind: kind,
       componentId: component,
