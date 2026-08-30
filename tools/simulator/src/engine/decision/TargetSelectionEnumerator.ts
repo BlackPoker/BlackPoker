@@ -56,13 +56,21 @@ export class TargetSelectionEnumerator {
         const stageRequests = state.stage?.requests || [];
         for (const req of stageRequests) {
           if (cond?.status && req.status !== cond.status) continue;
+          if (cond?.keyCards) {
+            const reqKeyCards = Array.isArray(req.keyCards) ? req.keyCards : [];
+            if (cond.keyCards.count !== undefined) {
+              const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
+              if (!expectedCounts.includes(reqKeyCards.length)) continue;
+            }
+          }
           results.push({
             targetType: "request",
             targetRequestId: req.id,
             displayName: `リクエスト: ${req.action?.name || req.actionId} (ID: ${req.id})`,
           });
         }
-      } else if (targetType === "unit") {
+      }
+ else if (targetType === "unit") {
         // ユニットターゲット（アップ、ダウン、アタック等）
         const searchPlayers = cond?.owner === "opponent"
           ? Object.keys(state.players || {}).filter((k) => k !== requesterPlayerKey)

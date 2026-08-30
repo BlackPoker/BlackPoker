@@ -63,6 +63,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -87,7 +88,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -110,6 +111,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1,
       actions: rulePackage.actions,
       components: rulePackage.components,
@@ -132,6 +134,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -156,7 +159,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -178,6 +181,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1,
       actions: rulePackage.actions,
       components: rulePackage.components,
@@ -196,6 +200,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -220,7 +225,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -242,11 +247,13 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
     const req2 = registry.createRequest(counterAction, context2);
+
 
     // 1. カウンターを解決する
     registry.resolveTopRequest(context2);
@@ -266,6 +273,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
 
   it("should fail when targeting a non-existent request (F)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -273,7 +281,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -285,7 +293,8 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context: CommandContext = {
       state,
       playerKey: "p2",
-      targetRequest: { id: "req-999", actionId: "action.up", status: "pending" } as any, // 存在しないモック
+      keyCard: counterKey,
+      targetRequest: { id: "req-999", actionId: "action.up", status: "pending", keyCards: [{ id: "c", rank: "4" }] } as any,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
@@ -301,6 +310,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -325,7 +335,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard, { id: "extra-hand", suit: "D", rank: "3", value: 3 }],
+          hand: [counterKey, counterCostCard, { id: "extra-key", suit: "C", rank: "9", value: 9 }, { id: "extra-cost", suit: "D", rank: "3", value: 3 }],
           field: [],
           grave: [],
           fog: [],
@@ -347,6 +357,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1,
       actions: rulePackage.actions,
       components: rulePackage.components,
@@ -361,6 +372,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context3: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: { id: "extra-key", suit: "C", rank: "9", value: 9 },
       targetRequest: req1, // すでに cancelled 状態
       actions: rulePackage.actions,
       components: rulePackage.components,
@@ -376,6 +388,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -400,7 +413,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -427,6 +440,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1, // すでに resolved 状態
       actions: rulePackage.actions,
       components: rulePackage.components,
@@ -439,6 +453,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
 
   it("should fail when targeting counter request itself", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -446,7 +461,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -460,8 +475,9 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const selfContext: CommandContext = {
       state,
       playerKey: "p2",
-      targetRequest: { id: "req-1", actionId: "action.counter", status: "pending" } as any, // 自分自身とみなす
-      currentRequest: { id: "req-1", actionId: "action.counter", status: "pending" } as any, // 自分自身
+      keyCard: counterKey,
+      targetRequest: { id: "req-1", actionId: "action.counter", status: "pending", keyCards: [counterKey] } as any,
+      currentRequest: { id: "req-1", actionId: "action.counter", status: "pending", keyCards: [counterKey] } as any,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
@@ -472,13 +488,15 @@ describe("Counter Action integration Tests (New YAML)", () => {
     );
   });
 
+
   it("should track resolved and cancelled requests in Stage.history and verify state", () => {
     const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
-    const counterKey = { id: "counter-key", code: "♣5", suit: "C", rank: "5", value: 5 };
+    const counterKey = { id: "counter-key", code: "♣8", suit: "C", rank: "8", value: 8 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
+
     
     const state: any = {
       players: {

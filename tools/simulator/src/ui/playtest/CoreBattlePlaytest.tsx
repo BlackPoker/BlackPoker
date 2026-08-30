@@ -359,8 +359,8 @@ export const CoreBattlePlaytest: React.FC = () => {
               src={logoUrl}
               alt="BlackPoker Logo"
               className="w-6 h-6 transition-transform hover:scale-105"
-              style={{ filter: "brightness(0) contrast(200%) drop-shadow(0 0 0.4px #000)" }}
             />
+
 
             <div className="flex flex-col">
               <span

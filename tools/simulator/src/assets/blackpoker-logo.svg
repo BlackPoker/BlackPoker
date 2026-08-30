@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN"
               "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
-
-<svg xmlns="http://www.w3.org/2000/svg"
+<!--
      width="5.61111in" height="5.55556in"
+     -->
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="32px" height="32px"
      viewBox="0 0 404 400">
-  <path id="選択範囲 コピー#3"
-        fill="black" fill-rule="evenodd" stroke="black" stroke-width="1"
+  <path id="blackpoker"
+        fill="black" stroke="none" stroke-width="1"
+        fill-rule="evenodd"
         d="M 367.68,173.84
            C 367.60,180.63 365.89,188.20 363.02,194.35
              360.07,200.64 357.76,204.80 352.96,209.96

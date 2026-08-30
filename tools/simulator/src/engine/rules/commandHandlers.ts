@@ -2,7 +2,8 @@ import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey } from "./playerUtils";
 import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
-import { CommandHandler } from "./CommandRegistry";
+import { CommandHandler, finalizeRequestKeyCards } from "./CommandRegistry";
+
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
@@ -488,7 +489,10 @@ export function dealDamageHandler(
 /**
  * cancelRequest: 指定されたリクエストをキャンセルする
  */
-export function cancelRequestHandler(expressionEvaluator: ExpressionEvaluator): CommandHandler {
+export function cancelRequestHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
   return (args, context) => {
     const { target } = args;
     const requestId = expressionEvaluator.resolveBindingValue(target, context);
@@ -507,20 +511,11 @@ export function cancelRequestHandler(expressionEvaluator: ExpressionEvaluator): 
 
     request.status = "cancelled";
 
-    // キャンセルされたリクエストのキーカードをコントローラーの墓地へ移動
-    const reqPlayer = context.state.players?.[request.controller];
-    if (reqPlayer && Array.isArray(request.keyCards) && request.keyCards.length > 0) {
-      if (!Array.isArray(reqPlayer.grave)) {
-        reqPlayer.grave = [];
-      }
-      for (const keyCard of request.keyCards) {
-        if (keyCard?.id && !isCardInGameZones(keyCard.id, context.state)) {
-          reqPlayer.grave.push(keyCard);
-        }
-      }
-    }
+    // キャンセルされたリクエストのキーカードを墓地へ移動し、cardMoved (from: request, to: grave) イベントを発行
+    finalizeRequestKeyCards(request, context, effectInterpreter);
   };
 }
+
 
 
 /**

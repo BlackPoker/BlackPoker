@@ -2,16 +2,38 @@ actions:
   - id: action.counter
     name: カウンター
     type: magic
+
     request:
       trigger: direct
       speed: normal
       timing: quick
+
     cost: D
+
+    key:
+      id: key
+      count: 1
+      condition:
+        card:
+          suit: club
+          rank: "A..10"
+          zone: hand
+
     targets:
       - id: targetRequest
         type: request
         condition:
           status: pending
+          keyCards:
+            count: [1, 2]
+
+    text:
+      effect: キーカードが1枚または2枚のリクエストを対象とする。対象のキーカードが1枚の場合、このカウンターのキーカードの数字が対象以上であれば無効化する。対象のキーカードが2枚の場合は無条件で無効化する。無効化されたリクエストはステージから取り除かれ、キーカードは墓地へ送られる。
+
     effect:
-      - cancelRequest:
-          target: targetRequest
+      - if:
+          condition: "targetRequest.keyCards.count == 2 || key.rankValue >= targetRequest.keyCards.first.rankValue"
+          then:
+            - cancelRequest:
+                target: targetRequest
+

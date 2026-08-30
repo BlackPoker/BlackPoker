@@ -754,7 +754,8 @@ export class CommandRegistry {
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
     this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
-    this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator));
+    this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator, this.effectInterpreter));
+
     this.register("toggleUnitState", toggleUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("cleanupFogs", cleanupFogsHandler(this.effectInterpreter));
     this.register("endTurn", endTurnHandler());

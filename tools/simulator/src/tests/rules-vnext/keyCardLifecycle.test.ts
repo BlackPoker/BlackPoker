@@ -309,9 +309,9 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     expect(state.players.p1.grave.some((c: any) => c.id === "s10-uuid")).toBe(true);
   });
 
-  it("10-11: Counter cancels target request, moving both target key and counter key to grave", () => {
+  it("10: Counter LegalPattern generation & Lifecycle (♣5 Counter vs key 4 Request -> cancel success)", () => {
     const state = createBaseState();
-    const targetTwistKey = { id: "d8-uuid", suit: "D", rank: "8", value: 8 };
+    const targetTwistKey = { id: "d4-uuid", suit: "D", rank: "4", value: 4 };
     const twistCostCard = { id: "twist-cost", suit: "S", rank: "3", value: 3 };
     const counterKey = { id: "c5-uuid", suit: "C", rank: "5", value: 5 };
     const counterCostCard = { id: "counter-cost", suit: "S", rank: "4", value: 4 };
@@ -328,13 +328,174 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     state.players.p1.hand = [targetTwistKey, twistCostCard];
     state.players.p2.hand = [counterKey, counterCostCard];
     state.players.p1.field = [dummyBulwark];
-    state.chancePlayer = "p1"; // 1. p1 が Twist リクエスト
+    state.turnPlayer = "p1";
+    state.chancePlayer = "p1";
+
+    const session = new GameSession(state, rulePackage);
+
+    // cardMoved イベントの追跡
+    const cardMovedEvents: any[] = [];
+    session.registry.onEvent((event: any) => {
+      if (event.type === "cardMoved") {
+        cardMovedEvents.push(event.payload);
+      }
+    });
+
+
+
+    // 1. p1 が Twist をリクエスト
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") return;
+
+    const twistPatternIdx = step1.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.twist"
+    );
+    expect(twistPatternIdx).toBeGreaterThanOrEqual(0);
+
+    const afterTwistReq = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: twistPatternIdx,
+    });
+
+    expect(state.stage.requests.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0); // Twist キーとコストが手札から消費
+
+    // p1 が PASS -> チャンスが p2 へ
+    expect(afterTwistReq.type).toBe("WAITING_FOR_DECISION");
+    if (afterTwistReq.type !== "WAITING_FOR_DECISION") return;
+    const p1PassIdx = afterTwistReq.request.patterns.findIndex((p) => p.kind === "PASS");
+    const afterP1Pass = session.submitDecision({
+      decisionId: afterTwistReq.request.decisionId,
+      stateVersion: afterTwistReq.request.stateVersion,
+      selectedPatternRef: p1PassIdx,
+    });
+
+    expect(state.chancePlayer).toBe("p2");
+    expect(afterP1Pass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP1Pass.type !== "WAITING_FOR_DECISION") return;
+
+    // 2. p2 の DecisionRequest で counter.yaml のキー (♣A〜10) から LegalPattern が生成されていることを確認
+    const counterPatternIdx = afterP1Pass.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && afterP1Pass.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.counter"
+    );
+    expect(counterPatternIdx).toBeGreaterThanOrEqual(0);
+
+    // p2 が Counter を提出 (キー: ♣5, コスト: counter-cost)
+    const afterCounterReq = session.submitDecision({
+      decisionId: afterP1Pass.request.decisionId,
+      stateVersion: afterP1Pass.request.stateVersion,
+      selectedPatternRef: counterPatternIdx,
+    });
+
+    expect(state.stage.requests.length).toBe(2);
+    expect(state.players.p2.hand.length).toBe(0); // Counter キーとコストが手札から消費
+
+    // 3. p2 PASS -> p1 PASS -> Counter 解決
+    expect(afterCounterReq.type).toBe("WAITING_FOR_DECISION");
+    if (afterCounterReq.type !== "WAITING_FOR_DECISION") return;
+    const p2PassIdx = afterCounterReq.request.patterns.findIndex((p) => p.kind === "PASS");
+    const afterP2Pass = session.submitDecision({
+      decisionId: afterCounterReq.request.decisionId,
+      stateVersion: afterCounterReq.request.stateVersion,
+      selectedPatternRef: p2PassIdx,
+    });
+
+
+    expect(afterP2Pass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP2Pass.type !== "WAITING_FOR_DECISION") return;
+    const p1FinalPassIdx = afterP2Pass.request.patterns.findIndex((p) => p.kind === "PASS");
+    const afterCounterResolve = session.submitDecision({
+      decisionId: afterP2Pass.request.decisionId,
+      stateVersion: afterP2Pass.request.stateVersion,
+      selectedPatternRef: p1FinalPassIdx,
+    });
+
+    // 4. Counter 解決直後の状態検証
+    // Counter は解決完了して history へ移動
+    const counterReq = state.stage.history.find((r: any) => r.actionId === "action.counter");
+    expect(counterReq).toBeDefined();
+    expect(counterReq.status).toBe("resolved");
+
+    // Twist は cancel されて stage.requests 上に cancelled 状態で残る
+    const stagedTwistReq = state.stage.requests.find((r: any) => r.actionId === "action.twist");
+    expect(stagedTwistReq).toBeDefined();
+    expect(stagedTwistReq.status).toBe("cancelled");
+
+    // キーカードの墓地移動確認 (Twistキー, Counterキーともに墓地へ)
+    expect(state.players.p1.grave.some((c: any) => c.id === "d4-uuid")).toBe(true);
+    expect(state.players.p2.grave.some((c: any) => c.id === "c5-uuid")).toBe(true);
+
+    // cardMoved (request -> grave) イベントが各1回だけ発行されていることを検証
+    const twistKeyMoves = cardMovedEvents.filter(
+      (e) => e.card?.id === "d4-uuid" && e.fromZone === "request" && e.toZone === "grave"
+    );
+    const counterKeyMoves = cardMovedEvents.filter(
+      (e) => e.card?.id === "c5-uuid" && e.fromZone === "request" && e.toZone === "grave"
+    );
+    expect(twistKeyMoves.length).toBe(1);
+    expect(counterKeyMoves.length).toBe(1);
+
+    // 5. キャンセルされた Twist を Stage から解決 (再度 p1 PASS -> p2 PASS)
+    expect(afterCounterResolve.type).toBe("WAITING_FOR_DECISION");
+    if (afterCounterResolve.type !== "WAITING_FOR_DECISION") return;
+    const p1Pass2Idx = afterCounterResolve.request.patterns.findIndex((p) => p.kind === "PASS");
+    const afterP1Pass2 = session.submitDecision({
+      decisionId: afterCounterResolve.request.decisionId,
+      stateVersion: afterCounterResolve.request.stateVersion,
+      selectedPatternRef: p1Pass2Idx,
+    });
+
+    expect(afterP1Pass2.type).toBe("WAITING_FOR_DECISION");
+    if (afterP1Pass2.type !== "WAITING_FOR_DECISION") return;
+    const p2Pass2Idx = afterP1Pass2.request.patterns.findIndex((p) => p.kind === "PASS");
+    session.submitDecision({
+      decisionId: afterP1Pass2.request.decisionId,
+      stateVersion: afterP1Pass2.request.stateVersion,
+      selectedPatternRef: p2Pass2Idx,
+    });
+
+    // Twist も history へ移動し、二重移動・二重イベントが発生しないことを検証
+    const finalTwistReq = state.stage.history.find((r: any) => r.actionId === "action.twist");
+    expect(finalTwistReq).toBeDefined();
+    expect(finalTwistReq.status).toBe("cancelled");
+    expect(state.stage.requests.length).toBe(0);
+
+    const finalTwistKeyMoves = cardMovedEvents.filter(
+      (e) => e.card?.id === "d4-uuid" && e.fromZone === "request" && e.toZone === "grave"
+    );
+    expect(finalTwistKeyMoves.length).toBe(1); // 二重発行なし
+    expect(state.players.p1.grave.filter((c: any) => c.id === "d4-uuid").length).toBe(1); // 二重追加なし
+
+  });
+
+  it("11: Counter vs higher rank key (♣5 Counter vs key 6 Request -> cancel fails)", () => {
+    const state = createBaseState();
+    const targetTwistKey = { id: "d6-uuid", suit: "D", rank: "6", value: 6 }; // key 6
+    const twistCostCard = { id: "twist-cost", suit: "S", rank: "3", value: 3 };
+    const counterKey = { id: "c5-uuid", suit: "C", rank: "5", value: 5 }; // key 5 (5 < 6)
+    const counterCostCard = { id: "counter-cost", suit: "S", rank: "4", value: 4 };
+
+    const dummyBulwark = {
+      unitId: "bw-p1",
+      componentId: "character.bulwark",
+      kind: "防壁",
+      state: "charge",
+      cards: [{ id: "c-bw", suit: "H", rank: "2", value: 2 }],
+      labels: ["防御"],
+    };
+
+    state.players.p1.hand = [targetTwistKey, twistCostCard];
+    state.players.p2.hand = [counterKey, counterCostCard];
+    state.players.p1.field = [dummyBulwark];
+    state.chancePlayer = "p1";
 
     const registry = new CommandRegistry();
     const twistAction = rulePackage.actions.find((a) => a.id === "action.twist")!;
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
 
-    // 1. Player A が Twist をリクエスト
+    // 1. p1 が Twist リクエスト (key 6)
     const twistContext: CommandContext = {
       state,
       playerKey: "p1",
@@ -346,13 +507,9 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     const twistReq = registry.createRequest(twistAction, twistContext, {
       selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["twist-cost"], summary: "$D" }),
     });
-    expect(state.stage.requests.length).toBe(1);
-    expect(state.players.p1.hand.length).toBe(0);
 
-    // 2. Player A が PASS し、Player B にチャンスが移る
+    // 2. p2 が Counter リクエスト (key 5)
     state.chancePlayer = "p2";
-
-    // Player B が Twist に対して Counter をリクエスト
     const counterContext: CommandContext = {
       state,
       playerKey: "p2",
@@ -365,35 +522,82 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
       selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["counter-cost"], summary: "$D" }),
     });
 
-    expect(state.stage.requests.length).toBe(2);
-    expect(state.players.p2.hand.length).toBe(0);
-
     // 3. Counter 解決 (Stage top: counterReq)
-    const topReq = registry.resolveTopRequest({
+    registry.resolveTopRequest({
       state,
       playerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
     });
-    expect(topReq?.request.id).toBe(counterReq.id);
 
-    // 10: Counter の効果により対象の twistReq は cancelled となり、twistKey は p1 の grave へ
-    expect(twistReq.status).toBe("cancelled");
-    expect(state.players.p1.grave.some((c: any) => c.id === "d8-uuid")).toBe(true);
+    // 5 < 6 なので Twist はキャンセルされず pending を維持する
+    expect(twistReq.status).toBe("pending");
+    expect(state.players.p1.grave.some((c: any) => c.id === "d6-uuid")).toBe(false);
 
-    // 11: Counter 自身の key も解決完了により p2 の grave へ
+    // Counter 自身のキーは解決完了により grave へ移動
     expect(state.players.p2.grave.some((c: any) => c.id === "c5-uuid")).toBe(true);
 
-    // 4. キャンセルされた twistReq が Stage から解決される際も安全にスキップされ、二重墓地送り等にならない
-    const nextTop = registry.resolveTopRequest({
+    // 4. Twist 解決 (未キャンセルなので正常に解決される)
+    registry.resolveTopRequest({
       state,
       playerKey: "p1",
       actions: rulePackage.actions,
       components: rulePackage.components,
     });
-    expect(nextTop?.request.id).toBe(twistReq.id);
-    expect(state.players.p1.grave.filter((c: any) => c.id === "d8-uuid").length).toBe(1);
+    expect(twistReq.status).toBe("resolved");
+    expect(dummyBulwark.state).toBe("drive");
+    expect(state.players.p1.grave.some((c: any) => c.id === "d6-uuid")).toBe(true);
   });
 
+  it("12: Counter vs 2-key request (♣5 Counter vs 2-key Request -> cancel success)", () => {
+    const state = createBaseState();
+    const keyCard1 = { id: "k1-uuid", suit: "S", rank: "9", value: 9 };
+    const keyCard2 = { id: "k2-uuid", suit: "D", rank: "8", value: 8 };
+    const counterKey = { id: "c5-uuid", suit: "C", rank: "5", value: 5 }; // key 5 (key 2枚なら数字無関係で無効化)
+    const counterCostCard = { id: "counter-cost", suit: "S", rank: "4", value: 4 };
 
+    state.players.p2.hand = [counterKey, counterCostCard];
+    state.stage.requests = [
+      {
+        id: "two-key-req",
+        actionId: "action.revolution",
+        controller: "p1",
+        status: "pending",
+        keyCards: [keyCard1, keyCard2],
+      },
+    ];
+
+    state.chancePlayer = "p2";
+    const registry = new CommandRegistry();
+    const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+
+    const counterContext: CommandContext = {
+      state,
+      playerKey: "p2",
+      keyCard: counterKey,
+      targetRequest: state.stage.requests[0],
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    const counterReq = registry.createRequest(counterAction, counterContext, {
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["counter-cost"], summary: "$D" }),
+    });
+
+    // Counter 解決
+    registry.resolveTopRequest({
+      state,
+      playerKey: "p2",
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    });
+
+    // 2-key request が無条件で cancelled になること
+    const targetReq = state.stage.requests.find((r: any) => r.id === "two-key-req");
+    expect(targetReq.status).toBe("cancelled");
+    expect(state.players.p1.grave.some((c: any) => c.id === "k1-uuid")).toBe(true);
+    expect(state.players.p1.grave.some((c: any) => c.id === "k2-uuid")).toBe(true);
+    expect(state.players.p2.grave.some((c: any) => c.id === "c5-uuid")).toBe(true);
+  });
 });
+

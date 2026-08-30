@@ -225,6 +225,18 @@ export class ActionRequestValidator {
               `ターゲットリクエストのステータスが不適合です。期待: ${cond.status}, 実際: ${targetReq.status}`
             );
           }
+          if (cond && cond.keyCards) {
+            const reqKeyCards = Array.isArray(targetReq.keyCards) ? targetReq.keyCards : [];
+            if (cond.keyCards.count !== undefined) {
+              const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
+              if (!expectedCounts.includes(reqKeyCards.length)) {
+                throw new ValidationError(
+                  `ターゲットリクエストのキーカード枚数が不適合です。期待: ${expectedCounts.join(", ")}, 実際: ${reqKeyCards.length}`
+                );
+              }
+            }
+          }
+
           if (context.currentRequest && targetReq.id === context.currentRequest.id) {
             throw new ValidationError("自分自身のリクエストを対象にすることはできません。");
           }
