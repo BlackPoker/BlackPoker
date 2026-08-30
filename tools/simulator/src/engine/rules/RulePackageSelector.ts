@@ -13,12 +13,14 @@ export const PLAYTEST_SUPPORTED_ACTION_IDS = new Set<string>([
   "action.twist",
   "action.up",
   "action.down",
+  "action.counter",
   "action.summonSoldier",
   "action.setBulwark",
   "action.counterattack",
   "action.nextGeneration",
   "action.revolutionDraw",
 ]);
+
 
 /**
  * Core Battle Playtest 用に、Playtest でサポートされているアクションのみにフィルタリングした RulePackage を生成します。

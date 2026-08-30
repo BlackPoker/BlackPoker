@@ -226,16 +226,20 @@ export class ActionRequestValidator {
             );
           }
           if (cond && cond.keyCards) {
-            const reqKeyCards = Array.isArray(targetReq.keyCards) ? targetReq.keyCards : [];
+            const reqKeyCards = Array.isArray(targetReq.keyCards)
+              ? targetReq.keyCards
+              : ((targetReq as any).keyCard ? [(targetReq as any).keyCard] : []);
             if (cond.keyCards.count !== undefined) {
               const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
               if (!expectedCounts.includes(reqKeyCards.length)) {
+
                 throw new ValidationError(
                   `ターゲットリクエストのキーカード枚数が不適合です。期待: ${expectedCounts.join(", ")}, 実際: ${reqKeyCards.length}`
                 );
               }
             }
           }
+
 
           if (context.currentRequest && targetReq.id === context.currentRequest.id) {
             throw new ValidationError("自分自身のリクエストを対象にすることはできません。");

@@ -57,8 +57,11 @@ export class TargetSelectionEnumerator {
         for (const req of stageRequests) {
           if (cond?.status && req.status !== cond.status) continue;
           if (cond?.keyCards) {
-            const reqKeyCards = Array.isArray(req.keyCards) ? req.keyCards : [];
+            const reqKeyCards = Array.isArray(req.keyCards)
+              ? req.keyCards
+              : ((req as any).keyCard ? [(req as any).keyCard] : []);
             if (cond.keyCards.count !== undefined) {
+
               const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
               if (!expectedCounts.includes(reqKeyCards.length)) continue;
             }
@@ -70,6 +73,7 @@ export class TargetSelectionEnumerator {
           });
         }
       }
+
  else if (targetType === "unit") {
         // ユニットターゲット（アップ、ダウン、アタック等）
         const searchPlayers = cond?.owner === "opponent"
