@@ -1,10 +1,25 @@
 import React, { useState } from "react";
 
+export interface TraceEntry {
+  seq: number;
+  stateVersion: number;
+  timestamp: string;
+  category: string;
+  actionId?: string;
+  requestId?: string;
+  controller?: string;
+  turnPlayer?: string;
+  chancePlayer?: string;
+  stageDepth?: number;
+  message: string;
+}
+
 export interface DebugPanelProps {
   state: any;
   currentDecisionRequest?: any;
   rulePackage?: any;
   logs: any[];
+  traces?: TraceEntry[];
 }
 
 export const DebugPanel: React.FC<DebugPanelProps> = ({
@@ -12,9 +27,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   currentDecisionRequest,
   rulePackage,
   logs,
+  traces = [],
 }) => {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"state" | "stage" | "buffer" | "decision">("state");
+  const [activeTab, setActiveTab] = useState<"trace" | "state" | "stage" | "buffer" | "decision">("trace");
 
   const handleCopy = () => {
     const env = (import.meta as any).env || {};
@@ -44,6 +60,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           graveCount: state?.players?.p2?.grave?.length,
         },
       },
+      traces,
       logs,
     };
 
@@ -55,6 +72,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   const env = (import.meta as any).env || {};
   const buildSha = env.VITE_BUILD_SHA ? String(env.VITE_BUILD_SHA).slice(0, 7) : "local";
   const buildRef = env.VITE_BUILD_REF ? String(env.VITE_BUILD_REF) : "local";
+  const bufferCount = state?.requestBuffer?.requests?.length || 0;
 
   return (
     <div className="flex flex-col h-full p-2.5 bg-white text-zinc-800 rounded border border-zinc-200 shadow-sm font-mono text-xs">
@@ -75,7 +93,15 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
       </div>
 
       {/* タブナビゲーション */}
-      <div className="flex gap-1 mb-1.5 border-b border-zinc-200 pb-1 text-[10px]">
+      <div className="flex flex-wrap gap-1 mb-1.5 border-b border-zinc-200 pb-1 text-[10px]">
+        <button
+          onClick={() => setActiveTab("trace")}
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "trace" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
+          }`}
+        >
+          TRACE ({traces.length})
+        </button>
         <button
           onClick={() => setActiveTab("state")}
           className={`px-2 py-0.5 rounded transition ${
@@ -98,7 +124,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             activeTab === "buffer" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
-          Buffer ({state?.requestBuffer?.length || 0})
+          Buffer ({bufferCount})
         </button>
         <button
           onClick={() => setActiveTab("decision")}
@@ -112,6 +138,48 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 
       {/* コンテンツ表示エリア */}
       <div className="flex-1 overflow-auto bg-zinc-50 p-2 rounded border border-zinc-200 text-[11px] leading-relaxed">
+        {activeTab === "trace" && (
+          <div className="flex flex-col gap-1">
+            {traces.length === 0 ? (
+              <div className="text-zinc-400 italic py-2">トレースログはまだありません</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-[10px]">
+                  <thead>
+                    <tr className="border-b border-zinc-300 text-zinc-600 bg-zinc-100">
+                      <th className="py-1 px-1">Seq</th>
+                      <th className="py-1 px-1">Ver</th>
+                      <th className="py-1 px-1">Time</th>
+                      <th className="py-1 px-1">Category</th>
+                      <th className="py-1 px-1">TP/CP</th>
+                      <th className="py-1 px-1">Stage</th>
+                      <th className="py-1 px-1">Detail</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {traces.map((t) => (
+                      <tr key={t.seq} className="border-b border-zinc-200 hover:bg-zinc-100">
+                        <td className="py-0.5 px-1 font-bold text-zinc-900">#{t.seq}</td>
+                        <td className="py-0.5 px-1 text-zinc-500">v{t.stateVersion}</td>
+                        <td className="py-0.5 px-1 text-zinc-400">{t.timestamp}</td>
+                        <td className="py-0.5 px-1">
+                          <span className="px-1 py-0.2 rounded bg-zinc-200 text-zinc-800 text-[9px] font-bold">
+                            {t.category}
+                          </span>
+                        </td>
+                        <td className="py-0.5 px-1 text-zinc-700">
+                          {t.turnPlayer || "-"}/{t.chancePlayer || "-"}
+                        </td>
+                        <td className="py-0.5 px-1 text-zinc-600">{t.stageDepth ?? 0}</td>
+                        <td className="py-0.5 px-1 text-zinc-950 font-sans break-all">{t.message}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
         {activeTab === "state" && (
           <pre className="text-zinc-800">{JSON.stringify(state, null, 2)}</pre>
         )}
@@ -122,7 +190,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
         )}
         {activeTab === "buffer" && (
           <pre className="text-zinc-800">
-            {JSON.stringify(state?.requestBuffer || [], null, 2)}
+            {JSON.stringify(state?.requestBuffer || { requests: [] }, null, 2)}
           </pre>
         )}
         {activeTab === "decision" && (
@@ -134,5 +202,6 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     </div>
   );
 };
+
 
 

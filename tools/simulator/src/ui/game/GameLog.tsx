@@ -5,6 +5,8 @@ export interface LogEntry {
   level: "info" | "event" | "action" | "trigger" | "system";
   message: string;
   timestamp: string;
+  seq?: number;
+  stateVersion?: number;
 }
 
 export interface GameLogProps {
@@ -23,7 +25,7 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
   const [copied, setCopied] = React.useState(false);
 
   const handleCopy = () => {
-    const text = logs.map((l) => `[${l.timestamp}] ${l.message}`).join("\n");
+    const text = logs.map((l) => `[${l.timestamp}] ${l.seq ? `#${l.seq} ` : ""}${l.message}`).join("\n");
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -49,7 +51,8 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
         </button>
       </div>
 
-      <div className="flex flex-col-reverse gap-1 overflow-y-auto flex-1 text-xs pr-1 font-mono">
+      {/* 上から順に詰めて表示する（上部空白を解消） */}
+      <div className="flex flex-col gap-1 overflow-y-auto flex-1 text-xs pr-1 font-mono">
         {logs.length === 0 ? (
           <div className="text-center text-zinc-400 py-3 text-[11px] italic">ログはありません</div>
         ) : (
@@ -58,9 +61,12 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
               key={log.id}
               className="flex items-start gap-1.5 p-1 rounded bg-zinc-50 hover:bg-zinc-100 transition leading-snug border border-zinc-200"
             >
-              <span className="text-[9px] text-zinc-400 font-mono mt-0.5 shrink-0">
-                {log.timestamp}
-              </span>
+              <div className="flex items-center gap-1 text-[9px] text-zinc-400 font-mono shrink-0 mt-0.5">
+                {log.seq !== undefined && (
+                  <span className="text-zinc-600 font-bold">#{log.seq}</span>
+                )}
+                <span>{log.timestamp}</span>
+              </div>
               <span className={`flex-1 break-words text-[11px] ${levelStyles[log.level] || levelStyles.info}`}>
                 {log.message}
               </span>
@@ -71,5 +77,6 @@ export const GameLog: React.FC<GameLogProps> = ({ logs = [] }) => {
     </div>
   );
 };
+
 
 

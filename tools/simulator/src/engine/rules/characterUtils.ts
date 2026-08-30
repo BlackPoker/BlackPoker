@@ -98,6 +98,60 @@ export function getCharacterType(unit: any, components: readonly ComponentDefini
   return kind || compId;
 }
 
+const CIRCLE_NUMBERS = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
+
+/**
+ * 盤面（field）内における防壁の識別番号（①, ②, ③...）のインデックスを取得します。
+ * ライフ側（field 配列のインデックス順）に 0, 1, 2... と番号付けされます。
+ */
+export function getBulwarkIndexInField(unit: any, field: readonly any[] = []): number {
+  if (!unit || !Array.isArray(field)) return -1;
+  let count = 0;
+  for (const u of field) {
+    const isBw = u.componentId === "character.bulwark" || u.kind === "防壁" || getCharacterType(u) === "bulwark";
+    if (isBw) {
+      if (u.unitId === unit.unitId) {
+        return count;
+      }
+      count++;
+    }
+  }
+  return -1;
+}
+
+/**
+ * 防壁の表示名（例: "防壁①", "防壁②"）を取得します。
+ */
+export function getBulwarkDisplayName(unit: any, field: readonly any[] = []): string {
+  const idx = getBulwarkIndexInField(unit, field);
+  if (idx >= 0 && idx < CIRCLE_NUMBERS.length) {
+    return `防壁${CIRCLE_NUMBERS[idx]}`;
+  }
+  return "防壁";
+}
+
+/**
+ * ユニットの統一表示名を取得します。
+ * 防壁の場合は盤面配置順に応じた防壁番号（防壁①、防壁②等）、兵士の場合は種類名を返します。
+ */
+export function getUnitDisplayName(
+  unit: any,
+  field: readonly any[] = [],
+  options?: { includeSize?: boolean }
+): string {
+  if (!unit) return "不明なユニット";
+  const charType = getCharacterType(unit);
+  if (charType === "bulwark" || unit.kind === "防壁" || unit.componentId === "character.bulwark") {
+    return getBulwarkDisplayName(unit, field);
+  }
+  const kindName = unit.kind || "兵士";
+  if (options?.includeSize && unit.currentSize !== undefined) {
+    return `${kindName}(サイズ:${unit.currentSize})`;
+  }
+  return kindName;
+}
+
+
 /**
  * ユニットが「兵士タイプ」であるかを判定します。
  */

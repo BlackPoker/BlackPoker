@@ -500,6 +500,7 @@ describe("Phase 21B.7: Battle Relations, Summoning Sickness, End Hand Limit & St
       },
     };
     const logsWithCost = GameEventFormatter.formatStateTransition(prevState, nextStateWithCost);
-    expect(logsWithCost.some((l) => l.message.includes("💰 Player A がコストを支払いました: 手札破棄: ♢7 → 墓地"))).toBe(true);
+    expect(logsWithCost.some((l) => l.message.includes("[COST] Player A がコストを支払いました: 手札破棄: ♢7 → 墓地"))).toBe(true);
   });
 });
+

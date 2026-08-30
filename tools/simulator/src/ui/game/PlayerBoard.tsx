@@ -152,12 +152,14 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
                 <UnitCard
                   key={unit.unitId}
                   unit={unit}
+                  field={fieldUnits}
                   fogs={unitFogs}
                   showCardDetails={showPrivateInfo || unit.face !== "down"}
                   selectionMarker={unitSelectionMarkers?.get(unit.unitId)}
                   battleDisplayInfo={battleRelationMap?.get(unit.unitId)}
                   onClick={onUnitClick ? () => onUnitClick(unit.unitId) : undefined}
                 />
+
               );
             })
           ) : (

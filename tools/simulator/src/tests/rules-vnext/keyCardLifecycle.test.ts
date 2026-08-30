@@ -5,6 +5,19 @@ import { RulePackage } from "../../domain/rules/RulePackage";
 import { GameSession } from "../../engine/session/GameSession";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { isCardInGameZones } from "../../engine/rules/cardUtils";
+import { CostPayment } from "../../domain/decision/DecisionCatalog";
+
+
+function createCostPayment(partial: Partial<CostPayment> & { summary?: string }): CostPayment {
+  return {
+    discardedCardIds: [],
+    drivenBulwarkUnitIds: [],
+    sacrificedUnitIds: [],
+    lifeCount: 0,
+    ...partial,
+  };
+}
+
 
 describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
   let rulePackage: RulePackage;
@@ -81,8 +94,9 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
 
     // 1: リクエスト作成時、keyCard は手札から消える (コスト card も消費される)
     const req = registry.createRequest(twistAction, context, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["cost-c3"], summary: "$D (c3 破棄)" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c3"], summary: "$D (c3 破棄)" }),
     });
+
     expect(state.players.p1.hand.find((c: any) => c.id === "d6-uuid")).toBeUndefined();
     expect(state.players.p1.hand.length).toBe(0);
 
@@ -110,9 +124,10 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     };
     expect(() =>
       registry.createRequest(twistAction, context2, {
-        selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["cost-c3"], summary: "$D" },
+        selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c3"], summary: "$D" }),
       })
     ).toThrow(); // コストも手札もないため失敗
+
 
     // 12: カードの二重存在がないこと
     expect(isCardInGameZones("d6-uuid", state)).toBe(true);
@@ -150,13 +165,14 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
 
     // リクエスト作成: hand から消える
     const req = registry.createRequest(summonAction, context, {
-      selectedCostPayment: {
-        costRef: 0,
+      selectedCostPayment: createCostPayment({
         lifeCount: 1,
         drivenBulwarkUnitIds: ["bw-cost"],
         summary: "$BL (防壁ドライブ+ライフ1)",
-      },
+      }),
     });
+
+
     expect(state.players.p1.hand.length).toBe(0);
     expect(dummyBulwark.state).toBe("drive"); // 防壁ドライブ
     expect(state.players.p1.life.length).toBe(0); // ライフ消費
@@ -198,7 +214,7 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
 
     // リクエスト作成: hand から消える
     const req = registry.createRequest(upAction, context, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["cost-c4"], summary: "$D" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c4"], summary: "$D" }),
     });
     expect(state.players.p1.hand.length).toBe(0);
 
@@ -240,7 +256,7 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     };
 
     const req = registry.createRequest(downAction, context, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["cost-c5"], summary: "$D" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c5"], summary: "$D" }),
     });
     expect(state.players.p1.hand.length).toBe(0);
 
@@ -280,7 +296,7 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     };
 
     const req = registry.createRequest(downAction, context, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["cost-c6"], summary: "$D" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c6"], summary: "$D" }),
     });
     expect(state.players.p1.hand.length).toBe(0);
 
@@ -328,7 +344,7 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
       components: rulePackage.components,
     };
     const twistReq = registry.createRequest(twistAction, twistContext, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["twist-cost"], summary: "$D" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["twist-cost"], summary: "$D" }),
     });
     expect(state.stage.requests.length).toBe(1);
     expect(state.players.p1.hand.length).toBe(0);
@@ -346,8 +362,9 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
       components: rulePackage.components,
     };
     const counterReq = registry.createRequest(counterAction, counterContext, {
-      selectedCostPayment: { costRef: 0, lifeCount: 0, discardedCardIds: ["counter-cost"], summary: "$D" },
+      selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["counter-cost"], summary: "$D" }),
     });
+
     expect(state.stage.requests.length).toBe(2);
     expect(state.players.p2.hand.length).toBe(0);
 

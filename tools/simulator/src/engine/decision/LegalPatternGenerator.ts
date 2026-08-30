@@ -9,7 +9,8 @@ import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
-import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue } from "../rules/cardUtils";
+import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort } from "../rules/cardUtils";
+
 
 export interface DecisionGenerationMetrics {
   actionCount: number;
@@ -494,10 +495,7 @@ export class LegalPatternGenerator {
 
     combos.forEach((combo, index) => {
       const selectedValues = combo.map((c) => c.id);
-      const cardNames = combo.map((c) => {
-        const code = c.code || `${c.suit || ""}${c.rank || ""}`;
-        return formatSuitSymbol(code);
-      }).join(", ");
+      const cardNames = combo.map((c) => formatCardCodeShort(c)).join(", ");
 
       let summary = `カード選択 (${requiredCount}枚): [${cardNames}]`;
       if (options?.selectionId === "bulwarkCard" || sourceRequest?.actionId === "action.setBulwark" || sourceRequest?.action?.id === "action.setBulwark") {
@@ -505,6 +503,7 @@ export class LegalPatternGenerator {
       } else if (effectStepId === "discardDownTo" || options?.selectionId === "discardCards") {
         summary = `手札破棄 (${requiredCount}枚): [${cardNames}]`;
       }
+
 
       const effSel = {
         selectionType: "card",

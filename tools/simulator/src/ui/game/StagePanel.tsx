@@ -50,11 +50,12 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
                 ? req.keyCards.map((c: any) => formatCardCodeDisplay(c.code || `${c.suit}${c.rank}`)).join(", ")
                 : undefined;
 
-              // コスト表示の判定
+              // コスト表示の判定（「（支払い済み）」は削除）
               const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
               const costLabel = costSummary
-                ? `Cost: ${costSummary}（支払い済み）`
-                : (req.cost ? `Cost: ${req.cost}（支払い済み）` : "Cost: なし");
+                ? `Cost: ${costSummary}`
+                : (req.cost ? `Cost: ${req.cost}` : "Cost: なし");
+
 
               // ターゲット情報の整形
               const targetLabels: string[] = [];

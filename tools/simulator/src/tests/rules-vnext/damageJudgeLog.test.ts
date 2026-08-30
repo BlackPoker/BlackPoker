@@ -53,9 +53,9 @@ describe("DamageJudge Detailed Log Formatter Tests (Phase 21B.6)", () => {
     const logs = GameEventFormatter.formatStateTransition(prevState, nextState);
     const messages = logs.map((l) => l.message);
 
-    expect(messages.some((m) => m.includes("Player A の一般兵 [♠6] vs Player B の一般兵 [♣6] + Player B の一般兵 [♢5]"))).toBe(true);
-    expect(messages.some((m) => m.includes("サイズ比較: attacker 6 vs blockers 11"))).toBe(true);
-    expect(messages.some((m) => m.includes("アタッカー死亡 / ブロッカー生存"))).toBe(true);
+    expect(messages.some((m) => m.includes("[DAMAGE_JUDGE] Player A の一般兵 [♠6] vs Player B の一般兵 [♣6] + Player B の一般兵 [♢5]"))).toBe(true);
+    expect(messages.some((m) => m.includes("[JUDGE_DETAIL] サイズ比較: attacker 6 vs blockers 11"))).toBe(true);
+    expect(messages.some((m) => m.includes("[DEFEATED] 結果: アタッカー死亡 / ブロッカー生存"))).toBe(true);
   });
 
   it("P0-2: should format soldier vs bulwark combat log with printed rank match", () => {
@@ -111,8 +111,9 @@ describe("DamageJudge Detailed Log Formatter Tests (Phase 21B.6)", () => {
     const logs = GameEventFormatter.formatStateTransition(prevState, nextState);
     const messages = logs.map((l) => l.message);
 
-    expect(messages.some((m) => m.includes("Player A の一般兵 [♡5] vs Player B の防壁 [♡5]"))).toBe(true);
-    expect(messages.some((m) => m.includes("防壁判定: printed rank 5 一致"))).toBe(true);
-    expect(messages.some((m) => m.includes("アタッカー死亡 / 防壁死亡"))).toBe(true);
+    expect(messages.some((m) => m.includes("[DAMAGE_JUDGE] Player A の一般兵 [♡5] vs Player B の防壁 [♡5]"))).toBe(true);
+    expect(messages.some((m) => m.includes("[BULWARK_JUDGE] 防壁判定: printed rank 5 一致"))).toBe(true);
+    expect(messages.some((m) => m.includes("[DEFEATED] 結果: アタッカー死亡 / 防壁死亡"))).toBe(true);
   });
 });
+

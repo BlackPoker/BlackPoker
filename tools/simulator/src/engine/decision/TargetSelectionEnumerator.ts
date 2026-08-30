@@ -2,6 +2,8 @@ import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { ExpressionEvaluator } from "../rules/ExpressionEvaluator";
 import { formatSuitSymbol } from "../rules/cardUtils";
+import { getUnitDisplayName } from "../rules/characterUtils";
+
 
 /**
  * アクション定義と盤面状態から、合法なターゲット候補を列挙するクラス。
@@ -102,14 +104,15 @@ export class TargetSelectionEnumerator {
               ? unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+")
               : "カードなし";
             const stateLabel = unit.state === "drive" ? "drive" : "charge";
-            const unitLabel = unit.kind || (isBulwark ? "防壁" : "一般兵");
+            const unitLabel = getUnitDisplayName(unit, player.field);
 
             results.push({
               targetType: "unit",
               targetPlayerKey: pKey,
               targetUnitId: unit.unitId,
-              displayName: `${pName} の ${unitLabel} [${cardDisplay}] (${stateLabel}) (#${unit.unitId.slice(-6)})`,
+              displayName: `${pName} の ${unitLabel} [${cardDisplay}] (${stateLabel})`,
             });
+
           }
         }
       }

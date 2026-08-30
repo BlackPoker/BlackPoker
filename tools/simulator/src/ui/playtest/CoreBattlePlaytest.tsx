@@ -14,16 +14,16 @@ import { DecisionPanel } from "../decision/DecisionPanel";
 import { GameLog, LogEntry } from "../game/GameLog";
 import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
-import { DebugPanel } from "../debug/DebugPanel";
+import { DebugPanel, TraceEntry } from "../debug/DebugPanel";
 
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
-
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
+  const seqRef = useRef<number>(1);
 
   // レギュレーション選択状態
   const [selectedRegulation, setSelectedRegulation] = useState<string>("core-battle");
@@ -35,7 +35,8 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [gameState, setGameState] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<GameSessionStep | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [latestEventMessage, setLatestEventMessage] = useState<string>("");
+  const [traces, setTraces] = useState<TraceEntry[]>([]);
+  const [latestEventMessage, setLatestEventMessage] = useState<string>("ゲーム開始準備完了");
 
   // ユニット選択マーカー（①, ②）および盤面クリック選択状態
   const [unitSelectionMarkers, setUnitSelectionMarkers] = useState<Map<string, { badge: string; isSelected: boolean }>>(
@@ -52,15 +53,42 @@ export const CoreBattlePlaytest: React.FC = () => {
   // デバッグタブ
   const [showDebug, setShowDebug] = useState(false);
 
-  const addLog = useCallback((message: string, level: LogEntry["level"] = "info") => {
+  const addTrace = useCallback((
+    category: string,
+    message: string,
+    state: any,
+    extra?: Partial<TraceEntry>
+  ) => {
+    const seq = seqRef.current++;
+    const stateVersion = state?.stateVersion ?? state?.version ?? 1;
+    const entry: TraceEntry = {
+      seq,
+      stateVersion,
+      timestamp: new Date().toLocaleTimeString(),
+      category,
+      turnPlayer: state?.turnPlayer,
+      chancePlayer: state?.chancePlayer,
+      stageDepth: state?.stage?.requests?.length || 0,
+      message,
+      ...extra,
+    };
+    setTraces((prev) => [...prev, entry]);
+  }, []);
+
+  const addLog = useCallback((message: string, level: LogEntry["level"] = "info", state?: any) => {
+    const seq = seqRef.current;
+    const stateVersion = state?.stateVersion ?? state?.version;
     const entry: LogEntry = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       level,
       message,
       timestamp: new Date().toLocaleTimeString(),
+      seq,
+      stateVersion,
     };
-    setLogs((prev) => [entry, ...prev]);
+    setLogs((prev) => [...prev, entry]);
   }, []);
+
 
   // 新しい対戦の開始
   const startNewGame = useCallback(() => {
@@ -81,31 +109,33 @@ export const CoreBattlePlaytest: React.FC = () => {
     sessionRef.current = session;
 
     setLogs([]);
-    setLatestEventMessage("");
+    setTraces([]);
+    seqRef.current = 1;
+    setLatestEventMessage("ゲーム開始準備完了");
     setSelectedUnitIds([]);
-    addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info");
-    addLog(`[REGULATION] Core Battle (Preset 001)`, "info");
+    addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info", setupResult.state);
+    addLog(`[REGULATION] Core Battle (Preset 001)`, "info", setupResult.state);
+    addTrace("MATCH_SETUP", `ゲーム開始 (Preset: ${CORE_BATTLE_PRESET_ID})`, setupResult.state);
 
     // 先攻決定プロセスのログ出力
     for (const round of setupResult.rounds) {
       const p1Code = `${round.p1Card.suit}${round.p1Card.rank}`;
       const p2Code = `${round.p2Card.suit}${round.p2Card.rank}`;
       if (round.result === "tie") {
-        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action");
+        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action", setupResult.state);
       } else {
         const winnerName = round.result === "p1" ? "Player A" : "Player B";
-        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定`, "action");
+        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定`, "action", setupResult.state);
       }
     }
-    addLog(`[SETUP] 公開された比較カードを両者の墓地へ移動しました`, "info");
+    addLog(`[SETUP] 公開された比較カードを両者の墓地へ移動しました`, "info", setupResult.state);
     if (setupResult.drawnCard) {
       const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
       const drawnCode = `${setupResult.drawnCard.suit}${setupResult.drawnCard.rank}`;
-      addLog(`[DRAW] 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action");
+      addLog(`[DRAW] 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action", setupResult.state);
     }
     const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
-    addLog(`[TURN] ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info");
-
+    addLog(`[TURN] ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info", setupResult.state);
 
     const step = session.advance();
     setCurrentStep(step);
@@ -117,8 +147,10 @@ export const CoreBattlePlaytest: React.FC = () => {
       if (enablePassAndPlay) {
         setIsPassAndPlayWaiting(true);
       }
+      addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, setupResult.state);
     }
-  }, [fullRulePackage, rulePackage, enablePassAndPlay, addLog]);
+  }, [fullRulePackage, rulePackage, enablePassAndPlay, addLog, addTrace]);
+
 
   // 初回マウント時にゲーム初期化
   useEffect(() => {
@@ -148,6 +180,10 @@ export const CoreBattlePlaytest: React.FC = () => {
       if (!session) return;
 
       let prevState = JSON.parse(JSON.stringify(session.state));
+      const selectedPattern = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.patterns[response.selectedPatternRef] : undefined;
+      const category = selectedPattern?.kind === "PASS" ? "PASS" : "DECISION_SUBMIT";
+      addTrace(category, `判断送信 (Pattern #${response.selectedPatternRef}: ${selectedPattern?.patternId || ""})`, prevState);
+
       let nextStep = session.submitDecision(response);
       let nextState = JSON.parse(JSON.stringify(session.state));
 
@@ -157,7 +193,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       // State 遷移からイベントログを自動生成・蓄積
       const generatedEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
       for (const ev of generatedEvents) {
-        addLog(ev.message, ev.level);
+        addLog(ev.message, ev.level, nextState);
+        addTrace("STATE_TRANSITION", ev.message, nextState);
       }
 
       // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS
@@ -170,7 +207,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         const autoPassIndex = nextStep.request.patterns.findIndex((p) => p.kind === "PASS");
         if (autoPassIndex !== -1) {
           const autoPassPlayer = nextStep.request.playerId === "p1" ? "Player A" : "Player B";
-          addLog(`⏩ ${autoPassPlayer} が自動 PASS しました (リクエスト＆PASS)`, "action");
+          addLog(`[AUTO_PASS] ${autoPassPlayer} が自動 PASS しました (リクエスト＆PASS)`, "action", nextState);
+          addTrace("AUTO_PASS", `${autoPassPlayer} 自動PASS`, nextState);
 
           prevState = JSON.parse(JSON.stringify(session.state));
           nextStep = session.submitDecision({
@@ -182,7 +220,8 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           const autoEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
           for (const ev of autoEvents) {
-            addLog(ev.message, ev.level);
+            addLog(ev.message, ev.level, nextState);
+            addTrace("STATE_TRANSITION", ev.message, nextState);
           }
         }
       }
@@ -203,15 +242,18 @@ export const CoreBattlePlaytest: React.FC = () => {
           setIsPassAndPlayWaiting(true);
         }
         lastActivePlayerRef.current = newPlayerId;
+        addTrace("WAITING_DECISION", `判断待機 (${newPlayerId})`, nextState);
       } else if (nextStep.type === "FINISHED") {
         const winnerName =
           nextState.players?.[nextStep.result.winner || ""]?.name ||
           (nextStep.result.winner === "p1" ? "Player A" : "Player B");
-        addLog(`🏆 ゲーム終了: 勝者【${winnerName}】(${nextStep.result.reason})`, "system");
+        addLog(`[FINISH] ゲーム終了: 勝者【${winnerName}】(${nextStep.result.reason})`, "system", nextState);
+        addTrace("GAME_FINISHED", `勝者: ${winnerName} (${nextStep.result.reason})`, nextState);
       }
     },
-    [enablePassAndPlay, currentStep, addLog]
+    [enablePassAndPlay, currentStep, addLog, addTrace]
   );
+
 
   // Pass-and-Play 準備完了ハンドラ
   const handlePassAndPlayReady = useCallback(() => {
@@ -316,8 +358,10 @@ export const CoreBattlePlaytest: React.FC = () => {
             <img
               src={logoUrl}
               alt="BlackPoker Logo"
-              className="w-6 h-6 opacity-95 transition-transform hover:scale-105"
+              className="w-6 h-6 transition-transform hover:scale-105"
+              style={{ filter: "brightness(0) contrast(200%) drop-shadow(0 0 0.4px #000)" }}
             />
+
             <div className="flex flex-col">
               <span
                 style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
@@ -480,9 +524,11 @@ export const CoreBattlePlaytest: React.FC = () => {
                 currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
                 rulePackage={rulePackage}
                 logs={logs}
+                traces={traces}
               />
             </div>
           )}
+
         </div>
       </main>
 

@@ -6,7 +6,7 @@
      width="5.61111in" height="5.55556in"
      viewBox="0 0 404 400">
   <path id="選択範囲 コピー#3"
-        fill="none" stroke="black" stroke-width="1"
+        fill="black" fill-rule="evenodd" stroke="black" stroke-width="1"
         d="M 367.68,173.84
            C 367.60,180.63 365.89,188.20 363.02,194.35
              360.07,200.64 357.76,204.80 352.96,209.96

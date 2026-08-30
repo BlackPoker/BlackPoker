@@ -1,9 +1,12 @@
 import React from "react";
 import { CardView } from "./CardView";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
+import { getUnitDisplayName } from "../../engine/rules/characterUtils";
+
 
 export interface UnitCardProps {
   unit: any;
+  field?: readonly any[];
   fogs?: readonly any[];
   showCardDetails?: boolean;
   selectionMarker?: {
@@ -16,6 +19,7 @@ export interface UnitCardProps {
 
 export const UnitCard: React.FC<UnitCardProps> = ({
   unit,
+  field = [],
   fogs,
   showCardDetails = true,
   selectionMarker,
@@ -26,6 +30,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   const isFaceDown = unit.face === "down";
   const isDrive = unit.state === "drive";
   const battleRole = battleDisplayInfo?.role || unit.battle?.role;
+  const unitDisplayName = getUnitDisplayName(unit, field);
 
   // サイズ合計の計算（兵士のみ）
   const isHiddenFromViewer = isFaceDown && !showCardDetails;
@@ -58,24 +63,24 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           ? "bg-zinc-50 border-zinc-600 ring-1 ring-zinc-600"
           : isBulwark
           ? isDrive
-            ? "bg-zinc-100 border-2 border-zinc-600 border-dashed opacity-80"
-            : "bg-white border-2 border-zinc-950 shadow-sm"
+          ? "bg-zinc-100 border-zinc-300 opacity-70"
+          : "bg-zinc-900 border-zinc-950 text-white shadow-sm"
           : isDrive
-          ? "bg-zinc-100 border border-zinc-400 opacity-80"
+          ? "bg-zinc-100 border-zinc-300 opacity-80"
           : "bg-white border border-zinc-300 shadow-sm"
       }`}
       style={{
         minWidth: "104px",
       }}
     >
-      {/* 選択可能・選択中バッジ (①, ②) */}
+      {/* 選択可能・選択中バッジ (①, ②) - 拡大 (24〜28px, text-sm, font-black, border-2) */}
       {selectionMarker && (
-        <div className="absolute -top-2.5 -left-1.5 z-10">
+        <div className="absolute -top-3.5 -left-2.5 z-20">
           <span
-            className={`flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-mono font-black shadow border ${
+            className={`flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs sm:text-sm font-mono font-black shadow-md border-2 ${
               selectionMarker.isSelected
-                ? "bg-zinc-950 border-zinc-950 text-white ring-2 ring-zinc-950"
-                : "bg-white border-zinc-400 text-zinc-900"
+                ? "bg-zinc-950 border-zinc-950 text-white ring-2 ring-zinc-950 scale-110"
+                : "bg-white border-zinc-950 text-zinc-950 hover:bg-zinc-100"
             }`}
           >
             {selectionMarker.badge}
@@ -92,7 +97,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               : "bg-zinc-100 text-zinc-800 border border-zinc-300"
           }`}
         >
-          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark ? "防壁" : "兵士"}
+          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{unitDisplayName}
         </span>
 
         <span

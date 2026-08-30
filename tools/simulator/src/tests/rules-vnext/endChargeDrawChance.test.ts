@@ -76,6 +76,7 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
 
     const initialStep = session.advance();
     expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+    if (initialStep.type !== "WAITING_FOR_DECISION") return;
     expect(initialStep.request.playerId).toBe("p1");
 
     const endPatternIdx = initialStep.request.patterns.findIndex(
@@ -93,6 +94,8 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0].actionId).toBe("action.end");
     expect(state.chancePlayer).toBe("p1");
+    expect(afterEndReq.type).toBe("WAITING_FOR_DECISION");
+    if (afterEndReq.type !== "WAITING_FOR_DECISION") return;
 
     // p1 が PASS -> チャンスが p2 へ
     const p1EndPassIdx = afterEndReq.request.patterns.findIndex((p) => p.kind === "PASS");
@@ -105,6 +108,7 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
 
     expect(state.chancePlayer).toBe("p2");
     expect(afterP1EndPass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP1EndPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP1EndPass.request.playerId).toBe("p2");
 
     // p2 が PASS -> 全員連続PASS成立により End が解決される
@@ -133,6 +137,7 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
 
     // I: 次の DecisionRequest.playerId も p2
     expect(afterP2EndPass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP2EndPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP2EndPass.request.playerId).toBe("p2");
 
     // J: p2 が PASS -> chancePlayer が p1 になる
@@ -147,6 +152,7 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
 
     expect(state.chancePlayer).toBe("p1");
     expect(afterP2DrawPass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP2DrawPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP2DrawPass.request.playerId).toBe("p1");
 
     // K: p1 も PASS -> Draw 解決
@@ -164,7 +170,9 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
     expect(state.players.p2.hand.length).toBe(2);
     expect(state.chancePlayer).toBe("p2");
     expect(afterP1DrawPass.type).toBe("WAITING_FOR_DECISION");
+    if (afterP1DrawPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP1DrawPass.request.playerId).toBe("p2");
   });
 });
+
 
