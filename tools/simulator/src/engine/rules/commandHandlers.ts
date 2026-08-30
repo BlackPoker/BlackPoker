@@ -2,7 +2,8 @@ import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey } from "./playerUtils";
 import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
-import { CommandHandler, finalizeRequestKeyCards } from "./CommandRegistry";
+import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
+
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
@@ -487,7 +488,7 @@ export function dealDamageHandler(
 }
 
 /**
- * cancelRequest: 指定されたリクエストをキャンセルする
+ * cancelRequest: 指定されたリクエストをキャンセルし、ステージから即座に取り除く
  */
 export function cancelRequestHandler(
   expressionEvaluator: ExpressionEvaluator,
@@ -500,21 +501,10 @@ export function cancelRequestHandler(
       throw new Error("キャンセル対象のリクエストIDが解決できません。");
     }
 
-    if (!context.state.stage || !context.state.stage.requests) {
-      throw new Error("ステージまたはリクエストリストが存在しません。");
-    }
-
-    const request = context.state.stage.requests.find((r: any) => r.id === requestId);
-    if (!request) {
-      throw new Error(`キャンセル対象のリクエストが見つかりません: ${requestId}`);
-    }
-
-    request.status = "cancelled";
-
-    // キャンセルされたリクエストのキーカードを墓地へ移動し、cardMoved (from: request, to: grave) イベントを発行
-    finalizeRequestKeyCards(request, context, effectInterpreter);
+    cancelStageRequest(requestId, context, effectInterpreter);
   };
 }
+
 
 
 

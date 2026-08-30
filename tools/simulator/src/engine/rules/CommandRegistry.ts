@@ -76,8 +76,47 @@ export function finalizeRequestKeyCards(
   }
 }
 
+/**
+ * ステージ上に存在する特定のリクエストを無効化（キャンセル）し、ステージから即座に取り除きます。
+ * - 対象リクエストの status を "cancelled" に設定
+ * - state.stage.requests から即座に除去（他のリクエストの相対順序・LIFO順は維持）
+ * - キーカードをコントローラーの墓地へ移動し、cardMoved (from: request, to: grave) イベントを発行
+ * - state.stage.history に 1 回だけ記録
+ * - actionResolved イベントは発行しない
+ */
+export function cancelStageRequest(
+  requestId: string,
+  context: CommandContext,
+  effectInterpreter?: EffectInterpreter
+): ActionRequest {
+  if (!context.state.stage || !Array.isArray(context.state.stage.requests)) {
+    throw new Error("ステージまたはリクエストリストが存在しません。");
+  }
+
+  const index = context.state.stage.requests.findIndex((r: any) => r.id === requestId);
+  if (index === -1) {
+    throw new Error(`キャンセル対象のリクエストが見つかりません: ${requestId}`);
+  }
+
+  const [request] = context.state.stage.requests.splice(index, 1);
+  request.status = "cancelled";
+
+  // キャンセルされたリクエストのキーカードを墓地へ移動し、cardMoved (from: request, to: grave) イベントを発行
+  finalizeRequestKeyCards(request, context, effectInterpreter);
+
+  // stage.history に記録（重複防止）
+  if (!context.state.stage.history) {
+    context.state.stage.history = [];
+  }
+  if (!context.state.stage.history.some((r: any) => r.id === request.id)) {
+    context.state.stage.history.push(request);
+  }
+
+  return request;
+}
 
 export interface CommandContext {
+
   state: any; // シミュレーターのゲーム状態
   playerKey: string; // 実行するプレイヤー ("p1" | "p2")
   keyCard?: any; // キーカード情報

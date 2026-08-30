@@ -193,6 +193,10 @@ describe("Counter Action integration Tests (New YAML)", () => {
 
     expect(req2.status).toBe("resolved");
     expect(req1.status).toBe("cancelled"); // 対象のアップが cancelled になる！
+    expect(state.stage.requests.length).toBe(0); // req1 も req2 も Stage から即座に取り除かれていること
+    expect(state.stage.history.length).toBe(2);
+    expect(state.stage.history[0]).toBe(req1); // キャンセルされた req1 が先に history に入る
+    expect(state.stage.history[1]).toBe(req2); // 解決された req2 が history に入る
   });
 
   it("should skip effect and cost of cancelled request (D, E)", () => {
@@ -259,15 +263,17 @@ describe("Counter Action integration Tests (New YAML)", () => {
     registry.resolveTopRequest(context2);
 
     expect(req2.status).toBe("resolved");
+    expect(req1.status).toBe("cancelled");
+    expect(state.stage.requests.length).toBe(0); // req1 も req2 も Stage から即座に取り除かれていること
     expect(state.players.p2.hand.length).toBe(0); // カウンターの D コストは支払われる (E)
-
-    // 2. キャンセルされたアップを解決しようとする
-    registry.resolveTopRequest(context1);
-
-    expect(req1.status).toBe("cancelled"); // 変わらず cancelled のまま
     expect(state.players.p1.hand.length).toBe(0); // リクエスト時にDコストとキーカードが消費される
     expect(state.players.p1.fog.length).toBe(0); // アップの効果であるフォグは生成されていないこと！ (D)
     expect(state.players.p1.grave.length).toBe(2); // アップのDコスト + キーカードが墓地へ
+
+    // 2. Stage は空なので resolveTopRequest を呼んでも undefined となり安全
+    const nextResolve = registry.resolveTopRequest(context1);
+    expect(nextResolve).toBeUndefined();
+
 
   });
 
@@ -554,22 +560,19 @@ describe("Counter Action integration Tests (New YAML)", () => {
     registry.resolveTopRequest(context2);
 
     expect(req2.status).toBe("resolved");
-    expect(state.stage.history).toBeDefined();
-    expect(state.stage.history.length).toBe(1);
-    expect(state.stage.history[0]).toBe(req2); // カウンター自身が history に残る
-
-    // 2. キャンセルされたアップを解決しようとする (cancelled としてスキップ)
-    registry.resolveTopRequest(context1);
-
     expect(req1.status).toBe("cancelled");
+    expect(state.stage.requests.length).toBe(0); // Stage は即時クリア
+    expect(state.stage.history).toBeDefined();
     expect(state.stage.history.length).toBe(2);
-    expect(state.stage.history[1]).toBe(req1); // キャンセルされたアップも history に残る
+    expect(state.stage.history[0]).toBe(req1); // キャンセルされたアップが先に history に記録
+    expect(state.stage.history[1]).toBe(req2); // カウンター自身が history に記録
 
-    // 3. キャンセルされたリクエストのコストとキーカードは墓地へ送られ、効果は未実行であることを検証
+    // 2. キャンセルされたリクエストのコストとキーカードは墓地へ送られ、効果は未実行であることを検証
     expect(state.players.p1.hand.length).toBe(0); // リクエスト時に消費済み
     expect(state.players.p1.fog.length).toBe(0); // 効果（フォグ生成）は未実行
     expect(state.players.p1.grave.length).toBe(2); // アップのDコスト(1枚) + キーカード(1枚)
     expect(state.players.p2.grave.length).toBe(2); // カウンターのDコスト(1枚) + キーカード(1枚)
+
   });
 });
 
