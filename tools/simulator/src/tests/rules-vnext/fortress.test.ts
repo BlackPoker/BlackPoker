@@ -308,12 +308,12 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    let eventFired = false;
+    let lifeCardMovedFired = false;
     // dispatchEventのフックを作成して監視する
     const originalDispatch = registry["effectInterpreter"].dispatchEvent;
     registry["effectInterpreter"].dispatchEvent = (event: any, ctx: any) => {
-      if (event.type === "cardMoved") {
-        eventFired = true;
+      if (event.type === "cardMoved" && event.payload?.fromZone === "life") {
+        lifeCardMovedFired = true;
       }
       originalDispatch.call(registry["effectInterpreter"], event, ctx);
     };
@@ -321,8 +321,9 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
     // アクションを実行
     registry.executeAction(throwingAction, context);
 
-    // 検証：イベントが一切発火していないこと
-    expect(eventFired).toBe(false);
+    // 検証：ライフからの移動イベントが一切発火していないこと
+    expect(lifeCardMovedFired).toBe(false);
+
     expect(state.players.p2.life.length).toBe(2);
     expect(state.players.p2.grave.length).toBe(0);
 

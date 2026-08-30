@@ -86,22 +86,22 @@ describe("Core Architecture Consistency Tests (Phase 16.5)", () => {
     // 初期手札枚数 = 2
     expect(state.players.p1.hand.length).toBe(2);
 
-    // A: createRequest 成立の瞬間にコスト (D) が消費される
+    // A: createRequest 成立の瞬間にコスト (D) とキーカードが手札から消費される
     const req = registry.createRequest(twistAction, context);
-    expect(state.players.p1.hand.length).toBe(1); // 1枚消費済み
-    expect(state.players.p1.grave.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0); // 2枚とも手札から消費
+    expect(state.players.p1.grave.length).toBe(1); // コストカードが墓地へ
 
     // B: stage に pending の間、すでに支払済み
     expect(state.stage.requests.length).toBe(1);
     expect(req.status).toBe("pending");
-    expect(state.players.p1.hand.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0);
 
-    // C: resolveTopRequest 実行時に二重支払いは発生しない
+    // C: resolveTopRequest 実行時に二重支払いは発生せず、未配置キーカードが墓地へ移る
     const resolveResult = registry.resolveTopRequest(context);
     expect(resolveResult?.type).toBe("COMPLETED");
     expect(req.status).toBe("resolved");
-    expect(state.players.p1.hand.length).toBe(1); // 手札は減っていない（二重消費なし）
-    expect(state.players.p1.grave.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0); // 二重消費なし
+    expect(state.players.p1.grave.length).toBe(2); // コスト + キーカード
   });
 
   it("D: When a request is cancelled on stage, paid cost is NOT refunded", () => {
@@ -119,7 +119,7 @@ describe("Core Architecture Consistency Tests (Phase 16.5)", () => {
     };
 
     const req = registry.createRequest(twistAction, context);
-    expect(state.players.p1.hand.length).toBe(1);
+    expect(state.players.p1.hand.length).toBe(0);
 
     // カウンター等で request が cancelled に変更された場合
     req.status = "cancelled";
@@ -127,8 +127,10 @@ describe("Core Architecture Consistency Tests (Phase 16.5)", () => {
 
     expect(result?.type).toBe("COMPLETED");
     expect(result?.request.status).toBe("cancelled");
-    // コストは返還されず手札は1枚のまま
-    expect(state.players.p1.hand.length).toBe(1);
+    // コストは返還されず手札は0枚のまま、墓地にキーカードも送られる
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.grave.length).toBe(2); // コスト + キーカード
+
   });
 
   it("E: EFFECT_RESOLUTION interruption and resumption should NOT double-pay costs", () => {

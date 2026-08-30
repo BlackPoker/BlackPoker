@@ -10,7 +10,8 @@ actions:
       timing: main
       controller: turnPlayer
       definitionOwner: turnPlayer
-      initialChance: nonTurnPlayer
+      initialChance: turnPlayer
+
 
     triggerCondition:
       event: actionResolved

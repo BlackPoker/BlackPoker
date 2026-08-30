@@ -220,9 +220,19 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
     expect(state.players.p2.field.find((u: any) => u.unitId === "soldier-p2-2").state).toBe("charge");
     expect(state.players.p2.field.find((u: any) => u.unitId === "bw-p2").state).toBe("charge");
 
-    // Draw が Stage に積まれ、チャンスは p1 (新 NTP)
+    // Draw が Stage に積まれ、チャンスは p2 (新 TP)
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0].actionId).toBe("action.draw");
+    expect(state.chancePlayer).toBe("p2");
+
+    // p2 が PASS してチャンスを p1 へ渡す
+    if (step.type !== "WAITING_FOR_DECISION") return;
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: findPassPatternIndex(step.request),
+    });
+
     expect(state.chancePlayer).toBe("p1");
 
     // p1 が Draw に対して Quick アクション「ツイスト」（対象: bw-p1）をリクエスト！
@@ -243,6 +253,7 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
       stateVersion: reqTwist.stateVersion,
       selectedPatternRef: twistPatternIdx,
     });
+
 
     // Stage に [Draw (req-1), Twist (req-2)] が積まれている
     expect(state.stage.requests.length).toBe(2);

@@ -59,8 +59,9 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
     expect(state.stage.requests[0]).toBe(req);
     expect(req.status).toBe("pending");
     expect(req.cost).toBe("D");
-    expect(state.players.p1.hand.length).toBe(1); // costCard が消費された
-    expect(state.players.p1.grave.length).toBe(1); // 墓地に送られた
+    expect(state.players.p1.hand.length).toBe(0); // costCard と keyCard がリクエスト時に消費された
+    expect(state.players.p1.grave.length).toBe(1); // コストカードが墓地に送られた
+
   });
 
   it("should generate sequential IDs and sequence numbers for reproducibility", () => {
@@ -164,7 +165,8 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
 
     const req = registry.createRequest(upAction, context);
     expect(req.status).toBe("pending");
-    expect(state.players.p1.hand.length).toBe(1); // コスト消費済み
+    expect(state.players.p1.hand.length).toBe(0); // コストおよびキーカード消費済み
+
 
     // 解決の実行
     registry.resolveTopRequest(context);

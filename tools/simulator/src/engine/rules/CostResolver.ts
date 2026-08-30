@@ -75,6 +75,7 @@ export class CostResolver {
             fromZone: "hand",
             toZone: "grave",
             playerKey: context.playerKey,
+            cause: { type: "cost", symbol: "D" },
           },
         };
         effectInterpreter.dispatchEvent(event, context);
@@ -132,11 +133,13 @@ export class CostResolver {
             fromZone: "life",
             toZone: "grave",
             playerKey: context.playerKey,
+            cause: { type: "cost", symbol: "L" },
           },
         };
         effectInterpreter.dispatchEvent(event, context);
       }
     }
+
   }
   /**
    * プレイヤーが指定されたコスト文字列を支払うことが可能か判定します。

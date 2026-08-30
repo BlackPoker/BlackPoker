@@ -74,10 +74,10 @@ describe("Twist Action Integration Tests (New YAML)", () => {
     registry.resolveTopRequest(context);
     expect(req.status).toBe("resolved");
 
-    // コストD用カードが消費されたかチェック
-    expect(state.players.p1.hand.length).toBe(1);
-    expect(state.players.p1.hand[0]).toBe(twistKeyCard); // キーカードは残る
-    expect(state.players.p1.grave.length).toBe(1); // コストカードが墓地へ
+    // キーカードおよびコストD用カードが消費されたかチェック
+    expect(state.players.p1.hand.length).toBe(0);
+    expect(state.players.p1.grave.length).toBe(2); // コストカード + キーカードが墓地へ
+
 
     // A. 状態が charge -> drive にトグルされたことをアサート
     expect(soldier.state).toBe("drive");

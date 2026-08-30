@@ -7,6 +7,8 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
 import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
+import { isCardInGameZones } from "./cardUtils";
+
 
 /**
  * createFog: フォグの生成と配置
@@ -30,27 +32,32 @@ export function createFogHandler(
 
     const keyCard = context.keyCard;
 
-    // 手札からキーカードを取り除き、fog 領域へ移動
-    if (keyCard && Array.isArray(player.hand)) {
-      const idx = player.hand.findIndex((c: any) => c.id === keyCard.id);
-      if (idx !== -1) {
-        player.hand.splice(idx, 1);
-        if (effectInterpreter) {
-          effectInterpreter.dispatchEvent(
-            {
-              type: "cardMoved",
-              payload: {
-                card: keyCard,
-                fromZone: "hand",
-                toZone: "fog",
-                playerKey: context.playerKey,
-              },
-            },
-            context
-          );
+    // 手札からキーカードを取り除き（残っていれば）、fog 領域へ移動
+    if (keyCard) {
+      let fromZone = "request";
+      if (Array.isArray(player.hand)) {
+        const idx = player.hand.findIndex((c: any) => c.id === keyCard.id);
+        if (idx !== -1) {
+          player.hand.splice(idx, 1);
+          fromZone = "hand";
         }
       }
+      if (effectInterpreter) {
+        effectInterpreter.dispatchEvent(
+          {
+            type: "cardMoved",
+            payload: {
+              card: keyCard,
+              fromZone,
+              toZone: "fog",
+              playerKey: context.playerKey,
+            },
+          },
+          context
+        );
+      }
     }
+
 
     const newFog = {
       fogId: `fog-${Date.now()}-${Math.random().toString(36).slice(2)}`,
@@ -499,8 +506,22 @@ export function cancelRequestHandler(expressionEvaluator: ExpressionEvaluator): 
     }
 
     request.status = "cancelled";
+
+    // キャンセルされたリクエストのキーカードをコントローラーの墓地へ移動
+    const reqPlayer = context.state.players?.[request.controller];
+    if (reqPlayer && Array.isArray(request.keyCards) && request.keyCards.length > 0) {
+      if (!Array.isArray(reqPlayer.grave)) {
+        reqPlayer.grave = [];
+      }
+      for (const keyCard of request.keyCards) {
+        if (keyCard?.id && !isCardInGameZones(keyCard.id, context.state)) {
+          reqPlayer.grave.push(keyCard);
+        }
+      }
+    }
   };
 }
+
 
 /**
  * toggleUnitState: 対象ユニットのチャージ/ドライブ状態をトグルする

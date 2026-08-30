@@ -28,12 +28,54 @@ import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { EffectContinuation } from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
+import { isCardInGameZones } from "./cardUtils";
 
 export interface CreateRequestOptions {
   readonly selectedCostPayment?: CostPayment;
   readonly sourcePatternId?: string;
   readonly placement?: "stage" | "none";
 }
+
+/**
+ * リクエストに付属していたキーカードのうち、効果によって他のゾーン（field, fog, hand, grave, life 等）
+ * へ移動しなかった未配置カードをコントローラーの墓地へ移動します。
+ */
+export function finalizeRequestKeyCards(
+  request: ActionRequest,
+  context: CommandContext,
+  effectInterpreter?: EffectInterpreter
+): void {
+  if (!request.keyCards || request.keyCards.length === 0) return;
+  const player = context.state.players?.[request.controller];
+  if (!player) return;
+
+  if (!Array.isArray(player.grave)) {
+    player.grave = [];
+  }
+
+  for (const keyCard of request.keyCards) {
+    if (!keyCard || !keyCard.id) continue;
+    if (!isCardInGameZones(keyCard.id, context.state)) {
+      player.grave.push(keyCard);
+      if (effectInterpreter) {
+        effectInterpreter.dispatchEvent(
+          {
+            type: "cardMoved",
+            payload: {
+              card: keyCard,
+              fromZone: "request",
+              toZone: "grave",
+              playerKey: request.controller,
+              cause: { type: "action", actionId: request.actionId, requestId: request.id },
+            },
+          },
+          context
+        );
+      }
+    }
+  }
+}
+
 
 export interface CommandContext {
   state: any; // シミュレーターのゲーム状態
@@ -154,13 +196,35 @@ export class CommandRegistry {
     context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
     const seq = context.state.nextRequestSeq;
 
-    // 4. 投入カードのリスト化
+    // 4. 投入カードのリスト化 & 手札からの取り除き（Requestに付属）
     const actualCards =
       context.keyCards && context.keyCards.length > 0
         ? context.keyCards
         : context.keyCard
         ? [context.keyCard]
         : [];
+
+    const player = context.state.players?.[context.playerKey];
+    if (player && Array.isArray(player.hand) && actualCards.length > 0) {
+      const actualCardIds = new Set(actualCards.map((c: any) => c.id));
+      player.hand = player.hand.filter((c: any) => !actualCardIds.has(c.id));
+      for (const card of actualCards) {
+        this.effectInterpreter.dispatchEvent(
+          {
+            type: "cardMoved",
+            payload: {
+              card,
+              fromZone: "hand",
+              toZone: "request",
+              playerKey: context.playerKey,
+              requestId: `req-${seq}`,
+            },
+          },
+          context
+        );
+      }
+    }
+
 
     // 5. 型安全なターゲット情報の構築
     let targets: ActionRequestTarget[] | undefined = undefined;
@@ -273,12 +337,14 @@ export class CommandRegistry {
 
     // キャンセル済みリクエストのスキップ
     if (request.status === "cancelled") {
+      finalizeRequestKeyCards(request, context, this.effectInterpreter);
       context.state.stage.history.push(request);
       return {
         type: "COMPLETED",
         request,
       };
     }
+
 
     request.status = "resolving";
 
@@ -378,6 +444,7 @@ export class CommandRegistry {
     }
 
     request.status = "resolved";
+    finalizeRequestKeyCards(request, context, this.effectInterpreter);
     if (!context.state.stage) {
       context.state.stage = { requests: [], history: [] };
     }
@@ -444,6 +511,7 @@ export class CommandRegistry {
     const action = request.action;
     if (!action || !action.effect) {
       request.status = "resolved";
+      finalizeRequestKeyCards(request, context, this.effectInterpreter);
       context.state.stage.history.push(request);
       return { type: "COMPLETED", request };
     }
@@ -534,7 +602,9 @@ export class CommandRegistry {
     }
 
     request.status = "resolved";
+    finalizeRequestKeyCards(request, context, this.effectInterpreter);
     context.state.stage.history.push(request);
+
 
     // アクション解決イベントの発行
     const resolveEvent = {

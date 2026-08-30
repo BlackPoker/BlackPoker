@@ -37,10 +37,10 @@ describe("Cost Payment Integration Tests (New YAML)", () => {
     const context: CommandContext = {
       state,
       playerKey: "p1",
-      keyCard: handCard,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
+
 
     // 1. 事前検証が正常に通ること
     expect(() => registry.validateAction(setAction, context)).not.toThrow();

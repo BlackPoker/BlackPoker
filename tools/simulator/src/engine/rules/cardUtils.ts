@@ -127,3 +127,80 @@ export function matchesPrintedRank(attackerCards: any[], bulwarkCard?: any): boo
   const bulwarkRank = String(bulwarkCard.rank).toUpperCase();
   return attackerCards.some((c: any) => String(c.rank).toUpperCase() === bulwarkRank);
 }
+
+/**
+ * 短縮ASCIIカードコード (スート小文字 + ランク: s2, h8, d5, cA, dK, jk 等)
+ */
+export function formatCardCodeShort(card: any): string {
+  if (!card) return "";
+  if (typeof card === "string") {
+    const suit = card.charAt(0);
+    const rest = card.slice(1);
+    if (suit === "H" || suit === "h" || suit === "♡") return `h${rest}`;
+    if (suit === "D" || suit === "d" || suit === "♢") return `d${rest}`;
+    if (suit === "S" || suit === "s" || suit === "♠") return `s${rest}`;
+    if (suit === "C" || suit === "c" || suit === "♣") return `c${rest}`;
+    return card.toLowerCase();
+  }
+  const normSuit = normalizeSuit(card.suit);
+  const suitPrefix =
+    normSuit === "heart"
+      ? "h"
+      : normSuit === "diamond"
+      ? "d"
+      : normSuit === "spade"
+      ? "s"
+      : normSuit === "club"
+      ? "c"
+      : normSuit === "joker"
+      ? "jk"
+      : String(card.suit || "").toLowerCase();
+  const rank = String(card.rank || "").toUpperCase();
+  if (suitPrefix === "jk") return "jk";
+  return `${suitPrefix}${rank}`;
+}
+
+/**
+ * 指定カードがゲーム盤面の主要ゾーン（hand, field, fog, grave, life）のいずれかに存在するか判定します。
+ */
+export function isCardInGameZones(cardId: string, state: any): boolean {
+  if (!cardId || !state?.players) return false;
+  for (const player of Object.values<any>(state.players)) {
+    // 1. hand
+    if (Array.isArray(player.hand) && player.hand.some((c: any) => c?.id === cardId)) {
+      return true;
+    }
+    // 2. field
+    if (Array.isArray(player.field)) {
+      for (const unit of player.field) {
+        if (Array.isArray(unit.cards) && unit.cards.some((c: any) => c?.id === cardId)) {
+          return true;
+        }
+      }
+    }
+    // 3. fog
+    if (Array.isArray(player.fog)) {
+      for (const fog of player.fog) {
+        if (fog.card?.id === cardId) return true;
+        if (Array.isArray(fog.cards) && fog.cards.some((c: any) => c?.id === cardId)) {
+          return true;
+        }
+      }
+    }
+    // 4. grave
+    if (Array.isArray(player.grave)) {
+      for (const g of player.grave) {
+        if (g?.id === cardId) return true;
+        if (Array.isArray(g?.cards) && g.cards.some((c: any) => c?.id === cardId)) {
+          return true;
+        }
+      }
+    }
+    // 5. life
+    if (Array.isArray(player.life) && player.life.some((c: any) => c?.id === cardId)) {
+      return true;
+    }
+  }
+  return false;
+}
+

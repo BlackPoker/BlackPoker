@@ -54,8 +54,9 @@ describe("Counter Action integration Tests (New YAML)", () => {
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0]).toBe(req);
     expect(req.status).toBe("pending");
-    expect(state.players.p1.hand.length).toBe(1); // コストDはリクエスト時に消費済み (Rule 5.3)
+    expect(state.players.p1.hand.length).toBe(0); // コストDとキーカードはリクエスト時に消費済み
   });
+
 
   it("should stack Counter action request on stage with reference (B)", () => {
     const upAction = rulePackage.actions.find((a) => a.id === "action.up")!;
@@ -257,8 +258,10 @@ describe("Counter Action integration Tests (New YAML)", () => {
     registry.resolveTopRequest(context1);
 
     expect(req1.status).toBe("cancelled"); // 変わらず cancelled のまま
-    expect(state.players.p1.hand.length).toBe(1); // リクエスト時に消費された D コストは返還されない (Rule 5.3)
+    expect(state.players.p1.hand.length).toBe(0); // リクエスト時にDコストとキーカードが消費される
     expect(state.players.p1.fog.length).toBe(0); // アップの効果であるフォグは生成されていないこと！ (D)
+    expect(state.players.p1.grave.length).toBe(2); // アップのDコスト + キーカードが墓地へ
+
   });
 
   it("should fail when targeting a non-existent request (F)", () => {
@@ -474,6 +477,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
     const handCard = { id: "hand-card", code: "♡7", suit: "H", rank: "7", value: 7 };
     const costCard = { id: "cost-card", code: "♠2", suit: "S", rank: "2", value: 2 };
+    const counterKey = { id: "counter-key", code: "♣5", suit: "C", rank: "5", value: 5 };
     const counterCostCard = { id: "counter-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
     
     const state: any = {
@@ -498,7 +502,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
         p2: {
           name: "Player B",
           life: [],
-          hand: [counterCostCard],
+          hand: [counterKey, counterCostCard],
           field: [],
           grave: [],
           fog: [],
@@ -520,11 +524,13 @@ describe("Counter Action integration Tests (New YAML)", () => {
     const context2: CommandContext = {
       state,
       playerKey: "p2",
+      keyCard: counterKey,
       targetRequest: req1,
       actions: rulePackage.actions,
       components: rulePackage.components,
     };
     const req2 = registry.createRequest(counterAction, context2);
+
 
     // 1. カウンターを解決する (resolved)
     registry.resolveTopRequest(context2);
@@ -541,10 +547,11 @@ describe("Counter Action integration Tests (New YAML)", () => {
     expect(state.stage.history.length).toBe(2);
     expect(state.stage.history[1]).toBe(req1); // キャンセルされたアップも history に残る
 
-    // 3. キャンセルされたリクエストのコストはリクエスト時に消費済みだが効果は未実行であることを検証
-    expect(state.players.p1.hand.length).toBe(1); // リクエスト時に消費された D コストは返還されない (Rule 5.3)
+    // 3. キャンセルされたリクエストのコストとキーカードは墓地へ送られ、効果は未実行であることを検証
+    expect(state.players.p1.hand.length).toBe(0); // リクエスト時に消費済み
     expect(state.players.p1.fog.length).toBe(0); // 効果（フォグ生成）は未実行
-    expect(state.players.p1.grave.length).toBe(1); // アップのDコスト(1枚)
-    expect(state.players.p2.grave.length).toBe(1); // カウンターのDコスト(1枚)
+    expect(state.players.p1.grave.length).toBe(2); // アップのDコスト(1枚) + キーカード(1枚)
+    expect(state.players.p2.grave.length).toBe(2); // カウンターのDコスト(1枚) + キーカード(1枚)
   });
 });
+

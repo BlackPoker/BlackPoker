@@ -159,26 +159,13 @@ describe("Turn Cycle, Charge & Draw Integration Tests (Phase 21A)", () => {
     expect(state.players.p2.life.length).toBe(5); // この時点ではまだライフは減っていない
     expect(state.players.p2.hand.length).toBe(0);
 
-    // Draw が Stage に積まれた直後、対応機会としてチャンスは p1 (新 NTP = 旧 TP) へ
-    expect(state.chancePlayer).toBe("p1");
-    expect(step.type).toBe("WAITING_FOR_DECISION");
-    if (step.type !== "WAITING_FOR_DECISION") return;
-    expect(step.request.playerId).toBe("p1");
-
-    // 4. p1 が PASS (対応なし)
-    const passIndexAfterDrawP1 = step.request.patterns.findIndex((p) => p.kind === "PASS");
-    step = session.submitDecision({
-      decisionId: step.request.decisionId,
-      stateVersion: step.request.stateVersion,
-      selectedPatternRef: passIndexAfterDrawP1,
-    });
-
-    // チャンスが p2 へ移行
+    // Draw が Stage に積まれた直後、チャンスは新ターンプレイヤー p2 へ
+    expect(state.chancePlayer).toBe("p2");
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") return;
     expect(step.request.playerId).toBe("p2");
 
-    // 5. p2 が PASS -> 連続PASS成立で Draw 解決
+    // 4. p2 が PASS (対応なし) -> チャンスが p1 へ
     const passIndexAfterDrawP2 = step.request.patterns.findIndex((p) => p.kind === "PASS");
     step = session.submitDecision({
       decisionId: step.request.decisionId,
@@ -186,10 +173,24 @@ describe("Turn Cycle, Charge & Draw Integration Tests (Phase 21A)", () => {
       selectedPatternRef: passIndexAfterDrawP2,
     });
 
+    expect(state.chancePlayer).toBe("p1");
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    if (step.type !== "WAITING_FOR_DECISION") return;
+    expect(step.request.playerId).toBe("p1");
+
+    // 5. p1 も PASS (全員連続PASS成立) -> Draw 解決
+    const passIndexAfterDrawP1 = step.request.patterns.findIndex((p) => p.kind === "PASS");
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: passIndexAfterDrawP1,
+    });
+
     // Draw 解決後: ライフ 5枚 -> 2枚引いて手札 2枚、ライフ残り 3枚
     expect(state.players.p2.hand.length).toBe(2);
     expect(state.players.p2.life.length).toBe(3);
     expect(state.stage.requests.length).toBe(0);
+
 
     // Draw 解決後、チャンスは手番プレイヤー (turnPlayer = p2) へ戻る
     expect(state.turnPlayer).toBe("p2");
@@ -338,13 +339,25 @@ describe("Turn Cycle, Charge & Draw Integration Tests (Phase 21A)", () => {
       selectedPatternRef: pass2,
     });
 
-    // Draw が Stage に積まれ、チャンスは p1
+    // Draw が Stage に積まれ、チャンスは p2
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0].actionId).toBe("action.draw");
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") return;
+    expect(step.request.playerId).toBe("p2");
+
+    // p2 が PASS してチャンスを p1 へ渡す
+    const passDrawP2 = step.request.patterns.findIndex((p) => p.kind === "PASS");
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: passDrawP2,
+    });
+
+    if (step.type !== "WAITING_FOR_DECISION") return;
     const reqDrawStage = step.request;
     expect(reqDrawStage.playerId).toBe("p1");
+
 
     // p1 の Legal Patterns に Quick アクション (ツイスト) が存在することを確認
     const twistPatternIndex = reqDrawStage.patterns.findIndex(
