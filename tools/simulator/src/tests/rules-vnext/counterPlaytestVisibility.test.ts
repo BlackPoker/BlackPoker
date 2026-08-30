@@ -41,11 +41,11 @@ describe("Phase 21B.8.2.1: Counter Playtest Visibility and Target Condition Test
     return {
       protocolVersion: "2026-08-vnext",
       matchId: "match-counter-test",
-      phase: "battle",
       turn: 1,
       turnPlayer: "p1",
       chancePlayer: "p1",
       passCount: 0,
+
       players: {
         p1: {
           name: "Player A",
