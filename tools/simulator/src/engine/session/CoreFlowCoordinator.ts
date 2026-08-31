@@ -70,8 +70,28 @@ export class CoreFlowCoordinator {
     // 1. PASS の処理
     if (pattern.kind === "PASS") {
       passTracker.recordPass();
+      const prevChance = state.chancePlayer;
       const nextChance = this.getNextPlayerKey(playerId, state);
       state.chancePlayer = nextChance;
+
+      if (registry.logRecorder) {
+        registry.logRecorder.record({
+          type: "player.passed",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          playerId,
+          passCount: passTracker.consecutivePassCount,
+        });
+        if (prevChance !== nextChance) {
+
+          registry.logRecorder.record({
+            type: "chance.changed",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            fromChancePlayer: prevChance,
+            toChancePlayer: nextChance,
+            reason: "pass",
+          });
+        }
+      }
 
       return {
         type: "PASSED",
@@ -79,6 +99,7 @@ export class CoreFlowCoordinator {
         nextChancePlayerId: nextChance,
       };
     }
+
 
     // 2. 通常 / 即時アクション（ACTION）の処理
     passTracker.reset(); // 新しいアクションが積まれたため連続PASS状態をリセット

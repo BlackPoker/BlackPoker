@@ -149,7 +149,9 @@ export class PatternExecutor {
     const actionRequest = registry.createRequest(actionDef, context, {
       selectedCostPayment: costPayment,
       sourcePatternId: pattern.patternId,
+      decisionId: request.decisionId,
     });
+
 
     return { actionRequest, context };
   }

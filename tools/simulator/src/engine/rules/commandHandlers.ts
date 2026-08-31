@@ -645,9 +645,10 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
  */
 export function endTurnHandler(): CommandHandler {
   return (args, context) => {
-    TurnManager.endTurn(context.state);
+    TurnManager.endTurn(context.state, context);
   };
 }
+
 
 /**
  * startAttack: アタックを宣言し、戦闘状態 (state.combat) を作成する

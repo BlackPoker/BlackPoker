@@ -148,6 +148,18 @@ export class TriggerProcessingCoordinator {
       const seq = state.nextRequestSeq;
       const actionRequestId = `req-${seq}`;
 
+      const logRecorder = registry.logRecorder;
+      if (logRecorder) {
+        logRecorder.record({
+          type: "requestBuffer.dequeued",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          actionRef: triggeredReq.actionId,
+          controller: triggeredReq.controller,
+          requestId: actionRequestId,
+          speed: isImmediate ? "immediate" : "normal",
+        });
+      }
+
       const actionReq: ActionRequest = {
         id: actionRequestId,
         actionId: triggeredReq.actionId,
@@ -163,13 +175,39 @@ export class TriggerProcessingCoordinator {
         triggerBindings: triggeredReq.triggerBindings,
       };
 
+      if (logRecorder) {
+        logRecorder.record({
+          type: "request.created",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          requestId: actionReq.id,
+          actionRef: actionReq.actionId,
+          requester: actionReq.controller,
+          controller: actionReq.controller,
+          definitionOwner: actionReq.definitionOwner,
+          speed: isImmediate ? "immediate" : "normal",
+          timing: actionReq.action.request?.timing,
+          keyCardIds: actionReq.keyCards?.map((c: any) => c.id).filter(Boolean),
+        });
+      }
+
       const context: CommandContext = {
         ...tempContext,
         currentRequest: actionReq,
         sourceEvent: triggeredReq.sourceEvent,
+        logRecorder,
       };
 
       if (isImmediate) {
+        if (logRecorder) {
+          logRecorder.record({
+            type: "request.resolve.started",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            requestId: actionReq.id,
+            actionRef: actionReq.actionId,
+            controller: actionReq.controller,
+          });
+        }
+
         // 即時誘発: stage を経由せず直接解決
         if (triggeredReq.action.cost) {
           this.costResolver.pay(triggeredReq.action.cost, context, registry.getEffectInterpreter());
@@ -182,6 +220,17 @@ export class TriggerProcessingCoordinator {
         if (!state.stage) state.stage = { requests: [], history: [] };
         if (!state.stage.history) state.stage.history = [];
         state.stage.history.push(actionReq);
+
+        if (logRecorder) {
+          logRecorder.record({
+            type: "request.resolved",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            requestId: actionReq.id,
+            actionRef: actionReq.actionId,
+            controller: actionReq.controller,
+            result: actionReq.result,
+          });
+        }
 
         state.requestBuffer.history.push({
           actionId: triggeredReq.actionId,
@@ -207,7 +256,21 @@ export class TriggerProcessingCoordinator {
         // 通常誘発: stage へ積載（未解決）
         if (!state.stage) state.stage = { requests: [], history: [] };
         if (!state.stage.requests) state.stage.requests = [];
+        const depthBefore = state.stage.requests.length;
         state.stage.requests.push(actionReq);
+        const depthAfter = state.stage.requests.length;
+
+        if (logRecorder) {
+          logRecorder.record({
+            type: "stage.pushed",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            requestId: actionReq.id,
+            actionRef: actionReq.actionId,
+            depthBefore,
+            depthAfter,
+            topRequestId: actionReq.id,
+          });
+        }
 
         state.requestBuffer.history.push({
           actionId: triggeredReq.actionId,
@@ -220,6 +283,7 @@ export class TriggerProcessingCoordinator {
         stagedRequests.push(actionReq);
         console.log(`[BUFFER-MOVE] 通常誘発アクションをステージへ積載: ${triggeredReq.actionId} (ID: ${actionReq.id}, controller: ${actionReq.controller}, definitionOwner: ${actionReq.definitionOwner})`);
       }
+
     }
 
     return {

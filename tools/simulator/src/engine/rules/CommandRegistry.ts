@@ -29,12 +29,15 @@ import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { EffectContinuation } from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 import { isCardInGameZones } from "./cardUtils";
+import { MatchLogRecorder, normalizeCardLocation } from "../log/MatchLogRecorder";
 
 export interface CreateRequestOptions {
   readonly selectedCostPayment?: CostPayment;
   readonly sourcePatternId?: string;
   readonly placement?: "stage" | "none";
+  readonly decisionId?: string;
 }
+
 
 /**
  * リクエストに付属していたキーカードのうち、効果によって他のゾーン（field, fog, hand, grave, life 等）
@@ -98,8 +101,31 @@ export function cancelStageRequest(
     throw new Error(`キャンセル対象のリクエストが見つかりません: ${requestId}`);
   }
 
+  const depthBefore = context.state.stage.requests.length;
   const [request] = context.state.stage.requests.splice(index, 1);
+  const depthAfter = context.state.stage.requests.length;
   request.status = "cancelled";
+
+  const logRecorder = context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;
+  if (logRecorder) {
+
+    logRecorder.record({
+      type: "stage.popped",
+      stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+      requestId: request.id,
+      actionRef: request.actionId,
+      depthBefore,
+      depthAfter,
+    });
+    logRecorder.record({
+      type: "request.cancelled",
+      stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+      requestId: request.id,
+      actionRef: request.actionId,
+      controller: request.controller,
+      reason: "countered",
+    });
+  }
 
   // キャンセルされたリクエストのキーカードを墓地へ移動し、cardMoved (from: request, to: grave) イベントを発行
   finalizeRequestKeyCards(request, context, effectInterpreter);
@@ -132,7 +158,9 @@ export interface CommandContext {
   source?: string; // 新規追加：移送ソース
   sourceEvent?: any; // 誘発元イベント
   selections?: Record<string, any>; // 効果解決時の選択結果マップ
+  logRecorder?: MatchLogRecorder; // Canonical Match Log レコーダー
 }
+
 
 export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
 
@@ -148,6 +176,7 @@ export class CommandRegistry {
   private effectInterpreter: EffectInterpreter;
   public triggerResolver = new TriggerResolver();
   public requestBufferProcessor = new RequestBufferProcessor();
+  public logRecorder?: MatchLogRecorder;
 
   constructor() {
     this.effectInterpreter = new EffectInterpreter(
@@ -157,6 +186,7 @@ export class CommandRegistry {
     );
     this.registerDefaults();
   }
+
 
   getEffectInterpreter(): EffectInterpreter {
     return this.effectInterpreter;
@@ -343,15 +373,48 @@ export class CommandRegistry {
       action,
     };
 
+    const logRecorder = context.logRecorder || this.logRecorder;
+    if (logRecorder) {
+      logRecorder.record({
+        type: "request.created",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: request.id,
+        actionRef: action.id,
+        requester: context.playerKey,
+        controller: context.playerKey,
+        speed: isImmediate ? "immediate" : "normal",
+        timing: action.request?.timing,
+        decisionId: options?.decisionId,
+        sourcePatternId: options?.sourcePatternId,
+        keyCardIds: actualCards.map((c: any) => c.id).filter(Boolean),
+        targetRefs: targets,
+      });
+    }
+
     // 7. ステージに積載（即時アクションまたは明示的 none の場合は積載しない）
     const shouldPlaceOnStage = options?.placement !== "none" && !isImmediate;
     if (shouldPlaceOnStage) {
       if (!context.state.stage.requests) context.state.stage.requests = [];
+      const depthBefore = context.state.stage.requests.length;
       context.state.stage.requests.push(request);
+      const depthAfter = context.state.stage.requests.length;
+
+      if (logRecorder) {
+        logRecorder.record({
+          type: "stage.pushed",
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          requestId: request.id,
+          actionRef: action.id,
+          depthBefore,
+          depthAfter,
+          topRequestId: request.id,
+        });
+      }
     }
 
     return request;
   }
+
 
   /**
    * 単一のアクションリクエストを解決する共通プリミティブ。
@@ -446,9 +509,22 @@ export class CommandRegistry {
       currentAction: action,
       currentRequest: request,
       sourceEvent: request.sourceEvent,
+      logRecorder: context.logRecorder || this.logRecorder,
     };
 
+
     // コストはリクエスト成立時に支払い済みのため、解決時には支払わない
+
+    const logRecorder = context.logRecorder || this.logRecorder;
+    if (logRecorder) {
+      logRecorder.record({
+        type: "request.resolve.started",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: request.id,
+        actionRef: request.actionId,
+        controller: request.controller,
+      });
+    }
 
     // 効果（effect）の解決（中断対応）
     if (action.effect) {
@@ -492,6 +568,17 @@ export class CommandRegistry {
     }
     context.state.stage.history.push(request);
 
+    if (logRecorder) {
+      logRecorder.record({
+        type: "request.resolved",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: request.id,
+        actionRef: request.actionId,
+        controller: request.controller,
+        result: request.result,
+      });
+    }
+
     // アクション解決イベントの発行
     const resolveEvent = {
       type: "actionResolved",
@@ -527,9 +614,25 @@ export class CommandRegistry {
     }
 
     // LIFO スタックから最新のリクエストを取り出す
+    const depthBefore = context.state.stage.requests.length;
     const request = context.state.stage.requests.pop()!;
+    const depthAfter = context.state.stage.requests.length;
+
+    const logRecorder = context.logRecorder || this.logRecorder;
+    if (logRecorder) {
+      logRecorder.record({
+        type: "stage.popped",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: request.id,
+        actionRef: request.actionId,
+        depthBefore,
+        depthAfter,
+      });
+    }
+
     return this.resolveRequest(request, context);
   }
+
 
   /**
    * 中断されたアクションリクエストの効果解決を再開します。
@@ -644,6 +747,17 @@ export class CommandRegistry {
     finalizeRequestKeyCards(request, context, this.effectInterpreter);
     context.state.stage.history.push(request);
 
+    const logRecorder = context.logRecorder || this.logRecorder;
+    if (logRecorder) {
+      logRecorder.record({
+        type: "request.resolved",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: request.id,
+        actionRef: request.actionId,
+        controller: request.controller,
+        result: request.result,
+      });
+    }
 
     // アクション解決イベントの発行
     const resolveEvent = {
@@ -656,6 +770,7 @@ export class CommandRegistry {
       },
     };
     this.dispatchEvent(resolveEvent, context);
+
 
     return {
       type: "COMPLETED",
@@ -769,6 +884,23 @@ export class CommandRegistry {
    * 登録されたリスナーへイベントを通知します。
    */
   emitEvent(event: any) {
+    if (this.logRecorder && event?.type === "cardMoved" && event.payload?.card?.id) {
+      const p = event.payload;
+      this.logRecorder.record({
+        type: "card.moved",
+        stateVersion: p.stateVersion ?? 1,
+        cardId: p.card.id,
+        from: normalizeCardLocation(p.fromZone, p.playerKey, p.requestId),
+        to: normalizeCardLocation(p.toZone, p.playerKey, p.requestId),
+        cause: p.cause
+          ? {
+              type: p.cause.type === "action" ? "effect" : p.cause.type || "rule",
+              requestId: p.cause.requestId || p.requestId,
+              details: p.cause.details,
+            }
+          : undefined,
+      });
+    }
     for (const l of this.eventListeners) {
       l(event);
     }
@@ -782,6 +914,8 @@ export class CommandRegistry {
     // 既存のイベント解決を優先して走らせる
     this.effectInterpreter.dispatchEvent(event, context);
   }
+
+
 
   /**
    * デフォルトの検証用命令ハンドラーを登録

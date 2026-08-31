@@ -98,6 +98,7 @@ export class TriggerResolver {
       const action = match.action;
       const isMain = this.isMainTriggeredRequest(action);
 
+      const logRecorder = context.logRecorder;
       if (isMain && hasMainTriggered) {
         // 6-D-9 に基づき後発メイン系アクションを破棄
         const discardReason = `6-D-9: later triggered main action discarded (actionId: ${action.id})`;
@@ -107,6 +108,15 @@ export class TriggerResolver {
           reason: discardReason,
           sourceEvent: event
         });
+        if (logRecorder) {
+          logRecorder.record({
+            type: "requestBuffer.discarded",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            actionRef: action.id,
+            controller: (match as any).resolvedController ?? context.playerKey,
+            reason: discardReason,
+          });
+        }
         console.log(`[TRIGGER-DISCARD] 後発メインアクションのため破棄: ${action.id} (理由: ${discardReason})`);
       } else {
         // リクエストバッファへ積む
@@ -114,6 +124,17 @@ export class TriggerResolver {
         const seq = state.nextRequestSeq;
         const controller = (match as any).resolvedController ?? context.playerKey;
         const definitionOwner = (match as any).resolvedDefinitionOwner ?? context.playerKey;
+
+        if (logRecorder) {
+          logRecorder.record({
+            type: "trigger.detected",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            actionRef: action.id,
+            controller,
+            definitionOwner,
+            causedByEvent: event,
+          });
+        }
 
         const req: TriggeredActionRequest = {
           id: `req-trg-${seq}`,
@@ -135,6 +156,16 @@ export class TriggerResolver {
           sourceEvent: event
         });
 
+        if (logRecorder) {
+          logRecorder.record({
+            type: "requestBuffer.enqueued",
+            stateVersion: state.stateVersion ?? state.version ?? 1,
+            actionRef: action.id,
+            controller,
+            definitionOwner,
+          });
+        }
+
         console.log(`[TRIGGER] ${action.name || action.id} が誘発しました (ID: ${req.id}, コントローラー: ${controller}, 所有者: ${definitionOwner})`);
 
         if (isMain) {
@@ -143,6 +174,7 @@ export class TriggerResolver {
       }
     }
   }
+
 
   /**
    * 単一アクション定義に対するイベント一致結果を検索します（0〜N件）。

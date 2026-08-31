@@ -9,6 +9,8 @@ import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
 import { PassTracker } from "./PassTracker";
 import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordinator";
 import { getOpponentPlayerKey } from "../rules/playerUtils";
+import { MatchLogRecorder, MatchLogRecorderOptions } from "../log/MatchLogRecorder";
+import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -66,7 +68,10 @@ export class GameSession {
   public resolvingRequest?: any;
   public resolvingContext?: any;
   public passTracker: PassTracker;
+  public logRecorder: MatchLogRecorder;
   private triggerCoordinator: TriggerProcessingCoordinator;
+  private matchStartedRecorded = false;
+  private lastRecordedTurnPlayer?: string;
 
   public get stateVersion(): number {
     return this.state.stateVersion ?? this.state.version ?? 1;
@@ -80,7 +85,13 @@ export class GameSession {
   constructor(
     state: any,
     rulePackage: RulePackage,
-    options?: { matchId?: string; registry?: CommandRegistry; passTracker?: PassTracker }
+    options?: {
+      matchId?: string;
+      registry?: CommandRegistry;
+      passTracker?: PassTracker;
+      logRecorder?: MatchLogRecorder;
+      logOptions?: MatchLogRecorderOptions;
+    }
   ) {
     this.state = state;
     if (this.state.stateVersion === undefined) {
@@ -91,16 +102,70 @@ export class GameSession {
     this.matchId = options?.matchId || `match-${Date.now()}`;
     this.passTracker = options?.passTracker || new PassTracker();
     this.triggerCoordinator = new TriggerProcessingCoordinator();
+
+    this.logRecorder =
+      options?.logRecorder ||
+      new MatchLogRecorder({
+        matchId: this.matchId,
+        rulesVersion: "9.1.2",
+        rulePackageRef: "rules-vnext",
+        ...(options?.logOptions || {}),
+      });
+
+    this.registry.logRecorder = this.logRecorder;
   }
+
+  /**
+   * 現在の CanonicalMatchLog を取得
+   */
+  getMatchLog(): CanonicalMatchLog {
+    return this.logRecorder.getMatchLog();
+  }
+
 
   /**
    * ゲームを自動的に進め、プレイヤーの判断が必要な場合は WAITING_FOR_DECISION を返します。
    */
   advance(): GameSessionStep {
+    // 0. マッチ開始イベント（初回のみ）
+    if (!this.matchStartedRecorded) {
+      this.matchStartedRecorded = true;
+      this.lastRecordedTurnPlayer = this.state.turnPlayer || "p1";
+      this.logRecorder.record({
+        type: "match.started",
+        stateVersion: this.stateVersion,
+        matchId: this.matchId,
+        turnPlayer: this.state.turnPlayer || "p1",
+        chancePlayer: this.state.chancePlayer || this.state.turnPlayer || "p1",
+        initialPlayers: Object.keys(this.state.players || {}),
+      });
+    }
+
+    // 0.5. ターン交代の検知
+    if (this.state.turnPlayer && this.state.turnPlayer !== this.lastRecordedTurnPlayer) {
+      const fromTP = this.lastRecordedTurnPlayer || "p1";
+      const toTP = this.state.turnPlayer;
+      this.lastRecordedTurnPlayer = toTP;
+      this.logRecorder.record({
+        type: "turn.changed",
+        stateVersion: this.stateVersion,
+        fromTurnPlayer: fromTP,
+        toTurnPlayer: toTP,
+        turnCount: this.state.turnCount ?? this.state.turn ?? 1,
+      });
+    }
+
     // 1. 勝敗判定（ライフ 0 判定）
     const finishCheck = this.checkGameFinished();
     if (finishCheck) {
       this.pendingDecision = undefined;
+      this.logRecorder.record({
+        type: "match.finished",
+        stateVersion: this.stateVersion,
+        winner: finishCheck.winner,
+        reason: finishCheck.reason,
+      });
+      this.logRecorder.finishMatch();
       return {
         type: "FINISHED",
         result: finishCheck,
@@ -131,6 +196,17 @@ export class GameSession {
         this.resolvingRequest = stageResolveEvent.actionRequest;
         this.resolvingContext = stageResolveEvent.context;
 
+        this.logRecorder.record({
+          type: "decision.requested",
+          stateVersion: this.stateVersion,
+          decisionId: this.pendingDecision.decisionId,
+          playerId: this.pendingDecision.playerId,
+          source: this.pendingDecision.source.type,
+          requestId: (this.pendingDecision.source as any).requestId,
+          legalPatternCount: this.pendingDecision.patterns.length,
+          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+        });
+
         return {
           type: "WAITING_FOR_DECISION",
           request: this.pendingDecision,
@@ -141,6 +217,13 @@ export class GameSession {
       const postFinishCheck = this.checkGameFinished();
       if (postFinishCheck) {
         this.pendingDecision = undefined;
+        this.logRecorder.record({
+          type: "match.finished",
+          stateVersion: this.stateVersion,
+          winner: postFinishCheck.winner,
+          reason: postFinishCheck.reason,
+        });
+        this.logRecorder.finishMatch();
         return {
           type: "FINISHED",
           result: postFinishCheck,
@@ -159,6 +242,13 @@ export class GameSession {
       const postTriggerFinishCheck = this.checkGameFinished();
       if (postTriggerFinishCheck) {
         this.pendingDecision = undefined;
+        this.logRecorder.record({
+          type: "match.finished",
+          stateVersion: this.stateVersion,
+          winner: postTriggerFinishCheck.winner,
+          reason: postTriggerFinishCheck.reason,
+        });
+        this.logRecorder.finishMatch();
         return {
           type: "FINISHED",
           result: postTriggerFinishCheck,
@@ -171,19 +261,32 @@ export class GameSession {
       const topStagedReq = triggerResult.stagedRequests[triggerResult.stagedRequests.length - 1];
       const actionDef = this.rulePackage.actions.find((a) => a.id === topStagedReq.actionId);
       const initialChanceSpec = actionDef?.request?.initialChance;
+      const prevChance = this.state.chancePlayer;
+      let newChance: PlayerKey;
 
       if (initialChanceSpec === "turnPlayer") {
-        this.state.chancePlayer = this.state.turnPlayer || topStagedReq.controller;
+        newChance = this.state.turnPlayer || topStagedReq.controller;
       } else if (initialChanceSpec === "nonTurnPlayer") {
-        this.state.chancePlayer =
+        newChance =
           this.state.nonTurnPlayer ||
           getOpponentPlayerKey(this.state.turnPlayer || topStagedReq.controller, this.state);
       } else if (initialChanceSpec === "controller") {
-        this.state.chancePlayer = topStagedReq.controller;
+        newChance = topStagedReq.controller;
       } else if (initialChanceSpec === "opponent") {
-        this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
+        newChance = getOpponentPlayerKey(topStagedReq.controller, this.state);
       } else {
-        this.state.chancePlayer = getOpponentPlayerKey(topStagedReq.controller, this.state);
+        newChance = getOpponentPlayerKey(topStagedReq.controller, this.state);
+      }
+
+      this.state.chancePlayer = newChance;
+      if (prevChance !== newChance) {
+        this.logRecorder.record({
+          type: "chance.changed",
+          stateVersion: this.stateVersion,
+          fromChancePlayer: prevChance,
+          toChancePlayer: newChance,
+          reason: "triggerStaged",
+        });
       }
     }
 
@@ -202,6 +305,17 @@ export class GameSession {
 
     if (request.patterns.length > 0) {
       this.pendingDecision = request;
+      this.logRecorder.record({
+        type: "decision.requested",
+        stateVersion: this.stateVersion,
+        decisionId: request.decisionId,
+        playerId: request.playerId,
+        source: request.source.type,
+        requestId: (request.source as any).requestId,
+        legalPatternCount: request.patterns.length,
+        legalPatternRefs: request.patterns.map((_, i) => i),
+      });
+
       return {
         type: "WAITING_FOR_DECISION",
         request,
@@ -225,8 +339,18 @@ export class GameSession {
 
     PatternExecutor.validateResponse(this.pendingDecision, response, this.stateVersion);
 
+    this.logRecorder.record({
+      type: "decision.responded",
+      stateVersion: this.stateVersion,
+      decisionId: response.decisionId,
+      playerId: this.pendingDecision.playerId,
+      source: this.pendingDecision.source.type,
+      selectedPatternRef: response.selectedPatternRef,
+    });
+
     // 判断回答が受理されたため、盤面バージョンを進める
     this.stateVersion++;
+
 
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {

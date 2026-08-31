@@ -9,16 +9,28 @@ export class TurnManager {
    * チャンスプレイヤーも同じプレイヤーに設定し、turnCount を +1 します。
    * ターンごとのアクション数 (actionCount) を 0 にリセットします。
    */
-  static startTurn(state: any, playerKey: string) {
+  static startTurn(state: any, playerKey: string, context?: any) {
     if (!state.players) {
       state.players = {};
     }
+    const prevTurnPlayer = state.turnPlayer;
     state.turnPlayer = playerKey;
     state.nonTurnPlayer = getOpponentPlayerKey(playerKey, state);
     state.chancePlayer = playerKey;
     state.turnCount = (state.turnCount || 0) + 1;
     state.actionCount = 0; // ターンごとのアクション数をリセット
     state.turnUsage = {}; // ターンごとのアクション使用回数をリセット
+
+    const logRecorder = context?.logRecorder;
+    if (logRecorder && prevTurnPlayer && prevTurnPlayer !== playerKey) {
+      logRecorder.record({
+        type: "turn.changed",
+        stateVersion: state.stateVersion ?? state.version ?? 1,
+        fromTurnPlayer: prevTurnPlayer,
+        toTurnPlayer: playerKey,
+        turnCount: state.turnCount,
+      });
+    }
   }
 
   /**
@@ -32,10 +44,11 @@ export class TurnManager {
   /**
    * 現在のターンを終了し、次のプレイヤーのターンを開始します。
    */
-  static endTurn(state: any) {
+  static endTurn(state: any, context?: any) {
     const nextPlayer = getOpponentPlayerKey(state.turnPlayer, state);
-    this.startTurn(state, nextPlayer);
+    this.startTurn(state, nextPlayer, context);
   }
+
 
   /**
    * 既存テストおよびCLI互換性、およびメインアクション開始準備のための初期化ヘルパー。
