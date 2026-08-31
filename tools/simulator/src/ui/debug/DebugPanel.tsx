@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 
 export interface TraceEntry {
   seq: number;
@@ -20,6 +21,7 @@ export interface DebugPanelProps {
   rulePackage?: any;
   logs: any[];
   traces?: TraceEntry[];
+  matchLog?: CanonicalMatchLog;
 }
 
 export const DebugPanel: React.FC<DebugPanelProps> = ({
@@ -28,9 +30,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
   rulePackage,
   logs,
   traces = [],
+  matchLog,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"trace" | "state" | "stage" | "buffer" | "decision">("trace");
+  const [activeTab, setActiveTab] = useState<"trace" | "matchLog" | "state" | "stage" | "buffer" | "decision">("trace");
 
   const handleCopy = () => {
     const env = (import.meta as any).env || {};
@@ -69,10 +72,27 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleDownloadMatchLog = () => {
+    if (!matchLog) return;
+    const jsonStr = JSON.stringify(matchLog, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const matchId = matchLog.meta.matchId || state?.matchId || "match";
+    const timeStr = new Date().toISOString().replace(/[:.]/g, "-");
+    a.href = url;
+    a.download = `blackpoker-match-${timeStr}-${matchId}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const env = (import.meta as any).env || {};
   const buildSha = env.VITE_BUILD_SHA ? String(env.VITE_BUILD_SHA).slice(0, 7) : "local";
   const buildRef = env.VITE_BUILD_REF ? String(env.VITE_BUILD_REF) : "local";
   const bufferCount = state?.requestBuffer?.requests?.length || 0;
+  const canonicalEventCount = matchLog?.events?.length || 0;
 
   return (
     <div className="flex flex-col h-full p-2.5 bg-white text-zinc-800 rounded border border-zinc-200 shadow-sm font-mono text-xs">
@@ -84,12 +104,23 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           </span>
         </div>
 
-        <button
-          onClick={handleCopy}
-          className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 transition flex items-center gap-1"
-        >
-          {copied ? "✓ COPIED" : "COPY"}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {matchLog && (
+            <button
+              onClick={handleDownloadMatchLog}
+              className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-900 hover:bg-zinc-800 text-white transition flex items-center gap-1"
+              title="Download Canonical Match Log (JSON)"
+            >
+              DOWNLOAD MATCH LOG ({canonicalEventCount})
+            </button>
+          )}
+          <button
+            onClick={handleCopy}
+            className="px-2 py-0.5 text-[10px] font-bold rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 transition flex items-center gap-1"
+          >
+            {copied ? "✓ COPIED" : "COPY"}
+          </button>
+        </div>
       </div>
 
       {/* タブナビゲーション */}
@@ -103,12 +134,20 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           TRACE ({traces.length})
         </button>
         <button
+          onClick={() => setActiveTab("matchLog")}
+          className={`px-2 py-0.5 rounded transition ${
+            activeTab === "matchLog" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
+          }`}
+        >
+          CANONICAL LOG ({canonicalEventCount})
+        </button>
+        <button
           onClick={() => setActiveTab("state")}
           className={`px-2 py-0.5 rounded transition ${
             activeTab === "state" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
-          Full State
+          STATE
         </button>
         <button
           onClick={() => setActiveTab("stage")}
@@ -116,7 +155,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             activeTab === "stage" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
-          Stage ({state?.stage?.requests?.length || 0})
+          STAGE ({state?.stage?.requests?.length || 0})
         </button>
         <button
           onClick={() => setActiveTab("buffer")}
@@ -124,7 +163,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             activeTab === "buffer" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
-          Buffer ({bufferCount})
+          BUFFER ({bufferCount})
         </button>
         <button
           onClick={() => setActiveTab("decision")}
@@ -132,7 +171,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             activeTab === "decision" ? "bg-zinc-950 text-white font-bold" : "text-zinc-500 hover:text-zinc-900"
           }`}
         >
-          Decision ({currentDecisionRequest?.patterns?.length || 0})
+          DECISION
         </button>
       </div>
 
@@ -180,9 +219,58 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
             )}
           </div>
         )}
+        {activeTab === "matchLog" && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between pb-1 mb-1 border-b border-zinc-200 text-[10px]">
+              <span className="font-bold text-zinc-700">Canonical Events ({canonicalEventCount} 件)</span>
+              <button
+                onClick={handleDownloadMatchLog}
+                className="px-1.5 py-0.5 rounded bg-zinc-900 text-white font-bold hover:bg-zinc-800"
+              >
+                DOWNLOAD JSON
+              </button>
+            </div>
+            {canonicalEventCount === 0 ? (
+              <div className="text-zinc-500 py-2 text-center text-[10px]">イベントなし</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[9px]">
+                  <thead>
+                    <tr className="border-b border-zinc-300 text-zinc-600 bg-zinc-50">
+                      <th className="py-1 px-1">Seq</th>
+                      <th className="py-1 px-1">Ver</th>
+                      <th className="py-1 px-1">Type</th>
+                      <th className="py-1 px-1">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(matchLog?.events || []).map((e) => {
+                      const { seq, stateVersion, type, timestamp, ...payload } = e as any;
+                      return (
+                        <tr key={seq} className="border-b border-zinc-200 hover:bg-zinc-100">
+                          <td className="py-0.5 px-1 font-bold text-zinc-900">#{seq}</td>
+                          <td className="py-0.5 px-1 text-zinc-500">v{stateVersion}</td>
+                          <td className="py-0.5 px-1">
+                            <span className="px-1 py-0.2 rounded bg-zinc-800 text-white text-[9px] font-bold">
+                              {type}
+                            </span>
+                          </td>
+                          <td className="py-0.5 px-1 text-zinc-900 font-sans break-all">
+                            {JSON.stringify(payload)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
         {activeTab === "state" && (
           <pre className="text-zinc-800">{JSON.stringify(state, null, 2)}</pre>
         )}
+
         {activeTab === "stage" && (
           <pre className="text-zinc-800">
             {JSON.stringify(state?.stage || { requests: [] }, null, 2)}

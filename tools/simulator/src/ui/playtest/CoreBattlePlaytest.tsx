@@ -525,7 +525,9 @@ export const CoreBattlePlaytest: React.FC = () => {
                 rulePackage={rulePackage}
                 logs={logs}
                 traces={traces}
+                matchLog={sessionRef.current?.getMatchLog()}
               />
+
             </div>
           )}
 
