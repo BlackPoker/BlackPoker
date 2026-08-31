@@ -479,4 +479,160 @@ describe("Canonical Match Log Minimal Infrastructure Tests", () => {
     expect(customEvent.actionRef).toBe("action.customUnknownAction");
     expect(logRecorder.getMatchLog().events).toContainEqual(customEvent);
   });
+
+  // --------------------------------------------------------------------------
+  // J. Exactly-Once Event Emission for 4 Lifecycles (No Duplicate Events)
+  // --------------------------------------------------------------------------
+  it("J: verifies exactly-once event emission per requestId for direct normal, direct immediate, triggered normal, and triggered immediate", () => {
+    // 1. 直接 normal (Twist)
+    {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "d4-twist", suit: "D", rank: "4", value: 4 },
+        { id: "twist-cost", suit: "S", rank: "3", value: 3 },
+      ];
+      const session = new GameSession(state, playtestRulePackage, { matchId: "match-j-direct-normal" });
+      const step1 = session.advance();
+      if (step1.type !== "WAITING_FOR_DECISION") return;
+      const twistIdx = step1.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.twist"
+      );
+      const step2 = session.submitDecision({
+        decisionId: step1.request.decisionId,
+        stateVersion: step1.request.stateVersion,
+        selectedPatternRef: twistIdx,
+      });
+      if (step2.type !== "WAITING_FOR_DECISION") return;
+      const p1Pass = session.submitDecision({
+        decisionId: step2.request.decisionId,
+        stateVersion: step2.request.stateVersion,
+        selectedPatternRef: step2.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+      if (p1Pass.type !== "WAITING_FOR_DECISION") return;
+      session.submitDecision({
+        decisionId: p1Pass.request.decisionId,
+        stateVersion: p1Pass.request.stateVersion,
+        selectedPatternRef: p1Pass.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+
+      const log = session.getMatchLog();
+      const twistCreated = log.events.filter((e) => e.type === "request.created" && e.actionRef === "action.twist");
+      const twistPushed = log.events.filter((e) => e.type === "stage.pushed" && e.actionRef === "action.twist");
+      const twistPopped = log.events.filter((e) => e.type === "stage.popped" && e.actionRef === "action.twist");
+      const twistStarted = log.events.filter((e) => e.type === "request.resolve.started" && e.actionRef === "action.twist");
+      const twistResolved = log.events.filter((e) => e.type === "request.resolved" && e.actionRef === "action.twist");
+
+      expect(twistCreated).toHaveLength(1);
+      expect(twistPushed).toHaveLength(1);
+      expect(twistPopped).toHaveLength(1);
+      expect(twistStarted).toHaveLength(1);
+      expect(twistResolved).toHaveLength(1);
+    }
+
+    // 2. 直接 immediate (Bulwark 設置)
+    {
+      const state = createBaseState();
+      state.players.p1.hand = [{ id: "bw-card", suit: "S", rank: "4", value: 4 }];
+      const session = new GameSession(state, fullRulePackage, { matchId: "match-j-direct-immediate" });
+      const step1 = session.advance();
+      if (step1.type !== "WAITING_FOR_DECISION") return;
+      const bwIdx = step1.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.setBulwark"
+      );
+      const step2 = session.submitDecision({
+        decisionId: step1.request.decisionId,
+        stateVersion: step1.request.stateVersion,
+        selectedPatternRef: bwIdx,
+      });
+      if (step2.type !== "WAITING_FOR_DECISION") return;
+      session.submitDecision({
+        decisionId: step2.request.decisionId,
+        stateVersion: step2.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+
+      const log = session.getMatchLog();
+      const bwCreated = log.events.filter((e) => e.type === "request.created" && e.actionRef === "action.setBulwark");
+      const bwStarted = log.events.filter((e) => e.type === "request.resolve.started" && e.actionRef === "action.setBulwark");
+      const bwResolved = log.events.filter((e) => e.type === "request.resolved" && e.actionRef === "action.setBulwark");
+      const bwPushed = log.events.filter((e) => e.type === "stage.pushed" && e.actionRef === "action.setBulwark");
+      const bwPopped = log.events.filter((e) => e.type === "stage.popped" && e.actionRef === "action.setBulwark");
+
+      expect(bwCreated).toHaveLength(1);
+      expect(bwStarted).toHaveLength(1);
+      expect(bwResolved).toHaveLength(1);
+      expect(bwPushed).toHaveLength(0);
+      expect(bwPopped).toHaveLength(0);
+    }
+
+    // 3. 誘発 immediate (Charge) & 4. 誘発 normal (Draw)
+    {
+      const state = createBaseState();
+      const session = new GameSession(state, playtestRulePackage, { matchId: "match-j-triggered" });
+      const step1 = session.advance();
+      if (step1.type !== "WAITING_FOR_DECISION") return;
+      const endIdx = step1.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.end"
+      );
+      const step2 = session.submitDecision({
+        decisionId: step1.request.decisionId,
+        stateVersion: step1.request.stateVersion,
+        selectedPatternRef: endIdx,
+      });
+      if (step2.type !== "WAITING_FOR_DECISION") return;
+      const p1Pass = session.submitDecision({
+        decisionId: step2.request.decisionId,
+        stateVersion: step2.request.stateVersion,
+        selectedPatternRef: step2.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+      if (p1Pass.type !== "WAITING_FOR_DECISION") return;
+      // p2 PASS -> End 解決 -> Turn交代 -> Charge即時解決 -> Draw Stage積載
+      const step3 = session.submitDecision({
+        decisionId: p1Pass.request.decisionId,
+        stateVersion: p1Pass.request.stateVersion,
+        selectedPatternRef: p1Pass.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+
+      // Draw 解決のため p2 PASS -> p1 PASS
+      if (step3.type !== "WAITING_FOR_DECISION") return;
+      const p2Pass = session.submitDecision({
+        decisionId: step3.request.decisionId,
+        stateVersion: step3.request.stateVersion,
+        selectedPatternRef: step3.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+      if (p2Pass.type !== "WAITING_FOR_DECISION") return;
+      session.submitDecision({
+        decisionId: p2Pass.request.decisionId,
+        stateVersion: p2Pass.request.stateVersion,
+        selectedPatternRef: p2Pass.request.patterns.findIndex((p) => p.kind === "PASS"),
+      });
+
+      const log = session.getMatchLog();
+
+      // 誘発 immediate (Charge)
+      const chargeCreated = log.events.filter((e) => e.type === "request.created" && e.actionRef === "action.charge");
+      const chargeStarted = log.events.filter((e) => e.type === "request.resolve.started" && e.actionRef === "action.charge");
+      const chargeResolved = log.events.filter((e) => e.type === "request.resolved" && e.actionRef === "action.charge");
+      const chargePushed = log.events.filter((e) => e.type === "stage.pushed" && e.actionRef === "action.charge");
+
+      expect(chargeCreated).toHaveLength(1);
+      expect(chargeStarted).toHaveLength(1);
+      expect(chargeResolved).toHaveLength(1);
+      expect(chargePushed).toHaveLength(0);
+
+      // 誘発 normal (Draw)
+      const drawCreated = log.events.filter((e) => e.type === "request.created" && e.actionRef === "action.draw");
+      const drawPushed = log.events.filter((e) => e.type === "stage.pushed" && e.actionRef === "action.draw");
+      const drawPopped = log.events.filter((e) => e.type === "stage.popped" && e.actionRef === "action.draw");
+      const drawStarted = log.events.filter((e) => e.type === "request.resolve.started" && e.actionRef === "action.draw");
+      const drawResolved = log.events.filter((e) => e.type === "request.resolved" && e.actionRef === "action.draw");
+
+      expect(drawCreated).toHaveLength(1);
+      expect(drawPushed).toHaveLength(1);
+      expect(drawPopped).toHaveLength(1);
+      expect(drawStarted).toHaveLength(1);
+      expect(drawResolved).toHaveLength(1);
+    }
+  });
 });
+

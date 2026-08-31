@@ -27,7 +27,7 @@ export type CanonicalGameEventType =
   | "player.passed"
   | "card.moved";
 
-export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "deck";
+export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life";
 
 export type CardLocation =
   | {
@@ -38,7 +38,12 @@ export type CardLocation =
   | {
       readonly kind: "request";
       readonly requestId: string;
+    }
+  | {
+      readonly kind: "deck";
+      readonly playerId: string;
     };
+
 
 export interface CanonicalGameEventBase {
   readonly seq: number;

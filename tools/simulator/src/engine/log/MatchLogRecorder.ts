@@ -38,7 +38,14 @@ export function normalizeCardLocation(
     };
   }
 
-  const validZones: CardZoneName[] = ["hand", "field", "grave", "fog", "life", "deck"];
+  if (rawZoneStr === "deck") {
+    return {
+      kind: "deck",
+      playerId: playerKey || "unknown",
+    };
+  }
+
+  const validZones: CardZoneName[] = ["hand", "field", "grave", "fog", "life"];
   const matchedZone: CardZoneName = validZones.includes(rawZoneStr as CardZoneName)
     ? (rawZoneStr as CardZoneName)
     : "grave";
@@ -48,6 +55,7 @@ export function normalizeCardLocation(
     playerId: playerKey || "unknown",
     zone: matchedZone,
   };
+
 }
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
