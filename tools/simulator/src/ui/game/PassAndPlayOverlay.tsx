@@ -58,7 +58,7 @@ export const PassAndPlayOverlay: React.FC<PassAndPlayOverlayProps> = ({
         <button
           ref={buttonRef}
           onClick={onReady}
-          className="w-full py-2.5 px-6 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold rounded shadow transition-all text-sm font-mono focus:ring-2 focus:ring-zinc-950 focus:outline-none"
+          className="w-full py-3 px-6 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold rounded shadow transition-all text-sm font-mono focus:ring-2 focus:ring-zinc-950 focus:outline-none min-h-[48px]"
         >
           準備完了 (操作画面を表示)
         </button>

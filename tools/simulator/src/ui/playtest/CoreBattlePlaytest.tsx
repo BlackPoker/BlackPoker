@@ -15,11 +15,16 @@ import { GameLog, LogEntry } from "../game/GameLog";
 import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel, TraceEntry } from "../debug/DebugPanel";
+import { MobileDecisionDock } from "../decision/MobileDecisionDock";
+import { MobileBottomSheet } from "../game/MobileBottomSheet";
+import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
+import { useIsDesktop } from "../hooks/useMediaQuery";
 
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
+  const isDesktop = useIsDesktop();
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
@@ -50,8 +55,14 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [pendingPlayerKey, setPendingPlayerKey] = useState<string>("p1");
   const lastActivePlayerRef = useRef<string>("p1");
 
-  // デバッグタブ
+  // デスクトップ用デバッグ表示
   const [showDebug, setShowDebug] = useState(false);
+
+  // モバイル用 UI 状態
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileLogModal, setShowMobileLogModal] = useState(false);
+  const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
 
   const addTrace = useCallback((
     category: string,
@@ -89,7 +100,6 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
-
   // 新しい対戦の開始
   const startNewGame = useCallback(() => {
     const rawState = createCoreBattlePresetState();
@@ -113,6 +123,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     seqRef.current = 1;
     setLatestEventMessage("ゲーム開始準備完了");
     setSelectedUnitIds([]);
+    setIsMobileSheetOpen(false);
     addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info", setupResult.state);
     addLog(`[REGULATION] Core Battle (Preset 001)`, "info", setupResult.state);
     addTrace("MATCH_SETUP", `ゲーム開始 (Preset: ${CORE_BATTLE_PRESET_ID})`, setupResult.state);
@@ -151,7 +162,6 @@ export const CoreBattlePlaytest: React.FC = () => {
     }
   }, [fullRulePackage, rulePackage, enablePassAndPlay, addLog, addTrace]);
 
-
   // 初回マウント時にゲーム初期化
   useEffect(() => {
     startNewGame();
@@ -178,6 +188,9 @@ export const CoreBattlePlaytest: React.FC = () => {
     (response: DecisionResponse, options?: { autoPass?: boolean }) => {
       const session = sessionRef.current;
       if (!session) return;
+
+      // モバイル Bottom Sheet を閉じる
+      setIsMobileSheetOpen(false);
 
       let prevState = JSON.parse(JSON.stringify(session.state));
       const selectedPattern = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.patterns[response.selectedPatternRef] : undefined;
@@ -253,7 +266,6 @@ export const CoreBattlePlaytest: React.FC = () => {
     },
     [enablePassAndPlay, currentStep, addLog, addTrace]
   );
-
 
   // Pass-and-Play 準備完了ハンドラ
   const handlePassAndPlayReady = useCallback(() => {
@@ -336,7 +348,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           </ul>
           <button
             onClick={startNewGame}
-            className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold rounded shadow transition text-xs font-mono"
+            className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold rounded shadow transition text-xs font-mono min-h-[44px]"
           >
             再試行 (Retry)
           </button>
@@ -348,20 +360,29 @@ export const CoreBattlePlaytest: React.FC = () => {
   const activePlayerKey =
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
+  // DecisionPanel のコンテンツ生成
+  const decisionPanelContent = currentStep?.type === "WAITING_FOR_DECISION" ? (
+    <DecisionPanel
+      key={currentStep.request.decisionId}
+      request={currentStep.request}
+      onSubmit={handleDecisionSubmit}
+      onSelectionMarkersChange={setUnitSelectionMarkers}
+      selectedUnitIdsFromBoard={selectedUnitIds}
+    />
+  ) : null;
+
   return (
     <div className="flex flex-col min-h-screen bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white">
       {/* 画面ヘッダー */}
-      <header className="flex flex-wrap items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">
-        <div className="flex items-center gap-3">
-          {/* ロゴ + ブランドタイトル (Times New Roman Bold 明示 / uppercase 削除で大文字小文字正確) */}
-          <div className="flex items-center gap-2">
+      <header className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* ロゴ + ブランドタイトル */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <img
               src={logoUrl}
               alt="BlackPoker Logo"
               className="w-6 h-6 transition-transform hover:scale-105"
             />
-
-
             <div className="flex flex-col">
               <span
                 style={{ fontFamily: '"Times New Roman", Times, serif', fontWeight: 700 }}
@@ -377,8 +398,8 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           <div className="h-4 w-px bg-zinc-300 mx-1 hidden sm:block" />
 
-          {/* バッジ群 */}
-          <div className="flex items-center gap-1.5 font-mono">
+          {/* バッジ群 (PC / タブレット用) */}
+          <div className="hidden sm:flex items-center gap-1.5 font-mono">
             <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-zinc-950 text-white uppercase tracking-wider">
               PLAYTEST
             </span>
@@ -391,8 +412,8 @@ export const CoreBattlePlaytest: React.FC = () => {
             </span>
           </div>
 
-          {/* Regulation Selector */}
-          <div className="flex items-center gap-1 ml-1 font-mono">
+          {/* Regulation Selector (PC用) */}
+          <div className="hidden md:flex items-center gap-1 ml-1 font-mono">
             <span className="text-[9px] font-bold text-zinc-400">Reg:</span>
             <select
               value={selectedRegulation}
@@ -406,8 +427,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           </div>
         </div>
 
-        {/* コントロールボタン */}
-        <div className="flex items-center gap-2 mt-1 sm:mt-0 font-mono">
+        {/* コントロールボタン群 (PC用) */}
+        <div className="hidden sm:flex items-center gap-2 font-mono">
           <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
             <input
               type="checkbox"
@@ -436,14 +457,23 @@ export const CoreBattlePlaytest: React.FC = () => {
             Reset
           </button>
         </div>
+
+        {/* Mobile メニューボタン (⋯) */}
+        <div className="sm:hidden flex items-center gap-1">
+          <button
+            onClick={() => setIsMobileMenuOpen(true)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-300 bg-white hover:bg-zinc-100 active:bg-zinc-200 text-zinc-950 text-base font-bold shadow-sm transition min-h-[44px] min-w-[44px]"
+            title="メニューを開く"
+          >
+            ⋯
+          </button>
+        </div>
       </header>
 
-
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
-      <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2">
+      <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
         <div className="lg:col-span-7 flex flex-col gap-1.5">
-
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar
@@ -491,24 +521,19 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
         </div>
 
-        {/* 右ペイン: 操作パネル / 対戦ログ */}
-        <div className="lg:col-span-5 flex flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
+        {/* 右ペイン: PC用 操作パネル / 対戦ログ (Desktop 時のみレンダリングして二重マウントを防止) */}
+        <div className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
           {/* 判断要求パネル (Decision Panel) */}
-          {currentStep?.type === "WAITING_FOR_DECISION" ? (
-            <div className="shrink-0">
-              <DecisionPanel
-                key={currentStep.request.decisionId}
-                request={currentStep.request}
-                onSubmit={handleDecisionSubmit}
-                onSelectionMarkersChange={setUnitSelectionMarkers}
-                selectedUnitIdsFromBoard={selectedUnitIds}
-              />
-            </div>
-          ) : (
-            <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm">
-              現在待機中の判断要求はありません
-            </div>
-
+          {isDesktop && (
+            currentStep?.type === "WAITING_FOR_DECISION" ? (
+              <div className="shrink-0">
+                {decisionPanelContent}
+              </div>
+            ) : (
+              <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm">
+                現在待機中の判断要求はありません
+              </div>
+            )
           )}
 
           {/* 対戦ログ (Game Log) */}
@@ -527,12 +552,101 @@ export const CoreBattlePlaytest: React.FC = () => {
                 traces={traces}
                 matchLog={sessionRef.current?.getMatchLog()}
               />
-
             </div>
           )}
-
         </div>
       </main>
+
+      {/* =========================================================================
+          Mobile 用コンポーネント群 (画面下部固定 Dock / Bottom Sheet / 各種モーダル)
+         ========================================================================= */}
+
+      {/* 1. 画面下部固定 Mobile Decision Dock */}
+      {currentStep?.type === "WAITING_FOR_DECISION" && (
+        <MobileDecisionDock
+          request={currentStep.request}
+          onOpenSheet={() => setIsMobileSheetOpen(true)}
+          onSubmit={handleDecisionSubmit}
+          isSheetOpen={isMobileSheetOpen}
+        />
+      )}
+
+      {/* 2. Mobile Decision Bottom Sheet (非Desktop時のみマウントして二重マウントを防止) */}
+      {!isDesktop && (
+        <MobileBottomSheet
+          isOpen={isMobileSheetOpen}
+          onClose={() => setIsMobileSheetOpen(false)}
+          title={
+            currentStep?.type === "WAITING_FOR_DECISION"
+              ? `${currentStep.request.playerId === "p1" ? "Player A" : "Player B"} の${
+                  currentStep.request.source.type === "EFFECT_RESOLUTION" ? "効果選択" : "行動選択"
+                }`
+              : "行動選択"
+          }
+        >
+          {decisionPanelContent}
+        </MobileBottomSheet>
+      )}
+
+      {/* 3. Mobile ヘッダーメニュー */}
+      <MobileHeaderMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        selectedRegulation={selectedRegulation}
+        onSelectRegulation={setSelectedRegulation}
+        enablePassAndPlay={enablePassAndPlay}
+        onTogglePassAndPlay={setEnablePassAndPlay}
+        onOpenLogModal={() => setShowMobileLogModal(true)}
+        onOpenDebugModal={() => setShowMobileDebugModal(true)}
+        onResetGame={startNewGame}
+      />
+
+      {/* 4. Mobile 対戦ログモーダル */}
+      {showMobileLogModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
+          <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[85vh]">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
+              <h3 className="text-sm font-bold text-zinc-950 font-serif">対戦ログ (Game Log)</h3>
+              <button
+                onClick={() => setShowMobileLogModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-mono min-h-[44px] min-w-[44px]"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden flex flex-col min-h-[300px]">
+              <GameLog logs={logs} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 5. Mobile デバッグモーダル */}
+      {showMobileDebugModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
+          <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[90vh]">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
+              <h3 className="text-sm font-bold text-zinc-950 font-serif">デバッグパネル (Debug Panel)</h3>
+              <button
+                onClick={() => setShowMobileDebugModal(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-mono min-h-[44px] min-w-[44px]"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden flex flex-col min-h-[350px]">
+              <DebugPanel
+                state={gameState}
+                currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
+                rulePackage={rulePackage}
+                logs={logs}
+                traces={traces}
+                matchLog={sessionRef.current?.getMatchLog()}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Pass-and-Play 交代オーバーレイ */}
       {isPassAndPlayWaiting && (
@@ -556,4 +670,3 @@ export const CoreBattlePlaytest: React.FC = () => {
     </div>
   );
 };
-

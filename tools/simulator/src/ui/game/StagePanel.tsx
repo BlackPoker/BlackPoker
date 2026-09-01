@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 export interface StagePanelProps {
   requests: any[];
@@ -14,8 +14,13 @@ function formatCardCodeDisplay(code?: string): string {
 }
 
 export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
+  const [showAllMobile, setShowAllMobile] = useState(false);
+
+  // LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示
+  const reversedRequests = requests.slice().reverse();
+
   return (
-    <div className="flex flex-col p-2.5 rounded border border-zinc-200 bg-white shadow-sm font-sans">
+    <div className="flex flex-col p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
       <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-200">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
@@ -25,125 +30,132 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
             {requests.length} 件
           </span>
         </div>
-        <span className="text-[10px] text-zinc-500 font-mono">
-          ※ 上 (TOP) から順に解決
-        </span>
+        <div className="flex items-center gap-2">
+          {requests.length > 1 && (
+            <button
+              onClick={() => setShowAllMobile(!showAllMobile)}
+              className="lg:hidden text-[10px] font-mono font-bold text-zinc-600 hover:text-zinc-950 bg-zinc-100 hover:bg-zinc-200 px-1.5 py-0.5 rounded border border-zinc-300"
+            >
+              {showAllMobile ? "TOPのみ表示" : `全${requests.length}件表示`}
+            </button>
+          )}
+          <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">
+            ※ 上 (TOP) から順に解決
+          </span>
+        </div>
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex items-center justify-center py-2.5 text-xs text-zinc-400 font-mono">
+        <div className="flex items-center justify-center py-2 text-xs text-zinc-400 font-mono">
           ステージは空です (全員PASSで次の処理へ)
         </div>
       ) : (
         <div className="flex flex-col gap-1.5">
-          {/* LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示 */}
-          {requests
-            .slice()
-            .reverse()
-            .map((req, revIdx) => {
-              const isTop = revIdx === 0;
-              const actionName = req.action?.name || req.actionId;
-              const controllerName = req.controller === "p1" ? "Player A" : "Player B";
+          {reversedRequests.map((req, revIdx) => {
+            const isTop = revIdx === 0;
+            // Mobile では展開されていない場合、TOP 以外は折りたたむ（またはコンパクト表示）
+            const isHiddenOnMobile = !isTop && !showAllMobile;
 
-              // Key カードの整形
-              const keyCodes = Array.isArray(req.keyCards) && req.keyCards.length > 0
-                ? req.keyCards.map((c: any) => formatCardCodeDisplay(c.code || `${c.suit}${c.rank}`)).join(", ")
-                : undefined;
+            const actionName = req.action?.name || req.actionId;
+            const controllerName = req.controller === "p1" ? "Player A" : "Player B";
 
-              // コスト表示の判定（「（支払い済み）」は削除）
-              const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
-              const costLabel = costSummary
-                ? `Cost: ${costSummary}`
-                : (req.cost ? `Cost: ${req.cost}` : "Cost: なし");
+            // Key カードの整形
+            const keyCodes = Array.isArray(req.keyCards) && req.keyCards.length > 0
+              ? req.keyCards.map((c: any) => formatCardCodeDisplay(c.code || `${c.suit}${c.rank}`)).join(", ")
+              : undefined;
 
+            // コスト表示の判定
+            const costSummary = req.paidCostSummary || req.selectedCostPayment?.summary;
+            const costLabel = costSummary
+              ? `Cost: ${costSummary}`
+              : (req.cost ? `Cost: ${req.cost}` : "Cost: なし");
 
-              // ターゲット情報の整形
-              const targetLabels: string[] = [];
-              if (req.targets && Array.isArray(req.targets)) {
-                for (const t of req.targets) {
-                  if (t.type === "unit") {
-                    const shortId = t.unitId ? `#${t.unitId.slice(-4)}` : "";
-                    targetLabels.push(`${t.kind || "ユニット"} ${shortId}`);
-                  } else if (t.type === "player") {
-                    targetLabels.push(t.name || t.targetPlayerKey || "プレイヤー");
-                  }
+            // ターゲット情報の整形
+            const targetLabels: string[] = [];
+            if (req.targets && Array.isArray(req.targets)) {
+              for (const t of req.targets) {
+                if (t.type === "unit") {
+                  const shortId = t.unitId ? `#${t.unitId.slice(-4)}` : "";
+                  targetLabels.push(`${t.kind || "ユニット"} ${shortId}`);
+                } else if (t.type === "player") {
+                  targetLabels.push(t.name || t.targetPlayerKey || "プレイヤー");
                 }
               }
-              const targetStr = targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
+            }
+            const targetStr = targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
+            const statusText = (req.status || "pending").toUpperCase();
 
-              const statusText = (req.status || "pending").toUpperCase();
-
-              return (
-                <div
-                  key={req.id || revIdx}
-                  className={`flex flex-col p-2 rounded border transition-all ${
-                    isTop
-                      ? "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950"
-                      : "bg-white border-zinc-200 text-zinc-800"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
-                          isTop
-                            ? "bg-zinc-950 text-white shadow-sm"
-                            : "bg-zinc-100 text-zinc-700 border border-zinc-300"
-                        }`}
-                      >
-                        {isTop ? "TOP (次に解決)" : `STAGE #${requests.length - revIdx}`}
-                      </span>
-                      <span className="text-xs font-bold text-zinc-950 tracking-wide">
-                        {actionName}
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-mono">
-                        (ID: {req.id})
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 font-mono text-[10px]">
-                      <span className="text-zinc-600">
-                        {controllerName}
-                      </span>
-                      <span
-                        className={`font-bold px-1 py-0.2 rounded border ${
-                          req.status === "resolving"
-                            ? "bg-zinc-950 text-white border-zinc-950 font-black animate-pulse"
-                            : "bg-zinc-100 text-zinc-600 border-zinc-300"
-                        }`}
-                      >
-                        {statusText}
-                      </span>
-                    </div>
+            return (
+              <div
+                key={req.id || revIdx}
+                className={`flex flex-col p-2 rounded border transition-all ${
+                  isHiddenOnMobile ? "hidden lg:flex" : "flex"
+                } ${
+                  isTop
+                    ? "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950"
+                    : "bg-white border-zinc-200 text-zinc-800"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span
+                      className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
+                        isTop
+                          ? "bg-zinc-950 text-white shadow-sm"
+                          : "bg-zinc-100 text-zinc-700 border border-zinc-300"
+                      }`}
+                    >
+                      {isTop ? "TOP" : `STAGE #${requests.length - revIdx}`}
+                    </span>
+                    <span className="text-xs font-bold text-zinc-950 tracking-wide">
+                      {actionName}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono hidden sm:inline">
+                      (ID: {req.id})
+                    </span>
                   </div>
 
-                  {/* 詳細メタデータ行 (Key, Cost, Target) */}
-                  <div className="mt-1 pt-1 border-t border-zinc-200 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-zinc-600 font-mono">
-                    {keyCodes && (
-                      <span className="flex items-center gap-1">
-                        <span className="text-zinc-500 font-bold">Key:</span>
-                        <span className="font-bold text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">
-                          {keyCodes}
-                        </span>
-                      </span>
-                    )}
-                    <span className="flex items-center gap-1">
-                      <span className="font-bold text-zinc-800">{costLabel}</span>
+                  <div className="flex items-center gap-1.5 font-mono text-[10px] shrink-0">
+                    <span className="text-zinc-600">
+                      {controllerName}
                     </span>
-                    {targetStr && (
-                      <span className="flex items-center gap-1">
-                        <span className="text-zinc-500 font-bold">Target:</span>
-                        <span className="text-zinc-800">{targetStr}</span>
-                      </span>
-                    )}
+                    <span
+                      className={`font-bold px-1 py-0.2 rounded border ${
+                        req.status === "resolving"
+                          ? "bg-zinc-950 text-white border-zinc-950 font-black animate-pulse"
+                          : "bg-zinc-100 text-zinc-600 border-zinc-300"
+                      }`}
+                    >
+                      {statusText}
+                    </span>
                   </div>
                 </div>
-              );
-            })}
+
+                {/* 詳細メタデータ行 (Key, Cost, Target) */}
+                <div className="mt-1 pt-1 border-t border-zinc-200 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[10px] text-zinc-600 font-mono">
+                  {keyCodes && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-zinc-500 font-bold">Key:</span>
+                      <span className="font-bold text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">
+                        {keyCodes}
+                      </span>
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1">
+                    <span className="font-bold text-zinc-800">{costLabel}</span>
+                  </span>
+                  {targetStr && (
+                    <span className="flex items-center gap-1">
+                      <span className="text-zinc-500 font-bold">Target:</span>
+                      <span className="text-zinc-800">{targetStr}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       )}
-
     </div>
   );
 };
-
