@@ -45,14 +45,19 @@ export interface FogView {
 export interface PlayerObservationView {
   readonly playerId: PlayerKey;
   readonly name: string;
+  readonly isViewer: boolean;
   readonly lifeCount: number;
+  readonly lifeDisplay: string;
   readonly lifeCards?: readonly CardView[];
   readonly handCount: number;
   readonly handCards: readonly CardView[];
   readonly field: readonly UnitView[];
   readonly fog: readonly FogView[];
   readonly trumps: readonly UnitView[];
-  readonly grave: readonly UnitView[];
+  readonly graveCount: number;
+  readonly graveTopCard?: CardView;
+  readonly grave: readonly (UnitView | CardView)[];
+  readonly canViewFullGrave: boolean;
 }
 
 export interface RequestView {

@@ -85,7 +85,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           }}
           className="w-full py-2.5 px-3 rounded border border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
         >
-          <span>📜 対戦ログ (Game Log) を表示</span>
+          <span>対戦ログ (Game Log) を表示</span>
         </button>
 
         {/* Debug モーダル開くボタン */}
@@ -96,7 +96,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           }}
           className="w-full py-2.5 px-3 rounded border border-zinc-300 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
         >
-          <span>⚙️ デバッグ情報 (Debug / Canonical Log)</span>
+          <span>デバッグ情報 (Debug / Canonical Log)</span>
         </button>
 
         {/* Reset ボタン */}
@@ -107,7 +107,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           }}
           className="w-full py-2.5 px-3 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
         >
-          <span>🔄 ゲームをリセット (Reset)</span>
+          <span>ゲームをリセット (Reset)</span>
         </button>
 
         {/* Build 情報 */}

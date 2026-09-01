@@ -362,21 +362,19 @@ export const CoreBattlePlaytest: React.FC = () => {
   const activePlayerKey =
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 
-  // Observation を基準とした PlayerBoardViewModel の生成
+  // Observation を基準とした PlayerBoardViewModel の生成 (Debug ONに関わらず通常盤面は常にObservation準拠)
   const observation = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
   const p1ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
     "p1",
-    gameState,
     observation,
-    activePlayerKey,
-    showDebug
+    gameState,
+    activePlayerKey
   );
   const p2ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
     "p2",
-    gameState,
     observation,
-    activePlayerKey,
-    showDebug
+    gameState,
+    activePlayerKey
   );
 
   // DecisionPanel のコンテンツ生成

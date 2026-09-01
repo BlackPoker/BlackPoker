@@ -28,9 +28,9 @@ export const CardView: React.FC<CardViewProps> = ({
   className = "",
 }) => {
   const sizeClasses = {
-    sm: "w-8 h-11 text-xs",
-    md: "w-10 h-14 text-sm",
-    lg: "w-14 h-20 text-base",
+    sm: "w-8 h-[40px] text-xs",
+    md: "w-10 h-[52px] text-sm",
+    lg: "w-14 h-[72px] text-base",
   }[size];
 
   if (faceDown || !card) {

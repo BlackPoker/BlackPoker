@@ -75,10 +75,10 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
           >
             <span>
               {isEffectResolution
-                ? "効果・割当てを選択 📋"
+                ? "効果・割当てを選択"
                 : isSheetOpen
-                ? "選択中... ⚡"
-                : "行動を選ぶ / 選択を続ける ⚡"}
+                ? "選択中..."
+                : "行動を選ぶ"}
             </span>
           </button>
         </div>

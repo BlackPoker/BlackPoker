@@ -71,7 +71,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
                 className="flex items-center gap-1 px-2.5 py-1 rounded bg-white hover:bg-zinc-200 active:bg-zinc-300 text-zinc-900 border border-zinc-300 text-[11px] font-mono font-bold transition shadow-sm min-h-[36px]"
                 title="盤面を確認する (選択状態を維持して最小化)"
               >
-                <span>盤面を見る 👁️</span>
+                <span>盤面を見る</span>
               </button>
 
               {/* 拡大 / 縮小 ボタン */}

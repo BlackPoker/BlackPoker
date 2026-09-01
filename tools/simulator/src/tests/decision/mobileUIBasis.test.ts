@@ -5,9 +5,10 @@ import { RulePackage } from "../../domain/rules/RulePackage";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { GameSession } from "../../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../../engine/session/playtest/createCoreBattlePlaytest";
+import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import { PlayerObservationPresenter } from "../../ui/game/PlayerObservationPresenter";
 
-describe("Mobile UI Infrastructure & Responsiveness Tests (Phase 2)", () => {
+describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () => {
   let playtestRulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -145,10 +146,10 @@ describe("Mobile UI Infrastructure & Responsiveness Tests (Phase 2)", () => {
   });
 
   // --------------------------------------------------------------------------
-  // 4. Observation & Secret info boundaries via PlayerObservationPresenter
+  // 4. Observation & Secret info boundaries (Core Observation-first)
   // --------------------------------------------------------------------------
-  describe("PlayerObservationPresenter & Public/Secret Information Boundaries", () => {
-    const mockState = {
+  describe("Core PlayerObservation & PlayerObservationPresenter Boundary Tests", () => {
+    const mockRawState = {
       turnPlayer: "p1",
       chancePlayer: "p1",
       players: {
@@ -201,64 +202,149 @@ describe("Mobile UI Infrastructure & Responsiveness Tests (Phase 2)", () => {
       },
     };
 
-    it("Presenter correctly presents viewer (Player A) data: exact life, known hand, full grave", () => {
-      const p1Vm = PlayerObservationPresenter.buildPlayerViewModel("p1", mockState, undefined, "p1", false);
+    // ケース A & B & C & D: ObservationFactory による境界生成
+    it("Core ObservationFactory accurately creates observation boundaries for p1 viewer", () => {
+      const observation = ObservationFactory.createObservation(mockRawState, "p1");
 
+      // p1 (viewer)
+      const p1Obs = observation.players.find((p) => p.playerId === "p1")!;
+      expect(p1Obs.isViewer).toBe(true);
+      expect(p1Obs.lifeDisplay).toBe("15");
+      expect(p1Obs.handCards[0].visibility).toBe("KNOWN");
+      expect(p1Obs.canViewFullGrave).toBe(true);
+      expect(p1Obs.grave).toHaveLength(3);
+
+      // p2 (opponent)
+      const p2Obs = observation.players.find((p) => p.playerId === "p2")!;
+      expect(p2Obs.isViewer).toBe(false);
+      // ケース B: 相手 Life 10以上は「10以上」
+      expect(p2Obs.lifeDisplay).toBe("10以上");
+      // ケース A: 相手手札は HIDDEN
+      expect(p2Obs.handCount).toBe(3);
+      expect(p2Obs.handCards[0].visibility).toBe("HIDDEN");
+      expect((p2Obs.handCards[0] as any).suit).toBeUndefined();
+      // ケース C: 相手墓地はトップのみ公開
+      expect(p2Obs.graveCount).toBe(2);
+      expect(p2Obs.graveTopCard?.visibility).toBe("KNOWN");
+      expect((p2Obs.graveTopCard as any)?.rank).toBe("7");
+      expect(p2Obs.canViewFullGrave).toBe(false);
+      expect(p2Obs.grave).toHaveLength(1);
+      // ケース D: 相手伏せ防壁は HIDDEN
+      expect(p2Obs.field[0].cards[0].visibility).toBe("HIDDEN");
+      expect((p2Obs.field[0].cards[0] as any).suit).toBeUndefined();
+    });
+
+    // Presenter が Observation のみから ViewModel を構築する検証
+    it("PlayerObservationPresenter maps PlayerBoardViewModel strictly from Observation", () => {
+      const observation = ObservationFactory.createObservation(mockRawState, "p1");
+
+      const p1Vm = PlayerObservationPresenter.buildPlayerViewModel("p1", observation, mockRawState, "p1");
+      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", observation, mockRawState, "p1");
+
+      // p1
       expect(p1Vm.isViewer).toBe(true);
-      expect(p1Vm.lifeCount).toBe(15);
-      expect(p1Vm.lifeDisplay).toBe("15"); // 自分のLifeは正確に表示
-      expect(p1Vm.handCount).toBe(2);
-      expect(p1Vm.handCards[0].suit).toBe("H"); // 自分の手札はKNOWN
-      expect(p1Vm.canViewFullGrave).toBe(true); // 自分の墓地は全件閲覧可能
+      expect(p1Vm.lifeDisplay).toBe("15");
+      expect(p1Vm.handCards[0].suit).toBe("H");
+      expect(p1Vm.canViewFullGrave).toBe(true);
       expect(p1Vm.graveCards).toHaveLength(3);
-    });
 
-    it("Presenter correctly protects opponent (Player B) secret info: '10以上' life, hidden hand, top-only grave", () => {
-      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", mockState, undefined, "p1", false);
-
+      // p2
       expect(p2Vm.isViewer).toBe(false);
-      expect(p2Vm.lifeCount).toBe(15);
-      expect(p2Vm.lifeDisplay).toBe("10以上"); // 相手Life >= 10 は「10以上」
+      expect(p2Vm.lifeDisplay).toBe("10以上");
       expect(p2Vm.handCount).toBe(3);
-      // 相手の手札はHIDDENでsuit/rankは非公開
-      expect(p2Vm.handCards[0].faceDown).toBe(true);
-      expect(p2Vm.handCards[0].suit).toBeUndefined();
-
-      // 相手の墓地は全件非公開で、トップカードのみが公開
+      expect((p2Vm.handCards[0] as any).suit).toBeUndefined();
       expect(p2Vm.canViewFullGrave).toBe(false);
-      expect(p2Vm.graveCount).toBe(2);
-      expect(p2Vm.graveTopCard?.rank).toBe("7");
       expect(p2Vm.graveCards).toHaveLength(1);
-      expect(p2Vm.graveCards[0].id).toBe("p2-g2"); // topのみ
-
-      // 相手の伏せ防壁はカード情報が非公開
-      expect(p2Vm.fieldUnits[0].cards[0].faceDown).toBe(true);
-      expect(p2Vm.fieldUnits[0].cards[0].suit).toBeUndefined();
+      expect(p2Vm.graveTopCard.rank).toBe("7");
     });
 
-    it("Opponent life < 10 displays exact number", () => {
+    // ケース E: 相手 Life < 10 の場合は正確な数値
+    it("Opponent life < 10 displays exact number in observation and viewModel", () => {
       const lowLifeState = {
-        ...mockState,
+        ...mockRawState,
         players: {
-          ...mockState.players,
+          ...mockRawState.players,
           p2: {
-            ...mockState.players.p2,
+            ...mockRawState.players.p2,
             life: Array(9).fill({ suit: "H", rank: "A" }), // 9枚
           },
         },
       };
 
-      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", lowLifeState, undefined, "p1", false);
+      const obs = ObservationFactory.createObservation(lowLifeState, "p1");
+      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", obs, lowLifeState, "p1");
       expect(p2Vm.lifeCount).toBe(9);
-      expect(p2Vm.lifeDisplay).toBe("9"); // 9枚以下は正確な数値
+      expect(p2Vm.lifeDisplay).toBe("9");
     });
 
-    it("Debug ON mode allows full observation of all secret data", () => {
-      const p2VmDebug = PlayerObservationPresenter.buildPlayerViewModel("p2", mockState, undefined, "p1", true);
+    // ケース F: Raw と Observation が意図的に食い違っていても、通常 UI (ViewModel) では Observation が勝つ
+    it("Observation always supersedes Raw GameState in PlayerBoardViewModel (fail-safe test)", () => {
+      // 意図的に Raw State に不正な秘密データ（相手手札がKNOWNのように見える偽装）を用意
+      const fakeRawState = {
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: { name: "P1", life: 10, hand: [], field: [], fog: [], grave: [] },
+          p2: {
+            name: "P2",
+            life: 99, // 偽装
+            hand: [{ id: "raw-leak", suit: "S", rank: "A", value: 1 }], // 意図的リーク
+            field: [],
+            fog: [],
+            grave: [{ id: "g1", suit: "D", rank: "K" }],
+          },
+        },
+      };
 
-      expect(p2VmDebug.lifeDisplay).toBe("15"); // Debug時は正確な数値
-      expect(p2VmDebug.canViewFullGrave).toBe(true); // Debug時は全墓地閲覧可能
-      expect(p2VmDebug.handCards[0].suit).toBe("D"); // Debug時は相手手札も可視化
+      // 正式な Observation では HIDDEN
+      const safeObservation = {
+        viewerPlayerId: "p1" as const,
+        turnPlayerId: "p1" as const,
+        chancePlayerId: "p1" as const,
+        players: [
+          {
+            playerId: "p1" as const,
+            name: "P1",
+            isViewer: true,
+            lifeCount: 10,
+            lifeDisplay: "10",
+            handCount: 0,
+            handCards: [],
+            field: [],
+            fog: [],
+            trumps: [],
+            graveCount: 0,
+            grave: [],
+            canViewFullGrave: true,
+          },
+          {
+            playerId: "p2" as const,
+            name: "P2",
+            isViewer: false,
+            lifeCount: 99,
+            lifeDisplay: "10以上",
+            handCount: 1,
+            handCards: [{ visibility: "HIDDEN" as const, faceUp: false as const }],
+            field: [],
+            fog: [],
+            trumps: [],
+            graveCount: 1,
+            graveTopCard: { visibility: "KNOWN" as const, cardInstanceId: "g1", suit: "D", rank: "K", value: 13, faceUp: true },
+            grave: [{ visibility: "KNOWN" as const, cardInstanceId: "g1", suit: "D", rank: "K", value: 13, faceUp: true }],
+            canViewFullGrave: false,
+          },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", safeObservation, fakeRawState, "p1");
+
+      // Raw の手札 ♠A は漏洩せず、Observation の HIDDEN が使用される
+      expect((p2Vm.handCards[0] as any).suit).toBeUndefined();
+      expect(p2Vm.handCards[0].visibility).toBe("HIDDEN");
+      expect(p2Vm.lifeDisplay).toBe("10以上");
     });
   });
 });

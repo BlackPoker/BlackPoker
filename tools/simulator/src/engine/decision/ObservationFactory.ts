@@ -13,7 +13,8 @@ const abilityEvaluator = new AbilityEvaluator();
 
 /**
  * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
- * 非公開情報（対戦相手の手札カード詳細や対戦相手の裏向き防壁など）は HIDDEN に変換されます。
+ * 非公開情報（対戦相手の手札カード詳細、対戦相手の裏向き防壁、対戦相手のLife 10以上、対戦相手の非トップ墓地など）は
+ * ルールに準拠してマスク/HIDDEN 化されます。
  */
 export class ObservationFactory {
   /**
@@ -26,24 +27,31 @@ export class ObservationFactory {
       for (const [pKey, p] of Object.entries<any>(state.players)) {
         const isViewer = pKey === viewerPlayerId;
 
-        // ライフカードの処理
-        const lifeCards = Array.isArray(p.life)
-          ? p.life.map((c: any) => this.mapCard(c, false)) // ライフは基本非公開（または裏向き）
-          : undefined;
-        const lifeCount = Array.isArray(p.life) ? p.life.length : (typeof p.life === "number" ? p.life : 0);
+        // 1. ライフカード & 表示の処理
+        // ルール: 自分のライフは正確な枚数。相手のライフは9以下なら正確な数値、10以上なら「10以上」
+        const rawLifeCount = Array.isArray(p.life) ? p.life.length : (typeof p.life === "number" ? p.life : 0);
+        const lifeDisplay = isViewer
+          ? String(rawLifeCount)
+          : rawLifeCount >= 10
+          ? "10以上"
+          : String(rawLifeCount);
 
-        // 手札カードの処理（自分は KNOWN、相手は HIDDEN）
+        const lifeCards = Array.isArray(p.life)
+          ? p.life.map((c: any) => this.mapCard(c, false)) // ライフは基本裏向き
+          : undefined;
+
+        // 2. 手札カードの処理（自分は KNOWN、相手は HIDDEN）
         const handCards = Array.isArray(p.hand)
           ? p.hand.map((c: any) => (isViewer ? this.mapCard(c, true) : this.hideCard(c)))
           : [];
         const handCount = Array.isArray(p.hand) ? p.hand.length : 0;
 
-        // フィールドユニットの処理（自分の裏向き防壁は KNOWN、相手の裏向き防壁は HIDDEN）
+        // 3. フィールドユニットの処理（自分の裏向き防壁は KNOWN、相手の裏向き防壁は HIDDEN）
         const field: UnitView[] = Array.isArray(p.field)
           ? p.field.map((u: any) => this.mapUnit(u, isViewer, state))
           : [];
 
-        // フォグの処理（全フォグは公開情報、ownerPlayerId を付与）
+        // 4. フォグの処理（全フォグは公開情報、ownerPlayerId を付与）
         const fog: FogView[] = Array.isArray(p.fog)
           ? p.fog.map((f: any) => ({
               fogId: f.fogId || "",
@@ -54,27 +62,41 @@ export class ObservationFactory {
             }))
           : [];
 
-        // 切札の処理
+        // 5. 切札の処理
         const trumps: UnitView[] = Array.isArray(p.trumps || p.trump)
           ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer, state))
           : [];
 
-        // 墓地の処理 (墓地は公開情報)
-        const grave: UnitView[] = Array.isArray(p.grave)
-          ? p.grave.map((g: any) => this.mapUnit(g, true, state))
+        // 6. 墓地の処理
+        // ルール: 墓地枚数と墓地トップカードは全員に公開。墓地全体（非トップカード）はオーナー本人のみ確認可能
+        const rawGrave = Array.isArray(p.grave) ? p.grave : [];
+        const graveCount = rawGrave.length;
+        const rawGraveTop = graveCount > 0 ? rawGrave[graveCount - 1] : undefined;
+        const graveTopCard: CardView | undefined = rawGraveTop ? this.mapCard(rawGraveTop, true) : undefined;
+
+        // 墓地一覧: オーナー本人は全カード確認可能、相手はトップカードのみ（または空）
+        const grave: CardView[] = isViewer
+          ? rawGrave.map((g: any) => this.mapCard(g, true))
+          : graveTopCard
+          ? [graveTopCard]
           : [];
 
         playersView.push({
           playerId: pKey as PlayerKey,
           name: p.name || pKey,
-          lifeCount,
+          isViewer,
+          lifeCount: rawLifeCount,
+          lifeDisplay,
           lifeCards,
           handCount,
           handCards,
           field,
           fog,
           trumps,
+          graveCount,
+          graveTopCard,
           grave,
+          canViewFullGrave: isViewer,
         });
       }
     }

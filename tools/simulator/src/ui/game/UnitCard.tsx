@@ -63,8 +63,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           ? "bg-zinc-50 border-zinc-600 ring-1 ring-zinc-600"
           : isBulwark
           ? isDrive
-          ? "bg-zinc-100 border-zinc-300 opacity-70"
-          : "bg-zinc-900 border-zinc-950 text-white shadow-sm"
+            ? "bg-zinc-100 border border-dashed border-zinc-400 opacity-75 text-zinc-700"
+            : "bg-zinc-50 border-2 border-zinc-800 shadow-sm text-zinc-950"
           : isDrive
           ? "bg-zinc-100 border-zinc-300 opacity-80"
           : "bg-white border border-zinc-300 shadow-sm"
