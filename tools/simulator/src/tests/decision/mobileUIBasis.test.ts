@@ -178,7 +178,13 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
         },
         p2: {
           name: "Player B",
-          life: Array(15).fill({ suit: "H", rank: "A" }), // 15枚 (10以上)
+          // 相手の Life に明確な秘密カード（S A, H K, D Q 等）を含む15枚
+          life: [
+            { id: "sec-life-1", suit: "S", rank: "A", value: 1, code: "SA" },
+            { id: "sec-life-2", suit: "H", rank: "K", value: 13, code: "HK" },
+            { id: "sec-life-3", suit: "D", rank: "Q", value: 12, code: "DQ" },
+            ...Array(12).fill({ id: "sec-life-x", suit: "C", rank: "2", value: 2, code: "C2" }),
+          ],
           hand: [
             { id: "p2-h1", suit: "D", rank: "A", value: 1 },
             { id: "p2-h2", suit: "D", rank: "K", value: 13 },
@@ -206,32 +212,46 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
     it("Core ObservationFactory accurately creates observation boundaries for p1 viewer", () => {
       const observation = ObservationFactory.createObservation(mockRawState, "p1");
 
-      // p1 (viewer)
+      // p1 (viewer: 自分の Life 15)
       const p1Obs = observation.players.find((p) => p.playerId === "p1")!;
       expect(p1Obs.isViewer).toBe(true);
       expect(p1Obs.lifeDisplay).toBe("15");
+      expect(p1Obs.lifeCount).toBe(15);
       expect(p1Obs.handCards[0].visibility).toBe("KNOWN");
       expect(p1Obs.canViewFullGrave).toBe(true);
       expect(p1Obs.grave).toHaveLength(3);
 
-      // p2 (opponent)
+      // p2 (opponent: 相手の Life 15)
       const p2Obs = observation.players.find((p) => p.playerId === "p2")!;
       expect(p2Obs.isViewer).toBe(false);
-      // ケース B: 相手 Life 10以上は「10以上」
+      // ケース B: 相手 Life 10以上は「10以上」かつ exact count は秘匿 (undefined)
       expect(p2Obs.lifeDisplay).toBe("10以上");
+      expect(p2Obs.lifeCount).toBeUndefined();
+
       // ケース A: 相手手札は HIDDEN
       expect(p2Obs.handCount).toBe(3);
       expect(p2Obs.handCards[0].visibility).toBe("HIDDEN");
       expect((p2Obs.handCards[0] as any).suit).toBeUndefined();
+
       // ケース C: 相手墓地はトップのみ公開
       expect(p2Obs.graveCount).toBe(2);
       expect(p2Obs.graveTopCard?.visibility).toBe("KNOWN");
       expect((p2Obs.graveTopCard as any)?.rank).toBe("7");
       expect(p2Obs.canViewFullGrave).toBe(false);
       expect(p2Obs.grave).toHaveLength(1);
+
       // ケース D: 相手伏せ防壁は HIDDEN
       expect(p2Obs.field[0].cards[0].visibility).toBe("HIDDEN");
       expect((p2Obs.field[0].cards[0] as any).suit).toBeUndefined();
+
+      // ケース D2: JSON.stringify(observation) しても相手 Life カードの identity (SA, HK, DQ 等) が漏洩しないこと
+      const obsJson = JSON.stringify(observation);
+      expect(obsJson).not.toContain("sec-life-1");
+      expect(obsJson).not.toContain("sec-life-2");
+      expect(obsJson).not.toContain("sec-life-3");
+      expect(obsJson).not.toContain('"code":"SA"');
+      expect(obsJson).not.toContain('"code":"HK"');
+      expect(obsJson).not.toContain('"code":"DQ"');
     });
 
     // Presenter が Observation のみから ViewModel を構築する検証
@@ -244,6 +264,7 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
       // p1
       expect(p1Vm.isViewer).toBe(true);
       expect(p1Vm.lifeDisplay).toBe("15");
+      expect(p1Vm.lifeCount).toBe(15);
       expect(p1Vm.handCards[0].suit).toBe("H");
       expect(p1Vm.canViewFullGrave).toBe(true);
       expect(p1Vm.graveCards).toHaveLength(3);
@@ -251,6 +272,7 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
       // p2
       expect(p2Vm.isViewer).toBe(false);
       expect(p2Vm.lifeDisplay).toBe("10以上");
+      expect(p2Vm.lifeCount).toBeUndefined();
       expect(p2Vm.handCount).toBe(3);
       expect((p2Vm.handCards[0] as any).suit).toBeUndefined();
       expect(p2Vm.canViewFullGrave).toBe(false);
@@ -272,14 +294,17 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
       };
 
       const obs = ObservationFactory.createObservation(lowLifeState, "p1");
+      const p2Obs = obs.players.find((p) => p.playerId === "p2")!;
+      expect(p2Obs.lifeDisplay).toBe("9");
+      expect(p2Obs.lifeCount).toBe(9);
+
       const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", obs, lowLifeState, "p1");
-      expect(p2Vm.lifeCount).toBe(9);
       expect(p2Vm.lifeDisplay).toBe("9");
+      expect(p2Vm.lifeCount).toBe(9);
     });
 
     // ケース F: Raw と Observation が意図的に食い違っていても、通常 UI (ViewModel) では Observation が勝つ
     it("Observation always supersedes Raw GameState in PlayerBoardViewModel (fail-safe test)", () => {
-      // 意図的に Raw State に不正な秘密データ（相手手札がKNOWNのように見える偽装）を用意
       const fakeRawState = {
         turnPlayer: "p1",
         chancePlayer: "p1",
@@ -321,7 +346,6 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
             playerId: "p2" as const,
             name: "P2",
             isViewer: false,
-            lifeCount: 99,
             lifeDisplay: "10以上",
             handCount: 1,
             handCards: [{ visibility: "HIDDEN" as const, faceUp: false as const }],
@@ -345,6 +369,19 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
       expect((p2Vm.handCards[0] as any).suit).toBeUndefined();
       expect(p2Vm.handCards[0].visibility).toBe("HIDDEN");
       expect(p2Vm.lifeDisplay).toBe("10以上");
+      expect(p2Vm.lifeCount).toBeUndefined();
+    });
+
+    // ケース G: null / undefined state に対する防御（初回 render クラッシュ防止 smoke test）
+    it("handles null or undefined state safely without throwing errors", () => {
+      expect(() => ObservationFactory.createObservation(null, "p1")).not.toThrow();
+      expect(() => ObservationFactory.createObservation(undefined, "p1")).not.toThrow();
+      expect(() => ObservationFactory.createObservation({}, "p1")).not.toThrow();
+
+      const nullVm = PlayerObservationPresenter.buildPlayerViewModel("p1", undefined, null, "p1");
+      expect(nullVm).toBeDefined();
+      expect(nullVm.lifeDisplay).toBe("0");
+      expect(nullVm.handCount).toBe(0);
     });
   });
 });

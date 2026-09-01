@@ -13,8 +13,9 @@ const abilityEvaluator = new AbilityEvaluator();
 
 /**
  * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
- * 非公開情報（対戦相手の手札カード詳細、対戦相手の裏向き防壁、対戦相手のLife 10以上、対戦相手の非トップ墓地など）は
- * ルールに準拠してマスク/HIDDEN 化されます。
+ * 非公開情報（対戦相手の手札カード詳細、対戦相手の裏向き防壁、対戦相手のLife 10以上時の正確な枚数、
+ * 対戦相手の非トップ墓地、全プレイヤーのLifeカード中身等）は
+ * ルールに準拠して完全に排除/HIDDEN 化されます。
  */
 export class ObservationFactory {
   /**
@@ -23,12 +24,13 @@ export class ObservationFactory {
   static createObservation(state: any, viewerPlayerId: PlayerKey): PlayerObservation {
     const playersView: PlayerObservationView[] = [];
 
-    if (state.players) {
+    if (state && state.players) {
       for (const [pKey, p] of Object.entries<any>(state.players)) {
         const isViewer = pKey === viewerPlayerId;
 
-        // 1. ライフカード & 表示の処理
-        // ルール: 自分のライフは正確な枚数。相手のライフは9以下なら正確な数値、10以上なら「10以上」
+        // 1. ライフ表示 & 観測可能枚数の処理
+        // ルール: 自分のライフは正確な枚数（lifeCount, lifeDisplay）。
+        // 相手のライフは9枚以下なら正確な数値（lifeCount, lifeDisplay）、10枚以上なら exact count は秘匿 (lifeCount: undefined, lifeDisplay: "10以上")
         const rawLifeCount = Array.isArray(p.life) ? p.life.length : (typeof p.life === "number" ? p.life : 0);
         const lifeDisplay = isViewer
           ? String(rawLifeCount)
@@ -36,9 +38,7 @@ export class ObservationFactory {
           ? "10以上"
           : String(rawLifeCount);
 
-        const lifeCards = Array.isArray(p.life)
-          ? p.life.map((c: any) => this.mapCard(c, false)) // ライフは基本裏向き
-          : undefined;
+        const lifeCount = isViewer || rawLifeCount < 10 ? rawLifeCount : undefined;
 
         // 2. 手札カードの処理（自分は KNOWN、相手は HIDDEN）
         const handCards = Array.isArray(p.hand)
@@ -85,9 +85,8 @@ export class ObservationFactory {
           playerId: pKey as PlayerKey,
           name: p.name || pKey,
           isViewer,
-          lifeCount: rawLifeCount,
+          lifeCount,
           lifeDisplay,
-          lifeCards,
           handCount,
           handCards,
           field,
@@ -105,7 +104,7 @@ export class ObservationFactory {
     const stageRequests: RequestView[] = [];
     const stageRequestRefs: string[] = [];
 
-    if (state.stage?.requests && Array.isArray(state.stage.requests)) {
+    if (state && state.stage?.requests && Array.isArray(state.stage.requests)) {
       for (const req of state.stage.requests) {
         stageRequestRefs.push(req.id);
         stageRequests.push({
@@ -122,8 +121,8 @@ export class ObservationFactory {
 
     return {
       viewerPlayerId,
-      turnPlayerId: state.turnPlayer,
-      chancePlayerId: state.chancePlayer,
+      turnPlayerId: state?.turnPlayer,
+      chancePlayerId: state?.chancePlayer,
       players: playersView,
       stageRequestRefs,
       stageRequests,

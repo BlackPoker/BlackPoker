@@ -359,6 +359,19 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
+  if (!gameState) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f7f7f8] text-zinc-950 font-sans">
+        <div className="flex flex-col items-center gap-2">
+          <img src={logoUrl} alt="BlackPoker" className="w-8 h-8 animate-pulse" />
+          <div className="text-xs font-mono font-bold tracking-widest text-zinc-600 uppercase">
+            BlackPoker Initializing...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const activePlayerKey =
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
 

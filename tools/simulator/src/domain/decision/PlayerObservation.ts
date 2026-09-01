@@ -46,9 +46,16 @@ export interface PlayerObservationView {
   readonly playerId: PlayerKey;
   readonly name: string;
   readonly isViewer: boolean;
-  readonly lifeCount: number;
+  /**
+   * 観測可能な正確なライフ枚数。
+   * 自分なら正確な枚数、相手かつ9枚以下なら正確な枚数。
+   * 相手かつ10枚以上の場合は観測不能なため undefined となる。
+   */
+  readonly lifeCount?: number;
+  /**
+   * ライフの表示用文字列（自分: "15", 相手9以下: "9", 相手10以上: "10以上"）。
+   */
   readonly lifeDisplay: string;
-  readonly lifeCards?: readonly CardView[];
   readonly handCount: number;
   readonly handCards: readonly CardView[];
   readonly field: readonly UnitView[];
@@ -79,7 +86,10 @@ export interface GameEventView {
 
 /**
  * プレイヤー視点の読み取り専用盤面情報。
- * 非公開情報（対戦相手の手札カード内容など）は HIDDEN 化されている。
+ * その viewer がルール上合法的に観測可能な情報のみを持つ安全な読み取りモデル。
+ * AI入力、Replay分析、観戦、ネットワーク対戦にもそのまま渡すことができるよう、
+ * 観測不能な秘密情報（相手の手札・相手の伏せ防壁・相手のLife 10以上時の正確な枚数やLifeカード中身等）は
+ * 完全に排除・HIDDEN化されている。
  */
 export interface PlayerObservation {
   readonly viewerPlayerId: PlayerKey;
