@@ -16,9 +16,10 @@ import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel, TraceEntry } from "../debug/DebugPanel";
 import { MobileDecisionDock } from "../decision/MobileDecisionDock";
-import { MobileBottomSheet } from "../game/MobileBottomSheet";
+import { MobileBottomSheet, SheetMode } from "../game/MobileBottomSheet";
 import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
+import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import logoUrl from "../../assets/blackpoker-logo.svg";
@@ -58,8 +59,8 @@ export const CoreBattlePlaytest: React.FC = () => {
   // デスクトップ用デバッグ表示
   const [showDebug, setShowDebug] = useState(false);
 
-  // モバイル用 UI 状態
-  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  // モバイル用 UI 状態 (collapsed / half / expanded)
+  const [sheetMode, setSheetMode] = useState<SheetMode>("collapsed");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileLogModal, setShowMobileLogModal] = useState(false);
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
@@ -123,7 +124,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     seqRef.current = 1;
     setLatestEventMessage("ゲーム開始準備完了");
     setSelectedUnitIds([]);
-    setIsMobileSheetOpen(false);
+    setSheetMode("collapsed");
     addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info", setupResult.state);
     addLog(`[REGULATION] Core Battle (Preset 001)`, "info", setupResult.state);
     addTrace("MATCH_SETUP", `ゲーム開始 (Preset: ${CORE_BATTLE_PRESET_ID})`, setupResult.state);
@@ -189,8 +190,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       const session = sessionRef.current;
       if (!session) return;
 
-      // モバイル Bottom Sheet を閉じる
-      setIsMobileSheetOpen(false);
+      // モバイル Bottom Sheet を最小化
+      setSheetMode("collapsed");
 
       let prevState = JSON.parse(JSON.stringify(session.state));
       const selectedPattern = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.patterns[response.selectedPatternRef] : undefined;
@@ -292,9 +293,10 @@ export const CoreBattlePlaytest: React.FC = () => {
     return BattleRelationPresenter.buildPresentationMap(gameState, obs);
   }, [gameState, currentStep]);
 
-  // decisionId 切替時の盤面選択リセット
+  // decisionId 切替時の盤面選択リセット & モバイルシート最小化
   useEffect(() => {
     setSelectedUnitIds([]);
+    setSheetMode("collapsed");
   }, [currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.decisionId : null]);
 
   // キーボードショートカット (P: PASS)
@@ -341,7 +343,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           <p className="text-xs text-zinc-600 mb-4">
             初期盤面プリセットの整合性チェックに失敗しました。定義を確認してください。
           </p>
-          <ul className="list-disc list-inside space-y-1 text-xs text-red-700 font-mono bg-red-50 p-3 rounded border border-red-200 mb-4">
+          <ul className="list-disc list-inside space-y-1 text-red-700 font-mono bg-red-50 p-3 rounded border border-red-200 mb-4">
             {presetValidationErrors.map((err, i) => (
               <li key={i}>{err}</li>
             ))}
@@ -359,6 +361,23 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   const activePlayerKey =
     currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
+
+  // Observation を基準とした PlayerBoardViewModel の生成
+  const observation = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
+  const p1ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
+    "p1",
+    gameState,
+    observation,
+    activePlayerKey,
+    showDebug
+  );
+  const p2ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
+    "p2",
+    gameState,
+    observation,
+    activePlayerKey,
+    showDebug
+  );
 
   // DecisionPanel のコンテンツ生成
   const decisionPanelContent = currentStep?.type === "WAITING_FOR_DECISION" ? (
@@ -485,16 +504,12 @@ export const CoreBattlePlaytest: React.FC = () => {
             />
           )}
 
-          {/* 対戦相手 (Player B) の盤面 */}
+          {/* 対戦相手 (Player B) の盤面 (Observation 準拠) */}
           {gameState?.players?.p2 && (
             <PlayerBoard
               playerKey="p2"
-              player={gameState.players.p2}
+              viewModel={p2ViewModel}
               allPlayersFog={allPlayersFog}
-              isCurrentDecisionPlayer={activePlayerKey === "p2"}
-              isTurnPlayer={gameState.turnPlayer === "p2"}
-              isChancePlayer={gameState.chancePlayer === "p2"}
-              showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p2" || showDebug}
               unitSelectionMarkers={unitSelectionMarkers}
               battleRelationMap={battleRelationMap}
               onUnitClick={handleUnitClick}
@@ -504,16 +519,12 @@ export const CoreBattlePlaytest: React.FC = () => {
           {/* 中央 STAGE パネル */}
           <StagePanel requests={gameState?.stage?.requests || []} />
 
-          {/* 自分 (Player A) の盤面 */}
+          {/* 自分 (Player A) の盤面 (Observation 準拠) */}
           {gameState?.players?.p1 && (
             <PlayerBoard
               playerKey="p1"
-              player={gameState.players.p1}
+              viewModel={p1ViewModel}
               allPlayersFog={allPlayersFog}
-              isCurrentDecisionPlayer={activePlayerKey === "p1"}
-              isTurnPlayer={gameState.turnPlayer === "p1"}
-              isChancePlayer={gameState.chancePlayer === "p1"}
-              showPrivateInfo={!enablePassAndPlay || activePlayerKey === "p1" || showDebug}
               unitSelectionMarkers={unitSelectionMarkers}
               battleRelationMap={battleRelationMap}
               onUnitClick={handleUnitClick}
@@ -565,17 +576,18 @@ export const CoreBattlePlaytest: React.FC = () => {
       {currentStep?.type === "WAITING_FOR_DECISION" && (
         <MobileDecisionDock
           request={currentStep.request}
-          onOpenSheet={() => setIsMobileSheetOpen(true)}
+          onOpenSheet={() => setSheetMode("half")}
           onSubmit={handleDecisionSubmit}
-          isSheetOpen={isMobileSheetOpen}
+          sheetMode={sheetMode}
         />
       )}
 
-      {/* 2. Mobile Decision Bottom Sheet (非Desktop時のみマウントして二重マウントを防止) */}
+      {/* 2. Mobile Decision Bottom Sheet (collapsed 時でもマウントを維持して選択状態を保持) */}
       {!isDesktop && (
         <MobileBottomSheet
-          isOpen={isMobileSheetOpen}
-          onClose={() => setIsMobileSheetOpen(false)}
+          mode={sheetMode}
+          onModeChange={setSheetMode}
+          onClose={() => setSheetMode("collapsed")}
           title={
             currentStep?.type === "WAITING_FOR_DECISION"
               ? `${currentStep.request.playerId === "p1" ? "Player A" : "Player B"} の${
