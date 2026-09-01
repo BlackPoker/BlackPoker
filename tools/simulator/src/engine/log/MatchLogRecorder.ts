@@ -25,7 +25,12 @@ export function normalizeCardLocation(
   requestId?: string
 ): CardLocation {
   if (typeof zoneOrLoc === "object" && zoneOrLoc !== null) {
-    if (zoneOrLoc.kind === "zone" || zoneOrLoc.kind === "request") {
+    if (
+      zoneOrLoc.kind === "zone" ||
+      zoneOrLoc.kind === "request" ||
+      zoneOrLoc.kind === "deck" ||
+      zoneOrLoc.kind === "unknown"
+    ) {
       return zoneOrLoc as CardLocation;
     }
   }
@@ -46,16 +51,19 @@ export function normalizeCardLocation(
   }
 
   const validZones: CardZoneName[] = ["hand", "field", "grave", "fog", "life"];
-  const matchedZone: CardZoneName = validZones.includes(rawZoneStr as CardZoneName)
-    ? (rawZoneStr as CardZoneName)
-    : "grave";
+  if (validZones.includes(rawZoneStr as CardZoneName)) {
+    return {
+      kind: "zone",
+      playerId: playerKey || "unknown",
+      zone: rawZoneStr as CardZoneName,
+    };
+  }
 
   return {
-    kind: "zone",
+    kind: "unknown",
+    rawLocation: String(zoneOrLoc),
     playerId: playerKey || "unknown",
-    zone: matchedZone,
   };
-
 }
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;

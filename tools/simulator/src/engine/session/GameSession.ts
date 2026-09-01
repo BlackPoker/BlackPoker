@@ -141,22 +141,9 @@ export class GameSession {
       });
     }
 
-    // 0.5. ターン交代の検知
-    if (this.state.turnPlayer && this.state.turnPlayer !== this.lastRecordedTurnPlayer) {
-      const fromTP = this.lastRecordedTurnPlayer || "p1";
-      const toTP = this.state.turnPlayer;
-      this.lastRecordedTurnPlayer = toTP;
-      this.logRecorder.record({
-        type: "turn.changed",
-        stateVersion: this.stateVersion,
-        fromTurnPlayer: fromTP,
-        toTurnPlayer: toTP,
-        turnCount: this.state.turnCount ?? this.state.turn ?? 1,
-      });
-    }
-
     // 1. 勝敗判定（ライフ 0 判定）
     const finishCheck = this.checkGameFinished();
+
     if (finishCheck) {
       this.pendingDecision = undefined;
       this.logRecorder.record({
@@ -393,10 +380,21 @@ export class GameSession {
       this.resolvingContext = undefined;
 
       // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+      const prevChance = this.state.chancePlayer;
       const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
       this.state.chancePlayer = turnPlayer;
+      if (prevChance !== turnPlayer) {
+        this.logRecorder.record({
+          type: "chance.changed",
+          stateVersion: this.stateVersion,
+          fromChancePlayer: prevChance,
+          toChancePlayer: turnPlayer,
+          reason: "effectResolved",
+        });
+      }
 
       return this.advance();
+
     }
 
     // 2. 通常の行動要求 (ACTION_REQUEST) の場合

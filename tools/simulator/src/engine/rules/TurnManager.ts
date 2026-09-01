@@ -14,6 +14,7 @@ export class TurnManager {
       state.players = {};
     }
     const prevTurnPlayer = state.turnPlayer;
+    const prevChance = state.chancePlayer;
     state.turnPlayer = playerKey;
     state.nonTurnPlayer = getOpponentPlayerKey(playerKey, state);
     state.chancePlayer = playerKey;
@@ -22,16 +23,28 @@ export class TurnManager {
     state.turnUsage = {}; // ターンごとのアクション使用回数をリセット
 
     const logRecorder = context?.logRecorder;
-    if (logRecorder && prevTurnPlayer && prevTurnPlayer !== playerKey) {
-      logRecorder.record({
-        type: "turn.changed",
-        stateVersion: state.stateVersion ?? state.version ?? 1,
-        fromTurnPlayer: prevTurnPlayer,
-        toTurnPlayer: playerKey,
-        turnCount: state.turnCount,
-      });
+    if (logRecorder) {
+      if (prevTurnPlayer && prevTurnPlayer !== playerKey) {
+        logRecorder.record({
+          type: "turn.changed",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          fromTurnPlayer: prevTurnPlayer,
+          toTurnPlayer: playerKey,
+          turnCount: state.turnCount,
+        });
+      }
+      if (prevChance && prevChance !== playerKey) {
+        logRecorder.record({
+          type: "chance.changed",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          fromChancePlayer: prevChance,
+          toChancePlayer: playerKey,
+          reason: "turnStart",
+        });
+      }
     }
   }
+
 
   /**
    * チャンス（アクション実行権）を相手プレイヤーへ受け渡します。

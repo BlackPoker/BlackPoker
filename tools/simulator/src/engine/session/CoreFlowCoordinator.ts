@@ -209,8 +209,18 @@ export class CoreFlowCoordinator {
       }
 
       // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+      const prevChance = state.chancePlayer;
       const turnPlayer: PlayerKey = state.turnPlayer || "p1";
       state.chancePlayer = turnPlayer;
+      if (registry.logRecorder && prevChance !== turnPlayer) {
+        registry.logRecorder.record({
+          type: "chance.changed",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          fromChancePlayer: prevChance,
+          toChancePlayer: turnPlayer,
+          reason: "stageTopResolved",
+        });
+      }
 
       return {
         type: "STAGE_TOP_RESOLVED",
@@ -219,9 +229,20 @@ export class CoreFlowCoordinator {
       };
     } else {
       // stage が空の状態で全員連続PASSした場合、チャンスを turnPlayer へ戻す
+      const prevChance = state.chancePlayer;
       const turnPlayer: PlayerKey = state.turnPlayer || "p1";
       state.chancePlayer = turnPlayer;
+      if (registry.logRecorder && prevChance !== turnPlayer) {
+        registry.logRecorder.record({
+          type: "chance.changed",
+          stateVersion: state.stateVersion ?? state.version ?? 1,
+          fromChancePlayer: prevChance,
+          toChancePlayer: turnPlayer,
+          reason: "allPassedStageEmpty",
+        });
+      }
       return null;
     }
+
   }
 }

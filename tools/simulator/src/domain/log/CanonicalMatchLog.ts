@@ -42,7 +42,13 @@ export type CardLocation =
   | {
       readonly kind: "deck";
       readonly playerId: string;
+    }
+  | {
+      readonly kind: "unknown";
+      readonly rawLocation?: string;
+      readonly playerId?: string;
     };
+
 
 
 export interface CanonicalGameEventBase {

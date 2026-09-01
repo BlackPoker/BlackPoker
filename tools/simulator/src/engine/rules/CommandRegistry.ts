@@ -558,6 +558,26 @@ export class CommandRegistry {
       }
     }
 
+    // 効果完了後のステージ除去・キーカード後処理・解決完了
+    if (context.state.stage?.requests && context.state.stage.requests.length > 0) {
+      const idx = context.state.stage.requests.lastIndexOf(request);
+      if (idx !== -1) {
+        const depthBefore = context.state.stage.requests.length;
+        context.state.stage.requests.splice(idx, 1);
+        const depthAfter = context.state.stage.requests.length;
+        if (logRecorder) {
+          logRecorder.record({
+            type: "stage.popped",
+            stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+            requestId: request.id,
+            actionRef: request.actionId,
+            depthBefore,
+            depthAfter,
+          });
+        }
+      }
+    }
+
     request.status = "resolved";
     finalizeRequestKeyCards(request, context, this.effectInterpreter);
     if (!context.state.stage) {
@@ -598,7 +618,8 @@ export class CommandRegistry {
   }
 
   /**
-   * ステージの一番上（最新）のリクエストを取り出し、効果を解決します。
+   * ステージの一番上（最新）のリクエストを取り出さず参照し、効果を解決します。
+   * ※公式ルール5.4.5〜5.4.7に基づき、効果処理中もRequestはStage上に残り、効果完了時にStageから除去されます。
    */
   resolveTopRequest(
     context: CommandContext
@@ -613,25 +634,12 @@ export class CommandRegistry {
       return undefined;
     }
 
-    // LIFO スタックから最新のリクエストを取り出す
-    const depthBefore = context.state.stage.requests.length;
-    const request = context.state.stage.requests.pop()!;
-    const depthAfter = context.state.stage.requests.length;
-
-    const logRecorder = context.logRecorder || this.logRecorder;
-    if (logRecorder) {
-      logRecorder.record({
-        type: "stage.popped",
-        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
-        requestId: request.id,
-        actionRef: request.actionId,
-        depthBefore,
-        depthAfter,
-      });
-    }
+    // LIFO スタックの最上段リクエストを参照（popせず効果解決へ）
+    const request = context.state.stage.requests[context.state.stage.requests.length - 1];
 
     return this.resolveRequest(request, context);
   }
+
 
 
   /**
@@ -743,11 +751,31 @@ export class CommandRegistry {
       };
     }
 
+    // 効果完了後のステージ除去・キーカード後処理・解決完了
+    const logRecorder = context.logRecorder || this.logRecorder;
+    if (context.state.stage?.requests && context.state.stage.requests.length > 0) {
+      const idx = context.state.stage.requests.lastIndexOf(request);
+      if (idx !== -1) {
+        const depthBefore = context.state.stage.requests.length;
+        context.state.stage.requests.splice(idx, 1);
+        const depthAfter = context.state.stage.requests.length;
+        if (logRecorder) {
+          logRecorder.record({
+            type: "stage.popped",
+            stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+            requestId: request.id,
+            actionRef: request.actionId,
+            depthBefore,
+            depthAfter,
+          });
+        }
+      }
+    }
+
     request.status = "resolved";
     finalizeRequestKeyCards(request, context, this.effectInterpreter);
     context.state.stage.history.push(request);
 
-    const logRecorder = context.logRecorder || this.logRecorder;
     if (logRecorder) {
       logRecorder.record({
         type: "request.resolved",
@@ -758,6 +786,7 @@ export class CommandRegistry {
         result: request.result,
       });
     }
+
 
     // アクション解決イベントの発行
     const resolveEvent = {
@@ -883,12 +912,17 @@ export class CommandRegistry {
   /**
    * 登録されたリスナーへイベントを通知します。
    */
-  emitEvent(event: any) {
+  emitEvent(event: any, context?: CommandContext) {
     if (this.logRecorder && event?.type === "cardMoved" && event.payload?.card?.id) {
       const p = event.payload;
+      const stateVersion =
+        p.stateVersion ??
+        context?.state?.stateVersion ??
+        context?.state?.version ??
+        1;
       this.logRecorder.record({
         type: "card.moved",
-        stateVersion: p.stateVersion ?? 1,
+        stateVersion,
         cardId: p.card.id,
         from: normalizeCardLocation(p.fromZone, p.playerKey, p.requestId),
         to: normalizeCardLocation(p.toZone, p.playerKey, p.requestId),
@@ -910,10 +944,10 @@ export class CommandRegistry {
    * [イベント配信ブリッジ] ゲームイベントを発行し、誘発アクションをチェック・実行します。
    */
   dispatchEvent(event: any, context: CommandContext) {
-    this.emitEvent(event);
-    // 既存のイベント解決を優先して走らせる
+    // 既存のイベント解決を優先して走らせる（EffectInterpreter.dispatchEvent 内で emitEvent(event, context) が1回呼ばれる）
     this.effectInterpreter.dispatchEvent(event, context);
   }
+
 
 
 
