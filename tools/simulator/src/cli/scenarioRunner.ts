@@ -70,8 +70,8 @@ function logState(state: any) {
     if (p.grave && p.grave.length > 0) {
       const graveStr = p.grave
         .map((u: any) => {
-          const cardsStr = u.cards.map((c: any) => `${c.suit}${c.rank}`).join("+");
-          return `${u.unitId}(${cardsStr})`;
+          const cardsStr = u.cards ? u.cards.map((c: any) => `${c.suit}${c.rank}`).join("+") : `${u.suit || ""}${u.rank || ""}`;
+          return `${u.unitId || "card"}(${cardsStr})`;
         })
         .join(", ");
       console.log(`    墓地    : [${graveStr}]`);
@@ -604,7 +604,8 @@ async function runCounterScenario(rulePackage: any) {
         name: "Player B",
         life: [],
         hand: [
-          { id: "counter-cost", suit: "C", rank: "2", value: 2 }, // カウンターコスト用手札
+          { id: "counter-key", suit: "C", rank: "2", value: 2 },
+          { id: "counter-cost", suit: "D", rank: "5", value: 5 }, // カウンターコスト用手札 (D)
         ],
         field: [],
         grave: [],
@@ -639,11 +640,12 @@ async function runCounterScenario(rulePackage: any) {
   TurnManager.passChance(state);
 
   // 2. Player B が「カウンター」をステージに積む
+  const counterKeyCard = state.players.p2.hand[0];
   const counterContext: CommandContext = {
     state,
     playerKey: "p2",
     targetRequest: req1, // アップを対象
-    keyCard: undefined,
+    keyCard: counterKeyCard,
     actions: rulePackage.actions,
     components: rulePackage.components,
   };
