@@ -275,7 +275,16 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   const allPlayersFog = useMemo(() => {
     const fogs: any[] = [];
-    if (gameState?.players) {
+    const obs = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
+    if (obs?.players && Array.isArray(obs.players)) {
+      for (const p of obs.players) {
+        if (Array.isArray(p.fog)) {
+          for (const f of p.fog) {
+            fogs.push(f);
+          }
+        }
+      }
+    } else if (gameState?.players) {
       for (const [pKey, p] of Object.entries<any>(gameState.players)) {
         if (Array.isArray(p.fog)) {
           for (const f of p.fog) {
@@ -285,7 +294,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
     }
     return fogs;
-  }, [gameState]);
+  }, [gameState, currentStep]);
 
   // 戦闘関係番号プレゼンテーション (①, ②, ...) の生成
   const battleRelationMap = useMemo(() => {

@@ -7,8 +7,9 @@ import { GameSession } from "../../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../../engine/session/playtest/createCoreBattlePlaytest";
 import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import { PlayerObservationPresenter } from "../../ui/game/PlayerObservationPresenter";
+import { BattleRelationPresenter } from "../../ui/game/BattleRelationPresenter";
 
-describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () => {
+describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", () => {
   let playtestRulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -382,6 +383,194 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2)", () =
       expect(nullVm).toBeDefined();
       expect(nullVm.lifeDisplay).toBe("0");
       expect(nullVm.handCount).toBe(0);
+    });
+  });
+
+  // --------------------------------------------------------------------------
+  // 5. BattleRelationPresenter & Unit Presentation Tests (Phase 2.3)
+  // --------------------------------------------------------------------------
+  describe("BattleRelationPresenter Array & Observation-first Tests (Phase 2.3)", () => {
+    const mockObsState = {
+      viewerPlayerId: "p1" as const,
+      turnPlayerId: "p1" as const,
+      chancePlayerId: "p1" as const,
+      players: [
+        {
+          playerId: "p1" as const,
+          name: "Player A",
+          isViewer: true,
+          lifeCount: 15,
+          lifeDisplay: "15",
+          handCount: 2,
+          handCards: [],
+          field: [
+            {
+              unitId: "p1-u1",
+              kind: "一般兵",
+              state: "charge",
+              face: "up",
+              cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c1", suit: "S", rank: "6", value: 6, faceUp: true }],
+              labels: [],
+              battle: { role: "attacker" },
+            },
+            {
+              unitId: "p1-bw",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              face: "down",
+              cards: [{ visibility: "KNOWN" as const, cardInstanceId: "bw1", suit: "D", rank: "4", value: 4, faceUp: false }],
+              labels: [],
+            },
+          ],
+          fog: [],
+          trumps: [],
+          graveCount: 0,
+          grave: [],
+          canViewFullGrave: true,
+        },
+        {
+          playerId: "p2" as const,
+          name: "Player B",
+          isViewer: false,
+          lifeDisplay: "10以上",
+          handCount: 3,
+          handCards: [],
+          field: [
+            {
+              unitId: "p2-bw",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              face: "down",
+              // 相手の伏せ防壁は HIDDEN (カード詳細なし)
+              cards: [{ visibility: "HIDDEN" as const, faceUp: false as const }],
+              labels: [],
+            },
+            {
+              unitId: "p2-u1",
+              kind: "一般兵",
+              state: "charge",
+              face: "up",
+              cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c2", suit: "H", rank: "8", value: 8, faceUp: true }],
+              labels: [],
+              battle: { role: "blocker", blocksUnitId: "p1-u1" },
+            },
+            {
+              unitId: "p2-u2",
+              kind: "一般兵",
+              state: "charge",
+              face: "up",
+              cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c3", suit: "C", rank: "3", value: 3, faceUp: true }],
+              labels: [],
+              battle: { role: "blocker", blocksUnitId: "p1-u1" }, // 複数ブロッカー
+            },
+          ],
+          fog: [],
+          trumps: [],
+          graveCount: 0,
+          grave: [],
+          canViewFullGrave: false,
+        },
+      ],
+      stageRequestRefs: [],
+      stageRequests: [],
+      recentEvents: [],
+    };
+
+    // ケース A: PlayerObservation.players が配列でも Unit Presentation map が正しく生成される
+    it("generates Unit Presentation map accurately when observation.players is an array", () => {
+      const map = BattleRelationPresenter.buildPresentationMap(undefined, mockObsState);
+
+      expect(map.size).toBe(5);
+      expect(map.get("p1-u1")?.badge).toBe("①");
+      expect(map.get("p1-bw")?.badge).toBe("②");
+      expect(map.get("p2-bw")?.badge).toBe("③");
+      expect(map.get("p2-u1")?.badge).toBe("④");
+      expect(map.get("p2-u2")?.badge).toBe("⑤");
+    });
+
+    // ケース B: Observation 優先 & 相手の HIDDEN 防壁から秘密情報が漏洩しない
+    it("prioritizes Observation and conceals secret info for HIDDEN bulwark cards in label", () => {
+      // 意図的に Raw GameState には相手防壁のカード 'H5' が入っている偽装
+      const fakeRawState = {
+        players: {
+          p1: { field: [] },
+          p2: {
+            field: [
+              {
+                unitId: "p2-bw",
+                kind: "防壁",
+                componentId: "character.bulwark",
+                face: "down",
+                cards: [{ id: "secret-bw", suit: "H", rank: "5", value: 5, code: "H5" }],
+              },
+            ],
+          },
+        },
+      };
+
+      const map = BattleRelationPresenter.buildPresentationMap(fakeRawState, mockObsState);
+      const p2BwInfo = map.get("p2-bw");
+
+      expect(p2BwInfo).toBeDefined();
+      expect(p2BwInfo?.badge).toBe("③");
+      // label は '③ 防壁' となり、'H5' や '♡5' や 'H' や '5' 等の秘密カード情報は含まれない
+      expect(p2BwInfo?.label).toBe("③ 防壁");
+      expect(p2BwInfo?.label).not.toContain("H5");
+      expect(p2BwInfo?.label).not.toContain("♡5");
+      expect(p2BwInfo?.label).not.toContain("H");
+      expect(p2BwInfo?.label).not.toContain("5");
+    });
+
+    // ケース C & D: Attacker / Blocker 関係および複数ブロッカー関係の正確性
+    it("correctly resolves bidirectional attack and multi-block relationships", () => {
+      const map = BattleRelationPresenter.buildPresentationMap(undefined, mockObsState);
+
+      const attackerInfo = map.get("p1-u1");
+      const blocker1Info = map.get("p2-u1");
+      const blocker2Info = map.get("p2-u2");
+
+      expect(attackerInfo).toBeDefined();
+      expect(blocker1Info).toBeDefined();
+      expect(blocker2Info).toBeDefined();
+
+      // アタッカー (①) は blocker1 (④) と blocker2 (⑤) にブロックされている
+      expect(attackerInfo?.role).toBe("attacker");
+      expect(attackerInfo?.blockedByBadges).toEqual(["④", "⑤"]);
+
+      // ブロッカー1 (④) は アタッカー (①) をブロックしている
+      expect(blocker1Info?.role).toBe("blocker");
+      expect(blocker1Info?.targetBadge).toBe("①");
+
+      // ブロッカー2 (⑤) は アタッカー (①) をブロックしている
+      expect(blocker2Info?.role).toBe("blocker");
+      expect(blocker2Info?.targetBadge).toBe("①");
+    });
+
+    // ケース E: Observation なしで GameState のみの場合でも Presentation map が壊れない
+    it("gracefully generates presentation map from GameState when observation is not provided", () => {
+      const rawStateOnly = {
+        players: {
+          p1: {
+            field: [
+              { unitId: "u-a", kind: "一般兵", cards: [{ suit: "S", rank: "6" }] },
+            ],
+          },
+          p2: {
+            field: [
+              { unitId: "u-b", kind: "一般兵", cards: [{ suit: "H", rank: "8" }] },
+            ],
+          },
+        },
+      };
+
+      const map = BattleRelationPresenter.buildPresentationMap(rawStateOnly, undefined);
+      expect(map.size).toBe(2);
+      expect(map.get("u-a")?.badge).toBe("①");
+      expect(map.get("u-a")?.label).toContain("♠6");
+      expect(map.get("u-b")?.badge).toBe("②");
+      expect(map.get("u-b")?.label).toContain("♡8");
     });
   });
 });

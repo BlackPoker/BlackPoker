@@ -7,28 +7,22 @@ import { PlayerBoardViewModel } from "./PlayerObservationPresenter";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 
 export interface PlayerBoardProps {
-  playerKey: string;
-  viewModel?: PlayerBoardViewModel;
-  player?: any;
-  allPlayersFog?: any[];
-  isCurrentDecisionPlayer?: boolean;
-  isTurnPlayer?: boolean;
-  isChancePlayer?: boolean;
-  showPrivateInfo?: boolean;
-  unitSelectionMarkers?: Map<string, { badge: string; isSelected: boolean }>;
-  battleRelationMap?: Map<string, UnitBattleDisplayInfo>;
-  onUnitClick?: (unitId: string) => void;
+  readonly playerKey: string;
+  readonly viewModel: PlayerBoardViewModel;
+  readonly allPlayersFog?: readonly any[];
+  readonly unitSelectionMarkers?: Map<string, { badge: string; isSelected: boolean }>;
+  readonly battleRelationMap?: Map<string, UnitBattleDisplayInfo>;
+  readonly onUnitClick?: (unitId: string) => void;
 }
 
+/**
+ * プレイヤー盤面コンポーネント。
+ * 通常盤面の入力は PlayerBoardViewModel のみを唯一の正とし、Raw GameState へのフォールバックは行いません。
+ */
 export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   playerKey,
   viewModel,
-  player = {},
   allPlayersFog = [],
-  isCurrentDecisionPlayer = false,
-  isTurnPlayer: propIsTurnPlayer,
-  isChancePlayer: propIsChancePlayer,
-  showPrivateInfo: propShowPrivateInfo,
   unitSelectionMarkers,
   battleRelationMap,
   onUnitClick,
@@ -36,19 +30,19 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const [showGraveModal, setShowGraveModal] = useState(false);
   const [showFogModal, setShowFogModal] = useState(false);
 
-  // ViewModel があればそれを最優先
-  const name = viewModel?.name || player.name || (playerKey === "p1" ? "Player A" : "Player B");
-  const isTurnPlayer = viewModel ? viewModel.isTurnPlayer : Boolean(propIsTurnPlayer);
-  const isChancePlayer = viewModel ? viewModel.isChancePlayer : Boolean(propIsChancePlayer);
-  const lifeDisplay = viewModel ? viewModel.lifeDisplay : String(Array.isArray(player.life) ? player.life.length : player.life || 0);
-  const handCards = viewModel ? viewModel.handCards : (Array.isArray(player.hand) ? player.hand : []);
-  const handCount = viewModel ? viewModel.handCount : handCards.length;
-  const fieldUnits = viewModel ? viewModel.fieldUnits : (Array.isArray(player.field) ? player.field : []);
-  const graveCards = viewModel ? viewModel.graveCards : (Array.isArray(player.grave) ? player.grave : []);
-  const graveCount = viewModel ? viewModel.graveCount : (Array.isArray(player.grave) ? player.grave.length : 0);
-  const canViewFullGrave = viewModel ? viewModel.canViewFullGrave : Boolean(propShowPrivateInfo);
-  const playerFog = viewModel ? viewModel.fog : (Array.isArray(player.fog) ? player.fog : []);
-  const isViewer = viewModel ? viewModel.isViewer : Boolean(propShowPrivateInfo);
+  // 全ての表示情報は ViewModel のみを正とする (fail-closed)
+  const name = viewModel.name;
+  const isTurnPlayer = viewModel.isTurnPlayer;
+  const isChancePlayer = viewModel.isChancePlayer;
+  const lifeDisplay = viewModel.lifeDisplay;
+  const handCards = viewModel.handCards;
+  const handCount = viewModel.handCount;
+  const fieldUnits = viewModel.fieldUnits;
+  const graveCards = viewModel.graveCards;
+  const graveCount = viewModel.graveCount;
+  const canViewFullGrave = viewModel.canViewFullGrave;
+  const playerFog = viewModel.fog;
+  const isViewer = viewModel.isViewer;
 
   // ZoneStrip 用アイテム（将来の切札・Pack・Rare Card 拡張に対応）
   const zoneItems: ZoneSummaryItem[] = [
@@ -62,7 +56,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       id: "grave",
       label: "墓地",
       count: graveCount,
-      badge: viewModel?.graveTopCard ? `TOP: ${viewModel.graveTopCard.suit || ""}${viewModel.graveTopCard.rank || ""}` : undefined,
+      badge: viewModel.graveTopCard ? `TOP: ${viewModel.graveTopCard.suit || ""}${viewModel.graveTopCard.rank || ""}` : undefined,
       onClick: () => setShowGraveModal(true),
     },
   ];
@@ -148,7 +142,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
                 <div className="text-xs text-zinc-600 font-mono">
                   総枚数: <span className="font-bold text-zinc-950">{graveCount} 枚</span>（相手の墓地全体は非公開）
                 </div>
-                {viewModel?.graveTopCard ? (
+                {viewModel.graveTopCard ? (
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-zinc-700 font-mono">墓地トップ（公開）:</span>
                     <CardView card={viewModel.graveTopCard} size="sm" />
