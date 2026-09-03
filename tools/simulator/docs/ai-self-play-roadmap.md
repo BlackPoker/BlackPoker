@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.0-20260903-0029`  
-更新日時: 2026-09-03 00:29 JST  
+作業ID: `BP-SIM-AI-1.1-20260903-2216`
+更新日時: 2026-09-03 22:16 JST
 
 ---
 
@@ -14,13 +14,14 @@
 | **First Legal baseline Policy** | **IMPLEMENTED** | `src/engine/simulation/DecisionPolicy.ts` (`FirstLegalPolicy`) | `src/tests/simulation/headlessSimulation.test.ts` | baseline AI として利用 |
 | **Random Policy (Seeded)** | **IMPLEMENTED** | `src/engine/simulation/DecisionPolicy.ts` (`RandomPolicy`) | `src/tests/simulation/seededDeterminism.test.ts` | 決定論的ランダム対戦 |
 | **Seeded RNG** | **IMPLEMENTED** | `src/engine/random/RandomSource.ts` (`SeededRandom` / Mulberry32) | `src/tests/simulation/seededDeterminism.test.ts` | PRNG 再現性保証 |
-| **Deterministic replay** | **IMPLEMENTED** | `SimulationRunner.run` + `SeededRandom` | `src/tests/simulation/seededDeterminism.test.ts` (100% trace 一致検証) | 決定論的再現を保証 |
+| **Deterministic re-execution** | **IMPLEMENTED** | `SimulationRunner.run` + `SeededRandom` | `src/tests/simulation/seededDeterminism.test.ts` (100% trace/hash 一致検証) | 同一入力での決定論的再実行を保証 |
+| **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
-| **Decision Trace** | **IMPLEMENTED (Base)** | `src/engine/simulation/SimulationRunner.ts` (`SimulationStepRecord`) | `src/tests/simulation/seededDeterminism.test.ts` | 将来 JSON エクスポートへ拡張 |
-| **State Hash** | **MISSING** | - | - | Phase 2.0 で導入検討 |
-| **Snapshot** | **MISSING** | - | - | Phase 2.0 で導入検討 |
-| **Resume** | **MISSING** | - | - | Phase 2.0 で導入検討 |
-| **Batch simulation** | **MISSING** | - | - | Phase 2.0 (10〜100試合) で導入 |
+| **Decision Trace v1** | **IMPLEMENTED** | `src/engine/simulation/SimulationRunner.ts` (`DecisionTraceRecord`, `decisionTraceVersion: 1`) | `src/tests/simulation/seededDeterminism.test.ts`, `simulate:single` | 意思決定・合法手の追跡基盤確立 |
+| **State Hash** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 1`, FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | 決定論的 Logical State Fingerprint |
+| **Snapshot** | **MISSING** | - | - | Phase 1.2 で導入検討 |
+| **Resume** | **MISSING** | - | - | Phase 1.2 で導入検討 |
+| **Batch simulation** | **MISSING** | - | - | Phase 1.2 (10〜100試合) で導入 |
 | **Failure isolation** | **MISSING** | - | - | Batch 実行時に導入 |
 | **Policy versioning** | **IMPLEMENTED** | `PolicyDescriptor` (`kind`, `policyVersion`, `metadata`) | `src/engine/simulation/DecisionPolicy.ts` | Version 管理対応済み |
 | **DNA format** | **MISSING** | - | - | Phase 3.0 で策定 |
@@ -31,11 +32,13 @@
 
 ---
 
-## 2. Current Foundation (Phase 1.0 完了状態)
+## 2. Current Foundation (Phase 1.1 完了状態)
 
 ### アーキテクチャとデータフロー
 ```text
 Game State (Raw)
+    ↓
+StateHasher.hash(state) ──> stateHash (sh1-...) [Decision直前の論理指紋]
     ↓
 DecisionRequest (合法的公開情報・PlayerObservation・LegalPattern・DecisionCatalog)
     ↓ (生 GameState は完全遮断)
@@ -45,23 +48,22 @@ DecisionResponse (selectedPatternRef)
     ↓
 GameSession.submitDecision(response)
     ↓
-SimulationStepRecord (Decision Trace) & Canonical Match Log
+DecisionTraceRecord (stepCount, decisionId, playerId, stateVersion, stateHash, legalPatterns, selectedPattern, policyDescriptor)
+    & Canonical Match Log (実際に起きたゲームイベント)
 ```
 
 - **秘密情報境界の厳格維持**:
-  AI Policy は `DecisionRequest` のみを受け取ります。生 `GameState` へのアクセス経路はなく、相手の非公開情報（Life 10以上時の正確な枚数、相手手札、相手伏せ防壁）は `PlayerObservation` 境界で完全に秘匿・HIDDEN 化されています。
-- **決定論的再現性 (Determinism)**:
-  `SeededRandom` (Mulberry32 PRNG) を用いることで、同一 seed・同一初期盤面・同一 Policy によるシミュレーションは 100% 同一の `DecisionTrace`、勝敗、最終盤面を再現します。
+  AI Policy は `DecisionRequest` のみを受け取ります。生 `GameState` へのアクセス経路はなく、相手の非公開情報（Life 10以上時の正確な枚数、相手手札、相手伏せ防壁）は `PlayerObservation` 境界で完全に秘匿・HIDDEN 化されています。Decision Trace にも生の相手秘密情報は保存されません。
+- **決定論的再現性 (Deterministic Re-execution)**:
+  `SeededRandom` (Mulberry32 PRNG) と `StateHasher` (Canonical Stringify + FNV-1a 64-bit) により、同一 seed・同一初期盤面・同一 Policy で実行したシミュレーションは全ステップの `stateHash` 列、`decisionTrace`、勝敗、`finalStateHash` が 100% 完全一致します。
 
 ---
 
-## 3. Next Capability (Phase 2.0 予定)
+## 3. Next Capability (Phase 1.2 予定)
 
-1. **State Hash**:
-   論理ゲーム状態の決定論的ハッシュ関数。
-2. **Snapshot & Resume**:
+1. **Snapshot & Resume**:
    途中状態（`snapshotFormatVersion: 1`）の保存と復元実行。
-3. **Batch Simulation (Smoke 10〜100試合)**:
+2. **Batch Simulation (Smoke 10〜100試合)**:
    複数試合の連続実行と勝率統計、1試合のエラーが全体を止めない Failure Isolation。
 
 ---
