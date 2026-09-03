@@ -3,13 +3,16 @@
  * ゲームの進行に影響する論理状態のみを抽出し、オブジェクトキーの順序や実行時タイムスタンプ・ランタイムIDに依存しない
  * 安定した fingerprint (State Hash) を算出します。
  *
- * v2.1 補修点:
+ * v2.2 補修点:
  * 1. ActionRequestTarget 正式構造 (unit / request / player) への完全適合
  * 2. player target (targetPlayerKey: "p1" vs "p2") の厳格な Hash 反映
  * 3. CostPayment 内部 ID の canonicalize (discardedCardIds, drivenBulwarkUnitIds, sacrificedUnitIds)
  * 4. 再帰的 canonicalizeRuntimeReferences による triggerBindings および sourceEvent.payload の安定化
- * 5. 非論理的/デバッグ用の sourcePatternId を Hash から除外
- * 6. 標準 FNV-1a 64-bit ハッシュ (BigInt 実装)
+ * 5. turnUsage (プレイヤーごとのアクション使用回数制限状態) を Hash へ反映
+ * 6. nextRequestSeq (リクエスト発番シーケンス) を Hash へ反映
+ * 7. player.name (表示用文字列) を Hash から完全に除外
+ * 8. 非論理的/デバッグ用の sourcePatternId を Hash から除外
+ * 9. 標準 FNV-1a 64-bit ハッシュ (BigInt 実装)
  */
 
 export interface StateHashResult {
@@ -66,7 +69,7 @@ export class StateHasher {
 
   /**
    * GameState からゲーム結果・進行に影響する論理状態のみを抽出。
-   * ※ タイムスタンプ、UI状態、React状態、MatchLog内部状態は除外します。
+   * ※ タイムスタンプ、UI状態、React状態、MatchLog内部状態、表示名(player.name)は除外します。
    */
   static extractLogicalState(state: any): any {
     if (!state || typeof state !== "object") return state;
@@ -318,15 +321,35 @@ export class StateHasher {
       };
     };
 
+    const normalizeTurnUsage = (turnUsage: any): any => {
+      if (!turnUsage || typeof turnUsage !== "object") return undefined;
+      const normalized: Record<string, any> = {};
+      for (const pKey of Object.keys(turnUsage).sort()) {
+        const userUsage = turnUsage[pKey];
+        if (userUsage && typeof userUsage === "object") {
+          const actionUsage: Record<string, number> = {};
+          for (const actId of Object.keys(userUsage).sort()) {
+            if (typeof userUsage[actId] === "number") {
+              actionUsage[actId] = userUsage[actId];
+            }
+          }
+          normalized[pKey] = actionUsage;
+        }
+      }
+      return normalized;
+    };
+
     const logical: Record<string, any> = {
       presetId: state.presetId,
       turnCount: state.turnCount ?? 1,
       turnPlayer: state.turnPlayer,
       chancePlayer: state.chancePlayer,
       stateVersion: state.stateVersion ?? 0,
+      nextRequestSeq: state.nextRequestSeq !== undefined ? Number(state.nextRequestSeq) : undefined,
+      turnUsage: normalizeTurnUsage(state.turnUsage),
     };
 
-    // 1. Players
+    // 1. Players (※ player.name は表示用のため Hash から除外)
     if (state.players && typeof state.players === "object") {
       const players: Record<string, any> = {};
       const pKeys = Object.keys(state.players).sort();
@@ -336,7 +359,6 @@ export class StateHasher {
         if (!p) continue;
 
         players[pKey] = {
-          name: p.name,
           life: normalizeCardList(p.life),
           hand: normalizeCardList(p.hand),
           field: normalizeUnitList(p.field),
@@ -467,6 +489,7 @@ export class StateHasher {
    * 標準 64-bit FNV-1a ハッシュ (BigInt による正確な実装、16進数文字列を返却)
    * Offset Basis: 0xcbf29ce484222325n
    * Prime: 0x100000001b3n
+   * 64-bit マスク
    */
   private static fnv1a64(str: string): string {
     const FNV_OFFSET_BASIS_64 = 0xcbf29ce484222325n;
@@ -477,12 +500,10 @@ export class StateHasher {
 
     for (let i = 0; i < str.length; i++) {
       const code = str.charCodeAt(i);
-      // UTF-16 / ASCII バイト処理
       if (code < 128) {
         hash ^= BigInt(code);
         hash = (hash * FNV_PRIME_64) & MASK_64;
       } else {
-        // マルチバイト UTF-8
         const bytes = new TextEncoder().encode(str[i]);
         for (let b = 0; b < bytes.length; b++) {
           hash ^= BigInt(bytes[b]);

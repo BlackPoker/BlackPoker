@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.1.2-20260903-2355`
-更新日時: 2026-09-03 23:55 JST
+作業ID: `BP-SIM-AI-1.1.3-20260904-0201`
+更新日時: 2026-09-04 02:01 JST
 
 ---
 
@@ -21,7 +21,7 @@
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **Decision Trace v2** | **IMPLEMENTED** | `src/engine/simulation/SimulationRunner.ts` (`decisionTraceVersion: 2`) | `src/tests/simulation/seededDeterminism.test.ts`, `simulate:single` | logicalDecisionId / logicalPatternKey 包含 |
-| **State Hash v2** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 2`, 標準 FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | 正式Target・Cost・再帰Bindings反映 |
+| **State Hash v2** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 2`, 標準 FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | turnUsage/nextRequestSeq包含, player.name除外 |
 | **Snapshot** | **MISSING** | - | - | Phase 1.2 で導入予定 |
 | **Resume** | **MISSING** | - | - | Phase 1.2 で導入予定 |
 | **Batch simulation** | **MISSING** | - | - | Phase 1.3 (10〜100試合) で導入 |
@@ -35,13 +35,13 @@
 
 ---
 
-## 2. Current Foundation (Phase 1.1.2 完了状態)
+## 2. Current Foundation (Phase 1.1.3 完了状態)
 
 ### アーキテクチャとデータフロー
 ```text
 Game State (Raw)
     ↓
-StateHasher.hash(state) ──> stateHash (sh2-...) [Decision直前の論理指紋 (ID/参照/正式Target保持)]
+StateHasher.hash(state) ──> stateHash (sh2-...) [Decision直前の論理指紋 (ID/参照/Target/turnUsage保持)]
     ↓
 DecisionRequest (合法的公開情報・PlayerObservation・LegalPattern・DecisionCatalog)
     ↓ (生 GameState は完全遮断)
@@ -55,28 +55,30 @@ DecisionTraceRecord (stepCount, logicalDecisionId, runtimeDecisionId, playerId, 
     & Canonical Match Log (実際に起きたゲームイベント)
 ```
 
-### State Hash v2 仕様 (v2.1 補修)
+### State Hash v2 仕様 (v2.2 最終補修)
 - **stateHashVersion**: `2` (ハッシュ文字列プレフィックス: `sh2-...`)
 - **Hash Algorithm**: 標準 64-bit FNV-1a (BigInt 実装, Offset Basis: `0xcbf29ce484222325n`, Prime: `0x100000001b3n`, 64-bit マスク)
 - **Canonical Serialization**: オブジェクトキーを再帰的にアルファベット昇順ソートして正規化 JSON 文字列を生成 (`StateHasher.canonicalStringify`)
 - **Deterministic Entity ID Canonicalization**:
   - 動的生成 ID (タイムスタンプを含むもの) を単一の文字列へ潰さず、決定論的な走査順 (players キー順 $\rightarrow$ 手札/ライフ/フィールド/フォグ/墓地/切札 $\rightarrow$ stage requests $\rightarrow$ requestBuffer) で連番 ID (`unit#1`, `unit#2`, `req#1`, `req#2`, `fog#1`, `card#1` 等) を割り当て。
   - エンティティ自身の ID だけでなく、`blocksUnitId`, `targetComponentId`, `targetRequestId`, `keyCards.id`, `targets`, `selectedCostPayment` などのすべての参照先も同一の連番 canonical ID へ置換。
-- **正式 ActionRequestTarget の正規化**:
-  - `type: "unit"`: `{ type: "unit", unitId, kind, componentId }`
-  - `type: "request"`: `{ type: "request", requestId, actionId }`
-  - `type: "player"`: `{ type: "player", targetPlayerKey }` (※ 表示名 `name` は除外)
-- **CostPayment の正規化**:
-  - `selectedCostPayment` の `discardedCardIds`, `drivenBulwarkUnitIds`, `sacrificedUnitIds` を canonical ID に置換してソート。
-  - `lifeCount` は数値のまま保持。表示用 `summary` は除外。
-- **再帰的 Bindings / Event Payload 正規化**:
-  - `triggerBindings` および `sourceEvent.payload` 内の登録済み動的 ID を汎用再帰走査 (`canonicalizeRuntimeReferences`) で canonical ID に置換。タイムスタンプ等の非論理プロパティは除外。
+- **Hash 対象フィールド (Logical GameState)**:
+  - 基本進行状態: `presetId`, `turnCount`, `turnPlayer`, `chancePlayer`, `stateVersion`
+  - アクション制限状態: `turnUsage` (プレイヤー別・アクション別使用回数 Record)
+  - リクエスト発番カウンタ: `nextRequestSeq` (リクエスト順序・イベント相関に直結)
+  - プレイヤー状態: `players` (playerKey ソート順: `life`, `hand`, `field`, `fog`, `grave`, `trumps`)
+  - アクション処理構造: `stageRequests` (LIFO 配列順厳格保持: `id`, `actionId`, `controller`, `status`, `sequence`, `definitionOwner`, `keyCards`, `targets`, `cost`, `selectedCostPayment`)
+  - 誘発処理構造: `bufferRequests` (保留中誘発キュー: `id`, `actionId`, `controller`, `sequence`, `definitionOwner`, `keyCards`, `triggerBindings`, `sourceEvent`)
 - **Hash 除外フィールド**:
-  - タイムスタンプ (`Date.now()`, `timestamp`, `createdAt`)
-  - UI 状態・React 状態
+  - プレイヤー表示名: `player.name` ("Player A", "Alice" 等の表示用文字列)
+  - タイムスタンプ: `Date.now()`, `timestamp`, `createdAt`
+  - UI 描画状態: `uiSelection`, `renderCount`
   - MatchLog 内部状態
-  - 表示名・テキスト (`player.name`, `selectedCostPayment.summary`, `sourcePatternId`)
+  - 表示サマリー: `selectedCostPayment.summary`, `sourcePatternId`
   - `phase` (BlackPoker 公式ルールに Phase 概念は存在しないため完全削除)
+- **決定論性ステータス**:
+  - **GameState-level deterministic re-execution**: `IMPLEMENTED`
+  - **Session Resume determinism**: `NEXT / Snapshotで検証`
 
 ### Decision Trace v2 仕様
 - **decisionTraceVersion**: `2`
@@ -91,12 +93,18 @@ DecisionTraceRecord (stepCount, logicalDecisionId, runtimeDecisionId, playerId, 
 
 ---
 
-## 3. Next Capability (Phase 1.2 予定)
+## 3. Next Capability: Match Snapshot & Resume 基盤 (Phase 1.2 予定)
 
-1. **Snapshot & Resume**:
-   途中状態（`snapshotFormatVersion: 1`）のシリアライズ保存とセッション復元実行。
-2. **Batch Simulation (Smoke 10〜100試合)**:
-   複数試合の連続実行ループと勝率・ターン数等の統計サマライザー、1試合のエラーが全体を止めない Failure Isolation。
+State Hash v2 (GameState Logical Fingerprint) とは明確に分離し、ゲームの途中保存および完全復元（Resume）を行うための Session Snapshot を設計・実装します。
+
+### GameSession Resume 状態の棚卸しと候補一覧
+1. **`state`**: 現在の GameState (必須)
+2. **`matchId`**: マッチ識別子
+3. **`passTracker`**: `consecutivePassCount` (全員 PASS 後の Stage TOP 解決判定に直結するため Resume に必須候補)
+4. **`pendingDecision`**: WAITING_FOR_DECISION 状態での中断復元に必要
+5. **`continuation`, `resolvingRequest`, `resolvingContext`**: EFFECT_SELECTION などの多段階効果解決中の中断復元に必要
+6. **`matchStartedRecorded`, `lastRecordedTurnPlayer`**: MatchLog 重複記録防止用フラグ
+7. **`matchLog`**: `CanonicalMatchLog` の途中履歴
 
 ---
 
