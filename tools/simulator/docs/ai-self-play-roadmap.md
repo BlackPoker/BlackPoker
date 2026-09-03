@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.1-20260903-2216`
-更新日時: 2026-09-03 22:16 JST
+作業ID: `BP-SIM-AI-1.1.1-20260903-2311`
+更新日時: 2026-09-03 23:11 JST
 
 ---
 
@@ -17,8 +17,8 @@
 | **Deterministic re-execution** | **IMPLEMENTED** | `SimulationRunner.run` + `SeededRandom` | `src/tests/simulation/seededDeterminism.test.ts` (100% trace/hash 一致検証) | 同一入力での決定論的再実行を保証 |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
-| **Decision Trace v1** | **IMPLEMENTED** | `src/engine/simulation/SimulationRunner.ts` (`DecisionTraceRecord`, `decisionTraceVersion: 1`) | `src/tests/simulation/seededDeterminism.test.ts`, `simulate:single` | 意思決定・合法手の追跡基盤確立 |
-| **State Hash** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 1`, FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | 決定論的 Logical State Fingerprint |
+| **Decision Trace v1** | **IMPLEMENTED** | `src/engine/simulation/SimulationRunner.ts` (`DecisionTraceRecord`, `decisionTraceVersion: 1`) | `src/tests/simulation/seededDeterminism.test.ts`, `simulate:single` | 意思決定・合法手 selection refs 追跡基盤確立 |
+| **State Hash v2** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 2`, 標準 FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | 決定論的 Logical State Fingerprint (ID/参照保持) |
 | **Snapshot** | **MISSING** | - | - | Phase 1.2 で導入検討 |
 | **Resume** | **MISSING** | - | - | Phase 1.2 で導入検討 |
 | **Batch simulation** | **MISSING** | - | - | Phase 1.2 (10〜100試合) で導入 |
@@ -32,13 +32,13 @@
 
 ---
 
-## 2. Current Foundation (Phase 1.1 完了状態)
+## 2. Current Foundation (Phase 1.1.1 完了状態)
 
 ### アーキテクチャとデータフロー
 ```text
 Game State (Raw)
     ↓
-StateHasher.hash(state) ──> stateHash (sh1-...) [Decision直前の論理指紋]
+StateHasher.hash(state) ──> stateHash (sh2-...) [Decision直前の論理指紋 (ID/参照関係保持)]
     ↓
 DecisionRequest (合法的公開情報・PlayerObservation・LegalPattern・DecisionCatalog)
     ↓ (生 GameState は完全遮断)
@@ -48,23 +48,41 @@ DecisionResponse (selectedPatternRef)
     ↓
 GameSession.submitDecision(response)
     ↓
-DecisionTraceRecord (stepCount, decisionId, playerId, stateVersion, stateHash, legalPatterns, selectedPattern, policyDescriptor)
+DecisionTraceRecord (stepCount, decisionId, playerId, stateVersion, stateHash, legalPatterns(with refs), selectedPattern, policyDescriptor)
     & Canonical Match Log (実際に起きたゲームイベント)
 ```
 
-- **秘密情報境界の厳格維持**:
-  AI Policy は `DecisionRequest` のみを受け取ります。生 `GameState` へのアクセス経路はなく、相手の非公開情報（Life 10以上時の正確な枚数、相手手札、相手伏せ防壁）は `PlayerObservation` 境界で完全に秘匿・HIDDEN 化されています。Decision Trace にも生の相手秘密情報は保存されません。
-- **決定論的再現性 (Deterministic Re-execution)**:
-  `SeededRandom` (Mulberry32 PRNG) と `StateHasher` (Canonical Stringify + FNV-1a 64-bit) により、同一 seed・同一初期盤面・同一 Policy で実行したシミュレーションは全ステップの `stateHash` 列、`decisionTrace`、勝敗、`finalStateHash` が 100% 完全一致します。
+### State Hash v2 仕様
+- **stateHashVersion**: `2` (ハッシュ文字列プレフィックス: `sh2-...`)
+- **Hash Algorithm**: 標準 64-bit FNV-1a (BigInt 実装, Offset Basis: `0xcbf29ce484222325n`, Prime: `0x100000001b3n`, 64-bit マスク)
+- **Canonical Serialization**: オブジェクトキーを再帰的にアルファベット昇順ソートして正規化 JSON 文字列を生成 (`StateHasher.canonicalStringify`)
+- **Deterministic Entity ID Canonicalization**:
+  - 動的生成 ID (タイムスタンプを含むもの) を単一の文字列へ潰さず、決定論的な走査順 (players キー順 $\rightarrow$ 手札/ライフ/フィールド/フォグ/墓地/切札 $\rightarrow$ stage requests $\rightarrow$ requestBuffer) で連番 ID (`unit#1`, `unit#2`, `req#1`, `req#2`, `fog#1`, `card#1` 等) を割り当て。
+  - エンティティ自身の ID だけでなく、`blocksUnitId`, `targetComponentId`, `targetRequestId`, `keyCards.id`, `targets` などのすべての参照先も同一の連番 canonical ID へ置換し、エンティティの個体識別と論理参照関係を完全に維持。
+- **Hash 対象フィールド**:
+  - 基本メタデータ: `presetId`, `turnCount`, `turnPlayer`, `chancePlayer`, `stateVersion`
+  - `players`: Life (カード配列), Hand (カード配列), Field (units: componentId, kind, state, face, cards, labels, battle), Fog (fogId, componentId, card, bindings), Grave (cards/units), Trumps
+  - `stageRequests`: Action processing structure (LIFO 配列順を厳格保持, id, actionId, controller, status, sequence, definitionOwner, keyCards 配列, targets, cost, selectedCostPayment, sourcePatternId)
+  - `bufferRequests`: Stage とは明確に分離された保留中誘発キュー (id, actionId, controller, sequence, definitionOwner, keyCards 配列, triggerBindings, sourceEvent)
+- **Hash 除外フィールド**:
+  - タイムスタンプ (`Date.now()`, `timestamp`)
+  - UI 状態・React 状態
+  - MatchLog 内部状態
+  - ランダムな UI 用 ID
+  - `phase` (BlackPoker 公式ルールに Phase 概念は存在しないため完全削除)
+- **v1 との非互換理由**:
+  - ID 単純潰しの廃止による個体識別・参照関係の保持
+  - ActionRequest 正式構造 (`keyCards` 配列) への完全適合
+  - `phase` フィールドの削除
 
 ---
 
 ## 3. Next Capability (Phase 1.2 予定)
 
 1. **Snapshot & Resume**:
-   途中状態（`snapshotFormatVersion: 1`）の保存と復元実行。
+   途中状態（`snapshotFormatVersion: 1`）のシリアライズ保存とセッション復元実行。
 2. **Batch Simulation (Smoke 10〜100試合)**:
-   複数試合の連続実行と勝率統計、1試合のエラーが全体を止めない Failure Isolation。
+   複数試合の連続実行ループと勝率・ターン数等の統計サマライザー、1試合のエラーが全体を止めない Failure Isolation。
 
 ---
 

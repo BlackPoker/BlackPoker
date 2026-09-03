@@ -7,12 +7,13 @@ export type { DecisionPolicy, PolicyDescriptor };
 
 /**
  * AI判断ロジック（Policy）のインターフェース。
+ * engine/simulation/DecisionPolicy の Canonical interface を継承・統合し、
  * 同期 choose と非同期 decide の両方をサポートします。
  */
-export interface BlackPokerPolicy {
-  readonly descriptor?: PolicyDescriptor;
+export interface BlackPokerPolicy extends DecisionPolicy {
+  readonly descriptor: PolicyDescriptor;
+  choose(request: Readonly<DecisionRequest>): DecisionResponse;
   decide(request: Readonly<DecisionRequest>): Promise<DecisionResponse>;
-  choose?(request: Readonly<DecisionRequest>): DecisionResponse;
 }
 
 /**

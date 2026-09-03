@@ -5,13 +5,21 @@ import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 import { StateHasher } from "./StateHasher";
 
 /**
- * 各 DecisionRequest 時点で選択可能だった合法パターンの公開サマリー
+ * 各 DecisionRequest 時点で選択可能だった合法パターンの公開サマリー (Decision Trace v1)
+ * ※ 生の秘密情報は含めず、DecisionRequest 内のカタログ参照 (refs) を保持します。
  */
 export interface DecisionLegalPatternSummary {
   readonly patternRef: number;
   readonly patternId?: string;
   readonly kind: string;
   readonly actionId?: string;
+  readonly actionSelectionRef?: number;
+  readonly keyCardSelectionRef?: number;
+  readonly keyUnitSelectionRef?: number;
+  readonly costPaymentRef?: number;
+  readonly targetSelectionRef?: number;
+  readonly effectSelectionRef?: number;
+  readonly orderSelectionRef?: number;
 }
 
 /**
@@ -22,7 +30,7 @@ export interface DecisionTraceRecord {
   readonly decisionId: string;
   readonly playerId: PlayerKey;
   readonly stateVersion: number;
-  /** この意思決定直前の論理ゲーム状態のハッシュ値 */
+  /** この意思決定直前の論理ゲーム状態のハッシュ値 (State Hash v2: "sh2-...") */
   readonly stateHash: string;
   /** 選択可能だった合法パターン一覧 */
   readonly legalPatterns: readonly DecisionLegalPatternSummary[];
@@ -57,7 +65,7 @@ export interface SimulationResult {
   readonly decisionTraceVersion: number;
   /** 各 Decision の決定履歴 (再現性・検証用) */
   readonly decisionTrace: readonly DecisionTraceRecord[];
-  /** 終了時論理状態のハッシュ値 */
+  /** 終了時論理状態のハッシュ値 (State Hash v2: "sh2-...") */
   readonly finalStateHash?: string;
   /** ゲームセッションの公式ログ */
   readonly matchLog?: CanonicalMatchLog;
@@ -85,7 +93,7 @@ export class SimulationRunner {
    */
   private static normalizePatternId(patternId?: string): string | undefined {
     if (!patternId) return undefined;
-    return patternId.replace(/unit-\d{10,}-[a-zA-Z0-9]+/g, "unit-dynamic");
+    return patternId.replace(/unit-\d{10,}-[a-zA-Z0-9]+/g, "unit-canonical");
   }
 
   static run(
@@ -123,7 +131,7 @@ export class SimulationRunner {
           throw new Error(`プレイヤー '${playerId}' に対する DecisionPolicy が設定されていません。`);
         }
 
-        // 1. Decision 直前の Logical State Hash を算出
+        // 1. Decision 直前の Logical State Hash を算出 (State Hash v2)
         const currentStateHash = StateHasher.hash(session.state);
 
         // 2. 選択可能な合法パターンサマリーを生成 (秘密情報は含まない)
@@ -137,6 +145,13 @@ export class SimulationRunner {
             patternId: this.normalizePatternId(p.patternId),
             kind: p.kind || "UNKNOWN",
             actionId: actId,
+            actionSelectionRef: p.actionSelectionRef,
+            keyCardSelectionRef: p.keyCardSelectionRef,
+            keyUnitSelectionRef: p.keyUnitSelectionRef,
+            costPaymentRef: p.costPaymentRef,
+            targetSelectionRef: p.targetSelectionRef,
+            effectSelectionRef: p.effectSelectionRef,
+            orderSelectionRef: p.orderSelectionRef,
           };
         });
 
