@@ -3,12 +3,13 @@
  * ゲームの進行に影響する論理状態のみを抽出し、オブジェクトキーの順序や実行時タイムスタンプ・ランタイムIDに依存しない
  * 安定した fingerprint (State Hash) を算出します。
  *
- * v2 の改善点:
- * 1. BlackPoker に存在しない phase フィールドの完全削除
- * 2. 単一文字列への潰しを廃止し、entity identity と参照関係を完全に保持する決定論的 ID Canonicalization
- * 3. ActionRequest 正式構造 (keyCards 配列、targets 等) の完全反映
- * 4. Request Buffer の Stage との明確な分離と正式構造反映
- * 5. 標準 FNV-1a 64-bit ハッシュ (BigInt による正確な実装、ブラウザ/Node両対応)
+ * v2.1 補修点:
+ * 1. ActionRequestTarget 正式構造 (unit / request / player) への完全適合
+ * 2. player target (targetPlayerKey: "p1" vs "p2") の厳格な Hash 反映
+ * 3. CostPayment 内部 ID の canonicalize (discardedCardIds, drivenBulwarkUnitIds, sacrificedUnitIds)
+ * 4. 再帰的 canonicalizeRuntimeReferences による triggerBindings および sourceEvent.payload の安定化
+ * 5. 非論理的/デバッグ用の sourcePatternId を Hash から除外
+ * 6. 標準 FNV-1a 64-bit ハッシュ (BigInt 実装)
  */
 
 export interface StateHashResult {
@@ -84,6 +85,19 @@ export class StateHasher {
       }
     };
 
+    const registerDynamicIdsRecursively = (value: any, defaultPrefix = "entity") => {
+      if (value === null || value === undefined) return;
+      if (typeof value === "string") {
+        registerId(value, defaultPrefix);
+      } else if (Array.isArray(value)) {
+        value.forEach((item) => registerDynamicIdsRecursively(item, defaultPrefix));
+      } else if (typeof value === "object") {
+        for (const key of Object.keys(value).sort()) {
+          registerDynamicIdsRecursively(value[key], defaultPrefix);
+        }
+      }
+    };
+
     const resolveId = (rawId: any): string | undefined => {
       if (!rawId || typeof rawId !== "string") return undefined;
       return idMap.get(rawId) || rawId;
@@ -122,6 +136,9 @@ export class StateHasher {
           p.fog.forEach((f: any) => {
             registerId(f?.fogId, "fog");
             registerId(f?.card?.id, "card");
+            if (f?.bindings) {
+              registerDynamicIdsRecursively(f.bindings);
+            }
           });
         }
 
@@ -161,6 +178,17 @@ export class StateHasher {
         } else if (r?.keyCard) {
           registerId(r.keyCard.id, "card");
         }
+        if (r?.selectedCostPayment) {
+          if (Array.isArray(r.selectedCostPayment.discardedCardIds)) {
+            r.selectedCostPayment.discardedCardIds.forEach((id: string) => registerId(id, "card"));
+          }
+          if (Array.isArray(r.selectedCostPayment.drivenBulwarkUnitIds)) {
+            r.selectedCostPayment.drivenBulwarkUnitIds.forEach((id: string) => registerId(id, "unit"));
+          }
+          if (Array.isArray(r.selectedCostPayment.sacrificedUnitIds)) {
+            r.selectedCostPayment.sacrificedUnitIds.forEach((id: string) => registerId(id, "unit"));
+          }
+        }
       });
     }
 
@@ -172,6 +200,12 @@ export class StateHasher {
           r.keyCards.forEach((c: any) => registerId(c?.id, "card"));
         } else if (r?.keyCard) {
           registerId(r.keyCard.id, "card");
+        }
+        if (r?.triggerBindings) {
+          registerDynamicIdsRecursively(r.triggerBindings);
+        }
+        if (r?.sourceEvent?.payload) {
+          registerDynamicIdsRecursively(r.sourceEvent.payload);
         }
       });
     }
@@ -229,7 +263,7 @@ export class StateHasher {
         fogId: resolveId(f.fogId),
         componentId: f.componentId,
         card: normalizeCard(f.card),
-        bindings: f.bindings ? this.canonicalizeBindings(f.bindings, resolveId) : undefined,
+        bindings: f.bindings ? this.canonicalizeRuntimeReferences(f.bindings, resolveId) : undefined,
       }));
     };
 
@@ -241,6 +275,47 @@ export class StateHasher {
         }
         return normalizeCard(item);
       });
+    };
+
+    const normalizeTarget = (target: any): any => {
+      if (!target || typeof target !== "object") return target;
+
+      if (target.type === "player") {
+        return {
+          type: "player",
+          targetPlayerKey: target.targetPlayerKey,
+        };
+      } else if (target.type === "request") {
+        return {
+          type: "request",
+          requestId: resolveId(target.requestId),
+          actionId: target.actionId,
+        };
+      } else if (target.type === "unit" || target.unitId) {
+        return {
+          type: "unit",
+          unitId: resolveId(target.unitId),
+          kind: target.kind,
+          componentId: target.componentId,
+        };
+      }
+      return this.canonicalizeRuntimeReferences(target, resolveId);
+    };
+
+    const normalizeCostPayment = (costPayment: any): any => {
+      if (!costPayment || typeof costPayment !== "object") return undefined;
+      return {
+        lifeCount: costPayment.lifeCount ?? 0,
+        discardedCardIds: Array.isArray(costPayment.discardedCardIds)
+          ? costPayment.discardedCardIds.map((id: string) => resolveId(id)).sort()
+          : [],
+        drivenBulwarkUnitIds: Array.isArray(costPayment.drivenBulwarkUnitIds)
+          ? costPayment.drivenBulwarkUnitIds.map((id: string) => resolveId(id)).sort()
+          : [],
+        sacrificedUnitIds: Array.isArray(costPayment.sacrificedUnitIds)
+          ? costPayment.sacrificedUnitIds.map((id: string) => resolveId(id)).sort()
+          : [],
+      };
     };
 
     const logical: Record<string, any> = {
@@ -282,6 +357,14 @@ export class StateHasher {
           ? [normalizeCard(r.keyCard)]
           : [];
 
+        const targets = Array.isArray(r.targets)
+          ? r.targets.map((t: any) => normalizeTarget(t))
+          : r.targetComponent
+          ? [normalizeTarget({ type: "unit", unitId: r.targetComponent.unitId, kind: r.targetComponent.kind, componentId: r.targetComponent.componentId })]
+          : r.targetRequest
+          ? [normalizeTarget({ type: "request", requestId: r.targetRequest.id, actionId: r.targetRequest.actionId })]
+          : undefined;
+
         return {
           id: resolveId(r.id),
           actionId: r.actionId,
@@ -290,21 +373,9 @@ export class StateHasher {
           sequence: r.sequence,
           definitionOwner: r.definitionOwner,
           keyCards,
-          targets: r.targets
-            ? r.targets.map((t: any) => ({
-                kind: t.kind,
-                unitId: resolveId(t.unitId),
-                playerId: t.playerId,
-                requestId: resolveId(t.requestId),
-              }))
-            : undefined,
-          targetComponentId: resolveId(r.targetComponent?.unitId || r.targetComponent?.componentId),
-          targetRequestId: resolveId(r.targetRequest?.id),
+          targets,
           cost: r.cost,
-          selectedCostPayment: r.selectedCostPayment,
-          sourcePatternId: r.sourcePatternId
-            ? r.sourcePatternId.replace(/unit-\d{10,}-[a-zA-Z0-9]+/g, (match: string) => resolveId(match) || match)
-            : undefined,
+          selectedCostPayment: normalizeCostPayment(r.selectedCostPayment),
         };
       });
     }
@@ -326,13 +397,15 @@ export class StateHasher {
           definitionOwner: r.definitionOwner,
           keyCards,
           triggerBindings: r.triggerBindings
-            ? this.canonicalizeBindings(r.triggerBindings, resolveId)
+            ? this.canonicalizeRuntimeReferences(r.triggerBindings, resolveId)
             : undefined,
           sourceEvent: r.sourceEvent
             ? {
                 type: r.sourceEvent.type,
                 name: r.sourceEvent.name,
-                payload: r.sourceEvent.payload,
+                payload: r.sourceEvent.payload
+                  ? this.canonicalizeRuntimeReferences(r.sourceEvent.payload, resolveId)
+                  : undefined,
               }
             : undefined,
         };
@@ -342,18 +415,28 @@ export class StateHasher {
     return logical;
   }
 
-  private static canonicalizeBindings(
-    bindings: Record<string, any>,
+  /**
+   * オブジェクト/配列内の登録済み動的 ID 参照を再帰的に canonical ID へ置換
+   */
+  public static canonicalizeRuntimeReferences(
+    value: any,
     resolveId: (id: any) => string | undefined
-  ): Record<string, any> {
+  ): any {
+    if (value === null || value === undefined) return value;
+    if (typeof value === "string") {
+      return resolveId(value) || value;
+    }
+    if (typeof value !== "object") return value;
+
+    if (Array.isArray(value)) {
+      return value.map((item) => this.canonicalizeRuntimeReferences(item, resolveId));
+    }
+
     const sorted: Record<string, any> = {};
-    for (const key of Object.keys(bindings).sort()) {
-      const val = bindings[key];
-      if (typeof val === "string") {
-        sorted[key] = resolveId(val) || val;
-      } else {
-        sorted[key] = val;
-      }
+    for (const key of Object.keys(value).sort()) {
+      // timestamp や非論理プロパティを除外
+      if (key === "timestamp" || key === "createdAt") continue;
+      sorted[key] = this.canonicalizeRuntimeReferences(value[key], resolveId);
     }
     return sorted;
   }

@@ -50,7 +50,7 @@ async function main() {
   console.log(`Turn Count: ${result.turnCount}`);
   console.log(`Winner: ${result.winner ?? "None"}`);
   console.log(`Reason: ${result.reason ?? "N/A"}`);
-  console.log(`Decision Trace Count: ${result.decisionTrace.length}`);
+  console.log(`Logical Decisions: ${result.decisionTrace.length}`);
   console.log(`Final State Hash: ${result.finalStateHash ?? "N/A"}`);
   console.log("================================================================================");
 

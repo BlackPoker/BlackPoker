@@ -5,12 +5,38 @@ import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 import { StateHasher } from "./StateHasher";
 
 /**
- * 各 DecisionRequest 時点で選択可能だった合法パターンの公開サマリー (Decision Trace v1)
- * ※ 生の秘密情報は含めず、DecisionRequest 内のカタログ参照 (refs) を保持します。
+ * 決定論的 Logical Pattern Key を生成。
+ * 各 LegalPattern の selection refs から意味論的な一意識別キーを算出します。
+ */
+export function generateLogicalPatternKey(pattern: {
+  kind: string;
+  actionSelectionRef?: number;
+  keyCardSelectionRef?: number;
+  keyUnitSelectionRef?: number;
+  costPaymentRef?: number;
+  targetSelectionRef?: number;
+  effectSelectionRef?: number;
+  orderSelectionRef?: number;
+}): string {
+  if (pattern.kind === "PASS") return "PASS";
+  const parts = [pattern.kind];
+  if (pattern.actionSelectionRef !== undefined) parts.push(`a=${pattern.actionSelectionRef}`);
+  if (pattern.keyCardSelectionRef !== undefined) parts.push(`k=${pattern.keyCardSelectionRef}`);
+  if (pattern.keyUnitSelectionRef !== undefined) parts.push(`ku=${pattern.keyUnitSelectionRef}`);
+  if (pattern.costPaymentRef !== undefined) parts.push(`c=${pattern.costPaymentRef}`);
+  if (pattern.targetSelectionRef !== undefined) parts.push(`t=${pattern.targetSelectionRef}`);
+  if (pattern.effectSelectionRef !== undefined) parts.push(`e=${pattern.effectSelectionRef}`);
+  if (pattern.orderSelectionRef !== undefined) parts.push(`o=${pattern.orderSelectionRef}`);
+  return parts.join("|");
+}
+
+/**
+ * 各 DecisionRequest 時点で選択可能だった合法パターンの公開サマリー (Decision Trace v2)
+ * ※ 生の秘密情報は含めず、カタログ参照 (refs) および決定論的 logicalPatternKey を保持します。
  */
 export interface DecisionLegalPatternSummary {
   readonly patternRef: number;
-  readonly patternId?: string;
+  readonly logicalPatternKey: string;
   readonly kind: string;
   readonly actionId?: string;
   readonly actionSelectionRef?: number;
@@ -23,21 +49,24 @@ export interface DecisionLegalPatternSummary {
 }
 
 /**
- * シミュレーション中の意思決定ステップの Decision Trace v1 レコード
+ * シミュレーション中の意思決定ステップの Decision Trace v2 レコード
  */
 export interface DecisionTraceRecord {
   readonly stepCount: number;
-  readonly decisionId: string;
+  /** 決定論的 Logical Decision ID (同一seed再実行で100%一致) */
+  readonly logicalDecisionId: string;
+  /** 実行時動的 Decision ID (GameSession / Canonical Match Log 照合用) */
+  readonly runtimeDecisionId: string;
   readonly playerId: PlayerKey;
   readonly stateVersion: number;
   /** この意思決定直前の論理ゲーム状態のハッシュ値 (State Hash v2: "sh2-...") */
   readonly stateHash: string;
-  /** 選択可能だった合法パターン一覧 */
+  /** 選択可能だった合法パターン一覧 (logicalPatternKey 付き) */
   readonly legalPatterns: readonly DecisionLegalPatternSummary[];
-  /** 選択されたパターン番号 */
+  /** 選択されたパターン番号 (インデックス) */
   readonly selectedPatternRef: number;
-  /** 選択されたパターン識別子 */
-  readonly selectedPatternId?: string;
+  /** 選択されたパターンの決定論的 Logical Key */
+  readonly selectedLogicalPatternKey: string;
   /** 選択されたパターンの種別 ("ACTION", "PASS", "EFFECT_SELECTION" 等) */
   readonly selectedPatternKind: string;
   /** アクション種別 (該当する場合) */
@@ -47,7 +76,7 @@ export interface DecisionTraceRecord {
 }
 
 /**
- * 意思決定トレースのコンテナ構造 (Decision Trace v1)
+ * 意思決定トレースのコンテナ構造 (Decision Trace v2)
  */
 export interface DecisionTrace {
   readonly decisionTraceVersion: number;
@@ -61,7 +90,7 @@ export interface SimulationResult {
   readonly winner?: string;
   readonly reason?: string;
   readonly finalState: any;
-  /** Decision Trace フォーマットバージョン (常に 1) */
+  /** Decision Trace フォーマットバージョン (常に 2) */
   readonly decisionTraceVersion: number;
   /** 各 Decision の決定履歴 (再現性・検証用) */
   readonly decisionTrace: readonly DecisionTraceRecord[];
@@ -86,14 +115,20 @@ export interface SimulationOptions {
  * AI Policy には合法的観測情報 (DecisionRequest) のみを渡し、生 GameState は遮断します。
  */
 export class SimulationRunner {
-  public static readonly DECISION_TRACE_VERSION = 1;
+  public static readonly DECISION_TRACE_VERSION = 2;
 
   /**
-   * ランタイム動的IDが含まれる patternId を決定論的な識別子へ正規化
+   * 決定論的 Logical Decision ID を生成
    */
-  private static normalizePatternId(patternId?: string): string | undefined {
-    if (!patternId) return undefined;
-    return patternId.replace(/unit-\d{10,}-[a-zA-Z0-9]+/g, "unit-canonical");
+  private static generateLogicalDecisionId(
+    stepCount: number,
+    playerId: PlayerKey,
+    stateVersion: number,
+    stateHash: string
+  ): string {
+    const stepPad = String(stepCount).padStart(6, "0");
+    const hashShort = stateHash.startsWith("sh2-") ? stateHash.slice(4, 12) : stateHash.slice(0, 8);
+    return `d2-${stepPad}-${playerId}-v${stateVersion}-${hashShort}`;
   }
 
   static run(
@@ -134,15 +169,27 @@ export class SimulationRunner {
         // 1. Decision 直前の Logical State Hash を算出 (State Hash v2)
         const currentStateHash = StateHasher.hash(session.state);
 
-        // 2. 選択可能な合法パターンサマリーを生成 (秘密情報は含まない)
+        // 2. 選択可能な合法パターンサマリーを生成 (logicalPatternKey 付き、秘密情報は含まない)
         const legalPatterns: DecisionLegalPatternSummary[] = (step.request.patterns || []).map((p, idx) => {
           let actId: string | undefined;
           if (p.actionSelectionRef !== undefined) {
             actId = step.request.catalog?.actions?.[p.actionSelectionRef]?.actionId;
           }
+
+          const logicalKey = generateLogicalPatternKey({
+            kind: p.kind || "UNKNOWN",
+            actionSelectionRef: p.actionSelectionRef,
+            keyCardSelectionRef: p.keyCardSelectionRef,
+            keyUnitSelectionRef: p.keyUnitSelectionRef,
+            costPaymentRef: p.costPaymentRef,
+            targetSelectionRef: p.targetSelectionRef,
+            effectSelectionRef: p.effectSelectionRef,
+            orderSelectionRef: p.orderSelectionRef,
+          });
+
           return {
             patternRef: idx,
-            patternId: this.normalizePatternId(p.patternId),
+            logicalPatternKey: logicalKey,
             kind: p.kind || "UNKNOWN",
             actionId: actId,
             actionSelectionRef: p.actionSelectionRef,
@@ -167,15 +214,34 @@ export class SimulationRunner {
           actionId = step.request.catalog?.actions?.[selectedPat.actionSelectionRef]?.actionId;
         }
 
+        const selectedLogicalPatternKey = generateLogicalPatternKey({
+          kind: selectedPatternKind,
+          actionSelectionRef: selectedPat?.actionSelectionRef,
+          keyCardSelectionRef: selectedPat?.keyCardSelectionRef,
+          keyUnitSelectionRef: selectedPat?.keyUnitSelectionRef,
+          costPaymentRef: selectedPat?.costPaymentRef,
+          targetSelectionRef: selectedPat?.targetSelectionRef,
+          effectSelectionRef: selectedPat?.effectSelectionRef,
+          orderSelectionRef: selectedPat?.orderSelectionRef,
+        });
+
+        const logicalDecisionId = this.generateLogicalDecisionId(
+          totalDecisions,
+          playerId,
+          response.stateVersion,
+          currentStateHash
+        );
+
         const stepRecord: DecisionTraceRecord = {
           stepCount: totalDecisions,
-          decisionId: response.decisionId,
+          logicalDecisionId,
+          runtimeDecisionId: response.decisionId,
           playerId,
           stateVersion: response.stateVersion,
           stateHash: currentStateHash,
           legalPatterns,
           selectedPatternRef: response.selectedPatternRef,
-          selectedPatternId: this.normalizePatternId(selectedPat?.patternId),
+          selectedLogicalPatternKey,
           selectedPatternKind,
           actionId,
           policyDescriptor: policy.descriptor,
