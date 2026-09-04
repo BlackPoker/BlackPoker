@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.2.1-20260904-1914`
-更新日時: 2026-09-04 19:14 JST
+作業ID: `BP-SIM-AI-1.3-20260904-2101`
+更新日時: 2026-09-04 21:01 JST
 
 ---
 
@@ -25,11 +25,12 @@
 | **PASS-in-Stage Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | Stage上に実Request存在下でのPASS解決保証 |
 | **EFFECT_SELECTION Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | 多段階効果解決中断からの完全再開 |
 | **RulePackage Validation** | **IMPLEMENTED** | `GameSessionSnapshotCodec.restore` | `src/tests/simulation/sessionSnapshot.test.ts` | id / version 不一致の厳格な reject |
+| **Batch simulation** | **IMPLEMENTED** | `src/engine/simulation/BatchSimulationRunner.ts`, `src/domain/simulation/BatchSimulationTypes.ts` | `src/tests/simulation/batchSimulation.test.ts`, `npm run simulate:batch` | 決定論的バッチ対戦・集計基盤 |
+| **Failure isolation** | **IMPLEMENTED** | `BatchSimulationRunner.ts` (`BatchFailureRecord`, `stopOnError: false`) | `src/tests/simulation/batchSimulation.test.ts` | 異常試合の隔離とバッチ継続完走 |
+| **Deterministic Seed Derivation** | **IMPLEMENTED** | `BatchSimulationRunner.deriveSeed` (FNV-1a 32-bit 純粋関数) | `src/tests/simulation/batchSimulation.test.ts` | 実行順序非依存・単独再現性保証 |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン (将来) |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **AI Policy / RNG Checkpoint** | **MISSING / FUTURE** | - | - | Simulation Runner レベルでの乱数状態を含むチェックポイント |
-| **Batch simulation** | **MISSING** | - | - | Phase 1.3 (10〜100試合) で導入予定 |
-| **Failure isolation** | **MISSING** | - | - | Batch 実行時に導入 |
 | **Policy versioning** | **IMPLEMENTED** | `PolicyDescriptor` (`kind`, `policyVersion`, `metadata`) | `src/engine/simulation/DecisionPolicy.ts` | Version 管理対応済み |
 | **DNA format** | **MISSING** | - | - | Phase 3.0 で策定 |
 | **Feature Encoder** | **MISSING** | - | - | Phase 3.0 で策定 |
@@ -39,7 +40,7 @@
 
 ---
 
-## 2. Current Foundation (Phase 1.2.1 完了状態)
+## 2. Match Snapshot & Resume Foundation (Phase 1.2.1)
 
 ### アーキテクチャとデータフロー
 ```text
@@ -59,37 +60,50 @@ GameSession.fromSnapshot(snapshot, rulePackage) (検証: Version, 必須フィ�
 Restored GameSession (同じ DecisionResponse を適用して Original と同一の GameState 遷移を再開)
 ```
 
-### GameSession Snapshot v1 仕様 (Phase 1.2.1 最終補修)
-- **snapshotFormatVersion**: `1`
-- **RulePackage 整合性仕様**:
-  - `metadata.rulePackageRef`: `RulePackage.id` (必須)
-  - `metadata.rulesVersion`: `RulePackage.version` (必須)
-  - Restore 時に、提供された `rulePackage` の `id` および `version` が Snapshot メタデータと厳格に一致することを検証。不一致時は `GameSessionSnapshotValidationError` で明確に reject。
-- **Capture 可能 Boundary**: `GameSession` のパブリックメソッドが return した後の stable boundary（特に `WAITING_FOR_DECISION` 状態）。同期処理中の JavaScript call stack 内部を外部から無理に保存するものではありません。
-- **Encapsulation 保証**: `GameSessionSnapshotCodec` から `(session as any)` による private field アクセスを完全排除。`session.exportSnapshotSessionData()` および `session.importSnapshotSessionData()` を通じて安全にカプセル化。
-- **JSON-safe 保証**: class instance, function, Map, Set, Symbol, cyclic reference, BigInt を含まず、`JSON.stringify` / `JSON.parse` の完全な round-trip が可能。
-- **GameState Hash**: Snapshot 作成時の GameState に対して `StateHasher.hash(state)` (State Hash v2: `sh2-...`) を算出して格納。Restore 時に再計算 Hash と照合し、データの破損や改ざんを検知して reject。
-- **Session State の棚卸しと再構成**:
-  - `consecutivePassCount`: Snapshot へ保存し、Restore 時に `new PassTracker(count)` で復元。
-  - `pendingDecision`: `DecisionRequest` (JSON-safe DTO) を Snapshot へ保存・復元し、同一 Session の `runtimeDecisionId` を維持。
-  - `continuation`: `EffectContinuation` (JSON-safe DTO) を保存・復元。
-  - `resolvingRequest`: JSON-safe DTO として保存し、Restore 時に GameState 内のリクエスト参照を優先して再バインド（`action` 定義は RulePackage から再バインド）。
-  - `resolvingContext`: runtime object (registry, logRecorder) は除外した DTO として保存し、Restore 時に新しい GameSession の runtime インスタンスから安全に再構築。
-  - `matchStartedRecorded`, `lastRecordedTurnPlayer`: 内部フラグとして保存・復元。
-- **Full / Privileged Data Artifact**: Snapshot は GameState の完全復元を目的とするため、相手手札や伏せ防壁などの非公開情報を含む。ただし、**Snapshot は AI Policy 入力境界ではなく、Public Observation でもない**。AI Policy への入力は引き続き `DecisionRequest`（マスクされた PlayerObservation）のみに限定。
-- **MatchLog Continuation**: Snapshot 前の `CanonicalMatchLog` を prefix として完全保持し、Restore 後の初回 `advance()` で `match.started` を重複記録せず、新規イベントを単調増加する `seq` で正常に追記。
-- **Branching (What-if)**: 1 つの Snapshot から複数の独立した `GameSession` を復元し、それぞれ異なる意思決定を行って状態を分岐可能。
-
 ---
 
-## 3. Next Capability: Batch Simulation & Failure Isolation (Phase 1.3 予定)
+## 3. Batch Simulation & Failure Isolation Foundation (Phase 1.3 完了状態)
 
-Match Snapshot & Resume 基盤が確立されたため、多数の対戦（10〜100試合）を安定して自動実行し、勝率・ターン数・エラー発生率などの統計を収集する Batch Simulation 基盤へ進みます。
+### アーキテクチャとデータフロー
+```text
+BatchSimulationRunner.run(options)
+    │
+    ├─ for matchIndex = 0 .. matchCount - 1:
+    │     │
+    │     ├─ planMatch(baseSeed, matchIndex)
+    │     │     ├─ matchSeed = deriveSeed(baseSeed, matchIndex, "match")
+    │     │     ├─ p1Seed    = deriveSeed(baseSeed, matchIndex, "p1")
+    │     │     └─ p2Seed    = deriveSeed(baseSeed, matchIndex, "p2")
+    │     │
+    │     ├─ try {
+    │     │     session  = options.sessionFactory(context)   // fresh instance
+    │     │     policies = options.policyFactory(context)    // fresh instance with derived seeds
+    │     │     result   = SimulationRunner.run(session, policies, { maxDecisions })
+    │     │  } catch (err) {
+    │     │     record BatchFailureRecord (phase, error, seeds)
+    │     │     continue next match (Failure Isolation)
+    │     │  }
+    │     │
+    │     └─ compact BatchMatchResult (COMPLETED | INCOMPLETE | FAILED)
+    │
+    └─ calculateSummary() ──> BatchSimulationResult (batchResultVersion: 1)
+```
 
-### 主要要件
-1. **Batch Runner**: N 試合（例: 50〜100 試合）を連続実行するヘッドレスランナー
-2. **Failure Isolation**: 単一試合でのエラー（タイムアウト、例外）が発生してもプロセス全体をクラッシュさせず、失敗としてログ記録して次の試合を継続
-3. **Statistical Aggregator**: 勝率、平均ターン数、引き分け数、勝因（ライフ枯渇、投了等）、平均意思決定回数の集計レポート出力
+### 主要設計仕様
+1. **batchResultVersion**: `1`
+2. **純粋関数 Seed 導出 (`deriveSeed`)**:
+   - `deriveSeed(baseSeed, matchIndex, streamKey)`: FNV-1a 32-bit アルゴリズムによる純粋関数。
+   - 他の試合の実行有無や実行順序に一切依存せず、Match #N のシードを単独で一意算出可能。
+3. **決定論的 Match ID**:
+   - `batch-${baseSeed}-match-${String(matchIndex).padStart(6, "0")}` により同一設定での完全な再現性を保証。
+4. **Failure Isolation**:
+   - `sessionFactory`, `policyFactory`, `SimulationRunner.run` のいずれのフェーズで例外が発生しても、該当試合を `status: "FAILED"` として記録し、後続の試合を中断せずに継続実行。
+   - `BatchFailureRecord` に発生フェーズ、エラー名、メッセージ、シード情報を保持し、単独再現を可能に。
+5. **Memory Safety (Compact Result)**:
+   - 全試合の生 `GameState` や `DecisionTrace`、`MatchLog` はデフォルトで保持せず破棄。
+   - 勝敗、ターン数、判断数、State Hash v2 のみを集約し、大量試合（100〜1,000+試合）でもメモリ溢れを起こさない設計。
+6. **統計サマリー集約**:
+   - 総試合数、完了数、未完了数、失敗数、プレイヤー別勝率、引き分け数、平均ターン数、平均意思決定数、総実行時間を即時算出。
 
 ---
 
