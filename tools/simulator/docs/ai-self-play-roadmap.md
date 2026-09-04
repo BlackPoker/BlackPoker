@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.2-20260904-1813`
-更新日時: 2026-09-04 18:13 JST
+作業ID: `BP-SIM-AI-1.2.1-20260904-1914`
+更新日時: 2026-09-04 19:14 JST
 
 ---
 
@@ -22,6 +22,9 @@
 | **State Hash v2** | **IMPLEMENTED** | `src/engine/simulation/StateHasher.ts` (`stateHashVersion: 2`, 標準 FNV-1a 64-bit) | `src/tests/simulation/seededDeterminism.test.ts` | turnUsage/nextRequestSeq包含, player.name除外 |
 | **GameSession Snapshot v1** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts`, `GameSession.createSnapshot()` | `src/tests/simulation/sessionSnapshot.test.ts` | JSON-safe DTO (Format Version 1) |
 | **GameSession Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts`, `GameSession.fromSnapshot()` | `src/tests/simulation/sessionSnapshot.test.ts` | 途中保存・復元、分岐(What-if)対応 |
+| **PASS-in-Stage Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | Stage上に実Request存在下でのPASS解決保証 |
+| **EFFECT_SELECTION Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | 多段階効果解決中断からの完全再開 |
+| **RulePackage Validation** | **IMPLEMENTED** | `GameSessionSnapshotCodec.restore` | `src/tests/simulation/sessionSnapshot.test.ts` | id / version 不一致の厳格な reject |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン (将来) |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **AI Policy / RNG Checkpoint** | **MISSING / FUTURE** | - | - | Simulation Runner レベルでの乱数状態を含むチェックポイント |
@@ -36,14 +39,14 @@
 
 ---
 
-## 2. Current Foundation (Phase 1.2 完了状態)
+## 2. Current Foundation (Phase 1.2.1 完了状態)
 
 ### アーキテクチャとデータフロー
 ```text
 GameSession (WAITING_FOR_DECISION などの Stable Boundary)
     ↓
 session.createSnapshot() ──> GameSessionSnapshot (JSON-safe DTO, Version: 1)
-    │                         ├─ metadata (matchId, rulePackageRef, rulesVersion)
+    │                         ├─ metadata (matchId, rulePackageRef: RulePackage.id, rulesVersion: RulePackage.version, createdAt)
     │                         ├─ gameState (Raw GameState clone)
     │                         ├─ gameStateHash ("sh2-..." State Hash v2)
     │                         ├─ session (consecutivePassCount, pendingDecision, continuation, resolvingRequest, resolvingContext)
@@ -51,14 +54,19 @@ session.createSnapshot() ──> GameSessionSnapshot (JSON-safe DTO, Version: 1)
     ↓
 JSON.stringify(snapshot) / JSON.parse(json) (JSON Round-Trip 保証)
     ↓
-GameSession.fromSnapshot(snapshot, rulePackage) (検証: Version, 必須フィールド, State Hash 照合)
+GameSession.fromSnapshot(snapshot, rulePackage) (検証: Version, 必須フィールド, State Hash 照合, RulePackage id/version 照合)
     ↓
 Restored GameSession (同じ DecisionResponse を適用して Original と同一の GameState 遷移を再開)
 ```
 
-### GameSession Snapshot v1 仕様
+### GameSession Snapshot v1 仕様 (Phase 1.2.1 最終補修)
 - **snapshotFormatVersion**: `1`
-- **Capture 可能 Boundary**: `GameSession` のパブリックメソッドが return した後の stable boundary（特に `WAITING_FOR_DECISION` 状態）
+- **RulePackage 整合性仕様**:
+  - `metadata.rulePackageRef`: `RulePackage.id` (必須)
+  - `metadata.rulesVersion`: `RulePackage.version` (必須)
+  - Restore 時に、提供された `rulePackage` の `id` および `version` が Snapshot メタデータと厳格に一致することを検証。不一致時は `GameSessionSnapshotValidationError` で明確に reject。
+- **Capture 可能 Boundary**: `GameSession` のパブリックメソッドが return した後の stable boundary（特に `WAITING_FOR_DECISION` 状態）。同期処理中の JavaScript call stack 内部を外部から無理に保存するものではありません。
+- **Encapsulation 保証**: `GameSessionSnapshotCodec` から `(session as any)` による private field アクセスを完全排除。`session.exportSnapshotSessionData()` および `session.importSnapshotSessionData()` を通じて安全にカプセル化。
 - **JSON-safe 保証**: class instance, function, Map, Set, Symbol, cyclic reference, BigInt を含まず、`JSON.stringify` / `JSON.parse` の完全な round-trip が可能。
 - **GameState Hash**: Snapshot 作成時の GameState に対して `StateHasher.hash(state)` (State Hash v2: `sh2-...`) を算出して格納。Restore 時に再計算 Hash と照合し、データの破損や改ざんを検知して reject。
 - **Session State の棚卸しと再構成**:
@@ -68,16 +76,9 @@ Restored GameSession (同じ DecisionResponse を適用して Original と同一
   - `resolvingRequest`: JSON-safe DTO として保存し、Restore 時に GameState 内のリクエスト参照を優先して再バインド（`action` 定義は RulePackage から再バインド）。
   - `resolvingContext`: runtime object (registry, logRecorder) は除外した DTO として保存し、Restore 時に新しい GameSession の runtime インスタンスから安全に再構築。
   - `matchStartedRecorded`, `lastRecordedTurnPlayer`: 内部フラグとして保存・復元。
-- **Rule Package**: Snapshot にルール定義全体は含めず外部依存とし、Restore 時に `RulePackage` を渡して `metadata` と整合性を確認。
 - **Full / Privileged Data Artifact**: Snapshot は GameState の完全復元を目的とするため、相手手札や伏せ防壁などの非公開情報を含む。ただし、**Snapshot は AI Policy 入力境界ではなく、Public Observation でもない**。AI Policy への入力は引き続き `DecisionRequest`（マスクされた PlayerObservation）のみに限定。
 - **MatchLog Continuation**: Snapshot 前の `CanonicalMatchLog` を prefix として完全保持し、Restore 後の初回 `advance()` で `match.started` を重複記録せず、新規イベントを単調増加する `seq` で正常に追記。
 - **Branching (What-if)**: 1 つの Snapshot から複数の独立した `GameSession` を復元し、それぞれ異なる意思決定を行って状態を分岐可能。
-
-### GameSession Snapshot と AI Policy Checkpoint / Replay Engine の違い
-- **GameSession Snapshot**: ゲーム進行（ルールエンジン・セッション状態）の途中保存・再開を行う DTO。
-- **AI Policy / RNG Checkpoint (MISSING / FUTURE)**: RandomPolicy などの AI 内部乱数状態（PRNG position）や SimulationRunner のトレース蓄積を含むチェックポイント。
-- **Replay Engine (MISSING / FUTURE)**: 保存済み Decision Trace を初期状態から順次適用して試合をリプレイ再生する機構。
-- **Snapshot Resume ≠ Replay from saved trace**: Snapshot Resume は「保存された Session State からの直接再開」であり、最初からのリプレイ再生ではありません。
 
 ---
 

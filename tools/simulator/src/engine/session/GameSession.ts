@@ -11,7 +11,10 @@ import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordina
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { MatchLogRecorder, MatchLogRecorderOptions } from "../log/MatchLogRecorder";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
-import { GameSessionSnapshot } from "../../domain/session/GameSessionSnapshot";
+import {
+  GameSessionSnapshot,
+  GameSessionSnapshotSessionData,
+} from "../../domain/session/GameSessionSnapshot";
 import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 
 /**
@@ -109,8 +112,8 @@ export class GameSession {
       options?.logRecorder ||
       new MatchLogRecorder({
         matchId: this.matchId,
-        rulesVersion: "9.1.2",
-        rulePackageRef: "rules-vnext",
+        rulesVersion: this.rulePackage?.version || "9.1.2",
+        rulePackageRef: this.rulePackage?.id || "rules-vnext",
         ...(options?.logOptions || {}),
       });
 
@@ -122,6 +125,129 @@ export class GameSession {
    */
   getMatchLog(): CanonicalMatchLog {
     return this.logRecorder.getMatchLog();
+  }
+
+  /**
+   * Snapshot コーデック用の内部セッション状態 DTO をエクスポート (Encapsulation 準拠)
+   */
+  exportSnapshotSessionData(): GameSessionSnapshotSessionData {
+    let resolvingContextData = undefined;
+    if (this.resolvingContext) {
+      resolvingContextData = {
+        playerKey: this.resolvingContext.playerKey,
+        keyCardIds: this.resolvingContext.keyCards?.map((c: any) => c.id),
+        keyCards: this.resolvingContext.keyCards
+          ? JSON.parse(JSON.stringify(this.resolvingContext.keyCards))
+          : undefined,
+        targetComponent: this.resolvingContext.targetComponent
+          ? JSON.parse(JSON.stringify(this.resolvingContext.targetComponent))
+          : undefined,
+        targetRequest: this.resolvingContext.targetRequest
+          ? JSON.parse(JSON.stringify(this.resolvingContext.targetRequest))
+          : undefined,
+        targetPlayerKey: this.resolvingContext.targetPlayerKey,
+        selections: this.resolvingContext.selections
+          ? JSON.parse(JSON.stringify(this.resolvingContext.selections))
+          : undefined,
+        sourceEvent: this.resolvingContext.sourceEvent
+          ? JSON.parse(JSON.stringify(this.resolvingContext.sourceEvent))
+          : undefined,
+        currentActionId: this.resolvingContext.currentAction?.id,
+        currentRequestId: this.resolvingContext.currentRequest?.id,
+      };
+    }
+
+    let resolvingRequestCopy = undefined;
+    if (this.resolvingRequest) {
+      resolvingRequestCopy = JSON.parse(JSON.stringify(this.resolvingRequest));
+      if (resolvingRequestCopy.action) {
+        delete resolvingRequestCopy.action;
+      }
+    }
+
+    return {
+      consecutivePassCount: this.passTracker.consecutivePassCount,
+      pendingDecision: this.pendingDecision
+        ? JSON.parse(JSON.stringify(this.pendingDecision))
+        : undefined,
+      continuation: this.continuation
+        ? JSON.parse(JSON.stringify(this.continuation))
+        : undefined,
+      resolvingRequest: resolvingRequestCopy,
+      resolvingContext: resolvingContextData,
+      matchStartedRecorded: this.matchStartedRecorded,
+      lastRecordedTurnPlayer: this.lastRecordedTurnPlayer,
+    };
+  }
+
+  /**
+   * Snapshot コーデック用の内部セッション状態 DTO をインポート (Encapsulation 準拠)
+   */
+  importSnapshotSessionData(data: GameSessionSnapshotSessionData): void {
+    this.matchStartedRecorded = data.matchStartedRecorded;
+    this.lastRecordedTurnPlayer = data.lastRecordedTurnPlayer;
+
+    if (data.pendingDecision) {
+      this.pendingDecision = JSON.parse(JSON.stringify(data.pendingDecision));
+    }
+
+    if (data.continuation) {
+      this.continuation = JSON.parse(JSON.stringify(data.continuation));
+    }
+
+    // resolvingRequest の復元 (GameState 内の Request と同一参照を優先)
+    if (data.resolvingRequest) {
+      const reqData = data.resolvingRequest;
+      let matchedReq: any = undefined;
+
+      if (this.state.stage?.requests) {
+        matchedReq = this.state.stage.requests.find((r: any) => r.id === reqData.id);
+      }
+      if (!matchedReq && this.state.requestBuffer?.requests) {
+        matchedReq = this.state.requestBuffer.requests.find((r: any) => r.id === reqData.id);
+      }
+
+      if (matchedReq) {
+        if (reqData.actionId && !matchedReq.action) {
+          matchedReq.action = this.rulePackage.actions.find((a) => a.id === reqData.actionId);
+        }
+        this.resolvingRequest = matchedReq;
+      } else {
+        const reqCopy = JSON.parse(JSON.stringify(reqData));
+        if (reqCopy.actionId) {
+          reqCopy.action = this.rulePackage.actions.find((a) => a.id === reqCopy.actionId);
+        }
+        this.resolvingRequest = reqCopy;
+      }
+    }
+
+    // resolvingContext の再構築
+    if (data.resolvingContext) {
+      const ctxData = data.resolvingContext;
+      const currentAction = ctxData.currentActionId
+        ? this.rulePackage.actions.find((a) => a.id === ctxData.currentActionId)
+        : this.resolvingRequest?.action;
+
+      this.resolvingContext = {
+        state: this.state,
+        actions: this.rulePackage.actions,
+        playerKey: ctxData.playerKey,
+        keyCards: ctxData.keyCards ? JSON.parse(JSON.stringify(ctxData.keyCards)) : undefined,
+        keyCard: ctxData.keyCards && ctxData.keyCards.length > 0 ? ctxData.keyCards[0] : undefined,
+        targetComponent: ctxData.targetComponent
+          ? JSON.parse(JSON.stringify(ctxData.targetComponent))
+          : undefined,
+        targetRequest: ctxData.targetRequest
+          ? JSON.parse(JSON.stringify(ctxData.targetRequest))
+          : undefined,
+        targetPlayerKey: ctxData.targetPlayerKey,
+        selections: ctxData.selections ? JSON.parse(JSON.stringify(ctxData.selections)) : undefined,
+        sourceEvent: ctxData.sourceEvent ? JSON.parse(JSON.stringify(ctxData.sourceEvent)) : undefined,
+        currentAction,
+        currentRequest: this.resolvingRequest,
+        logRecorder: this.logRecorder,
+      };
+    }
   }
 
   /**

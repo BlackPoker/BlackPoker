@@ -8,13 +8,13 @@ import { EffectContinuation } from "../../engine/session/GameSession";
 export const SNAPSHOT_FORMAT_VERSION = 1;
 
 /**
- * GameSession Snapshot のメタデータ
+ * GameSession Snapshot のメタデータ (RulePackage.id / RulePackage.version を正式保持)
  */
 export interface GameSessionSnapshotMetadata {
   readonly matchId: string;
-  readonly rulePackageRef?: string;
-  readonly rulesVersion?: string;
-  readonly createdAt?: number;
+  readonly rulePackageRef: string;
+  readonly rulesVersion: string;
+  readonly createdAt: number;
 }
 
 /**
@@ -39,7 +39,6 @@ export interface ResolvingContextSnapshotData {
  */
 export interface GameSessionSnapshotSessionData {
   readonly consecutivePassCount: number;
-  readonly lastActionPlayer?: string;
   readonly pendingDecision?: DecisionRequest;
   readonly continuation?: EffectContinuation;
   readonly resolvingRequest?: any;

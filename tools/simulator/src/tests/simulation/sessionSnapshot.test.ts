@@ -13,7 +13,7 @@ import { SNAPSHOT_FORMAT_VERSION } from "../../domain/session/GameSessionSnapsho
 import { StateHasher } from "../../engine/simulation/StateHasher";
 import { FirstLegalPolicy } from "../../engine/simulation/DecisionPolicy";
 
-describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-20260904-1813)", () => {
+describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2.1-20260904-1914)", () => {
   let playtestRulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -23,9 +23,9 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-202609
   });
 
   // --------------------------------------------------------------------------
-  // 1. JSON Round-Trip, Format Version & Metadata Tests
+  // 1. JSON Round-Trip, Format Version & RulePackage Validation Tests
   // --------------------------------------------------------------------------
-  describe("Snapshot Format, Serialization & Hash Validation", () => {
+  describe("Snapshot Format, Serialization & RulePackage Validation", () => {
     it("captures, serializes and deserializes snapshot with JSON round-trip (Version 1)", () => {
       const state = createCoreBattlePresetState();
       const session = new GameSession(state, playtestRulePackage, { matchId: "test-match-123" });
@@ -37,9 +37,11 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-202609
       expect(snapshot.snapshotFormatVersion).toBe(SNAPSHOT_FORMAT_VERSION);
       expect(snapshot.snapshotFormatVersion).toBe(1);
 
-      // Metadata
+      // Metadata with RulePackage id & version
       expect(snapshot.metadata.matchId).toBe("test-match-123");
-      expect(snapshot.metadata.rulesVersion).toBeDefined();
+      expect(snapshot.metadata.rulePackageRef).toBe(playtestRulePackage.id);
+      expect(snapshot.metadata.rulesVersion).toBe(playtestRulePackage.version);
+      expect(snapshot.metadata.createdAt).toBeGreaterThan(0);
 
       // State Hash v2
       expect(snapshot.gameStateHash).toBeDefined();
@@ -53,7 +55,7 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-202609
       const deserialized = GameSessionSnapshotCodec.deserialize(jsonString);
       expect(deserialized).toEqual(snapshot);
 
-      // Restore
+      // Restore with compatible RulePackage
       const restoredSession = GameSession.fromSnapshot(deserialized, playtestRulePackage);
       expect(restoredSession.matchId).toBe("test-match-123");
       expect(StateHasher.hash(restoredSession.state)).toBe(snapshot.gameStateHash);
@@ -72,6 +74,38 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-202609
 
       expect(() => {
         GameSessionSnapshotCodec.restore(invalidSnapshot, playtestRulePackage);
+      }).toThrow(GameSessionSnapshotValidationError);
+    });
+
+    it("rejects restore when RulePackage ID does not match snapshot metadata", () => {
+      const state = createCoreBattlePresetState();
+      const session = new GameSession(state, playtestRulePackage);
+      session.advance();
+
+      const snapshot = session.createSnapshot();
+      const incompatibleRulePackage: RulePackage = {
+        ...playtestRulePackage,
+        id: "other-incompatible-rules",
+      };
+
+      expect(() => {
+        GameSessionSnapshotCodec.restore(snapshot, incompatibleRulePackage);
+      }).toThrow(GameSessionSnapshotValidationError);
+    });
+
+    it("rejects restore when RulePackage version does not match snapshot metadata", () => {
+      const state = createCoreBattlePresetState();
+      const session = new GameSession(state, playtestRulePackage);
+      session.advance();
+
+      const snapshot = session.createSnapshot();
+      const incompatibleVersionPackage: RulePackage = {
+        ...playtestRulePackage,
+        version: "99.9.9",
+      };
+
+      expect(() => {
+        GameSessionSnapshotCodec.restore(snapshot, incompatibleVersionPackage);
       }).toThrow(GameSessionSnapshotValidationError);
     });
 
@@ -147,66 +181,135 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2-202609
   });
 
   // --------------------------------------------------------------------------
-  // 3. Consecutive PASS Resume Tests
+  // 3. Stage Request with Consecutive PASS & Stage Top Resolution Resume Tests
   // --------------------------------------------------------------------------
-  describe("Consecutive PASS & Stage Top Resolution Resume", () => {
-    it("preserves consecutivePassCount=1 across snapshot and triggers Stage TOP resolution on second PASS", () => {
+  describe("Stage Request with Consecutive PASS & Stage Top Resolution Resume", () => {
+    it("verifies Stage TOP resolution on second PASS after resuming from snapshot with consecutivePassCount=1 and active Stage request", () => {
       const state = createCoreBattlePresetState();
-      const originalSession = new GameSession(state, playtestRulePackage, { matchId: "match-pass-002" });
+      const originalSession = new GameSession(state, playtestRulePackage, { matchId: "match-stage-pass-002" });
 
-      // Step 1: 1回目の判断待ち (Player A の手番)
+      // Step 1: 初期判断待ち (Player A の手番)
       const step1 = originalSession.advance();
       expect(step1.type).toBe("WAITING_FOR_DECISION");
       if (step1.type !== "WAITING_FOR_DECISION") return;
 
-      // PASS のインデックスを検索して PASS を適用
-      const passIdx = step1.request.patterns.findIndex((p) => p.kind === "PASS");
-      expect(passIdx).toBeGreaterThanOrEqual(0);
-      originalSession.submitDecision({
+      // 通常アクション（Stage に積まれるアクション、例: action.attack）を選択
+      const normalActionIdx = step1.request.patterns.findIndex((p) => {
+        if (p.actionSelectionRef === undefined) return false;
+        const actId = step1.request.catalog.actions[p.actionSelectionRef]?.actionId;
+        return actId === "action.attack";
+      });
+      expect(normalActionIdx).toBeGreaterThanOrEqual(0);
+
+      // 1. 通常アクションを選択して送信（Stage に積まれるが未解決、チャンスは Player A のまま）
+      const step2 = originalSession.submitDecision({
         decisionId: step1.request.decisionId,
         stateVersion: step1.request.stateVersion,
-        selectedPatternRef: passIdx,
+        selectedPatternRef: normalActionIdx,
       });
 
-      // Step 2: チャンスが Player B に移動し、consecutivePassCount = 1 の状態で WAITING_FOR_DECISION
-      const step2 = originalSession.advance();
-      expect(step2.type).toBe("WAITING_FOR_DECISION");
-      expect(originalSession.passTracker.consecutivePassCount).toBe(1);
+      // 49.D: Stage 上に実際に Request が 1 件以上存在することを明示的に assert
+      expect(originalSession.state.stage?.requests?.length).toBeGreaterThanOrEqual(1);
+      const initialStageDepth = originalSession.state.stage.requests.length;
+      const targetRequestId =
+        originalSession.state.stage.requests[originalSession.state.stage.requests.length - 1].id;
+      expect(targetRequestId).toBeDefined();
 
-      // この consecutivePassCount = 1 の状態で Snapshot 取得
+      // 2. 1人目 (Player A) が PASS を選択
+      expect(step2.type).toBe("WAITING_FOR_DECISION");
+      if (step2.type !== "WAITING_FOR_DECISION") return;
+      const p1PassIdx = step2.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(p1PassIdx).toBeGreaterThanOrEqual(0);
+
+      const step3 = originalSession.submitDecision({
+        decisionId: step2.request.decisionId,
+        stateVersion: step2.request.stateVersion,
+        selectedPatternRef: p1PassIdx,
+      });
+
+      // 49.F: 1人目の PASS により、consecutivePassCount = 1、チャンスが Player B へ移動
+      expect(originalSession.passTracker.consecutivePassCount).toBe(1);
+      expect(originalSession.state.chancePlayer).toBe("p2");
+
+      // Stage depth が維持されており、TOP Request が未解決のまま残っていることを assert
+      expect(originalSession.state.stage.requests.length).toBe(initialStageDepth);
+      expect(
+        originalSession.state.stage.requests[originalSession.state.stage.requests.length - 1].id
+      ).toBe(targetRequestId);
+
+      // 49.F: この「Stage 上に Request が存在し、consecutivePassCount = 1」の状態で Snapshot 取得
       const snapshot = originalSession.createSnapshot();
       expect(snapshot.session.consecutivePassCount).toBe(1);
+      expect(snapshot.gameState.stage.requests.length).toBe(initialStageDepth);
 
-      // Snapshot からセッションを復元
+      // 49.G: Snapshot からセッションを復元
       const restoredSession = GameSession.fromSnapshot(snapshot, playtestRulePackage);
+
+      // Restore 直後の状態検証
       expect(restoredSession.passTracker.consecutivePassCount).toBe(1);
+      expect(restoredSession.state.stage.requests.length).toBe(initialStageDepth);
+      expect(
+        restoredSession.state.stage.requests[restoredSession.state.stage.requests.length - 1].id
+      ).toBe(targetRequestId);
+      expect(restoredSession.state.chancePlayer).toBe("p2");
       expect(StateHasher.hash(restoredSession.state)).toBe(StateHasher.hash(originalSession.state));
 
-      // 両セッションで 2 回目の PASS を適用
-      const step2ReqOrig = originalSession.pendingDecision!;
-      const step2ReqRest = restoredSession.pendingDecision!;
+      // 49.H: 両セッションで 2 人目 (Player B) が PASS を選択
+      expect(step3.type).toBe("WAITING_FOR_DECISION");
+      if (step3.type !== "WAITING_FOR_DECISION") return;
+      const step3ReqOrig = step3.request;
+      const step3ReqRest = restoredSession.pendingDecision!;
 
-      const pass2IdxOrig = step2ReqOrig.patterns.findIndex((p) => p.kind === "PASS");
-      const pass2IdxRest = step2ReqRest.patterns.findIndex((p) => p.kind === "PASS");
-      expect(pass2IdxOrig).toBe(pass2IdxRest);
+      const p2PassIdxOrig = step3ReqOrig.patterns.findIndex((p) => p.kind === "PASS");
+      const p2PassIdxRest = step3ReqRest.patterns.findIndex((p) => p.kind === "PASS");
+      expect(p2PassIdxOrig).toBe(p2PassIdxRest);
+      expect(p2PassIdxOrig).toBeGreaterThanOrEqual(0);
 
       const origResult = originalSession.submitDecision({
-        decisionId: step2ReqOrig.decisionId,
-        stateVersion: step2ReqOrig.stateVersion,
-        selectedPatternRef: pass2IdxOrig,
+        decisionId: step3ReqOrig.decisionId,
+        stateVersion: step3ReqOrig.stateVersion,
+        selectedPatternRef: p2PassIdxOrig,
       });
 
       const restResult = restoredSession.submitDecision({
-        decisionId: step2ReqRest.decisionId,
-        stateVersion: step2ReqRest.stateVersion,
-        selectedPatternRef: pass2IdxRest,
+        decisionId: step3ReqRest.decisionId,
+        stateVersion: step3ReqRest.stateVersion,
+        selectedPatternRef: p2PassIdxRest,
       });
 
-      // 2人連続 PASS により Stage TOP が解決され、結果の State Hash とターン/チャンスプレイヤーが完全一致
+      // 49.H: 全員連続 PASS 成立により、Stage TOP Request (targetRequestId) の解決が実際にトリガーされたことを検証
+      // passTracker はリセットされて 0 に戻る
+      expect(originalSession.passTracker.consecutivePassCount).toBe(0);
+      expect(restoredSession.passTracker.consecutivePassCount).toBe(0);
+
+      // Stage TOP Request の解決が開始され、EFFECT_RESOLUTION 待機状態に入っていること
+      expect(origResult.type).toBe("WAITING_FOR_DECISION");
+      expect(restResult.type).toBe("WAITING_FOR_DECISION");
+      if (origResult.type === "WAITING_FOR_DECISION" && restResult.type === "WAITING_FOR_DECISION") {
+        expect(origResult.request.source.type).toBe("EFFECT_RESOLUTION");
+        expect(restResult.request.source.type).toBe("EFFECT_RESOLUTION");
+        expect((origResult.request.source as any).sourceRequestRef).toBe(targetRequestId);
+        expect((restResult.request.source as any).sourceRequestRef).toBe(targetRequestId);
+      }
+
+      // 49.I: Original / Restored で State Hash、turnPlayer、chancePlayer、GameSessionStep.type が完全一致
       expect(StateHasher.hash(restoredSession.state)).toBe(StateHasher.hash(originalSession.state));
       expect(restoredSession.state.turnPlayer).toBe(originalSession.state.turnPlayer);
       expect(restoredSession.state.chancePlayer).toBe(originalSession.state.chancePlayer);
       expect(restResult.type).toBe(origResult.type);
+
+      // さらに両方のセッションで効果選択を実行し、最後まで解決を進めて一致することを確認
+      const policy = new FirstLegalPolicy();
+      if (origResult.type === "WAITING_FOR_DECISION" && restResult.type === "WAITING_FOR_DECISION") {
+        const origEffResp = policy.choose(origResult.request);
+        const restEffResp = policy.choose(restResult.request);
+
+        const origStepFinal = originalSession.submitDecision(origEffResp);
+        const restStepFinal = restoredSession.submitDecision(restEffResp);
+
+        expect(StateHasher.hash(restoredSession.state)).toBe(StateHasher.hash(originalSession.state));
+        expect(restStepFinal.type).toBe(origStepFinal.type);
+      }
     });
   });
 

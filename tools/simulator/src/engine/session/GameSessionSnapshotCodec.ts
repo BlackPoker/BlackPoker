@@ -1,15 +1,13 @@
 import {
   GameSessionSnapshot,
   SNAPSHOT_FORMAT_VERSION,
-  ResolvingContextSnapshotData,
 } from "../../domain/session/GameSessionSnapshot";
 import { GameSession } from "./GameSession";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { StateHasher } from "../simulation/StateHasher";
 import { PassTracker } from "./PassTracker";
 import { MatchLogRecorder } from "../log/MatchLogRecorder";
-import { CommandRegistry, CommandContext } from "../rules/CommandRegistry";
-import { ActionRequest } from "../../domain/rules/RulePackage";
+import { CommandRegistry } from "../rules/CommandRegistry";
 
 export class GameSessionSnapshotValidationError extends Error {
   constructor(message: string) {
@@ -29,64 +27,17 @@ export class GameSessionSnapshotCodec {
     const rawStateCopy = JSON.parse(JSON.stringify(session.state));
     const stateHash = StateHasher.hash(rawStateCopy);
 
-    let resolvingContextData: ResolvingContextSnapshotData | undefined = undefined;
-    if (session.resolvingContext) {
-      resolvingContextData = {
-        playerKey: session.resolvingContext.playerKey,
-        keyCardIds: session.resolvingContext.keyCards?.map((c: any) => c.id),
-        keyCards: session.resolvingContext.keyCards
-          ? JSON.parse(JSON.stringify(session.resolvingContext.keyCards))
-          : undefined,
-        targetComponent: session.resolvingContext.targetComponent
-          ? JSON.parse(JSON.stringify(session.resolvingContext.targetComponent))
-          : undefined,
-        targetRequest: session.resolvingContext.targetRequest
-          ? JSON.parse(JSON.stringify(session.resolvingContext.targetRequest))
-          : undefined,
-        targetPlayerKey: session.resolvingContext.targetPlayerKey,
-        selections: session.resolvingContext.selections
-          ? JSON.parse(JSON.stringify(session.resolvingContext.selections))
-          : undefined,
-        sourceEvent: session.resolvingContext.sourceEvent
-          ? JSON.parse(JSON.stringify(session.resolvingContext.sourceEvent))
-          : undefined,
-        currentActionId: session.resolvingContext.currentAction?.id,
-        currentRequestId: session.resolvingContext.currentRequest?.id,
-      };
-    }
-
-    let resolvingRequestCopy: any = undefined;
-    if (session.resolvingRequest) {
-      resolvingRequestCopy = JSON.parse(JSON.stringify(session.resolvingRequest));
-      // action オブジェクト参照などの runtime 依存を除去
-      if (resolvingRequestCopy.action) {
-        delete resolvingRequestCopy.action;
-      }
-    }
-
     const snapshot: GameSessionSnapshot = {
       snapshotFormatVersion: SNAPSHOT_FORMAT_VERSION,
       metadata: {
         matchId: session.matchId,
-        rulePackageRef: (session.rulePackage as any)?.name || "rules-vnext",
-        rulesVersion: (session.rulePackage as any)?.version || "9.1.2",
+        rulePackageRef: session.rulePackage.id,
+        rulesVersion: session.rulePackage.version,
         createdAt: Date.now(),
       },
       gameState: rawStateCopy,
       gameStateHash: stateHash,
-      session: {
-        consecutivePassCount: session.passTracker.consecutivePassCount,
-        pendingDecision: session.pendingDecision
-          ? JSON.parse(JSON.stringify(session.pendingDecision))
-          : undefined,
-        continuation: session.continuation
-          ? JSON.parse(JSON.stringify(session.continuation))
-          : undefined,
-        resolvingRequest: resolvingRequestCopy,
-        resolvingContext: resolvingContextData,
-        matchStartedRecorded: (session as any).matchStartedRecorded ?? false,
-        lastRecordedTurnPlayer: (session as any).lastRecordedTurnPlayer,
-      },
+      session: session.exportSnapshotSessionData(),
       matchLog: session.getMatchLog ? JSON.parse(JSON.stringify(session.getMatchLog())) : undefined,
     };
 
@@ -134,8 +85,20 @@ export class GameSessionSnapshotCodec {
       );
     }
 
-    if (!snapshot.metadata || typeof snapshot.metadata !== "object" || !snapshot.metadata.matchId) {
+    if (!snapshot.metadata || typeof snapshot.metadata !== "object") {
+      throw new GameSessionSnapshotValidationError("Snapshot validation failed: missing metadata object.");
+    }
+
+    if (!snapshot.metadata.matchId || typeof snapshot.metadata.matchId !== "string") {
       throw new GameSessionSnapshotValidationError("Snapshot validation failed: missing metadata.matchId.");
+    }
+
+    if (!snapshot.metadata.rulePackageRef || typeof snapshot.metadata.rulePackageRef !== "string") {
+      throw new GameSessionSnapshotValidationError("Snapshot validation failed: missing metadata.rulePackageRef.");
+    }
+
+    if (!snapshot.metadata.rulesVersion || typeof snapshot.metadata.rulesVersion !== "string") {
+      throw new GameSessionSnapshotValidationError("Snapshot validation failed: missing metadata.rulesVersion.");
     }
 
     if (!snapshot.gameState || typeof snapshot.gameState !== "object") {
@@ -169,6 +132,24 @@ export class GameSessionSnapshotCodec {
   static restore(snapshot: GameSessionSnapshot, rulePackage: RulePackage): GameSession {
     this.validate(snapshot);
 
+    if (!rulePackage || typeof rulePackage !== "object") {
+      throw new GameSessionSnapshotValidationError("Restore failed: valid rulePackage must be provided.");
+    }
+
+    // RulePackage ID 照合
+    if (rulePackage.id !== snapshot.metadata.rulePackageRef) {
+      throw new GameSessionSnapshotValidationError(
+        `Rule package ID mismatch: expected '${snapshot.metadata.rulePackageRef}', but got '${rulePackage.id}'.`
+      );
+    }
+
+    // RulePackage Version 照合
+    if (rulePackage.version !== snapshot.metadata.rulesVersion) {
+      throw new GameSessionSnapshotValidationError(
+        `Rule package version mismatch: expected '${snapshot.metadata.rulesVersion}', but got '${rulePackage.version}'.`
+      );
+    }
+
     const stateClone = JSON.parse(JSON.stringify(snapshot.gameState));
     const passTracker = new PassTracker(snapshot.session.consecutivePassCount);
     const registry = new CommandRegistry();
@@ -187,73 +168,8 @@ export class GameSessionSnapshotCodec {
       logRecorder,
     });
 
-    // 内部フラグ・進行状態の復元
-    (session as any).matchStartedRecorded = snapshot.session.matchStartedRecorded;
-    (session as any).lastRecordedTurnPlayer = snapshot.session.lastRecordedTurnPlayer;
-
-    if (snapshot.session.pendingDecision) {
-      session.pendingDecision = JSON.parse(JSON.stringify(snapshot.session.pendingDecision));
-    }
-
-    if (snapshot.session.continuation) {
-      session.continuation = JSON.parse(JSON.stringify(snapshot.session.continuation));
-    }
-
-    // resolvingRequest の復元 (GameState 内の Request と同一参照を優先)
-    if (snapshot.session.resolvingRequest) {
-      const reqData = snapshot.session.resolvingRequest;
-      let matchedReq: any = undefined;
-
-      if (session.state.stage?.requests) {
-        matchedReq = session.state.stage.requests.find((r: any) => r.id === reqData.id);
-      }
-      if (!matchedReq && session.state.requestBuffer?.requests) {
-        matchedReq = session.state.requestBuffer.requests.find((r: any) => r.id === reqData.id);
-      }
-
-      if (matchedReq) {
-        if (reqData.actionId && !matchedReq.action) {
-          matchedReq.action = rulePackage.actions.find((a) => a.id === reqData.actionId);
-        }
-        session.resolvingRequest = matchedReq;
-      } else {
-        const reqCopy = JSON.parse(JSON.stringify(reqData));
-        if (reqCopy.actionId) {
-          reqCopy.action = rulePackage.actions.find((a) => a.id === reqCopy.actionId);
-        }
-        session.resolvingRequest = reqCopy;
-      }
-    }
-
-    // resolvingContext の再構築
-    if (snapshot.session.resolvingContext) {
-      const ctxData = snapshot.session.resolvingContext;
-      const currentAction = ctxData.currentActionId
-        ? rulePackage.actions.find((a) => a.id === ctxData.currentActionId)
-        : session.resolvingRequest?.action;
-
-      const resolveContext: CommandContext = {
-        state: session.state,
-        actions: rulePackage.actions,
-        playerKey: ctxData.playerKey,
-        keyCards: ctxData.keyCards ? JSON.parse(JSON.stringify(ctxData.keyCards)) : undefined,
-        keyCard: ctxData.keyCards && ctxData.keyCards.length > 0 ? ctxData.keyCards[0] : undefined,
-        targetComponent: ctxData.targetComponent
-          ? JSON.parse(JSON.stringify(ctxData.targetComponent))
-          : undefined,
-        targetRequest: ctxData.targetRequest
-          ? JSON.parse(JSON.stringify(ctxData.targetRequest))
-          : undefined,
-        targetPlayerKey: ctxData.targetPlayerKey,
-        selections: ctxData.selections ? JSON.parse(JSON.stringify(ctxData.selections)) : undefined,
-        sourceEvent: ctxData.sourceEvent ? JSON.parse(JSON.stringify(ctxData.sourceEvent)) : undefined,
-        currentAction,
-        currentRequest: session.resolvingRequest,
-        logRecorder: session.logRecorder,
-      };
-
-      session.resolvingContext = resolveContext;
-    }
+    // GameSession のカプセル化 API 経由で内部状態を復元
+    session.importSnapshotSessionData(snapshot.session);
 
     return session;
   }
