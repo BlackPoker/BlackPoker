@@ -36,6 +36,14 @@ Open:
 http://localhost:5173/
 ```
 
+## 技術スタック・開発規約
+
+- **主要言語・環境**: TypeScript / Node.js (Vite, Vitest)
+- **コンテナ環境**: Docker (`node:20-slim`)
+- **Python の使用禁止**:
+  - 本シミュレータの実装、テスト、補助スクリプト、データ変換、検証ロジック等において、**Python（`python`, `python3`, `pip`, `venv`, `pytest`, `*.py` ファイル等）の使用・導入・作成は一切禁止**されています。
+  - 一時的な確認用途であっても Python は使用せず、必ず TypeScript / Node.js ツールチェーンを使用してください。
+
 ## 非目標
 
 初期段階では以下はやらないでください。

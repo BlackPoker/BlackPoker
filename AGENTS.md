@@ -8,3 +8,8 @@ Gitのコミットメッセージを生成する際（「Generate Commit Message
 
 # Artifact Rules
 実装計画 (implementation_plan.md) やタスクリスト (task.md) などのアーティファクトは、常に**日本語**で記述してください。
+
+# Technology Stack Rules (BlackPoker Simulator)
+BlackPoker Simulator (`tools/simulator/`) の実装、テスト、補助スクリプト、検証ロジック、データ変換等において、**Python（`python`, `python3`, `pip`, `venv`, `pytest`, `*.py` ファイル等）は一切使用・導入・作成しないでください**。
+すべて **TypeScript / Node.js**（および Docker, npm, npx, shell command）へ統一してください。一時的な確認やスクリプトであっても Python の使用は厳格に禁止します。
+
