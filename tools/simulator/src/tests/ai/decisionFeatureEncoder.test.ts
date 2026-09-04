@@ -9,6 +9,7 @@ import {
   PATTERN_FEATURE_NAMES,
   PATTERN_FEATURE_DIMENSION,
   FEATURE_SCHEMA_VERSION,
+  EncodedDecisionFeatures,
 } from "../../domain/ai/DecisionFeatureTypes";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
@@ -19,6 +20,20 @@ import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoor
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const expectNumericFeaturesEqual = (
+  a: EncodedDecisionFeatures,
+  b: EncodedDecisionFeatures
+) => {
+  expect(a.featureSchemaVersion).toBe(b.featureSchemaVersion);
+  expect(a.context.values).toEqual(b.context.values);
+  expect(a.patterns.length).toBe(b.patterns.length);
+  for (let i = 0; i < a.patterns.length; i++) {
+    expect(a.patterns[i].patternRef).toBe(b.patterns[i].patternRef);
+    expect(a.patterns[i].kind).toBe(b.patterns[i].kind);
+    expect(a.patterns[i].values).toEqual(b.patterns[i].values);
+  }
+};
 
 describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)", () => {
   let rulePackage: RulePackage;
@@ -303,10 +318,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const encoded1 = DecisionFeatureEncoder.encode(req1);
     const encoded2 = DecisionFeatureEncoder.encode(req2);
 
-    expect(encoded1.context.values).toEqual(encoded2.context.values);
-    for (let i = 0; i < encoded1.patterns.length; i++) {
-      expect(encoded1.patterns[i].values).toEqual(encoded2.patterns[i].values);
-    }
+    expectNumericFeaturesEqual(encoded1, encoded2);
   });
 
   it("G. 表示用文字列 (player.name, actionName, displayName, summary) のみを変更しても特徴量ベクトルが一切変化しないこと", () => {
@@ -326,9 +338,17 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
           ...a,
           actionName: a.actionName + " (日本語変更)",
         })),
+        unitSelections: req1.catalog.unitSelections.map((u) => ({
+          ...u,
+          displayNames: ["改変ユニット名"],
+        })),
         costPayments: req1.catalog.costPayments.map((cp) => ({
           ...cp,
           summary: "別の説明文",
+        })),
+        targetSelections: req1.catalog.targetSelections.map((ts) => ({
+          ...ts,
+          displayName: "改変ターゲット名",
         })),
       },
     };
@@ -336,10 +356,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const encoded1 = DecisionFeatureEncoder.encode(req1);
     const encoded2 = DecisionFeatureEncoder.encode(req2);
 
-    expect(encoded1.context.values).toEqual(encoded2.context.values);
-    for (let i = 0; i < encoded1.patterns.length; i++) {
-      expect(encoded1.patterns[i].values).toEqual(encoded2.patterns[i].values);
-    }
+    expectNumericFeaturesEqual(encoded1, encoded2);
   });
 
   it("H. HiddenCardView の opaqueCardId のみを変更しても特徴量ベクトルが一切変化しないこと", () => {
@@ -366,14 +383,79 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const encoded1 = DecisionFeatureEncoder.encode(req1);
     const encoded2 = DecisionFeatureEncoder.encode(req2);
 
-    expect(encoded1.context.values).toEqual(encoded2.context.values);
+    expectNumericFeaturesEqual(encoded1, encoded2);
   });
 
-  it("I. 視点対称性 (Viewer Symmetry): 鏡像関係の盤面で viewer が入れ替わった場合、相対特徴量が完全一致すること", () => {
+  it("H2. 参照関係を維持したまま cardInstanceId や unitId を一括リネームしても特徴量ベクトルが一切変化しないこと", () => {
+    const req1 = createSyntheticDecisionRequest();
+
+    const idMap: Record<string, string> = {
+      "card-p1-1": "card-alpha-1",
+      "card-p1-2": "card-alpha-2",
+      "unit-p1-1": "unit-bravo-1",
+      "unit-p2-1": "unit-charlie-2",
+    };
+    const mapId = (id: string) => idMap[id] ?? id;
+
+    const req2: DecisionRequest = {
+      ...req1,
+      observation: {
+        ...req1.observation,
+        players: req1.observation.players.map((p) => ({
+          ...p,
+          handCards: p.handCards.map((c) => {
+            if (c.visibility === "KNOWN") {
+              return { ...c, cardInstanceId: mapId(c.cardInstanceId) };
+            }
+            return c;
+          }),
+          field: p.field.map((u) => ({
+            ...u,
+            unitId: mapId(u.unitId),
+          })),
+        })),
+      },
+      catalog: {
+        ...req1.catalog,
+        cardSelections: req1.catalog.cardSelections.map((cs) => ({
+          ...cs,
+          cardIds: cs.cardIds.map(mapId),
+        })),
+        unitSelections: req1.catalog.unitSelections.map((us) => ({
+          ...us,
+          unitIds: us.unitIds.map(mapId),
+        })),
+        costPayments: req1.catalog.costPayments.map((cp) => ({
+          ...cp,
+          discardedCardIds: cp.discardedCardIds.map(mapId),
+          drivenBulwarkUnitIds: cp.drivenBulwarkUnitIds.map(mapId),
+          sacrificedUnitIds: cp.sacrificedUnitIds.map(mapId),
+        })),
+        targetSelections: req1.catalog.targetSelections.map((ts) => ({
+          ...ts,
+          targetUnitId: ts.targetUnitId ? mapId(ts.targetUnitId) : undefined,
+        })),
+        effectSelections: req1.catalog.effectSelections.map((es) => ({
+          ...es,
+          assignments: es.assignments?.map((a) => ({
+            sourceUnitId: mapId(a.sourceUnitId),
+            selectedUnitIds: a.selectedUnitIds.map(mapId),
+          })),
+        })),
+      },
+    };
+
+    const encoded1 = DecisionFeatureEncoder.encode(req1);
+    const encoded2 = DecisionFeatureEncoder.encode(req2);
+
+    expectNumericFeaturesEqual(encoded1, encoded2);
+  });
+
+  it("I. 視点対称性 (Viewer Symmetry): 鏡像関係の盤面・カタログで viewer が入れ替わった場合、Contextおよび全Pattern特徴量が完全一致すること", () => {
     // P1 視点
     const reqP1 = createSyntheticDecisionRequest();
 
-    // P2 視点の鏡像リクエストを作成 (盤面・手札・ユニットを P1 と完全に対称化)
+    // P2 視点の鏡像リクエストを作成 (盤面・手札・ユニット・カタログ参照を P1 と完全に対称化)
     const reqP2: DecisionRequest = {
       protocolVersion: "1.0.0",
       matchId: "match-test-001",
@@ -466,14 +548,93 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
         stageRequests: [],
         recentEvents: [],
       },
-      catalog: reqP1.catalog,
+      catalog: {
+        actions: [
+          {
+            actionId: "action.attack",
+            actionName: "アタック",
+            timing: "main",
+            speed: "normal",
+            cost: "D",
+          },
+          {
+            actionId: "action.custom_flash",
+            actionName: "閃光",
+            timing: "quick",
+            speed: "immediate",
+          },
+        ],
+        cardSelections: [
+          {
+            cardIds: ["card-p2-1", "card-p2-2"],
+            displayCodes: ["S-A", "H-10"],
+          },
+        ],
+        unitSelections: [
+          {
+            unitIds: ["unit-p2-1"],
+            displayNames: ["P2 兵士"],
+          },
+        ],
+        costPayments: [
+          {
+            discardedCardIds: ["card-p2-1"],
+            drivenBulwarkUnitIds: [],
+            sacrificedUnitIds: [],
+            lifeCount: 0,
+            summary: "手札1枚破棄",
+          },
+          {
+            discardedCardIds: [],
+            drivenBulwarkUnitIds: [],
+            sacrificedUnitIds: [],
+            lifeCount: 2,
+            summary: "ライフ2枚支払い",
+          },
+        ],
+        targetSelections: [
+          {
+            targetType: "unit",
+            targetUnitId: "unit-p1-1",
+            displayName: "P1 兵士",
+          },
+          {
+            targetType: "player",
+            targetPlayerKey: "p1",
+            displayName: "相手プレイヤー",
+          },
+        ],
+        effectSelections: [
+          {
+            selectionType: "unitAssignment",
+            assignments: [
+              {
+                sourceUnitId: "unit-p2-1",
+                selectedUnitIds: ["unit-p1-1"],
+              },
+            ],
+          },
+          {
+            selectionType: "future_unknown_type",
+            selectedValues: ["val1", "val2"],
+          },
+        ],
+        orderSelections: [
+          {
+            orderedIds: ["item-1", "item-2"],
+          },
+        ],
+      },
       patterns: reqP1.patterns,
     };
 
     const encodedP1 = DecisionFeatureEncoder.encode(reqP1);
     const encodedP2 = DecisionFeatureEncoder.encode(reqP2);
 
-    expect(encodedP1.context.values).toEqual(encodedP2.context.values);
+    expectNumericFeaturesEqual(encodedP1, encodedP2);
+    for (let i = 0; i < encodedP1.patterns.length; i++) {
+      expect(encodedP1.patterns[i].logicalPatternKey).toBe(encodedP2.patterns[i].logicalPatternKey);
+    }
   });
 
   it("J. 相手 Life 10以上時の秘密保持: lifeDisplay 文字列から正確な枚数を推測せず、秘密状態として同一にエンコードされること", () => {
@@ -687,6 +848,152 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
           expect(Number.isFinite(v)).toBe(true);
         }
       }
+    }
+  });
+
+  it("Q. 実 GameSession から生成された EFFECT_RESOLUTION 判断要求を正常にエンコードできること", () => {
+    const soldier1 = {
+      unitId: "soldier-1",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c1", suit: "S", rank: "6", value: 6 }],
+      labels: ["攻撃", "防御"],
+    };
+    const soldier2 = {
+      unitId: "soldier-2",
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c2", suit: "H", rank: "7", value: 7 }],
+      labels: ["攻撃"],
+    };
+    const bulwark1 = {
+      unitId: "bulwark-1",
+      kind: "防壁",
+      componentId: "character.bulwark",
+      state: "charge",
+      cards: [{ id: "b1", suit: "D", rank: "5", value: 5 }],
+      labels: ["防御"],
+    };
+    const battleState = {
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          name: "Player A",
+          life: [
+            { id: "l1-1", suit: "S", rank: "A", value: 1 },
+            { id: "l1-2", suit: "H", rank: "2", value: 2 },
+          ],
+          hand: [
+            { id: "key-s8", suit: "S", rank: "8", value: 8 },
+            { id: "cost-c2", suit: "C", rank: "2", value: 2 },
+          ],
+          field: [soldier1, soldier2],
+          fog: [],
+          grave: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [
+            { id: "l2-1", suit: "D", rank: "K", value: 13 },
+            { id: "l2-2", suit: "C", rank: "Q", value: 12 },
+          ],
+          hand: [],
+          field: [bulwark1],
+          fog: [],
+          grave: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: { requests: [], history: [] },
+    } as any;
+
+    const session = new GameSession(battleState, rulePackage);
+
+    // 1. P1 がアタック
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") return;
+    const req1 = step1.request;
+    const attackRef = req1.patterns.findIndex((p) => {
+      if (p.actionSelectionRef === undefined) return false;
+      return req1.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack";
+    });
+    expect(attackRef).toBeGreaterThanOrEqual(0);
+    session.submitDecision({
+      decisionId: req1.decisionId,
+      stateVersion: req1.stateVersion,
+      selectedPatternRef: attackRef,
+    });
+
+    // 2. P1 が PASS
+    const step2 = session.advance();
+    expect(step2.type).toBe("WAITING_FOR_DECISION");
+    if (step2.type !== "WAITING_FOR_DECISION") return;
+    const req2 = step2.request;
+    const pass1Ref = req2.patterns.findIndex((p) => p.kind === "PASS");
+    expect(pass1Ref).toBeGreaterThanOrEqual(0);
+    session.submitDecision({
+      decisionId: req2.decisionId,
+      stateVersion: req2.stateVersion,
+      selectedPatternRef: pass1Ref,
+    });
+
+    // 3. P2 が PASS (全員PASS -> stage解決開始)
+    const step3 = session.advance();
+    expect(step3.type).toBe("WAITING_FOR_DECISION");
+    if (step3.type !== "WAITING_FOR_DECISION") return;
+    const req3 = step3.request;
+    const pass2Ref = req3.patterns.findIndex((p) => p.kind === "PASS");
+    expect(pass2Ref).toBeGreaterThanOrEqual(0);
+    const step4 = session.submitDecision({
+      decisionId: req3.decisionId,
+      stateVersion: req3.stateVersion,
+      selectedPatternRef: pass2Ref,
+    });
+
+    // 4. EFFECT_RESOLUTION DecisionRequest が返る
+    expect(step4.type).toBe("WAITING_FOR_DECISION");
+    if (step4.type !== "WAITING_FOR_DECISION") return;
+    const effReq = step4.request;
+    expect(effReq.source.type).toBe("EFFECT_RESOLUTION");
+    expect(effReq.patterns.length).toBeGreaterThan(0);
+    expect(effReq.patterns.every((p) => p.kind === "EFFECT_SELECTION")).toBe(true);
+
+    // 5. エンコード実行
+    const encoded = DecisionFeatureEncoder.encode(effReq);
+
+    expect(encoded.featureSchemaVersion).toBe(1);
+    expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
+    for (const val of encoded.context.values) {
+      expect(Number.isFinite(val)).toBe(true);
+    }
+
+    // context の source_is_effect_resolution が 1 であること
+    const effSrcIdx = CONTEXT_FEATURE_NAMES.indexOf("source_is_effect_resolution");
+    expect(encoded.context.values[effSrcIdx]).toBe(1);
+
+    // context の legal_effect_selection_pattern_count が patterns.length と一致すること
+    const effCountIdx = CONTEXT_FEATURE_NAMES.indexOf("legal_effect_selection_pattern_count");
+    expect(encoded.context.values[effCountIdx]).toBe(effReq.patterns.length);
+
+    // patterns の検証
+    expect(encoded.patterns.length).toBe(effReq.patterns.length);
+    const isEffPatIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_effect_selection");
+    const hasEffPatIdx = PATTERN_FEATURE_NAMES.indexOf("has_effect_selection");
+
+    for (let i = 0; i < encoded.patterns.length; i++) {
+      const pat = encoded.patterns[i];
+      expect(pat.patternRef).toBe(i);
+      expect(pat.kind).toBe("EFFECT_SELECTION");
+      expect(pat.values.length).toBe(PATTERN_FEATURE_DIMENSION);
+      for (const val of pat.values) {
+        expect(Number.isFinite(val)).toBe(true);
+      }
+      expect(pat.values[isEffPatIdx]).toBe(1);
+      expect(pat.values[hasEffPatIdx]).toBe(1);
     }
   });
 });

@@ -101,9 +101,9 @@ BatchSimulationRunner.run(options)
 
 ---
 
-## 4. Decision Feature Contract v1 & Generic Feature Encoder (Phase 3.0 完了状態)
+## 4. Decision Feature Contract v1 & Generic Feature Encoder (Phase 3.0 / Phase 3.0.1 完了状態)
 
-AI の実装安全性を高めるため、Phase 3.0 ではまず Feature Contract / Generic Encoder を確立し、DNA 形式・Genome Policy の実装を Phase 3.1 へ分離しました。
+AI の実装安全性を高めるため、Phase 3.0 ではまず Feature Contract / Generic Encoder を確立し、DNA 形式・Genome Policy の実装を Phase 3.1 へ分離しました。さらに Phase 3.0.1 において視点対称性、実 Core 連携、ID 不変性の検証保証を補強しました。
 
 ### アーキテクチャとデータフロー
 ```text
@@ -233,6 +233,14 @@ EncodedDecisionFeatures (featureSchemaVersion: 1, JSON-Safe, Finite Numbers)
 3. **Master + Extra 互換原則**:
    - `action.attack` などの特定アクション名や component ID のハードコード、Action ID のハッシュバケット特徴量は一切使用しません。
    - 将来より高度な Action 意味理解が必要な場合は、Action ID hardcode ではなく汎用的な semantic traits として別途設計します。
+
+### Phase 3.0.1 検証保証
+1. **Full Viewer Symmetry 保証**:
+   - Context 特徴量だけでなく全 Pattern 特徴量ベクトル（および `logicalPatternKey`）について、鏡像関係の盤面・カタログでプレイヤー視点（viewer）が入れ替わった場合でも、相対特徴量が 100% 完全一致することをテスト検証。
+2. **実 GameSession EFFECT_RESOLUTION 統合保証**:
+   - 手動作成（synthetic）の `EFFECT_SELECTION` のみならず、実際の `GameSession` の Stage 解決フロー（Attack 宣言 $\rightarrow$ P1 PASS $\rightarrow$ P2 PASS）から生成された `source.type === "EFFECT_RESOLUTION"` の `DecisionRequest` を `DecisionFeatureEncoder` でエンコードし、固定次元数・有限数値・`source_is_effect_resolution: 1`・`pattern_is_effect_selection: 1` が成立することをテスト検証。
+3. **Runtime / Presentation / Opaque / ID Rename 不変性保証**:
+   - Context および全 Pattern 特徴量ベクトルについて、実行時動的 ID (`decisionId`, `matchId`, `stateVersion`)、表示用文字列 (`player.name`, `actionName`, `displayName`, `summary`)、非公開カード Opaque ID (`opaqueCardId`)、および参照関係を維持したエンティティ ID 一括リネーム (`cardInstanceId`, `unitId`) に対し、全数値特徴量が 100% 一致することをテスト検証。
 
 ---
 
