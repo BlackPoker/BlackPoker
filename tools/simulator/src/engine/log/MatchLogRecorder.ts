@@ -14,6 +14,7 @@ export interface MatchLogRecorderOptions {
   readonly buildRef?: string;
   readonly simulatorCommit?: string;
   readonly startedAt?: string;
+  readonly initialLog?: CanonicalMatchLog;
 }
 
 /**
@@ -82,15 +83,22 @@ export class MatchLogRecorder {
   private meta: CanonicalMatchLogMeta;
 
   constructor(options: MatchLogRecorderOptions) {
-    this.meta = {
-      matchId: options.matchId,
-      rulesVersion: options.rulesVersion || "9.1.2",
-      rulePackageRef: options.rulePackageRef || "rules-vnext",
-      buildSha: options.buildSha,
-      buildRef: options.buildRef,
-      simulatorCommit: options.simulatorCommit,
-      startedAt: options.startedAt || new Date().toISOString(),
-    };
+    if (options.initialLog) {
+      this.meta = { ...options.initialLog.meta };
+      this.events = [...options.initialLog.events];
+      const maxSeq = this.events.reduce((max, e) => Math.max(max, e.seq || 0), 0);
+      this.seq = maxSeq + 1;
+    } else {
+      this.meta = {
+        matchId: options.matchId,
+        rulesVersion: options.rulesVersion || "9.1.2",
+        rulePackageRef: options.rulePackageRef || "rules-vnext",
+        buildSha: options.buildSha,
+        buildRef: options.buildRef,
+        simulatorCommit: options.simulatorCommit,
+        startedAt: options.startedAt || new Date().toISOString(),
+      };
+    }
   }
 
   get currentSeq(): number {

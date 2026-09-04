@@ -11,6 +11,8 @@ import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordina
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { MatchLogRecorder, MatchLogRecorderOptions } from "../log/MatchLogRecorder";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
+import { GameSessionSnapshot } from "../../domain/session/GameSessionSnapshot";
+import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -120,6 +122,20 @@ export class GameSession {
    */
   getMatchLog(): CanonicalMatchLog {
     return this.logRecorder.getMatchLog();
+  }
+
+  /**
+   * 現在のセッションから JSON-safe な Snapshot DTO を生成
+   */
+  createSnapshot(): GameSessionSnapshot {
+    return GameSessionSnapshotCodec.capture(this);
+  }
+
+  /**
+   * Snapshot DTO と RulePackage から GameSession を復元 (Resume)
+   */
+  static fromSnapshot(snapshot: GameSessionSnapshot, rulePackage: RulePackage): GameSession {
+    return GameSessionSnapshotCodec.restore(snapshot, rulePackage);
   }
 
 
