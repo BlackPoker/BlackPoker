@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-3.0-20260904-2242`
-更新日時: 2026-09-04 22:42 JST
+作業ID: `BP-SIM-AI-3.1-20260905-0500`
+更新日時: 2026-09-05 05:00 JST
 
 ---
 
@@ -36,8 +36,8 @@
 | **Generic Feature Encoder v1** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | DecisionRequest のみを入力とする決定論的エンコーダー |
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
-| **Decision DNA v1 format** | **MISSING / NEXT** | - | - | Phase 3.1 で策定 |
-| **Genome Policy** | **MISSING / NEXT** | - | - | Phase 3.1 で実装 |
+| **Decision DNA v1 format** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 1482次元 (Context 25, Pattern 57, Inter 1425) |
+| **Genome Policy** | **IMPLEMENTED** | `src/engine/ai/GenomePolicy.ts`, `src/engine/ai/GenomeScorer.ts` | `src/tests/ai/genomePolicy.test.ts` | 決定論的 Argmax + 最小 patternRef タイブレーク |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
 | **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン (将来) |
@@ -244,18 +244,48 @@ EncodedDecisionFeatures (featureSchemaVersion: 1, JSON-Safe, Finite Numbers)
 
 ---
 
-## 5. Future Architecture (Phase 3.1 & Phase 4.0 予定)
+## 5. Decision DNA v1 & Deterministic Genome Policy (Phase 3.1)
 
-### Decision DNA & Genome Policy (Phase 3.1 予定)
+### Decision DNA v1 Architecture
 ```text
-EncodedDecisionFeatures (Context Vector + Pattern Vectors)
+EncodedDecisionFeatures (Context Vector 25次元 + Pattern Vectors 57次元)
     ↓
-Genome / DNA (Context Weights + Pattern Weights + Interaction Weights)
+GenomeScorer (Pure Functional / Stateless)
+    score(p) = Σ w_j * p_j + Σ Σ M_ij * c_i * p_j
+    (Pattern Weights: 57次元 + Context-Pattern Interaction Weights: 1425次元 = 計 1482 重み)
     ↓
-LegalPattern Scoring (各合法手の線形/非線形スコアリング)
+Deterministic Argmax Selection
+    - 最高スコアの合法手 (pattern) を選択
+    - 同点時は最小 patternRef インデックスを優先 (RNG 非依存の完全決定論的タイブレーク)
     ↓
-DecisionResponse (Argmax / Softmax Sampling)
+DecisionResponse (Action / Pass / EffectSelection)
 ```
+
+### DNA Structure & Validation Contract
+1. **Version & DTO Contract**:
+   - `dnaFormatVersion: 1`, `featureSchemaVersion: 1`, `scoringModel: "linear-bilinear-v1"`
+   - `contextDimension: 25`, `patternDimension: 57`, `totalWeights: 1482`
+   - `patternWeights: number[]` (57次元)
+   - `contextPatternWeights: number[]` (1425次元, row-major: `c_idx * 57 + p_idx`)
+   - `DecisionDNACodec.validate(dna)` による厳格な次元・有限数値 (NaN / Infinity 除外) 検証
+   - `DecisionDNACodec.clone(dna)` による外部 mutation からの完全保護
+2. **Context-only Additive Weight を除外する数学的根拠**:
+   - 行動選択は $\arg\max_{p \in \mathcal{P}} \text{score}(p)$ で行われる。
+   - 仮に Context 単独のバイアス項 $\sum_{i} u_i c_i$ を加算した場合、同一リクエスト内のすべての合法手 $p$ に対してこの値は同一の定数値 $C = \sum_{i} u_i c_i$ となる。
+   - 任意の定数 $C$ に対して $\arg\max_p (\text{score}(p) + C) = \arg\max_p \text{score}(p)$ が常に成立するため、Context 単独バイアスは行動順位付けに一切寄与せず相殺される（識別不能な Dead Weight）。
+   - パラメータの冗長性排除と探索空間の最小化のため、Context 単独重みはモデルから完全に除外している。
+3. **RNG 独立性 & 決定論的タイブレーク**:
+   - `GenomePolicy` は乱数源 (`RandomSource`) を一切必要とせず、乱数消費も発生しない純粋決定論的写像 `(DecisionRequest, DecisionDNA) -> DecisionResponse` を実現。
+   - 複数手が同点（重みゼロの初期状態を含む）の場合は、`DecisionRequest.legalPatterns` における最小の `patternRef`（先頭合法手）を一意に選択する。
+4. **Master + Extra 互換原則**:
+   - 特定の Action タイプやルールの決め打ちを行わず、`DecisionFeatureEncoder` が生成する汎用特徴量に対して重み付けを行うため、ルール拡張（Master / Extra）に対しても同一 DNA 構造で完全動作。
+5. **DNA Artifact 保存と分離契約**:
+   - 1482 重みは DNA 単体 JSON アーティファクトとして保存・管理され、Match Log や `PolicyDescriptor` の内部にはシリアライズされない。
+   - `PolicyDescriptor.metadata` には `dnaId`, `dnaName`, `generation`, `fitness` などの軽量メタデータのみを保持し、Canonical Match Log や State Hash の肥大化を防止。
+
+---
+
+## 6. Future Architecture (Phase 4.0 予定)
 
 ### Self-Play Evolution Cycle (Phase 4.0 予定)
 1. **Population**: 100 DNA
@@ -264,3 +294,4 @@ DecisionResponse (Argmax / Softmax Sampling)
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+
