@@ -24,15 +24,35 @@ export const DNA_INTERACTION_DIMENSION = CONTEXT_FEATURE_DIMENSION * PATTERN_FEA
 export const DNA_TOTAL_WEIGHTS = DNA_PATTERN_DIMENSION + DNA_INTERACTION_DIMENSION; // 57 + 1425 = 1482
 
 /**
- * Decision DNA Metadata (任意、Scoringには一切影響しない)
+ * JSON-Safe Primitive Values
+ */
+export type JSONPrimitive = string | number | boolean | null;
+
+/**
+ * JSON-Safe Value Hierarchy (Artifact Contract)
+ */
+export type JSONValue =
+  | JSONPrimitive
+  | readonly JSONValue[]
+  | { readonly [key: string]: JSONValue };
+
+/**
+ * Decision DNA Metadata (JSON-Safe Plain Object)
+ *
+ * 【JSON Artifact Contract】
+ * - 全ての値は JSON-safe (string, finite number, boolean, null, array, nested plain object) でなければならない。
+ * - NaN, Infinity, BigInt, function, Symbol, Date, Map, Set, class instance, 循環参照は禁止。
+ * - undefined は optional property の「存在しない値」としてのみ型定義上許容。
+ * - Scoring (GenomeScorer) には一切関与しない。
  */
 export interface DecisionDNAMetadata {
   readonly id?: string;
   readonly name?: string;
   readonly description?: string;
   readonly generation?: number;
+  readonly fitness?: number;
   readonly author?: string;
-  readonly [key: string]: unknown;
+  readonly [key: string]: JSONValue | undefined;
 }
 
 /**

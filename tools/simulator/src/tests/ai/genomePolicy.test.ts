@@ -275,6 +275,72 @@ describe("Genome Policy v1 & Real / Batch Integration (Phase 3.1)", () => {
 
       expect(() => policy.choose(req)).toThrow("DecisionRequest に選択可能なパターンが存在しません");
     });
+
+    it("9. Policy constructor 後の caller 側 nested metadata 変更から Policy 内部 DNA が完全に独立していること", () => {
+      const dna = DecisionDNACodec.createZeroDecisionDNA({
+        id: "meta-isolation",
+        experiment: {
+          tags: ["initial"],
+          params: { rate: 0.1 },
+        },
+      } as any);
+
+      const policy = new GenomePolicy(dna);
+
+      // caller 側で変更
+      (dna.metadata as any).experiment.tags.push("mutated");
+      (dna.metadata as any).experiment.params.rate = 9.99;
+
+      const policyDna = policy.getDNA();
+      expect((policyDna.metadata as any).experiment.tags).toEqual(["initial"]);
+      expect((policyDna.metadata as any).experiment.params.rate).toBe(0.1);
+    });
+
+    it("10. Policy.getDNA() の戻り値に対する nested metadata 変更から Policy 内部 DNA が完全に独立していること", () => {
+      const dna = DecisionDNACodec.createZeroDecisionDNA({
+        id: "getdna-isolation",
+        experiment: {
+          tags: ["v1"],
+          params: { step: 1 },
+        },
+      } as any);
+
+      const policy = new GenomePolicy(dna);
+
+      const retrieved1 = policy.getDNA();
+      (retrieved1.metadata as any).experiment.tags.push("leaked");
+      (retrieved1.metadata as any).experiment.params.step = 999;
+
+      const retrieved2 = policy.getDNA();
+      expect((retrieved2.metadata as any).experiment.tags).toEqual(["v1"]);
+      expect((retrieved2.metadata as any).experiment.params.step).toBe(1);
+    });
+
+    it("11. metadata の有無や変更によって GenomePolicy.choose の selectedPatternRef が 100% 不変であること", () => {
+      const dna1 = DecisionDNACodec.createZeroDecisionDNA();
+      const dna2 = DecisionDNACodec.createZeroDecisionDNA({
+        id: "dna-with-rich-metadata",
+        name: "Rich Metadata Genome",
+        generation: 10,
+        fitness: 0.88,
+        nested: { tags: ["meta1", "meta2"], config: { active: true, count: 5 } },
+      } as any);
+
+      // 双方に同じ重みを設定
+      const actIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_action");
+      (dna1.patternWeights as number[])[actIdx] = 3.0;
+      (dna2.patternWeights as number[])[actIdx] = 3.0;
+
+      const policy1 = new GenomePolicy(dna1);
+      const policy2 = new GenomePolicy(dna2);
+
+      const req = createSyntheticDecisionRequest();
+      const res1 = policy1.choose(req);
+      const res2 = policy2.choose(req);
+
+      expect(res1.selectedPatternRef).toBe(res2.selectedPatternRef);
+      expect(res1.selectedPatternRef).toBe(1);
+    });
   });
 
   describe("AD. Real GameSession & Batch Integration", () => {

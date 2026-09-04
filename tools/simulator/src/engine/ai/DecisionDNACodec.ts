@@ -85,9 +85,181 @@ export class DecisionDNACodec {
     }
 
     // 7. Metadata (Optional)
-    if (candidate.metadata !== undefined && (typeof candidate.metadata !== "object" || candidate.metadata === null)) {
-      throw new DecisionDNAValidationError("metadata", "object or undefined", typeof candidate.metadata);
+    if (candidate.metadata !== undefined) {
+      this.validateMetadata(candidate.metadata);
     }
+  }
+
+  /**
+   * DecisionDNAMetadata の再帰的検証
+   * JSON-safe (string, finite number, boolean, null, array, plain object) のみを許可。
+   * NaN, Infinity, BigInt, function, Symbol, Date, Map, Set, class instance, 循環参照を厳格に拒絶。
+   */
+  public static validateMetadata(metadata: unknown): void {
+    if (metadata === null || typeof metadata !== "object" || Array.isArray(metadata)) {
+      throw new DecisionDNAValidationError(
+        "metadata",
+        "plain JSON object",
+        metadata === null ? "null" : Array.isArray(metadata) ? "array" : typeof metadata,
+        "metadata は null でないプレーンな JSON オブジェクトである必要があります。"
+      );
+    }
+
+    const proto = Object.getPrototypeOf(metadata);
+    if (proto !== null && proto !== Object.prototype) {
+      throw new DecisionDNAValidationError(
+        "metadata",
+        "plain JSON object",
+        Object.prototype.toString.call(metadata),
+        "metadata はプレーンな JSON オブジェクトである必要があります (カスタムクラスインスタンス等は禁止)。"
+      );
+    }
+
+    const activePath = new Set<object>();
+    this.validateJSONValue(metadata, "metadata", activePath);
+  }
+
+  /**
+   * JSON-Safe 値の再帰的型検査
+   */
+  private static validateJSONValue(value: unknown, path: string, activePath: Set<object>): void {
+    if (value === null) {
+      return;
+    }
+
+    const t = typeof value;
+    if (t === "string" || t === "boolean") {
+      return;
+    }
+    if (t === "number") {
+      if (!Number.isFinite(value)) {
+        throw new DecisionDNAValidationError(
+          path,
+          "finite number",
+          value,
+          `metadata の ${path} に非有限数値 (${value}) が指定されています。NaN, Infinity, -Infinity は禁止です。`
+        );
+      }
+      return;
+    }
+    if (t === "bigint") {
+      throw new DecisionDNAValidationError(
+        path,
+        "JSON-safe value",
+        "bigint",
+        `metadata の ${path} に BigInt は使用できません。`
+      );
+    }
+    if (t === "function") {
+      throw new DecisionDNAValidationError(
+        path,
+        "JSON-safe value",
+        "function",
+        `metadata の ${path} に function は使用できません。`
+      );
+    }
+    if (t === "symbol") {
+      throw new DecisionDNAValidationError(
+        path,
+        "JSON-safe value",
+        "symbol",
+        `metadata の ${path} に Symbol は使用できません。`
+      );
+    }
+    if (t === "undefined") {
+      throw new DecisionDNAValidationError(
+        path,
+        "JSON-safe value",
+        "undefined",
+        `metadata の ${path} に undefined 値は使用できません。`
+      );
+    }
+
+    if (t === "object") {
+      const obj = value as object;
+      if (activePath.has(obj)) {
+        throw new DecisionDNAValidationError(
+          path,
+          "non-cyclic structure",
+          "cyclic reference",
+          `metadata の ${path} に循環参照が検出されました。`
+        );
+      }
+      activePath.add(obj);
+
+      try {
+        if (Array.isArray(obj)) {
+          for (let i = 0; i < obj.length; i++) {
+            this.validateJSONValue(obj[i], `${path}[${i}]`, activePath);
+          }
+        } else {
+          // Reject non-plain objects (Date, RegExp, Map, Set, Promise, etc.)
+          if (
+            obj instanceof Date ||
+            obj instanceof RegExp ||
+            obj instanceof Map ||
+            obj instanceof Set ||
+            obj instanceof WeakMap ||
+            obj instanceof WeakSet ||
+            obj instanceof Promise
+          ) {
+            throw new DecisionDNAValidationError(
+              path,
+              "plain JSON object",
+              Object.prototype.toString.call(obj),
+              `metadata の ${path} に ${Object.prototype.toString.call(obj)} は使用できません。`
+            );
+          }
+
+          const proto = Object.getPrototypeOf(obj);
+          if (proto !== null && proto !== Object.prototype) {
+            throw new DecisionDNAValidationError(
+              path,
+              "plain JSON object",
+              Object.prototype.toString.call(obj),
+              `metadata の ${path} はプレーンな JSON オブジェクトである必要があります。`
+            );
+          }
+
+          const keys = Object.keys(obj);
+          for (let i = 0; i < keys.length; i++) {
+            const k = keys[i];
+            const v = (obj as Record<string, unknown>)[k];
+            this.validateJSONValue(v, `${path}.${k}`, activePath);
+          }
+        }
+      } finally {
+        activePath.delete(obj);
+      }
+      return;
+    }
+
+    throw new DecisionDNAValidationError(
+      path,
+      "JSON-safe value",
+      t,
+      `metadata の ${path} に不正な型の値 (${t}) が含まれています。`
+    );
+  }
+
+  /**
+   * JSON-Safe メタデータの再帰的ディープクローン
+   */
+  private static deepCloneMetadata<T>(value: T): T {
+    if (value === null || typeof value !== "object") {
+      return value;
+    }
+    if (Array.isArray(value)) {
+      return value.map((item) => this.deepCloneMetadata(item)) as unknown as T;
+    }
+    const result: Record<string, any> = {};
+    for (const key of Object.keys(value)) {
+      const v = (value as Record<string, any>)[key];
+      if (v !== undefined) {
+        result[key] = this.deepCloneMetadata(v);
+      }
+    }
+    return result as T;
   }
 
   /**
@@ -116,7 +288,7 @@ export class DecisionDNACodec {
    * 全ての重みが 0 の基準 DecisionDNA (Zero DNA) を作成
    */
   public static createZeroDecisionDNA(metadata?: DecisionDNAMetadata): DecisionDNA {
-    return {
+    const dna: DecisionDNA = {
       dnaFormatVersion: DNA_FORMAT_VERSION,
       featureSchemaVersion: FEATURE_SCHEMA_VERSION,
       scoringModel: SCORING_MODEL_V1,
@@ -124,12 +296,16 @@ export class DecisionDNACodec {
       patternDimension: DNA_PATTERN_DIMENSION,
       patternWeights: new Array(DNA_PATTERN_DIMENSION).fill(0),
       contextPatternWeights: new Array(DNA_INTERACTION_DIMENSION).fill(0),
-      metadata: metadata ? { ...metadata } : undefined,
+      metadata: metadata ? this.deepCloneMetadata(metadata) : undefined,
     };
+    if (metadata) {
+      this.validate(dna);
+    }
+    return dna;
   }
 
   /**
-   * DecisionDNA の完全なディープクローンを作成 (外部の配列改変から保護)
+   * DecisionDNA の完全なディープクローンを作成 (外部の配列・オブジェクト改変から保護)
    */
   public static clone(dna: Readonly<DecisionDNA>): DecisionDNA {
     this.validate(dna);
@@ -141,7 +317,7 @@ export class DecisionDNACodec {
       patternDimension: dna.patternDimension,
       patternWeights: [...dna.patternWeights],
       contextPatternWeights: [...dna.contextPatternWeights],
-      metadata: dna.metadata ? { ...dna.metadata } : undefined,
+      metadata: dna.metadata ? this.deepCloneMetadata(dna.metadata) : undefined,
     };
   }
 }

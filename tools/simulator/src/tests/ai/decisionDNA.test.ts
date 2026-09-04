@@ -273,4 +273,181 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       expect(() => GenomeScorer.score(features, dna)).toThrow(DecisionDNAExecutionError);
     });
   });
+
+  describe("AC. Metadata JSON Artifact Contract & Deep Isolation (Phase 3.1.1)", () => {
+    it("1. valid な nested metadata が正常に validate されること (Section V 準拠)", () => {
+      const validMetadata = {
+        id: "dna-001",
+        name: "Genome A",
+        generation: 3,
+        fitness: 0.75,
+        tags: ["baseline", "test"],
+        experiment: {
+          seed: 42,
+          active: true,
+          note: null,
+        },
+      };
+
+      const dna = DecisionDNACodec.createZeroDecisionDNA(validMetadata as any);
+      expect(() => DecisionDNACodec.validate(dna)).not.toThrow();
+      expect(dna.metadata?.id).toBe("dna-001");
+      expect(dna.metadata?.fitness).toBe(0.75);
+    });
+
+    it("2. nested metadata を含む DNA の JSON シリアライズ / デシリアライズ round-trip で deepEqual になること", () => {
+      const dna = DecisionDNACodec.createZeroDecisionDNA({
+        id: "dna-nested",
+        generation: 5,
+        experiment: {
+          tags: ["alpha", "beta"],
+          params: { learningRate: 0.01, active: true, score: null },
+        },
+      } as any);
+
+      const json = DecisionDNACodec.serialize(dna);
+      const deserialized = DecisionDNACodec.deserialize(json);
+
+      expect(deserialized).toEqual(dna);
+      expect((deserialized.metadata as any).experiment.params.learningRate).toBe(0.01);
+    });
+
+    it("3. nested metadata のディープクローンで参照共有が完全に残らないこと (Clone Isolation)", () => {
+      const original = DecisionDNACodec.createZeroDecisionDNA({
+        experiment: {
+          tags: ["baseline", "v1"],
+          params: { alpha: 0.5 },
+        },
+      } as any);
+
+      const cloned = DecisionDNACodec.clone(original);
+
+      // clone 側の配列・オブジェクトを変更
+      (cloned.metadata as any).experiment.tags.push("v2");
+      (cloned.metadata as any).experiment.tags[0] = "mutated";
+      (cloned.metadata as any).experiment.params.alpha = 0.99;
+      (cloned.metadata as any).experiment.params.newField = "added";
+
+      // original は一切影響を受けないこと
+      expect((original.metadata as any).experiment.tags).toEqual(["baseline", "v1"]);
+      expect((original.metadata as any).experiment.params).toEqual({ alpha: 0.5 });
+    });
+
+    it("4. metadata 内の不正な型を厳格に reject すること (Section U: 10条件 + α)", () => {
+      const base = DecisionDNACodec.createZeroDecisionDNA();
+
+      // 1. NaN
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: NaN } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 2. Infinity
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: Infinity } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 3. -Infinity
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: -Infinity } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 4. 1n (BigInt)
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: 1n as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 5. () => {} (function)
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: (() => {}) as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 6. Symbol("x")
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: Symbol("x") as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 7. new Date()
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: new Date() as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 8. new Map()
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: new Map() as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 9. new Set()
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: new Set() as any } })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 10. cyclic metadata (循環参照)
+      const cyclic: any = { a: 1 };
+      cyclic.self = cyclic;
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: cyclic })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 11. nested cyclic metadata
+      const parent: any = { child: {} };
+      parent.child.back = parent;
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: parent })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 12. undefined 値 (プロパティ値としての undefined は拒絶)
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { foo: undefined } as any })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 13. RegExp
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: { regex: /test/ } as any })
+      ).toThrow(DecisionDNAValidationError);
+
+      // 14. Custom class instance
+      class CustomMeta {
+        name = "custom";
+      }
+      expect(() =>
+        DecisionDNACodec.validate({ ...base, metadata: new CustomMeta() as any })
+      ).toThrow(DecisionDNAValidationError);
+    });
+
+    it("5. validate が成功した任意の DecisionDNA は serialize が必ず成功すること", () => {
+      const dna = DecisionDNACodec.createZeroDecisionDNA({
+        id: "valid-serialized",
+        tags: ["a", "b", "c"],
+        nested: { count: 10, valid: true, empty: null },
+      } as any);
+
+      expect(() => DecisionDNACodec.validate(dna)).not.toThrow();
+      expect(() => {
+        const json = DecisionDNACodec.serialize(dna);
+        expect(typeof json).toBe("string");
+      }).not.toThrow();
+    });
+
+    it("6. metadata を変更・追加しても GenomeScorer のスコア計算結果は 100% 不変であること", () => {
+      const baseDna = DecisionDNACodec.createZeroDecisionDNA();
+      const metaDna = DecisionDNACodec.createZeroDecisionDNA({
+        id: "meta-test",
+        name: "Complex Meta",
+        generation: 99,
+        fitness: 0.999,
+        nested: { tags: ["t1", "t2"] },
+      } as any);
+
+      // 双方に同じ重みを設定
+      const passIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_pass");
+      (baseDna.patternWeights as number[])[passIdx] = 1.23;
+      (metaDna.patternWeights as number[])[passIdx] = 1.23;
+
+      const features = createSyntheticFeatures({ self_life_count: 10 });
+      const scoredBase = GenomeScorer.score(features, baseDna);
+      const scoredMeta = GenomeScorer.score(features, metaDna);
+
+      expect(scoredBase).toEqual(scoredMeta);
+    });
+  });
 });

@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-3.1-20260905-0500`
-更新日時: 2026-09-05 05:00 JST
+作業ID: `BP-SIM-AI-3.1.1-20260905-0556`
+更新日時: 2026-09-05 05:56 JST
 
 ---
 
@@ -37,6 +37,9 @@
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
 | **Decision DNA v1 format** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 1482次元 (Context 25, Pattern 57, Inter 1425) |
+| **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
+| **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
+| **Deep Clone Isolation** | **IMPLEMENTED** | `DecisionDNACodec.clone`, `GenomePolicy` | `src/tests/ai/decisionDNA.test.ts`, `src/tests/ai/genomePolicy.test.ts` | nested metadata / arrays の参照共有完全排除 |
 | **Genome Policy** | **IMPLEMENTED** | `src/engine/ai/GenomePolicy.ts`, `src/engine/ai/GenomeScorer.ts` | `src/tests/ai/genomePolicy.test.ts` | 決定論的 Argmax + 最小 patternRef タイブレーク |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
 | **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
@@ -281,7 +284,25 @@ DecisionResponse (Action / Pass / EffectSelection)
    - 特定の Action タイプやルールの決め打ちを行わず、`DecisionFeatureEncoder` が生成する汎用特徴量に対して重み付けを行うため、ルール拡張（Master / Extra）に対しても同一 DNA 構造で完全動作。
 5. **DNA Artifact 保存と分離契約**:
    - 1482 重みは DNA 単体 JSON アーティファクトとして保存・管理され、Match Log や `PolicyDescriptor` の内部にはシリアライズされない。
-   - `PolicyDescriptor.metadata` には `dnaId`, `dnaName`, `generation`, `fitness` などの軽量メタデータのみを保持し、Canonical Match Log や State Hash の肥大化を防止。
+   - `PolicyDescriptor.metadata` には `dnaFormatVersion`, `featureSchemaVersion`, `scoringModel`, `dnaId`, `dnaName` などの軽量メタデータのみを保持し、Canonical Match Log や State Hash の肥大化を防止。
+
+### DNA JSON Artifact Contract & Validation (Phase 3.1.1)
+1. **JSON-Safe Metadata Contract**:
+   - `DecisionDNAMetadata` に含まれるすべてのプロパティ値は厳格に `JSONValue`（`string`, 有限 `number`, `boolean`, `null`, `readonly JSONValue[]`, プレーンオブジェクト `{ [key: string]: JSONValue }`）に限定されます。
+   - `number` 型は `Number.isFinite(v) === true` を必須とし、`NaN`, `Infinity`, `-Infinity` は即座に `DecisionDNAValidationError` として拒絶されます（JSON シリアライズ時の `null` 縮退を防止）。
+   - `BigInt`, `function`, `Symbol`, `Date`, `RegExp`, `Map`, `Set`, カスタムクラスインスタンス、および循環参照（cyclic reference）は厳格に禁止・拒絶されます。
+2. **Recursive Validation & Cycle Detection**:
+   - `DecisionDNACodec.validateMetadata()` により、ネストされた配列・オブジェクトを再帰的に検証します。
+   - 探索パス集合（active traversal path）を用いたサイクル検知により、循環参照を含む構造に対しても無限再帰やスタックオーバーフローを起こさず即座に例外をスローします。
+3. **Deep Clone Isolation**:
+   - `DecisionDNACodec.clone()` は、重み配列だけでなく `metadata` 内のネストされた配列およびオブジェクトを再帰的にディープクローンします。
+   - クローンされた DNA や `GenomePolicy.getDNA()` の戻り値、または Policy 生成後の呼び出し元 DNA のプロパティを変更しても、元の DNA および Policy 内部の DNA との間に参照共有は一切残りません。
+4. **Metadata Scoring Independence**:
+   - `metadata` は管理・記録（世代、適応度、タグ、実験パラメータ等）のための純粋なメタ情報であり、`GenomeScorer.score` および `GenomePolicy.choose` の行動選択には一切関与しません。
+   - `metadata` の有無や内容変更によって、出力されるスコアベクトルおよび `selectedPatternRef` は 100% 不変です。
+5. **シミュレータ実装言語の原則**:
+   - BlackPoker Simulator の実装、テスト、補助スクリプト、検証ロジック、データ変換は原則として **TypeScript / Node.js** へ統一します。
+   - ユーザーからの明示的な承認がない限り、Python（`.py` スクリプト、仮想環境、pytest 等）は一切使用・導入しません。
 
 ---
 
