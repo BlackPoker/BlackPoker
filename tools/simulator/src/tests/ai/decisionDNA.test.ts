@@ -450,4 +450,145 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       expect(scoredBase).toEqual(scoredMeta);
     });
   });
+
+  describe("AD. Decision DNA Factory Entry Validation (Phase 3.1.2)", () => {
+    it("1. Factory 入口 (createZeroDecisionDNA) に valid nested metadata を渡して正常生成できること", () => {
+      const validMetadata = {
+        id: "dna-factory-001",
+        name: "Factory Agent",
+        generation: 4,
+        fitness: 0.82,
+        tags: ["factory", "v1"],
+        experiment: {
+          seed: 123,
+          active: true,
+          note: null,
+        },
+      };
+
+      const dna = DecisionDNACodec.createZeroDecisionDNA(validMetadata as any);
+      expect(dna.metadata?.id).toBe("dna-factory-001");
+      expect(dna.metadata?.fitness).toBe(0.82);
+      expect((dna.metadata as any).experiment.seed).toBe(123);
+      expect(() => DecisionDNACodec.validate(dna)).not.toThrow();
+    });
+
+    it("2. Factory 生成後に caller 側の metadata を変更しても生成済み DNA が完全に不変であること (Factory Clone Isolation)", () => {
+      const metadata = {
+        tags: ["init"],
+        experiment: {
+          params: { lr: 0.05 },
+        },
+      };
+
+      const dna = DecisionDNACodec.createZeroDecisionDNA(metadata as any);
+
+      // caller 側変更
+      metadata.tags.push("mutated");
+      metadata.experiment.params.lr = 0.99;
+
+      expect((dna.metadata as any).tags).toEqual(["init"]);
+      expect((dna.metadata as any).experiment.params.lr).toBe(0.05);
+    });
+
+    it("3. Factory 入口に直接 null を渡した場合、DecisionDNAValidationError として安全に reject すること", () => {
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(null as any)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+
+    it("4. Factory 入口に直接 array を渡した場合、DecisionDNAValidationError として安全に reject すること", () => {
+      expect(() => DecisionDNACodec.createZeroDecisionDNA([] as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(["tag1", "tag2"] as any)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+
+    it("5. Factory 入口に非有限数 (NaN, Infinity, -Infinity) を含む metadata を渡した場合に reject すること", () => {
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: NaN } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: Infinity } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: -Infinity } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+
+    it("6. Factory 入口に BigInt, function, Symbol を含む metadata を渡した場合に reject すること", () => {
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: 1n as any } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: (() => {}) as any } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ foo: Symbol("test") as any } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+
+    it("7. Factory 入口に Date, RegExp, Map, Set, custom class instance を直接渡した場合、{} へ変換せず元入力で reject すること", () => {
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(new Date() as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(/regex/ as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(new Map() as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(new Set() as any)).toThrow(
+        DecisionDNAValidationError
+      );
+
+      class CustomClass {
+        prop = "val";
+      }
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(new CustomClass() as any)).toThrow(
+        DecisionDNAValidationError
+      );
+
+      // object のプロパティ値として含まれている場合も同様に reject
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ d: new Date() } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ m: new Map() } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ s: new Set() } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ r: /pattern/ } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+      expect(() => DecisionDNACodec.createZeroDecisionDNA({ c: new CustomClass() } as any)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+
+    it("8. Factory 入口に explicit undefined property ({ foo: undefined }) を渡した場合に reject すること", () => {
+      expect(() =>
+        DecisionDNACodec.createZeroDecisionDNA({ foo: undefined } as any)
+      ).toThrow(DecisionDNAValidationError);
+    });
+
+    it("9. Factory 入口に cyclic metadata を渡した場合、RangeError や stack overflow にならず DecisionDNAValidationError として安全に reject すること", () => {
+      const cyclic: any = { name: "cycle" };
+      cyclic.self = cyclic;
+
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(cyclic)).toThrow(
+        DecisionDNAValidationError
+      );
+
+      // ネストされた循環参照
+      const parent: any = { child: {} };
+      parent.child.parent = parent;
+      expect(() => DecisionDNACodec.createZeroDecisionDNA(parent)).toThrow(
+        DecisionDNAValidationError
+      );
+    });
+  });
 });

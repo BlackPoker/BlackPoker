@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-3.1.1-20260905-0556`
-更新日時: 2026-09-05 05:56 JST
+作業ID: `BP-SIM-AI-3.1.2-20260905-0638`
+更新日時: 2026-09-05 06:38 JST
 
 ---
 
@@ -39,6 +39,7 @@
 | **Decision DNA v1 format** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 1482次元 (Context 25, Pattern 57, Inter 1425) |
 | **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
 | **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
+| **Factory Entry Validation** | **IMPLEMENTED** | `DecisionDNACodec.createZeroDecisionDNA` | `src/tests/ai/decisionDNA.test.ts` | clone 前先行 validation、truthy 判定廃止、null/array/cycle 安全拒絶 |
 | **Deep Clone Isolation** | **IMPLEMENTED** | `DecisionDNACodec.clone`, `GenomePolicy` | `src/tests/ai/decisionDNA.test.ts`, `src/tests/ai/genomePolicy.test.ts` | nested metadata / arrays の参照共有完全排除 |
 | **Genome Policy** | **IMPLEMENTED** | `src/engine/ai/GenomePolicy.ts`, `src/engine/ai/GenomeScorer.ts` | `src/tests/ai/genomePolicy.test.ts` | 決定論的 Argmax + 最小 patternRef タイブレーク |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
@@ -300,7 +301,15 @@ DecisionResponse (Action / Pass / EffectSelection)
 4. **Metadata Scoring Independence**:
    - `metadata` は管理・記録（世代、適応度、タグ、実験パラメータ等）のための純粋なメタ情報であり、`GenomeScorer.score` および `GenomePolicy.choose` の行動選択には一切関与しません。
    - `metadata` の有無や内容変更によって、出力されるスコアベクトルおよび `selectedPatternRef` は 100% 不変です。
-5. **シミュレータ実装言語の原則**:
+### Factory Entry Validation (Phase 3.1.2)
+1. **先行 Validation 順序の強制**:
+   - `DecisionDNACodec.createZeroDecisionDNA(metadata)` は、`metadata !== undefined` の場合、ディープクローン処理 (`deepCloneMetadata`) を呼び出す前に必ず `validateMetadata(metadata)` を先行実行します。
+   - 不正な型情報（`Date`, `Map`, `Set`, `RegExp`, カスタムクラスインスタンス等）がクローン処理でプレーンオブジェクト `{}` 等へ変形・偽装されてバリデーションを通過する脆弱性を完全に排除しました。
+2. **Cycle Safety & Runtime Protection**:
+   - 循環参照（cyclic metadata）が公開 Factory 入口に渡された場合でも、クローンによる無限再帰やスタックオーバーフロー (`RangeError: Maximum call stack size exceeded`) を起こさず、閉路検知により即座に `DecisionDNAValidationError` として安全に拒絶されます。
+3. **厳格な型境界**:
+   - `if (metadata)` のような truthy 判定を廃止し、`if (metadata !== undefined)` による厳格判定を採用。`null` や `array` などの不正値が渡された場合も、サイレントに `undefined` 扱いすることなく確実に `DecisionDNAValidationError` として拒絶されます。
+4. **シミュレータ実装言語の原則**:
    - BlackPoker Simulator の実装、テスト、補助スクリプト、検証ロジック、データ変換は原則として **TypeScript / Node.js** へ統一します。
    - ユーザーからの明示的な承認がない限り、Python（`.py` スクリプト、仮想環境、pytest 等）は一切使用・導入しません。
 

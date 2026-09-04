@@ -286,9 +286,16 @@ export class DecisionDNACodec {
 
   /**
    * 全ての重みが 0 の基準 DecisionDNA (Zero DNA) を作成
+   * 公開 Factory 入口として、metadata が渡された場合は clone 前に必ず validation を実行
    */
   public static createZeroDecisionDNA(metadata?: DecisionDNAMetadata): DecisionDNA {
-    const dna: DecisionDNA = {
+    let clonedMetadata: DecisionDNAMetadata | undefined = undefined;
+    if (metadata !== undefined) {
+      this.validateMetadata(metadata);
+      clonedMetadata = this.deepCloneMetadata(metadata);
+    }
+
+    return {
       dnaFormatVersion: DNA_FORMAT_VERSION,
       featureSchemaVersion: FEATURE_SCHEMA_VERSION,
       scoringModel: SCORING_MODEL_V1,
@@ -296,12 +303,8 @@ export class DecisionDNACodec {
       patternDimension: DNA_PATTERN_DIMENSION,
       patternWeights: new Array(DNA_PATTERN_DIMENSION).fill(0),
       contextPatternWeights: new Array(DNA_INTERACTION_DIMENSION).fill(0),
-      metadata: metadata ? this.deepCloneMetadata(metadata) : undefined,
+      metadata: clonedMetadata,
     };
-    if (metadata) {
-      this.validate(dna);
-    }
-    return dna;
   }
 
   /**
@@ -317,7 +320,7 @@ export class DecisionDNACodec {
       patternDimension: dna.patternDimension,
       patternWeights: [...dna.patternWeights],
       contextPatternWeights: [...dna.contextPatternWeights],
-      metadata: dna.metadata ? this.deepCloneMetadata(dna.metadata) : undefined,
+      metadata: dna.metadata !== undefined ? this.deepCloneMetadata(dna.metadata) : undefined,
     };
   }
 }
