@@ -7,18 +7,81 @@ import {
   BatchMatchContext,
   BatchMatchPlan,
   BatchMatchResult,
+  BatchMatchRuntimeMetrics,
   BatchMatchStatus,
+  BatchSimulationConfigurationError,
   BatchSimulationOptions,
   BatchSimulationResult,
+  BatchSimulationRuntimeMetrics,
   BatchSimulationSummary,
 } from "../../domain/simulation/BatchSimulationTypes";
 
 /**
  * 複数の試合を決定論的・安全・独立に実行するバッチシミュレーションランナー。
  * 各試合で fresh な GameSession / DecisionPolicy を生成し、エラー発生時も分離（Failure Isolation）してバッチを継続します。
+ *
+ * 【ファクトリ契約】
+ * sessionFactory および policyFactory は、各試合（BatchMatchContext）ごとに
+ * 完全に独立した fresh なインスタンス（別オブジェクト参照）を生成して返す必要があります。
+ *
+ * 【Master + Extra 互換原則】
+ * 本ランナーは特定のアクションIDやコンポーネント定義（action.attack 等）を直接解釈しません。
+ * RulePackage, GameSession, SimulationRunner, DecisionPolicy の抽象境界のみを利用するため、
+ * 既存DSL/Coreで表現可能なアクション・コンポーネント追加に伴うBatchRunnerの改修は原則不要です。
  */
 export class BatchSimulationRunner {
   public static readonly VERSION = BATCH_SIMULATION_RESULT_VERSION;
+
+  /**
+   * バッチ実行オプションを検証 (開始前 fail-fast)
+   */
+  public static validateOptions(options: BatchSimulationOptions): void {
+    if (!options || typeof options !== "object") {
+      throw new BatchSimulationConfigurationError("Batch configuration error: options must be a valid object.");
+    }
+
+    if (
+      typeof options.matchCount !== "number" ||
+      !Number.isFinite(options.matchCount) ||
+      !Number.isInteger(options.matchCount) ||
+      options.matchCount < 1
+    ) {
+      throw new BatchSimulationConfigurationError(
+        `Batch configuration error: matchCount must be a finite positive integer (>= 1). Received: ${options.matchCount}`
+      );
+    }
+
+    if (typeof options.baseSeed !== "number" || !Number.isFinite(options.baseSeed)) {
+      throw new BatchSimulationConfigurationError(
+        `Batch configuration error: baseSeed must be a finite number. Received: ${options.baseSeed}`
+      );
+    }
+
+    if (options.maxDecisionsPerMatch !== undefined) {
+      if (
+        typeof options.maxDecisionsPerMatch !== "number" ||
+        !Number.isFinite(options.maxDecisionsPerMatch) ||
+        !Number.isInteger(options.maxDecisionsPerMatch) ||
+        options.maxDecisionsPerMatch < 1
+      ) {
+        throw new BatchSimulationConfigurationError(
+          `Batch configuration error: maxDecisionsPerMatch must be a finite positive integer (>= 1). Received: ${options.maxDecisionsPerMatch}`
+        );
+      }
+    }
+
+    if (typeof options.sessionFactory !== "function") {
+      throw new BatchSimulationConfigurationError(
+        "Batch configuration error: sessionFactory must be a function."
+      );
+    }
+
+    if (typeof options.policyFactory !== "function") {
+      throw new BatchSimulationConfigurationError(
+        "Batch configuration error: policyFactory must be a function."
+      );
+    }
+  }
 
   /**
    * 32-bit FNV-1a を用いて baseSeed, matchIndex, streamKey から純粋関数で決定論的シードを導出。
@@ -68,13 +131,17 @@ export class BatchSimulationRunner {
    * 複数の試合を決定論的・安全・独立に実行
    */
   public static run(options: BatchSimulationOptions): BatchSimulationResult {
+    // 0. 開始前検証 (fail-fast)
+    this.validateOptions(options);
+
     const startTime = Date.now();
-    const matchCount = Math.max(0, Math.floor(options.matchCount));
+    const matchCount = options.matchCount;
     const baseSeed = options.baseSeed;
     const maxDecisions = options.maxDecisionsPerMatch ?? 500;
     const stopOnError = options.stopOnError ?? false;
 
     const matches: BatchMatchResult[] = [];
+    const matchMetrics: BatchMatchRuntimeMetrics[] = [];
     const failures: BatchFailureRecord[] = [];
 
     for (let i = 0; i < matchCount; i++) {
@@ -141,6 +208,10 @@ export class BatchSimulationRunner {
       }
 
       const matchDuration = Date.now() - matchStartTime;
+      matchMetrics.push({
+        matchIndex: i,
+        durationMs: matchDuration,
+      });
 
       let matchResult: BatchMatchResult;
       if (failureRecord) {
@@ -154,7 +225,6 @@ export class BatchSimulationRunner {
           matchSeed: plan.matchSeed,
           playerSeeds: plan.playerSeeds,
           failure: failureRecord,
-          durationMs: matchDuration,
         };
       } else if (simResult) {
         const status: BatchMatchStatus = simResult.completed ? "COMPLETED" : "INCOMPLETE";
@@ -170,7 +240,6 @@ export class BatchSimulationRunner {
           finalStateHash: simResult.finalStateHash,
           matchSeed: plan.matchSeed,
           playerSeeds: plan.playerSeeds,
-          durationMs: matchDuration,
         };
       } else {
         // フォールバック
@@ -183,7 +252,6 @@ export class BatchSimulationRunner {
           turnCount: 0,
           matchSeed: plan.matchSeed,
           playerSeeds: plan.playerSeeds,
-          durationMs: matchDuration,
         };
       }
 
@@ -202,7 +270,11 @@ export class BatchSimulationRunner {
     }
 
     const totalExecutionTimeMs = Date.now() - startTime;
-    const summary = this.calculateSummary(matches, totalExecutionTimeMs);
+    const summary = this.calculateSummary(matches);
+    const runtimeMetrics: BatchSimulationRuntimeMetrics = {
+      totalExecutionTimeMs,
+      matchMetrics,
+    };
 
     return {
       batchResultVersion: this.VERSION,
@@ -211,16 +283,14 @@ export class BatchSimulationRunner {
       matches,
       summary,
       failures,
+      runtimeMetrics,
     };
   }
 
   /**
-   * 統計サマリーを算出
+   * 論理統計サマリーを算出
    */
-  public static calculateSummary(
-    matches: readonly BatchMatchResult[],
-    totalExecutionTimeMs: number
-  ): BatchSimulationSummary {
+  public static calculateSummary(matches: readonly BatchMatchResult[]): BatchSimulationSummary {
     let completedCount = 0;
     let incompleteCount = 0;
     let failedCount = 0;
@@ -269,7 +339,6 @@ export class BatchSimulationRunner {
       winRates,
       averageDecisionsPerCompletedMatch,
       averageTurnsPerCompletedMatch,
-      totalExecutionTimeMs,
     };
   }
 }

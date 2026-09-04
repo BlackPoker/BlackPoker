@@ -8,16 +8,18 @@ import { GameSession } from "../../engine/session/GameSession";
 import { createCoreBattlePresetState } from "../../engine/session/playtest/createCoreBattlePlaytest";
 import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
 import { BatchSimulationRunner } from "../../engine/simulation/BatchSimulationRunner";
-import { RandomPolicy } from "../../engine/simulation/DecisionPolicy";
+import { DecisionPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy";
 import { SeededRandom } from "../../engine/random/RandomSource";
 import { SimulationRunner } from "../../engine/simulation/SimulationRunner";
-import { StateHasher } from "../../engine/simulation/StateHasher";
-import { BATCH_SIMULATION_RESULT_VERSION } from "../../domain/simulation/BatchSimulationTypes";
+import {
+  BATCH_SIMULATION_RESULT_VERSION,
+  BatchSimulationConfigurationError,
+} from "../../domain/simulation/BatchSimulationTypes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
+describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3.1 最終補修)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -61,6 +63,8 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
       result.summary.completedCount + result.summary.incompleteCount + result.summary.failedCount
     ).toBe(10);
     expect(result.failures).toHaveLength(0);
+    expect(result.runtimeMetrics).toBeDefined();
+    expect(result.runtimeMetrics?.totalExecutionTimeMs).toBeGreaterThan(0);
 
     for (let i = 0; i < 10; i++) {
       const m = result.matches[i];
@@ -73,7 +77,49 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     }
   });
 
-  it("B. 同一の baseSeed でバッチを実行した場合、全試合の勝敗・ターン数・State Hash が 100% 一致すること", () => {
+  it("B. 各試合で生成される GameSession, p1 Policy, p2 Policy が独立した別インスタンスであり、同一試合内でも p1 !== p2 であること", () => {
+    const sessionInstances: GameSession[] = [];
+    const p1Instances: DecisionPolicy[] = [];
+    const p2Instances: DecisionPolicy[] = [];
+    const matchCount = 4;
+
+    BatchSimulationRunner.run({
+      matchCount,
+      baseSeed: 100,
+      maxDecisionsPerMatch: 500,
+      sessionFactory: (_ctx) => {
+        const rawState = createCoreBattlePresetState();
+        const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+        const session = new GameSession(setupResult.state, rulePackage);
+        sessionInstances.push(session);
+        return session;
+      },
+      policyFactory: (ctx) => {
+        const p1 = new RandomPolicy(new SeededRandom(ctx.playerSeeds.p1), "RandomAI-P1");
+        const p2 = new RandomPolicy(new SeededRandom(ctx.playerSeeds.p2), "RandomAI-P2");
+        p1Instances.push(p1);
+        p2Instances.push(p2);
+        return { p1, p2 };
+      },
+    });
+
+    // 1. 生成回数の検証
+    expect(sessionInstances).toHaveLength(matchCount);
+    expect(p1Instances).toHaveLength(matchCount);
+    expect(p2Instances).toHaveLength(matchCount);
+
+    // 2. オブジェクト同一性 (参照) の独立性検証
+    expect(new Set(sessionInstances).size).toBe(matchCount);
+    expect(new Set(p1Instances).size).toBe(matchCount);
+    expect(new Set(p2Instances).size).toBe(matchCount);
+
+    // 3. 同一試合内の p1 / p2 参照独立性検証
+    for (let i = 0; i < matchCount; i++) {
+      expect(p1Instances[i]).not.toBe(p2Instances[i]);
+    }
+  });
+
+  it("C. 同一の baseSeed でバッチを実行した場合、Logical Batch Result の JSON 文字列が 100% 完全一致すること", () => {
     const resultA = BatchSimulationRunner.run({
       matchCount: 5,
       baseSeed: 9999,
@@ -90,27 +136,14 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
       policyFactory: createTestPolicyFactory(),
     });
 
-    expect(resultA.matches).toHaveLength(5);
-    expect(resultB.matches).toHaveLength(5);
+    // runtimeMetrics を除外した論理結果の完全一致を検証
+    const { runtimeMetrics: _rA, ...logicalA } = resultA;
+    const { runtimeMetrics: _rB, ...logicalB } = resultB;
 
-    for (let i = 0; i < 5; i++) {
-      const mA = resultA.matches[i];
-      const mB = resultB.matches[i];
-      expect(mA.status).toBe(mB.status);
-      expect(mA.winner).toBe(mB.winner);
-      expect(mA.turnCount).toBe(mB.turnCount);
-      expect(mA.totalDecisions).toBe(mB.totalDecisions);
-      expect(mA.finalStateHash).toBe(mB.finalStateHash);
-      expect(mA.matchSeed).toBe(mB.matchSeed);
-      expect(mA.playerSeeds).toEqual(mB.playerSeeds);
-    }
-
-    const { totalExecutionTimeMs: _tA, ...summaryA } = resultA.summary;
-    const { totalExecutionTimeMs: _tB, ...summaryB } = resultB.summary;
-    expect(summaryA).toEqual(summaryB);
+    expect(JSON.stringify(logicalA)).toBe(JSON.stringify(logicalB));
   });
 
-  it("C. 異なる baseSeed で実行した場合、異なる試合結果が生成されること", () => {
+  it("D. 異なる baseSeed で実行した場合、異なる試合結果が生成されること", () => {
     const resultA = BatchSimulationRunner.run({
       matchCount: 5,
       baseSeed: 1111,
@@ -132,7 +165,7 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     expect(hashesA).not.toEqual(hashesB);
   });
 
-  it("D. Match Plan とシード導出が純粋関数であり、実行順序に依存しないこと", () => {
+  it("E. Match Plan とシード導出が純粋関数であり、実行順序に依存しないこと", () => {
     const planDirect = BatchSimulationRunner.planMatch(8888, 7);
     const seedDirectP1 = BatchSimulationRunner.deriveSeed(8888, 7, "p1");
     const seedDirectP2 = BatchSimulationRunner.deriveSeed(8888, 7, "p2");
@@ -145,7 +178,7 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     expect(planDirect.matchSeed).toBe(seedDirectMatch);
   });
 
-  it("E. バッチ内の特定の1試合を単独実行した場合、バッチ実行時と完全に同一の State Hash / ログが再現されること", () => {
+  it("F. バッチ内の特定の1試合を単独実行した場合、バッチ実行時と完全に同一の State Hash / ログが再現されること", () => {
     const baseSeed = 54321;
     const targetMatchIndex = 3;
 
@@ -177,34 +210,6 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     expect(batchTargetMatch.turnCount).toBe(singleResult.turnCount);
     expect(batchTargetMatch.totalDecisions).toBe(singleResult.totalDecisions);
     expect(batchTargetMatch.finalStateHash).toBe(singleResult.finalStateHash);
-  });
-
-  it("F. 各試合で fresh な GameSession と Policy が生成され、試合間で状態が汚染されないこと", () => {
-    let sessionCount = 0;
-    let policyCount = 0;
-
-    BatchSimulationRunner.run({
-      matchCount: 3,
-      baseSeed: 100,
-      maxDecisionsPerMatch: 500,
-      sessionFactory: (ctx) => {
-        sessionCount++;
-        expect(ctx.matchIndex).toBeDefined();
-        const rawState = createCoreBattlePresetState();
-        const setupResult = MatchSetupCoordinator.setupMatch(rawState);
-        return new GameSession(setupResult.state, rulePackage);
-      },
-      policyFactory: (ctx) => {
-        policyCount++;
-        return {
-          p1: new RandomPolicy(new SeededRandom(ctx.playerSeeds.p1), "RandomAI-P1"),
-          p2: new RandomPolicy(new SeededRandom(ctx.playerSeeds.p2), "RandomAI-P2"),
-        };
-      },
-    });
-
-    expect(sessionCount).toBe(3);
-    expect(policyCount).toBe(3);
   });
 
   it("G. 単一試合で例外が発生しても他の試合が隔離（Failure Isolation）され、バッチ全体が完走すること", () => {
@@ -249,14 +254,17 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     expect(result.failures[0].matchIndex).toBe(errorMatchIndex);
   });
 
-  it("H. 失敗した試合の記録 (BatchFailureRecord) から単独でエラー原因を再現できること", () => {
+  it("H. FailureRecordが単独再現に必要なMatch Plan情報を保持し、planMatchから同一プランを再構築できること", () => {
+    const baseSeed = 3333;
+    const errorMatchIndex = 1;
+
     const result = BatchSimulationRunner.run({
       matchCount: 3,
-      baseSeed: 3333,
+      baseSeed,
       maxDecisionsPerMatch: 500,
       sessionFactory: createTestSessionFactory(),
       policyFactory: (ctx) => {
-        if (ctx.matchIndex === 1) {
+        if (ctx.matchIndex === errorMatchIndex) {
           throw new TypeError("Policy initialization error");
         }
         return {
@@ -268,12 +276,16 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
 
     expect(result.failures).toHaveLength(1);
     const failure = result.failures[0];
-    expect(failure.matchIndex).toBe(1);
+    expect(failure.matchIndex).toBe(errorMatchIndex);
     expect(failure.errorName).toBe("TypeError");
     expect(failure.errorMessage).toBe("Policy initialization error");
     expect(failure.phase).toBe("POLICY_FACTORY");
-    expect(failure.playerSeeds).toBeDefined();
-    expect(failure.matchSeed).toBeDefined();
+
+    // Failure Record の情報から Match Plan を再構築
+    const reconstructedPlan = BatchSimulationRunner.planMatch(failure.baseSeed, failure.matchIndex);
+    expect(reconstructedPlan.matchId).toBe(failure.matchId);
+    expect(reconstructedPlan.matchSeed).toBe(failure.matchSeed);
+    expect(reconstructedPlan.playerSeeds).toEqual(failure.playerSeeds);
   });
 
   it("I. maxDecisions 到達時は INCOMPLETE となり、FAILED (例外) と明確に区別されること", () => {
@@ -297,7 +309,63 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     }
   });
 
-  it("J. コンパクトな結果構造（メモリ保護）であり、生 GameState や DecisionTrace を保持しないこと", () => {
+  it("J. 設定不備 (matchCount <= 0, 不正 maxDecisions, 不正 baseSeed) を開始前 fail-fast してファクトリを呼ばないこと", () => {
+    let factoryCallCount = 0;
+    const trackingSessionFactory = () => {
+      factoryCallCount++;
+      return createTestSessionFactory()();
+    };
+    const trackingPolicyFactory = (ctx: any) => {
+      factoryCallCount++;
+      return createTestPolicyFactory()(ctx);
+    };
+
+    // 1. matchCount = 0
+    expect(() => {
+      BatchSimulationRunner.run({
+        matchCount: 0,
+        baseSeed: 42,
+        sessionFactory: trackingSessionFactory,
+        policyFactory: trackingPolicyFactory,
+      });
+    }).toThrow(BatchSimulationConfigurationError);
+
+    // 2. matchCount < 0
+    expect(() => {
+      BatchSimulationRunner.run({
+        matchCount: -5,
+        baseSeed: 42,
+        sessionFactory: trackingSessionFactory,
+        policyFactory: trackingPolicyFactory,
+      });
+    }).toThrow(BatchSimulationConfigurationError);
+
+    // 3. maxDecisionsPerMatch = 0
+    expect(() => {
+      BatchSimulationRunner.run({
+        matchCount: 5,
+        baseSeed: 42,
+        maxDecisionsPerMatch: 0,
+        sessionFactory: trackingSessionFactory,
+        policyFactory: trackingPolicyFactory,
+      });
+    }).toThrow(BatchSimulationConfigurationError);
+
+    // 4. baseSeed = NaN
+    expect(() => {
+      BatchSimulationRunner.run({
+        matchCount: 5,
+        baseSeed: NaN,
+        sessionFactory: trackingSessionFactory,
+        policyFactory: trackingPolicyFactory,
+      });
+    }).toThrow(BatchSimulationConfigurationError);
+
+    // 設定不備時はファクトリが一度も呼び出されていないことを確認
+    expect(factoryCallCount).toBe(0);
+  });
+
+  it("K. コンパクトな結果構造（メモリ保護）であり、生 GameState や DecisionTrace を保持しないこと", () => {
     const result = BatchSimulationRunner.run({
       matchCount: 3,
       baseSeed: 6666,
@@ -313,7 +381,7 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     }
   });
 
-  it("K. BatchSimulationResult が JSON-safe であり、シリアライズ / デシリアライズで情報損失がないこと", () => {
+  it("L. BatchSimulationResult が JSON-safe であり、シリアライズ / デシリアライズで情報損失がないこと", () => {
     const result = BatchSimulationRunner.run({
       matchCount: 3,
       baseSeed: 7777,
@@ -330,5 +398,6 @@ describe("Batch Simulation & Failure Isolation 基盤 (Phase 1.3)", () => {
     expect(parsed.summary).toEqual(result.summary);
     expect(parsed.matches).toHaveLength(3);
     expect(parsed.matches[0].finalStateHash).toBe(result.matches[0].finalStateHash);
+    expect(parsed.runtimeMetrics?.totalExecutionTimeMs).toBe(result.runtimeMetrics?.totalExecutionTimeMs);
   });
 });

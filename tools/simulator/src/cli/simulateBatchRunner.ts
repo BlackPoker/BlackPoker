@@ -14,11 +14,27 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
-  const matchCountArg = process.argv[2] ? parseInt(process.argv[2], 10) : 20;
-  const matchCount = isNaN(matchCountArg) || matchCountArg <= 0 ? 20 : matchCountArg;
+  let matchCount = 20;
+  if (process.argv[2] !== undefined) {
+    const raw = process.argv[2];
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
+      console.error(`[Error] 不正な matchCount 引数が指定されました: "${raw}" (1以上の整数を指定してください)`);
+      process.exit(1);
+    }
+    matchCount = parsed;
+  }
 
-  const baseSeedArg = process.argv[3] ? parseInt(process.argv[3], 10) : 42;
-  const baseSeed = isNaN(baseSeedArg) ? 42 : baseSeedArg;
+  let baseSeed = 42;
+  if (process.argv[3] !== undefined) {
+    const raw = process.argv[3];
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) {
+      console.error(`[Error] 不正な baseSeed 引数が指定されました: "${raw}" (有限の数値を指定してください)`);
+      process.exit(1);
+    }
+    baseSeed = parsed;
+  }
 
   console.log("================================================================================");
   console.log(`  BLACKPOKER BATCH SIMULATION (BaseSeed: ${baseSeed}, Matches: ${matchCount})`);
@@ -44,7 +60,11 @@ async function main() {
       };
     },
     onMatchCompleted: (match, progress) => {
-      if (progress.completedCount <= 5 || progress.completedCount % 5 === 0 || progress.completedCount === progress.totalCount) {
+      if (
+        progress.completedCount <= 5 ||
+        progress.completedCount % 5 === 0 ||
+        progress.completedCount === progress.totalCount
+      ) {
         const statusLabel = match.status.padEnd(10, " ");
         const winnerLabel = (match.winner ?? "None").padEnd(6, " ");
         const turnsLabel = `Turns: ${String(match.turnCount).padStart(2, " ")}`;
@@ -58,7 +78,7 @@ async function main() {
   });
 
   console.log("\n--------------------------------------------------------------------------------");
-  console.log("  BATCH SIMULATION SUMMARY");
+  console.log("  BATCH SIMULATION SUMMARY (Logical Results)");
   console.log("--------------------------------------------------------------------------------");
   console.log(`Batch Result Version: ${result.batchResultVersion}`);
   console.log(`State Hash Version:   ${StateHasher.VERSION}`);
@@ -72,13 +92,15 @@ async function main() {
   console.log(`Win Rates:            ${JSON.stringify(result.summary.winRates)}`);
   console.log(`Avg Decisions/Match:  ${result.summary.averageDecisionsPerCompletedMatch}`);
   console.log(`Avg Turns/Match:      ${result.summary.averageTurnsPerCompletedMatch}`);
-  console.log(`Total Execution Time: ${result.summary.totalExecutionTimeMs} ms`);
+  console.log(`Total Execution Time: ${result.runtimeMetrics?.totalExecutionTimeMs ?? "N/A"} ms (Runtime Metrics)`);
   console.log("================================================================================");
 
   if (result.failures.length > 0) {
     console.error(`\n[WARNING] ${result.failures.length} match(es) failed with exceptions:`);
     for (const f of result.failures) {
-      console.error(`  - Match #${f.matchIndex} (${f.matchId}) in phase ${f.phase}: ${f.errorName}: ${f.errorMessage}`);
+      console.error(
+        `  - Match #${f.matchIndex} (${f.matchId}) in phase ${f.phase}: ${f.errorName}: ${f.errorMessage}`
+      );
     }
   }
 }

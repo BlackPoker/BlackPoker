@@ -7,6 +7,16 @@ import { GameSession } from "../../engine/session/GameSession";
 export const BATCH_SIMULATION_RESULT_VERSION = 1;
 
 /**
+ * バッチシミュレーションの設定不備を示すエラー
+ */
+export class BatchSimulationConfigurationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BatchSimulationConfigurationError";
+  }
+}
+
+/**
  * 単一試合の実行ステータス
  * - COMPLETED: 正常に決着がついた (winner, reason あり)
  * - INCOMPLETE: 最大判断回数 (maxDecisionsPerMatch) 到達等で決着がつかずに終了
@@ -38,7 +48,7 @@ export interface BatchMatchPlan {
 }
 
 /**
- * 試合実行中に発生した例外・失敗の記録
+ * 試合実行中に発生した例外・失敗の記録 (Failure Reproduction Recipe)
  */
 export interface BatchFailureRecord {
   readonly matchIndex: number;
@@ -53,8 +63,10 @@ export interface BatchFailureRecord {
 }
 
 /**
- * 単一試合のコンパクト実行結果
+ * 単一試合の論理実行結果 (Logical Batch Match Result)
+ * ※ 決定論的一致保証の対象となる純粋な論理結果。
  * ※ メモリ保護のため、デフォルトでは巨大な GameState, DecisionTrace, MatchLog を保持しません。
+ * ※ 実行時間 (durationMs) などの非決定論的実行時メトリクスは分離されています。
  */
 export interface BatchMatchResult {
   readonly matchIndex: number;
@@ -69,11 +81,12 @@ export interface BatchMatchResult {
   readonly matchSeed: number;
   readonly playerSeeds: Record<string, number>;
   readonly failure?: BatchFailureRecord;
-  readonly durationMs?: number;
 }
 
 /**
- * バッチ全体の統計サマリー
+ * バッチ全体の論理統計サマリー (Logical Batch Summary)
+ * ※ 決定論的一致保証の対象となる純粋な論理統計。
+ * ※ 実行時間 (totalExecutionTimeMs) などの非決定論的実行時メトリクスは分離されています。
  */
 export interface BatchSimulationSummary {
   readonly totalMatches: number;
@@ -85,18 +98,34 @@ export interface BatchSimulationSummary {
   readonly winRates: Record<string, number>;
   readonly averageDecisionsPerCompletedMatch: number;
   readonly averageTurnsPerCompletedMatch: number;
+}
+
+/**
+ * 試合ごとの非決定論的実行時メトリクス
+ */
+export interface BatchMatchRuntimeMetrics {
+  readonly matchIndex: number;
+  readonly durationMs: number;
+}
+
+/**
+ * バッチ全体の非決定論的実行時メトリクス (診断・参考用)
+ * ※ 実行タイミングによって変動するため、Logical Deterministic Comparison の対象外です。
+ */
+export interface BatchSimulationRuntimeMetrics {
   readonly totalExecutionTimeMs: number;
+  readonly matchMetrics?: readonly BatchMatchRuntimeMetrics[];
 }
 
 /**
  * バッチシミュレーション実行設定
  */
 export interface BatchSimulationOptions {
-  /** 実行する総試合数 (1以上の整数) */
+  /** 実行する総試合数 (1以上の有限整数) */
   readonly matchCount: number;
   /** バッチ全体のベースシード (各試合シードはここから純粋関数で導出) */
   readonly baseSeed: number;
-  /** 1試合あたりの最大意思決定回数 (デフォルト: 500) */
+  /** 1試合あたりの最大意思決定回数 (デフォルト: 500, 指定時は1以上の有限整数) */
   readonly maxDecisionsPerMatch?: number;
   /** 各試合の独立した fresh な GameSession を生成するファクトリ関数 */
   readonly sessionFactory: (context: BatchMatchContext) => GameSession;
@@ -121,4 +150,6 @@ export interface BatchSimulationResult {
   readonly matches: readonly BatchMatchResult[];
   readonly summary: BatchSimulationSummary;
   readonly failures: readonly BatchFailureRecord[];
+  /** 非決定論的な実行時メトリクス (診断・性能分析用) */
+  readonly runtimeMetrics?: BatchSimulationRuntimeMetrics;
 }

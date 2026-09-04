@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-1.3-20260904-2101`
-更新日時: 2026-09-04 21:01 JST
+作業ID: `BP-SIM-AI-1.3.1-20260904-2207`
+更新日時: 2026-09-04 22:07 JST
 
 ---
 
@@ -25,9 +25,15 @@
 | **PASS-in-Stage Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | Stage上に実Request存在下でのPASS解決保証 |
 | **EFFECT_SELECTION Resume** | **IMPLEMENTED** | `src/engine/session/GameSessionSnapshotCodec.ts` | `src/tests/simulation/sessionSnapshot.test.ts` | 多段階効果解決中断からの完全再開 |
 | **RulePackage Validation** | **IMPLEMENTED** | `GameSessionSnapshotCodec.restore` | `src/tests/simulation/sessionSnapshot.test.ts` | id / version 不一致の厳格な reject |
-| **Batch simulation** | **IMPLEMENTED** | `src/engine/simulation/BatchSimulationRunner.ts`, `src/domain/simulation/BatchSimulationTypes.ts` | `src/tests/simulation/batchSimulation.test.ts`, `npm run simulate:batch` | 決定論的バッチ対戦・集計基盤 |
-| **Failure isolation** | **IMPLEMENTED** | `BatchSimulationRunner.ts` (`BatchFailureRecord`, `stopOnError: false`) | `src/tests/simulation/batchSimulation.test.ts` | 異常試合の隔離とバッチ継続完走 |
-| **Deterministic Seed Derivation** | **IMPLEMENTED** | `BatchSimulationRunner.deriveSeed` (FNV-1a 32-bit 純粋関数) | `src/tests/simulation/batchSimulation.test.ts` | 実行順序非依存・単独再現性保証 |
+| **Batch Simulation v1** | **IMPLEMENTED** | `src/engine/simulation/BatchSimulationRunner.ts`, `src/domain/simulation/BatchSimulationTypes.ts` | `src/tests/simulation/batchSimulation.test.ts`, `npm run simulate:batch` | 決定論的バッチ対戦・集計基盤 |
+| **Failure Isolation** | **IMPLEMENTED** | `BatchSimulationRunner.ts` (`BatchFailureRecord`, `stopOnError: false`) | `src/tests/simulation/batchSimulation.test.ts` | 異常試合の隔離とバッチ継続完走 |
+| **Deterministic Match Planning** | **IMPLEMENTED** | `BatchSimulationRunner.planMatch`, `deriveSeed` (FNV-1a 32-bit 純粋関数) | `src/tests/simulation/batchSimulation.test.ts` | 実行順序非依存・単独再現性保証 |
+| **Fresh Session / Policy Isolation** | **IMPLEMENTED** | `sessionFactory` / `policyFactory` 契約 & テスト保証 | `src/tests/simulation/batchSimulation.test.ts` | 試合間インスタンス独立性保証 |
+| **Logical Result / Runtime Metrics Separation** | **IMPLEMENTED** | `BatchMatchResult` / `BatchSimulationRuntimeMetrics` 分離 | `src/tests/simulation/batchSimulation.test.ts` | 同一Seedでの100% Logical JSON一致保証 |
+| **Master + Extra Generic Compatibility** | **IMPLEMENTED** | Action / Component 非依存な抽象インターフェース設計 | `BatchSimulationRunner.ts` | 拡張DSL追加でのBatchRunner改修不要 |
+| **Failure Reproduction Recipe** | **IMPLEMENTED** | `BatchFailureRecord` (`baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`) | `src/tests/simulation/batchSimulation.test.ts` | 失敗試合の同一プラン再構築保証 |
+| **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
+| **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン (将来) |
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **AI Policy / RNG Checkpoint** | **MISSING / FUTURE** | - | - | Simulation Runner レベルでの乱数状態を含むチェックポイント |
@@ -62,11 +68,13 @@ Restored GameSession (同じ DecisionResponse を適用して Original と同一
 
 ---
 
-## 3. Batch Simulation & Failure Isolation Foundation (Phase 1.3 完了状態)
+## 3. Batch Simulation & Failure Isolation Foundation (Phase 1.3 / 1.3.1 完了状態)
 
 ### アーキテクチャとデータフロー
 ```text
 BatchSimulationRunner.run(options)
+    │
+    ├─ 0. validateOptions(options) ──> 不正設定は即時 throw (BatchSimulationConfigurationError, ファクトリ未呼出)
     │
     ├─ for matchIndex = 0 .. matchCount - 1:
     │     │
@@ -76,7 +84,7 @@ BatchSimulationRunner.run(options)
     │     │     └─ p2Seed    = deriveSeed(baseSeed, matchIndex, "p2")
     │     │
     │     ├─ try {
-    │     │     session  = options.sessionFactory(context)   // fresh instance
+    │     │     session  = options.sessionFactory(context)   // fresh instance (別オブジェクト参照)
     │     │     policies = options.policyFactory(context)    // fresh instance with derived seeds
     │     │     result   = SimulationRunner.run(session, policies, { maxDecisions })
     │     │  } catch (err) {
@@ -84,26 +92,41 @@ BatchSimulationRunner.run(options)
     │     │     continue next match (Failure Isolation)
     │     │  }
     │     │
-    │     └─ compact BatchMatchResult (COMPLETED | INCOMPLETE | FAILED)
+    │     └─ compact BatchMatchResult (COMPLETED | INCOMPLETE | FAILED) (durationMs は分離)
     │
-    └─ calculateSummary() ──> BatchSimulationResult (batchResultVersion: 1)
+    ├─ calculateSummary() ──> BatchSimulationSummary (totalExecutionTimeMs は分離)
+    └─ runtimeMetrics     ──> BatchSimulationRuntimeMetrics (非決定論的実行時メトリクス)
 ```
 
 ### 主要設計仕様
 1. **batchResultVersion**: `1`
-2. **純粋関数 Seed 導出 (`deriveSeed`)**:
+2. **Master + Extra 互換原則**:
+   - `BatchSimulationRunner` は、`action.attack` や `action.block` などの Action ID、特定の Trump、Fog、Component の内容を一切解釈しません。
+   - `RulePackage`, `GameSession`, `SimulationRunner`, `DecisionPolicy` の抽象境界のみを利用します。
+   - したがって、既存 DSL / Core で表現可能な新しい Action や Component を追加する際、原則として `BatchRunner` の改修は不要です。
+   - 改修が必要となるのは、新しい Decision 種別、新しい GameState 論理状態、新しい Session 中断状態など、Core 全体の一般能力を追加した場合に限られます。
+   - `attackCount` や `blockCount` などのアクション固有統計は BatchSummary には含めず、将来の `Canonical Match Log Analytics` の責務として分離します。
+3. **Session / Policy Factory 契約 & インスタンス独立性**:
+   - `sessionFactory` および `policyFactory` は、各試合（`BatchMatchContext`）ごとに完全に独立した fresh なインスタンス（別オブジェクト参照）を生成して返す契約です。
+   - テストスイートにより、`GameSession`、`p1 Policy`、`p2 Policy` が全試合で異なるインスタンスであること、および同一試合内の `p1` と `p2` が異なるインスタンスであることが厳格に保証されています。
+4. **Logical Result と Runtime Metrics の明確な分離**:
+   - `BatchMatchResult`（勝敗、判断数、ターン数、State Hash v2）および `BatchSimulationSummary`（完了数、未完了数、勝率など）は純粋な決定論的論理結果です。
+   - `durationMs` や `totalExecutionTimeMs` などの実行時タイミング情報は `runtimeMetrics`（`BatchSimulationRuntimeMetrics`）へ分離されています。
+   - これにより、同一 `baseSeed` での実行において、`JSON.stringify(logicalResultA) === JSON.stringify(logicalResultB)` の 100% 決定論的完全一致が保証されます。
+5. **純粋関数 Seed 導出 (`deriveSeed`)**:
    - `deriveSeed(baseSeed, matchIndex, streamKey)`: FNV-1a 32-bit アルゴリズムによる純粋関数。
    - 他の試合の実行有無や実行順序に一切依存せず、Match #N のシードを単独で一意算出可能。
-3. **決定論的 Match ID**:
+6. **決定論的 Match ID**:
    - `batch-${baseSeed}-match-${String(matchIndex).padStart(6, "0")}` により同一設定での完全な再現性を保証。
-4. **Failure Isolation**:
-   - `sessionFactory`, `policyFactory`, `SimulationRunner.run` のいずれのフェーズで例外が発生しても、該当試合を `status: "FAILED"` として記録し、後続の試合を中断せずに継続実行。
-   - `BatchFailureRecord` に発生フェーズ、エラー名、メッセージ、シード情報を保持し、単独再現を可能に。
-5. **Memory Safety (Compact Result)**:
-   - 全試合の生 `GameState` や `DecisionTrace`、`MatchLog` はデフォルトで保持せず破棄。
-   - 勝敗、ターン数、判断数、State Hash v2 のみを集約し、大量試合（100〜1,000+試合）でもメモリ溢れを起こさない設計。
-6. **統計サマリー集約**:
-   - 総試合数、完了数、未完了数、失敗数、プレイヤー別勝率、引き分け数、平均ターン数、平均意思決定数、総実行時間を即時算出。
+7. **Batch Configuration Validation (Fail-Fast)**:
+   - `matchCount <= 0`、`baseSeed = NaN`、`maxDecisionsPerMatch <= 0`、非関数ファクトリなどの設定不備は、バッチ開始前に `BatchSimulationConfigurationError` として fail-fast で reject されます。
+   - 設定不備時はファクトリが一度も呼び出されず、`FAILED` 試合サマリーへ変換されることもありません。
+8. **Failure Isolation (異常隔離) & Failure Reproduction Recipe**:
+   - 試合実行中の例外（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER` フェーズ）は該当試合を `status: "FAILED"` として記録し、後続の試合を中断せずに継続完走します。
+   - `BatchFailureRecord` に `baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`, エラー情報を記録し、`BatchSimulationRunner.planMatch(failure.baseSeed, failure.matchIndex)` により単独で同一 Match Plan を再構築可能です。
+   - ※ 自動で再実行を行う API（`rerunFailure` 等）は未実装（MISSING / FUTURE）です。
+9. **Memory Safety (Compact Result)**:
+   - 全試合の生 `GameState` や `DecisionTrace`、`MatchLog` はデフォルトで保持せず破棄。大量試合でもメモリ溢れを起こさない設計。
 
 ---
 
