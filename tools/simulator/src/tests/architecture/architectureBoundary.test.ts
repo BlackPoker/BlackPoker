@@ -87,4 +87,41 @@ describe("Architecture Boundary & Dependency Direction Tests (Phase 21B.3)", () 
 
     expect(violations).toEqual([]);
   });
+
+  it("AI Feature Encoder (engine/ai, domain/ai) must NOT import GameState, GameSession, Snapshot, StateHasher, or RulePackage", () => {
+    const targetDirs = [
+      path.resolve(srcDir, "domain/ai"),
+      path.resolve(srcDir, "engine/ai"),
+    ];
+
+    const forbiddenPatterns = [
+      /from\s+['"].*GameState.*['"]/,
+      /from\s+['"].*GameSession.*['"]/,
+      /from\s+['"].*Snapshot.*['"]/,
+      /from\s+['"].*RulePackage.*['"]/,
+      /from\s+['"].*StateHasher.*['"]/,
+      /from\s+['"].*\/ui(\/.*)?['"]/,
+      /from\s+['"]react['"]/,
+    ];
+
+    const violations: Array<{ file: string; match: string }> = [];
+
+    for (const dir of targetDirs) {
+      const files = getTsFiles(dir);
+      for (const file of files) {
+        const content = fs.readFileSync(file, "utf-8");
+        for (const pattern of forbiddenPatterns) {
+          const match = content.match(pattern);
+          if (match) {
+            violations.push({
+              file: path.relative(srcDir, file),
+              match: match[0],
+            });
+          }
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
 });
