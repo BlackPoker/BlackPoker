@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-3.1.2-20260905-0638`
-更新日時: 2026-09-05 06:38 JST
+作業ID: `BP-SIM-AI-3.2-20260905-0808`
+更新日時: 2026-09-05 08:08 JST
 
 ---
 
@@ -42,6 +42,13 @@
 | **Factory Entry Validation** | **IMPLEMENTED** | `DecisionDNACodec.createZeroDecisionDNA` | `src/tests/ai/decisionDNA.test.ts` | clone 前先行 validation、truthy 判定廃止、null/array/cycle 安全拒絶 |
 | **Deep Clone Isolation** | **IMPLEMENTED** | `DecisionDNACodec.clone`, `GenomePolicy` | `src/tests/ai/decisionDNA.test.ts`, `src/tests/ai/genomePolicy.test.ts` | nested metadata / arrays の参照共有完全排除 |
 | **Genome Policy** | **IMPLEMENTED** | `src/engine/ai/GenomePolicy.ts`, `src/engine/ai/GenomeScorer.ts` | `src/tests/ai/genomePolicy.test.ts` | 決定論的 Argmax + 最小 patternRef タイブレーク |
+| **Policy Experiment Harness** | **IMPLEMENTED** | `src/engine/ai/PolicyExperimentRunner.ts`, `src/domain/ai/PolicyExperimentTypes.ts` | `src/tests/ai/policyExperiment.test.ts`, `simulate:experiment` | Pairwise 対戦実験・評価基盤 |
+| **Seat-Swapped Evaluation** | **IMPLEMENTED** | `PolicyExperimentRunner.ts` (Leg 1 / Leg 2 同一 baseSeed 実行) | `src/tests/ai/policyExperiment.test.ts` | 先攻・後攻バイアスの完全分離 |
+| **Deterministic Paired Match Plan** | **IMPLEMENTED** | `BatchSimulationRunner.planMatch` 再利用 (同一 matchIndex seed 一致) | `src/tests/ai/policyExperiment.test.ts` | 各 Leg の matchSeed / playerSeeds 完全一致 |
+| **Participant Outcome Summary** | **IMPLEMENTED** | `PolicyExperimentRunner.ts` | `src/tests/ai/policyExperiment.test.ts` | 保存則、asP1/asP2、winRateOnCompleted |
+| **Generic Behavior Metrics** | **IMPLEMENTED** | `src/engine/ai/DecisionBehaviorObserverPolicy.ts` | `src/tests/ai/policyExperiment.test.ts` | 外部 Accumulator、Pattern Kind / Source 集計 |
+| **Baseline Policy Suite** | **IMPLEMENTED** | `src/engine/ai/BaselinePolicies.ts` | `src/tests/ai/policyExperiment.test.ts`, `simulate:experiment` | FirstLegal, Random, Zero, ManualGeneric |
+| **Composite Fitness** | **MISSING / FUTURE** | - | - | 単一スコア評価・適応度関数 (Phase 4.0 で策定) |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
 | **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
 | **Replay from saved data** | **MISSING** | - | - | 保存済み Trace からの再生エンジン (将来) |
@@ -315,11 +322,71 @@ DecisionResponse (Action / Pass / EffectSelection)
 
 ---
 
-## 6. Future Architecture (Phase 4.0 予定)
+## 6. Policy Experiment Harness & Baseline Evaluation (Phase 3.2)
+
+### 1. 階層アーキテクチャ（第二のシミュレーションループを作らない）
+```text
+PolicyExperimentRunner
+        ↓ (Leg 1 & Leg 2 のバッチ実行)
+BatchSimulationRunner.run()
+        ↓ (各試合の実行)
+SimulationRunner.run()
+        ↓
+GameSession
+```
+- 実験専用のゲーム進行ループは一切新設せず、既存の `BatchSimulationRunner.run()` をそのまま再利用します。
+- `GameSession`, `Core Flow`, `Stage`, `Chance`, `Observation`, `BatchSimulationRunner` 本体は変更しません。
+
+### 2. Seat Swap 契約 & 決定論的 Paired Match Plan
+- 基本単位: Participant A vs Participant B の Pairwise 実験。
+- **Leg 1**: `p1 = A, p2 = B`（LegId: `"leg-a-as-p1"`）
+- **Leg 2**: `p1 = B, p2 = A`（LegId: `"leg-b-as-p1"`）
+- **同一Seed群保証**: Leg 1 と Leg 2 は同一の `baseSeed` および `matchesPerSeat` で計画され、同一 `matchIndex` で `matchSeed` と `playerSeeds` が完全に一致します。
+- これにより、BlackPoker の先攻・後攻バイアスを完全に分離し、ポリシー自身の選択性能を公平に比較評価します。
+
+### 3. 論理結果と実行時・診断メトリクスの完全分離
+- **Logical Experiment Result**:
+  - `experimentResultVersion: 1`
+  - `PolicyExperimentLogicalFailure` には `matchIndex`, `matchId`, `baseSeed`, `matchSeed`, `playerSeeds`, `phase`, `errorName` のみを保持。
+  - 実行時動的生成文字列（`decisionId` 等）が含まれ得る `errorMessage` およびスタックトレース `errorStack` は Logical Result から厳格に排除し、`PolicyExperimentRuntimeMetrics` / 診断領域へ分離。
+  - 関数（`sessionFactory`, `policyFactory`）や Genome の 1482 重み配列は結果 JSON に保持せず、参照情報（`id`, `name`, `artifactRef`）のみを保存。
+  - 同一設定での再実行時、`JSON.stringify(logicalResult)` は 100% 決定論的に一致します。
+
+### 4. Outcome Summary 保存則 & ステータス分離
+- **保存則保証**:
+  - `wins + losses + draws === completedMatches`
+  - `completedMatches + incompleteMatches + failedMatches === scheduledMatches`
+- **ステータス厳格分離**:
+  - `INCOMPLETE`（最大判断回数到達等）および `FAILED`（例外発生）は **Draw（引き分け）には数えません**。
+  - `winRateOnCompleted` の分母は `completedMatches` のみとします。
+
+### 5. 汎用 Decision Behavior 計測
+- 軽量ラッパー `DecisionBehaviorObserverPolicy` により、意思決定の選択内容（`selectedPatternRef`）を 100% 透過しつつ、外部 Accumulator へ意思決定を通知。
+- Action 固有の名称や Component ID（`action.attack` 等）は集計せず、汎用パターン種別（`ACTION`, `PASS`, `EFFECT_SELECTION`, `OTHER`）および決定元（`ACTION_REQUEST`, `EFFECT_RESOLUTION`）のみを集計。
+- 母集団は `COMPLETED`, `INCOMPLETE`, `FAILED` にかかわらず、観測されたすべての正常意思決定を対象とします（0件時は rate = 0）。
+
+### 6. 単一 Fitness の未定義 & Evolution 前段階の明記
+- Phase 3.2 では単一の Composite Fitness（`winRate * 0.7 + ...`）や適応度関数は一切定義していません。
+- 目的は「強い AI を作ること」や「進化させること」ではなく、**「ポリシー間の行動差と勝敗傾向を正確かつ決定論的に測る観測基盤」** を確立することです。
+
+### 7. Genome 実験結果の完全再現要件
+- 実験結果の完全再現には、以下が必要です:
+  - 実験設定（`baseSeed`, `matchesPerSeat`, `maxDecisionsPerMatch`）
+  - ルール環境（`environmentRef`, `RulePackage`）
+  - 各 Participant の Policy 実装
+  - Genome Policy の場合は、外部保存された **Decision DNA JSON Artifact**（1482 weights + metadata）
+
+### 8. Master + Extra 互換原則
+- Experiment Harness（`PolicyExperimentRunner`, `DecisionBehaviorObserverPolicy`）は特定のアクションIDやコンポーネント定義を一切直接解釈しません。
+- 既存 Core / Decision / Feature Schema で表現可能なアクション追加（Master + Extra DSL）に対して、Experiment Harness の改修は原則不要です。
+
+---
+
+## 7. Future Architecture (Phase 4.0 予定)
 
 ### Self-Play Evolution Cycle (Phase 4.0 予定)
 1. **Population**: 100 DNA
-2. **Generation Self-Play**: `BatchSimulationRunner` を用いた世代内トーナメント・総当たり戦
+2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価
 3. **Fitness Evaluation**: 勝率、平均ターン数、ライフ残量、対戦成果に基づく適応度評価
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存

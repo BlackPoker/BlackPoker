@@ -17,7 +17,8 @@
     "compare:rules-vnext": "vite-node src/cli/compareRunner.ts",
     "playable:check": "vite-node src/cli/playableMatchRunner.ts",
     "simulate:single": "vite-node src/cli/simulateSingleRunner.ts",
-    "simulate:batch": "vite-node src/cli/simulateBatchRunner.ts"
+    "simulate:batch": "vite-node src/cli/simulateBatchRunner.ts",
+    "simulate:experiment": "vite-node src/cli/policyExperimentRunner.ts"
   },
   "dependencies": {
     "react": "^18.2.0",
