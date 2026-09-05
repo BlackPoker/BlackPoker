@@ -88,8 +88,33 @@ export interface RegulationValidationResult {
 }
 
 /**
+ * 公式ルール第9.1.2版において結果が未定義であるセットアップ結果 (RULE_UNSPECIFIED)
+ * reasonCode ごとの Discriminated Union として厳格に型付けします。
+ */
+export type SetupRuleUnspecifiedOutcome =
+  | {
+      readonly type: "RULE_UNSPECIFIED";
+      readonly reasonCode: "FIRST_PLAYER_DETERMINATION_LIFE_EXHAUSTED";
+      readonly reason: string;
+      readonly exhaustedPlayers: readonly PlayerKey[];
+      readonly winner?: undefined;
+      readonly loser?: undefined;
+    }
+  | {
+      readonly type: "RULE_UNSPECIFIED";
+      readonly reasonCode: "GAME_START_DRAW_LIFE_EXHAUSTED";
+      readonly reason: string;
+      readonly exhaustedPlayers: readonly PlayerKey[];
+      readonly affectedPlayer: PlayerKey;
+      readonly winner?: undefined;
+      readonly loser?: undefined;
+    };
+
+/**
  * ゲーム準備結果 (Setup Outcome)
- * 3.9.1 のプリセット再試行で Life が枯渇した場合は公式ルール上の「敗北（TERMINAL）」となります。
+ * - READY: 公式Setup完了、GameSession生成可能
+ * - TERMINAL: 3.9.1 のプリセット再試行で Life が枯渇した場合など、公式ルール上の明示的「敗北」
+ * - RULE_UNSPECIFIED: 公式ルール第9.1.2版に結果が定義されていないため、シミュレータが勝敗を補完しない状態
  */
 export type SetupOutcome =
   | {
@@ -102,7 +127,8 @@ export type SetupOutcome =
       readonly winner: PlayerKey;
       readonly loser: PlayerKey;
       readonly reason: string;
-    };
+    }
+  | SetupRuleUnspecifiedOutcome;
 
 /**
  * レギュレーション関連エラー基底クラス
@@ -112,6 +138,26 @@ export class RegulationError extends Error {
     super(message);
     this.name = "RegulationError";
     Object.setPrototypeOf(this, RegulationError.prototype);
+  }
+}
+
+/**
+ * 公式ルールにおいて勝敗や処理が未定義（RULE_UNSPECIFIED）であるため、
+ * GameSession を生成できない場合のエラー。
+ */
+export class OfficialSetupRuleUnspecifiedError extends RegulationError {
+  public readonly setupOutcome: SetupRuleUnspecifiedOutcome;
+  public readonly errorCode = "RULE_UNSPECIFIED" as const;
+  public readonly reasonCode: SetupRuleUnspecifiedOutcome["reasonCode"];
+
+  constructor(outcome: SetupRuleUnspecifiedOutcome) {
+    super(
+      `公式ルール第9.1.2版において勝敗・処理が未定義です (${outcome.reasonCode}: ${outcome.reason})`
+    );
+    this.name = "OfficialSetupRuleUnspecifiedError";
+    this.setupOutcome = outcome;
+    this.reasonCode = outcome.reasonCode;
+    Object.setPrototypeOf(this, OfficialSetupRuleUnspecifiedError.prototype);
   }
 }
 

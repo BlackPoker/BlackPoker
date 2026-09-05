@@ -4,7 +4,14 @@ import {
   FrameDefinition,
   RegulationDefinition,
   SetupOutcome,
+  OfficialSetupRuleUnspecifiedError,
 } from "../../domain/regulation/RegulationDefinition";
+import {
+  executeFirstPlayerDetermination,
+  applyGameStart,
+  isFirstPlayerDeterminationExhausted,
+  isGameStartDrawLifeExhausted,
+} from "../session/setup/commonSetupProcedures";
 import { RegulationCatalog, loadRegulationCatalog } from "./RegulationLoader";
 import { RegulationValidator } from "./RegulationValidator";
 import { RegulationRulePackageSelector } from "./RegulationRulePackageSelector";
@@ -197,6 +204,7 @@ export class OfficialRegulationMatchFactory {
     const p2Shuffled = shuffleCards(p2RawDeck, p2Rng);
 
     // 3. デッキ全体を Life として伏せる (Deck は Zone ではない)
+    // Setup Draft 時点ではゲーム開始情報を確定させず、未開始状態 (Pregame State) とする
     const state: any = {
       stateVersion: 1,
       version: 1,
@@ -204,9 +212,9 @@ export class OfficialRegulationMatchFactory {
       regulationId: regulation.id,
       formatId: regulation.formatId,
       frameId: regulation.frameId,
-      turnPlayer: "p1",
-      chancePlayer: "p1",
-      turnCount: 1,
+      turnPlayer: undefined,
+      chancePlayer: undefined,
+      turnCount: 0,
       actionCount: 0,
       stage: { requests: [] },
       requestBuffer: { requests: [], history: [] },
@@ -271,6 +279,7 @@ export class OfficialRegulationMatchFactory {
 
       // 5-2. 兵士プリセット (RulePackage の eligibleAsPresetSoldier 属性を持つ Component に適合するか検証)
       let soldierPlaced = false;
+      let discardIndex = 0;
       while (!soldierPlaced) {
         if (player.life.length === 0) {
           // 公式ルール上の敗北（技術的エラーではない）
@@ -304,94 +313,44 @@ export class OfficialRegulationMatchFactory {
           });
           soldierPlaced = true;
         } else {
-          // 不適格カードは墓地へ送り再試行
+          // 不適格カードは墓地へ送り再試行 (決定論的 ID 生成)
           player.grave.push({
-            unitId: `unit-preset-discard-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+            unitId: `unit-preset-discard-${playerKey}-${candidateCard.id}-${discardIndex}`,
+            id: candidateCard.id,
+            suit: candidateCard.suit,
+            rank: candidateCard.rank,
+            value: candidateCard.value,
             kind: "墓地カード",
             cards: [candidateCard],
             labels: [],
           });
+          discardIndex++;
         }
       }
     }
 
-    // 6. 先攻決定 (3.9.2: 両者 Life 先頭を比較、タイ時は再試行、公開カードはすべて各々の墓地へ)
-    let firstPlayer: PlayerKey | null = null;
-    const p1Discarded: InGameCard[] = [];
-    const p2Discarded: InGameCard[] = [];
-
-    while (!firstPlayer) {
-      if (p1.life.length === 0 && p2.life.length === 0) {
-        return {
-          type: "TERMINAL",
-          winner: "p1",
-          loser: "p2",
-          reason: "先攻決定中に双方のライフが枯渇しました",
-        };
-      }
-      if (p1.life.length === 0) {
-        return {
-          type: "TERMINAL",
-          winner: "p2",
-          loser: "p1",
-          reason: `先攻決定中に ${p1.name} のライフが枯渇しました`,
-        };
-      }
-      if (p2.life.length === 0) {
-        return {
-          type: "TERMINAL",
-          winner: "p1",
-          loser: "p2",
-          reason: `先攻決定中に ${p2.name} のライフが枯渇しました`,
-        };
-      }
-
-      const p1Card = p1.life.shift();
-      const p2Card = p2.life.shift();
-
-      p1Discarded.push(p1Card);
-      p2Discarded.push(p2Card);
-
-      const p1Val = p1Card.value !== undefined ? p1Card.value : rankToValue(p1Card.rank);
-      const p2Val = p2Card.value !== undefined ? p2Card.value : rankToValue(p2Card.rank);
-
-      if (p1Val > p2Val) {
-        firstPlayer = "p1";
-      } else if (p2Val > p1Val) {
-        firstPlayer = "p2";
-      }
+    // 6. 先攻決定 (3.9.2 共通プロシージャ)
+    const determination = executeFirstPlayerDetermination(p1, p2);
+    if (isFirstPlayerDeterminationExhausted(determination)) {
+      return {
+        type: "RULE_UNSPECIFIED",
+        reasonCode: determination.reasonCode,
+        reason: determination.reason,
+        exhaustedPlayers: determination.exhaustedPlayers,
+      };
     }
 
-    // 公開カードをすべて Grave へ
-    for (const c of p1Discarded) {
-      p1.grave.push({
-        unitId: `unit-first-draw-${c.id}`,
-        kind: "墓地カード",
-        cards: [c],
-        labels: [],
-      });
+    // 7. ゲーム開始 (3.9.3 共通プロシージャ)
+    const gameStart = applyGameStart(state, determination.firstPlayer);
+    if (isGameStartDrawLifeExhausted(gameStart)) {
+      return {
+        type: "RULE_UNSPECIFIED",
+        reasonCode: gameStart.reasonCode,
+        reason: gameStart.reason,
+        exhaustedPlayers: gameStart.exhaustedPlayers,
+        affectedPlayer: gameStart.affectedPlayer,
+      };
     }
-    for (const c of p2Discarded) {
-      p2.grave.push({
-        unitId: `unit-first-draw-${c.id}`,
-        kind: "墓地カード",
-        cards: [c],
-        labels: [],
-      });
-    }
-
-    // 7. ゲーム開始 (3.9.3: 先攻プレイヤーは Life 先頭から 1枚引いて Hand へ)
-    const firstPlayerObj = state.players[firstPlayer];
-    if (firstPlayerObj.life.length > 0) {
-      firstPlayerObj.hand.push(firstPlayerObj.life.shift());
-    }
-
-    state.turnPlayer = firstPlayer;
-    state.chancePlayer = firstPlayer;
-    state.nonTurnPlayer = getOpponentPlayerKey(firstPlayer, state);
-    state.turnCount = 1;
-    state.actionCount = 0;
-    state.turnUsage = {};
 
     // 8. カード保存則検証
     this.verifyCardConservation("p1", p1, frame.deck.cards);
@@ -399,8 +358,8 @@ export class OfficialRegulationMatchFactory {
 
     return {
       type: "READY",
-      state,
-      firstPlayer,
+      state: gameStart.state,
+      firstPlayer: determination.firstPlayer,
     };
   }
 
@@ -453,6 +412,10 @@ export class OfficialRegulationMatchFactory {
         },
       };
       return new GameSession(terminalState, officialRulePackage);
+    }
+
+    if (outcome.type === "RULE_UNSPECIFIED") {
+      throw new OfficialSetupRuleUnspecifiedError(outcome);
     }
 
     return new GameSession(outcome.state, officialRulePackage, {
@@ -527,6 +490,10 @@ export class OfficialRegulationMatchFactory {
           },
         };
         return new GameSession(terminalState, officialRulePackage);
+      }
+
+      if (outcome.type === "RULE_UNSPECIFIED") {
+        throw new OfficialSetupRuleUnspecifiedError(outcome);
       }
 
       return new GameSession(outcome.state, officialRulePackage, {

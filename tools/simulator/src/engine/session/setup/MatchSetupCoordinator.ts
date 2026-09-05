@@ -1,13 +1,12 @@
 import { PlayerKey } from "../../../domain/decision/DecisionSource";
-import { getOpponentPlayerKey } from "../../rules/playerUtils";
-import { rankToValue } from "../../rules/cardUtils";
+import {
+  SetupRound,
+  executeFirstPlayerDetermination,
+  applyGameStart,
+  isGameStartDrawLifeExhausted,
+} from "./commonSetupProcedures";
 
-export interface SetupRound {
-  readonly round: number;
-  readonly p1Card: any;
-  readonly p2Card: any;
-  readonly result: "p1" | "p2" | "tie";
-}
+export type { SetupRound };
 
 export interface MatchSetupResult {
   readonly firstPlayer: PlayerKey;
@@ -22,7 +21,8 @@ export interface MatchSetupResult {
 
 /**
  * 公式規則 3.9.2 (先攻決定) および 3.9.3 (ゲーム開始) を実行するコーディネーター。
- * ゲーム開始前の準備処理として、ゲーム内トリガーを発生させずに先攻決定・墓地送り・先攻1枚ドローを行います。
+ * 共通 Setup Procedure（executeFirstPlayerDetermination, applyGameStart）に委譲し、
+ * 単一実装ソース（Single Source）を担保します。
  */
 export class MatchSetupCoordinator {
   /**
@@ -48,69 +48,26 @@ export class MatchSetupCoordinator {
     if (!Array.isArray(p1.hand)) p1.hand = [];
     if (!Array.isArray(p2.hand)) p2.hand = [];
 
-    const rounds: SetupRound[] = [];
-    const p1Discarded: any[] = [];
-    const p2Discarded: any[] = [];
-    let firstPlayer: PlayerKey | null = null;
-    let roundCount = 1;
-
-    // 3.9.2 先攻決定: 両者ライフ最上段（index 0）を取り出し、勝者が決まるまで比較
-    while (!firstPlayer) {
-      if (p1.life.length === 0 || p2.life.length === 0) {
-        throw new Error("MatchSetupCoordinator: 先攻決定中にライフが不足しました。");
-      }
-
-      const p1Card = p1.life.shift();
-      const p2Card = p2.life.shift();
-
-      p1Discarded.push(p1Card);
-      p2Discarded.push(p2Card);
-
-      const p1Val = p1Card.value !== undefined ? p1Card.value : rankToValue(p1Card.rank);
-      const p2Val = p2Card.value !== undefined ? p2Card.value : rankToValue(p2Card.rank);
-
-      if (p1Val > p2Val) {
-        rounds.push({ round: roundCount, p1Card, p2Card, result: "p1" });
-        firstPlayer = "p1";
-      } else if (p2Val > p1Val) {
-        rounds.push({ round: roundCount, p1Card, p2Card, result: "p2" });
-        firstPlayer = "p2";
-      } else {
-        rounds.push({ round: roundCount, p1Card, p2Card, result: "tie" });
-        roundCount++;
-      }
+    // 3.9.2 先攻決定共通プロシージャ
+    const determination = executeFirstPlayerDetermination(p1, p2);
+    if (!determination.success) {
+      throw new Error("MatchSetupCoordinator: 先攻決定中にライフが不足しました。");
     }
 
-    // 公開したカードをすべて各プレイヤーの墓地へ移す
-    p1.grave.push(...p1Discarded);
-    p2.grave.push(...p2Discarded);
-
-    // 3.9.3 ゲーム開始: 先攻プレイヤーはライフから1枚引いて手札へ
-    const firstPlayerObj = state.players[firstPlayer];
-    let drawnCard: any = undefined;
-    if (firstPlayerObj.life.length > 0) {
-      drawnCard = firstPlayerObj.life.shift();
-      firstPlayerObj.hand.push(drawnCard);
+    // 3.9.3 ゲーム開始共通プロシージャ
+    const gameStart = applyGameStart(state, determination.firstPlayer);
+    if (isGameStartDrawLifeExhausted(gameStart)) {
+      throw new Error(
+        `MatchSetupCoordinator: ゲーム開始ドロー処理中にライフが不足しました (${gameStart.reason})`
+      );
     }
-
-    // ターン情報・チャンス情報の初期化
-    state.turnPlayer = firstPlayer;
-    state.chancePlayer = firstPlayer;
-    state.nonTurnPlayer = getOpponentPlayerKey(firstPlayer, state);
-    state.turnCount = 1;
-    state.actionCount = 0;
-    state.turnUsage = {};
-    state.stateVersion = (state.stateVersion || 1) + 1;
 
     return {
-      firstPlayer,
-      rounds,
-      discardedCards: {
-        p1: p1Discarded,
-        p2: p2Discarded,
-      },
-      drawnCard,
-      state,
+      firstPlayer: determination.firstPlayer,
+      rounds: determination.rounds,
+      discardedCards: determination.discardedCards,
+      drawnCard: gameStart.drawnCard,
+      state: gameStart.state,
     };
   }
 }

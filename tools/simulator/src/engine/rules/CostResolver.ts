@@ -118,8 +118,9 @@ export class CostResolver {
         }
         const costCard = player.life.shift();
         if (!player.grave) player.grave = [];
+        const cardIdPart = costCard?.id ? `-${costCard.id}` : "";
         const graveUnit = {
-          unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          unitId: `unit-cost-${context.playerKey}${cardIdPart}-${context.state.stateVersion || 1}-${i}`,
           kind: "コスト",
           cards: [costCard],
           labels: [],

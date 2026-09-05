@@ -4,6 +4,7 @@ import { loadRegulationCatalog, getRegulation, getFrame, getFormat } from "../..
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 import { OfficialRegulationMatchFactory } from "../../engine/regulation/OfficialRegulationMatchFactory";
+import { OfficialSetupRuleUnspecifiedError } from "../../domain/regulation/RegulationDefinition";
 import { SeededRandom } from "../../engine/random/RandomSource";
 
 describe("Entry16 Deck, Setup & Conservation Tests (AQ 15-21, AR 22-38, AS 39-42)", () => {
@@ -171,11 +172,9 @@ describe("Entry16 Deck, Setup & Conservation Tests (AQ 15-21, AR 22-38, AS 39-42
     const mockFrame: any = {
       ...frame,
       deck: {
-        cardCount: 8,
+        cardCount: 4,
         cards: [
-          // 防壁用
-          { suit: "S", rank: "2", value: 2 },
-          // 兵士候補だが不適格（rank が条件外のダミー）
+          { suit: "J", rank: "0", value: 0 },
           { suit: "J", rank: "0", value: 0 },
           { suit: "J", rank: "0", value: 0 },
           { suit: "J", rank: "0", value: 0 },
@@ -243,5 +242,145 @@ describe("Entry16 Deck, Setup & Conservation Tests (AQ 15-21, AR 22-38, AS 39-42
         OfficialRegulationMatchFactory.verifyCardConservation("p2", outcome.state.players.p2, frame.deck.cards)
       ).not.toThrow();
     }
+  });
+
+  // =========================================================================
+  // AT. Determinism Repair & Rule Gaps (Phase 1.0.1)
+  // =========================================================================
+  it("43-45. Retry path must be 100% same-seed deterministic including grave unit IDs", () => {
+    // 不適格カードを含む制御デッキ（防壁 1, 不適格カード 1, 兵士 1, 先攻決定用 2枚）
+    const mockFrame: any = {
+      ...frame,
+      deck: {
+        cardCount: 6,
+        cards: [
+          { suit: "S", rank: "2", value: 2 }, // 防壁
+          { suit: "J", rank: "0", value: 0 }, // 不適格 -> 墓地送り & retry
+          { suit: "S", rank: "5", value: 5 }, // 適合兵士
+          { suit: "H", rank: "K", value: 13 }, // 先攻決定用
+          { suit: "D", rank: "3", value: 3 }, // 先攻ドロー用
+          { suit: "C", rank: "4", value: 4 },
+        ],
+      },
+      setup: {
+        initialHandCount: 0,
+        preset: { bulwarkCount: 1, soldierCount: 1 },
+      },
+    };
+
+    const outcome1 = OfficialRegulationMatchFactory.setupMatch(regulation, mockFrame, officialRulePackage, 777);
+    const outcome2 = OfficialRegulationMatchFactory.setupMatch(regulation, mockFrame, officialRulePackage, 777);
+
+    expect(outcome1.type).toBe("READY");
+    expect(outcome2.type).toBe("READY");
+
+    // Logical JSON が完全一致すること
+    expect(JSON.stringify(outcome1)).toBe(JSON.stringify(outcome2));
+
+    if (outcome1.type === "READY" && outcome2.type === "READY") {
+      const p1Grave1 = outcome1.state.players.p1.grave;
+      const p1Grave2 = outcome2.state.players.p1.grave;
+
+      // プリセット不適格カードの discard unitId が存在し、完全決定論的一致すること
+      const retryGrave1 = p1Grave1.find((g: any) => g.unitId.startsWith("unit-preset-discard-"));
+      const retryGrave2 = p1Grave2.find((g: any) => g.unitId.startsWith("unit-preset-discard-"));
+
+      expect(retryGrave1).toBeDefined();
+      expect(retryGrave2).toBeDefined();
+      expect(retryGrave1.unitId).toBe(retryGrave2.unitId);
+      expect(retryGrave1.unitId).not.toContain("NaN");
+      expect(retryGrave1.unitId).not.toContain("undefined");
+    }
+  });
+
+  it("46. Non-deterministic APIs (Date.now, Math.random) must NOT exist in Official Setup engine paths", () => {
+    const fs = require("fs");
+    const checkDir = (dirPath: string) => {
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dirPath, entry.name);
+        if (entry.isDirectory()) {
+          checkDir(fullPath);
+        } else if (entry.name.endsWith(".ts")) {
+          const content = fs.readFileSync(fullPath, "utf-8");
+          expect(content.includes("Date.now()")).toBe(false);
+          expect(content.includes("Math.random()")).toBe(false);
+        }
+      }
+    };
+
+    // Official Setup の依存経路全体を検証
+    checkDir(path.resolve(__dirname, "../../engine/regulation"));
+    checkDir(path.resolve(__dirname, "../../engine/session/setup"));
+  });
+
+  it("47. 3.9.2 vs 3.9.1: 3.9.2 Life exhaustion must be RULE_UNSPECIFIED, NOT TERMINAL defeat", () => {
+    // 3.9.2 先攻決定中に Life が枯渇するモック（Seed 42 でタイ発生後にカード不足で枯渇）
+    const mockFrame: any = {
+      ...frame,
+      deck: {
+        cardCount: 3,
+        cards: [
+          { suit: "S", rank: "2", value: 2 }, // 防壁
+          { suit: "S", rank: "5", value: 5 }, // 兵士
+          { suit: "H", rank: "K", value: 13 }, // 先攻決定用
+        ],
+      },
+      setup: {
+        initialHandCount: 0,
+        preset: { bulwarkCount: 1, soldierCount: 1 },
+      },
+    };
+
+    const outcome = OfficialRegulationMatchFactory.setupMatch(regulation, mockFrame, officialRulePackage, 42);
+
+    // 3.9.2 のライフ枯渇は RULE_UNSPECIFIED であり、TERMINAL ではない
+    expect(outcome.type).toBe("RULE_UNSPECIFIED");
+    if (outcome.type === "RULE_UNSPECIFIED") {
+      expect(outcome.reasonCode).toBe("FIRST_PLAYER_DETERMINATION_LIFE_EXHAUSTED");
+      expect(outcome.winner).toBeUndefined();
+      expect(outcome.loser).toBeUndefined();
+    }
+  });
+
+  it("48. 3.9.3: Game start draw Life exhaustion must also be RULE_UNSPECIFIED and throw OfficialSetupRuleUnspecifiedError", async () => {
+    // 3.9.2 で先攻は決定するが、決定後に先攻の Life が 0 になるモック (Seed 1)
+    const mockFrame: any = {
+      ...frame,
+      deck: {
+        cardCount: 3,
+        cards: [
+          { suit: "S", rank: "2", value: 2 }, // 防壁
+          { suit: "S", rank: "5", value: 5 }, // 兵士
+          { suit: "H", rank: "K", value: 13 }, // 先攻決定用 (Seed 1 で先攻が決定し Life 0 に)
+        ],
+      },
+      setup: {
+        initialHandCount: 0,
+        preset: { bulwarkCount: 1, soldierCount: 1 },
+      },
+    };
+
+    const outcome = OfficialRegulationMatchFactory.setupMatch(regulation, mockFrame, officialRulePackage, 1);
+
+    // 3.9.2 は成功するが 3.9.3 の先攻ドロー用 Life が不足するため RULE_UNSPECIFIED
+    expect(outcome.type).toBe("RULE_UNSPECIFIED");
+    if (outcome.type === "RULE_UNSPECIFIED") {
+      expect(outcome.reasonCode).toBe("GAME_START_DRAW_LIFE_EXHAUSTED");
+      expect(outcome.winner).toBeUndefined();
+      expect(outcome.loser).toBeUndefined();
+    }
+
+    // createSession 呼び出し時に OfficialSetupRuleUnspecifiedError がスローされること
+    await expect(
+      OfficialRegulationMatchFactory.createSession("light-entry16", 1, {
+        catalog: {
+          regulations: new Map([[regulation.id, regulation]]),
+          formats: new Map([[format.id, format]]),
+          frames: new Map([[mockFrame.id, mockFrame]]),
+        },
+        fullRulePackage: officialRulePackage,
+      })
+    ).rejects.toThrowError(OfficialSetupRuleUnspecifiedError);
   });
 });

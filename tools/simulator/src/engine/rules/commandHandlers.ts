@@ -61,8 +61,9 @@ export function createFogHandler(
     }
 
 
+    const cardIdPart = keyCard?.id ? `-${keyCard.id}` : "";
     const newFog = {
-      fogId: `fog-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      fogId: `fog-${context.playerKey}-${component}${cardIdPart}-${context.state.stateVersion || 1}`,
       componentId: component,
       card: keyCard, // キーカードを配置
       bindings: resolvedBindings,
@@ -111,8 +112,9 @@ export function summonUnitHandler(): CommandHandler {
       return;
     }
 
+    const cardIdPart = unitCard?.id ? `-${unitCard.id}` : "";
     const newUnit = {
-      unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      unitId: `unit-${context.playerKey}-${component}${cardIdPart}-${context.state.stateVersion || 1}`,
       kind: kind,
       componentId: component,
       state: state || "charge",

@@ -100,7 +100,7 @@ BlackPoker公式ルールにおける対戦環境は、**「フォーマット (
 3. **共通プリセット配置**:
    - Life 先頭 1枚を裏向き防壁（charge）として Field へ配置。
    - Life 先頭 1枚を取り出し、RulePackage 内の `eligibleAsPresetSoldier === true` な Component（一般兵・英雄・エース）に適合するか判定し、適合すれば表向き（charge）で Field へ配置。
-   - 不適格なカードは Grave へ送り、適合するまで Life から順次再試行（Life 枯渇時は公式ルール上の「敗北」）。
+   - 不適格なカードは Grave へ送り、適合するまで Life から順次再試行（Life 枯渇時は公式ルール上の「敗北」`TERMINAL`）。
 4. **先攻決定**:
    - 両者の Life 先頭を公開してランク比較。同値の場合は勝者が決まるまで再試行。
    - 公開したカードはすべて各プレイヤーの Grave へ。
@@ -108,6 +108,23 @@ BlackPoker公式ルールにおける対戦環境は、**「フォーマット (
    - 先攻プレイヤーは Life 先頭から 1枚を Hand へドロー（先攻通常8枚、後攻7枚）。
    - `turnPlayer = firstPlayer`, `chancePlayer = firstPlayer`。
    - 準備処理中はカード移動等のゲーム内トリガーは一切発火しない。
+
+### 3.4 既知のルール未定義ケース (Known Rule Gap) と RULE_UNSPECIFIED
+
+公式ルール第9.1.2版には、ゲーム準備段階において次の事象が発生した際の勝者・敗者・引き分け・代替処理が明記されていません:
+
+1. **3.9.2 先攻決定中のライフ枯渇 (`FIRST_PLAYER_DETERMINATION_LIFE_EXHAUSTED`)**:
+   - 複数回のタイ再試行等により、先攻が決定する前に片方または双方の Life が 0 枚になった場合。
+   - 3.9.1（プリセット配置中の枯渇は「そのプレイヤーは敗北」と明記）と異なり、3.9.2 には勝敗規定が存在しません。
+2. **3.9.3 ゲーム開始時ドローのライフ枯渇 (`GAME_START_DRAW_LIFE_EXHAUSTED`)**:
+   - 最後の Life カードで先攻が決定し、3.9.3 開始時に先攻プレイヤーの Life が 0 枚で 1枚ドローができない場合。
+   - ルール上「ドローをスキップして開始」や「先攻の敗北」などの規定は存在しません。
+
+**Simulator の安全表現**:
+- Simulator ではこれらの未定義ケースに対し、勝者・敗者・引き分けを勝手に推測・補完せず、`RULE_UNSPECIFIED` として明示的に処理します（`winner: undefined, loser: undefined`）。
+- 3.9.3 でドロー不能な場合はゲーム開始処理を中断し、入力状態への部分変更を行わない（Zero Partial Mutation）安全性を保証します。
+- `createSession()` では `OfficialSetupRuleUnspecifiedError` をスローし、勝敗が確定しない不正なセッションの生成を防止します。
+- この仕様は公式ルールの改変ではなく、未定義状態を Simulator が勝手に補完しないための安全表現です。
 
 ---
 
