@@ -19,7 +19,8 @@
     "simulate:single": "vite-node src/cli/simulateSingleRunner.ts",
     "simulate:batch": "vite-node src/cli/simulateBatchRunner.ts",
     "simulate:experiment": "vite-node src/cli/policyExperimentRunner.ts",
-    "simulate:official": "vite-node src/cli/simulateOfficialRunner.ts"
+    "simulate:official": "vite-node src/cli/simulateOfficialRunner.ts",
+    "measure:official-baseline": "vite-node src/cli/measureOfficialBaseline.ts"
   },
   "dependencies": {
     "react": "^18.2.0",

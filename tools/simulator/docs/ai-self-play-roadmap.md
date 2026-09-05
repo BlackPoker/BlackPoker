@@ -49,6 +49,12 @@
 | **Generic Behavior Metrics** | **IMPLEMENTED** | `src/engine/ai/DecisionBehaviorObserverPolicy.ts` | `src/tests/ai/policyExperiment.test.ts` | 外部 Accumulator、Pattern Kind / Source 集計 |
 | **Baseline Policy Suite** | **IMPLEMENTED** | `src/engine/ai/BaselinePolicies.ts` | `src/tests/ai/policyExperiment.test.ts`, `simulate:experiment` | FirstLegal, Random, Zero, ManualGeneric |
 | **Official Regulation Environment** | **IMPLEMENTED (Light + Entry16)** | `src/engine/regulation/OfficialRegulationMatchFactory.ts` | `src/tests/regulation/*.test.ts`, `npm run simulate:official` | 公式ルール第9.1.2版に基づく公式対戦環境。CORE-BATTLE 結果は公式評価ではなく Core 検証用 |
+| **Official Baseline Measurement** | **IMPLEMENTED** | `src/engine/regulation/OfficialBaselineMeasurementRunner.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts`, `npm run measure:official-baseline` | 公式Light+Entry16での600戦定量計測基盤 (Phase 3.3) |
+| **Official Setup Viability Audit** | **IMPLEMENTED** | `src/engine/regulation/OfficialSetupAuditor.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 大量シードでの公式セットアップ成立監査 (100 Seeds) |
+| **Feature Collision Diagnostics** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 57次元同一ベクトル衝突の透明な検出・集計 |
+| **Feature Activation Coverage** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | Context 25 / Pattern 57 特徴量の実戦活性化率集計 |
+| **Genome Argmax Tie Diagnostics** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | GenomeScorer による最善手タイ発生率の集計 |
+| **Baseline Repeatability** | **IMPLEMENTED** | `src/engine/ai/OfficialBaselineMeasurementRunner.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | Run A == Run B による 100% 論理ダイジェスト一致検証 |
 | **Composite Fitness** | **MISSING / FUTURE** | - | - | 単一スコア評価・適応度関数 (Phase 4.0 で策定) |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
 | **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
@@ -56,8 +62,8 @@
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **AI Policy / RNG Checkpoint** | **MISSING / FUTURE** | - | - | Simulation Runner レベルでの乱数状態を含むチェックポイント |
 | **Policy versioning** | **IMPLEMENTED** | `PolicyDescriptor` (`kind`, `policyVersion`, `metadata`) | `src/engine/simulation/DecisionPolicy.ts` | Version 管理対応済み |
-| **Evolution** | **MISSING** | - | - | Phase 4.0 で策定 |
-| **Hall of Fame** | **MISSING** | - | - | Phase 4.0 で策定 |
+| **Evolution** | **MISSING / FUTURE** | - | - | Phase 4.0 で策定 |
+| **Hall of Fame** | **MISSING / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
 

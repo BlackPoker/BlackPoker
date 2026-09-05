@@ -52,7 +52,8 @@ export class CostResolver {
 
     // 1. 指定された手札カードを捨てる
     if (costPayment.discardedCardIds && costPayment.discardedCardIds.length > 0) {
-      for (const cardId of costPayment.discardedCardIds) {
+      for (let i = 0; i < costPayment.discardedCardIds.length; i++) {
+        const cardId = costPayment.discardedCardIds[i];
         const index = player.hand.findIndex((c: any) => c.id === cardId);
         if (index === -1) {
           throw new Error(`コストとして指定された手札カードが見つかりません: ${cardId}`);
@@ -60,8 +61,9 @@ export class CostResolver {
         const [costCard] = player.hand.splice(index, 1);
 
         if (!player.grave) player.grave = [];
+        const stateVersion = context.state?.stateVersion ?? context.state?.version ?? 1;
         const graveUnit = {
-          unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          unitId: `unit-cost-${context.playerKey}-${costCard.id || cardId}-${stateVersion}-${i}`,
           kind: "コスト",
           cards: [costCard],
           labels: [],

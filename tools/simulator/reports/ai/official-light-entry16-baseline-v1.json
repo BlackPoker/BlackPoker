@@ -1,0 +1,486 @@
+{
+  "measurementResultVersion": "1.0.0",
+  "measurementId": "baseline-light-entry16-20260906",
+  "workId": "BP-SIM-AI-3.3-20260906-0041",
+  "environmentRef": "official:light-entry16",
+  "regulationId": "light-entry16",
+  "rulesVersion": "rules-vnext-9.1.2",
+  "featureSchemaVersion": "1.0.0",
+  "dnaFormatVersion": "1.0.0",
+  "baseSeed": 20260906,
+  "setupAudit": {
+    "plannedSetups": 100,
+    "readySetups": 100,
+    "terminalSetups": 0,
+    "ruleUnspecifiedSetups": 0,
+    "reasonBreakdown": {
+      "FIRST_PLAYER_DETERMINATION_LIFE_EXHAUSTED": 0,
+      "GAME_START_DRAW_LIFE_EXHAUSTED": 0
+    },
+    "nonReadyEntries": []
+  },
+  "matchups": [
+    {
+      "pairId": "firstLegal-vs-seededRandom",
+      "participantA": {
+        "id": "baseline-first-legal-v1",
+        "name": "FirstLegal"
+      },
+      "participantB": {
+        "id": "baseline-seeded-random-v1",
+        "name": "SeededRandom"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 87,
+      "incompleteMatches": 13,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 57,
+      "bWins": 30,
+      "draws": 0,
+      "aAsP1": 35,
+      "aAsP2": 22,
+      "bAsP1": 18,
+      "bAsP2": 12,
+      "p1Wins": 53,
+      "p2Wins": 34,
+      "p1WinRate": 0.6091954022988506,
+      "p2WinRate": 0.39080459770114945,
+      "winRateOnCompleted": 0.6551724137931034
+    },
+    {
+      "pairId": "firstLegal-vs-zeroGenome",
+      "participantA": {
+        "id": "baseline-first-legal-v1",
+        "name": "FirstLegal"
+      },
+      "participantB": {
+        "id": "baseline-zero-genome-v1",
+        "name": "ZeroGenome"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 76,
+      "incompleteMatches": 24,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 38,
+      "bWins": 38,
+      "draws": 0,
+      "aAsP1": 19,
+      "aAsP2": 19,
+      "bAsP1": 19,
+      "bAsP2": 19,
+      "p1Wins": 38,
+      "p2Wins": 38,
+      "p1WinRate": 0.5,
+      "p2WinRate": 0.5,
+      "winRateOnCompleted": 0.5
+    },
+    {
+      "pairId": "firstLegal-vs-manualGeneric",
+      "participantA": {
+        "id": "baseline-first-legal-v1",
+        "name": "FirstLegal"
+      },
+      "participantB": {
+        "id": "baseline-manual-generic-v1",
+        "name": "ManualGenericGenome"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 76,
+      "incompleteMatches": 24,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 38,
+      "bWins": 38,
+      "draws": 0,
+      "aAsP1": 19,
+      "aAsP2": 19,
+      "bAsP1": 19,
+      "bAsP2": 19,
+      "p1Wins": 38,
+      "p2Wins": 38,
+      "p1WinRate": 0.5,
+      "p2WinRate": 0.5,
+      "winRateOnCompleted": 0.5
+    },
+    {
+      "pairId": "seededRandom-vs-zeroGenome",
+      "participantA": {
+        "id": "baseline-seeded-random-v1",
+        "name": "SeededRandom"
+      },
+      "participantB": {
+        "id": "baseline-zero-genome-v1",
+        "name": "ZeroGenome"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 87,
+      "incompleteMatches": 13,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 30,
+      "bWins": 57,
+      "draws": 0,
+      "aAsP1": 18,
+      "aAsP2": 12,
+      "bAsP1": 35,
+      "bAsP2": 22,
+      "p1Wins": 53,
+      "p2Wins": 34,
+      "p1WinRate": 0.6091954022988506,
+      "p2WinRate": 0.39080459770114945,
+      "winRateOnCompleted": 0.3448275862068966
+    },
+    {
+      "pairId": "seededRandom-vs-manualGeneric",
+      "participantA": {
+        "id": "baseline-seeded-random-v1",
+        "name": "SeededRandom"
+      },
+      "participantB": {
+        "id": "baseline-manual-generic-v1",
+        "name": "ManualGenericGenome"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 87,
+      "incompleteMatches": 13,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 30,
+      "bWins": 57,
+      "draws": 0,
+      "aAsP1": 18,
+      "aAsP2": 12,
+      "bAsP1": 35,
+      "bAsP2": 22,
+      "p1Wins": 53,
+      "p2Wins": 34,
+      "p1WinRate": 0.6091954022988506,
+      "p2WinRate": 0.39080459770114945,
+      "winRateOnCompleted": 0.3448275862068966
+    },
+    {
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "participantA": {
+        "id": "baseline-zero-genome-v1",
+        "name": "ZeroGenome"
+      },
+      "participantB": {
+        "id": "baseline-manual-generic-v1",
+        "name": "ManualGenericGenome"
+      },
+      "scheduledMatches": 100,
+      "completedMatches": 76,
+      "incompleteMatches": 24,
+      "setupRuleGapMatches": 0,
+      "technicalFailedMatches": 0,
+      "aWins": 38,
+      "bWins": 38,
+      "draws": 0,
+      "aAsP1": 19,
+      "aAsP2": 19,
+      "bAsP1": 19,
+      "bAsP2": 19,
+      "p1Wins": 38,
+      "p2Wins": 38,
+      "p1WinRate": 0.5,
+      "p2WinRate": 0.5,
+      "winRateOnCompleted": 0.5
+    }
+  ],
+  "participantBehavior": [
+    {
+      "participantId": "baseline-first-legal-v1",
+      "totalObservedDecisions": 23683,
+      "actionSelections": 2570,
+      "passSelections": 20630,
+      "effectSelections": 483,
+      "otherSelections": 0,
+      "actionRequestDecisions": 23200,
+      "effectResolutionDecisions": 483,
+      "otherSourceDecisions": 0,
+      "actionSelectionRate": 0.10851665751805092,
+      "passSelectionRate": 0.8710889667694126,
+      "effectSelectionRate": 0.020394375712536418
+    },
+    {
+      "participantId": "baseline-manual-generic-v1",
+      "totalObservedDecisions": 23683,
+      "actionSelections": 2570,
+      "passSelections": 20630,
+      "effectSelections": 483,
+      "otherSelections": 0,
+      "actionRequestDecisions": 23200,
+      "effectResolutionDecisions": 483,
+      "otherSourceDecisions": 0,
+      "actionSelectionRate": 0.10851665751805092,
+      "passSelectionRate": 0.8710889667694126,
+      "effectSelectionRate": 0.020394375712536418
+    },
+    {
+      "participantId": "baseline-seeded-random-v1",
+      "totalObservedDecisions": 16839,
+      "actionSelections": 2103,
+      "passSelections": 14475,
+      "effectSelections": 261,
+      "otherSelections": 0,
+      "actionRequestDecisions": 16578,
+      "effectResolutionDecisions": 261,
+      "otherSourceDecisions": 0,
+      "actionSelectionRate": 0.12488865134509175,
+      "passSelectionRate": 0.85961161589168,
+      "effectSelectionRate": 0.01549973276322822
+    },
+    {
+      "participantId": "baseline-zero-genome-v1",
+      "totalObservedDecisions": 23683,
+      "actionSelections": 2570,
+      "passSelections": 20630,
+      "effectSelections": 483,
+      "otherSelections": 0,
+      "actionRequestDecisions": 23200,
+      "effectResolutionDecisions": 483,
+      "otherSourceDecisions": 0,
+      "actionSelectionRate": 0.10851665751805092,
+      "passSelectionRate": 0.8710889667694126,
+      "effectSelectionRate": 0.020394375712536418
+    }
+  ],
+  "featureDiagnostics": {
+    "featureCollisions": [
+      {
+        "participantId": "baseline-first-legal-v1",
+        "encodedDecisions": 23683,
+        "decisionsWithPatternCollision": 1716,
+        "collisionDecisionRate": 0.07245703669298653,
+        "totalEncodedPatterns": 82137,
+        "collidingPatterns": 49244,
+        "collisionGroupCount": 9659,
+        "maxCollisionGroupSize": 24,
+        "logicalPatternKeyMissingCount": 0
+      },
+      {
+        "participantId": "baseline-manual-generic-v1",
+        "encodedDecisions": 23683,
+        "decisionsWithPatternCollision": 1716,
+        "collisionDecisionRate": 0.07245703669298653,
+        "totalEncodedPatterns": 82137,
+        "collidingPatterns": 49244,
+        "collisionGroupCount": 9659,
+        "maxCollisionGroupSize": 24,
+        "logicalPatternKeyMissingCount": 0
+      },
+      {
+        "participantId": "baseline-seeded-random-v1",
+        "encodedDecisions": 16839,
+        "decisionsWithPatternCollision": 2166,
+        "collisionDecisionRate": 0.1286299661500089,
+        "totalEncodedPatterns": 64257,
+        "collidingPatterns": 39999,
+        "collisionGroupCount": 7974,
+        "maxCollisionGroupSize": 24,
+        "logicalPatternKeyMissingCount": 0
+      },
+      {
+        "participantId": "baseline-zero-genome-v1",
+        "encodedDecisions": 23683,
+        "decisionsWithPatternCollision": 1716,
+        "collisionDecisionRate": 0.07245703669298653,
+        "totalEncodedPatterns": 82137,
+        "collidingPatterns": 49244,
+        "collisionGroupCount": 9659,
+        "maxCollisionGroupSize": 24,
+        "logicalPatternKeyMissingCount": 0
+      }
+    ],
+    "activationCoverage": {
+      "context": {
+        "totalFeatures": 25,
+        "activatedFeatures": 22,
+        "coverageRate": 0.88,
+        "featureCounts": {
+          "source_is_action_request": 86178,
+          "source_is_effect_resolution": 1710,
+          "self_is_turn_player": 48186,
+          "self_is_chance_player": 87822,
+          "opponent_is_turn_player": 39702,
+          "opponent_is_chance_player": 66,
+          "stage_depth": 82002,
+          "legal_pattern_count": 87888,
+          "legal_action_pattern_count": 10338,
+          "legal_pass_pattern_count": 86178,
+          "legal_effect_selection_pattern_count": 1710,
+          "self_life_count": 87888,
+          "self_hand_count": 61809,
+          "self_field_count": 87681,
+          "self_fog_count": 8613,
+          "self_trump_count": 0,
+          "self_grave_count": 87888,
+          "opponent_life_known": 87888,
+          "opponent_life_visible_count": 87888,
+          "opponent_life_is_10plus": 0,
+          "opponent_hand_count": 60204,
+          "opponent_field_count": 87627,
+          "opponent_fog_count": 8094,
+          "opponent_trump_count": 0,
+          "opponent_grave_count": 87888
+        },
+        "neverActivatedFeatures": [
+          "self_trump_count",
+          "opponent_life_is_10plus",
+          "opponent_trump_count"
+        ]
+      },
+      "pattern": {
+        "totalFeatures": 57,
+        "activatedFeatures": 40,
+        "coverageRate": 0.7017543859649122,
+        "featureCounts": {
+          "pattern_is_action": 221055,
+          "pattern_is_pass": 86178,
+          "pattern_is_effect_selection": 3435,
+          "pattern_is_other": 0,
+          "has_action": 221055,
+          "action_speed_normal": 216018,
+          "action_speed_immediate": 5037,
+          "action_speed_other": 0,
+          "action_timing_main": 36714,
+          "action_timing_quick": 184341,
+          "action_timing_block": 0,
+          "action_timing_damage_judge": 0,
+          "action_timing_other": 0,
+          "has_cost": 221055,
+          "cost_discard_count": 184341,
+          "cost_driven_bulwark_count": 10923,
+          "cost_sacrificed_unit_count": 0,
+          "cost_life_count": 17484,
+          "has_key_card": 207555,
+          "key_card_count": 207555,
+          "key_card_known_count": 207555,
+          "key_card_value_sum": 207555,
+          "key_card_value_max": 207555,
+          "key_card_spade_count": 28374,
+          "key_card_heart_count": 25986,
+          "key_card_diamond_count": 130086,
+          "key_card_club_count": 33876,
+          "has_key_unit": 0,
+          "key_unit_count": 0,
+          "selected_unit_size_sum": 0,
+          "selected_unit_size_max": 0,
+          "selected_unit_charge_count": 0,
+          "selected_unit_drive_count": 0,
+          "selected_unit_face_up_count": 0,
+          "selected_unit_face_down_count": 0,
+          "has_target": 221055,
+          "target_is_player": 3387,
+          "target_is_unit": 170169,
+          "target_is_request": 26898,
+          "target_is_none": 20601,
+          "target_is_other": 0,
+          "target_is_self": 83925,
+          "target_is_opponent": 89631,
+          "target_unit_size": 103113,
+          "target_unit_is_charge": 168030,
+          "target_unit_is_drive": 2139,
+          "target_unit_face_up": 103113,
+          "target_unit_face_down": 67056,
+          "has_effect_selection": 3435,
+          "effect_type_unit": 3072,
+          "effect_type_unit_assignment": 159,
+          "effect_type_other": 204,
+          "effect_selected_value_count": 1740,
+          "effect_assignment_count": 159,
+          "effect_assigned_unit_total": 93,
+          "has_order_selection": 0,
+          "ordered_item_count": 0
+        },
+        "neverActivatedFeatures": [
+          "pattern_is_other",
+          "action_speed_other",
+          "action_timing_block",
+          "action_timing_damage_judge",
+          "action_timing_other",
+          "cost_sacrificed_unit_count",
+          "has_key_unit",
+          "key_unit_count",
+          "selected_unit_size_sum",
+          "selected_unit_size_max",
+          "selected_unit_charge_count",
+          "selected_unit_drive_count",
+          "selected_unit_face_up_count",
+          "selected_unit_face_down_count",
+          "target_is_other",
+          "has_order_selection",
+          "ordered_item_count"
+        ]
+      }
+    },
+    "genomeArgmaxTies": [
+      {
+        "participantId": "baseline-manual-generic-v1",
+        "scoredDecisions": 23683,
+        "decisionsWithArgmaxTie": 2992,
+        "argmaxTieRate": 0.12633534602879704,
+        "totalTopTiedPatterns": 58876,
+        "maxTopTieCount": 152,
+        "argmaxTieWithFeatureCollisionCount": 1716
+      },
+      {
+        "participantId": "baseline-zero-genome-v1",
+        "scoredDecisions": 23683,
+        "decisionsWithArgmaxTie": 3053,
+        "argmaxTieRate": 0.12891103323058734,
+        "totalTopTiedPatterns": 61507,
+        "maxTopTieCount": 153,
+        "argmaxTieWithFeatureCollisionCount": 1716
+      }
+    ],
+    "counterfactualAgreements": [
+      {
+        "participantId": "baseline-first-legal-v1",
+        "referenceComparableDecisions": 23683,
+        "sameAsFirstLegalCount": 23683,
+        "sameAsFirstLegalRate": 1,
+        "sameAsZeroGenomeCount": 23683,
+        "sameAsZeroGenomeRate": 1
+      },
+      {
+        "participantId": "baseline-manual-generic-v1",
+        "referenceComparableDecisions": 23683,
+        "sameAsFirstLegalCount": 23683,
+        "sameAsFirstLegalRate": 1,
+        "sameAsZeroGenomeCount": 23683,
+        "sameAsZeroGenomeRate": 1
+      },
+      {
+        "participantId": "baseline-seeded-random-v1",
+        "referenceComparableDecisions": 16839,
+        "sameAsFirstLegalCount": 14595,
+        "sameAsFirstLegalRate": 0.866737929805808,
+        "sameAsZeroGenomeCount": 14595,
+        "sameAsZeroGenomeRate": 0.866737929805808
+      },
+      {
+        "participantId": "baseline-zero-genome-v1",
+        "referenceComparableDecisions": 23683,
+        "sameAsFirstLegalCount": 23683,
+        "sameAsFirstLegalRate": 1,
+        "sameAsZeroGenomeCount": 23683,
+        "sameAsZeroGenomeRate": 1
+      }
+    ]
+  },
+  "notes": [
+    "Official Baseline Evidence Measurement without fitness scalar or evolution.",
+    "Deterministic evaluation across 6 matchups x 100 matches (600 games total) using baseSeed 20260906."
+  ],
+  "logicalDigest": "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4",
+  "repeatability": {
+    "runADigest": "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4",
+    "runBDigest": "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4",
+    "matched": true,
+    "exactLogicalEquality": true,
+    "diagnosticErrorCount": 0
+  }
+}
