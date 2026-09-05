@@ -3,6 +3,10 @@ import { GameSession, GameSessionStep } from "../../engine/session/GameSession";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
+import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
+import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
+import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
+import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../../engine/session/playtest/createCoreBattlePlaytest";
 import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
 import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
@@ -31,8 +35,21 @@ export const CoreBattlePlaytest: React.FC = () => {
   const sessionRef = useRef<GameSession | null>(null);
   const seqRef = useRef<number>(1);
 
-  // レギュレーション選択状態
-  const [selectedRegulation, setSelectedRegulation] = useState<string>("core-battle");
+  // Pending 設定（UI入力中・対戦セッションには「新しい対戦」押下まで反映されない）
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>("core-battle");
+  const [seedInput, setSeedInput] = useState<string>("42");
+
+  // Active 設定（現在進行中の対戦セッションの設定）
+  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string>("core-battle");
+  const [activeSeed, setActiveSeed] = useState<number>(42);
+
+  // セットアップ結果通知（RULE_UNSPECIFIED または TERMINAL）
+  const [setupNotice, setSetupNotice] = useState<{
+    type: "TERMINAL" | "RULE_UNSPECIFIED";
+    title: string;
+    message: string;
+    details?: string;
+  } | null>(null);
 
   // プリセットバリデーションエラー
   const [presetValidationErrors, setPresetValidationErrors] = useState<string[]>([]);
@@ -102,7 +119,125 @@ export const CoreBattlePlaytest: React.FC = () => {
   }, []);
 
   // 新しい対戦の開始
-  const startNewGame = useCallback(() => {
+  const startNewGame = useCallback((overrideEnv?: string, overrideSeed?: number) => {
+    const env = overrideEnv ?? selectedEnvironmentId;
+    let seed = overrideSeed;
+    if (seed === undefined) {
+      const parsed = parseInt(seedInput, 10);
+      seed = isNaN(parsed) || parsed < 0 ? 42 : parsed;
+    }
+
+    // Active 設定にコミット
+    setActiveEnvironmentId(env);
+    setActiveSeed(seed);
+    setSetupNotice(null);
+
+    if (env === "official-light-entry16") {
+      try {
+        const catalog = loadRegulationCatalogForBrowser();
+        const validation = RegulationValidator.validateRegulation(catalog, "light-entry16", {
+          assertImplemented: true,
+        });
+        const regulation = validation.regulation!;
+        const format = validation.format!;
+        const frame = validation.frame!;
+
+        const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(
+          fullRulePackage,
+          format,
+          regulation
+        );
+
+        const outcome = OfficialRegulationMatchSetup.setupMatch(
+          regulation,
+          frame,
+          officialRulePackage,
+          seed,
+          {
+            matchId: `match-official-${seed}`,
+            playerNames: { p1: "Player A", p2: "Player B" },
+          }
+        );
+
+        if (outcome.type === "RULE_UNSPECIFIED") {
+          sessionRef.current = null;
+          setCurrentStep(null);
+          setGameState(null);
+          setSetupNotice({
+            type: "RULE_UNSPECIFIED",
+            title: "公式セットアップ未定義 (RULE_UNSPECIFIED)",
+            message: outcome.reason,
+            details: `reasonCode: ${outcome.reasonCode} | seed: ${seed}`,
+          });
+          addLog(`[RULE_UNSPECIFIED] ${outcome.reason} (reasonCode: ${outcome.reasonCode}, seed: ${seed})`, "system");
+          return;
+        }
+
+        if (outcome.type === "TERMINAL") {
+          const terminalState: any = {
+            stateVersion: 1,
+            version: 1,
+            matchId: `match-official-${seed}`,
+            turnPlayer: outcome.loser,
+            chancePlayer: outcome.loser,
+            players: {
+              p1: { name: "Player A", life: outcome.winner === "p1" ? [1] : [] },
+              p2: { name: "Player B", life: outcome.winner === "p2" ? [1] : [] },
+            },
+          };
+          const session = new GameSession(terminalState, officialRulePackage);
+          sessionRef.current = session;
+          setGameState(terminalState);
+          setCurrentStep(session.advance());
+          setLatestEventMessage(outcome.reason);
+          addLog(`[TERMINAL] ${outcome.reason}`, "system", terminalState);
+          return;
+        }
+
+        // outcome.type === "READY"
+        const session = new GameSession(outcome.state, officialRulePackage, {
+          matchId: outcome.state.matchId,
+        });
+        sessionRef.current = session;
+
+        setLogs([]);
+        setTraces([]);
+        seqRef.current = 1;
+        setLatestEventMessage("ゲーム開始準備完了");
+        setSelectedUnitIds([]);
+        setSheetMode("collapsed");
+        addLog(`[START] ライト + エントリー16 (公式対戦) を開始しました (Seed: ${seed})`, "info", outcome.state);
+        addLog(`[REGULATION] Light + Entry16 (Rules 9.1.2)`, "info", outcome.state);
+        addTrace("MATCH_SETUP", `公式対戦開始 (Seed: ${seed})`, outcome.state);
+
+        const firstPlayerName = outcome.firstPlayer === "p1" ? "Player A" : "Player B";
+        addLog(`[FIRST_PLAYER] 先攻決定により ${firstPlayerName} (${outcome.firstPlayer.toUpperCase()}) が先攻に決定しました`, "action", outcome.state);
+        addLog(`[GAME_START] 先攻プレイヤーがライフから1枚引いてゲームを開始します`, "info", outcome.state);
+
+        const step = session.advance();
+        setCurrentStep(step);
+        setGameState(JSON.parse(JSON.stringify(session.state)));
+
+        if (step.type === "WAITING_FOR_DECISION") {
+          lastActivePlayerRef.current = step.request.playerId;
+          setPendingPlayerKey(step.request.playerId);
+          if (enablePassAndPlay) {
+            setIsPassAndPlayWaiting(true);
+          }
+          addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, outcome.state);
+        }
+        return;
+      } catch (err: any) {
+        setSetupNotice({
+          type: "TERMINAL",
+          title: "公式対戦初期化エラー",
+          message: err?.message || String(err),
+        });
+        return;
+      }
+    }
+
+    // Default: Core Battle
     const rawState = createCoreBattlePresetState();
 
     // プリセットバリデーション
@@ -161,11 +296,15 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
       addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, setupResult.state);
     }
-  }, [fullRulePackage, rulePackage, enablePassAndPlay, addLog, addTrace]);
+  }, [selectedEnvironmentId, seedInput, fullRulePackage, rulePackage, enablePassAndPlay, addLog, addTrace]);
 
-  // 初回マウント時にゲーム初期化
+  // 初回マウント時にのみ1回ゲーム初期化
+  const initialStartRef = useRef(false);
   useEffect(() => {
-    startNewGame();
+    if (!initialStartRef.current) {
+      initialStartRef.current = true;
+      startNewGame("core-battle", 42);
+    }
   }, [startNewGame]);
 
   // 盤面ユニットクリック時のトグルハンドラ
@@ -358,7 +497,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             ))}
           </ul>
           <button
-            onClick={startNewGame}
+            onClick={() => startNewGame()}
             className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold rounded shadow transition text-xs font-mono min-h-[44px]"
           >
             再試行 (Retry)
@@ -368,7 +507,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
-  if (!gameState) {
+  if (!gameState && !setupNotice) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f7f8] text-zinc-950 font-sans">
         <div className="flex flex-col items-center gap-2">
@@ -386,18 +525,18 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   // Observation を基準とした PlayerBoardViewModel の生成 (Debug ONに関わらず通常盤面は常にObservation準拠)
   const observation = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
-  const p1ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
+  const p1ViewModel = gameState ? PlayerObservationPresenter.buildPlayerViewModel(
     "p1",
     observation,
     gameState,
     activePlayerKey
-  );
-  const p2ViewModel = PlayerObservationPresenter.buildPlayerViewModel(
+  ) : null;
+  const p2ViewModel = gameState ? PlayerObservationPresenter.buildPlayerViewModel(
     "p2",
     observation,
     gameState,
     activePlayerKey
-  );
+  ) : null;
 
   // DecisionPanel のコンテンツ生成
   const decisionPanelContent = currentStep?.type === "WAITING_FOR_DECISION" ? (
@@ -451,18 +590,27 @@ export const CoreBattlePlaytest: React.FC = () => {
             </span>
           </div>
 
-          {/* Regulation Selector (PC用) */}
-          <div className="hidden md:flex items-center gap-1 ml-1 font-mono">
-            <span className="text-[9px] font-bold text-zinc-400">Reg:</span>
+          {/* Environment Selector & Seed (PC用) */}
+          <div className="hidden md:flex items-center gap-1.5 ml-1 font-mono">
+            <span className="text-[9px] font-bold text-zinc-400">Env:</span>
             <select
-              value={selectedRegulation}
-              onChange={(e) => setSelectedRegulation(e.target.value)}
+              value={selectedEnvironmentId}
+              onChange={(e) => setSelectedEnvironmentId(e.target.value)}
               className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
-              <option value="core-battle">Core Battle (Preset 001)</option>
+              <option value="core-battle">Core Battle (既存初期盤面)</option>
+              <option value="official-light-entry16">ライト + エントリー16 (公式)</option>
               <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
-              <option value="entry-16" disabled>Entry 16 (Coming Soon)</option>
             </select>
+
+            <span className="text-[9px] font-bold text-zinc-400 ml-1">Seed:</span>
+            <input
+              type="number"
+              value={seedInput}
+              onChange={(e) => setSeedInput(e.target.value)}
+              className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
+              placeholder="42"
+            />
           </div>
         </div>
 
@@ -490,10 +638,10 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
 
           <button
-            onClick={startNewGame}
+            onClick={() => startNewGame()}
             className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
           >
-            Reset
+            新しい対戦
           </button>
         </div>
 
@@ -513,9 +661,39 @@ export const CoreBattlePlaytest: React.FC = () => {
       <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
         <div className="lg:col-span-7 flex flex-col gap-1.5">
+          {/* セットアップ通知バナー (RULE_UNSPECIFIED または TERMINAL) */}
+          {setupNotice && (
+            <div className={`p-3 rounded border font-mono ${
+              setupNotice.type === "RULE_UNSPECIFIED"
+                ? "bg-amber-50 border-amber-300 text-amber-950"
+                : "bg-red-50 border-red-300 text-red-950"
+            }`}>
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <span className={`px-1.5 py-0.5 rounded text-xs text-white ${
+                  setupNotice.type === "RULE_UNSPECIFIED" ? "bg-amber-600" : "bg-red-600"
+                }`}>
+                  {setupNotice.type}
+                </span>
+                <span>{setupNotice.title}</span>
+              </div>
+              <p className="text-xs mt-1">{setupNotice.message}</p>
+              {setupNotice.details && (
+                <p className="text-[11px] text-zinc-600 mt-0.5">{setupNotice.details}</p>
+              )}
+              {!gameState && (
+                <p className="text-xs text-zinc-500 mt-2">
+                  ※ Seedまたは対戦環境を変更し、上部の「新しい対戦」ボタンを押してください。
+                </p>
+              )}
+            </div>
+          )}
+
           {/* ゲーム進行ステータスバー */}
           {gameState && (
             <GameStatusBar
+              environmentName={activeEnvironmentId === "official-light-entry16" ? "ライト + エントリー16 (公式)" : "Core Battle (Preset 001)"}
+              matchSeed={activeSeed}
+              stateVersion={gameState.stateVersion ?? gameState.version}
               turnPlayer={gameState.turnPlayer}
               chancePlayer={gameState.chancePlayer}
               turnCount={gameState.turnCount}
@@ -525,7 +703,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
 
           {/* 対戦相手 (Player B) の盤面 (Observation 準拠) */}
-          {gameState?.players?.p2 && (
+          {p2ViewModel && gameState?.players?.p2 && (
             <PlayerBoard
               playerKey="p2"
               viewModel={p2ViewModel}
@@ -537,10 +715,10 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
 
           {/* 中央 STAGE パネル */}
-          <StagePanel requests={gameState?.stage?.requests || []} />
+          {gameState && <StagePanel requests={gameState?.stage?.requests || []} />}
 
           {/* 自分 (Player A) の盤面 (Observation 準拠) */}
-          {gameState?.players?.p1 && (
+          {p1ViewModel && gameState?.players?.p1 && (
             <PlayerBoard
               playerKey="p1"
               viewModel={p1ViewModel}
@@ -624,13 +802,15 @@ export const CoreBattlePlaytest: React.FC = () => {
       <MobileHeaderMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        selectedRegulation={selectedRegulation}
-        onSelectRegulation={setSelectedRegulation}
+        selectedRegulation={selectedEnvironmentId}
+        onSelectRegulation={setSelectedEnvironmentId}
+        seedInput={seedInput}
+        onSeedInputChange={setSeedInput}
         enablePassAndPlay={enablePassAndPlay}
         onTogglePassAndPlay={setEnablePassAndPlay}
         onOpenLogModal={() => setShowMobileLogModal(true)}
         onOpenDebugModal={() => setShowMobileDebugModal(true)}
-        onResetGame={startNewGame}
+        onResetGame={() => startNewGame()}
       />
 
       {/* 4. Mobile 対戦ログモーダル */}
@@ -696,7 +876,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           winnerName={gameState?.players?.[currentStep.result.winner || ""]?.name || currentStep.result.winner}
           reason={currentStep.result.reason}
           logs={logs}
-          onRestart={startNewGame}
+          onRestart={() => startNewGame()}
         />
       )}
     </div>

@@ -5,6 +5,8 @@ export interface MobileHeaderMenuProps {
   readonly onClose: () => void;
   readonly selectedRegulation: string;
   readonly onSelectRegulation: (reg: string) => void;
+  readonly seedInput?: string;
+  readonly onSeedInputChange?: (val: string) => void;
   readonly enablePassAndPlay: boolean;
   readonly onTogglePassAndPlay: (val: boolean) => void;
   readonly onOpenLogModal: () => void;
@@ -17,6 +19,8 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onClose,
   selectedRegulation,
   onSelectRegulation,
+  seedInput = "42",
+  onSeedInputChange,
   enablePassAndPlay,
   onTogglePassAndPlay,
   onOpenLogModal,
@@ -49,21 +53,33 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
         {/* レギュレーション選択 */}
         <div className="flex flex-col gap-1">
           <label className="text-[11px] font-mono font-bold text-zinc-500">
-            レギュレーション:
+            対戦環境 (Environment):
           </label>
           <select
             value={selectedRegulation}
             onChange={(e) => onSelectRegulation(e.target.value)}
             className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
           >
-            <option value="core-battle">Core Battle (Preset 001)</option>
+            <option value="core-battle">Core Battle (既存初期盤面)</option>
+            <option value="official-light-entry16">ライト + エントリー16 (公式)</option>
             <option value="master-extra" disabled>
               Master + Extra (Coming Soon)
             </option>
-            <option value="entry-16" disabled>
-              Entry 16 (Coming Soon)
-            </option>
           </select>
+        </div>
+
+        {/* Seed 入力 */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-mono font-bold text-zinc-500">
+            Seed (乱数シード):
+          </label>
+          <input
+            type="number"
+            value={seedInput}
+            onChange={(e) => onSeedInputChange?.(e.target.value)}
+            className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
+            placeholder="42"
+          />
         </div>
 
         {/* Pass-and-Play */}
@@ -107,7 +123,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           }}
           className="w-full py-2.5 px-3 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
         >
-          <span>ゲームをリセット (Reset)</span>
+          <span>新しい対戦を開始 (New Match)</span>
         </button>
 
         {/* Build 情報 */}

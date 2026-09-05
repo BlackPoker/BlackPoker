@@ -3,17 +3,14 @@ import {
   FormatDefinition,
   FrameDefinition,
   RegulationDefinition,
+  RegulationCatalog,
   UnknownRegulationError,
   UnknownFormatError,
   UnknownFrameError,
 } from "../../domain/regulation/RegulationDefinition";
 import { deepFreeze } from "../rules/RuleLoader";
 
-export interface RegulationCatalog {
-  readonly formats: ReadonlyMap<string, FormatDefinition>;
-  readonly frames: ReadonlyMap<string, FrameDefinition>;
-  readonly regulations: ReadonlyMap<string, RegulationDefinition>;
-}
+export type { RegulationCatalog };
 
 let catalogCache: RegulationCatalog | null = null;
 

@@ -6,6 +6,9 @@ export interface GameStatusBarProps {
   turnCount: number;
   players: any;
   latestEventMessage?: string;
+  environmentName?: string;
+  matchSeed?: number;
+  stateVersion?: number;
 }
 
 export const GameStatusBar: React.FC<GameStatusBarProps> = ({
@@ -14,6 +17,9 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
   turnCount,
   players = {},
   latestEventMessage,
+  environmentName,
+  matchSeed,
+  stateVersion,
 }) => {
   const turnPlayerName = players[turnPlayer]?.name || (turnPlayer === "p1" ? "Player A" : "Player B");
   const chancePlayerName = players[chancePlayer]?.name || (chancePlayer === "p1" ? "Player A" : "Player B");
@@ -23,6 +29,25 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
       {/* 主要ステータスバッジ群 */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-1.5 font-mono">
+          {/* 環境バッジ */}
+          {environmentName && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">環境:</span>
+              <span className="text-xs font-bold text-zinc-950 font-mono">
+                {environmentName}
+              </span>
+            </div>
+          )}
+
+          {/* Seed バッジ */}
+          {matchSeed !== undefined && (
+            <div className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">Seed:</span>
+              <span className="text-xs font-bold text-zinc-950 font-mono">
+                {matchSeed}
+              </span>
+            </div>
+          )}
           {/* ターン数バッジ */}
           <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">TURN</span>
@@ -52,7 +77,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
         </div>
 
         <div className="text-[11px] text-zinc-500 font-mono italic">
-          Action Request or PASS
+          {stateVersion !== undefined ? `v${stateVersion} | ` : ""}Action Request or PASS
         </div>
       </div>
 

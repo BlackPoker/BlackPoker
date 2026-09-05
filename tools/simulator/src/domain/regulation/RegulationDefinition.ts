@@ -73,6 +73,15 @@ export interface RegulationDefinition {
 }
 
 /**
+ * フォーマット、フレーム、レギュレーション定義を統合したカタログ
+ */
+export interface RegulationCatalog {
+  readonly formats: ReadonlyMap<string, FormatDefinition>;
+  readonly frames: ReadonlyMap<string, FrameDefinition>;
+  readonly regulations: ReadonlyMap<string, RegulationDefinition>;
+}
+
+/**
  * レギュレーション検証結果
  */
 export interface RegulationValidationResult {
