@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-3.2-20260905-0808`
-更新日時: 2026-09-05 08:08 JST
+作業ID: `BP-SIM-REG-1.0-20260905-1240`
+更新日時: 2026-09-05 12:40 JST
 
 ---
 
