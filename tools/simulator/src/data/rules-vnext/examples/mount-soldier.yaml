@@ -1,0 +1,35 @@
+actions:
+  - id: action.mountSoldier
+    name: 装備
+    ruby: そうび
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BL
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "A..K"
+          zone: hand
+
+    targets:
+      - id: targetSoldier
+        type: unit
+        condition:
+          relation: self
+          characterType: soldier
+          matchSuitWithKey: true
+
+    text:
+      effect: 対象とした兵士の上にキーカードを置き装備兵とする。
+
+    effect:
+      - mountUnit:
+          card: key
+          target: selection.targetSoldier

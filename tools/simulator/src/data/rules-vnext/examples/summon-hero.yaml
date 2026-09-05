@@ -1,0 +1,29 @@
+actions:
+  - id: action.summonHero
+    name: 英雄召喚
+    ruby: えいゆうしょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BBL
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "J..K"
+          zone: hand
+
+    text:
+      effect: キーカードを英雄として表向きかつチャージ状態で場に出す。
+
+    effect:
+      - summonUnit:
+          card: key
+          component: character.hero
+          face: up
+          state: charge

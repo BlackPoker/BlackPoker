@@ -19,6 +19,7 @@ import {
   drawFromLifeHandler,
   setAllUnitStateHandler,
   discardCardsHandler,
+  mountUnitHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -148,6 +149,7 @@ export interface CommandContext {
   keyCard?: any; // キーカード情報
   keyCards?: any[]; // 複数キーカード情報
   targetComponent?: any; // 対象となったコンポーネント/ユニット
+  targetUnitId?: string; // 対象となったユニットID
   targetPlayerKey?: string; // 対象となったプレイヤー情報
   targetRequest?: ActionRequest; // 対象となったリクエスト情報
   actions?: ActionDefinition[]; // アクションの全定義（誘発アクションの検索用）
@@ -973,5 +975,6 @@ export class CommandRegistry {
     this.register("drawCards", drawFromLifeHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("setAllUnitState", setAllUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("discardCards", discardCardsHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("mountUnit", mountUnitHandler(this.effectInterpreter));
   }
 }

@@ -1,0 +1,29 @@
+actions:
+  - id: action.summonAce
+    name: エース召喚
+    ruby: えーすしょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: L
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "A"
+          zone: hand
+
+    text:
+      effect: キーカードをエースとして表向きかつチャージ状態で場に出す。
+
+    effect:
+      - summonUnit:
+          card: key
+          component: character.ace
+          face: up
+          state: charge

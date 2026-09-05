@@ -100,7 +100,7 @@ export async function loadRulePackageFromDirectory(dirPath: string): Promise<Rul
 
   const readDirRecursive = (dir: string): string[] => {
     let results: string[] = [];
-    const list = fs.readdirSync(dir);
+    const list = fs.readdirSync(dir).sort();
     list.forEach((file) => {
       const fullPath = path.resolve(dir, file);
       const stat = fs.statSync(fullPath);

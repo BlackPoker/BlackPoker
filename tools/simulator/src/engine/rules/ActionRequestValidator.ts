@@ -1,7 +1,8 @@
 import { CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { CostResolver } from "./CostResolver";
-import { matchesSuit, rankToValue, matchesRank } from "./cardUtils";
+import { matchesSuit, rankToValue, matchesRank, normalizeSuit } from "./cardUtils";
+import { getCharacterType } from "./characterUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -321,6 +322,29 @@ export class ActionRequestValidator {
                 throw new ValidationError(
                   `ターゲットユニットの状態が不適合です。期待: charge または drive, 実際: ${unitState}`
                 );
+              }
+            }
+
+            // キャラクタータイプの検証 (例: soldier)
+            if (cond.characterType) {
+              const charType = getCharacterType(context.targetComponent, context.components);
+              if (charType !== cond.characterType) {
+                throw new ValidationError(
+                  `ターゲットのキャラクタータイプが不適合です。要求: ${cond.characterType}, 実際: ${charType}`
+                );
+              }
+            }
+
+            // キーカードとのスート一致検証 (装備など)
+            if (cond.matchSuitWithKey) {
+              const keyCard = context.keyCard || (context.keyCards && context.keyCards[0]);
+              const targetCard = context.targetComponent?.cards?.[0];
+              if (keyCard && targetCard) {
+                if (normalizeSuit(keyCard.suit) !== normalizeSuit(targetCard.suit)) {
+                  throw new ValidationError(
+                    `キーカードとターゲットのスートが一致しません。キー: ${keyCard.suit}, ターゲット: ${targetCard.suit}`
+                  );
+                }
               }
             }
 

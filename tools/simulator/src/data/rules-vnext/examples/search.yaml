@@ -1,0 +1,20 @@
+actions:
+  - id: action.search
+    name: サーチ
+    ruby: さーち
+    type: magic
+
+    request:
+      trigger: direct
+      speed: immediate
+      timing: quick
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "Joker"
+          zone: hand
+
+    text:
+      effect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフをシャッフルする。

@@ -1,0 +1,61 @@
+id: entry16
+name: エントリー16
+description: 公式BlackPoker エントリー16フレーム (第9.1.2版 8.3.1.1)
+recommendedFormatIds:
+  - light
+deck:
+  cardCount: 16
+  cards:
+    - suit: S
+      rank: A
+      value: 1
+    - suit: S
+      rank: "2"
+      value: 2
+    - suit: S
+      rank: "3"
+      value: 3
+    - suit: S
+      rank: K
+      value: 13
+    - suit: H
+      rank: "4"
+      value: 4
+    - suit: H
+      rank: "7"
+      value: 7
+    - suit: H
+      rank: J
+      value: 11
+    - suit: H
+      rank: Q
+      value: 12
+    - suit: D
+      rank: "5"
+      value: 5
+    - suit: D
+      rank: "8"
+      value: 8
+    - suit: D
+      rank: "10"
+      value: 10
+    - suit: D
+      rank: Q
+      value: 12
+    - suit: C
+      rank: A
+      value: 1
+    - suit: C
+      rank: "6"
+      value: 6
+    - suit: C
+      rank: "9"
+      value: 9
+    - suit: C
+      rank: K
+      value: 13
+setup:
+  initialHandCount: 7
+  preset:
+    bulwarkCount: 1
+    soldierCount: 1

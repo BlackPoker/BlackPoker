@@ -167,12 +167,30 @@ export function isBulwarkType(unit: any, components: readonly ComponentDefinitio
 }
 
 /**
- * ユニットがアタッカー候補としての資格（charge状態、character、<攻撃>ラベル）を満たすか判定します。
+ * ユニットがアタッカー候補としての資格（charge状態、character、<攻撃>ラベル、召喚ターン制限）を満たすか判定します。
  */
-export function isLegalAttackerCandidate(unit: any, components: readonly ComponentDefinition[] = []): boolean {
+export function isLegalAttackerCandidate(
+  unit: any,
+  components: readonly ComponentDefinition[] = [],
+  currentTurn?: number
+): boolean {
   if (!unit || unit.state !== "charge") return false;
   if (!isCharacterComponent(unit, components)) return false;
-  return hasUnitLabel(unit, "攻撃", components);
+  if (!hasUnitLabel(unit, "攻撃", components)) return false;
+
+  if (currentTurn !== undefined) {
+    const isPreset = unit.enteredFieldBeforeGame === true || unit.enteredFieldTurn === 0 || unit.enteredTurn === 0;
+    if (!isPreset) {
+      const enteredThisTurn =
+        unit.enteredFieldTurn === currentTurn ||
+        (unit.enteredFieldTurn === undefined && unit.enteredTurn === currentTurn);
+      if (enteredThisTurn && !hasHaste(unit, components)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 /**

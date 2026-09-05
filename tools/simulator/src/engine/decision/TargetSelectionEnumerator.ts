@@ -2,7 +2,7 @@ import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { ExpressionEvaluator } from "../rules/ExpressionEvaluator";
 import { formatSuitSymbol } from "../rules/cardUtils";
-import { getUnitDisplayName } from "../rules/characterUtils";
+import { getUnitDisplayName, getCharacterType } from "../rules/characterUtils";
 
 
 /**
@@ -99,6 +99,12 @@ export class TargetSelectionEnumerator {
               const compDef = components?.find((c: any) => c.id === compId);
               const isChar = compDef ? compDef.type === "character" : compId.startsWith("character.");
               if (!isChar) continue;
+            }
+
+            // characterType の検証 (例: soldier)
+            if (cond?.characterType) {
+              const charType = getCharacterType(unit, components);
+              if (charType !== cond.characterType) continue;
             }
 
             // cond.component の検証

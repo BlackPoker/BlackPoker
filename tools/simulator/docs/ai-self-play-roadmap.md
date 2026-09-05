@@ -48,6 +48,7 @@
 | **Participant Outcome Summary** | **IMPLEMENTED** | `PolicyExperimentRunner.ts` | `src/tests/ai/policyExperiment.test.ts` | 保存則、asP1/asP2、winRateOnCompleted |
 | **Generic Behavior Metrics** | **IMPLEMENTED** | `src/engine/ai/DecisionBehaviorObserverPolicy.ts` | `src/tests/ai/policyExperiment.test.ts` | 外部 Accumulator、Pattern Kind / Source 集計 |
 | **Baseline Policy Suite** | **IMPLEMENTED** | `src/engine/ai/BaselinePolicies.ts` | `src/tests/ai/policyExperiment.test.ts`, `simulate:experiment` | FirstLegal, Random, Zero, ManualGeneric |
+| **Official Regulation Environment** | **IMPLEMENTED (Light + Entry16)** | `src/engine/regulation/OfficialRegulationMatchFactory.ts` | `src/tests/regulation/*.test.ts`, `npm run simulate:official` | 公式ルール第9.1.2版に基づく公式対戦環境。CORE-BATTLE 結果は公式評価ではなく Core 検証用 |
 | **Composite Fitness** | **MISSING / FUTURE** | - | - | 単一スコア評価・適応度関数 (Phase 4.0 で策定) |
 | **Automatic Failure Re-run** | **MISSING / FUTURE** | - | - | 失敗試合の自動再実行API (将来) |
 | **Parallel Batch** | **MISSING / FUTURE** | - | - | Worker thread / マルチプロセス並列実行 (将来) |
@@ -382,7 +383,46 @@ GameSession
 
 ---
 
-## 7. Future Architecture (Phase 4.0 予定)
+## 7. Official Regulation Environment (Official Regulation Phase 1.0)
+
+### 1. CORE-BATTLE-001 と公式レギュレーションの分離
+- **CORE-BATTLE-001 の位置づけ**:
+  - `CORE-BATTLE-001` はシミュレータの Core Flow、Stage、決定論、Snapshot、Batch、Feature Encoder、Experiment Harness 等の内部エンジニアリング検証を目的とした人工的な最小対戦環境です。
+  - **`CORE-BATTLE-001` による勝敗、性能、メトリクス結果は、BlackPoker の公式なゲームバランス評価や AI 性能評価としては扱いません**。
+- **公式レギュレーション（Light + Entry16）の確立**:
+  - BlackPoker 公式ルール（第9.1.2版）に準拠した初の公式対戦環境「ライト（Format）」+「エントリー16（Frame）」を E2E 構築しました。
+  - 今後の AI ポリシー評価、強化学習、自己対戦実験は本公式レギュレーション環境を基準として行われます。
+
+### 2. Format と Frame の分離と合法性
+- **ルール上の合法性と推奨の分離**:
+  - 公式ルール 2.3 に基づき、すべての Format と Frame の組み合わせはルール上合法（`ruleLegal: true`）として扱われます。
+  - 推奨レギュレーション（Table 2.1）は `recommendedFormatIds` として表現され、非推奨の組み合わせもルール違反（`RULE_INVALID`）ではなく `NOT_RECOMMENDED` と判定されます。
+  - Simulator Phase 1.0 で未実装の組み合わせ（Standard/Pro/Master）については、ルール違反ではなく `SIMULATOR_NOT_IMPLEMENTED` としてフェイルファストします。
+
+### 3. エントリー16 プレゲームセットアップ
+- **固定16枚デッキ & カード保存則**:
+  - 各プレイヤーは指定の16枚（♠A,2,3,K, ♡4,7,J,Q, ♢5,8,10,Q, ♣A,6,9,K; Jokerなし）をデッキとして使用。
+  - シード付きシャッフルを経て、全16枚を Life ゾーンへ配置。
+  - Life から7枚を初期手札として引く。
+  - 防壁プリセット: Life から1枚を裏向き防壁として配置。
+  - 兵士プリセット: Hand から条件に合致する1枚を初期兵士として配置。条件カードがない場合はルール 3.9.1 の再試行（Lifeから補充）を実施。Life が枯渇した場合はゲーム上の敗北（SetupOutcome: TERMINAL）として処理。
+  - 先攻決定後、先攻プレイヤーが1枚ドローしてゲーム開始。
+  - 各プレイヤーの全カード枚数（Hand + Field + Bulwark + Life + Grave）はゲーム中常に厳格に 16 枚を保存。
+
+### 4. アタック制限ルール（プリセット兵 vs 召喚兵）
+- **プリセット兵（`enteredFieldBeforeGame: true`）**:
+  - ゲーム開始前から戦場に配置されているため、Turn 1 / 自身の最初のターンから通常通り攻撃宣言可能。
+- **ゲーム中召喚兵（`enteredFieldTurn === currentTurn`）**:
+  - 召喚されたターン中は攻撃不可（チャージ状態であっても不可、同ターン内に再チャージされても不可）。
+  - ただし、エース（Ace）等の即時攻撃能力（`<速攻>` / haste）を持つユニットは召喚ターンでも攻撃可能。
+
+### 5. Policy Experiment Harness とのシームレス統合
+- `OfficialRegulationMatchFactory.createSessionFactory()` は、Phase 3.2 の `PolicyExperimentRunner` や `BatchSimulationRunner` に渡す `sessionFactory` を直接生成できます。
+- これにより、公式レギュレーション下での Pairwise AI 対戦実験（Leg 1/2 の座席入替、同一シード決定論評価）が追加実装なしで即座に実行可能です。
+
+---
+
+## 8. Future Architecture (Phase 4.0 予定)
 
 ### Self-Play Evolution Cycle (Phase 4.0 予定)
 1. **Population**: 100 DNA
@@ -391,4 +431,5 @@ GameSession
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+
 

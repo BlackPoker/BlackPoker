@@ -1,0 +1,31 @@
+id: light
+name: ライト
+description: 公式BlackPoker ライトフォーマット (第9.1.2版 第7章)
+actions:
+  - action.end
+  - action.charge
+  - action.draw
+  - action.attack
+  - action.block
+  - action.damageJudge
+  - action.nextGeneration
+  - action.setBulwark
+  - action.summonSoldier
+  - action.summonHero
+  - action.summonAce
+  - action.mountSoldier
+  - action.up
+  - action.down
+  - action.twist
+  - action.counter
+  - action.destroyBulwark
+  - action.throwing
+  - action.search
+components:
+  - character.soldier
+  - character.hero
+  - character.ace
+  - character.armedSoldier
+  - character.bulwark
+  - fog.up
+  - fog.down

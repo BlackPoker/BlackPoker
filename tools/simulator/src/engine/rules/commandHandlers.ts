@@ -112,7 +112,6 @@ export function summonUnitHandler(): CommandHandler {
     }
 
     const newUnit = {
-
       unitId: `unit-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       kind: kind,
       componentId: component,
@@ -121,6 +120,8 @@ export function summonUnitHandler(): CommandHandler {
       cards: unitCard ? [unitCard] : [],
       labels: [...labels],
       enteredTurn: context.state.turnCount ?? 1,
+      enteredFieldTurn: context.state.turnCount ?? 1,
+      enteredFieldBeforeGame: false,
     };
 
     // 手札から召喚カードを消費（手札にある場合のみ）
@@ -132,6 +133,89 @@ export function summonUnitHandler(): CommandHandler {
       player.field = [];
     }
     player.field.push(newUnit);
+  };
+}
+
+/**
+ * mountUnit: ユニットの上にカードを重ねて装備する（装備兵化）
+ */
+export function mountUnitHandler(effectInterpreter: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    const { target, card } = args;
+    const player = context.state.players[context.playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
+
+    let targetUnit: any = undefined;
+    let targetUnitId: string | undefined = undefined;
+
+    if (typeof target === "string" && target.startsWith("selection.")) {
+      const selId = target.replace("selection.", "");
+      const selected = context.selections?.[selId];
+      if (Array.isArray(selected) && selected.length > 0) {
+        targetUnitId = typeof selected[0] === "string" ? selected[0] : selected[0]?.unitId;
+      }
+    }
+    if (!targetUnitId && context.targetComponent) {
+      targetUnit = context.targetComponent;
+      targetUnitId = targetUnit.unitId;
+    }
+    if (!targetUnitId && context.targetUnitId) {
+      targetUnitId = context.targetUnitId;
+    }
+
+    if (!targetUnit && targetUnitId) {
+      targetUnit = player.field?.find((u: any) => u.unitId === targetUnitId);
+    }
+
+    if (!targetUnit) return;
+
+    let mountCard: any = undefined;
+    if (typeof card === "string" && card.startsWith("selection.")) {
+      const selId = card.replace("selection.", "");
+      const selected = context.selections?.[selId];
+      if (Array.isArray(selected) && selected.length > 0) {
+        const val = selected[0];
+        mountCard = typeof val === "string" ? player.hand?.find((c: any) => c.id === val) : val;
+      }
+    }
+    if (!mountCard && (card === "key" || card === "keyCard" || context.keyCard)) {
+      mountCard = context.keyCard;
+    }
+
+    if (!mountCard) return;
+
+    if (Array.isArray(player.hand)) {
+      player.hand = player.hand.filter((c: any) => c.id !== mountCard.id);
+    }
+
+    if (!Array.isArray(targetUnit.cards)) {
+      targetUnit.cards = [];
+    }
+    targetUnit.cards.push(mountCard);
+
+    const armedDef = context.components?.find((c: any) => c.id === "character.armedSoldier");
+    targetUnit.kind = armedDef?.display?.kind || armedDef?.name || "装備兵";
+    targetUnit.componentId = "character.armedSoldier";
+
+    if (mountCard.rank === "A" || String(mountCard.rank).toUpperCase() === "A") {
+      if (!targetUnit.labels) targetUnit.labels = [];
+      if (!targetUnit.labels.includes("速攻") && !targetUnit.labels.includes("haste")) {
+        targetUnit.labels.push("速攻");
+      }
+    }
+
+    const event = {
+      type: "cardMoved",
+      payload: {
+        card: mountCard,
+        fromZone: "hand",
+        toZone: "field",
+        playerKey: context.playerKey,
+        targetUnitId: targetUnit.unitId,
+        cause: { type: "effect", command: "mountUnit" },
+      },
+    };
+    effectInterpreter.dispatchEvent(event, context);
   };
 }
 

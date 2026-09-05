@@ -17,9 +17,77 @@ components:
       characterType: soldier
       size: unit.cards[0].rankValue
       labels: [attack, defense]
+      eligibleAsPresetSoldier: true
 
     text:
       summary: 数字2〜10のカードは一般兵として扱う。
+
+  - id: character.hero
+    name: 英雄
+    ruby: えいゆう
+    type: character
+    zone: field
+    display:
+      kind: 英雄
+
+    unitCondition:
+      cards:
+        count: 1
+        rank: "J..K"
+      face: up
+
+    properties:
+      characterType: soldier
+      size: unit.cards[0].rankValue
+      labels: [attack, defense]
+      eligibleAsPresetSoldier: true
+
+    text:
+      summary: 絵札J〜Kのカードは英雄として扱う。
+
+  - id: character.ace
+    name: エース
+    ruby: えーす
+    type: character
+    zone: field
+    display:
+      kind: エース
+
+    unitCondition:
+      cards:
+        count: 1
+        rank: "A"
+      face: up
+
+    properties:
+      characterType: soldier
+      size: 1
+      labels: [attack, defense, haste]
+      eligibleAsPresetSoldier: true
+
+    text:
+      summary: Aのカードはエースとして扱う。速攻を持つ。
+
+  - id: character.armedSoldier
+    name: 装備兵
+    ruby: そうびへい
+    type: character
+    zone: field
+    display:
+      kind: 装備兵
+
+    unitCondition:
+      cards:
+        minCount: 2
+      face: up
+
+    properties:
+      characterType: soldier
+      labels: [attack, defense]
+      eligibleAsPresetSoldier: false
+
+    text:
+      summary: 兵士の上にカードを装備した状態の兵士。
 
   - id: fog.up
     name: アップ
@@ -66,4 +134,3 @@ components:
 
     text:
       summary: 任意のカード1枚を裏向きにしたユニットは防壁として扱う。
-

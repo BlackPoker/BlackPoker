@@ -1,0 +1,166 @@
+import { PlayerKey } from "../decision/DecisionSource";
+
+/**
+ * フォーマット定義 (Format Definition)
+ * 例: "light" (ライト)
+ * 利用可能な Action ID および Component ID の集合を定義します。
+ */
+export interface FormatDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  readonly actions: readonly string[];
+  readonly components: readonly string[];
+}
+
+/**
+ * カード定義 (Card Definition)
+ */
+export interface CardDefinition {
+  readonly suit: "S" | "H" | "D" | "C" | "J";
+  readonly rank: string;
+  readonly value: number;
+}
+
+/**
+ * フレームデッキ定義 (Frame Deck Definition)
+ */
+export interface FrameDeckDefinition {
+  readonly cardCount: number;
+  readonly cards: readonly CardDefinition[];
+}
+
+/**
+ * フレームセットアップ定義 (Frame Setup Definition)
+ */
+export interface FrameSetupDefinition {
+  readonly initialHandCount: number;
+  readonly preset: {
+    readonly bulwarkCount: number;
+    readonly soldierCount: number;
+  };
+}
+
+/**
+ * フレーム定義 (Frame Definition)
+ * 例: "entry16" (エントリー16)
+ *
+ * 【公式ルール第9.1.2版 2.3 & 8.3.1】
+ * ルール上はどのフォーマットとも組み合わせ可能ですが、公式に推奨されるフォーマット一覧を
+ * recommendedFormatIds に保持します。
+ */
+export interface FrameDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly description?: string;
+  /** 公式に推奨されるフォーマットID一覧 (エントリー16は ["light"]) */
+  readonly recommendedFormatIds: readonly string[];
+  readonly deck: FrameDeckDefinition;
+  readonly setup: FrameSetupDefinition;
+}
+
+/**
+ * 公式対戦レギュレーション定義 (Regulation Definition)
+ * 例: "light-entry16" (ライト + エントリー16)
+ * フォーマットとフレームの公式な組み合わせを定義します。
+ */
+export interface RegulationDefinition {
+  readonly id: string;
+  readonly name: string;
+  readonly formatId: string;
+  readonly frameId: string;
+  readonly sourceRulesVersion: string;
+}
+
+/**
+ * レギュレーション検証結果
+ */
+export interface RegulationValidationResult {
+  /** ルール上合法か (公式2.3原則: 常に true) */
+  readonly ruleLegal: boolean;
+  /** 公式推奨レギュレーションか (Table 2.1) */
+  readonly recommended: boolean;
+  /** 現行 Simulator で E2E 実装済みか */
+  readonly simulatorImplemented: boolean;
+  readonly regulation?: RegulationDefinition;
+  readonly format?: FormatDefinition;
+  readonly frame?: FrameDefinition;
+}
+
+/**
+ * ゲーム準備結果 (Setup Outcome)
+ * 3.9.1 のプリセット再試行で Life が枯渇した場合は公式ルール上の「敗北（TERMINAL）」となります。
+ */
+export type SetupOutcome =
+  | {
+      readonly type: "READY";
+      readonly state: any;
+      readonly firstPlayer: PlayerKey;
+    }
+  | {
+      readonly type: "TERMINAL";
+      readonly winner: PlayerKey;
+      readonly loser: PlayerKey;
+      readonly reason: string;
+    };
+
+/**
+ * レギュレーション関連エラー基底クラス
+ */
+export class RegulationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RegulationError";
+    Object.setPrototypeOf(this, RegulationError.prototype);
+  }
+}
+
+export class UnknownRegulationError extends RegulationError {
+  public readonly regulationId: string;
+  constructor(regulationId: string) {
+    super(`未知のレギュレーションIDです: "${regulationId}"`);
+    this.name = "UnknownRegulationError";
+    this.regulationId = regulationId;
+    Object.setPrototypeOf(this, UnknownRegulationError.prototype);
+  }
+}
+
+export class UnknownFormatError extends RegulationError {
+  public readonly formatId: string;
+  constructor(formatId: string) {
+    super(`未知のフォーマットIDです: "${formatId}"`);
+    this.name = "UnknownFormatError";
+    this.formatId = formatId;
+    Object.setPrototypeOf(this, UnknownFormatError.prototype);
+  }
+}
+
+export class UnknownFrameError extends RegulationError {
+  public readonly frameId: string;
+  constructor(frameId: string) {
+    super(`未知のフレームIDです: "${frameId}"`);
+    this.name = "UnknownFrameError";
+    this.frameId = frameId;
+    Object.setPrototypeOf(this, UnknownFrameError.prototype);
+  }
+}
+
+/**
+ * ルール上は合法であるが、Simulator で未実装の組み合わせが要求された場合のエラー
+ * (NOT_RECOMMENDED や RULE_INVALID と区別)
+ */
+export class SimulatorNotImplementedError extends RegulationError {
+  public readonly formatId: string;
+  public readonly frameId: string;
+  public readonly errorCode = "SIMULATOR_NOT_IMPLEMENTED" as const;
+
+  constructor(formatId: string, frameId: string) {
+    super(
+      `レギュレーション "${formatId} + ${frameId}" はルール上合法ですが、現行Simulatorバージョンでは未実装です。`
+    );
+    this.name = "SimulatorNotImplementedError";
+    this.formatId = formatId;
+    this.frameId = frameId;
+    Object.setPrototypeOf(this, SimulatorNotImplementedError.prototype);
+  }
+}

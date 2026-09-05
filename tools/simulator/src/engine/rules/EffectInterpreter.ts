@@ -352,11 +352,16 @@ export class EffectInterpreter {
       }
 
       // 召喚酔いチェック (アタッカー指定時: このターン場に出たキャラクターは <速攻> を持たない限りアタッカー指定不可)
+      // ※ プリセット配置 (enteredFieldBeforeGame === true) のユニットはゲーム開始前配置のため Turn 1 からアタック可能
       const isAttackerSelection = args.id === "attackers" || condition.canAttack === true;
       if (isAttackerSelection) {
         const currentTurn = context.state.turnCount ?? 1;
-        if (unit.enteredTurn === currentTurn && !hasHaste(unit, context.components)) {
-          return false;
+        const isPreset = unit.enteredFieldBeforeGame === true || unit.enteredFieldTurn === 0 || unit.enteredTurn === 0;
+        if (!isPreset) {
+          const enteredThisTurn = unit.enteredFieldTurn === currentTurn || (unit.enteredFieldTurn === undefined && unit.enteredTurn === currentTurn);
+          if (enteredThisTurn && !hasHaste(unit, context.components)) {
+            return false;
+          }
         }
       }
 
