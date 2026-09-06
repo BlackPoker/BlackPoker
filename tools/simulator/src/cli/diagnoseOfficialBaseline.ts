@@ -4,8 +4,11 @@ import { fileURLToPath } from "url";
 import { loadRegulationCatalog } from "../engine/regulation/RegulationLoader";
 import { RegulationValidator } from "../engine/regulation/RegulationValidator";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
-import { OfficialBaselineDiagnosticsRunner } from "../engine/regulation/OfficialBaselineDiagnosticsRunner";
-import { OfficialBaselineDiagnosticsConfig } from "../domain/ai/OfficialBaselineDiagnosticsTypes";
+import { OfficialBaselineDiagnosticsRunner } from "../engine/diagnostics/OfficialBaselineDiagnosticsRunner";
+import {
+  OfficialBaselineDiagnosticsConfig,
+  OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_1,
+} from "../domain/ai/OfficialBaselineDiagnosticsTypes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,7 +30,7 @@ function parseArgs(args: string[]): CliArgs {
   let primaryMaxDecisions = 500;
   let secondaryMaxDecisions = 1000;
   let tertiaryMaxDecisions = 2000;
-  let outFile = "reports/ai/official-light-entry16-diagnostics-v1.json";
+  let outFile = "reports/ai/official-light-entry16-diagnostics-v1.1.json";
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -78,28 +81,32 @@ async function main() {
   const cliArgs = parseArgs(process.argv.slice(2));
 
   console.log("================================================================================");
-  console.log("  BLACKPOKER OFFICIAL BASELINE DIAGNOSTICS (AI PHASE 3.4)");
+  console.log("  BlackPoker Official Baseline Diagnostics Runner (Phase 3.4.1)");
   console.log("================================================================================");
   console.log(`Regulation:              ${cliArgs.regulationId}`);
   console.log(`Base Seed:               ${cliArgs.baseSeed}`);
-  console.log(`Primary Max Decisions:   ${cliArgs.primaryMaxDecisions}`);
-  console.log(`Secondary Max Decisions: ${cliArgs.secondaryMaxDecisions}`);
-  console.log(`Tertiary Max Decisions:  ${cliArgs.tertiaryMaxDecisions}`);
-  console.log(`Matches/Seat:            ${cliArgs.matchesPerSeat} (100 games/matchup x 6 = 600 total)`);
+  console.log(`Matches Per Seat:        ${cliArgs.matchesPerSeat} (Total: ${cliArgs.matchesPerSeat * 2 * 6} matches)`);
+  console.log(`Step Budgets:            Primary=${cliArgs.primaryMaxDecisions}, Secondary=${cliArgs.secondaryMaxDecisions}, Tertiary=${cliArgs.tertiaryMaxDecisions}`);
   console.log(`Output File:             ${cliArgs.outFile}`);
   console.log("--------------------------------------------------------------------------------");
 
   const catalog = await loadRegulationCatalog();
-  RegulationValidator.validateRegulation(catalog, cliArgs.regulationId, {
-    assertImplemented: true,
-  });
+  const reg = catalog.regulations.get(cliArgs.regulationId);
+  if (!reg) {
+    throw new Error(`Regulation not found: ${cliArgs.regulationId}`);
+  }
+
+  const valResult = RegulationValidator.validateRegulation(catalog, cliArgs.regulationId, { assertImplemented: true });
+  if (!valResult.simulatorImplemented) {
+    throw new Error(`Regulation not implemented in simulator: ${cliArgs.regulationId}`);
+  }
 
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
 
   const config: OfficialBaselineDiagnosticsConfig = {
-    diagnosticsVersion: "1.0.0",
-    workId: "BP-SIM-AI-3.4-20260906-1601",
+    diagnosticsVersion: OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_1,
+    workId: "BP-SIM-AI-3.4.1-20260906-1841",
     sourceBaselineDigest: "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4",
     regulationId: cliArgs.regulationId,
     baseSeed: cliArgs.baseSeed,
@@ -127,10 +134,29 @@ async function main() {
   console.log(`  - Still Incomplete (No Recurrence):${result.incompleteOutcomeCounts.stillIncompleteWithoutRecurrence}`);
   console.log(`  - Deterministic Cycle Candidates:  ${result.incompleteOutcomeCounts.deterministicCycleCandidates}`);
 
-  console.log("\n[State Recurrence Summary]");
+  console.log("\n[State Hash v2 Recurrence Summary]");
   console.log(`  Cases with State Recurrence:       ${result.stateRecurrenceSummary.casesWithRecurrence}/${result.totalIncompleteCases}`);
   console.log(`  Max Visits per State Hash:         ${result.stateRecurrenceSummary.maxVisitsObserved}`);
   console.log(`  Shortest Repeat Distance:          ${result.stateRecurrenceSummary.minRepeatDistanceObserved ?? "N/A"}`);
+
+  if (result.cycleFingerprintRecurrenceSummary) {
+    console.log("\n[Cycle State Fingerprint v1 Recurrence Summary]");
+    console.log(`  Cases with Cycle Recurrence:       ${result.cycleFingerprintRecurrenceSummary.casesWithRecurrence}/${result.totalIncompleteCases}`);
+    console.log(`  Max Visits per Fingerprint:        ${result.cycleFingerprintRecurrenceSummary.maxVisitsObserved}`);
+    console.log(`  Shortest Repeat Distance:          ${result.cycleFingerprintRecurrenceSummary.minRepeatDistanceObserved ?? "N/A"}`);
+  }
+
+  if (result.requestBufferSummary) {
+    console.log("\n[Request Buffer Depth Summary]");
+    console.log(`  Max Observed Buffer Depth:         ${result.requestBufferSummary.maxObservedBufferDepth}`);
+    console.log(`  Average Final Buffer Depth:        ${result.requestBufferSummary.averageFinalBufferDepth}`);
+  }
+
+  if (result.divergenceSummary) {
+    console.log("\n[Divergence Summary]");
+    console.log(`  All Turn 1 Cases:                  ${result.divergenceSummary.allTurn1Cases}/${result.totalIncompleteCases}`);
+    console.log(`  Stable Depth Unbounded Cases:      ${result.divergenceSummary.stableDepthUnboundedCases}/${result.totalIncompleteCases}`);
+  }
 
   console.log("\n[Core Flow: Stage-Empty PASS Summary]");
   console.log(`  Cases with Stage-Empty PASS:       ${result.stageEmptyPassSummary.totalCasesWithStageEmptyPass}/${result.totalIncompleteCases}`);

@@ -124,4 +124,39 @@ describe("Architecture Boundary & Dependency Direction Tests (Phase 21B.3)", () 
 
     expect(violations).toEqual([]);
   });
+
+  it("Core gameplay layers (domain, engine/rules, engine/decision, engine/session, engine/simulation, engine/regulation) must NOT import engine/diagnostics", () => {
+    const targetDirs = [
+      path.resolve(srcDir, "domain"),
+      path.resolve(srcDir, "engine/rules"),
+      path.resolve(srcDir, "engine/decision"),
+      path.resolve(srcDir, "engine/session"),
+      path.resolve(srcDir, "engine/simulation"),
+      path.resolve(srcDir, "engine/regulation"),
+    ];
+
+    const forbiddenPatterns = [
+      /from\s+['"].*\/diagnostics(\/.*)?['"]/,
+    ];
+
+    const violations: Array<{ file: string; match: string }> = [];
+
+    for (const dir of targetDirs) {
+      const files = getTsFiles(dir);
+      for (const file of files) {
+        const content = fs.readFileSync(file, "utf-8");
+        for (const pattern of forbiddenPatterns) {
+          const match = content.match(pattern);
+          if (match) {
+            violations.push({
+              file: path.relative(srcDir, file),
+              match: match[0],
+            });
+          }
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
 });

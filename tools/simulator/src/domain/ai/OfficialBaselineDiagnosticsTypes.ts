@@ -1,7 +1,8 @@
 /**
- * BlackPoker Official Baseline Diagnostics Contract v1
+ * BlackPoker Official Baseline Diagnostics Contract (Phase 3.4 & Phase 3.4.1)
  * 
  * AI Self-Play Phase 3.4: Incomplete Root Cause & Policy Distinguishability Diagnostics
+ * AI Self-Play Phase 3.4.1: Cycle Fingerprint & Turn-1 Divergence Evidence Repair
  * 
  * 【契約原則】
  * 1. 論理結果と実行時メタデータの厳格な分離:
@@ -9,10 +10,17 @@
  * 2. 決定論的再現性の保証:
  *    同一 config での Run A と Run B の論理ペイロードは 1bit も違わず完全一致する。
  * 3. 汎用 Core Flow 指標:
- *    特定 Action 名（action.attack 等）に依存せず、State Hash, Pattern Kind, Stage Depth, Turn Progress 等の抽象指標で計測する。
+ *    特定 Action 名（action.attack 等）に依存せず、State Hash, Cycle Fingerprint, Pattern Kind, Stage Depth, Turn Progress 等の抽象指標で計測する。
+ * 4. 契約の後方互換性:
+ *    v1.0 と v1.1 の両バージョンの識別性を維持し、Phase 3.4 歴史成果物を破壊しない。
  */
 
-export const OFFICIAL_BASELINE_DIAGNOSTICS_VERSION = "1.0.0";
+export const OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_0 = "1.0.0";
+export const OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_1 = "1.1.0";
+export const OFFICIAL_BASELINE_DIAGNOSTICS_VERSION = OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_0;
+export const OFFICIAL_BASELINE_DIAGNOSTICS_LATEST_VERSION = OFFICIAL_BASELINE_DIAGNOSTICS_VERSION_1_1;
+
+export const CYCLE_STATE_FINGERPRINT_VERSION = 1;
 
 /**
  * 再現レシピ（各未完走対戦を単一で決定論的に再実行するための最小情報）
@@ -44,7 +52,7 @@ export interface StepBudgetOutcome {
 }
 
 /**
- * 論理状態再訪メトリクス
+ * 論理状態再訪メトリクス (State Hash v2 基準)
  */
 export interface StateRecurrenceMetrics {
   readonly observedDecisionCount: number;
@@ -53,6 +61,18 @@ export interface StateRecurrenceMetrics {
   readonly firstRepeatedStateDecision: number | null;
   readonly maxVisitsPerStateHash: number;
   readonly shortestObservedRepeatDistance: number | null;
+}
+
+/**
+ * 周期診断専用フィンガープリント再訪メトリクス (Cycle State Fingerprint v1 基準)
+ */
+export interface CycleFingerprintRecurrenceMetrics {
+  readonly observedDecisionCount: number;
+  readonly uniqueFingerprintCount: number;
+  readonly repeatedFingerprintVisitCount: number;
+  readonly firstRepeatedFingerprintDecision: number | null;
+  readonly maxVisitsPerFingerprint: number;
+  readonly shortestRepeatDistance: number | null;
 }
 
 /**
@@ -72,6 +92,36 @@ export interface StageDiagnosticsMetrics {
   readonly maxStageDepth: number;
   readonly finalStageDepth: number;
 }
+
+/**
+ * リクエストバッファ深度診断メトリクス
+ */
+export interface RequestBufferDiagnosticsMetrics {
+  readonly maxRequestBufferDepth: number;
+  readonly finalRequestBufferDepth: number;
+}
+
+/**
+ * 構造化イベントから集計した汎用リクエストライフサイクルメトリクス
+ * （人間向けログ文字列のパースに依存せず、CanonicalMatchLog の構造化イベント型からのみ集計）
+ */
+export interface GenericRequestLifecycleMetrics {
+  readonly requestCreatedCount: number;
+  readonly requestResolvedCount: number;
+  readonly immediateResolutionCount: number;
+  readonly normalRequestMovedToStageCount: number;
+  readonly triggeredRequestObservedCount: number;
+}
+
+/**
+ * 進行発散パターンの分類
+ */
+export type DivergencePattern =
+  | "ALL_TURN_1_CONTINUOUS_GENERATION"
+  | "REQUEST_BUFFER_GROWTH"
+  | "STAGE_GROWTH"
+  | "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION"
+  | "UNKNOWN_DIVERGENCE";
 
 /**
  * Stage空状態PASS診断メトリクス
@@ -101,6 +151,7 @@ export interface CompactTrajectorySummary {
   readonly repeatCount: number;
   readonly cyclePeriod?: number;
   readonly sampleStateHashes: readonly string[];
+  readonly sampleCycleFingerprints?: readonly string[];
 }
 
 /**
@@ -128,10 +179,16 @@ export interface IncompleteCaseRecord {
     | "FINISHED_BY_1000"
     | "FINISHED_BY_2000"
     | "STILL_INCOMPLETE_WITH_STATE_RECURRENCE"
-    | "STILL_INCOMPLETE_WITHOUT_EXACT_STATE_RECURRENCE";
+    | "STILL_INCOMPLETE_WITHOUT_EXACT_STATE_RECURRENCE"
+    | "CYCLE_STATE_RECURRENCE_OBSERVED";
   readonly stateRecurrence: StateRecurrenceMetrics;
+  readonly cycleFingerprintRecurrence?: CycleFingerprintRecurrenceMetrics;
   readonly turnProgress: TurnProgressMetrics;
   readonly stageDiagnostics: StageDiagnosticsMetrics;
+  readonly requestBufferDiagnostics?: RequestBufferDiagnosticsMetrics;
+  readonly requestLifecycleMetrics?: GenericRequestLifecycleMetrics;
+  readonly observedActionIdCounts?: Record<string, number>;
+  readonly divergencePattern?: DivergencePattern;
   readonly stageEmptyPassDiagnostics: StageEmptyPassMetrics;
   readonly cycleDiagnostics?: DeterministicCycleDiagnostics;
   readonly compactTrajectory: CompactTrajectorySummary;
@@ -235,6 +292,20 @@ export interface OfficialBaselineDiagnosticsLogicalPayload {
     readonly casesWithoutRecurrence: number;
     readonly maxVisitsObserved: number;
     readonly minRepeatDistanceObserved: number | null;
+  };
+  readonly cycleFingerprintRecurrenceSummary?: {
+    readonly casesWithRecurrence: number;
+    readonly casesWithoutRecurrence: number;
+    readonly maxVisitsObserved: number;
+    readonly minRepeatDistanceObserved: number | null;
+  };
+  readonly requestBufferSummary?: {
+    readonly maxObservedBufferDepth: number;
+    readonly averageFinalBufferDepth: number;
+  };
+  readonly divergenceSummary?: {
+    readonly allTurn1Cases: number;
+    readonly stableDepthUnboundedCases: number;
   };
   readonly stageEmptyPassSummary: {
     readonly totalCasesWithStageEmptyPass: number;
