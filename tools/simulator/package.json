@@ -20,7 +20,8 @@
     "simulate:batch": "vite-node src/cli/simulateBatchRunner.ts",
     "simulate:experiment": "vite-node src/cli/policyExperimentRunner.ts",
     "simulate:official": "vite-node src/cli/simulateOfficialRunner.ts",
-    "measure:official-baseline": "vite-node src/cli/measureOfficialBaseline.ts"
+    "measure:official-baseline": "vite-node src/cli/measureOfficialBaseline.ts",
+    "diagnose:official-baseline": "vite-node src/cli/diagnoseOfficialBaseline.ts"
   },
   "dependencies": {
     "react": "^18.2.0",

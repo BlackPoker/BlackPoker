@@ -21,7 +21,7 @@ Official Regulation Phase 1.0 / 1.0.1 により、「ライト + エントリー
 
 - **Regulation**: `light-entry16`
 - **Format**: `light` (19 Actions, Light Components)
-- **Frame**: `entry16` (固定16枚デッキ: 各スート A〜4, 初期手札7, プリセット防壁1・兵士1)
+- **Frame**: `entry16` (固定16枚デッキ: ♠ A, 2, 3, K / ♡ 4, 7, J, Q / ♢ 5, 8, 10, Q / ♣ A, 6, 9, K, 初期手札7, プリセット防壁1・兵士1)
 - **Rules Version**: `rules-vnext-9.1.2` (公式ルール第9.1.2版ベース)
 - **排除対象**: `CORE-BATTLE-001`（Core 検証用固定盤面）はベースライン測定に一切使用していません。
 
@@ -44,7 +44,7 @@ Official Regulation Phase 1.0 / 1.0.1 により、「ライト + エントリー
 
 ## 4. Setup Viability Audit (100 Seeds 監査結果)
 
-`BatchSimulationRunner.planMatch(20260906, matchIndex)` により導出した 100シードについて、公式セットアップ（シャッフル $\rightarrow$ Life化 $\rightarrow$ 初期手札7 $\rightarrow$ プリセット防壁 $\rightarrow$ プリセット兵士探索 $\rightarrow$ 3.9.2 先攻決定 $\rightarrow$ 3.9.3 先攻ドロー）の成立状況を監査しました。
+Setup Audit Seed は単純連番（20260906〜20261005）ではなく、`baseSeed = 20260906` と `matchIndex = 0..99` を `BatchSimulationRunner.planMatch()` へ渡して決定論的に導出した 100シードについて、公式セットアップ（シャッフル $\rightarrow$ Life化 $\rightarrow$ 初期手札7 $\rightarrow$ プリセット防壁 $\rightarrow$ プリセット兵士探索 $\rightarrow$ 3.9.2 先攻決定 $\rightarrow$ 3.9.3 先攻ドロー）の成立状況を監査しました。
 
 | 項目 | 測定値 | 割合 | 備考 |
 | :--- | :---: | :---: | :--- |
@@ -125,7 +125,7 @@ Official Regulation Phase 1.0 / 1.0.1 により、「ライト + エントリー
 - **Pattern Features**: **40 / 57 (70.2%)**
   - **一度も活性化しなかった特徴量 (17件)**:
     - `pattern_is_other`, `action_speed_other`, `action_timing_other`
-    - `action_timing_block`, `action_timing_damage_judge`: ブロック・判定タイミングのアクション定義が存在しない
+    - `action_timing_block`, `action_timing_damage_judge`: 現在のルール定義上に `action.block` および `action.damageJudge` は存在するが、Feature Schema 上の該当 timing feature が今回の観測では活性化しなかった
     - `cost_sacrificed_unit_count`: 生贄コストを要求するアクションが Light に存在しない
     - `has_key_unit`, `key_unit_count`, `selected_unit_size_*`, `selected_unit_charge_*` 等 (8件): ユニットを合体・選択する高レベルアクションが Light に存在しない
     - `target_is_other`: 汎用ターゲット種別
