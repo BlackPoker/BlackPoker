@@ -4,12 +4,14 @@ import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
-import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
-import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
-import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup";
-import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../../engine/session/playtest/createCoreBattlePlaytest";
-import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
-import { validatePlaytestPreset } from "../../engine/session/playtest/validatePlaytestPreset";
+import {
+  ActiveMatchContext,
+  SetupNotice,
+  CORE_BATTLE_ENV_ID,
+  isOfficialEnvironment,
+  getAvailableEnvironments,
+  startMatchAttempt,
+} from "../../engine/playtest/PlaytestEnvironmentController";
 import { GameEventFormatter } from "../../engine/session/playtest/GameEventFormatter";
 import { GameStatusBar } from "../game/GameStatusBar";
 import { PlayerBoard } from "../game/PlayerBoard";
@@ -31,25 +33,21 @@ import logoUrl from "../../assets/blackpoker-logo.svg";
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
+  const [catalog] = useState(() => loadRegulationCatalogForBrowser());
+  const environmentOptions = useMemo(() => getAvailableEnvironments(catalog), [catalog]);
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
   const seqRef = useRef<number>(1);
 
   // Pending 設定（UI入力中・対戦セッションには「新しい対戦」押下まで反映されない）
-  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>("core-battle");
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(CORE_BATTLE_ENV_ID);
   const [seedInput, setSeedInput] = useState<string>("42");
 
-  // Active 設定（現在進行中の対戦セッションの設定）
-  const [activeEnvironmentId, setActiveEnvironmentId] = useState<string>("core-battle");
-  const [activeSeed, setActiveSeed] = useState<number>(42);
+  // Active 設定（現在進行中の対戦セッションの設定。未成立時は null）
+  const [activeMatch, setActiveMatch] = useState<ActiveMatchContext | null>(null);
 
-  // セットアップ結果通知（RULE_UNSPECIFIED または TERMINAL）
-  const [setupNotice, setSetupNotice] = useState<{
-    type: "TERMINAL" | "RULE_UNSPECIFIED";
-    title: string;
-    message: string;
-    details?: string;
-  } | null>(null);
+  // セットアップ結果通知（VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR）
+  const [setupNotice, setSetupNotice] = useState<SetupNotice | null>(null);
 
   // プリセットバリデーションエラー
   const [presetValidationErrors, setPresetValidationErrors] = useState<string[]>([]);
@@ -118,192 +116,74 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
-  // 新しい対戦の開始
-  const startNewGame = useCallback((overrideEnv?: string, overrideSeed?: number) => {
+  // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
+  const startNewGame = useCallback((overrideEnv?: string, overrideSeedInput?: string) => {
     const env = overrideEnv ?? selectedEnvironmentId;
-    let seed = overrideSeed;
-    if (seed === undefined) {
-      const parsed = parseInt(seedInput, 10);
-      seed = isNaN(parsed) || parsed < 0 ? 42 : parsed;
-    }
+    const seed = overrideSeedInput ?? seedInput;
 
-    // Active 設定にコミット
-    setActiveEnvironmentId(env);
-    setActiveSeed(seed);
-    setSetupNotice(null);
-
-    if (env === "official-light-entry16") {
-      try {
-        const catalog = loadRegulationCatalogForBrowser();
-        const validation = RegulationValidator.validateRegulation(catalog, "light-entry16", {
-          assertImplemented: true,
-        });
-        const regulation = validation.regulation!;
-        const format = validation.format!;
-        const frame = validation.frame!;
-
-        const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(
-          fullRulePackage,
-          format,
-          regulation
-        );
-
-        const outcome = OfficialRegulationMatchSetup.setupMatch(
-          regulation,
-          frame,
-          officialRulePackage,
-          seed,
-          {
-            matchId: `match-official-${seed}`,
-            playerNames: { p1: "Player A", p2: "Player B" },
-          }
-        );
-
-        if (outcome.type === "RULE_UNSPECIFIED") {
-          sessionRef.current = null;
-          setCurrentStep(null);
-          setGameState(null);
-          setSetupNotice({
-            type: "RULE_UNSPECIFIED",
-            title: "公式セットアップ未定義 (RULE_UNSPECIFIED)",
-            message: outcome.reason,
-            details: `reasonCode: ${outcome.reasonCode} | seed: ${seed}`,
-          });
-          addLog(`[RULE_UNSPECIFIED] ${outcome.reason} (reasonCode: ${outcome.reasonCode}, seed: ${seed})`, "system");
-          return;
-        }
-
-        if (outcome.type === "TERMINAL") {
-          const terminalState: any = {
-            stateVersion: 1,
-            version: 1,
-            matchId: `match-official-${seed}`,
-            turnPlayer: outcome.loser,
-            chancePlayer: outcome.loser,
-            players: {
-              p1: { name: "Player A", life: outcome.winner === "p1" ? [1] : [] },
-              p2: { name: "Player B", life: outcome.winner === "p2" ? [1] : [] },
-            },
-          };
-          const session = new GameSession(terminalState, officialRulePackage);
-          sessionRef.current = session;
-          setGameState(terminalState);
-          setCurrentStep(session.advance());
-          setLatestEventMessage(outcome.reason);
-          addLog(`[TERMINAL] ${outcome.reason}`, "system", terminalState);
-          return;
-        }
-
-        // outcome.type === "READY"
-        const session = new GameSession(outcome.state, officialRulePackage, {
-          matchId: outcome.state.matchId,
-        });
-        sessionRef.current = session;
-
-        setLogs([]);
-        setTraces([]);
-        seqRef.current = 1;
-        setLatestEventMessage("ゲーム開始準備完了");
-        setSelectedUnitIds([]);
-        setSheetMode("collapsed");
-        addLog(`[START] ライト + エントリー16 (公式対戦) を開始しました (Seed: ${seed})`, "info", outcome.state);
-        addLog(`[REGULATION] Light + Entry16 (Rules 9.1.2)`, "info", outcome.state);
-        addTrace("MATCH_SETUP", `公式対戦開始 (Seed: ${seed})`, outcome.state);
-
-        const firstPlayerName = outcome.firstPlayer === "p1" ? "Player A" : "Player B";
-        addLog(`[FIRST_PLAYER] 先攻決定により ${firstPlayerName} (${outcome.firstPlayer.toUpperCase()}) が先攻に決定しました`, "action", outcome.state);
-        addLog(`[GAME_START] 先攻プレイヤーがライフから1枚引いてゲームを開始します`, "info", outcome.state);
-
-        const step = session.advance();
-        setCurrentStep(step);
-        setGameState(JSON.parse(JSON.stringify(session.state)));
-
-        if (step.type === "WAITING_FOR_DECISION") {
-          lastActivePlayerRef.current = step.request.playerId;
-          setPendingPlayerKey(step.request.playerId);
-          if (enablePassAndPlay) {
-            setIsPassAndPlayWaiting(true);
-          }
-          addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, outcome.state);
-        }
-        return;
-      } catch (err: any) {
-        setSetupNotice({
-          type: "TERMINAL",
-          title: "公式対戦初期化エラー",
-          message: err?.message || String(err),
-        });
-        return;
-      }
-    }
-
-    // Default: Core Battle
-    const rawState = createCoreBattlePresetState();
-
-    // プリセットバリデーション
-    const validation = validatePlaytestPreset(rawState, fullRulePackage);
-    if (!validation.valid) {
-      setPresetValidationErrors(validation.errors);
-      return;
-    }
+    // 失敗時・開始時に直前のセッション状態を安全にリセット
+    sessionRef.current = null;
+    setGameState(null);
+    setCurrentStep(null);
+    setActiveMatch(null);
+    setSelectedUnitIds([]);
+    setSheetMode("collapsed");
+    setIsPassAndPlayWaiting(false);
     setPresetValidationErrors([]);
 
-    // 公式ゲーム開始手順 (先攻決定・公開カード墓地送り・先攻1枚ドロー)
-    const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+    const outcome = startMatchAttempt({
+      environmentId: env,
+      seedInput: seed,
+      catalog,
+      fullRulePackage,
+    });
 
-    const session = new GameSession(setupResult.state, rulePackage);
-    sessionRef.current = session;
+    if (outcome.type !== "READY") {
+      setSetupNotice(outcome.setupNotice);
+      if (outcome.presetValidationErrors && outcome.presetValidationErrors.length > 0) {
+        setPresetValidationErrors([...outcome.presetValidationErrors]);
+      }
+      for (const l of outcome.logs) {
+        addLog(l.message, l.level);
+      }
+      return;
+    }
 
+    // READY 成功時のみ commit
+    sessionRef.current = outcome.session;
+    setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+    setCurrentStep(outcome.initialStep);
+    setActiveMatch(outcome.activeMatch);
+    setSetupNotice(null);
+    setPresetValidationErrors([]);
     setLogs([]);
     setTraces([]);
     seqRef.current = 1;
     setLatestEventMessage("ゲーム開始準備完了");
-    setSelectedUnitIds([]);
-    setSheetMode("collapsed");
-    addLog(`[START] Core Battle Playtest を開始しました (プリセット: ${CORE_BATTLE_PRESET_ID})`, "info", setupResult.state);
-    addLog(`[REGULATION] Core Battle (Preset 001)`, "info", setupResult.state);
-    addTrace("MATCH_SETUP", `ゲーム開始 (Preset: ${CORE_BATTLE_PRESET_ID})`, setupResult.state);
 
-    // 先攻決定プロセスのログ出力
-    for (const round of setupResult.rounds) {
-      const p1Code = `${round.p1Card.suit}${round.p1Card.rank}`;
-      const p2Code = `${round.p2Card.suit}${round.p2Card.rank}`;
-      if (round.result === "tie") {
-        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> 同値のため引き分け`, "action", setupResult.state);
-      } else {
-        const winnerName = round.result === "p1" ? "Player A" : "Player B";
-        addLog(`[先攻決定 Round ${round.round}] Player A: ${p1Code} vs Player B: ${p2Code} -> ${winnerName} が先攻に決定`, "action", setupResult.state);
-      }
+    for (const l of outcome.logs) {
+      addLog(l.message, l.level, l.state);
     }
-    addLog(`[SETUP] 公開された比較カードを両者の墓地へ移動しました`, "info", setupResult.state);
-    if (setupResult.drawnCard) {
-      const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
-      const drawnCode = `${setupResult.drawnCard.suit}${setupResult.drawnCard.rank}`;
-      addLog(`[DRAW] 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, "action", setupResult.state);
+    for (const t of outcome.traces) {
+      addTrace(t.category, t.message, t.state);
     }
-    const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
-    addLog(`[TURN] ${winnerName} がターンとチャンスを持ってゲームを開始します`, "info", setupResult.state);
 
-    const step = session.advance();
-    setCurrentStep(step);
-    setGameState(JSON.parse(JSON.stringify(session.state)));
-
-    if (step.type === "WAITING_FOR_DECISION") {
-      lastActivePlayerRef.current = step.request.playerId;
-      setPendingPlayerKey(step.request.playerId);
+    if (outcome.initialStep.type === "WAITING_FOR_DECISION") {
+      lastActivePlayerRef.current = outcome.initialStep.request.playerId;
+      setPendingPlayerKey(outcome.initialStep.request.playerId);
       if (enablePassAndPlay) {
         setIsPassAndPlayWaiting(true);
       }
-      addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, setupResult.state);
+      addTrace("DECISION_REQUEST", `判断待機 (${outcome.initialStep.request.playerId})`, outcome.session.state);
     }
-  }, [selectedEnvironmentId, seedInput, fullRulePackage, rulePackage, enablePassAndPlay, addLog, addTrace]);
+  }, [selectedEnvironmentId, seedInput, catalog, fullRulePackage, enablePassAndPlay, addLog, addTrace]);
 
   // 初回マウント時にのみ1回ゲーム初期化
   const initialStartRef = useRef(false);
   useEffect(() => {
     if (!initialStartRef.current) {
       initialStartRef.current = true;
-      startNewGame("core-battle", 42);
+      startNewGame(CORE_BATTLE_ENV_ID, "42");
     }
   }, [startNewGame]);
 
@@ -569,7 +449,7 @@ export const CoreBattlePlaytest: React.FC = () => {
                 BlackPoker
               </span>
               <span className="text-[8px] font-mono text-zinc-500 font-bold tracking-wider leading-none mt-0.5">
-                CORE BATTLE PLAYTEST
+                SIMULATOR PLAYTEST
               </span>
             </div>
           </div>
@@ -590,7 +470,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             </span>
           </div>
 
-          {/* Environment Selector & Seed (PC用) */}
+          {/* Environment Selector & Seed (PC用・Catalog由来動的列挙) */}
           <div className="hidden md:flex items-center gap-1.5 ml-1 font-mono">
             <span className="text-[9px] font-bold text-zinc-400">Env:</span>
             <select
@@ -598,19 +478,27 @@ export const CoreBattlePlaytest: React.FC = () => {
               onChange={(e) => setSelectedEnvironmentId(e.target.value)}
               className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
-              <option value="core-battle">Core Battle (既存初期盤面)</option>
-              <option value="official-light-entry16">ライト + エントリー16 (公式)</option>
-              <option value="master-extra" disabled>Master + Extra (Coming Soon)</option>
+              {environmentOptions.map((opt) => (
+                <option key={opt.id} value={opt.id}>
+                  {opt.name}
+                </option>
+              ))}
             </select>
 
-            <span className="text-[9px] font-bold text-zinc-400 ml-1">Seed:</span>
-            <input
-              type="number"
-              value={seedInput}
-              onChange={(e) => setSeedInput(e.target.value)}
-              className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
-              placeholder="42"
-            />
+            {isOfficialEnvironment(selectedEnvironmentId) && (
+              <>
+                <span className="text-[9px] font-bold text-zinc-400 ml-1">Seed:</span>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={seedInput}
+                  onChange={(e) => setSeedInput(e.target.value)}
+                  className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
+                  placeholder="42"
+                />
+              </>
+            )}
           </div>
         </div>
 
@@ -661,16 +549,26 @@ export const CoreBattlePlaytest: React.FC = () => {
       <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
         {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
         <div className="lg:col-span-7 flex flex-col gap-1.5">
-          {/* セットアップ通知バナー (RULE_UNSPECIFIED または TERMINAL) */}
+          {/* セットアップ通知バナー (VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR) */}
           {setupNotice && (
             <div className={`p-3 rounded border font-mono ${
               setupNotice.type === "RULE_UNSPECIFIED"
                 ? "bg-amber-50 border-amber-300 text-amber-950"
+                : setupNotice.type === "VALIDATION_ERROR"
+                ? "bg-rose-50 border-rose-300 text-rose-950"
+                : setupNotice.type === "TERMINAL"
+                ? "bg-blue-50 border-blue-300 text-blue-950"
                 : "bg-red-50 border-red-300 text-red-950"
             }`}>
               <div className="flex items-center gap-2 font-bold text-sm">
                 <span className={`px-1.5 py-0.5 rounded text-xs text-white ${
-                  setupNotice.type === "RULE_UNSPECIFIED" ? "bg-amber-600" : "bg-red-600"
+                  setupNotice.type === "RULE_UNSPECIFIED"
+                    ? "bg-amber-600"
+                    : setupNotice.type === "VALIDATION_ERROR"
+                    ? "bg-rose-600"
+                    : setupNotice.type === "TERMINAL"
+                    ? "bg-blue-600"
+                    : "bg-red-600"
                 }`}>
                   {setupNotice.type}
                 </span>
@@ -682,17 +580,17 @@ export const CoreBattlePlaytest: React.FC = () => {
               )}
               {!gameState && (
                 <p className="text-xs text-zinc-500 mt-2">
-                  ※ Seedまたは対戦環境を変更し、上部の「新しい対戦」ボタンを押してください。
+                  ※ 設定またはSeedを確認し、上部の「新しい対戦」ボタンを押してください。
                 </p>
               )}
             </div>
           )}
 
           {/* ゲーム進行ステータスバー */}
-          {gameState && (
+          {gameState && activeMatch && (
             <GameStatusBar
-              environmentName={activeEnvironmentId === "official-light-entry16" ? "ライト + エントリー16 (公式)" : "Core Battle (Preset 001)"}
-              matchSeed={activeSeed}
+              environmentName={activeMatch.environmentName}
+              matchSeed={activeMatch.seed}
               stateVersion={gameState.stateVersion ?? gameState.version}
               turnPlayer={gameState.turnPlayer}
               chancePlayer={gameState.chancePlayer}
@@ -728,6 +626,16 @@ export const CoreBattlePlaytest: React.FC = () => {
               onUnitClick={handleUnitClick}
             />
           )}
+
+          {/* セッション未開始時のプレースホルダー */}
+          {!gameState && (
+            <div className="p-8 flex flex-col items-center justify-center bg-zinc-50 border border-zinc-200 rounded text-center my-auto">
+              <span className="text-sm font-bold text-zinc-700 font-mono">対戦セッションが開始されていません</span>
+              <span className="text-xs text-zinc-500 font-mono mt-1">
+                上部の設定・Seed を確認し、「新しい対戦」ボタンを押してください。
+              </span>
+            </div>
+          )}
         </div>
 
         {/* 右ペイン: PC用 操作パネル / 対戦ログ (Desktop 時のみレンダリングして二重マウントを防止) */}
@@ -750,17 +658,23 @@ export const CoreBattlePlaytest: React.FC = () => {
             <GameLog logs={logs} />
           </div>
 
-          {/* Raw Debug パネル */}
+          {/* Raw Debug パネル (Active Match が存在する場合のみその RulePackage を表示、存在しない場合はフォールバックせず「Active Match なし」と表示) */}
           {showDebug && (
             <div className="h-56 shrink-0">
-              <DebugPanel
-                state={gameState}
-                currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
-                rulePackage={rulePackage}
-                logs={logs}
-                traces={traces}
-                matchLog={sessionRef.current?.getMatchLog()}
-              />
+              {activeMatch ? (
+                <DebugPanel
+                  state={gameState}
+                  currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
+                  rulePackage={activeMatch.rulePackage}
+                  logs={logs}
+                  traces={traces}
+                  matchLog={sessionRef.current?.getMatchLog()}
+                />
+              ) : (
+                <div className="h-full flex items-center justify-center bg-zinc-100 rounded border border-zinc-300 text-xs font-mono text-zinc-500">
+                  進行中の対戦はありません (Active Match なし)
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -802,8 +716,10 @@ export const CoreBattlePlaytest: React.FC = () => {
       <MobileHeaderMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        selectedRegulation={selectedEnvironmentId}
-        onSelectRegulation={setSelectedEnvironmentId}
+        selectedEnvironmentId={selectedEnvironmentId}
+        onSelectEnvironment={setSelectedEnvironmentId}
+        environmentOptions={environmentOptions}
+        showSeedInput={isOfficialEnvironment(selectedEnvironmentId)}
         seedInput={seedInput}
         onSeedInputChange={setSeedInput}
         enablePassAndPlay={enablePassAndPlay}
@@ -833,7 +749,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Mobile デバッグモーダル */}
+      {/* 5. Mobile デバッグモーダル (Active Match が存在する場合のみその RulePackage を表示、存在しない場合はフォールバックせず「Active Match なし」と表示) */}
       {showMobileDebugModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
           <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[90vh]">
@@ -847,14 +763,20 @@ export const CoreBattlePlaytest: React.FC = () => {
               </button>
             </div>
             <div className="flex-1 overflow-hidden flex flex-col min-h-[350px]">
-              <DebugPanel
-                state={gameState}
-                currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
-                rulePackage={rulePackage}
-                logs={logs}
-                traces={traces}
-                matchLog={sessionRef.current?.getMatchLog()}
-              />
+              {activeMatch ? (
+                <DebugPanel
+                  state={gameState}
+                  currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
+                  rulePackage={activeMatch.rulePackage}
+                  logs={logs}
+                  traces={traces}
+                  matchLog={sessionRef.current?.getMatchLog()}
+                />
+              ) : (
+                <div className="flex-1 flex items-center justify-center bg-zinc-100 rounded border border-zinc-300 text-xs font-mono text-zinc-500 min-h-[350px]">
+                  進行中の対戦はありません (Active Match なし)
+                </div>
+              )}
             </div>
           </div>
         </div>

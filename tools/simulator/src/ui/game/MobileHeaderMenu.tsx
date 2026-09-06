@@ -1,10 +1,13 @@
 import React from "react";
+import { EnvironmentOption } from "../../engine/playtest/PlaytestEnvironmentController";
 
 export interface MobileHeaderMenuProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly selectedRegulation: string;
-  readonly onSelectRegulation: (reg: string) => void;
+  readonly selectedEnvironmentId: string;
+  readonly onSelectEnvironment: (envId: string) => void;
+  readonly environmentOptions: readonly EnvironmentOption[];
+  readonly showSeedInput: boolean;
   readonly seedInput?: string;
   readonly onSeedInputChange?: (val: string) => void;
   readonly enablePassAndPlay: boolean;
@@ -17,8 +20,10 @@ export interface MobileHeaderMenuProps {
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   isOpen,
   onClose,
-  selectedRegulation,
-  onSelectRegulation,
+  selectedEnvironmentId,
+  onSelectEnvironment,
+  environmentOptions,
+  showSeedInput,
   seedInput = "42",
   onSeedInputChange,
   enablePassAndPlay,
@@ -50,37 +55,41 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         </div>
 
-        {/* レギュレーション選択 */}
+        {/* 対戦環境選択 (Catalog 由来の動的列挙) */}
         <div className="flex flex-col gap-1">
           <label className="text-[11px] font-mono font-bold text-zinc-500">
             対戦環境 (Environment):
           </label>
           <select
-            value={selectedRegulation}
-            onChange={(e) => onSelectRegulation(e.target.value)}
+            value={selectedEnvironmentId}
+            onChange={(e) => onSelectEnvironment(e.target.value)}
             className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
           >
-            <option value="core-battle">Core Battle (既存初期盤面)</option>
-            <option value="official-light-entry16">ライト + エントリー16 (公式)</option>
-            <option value="master-extra" disabled>
-              Master + Extra (Coming Soon)
-            </option>
+            {environmentOptions.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.name}
+              </option>
+            ))}
           </select>
         </div>
 
-        {/* Seed 入力 */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[11px] font-mono font-bold text-zinc-500">
-            Seed (乱数シード):
-          </label>
-          <input
-            type="number"
-            value={seedInput}
-            onChange={(e) => onSeedInputChange?.(e.target.value)}
-            className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
-            placeholder="42"
-          />
-        </div>
+        {/* Seed 入力 (Official 環境のみ条件付き表示) */}
+        {showSeedInput && (
+          <div className="flex flex-col gap-1">
+            <label className="text-[11px] font-mono font-bold text-zinc-500">
+              Seed (乱数シード・非負整数):
+            </label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={seedInput}
+              onChange={(e) => onSeedInputChange?.(e.target.value)}
+              className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
+              placeholder="42"
+            />
+          </div>
+        )}
 
         {/* Pass-and-Play */}
         <label className="flex items-center justify-between p-2 rounded bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 cursor-pointer min-h-[44px]">

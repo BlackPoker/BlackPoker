@@ -8,8 +8,9 @@ import { createCoreBattlePresetState } from "../../engine/session/playtest/creat
 import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { GameSession } from "../../engine/session/GameSession";
+import { startMatchAttempt } from "../../engine/playtest/PlaytestEnvironmentController";
 
-describe("Official Playtest UI Routing Tests (Phase 2.4)", () => {
+describe("Official Playtest UI Routing Tests (Phase 2.4 / 2.4.1)", () => {
   const fullRulePackage = loadRulePackageForBrowser();
   const catalog = loadRegulationCatalogForBrowser();
 
@@ -102,6 +103,23 @@ describe("Official Playtest UI Routing Tests (Phase 2.4)", () => {
       const p1Hand1 = outcome1.state.players.p1.hand.map((c: any) => c.id).join(",");
       const p1Hand2 = outcome2.state.players.p1.hand.map((c: any) => c.id).join(",");
       expect(p1Hand1).not.toBe(p1Hand2);
+    }
+  });
+
+  it("startMatchAttempt 経由の official:light-entry16 ルーティングが整合して動作すること", () => {
+    const outcome = startMatchAttempt({
+      environmentId: "official:light-entry16",
+      seedInput: "42",
+      catalog,
+      fullRulePackage,
+    });
+
+    expect(outcome.type).toBe("READY");
+    if (outcome.type === "READY") {
+      expect(outcome.activeMatch.environmentId).toBe("official:light-entry16");
+      expect(outcome.activeMatch.regulationId).toBe("light-entry16");
+      expect(outcome.activeMatch.seed).toBe(42);
+      expect(outcome.session).toBeDefined();
     }
   });
 });
