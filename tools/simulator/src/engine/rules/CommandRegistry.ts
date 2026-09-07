@@ -299,6 +299,13 @@ export class CommandRegistry {
 
 
     // 5. 型安全なターゲット情報の構築
+    // 【補足: 複数Target対応範囲】
+    // 現在完成しているのは「targetDefinitionId付きActionRequestのResolution-time validation」です。
+    // createRequest() における context.targetComponent / context.targetRequest / context.targetPlayerKey は単数であり、
+    // 異なる複数Targetに対するGenericなRequest-time selection/binding（例: 2体以上の異なるユニットの個別指定）は
+    // 現時点では未完成であり将来課題として扱います。
+    // なお、現在の公式レギュレーション（Official Light + Entry16）に含まれる全ActionDefinitionにおいて
+    // targets が複数定義（length > 1）のActionは存在しない（最大1件）ため、現Official baselineには影響しません。
     let targets: ActionRequestTarget[] | undefined = undefined;
     if (context.targetRequest || context.targetComponent || context.targetPlayerKey) {
       targets = [];
@@ -660,7 +667,7 @@ export class CommandRegistry {
       return undefined;
     }
 
-    // LIFO スタックの最上段リクエストを参照（popせず効果解決へ）
+    // Stage TOP（配列末尾）のRequestを参照（popせず効果解決へ）
     const request = context.state.stage.requests[context.state.stage.requests.length - 1];
 
     return this.resolveRequest(request, context);

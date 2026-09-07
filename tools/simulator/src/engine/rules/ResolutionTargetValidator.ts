@@ -46,11 +46,9 @@ export function validateTargetsAtResolution(
     if (defId) {
       tDef = actionTargets.find((def: any) => def.id === defId);
       if (!tDef) {
-        return {
-          isValid: false,
-          reason: "TARGET_INVALID_AT_RESOLUTION",
-          detail: `アクション定義 [${action.id}] 内に対応するターゲット定義ID [${defId}] が存在しません。`,
-        };
+        throw new Error(
+          `アクション定義 [${action.id}] 内に対応するターゲット定義ID [${defId}] が存在しません（Invariant Violation）。`
+        );
       }
     } else {
       if (actionTargets.length === 1) {

@@ -7,6 +7,9 @@ import { ActionRequestValidator } from "../../engine/rules/ActionRequestValidato
 import { validateTargetsAtResolution } from "../../engine/rules/ResolutionTargetValidator";
 import { TurnManager } from "../../engine/rules/TurnManager";
 import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
+import { loadRegulationCatalog } from "../../engine/regulation/RegulationLoader";
+import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
+import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 
 describe("Resolution Target Validation & Invalid-Target Resolution Contract (Phase 6.0.1 / 6.0.1.1)", () => {
   let rulePackage: RulePackage;
@@ -706,5 +709,151 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
         targetComponent: state.players.p1.field[0],
       })
     ).toThrow(/キャラクタータイプが不適合です/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-1: 不存在 targetDefinitionId は TARGET_INVALID_AT_RESOLUTION で握りつぶさず fail-fast する
+  // ---------------------------------------------------------------------------
+  it("【R1-1】不存在な targetDefinitionId が指定されたリクエストは TARGET_INVALID_AT_RESOLUTION で正常終了せず fail-fast（例外送出）する", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+    const registry = new CommandRegistry();
+
+    const action: any = {
+      id: "action.test.non_existent_def",
+      name: "不存在ターゲット定義アクション",
+      targets: [
+        {
+          id: "validDefId",
+          type: "unit",
+          condition: { componentType: "character" },
+        },
+      ],
+      effect: [{ command: "toggleUnitState" }],
+    };
+
+    // リクエストの targetDefinitionId が "nonExistentDef"（アクション定義に存在しない）
+    const corruptedReq: ActionRequest = {
+      id: "req-corrupted-def",
+      actionId: "action.test.non_existent_def",
+      action,
+      controller: "p1",
+      keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "nonExistentDef",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    // 1. validateTargetsAtResolution 単体での fail-fast（例外送出）
+    expect(() => validateTargetsAtResolution(action, corruptedReq, context)).toThrow(
+      /アクション定義 \[action\.test\.non_existent_def\] 内に対応するターゲット定義ID \[nonExistentDef\] が存在しません（Invariant Violation）/
+    );
+
+    // 2. resolveTopRequest 経由でも TARGET_INVALID_AT_RESOLUTION として握りつぶされず fail-fast すること
+    state.stage.requests = [corruptedReq];
+    expect(() => registry.resolveTopRequest(context)).toThrow(
+      /アクション定義 \[action\.test\.non_existent_def\] 内に対応するターゲット定義ID \[nonExistentDef\] が存在しません（Invariant Violation）/
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-2: 正しい Definition + 消失 Target は TARGET_INVALID_AT_RESOLUTION で正常解決する
+  // ---------------------------------------------------------------------------
+  it("【R1-2】正しい targetDefinitionId を持ち、対象そのものが消失した場合は TARGET_INVALID_AT_RESOLUTION として効果をスキップし正常解決する", () => {
+    const state = createTestState();
+    state.players.p1.hand = [];
+    state.players.p2.hand = [];
+    const logRecorder = new MatchLogRecorder({ matchId: "test-valid-def-disappeared-target" });
+    const context = createTestContext(state, logRecorder);
+    const registry = new CommandRegistry();
+
+    const action: any = {
+      id: "action.test.disappeared_target",
+      name: "対象消失テストアクション",
+      targets: [
+        {
+          id: "targetUnit",
+          type: "unit",
+          condition: { componentType: "character" },
+        },
+      ],
+      effect: [{ command: "toggleUnitState" }],
+    };
+
+    // 正しい targetDefinitionId: "targetUnit"
+    const req: ActionRequest = {
+      id: "req-disappeared",
+      actionId: "action.test.disappeared_target",
+      action,
+      controller: "p1",
+      keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetUnit",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    state.stage.requests = [req];
+
+    // 対象ユニット soldier-1 がフィールドから墓地へ消失
+    state.players.p1.field = [];
+
+    // 1. validateTargetsAtResolution は例外を出さず TARGET_INVALID_AT_RESOLUTION を返す
+    const valResult = validateTargetsAtResolution(action, req, context);
+    expect(valResult.isValid).toBe(false);
+    expect(valResult.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+
+    // 2. resolveTopRequest は例外なく正常完了し、効果のみスキップされる（不発解決）
+    const resolveResult = registry.resolveTopRequest(context);
+    expect(resolveResult.type).toBe("COMPLETED");
+    expect(resolveResult.request.status).toBe("resolved");
+    expect(state.stage.requests.length).toBe(0);
+
+    const events = logRecorder.getEvents();
+    const resolvedEvent = events.find((e) => e.type === "request.resolved") as any;
+    expect(resolvedEvent).toBeDefined();
+    expect(resolvedEvent.effectSkipped).toBe(true);
+    expect(resolvedEvent.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-3: Official Light + Entry16 に複数 targets 定義のアクションが存在しないことを静的確認
+  // ---------------------------------------------------------------------------
+  it("【R1-3】Official Light + Entry16 の全ActionDefinitionにおいて targets が複数定義（length > 1）のActionが存在しないことを静的確認する", async () => {
+    const catalog = await loadRegulationCatalog();
+    const validation = RegulationValidator.validateRegulation(catalog, "light-entry16", {
+      assertImplemented: true,
+    });
+    const format = validation.format!;
+    const regulation = validation.regulation!;
+    const officialPackage = RegulationRulePackageSelector.selectRulePackage(
+      rulePackage,
+      format,
+      regulation
+    );
+
+    // 公式ルールパッケージに含まれる全アクションの targets 定義数を検証
+    for (const action of officialPackage.actions) {
+      const targetsLength = action.targets ? action.targets.length : 0;
+      expect(
+        targetsLength,
+        `公式アクション [${action.id}] の targets 数が複数 (${targetsLength}) です。現在のOfficial baselineには複数ターゲット定義アクションが存在しない前提です。`
+      ).toBeLessThanOrEqual(1);
+    }
   });
 });
