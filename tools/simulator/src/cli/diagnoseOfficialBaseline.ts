@@ -155,7 +155,7 @@ async function main() {
   if (result.divergenceSummary) {
     console.log("\n[Divergence Summary]");
     console.log(`  All Turn 1 Cases:                  ${result.divergenceSummary.allTurn1Cases}/${result.totalIncompleteCases}`);
-    console.log(`  Stable Depth Unbounded Cases:      ${result.divergenceSummary.stableDepthUnboundedCases}/${result.totalIncompleteCases}`);
+    console.log(`  Turn Stalled with Cycle Recurrence:${result.divergenceSummary.turnStalledWithCycleRecurrenceCases}/${result.totalIncompleteCases}`);
   }
 
   console.log("\n[Core Flow: Stage-Empty PASS Summary]");

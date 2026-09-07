@@ -159,4 +159,41 @@ describe("Architecture Boundary & Dependency Direction Tests (Phase 21B.3)", () 
 
     expect(violations).toEqual([]);
   });
+
+  it("GitHub Actions workflows must NOT call heavy diagnostics (measure:official-baseline or diagnose:official-baseline)", () => {
+    const possibleWorkflowsDirs = [
+      path.resolve(srcDir, "../../../.github/workflows"),
+      path.resolve(process.cwd(), "../../.github/workflows"),
+      "/tmp/.github/workflows",
+    ];
+    const workflowsDir = possibleWorkflowsDirs.find((dir) => fs.existsSync(dir));
+    expect(workflowsDir, "Workflows directory should be accessible").toBeDefined();
+
+    const yamlFiles = fs.readdirSync(workflowsDir!).filter(
+      (file) => file.endsWith(".yaml") || file.endsWith(".yml")
+    );
+    expect(yamlFiles.length).toBeGreaterThan(0);
+
+    const heavyCommands = [
+      "measure:official-baseline",
+      "diagnose:official-baseline",
+    ];
+
+    const violations: Array<{ file: string; match: string }> = [];
+
+    for (const file of yamlFiles) {
+      const fullPath = path.resolve(workflowsDir!, file);
+      const content = fs.readFileSync(fullPath, "utf-8");
+      for (const cmd of heavyCommands) {
+        if (content.includes(cmd)) {
+          violations.push({
+            file,
+            match: cmd,
+          });
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
 });

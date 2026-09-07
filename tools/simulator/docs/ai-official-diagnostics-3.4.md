@@ -9,8 +9,14 @@
 - 診断対象リポジトリ: `BlackPoker/BlackPoker`
 - 診断対象ブランチ: `BlackPoker/issue551-core-flow`
 - 診断バージョン: `1.1.0` (v1.0.0 後方互換保持)
-- 診断論理ダイジェスト (Diagnostics Digest v1.1): `9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607`
+- 診断論理ダイジェスト (Diagnostics Digest v1.1): `0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20`
 - 参照元ベースラインダイジェスト (Source Baseline Digest): `0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4`
+
+> [!WARNING]
+> **HEAVY / MANUAL ONLY / DO NOT RUN IN CI**
+> `npm run measure:official-baseline` および `npm run diagnose:official-baseline` は、600戦以上の完全対戦シミュレーションおよび最大2,000ステップの再実行を伴う**重い手動診断専用コマンド**です。
+> `npm test`、`npm run build`、`npm run playable:check`、GitHub Actions（push / schedule / refresh_docs.yaml）等のCIワークフローからは**絶対に呼び出さないでください**。
+> CIワークフローへの混入抑止はアーキテクチャ境界テスト（`src/tests/architecture/architectureBoundary.test.ts`）によって厳格に自動検証されています。
 
 ---
 
@@ -108,21 +114,24 @@ Canonical Match Log の構造化イベントから直接集計した汎用リク
 
 - **最大観測バッファ深度 (maxRequestBufferDepth)**: `0`
 - **最終バッファ深度 (finalRequestBufferDepth)**: `0`
+- **リクエスト生成総数 (requestCreatedCount)**: 平均 `7 件`（最大 `7 件`）
+- **リクエスト解決総数 (requestResolvedCount)**: 平均 `4 件`（最大 `4 件`）
+- **通常リクエストのステージ移送数 (normalRequestMovedToStageCount)**: `7 件`
 - **分析**:
-  - Request Buffer に投入されたリクエストは即座に Stage へ移送（`normalRequestMovedToStageCount`）されるか、即時解決（`immediateResolutionCount`）されているため、バッファが肥大化・スタックしているわけではない。
-  - バッファ自体は正常に空になりつつ、新たなリクエストが繰り返し生成され、Stage を経由して処理され続けている。
+  - Request Buffer に投入されたリクエストは即座に Stage へ移送（`normalRequestMovedToStageCount`）されるか、即時解決されているため、バッファが肥大化・スタックしているわけではない。
+  - 初期に 7 件のリクエストが生成・移送された後、新たなリクエストの追加生成は行われていない。
 
 ---
 
-## 8. Stage 深度の是正と観測結果 (Stage Depth Corrected Metrics)
+## 8. Stage 深度と未解決リクエストの残存 (Stage Depth Corrected Metrics)
 
 `state.stage.requests.length` による正準計測への是正結果：
 
 - **最大ステージ深度 (maxStageDepth)**: `6`
 - **最終ステージ深度 (finalStageDepth)**: **`2`** (旧バグによる `0` から是正)
 - **分析**:
-  - セッション終了時点において、Stage には依然として 2 件のリクエスト（LIFO スタック）が残存した状態で意思決定上限（2000）に到達している。
-  - Stage が空（深度 0）になってターン終了判定へ至る前に、新たなリクエストが Stage 上に積み増しされ続けていることが定量的に実証された。
+  - セッション終了時点において、Stage には依然として 2 件の未解決リクエスト（LIFO スタック）が残存した状態で意思決定上限（2000）に到達している。
+  - Stage 上の最上位リクエスト（`action.twist`）に対する効果解決（`EFFECT_RESOLUTION`）が完了せず、Stage が空（深度 0）になってターン終了判定へ至る遷移が発生していない。
 
 ---
 
@@ -139,32 +148,54 @@ Core Flow の generic 指標として追跡された Stage 空 PASS 観測結果
 
 ---
 
-## 10. 観測されたアクション ID の分布 (Observed Action ID Distribution)
+## 10. 意思決定種別の客観的内訳と進行発散分類 (Decision Kind Evidence & Divergence Classification)
 
-診断ロジック自体には Action ID を一切ハードコードせず、純粋な観測エビデンスとして集計した Action ID の発生状況：
+ログ文字列パースを行わず、実行時データ構造（`decision.kind`, `request.source.type`, `state.stage.requests[0].actionId`）から動的集計した客観的証跡：
 
-- 未完走対戦において観測された主要アクション ID：
-  - `action.attack`
-  - `action.down`
-  - `action.counter`
-  - `action.up`
-  - `action.twist`
-  - `action.charge`
-  - `action.draw`
-- **重要**: 診断ランナーはこれらの Action ID に基づく分岐を持たず、汎用的な `divergencePattern`（`STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION`）として分類している。
+### 意思決定種別の内訳 (Selected Pattern Kind Counts)
+- **ACTION**: `7 回`（対戦初期のアクション選択）
+- **PASS**: `1,993 回`（全体の 99.65%）
+- **EFFECT_SELECTION**: `0 回`
+
+### 意思決定要求ソースの内訳 (Decision Source Type Counts)
+- **ACTION_REQUEST**: `7 回`（手札からの通常アクション選択要求）
+- **EFFECT_RESOLUTION**: `1,993 回`（ステージ上のアクション効果解決に伴う要求）
+
+### ステージ最上位アクションIDの内訳 (Stage Top Action ID Counts)
+- `action.twist`: `1,994 回`（意思決定時にステージ最上位に積まれていたアクションの 99.7%）
+- `action.counter`: `2 回`
+- `action.up`: `2 回`
+- `action.attack`: `1 回`
+- `action.down`: `1 回`
+
+### 観測されたアクションIDの分布 (Observed Action ID Distribution)
+- `action.attack`: `1 回`
+- `action.down`: `1 回`
+- `action.counter`: `2 回`
+- `action.up`: `2 回`
+- `action.twist`: `1 回`
+
+### 進行発散パターンの是正分類
+- **分類名**: **`TURN_STALLED_WITH_CYCLE_RECURRENCE`**（111 / 111 件）
+  - （旧分類名 `STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION` から実態に合わせて改称）
+- **分類根拠**:
+  - リクエスト生成数（`requestCreatedCount = 7`）および解決数（`requestResolvedCount = 4`）は有限で停止している。
+  - Stage 深度は 2（最上位: `action.twist`）で固定されたまま、両プレイヤーが `EFFECT_RESOLUTION` に対して繰り返し `PASS` を選択している。
+  - 単調カウンタを除外したゲーム論理状態（CSF1）が 100% 同一のまま 1,993 回の決定サイクルを反復し、ターン進行（`turnCount = 1`）が完全に停止している。
 
 ---
 
 ## 11. エビデンスから確実に言えること (What the Evidence Proves)
 
 1. **実質的状態再帰の存在**:
-   - 単調カウンタを除外したゲーム論理状態において、111 件全件で 100% の再帰が発生しており、最短 2 ステップでの循環が確認された。
+   - 単調カウンタを除外したゲーム論理状態（CSF1）において、111 件全件で 100% の再帰が発生しており、最短 2 ステップでの循環が確認された。
 2. **決定論的サイクルの確定**:
    - 非 RNG 対戦（72 件）において、同一の `(CycleFingerprint, RequestFingerprint, SelectedPatternKey)` が反復されており、決定論的無限ループに陥っている。
-3. **Turn 1 内での処理連鎖停滞**:
-   - 全未完走対戦で Turn 1 から進まず、Stage 深度が 0 に戻らないままリクエストの生成・解決が繰り返されている。
+3. **Turn 1・Stage 深度 2 での意思決定停滞**:
+   - 全未完走対戦で Turn 1 から進まず、Stage 深度が 2 のまま（最上位に `action.twist` 等が残存）、`EFFECT_RESOLUTION` に対する `PASS` が 1,993 回繰り返されている。
+   - 「無限にリクエストが生成されている」のではなく、「未解決リクエストが Stage 上に残ったまま、PASS 選択の循環によってターン終了判定へ進まない」ことが確定した。
 4. **Stage 空 PASS 仮説の否定**:
-   - 停滞の原因は「Stage 空での PASS」ではない。
+   - `Stage 深度 0 かつ TP=CP` での PASS は 0 件であり、停滞の原因は Stage が空になった後の PASS ではない。
 5. **ポリシー無差別の原因**:
    - 複数選択肢局面（13.6%）において、全候補同点タイおよび同一アクション種別タイが発生し、最小 patternRef 優先タイブレークにより全ポリシーが同一インデックスを選択している。
 
@@ -172,23 +203,23 @@ Core Flow の generic 指標として追跡された Stage 空 PASS 観測結果
 
 ## 12. エビデンスからまだ言えないこと (What Remains Unproven)
 
-1. **特定アクション単独の有責性**:
-   - `action.charge` や `action.draw` などの特定アクション ID が高頻度で出現しているものの、それら単体の不具合か、トリガー条件・Usage ガード・Stage 解決遷移の組み合わせによるものかは、Core Flow 実装の詳細検証を待つ必要がある。
-2. **PASS の合法性ルールの是非**:
-   - Stage 空での PASS が 0 件であったことは事実であるが、ルール設計として PASS を常に許可すべきか否かは、ゲーム仕様の観点から別途検討が必要である。
+1. **`action.twist` や効果解決ルールの有責性**:
+   - Stage 最上位に `action.twist` が残存した状態で `EFFECT_RESOLUTION` への PASS が繰り返されているが、これが `action.twist` 独自の実装不備によるものか、Stage の効果解決フロー全般における PASS 処理やスタック解決遷移の設計によるものかは、Core Flow 実装の詳細検証を待つ必要がある。
+2. **PASS 選択時の Stage 解消遷移仕様**:
+   - 効果解決において両者が PASS を選択した場合にリクエストが解決・破棄されて Stage からポップされるべきか否かは、BlackPoker の公式ルール・Core Flow 設計仕様に基づく判断が必要である。
 
 ---
 
 ## 13. Core Flow 修正候補への提言 (Core Flow Repair Candidates)
 
-Phase 3.4.1 のエビデンスを踏まえ、次作業において検証・修正すべき Core Flow 側の候補：
+Phase 3.4.1 の補修エビデンスを踏まえ、次作業（Phase 4 等）において検証・修正すべき Core Flow 側の候補：
 
-1. **リクエスト再投入・トリガー再誘発条件のガード**:
-   - アクション解決後に同一トリガーが即座に再発火し、無限にリクエストが再生成されるループの抑止。
-2. **ターン内アクション使用制限 (Turn Usage Limits)**:
+1. **Stage 上の効果解決（`EFFECT_RESOLUTION`）における PASS 処理・解決完了遷移**:
+   - Stage 上のリクエストに対する効果解決要求でプレイヤーが PASS を選択した場合、リクエストが適切に解決済みとして Stage からポップされ、次の処理またはターン終了判定へ進む遷移の確認・整備。
+2. **トリガー即時解決・Stage 移送後の後続遷移**:
+   - 即時誘発（`action.charge`）や通常誘発（`action.draw`）の処理後、Stage に残されたリクエストのライフサイクルが正しく終了判定へ至るかの検証。
+3. **ターン内アクション使用制限 (Turn Usage Limits)**:
    - ターン開始時アクションや特定補助アクションに対する使用回数上限（Turn Usage Guard）が適切に機能しているかの確認。
-3. **Stage 解決完了遷移**:
-   - Stage のリクエストが解決された後、新たなリクエストを積載せずにターン終了（または次の合法アクション選択）へ抜ける遷移条件の整備。
 
 ---
 
@@ -216,8 +247,8 @@ Phase 3.4.1 のエビデンスを踏まえ、次作業において検証・修�
 
 ## 16. 決定論的再現性の検証 (Repeatability Verification)
 
-- **Run A Digest**: `9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607`
-- **Run B Digest**: `9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607`
+- **Run A Digest**: `0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20`
+- **Run B Digest**: `0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20`
 - **一致判定**: `true`
 - **論理的一致性 (Exact Logical Equality)**: `true`
 - **診断実行時エラー**: `0 件`

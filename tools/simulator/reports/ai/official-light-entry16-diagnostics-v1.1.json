@@ -113,7 +113,21 @@
         "action.up": 2,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1989,
+        "action.up": 6,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -235,7 +249,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonSoldier": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -358,7 +384,20 @@
         "action.counter": 2,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 3,
+        "action.counter": 1982,
+        "action.twist": 13
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -481,7 +520,20 @@
         "action.counter": 3,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -603,7 +655,19 @@
         "action.twist": 2,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 5,
+        "PASS": 1995
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonAce": 1,
+        "action.twist": 4,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -726,7 +790,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -849,7 +926,20 @@
         "action.counter": 3,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 5,
+        "action.counter": 6,
+        "action.twist": 1987
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -970,7 +1060,18 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 4,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1093,7 +1194,20 @@
         "action.down": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.up": 1,
+        "action.twist": 5,
+        "action.down": 1,
+        "action.counter": 1992
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1216,7 +1330,20 @@
         "action.counter": 1,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.destroyBulwark": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1339,7 +1466,20 @@
         "action.counter": 2,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1987,
+        "action.twist": 7
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1461,7 +1601,19 @@
         "action.counter": 4,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.down": 4,
+        "action.counter": 1993,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1582,7 +1734,18 @@
         "action.twist": 2,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 3,
+        "action.counter": 1996
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1705,7 +1868,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1832,7 +2008,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -1959,6 +2149,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -2084,7 +2291,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2210,7 +2429,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2336,7 +2568,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2461,7 +2706,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2587,7 +2844,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2712,7 +2982,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -2840,6 +3122,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -2965,7 +3265,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3091,7 +3403,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3217,7 +3542,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3344,7 +3682,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3471,6 +3823,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -3596,7 +3965,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3722,7 +4103,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3848,7 +4242,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -3973,7 +4380,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4099,7 +4518,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4224,7 +4656,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4352,6 +4796,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -4477,7 +4939,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4603,7 +5077,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4729,7 +5216,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4856,7 +5356,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -4983,6 +5497,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -5108,7 +5639,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5234,7 +5777,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5360,7 +5916,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5485,7 +6054,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5611,7 +6192,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5736,7 +6330,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -5864,6 +6470,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -5989,7 +6613,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6115,7 +6751,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6241,7 +6890,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6368,7 +7030,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6495,6 +7171,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -6620,7 +7313,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6746,7 +7451,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6872,7 +7590,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -6997,7 +7728,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7123,7 +7866,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7248,7 +8004,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7376,6 +8144,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -7501,7 +8287,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7627,7 +8425,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7753,7 +8564,20 @@
         "action.counter": 3,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7875,7 +8699,19 @@
         "action.twist": 2,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 5,
+        "PASS": 1995
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonAce": 1,
+        "action.twist": 4,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -7998,7 +8834,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8121,7 +8970,20 @@
         "action.counter": 3,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 5,
+        "action.counter": 6,
+        "action.twist": 1987
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8242,7 +9104,18 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 4,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8365,7 +9238,20 @@
         "action.down": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.up": 1,
+        "action.twist": 5,
+        "action.down": 1,
+        "action.counter": 1992
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8488,7 +9374,20 @@
         "action.counter": 1,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.destroyBulwark": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8611,7 +9510,20 @@
         "action.counter": 2,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1987,
+        "action.twist": 7
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8733,7 +9645,19 @@
         "action.counter": 4,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.down": 4,
+        "action.counter": 1993,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8854,7 +9778,18 @@
         "action.twist": 2,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 3,
+        "action.counter": 1996
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -8978,7 +9913,21 @@
         "action.up": 2,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1989,
+        "action.up": 6,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9100,7 +10049,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonSoldier": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9223,7 +10184,20 @@
         "action.counter": 2,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 3,
+        "action.counter": 1982,
+        "action.twist": 13
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9346,7 +10320,20 @@
         "action.counter": 3,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9468,7 +10455,19 @@
         "action.twist": 2,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 5,
+        "PASS": 1995
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonAce": 1,
+        "action.twist": 4,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9591,7 +10590,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9714,7 +10726,20 @@
         "action.counter": 3,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 5,
+        "action.counter": 6,
+        "action.twist": 1987
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9835,7 +10860,18 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 4,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -9958,7 +10994,20 @@
         "action.down": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.up": 1,
+        "action.twist": 5,
+        "action.down": 1,
+        "action.counter": 1992
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10081,7 +11130,20 @@
         "action.counter": 1,
         "action.down": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.destroyBulwark": 1,
+        "action.twist": 1992,
+        "action.counter": 4,
+        "action.down": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10204,7 +11266,20 @@
         "action.counter": 2,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1987,
+        "action.twist": 7
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10326,7 +11401,19 @@
         "action.counter": 4,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.down": 4,
+        "action.counter": 1993,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10447,7 +11534,18 @@
         "action.twist": 2,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.twist": 3,
+        "action.counter": 1996
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10571,7 +11669,21 @@
         "action.up": 2,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1989,
+        "action.up": 6,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10693,7 +11805,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.summonSoldier": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10816,7 +11940,20 @@
         "action.counter": 2,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 3,
+        "action.counter": 1982,
+        "action.twist": 13
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -10939,7 +12076,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11066,7 +12216,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11193,6 +12357,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -11318,7 +12499,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11444,7 +12637,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11570,7 +12776,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11695,7 +12914,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11821,7 +13052,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -11946,7 +13190,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12074,6 +13330,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -12199,7 +13473,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12325,7 +13611,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12451,7 +13750,20 @@
         "action.counter": 4,
         "action.twist": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1993,
+        "action.twist": 4
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12578,7 +13890,21 @@
         "action.up": 1,
         "action.counter": 2
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.twist": 1,
+        "action.up": 2,
+        "action.counter": 1994
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12705,6 +14031,23 @@
         "action.destroyBulwark": 2,
         "action.end": 3
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 17,
+        "PASS": 1979,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 13,
+        "action.twist": 12,
+        "action.counter": 1951,
+        "action.destroyBulwark": 3,
+        "action.end": 6,
+        "action.draw": 6
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -12830,7 +14173,19 @@
         "action.twist": 2,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 3,
+        "action.counter": 1995
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -12956,7 +14311,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13082,7 +14450,20 @@
         "action.counter": 1,
         "action.twist": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 4,
+        "action.counter": 1,
+        "action.twist": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13207,7 +14588,19 @@
         "action.twist": 3,
         "action.counter": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 7,
+        "PASS": 1993
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13333,7 +14726,20 @@
         "action.counter": 3,
         "action.twist": 3
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1992,
+        "action.twist": 5
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13458,7 +14864,19 @@
         "action.twist": 1,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 6,
+        "PASS": 1994
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 1,
+        "action.counter": 1997
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13586,6 +15004,24 @@
         "action.up": 2,
         "action.end": 4
       },
+      "selectedPatternKindCounts": {
+        "ACTION": 19,
+        "PASS": 1977,
+        "EFFECT_SELECTION": 4
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 1996,
+        "EFFECT_RESOLUTION": 4
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 14,
+        "action.down": 4,
+        "action.counter": 1950,
+        "action.twist": 4,
+        "action.up": 3,
+        "action.end": 8,
+        "action.draw": 8
+      },
       "divergencePattern": "UNKNOWN_DIVERGENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
@@ -13711,7 +15147,19 @@
         "action.twist": 3,
         "action.counter": 4
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.twist": 5,
+        "action.counter": 1993
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13837,7 +15285,20 @@
         "action.counter": 5,
         "action.twist": 1
       },
-      "divergencePattern": "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION",
+      "selectedPatternKindCounts": {
+        "ACTION": 8,
+        "PASS": 1992
+      },
+      "decisionSourceTypeCounts": {
+        "ACTION_REQUEST": 2000
+      },
+      "stageTopActionIdCounts": {
+        "action.attack": 1,
+        "action.down": 1,
+        "action.counter": 1995,
+        "action.twist": 2
+      },
+      "divergencePattern": "TURN_STALLED_WITH_CYCLE_RECURRENCE",
       "stageEmptyPassDiagnostics": {
         "stageEmptyPassCount": 0,
         "maxConsecutiveStageEmptyPass": 0,
@@ -13935,6 +15396,7 @@
   },
   "divergenceSummary": {
     "allTurn1Cases": 99,
+    "turnStalledWithCycleRecurrenceCases": 99,
     "stableDepthUnboundedCases": 99
   },
   "stageEmptyPassSummary": {
@@ -13956,10 +15418,10 @@
     "No fitness scalar, genome mutations, schema changes, or core flow modifications were applied in this diagnostic phase.",
     "Cycle Fingerprint excludes monotonic counters (stateVersion, nextRequestSeq, sequence, runtime request IDs) while strictly preserving array order and gameplay-relevant state."
   ],
-  "logicalDigest": "9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607",
+  "logicalDigest": "0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20",
   "repeatability": {
-    "runADigest": "9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607",
-    "runBDigest": "9f2aee0b8f4e4be6ebfc541e3bd1c5009c30ab8a6038766cd31d4295e8103607",
+    "runADigest": "0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20",
+    "runBDigest": "0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20",
     "matched": true,
     "exactLogicalEquality": true,
     "diagnosticErrorCount": 0

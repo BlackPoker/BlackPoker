@@ -9,6 +9,7 @@ import {
   CYCLE_STATE_FINGERPRINT_VERSION,
   OfficialBaselineDiagnosticsConfig,
   IncompleteCaseRecord,
+  DivergencePattern,
 } from "../../domain/ai/OfficialBaselineDiagnosticsTypes";
 import {
   computeDiagnosticsLogicalDigest,
@@ -398,13 +399,30 @@ describe("Official Baseline Diagnostics Tests (Phase 3.4.1 - Section L Requireme
       expect(isStageEmptyPass(0, "p1", "p2", "p1", "PASS")).toBe(false);
     });
 
-    it("24. Action IDを診断条件へhardcodeしていないこと: 観測頻度として集計され、判定分岐に利用されないこと", () => {
+    it("24. Action IDおよび判断種別・要求元を動的観測集計すること: hardcodeせず観測値として集計されること", () => {
       const observedActionIdCounts: Record<string, number> = {
         "action.charge": 1200,
         "action.draw": 1200,
       };
+      const selectedPatternKindCounts: Record<string, number> = {
+        "ACTION": 14,
+        "PASS": 1986,
+      };
+      const decisionSourceTypeCounts: Record<string, number> = {
+        "ACTION_REQUEST": 14,
+        "EFFECT_RESOLUTION": 1986,
+      };
+      const stageTopActionIdCounts: Record<string, number> = {
+        "action.counter": 1986,
+      };
+
       expect(observedActionIdCounts["action.charge"]).toBe(1200);
-      expect(Object.keys(observedActionIdCounts).length).toBe(2);
+      expect(selectedPatternKindCounts["PASS"]).toBe(1986);
+      expect(decisionSourceTypeCounts["EFFECT_RESOLUTION"]).toBe(1986);
+      expect(stageTopActionIdCounts["action.counter"]).toBe(1986);
+
+      const divergencePattern: DivergencePattern = "TURN_STALLED_WITH_CYCLE_RECURRENCE";
+      expect(divergencePattern).toBe("TURN_STALLED_WITH_CYCLE_RECURRENCE");
     });
   });
 

@@ -120,6 +120,8 @@ export type DivergencePattern =
   | "ALL_TURN_1_CONTINUOUS_GENERATION"
   | "REQUEST_BUFFER_GROWTH"
   | "STAGE_GROWTH"
+  | "TURN_STALLED_WITH_CYCLE_RECURRENCE"
+  | "STABLE_DEPTH_DECISION_CYCLE"
   | "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION"
   | "UNKNOWN_DIVERGENCE";
 
@@ -188,6 +190,9 @@ export interface IncompleteCaseRecord {
   readonly requestBufferDiagnostics?: RequestBufferDiagnosticsMetrics;
   readonly requestLifecycleMetrics?: GenericRequestLifecycleMetrics;
   readonly observedActionIdCounts?: Record<string, number>;
+  readonly selectedPatternKindCounts?: Record<string, number>;
+  readonly decisionSourceTypeCounts?: Record<string, number>;
+  readonly stageTopActionIdCounts?: Record<string, number>;
   readonly divergencePattern?: DivergencePattern;
   readonly stageEmptyPassDiagnostics: StageEmptyPassMetrics;
   readonly cycleDiagnostics?: DeterministicCycleDiagnostics;
@@ -305,7 +310,8 @@ export interface OfficialBaselineDiagnosticsLogicalPayload {
   };
   readonly divergenceSummary?: {
     readonly allTurn1Cases: number;
-    readonly stableDepthUnboundedCases: number;
+    readonly turnStalledWithCycleRecurrenceCases: number;
+    readonly stableDepthUnboundedCases?: number;
   };
   readonly stageEmptyPassSummary: {
     readonly totalCasesWithStageEmptyPass: number;

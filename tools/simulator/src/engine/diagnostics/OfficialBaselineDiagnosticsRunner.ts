@@ -318,6 +318,9 @@ export class MatchDiagnosticRunner {
     requestBufferDiagnostics: RequestBufferDiagnosticsMetrics;
     requestLifecycleMetrics: GenericRequestLifecycleMetrics;
     observedActionIdCounts: Record<string, number>;
+    selectedPatternKindCounts: Record<string, number>;
+    decisionSourceTypeCounts: Record<string, number>;
+    stageTopActionIdCounts: Record<string, number>;
     divergencePattern: DivergencePattern;
     stageEmptyPass: StageEmptyPassMetrics;
     cycleDiagnostics: DeterministicCycleDiagnostics;
@@ -353,6 +356,9 @@ export class MatchDiagnosticRunner {
     let maxConsecutiveStageEmptyPass = 0;
 
     const observedActionIdCounts: Record<string, number> = {};
+    const selectedPatternKindCounts: Record<string, number> = {};
+    const decisionSourceTypeCounts: Record<string, number> = {};
+    const stageTopActionIdCounts: Record<string, number> = {};
 
     // 1. State Hash v2 トラッキング
     const stateVisits = new Map<string, number[]>();
@@ -394,6 +400,28 @@ export class MatchDiagnosticRunner {
         // Action ID 頻度集計
         if (record.actionId) {
           observedActionIdCounts[record.actionId] = (observedActionIdCounts[record.actionId] || 0) + 1;
+        }
+
+        // 判断種別 (selectedPatternKind) 頻度集計 (ACTION, PASS, EFFECT_SELECTION 等)
+        if (record.selectedPatternKind) {
+          selectedPatternKindCounts[record.selectedPatternKind] =
+            (selectedPatternKindCounts[record.selectedPatternKind] || 0) + 1;
+        }
+
+        // 判断要求ソース種別 (latestRequest.source.type) 頻度集計
+        if (latestRequest?.source?.type) {
+          decisionSourceTypeCounts[latestRequest.source.type] =
+            (decisionSourceTypeCounts[latestRequest.source.type] || 0) + 1;
+        }
+
+        // 判断時点の Stage 先頭 actionId 頻度集計
+        const stageReqs = session.state.stage?.requests;
+        if (stageReqs && stageReqs.length > 0) {
+          const topStageReq = stageReqs[stageReqs.length - 1];
+          if (topStageReq?.actionId) {
+            stageTopActionIdCounts[topStageReq.actionId] =
+              (stageTopActionIdCounts[topStageReq.actionId] || 0) + 1;
+          }
         }
 
         const turnPlayer = obs?.turnPlayerId ?? session.state.turnPlayer;
@@ -517,7 +545,7 @@ export class MatchDiagnosticRunner {
       } else if (maxStageDepth >= 10) {
         divergencePattern = "STAGE_GROWTH";
       } else {
-        divergencePattern = "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION";
+        divergencePattern = "TURN_STALLED_WITH_CYCLE_RECURRENCE";
       }
     }
 
@@ -563,6 +591,9 @@ export class MatchDiagnosticRunner {
         triggeredRequestObservedCount,
       },
       observedActionIdCounts,
+      selectedPatternKindCounts,
+      decisionSourceTypeCounts,
+      stageTopActionIdCounts,
       divergencePattern,
       stageEmptyPass: {
         stageEmptyPassCount,
@@ -776,6 +807,9 @@ export class OfficialBaselineDiagnosticsRunner {
               requestBufferDiagnostics: detailedRun.requestBufferDiagnostics,
               requestLifecycleMetrics: detailedRun.requestLifecycleMetrics,
               observedActionIdCounts: detailedRun.observedActionIdCounts,
+              selectedPatternKindCounts: detailedRun.selectedPatternKindCounts,
+              decisionSourceTypeCounts: detailedRun.decisionSourceTypeCounts,
+              stageTopActionIdCounts: detailedRun.stageTopActionIdCounts,
               divergencePattern: detailedRun.divergencePattern,
               stageEmptyPassDiagnostics: detailedRun.stageEmptyPass,
               cycleDiagnostics: detailedRun.cycleDiagnostics,
@@ -863,7 +897,12 @@ export class OfficialBaselineDiagnosticsRunner {
 
     // Divergence Summary
     const allTurn1Cases = incompleteCases.filter((c) => c.turnProgress.initialTurnCount === 1 && c.turnProgress.finalTurnCount === 1).length;
-    const stableDepthUnboundedCases = incompleteCases.filter((c) => c.divergencePattern === "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION").length;
+    const turnStalledWithCycleRecurrenceCases = incompleteCases.filter(
+      (c) =>
+        c.divergencePattern === "TURN_STALLED_WITH_CYCLE_RECURRENCE" ||
+        c.divergencePattern === "STABLE_DEPTH_DECISION_CYCLE" ||
+        c.divergencePattern === "STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION"
+    ).length;
 
     // Stage-Empty PASS Summary
     const totalCasesWithStageEmptyPass = incompleteCases.filter(
@@ -921,7 +960,8 @@ export class OfficialBaselineDiagnosticsRunner {
       },
       divergenceSummary: {
         allTurn1Cases,
-        stableDepthUnboundedCases,
+        turnStalledWithCycleRecurrenceCases,
+        stableDepthUnboundedCases: turnStalledWithCycleRecurrenceCases,
       },
       stageEmptyPassSummary: {
         totalCasesWithStageEmptyPass,
