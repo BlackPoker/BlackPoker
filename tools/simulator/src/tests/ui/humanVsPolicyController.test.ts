@@ -242,5 +242,139 @@ describe("HumanVsPolicyController Tests", () => {
         expect(result.error.message).toContain("安全上限");
       }
     });
+
+    it("session.submitDecision が例外をスローした場合、Promise reject せず TECHNICAL_ERROR を返すこと", async () => {
+      const { session, initialStep } = setupRealSession();
+      const aiPlayer = (initialStep as any).request.playerId;
+      const humanPlayer = aiPlayer === "p1" ? "p2" : "p1";
+
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      // submitDecision が例外をスローするようにモック
+      session.submitDecision = () => {
+        throw new Error("Simulated core session crash during submitDecision");
+      };
+
+      // Promise が reject されずに正常に resolve されることを検証
+      const resultPromise = advanceAutomatedDecisions(
+        session,
+        initialStep,
+        seatControllers,
+        policies
+      );
+      await expect(resultPromise).resolves.toBeDefined();
+
+      const result = await resultPromise;
+      expect(result.status).toBe("TECHNICAL_ERROR");
+      if (result.status === "TECHNICAL_ERROR") {
+        expect(result.error.message).toContain("Simulated core session crash during submitDecision");
+        expect(result.lastStep).toBe(initialStep);
+        expect(result.records.length).toBe(0);
+      }
+    });
+
+    it("initialStep が PROGRESSED で advance() により HUMAN 手番へ遷移した場合、STOPPED (HUMAN_TURN) となること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const humanPlayer = (initialStep as any).request.playerId;
+      const aiPlayer = humanPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      // advance() が initialStep (HUMAN_TURN) を返すようにモック
+      session.advance = () => initialStep;
+
+      const progressedStep: GameSessionStep = { type: "PROGRESSED" };
+      const result = await advanceAutomatedDecisions(
+        session,
+        progressedStep,
+        seatControllers,
+        policies
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(result.reason).toBe("HUMAN_TURN");
+        expect(result.step).toBe(initialStep);
+      }
+    });
+
+    it("initialStep が PROGRESSED で advance() により FINISHED へ遷移した場合、STOPPED (FINISHED) となること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const humanPlayer = (initialStep as any).request.playerId;
+      const aiPlayer = humanPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      const finishedStep: GameSessionStep = {
+        type: "FINISHED",
+        result: { winner: "p1", reason: "ライフ枯渇" },
+      };
+      session.advance = () => finishedStep;
+
+      const progressedStep: GameSessionStep = { type: "PROGRESSED" };
+      const result = await advanceAutomatedDecisions(
+        session,
+        progressedStep,
+        seatControllers,
+        policies
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(result.reason).toBe("FINISHED");
+        expect(result.step).toBe(finishedStep);
+      }
+    });
+
+    it("initialStep が PROGRESSED で session.advance() が例外をスローした場合、TECHNICAL_ERROR を返すこと", async () => {
+      const { session, initialStep } = setupRealSession();
+      const humanPlayer = (initialStep as any).request.playerId;
+      const aiPlayer = humanPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      session.advance = () => {
+        throw new Error("Simulated advance crash");
+      };
+
+      const progressedStep: GameSessionStep = { type: "PROGRESSED" };
+      const result = await advanceAutomatedDecisions(
+        session,
+        progressedStep,
+        seatControllers,
+        policies
+      );
+
+      expect(result.status).toBe("TECHNICAL_ERROR");
+      if (result.status === "TECHNICAL_ERROR") {
+        expect(result.error.message).toContain("Simulated advance crash");
+        expect(result.lastStep).toBe(progressedStep);
+      }
+    });
+
+    it("PROGRESSED が安全上限ガード (maxProgressSteps) を超過した場合、TECHNICAL_ERROR を返すこと", async () => {
+      const { session, initialStep } = setupRealSession();
+      const humanPlayer = (initialStep as any).request.playerId;
+      const aiPlayer = humanPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      const progressedStep: GameSessionStep = { type: "PROGRESSED" };
+      session.advance = () => progressedStep;
+
+      const result = await advanceAutomatedDecisions(
+        session,
+        progressedStep,
+        seatControllers,
+        policies,
+        { maxProgressSteps: 3 }
+      );
+
+      expect(result.status).toBe("TECHNICAL_ERROR");
+      if (result.status === "TECHNICAL_ERROR") {
+        expect(result.error.message).toContain("AI の自動進行ステップが安全上限");
+      }
+    });
   });
 });

@@ -44,43 +44,47 @@ describe("Human vs Policy Integration Tests (Phase 2.5)", () => {
       expect(step.type).toBe("WAITING_FOR_DECISION");
       if (step.type !== "WAITING_FOR_DECISION") return;
 
-      // 初手が p1 (Human) の場合、Human が手動で合法手を提出
-      if (step.request.playerId === "p1") {
-        const humanResponse = {
-          decisionId: step.request.decisionId,
-          stateVersion: step.request.stateVersion,
-          selectedPatternRef: 0,
-        };
-        step = outcome.session.submitDecision(humanResponse);
-      }
+      // 初手が p1 (Human) であることを明示的にアサート
+      expect(step.request.playerId).toBe("p1");
+      const passPatternRef = step.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(passPatternRef).toBeGreaterThanOrEqual(0);
 
-      // 次が p2 (AI) の場合、自動進行
-      if (step.type === "WAITING_FOR_DECISION" && step.request.playerId === "p2") {
-        const aiResult = await advanceAutomatedDecisions(
-          outcome.session,
-          step,
-          seatControllers,
-          policies,
-          { viewerPlayerId: "p1" }
-        );
+      const humanResponse = {
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: passPatternRef,
+      };
+      step = outcome.session.submitDecision(humanResponse);
 
-        expect(aiResult.status).toBe("STOPPED");
-        if (aiResult.status === "STOPPED") {
-          expect(aiResult.records.length).toBeGreaterThanOrEqual(1);
-          for (const rec of aiResult.records) {
-            expect(rec.playerId).toBe("p2");
-            expect(rec.response.stateVersion).toBe(rec.request.stateVersion);
-            expect(rec.response.decisionId).toBe(rec.request.decisionId);
-          }
-          // Human 手番またはゲーム終了で停止していること
-          expect(["HUMAN_TURN", "FINISHED"]).toContain(aiResult.reason);
+      // 次が p2 (AI) であることを明示的にアサートして自動進行
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
+      expect(step.request.playerId).toBe("p2");
+
+      const aiResult = await advanceAutomatedDecisions(
+        outcome.session,
+        step,
+        seatControllers,
+        policies,
+        { viewerPlayerId: "p1" }
+      );
+
+      expect(aiResult.status).toBe("STOPPED");
+      if (aiResult.status === "STOPPED") {
+        expect(aiResult.records.length).toBeGreaterThanOrEqual(1);
+        for (const rec of aiResult.records) {
+          expect(rec.playerId).toBe("p2");
+          expect(rec.response.stateVersion).toBe(rec.request.stateVersion);
+          expect(rec.response.decisionId).toBe(rec.request.decisionId);
         }
+        // Human 手番またはゲーム終了で停止していること
+        expect(["HUMAN_TURN", "FINISHED"]).toContain(aiResult.reason);
       }
     });
   });
 
-  describe("2. Human p2 vs FirstLegal p1 (初期 AI 先行自動処理)", () => {
-    it("Human=p2 かつ AI=p1 の場合、開始直後の AI ターンが自動実行され Human(p2) 手番で待機すること", async () => {
+  describe("2. Human p2 vs FirstLegal p1 (初期 AI 自動処理)", () => {
+    it("AI席が初期Decision担当となる場合、開始直後の AI ターンが自動実行され Human 手番で待機すること", async () => {
       const outcome = startMatchAttempt({
         environmentId: officialEnvId,
         seedInput: "20260907",
@@ -91,36 +95,38 @@ describe("Human vs Policy Integration Tests (Phase 2.5)", () => {
       expect(outcome.type).toBe("READY");
       if (outcome.type !== "READY") return;
 
-      const seatControllers = createSeatControllers("humanVsAi", "p2", "firstLegal");
+      const aiSeat = "p1";
+      const humanSeat = "p2";
+      const seatControllers = createSeatControllers("humanVsAi", humanSeat, "firstLegal");
       const policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, outcome.activeMatch.seed);
 
       expect(seatControllers.p1.kind).toBe("POLICY");
       expect(seatControllers.p2.kind).toBe("HUMAN");
 
-      const step = outcome.initialStep;
-      expect(step.type).toBe("WAITING_FOR_DECISION");
-      if (step.type !== "WAITING_FOR_DECISION") return;
+      const initialStep = outcome.initialStep;
+      expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+      if (initialStep.type !== "WAITING_FOR_DECISION") return;
 
-      // Official Light + Entry16 では通常先攻 (p1) から開始
-      if (step.request.playerId === "p1") {
-        // AI 先行の自動実行
-        const aiResult = await advanceAutomatedDecisions(
-          outcome.session,
-          step,
-          seatControllers,
-          policies,
-          { viewerPlayerId: "p2" }
-        );
+      // AI席 (aiSeat = "p1") が初期 Decision 担当であることを明示的に検証 (空振り防止)
+      expect(initialStep.request.playerId).toBe(aiSeat);
 
-        expect(aiResult.status).toBe("STOPPED");
-        if (aiResult.status === "STOPPED") {
-          expect(aiResult.records.length).toBeGreaterThanOrEqual(1);
-          // 停止時点で Human (p2) の手番になっていること
-          expect(aiResult.reason).toBe("HUMAN_TURN");
-          expect(aiResult.step.type).toBe("WAITING_FOR_DECISION");
-          if (aiResult.step.type === "WAITING_FOR_DECISION") {
-            expect(aiResult.step.request.playerId).toBe("p2");
-          }
+      // AI 先行の自動実行
+      const aiResult = await advanceAutomatedDecisions(
+        outcome.session,
+        initialStep,
+        seatControllers,
+        policies,
+        { viewerPlayerId: humanSeat }
+      );
+
+      expect(aiResult.status).toBe("STOPPED");
+      if (aiResult.status === "STOPPED") {
+        expect(aiResult.records.length).toBeGreaterThanOrEqual(1);
+        // 停止時点で Human (p2) の手番になっていること
+        expect(aiResult.reason).toBe("HUMAN_TURN");
+        expect(aiResult.step.type).toBe("WAITING_FOR_DECISION");
+        if (aiResult.step.type === "WAITING_FOR_DECISION") {
+          expect(aiResult.step.request.playerId).toBe(humanSeat);
         }
       }
     });

@@ -238,22 +238,18 @@ export const CoreBattlePlaytest: React.FC = () => {
 
       // 初期ステップの処理
       let step = outcome.initialStep;
-      if (step.type === "WAITING_FOR_DECISION") {
-        const initPlayer = step.request.playerId;
-        const isHuman = isHumanSeat(seatControllers, initPlayer);
+      if (mode === "humanVsAi") {
+        const needsAiAdvance =
+          step.type === "PROGRESSED" ||
+          (step.type === "WAITING_FOR_DECISION" && !isHumanSeat(seatControllers, step.request.playerId));
 
-        if (isHuman) {
-          lastActivePlayerRef.current = initPlayer;
-          setPendingPlayerKey(initPlayer);
-          if (mode === "humanVsHuman" && enablePassAndPlay) {
-            setIsPassAndPlayWaiting(true);
-          }
-          addTrace("DECISION_REQUEST", `判断待機 (${initPlayer})`, outcome.session.state);
-          setCurrentStep(step);
-        } else {
-          // AI 先行 (e.g. Human = p2, AI = p1)
+        if (needsAiAdvance) {
           setIsPassAndPlayWaiting(false);
-          addTrace("AI_TURN_START", `AI (${initPlayer}) 先行のため自動実行を開始`, outcome.session.state);
+          const advanceLogMsg =
+            step.type === "WAITING_FOR_DECISION"
+              ? `AI (${step.request.playerId}) 判断のため自動実行を開始`
+              : `PROGRESSED ステップのため自動進行を開始`;
+          addTrace("AI_TURN_START", advanceLogMsg, outcome.session.state);
           setIsAiProcessing(true);
 
           const aiResult = await advanceAutomatedDecisions(
@@ -313,7 +309,20 @@ export const CoreBattlePlaytest: React.FC = () => {
             addLog(`[FINISH] ゲーム終了: 勝者【${winnerName}】(${step.result.reason})`, "system", nextState);
             addTrace("GAME_FINISHED", `勝者: ${winnerName} (${step.result.reason})`, nextState);
           }
+          return;
         }
+      }
+
+      // Human 手番または Human vs Human または FINISHED
+      if (step.type === "WAITING_FOR_DECISION") {
+        const initPlayer = step.request.playerId;
+        lastActivePlayerRef.current = initPlayer;
+        setPendingPlayerKey(initPlayer);
+        if (mode === "humanVsHuman" && enablePassAndPlay) {
+          setIsPassAndPlayWaiting(true);
+        }
+        addTrace("DECISION_REQUEST", `判断待機 (${initPlayer})`, outcome.session.state);
+        setCurrentStep(step);
       } else {
         setCurrentStep(step);
       }
@@ -435,12 +444,14 @@ export const CoreBattlePlaytest: React.FC = () => {
         setLatestEventMessage(generatedEvents[generatedEvents.length - 1].message);
       }
 
-      // 2. 次の手番が AI (POLICY) の場合、自動進行ループを実行
-      if (
+      // 2. 次の手番が AI (POLICY) または PROGRESSED の場合、自動進行ループを実行
+      const shouldAutoAdvance =
         activeMatchMode === "humanVsAi" &&
-        nextStep.type === "WAITING_FOR_DECISION" &&
-        !isHumanSeat(activeSeatControllers, nextStep.request.playerId)
-      ) {
+        (nextStep.type === "PROGRESSED" ||
+          (nextStep.type === "WAITING_FOR_DECISION" &&
+            !isHumanSeat(activeSeatControllers, nextStep.request.playerId)));
+
+      if (shouldAutoAdvance) {
         setIsAiProcessing(true);
 
         const aiResult = await advanceAutomatedDecisions(

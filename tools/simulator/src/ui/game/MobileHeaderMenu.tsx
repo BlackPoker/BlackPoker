@@ -137,8 +137,8 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
                 onChange={(e) => onSelectHumanSeat(e.target.value as "p1" | "p2")}
                 className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
               >
-                <option value="p1">Player A (先攻優先席 / p1)</option>
-                <option value="p2">Player B (後攻優先席 / p2)</option>
+                <option value="p1">Player A (p1)</option>
+                <option value="p2">Player B (p2)</option>
               </select>
             </div>
 

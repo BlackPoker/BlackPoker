@@ -91,17 +91,20 @@ export async function advanceAutomatedDecisions(
   policies: Record<string, DecisionPolicy>,
   options?: {
     maxAutomatedDecisions?: number;
+    maxProgressSteps?: number;
     viewerPlayerId?: PlayerKey;
   }
 ): Promise<AutomatedAdvanceResult> {
   const maxDecisions = options?.maxAutomatedDecisions ?? 500;
+  const maxProgressSteps = options?.maxProgressSteps ?? 1000;
   const records: AutomatedDecisionRecord[] = [];
   let currentStep = initialStep;
   let decisionCount = 0;
+  let progressCount = 0;
 
   while (true) {
-    // 1. 終局または判断待機以外のステップであれば停止
-    if (currentStep.type !== "WAITING_FOR_DECISION") {
+    // 1. FINISHED の場合は正常終了
+    if (currentStep.type === "FINISHED") {
       return {
         status: "STOPPED",
         reason: "FINISHED",
@@ -110,85 +113,135 @@ export async function advanceAutomatedDecisions(
       };
     }
 
-    // 2. 現在の席コントローラーを確認
-    const playerId = currentStep.request.playerId;
-    const seat = playerId === "p1" ? seatControllers.p1 : playerId === "p2" ? seatControllers.p2 : null;
+    // 2. PROGRESSED の場合: session.advance() して自動進行を継続
+    if (currentStep.type === "PROGRESSED") {
+      if (progressCount >= maxProgressSteps) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: new Error(
+            `AI の自動進行ステップが安全上限 (${maxProgressSteps}回) を超過しました。無限進行ループの可能性があります。`
+          ),
+          records,
+          lastStep: currentStep,
+        };
+      }
 
-    if (!seat || seat.kind === "HUMAN") {
-      // 人間プレイヤーの手番に到達したら正常停止
-      return {
-        status: "STOPPED",
-        reason: "HUMAN_TURN",
-        step: currentStep,
-        records,
-      };
+      progressCount++;
+      try {
+        currentStep = session.advance();
+      } catch (err: any) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: err instanceof Error ? err : new Error(String(err)),
+          records,
+          lastStep: currentStep,
+        };
+      }
+      continue;
     }
 
-    // 3. AI (POLICY) の場合: 500回上限ガード確認
-    if (decisionCount >= maxDecisions) {
-      return {
-        status: "TECHNICAL_ERROR",
-        error: new Error(
-          `AI の連続自動意思決定が安全上限 (${maxDecisions}回) を超過しました。無限判断ループの可能性があります。`
-        ),
-        records,
-        lastStep: currentStep,
-      };
+    // 3. WAITING_FOR_DECISION の場合
+    if (currentStep.type === "WAITING_FOR_DECISION") {
+      const playerId = currentStep.request.playerId;
+      const seat = playerId === "p1" ? seatControllers.p1 : playerId === "p2" ? seatControllers.p2 : null;
+
+      if (!seat || seat.kind === "HUMAN") {
+        // 人間プレイヤーの手番に到達したら正常停止
+        return {
+          status: "STOPPED",
+          reason: "HUMAN_TURN",
+          step: currentStep,
+          records,
+        };
+      }
+
+      // AI (POLICY) の場合: 500回上限ガード確認
+      if (decisionCount >= maxDecisions) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: new Error(
+            `AI の連続自動意思決定が安全上限 (${maxDecisions}回) を超過しました。無限判断ループの可能性があります。`
+          ),
+          records,
+          lastStep: currentStep,
+        };
+      }
+
+      // Policy インスタンス取得
+      const policy = policies[playerId];
+      if (!policy) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: new Error(`プレイヤー席 "${playerId}" に対する Policy インスタンスが初期化されていません。`),
+          records,
+          lastStep: currentStep,
+        };
+      }
+
+      // Policy から意思決定を取得 (非同期 decide() 優先)
+      let response: DecisionResponse;
+      const policyName = policy.descriptor.name || policy.descriptor.kind;
+      try {
+        response = await (policy.decide
+          ? policy.decide(currentStep.request)
+          : Promise.resolve(policy.choose(currentStep.request)));
+
+        // レスポンスの厳格バリデーション (fail-fast)
+        validateDecisionResponse(currentStep.request, response, policyName);
+      } catch (err: any) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: err instanceof Error ? err : new Error(String(err)),
+          records,
+          lastStep: currentStep,
+        };
+      }
+
+      // 同一の session.submitDecision 経路で進行 (Core 例外境界)
+      let nextStep: GameSessionStep;
+      let nextState: any;
+      let generatedEvents: readonly FormattedLogEntry[];
+      const prevState = JSON.parse(JSON.stringify(session.state));
+
+      try {
+        nextStep = session.submitDecision(response);
+        nextState = JSON.parse(JSON.stringify(session.state));
+        generatedEvents = ViewerAwareGameEventFormatter.formatStateTransition(
+          prevState,
+          nextState,
+          options?.viewerPlayerId
+        );
+      } catch (err: any) {
+        return {
+          status: "TECHNICAL_ERROR",
+          error: err instanceof Error ? err : new Error(String(err)),
+          records,
+          lastStep: currentStep,
+        };
+      }
+
+      records.push({
+        playerId,
+        policyDescriptor: policy.descriptor,
+        request: currentStep.request,
+        response,
+        prevState,
+        nextState,
+        nextStep,
+        generatedEvents,
+      });
+
+      currentStep = nextStep;
+      decisionCount++;
+      continue;
     }
 
-    // 4. Policy インスタンス取得
-    const policy = policies[playerId];
-    if (!policy) {
-      return {
-        status: "TECHNICAL_ERROR",
-        error: new Error(`プレイヤー席 "${playerId}" に対する Policy インスタンスが初期化されていません。`),
-        records,
-        lastStep: currentStep,
-      };
-    }
-
-    // 5. Policy から意思決定を取得 (非同期 decide() 優先)
-    let response: DecisionResponse;
-    const policyName = policy.descriptor.name || policy.descriptor.kind;
-    try {
-      response = await (policy.decide
-        ? policy.decide(currentStep.request)
-        : Promise.resolve(policy.choose(currentStep.request)));
-
-      // 6. レスポンスの厳格バリデーション (fail-fast)
-      validateDecisionResponse(currentStep.request, response, policyName);
-    } catch (err: any) {
-      return {
-        status: "TECHNICAL_ERROR",
-        error: err instanceof Error ? err : new Error(String(err)),
-        records,
-        lastStep: currentStep,
-      };
-    }
-
-    // 7. 同一の session.submitDecision 経路で進行
-    const prevState = JSON.parse(JSON.stringify(session.state));
-    const nextStep = session.submitDecision(response);
-    const nextState = JSON.parse(JSON.stringify(session.state));
-
-    const generatedEvents = ViewerAwareGameEventFormatter.formatStateTransition(
-      prevState,
-      nextState,
-      options?.viewerPlayerId
-    );
-
-    records.push({
-      playerId,
-      policyDescriptor: policy.descriptor,
-      request: currentStep.request,
-      response,
-      prevState,
-      nextState,
-      nextStep,
-      generatedEvents,
-    });
-
-    currentStep = nextStep;
-    decisionCount++;
+    // 万が一未知の Step 種別が渡された場合
+    return {
+      status: "TECHNICAL_ERROR",
+      error: new Error(`未知の GameSessionStep 種別です: ${(currentStep as any)?.type}`),
+      records,
+      lastStep: currentStep,
+    };
   }
 }
