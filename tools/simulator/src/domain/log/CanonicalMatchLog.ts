@@ -118,6 +118,9 @@ export interface RequestResolvedEvent extends CanonicalGameEventBase {
   readonly actionRef: string;
   readonly controller: string;
   readonly result?: any;
+  readonly effectSkipped?: boolean;
+  readonly reason?: string;
+  readonly detail?: string;
 }
 
 export interface RequestCancelledEvent extends CanonicalGameEventBase {

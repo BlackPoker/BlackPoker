@@ -3,6 +3,11 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { CostResolver } from "./CostResolver";
 import { matchesSuit, rankToValue, matchesRank, normalizeSuit } from "./cardUtils";
 import { getCharacterType } from "./characterUtils";
+import {
+  evaluateUnitTargetCondition,
+  evaluateRequestTargetCondition,
+  evaluatePlayerTargetCondition,
+} from "./targetConditionUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -210,10 +215,11 @@ export class ActionRequestValidator {
           if (!context.targetPlayerKey) {
             throw new ValidationError("ターゲットとなるプレイヤーが指定されていません。");
           }
-          if (cond.relation === "opponent") {
-            if (context.playerKey === context.targetPlayerKey) {
-              throw new ValidationError("ターゲットプレイヤーは対戦相手である必要があります。");
-            }
+          const res = evaluatePlayerTargetCondition(context.targetPlayerKey, cond, {
+            requesterPlayerKey: context.playerKey,
+          });
+          if (!res.isValid) {
+            throw new ValidationError(res.detail || "ターゲットプレイヤーの条件が不適合です。");
           }
         } else if (targetType === "request") {
           // リクエストターゲットの検証
@@ -221,27 +227,12 @@ export class ActionRequestValidator {
           if (!targetReq) {
             throw new ValidationError("ターゲットとなるリクエストが指定されていません。");
           }
-          if (cond && cond.status && targetReq.status !== cond.status) {
-            throw new ValidationError(
-              `ターゲットリクエストのステータスが不適合です。期待: ${cond.status}, 実際: ${targetReq.status}`
-            );
+          const res = evaluateRequestTargetCondition(targetReq, cond, {
+            currentRequestId: context.currentRequest?.id,
+          });
+          if (!res.isValid) {
+            throw new ValidationError(res.detail || "ターゲットリクエストの条件が不適合です。");
           }
-          if (cond && cond.keyCards) {
-            const reqKeyCards = Array.isArray(targetReq.keyCards)
-              ? targetReq.keyCards
-              : ((targetReq as any).keyCard ? [(targetReq as any).keyCard] : []);
-            if (cond.keyCards.count !== undefined) {
-              const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
-              if (!expectedCounts.includes(reqKeyCards.length)) {
-
-                throw new ValidationError(
-                  `ターゲットリクエストのキーカード枚数が不適合です。期待: ${expectedCounts.join(", ")}, 実際: ${reqKeyCards.length}`
-                );
-              }
-            }
-          }
-
-
           if (context.currentRequest && targetReq.id === context.currentRequest.id) {
             throw new ValidationError("自分自身のリクエストを対象にすることはできません。");
           }
@@ -251,13 +242,6 @@ export class ActionRequestValidator {
             throw new ValidationError(
               `ターゲットリクエスト ${targetReq.id} はステージ上に存在しません。`
             );
-          }
-          if (cond && cond.hasTarget) {
-            if (!targetReq.targets || targetReq.targets.length === 0) {
-              throw new ValidationError(
-                `ターゲットリクエスト ${targetReq.id} は変更可能なターゲットを持っていません。`
-              );
-            }
           }
         } else if (targetType === "unit") {
           // ツイストを含むユニットターゲットの検証
@@ -301,64 +285,24 @@ export class ActionRequestValidator {
               }
             }
 
-            // キャラクタータイプの検証 (ツイストなど)
-            if (cond.componentType === "character") {
-              const compId = context.targetComponent.componentId || "";
-              const compDef = context.components?.find((c: any) => c.id === compId);
-
-              // 優先判定: ComponentDefinition.type === "character"
-              // フォールバック: componentId.startsWith("character.")
-              const isCharacter = compDef
-                ? compDef.type === "character"
-                : compId.startsWith("character.");
-
-              if (!isCharacter) {
-                throw new ValidationError("ターゲットがキャラクターではありません。");
-              }
-
-              // 状態の検証 (charge または drive であること)
-              const unitState = context.targetComponent.state;
-              if (unitState !== "charge" && unitState !== "drive") {
-                throw new ValidationError(
-                  `ターゲットユニットの状態が不適合です。期待: charge または drive, 実際: ${unitState}`
-                );
-              }
-            }
-
-            // キャラクタータイプの検証 (例: soldier)
-            if (cond.characterType) {
-              const charType = getCharacterType(context.targetComponent, context.components);
-              if (charType !== cond.characterType) {
-                throw new ValidationError(
-                  `ターゲットのキャラクタータイプが不適合です。要求: ${cond.characterType}, 実際: ${charType}`
-                );
-              }
-            }
-
-            // キーカードとのスート一致検証 (装備など)
-            if (cond.matchSuitWithKey) {
-              const keyCard = context.keyCard || (context.keyCards && context.keyCards[0]);
-              const targetCard = context.targetComponent?.cards?.[0];
-              if (keyCard && targetCard) {
-                if (normalizeSuit(keyCard.suit) !== normalizeSuit(targetCard.suit)) {
-                  throw new ValidationError(
-                    `キーカードとターゲットのスートが一致しません。キー: ${keyCard.suit}, ターゲット: ${targetCard.suit}`
-                  );
+            let unitOwnerKey: string | undefined;
+            if (context.state?.players) {
+              for (const [pKey, p] of Object.entries<any>(context.state.players)) {
+                if (p.field?.some((u: any) => u.unitId === context.targetComponent.unitId)) {
+                  unitOwnerKey = pKey;
+                  break;
                 }
               }
             }
 
-            // 既存のコンポーネントターゲット検証 (cond.component がある場合)
-            if (cond.component) {
-              const isMatch = this.expressionEvaluator.evaluateTargetCondition(
-                context.targetComponent,
-                cond
-              );
-              if (!isMatch) {
-                throw new ValidationError(
-                  `ターゲットコンポーネントが条件を満たしていません。要求: ${cond.component}, 実際: ${context.targetComponent.componentId}`
-                );
-              }
+            const res = evaluateUnitTargetCondition(context.targetComponent, cond, {
+              components: context.components,
+              keyCard: context.keyCard || (context.keyCards && context.keyCards[0]),
+              playerKey: context.playerKey,
+              unitOwnerKey,
+            });
+            if (!res.isValid) {
+              throw new ValidationError(res.detail || "ターゲットユニットの条件が不適合です。");
             }
           }
         }
