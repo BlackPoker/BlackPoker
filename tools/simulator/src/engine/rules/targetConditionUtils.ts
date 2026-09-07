@@ -50,15 +50,6 @@ export function evaluateUnitTargetCondition(
         detail: "ターゲットがキャラクターではありません。",
       };
     }
-
-    // キャラクターの基本状態（charge または drive）
-    if (unit.state !== "charge" && unit.state !== "drive") {
-      return {
-        isValid: false,
-        reason: "TARGET_CONDITION_UNMET",
-        detail: `ターゲットユニットの状態が不適合です。期待: charge または drive, 実際: ${unit.state}`,
-      };
-    }
   }
 
   // 3. characterType: "soldier", "bulwark" 等の一致

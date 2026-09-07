@@ -73,16 +73,22 @@ export type ActionRequestTarget =
       unitId: string;
       kind: string;
       componentId: string;
+      targetDefinitionId?: string;
+      id?: string;
     }
   | {
       type: "request";
       requestId: string;
       actionId: string;
+      targetDefinitionId?: string;
+      id?: string;
     }
   | {
       type: "player";
       targetPlayerKey: string;
       name?: string;
+      targetDefinitionId?: string;
+      id?: string;
     };
 
 import type { DamageJudgeResult } from "./DamageJudgeResult";

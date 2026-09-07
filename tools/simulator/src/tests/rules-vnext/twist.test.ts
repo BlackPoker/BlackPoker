@@ -176,7 +176,7 @@ describe("Twist Action Integration Tests (New YAML)", () => {
     );
   });
 
-  it("should fail when targeting unit with state other than charge or drive (F)", () => {
+  it("should allow targeting character even if state is not charge or drive (F)", () => {
     const twistAction = rulePackage.actions.find((a) => a.id === "action.twist")!;
     const twistKeyCard = { id: "twist-key", code: "♢5", suit: "D", rank: "5", value: 5 };
     const twistCostCard = { id: "twist-cost", code: "♣2", suit: "C", rank: "2", value: 2 };
@@ -185,7 +185,7 @@ describe("Twist Action Integration Tests (New YAML)", () => {
       unitId: "soldier-1",
       kind: "一般兵",
       componentId: "character.soldier",
-      state: "broken", // charge/drive 以外の無効な状態
+      state: "broken", // charge/drive 以外の状態
       cards: [],
       labels: [],
     };
@@ -213,10 +213,8 @@ describe("Twist Action Integration Tests (New YAML)", () => {
       components: rulePackage.components,
     };
 
-    // F. charge/drive 以外の状態で ValidationError / Error になることをアサート
-    expect(() => registry.createRequest(twistAction, context)).toThrow(
-      "ターゲットユニットの状態が不適合です。期待: charge または drive, 実際: broken"
-    );
+    // F. twist.yaml は componentType: character のみ指定のため、charge/drive 以外でもリクエスト対象として妥当
+    expect(() => registry.createRequest(twistAction, context)).not.toThrow();
   });
 
   it("should allow targeting character.bulwark component as a character (H)", () => {

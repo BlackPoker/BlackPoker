@@ -8,7 +8,7 @@ import { validateTargetsAtResolution } from "../../engine/rules/ResolutionTarget
 import { TurnManager } from "../../engine/rules/TurnManager";
 import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
 
-describe("Resolution Target Validation & Invalid-Target Resolution Contract (Phase 6.0.1)", () => {
+describe("Resolution Target Validation & Invalid-Target Resolution Contract (Phase 6.0.1 / 6.0.1.1)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -81,16 +81,414 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
     };
   };
 
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 1: componentType: character からの暗黙 state 除去
+  // ---------------------------------------------------------------------------
+  it("【必須1】componentType: character のみの条件では、state が charge/drive 以外でも Target Invalid にしない", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+
+    const actionWithCharOnly: any = {
+      id: "action.test.char_only",
+      name: "キャラクターのみ対象",
+      targets: [
+        {
+          id: "targetChar",
+          type: "unit",
+          condition: { componentType: "character" },
+        },
+      ],
+    };
+
+    const req: ActionRequest = {
+      id: "req-char-only",
+      actionId: "action.test.char_only",
+      controller: "p1",
+      keyCards: [],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetChar",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    // 1. charge 状態: 妥当
+    state.players.p1.field[0].state = "charge";
+    const resCharge = validateTargetsAtResolution(actionWithCharOnly, req, context);
+    expect(resCharge.isValid).toBe(true);
+
+    // 2. drive 状態: 妥当
+    state.players.p1.field[0].state = "drive";
+    const resDrive = validateTargetsAtResolution(actionWithCharOnly, req, context);
+    expect(resDrive.isValid).toBe(true);
+
+    // 3. rest 状態（charge/drive 以外）: componentType: character のみなら state を理由に Invalid にしない！
+    state.players.p1.field[0].state = "rest";
+    const resRest = validateTargetsAtResolution(actionWithCharOnly, req, context);
+    expect(resRest.isValid).toBe(true);
+
+    // 4. exhausted 状態: 妥当
+    state.players.p1.field[0].state = "exhausted";
+    const resExhausted = validateTargetsAtResolution(actionWithCharOnly, req, context);
+    expect(resExhausted.isValid).toBe(true);
+
+    // 5. ただし character でないコンポーネントなら Invalid となる
+    state.players.p1.field[0].kind = undefined;
+    state.players.p1.field[0].componentId = "non_character_object";
+    const contextWithNonChar = {
+      ...context,
+      components: [{ id: "non_character_object", name: "Fog", type: "fog", zone: "fog" }],
+    };
+    const resNotChar = validateTargetsAtResolution(actionWithCharOnly, req, contextWithNonChar);
+    expect(resNotChar.isValid).toBe(false);
+    expect(resNotChar.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+  });
+
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 2: condition.state: charge 明示時のみ他状態で Target Invalid となる
+  // ---------------------------------------------------------------------------
+  it("【必須2】condition.state: charge を明示したときのみ他状態で Target Invalid となる", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+
+    const actionWithExplicitState: any = {
+      id: "action.test.explicit_charge",
+      name: "明示的チャージ条件アクション",
+      targets: [
+        {
+          id: "targetUnit",
+          type: "unit",
+          condition: {
+            componentType: "character",
+            state: "charge",
+          },
+        },
+      ],
+    };
+
+    const req: ActionRequest = {
+      id: "req-explicit-state",
+      actionId: "action.test.explicit_charge",
+      controller: "p1",
+      keyCards: [],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetUnit",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    // charge 状態: 適合
+    state.players.p1.field[0].state = "charge";
+    const resCharge = validateTargetsAtResolution(actionWithExplicitState, req, context);
+    expect(resCharge.isValid).toBe(true);
+
+    // drive 状態: state: charge に違反するため Target Invalid
+    state.players.p1.field[0].state = "drive";
+    const resDrive = validateTargetsAtResolution(actionWithExplicitState, req, context);
+    expect(resDrive.isValid).toBe(false);
+    expect(resDrive.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+    expect(resDrive.detail).toMatch(/ターゲットユニットの状態が不適合です/);
+
+    // rest 状態: Target Invalid
+    state.players.p1.field[0].state = "rest";
+    const resRest = validateTargetsAtResolution(actionWithExplicitState, req, context);
+    expect(resRest.isValid).toBe(false);
+    expect(resRest.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+  });
+
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 3: 複数 Target Definition で各対象が対応する Definition で検証される
+  // ---------------------------------------------------------------------------
+  it("【必須3】複数 Target Definition を持つ Action で各対象が対応する Definition で厳密に検証される", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+
+    // attacker は charge、defender は rest を要求する2対象アクション
+    const multiTargetAction: any = {
+      id: "action.test.multi_target",
+      name: "2対象アクション",
+      targets: [
+        {
+          id: "attacker",
+          type: "unit",
+          condition: { state: "charge" },
+        },
+        {
+          id: "defender",
+          type: "unit",
+          condition: { state: "rest" },
+        },
+      ],
+    };
+
+    // soldier-1: charge, soldier-2: rest
+    state.players.p1.field[0].state = "charge";
+    state.players.p2.field[0].state = "rest";
+
+    // 正常バインド: attacker -> soldier-1(charge), defender -> soldier-2(rest)
+    const validReq: ActionRequest = {
+      id: "req-multi-1",
+      actionId: "action.test.multi_target",
+      controller: "p1",
+      keyCards: [],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "attacker",
+        },
+        {
+          type: "unit",
+          unitId: "soldier-2",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "defender",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    const resValid = validateTargetsAtResolution(multiTargetAction, validReq, context);
+    expect(resValid.isValid).toBe(true);
+
+    // defender 側の soldier-2 が charge だった場合:
+    // もし attacker[0] の条件で評価されていたら charge なので通ってしまうが、
+    // defender の条件 (rest) で評価されるため正しく Target Invalid になること！
+    state.players.p2.field[0].state = "charge";
+    const resDefenderMismatch = validateTargetsAtResolution(multiTargetAction, validReq, context);
+    expect(resDefenderMismatch.isValid).toBe(false);
+    expect(resDefenderMismatch.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
+    expect(resDefenderMismatch.detail).toMatch(/ターゲットユニットの状態が不適合です/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 4: targetDefinitionId のない legacy single-target Request の互換動作
+  // ---------------------------------------------------------------------------
+  it("【必須4】targetDefinitionId のない legacy single-target Request が互換動作する", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+
+    const singleTargetAction: any = {
+      id: "action.test.single",
+      name: "単一対象アクション",
+      targets: [
+        {
+          id: "onlyTarget",
+          type: "unit",
+          condition: { componentType: "character" },
+        },
+      ],
+    };
+
+    // targetDefinitionId なしのレガシーリクエスト
+    const legacyReq: ActionRequest = {
+      id: "req-legacy-single",
+      actionId: "action.test.single",
+      controller: "p1",
+      keyCards: [],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    // targets.length === 1 なので例外なく唯一の定義で検証され妥当
+    const res = validateTargetsAtResolution(singleTargetAction, legacyReq, context);
+    expect(res.isValid).toBe(true);
+  });
+
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 5: targetDefinitionId のない multi-target Request は fail-fast する
+  // ---------------------------------------------------------------------------
+  it("【必須5】targetDefinitionId のない multi-target Request を黙って targets[0] で評価せず fail-fast する", () => {
+    const state = createTestState();
+    const context = createTestContext(state);
+
+    const multiTargetAction: any = {
+      id: "action.test.multi_strict",
+      name: "複数対象アクション",
+      targets: [
+        { id: "targetA", type: "unit" },
+        { id: "targetB", type: "unit" },
+      ],
+    };
+
+    // targetDefinitionId を持たないリクエスト
+    const ambiguousReq: ActionRequest = {
+      id: "req-ambiguous",
+      actionId: "action.test.multi_strict",
+      controller: "p1",
+      keyCards: [],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    // 複数定義があるのに targetDefinitionId が未指定の場合、暗黙フォールバックせず例外スロー
+    expect(() => validateTargetsAtResolution(multiTargetAction, ambiguousReq, context)).toThrow(
+      /複数のターゲット定義が存在しますが、リクエストのターゲットに targetDefinitionId が指定されていません/
+    );
+  });
+
+  // ---------------------------------------------------------------------------
+  // 必須回帰テスト 6: resumeRequest の完了契約（Canonical Resolution Order）と invariant
+  // ---------------------------------------------------------------------------
+  it("【必須6】resumeRequest の全正常完了経路が Canonical Resolution Order を守り、不正時は fail-fast する", () => {
+    const state = createTestState();
+    state.players.p1.hand = [];
+    state.players.p2.hand = [];
+    const logRecorder = new MatchLogRecorder({ matchId: "test-resume-order" });
+    const context = createTestContext(state, logRecorder);
+    const registry = new CommandRegistry();
+
+    const twoStepAction: any = {
+      id: "action.test.interruptible",
+      name: "中断可能アクション",
+      timing: "action",
+      targets: [
+        {
+          id: "targetUnit",
+          type: "unit",
+          condition: { componentType: "character" },
+        },
+      ],
+      effect: [
+        {
+          command: "customDecisionStep" as any,
+        },
+        {
+          command: "toggleUnitState",
+        },
+      ],
+    };
+
+    (registry as any).effectInterpreter.executeEffectsWithInterruption = (
+      _effects: any[],
+      ctx: CommandContext,
+      startIndex: number
+    ) => {
+      if (startIndex === 0) {
+        return {
+          interrupted: true,
+          effectIndex: 0,
+          effectStepId: "step-1",
+          selectionId: "select-1",
+          candidates: [],
+        };
+      } else {
+        ctx.state.players.p1.field[0].state = "rest";
+        return { interrupted: false };
+      }
+    };
+
+    const req: ActionRequest = {
+      id: "req-int",
+      actionId: "action.test.interruptible",
+      action: twoStepAction,
+      controller: "p1",
+      keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetUnit",
+        },
+      ],
+      status: "pending",
+      sequence: 1,
+    };
+
+    state.stage.requests = [req];
+
+    // 初回解決 -> 中断
+    const firstResolve = registry.resolveTopRequest(context);
+    expect(firstResolve.type).toBe("WAITING_FOR_DECISION");
+    expect(firstResolve.continuation).toBeDefined();
+
+    // 中断再開 (resumeRequest)
+    const resumeResult = registry.resumeRequest(
+      req,
+      firstResolve.continuation!,
+      ["opt-1"],
+      context
+    );
+
+    expect(resumeResult.type).toBe("COMPLETED");
+    expect(resumeResult.request.status).toBe("resolved");
+    expect(state.stage.requests.length).toBe(0);
+    expect(state.stage.history[0].id).toBe("req-int");
+
+    // カノニカル順序のログ記録確認: stage.popped -> card.moved -> request.resolved
+    const events = logRecorder.getEvents();
+    const stagePoppedIdx = events.findIndex((e) => e.type === "stage.popped");
+    const cardMovedIdx = events.findIndex((e) => e.type === "card.moved");
+    const resolvedIdx = events.findIndex((e) => e.type === "request.resolved");
+
+    expect(stagePoppedIdx).toBeGreaterThan(-1);
+    expect(cardMovedIdx).toBeGreaterThan(stagePoppedIdx);
+    expect(resolvedIdx).toBeGreaterThan(cardMovedIdx);
+
+    // 不正な resume（action / effect が存在しない場合）は fail-fast する
+    const corruptedReq: ActionRequest = {
+      id: "req-corrupted",
+      actionId: "non.existent.action",
+      controller: "p1",
+      keyCards: [],
+      status: "resolving",
+      sequence: 99,
+    };
+    expect(() =>
+      registry.resumeRequest(
+        corruptedReq,
+        firstResolve.continuation!,
+        ["opt-1"],
+        context
+      )
+    ).toThrow(/アクション定義または効果定義が存在しません/);
+  });
+
+  // ---------------------------------------------------------------------------
+  // 既存契約: リクエスト対象消失時の不発解決
+  // ---------------------------------------------------------------------------
   it("リクエスト対象が解決時点で存在しない場合、効果をスキップしカノニカル順序で解決完了する", () => {
     const state = createTestState();
-    // リクエスト配置済みのため手札からは消費されている
     state.players.p1.hand = [];
     state.players.p2.hand = [];
     const logRecorder = new MatchLogRecorder({ matchId: "test-req-invalid" });
     const context = createTestContext(state, logRecorder);
     const registry = new CommandRegistry();
 
-    // 先行リクエスト req1
     const req1: ActionRequest = {
       id: "req-1",
       actionId: "action.attack",
@@ -100,7 +498,6 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
       sequence: 1,
     };
 
-    // カウンターリクエスト req2 (req1 を対象)
     const counterAction: any = {
       id: "action.test.counter",
       name: "テストカウンター",
@@ -125,7 +522,14 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
       action: counterAction,
       controller: "p2",
       keyCards: [{ id: "p2-key-1", suit: "C", rank: "10", value: 10 }],
-      targets: [{ type: "request", requestId: "req-1", actionId: "action.attack" }],
+      targets: [
+        {
+          type: "request",
+          requestId: "req-1",
+          actionId: "action.attack",
+          targetDefinitionId: "targetRequest",
+        },
+      ],
       status: "pending",
       sequence: 2,
     };
@@ -135,25 +539,19 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
     // 解決前に req1 が Stage から除去されたとする（対象消失）
     state.stage.requests = [req2];
 
-    // req2 の解決
     const result = registry.resolveTopRequest(context);
 
-    // 1. 解決結果契約
     expect(result.type).toBe("COMPLETED");
     expect(result.request.id).toBe("req-2");
     expect(result.request.status).toBe("resolved");
-
-    // 2. Stage から除去され history へ送られている
     expect(state.stage.requests.length).toBe(0);
     expect(state.stage.history.length).toBe(1);
     expect(state.stage.history[0].id).toBe("req-2");
 
-    // 3. キーカードが墓地へ送られている
     expect(state.players.p2.grave).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: "p2-key-1" })])
     );
 
-    // 4. ログ記録（カノニカル順序 & effectSkipped & reason）
     const events = logRecorder.getEvents();
     const resolveStartedIdx = events.findIndex((e) => e.type === "request.resolve.started");
     const stagePoppedIdx = events.findIndex((e) => e.type === "stage.popped");
@@ -171,6 +569,9 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
     expect(resolvedEvent.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
   });
 
+  // ---------------------------------------------------------------------------
+  // 既存契約: ユニット対象消失時の不発解決
+  // ---------------------------------------------------------------------------
   it("ユニット対象が解決時点でフィールドに存在しない場合、効果をスキップし不発解決完了する", () => {
     const state = createTestState();
     state.players.p1.hand = [];
@@ -203,14 +604,22 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
       action: twistAction,
       controller: "p1",
       keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
-      targets: [{ type: "unit", unitId: "soldier-2", kind: "一般兵", componentId: "character.soldier" }],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-2",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetUnit",
+        },
+      ],
       status: "pending",
       sequence: 1,
     };
 
     state.stage.requests = [req];
 
-    // 解決前に対象ユニット soldier-2 がフィールドから消失（例: 破壊・墓地送り）
+    // 解決前に対象ユニット soldier-2 がフィールドから消失
     state.players.p2.field = [];
 
     const result = registry.resolveTopRequest(context);
@@ -220,7 +629,6 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
     expect(state.stage.requests.length).toBe(0);
     expect(state.stage.history[0].id).toBe("req-twist");
 
-    // キーカードは墓地へ移動
     expect(state.players.p1.grave).toEqual(
       expect.arrayContaining([expect.objectContaining({ id: "p1-key-1" })])
     );
@@ -232,153 +640,9 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
     expect(resolvedEvent.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
   });
 
-  it("DSLターゲット条件（状態・条件）が解決時点で不適合の場合、効果をスキップする", () => {
-    const state = createTestState();
-    const logRecorder = new MatchLogRecorder({ matchId: "test-condition-invalid" });
-    const context = createTestContext(state, logRecorder);
-    const registry = new CommandRegistry();
-
-    const actionWithCond: any = {
-      id: "action.test.charge_only",
-      name: "チャージ限定アクション",
-      timing: "action",
-      targets: [
-        {
-          id: "targetUnit",
-          type: "unit",
-          condition: {
-            componentType: "character",
-            state: "charge",
-          },
-        },
-      ],
-      effect: [
-        {
-          command: "toggleUnitState",
-        },
-      ],
-    };
-
-    const req: ActionRequest = {
-      id: "req-charge-only",
-      actionId: "action.test.charge_only",
-      action: actionWithCond,
-      controller: "p1",
-      keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
-      targets: [{ type: "unit", unitId: "soldier-1", kind: "一般兵", componentId: "character.soldier" }],
-      status: "pending",
-      sequence: 1,
-    };
-
-    state.stage.requests = [req];
-
-    // 解決前に対象ユニットの状態が rest に変化
-    state.players.p1.field[0].state = "rest";
-
-    const result = registry.resolveTopRequest(context);
-
-    expect(result.type).toBe("COMPLETED");
-    expect(result.request.status).toBe("resolved");
-    expect(state.stage.requests.length).toBe(0);
-
-    // ユニット状態が toggle されていない（効果スキップ）
-    expect(state.players.p1.field[0].state).toBe("rest");
-
-    const events = logRecorder.getEvents();
-    const resolvedEvent = events.find((e) => e.type === "request.resolved") as any;
-    expect(resolvedEvent.effectSkipped).toBe(true);
-    expect(resolvedEvent.reason).toBe("TARGET_INVALID_AT_RESOLUTION");
-  });
-
-  it("中断再開時（resumeInterruptedEffect）にはターゲット再検証を行わない契約を満たす", () => {
-    const state = createTestState();
-    const logRecorder = new MatchLogRecorder({ matchId: "test-resume-no-reval" });
-    const context = createTestContext(state, logRecorder);
-    const registry = new CommandRegistry();
-
-    // 2ステップの効果を持つアクション（ステップ1完了後に中断）
-    const twoStepAction: any = {
-      id: "action.test.interruptible",
-      name: "中断可能アクション",
-      timing: "action",
-      targets: [
-        {
-          id: "targetUnit",
-          type: "unit",
-          condition: { componentType: "character" },
-        },
-      ],
-      effect: [
-        {
-          // 外部決定要求による中断をシミュレート
-          command: "customDecisionStep" as any,
-        },
-        {
-          command: "toggleUnitState",
-        },
-      ],
-    };
-
-    // EffectInterpreter のモック的フック
-    (registry as any).effectInterpreter.executeEffectsWithInterruption = (
-      _effects: any[],
-      ctx: CommandContext,
-      startIndex: number
-    ) => {
-      if (startIndex === 0) {
-        return {
-          interrupted: true,
-          effectIndex: 0,
-          effectStepId: "step-1",
-          selectionId: "select-1",
-          candidates: [],
-        };
-      } else {
-        ctx.state.players.p1.field[0].state = "rest";
-        return { interrupted: false };
-      }
-    };
-
-    const req: ActionRequest = {
-      id: "req-int",
-      actionId: "action.test.interruptible",
-      action: twoStepAction,
-      controller: "p1",
-      keyCards: [{ id: "p1-key-1", suit: "H", rank: "7", value: 7 }],
-      targets: [{ type: "unit", unitId: "soldier-1", kind: "一般兵", componentId: "character.soldier" }],
-      status: "pending",
-      sequence: 1,
-    };
-
-    state.stage.requests = [req];
-
-    // 初回解決呼び出し -> 中断
-    const firstResolve = registry.resolveTopRequest(context);
-    expect(firstResolve.type).toBe("WAITING_FOR_DECISION");
-    expect(firstResolve.continuation).toBeDefined();
-
-    // 中断中に対象ユニットの状態が変化（charge/drive ではなく rest になった等）
-    state.players.p1.field[0].state = "exhausted";
-
-    // 中断再開 (resumeRequest)
-    const resumeResult = registry.resumeRequest(
-      req,
-      firstResolve.continuation!,
-      ["opt-1"],
-      context
-    );
-
-    // 再開時は対象再検証を行わず、残りのステップが正常に完了する契約
-    expect(resumeResult.type).toBe("COMPLETED");
-    expect(resumeResult.request.status).toBe("resolved");
-    expect(state.stage.requests.length).toBe(0);
-    expect(state.stage.history[0].id).toBe("req-int");
-
-    const events = logRecorder.getEvents();
-    const resolvedEvent = events.find((e) => e.type === "request.resolved") as any;
-    expect(resolvedEvent.effectSkipped).toBe(false);
-  });
-
+  // ---------------------------------------------------------------------------
+  // ActionRequestValidator と ResolutionTargetValidator の共通条件評価一致
+  // ---------------------------------------------------------------------------
   it("ActionRequestValidator と ResolutionTargetValidator で共通条件評価ロジックが一致する", () => {
     const state = createTestState();
     const context = createTestContext(state);
@@ -405,7 +669,15 @@ describe("Resolution Target Validation & Invalid-Target Resolution Contract (Pha
       actionId: "action.test.validate",
       controller: "p1",
       keyCards: [],
-      targets: [{ type: "unit", unitId: "soldier-1", kind: "一般兵", componentId: "character.soldier" }],
+      targets: [
+        {
+          type: "unit",
+          unitId: "soldier-1",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          targetDefinitionId: "targetUnit",
+        },
+      ],
       status: "pending",
       sequence: 1,
     };

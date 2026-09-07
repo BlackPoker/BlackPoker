@@ -37,8 +37,32 @@ export function validateTargetsAtResolution(
   let targetRequest = context.targetRequest;
   let targetPlayerKey = context.targetPlayerKey;
 
+  const actionTargets = action.targets || [];
+
   for (const t of request.targets) {
-    const tDef = action.targets?.find((def: any) => def.id === (t as any).id) || action.targets?.[0];
+    let tDef: any = undefined;
+    const defId = (t as any).targetDefinitionId || (t as any).id;
+
+    if (defId) {
+      tDef = actionTargets.find((def: any) => def.id === defId);
+      if (!tDef) {
+        return {
+          isValid: false,
+          reason: "TARGET_INVALID_AT_RESOLUTION",
+          detail: `アクション定義 [${action.id}] 内に対応するターゲット定義ID [${defId}] が存在しません。`,
+        };
+      }
+    } else {
+      if (actionTargets.length === 1) {
+        // legacy compatibility: 唯一のターゲット定義を使用
+        tDef = actionTargets[0];
+      } else if (actionTargets.length > 1) {
+        // 複数ターゲット定義がある場合、暗黙に targets[0] へフォールバックせず fail-fast
+        throw new Error(
+          `アクション [${action.id}] には複数のターゲット定義が存在しますが、リクエストのターゲットに targetDefinitionId が指定されていません。`
+        );
+      }
+    }
 
     if (t.type === "request") {
       // 対象リクエストはステージ（requests）上に現在存在し、未キャンセル・未解決であること

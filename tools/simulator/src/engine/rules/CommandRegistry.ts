@@ -310,12 +310,16 @@ export class CommandRegistry {
               type: "request",
               requestId: context.targetRequest.id,
               actionId: context.targetRequest.actionId,
+              targetDefinitionId: tDef.id,
+              id: tDef.id,
             });
           } else if (tType === "player" && context.targetPlayerKey) {
             targets.push({
               type: "player",
               targetPlayerKey: context.targetPlayerKey,
               name: context.state.players?.[context.targetPlayerKey]?.name || context.targetPlayerKey,
+              targetDefinitionId: tDef.id,
+              id: tDef.id,
             } as any);
           } else if (
             (tType === "unit" ||
@@ -329,6 +333,8 @@ export class CommandRegistry {
               unitId: context.targetComponent.unitId,
               kind: context.targetComponent.kind || "ユニット",
               componentId: context.targetComponent.componentId,
+              targetDefinitionId: tDef.id,
+              id: tDef.id,
             });
           }
         }
@@ -678,12 +684,11 @@ export class CommandRegistry {
     continuation?: EffectContinuation;
     context?: CommandContext;
   } {
-    const action = request.action;
+    const action = request.action || context.actions?.find((a) => a.id === request.actionId);
     if (!action || !action.effect) {
-      request.status = "resolved";
-      finalizeRequestKeyCards(request, context, this.effectInterpreter);
-      context.state.stage.history.push(request);
-      return { type: "COMPLETED", request };
+      throw new Error(
+        `中断されたリクエスト [${request.id}] のアクション定義または効果定義が存在しません (actionId: ${request.actionId})。`
+      );
     }
 
     // continuation.selectionId を正として汎用バインド
