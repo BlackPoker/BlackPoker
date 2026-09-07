@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { GameSession, GameSessionStep } from "../../engine/session/GameSession";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
@@ -12,7 +13,21 @@ import {
   getAvailableEnvironments,
   startMatchAttempt,
 } from "../../engine/playtest/PlaytestEnvironmentController";
-import { GameEventFormatter } from "../../engine/session/playtest/GameEventFormatter";
+import {
+  PlaytestMatchMode,
+  PlaytestPolicyId,
+  PLAYTEST_POLICY_OPTIONS,
+  PlaytestSeatControllers,
+  createSeatControllers,
+  isHumanSeat,
+} from "../../engine/playtest/PlaytestSeatController";
+import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory";
+import {
+  advanceAutomatedDecisions,
+} from "../../engine/playtest/HumanVsPolicyController";
+import { ViewerAwareGameEventFormatter } from "../../engine/session/playtest/ViewerAwareGameEventFormatter";
+import { ObservationFactory } from "../../engine/decision/ObservationFactory";
+import { DecisionPolicy } from "../../engine/simulation/DecisionPolicy";
 import { GameStatusBar } from "../game/GameStatusBar";
 import { PlayerBoard } from "../game/PlayerBoard";
 import { StagePanel } from "../game/StagePanel";
@@ -26,7 +41,6 @@ import { MobileBottomSheet, SheetMode } from "../game/MobileBottomSheet";
 import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
-
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
@@ -42,12 +56,27 @@ export const CoreBattlePlaytest: React.FC = () => {
   // Pending 設定（UI入力中・対戦セッションには「新しい対戦」押下まで反映されない）
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(CORE_BATTLE_ENV_ID);
   const [seedInput, setSeedInput] = useState<string>("42");
+  const [pendingMatchMode, setPendingMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
+  const [pendingHumanSeat, setPendingHumanSeat] = useState<"p1" | "p2">("p1");
+  const [pendingPolicyId, setPendingPolicyId] = useState<PlaytestPolicyId>("firstLegal");
 
   // Active 設定（現在進行中の対戦セッションの設定。未成立時は null）
   const [activeMatch, setActiveMatch] = useState<ActiveMatchContext | null>(null);
+  const [activeSeatControllers, setActiveSeatControllers] = useState<PlaytestSeatControllers>(() =>
+    createSeatControllers("humanVsHuman")
+  );
+  const [activePolicies, setActivePolicies] = useState<Record<string, DecisionPolicy>>({});
+  const [activeMatchMode, setActiveMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
+  const [activeHumanSeat, setActiveHumanSeat] = useState<"p1" | "p2">("p1");
 
   // セットアップ結果通知（VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR）
   const [setupNotice, setSetupNotice] = useState<SetupNotice | null>(null);
+
+  // 対戦中実行時エラー通知 (AI障害等)
+  const [runtimeNotice, setRuntimeNotice] = useState<SetupNotice | null>(null);
+
+  // AI 意思決定処理中インジケータ
+  const [isAiProcessing, setIsAiProcessing] = useState<boolean>(false);
 
   // プリセットバリデーションエラー
   const [presetValidationErrors, setPresetValidationErrors] = useState<string[]>([]);
@@ -79,6 +108,13 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileLogModal, setShowMobileLogModal] = useState(false);
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
+
+  // 非公式環境への切替時に SeededRandom が選択されていたら自動的に FirstLegal へフォールバック
+  useEffect(() => {
+    if (!isOfficialEnvironment(selectedEnvironmentId) && pendingPolicyId === "seededRandom") {
+      setPendingPolicyId("firstLegal");
+    }
+  }, [selectedEnvironmentId, pendingPolicyId]);
 
   const addTrace = useCallback((
     category: string,
@@ -117,66 +153,184 @@ export const CoreBattlePlaytest: React.FC = () => {
   }, []);
 
   // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
-  const startNewGame = useCallback((overrideEnv?: string, overrideSeedInput?: string) => {
-    const env = overrideEnv ?? selectedEnvironmentId;
-    const seed = overrideSeedInput ?? seedInput;
+  const startNewGame = useCallback(
+    async (
+      overrideEnv?: string,
+      overrideSeedInput?: string,
+      overrideMode?: PlaytestMatchMode,
+      overrideHumanSeat?: "p1" | "p2",
+      overridePolicyId?: PlaytestPolicyId
+    ) => {
+      const env = overrideEnv ?? selectedEnvironmentId;
+      const seed = overrideSeedInput ?? seedInput;
+      const mode = overrideMode ?? pendingMatchMode;
+      const humanSeat = overrideHumanSeat ?? pendingHumanSeat;
+      const policyId = overridePolicyId ?? pendingPolicyId;
 
-    // 失敗時・開始時に直前のセッション状態を安全にリセット
-    sessionRef.current = null;
-    setGameState(null);
-    setCurrentStep(null);
-    setActiveMatch(null);
-    setSelectedUnitIds([]);
-    setSheetMode("collapsed");
-    setIsPassAndPlayWaiting(false);
-    setPresetValidationErrors([]);
+      // 失敗時・開始時に直前のセッション状態を安全にリセット
+      sessionRef.current = null;
+      setGameState(null);
+      setCurrentStep(null);
+      setActiveMatch(null);
+      setSelectedUnitIds([]);
+      setSheetMode("collapsed");
+      setIsPassAndPlayWaiting(false);
+      setPresetValidationErrors([]);
+      setRuntimeNotice(null);
+      setIsAiProcessing(false);
 
-    const outcome = startMatchAttempt({
-      environmentId: env,
-      seedInput: seed,
+      const outcome = startMatchAttempt({
+        environmentId: env,
+        seedInput: seed,
+        catalog,
+        fullRulePackage,
+      });
+
+      if (outcome.type !== "READY") {
+        setSetupNotice(outcome.setupNotice);
+        if (outcome.presetValidationErrors && outcome.presetValidationErrors.length > 0) {
+          setPresetValidationErrors([...outcome.presetValidationErrors]);
+        }
+        for (const l of outcome.logs) {
+          addLog(l.message, l.level);
+        }
+        return;
+      }
+
+      // SeatControllers & Policies 生成
+      const seatControllers = createSeatControllers(mode, humanSeat, policyId);
+      let policies: Record<string, DecisionPolicy> = {};
+      try {
+        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, outcome.activeMatch.seed);
+      } catch (err: any) {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "AI Policy 初期化エラー",
+          message: err.message,
+          environmentName: outcome.activeMatch.environmentName,
+          seed: outcome.activeMatch.seed,
+        });
+        addLog(`[AI_ERROR] ${err.message}`, "system");
+        return;
+      }
+
+      // READY 成功時のみ commit
+      sessionRef.current = outcome.session;
+      setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+      setActiveMatch(outcome.activeMatch);
+      setActiveSeatControllers(seatControllers);
+      setActivePolicies(policies);
+      setActiveMatchMode(mode);
+      setActiveHumanSeat(humanSeat);
+      setSetupNotice(null);
+      setPresetValidationErrors([]);
+      setLogs([]);
+      setTraces([]);
+      seqRef.current = 1;
+      setLatestEventMessage("ゲーム開始準備完了");
+
+      for (const l of outcome.logs) {
+        addLog(l.message, l.level, l.state);
+      }
+      for (const t of outcome.traces) {
+        addTrace(t.category, t.message, t.state);
+      }
+
+      // 初期ステップの処理
+      let step = outcome.initialStep;
+      if (step.type === "WAITING_FOR_DECISION") {
+        const initPlayer = step.request.playerId;
+        const isHuman = isHumanSeat(seatControllers, initPlayer);
+
+        if (isHuman) {
+          lastActivePlayerRef.current = initPlayer;
+          setPendingPlayerKey(initPlayer);
+          if (mode === "humanVsHuman" && enablePassAndPlay) {
+            setIsPassAndPlayWaiting(true);
+          }
+          addTrace("DECISION_REQUEST", `判断待機 (${initPlayer})`, outcome.session.state);
+          setCurrentStep(step);
+        } else {
+          // AI 先行 (e.g. Human = p2, AI = p1)
+          setIsPassAndPlayWaiting(false);
+          addTrace("AI_TURN_START", `AI (${initPlayer}) 先行のため自動実行を開始`, outcome.session.state);
+          setIsAiProcessing(true);
+
+          const aiResult = await advanceAutomatedDecisions(
+            outcome.session,
+            step,
+            seatControllers,
+            policies,
+            { viewerPlayerId: humanSeat }
+          );
+
+          setIsAiProcessing(false);
+
+          for (const rec of aiResult.records) {
+            addTrace(
+              "AI_DECISION",
+              `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
+              rec.prevState
+            );
+            for (const ev of rec.generatedEvents) {
+              addLog(ev.message, ev.level, rec.nextState);
+              addTrace("STATE_TRANSITION", ev.message, rec.nextState);
+            }
+            if (rec.generatedEvents.length > 0) {
+              setLatestEventMessage(rec.generatedEvents[rec.generatedEvents.length - 1].message);
+            }
+          }
+
+          if (aiResult.status === "TECHNICAL_ERROR") {
+            setRuntimeNotice({
+              type: "TECHNICAL_ERROR",
+              title: "AI Policy 実行時エラー",
+              message: aiResult.error.message,
+              details: aiResult.error.stack,
+              environmentName: outcome.activeMatch.environmentName,
+              seed: outcome.activeMatch.seed,
+            });
+            addLog(`[AI_ERROR] ${aiResult.error.message}`, "system");
+            addTrace("AI_ERROR", aiResult.error.message, outcome.session.state);
+            setCurrentStep(aiResult.lastStep || step);
+            setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+            return;
+          }
+
+          step = aiResult.step;
+          setCurrentStep(step);
+          setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+
+          if (step.type === "WAITING_FOR_DECISION") {
+            lastActivePlayerRef.current = step.request.playerId;
+            setPendingPlayerKey(step.request.playerId);
+            addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, outcome.session.state);
+          } else if (step.type === "FINISHED") {
+            const nextState = outcome.session.state;
+            const winnerName =
+              nextState.players?.[step.result.winner || ""]?.name ||
+              (step.result.winner === "p1" ? "Player A" : "Player B");
+            addLog(`[FINISH] ゲーム終了: 勝者【${winnerName}】(${step.result.reason})`, "system", nextState);
+            addTrace("GAME_FINISHED", `勝者: ${winnerName} (${step.result.reason})`, nextState);
+          }
+        }
+      } else {
+        setCurrentStep(step);
+      }
+    },
+    [
+      selectedEnvironmentId,
+      seedInput,
+      pendingMatchMode,
+      pendingHumanSeat,
+      pendingPolicyId,
       catalog,
       fullRulePackage,
-    });
-
-    if (outcome.type !== "READY") {
-      setSetupNotice(outcome.setupNotice);
-      if (outcome.presetValidationErrors && outcome.presetValidationErrors.length > 0) {
-        setPresetValidationErrors([...outcome.presetValidationErrors]);
-      }
-      for (const l of outcome.logs) {
-        addLog(l.message, l.level);
-      }
-      return;
-    }
-
-    // READY 成功時のみ commit
-    sessionRef.current = outcome.session;
-    setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
-    setCurrentStep(outcome.initialStep);
-    setActiveMatch(outcome.activeMatch);
-    setSetupNotice(null);
-    setPresetValidationErrors([]);
-    setLogs([]);
-    setTraces([]);
-    seqRef.current = 1;
-    setLatestEventMessage("ゲーム開始準備完了");
-
-    for (const l of outcome.logs) {
-      addLog(l.message, l.level, l.state);
-    }
-    for (const t of outcome.traces) {
-      addTrace(t.category, t.message, t.state);
-    }
-
-    if (outcome.initialStep.type === "WAITING_FOR_DECISION") {
-      lastActivePlayerRef.current = outcome.initialStep.request.playerId;
-      setPendingPlayerKey(outcome.initialStep.request.playerId);
-      if (enablePassAndPlay) {
-        setIsPassAndPlayWaiting(true);
-      }
-      addTrace("DECISION_REQUEST", `判断待機 (${outcome.initialStep.request.playerId})`, outcome.session.state);
-    }
-  }, [selectedEnvironmentId, seedInput, catalog, fullRulePackage, enablePassAndPlay, addLog, addTrace]);
+      enablePassAndPlay,
+      addLog,
+      addTrace,
+    ]
+  );
 
   // 初回マウント時にのみ1回ゲーム初期化
   const initialStartRef = useRef(false);
@@ -190,7 +344,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   // 盤面ユニットクリック時のトグルハンドラ
   const handleUnitClick = useCallback(
     (unitId: string) => {
-      if (!unitSelectionMarkers.has(unitId)) return; // 選択可能でないユニットは無視
+      if (!unitSelectionMarkers.has(unitId)) return;
 
       setSelectedUnitIds((prev) => {
         if (prev.includes(unitId)) {
@@ -203,19 +357,27 @@ export const CoreBattlePlaytest: React.FC = () => {
     [unitSelectionMarkers]
   );
 
-  // プレイヤーが判断（DecisionResponse）を提出したときの処理
+  // 共通 Decision 提出パイプライン (Human提出 -> 状態反映 -> 次がAIなら自動連鎖進行)
   const handleDecisionSubmit = useCallback(
-    (response: DecisionResponse, options?: { autoPass?: boolean }) => {
+    async (response: DecisionResponse, options?: { autoPass?: boolean }) => {
       const session = sessionRef.current;
       if (!session) return;
 
       // モバイル Bottom Sheet を最小化
       setSheetMode("collapsed");
 
+      // 1. Human の判断を提出
       let prevState = JSON.parse(JSON.stringify(session.state));
-      const selectedPattern = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.patterns[response.selectedPatternRef] : undefined;
+      const selectedPattern =
+        currentStep?.type === "WAITING_FOR_DECISION"
+          ? currentStep.request.patterns[response.selectedPatternRef]
+          : undefined;
       const category = selectedPattern?.kind === "PASS" ? "PASS" : "DECISION_SUBMIT";
-      addTrace(category, `判断送信 (Pattern #${response.selectedPatternRef}: ${selectedPattern?.patternId || ""})`, prevState);
+      addTrace(
+        category,
+        `判断送信 (Pattern #${response.selectedPatternRef}: ${selectedPattern?.patternId || ""})`,
+        prevState
+      );
 
       let nextStep = session.submitDecision(response);
       let nextState = JSON.parse(JSON.stringify(session.state));
@@ -223,19 +385,25 @@ export const CoreBattlePlaytest: React.FC = () => {
       // 選択状態をリセット
       setSelectedUnitIds([]);
 
-      // State 遷移からイベントログを自動生成・蓄積
-      const generatedEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+      // State 遷移からイベントログを自動生成・蓄積 (Human vs AI では閲覧者視点で非公開情報秘匿)
+      const viewer = activeMatchMode === "humanVsAi" ? activeHumanSeat : undefined;
+      const generatedEvents = ViewerAwareGameEventFormatter.formatStateTransition(
+        prevState,
+        nextState,
+        viewer
+      );
       for (const ev of generatedEvents) {
         addLog(ev.message, ev.level, nextState);
         addTrace("STATE_TRANSITION", ev.message, nextState);
       }
 
-      // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS
+      // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS (Human操作補助)
       if (
         options?.autoPass &&
         nextStep.type === "WAITING_FOR_DECISION" &&
         currentStep?.type === "WAITING_FOR_DECISION" &&
-        nextStep.request.playerId === currentStep.request.playerId
+        nextStep.request.playerId === currentStep.request.playerId &&
+        isHumanSeat(activeSeatControllers, nextStep.request.playerId)
       ) {
         const autoPassIndex = nextStep.request.patterns.findIndex((p) => p.kind === "PASS");
         if (autoPassIndex !== -1) {
@@ -251,7 +419,11 @@ export const CoreBattlePlaytest: React.FC = () => {
           });
           nextState = JSON.parse(JSON.stringify(session.state));
 
-          const autoEvents = GameEventFormatter.formatStateTransition(prevState, nextState);
+          const autoEvents = ViewerAwareGameEventFormatter.formatStateTransition(
+            prevState,
+            nextState,
+            viewer
+          );
           for (const ev of autoEvents) {
             addLog(ev.message, ev.level, nextState);
             addTrace("STATE_TRANSITION", ev.message, nextState);
@@ -259,18 +431,74 @@ export const CoreBattlePlaytest: React.FC = () => {
         }
       }
 
-      setCurrentStep(nextStep);
-      setGameState(nextState);
-
-      // 最新の重要なイベントをステータスバーに表示
       if (generatedEvents.length > 0) {
         setLatestEventMessage(generatedEvents[generatedEvents.length - 1].message);
       }
 
-      // プレイヤー交代時の Pass-and-Play オーバーレイ制御
+      // 2. 次の手番が AI (POLICY) の場合、自動進行ループを実行
+      if (
+        activeMatchMode === "humanVsAi" &&
+        nextStep.type === "WAITING_FOR_DECISION" &&
+        !isHumanSeat(activeSeatControllers, nextStep.request.playerId)
+      ) {
+        setIsAiProcessing(true);
+
+        const aiResult = await advanceAutomatedDecisions(
+          session,
+          nextStep,
+          activeSeatControllers,
+          activePolicies,
+          { viewerPlayerId: activeHumanSeat }
+        );
+
+        setIsAiProcessing(false);
+
+        for (const rec of aiResult.records) {
+          addTrace(
+            "AI_DECISION",
+            `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
+            rec.prevState
+          );
+          for (const ev of rec.generatedEvents) {
+            addLog(ev.message, ev.level, rec.nextState);
+            addTrace("STATE_TRANSITION", ev.message, rec.nextState);
+          }
+          if (rec.generatedEvents.length > 0) {
+            setLatestEventMessage(rec.generatedEvents[rec.generatedEvents.length - 1].message);
+          }
+        }
+
+        if (aiResult.status === "TECHNICAL_ERROR") {
+          setRuntimeNotice({
+            type: "TECHNICAL_ERROR",
+            title: "AI Policy 実行時エラー",
+            message: aiResult.error.message,
+            details: aiResult.error.stack,
+            environmentName: activeMatch?.environmentName || "",
+            seed: activeMatch?.seed,
+          });
+          addLog(`[AI_ERROR] ${aiResult.error.message}`, "system");
+          addTrace("AI_ERROR", aiResult.error.message, session.state);
+          setCurrentStep(aiResult.lastStep || nextStep);
+          setGameState(JSON.parse(JSON.stringify(session.state)));
+          return;
+        }
+
+        nextStep = aiResult.step;
+        nextState = JSON.parse(JSON.stringify(session.state));
+      }
+
+      setCurrentStep(nextStep);
+      setGameState(nextState);
+
+      // プレイヤー交代時の Pass-and-Play オーバーレイ制御 (Human vs Human のみ)
       if (nextStep.type === "WAITING_FOR_DECISION") {
         const newPlayerId = nextStep.request.playerId;
-        if (enablePassAndPlay && newPlayerId !== lastActivePlayerRef.current) {
+        if (
+          activeMatchMode === "humanVsHuman" &&
+          enablePassAndPlay &&
+          newPlayerId !== lastActivePlayerRef.current
+        ) {
           setPendingPlayerKey(newPlayerId);
           setIsPassAndPlayWaiting(true);
         }
@@ -284,7 +512,17 @@ export const CoreBattlePlaytest: React.FC = () => {
         addTrace("GAME_FINISHED", `勝者: ${winnerName} (${nextStep.result.reason})`, nextState);
       }
     },
-    [enablePassAndPlay, currentStep, addLog, addTrace]
+    [
+      activeMatchMode,
+      activeHumanSeat,
+      activeSeatControllers,
+      activePolicies,
+      activeMatch,
+      enablePassAndPlay,
+      currentStep,
+      addLog,
+      addTrace,
+    ]
   );
 
   // Pass-and-Play 準備完了ハンドラ
@@ -292,34 +530,39 @@ export const CoreBattlePlaytest: React.FC = () => {
     setIsPassAndPlayWaiting(false);
   }, []);
 
+  // UI 閲覧者視点 ID: Human vs AI の時は常に activeHumanSeat に完全固定
+  const uiViewerPlayerId: PlayerKey =
+    activeMatchMode === "humanVsAi"
+      ? activeHumanSeat
+      : (currentStep?.type === "WAITING_FOR_DECISION"
+          ? (currentStep.request.playerId as PlayerKey)
+          : ((gameState?.chancePlayer as PlayerKey) || "p1"));
+
+  // 通常盤面表示用 Observation (常に uiViewerPlayerId 視点から生成し、AI の秘密情報を完全秘匿)
+  const boardObservation = useMemo(() => {
+    if (!gameState) return undefined;
+    return ObservationFactory.createObservation(gameState, uiViewerPlayerId);
+  }, [gameState, uiViewerPlayerId]);
+
+  // 全プレイヤーの Fog (boardObservation 基準)
   const allPlayersFog = useMemo(() => {
     const fogs: any[] = [];
-    const obs = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
-    if (obs?.players && Array.isArray(obs.players)) {
-      for (const p of obs.players) {
+    if (boardObservation?.players && Array.isArray(boardObservation.players)) {
+      for (const p of boardObservation.players) {
         if (Array.isArray(p.fog)) {
           for (const f of p.fog) {
             fogs.push(f);
           }
         }
       }
-    } else if (gameState?.players) {
-      for (const [pKey, p] of Object.entries<any>(gameState.players)) {
-        if (Array.isArray(p.fog)) {
-          for (const f of p.fog) {
-            fogs.push({ ...f, ownerPlayerId: pKey });
-          }
-        }
-      }
     }
     return fogs;
-  }, [gameState, currentStep]);
+  }, [boardObservation]);
 
-  // 戦闘関係番号プレゼンテーション (①, ②, ...) の生成
+  // 戦闘関係番号プレゼンテーション (①, ②, ...) の生成 (boardObservation 基準)
   const battleRelationMap = useMemo(() => {
-    const obs = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
-    return BattleRelationPresenter.buildPresentationMap(gameState, obs);
-  }, [gameState, currentStep]);
+    return BattleRelationPresenter.buildPresentationMap(gameState, boardObservation);
+  }, [gameState, boardObservation]);
 
   // decisionId 切替時の盤面選択リセット & モバイルシート最小化
   useEffect(() => {
@@ -327,11 +570,16 @@ export const CoreBattlePlaytest: React.FC = () => {
     setSheetMode("collapsed");
   }, [currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.decisionId : null]);
 
+  // 人間プレイヤーの判断待機中フラグ
+  const isHumanTurnWaiting =
+    currentStep?.type === "WAITING_FOR_DECISION" &&
+    (activeMatchMode === "humanVsHuman" || currentStep.request.playerId === activeHumanSeat) &&
+    !isAiProcessing;
+
   // キーボードショートカット (P: PASS)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // オーバーレイ表示中、またはフォーム入力フォーカス中は無視
-      if (isPassAndPlayWaiting) return;
+      if (isPassAndPlayWaiting || isAiProcessing || !isHumanTurnWaiting) return;
       const target = e.target as HTMLElement;
       if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT")) {
         return;
@@ -358,7 +606,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [currentStep, isPassAndPlayWaiting, handleDecisionSubmit]);
+  }, [currentStep, isPassAndPlayWaiting, isAiProcessing, isHumanTurnWaiting, handleDecisionSubmit]);
 
   if (presetValidationErrors.length > 0) {
     return (
@@ -387,7 +635,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
-  if (!gameState && !setupNotice) {
+  if (!gameState && !setupNotice && !runtimeNotice) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f7f8] text-zinc-950 font-sans">
         <div className="flex flex-col items-center gap-2">
@@ -400,26 +648,26 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
-  const activePlayerKey =
-    currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.playerId : gameState?.chancePlayer || "p1";
+  // PlayerBoardViewModel の生成 (通常盤面は常に boardObservation 準拠)
+  const p1ViewModel = gameState
+    ? PlayerObservationPresenter.buildPlayerViewModel(
+        "p1",
+        boardObservation,
+        gameState,
+        uiViewerPlayerId
+      )
+    : null;
+  const p2ViewModel = gameState
+    ? PlayerObservationPresenter.buildPlayerViewModel(
+        "p2",
+        boardObservation,
+        gameState,
+        uiViewerPlayerId
+      )
+    : null;
 
-  // Observation を基準とした PlayerBoardViewModel の生成 (Debug ONに関わらず通常盤面は常にObservation準拠)
-  const observation = currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.observation : undefined;
-  const p1ViewModel = gameState ? PlayerObservationPresenter.buildPlayerViewModel(
-    "p1",
-    observation,
-    gameState,
-    activePlayerKey
-  ) : null;
-  const p2ViewModel = gameState ? PlayerObservationPresenter.buildPlayerViewModel(
-    "p2",
-    observation,
-    gameState,
-    activePlayerKey
-  ) : null;
-
-  // DecisionPanel のコンテンツ生成
-  const decisionPanelContent = currentStep?.type === "WAITING_FOR_DECISION" ? (
+  // DecisionPanel のコンテンツ生成 (人間待機中のみ表示し、AI Step の patterns は非表示)
+  const decisionPanelContent = isHumanTurnWaiting ? (
     <DecisionPanel
       key={currentStep.request.decisionId}
       request={currentStep.request}
@@ -427,6 +675,11 @@ export const CoreBattlePlaytest: React.FC = () => {
       onSelectionMarkersChange={setUnitSelectionMarkers}
       selectedUnitIdsFromBoard={selectedUnitIds}
     />
+  ) : isAiProcessing ? (
+    <div className="p-4 bg-white rounded border border-zinc-200 text-center font-mono shadow-sm">
+      <div className="text-xs font-bold text-zinc-800 animate-pulse">AI 操作中…</div>
+      <div className="text-[10px] text-zinc-500 mt-1">AI が手番・効果の判断を行っています</div>
+    </div>
   ) : null;
 
   return (
@@ -499,20 +752,64 @@ export const CoreBattlePlaytest: React.FC = () => {
                 />
               </>
             )}
+
+            {/* 対戦モード & AI 設定 (PC用) */}
+            <span className="text-[9px] font-bold text-zinc-400 ml-1.5">Mode:</span>
+            <select
+              value={pendingMatchMode}
+              onChange={(e) => setPendingMatchMode(e.target.value as PlaytestMatchMode)}
+              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
+            >
+              <option value="humanVsHuman">Human vs Human</option>
+              <option value="humanVsAi">Human vs AI</option>
+            </select>
+
+            {pendingMatchMode === "humanVsAi" && (
+              <>
+                <span className="text-[9px] font-bold text-zinc-400 ml-1">Human:</span>
+                <select
+                  value={pendingHumanSeat}
+                  onChange={(e) => setPendingHumanSeat(e.target.value as "p1" | "p2")}
+                  className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
+                >
+                  <option value="p1">p1 (Player A)</option>
+                  <option value="p2">p2 (Player B)</option>
+                </select>
+
+                <span className="text-[9px] font-bold text-zinc-400 ml-1">AI:</span>
+                <select
+                  value={pendingPolicyId}
+                  onChange={(e) => setPendingPolicyId(e.target.value as PlaytestPolicyId)}
+                  className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
+                >
+                  {PLAYTEST_POLICY_OPTIONS.map((opt) => (
+                    <option
+                      key={opt.id}
+                      value={opt.id}
+                      disabled={opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)}
+                    >
+                      {opt.label}{opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId) ? " (Official専用)" : ""}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
           </div>
         </div>
 
         {/* コントロールボタン群 (PC用) */}
         <div className="hidden sm:flex items-center gap-2 font-mono">
-          <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={enablePassAndPlay}
-              onChange={(e) => setEnablePassAndPlay(e.target.checked)}
-              className="rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
-            />
-            Pass-and-Play
-          </label>
+          {pendingMatchMode === "humanVsHuman" && (
+            <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={enablePassAndPlay}
+                onChange={(e) => setEnablePassAndPlay(e.target.checked)}
+                className="rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
+              />
+              Pass-and-Play
+            </label>
+          )}
 
           <button
             onClick={() => setShowDebug(!showDebug)}
@@ -586,10 +883,33 @@ export const CoreBattlePlaytest: React.FC = () => {
             </div>
           )}
 
+          {/* 対戦中実行時エラー通知バナー (AI 技術的障害等) */}
+          {runtimeNotice && (
+            <div className="p-3 rounded border font-mono bg-red-50 border-red-300 text-red-950">
+              <div className="flex items-center gap-2 font-bold text-sm">
+                <span className="px-1.5 py-0.5 rounded text-xs text-white bg-red-600">
+                  {runtimeNotice.type}
+                </span>
+                <span>{runtimeNotice.title}</span>
+              </div>
+              <p className="text-xs mt-1">{runtimeNotice.message}</p>
+              {runtimeNotice.details && (
+                <p className="text-[11px] text-zinc-600 mt-0.5">{runtimeNotice.details}</p>
+              )}
+              <p className="text-xs text-zinc-500 mt-2">
+                ※ 対戦が安全に停止しました。上部の「新しい対戦」ボタンから再開できます。
+              </p>
+            </div>
+          )}
+
           {/* ゲーム進行ステータスバー */}
           {gameState && activeMatch && (
             <GameStatusBar
-              environmentName={activeMatch.environmentName}
+              environmentName={
+                activeMatchMode === "humanVsAi"
+                  ? `${activeMatch.environmentName} [Human(${activeHumanSeat}) vs AI]`
+                  : activeMatch.environmentName
+              }
               matchSeed={activeMatch.seed}
               stateVersion={gameState.stateVersion ?? gameState.version}
               turnPlayer={gameState.turnPlayer}
@@ -638,13 +958,16 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
         </div>
 
-        {/* 右ペイン: PC用 操作パネル / 対戦ログ (Desktop 時のみレンダリングして二重マウントを防止) */}
+        {/* 右ペイン: PC用 操作パネル / 対戦ログ */}
         <div className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
           {/* 判断要求パネル (Decision Panel) */}
           {isDesktop && (
-            currentStep?.type === "WAITING_FOR_DECISION" ? (
-              <div className="shrink-0">
-                {decisionPanelContent}
+            isHumanTurnWaiting ? (
+              <div className="shrink-0">{decisionPanelContent}</div>
+            ) : isAiProcessing ? (
+              <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs font-mono shadow-sm">
+                <span className="font-bold text-zinc-800 animate-pulse">AI 操作中…</span>
+                <span className="text-zinc-500 ml-2">自動思考しています</span>
               </div>
             ) : (
               <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm">
@@ -658,7 +981,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             <GameLog logs={logs} />
           </div>
 
-          {/* Raw Debug パネル (Active Match が存在する場合のみその RulePackage を表示、存在しない場合はフォールバックせず「Active Match なし」と表示) */}
+          {/* Raw Debug パネル */}
           {showDebug && (
             <div className="h-56 shrink-0">
               {activeMatch ? (
@@ -684,8 +1007,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           Mobile 用コンポーネント群 (画面下部固定 Dock / Bottom Sheet / 各種モーダル)
          ========================================================================= */}
 
-      {/* 1. 画面下部固定 Mobile Decision Dock */}
-      {currentStep?.type === "WAITING_FOR_DECISION" && (
+      {/* 1. 画面下部固定 Mobile Decision Dock (人間待機中のみ表示) */}
+      {isHumanTurnWaiting && currentStep?.type === "WAITING_FOR_DECISION" && (
         <MobileDecisionDock
           request={currentStep.request}
           onOpenSheet={() => setSheetMode("half")}
@@ -694,7 +1017,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         />
       )}
 
-      {/* 2. Mobile Decision Bottom Sheet (collapsed 時でもマウントを維持して選択状態を保持) */}
+      {/* 2. Mobile Decision Bottom Sheet */}
       {!isDesktop && (
         <MobileBottomSheet
           mode={sheetMode}
@@ -722,6 +1045,13 @@ export const CoreBattlePlaytest: React.FC = () => {
         showSeedInput={isOfficialEnvironment(selectedEnvironmentId)}
         seedInput={seedInput}
         onSeedInputChange={setSeedInput}
+        matchMode={pendingMatchMode}
+        onSelectMatchMode={setPendingMatchMode}
+        humanSeat={pendingHumanSeat}
+        onSelectHumanSeat={setPendingHumanSeat}
+        policyId={pendingPolicyId}
+        onSelectPolicyId={setPendingPolicyId}
+        isOfficialEnvironment={isOfficialEnvironment(selectedEnvironmentId)}
         enablePassAndPlay={enablePassAndPlay}
         onTogglePassAndPlay={setEnablePassAndPlay}
         onOpenLogModal={() => setShowMobileLogModal(true)}
@@ -749,7 +1079,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Mobile デバッグモーダル (Active Match が存在する場合のみその RulePackage を表示、存在しない場合はフォールバックせず「Active Match なし」と表示) */}
+      {/* 5. Mobile デバッグモーダル */}
       {showMobileDebugModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
           <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[90vh]">
@@ -782,8 +1112,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       )}
 
-      {/* Pass-and-Play 交代オーバーレイ */}
-      {isPassAndPlayWaiting && (
+      {/* Pass-and-Play 交代オーバーレイ (Human vs Human のみ) */}
+      {activeMatchMode === "humanVsHuman" && isPassAndPlayWaiting && (
         <PassAndPlayOverlay
           targetPlayerKey={pendingPlayerKey}
           targetPlayerName={pendingPlayerKey === "p1" ? "Player A" : "Player B"}

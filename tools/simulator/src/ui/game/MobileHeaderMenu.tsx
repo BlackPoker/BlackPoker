@@ -1,5 +1,10 @@
 import React from "react";
 import { EnvironmentOption } from "../../engine/playtest/PlaytestEnvironmentController";
+import {
+  PlaytestMatchMode,
+  PlaytestPolicyId,
+  PLAYTEST_POLICY_OPTIONS,
+} from "../../engine/playtest/PlaytestSeatController";
 
 export interface MobileHeaderMenuProps {
   readonly isOpen: boolean;
@@ -10,6 +15,13 @@ export interface MobileHeaderMenuProps {
   readonly showSeedInput: boolean;
   readonly seedInput?: string;
   readonly onSeedInputChange?: (val: string) => void;
+  readonly matchMode: PlaytestMatchMode;
+  readonly onSelectMatchMode: (mode: PlaytestMatchMode) => void;
+  readonly humanSeat: "p1" | "p2";
+  readonly onSelectHumanSeat: (seat: "p1" | "p2") => void;
+  readonly policyId: PlaytestPolicyId;
+  readonly onSelectPolicyId: (id: PlaytestPolicyId) => void;
+  readonly isOfficialEnvironment: boolean;
   readonly enablePassAndPlay: boolean;
   readonly onTogglePassAndPlay: (val: boolean) => void;
   readonly onOpenLogModal: () => void;
@@ -26,6 +38,13 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   showSeedInput,
   seedInput = "42",
   onSeedInputChange,
+  matchMode,
+  onSelectMatchMode,
+  humanSeat,
+  onSelectHumanSeat,
+  policyId,
+  onSelectPolicyId,
+  isOfficialEnvironment,
   enablePassAndPlay,
   onTogglePassAndPlay,
   onOpenLogModal,
@@ -41,7 +60,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 lg:hidden animate-fade-in">
-      <div className="w-full max-w-sm bg-white rounded-xl border border-zinc-300 shadow-2xl p-4 flex flex-col gap-3 font-sans">
+      <div className="w-full max-w-sm bg-white rounded-xl border border-zinc-300 shadow-2xl p-4 flex flex-col gap-3 font-sans max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
           <h3 className="text-sm font-bold text-zinc-950 font-serif">
@@ -91,16 +110,73 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </div>
         )}
 
-        {/* Pass-and-Play */}
-        <label className="flex items-center justify-between p-2 rounded bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 cursor-pointer min-h-[44px]">
-          <span>Pass-and-Play (秘密情報保護)</span>
-          <input
-            type="checkbox"
-            checked={enablePassAndPlay}
-            onChange={(e) => onTogglePassAndPlay(e.target.checked)}
-            className="w-5 h-5 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
-          />
-        </label>
+        {/* 対戦モード選択 */}
+        <div className="flex flex-col gap-1">
+          <label className="text-[11px] font-mono font-bold text-zinc-500">
+            対戦モード (Match Mode):
+          </label>
+          <select
+            value={matchMode}
+            onChange={(e) => onSelectMatchMode(e.target.value as PlaytestMatchMode)}
+            className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
+          >
+            <option value="humanVsHuman">Human vs Human (パス＆プレイ)</option>
+            <option value="humanVsAi">Human vs AI</option>
+          </select>
+        </div>
+
+        {/* Human vs AI 設定 */}
+        {matchMode === "humanVsAi" && (
+          <>
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-mono font-bold text-zinc-500">
+                プレイヤー席 (Human Seat):
+              </label>
+              <select
+                value={humanSeat}
+                onChange={(e) => onSelectHumanSeat(e.target.value as "p1" | "p2")}
+                className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
+              >
+                <option value="p1">Player A (先攻優先席 / p1)</option>
+                <option value="p2">Player B (後攻優先席 / p2)</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-[11px] font-mono font-bold text-zinc-500">
+                AI Policy:
+              </label>
+              <select
+                value={policyId}
+                onChange={(e) => onSelectPolicyId(e.target.value as PlaytestPolicyId)}
+                className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
+              >
+                {PLAYTEST_POLICY_OPTIONS.map((opt) => (
+                  <option
+                    key={opt.id}
+                    value={opt.id}
+                    disabled={opt.requiresSeed && !isOfficialEnvironment}
+                  >
+                    {opt.label}{opt.requiresSeed && !isOfficialEnvironment ? " (Official専用)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* Pass-and-Play (Human vs Human のみ) */}
+        {matchMode === "humanVsHuman" && (
+          <label className="flex items-center justify-between p-2 rounded bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 cursor-pointer min-h-[44px]">
+            <span>Pass-and-Play (秘密情報保護)</span>
+            <input
+              type="checkbox"
+              checked={enablePassAndPlay}
+              onChange={(e) => onTogglePassAndPlay(e.target.checked)}
+              className="w-5 h-5 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
+            />
+          </label>
+        )}
 
         {/* Game Log モーダル開くボタン */}
         <button

@@ -307,7 +307,8 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
       if (setupResult.drawnCard) {
         const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
         const drawnCode = `${setupResult.drawnCard.suit}${setupResult.drawnCard.rank}`;
-        logs.push({ message: `[DRAW] 先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, level: "action", state: setupResult.state });
+        logs.push({ message: `[DRAW] 先攻の ${winnerName} がライフから1枚引きました`, level: "action", state: setupResult.state });
+        traces.push({ category: "MATCH_SETUP", message: `先攻の ${winnerName} がライフから1枚引きました (${drawnCode})`, state: setupResult.state });
       }
       const winnerName = setupResult.firstPlayer === "p1" ? "Player A" : "Player B";
       logs.push({ message: `[TURN] ${winnerName} がターンとチャンスを持ってゲームを開始します`, level: "info", state: setupResult.state });
