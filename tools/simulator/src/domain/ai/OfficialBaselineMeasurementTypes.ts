@@ -134,6 +134,79 @@ export interface BaselineRepeatabilityMetrics {
   readonly diagnosticErrorCount: number;
 }
 
+export interface MatchLengthMetrics {
+  readonly count: number;
+  readonly mean: number;
+  readonly median: number;
+  readonly min: number;
+  readonly max: number;
+}
+
+export interface MatchLengthSummary {
+  readonly allMatches: {
+    readonly count: number;
+    readonly failedCount: number;
+    readonly decisions: MatchLengthMetrics;
+    readonly turns: MatchLengthMetrics;
+  };
+  readonly completedMatches: {
+    readonly count: number;
+    readonly decisions: MatchLengthMetrics;
+    readonly turns: MatchLengthMetrics;
+  };
+  readonly perMatchup: {
+    readonly [pairId: string]: {
+      readonly allMatches: {
+        readonly count: number;
+        readonly decisions: MatchLengthMetrics;
+        readonly turns: MatchLengthMetrics;
+      };
+      readonly completedMatches: {
+        readonly count: number;
+        readonly decisions: MatchLengthMetrics;
+        readonly turns: MatchLengthMetrics;
+      };
+    };
+  };
+}
+
+export interface MatchOutcomeIndexEntry {
+  readonly canonicalKey: string; // pairId:legId:matchIndex
+  readonly pairId: string;
+  readonly legId: string;
+  readonly matchIndex: number;
+  readonly matchId: string;
+  readonly matchSeed: number;
+  readonly status: string;
+  readonly completed: boolean;
+  readonly winner?: string;
+  readonly reason?: string;
+  readonly totalDecisions: number;
+  readonly turnCount: number;
+}
+
+export interface OfficialBaselineMeasurementMetadata {
+  readonly sourceHead: string;
+  readonly coreFlowRepairHead: string;
+  readonly sourceBaselineArtifact: string;
+  readonly sourceBaselineLogicalDigest: string;
+  readonly formatId: string;
+  readonly frameId: string;
+  readonly experimentConfiguration: {
+    readonly matchCount: number;
+    readonly matchesPerSeat: number;
+    readonly maxDecisions: number;
+    readonly baseSeed: number;
+    readonly setupAuditCount: number;
+  };
+  readonly participantDefinitions: readonly {
+    readonly id: string;
+    readonly name: string;
+    readonly artifactRef?: string;
+  }[];
+  readonly createdAt: string;
+}
+
 export interface OfficialBaselineMeasurementConfig {
   readonly measurementId: string;
   readonly workId: string;
@@ -143,6 +216,10 @@ export interface OfficialBaselineMeasurementConfig {
   readonly setupAuditCount: number;
   readonly matchesPerSeat: number;
   readonly maxDecisionsPerMatch: number;
+  readonly sourceHead?: string;
+  readonly coreFlowRepairHead?: string;
+  readonly sourceBaselineArtifact?: string;
+  readonly sourceBaselineLogicalDigest?: string;
 }
 
 /**
@@ -177,4 +254,7 @@ export interface OfficialBaselineLogicalPayload {
 export interface OfficialBaselineMeasurementResult extends OfficialBaselineLogicalPayload {
   readonly logicalDigest: string;
   readonly repeatability: BaselineRepeatabilityMetrics;
+  readonly metadata?: OfficialBaselineMeasurementMetadata;
+  readonly matchLengthSummary?: MatchLengthSummary;
+  readonly matchOutcomeIndex?: readonly MatchOutcomeIndexEntry[];
 }

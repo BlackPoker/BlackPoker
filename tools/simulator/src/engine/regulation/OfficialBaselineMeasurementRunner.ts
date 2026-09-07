@@ -11,9 +11,13 @@ import {
 import { OfficialSetupAuditor } from "./OfficialSetupAuditor";
 import {
   BaselineMatchupSummary,
+  MatchLengthMetrics,
+  MatchLengthSummary,
+  MatchOutcomeIndexEntry,
   OFFICIAL_BASELINE_MEASUREMENT_VERSION,
   OfficialBaselineLogicalPayload,
   OfficialBaselineMeasurementConfig,
+  OfficialBaselineMeasurementMetadata,
   OfficialBaselineMeasurementResult,
   SetupAuditSummary,
 } from "../../domain/ai/OfficialBaselineMeasurementTypes";
@@ -42,6 +46,20 @@ export function computeLogicalDigest(payload: OfficialBaselineLogicalPayload): s
   return crypto.createHash("sha256").update(json, "utf8").digest("hex");
 }
 
+export function computeMetrics(values: number[]): MatchLengthMetrics {
+  if (values.length === 0) {
+    return { count: 0, mean: 0, median: 0, min: 0, max: 0 };
+  }
+  const sorted = [...values].sort((a, b) => a - b);
+  const min = sorted[0];
+  const max = sorted[sorted.length - 1];
+  const sum = sorted.reduce((acc, v) => acc + v, 0);
+  const mean = sum / sorted.length;
+  const mid = Math.floor(sorted.length / 2);
+  const median = sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+  return { count: sorted.length, mean, median, min, max };
+}
+
 export class OfficialBaselineMeasurementRunner {
   public static readonly VERSION = OFFICIAL_BASELINE_MEASUREMENT_VERSION;
 
@@ -53,7 +71,12 @@ export class OfficialBaselineMeasurementRunner {
     catalog: RegulationCatalog,
     fullRulePackage: RulePackage,
     onProgress?: (msg: string) => void
-  ): Promise<{ payload: OfficialBaselineLogicalPayload; diagnosticErrorCount: number }> {
+  ): Promise<{
+    payload: OfficialBaselineLogicalPayload;
+    matchLengthSummary: MatchLengthSummary;
+    matchOutcomeIndex: MatchOutcomeIndexEntry[];
+    diagnosticErrorCount: number;
+  }> {
     const reg = catalog.regulations.get(config.regulationId);
     if (!reg) throw new Error(`Regulation not found: ${config.regulationId}`);
     const frame = catalog.frames.get(reg.frameId);
@@ -105,6 +128,14 @@ export class OfficialBaselineMeasurementRunner {
     ];
 
     const matchupSummaries: BaselineMatchupSummary[] = [];
+    const allDecisions: number[] = [];
+    const allTurns: number[] = [];
+    const completedDecisions: number[] = [];
+    const completedTurns: number[] = [];
+    let failedCount = 0;
+
+    const perMatchupLength: Record<string, any> = {};
+    const matchOutcomeIndex: MatchOutcomeIndexEntry[] = [];
 
     for (let i = 0; i < pairs.length; i++) {
       const { a, b, pairId } = pairs[i];
@@ -146,8 +177,44 @@ export class OfficialBaselineMeasurementRunner {
       let setupRuleGaps = 0;
       let technicalFailures = 0;
 
+      const pairAllDecisions: number[] = [];
+      const pairAllTurns: number[] = [];
+      const pairCompletedDecisions: number[] = [];
+      const pairCompletedTurns: number[] = [];
+
       for (const leg of expResult.legs) {
         for (const m of leg.matches) {
+          const canonicalKey = `${pairId}:${leg.legId}:${m.matchIndex}`;
+          matchOutcomeIndex.push({
+            canonicalKey,
+            pairId,
+            legId: leg.legId,
+            matchIndex: m.matchIndex,
+            matchId: m.matchId,
+            matchSeed: m.matchSeed,
+            status: m.status,
+            completed: m.completed,
+            winner: m.winner,
+            reason: m.reason,
+            totalDecisions: m.totalDecisions,
+            turnCount: m.turnCount,
+          });
+
+          allDecisions.push(m.totalDecisions);
+          allTurns.push(m.turnCount);
+          pairAllDecisions.push(m.totalDecisions);
+          pairAllTurns.push(m.turnCount);
+
+          if (m.completed) {
+            completedDecisions.push(m.totalDecisions);
+            completedTurns.push(m.turnCount);
+            pairCompletedDecisions.push(m.totalDecisions);
+            pairCompletedTurns.push(m.turnCount);
+          }
+          if (m.status === "FAILED") {
+            failedCount++;
+          }
+
           if (m.failure) {
             if (m.failure.errorName === "OfficialSetupRuleUnspecifiedError") {
               setupRuleGaps++;
@@ -157,6 +224,19 @@ export class OfficialBaselineMeasurementRunner {
           }
         }
       }
+
+      perMatchupLength[pairId] = {
+        allMatches: {
+          count: pairAllDecisions.length,
+          decisions: computeMetrics(pairAllDecisions),
+          turns: computeMetrics(pairAllTurns),
+        },
+        completedMatches: {
+          count: pairCompletedDecisions.length,
+          decisions: computeMetrics(pairCompletedDecisions),
+          turns: computeMetrics(pairCompletedTurns),
+        },
+      };
 
       const summaryA = expResult.summary.participants[a.id];
       const summaryB = expResult.summary.participants[b.id];
@@ -199,6 +279,21 @@ export class OfficialBaselineMeasurementRunner {
       matchupSummaries.push(summary);
     }
 
+    const matchLengthSummary: MatchLengthSummary = {
+      allMatches: {
+        count: allDecisions.length,
+        failedCount,
+        decisions: computeMetrics(allDecisions),
+        turns: computeMetrics(allTurns),
+      },
+      completedMatches: {
+        count: completedDecisions.length,
+        decisions: computeMetrics(completedDecisions),
+        turns: computeMetrics(completedTurns),
+      },
+      perMatchup: perMatchupLength,
+    };
+
     // 6. Logical Payload 構築
     const payload: OfficialBaselineLogicalPayload = {
       measurementResultVersion: this.VERSION,
@@ -227,6 +322,8 @@ export class OfficialBaselineMeasurementRunner {
 
     return {
       payload,
+      matchLengthSummary,
+      matchOutcomeIndex,
       diagnosticErrorCount: accumulator.diagnosticErrorCount,
     };
   }
@@ -251,6 +348,7 @@ export class OfficialBaselineMeasurementRunner {
 
     onProgress?.(`Run B Digest: ${digestB}`);
 
+    // 1. Logical Payload Repeatability Verification
     const matched = digestA === digestB;
     const jsonA = canonicalJsonStringify(runA.payload);
     const jsonB = canonicalJsonStringify(runB.payload);
@@ -262,7 +360,64 @@ export class OfficialBaselineMeasurementRunner {
       );
     }
 
+    // 2. Match Length Summary Repeatability Verification
+    const matchLengthJsonA = canonicalJsonStringify(runA.matchLengthSummary);
+    const matchLengthJsonB = canonicalJsonStringify(runB.matchLengthSummary);
+    if (matchLengthJsonA !== matchLengthJsonB) {
+      throw new Error(
+        `Deterministic Repeatability Violation: Run A matchLengthSummary does not match Run B matchLengthSummary`
+      );
+    }
+
+    // 3. Match Outcome Index Repeatability & Uniqueness Verification
+    const outcomeIndexJsonA = canonicalJsonStringify(runA.matchOutcomeIndex);
+    const outcomeIndexJsonB = canonicalJsonStringify(runB.matchOutcomeIndex);
+    if (outcomeIndexJsonA !== outcomeIndexJsonB) {
+      throw new Error(
+        `Deterministic Repeatability Violation: Run A matchOutcomeIndex does not match Run B matchOutcomeIndex`
+      );
+    }
+
+    // 正準キーの全件・ユニーク性検証
+    const expectedMatchCount = config.matchesPerSeat * 2 * 6;
+    if (runA.matchOutcomeIndex.length !== expectedMatchCount) {
+      throw new Error(
+        `Match Outcome Index count mismatch: expected ${expectedMatchCount}, got ${runA.matchOutcomeIndex.length}`
+      );
+    }
+    const keySet = new Set<string>();
+    for (const entry of runA.matchOutcomeIndex) {
+      if (keySet.has(entry.canonicalKey)) {
+        throw new Error(`Duplicate canonical key in matchOutcomeIndex: ${entry.canonicalKey}`);
+      }
+      keySet.add(entry.canonicalKey);
+    }
+
     const totalDiagnosticErrors = runA.diagnosticErrorCount + runB.diagnosticErrorCount;
+
+    const reg = catalog.regulations.get(config.regulationId)!;
+    const metadata: OfficialBaselineMeasurementMetadata = {
+      sourceHead: config.sourceHead || "UNKNOWN",
+      coreFlowRepairHead: config.coreFlowRepairHead || "783aa852c009a3801f5cca623c794cdbabda916f",
+      sourceBaselineArtifact: config.sourceBaselineArtifact || "reports/ai/official-light-entry16-baseline-v1.json",
+      sourceBaselineLogicalDigest: config.sourceBaselineLogicalDigest || "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4",
+      formatId: reg.formatId,
+      frameId: reg.frameId,
+      experimentConfiguration: {
+        matchCount: expectedMatchCount,
+        matchesPerSeat: config.matchesPerSeat,
+        maxDecisions: config.maxDecisionsPerMatch,
+        baseSeed: config.baseSeed,
+        setupAuditCount: config.setupAuditCount,
+      },
+      participantDefinitions: [
+        { id: "baseline-first-legal-v1", name: "FirstLegal" },
+        { id: "baseline-seeded-random-v1", name: "SeededRandom" },
+        { id: "baseline-zero-genome-v1", name: "ZeroGenome" },
+        { id: "baseline-manual-generic-v1", name: "ManualGenericGenome" },
+      ],
+      createdAt: new Date().toISOString(),
+    };
 
     return {
       ...runA.payload,
@@ -274,6 +429,9 @@ export class OfficialBaselineMeasurementRunner {
         exactLogicalEquality,
         diagnosticErrorCount: totalDiagnosticErrors,
       },
+      metadata,
+      matchLengthSummary: runA.matchLengthSummary,
+      matchOutcomeIndex: runA.matchOutcomeIndex,
     };
   }
 }

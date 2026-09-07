@@ -343,6 +343,23 @@ describe("Official Baseline Measurement Tests (Phase 3.3)", () => {
       expect(result.repeatability.diagnosticErrorCount).toBe(0);
       expect(result.logicalDigest).toBe(result.repeatability.runADigest);
       expect(result.logicalDigest).toBe(result.repeatability.runBDigest);
+
+      // Phase 3.5 拡張メタデータ・Match Length・Match Outcome Index の検証
+      expect(result.metadata).toBeDefined();
+      expect(result.metadata?.formatId).toBe("light");
+      expect(result.metadata?.frameId).toBe("entry16");
+      expect(result.metadata?.experimentConfiguration.matchCount).toBe(12);
+      expect(result.metadata?.participantDefinitions).toHaveLength(4);
+
+      expect(result.matchLengthSummary).toBeDefined();
+      expect(result.matchLengthSummary?.allMatches.count).toBe(12);
+      expect(result.matchLengthSummary?.completedMatches.count).toBeGreaterThanOrEqual(0);
+      expect(result.matchLengthSummary?.allMatches.decisions.count).toBe(12);
+      expect(result.matchLengthSummary?.allMatches.turns.count).toBe(12);
+
+      expect(result.matchOutcomeIndex).toBeDefined();
+      expect(result.matchOutcomeIndex).toHaveLength(12);
+      expect(result.matchOutcomeIndex![0].canonicalKey).toMatch(/^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+:\d+$/);
     });
   });
 });
