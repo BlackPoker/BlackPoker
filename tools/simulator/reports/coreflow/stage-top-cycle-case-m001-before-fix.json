@@ -1,0 +1,310 @@
+{
+  "artifactType": "CoreFlowPreFixLoopTrace",
+  "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m001",
+  "matchSeed": 1468640084,
+  "baseSeed": 20260906,
+  "workId": "BP-SIM-CORE-6.0-20260907-1016",
+  "timestamp": "2026-09-07T01:46:28.462Z",
+  "description": "Decision 10 to 20 time-series trace demonstrating consecutive PASS leading to cancelStageRequest exception swallowed by tryResolveStageTop, resulting in stageTop permanent retention and cycle recurrence.",
+  "trace": [
+    {
+      "decisionNumber": 10,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p2",
+      "decisionPlayer": "p2",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 8,
+      "stageTop": {
+        "requestId": "req-8",
+        "actionId": "action.twist",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "unit",
+            "unitId": "soldier-p1-preset",
+            "kind": "一般兵",
+            "componentId": "character.soldier"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 11,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 1,
+      "stageDepth": 8,
+      "stageTop": {
+        "requestId": "req-8",
+        "actionId": "action.twist",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "unit",
+            "unitId": "soldier-p1-preset",
+            "kind": "一般兵",
+            "componentId": "character.soldier"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 12,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 7,
+      "stageTop": {
+        "requestId": "req-7",
+        "actionId": "action.counter",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 13,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p2",
+      "decisionPlayer": "p2",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 1,
+      "stageDepth": 7,
+      "stageTop": {
+        "requestId": "req-7",
+        "actionId": "action.counter",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 14,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 15,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p2",
+      "decisionPlayer": "p2",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 1,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "pending",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 16,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "resolving",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 17,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p2",
+      "decisionPlayer": "p2",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 1,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "resolving",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 18,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "resolving",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 19,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p2",
+      "decisionPlayer": "p2",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 1,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "resolving",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    },
+    {
+      "decisionNumber": 20,
+      "turnNumber": 1,
+      "turnPlayer": "p1",
+      "chancePlayer": "p1",
+      "decisionPlayer": "p1",
+      "selectedPattern": {
+        "kind": "PASS",
+        "patternRef": 0
+      },
+      "consecutivePassCount": 0,
+      "stageDepth": 5,
+      "stageTop": {
+        "requestId": "req-6",
+        "actionId": "action.counter",
+        "status": "resolving",
+        "targets": [
+          {
+            "type": "request",
+            "requestId": "req-3",
+            "actionId": "action.counter"
+          }
+        ]
+      },
+      "resolveTopRequest": null,
+      "coordinatorEventReturned": null
+    }
+  ]
+}

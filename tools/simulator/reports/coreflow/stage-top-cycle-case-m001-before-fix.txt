@@ -1,0 +1,119 @@
+=== BlackPoker Simulator Pre-Fix Loop Trace ===
+Case ID: case-firstLegal-vs-zeroGenome-leg-a-as-p1-m001
+Match Seed: 1468640084
+Base Seed: 20260906
+Work ID: BP-SIM-CORE-6.0-20260907-1016
+Timestamp: 2026-09-07T10:46:00+09:00
+Target HEAD: eaed0877ccc335caaeb78449339f8f21cfa13d07
+
+Summary of Pre-Fix Behavior:
+At D12-D13, req-7 (action.counter, target: req-3) resolves successfully and removes req-3 from stage.requests to stage.history.
+At D14-D15, consecutivePassCount reaches 2. Coordinator invokes tryResolveStageTop() for Stage TOP req-6 (action.counter, target: req-3).
+Inside resolveTopRequest(), cancelStageRequest('req-3') throws Error ("キャンセル対象のリクエストが見つかりません: req-3") because req-3 is already in history.
+tryResolveStageTop() catches this error via broad catch(err: any), swallows it, and returns a fake STAGE_TOP_RESOLVED event referencing stageRequests[0] (req-1, BOTTOM of Stage!).
+req-6 is NOT popped from Stage TOP (depth remains 5).
+passTracker is reset, leading players to PASS again (D16, D17). At D17, consecutivePassCount reaches 2 again, re-triggering the same swallowed exception and fake resolution.
+This cycle repeats indefinitely up to the 2000 decision limit.
+
+--------------------------------------------------------------------------------
+Decision: 10
+  turnPlayer: p1, chancePlayer: p2, decisionPlayer: p2
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 1 (before pass: 0)
+  Stage depth before: 8, after: 8
+  Stage TOP before: requestId=req-8, actionId=action.twist, status=pending
+  resolveTopRequest called: No (consecutivePassCount < 2)
+  resolve result / exception: N/A
+  STAGE_TOP_RESOLVED returned: No
+--------------------------------------------------------------------------------
+Decision: 11
+  turnPlayer: p1, chancePlayer: p1, decisionPlayer: p1
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 2 (triggers Stage TOP resolution)
+  Stage depth before: 8, after: 7
+  Stage TOP before: requestId=req-8, actionId=action.twist, status=pending
+  resolveTopRequest called: Yes
+  resolve result / exception: Success (req-8 resolved, popped from Stage TOP)
+  Stage depth after: 7
+  STAGE_TOP_RESOLVED returned: Yes (requestId=req-8)
+--------------------------------------------------------------------------------
+Decision: 12
+  turnPlayer: p1, chancePlayer: p1, decisionPlayer: p1
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 1 (before pass: 0)
+  Stage depth before: 7, after: 7
+  Stage TOP before: requestId=req-7, actionId=action.counter, status=pending, target=req-3
+  resolveTopRequest called: No
+  resolve result / exception: N/A
+  STAGE_TOP_RESOLVED returned: No
+--------------------------------------------------------------------------------
+Decision: 13
+  turnPlayer: p1, chancePlayer: p2, decisionPlayer: p2
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 2 (triggers Stage TOP resolution)
+  Stage depth before: 7, after: 5
+  Stage TOP before: requestId=req-7, actionId=action.counter, status=pending, target=req-3
+  resolveTopRequest called: Yes
+  resolve result / exception: Success (req-7 resolved, cancelled target req-3, both req-7 and req-3 removed from Stage to history)
+  Stage depth after: 5
+  STAGE_TOP_RESOLVED returned: Yes (requestId=req-7)
+--------------------------------------------------------------------------------
+Decision: 14
+  turnPlayer: p1, chancePlayer: p1, decisionPlayer: p1
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 1 (before pass: 0)
+  Stage depth before: 5, after: 5
+  Stage TOP before: requestId=req-6, actionId=action.counter, status=pending, target=req-3
+  resolveTopRequest called: No
+  resolve result / exception: N/A
+  STAGE_TOP_RESOLVED returned: No
+--------------------------------------------------------------------------------
+Decision: 15 (STALL CYCLE BEGINS)
+  turnPlayer: p1, chancePlayer: p2, decisionPlayer: p2
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 2 (triggers Stage TOP resolution)
+  Stage depth before: 5
+  Stage TOP before: requestId=req-6, actionId=action.counter, status=pending, target=req-3
+  resolveTopRequest called: Yes
+  resolve result / exception: EXCEPTION SWALLOWED!
+    Error: キャンセル対象のリクエストが見つかりません: req-3
+      at Module.cancelStageRequest (CommandRegistry.ts:102:11)
+      at executeCommand (commandHandlers.ts:590:5)
+    Swallowed by: CoreFlowCoordinator.tryResolveStageTop() catch (err: any) block
+  Stage depth after: 5 (req-6 was NOT popped from Stage TOP; status left as "resolving")
+  STAGE_TOP_RESOLVED returned: Yes (FALSE! Returned stageRequests[0] = req-1: action.attack)
+--------------------------------------------------------------------------------
+Decision: 16 (STALL CYCLE RE-VISIT 1)
+  turnPlayer: p1, chancePlayer: p1, decisionPlayer: p1
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 1 (before pass: 0)
+  Stage depth before: 5, after: 5
+  Stage TOP before: requestId=req-6, actionId=action.counter, status=resolving, target=req-3
+  resolveTopRequest called: No
+  resolve result / exception: N/A
+  STAGE_TOP_RESOLVED returned: No
+--------------------------------------------------------------------------------
+Decision: 17 (STALL CYCLE RE-VISIT 1 RESOLVE ATTEMPT)
+  turnPlayer: p1, chancePlayer: p2, decisionPlayer: p2
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 2 (triggers Stage TOP resolution)
+  Stage depth before: 5
+  Stage TOP before: requestId=req-6, actionId=action.counter, status=resolving, target=req-3
+  resolveTopRequest called: Yes
+  resolve result / exception: EXCEPTION SWALLOWED!
+    Error: キャンセル対象のリクエストが見つかりません: req-3
+      at Module.cancelStageRequest (CommandRegistry.ts:102:11)
+    Swallowed by: CoreFlowCoordinator.tryResolveStageTop() catch (err: any) block
+  Stage depth after: 5 (req-6 still NOT popped from Stage TOP)
+  STAGE_TOP_RESOLVED returned: Yes (FALSE! Returned stageRequests[0] = req-1: action.attack)
+--------------------------------------------------------------------------------
+Decision: 18 (STALL CYCLE RE-VISIT 2)
+  turnPlayer: p1, chancePlayer: p1, decisionPlayer: p1
+  selected pattern: PASS (patternRef: 0)
+  consecutivePassCount: 1 (before pass: 0)
+  Stage depth before: 5, after: 5
+  Stage TOP before: requestId=req-6, actionId=action.counter, status=resolving, target=req-3
+  resolveTopRequest called: No
+  resolve result / exception: N/A
+  STAGE_TOP_RESOLVED returned: No
+================================================================================

@@ -1,0 +1,2268 @@
+{
+  "artifactType": "OfficialStageResolutionPostFixReport",
+  "workId": "BP-SIM-CORE-6.0-20260907-1016",
+  "timestamp": "2026-09-07T02:10:28.666Z",
+  "sourceDiagnosticsArtifact": "reports/ai/official-light-entry16-diagnostics-v1.1.json",
+  "sourceIncompleteCasesCount": 111,
+  "durationSeconds": 39.82,
+  "summary": {
+    "totalCases": 111,
+    "newlyCompletedBy500": 111,
+    "stillIncompleteAt500": 0,
+    "recoveryRatePercent": 100,
+    "pairBreakdown": {
+      "firstLegal-vs-seededRandom": {
+        "total": 13,
+        "completed": 13,
+        "stillIncomplete": 0
+      },
+      "firstLegal-vs-zeroGenome": {
+        "total": 24,
+        "completed": 24,
+        "stillIncomplete": 0
+      },
+      "firstLegal-vs-manualGeneric": {
+        "total": 24,
+        "completed": 24,
+        "stillIncomplete": 0
+      },
+      "seededRandom-vs-zeroGenome": {
+        "total": 13,
+        "completed": 13,
+        "stillIncomplete": 0
+      },
+      "seededRandom-vs-manualGeneric": {
+        "total": 13,
+        "completed": 13,
+        "stillIncomplete": 0
+      },
+      "zeroGenome-vs-manualGeneric": {
+        "total": 24,
+        "completed": 24,
+        "stillIncomplete": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-a-as-p1-m020",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 20,
+      "matchSeed": 916822129,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-7f38f237ff1558d9"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-a-as-p1-m021",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-25ba8adf00248e24"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-a-as-p1-m022",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 45,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-ee1a2c291556e7ee"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m001",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-684f5b80b283e0ea"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m007",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 50,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-51ba5353664215d8"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m013",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 34,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-93d7e1e8c4ed335a"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m014",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 14,
+      "matchSeed": 1112419206,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 54,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-b7b1d8d7298c2b7a"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m018",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 70,
+        "finalTurnCount": 5,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-5a356ee944fa99b0"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m022",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-2eeebf772a62a040"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m038",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 38,
+      "matchSeed": 1113876084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3d16cb086beb098d"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m039",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 39,
+      "matchSeed": 3823121487,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-c34bfad5f5f68cf3"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m042",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 69,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-74a3c69bd6026bd7"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-seededRandom-leg-b-as-p1-m043",
+      "pairId": "firstLegal-vs-seededRandom",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 43,
+      "matchSeed": 2067158302,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 52,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3a798214f39da7f5"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m001",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m003",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m005",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m007",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m008",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m013",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m018",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m021",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m028",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m035",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m036",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-a-as-p1-m042",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m001",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m003",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m005",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m007",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m008",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m013",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m018",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m021",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m028",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m035",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m036",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-zeroGenome-leg-b-as-p1-m042",
+      "pairId": "firstLegal-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m001",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m003",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m005",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m007",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m008",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m013",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m018",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m021",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m028",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m035",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m036",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-a-as-p1-m042",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m001",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m003",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m005",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m007",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m008",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m013",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m018",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m021",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m028",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m035",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m036",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-firstLegal-vs-manualGeneric-leg-b-as-p1-m042",
+      "pairId": "firstLegal-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m001",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-684f5b80b283e0ea"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m007",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 50,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-51ba5353664215d8"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m013",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 34,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-93d7e1e8c4ed335a"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m014",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 14,
+      "matchSeed": 1112419206,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 54,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-b7b1d8d7298c2b7a"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m018",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 70,
+        "finalTurnCount": 5,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-5a356ee944fa99b0"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m022",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-2eeebf772a62a040"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m038",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 38,
+      "matchSeed": 1113876084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3d16cb086beb098d"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m039",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 39,
+      "matchSeed": 3823121487,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-c34bfad5f5f68cf3"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m042",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 69,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-74a3c69bd6026bd7"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-a-as-p1-m043",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 43,
+      "matchSeed": 2067158302,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 52,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3a798214f39da7f5"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-b-as-p1-m020",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 20,
+      "matchSeed": 916822129,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-7f38f237ff1558d9"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-b-as-p1-m021",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-25ba8adf00248e24"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-zeroGenome-leg-b-as-p1-m022",
+      "pairId": "seededRandom-vs-zeroGenome",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 45,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-ee1a2c291556e7ee"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m001",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-684f5b80b283e0ea"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m007",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 50,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-51ba5353664215d8"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m013",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 34,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-93d7e1e8c4ed335a"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m014",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 14,
+      "matchSeed": 1112419206,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 54,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-b7b1d8d7298c2b7a"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m018",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 70,
+        "finalTurnCount": 5,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-5a356ee944fa99b0"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m022",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-2eeebf772a62a040"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m038",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 38,
+      "matchSeed": 1113876084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3d16cb086beb098d"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m039",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 39,
+      "matchSeed": 3823121487,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 4,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-c34bfad5f5f68cf3"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m042",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 69,
+        "finalTurnCount": 5,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-74a3c69bd6026bd7"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-a-as-p1-m043",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 43,
+      "matchSeed": 2067158302,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 52,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-3a798214f39da7f5"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-b-as-p1-m020",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 20,
+      "matchSeed": 916822129,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-7f38f237ff1558d9"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-b-as-p1-m021",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 51,
+        "finalTurnCount": 3,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-25ba8adf00248e24"
+      }
+    },
+    {
+      "caseId": "case-seededRandom-vs-manualGeneric-leg-b-as-p1-m022",
+      "pairId": "seededRandom-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 22,
+      "matchSeed": 3206401419,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 45,
+        "finalTurnCount": 2,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-ee1a2c291556e7ee"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m001",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m003",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m005",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m007",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m008",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m013",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m018",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m021",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m028",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m035",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m036",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-a-as-p1-m042",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-a-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m001",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 1,
+      "matchSeed": 1468640084,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-cbac817dfaab9eed"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m003",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 3,
+      "matchSeed": 1485126154,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 87,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-f9b60efdceaf3643"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m005",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 5,
+      "matchSeed": 2770713936,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 61,
+        "finalTurnCount": 4,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-30135debfbc61d08"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m007",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 7,
+      "matchSeed": 1158281110,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 81,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-4f4ad53d11286cd3"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m008",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 8,
+      "matchSeed": 3914793191,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 74,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-9b23481d357b8058"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m013",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 13,
+      "matchSeed": 4125770847,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 71,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bed169f95a0522c7"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m018",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 18,
+      "matchSeed": 3917201970,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 84,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-33225a9c483ee5af"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m021",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 21,
+      "matchSeed": 2217762454,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 66,
+        "finalTurnCount": 6,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-bd9cd66eb7dace52"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m028",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 28,
+      "matchSeed": 464878345,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 83,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-fa8a18d96f78e4d5"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m035",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 35,
+      "matchSeed": 1085796547,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 82,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-d78382d3f2df6e29"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m036",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 36,
+      "matchSeed": 2585689998,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 89,
+        "finalTurnCount": 7,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "finalStateHash": "sh2-e45551d836234919"
+      }
+    },
+    {
+      "caseId": "case-zeroGenome-vs-manualGeneric-leg-b-as-p1-m042",
+      "pairId": "zeroGenome-vs-manualGeneric",
+      "legId": "leg-b-as-p1",
+      "matchIndex": 42,
+      "matchSeed": 868448441,
+      "beforeFix": {
+        "primary500Completed": false,
+        "secondary1000Completed": false,
+        "tertiary2000Completed": false
+      },
+      "afterFix": {
+        "completed": true,
+        "totalDecisions": 86,
+        "finalTurnCount": 7,
+        "winner": "p2",
+        "reason": "Player A のライフが0になりました",
+        "finalStateHash": "sh2-6038355d0d278082"
+      }
+    }
+  ]
+}

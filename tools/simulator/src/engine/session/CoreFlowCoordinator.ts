@@ -171,7 +171,7 @@ export class CoreFlowCoordinator {
 
     const stageRequests = state.stage?.requests;
     if (stageRequests && stageRequests.length > 0) {
-      // ステージ最上段を 1 件だけ解決
+      // ステージ最上段（最新）を 1 件だけ解決
       const context: CommandContext = {
         state,
         playerKey: state.chancePlayer || state.turnPlayer || "p1",
@@ -179,20 +179,7 @@ export class CoreFlowCoordinator {
         components: rulePackage.components,
       };
 
-      let resolveResult: any;
-      try {
-        resolveResult = registry.resolveTopRequest(context);
-      } catch (err: any) {
-        // コスト支払い不能等でキャンセルされた場合
-        const turnPlayer: PlayerKey = state.turnPlayer || "p1";
-        state.chancePlayer = turnPlayer;
-        return {
-          type: "STAGE_TOP_RESOLVED",
-          actionRequest: stageRequests[0],
-          nextChancePlayerId: turnPlayer,
-        };
-      }
-
+      const resolveResult = registry.resolveTopRequest(context);
       if (!resolveResult) {
         return null;
       }

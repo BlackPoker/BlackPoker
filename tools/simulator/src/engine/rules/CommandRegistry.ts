@@ -419,6 +419,91 @@ export class CommandRegistry {
 
 
   /**
+   * 解決時のターゲット妥当性を検証します。
+   * 公式ルール（common-action.rst / action-resolve-flow.puml）に基づき:
+   * 対象を指定するアクションが効果を発揮しようとした際に対象が存在しない（または無効化済み）場合、
+   * 効果を発揮せず解決とします（キーカードは墓地へ送り、ステージからポップして履歴へ送る）。
+   */
+  validateTargetsAtResolution(
+    action: ActionDefinition,
+    request: ActionRequest,
+    context: CommandContext
+  ): {
+    isValid: boolean;
+    targetComponent?: any;
+    targetRequest?: any;
+    targetPlayerKey?: string;
+  } {
+    // ターゲット指定のないアクションは常に妥当
+    if (!request.targets || request.targets.length === 0) {
+      return {
+        isValid: true,
+        targetComponent: context.targetComponent,
+        targetRequest: context.targetRequest,
+        targetPlayerKey: context.targetPlayerKey,
+      };
+    }
+
+    let targetComponent = context.targetComponent;
+    let targetRequest = context.targetRequest;
+    let targetPlayerKey = context.targetPlayerKey;
+
+    for (const t of request.targets) {
+      const tDef = action.targets?.find((def: any) => def.id === (t as any).id) || action.targets?.[0];
+
+      if (t.type === "request") {
+        // 対象リクエストはステージ（requests）上に現在存在し、未キャンセル・未解決であること
+        const stageReqs = context.state.stage?.requests || [];
+        const req = stageReqs.find((r: any) => r.id === t.requestId);
+        if (!req || req.status === "cancelled" || req.status === "resolved") {
+          return { isValid: false };
+        }
+        if (tDef?.condition?.status && req.status !== tDef.condition.status) {
+          return { isValid: false };
+        }
+        targetRequest = req;
+      } else if (t.type === "unit") {
+        // 対象ユニットはプレイヤーのいずれかのフィールドに存在すること
+        let foundUnit: any = null;
+        for (const p of Object.values<any>(context.state.players || {})) {
+          const u = p.field?.find((unit: any) => unit.unitId === t.unitId);
+          if (u) {
+            foundUnit = u;
+            break;
+          }
+        }
+        if (!foundUnit) {
+          return { isValid: false };
+        }
+        if (tDef?.condition?.component && foundUnit.componentId !== tDef.condition.component) {
+          return { isValid: false };
+        }
+        if (tDef?.condition?.componentType === "character") {
+          const compDef = context.components?.find((c: any) => c.id === foundUnit.componentId);
+          const isChar = compDef ? compDef.type === "character" : foundUnit.componentId?.startsWith("character.");
+          if (!isChar) {
+            return { isValid: false };
+          }
+        }
+        targetComponent = foundUnit;
+      } else if (t.type === "player") {
+        const playerKey = t.targetPlayerKey || (t as any).playerId || (t as any).playerKey;
+        if (!context.state.players?.[playerKey]) {
+          return { isValid: false };
+        }
+        targetPlayerKey = playerKey;
+      }
+    }
+
+    return {
+      isValid: true,
+      targetComponent: targetComponent || context.targetComponent,
+      targetRequest: targetRequest || context.targetRequest,
+      targetPlayerKey: targetPlayerKey || context.targetPlayerKey,
+    };
+  }
+
+  /**
    * 単一のアクションリクエストを解決する共通プリミティブ。
    * stage 上の通常アクション・直接即時アクションの双方から共通利用されます。
    */
@@ -449,7 +534,6 @@ export class CommandRegistry {
       };
     }
 
-
     request.status = "resolving";
 
     // アクション定義の逆引き
@@ -457,65 +541,6 @@ export class CommandRegistry {
     if (!action) {
       throw new Error(`アクションIDに対する定義が見つかりません: ${request.actionId}`);
     }
-
-    // リクエスト実行時のコンテキスト復元
-    const player = context.state.players?.[request.controller];
-    let targetComponent = context.targetComponent;
-    let targetRequest = context.targetRequest;
-    let targetPlayerKey = context.targetPlayerKey;
-
-    if (request.targets && request.targets.length > 0) {
-      for (const t of request.targets) {
-        if (t.type === "unit") {
-          if (!targetComponent) {
-            for (const p of Object.values<any>(context.state.players || {})) {
-              const u = p.field?.find((unit: any) => unit.unitId === t.unitId);
-              if (u) {
-                targetComponent = u;
-                break;
-              }
-            }
-            if (!targetComponent) {
-              targetComponent = t;
-            }
-          }
-        } else if (t.type === "player") {
-          if (!targetPlayerKey) {
-            targetPlayerKey = (t as any).targetPlayerKey || (t as any).playerId || (t as any).playerKey;
-          }
-        } else if (t.type === "request") {
-          if (!targetRequest) {
-            const allReqs = [
-              ...(context.state.stage.requests || []),
-              ...(context.state.stage.history || []),
-            ];
-            targetRequest = allReqs.find((r: any) => r.id === t.requestId);
-          }
-        }
-      }
-    }
-
-    const resolveContext: CommandContext = {
-      ...context,
-      playerKey: request.controller,
-      keyCards: request.keyCards && request.keyCards.length > 0 ? request.keyCards : context.keyCards,
-      keyCard:
-        request.keyCards && request.keyCards.length === 1
-          ? request.keyCards[0]
-          : request.keyCards && request.keyCards.length > 0
-          ? request.keyCards[0]
-          : context.keyCard,
-      targetComponent,
-      targetRequest,
-      targetPlayerKey,
-      currentAction: action,
-      currentRequest: request,
-      sourceEvent: request.sourceEvent,
-      logRecorder: context.logRecorder || this.logRecorder,
-    };
-
-
-    // コストはリクエスト成立時に支払い済みのため、解決時には支払わない
 
     const logRecorder = context.logRecorder || this.logRecorder;
     if (logRecorder) {
@@ -528,8 +553,31 @@ export class CommandRegistry {
       });
     }
 
+    // 解決時ターゲット妥当性検証 (Resolution-time Target Validation)
+    // 対象が存在しない・無効化済みの場合は効果を実行せず、ステージからの除去・キーカード墓地送り・解決完了処理へ進む
+    const targetValidation = this.validateTargetsAtResolution(action, request, context);
+
     // 効果（effect）の解決（中断対応）
-    if (action.effect) {
+    if (targetValidation.isValid && action.effect) {
+      const resolveContext: CommandContext = {
+        ...context,
+        playerKey: request.controller,
+        keyCards: request.keyCards && request.keyCards.length > 0 ? request.keyCards : context.keyCards,
+        keyCard:
+          request.keyCards && request.keyCards.length === 1
+            ? request.keyCards[0]
+            : request.keyCards && request.keyCards.length > 0
+            ? request.keyCards[0]
+            : context.keyCard,
+        targetComponent: targetValidation.targetComponent,
+        targetRequest: targetValidation.targetRequest,
+        targetPlayerKey: targetValidation.targetPlayerKey,
+        currentAction: action,
+        currentRequest: request,
+        sourceEvent: request.sourceEvent,
+        logRecorder,
+      };
+
       const execResult = this.effectInterpreter.executeEffectsWithInterruption(
         action.effect,
         resolveContext,
