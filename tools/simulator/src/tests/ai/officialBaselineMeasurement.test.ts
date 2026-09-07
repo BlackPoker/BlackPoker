@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import * as path from "path";
+import * as fs from "fs";
 import {
   OFFICIAL_BASELINE_MEASUREMENT_VERSION,
   OfficialBaselineMeasurementConfig,
@@ -8,6 +9,9 @@ import {
   canonicalJsonStringify,
   computeLogicalDigest,
   OfficialBaselineMeasurementRunner,
+  EXPECTED_V1_BASELINE_DIGEST,
+  EXPECTED_V1_DIAGNOSTICS_DIGEST,
+  verifyHistoricalArtifactDigests,
 } from "../../engine/regulation/OfficialBaselineMeasurementRunner";
 import { OfficialSetupAuditor } from "../../engine/regulation/OfficialSetupAuditor";
 import {
@@ -360,6 +364,62 @@ describe("Official Baseline Measurement Tests (Phase 3.3)", () => {
       expect(result.matchOutcomeIndex).toBeDefined();
       expect(result.matchOutcomeIndex).toHaveLength(12);
       expect(result.matchOutcomeIndex![0].canonicalKey).toMatch(/^[a-zA-Z0-9_-]+:[a-zA-Z0-9_-]+:\d+$/);
+    });
+  });
+
+  describe("6. Historical Diagnostics Digest Guard (Phase 3.5.1)", () => {
+    it("正常な v1Baseline と v1Diagnostics の digest で検証が成功すること", () => {
+      const validBaseline = { logicalDigest: EXPECTED_V1_BASELINE_DIGEST };
+      const validDiagnostics = {
+        logicalDigest: EXPECTED_V1_DIAGNOSTICS_DIGEST,
+        sourceBaselineDigest: EXPECTED_V1_BASELINE_DIGEST,
+      };
+      expect(() => verifyHistoricalArtifactDigests(validBaseline, validDiagnostics)).not.toThrow();
+    });
+
+    it("v1Diagnostics の logicalDigest が欠損している場合 fail-fast すること", () => {
+      const validBaseline = { logicalDigest: EXPECTED_V1_BASELINE_DIGEST };
+      const invalidDiagnostics: any = {
+        diagnosticsDigest: EXPECTED_V1_DIAGNOSTICS_DIGEST, // 旧誤フィールド名
+        sourceBaselineDigest: EXPECTED_V1_BASELINE_DIGEST,
+      };
+      expect(() => verifyHistoricalArtifactDigests(validBaseline, invalidDiagnostics)).toThrow(
+        /Source diagnostics logical digest mismatch/
+      );
+    });
+
+    it("v1Diagnostics の logicalDigest が不一致の場合 fail-fast すること", () => {
+      const validBaseline = { logicalDigest: EXPECTED_V1_BASELINE_DIGEST };
+      const invalidDiagnostics = {
+        logicalDigest: "wrong-digest",
+        sourceBaselineDigest: EXPECTED_V1_BASELINE_DIGEST,
+      };
+      expect(() => verifyHistoricalArtifactDigests(validBaseline, invalidDiagnostics)).toThrow(
+        /Source diagnostics logical digest mismatch/
+      );
+    });
+
+    it("v1Diagnostics の sourceBaselineDigest が不一致の場合 fail-fast すること", () => {
+      const validBaseline = { logicalDigest: EXPECTED_V1_BASELINE_DIGEST };
+      const invalidDiagnostics = {
+        logicalDigest: EXPECTED_V1_DIAGNOSTICS_DIGEST,
+        sourceBaselineDigest: "wrong-baseline-digest",
+      };
+      expect(() => verifyHistoricalArtifactDigests(validBaseline, invalidDiagnostics)).toThrow(
+        /Source diagnostics references unexpected baseline digest/
+      );
+    });
+
+    it("実ファイル reports/ai/official-light-entry16-baseline-v1.json と diagnostics-v1.1.json でガードをパスすること", () => {
+      const v1BaselinePath = path.resolve(process.cwd(), "reports/ai/official-light-entry16-baseline-v1.json");
+      const v1DiagnosticsPath = path.resolve(process.cwd(), "reports/ai/official-light-entry16-diagnostics-v1.1.json");
+      const v1Baseline = JSON.parse(fs.readFileSync(v1BaselinePath, "utf8"));
+      const v1Diagnostics = JSON.parse(fs.readFileSync(v1DiagnosticsPath, "utf8"));
+
+      expect(() => verifyHistoricalArtifactDigests(v1Baseline, v1Diagnostics)).not.toThrow();
+      expect(v1Baseline.logicalDigest).toBe(EXPECTED_V1_BASELINE_DIGEST);
+      expect(v1Diagnostics.logicalDigest).toBe(EXPECTED_V1_DIAGNOSTICS_DIGEST);
+      expect(v1Diagnostics.sourceBaselineDigest).toBe(EXPECTED_V1_BASELINE_DIGEST);
     });
   });
 });

@@ -4,12 +4,19 @@ import { fileURLToPath } from "url";
 import { loadRegulationCatalog } from "../engine/regulation/RegulationLoader";
 import { RegulationValidator } from "../engine/regulation/RegulationValidator";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
-import { OfficialBaselineMeasurementRunner } from "../engine/regulation/OfficialBaselineMeasurementRunner";
+import {
+  OfficialBaselineMeasurementRunner,
+  EXPECTED_V1_BASELINE_DIGEST,
+  EXPECTED_V1_DIAGNOSTICS_DIGEST,
+  verifyHistoricalArtifactDigests,
+} from "../engine/regulation/OfficialBaselineMeasurementRunner";
 import {
   OfficialBaselineMeasurementConfig,
   OfficialBaselineMeasurementResult,
   MatchLengthMetrics,
 } from "../domain/ai/OfficialBaselineMeasurementTypes";
+
+export { EXPECTED_V1_BASELINE_DIGEST, EXPECTED_V1_DIAGNOSTICS_DIGEST, verifyHistoricalArtifactDigests };
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -166,31 +173,16 @@ async function main() {
   const v1Baseline: OfficialBaselineMeasurementResult = JSON.parse(
     fs.readFileSync(resolvedSourceBaseline, "utf8")
   );
-  const EXPECTED_V1_DIGEST = "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4";
-  if (v1Baseline.logicalDigest !== EXPECTED_V1_DIGEST) {
-    throw new Error(
-      `Source baseline logical digest mismatch: expected ${EXPECTED_V1_DIGEST}, got ${v1Baseline.logicalDigest}`
-    );
-  }
-  console.log(`[PRE-CHECK] Source baseline verified. Logical Digest: ${v1Baseline.logicalDigest}`);
 
   const resolvedSourceDiagnostics = path.resolve(process.cwd(), cliArgs.sourceDiagnostics);
   if (!fs.existsSync(resolvedSourceDiagnostics)) {
     throw new Error(`Source diagnostics artifact not found: ${resolvedSourceDiagnostics}`);
   }
   const v1Diagnostics: any = JSON.parse(fs.readFileSync(resolvedSourceDiagnostics, "utf8"));
-  const EXPECTED_DIAGNOSTICS_DIGEST = "0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20";
-  if (v1Diagnostics.diagnosticsDigest && v1Diagnostics.diagnosticsDigest !== EXPECTED_DIAGNOSTICS_DIGEST) {
-    throw new Error(
-      `Source diagnostics digest mismatch: expected ${EXPECTED_DIAGNOSTICS_DIGEST}, got ${v1Diagnostics.diagnosticsDigest}`
-    );
-  }
-  if (v1Diagnostics.sourceBaselineDigest !== EXPECTED_V1_DIGEST) {
-    throw new Error(
-      `Source diagnostics references unexpected baseline digest: ${v1Diagnostics.sourceBaselineDigest}`
-    );
-  }
-  console.log(`[PRE-CHECK] Source diagnostics verified. Matches 111 incomplete cases.`);
+
+  verifyHistoricalArtifactDigests(v1Baseline, v1Diagnostics);
+  console.log(`[PRE-CHECK] Source baseline verified. Logical Digest: ${v1Baseline.logicalDigest}`);
+  console.log(`[PRE-CHECK] Source diagnostics verified. Logical Digest: ${v1Diagnostics.logicalDigest}, matches 111 incomplete cases.`);
 
   const catalog = await loadRegulationCatalog();
   RegulationValidator.validateRegulation(catalog, cliArgs.regulationId, {
@@ -444,7 +436,7 @@ async function main() {
     },
     sourceDiagnostics: {
       artifactPath: cliArgs.sourceDiagnostics,
-      diagnosticsDigest: v1Diagnostics.diagnosticsDigest || EXPECTED_DIAGNOSTICS_DIGEST,
+      diagnosticsDigest: v1Diagnostics.logicalDigest,
       sourceBaselineDigest: v1Diagnostics.sourceBaselineDigest,
     },
     comparison: {

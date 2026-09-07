@@ -435,3 +435,28 @@ export class OfficialBaselineMeasurementRunner {
     };
   }
 }
+
+export const EXPECTED_V1_BASELINE_DIGEST = "0f16b7d3f6193d58b016a5f5aeae9e5caef1c3faf5be2d5822027835c42ddaa4";
+export const EXPECTED_V1_DIAGNOSTICS_DIGEST = "0ee51e74dc28ab761123f58ff2d58a26757bc85445ff43428e745bdd42cceb20";
+
+export function verifyHistoricalArtifactDigests(
+  v1Baseline: { logicalDigest?: string },
+  v1Diagnostics: { logicalDigest?: string; sourceBaselineDigest?: string }
+): void {
+  if (!v1Baseline || !v1Baseline.logicalDigest || v1Baseline.logicalDigest !== EXPECTED_V1_BASELINE_DIGEST) {
+    throw new Error(
+      `Source baseline logical digest mismatch: expected ${EXPECTED_V1_BASELINE_DIGEST}, got ${v1Baseline?.logicalDigest}`
+    );
+  }
+  if (!v1Diagnostics || !v1Diagnostics.logicalDigest || v1Diagnostics.logicalDigest !== EXPECTED_V1_DIAGNOSTICS_DIGEST) {
+    throw new Error(
+      `Source diagnostics logical digest mismatch: expected ${EXPECTED_V1_DIAGNOSTICS_DIGEST}, got ${v1Diagnostics?.logicalDigest}`
+    );
+  }
+  if (v1Diagnostics.sourceBaselineDigest !== EXPECTED_V1_BASELINE_DIGEST) {
+    throw new Error(
+      `Source diagnostics references unexpected baseline digest: ${v1Diagnostics.sourceBaselineDigest}`
+    );
+  }
+}
+
