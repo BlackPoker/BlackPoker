@@ -383,9 +383,10 @@ export class MatchDiagnosticRunner {
     // SimulationRunner を wrap して進行
     const simResult = SimulationRunner.run(session, policies, {
       maxDecisions,
-      onStep: ({ stepCount, decisionPlayer, record }) => {
+      onStep: ({ stepCount, decisionPlayer, record, request }) => {
+        const currentReq = request ?? latestRequest;
         // Stage 深度計測 (正: stage.requests.length)
-        const obs = latestRequest?.observation;
+        const obs = currentReq?.observation;
         const stageDepth = obs?.stageRequests?.length ?? (session.state.stage?.requests?.length ?? 0);
         if (stageDepth > maxStageDepth) {
           maxStageDepth = stageDepth;
@@ -408,13 +409,13 @@ export class MatchDiagnosticRunner {
             (selectedPatternKindCounts[record.selectedPatternKind] || 0) + 1;
         }
 
-        // 判断要求ソース種別 (latestRequest.source.type) 頻度集計
-        if (latestRequest?.source?.type) {
-          decisionSourceTypeCounts[latestRequest.source.type] =
-            (decisionSourceTypeCounts[latestRequest.source.type] || 0) + 1;
+        // 判断要求ソース種別 (req.source.type) 頻度集計
+        if (currentReq?.source?.type) {
+          decisionSourceTypeCounts[currentReq.source.type] =
+            (decisionSourceTypeCounts[currentReq.source.type] || 0) + 1;
         }
 
-        // 判断時点の Stage 先頭 actionId 頻度集計
+        // 判断時点の Stage TOP actionId 頻度集計 (LIFO stack の末尾要素)
         const stageReqs = session.state.stage?.requests;
         if (stageReqs && stageReqs.length > 0) {
           const topStageReq = stageReqs[stageReqs.length - 1];
@@ -485,8 +486,8 @@ export class MatchDiagnosticRunner {
         }
 
         // 3. 決定的サイクル候補検出 (Cycle Fingerprint + Request Fingerprint + Logical Pattern Key)
-        if (isDeterministicMatchup && !isDeterministicCycleCandidate && latestRequest) {
-          const reqFingerprint = computeLogicalDecisionRequestFingerprint(latestRequest);
+        if (isDeterministicMatchup && !isDeterministicCycleCandidate && currentReq) {
+          const reqFingerprint = computeLogicalDecisionRequestFingerprint(currentReq);
           const sig = `${cycleFp}|${reqFingerprint}|${record.selectedLogicalPatternKey}`;
 
           if (stepSignatures.has(sig)) {

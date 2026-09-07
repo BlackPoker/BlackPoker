@@ -27,8 +27,8 @@ Phase 3.4 において、公式レギュレーション（Light + Entry16）600 
 1. **ステップ予算拡大（1000 / 2000 ステップ）**:
    - 1000 ステップでも 111/111 件が未完走（完走率 0.0%）。
    - 2000 ステップでも 111/111 件が未完走（完走率 0.0%）。
-2. **ターン進行の完全停止**:
-   - 未完走 111 件のすべてにおいて、ターン数は 1 のまま一度も進展せず、Turn 1 内で 2000 回の意思決定が消費された。
+2. **ターン進行の停滞**:
+   - 未完走 111 件中 99 件（89.2%）において、ターン数は 1 のまま一度も進展せず（Turn 1 停滞）、残り 12 件（10.8%）も Turn 4（6件）または Turn 5（6件）へ進展した後に停滞した。全 111 件において 2000 回の意思決定上限に到達した。
 3. **ポリシー反実仮想一致率**:
    - FirstLegal, ZeroGenome, ManualGenericGenome の 3 者間において、観測された全 87,888 回の `DecisionRequest` に対する選択一致率は 100.0%（差分 0 件）であった。
 4. **Stage-Empty TP+CP PASS の不発**:
@@ -99,12 +99,18 @@ Cycle State Fingerprint v1 を導入したことで、Phase 3.4 では見えな�
 
 ---
 
-## 6. ターン進行と Turn 1 停滞証跡 (Turn 1 Progress Evidence)
+## 6. ターン進行と Turn 1 / 複数ターン停滞証跡 (Turn Progress Evidence)
 
-- **Turn 1 停滞件数**: 111 件中 99 件（完全決定論的対戦の全件）において、2000 ステップ経過後も `finalTurnCount = 1`（ターン進行数 0）であった。
-- **ターンあたり意思決定数**: 平均 `2000 回 / ターン`
-- **Turn 進行停止の直接証拠**:
-  - プレイヤー双方が「ターン終了」へ遷移するための処理連鎖を完了できず、Turn 1 の内部でリクエストの生成と解決が継続している。
+- **Turn 1 停滞件数**: 111 件中 99 件（89.2%）において、2000 ステップ経過後も `finalTurnCount = 1`（ターン進行数 `turnsAdvanced = 0`）であった。
+- **複数ターン進展後停滞件数**: 111 件中 12 件（10.8%）は Turn 4 または Turn 5 へ進展した後に停滞した。
+  - **Turn 4 停滞**: 6 件（`turnsAdvanced = 3`, 全マッチアップの seed m005）
+  - **Turn 5 停滞**: 6 件（`turnsAdvanced = 4`, 全マッチアップの seed m035）
+- **ターンあたり意思決定数**:
+  - Turn 1 停滞群（99 件）: 平均 `2,000 回 / ターン`
+  - Turn 4 停滞群（6 件）: 平均 `666.7 回 / ターン`
+  - Turn 5 停滞群（6 件）: 平均 `500.0 回 / ターン`
+- **進行停止の直接証拠**:
+  - Turn 1 停滞群（99件）および Turn 4/5 停滞群（12件）の双方が、特定ターンにおいて Stage スタック上のリクエスト解決とターン終了遷移の処理連鎖を完了できず、意思決定上限（2000）を消費した。
 
 ---
 
@@ -131,7 +137,7 @@ Canonical Match Log の構造化イベントから直接集計した汎用リク
 - **最終ステージ深度 (finalStageDepth)**: **`2`** (旧バグによる `0` から是正)
 - **分析**:
   - セッション終了時点において、Stage には依然として 2 件の未解決リクエスト（LIFO スタック）が残存した状態で意思決定上限（2000）に到達している。
-  - Stage 上の最上位リクエスト（`action.twist`）に対する効果解決（`EFFECT_RESOLUTION`）が完了せず、Stage が空（深度 0）になってターン終了判定へ至る遷移が発生していない。
+  - Stage スタックの最上位（TOP: 配列末尾 `state.stage.requests[state.stage.requests.length - 1]`）に積まれたアクション（代表対戦 Case 0 では `action.counter`、全111件集計でも `action.counter` が 83.35%、`action.twist` が 16.35%）が解決・ポップされず、Stage が空（深度 0）になってターン終了判定へ至る遷移が発生していない。
 
 ---
 
@@ -150,50 +156,92 @@ Core Flow の generic 指標として追跡された Stage 空 PASS 観測結果
 
 ## 10. 意思決定種別の客観的内訳と進行発散分類 (Decision Kind Evidence & Divergence Classification)
 
-ログ文字列パースを行わず、実行時データ構造（`decision.kind`, `request.source.type`, `state.stage.requests[0].actionId`）から動的集計した客観的証跡：
+ログ文字列パースを行わず、実行時データ構造（`record.selectedPatternKind`, `request.source.type`, `state.stage.requests[state.stage.requests.length - 1].actionId`）から動的集計した客観的証跡：
 
-### 意思決定種別の内訳 (Selected Pattern Kind Counts)
-- **ACTION**: `7 回`（対戦初期のアクション選択）
-- **PASS**: `1,993 回`（全体の 99.65%）
-- **EFFECT_SELECTION**: `0 回`
+### 代表対戦（Case 0: seed 1468640084）の内訳
+- **意思決定種別の内訳 (selectedPatternKindCounts)**:
+  - `ACTION`: `7 回`（対戦初期のアクション選択）
+  - `PASS`: `1,993 回`（全体の 99.65%）
+  - `EFFECT_SELECTION`: `0 回`
+- **意思決定要求ソースの内訳 (decisionSourceTypeCounts)**:
+  - `ACTION_REQUEST`: `2,000 回`（手札からの通常/クイックアクション選択要求: 100.0%）
+  - `EFFECT_RESOLUTION`: `0 回`
+- **ステージ最上位アクションIDの内訳 (stageTopActionIdCounts: LIFO スタック末尾要素)**:
+  - `action.counter`: `1,989 回`（意思決定時にステージ最上位に積まれていたアクションの 99.45%）
+  - `action.up`: `6 回`
+  - `action.twist`: `2 回`
+  - `action.attack`: `1 回`
+  - `action.down`: `1 回`
+- **観測されたアクション実行ID (observedActionIdCounts)**:
+  - `action.counter`: `2 回`
+  - `action.up`: `2 回`
+  - `action.attack`: `1 回`
+  - `action.down`: `1 回`
+  - `action.twist`: `1 回`
+- **リクエストライフサイクル指標 (requestLifecycleMetrics)**:
+  - `requestCreatedCount`: `7 件`
+  - `requestResolvedCount`: `4 件`
+  - `immediateResolutionCount`: `0 件`
+  - `normalRequestMovedToStageCount`: `7 件`
+  - `triggeredRequestObservedCount`: `0 件`
 
-### 意思決定要求ソースの内訳 (Decision Source Type Counts)
-- **ACTION_REQUEST**: `7 回`（手札からの通常アクション選択要求）
-- **EFFECT_RESOLUTION**: `1,993 回`（ステージ上のアクション効果解決に伴う要求）
-
-### ステージ最上位アクションIDの内訳 (Stage Top Action ID Counts)
-- `action.twist`: `1,994 回`（意思決定時にステージ最上位に積まれていたアクションの 99.7%）
-- `action.counter`: `2 回`
-- `action.up`: `2 回`
-- `action.attack`: `1 回`
-- `action.down`: `1 回`
-
-### 観測されたアクションIDの分布 (Observed Action ID Distribution)
-- `action.attack`: `1 回`
-- `action.down`: `1 回`
-- `action.counter`: `2 回`
-- `action.up`: `2 回`
-- `action.twist`: `1 回`
+### 全 111 件未完走対戦の総合集計 (Total Across All 111 Incomplete Matches)
+- **意思決定要求ソースの総合内訳 (decisionSourceTypeCounts)**:
+  - `ACTION_REQUEST`: `221,952 回`（全体の **99.98%**）
+  - `EFFECT_RESOLUTION`: `48 回`（全体の **0.02%**）
+- **意思決定種別の総合内訳 (selectedPatternKindCounts)**:
+  - `ACTION`: `927 回`（全体の 0.42%）
+  - `PASS`: `221,025 回`（全体の **99.56%**）
+  - `EFFECT_SELECTION`: `48 回`（全体の 0.02%）
+- **ステージ最上位アクションIDの総合内訳 (stageTopActionIdCounts)**:
+  - `action.counter`: `184,884 回`（全体の **83.35%**）
+  - `action.twist`: `36,267 回`（全体の **16.35%**）
+  - `action.attack`: `240 回`
+  - `action.down`: `156 回`
+  - `action.end`: `84 回`
+  - `action.draw`: `84 回`
+  - `action.up`: `51 回`
+  - `action.destroyBulwark`: `21 回`
+  - `action.summonSoldier`: `3 回`
+  - `action.summonAce`: `3 回`
+- **観測されたアクション実行IDの総合内訳 (observedActionIdCounts)**:
+  - `action.counter`: `342 回`
+  - `action.twist`: `264 回`
+  - `action.attack`: `132 回`
+  - `action.down`: `99 回`
+  - `action.end`: `42 回`
+  - `action.up`: `27 回`
+  - `action.destroyBulwark`: `15 回`
+  - `action.summonSoldier`: `3 回`
+  - `action.summonAce`: `3 回`
+- **リクエストライフサイクルの総合集計 (requestLifecycleMetrics)**:
+  - `requestCreatedCount`: `1,011 件`
+  - `requestResolvedCount`: `492 件`
+  - `immediateResolutionCount`: `0 件`
+  - `normalRequestMovedToStageCount`: `969 件`
+  - `triggeredRequestObservedCount`: `42 件`
 
 ### 進行発散パターンの是正分類
-- **分類名**: **`TURN_STALLED_WITH_CYCLE_RECURRENCE`**（111 / 111 件）
-  - （旧分類名 `STABLE_DEPTH_UNBOUNDED_REQUEST_GENERATION` から実態に合わせて改称）
-- **分類根拠**:
-  - リクエスト生成数（`requestCreatedCount = 7`）および解決数（`requestResolvedCount = 4`）は有限で停止している。
-  - Stage 深度は 2（最上位: `action.twist`）で固定されたまま、両プレイヤーが `EFFECT_RESOLUTION` に対して繰り返し `PASS` を選択している。
-  - 単調カウンタを除外したゲーム論理状態（CSF1）が 100% 同一のまま 1,993 回の決定サイクルを反復し、ターン進行（`turnCount = 1`）が完全に停止している。
+- **分類内訳**:
+  - **`TURN_STALLED_WITH_CYCLE_RECURRENCE`**: **`99 / 111 件 (89.2%)`**（Turn 1 で周期再帰停滞）
+  - **`UNKNOWN_DIVERGENCE`**: **`12 / 111 件 (10.8%)`**（Turn 4 または Turn 5 へ進展後に周期再帰停滞）
+  - ※ 全 111 件（100.0%）において、`cycleFingerprintRecurrence.repeatedFingerprintVisitCount > 0` による実質的状態再帰が確認されている。
+- **メカニズムと停滞の真の根拠**:
+  - BlackPoker では、Stage スタック上に未解決リクエストが存在する間、クイックアクション等の機会確認としてプレイヤーへ `ACTION_REQUEST`（`source.type = ACTION_REQUEST`）が提示される。
+  - 両プレイヤーが `PASS` を選択し続けても、Stage TOP（`stageReqs[stageReqs.length - 1]`）にある未解決リクエスト（Case 0 では `action.counter`、他対戦では `action.twist` 等）が解決・ポップされない場合、Stage 深度が維持されたまま再度 `ACTION_REQUEST` が提示され、両者が再び `PASS` を選択する無限循環に陥る。
+  - これにより、`ACTION_REQUEST` に対する `PASS` 選択が延々と反復され（全決定の 99.5% 以上）、ターン進行およびゲーム進行が停止する。
 
 ---
 
 ## 11. エビデンスから確実に言えること (What the Evidence Proves)
 
 1. **実質的状態再帰の存在**:
-   - 単調カウンタを除外したゲーム論理状態（CSF1）において、111 件全件で 100% の再帰が発生しており、最短 2 ステップでの循環が確認された。
+   - 単調カウンタを除外したゲーム論理状態（CSF1）において、111 件全件（100.0%）で周期再帰が発生しており、最短 2 ステップでの循環が確認された。
 2. **決定論的サイクルの確定**:
    - 非 RNG 対戦（72 件）において、同一の `(CycleFingerprint, RequestFingerprint, SelectedPatternKey)` が反復されており、決定論的無限ループに陥っている。
-3. **Turn 1・Stage 深度 2 での意思決定停滞**:
-   - 全未完走対戦で Turn 1 から進まず、Stage 深度が 2 のまま（最上位に `action.twist` 等が残存）、`EFFECT_RESOLUTION` に対する `PASS` が 1,993 回繰り返されている。
-   - 「無限にリクエストが生成されている」のではなく、「未解決リクエストが Stage 上に残ったまま、PASS 選択の循環によってターン終了判定へ進まない」ことが確定した。
+3. **Stage 上の未解決リクエスト残存と `ACTION_REQUEST` 停滞**:
+   - 111 件中 99 件は Turn 1 で停滞し、12 件は Turn 4 または 5 へ進んだ後に停滞した。いずれも Stage 深度が維持されたまま、Stage TOP に未解決リクエスト（全体で `action.counter` が 83.35%、`action.twist` が 16.35%）が残存し、`ACTION_REQUEST` に対する `PASS` が数千回繰り返されている。
+   - 「無限にリクエストが生成されている」のではなく、「未解決リクエストが Stage 上に残ったまま、`ACTION_REQUEST` に対する PASS 選択の循環によってリクエスト解決・ターン進行へ進まない」ことが確定した。
 4. **Stage 空 PASS 仮説の否定**:
    - `Stage 深度 0 かつ TP=CP` での PASS は 0 件であり、停滞の原因は Stage が空になった後の PASS ではない。
 5. **ポリシー無差別の原因**:
@@ -203,10 +251,10 @@ Core Flow の generic 指標として追跡された Stage 空 PASS 観測結果
 
 ## 12. エビデンスからまだ言えないこと (What Remains Unproven)
 
-1. **`action.twist` や効果解決ルールの有責性**:
-   - Stage 最上位に `action.twist` が残存した状態で `EFFECT_RESOLUTION` への PASS が繰り返されているが、これが `action.twist` 独自の実装不備によるものか、Stage の効果解決フロー全般における PASS 処理やスタック解決遷移の設計によるものかは、Core Flow 実装の詳細検証を待つ必要がある。
+1. **`action.counter` / `action.twist` やクイックアクション機会判定の有責性**:
+   - Stage 最上位に `action.counter` や `action.twist` が残存した状態で `ACTION_REQUEST` への PASS が繰り返されているが、これが特定アクション独自の実装不備によるものか、Stage のクイックアクション処理／スタック解決遷移全般の設計によるものかは、Core Flow 実装の詳細検証を待つ必要がある。
 2. **PASS 選択時の Stage 解消遷移仕様**:
-   - 効果解決において両者が PASS を選択した場合にリクエストが解決・破棄されて Stage からポップされるべきか否かは、BlackPoker の公式ルール・Core Flow 設計仕様に基づく判断が必要である。
+   - Stage 上にリクエストが存在する状態で両者が PASS を選択した場合に、最上位リクエストが解決・破棄されて Stage からポップされるべきか、どのような条件で解決遷移が進むべきかは、BlackPoker の公式ルール・Core Flow 設計仕様に基づく判断が必要である。
 
 ---
 
@@ -214,8 +262,8 @@ Core Flow の generic 指標として追跡された Stage 空 PASS 観測結果
 
 Phase 3.4.1 の補修エビデンスを踏まえ、次作業（Phase 4 等）において検証・修正すべき Core Flow 側の候補：
 
-1. **Stage 上の効果解決（`EFFECT_RESOLUTION`）における PASS 処理・解決完了遷移**:
-   - Stage 上のリクエストに対する効果解決要求でプレイヤーが PASS を選択した場合、リクエストが適切に解決済みとして Stage からポップされ、次の処理またはターン終了判定へ進む遷移の確認・整備。
+1. **Stage 上のアクション滞留と `ACTION_REQUEST` における PASS 処理・解決完了遷移**:
+   - Stage 上に未解決リクエストが存在する際の `ACTION_REQUEST` に対し、プレイヤー双方が PASS を選択した際、最上位リクエスト（`action.counter` 等）が適切に解決・ポップされ、次の処理またはターン進行へ進む遷移の確認・整備。
 2. **トリガー即時解決・Stage 移送後の後続遷移**:
    - 即時誘発（`action.charge`）や通常誘発（`action.draw`）の処理後、Stage に残されたリクエストのライフサイクルが正しく終了判定へ至るかの検証。
 3. **ターン内アクション使用制限 (Turn Usage Limits)**:

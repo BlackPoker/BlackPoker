@@ -1,6 +1,7 @@
 import { GameSession } from "../session/GameSession";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { DecisionPolicy, PolicyDescriptor } from "./DecisionPolicy";
+import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 import { StateHasher } from "./StateHasher";
 
@@ -84,6 +85,7 @@ export interface SimulationOptions {
     decisionPlayer: PlayerKey;
     actionSummary: string;
     record: DecisionTraceRecord;
+    request?: Readonly<DecisionRequest>;
   }) => void;
 }
 
@@ -238,6 +240,7 @@ export class SimulationRunner {
             decisionPlayer: playerId,
             actionSummary: summary,
             record: stepRecord,
+            request: step.request,
           });
         }
 
