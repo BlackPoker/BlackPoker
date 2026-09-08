@@ -2,6 +2,7 @@ import React, { useState } from "react";
 
 export interface StagePanelProps {
   requests: any[];
+  highlightedRequestId?: string | null;
 }
 
 function formatCardCodeDisplay(code?: string): string {
@@ -13,7 +14,7 @@ function formatCardCodeDisplay(code?: string): string {
     .replace(/C/g, "♣");
 }
 
-export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
+export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlightedRequestId }) => {
   const [showAllMobile, setShowAllMobile] = useState(false);
 
   // LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示
@@ -53,8 +54,9 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
         <div className="flex flex-col gap-1.5">
           {reversedRequests.map((req, revIdx) => {
             const isTop = revIdx === 0;
-            // Mobile では展開されていない場合、TOP 以外は折りたたむ（またはコンパクト表示）
-            const isHiddenOnMobile = !isTop && !showAllMobile;
+            const isHighlighted = Boolean(highlightedRequestId && req.id === highlightedRequestId);
+            // Mobile では展開されていない場合、TOP またはハイライト対象以外は折りたたむ
+            const isHiddenOnMobile = !isTop && !isHighlighted && !showAllMobile;
 
             const actionName = req.action?.name || req.actionId;
             const controllerName = req.controller === "p1" ? "Player A" : "Player B";
@@ -75,32 +77,43 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
             if (req.targets && Array.isArray(req.targets)) {
               for (const t of req.targets) {
                 if (t.type === "unit") {
-                  const shortId = t.unitId ? `#${t.unitId.slice(-4)}` : "";
-                  targetLabels.push(`${t.kind || "ユニット"} ${shortId}`);
+                  targetLabels.push(t.displayName || t.kind || "ユニット");
                 } else if (t.type === "player") {
                   targetLabels.push(t.name || t.targetPlayerKey || "プレイヤー");
+                } else if (t.type === "request") {
+                  targetLabels.push(`Request (${t.targetRequestId || t.actionName || ""})`);
                 }
               }
             }
             const targetStr = targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
             const statusText = (req.status || "pending").toUpperCase();
 
+            let borderAndBgClass = "bg-white border-zinc-200 text-zinc-800";
+            if (isHighlighted) {
+              borderAndBgClass = "bg-amber-50/80 border-amber-500 shadow-md ring-2 ring-amber-500 text-zinc-950";
+            } else if (isTop) {
+              borderAndBgClass = "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950";
+            }
+
             return (
               <div
                 key={req.id || revIdx}
                 className={`flex flex-col p-2 rounded border transition-all ${
                   isHiddenOnMobile ? "hidden lg:flex" : "flex"
-                } ${
-                  isTop
-                    ? "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950"
-                    : "bg-white border-zinc-200 text-zinc-800"
-                }`}
+                } ${borderAndBgClass}`}
               >
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
+                    {isHighlighted && (
+                      <span className="bg-amber-500 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm animate-pulse">
+                        TARGETED
+                      </span>
+                    )}
                     <span
                       className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
-                        isTop
+                        isHighlighted
+                          ? "bg-amber-600 text-white"
+                          : isTop
                           ? "bg-zinc-950 text-white shadow-sm"
                           : "bg-zinc-100 text-zinc-700 border border-zinc-300"
                       }`}
@@ -159,3 +172,4 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [] }) => {
     </div>
   );
 };
+

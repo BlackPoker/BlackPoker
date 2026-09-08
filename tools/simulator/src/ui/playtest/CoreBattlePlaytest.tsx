@@ -42,6 +42,9 @@ import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
+import { ActionFeedbackComposer } from "../../engine/session/playtest/ActionFeedbackComposer";
+import { useActionFeedbackQueue } from "../game/useActionFeedbackQueue";
+import { ActionFeedbackFlash } from "../game/ActionFeedbackFlash";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
@@ -86,6 +89,20 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<GameSessionStep | null>(null);
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [traces, setTraces] = useState<TraceEntry[]>([]);
+
+  // Action Feedback Flash キュー & ハイライトターゲット状態
+  const {
+    currentItem: feedbackFlashItem,
+    pendingCount: feedbackFlashPendingCount,
+    enqueue: enqueueFeedbackFlash,
+    reset: resetFeedbackFlash,
+  } = useActionFeedbackQueue();
+  const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
+
+  // 環境切替時のフラッシュキューリセット
+  useEffect(() => {
+    resetFeedbackFlash();
+  }, [selectedEnvironmentId, resetFeedbackFlash]);
   const [latestEventMessage, setLatestEventMessage] = useState<string>("ゲーム開始準備完了");
 
   // ユニット選択マーカー（①, ②）および盤面クリック選択状態
@@ -168,6 +185,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       const policyId = overridePolicyId ?? pendingPolicyId;
 
       // 失敗時・開始時に直前のセッション状態を安全にリセット
+      resetFeedbackFlash();
+      setHighlightedRequestId(null);
       sessionRef.current = null;
       setGameState(null);
       setCurrentStep(null);
@@ -274,6 +293,8 @@ export const CoreBattlePlaytest: React.FC = () => {
             }
             if (rec.generatedEvents.length > 0) {
               setLatestEventMessage(rec.generatedEvents[rec.generatedEvents.length - 1].message);
+              const flashItems = ActionFeedbackComposer.compose(rec.generatedEvents);
+              enqueueFeedbackFlash(flashItems);
             }
           }
 
@@ -405,6 +426,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         addLog(ev.message, ev.level, nextState);
         addTrace("STATE_TRANSITION", ev.message, nextState);
       }
+      if (generatedEvents.length > 0) {
+        enqueueFeedbackFlash(ActionFeedbackComposer.compose(generatedEvents));
+      }
 
       // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS (Human操作補助)
       if (
@@ -436,6 +460,9 @@ export const CoreBattlePlaytest: React.FC = () => {
           for (const ev of autoEvents) {
             addLog(ev.message, ev.level, nextState);
             addTrace("STATE_TRANSITION", ev.message, nextState);
+          }
+          if (autoEvents.length > 0) {
+            enqueueFeedbackFlash(ActionFeedbackComposer.compose(autoEvents));
           }
         }
       }
@@ -476,6 +503,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           }
           if (rec.generatedEvents.length > 0) {
             setLatestEventMessage(rec.generatedEvents[rec.generatedEvents.length - 1].message);
+            const aiFlashItems = ActionFeedbackComposer.compose(rec.generatedEvents);
+            enqueueFeedbackFlash(aiFlashItems);
           }
         }
 
@@ -685,6 +714,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       onSubmit={handleDecisionSubmit}
       onSelectionMarkersChange={setUnitSelectionMarkers}
       selectedUnitIdsFromBoard={selectedUnitIds}
+      onHighlightRequest={(reqId) => setHighlightedRequestId(reqId || null)}
     />
   ) : isAiProcessing ? (
     <div className="p-4 bg-white rounded border border-zinc-200 text-center font-mono shadow-sm">
@@ -695,6 +725,9 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white">
+      {/* Action Feedback Flash (トップフロート通知) */}
+      <ActionFeedbackFlash item={feedbackFlashItem} pendingCount={feedbackFlashPendingCount} />
+
       {/* 画面ヘッダー */}
       <header className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">
         <div className="flex items-center gap-2 sm:gap-3">
@@ -944,7 +977,12 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
 
           {/* 中央 STAGE パネル */}
-          {gameState && <StagePanel requests={gameState?.stage?.requests || []} />}
+          {gameState && (
+            <StagePanel
+              requests={gameState?.stage?.requests || []}
+              highlightedRequestId={highlightedRequestId}
+            />
+          )}
 
           {/* 自分 (Player A) の盤面 (Observation 準拠) */}
           {p1ViewModel && gameState?.players?.p1 && (

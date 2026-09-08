@@ -25,6 +25,7 @@ export class TargetSelectionEnumerator {
         {
           targetType: "none",
           displayName: "対象なし",
+          primaryLabel: "対象なし",
         },
       ];
     }
@@ -33,7 +34,7 @@ export class TargetSelectionEnumerator {
 
     for (const targetDef of action.targets) {
       const cond = targetDef.condition;
-      let targetType = targetDef.type || (cond ? cond.type : undefined);
+      let targetType = targetDef.type || (targetDef as any).targetType || (cond ? cond.type : undefined);
       if (!targetType && (cond?.component || cond?.componentType || targetDef.id === "target" || targetDef.id === "targetUnit")) {
         targetType = "unit";
       }
@@ -44,11 +45,13 @@ export class TargetSelectionEnumerator {
           if (cond?.relation === "opponent" && pKey === requesterPlayerKey) {
             continue;
           }
-          const pName = state.players[pKey]?.name || pKey;
+          const pName = state.players[pKey]?.name || (pKey === "p1" ? "Player A" : "Player B");
           results.push({
             targetType: "player",
             targetPlayerKey: pKey,
             displayName: `プレイヤー: ${pName} (${pKey})`,
+            primaryLabel: pName,
+            secondaryLabel: `(${pKey})`,
           });
         }
       } else if (targetType === "request") {
@@ -61,20 +64,25 @@ export class TargetSelectionEnumerator {
               ? req.keyCards
               : ((req as any).keyCard ? [(req as any).keyCard] : []);
             if (cond.keyCards.count !== undefined) {
-
               const expectedCounts = Array.isArray(cond.keyCards.count) ? cond.keyCards.count : [cond.keyCards.count];
               if (!expectedCounts.includes(reqKeyCards.length)) continue;
             }
           }
+          const isTop = stageRequests.length > 0 && req.id === stageRequests[stageRequests.length - 1].id;
+          const cName = req.controller === "p1" ? "Player A" : req.controller === "p2" ? "Player B" : req.controller;
+          const actName = req.action?.name || req.actionId;
+          const primaryLabel = `${cName}: ${actName}`;
+          const secondaryLabel = `Stage ${isTop ? "TOP " : ""}[${req.id}]`;
           results.push({
             targetType: "request",
+            targetPlayerKey: req.controller,
             targetRequestId: req.id,
-            displayName: `リクエスト: ${req.action?.name || req.actionId} (ID: ${req.id})`,
+            displayName: `${primaryLabel} (${secondaryLabel})`,
+            primaryLabel,
+            secondaryLabel,
           });
         }
-      }
-
- else if (targetType === "unit") {
+      } else if (targetType === "unit") {
         // ユニットターゲット（アップ、ダウン、アタック等）
         const searchPlayers = cond?.owner === "opponent"
           ? Object.keys(state.players || {}).filter((k) => k !== requesterPlayerKey)
@@ -123,12 +131,16 @@ export class TargetSelectionEnumerator {
               : "カードなし";
             const stateLabel = unit.state === "drive" ? "drive" : "charge";
             const unitLabel = getUnitDisplayName(unit, player.field);
+            const primaryLabel = `${pName}の${unitLabel}`;
+            const secondaryLabel = `[${cardDisplay}] (${stateLabel})`;
 
             results.push({
               targetType: "unit",
               targetPlayerKey: pKey,
               targetUnitId: unit.unitId,
-              displayName: `${pName} の ${unitLabel} [${cardDisplay}] (${stateLabel})`,
+              displayName: `${primaryLabel} ${secondaryLabel}`,
+              primaryLabel,
+              secondaryLabel,
             });
 
           }

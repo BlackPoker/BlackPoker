@@ -11,6 +11,7 @@ export interface DecisionPanelProps {
   readonly onCancel?: () => void;
   readonly onSelectionMarkersChange?: (markers: Map<string, { badge: string; isSelected: boolean }>) => void;
   readonly selectedUnitIdsFromBoard?: string[];
+  readonly onHighlightRequest?: (requestId?: string) => void;
 }
 
 export const DecisionPanel: React.FC<DecisionPanelProps> = ({
@@ -18,6 +19,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   onSubmit,
   onSelectionMarkersChange,
   selectedUnitIdsFromBoard,
+  onHighlightRequest,
 }) => {
   const catalog = request.catalog;
   const patterns = request.patterns;
@@ -37,6 +39,22 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     setSelectedTargetRef(null);
     setSelectedEffectPatternRef(null);
   }, [request.decisionId]);
+
+  // 選択中ターゲットのリクエストIDハイライト連携
+  useEffect(() => {
+    if (selectedTargetRef !== null && catalog.targetSelections[selectedTargetRef]) {
+      const target = catalog.targetSelections[selectedTargetRef];
+      onHighlightRequest?.(target.targetRequestId);
+    } else {
+      onHighlightRequest?.(undefined);
+    }
+  }, [selectedTargetRef, catalog, onHighlightRequest]);
+
+  useEffect(() => {
+    return () => {
+      onHighlightRequest?.(undefined);
+    };
+  }, [onHighlightRequest]);
 
   // 1. 選択可能なアクション一覧
   const availableActionRefs = useMemo(() => {
@@ -585,7 +603,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
               4. 対象（ターゲット）
             </label>
-            <div className="grid grid-cols-2 gap-1.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {availableTargetRefs.map((targetRef) => {
                 const target = catalog.targetSelections[targetRef];
                 const isSelected = selectedTargetRef === targetRef;
@@ -593,13 +611,31 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   <button
                     key={targetRef}
                     onClick={() => handleSelectTarget(targetRef)}
-                    className={`rounded border p-1.5 text-left transition ${
+                    onMouseEnter={() => {
+                      if (target.targetRequestId) onHighlightRequest?.(target.targetRequestId);
+                    }}
+                    onMouseLeave={() => {
+                      const current = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
+                      onHighlightRequest?.(current?.targetRequestId);
+                    }}
+                    className={`rounded border p-2 text-left transition flex flex-col justify-center ${
                       isSelected
                         ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
                         : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
                     }`}
                   >
-                    <div className="font-bold text-xs">{target.displayName}</div>
+                    <span className="font-bold text-xs leading-snug">
+                      {target.primaryLabel || target.displayName}
+                    </span>
+                    {target.secondaryLabel && (
+                      <span
+                        className={`text-[10px] font-mono leading-tight mt-0.5 ${
+                          isSelected ? "text-zinc-300" : "text-zinc-500"
+                        }`}
+                      >
+                        {target.secondaryLabel}
+                      </span>
+                    )}
                   </button>
                 );
               })}

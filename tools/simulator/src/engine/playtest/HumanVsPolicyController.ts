@@ -6,19 +6,20 @@ import { PlaytestSeatControllers } from "./PlaytestSeatController";
 import { FormattedLogEntry } from "../session/playtest/GameEventFormatter";
 import { ViewerAwareGameEventFormatter } from "../session/playtest/ViewerAwareGameEventFormatter";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+import { PlaytestPresentationEvent } from "../session/playtest/PlaytestPresentationEvent";
 
 /**
  * 1回の AI 自動意思決定におけるスナップショット記録
  */
 export interface AutomatedDecisionRecord {
-  readonly playerId: string;
+  readonly playerId: PlayerKey;
   readonly policyDescriptor: PolicyDescriptor;
   readonly request: DecisionRequest;
   readonly response: DecisionResponse;
   readonly prevState: any;
   readonly nextState: any;
   readonly nextStep: GameSessionStep;
-  readonly generatedEvents: readonly FormattedLogEntry[];
+  readonly generatedEvents: readonly PlaytestPresentationEvent[];
 }
 
 /**
@@ -200,7 +201,7 @@ export async function advanceAutomatedDecisions(
       // 同一の session.submitDecision 経路で進行 (Core 例外境界)
       let nextStep: GameSessionStep;
       let nextState: any;
-      let generatedEvents: readonly FormattedLogEntry[];
+      let generatedEvents: readonly PlaytestPresentationEvent[];
       const prevState = JSON.parse(JSON.stringify(session.state));
 
       try {

@@ -40,7 +40,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
     const debugInfo = {
       buildSha: env.VITE_BUILD_SHA || "local",
       buildRef: env.VITE_BUILD_REF || "local",
-      presetId: state?.presetId || "CORE-BATTLE-001",
+      ...(state?.presetId ? { presetId: state.presetId } : {}),
+      ...(state?.regulationId ? { regulationId: state.regulationId } : {}),
+      ...(state?.formatId ? { formatId: state.formatId } : {}),
+      ...(state?.frameId ? { frameId: state.frameId } : {}),
       rulePackageId: rulePackage?.id,
       rulePackageVersion: rulePackage?.version,
       stateVersion: state?.stateVersion,
@@ -101,6 +104,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
           <span className="font-bold text-zinc-950">Raw Debug</span>
           <span className="text-[9px] text-zinc-500">
             Build: {buildSha} ({buildRef}) | Ver: {state?.stateVersion}
+            {state?.presetId && ` | Preset: ${state.presetId}`}
+            {state?.regulationId && ` | Reg: ${state.regulationId}`}
+            {state?.formatId && ` | Format: ${state.formatId}`}
+            {state?.frameId && ` | Frame: ${state.frameId}`}
           </span>
         </div>
 

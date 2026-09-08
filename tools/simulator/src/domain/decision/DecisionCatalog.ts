@@ -55,6 +55,8 @@ export interface TargetSelection {
   readonly targetUnitId?: string;
   readonly targetRequestId?: string;
   readonly displayName?: string;
+  readonly primaryLabel?: string;
+  readonly secondaryLabel?: string;
 }
 
 /**
