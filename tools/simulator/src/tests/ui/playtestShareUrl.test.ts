@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   parsePlaytestShareUrl,
+  resolvePlaytestInitialBootstrap,
   serializePlaytestShareUrl,
   buildPlaytestShareUrl,
   PlaytestShareConfigV1,
@@ -259,5 +260,97 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
     const built = buildPlaytestShareUrl("http://localhost:5173/game/?debug=true", config, catalog);
     expect(built).toContain("bpv=1");
     expect(built).toContain("debug=true");
+  });
+
+  // Phase 2.7-R1 追加テスト群
+
+  // R1-A: mode=humanVsHuman における human / policy の正規化
+  it("R1-A: mode=humanVsHuman に不要な human=p2, policy=manualGenericGenome があっても humanSeat=p1, policyId=firstLegal へ正規化されること", () => {
+    const url = "?bpv=1&env=official:light-entry16&mode=humanVsHuman&human=p2&policy=manualGenericGenome&seed=42";
+    const result = parsePlaytestShareUrl(url, catalog);
+    expect(result.kind).toBe("READY");
+    if (result.kind === "READY") {
+      expect(result.config.mode).toBe("humanVsHuman");
+      expect(result.config.humanSeat).toBe("p1");
+      expect(result.config.policyId).toBe("firstLegal");
+      expect(result.warnings.some((w) => w.includes("Human vs Human モードではプレイヤー席設定"))).toBe(true);
+      expect(result.warnings.some((w) => w.includes("Human vs Human モードではAIポリシー設定"))).toBe(true);
+    }
+  });
+
+  // R1-B: 非公式環境 (core-battle) における seed の正規化
+  it("R1-B: 非公式環境 (core-battle) に seed=999 があっても既定値 42 へ正規化されること", () => {
+    const url = "?bpv=1&env=core-battle&mode=humanVsHuman&human=p2&policy=manualGenericGenome&seed=999";
+    const result = parsePlaytestShareUrl(url, catalog);
+    expect(result.kind).toBe("READY");
+    if (result.kind === "READY") {
+      expect(result.config.environmentId).toBe("core-battle");
+      expect(result.config.seedInput).toBe("42");
+      expect(result.warnings.some((w) => w.includes("非公式環境"))).toBe(true);
+    }
+  });
+
+  // R1-C: 上記正規化後 config の serialize で human / policy / seed が除外されること
+  it("R1-C: 正規化された config を serialize すると human / policy / seed が Canonical URL に含まれないこと", () => {
+    const url = "?bpv=1&env=core-battle&mode=humanVsHuman&human=p2&policy=manualGenericGenome&seed=999";
+    const result = parsePlaytestShareUrl(url, catalog);
+    expect(result.kind).toBe("READY");
+    if (result.kind === "READY") {
+      const reserialized = serializePlaytestShareUrl(result.config, catalog);
+      expect(reserialized).toBe("?bpv=1&env=core-battle&mode=humanVsHuman");
+      expect(reserialized).not.toContain("human=");
+      expect(reserialized).not.toContain("policy=");
+      expect(reserialized).not.toContain("seed=");
+    }
+  });
+
+  // R1-3: 非Shareパラメータの Multiplicity 保持
+  it("R1-3: buildPlaytestShareUrl で非Shareパラメータの Multiplicity (?foo=a&foo=b#section) が完全に保持されること", () => {
+    const currentUrl = "https://blackpoker.example.com/playtest/?foo=a&foo=b#section";
+    const config: PlaytestShareConfigV1 = {
+      version: 1,
+      environmentId: "official:light-entry16",
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "firstLegal",
+      seedInput: "42",
+    };
+
+    const built = buildPlaytestShareUrl(currentUrl, config, catalog);
+    const parsed = new URL(built);
+
+    expect(parsed.searchParams.getAll("foo")).toEqual(["a", "b"]);
+    expect(parsed.hash).toBe("#section");
+    expect(parsed.searchParams.get("bpv")).toBe("1");
+    expect(parsed.searchParams.get("env")).toBe("official:light-entry16");
+  });
+
+  // R1-2: resolvePlaytestInitialBootstrap 単体判定契約
+  describe("R1-2: resolvePlaytestInitialBootstrap 判定契約", () => {
+    it("bpv=1 の有効な Share URL では RESTORE_SHARE_SETTINGS を返すこと", () => {
+      const url = "?bpv=1&env=official:light-entry16&mode=humanVsAi&human=p1&policy=firstLegal&seed=42";
+      const bootstrap = resolvePlaytestInitialBootstrap(url, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SHARE_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SHARE_SETTINGS") {
+        expect(bootstrap.config.environmentId).toBe("official:light-entry16");
+      }
+    });
+
+    it("bpv=999 の未知バージョンでは SHOW_SHARE_WARNING を返すこと", () => {
+      const url = "?bpv=999&env=official:light-entry16";
+      const bootstrap = resolvePlaytestInitialBootstrap(url, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+      if (bootstrap.kind === "SHOW_SHARE_WARNING") {
+        expect(bootstrap.warnings.some((w) => w.includes("bpv=999"))).toBe(true);
+      }
+    });
+
+    it("bpv なしの通常アクセスでは START_DEFAULT_MATCH を返すこと", () => {
+      const bootstrapEmpty = resolvePlaytestInitialBootstrap("", catalog);
+      expect(bootstrapEmpty.kind).toBe("START_DEFAULT_MATCH");
+
+      const bootstrapNonShare = resolvePlaytestInitialBootstrap("?foo=bar&debug=true", catalog);
+      expect(bootstrapNonShare.kind).toBe("START_DEFAULT_MATCH");
+    });
   });
 });

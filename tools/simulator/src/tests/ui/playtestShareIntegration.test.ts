@@ -3,6 +3,7 @@ import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader"
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import {
   parsePlaytestShareUrl,
+  resolvePlaytestInitialBootstrap,
   buildPlaytestShareUrl,
   PlaytestShareConfigV1,
 } from "../../ui/playtest/PlaytestShareUrl";
@@ -70,40 +71,85 @@ describe("Playtest Share URL Integration Tests (Phase 2.7)", () => {
     });
   });
 
-  describe("Test B: Secret & State Boundary / No Auto-Start", () => {
-    it("共有URLをパース・読み込んでも対戦は自動開始されず、activeMatch は null を維持すること", () => {
-      const shareUrl = "https://blackpoker.example.com/?bpv=1&env=official%3Alight-entry16&mode=humanVsAi&human=p1&policy=seededRandom&seed=777";
-
-      // URLパース実行
-      const parseResult = parsePlaytestShareUrl(shareUrl, catalog);
-      expect(parseResult.kind).toBe("READY");
-
-      // Active Match は null (自動開始は絶対に呼ばれない)
+  describe("Test B: Secret & State Boundary / No Auto-Start (Bootstrap Contract)", () => {
+    it("resolvePlaytestInitialBootstrap による初期化判定で、Share URL ロード時は自動対戦開始が一切呼ばれず activeMatch が null のままであること", () => {
+      // 模擬Bootstrapディスパッチャ（CoreBattlePlaytest.tsx の useEffect 実装と同一の switch 契約）
       let activeMatch: any = null;
       let session: any = null;
+      let restoredSettings: PlaytestShareConfigV1 | null = null;
+      let warningNotice: readonly string[] | null = null;
 
-      expect(activeMatch).toBeNull();
-      expect(session).toBeNull();
-
-      // ユーザーが明示的に「新しい対戦を開始」を押した時のみ、初めて startMatchAttempt が呼ばれる
-      if (parseResult.kind === "READY") {
+      const mockStartNewGame = vi.fn((envId: string, seed: string) => {
         const outcome = startMatchAttempt({
-          environmentId: parseResult.config.environmentId,
-          seedInput: parseResult.config.seedInput,
+          environmentId: envId,
+          seedInput: seed,
           catalog,
           fullRulePackage,
         });
-
-        expect(outcome.type).toBe("READY");
         if (outcome.type === "READY") {
           activeMatch = outcome.activeMatch;
           session = outcome.session;
         }
-      }
+      });
 
+      const executeBootstrap = (searchOrUrl: string) => {
+        const bootstrap = resolvePlaytestInitialBootstrap(searchOrUrl, catalog);
+        switch (bootstrap.kind) {
+          case "RESTORE_SHARE_SETTINGS":
+            restoredSettings = bootstrap.config;
+            // startNewGame は絶対に呼ばない
+            break;
+          case "SHOW_SHARE_WARNING":
+            warningNotice = bootstrap.warnings;
+            // startNewGame は絶対に呼ばない
+            break;
+          case "START_DEFAULT_MATCH":
+            mockStartNewGame(CORE_BATTLE_ENV_ID, "42");
+            break;
+        }
+        return bootstrap;
+      };
+
+      // 1. 有効な bpv=1 Share URL の場合: RESTORE_SHARE_SETTINGS となり startNewGame は呼ばれない
+      const validShareUrl = "https://blackpoker.example.com/?bpv=1&env=official%3Alight-entry16&mode=humanVsAi&human=p1&policy=seededRandom&seed=777";
+      const bootstrap1 = executeBootstrap(validShareUrl);
+
+      expect(bootstrap1.kind).toBe("RESTORE_SHARE_SETTINGS");
+      expect(mockStartNewGame).not.toHaveBeenCalled();
+      expect(activeMatch).toBeNull();
+      expect(session).toBeNull();
+      expect(restoredSettings).not.toBeNull();
+      expect(restoredSettings?.environmentId).toBe(officialEnvId);
+      expect(restoredSettings?.seedInput).toBe("777");
+
+      // 2. 未知バージョン bpv=999 の場合: SHOW_SHARE_WARNING となり startNewGame は呼ばれない
+      const invalidVersionUrl = "https://blackpoker.example.com/?bpv=999&env=official%3Alight-entry16";
+      const bootstrap2 = executeBootstrap(invalidVersionUrl);
+
+      expect(bootstrap2.kind).toBe("SHOW_SHARE_WARNING");
+      expect(mockStartNewGame).not.toHaveBeenCalled();
+      expect(activeMatch).toBeNull();
+      expect(warningNotice).not.toBeNull();
+
+      // 3. 通常アクセス (bpv なし) の場合: START_DEFAULT_MATCH となり初期対戦が自動開始される
+      const normalUrl = "https://blackpoker.example.com/playtest/?debug=true";
+      const bootstrap3 = executeBootstrap(normalUrl);
+
+      expect(bootstrap3.kind).toBe("START_DEFAULT_MATCH");
+      expect(mockStartNewGame).toHaveBeenCalledTimes(1);
+      expect(mockStartNewGame).toHaveBeenCalledWith(CORE_BATTLE_ENV_ID, "42");
       expect(activeMatch).not.toBeNull();
-      expect(activeMatch.seed).toBe(777);
       expect(session).not.toBeNull();
+
+      // 4. Share URL ロード後、ユーザーが明示的に「新しい対戦を開始」を押した時のみ、復元設定で対戦が開始される
+      activeMatch = null;
+      session = null;
+      if (restoredSettings) {
+        mockStartNewGame((restoredSettings as PlaytestShareConfigV1).environmentId, (restoredSettings as PlaytestShareConfigV1).seedInput);
+      }
+      expect(activeMatch).not.toBeNull();
+      expect(activeMatch.environmentId).toBe(officialEnvId);
+      expect(activeMatch.seed).toBe(777);
     });
   });
 

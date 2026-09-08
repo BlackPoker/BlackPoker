@@ -47,6 +47,7 @@ import { useActionFeedbackQueue } from "../game/useActionFeedbackQueue";
 import { ActionFeedbackFlash } from "../game/ActionFeedbackFlash";
 import {
   parsePlaytestShareUrl,
+  resolvePlaytestInitialBootstrap,
   buildPlaytestShareUrl,
   PlaytestShareConfigV1,
 } from "./PlaytestShareUrl";
@@ -381,19 +382,21 @@ export const CoreBattlePlaytest: React.FC = () => {
     if (shareUrlAppliedRef.current) return;
     shareUrlAppliedRef.current = true;
 
-    if (typeof window !== "undefined") {
-      const parseResult = parsePlaytestShareUrl(window.location.search, catalog);
-      if (parseResult.kind === "READY") {
-        setSelectedEnvironmentId(parseResult.config.environmentId);
-        setPendingMatchMode(parseResult.config.mode);
-        setPendingHumanSeat(parseResult.config.humanSeat);
-        setPendingPolicyId(parseResult.config.policyId);
-        setSeedInput(parseResult.config.seedInput);
+    const search = typeof window !== "undefined" ? window.location.search : "";
+    const bootstrap = resolvePlaytestInitialBootstrap(search, catalog);
 
-        if (parseResult.warnings.length > 0) {
+    switch (bootstrap.kind) {
+      case "RESTORE_SHARE_SETTINGS": {
+        setSelectedEnvironmentId(bootstrap.config.environmentId);
+        setPendingMatchMode(bootstrap.config.mode);
+        setPendingHumanSeat(bootstrap.config.humanSeat);
+        setPendingPolicyId(bootstrap.config.policyId);
+        setSeedInput(bootstrap.config.seedInput);
+
+        if (bootstrap.warnings.length > 0) {
           setShareNotice({
             type: "warning",
-            message: `共有URLの設定を読み込みました (${parseResult.warnings.join(", ")})`,
+            message: `共有URLの設定を読み込みました (${bootstrap.warnings.join(", ")})`,
           });
         } else {
           setShareNotice({
@@ -402,19 +405,22 @@ export const CoreBattlePlaytest: React.FC = () => {
           });
         }
         // Share URL の場合は自動対戦開始を行わない (Auto Start 禁止)
-        return;
-      } else if (parseResult.kind === "UNSUPPORTED_VERSION") {
+        break;
+      }
+      case "SHOW_SHARE_WARNING": {
         setShareNotice({
           type: "warning",
-          message: parseResult.warnings.join(", "),
+          message: bootstrap.warnings.join(", "),
         });
         // 未知バージョンの場合も自動対戦開始を行わない
-        return;
+        break;
+      }
+      case "START_DEFAULT_MATCH": {
+        // 通常アクセス時 (Share URL なし) は従来の初期対戦を開始
+        startNewGame(CORE_BATTLE_ENV_ID, "42");
+        break;
       }
     }
-
-    // 通常アクセス時 (Share URL なし) は従来の初期対戦を開始
-    startNewGame(CORE_BATTLE_ENV_ID, "42");
   }, [catalog, startNewGame]);
 
   // 現在の Pending 設定から Canonical Share URL を生成してクリップボードにコピー

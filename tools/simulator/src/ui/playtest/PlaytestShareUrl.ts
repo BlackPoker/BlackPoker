@@ -39,6 +39,23 @@ export type PlaytestShareParseResult =
     };
 
 /**
+ * UI起動時の初期化アクション判定結果
+ */
+export type PlaytestInitialBootstrap =
+  | {
+      readonly kind: "RESTORE_SHARE_SETTINGS";
+      readonly config: PlaytestShareConfigV1;
+      readonly warnings: readonly string[];
+    }
+  | {
+      readonly kind: "SHOW_SHARE_WARNING";
+      readonly warnings: readonly string[];
+    }
+  | {
+      readonly kind: "START_DEFAULT_MATCH";
+    };
+
+/**
  * URL またはクエリ文字列から Playtest 共有設定を解析します。
  * Pure Function であり、DOM / window / navigator には依存しません。
  */
@@ -104,41 +121,54 @@ export function parsePlaytestShareUrl(
     mode = "humanVsHuman";
   }
 
-  // 3. プレイヤー席 (human) の検証
+  // 3. プレイヤー席 (human) & AIポリシー (policy) の検証 & 正規化
   const rawHuman = params.get("human");
-  let humanSeat: "p1" | "p2" = "p1";
-  if (rawHuman === "p2") {
-    humanSeat = "p2";
-  } else if (rawHuman === "p1") {
-    humanSeat = "p1";
-  } else if (rawHuman !== null && mode === "humanVsAi") {
-    warnings.push(`無効なプレイヤー席です: "${rawHuman}"。デフォルト (p1) を設定しました。`);
-  }
-
-  // 4. AIポリシー (policy) の検証 & 正規化
   const rawPolicy = params.get("policy");
+  let humanSeat: "p1" | "p2" = "p1";
   let policyId: PlaytestPolicyId = "firstLegal";
-  if (rawPolicy) {
-    const matchedPolicy = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === rawPolicy);
-    if (!matchedPolicy) {
-      if (mode === "humanVsAi") {
-        warnings.push(`無効なAIポリシーです: "${rawPolicy}"。デフォルト (FirstLegal) を設定しました。`);
-      }
-    } else {
-      policyId = matchedPolicy.id;
-    }
-  }
 
-  // Policy / Environment の整合性チェック（非公式環境での SeededRandom など）
-  const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === policyId);
-  if (selectedPolicyOpt?.requiresSeed && !isOfficialEnvironment(environmentId)) {
-    warnings.push(
-      `選択された環境 (${environmentId}) では "${selectedPolicyOpt.label}" を使用できないため、FirstLegal に変更しました。`
-    );
+  if (mode === "humanVsAi") {
+    // humanSeat
+    if (rawHuman === "p2") {
+      humanSeat = "p2";
+    } else if (rawHuman === "p1") {
+      humanSeat = "p1";
+    } else if (rawHuman !== null) {
+      warnings.push(`無効なプレイヤー席です: "${rawHuman}"。デフォルト (p1) を設定しました。`);
+    }
+
+    // policyId
+    if (rawPolicy) {
+      const matchedPolicy = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === rawPolicy);
+      if (!matchedPolicy) {
+        warnings.push(`無効なAIポリシーです: "${rawPolicy}"。デフォルト (FirstLegal) を設定しました。`);
+      } else {
+        policyId = matchedPolicy.id;
+      }
+    }
+
+    // Policy / Environment の整合性チェック（非公式環境での SeededRandom など）
+    const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === policyId);
+    if (selectedPolicyOpt?.requiresSeed && !isOfficialEnvironment(environmentId)) {
+      warnings.push(
+        `選択された環境 (${environmentId}) では "${selectedPolicyOpt.label}" を使用できないため、FirstLegal に変更しました。`
+      );
+      policyId = "firstLegal";
+    }
+  } else {
+    // mode === "humanVsHuman"
+    // URLにhuman/policyが存在していても適用せず、Canonical値 (p1, firstLegal) に正規化
+    if (rawHuman !== null) {
+      warnings.push(`Human vs Human モードではプレイヤー席設定 ("${rawHuman}") は不要なため、デフォルト (p1) に正規化しました。`);
+    }
+    if (rawPolicy !== null) {
+      warnings.push(`Human vs Human モードではAIポリシー設定 ("${rawPolicy}") は不要なため、デフォルト (FirstLegal) に正規化しました。`);
+    }
+    humanSeat = "p1";
     policyId = "firstLegal";
   }
 
-  // 5. Seed (seed) の検証
+  // 4. Seed (seed) の検証 & 正規化
   const rawSeed = params.get("seed");
   let seedInput = "42";
   if (isOfficialEnvironment(environmentId)) {
@@ -150,15 +180,14 @@ export function parsePlaytestShareUrl(
         warnings.push(`無効なSeedです: "${rawSeed}" (${seedVal.error})。デフォルト値 (42) を設定しました。`);
       }
     } else {
-      // 公式環境で Seed がない場合はデフォルト 42
       seedInput = "42";
     }
   } else {
-    if (rawSeed !== null && validateSeed(rawSeed).valid) {
-      seedInput = rawSeed.trim();
-    } else {
-      seedInput = "42";
+    // 非公式環境 (Core Battle 等) では match seed を使用しないため、既定値 "42" へ正規化
+    if (rawSeed !== null) {
+      warnings.push(`非公式環境 (${environmentId}) ではSeed設定 ("${rawSeed}") は不要なため、デフォルト値 (42) に正規化しました。`);
     }
+    seedInput = "42";
   }
 
   return {
@@ -173,6 +202,35 @@ export function parsePlaytestShareUrl(
     },
     warnings,
   };
+}
+
+/**
+ * URL またはクエリ文字列から、UI 初回起動時の動作を判定します。
+ * Pure Function であり、DOM / window / navigator には依存しません。
+ */
+export function resolvePlaytestInitialBootstrap(
+  searchOrUrl: string,
+  catalog: RegulationCatalog
+): PlaytestInitialBootstrap {
+  const parseResult = parsePlaytestShareUrl(searchOrUrl, catalog);
+  switch (parseResult.kind) {
+    case "READY":
+      return {
+        kind: "RESTORE_SHARE_SETTINGS",
+        config: parseResult.config,
+        warnings: parseResult.warnings,
+      };
+    case "UNSUPPORTED_VERSION":
+      return {
+        kind: "SHOW_SHARE_WARNING",
+        warnings: parseResult.warnings,
+      };
+    case "NOT_SHARE":
+    default:
+      return {
+        kind: "START_DEFAULT_MATCH",
+      };
+  }
 }
 
 /**
@@ -259,13 +317,13 @@ export function buildPlaytestShareUrl(
     finalParams.set(key, val);
   }
   for (const [key, val] of nonShareParams) {
-    finalParams.set(key, val);
+    finalParams.append(key, val);
   }
 
   url.search = finalParams.toString();
 
   if (isRelative) {
-    return `${url.pathname}${url.search ? `?${url.search}` : ""}${url.hash}`;
+    return `${url.pathname}${url.search}${url.hash}`;
   }
 
   return url.toString();
