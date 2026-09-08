@@ -96,6 +96,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     pendingCount: feedbackFlashPendingCount,
     enqueue: enqueueFeedbackFlash,
     reset: resetFeedbackFlash,
+    skipCurrent: skipFeedbackFlash,
   } = useActionFeedbackQueue();
   const [highlightedRequestId, setHighlightedRequestId] = useState<string | null>(null);
 
@@ -726,7 +727,11 @@ export const CoreBattlePlaytest: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white">
       {/* Action Feedback Flash (トップフロート通知) */}
-      <ActionFeedbackFlash item={feedbackFlashItem} pendingCount={feedbackFlashPendingCount} />
+      <ActionFeedbackFlash
+        item={feedbackFlashItem}
+        pendingCount={feedbackFlashPendingCount}
+        onSkip={skipFeedbackFlash}
+      />
 
       {/* 画面ヘッダー */}
       <header className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">

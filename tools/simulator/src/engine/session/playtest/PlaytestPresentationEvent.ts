@@ -41,6 +41,7 @@ export interface PlaytestPresentationEvent extends FormattedLogEntry {
   readonly targetRequestId?: string;
   readonly sourceRequestId?: string;
   readonly sourceCanonicalSeq?: number;
+  readonly targetUnitId?: string;
 
   readonly unitId?: string;
   readonly unitLabel?: string;

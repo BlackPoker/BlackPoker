@@ -161,4 +161,104 @@ describe("Playtest Presentation Event & Format Tests", () => {
       expect(defeatEvents[0].message).toContain("Player B の 防壁① が墓地へ送られました");
     });
   });
+
+  describe("C & 汎用因果関係: Action ID 非依存性およびターゲット情報の汎用抽出", () => {
+    it("actionId が action.damageJudge 以外の名称であっても、result.damageJudge.combats の存在により正常に戦闘ログが発行されること (Action ID 非依存)", () => {
+      const prevState = createCoreBattlePresetState();
+      prevState.stage.requests = [];
+      prevState.stage.history = [];
+
+      const nextState = JSON.parse(JSON.stringify(prevState));
+      // actionId が action.damageJudge ではないカスタム名称
+      nextState.stage.history = [
+        {
+          id: "req-custom-combat-1",
+          actionId: "custom.combatResolveAction",
+          controller: "p1",
+          action: { id: "custom.combatResolveAction", name: "戦闘解決" },
+          result: {
+            damageJudge: {
+              combats: [
+                {
+                  attackerUnitId: "u-atk",
+                  attackerPlayerKey: "p1",
+                  combatType: "unblocked",
+                  attackerInitialSize: 5,
+                  attackerCardCode: "S5",
+                  targetPlayerKey: "p2",
+                  directDamageAmount: 5,
+                },
+              ],
+            },
+          },
+        },
+      ];
+
+      const events = ViewerAwareGameEventFormatter.formatStateTransition(prevState, nextState);
+      const judgeEvents = events.filter((e) => e.kind === "DAMAGE_JUDGE");
+      expect(judgeEvents.length).toBe(1);
+      expect(judgeEvents[0].message).toContain("未ブロック (攻撃サイズ: 5)");
+    });
+
+    it("res.targets から汎用的に targetRequestId および targetUnitId が ACTION_RESOLVED / UNIT_STATE_CHANGED に抽出・紐付けされること", () => {
+      const prevState = createCoreBattlePresetState();
+      prevState.players.p1.field = [
+        {
+          unitId: "unit-hero-target",
+          kind: "英雄",
+          state: "charge",
+          cards: [{ suit: "S", rank: 1 }],
+        },
+      ];
+      prevState.stage.requests = [];
+      prevState.stage.history = [];
+
+      const nextState = JSON.parse(JSON.stringify(prevState));
+      nextState.players.p1.field[0].state = "drive";
+      nextState.stage.history = [
+        {
+          id: "req-action-unit",
+          actionId: "action.customTwist",
+          controller: "p1",
+          action: { id: "action.customTwist", name: "カスタムツイスト" },
+          targets: [
+            {
+              type: "unit",
+              unitId: "unit-hero-target",
+            },
+          ],
+        },
+        {
+          id: "req-action-req",
+          actionId: "action.customCounter",
+          controller: "p2",
+          action: { id: "action.customCounter", name: "カスタムカウンター" },
+          targets: [
+            {
+              type: "request",
+              requestId: "req-target-42",
+            },
+          ],
+        },
+      ];
+
+      const events = ViewerAwareGameEventFormatter.formatStateTransition(prevState, nextState);
+
+      const resolveEvents = events.filter((e) => e.kind === "ACTION_RESOLVED");
+      expect(resolveEvents.length).toBe(2);
+
+      const unitAction = resolveEvents.find((e) => e.requestId === "req-action-unit");
+      expect(unitAction).toBeDefined();
+      expect(unitAction!.targetUnitId).toBe("unit-hero-target");
+
+      const reqAction = resolveEvents.find((e) => e.requestId === "req-action-req");
+      expect(reqAction).toBeDefined();
+      expect(reqAction!.targetRequestId).toBe("req-target-42");
+
+      // UNIT_STATE_CHANGED には、ちょうど1件合致した unitAction の ID が sourceRequestId として紐付くこと
+      const stateEvents = events.filter((e) => e.kind === "UNIT_STATE_CHANGED");
+      expect(stateEvents.length).toBe(1);
+      expect(stateEvents[0].sourceRequestId).toBe("req-action-unit");
+    });
+  });
 });

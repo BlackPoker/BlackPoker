@@ -141,11 +141,26 @@ export class ViewerAwareGameEventFormatter {
     const calculatedDamageByPlayer: Record<string, number> = {};
     const prevStageHistory = prevState.stage?.history || [];
     const nextStageHistory = nextState.stage?.history || [];
+    let newlyResolved: any[] = [];
     if (nextStageHistory.length > prevStageHistory.length) {
-      const newlyResolved = nextStageHistory.slice(prevStageHistory.length);
+      newlyResolved = nextStageHistory.slice(prevStageHistory.length);
       for (const res of newlyResolved) {
         const actName = res.action?.name || res.actionId;
         const cName = getPlayerName(res.controller);
+
+        const reqTarget = Array.isArray(res.targets)
+          ? res.targets.find((t: any) => t?.type === "request" || t?.selector === "request")
+          : undefined;
+        const targetRequestId = reqTarget
+          ? (reqTarget.requestId || reqTarget.targetRequestId || reqTarget.id)
+          : (res as any).targetRequestId;
+
+        const unitTarget = Array.isArray(res.targets)
+          ? res.targets.find((t: any) => t?.type === "unit" || t?.selector === "unit")
+          : undefined;
+        const targetUnitId = unitTarget
+          ? (unitTarget.unitId || unitTarget.targetUnitId || unitTarget.id)
+          : (res as any).targetUnitId;
 
         // E-1: キャンセル済みリクエストの正確な表示 ([RESOLVE] ではなく [CANCELLED])
         if (res.status === "cancelled") {
@@ -161,7 +176,8 @@ export class ViewerAwareGameEventFormatter {
                 actionName: actName,
                 requestId: res.id || res.requestId,
                 sourceRequestId: res.id || res.requestId,
-                targetRequestId: res.targetRequestId,
+                targetRequestId: targetRequestId,
+                targetUnitId: targetUnitId,
               }
             )
           );
@@ -181,6 +197,8 @@ export class ViewerAwareGameEventFormatter {
               actionName: actName,
               requestId: res.id || res.requestId,
               sourceRequestId: res.id || res.requestId,
+              targetRequestId: targetRequestId,
+              targetUnitId: targetUnitId,
             }
           )
         );
@@ -201,8 +219,8 @@ export class ViewerAwareGameEventFormatter {
           );
         }
 
-        // ダメージ判定の詳細ログを出力
-        if (res.actionId === "action.damageJudge" && res.result?.damageJudge?.combats) {
+        // ダメージ判定の詳細ログを出力 (Action ID依存を撤廃し、result.damageJudge.combats の存在で判定)
+        if (res.result?.damageJudge?.combats) {
           const combats: CombatResult[] = res.result.damageJudge.combats;
           let combatIdx = 1;
           for (const combat of combats) {
@@ -259,7 +277,10 @@ export class ViewerAwareGameEventFormatter {
                   createEvent(
                     "UNIT_DEFEATED",
                     `[DEFEATED] 結果: 両者死亡 (相打ち)`,
-                    "event"
+                    "event",
+                    {
+                      sourceRequestId: res.id || res.requestId,
+                    }
                   )
                 );
               } else if (combat.attackerMovedToGrave) {
@@ -267,7 +288,10 @@ export class ViewerAwareGameEventFormatter {
                   createEvent(
                     "UNIT_DEFEATED",
                     `[DEFEATED] 結果: アタッカー死亡 / ブロッカー生存`,
-                    "event"
+                    "event",
+                    {
+                      sourceRequestId: res.id || res.requestId,
+                    }
                   )
                 );
               } else if (combat.blockersMovedToGrave.length > 0) {
@@ -275,7 +299,10 @@ export class ViewerAwareGameEventFormatter {
                   createEvent(
                     "UNIT_DEFEATED",
                     `[DEFEATED] 結果: ブロッカー死亡 / アタッカー生存`,
-                    "event"
+                    "event",
+                    {
+                      sourceRequestId: res.id || res.requestId,
+                    }
                   )
                 );
               }
@@ -306,7 +333,10 @@ export class ViewerAwareGameEventFormatter {
                   createEvent(
                     "UNIT_DEFEATED",
                     `[DEFEATED] 結果: アタッカー死亡 / 防壁死亡`,
-                    "event"
+                    "event",
+                    {
+                      sourceRequestId: res.id || res.requestId,
+                    }
                   )
                 );
               } else {
@@ -314,7 +344,10 @@ export class ViewerAwareGameEventFormatter {
                   createEvent(
                     "UNIT_DEFEATED",
                     `[DEFEATED] 結果: 防壁死亡 / アタッカー生存`,
-                    "event"
+                    "event",
+                    {
+                      sourceRequestId: res.id || res.requestId,
+                    }
                   )
                 );
               }
@@ -338,6 +371,23 @@ export class ViewerAwareGameEventFormatter {
           if (pu && pu.state !== nu.state) {
             const unitLabel = getUnitDisplayName(nu, nextUnits);
             const fullUnitName = `${pName} の ${unitLabel}`;
+
+            // 因果関係の明示 (A. Causality fallbackの一意性)
+            // newlyResolved の中でこの unitId を対象とする解決リクエストが「ちょうど1件」の場合のみ紐付け
+            let sourceReqId: string | undefined;
+            if (newlyResolved && newlyResolved.length > 0) {
+              const matchingReqs = newlyResolved.filter((r: any) => {
+                const uTarget = Array.isArray(r.targets)
+                  ? r.targets.find((t: any) => t?.type === "unit" || t?.selector === "unit")
+                  : undefined;
+                return uTarget && (uTarget.unitId || uTarget.targetUnitId || uTarget.id) === nu.unitId;
+              });
+              if (matchingReqs.length === 1) {
+                sourceReqId = matchingReqs[0].id || matchingReqs[0].requestId;
+              }
+              // 複数件または0件の場合は推測禁止 (sourceReqId は undefined)
+            }
+
             events.push(
               createEvent(
                 "UNIT_STATE_CHANGED",
@@ -350,6 +400,7 @@ export class ViewerAwareGameEventFormatter {
                   unitLabel: fullUnitName,
                   fromState: pu.state,
                   toState: nu.state,
+                  sourceRequestId: sourceReqId,
                 }
               )
             );

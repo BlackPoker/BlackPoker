@@ -1,8 +1,9 @@
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
+import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { ExpressionEvaluator } from "../rules/ExpressionEvaluator";
-import { formatSuitSymbol } from "../rules/cardUtils";
-import { getUnitDisplayName, getCharacterType } from "../rules/characterUtils";
+import { getCharacterType } from "../rules/characterUtils";
+import { PlaytestTargetPresenter } from "./PlaytestTargetPresenter";
 
 
 /**
@@ -45,13 +46,20 @@ export class TargetSelectionEnumerator {
           if (cond?.relation === "opponent" && pKey === requesterPlayerKey) {
             continue;
           }
-          const pName = state.players[pKey]?.name || (pKey === "p1" ? "Player A" : "Player B");
-          results.push({
+          const candidate: TargetSelection = {
             targetType: "player",
             targetPlayerKey: pKey,
-            displayName: `プレイヤー: ${pName} (${pKey})`,
-            primaryLabel: pName,
-            secondaryLabel: `(${pKey})`,
+          };
+          const labels = PlaytestTargetPresenter.formatTarget(
+            candidate,
+            state,
+            requesterPlayerKey as PlayerKey
+          );
+          results.push({
+            ...candidate,
+            displayName: labels.displayName,
+            primaryLabel: labels.primaryLabel,
+            secondaryLabel: labels.secondaryLabel,
           });
         }
       } else if (targetType === "request") {
@@ -68,18 +76,21 @@ export class TargetSelectionEnumerator {
               if (!expectedCounts.includes(reqKeyCards.length)) continue;
             }
           }
-          const isTop = stageRequests.length > 0 && req.id === stageRequests[stageRequests.length - 1].id;
-          const cName = req.controller === "p1" ? "Player A" : req.controller === "p2" ? "Player B" : req.controller;
-          const actName = req.action?.name || req.actionId;
-          const primaryLabel = `${cName}: ${actName}`;
-          const secondaryLabel = `Stage ${isTop ? "TOP " : ""}[${req.id}]`;
-          results.push({
+          const candidate: TargetSelection = {
             targetType: "request",
             targetPlayerKey: req.controller,
             targetRequestId: req.id,
-            displayName: `${primaryLabel} (${secondaryLabel})`,
-            primaryLabel,
-            secondaryLabel,
+          };
+          const labels = PlaytestTargetPresenter.formatTarget(
+            candidate,
+            state,
+            requesterPlayerKey as PlayerKey
+          );
+          results.push({
+            ...candidate,
+            displayName: labels.displayName,
+            primaryLabel: labels.primaryLabel,
+            secondaryLabel: labels.secondaryLabel,
           });
         }
       } else if (targetType === "unit") {
@@ -121,28 +132,22 @@ export class TargetSelectionEnumerator {
               if (!isMatch) continue;
             }
 
-            const pName = player.name || (pKey === "p1" ? "Player A" : "Player B");
-            const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
-            const isFaceDown = unit.face === "down";
-            const cardDisplay = isBulwark && isFaceDown
-              ? "🂠"
-              : unit.cards && unit.cards.length > 0
-              ? unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+")
-              : "カードなし";
-            const stateLabel = unit.state === "drive" ? "drive" : "charge";
-            const unitLabel = getUnitDisplayName(unit, player.field);
-            const primaryLabel = `${pName}の${unitLabel}`;
-            const secondaryLabel = `[${cardDisplay}] (${stateLabel})`;
-
-            results.push({
+            const candidate: TargetSelection = {
               targetType: "unit",
               targetPlayerKey: pKey,
               targetUnitId: unit.unitId,
-              displayName: `${primaryLabel} ${secondaryLabel}`,
-              primaryLabel,
-              secondaryLabel,
+            };
+            const labels = PlaytestTargetPresenter.formatTarget(
+              candidate,
+              state,
+              requesterPlayerKey as PlayerKey
+            );
+            results.push({
+              ...candidate,
+              displayName: labels.displayName,
+              primaryLabel: labels.primaryLabel,
+              secondaryLabel: labels.secondaryLabel,
             });
-
           }
         }
       }

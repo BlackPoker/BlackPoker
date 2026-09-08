@@ -48,42 +48,46 @@ export class PlaytestTargetPresenter {
     viewerPlayerId?: PlayerKey
   ): FormattedTargetLabels {
     const pName = ownerPlayerKey === "p1" ? "Player A" : "Player B";
-    const unitLabel = getUnitDisplayName(unit, field);
+    const unitLabel = unit ? getUnitDisplayName(unit, field) : "ユニット";
     const primaryLabel = `${pName} の ${unitLabel}`;
 
-    const isOpponent = viewerPlayerId && ownerPlayerKey !== viewerPlayerId;
     const isBulwark = unit?.componentId === "character.bulwark" || unit?.kind === "防壁";
     const isFaceDown = unit?.face === "down";
+    const isOpponent = viewerPlayerId && ownerPlayerKey !== viewerPlayerId;
 
-    if (isBulwark && isFaceDown && isOpponent) {
-      const stateStr = unit?.state ? ` [${unit.state.toUpperCase()}]` : "";
-      const secondaryLabel = `伏せ防壁${stateStr}`;
-      return {
-        primaryLabel,
-        secondaryLabel,
-        displayName: `${primaryLabel} ${secondaryLabel}`,
-      };
-    }
+    const stateLabel = (unit?.state ? unit.state : "charge").toLowerCase();
 
+    // 伏せ防壁または非公開ユニットの場合: カード内容は伏せカード記号 🂠 で隠蔽
     let cardStr = "";
-    if (unit?.cards && unit.cards.length > 0) {
-      cardStr = unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+");
+    if (isBulwark && isFaceDown) {
+      cardStr = "🂠";
+    } else if (unit?.cards && unit.cards.length > 0) {
+      if (isOpponent && isFaceDown) {
+        cardStr = "🂠";
+      } else {
+        cardStr = unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+");
+      }
     }
-    const stateStr = unit?.state ? ` [${unit.state.toUpperCase()}]` : "";
-    const secondaryLabel = `${cardStr ? `[${cardStr}]` : ""}${stateStr}`.trim() || undefined;
+
+    const secondaryParts: string[] = [];
+    if (cardStr) secondaryParts.push(`[${cardStr}]`);
+    secondaryParts.push(`(${stateLabel})`);
+
+    const secondaryLabel = secondaryParts.join(" ");
+    const displayName = `${primaryLabel} ${secondaryLabel}`;
 
     return {
       primaryLabel,
       secondaryLabel,
-      displayName: `${primaryLabel}${secondaryLabel ? ` ${secondaryLabel}` : ""}`,
+      displayName,
     };
   }
 
   /**
    * プレイヤーターゲットの表示ラベルを生成します。
    */
-  static formatPlayerTarget(playerKey: PlayerKey): FormattedTargetLabels {
-    const pName = playerKey === "p1" ? "Player A" : "Player B";
+  static formatPlayerTarget(playerKey: PlayerKey, state?: any): FormattedTargetLabels {
+    const pName = state?.players?.[playerKey]?.name || (playerKey === "p1" ? "Player A" : "Player B");
     return {
       primaryLabel: pName,
       secondaryLabel: "プレイヤー",
@@ -102,11 +106,6 @@ export class PlaytestTargetPresenter {
         displayName: "対象なし",
       };
     }
-
-    const getPlayerName = (pKey?: string) => {
-      if (!pKey) return "プレイヤー";
-      return state?.players?.[pKey]?.name || (pKey === "p1" ? "Player A" : "Player B");
-    };
 
     // 1. リクエストターゲット (カウンター等)
     if (target.targetType === "request") {
@@ -128,21 +127,20 @@ export class PlaytestTargetPresenter {
         return this.formatRequestTarget(matchedReq, isTop);
       }
 
-      const cName = getPlayerName(target.targetPlayerKey);
-      const reqId = target.targetRequestId || "";
-      const primaryLabel = `${cName}: リクエスト`;
-      const secondaryLabel = `Stage [${reqId}]`;
-      return {
-        primaryLabel,
-        secondaryLabel,
-        displayName: `${primaryLabel} (${secondaryLabel})`,
-      };
+      return this.formatRequestTarget(
+        {
+          id: target.targetRequestId,
+          controller: target.targetPlayerKey,
+          action: { name: "リクエスト" },
+        },
+        false
+      );
     }
 
     // 2. ユニットターゲット (ツイスト、アップ、ダウン、防壁破壊等)
     if (target.targetType === "unit") {
       let matchedUnit: any = undefined;
-      let unitPlayerKey = target.targetPlayerKey;
+      let unitPlayerKey = target.targetPlayerKey as PlayerKey | undefined;
 
       if (state?.players) {
         if (unitPlayerKey && state.players[unitPlayerKey]?.field) {
@@ -160,52 +158,13 @@ export class PlaytestTargetPresenter {
         }
       }
 
-      const pName = getPlayerName(unitPlayerKey);
       const playerUnits = unitPlayerKey && state?.players?.[unitPlayerKey]?.field ? state.players[unitPlayerKey].field : [];
-      const unitLabel = matchedUnit ? getUnitDisplayName(matchedUnit, playerUnits) : "ユニット";
-
-      const primaryLabel = `${pName}の${unitLabel}`;
-
-      // 秘密情報保護: 相手の裏向き防壁のカード内容は絶対に漏洩させない
-      const isOpponent = viewerPlayerId && unitPlayerKey !== viewerPlayerId;
-      const isBulwark = matchedUnit?.componentId === "character.bulwark" || matchedUnit?.kind === "防壁";
-      const isFaceDown = matchedUnit?.face === "down";
-
-      let cardStr = "";
-      if (isBulwark && isFaceDown && isOpponent) {
-        cardStr = "🂠";
-      } else if (matchedUnit?.cards && matchedUnit.cards.length > 0) {
-        cardStr = matchedUnit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+");
-      }
-
-      const stateLabel = matchedUnit?.state ? matchedUnit.state : undefined;
-      const secondaryParts: string[] = [];
-      if (cardStr) secondaryParts.push(`[${cardStr}]`);
-      if (stateLabel) secondaryParts.push(`(${stateLabel})`);
-      if (target.targetUnitId) secondaryParts.push(target.targetUnitId);
-
-      const secondaryLabel = secondaryParts.length > 0 ? secondaryParts.join(" ") : undefined;
-      const displayName = `${primaryLabel}${cardStr ? ` [${cardStr}]` : ""}${stateLabel ? ` (${stateLabel})` : ""}`;
-
-      return {
-        primaryLabel,
-        secondaryLabel,
-        displayName,
-      };
+      return this.formatUnitTarget(matchedUnit, (unitPlayerKey || "p1") as PlayerKey, playerUnits, viewerPlayerId);
     }
 
     // 3. プレイヤーターゲット
     if (target.targetType === "player") {
-      const pName = getPlayerName(target.targetPlayerKey);
-      const primaryLabel = pName;
-      const secondaryLabel = target.targetPlayerKey ? `(${target.targetPlayerKey})` : undefined;
-      const displayName = `プレイヤー: ${pName}${secondaryLabel ? ` ${secondaryLabel}` : ""}`;
-
-      return {
-        primaryLabel,
-        secondaryLabel,
-        displayName,
-      };
+      return this.formatPlayerTarget(target.targetPlayerKey as PlayerKey, state);
     }
 
     return {

@@ -4,13 +4,15 @@ import { ActionFeedbackItem } from "../../engine/session/playtest/ActionFeedback
 export interface ActionFeedbackFlashProps {
   readonly item: ActionFeedbackItem | null;
   readonly pendingCount?: number;
+  readonly onSkip?: () => void;
 }
 
 /**
  * 画面上部にフロート表示される、直近のアクションフィードバック用 Flash コンポーネント。
  * 人間 vs AI 対戦時に「何が起きたか」「誰が何をしたか」を直感的かつ即座に伝えます。
+ * カード領域をクリック・タップまたは Enter/Space で即座に次の Flash へスキップ可能です。
  */
-export const ActionFeedbackFlash: React.FC<ActionFeedbackFlashProps> = ({ item, pendingCount = 0 }) => {
+export const ActionFeedbackFlash: React.FC<ActionFeedbackFlashProps> = ({ item, pendingCount = 0, onSkip }) => {
   if (!item) return null;
 
   // カテゴリ別の視認性スタイル
@@ -62,8 +64,18 @@ export const ActionFeedbackFlash: React.FC<ActionFeedbackFlashProps> = ({ item, 
       role="status"
       aria-live="polite"
     >
-      <div
-        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg shadow-xl border ${borderClass} ${bgClass} backdrop-blur-md font-sans`}
+      <button
+        type="button"
+        onClick={onSkip}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSkip?.();
+          }
+        }}
+        aria-label="クリックでスキップ"
+        title="クリックでスキップ"
+        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg shadow-xl border ${borderClass} ${bgClass} backdrop-blur-md font-sans pointer-events-auto cursor-pointer select-none active:scale-95 transition-transform hover:brightness-110 text-left focus:outline-none focus:ring-2 focus:ring-white/40`}
       >
         {item.detailBadge && (
           <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-black shrink-0 ${badgeBg}`}>
@@ -85,7 +97,7 @@ export const ActionFeedbackFlash: React.FC<ActionFeedbackFlashProps> = ({ item, 
             +{pendingCount}
           </span>
         )}
-      </div>
+      </button>
     </div>
   );
 };

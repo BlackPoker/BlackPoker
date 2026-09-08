@@ -6,6 +6,7 @@ export interface UseActionFeedbackQueueReturn {
   readonly pendingCount: number;
   readonly enqueue: (items: readonly ActionFeedbackItem[]) => void;
   readonly reset: () => void;
+  readonly skipCurrent: () => void;
 }
 
 /**
@@ -40,6 +41,16 @@ export class ActionFeedbackQueueController {
     }
   }
 
+  /**
+   * 現在表示中の Flash のタイマーを破棄し、キュー内の次アイテムへ即座に遷移します。
+   * キューが空の場合は即座に非表示 (null) となります。
+   */
+  skipCurrent(): void {
+    if (!this.activeItem && this.queue.length === 0) return;
+    this.clearTimer();
+    this.processNext();
+  }
+
   private processNext(): void {
     if (this.queue.length === 0) {
       this.activeItem = null;
@@ -66,6 +77,17 @@ export class ActionFeedbackQueueController {
     this.queue = [];
     this.activeItem = null;
     this.notify();
+  }
+
+  /**
+   * アンマウント時の完全な後始末。
+   * 通知コールバックを解除することで unmount 後の React setState 警告を完全に防止します。
+   */
+  dispose(): void {
+    this.clearTimer();
+    this.onUpdate = undefined;
+    this.queue = [];
+    this.activeItem = null;
   }
 
   private clearTimer(): void {
@@ -105,10 +127,14 @@ export function useActionFeedbackQueue(): UseActionFeedbackQueueReturn {
     controllerRef.current?.reset();
   }, []);
 
-  // アンマウント時の安全な破棄
+  const skipCurrent = useCallback(() => {
+    controllerRef.current?.skipCurrent();
+  }, []);
+
+  // アンマウント時の安全な破棄 (dispose により unmount 後の setState を完全防止)
   useEffect(() => {
     return () => {
-      controllerRef.current?.reset();
+      controllerRef.current?.dispose();
     };
   }, []);
 
@@ -117,5 +143,6 @@ export function useActionFeedbackQueue(): UseActionFeedbackQueueReturn {
     pendingCount,
     enqueue,
     reset,
+    skipCurrent,
   };
 }
