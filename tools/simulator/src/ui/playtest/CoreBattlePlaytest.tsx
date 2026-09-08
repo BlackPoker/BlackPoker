@@ -45,6 +45,12 @@ import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import { ActionFeedbackComposer } from "../../engine/session/playtest/ActionFeedbackComposer";
 import { useActionFeedbackQueue } from "../game/useActionFeedbackQueue";
 import { ActionFeedbackFlash } from "../game/ActionFeedbackFlash";
+import {
+  parsePlaytestShareUrl,
+  buildPlaytestShareUrl,
+  PlaytestShareConfigV1,
+} from "./PlaytestShareUrl";
+import { copyTextToClipboard } from "../utils/clipboard";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
@@ -74,6 +80,13 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   // セットアップ結果通知（VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR）
   const [setupNotice, setSetupNotice] = useState<SetupNotice | null>(null);
+
+  // 共有 URL 通知 (読み込み完了・コピー成功・警告など)
+  const [shareNotice, setShareNotice] = useState<{
+    type: "success" | "error" | "warning" | "info";
+    message: string;
+  } | null>(null);
+  const shareUrlAppliedRef = useRef<boolean>(false);
 
   // 対戦中実行時エラー通知 (AI障害等)
   const [runtimeNotice, setRuntimeNotice] = useState<SetupNotice | null>(null);
@@ -363,14 +376,82 @@ export const CoreBattlePlaytest: React.FC = () => {
     ]
   );
 
-  // 初回マウント時にのみ1回ゲーム初期化
-  const initialStartRef = useRef(false);
+  // Share URL 解析および初回マウント処理 (ライフサイクル中1回のみ実行)
   useEffect(() => {
-    if (!initialStartRef.current) {
-      initialStartRef.current = true;
-      startNewGame(CORE_BATTLE_ENV_ID, "42");
+    if (shareUrlAppliedRef.current) return;
+    shareUrlAppliedRef.current = true;
+
+    if (typeof window !== "undefined") {
+      const parseResult = parsePlaytestShareUrl(window.location.search, catalog);
+      if (parseResult.kind === "READY") {
+        setSelectedEnvironmentId(parseResult.config.environmentId);
+        setPendingMatchMode(parseResult.config.mode);
+        setPendingHumanSeat(parseResult.config.humanSeat);
+        setPendingPolicyId(parseResult.config.policyId);
+        setSeedInput(parseResult.config.seedInput);
+
+        if (parseResult.warnings.length > 0) {
+          setShareNotice({
+            type: "warning",
+            message: `共有URLの設定を読み込みました (${parseResult.warnings.join(", ")})`,
+          });
+        } else {
+          setShareNotice({
+            type: "info",
+            message: "共有URLの設定を読み込みました",
+          });
+        }
+        // Share URL の場合は自動対戦開始を行わない (Auto Start 禁止)
+        return;
+      } else if (parseResult.kind === "UNSUPPORTED_VERSION") {
+        setShareNotice({
+          type: "warning",
+          message: parseResult.warnings.join(", "),
+        });
+        // 未知バージョンの場合も自動対戦開始を行わない
+        return;
+      }
     }
-  }, [startNewGame]);
+
+    // 通常アクセス時 (Share URL なし) は従来の初期対戦を開始
+    startNewGame(CORE_BATTLE_ENV_ID, "42");
+  }, [catalog, startNewGame]);
+
+  // 現在の Pending 設定から Canonical Share URL を生成してクリップボードにコピー
+  const handleCopyShareUrl = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    const config: PlaytestShareConfigV1 = {
+      version: 1,
+      environmentId: selectedEnvironmentId,
+      mode: pendingMatchMode,
+      humanSeat: pendingHumanSeat,
+      policyId: pendingPolicyId,
+      seedInput: seedInput,
+    };
+
+    const url = buildPlaytestShareUrl(window.location.href, config, catalog);
+    const success = await copyTextToClipboard(url);
+    if (success) {
+      try {
+        window.history.replaceState(null, "", url);
+      } catch (_) {
+        // history replaceState 制限環境を許容
+      }
+      setShareNotice({
+        type: "success",
+        message: "共有URLをクリップボードにコピーしました",
+      });
+    } else {
+      setShareNotice({
+        type: "error",
+        message: "URLのコピーに失敗しました",
+      });
+    }
+
+    setTimeout(() => {
+      setShareNotice((prev) => (prev?.type === "success" || prev?.type === "error" ? null : prev));
+    }, 3000);
+  }, [selectedEnvironmentId, pendingMatchMode, pendingHumanSeat, pendingPolicyId, seedInput, catalog]);
 
   // 盤面ユニットクリック時のトグルハンドラ
   const handleUnitClick = useCallback(
@@ -676,19 +757,6 @@ export const CoreBattlePlaytest: React.FC = () => {
     );
   }
 
-  if (!gameState && !setupNotice && !runtimeNotice) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f7f8] text-zinc-950 font-sans">
-        <div className="flex flex-col items-center gap-2">
-          <img src={logoUrl} alt="BlackPoker" className="w-8 h-8 animate-pulse" />
-          <div className="text-xs font-mono font-bold tracking-widest text-zinc-600 uppercase">
-            BlackPoker Initializing...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   // PlayerBoardViewModel の生成 (通常盤面は常に boardObservation 準拠)
   const p1ViewModel = gameState
     ? PlayerObservationPresenter.buildPlayerViewModel(
@@ -872,6 +940,14 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
 
           <button
+            onClick={handleCopyShareUrl}
+            title="現在の対戦設定を共有するURLをコピー"
+            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1"
+          >
+            共有URLをコピー
+          </button>
+
+          <button
             onClick={() => startNewGame()}
             className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
           >
@@ -890,6 +966,35 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
         </div>
       </header>
+
+      {/* 共有URL通知バナー (デスクトップ / モバイル共通) */}
+      {shareNotice && (
+        <div
+          className={`px-3 py-1.5 text-xs font-mono font-bold flex items-center justify-between border-b transition ${
+            shareNotice.type === "error"
+              ? "bg-red-50 text-red-700 border-red-200"
+              : shareNotice.type === "warning"
+              ? "bg-amber-50 text-amber-700 border-amber-200"
+              : shareNotice.type === "info"
+              ? "bg-blue-50 text-blue-700 border-blue-200"
+              : "bg-emerald-50 text-emerald-700 border-emerald-200"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase px-1.5 py-0.2 rounded bg-white/70 border border-current">
+              {shareNotice.type}
+            </span>
+            <span>{shareNotice.message}</span>
+          </div>
+          <button
+            onClick={() => setShareNotice(null)}
+            className="text-zinc-400 hover:text-zinc-700 text-sm font-bold px-1"
+            title="閉じる"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
       <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
@@ -948,6 +1053,27 @@ export const CoreBattlePlaytest: React.FC = () => {
               <p className="text-xs text-zinc-500 mt-2">
                 ※ 対戦が安全に停止しました。上部の「新しい対戦」ボタンから再開できます。
               </p>
+            </div>
+          )}
+
+          {/* 未開始 / 共有URL読み込み待機状態のカード */}
+          {!gameState && !setupNotice && !runtimeNotice && (
+            <div className="flex flex-col items-center justify-center p-8 sm:p-12 my-4 bg-white rounded-lg border border-zinc-200 shadow-sm text-center font-mono">
+              <img src={logoUrl} alt="BlackPoker" className="w-10 h-10 mb-3 opacity-90" />
+              <h3 className="text-sm font-bold text-zinc-900 mb-1">
+                {shareNotice ? shareNotice.message : "対戦準備完了 (Pending Settings)"}
+              </h3>
+              <p className="text-xs text-zinc-500 max-w-md mb-5 font-sans">
+                {shareNotice
+                  ? "共有URLの設定を読み込みました。上部の対戦設定を確認の上、「新しい対戦」を押してゲームを開始してください。"
+                  : "上部で対戦環境・モード・AI設定等を選択し、「新しい対戦」を押してゲームを開始してください。"}
+              </p>
+              <button
+                onClick={() => startNewGame()}
+                className="px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold text-xs rounded shadow transition min-h-[44px]"
+              >
+                新しい対戦を開始
+              </button>
             </div>
           )}
 
@@ -1111,6 +1237,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         onOpenLogModal={() => setShowMobileLogModal(true)}
         onOpenDebugModal={() => setShowMobileDebugModal(true)}
         onResetGame={() => startNewGame()}
+        onCopyShareUrl={handleCopyShareUrl}
+        shareNotice={shareNotice}
       />
 
       {/* 4. Mobile 対戦ログモーダル */}

@@ -27,6 +27,8 @@ export interface MobileHeaderMenuProps {
   readonly onOpenLogModal: () => void;
   readonly onOpenDebugModal: () => void;
   readonly onResetGame: () => void;
+  readonly onCopyShareUrl?: () => void;
+  readonly shareNotice?: { readonly type: "success" | "error" | "warning" | "info"; readonly message: string } | null;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -50,6 +52,8 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onOpenLogModal,
   onOpenDebugModal,
   onResetGame,
+  onCopyShareUrl,
+  shareNotice,
 }) => {
   if (!isOpen) return null;
 
@@ -176,6 +180,35 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
               className="w-5 h-5 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
             />
           </label>
+        )}
+
+        {/* 共有URLをコピーボタン */}
+        {onCopyShareUrl && (
+          <button
+            onClick={() => {
+              onCopyShareUrl();
+            }}
+            className="w-full py-2.5 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <span>共有URLをコピー</span>
+          </button>
+        )}
+
+        {/* 共有通知バナー (モバイルメニュー内) */}
+        {shareNotice && (
+          <div
+            className={`p-2 rounded text-xs font-mono font-bold text-center ${
+              shareNotice.type === "error"
+                ? "bg-red-50 text-red-700 border border-red-200"
+                : shareNotice.type === "warning"
+                ? "bg-amber-50 text-amber-700 border border-amber-200"
+                : shareNotice.type === "info"
+                ? "bg-blue-50 text-blue-700 border border-blue-200"
+                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+            }`}
+          >
+            {shareNotice.message}
+          </div>
         )}
 
         {/* Game Log モーダル開くボタン */}
