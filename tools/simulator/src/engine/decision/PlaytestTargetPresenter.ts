@@ -57,9 +57,9 @@ export class PlaytestTargetPresenter {
 
     const stateLabel = (unit?.state ? unit.state : "charge").toLowerCase();
 
-    // 伏せ防壁または非公開ユニットの場合: カード内容は伏せカード記号 🂠 で隠蔽
+    // 伏せ防壁または非公開ユニットの場合: カード内容は伏せカード記号 🂠 で隠蔽 (相手視点のみ)
     let cardStr = "";
-    if (isBulwark && isFaceDown) {
+    if (isBulwark && isFaceDown && isOpponent) {
       cardStr = "🂠";
     } else if (unit?.cards && unit.cards.length > 0) {
       if (isOpponent && isFaceDown) {

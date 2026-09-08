@@ -53,6 +53,60 @@ describe("Playtest Target Presentation Tests", () => {
       expect(bulwarkOpponentLabels.secondaryLabel).not.toContain("♢8");
     });
 
+    it("A: viewer=p1, owner=p1 の伏せ防壁 (♢8) は primaryLabel: 'Player A の 防壁①', secondaryLabel/displayName で ♢8 が確認でき 🂠 ではないこと", () => {
+      const bulwarkUnit = {
+        unitId: "u-bulwark-p1",
+        kind: "防壁",
+        componentId: "character.bulwark",
+        state: "charge",
+        face: "down",
+        cards: [{ suit: "D", rank: 8 }],
+      };
+
+      const labels = PlaytestTargetPresenter.formatUnitTarget(
+        bulwarkUnit,
+        "p1",
+        [bulwarkUnit],
+        "p1" // viewer is p1, owner is p1
+      );
+
+      expect(labels.primaryLabel).toBe("Player A の 防壁①");
+      expect(labels.secondaryLabel).toContain("♢8");
+      expect(labels.secondaryLabel).toContain("charge");
+      expect(labels.secondaryLabel).not.toContain("🂠");
+      expect(labels.displayName).toBe("Player A の 防壁① [♢8] (charge)");
+      expect(labels.displayName).not.toContain("🂠");
+    });
+
+    it("B: viewer=p1, owner=p2 の伏せ防壁 (♢8) は ♢8 / D8 / rank 8 が漏洩せず 🂠 が表示されること", () => {
+      const bulwarkUnit = {
+        unitId: "u-bulwark-p2",
+        kind: "防壁",
+        componentId: "character.bulwark",
+        state: "charge",
+        face: "down",
+        cards: [{ suit: "D", rank: 8, code: "♢8" }],
+      };
+
+      const labels = PlaytestTargetPresenter.formatUnitTarget(
+        bulwarkUnit,
+        "p2",
+        [bulwarkUnit],
+        "p1" // viewer is p1, owner is p2
+      );
+
+      expect(labels.primaryLabel).toBe("Player B の 防壁①");
+      expect(labels.secondaryLabel).toContain("🂠");
+      expect(labels.secondaryLabel).toContain("charge");
+      expect(labels.secondaryLabel).not.toContain("♢8");
+      expect(labels.secondaryLabel).not.toContain("D8");
+      expect(labels.secondaryLabel).not.toContain("8");
+      expect(labels.displayName).toBe("Player B の 防壁① [🂠] (charge)");
+      expect(labels.displayName).not.toContain("♢8");
+      expect(labels.displayName).not.toContain("D8");
+      expect(labels.displayName).not.toContain("8");
+    });
+
     it("Playerターゲットのラベルを生成すること", () => {
       const labels = PlaytestTargetPresenter.formatPlayerTarget("p2");
       expect(labels.primaryLabel).toBe("Player B");
@@ -144,6 +198,68 @@ describe("Playtest Target Presentation Tests", () => {
       expect(bulwarkTarget!.primaryLabel).toBe("Player B の 防壁①");
       expect(bulwarkTarget!.secondaryLabel).toContain("🂠");
       expect(bulwarkTarget!.secondaryLabel).toContain("charge");
+    });
+
+    it("C: TargetSelectionEnumerator経由でも requesterPlayerKey=p1 に対し、A (自分p1の伏せ防壁: ♢8表示・🂠なし) と B (相手p2の伏せ防壁: 🂠表示・情報漏洩なし) が同じ契約になること", () => {
+      const state = createCoreBattlePresetState();
+      state.players.p1.field = [
+        {
+          unitId: "u-p1-bulwark",
+          kind: "防壁",
+          componentId: "character.bulwark",
+          state: "charge",
+          face: "down",
+          cards: [{ suit: "D", rank: 8, code: "♢8" }],
+        },
+      ];
+      state.players.p2.field = [
+        {
+          unitId: "u-p2-bulwark",
+          kind: "防壁",
+          componentId: "character.bulwark",
+          state: "charge",
+          face: "down",
+          cards: [{ suit: "D", rank: 8, code: "♢8" }],
+        },
+      ];
+
+      const targets = [
+        {
+          id: "target_unit",
+          type: "unit",
+          selector: "unit",
+          targetType: "unit",
+        },
+      ];
+
+      const results = TargetSelectionEnumerator.enumerateTargets(
+        { id: "action.destroyBulwark", name: "防壁破壊", targets } as any,
+        state,
+        "p1" // requester is p1
+      );
+
+      // A 検証: 自分の伏せ防壁 (♢8確認可能、🂠ではない)
+      const ownTarget = results.find((t) => t.targetUnitId === "u-p1-bulwark");
+      expect(ownTarget).toBeDefined();
+      expect(ownTarget!.primaryLabel).toBe("Player A の 防壁①");
+      expect(ownTarget!.secondaryLabel).toContain("♢8");
+      expect(ownTarget!.secondaryLabel).not.toContain("🂠");
+      expect(ownTarget!.displayName).toBe("Player A の 防壁① [♢8] (charge)");
+      expect(ownTarget!.displayName).not.toContain("🂠");
+
+      // B 検証: 相手の伏せ防壁 (♢8 / D8 / rank 8 が漏洩せず、🂠が表示される)
+      const oppTarget = results.find((t) => t.targetUnitId === "u-p2-bulwark");
+      expect(oppTarget).toBeDefined();
+      expect(oppTarget!.primaryLabel).toBe("Player B の 防壁①");
+      expect(oppTarget!.secondaryLabel).toContain("🂠");
+      expect(oppTarget!.secondaryLabel).toContain("charge");
+      expect(oppTarget!.secondaryLabel).not.toContain("♢8");
+      expect(oppTarget!.secondaryLabel).not.toContain("D8");
+      expect(oppTarget!.secondaryLabel).not.toContain("8");
+      expect(oppTarget!.displayName).toBe("Player B の 防壁① [🂠] (charge)");
+      expect(oppTarget!.displayName).not.toContain("♢8");
+      expect(oppTarget!.displayName).not.toContain("D8");
+      expect(oppTarget!.displayName).not.toContain("8");
     });
   });
 });

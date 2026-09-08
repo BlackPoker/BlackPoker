@@ -187,7 +187,7 @@ describe("Phase 21B.2: UI/UX Hardening & Bug Fix Tests", () => {
       }
     });
 
-    it("裏向き防壁の対象選択肢でカード内容が隠蔽 (🂠) されること", () => {
+    it("裏向き防壁の対象選択肢で、相手の防壁はカード内容が隠蔽 (🂠) され、自分の防壁はカード内容が表示されること", () => {
       const state = createCoreBattlePresetState();
       const destroyBulwarkAction = rulePackage.actions.find((a) => a.id === "action.destroyBulwark");
       if (destroyBulwarkAction) {
@@ -197,9 +197,16 @@ describe("Phase 21B.2: UI/UX Hardening & Bug Fix Tests", () => {
           "p1",
           rulePackage.components
         );
-        const bulwarkTarget = targets.find((t) => t.displayName?.includes("防壁"));
-        if (bulwarkTarget) {
-          expect(bulwarkTarget.displayName).toContain("🂠");
+        // 相手 (p2) の裏向き防壁は隠蔽されること
+        const opponentBulwark = targets.find((t) => t.targetPlayerKey === "p2" && t.displayName?.includes("防壁"));
+        if (opponentBulwark) {
+          expect(opponentBulwark.displayName).toContain("🂠");
+        }
+        // 自分 (p1) の裏向き防壁は本人にはカード内容が表示され 🂠 ではないこと
+        const ownBulwark = targets.find((t) => t.targetPlayerKey === "p1" && t.displayName?.includes("防壁"));
+        if (ownBulwark) {
+          expect(ownBulwark.displayName).not.toContain("🂠");
+          expect(ownBulwark.displayName).toContain("♢4");
         }
       }
     });
