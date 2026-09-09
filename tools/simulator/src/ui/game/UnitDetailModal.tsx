@@ -38,6 +38,15 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
   const cards: readonly any[] = Array.isArray(unit?.cards) ? unit.cards : [];
   const cardCount = cards.length;
 
+  // 公開ユニット分類の安全な解決（防壁、または unit.kind / unit.characterType が明示的に存在する場合のみ表示）
+  const classification = isBulwark
+    ? "防壁"
+    : (typeof unit?.kind === "string" && unit.kind.trim().length > 0
+        ? unit.kind.trim()
+        : (typeof unit?.characterType === "string" && unit.characterType.trim().length > 0
+            ? unit.characterType.trim()
+            : null));
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in cursor-default"
@@ -56,9 +65,11 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-sm font-bold font-serif">{unitDisplayName}</span>
-            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-100 border border-zinc-300 text-zinc-700 font-bold">
-              {isBulwark ? "防壁" : "兵士"}
-            </span>
+            {classification && (
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-100 border border-zinc-300 text-zinc-700 font-bold">
+                {classification}
+              </span>
+            )}
             <span
               className={`text-[9px] font-mono px-1.5 py-0.2 rounded font-bold ${
                 isDrive
@@ -88,7 +99,7 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
           <div>
             <span className="text-zinc-500 font-bold mr-1">状態:</span>
             <span className="font-black text-zinc-900">
-              {isDrive ? "DRIVE (行動済)" : "CHARGE (未行動)"}
+              {isDrive ? "DRIVE" : "CHARGE"}
             </span>
           </div>
           <div>

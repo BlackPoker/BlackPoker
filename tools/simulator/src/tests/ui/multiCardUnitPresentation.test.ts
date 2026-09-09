@@ -343,7 +343,9 @@ describe("Multi-card Unit Presentation Tests", () => {
 
       expect(html).toContain("unit-detail-modal-container");
       expect(html).toContain("魔王");
-      expect(html).toContain("DRIVE (行動済)");
+      expect(html).toContain("DRIVE");
+      expect(html).not.toContain("行動済");
+      expect(html).not.toContain("兵士");
       expect(html).toContain("24");
       expect(html).toContain("構成カード (3枚)");
       expect(html).toContain("#1");
@@ -384,4 +386,205 @@ describe("Multi-card Unit Presentation Tests", () => {
       expect(html).not.toContain("♡8");
     });
   });
+
+  describe("Generic Unit Detail Semantics Tests (UI Phase 2.8-R1)", () => {
+    it("A: 防壁ではないGeneric Unitに対し、自動的に「兵士」という文字列を付与しない", () => {
+      const genericUnit = {
+        unitId: "u-generic-1",
+        cards: [
+          { suit: "S", rank: 10 },
+          { suit: "H", rank: 8 },
+        ],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: genericUnit,
+          unitDisplayName: "魔王",
+          isBulwark: false,
+          isDrive: true,
+          displaySize: 18,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("魔王");
+      expect(html).not.toContain("兵士");
+    });
+
+    it("B: unitDisplayName='魔王'のようなGeneric UnitでもDetail Modalが正常描画される", () => {
+      const demonUnit = {
+        unitId: "u-demon-boss",
+        cards: [
+          { suit: "S", rank: 10, code: "S10" },
+          { suit: "H", rank: 10, code: "H10" },
+          { suit: "D", rank: 10, code: "D10" },
+        ],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: demonUnit,
+          unitDisplayName: "魔王",
+          isBulwark: false,
+          isDrive: false,
+          displaySize: 30,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("unit-detail-modal-container");
+      expect(html).toContain("魔王");
+      expect(html).toContain("構成カード (3枚)");
+      expect(html).toContain("30");
+      expect(html).toContain("CHARGE");
+    });
+
+    it("C: DRIVE時に「行動済」の文字列が存在しない", () => {
+      const unit = {
+        unitId: "u-test-drive",
+        cards: [{ suit: "S", rank: 5 }],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: unit,
+          unitDisplayName: "巨人",
+          isBulwark: false,
+          isDrive: true,
+          displaySize: 5,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("DRIVE");
+      expect(html).not.toContain("行動済");
+      expect(html).not.toContain("未行動");
+    });
+
+    it("D: CHARGE時に「未行動」の文字列が存在しない", () => {
+      const unit = {
+        unitId: "u-test-charge",
+        cards: [{ suit: "H", rank: 3 }],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: unit,
+          unitDisplayName: "リアニメーター",
+          isBulwark: false,
+          isDrive: false,
+          displaySize: 3,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("CHARGE");
+      expect(html).not.toContain("未行動");
+      expect(html).not.toContain("行動済");
+    });
+
+    it("E: CHARGE / DRIVE 自体は表示される", () => {
+      const chargeHtml = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: { cards: [{ suit: "C", rank: 2 }] },
+          unitDisplayName: "ユニットA",
+          isBulwark: false,
+          isDrive: false,
+          displaySize: 2,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+      expect(chargeHtml).toContain("状態:");
+      expect(chargeHtml).toContain("CHARGE");
+
+      const driveHtml = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: { cards: [{ suit: "C", rank: 2 }] },
+          unitDisplayName: "ユニットA",
+          isBulwark: false,
+          isDrive: true,
+          displaySize: 2,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+      expect(driveHtml).toContain("状態:");
+      expect(driveHtml).toContain("DRIVE");
+    });
+
+    it("F: isBulwark=true の場合は「防壁」バッジが表示される", () => {
+      const bulwarkUnit = {
+        unitId: "u-bulwark-detail",
+        componentId: "character.bulwark",
+        kind: "防壁",
+        cards: [{ suit: "D", rank: 8, code: "D8" }],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: bulwarkUnit,
+          unitDisplayName: "防壁①",
+          isBulwark: true,
+          isDrive: false,
+          displaySize: "?",
+          bulwarkRank: "8",
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("防壁①");
+      expect(html).toContain("防壁");
+      expect(html).toContain("防壁数字:");
+      expect(html).toContain("8");
+    });
+
+    it("G: 明示的な kind を持つユニットはその分類バッジが表示される", () => {
+      const soldierUnit = {
+        unitId: "u-soldier-detail",
+        kind: "兵士",
+        cards: [{ suit: "S", rank: 7, code: "S7" }],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: soldierUnit,
+          unitDisplayName: "兵士①",
+          isBulwark: false,
+          isDrive: false,
+          displaySize: 7,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+
+      expect(html).toContain("兵士①");
+      expect(html).toContain("兵士");
+      expect(html).toContain("SIZE:");
+      expect(html).toContain("7");
+    });
+  });
 });
+
