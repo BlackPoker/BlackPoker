@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { CardView } from "./CardView";
+import { MultiCardUnitStack } from "./MultiCardUnitStack";
+import { UnitDetailModal } from "./UnitDetailModal";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { getUnitDisplayName } from "../../engine/rules/characterUtils";
 
@@ -31,6 +33,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   const isDrive = unit.state === "drive";
   const battleRole = battleDisplayInfo?.role || unit.battle?.role;
   const unitDisplayName = getUnitDisplayName(unit, field);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   // サイズ合計の計算（兵士のみ）
   const isHiddenFromViewer = isFaceDown && !showCardDetails;
@@ -38,9 +41,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0)
     : 0;
 
-  // Engine の calculateUnitSize 結果 (currentSize) があればそれを最優先
-  const displaySize = unit.currentSize !== undefined
-    ? unit.currentSize
+  // Engine の calculateUnitSize 結果 (currentSize) や unit.size があればそれを優先
+  const unitSizeVal = unit.currentSize !== undefined ? unit.currentSize : unit.size;
+  const displaySize = unitSizeVal !== undefined
+    ? unitSizeVal
     : (isHiddenFromViewer ? "?" : baseSize);
 
   // 防壁の記載数字（本人には見える、相手には秘匿）
@@ -139,23 +143,18 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           isDrive ? "rotate-90 scale-95 my-3" : "my-1"
         }`}
       >
-        {showCardDetails || !isFaceDown ? (
-          Array.isArray(unit.cards) && unit.cards.length > 0 ? (
-            unit.cards.map((card: any, idx: number) => (
-              <CardView key={card.id || idx} card={card} faceDown={isFaceDown && !showCardDetails} size="sm" />
-            ))
-          ) : (
-            <div className="text-xs text-zinc-400 italic py-2">カードなし</div>
-          )
-        ) : (
-          <CardView faceDown={true} size="sm" />
-        )}
+        <MultiCardUnitStack
+          cards={Array.isArray(unit.cards) ? unit.cards : []}
+          faceDown={isFaceDown && !showCardDetails}
+          isDrive={isDrive}
+          onOpenDetail={() => setShowDetailModal(true)}
+        />
       </div>
 
-      {/* Fog バッジ一覧表示 (兵士のみ) */}
+      {/* Fog 表示 (Secondary補足情報: 横並びwrap・小さなchip) */}
       {!isBulwark && fogs && fogs.length > 0 && (
-        <div className="w-full my-1 flex flex-col gap-0.5">
-          {fogs.map((f, idx) => {
+        <div className="w-full my-0.5 flex flex-wrap items-center justify-center gap-0.5">
+          {fogs.slice(0, 3).map((f, idx) => {
             const amount = f.bindings?.amount || 0;
             const isUp = amount > 0;
             const cardCode = f.card?.code || (f.card?.suit && f.card?.rank ? `${f.card.suit}${f.card.rank}` : "");
@@ -167,24 +166,30 @@ export const UnitCard: React.FC<UnitCardProps> = ({
             const ownerLabel = f.ownerPlayerId === "p1" ? "A" : f.ownerPlayerId === "p2" ? "B" : "";
 
             return (
-              <div
+              <span
                 key={f.fogId || idx}
-                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded flex items-center justify-between border bg-zinc-100 border-zinc-300 text-zinc-900"
+                className="text-[8px] font-mono font-medium px-1 py-0 rounded bg-zinc-100 border border-zinc-200 text-zinc-600 inline-flex items-center gap-0.5"
                 title={`Fog: ${isUp ? "アップ" : "ダウン"} (${amount >= 0 ? `+${amount}` : amount}) ${ownerLabel ? `by Player ${ownerLabel}` : ""}`}
+                data-testid="fog-chip"
               >
-                <span className="flex items-center gap-0.5">
-                  <span className="font-extrabold">{isUp ? "↑" : "↓"}</span>
-                  <span className="font-black">{amount >= 0 ? `+${amount}` : amount}</span>
-                  {formattedCard && <span className="font-bold ml-0.5 text-zinc-700">[{formattedCard}]</span>}
-                </span>
-                {ownerLabel && (
-                  <span className="text-[8px] text-zinc-500 font-mono">
-                    {ownerLabel}
-                  </span>
-                )}
-              </div>
+                <span>{`${isUp ? "↑" : "↓"}${Math.abs(amount)}`}</span>
+                {formattedCard && <span className="text-zinc-500 font-normal">[{formattedCard}]</span>}
+              </span>
             );
           })}
+          {fogs.length > 3 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowDetailModal(true);
+              }}
+              className="text-[8px] font-mono px-1 py-0 rounded bg-zinc-200/80 text-zinc-600 hover:bg-zinc-300"
+              title="他Fogの詳細を表示"
+            >
+              {`+${fogs.length - 3}`}
+            </button>
+          )}
         </div>
       )}
 
@@ -207,6 +212,20 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         )}
       </div>
 
+      {/* 複数枚構成/詳細モーダル */}
+      <UnitDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        unit={unit}
+        unitDisplayName={unitDisplayName}
+        isBulwark={isBulwark}
+        isDrive={isDrive}
+        displaySize={displaySize}
+        bulwarkRank={bulwarkRank}
+        showCardDetails={showCardDetails}
+        isFaceDown={isFaceDown}
+        fogs={fogs}
+      />
     </div>
   );
 };

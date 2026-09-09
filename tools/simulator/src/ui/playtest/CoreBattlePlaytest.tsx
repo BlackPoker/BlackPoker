@@ -1250,8 +1250,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       {/* 4. Mobile 対戦ログモーダル */}
       {showMobileLogModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
-          <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[85vh]">
-            <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
+          <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[85vh] min-h-0">
+            <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2 shrink-0">
               <h3 className="text-sm font-bold text-zinc-950 font-serif">対戦ログ (Game Log)</h3>
               <button
                 onClick={() => setShowMobileLogModal(false)}
@@ -1260,7 +1260,7 @@ export const CoreBattlePlaytest: React.FC = () => {
                 ✕
               </button>
             </div>
-            <div className="flex-1 overflow-hidden flex flex-col min-h-[300px]">
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               <GameLog logs={logs} />
             </div>
           </div>
