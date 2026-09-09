@@ -54,16 +54,28 @@ describe("GameLog Scroll & Readability Tests", () => {
   describe("Clipboard Copy Chronological Order Contract", () => {
     it("コピーされるテキストは常に古い順（過去→現在）であること", () => {
       let copiedText = "";
-      const originalClipboard = (globalThis as any).navigator?.clipboard;
-      Object.defineProperty(globalThis.navigator, "clipboard", {
-        value: {
-          writeText: async (text: string) => {
-            copiedText = text;
+      const hadNavigator = typeof (globalThis as any).navigator !== "undefined";
+      const originalClipboard = hadNavigator ? (globalThis as any).navigator.clipboard : undefined;
+
+      if (!hadNavigator) {
+        (globalThis as any).navigator = {
+          clipboard: {
+            writeText: async (text: string) => {
+              copiedText = text;
+            },
           },
-        },
-        configurable: true,
-        writable: true,
-      });
+        };
+      } else {
+        Object.defineProperty((globalThis as any).navigator, "clipboard", {
+          value: {
+            writeText: async (text: string) => {
+              copiedText = text;
+            },
+          },
+          configurable: true,
+          writable: true,
+        });
+      }
 
       const mockLogs: LogEntry[] = [
         { id: "1", seq: 1, level: "action", message: "Step 1: P1 Action", timestamp: "00:01" },
@@ -86,8 +98,10 @@ describe("GameLog Scroll & Readability Tests", () => {
       expect(idx2).toBeLessThan(idx3);
 
       // Restore clipboard
-      if (originalClipboard) {
-        Object.defineProperty(globalThis.navigator, "clipboard", {
+      if (!hadNavigator) {
+        delete (globalThis as any).navigator;
+      } else if (originalClipboard) {
+        Object.defineProperty((globalThis as any).navigator, "clipboard", {
           value: originalClipboard,
           configurable: true,
           writable: true,
