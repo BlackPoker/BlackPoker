@@ -169,6 +169,119 @@ describe("Entry16 Reachable Missing Actions End-to-End Tests (Hero, Ace, Mount)"
     expect(size).toBe(13);
   });
 
+  it("3b. 装備 (action.mountSoldier): 同一ターンに条件を満たせば複数回合法アクションとして列挙可能 (usageLimitなし回帰検証)", () => {
+    const mountAction = officialRulePackage.actions.find((a: any) => a.id === "action.mountSoldier");
+    expect(mountAction).toBeDefined();
+    // usageLimit が未定義であることを確認
+    expect(mountAction.usageLimit).toBeUndefined();
+
+    const state: any = {
+      turnCount: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnUsage: {},
+      stage: { requests: [], history: [] },
+      players: {
+        p1: {
+          life: [
+            { id: "l1", suit: "H", rank: "2", value: 2 },
+            { id: "l2", suit: "D", rank: "3", value: 3 },
+          ],
+          hand: [
+            { id: "h-s8", suit: "S", rank: "8", value: 8 },
+            { id: "h-s10", suit: "S", rank: "10", value: 10 },
+          ],
+          field: [
+            {
+              unitId: "bw-1",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              cards: [{ id: "c-bw1", suit: "D", rank: "4" }],
+            },
+            {
+              unitId: "bw-2",
+              kind: "防壁",
+              componentId: "character.bulwark",
+              state: "charge",
+              cards: [{ id: "c-bw2", suit: "C", rank: "6" }],
+            },
+            {
+              unitId: "soldier-s5",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [{ id: "c-s5", suit: "S", rank: "5", value: 5 }],
+              labels: ["攻撃", "防御"],
+            },
+          ],
+          grave: [],
+        },
+        p2: {
+          life: [{ id: "p2-l1", suit: "C", rank: "4", value: 4 }],
+          hand: [],
+          field: [],
+          grave: [],
+        },
+      },
+    };
+
+    // 1. 初回: action.mountSoldier の合法パターンが存在すること
+    const { request: req1 } = LegalPatternGenerator.generateActionRequestDecision(state, "p1", officialRulePackage);
+    const mountActionRef1 = req1.catalog.actions.findIndex((a) => a.actionId === "action.mountSoldier");
+    expect(mountActionRef1).not.toBe(-1);
+    const mountPatterns1 = req1.patterns.filter((p) => p.actionSelectionRef === mountActionRef1);
+    expect(mountPatterns1.length).toBeGreaterThan(0);
+
+    // 2. 1回目の装備を実行して解決 (h-s8 を soldier-s5 に装備)
+    const effectCmd = mountAction.effect?.find((e: any) => e.mountUnit);
+    expect(effectCmd).toBeDefined();
+
+    const player1 = state.players.p1;
+    const targetSoldier = player1.field.find((u: any) => u.unitId === "soldier-s5");
+    const context1: any = {
+      state,
+      playerKey: "p1",
+      keyCard: player1.hand[0], // h-s8
+      targetUnitId: "soldier-s5",
+      targetComponent: targetSoldier,
+      components: officialRulePackage.components,
+    };
+
+    // コストBL支払い (防壁 bw-1 を drive、Life 1枚を Grave へ)
+    const bw1 = player1.field.find((u: any) => u.unitId === "bw-1");
+    bw1.state = "drive";
+    const blCard = player1.life.shift();
+    player1.grave.push(blCard);
+    // 手札からキーカードを消費して装備
+    player1.hand.shift();
+
+    // mountUnit 実行
+    registry.execute("mountUnit", (effectCmd as any).mountUnit, context1);
+
+    // 1回目の使用回数を記録
+    if (!state.turnUsage.p1) state.turnUsage.p1 = {};
+    state.turnUsage.p1["action.mountSoldier"] = 1;
+
+    // 装備兵にアップグレードされていることを確認
+    const armedUnit = player1.field.find((u: any) => u.unitId === "soldier-s5");
+    expect(armedUnit.componentId).toBe("character.armedSoldier");
+    expect(armedUnit.kind).toBe("装備兵");
+    expect(armedUnit.cards.length).toBe(2);
+
+    // 3. 同じターン内、Stage empty、chancePlayer=p1、別キーカード (h-s10) が手札にあり、コストBL支払い可能
+    // 装備兵も characterType === "soldier" かつ suit === "S" であり、合法対象として再度装備可能
+    const { request: req2 } = LegalPatternGenerator.generateActionRequestDecision(state, "p1", officialRulePackage);
+    const mountActionRef2 = req2.catalog.actions.findIndex((a) => a.actionId === "action.mountSoldier");
+    expect(mountActionRef2).not.toBe(-1);
+    const mountPatterns2 = req2.patterns.filter((p) => p.actionSelectionRef === mountActionRef2);
+
+    // turnUsage に 1 回の記録があっても usageLimit がないため、2回目の装備パターンが正常に列挙されること
+    expect(mountPatterns2.length).toBeGreaterThan(0);
+    expect(state.turnUsage.p1["action.mountSoldier"]).toBe(1);
+  });
+
+
   it("4. サーチ (action.search): Present in Light RulePackage but DECLARED_UNREACHABLE_IN_ENTRY16", () => {
     const searchAction = officialRulePackage.actions.find((a: any) => a.id === "action.search");
     expect(searchAction).toBeDefined();

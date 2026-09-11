@@ -1,4 +1,5 @@
 import React from "react";
+import { createPortal } from "react-dom";
 import { CardView } from "./CardView";
 
 export interface UnitDetailModalProps {
@@ -47,7 +48,7 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
             ? unit.characterType.trim()
             : null));
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in cursor-default"
       onClick={(e) => {
@@ -179,4 +180,10 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
       </div>
     </div>
   );
+
+  if (typeof document !== "undefined" && document.body) {
+    return createPortal(modalContent, document.body);
+  }
+
+  return modalContent;
 };

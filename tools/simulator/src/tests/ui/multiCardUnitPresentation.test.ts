@@ -585,6 +585,79 @@ describe("Multi-card Unit Presentation Tests", () => {
       expect(html).toContain("SIZE:");
       expect(html).toContain("7");
     });
+
+    it("Test I: UnitDetailModal は document が存在する場合 createPortal を呼び出して document.body 直下にポータル化すること", () => {
+      const mockBody = { nodeType: 1 } as unknown as HTMLElement;
+      const originalDocument = (globalThis as any).document;
+      try {
+        (globalThis as any).document = { body: mockBody };
+        const element = React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: { cards: [{ suit: "S", rank: 7 }] },
+          unitDisplayName: "兵士",
+          isBulwark: false,
+          isDrive: true,
+          displaySize: 7,
+          showCardDetails: true,
+          isFaceDown: false,
+        });
+        const rendered = (element.type as any)(element.props);
+        expect(rendered).toBeDefined();
+        // createPortal が生成するオブジェクトの containerInfo が document.body であること
+        expect(rendered.containerInfo).toBe(mockBody);
+      } finally {
+        (globalThis as any).document = originalDocument;
+      }
+    });
+
+    it("Test J: DRIVE状態の複数枚構成ユニット（装備兵など）のモーダルが正常に描画されること", () => {
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: {
+            cards: [
+              { suit: "S", rank: 7, code: "S7" },
+              { suit: "H", rank: 4, code: "H4" },
+            ],
+          },
+          unitDisplayName: "装備兵",
+          isBulwark: false,
+          isDrive: true,
+          displaySize: 7,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+      expect(html).toContain("装備兵");
+      expect(html).toContain("DRIVE");
+      expect(html).toContain("構成カード (2枚)");
+      expect(html).toContain("♠");
+      expect(html).toContain("♡");
+    });
+
+    it("Test K: CHARGE状態の単体ユニットのモーダルが正常に描画されること", () => {
+      const html = renderToString(
+        React.createElement(UnitDetailModal, {
+          isOpen: true,
+          onClose: () => {},
+          unit: {
+            cards: [{ suit: "C", rank: 2, code: "C2" }],
+          },
+          unitDisplayName: "兵士A",
+          isBulwark: false,
+          isDrive: false,
+          displaySize: 2,
+          showCardDetails: true,
+          isFaceDown: false,
+        })
+      );
+      expect(html).toContain("兵士A");
+      expect(html).toContain("CHARGE");
+      expect(html).toContain("構成カード (1枚)");
+      expect(html).toContain("♣");
+    });
   });
 });
 

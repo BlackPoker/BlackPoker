@@ -863,7 +863,12 @@ export const CoreBattlePlaytest: React.FC = () => {
 
             {isOfficialEnvironment(selectedEnvironmentId) && (
               <>
-                <span className="text-[9px] font-bold text-zinc-400 ml-1">Seed:</span>
+                <span
+                  className="text-[9px] font-bold text-zinc-400 ml-1 cursor-help"
+                  title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+                >
+                  再現SEED:
+                </span>
                 <input
                   type="text"
                   inputMode="numeric"
@@ -872,6 +877,7 @@ export const CoreBattlePlaytest: React.FC = () => {
                   onChange={(e) => setSeedInput(e.target.value)}
                   className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
                   placeholder="42"
+                  title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
                 />
               </>
             )}

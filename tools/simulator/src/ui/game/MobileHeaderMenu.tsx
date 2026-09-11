@@ -99,8 +99,11 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
         {/* Seed 入力 (Official 環境のみ条件付き表示) */}
         {showSeedInput && (
           <div className="flex flex-col gap-1">
-            <label className="text-[11px] font-mono font-bold text-zinc-500">
-              Seed (乱数シード・非負整数):
+            <label
+              className="text-[11px] font-mono font-bold text-zinc-500 cursor-help"
+              title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+            >
+              再現SEED (乱数シード・非負整数):
             </label>
             <input
               type="text"
@@ -110,6 +113,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
               onChange={(e) => onSeedInputChange?.(e.target.value)}
               className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
               placeholder="42"
+              title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
             />
           </div>
         )}

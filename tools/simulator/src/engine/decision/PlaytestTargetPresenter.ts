@@ -1,7 +1,7 @@
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { getUnitDisplayName } from "../rules/characterUtils";
-import { formatSuitSymbol } from "../rules/cardUtils";
+import { formatSuitSymbol, formatCardDisplay } from "../rules/cardUtils";
 
 export interface FormattedTargetLabels {
   readonly primaryLabel: string;
@@ -27,7 +27,25 @@ export class PlaytestTargetPresenter {
     const primaryLabel = `${cName}: ${actName}`;
     const reqId = req?.id || "";
     const isStageTop = isTop ?? true;
-    const secondaryLabel = `Stage ${isStageTop ? "TOP " : ""}[${reqId}]`;
+
+    // keyCards の抽出とカード表示の生成
+    const rawKeyCards = Array.isArray(req?.keyCards)
+      ? req.keyCards
+      : req?.keyCard
+      ? [req.keyCard]
+      : [];
+
+    const validKeyCards = rawKeyCards.filter((c: any) => c && (c.suit || c.rank || c.code));
+    let keyStr = "";
+    if (validKeyCards.length > 0) {
+      keyStr = validKeyCards
+        .map((c: any) => formatCardDisplay(c))
+        .filter((str: string) => str.length > 0)
+        .join(" + ");
+    }
+
+    const stagePart = `Stage ${isStageTop ? "TOP " : ""}[${reqId}]`;
+    const secondaryLabel = keyStr ? `Key: ${keyStr} ・ ${stagePart}` : stagePart;
     const displayName = `${primaryLabel} (${secondaryLabel})`;
 
     return {

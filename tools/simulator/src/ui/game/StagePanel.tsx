@@ -90,7 +90,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
 
             let borderAndBgClass = "bg-white border-zinc-200 text-zinc-800";
             if (isHighlighted) {
-              borderAndBgClass = "bg-amber-50/80 border-amber-500 shadow-md ring-2 ring-amber-500 text-zinc-950";
+              borderAndBgClass = "bg-zinc-100 border-2 border-zinc-950 shadow-md ring-2 ring-zinc-950 text-zinc-950";
             } else if (isTop) {
               borderAndBgClass = "bg-zinc-50 border-zinc-950 shadow-sm ring-1 ring-zinc-950 text-zinc-950";
             }
@@ -105,15 +105,13 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
                 <div className="flex items-center justify-between gap-1">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     {isHighlighted && (
-                      <span className="bg-amber-500 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm animate-pulse">
+                      <span className="bg-zinc-950 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm">
                         TARGETED
                       </span>
                     )}
                     <span
                       className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
-                        isHighlighted
-                          ? "bg-amber-600 text-white"
-                          : isTop
+                        isTop
                           ? "bg-zinc-950 text-white shadow-sm"
                           : "bg-zinc-100 text-zinc-700 border border-zinc-300"
                       }`}

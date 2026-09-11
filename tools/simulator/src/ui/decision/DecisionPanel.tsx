@@ -12,6 +12,9 @@ export interface DecisionPanelProps {
   readonly onSelectionMarkersChange?: (markers: Map<string, { badge: string; isSelected: boolean }>) => void;
   readonly selectedUnitIdsFromBoard?: string[];
   readonly onHighlightRequest?: (requestId?: string) => void;
+  readonly initialActionRef?: number;
+  readonly initialCostRef?: number;
+  readonly initialTargetRef?: number;
 }
 
 export const DecisionPanel: React.FC<DecisionPanelProps> = ({
@@ -20,15 +23,18 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   onSelectionMarkersChange,
   selectedUnitIdsFromBoard,
   onHighlightRequest,
+  initialActionRef,
+  initialCostRef,
+  initialTargetRef,
 }) => {
   const catalog = request.catalog;
   const patterns = request.patterns;
 
   // 選択状態
-  const [selectedActionRef, setSelectedActionRef] = useState<number | null>(null);
+  const [selectedActionRef, setSelectedActionRef] = useState<number | null>(initialActionRef ?? null);
   const [selectedKeyRef, setSelectedKeyRef] = useState<number | null>(null);
-  const [selectedCostRef, setSelectedCostRef] = useState<number | null>(null);
-  const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(null);
+  const [selectedCostRef, setSelectedCostRef] = useState<number | null>(initialCostRef ?? null);
+  const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(initialTargetRef ?? null);
   const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
 
   // decisionId 切替時の選択状態リセット (Defense-in-depth)
@@ -187,6 +193,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   const handleSelectTarget = (targetRef: number) => {
     setSelectedTargetRef(targetRef);
+    const target = catalog.targetSelections[targetRef];
+    onHighlightRequest?.(target?.targetRequestId);
   };
 
 
@@ -207,7 +215,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
     // catalog.effectSelections に含まれる unitId を収集
     const candidateUnitIds = new Set<string>();
-    for (const eff of catalog.effectSelections) {
+    for (const eff of (catalog.effectSelections || [])) {
       if (eff.selectedValues) {
         for (const uId of eff.selectedValues) {
           candidateUnitIds.add(uId);
@@ -379,8 +387,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   };
 
   // EFFECT_RESOLUTION 時の UI
-  if (request.source.type === "EFFECT_RESOLUTION") {
-    const isBlockAssignment = catalog.effectSelections.some(
+  if (request.source?.type === "EFFECT_RESOLUTION") {
+    const isBlockAssignment = (catalog.effectSelections || []).some(
       (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
     );
 
@@ -618,25 +626,33 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                       const current = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
                       onHighlightRequest?.(current?.targetRequestId);
                     }}
-                    className={`rounded border p-2 text-left transition flex flex-col justify-center ${
+                    className={`rounded p-2 text-left transition flex flex-col justify-center ${
                       isSelected
-                        ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
-                        : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
+                        ? "border-2 border-zinc-950 ring-1 ring-zinc-950 bg-zinc-100 text-zinc-950 shadow-sm"
+                        : "border border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
                     }`}
                   >
-                    <span className="font-bold text-xs leading-snug">
-                      {target.primaryLabel || target.displayName}
-                    </span>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-bold text-xs leading-snug">
+                        {target.primaryLabel || target.displayName}
+                      </span>
+                      {isSelected && (
+                        <span className="text-[9px] font-mono font-bold px-1 rounded bg-zinc-950 text-white shrink-0 ml-1">
+                          SELECTED
+                        </span>
+                      )}
+                    </div>
                     {target.secondaryLabel && (
                       <span
                         className={`text-[10px] font-mono leading-tight mt-0.5 ${
-                          isSelected ? "text-zinc-300" : "text-zinc-500"
+                          isSelected ? "text-zinc-700 font-medium" : "text-zinc-500"
                         }`}
                       >
                         {target.secondaryLabel}
                       </span>
                     )}
                   </button>
+
                 );
               })}
             </div>
