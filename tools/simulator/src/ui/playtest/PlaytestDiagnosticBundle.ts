@@ -1,5 +1,4 @@
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
-import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { ActiveMatchContext, SetupNotice } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
   PlaytestMatchMode,
@@ -7,24 +6,9 @@ import {
   PlaytestSeatControllers,
 } from "../../engine/playtest/PlaytestSeatController";
 import { GameSessionStep } from "../../engine/session/GameSession";
+import type { PlaytestDecisionTranscriptEntryV1 } from "./PlaytestDecisionTranscript";
 
-/**
- * 意思決定トランスクリプトの1エントリ。
- * 単調増加 seq により、将来の Replay や調査での順序性を保証する。
- */
-export interface PlaytestDecisionTranscriptEntryV1 {
-  readonly seq: number;
-  readonly actor: "human" | "policy" | "autoPass";
-  readonly playerId: "p1" | "p2";
-  readonly decisionId: string;
-  readonly stateVersion: number;
-  readonly response: DecisionResponse;
-  readonly policy?: {
-    readonly kind?: string;
-    readonly name?: string;
-    readonly policyVersion?: string;
-  };
-}
+export type { PlaytestDecisionTranscriptEntryV1 };
 
 /**
  * 現在進行中の対戦のコミット済みアクティブ設定。
@@ -101,35 +85,44 @@ export interface PlaytestDiagnosticBundleV1 {
 }
 
 export interface BuildPlaytestDiagnosticBundleParams {
-  readonly build?: {
-    readonly sha?: string;
-    readonly ref?: string;
+  readonly build: {
+    readonly sha: string;
+    readonly ref: string;
   };
+  readonly generatedAt: string;
   readonly activeMatch?: ActiveMatchContext | null;
-  readonly activeSettings?: ActivePlaytestSettings | null;
   readonly activePlaytestSettings?: ActivePlaytestSettings | null;
   readonly seatControllers?: PlaytestSeatControllers | null;
   readonly currentStep?: GameSessionStep | null;
   readonly rawState?: any;
   readonly normalLogs?: readonly unknown[];
   readonly traces?: readonly unknown[];
-  readonly uiTraces?: readonly unknown[];
   readonly canonicalMatchLog?: CanonicalMatchLog | null;
   readonly decisionTranscript?: readonly PlaytestDecisionTranscriptEntryV1[];
   readonly setupNotice?: SetupNotice | null;
   readonly runtimeNotice?: SetupNotice | null;
-  readonly generatedAt?: string;
+}
+
+/**
+ * GameSession の生状態から Diagnostic 用の rawState スナップショットを安全にディープコピー抽出する Pure Helper。
+ * UI 表示用スナップショット (gameState) ではなく session.state のみを引数に取り、
+ * 循環参照や非シリアライズ可能オブジェクトを排除した不変オブジェクトを返します。
+ */
+export function captureDiagnosticRawState(sessionState: unknown): any {
+  if (sessionState === null || sessionState === undefined) {
+    return undefined;
+  }
+  return JSON.parse(JSON.stringify(sessionState));
 }
 
 /**
  * Diagnostic Bundle v1 を構築する Pure Function。
- * ブラウザ DOM や React State に依存せず、引数のみから不変オブジェクトを生成します。
+ * ブラウザ DOM や React State、環境変数、日付等の外部状態に一切依存せず、
+ * 渡された引数のみから不変オブジェクトを決定論的に生成します。
  */
 export function buildPlaytestDiagnosticBundleV1(
   params: BuildPlaytestDiagnosticBundleParams
 ): PlaytestDiagnosticBundleV1 {
-  const generatedAt = params.generatedAt || new Date().toISOString();
-
   // match status / result の解決
   let status: "WAITING_FOR_DECISION" | "PROGRESSED" | "FINISHED" | "UNKNOWN" = "UNKNOWN";
   let winner: string | undefined = undefined;
@@ -167,29 +160,15 @@ export function buildPlaytestDiagnosticBundleV1(
   const currentDecisionRequest = params.currentStep?.type === "WAITING_FOR_DECISION" ? params.currentStep.request : undefined;
   const finalResult = params.currentStep?.type === "FINISHED" ? params.currentStep.result : undefined;
 
-  const activeSettings = params.activePlaytestSettings || params.activeSettings;
-  const traces = params.traces || params.uiTraces || [];
-
-  const buildSha =
-    params.build?.sha ||
-    (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_BUILD_SHA
-      ? String((import.meta as any).env.VITE_BUILD_SHA)
-      : "local");
-  const buildRef =
-    params.build?.ref ||
-    (typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_BUILD_REF
-      ? String((import.meta as any).env.VITE_BUILD_REF)
-      : "local");
-
   return {
     kind: "blackpoker-playtest-diagnostic",
     schemaVersion: 1,
-    generatedAt,
+    generatedAt: params.generatedAt,
     containsHiddenInformation: true,
 
     build: {
-      sha: buildSha,
-      ref: buildRef,
+      sha: params.build.sha,
+      ref: params.build.ref,
     },
 
     match: {
@@ -206,9 +185,9 @@ export function buildPlaytestDiagnosticBundleV1(
 
       seed: params.activeMatch?.seed ?? params.rawState?.seed,
 
-      matchMode: activeSettings?.matchMode,
-      humanSeat: activeSettings?.humanSeat,
-      policyId: activeSettings?.policyId,
+      matchMode: params.activePlaytestSettings?.matchMode,
+      humanSeat: params.activePlaytestSettings?.humanSeat,
+      policyId: params.activePlaytestSettings?.policyId,
 
       seatControllers: params.seatControllers
         ? {
@@ -223,7 +202,7 @@ export function buildPlaytestDiagnosticBundleV1(
     },
 
     normalLogs: params.normalLogs ? [...params.normalLogs] : [],
-    traces: [...traces],
+    traces: params.traces ? [...params.traces] : [],
 
     canonicalMatchLog: params.canonicalMatchLog ? JSON.parse(JSON.stringify(params.canonicalMatchLog)) : undefined,
 

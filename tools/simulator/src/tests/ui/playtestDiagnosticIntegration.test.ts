@@ -3,12 +3,21 @@ import { downloadJsonFile } from "../../ui/utils/downloadJson";
 import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
-  PlaytestDecisionTranscriptEntryV1,
+  captureDiagnosticRawState,
   ActivePlaytestSettings,
 } from "../../ui/playtest/PlaytestDiagnosticBundle";
+import {
+  PlaytestDecisionTranscriptEntryV1,
+  createDecisionTranscriptEntry,
+  createAutomatedDecisionTranscriptEntries,
+} from "../../ui/playtest/PlaytestDecisionTranscript";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
+import { AutomatedDecisionRecord } from "../../engine/playtest/HumanVsPolicyController";
 
 describe("Playtest Diagnostic Integration Tests", () => {
+  const dummyBuild = { sha: "63cc8b7", ref: "refs/heads/main" };
+  const dummyGeneratedAt = "2026-09-12T00:30:00.000Z";
+
   describe("Test K: downloadJsonFile DOM/Blob API mock (no network)", () => {
     let savedDocument: any;
     let savedWindow: any;
@@ -93,58 +102,13 @@ describe("Playtest Diagnostic Integration Tests", () => {
     });
   });
 
-  describe("Decision Transcript Contract & Sequencing Tests (Tests L, M, N, O, P, Q, R, D-ext)", () => {
-    function createTranscriptRecorder() {
-      let seq = 1;
+  describe("Production Shared Transcript Helper Contract Tests (Tests L, M, N, O, P, Q, R, D-ext)", () => {
+    it("Test L: Human Decision 受理後 -> 本番共通 helper (createDecisionTranscriptEntry) で actor=human として記録されること", () => {
       const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
 
-      function append(entry: {
-        actor: "human" | "policy" | "autoPass";
-        playerId: "p1" | "p2";
-        decisionId: string;
-        stateVersion: number;
-        response: DecisionResponse;
-        policy?: {
-          kind: string;
-          name?: string;
-          policyVersion?: string;
-        };
-      }) {
-        const currentSeq = seq++;
-        transcript.push({
-          seq: currentSeq,
-          actor: entry.actor,
-          playerId: entry.playerId,
-          decisionId: entry.decisionId,
-          stateVersion: entry.stateVersion,
-          response: {
-            decisionId: entry.response.decisionId,
-            stateVersion: entry.response.stateVersion,
-            selectedPatternRef: entry.response.selectedPatternRef,
-          },
-          policy: entry.policy
-            ? {
-                kind: entry.policy.kind,
-                name: entry.policy.name,
-                policyVersion: entry.policy.policyVersion,
-              }
-            : undefined,
-        });
-      }
-
-      function reset() {
-        seq = 1;
-        transcript.length = 0;
-      }
-
-      return { append, reset, getTranscript: () => [...transcript], getSeq: () => seq };
-    }
-
-    it("Test L: Human 意思決定の記録 (actor='human'、受理されたもののみ記録)", () => {
-      const recorder = createTranscriptRecorder();
-
-      // 受理された Human 決定
-      recorder.append({
+      // CoreBattlePlaytest と同一の実装パターン: createDecisionTranscriptEntry(seq++, ...)
+      const entry = createDecisionTranscriptEntry(seq++, {
         actor: "human",
         playerId: "p1",
         decisionId: "dec-h1",
@@ -155,20 +119,22 @@ describe("Playtest Diagnostic Integration Tests", () => {
           selectedPatternRef: 0,
         },
       });
+      transcript.push(entry);
 
-      const entries = recorder.getTranscript();
-      expect(entries).toHaveLength(1);
-      expect(entries[0].actor).toBe("human");
-      expect(entries[0].playerId).toBe("p1");
-      expect(entries[0].decisionId).toBe("dec-h1");
-      expect(entries[0].policy).toBeUndefined();
-      expect(entries[0].seq).toBe(1);
+      expect(transcript).toHaveLength(1);
+      expect(transcript[0].seq).toBe(1);
+      expect(transcript[0].actor).toBe("human");
+      expect(transcript[0].playerId).toBe("p1");
+      expect(transcript[0].decisionId).toBe("dec-h1");
+      expect(transcript[0].policy).toBeUndefined();
+      expect(seq).toBe(2);
     });
 
-    it("Test M: AutoPass 意思決定の記録 (actor='autoPass'、受理されたもののみ記録)", () => {
-      const recorder = createTranscriptRecorder();
+    it("Test M: AutoPass 受理後 -> 本番共通 helper で actor=autoPass として記録されること", () => {
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
 
-      recorder.append({
+      const entry = createDecisionTranscriptEntry(seq++, {
         actor: "autoPass",
         playerId: "p1",
         decisionId: "dec-ap1",
@@ -179,169 +145,261 @@ describe("Playtest Diagnostic Integration Tests", () => {
           selectedPatternRef: 1,
         },
       });
+      transcript.push(entry);
 
-      const entries = recorder.getTranscript();
-      expect(entries).toHaveLength(1);
-      expect(entries[0].actor).toBe("autoPass");
-      expect(entries[0].playerId).toBe("p1");
-      expect(entries[0].decisionId).toBe("dec-ap1");
-      expect(entries[0].policy).toBeUndefined();
-      expect(entries[0].seq).toBe(1);
+      expect(transcript).toHaveLength(1);
+      expect(transcript[0].seq).toBe(1);
+      expect(transcript[0].actor).toBe("autoPass");
+      expect(transcript[0].playerId).toBe("p1");
+      expect(transcript[0].decisionId).toBe("dec-ap1");
+      expect(transcript[0].policy).toBeUndefined();
     });
 
-    it("Test N: AI 意思決定の記録 (actor='policy'、PolicyDescriptorサニタイズ)", () => {
-      const recorder = createTranscriptRecorder();
-
-      const rawPolicyDescriptor = {
-        kind: "firstLegal",
-        name: "First Legal Choice",
-        policyVersion: 1,
-        // 下記の内部プロパティはサニタイズされてbundle/transcriptから除外されるべき
-        weights: [0.5, 0.5],
-        internalFn: () => "secret",
-        metadata: { secretSeed: 9999 },
-      };
-
-      recorder.append({
-        actor: "policy",
-        playerId: "p2",
-        decisionId: "dec-ai1",
-        stateVersion: 3,
-        response: {
-          decisionId: "dec-ai1",
-          stateVersion: 3,
-          selectedPatternRef: 0,
+    it("Test N: advanceAutomatedDecisions.records の変換 -> 全 record を順番通り actor=policy として変換し、policyVersion は number 型であること", () => {
+      const mockRecords: AutomatedDecisionRecord[] = [
+        {
+          playerId: "p2",
+          policyDescriptor: {
+            kind: "firstLegal",
+            name: "First Legal AI",
+            policyVersion: 1, // number 型
+            metadata: { secret: 123 }, // 除外されるべきメタデータ
+          },
+          request: {
+            decisionId: "dec-ai-1",
+            stateVersion: 5,
+          } as any,
+          response: {
+            decisionId: "dec-ai-1",
+            stateVersion: 5,
+            selectedPatternRef: 0,
+          },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
         },
-        policy: {
-          kind: rawPolicyDescriptor.kind,
-          name: rawPolicyDescriptor.name,
-          policyVersion: String(rawPolicyDescriptor.policyVersion),
+        {
+          playerId: "p2",
+          policyDescriptor: {
+            kind: "seededRandom",
+            name: "Seeded Random AI",
+            policyVersion: 2, // number 型
+          },
+          request: {
+            decisionId: "dec-ai-2",
+            stateVersion: 6,
+          } as any,
+          response: {
+            decisionId: "dec-ai-2",
+            stateVersion: 6,
+            selectedPatternRef: 2,
+          },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
         },
-      });
+      ];
 
-      const entries = recorder.getTranscript();
-      expect(entries).toHaveLength(1);
-      expect(entries[0].actor).toBe("policy");
-      expect(entries[0].policy).toEqual({
-        kind: "firstLegal",
-        name: "First Legal Choice",
-        policyVersion: "1",
-      });
-      expect((entries[0].policy as any).weights).toBeUndefined();
-      expect((entries[0].policy as any).internalFn).toBeUndefined();
-      expect((entries[0].policy as any).metadata).toBeUndefined();
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
+
+      // 本番 CoreBattlePlaytest と同一の呼び出し
+      const { entries, nextSeq } = createAutomatedDecisionTranscriptEntries(seq, mockRecords);
+      transcript.push(...entries);
+      seq = nextSeq;
+
+      expect(transcript).toHaveLength(2);
+      expect(transcript[0].seq).toBe(1);
+      expect(transcript[0].actor).toBe("policy");
+      expect(transcript[0].policy?.kind).toBe("firstLegal");
+      expect(transcript[0].policy?.name).toBe("First Legal AI");
+      // policyVersion は number 型
+      expect(transcript[0].policy?.policyVersion).toBe(1);
+      expect(typeof transcript[0].policy?.policyVersion).toBe("number");
+      expect((transcript[0].policy as any)?.metadata).toBeUndefined();
+
+      expect(transcript[1].seq).toBe(2);
+      expect(transcript[1].actor).toBe("policy");
+      expect(transcript[1].policy?.policyVersion).toBe(2);
+      expect(typeof transcript[1].policy?.policyVersion).toBe("number");
+
+      expect(seq).toBe(3);
     });
 
-    it("Test O & D-ext: 連続 AI 判断および全アクター混合での単調増加 seq (1, 2, 3...)", () => {
-      const recorder = createTranscriptRecorder();
+    it("Test P: Initial AI records も本番と同一の createAutomatedDecisionTranscriptEntries を使用して seq=1 から記録されること", () => {
+      const initialAiRecords: AutomatedDecisionRecord[] = [
+        {
+          playerId: "p2",
+          policyDescriptor: { kind: "firstLegal", name: "AI", policyVersion: 1 },
+          request: { decisionId: "dec-init", stateVersion: 1 } as any,
+          response: { decisionId: "dec-init", stateVersion: 1, selectedPatternRef: 0 },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
+        },
+      ];
+
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
+
+      const { entries, nextSeq } = createAutomatedDecisionTranscriptEntries(seq, initialAiRecords);
+      transcript.push(...entries);
+      seq = nextSeq;
+
+      expect(transcript).toHaveLength(1);
+      expect(transcript[0].seq).toBe(1);
+      expect(transcript[0].actor).toBe("policy");
+      expect(seq).toBe(2);
+    });
+
+    it("Test E-ext: Technical Error 発生時でも、それまでに records に存在する成功済み Decision は保持されること", () => {
+      const partialRecords: AutomatedDecisionRecord[] = [
+        {
+          playerId: "p2",
+          policyDescriptor: { kind: "firstLegal", name: "AI", policyVersion: 1 },
+          request: { decisionId: "dec-ok", stateVersion: 1 } as any,
+          response: { decisionId: "dec-ok", stateVersion: 1, selectedPatternRef: 0 },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
+        },
+      ];
+
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
+
+      // advanceAutomatedDecisions が TECHNICAL_ERROR を返した場合でも records を変換・追加する本番契約
+      const { entries, nextSeq } = createAutomatedDecisionTranscriptEntries(seq, partialRecords);
+      transcript.push(...entries);
+      seq = nextSeq;
+
+      // エラー発生後も transcript に成功済みの1件が残っていること
+      expect(transcript).toHaveLength(1);
+      expect(transcript[0].decisionId).toBe("dec-ok");
+      expect(seq).toBe(2);
+    });
+
+    it("Test O & D-ext: 全アクター混合（Initial AI, Human, AutoPass, 連鎖 AI）で seq が 1, 2, 3... の単調増加になること", () => {
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
 
       // 1. Initial AI
-      recorder.append({
-        actor: "policy",
-        playerId: "p2",
-        decisionId: "dec-1",
-        stateVersion: 1,
-        response: { decisionId: "dec-1", stateVersion: 1, selectedPatternRef: 0 },
-        policy: { kind: "firstLegal", name: "AI", policyVersion: "1" },
-      });
+      const initResult = createAutomatedDecisionTranscriptEntries(seq, [
+        {
+          playerId: "p2",
+          policyDescriptor: { kind: "firstLegal", name: "AI", policyVersion: 1 },
+          request: { decisionId: "dec-1", stateVersion: 1 } as any,
+          response: { decisionId: "dec-1", stateVersion: 1, selectedPatternRef: 0 },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
+        },
+      ]);
+      transcript.push(...initResult.entries);
+      seq = initResult.nextSeq;
 
       // 2. Human
-      recorder.append({
+      const humanEntry = createDecisionTranscriptEntry(seq++, {
         actor: "human",
         playerId: "p1",
         decisionId: "dec-2",
         stateVersion: 2,
-        response: { decisionId: "dec-2", stateVersion: 2, selectedPatternRef: 2 },
+        response: { decisionId: "dec-2", stateVersion: 2, selectedPatternRef: 0 },
       });
+      transcript.push(humanEntry);
 
       // 3. AutoPass
-      recorder.append({
+      const autoPassEntry = createDecisionTranscriptEntry(seq++, {
         actor: "autoPass",
         playerId: "p1",
         decisionId: "dec-3",
         stateVersion: 3,
         response: { decisionId: "dec-3", stateVersion: 3, selectedPatternRef: 1 },
       });
+      transcript.push(autoPassEntry);
 
       // 4. 連鎖 AI
-      recorder.append({
-        actor: "policy",
-        playerId: "p2",
-        decisionId: "dec-4",
-        stateVersion: 4,
-        response: { decisionId: "dec-4", stateVersion: 4, selectedPatternRef: 0 },
-        policy: { kind: "firstLegal", name: "AI", policyVersion: "1" },
-      });
+      const chainedResult = createAutomatedDecisionTranscriptEntries(seq, [
+        {
+          playerId: "p2",
+          policyDescriptor: { kind: "firstLegal", name: "AI", policyVersion: 1 },
+          request: { decisionId: "dec-4", stateVersion: 4 } as any,
+          response: { decisionId: "dec-4", stateVersion: 4, selectedPatternRef: 0 },
+          prevState: {},
+          nextState: {},
+          nextStep: { type: "PROGRESSED" } as any,
+          generatedEvents: [],
+        },
+      ]);
+      transcript.push(...chainedResult.entries);
+      seq = chainedResult.nextSeq;
 
-      const entries = recorder.getTranscript();
-      expect(entries.map((e) => e.seq)).toEqual([1, 2, 3, 4]);
-      expect(entries.map((e) => e.actor)).toEqual(["policy", "human", "autoPass", "policy"]);
+      expect(transcript.map((e) => e.seq)).toEqual([1, 2, 3, 4]);
+      expect(transcript.map((e) => e.actor)).toEqual(["policy", "human", "autoPass", "policy"]);
+      expect(seq).toBe(5);
     });
 
-    it("Test P: 初期 AI 手番の判断が seq=1 で記録されること", () => {
-      const recorder = createTranscriptRecorder();
+    it("Test Q: New Match reset で seq=1 および transcript=[] へリセットされること", () => {
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
 
-      recorder.append({
-        actor: "policy",
-        playerId: "p1",
-        decisionId: "dec-init-ai",
-        stateVersion: 1,
-        response: { decisionId: "dec-init-ai", stateVersion: 1, selectedPatternRef: 0 },
-        policy: { kind: "seededRandom", name: "Random AI", policyVersion: "1" },
-      });
+      // Match 1
+      transcript.push(
+        createDecisionTranscriptEntry(seq++, {
+          actor: "human",
+          playerId: "p1",
+          decisionId: "dec-m1",
+          stateVersion: 1,
+          response: { decisionId: "dec-m1", stateVersion: 1, selectedPatternRef: 0 },
+        })
+      );
+      expect(transcript).toHaveLength(1);
+      expect(seq).toBe(2);
 
-      const entries = recorder.getTranscript();
-      expect(entries).toHaveLength(1);
-      expect(entries[0].seq).toBe(1);
-      expect(entries[0].actor).toBe("policy");
-    });
+      // Match 2 start (startNewGame reset: seqRef.current = 1, transcriptRef.current = [])
+      transcript.length = 0;
+      seq = 1;
 
-    it("Test Q: 新対戦開始時の Transcript & seq のリセット", () => {
-      const recorder = createTranscriptRecorder();
+      expect(transcript).toHaveLength(0);
+      expect(seq).toBe(1);
 
-      recorder.append({
-        actor: "human",
-        playerId: "p1",
-        decisionId: "dec-match1",
-        stateVersion: 1,
-        response: { decisionId: "dec-match1", stateVersion: 1, selectedPatternRef: 0 },
-      });
-      expect(recorder.getTranscript()).toHaveLength(1);
-      expect(recorder.getTranscript()[0].seq).toBe(1);
-
-      // Match 2 start -> reset
-      recorder.reset();
-      expect(recorder.getTranscript()).toHaveLength(0);
-      expect(recorder.getSeq()).toBe(1);
-
-      // Subsequent decision starts at seq=1
-      recorder.append({
-        actor: "human",
-        playerId: "p1",
-        decisionId: "dec-match2",
-        stateVersion: 1,
-        response: { decisionId: "dec-match2", stateVersion: 1, selectedPatternRef: 0 },
-      });
-      expect(recorder.getTranscript()).toHaveLength(1);
-      expect(recorder.getTranscript()[0].seq).toBe(1);
+      // Match 2 decision starts at seq=1
+      transcript.push(
+        createDecisionTranscriptEntry(seq++, {
+          actor: "human",
+          playerId: "p1",
+          decisionId: "dec-m2",
+          stateVersion: 1,
+          response: { decisionId: "dec-m2", stateVersion: 1, selectedPatternRef: 0 },
+        })
+      );
+      expect(transcript).toHaveLength(1);
+      expect(transcript[0].seq).toBe(1);
     });
 
     it("Test R: Date.now() / LogEntry.id からの独立性 (純粋な単調増加整数)", () => {
-      const recorder = createTranscriptRecorder();
+      const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+      let seq = 1;
 
       for (let i = 0; i < 5; i++) {
-        recorder.append({
-          actor: "human",
-          playerId: "p1",
-          decisionId: `dec-${i}`,
-          stateVersion: i + 1,
-          response: { decisionId: `dec-${i}`, stateVersion: i + 1, selectedPatternRef: 0 },
-        });
+        transcript.push(
+          createDecisionTranscriptEntry(seq++, {
+            actor: "human",
+            playerId: "p1",
+            decisionId: `dec-${i}`,
+            stateVersion: i + 1,
+            response: { decisionId: `dec-${i}`, stateVersion: i + 1, selectedPatternRef: 0 },
+          })
+        );
       }
 
-      const seqs = recorder.getTranscript().map((e) => e.seq);
+      const seqs = transcript.map((e) => e.seq);
       expect(seqs).toEqual([1, 2, 3, 4, 5]);
-      // seq must be number, not timestamp or uuid string
       seqs.forEach((s) => {
         expect(typeof s).toBe("number");
         expect(s).toBeLessThan(1000);
@@ -350,7 +408,7 @@ describe("Playtest Diagnostic Integration Tests", () => {
   });
 
   describe("Lifecycle & Source of Truth Tests (Tests A-ext, B-ext, S, T)", () => {
-    it("Test A-ext: session.state と UI gameState が異なる場合、session.state を正として利用すること", () => {
+    it("Test A-ext: captureDiagnosticRawState を介して、UI gameState ではなく session.state が正として抽出される契約", () => {
       const staleUiGameState = {
         matchId: "match-001",
         stateVersion: 2,
@@ -369,6 +427,9 @@ describe("Playtest Diagnostic Integration Tests", () => {
         },
       };
 
+      // 本番 CoreBattlePlaytest と同一の captureDiagnosticRawState を実行
+      const capturedRawState = captureDiagnosticRawState(authoritativeSessionState);
+
       const activeMatch = {
         environmentId: "core-battle",
         environmentName: "Core Battle",
@@ -377,49 +438,54 @@ describe("Playtest Diagnostic Integration Tests", () => {
         rulePackage: { id: "pkg-core", version: "1.0.0" } as any,
       };
 
-      const activeSettings: ActivePlaytestSettings = {
+      const activePlaytestSettings: ActivePlaytestSettings = {
         matchMode: "humanVsHuman",
         humanSeat: "p1",
         policyId: "firstLegal",
       };
 
-      // Bundle 生成に session.state のディープコピーを渡す
       const bundle = buildPlaytestDiagnosticBundleV1({
+        build: dummyBuild,
+        generatedAt: dummyGeneratedAt,
         activeMatch,
-        activePlaytestSettings: activeSettings,
-        rawState: JSON.parse(JSON.stringify(authoritativeSessionState)),
+        activePlaytestSettings,
+        rawState: capturedRawState,
       });
 
+      // session.state の内容が反映され、stale な gameState は一切反映されないこと
       expect((bundle.snapshot.rawState as any).stateVersion).toBe(3);
       expect((bundle.snapshot.rawState as any).turnPlayer).toBe("p2");
       expect((bundle.snapshot.rawState as any).players.p1.hand).toHaveLength(2);
       expect((bundle.snapshot.rawState as any).players.p1.hand[0].id).toBe("real-card-1");
+
+      // ディープコピーされており元オブジェクトの変更に影響されないこと
+      authoritativeSessionState.players.p1.hand.push({ id: "mutated-card" });
+      expect((bundle.snapshot.rawState as any).players.p1.hand).toHaveLength(2);
     });
 
     it("Test B-ext: Match A 成功後に Match B 開始失敗した場合、activePlaytestSettings は null となり Match A の設定が残らないこと", () => {
-      let activeSettings: ActivePlaytestSettings | null = null;
+      let activePlaytestSettings: ActivePlaytestSettings | null = null;
       let session: any = null;
 
       // Match A start
-      activeSettings = null; // startNewGame resets to null immediately
+      activePlaytestSettings = null; // startNewGame resets to null immediately
       // Match A succeeds
       session = { id: "session-A" };
-      activeSettings = {
+      activePlaytestSettings = {
         matchMode: "humanVsAi",
         humanSeat: "p1",
         policyId: "seededRandom",
       };
-      let isAvailable = Boolean(session && activeSettings);
+      let isAvailable = Boolean(session && activePlaytestSettings);
       expect(isAvailable).toBe(true);
 
       // Match B start
-      activeSettings = null; // startNewGame resets to null immediately
+      activePlaytestSettings = null; // startNewGame resets to null immediately
       session = null;
-      // Match B fails (e.g. invalid seed or preset error)
-      // outcome.type !== "READY" -> returns early without committing
-      isAvailable = Boolean(session && activeSettings);
+      // Match B fails (outcome.type !== "READY")
+      isAvailable = Boolean(session && activePlaytestSettings);
       expect(isAvailable).toBe(false);
-      expect(activeSettings).toBeNull();
+      expect(activePlaytestSettings).toBeNull();
     });
 
     it("Test S: Debug OFF (showDebug === false) でも診断データ保存が利用可能であること", () => {
@@ -444,7 +510,6 @@ describe("Playtest Diagnostic Integration Tests", () => {
         downloadInvoked = true;
       };
 
-      // GameOverOverlay props test
       expect(typeof onDownloadDiagnostic).toBe("function");
       onDownloadDiagnostic();
       expect(downloadInvoked).toBe(true);

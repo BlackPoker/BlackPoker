@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
+  captureDiagnosticRawState,
   PlaytestDiagnosticBundleV1,
   ActivePlaytestSettings,
 } from "../../ui/playtest/PlaytestDiagnosticBundle";
@@ -9,6 +10,7 @@ import { createSeatControllers } from "../../engine/playtest/PlaytestSeatControl
 
 describe("Playtest Diagnostic Bundle v1 Tests", () => {
   const dummyBuild = { sha: "abc1234def", ref: "refs/heads/main" };
+  const dummyGeneratedAt = "2026-09-11T23:14:00.000Z";
 
   const dummyActiveMatch = {
     environmentId: "core-battle",
@@ -49,11 +51,11 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
   it("Test A, B, C: Schemaルートプロパティ (kind, schemaVersion, containsHiddenInformation, generatedAt) の完全性", () => {
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
-      activeSettings: dummyActiveSettings,
+      activePlaytestSettings: dummyActiveSettings,
       seatControllers: dummySeatControllers,
       rawState: dummyRawState,
-      generatedAt: "2026-09-11T23:14:00.000Z",
     });
 
     expect(bundle.kind).toBe("blackpoker-playtest-diagnostic");
@@ -62,21 +64,30 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
     expect(bundle.generatedAt).toBe("2026-09-11T23:14:00.000Z");
   });
 
-  it("Test D: build 情報 (sha, ref) が反映されること", () => {
-    const bundle = buildPlaytestDiagnosticBundleV1({
+  it("Test D: build 情報 (sha, ref) が必須として反映され、完全Pureに決定論的であること", () => {
+    const bundle1 = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
+      activeMatch: dummyActiveMatch,
+    });
+    const bundle2 = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
     });
 
-    expect(bundle.build.sha).toBe("abc1234def");
-    expect(bundle.build.ref).toBe("refs/heads/main");
+    expect(bundle1.build.sha).toBe("abc1234def");
+    expect(bundle1.build.ref).toBe("refs/heads/main");
+    // 完全Pure: 同一入力なら完全に同一
+    expect(bundle1).toEqual(bundle2);
   });
 
   it("Test E: match メタデータ (environmentId, environmentName, regulationId, seed, rulePackage) が反映されること", () => {
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
-      activeSettings: dummyActiveSettings,
+      activePlaytestSettings: dummyActiveSettings,
       seatControllers: dummySeatControllers,
       rawState: dummyRawState,
     });
@@ -93,8 +104,9 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
   it("Test F: Human vs AI の設定 (humanSeat, policyId, seatControllers) が Active 設定から入ること", () => {
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
-      activeSettings: dummyActiveSettings,
+      activePlaytestSettings: dummyActiveSettings,
       seatControllers: dummySeatControllers,
     });
 
@@ -113,11 +125,12 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
     };
 
     // UI 上で次戦用に pendingPolicyId が manualGenericGenome へ変更されていても、
-    // Bundle Builder には activeSettings を渡すため、Bundle には firstLegal が記録される
+    // Bundle Builder には activePlaytestSettings を渡すため、Bundle には firstLegal が記録される
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
-      activeSettings: currentActiveSettings,
+      activePlaytestSettings: currentActiveSettings,
       seatControllers: dummySeatControllers,
     });
 
@@ -126,10 +139,12 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
   });
 
   it("Test H: snapshot.rawState に両者の非公開手札・ライフが含まれること", () => {
+    const rawStateSnapshot = captureDiagnosticRawState(dummyRawState);
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
-      rawState: dummyRawState,
+      rawState: rawStateSnapshot,
     });
 
     expect(bundle.snapshot.stateVersion).toBe(10);
@@ -149,6 +164,7 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
 
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
       canonicalMatchLog: mockMatchLog,
     });
@@ -166,6 +182,7 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
 
     const bundle = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
       runtimeNotice: mockNotice,
     });
@@ -177,6 +194,7 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
   it("Test C-ext: formatId / frameId は rawState にない場合は undefined であり、推測されないこと", () => {
     const bundleWithoutFormat = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
       rawState: dummyRawState, // formatId, frameId なし
     });
@@ -186,6 +204,7 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
 
     const bundleWithFormat = buildPlaytestDiagnosticBundleV1({
       build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
       activeMatch: dummyActiveMatch,
       rawState: {
         ...dummyRawState,

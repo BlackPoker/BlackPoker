@@ -54,9 +54,14 @@ import {
 import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
-  PlaytestDecisionTranscriptEntryV1,
+  captureDiagnosticRawState,
   ActivePlaytestSettings,
 } from "./PlaytestDiagnosticBundle";
+import {
+  PlaytestDecisionTranscriptEntryV1,
+  createDecisionTranscriptEntry,
+  createAutomatedDecisionTranscriptEntries,
+} from "./PlaytestDecisionTranscript";
 import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import logoUrl from "../../assets/blackpoker-logo.svg";
@@ -196,44 +201,6 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
-  // 共通 Decision 提出・受理記録 helper (Human / AutoPass / Policy 全経路で統一)
-  const appendDecisionTranscript = useCallback(
-    (entry: {
-      actor: "human" | "policy" | "autoPass";
-      playerId: "p1" | "p2";
-      decisionId: string;
-      stateVersion: number;
-      response: DecisionResponse;
-      policy?: {
-        kind: string;
-        name?: string;
-        policyVersion?: string;
-      };
-    }) => {
-      const seq = decisionSeqRef.current++;
-      decisionTranscriptRef.current.push({
-        seq,
-        actor: entry.actor,
-        playerId: entry.playerId,
-        decisionId: entry.decisionId,
-        stateVersion: entry.stateVersion,
-        response: {
-          decisionId: entry.response.decisionId,
-          stateVersion: entry.response.stateVersion,
-          selectedPatternRef: entry.response.selectedPatternRef,
-        },
-        policy: entry.policy
-          ? {
-              kind: entry.policy.kind,
-              name: entry.policy.name,
-              policyVersion: entry.policy.policyVersion,
-            }
-          : undefined,
-      });
-    },
-    []
-  );
-
   // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
   const startNewGame = useCallback(
     async (
@@ -354,22 +321,12 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           setIsAiProcessing(false);
 
+          const { entries: initialAiEntries, nextSeq: afterInitialAiSeq } =
+            createAutomatedDecisionTranscriptEntries(decisionSeqRef.current, aiResult.records);
+          decisionTranscriptRef.current.push(...initialAiEntries);
+          decisionSeqRef.current = afterInitialAiSeq;
+
           for (const rec of aiResult.records) {
-            appendDecisionTranscript({
-              actor: "policy",
-              playerId: rec.playerId as "p1" | "p2",
-              decisionId: rec.request.decisionId,
-              stateVersion: rec.request.stateVersion,
-              response: rec.response,
-              policy: {
-                kind: rec.policyDescriptor.kind,
-                name: rec.policyDescriptor.name,
-                policyVersion:
-                  rec.policyDescriptor.policyVersion != null
-                    ? String(rec.policyDescriptor.policyVersion)
-                    : undefined,
-              },
-            });
             addTrace(
               "AI_DECISION",
               `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
@@ -575,13 +532,14 @@ export const CoreBattlePlaytest: React.FC = () => {
 
       // 受理された Human 意思決定を記録
       if (currentStep?.type === "WAITING_FOR_DECISION") {
-        appendDecisionTranscript({
+        const entry = createDecisionTranscriptEntry(decisionSeqRef.current++, {
           actor: "human",
           playerId: currentStep.request.playerId as "p1" | "p2",
           decisionId: response.decisionId,
           stateVersion: response.stateVersion,
           response,
         });
+        decisionTranscriptRef.current.push(entry);
       }
 
       // 選択状態をリセット
@@ -627,13 +585,14 @@ export const CoreBattlePlaytest: React.FC = () => {
           nextState = JSON.parse(JSON.stringify(session.state));
 
           // 受理された AutoPass 意思決定を記録
-          appendDecisionTranscript({
+          const entry = createDecisionTranscriptEntry(decisionSeqRef.current++, {
             actor: "autoPass",
             playerId: autoPassRequest.playerId as "p1" | "p2",
             decisionId: autoPassResponse.decisionId,
             stateVersion: autoPassResponse.stateVersion,
             response: autoPassResponse,
           });
+          decisionTranscriptRef.current.push(entry);
 
           const autoEvents = ViewerAwareGameEventFormatter.formatStateTransition(
             prevState,
@@ -674,22 +633,12 @@ export const CoreBattlePlaytest: React.FC = () => {
 
         setIsAiProcessing(false);
 
+        const { entries: aiEntries, nextSeq: afterAiSeq } =
+          createAutomatedDecisionTranscriptEntries(decisionSeqRef.current, aiResult.records);
+        decisionTranscriptRef.current.push(...aiEntries);
+        decisionSeqRef.current = afterAiSeq;
+
         for (const rec of aiResult.records) {
-          appendDecisionTranscript({
-            actor: "policy",
-            playerId: rec.playerId as "p1" | "p2",
-            decisionId: rec.request.decisionId,
-            stateVersion: rec.request.stateVersion,
-            response: rec.response,
-            policy: {
-              kind: rec.policyDescriptor.kind,
-              name: rec.policyDescriptor.name,
-              policyVersion:
-                rec.policyDescriptor.policyVersion != null
-                  ? String(rec.policyDescriptor.policyVersion)
-                  : undefined,
-            },
-          });
           addTrace(
             "AI_DECISION",
             `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
@@ -760,7 +709,6 @@ export const CoreBattlePlaytest: React.FC = () => {
       currentStep,
       addLog,
       addTrace,
-      appendDecisionTranscript,
     ]
   );
 
@@ -777,16 +725,23 @@ export const CoreBattlePlaytest: React.FC = () => {
     if (!session || !activeMatch || !activePlaytestSettings) return;
 
     // session.state を正とする (UI snapshot の gameState ではなく Session state のディープコピー)
-    const rawState = JSON.parse(JSON.stringify(session.state));
+    const generatedAt = new Date().toISOString();
+    const build = {
+      sha: (import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA) : "local",
+      ref: (import.meta as any).env?.VITE_BUILD_REF ? String((import.meta as any).env.VITE_BUILD_REF) : "local",
+    };
+    const rawState = captureDiagnosticRawState(session.state);
+
     const bundle = buildPlaytestDiagnosticBundleV1({
-      generatedAt: new Date().toISOString(),
+      build,
+      generatedAt,
       activeMatch,
       activePlaytestSettings,
       rawState,
       canonicalMatchLog: session.getMatchLog(),
       currentStep,
       decisionTranscript: decisionTranscriptRef.current,
-      uiTraces: traces,
+      traces,
       runtimeNotice: runtimeNotice || undefined,
     });
 
