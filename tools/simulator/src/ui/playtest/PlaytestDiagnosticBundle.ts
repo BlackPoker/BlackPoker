@@ -104,6 +104,57 @@ export interface BuildPlaytestDiagnosticBundleParams {
 }
 
 /**
+ * UI コンポーネントの状態（CoreBattlePlaytest 等）から
+ * Diagnostic Bundle 構築パラメータ（BuildPlaytestDiagnosticBundleParams）を
+ * 漏れなく組み立てる Pure Adapter Helper の入力インターフェース。
+ */
+export interface AssemblePlaytestDiagnosticBundleParamsInput {
+  readonly build: {
+    readonly sha: string;
+    readonly ref: string;
+  };
+  readonly generatedAt: string;
+  readonly activeMatch?: ActiveMatchContext | null;
+  readonly activePlaytestSettings?: ActivePlaytestSettings | null;
+  readonly activeSeatControllers?: PlaytestSeatControllers | null;
+  readonly rawState?: any;
+  readonly logs?: readonly unknown[];
+  readonly traces?: readonly unknown[];
+  readonly canonicalMatchLog?: CanonicalMatchLog | null;
+  readonly currentStep?: GameSessionStep | null;
+  readonly decisionTranscript?: readonly PlaytestDecisionTranscriptEntryV1[];
+  readonly setupNotice?: SetupNotice | null;
+  readonly runtimeNotice?: SetupNotice | null;
+}
+
+/**
+ * UI コンポーネントの状態（CoreBattlePlaytest 等）から
+ * Diagnostic Bundle 構築パラメータ（BuildPlaytestDiagnosticBundleParams）を
+ * 漏れなく組み立てる Pure Adapter Helper。
+ * activeSeatControllers -> seatControllers、logs -> normalLogs などの命名・構造差異を
+ * 安全にマッピングし、接続漏れを防止します。
+ */
+export function assemblePlaytestDiagnosticBundleParams(
+  inputs: AssemblePlaytestDiagnosticBundleParamsInput
+): BuildPlaytestDiagnosticBundleParams {
+  return {
+    build: inputs.build,
+    generatedAt: inputs.generatedAt,
+    activeMatch: inputs.activeMatch,
+    activePlaytestSettings: inputs.activePlaytestSettings,
+    seatControllers: inputs.activeSeatControllers,
+    rawState: inputs.rawState,
+    normalLogs: inputs.logs,
+    traces: inputs.traces,
+    canonicalMatchLog: inputs.canonicalMatchLog,
+    currentStep: inputs.currentStep,
+    decisionTranscript: inputs.decisionTranscript,
+    setupNotice: inputs.setupNotice,
+    runtimeNotice: inputs.runtimeNotice,
+  };
+}
+
+/**
  * GameSession の生状態から Diagnostic 用の rawState スナップショットを安全にディープコピー抽出する Pure Helper。
  * UI 表示用スナップショット (gameState) ではなく session.state のみを引数に取り、
  * 循環参照や非シリアライズ可能オブジェクトを排除した不変オブジェクトを返します。

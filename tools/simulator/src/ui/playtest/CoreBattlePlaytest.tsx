@@ -55,6 +55,7 @@ import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
   captureDiagnosticRawState,
+  assemblePlaytestDiagnosticBundleParams,
   ActivePlaytestSettings,
 } from "./PlaytestDiagnosticBundle";
 import {
@@ -732,18 +733,22 @@ export const CoreBattlePlaytest: React.FC = () => {
     };
     const rawState = captureDiagnosticRawState(session.state);
 
-    const bundle = buildPlaytestDiagnosticBundleV1({
-      build,
-      generatedAt,
-      activeMatch,
-      activePlaytestSettings,
-      rawState,
-      canonicalMatchLog: session.getMatchLog(),
-      currentStep,
-      decisionTranscript: decisionTranscriptRef.current,
-      traces,
-      runtimeNotice: runtimeNotice || undefined,
-    });
+    const bundle = buildPlaytestDiagnosticBundleV1(
+      assemblePlaytestDiagnosticBundleParams({
+        build,
+        generatedAt,
+        activeMatch,
+        activePlaytestSettings,
+        activeSeatControllers,
+        rawState,
+        logs,
+        traces,
+        canonicalMatchLog: session.getMatchLog(),
+        currentStep,
+        decisionTranscript: decisionTranscriptRef.current,
+        runtimeNotice: runtimeNotice || undefined,
+      })
+    );
 
     const filename = generateDiagnosticFilename({
       environmentName: activeMatch.environmentName,
@@ -752,7 +757,15 @@ export const CoreBattlePlaytest: React.FC = () => {
     });
 
     downloadJsonFile(filename, bundle);
-  }, [activeMatch, activePlaytestSettings, currentStep, traces, runtimeNotice]);
+  }, [
+    activeMatch,
+    activePlaytestSettings,
+    activeSeatControllers,
+    logs,
+    currentStep,
+    traces,
+    runtimeNotice,
+  ]);
 
   // UI 閲覧者視点 ID: Human vs AI の時は常に activeHumanSeat に完全固定
   const uiViewerPlayerId: PlayerKey =

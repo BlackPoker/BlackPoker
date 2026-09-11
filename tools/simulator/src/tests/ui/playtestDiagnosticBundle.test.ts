@@ -3,6 +3,7 @@ import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
   captureDiagnosticRawState,
+  assemblePlaytestDiagnosticBundleParams,
   PlaytestDiagnosticBundleV1,
   ActivePlaytestSettings,
 } from "../../ui/playtest/PlaytestDiagnosticBundle";
@@ -234,4 +235,60 @@ describe("Playtest Diagnostic Bundle v1 Tests", () => {
     });
     expect(filename2).toBe("blackpoker-diagnostic-v1-seed99-4dda9d4-2026-09-11T23-14-00-000Z.json");
   });
+
+  it("Test A-log: normalLogs に 2 件渡した場合、Bundle 内も同一の 2 件・同一の順序（古い→新しい順、reverse なし）であること", () => {
+    const log1 = { id: "log-1", message: "ゲーム開始準備完了", timestamp: "10:00:00", seq: 1 };
+    const log2 = { id: "log-2", message: "Player A の行動完了", timestamp: "10:00:05", seq: 2 };
+
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
+      activeMatch: dummyActiveMatch,
+      normalLogs: [log1, log2],
+    });
+
+    expect(bundle.normalLogs).toHaveLength(2);
+    expect(bundle.normalLogs[0]).toEqual(log1);
+    expect(bundle.normalLogs[1]).toEqual(log2);
+  });
+
+  it("Test D-log: normalLogs 未指定時、Builder 単体 default [] として格納されること", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
+      activeMatch: dummyActiveMatch,
+    });
+
+    expect(bundle.normalLogs).toBeDefined();
+    expect(Array.isArray(bundle.normalLogs)).toBe(true);
+    expect(bundle.normalLogs).toEqual([]);
+  });
+
+  it("Test E-ui: UI Adapter (assemblePlaytestDiagnosticBundleParams) 経由で生成した場合、normalLogs と seatControllers が両方欠落しないこと", () => {
+    const testLogs = [
+      { id: "log-1", message: "準備完了", timestamp: "10:00:00" },
+      { id: "log-2", message: "戦闘開始", timestamp: "10:00:02" },
+    ];
+
+    const params = assemblePlaytestDiagnosticBundleParams({
+      build: dummyBuild,
+      generatedAt: dummyGeneratedAt,
+      activeMatch: dummyActiveMatch,
+      activePlaytestSettings: dummyActiveSettings,
+      activeSeatControllers: dummySeatControllers,
+      rawState: dummyRawState,
+      logs: testLogs,
+    });
+
+    const bundle = buildPlaytestDiagnosticBundleV1(params);
+
+    // normalLogs が渡した testLogs と完全一致し欠落しないこと
+    expect(bundle.normalLogs).toHaveLength(2);
+    expect(bundle.normalLogs).toEqual(testLogs);
+
+    // match.seatControllers が渡した activeSeatControllers と完全一致し欠落しないこと
+    expect(bundle.match.seatControllers).toBeDefined();
+    expect(bundle.match.seatControllers).toEqual(dummySeatControllers);
+  });
 });
+

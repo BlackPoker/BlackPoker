@@ -4,6 +4,7 @@ import {
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
   captureDiagnosticRawState,
+  assemblePlaytestDiagnosticBundleParams,
   ActivePlaytestSettings,
 } from "../../ui/playtest/PlaytestDiagnosticBundle";
 import {
@@ -13,6 +14,7 @@ import {
 } from "../../ui/playtest/PlaytestDecisionTranscript";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { AutomatedDecisionRecord } from "../../engine/playtest/HumanVsPolicyController";
+import { createSeatControllers, PlaytestSeatControllers } from "../../engine/playtest/PlaytestSeatController";
 
 describe("Playtest Diagnostic Integration Tests", () => {
   const dummyBuild = { sha: "63cc8b7", ref: "refs/heads/main" };
@@ -513,6 +515,108 @@ describe("Playtest Diagnostic Integration Tests", () => {
       expect(typeof onDownloadDiagnostic).toBe("function");
       onDownloadDiagnostic();
       expect(downloadInvoked).toBe(true);
+    });
+
+    it("Test U (B & C): Human vs AI で activeSeatControllers が渡され、UI の Pending Policy を変更しても Active Match 側の Seat Controller が記録されること", () => {
+      // 1. Active 対戦が firstLegal で開始・コミットされた状態
+      const activeSeatControllers = createSeatControllers("humanVsAi", "p1", "firstLegal");
+      const activePlaytestSettings: ActivePlaytestSettings = {
+        matchMode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "firstLegal",
+      };
+      const activeMatch = {
+        environmentId: "core-battle",
+        environmentName: "Core Battle",
+        seed: 42,
+      };
+
+      // 2. UI 上で次戦用の pending 設定が seededRandom へ変更された状態
+      let pendingPolicyId = "seededRandom";
+
+      // 3. handleDownloadDiagnostic のシミュレーション:
+      // pending 設定ではなく、現在の activeSeatControllers を渡して Bundle を構築
+      const bundle = buildPlaytestDiagnosticBundleV1({
+        build: dummyBuild,
+        generatedAt: dummyGeneratedAt,
+        activeMatch: activeMatch as any,
+        activePlaytestSettings,
+        seatControllers: activeSeatControllers,
+      });
+
+      // p1/p2 のコントローラ情報が一致すること (要件 B)
+      expect(bundle.match.seatControllers).toBeDefined();
+      const recordedSeats = bundle.match.seatControllers as PlaytestSeatControllers;
+      expect(recordedSeats.p1).toEqual(activeSeatControllers.p1);
+      expect(recordedSeats.p2).toEqual(activeSeatControllers.p2);
+
+      // Pending の seededRandom ではなく、Active の firstLegal が記録されていること (要件 C)
+      expect(bundle.match.policyId).toBe("firstLegal");
+      expect((recordedSeats.p2 as any)?.policyId).toBe("firstLegal");
+      expect((recordedSeats.p2 as any)?.policyId).not.toBe(pendingPolicyId);
+    });
+
+    it("Test V (A & E): UI Adapter (assemblePlaytestDiagnosticBundleParams) を介した構築で logs (古い→新しい順) と activeSeatControllers が両方欠落せず完全反映されること", () => {
+      const activeSeatControllers = createSeatControllers("humanVsAi", "p1", "seededRandom");
+      const activePlaytestSettings: ActivePlaytestSettings = {
+        matchMode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "seededRandom",
+      };
+      const activeMatch = {
+        environmentId: "core-battle",
+        environmentName: "Core Battle",
+        seed: 12345,
+      };
+
+      // 時系列順 (古い→新しい順) の通常ログ
+      const logs = [
+        { id: "log-1", message: "ゲーム開始準備完了", timestamp: "12:00:00", seq: 1 },
+        { id: "log-2", message: "Player A の手番開始", timestamp: "12:00:05", seq: 2 },
+        { id: "log-3", message: "Player A: 攻撃宣言", timestamp: "12:00:10", seq: 3 },
+      ];
+
+      const traces = [
+        { id: "trace-1", category: "AI_DECISION", message: "Pattern #0 selected" },
+      ];
+
+      const mockSession = {
+        state: { stateVersion: 5, turnPlayer: "p1" },
+        getMatchLog: () => ({ meta: { matchId: "m-123" }, events: [] } as any),
+      };
+
+      // 本番 CoreBattlePlaytest.handleDownloadDiagnostic と完全に同一のフロー
+      const rawState = captureDiagnosticRawState(mockSession.state);
+      const params = assemblePlaytestDiagnosticBundleParams({
+        build: dummyBuild,
+        generatedAt: dummyGeneratedAt,
+        activeMatch: activeMatch as any,
+        activePlaytestSettings,
+        activeSeatControllers,
+        rawState,
+        logs,
+        traces,
+        canonicalMatchLog: mockSession.getMatchLog(),
+        currentStep: null,
+        decisionTranscript: [],
+      });
+
+      const bundle = buildPlaytestDiagnosticBundleV1(params);
+
+      // normalLogs の検証: 欠落なし、要素数一致、古い→新しい順（reverse されていないこと） (要件 A, E)
+      expect(bundle.normalLogs).toHaveLength(3);
+      expect(bundle.normalLogs).toEqual(logs);
+      expect((bundle.normalLogs[0] as any).id).toBe("log-1");
+      expect((bundle.normalLogs[1] as any).id).toBe("log-2");
+      expect((bundle.normalLogs[2] as any).id).toBe("log-3");
+
+      // seatControllers の検証: 欠落なし、activeSeatControllers と完全一致 (要件 B, E)
+      expect(bundle.match.seatControllers).toBeDefined();
+      expect(bundle.match.seatControllers).toEqual(activeSeatControllers);
+      const recordedSeats = bundle.match.seatControllers as PlaytestSeatControllers;
+      expect(recordedSeats.p1.kind).toBe("HUMAN");
+      expect(recordedSeats.p2.kind).toBe("POLICY");
+      expect((recordedSeats.p2 as any)?.policyId).toBe("seededRandom");
     });
   });
 });
