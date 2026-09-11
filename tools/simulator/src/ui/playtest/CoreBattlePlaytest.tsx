@@ -51,6 +51,13 @@ import {
   buildPlaytestShareUrl,
   PlaytestShareConfigV1,
 } from "./PlaytestShareUrl";
+import {
+  buildPlaytestDiagnosticBundleV1,
+  generateDiagnosticFilename,
+  PlaytestDecisionTranscriptEntryV1,
+  ActivePlaytestSettings,
+} from "./PlaytestDiagnosticBundle";
+import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
@@ -72,12 +79,17 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   // Active 設定（現在進行中の対戦セッションの設定。未成立時は null）
   const [activeMatch, setActiveMatch] = useState<ActiveMatchContext | null>(null);
+  const [activePlaytestSettings, setActivePlaytestSettings] = useState<ActivePlaytestSettings | null>(null);
   const [activeSeatControllers, setActiveSeatControllers] = useState<PlaytestSeatControllers>(() =>
     createSeatControllers("humanVsHuman")
   );
   const [activePolicies, setActivePolicies] = useState<Record<string, DecisionPolicy>>({});
   const [activeMatchMode, setActiveMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [activeHumanSeat, setActiveHumanSeat] = useState<"p1" | "p2">("p1");
+
+  // Decision Transcript 管理 (単調増加 seq と受理された意思決定ログ)
+  const decisionSeqRef = useRef<number>(1);
+  const decisionTranscriptRef = useRef<PlaytestDecisionTranscriptEntryV1[]>([]);
 
   // セットアップ結果通知（VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR）
   const [setupNotice, setSetupNotice] = useState<SetupNotice | null>(null);
@@ -184,6 +196,44 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
+  // 共通 Decision 提出・受理記録 helper (Human / AutoPass / Policy 全経路で統一)
+  const appendDecisionTranscript = useCallback(
+    (entry: {
+      actor: "human" | "policy" | "autoPass";
+      playerId: "p1" | "p2";
+      decisionId: string;
+      stateVersion: number;
+      response: DecisionResponse;
+      policy?: {
+        kind: string;
+        name?: string;
+        policyVersion?: string;
+      };
+    }) => {
+      const seq = decisionSeqRef.current++;
+      decisionTranscriptRef.current.push({
+        seq,
+        actor: entry.actor,
+        playerId: entry.playerId,
+        decisionId: entry.decisionId,
+        stateVersion: entry.stateVersion,
+        response: {
+          decisionId: entry.response.decisionId,
+          stateVersion: entry.response.stateVersion,
+          selectedPatternRef: entry.response.selectedPatternRef,
+        },
+        policy: entry.policy
+          ? {
+              kind: entry.policy.kind,
+              name: entry.policy.name,
+              policyVersion: entry.policy.policyVersion,
+            }
+          : undefined,
+      });
+    },
+    []
+  );
+
   // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
   const startNewGame = useCallback(
     async (
@@ -206,6 +256,9 @@ export const CoreBattlePlaytest: React.FC = () => {
       setGameState(null);
       setCurrentStep(null);
       setActiveMatch(null);
+      setActivePlaytestSettings(null);
+      decisionSeqRef.current = 1;
+      decisionTranscriptRef.current = [];
       setSelectedUnitIds([]);
       setSheetMode("collapsed");
       setIsPassAndPlayWaiting(false);
@@ -252,6 +305,11 @@ export const CoreBattlePlaytest: React.FC = () => {
       sessionRef.current = outcome.session;
       setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
       setActiveMatch(outcome.activeMatch);
+      setActivePlaytestSettings({
+        matchMode: mode,
+        humanSeat,
+        policyId,
+      });
       setActiveSeatControllers(seatControllers);
       setActivePolicies(policies);
       setActiveMatchMode(mode);
@@ -297,6 +355,21 @@ export const CoreBattlePlaytest: React.FC = () => {
           setIsAiProcessing(false);
 
           for (const rec of aiResult.records) {
+            appendDecisionTranscript({
+              actor: "policy",
+              playerId: rec.playerId as "p1" | "p2",
+              decisionId: rec.request.decisionId,
+              stateVersion: rec.request.stateVersion,
+              response: rec.response,
+              policy: {
+                kind: rec.policyDescriptor.kind,
+                name: rec.policyDescriptor.name,
+                policyVersion:
+                  rec.policyDescriptor.policyVersion != null
+                    ? String(rec.policyDescriptor.policyVersion)
+                    : undefined,
+              },
+            });
             addTrace(
               "AI_DECISION",
               `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
@@ -500,6 +573,17 @@ export const CoreBattlePlaytest: React.FC = () => {
       let nextStep = session.submitDecision(response);
       let nextState = JSON.parse(JSON.stringify(session.state));
 
+      // 受理された Human 意思決定を記録
+      if (currentStep?.type === "WAITING_FOR_DECISION") {
+        appendDecisionTranscript({
+          actor: "human",
+          playerId: currentStep.request.playerId as "p1" | "p2",
+          decisionId: response.decisionId,
+          stateVersion: response.stateVersion,
+          response,
+        });
+      }
+
       // 選択状態をリセット
       setSelectedUnitIds([]);
 
@@ -533,12 +617,23 @@ export const CoreBattlePlaytest: React.FC = () => {
           addTrace("AUTO_PASS", `${autoPassPlayer} 自動PASS`, nextState);
 
           prevState = JSON.parse(JSON.stringify(session.state));
-          nextStep = session.submitDecision({
-            decisionId: nextStep.request.decisionId,
-            stateVersion: nextStep.request.stateVersion,
+          const autoPassRequest = nextStep.request;
+          const autoPassResponse: DecisionResponse = {
+            decisionId: autoPassRequest.decisionId,
+            stateVersion: autoPassRequest.stateVersion,
             selectedPatternRef: autoPassIndex,
-          });
+          };
+          nextStep = session.submitDecision(autoPassResponse);
           nextState = JSON.parse(JSON.stringify(session.state));
+
+          // 受理された AutoPass 意思決定を記録
+          appendDecisionTranscript({
+            actor: "autoPass",
+            playerId: autoPassRequest.playerId as "p1" | "p2",
+            decisionId: autoPassResponse.decisionId,
+            stateVersion: autoPassResponse.stateVersion,
+            response: autoPassResponse,
+          });
 
           const autoEvents = ViewerAwareGameEventFormatter.formatStateTransition(
             prevState,
@@ -580,6 +675,21 @@ export const CoreBattlePlaytest: React.FC = () => {
         setIsAiProcessing(false);
 
         for (const rec of aiResult.records) {
+          appendDecisionTranscript({
+            actor: "policy",
+            playerId: rec.playerId as "p1" | "p2",
+            decisionId: rec.request.decisionId,
+            stateVersion: rec.request.stateVersion,
+            response: rec.response,
+            policy: {
+              kind: rec.policyDescriptor.kind,
+              name: rec.policyDescriptor.name,
+              policyVersion:
+                rec.policyDescriptor.policyVersion != null
+                  ? String(rec.policyDescriptor.policyVersion)
+                  : undefined,
+            },
+          });
           addTrace(
             "AI_DECISION",
             `[AI ${rec.policyDescriptor.name || rec.policyDescriptor.kind}] selected Pattern #${rec.response.selectedPatternRef}`,
@@ -650,6 +760,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       currentStep,
       addLog,
       addTrace,
+      appendDecisionTranscript,
     ]
   );
 
@@ -657,6 +768,36 @@ export const CoreBattlePlaytest: React.FC = () => {
   const handlePassAndPlayReady = useCallback(() => {
     setIsPassAndPlayWaiting(false);
   }, []);
+
+  // 診断データ一括保存 (Playtest Diagnostic Bundle v1)
+  const isDiagnosticAvailable = Boolean(activeMatch && activePlaytestSettings && sessionRef.current);
+
+  const handleDownloadDiagnostic = useCallback(() => {
+    const session = sessionRef.current;
+    if (!session || !activeMatch || !activePlaytestSettings) return;
+
+    // session.state を正とする (UI snapshot の gameState ではなく Session state のディープコピー)
+    const rawState = JSON.parse(JSON.stringify(session.state));
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      generatedAt: new Date().toISOString(),
+      activeMatch,
+      activePlaytestSettings,
+      rawState,
+      canonicalMatchLog: session.getMatchLog(),
+      currentStep,
+      decisionTranscript: decisionTranscriptRef.current,
+      uiTraces: traces,
+      runtimeNotice: runtimeNotice || undefined,
+    });
+
+    const filename = generateDiagnosticFilename({
+      environmentName: activeMatch.environmentName,
+      seed: activeMatch.seed,
+      generatedAt: bundle.generatedAt,
+    });
+
+    downloadJsonFile(filename, bundle);
+  }, [activeMatch, activePlaytestSettings, currentStep, traces, runtimeNotice]);
 
   // UI 閲覧者視点 ID: Human vs AI の時は常に activeHumanSeat に完全固定
   const uiViewerPlayerId: PlayerKey =
@@ -952,6 +1093,19 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
 
           <button
+            onClick={handleDownloadDiagnostic}
+            disabled={!isDiagnosticAvailable}
+            title="診断データを保存します。※非公開情報を含みます（手札・Life等）"
+            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
+              isDiagnosticAvailable
+                ? "bg-white text-zinc-700 border-zinc-300 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
+                : "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
+            }`}
+          >
+            診断データ保存
+          </button>
+
+          <button
             onClick={handleCopyShareUrl}
             title="現在の対戦設定を共有するURLをコピー"
             className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1"
@@ -1065,6 +1219,17 @@ export const CoreBattlePlaytest: React.FC = () => {
               <p className="text-xs text-zinc-500 mt-2">
                 ※ 対戦が安全に停止しました。上部の「新しい対戦」ボタンから再開できます。
               </p>
+              {isDiagnosticAvailable && (
+                <div className="mt-2.5 flex items-center gap-2">
+                  <button
+                    onClick={handleDownloadDiagnostic}
+                    title="エラー発生時点の診断データを保存します。※非公開情報を含みます（手札・Life等）"
+                    className="px-2.5 py-1 text-xs font-bold rounded bg-red-700 hover:bg-red-800 text-white shadow-sm transition flex items-center gap-1 cursor-pointer"
+                  >
+                    📥 診断データを保存 (非公開情報を含む)
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -1251,6 +1416,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         onResetGame={() => startNewGame()}
         onCopyShareUrl={handleCopyShareUrl}
         shareNotice={shareNotice}
+        onDownloadDiagnostic={handleDownloadDiagnostic}
+        isDiagnosticAvailable={isDiagnosticAvailable}
       />
 
       {/* 4. Mobile 対戦ログモーダル */}
@@ -1323,6 +1490,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           reason={currentStep.result.reason}
           logs={logs}
           onRestart={() => startNewGame()}
+          onDownloadDiagnostic={handleDownloadDiagnostic}
         />
       )}
     </div>

@@ -29,6 +29,8 @@ export interface MobileHeaderMenuProps {
   readonly onResetGame: () => void;
   readonly onCopyShareUrl?: () => void;
   readonly shareNotice?: { readonly type: "success" | "error" | "warning" | "info"; readonly message: string } | null;
+  readonly onDownloadDiagnostic?: () => void;
+  readonly isDiagnosticAvailable?: boolean;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -54,6 +56,8 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onResetGame,
   onCopyShareUrl,
   shareNotice,
+  onDownloadDiagnostic,
+  isDiagnosticAvailable = true,
 }) => {
   if (!isOpen) return null;
 
@@ -195,6 +199,27 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
             className="w-full py-2.5 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
           >
             <span>共有URLをコピー</span>
+          </button>
+        )}
+
+        {/* 診断データ保存ボタン (モバイルメニュー内) */}
+        {onDownloadDiagnostic && (
+          <button
+            onClick={() => {
+              onClose();
+              onDownloadDiagnostic();
+            }}
+            disabled={isDiagnosticAvailable === false}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title="対戦調査用JSONを保存します。手札・Life等の非公開情報を含みます。"
+          >
+            <div className="flex items-center gap-1.5">
+              <span>💾</span>
+              <span>診断データを保存</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-normal">
+              ※ 手札・Life等の非公開情報を含みます
+            </span>
           </button>
         )}
 

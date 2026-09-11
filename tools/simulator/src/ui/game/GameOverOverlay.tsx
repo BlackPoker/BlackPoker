@@ -6,6 +6,7 @@ export interface GameOverOverlayProps {
   reason: string;
   logs?: any[];
   onRestart: () => void;
+  onDownloadDiagnostic?: () => void;
 }
 
 export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
@@ -14,6 +15,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
   reason,
   logs = [],
   onRestart,
+  onDownloadDiagnostic,
 }) => {
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -44,6 +46,15 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
         >
           結果表示
         </button>
+        {onDownloadDiagnostic && (
+          <button
+            onClick={onDownloadDiagnostic}
+            title="対戦調査用JSONを保存します。手札・Life等の非公開情報を含みます。"
+            className="px-2 py-1 text-[10px] font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded border border-zinc-300 transition"
+          >
+            診断保存
+          </button>
+        )}
         <button
           onClick={onRestart}
           className="px-2.5 py-1 text-[10px] font-bold bg-zinc-950 hover:bg-zinc-800 text-white rounded transition"
@@ -92,6 +103,22 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
             盤面を見る
           </button>
         </div>
+
+        {onDownloadDiagnostic && (
+          <button
+            onClick={onDownloadDiagnostic}
+            title="対戦調査用JSONを保存します。手札・Life等の非公開情報を含みます。"
+            className="w-full py-2 px-3 text-xs font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-900 rounded transition flex flex-col items-center justify-center gap-0.5 border border-zinc-300 mb-3"
+          >
+            <div className="flex items-center gap-1.5 font-mono">
+              <span>💾</span>
+              <span>診断データを保存</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-normal">
+              ※ バグ報告・調査用。手札・Life等の非公開情報を含みます
+            </span>
+          </button>
+        )}
 
         <button
           onClick={onRestart}

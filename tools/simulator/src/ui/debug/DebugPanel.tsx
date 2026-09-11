@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
+import { downloadJsonFile } from "../utils/downloadJson";
 
 export interface TraceEntry {
   seq: number;
@@ -77,18 +78,10 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 
   const handleDownloadMatchLog = () => {
     if (!matchLog) return;
-    const jsonStr = JSON.stringify(matchLog, null, 2);
-    const blob = new Blob([jsonStr], { type: "application/json;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
     const matchId = matchLog.meta.matchId || state?.matchId || "match";
     const timeStr = new Date().toISOString().replace(/[:.]/g, "-");
-    a.href = url;
-    a.download = `blackpoker-match-${timeStr}-${matchId}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const filename = `blackpoker-match-${timeStr}-${matchId}.json`;
+    downloadJsonFile(filename, matchLog);
   };
 
   const env = (import.meta as any).env || {};

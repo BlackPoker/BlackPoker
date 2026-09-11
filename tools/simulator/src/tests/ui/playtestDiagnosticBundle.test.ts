@@ -1,0 +1,218 @@
+import { describe, it, expect } from "vitest";
+import {
+  buildPlaytestDiagnosticBundleV1,
+  generateDiagnosticFilename,
+  PlaytestDiagnosticBundleV1,
+  ActivePlaytestSettings,
+} from "../../ui/playtest/PlaytestDiagnosticBundle";
+import { createSeatControllers } from "../../engine/playtest/PlaytestSeatController";
+
+describe("Playtest Diagnostic Bundle v1 Tests", () => {
+  const dummyBuild = { sha: "abc1234def", ref: "refs/heads/main" };
+
+  const dummyActiveMatch = {
+    environmentId: "core-battle",
+    environmentName: "Core Battle",
+    regulationId: "reg-core-01",
+    seed: 42,
+    rulePackage: {
+      id: "pkg-core",
+      version: "1.0.0",
+    } as any,
+  };
+
+  const dummyActiveSettings: ActivePlaytestSettings = {
+    matchMode: "humanVsAi",
+    humanSeat: "p1",
+    policyId: "firstLegal",
+  };
+
+  const dummySeatControllers = createSeatControllers("humanVsAi", "p1", "firstLegal");
+
+  const dummyRawState = {
+    matchId: "match-test-001",
+    stateVersion: 10,
+    turnPlayer: "p1",
+    chancePlayer: "p1",
+    players: {
+      p1: {
+        hand: [{ id: "c1", suit: "S", rank: 10 }],
+        life: [{ id: "l1", suit: "H", rank: 5 }],
+      },
+      p2: {
+        hand: [{ id: "c2", suit: "D", rank: 7 }],
+        life: [{ id: "l2", suit: "C", rank: 2 }],
+      },
+    },
+  };
+
+  it("Test A, B, C: Schemaルートプロパティ (kind, schemaVersion, containsHiddenInformation, generatedAt) の完全性", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      activeSettings: dummyActiveSettings,
+      seatControllers: dummySeatControllers,
+      rawState: dummyRawState,
+      generatedAt: "2026-09-11T23:14:00.000Z",
+    });
+
+    expect(bundle.kind).toBe("blackpoker-playtest-diagnostic");
+    expect(bundle.schemaVersion).toBe(1);
+    expect(bundle.containsHiddenInformation).toBe(true);
+    expect(bundle.generatedAt).toBe("2026-09-11T23:14:00.000Z");
+  });
+
+  it("Test D: build 情報 (sha, ref) が反映されること", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+    });
+
+    expect(bundle.build.sha).toBe("abc1234def");
+    expect(bundle.build.ref).toBe("refs/heads/main");
+  });
+
+  it("Test E: match メタデータ (environmentId, environmentName, regulationId, seed, rulePackage) が反映されること", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      activeSettings: dummyActiveSettings,
+      seatControllers: dummySeatControllers,
+      rawState: dummyRawState,
+    });
+
+    expect(bundle.match.matchId).toBe("match-test-001");
+    expect(bundle.match.environmentId).toBe("core-battle");
+    expect(bundle.match.environmentName).toBe("Core Battle");
+    expect(bundle.match.regulationId).toBe("reg-core-01");
+    expect(bundle.match.seed).toBe(42);
+    expect(bundle.match.rulePackageId).toBe("pkg-core");
+    expect(bundle.match.rulePackageVersion).toBe("1.0.0");
+  });
+
+  it("Test F: Human vs AI の設定 (humanSeat, policyId, seatControllers) が Active 設定から入ること", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      activeSettings: dummyActiveSettings,
+      seatControllers: dummySeatControllers,
+    });
+
+    expect(bundle.match.matchMode).toBe("humanVsAi");
+    expect(bundle.match.humanSeat).toBe("p1");
+    expect(bundle.match.policyId).toBe("firstLegal");
+    expect(bundle.match.seatControllers).toEqual(dummySeatControllers);
+  });
+
+  it("Test G: Pending 設定の変更が Active 設定に混入しないこと (Pending 汚染防止契約)", () => {
+    // Active 設定は firstLegal で固定されている
+    const currentActiveSettings: ActivePlaytestSettings = {
+      matchMode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "firstLegal",
+    };
+
+    // UI 上で次戦用に pendingPolicyId が manualGenericGenome へ変更されていても、
+    // Bundle Builder には activeSettings を渡すため、Bundle には firstLegal が記録される
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      activeSettings: currentActiveSettings,
+      seatControllers: dummySeatControllers,
+    });
+
+    expect(bundle.match.policyId).toBe("firstLegal");
+    expect(bundle.match.policyId).not.toBe("manualGenericGenome");
+  });
+
+  it("Test H: snapshot.rawState に両者の非公開手札・ライフが含まれること", () => {
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      rawState: dummyRawState,
+    });
+
+    expect(bundle.snapshot.stateVersion).toBe(10);
+    expect(bundle.snapshot.rawState).toEqual(dummyRawState);
+    const raw = bundle.snapshot.rawState as any;
+    expect(raw.players.p1.hand[0].suit).toBe("S");
+    expect(raw.players.p2.hand[0].suit).toBe("D");
+    expect(raw.players.p1.life[0].suit).toBe("H");
+    expect(raw.players.p2.life[0].suit).toBe("C");
+  });
+
+  it("Test I: CanonicalMatchLog が存在する場合に完全な形で格納されること", () => {
+    const mockMatchLog = {
+      meta: { matchId: "canonical-match-123" },
+      events: [{ seq: 1, type: "TURN_START" }],
+    } as any;
+
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      canonicalMatchLog: mockMatchLog,
+    });
+
+    expect(bundle.canonicalMatchLog).toEqual(mockMatchLog);
+  });
+
+  it("Test J: runtimeNotice および setupNotice が notices に格納されること", () => {
+    const mockNotice = {
+      type: "TECHNICAL_ERROR" as const,
+      title: "AI Policy 実行時エラー",
+      message: "AI timed out",
+      environmentName: "Core Battle",
+    };
+
+    const bundle = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      runtimeNotice: mockNotice,
+    });
+
+    expect(bundle.notices?.runtime).toEqual(mockNotice);
+    expect(bundle.notices?.setup).toBeUndefined();
+  });
+
+  it("Test C-ext: formatId / frameId は rawState にない場合は undefined であり、推測されないこと", () => {
+    const bundleWithoutFormat = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      rawState: dummyRawState, // formatId, frameId なし
+    });
+
+    expect(bundleWithoutFormat.match.formatId).toBeUndefined();
+    expect(bundleWithoutFormat.match.frameId).toBeUndefined();
+
+    const bundleWithFormat = buildPlaytestDiagnosticBundleV1({
+      build: dummyBuild,
+      activeMatch: dummyActiveMatch,
+      rawState: {
+        ...dummyRawState,
+        formatId: "format-official",
+        frameId: "frame-2026",
+      },
+    });
+
+    expect(bundleWithFormat.match.formatId).toBe("format-official");
+    expect(bundleWithFormat.match.frameId).toBe("frame-2026");
+  });
+
+  it("Test K: generateDiagnosticFilename での安全なファイル名生成とサニタイズ", () => {
+    const filename1 = generateDiagnosticFilename({
+      matchId: "match:test/001",
+      seed: 42,
+      buildSha: "4dda9d48b",
+      timestamp: "2026-09-11T23:14:00.000Z",
+    });
+    // : や / が _ に置換され、ISO timestamp のコロンも置換されていること
+    expect(filename1).toBe("blackpoker-diagnostic-v1-match_test_001-4dda9d4-2026-09-11T23-14-00-000Z.json");
+
+    const filename2 = generateDiagnosticFilename({
+      seed: 99,
+      buildSha: "4dda9d48b",
+      timestamp: "2026-09-11T23:14:00.000Z",
+    });
+    expect(filename2).toBe("blackpoker-diagnostic-v1-seed99-4dda9d4-2026-09-11T23-14-00-000Z.json");
+  });
+});
