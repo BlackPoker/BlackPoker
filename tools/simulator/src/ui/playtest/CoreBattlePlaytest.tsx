@@ -65,6 +65,8 @@ import {
 } from "./PlaytestDecisionTranscript";
 import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
+import { ReplayVerifyModal } from "../replay/ReplayVerifyModal";
+import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
@@ -158,6 +160,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showMobileLogModal, setShowMobileLogModal] = useState(false);
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
+  const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
 
   // 非公式環境への切替時に SeededRandom が選択されていたら自動的に FirstLegal へフォールバック
   useEffect(() => {
@@ -767,6 +770,22 @@ export const CoreBattlePlaytest: React.FC = () => {
     runtimeNotice,
   ]);
 
+  // Replay 検証サービス連携（現在進行中の対戦には一切影響を与えない）
+  const currentBuildSha = (import.meta as any).env?.VITE_BUILD_SHA
+    ? String((import.meta as any).env.VITE_BUILD_SHA)
+    : "local";
+
+  const handleVerifyReplayBundle = useCallback(
+    (bundle: unknown) => {
+      return verifyDiagnosticReplayBundleV1(bundle, {
+        currentBuildSha,
+        catalog,
+        fullRulePackage,
+      });
+    },
+    [currentBuildSha, catalog, fullRulePackage]
+  );
+
   // UI 閲覧者視点 ID: Human vs AI の時は常に activeHumanSeat に完全固定
   const uiViewerPlayerId: PlayerKey =
     activeMatchMode === "humanVsAi"
@@ -1071,6 +1090,14 @@ export const CoreBattlePlaytest: React.FC = () => {
             }`}
           >
             診断データ保存
+          </button>
+
+          <button
+            onClick={() => setIsReplayVerifyModalOpen(true)}
+            title="Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"
+            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
+          >
+            Replay検証
           </button>
 
           <button
@@ -1386,6 +1413,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         shareNotice={shareNotice}
         onDownloadDiagnostic={handleDownloadDiagnostic}
         isDiagnosticAvailable={isDiagnosticAvailable}
+        onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
       />
 
       {/* 4. Mobile 対戦ログモーダル */}
@@ -1461,6 +1489,14 @@ export const CoreBattlePlaytest: React.FC = () => {
           onDownloadDiagnostic={handleDownloadDiagnostic}
         />
       )}
+
+      {/* 6. Replay 検証モーダル */}
+      <ReplayVerifyModal
+        isOpen={isReplayVerifyModalOpen}
+        onClose={() => setIsReplayVerifyModalOpen(false)}
+        onVerify={handleVerifyReplayBundle}
+        currentBuildSha={currentBuildSha}
+      />
     </div>
   );
 };

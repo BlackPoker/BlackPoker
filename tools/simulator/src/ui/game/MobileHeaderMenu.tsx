@@ -31,6 +31,7 @@ export interface MobileHeaderMenuProps {
   readonly shareNotice?: { readonly type: "success" | "error" | "warning" | "info"; readonly message: string } | null;
   readonly onDownloadDiagnostic?: () => void;
   readonly isDiagnosticAvailable?: boolean;
+  readonly onOpenReplayVerify?: () => void;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -58,6 +59,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   shareNotice,
   onDownloadDiagnostic,
   isDiagnosticAvailable = true,
+  onOpenReplayVerify,
 }) => {
   if (!isOpen) return null;
 
@@ -219,6 +221,26 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
             </div>
             <span className="text-[10px] text-zinc-500 font-normal">
               ※ 手札・Life等の非公開情報を含みます
+            </span>
+          </button>
+        )}
+
+        {/* Replay検証ボタン (モバイルメニュー内) */}
+        {onOpenReplayVerify && (
+          <button
+            onClick={() => {
+              onClose();
+              onOpenReplayVerify();
+            }}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title="Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"
+          >
+            <div className="flex items-center gap-1.5">
+              <span>🔍</span>
+              <span>Replay検証</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-normal">
+              ※ 保存済みJSONの再現性を検証
             </span>
           </button>
         )}
