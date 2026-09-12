@@ -303,15 +303,69 @@ describe("ReplayVerificationService Tests", () => {
       }
     });
 
-    it("G-3: null JSON ('null') は parse 自体は SUCCESS となり value が null であること", () => {
+    it("G-3: null JSON ('null') は parse 自体は SUCCESS となり value が null で、verify service で INCOMPATIBLE / INVALID_KIND となること", () => {
       const res = parseDiagnosticJson("null");
       expect(res.type).toBe("SUCCESS");
       if (res.type === "SUCCESS") {
         expect(res.value).toBeNull();
       }
 
-      // null を verifyDiagnosticReplayBundleV1 に渡すと INCOMPATIBLE (INVALID_KIND) で安全に拒絶される
+      // null を verifyDiagnosticReplayBundleV1 に渡すと INCOMPATIBLE (INVALID_KIND) で安全に処理される
       const outcome = verifyDiagnosticReplayBundleV1(res.type === "SUCCESS" ? res.value : null, {
+        currentBuildSha: currentBuild.sha,
+        catalog,
+        fullRulePackage,
+      });
+      expect(outcome.type).toBe("INCOMPATIBLE");
+      if (outcome.type === "INCOMPATIBLE") {
+        expect(outcome.code).toBe("INVALID_KIND");
+      }
+    });
+
+    it("G-4: boolean JSON ('false') は parse SUCCESS となり verify service で INVALID_KIND となること", () => {
+      const res = parseDiagnosticJson("false");
+      expect(res.type).toBe("SUCCESS");
+      if (res.type === "SUCCESS") {
+        expect(res.value).toBe(false);
+      }
+
+      const outcome = verifyDiagnosticReplayBundleV1(res.type === "SUCCESS" ? res.value : false, {
+        currentBuildSha: currentBuild.sha,
+        catalog,
+        fullRulePackage,
+      });
+      expect(outcome.type).toBe("INCOMPATIBLE");
+      if (outcome.type === "INCOMPATIBLE") {
+        expect(outcome.code).toBe("INVALID_KIND");
+      }
+    });
+
+    it("G-5: number JSON ('0') は parse SUCCESS となり verify service で INVALID_KIND となること", () => {
+      const res = parseDiagnosticJson("0");
+      expect(res.type).toBe("SUCCESS");
+      if (res.type === "SUCCESS") {
+        expect(res.value).toBe(0);
+      }
+
+      const outcome = verifyDiagnosticReplayBundleV1(res.type === "SUCCESS" ? res.value : 0, {
+        currentBuildSha: currentBuild.sha,
+        catalog,
+        fullRulePackage,
+      });
+      expect(outcome.type).toBe("INCOMPATIBLE");
+      if (outcome.type === "INCOMPATIBLE") {
+        expect(outcome.code).toBe("INVALID_KIND");
+      }
+    });
+
+    it("G-6: empty string JSON ('\"\"') は parse SUCCESS となり verify service で INVALID_KIND となること", () => {
+      const res = parseDiagnosticJson('""');
+      expect(res.type).toBe("SUCCESS");
+      if (res.type === "SUCCESS") {
+        expect(res.value).toBe("");
+      }
+
+      const outcome = verifyDiagnosticReplayBundleV1(res.type === "SUCCESS" ? res.value : "", {
         currentBuildSha: currentBuild.sha,
         catalog,
         fullRulePackage,

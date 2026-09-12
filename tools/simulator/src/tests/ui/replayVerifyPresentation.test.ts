@@ -1,7 +1,12 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { renderToString } from "react-dom/server";
-import { ReplayVerifyModal } from "../../ui/replay/ReplayVerifyModal";
+import {
+  ReplayVerifyModal,
+  isVerifyActionAvailable,
+  createSafeTechnicalErrorOutcome,
+  ParsedBundleState,
+} from "../../ui/replay/ReplayVerifyModal";
 import { MobileHeaderMenu } from "../../ui/game/MobileHeaderMenu";
 
 describe("ReplayVerifyPresentation Tests", () => {
@@ -65,6 +70,88 @@ describe("ReplayVerifyPresentation Tests", () => {
         })
       );
       expect(html).toContain("Current: local");
+    });
+
+    it("5. PARSED 状態の値が falsy (null, false, 0, '') であっても検証可能状態となり、ボタンが描画されること", () => {
+      // 純粋関数 isVerifyActionAvailable の検証
+      expect(isVerifyActionAvailable({ type: "PARSED", value: null }, null, null)).toBe(true);
+      expect(isVerifyActionAvailable({ type: "PARSED", value: false }, null, null)).toBe(true);
+      expect(isVerifyActionAvailable({ type: "PARSED", value: 0 }, null, null)).toBe(true);
+      expect(isVerifyActionAvailable({ type: "PARSED", value: "" }, null, null)).toBe(true);
+      expect(isVerifyActionAvailable({ type: "NONE" }, null, null)).toBe(false);
+      expect(isVerifyActionAvailable({ type: "PARSED", value: null }, { type: "INCOMPATIBLE", code: "INVALID_KIND", message: "err", currentBuildSha: "local" }, null)).toBe(false);
+      expect(isVerifyActionAvailable({ type: "PARSED", value: null }, null, "Parse error")).toBe(false);
+
+      // Modal レンダリング契約: value が null でも「検証する」ボタンが描画されること
+      const htmlNull = renderToString(
+        React.createElement(ReplayVerifyModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          onVerify: dummyOnVerify,
+          currentBuildSha: "local",
+          initialParsedBundle: { type: "PARSED", value: null },
+        })
+      );
+      expect(htmlNull).toContain("検証する");
+    });
+
+    it("6. onVerify が throw した場合に TECHNICAL_ERROR がサニタイズされ、throw message (秘密情報) が含まれないこと", () => {
+      const secretError = new Error("SECRET_INTERNAL_VALUE_TOKEN_12345");
+      const outcome = createSafeTechnicalErrorOutcome(secretError);
+
+      expect(outcome.type).toBe("TECHNICAL_ERROR");
+      if (outcome.type === "TECHNICAL_ERROR") {
+        expect(outcome.message).toBe("Replay検証中に技術的エラーが発生しました。");
+        expect(outcome.message).not.toContain("SECRET_INTERNAL_VALUE_TOKEN_12345");
+      }
+
+      // Modal レンダリング契約: 画面内に秘密情報が出力されないこと
+      const html = renderToString(
+        React.createElement(ReplayVerifyModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          onVerify: dummyOnVerify,
+          currentBuildSha: "local",
+          initialOutcome: outcome,
+        })
+      );
+
+      expect(html).toContain("TECHNICAL_ERROR");
+      expect(html).toContain("Replay検証中に技術的エラーが発生しました。");
+      expect(html).not.toContain("SECRET_INTERNAL_VALUE_TOKEN_12345");
+    });
+
+    it("7. Stale parsed state 回帰テスト: 新規ファイル選択時に旧Bundleが即時破棄され、エラー時にも再検証可能に戻らないこと", () => {
+      // A. 最初に正常 Bundle を PARSED 状態にする
+      let parsedState: ParsedBundleState = {
+        type: "PARSED",
+        value: { kind: "blackpoker-playtest-diagnostic" },
+      };
+      let currentOutcome: any = null;
+      let currentParseError: string | null = null;
+
+      expect(isVerifyActionAvailable(parsedState, currentOutcome, currentParseError)).toBe(true);
+
+      // B. 次のファイル選択開始時 (非同期 read 前) に ParsedBundleState を NONE へ即時リセット
+      parsedState = { type: "NONE" };
+      currentOutcome = null;
+      currentParseError = null;
+      expect(isVerifyActionAvailable(parsedState, currentOutcome, currentParseError)).toBe(false);
+
+      // C. 新しいファイルが invalid JSON だった場合: パースエラー設定、state は NONE のまま
+      currentParseError = "JSONとして読み込めませんでした。ファイル形式を確認してください。";
+      expect(isVerifyActionAvailable(parsedState, currentOutcome, currentParseError)).toBe(false);
+
+      // D. 正常ファイル読み込み後に file read error が発生した場合の回帰確認
+      // 再び正常 Bundle を読み込んだ状態から
+      parsedState = { type: "PARSED", value: { kind: "blackpoker-playtest-diagnostic" } };
+      currentParseError = null;
+      expect(isVerifyActionAvailable(parsedState, currentOutcome, currentParseError)).toBe(true);
+
+      // 新規ファイル選択開始で NONE にリセットされ、read error 発生
+      parsedState = { type: "NONE" };
+      currentParseError = "JSONとして読み込めませんでした。ファイル形式を確認してください。";
+      expect(isVerifyActionAvailable(parsedState, currentOutcome, currentParseError)).toBe(false);
     });
   });
 

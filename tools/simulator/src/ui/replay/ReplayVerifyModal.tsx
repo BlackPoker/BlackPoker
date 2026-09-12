@@ -5,11 +5,44 @@ import {
   ReplayVerificationOutcome,
 } from "../playtest/ReplayVerificationService";
 
+export type ParsedBundleState =
+  | { readonly type: "NONE" }
+  | { readonly type: "PARSED"; readonly value: unknown };
+
+/**
+ * 検証アクションが実行可能（ファイルパース成功、未検証、パースエラーなし）かを判定する Pure Helper。
+ * 値が null / false / 0 / "" 等の falsy な値であってもパース成功なら実行可能とする。
+ */
+export function isVerifyActionAvailable(
+  parsedState: ParsedBundleState,
+  outcome: ReplayVerificationOutcome | null,
+  parseError: string | null
+): boolean {
+  return (
+    parsedState.type === "PARSED" && outcome === null && parseError === null
+  );
+}
+
+/**
+ * onVerify 呼び出し時の未知例外を安全な TECHNICAL_ERROR Outcome へ変換する Pure Helper。
+ * 秘密情報漏洩を防ぐため、err?.message は通常UIへ露出させず固定メッセージを返却する。
+ */
+export function createSafeTechnicalErrorOutcome(
+  _err?: unknown
+): ReplayVerificationOutcome {
+  return {
+    type: "TECHNICAL_ERROR",
+    message: "Replay検証中に技術的エラーが発生しました。",
+  };
+}
+
 export interface ReplayVerifyModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly onVerify: (bundle: unknown) => ReplayVerificationOutcome;
   readonly currentBuildSha: string;
+  readonly initialParsedBundle?: ParsedBundleState;
+  readonly initialOutcome?: ReplayVerificationOutcome | null;
 }
 
 export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
@@ -17,6 +50,8 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
   onClose,
   onVerify,
   currentBuildSha,
+  initialParsedBundle,
+  initialOutcome,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -24,14 +59,18 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
     readonly name: string;
     readonly size: number;
   } | null>(null);
-  const [selectedBundle, setSelectedBundle] = useState<unknown | null>(null);
+  const [parsedBundle, setParsedBundle] = useState<ParsedBundleState>(
+    initialParsedBundle ?? { type: "NONE" }
+  );
   const [parseError, setParseError] = useState<string | null>(null);
   const [isVerifying, setIsVerifying] = useState<boolean>(false);
-  const [outcome, setOutcome] = useState<ReplayVerificationOutcome | null>(null);
+  const [outcome, setOutcome] = useState<ReplayVerificationOutcome | null>(
+    initialOutcome ?? null
+  );
 
   const resetState = useCallback(() => {
     setSelectedFile(null);
-    setSelectedBundle(null);
+    setParsedBundle({ type: "NONE" });
     setParseError(null);
     setIsVerifying(false);
     setOutcome(null);
@@ -40,12 +79,12 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
     }
   }, []);
 
-  // モーダルオープン時に状態を初期化
+  // モーダルオープン時に状態を初期化（テスト用初期値が与えられている場合は除外）
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !initialParsedBundle && !initialOutcome) {
       resetState();
     }
-  }, [isOpen, resetState]);
+  }, [isOpen, resetState, initialParsedBundle, initialOutcome]);
 
   // Escape キーによるモーダルクローズ
   useEffect(() => {
@@ -65,6 +104,8 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
     e.target.value = "";
     if (!file) return;
 
+    // 新規ファイル選択時に旧Parsed BundleとOutcome/Errorを即時破棄
+    setParsedBundle({ type: "NONE" });
     setOutcome(null);
     setParseError(null);
 
@@ -72,22 +113,22 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
       const text = await file.text();
       const parseResult = parseDiagnosticJson(text);
       if (parseResult.type === "SUCCESS") {
-        setSelectedBundle(parseResult.value);
+        setParsedBundle({ type: "PARSED", value: parseResult.value });
         setSelectedFile({ name: file.name, size: file.size });
       } else {
-        setSelectedBundle(null);
+        setParsedBundle({ type: "NONE" });
         setSelectedFile({ name: file.name, size: file.size });
         setParseError(parseResult.message);
       }
     } catch {
-      setSelectedBundle(null);
+      setParsedBundle({ type: "NONE" });
       setSelectedFile({ name: file.name, size: file.size });
       setParseError("JSONとして読み込めませんでした。ファイル形式を確認してください。");
     }
   };
 
   const handleVerify = async () => {
-    if (!selectedBundle || isVerifying) return;
+    if (parsedBundle.type !== "PARSED" || isVerifying) return;
     setIsVerifying(true);
     setOutcome(null);
 
@@ -101,13 +142,10 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
     });
 
     try {
-      const result = onVerify(selectedBundle);
+      const result = onVerify(parsedBundle.value);
       setOutcome(result);
-    } catch (err: any) {
-      setOutcome({
-        type: "TECHNICAL_ERROR",
-        message: err?.message || "Replay検証中に技術的エラーが発生しました。",
-      });
+    } catch (err: unknown) {
+      setOutcome(createSafeTechnicalErrorOutcome(err));
     } finally {
       setIsVerifying(false);
     }
@@ -223,7 +261,7 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
         )}
 
         {/* 検証実行ボタン（ファイル選択済みかつ未検証時） */}
-        {selectedBundle && !outcome && !parseError && (
+        {isVerifyActionAvailable(parsedBundle, outcome, parseError) && (
           <button
             onClick={handleVerify}
             disabled={isVerifying}
