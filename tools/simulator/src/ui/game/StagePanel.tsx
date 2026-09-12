@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import type { ActionRequest } from "../../domain/rules/RulePackage";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { StageTargetPresenter, getStageRequestDisplayIndex } from "./StageTargetPresenter";
 
@@ -119,9 +120,9 @@ export const StagePanel: React.FC<StagePanelProps> = ({
                     {isTargetRelationRelevant && (
                       <span
                         className="bg-amber-600 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm"
-                        title="別のアクションから対象（Counter等）として指定されています"
+                        title="別のアクションから対象として指定されています"
                       >
-                        COUNTER TARGET
+                        TARGET
                       </span>
                     )}
                     <span

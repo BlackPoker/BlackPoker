@@ -5,10 +5,11 @@ import {
   StageTargetPresenter,
   getStageRequestDisplayIndex,
 } from "../../ui/game/StageTargetPresenter";
+import type { ActionRequest } from "../../domain/rules/RulePackage";
 import type { UnitBattleDisplayInfo } from "../../ui/game/BattleRelationPresenter";
 import { StagePanel } from "../../ui/game/StagePanel";
 
-describe("StageTargetPresenter (UI Phase 3.1)", () => {
+describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
   describe("getStageRequestDisplayIndex", () => {
     it("LIFO配列の末尾をTOP、先頭をSTAGE #1と正しく計算すること", () => {
       const top = getStageRequestDisplayIndex(2, 3);
@@ -26,7 +27,7 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
   });
 
   describe("StageTargetPresenter.buildStageTargetPresentation", () => {
-    it("Test A: 同種一般兵2体存在時のターゲット個別識別 (盤面番号・カード・役職が付与されること)", () => {
+    it("Test A: 同種一般兵2体存在時のターゲット個別識別 (canonical unitId による盤面番号・カード・役職の付与)", () => {
       const battleMap = new Map<string, UnitBattleDisplayInfo>([
         [
           "u-soldier-1",
@@ -48,11 +49,15 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
         ],
       ]);
 
-      const requests = [
+      const requests: ActionRequest[] = [
         {
           id: "req-1",
           actionId: "action.down",
-          targets: [{ type: "unit", unitId: "u-soldier-2" }],
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [{ type: "unit", unitId: "u-soldier-2", kind: "soldier", componentId: "c-2" }],
         },
       ];
 
@@ -77,11 +82,15 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
         ],
       ]);
 
-      const requests = [
+      const requests: ActionRequest[] = [
         {
           id: "req-destroy-bulwark",
           actionId: "action.destroyBulwark",
-          targets: [{ type: "unit", unitId: "u-bulwark-opp" }],
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [{ type: "unit", unitId: "u-bulwark-opp", kind: "bulwark", componentId: "c-4" }],
         },
       ];
 
@@ -96,18 +105,26 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
       expect(labels?.[0]).not.toContain("♣");
     });
 
-    it("Test C: Request target (STAGE #1 アタック / targetedRequestIds の収集)", () => {
-      const requests = [
+    it("Test C: Request target (canonical requestId による STAGE #1 アタック / targetedRequestIds の収集)", () => {
+      const requests: ActionRequest[] = [
         {
           id: "req-1",
           actionId: "action.attack",
-          action: { name: "アタック" },
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          action: { id: "action.attack", name: "アタック", timing: "turn", description: "" } as any,
         },
         {
           id: "req-2",
           actionId: "action.counter",
-          action: { name: "カウンター" },
-          targets: [{ type: "request", targetRequestId: "req-1" }],
+          controller: "p2",
+          keyCards: [],
+          status: "pending",
+          sequence: 2,
+          action: { id: "action.counter", name: "カウンター", timing: "turn", description: "" } as any,
+          targets: [{ type: "request", requestId: "req-1", actionId: "action.attack" }],
         },
       ];
 
@@ -119,20 +136,26 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
       expect(labels?.[0]).toBe("STAGE #1 アタック");
     });
 
-    it("Test D: Mobile展開制御 (Counter対象のRequestがMobileで折りたたまれないこと)", () => {
-      const requests = [
+    it("Test D: Mobile展開制御 & Generic TARGET indicator (Counter固有ではなくgeneric TARGETバッジであること)", () => {
+      const requests: ActionRequest[] = [
         {
           id: "req-1",
           actionId: "action.attack",
-          action: { name: "アタック" },
           controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          action: { id: "action.attack", name: "アタック", timing: "turn", description: "" } as any,
         },
         {
           id: "req-2",
           actionId: "action.counter",
-          action: { name: "カウンター" },
           controller: "p2",
-          targets: [{ type: "request", targetRequestId: "req-1" }],
+          keyCards: [],
+          status: "pending",
+          sequence: 2,
+          action: { id: "action.counter", name: "カウンター", timing: "turn", description: "" } as any,
+          targets: [{ type: "request", requestId: "req-1", actionId: "action.attack" }],
         },
       ];
 
@@ -143,14 +166,15 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
         })
       );
 
-      // req-1 に COUNTER TARGET バッジが表示されること
-      expect(html).toContain("COUNTER TARGET");
+      // generic TARGET バッジが表示されること (COUNTER TARGET ではない)
+      expect(html).toContain("TARGET");
+      expect(html).not.toContain("COUNTER TARGET");
+      expect(html).toContain("別のアクションから対象として指定されています");
       // req-1 は非TOPだが targetedRequestIds に含まれるため、hidden lg:flex にならない
-      // HTML中に hidden lg:flex が含まれていないこと (全リクエストが表示対象)
       expect(html).not.toContain("hidden lg:flex");
     });
 
-    it("Test E: 複数Targetの表示順序が維持されること", () => {
+    it("Test E: 複数Targetの表示順序が維持されること (canonical ActionRequestTarget)", () => {
       const battleMap = new Map<string, UnitBattleDisplayInfo>([
         [
           "u-1",
@@ -172,13 +196,17 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
         ],
       ]);
 
-      const requests = [
+      const requests: ActionRequest[] = [
         {
           id: "req-multi",
           actionId: "action.dualAttack",
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
           targets: [
-            { type: "unit", unitId: "u-2" },
-            { type: "unit", unitId: "u-1" },
+            { type: "unit", unitId: "u-2", kind: "soldier", componentId: "c-2" },
+            { type: "unit", unitId: "u-1", kind: "hero", componentId: "c-1" },
           ],
         },
       ];
@@ -189,26 +217,35 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
       expect(labels).toEqual(["② ♣2 一般兵", "① ♠A 英雄"]);
     });
 
-    it("Test F: missing stable identity 時に推測せず fail-closed 表示になること", () => {
-      const requests = [
+    it("Test F: displayName/card/action名/配列位置等からidentityを推測しないこと", () => {
+      // canonical targets が空または未指定の場合、推測によるラベル生成を絶対に行わない
+      const requests: ActionRequest[] = [
         {
-          id: "req-no-unit-id",
-          actionId: "action.down",
-          targets: [{ type: "unit" }], // unitId 欠落
-        },
-        {
-          id: "req-no-req-id",
-          actionId: "action.counter",
-          targets: [{ type: "request" }], // requestId 欠落
+          id: "req-no-targets",
+          actionId: "action.attack",
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [],
         },
       ];
 
-      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests);
-      const unitLabels = presentation.requestTargetLabels.get("req-no-unit-id");
-      const reqLabels = presentation.requestTargetLabels.get("req-no-req-id");
+      const battleMap = new Map<string, UnitBattleDisplayInfo>([
+        [
+          "u-1",
+          {
+            unitId: "u-1",
+            badge: "①",
+            label: "① ♠A 英雄",
+            blockedByBadges: [],
+          },
+        ],
+      ]);
 
-      expect(unitLabels?.[0]).toBe("対象Unit（識別不能）");
-      expect(reqLabels?.[0]).toBe("対象リクエスト（識別不能）");
+      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
+      expect(presentation.requestTargetLabels.get("req-no-targets")).toBeUndefined();
+      expect(presentation.targetedRequestIds.size).toBe(0);
     });
 
     it("Test G: Observation secrecy (raw GameState 経由の非公開情報が漏洩しないこと)", () => {
@@ -226,11 +263,15 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
       ]);
 
       // raw targets にカード情報が含まれていない (unitId のみ)
-      const requests = [
+      const requests: ActionRequest[] = [
         {
           id: "req-target-bulwark",
           actionId: "action.destroyBulwark",
-          targets: [{ type: "unit", unitId: "u-hidden-bulwark" }],
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [{ type: "unit", unitId: "u-hidden-bulwark", kind: "bulwark", componentId: "c-3" }],
         },
       ];
 
@@ -241,22 +282,37 @@ describe("StageTargetPresenter (UI Phase 3.1)", () => {
       expect(label).not.toMatch(/[♠♡♢♣]/);
     });
 
-    it("Test H: Target lost (対象Unitが既に盤面から離脱している場合の安全な表示)", () => {
+    it("Test H: Target lost (対象Unitまたは対象Requestが既に離脱している場合の安全な表示)", () => {
       // battleRelationMap に存在しない unitId
       const battleMap = new Map<string, UnitBattleDisplayInfo>();
 
-      const requests = [
+      const requests: ActionRequest[] = [
         {
-          id: "req-lost",
+          id: "req-lost-unit",
           actionId: "action.down",
-          targets: [{ type: "unit", unitId: "u-vanished" }],
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [{ type: "unit", unitId: "u-vanished", kind: "soldier", componentId: "c-v" }],
+        },
+        {
+          id: "req-lost-request",
+          actionId: "action.counter",
+          controller: "p2",
+          keyCards: [],
+          status: "pending",
+          sequence: 2,
+          targets: [{ type: "request", requestId: "req-resolved-earlier", actionId: "action.attack" }],
         },
       ];
 
       const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
-      const labels = presentation.requestTargetLabels.get("req-lost");
+      const unitLabels = presentation.requestTargetLabels.get("req-lost-unit");
+      const reqLabels = presentation.requestTargetLabels.get("req-lost-request");
 
-      expect(labels?.[0]).toBe("対象Unit（現在盤面に存在しません）");
+      expect(unitLabels?.[0]).toBe("対象Unit（現在盤面に存在しません）");
+      expect(reqLabels?.[0]).toBe("対象リクエスト（解決済み）");
     });
   });
 });

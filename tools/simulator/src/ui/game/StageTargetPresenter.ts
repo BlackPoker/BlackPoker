@@ -1,3 +1,4 @@
+import type { ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 
 export interface StageTargetPresentation {
@@ -8,7 +9,7 @@ export interface StageTargetPresentation {
   readonly requestTargetLabels: ReadonlyMap<string, readonly string[]>;
 
   /**
-   * 現在ステージ上で別の Request から対象（Counter 等）として指定されている Request ID の集合。
+   * 現在ステージ上で別の Request から対象として指定されている Request ID の集合。
    * 一時的ハイライト（highlightedRequestId）とは異なり、Stage 上の持続的対象関係を表します。
    */
   readonly targetedRequestIds: ReadonlySet<string>;
@@ -29,8 +30,8 @@ export function getStageRequestDisplayIndex(
 
 /**
  * UI Presentation 専用の Stage Target 解決プレゼンター。
- * Core の Request 構造や Target resolution には干渉せず、保存済み identity から
- * 人間が判別可能な番号（Unit: battleRelationMap, Request: STAGE #N / TOP）へ純粋変換します。
+ * domain/rules/RulePackage の ActionRequest / ActionRequestTarget 正式契約を直接使用し、
+ * 保存済み canonical identity から人間が判別可能な番号（Unit: battleRelationMap, Request: STAGE #N / TOP）へ純粋変換します。
  */
 export class StageTargetPresenter {
   /**
@@ -38,65 +39,52 @@ export class StageTargetPresenter {
    * Observation 基準の battleRelationMap を再利用するため、相手の裏向き防壁等の秘密情報は隠蔽されます。
    */
   static buildStageTargetPresentation(
-    requests: readonly any[] = [],
+    requests: readonly ActionRequest[] = [],
     battleRelationMap?: ReadonlyMap<string, UnitBattleDisplayInfo> | Map<string, UnitBattleDisplayInfo>
   ): StageTargetPresentation {
     const requestTargetLabels = new Map<string, string[]>();
     const targetedRequestIds = new Set<string>();
 
     for (const req of requests) {
-      if (!req) continue;
-
-      const rawTargets = Array.isArray(req.targets)
-        ? req.targets
-        : req.target
-        ? [req.target]
-        : [];
-
-      if (rawTargets.length === 0) continue;
+      if (!req || !Array.isArray(req.targets) || req.targets.length === 0) continue;
 
       const labels: string[] = [];
 
-      for (const t of rawTargets) {
+      for (const t of req.targets) {
         if (!t) continue;
 
         if (t.type === "unit") {
-          // 1. ユニットターゲット (ダウン、ツイスト、アップ、防壁破壊等)
-          const unitId = t.unitId || t.targetUnitId || (req as any).targetUnitId;
+          // 1. ユニットターゲット (ダウン、ツイスト、アップ、防壁破壊等: unitId)
+          const unitId = t.unitId;
           if (unitId) {
             const unitInfo = battleRelationMap?.get(unitId);
             if (unitInfo) {
               // 既存 battleRelationMap の安定バッジ・ラベル（例: "② ♣6 一般兵", "④ 防壁"）を再利用
               labels.push(unitInfo.label);
             } else {
-              // ターゲット対象がすでに盤面から消えている場合は fail-closed 表示
+              // canonical identity は存在するが、現在盤面に存在しない場合 (Target Lost)
               labels.push("対象Unit（現在盤面に存在しません）");
             }
-          } else {
-            // stable identity が欠如している場合は推測せず fail-closed
-            labels.push("対象Unit（識別不能）");
           }
         } else if (t.type === "request") {
-          // 2. リクエストターゲット (カウンター等)
-          const targetReqId = t.requestId || t.targetRequestId || (req as any).targetRequestId;
+          // 2. リクエストターゲット (カウンター等: requestId)
+          const targetReqId = t.requestId;
           if (targetReqId) {
             targetedRequestIds.add(targetReqId);
-            const targetIdx = requests.findIndex((r: any) => r && r.id === targetReqId);
+            const targetIdx = requests.findIndex((r) => r && r.id === targetReqId);
             if (targetIdx !== -1) {
               const targetReq = requests[targetIdx];
               const { label: stagePrefix } = getStageRequestDisplayIndex(targetIdx, requests.length);
               const targetActionName = targetReq.action?.name || targetReq.actionId || "アクション";
               labels.push(`${stagePrefix} ${targetActionName}`);
             } else {
-              // すでにステージから解決済み・除去済みの場合
+              // canonical identity は存在するが、すでにステージから解決済み・除去済みの場合 (Target Lost)
               labels.push("対象リクエスト（解決済み）");
             }
-          } else {
-            labels.push("対象リクエスト（識別不能）");
           }
         } else if (t.type === "player") {
-          // 3. プレイヤーターゲット
-          const targetPlayerKey = t.targetPlayerKey || (t as any).playerId;
+          // 3. プレイヤーターゲット (targetPlayerKey)
+          const targetPlayerKey = t.targetPlayerKey;
           const pName =
             targetPlayerKey === "p1"
               ? "Player A"
