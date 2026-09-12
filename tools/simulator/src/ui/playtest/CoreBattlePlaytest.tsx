@@ -11,6 +11,7 @@ import {
   CORE_BATTLE_ENV_ID,
   isOfficialEnvironment,
   getAvailableEnvironments,
+  chooseDefaultPlaytestEnvironment,
   startMatchAttempt,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
@@ -31,6 +32,7 @@ import { DecisionPolicy } from "../../engine/simulation/DecisionPolicy";
 import { GameStatusBar } from "../game/GameStatusBar";
 import { PlayerBoard } from "../game/PlayerBoard";
 import { StagePanel } from "../game/StagePanel";
+import { MatchSetupScreen } from "./MatchSetupScreen";
 import { DecisionPanel } from "../decision/DecisionPanel";
 import { GameLog, LogEntry } from "../game/GameLog";
 import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
@@ -79,7 +81,9 @@ export const CoreBattlePlaytest: React.FC = () => {
   const seqRef = useRef<number>(1);
 
   // Pending 設定（UI入力中・対戦セッションには「新しい対戦」押下まで反映されない）
-  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(CORE_BATTLE_ENV_ID);
+  const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(() =>
+    chooseDefaultPlaytestEnvironment(getAvailableEnvironments(catalog))
+  );
   const [seedInput, setSeedInput] = useState<string>("42");
   const [pendingMatchMode, setPendingMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [pendingHumanSeat, setPendingHumanSeat] = useState<"p1" | "p2">("p1");
@@ -449,13 +453,13 @@ export const CoreBattlePlaytest: React.FC = () => {
         // 未知バージョンの場合も自動対戦開始を行わない
         break;
       }
+      case "SHOW_SETUP":
       case "START_DEFAULT_MATCH": {
-        // 通常アクセス時 (Share URL なし) は従来の初期対戦を開始
-        startNewGame(CORE_BATTLE_ENV_ID, "42");
+        // 通常アクセス時 (Share URL なし) は自動開始せず、Setup Screen を表示
         break;
       }
     }
-  }, [catalog, startNewGame]);
+  }, [catalog]);
 
   // 現在の Pending 設定から Canonical Share URL を生成してクリップボードにコピー
   const handleCopyShareUrl = useCallback(async () => {
@@ -993,9 +997,9 @@ export const CoreBattlePlaytest: React.FC = () => {
               <>
                 <span
                   className="text-[9px] font-bold text-zinc-400 ml-1 cursor-help"
-                  title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+                  title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
                 >
-                  再現SEED:
+                  対戦SEED:
                 </span>
                 <input
                   type="text"
@@ -1157,158 +1161,146 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       )}
 
-      {/* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */}
-      <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
-        {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-        <div className="lg:col-span-7 flex flex-col gap-1.5">
-          {/* セットアップ通知バナー (VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR) */}
-          {setupNotice && (
-            <div className={`p-3 rounded border font-mono ${
-              setupNotice.type === "RULE_UNSPECIFIED"
-                ? "bg-amber-50 border-amber-300 text-amber-950"
-                : setupNotice.type === "VALIDATION_ERROR"
-                ? "bg-rose-50 border-rose-300 text-rose-950"
-                : setupNotice.type === "TERMINAL"
-                ? "bg-blue-50 border-blue-300 text-blue-950"
-                : "bg-red-50 border-red-300 text-red-950"
-            }`}>
-              <div className="flex items-center gap-2 font-bold text-sm">
-                <span className={`px-1.5 py-0.5 rounded text-xs text-white ${
-                  setupNotice.type === "RULE_UNSPECIFIED"
-                    ? "bg-amber-600"
-                    : setupNotice.type === "VALIDATION_ERROR"
-                    ? "bg-rose-600"
-                    : setupNotice.type === "TERMINAL"
-                    ? "bg-blue-600"
-                    : "bg-red-600"
-                }`}>
-                  {setupNotice.type}
-                </span>
-                <span>{setupNotice.title}</span>
-              </div>
-              <p className="text-xs mt-1">{setupNotice.message}</p>
-              {setupNotice.details && (
-                <p className="text-[11px] text-zinc-600 mt-0.5">{setupNotice.details}</p>
-              )}
-              {!gameState && (
-                <p className="text-xs text-zinc-500 mt-2">
-                  ※ 設定またはSeedを確認し、上部の「新しい対戦」ボタンを押してください。
-                </p>
-              )}
-            </div>
-          )}
-
-          {/* 対戦中実行時エラー通知バナー (AI 技術的障害等) */}
-          {runtimeNotice && (
-            <div className="p-3 rounded border font-mono bg-red-50 border-red-300 text-red-950">
-              <div className="flex items-center gap-2 font-bold text-sm">
-                <span className="px-1.5 py-0.5 rounded text-xs text-white bg-red-600">
-                  {runtimeNotice.type}
-                </span>
-                <span>{runtimeNotice.title}</span>
-              </div>
-              <p className="text-xs mt-1">{runtimeNotice.message}</p>
-              {runtimeNotice.details && (
-                <p className="text-[11px] text-zinc-600 mt-0.5">{runtimeNotice.details}</p>
-              )}
-              <p className="text-xs text-zinc-500 mt-2">
-                ※ 対戦が安全に停止しました。上部の「新しい対戦」ボタンから再開できます。
-              </p>
-              {isDiagnosticAvailable && (
-                <div className="mt-2.5 flex items-center gap-2">
-                  <button
-                    onClick={handleDownloadDiagnostic}
-                    title="エラー発生時点の診断データを保存します。※非公開情報を含みます（手札・Life等）"
-                    className="px-2.5 py-1 text-xs font-bold rounded bg-red-700 hover:bg-red-800 text-white shadow-sm transition flex items-center gap-1 cursor-pointer"
-                  >
-                    📥 診断データを保存 (非公開情報を含む)
-                  </button>
+      {/* 未開始時は盤面ではなく MatchSetupScreen を表示 */}
+      {!activeMatch ? (
+        <main className="flex-1 p-3 sm:p-6 max-w-4xl mx-auto w-full flex flex-col justify-center">
+          <MatchSetupScreen
+            environmentOptions={environmentOptions}
+            selectedEnvironmentId={selectedEnvironmentId}
+            onSelectEnvironment={setSelectedEnvironmentId}
+            matchMode={pendingMatchMode}
+            onSelectMatchMode={setPendingMatchMode}
+            humanSeat={pendingHumanSeat}
+            onSelectHumanSeat={setPendingHumanSeat}
+            policyId={pendingPolicyId}
+            onSelectPolicyId={setPendingPolicyId}
+            seedInput={seedInput}
+            onSeedInputChange={setSeedInput}
+            setupNotice={setupNotice}
+            shareNotice={shareNotice}
+            presetValidationErrors={presetValidationErrors}
+            onStartMatch={() => startNewGame()}
+            onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
+          />
+        </main>
+      ) : (
+        /* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */
+        <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
+          {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
+          <div className="lg:col-span-7 flex flex-col gap-1.5">
+            {/* セットアップ通知バナー (対戦中のみ) */}
+            {setupNotice && (
+              <div className={`p-3 rounded border font-mono ${
+                setupNotice.type === "RULE_UNSPECIFIED"
+                  ? "bg-amber-50 border-amber-300 text-amber-950"
+                  : setupNotice.type === "VALIDATION_ERROR"
+                  ? "bg-rose-50 border-rose-300 text-rose-950"
+                  : setupNotice.type === "TERMINAL"
+                  ? "bg-blue-50 border-blue-300 text-blue-950"
+                  : "bg-red-50 border-red-300 text-red-950"
+              }`}>
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <span className={`px-1.5 py-0.5 rounded text-xs text-white ${
+                    setupNotice.type === "RULE_UNSPECIFIED"
+                      ? "bg-amber-600"
+                      : setupNotice.type === "VALIDATION_ERROR"
+                      ? "bg-rose-600"
+                      : setupNotice.type === "TERMINAL"
+                      ? "bg-blue-600"
+                      : "bg-red-600"
+                  }`}>
+                    {setupNotice.type}
+                  </span>
+                  <span>{setupNotice.title}</span>
                 </div>
-              )}
-            </div>
-          )}
+                <p className="text-xs mt-1">{setupNotice.message}</p>
+                {setupNotice.details && (
+                  <p className="text-[11px] text-zinc-600 mt-0.5">{setupNotice.details}</p>
+                )}
+              </div>
+            )}
 
-          {/* 未開始 / 共有URL読み込み待機状態のカード */}
-          {!gameState && !setupNotice && !runtimeNotice && (
-            <div className="flex flex-col items-center justify-center p-8 sm:p-12 my-4 bg-white rounded-lg border border-zinc-200 shadow-sm text-center font-mono">
-              <img src={logoUrl} alt="BlackPoker" className="w-10 h-10 mb-3 opacity-90" />
-              <h3 className="text-sm font-bold text-zinc-900 mb-1">
-                {shareNotice ? shareNotice.message : "対戦準備完了 (Pending Settings)"}
-              </h3>
-              <p className="text-xs text-zinc-500 max-w-md mb-5 font-sans">
-                {shareNotice
-                  ? "共有URLの設定を読み込みました。上部の対戦設定を確認の上、「新しい対戦」を押してゲームを開始してください。"
-                  : "上部で対戦環境・モード・AI設定等を選択し、「新しい対戦」を押してゲームを開始してください。"}
-              </p>
-              <button
-                onClick={() => startNewGame()}
-                className="px-5 py-2.5 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold text-xs rounded shadow transition min-h-[44px]"
-              >
-                新しい対戦を開始
-              </button>
-            </div>
-          )}
+            {/* 対戦中実行時エラー通知バナー (AI 技術的障害等) */}
+            {runtimeNotice && (
+              <div className="p-3 rounded border font-mono bg-red-50 border-red-300 text-red-950">
+                <div className="flex items-center gap-2 font-bold text-sm">
+                  <span className="px-1.5 py-0.5 rounded text-xs text-white bg-red-600">
+                    {runtimeNotice.type}
+                  </span>
+                  <span>{runtimeNotice.title}</span>
+                </div>
+                <p className="text-xs mt-1">{runtimeNotice.message}</p>
+                {runtimeNotice.details && (
+                  <p className="text-[11px] text-zinc-600 mt-0.5">{runtimeNotice.details}</p>
+                )}
+                <p className="text-xs text-zinc-500 mt-2">
+                  ※ 対戦が安全に停止しました。上部の「新しい対戦」ボタンから再開できます。
+                </p>
+                {isDiagnosticAvailable && (
+                  <div className="mt-2.5 flex items-center gap-2">
+                    <button
+                      onClick={handleDownloadDiagnostic}
+                      title="エラー発生時点の診断データを保存します。※非公開情報を含みます（手札・Life等）"
+                      className="px-2.5 py-1 text-xs font-bold rounded bg-red-700 hover:bg-red-800 text-white shadow-sm transition flex items-center gap-1 cursor-pointer"
+                    >
+                      📥 診断データを保存 (非公開情報を含む)
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
-          {/* ゲーム進行ステータスバー */}
-          {gameState && activeMatch && (
-            <GameStatusBar
-              environmentName={
-                activeMatchMode === "humanVsAi"
-                  ? `${activeMatch.environmentName} [Human(${activeHumanSeat}) vs AI]`
-                  : activeMatch.environmentName
-              }
-              matchSeed={activeMatch.seed}
-              stateVersion={gameState.stateVersion ?? gameState.version}
-              turnPlayer={gameState.turnPlayer}
-              chancePlayer={gameState.chancePlayer}
-              turnCount={gameState.turnCount}
-              players={gameState.players}
-              latestEventMessage={latestEventMessage}
-            />
-          )}
+            {/* ゲーム進行ステータスバー */}
+            {gameState && activeMatch && (
+              <GameStatusBar
+                environmentName={
+                  activeMatchMode === "humanVsAi"
+                    ? `${activeMatch.environmentName} [Human(${activeHumanSeat}) vs AI]`
+                    : activeMatch.environmentName
+                }
+                matchSeed={activeMatch.seed}
+                stateVersion={gameState.stateVersion ?? gameState.version}
+                turnPlayer={gameState.turnPlayer}
+                chancePlayer={gameState.chancePlayer}
+                turnCount={gameState.turnCount}
+                players={gameState.players}
+                latestEventMessage={latestEventMessage}
+              />
+            )}
 
-          {/* 対戦相手 (Player B) の盤面 (Observation 準拠) */}
-          {p2ViewModel && gameState?.players?.p2 && (
-            <PlayerBoard
-              playerKey="p2"
-              viewModel={p2ViewModel}
-              allPlayersFog={allPlayersFog}
-              unitSelectionMarkers={unitSelectionMarkers}
-              battleRelationMap={battleRelationMap}
-              onUnitClick={handleUnitClick}
-            />
-          )}
+            {/* 対戦相手 (Player B) の盤面 (Observation 準拠) */}
+            {p2ViewModel && gameState?.players?.p2 && (
+              <PlayerBoard
+                playerKey="p2"
+                viewModel={p2ViewModel}
+                allPlayersFog={allPlayersFog}
+                unitSelectionMarkers={unitSelectionMarkers}
+                battleRelationMap={battleRelationMap}
+                onUnitClick={handleUnitClick}
+              />
+            )}
 
-          {/* 中央 STAGE パネル */}
-          {gameState && (
-            <StagePanel
-              requests={gameState?.stage?.requests || []}
-              highlightedRequestId={highlightedRequestId}
-            />
-          )}
+            {/* 中央 STAGE パネル */}
+            {gameState && (
+              <StagePanel
+                requests={gameState?.stage?.requests || []}
+                highlightedRequestId={highlightedRequestId}
+                battleRelationMap={battleRelationMap}
+              />
+            )}
 
-          {/* 自分 (Player A) の盤面 (Observation 準拠) */}
-          {p1ViewModel && gameState?.players?.p1 && (
-            <PlayerBoard
-              playerKey="p1"
-              viewModel={p1ViewModel}
-              allPlayersFog={allPlayersFog}
-              unitSelectionMarkers={unitSelectionMarkers}
-              battleRelationMap={battleRelationMap}
-              onUnitClick={handleUnitClick}
-            />
-          )}
-
-          {/* セッション未開始時のプレースホルダー */}
-          {!gameState && (
-            <div className="p-8 flex flex-col items-center justify-center bg-zinc-50 border border-zinc-200 rounded text-center my-auto">
-              <span className="text-sm font-bold text-zinc-700 font-mono">対戦セッションが開始されていません</span>
-              <span className="text-xs text-zinc-500 font-mono mt-1">
-                上部の設定・Seed を確認し、「新しい対戦」ボタンを押してください。
-              </span>
-            </div>
-          )}
-        </div>
+            {/* 自分 (Player A) の盤面 (Observation 準拠) */}
+            {p1ViewModel && gameState?.players?.p1 && (
+              <PlayerBoard
+                playerKey="p1"
+                viewModel={p1ViewModel}
+                allPlayersFog={allPlayersFog}
+                unitSelectionMarkers={unitSelectionMarkers}
+                battleRelationMap={battleRelationMap}
+                onUnitClick={handleUnitClick}
+              />
+            )}
+          </div>
 
         {/* 右ペイン: PC用 操作パネル / 対戦ログ */}
         <div className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
@@ -1354,6 +1346,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
         </div>
       </main>
+      )}
 
       {/* =========================================================================
           Mobile 用コンポーネント群 (画面下部固定 Dock / Bottom Sheet / 各種モーダル)

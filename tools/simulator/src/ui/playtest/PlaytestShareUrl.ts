@@ -52,6 +52,9 @@ export type PlaytestInitialBootstrap =
       readonly warnings: readonly string[];
     }
   | {
+      readonly kind: "SHOW_SETUP";
+    }
+  | {
       readonly kind: "START_DEFAULT_MATCH";
     };
 
@@ -228,7 +231,7 @@ export function resolvePlaytestInitialBootstrap(
     case "NOT_SHARE":
     default:
       return {
-        kind: "START_DEFAULT_MATCH",
+        kind: "SHOW_SETUP",
       };
   }
 }

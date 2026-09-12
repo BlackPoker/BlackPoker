@@ -36,18 +36,18 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
   {
     id: "seededRandom",
     label: "SeededRandom (Baseline)",
-    description: "決定論的PRNGを用いてランダムに合法手を選択 (Official環境専用)",
+    description: "PRNGによる擬似乱数選択（DNA不使用・Official環境専用）",
     requiresSeed: true,
   },
   {
     id: "manualGenericGenome",
     label: "ManualGenericGenome (Experimental)",
-    description: "手動設計重みによる決定論的ゲノムベースライン",
+    description: "手動設計された固定重みによるベースライン（※進化・学習済みDNAではありません）",
   },
   {
     id: "zeroGenome",
     label: "ZeroGenome (Debug)",
-    description: "ゼロ重みゲノムによるデバッグ用ベースライン",
+    description: "全特徴量重み0の基準値（DNA重みなしのデバッグ用）",
   },
 ];
 

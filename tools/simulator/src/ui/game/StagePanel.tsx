@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
+import { StageTargetPresenter, getStageRequestDisplayIndex } from "./StageTargetPresenter";
 
 export interface StagePanelProps {
   requests: any[];
   highlightedRequestId?: string | null;
+  battleRelationMap?: ReadonlyMap<string, UnitBattleDisplayInfo> | Map<string, UnitBattleDisplayInfo>;
 }
 
 function formatCardCodeDisplay(code?: string): string {
@@ -14,8 +17,17 @@ function formatCardCodeDisplay(code?: string): string {
     .replace(/C/g, "♣");
 }
 
-export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlightedRequestId }) => {
+export const StagePanel: React.FC<StagePanelProps> = ({
+  requests = [],
+  highlightedRequestId,
+  battleRelationMap,
+}) => {
   const [showAllMobile, setShowAllMobile] = useState(false);
+
+  // Pure StageTargetPresentation を生成 (UnitTarget, RequestTarget, targetedRequestIds)
+  const stagePresentation = useMemo(() => {
+    return StageTargetPresenter.buildStageTargetPresentation(requests, battleRelationMap);
+  }, [requests, battleRelationMap]);
 
   // LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示
   const reversedRequests = requests.slice().reverse();
@@ -53,10 +65,16 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
       ) : (
         <div className="flex flex-col gap-1.5">
           {reversedRequests.map((req, revIdx) => {
-            const isTop = revIdx === 0;
+            const origIdx = requests.length - 1 - revIdx;
+            const { isTop, label: stageBadgeLabel } = getStageRequestDisplayIndex(
+              origIdx,
+              requests.length
+            );
             const isHighlighted = Boolean(highlightedRequestId && req.id === highlightedRequestId);
-            // Mobile では展開されていない場合、TOP またはハイライト対象以外は折りたたむ
-            const isHiddenOnMobile = !isTop && !isHighlighted && !showAllMobile;
+            const isTargetRelationRelevant = stagePresentation.targetedRequestIds.has(req.id);
+            // Mobile では展開されていない場合、TOP、ハイライト対象、または別リクエストからのターゲット対象以外は折りたたむ
+            const isHiddenOnMobile =
+              !isTop && !isHighlighted && !isTargetRelationRelevant && !showAllMobile;
 
             const actionName = req.action?.name || req.actionId;
             const controllerName = req.controller === "p1" ? "Player A" : "Player B";
@@ -72,20 +90,9 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
               ? `Cost: ${costSummary}`
               : (req.cost ? `Cost: ${req.cost}` : "Cost: なし");
 
-            // ターゲット情報の整形
-            const targetLabels: string[] = [];
-            if (req.targets && Array.isArray(req.targets)) {
-              for (const t of req.targets) {
-                if (t.type === "unit") {
-                  targetLabels.push(t.displayName || t.kind || "ユニット");
-                } else if (t.type === "player") {
-                  targetLabels.push(t.name || t.targetPlayerKey || "プレイヤー");
-                } else if (t.type === "request") {
-                  targetLabels.push(`Request (${t.targetRequestId || t.actionName || ""})`);
-                }
-              }
-            }
-            const targetStr = targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
+            // ターゲット情報の整形 (StageTargetPresenter 由来)
+            const targetLabels = stagePresentation.requestTargetLabels.get(req.id);
+            const targetStr = targetLabels && targetLabels.length > 0 ? targetLabels.join(", ") : undefined;
             const statusText = (req.status || "pending").toUpperCase();
 
             let borderAndBgClass = "bg-white border-zinc-200 text-zinc-800";
@@ -109,6 +116,14 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
                         TARGETED
                       </span>
                     )}
+                    {isTargetRelationRelevant && (
+                      <span
+                        className="bg-amber-600 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm"
+                        title="別のアクションから対象（Counter等）として指定されています"
+                      >
+                        COUNTER TARGET
+                      </span>
+                    )}
                     <span
                       className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded ${
                         isTop
@@ -116,7 +131,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({ requests = [], highlight
                           : "bg-zinc-100 text-zinc-700 border border-zinc-300"
                       }`}
                     >
-                      {isTop ? "TOP" : `STAGE #${requests.length - revIdx}`}
+                      {stageBadgeLabel}
                     </span>
                     <span className="text-xs font-bold text-zinc-950 tracking-wide">
                       {actionName}

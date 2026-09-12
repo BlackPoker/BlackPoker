@@ -345,12 +345,12 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
       }
     });
 
-    it("bpv なしの通常アクセスでは START_DEFAULT_MATCH を返すこと", () => {
+    it("bpv なしの通常アクセスでは SHOW_SETUP を返すこと", () => {
       const bootstrapEmpty = resolvePlaytestInitialBootstrap("", catalog);
-      expect(bootstrapEmpty.kind).toBe("START_DEFAULT_MATCH");
+      expect(bootstrapEmpty.kind).toBe("SHOW_SETUP");
 
       const bootstrapNonShare = resolvePlaytestInitialBootstrap("?foo=bar&debug=true", catalog);
-      expect(bootstrapNonShare.kind).toBe("START_DEFAULT_MATCH");
+      expect(bootstrapNonShare.kind).toBe("SHOW_SETUP");
     });
   });
 });

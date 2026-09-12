@@ -512,7 +512,7 @@ describe("Playtest Target Presentation Tests", () => {
       expect(highlightedHtml).not.toContain("hidden lg:flex");
     });
 
-    it("Test H: GameStatusBar に「再現SEED:」と説明用ツールチップが表示されること", () => {
+    it("Test H: GameStatusBar に「対戦SEED:」と説明用ツールチップが表示されること", () => {
       const html = renderToString(
         React.createElement(GameStatusBar, {
           turnPlayer: "p1",
@@ -526,9 +526,9 @@ describe("Playtest Target Presentation Tests", () => {
         })
       );
 
-      expect(html).toContain("再現SEED:");
+      expect(html).toContain("対戦SEED:");
       expect(html).toContain("42");
-      expect(html).toContain("初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。");
+      expect(html).toContain("初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。");
       expect(html).toContain("cursor-help");
     });
   });

@@ -43,9 +43,9 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           {matchSeed !== undefined && (
             <div
               className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm cursor-help"
-              title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+              title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">再現SEED:</span>
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">対戦SEED:</span>
               <span className="text-xs font-bold text-zinc-950 font-mono">
                 {matchSeed}
               </span>

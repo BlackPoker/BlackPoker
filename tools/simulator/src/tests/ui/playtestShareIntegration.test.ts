@@ -103,8 +103,9 @@ describe("Playtest Share URL Integration Tests (Phase 2.7)", () => {
             warningNotice = bootstrap.warnings;
             // startNewGame は絶対に呼ばない
             break;
+          case "SHOW_SETUP":
           case "START_DEFAULT_MATCH":
-            mockStartNewGame(CORE_BATTLE_ENV_ID, "42");
+            // UI Phase 3.1: 自動対戦開始は行わず、Setup Screen を表示
             break;
         }
         return bootstrap;
@@ -131,15 +132,14 @@ describe("Playtest Share URL Integration Tests (Phase 2.7)", () => {
       expect(activeMatch).toBeNull();
       expect(warningNotice).not.toBeNull();
 
-      // 3. 通常アクセス (bpv なし) の場合: START_DEFAULT_MATCH となり初期対戦が自動開始される
+      // 3. 通常アクセス (bpv なし) の場合: SHOW_SETUP となり初期対戦は自動開始されない
       const normalUrl = "https://blackpoker.example.com/playtest/?debug=true";
       const bootstrap3 = executeBootstrap(normalUrl);
 
-      expect(bootstrap3.kind).toBe("START_DEFAULT_MATCH");
-      expect(mockStartNewGame).toHaveBeenCalledTimes(1);
-      expect(mockStartNewGame).toHaveBeenCalledWith(CORE_BATTLE_ENV_ID, "42");
-      expect(activeMatch).not.toBeNull();
-      expect(session).not.toBeNull();
+      expect(bootstrap3.kind).toBe("SHOW_SETUP");
+      expect(mockStartNewGame).not.toHaveBeenCalled();
+      expect(activeMatch).toBeNull();
+      expect(session).toBeNull();
 
       // 4. Share URL ロード後、ユーザーが明示的に「新しい対戦を開始」を押した時のみ、復元設定で対戦が開始される
       activeMatch = null;

@@ -107,9 +107,9 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           <div className="flex flex-col gap-1">
             <label
               className="text-[11px] font-mono font-bold text-zinc-500 cursor-help"
-              title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+              title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
-              再現SEED (乱数シード・非負整数):
+              対戦SEED (乱数シード・非負整数):
             </label>
             <input
               type="text"

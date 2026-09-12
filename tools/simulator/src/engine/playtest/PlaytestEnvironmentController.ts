@@ -161,6 +161,17 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
 }
 
 /**
+ * 利用可能な環境リストから、デフォルトとして選択すべき環境 ID を返します。
+ * isOfficial === true である最初の環境を選択し、存在しない場合のみ CORE_BATTLE_ENV_ID へフォールバックします。
+ */
+export function chooseDefaultPlaytestEnvironment(
+  environmentOptions: readonly EnvironmentOption[]
+): string {
+  const official = environmentOptions.find((e) => e.isOfficial);
+  return official ? official.id : CORE_BATTLE_ENV_ID;
+}
+
+/**
  * 初期 PlaytestUIState を生成します。
  */
 export function createInitialPlaytestState(
