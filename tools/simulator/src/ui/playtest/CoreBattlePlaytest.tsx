@@ -69,6 +69,7 @@ import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { ReplayVerifyModal } from "../replay/ReplayVerifyModal";
 import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
+import { PlaytestPerspectiveResolver } from "./PlaytestPerspectiveResolver";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 export const CoreBattlePlaytest: React.FC = () => {
@@ -790,30 +791,17 @@ export const CoreBattlePlaytest: React.FC = () => {
     [currentBuildSha, catalog, fullRulePackage]
   );
 
-  // UI 閲覧者視点 ID (bottomPlayerKey):
-  // 1. Human vs AI: 常に activeHumanSeat に完全固定
-  // 2. Human vs Human:
-  //    Priority 1: currentStep?.type === "WAITING_FOR_DECISION" && currentStep.request?.playerId -> currentStep.request.playerId
-  //    Priority 2: gameState?.chancePlayer
-  //    Priority 3: gameState?.turnPlayer
-  //    Fallback: "p1"
-  const bottomPlayerKey: PlayerKey = useMemo(() => {
-    if (activeMatchMode === "humanVsAi") {
-      return activeHumanSeat;
-    }
-    if (currentStep?.type === "WAITING_FOR_DECISION" && currentStep.request?.playerId) {
-      return currentStep.request.playerId as PlayerKey;
-    }
-    if (gameState?.chancePlayer) {
-      return gameState.chancePlayer as PlayerKey;
-    }
-    if (gameState?.turnPlayer) {
-      return gameState.turnPlayer as PlayerKey;
-    }
-    return "p1";
-  }, [activeMatchMode, activeHumanSeat, currentStep, gameState?.chancePlayer, gameState?.turnPlayer]);
+  // UI 閲覧者視点 ID (bottomPlayerKey & topPlayerKey):
+  // PlaytestPerspectiveResolver (共通 Pure Helper) により優先度を解決
+  const { bottomPlayerKey, topPlayerKey } = useMemo(() => {
+    return PlaytestPerspectiveResolver.resolvePerspective({
+      matchMode: activeMatchMode,
+      activeHumanSeat,
+      currentStep,
+      gameState,
+    });
+  }, [activeMatchMode, activeHumanSeat, currentStep, gameState]);
 
-  const topPlayerKey: PlayerKey = bottomPlayerKey === "p1" ? "p2" : "p1";
   const uiViewerPlayerId: PlayerKey = bottomPlayerKey;
 
   // 通常盤面表示用 Observation (常に uiViewerPlayerId 視点から生成し、AI の秘密情報を完全秘匿)

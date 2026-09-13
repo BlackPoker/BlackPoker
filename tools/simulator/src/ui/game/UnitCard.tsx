@@ -95,13 +95,22 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       {/* ユニット種別 & 状態バッジ */}
       <div className="flex items-center justify-between w-full mb-1 gap-1">
         <span
-          className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-0.5 uppercase tracking-wider ${
+          className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-1 uppercase tracking-wider ${
             isBulwark
               ? "bg-zinc-950 text-white font-black"
               : "bg-zinc-100 text-zinc-800 border border-zinc-300"
           }`}
         >
-          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark && battleDisplayInfo?.bulwarkPosition ? `防壁${battleDisplayInfo.bulwarkPosition}` : unitDisplayName}
+          {battleDisplayInfo ? <span>{battleDisplayInfo.badge}</span> : null}
+          <span>{isBulwark ? "防壁" : unitDisplayName}</span>
+          {isBulwark && battleDisplayInfo?.bulwarkPosition && (
+            <span
+              className="text-[8px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-800 text-zinc-200 border border-zinc-700 ml-0.5"
+              title={`防壁配置: ライフ側から ${battleDisplayInfo.bulwarkPosition}`}
+            >
+              {`B${battleDisplayInfo.bulwarkPosition}`}
+            </span>
+          )}
         </span>
 
         <span

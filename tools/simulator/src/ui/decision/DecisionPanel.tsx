@@ -4,7 +4,7 @@ import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
 import { formatCardDisplay, formatCardList } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
-import type { UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
+import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
@@ -254,22 +254,39 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   };
 
 
-  // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & ①/② 番号マッピング
+  // BattleRelationPresenter を Single Source of Truth (SSOT) とし、
+  // battleRelationMap が渡されていない場合も BattleRelationPresenter.buildPresentationMap(undefined, request.observation) を呼び出す
+  const effectiveBattleRelationMap = useMemo(() => {
+    if (battleRelationMap && battleRelationMap.size > 0) {
+      return battleRelationMap;
+    }
+    if (request.observation) {
+      return BattleRelationPresenter.buildPresentationMap(undefined, request.observation);
+    }
+    return new Map<string, UnitBattleDisplayInfo>();
+  }, [battleRelationMap, request.observation]);
+
+  // EFFECT_RESOLUTION 時のアタッカー・ブロッカー情報の Observation 照合 & 番号マッピング
+  // ※ 独自番号ロジックは一切作らず、BattleRelationPresenter / effectiveBattleRelationMap を SSOT として使用。
+  // ※ P1/P2 双方の「①」の曖昧性を除去するため、「自分」「相手」の owner-relative プレフィックスを付与。
   const unitNumberMap = useMemo(() => {
     const map = new Map<string, { badge: string; label: string; fullLabel: string; unitView: any }>();
-    const digits = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"];
 
-    // Observation から全フィールドユニットを収集
-    const allUnits: any[] = [];
-    if (request.observation?.players) {
-      for (const p of Object.values<any>(request.observation.players)) {
+    // Observation から全フィールドユニットを辞書化 (unitId -> { unit, ownerPlayerKey })
+    const allFieldUnits = new Map<string, { unit: any; ownerPlayerKey: string }>();
+    if (request.observation?.players && Array.isArray(request.observation.players)) {
+      for (const p of request.observation.players) {
         if (p.field && Array.isArray(p.field)) {
-          allUnits.push(...p.field);
+          for (const u of p.field) {
+            if (u?.unitId) {
+              allFieldUnits.set(u.unitId, { unit: u, ownerPlayerKey: p.playerId });
+            }
+          }
         }
       }
     }
 
-    // catalog.effectSelections に含まれる unitId を収集
+    // catalog.effectSelections に含まれる candidateUnitIds を収集
     const candidateUnitIds = new Set<string>();
     for (const eff of (catalog.effectSelections || [])) {
       if (eff.selectedValues) {
@@ -287,21 +304,38 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       }
     }
 
-    let count = 0;
-    for (const unit of allUnits) {
-      if (candidateUnitIds.has(unit.unitId)) {
-        const badge = digits[count] || `[${count + 1}]`;
-        const cardStr = formatCardList(unit.cards || []);
-        const unitType = unit.kind || (unit.componentId === "character.bulwark" ? "防壁" : "一般兵");
-        const label = `${cardStr} ${unitType}`;
-        const fullLabel = `${badge} ${cardStr} ${unitType}`;
-        map.set(unit.unitId, { badge, label, fullLabel, unitView: unit });
-        count++;
-      }
+    // candidateUnitIds それぞれについて、effectiveBattleRelationMap (SSOT) から情報を取得
+    for (const unitId of candidateUnitIds) {
+      const fieldEntry = allFieldUnits.get(unitId);
+      const relInfo = effectiveBattleRelationMap.get(unitId);
+      const ownerPlayerKey = relInfo?.ownerPlayerKey || fieldEntry?.ownerPlayerKey;
+      const isOwner = ownerPlayerKey === request.playerId;
+      const ownerPrefix = ownerPlayerKey ? (isOwner ? "自分 " : "相手 ") : "";
+
+      const badge = relInfo?.badge || "";
+      const unit = fieldEntry?.unit;
+      const cardStr = formatCardList(unit?.cards || []);
+      const unitType = unit?.kind || (unit?.componentId === "character.bulwark" ? "防壁" : "一般兵");
+      const cardPart = cardStr ? `${cardStr} ` : "";
+
+      // label: badge 単体を描画する UI 向け（二重の①を避けるため badge なし）
+      const label = `${ownerPrefix}${cardPart}${unitType}`.trim();
+
+      // fullLabel: パターン一覧テキスト用（"自分 ① ♠5 一般兵", "相手 ① ♠6 一般兵"）
+      const fullLabel = badge
+        ? `${ownerPrefix}${badge} ${cardPart}${unitType}`.trim()
+        : `${ownerPrefix}${cardPart}${unitType}`.trim();
+
+      map.set(unitId, {
+        badge,
+        label,
+        fullLabel,
+        unitView: unit,
+      });
     }
 
     return map;
-  }, [catalog, request.observation]);
+  }, [catalog.effectSelections, request.observation, request.playerId, effectiveBattleRelationMap]);
 
   // EFFECT_RESOLUTION 用の人間可読パターンリスト
   const humanReadableEffectPatterns = useMemo(() => {
