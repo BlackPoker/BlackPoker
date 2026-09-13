@@ -40,7 +40,8 @@ export class StageTargetPresenter {
    */
   static buildStageTargetPresentation(
     requests: readonly ActionRequest[] = [],
-    battleRelationMap?: ReadonlyMap<string, UnitBattleDisplayInfo> | Map<string, UnitBattleDisplayInfo>
+    battleRelationMap?: ReadonlyMap<string, UnitBattleDisplayInfo> | Map<string, UnitBattleDisplayInfo>,
+    viewerPlayerId?: string
   ): StageTargetPresentation {
     const requestTargetLabels = new Map<string, string[]>();
     const targetedRequestIds = new Set<string>();
@@ -59,8 +60,11 @@ export class StageTargetPresenter {
           if (unitId) {
             const unitInfo = battleRelationMap?.get(unitId);
             if (unitInfo) {
-              // 既存 battleRelationMap の安定バッジ・ラベル（例: "② ♣6 一般兵", "④ 防壁"）を再利用
-              labels.push(unitInfo.label);
+              // 既存 battleRelationMap の安定バッジ・ラベル（例: "① ♣6 一般兵", "② 防壁"）を再利用
+              const relationPrefix = viewerPlayerId && unitInfo.ownerPlayerKey
+                ? (unitInfo.ownerPlayerKey === viewerPlayerId ? "自分 " : "相手 ")
+                : "";
+              labels.push(`${relationPrefix}${unitInfo.label}`);
             } else {
               // canonical identity は存在するが、現在盤面に存在しない場合 (Target Lost)
               labels.push("対象Unit（現在盤面に存在しません）");

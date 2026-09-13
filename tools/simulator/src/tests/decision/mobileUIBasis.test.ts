@@ -485,9 +485,9 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", ()
       expect(map.size).toBe(5);
       expect(map.get("p1-u1")?.badge).toBe("①");
       expect(map.get("p1-bw")?.badge).toBe("②");
+      expect(map.get("p2-u1")?.badge).toBe("①");
+      expect(map.get("p2-u2")?.badge).toBe("②");
       expect(map.get("p2-bw")?.badge).toBe("③");
-      expect(map.get("p2-u1")?.badge).toBe("④");
-      expect(map.get("p2-u2")?.badge).toBe("⑤");
     });
 
     // ケース B: Observation 優先 & 相手の HIDDEN 防壁から秘密情報が漏洩しない
@@ -535,15 +535,15 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", ()
       expect(blocker1Info).toBeDefined();
       expect(blocker2Info).toBeDefined();
 
-      // アタッカー (①) は blocker1 (④) と blocker2 (⑤) にブロックされている
+      // アタッカー (p1 ①) は blocker1 (p2 ①) と blocker2 (p2 ②) にブロックされている
       expect(attackerInfo?.role).toBe("attacker");
-      expect(attackerInfo?.blockedByBadges).toEqual(["④", "⑤"]);
+      expect(attackerInfo?.blockedByBadges).toEqual(["①", "②"]);
 
-      // ブロッカー1 (④) は アタッカー (①) をブロックしている
+      // ブロッカー1 (p2 ①) は アタッカー (p1 ①) をブロックしている
       expect(blocker1Info?.role).toBe("blocker");
       expect(blocker1Info?.targetBadge).toBe("①");
 
-      // ブロッカー2 (⑤) は アタッカー (①) をブロックしている
+      // ブロッカー2 (p2 ②) は アタッカー (p1 ①) をブロックしている
       expect(blocker2Info?.role).toBe("blocker");
       expect(blocker2Info?.targetBadge).toBe("①");
     });
@@ -569,7 +569,7 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", ()
       expect(map.size).toBe(2);
       expect(map.get("u-a")?.badge).toBe("①");
       expect(map.get("u-a")?.label).toContain("♠6");
-      expect(map.get("u-b")?.badge).toBe("②");
+      expect(map.get("u-b")?.badge).toBe("①");
       expect(map.get("u-b")?.label).toContain("♡8");
     });
   });

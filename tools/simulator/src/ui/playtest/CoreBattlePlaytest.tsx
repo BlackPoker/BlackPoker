@@ -790,13 +790,31 @@ export const CoreBattlePlaytest: React.FC = () => {
     [currentBuildSha, catalog, fullRulePackage]
   );
 
-  // UI 閲覧者視点 ID: Human vs AI の時は常に activeHumanSeat に完全固定
-  const uiViewerPlayerId: PlayerKey =
-    activeMatchMode === "humanVsAi"
-      ? activeHumanSeat
-      : (currentStep?.type === "WAITING_FOR_DECISION"
-          ? (currentStep.request.playerId as PlayerKey)
-          : ((gameState?.chancePlayer as PlayerKey) || "p1"));
+  // UI 閲覧者視点 ID (bottomPlayerKey):
+  // 1. Human vs AI: 常に activeHumanSeat に完全固定
+  // 2. Human vs Human:
+  //    Priority 1: currentStep?.type === "WAITING_FOR_DECISION" && currentStep.request?.playerId -> currentStep.request.playerId
+  //    Priority 2: gameState?.chancePlayer
+  //    Priority 3: gameState?.turnPlayer
+  //    Fallback: "p1"
+  const bottomPlayerKey: PlayerKey = useMemo(() => {
+    if (activeMatchMode === "humanVsAi") {
+      return activeHumanSeat;
+    }
+    if (currentStep?.type === "WAITING_FOR_DECISION" && currentStep.request?.playerId) {
+      return currentStep.request.playerId as PlayerKey;
+    }
+    if (gameState?.chancePlayer) {
+      return gameState.chancePlayer as PlayerKey;
+    }
+    if (gameState?.turnPlayer) {
+      return gameState.turnPlayer as PlayerKey;
+    }
+    return "p1";
+  }, [activeMatchMode, activeHumanSeat, currentStep, gameState?.chancePlayer, gameState?.turnPlayer]);
+
+  const topPlayerKey: PlayerKey = bottomPlayerKey === "p1" ? "p2" : "p1";
+  const uiViewerPlayerId: PlayerKey = bottomPlayerKey;
 
   // 通常盤面表示用 Observation (常に uiViewerPlayerId 視点から生成し、AI の秘密情報を完全秘匿)
   const boardObservation = useMemo(() => {
@@ -896,22 +914,24 @@ export const CoreBattlePlaytest: React.FC = () => {
   }
 
   // PlayerBoardViewModel の生成 (通常盤面は常に boardObservation 準拠)
-  const p1ViewModel = gameState
+  const bottomViewModel = gameState
     ? PlayerObservationPresenter.buildPlayerViewModel(
-        "p1",
+        bottomPlayerKey,
         boardObservation,
         gameState,
         uiViewerPlayerId
       )
     : null;
-  const p2ViewModel = gameState
+  const topViewModel = gameState
     ? PlayerObservationPresenter.buildPlayerViewModel(
-        "p2",
+        topPlayerKey,
         boardObservation,
         gameState,
         uiViewerPlayerId
       )
     : null;
+  const p1ViewModel = bottomPlayerKey === "p1" ? bottomViewModel : topViewModel;
+  const p2ViewModel = bottomPlayerKey === "p2" ? bottomViewModel : topViewModel;
 
   // DecisionPanel のコンテンツ生成 (人間待機中のみ表示し、AI Step の patterns は非表示)
   const decisionPanelContent = isHumanTurnWaiting ? (
@@ -922,6 +942,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       onSelectionMarkersChange={setUnitSelectionMarkers}
       selectedUnitIdsFromBoard={selectedUnitIds}
       onHighlightRequest={(reqId) => setHighlightedRequestId(reqId || null)}
+      battleRelationMap={battleRelationMap}
     />
   ) : isAiProcessing ? (
     <div className="p-4 bg-white rounded border border-zinc-200 text-center font-mono shadow-sm">
@@ -1268,11 +1289,12 @@ export const CoreBattlePlaytest: React.FC = () => {
               />
             )}
 
-            {/* 対戦相手 (Player B) の盤面 (Observation 準拠) */}
-            {p2ViewModel && gameState?.players?.p2 && (
+            {/* 上部プレイヤー (Top Player: 対戦相手 / 非操作側) の盤面 (Observation 準拠) */}
+            {topViewModel && gameState?.players?.[topPlayerKey] && (
               <PlayerBoard
-                playerKey="p2"
-                viewModel={p2ViewModel}
+                playerKey={topPlayerKey}
+                viewModel={topViewModel}
+                position="top"
                 allPlayersFog={allPlayersFog}
                 unitSelectionMarkers={unitSelectionMarkers}
                 battleRelationMap={battleRelationMap}
@@ -1286,14 +1308,16 @@ export const CoreBattlePlaytest: React.FC = () => {
                 requests={gameState?.stage?.requests || []}
                 highlightedRequestId={highlightedRequestId}
                 battleRelationMap={battleRelationMap}
+                viewerPlayerId={bottomPlayerKey}
               />
             )}
 
-            {/* 自分 (Player A) の盤面 (Observation 準拠) */}
-            {p1ViewModel && gameState?.players?.p1 && (
+            {/* 下部プレイヤー (Bottom Player: 操作側 / 手前) の盤面 (Observation 準拠) */}
+            {bottomViewModel && gameState?.players?.[bottomPlayerKey] && (
               <PlayerBoard
-                playerKey="p1"
-                viewModel={p1ViewModel}
+                playerKey={bottomPlayerKey}
+                viewModel={bottomViewModel}
+                position="bottom"
                 allPlayersFog={allPlayersFog}
                 unitSelectionMarkers={unitSelectionMarkers}
                 battleRelationMap={battleRelationMap}

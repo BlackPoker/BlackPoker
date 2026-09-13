@@ -7,6 +7,7 @@ export interface StagePanelProps {
   requests: any[];
   highlightedRequestId?: string | null;
   battleRelationMap?: ReadonlyMap<string, UnitBattleDisplayInfo> | Map<string, UnitBattleDisplayInfo>;
+  viewerPlayerId?: string;
 }
 
 function formatCardCodeDisplay(code?: string): string {
@@ -22,13 +23,14 @@ export const StagePanel: React.FC<StagePanelProps> = ({
   requests = [],
   highlightedRequestId,
   battleRelationMap,
+  viewerPlayerId,
 }) => {
   const [showAllMobile, setShowAllMobile] = useState(false);
 
   // Pure StageTargetPresentation を生成 (UnitTarget, RequestTarget, targetedRequestIds)
   const stagePresentation = useMemo(() => {
-    return StageTargetPresenter.buildStageTargetPresentation(requests, battleRelationMap);
-  }, [requests, battleRelationMap]);
+    return StageTargetPresenter.buildStageTargetPresentation(requests, battleRelationMap, viewerPlayerId);
+  }, [requests, battleRelationMap, viewerPlayerId]);
 
   // LIFO: 末尾 (TOP) から先頭 (BOTTOM) へ逆順に表示
   const reversedRequests = requests.slice().reverse();
@@ -119,7 +121,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({
                     )}
                     {isTargetRelationRelevant && (
                       <span
-                        className="bg-amber-600 text-white font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm"
+                        className="bg-zinc-900 text-white border border-zinc-700 font-mono text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm"
                         title="別のアクションから対象として指定されています"
                       >
                         TARGET

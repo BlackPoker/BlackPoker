@@ -101,7 +101,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               : "bg-zinc-100 text-zinc-800 border border-zinc-300"
           }`}
         >
-          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{unitDisplayName}
+          {battleDisplayInfo ? `${battleDisplayInfo.badge} ` : ""}{isBulwark && battleDisplayInfo?.bulwarkPosition ? `防壁${battleDisplayInfo.bulwarkPosition}` : unitDisplayName}
         </span>
 
         <span

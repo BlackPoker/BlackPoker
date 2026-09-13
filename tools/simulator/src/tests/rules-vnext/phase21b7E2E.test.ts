@@ -60,16 +60,16 @@ describe("Phase 21B.7: Battle Relations, Summoning Sickness, End Hand Limit & St
     expect(atk.badge).toBe("①");
     expect(atk.label).toContain("① ♠6 一般兵");
     expect(atk.label).not.toContain("soldier-p1-1");
-    expect(atk.blockedByBadges).toEqual(["②", "③"]);
+    expect(atk.blockedByBadges).toEqual(["①", "②"]);
 
     const blk1 = map.get("soldier-p2-1")!;
     expect(blk1).toBeDefined();
-    expect(blk1.badge).toBe("②");
+    expect(blk1.badge).toBe("①");
     expect(blk1.targetBadge).toBe("①");
 
     const blk2 = map.get("bulwark-p2-1")!;
     expect(blk2).toBeDefined();
-    expect(blk2.badge).toBe("③");
+    expect(blk2.badge).toBe("②");
     expect(blk2.targetBadge).toBe("①");
   });
 

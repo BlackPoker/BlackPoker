@@ -4,6 +4,7 @@ import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
 import { formatCardDisplay, formatCardList } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
+import type { UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
@@ -15,6 +16,60 @@ export interface DecisionPanelProps {
   readonly initialActionRef?: number;
   readonly initialCostRef?: number;
   readonly initialTargetRef?: number;
+  readonly battleRelationMap?: Map<string, UnitBattleDisplayInfo> | ReadonlyMap<string, UnitBattleDisplayInfo>;
+}
+
+/**
+ * コスト支払い要素の表示用文字列を生成します。
+ * 防壁ドライブ ($B) 選択時は、防壁配置番号（ライフ側から ①, ②...）とカードのスート/ランクを表示します。
+ * 例: "防壁① ♠2", "手札 ♠A 破棄, 防壁① ♠2"
+ */
+export function formatCostPaymentDisplay(
+  costSel: {
+    readonly discardedCardIds?: readonly string[];
+    readonly drivenBulwarkUnitIds?: readonly string[];
+    readonly sacrificedUnitIds?: readonly string[];
+    readonly lifeCount?: number;
+    readonly summary?: string;
+  },
+  request: DecisionRequest,
+  battleRelationMap?: Map<string, UnitBattleDisplayInfo> | ReadonlyMap<string, UnitBattleDisplayInfo>
+): string {
+  const parts: string[] = [];
+  const decisionPlayer = request.observation?.players?.find((p) => p.playerId === request.playerId);
+
+  // 1. 手札破棄
+  if (costSel.discardedCardIds && costSel.discardedCardIds.length > 0) {
+    const cardLabels = costSel.discardedCardIds.map((cId) => {
+      const card = decisionPlayer?.handCards?.find(
+        (c: any) => (c.cardInstanceId && c.cardInstanceId === cId) || c.id === cId
+      );
+      return card ? formatCardDisplay(card) : cId;
+    });
+    parts.push(`手札 ${cardLabels.join(", ")} 破棄`);
+  }
+
+  // 2. 防壁ドライブ
+  if (costSel.drivenBulwarkUnitIds && costSel.drivenBulwarkUnitIds.length > 0) {
+    const bulwarkLabels = costSel.drivenBulwarkUnitIds.map((bId) => {
+      const info = battleRelationMap?.get(bId);
+      const bulwarkPos = info?.bulwarkPosition ?? "";
+      const unit = decisionPlayer?.field?.find((u: any) => u.unitId === bId);
+      const cardText = unit?.cards?.[0] ? formatCardDisplay(unit.cards[0]) : "";
+      return `防壁${bulwarkPos}${cardText ? ` ${cardText}` : ""}`;
+    });
+    parts.push(bulwarkLabels.join(", "));
+  }
+
+  // 3. ライフ消費
+  if (costSel.lifeCount && costSel.lifeCount > 0) {
+    parts.push(`${costSel.lifeCount}点 ライフ消費`);
+  }
+
+  if (parts.length > 0) {
+    return parts.join(", ");
+  }
+  return costSel.summary || "コストなし";
 }
 
 export const DecisionPanel: React.FC<DecisionPanelProps> = ({
@@ -26,6 +81,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   initialActionRef,
   initialCostRef,
   initialTargetRef,
+  battleRelationMap,
 }) => {
   const catalog = request.catalog;
   const patterns = request.patterns;
@@ -597,7 +653,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                         : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
                     }`}
                   >
-                    <div className="font-mono font-bold text-xs">{costSel.summary}</div>
+                    <div className="font-mono font-bold text-xs">
+                      {formatCostPaymentDisplay(costSel, request, battleRelationMap)}
+                    </div>
                   </button>
                 );
               })}
