@@ -30,6 +30,7 @@ export interface MobileHeaderMenuProps {
   readonly onDownloadDiagnostic?: () => void;
   readonly isDiagnosticAvailable?: boolean;
   readonly onOpenReplayVerify?: () => void;
+  readonly onOpenReplayViewer?: () => void;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -56,7 +57,9 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onDownloadDiagnostic,
   isDiagnosticAvailable = true,
   onOpenReplayVerify,
+  onOpenReplayViewer,
 }) => {
+
   if (!isOpen) return null;
 
   const buildSha = (import.meta as any).env?.VITE_BUILD_SHA
@@ -232,7 +235,28 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         )}
 
+        {/* Replay Viewer ボタン (モバイルメニュー内) */}
+        {onOpenReplayViewer && (
+          <button
+            onClick={() => {
+              onClose();
+              onOpenReplayViewer();
+            }}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title="Diagnostic JSON を読み込み、盤面を1Decisionずつ再生・確認します"
+          >
+            <div className="flex items-center gap-1.5">
+              <span>▶</span>
+              <span>Replay Viewer</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-normal">
+              ※ 盤面を1手ずつ確認・再生
+            </span>
+          </button>
+        )}
+
         {/* 共有通知バナー (モバイルメニュー内) */}
+
         {shareNotice && (
           <div
             className={`p-2 rounded text-xs font-mono font-bold text-center ${

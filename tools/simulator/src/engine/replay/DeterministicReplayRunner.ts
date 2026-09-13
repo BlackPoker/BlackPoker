@@ -15,8 +15,8 @@ import type {
   DeterministicReplayResultV1,
   ReplayDifference,
 } from "./ReplayTypes";
+import { reconstructMatch } from "./ReplayReconstructionService";
 
-const MAX_AUTO_PROGRESS_STEPS = 10000;
 
 /**
  * 2つの値（プリミティブ、配列、オブジェクト）の深層比較を行い、
@@ -128,165 +128,39 @@ export function runDeterministicReplay(
   }
 ): DeterministicReplayResultV1 {
   try {
-    // 1. startMatchAttempt による新規セッション開始
-    const outcome = startMatchAttempt({
+    const recon = reconstructMatch({
       environmentId: plan.environmentId,
-      seedInput: plan.seed !== undefined ? String(plan.seed) : "",
+      seed: plan.seed,
+      transcript: plan.decisions,
+      decisionCount: plan.decisions.length,
       catalog: dependencies.catalog,
       fullRulePackage: dependencies.fullRulePackage,
+      expectedRulePackage: plan.sourceRulePackage,
     });
 
-    if (outcome.type !== "READY") {
+    if (recon.status === "DIVERGED") {
       return {
         status: "DIVERGED",
-        code: "SETUP_FAILED",
-        message: `startMatchAttempt failed with ${outcome.type}: ${outcome.setupNotice.message}`,
-        stepIndex: 0,
+        code: recon.code,
+        message: recon.message,
+        stepIndex: recon.stepIndex,
+        decisionSeq: recon.decisionSeq,
+        difference: recon.difference,
       };
     }
 
-    const session = outcome.session;
-    let currentStep: GameSessionStep = outcome.initialStep;
-    let stepIndex = 0;
-
-    // 2. RulePackage 整合性チェック
-    if (plan.sourceRulePackage) {
-      const activeRulePkg = outcome.activeMatch.rulePackage;
-      if (
-        (plan.sourceRulePackage.id && activeRulePkg.id !== plan.sourceRulePackage.id) ||
-        (plan.sourceRulePackage.version && activeRulePkg.version !== plan.sourceRulePackage.version)
-      ) {
-        return {
-          status: "DIVERGED",
-          code: "RULE_PACKAGE_MISMATCH",
-          message: `RulePackage mismatch: expected id=${plan.sourceRulePackage.id}, version=${plan.sourceRulePackage.version}; actual id=${activeRulePkg.id}, version=${activeRulePkg.version}`,
-          stepIndex,
-        };
-      }
-    }
-
-    // 3. 判断列の再投入ループ
-    let executedDecisions = 0;
-
-    for (const entry of plan.decisions) {
-      // PROGRESSED 中は advance() で進める
-      let autoSteps = 0;
-      while (currentStep.type === "PROGRESSED") {
-        if (autoSteps >= MAX_AUTO_PROGRESS_STEPS) {
-          return {
-            status: "DIVERGED",
-            code: "AUTO_PROGRESS_LIMIT_EXCEEDED",
-            message: `Exceeded max auto-progress steps (${MAX_AUTO_PROGRESS_STEPS}) before decision seq ${entry.seq}`,
-            stepIndex,
-            decisionSeq: entry.seq,
-          };
-        }
-        currentStep = session.advance();
-        stepIndex++;
-        autoSteps++;
-      }
-
-      // 未消費の判断があるのに終了した場合は FINISHED_EARLY
-      if (currentStep.type === "FINISHED") {
-        return {
-          status: "DIVERGED",
-          code: "FINISHED_EARLY",
-          message: `Session reached FINISHED early at decision seq ${entry.seq}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
-
-      // WAITING_FOR_DECISION であること
-      if ((currentStep as any).type !== "WAITING_FOR_DECISION") {
-        return {
-          status: "DIVERGED",
-          code: "EXPECTED_STEP_MISMATCH",
-          message: `Expected step WAITING_FOR_DECISION before decision seq ${entry.seq}, got ${(currentStep as any).type}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
-
-      const actualRequest = currentStep.request;
-
-      // プレイヤー席の一致
-      if (actualRequest.playerId !== entry.playerId) {
-        return {
-          status: "DIVERGED",
-          code: "PLAYER_MISMATCH",
-          message: `Player mismatch at seq ${entry.seq}: expected ${entry.playerId}, actual ${actualRequest.playerId}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
-
-      // 盤面バージョンの一致
-      if (actualRequest.stateVersion !== entry.response.stateVersion) {
-        return {
-          status: "DIVERGED",
-          code: "STATE_VERSION_MISMATCH",
-          message: `State version mismatch at seq ${entry.seq}: expected ${entry.response.stateVersion}, actual ${actualRequest.stateVersion}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
-
-      // パターン参照インデックスの範囲内チェック
-      if (
-        entry.response.selectedPatternRef < 0 ||
-        entry.response.selectedPatternRef >= actualRequest.patterns.length
-      ) {
-        return {
-          status: "DIVERGED",
-          code: "PATTERN_REF_OUT_OF_RANGE",
-          message: `Pattern ref out of range at seq ${entry.seq}: selected ${entry.response.selectedPatternRef}, available patterns: ${actualRequest.patterns.length}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
-
-      // actualRequest.decisionId を使用して Runtime レスポンスを再構築
-      const replayResponse = {
-        decisionId: actualRequest.decisionId,
-        stateVersion: actualRequest.stateVersion,
-        selectedPatternRef: entry.response.selectedPatternRef,
+    if (recon.status === "TECHNICAL_ERROR") {
+      return {
+        status: "TECHNICAL_ERROR",
+        error: recon.error,
+        stack: recon.stack,
       };
-
-      try {
-        currentStep = session.submitDecision(replayResponse);
-        stepIndex++;
-        executedDecisions++;
-      } catch (err: any) {
-        return {
-          status: "DIVERGED",
-          code: "SUBMIT_REJECTED",
-          message: `Session rejected decision at seq ${entry.seq}: ${err?.message || String(err)}`,
-          stepIndex,
-          decisionSeq: entry.seq,
-        };
-      }
     }
 
-    // 4. 判断列消費後の Step 調整
-    if (plan.expected.status === "WAITING_FOR_DECISION" || plan.expected.status === "FINISHED") {
-      let autoSteps = 0;
-      while (currentStep.type === "PROGRESSED") {
-        if (autoSteps >= MAX_AUTO_PROGRESS_STEPS) {
-          return {
-            status: "DIVERGED",
-            code: "AUTO_PROGRESS_LIMIT_EXCEEDED",
-            message: `Exceeded max auto-progress steps (${MAX_AUTO_PROGRESS_STEPS}) waiting for final status ${plan.expected.status}`,
-            stepIndex,
-          };
-        }
-        currentStep = session.advance();
-        stepIndex++;
-        autoSteps++;
-      }
-    }
+    const currentStep = recon.currentStep;
+    const stepIndex = recon.executedDecisions;
 
-    // 5. Final Step 検証
+    // Final Step 検証
     if (currentStep.type !== plan.expected.status) {
       return {
         status: "DIVERGED",
@@ -328,8 +202,8 @@ export function runDeterministicReplay(
       }
     }
 
-    // 6. Raw GameState 完全一致検証
-    const actualRawState = JSON.parse(JSON.stringify(session.state));
+    // Raw GameState 完全一致検証
+    const actualRawState = JSON.parse(JSON.stringify(recon.session.state));
     const stateDiff = findFirstDifference(plan.expected.rawState, actualRawState, "$");
     if (stateDiff) {
       return {
@@ -343,7 +217,7 @@ export function runDeterministicReplay(
 
     return {
       status: "VERIFIED",
-      executedDecisions,
+      executedDecisions: recon.executedDecisions,
       totalDecisions: plan.decisions.length,
       finalStepType: currentStep.type,
     };

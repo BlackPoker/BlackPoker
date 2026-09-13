@@ -8,6 +8,8 @@ export interface MobileDecisionDockProps {
   readonly onOpenSheet: () => void;
   readonly onSubmit: (response: DecisionResponse, options?: { autoPass?: boolean }) => void;
   readonly sheetMode: SheetMode;
+  readonly onUndo?: () => void;
+  readonly canUndo?: boolean;
 }
 
 export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
@@ -15,7 +17,10 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
   onOpenSheet,
   onSubmit,
   sheetMode,
+  onUndo,
+  canUndo,
 }) => {
+
   if (!request) {
     return null;
   }
@@ -56,7 +61,22 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
 
         {/* アクションボタン群 (min-h-[44px] 確保) */}
         <div className="flex items-center gap-2">
+          {/* Undo ボタン */}
+          {onUndo && (
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              title={canUndo ? "直前の操作を取り消します" : "戻せる操作はありません"}
+              aria-label="1つ前の判断に戻る"
+              className="min-h-[44px] px-3 py-2 rounded-lg border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:hover:bg-white text-zinc-700 font-mono font-bold text-xs shadow-sm transition flex items-center justify-center gap-1 shrink-0"
+            >
+              <span className="text-sm">↶</span>
+              <span className="text-[10px]">戻る</span>
+            </button>
+          )}
+
           {/* PASS ボタン (PASS が可能な場合のみ表示・有効化) */}
+
           {hasPass && (
             <button
               onClick={handlePassClick}

@@ -17,7 +17,10 @@ export interface DecisionPanelProps {
   readonly initialCostRef?: number;
   readonly initialTargetRef?: number;
   readonly battleRelationMap?: Map<string, UnitBattleDisplayInfo> | ReadonlyMap<string, UnitBattleDisplayInfo>;
+  readonly onUndo?: () => void;
+  readonly canUndo?: boolean;
 }
+
 
 /**
  * コスト支払い要素の表示用文字列を生成します。
@@ -82,7 +85,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   initialCostRef,
   initialTargetRef,
   battleRelationMap,
+  onUndo,
+  canUndo,
 }) => {
+
   const catalog = request.catalog;
   const patterns = request.patterns;
 
@@ -493,7 +499,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "対象・割当て指定"}
             </h2>
           </div>
+
+          {onUndo && (
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              title={canUndo ? "直前の操作を取り消します" : "戻せる操作はありません"}
+              aria-label="1つ前の判断に戻る"
+              className="rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:hover:bg-white px-2.5 py-1 text-xs font-mono font-bold text-zinc-700 transition active:scale-95 shadow-sm flex items-center gap-1 shrink-0"
+            >
+              <span>↶</span>
+              <span>1つ戻る</span>
+            </button>
+          )}
         </div>
+
 
         {isBlockAssignment ? (
           <BlockAssignmentEditor
@@ -588,16 +608,32 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           </h2>
         </div>
 
-        {passPatternIndex !== -1 && (
-          <button
-            onClick={handlePass}
-            title="Pキーを押してもPASSできます"
-            className="rounded border border-zinc-300 bg-white hover:bg-zinc-100 px-3 py-1 text-xs font-mono font-bold text-zinc-950 transition active:scale-95 shadow-sm"
-          >
-            <span>PASS [P]</span>
-          </button>
-        )}
+        <div className="flex items-center gap-1.5">
+          {onUndo && (
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              title={canUndo ? "直前の操作を取り消します" : "戻せる操作はありません"}
+              aria-label="1つ前の判断に戻る"
+              className="rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:hover:bg-white px-2.5 py-1 text-xs font-mono font-bold text-zinc-700 transition active:scale-95 shadow-sm flex items-center gap-1"
+            >
+              <span>↶</span>
+              <span>1つ戻る</span>
+            </button>
+          )}
+
+          {passPatternIndex !== -1 && (
+            <button
+              onClick={handlePass}
+              title="Pキーを押してもPASSできます"
+              className="rounded border border-zinc-300 bg-white hover:bg-zinc-100 px-3 py-1 text-xs font-mono font-bold text-zinc-950 transition active:scale-95 shadow-sm"
+            >
+              <span>PASS [P]</span>
+            </button>
+          )}
+        </div>
       </div>
+
 
       {/* 選択済みサマリーバナー */}
       {selectedAction && (

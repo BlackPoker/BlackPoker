@@ -69,9 +69,15 @@ import {
 import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { ReplayVerifyModal } from "../replay/ReplayVerifyModal";
+import { ReplayViewerModal } from "../replay/ReplayViewerModal";
+import {
+  reconstructMatch,
+  findUndoTruncationIndex,
+} from "../../engine/replay/ReplayReconstructionService";
 import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
 import { PlaytestPerspectiveResolver } from "./PlaytestPerspectiveResolver";
 import logoUrl from "../../assets/blackpoker-logo.svg";
+
 
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
@@ -167,6 +173,14 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [showMobileLogModal, setShowMobileLogModal] = useState(false);
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
   const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
+  const [isReplayViewerOpen, setIsReplayViewerOpen] = useState(false);
+  const [replayViewerInitialBundle, setReplayViewerInitialBundle] = useState<unknown | null>(null);
+
+  const handleOpenReplayViewer = useCallback((bundle?: unknown) => {
+    setReplayViewerInitialBundle(bundle ?? null);
+    setIsReplayViewerOpen(true);
+  }, []);
+
 
   // 非公式環境への切替時に SeededRandom が選択されていたら自動的に FirstLegal へフォールバック
   useEffect(() => {
@@ -730,10 +744,136 @@ export const CoreBattlePlaytest: React.FC = () => {
     ]
   );
 
+  // 意思決定履歴から取り消し可能な Human Decision が存在するか判定
+  const canUndo = Boolean(
+    !isAiProcessing &&
+    activeMatch &&
+    sessionRef.current &&
+    findUndoTruncationIndex(decisionTranscriptRef.current) >= 0
+  );
+
+  // In-Game Undo ハンドラ (直前の Human Decision 前まで fresh GameSession & AI Policy 状態を再構築)
+  const handleUndo = useCallback(async () => {
+    if (!sessionRef.current || !activeMatch) return;
+    const currentTranscript = decisionTranscriptRef.current;
+    const targetCount = findUndoTruncationIndex(currentTranscript);
+    if (targetCount < 0) return;
+
+    const targetTranscript = currentTranscript.slice(0, targetCount);
+
+    // 1. fresh GameSession を決定論的に再構築
+    const recon = reconstructMatch({
+      environmentId: activeMatch.environmentId,
+      seed: activeMatch.seed,
+      transcript: targetTranscript,
+      decisionCount: targetTranscript.length,
+      catalog,
+      fullRulePackage,
+      expectedRulePackage: activeMatch.rulePackage,
+    });
+
+    if (recon.status !== "SUCCESS") {
+      setRuntimeNotice({
+        type: "TECHNICAL_ERROR",
+        title: "Undo 失敗",
+        message:
+          recon.status === "DIVERGED"
+            ? `Undo 再シミュレーションで乖離が発生しました: ${recon.message}`
+            : `Undo 中にエラーが発生しました: ${recon.error}`,
+        environmentName: activeMatch.environmentName,
+        seed: activeMatch.seed,
+      });
+      return;
+    }
+
+    // 2. Human vs AI の場合、AI Policy の PRNG 状態を巻き戻し
+    let newPolicies = activePolicies;
+    if (activeMatchMode === "humanVsAi") {
+      try {
+        const freshPolicies = PlaytestPolicyFactory.createPoliciesForMatch(
+          activeSeatControllers,
+          activeMatch.seed
+        );
+
+        for (const item of recon.replayedDecisions) {
+          if (item.entry.actor === "policy") {
+            const policy = freshPolicies[item.entry.playerId];
+            if (policy) {
+              const resp = policy.choose(item.request);
+              if (resp.selectedPatternRef !== item.entry.response.selectedPatternRef) {
+                throw new Error(
+                  `Policy PRNG state mismatch at seq ${item.entry.seq}: expected pattern ${item.entry.response.selectedPatternRef}, got ${resp.selectedPatternRef}`
+                );
+              }
+            }
+          }
+        }
+        newPolicies = freshPolicies;
+      } catch (err: any) {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "AI Policy 状態復元エラー",
+          message: err?.message || String(err),
+          environmentName: activeMatch.environmentName,
+          seed: activeMatch.seed,
+        });
+        return;
+      }
+    }
+
+    // 3. live session / activePolicies を安全に置換
+    sessionRef.current = recon.session;
+    setGameState(recon.currentGameState);
+    setCurrentStep(recon.currentStep);
+    setActivePolicies(newPolicies);
+
+    // 4. Transcript と decisionSeq の巻き戻し (連続性を厳格に保証)
+    decisionTranscriptRef.current = targetTranscript;
+    decisionSeqRef.current =
+      targetTranscript.length === 0
+        ? 1
+        : (targetTranscript[targetTranscript.length - 1]?.seq ?? targetTranscript.length) + 1;
+
+    // 5. UI 状態の完全クリア & 再同期
+    setSelectedUnitIds([]);
+    setUnitSelectionMarkers(new Map());
+    setHighlightedRequestId(null);
+    resetFeedbackFlash();
+    setIsAiProcessing(false);
+    setRuntimeNotice(null);
+    setSheetMode("collapsed");
+    setLatestEventMessage("Undo により直前の判断へ戻りました");
+
+    if (activeMatchMode === "humanVsHuman" && recon.currentStep.type === "WAITING_FOR_DECISION") {
+      setIsPassAndPlayWaiting(false);
+    }
+
+    // logs / traces を安全に再同期
+    setLogs([
+      {
+        id: "log-undo-resync",
+        timestamp: new Date().toLocaleTimeString(),
+        message: `[UNDO] 直前の判断を取り消し、対戦状態を Decision #${decisionSeqRef.current} 開始前へ再同期しました`,
+        level: "action",
+      },
+    ]);
+    addTrace("UNDO", `Undo executed: replayed ${recon.executedDecisions} decisions`, recon.currentGameState);
+  }, [
+    activeMatch,
+    activeMatchMode,
+    activeSeatControllers,
+    activePolicies,
+    catalog,
+    fullRulePackage,
+    resetFeedbackFlash,
+    addTrace,
+  ]);
+
   // Pass-and-Play 準備完了ハンドラ
   const handlePassAndPlayReady = useCallback(() => {
     setIsPassAndPlayWaiting(false);
   }, []);
+
 
   // 診断データ一括保存 (Playtest Diagnostic Bundle v1)
   const isDiagnosticAvailable = Boolean(activeMatch && activePlaytestSettings && sessionRef.current);
@@ -940,7 +1080,10 @@ export const CoreBattlePlaytest: React.FC = () => {
       selectedUnitIdsFromBoard={selectedUnitIds}
       onHighlightRequest={(reqId) => setHighlightedRequestId(reqId || null)}
       battleRelationMap={battleRelationMap}
+      onUndo={handleUndo}
+      canUndo={canUndo}
     />
+
   ) : isAiProcessing ? (
     <div className="p-4 bg-white rounded border border-zinc-200 text-center font-mono shadow-sm">
       <div className="text-xs font-bold text-zinc-800 animate-pulse">AI 操作中…</div>
@@ -1111,6 +1254,15 @@ export const CoreBattlePlaytest: React.FC = () => {
           >
             Replay検証
           </button>
+
+          <button
+            onClick={() => handleOpenReplayViewer()}
+            title="Diagnostic JSON を読み込み、盤面を1手ずつ再生・確認します"
+            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
+          >
+            Replay Viewer
+          </button>
+
 
           <button
             onClick={handleCopyShareUrl}
@@ -1368,6 +1520,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           onOpenSheet={() => setSheetMode("half")}
           onSubmit={handleDecisionSubmit}
           sheetMode={sheetMode}
+          onUndo={handleUndo}
+          canUndo={canUndo}
         />
       )}
 
@@ -1414,7 +1568,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         onDownloadDiagnostic={handleDownloadDiagnostic}
         isDiagnosticAvailable={isDiagnosticAvailable}
         onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
+        onOpenReplayViewer={() => handleOpenReplayViewer()}
       />
+
 
       {/* 4. Mobile 対戦ログモーダル */}
       {showMobileLogModal && (
@@ -1496,7 +1652,19 @@ export const CoreBattlePlaytest: React.FC = () => {
         onClose={() => setIsReplayVerifyModalOpen(false)}
         onVerify={handleVerifyReplayBundle}
         currentBuildSha={currentBuildSha}
+        onOpenReplayViewer={(bundle) => handleOpenReplayViewer(bundle)}
+      />
+
+      {/* 7. Replay Viewer モーダル */}
+      <ReplayViewerModal
+        isOpen={isReplayViewerOpen}
+        onClose={() => setIsReplayViewerOpen(false)}
+        catalog={catalog}
+        fullRulePackage={fullRulePackage}
+        currentBuildSha={currentBuildSha}
+        initialBundle={replayViewerInitialBundle}
       />
     </div>
+
   );
 };

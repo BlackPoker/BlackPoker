@@ -43,6 +43,7 @@ export interface ReplayVerifyModalProps {
   readonly currentBuildSha: string;
   readonly initialParsedBundle?: ParsedBundleState;
   readonly initialOutcome?: ReplayVerificationOutcome | null;
+  readonly onOpenReplayViewer?: (bundle: unknown) => void;
 }
 
 export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
@@ -52,7 +53,9 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
   currentBuildSha,
   initialParsedBundle,
   initialOutcome,
+  onOpenReplayViewer,
 }) => {
+
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [selectedFile, setSelectedFile] = useState<{
@@ -399,6 +402,20 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
               </div>
             )}
 
+            {/* Replay Viewer で盤面を再生 */}
+            {onOpenReplayViewer && parsedBundle.type === "PARSED" && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenReplayViewer(parsedBundle.value);
+                }}
+                className="w-full py-2 px-3 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs transition min-h-[44px] flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <span>▶</span>
+                <span>Replay Viewer で盤面を再生・確認</span>
+              </button>
+            )}
+
             {/* 再検証・リセットボタン */}
             <button
               onClick={resetState}
@@ -406,6 +423,7 @@ export const ReplayVerifyModal: React.FC<ReplayVerifyModalProps> = ({
             >
               別の Diagnostic JSON を検証
             </button>
+
           </div>
         )}
       </div>
