@@ -23,11 +23,6 @@ export interface MatchSetupScreenProps {
   /** 対戦モード変更コールバック */
   readonly onSelectMatchMode: (mode: PlaytestMatchMode) => void;
 
-  /** 人間席 (p1: Player A / p2: Player B) */
-  readonly humanSeat: "p1" | "p2";
-  /** 人間席変更コールバック */
-  readonly onSelectHumanSeat: (seat: "p1" | "p2") => void;
-
   /** AI Policy ID */
   readonly policyId: PlaytestPolicyId;
   /** AI Policy 変更コールバック */
@@ -60,8 +55,6 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   onSelectEnvironment,
   matchMode,
   onSelectMatchMode,
-  humanSeat,
-  onSelectHumanSeat,
   policyId,
   onSelectPolicyId,
   seedInput,

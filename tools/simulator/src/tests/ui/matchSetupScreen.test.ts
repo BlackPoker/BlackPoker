@@ -28,8 +28,6 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
     onSelectEnvironment: vi.fn(),
     matchMode: "humanVsHuman" as const,
     onSelectMatchMode: vi.fn(),
-    humanSeat: "p1" as const,
-    onSelectHumanSeat: vi.fn(),
     policyId: "firstLegal" as const,
     onSelectPolicyId: vi.fn(),
     seedInput: "42",
@@ -148,7 +146,6 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
         ...defaultProps,
         selectedEnvironmentId: "official:light-entry16",
         matchMode: "humanVsAi",
-        humanSeat: "p2",
         policyId: "manualGenericGenome",
         seedInput: "999",
       })

@@ -1178,8 +1178,6 @@ export const CoreBattlePlaytest: React.FC = () => {
             onSelectEnvironment={setSelectedEnvironmentId}
             matchMode={pendingMatchMode}
             onSelectMatchMode={handleSelectMatchMode}
-            humanSeat={pendingHumanSeat}
-            onSelectHumanSeat={setPendingHumanSeat}
             policyId={pendingPolicyId}
             onSelectPolicyId={setPendingPolicyId}
             seedInput={seedInput}
