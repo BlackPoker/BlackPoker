@@ -483,7 +483,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     );
 
     return (
-      <div className="rounded border border-zinc-200 bg-white p-3 text-zinc-950 shadow-sm font-sans">
+      <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
           <div>
             <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
@@ -571,7 +571,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
 
   return (
-    <div className="rounded border border-zinc-200 bg-white p-3 text-zinc-950 shadow-sm font-sans">
+    <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
       {/* ヘッダー */}
       <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
         <div>
@@ -623,7 +623,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                 <button
                   key={actRef}
                   onClick={() => handleSelectAction(actRef)}
-                  className={`rounded border p-2 text-left transition ${
+                  className={`rounded border p-1.5 sm:p-2 text-left transition ${
                     isSelected
                       ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
                       : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
@@ -653,7 +653,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   <button
                     key={keyRef}
                     onClick={() => handleSelectKey(keyRef)}
-                    className={`rounded border p-1.5 text-center transition ${
+                    className={`rounded border p-1 sm:p-1.5 text-center transition ${
                       isSelected
                         ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
                         : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
@@ -681,7 +681,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   <button
                     key={costRef}
                     onClick={() => handleSelectCost(costRef)}
-                    className={`rounded border p-1.5 text-left transition ${
+                    className={`rounded border p-1 sm:p-1.5 text-left transition ${
                       isSelected
                         ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
                         : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
@@ -718,7 +718,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                       const current = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
                       onHighlightRequest?.(current?.targetRequestId);
                     }}
-                    className={`rounded p-2 text-left transition flex flex-col justify-center ${
+                    className={`rounded p-1.5 sm:p-2 text-left transition flex flex-col justify-center ${
                       isSelected
                         ? "border-2 border-zinc-950 ring-1 ring-zinc-950 bg-zinc-100 text-zinc-950 shadow-sm"
                         : "border border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
@@ -744,7 +744,6 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                       </span>
                     )}
                   </button>
-
                 );
               })}
             </div>
@@ -757,7 +756,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             {selectedAction?.speed === "immediate" ? (
               <button
                 onClick={() => handleActionSubmit(false)}
-                className="w-full py-2 px-4 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                className="w-full py-1.5 sm:py-2 px-3 sm:px-4 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
               >
                 <span>リクエスト</span>
               </button>
@@ -765,13 +764,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               <>
                 <button
                   onClick={() => handleActionSubmit(false)}
-                  className="flex-1 py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                  className="flex-1 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
                 >
                   <span>リクエストのみ</span>
                 </button>
                 <button
                   onClick={() => handleActionSubmit(true)}
-                  className="flex-1 py-2 px-3 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                  className="flex-1 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
                 >
                   <span>リクエスト＆PASS (推奨)</span>
                 </button>

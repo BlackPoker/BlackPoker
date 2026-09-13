@@ -222,7 +222,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       const env = overrideEnv ?? selectedEnvironmentId;
       const seed = overrideSeedInput ?? seedInput;
       const mode = overrideMode ?? pendingMatchMode;
-      const humanSeat = overrideHumanSeat ?? pendingHumanSeat;
+      // Human vs AI では Human 席を常に "p1" へ正規化 (URLパラメータや復元設定の p2 も吸収)
+      const humanSeat: "p1" | "p2" = mode === "humanVsAi" ? "p1" : (overrideHumanSeat ?? pendingHumanSeat);
       const policyId = overridePolicyId ?? pendingPolicyId;
 
       // 失敗時・開始時に直前のセッション状態を安全にリセット
@@ -428,7 +429,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       case "RESTORE_SHARE_SETTINGS": {
         setSelectedEnvironmentId(bootstrap.config.environmentId);
         setPendingMatchMode(bootstrap.config.mode);
-        setPendingHumanSeat(bootstrap.config.humanSeat);
+        // Human vs AI の場合は "p1" に正規化
+        setPendingHumanSeat(bootstrap.config.mode === "humanVsAi" ? "p1" : bootstrap.config.humanSeat);
         setPendingPolicyId(bootstrap.config.policyId);
         setSeedInput(bootstrap.config.seedInput);
 
@@ -1027,7 +1029,13 @@ export const CoreBattlePlaytest: React.FC = () => {
             <span className="text-[9px] font-bold text-zinc-400 ml-1.5">Mode:</span>
             <select
               value={pendingMatchMode}
-              onChange={(e) => setPendingMatchMode(e.target.value as PlaytestMatchMode)}
+              onChange={(e) => {
+                const newMode = e.target.value as PlaytestMatchMode;
+                setPendingMatchMode(newMode);
+                if (newMode === "humanVsAi") {
+                  setPendingHumanSeat("p1");
+                }
+              }}
               className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
               <option value="humanVsHuman">Human vs Human</option>
@@ -1036,16 +1044,6 @@ export const CoreBattlePlaytest: React.FC = () => {
 
             {pendingMatchMode === "humanVsAi" && (
               <>
-                <span className="text-[9px] font-bold text-zinc-400 ml-1">Human:</span>
-                <select
-                  value={pendingHumanSeat}
-                  onChange={(e) => setPendingHumanSeat(e.target.value as "p1" | "p2")}
-                  className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
-                >
-                  <option value="p1">p1 (Player A)</option>
-                  <option value="p2">p2 (Player B)</option>
-                </select>
-
                 <span className="text-[9px] font-bold text-zinc-400 ml-1">AI:</span>
                 <select
                   value={pendingPolicyId}
@@ -1194,9 +1192,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         </main>
       ) : (
         /* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */
-        <main className="flex-1 p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-2 pb-24 lg:pb-2">
+        <main className="flex-1 p-1 sm:p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-1 sm:gap-2 pb-24 lg:pb-2">
           {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-          <div className="lg:col-span-7 flex flex-col gap-1.5">
+          <div className="lg:col-span-7 flex flex-col gap-1 sm:gap-1.5">
             {/* セットアップ通知バナー (対戦中のみ) */}
             {setupNotice && (
               <div className={`p-3 rounded border font-mono ${

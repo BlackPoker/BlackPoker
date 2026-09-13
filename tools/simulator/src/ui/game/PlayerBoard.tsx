@@ -106,13 +106,13 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
     );
   };
 
-  // 兵士列 (中央寄り)
+  // 兵士列 (中央寄り・右寄せ)
   const soldierRow = soldierUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
-      <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-between">
-        <span>兵士 ({soldierUnits.length}体)</span>
+      <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
+        <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
-      <div className="flex gap-1.5 p-1 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
         {soldierUnits.map((u: any) => renderUnitCard(u))}
       </div>
     </div>
@@ -123,9 +123,9 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const bulwarkRow = bulwarkUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
       <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
-        <span>防壁 ({bulwarkUnits.length}体・ライフ側 →)</span>
+        <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
-      <div className="flex gap-1.5 p-1 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
         {[...bulwarkUnits].reverse().map((u: any) => renderUnitCard(u))}
       </div>
     </div>
@@ -133,7 +133,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   return (
     <div
-      className={`flex flex-col p-2 rounded border transition-all ${
+      className={`flex flex-col p-1 sm:p-2 rounded border transition-all ${
         isChancePlayer
           ? "bg-white border-zinc-950 shadow-md ring-2 ring-zinc-950"
           : isTurnPlayer
@@ -142,7 +142,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       }`}
     >
       {/* 1. プレイヤーサマリーヘッダー (PlayerSummary) */}
-      <div className="flex flex-wrap items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-200 gap-1">
+      <div className="flex flex-wrap items-center justify-between border-b pb-1 sm:pb-1.5 mb-1 sm:mb-1.5 border-zinc-200 gap-1">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-bold text-zinc-950 tracking-wide">
             {name}
@@ -164,12 +164,12 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
         {/* ライフ & 手札サマリー */}
         <div className="flex items-center gap-1.5 font-mono">
-          <div className="flex items-center gap-1 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[26px]">
+          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 sm:px-2 py-0 sm:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] sm:min-h-[26px]">
             <span className="text-[10px] font-bold text-zinc-500">LIFE:</span>
             <span className="text-xs font-black text-zinc-950">{lifeDisplay}</span>
           </div>
 
-          <div className="flex items-center gap-1 bg-zinc-100 px-2 py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[26px]">
+          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 sm:px-2 py-0 sm:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] sm:min-h-[26px]">
             <span className="text-[10px] font-bold text-zinc-500">HAND:</span>
             <span className="text-xs font-black text-zinc-950">{handCount}</span>
           </div>
@@ -177,7 +177,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       </div>
 
       {/* 2. Zone Strip (Fog, 墓地, 将来の拡張Zone) */}
-      <PlayerZoneStrip items={zoneItems} className="mb-1.5" />
+      <PlayerZoneStrip items={zoneItems} className="mb-1 sm:mb-1.5" />
 
       {/* Fog 詳細モーダル (公開情報) */}
       {showFogModal && (
@@ -237,12 +237,12 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       )}
 
       {/* 3. フィールド (Units) - 兵士列 / 防壁列の分離 */}
-      <div className="mb-1.5">
+      <div className="mb-1 sm:mb-1.5">
         <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
           <span>FIELD (ユニット: {fieldUnits.length}体)</span>
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1 sm:gap-1.5">
           {fieldUnits.length === 0 ? (
             <div className="flex items-center justify-center w-full text-xs text-zinc-400 italic py-2 rounded bg-zinc-50 border border-zinc-200">
               ユニットなし
@@ -276,7 +276,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
               <span>HAND (手札: {handCount}枚)</span>
             </div>
 
-            <div className="flex gap-1.5 min-h-[60px] p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
+            <div className="flex gap-1 sm:gap-1.5 min-h-[44px] sm:min-h-[60px] p-1 sm:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
               {handCards.length > 0 ? (
                 handCards.map((card: any, idx: number) => (
                   <CardView

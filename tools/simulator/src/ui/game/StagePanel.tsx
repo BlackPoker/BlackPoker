@@ -36,8 +36,8 @@ export const StagePanel: React.FC<StagePanelProps> = ({
   const reversedRequests = requests.slice().reverse();
 
   return (
-    <div className="flex flex-col p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
-      <div className="flex items-center justify-between border-b pb-1.5 mb-1.5 border-zinc-200">
+    <div className="flex flex-col p-1.5 sm:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
+      <div className="flex items-center justify-between border-b pb-1 sm:pb-1.5 mb-1 sm:mb-1.5 border-zinc-200">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
             STAGE (LIFO)
@@ -108,7 +108,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({
             return (
               <div
                 key={req.id || revIdx}
-                className={`flex flex-col p-2 rounded border transition-all ${
+                className={`flex flex-col p-1.5 sm:p-2 rounded border transition-all ${
                   isHiddenOnMobile ? "hidden lg:flex" : "flex"
                 } ${borderAndBgClass}`}
               >

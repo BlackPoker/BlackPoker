@@ -221,19 +221,9 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
               Human vs AI 設定
             </div>
 
-            {/* Human 席選択 */}
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-bold font-mono text-zinc-600">
-                プレイヤー席 (Human Seat):
-              </label>
-              <select
-                value={humanSeat}
-                onChange={(e) => onSelectHumanSeat(e.target.value as "p1" | "p2")}
-                className="w-full text-xs font-bold py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px] cursor-pointer"
-              >
-                <option value="p1">Player A (先攻)</option>
-                <option value="p2">Player B (後攻)</option>
-              </select>
+            {/* 先攻/後攻 自動決定案内 */}
+            <div className="p-2 bg-white rounded border border-zinc-200 text-[11px] font-mono text-zinc-600">
+              ※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。
             </div>
 
             {/* AI Policy 選択 */}
