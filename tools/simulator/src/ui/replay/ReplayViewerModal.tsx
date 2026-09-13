@@ -7,6 +7,9 @@ import { reconstructMatch, ReconstructMatchResult } from "../../engine/replay/Re
 import type { ReplayPlanV1 } from "../../engine/replay/ReplayTypes";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 import { PlayerBoard } from "../game/PlayerBoard";
+import { GameStatusBar } from "../game/GameStatusBar";
+import { StagePanel } from "../game/StagePanel";
+import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import {
   parseDiagnosticJson,
   verifyDiagnosticReplayBundleV1,
@@ -157,11 +160,50 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     });
   }, [plan, currentIndex, catalog, fullRulePackage]);
 
-  // 直前の Decision 情報 (index > 0 のとき)
+  // 直前の Decision 情報およびカタログ正式参照からの Action / Effect 表示 (index > 0 のとき)
   const lastExecutedDecision = useMemo(() => {
     if (!plan || currentIndex === 0) return null;
-    return plan.decisions[currentIndex - 1] ?? null;
-  }, [plan, currentIndex]);
+    const entry = plan.decisions[currentIndex - 1] ?? null;
+    if (!entry) return null;
+
+    let actionLabel: string | undefined = undefined;
+    if (reconResult?.status === "SUCCESS" && reconResult.replayedDecisions) {
+      const executed = reconResult.replayedDecisions[currentIndex - 1];
+      if (executed) {
+        const pattern = executed.request.patterns?.[executed.entry.response.selectedPatternRef];
+        if (pattern) {
+          if (pattern.kind === "PASS") {
+            actionLabel = "パス";
+          } else if (pattern.kind === "ACTION") {
+            if (
+              pattern.actionSelectionRef !== undefined &&
+              executed.request.catalog?.actions?.[pattern.actionSelectionRef]
+            ) {
+              actionLabel = executed.request.catalog.actions[pattern.actionSelectionRef].actionName;
+            } else {
+              actionLabel = "アクション";
+            }
+          } else if (pattern.kind === "EFFECT_SELECTION") {
+            if (
+              pattern.effectSelectionRef !== undefined &&
+              executed.request.catalog?.effectSelections?.[pattern.effectSelectionRef]?.summary
+            ) {
+              actionLabel = executed.request.catalog.effectSelections[pattern.effectSelectionRef].summary;
+            } else {
+              actionLabel = "効果解決";
+            }
+          } else {
+            actionLabel = pattern.kind;
+          }
+        }
+      }
+    }
+
+    return {
+      ...entry,
+      actionLabel,
+    };
+  }, [plan, currentIndex, reconResult]);
 
   // ナビゲーション操作
   const handleFirst = () => {
@@ -186,13 +228,16 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   // 盤面の Presentation 生成 (Observation 境界を厳格に保持)
   let topViewModel = null;
   let bottomViewModel = null;
-  let stageText = "";
-  let turnText = "";
+  let allPlayersFog: readonly any[] = [];
+  let battleRelationMap: Map<string, any> = new Map();
 
   if (reconResult?.status === "SUCCESS" && reconResult.currentGameState) {
     const obs = ObservationFactory.createObservation(reconResult.currentGameState, viewerPerspective);
     const topPlayerKey = viewerPerspective === "p1" ? "p2" : "p1";
     const bottomPlayerKey = viewerPerspective;
+
+    allPlayersFog = (obs.players || []).flatMap((p) => p.fog || []);
+    battleRelationMap = BattleRelationPresenter.buildPresentationMap(reconResult.currentGameState, obs);
 
     topViewModel = PlayerObservationPresenter.buildPlayerViewModel(
       topPlayerKey,
@@ -206,11 +251,6 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
       reconResult.currentGameState,
       viewerPerspective
     );
-
-    const stageObj = reconResult.currentGameState.stage;
-    stageText = stageObj ? `Stage: ${stageObj.name || stageObj.id || "Main"}` : "";
-    const activePlayerId = (reconResult.currentGameState as any).activePlayerId || (reconResult.currentGameState as any).turnPlayerId;
-    turnText = activePlayerId ? `Turn: ${activePlayerId === "p1" ? "Player A" : "Player B"}` : "";
   }
 
   const modalContent = (
@@ -378,7 +418,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
             {/* Decision 情報カード */}
             {lastExecutedDecision ? (
               <div className="p-2 rounded bg-zinc-100/90 border border-zinc-200 text-xs font-mono flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-bold text-zinc-900 bg-white px-1.5 py-0.5 rounded border border-zinc-300">
                     Seq #{lastExecutedDecision.seq}
                   </span>
@@ -388,6 +428,11 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
                   <span className="text-zinc-500">
                     ({lastExecutedDecision.actor})
                   </span>
+                  {lastExecutedDecision.actionLabel && (
+                    <span className="font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">
+                      {lastExecutedDecision.actionLabel}
+                    </span>
+                  )}
                   <span className="text-zinc-700">
                     選択パターン: #{lastExecutedDecision.response.selectedPatternRef}
                   </span>
@@ -434,28 +479,44 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
             </div>
           )}
 
-          {plan && topViewModel && bottomViewModel && (
+          {plan && reconResult?.status === "SUCCESS" && topViewModel && bottomViewModel && (
             <div className="flex flex-col gap-2">
+              {/* ゲーム進行ステータスバー */}
+              <GameStatusBar
+                environmentName={plan.environmentId}
+                matchSeed={plan.seed}
+                stateVersion={reconResult.currentGameState.stateVersion ?? reconResult.currentGameState.version}
+                turnPlayer={reconResult.currentGameState.turnPlayer}
+                chancePlayer={reconResult.currentGameState.chancePlayer}
+                turnCount={reconResult.currentGameState.turnCount || 1}
+                players={reconResult.currentGameState.players || {}}
+                latestEventMessage={undefined}
+              />
+
               {/* 対向プレイヤー (Top) */}
               <PlayerBoard
                 playerKey={viewerPerspective === "p1" ? "p2" : "p1"}
                 viewModel={topViewModel}
                 position="top"
-                allPlayersFog={[]}
+                allPlayersFog={allPlayersFog}
+                battleRelationMap={battleRelationMap}
               />
 
-              {/* ステージ中央インジケータ */}
-              <div className="flex items-center justify-between px-3 py-1 bg-zinc-100 rounded border border-zinc-200 text-xs font-mono">
-                <span className="font-bold text-zinc-800">{stageText || "Stage"}</span>
-                <span className="text-zinc-600">{turnText}</span>
-              </div>
+              {/* 中央 STAGE パネル */}
+              <StagePanel
+                requests={reconResult.currentGameState?.stage?.requests || []}
+                highlightedRequestId={null}
+                battleRelationMap={battleRelationMap}
+                viewerPlayerId={viewerPerspective}
+              />
 
               {/* 手前プレイヤー (Bottom) */}
               <PlayerBoard
                 playerKey={viewerPerspective}
                 viewModel={bottomViewModel}
                 position="bottom"
-                allPlayersFog={[]}
+                allPlayersFog={allPlayersFog}
+                battleRelationMap={battleRelationMap}
               />
             </div>
           )}

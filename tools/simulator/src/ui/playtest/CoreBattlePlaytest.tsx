@@ -844,11 +844,25 @@ export const CoreBattlePlaytest: React.FC = () => {
     setSheetMode("collapsed");
     setLatestEventMessage("Undo により直前の判断へ戻りました");
 
-    if (activeMatchMode === "humanVsHuman" && recon.currentStep.type === "WAITING_FOR_DECISION") {
+    // Pass-and-Play 秘密情報漏洩防止 & 手番再同期 (Human vs Human)
+    if (activeMatchMode === "humanVsHuman") {
+      if (recon.currentStep.type === "WAITING_FOR_DECISION") {
+        const targetPlayerId = recon.currentStep.request.playerId;
+        setPendingPlayerKey(targetPlayerId);
+        lastActivePlayerRef.current = targetPlayerId;
+        if (enablePassAndPlay) {
+          setIsPassAndPlayWaiting(true);
+        } else {
+          setIsPassAndPlayWaiting(false);
+        }
+      } else {
+        setIsPassAndPlayWaiting(false);
+      }
+    } else {
       setIsPassAndPlayWaiting(false);
     }
 
-    // logs / traces を安全に再同期
+    // logs / traces を安全に再同期 (未来履歴・過去履歴を完全クリア)
     setLogs([
       {
         id: "log-undo-resync",
@@ -857,16 +871,28 @@ export const CoreBattlePlaytest: React.FC = () => {
         level: "action",
       },
     ]);
-    addTrace("UNDO", `Undo executed: replayed ${recon.executedDecisions} decisions`, recon.currentGameState);
+
+    const undoTrace: TraceEntry = {
+      seq: 1,
+      stateVersion: recon.currentGameState?.stateVersion ?? recon.currentGameState?.version ?? 1,
+      timestamp: new Date().toLocaleTimeString(),
+      category: "UNDO",
+      turnPlayer: recon.currentGameState?.turnPlayer,
+      chancePlayer: recon.currentGameState?.chancePlayer,
+      stageDepth: recon.currentGameState?.stage?.requests?.length || 0,
+      message: `Undo executed: replayed ${recon.executedDecisions} decisions`,
+    };
+    setTraces([undoTrace]);
+    seqRef.current = 2;
   }, [
     activeMatch,
     activeMatchMode,
     activeSeatControllers,
     activePolicies,
+    enablePassAndPlay,
     catalog,
     fullRulePackage,
     resetFeedbackFlash,
-    addTrace,
   ]);
 
   // Pass-and-Play 準備完了ハンドラ

@@ -128,11 +128,17 @@ export function runDeterministicReplay(
   }
 ): DeterministicReplayResultV1 {
   try {
+    const trailingNormalization =
+      plan.expected.status === "PROGRESSED"
+        ? "EXACT_AFTER_TRANSCRIPT"
+        : "EXTERNAL_DECISION_BOUNDARY";
+
     const recon = reconstructMatch({
       environmentId: plan.environmentId,
       seed: plan.seed,
       transcript: plan.decisions,
       decisionCount: plan.decisions.length,
+      trailingNormalization,
       catalog: dependencies.catalog,
       fullRulePackage: dependencies.fullRulePackage,
       expectedRulePackage: plan.sourceRulePackage,
@@ -158,7 +164,7 @@ export function runDeterministicReplay(
     }
 
     const currentStep = recon.currentStep;
-    const stepIndex = recon.executedDecisions;
+    const stepIndex = recon.stepIndex;
 
     // Final Step 検証
     if (currentStep.type !== plan.expected.status) {

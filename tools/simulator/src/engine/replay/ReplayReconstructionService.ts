@@ -29,6 +29,7 @@ export interface ReconstructMatchParams {
   readonly seed?: number;
   readonly transcript: readonly ReplayDecisionEntryV1[];
   readonly decisionCount?: number;
+  readonly trailingNormalization?: "EXTERNAL_DECISION_BOUNDARY" | "EXACT_AFTER_TRANSCRIPT";
   readonly catalog: RegulationCatalog;
   readonly fullRulePackage: RulePackage;
   readonly expectedRulePackage?: {
@@ -41,6 +42,7 @@ export type ReconstructMatchResult =
   | {
       readonly status: "SUCCESS";
       readonly session: GameSession;
+      readonly stepIndex: number;
       readonly executedDecisions: number;
       readonly totalDecisions: number;
       readonly currentStep: GameSessionStep;
@@ -138,6 +140,29 @@ export function reconstructMatch(
       }
     }
 
+    const trailingNorm = params.trailingNormalization ?? "EXTERNAL_DECISION_BOUNDARY";
+    const targetCount =
+      params.decisionCount !== undefined
+        ? Math.min(params.decisionCount, params.transcript.length)
+        : params.transcript.length;
+
+    // Decision 0件 かつ EXACT_AFTER_TRANSCRIPT の場合:
+    // startMatchAttempt が返した initialStep をそのまま結果とする (advance しない)
+    if (targetCount === 0 && trailingNorm === "EXACT_AFTER_TRANSCRIPT") {
+      return {
+        status: "SUCCESS",
+        session,
+        stepIndex,
+        executedDecisions: 0,
+        totalDecisions: params.transcript.length,
+        currentStep,
+        currentGameState: JSON.parse(JSON.stringify(session.state)),
+        currentDecisionRequest:
+          currentStep.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined,
+        replayedDecisions: [],
+      };
+    }
+
     // 3. 初期 PROGRESSED ステップの自動進行
     let initialAutoSteps = 0;
     while (currentStep.type === "PROGRESSED") {
@@ -159,11 +184,6 @@ export function reconstructMatch(
       stepIndex++;
       initialAutoSteps++;
     }
-
-    const targetCount =
-      params.decisionCount !== undefined
-        ? Math.min(params.decisionCount, params.transcript.length)
-        : params.transcript.length;
 
     let executedDecisions = 0;
     const replayedDecisions: ReplayExecutedDecision[] = [];
@@ -320,31 +340,34 @@ export function reconstructMatch(
     }
 
     // 5. 外部 Decision 境界までの自動進行 (Normalization)
-    // PROGRESSED ステップが残っている場合、WAITING_FOR_DECISION または FINISHED まで進める
-    let trailingAutoSteps = 0;
-    while (currentStep.type === "PROGRESSED") {
-      if (trailingAutoSteps >= MAX_AUTO_PROGRESS_STEPS) {
-        return {
-          status: "DIVERGED",
-          code: "AUTO_PROGRESS_LIMIT_EXCEEDED",
-          message: `Exceeded max auto-progress steps (${MAX_AUTO_PROGRESS_STEPS}) during post-decision normalization`,
-          stepIndex,
-          session,
-          executedDecisions,
-          totalDecisions: params.transcript.length,
-          currentStep,
-          currentGameState: JSON.parse(JSON.stringify(session.state)),
-          replayedDecisions,
-        };
+    // trailingNorm === "EXTERNAL_DECISION_BOUNDARY" の場合のみ、残りの PROGRESSED を WAITING_FOR_DECISION または FINISHED まで進める
+    if (trailingNorm === "EXTERNAL_DECISION_BOUNDARY") {
+      let trailingAutoSteps = 0;
+      while (currentStep.type === "PROGRESSED") {
+        if (trailingAutoSteps >= MAX_AUTO_PROGRESS_STEPS) {
+          return {
+            status: "DIVERGED",
+            code: "AUTO_PROGRESS_LIMIT_EXCEEDED",
+            message: `Exceeded max auto-progress steps (${MAX_AUTO_PROGRESS_STEPS}) during post-decision normalization`,
+            stepIndex,
+            session,
+            executedDecisions,
+            totalDecisions: params.transcript.length,
+            currentStep,
+            currentGameState: JSON.parse(JSON.stringify(session.state)),
+            replayedDecisions,
+          };
+        }
+        currentStep = session.advance();
+        stepIndex++;
+        trailingAutoSteps++;
       }
-      currentStep = session.advance();
-      stepIndex++;
-      trailingAutoSteps++;
     }
 
     return {
       status: "SUCCESS",
       session,
+      stepIndex,
       executedDecisions,
       totalDecisions: params.transcript.length,
       currentStep,

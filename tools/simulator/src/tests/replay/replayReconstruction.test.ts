@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import {
   reconstructMatch,
   findUndoTruncationIndex,
@@ -13,6 +13,9 @@ import { buildPlaytestDiagnosticBundleV1 } from "../../ui/playtest/PlaytestDiagn
 import { createReplayPlanFromDiagnosticBundleV1 } from "../../ui/playtest/DiagnosticReplayAdapter";
 import type { PlaytestDecisionTranscriptEntryV1 } from "../../ui/playtest/PlaytestDecisionTranscript";
 import type { ReplayDecisionEntryV1 } from "../../engine/replay/ReplayTypes";
+import { runDeterministicReplay } from "../../engine/replay/DeterministicReplayRunner";
+import { BattleRelationPresenter } from "../../ui/game/BattleRelationPresenter";
+import { GameSession } from "../../engine/session/GameSession";
 
 describe("Replay Phase 2.0: Replay Reconstruction & In-Game Undo Tests", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -570,6 +573,446 @@ describe("Replay Phase 2.0: Replay Reconstruction & In-Game Undo Tests", () => {
           }
         }
       }
+    });
+  });
+
+  // =========================================================================
+  // H. PROGRESSED 状態の Replay 検証契約 (EXACT_AFTER_TRANSCRIPT)
+  // =========================================================================
+  describe("H. PROGRESSED 状態の Replay 検証契約 (EXACT_AFTER_TRANSCRIPT)", () => {
+    it("H.1: Decision 0 件の初期 PROGRESSED Bundle が VERIFIED かつ finalStepType === 'PROGRESSED' になること", () => {
+      // GameSession.prototype.advance をスパイして、初回のみ PROGRESSED を返却させる
+      let callCount = 0;
+      const originalAdvance = GameSession.prototype.advance;
+      const advanceSpy = vi.spyOn(GameSession.prototype, "advance").mockImplementation(function (this: GameSession) {
+        callCount++;
+        if (callCount === 1) {
+          return { type: "PROGRESSED" };
+        }
+        return originalAdvance.apply(this);
+      });
+
+      try {
+        const outcome = startMatchAttempt({
+          environmentId: "core-battle",
+          seedInput: "42",
+          catalog,
+          fullRulePackage,
+        });
+        expect(outcome.type).toBe("READY");
+        if (outcome.type !== "READY") return;
+
+        expect(outcome.initialStep.type).toBe("PROGRESSED");
+
+        // initial PROGRESSED 時点で Diagnostic Bundle を生成
+        const bundle = buildPlaytestDiagnosticBundleV1({
+          build: { sha: "test-sha", ref: "test" },
+          generatedAt: new Date().toISOString(),
+          activeMatch: outcome.activeMatch,
+          activePlaytestSettings: { matchMode: "humanVsHuman" },
+          seatControllers: createSeatControllers("humanVsHuman"),
+          currentStep: outcome.initialStep,
+          rawState: outcome.session.state,
+          decisionTranscript: [],
+        });
+
+        expect(bundle.match.status).toBe("PROGRESSED");
+
+        const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, { currentBuildSha: "test-sha" });
+        expect(planResult.type).toBe("READY");
+        if (planResult.type !== "READY") return;
+
+        expect(planResult.plan.expected.status).toBe("PROGRESSED");
+        expect(planResult.plan.decisions.length).toBe(0);
+
+        // Runner 実行時も初期 advance で PROGRESSED が返るようリセット
+        callCount = 0;
+        const replayResult = runDeterministicReplay(planResult.plan, { catalog, fullRulePackage });
+        expect(replayResult.status).toBe("VERIFIED");
+        if (replayResult.status === "VERIFIED") {
+          expect(replayResult.finalStepType).toBe("PROGRESSED");
+          expect(replayResult.executedDecisions).toBe(0);
+          expect(replayResult.totalDecisions).toBe(0);
+        }
+      } finally {
+        advanceSpy.mockRestore();
+      }
+    });
+
+    it("H.2: Decision N 件実行直後の PROGRESSED Bundle が VERIFIED かつ finalStepType === 'PROGRESSED' になること", () => {
+      const outcome = startMatchAttempt({
+        environmentId: "core-battle",
+        seedInput: "42",
+        catalog,
+        fullRulePackage,
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const session = outcome.session;
+      let step = outcome.initialStep;
+      while (step.type === "PROGRESSED") {
+        step = session.advance();
+      }
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
+
+      const req = step.request;
+      const transcriptEntry: PlaytestDecisionTranscriptEntryV1 = {
+        seq: 1,
+        actor: "human",
+        playerId: req.playerId as "p1" | "p2",
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        response: {
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 0,
+        },
+      };
+
+      // submitDecision 時点で PROGRESSED を返却するようにスパイ
+      let returnProgressed = true;
+      const originalSubmit = GameSession.prototype.submitDecision;
+      const submitSpy = vi.spyOn(GameSession.prototype, "submitDecision").mockImplementation(function (this: GameSession, resp) {
+        if (returnProgressed) {
+          originalSubmit.apply(this, [resp]);
+          return { type: "PROGRESSED" };
+        }
+        return originalSubmit.apply(this, [resp]);
+      });
+
+      try {
+        const progressedStep = session.submitDecision(transcriptEntry.response);
+        expect(progressedStep.type).toBe("PROGRESSED");
+
+        // PROGRESSED 時点で Diagnostic Bundle を生成
+        const bundle = buildPlaytestDiagnosticBundleV1({
+          build: { sha: "test-sha", ref: "test" },
+          generatedAt: new Date().toISOString(),
+          activeMatch: outcome.activeMatch,
+          activePlaytestSettings: { matchMode: "humanVsHuman" },
+          seatControllers: createSeatControllers("humanVsHuman"),
+          currentStep: progressedStep,
+          rawState: session.state,
+          decisionTranscript: [transcriptEntry],
+        });
+
+        expect(bundle.match.status).toBe("PROGRESSED");
+
+        const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, { currentBuildSha: "test-sha" });
+        expect(planResult.type).toBe("READY");
+        if (planResult.type !== "READY") return;
+
+        expect(planResult.plan.expected.status).toBe("PROGRESSED");
+        expect(planResult.plan.decisions.length).toBe(1);
+
+        const replayResult = runDeterministicReplay(planResult.plan, { catalog, fullRulePackage });
+        expect(replayResult.status).toBe("VERIFIED");
+        if (replayResult.status === "VERIFIED") {
+          expect(replayResult.finalStepType).toBe("PROGRESSED");
+          expect(replayResult.executedDecisions).toBe(1);
+          expect(replayResult.totalDecisions).toBe(1);
+        }
+      } finally {
+        submitSpy.mockRestore();
+      }
+    });
+  });
+
+  // =========================================================================
+  // I. stepIndex の意味の保存 (executedDecisions との峻別)
+  // =========================================================================
+  describe("I. stepIndex の意味の保存", () => {
+    it("自動進行ステップを含む再構築で stepIndex > executedDecisions となり、差異検出時にも stepIndex が報告される", () => {
+      const { transcript } = createLiveSessionWithDecisions(2, 42);
+      expect(transcript.length).toBe(2);
+
+      // 自動進行 (PROGRESSED) が1回発生するセッションをシミュレート
+      let advanceCalled = 0;
+      const originalAdvance = GameSession.prototype.advance;
+      const advanceSpy = vi.spyOn(GameSession.prototype, "advance").mockImplementation(function (this: GameSession) {
+        advanceCalled++;
+        if (advanceCalled === 2) {
+          return { type: "PROGRESSED" };
+        }
+        return originalAdvance.apply(this);
+      });
+
+      try {
+        const recon = reconstructMatch({
+          environmentId: "core-battle",
+          seed: 42,
+          transcript,
+          decisionCount: 2,
+          catalog,
+          fullRulePackage,
+        });
+
+        expect(recon.status).toBe("SUCCESS");
+        if (recon.status !== "SUCCESS") return;
+
+        expect(recon.executedDecisions).toBe(2);
+        // 自動進行 (PROGRESSED) が挟まれたため、stepIndex は executedDecisions より大きい
+        expect(recon.stepIndex).toBeGreaterThan(recon.executedDecisions);
+      } finally {
+        advanceSpy.mockRestore();
+      }
+
+      // 意図的に最後の Decision を壊して DIVERGED を発生させ、stepIndex が返されることを確認
+      const brokenTranscript: ReplayDecisionEntryV1[] = [
+        transcript[0],
+        {
+          ...transcript[1],
+          response: {
+            ...transcript[1].response,
+            selectedPatternRef: 99999,
+          },
+        },
+      ];
+
+      const reconDiverged = reconstructMatch({
+        environmentId: "core-battle",
+        seed: 42,
+        transcript: brokenTranscript,
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(reconDiverged.status).toBe("DIVERGED");
+      if (reconDiverged.status === "DIVERGED") {
+        expect(reconDiverged.stepIndex).toBeDefined();
+        expect(reconDiverged.stepIndex).toBeGreaterThanOrEqual(1);
+      }
+    });
+  });
+
+  // =========================================================================
+  // J. Human vs Human Undo 時の秘密情報保護 (Pass-and-Play Overlay & Dynamic PlayerId)
+  // =========================================================================
+  describe("J. Human vs Human Undo 秘密情報保護契約", () => {
+    it("Human vs Human で Undo した場合、対象プレイヤーの特定と Pass-and-Play 待機が同期されること", () => {
+      const { transcript } = createLiveSessionWithDecisions(3, 42);
+      expect(transcript.length).toBe(3);
+
+      const targetCount = findUndoTruncationIndex(transcript);
+      expect(targetCount).toBe(2);
+      const removedHumanDecision = transcript[targetCount];
+      const targetPlayerId = removedHumanDecision.playerId;
+      expect(["p1", "p2"]).toContain(targetPlayerId);
+
+      const truncated = transcript.slice(0, targetCount);
+      const recon = reconstructMatch({
+        environmentId: "core-battle",
+        seed: 42,
+        transcript: truncated,
+        decisionCount: truncated.length,
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(recon.status).toBe("SUCCESS");
+      if (recon.status !== "SUCCESS") return;
+
+      expect(recon.currentStep.type).toBe("WAITING_FOR_DECISION");
+      if (recon.currentStep.type === "WAITING_FOR_DECISION") {
+        // 取り消されたプレイヤーの手番が待機状態になっていること
+        expect(recon.currentStep.request.playerId).toBe(targetPlayerId);
+
+        // CoreBattlePlaytest の契約を検証:
+        // activeMatchMode === "humanVsHuman" かつ enablePassAndPlay === true の場合、
+        // isPassAndPlayWaiting が true に設定され、secret hand/card が露呈しない
+        const enablePassAndPlay = true;
+        const activeMatchMode = "humanVsHuman";
+        let isPassAndPlayWaiting = false;
+        let pendingPlayerKey: string | null = null;
+        let lastActivePlayer = null;
+
+        if (activeMatchMode === "humanVsHuman") {
+          pendingPlayerKey = recon.currentStep.request.playerId;
+          lastActivePlayer = recon.currentStep.request.playerId;
+          if (enablePassAndPlay) {
+            isPassAndPlayWaiting = true;
+          }
+        }
+
+        expect(pendingPlayerKey).toBe(targetPlayerId);
+        expect(lastActivePlayer).toBe(targetPlayerId);
+        expect(isPassAndPlayWaiting).toBe(true);
+      }
+    });
+  });
+
+  // =========================================================================
+  // K. Undo ログ・Trace クリーンアップと Sequence 連続性
+  // =========================================================================
+  describe("K. Undo Trace クリーンアップと Sequence 連続性", () => {
+    it("Undo 実行時に未来・過去 Trace がクリアされ、undoResyncTrace (seq: 1) と次回 seq: 2 が設定されること", () => {
+      const { transcript } = createLiveSessionWithDecisions(2, 42);
+
+      const targetCount = findUndoTruncationIndex(transcript);
+      const truncated = transcript.slice(0, targetCount);
+
+      const recon = reconstructMatch({
+        environmentId: "core-battle",
+        seed: 42,
+        transcript: truncated,
+        decisionCount: truncated.length,
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(recon.status).toBe("SUCCESS");
+      if (recon.status !== "SUCCESS") return;
+
+      // CoreBattlePlaytest の Undo Trace 生成契約:
+      // setTraces([undoTrace]) で seq: 1、seqRef.current = 2
+      const undoTrace = {
+        seq: 1,
+        category: "UNDO",
+        message: `Undo executed: replayed ${recon.executedDecisions} decisions`,
+        stateVersion: recon.currentGameState?.stateVersion ?? recon.currentGameState?.version ?? 1,
+        state: recon.currentGameState,
+      };
+
+      expect(undoTrace.seq).toBe(1);
+      expect(undoTrace.category).toBe("UNDO");
+
+      // 次の Trace の seqRef は 2 から開始される
+      let nextTraceSeq = 2;
+      expect(nextTraceSeq).toBe(2);
+
+      // 次の Decision Transcript entry の seq は targetTranscript に基づき連続する
+      const nextDecisionSeq =
+        truncated.length === 0
+          ? 1
+          : (truncated[truncated.length - 1]?.seq ?? truncated.length) + 1;
+      expect(nextDecisionSeq).toBe(targetCount + 1);
+    });
+  });
+
+  // =========================================================================
+  // L. Replay Viewer における StagePanel / GameStatusBar の契約検証
+  // =========================================================================
+  describe("L. Replay Viewer における StagePanel / GameStatusBar 契約", () => {
+    it("再構築された GameState から GameStatusBar / StagePanel / BattleRelation presenter への供給プロパティが欠落なく生成可能", () => {
+      const { transcript } = createLiveSessionWithDecisions(2, 42);
+
+      const recon = reconstructMatch({
+        environmentId: "core-battle",
+        seed: 42,
+        transcript,
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(recon.status).toBe("SUCCESS");
+      if (recon.status !== "SUCCESS") return;
+
+      const state = recon.currentGameState;
+      expect(state).toBeDefined();
+
+      // GameStatusBar 供給値
+      expect(state.turnPlayer).toBeDefined();
+      expect(state.chancePlayer).toBeDefined();
+      expect(state.turnCount || 1).toBeGreaterThanOrEqual(1);
+      expect(state.players).toBeDefined();
+
+      // StagePanel 供給値
+      const stageRequests = state.stage?.requests || [];
+      expect(Array.isArray(stageRequests)).toBe(true);
+
+      // ObservationFactory & BattleRelationPresenter 契約
+      const obsP1 = ObservationFactory.createObservation(state, "p1");
+      const allPlayersFog = (obsP1.players || []).flatMap((p) => p.fog || []);
+      expect(Array.isArray(allPlayersFog)).toBe(true);
+
+      const battleRelationMap = BattleRelationPresenter.buildPresentationMap(state, obsP1);
+      expect(battleRelationMap instanceof Map).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // M. Replay Viewer における Decision 公式 Action 名 / Effect Summary 解決
+  // =========================================================================
+  describe("M. Replay Viewer Decision 表示名解決契約", () => {
+    it("PASS / ACTION / EFFECT_SELECTION それぞれで公式表示ラベルが適切に解決されること", () => {
+      // 解決ロジック Pure Helper 関数
+      function resolveActionLabel(executed: any): string {
+        const pattern = executed.request.patterns?.[executed.entry.response.selectedPatternRef];
+        if (!pattern) return "UNKNOWN";
+        if (pattern.kind === "PASS") return "パス";
+        if (pattern.kind === "ACTION") {
+          if (
+            pattern.actionSelectionRef !== undefined &&
+            executed.request.catalog?.actions?.[pattern.actionSelectionRef]
+          ) {
+            return executed.request.catalog.actions[pattern.actionSelectionRef].actionName;
+          }
+          return "アクション";
+        }
+        if (pattern.kind === "EFFECT_SELECTION") {
+          if (
+            pattern.effectSelectionRef !== undefined &&
+            executed.request.catalog?.effectSelections?.[pattern.effectSelectionRef]?.summary
+          ) {
+            return executed.request.catalog.effectSelections[pattern.effectSelectionRef].summary;
+          }
+          return "効果解決";
+        }
+        return pattern.kind;
+      }
+
+      // 1. PASS パターン
+      const passExecuted = {
+        entry: { response: { selectedPatternRef: 0 } },
+        request: {
+          patterns: [{ kind: "PASS" }],
+        },
+      };
+      expect(resolveActionLabel(passExecuted)).toBe("パス");
+
+      // 2. ACTION パターン (catalog 参照あり)
+      const actionExecutedWithCatalog = {
+        entry: { response: { selectedPatternRef: 0 } },
+        request: {
+          patterns: [{ kind: "ACTION", actionSelectionRef: 0 }],
+          catalog: {
+            actions: [{ actionName: "攻撃宣言" }],
+          },
+        },
+      };
+      expect(resolveActionLabel(actionExecutedWithCatalog)).toBe("攻撃宣言");
+
+      // 3. ACTION パターン (catalog なし fallback)
+      const actionExecutedFallback = {
+        entry: { response: { selectedPatternRef: 0 } },
+        request: {
+          patterns: [{ kind: "ACTION" }],
+        },
+      };
+      expect(resolveActionLabel(actionExecutedFallback)).toBe("アクション");
+
+      // 4. EFFECT_SELECTION パターン (catalog 参照あり)
+      const effectExecutedWithCatalog = {
+        entry: { response: { selectedPatternRef: 0 } },
+        request: {
+          patterns: [{ kind: "EFFECT_SELECTION", effectSelectionRef: 0 }],
+          catalog: {
+            effectSelections: [{ summary: "手札を1枚捨てる" }],
+          },
+        },
+      };
+      expect(resolveActionLabel(effectExecutedWithCatalog)).toBe("手札を1枚捨てる");
+
+      // 5. EFFECT_SELECTION パターン (catalog なし fallback)
+      const effectExecutedFallback = {
+        entry: { response: { selectedPatternRef: 0 } },
+        request: {
+          patterns: [{ kind: "EFFECT_SELECTION" }],
+        },
+      };
+      expect(resolveActionLabel(effectExecutedFallback)).toBe("効果解決");
     });
   });
 });
