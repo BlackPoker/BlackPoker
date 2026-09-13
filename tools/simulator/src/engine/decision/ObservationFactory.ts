@@ -70,13 +70,18 @@ export class ObservationFactory {
         // 6. 墓地の処理
         // ルール: 墓地枚数と墓地トップカードは全員に公開。墓地全体（非トップカード）はオーナー本人のみ確認可能
         const rawGrave = Array.isArray(p.grave) ? p.grave : [];
-        const graveCount = rawGrave.length;
-        const rawGraveTop = graveCount > 0 ? rawGrave[graveCount - 1] : undefined;
-        const graveTopCard: CardView | undefined = rawGraveTop ? this.mapCard(rawGraveTop, true) : undefined;
+        const rawGraveTop = rawGrave.length > 0 ? rawGrave[rawGrave.length - 1] : undefined;
+        const graveTopCard: CardView | undefined = rawGraveTop
+          ? this.resolveGraveTopCard(rawGraveTop)
+          : undefined;
+
+        // 物理カード単位に展開
+        const visibleGraveCards = rawGrave.flatMap((g: any) => this.resolveGraveEntryCards(g));
+        const graveCount = visibleGraveCards.length;
 
         // 墓地一覧: オーナー本人は全カード確認可能、相手はトップカードのみ（または空）
         const grave: CardView[] = isViewer
-          ? rawGrave.map((g: any) => this.mapCard(g, true))
+          ? visibleGraveCards
           : graveTopCard
           ? [graveTopCard]
           : [];
@@ -128,6 +133,68 @@ export class ObservationFactory {
       stageRequests,
       recentEvents: [],
     };
+  }
+
+  /**
+   * 対象オブジェクトが KnownCardView として成立する通常Cardの条件を満たすか判定する。
+   * suit と rank の双方が定義されていることを必須とする。
+   */
+  private static isCardLike(entry: any): boolean {
+    return (
+      entry != null &&
+      entry.suit !== undefined &&
+      entry.rank !== undefined
+    );
+  }
+
+  /**
+   * 墓地エントリ（通常Card または Unit wrapper）を展開し、含まれる全CardViewを返す。
+   * - 通常Card -> [mapCard(entry, true)]
+   * - Unit wrapper -> entry.cards 配列内の isCardLike な全要素を mapCard 化
+   * - 不明形式 / 不正要素 -> []
+   */
+  private static resolveGraveEntryCards(entry: any): CardView[] {
+    if (!entry) return [];
+
+    if (this.isCardLike(entry)) {
+      return [this.mapCard(entry, true)];
+    }
+
+    if (Array.isArray(entry.cards)) {
+      return entry.cards
+        .filter((c: any) => this.isCardLike(c))
+        .map((c: any) => this.mapCard(c, true));
+    }
+
+    return [];
+  }
+
+  /**
+   * 墓地最上位エントリから公開可能な墓地トップCardViewを安全に解決する。
+   * A. 通常Card (isCardLike) -> mapCard(entry, true)
+   * B. Unit wrapper かつ cards.length === 1 (かつ cards[0] が isCardLike) -> mapCard(entry.cards[0], true)
+   * C. Unit wrapper かつ cards.length > 1 -> 未解決 (undefined)
+   * その他 -> undefined
+   */
+  private static resolveGraveTopCard(entry: any): CardView | undefined {
+    if (!entry) return undefined;
+
+    // A. 通常Card
+    if (this.isCardLike(entry)) {
+      return this.mapCard(entry, true);
+    }
+
+    // B & C. Unit wrapper
+    if (Array.isArray(entry.cards)) {
+      if (entry.cards.length === 1 && this.isCardLike(entry.cards[0])) {
+        // B. 単一カードUnit wrapper
+        return this.mapCard(entry.cards[0], true);
+      }
+      // C. cards.length > 1 (または0枚、あるいは不正カード) の場合、推測せず undefined
+      return undefined;
+    }
+
+    return undefined;
   }
 
   private static mapCard(card: any, faceUp: boolean = true): CardView {
