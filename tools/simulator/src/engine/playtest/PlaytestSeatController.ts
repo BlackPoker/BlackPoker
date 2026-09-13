@@ -72,6 +72,19 @@ export interface PlaytestSeatControllers {
 }
 
 /**
+ * 対戦モードに応じた Human Seat の正規化
+ * Human vs AI では先攻・後攻はライフトップ比較により自動決定され、
+ * Human 側の席は常に "p1" に正規化されます。
+ * Human vs Human では指定された席（デフォルト "p1"）をそのまま維持します。
+ */
+export function normalizeHumanSeatForMode(
+  mode: PlaytestMatchMode,
+  humanSeat: "p1" | "p2" = "p1"
+): "p1" | "p2" {
+  return mode === "humanVsAi" ? "p1" : humanSeat;
+}
+
+/**
  * 対戦モード・人間席・AI Policy ID から SeatControllers を構築
  */
 export function createSeatControllers(

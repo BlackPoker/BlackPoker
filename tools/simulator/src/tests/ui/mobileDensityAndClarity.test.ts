@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 import { describe, it, expect } from "vitest";
 import { MatchSetupScreen } from "../../ui/playtest/MatchSetupScreen";
 import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator";
-import { createSeatControllers } from "../../engine/playtest/PlaytestSeatController";
+import { createSeatControllers, normalizeHumanSeatForMode } from "../../engine/playtest/PlaytestSeatController";
 import { PlayerBoard } from "../../ui/game/PlayerBoard";
 import { PlayerObservationPresenter } from "../../ui/game/PlayerObservationPresenter";
 import { PlayerZoneStrip } from "../../ui/game/PlayerZoneStrip";
@@ -11,6 +11,9 @@ import { StagePanel } from "../../ui/game/StagePanel";
 import { DecisionPanel, formatCostPaymentDisplay } from "../../ui/decision/DecisionPanel";
 import { UnitCard } from "../../ui/game/UnitCard";
 import { BattleRelationPresenter } from "../../ui/game/BattleRelationPresenter";
+import { MobileHeaderMenu } from "../../ui/game/MobileHeaderMenu";
+import { buildPlaytestShareUrl, PlaytestShareConfigV1 } from "../../ui/playtest/PlaytestShareUrl";
+import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 
 describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
   // 改善1: Human vs AI の先攻後攻を手動選択させない & Human=p1 正規化
@@ -161,7 +164,7 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       // CoreBattlePlaytest では mode === "humanVsAi" の時 resolvedHumanSeat = "p1" へ正規化する契約
       const mode = "humanVsAi";
       const pendingSeat = "p2" as const;
-      const normalizedSeat = mode === "humanVsAi" ? "p1" : pendingSeat;
+      const normalizedSeat = normalizeHumanSeatForMode(mode, pendingSeat);
       const seatControllers = createSeatControllers(mode, normalizedSeat, "firstLegal");
 
       expect(seatControllers.p1.kind).toBe("HUMAN");
@@ -501,6 +504,119 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       expect(html).toContain("♢7");
       expect(html).toContain("数:");
       expect(html).toContain("7");
+    });
+  });
+
+  // UI Phase 3.3-R1: MobileHeaderMenu Human Seat 削除とモード切替正規化
+  describe("UI Phase 3.3-R1: MobileHeaderMenu Human Seat 削除とモード切替正規化", () => {
+    it("R1.1: normalizeHumanSeatForMode 純粋関数が期待通りに動作すること", () => {
+      expect(normalizeHumanSeatForMode("humanVsAi", "p2")).toBe("p1");
+      expect(normalizeHumanSeatForMode("humanVsAi", "p1")).toBe("p1");
+      expect(normalizeHumanSeatForMode("humanVsHuman", "p2")).toBe("p2");
+      expect(normalizeHumanSeatForMode("humanVsHuman", "p1")).toBe("p1");
+    });
+
+    it("R1.2: MobileHeaderMenu で humanVsAi の場合、Human Seat 選択 UI が完全撤廃され、自動決定案内が表示されること", () => {
+      const html = renderToString(
+        React.createElement(MobileHeaderMenu, {
+          isOpen: true,
+          onClose: () => {},
+          selectedEnvironmentId: "core-battle-playtest",
+          onSelectEnvironment: () => {},
+          environmentOptions: [
+            { id: "core-battle-playtest", name: "Core Battle Playtest", isOfficial: false },
+          ],
+          showSeedInput: false,
+          matchMode: "humanVsAi",
+          onSelectMatchMode: () => {},
+          policyId: "firstLegal",
+          onSelectPolicyId: () => {},
+          isOfficialEnvironment: false,
+          enablePassAndPlay: false,
+          onTogglePassAndPlay: () => {},
+          onOpenLogModal: () => {},
+          onOpenDebugModal: () => {},
+          onResetGame: () => {},
+        })
+      );
+
+      // プレイヤー席 / Human Seat 関連の文言や option が一切描画されない
+      expect(html).not.toContain("プレイヤー席");
+      expect(html).not.toContain("Human Seat");
+      expect(html).not.toContain("Player A (p1)");
+      expect(html).not.toContain("Player B (p2)");
+
+      // 自動決定案内が表示される
+      expect(html).toContain("※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。");
+
+      // AI Policy 選択と実在する4つのポリシーが表示される
+      expect(html).toContain("AI Policy:");
+      expect(html).toContain("FirstLegal (Baseline)");
+      expect(html).toContain("SeededRandom (Baseline)");
+      expect(html).toContain("ManualGenericGenome (Experimental)");
+      expect(html).toContain("ZeroGenome (Debug)");
+    });
+
+    it("R1.3: MobileHeaderMenu で humanVsHuman の場合、自動決定案内も AI Policy も表示されないこと", () => {
+      const html = renderToString(
+        React.createElement(MobileHeaderMenu, {
+          isOpen: true,
+          onClose: () => {},
+          selectedEnvironmentId: "core-battle-playtest",
+          onSelectEnvironment: () => {},
+          environmentOptions: [
+            { id: "core-battle-playtest", name: "Core Battle Playtest", isOfficial: false },
+          ],
+          showSeedInput: false,
+          matchMode: "humanVsHuman",
+          onSelectMatchMode: () => {},
+          policyId: "firstLegal",
+          onSelectPolicyId: () => {},
+          isOfficialEnvironment: false,
+          enablePassAndPlay: false,
+          onTogglePassAndPlay: () => {},
+          onOpenLogModal: () => {},
+          onOpenDebugModal: () => {},
+          onResetGame: () => {},
+        })
+      );
+
+      expect(html).not.toContain("※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。");
+      expect(html).not.toContain("AI Policy:");
+      expect(html).not.toContain("プレイヤー席");
+      expect(html).not.toContain("Human Seat");
+    });
+
+    it("R1.4: 共有 URL 生成時、humanVsAi の場合は humanSeat が p1 に正規化され human=p2 が混入しないこと", () => {
+      const catalog = loadRegulationCatalogForBrowser();
+      const currentUrl = "http://localhost:5173/";
+
+      // pendingHumanSeat が万一 "p2" の状態で humanVsAi を共有した場合
+      const pendingHumanSeat = "p2" as const;
+      const configAi: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: "official:light-entry16",
+        mode: "humanVsAi",
+        humanSeat: normalizeHumanSeatForMode("humanVsAi", pendingHumanSeat),
+        policyId: "firstLegal",
+        seedInput: "42",
+      };
+
+      const urlAi = buildPlaytestShareUrl(currentUrl, configAi, catalog);
+      expect(urlAi).toContain("human=p1");
+      expect(urlAi).not.toContain("human=p2");
+
+      // humanVsHuman の場合は human パラメータ自体が除外される (canonicalization 契約)
+      const configHvh: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: "official:light-entry16",
+        mode: "humanVsHuman",
+        humanSeat: normalizeHumanSeatForMode("humanVsHuman", "p2"),
+        policyId: "firstLegal",
+        seedInput: "42",
+      };
+      const urlHvh = buildPlaytestShareUrl(currentUrl, configHvh, catalog);
+      expect(urlHvh).not.toContain("human=");
     });
   });
 });

@@ -21,6 +21,7 @@ import {
   PlaytestSeatControllers,
   createSeatControllers,
   isHumanSeat,
+  normalizeHumanSeatForMode,
 } from "../../engine/playtest/PlaytestSeatController";
 import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory";
 import {
@@ -210,6 +211,12 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
+  // 対戦モード選択ハンドラ (humanVsAi への変更時は常に pendingHumanSeat を "p1" に正規化)
+  const handleSelectMatchMode = useCallback((mode: PlaytestMatchMode) => {
+    setPendingMatchMode(mode);
+    setPendingHumanSeat((current) => normalizeHumanSeatForMode(mode, current));
+  }, []);
+
   // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
   const startNewGame = useCallback(
     async (
@@ -223,7 +230,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       const seed = overrideSeedInput ?? seedInput;
       const mode = overrideMode ?? pendingMatchMode;
       // Human vs AI では Human 席を常に "p1" へ正規化 (URLパラメータや復元設定の p2 も吸収)
-      const humanSeat: "p1" | "p2" = mode === "humanVsAi" ? "p1" : (overrideHumanSeat ?? pendingHumanSeat);
+      const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
       const policyId = overridePolicyId ?? pendingPolicyId;
 
       // 失敗時・開始時に直前のセッション状態を安全にリセット
@@ -430,7 +437,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         setSelectedEnvironmentId(bootstrap.config.environmentId);
         setPendingMatchMode(bootstrap.config.mode);
         // Human vs AI の場合は "p1" に正規化
-        setPendingHumanSeat(bootstrap.config.mode === "humanVsAi" ? "p1" : bootstrap.config.humanSeat);
+        setPendingHumanSeat(normalizeHumanSeatForMode(bootstrap.config.mode, bootstrap.config.humanSeat));
         setPendingPolicyId(bootstrap.config.policyId);
         setSeedInput(bootstrap.config.seedInput);
 
@@ -471,7 +478,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       version: 1,
       environmentId: selectedEnvironmentId,
       mode: pendingMatchMode,
-      humanSeat: pendingHumanSeat,
+      humanSeat: normalizeHumanSeatForMode(pendingMatchMode, pendingHumanSeat),
       policyId: pendingPolicyId,
       seedInput: seedInput,
     };
@@ -1029,13 +1036,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             <span className="text-[9px] font-bold text-zinc-400 ml-1.5">Mode:</span>
             <select
               value={pendingMatchMode}
-              onChange={(e) => {
-                const newMode = e.target.value as PlaytestMatchMode;
-                setPendingMatchMode(newMode);
-                if (newMode === "humanVsAi") {
-                  setPendingHumanSeat("p1");
-                }
-              }}
+              onChange={(e) => handleSelectMatchMode(e.target.value as PlaytestMatchMode)}
               className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
               <option value="humanVsHuman">Human vs Human</option>
@@ -1176,7 +1177,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             selectedEnvironmentId={selectedEnvironmentId}
             onSelectEnvironment={setSelectedEnvironmentId}
             matchMode={pendingMatchMode}
-            onSelectMatchMode={setPendingMatchMode}
+            onSelectMatchMode={handleSelectMatchMode}
             humanSeat={pendingHumanSeat}
             onSelectHumanSeat={setPendingHumanSeat}
             policyId={pendingPolicyId}
@@ -1401,9 +1402,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         seedInput={seedInput}
         onSeedInputChange={setSeedInput}
         matchMode={pendingMatchMode}
-        onSelectMatchMode={setPendingMatchMode}
-        humanSeat={pendingHumanSeat}
-        onSelectHumanSeat={setPendingHumanSeat}
+        onSelectMatchMode={handleSelectMatchMode}
         policyId={pendingPolicyId}
         onSelectPolicyId={setPendingPolicyId}
         isOfficialEnvironment={isOfficialEnvironment(selectedEnvironmentId)}

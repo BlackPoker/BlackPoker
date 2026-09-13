@@ -168,8 +168,6 @@ describe("ReplayVerifyPresentation Tests", () => {
           showSeedInput: false,
           matchMode: "humanVsHuman",
           onSelectMatchMode: vi.fn(),
-          humanSeat: "p1",
-          onSelectHumanSeat: vi.fn(),
           policyId: "firstLegal",
           onSelectPolicyId: vi.fn(),
           isOfficialEnvironment: false,

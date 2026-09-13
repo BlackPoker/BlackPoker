@@ -17,8 +17,6 @@ export interface MobileHeaderMenuProps {
   readonly onSeedInputChange?: (val: string) => void;
   readonly matchMode: PlaytestMatchMode;
   readonly onSelectMatchMode: (mode: PlaytestMatchMode) => void;
-  readonly humanSeat: "p1" | "p2";
-  readonly onSelectHumanSeat: (seat: "p1" | "p2") => void;
   readonly policyId: PlaytestPolicyId;
   readonly onSelectPolicyId: (id: PlaytestPolicyId) => void;
   readonly isOfficialEnvironment: boolean;
@@ -45,8 +43,6 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onSeedInputChange,
   matchMode,
   onSelectMatchMode,
-  humanSeat,
-  onSelectHumanSeat,
   policyId,
   onSelectPolicyId,
   isOfficialEnvironment,
@@ -142,18 +138,9 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
         {/* Human vs AI 設定 */}
         {matchMode === "humanVsAi" && (
           <>
-            <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-mono font-bold text-zinc-500">
-                プレイヤー席 (Human Seat):
-              </label>
-              <select
-                value={humanSeat}
-                onChange={(e) => onSelectHumanSeat(e.target.value as "p1" | "p2")}
-                className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
-              >
-                <option value="p1">Player A (p1)</option>
-                <option value="p2">Player B (p2)</option>
-              </select>
+            {/* 先攻/後攻 自動決定案内 */}
+            <div className="p-2 bg-zinc-50 rounded border border-zinc-200 text-[10px] font-mono text-zinc-600 leading-tight">
+              ※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。
             </div>
 
             <div className="flex flex-col gap-1">
