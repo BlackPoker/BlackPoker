@@ -5,6 +5,7 @@ import { FogDetailPopover } from "./FogDetailPopover";
 import { PlayerZoneStrip, ZoneSummaryItem } from "./PlayerZoneStrip";
 import { PlayerBoardViewModel } from "./PlayerObservationPresenter";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
+import { formatSuitSymbol } from "../../engine/rules/cardUtils";
 
 export interface PlayerBoardProps {
   readonly playerKey: string;
@@ -14,17 +15,7 @@ export interface PlayerBoardProps {
   readonly battleRelationMap?: Map<string, UnitBattleDisplayInfo>;
   readonly onUnitClick?: (unitId: string) => void;
   readonly position?: "top" | "bottom";
-}
-
-function formatSuit(suit?: string): string {
-  if (!suit) return "";
-  switch (suit) {
-    case "S": return "♠";
-    case "H": return "♡";
-    case "D": return "♢";
-    case "C": return "♣";
-    default: return suit;
-  }
+  readonly initialShowGraveModal?: boolean;
 }
 
 /**
@@ -39,8 +30,9 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   battleRelationMap,
   onUnitClick,
   position = "bottom",
+  initialShowGraveModal = false,
 }) => {
-  const [showGraveModal, setShowGraveModal] = useState(false);
+  const [showGraveModal, setShowGraveModal] = useState(initialShowGraveModal);
   const [showFogModal, setShowFogModal] = useState(false);
 
   // 全ての表示情報は ViewModel のみを正とする (fail-closed)
@@ -58,9 +50,10 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const isViewer = viewModel.isViewer;
 
   // 墓地トップカードの表示用バッジ
-  const graveTopBadge = viewModel.graveTopCard
-    ? `TOP: ${formatSuit(viewModel.graveTopCard.suit)}${viewModel.graveTopCard.rank || ""}`
-    : undefined;
+  const graveTopText = viewModel.graveTopCard
+    ? `${formatSuitSymbol(viewModel.graveTopCard.suit)}${viewModel.graveTopCard.rank || ""}`
+    : "";
+  const graveTopBadge = graveTopText ? `TOP: ${graveTopText}` : undefined;
 
   // ZoneStrip 用アイテム（将来の切札・Pack・Rare Card 拡張に対応）
   const zoneItems: ZoneSummaryItem[] = [
@@ -112,7 +105,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
         <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
-      <div className="flex gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
         {soldierUnits.map((u: any) => renderUnitCard(u))}
       </div>
     </div>
@@ -125,7 +118,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
         <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
-      <div className="flex gap-1 sm:gap-1.5 p-0.5 sm:p-1 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
         {[...bulwarkUnits].reverse().map((u: any) => renderUnitCard(u))}
       </div>
     </div>
@@ -210,15 +203,21 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
             {!canViewFullGrave ? (
               <div className="flex flex-col gap-2 p-2 bg-zinc-50 rounded border border-zinc-200">
                 <div className="text-xs text-zinc-600 font-mono">
-                  総枚数: <span className="font-bold text-zinc-950">{graveCount} 枚</span>（相手の墓地全体は非公開）
+                  {`総枚数: `}<span className="font-bold text-zinc-950">{`${graveCount} 枚`}</span>{`（相手の墓地全体は非公開）`}
                 </div>
-                {viewModel.graveTopCard ? (
+                {graveCount === 0 ? (
+                  <div className="text-xs text-zinc-400 italic py-2">墓地は空です</div>
+                ) : viewModel.graveTopCard ? (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-zinc-700 font-mono">墓地トップ（公開）:</span>
+                    <span className="text-xs font-bold text-zinc-700 font-mono">
+                      {`墓地トップ（公開）: ${graveTopText}`}
+                    </span>
                     <CardView card={viewModel.graveTopCard} size="sm" />
                   </div>
                 ) : (
-                  <div className="text-xs text-zinc-400 italic py-2">墓地は空です</div>
+                  <div className="text-xs text-zinc-500 font-mono py-1">
+                    墓地トップ情報を表示できません
+                  </div>
                 )}
               </div>
             ) : (

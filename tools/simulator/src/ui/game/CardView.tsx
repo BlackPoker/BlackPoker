@@ -1,12 +1,5 @@
 import React from "react";
-
-const suitSymbols: Record<string, { symbol: string; color: string }> = {
-  S: { symbol: "♠", color: "text-zinc-950 dark:text-zinc-100" },
-  H: { symbol: "♡", color: "text-zinc-800 dark:text-zinc-200" },
-  D: { symbol: "♢", color: "text-zinc-800 dark:text-zinc-200" },
-  C: { symbol: "♣", color: "text-zinc-950 dark:text-zinc-100" },
-  J: { symbol: "★", color: "text-zinc-900 dark:text-zinc-100" },
-};
+import { formatSuitSymbol, isJokerCard } from "../../engine/rules/cardUtils";
 
 export interface CardViewProps {
   card?: {
@@ -44,8 +37,8 @@ export const CardView: React.FC<CardViewProps> = ({
     );
   }
 
-  const isJoker = card.suit === "J" || card.rank === "0" || card.code?.toUpperCase().includes("JOKER");
-  const suitInfo = suitSymbols[card.suit || ""] || { symbol: card.suit || "", color: "text-zinc-950" };
+  const isJoker = isJokerCard(card);
+  const suitSymbol = isJoker ? "★" : formatSuitSymbol(card.suit);
   const displayRank = isJoker ? "JK" : card.rank || "";
 
   return (
@@ -57,7 +50,7 @@ export const CardView: React.FC<CardViewProps> = ({
         {displayRank}
       </div>
       <div className="text-center leading-none text-zinc-950 text-sm my-auto">
-        {isJoker ? "★" : suitInfo.symbol}
+        {suitSymbol}
       </div>
     </div>
   );

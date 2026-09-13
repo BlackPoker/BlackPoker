@@ -4,7 +4,7 @@ import { MultiCardUnitStack } from "./MultiCardUnitStack";
 import { UnitDetailModal } from "./UnitDetailModal";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { getUnitDisplayName } from "../../engine/rules/characterUtils";
-import { formatSuitSymbol, normalizeSuit } from "../../engine/rules/cardUtils";
+import { formatSuitSymbol } from "../../engine/rules/cardUtils";
 
 
 export interface UnitCardProps {
@@ -70,15 +70,12 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   // モバイル表示用: 1枚目カードのフォーマット
   const primaryCard = Array.isArray(unit.cards) && unit.cards.length > 0 ? unit.cards[0] : null;
   let mobileCardText = "—";
-  let isRedSuit = false;
   if (isHiddenFromViewer) {
     mobileCardText = "🂠";
   } else if (primaryCard) {
     const sym = formatSuitSymbol(primaryCard.suit);
     const rk = primaryCard.rank !== undefined ? String(primaryCard.rank) : "";
     mobileCardText = `${sym}${rk}`;
-    const nSuit = normalizeSuit(primaryCard.suit);
-    isRedSuit = nSuit === "heart" || nSuit === "diamond";
   }
   const extraCardCount = Array.isArray(unit.cards) && unit.cards.length > 1 ? unit.cards.length - 1 : 0;
 
@@ -104,11 +101,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           : "bg-white border border-zinc-300 shadow-sm"
       }`}
     >
-      {/* 選択可能・選択中バッジ (①, ②) - 拡大 (24〜28px, text-sm, font-black, border-2) */}
+      {/* 選択可能・選択中バッジ (①, ②) - モバイルでは内側に寄せ見切れ防止 (-top-2 -left-1, w-5 h-5) */}
       {selectionMarker && (
-        <div className="absolute -top-3.5 -left-2.5 z-20">
+        <div className="absolute -top-2 -left-1 sm:-top-3.5 sm:-left-2.5 z-20">
           <span
-            className={`flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full text-xs sm:text-sm font-mono font-black shadow-md border-2 ${
+            className={`flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full text-[10px] sm:text-sm font-mono font-black shadow-md border-2 ${
               selectionMarker.isSelected
                 ? "bg-zinc-950 border-zinc-950 text-white ring-2 ring-zinc-950 scale-110"
                 : "bg-white border-zinc-950 text-zinc-950 hover:bg-zinc-100"
@@ -258,8 +255,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       </div>
 
       {/* ===================== MOBILE 要約表示 (sm:未満) ===================== */}
-      <div className="flex sm:hidden flex-col w-full min-h-[46px] justify-between">
-        {/* 1行目: 識別子 + 状態(C/D) */}
+      <div className="flex sm:hidden flex-col w-full justify-between gap-0.5">
+        {/* 1行目: 識別子 + 状態(↑/→) */}
         <div className="flex items-center justify-between w-full gap-0.5">
           {isBulwark ? (
             <div className="flex items-center gap-0.5 truncate">
@@ -295,8 +292,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                 ? "bg-zinc-100 text-zinc-500 border border-zinc-300"
                 : "bg-zinc-950 text-white font-black"
             }`}
+            title={isDrive ? "Drive (→)" : "Charge (↑)"}
           >
-            {isDrive ? "D" : "C"}
+            {isDrive ? "→" : "↑"}
           </span>
         </div>
 
@@ -313,9 +311,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         )}
 
         {/* 2行目: カードスート/数字 + SIZE/数字 */}
-        <div className="flex items-center justify-between w-full mt-1 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
+        <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
           <div className="flex items-center gap-0.5">
-            <span className={`font-bold ${isRedSuit ? "text-red-600" : "text-zinc-950"}`}>
+            <span className="font-bold text-zinc-950">
               {mobileCardText}
             </span>
             {extraCardCount > 0 && !isHiddenFromViewer && (

@@ -414,7 +414,7 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       expect(html).toContain("hidden sm:flex");
     });
 
-    it("5.2: モバイル要約表示にスート+数字 (♠6), 種別, 状態 (C/D), SIZE が含まれる", () => {
+    it("5.2: モバイル要約表示にスート+数字 (♠6), 種別, 状態 (矢印 ↑/→), SIZE が含まれる", () => {
       const html = renderToString(
         React.createElement(UnitCard, {
           unit: soldierUnit,
@@ -428,7 +428,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       expect(html).toContain("一般兵");
       expect(html).toContain("S:"); // SIZE プレフィックス
       expect(html).toContain("10"); // SIZE 合計 6+4=10
-      expect(html).toContain(">C<"); // CHARGE 状態
+      expect(html).toContain(">↑<"); // CHARGE 状態 (矢印表示)
+      expect(html).not.toContain(">C<"); // C 略号は撤廃
       expect(html).toContain("+1"); // 追加カード枚数
     });
 
