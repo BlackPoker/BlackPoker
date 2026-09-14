@@ -31,8 +31,8 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(browserCompIds).toContain("fog.up");
     expect(browserCompIds).toContain("fog.down");
 
-    // 実総数の確認 (全21アクション、全10コンポーネント)
-    expect(browserActionIds.length).toBe(21);
+    // 実総数の確認 (全22アクション、全10コンポーネント)
+    expect(browserActionIds.length).toBe(22);
     expect(browserCompIds.length).toBe(10);
   });
 

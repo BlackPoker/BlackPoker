@@ -7,6 +7,7 @@ import { ObservationFactory } from "./ObservationFactory";
 import { CostPaymentEnumerator } from "./CostPaymentEnumerator";
 import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
+import { ActionActivationConditionEvaluator } from "../rules/ActionActivationConditionEvaluator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort } from "../rules/cardUtils";
@@ -307,6 +308,17 @@ export class LegalPatternGenerator {
           if (usedCount >= max) {
             return false;
           }
+        }
+      }
+
+      // 起動条件 (activationCondition) の判定
+      if (action.activationCondition) {
+        const condResult = ActionActivationConditionEvaluator.evaluate(
+          action.activationCondition,
+          { state, playerKey: playerId }
+        );
+        if (!condResult.isLegal) {
+          return false;
         }
       }
 

@@ -66,6 +66,7 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   onOpenReplayVerify,
 }) => {
   const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
+  const selectedEnvOpt = environmentOptions.find((opt) => opt.id === selectedEnvironmentId);
   const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((opt) => opt.id === policyId);
 
   return (
@@ -167,6 +168,11 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
               </option>
             ))}
           </select>
+          {selectedEnvOpt?.deckProfileNotice && (
+            <p className="text-[11px] text-blue-900 font-mono mt-0.5 bg-blue-50 p-2 rounded border border-blue-200">
+              {selectedEnvOpt.deckProfileNotice}
+            </p>
+          )}
           {!isOfficial && (
             <p className="text-[11px] text-zinc-500 font-mono mt-0.5 bg-zinc-50 p-2 rounded border border-zinc-200">
               ※固定初期盤面による基本ルールの検証環境

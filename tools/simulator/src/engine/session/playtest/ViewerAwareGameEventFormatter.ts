@@ -530,6 +530,34 @@ export class ViewerAwareGameEventFormatter {
       }
     }
 
+    // 7. パック開封およびカード公開の検知
+    for (const pKey of ["p1", "p2"]) {
+      const prevPack = prevState.players?.[pKey]?.pack;
+      const nextPack = nextState.players?.[pKey]?.pack;
+      const pName = getPlayerName(pKey);
+
+      if (prevPack && nextPack && !prevPack.opened && nextPack.opened) {
+        const prevCards = Array.isArray(prevPack.cards) ? prevPack.cards : [];
+        const nextCards = Array.isArray(nextPack.cards) ? nextPack.cards : [];
+        const chosenCard = prevCards.find((c: any) => !nextCards.some((nc: any) => nc.id === c.id));
+        const cardDisplay = chosenCard
+          ? `${formatSuitSymbol(chosenCard.suit)}${chosenCard.rank}`
+          : "カード";
+
+        events.push(
+          createEvent(
+            "ACTION_RESOLVED",
+            `[カード公開] ${pName} がパックから ${cardDisplay} を公開しました`,
+            "action",
+            {
+              actorPlayerId: pKey as PlayerKey,
+              actorName: pName,
+            }
+          )
+        );
+      }
+    }
+
     return events;
   }
 }

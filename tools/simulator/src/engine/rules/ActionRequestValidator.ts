@@ -8,6 +8,7 @@ import {
   evaluateRequestTargetCondition,
   evaluatePlayerTargetCondition,
 } from "./targetConditionUtils";
+import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -118,6 +119,17 @@ export class ActionRequestValidator {
             `アクション '${action.id}' はこのターンすでに上限回数 (${max}回) 使用されています。`
           );
         }
+      }
+    }
+
+    // 0.1.0 起動条件 (activationCondition) の検証
+    if (action.activationCondition) {
+      const condResult = ActionActivationConditionEvaluator.evaluate(
+        action.activationCondition,
+        context
+      );
+      if (!condResult.isLegal) {
+        throw new ValidationError(condResult.reason || "起動条件を満たしていません。");
       }
     }
 

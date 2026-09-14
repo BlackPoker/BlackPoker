@@ -1,5 +1,5 @@
 import { RulePackage, ActionDefinition, ComponentDefinition } from "../../domain/rules/RulePackage";
-import { FormatDefinition, RegulationDefinition } from "../../domain/regulation/RegulationDefinition";
+import { FormatDefinition, FrameDefinition, RegulationDefinition } from "../../domain/regulation/RegulationDefinition";
 
 /**
  * 公式レギュレーション / フォーマット定義に基づき、許可されたアクション・コンポーネントのみに
@@ -7,16 +7,20 @@ import { FormatDefinition, RegulationDefinition } from "../../domain/regulation/
  */
 export class RegulationRulePackageSelector {
   /**
-   * fullRulePackage から、指定フォーマットで利用可能な Actions および Components を選択した
+   * fullRulePackage から、指定フォーマットおよびフレームで利用可能な Actions および Components を選択した
    * 派生 RulePackage を生成します。
    */
   public static selectRulePackage(
     fullRulePackage: RulePackage,
     format: FormatDefinition,
-    regulation?: RegulationDefinition
+    regulation?: RegulationDefinition,
+    frame?: FrameDefinition
   ): RulePackage {
     const actionMap = new Map(fullRulePackage.actions.map((a) => [a.id, a]));
-    const filteredActions = format.actions
+    const combinedActionIds = Array.from(
+      new Set([...format.actions, ...(frame?.actions || [])])
+    );
+    const filteredActions = combinedActionIds
       .map((id) => actionMap.get(id))
       .filter((a): a is ActionDefinition => a !== undefined);
 

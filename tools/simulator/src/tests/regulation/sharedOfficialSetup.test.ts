@@ -126,7 +126,7 @@ describe("Shared Official Regulation Match Setup Tests (Phase 2.4)", () => {
       OfficialRegulationMatchSetup.verifyCardConservation(
         "p1",
         brokenPlayer,
-        validation.frame!.deck.cards
+        (validation.frame!.deck as any).cards
       );
     }).toThrow("Card conservation violated");
   });

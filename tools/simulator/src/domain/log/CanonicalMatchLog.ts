@@ -25,9 +25,10 @@ export type CanonicalGameEventType =
   | "turn.changed"
   | "chance.changed"
   | "player.passed"
-  | "card.moved";
+  | "card.moved"
+  | "card.revealed";
 
-export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life";
+export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack";
 
 export type CardLocation =
   | {
@@ -210,6 +211,17 @@ export interface CardMovedEvent extends CanonicalGameEventBase {
   };
 }
 
+export interface CardRevealedEvent extends CanonicalGameEventBase {
+  readonly type: "card.revealed";
+  readonly cardId: string;
+  readonly suit: string;
+  readonly rank: string;
+  readonly value?: number;
+  readonly revealedBy: string;
+  readonly revealedTo: "all" | string;
+  readonly fromZone: "pack" | CardZoneName;
+}
+
 export type CanonicalGameEvent =
   | MatchStartedEvent
   | MatchFinishedEvent
@@ -228,7 +240,8 @@ export type CanonicalGameEvent =
   | TurnChangedEvent
   | ChanceChangedEvent
   | PlayerPassedEvent
-  | CardMovedEvent;
+  | CardMovedEvent
+  | CardRevealedEvent;
 
 export interface CanonicalMatchLogMeta {
   readonly matchId: string;

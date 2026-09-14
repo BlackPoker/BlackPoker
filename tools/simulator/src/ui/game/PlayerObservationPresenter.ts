@@ -1,5 +1,5 @@
 import { PlayerKey } from "../../domain/decision/DecisionSource";
-import { PlayerObservation, PlayerObservationView } from "../../domain/decision/PlayerObservation";
+import { PlayerObservation, PlayerObservationView, PackView } from "../../domain/decision/PlayerObservation";
 import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 
 export interface PlayerBoardViewModel {
@@ -23,6 +23,8 @@ export interface PlayerBoardViewModel {
   readonly graveTopCard?: any;
   readonly graveCards: readonly any[];
   readonly canViewFullGrave: boolean;
+  // Pack
+  readonly pack?: PackView;
 }
 
 /**
@@ -64,6 +66,7 @@ export class PlayerObservationPresenter {
         graveCount: 0,
         graveCards: [],
         canViewFullGrave: playerKey === viewerPlayerId,
+        pack: undefined,
       };
     }
 
@@ -83,6 +86,7 @@ export class PlayerObservationPresenter {
       graveTopCard: obsPlayer.graveTopCard,
       graveCards: obsPlayer.grave,
       canViewFullGrave: obsPlayer.canViewFullGrave,
+      pack: obsPlayer.pack,
     };
   }
 }

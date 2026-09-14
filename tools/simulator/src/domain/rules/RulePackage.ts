@@ -8,6 +8,16 @@ export type RulePackage = {
   components: ComponentDefinition[];
 };
 
+export interface ActionActivationCondition {
+  readonly zoneState?: {
+    readonly player?: "controller" | "opponent" | "turnPlayer" | "self" | string;
+    readonly zone: string;
+    readonly property: string;
+    readonly equals?: any;
+    readonly notEquals?: any;
+  };
+}
+
 export type ActionDefinition = {
   id: string;
   name: string;
@@ -38,6 +48,7 @@ export type ActionDefinition = {
     condition?: Record<string, any>;
     [key: string]: any;
   }>;
+  activationCondition?: ActionActivationCondition;
   text?: {
     effect?: string;
     ability?: string;

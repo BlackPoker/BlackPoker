@@ -24,17 +24,26 @@ export interface CardDefinition {
 
 /**
  * フレームデッキ定義 (Frame Deck Definition)
+ * - fixed: 固定枚数・固定カード構成（例: entry16）
+ * - constructed: プレイヤー構築デッキ（例: pack、40枚以上）
  */
-export interface FrameDeckDefinition {
-  readonly cardCount: number;
-  readonly cards: readonly CardDefinition[];
-}
+export type FrameDeckDefinition =
+  | {
+      readonly type: "fixed";
+      readonly cardCount: number;
+      readonly cards: readonly CardDefinition[];
+    }
+  | {
+      readonly type: "constructed";
+      readonly minCards: number;
+    };
 
 /**
  * フレームセットアップ定義 (Frame Setup Definition)
  */
 export interface FrameSetupDefinition {
   readonly initialHandCount: number;
+  readonly packCount?: number;
   readonly preset: {
     readonly bulwarkCount: number;
     readonly soldierCount: number;
@@ -43,7 +52,7 @@ export interface FrameSetupDefinition {
 
 /**
  * フレーム定義 (Frame Definition)
- * 例: "entry16" (エントリー16)
+ * 例: "entry16" (エントリー16), "pack" (パック)
  *
  * 【公式ルール第9.1.2版 2.3 & 8.3.1】
  * ルール上はどのフォーマットとも組み合わせ可能ですが、公式に推奨されるフォーマット一覧を
@@ -53,10 +62,12 @@ export interface FrameDefinition {
   readonly id: string;
   readonly name: string;
   readonly description?: string;
-  /** 公式に推奨されるフォーマットID一覧 (エントリー16は ["light"]) */
+  /** 公式に推奨されるフォーマットID一覧 (エントリー16は ["light"], パックは ["light", "standard"]) */
   readonly recommendedFormatIds: readonly string[];
   readonly deck: FrameDeckDefinition;
   readonly setup: FrameSetupDefinition;
+  /** フレーム固有アクションID一覧 (例: パックフレームの ["action.packOpen"]) */
+  readonly actions?: readonly string[];
 }
 
 /**

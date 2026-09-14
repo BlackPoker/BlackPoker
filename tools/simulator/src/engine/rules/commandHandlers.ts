@@ -961,4 +961,181 @@ export function judgeDamageHandler(
   };
 }
 
+/**
+ * moveCard: カードのゾーン間移動
+ */
+export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    let cardToMove = args.card ?? args.target;
+    if (typeof cardToMove === "string") {
+      if (cardToMove.startsWith("selection.")) {
+        const selId = cardToMove.replace("selection.", "");
+        const sel = context.selections?.[selId];
+        cardToMove = Array.isArray(sel) ? sel[0] : sel;
+      } else if (cardToMove.startsWith("$")) {
+        const selId = cardToMove.slice(1);
+        const sel = context.selections?.[selId];
+        cardToMove = Array.isArray(sel) ? sel[0] : sel;
+      } else if (context.selections && context.selections[cardToMove] !== undefined) {
+        const sel = context.selections[cardToMove];
+        cardToMove = Array.isArray(sel) ? sel[0] : sel;
+      }
+    }
+
+    const fromZone = args.from;
+    const toZone = args.to;
+    const playerKey = args.player === "opponent"
+      ? getOpponentPlayerKey(context.playerKey, context.state)
+      : context.playerKey;
+    const player = context.state.players?.[playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${playerKey}`);
+
+    let sourceCards: any[] | undefined;
+    if (fromZone === "pack") {
+      sourceCards = player.pack?.cards;
+    } else if (fromZone === "hand") {
+      sourceCards = player.hand;
+    } else if (fromZone === "grave") {
+      sourceCards = player.grave;
+    } else if (fromZone === "life") {
+      sourceCards = player.life?.cards;
+    } else {
+      throw new Error(`moveCard: 未対応の移動元ゾーンです (${fromZone})`);
+    }
+
+    if (!Array.isArray(sourceCards)) {
+      throw new Error(`moveCard: 移動元ゾーン '${fromZone}' にカード配列が存在しません`);
+    }
+
+    const cardId = typeof cardToMove === "object" && cardToMove !== null ? cardToMove.id : cardToMove;
+    const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c === cardToMove));
+    if (cardIdx === -1) {
+      throw new Error(`moveCard: 移動元ゾーン '${fromZone}' に対象カードが見つかりません: ${cardId}`);
+    }
+
+    const [actualCard] = sourceCards.splice(cardIdx, 1);
+    if (fromZone === "pack" && player.pack) {
+      player.pack.count = player.pack.cards?.length ?? 0;
+    }
+
+    let destCards: any[] | undefined;
+    if (toZone === "hand") {
+      if (!Array.isArray(player.hand)) player.hand = [];
+      destCards = player.hand;
+    } else if (toZone === "grave") {
+      if (!Array.isArray(player.grave)) player.grave = [];
+      destCards = player.grave;
+    } else if (toZone === "pack") {
+      if (!player.pack) player.pack = { count: 0, opened: false, cards: [] };
+      if (!Array.isArray(player.pack.cards)) player.pack.cards = [];
+      destCards = player.pack.cards;
+    } else if (toZone === "life") {
+      if (!player.life) player.life = { cards: [] };
+      if (!Array.isArray(player.life.cards)) player.life.cards = [];
+      destCards = player.life.cards;
+    } else {
+      throw new Error(`moveCard: 未対応の移動先ゾーンです (${toZone})`);
+    }
+
+    destCards.push(actualCard);
+    if (toZone === "pack" && player.pack) {
+      player.pack.count = player.pack.cards?.length ?? 0;
+    }
+
+    if (effectInterpreter) {
+      effectInterpreter.dispatchEvent(
+        {
+          type: "cardMoved",
+          payload: {
+            card: actualCard,
+            fromZone,
+            toZone,
+            playerKey,
+            cause: {
+              type: "effect",
+              actionId: context.currentAction?.id || context.currentRequest?.actionId,
+              requestId: context.currentRequest?.id,
+            },
+          },
+        },
+        context
+      );
+    }
+  };
+}
+
+/**
+ * setZoneState: ゾーンの状態プロパティを更新
+ */
+export function setZoneStateHandler(): CommandHandler {
+  return (args, context) => {
+    const { player: playerSpec = "controller", zone, property, value } = args;
+    const playerKey = playerSpec === "opponent"
+      ? getOpponentPlayerKey(context.playerKey, context.state)
+      : context.playerKey;
+    const player = context.state.players?.[playerKey];
+    if (!player) throw new Error(`プレイヤーが見つかりません: ${playerKey}`);
+
+    const targetZone = player[zone];
+    if (targetZone === undefined || targetZone === null) {
+      throw new Error(`setZoneState: ゾーン '${zone}' が見つかりません`);
+    }
+
+    if (typeof property !== "string" || property.includes(".")) {
+      throw new Error(`setZoneState: 不正なプロパティ名です: ${property}`);
+    }
+
+    targetZone[property] = value;
+  };
+}
+
+/**
+ * revealCard: カードの一過性公開イベントを発行
+ */
+export function revealCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    let cardToReveal = args.card ?? args.selection ?? args.target;
+    if (typeof cardToReveal === "string") {
+      if (cardToReveal.startsWith("selection.")) {
+        const selId = cardToReveal.replace("selection.", "");
+        const sel = context.selections?.[selId];
+        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
+      } else if (cardToReveal.startsWith("$")) {
+        const selId = cardToReveal.slice(1);
+        const sel = context.selections?.[selId];
+        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
+      } else if (context.selections && context.selections[cardToReveal] !== undefined) {
+        const sel = context.selections[cardToReveal];
+        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
+      }
+    }
+
+    let actualCard = cardToReveal;
+    if (typeof cardToReveal === "string") {
+      const player = context.state.players?.[context.playerKey];
+      if (player) {
+        const inPack = player.pack?.cards?.find((c: any) => c.id === cardToReveal);
+        const inHand = player.hand?.find((c: any) => c.id === cardToReveal);
+        const inLife = player.life?.cards?.find((c: any) => c.id === cardToReveal);
+        actualCard = inPack || inHand || inLife || { id: cardToReveal };
+      }
+    }
+
+    const target = args.target || "all";
+    const event = {
+      type: "cardRevealed",
+      payload: {
+        playerKey: context.playerKey,
+        target,
+        card: actualCard,
+        sourceZone: args.sourceZone || "pack",
+      },
+    };
+
+    if (effectInterpreter) {
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
 

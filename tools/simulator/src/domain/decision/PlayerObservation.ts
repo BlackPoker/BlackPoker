@@ -42,6 +42,13 @@ export interface FogView {
   readonly ownerPlayerId?: PlayerKey;
 }
 
+export interface PackView {
+  readonly count: number;
+  readonly opened: boolean;
+  readonly cards: readonly CardView[];
+  readonly canViewCards: boolean;
+}
+
 export interface PlayerObservationView {
   readonly playerId: PlayerKey;
   readonly name: string;
@@ -65,6 +72,7 @@ export interface PlayerObservationView {
   readonly graveTopCard?: CardView;
   readonly grave: readonly (UnitView | CardView)[];
   readonly canViewFullGrave: boolean;
+  readonly pack?: PackView;
 }
 
 export interface RequestView {

@@ -265,6 +265,8 @@ export class EffectInterpreter {
       cardPool = Array.isArray(player.hand) ? [...player.hand] : [];
     } else if (zone === "grave") {
       cardPool = Array.isArray(player.grave) ? [...player.grave] : [];
+    } else if (zone === "pack") {
+      cardPool = Array.isArray(player.pack?.cards) ? [...player.pack.cards] : [];
     }
 
     // 候補カードの絞り込み

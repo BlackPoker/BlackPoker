@@ -34,6 +34,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 }) => {
   const [showGraveModal, setShowGraveModal] = useState(initialShowGraveModal);
   const [showFogModal, setShowFogModal] = useState(false);
+  const [showPackModal, setShowPackModal] = useState(false);
 
   // 全ての表示情報は ViewModel のみを正とする (fail-closed)
   const name = viewModel.name;
@@ -48,6 +49,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const canViewFullGrave = viewModel.canViewFullGrave;
   const playerFog = viewModel.fog;
   const isViewer = viewModel.isViewer;
+  const pack = viewModel.pack;
 
   // 墓地トップカードの表示用バッジ
   const graveTopText = viewModel.graveTopCard
@@ -71,6 +73,16 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       onClick: () => setShowGraveModal(true),
     },
   ];
+
+  if (pack) {
+    zoneItems.push({
+      id: "pack",
+      label: "PACK",
+      count: pack.count,
+      badge: pack.opened ? "開封済" : "未開封",
+      onClick: () => setShowPackModal(true),
+    });
+  }
 
   // フィールドユニットの兵士・防壁分離
   const soldierUnits = fieldUnits.filter(
@@ -228,6 +240,43 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
                   ))
                 ) : (
                   <div className="text-xs text-zinc-500 italic py-4 w-full text-center">墓地は空です</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showPackModal && pack && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-4 max-w-sm w-full shadow-xl">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-bold text-sm text-zinc-900 font-mono">
+                {`${name} のパック (${pack.opened ? "開封済" : "未開封"})`}
+              </h3>
+              <button
+                onClick={() => setShowPackModal(false)}
+                className="text-zinc-500 hover:text-zinc-800 text-xs px-2 py-1 rounded bg-zinc-100"
+              >
+                閉じる
+              </button>
+            </div>
+
+            {!pack.canViewCards ? (
+              <div className="flex flex-col gap-2 p-2 bg-zinc-50 rounded border border-zinc-200">
+                <div className="text-xs text-zinc-600 font-mono">
+                  {`総枚数: `}<span className="font-bold text-zinc-950">{`${pack.count} 枚`}</span>
+                  {!pack.opened ? "（未開封のため非公開）" : "（相手のパックの中身は非公開）"}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-1.5 max-h-60 overflow-y-auto p-2 bg-zinc-50 rounded border border-zinc-200">
+                {pack.cards.length > 0 ? (
+                  pack.cards.map((c: any, i: number) => (
+                    <CardView key={c.id || c.cardInstanceId || i} card={c} size="sm" />
+                  ))
+                ) : (
+                  <div className="text-xs text-zinc-500 italic py-4 w-full text-center">パックは空です</div>
                 )}
               </div>
             )}

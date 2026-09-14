@@ -20,6 +20,9 @@ import {
   setAllUnitStateHandler,
   discardCardsHandler,
   mountUnitHandler,
+  moveCardHandler,
+  setZoneStateHandler,
+  revealCardHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -918,6 +921,25 @@ export class CommandRegistry {
           : undefined,
       });
     }
+    if (logRecorder && event?.type === "cardRevealed" && event.payload?.card?.id) {
+      const p = event.payload;
+      const stateVersion =
+        p.stateVersion ??
+        context?.state?.stateVersion ??
+        context?.state?.version ??
+        1;
+      logRecorder.record({
+        type: "card.revealed",
+        stateVersion,
+        cardId: p.card.id,
+        suit: p.card.suit,
+        rank: p.card.rank,
+        value: p.card.value,
+        revealedBy: p.playerKey,
+        revealedTo: p.target || "opponent",
+        fromZone: p.sourceZone || "pack",
+      });
+    }
     for (const l of this.eventListeners) {
       l(event);
     }
@@ -957,5 +979,8 @@ export class CommandRegistry {
     this.register("setAllUnitState", setAllUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("discardCards", discardCardsHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("mountUnit", mountUnitHandler(this.effectInterpreter));
+    this.register("moveCard", moveCardHandler(this.effectInterpreter));
+    this.register("setZoneState", setZoneStateHandler());
+    this.register("revealCard", revealCardHandler(this.effectInterpreter));
   }
 }

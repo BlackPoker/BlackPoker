@@ -4,6 +4,7 @@ description: 公式BlackPoker エントリー16フレーム (第9.1.2版 8.3.1.1
 recommendedFormatIds:
   - light
 deck:
+  type: fixed
   cardCount: 16
   cards:
     - suit: S

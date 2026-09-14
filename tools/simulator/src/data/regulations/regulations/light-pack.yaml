@@ -1,0 +1,6 @@
+id: light-pack
+name: ライト + パック
+formatId: light
+frameId: pack
+sourceRulesVersion: 9.1.2
+description: 公式BlackPoker 推奨対戦レギュレーション (ライトフォーマット + パックフレーム)

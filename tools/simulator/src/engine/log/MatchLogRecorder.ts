@@ -51,7 +51,7 @@ export function normalizeCardLocation(
     };
   }
 
-  const validZones: CardZoneName[] = ["hand", "field", "grave", "fog", "life"];
+  const validZones: CardZoneName[] = ["hand", "field", "grave", "fog", "life", "pack"];
   if (validZones.includes(rawZoneStr as CardZoneName)) {
     return {
       kind: "zone",

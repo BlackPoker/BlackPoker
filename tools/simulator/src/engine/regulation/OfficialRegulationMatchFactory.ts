@@ -63,7 +63,8 @@ export class OfficialRegulationMatchFactory {
                 (await import("path")).resolve(__dirname, "../../data/rules-vnext")
               )),
             format,
-            regulation
+            regulation,
+            frame
           );
 
     // セットアップ実行
@@ -137,7 +138,8 @@ export class OfficialRegulationMatchFactory {
       const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(
         preloaded.fullRulePackage,
         validation.format!,
-        validation.regulation!
+        validation.regulation!,
+        validation.frame!
       );
 
       const outcome = OfficialRegulationMatchFactory.setupMatch(

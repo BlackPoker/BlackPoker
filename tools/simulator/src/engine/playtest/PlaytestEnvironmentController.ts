@@ -5,6 +5,7 @@ import { validatePlaytestPreset } from "../session/playtest/validatePlaytestPres
 import { RegulationValidator } from "../regulation/RegulationValidator";
 import { RegulationRulePackageSelector } from "../regulation/RegulationRulePackageSelector";
 import { OfficialRegulationMatchSetup } from "../regulation/OfficialRegulationMatchSetup";
+import { SimulatorDeckProfileResolver } from "../regulation/SimulatorDeckProfileResolver";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../session/playtest/createCoreBattlePlaytest";
 import { MatchSetupCoordinator } from "../session/setup/MatchSetupCoordinator";
 import { getPlaytestRulePackage } from "../rules/RulePackageSelector";
@@ -68,6 +69,7 @@ export interface EnvironmentOption {
   readonly name: string;
   readonly isOfficial: boolean;
   readonly regulationId?: string;
+  readonly deckProfileNotice?: string;
 }
 
 /**
@@ -148,11 +150,16 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
   for (const reg of catalog.regulations.values()) {
     const validation = RegulationValidator.validateRegulation(catalog, reg.id);
     if (validation.simulatorImplemented) {
+      const deckProfileNotice = SimulatorDeckProfileResolver.getDeckProfileNotice(
+        reg.id,
+        validation.frame?.id
+      );
       options.push({
         id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
         name: `${reg.name} (公式)`,
         isOfficial: true,
         regulationId: reg.id,
+        deckProfileNotice,
       });
     }
   }
@@ -410,7 +417,8 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
       const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(
         request.fullRulePackage,
         validation.format!,
-        validation.regulation!
+        validation.regulation!,
+        validation.frame!
       );
 
       const outcome = OfficialRegulationMatchSetup.setupMatch(

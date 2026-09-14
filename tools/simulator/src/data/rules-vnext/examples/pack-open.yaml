@@ -1,0 +1,40 @@
+actions:
+  - id: action.packOpen
+    name: パック開封
+    ruby: ぱっくかいふう
+    type: packOperation
+
+    request:
+      trigger: direct
+      speed: immediate
+      timing: quick
+
+    activationCondition:
+      zoneState:
+        player: controller
+        zone: pack
+        property: opened
+        equals: false
+
+    text:
+      summary: 未開封のパックから好きなカードを1枚選び対戦相手に見せ手札に加える。
+      effect: パックの中から好きなカードを1枚選ぶ。そのカードを対戦相手に見せ、手札に加える。パックを表向きにし、開封済みとする。
+
+    effect:
+      - selectCards:
+          id: chosenPackCard
+          zone: pack
+          count: 1
+          chooser: controller
+      - revealCard:
+          selection: chosenPackCard
+          target: opponent
+      - moveCard:
+          from: pack
+          to: hand
+          card: selection.chosenPackCard
+      - setZoneState:
+          player: controller
+          zone: pack
+          property: opened
+          value: true

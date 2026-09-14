@@ -15,6 +15,7 @@ import { SeededRandom, RandomSource } from "../random/RandomSource";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { rankToValue, matchesRank } from "../rules/cardUtils";
+import { SimulatorDeckProfileResolver } from "./SimulatorDeckProfileResolver";
 
 export interface InGameCard {
   readonly id: string;
@@ -121,6 +122,18 @@ export function verifyCardConservation(
       }
     }
   }
+  // Pack
+  if (player.pack && Array.isArray(player.pack.cards)) {
+    cards.push(...player.pack.cards);
+  }
+  // Fog (キーカード等のカードオブジェクト)
+  if (Array.isArray(player.fog)) {
+    for (const fogEntry of player.fog) {
+      if (fogEntry.card && fogEntry.card.id) {
+        cards.push(fogEntry.card);
+      }
+    }
+  }
 
   if (cards.length !== expectedDeck.length) {
     throw new Error(
@@ -171,9 +184,12 @@ export class OfficialRegulationMatchSetup {
     const p1Name = options?.playerNames?.p1 || "Player A";
     const p2Name = options?.playerNames?.p2 || "Player B";
 
-    // 1. フレーム定義から P1, P2 の固定16枚デッキを生成 (ID 一意化)
+    // 1. デッキプロファイル解決 (SSOT) から P1, P2 のデッキを生成 (ID 一意化)
+    const deckProfile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, regulation.id);
+    const expectedDeck = deckProfile.cards;
+
     const buildDeck = (playerKey: PlayerKey): InGameCard[] =>
-      frame.deck.cards.map((c) => ({
+      expectedDeck.map((c) => ({
         id: `${playerKey}-c-${c.suit}${c.rank}`,
         suit: c.suit,
         rank: c.rank,
@@ -190,7 +206,25 @@ export class OfficialRegulationMatchSetup {
     const p1Shuffled = shuffleCards(p1RawDeck, p1Rng);
     const p2Shuffled = shuffleCards(p2RawDeck, p2Rng);
 
-    // 3. デッキ全体を Life として伏せる (Deck は Zone ではない)
+    // 3. 初期配置 (8.3.1.1 vs 8.3.1.2)
+    // packCount が指定されている場合: 上から packCount 枚を取り除いて伏せた Pack とし、残りを Life とする
+    let p1Pack: any = undefined;
+    let p2Pack: any = undefined;
+    let p1Life: InGameCard[];
+    let p2Life: InGameCard[];
+
+    if (frame.setup.packCount !== undefined && frame.setup.packCount > 0) {
+      const p1PackCards = p1Shuffled.slice(0, frame.setup.packCount);
+      const p2PackCards = p2Shuffled.slice(0, frame.setup.packCount);
+      p1Pack = { count: p1PackCards.length, opened: false, cards: p1PackCards };
+      p2Pack = { count: p2PackCards.length, opened: false, cards: p2PackCards };
+      p1Life = p1Shuffled.slice(frame.setup.packCount);
+      p2Life = p2Shuffled.slice(frame.setup.packCount);
+    } else {
+      p1Life = p1Shuffled;
+      p2Life = p2Shuffled;
+    }
+
     // Setup Draft 時点ではゲーム開始情報を確定させず、未開始状態 (Pregame State) とする
     const state: any = {
       stateVersion: 1,
@@ -208,21 +242,23 @@ export class OfficialRegulationMatchSetup {
       players: {
         p1: {
           name: p1Name,
-          life: p1Shuffled,
+          life: p1Life,
           hand: [],
           field: [],
           grave: [],
           fog: [],
           trump: [],
+          pack: p1Pack,
         },
         p2: {
           name: p2Name,
-          life: p2Shuffled,
+          life: p2Life,
           hand: [],
           field: [],
           grave: [],
           fog: [],
           trump: [],
+          pack: p2Pack,
         },
       },
     };
@@ -340,8 +376,8 @@ export class OfficialRegulationMatchSetup {
     }
 
     // 8. カード保存則検証
-    verifyCardConservation("p1", p1, frame.deck.cards);
-    verifyCardConservation("p2", p2, frame.deck.cards);
+    verifyCardConservation("p1", p1, expectedDeck);
+    verifyCardConservation("p2", p2, expectedDeck);
 
     return {
       type: "READY",

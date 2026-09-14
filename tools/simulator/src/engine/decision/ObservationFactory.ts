@@ -5,6 +5,7 @@ import {
   UnitView,
   FogView,
   RequestView,
+  PackView,
 } from "../../domain/decision/PlayerObservation";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { AbilityEvaluator } from "../rules/AbilityEvaluator";
@@ -86,6 +87,31 @@ export class ObservationFactory {
           ? [graveTopCard]
           : [];
 
+        // 7. パックの処理（未開封時は両者非公開、開封済時はオーナーのみKNOWN、相手はHIDDEN）
+        let pack: PackView | undefined = undefined;
+        if (p.pack) {
+          const rawPack = p.pack;
+          const opened = rawPack.opened === true;
+          const rawCards = Array.isArray(rawPack.cards) ? rawPack.cards : [];
+          const count = typeof rawPack.count === "number" ? rawPack.count : rawCards.length;
+
+          if (!opened) {
+            pack = {
+              count,
+              opened: false,
+              cards: [],
+              canViewCards: false,
+            };
+          } else {
+            pack = {
+              count,
+              opened: true,
+              cards: isViewer ? rawCards.map((c: any) => this.mapCard(c, true)) : [],
+              canViewCards: isViewer,
+            };
+          }
+        }
+
         playersView.push({
           playerId: pKey as PlayerKey,
           name: p.name || pKey,
@@ -101,6 +127,7 @@ export class ObservationFactory {
           graveTopCard,
           grave,
           canViewFullGrave: isViewer,
+          pack,
         });
       }
     }

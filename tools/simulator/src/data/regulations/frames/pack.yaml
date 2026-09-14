@@ -1,0 +1,17 @@
+id: pack
+name: パック
+description: 公式BlackPoker パックフレーム (第9.1.2版 8.3.1.2)
+recommendedFormatIds:
+  - light
+  - standard
+actions:
+  - action.packOpen
+deck:
+  type: constructed
+  minCards: 40
+setup:
+  packCount: 14
+  initialHandCount: 7
+  preset:
+    bulwarkCount: 1
+    soldierCount: 1
