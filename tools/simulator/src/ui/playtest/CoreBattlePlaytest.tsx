@@ -559,8 +559,10 @@ export const CoreBattlePlaytest: React.FC = () => {
         prevState
       );
 
+      const prevLogEventCount = session.logRecorder.getMatchLog().events.length;
       let nextStep = session.submitDecision(response);
       let nextState = JSON.parse(JSON.stringify(session.state));
+      const newCanonicalEvents = session.logRecorder.getMatchLog().events.slice(prevLogEventCount);
 
       // 受理された Human 意思決定を記録
       if (currentStep?.type === "WAITING_FOR_DECISION") {
@@ -582,7 +584,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       const generatedEvents = ViewerAwareGameEventFormatter.formatStateTransition(
         prevState,
         nextState,
-        viewer
+        viewer,
+        newCanonicalEvents
       );
       for (const ev of generatedEvents) {
         addLog(ev.message, ev.level, nextState);
@@ -613,8 +616,10 @@ export const CoreBattlePlaytest: React.FC = () => {
             stateVersion: autoPassRequest.stateVersion,
             selectedPatternRef: autoPassIndex,
           };
+          const autoPassPrevLogCount = session.logRecorder.getMatchLog().events.length;
           nextStep = session.submitDecision(autoPassResponse);
           nextState = JSON.parse(JSON.stringify(session.state));
+          const autoPassNewCanonicalEvents = session.logRecorder.getMatchLog().events.slice(autoPassPrevLogCount);
 
           // 受理された AutoPass 意思決定を記録
           const entry = createDecisionTranscriptEntry(decisionSeqRef.current++, {
@@ -629,7 +634,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           const autoEvents = ViewerAwareGameEventFormatter.formatStateTransition(
             prevState,
             nextState,
-            viewer
+            viewer,
+            autoPassNewCanonicalEvents
           );
           for (const ev of autoEvents) {
             addLog(ev.message, ev.level, nextState);

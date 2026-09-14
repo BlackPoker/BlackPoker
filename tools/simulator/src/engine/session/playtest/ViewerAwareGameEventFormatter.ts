@@ -3,6 +3,10 @@ import { getUnitDisplayName } from "../../rules/characterUtils";
 import { formatSuitSymbol } from "../../rules/cardUtils";
 import { PlayerKey } from "../../../domain/decision/DecisionSource";
 import {
+  CanonicalGameEvent,
+  CardRevealedEvent,
+} from "../../../domain/log/CanonicalMatchLog";
+import {
   PlaytestPresentationEvent,
   PlaytestPresentationEventKind,
   createDeterministicPresentationEventId,
@@ -32,7 +36,8 @@ export class ViewerAwareGameEventFormatter {
   static formatStateTransition(
     prevState: any,
     nextState: any,
-    viewerPlayerId?: PlayerKey
+    viewerPlayerId?: PlayerKey,
+    canonicalEvents?: readonly CanonicalGameEvent[]
   ): PlaytestPresentationEvent[] {
     const events: PlaytestPresentationEvent[] = [];
     if (!prevState || !nextState) return events;
@@ -530,28 +535,79 @@ export class ViewerAwareGameEventFormatter {
       }
     }
 
-    // 7. パック開封およびカード公開の検知
-    for (const pKey of ["p1", "p2"]) {
-      const prevPack = prevState.players?.[pKey]?.pack;
-      const nextPack = nextState.players?.[pKey]?.pack;
-      const pName = getPlayerName(pKey);
+    // 7. Canonical Game Event（一過性公開カードなど）の汎用統合
+    if (canonicalEvents && canonicalEvents.length > 0) {
+      const canonicalPresentationEvents = this.formatCanonicalEvents(
+        canonicalEvents,
+        nextState,
+        viewerPlayerId,
+        localIndex
+      );
+      events.push(...canonicalPresentationEvents);
+    }
 
-      if (prevPack && nextPack && !prevPack.opened && nextPack.opened) {
-        const prevCards = Array.isArray(prevPack.cards) ? prevPack.cards : [];
-        const nextCards = Array.isArray(nextPack.cards) ? nextPack.cards : [];
-        const chosenCard = prevCards.find((c: any) => !nextCards.some((nc: any) => nc.id === c.id));
-        const cardDisplay = chosenCard
-          ? `${formatSuitSymbol(chosenCard.suit)}${chosenCard.rank}`
-          : "カード";
+    return events;
+  }
+
+  /**
+   * Canonical Game Event 配列から、閲覧者視点に合わせたプレゼンテーションイベント配列を生成します。
+   * 現在は card.revealed（一過性カード公開イベント）に対応し、将来的にサーチや再会などの公開効果にも共通利用されます。
+   */
+  static formatCanonicalEvents(
+    canonicalEvents: readonly CanonicalGameEvent[],
+    state?: any,
+    _viewerPlayerId?: PlayerKey,
+    startIndex = 0
+  ): PlaytestPresentationEvent[] {
+    const events: PlaytestPresentationEvent[] = [];
+    if (!canonicalEvents || canonicalEvents.length === 0) return events;
+
+    const stateVersion = state?.stateVersion ?? state?.version ?? 1;
+    let localIndex = startIndex;
+
+    const createEvent = (
+      kind: PlaytestPresentationEventKind,
+      message: string,
+      level: "info" | "action" | "event" | "system",
+      extra: Partial<PlaytestPresentationEvent> = {}
+    ): PlaytestPresentationEvent => {
+      return {
+        id: createDeterministicPresentationEventId(stateVersion, localIndex++, kind),
+        stateVersion,
+        kind,
+        message,
+        level,
+        ...extra,
+      };
+    };
+
+    const getPlayerName = (pKey: string) => {
+      return state?.players?.[pKey]?.name || (pKey === "p1" ? "Player A" : "Player B");
+    };
+
+    for (const cev of canonicalEvents) {
+      if (cev.type === "card.revealed") {
+        const rev = cev as CardRevealedEvent;
+        const actorName = getPlayerName(rev.revealedBy);
+        const suitSymbol = formatSuitSymbol(rev.suit);
+        const cardDisplay = `${suitSymbol}${rev.rank}`;
+
+        const zoneNames: Record<string, string> = {
+          pack: "パック",
+          hand: "手札",
+          grave: "墓地",
+          life: "ライフ",
+        };
+        const zoneDisplay = zoneNames[rev.fromZone] || rev.fromZone;
 
         events.push(
           createEvent(
             "ACTION_RESOLVED",
-            `[カード公開] ${pName} がパックから ${cardDisplay} を公開しました`,
+            `[カード公開] ${actorName} が${zoneDisplay}から ${cardDisplay} を公開しました`,
             "action",
             {
-              actorPlayerId: pKey as PlayerKey,
-              actorName: pName,
+              actorPlayerId: rev.revealedBy,
+              actorName,
             }
           )
         );

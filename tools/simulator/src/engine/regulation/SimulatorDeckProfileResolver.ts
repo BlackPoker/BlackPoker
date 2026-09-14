@@ -72,8 +72,8 @@ export class SimulatorDeckProfileResolver {
     }
 
     if (frame.deck.type === "constructed") {
-      // Pack Frame / light-pack レギュレーション用の標準52枚 Fixture
-      if (frame.id === "pack" || regulationId === "light-pack") {
+      // 今回Simulatorで実装済みのconstructed profileは light-pack のみ
+      if (regulationId === "light-pack") {
         if (STANDARD_52_DECK_CARDS.length < frame.deck.minCards) {
           throw new Error(
             `標準52枚Fixtureのカード数 (${STANDARD_52_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
@@ -96,13 +96,13 @@ export class SimulatorDeckProfileResolver {
   }
 
   /**
-   * レギュレーションIDまたはフレームIDから、UI表示用の DeckProfile 案内文（Notice）を取得します。
+   * レギュレーションIDから、UI表示用の DeckProfile 案内文（Notice）を取得します。
    */
   public static getDeckProfileNotice(
     regulationId?: string,
-    frameId?: string
+    _frameId?: string
   ): string | undefined {
-    if (regulationId === "light-pack" || frameId === "pack") {
+    if (regulationId === "light-pack") {
       return STANDARD_52_FIXTURE_NOTICE;
     }
     return undefined;

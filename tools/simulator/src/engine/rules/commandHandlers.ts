@@ -998,7 +998,7 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
     } else if (fromZone === "grave") {
       sourceCards = player.grave;
     } else if (fromZone === "life") {
-      sourceCards = player.life?.cards;
+      sourceCards = player.life;
     } else {
       throw new Error(`moveCard: 未対応の移動元ゾーンです (${fromZone})`);
     }
@@ -1007,10 +1007,17 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
       throw new Error(`moveCard: 移動元ゾーン '${fromZone}' にカード配列が存在しません`);
     }
 
-    const cardId = typeof cardToMove === "object" && cardToMove !== null ? cardToMove.id : cardToMove;
-    const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c === cardToMove));
+    const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
+    const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c.unitId === cardId || c === cardToMove));
     if (cardIdx === -1) {
       throw new Error(`moveCard: 移動元ゾーン '${fromZone}' に対象カードが見つかりません: ${cardId}`);
+    }
+
+    const candidate = sourceCards[cardIdx];
+    if (fromZone === "grave") {
+      if (candidate.unitId || Array.isArray(candidate.cards) || candidate.kind || !candidate.suit || !candidate.rank) {
+        throw new Error(`moveCard: 墓地内のUnit wrapperまたは未対応形式のエントリは移動できません: ${cardId}`);
+      }
     }
 
     const [actualCard] = sourceCards.splice(cardIdx, 1);
@@ -1030,9 +1037,8 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
       if (!Array.isArray(player.pack.cards)) player.pack.cards = [];
       destCards = player.pack.cards;
     } else if (toZone === "life") {
-      if (!player.life) player.life = { cards: [] };
-      if (!Array.isArray(player.life.cards)) player.life.cards = [];
-      destCards = player.life.cards;
+      if (!Array.isArray(player.life)) player.life = [];
+      destCards = player.life;
     } else {
       throw new Error(`moveCard: 未対応の移動先ゾーンです (${toZone})`);
     }

@@ -21,9 +21,17 @@ import {
   getAvailableEnvironments,
   startMatchAttempt,
 } from "../../engine/playtest/PlaytestEnvironmentController";
-import { reconstructMatch } from "../../engine/replay/ReplayReconstructionService";
+import {
+  reconstructMatch,
+  findUndoTruncationIndex,
+} from "../../engine/replay/ReplayReconstructionService";
 import { SimulationRunner } from "../../engine/simulation/SimulationRunner";
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy";
+import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory";
+import { ActionActivationConditionEvaluator } from "../../engine/rules/ActionActivationConditionEvaluator";
+import { moveCardHandler } from "../../engine/rules/commandHandlers";
+import { formatSuitSymbol } from "../../engine/rules/cardUtils";
+import type { CardRevealedEvent } from "../../domain/log/CanonicalMatchLog";
 import { SeededRandom } from "../../engine/random/RandomSource";
 import type { PlaytestDecisionTranscriptEntryV1 } from "../../ui/playtest/PlaytestDecisionTranscript";
 
@@ -293,7 +301,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test H: Replay Determinism
-  it("Test H: Replay Determinism - Identical reconstruct for light-pack", async () => {
+  it("Test H: Replay Determinism - Identical reconstruct for light-pack with PackOpen and Effect Selection", async () => {
     const browserCatalog = loadRegulationCatalogForBrowser();
     const browserRulePackage = loadRulePackageForBrowser();
 
@@ -310,29 +318,53 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
     let step = outcome.initialStep;
     const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
 
-    // Advance and make 3 decisions
-    for (let i = 0; i < 3; i++) {
-      while (step.type === "PROGRESSED") {
-        step = session.advance();
-      }
-      if (step.type !== "WAITING_FOR_DECISION") break;
-
-      const req = step.request;
-      const entry: PlaytestDecisionTranscriptEntryV1 = {
-        seq: transcript.length + 1,
-        actor: "human",
-        playerId: req.playerId as "p1" | "p2",
-        decisionId: req.decisionId,
-        stateVersion: req.stateVersion,
-        response: {
-          decisionId: req.decisionId,
-          stateVersion: req.stateVersion,
-          selectedPatternRef: 0,
-        },
-      };
-      transcript.push(entry);
-      step = session.submitDecision(entry.response);
+    while (step.type === "PROGRESSED") {
+      step = session.advance();
     }
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    const waitingStep = step;
+
+    // 1. PackOpen ACTION Decision
+    const packOpenIdx = waitingStep.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && waitingStep.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+    );
+    expect(packOpenIdx).toBeGreaterThanOrEqual(0);
+
+    const d1: PlaytestDecisionTranscriptEntryV1 = {
+      seq: 1,
+      actor: "human",
+      playerId: step.request.playerId as "p1" | "p2",
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      response: {
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: packOpenIdx,
+      },
+    };
+    transcript.push(d1);
+    step = session.submitDecision(d1.response);
+
+    // 2. Pack Card Pick EFFECT_RESOLUTION Decision
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step.request.source.type).toBe("EFFECT_RESOLUTION");
+    const selectedCardId = step.request.catalog.effectSelections[0]?.selectedValues[0];
+    expect(selectedCardId).toBeDefined();
+
+    const d2: PlaytestDecisionTranscriptEntryV1 = {
+      seq: 2,
+      actor: "human",
+      playerId: step.request.playerId as "p1" | "p2",
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      response: {
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: 0,
+      },
+    };
+    transcript.push(d2);
+    step = session.submitDecision(d2.response);
 
     // Reconstruct match
     const recon = reconstructMatch({
@@ -344,10 +376,42 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
     });
 
     expect(recon.status).toBe("SUCCESS");
+    if (recon.status !== "SUCCESS") throw new Error("Reconstruction failed");
+
+    // Comprehensive State comparison
+    const origState = session.state;
+    const reconState = recon.session.state;
+    const turnPlayer = d1.playerId;
+
+    // pack.opened, pack.count, card IDs and order
+    expect(reconState.players[turnPlayer].pack.opened).toBe(origState.players[turnPlayer].pack.opened);
+    expect(reconState.players[turnPlayer].pack.opened).toBe(true);
+    expect(reconState.players[turnPlayer].pack.count).toBe(origState.players[turnPlayer].pack.count);
+    expect(reconState.players[turnPlayer].pack.count).toBe(13);
+    const origPackCardIds = origState.players[turnPlayer].pack.cards.map((c: any) => c.id);
+    const reconPackCardIds = reconState.players[turnPlayer].pack.cards.map((c: any) => c.id);
+    expect(reconPackCardIds).toEqual(origPackCardIds);
+
+    // hand card IDs and order
+    const origHandCardIds = origState.players[turnPlayer].hand.map((c: any) => c.id);
+    const reconHandCardIds = reconState.players[turnPlayer].hand.map((c: any) => c.id);
+    expect(reconHandCardIds).toEqual(origHandCardIds);
+
+    // selected card identity
+    expect(origHandCardIds).toContain(selectedCardId);
+    expect(reconHandCardIds).toContain(selectedCardId);
+
+    // turnPlayer, chancePlayer, stateVersion
+    expect(reconState.turnPlayer).toBe(origState.turnPlayer);
+    expect(reconState.chancePlayer).toBe(origState.chancePlayer);
+    expect(reconState.stateVersion).toBe(origState.stateVersion);
+
+    // Full GameState comparison
+    expect(JSON.stringify(reconState.players)).toBe(JSON.stringify(origState.players));
   });
 
   // Test I: Undo
-  it("Test I: Undo reverts pack open state, hand cards, and pack count", async () => {
+  it("Test I: Undo reverts pack open state, hand cards, and pack count using findUndoTruncationIndex", async () => {
     const browserCatalog = loadRegulationCatalogForBrowser();
     const browserRulePackage = loadRulePackageForBrowser();
 
@@ -395,6 +459,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
     // Decision 2: Select Card from pack
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    const chosenCardId = step.request.catalog.effectSelections[0]?.selectedValues[0];
 
     const d2: PlaytestDecisionTranscriptEntryV1 = {
       seq: 2,
@@ -411,26 +476,54 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
     transcript.push(d2);
     step = session.submitDecision(d2.response);
 
-    // State after decision 2: pack is opened, 13 cards
+    // State after decision 2: pack is opened, 13 cards, hand contains chosen card
     const turnPlayer = d1.playerId;
     expect(session.state.players[turnPlayer].pack.opened).toBe(true);
     expect(session.state.players[turnPlayer].pack.count).toBe(13);
+    expect(session.state.players[turnPlayer].hand.some((c: any) => c.id === chosenCardId)).toBe(true);
 
-    // Now Undo back to before packOpen (0 decisions)
-    const undoRecon = reconstructMatch({
+    // 1. Undo decision 2 (card pick): findUndoTruncationIndex finds index 1
+    const undoCardPickIdx = findUndoTruncationIndex(transcript);
+    expect(undoCardPickIdx).toBe(1);
+    const undoCardPickTranscript = transcript.slice(0, undoCardPickIdx);
+
+    const reconAfterUndoPick = reconstructMatch({
       environmentId: "official:light-pack",
       seed: 42,
-      transcript: [],
+      transcript: undoCardPickTranscript,
       catalog: browserCatalog,
       fullRulePackage: browserRulePackage,
     });
+    expect(reconAfterUndoPick.status).toBe("SUCCESS");
+    if (reconAfterUndoPick.status !== "SUCCESS") throw new Error("Reconstruction failed");
 
-    expect(undoRecon.status).toBe("SUCCESS");
-    if (undoRecon.status !== "SUCCESS") throw new Error("Reconstruction failed");
-    const restoredPlayer = undoRecon.session.state.players[turnPlayer];
+    // After undoing card pick: pack is not yet opened, chosen card is not in hand, waiting for effect selection
+    const stateUndoPick = reconAfterUndoPick.session.state.players[turnPlayer];
+    expect(stateUndoPick.pack.opened).toBe(false);
+    expect(stateUndoPick.pack.count).toBe(14);
+    expect(stateUndoPick.hand.some((c: any) => c.id === chosenCardId)).toBe(false);
+
+    // 2. Undo decision 1 (packOpen action): findUndoTruncationIndex finds index 0
+    const undoActionIdx = findUndoTruncationIndex(undoCardPickTranscript);
+    expect(undoActionIdx).toBe(0);
+    const undoActionTranscript = undoCardPickTranscript.slice(0, undoActionIdx);
+    expect(undoActionTranscript.length).toBe(0);
+
+    const reconAfterUndoAction = reconstructMatch({
+      environmentId: "official:light-pack",
+      seed: 42,
+      transcript: undoActionTranscript,
+      catalog: browserCatalog,
+      fullRulePackage: browserRulePackage,
+    });
+    expect(reconAfterUndoAction.status).toBe("SUCCESS");
+    if (reconAfterUndoAction.status !== "SUCCESS") throw new Error("Reconstruction failed");
+
+    const restoredPlayer = reconAfterUndoAction.session.state.players[turnPlayer];
     expect(restoredPlayer.pack.opened).toBe(false);
     expect(restoredPlayer.pack.count).toBe(14);
     expect(restoredPlayer.pack.cards.length).toBe(14);
+    expect(restoredPlayer.hand.some((c: any) => c.id === chosenCardId)).toBe(false);
   });
 
   // Test J: UI 390px Density
@@ -601,42 +694,175 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test Q: Fixture Determinism
-  it("Test Q: Fixture Determinism - Same seed produces exact same deck, shuffle, and pack cards", async () => {
-    const s1 = await OfficialRegulationMatchFactory.createSession("light-pack", 12345, {
+  it("Test Q: Fixture Determinism - 3 paths (MatchFactory, startMatchAttempt, reconstructMatch) produce identical initial state", async () => {
+    const s1 = (
+      await OfficialRegulationMatchFactory.createSession("light-pack", 12345, {
+        catalog,
+        fullRulePackage: lightPackRulePackage,
+      })
+    ).state;
+
+    const outcome2 = startMatchAttempt({
+      environmentId: "official:light-pack",
+      seedInput: "12345",
       catalog,
       fullRulePackage: lightPackRulePackage,
     });
-    const s2 = await OfficialRegulationMatchFactory.createSession("light-pack", 12345, {
+    if (outcome2.type !== "READY") throw new Error("Expected READY");
+    const s2 = outcome2.session.state;
+
+    const recon3 = reconstructMatch({
+      environmentId: "official:light-pack",
+      seed: 12345,
+      transcript: [],
       catalog,
       fullRulePackage: lightPackRulePackage,
     });
+    if (recon3.status !== "SUCCESS") throw new Error("Expected SUCCESS");
+    const s3 = recon3.session.state;
+
+    // First player must match across all 3 paths
+    expect(s1.turnPlayer).toBe(s2.turnPlayer);
+    expect(s2.turnPlayer).toBe(s3.turnPlayer);
 
     for (const pKey of ["p1", "p2"]) {
-      const p1Cards = s1.state.players[pKey].pack.cards.map((c: any) => c.id);
-      const p2Cards = s2.state.players[pKey].pack.cards.map((c: any) => c.id);
-      expect(p1Cards).toEqual(p2Cards);
+      // Pack card IDs and order
+      const p1Pack = s1.players[pKey].pack.cards.map((c: any) => c.id);
+      const p2Pack = s2.players[pKey].pack.cards.map((c: any) => c.id);
+      const p3Pack = s3.players[pKey].pack.cards.map((c: any) => c.id);
+      expect(p2Pack).toEqual(p1Pack);
+      expect(p3Pack).toEqual(p1Pack);
+
+      // Life card IDs and order
+      const p1Life = s1.players[pKey].life.map((c: any) => c.id);
+      const p2Life = s2.players[pKey].life.map((c: any) => c.id);
+      const p3Life = s3.players[pKey].life.map((c: any) => c.id);
+      expect(p2Life).toEqual(p1Life);
+      expect(p3Life).toEqual(p1Life);
+
+      // Hand card IDs and order
+      const p1Hand = s1.players[pKey].hand.map((c: any) => c.id);
+      const p2Hand = s2.players[pKey].hand.map((c: any) => c.id);
+      const p3Hand = s3.players[pKey].hand.map((c: any) => c.id);
+      expect(p2Hand).toEqual(p1Hand);
+      expect(p3Hand).toEqual(p1Hand);
+
+      // Field preset cards
+      const p1Field = s1.players[pKey].field.map((u: any) => u.cards.map((c: any) => c.id));
+      const p2Field = s2.players[pKey].field.map((u: any) => u.cards.map((c: any) => c.id));
+      const p3Field = s3.players[pKey].field.map((u: any) => u.cards.map((c: any) => c.id));
+      expect(p2Field).toEqual(p1Field);
+      expect(p3Field).toEqual(p1Field);
     }
   });
 
   // Test R: AI Smoke
-  it("Test R: AI Smoke - FirstLegalPolicy and RandomPolicy can run light-pack match without throwing", async () => {
-    const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
-      catalog,
-      fullRulePackage: lightPackRulePackage,
-    });
+  it("Test R: AI Smoke - FirstLegal, SeededRandom, and ManualGenericGenome can process PackOpen EFFECT_RESOLUTION", async () => {
+    // 1. FirstLegalPolicy processes PackOpen EFFECT_RESOLUTION
+    {
+      const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
+        catalog,
+        fullRulePackage: lightPackRulePackage,
+      });
 
-    const rng = new SeededRandom(42);
-    const policies = {
-      p1: new FirstLegalPolicy(),
-      p2: new RandomPolicy(rng.fork(), "Random-P2"),
-    };
+      let step = session.advance();
+      if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
 
-    const result = SimulationRunner.run(session, policies, {
-      maxDecisions: 50,
-    });
+      const packOpenIdx = step.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+      );
+      const nextStep = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: packOpenIdx,
+      });
 
-    expect(result.totalDecisions).toBeGreaterThan(0);
-    expect(result.decisionTrace.length).toBeGreaterThan(0);
+      if (nextStep.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+      expect(nextStep.request.source.type).toBe("EFFECT_RESOLUTION");
+
+      const turnPlayer = step.request.playerId;
+      const firstLegal = new FirstLegalPolicy();
+      const decision = firstLegal.choose(nextStep.request);
+      expect(decision.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(decision.selectedPatternRef).toBeLessThan(nextStep.request.patterns.length);
+
+      const afterStep = session.submitDecision(decision);
+      expect(session.state.players[turnPlayer].pack.opened).toBe(true);
+      expect(session.state.players[turnPlayer].pack.count).toBe(13);
+      expect(session.state.players[turnPlayer].hand.length).toBe(9);
+      // Verify session can continue
+      expect(afterStep.type === "WAITING_FOR_DECISION" || afterStep.type === "PROGRESSED").toBe(true);
+    }
+
+    // 2. SeededRandom processes PackOpen EFFECT_RESOLUTION
+    {
+      const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
+        catalog,
+        fullRulePackage: lightPackRulePackage,
+      });
+
+      let step = session.advance();
+      if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+      const packOpenIdx = step.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+      );
+      const nextStep = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: packOpenIdx,
+      });
+
+      if (nextStep.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+      expect(nextStep.request.source.type).toBe("EFFECT_RESOLUTION");
+
+      const turnPlayer = step.request.playerId;
+      const randomPolicy = new RandomPolicy(new SeededRandom(42), "Random-P1");
+      const decision = randomPolicy.choose(nextStep.request);
+      expect(decision.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(decision.selectedPatternRef).toBeLessThan(nextStep.request.patterns.length);
+
+      const afterStep = session.submitDecision(decision);
+      expect(session.state.players[turnPlayer].pack.opened).toBe(true);
+      expect(session.state.players[turnPlayer].pack.count).toBe(13);
+      expect(session.state.players[turnPlayer].hand.length).toBe(9);
+      expect(afterStep.type === "WAITING_FOR_DECISION" || afterStep.type === "PROGRESSED").toBe(true);
+    }
+
+    // 3. ManualGenericGenome (1482-weight schema) processes PackOpen EFFECT_RESOLUTION without modification
+    {
+      const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
+        catalog,
+        fullRulePackage: lightPackRulePackage,
+      });
+
+      let step = session.advance();
+      if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+      const packOpenIdx = step.request.patterns.findIndex(
+        (p) => p.kind === "ACTION" && step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+      );
+      const nextStep = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: packOpenIdx,
+      });
+
+      if (nextStep.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+      expect(nextStep.request.source.type).toBe("EFFECT_RESOLUTION");
+
+      const turnPlayer = step.request.playerId;
+      const genomePolicy = PlaytestPolicyFactory.createPolicy("manualGenericGenome", undefined, turnPlayer);
+      const decision = genomePolicy.choose(nextStep.request);
+      expect(decision.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(decision.selectedPatternRef).toBeLessThan(nextStep.request.patterns.length);
+
+      const afterStep = session.submitDecision(decision);
+      expect(session.state.players[turnPlayer].pack.opened).toBe(true);
+      expect(session.state.players[turnPlayer].pack.count).toBe(13);
+      expect(session.state.players[turnPlayer].hand.length).toBe(9);
+      expect(afterStep.type === "WAITING_FOR_DECISION" || afterStep.type === "PROGRESSED").toBe(true);
+    }
   });
 
   // Test S: Presenter Pack Projection
@@ -689,47 +915,65 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test U: Reveal UI Persistence
-  it("Test U: Reveal UI Persistence - ViewerAwareGameEventFormatter outputs card reveal message", () => {
-    const prevState = {
-      turnPlayer: "p1",
-      chancePlayer: "p1",
-      players: {
-        p1: {
-          name: "Player A",
-          pack: {
-            opened: false,
-            cards: [{ id: "c1", suit: "S", rank: "7" }, { id: "c2", suit: "H", rank: "A" }],
-          },
-        },
-        p2: { name: "Player B" },
-      },
-    };
+  it("Test U: Reveal UI Persistence - Real GameSession outputs card reveal presentation event after PackOpen", async () => {
+    const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
+      catalog,
+      fullRulePackage: lightPackRulePackage,
+    });
 
-    const nextState = {
-      turnPlayer: "p1",
-      chancePlayer: "p1",
-      players: {
-        p1: {
-          name: "Player A",
-          pack: {
-            opened: true,
-            cards: [{ id: "c2", suit: "H", rank: "A" }],
-          },
-        },
-        p2: { name: "Player B" },
-      },
-    };
+    let step = session.advance();
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
 
-    const events = ViewerAwareGameEventFormatter.formatStateTransition(prevState, nextState);
-    const revealEvent = events.find((e) => e.message.includes("[カード公開]"));
+    const patternIdx = step.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+    );
 
+    // Step 1: Submit PackOpen action
+    const nextStep = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: patternIdx,
+    });
+    if (nextStep.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(nextStep.request.source.type).toBe("EFFECT_RESOLUTION");
+
+    const selectedCardId = nextStep.request.catalog.effectSelections[0]?.selectedValues[0];
+    const prevLogCount = session.logRecorder.getMatchLog().events.length;
+    const prevState = JSON.parse(JSON.stringify(session.state));
+
+    // Step 2: Submit card selection
+    session.submitDecision({
+      decisionId: nextStep.request.decisionId,
+      stateVersion: nextStep.request.stateVersion,
+      selectedPatternRef: 0,
+    });
+    const nextState = JSON.parse(JSON.stringify(session.state));
+    const deltaEvents = session.logRecorder.getMatchLog().events.slice(prevLogCount);
+
+    // Canonical card.revealed event exists
+    const revealEvent = deltaEvents.find((e) => e.type === "card.revealed") as CardRevealedEvent | undefined;
     expect(revealEvent).toBeDefined();
-    expect(revealEvent?.message).toContain("Player A");
-    expect(revealEvent?.message).toContain("♠7");
+    expect(revealEvent?.cardId).toBe(selectedCardId);
+
+    const actorPlayerId = step.request.playerId;
+    const opponentPlayerId = actorPlayerId === "p1" ? "p2" : "p1";
+    const actorName = session.state.players[actorPlayerId]?.name || (actorPlayerId === "p1" ? "Player A" : "Player B");
+
+    // Format for opponent
+    const presentationEvents = ViewerAwareGameEventFormatter.formatStateTransition(
+      prevState,
+      nextState,
+      opponentPlayerId,
+      deltaEvents
+    );
+    const revealPresentation = presentationEvents.find((e) => e.message.includes("[カード公開]"));
+    expect(revealPresentation).toBeDefined();
+    expect(revealPresentation?.message).toContain(`${actorName} がパックから`);
+    expect(revealPresentation?.message).toContain(`${formatSuitSymbol(revealEvent!.suit)}${revealEvent!.rank}`);
   });
 
-  // Test V: Canonical Reveal Single Event
-  it("Test V: Canonical Reveal Single Event - Exactly 1 card.revealed event per PackOpen action", async () => {
+  // Test V: Canonical Reveal Single Event & Move Single Event
+  it("Test V: Canonical Reveal Single Event - Exactly 1 card.revealed and 1 card.moved (pack->hand) per PackOpen", async () => {
     const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
       catalog,
       fullRulePackage: lightPackRulePackage,
@@ -762,6 +1006,14 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
     expect(revealEvents.length).toBe(1);
     expect(revealEvents[0].revealedBy).toBe(step.request.playerId);
     expect(revealEvents[0].fromZone).toBe("pack");
+
+    // Exactly 1 card.moved pack -> hand
+    const moveEvents = canonicalLog.events.filter(
+      (e) => e.type === "card.moved" && (e as any).from?.zone === "pack" && (e as any).to?.zone === "hand"
+    );
+    expect(moveEvents.length).toBe(1);
+    expect((moveEvents[0] as any).from.zone).toBe("pack");
+    expect((moveEvents[0] as any).to.zone).toBe("hand");
   });
 
   // Test W: Immediate Effect Selection
@@ -792,16 +1044,193 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test X: Replay Viewer Pack Observation
-  it("Test X: Replay Viewer Pack Observation - Correct observation in replay viewer context", async () => {
-    const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
-      catalog,
-      fullRulePackage: lightPackRulePackage,
+  it("Test X: Replay Viewer Pack Observation - Full pipeline (Reconstruction -> Observation -> Presenter -> ViewModel)", async () => {
+    const browserCatalog = loadRegulationCatalogForBrowser();
+    const browserRulePackage = loadRulePackageForBrowser();
+
+    // 1. Initial Step (Index 0)
+    const recon0 = reconstructMatch({
+      environmentId: "official:light-pack",
+      seed: 42,
+      transcript: [],
+      catalog: browserCatalog,
+      fullRulePackage: browserRulePackage,
     });
+    if (recon0.status !== "SUCCESS") throw new Error("Expected SUCCESS");
 
-    const obsViewerP1 = ObservationFactory.createObservation(session.state, "p1");
-    const obsViewerP2 = ObservationFactory.createObservation(session.state, "p2");
+    const activePlayer = recon0.session.state.turnPlayer as "p1" | "p2";
+    const opponentPlayer = activePlayer === "p1" ? "p2" : "p1";
 
-    expect(obsViewerP1.players[0].pack?.count).toBe(14);
-    expect(obsViewerP2.players[0].pack?.count).toBe(14);
+    const obsOwner = ObservationFactory.createObservation(recon0.session.state, activePlayer);
+    const obsOpp = ObservationFactory.createObservation(recon0.session.state, opponentPlayer);
+    const vm0_owner = PlayerObservationPresenter.buildPlayerViewModel(activePlayer, obsOwner, recon0.session.state, activePlayer);
+    const vm0_opp = PlayerObservationPresenter.buildPlayerViewModel(activePlayer, obsOpp, recon0.session.state, opponentPlayer);
+
+    // Index 0: Both see PACK 14, unopened, cards not viewable
+    expect(vm0_owner.pack?.count).toBe(14);
+    expect(vm0_owner.pack?.opened).toBe(false);
+    expect(vm0_owner.pack?.canViewCards).toBe(false);
+    expect(vm0_owner.pack?.cards.length).toBe(0);
+
+    expect(vm0_opp.pack?.count).toBe(14);
+    expect(vm0_opp.pack?.opened).toBe(false);
+    expect(vm0_opp.pack?.canViewCards).toBe(false);
+    expect(vm0_opp.pack?.cards.length).toBe(0);
+
+    // 2. Execute PackOpen in session and add to transcript
+    const session = recon0.session;
+    let step = session.advance();
+    while (step.type === "PROGRESSED") step = session.advance();
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    const waitingStep = step;
+
+    const packOpenIdx = waitingStep.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && waitingStep.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+    );
+    const d1: PlaytestDecisionTranscriptEntryV1 = {
+      seq: 1,
+      actor: "human",
+      playerId: activePlayer,
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      response: {
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: packOpenIdx,
+      },
+    };
+    step = session.submitDecision(d1.response);
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    const d2: PlaytestDecisionTranscriptEntryV1 = {
+      seq: 2,
+      actor: "human",
+      playerId: activePlayer,
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      response: {
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: 0,
+      },
+    };
+    session.submitDecision(d2.response);
+
+    // 3. Reconstruct after PackOpen
+    const reconAfter = reconstructMatch({
+      environmentId: "official:light-pack",
+      seed: 42,
+      transcript: [d1, d2],
+      catalog: browserCatalog,
+      fullRulePackage: browserRulePackage,
+    });
+    if (reconAfter.status !== "SUCCESS") throw new Error("Expected SUCCESS");
+
+    const obsAfterOwner = ObservationFactory.createObservation(reconAfter.session.state, activePlayer);
+    const obsAfterOpp = ObservationFactory.createObservation(reconAfter.session.state, opponentPlayer);
+    const vmAfter_owner = PlayerObservationPresenter.buildPlayerViewModel(activePlayer, obsAfterOwner, reconAfter.session.state, activePlayer);
+    const vmAfter_opp = PlayerObservationPresenter.buildPlayerViewModel(activePlayer, obsAfterOpp, reconAfter.session.state, opponentPlayer);
+
+    // Owner: PACK 13, opened, 13 cards KNOWN
+    expect(vmAfter_owner.pack?.count).toBe(13);
+    expect(vmAfter_owner.pack?.opened).toBe(true);
+    expect(vmAfter_owner.pack?.canViewCards).toBe(true);
+    expect(vmAfter_owner.pack?.cards.length).toBe(13);
+    expect(vmAfter_owner.pack?.cards.every((c) => c.visibility === "KNOWN")).toBe(true);
+
+    // Opponent: PACK 13, opened, cards HIDDEN
+    expect(vmAfter_opp.pack?.count).toBe(13);
+    expect(vmAfter_opp.pack?.opened).toBe(true);
+    expect(vmAfter_opp.pack?.canViewCards).toBe(false);
+    expect(vmAfter_opp.pack?.cards.every((c) => c.visibility === "HIDDEN")).toBe(true);
+  });
+
+  // Test Y: moveCard Life & Grave Contracts
+  it("Test Y: moveCard Life & Grave Contracts - Correct Life Card[] handling and Grave Unit wrapper rejection", () => {
+    const handler = moveCardHandler();
+    const c1 = { id: "card-1", suit: "S", rank: "A", value: 1 };
+    const c2 = { id: "card-2", suit: "H", rank: "K", value: 13 };
+    const unitWrapper = { id: "unit-1", unitId: "unit-1", cards: [c1], kind: "soldier" };
+
+    const state: any = {
+      stateVersion: 1,
+      players: {
+        p1: {
+          life: [c1],
+          hand: [c2],
+          pack: { count: 0, opened: false, cards: [] },
+          grave: [unitWrapper],
+        },
+      },
+    };
+
+    const context: any = { playerKey: "p1", state };
+
+    // 1. Life -> Hand
+    handler({ from: "life", to: "hand", card: "card-1" }, context);
+    expect(state.players.p1.life.length).toBe(0);
+    expect(Array.isArray(state.players.p1.life)).toBe(true);
+    expect(state.players.p1.hand.length).toBe(2);
+    expect(state.players.p1.hand.some((c: any) => c.id === "card-1")).toBe(true);
+
+    // 2. Hand -> Life
+    handler({ from: "hand", to: "life", card: "card-2" }, context);
+    expect(state.players.p1.hand.length).toBe(1);
+    expect(state.players.p1.life.length).toBe(1);
+    expect(Array.isArray(state.players.p1.life)).toBe(true);
+    expect(state.players.p1.life[0].id).toBe("card-2");
+
+    // 3. Grave: moving a unit wrapper throws explicit error
+    expect(() => {
+      handler({ from: "grave", to: "hand", card: "unit-1" }, context);
+    }).toThrow(/Unit wrapper/);
+  });
+
+  // Test Z: ActivationCondition Fail-Closed Contracts
+  it("Test Z: ActivationCondition Fail-Closed Contracts - Reject unknown operators, invalid player specs, missing comparators", () => {
+    const state: any = {
+      turnPlayer: "p1",
+      players: {
+        p1: {
+          pack: { count: 14, opened: false, cards: [] },
+        },
+      },
+    };
+    const context = { state, playerKey: "p1" as const };
+
+    // 1. Unknown operator
+    const resUnknown = ActionActivationConditionEvaluator.evaluate(
+      { unknownCondition: {} } as any,
+      context
+    );
+    expect(resUnknown.isLegal).toBe(false);
+
+    // 2. Missing comparator in zoneState
+    const resNoComp = ActionActivationConditionEvaluator.evaluate(
+      { zoneState: { player: "controller", zone: "pack", property: "opened" } } as any,
+      context
+    );
+    expect(resNoComp.isLegal).toBe(false);
+
+    // 3. Property with dot
+    const resDotProp = ActionActivationConditionEvaluator.evaluate(
+      { zoneState: { player: "controller", zone: "pack", property: "opened.flag", equals: false } } as any,
+      context
+    );
+    expect(resDotProp.isLegal).toBe(false);
+
+    // 4. Invalid player spec
+    const resInvalidPlayer = ActionActivationConditionEvaluator.evaluate(
+      { zoneState: { player: "unknownPlayerSpec" as any, zone: "pack", property: "opened", equals: false } },
+      context
+    );
+    expect(resInvalidPlayer.isLegal).toBe(false);
+
+    // 5. Valid condition passes
+    const resValid = ActionActivationConditionEvaluator.evaluate(
+      { zoneState: { player: "controller", zone: "pack", property: "opened", equals: false } },
+      context
+    );
+    expect(resValid.isLegal).toBe(true);
   });
 });

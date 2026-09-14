@@ -205,12 +205,15 @@ export async function advanceAutomatedDecisions(
       const prevState = JSON.parse(JSON.stringify(session.state));
 
       try {
+        const prevLogCount = session.logRecorder.getMatchLog().events.length;
         nextStep = session.submitDecision(response);
         nextState = JSON.parse(JSON.stringify(session.state));
+        const deltaEvents = session.logRecorder.getMatchLog().events.slice(prevLogCount);
         generatedEvents = ViewerAwareGameEventFormatter.formatStateTransition(
           prevState,
           nextState,
-          options?.viewerPlayerId
+          options?.viewerPlayerId,
+          deltaEvents
         );
       } catch (err: any) {
         return {
