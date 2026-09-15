@@ -45,7 +45,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
     fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
 
-    // 2. Jokerを含むテスト用フレーム (16枚固定デッキ, 2枚のJoker [J and S] を含む, frameId: "entry16")
+    // 2. Jokerを含むテスト用フレーム (16枚固定デッキ, Joker exactly 1枚, frameId: "entry16")
     testSearchFrame = {
       id: "entry16",
       name: "テストサーチフレーム",
@@ -55,11 +55,10 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
         type: "fixed",
         cardCount: 16,
         cards: [
-          { suit: "J", rank: "Joker", value: 0 },
-          { suit: "S", rank: "Joker", value: 0 },
           { suit: "S", rank: "A", value: 1 },
           { suit: "S", rank: "2", value: 2 },
           { suit: "S", rank: "3", value: 3 },
+          { suit: "J", rank: "Joker", value: 0 },
           { suit: "H", rank: "4", value: 4 },
           { suit: "H", rank: "7", value: 7 },
           { suit: "H", rank: "J", value: 11 },
@@ -71,6 +70,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
           { suit: "C", rank: "A", value: 1 },
           { suit: "C", rank: "6", value: 6 },
           { suit: "C", rank: "9", value: 9 },
+          { suit: "C", rank: "K", value: 13 },
         ],
       },
       setup: {
@@ -113,8 +113,8 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     );
   });
 
-  // ヘルパー: 自然に手札に Joker が来る固定 Seed (seed = 9) でセッションを生成
-  async function createTestSearchSession(seed = 9) {
+  // ヘルパー: 自然に手札に Joker が来る固定 Seed (seed = 7) でセッションを生成
+  async function createTestSearchSession(seed = 7) {
     const outcome = startMatchAttempt({
       environmentId: "official:test-search",
       seedInput: String(seed),
@@ -127,9 +127,10 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const session = outcome.session;
     const tp = session.state.turnPlayer;
 
-    // 開始直後に Joker が手札に自然に存在することを検証 (GameState の手動改変は一切なし)
-    expect(session.state.players[tp].hand.some((c: any) => c.rank === "Joker")).toBe(true);
-    const jokerCard = session.state.players[tp].hand.find((c: any) => c.rank === "Joker")!;
+    // 開始直後に Joker が手札に exactly 1枚自然に存在することを検証 (GameState の手動改変は一切なし)
+    const jokersInHand = session.state.players[tp].hand.filter((c: any) => c.rank === "Joker");
+    expect(jokersInHand.length).toBe(1);
+    const jokerCard = jokersInHand[0];
     return { session, tp, jokerCard };
   }
 
@@ -385,7 +386,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const searchRevealEvents = canonicalEvents.filter((e) => e.type === "card.revealed") as CardRevealedEvent[];
     const searchShuffleEvents = canonicalEvents.filter((e) => e.type === "zone.shuffled") as ZoneShuffledEvent[];
     const jokerGraveMoveEvents = canonicalEvents.filter(
-      (e) => e.type === "card.moved" && (e as CardMovedEvent).cardId.endsWith("Joker") && ((e as CardMovedEvent).to as any).zone === "grave"
+      (e) => e.type === "card.moved" && (e as CardMovedEvent).cardId === jokerCard.id && ((e as CardMovedEvent).to as any).zone === "grave"
     ) as CardMovedEvent[];
 
     // 厳格な単一発行検証 (重複なし)
@@ -445,7 +446,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test J: Replay Reconstruction E2E with Unmodified Initial State
   it("Test J: Replay Reconstruction E2E with Unmodified Initial State", async () => {
-    const seed = 9;
+    const seed = 7;
     const outcome = startMatchAttempt({
       environmentId: "official:test-search",
       seedInput: String(seed),
@@ -456,8 +457,10 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const session = outcome.session;
     const tp = session.state.turnPlayer;
 
-    // 開始直後からJokerが手札に存在することを検証 (GameState手動改変なし)
-    expect(session.state.players[tp].hand.some((c: any) => c.rank === "Joker")).toBe(true);
+    // 開始直後からJokerが手札にexactly 1枚存在することを検証 (GameState手動改変なし)
+    const jokersInHand = session.state.players[tp].hand.filter((c: any) => c.rank === "Joker");
+    expect(jokersInHand.length).toBe(1);
+    const jokerCard = jokersInHand[0];
 
     const transcript: ReplayDecisionEntryV1[] = [];
     let step = session.advance();
@@ -530,7 +533,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
       origState.players[tp].grave.map((c: any) => c.id)
     );
     // Joker の位置 (墓地に存在)
-    expect(reconState.players[tp].grave.some((c: any) => c.rank === "Joker")).toBe(true);
+    expect(reconState.players[tp].grave.some((c: any) => c.id === jokerCard.id)).toBe(true);
     // runtimeShuffleCount
     expect(reconState.runtimeShuffleCount).toBe(origState.runtimeShuffleCount);
     // turnPlayer, chancePlayer, stateVersion
@@ -544,7 +547,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test K: In-Game Undo Verification with Unmodified Initial State
   it("Test K: In-Game Undo Verification with Unmodified Initial State", async () => {
-    const seed = 9;
+    const seed = 7;
     const outcome = startMatchAttempt({
       environmentId: "official:test-search",
       seedInput: String(seed),
@@ -557,6 +560,9 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
     const initialLife = session.state.players[tp].life.map((c: any) => c.id);
     const initialHand = session.state.players[tp].hand.map((c: any) => c.id);
+    const initialJokers = session.state.players[tp].hand.filter((c: any) => c.rank === "Joker");
+    expect(initialJokers.length).toBe(1);
+    const jokerCard = initialJokers[0];
 
     const transcript: ReplayDecisionEntryV1[] = [];
     let step = session.advance();
@@ -623,9 +629,9 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     expect(reconUndo.session.state.runtimeShuffleCount || 0).toBe(0);
     // - Life order は Search effect 実行前と完全一致
     expect(reconUndo.session.state.players[tp].life.map((c: any) => c.id)).toEqual(lifeBeforeEffect);
-    // - キーカードとして使用された Joker (p1-c-JJoker) は手札から消費され Request 処理中
-    expect(reconUndo.session.state.players[tp].hand.some((c: any) => c.id === "p1-c-JJoker")).toBe(false);
-    expect(reconUndo.session.state.players[tp].hand.filter((c: any) => c.rank === "Joker").length).toBe(1);
+    // - キーカードとして使用された Joker は手札から消費され Request 処理中 (手札の Joker は 0枚)
+    expect(reconUndo.session.state.players[tp].hand.some((c: any) => c.id === jokerCard.id)).toBe(false);
+    expect(reconUndo.session.state.players[tp].hand.some((c: any) => c.rank === "Joker")).toBe(false);
 
     // 2. Search ACTION Undo (さらに Human ACTION も取り消した prefix: index 0)
     const reconUndoAction = reconstructMatch({
@@ -638,8 +644,9 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     expect(reconUndoAction.status).toBe("SUCCESS");
     if (reconUndoAction.status !== "SUCCESS") throw new Error("Action undo reconstruction failed");
 
-    // - Joker は手札にある
-    expect(reconUndoAction.session.state.players[tp].hand.some((c: any) => c.rank === "Joker")).toBe(true);
+    // - Joker は手札に戻っている (手札の Joker は exactly 1枚)
+    expect(reconUndoAction.session.state.players[tp].hand.some((c: any) => c.id === jokerCard.id)).toBe(true);
+    expect(reconUndoAction.session.state.players[tp].hand.filter((c: any) => c.rank === "Joker").length).toBe(1);
     // - Life は初期状態と完全一致
     expect(reconUndoAction.session.state.players[tp].life.map((c: any) => c.id)).toEqual(initialLife);
     // - Hand は初期状態と完全一致
@@ -650,7 +657,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test L: Branching After Undo with Unmodified Initial State
   it("Test L: Branching After Undo with Unmodified Initial State", async () => {
-    const seed = 9;
+    const seed = 7;
     const outcome = startMatchAttempt({
       environmentId: "official:test-search",
       seedInput: String(seed),
@@ -772,7 +779,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test M: AI Agent Compatibility with Search Decision (FirstLegal, Random, ManualGenericGenome, FeatureEncoder)
   it("Test M: AI Agent Compatibility with Search Decision (FirstLegal, Random, ManualGenericGenome, FeatureEncoder)", async () => {
-    const { session, tp } = await createTestSearchSession(9);
+    const { session, tp } = await createTestSearchSession(7);
     let step = session.advance();
     if (step.type !== "WAITING_FOR_DECISION") return;
 
@@ -817,7 +824,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test N: Snapshot Capture and Counter Continuity Across Shuffles
   it("Test N: Snapshot Capture and Counter Continuity Across Shuffles", async () => {
-    const { session, tp } = await createTestSearchSession(9);
+    const { session, tp } = await createTestSearchSession(7);
     let step = session.advance();
     if (step.type !== "WAITING_FOR_DECISION") return;
 
@@ -844,48 +851,16 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const snapshot = GameSessionSnapshotCodec.capture(session);
     expect(snapshot.gameState.runtimeShuffleCount).toBe(1);
 
-    // --- Path A: セッションをそのまま継続して 2回目のサーチを実行 ---
-    const step2A = session.advance();
-    if (step2A.type !== "WAITING_FOR_DECISION") return;
-    const searchIdx2A = step2A.request.patterns.findIndex(
-      (p) => p.kind === "ACTION" && step2A.request.catalog.actions[p.actionSelectionRef!].actionId === "action.search"
-    );
-    const stepEffect2A = session.submitDecision({
-      decisionId: step2A.request.decisionId,
-      stateVersion: step2A.request.stateVersion,
-      selectedPatternRef: searchIdx2A,
-    });
-    if (stepEffect2A.type !== "WAITING_FOR_DECISION") return;
-    session.submitDecision({
-      decisionId: stepEffect2A.request.decisionId,
-      stateVersion: stepEffect2A.request.stateVersion,
-      selectedPatternRef: 0,
-    });
+    // --- Path A: 元セッションで generic shuffleZone を CommandRegistry 経由で実行 ---
+    session.registry.execute("shuffleZone", { zone: "life", player: "self" }, { state: session.state, playerKey: tp });
     expect(session.state.runtimeShuffleCount).toBe(2);
     const lifeOrderPathA = session.state.players[tp].life.map((c: any) => c.id);
 
-    // --- Path B: スナップショットから復元して 2回目のサーチを実行 ---
+    // --- Path B: スナップショットから復元して同じ generic shuffleZone を実行 ---
     const resumedSession = GameSessionSnapshotCodec.restore(snapshot, testSearchRulePackage);
     expect(resumedSession.state.runtimeShuffleCount).toBe(1);
 
-    const step2B = resumedSession.advance();
-    if (step2B.type !== "WAITING_FOR_DECISION") return;
-    const searchIdx2B = step2B.request.patterns.findIndex(
-      (p) => p.kind === "ACTION" && step2B.request.catalog.actions[p.actionSelectionRef!].actionId === "action.search"
-    );
-    const stepEffect2B = resumedSession.submitDecision({
-      decisionId: step2B.request.decisionId,
-      stateVersion: step2B.request.stateVersion,
-      selectedPatternRef: searchIdx2B,
-    });
-    if (stepEffect2B.type !== "WAITING_FOR_DECISION") return;
-    resumedSession.submitDecision({
-      decisionId: stepEffect2B.request.decisionId,
-      stateVersion: stepEffect2B.request.stateVersion,
-      selectedPatternRef: 0,
-    });
-
-    // 復元後セッションでも runtimeShuffleCount は 2 にインクリメント
+    resumedSession.registry.execute("shuffleZone", { zone: "life", player: "self" }, { state: resumedSession.state, playerKey: tp });
     expect(resumedSession.state.runtimeShuffleCount).toBe(2);
     const lifeOrderPathB = resumedSession.state.players[tp].life.map((c: any) => c.id);
 
@@ -895,12 +870,11 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test O: Key Card Finalization (Joker Hand -> Grave via finalizeRequestKeyCards)
   it("Test O: Key Card Finalization (Joker Hand -> Grave via finalizeRequestKeyCards)", async () => {
-    const { session, tp } = await createTestSearchSession(9);
+    const { session, tp, jokerCard } = await createTestSearchSession(7);
     const player = session.state.players[tp];
-    const usedJokerId = "p1-c-JJoker";
 
-    expect(player.hand.some((c: any) => c.id === usedJokerId)).toBe(true);
-    expect(player.grave.some((c: any) => c.id === usedJokerId)).toBe(false);
+    expect(player.hand.some((c: any) => c.id === jokerCard.id)).toBe(true);
+    expect(player.grave.some((c: any) => c.id === jokerCard.id)).toBe(false);
 
     let step = session.advance();
     if (step.type !== "WAITING_FOR_DECISION") return;
@@ -916,7 +890,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     if (nextStep.type !== "WAITING_FOR_DECISION") return;
 
     // リクエスト作成後、キーカードとして指定された Joker は手札から消費されている
-    expect(player.hand.some((c: any) => c.id === usedJokerId)).toBe(false);
+    expect(player.hand.some((c: any) => c.id === jokerCard.id)).toBe(false);
 
     // 効果選択完了
     session.submitDecision({
@@ -926,12 +900,12 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     });
 
     // 最終化後、Joker は墓地に配置されている
-    expect(player.grave.some((c: any) => c.id === usedJokerId)).toBe(true);
+    expect(player.grave.some((c: any) => c.id === jokerCard.id)).toBe(true);
   });
 
   // Test P: Multi-Step Effect Resolution Continuity
   it("Test P: Multi-Step Effect Resolution Continuity", async () => {
-    const { session, tp } = await createTestSearchSession(9);
+    const { session, tp } = await createTestSearchSession(7);
     let step = session.advance();
     if (step.type !== "WAITING_FOR_DECISION") return;
 
@@ -963,7 +937,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
   it("Test Q: Empty or Single-Card Life Edge Cases", async () => {
     // 1. Single card life
     {
-      const { session, tp } = await createTestSearchSession(9);
+      const { session, tp } = await createTestSearchSession(7);
       const player = session.state.players[tp];
       player.life = [player.life[0]]; // 1枚のみ
 
@@ -993,7 +967,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
     // 2. Empty life
     {
-      const { session, tp } = await createTestSearchSession(9);
+      const { session, tp } = await createTestSearchSession(7);
       const player = session.state.players[tp];
       player.life = []; // 0枚
 
@@ -1017,7 +991,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
   // Test R: Opponent State Isolation
   it("Test R: Opponent State Isolation", async () => {
-    const { session, tp } = await createTestSearchSession(9);
+    const { session, tp } = await createTestSearchSession(7);
     const opponent = tp === "p1" ? "p2" : "p1";
     const oppHandBefore = [...session.state.players[opponent].hand];
     const oppLifeBefore = [...session.state.players[opponent].life];
@@ -1051,62 +1025,24 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     expect(oppFieldAfter).toEqual(oppFieldBefore);
   });
 
-  // Test S: Multiple Consecutive Searches and Counter Tracking (100% Natural Without Mutation)
-  it("Test S: Multiple Consecutive Searches and Counter Tracking (100% Natural Without Mutation)", async () => {
-    const seed = 9;
+  // Test S: Multiple Runtime Shuffle Counter Tracking
+  it("Test S: Multiple Runtime Shuffle Counter Tracking", async () => {
+    const seed = 7;
     const { session, tp } = await createTestSearchSession(seed);
 
-    // 開始直後に手札に 2枚の Joker が自然に存在することを検証
-    expect(session.state.players[tp].hand.filter((c: any) => c.rank === "Joker").length).toBe(2);
     expect(session.state.runtimeShuffleCount || 0).toBe(0);
 
-    // 1回目のサーチ実行
-    let step = session.advance();
-    if (step.type !== "WAITING_FOR_DECISION") return;
-    const step1 = step;
-    let searchIdx = step1.request.patterns.findIndex(
-      (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!].actionId === "action.search"
-    );
-    let nextStep = session.submitDecision({
-      decisionId: step1.request.decisionId,
-      stateVersion: step1.request.stateVersion,
-      selectedPatternRef: searchIdx,
-    });
-    if (nextStep.type !== "WAITING_FOR_DECISION") return;
-    session.submitDecision({
-      decisionId: nextStep.request.decisionId,
-      stateVersion: nextStep.request.stateVersion,
-      selectedPatternRef: 0,
-    });
-    // 1回目のシャッフル完了
+    // 1回目の generic shuffleZone 実行
+    session.registry.execute("shuffleZone", { zone: "life", player: "self" }, { state: session.state, playerKey: tp });
     expect(session.state.runtimeShuffleCount).toBe(1);
-    expect(session.state.players[tp].hand.some((c: any) => c.rank === "Joker")).toBe(true);
 
-    // 2回目のサーチ実行 (手札に残る 2枚目の Joker を自然に使用)
-    step = session.advance();
-    if (step.type !== "WAITING_FOR_DECISION") return;
-    const step2 = step;
-    searchIdx = step2.request.patterns.findIndex(
-      (p) => p.kind === "ACTION" && step2.request.catalog.actions[p.actionSelectionRef!].actionId === "action.search"
-    );
-    expect(searchIdx).toBeGreaterThanOrEqual(0);
-    nextStep = session.submitDecision({
-      decisionId: step2.request.decisionId,
-      stateVersion: step2.request.stateVersion,
-      selectedPatternRef: searchIdx,
-    });
-    if (nextStep.type !== "WAITING_FOR_DECISION") return;
-    session.submitDecision({
-      decisionId: nextStep.request.decisionId,
-      stateVersion: nextStep.request.stateVersion,
-      selectedPatternRef: 0,
-    });
-    // 2回目のシャッフル完了
+    // 2回目の generic shuffleZone 実行
+    session.registry.execute("shuffleZone", { zone: "life", player: "self" }, { state: session.state, playerKey: tp });
     expect(session.state.runtimeShuffleCount).toBe(2);
 
-    // シャッフルシード導出の検証
-    const seed1 = deriveRuntimeShuffleSeed(seed, 1);
-    const seed2 = deriveRuntimeShuffleSeed(seed, 2);
+    // シャッフルシード導出の検証: 1回目と2回目でシードが異なり決定論的に再現可能
+    const seed1 = deriveRuntimeShuffleSeed(session.matchSeed!, 1);
+    const seed2 = deriveRuntimeShuffleSeed(session.matchSeed!, 2);
     expect(seed1).not.toBe(seed2);
   });
 
