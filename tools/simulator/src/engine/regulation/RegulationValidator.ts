@@ -36,7 +36,7 @@ export class RegulationValidator {
    * 【公式ルール第9.1.2版 2.3 & 8.3.1】
    * - ruleLegal: どの組み合わせでも公式ルール上は対戦可能であるため常に true。
    * - recommended: frame.recommendedFormatIds に formatId が含まれるかどうか（Table 2.1 推奨レギュレーション準拠）。
-   * - simulatorImplemented: 現行 Simulator (Phase 1.0) で E2E 実装されているのは "light + entry16" のみ。
+   * - simulatorImplemented: 現行 Simulator で公式実装されているのは "light + entry16" および "light + pack"。
    */
   public static validateCombination(
     catalog: RegulationCatalog,
@@ -61,8 +61,7 @@ export class RegulationValidator {
     const recommended = frame.recommendedFormatIds.includes(formatId);
     const simulatorImplemented =
       (formatId === "light" && frameId === "entry16") ||
-      (formatId === "light" && frameId === "pack") ||
-      (formatId === "light" && frameId === "test-search-frame");
+      (formatId === "light" && frameId === "pack");
 
     if (options?.assertImplemented && !simulatorImplemented) {
       throw new SimulatorNotImplementedError(formatId, frameId);
