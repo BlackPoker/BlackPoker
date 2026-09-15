@@ -68,6 +68,7 @@ export class GameSession {
   public rulePackage: RulePackage;
   public registry: CommandRegistry;
   public matchId: string;
+  public readonly matchSeed?: number;
   public pendingDecision?: DecisionRequest;
   public continuation?: EffectContinuation;
   public resolvingRequest?: any;
@@ -92,6 +93,7 @@ export class GameSession {
     rulePackage: RulePackage,
     options?: {
       matchId?: string;
+      matchSeed?: number;
       registry?: CommandRegistry;
       passTracker?: PassTracker;
       logRecorder?: MatchLogRecorder;
@@ -104,6 +106,8 @@ export class GameSession {
     }
     this.rulePackage = rulePackage;
     this.registry = options?.registry || new CommandRegistry();
+    this.matchSeed = options?.matchSeed;
+    this.registry.setMatchSeed(this.matchSeed);
     this.matchId = options?.matchId || `match-${Date.now()}`;
     this.passTracker = options?.passTracker || new PassTracker();
     this.triggerCoordinator = new TriggerProcessingCoordinator();
@@ -166,6 +170,7 @@ export class GameSession {
     }
 
     return {
+      matchSeed: this.matchSeed,
       consecutivePassCount: this.passTracker.consecutivePassCount,
       pendingDecision: this.pendingDecision
         ? JSON.parse(JSON.stringify(this.pendingDecision))
@@ -246,6 +251,7 @@ export class GameSession {
         currentAction,
         currentRequest: this.resolvingRequest,
         logRecorder: this.logRecorder,
+        matchSeed: this.matchSeed,
       };
     }
   }

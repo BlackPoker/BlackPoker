@@ -10,6 +10,8 @@ import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
 import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
 import { isCardInGameZones } from "./cardUtils";
+import { deriveRuntimeShuffleSeed, shuffleDeterministic } from "../random/DeterministicShuffle";
+import { SeededRandom } from "../random/RandomSource";
 
 
 /**
@@ -961,26 +963,32 @@ export function judgeDamageHandler(
   };
 }
 
+function resolveSelectionCard(cardRef: any, selections?: Record<string, any>): any {
+  if (typeof cardRef !== "string" || !selections) return cardRef;
+  let key = cardRef;
+  if (key.startsWith("$selections.")) {
+    key = key.replace("$selections.", "");
+  } else if (key.startsWith("selection.")) {
+    key = key.replace("selection.", "");
+  } else if (key.startsWith("$")) {
+    key = key.slice(1);
+  }
+  if (key.endsWith("[0]")) {
+    key = key.slice(0, -3);
+  }
+  if (selections[key] !== undefined) {
+    const sel = selections[key];
+    return Array.isArray(sel) ? sel[0] : sel;
+  }
+  return cardRef;
+}
+
 /**
  * moveCard: カードのゾーン間移動
  */
 export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    let cardToMove = args.card ?? args.target;
-    if (typeof cardToMove === "string") {
-      if (cardToMove.startsWith("selection.")) {
-        const selId = cardToMove.replace("selection.", "");
-        const sel = context.selections?.[selId];
-        cardToMove = Array.isArray(sel) ? sel[0] : sel;
-      } else if (cardToMove.startsWith("$")) {
-        const selId = cardToMove.slice(1);
-        const sel = context.selections?.[selId];
-        cardToMove = Array.isArray(sel) ? sel[0] : sel;
-      } else if (context.selections && context.selections[cardToMove] !== undefined) {
-        const sel = context.selections[cardToMove];
-        cardToMove = Array.isArray(sel) ? sel[0] : sel;
-      }
-    }
+    let cardToMove = resolveSelectionCard(args.card ?? args.target, context.selections);
 
     const fromZone = args.from;
     const toZone = args.to;
@@ -1100,30 +1108,35 @@ export function setZoneStateHandler(): CommandHandler {
  */
 export function revealCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    let cardToReveal = args.card ?? args.selection ?? args.target;
-    if (typeof cardToReveal === "string") {
-      if (cardToReveal.startsWith("selection.")) {
-        const selId = cardToReveal.replace("selection.", "");
-        const sel = context.selections?.[selId];
-        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
-      } else if (cardToReveal.startsWith("$")) {
-        const selId = cardToReveal.slice(1);
-        const sel = context.selections?.[selId];
-        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
-      } else if (context.selections && context.selections[cardToReveal] !== undefined) {
-        const sel = context.selections[cardToReveal];
-        cardToReveal = Array.isArray(sel) ? sel[0] : sel;
-      }
-    }
+    let cardToReveal = resolveSelectionCard(args.card ?? args.selection ?? args.target, context.selections);
 
     let actualCard = cardToReveal;
+    let detectedSourceZone = args.sourceZone || args.from;
+    const player = context.state.players?.[context.playerKey];
+
     if (typeof cardToReveal === "string") {
-      const player = context.state.players?.[context.playerKey];
       if (player) {
-        const inPack = player.pack?.cards?.find((c: any) => c.id === cardToReveal);
-        const inHand = player.hand?.find((c: any) => c.id === cardToReveal);
-        const inLife = player.life?.cards?.find((c: any) => c.id === cardToReveal);
+        // Generic zone resolver for known zones (life, pack, hand)
+        const inPack = Array.isArray(player.pack?.cards) ? player.pack.cards.find((c: any) => c?.id === cardToReveal) : undefined;
+        const inHand = Array.isArray(player.hand) ? player.hand.find((c: any) => c?.id === cardToReveal) : undefined;
+        const inLife = Array.isArray(player.life) ? player.life.find((c: any) => c?.id === cardToReveal) : undefined;
+
         actualCard = inPack || inHand || inLife || { id: cardToReveal };
+        if (!detectedSourceZone) {
+          if (inLife) detectedSourceZone = "life";
+          else if (inPack) detectedSourceZone = "pack";
+          else if (inHand) detectedSourceZone = "hand";
+        }
+      }
+    } else if (typeof cardToReveal === "object" && cardToReveal !== null) {
+      if (!detectedSourceZone && player) {
+        if (Array.isArray(player.life) && player.life.some((c: any) => c?.id === cardToReveal.id)) {
+          detectedSourceZone = "life";
+        } else if (Array.isArray(player.pack?.cards) && player.pack.cards.some((c: any) => c?.id === cardToReveal.id)) {
+          detectedSourceZone = "pack";
+        } else if (Array.isArray(player.hand) && player.hand.some((c: any) => c?.id === cardToReveal.id)) {
+          detectedSourceZone = "hand";
+        }
       }
     }
 
@@ -1134,7 +1147,7 @@ export function revealCardHandler(effectInterpreter?: EffectInterpreter): Comman
         playerKey: context.playerKey,
         target,
         card: actualCard,
-        sourceZone: args.sourceZone || "pack",
+        sourceZone: detectedSourceZone || "pack",
       },
     };
 
@@ -1143,5 +1156,59 @@ export function revealCardHandler(effectInterpreter?: EffectInterpreter): Comman
     }
   };
 }
+
+/**
+ * shuffleZone: ゾーンカードの決定論的シャッフル
+ */
+export function shuffleZoneHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    const { player: playerSpec, zone } = args;
+    if (zone !== "life") {
+      throw new Error(`shuffleZone: 未対応のシャッフル対象ゾーンです (${zone})。Phase 1.0 では 'life' のみサポートしています。`);
+    }
+
+    const playerKey = playerSpec === "opponent"
+      ? getOpponentPlayerKey(context.playerKey, context.state)
+      : (playerSpec === "controller" || playerSpec === "self" || !playerSpec ? context.playerKey : playerSpec);
+    const player = context.state.players?.[playerKey];
+    if (!player) throw new Error(`shuffleZone: プレイヤーが見つかりません: ${playerKey}`);
+
+    if (!Array.isArray(player.life)) {
+      throw new Error(`shuffleZone: プレイヤー '${playerKey}' のライフ配列が存在しません`);
+    }
+
+    const matchSeed = context.matchSeed;
+    if (matchSeed === undefined || typeof matchSeed !== "number" || isNaN(matchSeed)) {
+      throw new Error("shuffleZone: matchSeed is required for deterministic shuffle but was undefined. Fallback is prohibited.");
+    }
+
+    // 決定論的シャッフルカウンタの更新
+    const counter = (context.state.runtimeShuffleCount = (context.state.runtimeShuffleCount || 0) + 1);
+    const shuffleSeed = deriveRuntimeShuffleSeed(matchSeed, counter);
+    const rng = new SeededRandom(shuffleSeed);
+
+    player.life = shuffleDeterministic(player.life, rng);
+
+    if (effectInterpreter) {
+      effectInterpreter.dispatchEvent(
+        {
+          type: "zoneShuffled",
+          payload: {
+            playerKey,
+            zone: "life",
+            cardCount: player.life.length,
+            cause: {
+              type: "effect",
+              actionId: context.currentAction?.id || context.currentRequest?.actionId,
+              requestId: context.currentRequest?.id,
+            },
+          },
+        },
+        context
+      );
+    }
+  };
+}
+
 
 

@@ -163,6 +163,7 @@ export class GameSessionSnapshotCodec {
 
     const session = new GameSession(stateClone, rulePackage, {
       matchId: snapshot.metadata.matchId,
+      matchSeed: snapshot.session.matchSeed,
       passTracker,
       registry,
       logRecorder,

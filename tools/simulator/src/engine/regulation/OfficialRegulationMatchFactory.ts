@@ -94,6 +94,7 @@ export class OfficialRegulationMatchFactory {
 
     return new GameSession(outcome.state, officialRulePackage, {
       matchId: outcome.state.matchId,
+      matchSeed,
     });
   }
 
@@ -173,6 +174,7 @@ export class OfficialRegulationMatchFactory {
 
       return new GameSession(outcome.state, officialRulePackage, {
         matchId: outcome.state.matchId,
+        matchSeed: ctx.matchSeed,
       });
     };
   }

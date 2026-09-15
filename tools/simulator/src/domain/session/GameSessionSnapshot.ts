@@ -38,6 +38,7 @@ export interface ResolvingContextSnapshotData {
  * GameSession の進行管理・内部状態データ (JSON-safe DTO)
  */
 export interface GameSessionSnapshotSessionData {
+  readonly matchSeed?: number;
   readonly consecutivePassCount: number;
   readonly pendingDecision?: DecisionRequest;
   readonly continuation?: EffectContinuation;

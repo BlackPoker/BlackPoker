@@ -23,6 +23,7 @@ import {
   moveCardHandler,
   setZoneStateHandler,
   revealCardHandler,
+  shuffleZoneHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -165,6 +166,7 @@ export interface CommandContext {
   sourceEvent?: any; // 誘発元イベント
   selections?: Record<string, any>; // 効果解決時の選択結果マップ
   logRecorder?: MatchLogRecorder; // Canonical Match Log レコーダー
+  matchSeed?: number; // 決定論的シャッフル用の対戦シード値
 }
 
 
@@ -183,6 +185,15 @@ export class CommandRegistry {
   public triggerResolver = new TriggerResolver();
   public requestBufferProcessor = new RequestBufferProcessor();
   public logRecorder?: MatchLogRecorder;
+  private matchSeed?: number;
+
+  public setMatchSeed(matchSeed?: number): void {
+    this.matchSeed = matchSeed;
+  }
+
+  public getMatchSeed(): number | undefined {
+    return this.matchSeed;
+  }
 
   constructor() {
     this.effectInterpreter = new EffectInterpreter(
@@ -217,6 +228,7 @@ export class CommandRegistry {
     if (!handler) {
       throw new Error(`未定義の高レベル命令です: ${name}`);
     }
+    context.matchSeed = context.matchSeed ?? this.matchSeed;
     handler(args, context);
   }
 
@@ -940,6 +952,22 @@ export class CommandRegistry {
         fromZone: p.sourceZone || "pack",
       });
     }
+    if (logRecorder && event?.type === "zoneShuffled") {
+      const p = event.payload;
+      const stateVersion =
+        p.stateVersion ??
+        context?.state?.stateVersion ??
+        context?.state?.version ??
+        1;
+      logRecorder.record({
+        type: "zone.shuffled",
+        stateVersion,
+        playerId: p.playerKey,
+        zone: p.zone || "life",
+        cardCount: p.cardCount,
+        cause: p.cause,
+      });
+    }
     for (const l of this.eventListeners) {
       l(event);
     }
@@ -982,5 +1010,6 @@ export class CommandRegistry {
     this.register("moveCard", moveCardHandler(this.effectInterpreter));
     this.register("setZoneState", setZoneStateHandler());
     this.register("revealCard", revealCardHandler(this.effectInterpreter));
+    this.register("shuffleZone", shuffleZoneHandler(this.effectInterpreter));
   }
 }

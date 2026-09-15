@@ -32,32 +32,13 @@ export interface OfficialRegulationSetupOptions {
   };
 }
 
-/**
- * 32-bit FNV-1a を用いて独立した決定論的乱数シードを導出します。
- */
-export function deriveSeed(baseSeed: number, streamKey: string): number {
-  const str = `${baseSeed}:${streamKey}`;
-  let hash = 2166136261 >>> 0;
-  for (let i = 0; i < str.length; i++) {
-    hash ^= str.charCodeAt(i);
-    hash = Math.imul(hash, 16777619) >>> 0;
-  }
-  return hash >>> 0;
-}
-
-/**
- * Fisher-Yates アルゴリズムによる決定論的カードシャッフル
- */
-export function shuffleCards<T>(cards: readonly T[], rng: RandomSource): T[] {
-  const result = [...cards];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = rng.nextInt(0, i);
-    const temp = result[i];
-    result[i] = result[j];
-    result[j] = temp;
-  }
-  return result;
-}
+import {
+  deriveSeed,
+  shuffleCards,
+  shuffleDeterministic,
+  deriveRuntimeShuffleSeed,
+} from "../random/DeterministicShuffle";
+export { deriveSeed, shuffleCards, shuffleDeterministic, deriveRuntimeShuffleSeed };
 
 /**
  * 候補カードが、選択中の公式 RulePackage 内で「プリセット兵士として適格」な Component に適合するか判定します。

@@ -26,7 +26,8 @@ export type CanonicalGameEventType =
   | "chance.changed"
   | "player.passed"
   | "card.moved"
-  | "card.revealed";
+  | "card.revealed"
+  | "zone.shuffled";
 
 export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack";
 
@@ -222,6 +223,18 @@ export interface CardRevealedEvent extends CanonicalGameEventBase {
   readonly fromZone: "pack" | CardZoneName;
 }
 
+export interface ZoneShuffledEvent extends CanonicalGameEventBase {
+  readonly type: "zone.shuffled";
+  readonly playerId: string;
+  readonly zone: CardZoneName;
+  readonly cardCount: number;
+  readonly cause?: {
+    readonly type: "effect" | "setup" | string;
+    readonly actionId?: string;
+    readonly requestId?: string;
+  };
+}
+
 export type CanonicalGameEvent =
   | MatchStartedEvent
   | MatchFinishedEvent
@@ -241,7 +254,8 @@ export type CanonicalGameEvent =
   | ChanceChangedEvent
   | PlayerPassedEvent
   | CardMovedEvent
-  | CardRevealedEvent;
+  | CardRevealedEvent
+  | ZoneShuffledEvent;
 
 export interface CanonicalMatchLogMeta {
   readonly matchId: string;

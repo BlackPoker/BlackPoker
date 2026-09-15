@@ -479,6 +479,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
       // outcome.type === "READY"
       const session = new GameSession(outcome.state, officialRulePackage, {
         matchId: outcome.state.matchId,
+        matchSeed: seed,
       });
 
       logs.push({ message: `[START] ${regulation.name} (公式対戦) を開始しました (Seed: ${seed})`, level: "info", state: outcome.state });

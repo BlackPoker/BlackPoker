@@ -61,7 +61,8 @@ export class RegulationValidator {
     const recommended = frame.recommendedFormatIds.includes(formatId);
     const simulatorImplemented =
       (formatId === "light" && frameId === "entry16") ||
-      (formatId === "light" && frameId === "pack");
+      (formatId === "light" && frameId === "pack") ||
+      (formatId === "light" && frameId === "test-search-frame");
 
     if (options?.assertImplemented && !simulatorImplemented) {
       throw new SimulatorNotImplementedError(formatId, frameId);

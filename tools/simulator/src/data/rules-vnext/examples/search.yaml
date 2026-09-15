@@ -18,3 +18,21 @@ actions:
 
     text:
       effect: ライフから好きなカードを1枚選び対戦相手に見せ手札に加える。その後ライフをシャッフルする。
+
+    effect:
+      - selectCards:
+          id: searchCard
+          zone: life
+          count: 1
+          chooser: self
+      - revealCard:
+          card: selection.searchCard
+          target: opponent
+          sourceZone: life
+      - moveCard:
+          card: selection.searchCard
+          from: life
+          to: hand
+      - shuffleZone:
+          zone: life
+          player: self

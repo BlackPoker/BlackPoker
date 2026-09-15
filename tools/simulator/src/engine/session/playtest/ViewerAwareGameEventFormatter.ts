@@ -5,6 +5,7 @@ import { PlayerKey } from "../../../domain/decision/DecisionSource";
 import {
   CanonicalGameEvent,
   CardRevealedEvent,
+  ZoneShuffledEvent,
 } from "../../../domain/log/CanonicalMatchLog";
 import {
   PlaytestPresentationEvent,
@@ -607,6 +608,25 @@ export class ViewerAwareGameEventFormatter {
             "action",
             {
               actorPlayerId: rev.revealedBy,
+              actorName,
+            }
+          )
+        );
+      } else if (cev.type === "zone.shuffled") {
+        const shuf = cev as ZoneShuffledEvent;
+        const actorName = getPlayerName(shuf.playerId);
+        const zoneNames: Record<string, string> = {
+          life: "ライフ",
+          deck: "デッキ",
+        };
+        const zoneDisplay = zoneNames[shuf.zone] || shuf.zone;
+        events.push(
+          createEvent(
+            "ACTION_RESOLVED",
+            `[シャッフル] ${actorName} が${zoneDisplay} (${shuf.cardCount}枚) をシャッフルしました`,
+            "action",
+            {
+              actorPlayerId: shuf.playerId,
               actorName,
             }
           )
