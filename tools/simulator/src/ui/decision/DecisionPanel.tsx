@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
-import { formatCardDisplay, formatCardList } from "../../engine/rules/cardUtils";
+import { formatCardDisplay, formatCardList, formatSuitSymbol } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
 import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 
@@ -124,13 +124,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     };
   }, [onHighlightRequest]);
 
-  // 1. 選択可能なアクション一覧
+  // 1. 選択可能なアクション一覧（カタログ定義順 / 公式Action順で表示）
   const availableActionRefs = useMemo(() => {
     const refs = new Set<number>();
     for (const p of patterns) {
       if (p.actionSelectionRef !== undefined) refs.add(p.actionSelectionRef);
     }
-    return Array.from(refs);
+    return Array.from(refs).sort((a, b) => a - b);
   }, [patterns]);
 
   // 2. 選択中アクションで絞り込まれたパターン
@@ -351,9 +351,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
       // 0. カード選択 (selectionType === "card" / 手札破棄等)
       if (eff.selectionType === "card") {
+        let label = eff.summary;
+        if (!label) {
+          const formattedCards = (eff.selectedValues || []).map((val) => formatCardDisplay(val) || val);
+          label = `カード選択: ${formattedCards.join(", ")}`;
+        }
+        // ASCII 短縮コード (s10, hJ, dA, cK 等) が含まれている場合の安全な表示変換 (SSOT: formatCardDisplay / formatSuitSymbol)
+        label = label.replace(/\b([shdcSHDC])(10|[2-9ajqkAJQK])\b/g, (_m, s, r) => `${formatSuitSymbol(s)}${r.toUpperCase()}`);
         return {
           patternIndex: idx,
-          label: eff.summary || `カード選択: ${(eff.selectedValues || []).join(", ")}`,
+          label,
           selectedValues: eff.selectedValues || [],
         };
       }
@@ -496,7 +503,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               EFFECT SELECTION
             </span>
             <h2 className="text-sm font-bold text-zinc-950 mt-0.5 tracking-wide">
-              {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "対象・割当て指定"}
+              {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "効果を選択"}
             </h2>
           </div>
 

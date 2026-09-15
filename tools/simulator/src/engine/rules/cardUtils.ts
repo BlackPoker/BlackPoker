@@ -49,8 +49,21 @@ export function formatCardDisplay(card?: {
   value?: number;
   code?: string;
   visibility?: string;
-}): string {
+} | string): string {
   if (!card) return "";
+  if (typeof card === "string") {
+    const trimmed = card.trim();
+    if (trimmed.toLowerCase() === "jk" || trimmed.toLowerCase() === "joker") {
+      return "Joker";
+    }
+    const match = trimmed.match(/^([shdcSHDC♠♡♢♣])(10|[2-9ajqkAJQK])$/);
+    if (match) {
+      const symbol = formatSuitSymbol(match[1]);
+      const rank = match[2].toUpperCase();
+      return `${symbol}${rank}`;
+    }
+    return card;
+  }
   if (card.visibility === "HIDDEN" || (!card.suit && !card.rank)) return "🂠";
   if (isJokerCard(card)) return "Joker";
 

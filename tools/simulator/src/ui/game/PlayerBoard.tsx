@@ -41,14 +41,14 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const isTurnPlayer = viewModel.isTurnPlayer;
   const isChancePlayer = viewModel.isChancePlayer;
   const lifeDisplay = viewModel.lifeDisplay;
-  const handCards = viewModel.handCards;
+  const handCards = viewModel.handCards || [];
   const handCount = viewModel.handCount;
-  const fieldUnits = viewModel.fieldUnits;
-  const graveCards = viewModel.graveCards;
+  const fieldUnits = viewModel.fieldUnits || [];
+  const graveCards = viewModel.graveCards || [];
   const graveCount = viewModel.graveCount;
-  const canViewFullGrave = viewModel.canViewFullGrave;
-  const playerFog = viewModel.fog;
+  const playerFog = viewModel.fog || [];
   const isViewer = viewModel.isViewer;
+  const canViewFullGrave = viewModel.canViewFullGrave ?? isViewer;
   const pack = viewModel.pack;
 
   // 墓地トップカードの表示用バッジ
@@ -114,7 +114,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   // 兵士列 (中央寄り・右寄せ)
   const soldierRow = soldierUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
-      <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
+      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden sm:flex items-center justify-end">
         <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
       <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
@@ -127,7 +127,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   // 画面表示を左→右で見ると [③] [②] [①] となり ① がライフ側(右端)
   const bulwarkRow = bulwarkUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
-      <div className="text-[9px] font-mono font-bold text-zinc-500 flex items-center justify-end">
+      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden sm:flex items-center justify-end">
         <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
       <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
@@ -153,7 +153,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
             {name}
           </span>
           <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-100 text-zinc-700 border border-zinc-300">
-            {playerKey.toUpperCase()}
+            {(playerKey || viewModel.playerKey || "").toUpperCase()}
           </span>
           {isTurnPlayer && (
             <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-900 border border-zinc-400">
@@ -324,7 +324,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
               <span>HAND (手札: {handCount}枚)</span>
             </div>
 
-            <div className="flex gap-1 sm:gap-1.5 min-h-[44px] sm:min-h-[60px] p-1 sm:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
+            <div className="flex gap-1 sm:gap-1.5 min-h-[36px] sm:min-h-[60px] p-1 sm:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
               {handCards.length > 0 ? (
                 handCards.map((card: any, idx: number) => (
                   <CardView

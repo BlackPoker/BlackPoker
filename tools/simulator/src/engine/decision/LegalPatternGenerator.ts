@@ -10,7 +10,7 @@ import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { ActionActivationConditionEvaluator } from "../rules/ActionActivationConditionEvaluator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
-import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort } from "../rules/cardUtils";
+import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay } from "../rules/cardUtils";
 
 
 export interface DecisionGenerationMetrics {
@@ -507,7 +507,7 @@ export class LegalPatternGenerator {
 
     combos.forEach((combo, index) => {
       const selectedValues = combo.map((c) => c.id);
-      const cardNames = combo.map((c) => formatCardCodeShort(c)).join(", ");
+      const cardNames = combo.map((c) => formatCardDisplay(c)).join(", ");
 
       let summary = `カード選択 (${requiredCount}枚): [${cardNames}]`;
       if (options?.selectionId === "bulwarkCard" || sourceRequest?.actionId === "action.setBulwark" || sourceRequest?.action?.id === "action.setBulwark") {

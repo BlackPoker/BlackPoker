@@ -1023,6 +1023,25 @@ export const CoreBattlePlaytest: React.FC = () => {
     (activeMatchMode === "humanVsHuman" || currentStep.request.playerId === activeHumanSeat) &&
     !isAiProcessing;
 
+  // Immediate アクション実行後等の新しい Human EFFECT_RESOLUTION 判断要求時に Bottom Sheet を自動展開
+  const lastAutoOpenedDecisionIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (
+      !isDesktop &&
+      isHumanTurnWaiting &&
+      currentStep?.type === "WAITING_FOR_DECISION" &&
+      currentStep.request.source?.type === "EFFECT_RESOLUTION"
+    ) {
+      if (lastAutoOpenedDecisionIdRef.current !== currentStep.request.decisionId) {
+        lastAutoOpenedDecisionIdRef.current = currentStep.request.decisionId;
+        if (sheetMode === "collapsed") {
+          setSheetMode("half");
+        }
+      }
+    }
+  }, [isDesktop, isHumanTurnWaiting, currentStep, sheetMode]);
+
   // キーボードショートカット (P: PASS)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
