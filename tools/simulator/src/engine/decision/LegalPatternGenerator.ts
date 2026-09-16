@@ -8,7 +8,7 @@ import { CostPaymentEnumerator } from "./CostPaymentEnumerator";
 import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { ActionActivationConditionEvaluator } from "../rules/ActionActivationConditionEvaluator";
-import { ActionCostEvaluator } from "../rules/ActionCostEvaluator";
+import { ActionCostEvaluator, InvalidActionCostError } from "../rules/ActionCostEvaluator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay } from "../rules/cardUtils";
@@ -76,9 +76,12 @@ export class LegalPatternGenerator {
           playerId,
           rulePackage.components
         );
-      } catch {
-        // 不正なコスト定義を持つ Action は合法パターン生成からスキップ (fail-closed)
-        continue;
+      } catch (err) {
+        if (err instanceof InvalidActionCostError) {
+          // 不正なコスト定義を持つ Action は合法パターン生成からスキップ (fail-closed)
+          continue;
+        }
+        throw err;
       }
 
       for (const keyCards of keyCardCombinations) {

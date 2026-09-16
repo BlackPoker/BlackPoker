@@ -1302,7 +1302,7 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
     }).toThrow();
   });
 
-  it("Test AK: PatternExecutor rejects pattern execution of Action with invalid cost 'X'", () => {
+  it("Test AK-R2: PatternExecutor rejects pattern execution of Action with invalid cost 'X' after validateResponse passes", () => {
     const invalidAction: ActionDefinition = {
       id: "action.invalid_x",
       name: "Invalid X",
@@ -1315,6 +1315,7 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
       actions: [invalidAction],
     };
     const state = {
+      stateVersion: 1,
       chancePlayer: "p1",
       turnPlayer: "p1",
       players: {
@@ -1324,6 +1325,7 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
     };
     const decisionRequest: any = {
       decisionId: "dec-invalid-cost",
+      stateVersion: 1,
       decisionType: "ACTION_REQUEST",
       playerId: "p1",
       catalog: {
@@ -1341,6 +1343,7 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
         ],
         targetSelections: [],
         effectSelections: [],
+        orderSelections: [],
       },
       patterns: [
         {
@@ -1353,12 +1356,24 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
     };
     const response: any = {
       decisionId: "dec-invalid-cost",
-      selectedPatternId: "pat-inv-1",
+      stateVersion: 1,
+      selectedPatternRef: 0,
     };
     const registry = new CommandRegistry();
+
+    // 1. validateResponse 自体は正常に通過することを確認（形式エラーで落ちていないことの実証）
+    expect(() => {
+      PatternExecutor.validateResponse(decisionRequest, response, state.stateVersion);
+    }).not.toThrow();
+
+    // 2. 実行時に invalid cost そのものにより reject されることを確認
     expect(() => {
       PatternExecutor.executeResponse(decisionRequest, response, state, rulePkg, registry);
-    }).toThrow();
+    }).toThrow(ValidationError);
+
+    expect(() => {
+      PatternExecutor.executeResponse(decisionRequest, response, state, rulePkg, registry);
+    }).toThrow(/コスト定義.*不正/);
   });
 
   it("Test AL: Valid No Cost: cost undefined / empty string is treated as legitimate no-cost", () => {
@@ -1452,5 +1467,141 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
       costEvaluator.resolveEffectiveCost(invalidAction, state, "p1", standardRulePackage.components);
     }).toThrow(InvalidActionCostError);
     expect(invalidAction.cost).toBe("X");
+  });
+
+  it("Test AP: LegalPatternGenerator skips Action that throws InvalidActionCostError without error", () => {
+    const state = {
+      chancePlayer: "p1",
+      turnPlayer: "p1",
+      players: {
+        p1: {
+          hand: [{ id: "h1", suit: "S", rank: "A", value: 1 }],
+          field: [{ unitId: "u1", componentId: "character.soldier", face: "up", state: "charge", size: 5 }],
+          grave: [],
+          life: [],
+        },
+        p2: {
+          field: [{ unitId: "u2", componentId: "character.soldier", face: "up", state: "charge", size: 5 }],
+        },
+      },
+      stage: { requests: [] },
+    };
+
+    const invalidAction: ActionDefinition = {
+      id: "action.invalid_x",
+      name: "Invalid X Action",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "main" },
+      cost: "X",
+    };
+
+    const mixedPkg: RulePackage = {
+      ...standardRulePackage,
+      actions: [...standardRulePackage.actions, invalidAction],
+    };
+
+    // InvalidActionCostError はスキップされ、Decision 全体は例外なく完了する
+    expect(() => {
+      const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", mixedPkg);
+      const invalidPat = decision.request.patterns.find(
+        (p) =>
+          p.kind === "ACTION" &&
+          p.actionSelectionRef !== undefined &&
+          decision.request.catalog.actions[p.actionSelectionRef]?.actionId === "action.invalid_x"
+      );
+      expect(invalidPat).toBeUndefined();
+    }).not.toThrow();
+  });
+
+  it("Test AQ: LegalPatternGenerator rethrows unexpected Error and does not swallow it", () => {
+    const state = {
+      chancePlayer: "p1",
+      turnPlayer: "p1",
+      players: {
+        p1: {
+          hand: [{ id: "h1", suit: "S", rank: "A", value: 1 }],
+          field: [{ unitId: "u1", componentId: "character.soldier", face: "up", state: "charge", size: 5 }],
+          grave: [],
+          life: [],
+        },
+      },
+      stage: { requests: [] },
+    };
+
+    const originalCostEvaluator = (LegalPatternGenerator as any).costEvaluator;
+    try {
+      (LegalPatternGenerator as any).costEvaluator = {
+        resolveEffectiveCost: () => {
+          throw new Error("unexpected internal programming failure");
+        },
+      };
+
+      expect(() => {
+        LegalPatternGenerator.generateActionRequestDecision(state, "p1", standardRulePackage);
+      }).toThrow("unexpected internal programming failure");
+    } finally {
+      (LegalPatternGenerator as any).costEvaluator = originalCostEvaluator;
+    }
+  });
+
+  it("Test AR: LegalPatternGenerator generates patterns for valid actions normally", () => {
+    const state = {
+      chancePlayer: "p1",
+      turnPlayer: "p1",
+      players: {
+        p1: {
+          hand: [{ id: "h1", suit: "S", rank: "A", value: 1 }],
+          field: [{ unitId: "u1", componentId: "character.soldier", face: "up", state: "charge", size: 5 }],
+          grave: [],
+          life: [],
+        },
+        p2: {
+          field: [{ unitId: "u2", componentId: "character.soldier", face: "up", state: "charge", size: 5 }],
+        },
+      },
+      stage: { requests: [] },
+    };
+
+    const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", standardRulePackage);
+    expect(decision.request.patterns.length).toBeGreaterThan(0);
+    const attackPat = decision.request.patterns.find(
+      (p) =>
+        p.kind === "ACTION" &&
+        p.actionSelectionRef !== undefined &&
+        decision.request.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack"
+    );
+    expect(attackPat).toBeDefined();
+  });
+
+  it("Test AS: Magician regression: Quick Magic D becomes no-cost with Magician", () => {
+    const state = {
+      players: {
+        p1: {
+          field: [{ unitId: "m1", componentId: "character.magician", face: "up" }],
+        },
+      },
+    };
+    const upAction = standardRulePackage.actions.find((a) => a.id === "action.up")!;
+    const effCost = costEvaluator.resolveEffectiveCost(upAction, state, "p1", standardRulePackage.components);
+    expect(effCost).toBe("");
+  });
+
+  it("Test AT: Valid No Cost: undefined / empty cost evaluates to empty string without error", () => {
+    const undefAction: ActionDefinition = {
+      id: "syn.no_cost_undef",
+      name: "No Cost Undef",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "main" },
+    };
+    const emptyAction: ActionDefinition = {
+      id: "syn.no_cost_empty",
+      name: "No Cost Empty",
+      type: "magic",
+      request: { trigger: "direct", speed: "normal", timing: "main" },
+      cost: "",
+    };
+
+    expect(costEvaluator.resolveEffectiveCost(undefAction, {}, "p1", standardRulePackage.components)).toBe("");
+    expect(costEvaluator.resolveEffectiveCost(emptyAction, {}, "p1", standardRulePackage.components)).toBe("");
   });
 });

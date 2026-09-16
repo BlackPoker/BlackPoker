@@ -9,7 +9,7 @@ import {
   evaluatePlayerTargetCondition,
 } from "./targetConditionUtils";
 import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
-import { ActionCostEvaluator } from "./ActionCostEvaluator";
+import { ActionCostEvaluator, InvalidActionCostError } from "./ActionCostEvaluator";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -178,9 +178,12 @@ export class ActionRequestValidator {
         context.components
       );
     } catch (err: any) {
-      throw new ValidationError(
-        `アクション [${action.id || "unknown"}] のコスト定義 [${action.cost}] が不正です: ${err?.message || err}`
-      );
+      if (err instanceof InvalidActionCostError) {
+        throw new ValidationError(
+          `アクション [${action.id || "unknown"}] のコスト定義 [${action.cost}] が不正です: ${err?.message || err}`
+        );
+      }
+      throw err;
     }
     if (effectiveCost) {
       const costResolver = new CostResolver();
