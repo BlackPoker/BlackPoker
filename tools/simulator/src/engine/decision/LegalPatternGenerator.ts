@@ -68,12 +68,18 @@ export class LegalPatternGenerator {
       totalKeyCards += keyCardCombinations.length;
 
       // Effective Cost の導出 (SSOT)
-      const effectiveCost = this.costEvaluator.resolveEffectiveCost(
-        action,
-        state,
-        playerId,
-        rulePackage.components
-      );
+      let effectiveCost: string;
+      try {
+        effectiveCost = this.costEvaluator.resolveEffectiveCost(
+          action,
+          state,
+          playerId,
+          rulePackage.components
+        );
+      } catch {
+        // 不正なコスト定義を持つ Action は合法パターン生成からスキップ (fail-closed)
+        continue;
+      }
 
       for (const keyCards of keyCardCombinations) {
         const keyCardSet = new Set<string>(keyCards.map((c) => c.id));

@@ -15,6 +15,13 @@ export interface CostModifierDefinition {
   [key: string]: any;
 }
 
+export class InvalidActionCostError extends Error {
+  constructor(message: string, public readonly cost?: string, public readonly actionId?: string) {
+    super(message);
+    this.name = "InvalidActionCostError";
+  }
+}
+
 /**
  * アクションの実行時実効コスト (Effective Cost) を導出する単一責任クラス (SSOT)。
  * ActionDefinition の base cost を不変に保ち、現在の GameState、コントローラーの Field 上の
@@ -54,8 +61,12 @@ export class ActionCostEvaluator {
     let currentSymbols: CostSymbol[];
     try {
       currentSymbols = parseCost(action.cost);
-    } catch {
-      return [];
+    } catch (err: any) {
+      throw new InvalidActionCostError(
+        `アクション [${action.id || "unknown"}] のコスト [${action.cost}] のパースに失敗しました: ${err?.message || err}`,
+        action.cost,
+        action.id
+      );
     }
 
     if (!state || !playerKey) {

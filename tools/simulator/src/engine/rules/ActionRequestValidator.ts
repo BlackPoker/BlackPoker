@@ -169,12 +169,19 @@ export class ActionRequestValidator {
     }
 
     // 0.5. コスト (cost) の事前検証 (Effective Cost SSOT を利用)
-    const effectiveCost = this.costEvaluator.resolveEffectiveCost(
-      action,
-      context.state,
-      context.playerKey,
-      context.components
-    );
+    let effectiveCost: string;
+    try {
+      effectiveCost = this.costEvaluator.resolveEffectiveCost(
+        action,
+        context.state,
+        context.playerKey,
+        context.components
+      );
+    } catch (err: any) {
+      throw new ValidationError(
+        `アクション [${action.id || "unknown"}] のコスト定義 [${action.cost}] が不正です: ${err?.message || err}`
+      );
+    }
     if (effectiveCost) {
       const costResolver = new CostResolver();
       if (!costResolver.canPay(effectiveCost, context)) {
