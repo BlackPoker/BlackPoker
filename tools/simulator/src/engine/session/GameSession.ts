@@ -500,6 +500,11 @@ export class GameSession {
           selectedValues = effSel.selectedValues;
           assignments = effSel.assignments;
         }
+      } else if (pattern.orderSelectionRef !== undefined) {
+        const ordSel = this.pendingDecision.catalog.orderSelections[pattern.orderSelectionRef];
+        if (ordSel) {
+          selectedValues = ordSel.orderedIds;
+        }
       }
 
       const resumeResult = this.registry.resumeRequest(

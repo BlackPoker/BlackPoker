@@ -26,6 +26,7 @@ import {
   revealCardHandler,
   shuffleZoneHandler,
   deployTopCardsAsUnitsHandler,
+  moveUnitCardsToZoneTopHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -647,7 +648,7 @@ export class CommandRegistry {
           const decisionRequest = this.createEffectDecisionRequest(
             execResult,
             request,
-            context
+            resolveContext
           );
 
           return {
@@ -777,7 +778,9 @@ export class CommandRegistry {
       selections,
     };
 
-    const startIndex = (continuation.effectPath[0] ?? 0) + 1;
+    const startIndex = continuation.effectStepId === "selectUnitCardOrder"
+      ? (continuation.effectPath[0] ?? 0)
+      : (continuation.effectPath[0] ?? 0) + 1;
     const execResult = this.effectInterpreter.executeEffectsWithInterruption(
       action.effect,
       resolveContext,
@@ -880,6 +883,20 @@ export class CommandRegistry {
           selectionId: execResult.selectionId,
           stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
           matchId: context.state.matchId,
+        }
+      );
+    } else if (execResult.selectionType === "order") {
+      return LegalPatternGenerator.generateOrderSelectionDecision(
+        context.state,
+        decisionPlayerId,
+        request,
+        execResult.effectStepId,
+        execResult.candidates,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+          currentSelections: context.selections,
         }
       );
     } else {
@@ -1034,5 +1051,6 @@ export class CommandRegistry {
     this.register("revealCard", revealCardHandler(this.effectInterpreter));
     this.register("shuffleZone", shuffleZoneHandler(this.effectInterpreter));
     this.register("deployTopCardsAsUnits", deployTopCardsAsUnitsHandler(this.effectInterpreter));
+    this.register("moveUnitCardsToZoneTop", moveUnitCardsToZoneTopHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

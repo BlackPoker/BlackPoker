@@ -234,6 +234,8 @@ export class SimulationRunner {
             summary = actionId;
           } else if (selectedPat?.effectSelectionRef !== undefined) {
             summary = "EFFECT_SELECTION";
+          } else if (selectedPat?.orderSelectionRef !== undefined) {
+            summary = "ORDER_SELECTION";
           }
           options.onStep({
             stepCount: totalDecisions,

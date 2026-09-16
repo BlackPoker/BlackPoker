@@ -124,6 +124,7 @@ export function validateTargetsAtResolution(
       }
 
       targetComponent = foundUnit;
+      targetPlayerKey = foundOwnerKey;
     } else if (t.type === "player") {
       const playerKey = t.targetPlayerKey || (t as any).playerId || (t as any).playerKey;
       if (!context.state.players?.[playerKey]) {

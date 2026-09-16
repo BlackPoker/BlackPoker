@@ -1,5 +1,5 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
-import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection, EffectSelection, UnitAssignment } from "../../domain/decision/DecisionCatalog";
+import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection, EffectSelection, UnitAssignment, OrderSelection } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { PlayerKey, DecisionSource } from "../../domain/decision/DecisionSource";
 import { RulePackage, ActionDefinition, ComponentDefinition, ActionRequest } from "../../domain/rules/RulePackage";
@@ -641,6 +641,89 @@ export class LegalPatternGenerator {
       targetSelections: [],
       effectSelections,
       orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    return {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+  }
+
+  /**
+   * ユニット構成カードの順序選択時（EFFECT_RESOLUTION）の DecisionRequest を生成します。
+   * 全順列 (N!) ではなく、未決定の残りカードから1枚ずつ選ぶ逐次決定 (最大 N-1 回) を採用します。
+   */
+  static generateOrderSelectionDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: any,
+    effectStepId: string,
+    candidates: any[],
+    options?: {
+      stateVersion?: number;
+      matchId?: string;
+      decisionId?: string;
+      selectionId?: string;
+      currentSelections?: Record<string, any>;
+    }
+  ): DecisionRequest {
+    const stateVersion = options?.stateVersion ?? (state.stateVersion || 1);
+    const matchId = options?.matchId ?? (state.matchId || "match-1");
+    const decisionId = options?.decisionId ?? `dec-ord-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const selectionId = options?.selectionId || effectStepId || "order";
+    const partialOrder: string[] = Array.isArray(options?.currentSelections?.[selectionId])
+      ? options!.currentSelections![selectionId]
+      : [];
+
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    // 未決定の候補カード群
+    const remainingCards = candidates.filter((c) => !partialOrder.includes(c.id));
+
+    const orderSelections: OrderSelection[] = [];
+    const patterns: LegalPattern[] = [];
+
+    remainingCards.forEach((card, index) => {
+      const nextPartialIds = [...partialOrder, card.id];
+      const orderedCards = nextPartialIds.map((id) => candidates.find((c) => c.id === id) || { id });
+      const cardDisplays = orderedCards.map((c) => formatCardDisplay(c));
+      const summary = `上から ${cardDisplays.join(" → ")}`;
+
+      orderSelections.push({
+        orderedIds: nextPartialIds,
+        summary,
+      });
+
+      patterns.push({
+        patternId: `effect-order-${index}-${card.id}`,
+        kind: "EFFECT_SELECTION",
+        orderSelectionRef: index,
+      });
+    });
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections: [],
+      effectSelections: [],
+      orderSelections,
     };
 
     const source: DecisionSource = {

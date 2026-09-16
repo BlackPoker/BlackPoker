@@ -36,7 +36,8 @@ export class PatternExpander {
 
     if (pattern.kind === "EFFECT_SELECTION") {
       const effSel = pattern.effectSelectionRef !== undefined ? catalog.effectSelections[pattern.effectSelectionRef] : undefined;
-      const summary = effSel?.summary || "効果解決の選択";
+      const ordSel = pattern.orderSelectionRef !== undefined ? catalog.orderSelections?.[pattern.orderSelectionRef] : undefined;
+      const summary = effSel?.summary || ordSel?.summary || "効果解決の選択";
       return {
         patternRef,
         patternId: pattern.patternId,

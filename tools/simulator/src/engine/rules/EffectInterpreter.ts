@@ -1,11 +1,12 @@
 import { CommandRegistry, CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
-import { getOpponentPlayerKey } from "./playerUtils";
+import { getOpponentPlayerKey, findUnitOwnerPlayerKey } from "./playerUtils";
 import { hasUnitLabel, isCharacterComponent, hasHaste } from "./characterUtils";
 import { matchesSuit, matchesRank } from "./cardUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { validateOptionSelectionDefinition } from "./OptionSelectionValidator";
+import { validatePartialOrder, validateCompleteOrder } from "./OrderSelectionValidator";
 
 
 export interface EffectInterruption {
@@ -13,7 +14,7 @@ export interface EffectInterruption {
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
-  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option";
+  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option" | "order";
   readonly candidates: any[];
   readonly attackers?: any[];
   readonly requiredCount?: number;
@@ -115,7 +116,9 @@ export class EffectInterpreter {
     const name = keys[0];
     const args = effect[name];
 
-    if (name === "if") {
+    if (name === "guardCondition") {
+      return;
+    } else if (name === "if") {
       if (this.expressionEvaluator.evaluateCondition(args.condition, context, this.abilityEvaluator)) {
         if (args.then && Array.isArray(args.then)) {
           this.executeEffects(args.then, context);
@@ -140,6 +143,18 @@ export class EffectInterpreter {
    */
   executeEffects(effects: any[], context: CommandContext) {
     for (const effect of effects) {
+      const keys = Object.keys(effect);
+      if (keys.length > 0 && keys[0] === "guardCondition") {
+        const passed = this.expressionEvaluator.evaluateCondition(
+          effect.guardCondition.condition,
+          context,
+          this.abilityEvaluator
+        );
+        if (!passed) {
+          return;
+        }
+        continue;
+      }
       this.executeEffect(effect, context);
     }
   }
@@ -160,6 +175,17 @@ export class EffectInterpreter {
     if (spec === "nonTurnPlayer") {
       return context.state.nonTurnPlayer || getOpponentPlayerKey(context.state.turnPlayer || context.playerKey, context.state);
     }
+    if (spec === "targetOwner") {
+      if (context.targetComponent && context.state) {
+        return findUnitOwnerPlayerKey(context.state, context.targetComponent.unitId);
+      }
+      if (context.targetPlayerKey) {
+        return context.targetPlayerKey;
+      }
+    }
+    if (context.state.players?.[spec]) {
+      return spec as PlayerKey;
+    }
     return context.playerKey;
   }
 
@@ -177,6 +203,18 @@ export class EffectInterpreter {
       if (keys.length === 0) continue;
       const name = keys[0];
       const args = effect[name];
+
+      if (name === "guardCondition") {
+        const passed = this.expressionEvaluator.evaluateCondition(
+          args.condition,
+          context,
+          this.abilityEvaluator
+        );
+        if (!passed) {
+          return { completed: true };
+        }
+        continue;
+      }
 
       if (name === "selectUnits") {
         const selectionId = args.id || "attackers";
@@ -341,6 +379,86 @@ export class EffectInterpreter {
           selectionId,
           selectionType: "option",
           candidates: validated.options,
+          decisionPlayerKey,
+        };
+      }
+
+      if (name === "selectUnitCardOrder") {
+        const selectionId = args.id || "order";
+
+        // ターゲットユニットの特定
+        let targetUnit: any = context.targetComponent;
+        if (!targetUnit && args.target) {
+          const targetUnitId = this.expressionEvaluator.resolveBindingValue(args.target, context);
+          if (typeof targetUnitId === "string") {
+            for (const p of Object.values<any>(context.state.players || {})) {
+              const u = p.field?.find((unit: any) => unit.unitId === targetUnitId);
+              if (u) {
+                targetUnit = u;
+                break;
+              }
+            }
+          }
+        }
+
+        if (!targetUnit) {
+          throw new Error(`selectUnitCardOrder: 対象ユニットが見つかりません (target: ${args.target})`);
+        }
+
+        const cards: any[] = Array.isArray(targetUnit.cards) ? targetUnit.cards : [];
+        if (cards.length === 0) {
+          throw new Error(`selectUnitCardOrder: ユニット (${targetUnit.unitId}) の構成カードが0枚です (fail-closed)`);
+        }
+
+        const candidateCardIds = cards.map((c) => c.id);
+
+        // オーナー（判断権を持つプレイヤー）の特定
+        const decisionPlayerKey = this.resolveDecisionPlayerKey(args.chooser || args.decisionPlayer || "targetOwner", context);
+
+        // 現在の選択状態を取得
+        const currentSelection = context.selections?.[selectionId];
+
+        // 1枚のみの場合: 決定不要で自動束縛
+        if (cards.length === 1) {
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = [cards[0].id];
+          continue;
+        }
+
+        // 2枚以上の場合
+        let partialOrder: string[] = [];
+        if (Array.isArray(currentSelection)) {
+          validatePartialOrder(currentSelection, candidateCardIds);
+          partialOrder = currentSelection;
+        } else if (currentSelection !== undefined) {
+          throw new Error(`selectUnitCardOrder: selection.${selectionId} の値が配列ではありません`);
+        }
+
+        // すでに全カード確定済みの場合
+        if (partialOrder.length === cards.length) {
+          validateCompleteOrder(partialOrder, candidateCardIds);
+          continue;
+        }
+
+        const remainingCardIds = candidateCardIds.filter((id) => !partialOrder.includes(id));
+
+        // 残り1枚の場合は自動確定して次ステップへ
+        if (remainingCardIds.length === 1) {
+          const finalOrder = [...partialOrder, remainingCardIds[0]];
+          validateCompleteOrder(finalOrder, candidateCardIds);
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = finalOrder;
+          continue;
+        }
+
+        // 2枚以上残っている場合はオーナーに選択を要求
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "order",
+          candidates: cards,
           decisionPlayerKey,
         };
       }

@@ -113,10 +113,11 @@ export class PatternExecutor {
 
     if (targetSel) {
       if (targetSel.targetType === "unit" && targetSel.targetUnitId) {
-        for (const p of Object.values<any>(state.players || {})) {
+        for (const [pKey, p] of Object.entries<any>(state.players || {})) {
           const u = p.field?.find((unit: any) => unit.unitId === targetSel.targetUnitId);
           if (u) {
             targetComponent = u;
+            targetPlayerKey = pKey;
             break;
           }
         }

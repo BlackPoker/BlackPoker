@@ -1,6 +1,18 @@
 import { CommandContext } from "./CommandRegistry";
 import { AbilityEvaluator } from "./AbilityEvaluator";
-import { rankToValue } from "./cardUtils";
+import { normalizeSuit, rankToValue } from "./cardUtils";
+import { findUnitOwnerPlayerKey } from "./playerUtils";
+
+/**
+ * 指定されたスートに合致するキーカードのランク数値を解決します。
+ */
+export function resolveKeyCardRankValueBySuit(context: CommandContext, suit: string): number {
+  if (!context.keyCards || !Array.isArray(context.keyCards)) return 0;
+  const targetSuit = normalizeSuit(suit);
+  const card = context.keyCards.find((c: any) => normalizeSuit(c.suit) === targetSuit);
+  if (!card) return 0;
+  return card.value !== undefined ? card.value : rankToValue(card.rank);
+}
 
 /**
  * 条件式判定やバインディング値の評価・解決を担当します。
@@ -59,7 +71,7 @@ export class ExpressionEvaluator {
     abilityEvaluator?: AbilityEvaluator
   ): number {
     expr = expr.trim();
-    const tokens = expr.split(/\s*([+-])\s*/).filter(Boolean);
+    const tokens = expr.split(/\s*([+\-%])\s*/).filter(Boolean);
     if (tokens.length <= 1) {
       return this.resolveNumericValue(tokens[0] || expr, context, abilityEvaluator);
     }
@@ -68,8 +80,16 @@ export class ExpressionEvaluator {
     for (let i = 1; i < tokens.length; i += 2) {
       const op = tokens[i];
       const nextVal = this.resolveNumericValue(tokens[i + 1], context, abilityEvaluator);
-      if (op === "+") result += nextVal;
-      if (op === "-") result -= nextVal;
+      if (op === "+") {
+        result += nextVal;
+      } else if (op === "-") {
+        result -= nextVal;
+      } else if (op === "%") {
+        if (!Number.isFinite(nextVal) || nextVal <= 0) {
+          throw new Error(`Invalid modulo divisor: ${nextVal}`);
+        }
+        result = result % nextVal;
+      }
     }
     return result;
   }
@@ -91,6 +111,14 @@ export class ExpressionEvaluator {
       const card = context.keyCard || context.keyCards?.[0];
       if (!card) return 0;
       return card.value !== undefined ? card.value : rankToValue(card.rank);
+    }
+
+    if (token === "keyCards.spade.rankValue") {
+      return resolveKeyCardRankValueBySuit(context, "spade");
+    }
+
+    if (token === "keyCards.diamond.rankValue") {
+      return resolveKeyCardRankValueBySuit(context, "diamond");
     }
 
     if (token === "targetRequest.keyCards.count") {
@@ -121,11 +149,24 @@ export class ExpressionEvaluator {
         const val = context.keyCard.value !== undefined ? context.keyCard.value : rankToValue(context.keyCard.rank);
         return -val;
       }
-      if (value === "keyCards.spade.rankValue" && context.keyCards) {
-        const spadeCard = context.keyCards.find(
-          (c: any) => c.suit === "S" || c.suit === "spade" || c.suit?.toLowerCase() === "spade"
-        );
-        return spadeCard ? (spadeCard.value !== undefined ? spadeCard.value : rankToValue(spadeCard.rank)) : 0;
+      if (value === "keyCards.spade.rankValue") {
+        return resolveKeyCardRankValueBySuit(context, "spade");
+      }
+      if (value === "keyCards.diamond.rankValue") {
+        return resolveKeyCardRankValueBySuit(context, "diamond");
+      }
+      if (value === "targetOwner") {
+        if (context.targetPlayerKey) {
+          return context.targetPlayerKey;
+        }
+        if (context.targetComponent && context.state) {
+          try {
+            return findUnitOwnerPlayerKey(context.state, context.targetComponent.unitId);
+          } catch {
+            return undefined;
+          }
+        }
+        return undefined;
       }
       if (value === "target" && context.targetComponent) {
         return context.targetComponent.unitId;

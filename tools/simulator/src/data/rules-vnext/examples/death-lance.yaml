@@ -1,0 +1,48 @@
+actions:
+  - id: action.deathLance
+    name: 死の槍
+    ruby: しのやり
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: spade
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: diamond
+            rank: "A..K"
+            zone: hand
+
+    targets:
+      - id: target
+        type: unit
+        condition:
+          characterType: soldier
+
+    text:
+      effect: 対象の兵士のサイズが0以外であり、かつ、キーカードの♢カードの数字で割り切れる場合、次を行う。1. 対象の兵士をオーナーのライフの一番上に裏向きで移す。兵士が複数のカードから成る場合、任意の順でライフの一番上に裏向きで移す。2. 対象の兵士のオーナーにX点のダメージを与える。Xはキーカードの♠カードの数字に等しい。
+
+    effect:
+      - guardCondition:
+          condition: "target.size != 0 && target.size % keyCards.diamond.rankValue == 0"
+      - selectUnitCardOrder:
+          id: deathLanceOrder
+          target: target
+          chooser: targetOwner
+      - moveUnitCardsToZoneTop:
+          target: target
+          player: targetOwner
+          zone: life
+          order: selection.deathLanceOrder
+      - dealDamage:
+          target: targetOwner
+          amount: keyCards.spade.rankValue

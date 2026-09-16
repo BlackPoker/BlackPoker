@@ -1,8 +1,9 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
-import { getOpponentPlayerKey } from "./playerUtils";
+import { getOpponentPlayerKey, findUnitOwnerPlayerKey } from "./playerUtils";
 import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
+import { validateCompleteOrder } from "./OrderSelectionValidator";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -674,16 +675,6 @@ export function dealDamageHandler(
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
 
-    // 要塞などのダメージ無効化常在能力の適用チェック
-    if (abilityEvaluator.shouldPreventDamage(context)) {
-      return;
-    }
-
-    const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, context);
-    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) {
-      return;
-    }
-
     // 対象プレイヤーのキーを解決
     let targetPlayerKey = "";
     if (target) {
@@ -698,6 +689,18 @@ export function dealDamageHandler(
     }
     if (!targetPlayerKey) {
       targetPlayerKey = context.targetPlayerKey || (context.playerKey === "p1" ? "p2" : "p1");
+    }
+
+    const damageContext = { ...context, targetPlayerKey };
+
+    // 要塞などのダメージ無効化常在能力の適用チェック
+    if (abilityEvaluator.shouldPreventDamage(damageContext)) {
+      return;
+    }
+
+    const resolvedAmount = expressionEvaluator.resolveBindingValue(amount, damageContext);
+    if (typeof resolvedAmount !== "number" || resolvedAmount <= 0) {
+      return;
     }
 
     const targetPlayer = context.state.players[targetPlayerKey];
@@ -717,8 +720,9 @@ export function dealDamageHandler(
       if (!card) break;
 
       // 墓地へ追加 (ダメージのカードとして追加)
+      const graveUnitId = `unit-grave-${context.currentRequest?.id || "req"}-${card.id}-${targetPlayerKey}-${i}-${context.state?.stateVersion ?? 1}`;
       targetPlayer.grave.push({
-        unitId: `unit-grave-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        unitId: graveUnitId,
         kind: "ダメージ",
         cards: [card],
         labels: [],
@@ -734,7 +738,7 @@ export function dealDamageHandler(
           playerKey: targetPlayerKey,
         },
       };
-      effectInterpreter.dispatchEvent(event, context);
+      effectInterpreter.dispatchEvent(event, damageContext);
     }
   };
 }
@@ -1373,6 +1377,114 @@ export function shuffleZoneHandler(effectInterpreter?: EffectInterpreter): Comma
     }
   };
 }
+
+/**
+ * moveUnitCardsToZoneTop: ユニットの構成カードを解除し、指定ゾーン（life等）の一番上へ指定順序で移動
+ */
+export function moveUnitCardsToZoneTopHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, player, zone = "life", order } = args;
+
+    // 1. ターゲットユニットの解決
+    let targetUnit: any = context.targetComponent;
+    if (target) {
+      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+      if (typeof resolvedTarget === "string") {
+        for (const p of Object.values<any>(context.state.players || {})) {
+          const u = p.field?.find((unit: any) => unit.unitId === resolvedTarget);
+          if (u) {
+            targetUnit = u;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!targetUnit) {
+      throw new Error(`moveUnitCardsToZoneTop: 対象ユニットが見つかりません (target: ${JSON.stringify(target)})`);
+    }
+
+    // 2. オーナーの特定
+    let ownerPlayerKey = "";
+    if (player) {
+      const resolvedPlayer = expressionEvaluator.resolveBindingValue(player, context);
+      if (typeof resolvedPlayer === "string" && context.state.players?.[resolvedPlayer]) {
+        ownerPlayerKey = resolvedPlayer;
+      }
+    }
+    if (!ownerPlayerKey) {
+      ownerPlayerKey = findUnitOwnerPlayerKey(context.state, targetUnit.unitId);
+    }
+    context.targetPlayerKey = ownerPlayerKey;
+
+    const owner = context.state.players?.[ownerPlayerKey];
+    if (!owner) {
+      throw new Error(`moveUnitCardsToZoneTop: オーナープレイヤーが見つかりません: ${ownerPlayerKey}`);
+    }
+
+    // ユニットがオーナーの field に存在するか検証
+    const unitIndex = owner.field ? owner.field.findIndex((u: any) => u.unitId === targetUnit.unitId) : -1;
+    if (unitIndex === -1) {
+      throw new Error(`moveUnitCardsToZoneTop: ユニット (${targetUnit.unitId}) がプレイヤー (${ownerPlayerKey}) のフィールドに存在しません`);
+    }
+
+    const cards: any[] = Array.isArray(targetUnit.cards) ? targetUnit.cards : [];
+    if (cards.length === 0) {
+      throw new Error(`moveUnitCardsToZoneTop: ユニット (${targetUnit.unitId}) の構成カードが0枚です`);
+    }
+
+    // 3. 順序の解決と完全検証
+    const resolvedOrder = expressionEvaluator.resolveBindingValue(order, context);
+    if (!Array.isArray(resolvedOrder)) {
+      throw new Error(`moveUnitCardsToZoneTop: 順序指定 (order) が解決できないか配列ではありません: ${JSON.stringify(order)} -> ${JSON.stringify(resolvedOrder)}`);
+    }
+
+    const candidateIds = cards.map((c) => c.id);
+    validateCompleteOrder(resolvedOrder, candidateIds);
+
+    // 4. ユニットをフィールドから除去
+    owner.field.splice(unitIndex, 1);
+
+    // 5. 順序に従ってカードを並べ替え
+    const orderedCards = resolvedOrder.map((id) => {
+      const c = cards.find((card) => card.id === id);
+      if (!c) throw new Error(`moveUnitCardsToZoneTop: カードIDが見つかりません: ${id}`);
+      return c;
+    });
+
+    // 6. 指定ゾーン（life）への挿入
+    if (zone === "life") {
+      if (!owner.life) {
+        owner.life = [];
+      }
+
+      // 各カードについて cardMoved イベントを発行 (fromZone: "field", toZone: "life")
+      // 裏向きで移すため cardRevealed イベントは発行しない
+      for (const card of orderedCards) {
+        const event = {
+          type: "cardMoved",
+          payload: {
+            card,
+            fromZone: "field",
+            toZone: "life",
+            playerKey: ownerPlayerKey,
+          },
+        };
+        effectInterpreter.dispatchEvent(event, context);
+      }
+
+      // ライフのTOP (インデックス0) へ一括挿入
+      // orderedCards = [A, B] -> owner.life.unshift(A, B) -> owner.life[0] は A (TOP)
+      owner.life.unshift(...orderedCards);
+    } else {
+      throw new Error(`moveUnitCardsToZoneTop: 未対応の移動先ゾーンです: ${zone}`);
+    }
+  };
+}
+
 
 
 
