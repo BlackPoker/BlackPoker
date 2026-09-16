@@ -12,7 +12,7 @@ export interface EffectInterruption {
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
-  readonly selectionType?: "unit" | "unitAssignment" | "card";
+  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option";
   readonly candidates: any[];
   readonly attackers?: any[];
   readonly requiredCount?: number;
@@ -34,6 +34,54 @@ export class EffectInterpreter {
   ) {}
 
   /**
+   * ifSelection の条件判定と選択値の正規化を行います。
+   * context.selections[args.selection] が配列の場合は単一要素を取り出し、
+   * 不正な状態（未定義、空配列、複数要素、未知の選択値）に対しては例外を投げて fail-closed します。
+   */
+  public evaluateIfSelection(args: any, context: CommandContext): { shouldExecuteThen: boolean; shouldExecuteElse: boolean } {
+    const selectionId = args.selection;
+    const raw = context.selections?.[selectionId];
+
+    // fail-closed: missing or undefined
+    if (raw === undefined) {
+      throw new Error(`ifSelection: 選択結果が見つかりません: ${selectionId}`);
+    }
+
+    let selectedValue: any;
+    if (Array.isArray(raw)) {
+      // fail-closed: empty array or multiple values
+      if (raw.length !== 1) {
+        throw new Error(`ifSelection: 選択肢は1つのみ指定してください (selection: ${selectionId}, 件数: ${raw.length})`);
+      }
+      selectedValue = raw[0];
+    } else {
+      selectedValue = raw;
+    }
+
+    // validValues の解決（args.validValues または action.effect の selectOption 定義から取得）
+    let validValues: string[] | undefined = Array.isArray(args.validValues) ? args.validValues : undefined;
+    if (!validValues && context.currentAction?.effect) {
+      const optStep: any = context.currentAction.effect.find(
+        (e: any) => e.selectOption && e.selectOption.id === selectionId
+      );
+      if (optStep?.selectOption?.options && Array.isArray(optStep.selectOption.options)) {
+        validValues = optStep.selectOption.options.map((o: any) => o.value);
+      }
+    }
+
+    // fail-closed: unknown value
+    if (validValues && !validValues.includes(selectedValue)) {
+      throw new Error(`ifSelection: 未知の選択値です: '${selectedValue}' (有効値: ${validValues.join(", ")})`);
+    }
+
+    const matches = selectedValue === args.equals;
+    return {
+      shouldExecuteThen: matches,
+      shouldExecuteElse: !matches,
+    };
+  }
+
+  /**
    * 単一の効果コマンドを実行します（if分岐対応）。
    */
   executeEffect(effect: any, context: CommandContext) {
@@ -48,6 +96,13 @@ export class EffectInterpreter {
           this.executeEffects(args.then, context);
         }
       } else if (args.else && Array.isArray(args.else)) {
+        this.executeEffects(args.else, context);
+      }
+    } else if (name === "ifSelection") {
+      const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfSelection(args, context);
+      if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
+        this.executeEffects(args.then, context);
+      } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
         this.executeEffects(args.else, context);
       }
     } else {
@@ -243,6 +298,36 @@ export class EffectInterpreter {
           requiredCount,
           decisionPlayerKey: playerKey,
         };
+      }
+
+      if (name === "selectOption") {
+        const selectionId = args.id || "option";
+        if (context.selections && context.selections[selectionId] !== undefined) {
+          continue;
+        }
+
+        const decisionPlayerKey = this.resolveDecisionPlayerKey(args.decisionPlayer || args.chooser, context);
+        const options = Array.isArray(args.options) ? args.options : [];
+
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "option",
+          candidates: options,
+          decisionPlayerKey,
+        };
+      }
+
+      if (name === "ifSelection") {
+        const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfSelection(args, context);
+        if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
+          this.executeEffects(args.then, context);
+        } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
+          this.executeEffects(args.else, context);
+        }
+        continue;
       }
 
       this.executeEffect(effect, context);

@@ -589,6 +589,76 @@ export class LegalPatternGenerator {
   }
 
   /**
+   * 汎用選択肢（EFFECT_SELECTION - option）用 DecisionRequest を生成します。
+   * options 配列の順序（canonical presentation order）をそのまま維持してカタログおよびパターンを生成します。
+   */
+  static generateOptionSelectionDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: any,
+    effectStepId: string,
+    options: Array<{ value: string; label?: string }>,
+    extraOptions?: { stateVersion?: number; matchId?: string; decisionId?: string; selectionId?: string }
+  ): DecisionRequest {
+    const stateVersion = extraOptions?.stateVersion ?? (state.stateVersion || 1);
+    const matchId = extraOptions?.matchId ?? (state.matchId || "match-1");
+    const decisionId = extraOptions?.decisionId ?? `dec-opt-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    const effectSelections: any[] = [];
+    const patterns: LegalPattern[] = [];
+
+    options.forEach((opt, index) => {
+      const selectedValues = [opt.value];
+      const summary = opt.label || `選択: ${opt.value}`;
+
+      const effSel = {
+        selectionType: "option",
+        selectedValues,
+        summary,
+      };
+      effectSelections.push(effSel);
+
+      const pattern: LegalPattern = {
+        patternId: `effect-option-${index}-${opt.value}`,
+        kind: "EFFECT_SELECTION",
+        effectSelectionRef: index,
+      };
+      patterns.push(pattern);
+    });
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections: [],
+      effectSelections,
+      orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    return {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+  }
+
+  /**
    * 最新のブロック割当て生成メトリクス
    */
   public static latestBlockAssignmentMetrics?: BlockAssignmentMetrics;

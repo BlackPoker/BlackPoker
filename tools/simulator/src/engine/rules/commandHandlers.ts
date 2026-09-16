@@ -77,6 +77,57 @@ export function createFogHandler(
     player.fog.push(newFog);
   };
 }
+/**
+ * コンポーネント定義およびカード情報からフィールド配置用ユニットオブジェクトを構築します。
+ * SSOT: labels / kind はコンポーネント定義（ComponentDefinition）を正とします。
+ */
+export function buildFieldUnitFromComponent(params: {
+  componentId: string;
+  playerKey: string;
+  card?: any;
+  face?: "up" | "down" | string;
+  state?: "charge" | "drive" | string;
+  components?: readonly any[];
+  stateVersion?: number;
+  turnCount?: number;
+  disambiguator?: string | number;
+}): any {
+  const {
+    componentId,
+    playerKey,
+    card,
+    face = "up",
+    state = "charge",
+    components,
+    stateVersion = 1,
+    turnCount = 1,
+    disambiguator,
+  } = params;
+
+  // コンポーネント定義から kind, labels を動的に解決
+  const compDef = components?.find((c: any) => c.id === componentId);
+  const kind = compDef?.display?.kind || compDef?.properties?.kind || compDef?.name || "ユニット";
+  // labels は Component Definition を SSOT とする
+  const rawLabels = compDef?.properties?.labels || compDef?.display?.labels;
+  const labels = Array.isArray(rawLabels) ? [...rawLabels] : ["攻撃", "防御"];
+
+  const cardIdPart = card?.id ? `-${card.id}` : "";
+  const disamPart = disambiguator !== undefined ? `-${disambiguator}` : "";
+  const unitId = `unit-${playerKey}-${componentId}${cardIdPart}${disamPart}-${stateVersion}`;
+
+  return {
+    unitId,
+    kind,
+    componentId,
+    state,
+    face,
+    cards: card ? [card] : [],
+    labels: [...labels],
+    enteredTurn: turnCount,
+    enteredFieldTurn: turnCount,
+    enteredFieldBeforeGame: false,
+  };
+}
 
 /**
  * summonUnit: ユニットの召喚
@@ -86,11 +137,6 @@ export function summonUnitHandler(): CommandHandler {
     const { component, face, state, card } = args;
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
-
-    // コンポーネント定義から kind, labels を動的に解決
-    const compDef = context.components?.find((c: any) => c.id === component);
-    const kind = compDef?.display?.kind || compDef?.properties?.kind || compDef?.name || "ユニット";
-    const labels = compDef?.properties?.labels || compDef?.display?.labels || ["攻撃", "防御"];
 
     // 召喚に使用するカードの解決 (keyCard または selection.<id>)
     let unitCard: any = undefined;
@@ -114,19 +160,16 @@ export function summonUnitHandler(): CommandHandler {
       return;
     }
 
-    const cardIdPart = unitCard?.id ? `-${unitCard.id}` : "";
-    const newUnit = {
-      unitId: `unit-${context.playerKey}-${component}${cardIdPart}-${context.state.stateVersion || 1}`,
-      kind: kind,
+    const newUnit = buildFieldUnitFromComponent({
       componentId: component,
-      state: state || "charge",
+      playerKey: context.playerKey,
+      card: unitCard,
       face: face || "up",
-      cards: unitCard ? [unitCard] : [],
-      labels: [...labels],
-      enteredTurn: context.state.turnCount ?? 1,
-      enteredFieldTurn: context.state.turnCount ?? 1,
-      enteredFieldBeforeGame: false,
-    };
+      state: state || "charge",
+      components: context.components,
+      stateVersion: context.state.stateVersion || 1,
+      turnCount: context.state.turnCount ?? 1,
+    });
 
     // 手札から召喚カードを消費（手札にある場合のみ）
     if (unitCard && Array.isArray(player.hand)) {
@@ -137,6 +180,99 @@ export function summonUnitHandler(): CommandHandler {
       player.field = [];
     }
     player.field.push(newUnit);
+  };
+}
+
+/**
+ * deployTopCardsAsUnits: デッキやライフ等のトップから指定枚数のカードをユニットとして場に配置する汎用プリミティブ。
+ * 公式ルール5.4.4に基づく部分解決（要求枚数 > 残存枚数 の場合でも残存分を配置して正常完了）を保証します。
+ */
+export function deployTopCardsAsUnitsHandler(effectInterpreter: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    const { sourceZone = "life", player: playerSpec = "self", count, component = "character.bulwark", face = "down", state = "charge" } = args;
+
+    // 1. count の厳密バリデーション (非負整数・有限値)
+    if (typeof count !== "number" || !Number.isFinite(count) || count < 0 || !Number.isInteger(count)) {
+      throw new Error(`deployTopCardsAsUnits: count には0以上の整数を指定してください (指定値: ${count})`);
+    }
+
+    if (count === 0) {
+      return; // 正常 no-op
+    }
+
+    // 2. sourceZone のバリデーション
+    if (sourceZone !== "life") {
+      throw new Error(`deployTopCardsAsUnits: 未対応の sourceZone です: '${sourceZone}'`);
+    }
+
+    // 3. 対象プレイヤーの汎用解決
+    let targetPlayerKey: string;
+    if (playerSpec === "self" || playerSpec === "controller") {
+      targetPlayerKey = context.playerKey;
+    } else if (playerSpec === "opponent") {
+      targetPlayerKey = getOpponentPlayerKey(context.playerKey, context.state);
+    } else {
+      throw new Error(`deployTopCardsAsUnits: 未知の player 指定です: '${playerSpec}'`);
+    }
+
+    const targetPlayer = context.state.players?.[targetPlayerKey];
+    if (!targetPlayer) {
+      throw new Error(`deployTopCardsAsUnits: 対象プレイヤーが見つかりません: ${targetPlayerKey}`);
+    }
+
+    if (!Array.isArray(targetPlayer.life)) {
+      targetPlayer.life = [];
+    }
+    if (!Array.isArray(targetPlayer.field)) {
+      targetPlayer.field = [];
+    }
+
+    // 4. 公式ルール5.4.4 部分解決 (availableCount との min)
+    const availableCount = targetPlayer.life.length;
+    const actualCount = Math.min(count, availableCount);
+
+    if (actualCount === 0) {
+      // ライフ0枚などの正当な0枚配置: 正常終了
+      return;
+    }
+
+    for (let i = 0; i < actualCount; i++) {
+      const card = targetPlayer.life.shift();
+      if (!card) break;
+
+      const newUnit = buildFieldUnitFromComponent({
+        componentId: component,
+        playerKey: targetPlayerKey,
+        card,
+        face: face || "down",
+        state: state || "charge",
+        components: context.components,
+        stateVersion: context.state.stateVersion || 1,
+        turnCount: context.state.turnCount ?? 1,
+        disambiguator: i,
+      });
+
+      targetPlayer.field.push(newUnit);
+
+      // 各カードについて cardMoved イベントを発行 (revealCard は発行しない)
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card: card,
+          fromZone: sourceZone,
+          toZone: "field",
+          playerKey: targetPlayerKey,
+          targetUnitId: newUnit.unitId,
+          cause: {
+            type: "effect",
+            command: "deployTopCardsAsUnits",
+            actionId: context.currentAction?.id,
+            requestId: context.currentRequest?.id,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
   };
 }
 

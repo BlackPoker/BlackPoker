@@ -32,8 +32,12 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(browserCompIds).toContain("fog.down");
     expect(browserCompIds).toContain("character.magician");
 
-    // 実総数の確認 (全23アクション、全11コンポーネント)
-    expect(browserActionIds.length).toBe(23);
+    // 重要アクションの存在確認
+    expect(nodeActionIds).toContain("action.addBulwark");
+    expect(browserActionIds).toContain("action.addBulwark");
+
+    // 実総数の確認 (全24アクション、全11コンポーネント)
+    expect(browserActionIds.length).toBe(24);
     expect(browserCompIds.length).toBe(11);
   });
 

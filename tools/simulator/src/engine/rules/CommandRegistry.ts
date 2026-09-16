@@ -25,6 +25,7 @@ import {
   setZoneStateHandler,
   revealCardHandler,
   shuffleZoneHandler,
+  deployTopCardsAsUnitsHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -868,6 +869,19 @@ export class CommandRegistry {
           matchId: context.state.matchId,
         }
       );
+    } else if (execResult.selectionType === "option") {
+      return LegalPatternGenerator.generateOptionSelectionDecision(
+        context.state,
+        decisionPlayerId,
+        request,
+        execResult.effectStepId,
+        execResult.candidates,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+        }
+      );
     } else {
       return LegalPatternGenerator.generateEffectSelectionDecision(
         context.state,
@@ -1019,5 +1033,6 @@ export class CommandRegistry {
     this.register("setZoneState", setZoneStateHandler());
     this.register("revealCard", revealCardHandler(this.effectInterpreter));
     this.register("shuffleZone", shuffleZoneHandler(this.effectInterpreter));
+    this.register("deployTopCardsAsUnits", deployTopCardsAsUnitsHandler(this.effectInterpreter));
   }
 }

@@ -76,6 +76,9 @@ export type ComponentDefinition = {
 export type EffectCommand =
   | { createFog: Record<string, any> }
   | { summonUnit: Record<string, any> }
+  | { selectOption: Record<string, any> }
+  | { ifSelection: Record<string, any> }
+  | { deployTopCardsAsUnits: Record<string, any> }
   | { [commandName: string]: Record<string, any> };
 
 export type ActionRequestTarget =

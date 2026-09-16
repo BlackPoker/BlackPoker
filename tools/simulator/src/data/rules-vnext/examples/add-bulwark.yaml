@@ -1,0 +1,62 @@
+actions:
+  - id: action.addBulwark
+    name: 防壁補充
+    ruby: ぼうへきほじゅう
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: heart
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: club
+            rank: "A..K"
+            zone: hand
+
+    component: character.bulwark
+
+    text:
+      effect: ライフの先頭からカード1枚を裏向きのチャージ状態で防壁として出すか、ライフの先頭からカード2枚を裏向きのドライブ状態で防壁として出す。
+
+    effect:
+      - selectOption:
+          id: bulwarkMode
+          chooser: self
+          options:
+            - value: charge1
+              label: ライフから1枚をチャージ状態の防壁として出す
+            - value: drive2
+              label: ライフから2枚をドライブ状態の防壁として出す
+
+      - ifSelection:
+          selection: bulwarkMode
+          equals: charge1
+          then:
+            - deployTopCardsAsUnits:
+                sourceZone: life
+                player: self
+                count: 1
+                component: character.bulwark
+                face: down
+                state: charge
+
+      - ifSelection:
+          selection: bulwarkMode
+          equals: drive2
+          then:
+            - deployTopCardsAsUnits:
+                sourceZone: life
+                player: self
+                count: 2
+                component: character.bulwark
+                face: down
+                state: drive
