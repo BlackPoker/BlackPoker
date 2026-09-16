@@ -68,6 +68,38 @@ components:
     text:
       summary: Aのカードはエースとして扱う。速攻を持つ。
 
+  - id: character.magician
+    name: 魔術士
+    ruby: まじゅつし
+    type: character
+    zone: field
+    display:
+      kind: 魔術士
+
+    unitCondition:
+      cards:
+        count: 1
+        rank: "Joker"
+      face: up
+
+    properties:
+      characterType: soldier
+      size: 0
+      labels: [attack, defense, haste]
+      eligibleAsPresetSoldier: false
+
+    abilities:
+      - costModifier:
+          filter:
+            actionType: magic
+            timing: quick
+          remove:
+            symbol: D
+
+    text:
+      summary: Jokerのカードは魔術士として扱う。速攻を持つ。
+      ability: このキャラクターが場にいる間、タイプが「魔法」かつ、タイミングが「クイック」のアクションのコストDを無しとする。
+
   - id: character.armedSoldier
     name: 装備兵
     ruby: そうびへい

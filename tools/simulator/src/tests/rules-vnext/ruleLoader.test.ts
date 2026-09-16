@@ -30,10 +30,11 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(browserCompIds).toContain("character.giant");
     expect(browserCompIds).toContain("fog.up");
     expect(browserCompIds).toContain("fog.down");
+    expect(browserCompIds).toContain("character.magician");
 
-    // 実総数の確認 (全22アクション、全10コンポーネント)
-    expect(browserActionIds.length).toBe(22);
-    expect(browserCompIds.length).toBe(10);
+    // 実総数の確認 (全23アクション、全11コンポーネント)
+    expect(browserActionIds.length).toBe(23);
+    expect(browserCompIds.length).toBe(11);
   });
 
   it("should extract valid Playtest RulePackage with supported action list", () => {
@@ -54,7 +55,7 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
 
     // 全コンポーネント定義が維持されていること
     expect(playtestPackage.components.length).toBe(browserPackage.components.length);
-    expect(playtestPackage.components.length).toBe(10);
+    expect(playtestPackage.components.length).toBe(11);
   });
 
   it("should return deepFrozen RulePackage that strictly prevents runtime mutation", async () => {

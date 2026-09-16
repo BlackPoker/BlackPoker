@@ -8,10 +8,122 @@ import { CostPayment } from "../../domain/decision/DecisionCatalog";
  */
 export class CostResolver {
   /**
+   * 指定された CostPayment の形状（D, B, Lの要求数、ID重複なし、キーカード重複なし、余計な支払いなし）
+   * が要求コストと厳密に一致するかを検証します。
+   */
+  matchesCost(
+    costPayment: CostPayment,
+    requiredCost: string | readonly CostSymbol[],
+    context?: CommandContext
+  ): boolean {
+    if (!costPayment) return false;
+
+    // 1. sacrificedUnitIds が存在する場合は reject（D/B/L のみに限定）
+    if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
+      return false;
+    }
+
+    // 2. ID 重複検証（discardedCardIds, drivenBulwarkUnitIds に重複がないこと）
+    const discarded = costPayment.discardedCardIds || [];
+    if (new Set(discarded).size !== discarded.length) {
+      return false;
+    }
+
+    const driven = costPayment.drivenBulwarkUnitIds || [];
+    if (new Set(driven).size !== driven.length) {
+      return false;
+    }
+
+    // 3. Key Card との重複検証 (context が渡されている場合)
+    if (context) {
+      const keyCardIds = new Set<string>();
+      if (context.keyCard?.id) keyCardIds.add(context.keyCard.id);
+      if (context.keyCards) {
+        for (const k of context.keyCards) {
+          if (k?.id) keyCardIds.add(k.id);
+        }
+      }
+      for (const cardId of discarded) {
+        if (keyCardIds.has(cardId)) {
+          return false;
+        }
+      }
+    }
+
+    // 4. 要求シンボルの集計
+    let symbols: readonly CostSymbol[];
+    if (typeof requiredCost === "string") {
+      if (!requiredCost || requiredCost.trim() === "") {
+        symbols = [];
+      } else {
+        try {
+          symbols = parseCost(requiredCost);
+        } catch {
+          return false;
+        }
+      }
+    } else {
+      symbols = requiredCost;
+    }
+
+    let requiredD = 0;
+    let requiredB = 0;
+    let requiredL = 0;
+
+    for (const sym of symbols) {
+      if (sym === "D") requiredD++;
+      else if (sym === "B") requiredB++;
+      else if (sym === "L") requiredL++;
+    }
+
+    const actualD = discarded.length;
+    const actualB = driven.length;
+    const actualL = costPayment.lifeCount || 0;
+
+    return actualD === requiredD && actualB === requiredB && actualL === requiredL;
+  }
+
+  /**
    * 選択済みの具体的な CostPayment が支払えるか検証します。
    */
-  canPaySelection(costPayment: CostPayment, context: CommandContext): boolean {
-    const player = context.state.players[context.playerKey];
+  canPaySelection(
+    costPayment: CostPayment,
+    context: CommandContext,
+    requiredCost?: string | readonly CostSymbol[]
+  ): boolean {
+    if (!costPayment) return false;
+
+    // requiredCost が指定されている場合は形状一致を先行検証
+    if (requiredCost !== undefined) {
+      if (!this.matchesCost(costPayment, requiredCost, context)) {
+        return false;
+      }
+    } else {
+      // requiredCost が直接渡されなくても、重複・Keyカード重複・sacrificedUnitIdsは常時検証
+      if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
+        return false;
+      }
+      const discarded = costPayment.discardedCardIds || [];
+      if (new Set(discarded).size !== discarded.length) return false;
+
+      const driven = costPayment.drivenBulwarkUnitIds || [];
+      if (new Set(driven).size !== driven.length) return false;
+
+      if (context) {
+        const keyCardIds = new Set<string>();
+        if (context.keyCard?.id) keyCardIds.add(context.keyCard.id);
+        if (context.keyCards) {
+          for (const k of context.keyCards) {
+            if (k?.id) keyCardIds.add(k.id);
+          }
+        }
+        for (const cardId of discarded) {
+          if (keyCardIds.has(cardId)) return false;
+        }
+      }
+    }
+
+    const player = context.state?.players?.[context.playerKey];
     if (!player) return false;
 
     // 1. 手札カードの存在確認

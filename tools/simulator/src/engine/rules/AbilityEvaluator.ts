@@ -139,7 +139,8 @@ export class AbilityEvaluator {
     abilityKey: string,
     state: any,
     components: readonly any[] = [],
-    playerKey?: string
+    playerKey?: string,
+    options?: { zones?: ("field" | "trump" | "trumps" | string)[] }
   ): { playerKey: string; instance: any; ability: T }[] {
     const results: { playerKey: string; instance: any; ability: T }[] = [];
     if (!state?.players) return results;
@@ -148,17 +149,24 @@ export class AbilityEvaluator {
       ? [playerKey]
       : Object.keys(state.players);
 
+    const checkTrump = !options?.zones || options.zones.includes("trump") || options.zones.includes("trumps");
+    const checkField = !options?.zones || options.zones.includes("field");
+
     for (const pKey of targetPlayers) {
       const player = state.players[pKey];
       if (!player) continue;
 
       const activeInstances: any[] = [];
-      const trumps = player.trump || player.trumps || [];
-      if (Array.isArray(trumps)) {
-        activeInstances.push(...trumps.filter((t: any) => t.face === "up"));
+      if (checkTrump) {
+        const trumps = player.trump || player.trumps || [];
+        if (Array.isArray(trumps)) {
+          activeInstances.push(...trumps.filter((t: any) => t.face === "up"));
+        }
       }
-      if (Array.isArray(player.field)) {
-        activeInstances.push(...player.field.filter((u: any) => u.face === undefined || u.face === "up"));
+      if (checkField) {
+        if (Array.isArray(player.field)) {
+          activeInstances.push(...player.field.filter((u: any) => u.face === undefined || u.face === "up"));
+        }
       }
 
       for (const inst of activeInstances) {

@@ -8,6 +8,7 @@ import { CostPaymentEnumerator } from "./CostPaymentEnumerator";
 import { TargetSelectionEnumerator } from "./TargetSelectionEnumerator";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { ActionActivationConditionEvaluator } from "../rules/ActionActivationConditionEvaluator";
+import { ActionCostEvaluator } from "../rules/ActionCostEvaluator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay } from "../rules/cardUtils";
@@ -27,6 +28,7 @@ export interface DecisionGenerationMetrics {
  */
 export class LegalPatternGenerator {
   private static validator = new ActionRequestValidator();
+  private static costEvaluator = new ActionCostEvaluator();
 
   /**
    * 現在の盤面から、指定プレイヤー向けの合法な完成パターン全件を含む DecisionRequest を生成します。
@@ -65,12 +67,20 @@ export class LegalPatternGenerator {
       const keyCardCombinations = this.enumerateKeyCardCombinations(action, player?.hand || []);
       totalKeyCards += keyCardCombinations.length;
 
+      // Effective Cost の導出 (SSOT)
+      const effectiveCost = this.costEvaluator.resolveEffectiveCost(
+        action,
+        state,
+        playerId,
+        rulePackage.components
+      );
+
       for (const keyCards of keyCardCombinations) {
         const keyCardSet = new Set<string>(keyCards.map((c) => c.id));
 
         // 3. コスト支払い候補の列挙（キーカードは除外）
         const costPayments = CostPaymentEnumerator.enumeratePayments(
-          action.cost,
+          effectiveCost,
           player,
           keyCardSet
         );
@@ -150,12 +160,18 @@ export class LegalPatternGenerator {
     const getActionRef = (act: ActionDefinition): number => {
       if (actionMap.has(act.id)) return actionMap.get(act.id)!;
       const ref = actionCatalog.length;
+      const effectiveCost = LegalPatternGenerator.costEvaluator.resolveEffectiveCost(
+        act,
+        state,
+        playerId,
+        rulePackage.components
+      );
       actionCatalog.push({
         actionId: act.id,
         actionName: act.name,
         timing: act.request?.timing,
         speed: act.request?.speed,
-        cost: act.cost,
+        cost: effectiveCost || undefined,
       });
       actionMap.set(act.id, ref);
       return ref;

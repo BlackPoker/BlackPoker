@@ -9,6 +9,7 @@ import {
   evaluatePlayerTargetCondition,
 } from "./targetConditionUtils";
 import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
+import { ActionCostEvaluator } from "./ActionCostEvaluator";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -73,6 +74,7 @@ function getPermutations(arr: number[]): number[][] {
  */
 export class ActionRequestValidator {
   private expressionEvaluator = new ExpressionEvaluator();
+  private costEvaluator = new ActionCostEvaluator();
 
   /**
    * アクションリクエストを事前検証します。不正な場合は ValidationError をスローします。
@@ -166,11 +168,17 @@ export class ActionRequestValidator {
       }
     }
 
-    // 0.5. コスト (cost) の事前検証
-    if (action.cost) {
+    // 0.5. コスト (cost) の事前検証 (Effective Cost SSOT を利用)
+    const effectiveCost = this.costEvaluator.resolveEffectiveCost(
+      action,
+      context.state,
+      context.playerKey,
+      context.components
+    );
+    if (effectiveCost) {
       const costResolver = new CostResolver();
-      if (!costResolver.canPay(action.cost, context)) {
-        throw new ValidationError(`コスト [${action.cost}] を支払うことができません。`);
+      if (!costResolver.canPay(effectiveCost, context)) {
+        throw new ValidationError(`コスト [${effectiveCost}] を支払うことができません。`);
       }
     }
 

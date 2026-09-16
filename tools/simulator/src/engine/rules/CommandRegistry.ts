@@ -2,6 +2,7 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { EffectInterpreter, EffectInterruption } from "./EffectInterpreter";
 import { ActionRequestValidator } from "./ActionRequestValidator";
+import { ActionCostEvaluator } from "./ActionCostEvaluator";
 import {
   createFogHandler,
   summonUnitHandler,
@@ -180,6 +181,7 @@ export class CommandRegistry {
   private handlers = new Map<string, CommandHandler>();
   private expressionEvaluator = new ExpressionEvaluator();
   private abilityEvaluator = new AbilityEvaluator();
+  private costEvaluator = new ActionCostEvaluator(this.abilityEvaluator);
   private actionRequestValidator = new ActionRequestValidator();
   private effectInterpreter: EffectInterpreter;
   public triggerResolver = new TriggerResolver();
@@ -252,19 +254,25 @@ export class CommandRegistry {
     this.validateAction(action, context);
 
     // 2. コスト支払い（リクエスト成立時に即時消費）
+    const effectiveCost = this.costEvaluator.resolveEffectiveCost(
+      action,
+      context.state,
+      context.playerKey,
+      context.components
+    );
     const costResolver = new CostResolver();
     if (options?.selectedCostPayment) {
-      if (!costResolver.canPaySelection(options.selectedCostPayment, context)) {
+      if (!costResolver.canPaySelection(options.selectedCostPayment, context, effectiveCost)) {
         throw new Error(
           `選択されたコスト [${options.selectedCostPayment.summary || "payment"}] を支払うことができません。`
         );
       }
       costResolver.paySelection(options.selectedCostPayment, context, this.effectInterpreter);
-    } else if (action.cost) {
-      if (!costResolver.canPay(action.cost, context)) {
-        throw new Error(`コスト [${action.cost}] を支払うことができません。`);
+    } else if (effectiveCost) {
+      if (!costResolver.canPay(effectiveCost, context)) {
+        throw new Error(`コスト [${effectiveCost}] を支払うことができません。`);
       }
-      costResolver.pay(action.cost, context, this.effectInterpreter);
+      costResolver.pay(effectiveCost, context, this.effectInterpreter);
     }
 
     // 3. Stageおよび連番Seqの初期化・インクリメント

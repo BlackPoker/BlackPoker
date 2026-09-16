@@ -1,0 +1,29 @@
+actions:
+  - id: action.summonMagician
+    name: 魔術士召喚
+    ruby: まじゅつししょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BD
+
+    key:
+      id: key
+      condition:
+        card:
+          rank: "Joker"
+          zone: hand
+
+    text:
+      effect: キーカードを魔術士として表向きかつチャージ状態で場に出す。
+
+    effect:
+      - summonUnit:
+          card: key
+          component: character.magician
+          face: up
+          state: charge

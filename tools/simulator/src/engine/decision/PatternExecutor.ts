@@ -5,6 +5,7 @@ import { ActionRequest, ActionRequestTarget, RulePackage, ActionDefinition } fro
 import { CommandRegistry, CommandContext } from "../rules/CommandRegistry";
 import { CostResolver } from "../rules/CostResolver";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
+import { ActionCostEvaluator } from "../rules/ActionCostEvaluator";
 
 /**
  * 選択された LegalPattern の検証、復元、および ActionRequest の構築を行うクラス。
@@ -12,6 +13,7 @@ import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 export class PatternExecutor {
   private static validator = new ActionRequestValidator();
   private static costResolver = new CostResolver();
+  private static costEvaluator = new ActionCostEvaluator();
 
   /**
    * 【後方互換・単体テスト用ラッパー】
@@ -141,7 +143,13 @@ export class PatternExecutor {
 
     // 実行直前の再バリデーション（validateActionRequest / canPaySelection は createRequest 内でも実行される）
     this.validator.validateActionRequest(actionDef, context);
-    if (costPayment && !this.costResolver.canPaySelection(costPayment, context)) {
+    const effectiveCost = PatternExecutor.costEvaluator.resolveEffectiveCost(
+      actionDef,
+      context.state,
+      context.playerKey,
+      context.components
+    );
+    if (costPayment && !PatternExecutor.costResolver.canPaySelection(costPayment, context, effectiveCost)) {
       throw new Error(`選択されたコストを支払うことができません: ${costPayment.summary}`);
     }
 
