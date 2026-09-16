@@ -1,0 +1,6 @@
+﻿id: standard-pack
+name: スタンダード + パック
+formatId: standard
+frameId: pack
+sourceRulesVersion: 9.1.2
+description: 公式BlackPoker 推奨対戦レギュレーション (スタンダードフォーマット + パックフレーム)

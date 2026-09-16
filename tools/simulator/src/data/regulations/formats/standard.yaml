@@ -1,0 +1,42 @@
+﻿id: standard
+name: スタンダード
+description: 公式BlackPoker スタンダードフォーマット (第9.1.2版 第7章)
+actions:
+  # 基本
+  - action.end
+  - action.charge
+  - action.draw
+  - action.attack
+  - action.block
+  - action.damageJudge
+  - action.nextGeneration
+  # 召喚
+  - action.setBulwark
+  - action.summonSoldier
+  - action.summonHero
+  - action.summonAce
+  - action.summonMagician
+  - action.mountSoldier
+  # 基礎魔法
+  - action.up
+  - action.down
+  - action.twist
+  - action.counter
+  # 中級魔法
+  - action.destroyBulwark
+  - action.throwing
+  - action.deathLance
+  - action.addBulwark
+  - action.reanimate
+  - action.handeth
+  - action.search
+  - action.unsummons
+components:
+  - character.soldier
+  - character.hero
+  - character.ace
+  - character.magician
+  - character.armedSoldier
+  - character.bulwark
+  - fog.up
+  - fog.down
