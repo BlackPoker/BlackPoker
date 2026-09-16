@@ -22,8 +22,6 @@ actions:
             rank: "A..K"
             zone: hand
 
-    component: character.bulwark
-
     text:
       effect: ライフの先頭からカード1枚を裏向きのチャージ状態で防壁として出すか、ライフの先頭からカード2枚を裏向きのドライブ状態で防壁として出す。
 

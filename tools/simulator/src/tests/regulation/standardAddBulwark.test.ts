@@ -20,11 +20,16 @@ import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerat
 import { PatternExecutor } from "../../engine/decision/PatternExecutor";
 import { GameSession } from "../../engine/session/GameSession";
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy";
+import { GenomePolicy } from "../../engine/ai/GenomePolicy";
 import { SeededRandom } from "../../engine/random/RandomSource";
 import { BattleRelationPresenter } from "../../ui/game/BattleRelationPresenter";
 import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import type { ActionDefinition, ComponentDefinition, RulePackage } from "../../domain/rules/RulePackage";
 import { deployTopCardsAsUnitsHandler, buildFieldUnitFromComponent } from "../../engine/rules/commandHandlers";
+import { createManualGenericGenomeDNA } from "../../engine/ai/BaselinePolicies";
+import { FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes";
+import { validateOptionSelectionDefinition } from "../../engine/rules/OptionSelectionValidator";
+import { StateHasher } from "../../engine/simulation/StateHasher";
 
 describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolution Tests", () => {
   let catalog: any;
@@ -100,8 +105,8 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     expect(action!.key?.conditions?.[1]?.card?.suit).toBe("club");
     expect(action!.key?.conditions?.[1]?.card?.rank).toBe("A..K");
 
-    // component
-    expect((action as any).component).toBe("character.bulwark");
+    // Action top-level component is not defined (removed in R1; specified in effect DSL instead)
+    expect((action as any).component).toBeUndefined();
   });
 
   it("Test 2: Node Loader & Browser Loader load action.addBulwark consistently (Action count 24)", () => {
@@ -632,10 +637,10 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     };
     const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
 
-    expect(() => handler({ count: -1 }, dummyContext)).toThrow(/0以上の整数/);
-    expect(() => handler({ count: NaN }, dummyContext)).toThrow(/0以上の整数/);
-    expect(() => handler({ count: 1.5 }, dummyContext)).toThrow(/0以上の整数/);
-    expect(() => handler({ count: Infinity }, dummyContext)).toThrow(/0以上の整数/);
+    expect(() => handler({ sourceZone: "life", player: "self", count: -1, component: "character.bulwark", face: "down", state: "charge" }, dummyContext)).toThrow(/0以上の整数/);
+    expect(() => handler({ sourceZone: "life", player: "self", count: NaN, component: "character.bulwark", face: "down", state: "charge" }, dummyContext)).toThrow(/0以上の整数/);
+    expect(() => handler({ sourceZone: "life", player: "self", count: 1.5, component: "character.bulwark", face: "down", state: "charge" }, dummyContext)).toThrow(/0以上の整数/);
+    expect(() => handler({ sourceZone: "life", player: "self", count: Infinity, component: "character.bulwark", face: "down", state: "charge" }, dummyContext)).toThrow(/0以上の整数/);
   });
 
   it("Test 16: deployTopCardsAsUnits count 0 is legitimate no-op", () => {
@@ -646,7 +651,7 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     };
     const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
 
-    expect(() => handler({ count: 0 }, dummyContext)).not.toThrow();
+    expect(() => handler({ sourceZone: "life", player: "self", count: 0, component: "character.bulwark", face: "down", state: "charge" }, dummyContext)).not.toThrow();
     expect(dummyContext.state.players.p1.field).toHaveLength(0);
     expect(dummyContext.state.players.p1.life).toHaveLength(1);
   });
@@ -670,7 +675,12 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     };
     const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
 
-    expect(() => handler({ player: "unknownPlayer", count: 1 }, dummyContext)).toThrow(/未知の player/);
+    expect(() =>
+      handler(
+        { sourceZone: "life", player: "unknownPlayer", count: 1, component: "character.bulwark", face: "down", state: "charge" },
+        dummyContext
+      )
+    ).toThrow(/未知の player/);
   });
 
   // =========================================================================
@@ -707,7 +717,7 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     };
 
     const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
-    handler({ count: 2, state: "drive", face: "down" }, dummyContext);
+    handler({ sourceZone: "life", player: "self", count: 2, component: "character.bulwark", state: "drive", face: "down" }, dummyContext);
 
     const bulwarks = state.players.p1.field;
     expect(bulwarks).toHaveLength(3);
@@ -754,7 +764,7 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     };
 
     const handler = deployTopCardsAsUnitsHandler(localEffectInterpreter);
-    handler({ count: 2 }, ctx);
+    handler({ sourceZone: "life", player: "self", count: 2, component: "character.bulwark", state: "charge", face: "down" }, ctx);
 
     // Exactly 2 cardMoved events
     expect(events).toHaveLength(2);
@@ -870,6 +880,17 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
       state: { stateVersion: 1 },
       playerKey: "p1",
       selections: { bulwarkMode: [] },
+      currentAction: {
+        id: "action.addBulwark",
+        effect: [
+          {
+            selectOption: {
+              id: "bulwarkMode",
+              options: [{ value: "charge1" }, { value: "drive2" }],
+            },
+          },
+        ],
+      } as any,
     };
 
     expect(() => {
@@ -883,6 +904,17 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
       state: { stateVersion: 1 },
       playerKey: "p1",
       selections: { bulwarkMode: ["charge1", "drive2"] },
+      currentAction: {
+        id: "action.addBulwark",
+        effect: [
+          {
+            selectOption: {
+              id: "bulwarkMode",
+              options: [{ value: "charge1" }, { value: "drive2" }],
+            },
+          },
+        ],
+      } as any,
     };
 
     expect(() => {
@@ -920,6 +952,17 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
       state: { stateVersion: 1 },
       playerKey: "p1",
       selections: {},
+      currentAction: {
+        id: "action.addBulwark",
+        effect: [
+          {
+            selectOption: {
+              id: "bulwarkMode",
+              options: [{ value: "charge1" }, { value: "drive2" }],
+            },
+          },
+        ],
+      } as any,
     };
 
     expect(() => {
@@ -1022,5 +1065,499 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     const resA = runSimulation(42);
     const resB = runSimulation(42);
     expect(resA).toEqual(resB);
+  });
+
+  // =========================================================================
+  // 10. deployTopCardsAsUnits 汎用プリミティブ fail-closed 検証 (Phase 3.0-C-R1)
+  // =========================================================================
+  it("Test 31: deployTopCardsAsUnits: component missing throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, face: "down", state: "charge" }, context);
+    }).toThrow(/component は必須です/);
+  });
+
+  it("Test 32: deployTopCardsAsUnits: unknown component throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.unknown", face: "down", state: "charge" }, context);
+    }).toThrow(/コンポーネントが見つかりません/);
+  });
+
+  it("Test 33: deployTopCardsAsUnits: sourceZone missing throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ player: "self", count: 1, component: "character.bulwark", face: "down", state: "charge" }, context);
+    }).toThrow(/sourceZone は必須です/);
+  });
+
+  it("Test 34: deployTopCardsAsUnits: player missing throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", count: 1, component: "character.bulwark", face: "down", state: "charge" }, context);
+    }).toThrow(/player は必須です/);
+  });
+
+  it("Test 35: deployTopCardsAsUnits: face missing throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.bulwark", state: "charge" }, context);
+    }).toThrow(/face は 'up' または 'down' である必要があります/);
+  });
+
+  it("Test 36: deployTopCardsAsUnits: state missing throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.bulwark", face: "down" }, context);
+    }).toThrow(/state は 'charge' または 'drive' である必要があります/);
+  });
+
+  it("Test 37: deployTopCardsAsUnits: life: [] is legitimate no-op", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 2, component: "character.bulwark", face: "down", state: "drive" }, context);
+    }).not.toThrow();
+    expect(context.state.players.p1.field).toHaveLength(0);
+  });
+
+  it("Test 38: deployTopCardsAsUnits: life missing or malformed throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: null as any, field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.bulwark", face: "down", state: "charge" }, context);
+    }).toThrow(/ライフ領域が不正です/);
+  });
+
+  it("Test 39: deployTopCardsAsUnits: invalid face throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.bulwark", face: "sideways", state: "charge" }, context);
+    }).toThrow(/face は 'up' または 'down' である必要があります/);
+  });
+
+  it("Test 40: deployTopCardsAsUnits: invalid state throws Error", () => {
+    const handler = deployTopCardsAsUnitsHandler(effectInterpreter);
+    const context: CommandContext = {
+      state: { players: { p1: { life: [{ id: "c1" }], field: [] } } },
+      playerKey: "p1",
+      components: standardRulePackage.components,
+    };
+    expect(() => {
+      handler({ sourceZone: "life", player: "self", count: 1, component: "character.bulwark", face: "down", state: "sleeping" }, context);
+    }).toThrow(/state は 'charge' または 'drive' である必要があります/);
+  });
+
+  // =========================================================================
+  // 11. selectOption & ifSelection DSL バリデーション (Phase 3.0-C-R1)
+  // =========================================================================
+  it("Test 41: selectOption: options missing throws Error", () => {
+    expect(() => {
+      validateOptionSelectionDefinition({ id: "bulwarkMode" });
+    }).toThrow(/options は配列である必要があります/);
+  });
+
+  it("Test 42: selectOption: options [] throws Error", () => {
+    expect(() => {
+      validateOptionSelectionDefinition({ id: "bulwarkMode", options: [] });
+    }).toThrow(/1件以上の選択肢が必要です/);
+  });
+
+  it("Test 43: selectOption: option value missing throws Error", () => {
+    expect(() => {
+      validateOptionSelectionDefinition({ id: "bulwarkMode", options: [{ label: "モード1" }] });
+    }).toThrow(/value は空でない文字列である必要があります/);
+  });
+
+  it("Test 44: selectOption: option value empty throws Error", () => {
+    expect(() => {
+      validateOptionSelectionDefinition({ id: "bulwarkMode", options: [{ value: "   " }] });
+    }).toThrow(/value は空でない文字列である必要があります/);
+  });
+
+  it("Test 45: selectOption: duplicate option value throws Error", () => {
+    expect(() => {
+      validateOptionSelectionDefinition({
+        id: "bulwarkMode",
+        options: [{ value: "charge1" }, { value: "charge1" }],
+      });
+    }).toThrow(/重複した value が指定されています/);
+  });
+
+  it("Test 46: LegalPatternGenerator: valid charge1 / drive2 generates exactly 2 patterns", () => {
+    const state = { stateVersion: 1, players: { p1: {}, p2: {} } };
+    const res = LegalPatternGenerator.generateOptionSelectionDecision(
+      state,
+      "p1",
+      { id: "req-test" },
+      "selectOption",
+      [{ value: "charge1", label: "チャージ1枚" }, { value: "drive2", label: "ドライブ2枚" }]
+    );
+    expect(res.patterns).toHaveLength(2);
+    expect(res.catalog.effectSelections[0].selectedValues).toEqual(["charge1"]);
+    expect(res.catalog.effectSelections[1].selectedValues).toEqual(["drive2"]);
+  });
+
+  it("Test 47: ifSelection: references unknown selection id throws Error", () => {
+    const action = fullRulePackage.actions.find((a) => a.id === "action.addBulwark")!;
+    const ctx: CommandContext = {
+      state: {},
+      playerKey: "p1",
+      currentAction: action,
+      selections: { unknownMode: ["charge1"] },
+    };
+    expect(() => {
+      effectInterpreter.evaluateIfSelection({ selection: "unknownMode", equals: "charge1" }, ctx);
+    }).toThrow(/対応する有効な selectOption 定義または validValues が見つかりません/);
+  });
+
+  it("Test 48: ifSelection: equals unknown value (DSL typo) throws Error", () => {
+    const action = fullRulePackage.actions.find((a) => a.id === "action.addBulwark")!;
+    const ctx: CommandContext = {
+      state: {},
+      playerKey: "p1",
+      currentAction: action,
+      selections: { bulwarkMode: ["charge1"] },
+    };
+    expect(() => {
+      effectInterpreter.evaluateIfSelection({ selection: "bulwarkMode", equals: "drive3" }, ctx);
+    }).toThrow(/equals に指定された値 'drive3' は.*選択肢.*存在しません \(Rule DSL typo\)/);
+  });
+
+  it("Test 49: ifSelection: malformed selectedValues [] throws Error", () => {
+    const action = fullRulePackage.actions.find((a) => a.id === "action.addBulwark")!;
+    const ctx: CommandContext = {
+      state: {},
+      playerKey: "p1",
+      currentAction: action,
+      selections: { bulwarkMode: [] },
+    };
+    expect(() => {
+      effectInterpreter.evaluateIfSelection({ selection: "bulwarkMode", equals: "charge1" }, ctx);
+    }).toThrow(/選択肢は1つのみ指定してください/);
+  });
+
+  it("Test 50: ifSelection: malformed multi selectedValues throws Error", () => {
+    const action = fullRulePackage.actions.find((a) => a.id === "action.addBulwark")!;
+    const ctx: CommandContext = {
+      state: {},
+      playerKey: "p1",
+      currentAction: action,
+      selections: { bulwarkMode: ["charge1", "drive2"] },
+    };
+    expect(() => {
+      effectInterpreter.evaluateIfSelection({ selection: "bulwarkMode", equals: "charge1" }, ctx);
+    }).toThrow(/選択肢は1つのみ指定してください/);
+  });
+
+  // =========================================================================
+  // 12. Snapshot/Restore, Deterministic Replay & AI (Phase 3.0-C-R1)
+  // =========================================================================
+  it("Test 51: Option WAITING state createSnapshot and restore via GameSession.fromSnapshot", () => {
+    const hCard = { id: "h-snap", suit: "H", rank: "A", value: 1 };
+    const cCard = { id: "c-snap", suit: "C", rank: "A", value: 1 };
+    const l1 = { id: "l-s1", suit: "S", rank: "2", value: 2 };
+    const l2 = { id: "l-s2", suit: "S", rank: "3", value: 3 };
+
+    const state = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      stage: { requests: [] },
+      players: {
+        p1: { hand: [hCard, cCard], field: [], life: [l1, l2], grave: [] },
+        p2: { hand: [], field: [], life: [{ id: "l-opp" }], grave: [] },
+      },
+    };
+
+    const session = new GameSession(state, standardRulePackage);
+    const s1: any = session.advance();
+    const patIdx = s1.request.patterns.findIndex(
+      (p: any) => p.kind === "ACTION" && s1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.addBulwark"
+    );
+    const s2: any = session.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: patIdx });
+    const s3: any = session.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+    const s4: any = session.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+    // s4 is waiting for EFFECT_RESOLUTION option
+    expect(s4.request.source.type).toBe("EFFECT_RESOLUTION");
+    expect(s4.request.catalog.effectSelections).toHaveLength(2);
+
+    // Create snapshot at option waiting state
+    const snapshot = session.createSnapshot();
+    expect(snapshot.gameState).toBeDefined();
+    expect(snapshot.gameStateHash).toBeDefined();
+    expect(snapshot.session.pendingDecision).toBeDefined();
+    expect(snapshot.session.pendingDecision.source.type).toBe("EFFECT_RESOLUTION");
+
+    // Restore into fresh session
+    const restoredSession = GameSession.fromSnapshot(snapshot, standardRulePackage);
+    const restoredStep: any = restoredSession.advance();
+    expect(restoredStep.type).toBe("WAITING_FOR_DECISION");
+    expect(restoredStep.request.source.type).toBe("EFFECT_RESOLUTION");
+    expect(restoredStep.request.catalog.effectSelections).toHaveLength(2);
+    expect(restoredStep.request.catalog.effectSelections[0].selectedValues).toEqual(["charge1"]);
+    expect(restoredStep.request.catalog.effectSelections[1].selectedValues).toEqual(["drive2"]);
+  });
+
+  it("Test 52: Restored session executes drive2 and completes normal resolution", () => {
+    const hCard = { id: "h-snap2", suit: "H", rank: "A", value: 1 };
+    const cCard = { id: "c-snap2", suit: "C", rank: "A", value: 1 };
+    const l1 = { id: "l-s2-1", suit: "S", rank: "2", value: 2 };
+    const l2 = { id: "l-s2-2", suit: "S", rank: "3", value: 3 };
+
+    const state = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      stage: { requests: [] },
+      players: {
+        p1: { hand: [hCard, cCard], field: [], life: [l1, l2], grave: [] },
+        p2: { hand: [], field: [], life: [{ id: "l-opp" }], grave: [] },
+      },
+    };
+
+    const session = new GameSession(state, standardRulePackage);
+    const s1: any = session.advance();
+    const patIdx = s1.request.patterns.findIndex(
+      (p: any) => p.kind === "ACTION" && s1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.addBulwark"
+    );
+    const s2: any = session.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: patIdx });
+    const s3: any = session.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+    session.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+    const snapshot = session.createSnapshot();
+    const restoredSession = GameSession.fromSnapshot(snapshot, standardRulePackage);
+
+    const pendingReq: any = restoredSession.pendingDecision!;
+    // Submit drive2 (pattern index 1) in restored session
+    restoredSession.submitDecision({
+      decisionId: pendingReq.decisionId,
+      stateVersion: pendingReq.stateVersion,
+      selectedPatternRef: 1, // drive2
+    });
+
+    // Resolution completes, units deployed properly
+    const p1 = restoredSession.state.players.p1;
+    expect(p1.field).toHaveLength(2);
+    expect(p1.field[0].componentId).toBe("character.bulwark");
+    expect(p1.field[0].state).toBe("drive");
+    expect(p1.field[0].face).toBe("down");
+    expect(p1.field[1].componentId).toBe("character.bulwark");
+    expect(p1.field[1].state).toBe("drive");
+    expect(p1.field[1].face).toBe("down");
+    expect(p1.life).toHaveLength(0);
+    expect(p1.grave).toHaveLength(2); // Key cards moved to grave
+  });
+
+  it("Test 53: Restored final state matches non-restored final state identically", () => {
+    const createState = () => {
+      const hCard = { id: "h-match", suit: "H", rank: "A", value: 1 };
+      const cCard = { id: "c-match", suit: "C", rank: "A", value: 1 };
+      const l1 = { id: "l-m1", suit: "H", rank: "7", value: 7 };
+      const l2 = { id: "l-m2", suit: "C", rank: "8", value: 8 };
+
+      return {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        stage: { requests: [] },
+        players: {
+          p1: { hand: [hCard, cCard], field: [], life: [l1, l2], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l-opp" }], grave: [] },
+        },
+      };
+    };
+
+    const sessionA = new GameSession(createState(), standardRulePackage);
+    const s1A: any = sessionA.advance();
+    const patIdx = s1A.request.patterns.findIndex(
+      (p: any) => p.kind === "ACTION" && s1A.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.addBulwark"
+    );
+    const s2A: any = sessionA.submitDecision({ decisionId: s1A.request.decisionId, stateVersion: s1A.request.stateVersion, selectedPatternRef: patIdx });
+    const s3A: any = sessionA.submitDecision({ decisionId: s2A.request.decisionId, stateVersion: s2A.request.stateVersion, selectedPatternRef: s2A.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+    const s4A: any = sessionA.submitDecision({ decisionId: s3A.request.decisionId, stateVersion: s3A.request.stateVersion, selectedPatternRef: s3A.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+    // Snapshot at s4A
+    const snapshotA = sessionA.createSnapshot();
+    const sessionRestored = GameSession.fromSnapshot(snapshotA, standardRulePackage);
+
+    // Both sessions submit drive2
+    sessionA.submitDecision({
+      decisionId: s4A.request.decisionId,
+      stateVersion: s4A.request.stateVersion,
+      selectedPatternRef: 1,
+    });
+
+    const resReq: any = sessionRestored.pendingDecision!;
+    sessionRestored.submitDecision({
+      decisionId: resReq.decisionId,
+      stateVersion: resReq.stateVersion,
+      selectedPatternRef: 1,
+    });
+
+    expect(StateHasher.hash(sessionA.state)).toBe(StateHasher.hash(sessionRestored.state));
+    expect(sessionA.state.players.p1.field).toEqual(sessionRestored.state.players.p1.field);
+    expect(sessionA.state.players.p1.life).toEqual(sessionRestored.state.players.p1.life);
+    expect(sessionA.state.players.p1.grave).toEqual(sessionRestored.state.players.p1.grave);
+  });
+
+  it("Test 54: Fresh synthetic Decision Transcript replay reconstructs state deterministically", () => {
+    const makeInitialState = () => ({
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      stage: { requests: [] },
+      players: {
+        p1: {
+          hand: [
+            { id: "h-rep", suit: "H", rank: "9", value: 9 },
+            { id: "c-rep", suit: "C", rank: "9", value: 9 },
+          ],
+          field: [{ unitId: "u-bw0", componentId: "character.bulwark", kind: "防壁", state: "charge", face: "down", cards: [{ id: "l-init" }] }],
+          life: [
+            { id: "l-rep-1", suit: "H", rank: "2", value: 2 },
+            { id: "l-rep-2", suit: "C", rank: "3", value: 3 },
+            { id: "l-rep-3", suit: "D", rank: "4", value: 4 },
+          ],
+          grave: [],
+        },
+        p2: { hand: [], field: [], life: [{ id: "l-opp" }], grave: [] },
+      },
+    });
+
+    // Session A: Run forward and record transcript
+    const sessionA = new GameSession(makeInitialState(), standardRulePackage);
+    const transcript: Array<{ playerId: string; selectedPatternRef: number }> = [];
+
+    const s1: any = sessionA.advance();
+    const actRef = s1.request.patterns.findIndex(
+      (p: any) => p.kind === "ACTION" && s1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.addBulwark"
+    );
+    transcript.push({ playerId: "p1", selectedPatternRef: actRef });
+    const s2: any = sessionA.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: actRef });
+
+    const pass1 = s2.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    transcript.push({ playerId: "p1", selectedPatternRef: pass1 });
+    const s3: any = sessionA.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: pass1 });
+
+    const pass2 = s3.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    transcript.push({ playerId: "p2", selectedPatternRef: pass2 });
+    const s4: any = sessionA.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: pass2 });
+
+    // Option decision: drive2 (pattern 1)
+    transcript.push({ playerId: "p1", selectedPatternRef: 1 });
+    sessionA.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: 1 });
+
+    // Session B: Fresh reconstruct by applying transcript
+    const sessionB = new GameSession(makeInitialState(), standardRulePackage);
+    for (const entry of transcript) {
+      let step: any = sessionB.pendingDecision ? { type: "WAITING_FOR_DECISION", request: sessionB.pendingDecision } : sessionB.advance();
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      sessionB.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: entry.selectedPatternRef,
+      });
+    }
+
+    // Compare final states
+    expect(StateHasher.hash(sessionA.state)).toBe(StateHasher.hash(sessionB.state));
+    expect(sessionA.state.players.p1.field).toEqual(sessionB.state.players.p1.field);
+    expect(sessionA.state.players.p1.life).toEqual(sessionB.state.players.p1.life);
+    expect(sessionA.state.players.p1.grave).toEqual(sessionB.state.players.p1.grave);
+    expect(sessionA.state.players.p1.field).toHaveLength(3); // 1 initial + 2 new
+  });
+
+  it("Test 55: ManualGenericGenome selects valid pattern for EFFECT_SELECTION option seamlessly", () => {
+    const hCard = { id: "h-ai-m", suit: "H", rank: "Q", value: 12 };
+    const cCard = { id: "c-ai-m", suit: "C", rank: "Q", value: 12 };
+
+    const state = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      stage: { requests: [] },
+      players: {
+        p1: { hand: [hCard, cCard], field: [], life: [{ id: "l1" }, { id: "l2" }], grave: [] },
+        p2: { hand: [], field: [], life: [{ id: "l-opp" }], grave: [] },
+      },
+    };
+
+    const session = new GameSession(state, standardRulePackage);
+    const s1: any = session.advance();
+    const patIdx = s1.request.patterns.findIndex(
+      (p: any) => p.kind === "ACTION" && s1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.addBulwark"
+    );
+    const s2: any = session.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: patIdx });
+    const s3: any = session.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+    const s4: any = session.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+    // At s4, Option Decision is waiting
+    expect(s4.request.source.type).toBe("EFFECT_RESOLUTION");
+
+    const manualPolicy = new GenomePolicy(createManualGenericGenomeDNA());
+    const aiResp = manualPolicy.choose(s4.request);
+
+    expect(aiResp.decisionId).toBe(s4.request.decisionId);
+    expect(aiResp.stateVersion).toBe(s4.request.stateVersion);
+    expect(aiResp.selectedPatternRef).toBeGreaterThanOrEqual(0);
+    expect(aiResp.selectedPatternRef).toBeLessThan(s4.request.patterns.length);
+
+    // Submit AI response into session to verify smooth resolution
+    session.submitDecision(aiResp);
+    expect(session.state.players.p1.field.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it("Test 56: FEATURE_SCHEMA_VERSION remains 1 without new features", () => {
+    expect(FEATURE_SCHEMA_VERSION).toBe(1);
+  });
+
+  it("Test 57: ManualGenericGenome DNA dimension remains exactly 1482 weights", () => {
+    const dna = createManualGenericGenomeDNA();
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
   });
 });

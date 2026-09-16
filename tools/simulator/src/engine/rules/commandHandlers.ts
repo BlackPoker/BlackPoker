@@ -189,23 +189,20 @@ export function summonUnitHandler(): CommandHandler {
  */
 export function deployTopCardsAsUnitsHandler(effectInterpreter: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    const { sourceZone = "life", player: playerSpec = "self", count, component = "character.bulwark", face = "down", state = "charge" } = args;
+    const { sourceZone, player: playerSpec, count, component, face, state } = args;
 
-    // 1. count の厳密バリデーション (非負整数・有限値)
-    if (typeof count !== "number" || !Number.isFinite(count) || count < 0 || !Number.isInteger(count)) {
-      throw new Error(`deployTopCardsAsUnits: count には0以上の整数を指定してください (指定値: ${count})`);
+    // 1. sourceZone の厳密バリデーション (必須・空文字不可・対応ゾーン)
+    if (typeof sourceZone !== "string" || sourceZone.trim().length === 0) {
+      throw new Error("deployTopCardsAsUnits: sourceZone は必須です");
     }
-
-    if (count === 0) {
-      return; // 正常 no-op
-    }
-
-    // 2. sourceZone のバリデーション
     if (sourceZone !== "life") {
       throw new Error(`deployTopCardsAsUnits: 未対応の sourceZone です: '${sourceZone}'`);
     }
 
-    // 3. 対象プレイヤーの汎用解決
+    // 2. player の厳密バリデーション (必須・空文字不可・有効値)
+    if (typeof playerSpec !== "string" || playerSpec.trim().length === 0) {
+      throw new Error("deployTopCardsAsUnits: player は必須です");
+    }
     let targetPlayerKey: string;
     if (playerSpec === "self" || playerSpec === "controller") {
       targetPlayerKey = context.playerKey;
@@ -215,19 +212,50 @@ export function deployTopCardsAsUnitsHandler(effectInterpreter: EffectInterprete
       throw new Error(`deployTopCardsAsUnits: 未知の player 指定です: '${playerSpec}'`);
     }
 
+    // 3. count の厳密バリデーション (非負整数・有限値)
+    if (typeof count !== "number" || !Number.isFinite(count) || count < 0 || !Number.isInteger(count)) {
+      throw new Error(`deployTopCardsAsUnits: count には0以上の整数を指定してください (指定値: ${count})`);
+    }
+
+    // 4. component の厳密バリデーション (必須・空文字不可・実在・type === 'character')
+    if (typeof component !== "string" || component.trim().length === 0) {
+      throw new Error("deployTopCardsAsUnits: component は必須です");
+    }
+    const compDef = context.components?.find((c: any) => c.id === component);
+    if (!compDef) {
+      throw new Error(`deployTopCardsAsUnits: コンポーネントが見つかりません: '${component}'`);
+    }
+    if (compDef.type !== "character") {
+      throw new Error(`deployTopCardsAsUnits: ユニット生成可能なコンポーネントではありません (type: '${compDef.type}'): '${component}'`);
+    }
+
+    // 5. face の厳密バリデーション (必須・'up' または 'down')
+    if (typeof face !== "string" || (face !== "up" && face !== "down")) {
+      throw new Error(`deployTopCardsAsUnits: face は 'up' または 'down' である必要があります (指定値: ${JSON.stringify(face)})`);
+    }
+
+    // 6. state の厳密バリデーション (必須・'charge' または 'drive')
+    if (typeof state !== "string" || (state !== "charge" && state !== "drive")) {
+      throw new Error(`deployTopCardsAsUnits: state は 'charge' または 'drive' である必要があります (指定値: ${JSON.stringify(state)})`);
+    }
+
+    // 7. 対象プレイヤーおよび領域 state invariants の厳密検証 (malformed state の fail-closed)
     const targetPlayer = context.state.players?.[targetPlayerKey];
     if (!targetPlayer) {
       throw new Error(`deployTopCardsAsUnits: 対象プレイヤーが見つかりません: ${targetPlayerKey}`);
     }
-
     if (!Array.isArray(targetPlayer.life)) {
-      targetPlayer.life = [];
+      throw new Error("deployTopCardsAsUnits: 対象プレイヤーのライフ領域が不正です (life missing or not array)");
     }
     if (!Array.isArray(targetPlayer.field)) {
-      targetPlayer.field = [];
+      throw new Error("deployTopCardsAsUnits: 対象プレイヤーのフィールド領域が不正です (field missing or not array)");
     }
 
-    // 4. 公式ルール5.4.4 部分解決 (availableCount との min)
+    if (count === 0) {
+      return; // 正常 no-op
+    }
+
+    // 8. 公式ルール5.4.4 部分解決 (availableCount との min)
     const availableCount = targetPlayer.life.length;
     const actualCount = Math.min(count, availableCount);
 
@@ -244,8 +272,8 @@ export function deployTopCardsAsUnitsHandler(effectInterpreter: EffectInterprete
         componentId: component,
         playerKey: targetPlayerKey,
         card,
-        face: face || "down",
-        state: state || "charge",
+        face,
+        state,
         components: context.components,
         stateVersion: context.state.stateVersion || 1,
         turnCount: context.state.turnCount ?? 1,

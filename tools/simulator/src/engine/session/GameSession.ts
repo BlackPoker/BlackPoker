@@ -236,6 +236,7 @@ export class GameSession {
       this.resolvingContext = {
         state: this.state,
         actions: this.rulePackage.actions,
+        components: this.rulePackage.components,
         playerKey: ctxData.playerKey,
         keyCards: ctxData.keyCards ? JSON.parse(JSON.stringify(ctxData.keyCards)) : undefined,
         keyCard: ctxData.keyCards && ctxData.keyCards.length > 0 ? ctxData.keyCards[0] : undefined,

@@ -12,6 +12,7 @@ import { ActionCostEvaluator, InvalidActionCostError } from "../rules/ActionCost
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay } from "../rules/cardUtils";
+import { validateOptionSelectionDefinition } from "../rules/OptionSelectionValidator";
 
 
 export interface DecisionGenerationMetrics {
@@ -604,12 +605,16 @@ export class LegalPatternGenerator {
     const matchId = extraOptions?.matchId ?? (state.matchId || "match-1");
     const decisionId = extraOptions?.decisionId ?? `dec-opt-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+    // 選択肢定義の厳格バリデーション (fail-closed)
+    const selectionId = extraOptions?.selectionId || effectStepId || "option";
+    const validated = validateOptionSelectionDefinition({ id: selectionId, options });
+
     const observation = ObservationFactory.createObservation(state, playerId);
 
     const effectSelections: any[] = [];
     const patterns: LegalPattern[] = [];
 
-    options.forEach((opt, index) => {
+    validated.options.forEach((opt, index) => {
       const selectedValues = [opt.value];
       const summary = opt.label || `選択: ${opt.value}`;
 

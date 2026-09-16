@@ -5,6 +5,7 @@ import { getOpponentPlayerKey } from "./playerUtils";
 import { hasUnitLabel, isCharacterComponent, hasHaste } from "./characterUtils";
 import { matchesSuit, matchesRank } from "./cardUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+import { validateOptionSelectionDefinition } from "./OptionSelectionValidator";
 
 
 export interface EffectInterruption {
@@ -39,7 +40,42 @@ export class EffectInterpreter {
    * 不正な状態（未定義、空配列、複数要素、未知の選択値）に対しては例外を投げて fail-closed します。
    */
   public evaluateIfSelection(args: any, context: CommandContext): { shouldExecuteThen: boolean; shouldExecuteElse: boolean } {
+    if (!args || typeof args !== "object") {
+      throw new Error("ifSelection: 引数がオブジェクトではありません");
+    }
+
     const selectionId = args.selection;
+    if (typeof selectionId !== "string" || selectionId.trim().length === 0) {
+      throw new Error(`ifSelection: selection は空でない文字列である必要があります (指定値: ${JSON.stringify(selectionId)})`);
+    }
+
+    // args.equals の検証 (必須・空文字不可・文字列)
+    if (args.equals === undefined || typeof args.equals !== "string" || args.equals.trim().length === 0) {
+      throw new Error(`ifSelection: equals は空でない文字列である必要があります (selection: '${selectionId}', 指定値: ${JSON.stringify(args.equals)})`);
+    }
+
+    // validValues の解決（args.validValues または action.effect の selectOption 定義から取得）
+    let validValues: string[] | undefined = Array.isArray(args.validValues) ? args.validValues : undefined;
+    if (!validValues && context.currentAction?.effect) {
+      const optStep: any = context.currentAction.effect.find(
+        (e: any) => e.selectOption && e.selectOption.id === selectionId
+      );
+      if (optStep?.selectOption) {
+        const validated = validateOptionSelectionDefinition(optStep.selectOption);
+        validValues = validated.options.map((o) => o.value);
+      }
+    }
+
+    // 16. selection idに対応するselectOptionが存在しない / validValuesを取得不能 (fail-closed)
+    if (!validValues || validValues.length === 0) {
+      throw new Error(`ifSelection: selection id '${selectionId}' に対応する有効な selectOption 定義または validValues が見つかりません`);
+    }
+
+    // 17. args.equals が validValues に存在しない (Rule DSL typo fail-closed)
+    if (!validValues.includes(args.equals)) {
+      throw new Error(`ifSelection: equals に指定された値 '${args.equals}' は有効な選択肢 (${validValues.join(", ")}) に存在しません (Rule DSL typo)`);
+    }
+
     const raw = context.selections?.[selectionId];
 
     // fail-closed: missing or undefined
@@ -58,19 +94,8 @@ export class EffectInterpreter {
       selectedValue = raw;
     }
 
-    // validValues の解決（args.validValues または action.effect の selectOption 定義から取得）
-    let validValues: string[] | undefined = Array.isArray(args.validValues) ? args.validValues : undefined;
-    if (!validValues && context.currentAction?.effect) {
-      const optStep: any = context.currentAction.effect.find(
-        (e: any) => e.selectOption && e.selectOption.id === selectionId
-      );
-      if (optStep?.selectOption?.options && Array.isArray(optStep.selectOption.options)) {
-        validValues = optStep.selectOption.options.map((o: any) => o.value);
-      }
-    }
-
     // fail-closed: unknown value
-    if (validValues && !validValues.includes(selectedValue)) {
+    if (!validValues.includes(selectedValue)) {
       throw new Error(`ifSelection: 未知の選択値です: '${selectedValue}' (有効値: ${validValues.join(", ")})`);
     }
 
@@ -301,13 +326,13 @@ export class EffectInterpreter {
       }
 
       if (name === "selectOption") {
-        const selectionId = args.id || "option";
+        const validated = validateOptionSelectionDefinition(args);
+        const selectionId = validated.id;
         if (context.selections && context.selections[selectionId] !== undefined) {
           continue;
         }
 
         const decisionPlayerKey = this.resolveDecisionPlayerKey(args.decisionPlayer || args.chooser, context);
-        const options = Array.isArray(args.options) ? args.options : [];
 
         return {
           interrupted: true,
@@ -315,7 +340,7 @@ export class EffectInterpreter {
           effectStepId: name,
           selectionId,
           selectionType: "option",
-          candidates: options,
+          candidates: validated.options,
           decisionPlayerKey,
         };
       }
