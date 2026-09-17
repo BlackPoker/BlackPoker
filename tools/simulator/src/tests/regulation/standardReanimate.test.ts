@@ -23,6 +23,7 @@ import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/Decision
 import { GenomePolicy } from "../../engine/ai/GenomePolicy";
 import { createManualGenericGenomeDNA } from "../../engine/ai/BaselinePolicies";
 import { FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes";
+import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import {
   enumeratePhysicalCardsInGrave,
   findPhysicalCardInGrave,
@@ -882,4 +883,619 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
     const dna = createManualGenericGenomeDNA();
     expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
   });
+
+  // =========================================================================
+  // Official Regulation Phase 3.0-E-R1: Grave TOP & Wrapper Invariant Contract Tests
+  // =========================================================================
+  describe("Grave TOP and Wrapper Invariant Contracts (Phase 3.0-E-R1)", () => {
+    // -----------------------------------------------------------------------
+    // Test A: Grave TOPの基準
+    // -----------------------------------------------------------------------
+    it("Test A: Grave TOP is defined as the last element of player.grave, resolving raw card / single wrapper / multi wrapper accordingly", () => {
+      // 1. raw Card のみのケース: 末尾 (index 1) が TOP
+      const stateRaw = {
+        stateVersion: 1,
+        players: {
+          p1: { life: [], hand: [], field: [], fog: [], grave: [] },
+          p2: {
+            life: [],
+            hand: [],
+            field: [],
+            fog: [],
+            grave: [
+              { id: "c-bottom", suit: "S", rank: "2", value: 2 },
+              { id: "c-top", suit: "H", rank: "10", value: 10 },
+            ],
+          },
+        },
+        stage: { requests: [] },
+      };
+      const obsRawP1 = ObservationFactory.createObservation(stateRaw as any, "p1");
+      const p2RawView = obsRawP1.players.find((p) => p.playerId === "p2")!;
+      expect(p2RawView.graveCount).toBe(2);
+      expect(p2RawView.graveTopCard).toBeDefined();
+      expect((p2RawView.graveTopCard as any)?.suit).toBe("H");
+      expect((p2RawView.graveTopCard as any)?.rank).toBe("10");
+
+      // 2. cards.length === 1 の Unit wrapper が末尾のケース
+      const stateSingle = {
+        stateVersion: 1,
+        players: {
+          p1: { life: [], hand: [], field: [], fog: [], grave: [] },
+          p2: {
+            life: [],
+            hand: [],
+            field: [],
+            fog: [],
+            grave: [
+              {
+                unitId: "u-soldier",
+                kind: "一般兵",
+                cards: [{ id: "c-sol", suit: "C", rank: "7", value: 7 }],
+              },
+            ],
+          },
+        },
+        stage: { requests: [] },
+      };
+      const obsSingleP1 = ObservationFactory.createObservation(stateSingle as any, "p1");
+      const p2SingleView = obsSingleP1.players.find((p) => p.playerId === "p2")!;
+      expect(p2SingleView.graveCount).toBe(1);
+      expect(p2SingleView.graveTopCard).toBeDefined();
+      expect((p2SingleView.graveTopCard as any)?.suit).toBe("C");
+      expect((p2SingleView.graveTopCard as any)?.rank).toBe("7");
+
+      // 3. cards.length > 1 の Unit wrapper が末尾のケース: 推測せず undefined (fail-safe)
+      const stateMulti = {
+        stateVersion: 1,
+        players: {
+          p1: { life: [], hand: [], field: [], fog: [], grave: [] },
+          p2: {
+            life: [],
+            hand: [],
+            field: [],
+            fog: [],
+            grave: [
+              { id: "c-base", suit: "S", rank: "A", value: 1 },
+              {
+                unitId: "u-multi",
+                kind: "武装兵",
+                cards: [
+                  { id: "c-m1", suit: "D", rank: "8", value: 8 },
+                  { id: "c-m2", suit: "S", rank: "9", value: 9 },
+                ],
+              },
+            ],
+          },
+        },
+        stage: { requests: [] },
+      };
+      const obsMultiP1 = ObservationFactory.createObservation(stateMulti as any, "p1");
+      const p2MultiView = obsMultiP1.players.find((p) => p.playerId === "p2")!;
+      // 物理カード数 1 + 2 = 3
+      expect(p2MultiView.graveCount).toBe(3);
+      // canonical TOP 不在のため推測せず undefined
+      expect(p2MultiView.graveTopCard).toBeUndefined();
+      // 相手視点には非公開墓地が漏洩しない (0件)
+      expect(p2MultiView.grave.length).toBe(0);
+
+      // オーナー視点 (p2) では全物理カード 3枚が確認可能
+      const obsMultiP2 = ObservationFactory.createObservation(stateMulti as any, "p2");
+      const p2OwnerView = obsMultiP2.players.find((p) => p.playerId === "p2")!;
+      expect(p2OwnerView.graveCount).toBe(3);
+      expect(p2OwnerView.grave.length).toBe(3);
+
+      // 4. 混在 (rawCard + multiWrapper + singleWrapper): 末尾 (index 2) の singleWrapper が TOP
+      const stateMixed = {
+        stateVersion: 1,
+        players: {
+          p1: { life: [], hand: [], field: [], fog: [], grave: [] },
+          p2: {
+            life: [],
+            hand: [],
+            field: [],
+            fog: [],
+            grave: [
+              { id: "c-raw", suit: "S", rank: "3", value: 3 },
+              {
+                unitId: "u-multi",
+                cards: [
+                  { id: "c-m1", suit: "D", rank: "4", value: 4 },
+                  { id: "c-m2", suit: "C", rank: "5", value: 5 },
+                ],
+              },
+              {
+                unitId: "u-single-top",
+                cards: [{ id: "c-top-card", suit: "H", rank: "K", value: 13 }],
+              },
+            ],
+          },
+        },
+        stage: { requests: [] },
+      };
+      const obsMixedP1 = ObservationFactory.createObservation(stateMixed as any, "p1");
+      const p2MixedView = obsMixedP1.players.find((p) => p.playerId === "p2")!;
+      expect(p2MixedView.graveCount).toBe(4);
+      expect(p2MixedView.graveTopCard).toBeDefined();
+      expect((p2MixedView.graveTopCard as any)?.suit).toBe("H");
+      expect((p2MixedView.graveTopCard as any)?.rank).toBe("K");
+    });
+
+    // -----------------------------------------------------------------------
+    // Test B: 非TOPカードをリアニメイト
+    // -----------------------------------------------------------------------
+    it("Test B: Reanimating a non-TOP card removes only that card, keeps other cards and top untouched before new target moves to grave", () => {
+      // 1. ユーティリティ単体: 非TOPカード除去時の TOP 不変性
+      const grave = [
+        { id: "c-bottom", suit: "S", rank: "2", value: 2 },
+        {
+          unitId: "u-middle",
+          cards: [
+            { id: "c-mid-1", suit: "D", rank: "4", value: 4 },
+            { id: "c-mid-2", suit: "D", rank: "5", value: 5 },
+          ],
+        },
+        {
+          unitId: "u-top",
+          cards: [{ id: "c-top", suit: "H", rank: "10", value: 10 }],
+        },
+      ];
+
+      // 非TOP (c-bottom) を除去
+      const removed = removePhysicalCardFromGrave(grave, "c-bottom");
+      expect(removed.id).toBe("c-bottom");
+      expect(grave.length).toBe(2);
+      // TOP は依然として u-top の c-top (♡10)
+      const stateAfterUtil = {
+        stateVersion: 1,
+        players: { p1: { life: [], hand: [], field: [], fog: [], grave } },
+        stage: { requests: [] },
+      };
+      const obs1 = ObservationFactory.createObservation(stateAfterUtil as any, "p2");
+      const p1View1 = obs1.players.find((p) => p.playerId === "p1")!;
+      expect((p1View1.graveTopCard as any)?.suit).toBe("H");
+      expect((p1View1.graveTopCard as any)?.rank).toBe("10");
+
+      // 非TOP (u-middle の c-mid-1) を除去
+      const removedMid = removePhysicalCardFromGrave(grave, "c-mid-1");
+      expect(removedMid.id).toBe("c-mid-1");
+      expect(grave.length).toBe(2); // u-middle はまだ c-mid-2 を持つため除去されない
+      expect(grave[0].cards.length).toBe(1);
+      expect(grave[0].cards[0].id).toBe("c-mid-2");
+      // TOP は依然として u-top の c-top
+      const obs2 = ObservationFactory.createObservation(stateAfterUtil as any, "p2");
+      const p1View2 = obs2.players.find((p) => p.playerId === "p1")!;
+      expect((p1View2.graveTopCard as any)?.suit).toBe("H");
+      expect((p1View2.graveTopCard as any)?.rank).toBe("10");
+
+      // 2. 実 GameSession でのリアニメイト解決
+      // 非TOPカード (c-gBottom) を選択してリアニメイト
+      const targetCard = { id: "c-target-sol", suit: "C", rank: "3", value: 3 };
+      const topCard = { id: "c-gTop", suit: "H", rank: "K", value: 13 };
+      const bottomCard = { id: "c-gBottom", suit: "D", rank: "6", value: 6 };
+
+      const sessionState = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: {
+            hand: [
+              { id: "k-s1", suit: "S", rank: "1", value: 1 },
+              { id: "k-h1", suit: "H", rank: "1", value: 1 },
+            ],
+            field: [
+              {
+                ...buildFieldUnitFromComponent({ componentId: "character.soldier", playerKey: "p1", card: targetCard, components: fullRulePackage.components }),
+                cards: [targetCard],
+              },
+            ],
+            life: [{ id: "l1" }],
+            grave: [
+              bottomCard,
+              {
+                unitId: "u-top-sol",
+                kind: "一般兵",
+                cards: [topCard],
+              },
+            ],
+          },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const session = new GameSession(sessionState, standardRulePackage);
+      const s1: any = session.advance();
+      const rePat = s1.request.patterns.findIndex(
+        (p: any) => p.actionSelectionRef !== undefined && s1.request.catalog.actions[p.actionSelectionRef].actionId === "action.reanimate"
+      );
+      const s2: any = session.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: rePat });
+      const s3: any = session.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+      const s4: any = session.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+      // 非TOP (c-gBottom) を選択
+      const bottomPat = s4.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-gBottom")
+      );
+      expect(bottomPat).toBeGreaterThanOrEqual(0);
+      session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: bottomPat });
+
+      // 蘇生された c-gBottom が場に出ていること
+      const p1Field = session.state.players.p1.field;
+      expect(p1Field.some((u: any) => u.cards?.some((c: any) => c.id === "c-gBottom"))).toBe(true);
+
+      // 墓地の状態:
+      // c-gBottom は除去されている
+      // 元のTOP u-top-sol は壊れず残存
+      // 対象 targetCard が墓地へ送られていること
+      const p1Grave = session.state.players.p1.grave;
+      expect(p1Grave.some((g: any) => (g.id === "c-gBottom" || g.cards?.some((c: any) => c.id === "c-gBottom")))).toBe(false);
+      expect(p1Grave.some((g: any) => g.cards?.some((c: any) => c.id === "c-gTop"))).toBe(true);
+      expect(p1Grave.some((g: any) => g.cards?.some((c: any) => c.id === "c-target-sol"))).toBe(true);
+
+      // アクション解決完了時、ルール契約に基づきキーカード (k-s1, k-h1) が墓地末尾に追加されるため、
+      // 最終的な墓地TOPは2枚目のキーカード k-h1 (♡1) となる
+      expect(p1Grave[p1Grave.length - 1].id).toBe("k-h1");
+      const p1Obs = ObservationFactory.createObservation(session.state, "p2");
+      const p1ObsView = p1Obs.players.find((p) => p.playerId === "p1")!;
+      expect((p1ObsView.graveTopCard as any)?.suit).toBe("H");
+      expect((p1ObsView.graveTopCard as any)?.rank).toBe("1");
+    });
+
+    // -----------------------------------------------------------------------
+    // Test C: 現在のTOPカードをリアニメイト
+    // -----------------------------------------------------------------------
+    it("Test C: Reanimating the current TOP card removes it, updating the TOP according to existing contracts or leaving grave empty if last", () => {
+      // 1. ユーティリティ単体: TOPカード除去で前のカードが新TOPに昇格
+      const grave = [
+        { id: "c-bottom", suit: "S", rank: "2", value: 2 },
+        { id: "c-top", suit: "H", rank: "10", value: 10 },
+      ];
+      const removed = removePhysicalCardFromGrave(grave, "c-top");
+      expect(removed.id).toBe("c-top");
+      expect(grave.length).toBe(1);
+      expect(grave[0].id).toBe("c-bottom");
+
+      const obs1 = ObservationFactory.createObservation(
+        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
+        "p2"
+      );
+      const p1View1 = obs1.players.find((p) => p.playerId === "p1")!;
+      expect((p1View1.graveTopCard as any)?.suit).toBe("S");
+      expect((p1View1.graveTopCard as any)?.rank).toBe("2");
+
+      // 2. 最後の1枚を除去して墓地が空になるケース
+      const removedLast = removePhysicalCardFromGrave(grave, "c-bottom");
+      expect(removedLast.id).toBe("c-bottom");
+      expect(grave.length).toBe(0);
+
+      const obs2 = ObservationFactory.createObservation(
+        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
+        "p2"
+      );
+      const p1View2 = obs2.players.find((p) => p.playerId === "p1")!;
+      expect(p1View2.graveCount).toBe(0);
+      expect(p1View2.graveTopCard).toBeUndefined();
+      expect(p1View2.grave.length).toBe(0);
+
+      // 3. 実 GameSession: 元のTOPカードを選択してリアニメイト
+      const targetCard = { id: "c-target-sol", suit: "D", rank: "4", value: 4 };
+      const topCard = { id: "c-gTop", suit: "H", rank: "8", value: 8 };
+
+      const sessionState = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: {
+            hand: [
+              { id: "k-s2", suit: "S", rank: "2", value: 2 },
+              { id: "k-h2", suit: "H", rank: "2", value: 2 },
+            ],
+            field: [
+              {
+                ...buildFieldUnitFromComponent({ componentId: "character.soldier", playerKey: "p1", card: targetCard, components: fullRulePackage.components }),
+                cards: [targetCard],
+              },
+            ],
+            life: [{ id: "l1" }],
+            grave: [
+              {
+                unitId: "u-top-alone",
+                kind: "一般兵",
+                cards: [topCard],
+              },
+            ],
+          },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const session = new GameSession(sessionState, standardRulePackage);
+      const s1: any = session.advance();
+      const rePat = s1.request.patterns.findIndex(
+        (p: any) => p.actionSelectionRef !== undefined && s1.request.catalog.actions[p.actionSelectionRef].actionId === "action.reanimate"
+      );
+      const s2: any = session.submitDecision({ decisionId: s1.request.decisionId, stateVersion: s1.request.stateVersion, selectedPatternRef: rePat });
+      const s3: any = session.submitDecision({ decisionId: s2.request.decisionId, stateVersion: s2.request.stateVersion, selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+      const s4: any = session.submitDecision({ decisionId: s3.request.decisionId, stateVersion: s3.request.stateVersion, selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+      // TOP (c-gTop) を選択
+      const topPat = s4.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-gTop")
+      );
+      expect(topPat).toBeGreaterThanOrEqual(0);
+      session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: topPat });
+
+      // c-gTop は場へ
+      expect(session.state.players.p1.field.some((u: any) => u.cards?.some((c: any) => c.id === "c-gTop"))).toBe(true);
+
+      // 墓地からは u-top-alone が安全に除去され、targetCard が墓地へ送られ、
+      // 最終的にキーカード (k-s2, k-h2) が墓地末尾に送られるため、最終TOPは k-h2 (♡2) となる
+      const p1Grave = session.state.players.p1.grave;
+      expect(p1Grave.some((g: any) => g.cards?.some((c: any) => c.id === "c-gTop"))).toBe(false);
+      expect(p1Grave.some((g: any) => g.cards?.some((c: any) => c.id === "c-target-sol"))).toBe(true);
+      expect(p1Grave[p1Grave.length - 1].id).toBe("k-h2");
+
+      const p1Obs = ObservationFactory.createObservation(session.state, "p2");
+      const p1ObsView = p1Obs.players.find((p) => p.playerId === "p1")!;
+      expect((p1ObsView.graveTopCard as any)?.suit).toBe("H");
+      expect((p1ObsView.graveTopCard as any)?.rank).toBe("2");
+    });
+
+    // -----------------------------------------------------------------------
+    // Test D: 複数カードwrapperから1枚抜く
+    // -----------------------------------------------------------------------
+    it("Test D: Extracting one card from a multi-card wrapper retains wrapper identity, remaining cards, and updates publicity invariant", () => {
+      const cardA = { id: "c-multi-A", suit: "S", rank: "7", value: 7 };
+      const cardB = { id: "c-multi-B", suit: "D", rank: "8", value: 8 };
+      const cardC = { id: "c-multi-C", suit: "C", rank: "9", value: 9 };
+
+      // 3枚構成のラッパー
+      const grave = [
+        {
+          unitId: "u-multi-armed",
+          kind: "武装兵",
+          componentId: "character.armedSoldier",
+          labels: ["armed"],
+          cards: [cardA, cardB, cardC],
+        },
+      ];
+
+      // 最初: 3枚あるため TOP は undefined
+      const stateBefore = {
+        stateVersion: 1,
+        players: { p1: { life: [], hand: [], field: [], fog: [], grave } },
+        stage: { requests: [] },
+      };
+      const obs0 = ObservationFactory.createObservation(stateBefore as any, "p2");
+      expect(obs0.players[0].graveCount).toBe(3);
+      expect(obs0.players[0].graveTopCard).toBeUndefined();
+
+      // 1枚目 (cardA) を除去 -> 残り2枚
+      const removedA = removePhysicalCardFromGrave(grave, "c-multi-A");
+      expect(removedA.id).toBe("c-multi-A");
+      expect(grave.length).toBe(1); // ラッパーは保持される
+      expect(grave[0].unitId).toBe("u-multi-armed"); // unitId 保持
+      expect(grave[0].componentId).toBe("character.armedSoldier");
+      expect(grave[0].cards.length).toBe(2);
+      expect(grave[0].cards[0].id).toBe("c-multi-B");
+      expect(grave[0].cards[1].id).toBe("c-multi-C");
+
+      // 2枚残っているため TOP は依然として undefined
+      const obs1 = ObservationFactory.createObservation(stateBefore as any, "p2");
+      expect(obs1.players[0].graveCount).toBe(2);
+      expect(obs1.players[0].graveTopCard).toBeUndefined();
+
+      // 2枚目 (cardB) を除去 -> 残り1枚
+      const removedB = removePhysicalCardFromGrave(grave, "c-multi-B");
+      expect(removedB.id).toBe("c-multi-B");
+      expect(grave.length).toBe(1); // まだ1枚あるのでラッパー保持
+      expect(grave[0].unitId).toBe("u-multi-armed");
+      expect(grave[0].cards.length).toBe(1);
+      expect(grave[0].cards[0].id).toBe("c-multi-C");
+
+      // 1枚のみとなったため、既存の Observation 契約に従い cardC が正当に TOP として公開される！
+      const obs2 = ObservationFactory.createObservation(stateBefore as any, "p2");
+      expect(obs2.players[0].graveCount).toBe(1);
+      expect(obs2.players[0].graveTopCard).toBeDefined();
+      expect((obs2.players[0].graveTopCard as any)?.suit).toBe("C");
+      expect((obs2.players[0].graveTopCard as any)?.rank).toBe("9");
+    });
+
+    // -----------------------------------------------------------------------
+    // Test E: 単一カードwrapperから抜く
+    // -----------------------------------------------------------------------
+    it("Test E: Extracting from a single-card wrapper removes the card and cleans up the empty wrapper completely", () => {
+      const grave = [
+        { id: "c-bottom", suit: "S", rank: "A", value: 1 },
+        {
+          unitId: "u-single-wrapper",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          cards: [{ id: "c-sol-1", suit: "H", rank: "5", value: 5 }],
+        },
+      ];
+
+      expect(grave.length).toBe(2);
+      const removed = removePhysicalCardFromGrave(grave, "c-sol-1");
+      expect(removed.id).toBe("c-sol-1");
+
+      // 空ラッパーは自動除去され、墓地配列に空 Unit は残らない
+      expect(grave.length).toBe(1);
+      expect(grave[0].id).toBe("c-bottom");
+      expect((grave[0] as any).cards).toBeUndefined();
+
+      // 残った墓地の TOP が c-bottom (♠A) として正しく観測される
+      const obs = ObservationFactory.createObservation(
+        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
+        "p2"
+      );
+      expect(obs.players[0].graveCount).toBe(1);
+      expect((obs.players[0].graveTopCard as any)?.suit).toBe("S");
+      expect((obs.players[0].graveTopCard as any)?.rank).toBe("A");
+    });
+
+    // -----------------------------------------------------------------------
+    // Test F: リアニメイト対象CharacterがGraveへ入った後のTOP
+    // -----------------------------------------------------------------------
+    it("Test F: Target character moving to grave during reanimate follows standard grave entry contracts without special-case logic", () => {
+      const action = fullRulePackage.actions.find((a) => a.id === "action.reanimate")!;
+
+      // Case F1: 効果解決直後レベル - 対象が単一カード兵士 (♠5)
+      // 効果ステップ (selectCards -> moveToGraveyard -> deploySelectedCardsAsUnits) の解決直後、
+      // 対象兵士が player.grave の末尾に追加され、蘇生カードが墓地から抜かれる。
+      // この時点の墓地 TOP は対象兵士 (cards.length === 1) の ♠5 となる。
+      const singleTargetCard = { id: "c-target-single", suit: "S", rank: "5", value: 5 };
+      const singleTargetUnit = {
+        ...buildFieldUnitFromComponent({ componentId: "character.soldier", playerKey: "p1", card: singleTargetCard, components: fullRulePackage.components }),
+        cards: [singleTargetCard],
+      };
+      const graveCardA = { id: "c-gA", suit: "D", rank: "3", value: 3 };
+      const graveCardB = { id: "c-gB", suit: "C", rank: "4", value: 4 };
+
+      const stateF1: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            field: [singleTargetUnit],
+            grave: [graveCardA, graveCardB],
+          },
+          p2: { field: [], grave: [] },
+        },
+      };
+
+      const contextF1: CommandContext = {
+        state: stateF1,
+        playerKey: "p1",
+        currentAction: action,
+        targetComponent: singleTargetUnit,
+        components: fullRulePackage.components,
+        selections: {
+          reanimateCard: ["c-gA"],
+        },
+      };
+
+      // 効果のみを実行 (キーカードのファイナライズ前)
+      const resF1 = effectInterpreter.executeEffectsWithInterruption(action.effect!, contextF1);
+      expect("completed" in resF1 && resF1.completed).toBe(true);
+
+      // graveCardA は場へ配置され、墓地からは除去されている
+      expect(stateF1.players.p1.field.some((u: any) => u.cards?.some((c: any) => c.id === "c-gA"))).toBe(true);
+      expect(stateF1.players.p1.grave.some((g: any) => g.id === "c-gA")).toBe(false);
+
+      // 墓地の末尾 (TOP) は対象兵士 singleTargetUnit (cards.length === 1)
+      const p1GraveF1 = stateF1.players.p1.grave;
+      expect(p1GraveF1.length).toBe(2); // graveCardB + singleTargetUnit
+      const lastEntryF1 = p1GraveF1[p1GraveF1.length - 1];
+      expect(lastEntryF1.cards[0].id).toBe("c-target-single");
+
+      // ObservationFactory でも対象兵士のカードが公開 TOP として観測される
+      const obsF1 = ObservationFactory.createObservation(stateF1, "p2");
+      expect((obsF1.players[0].graveTopCard as any)?.suit).toBe("S");
+      expect((obsF1.players[0].graveTopCard as any)?.rank).toBe("5");
+
+      // Case F2: 効果解決直後レベル - 対象が複数カード武装兵士 (cards.length === 2)
+      // 墓地末尾に対象武装兵士が追加されるが、cards.length === 2 のため推測せず undefined (fail-safe)
+      const armedCard1 = { id: "c-armed-1", suit: "H", rank: "7", value: 7 };
+      const armedCard2 = { id: "c-armed-2", suit: "D", rank: "7", value: 7 };
+      const armedUnit = {
+        ...buildFieldUnitFromComponent({ componentId: "character.armedSoldier", playerKey: "p1", components: fullRulePackage.components }),
+        cards: [armedCard1, armedCard2],
+      };
+      const graveCardC = { id: "c-gC", suit: "C", rank: "2", value: 2 };
+
+      const stateF2: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            field: [armedUnit],
+            grave: [graveCardC],
+          },
+          p2: { field: [], grave: [] },
+        },
+      };
+
+      const contextF2: CommandContext = {
+        state: stateF2,
+        playerKey: "p1",
+        currentAction: action,
+        targetComponent: armedUnit,
+        components: fullRulePackage.components,
+        selections: {
+          reanimateCard: ["c-gC"],
+        },
+      };
+
+      const resF2 = effectInterpreter.executeEffectsWithInterruption(action.effect!, contextF2);
+      expect("completed" in resF2 && resF2.completed).toBe(true);
+
+      const p1GraveF2 = stateF2.players.p1.grave;
+      expect(p1GraveF2.length).toBe(1); // graveCardC 抜出、armedUnit 追加
+      const lastEntryF2 = p1GraveF2[0];
+      expect(lastEntryF2.cards.length).toBe(2);
+
+      // 通常の墓地移動 primitive の結果として、複数カード Unit が TOP のため推測せず undefined
+      const obsF2 = ObservationFactory.createObservation(stateF2, "p2");
+      expect(obsF2.players[0].graveCount).toBe(2);
+      expect(obsF2.players[0].graveTopCard).toBeUndefined();
+      expect(obsF2.players[0].grave.length).toBe(0); // 相手視点非公開
+
+      // Case F3: 実 GameSession での全工程（アクション完了・キーカード移動）統合検証
+      // 対象兵士 (非Legacy: ♣6) の墓地移動後に、キーカード (k-s1, k-h1) が墓地末尾に送られる
+      const targetSolCard = { id: "c-sol-6", suit: "C", rank: "6", value: 6 };
+      const sessionState = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: {
+            hand: [
+              { id: "k-s1", suit: "S", rank: "1", value: 1 },
+              { id: "k-h1", suit: "H", rank: "1", value: 1 },
+            ],
+            field: [
+              {
+                ...buildFieldUnitFromComponent({ componentId: "character.soldier", playerKey: "p1", card: targetSolCard, components: fullRulePackage.components }),
+                cards: [targetSolCard],
+              },
+            ],
+            life: [{ id: "l1" }],
+            grave: [{ id: "c-init-grave", suit: "D", rank: "9", value: 9 }],
+          },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const session = new GameSession(sessionState, standardRulePackage);
+      let s: any = session.advance();
+      const rePat = s.request.patterns.findIndex(
+        (p: any) => p.actionSelectionRef !== undefined && s.request.catalog.actions[p.actionSelectionRef].actionId === "action.reanimate"
+      );
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: rePat });
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: s.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: s.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+      const selPat = s.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-init-grave")
+      );
+      session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: selPat });
+
+      // アクション全工程完了後の墓地:
+      // [ targetSolCard (Unit wrapper), k-s1 (Card), k-h1 (Card) ]
+      const p1FinalGrave = session.state.players.p1.grave;
+      expect(p1FinalGrave.length).toBe(3);
+      expect(p1FinalGrave[0].cards[0].id).toBe("c-sol-6");
+      expect(p1FinalGrave[1].id).toBe("k-s1");
+      expect(p1FinalGrave[2].id).toBe("k-h1");
+
+      // 最終TOPはキーカード k-h1 (♡1)
+      const finalObs = ObservationFactory.createObservation(session.state, "p2");
+      expect((finalObs.players[0].graveTopCard as any)?.suit).toBe("H");
+      expect((finalObs.players[0].graveTopCard as any)?.rank).toBe("1");
+    });
+  });
 });
+
+
+
