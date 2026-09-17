@@ -4,6 +4,7 @@ import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegis
 import { TurnManager } from "../../engine/rules/TurnManager";
 import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage, RequestBuffer } from "../../domain/rules/RulePackage";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 import * as path from "path";
 
 describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
@@ -427,9 +428,18 @@ describe("Request Buffer Processor Integration Tests (Phase 14.5)", () => {
     expect(actionReq).toBeDefined();
 
     // 2. ステージ上の damageJudge を手動で解決
-    registry.resolveTopRequest(context);
+    const resolveRes = registry.resolveTopRequest(context);
 
     // 検証：
+    // - 複数枚ダメージにより墓地TOP選択が発生し、解決中は resolving を維持 (Foundation 1.0-R1)
+    expect(actionReq!.status).toBe("resolving");
+    expect(state.pendingGraveTopSelections?.length).toBe(1);
+
+    // 墓地TOP選択を適用してリクエストを再開
+    const pending = state.pendingGraveTopSelections[0];
+    GraveTopCoordinator.applyGraveTopSelection(state, pending.playerId, pending.candidateCardIds[0]);
+    registry.resumeRequest(actionReq!, resolveRes!.continuation!, undefined, context);
+
     // - ブロッカー不在で正常解決されること
     expect(actionReq!.status).toBe("resolved");
     // - 防御側（p2）にアタッカーのサイズ（6）分のダメージが入ること

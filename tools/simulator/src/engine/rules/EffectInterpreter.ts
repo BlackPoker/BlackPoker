@@ -8,7 +8,14 @@ import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { validateOptionSelectionDefinition } from "./OptionSelectionValidator";
 import { validatePartialOrder, validateCompleteOrder } from "./OrderSelectionValidator";
 import { enumeratePhysicalCardsInGrave } from "./graveCardUtils";
+import { EffectPathCodec, EffectBranchCode, BranchIdentity } from "./EffectPathCodec";
 
+export class NonInterruptibleEffectExecutionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "NonInterruptibleEffectExecutionError";
+  }
+}
 
 export interface EffectInterruption {
   readonly interrupted: true;
@@ -21,6 +28,7 @@ export interface EffectInterruption {
   readonly requiredCount?: number;
   readonly decisionPlayerKey?: PlayerKey;
   readonly resumeNextIndex?: number;
+  readonly effectPath?: readonly number[];
 }
 
 export type EffectInterpreterResult =
@@ -179,6 +187,8 @@ export class EffectInterpreter {
 
   /**
    * 効果コマンドのリストを順次実行します。
+   * ※非中断経路での同期実行用。コマンド実行によって pendingGraveTopSelections が発生した場合は
+   * 後続のコマンドを実行せずループを break します（フェイルセーフ）。
    */
   executeEffects(effects: any[], context: CommandContext) {
     for (const effect of effects) {
@@ -194,7 +204,12 @@ export class EffectInterpreter {
         }
         continue;
       }
+      const pendingBefore = context.state.pendingGraveTopSelections?.length ?? 0;
       this.executeEffect(effect, context);
+      const pendingAfter = context.state.pendingGraveTopSelections?.length ?? 0;
+      if (pendingAfter > pendingBefore) {
+        break;
+      }
     }
   }
 
@@ -228,15 +243,115 @@ export class EffectInterpreter {
     return context.playerKey;
   }
 
+  private executeConditionalBranchWithInterruption(
+    name: "if" | "ifSelection" | "ifResult",
+    args: any,
+    context: CommandContext,
+    index: number,
+    branchMatch: { matches: boolean; branch?: BranchIdentity; childPath: readonly number[] }
+  ): EffectInterpreterResult | undefined {
+    let chosenBranchName: BranchIdentity;
+    if (branchMatch.matches && branchMatch.branch) {
+      // 再開時は条件を再評価せず、保存された branch identity を直接使用
+      chosenBranchName = branchMatch.branch;
+    } else {
+      let shouldExecuteThen = false;
+      let shouldExecuteElse = false;
+      if (name === "if") {
+        const passed = this.expressionEvaluator.evaluateCondition(args.condition, context, this.abilityEvaluator);
+        shouldExecuteThen = passed;
+        shouldExecuteElse = !passed;
+      } else if (name === "ifSelection") {
+        const res = this.evaluateIfSelection(args, context);
+        shouldExecuteThen = res.shouldExecuteThen;
+        shouldExecuteElse = res.shouldExecuteElse;
+      } else if (name === "ifResult") {
+        const res = this.evaluateIfResult(args, context);
+        shouldExecuteThen = res.shouldExecuteThen;
+        shouldExecuteElse = res.shouldExecuteElse;
+      }
+
+      if (shouldExecuteThen) {
+        chosenBranchName = "then";
+      } else if (shouldExecuteElse) {
+        chosenBranchName = "else";
+      } else {
+        return undefined; // 実行すべきブランチなし
+      }
+    }
+
+    const branchEffects = args[chosenBranchName];
+    if (!branchEffects || !Array.isArray(branchEffects) || branchEffects.length === 0) {
+      return undefined;
+    }
+
+    const childPath = branchMatch.matches ? branchMatch.childPath : [0];
+    const branchResult = this.executeEffectsWithInterruption(
+      branchEffects,
+      context,
+      childPath
+    );
+
+    if ("interrupted" in branchResult && branchResult.interrupted) {
+      const innerChildPath = branchResult.effectPath ?? (
+        branchResult.selectionType === "zoneTop"
+          ? [branchResult.resumeNextIndex ?? branchResult.effectIndex + 1]
+          : [branchResult.effectIndex]
+      );
+
+      // ブランチ内の全コマンドが完了しての zoneTop 中断であれば、再開位置は次のトップレベル効果
+      const isBranchFullyExecuted = (
+        branchResult.selectionType === "zoneTop" &&
+        innerChildPath.length === 1 &&
+        innerChildPath[0] >= branchEffects.length
+      );
+
+      const combinedPath = isBranchFullyExecuted
+        ? EffectPathCodec.createTopLevelPath(index + 1)
+        : EffectPathCodec.createBranchPath(index, chosenBranchName, innerChildPath);
+
+      return {
+        ...branchResult,
+        effectIndex: index,
+        resumeNextIndex: index + 1,
+        effectPath: combinedPath,
+      };
+    }
+
+    return undefined; // ブランチ正常完了
+  }
+
   /**
    * 効果リストを実行し、途中でユーザー判断が必要なステップ（selectUnits, selectBlockAssignments等）に到達した場合は中断します。
    */
   executeEffectsWithInterruption(
     effects: any[],
     context: CommandContext,
-    startIndex: number = 0
+    startIndexOrPath: number | readonly number[] = 0
   ): EffectInterpreterResult {
-    for (let i = startIndex; i < effects.length; i++) {
+    const currentPath = EffectPathCodec.normalize(startIndexOrPath);
+    const topStartIndex = EffectPathCodec.getTopIndex(currentPath);
+
+    for (let i = topStartIndex; i < effects.length; i++) {
+      const branchMatch = EffectPathCodec.matchNestedBranch(currentPath, i);
+
+      // Fail-safe: Effect command実行前に pendingGraveTopSelections が既に存在する異常状態を遮断
+      // ただし、このエフェクトの途中に再開中（branchMatch.matches）ではない場合
+      if (!branchMatch.matches && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = context.state.pendingGraveTopSelections[0];
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: "zoneTopSelection",
+          selectionId: "graveTopCard",
+          selectionType: "zoneTop",
+          candidates: nextPending.candidateCardIds,
+          decisionPlayerKey: nextPending.playerId,
+          resumeNextIndex: i,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
+        };
+      }
+
       const effect = effects[i];
       const keys = Object.keys(effect);
       if (keys.length === 0) continue;
@@ -288,6 +403,7 @@ export class EffectInterpreter {
           selectionType: "unit",
           candidates,
           decisionPlayerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
@@ -346,6 +462,7 @@ export class EffectInterpreter {
           candidates,
           attackers,
           decisionPlayerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
@@ -374,6 +491,7 @@ export class EffectInterpreter {
           candidates,
           requiredCount: count,
           decisionPlayerKey: playerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
@@ -399,6 +517,7 @@ export class EffectInterpreter {
           candidates: [...hand],
           requiredCount,
           decisionPlayerKey: playerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
@@ -419,6 +538,7 @@ export class EffectInterpreter {
           selectionType: "option",
           candidates: validated.options,
           decisionPlayerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
@@ -499,51 +619,20 @@ export class EffectInterpreter {
           selectionType: "order",
           candidates: cards,
           decisionPlayerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
 
-      if (name === "ifSelection") {
-        const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfSelection(args, context);
-        if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
-          this.executeEffects(args.then, context);
-        } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
-          this.executeEffects(args.else, context);
-        }
-        if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
-          const nextPending = context.state.pendingGraveTopSelections[0];
-          return {
-            interrupted: true,
-            effectIndex: i,
-            effectStepId: "zoneTopSelection",
-            selectionId: "graveTopCard",
-            selectionType: "zoneTop",
-            candidates: nextPending.candidateCardIds,
-            decisionPlayerKey: nextPending.playerId,
-            resumeNextIndex: i + 1,
-          };
-        }
-        continue;
-      }
-
-      if (name === "ifResult") {
-        const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfResult(args, context);
-        if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
-          this.executeEffects(args.then, context);
-        } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
-          this.executeEffects(args.else, context);
-        }
-        if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
-          const nextPending = context.state.pendingGraveTopSelections[0];
-          return {
-            interrupted: true,
-            effectIndex: i,
-            effectStepId: "zoneTopSelection",
-            selectionId: "graveTopCard",
-            selectionType: "zoneTop",
-            candidates: nextPending.candidateCardIds,
-            decisionPlayerKey: nextPending.playerId,
-            resumeNextIndex: i + 1,
-          };
+      if (name === "if" || name === "ifSelection" || name === "ifResult") {
+        const branchInterruption = this.executeConditionalBranchWithInterruption(
+          name,
+          args,
+          context,
+          i,
+          branchMatch
+        );
+        if (branchInterruption) {
+          return branchInterruption;
         }
         continue;
       }
@@ -551,7 +640,8 @@ export class EffectInterpreter {
       this.executeEffect(effect, context);
 
       // コマンド単位即時中断 (Immediate Post-Command Interruption)
-      if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+      // 最後のeffectであっても、pendingGraveTopSelectionsが存在すれば必ず中断する (i < effects.length - 1 ガード撤廃)
+      if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
         const nextPending = context.state.pendingGraveTopSelections[0];
         return {
           interrupted: true,
@@ -562,6 +652,7 @@ export class EffectInterpreter {
           candidates: nextPending.candidateCardIds,
           decisionPlayerKey: nextPending.playerId,
           resumeNextIndex: i + 1,
+          effectPath: EffectPathCodec.createTopLevelPath(i + 1),
         };
       }
     }

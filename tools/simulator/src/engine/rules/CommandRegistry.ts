@@ -41,6 +41,7 @@ import { isCardInGameZones } from "./cardUtils";
 import { MatchLogRecorder, normalizeCardLocation } from "../log/MatchLogRecorder";
 import { validateTargetsAtResolution } from "./ResolutionTargetValidator";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
+import { EffectPathCodec } from "./EffectPathCodec";
 
 export interface CreateRequestOptions {
   readonly selectedCostPayment?: CostPayment;
@@ -488,6 +489,10 @@ export class CommandRegistry {
     type: "COMPLETED";
     request: ActionRequest;
   } {
+    if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+      throw new Error(`finalizeRequestResolution: 未解決の pendingGraveTopSelections が存在します。`);
+    }
+
     if (!context.state.stage) {
       context.state.stage = { requests: [], history: [] };
     }
@@ -651,7 +656,7 @@ export class CommandRegistry {
             const nextPending = context.state.pendingGraveTopSelections?.[0];
             const continuation: EffectContinuation = {
               sourceRequestId: request.id,
-              effectPath: [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
+              effectPath: execResult.effectPath ?? [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
               effectStepId: "zoneTopSelection",
               selectionId: "graveTopCard",
             };
@@ -676,7 +681,7 @@ export class CommandRegistry {
 
           const continuation: EffectContinuation = {
             sourceRequestId: request.id,
-            effectPath: [execResult.effectIndex],
+            effectPath: execResult.effectPath ?? [execResult.effectIndex],
             effectStepId: execResult.effectStepId,
             selectionId: execResult.selectionId,
           };
@@ -817,15 +822,14 @@ export class CommandRegistry {
       selections,
     };
 
-    const startIndex = continuation.effectStepId === "zoneTopSelection"
-      ? (continuation.effectPath[0] ?? 0)
-      : continuation.effectStepId === "selectUnitCardOrder"
-      ? (continuation.effectPath[0] ?? 0)
-      : (continuation.effectPath[0] ?? 0) + 1;
+    const startPath: readonly number[] =
+      continuation.effectStepId === "zoneTopSelection" || continuation.effectStepId === "selectUnitCardOrder"
+        ? (continuation.effectPath ?? [0])
+        : EffectPathCodec.advanceLastIndex(continuation.effectPath ?? [0]);
     const execResult = this.effectInterpreter.executeEffectsWithInterruption(
       action.effect,
       resolveContext,
-      startIndex
+      startPath
     );
 
     if ("interrupted" in execResult && execResult.interrupted) {
@@ -833,7 +837,7 @@ export class CommandRegistry {
         const nextPending = context.state.pendingGraveTopSelections?.[0];
         const nextContinuation: EffectContinuation = {
           sourceRequestId: request.id,
-          effectPath: [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
+          effectPath: execResult.effectPath ?? [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
           effectStepId: "zoneTopSelection",
           selectionId: "graveTopCard",
         };
@@ -858,7 +862,7 @@ export class CommandRegistry {
 
       const nextContinuation: EffectContinuation = {
         sourceRequestId: request.id,
-        effectPath: [execResult.effectIndex],
+        effectPath: execResult.effectPath ?? [execResult.effectIndex],
         effectStepId: execResult.effectStepId,
         selectionId: execResult.selectionId,
       };

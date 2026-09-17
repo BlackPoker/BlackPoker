@@ -1506,4 +1506,135 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
     const dna = createManualGenericGenomeDNA();
     expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
   });
+
+  // =========================================================================
+  // 16. Grave TOP Foundation 1.0-R1: Final dealDamage Interruption Verification
+  // =========================================================================
+  it("Test 30: Death Lance self-target + Spade rank >= 2 (dealDamage >= 2) immediately interrupts before Request finalization, key cards stay out of grave, request resolving on stage", () => {
+    const solCard = { id: "c-sol-self", suit: "C", rank: "3", value: 3 };
+
+    const state: any = {
+      stateVersion: 1,
+      matchId: "match-dl-self-target",
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      stage: { requests: [], history: [] },
+      players: {
+        p1: {
+          hand: [
+            { id: "k-s2", suit: "S", rank: "2", value: 2 },
+            { id: "k-d1", suit: "D", rank: "1", value: 1 },
+          ],
+          field: [
+            {
+              ...buildFieldUnitFromComponent({
+                componentId: "character.soldier",
+                playerKey: "p1",
+                card: solCard,
+                components: fullRulePackage.components,
+              }),
+              cards: [solCard],
+            },
+          ],
+          life: [
+            { id: "l1-a", suit: "H", rank: "7", value: 7 },
+            { id: "l1-b", suit: "D", rank: "8", value: 8 },
+          ],
+          grave: [],
+        },
+        p2: {
+          hand: [],
+          field: [],
+          life: [{ id: "l2-1", suit: "S", rank: "9", value: 9 }],
+          grave: [],
+        },
+      },
+    };
+
+    const session = new GameSession(state, standardRulePackage);
+    const s1: any = session.advance();
+
+    // p1 が自軍の兵士を対象に Death Lance を発動
+    const dlPat = s1.request.patterns.findIndex(
+      (p: any) =>
+        p.actionSelectionRef !== undefined &&
+        s1.request.catalog.actions[p.actionSelectionRef].actionId === "action.deathLance"
+    );
+    expect(dlPat).toBeGreaterThanOrEqual(0);
+
+    const s2: any = session.submitDecision({
+      decisionId: s1.request.decisionId,
+      stateVersion: s1.request.stateVersion,
+      selectedPatternRef: dlPat,
+    });
+
+    // Chance step: 両者パス
+    const s3: any = session.submitDecision({
+      decisionId: s2.request.decisionId,
+      stateVersion: s2.request.stateVersion,
+      selectedPatternRef: s2.request.patterns.findIndex((p: any) => p.kind === "PASS"),
+    });
+    const s4: any = session.submitDecision({
+      decisionId: s3.request.decisionId,
+      stateVersion: s3.request.stateVersion,
+      selectedPatternRef: s3.request.patterns.findIndex((p: any) => p.kind === "PASS"),
+    });
+
+    // 1. 最終効果 dealDamage の直後に ZONE_TOP_SELECTION で即時中断されること
+    expect(s4.type).toBe("WAITING_FOR_DECISION");
+    expect(s4.request.source.type).toBe("ZONE_TOP_SELECTION");
+    expect(s4.request.playerId).toBe("p1");
+
+    // 2. Request は Stage 上に残っていること
+    expect(session.state.stage.requests.length).toBe(1);
+    expect(session.state.stage.requests[0].actionId).toBe("action.deathLance");
+
+    // 3. Request status は resolving を維持していること
+    expect(session.state.stage.requests[0].status).toBe("resolving");
+
+    // 4. Death Lance のキーカード (k-s2, k-d1) はまだ墓地に送られていないこと
+    const p1Grave = session.state.players.p1.grave;
+    const isKeyInGraveBefore = p1Grave.some(
+      (entry: any) => entry.id === "k-s2" || entry.id === "k-d1"
+    );
+    expect(isKeyInGraveBefore).toBe(false);
+
+    // 5. ログに request.resolved や stage.popped が記録されていないこと
+    const eventsBefore = (session.logRecorder as any).events;
+    const resolvedBefore = eventsBefore.find((e: any) => e.type === "request.resolved");
+    expect(resolvedBefore).toBeUndefined();
+    const poppedBefore = eventsBefore.find((e: any) => e.type === "stage.popped");
+    expect(poppedBefore).toBeUndefined();
+
+    // 6. ZONE_TOP_SELECTION の決定を提出
+    const topPat = s4.request.patterns.findIndex(
+      (p: any) =>
+        p.effectSelectionRef !== undefined &&
+        s4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("l1-a")
+    );
+    expect(topPat).toBeGreaterThanOrEqual(0);
+
+    const s5: any = session.submitDecision({
+      decisionId: s4.request.decisionId,
+      stateVersion: s4.request.stateVersion,
+      selectedPatternRef: topPat,
+    });
+
+    // 7. 墓地TOP選択後に解決完了契約が実行され、Stage から除去され、Key Cards が墓地へ送られる
+    expect(session.state.stage.requests.length).toBe(0);
+    expect(session.state.stage.history.length).toBe(1);
+    expect(session.state.stage.history[0].status).toBe("resolved");
+
+    const p1GraveAfter = session.state.players.p1.grave;
+    const keyS2InGrave = p1GraveAfter.some((e: any) => e.id === "k-s2");
+    const keyD1InGrave = p1GraveAfter.some((e: any) => e.id === "k-d1");
+    expect(keyS2InGrave).toBe(true);
+    expect(keyD1InGrave).toBe(true);
+
+    const eventsAfter = (session.logRecorder as any).events;
+    const resolvedAfter = eventsAfter.find((e: any) => e.type === "request.resolved");
+    expect(resolvedAfter).toBeDefined();
+    const poppedAfter = eventsAfter.find((e: any) => e.type === "stage.popped");
+    expect(poppedAfter).toBeDefined();
+  });
 });

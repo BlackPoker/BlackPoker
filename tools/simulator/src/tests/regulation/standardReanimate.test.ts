@@ -30,6 +30,7 @@ import {
   removePhysicalCardFromGrave,
 } from "../../engine/rules/graveCardUtils";
 import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
+import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
 
 describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Selection Tests", () => {
   let catalog: any;
@@ -1547,6 +1548,134 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       const finalObs = ObservationFactory.createObservation(session.state, "p2");
       expect((finalObs.players[0].graveTopCard as any)?.suit).toBe("H");
       expect((finalObs.players[0].graveTopCard as any)?.rank).toBe("1");
+    });
+
+    it("Case F4: Final deploySelectedCardsAsUnits removes TOP card from grave (leaving >= 2 cards) -> immediately interrupts before Request finalization, key cards stay out of grave, request resolving on stage", () => {
+      const topGraveCard = { id: "c-top-card", suit: "S", rank: "7", value: 7 };
+      const otherGraveCard1 = { id: "c-other-1", suit: "D", rank: "4", value: 4 };
+      const otherGraveCard2 = { id: "c-other-2", suit: "H", rank: "5", value: 5 };
+
+      const deployAction: any = {
+        id: "action.reanimateDeployStage",
+        name: "リアニメイト配置",
+        type: "magic",
+        key: { count: 2 },
+        effect: [
+          {
+            deploySelectedCardsAsUnits: {
+              selection: "reanimateCard",
+              player: "self",
+              component: "character.soldier",
+              face: "up",
+              state: "charge",
+              expectedCount: 1,
+            },
+          },
+        ],
+      };
+
+      const keyCards = [
+        { id: "k-s1", suit: "S", rank: "1", value: 1 },
+        { id: "k-h1", suit: "H", rank: "1", value: 1 },
+      ];
+
+      const request: any = {
+        id: "req-reanimate-f4",
+        actionId: "action.reanimateDeployStage",
+        controller: "p1",
+        keyCards,
+        status: "resolving",
+        action: deployAction,
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-reanimate-f4",
+        turnPlayer: "p1",
+        stage: { requests: [request], history: [] },
+        players: {
+          p1: {
+            hand: [],
+            field: [],
+            life: [{ id: "l1" }],
+            graveTopCardId: "c-top-card",
+            // 墓地に複数のカードが存在し、c-top-card が現在の TOP
+            grave: [otherGraveCard1, otherGraveCard2, topGraveCard],
+          },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const logRecorder = new MatchLogRecorder({ matchId: "match-reanimate-f4" });
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        currentAction: deployAction,
+        components: fullRulePackage.components,
+        selections: {
+          reanimateCard: ["c-top-card"],
+        },
+        logRecorder,
+      };
+
+      // 最終効果 deploySelectedCardsAsUnits の解決
+      const result = registry.resolveRequest(request, context);
+
+      // 1. 最終効果 deploySelectedCardsAsUnits 直後に ZONE_TOP_SELECTION で即時中断されること
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(result.continuation).toBeDefined();
+      expect(result.continuation!.effectStepId).toBe("zoneTopSelection");
+      expect(result.continuation!.effectPath).toEqual([1]); // resumeNextIndex = effects.length (1)
+
+      // 2. Request は Stage 上に残っていること
+      expect(state.stage.requests.length).toBe(1);
+      expect(state.stage.requests[0].id).toBe("req-reanimate-f4");
+
+      // 3. Request status は resolving を維持していること
+      expect(request.status).toBe("resolving");
+
+      // 4. Reanimate のキーカード (k-s1, k-h1) はまだ墓地に送られていないこと
+      const p1GraveBefore = state.players.p1.grave;
+      const isKeyInGraveBefore = p1GraveBefore.some(
+        (entry: any) => entry.id === "k-s1" || entry.id === "k-h1"
+      );
+      expect(isKeyInGraveBefore).toBe(false);
+
+      // 5. ログに request.resolved や stage.popped が記録されていないこと
+      const resolvedBefore = (logRecorder as any).events.find((e: any) => e.type === "request.resolved");
+      expect(resolvedBefore).toBeUndefined();
+      const poppedBefore = (logRecorder as any).events.find((e: any) => e.type === "stage.popped");
+      expect(poppedBefore).toBeUndefined();
+
+      // 6. ZONE_TOP_SELECTION を解決
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-other-1", logRecorder);
+      expect(state.players.p1.graveTopCardId).toBe("c-other-1");
+      expect(state.pendingGraveTopSelections?.length ?? 0).toBe(0);
+
+      // 7. リクエストを再開
+      const resumeResult = registry.resumeRequest(
+        request,
+        result.continuation!,
+        ["c-other-1"],
+        result.context!
+      );
+
+      // 8. 墓地TOP選択後に解決完了契約が実行され、Stage から除去され、Key Cards が墓地へ送られる
+      expect(resumeResult.type).toBe("COMPLETED");
+      expect(state.stage.requests.length).toBe(0);
+      expect(state.stage.history.length).toBe(1);
+      expect(request.status).toBe("resolved");
+
+      const p1GraveAfter = state.players.p1.grave;
+      const keyS1InGrave = p1GraveAfter.some((e: any) => e.id === "k-s1");
+      const keyH1InGrave = p1GraveAfter.some((e: any) => e.id === "k-h1");
+      expect(keyS1InGrave).toBe(true);
+      expect(keyH1InGrave).toBe(true);
+
+      const resolvedAfter = (logRecorder as any).events.find((e: any) => e.type === "request.resolved");
+      expect(resolvedAfter).toBeDefined();
+      const poppedAfter = (logRecorder as any).events.find((e: any) => e.type === "stage.popped");
+      expect(poppedAfter).toBeDefined();
     });
   });
 });

@@ -7,6 +7,7 @@ import { TurnManager } from "../../engine/rules/TurnManager";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("Turn Cycle, Charge & Draw Integration Tests (Phase 21A)", () => {
   let rulePackage: RulePackage;
@@ -498,7 +499,16 @@ describe("Turn Cycle, Charge & Draw Integration Tests (Phase 21A)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    const resolveRes = registry.resolveTopRequest(context);
+    if (resolveRes && resolveRes.type === "WAITING_FOR_DECISION" && state.pendingGraveTopSelections?.length > 0) {
+      while (state.pendingGraveTopSelections && state.pendingGraveTopSelections.length > 0) {
+        const pending = state.pendingGraveTopSelections[0];
+        GraveTopCoordinator.applyGraveTopSelection(state, pending.playerId, pending.candidateCardIds[0]);
+      }
+      if (resolveRes.continuation) {
+        registry.resumeRequest(resolveRes.request, resolveRes.continuation, undefined, context);
+      }
+    }
 
     // 未ブロック兵士により revolutionDraw が 1件バッファに積まれる
     expect(state.requestBuffer.requests.length).toBe(1);

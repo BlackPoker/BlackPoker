@@ -181,7 +181,9 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
     expect(state.players.p2.grave.some((u: any) => u.unitId === "soldier-p2-1")).toBe(true);
     // 2. soldier-p1-2 (5) vs 未ブロック -> p2 への直接ダメージ (Life 7 - 5 = 2枚)
     expect(state.players.p2.life.length).toBe(2);
-    expect(state.stage.requests.length).toBe(0);
+    // 墓地TOP選択待機中であるため、damageJudge は Stage 上に resolving として残る (Foundation 1.0-R1)
+    expect(state.stage.requests.length).toBe(1);
+    expect(state.stage.requests[0].status).toBe("resolving");
 
     // 複数枚ダメージによる墓地TOP選択 (p2 が被ダメージ5枚からTOPを選択)
     if (step.type === "WAITING_FOR_DECISION" && (step.request.source as any)?.type === "ZONE_TOP_SELECTION") {
@@ -192,6 +194,8 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
         selectedPatternRef: 0,
       });
     }
+    // 墓地TOP選択解決後に damageJudge が完了し Stage から除去される
+    expect(state.stage.requests.length).toBe(0);
 
     // p1 が End をリクエスト
     if (step.type !== "WAITING_FOR_DECISION") return;

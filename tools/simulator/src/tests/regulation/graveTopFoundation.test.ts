@@ -10,8 +10,9 @@ import { RegulationRulePackageSelector } from "../../engine/regulation/Regulatio
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { EffectInterpreter } from "../../engine/rules/EffectInterpreter";
+import { EffectPathCodec } from "../../engine/rules/EffectPathCodec";
 import { GameSession } from "../../engine/session/GameSession";
-import type { RulePackage } from "../../domain/rules/RulePackage";
+import type { RulePackage, ActionRequest } from "../../domain/rules/RulePackage";
 import { buildFieldUnitFromComponent } from "../../engine/rules/commandHandlers";
 import { StateHasher } from "../../engine/simulation/StateHasher";
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy";
@@ -1002,6 +1003,668 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
       // After removing c-wrap-2, c-wrap-1 and targetUnit (now in grave) remain
       validateGraveTopInvariant(session.state.players.p1, (session.state.pendingGraveTopSelections?.length ?? 0) > 0);
       expect(session.state.players.p1.field.some((u: any) => u.cards?.some((c: any) => c.id === "c-wrap-2"))).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // 9. Grave TOP Foundation 1.0-R1: Final Effect Interruption & Order Hardening
+  // =========================================================================
+  describe("Grave TOP Foundation 1.0-R1: Final Effect Interruption & Order Hardening", () => {
+    it("Test 28: Final top-level effect generates pending Grave TOP selection -> interrupts immediately before Request finalization", () => {
+      const registry = new CommandRegistry();
+      const logRecorder = new MatchLogRecorder({ matchId: "match-r1-1" });
+
+      const action: any = {
+        id: "test.finalEffectInterruption",
+        name: "Test Final Effect Interruption",
+        type: "magic",
+        key: { count: 1 },
+        effect: [
+          {
+            moveToGraveyard: { target: "target" },
+          },
+        ],
+      };
+
+      const keyCard = { id: "k-test-1", suit: "S", rank: "A", value: 1 };
+      const request: any = {
+        id: "req-final-1",
+        actionId: "test.finalEffectInterruption",
+        controller: "p1",
+        keyCards: [keyCard],
+        status: "resolving",
+        action,
+      };
+
+      const unit = {
+        unitId: "u-target-1",
+        cards: [
+          { id: "c-multi-a", suit: "H", rank: "2", value: 2 },
+          { id: "c-multi-b", suit: "D", rank: "3", value: 3 },
+        ],
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-r1-1",
+        turnPlayer: "p1",
+        stage: {
+          requests: [request],
+          history: [],
+        },
+        players: {
+          p1: { hand: [], field: [unit], life: [{ id: "l1" }], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        targetComponent: unit,
+        logRecorder,
+      };
+
+      // 最終効果を実行
+      const result = registry.resolveRequest(request, context);
+
+      // 1. 即時中断されること (WAITING_FOR_DECISION)
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(result.continuation).toBeDefined();
+      expect(result.continuation!.effectStepId).toBe("zoneTopSelection");
+      expect(result.continuation!.effectPath).toEqual([1]); // resumeNextIndex = effects.length (1)
+
+      // 2. Request は Stage 上に残っていること (pop されていない)
+      expect(state.stage.requests.length).toBe(1);
+      expect(state.stage.requests[0].id).toBe("req-final-1");
+
+      // 3. Request status は resolving を維持していること (resolved になっていない)
+      expect(request.status).toBe("resolving");
+
+      // 4. Key Cards はまだ墓地に送られていないこと
+      expect(request.keyCards).toBeDefined();
+      expect(request.keyCards!.length).toBe(1);
+      const isKeyCardInGrave = state.players.p1.grave.some(
+        (entry: any) => entry.id === "k-test-1" || entry.cards?.some((c: any) => c.id === "k-test-1")
+      );
+      expect(isKeyCardInGrave).toBe(false);
+
+      // 5. request.resolved / stage.popped ログが発行されていないこと
+      const resolvedLog = (logRecorder as any).events.find((e: any) => e.type === "request.resolved");
+      expect(resolvedLog).toBeUndefined();
+      const poppedLog = (logRecorder as any).events.find((e: any) => e.type === "stage.popped");
+      expect(poppedLog).toBeUndefined();
+
+      // 6. pendingGraveTopSelections が 1 件存在すること
+      expect(state.pendingGraveTopSelections?.length).toBe(1);
+      expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-multi-a", "c-multi-b"]);
+    });
+
+    it("Test 29: Resume from final top-level effect (startIndex === effects.length) executes 0 commands and finalizes exactly once", () => {
+      const registry = new CommandRegistry();
+      const logRecorder = new MatchLogRecorder({ matchId: "match-r1-2" });
+
+      let commandRunCount = 0;
+      registry.register("testCountedCommand", (args, ctx) => {
+        commandRunCount++;
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-cnt",
+          cards: [
+            { id: "c-cnt-1", suit: "S", rank: "2", value: 2 },
+            { id: "c-cnt-2", suit: "H", rank: "3", value: 3 },
+          ],
+        }, ctx.state, "p1", ctx.logRecorder);
+      });
+
+      const action: any = {
+        id: "test.countedAction",
+        name: "Test Counted Action",
+        type: "magic",
+        key: { count: 1 },
+        effect: [
+          {
+            testCountedCommand: {},
+          },
+        ],
+      };
+
+      const keyCard = { id: "k-cnt-key", suit: "C", rank: "5", value: 5 };
+      const request: any = {
+        id: "req-counted-1",
+        actionId: "test.countedAction",
+        controller: "p1",
+        keyCards: [keyCard],
+        status: "resolving",
+        action,
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-r1-2",
+        turnPlayer: "p1",
+        stage: {
+          requests: [request],
+          history: [],
+        },
+        players: {
+          p1: { hand: [], field: [], life: [{ id: "l1" }], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        logRecorder,
+      };
+
+      // 最初の解決 -> 中断
+      const result = registry.resolveRequest(request, context);
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(commandRunCount).toBe(1);
+      expect(result.continuation!.effectPath).toEqual([1]); // startIndex = effects.length
+
+      // 墓地TOP選択を解決
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-cnt-1", logRecorder);
+      expect(state.players.p1.graveTopCardId).toBe("c-cnt-1");
+      expect(state.pendingGraveTopSelections?.length ?? 0).toBe(0);
+
+      // 再開実行
+      const resumeResult = registry.resumeRequest(
+        request,
+        result.continuation!,
+        ["c-cnt-1"],
+        result.context!
+      );
+
+      // コマンドは再実行されない (commandRunCount は 1 のまま)
+      expect(commandRunCount).toBe(1);
+
+      // 解決完了契約が 1 回のみ実行される
+      expect(resumeResult.type).toBe("COMPLETED");
+      expect(state.stage.requests.length).toBe(0); // Stage から除去
+      expect(state.stage.history.length).toBe(1); // History へ追加
+      expect(request.status).toBe("resolved");
+
+      // Key Cards が墓地へ送られている
+      const keyInGrave = state.players.p1.grave.some((e: any) => e.id === "k-cnt-key");
+      expect(keyInGrave).toBe(true);
+
+      // ログが記録されている
+      const resolvedLog = (logRecorder as any).events.find((e: any) => e.type === "request.resolved");
+      expect(resolvedLog).toBeDefined();
+      const poppedLog = (logRecorder as any).events.find((e: any) => e.type === "stage.popped");
+      expect(poppedLog).toBeDefined();
+    });
+
+    it("Test 30: Nested branch (ifResult) mid-command pending: cmdA interrupts, cmdB does not run; on resume, cmdB runs once and condition is NOT re-evaluated", () => {
+      const registry = new CommandRegistry();
+      const logRecorder = new MatchLogRecorder({ matchId: "match-r1-3" });
+
+      let cmdARunCount = 0;
+      let cmdBRunCount = 0;
+
+      registry.register("nestCmdA", (args, ctx) => {
+        cmdARunCount++;
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-nest",
+          cards: [
+            { id: "c-nest-a", suit: "S", rank: "4", value: 4 },
+            { id: "c-nest-b", suit: "H", rank: "5", value: 5 },
+          ],
+        }, ctx.state, "p1", ctx.logRecorder);
+      });
+
+      registry.register("nestCmdB", () => {
+        cmdBRunCount++;
+      });
+
+      const action: any = {
+        id: "test.nestedIfResult",
+        name: "Test Nested IfResult",
+        type: "magic",
+        key: { count: 1 },
+        effect: [
+          {
+            ifResult: {
+              id: "condResult",
+              equals: true,
+              then: [
+                { nestCmdA: {} },
+                { nestCmdB: {} },
+              ],
+            },
+          },
+        ],
+      };
+
+      const keyCard = { id: "k-nest-key", suit: "D", rank: "9", value: 9 };
+      const request: any = {
+        id: "req-nest-1",
+        actionId: "test.nestedIfResult",
+        controller: "p1",
+        keyCards: [keyCard],
+        status: "resolving",
+        action,
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-r1-3",
+        turnPlayer: "p1",
+        stage: {
+          requests: [request],
+          history: [],
+        },
+        players: {
+          p1: { hand: [], field: [], life: [{ id: "l1" }], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        results: { condResult: true },
+        logRecorder,
+      };
+
+      // 解決開始
+      const result = registry.resolveRequest(request, context);
+
+      // 1. 中断されること
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(cmdARunCount).toBe(1);
+      // cmdB は実行されていないこと
+      expect(cmdBRunCount).toBe(0);
+
+      // 2. effectPath に branch identity (then = 0) と innerIndex (1) が含まれていること
+      expect(result.continuation!.effectPath).toEqual([0, 0, 1]);
+
+      // 3. 条件の再評価が行われないことの検証:
+      // context.results.condResult を false に改ざんしても、再開時は保存された branch identity (then) を使用
+      (result.context as any).results.condResult = false;
+
+      // 墓地TOP選択を解決
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-nest-a", logRecorder);
+
+      // 再開
+      const resumeResult = registry.resumeRequest(
+        request,
+        result.continuation!,
+        ["c-nest-a"],
+        result.context!
+      );
+
+      // 4. 再開後の検証
+      expect(resumeResult.type).toBe("COMPLETED");
+      // cmdA は再実行されない
+      expect(cmdARunCount).toBe(1);
+      // cmdB は 1 回だけ実行される
+      expect(cmdBRunCount).toBe(1);
+      // Request は正常に解決完了
+      expect(request.status).toBe("resolved");
+      expect(state.stage.requests.length).toBe(0);
+    });
+
+    it("Test 31: Nested branch final command pending: inner command causes pending; on resume, advances to next outer command safely", () => {
+      const registry = new CommandRegistry();
+      const logRecorder = new MatchLogRecorder({ matchId: "match-r1-4" });
+
+      let innerRunCount = 0;
+      let outerNextRunCount = 0;
+
+      registry.register("nestInnerFinalCmd", (args, ctx) => {
+        innerRunCount++;
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-fin",
+          cards: [
+            { id: "c-fin-1", suit: "S", rank: "8", value: 8 },
+            { id: "c-fin-2", suit: "D", rank: "9", value: 9 },
+          ],
+        }, ctx.state, "p1", ctx.logRecorder);
+      });
+
+      registry.register("outerNextCmd", () => {
+        outerNextRunCount++;
+      });
+
+      const action: any = {
+        id: "test.nestedFinalCmd",
+        name: "Test Nested Final Command",
+        type: "magic",
+        key: { count: 1 },
+        effect: [
+          {
+            ifResult: {
+              id: "cond",
+              equals: true,
+              then: [
+                { nestInnerFinalCmd: {} }, // ブランチ内最後のコマンド
+              ],
+            },
+          },
+          {
+            outerNextCmd: {}, // トップレベルの次のコマンド
+          },
+        ],
+      };
+
+      const keyCard = { id: "k-fin-key", suit: "H", rank: "7", value: 7 };
+      const request: any = {
+        id: "req-fin-nest",
+        actionId: "test.nestedFinalCmd",
+        controller: "p1",
+        keyCards: [keyCard],
+        status: "resolving",
+        action,
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-r1-4",
+        turnPlayer: "p1",
+        stage: {
+          requests: [request],
+          history: [],
+        },
+        players: {
+          p1: { hand: [], field: [], life: [{ id: "l1" }], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        results: { cond: true },
+        logRecorder,
+      };
+
+      const result = registry.resolveRequest(request, context);
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(innerRunCount).toBe(1);
+      expect(outerNextRunCount).toBe(0);
+
+      // ブランチ内最終コマンドで中断したため、再開位置は外側の次インデックス [1]
+      expect(result.continuation!.effectPath).toEqual([1]);
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-fin-1", logRecorder);
+
+      const resumeResult = registry.resumeRequest(
+        request,
+        result.continuation!,
+        ["c-fin-1"],
+        result.context!
+      );
+
+      expect(resumeResult.type).toBe("COMPLETED");
+      expect(innerRunCount).toBe(1);
+      expect(outerNextRunCount).toBe(1);
+      expect(request.status).toBe("resolved");
+    });
+
+    it("Test 32: Nested else branch mid-command pending: encodes branchCode: 1 (ELSE) and resumes correctly without re-evaluating condition", () => {
+      const registry = new CommandRegistry();
+      const logRecorder = new MatchLogRecorder({ matchId: "match-r1-5" });
+
+      let elseCmdARunCount = 0;
+      let elseCmdBRunCount = 0;
+
+      registry.register("elseCmdA", (args, ctx) => {
+        elseCmdARunCount++;
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-else",
+          cards: [
+            { id: "c-else-1", suit: "C", rank: "2", value: 2 },
+            { id: "c-else-2", suit: "S", rank: "3", value: 3 },
+          ],
+        }, ctx.state, "p1", ctx.logRecorder);
+      });
+
+      registry.register("elseCmdB", () => {
+        elseCmdBRunCount++;
+      });
+
+      const action: any = {
+        id: "test.elseAction",
+        name: "Test Else Action",
+        type: "magic",
+        key: { count: 1 },
+        effect: [
+          {
+            ifResult: {
+              id: "cond",
+              equals: true,
+              then: [{ elseCmdB: {} }],
+              else: [
+                { elseCmdA: {} },
+                { elseCmdB: {} },
+              ],
+            },
+          },
+        ],
+      };
+
+      const keyCard = { id: "k-else-key", suit: "S", rank: "10", value: 10 };
+      const request: any = {
+        id: "req-else-1",
+        actionId: "test.elseAction",
+        controller: "p1",
+        keyCards: [keyCard],
+        status: "resolving",
+        action,
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-r1-5",
+        turnPlayer: "p1",
+        stage: {
+          requests: [request],
+          history: [],
+        },
+        players: {
+          p1: { hand: [], field: [], life: [{ id: "l1" }], grave: [] },
+          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        results: { cond: false }, // false -> else ブランチを実行
+        logRecorder,
+      };
+
+      const result = registry.resolveRequest(request, context);
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(elseCmdARunCount).toBe(1);
+      expect(elseCmdBRunCount).toBe(0);
+
+      // branchCode: 1 (ELSE), innerIndex: 1
+      expect(result.continuation!.effectPath).toEqual([0, 1, 1]);
+
+      // 改ざん: results.cond を true に変更
+      (result.context as any).results.cond = true;
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-else-1", logRecorder);
+
+      const resumeResult = registry.resumeRequest(
+        request,
+        result.continuation!,
+        ["c-else-1"],
+        result.context!
+      );
+
+      expect(resumeResult.type).toBe("COMPLETED");
+      expect(elseCmdARunCount).toBe(1);
+      expect(elseCmdBRunCount).toBe(1);
+      expect(request.status).toBe("resolved");
+    });
+
+    it("Test 33: Backward compatibility for 1-element effectPath [index]", () => {
+      expect(EffectPathCodec.normalize(2)).toEqual([2]);
+      expect(EffectPathCodec.normalize([2])).toEqual([2]);
+      expect(EffectPathCodec.normalize(undefined)).toEqual([0]);
+      expect(EffectPathCodec.getTopIndex([2])).toBe(2);
+      expect(EffectPathCodec.advanceLastIndex([2])).toEqual([3]);
+    });
+
+    it("Test 34: Fail-safe: executeEffects breaks loop when pending selection occurs", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let subsequentExecuted = false;
+
+      registry.register("triggerPendingCmd", (args, ctx) => {
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-fc",
+          cards: [
+            { id: "c-fc-1", suit: "H", rank: "1", value: 1 },
+            { id: "c-fc-2", suit: "D", rank: "2", value: 2 },
+          ],
+        }, ctx.state, "p1");
+      });
+
+      registry.register("subsequentCmd", () => {
+        subsequentExecuted = true;
+      });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      interpreter.executeEffects([{ triggerPendingCmd: {} }, { subsequentCmd: {} }], context);
+      expect(subsequentExecuted).toBe(false);
+      expect(state.pendingGraveTopSelections?.length).toBe(1);
+    });
+
+    it("Test 35: Fail-closed: finalizeRequestResolution throws Error when pendingGraveTopSelections is non-empty", () => {
+      const registry = new CommandRegistry();
+      const state: any = {
+        stateVersion: 1,
+        stage: { requests: [], history: [] },
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+        pendingGraveTopSelections: [
+          {
+            playerId: "p1",
+            candidateCardIds: ["c-1", "c-2"],
+            reason: "MULTI_CARD_GRAVE_MOVE",
+          },
+        ],
+      };
+
+      const request: any = {
+        id: "req-fc-err",
+        actionId: "action.test",
+        controller: "p1",
+        status: "resolving",
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      expect(() => {
+        registry.finalizeRequestResolution(request, context, { effectExecuted: true });
+      }).toThrow("finalizeRequestResolution: 未解決の pendingGraveTopSelections が存在します。");
+    });
+
+    it("Test 36: Nested branch snapshot restore and deterministic resume", () => {
+      const solCard = { id: "c-sol-1", suit: "C", rank: "3", value: 3 };
+
+      const state: any = {
+        stateVersion: 1,
+        matchId: "match-nested-snap",
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        stage: { requests: [] },
+        players: {
+          p1: {
+            hand: [
+              { id: "k-s2", suit: "S", rank: "2", value: 2 },
+              { id: "k-d1", suit: "D", rank: "1", value: 1 },
+            ],
+            field: [],
+            life: [{ id: "l1" }],
+            grave: [],
+          },
+          p2: {
+            hand: [],
+            field: [
+              {
+                ...buildFieldUnitFromComponent({
+                  componentId: "character.soldier",
+                  playerKey: "p2",
+                  card: solCard,
+                  components: fullRulePackage.components,
+                }),
+                cards: [solCard],
+              },
+            ],
+            life: [
+              { id: "l2-a", suit: "H", rank: "8", value: 8 },
+              { id: "l2-b", suit: "D", rank: "9", value: 9 },
+            ],
+            grave: [],
+          },
+        },
+      };
+
+      const session = new GameSession(state, standardRulePackage);
+      let s: any = session.advance();
+      const dlPat = s.request.patterns.findIndex(
+        (p: any) =>
+          p.actionSelectionRef !== undefined &&
+          s.request.catalog.actions[p.actionSelectionRef].actionId === "action.deathLance"
+      );
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: dlPat });
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: s.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: s.request.patterns.findIndex((p: any) => p.kind === "PASS") });
+
+      // Death Lance damage 2 on p2 causes 2 cards to move to p2 grave -> triggers ZONE_TOP_SELECTION for p2
+      expect(s.type).toBe("WAITING_FOR_DECISION");
+      expect(s.request.source.type).toBe("ZONE_TOP_SELECTION");
+
+      // Snapshot 保存
+      const snapshot = session.createSnapshot();
+      expect(snapshot.snapshotFormatVersion).toBe(1);
+
+      // Snapshot から復元
+      const restored = GameSession.fromSnapshot(snapshot, standardRulePackage);
+
+      // 両方で同じ選択を提出
+      const topPat = s.request.patterns.findIndex(
+        (p: any) =>
+          p.effectSelectionRef !== undefined &&
+          s.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("l2-a")
+      );
+
+      const nextOrig = session.submitDecision({
+        decisionId: s.request.decisionId,
+        stateVersion: s.request.stateVersion,
+        selectedPatternRef: topPat,
+      });
+      const nextRestored = restored.submitDecision({
+        decisionId: s.request.decisionId,
+        stateVersion: s.request.stateVersion,
+        selectedPatternRef: topPat,
+      });
+
+      expect(StateHasher.hash(restored.state)).toBe(StateHasher.hash(session.state));
     });
   });
 });

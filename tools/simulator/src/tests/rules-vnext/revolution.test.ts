@@ -4,9 +4,24 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
   let rulePackage: RulePackage;
+
+  const resolveTopRequestWithGraveTop = (registry: CommandRegistry, context: CommandContext) => {
+    const resolveRes = registry.resolveTopRequest(context);
+    if (resolveRes && resolveRes.type === "WAITING_FOR_DECISION" && context.state.pendingGraveTopSelections?.length > 0) {
+      while (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const pending = context.state.pendingGraveTopSelections[0];
+        GraveTopCoordinator.applyGraveTopSelection(context.state, pending.playerId, pending.candidateCardIds[0]);
+      }
+      if (resolveRes.continuation) {
+        registry.resumeRequest(resolveRes.request, resolveRes.continuation, undefined, context);
+      }
+    }
+    return resolveRes;
+  };
 
   beforeAll(async () => {
     const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
@@ -613,7 +628,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // 1体の未ブロック兵士により revolutionDraw が 1件バッファに積まれる
     expect(state.requestBuffer.requests.length).toBe(1);
@@ -669,7 +684,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // 2体の未ブロック兵士から 2件の revolutionDraw が積まれる
     expect(state.requestBuffer.requests.length).toBe(2);
@@ -730,7 +745,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // unblocked 兵士の 1件のみ
     expect(state.requestBuffer.requests.length).toBe(1);
@@ -871,7 +886,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // 装備兵 1体につき 1件
     expect(state.requestBuffer.requests.filter((r: any) => r.actionId === "action.revolutionDraw").length).toBe(1);
@@ -933,7 +948,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     expect(state.requestBuffer.requests.filter((r: any) => r.actionId === "action.revolutionDraw").length).toBe(1);
   });
@@ -979,7 +994,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
 
     const initialChance = state.chancePlayer;
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // Test T: controller & definitionOwner は p1
     const revReq = state.requestBuffer.requests[0];
@@ -1043,7 +1058,7 @@ describe("Revolution & Revolution Draw Integration Tests (Phase 19)", () => {
     };
 
     registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // 解決
     const procResult = coordinator.processPendingTriggers(state, rulePackage, registry);

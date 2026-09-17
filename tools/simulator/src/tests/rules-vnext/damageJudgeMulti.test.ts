@@ -4,9 +4,24 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { ActionRequestValidator } from "../../engine/rules/ActionRequestValidator";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
   let rulePackage: RulePackage;
+
+  const resolveTopRequestWithGraveTop = (registry: CommandRegistry, context: CommandContext) => {
+    const resolveRes = registry.resolveTopRequest(context);
+    if (resolveRes && resolveRes.type === "WAITING_FOR_DECISION" && context.state.pendingGraveTopSelections?.length > 0) {
+      while (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const pending = context.state.pendingGraveTopSelections[0];
+        GraveTopCoordinator.applyGraveTopSelection(context.state, pending.playerId, pending.candidateCardIds[0]);
+      }
+      if (resolveRes.continuation) {
+        registry.resumeRequest(resolveRes.request, resolveRes.continuation, undefined, context);
+      }
+    }
+    return resolveRes;
+  };
 
   beforeAll(async () => {
     const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
@@ -77,7 +92,7 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     };
 
     const req = registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     expect(req.status).toBe("resolved");
     // p2 に 6 点の直接ダメージ -> life が 6 枚減って 0 枚になる
@@ -972,7 +987,7 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     };
 
     const req = registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     expect(req.status).toBe("resolved");
     // actionResolved は CommandRegistry 経由で 1 回だけ発行されること
@@ -1189,7 +1204,7 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     };
 
     const req = registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // 1. resolved request に result.damageJudge が存在すること
     expect(req.result).toBeDefined();
@@ -1259,7 +1274,7 @@ describe("DamageJudge Multi-Combat Integration Tests (Phase 17)", () => {
     };
 
     const req = registry.createRequest(damageJudgeAction, context);
-    registry.resolveTopRequest(context);
+    resolveTopRequestWithGraveTop(registry, context);
 
     // actionResolved payload に requestId と result が含まれること
     expect(capturedEvent).toBeDefined();
