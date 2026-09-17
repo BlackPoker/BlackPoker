@@ -1031,7 +1031,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       !isDesktop &&
       isHumanTurnWaiting &&
       currentStep?.type === "WAITING_FOR_DECISION" &&
-      currentStep.request.source?.type === "EFFECT_RESOLUTION"
+      (currentStep.request.source?.type === "EFFECT_RESOLUTION" ||
+        currentStep.request.source?.type === "ZONE_TOP_SELECTION")
     ) {
       if (lastAutoOpenedDecisionIdRef.current !== currentStep.request.decisionId) {
         lastAutoOpenedDecisionIdRef.current = currentStep.request.decisionId;
@@ -1585,7 +1586,11 @@ export const CoreBattlePlaytest: React.FC = () => {
           title={
             currentStep?.type === "WAITING_FOR_DECISION"
               ? `${currentStep.request.playerId === "p1" ? "Player A" : "Player B"} の${
-                  currentStep.request.source.type === "EFFECT_RESOLUTION" ? "効果選択" : "行動選択"
+                  currentStep.request.source.type === "ZONE_TOP_SELECTION"
+                    ? "墓地TOP選択"
+                    : currentStep.request.source.type === "EFFECT_RESOLUTION"
+                    ? "効果選択"
+                    : "行動選択"
                 }`
               : "行動選択"
           }

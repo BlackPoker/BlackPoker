@@ -1,6 +1,7 @@
 import { CommandContext } from "./CommandRegistry";
 import { CostSymbol, parseCost } from "./CostParser";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
+import { GraveTopCoordinator } from "./GraveTopCoordinator";
 
 /**
  * 新YAML DSLにおけるアクションコスト（D, L, Bなど）の判定・支払いを担当するクラス。
@@ -172,7 +173,6 @@ export class CostResolver {
         }
         const [costCard] = player.hand.splice(index, 1);
 
-        if (!player.grave) player.grave = [];
         const stateVersion = context.state?.stateVersion ?? context.state?.version ?? 1;
         const graveUnit = {
           unitId: `unit-cost-${context.playerKey}-${costCard.id || cardId}-${stateVersion}-${i}`,
@@ -180,7 +180,13 @@ export class CostResolver {
           cards: [costCard],
           labels: [],
         };
-        player.grave.push(graveUnit);
+        GraveTopCoordinator.addUnitToGrave(
+          player,
+          graveUnit,
+          context.state,
+          context.playerKey,
+          context.logRecorder
+        );
 
         const event = {
           type: "cardMoved",
@@ -231,7 +237,6 @@ export class CostResolver {
           throw new Error("コストLを支払うためのライフが不足しています。");
         }
         const costCard = player.life.shift();
-        if (!player.grave) player.grave = [];
         const cardIdPart = costCard?.id ? `-${costCard.id}` : "";
         const graveUnit = {
           unitId: `unit-cost-${context.playerKey}${cardIdPart}-${context.state.stateVersion || 1}-${i}`,
@@ -239,7 +244,13 @@ export class CostResolver {
           cards: [costCard],
           labels: [],
         };
-        player.grave.push(graveUnit);
+        GraveTopCoordinator.addUnitToGrave(
+          player,
+          graveUnit,
+          context.state,
+          context.playerKey,
+          context.logRecorder
+        );
 
         const event = {
           type: "cardMoved",
@@ -344,14 +355,19 @@ export class CostResolver {
 
       const [costCard] = player.hand.splice(costCardIndex, 1);
 
-      if (!player.grave) player.grave = [];
       const graveUnit = {
         unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         kind: "コスト",
         cards: [costCard],
         labels: [],
       };
-      player.grave.push(graveUnit);
+      GraveTopCoordinator.addUnitToGrave(
+        player,
+        graveUnit,
+        context.state,
+        context.playerKey,
+        context.logRecorder
+      );
 
       // イベント発行
       const event = {
@@ -371,14 +387,19 @@ export class CostResolver {
       }
 
       const costCard = player.life.shift();
-      if (!player.grave) player.grave = [];
       const graveUnit = {
         unitId: `unit-cost-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         kind: "コスト",
         cards: [costCard],
         labels: [],
       };
-      player.grave.push(graveUnit);
+      GraveTopCoordinator.addUnitToGrave(
+        player,
+        graveUnit,
+        context.state,
+        context.playerKey,
+        context.logRecorder
+      );
 
       // イベント発行
       const event = {

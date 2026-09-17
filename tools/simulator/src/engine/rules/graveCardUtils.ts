@@ -159,3 +159,40 @@ export function removePhysicalCardFromGrave(grave: any[], cardId: string): any {
     return card;
   }
 }
+
+/**
+ * 墓地TOP不変条件（Invariant）を検証します。
+ */
+export function validateGraveTopInvariant(player: any, isPendingDecision: boolean = false): void {
+  if (!player || !Array.isArray(player.grave)) return;
+
+  const cards = enumeratePhysicalCardsInGrave(player.grave);
+
+  if (cards.length === 0) {
+    if (player.graveTopCardId !== undefined) {
+      throw new Error(
+        `GraveTopInvariant: 墓地枚数0ですが graveTopCardId (${player.graveTopCardId}) が設定されています (fail-closed)`
+      );
+    }
+    return;
+  }
+
+  if (isPendingDecision && player.graveTopCardId === undefined) {
+    // Pending Decision 待機中のみ undefined を許容
+    return;
+  }
+
+  if (!player.graveTopCardId) {
+    throw new Error(
+      `GraveTopInvariant: 墓地枚数 ${cards.length} ですが graveTopCardId が未設定です (fail-closed)`
+    );
+  }
+
+  const loc = findPhysicalCardInGrave(player.grave, player.graveTopCardId);
+  if (!loc) {
+    throw new Error(
+      `GraveTopInvariant: graveTopCardId (${player.graveTopCardId}) が墓地に存在しません (fail-closed)`
+    );
+  }
+}
+

@@ -105,8 +105,12 @@ export class CycleStateFingerprint {
             registerId(f?.card?.id, "card");
           });
         }
+        if (p.graveTopCardId) {
+          registerId(p.graveTopCardId, "card");
+        }
         if (Array.isArray(p.grave)) {
           p.grave.forEach((item: any) => {
+
             if (item?.unitId) {
               registerId(item.unitId, "unit");
               if (Array.isArray(item.cards)) {
@@ -129,7 +133,20 @@ export class CycleStateFingerprint {
       }
     }
 
+    // Pending Grave TOP Selections
+    if (Array.isArray(state.pendingGraveTopSelections)) {
+      state.pendingGraveTopSelections.forEach((p: any) => {
+        if (Array.isArray(p?.candidateCardIds)) {
+          p.candidateCardIds.forEach((cId: string) => registerId(cId, "card"));
+        }
+        if (p?.previousTopCardId) {
+          registerId(p.previousTopCardId, "card");
+        }
+      });
+    }
+
     // 2. Normalization Functions
+
     const normalizeCard = (card: any): any => {
       if (!card) return undefined;
       if (typeof card === "string" || typeof card === "number") return card;
@@ -274,6 +291,7 @@ export class CycleStateFingerprint {
           field: normalizeUnitList(p.field),
           fog: normalizeFogList(p.fog),
           grave: normalizeCardOrUnitList(p.grave),
+          graveTopCardId: p.graveTopCardId ? resolveId(p.graveTopCardId) : undefined,
           trumps: normalizeUnitList(p.trumps || p.trump),
         };
       }
@@ -340,6 +358,18 @@ export class CycleStateFingerprint {
             : undefined,
         };
       });
+    }
+
+    // Pending Grave TOP Selections
+    if (Array.isArray(state.pendingGraveTopSelections) && state.pendingGraveTopSelections.length > 0) {
+      logical.pendingGraveTopSelections = state.pendingGraveTopSelections.map((p: any) => ({
+        playerId: p.playerId,
+        candidateCardIds: Array.isArray(p.candidateCardIds)
+          ? p.candidateCardIds.map((cId: string) => resolveId(cId) || cId).sort()
+          : [],
+        previousTopCardId: p.previousTopCardId ? resolveId(p.previousTopCardId) || p.previousTopCardId : undefined,
+        reason: p.reason,
+      }));
     }
 
     return logical;

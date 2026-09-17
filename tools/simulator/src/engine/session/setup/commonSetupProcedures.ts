@@ -87,6 +87,7 @@ export function moveDiscardedCardsToGrave(player: any, cards: readonly any[]): v
       kind: "墓地カード",
       labels: [],
     });
+    player.graveTopCardId = c.id;
   }
 }
 

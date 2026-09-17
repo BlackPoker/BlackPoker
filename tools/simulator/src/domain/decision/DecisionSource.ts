@@ -14,4 +14,11 @@ export type DecisionSource =
       readonly sourceRequestRef: RequestRef;
       readonly effectStepId: string;
       readonly playerId?: PlayerKey;
+    }
+  | {
+      readonly type: "ZONE_TOP_SELECTION";
+      readonly zone: "grave";
+      readonly playerId: PlayerKey;
+      readonly reason?: "MULTI_CARD_GRAVE_MOVE" | "TOP_REMOVED";
     };
+

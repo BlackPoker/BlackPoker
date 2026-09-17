@@ -489,8 +489,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     });
   };
 
-  // EFFECT_RESOLUTION 時の UI
-  if (request.source?.type === "EFFECT_RESOLUTION") {
+  // EFFECT_RESOLUTION / ZONE_TOP_SELECTION 時の UI
+  if (request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION") {
+    const isZoneTopSelection = request.source?.type === "ZONE_TOP_SELECTION";
     const isBlockAssignment = (catalog.effectSelections || []).some(
       (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
     );
@@ -500,10 +501,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
           <div>
             <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
-              EFFECT SELECTION
+              {isZoneTopSelection ? "ZONE TOP SELECTION" : "EFFECT SELECTION"}
             </span>
             <h2 className="text-sm font-bold text-zinc-950 mt-0.5 tracking-wide">
-              {request.playerId === "p1" ? "Player A" : "Player B"} の{isBlockAssignment ? "ブロッカー指定" : "効果を選択"}
+              {request.playerId === "p1" ? "Player A" : "Player B"} の{isZoneTopSelection ? "墓地TOPを選択" : isBlockAssignment ? "ブロッカー指定" : "効果を選択"}
             </h2>
           </div>
 

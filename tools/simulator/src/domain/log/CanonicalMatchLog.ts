@@ -27,7 +27,9 @@ export type CanonicalGameEventType =
   | "player.passed"
   | "card.moved"
   | "card.revealed"
-  | "zone.shuffled";
+  | "zone.shuffled"
+  | "zone.top.changed";
+
 
 export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack";
 
@@ -78,7 +80,7 @@ export interface DecisionRequestedEvent extends CanonicalGameEventBase {
   readonly type: "decision.requested";
   readonly decisionId: string;
   readonly playerId: string;
-  readonly source: "ACTION_REQUEST" | "EFFECT_RESOLUTION";
+  readonly source: "ACTION_REQUEST" | "EFFECT_RESOLUTION" | "ZONE_TOP_SELECTION";
   readonly requestId?: string;
   readonly legalPatternCount: number;
   readonly legalPatternRefs?: readonly number[];
@@ -88,9 +90,10 @@ export interface DecisionRespondedEvent extends CanonicalGameEventBase {
   readonly type: "decision.responded";
   readonly decisionId: string;
   readonly playerId: string;
-  readonly source: "ACTION_REQUEST" | "EFFECT_RESOLUTION";
+  readonly source: "ACTION_REQUEST" | "EFFECT_RESOLUTION" | "ZONE_TOP_SELECTION";
   readonly selectedPatternRef: number;
 }
+
 
 export interface RequestCreatedEvent extends CanonicalGameEventBase {
   readonly type: "request.created";
@@ -235,6 +238,14 @@ export interface ZoneShuffledEvent extends CanonicalGameEventBase {
   };
 }
 
+export interface ZoneTopChangedEvent extends CanonicalGameEventBase {
+  readonly type: "zone.top.changed";
+  readonly playerId: string;
+  readonly zone: CardZoneName;
+  readonly previousCardId?: string;
+  readonly cardId?: string;
+}
+
 export type CanonicalGameEvent =
   | MatchStartedEvent
   | MatchFinishedEvent
@@ -255,7 +266,9 @@ export type CanonicalGameEvent =
   | PlayerPassedEvent
   | CardMovedEvent
   | CardRevealedEvent
-  | ZoneShuffledEvent;
+  | ZoneShuffledEvent
+  | ZoneTopChangedEvent;
+
 
 export interface CanonicalMatchLogMeta {
   readonly matchId: string;

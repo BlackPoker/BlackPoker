@@ -16,6 +16,7 @@ import {
   GameSessionSnapshotSessionData,
 } from "../../domain/session/GameSessionSnapshot";
 import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
+import { GraveTopCoordinator } from "../rules/GraveTopCoordinator";
 
 /**
  * 将来の効果解決中断・再開用コンティニュエーション型
@@ -290,6 +291,41 @@ export class GameSession {
       });
     }
 
+    // 0.5. すでに待機中の判断がある場合はそれを返す（勝敗判定より優先）
+    if (this.pendingDecision) {
+      return {
+        type: "WAITING_FOR_DECISION",
+        request: this.pendingDecision,
+      };
+    }
+
+    // 0.6. 保留中のGrave TOP選択がある場合はそれを要求（勝敗判定より優先）
+    if (this.state.pendingGraveTopSelections && this.state.pendingGraveTopSelections.length > 0) {
+      const nextPending = this.state.pendingGraveTopSelections[0];
+      this.pendingDecision = GraveTopCoordinator.createDecisionRequest(
+        this.state,
+        nextPending,
+        {
+          stateVersion: this.stateVersion,
+          matchId: this.matchId,
+        }
+      );
+      this.logRecorder.record({
+        type: "decision.requested",
+        stateVersion: this.stateVersion,
+        decisionId: this.pendingDecision.decisionId,
+        playerId: this.pendingDecision.playerId,
+        source: this.pendingDecision.source.type,
+        requestId: (this.pendingDecision.source as any).requestId,
+        legalPatternCount: this.pendingDecision.patterns.length,
+        legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+      });
+      return {
+        type: "WAITING_FOR_DECISION",
+        request: this.pendingDecision,
+      };
+    }
+
     // 1. 勝敗判定（ライフ 0 判定）
     const finishCheck = this.checkGameFinished();
 
@@ -305,14 +341,6 @@ export class GameSession {
       return {
         type: "FINISHED",
         result: finishCheck,
-      };
-    }
-
-    // すでに待機中の判断がある場合はそれを返す
-    if (this.pendingDecision) {
-      return {
-        type: "WAITING_FOR_DECISION",
-        request: this.pendingDecision,
       };
     }
 
@@ -343,6 +371,33 @@ export class GameSession {
           legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
         });
 
+        return {
+          type: "WAITING_FOR_DECISION",
+          request: this.pendingDecision,
+        };
+      }
+
+      // 解決後のGrave TOP選択Pendingが存在する場合はそちらを要求（勝敗判定・後続行動より優先）
+      if (this.state.pendingGraveTopSelections && this.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = this.state.pendingGraveTopSelections[0];
+        this.pendingDecision = GraveTopCoordinator.createDecisionRequest(
+          this.state,
+          nextPending,
+          {
+            stateVersion: this.stateVersion,
+            matchId: this.matchId,
+          }
+        );
+        this.logRecorder.record({
+          type: "decision.requested",
+          stateVersion: this.stateVersion,
+          decisionId: this.pendingDecision.decisionId,
+          playerId: this.pendingDecision.playerId,
+          source: this.pendingDecision.source.type,
+          requestId: (this.pendingDecision.source as any).requestId,
+          legalPatternCount: this.pendingDecision.patterns.length,
+          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+        });
         return {
           type: "WAITING_FOR_DECISION",
           request: this.pendingDecision,
@@ -487,6 +542,102 @@ export class GameSession {
     // 判断回答が受理されたため、盤面バージョンを進める
     this.stateVersion++;
 
+    // 0. 墓地TOP選択 (ZONE_TOP_SELECTION) の場合
+    if (this.pendingDecision.source.type === "ZONE_TOP_SELECTION") {
+      const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
+      let selectedCardId: string | undefined = undefined;
+      if (pattern.effectSelectionRef !== undefined) {
+        const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
+        if (effSel?.selectedValues && effSel.selectedValues.length > 0) {
+          selectedCardId = effSel.selectedValues[0];
+        }
+      }
+      if (!selectedCardId) {
+        throw new Error("ZONE_TOP_SELECTION: 選択されたカードIDが見つかりません。");
+      }
+
+      GraveTopCoordinator.applyGraveTopSelection(
+        this.state,
+        this.pendingDecision.playerId,
+        selectedCardId,
+        this.logRecorder,
+        this.stateVersion
+      );
+
+      // 他のプレイヤーまたは追加の墓地TOP選択がPendingに残っているか確認
+      if (this.state.pendingGraveTopSelections && this.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = this.state.pendingGraveTopSelections[0];
+        this.pendingDecision = GraveTopCoordinator.createDecisionRequest(
+          this.state,
+          nextPending,
+          {
+            stateVersion: this.stateVersion,
+            matchId: this.matchId,
+          }
+        );
+        this.logRecorder.record({
+          type: "decision.requested",
+          stateVersion: this.stateVersion,
+          decisionId: this.pendingDecision.decisionId,
+          playerId: this.pendingDecision.playerId,
+          source: this.pendingDecision.source.type,
+          requestId: (this.pendingDecision.source as any).requestId,
+          legalPatternCount: this.pendingDecision.patterns.length,
+          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+        });
+        return {
+          type: "WAITING_FOR_DECISION",
+          request: this.pendingDecision,
+        };
+      }
+
+      // 中断されたリクエストの効果解決中だった場合は、再開
+      if (this.resolvingRequest && this.continuation) {
+        const resumeResult = this.registry.resumeRequest(
+          this.resolvingRequest,
+          this.continuation,
+          undefined,
+          this.resolvingContext!
+        );
+
+        if (resumeResult.type === "WAITING_FOR_DECISION") {
+          this.pendingDecision = resumeResult.decisionRequest;
+          this.continuation = resumeResult.continuation;
+          this.resolvingRequest = resumeResult.request;
+          this.resolvingContext = resumeResult.context;
+
+          return {
+            type: "WAITING_FOR_DECISION",
+            request: this.pendingDecision!,
+          };
+        }
+
+        // 解決完了
+        this.pendingDecision = undefined;
+        this.continuation = undefined;
+        this.resolvingRequest = undefined;
+        this.resolvingContext = undefined;
+
+        // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+        const prevChance = this.state.chancePlayer;
+        const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+        this.state.chancePlayer = turnPlayer;
+        if (prevChance !== turnPlayer) {
+          this.logRecorder.record({
+            type: "chance.changed",
+            stateVersion: this.stateVersion,
+            fromChancePlayer: prevChance,
+            toChancePlayer: turnPlayer,
+            reason: "effectResolved",
+          });
+        }
+
+        return this.advance();
+      }
+
+      this.pendingDecision = undefined;
+      return this.advance();
+    }
 
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {

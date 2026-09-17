@@ -29,6 +29,7 @@ import {
   findPhysicalCardInGrave,
   removePhysicalCardFromGrave,
 } from "../../engine/rules/graveCardUtils";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Selection Tests", () => {
   let catalog: any;
@@ -891,8 +892,8 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
     // -----------------------------------------------------------------------
     // Test A: Grave TOPの基準
     // -----------------------------------------------------------------------
-    it("Test A: Grave TOP is defined as the last element of player.grave, resolving raw card / single wrapper / multi wrapper accordingly", () => {
-      // 1. raw Card のみのケース: 末尾 (index 1) が TOP
+    it("Test A: Grave TOP is defined by player.graveTopCardId as SSOT, exposing raw card / single wrapper / multi wrapper cards accordingly", () => {
+      // 1. raw Card のみのケース: graveTopCardId が TOP
       const stateRaw = {
         stateVersion: 1,
         players: {
@@ -902,6 +903,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
             hand: [],
             field: [],
             fog: [],
+            graveTopCardId: "c-top",
             grave: [
               { id: "c-bottom", suit: "S", rank: "2", value: 2 },
               { id: "c-top", suit: "H", rank: "10", value: 10 },
@@ -927,6 +929,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
             hand: [],
             field: [],
             fog: [],
+            graveTopCardId: "c-sol",
             grave: [
               {
                 unitId: "u-soldier",
@@ -945,7 +948,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect((p2SingleView.graveTopCard as any)?.suit).toBe("C");
       expect((p2SingleView.graveTopCard as any)?.rank).toBe("7");
 
-      // 3. cards.length > 1 の Unit wrapper が末尾のケース: 推測せず undefined (fail-safe)
+      // 3. cards.length > 1 の Unit wrapper が末尾のケース: 未決定 (undefined) 時は推測せず undefined (fail-safe)
       const stateMulti = {
         stateVersion: 1,
         players: {
@@ -955,6 +958,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
             hand: [],
             field: [],
             fog: [],
+            graveTopCardId: undefined,
             grave: [
               { id: "c-base", suit: "S", rank: "A", value: 1 },
               {
@@ -974,7 +978,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       const p2MultiView = obsMultiP1.players.find((p) => p.playerId === "p2")!;
       // 物理カード数 1 + 2 = 3
       expect(p2MultiView.graveCount).toBe(3);
-      // canonical TOP 不在のため推測せず undefined
+      // canonical TOP 未決定のため推測せず undefined
       expect(p2MultiView.graveTopCard).toBeUndefined();
       // 相手視点には非公開墓地が漏洩しない (0件)
       expect(p2MultiView.grave.length).toBe(0);
@@ -985,7 +989,16 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(p2OwnerView.graveCount).toBe(3);
       expect(p2OwnerView.grave.length).toBe(3);
 
-      // 4. 混在 (rawCard + multiWrapper + singleWrapper): 末尾 (index 2) の singleWrapper が TOP
+      // 所有者が TOP として c-m1 を選択した場合: 複数カードwrapper内であっても c-m1 が公開され、c-m2 は非公開を維持
+      (stateMulti.players.p2 as any).graveTopCardId = "c-m1";
+      const obsMultiChosen = ObservationFactory.createObservation(stateMulti as any, "p1");
+      const p2ChosenView = obsMultiChosen.players.find((p) => p.playerId === "p2")!;
+      expect(p2ChosenView.graveTopCard).toBeDefined();
+      expect((p2ChosenView.graveTopCard as any)?.suit).toBe("D");
+      expect(p2ChosenView.grave.length).toBe(1);
+      expect((p2ChosenView.grave[0] as any)?.cardInstanceId).toBe("c-m1");
+
+      // 4. 混在 (rawCard + multiWrapper + singleWrapper): graveTopCardId が TOP
       const stateMixed = {
         stateVersion: 1,
         players: {
@@ -995,6 +1008,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
             hand: [],
             field: [],
             fog: [],
+            graveTopCardId: "c-top-card",
             grave: [
               { id: "c-raw", suit: "S", rank: "3", value: 3 },
               {
@@ -1042,26 +1056,29 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       ];
 
       // 非TOP (c-bottom) を除去
-      const removed = removePhysicalCardFromGrave(grave, "c-bottom");
-      expect(removed.id).toBe("c-bottom");
-      expect(grave.length).toBe(2);
-      // TOP は依然として u-top の c-top (♡10)
+      const playerP1 = { life: [], hand: [], field: [], fog: [], grave, graveTopCardId: "c-top" };
       const stateAfterUtil = {
         stateVersion: 1,
-        players: { p1: { life: [], hand: [], field: [], fog: [], grave } },
+        players: { p1: playerP1 },
         stage: { requests: [] },
       };
+      const removed = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-bottom", stateAfterUtil, "p1");
+      expect(removed.id).toBe("c-bottom");
+      expect(grave.length).toBe(2);
+      expect(playerP1.graveTopCardId).toBe("c-top");
+      // TOP は依然として u-top の c-top (♡10)
       const obs1 = ObservationFactory.createObservation(stateAfterUtil as any, "p2");
       const p1View1 = obs1.players.find((p) => p.playerId === "p1")!;
       expect((p1View1.graveTopCard as any)?.suit).toBe("H");
       expect((p1View1.graveTopCard as any)?.rank).toBe("10");
 
       // 非TOP (u-middle の c-mid-1) を除去
-      const removedMid = removePhysicalCardFromGrave(grave, "c-mid-1");
+      const removedMid = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-mid-1", stateAfterUtil, "p1");
       expect(removedMid.id).toBe("c-mid-1");
       expect(grave.length).toBe(2); // u-middle はまだ c-mid-2 を持つため除去されない
       expect(grave[0].cards.length).toBe(1);
       expect(grave[0].cards[0].id).toBe("c-mid-2");
+      expect(playerP1.graveTopCardId).toBe("c-top");
       // TOP は依然として u-top の c-top
       const obs2 = ObservationFactory.createObservation(stateAfterUtil as any, "p2");
       const p1View2 = obs2.players.find((p) => p.playerId === "p1")!;
@@ -1091,6 +1108,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
               },
             ],
             life: [{ id: "l1" }],
+            graveTopCardId: "c-gTop",
             grave: [
               bottomCard,
               {
@@ -1151,28 +1169,30 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
         { id: "c-bottom", suit: "S", rank: "2", value: 2 },
         { id: "c-top", suit: "H", rank: "10", value: 10 },
       ];
-      const removed = removePhysicalCardFromGrave(grave, "c-top");
+      const playerP1 = { life: [], hand: [], field: [], fog: [], grave, graveTopCardId: "c-top" };
+      const stateUtil = {
+        stateVersion: 1,
+        players: { p1: playerP1 },
+        stage: { requests: [] },
+      };
+      const removed = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-top", stateUtil, "p1");
       expect(removed.id).toBe("c-top");
-      expect(grave.length).toBe(1);
-      expect(grave[0].id).toBe("c-bottom");
+      expect(playerP1.grave.length).toBe(1);
+      expect(playerP1.grave[0].id).toBe("c-bottom");
+      expect(playerP1.graveTopCardId).toBe("c-bottom");
 
-      const obs1 = ObservationFactory.createObservation(
-        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
-        "p2"
-      );
+      const obs1 = ObservationFactory.createObservation(stateUtil as any, "p2");
       const p1View1 = obs1.players.find((p) => p.playerId === "p1")!;
       expect((p1View1.graveTopCard as any)?.suit).toBe("S");
       expect((p1View1.graveTopCard as any)?.rank).toBe("2");
 
       // 2. 最後の1枚を除去して墓地が空になるケース
-      const removedLast = removePhysicalCardFromGrave(grave, "c-bottom");
+      const removedLast = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-bottom", stateUtil, "p1");
       expect(removedLast.id).toBe("c-bottom");
-      expect(grave.length).toBe(0);
+      expect(playerP1.grave.length).toBe(0);
+      expect(playerP1.graveTopCardId).toBeUndefined();
 
-      const obs2 = ObservationFactory.createObservation(
-        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
-        "p2"
-      );
+      const obs2 = ObservationFactory.createObservation(stateUtil as any, "p2");
       const p1View2 = obs2.players.find((p) => p.playerId === "p1")!;
       expect(p1View2.graveCount).toBe(0);
       expect(p1View2.graveTopCard).toBeUndefined();
@@ -1199,6 +1219,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
               },
             ],
             life: [{ id: "l1" }],
+            graveTopCardId: "c-gTop",
             grave: [
               {
                 unitId: "u-top-alone",
@@ -1263,9 +1284,10 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       ];
 
       // 最初: 3枚あるため TOP は undefined
+      const playerP1 = { life: [], hand: [], field: [], fog: [], grave, graveTopCardId: undefined };
       const stateBefore = {
         stateVersion: 1,
-        players: { p1: { life: [], hand: [], field: [], fog: [], grave } },
+        players: { p1: playerP1 },
         stage: { requests: [] },
       };
       const obs0 = ObservationFactory.createObservation(stateBefore as any, "p2");
@@ -1273,7 +1295,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(obs0.players[0].graveTopCard).toBeUndefined();
 
       // 1枚目 (cardA) を除去 -> 残り2枚
-      const removedA = removePhysicalCardFromGrave(grave, "c-multi-A");
+      const removedA = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-multi-A", stateBefore, "p1");
       expect(removedA.id).toBe("c-multi-A");
       expect(grave.length).toBe(1); // ラッパーは保持される
       expect(grave[0].unitId).toBe("u-multi-armed"); // unitId 保持
@@ -1288,14 +1310,15 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(obs1.players[0].graveTopCard).toBeUndefined();
 
       // 2枚目 (cardB) を除去 -> 残り1枚
-      const removedB = removePhysicalCardFromGrave(grave, "c-multi-B");
+      const removedB = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-multi-B", stateBefore, "p1");
       expect(removedB.id).toBe("c-multi-B");
       expect(grave.length).toBe(1); // まだ1枚あるのでラッパー保持
       expect(grave[0].unitId).toBe("u-multi-armed");
       expect(grave[0].cards.length).toBe(1);
       expect(grave[0].cards[0].id).toBe("c-multi-C");
 
-      // 1枚のみとなったため、既存の Observation 契約に従い cardC が正当に TOP として公開される！
+      // 残存1枚となったため、GraveTopCoordinatorにより自動昇格して cardC が正当に TOP として公開される！
+      expect(playerP1.graveTopCardId).toBe("c-multi-C");
       const obs2 = ObservationFactory.createObservation(stateBefore as any, "p2");
       expect(obs2.players[0].graveCount).toBe(1);
       expect(obs2.players[0].graveTopCard).toBeDefined();
@@ -1318,7 +1341,14 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       ];
 
       expect(grave.length).toBe(2);
-      const removed = removePhysicalCardFromGrave(grave, "c-sol-1");
+      const playerP1 = { life: [], hand: [], field: [], fog: [], grave, graveTopCardId: "c-sol-1" };
+      const stateUtil = {
+        stateVersion: 1,
+        players: { p1: playerP1 },
+        stage: { requests: [] },
+      };
+
+      const removed = GraveTopCoordinator.removeCardFromGrave(playerP1, "c-sol-1", stateUtil, "p1");
       expect(removed.id).toBe("c-sol-1");
 
       // 空ラッパーは自動除去され、墓地配列に空 Unit は残らない
@@ -1326,11 +1356,11 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(grave[0].id).toBe("c-bottom");
       expect((grave[0] as any).cards).toBeUndefined();
 
+      // 残存1枚 (c-bottom) が新TOPに自動昇格
+      expect(playerP1.graveTopCardId).toBe("c-bottom");
+
       // 残った墓地の TOP が c-bottom (♠A) として正しく観測される
-      const obs = ObservationFactory.createObservation(
-        { stateVersion: 1, players: { p1: { life: [], hand: [], field: [], fog: [], grave } }, stage: { requests: [] } } as any,
-        "p2"
-      );
+      const obs = ObservationFactory.createObservation(stateUtil as any, "p2");
       expect(obs.players[0].graveCount).toBe(1);
       expect((obs.players[0].graveTopCard as any)?.suit).toBe("S");
       expect((obs.players[0].graveTopCard as any)?.rank).toBe("A");
@@ -1360,6 +1390,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
           p1: {
             field: [singleTargetUnit],
             grave: [graveCardA, graveCardB],
+            graveTopCardId: "c-gB",
           },
           p2: { field: [], grave: [] },
         },
@@ -1396,7 +1427,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect((obsF1.players[0].graveTopCard as any)?.rank).toBe("5");
 
       // Case F2: 効果解決直後レベル - 対象が複数カード武装兵士 (cards.length === 2)
-      // 墓地末尾に対象武装兵士が追加されるが、cards.length === 2 のため推測せず undefined (fail-safe)
+      // 墓地に複数カードUnitが送られた直後に即時中断 (Immediate Post-Command Interruption) が発生
       const armedCard1 = { id: "c-armed-1", suit: "H", rank: "7", value: 7 };
       const armedCard2 = { id: "c-armed-2", suit: "D", rank: "7", value: 7 };
       const armedUnit = {
@@ -1411,6 +1442,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
           p1: {
             field: [armedUnit],
             grave: [graveCardC],
+            graveTopCardId: "c-gC",
           },
           p2: { field: [], grave: [] },
         },
@@ -1428,18 +1460,39 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       };
 
       const resF2 = effectInterpreter.executeEffectsWithInterruption(action.effect!, contextF2);
-      expect("completed" in resF2 && resF2.completed).toBe(true);
+      expect("interrupted" in resF2 && resF2.interrupted).toBe(true);
+      if (!("interrupted" in resF2)) return;
+      expect(resF2.effectStepId).toBe("zoneTopSelection");
+      expect(resF2.selectionType).toBe("zoneTop");
+      expect(stateF2.pendingGraveTopSelections?.length).toBe(1);
+      expect(stateF2.players.p1.graveTopCardId).toBeUndefined();
+
+      // 所有者が TOP として armedCard1 (♡7) を選択
+      GraveTopCoordinator.applyGraveTopSelection(stateF2, "p1", "c-armed-1");
+      expect(stateF2.players.p1.graveTopCardId).toBe("c-armed-1");
+
+      // 残りの効果（deploySelectedCardsAsUnits）を再開
+      const resF2_resumed = effectInterpreter.executeEffectsWithInterruption(
+        action.effect!,
+        contextF2,
+        resF2.resumeNextIndex
+      );
+      expect("completed" in resF2_resumed && resF2_resumed.completed).toBe(true);
 
       const p1GraveF2 = stateF2.players.p1.grave;
       expect(p1GraveF2.length).toBe(1); // graveCardC 抜出、armedUnit 追加
       const lastEntryF2 = p1GraveF2[0];
       expect(lastEntryF2.cards.length).toBe(2);
 
-      // 通常の墓地移動 primitive の結果として、複数カード Unit が TOP のため推測せず undefined
+      // 所有者が選択した physical card が TOP として公開され、他は非公開 (相手視点)
       const obsF2 = ObservationFactory.createObservation(stateF2, "p2");
       expect(obsF2.players[0].graveCount).toBe(2);
-      expect(obsF2.players[0].graveTopCard).toBeUndefined();
-      expect(obsF2.players[0].grave.length).toBe(0); // 相手視点非公開
+      expect(obsF2.players[0].graveTopCard).toBeDefined();
+      expect((obsF2.players[0].graveTopCard as any)?.cardInstanceId).toBe("c-armed-1");
+      expect((obsF2.players[0].graveTopCard as any)?.suit).toBe("H");
+      expect((obsF2.players[0].graveTopCard as any)?.rank).toBe("7");
+      expect(obsF2.players[0].grave.length).toBe(1); // 相手視点にはTOPカードのみ公開
+      expect((obsF2.players[0].grave[0] as any)?.cardInstanceId).toBe("c-armed-1");
 
       // Case F3: 実 GameSession での全工程（アクション完了・キーカード移動）統合検証
       // 対象兵士 (非Legacy: ♣6) の墓地移動後に、キーカード (k-s1, k-h1) が墓地末尾に送られる
@@ -1461,6 +1514,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
               },
             ],
             life: [{ id: "l1" }],
+            graveTopCardId: "c-init-grave",
             grave: [{ id: "c-init-grave", suit: "D", rank: "9", value: 9 }],
           },
           p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },

@@ -15,11 +15,12 @@ export interface EffectInterruption {
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
-  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option" | "order";
+  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option" | "order" | "zoneTop";
   readonly candidates: any[];
   readonly attackers?: any[];
   readonly requiredCount?: number;
   readonly decisionPlayerKey?: PlayerKey;
+  readonly resumeNextIndex?: number;
 }
 
 export type EffectInterpreterResult =
@@ -508,6 +509,19 @@ export class EffectInterpreter {
         } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
           this.executeEffects(args.else, context);
         }
+        if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+          const nextPending = context.state.pendingGraveTopSelections[0];
+          return {
+            interrupted: true,
+            effectIndex: i,
+            effectStepId: "zoneTopSelection",
+            selectionId: "graveTopCard",
+            selectionType: "zoneTop",
+            candidates: nextPending.candidateCardIds,
+            decisionPlayerKey: nextPending.playerId,
+            resumeNextIndex: i + 1,
+          };
+        }
         continue;
       }
 
@@ -518,10 +532,38 @@ export class EffectInterpreter {
         } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
           this.executeEffects(args.else, context);
         }
+        if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+          const nextPending = context.state.pendingGraveTopSelections[0];
+          return {
+            interrupted: true,
+            effectIndex: i,
+            effectStepId: "zoneTopSelection",
+            selectionId: "graveTopCard",
+            selectionType: "zoneTop",
+            candidates: nextPending.candidateCardIds,
+            decisionPlayerKey: nextPending.playerId,
+            resumeNextIndex: i + 1,
+          };
+        }
         continue;
       }
 
       this.executeEffect(effect, context);
+
+      // コマンド単位即時中断 (Immediate Post-Command Interruption)
+      if (i < effects.length - 1 && context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = context.state.pendingGraveTopSelections[0];
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: "zoneTopSelection",
+          selectionId: "graveTopCard",
+          selectionType: "zoneTop",
+          candidates: nextPending.candidateCardIds,
+          decisionPlayerKey: nextPending.playerId,
+          resumeNextIndex: i + 1,
+        };
+      }
     }
 
     return { completed: true };

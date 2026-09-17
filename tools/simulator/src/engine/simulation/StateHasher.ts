@@ -146,8 +146,12 @@ export class StateHasher {
         }
 
         // Grave
+        if (p.graveTopCardId) {
+          registerId(p.graveTopCardId, "card");
+        }
         if (Array.isArray(p.grave)) {
           p.grave.forEach((item: any) => {
+
             if (item?.unitId) {
               registerId(item.unitId, "unit");
               if (Array.isArray(item.cards)) {
@@ -213,7 +217,20 @@ export class StateHasher {
       });
     }
 
+    // Pending Grave TOP Selections
+    if (Array.isArray(state.pendingGraveTopSelections)) {
+      state.pendingGraveTopSelections.forEach((p: any) => {
+        if (Array.isArray(p?.candidateCardIds)) {
+          p.candidateCardIds.forEach((cId: string) => registerId(cId, "card"));
+        }
+        if (p?.previousTopCardId) {
+          registerId(p.previousTopCardId, "card");
+        }
+      });
+    }
+
     // ------------------------------------------------------------------------
+
     // Pass 2: 論理構造の抽出 & Canonical ID / 参照の置換 (Lookup のみ)
     // ------------------------------------------------------------------------
     const normalizeCard = (card: any): any => {
@@ -364,8 +381,10 @@ export class StateHasher {
           field: normalizeUnitList(p.field),
           fog: normalizeFogList(p.fog),
           grave: normalizeCardOrUnitList(p.grave),
+          graveTopCardId: p.graveTopCardId ? resolveId(p.graveTopCardId) : undefined,
           trumps: normalizeUnitList(p.trumps || p.trump),
         };
+
       }
       logical.players = players;
     }
@@ -434,7 +453,20 @@ export class StateHasher {
       });
     }
 
+    // Pending Grave TOP Selections
+    if (Array.isArray(state.pendingGraveTopSelections) && state.pendingGraveTopSelections.length > 0) {
+      logical.pendingGraveTopSelections = state.pendingGraveTopSelections.map((p: any) => ({
+        playerId: p.playerId,
+        candidateCardIds: Array.isArray(p.candidateCardIds)
+          ? p.candidateCardIds.map((cId: string) => resolveId(cId) || cId)
+          : [],
+        previousTopCardId: p.previousTopCardId ? resolveId(p.previousTopCardId) || p.previousTopCardId : undefined,
+        reason: p.reason,
+      }));
+    }
+
     return logical;
+
   }
 
   /**

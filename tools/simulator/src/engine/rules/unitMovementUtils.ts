@@ -1,5 +1,6 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { getCharacterType } from "./characterUtils";
+import { GraveTopCoordinator } from "./GraveTopCoordinator";
 
 export interface MoveUnitMetadata {
   cause?: { type: string; command?: string; actionId?: string; [key: string]: any };
@@ -37,11 +38,14 @@ export function moveUnitToGraveyard(
     delete unit.battle;
   }
 
-  // 墓地へ追加
-  if (!player.grave) {
-    player.grave = [];
-  }
-  player.grave.push(unit);
+  // 墓地へ追加 (GraveTopCoordinator経由でTOP状態およびPending選択を管理)
+  GraveTopCoordinator.addUnitToGrave(
+    player,
+    unit,
+    state,
+    playerKey,
+    context?.logRecorder
+  );
 
   // 各カードについて cardMoved イベントを発行
   if (unit.cards && Array.isArray(unit.cards)) {

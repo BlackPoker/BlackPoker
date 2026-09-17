@@ -183,6 +183,16 @@ describe("Core Battle Playtest: Full Match Integration Test (Phase 21B)", () => 
     expect(state.players.p2.life.length).toBe(2);
     expect(state.stage.requests.length).toBe(0);
 
+    // 複数枚ダメージによる墓地TOP選択 (p2 が被ダメージ5枚からTOPを選択)
+    if (step.type === "WAITING_FOR_DECISION" && (step.request.source as any)?.type === "ZONE_TOP_SELECTION") {
+      expect(step.request.playerId).toBe("p2");
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+    }
+
     // p1 が End をリクエスト
     if (step.type !== "WAITING_FOR_DECISION") return;
     const reqEnd1 = step.request;

@@ -328,6 +328,7 @@ export class OfficialRegulationMatchSetup {
             cards: [candidateCard],
             labels: [],
           });
+          player.graveTopCardId = candidateCard.id;
           discardIndex++;
         }
       }

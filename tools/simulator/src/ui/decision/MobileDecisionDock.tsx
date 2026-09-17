@@ -25,7 +25,8 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
     return null;
   }
 
-  const isEffectResolution = request.source.type === "EFFECT_RESOLUTION";
+  const isZoneTopSelection = request.source.type === "ZONE_TOP_SELECTION";
+  const isEffectResolution = request.source.type === "EFFECT_RESOLUTION" || isZoneTopSelection;
   const playerName = request.playerId === "p1" ? "Player A" : "Player B";
 
   // PASS パターンの検索（UI独自判定ではなく、request.patterns内のkind === "PASS"のみ使用）
@@ -51,11 +52,11 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-zinc-950 animate-pulse" />
             <span className="font-bold text-zinc-950">
-              {playerName} の{isEffectResolution ? "効果選択" : "行動選択"}
+              {playerName} の{isZoneTopSelection ? "墓地TOP選択" : isEffectResolution ? "効果選択" : "行動選択"}
             </span>
           </div>
           <span className="text-zinc-500 text-[10px]">
-            {isEffectResolution ? "EFFECT" : `${request.patterns.length} 選択肢`}
+            {isZoneTopSelection ? "ZONE TOP" : isEffectResolution ? "EFFECT" : `${request.patterns.length} 選択肢`}
           </span>
         </div>
 

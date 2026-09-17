@@ -9,8 +9,10 @@ import {
 } from "../../domain/decision/PlayerObservation";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { AbilityEvaluator } from "../rules/AbilityEvaluator";
+import { findPhysicalCardInGrave } from "../rules/graveCardUtils";
 
 const abilityEvaluator = new AbilityEvaluator();
+
 
 /**
  * GameState から指定プレイヤー視点の PlayerObservation を生成するファクトリ。
@@ -71,10 +73,29 @@ export class ObservationFactory {
         // 6. 墓地の処理
         // ルール: 墓地枚数と墓地トップカードは全員に公開。墓地全体（非トップカード）はオーナー本人のみ確認可能
         const rawGrave = Array.isArray(p.grave) ? p.grave : [];
-        const rawGraveTop = rawGrave.length > 0 ? rawGrave[rawGrave.length - 1] : undefined;
-        const graveTopCard: CardView | undefined = rawGraveTop
-          ? this.resolveGraveTopCard(rawGraveTop)
-          : undefined;
+        let graveTopCard: CardView | undefined = undefined;
+
+        if (p.graveTopCardId) {
+          const loc = findPhysicalCardInGrave(rawGrave, p.graveTopCardId);
+          if (loc) {
+            graveTopCard = this.mapCard(loc.card, true);
+          } else {
+            throw new Error(`ObservationFactory: graveTopCardId (${p.graveTopCardId}) が墓地に存在しません (fail-closed)`);
+          }
+        } else {
+          // graveTopCardId が未設定の場合:
+          // pendingDecision (Transient) の場合は undefined を厳格維持
+          const hasPending = Array.isArray(state?.pendingGraveTopSelections) &&
+            state.pendingGraveTopSelections.some((pending: any) => pending.playerId === pKey);
+          if (!hasPending && rawGrave.length > 0) {
+            // legacy / unmigrated fixture fallback
+            const rawGraveTop = rawGrave[rawGrave.length - 1];
+            graveTopCard = this.resolveGraveTopCard(rawGraveTop);
+          } else {
+            graveTopCard = undefined;
+          }
+        }
+
 
         // 物理カード単位に展開
         const visibleGraveCards = rawGrave.flatMap((g: any) => this.resolveGraveEntryCards(g));

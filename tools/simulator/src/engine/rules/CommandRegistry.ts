@@ -40,6 +40,7 @@ import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 import { isCardInGameZones } from "./cardUtils";
 import { MatchLogRecorder, normalizeCardLocation } from "../log/MatchLogRecorder";
 import { validateTargetsAtResolution } from "./ResolutionTargetValidator";
+import { GraveTopCoordinator } from "./GraveTopCoordinator";
 
 export interface CreateRequestOptions {
   readonly selectedCostPayment?: CostPayment;
@@ -69,7 +70,13 @@ export function finalizeRequestKeyCards(
   for (const keyCard of request.keyCards) {
     if (!keyCard || !keyCard.id) continue;
     if (!isCardInGameZones(keyCard.id, context.state)) {
-      player.grave.push(keyCard);
+      GraveTopCoordinator.addCardToGrave(
+        player,
+        keyCard,
+        context.state,
+        request.controller,
+        context.logRecorder
+      );
       if (effectInterpreter) {
         effectInterpreter.dispatchEvent(
           {
@@ -640,6 +647,33 @@ export class CommandRegistry {
         );
 
         if ("interrupted" in execResult && execResult.interrupted) {
+          if (execResult.selectionType === "zoneTop") {
+            const nextPending = context.state.pendingGraveTopSelections?.[0];
+            const continuation: EffectContinuation = {
+              sourceRequestId: request.id,
+              effectPath: [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
+              effectStepId: "zoneTopSelection",
+              selectionId: "graveTopCard",
+            };
+
+            const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+              context.state,
+              nextPending,
+              {
+                stateVersion: context.state.stateVersion,
+                matchId: context.state.matchId,
+              }
+            );
+
+            return {
+              type: "WAITING_FOR_DECISION",
+              request,
+              decisionRequest,
+              continuation,
+              context: resolveContext,
+            };
+          }
+
           const continuation: EffectContinuation = {
             sourceRequestId: request.id,
             effectPath: [execResult.effectIndex],
@@ -725,19 +759,22 @@ export class CommandRegistry {
       );
     }
 
-    // continuation.selectionId を正として汎用バインド
-    const selectionKey = continuation.selectionId || continuation.effectStepId;
-    const valueToStore: any = assignments !== undefined ? assignments : selectedValues;
+    // continuation.selectionId を正として汎用バインド (zoneTopSelectionはselectionsを汚染しない)
+    let selections = context.selections;
+    if (continuation.effectStepId !== "zoneTopSelection") {
+      const selectionKey = continuation.selectionId || continuation.effectStepId;
+      const valueToStore: any = assignments !== undefined ? assignments : selectedValues;
 
-    if (!context.selections) {
-      context.selections = {};
+      if (!context.selections) {
+        context.selections = {};
+      }
+      context.selections[selectionKey] = valueToStore;
+
+      selections = {
+        ...context.selections,
+        [selectionKey]: valueToStore,
+      };
     }
-    context.selections[selectionKey] = valueToStore;
-
-    const selections = {
-      ...context.selections,
-      [selectionKey]: valueToStore,
-    };
 
     const player = context.state.players?.[request.controller];
     let targetComponent = context.targetComponent;
@@ -780,7 +817,9 @@ export class CommandRegistry {
       selections,
     };
 
-    const startIndex = continuation.effectStepId === "selectUnitCardOrder"
+    const startIndex = continuation.effectStepId === "zoneTopSelection"
+      ? (continuation.effectPath[0] ?? 0)
+      : continuation.effectStepId === "selectUnitCardOrder"
       ? (continuation.effectPath[0] ?? 0)
       : (continuation.effectPath[0] ?? 0) + 1;
     const execResult = this.effectInterpreter.executeEffectsWithInterruption(
@@ -790,6 +829,33 @@ export class CommandRegistry {
     );
 
     if ("interrupted" in execResult && execResult.interrupted) {
+      if (execResult.selectionType === "zoneTop") {
+        const nextPending = context.state.pendingGraveTopSelections?.[0];
+        const nextContinuation: EffectContinuation = {
+          sourceRequestId: request.id,
+          effectPath: [execResult.resumeNextIndex ?? execResult.effectIndex + 1],
+          effectStepId: "zoneTopSelection",
+          selectionId: "graveTopCard",
+        };
+
+        const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+          context.state,
+          nextPending,
+          {
+            stateVersion: context.state.stateVersion,
+            matchId: context.state.matchId,
+          }
+        );
+
+        return {
+          type: "WAITING_FOR_DECISION",
+          request,
+          decisionRequest,
+          continuation: nextContinuation,
+          context: resolveContext,
+        };
+      }
+
       const nextContinuation: EffectContinuation = {
         sourceRequestId: request.id,
         effectPath: [execResult.effectIndex],

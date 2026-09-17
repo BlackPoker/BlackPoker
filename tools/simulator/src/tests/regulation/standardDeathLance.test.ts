@@ -246,9 +246,9 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
       components: fullRulePackage.components,
     };
 
-    // 単一カード兵士: selectUnitCardOrder は決定不要で自動束縛
+    // 単一カード兵士: selectUnitCardOrder は決定不要で自動束縛 (複数枚ダメージによるzoneTop中断は許容)
     const execResult = effectInterpreter.executeEffectsWithInterruption(action.effect!, context);
-    expect("completed" in execResult && execResult.completed).toBe(true);
+    expect("completed" in execResult ? execResult.completed : execResult.selectionType === "zoneTop").toBe(true);
 
     // 兵士は p2 のフィールドから除去されていること
     expect(state.players.p2.field.length).toBe(0);
@@ -892,7 +892,7 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
     };
 
     const execResult = effectInterpreter.executeEffectsWithInterruption(action.effect!, context);
-    expect("completed" in execResult && execResult.completed).toBe(true);
+    expect("completed" in execResult ? execResult.completed : execResult.selectionType === "zoneTop").toBe(true);
 
     // 兵士はライフTOPへ移動
     expect(state.players.p2.field.length).toBe(0);

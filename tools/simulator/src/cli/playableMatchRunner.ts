@@ -174,6 +174,16 @@ async function runPlayableMatch() {
   });
   console.log(`[RESOLVE] ダメージ判定解決: 兵士相打ち & 未ブロック兵士により Player B に 5ダメージ (残りLife: ${state.players.p2.life.length}枚)`);
 
+  // 複数枚ダメージによる墓地TOP選択 (p2 が被ダメージ5枚からTOPを選択)
+  if (step.type === "WAITING_FOR_DECISION" && (step.request.source as any)?.type === "ZONE_TOP_SELECTION") {
+    console.log(`[DECISION] Player B が被ダメージ5枚から墓地TOPを選択`);
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: 0,
+    });
+  }
+
   // End リクエスト
   if (step.type !== "WAITING_FOR_DECISION") return;
   const reqEnd1 = step.request;

@@ -6,6 +6,7 @@ import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./C
 import { validateCompleteOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
 import { moveUnitToGraveyard } from "./unitMovementUtils";
+import { GraveTopCoordinator } from "./GraveTopCoordinator";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -400,7 +401,13 @@ export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInter
     // 物理カードの除去およびフィールドへの兵士配置
     for (let i = 0; i < selectedCardIds.length; i++) {
       const cardId = selectedCardIds[i];
-      const card = removePhysicalCardFromGrave(targetPlayer.grave, cardId);
+      const card = GraveTopCoordinator.removeCardFromGrave(
+        targetPlayer,
+        cardId,
+        context.state,
+        targetPlayerKey,
+        context.logRecorder
+      );
 
       const newUnit = buildFieldUnitFromComponent({
         componentId: component,
@@ -591,11 +598,14 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
       player.field = player.field.filter((u: any) => u.unitId !== targetUnit.unitId);
     }
 
-    // 墓地へ追加
-    if (!player.grave) {
-      player.grave = [];
-    }
-    player.grave.push(targetUnit);
+    // 墓地へ追加 (GraveTopCoordinator経由でTOP状態およびPending選択を管理)
+    GraveTopCoordinator.addUnitToGrave(
+      player,
+      targetUnit,
+      context.state,
+      ownerPlayerKey,
+      context.logRecorder
+    );
 
     if (resultId && typeof resultId === "string") {
       if (!context.results) context.results = {};
@@ -712,7 +722,13 @@ export function discardCardsHandler(
     });
 
     for (const card of discarded) {
-      player.grave.push(card);
+      GraveTopCoordinator.addCardToGrave(
+        player,
+        card,
+        context.state,
+        playerKey,
+        context.logRecorder
+      );
       effectInterpreter.dispatchEvent(
         {
           type: "cardMoved",
@@ -811,12 +827,19 @@ export function takeUntilLegacyCardHandler(): CommandHandler {
         break;
       } else {
         // 違えば墓地に送る
-        player.grave.push({
-          unitId: `unit-grave-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        const unit = {
+          unitId: `unit-grave-${context.state.stateVersion || 1}-${card.id}-${Math.random().toString(36).slice(2)}`,
           kind: "一般兵",
           cards: [card],
           labels: []
-        });
+        };
+        GraveTopCoordinator.addUnitToGrave(
+          player,
+          unit,
+          context.state,
+          context.playerKey,
+          context.logRecorder
+        );
       }
     }
   };
@@ -875,30 +898,24 @@ export function dealDamageHandler(
 
     // ライフの上から resolvedAmount 枚数を墓地へ移動
     const damageAmount = Math.min(resolvedAmount, targetPlayer.life.length);
+    const damageCards: any[] = [];
     for (let i = 0; i < damageAmount; i++) {
       const card = targetPlayer.life.shift();
       if (!card) break;
+      damageCards.push(card);
+    }
 
-      // 墓地へ追加 (ダメージのカードとして追加)
-      const graveUnitId = `unit-grave-${context.currentRequest?.id || "req"}-${card.id}-${targetPlayerKey}-${i}-${context.state?.stateVersion ?? 1}`;
-      targetPlayer.grave.push({
-        unitId: graveUnitId,
-        kind: "ダメージ",
-        cards: [card],
-        labels: [],
-      });
-
-      // 各カードについて cardMoved イベントを発行 (fromZone: "life")
-      const event = {
-        type: "cardMoved",
-        payload: {
-          card: card,
-          fromZone: "life",
-          toZone: "grave",
-          playerKey: targetPlayerKey,
-        },
-      };
-      effectInterpreter.dispatchEvent(event, damageContext);
+    if (damageCards.length > 0) {
+      GraveTopCoordinator.addDamageBatchToGrave(
+        targetPlayer,
+        damageCards,
+        context.state,
+        targetPlayerKey,
+        context.currentRequest?.id,
+        context.logRecorder,
+        effectInterpreter,
+        damageContext
+      );
     }
   };
 }
@@ -1015,14 +1032,25 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
 
       // 各除去されたフォグについて墓地移動およびイベント発行
       for (const fog of removedFogs) {
-        // 墓地ユニットオブジェクトとして player.grave へ移動
-        player.grave.push({
+        const fogUnit = {
           unitId: fog.fogId,
           kind: "フォグ",
           componentId: fog.componentId,
           cards: fog.card ? [fog.card] : [],
           labels: [],
-        });
+        };
+        if (fog.card) {
+          GraveTopCoordinator.addUnitToGrave(
+            player,
+            fogUnit,
+            context.state,
+            playerKey,
+            context.logRecorder
+          );
+        } else {
+          if (!player.grave) player.grave = [];
+          player.grave.push(fogUnit);
+        }
 
         // fogRemoved イベントを必ず発行
         const fogEvent = {
@@ -1317,6 +1345,9 @@ function resolveSelectionCard(cardRef: any, selections?: Record<string, any>): a
 export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
     let cardToMove = resolveSelectionCard(args.card ?? args.target, context.selections);
+    if (!cardToMove) {
+      return;
+    }
 
     const fromZone = args.from;
     const toZone = args.to;
@@ -1437,6 +1468,9 @@ export function setZoneStateHandler(): CommandHandler {
 export function revealCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
     let cardToReveal = resolveSelectionCard(args.card ?? args.selection ?? args.target, context.selections);
+    if (!cardToReveal) {
+      return;
+    }
 
     let actualCard = cardToReveal;
     let detectedSourceZone = args.sourceZone || args.from;
