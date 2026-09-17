@@ -2,7 +2,7 @@ import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { ExpressionEvaluator } from "../rules/ExpressionEvaluator";
-import { getCharacterType } from "../rules/characterUtils";
+import { getCharacterType, isCharacterComponent } from "../rules/characterUtils";
 import { PlaytestTargetPresenter } from "./PlaytestTargetPresenter";
 
 
@@ -40,10 +40,27 @@ export class TargetSelectionEnumerator {
         targetType = "unit";
       }
 
+      let targetRelation: "self" | "opponent" | undefined = undefined;
+      if (cond?.owner !== undefined && cond?.relation !== undefined) {
+        if (cond.owner !== cond.relation) {
+          throw new Error(
+            `TargetSelectionEnumerator: owner ('${cond.owner}') と relation ('${cond.relation}') が矛盾しています (fail-closed)`
+          );
+        }
+        targetRelation = cond.owner as any;
+      } else if (cond?.owner !== undefined) {
+        targetRelation = cond.owner as any;
+      } else if (cond?.relation !== undefined) {
+        targetRelation = cond.relation as any;
+      }
+
       if (targetType === "player") {
         // プレイヤーターゲット
         for (const pKey of Object.keys(state.players || {})) {
-          if (cond?.relation === "opponent" && pKey === requesterPlayerKey) {
+          if (targetRelation === "opponent" && pKey === requesterPlayerKey) {
+            continue;
+          }
+          if (targetRelation === "self" && pKey !== requesterPlayerKey) {
             continue;
           }
           const candidate: TargetSelection = {
@@ -95,11 +112,12 @@ export class TargetSelectionEnumerator {
         }
       } else if (targetType === "unit") {
         // ユニットターゲット（アップ、ダウン、アタック等）
-        const searchPlayers = cond?.owner === "opponent"
-          ? Object.keys(state.players || {}).filter((k) => k !== requesterPlayerKey)
-          : cond?.owner === "self"
-          ? [requesterPlayerKey]
-          : Object.keys(state.players || {}); // デフォルトは全プレイヤー（通常は自分）
+        const searchPlayers =
+          targetRelation === "opponent"
+            ? Object.keys(state.players || {}).filter((k) => k !== requesterPlayerKey)
+            : targetRelation === "self"
+            ? [requesterPlayerKey]
+            : Object.keys(state.players || {}); // デフォルトは全プレイヤー（通常は自分）
 
         for (const pKey of searchPlayers) {
           const player = state.players[pKey];
@@ -114,10 +132,7 @@ export class TargetSelectionEnumerator {
 
             // キャラクタータイプの検証
             if (cond?.componentType === "character") {
-              const compId = unit.componentId || "";
-              const compDef = components?.find((c: any) => c.id === compId);
-              const isChar = compDef ? compDef.type === "character" : compId.startsWith("character.");
-              if (!isChar) continue;
+              if (!isCharacterComponent(unit, components)) continue;
             }
 
             // characterType の検証 (例: soldier)

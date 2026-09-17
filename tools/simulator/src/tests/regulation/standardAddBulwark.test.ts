@@ -111,8 +111,8 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
 
   it("Test 2: Node Loader & Browser Loader load action.addBulwark consistently", () => {
     const browserPackage = loadRulePackageForBrowser();
-    expect(browserPackage.actions.length).toBe(25);
-    expect(fullRulePackage.actions.length).toBe(25);
+    expect(browserPackage.actions.length).toBeGreaterThanOrEqual(25);
+    expect(fullRulePackage.actions.length).toBe(browserPackage.actions.length);
 
     const nodeAction = fullRulePackage.actions.find((a) => a.id === "action.addBulwark");
     const browserAction = browserPackage.actions.find((a) => a.id === "action.addBulwark");

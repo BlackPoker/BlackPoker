@@ -37,9 +37,11 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(browserActionIds).toContain("action.addBulwark");
     expect(nodeActionIds).toContain("action.deathLance");
     expect(browserActionIds).toContain("action.deathLance");
+    expect(nodeActionIds).toContain("action.reanimate");
+    expect(browserActionIds).toContain("action.reanimate");
 
-    // 実総数の確認 (全25アクション、全11コンポーネント)
-    expect(browserActionIds.length).toBe(25);
+    // 実総数の確認 (全26アクション、全11コンポーネント)
+    expect(browserActionIds.length).toBe(26);
     expect(browserCompIds.length).toBe(11);
   });
 

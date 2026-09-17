@@ -27,6 +27,7 @@ import {
   shuffleZoneHandler,
   deployTopCardsAsUnitsHandler,
   moveUnitCardsToZoneTopHandler,
+  deploySelectedCardsAsUnitsHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -168,6 +169,7 @@ export interface CommandContext {
   source?: string; // 新規追加：移送ソース
   sourceEvent?: any; // 誘発元イベント
   selections?: Record<string, any>; // 効果解決時の選択結果マップ
+  results?: Record<string, any>; // コマンド実行結果マップ (moveToGraveyard の resultId 等)
   logRecorder?: MatchLogRecorder; // Canonical Match Log レコーダー
   matchSeed?: number; // 決定論的シャッフル用の対戦シード値
 }
@@ -1052,5 +1054,6 @@ export class CommandRegistry {
     this.register("shuffleZone", shuffleZoneHandler(this.effectInterpreter));
     this.register("deployTopCardsAsUnits", deployTopCardsAsUnitsHandler(this.effectInterpreter));
     this.register("moveUnitCardsToZoneTop", moveUnitCardsToZoneTopHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("deploySelectedCardsAsUnits", deploySelectedCardsAsUnitsHandler(this.effectInterpreter));
   }
 }

@@ -18,6 +18,17 @@ export interface ActionActivationCondition {
   };
 }
 
+export interface ActionTargetCondition {
+  readonly relation?: "self" | "opponent" | string;
+  readonly owner?: "self" | "opponent" | string;
+  readonly component?: string;
+  readonly componentType?: "character" | "fog" | "trump" | string;
+  readonly characterType?: string;
+  readonly state?: "charge" | "drive" | string | string[];
+  readonly matchSuitWithKey?: boolean;
+  readonly [key: string]: any;
+}
+
 export type ActionDefinition = {
   id: string;
   name: string;
@@ -45,7 +56,7 @@ export type ActionDefinition = {
   targets?: Array<{
     id: string;
     type?: string;
-    condition?: Record<string, any>;
+    condition?: ActionTargetCondition;
     [key: string]: any;
   }>;
   activationCondition?: ActionActivationCondition;

@@ -1,0 +1,53 @@
+actions:
+  - id: action.reanimate
+    name: リアニメイト
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: spade
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: heart
+            rank: "A..K"
+            zone: hand
+
+    targets:
+      - id: target
+        type: unit
+        condition:
+          relation: self
+          componentType: character
+
+    text:
+      effect: 自分の墓地にあるカード1枚を選ぶ。対象のキャラクターを墓地に移せた場合、選んだカードを兵士として表向きかつチャージ状態で場に出す。移せない場合、選んだカードを墓地に戻す。
+
+    effect:
+      - selectCards:
+          id: reanimateCard
+          player: self
+          zone: grave
+          count: 1
+      - moveToGraveyard:
+          target: target
+          resultId: targetMoved
+      - ifResult:
+          id: targetMoved
+          equals: true
+          then:
+            - deploySelectedCardsAsUnits:
+                selection: reanimateCard
+                player: self
+                component: character.soldier
+                face: up
+                state: charge
+                expectedCount: 1

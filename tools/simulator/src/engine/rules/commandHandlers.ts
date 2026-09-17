@@ -4,6 +4,8 @@ import { getOpponentPlayerKey, findUnitOwnerPlayerKey } from "./playerUtils";
 import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
+import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
+import { moveUnitToGraveyard } from "./unitMovementUtils";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -306,6 +308,137 @@ export function deployTopCardsAsUnitsHandler(effectInterpreter: EffectInterprete
 }
 
 /**
+ * deploySelectedCardsAsUnits: 効果で選択されたカード（例: 墓地物理カード）を
+ * 指定コンポーネント（character.soldier 等）のユニットとしてフィールドへ配置する。
+ */
+export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInterpreter): CommandHandler {
+  return (args, context) => {
+    const selectionId = args.selection || args.selectionId;
+    if (!selectionId || typeof selectionId !== "string" || selectionId.trim().length === 0) {
+      throw new Error(`deploySelectedCardsAsUnits: selection は空でない文字列である必要があります (指定値: ${JSON.stringify(selectionId)})`);
+    }
+
+    const playerSpec = args.player || "self";
+    let targetPlayerKey: string;
+    if (playerSpec === "self" || playerSpec === "controller") {
+      targetPlayerKey = context.playerKey;
+    } else if (playerSpec === "opponent") {
+      targetPlayerKey = getOpponentPlayerKey(context.playerKey, context.state);
+    } else {
+      throw new Error(`deploySelectedCardsAsUnits: 未知の player 指定です: '${playerSpec}'`);
+    }
+
+    const component = args.component || "character.soldier";
+    const compDef = context.components?.find((c: any) => c.id === component);
+    if (!compDef) {
+      throw new Error(`deploySelectedCardsAsUnits: コンポーネントが見つかりません: '${component}'`);
+    }
+    if (compDef.type !== "character") {
+      throw new Error(`deploySelectedCardsAsUnits: ユニット生成可能なコンポーネントではありません (type: '${compDef.type}'): '${component}'`);
+    }
+
+    const face = args.face || "up";
+    if (face !== "up" && face !== "down") {
+      throw new Error(`deploySelectedCardsAsUnits: face は 'up' または 'down' である必要があります (指定値: ${JSON.stringify(face)})`);
+    }
+
+    const state = args.state || "charge";
+    if (state !== "charge" && state !== "drive") {
+      throw new Error(`deploySelectedCardsAsUnits: state は 'charge' または 'drive' である必要があります (指定値: ${JSON.stringify(state)})`);
+    }
+
+    const fromZone = args.fromZone || "grave";
+    if (fromZone !== "grave") {
+      throw new Error(`deploySelectedCardsAsUnits: 未対応の fromZone です: '${fromZone}'`);
+    }
+
+    const targetPlayer = context.state.players?.[targetPlayerKey];
+    if (!targetPlayer) {
+      throw new Error(`deploySelectedCardsAsUnits: 対象プレイヤーが見つかりません: ${targetPlayerKey}`);
+    }
+    if (!Array.isArray(targetPlayer.field)) {
+      throw new Error("deploySelectedCardsAsUnits: 対象プレイヤーのフィールド領域が不正です (field missing or not array)");
+    }
+    if (!Array.isArray(targetPlayer.grave)) {
+      throw new Error("deploySelectedCardsAsUnits: 対象プレイヤーの墓地領域が不正です (grave missing or not array)");
+    }
+
+    const rawSelection = context.selections?.[selectionId];
+    if (rawSelection === undefined) {
+      throw new Error(`deploySelectedCardsAsUnits: selection '${selectionId}' の選択結果が存在しません (fail-closed)`);
+    }
+    const selectedCardIds: string[] = Array.isArray(rawSelection) ? rawSelection : [rawSelection];
+
+    // 重複 ID の拒否 (Section 28)
+    const seenIds = new Set<string>();
+    for (const cId of selectedCardIds) {
+      if (seenIds.has(cId)) {
+        throw new Error(`deploySelectedCardsAsUnits: selection に重複したカードIDが含まれています: '${cId}' (fail-closed)`);
+      }
+      seenIds.add(cId);
+    }
+
+    // expectedCount / maxCount の検証 (Section 29)
+    const maxCount = args.expectedCount ?? args.maxCount ?? 1;
+    if (selectedCardIds.length > maxCount) {
+      throw new Error(`deploySelectedCardsAsUnits: 選択枚数 (${selectedCardIds.length}) が上限 (${maxCount}) を超過しています (fail-closed)`);
+    }
+
+    // 0枚の場合は合法な no-op (Section 30, Rule 5.4.4)
+    if (selectedCardIds.length === 0) {
+      return;
+    }
+
+    // 存在確認 (全カードが墓地に実在することを確認) (Section 31)
+    for (const cardId of selectedCardIds) {
+      const location = findPhysicalCardInGrave(targetPlayer.grave, cardId);
+      if (!location) {
+        throw new Error(`deploySelectedCardsAsUnits: 選択されたカード (${cardId}) が墓地に存在しません (stale selection fail-closed)`);
+      }
+    }
+
+    // 物理カードの除去およびフィールドへの兵士配置
+    for (let i = 0; i < selectedCardIds.length; i++) {
+      const cardId = selectedCardIds[i];
+      const card = removePhysicalCardFromGrave(targetPlayer.grave, cardId);
+
+      const newUnit = buildFieldUnitFromComponent({
+        componentId: component,
+        playerKey: targetPlayerKey,
+        card,
+        face,
+        state,
+        components: context.components,
+        stateVersion: context.state.stateVersion || 1,
+        turnCount: context.state.turnCount ?? 1,
+        disambiguator: i,
+      });
+
+      targetPlayer.field.push(newUnit);
+
+      // cardMoved イベントを発行 (from: grave, to: field)
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card,
+          fromZone: "grave",
+          toZone: "field",
+          playerKey: targetPlayerKey,
+          targetUnitId: newUnit.unitId,
+          cause: {
+            type: "effect",
+            command: "deploySelectedCardsAsUnits",
+            actionId: context.currentAction?.id || context.currentRequest?.actionId,
+            requestId: context.currentRequest?.id,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
  * mountUnit: ユニットの上にカードを重ねて装備する（装備兵化）
  */
 export function mountUnitHandler(effectInterpreter: EffectInterpreter): CommandHandler {
@@ -415,17 +548,39 @@ export function removeFogHandler(): CommandHandler {
  */
 export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    const { target } = args;
+    const { target, resultId } = args;
     const targetUnit = target === "target" ? context.targetComponent : null;
-    if (!targetUnit) return;
+    if (!targetUnit) {
+      if (resultId && typeof resultId === "string") {
+        if (!context.results) context.results = {};
+        context.results[resultId] = false;
+      }
+      return;
+    }
 
     // targetUnit が存在するプレイヤーを特定
-    let ownerPlayerKey = context.playerKey;
+    let ownerPlayerKey: string | null = null;
+    let foundCount = 0;
     for (const [pKey, p] of Object.entries<any>(context.state.players || {})) {
-      if (p.field && p.field.some((u: any) => u.unitId === targetUnit.unitId)) {
-        ownerPlayerKey = pKey;
-        break;
+      if (p.field && Array.isArray(p.field)) {
+        const matches = p.field.filter((u: any) => u.unitId === targetUnit.unitId);
+        foundCount += matches.length;
+        if (matches.length > 0) {
+          ownerPlayerKey = pKey;
+        }
       }
+    }
+
+    if (foundCount > 1) {
+      throw new Error(`重複するunitIdがフィールド上で検出されました: ${targetUnit.unitId} (count: ${foundCount})`);
+    }
+
+    if (foundCount === 0 || !ownerPlayerKey) {
+      if (resultId && typeof resultId === "string") {
+        if (!context.results) context.results = {};
+        context.results[resultId] = false;
+      }
+      return;
     }
 
     const player = context.state.players[ownerPlayerKey];
@@ -441,6 +596,11 @@ export function moveToGraveyardHandler(effectInterpreter: EffectInterpreter): Co
       player.grave = [];
     }
     player.grave.push(targetUnit);
+
+    if (resultId && typeof resultId === "string") {
+      if (!context.results) context.results = {};
+      context.results[resultId] = true;
+    }
 
     // 各カードについて cardMoved イベントを発行
     if (targetUnit.cards && Array.isArray(targetUnit.cards)) {

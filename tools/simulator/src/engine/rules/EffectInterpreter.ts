@@ -7,6 +7,7 @@ import { matchesSuit, matchesRank } from "./cardUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { validateOptionSelectionDefinition } from "./OptionSelectionValidator";
 import { validatePartialOrder, validateCompleteOrder } from "./OrderSelectionValidator";
+import { enumeratePhysicalCardsInGrave } from "./graveCardUtils";
 
 
 export interface EffectInterruption {
@@ -108,6 +109,36 @@ export class EffectInterpreter {
   }
 
   /**
+   * ifResult の真偽値判定を行います。
+   * context.results[args.id] の値と args.equals を厳密に比較します (fail-closed)。
+   */
+  public evaluateIfResult(args: any, context: CommandContext): { shouldExecuteThen: boolean; shouldExecuteElse: boolean } {
+    if (!args || typeof args !== "object") {
+      throw new Error("ifResult: 引数がオブジェクトではありません");
+    }
+
+    const resultId = args.id;
+    if (typeof resultId !== "string" || resultId.trim().length === 0) {
+      throw new Error(`ifResult: id は空でない文字列である必要があります (指定値: ${JSON.stringify(resultId)})`);
+    }
+
+    if (typeof args.equals !== "boolean") {
+      throw new Error(`ifResult: equals は真偽値 (boolean) である必要があります (id: '${resultId}', 指定値: ${JSON.stringify(args.equals)})`);
+    }
+
+    const actual = context.results?.[resultId];
+    if (typeof actual !== "boolean") {
+      throw new Error(`ifResult: context.results に真偽値の結果が存在しません: '${resultId}' (取得値: ${JSON.stringify(actual)})`);
+    }
+
+    const matches = actual === args.equals;
+    return {
+      shouldExecuteThen: matches,
+      shouldExecuteElse: !matches,
+    };
+  }
+
+  /**
    * 単一の効果コマンドを実行します（if分岐対応）。
    */
   executeEffect(effect: any, context: CommandContext) {
@@ -128,6 +159,13 @@ export class EffectInterpreter {
       }
     } else if (name === "ifSelection") {
       const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfSelection(args, context);
+      if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
+        this.executeEffects(args.then, context);
+      } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
+        this.executeEffects(args.else, context);
+      }
+    } else if (name === "ifResult") {
+      const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfResult(args, context);
       if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
         this.executeEffects(args.then, context);
       } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
@@ -473,6 +511,16 @@ export class EffectInterpreter {
         continue;
       }
 
+      if (name === "ifResult") {
+        const { shouldExecuteThen, shouldExecuteElse } = this.evaluateIfResult(args, context);
+        if (shouldExecuteThen && args.then && Array.isArray(args.then)) {
+          this.executeEffects(args.then, context);
+        } else if (shouldExecuteElse && args.else && Array.isArray(args.else)) {
+          this.executeEffects(args.else, context);
+        }
+        continue;
+      }
+
       this.executeEffect(effect, context);
     }
 
@@ -492,7 +540,7 @@ export class EffectInterpreter {
     if (zone === "hand") {
       cardPool = Array.isArray(player.hand) ? [...player.hand] : [];
     } else if (zone === "grave") {
-      cardPool = Array.isArray(player.grave) ? [...player.grave] : [];
+      cardPool = Array.isArray(player.grave) ? enumeratePhysicalCardsInGrave(player.grave) : [];
     } else if (zone === "pack") {
       cardPool = Array.isArray(player.pack?.cards) ? [...player.pack.cards] : [];
     } else if (zone === "life") {
