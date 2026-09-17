@@ -1426,7 +1426,10 @@ export function moveUnitCardsToZoneTopHandler(
     }
 
     // ユニットがオーナーの field に存在するか検証
-    const unitIndex = owner.field ? owner.field.findIndex((u: any) => u.unitId === targetUnit.unitId) : -1;
+    if (!Array.isArray(owner.field)) {
+      throw new Error(`moveUnitCardsToZoneTop: オーナー (${ownerPlayerKey}) の field が配列ではありません (fail-closed)`);
+    }
+    const unitIndex = owner.field.findIndex((u: any) => u.unitId === targetUnit.unitId);
     if (unitIndex === -1) {
       throw new Error(`moveUnitCardsToZoneTop: ユニット (${targetUnit.unitId}) がプレイヤー (${ownerPlayerKey}) のフィールドに存在しません`);
     }
@@ -1457,8 +1460,8 @@ export function moveUnitCardsToZoneTopHandler(
 
     // 6. 指定ゾーン（life）への挿入
     if (zone === "life") {
-      if (!owner.life) {
-        owner.life = [];
+      if (!Array.isArray(owner.life)) {
+        throw new Error(`moveUnitCardsToZoneTop: オーナー (${ownerPlayerKey}) の life が配列ではありません (fail-closed)`);
       }
 
       // 各カードについて cardMoved イベントを発行 (fromZone: "field", toZone: "life")
