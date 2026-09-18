@@ -9,7 +9,7 @@ import {
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
-import { EffectInterpreter } from "../../engine/rules/EffectInterpreter";
+import { EffectInterpreter, NonInterruptibleEffectExecutionError } from "../../engine/rules/EffectInterpreter";
 import { EffectPathCodec } from "../../engine/rules/EffectPathCodec";
 import { GameSession } from "../../engine/session/GameSession";
 import type { RulePackage, ActionRequest } from "../../domain/rules/RulePackage";
@@ -1511,12 +1511,14 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
       expect(EffectPathCodec.advanceLastIndex([2])).toEqual([3]);
     });
 
-    it("Test 34: Fail-safe: executeEffects breaks loop when pending selection occurs", () => {
+    it("Test 34: Fail-closed: executeEffects throws NonInterruptibleEffectExecutionError when command creates pending selection", () => {
       const registry = new CommandRegistry();
       const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let commandAExecuted = false;
       let subsequentExecuted = false;
 
       registry.register("triggerPendingCmd", (args, ctx) => {
+        commandAExecuted = true;
         GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
           unitId: "u-fc",
           cards: [
@@ -1543,7 +1545,11 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
         playerKey: "p1",
       };
 
-      interpreter.executeEffects([{ triggerPendingCmd: {} }, { subsequentCmd: {} }], context);
+      expect(() => {
+        interpreter.executeEffects([{ triggerPendingCmd: {} }, { subsequentCmd: {} }], context);
+      }).toThrow(NonInterruptibleEffectExecutionError);
+
+      expect(commandAExecuted).toBe(true);
       expect(subsequentExecuted).toBe(false);
       expect(state.pendingGraveTopSelections?.length).toBe(1);
     });
@@ -1665,6 +1671,258 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
       });
 
       expect(StateHasher.hash(restored.state)).toBe(StateHasher.hash(session.state));
+    });
+
+    it("Test 37: Fail-closed: executeEffects throws NonInterruptibleEffectExecutionError when pending selection exists before execution", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let commandExecuted = false;
+
+      registry.register("dummyCmd", () => {
+        commandExecuted = true;
+      });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+        pendingGraveTopSelections: [
+          {
+            playerId: "p1",
+            candidateCardIds: ["c-pre-1", "c-pre-2"],
+            reason: "MULTI_CARD_GRAVE_MOVE",
+          },
+        ],
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      expect(() => {
+        interpreter.executeEffects([{ dummyCmd: {} }], context);
+      }).toThrow(NonInterruptibleEffectExecutionError);
+
+      expect(commandExecuted).toBe(false);
+    });
+
+    it("Test 38: Normal execution: executeEffects completes normally when no pending selection occurs", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let cmd1Run = false;
+      let cmd2Run = false;
+
+      registry.register("cmd1", () => { cmd1Run = true; });
+      registry.register("cmd2", () => { cmd2Run = true; });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      interpreter.executeEffects([{ cmd1: {} }, { cmd2: {} }], context);
+      expect(cmd1Run).toBe(true);
+      expect(cmd2Run).toBe(true);
+    });
+
+    it("Test 39: Fail-closed: nested ifResult branch creates pending selection throws NonInterruptibleEffectExecutionError", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let cmdBRun = false;
+
+      registry.register("createPendingCmd", (args, ctx) => {
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-nested",
+          cards: [
+            { id: "c-n1", suit: "S", rank: "1", value: 1 },
+            { id: "c-n2", suit: "S", rank: "2", value: 2 },
+          ],
+        }, ctx.state, "p1");
+      });
+
+      registry.register("cmdB", () => { cmdBRun = true; });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        results: { testResult: true },
+      };
+
+      const effects = [
+        {
+          ifResult: {
+            id: "testResult",
+            equals: true,
+            then: [
+              { createPendingCmd: {} },
+              { cmdB: {} },
+            ],
+          },
+        },
+      ];
+
+      expect(() => {
+        interpreter.executeEffects(effects, context);
+      }).toThrow(NonInterruptibleEffectExecutionError);
+
+      expect(cmdBRun).toBe(false);
+      expect(state.pendingGraveTopSelections?.length).toBe(1);
+    });
+
+    it("Test 40: Fail-closed: nested ifSelection branch creates pending selection throws NonInterruptibleEffectExecutionError", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let cmdBRun = false;
+
+      registry.register("createPendingCmd", (args, ctx) => {
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-sel",
+          cards: [
+            { id: "c-s1", suit: "H", rank: "1", value: 1 },
+            { id: "c-s2", suit: "H", rank: "2", value: 2 },
+          ],
+        }, ctx.state, "p1");
+      });
+
+      registry.register("cmdB", () => { cmdBRun = true; });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        selections: { optSel: "optA" },
+      };
+
+      const effects = [
+        {
+          ifSelection: {
+            selection: "optSel",
+            equals: "optA",
+            validValues: ["optA", "optB"],
+            then: [
+              { createPendingCmd: {} },
+              { cmdB: {} },
+            ],
+          },
+        },
+      ];
+
+      expect(() => {
+        interpreter.executeEffects(effects, context);
+      }).toThrow(NonInterruptibleEffectExecutionError);
+
+      expect(cmdBRun).toBe(false);
+      expect(state.pendingGraveTopSelections?.length).toBe(1);
+    });
+
+    it("Test 41: Fail-closed: plain if branch creates pending selection throws NonInterruptibleEffectExecutionError", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+      let cmdBRun = false;
+
+      registry.register("createPendingCmd", (args, ctx) => {
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-if",
+          cards: [
+            { id: "c-i1", suit: "D", rank: "1", value: 1 },
+            { id: "c-i2", suit: "D", rank: "2", value: 2 },
+          ],
+        }, ctx.state, "p1");
+      });
+
+      registry.register("cmdB", () => { cmdBRun = true; });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      const effects = [
+        {
+          if: {
+            condition: "1 == 1",
+            then: [
+              { createPendingCmd: {} },
+              { cmdB: {} },
+            ],
+          },
+        },
+      ];
+
+      expect(() => {
+        interpreter.executeEffects(effects, context);
+      }).toThrow(NonInterruptibleEffectExecutionError);
+
+      expect(cmdBRun).toBe(false);
+      expect(state.pendingGraveTopSelections?.length).toBe(1);
+    });
+
+    it("Test 42: Interruption-aware contrast: executeEffectsWithInterruption returns WAITING without throwing", () => {
+      const registry = new CommandRegistry();
+      const interpreter = (registry as any).effectInterpreter as EffectInterpreter;
+
+      registry.register("createPendingCmd", (args, ctx) => {
+        GraveTopCoordinator.addUnitToGrave(ctx.state.players.p1, {
+          unitId: "u-interr",
+          cards: [
+            { id: "c-w1", suit: "S", rank: "1", value: 1 },
+            { id: "c-w2", suit: "S", rank: "2", value: 2 },
+          ],
+        }, ctx.state, "p1");
+      });
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: { hand: [], field: [], life: [], grave: [] },
+          p2: { hand: [], field: [], life: [], grave: [] },
+        },
+      };
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+      };
+
+      const res = interpreter.executeEffectsWithInterruption([{ createPendingCmd: {} }], context);
+      expect("interrupted" in res && res.interrupted).toBe(true);
+      if ("interrupted" in res && res.interrupted) {
+        expect(res.selectionType).toBe("zoneTop");
+      }
     });
   });
 });

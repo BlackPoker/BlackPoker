@@ -4,6 +4,7 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("Counterattack Action Integration Tests (Phase 18)", () => {
   let rulePackage: RulePackage;
@@ -440,9 +441,19 @@ describe("Counterattack Action Integration Tests (Phase 18)", () => {
     expect(state.requestBuffer.requests.length).toBe(2);
     expect(state.requestBuffer.requests.every((r: any) => r.actionId === "action.counterattack")).toBe(true);
 
-    // 即時誘発処理
+    // 即時誘発処理（1件目の反撃解決後、2点ダメージによるGrave TOP選択が発生し一時停止）
     const procResult = coordinator.processPendingTriggers(state, rulePackage, registry);
-    expect(procResult.immediateResolvedCount).toBe(2);
+    expect(procResult.immediateResolvedCount).toBe(1);
+    expect(state.pendingGraveTopSelections?.length).toBe(1);
+
+    // 1件目の墓地TOP選択を解決
+    const pending1 = state.pendingGraveTopSelections[0];
+    GraveTopCoordinator.applyGraveTopSelection(state, pending1.playerId, pending1.candidateCardIds[0]);
+
+    // 2件目の即時誘発処理を再開
+    const procResult2 = coordinator.processPendingTriggers(state, rulePackage, registry);
+    expect(procResult2.immediateResolvedCount).toBe(1);
+    expect(procResult.immediateResolvedCount + procResult2.immediateResolvedCount).toBe(2);
 
     // 2 + 2 = 4 点ダメージで p1 のライフは 4 -> 0
     expect(state.players.p1.life.length).toBe(0);

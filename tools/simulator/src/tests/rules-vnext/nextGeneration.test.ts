@@ -3,6 +3,7 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TriggerProcessingCoordinator } from "../../engine/rules/TriggerProcessingCoordinator";
 import { RulePackage } from "../../domain/rules/RulePackage";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 import * as path from "path";
 
 describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
@@ -191,6 +192,10 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
     // 1. dispatchEvent 直後は未実行でバッファに2件積まれていること
     expect(state.requestBuffer?.requests?.length).toBe(2);
     expect(state.players.p1.hand.length).toBe(0);
+
+    // 2枚のカードが同時に墓地へ送られたため、Grave TOP選択が保留中
+    expect(state.pendingGraveTopSelections?.length).toBe(1);
+    GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-J");
 
     // 2. TriggerProcessingCoordinator で即時誘発アクションを解決
     const coordinator = new TriggerProcessingCoordinator();

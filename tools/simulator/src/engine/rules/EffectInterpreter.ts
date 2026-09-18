@@ -187,11 +187,21 @@ export class EffectInterpreter {
 
   /**
    * 効果コマンドのリストを順次実行します。
-   * ※非中断経路での同期実行用。コマンド実行によって pendingGraveTopSelections が発生した場合は
-   * 後続のコマンドを実行せずループを break します（フェイルセーフ）。
+   * ※非中断経路での同期実行専用。実行前またはコマンド実行によって pendingGraveTopSelections が
+   * 存在・発生した場合は NonInterruptibleEffectExecutionError を throw します (fail-closed)。
    */
   executeEffects(effects: any[], context: CommandContext) {
+    if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+      throw new NonInterruptibleEffectExecutionError(
+        "executeEffects: pending Grave TOP selection exists before command execution"
+      );
+    }
     for (const effect of effects) {
+      if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        throw new NonInterruptibleEffectExecutionError(
+          "executeEffects: pending Grave TOP selection exists before command execution"
+        );
+      }
       const keys = Object.keys(effect);
       if (keys.length > 0 && keys[0] === "guardCondition") {
         const passed = this.expressionEvaluator.evaluateCondition(
@@ -208,7 +218,9 @@ export class EffectInterpreter {
       this.executeEffect(effect, context);
       const pendingAfter = context.state.pendingGraveTopSelections?.length ?? 0;
       if (pendingAfter > pendingBefore) {
-        break;
+        throw new NonInterruptibleEffectExecutionError(
+          "executeEffects: command created Grave TOP selection in non-interruptible path"
+        );
       }
     }
   }

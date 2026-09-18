@@ -1,7 +1,7 @@
 import { CommandContext, CommandRegistry } from "./CommandRegistry";
 import { ActionRequest, RequestBuffer, RulePackage, TriggeredActionRequest } from "../../domain/rules/RulePackage";
 import { ActionRequestValidator } from "./ActionRequestValidator";
-import { EffectInterpreter } from "./EffectInterpreter";
+import { EffectInterpreter, NonInterruptibleEffectExecutionError } from "./EffectInterpreter";
 import { CostResolver } from "./CostResolver";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 
@@ -122,6 +122,11 @@ export class TriggerProcessingCoordinator {
     const stagedRequests: ActionRequest[] = [];
 
     while (state.requestBuffer && state.requestBuffer.requests && state.requestBuffer.requests.length > 0) {
+      // 保留中の Grave TOP 選択が存在する場合は、後続の誘発処理へ進む前に意思決定を待つ
+      if (state.pendingGraveTopSelections && state.pendingGraveTopSelections.length > 0) {
+        break;
+      }
+
       // 1. 最優先候補を peek（バッファはまだ破壊しない）
       const triggeredReq = this.peekNextRequest(state);
       if (!triggeredReq) break;
@@ -213,7 +218,24 @@ export class TriggerProcessingCoordinator {
           this.costResolver.pay(triggeredReq.action.cost, context, registry.getEffectInterpreter());
         }
         if (triggeredReq.action.effect) {
-          registry.executeEffects(triggeredReq.action.effect, context);
+          const execResult = registry.getEffectInterpreter().executeEffectsWithInterruption(
+            triggeredReq.action.effect,
+            context,
+            0
+          );
+          if ("interrupted" in execResult && execResult.interrupted) {
+            if (
+              execResult.selectionType === "zoneTop" &&
+              (execResult.resumeNextIndex ?? 0) >= triggeredReq.action.effect.length
+            ) {
+              // 全コマンド完了後の Grave TOP pending: 即時アクションの全効果コマンドは実行済み。
+              // pendingGraveTopSelections は state に保持され、GameSession で所有者選択へ進む。
+            } else {
+              throw new NonInterruptibleEffectExecutionError(
+                `TriggerProcessingCoordinator: immediate action '${triggeredReq.actionId}' interrupted before completing all effects`
+              );
+            }
+          }
         }
 
         actionReq.status = "resolved";
