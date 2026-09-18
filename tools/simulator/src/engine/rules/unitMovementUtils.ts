@@ -66,3 +66,102 @@ export function moveUnitToGraveyard(
     }
   }
 }
+
+/**
+ * ユニットをフィールドから手札へ移動する共通処理 (Phase 3.0-G generic primitive)
+ * フィールドからユニットを除去し、unit.battle を削除した上で、
+ * ユニットを構成する physical cards をオーナーの手札（hand）末尾へ追加する。
+ * （Unit wrapper 自体は手札に入れない）
+ * 各カードについて cardMoved (from: "field", to: "hand") を発行する。
+ */
+export function moveUnitToHand(
+  unit: any,
+  playerKey: string,
+  state: any,
+  effectInterpreter: EffectInterpreter,
+  context: any,
+  metadata?: MoveUnitMetadata
+): void {
+  const player = state.players?.[playerKey];
+  if (!player) {
+    throw new Error(`moveUnitToHand: プレイヤーが見つかりません: ${playerKey} (fail-closed)`);
+  }
+
+  // --- 事前バリデーション (all-or-nothing: 変更前に全件検証) ---
+  if (!unit || !unit.unitId) {
+    throw new Error("moveUnitToHand: 対象ユニットが無効です (fail-closed)");
+  }
+
+  if (!Array.isArray(unit.cards) || unit.cards.length === 0) {
+    throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) の構成カードが0枚または不正です (fail-closed)`);
+  }
+
+  const cardIds = new Set<string>();
+  for (const card of unit.cards) {
+    if (!card || !card.id) {
+      throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) のカードにIDが存在しません (fail-closed)`);
+    }
+    if (cardIds.has(card.id)) {
+      throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) 内に重複カードIDが存在します: ${card.id} (fail-closed)`);
+    }
+    cardIds.add(card.id);
+  }
+
+  // 手札に既に同一カードIDが存在しないか検証
+  if (Array.isArray(player.hand)) {
+    for (const card of unit.cards) {
+      if (player.hand.some((c: any) => c?.id === card.id)) {
+        throw new Error(`moveUnitToHand: カード (${card.id}) は既に手札に存在します (fail-closed)`);
+      }
+    }
+  }
+
+  // フィールド上にユニットが存在するか検証
+  if (!Array.isArray(player.field)) {
+    throw new Error(`moveUnitToHand: プレイヤー (${playerKey}) の field が配列ではありません (fail-closed)`);
+  }
+  const unitIndex = player.field.findIndex((u: any) => u.unitId === unit.unitId);
+  if (unitIndex === -1) {
+    throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) がプレイヤー (${playerKey}) のフィールドに見つかりません (fail-closed)`);
+  }
+
+  // --- 状態変更処理 ---
+  // 移動前に battle snapshot と characterType を保持
+  const combatSnapshot = metadata?.combatSnapshot || (unit.battle ? { ...unit.battle } : undefined);
+  const characterType = metadata?.characterType || getCharacterType(unit, context?.components);
+
+  // フィールドから除外
+  player.field.splice(unitIndex, 1);
+
+  // battle 情報を完全に削除
+  if (unit.battle) {
+    delete unit.battle;
+  }
+
+  if (!Array.isArray(player.hand)) {
+    player.hand = [];
+  }
+
+  // physical cards を hand 末尾へ追加（Unit.cards の既存順序を完全維持）
+  // Unit wrapper 自体は hand へ入れず、カード実体のみを格納
+  for (const card of unit.cards) {
+    player.hand.push(card);
+  }
+
+  // 各カードについて cardMoved イベントを発行 (fromZone: "field", toZone: "hand")
+  for (const card of unit.cards) {
+    const event = {
+      type: "cardMoved",
+      payload: {
+        card: card,
+        fromZone: "field",
+        toZone: "hand",
+        playerKey: playerKey,
+        cause: metadata?.cause,
+        combat: combatSnapshot,
+        characterType: characterType,
+      },
+    };
+    effectInterpreter.dispatchEvent(event, context);
+  }
+}

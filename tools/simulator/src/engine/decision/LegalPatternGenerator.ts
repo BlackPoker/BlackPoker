@@ -11,7 +11,7 @@ import { ActionActivationConditionEvaluator } from "../rules/ActionActivationCon
 import { ActionCostEvaluator, InvalidActionCostError } from "../rules/ActionCostEvaluator";
 import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
-import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay } from "../rules/cardUtils";
+import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay, normalizeSuit } from "../rules/cardUtils";
 import { validateOptionSelectionDefinition } from "../rules/OptionSelectionValidator";
 
 
@@ -376,9 +376,10 @@ export class LegalPatternGenerator {
     const keyDef = action.key;
     const expectedCount = keyDef.count !== undefined ? keyDef.count : 1;
 
+    let results: any[][];
     if (keyDef.conditions && Array.isArray(keyDef.conditions)) {
       // 複数キーカード条件（投擲、防壁破壊など）
-      return this.enumerateMultiKeyConditions(keyDef.conditions, hand);
+      results = this.enumerateMultiKeyConditions(keyDef.conditions, hand);
     } else if (keyDef.condition) {
       // 単一キーカード条件（アップ、ダウン、ツイストなど）
       const cond = keyDef.condition.card;
@@ -391,13 +392,25 @@ export class LegalPatternGenerator {
       });
 
       if (expectedCount === 1) {
-        return validCards.map((c) => [c]);
+        results = validCards.map((c) => [c]);
       } else {
-        return this.getCombinations(validCards, expectedCount);
+        results = this.getCombinations(validCards, expectedCount);
       }
+    } else {
+      return [[]];
     }
 
-    return [[]];
+    if (keyDef.sameSuit) {
+      const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
+      results = results.filter((combo) => {
+        if (combo.length <= 1) return true;
+        const firstSuit = normalizeSuit(combo[0]?.suit);
+        if (!allowedSuits.has(firstSuit)) return false;
+        return combo.every((c) => normalizeSuit(c?.suit) === firstSuit);
+      });
+    }
+
+    return results;
   }
 
   /**

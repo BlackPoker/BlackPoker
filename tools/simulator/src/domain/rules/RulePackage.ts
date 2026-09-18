@@ -52,6 +52,7 @@ export type ActionDefinition = {
     condition?: Record<string, any>;
     conditions?: Array<Record<string, any>>;
     count?: number;
+    sameSuit?: boolean;
   };
   targets?: Array<{
     id: string;

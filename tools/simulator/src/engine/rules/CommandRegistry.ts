@@ -28,6 +28,8 @@ import {
   deployTopCardsAsUnitsHandler,
   moveUnitCardsToZoneTopHandler,
   deploySelectedCardsAsUnitsHandler,
+  moveUnitToHandHandler,
+  moveRequestKeyCardsToHandHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -1125,5 +1127,7 @@ export class CommandRegistry {
     this.register("deployTopCardsAsUnits", deployTopCardsAsUnitsHandler(this.effectInterpreter));
     this.register("moveUnitCardsToZoneTop", moveUnitCardsToZoneTopHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("deploySelectedCardsAsUnits", deploySelectedCardsAsUnitsHandler(this.effectInterpreter));
+    this.register("moveUnitToHand", moveUnitToHandHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("moveRequestKeyCardsToHand", moveRequestKeyCardsToHandHandler(this.effectInterpreter));
   }
 }

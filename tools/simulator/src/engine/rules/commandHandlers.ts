@@ -5,7 +5,7 @@ import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLa
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
-import { moveUnitToGraveyard } from "./unitMovementUtils";
+import { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 
 
@@ -1315,7 +1315,7 @@ export function declareBlockHandler(
 }
 
 export type { MoveUnitMetadata } from "./unitMovementUtils";
-export { moveUnitToGraveyard } from "./unitMovementUtils";
+export { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
 
 /**
  * judgeDamage: 全アタッカーおよびブロッカーの戦闘を判定し、直接ダメージおよび敗北ユニットの墓地移動を行う
@@ -1704,6 +1704,145 @@ export function moveUnitCardsToZoneTopHandler(
     }
   };
 }
+
+/**
+ * moveUnitToHand: 対象ユニットをフィールドから手札へ移動 (Phase 3.0-G generic command handler)
+ * - requiredState 指定時、unit.state が一致しない場合は Rule 5.4.4 に従い安全に no-op で終了
+ * - ユニットラッパーは手札へ入れず、構成 physical cards のみをオーナー手札へ移動
+ */
+export function moveUnitToHandHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, requiredState } = args;
+
+    // 1. ターゲットユニットの解決
+    let targetUnit: any = context.targetComponent;
+    if (target) {
+      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+      if (typeof resolvedTarget === "string") {
+        for (const p of Object.values<any>(context.state.players || {})) {
+          const u = p.field?.find((unit: any) => unit.unitId === resolvedTarget);
+          if (u) {
+            targetUnit = u;
+            break;
+          }
+        }
+      } else if (resolvedTarget && typeof resolvedTarget === "object" && resolvedTarget.unitId) {
+        targetUnit = resolvedTarget;
+      }
+    }
+
+    if (!targetUnit) {
+      throw new Error(`moveUnitToHand: 対象ユニットが見つかりません (target: ${JSON.stringify(target)}) (fail-closed)`);
+    }
+
+    // 2. requiredState の検証 (Rule 5.4.4 準拠の正常 no-op)
+    if (requiredState !== undefined && targetUnit.state !== requiredState) {
+      return; // 条件不一致時は何もしない (アクション全体は失敗させない)
+    }
+
+    // 3. オーナーの特定
+    const ownerPlayerKey = findUnitOwnerPlayerKey(context.state, targetUnit.unitId);
+    if (!ownerPlayerKey) {
+      throw new Error(`moveUnitToHand: オーナープレイヤーが見つかりません: ${targetUnit.unitId} (fail-closed)`);
+    }
+
+    // 4. generic moveUnitToHand primitive の呼び出し
+    moveUnitToHand(
+      targetUnit,
+      ownerPlayerKey,
+      context.state,
+      effectInterpreter,
+      context,
+      {
+        cause: {
+          type: "action",
+          actionId: context.currentAction?.id || "action.unsummons",
+          requestId: context.currentRequest?.id,
+        },
+      }
+    );
+  };
+}
+
+/**
+ * moveRequestKeyCardsToHand: リクエストに付属するキーカードを手札へ返却 (Phase 3.0-G generic command handler)
+ * - SSOT: context.currentRequest.keyCards
+ * - 事前バリデーション後にコントローラーの手札末尾へ追加
+ * - cardMoved イベント (fromZone: "request", toZone: "hand") を発行
+ */
+export function moveRequestKeyCardsToHandHandler(
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const request = context.currentRequest;
+    if (!request) {
+      throw new Error("moveRequestKeyCardsToHand: currentRequest が存在しません (fail-closed)");
+    }
+
+    const keyCards: any[] = request.keyCards && request.keyCards.length > 0
+      ? request.keyCards
+      : context.keyCards || [];
+
+    if (!Array.isArray(keyCards) || keyCards.length === 0) {
+      return;
+    }
+
+    const controllerKey = request.controller || context.playerKey;
+    const player = context.state.players?.[controllerKey];
+    if (!player) {
+      throw new Error(`moveRequestKeyCardsToHand: コントローラーが見つかりません: ${controllerKey} (fail-closed)`);
+    }
+
+    // --- 事前バリデーション (all-or-nothing: 変更前に全件検証) ---
+    const cardIds = new Set<string>();
+    for (const card of keyCards) {
+      if (!card || !card.id) {
+        throw new Error("moveRequestKeyCardsToHand: キーカードにIDが存在しません (fail-closed)");
+      }
+      if (cardIds.has(card.id)) {
+        throw new Error(`moveRequestKeyCardsToHand: 重複キーカードIDが存在します: ${card.id} (fail-closed)`);
+      }
+      cardIds.add(card.id);
+
+      // 手札に既に同一カードが存在しないか検証
+      if (Array.isArray(player.hand) && player.hand.some((c: any) => c?.id === card.id)) {
+        throw new Error(`moveRequestKeyCardsToHand: キーカード (${card.id}) は既に手札に存在します (fail-closed)`);
+      }
+    }
+
+    if (!Array.isArray(player.hand)) {
+      player.hand = [];
+    }
+
+    // キーカードを順序維持で手札末尾へ追加
+    for (const card of keyCards) {
+      player.hand.push(card);
+    }
+
+    // 各カードについて cardMoved イベントを発行 (fromZone: "request", toZone: "hand")
+    for (const card of keyCards) {
+      const event = {
+        type: "cardMoved",
+        payload: {
+          card,
+          fromZone: "request",
+          toZone: "hand",
+          playerKey: controllerKey,
+          cause: {
+            type: "action",
+            actionId: request.actionId,
+            requestId: request.id,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
 
 
 

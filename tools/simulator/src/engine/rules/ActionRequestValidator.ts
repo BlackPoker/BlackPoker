@@ -217,12 +217,28 @@ export class ActionRequestValidator {
       } else if (keyDef.condition) {
         const cond = keyDef.condition.card;
         if (cond) {
-          const card = actualCards[0];
-          if (!card) {
-            throw new ValidationError("キーカードが存在しません。");
+          for (const card of actualCards) {
+            if (!card) {
+              throw new ValidationError("キーカードが存在しません。");
+            }
+            if (!matchesSuit(card.suit, cond.suit) || !matchesRank(card.rank, card.value || 0, cond.rank)) {
+              throw new ValidationError("キーカードが要求される条件を満たしていません。");
+            }
           }
-          if (!matchesSuit(card.suit, cond.suit) || !matchesRank(card.rank, card.value || 0, cond.rank)) {
-            throw new ValidationError("キーカードが要求される条件を満たしていません。");
+        }
+      }
+
+      // sameSuit の検証
+      if (keyDef.sameSuit) {
+        if (actualCards.length > 1) {
+          const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
+          const firstSuit = normalizeSuit(actualCards[0]?.suit);
+          if (!allowedSuits.has(firstSuit)) {
+            throw new ValidationError("キーカードのスートが不正です。");
+          }
+          const allSame = actualCards.every((c) => normalizeSuit(c?.suit) === firstSuit);
+          if (!allSame) {
+            throw new ValidationError("キーカードのスートが一致していません。");
           }
         }
       }

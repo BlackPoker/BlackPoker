@@ -1,0 +1,45 @@
+actions:
+  - id: action.unsummons
+    name: 帰還
+    ruby: きかん
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: B
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit:
+            - spade
+            - heart
+            - diamond
+            - club
+          rank: "A..K"
+          zone: hand
+      sameSuit: true
+
+    targets:
+      - id: target
+        type: unit
+        condition:
+          relation: self
+          componentType: character
+
+    text:
+      effect: |-
+        1. 対象のキャラクターがチャージ状態の場合、対象のキャラクターを手札に戻す。
+        2. キーカードを手札に戻す。
+
+    effect:
+      - moveUnitToHand:
+          target: target
+          requiredState: charge
+
+      - moveRequestKeyCardsToHand: {}
