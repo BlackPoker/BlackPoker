@@ -5,10 +5,17 @@ import { EffectInterpreter, NonInterruptibleEffectExecutionError } from "./Effec
 import { CostResolver } from "./CostResolver";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 
+export interface InterruptedImmediateResolution {
+  readonly request: ActionRequest;
+  readonly context: CommandContext;
+  readonly completedEffectPath?: readonly number[];
+}
+
 export interface TriggerProcessingResult {
   readonly immediateResolvedCount: number;
   readonly normalQueuedCount: number;
   readonly stagedRequests: readonly ActionRequest[];
+  readonly interruptedImmediateResolution?: InterruptedImmediateResolution;
 }
 
 /**
@@ -229,7 +236,18 @@ export class TriggerProcessingCoordinator {
               (execResult.resumeNextIndex ?? 0) >= triggeredReq.action.effect.length
             ) {
               // 全コマンド完了後の Grave TOP pending: 即時アクションの全効果コマンドは実行済み。
-              // pendingGraveTopSelections は state に保持され、GameSession で所有者選択へ進む。
+              // actionReq.status は "resolving" を維持し、所有者の選択完了まで Finalization を遅延する。
+              // fall-through は絶対に禁止し、即座に中断状態を返却する。
+              return {
+                immediateResolvedCount,
+                normalQueuedCount,
+                stagedRequests,
+                interruptedImmediateResolution: {
+                  request: actionReq,
+                  context,
+                  completedEffectPath: [triggeredReq.action.effect.length],
+                },
+              };
             } else {
               throw new NonInterruptibleEffectExecutionError(
                 `TriggerProcessingCoordinator: immediate action '${triggeredReq.actionId}' interrupted before completing all effects`
@@ -238,42 +256,8 @@ export class TriggerProcessingCoordinator {
           }
         }
 
-        actionReq.status = "resolved";
-        if (!state.stage) state.stage = { requests: [], history: [] };
-        if (!state.stage.history) state.stage.history = [];
-        state.stage.history.push(actionReq);
-
-        if (logRecorder) {
-          logRecorder.record({
-            type: "request.resolved",
-            stateVersion: state.stateVersion ?? state.version ?? 1,
-            requestId: actionReq.id,
-            actionRef: actionReq.actionId,
-            controller: actionReq.controller,
-            result: actionReq.result,
-          });
-        }
-
-        state.requestBuffer.history.push({
-          actionId: triggeredReq.actionId,
-          status: "resolvedImmediately",
-          reason: `immediate triggered action resolved directly as ${actionRequestId}`,
-          sourceEvent: triggeredReq.sourceEvent,
-        });
-
-        const resolveEvent = {
-          type: "actionResolved",
-          payload: {
-            actionId: actionReq.actionId,
-            playerKey: actionReq.controller,
-            requestId: actionReq.id,
-            result: actionReq.result,
-          },
-        };
-        registry.dispatchEvent(resolveEvent, context);
-
+        this.finalizeImmediateTriggeredRequest(actionReq, context, registry);
         immediateResolvedCount++;
-        console.log(`[BUFFER-IMMEDIATE-RESOLVE] 即時誘発アクションを直接解決: ${triggeredReq.actionId} (ID: ${actionReq.id})`);
       } else {
         // 通常誘発: stage へ積載（未解決）
         if (!state.stage) state.stage = { requests: [], history: [] };
@@ -313,5 +297,65 @@ export class TriggerProcessingCoordinator {
       normalQueuedCount,
       stagedRequests,
     };
+  }
+
+  /**
+   * 即時誘発リクエストの解決を確定する汎用ヘルパー。
+   *
+   * Preconditions:
+   * - GameSession orchestration 用
+   * - actionReq.status === "resolving" (二重確定防止)
+   * - state.pendingGraveTopSelections.length === 0 (未解決の墓地TOP選択がないこと)
+   */
+  public finalizeImmediateTriggeredRequest(
+    actionReq: ActionRequest,
+    context: CommandContext,
+    registry: CommandRegistry
+  ): void {
+    if (actionReq.status !== "resolving") {
+      throw new Error(
+        `finalizeImmediateTriggeredRequest: request ${actionReq.id} status is '${actionReq.status}', expected 'resolving'`
+      );
+    }
+    if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+      throw new Error(
+        `finalizeImmediateTriggeredRequest: cannot finalize request ${actionReq.id} while ${context.state.pendingGraveTopSelections.length} pendingGraveTopSelections remain`
+      );
+    }
+
+    actionReq.status = "resolved";
+    if (!context.state.stage) context.state.stage = { requests: [], history: [] };
+    if (!context.state.stage.history) context.state.stage.history = [];
+    context.state.stage.history.push(actionReq);
+
+    if (context.logRecorder) {
+      context.logRecorder.record({
+        type: "request.resolved",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        requestId: actionReq.id,
+        actionRef: actionReq.actionId,
+        controller: actionReq.controller,
+        result: actionReq.result,
+      });
+    }
+
+    context.state.requestBuffer.history.push({
+      actionId: actionReq.actionId,
+      status: "resolvedImmediately",
+      reason: `immediate triggered action resolved directly as ${actionReq.id}`,
+      sourceEvent: actionReq.sourceEvent,
+    });
+
+    const resolveEvent = {
+      type: "actionResolved",
+      payload: {
+        actionId: actionReq.actionId,
+        playerKey: actionReq.controller,
+        requestId: actionReq.id,
+        result: actionReq.result,
+      },
+    };
+    registry.dispatchEvent(resolveEvent, context);
+    console.log(`[BUFFER-IMMEDIATE-RESOLVE] 即時誘発アクションを直接解決: ${actionReq.actionId} (ID: ${actionReq.id})`);
   }
 }

@@ -19,6 +19,11 @@ import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 import { GraveTopCoordinator } from "../rules/GraveTopCoordinator";
 
 /**
+ * 即時誘発アクションの効果実行完了後、墓地TOP選択待ちを表す汎用ステップID
+ */
+export const TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID = "triggerImmediateFinalization";
+
+/**
  * 将来の効果解決中断・再開用コンティニュエーション型
  */
 export interface EffectContinuation {
@@ -429,6 +434,45 @@ export class GameSession {
       this.registry
     );
 
+    // 3.1. 即時誘発の解決が墓地TOP選択により中断された場合（最優先で意思決定待機へ遷移）
+    if (triggerResult.interruptedImmediateResolution) {
+      const interrupted = triggerResult.interruptedImmediateResolution;
+      this.resolvingRequest = interrupted.request;
+      this.resolvingContext = interrupted.context;
+      this.continuation = {
+        sourceRequestId: interrupted.request.id,
+        effectPath: interrupted.completedEffectPath ?? (interrupted.request.action?.effect ? [interrupted.request.action.effect.length] : [0]),
+        effectStepId: TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID,
+        selectionId: "graveTopCard",
+      };
+
+      if (this.state.pendingGraveTopSelections && this.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = this.state.pendingGraveTopSelections[0];
+        this.pendingDecision = GraveTopCoordinator.createDecisionRequest(
+          this.state,
+          nextPending,
+          {
+            stateVersion: this.stateVersion,
+            matchId: this.matchId,
+          }
+        );
+        this.logRecorder.record({
+          type: "decision.requested",
+          stateVersion: this.stateVersion,
+          decisionId: this.pendingDecision.decisionId,
+          playerId: this.pendingDecision.playerId,
+          source: this.pendingDecision.source.type,
+          requestId: (this.pendingDecision.source as any).requestId,
+          legalPatternCount: this.pendingDecision.patterns.length,
+          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+        });
+        return {
+          type: "WAITING_FOR_DECISION",
+          request: this.pendingDecision,
+        };
+      }
+    }
+
     if (triggerResult.immediateResolvedCount > 0) {
       const postTriggerFinishCheck = this.checkGameFinished();
       if (postTriggerFinishCheck) {
@@ -591,7 +635,24 @@ export class GameSession {
         };
       }
 
-      // 中断されたリクエストの効果解決中だった場合は、再開
+      // 6. triggerImmediateFinalization check (R3: 即時誘発の遅延解決確定)
+      if (this.resolvingRequest && this.continuation?.effectStepId === TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID) {
+        this.triggerCoordinator.finalizeImmediateTriggeredRequest(
+          this.resolvingRequest,
+          this.resolvingContext!,
+          this.registry
+        );
+
+        this.pendingDecision = undefined;
+        this.continuation = undefined;
+        this.resolvingRequest = undefined;
+        this.resolvingContext = undefined;
+
+        // 解決完了後、自動進行へ戻る (勝敗判定、後続の誘発リクエスト処理など)
+        return this.advance();
+      }
+
+      // 7. 通常Stage Request continuation check (中断されたリクエストの効果解決中だった場合は、再開)
       if (this.resolvingRequest && this.continuation) {
         const resumeResult = this.registry.resumeRequest(
           this.resolvingRequest,
