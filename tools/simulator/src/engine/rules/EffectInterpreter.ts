@@ -1,7 +1,7 @@
 import { CommandRegistry, CommandContext } from "./CommandRegistry";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
-import { getOpponentPlayerKey, findUnitOwnerPlayerKey } from "./playerUtils";
+import { getOpponentPlayerKey, findUnitOwnerPlayerKey, resolveEffectPlayerKey } from "./playerUtils";
 import { hasUnitLabel, isCharacterComponent, hasHaste } from "./characterUtils";
 import { matchesSuit, matchesRank } from "./cardUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
@@ -229,30 +229,7 @@ export class EffectInterpreter {
    * DSL に基づいて判断権を持つプレイヤー（DecisionPlayer）を解決します。
    */
   private resolveDecisionPlayerKey(spec: string | undefined, context: CommandContext): PlayerKey {
-    if (!spec || spec === "controller" || spec === "self") {
-      return context.playerKey;
-    }
-    if (spec === "opponent") {
-      return getOpponentPlayerKey(context.playerKey, context.state);
-    }
-    if (spec === "turnPlayer") {
-      return context.state.turnPlayer || context.playerKey;
-    }
-    if (spec === "nonTurnPlayer") {
-      return context.state.nonTurnPlayer || getOpponentPlayerKey(context.state.turnPlayer || context.playerKey, context.state);
-    }
-    if (spec === "targetOwner") {
-      if (context.targetComponent && context.state) {
-        return findUnitOwnerPlayerKey(context.state, context.targetComponent.unitId);
-      }
-      if (context.targetPlayerKey) {
-        return context.targetPlayerKey;
-      }
-    }
-    if (context.state.players?.[spec]) {
-      return spec as PlayerKey;
-    }
-    return context.playerKey;
+    return resolveEffectPlayerKey(spec, context);
   }
 
   private executeConditionalBranchWithInterruption(
@@ -485,8 +462,14 @@ export class EffectInterpreter {
         }
 
         const count = args.count ?? 1;
-        const playerKey = this.resolveDecisionPlayerKey(args.player || args.chooser, context);
-        const candidates = this.findSelectableCards(args, context, playerKey);
+        const candidatePlayerSpec =
+          args.candidatePlayer ?? args.sourcePlayer ?? args.player ?? args.chooser ?? "self";
+        const decisionPlayerSpec =
+          args.decisionPlayer ?? args.chooser ?? args.player ?? "self";
+
+        const candidatePlayerKey = this.resolveDecisionPlayerKey(candidatePlayerSpec, context);
+        const decisionPlayerKey = this.resolveDecisionPlayerKey(decisionPlayerSpec, context);
+        const candidates = this.findSelectableCards(args, context, candidatePlayerKey);
 
         if (candidates.length === 0) {
           if (!context.selections) context.selections = {};
@@ -502,7 +485,7 @@ export class EffectInterpreter {
           selectionType: "card",
           candidates,
           requiredCount: count,
-          decisionPlayerKey: playerKey,
+          decisionPlayerKey,
           effectPath: EffectPathCodec.createTopLevelPath(i),
         };
       }
@@ -684,6 +667,16 @@ export class EffectInterpreter {
     let cardPool: any[] = [];
     if (zone === "hand") {
       cardPool = Array.isArray(player.hand) ? [...player.hand] : [];
+      const seenIds = new Set<string>();
+      for (const card of cardPool) {
+        if (!card || typeof card !== "object" || !card.id || card.unitId || Array.isArray(card.cards) || card.kind) {
+          throw new Error("findSelectableCards: 手札に不正なエントリまたはUnit wrapperが含まれています (fail-closed)");
+        }
+        if (seenIds.has(card.id)) {
+          throw new Error(`findSelectableCards: 手札に重複するカードIDが存在します: ${card.id} (fail-closed)`);
+        }
+        seenIds.add(card.id);
+      }
     } else if (zone === "grave") {
       cardPool = Array.isArray(player.grave) ? enumeratePhysicalCardsInGrave(player.grave) : [];
     } else if (zone === "pack") {

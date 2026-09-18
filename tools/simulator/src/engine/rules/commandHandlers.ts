@@ -1,6 +1,6 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
-import { getOpponentPlayerKey, findUnitOwnerPlayerKey } from "./playerUtils";
+import { getOpponentPlayerKey, findUnitOwnerPlayerKey, resolveEffectPlayerKey } from "./playerUtils";
 import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
@@ -701,34 +701,50 @@ export function discardCardsHandler(
 ): CommandHandler {
   return (args, context) => {
     const { player: targetPlayer = "self", cards, cause = "action" } = args;
-    const playerKey = targetPlayer === "opponent"
-      ? getOpponentPlayerKey(context.playerKey, context.state)
-      : context.playerKey;
+    const playerKey = resolveEffectPlayerKey(targetPlayer, context);
     const player = context.state.players[playerKey];
     if (!player || !Array.isArray(player.hand)) return;
 
     const resolvedCardIds: string[] = expressionEvaluator.resolveBindingValue(cards, context) || [];
-    if (!Array.isArray(resolvedCardIds) || resolvedCardIds.length === 0) return;
+    // Rule 5.4.4: 選択結果が空配列 [] (例: 空手札での選択スキップ) の場合は正常 No-op
+    if (Array.isArray(resolvedCardIds) && resolvedCardIds.length === 0) {
+      return;
+    }
+    if (!Array.isArray(resolvedCardIds) || resolvedCardIds.length === 0) {
+      return;
+    }
+
+    // 対象手札カードの存在および重複の厳格な fail-closed 検証
+    const handCardIds = player.hand.map((c: any) => c?.id);
+    for (const cardId of resolvedCardIds) {
+      const matchCount = handCardIds.filter((id: string) => id === cardId).length;
+      if (matchCount === 0) {
+        throw new Error(`discardCards: 指定されたカード (${cardId}) が手札に見つかりません (fail-closed)`);
+      }
+      if (matchCount > 1) {
+        throw new Error(`discardCards: 手札に重複するカードIDが存在します: ${cardId} (fail-closed)`);
+      }
+    }
 
     if (!Array.isArray(player.grave)) player.grave = [];
 
     const discarded: any[] = [];
     player.hand = player.hand.filter((c: any) => {
       if (resolvedCardIds.includes(c.id)) {
+        if (!c || typeof c !== "object" || c.unitId || Array.isArray(c.cards) || c.kind) {
+          throw new Error("discardCards: 破棄対象カードが不正なエントリまたはUnit wrapperです (fail-closed)");
+        }
         discarded.push(c);
         return false;
       }
       return true;
     });
 
+    if (discarded.length !== resolvedCardIds.length) {
+      throw new Error("discardCards: 破棄対象カードの件数が一致しません (fail-closed)");
+    }
+
     for (const card of discarded) {
-      GraveTopCoordinator.addCardToGrave(
-        player,
-        card,
-        context.state,
-        playerKey,
-        context.logRecorder
-      );
       effectInterpreter.dispatchEvent(
         {
           type: "cardMoved",
@@ -741,6 +757,13 @@ export function discardCardsHandler(
           },
         },
         context
+      );
+      GraveTopCoordinator.addCardToGrave(
+        player,
+        card,
+        context.state,
+        playerKey,
+        context.logRecorder
       );
     }
   };

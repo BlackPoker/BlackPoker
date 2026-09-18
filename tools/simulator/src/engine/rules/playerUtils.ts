@@ -1,4 +1,5 @@
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+import type { CommandContext } from "./CommandRegistry";
 
 /**
  * 2人対戦における対戦相手のプレイヤーキーを取得します。
@@ -59,5 +60,64 @@ export function findUnitOwnerPlayerKey(state: any, unitId: string): PlayerKey {
   }
 
   return matches[0];
+}
+
+/**
+ * 効果解決およびコマンドハンドラにおいて、DSL のプレイヤー参照（spec）を厳格に解決します。
+ *
+ * 参照規約:
+ * - undefined, "self", "controller": context.playerKey (アクション実行者)
+ * - "opponent": 2人対戦における対戦相手
+ * - "targetPlayer": context.targetPlayerKey (Request Target として確定したプレイヤー。存在しない場合は fail-closed)
+ * - "targetOwner": 対象ユニットまたは対象プレイヤーの所有者 (存在しない場合は fail-closed)
+ * - "turnPlayer": context.state.turnPlayer (存在しない場合は fail-closed)
+ * - "nonTurnPlayer": context.state.nonTurnPlayer || 対戦相手 (turnPlayer が未定義なら fail-closed)
+ * - 明示的プレイヤーID (例: "p1", "p2"): context.state.players[spec] が存在すれば返却
+ * - 未知の参照文字列: fail-closed (サイレントフォールバック禁止)
+ */
+export function resolveEffectPlayerKey(
+  spec: string | undefined,
+  context: CommandContext
+): PlayerKey {
+  if (!spec || spec === "self" || spec === "controller") {
+    return context.playerKey;
+  }
+  if (spec === "opponent") {
+    return getOpponentPlayerKey(context.playerKey, context.state);
+  }
+  if (spec === "targetPlayer") {
+    if (!context.targetPlayerKey) {
+      throw new Error("resolveEffectPlayerKey: targetPlayer reference requires context.targetPlayerKey (fail-closed)");
+    }
+    return context.targetPlayerKey as PlayerKey;
+  }
+  if (spec === "targetOwner") {
+    if (context.targetPlayerKey) {
+      return context.targetPlayerKey as PlayerKey;
+    }
+    if (context.targetComponent && context.state) {
+      return findUnitOwnerPlayerKey(context.state, context.targetComponent.unitId);
+    }
+    throw new Error("resolveEffectPlayerKey: targetOwner reference requires context.targetComponent or context.targetPlayerKey (fail-closed)");
+  }
+  if (spec === "turnPlayer") {
+    if (!context.state?.turnPlayer) {
+      throw new Error("resolveEffectPlayerKey: turnPlayer does not exist in state (fail-closed)");
+    }
+    return context.state.turnPlayer;
+  }
+  if (spec === "nonTurnPlayer") {
+    if (context.state?.nonTurnPlayer) {
+      return context.state.nonTurnPlayer;
+    }
+    if (context.state?.turnPlayer) {
+      return getOpponentPlayerKey(context.state.turnPlayer, context.state);
+    }
+    throw new Error("resolveEffectPlayerKey: nonTurnPlayer resolution requires state.turnPlayer (fail-closed)");
+  }
+  if (context.state?.players?.[spec]) {
+    return spec as PlayerKey;
+  }
+  throw new Error(`resolveEffectPlayerKey: unknown player reference '${spec}' (fail-closed)`);
 }
 

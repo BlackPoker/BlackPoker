@@ -105,10 +105,10 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
   // =========================================================================
   // 2. Node & Browser Loader 整合性テスト
   // =========================================================================
-  it("Test 2: Node loader and Browser loader consistency (count 26, contains reanimate)", () => {
+  it("Test 2: Node loader and Browser loader consistency (count 27, contains reanimate)", () => {
     const browserPackage = loadRulePackageForBrowser();
-    expect(browserPackage.actions.length).toBe(26);
-    expect(fullRulePackage.actions.length).toBe(26);
+    expect(browserPackage.actions.length).toBe(27);
+    expect(fullRulePackage.actions.length).toBe(27);
 
     const nodeActionIds = fullRulePackage.actions.map((a) => a.id).sort();
     const browserActionIds = browserPackage.actions.map((a) => a.id).sort();

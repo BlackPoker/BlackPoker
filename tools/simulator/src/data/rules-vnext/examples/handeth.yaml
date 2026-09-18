@@ -1,0 +1,43 @@
+actions:
+  - id: action.handeth
+    name: ハンデス
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            suit: diamond
+            rank: "A..K"
+            zone: hand
+        - card:
+            suit: club
+            rank: "A..K"
+            zone: hand
+
+    targets:
+      - id: targetPlayer
+        type: player
+        condition:
+          relation: opponent
+
+    text:
+      effect: 対戦相手の手札を見て1枚カードを指定する。対戦相手は指定されたカードを手札から捨てる。
+
+    effect:
+      - selectCards:
+          id: discardCard
+          player: targetPlayer
+          decisionPlayer: controller
+          zone: hand
+          count: 1
+
+      - discardCards:
+          player: targetPlayer
+          cards: selection.discardCard
