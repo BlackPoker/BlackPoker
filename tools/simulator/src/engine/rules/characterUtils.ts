@@ -1,4 +1,5 @@
 import { ComponentDefinition } from "../../domain/rules/RulePackage";
+import { isJokerCard, matchesRank, matchesSuit, rankToValue } from "./cardUtils";
 
 /**
  * ユニットが「キャラクター (character)」コンポーネントであるかを判定します。
@@ -225,5 +226,154 @@ export function hasHaste(unit: any, components: readonly ComponentDefinition[] =
   }
   return false;
 }
+
+/**
+ * ユニット情報（カード群、表裏、配置ゾーン、コンポーネント種別）が
+ * コンポーネント定義（ComponentDefinition）の zone, type および unitCondition に合致するか判定します。
+ *
+ * 判定順序:
+ * 1. compDef.zone === zone（コンポーネント定義のトップレベル）
+ * 2. compDef.type === componentType（コンポーネント定義のトップレベル）
+ * 3. compDef.unitCondition の評価:
+ *    - face: 'up' | 'down'
+ *    - cards.count: exact カード枚数
+ *    - cards.minCount: 最小カード枚数 (例: 装備兵)
+ *    - cards.maxCount: 最大カード枚数 (将来拡張用)
+ *    - cards.rank: ランク条件 (構成カード全枚数が合致することを要求)
+ *      - expectedRank === "Joker": isJokerCard(card)
+ *      - その他: matchesRank(card.rank, card.value, expectedRank)
+ *    - cards.suit: スート条件 (構成カード全枚数が合致することを要求)
+ */
+export function matchesUnitCondition(
+  component: ComponentDefinition,
+  params: {
+    readonly cards: readonly any[];
+    readonly face?: "up" | "down" | string;
+    readonly zone?: string;
+    readonly componentType?: string;
+  }
+): boolean {
+  const { cards, face = "up", zone = "field", componentType = "character" } = params;
+
+  // 1. トップレベル zone 判定
+  if (component.zone && component.zone !== zone) {
+    return false;
+  }
+
+  // 2. トップレベル type (componentType) 判定
+  if (componentType && component.type !== componentType) {
+    return false;
+  }
+
+  const cond = component.unitCondition;
+  if (!cond) {
+    return false;
+  }
+
+  // 3. face 条件判定
+  if (cond.face !== undefined && cond.face !== face) {
+    return false;
+  }
+
+  // 4. cards 条件判定
+  if (cond.cards) {
+    const cardCond = cond.cards;
+    const cardCount = cards.length;
+
+    // exact 枚数
+    if (cardCond.count !== undefined && cardCount !== cardCond.count) {
+      return false;
+    }
+
+    // 最小枚数
+    if (cardCond.minCount !== undefined && cardCount < cardCond.minCount) {
+      return false;
+    }
+
+    // 最大枚数
+    if (cardCond.maxCount !== undefined && cardCount > cardCond.maxCount) {
+      return false;
+    }
+
+    // rank 条件
+    if (cardCond.rank !== undefined) {
+      if (cardCount === 0) return false;
+      for (const c of cards) {
+        if (!c) return false;
+        const expectedRank = String(cardCond.rank);
+        if (expectedRank.toLowerCase() === "joker") {
+          if (!isJokerCard(c)) {
+            return false;
+          }
+        } else {
+          if (isJokerCard(c)) {
+            // Joker は 2..10, J..K, A など通常ランクには合致しない
+            return false;
+          }
+          const cRank = c.rank !== undefined ? String(c.rank) : "";
+          const cVal = c.value !== undefined ? c.value : rankToValue(cRank);
+          if (!matchesRank(cRank, cVal, expectedRank)) {
+            return false;
+          }
+        }
+      }
+    }
+
+    // suit 条件
+    if (cardCond.suit !== undefined) {
+      if (cardCount === 0) return false;
+      for (const c of cards) {
+        if (!c || !matchesSuit(c.suit, cardCond.suit)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+/**
+ * 盤面に配置されるユニット情報から、合致する ComponentDefinition を厳格に解決します。
+ * 
+ * 制約:
+ * - 0件 match: fail-closed 例外をスロー (勝手なフォールバック禁止)
+ * - 2件以上 match: 曖昧性エラーとして fail-closed 例外をスロー (先頭採用禁止)
+ * - 厳密に 1件 match の場合のみその ComponentDefinition を返却
+ */
+export function resolveComponentForUnit(params: {
+  readonly cards: readonly any[];
+  readonly face?: "up" | "down" | string;
+  readonly zone?: string;
+  readonly components: readonly ComponentDefinition[];
+  readonly componentType?: string;
+}): ComponentDefinition {
+  const { cards, face = "up", zone = "field", components, componentType = "character" } = params;
+
+  if (!Array.isArray(components) || components.length === 0) {
+    throw new Error("resolveComponentForUnit: コンポーネント定義一覧が空または無効です (fail-closed)");
+  }
+
+  const matching = components.filter((comp) =>
+    matchesUnitCondition(comp, { cards, face, zone, componentType })
+  );
+
+  if (matching.length === 0) {
+    const cardSummary = cards.map((c) => `${c?.suit || ""}${c?.rank || ""}`).join(", ");
+    throw new Error(
+      `resolveComponentForUnit: 条件に一致するコンポーネント定義が存在しません (cards: [${cardSummary}] (${cards.length}枚), face: '${face}', zone: '${zone}') (fail-closed)`
+    );
+  }
+
+  if (matching.length > 1) {
+    const matchedIds = matching.map((c) => c.id).join(", ");
+    throw new Error(
+      `resolveComponentForUnit: 複数のコンポーネント定義が同時に一致しました (曖昧性エラー: [${matchedIds}]) (fail-closed)`
+    );
+  }
+
+  return matching[0];
+}
+
 
 

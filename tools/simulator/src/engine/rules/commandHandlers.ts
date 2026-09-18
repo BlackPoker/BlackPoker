@@ -1,7 +1,15 @@
 import type { EffectInterpreter } from "./EffectInterpreter";
 import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey, findUnitOwnerPlayerKey, resolveEffectPlayerKey } from "./playerUtils";
-import { isSoldierType, isLegalBlockerCandidate, isCharacterComponent, hasUnitLabel, getCharacterType } from "./characterUtils";
+import {
+  isSoldierType,
+  isLegalBlockerCandidate,
+  isCharacterComponent,
+  hasUnitLabel,
+  getCharacterType,
+  matchesUnitCondition,
+  resolveComponentForUnit,
+} from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
@@ -329,13 +337,16 @@ export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInter
       throw new Error(`deploySelectedCardsAsUnits: 未知の player 指定です: '${playerSpec}'`);
     }
 
-    const component = args.component || "character.soldier";
-    const compDef = context.components?.find((c: any) => c.id === component);
-    if (!compDef) {
-      throw new Error(`deploySelectedCardsAsUnits: コンポーネントが見つかりません: '${component}'`);
-    }
-    if (compDef.type !== "character") {
-      throw new Error(`deploySelectedCardsAsUnits: ユニット生成可能なコンポーネントではありません (type: '${compDef.type}'): '${component}'`);
+    const explicitComponent = args.component;
+    let explicitCompDef: any = undefined;
+    if (explicitComponent !== undefined) {
+      explicitCompDef = context.components?.find((c: any) => c.id === explicitComponent);
+      if (!explicitCompDef) {
+        throw new Error(`deploySelectedCardsAsUnits: コンポーネントが見つかりません: '${explicitComponent}'`);
+      }
+      if (explicitCompDef.type !== "character") {
+        throw new Error(`deploySelectedCardsAsUnits: ユニット生成可能なコンポーネントではありません (type: '${explicitCompDef.type}'): '${explicitComponent}'`);
+      }
     }
 
     const face = args.face || "up";
@@ -390,18 +401,49 @@ export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInter
       return;
     }
 
-    // 存在確認 (全カードが墓地に実在することを確認) (Section 31)
+    // 存在確認およびコンポーネント解決・事前検証 (全カードが墓地に実在し、Unit Condition を満たすことを確認)
+    // 墓地操作（removeCardFromGrave）前に全件検証し、失敗時は墓地を一切変更しない (all-or-nothing fail-closed)
+    const deploymentPlans: { card: any; compDef: any }[] = [];
     for (const cardId of selectedCardIds) {
       const location = findPhysicalCardInGrave(targetPlayer.grave, cardId);
       if (!location) {
         throw new Error(`deploySelectedCardsAsUnits: 選択されたカード (${cardId}) が墓地に存在しません (stale selection fail-closed)`);
       }
+      const card = location.card;
+      let targetCompDef: any;
+      if (explicitCompDef !== undefined) {
+        targetCompDef = explicitCompDef;
+        // 明示指定されたコンポーネントの unitCondition をカードが満たしているか検証 (fail-closed)
+        if (
+          !matchesUnitCondition(targetCompDef, {
+            cards: [card],
+            face,
+            zone: "field",
+            componentType: "character",
+          })
+        ) {
+          throw new Error(
+            `deploySelectedCardsAsUnits: 指定コンポーネント '${explicitComponent}' のユニット条件をカード (${card.id || card.rank}) が満たしていません (fail-closed)`
+          );
+        }
+      } else {
+        // コンポーネント未指定: Unit Condition から auto-resolve
+        targetCompDef = resolveComponentForUnit({
+          cards: [card],
+          face,
+          zone: "field",
+          components: context.components || [],
+          componentType: "character",
+        });
+      }
+      deploymentPlans.push({ card, compDef: targetCompDef });
     }
 
-    // 物理カードの除去およびフィールドへの兵士配置
-    for (let i = 0; i < selectedCardIds.length; i++) {
-      const cardId = selectedCardIds[i];
-      const card = GraveTopCoordinator.removeCardFromGrave(
+    // 全事前検証完了後の物理カード除去およびフィールドへのユニット配置
+    for (let i = 0; i < deploymentPlans.length; i++) {
+      const { card, compDef: unitCompDef } = deploymentPlans[i];
+      const cardId = card.id;
+      const removedCard = GraveTopCoordinator.removeCardFromGrave(
         targetPlayer,
         cardId,
         context.state,
@@ -410,9 +452,9 @@ export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInter
       );
 
       const newUnit = buildFieldUnitFromComponent({
-        componentId: component,
+        componentId: unitCompDef.id,
         playerKey: targetPlayerKey,
-        card,
+        card: removedCard,
         face,
         state,
         components: context.components,
@@ -427,7 +469,7 @@ export function deploySelectedCardsAsUnitsHandler(effectInterpreter: EffectInter
       const event = {
         type: "cardMoved",
         payload: {
-          card,
+          card: removedCard,
           fromZone: "grave",
           toZone: "field",
           playerKey: targetPlayerKey,

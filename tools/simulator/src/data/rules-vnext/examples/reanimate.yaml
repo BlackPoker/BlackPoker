@@ -47,7 +47,6 @@ actions:
             - deploySelectedCardsAsUnits:
                 selection: reanimateCard
                 player: self
-                component: character.soldier
                 face: up
                 state: charge
                 expectedCount: 1
