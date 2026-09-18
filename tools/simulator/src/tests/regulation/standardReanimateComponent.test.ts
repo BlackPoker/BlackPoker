@@ -463,7 +463,7 @@ describe("Official Standard Post-Acceptance Bugfix: Reanimate Component Re-evalu
         selectedPatternRef: reanimatePat,
       });
 
-      // Priority passes: p1 -> p2
+      // Chance passes: p1 -> p2
       const step3: any = session.submitDecision({
         decisionId: step2.request.decisionId,
         stateVersion: step2.request.stateVersion,
@@ -871,48 +871,159 @@ describe("Official Standard Post-Acceptance Bugfix: Reanimate Component Re-evalu
       expect(StateHasher.hash(restored.state)).toBe(StateHasher.hash(session.state));
     });
 
-    it("Test 6.2: Replay determinism with Reanimated Joker", () => {
-      const runReanimate = () => {
-        const jokerCard = { id: "JOKER-0", suit: "J", rank: "Joker", value: 0 };
-        const targetCard = { id: "c-tgt", suit: "C", rank: "5", value: 5 };
+    it("Test 6.2: Fresh Replay reproduces Reanimated Joker Magician flow deterministically from ordered Decision Transcript", () => {
+      const jokerCard = { id: "JOKER-0", suit: "J", rank: "Joker", value: 0 };
+      const targetCard = { id: "c-tgt", suit: "C", rank: "5", value: 5 };
+      const keySpade = { id: "k-s2", suit: "S", rank: "2", value: 2 };
+      const keyHeart = { id: "k-h3", suit: "H", rank: "3", value: 3 };
 
+      const makeInitialState = () => {
         const targetUnit = {
           ...buildFieldUnitFromComponent({
             componentId: "character.soldier",
             playerKey: "p1",
-            card: targetCard,
+            card: { ...targetCard },
             components: fullRulePackage.components,
           }),
-          cards: [targetCard],
+          cards: [{ ...targetCard }],
         };
 
-        const state: any = {
+        return {
           stateVersion: 1,
+          matchId: "match-replay-reanimate-joker",
           turnPlayer: "p1",
           chancePlayer: "p1",
           turnCount: 1,
           players: {
             p1: {
-              hand: [
-                { id: "k-s2", suit: "S", rank: "2", value: 2 },
-                { id: "k-h3", suit: "H", rank: "3", value: 3 },
-              ],
+              hand: [{ ...keySpade }, { ...keyHeart }],
               field: [targetUnit],
               life: [{ id: "l1" }],
-              grave: [jokerCard],
+              grave: [{ ...jokerCard }],
             },
             p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
           },
+          stage: { requests: [], history: [] },
         };
-
-        const session = new GameSession(state, standardRulePackage);
-        runReanimateSession(session, "JOKER-0");
-        return StateHasher.hash(session.state);
       };
 
-      const hash1 = runReanimate();
-      const hash2 = runReanimate();
-      expect(hash2).toBe(hash1);
+      // --- Session A: 実セッション実行と Decision Transcript 記録 ---
+      const sessionA = new GameSession(makeInitialState(), standardRulePackage);
+      const transcript: { playerId: string; selectedPatternRef: number }[] = [];
+
+      // Step 1: Action Request (p1 chooses action.reanimate)
+      const stepA1: any = sessionA.advance();
+      expect(stepA1.type).toBe("WAITING_FOR_DECISION");
+      const reanimatePat = stepA1.request.patterns.findIndex(
+        (p: any) =>
+          p.actionSelectionRef !== undefined &&
+          stepA1.request.catalog.actions[p.actionSelectionRef].actionId === "action.reanimate"
+      );
+      expect(reanimatePat).toBeGreaterThanOrEqual(0);
+      transcript.push({ playerId: "p1", selectedPatternRef: reanimatePat });
+
+      // Step 2: Chance PASS (p1)
+      const stepA2: any = sessionA.submitDecision({
+        decisionId: stepA1.request.decisionId,
+        stateVersion: stepA1.request.stateVersion,
+        selectedPatternRef: reanimatePat,
+      });
+      expect(stepA2.type).toBe("WAITING_FOR_DECISION");
+      const p1Pass = stepA2.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      expect(p1Pass).toBeGreaterThanOrEqual(0);
+      transcript.push({ playerId: "p1", selectedPatternRef: p1Pass });
+
+      // Step 3: Chance PASS (p2)
+      const stepA3: any = sessionA.submitDecision({
+        decisionId: stepA2.request.decisionId,
+        stateVersion: stepA2.request.stateVersion,
+        selectedPatternRef: p1Pass,
+      });
+      expect(stepA3.type).toBe("WAITING_FOR_DECISION");
+      const p2Pass = stepA3.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      expect(p2Pass).toBeGreaterThanOrEqual(0);
+      transcript.push({ playerId: "p2", selectedPatternRef: p2Pass });
+
+      // Step 4: Effect Card Selection (p1 chooses JOKER-0 from grave)
+      const stepA4: any = sessionA.submitDecision({
+        decisionId: stepA3.request.decisionId,
+        stateVersion: stepA3.request.stateVersion,
+        selectedPatternRef: p2Pass,
+      });
+      expect(stepA4.type).toBe("WAITING_FOR_DECISION");
+      expect(stepA4.request.source.effectStepId).toBe("selectCards");
+      const jokerPat = stepA4.request.patterns.findIndex(
+        (p: any) =>
+          p.effectSelectionRef !== undefined &&
+          stepA4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("JOKER-0")
+      );
+      expect(jokerPat).toBeGreaterThanOrEqual(0);
+      transcript.push({ playerId: "p1", selectedPatternRef: jokerPat });
+
+      // Step 5: Effect resolution completes
+      sessionA.submitDecision({
+        decisionId: stepA4.request.decisionId,
+        stateVersion: stepA4.request.stateVersion,
+        selectedPatternRef: jokerPat,
+      });
+
+      const finalHashA = StateHasher.hash(sessionA.state);
+
+      // --- Session B: 完全な新規 Fresh GameSession へ Transcript 順次適用 (Replay) ---
+      // Session A の state オブジェクトや Snapshot は一切渡さず、fresh な初期状態から再構築
+      const sessionB = new GameSession(makeInitialState(), standardRulePackage);
+
+      let stepB: any = sessionB.advance();
+      for (let i = 0; i < transcript.length; i++) {
+        expect(stepB.type).toBe("WAITING_FOR_DECISION");
+        // runtime decisionId や stateVersion は Session B 自身のものを利用し、selectedPatternRef のみ transcript から適用
+        stepB = sessionB.submitDecision({
+          decisionId: stepB.request.decisionId,
+          stateVersion: stepB.request.stateVersion,
+          selectedPatternRef: transcript[i].selectedPatternRef,
+        });
+      }
+
+      const finalHashB = StateHasher.hash(sessionB.state);
+
+      // 1. StateHash 完全一致
+      expect(finalHashB).toBe(finalHashA);
+
+      // 2. Component ID, kind, labels, physical Card 一致
+      const magicianA = sessionA.state.players.p1.field.find((u: any) => u.cards?.some((c: any) => c.id === "JOKER-0"));
+      const magicianB = sessionB.state.players.p1.field.find((u: any) => u.cards?.some((c: any) => c.id === "JOKER-0"));
+
+      expect(magicianA).toBeDefined();
+      expect(magicianB).toBeDefined();
+      expect(magicianB.componentId).toBe("character.magician");
+      expect(magicianB.kind).toBe("魔術士");
+      expect(magicianB.labels).toEqual(["attack", "defense", "haste"]);
+      expect(magicianB.cards[0].id).toBe("JOKER-0");
+      expect(magicianB.unitId).toBe(magicianA.unitId);
+
+      // 3. 移動結果の完全一致 (旧キャラが墓地へ、キーカードが墓地へ、Stage が空)
+      expect(sessionB.state.players.p1.field.some((u: any) => u.cards?.some((c: any) => c.id === "c-tgt"))).toBe(false);
+      expect(findPhysicalCardInGrave(sessionB.state.players.p1.grave, "c-tgt")).toBeDefined();
+      expect(findPhysicalCardInGrave(sessionB.state.players.p1.grave, "k-s2")).toBeDefined();
+      expect(findPhysicalCardInGrave(sessionB.state.players.p1.grave, "k-h3")).toBeDefined();
+      expect(sessionB.state.players.p1.hand).toHaveLength(0);
+      expect(sessionB.state.stage.requests).toHaveLength(0);
+
+      // 4. Replay 後の Reanimated Magician 能力（Quick Magic の Cost D 除去）の検証
+      const quickMagicAction: any = {
+        id: "action.testQuickMagic",
+        type: "magic",
+        request: { timing: "quick" },
+        cost: "BD",
+      };
+
+      const effectiveCosts = actionCostEvaluator.resolveEffectiveCostSymbols(
+        quickMagicAction,
+        sessionB.state,
+        "p1",
+        fullRulePackage.components
+      );
+      expect(effectiveCosts).toEqual(["B"]);
     });
 
     it("Test 6.3: AI policies (FirstLegal, SeededRandom, GenomePolicy) handle Reanimate decision", () => {
@@ -1055,7 +1166,7 @@ describe("Official Standard Post-Acceptance Bugfix: Reanimate Component Re-evalu
         selectedPatternRef: handesPat,
       });
 
-      // Priority passes
+      // Chance passes: p1 -> p2
       const s3: any = session.submitDecision({
         decisionId: s2.request.decisionId,
         stateVersion: s2.request.stateVersion,
