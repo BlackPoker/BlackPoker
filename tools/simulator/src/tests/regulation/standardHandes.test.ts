@@ -815,11 +815,14 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
   });
 
   // =========================================================================
-  // 18. standard-pack.simulatorImplemented = false 維持検証
+  // 18. standard-pack.simulatorImplemented = true / standard-entry16 = false 検証
   // =========================================================================
-  it("Test 18: standard-pack regulation has simulatorImplemented = false", () => {
+  it("Test 18: standard-pack regulation has simulatorImplemented = true in Phase 3.0-H", () => {
     const result = RegulationValidator.validateRegulation(catalog, "standard-pack");
-    expect(result.simulatorImplemented).toBe(false);
+    expect(result.simulatorImplemented).toBe(true);
+
+    const standardEntry16 = RegulationValidator.validateCombination(catalog, "standard", "entry16");
+    expect(standardEntry16.simulatorImplemented).toBe(false);
   });
 
   // =========================================================================

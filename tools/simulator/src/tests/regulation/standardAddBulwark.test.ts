@@ -129,10 +129,13 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     expect(lightAction).toBeUndefined();
   });
 
-  it("Test 4: standard-pack regulation remains simulatorImplemented = false in Phase 3.0-C", () => {
+  it("Test 4: standard-pack regulation has simulatorImplemented = true in Phase 3.0-H (standard-entry16 is false)", () => {
     const validation = RegulationValidator.validateRegulation(catalog, "standard-pack");
     expect(validation.ruleLegal).toBe(true);
-    expect(validation.simulatorImplemented).toBe(false);
+    expect(validation.simulatorImplemented).toBe(true);
+
+    const standardEntry16 = RegulationValidator.validateCombination(catalog, "standard", "entry16");
+    expect(standardEntry16.simulatorImplemented).toBe(false);
   });
 
   // =========================================================================

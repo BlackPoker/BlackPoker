@@ -111,21 +111,24 @@ describe("Official Regulation Phase 3.0-A - Standard + Pack Foundation & Fixture
     expect(frame.recommendedFormatIds).toContain("standard");
   });
 
-  it("Test F & G: standard-pack is ruleLegal=true, recommended=true, but simulatorImplemented=false in 3.0-A", async () => {
+  it("Test F & G: standard-pack is ruleLegal=true, recommended=true, and simulatorImplemented=true in 3.0-H", async () => {
     const result = RegulationValidator.validateRegulation(catalog, "standard-pack");
     expect(result.ruleLegal).toBe(true);
     expect(result.recommended).toBe(true);
-    expect(result.simulatorImplemented).toBe(false);
+    expect(result.simulatorImplemented).toBe(true);
 
-    // assertImplemented: true でエラー送出を確認
+    // assertImplemented: true でエラー送出されないことを確認
     expect(() =>
       RegulationValidator.validateRegulation(catalog, "standard-pack", { assertImplemented: true })
-    ).toThrow(SimulatorNotImplementedError);
+    ).not.toThrow();
 
-    // OfficialRegulationMatchFactory.createSession でエラー送出を確認
-    await expect(
-      OfficialRegulationMatchFactory.createSession("standard-pack", 42, { catalog, fullRulePackage })
-    ).rejects.toThrow(SimulatorNotImplementedError);
+    // OfficialRegulationMatchFactory.createSession でセッション作成が成功することを確認
+    const session = await OfficialRegulationMatchFactory.createSession("standard-pack", 42, {
+      catalog,
+      fullRulePackage,
+    });
+    expect(session).toBeDefined();
+    expect(session.state.regulationId).toBe("standard-pack");
   });
 
   it("Test H & I: standard-pack fixture resolves to 53 cards with exactly 1 Joker", async () => {
@@ -273,9 +276,9 @@ describe("Official Regulation Phase 3.0-A - Standard + Pack Foundation & Fixture
     expect(SimulatorDeckProfileResolver.getDeckProfileNotice(undefined)).toBeUndefined();
   });
 
-  it("Test Q: standard-pack does not appear in getAvailableEnvironments until simulatorImplemented=true", () => {
+  it("Test Q: standard-pack appears in getAvailableEnvironments as simulatorImplemented=true", () => {
     const envs = getAvailableEnvironments(catalog);
-    expect(envs.some((e) => e.regulationId === "standard-pack")).toBe(false);
+    expect(envs.some((e) => e.regulationId === "standard-pack")).toBe(true);
     expect(envs.some((e) => e.regulationId === "light-pack")).toBe(true);
     expect(envs.some((e) => e.regulationId === "light-entry16")).toBe(true);
   });

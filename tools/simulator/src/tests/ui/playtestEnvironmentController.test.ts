@@ -119,10 +119,10 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
 
     it("未実装のレギュレーションは選択肢に入らないこと", () => {
       const unimplementedReg = {
-        id: "standard-pack",
-        name: "スタンダード + パック",
+        id: "standard-entry16",
+        name: "スタンダード + エントリー16",
         formatId: "standard",
-        frameId: "pack",
+        frameId: "entry16",
       };
       const customCatalog = {
         ...catalog,
@@ -130,15 +130,16 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
           ...catalog.formats.entries(),
           ["standard", { id: "standard", name: "スタンダード", rulePackageId: "official-base" } as any],
         ]),
-        regulations: new Map([...catalog.regulations.entries(), ["standard-pack", unimplementedReg as any]]),
+        regulations: new Map([...catalog.regulations.entries(), ["standard-entry16", unimplementedReg as any]]),
       };
       const options = getAvailableEnvironments(customCatalog);
-      const found = options.find((o) => o.regulationId === "standard-pack");
+      const found = options.find((o) => o.regulationId === "standard-entry16");
       expect(found).toBeUndefined();
 
-      // 実装済みの light-entry16 および light-pack は含まれていること
+      // 実装済みの light-entry16, light-pack, standard-pack は含まれていること
       expect(options.some((o) => o.regulationId === "light-entry16")).toBe(true);
       expect(options.some((o) => o.regulationId === "light-pack")).toBe(true);
+      expect(options.some((o) => o.regulationId === "standard-pack")).toBe(true);
     });
 
     it("Official route が generic に regulationId を抽出できること", () => {

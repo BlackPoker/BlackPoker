@@ -567,7 +567,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test L: Recommendation Contract
-  it("Test L: Recommendation Contract - light-pack is implemented, standard-pack is not implemented", () => {
+  it("Test L: Recommendation Contract - light-pack and standard-pack are implemented, standard-entry16 is not implemented", () => {
     const lightPackValidation = RegulationValidator.validateCombination(catalog, "light", "pack");
     expect(lightPackValidation.recommended).toBe(true);
     expect(lightPackValidation.simulatorImplemented).toBe(true);
@@ -585,7 +585,14 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
       "pack"
     );
     expect(standardPackValidation.recommended).toBe(true);
-    expect(standardPackValidation.simulatorImplemented).toBe(false);
+    expect(standardPackValidation.simulatorImplemented).toBe(true);
+
+    const standardEntry16Validation = RegulationValidator.validateCombination(
+      syntheticCatalog,
+      "standard",
+      "entry16"
+    );
+    expect(standardEntry16Validation.simulatorImplemented).toBe(false);
   });
 
   // Test M: RulePackage Composition
