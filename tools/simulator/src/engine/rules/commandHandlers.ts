@@ -1759,7 +1759,7 @@ export function moveUnitToHandHandler(
       {
         cause: {
           type: "action",
-          actionId: context.currentAction?.id || "action.unsummons",
+          actionId: context.currentAction?.id ?? context.currentRequest?.actionId,
           requestId: context.currentRequest?.id,
         },
       }
@@ -1782,11 +1782,16 @@ export function moveRequestKeyCardsToHandHandler(
       throw new Error("moveRequestKeyCardsToHand: currentRequest が存在しません (fail-closed)");
     }
 
-    const keyCards: any[] = request.keyCards && request.keyCards.length > 0
-      ? request.keyCards
-      : context.keyCards || [];
+    if (request.keyCards === undefined) {
+      throw new Error("moveRequestKeyCardsToHand: request.keyCards が未定義です (fail-closed)");
+    }
 
-    if (!Array.isArray(keyCards) || keyCards.length === 0) {
+    const keyCards: any[] = request.keyCards;
+    if (!Array.isArray(keyCards)) {
+      throw new Error("moveRequestKeyCardsToHand: request.keyCards が配列ではありません (fail-closed)");
+    }
+
+    if (keyCards.length === 0) {
       return;
     }
 

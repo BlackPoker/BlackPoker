@@ -20,9 +20,10 @@ import { GenomePolicy } from "../../engine/ai/GenomePolicy";
 import { createManualGenericGenomeDNA } from "../../engine/ai/BaselinePolicies";
 import { FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes";
 import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator";
+import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import { ActionRequestValidator, ValidationError } from "../../engine/rules/ActionRequestValidator";
 import { evaluateUnitTargetCondition } from "../../engine/rules/targetConditionUtils";
-import { buildFieldUnitFromComponent } from "../../engine/rules/commandHandlers";
+import { buildFieldUnitFromComponent, moveUnitToHandHandler, moveRequestKeyCardsToHandHandler } from "../../engine/rules/commandHandlers";
 import { isCardInGameZones } from "../../engine/rules/cardUtils";
 
 describe("Official Regulation Phase 3.0-G - Return / 帰還 (action.unsummons) Tests", () => {
@@ -1111,9 +1112,10 @@ describe("Official Regulation Phase 3.0-G - Return / 帰還 (action.unsummons) T
   });
 
   // =========================================================================
-  // 21. スナップショット保存復元検証 (Snapshot save and restore)
   // =========================================================================
-  it("Test 21: Snapshot restore preserves GameState integrity and produces matching StateHash", () => {
+  // 21. 未解決段階でのスナップショット保存復元検証 (Mid-stage Snapshot/Restore)
+  // =========================================================================
+  it("Test 21: Mid-stage Snapshot/Restore preserves Return request and resolves identically", () => {
     const keyH2 = { id: "c-h2", suit: "H", rank: "2", value: 2 };
     const keyH5 = { id: "c-h5", suit: "H", rank: "5", value: 5 };
     const solCard = { id: "c-sol-1", suit: "S", rank: "8", value: 8 };
@@ -1139,16 +1141,110 @@ describe("Official Regulation Phase 3.0-G - Return / 帰還 (action.unsummons) T
       stage: { requests: [], history: [] },
     };
 
-    const session = new GameSession(state, standardRulePackage);
-    playReturnAndPass(session, "u-sol-1");
+    const sessionA = new GameSession(state, standardRulePackage);
+    const step1: any = sessionA.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
 
-    const snapshot = session.createSnapshot();
-    const restoredSession = GameSession.fromSnapshot(snapshot, standardRulePackage);
+    // 帰還パターンを選択して提出（まだ両者 PASS 前）
+    const unsummonsPat = step1.request.patterns.findIndex((p: any) => {
+      if (p.actionSelectionRef === undefined) return false;
+      const act = step1.request.catalog.actions[p.actionSelectionRef];
+      if (act.actionId !== "action.unsummons") return false;
+      const tgt = step1.request.catalog.targetSelections[p.targetSelectionRef];
+      return tgt?.targetUnitId === "u-sol-1";
+    });
+    expect(unsummonsPat).toBeGreaterThanOrEqual(0);
 
-    const hashOrig = StateHasher.hash(session.state);
-    const hashRestored = StateHasher.hash(restoredSession.state);
+    const stepChanceA: any = sessionA.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: unsummonsPat,
+    });
 
-    expect(hashRestored).toBe(hashOrig);
+    // 1. Snapshot 前の状態検証（Request は Stage 上で pending）
+    expect(sessionA.state.stage.requests).toHaveLength(1);
+    const reqA = sessionA.state.stage.requests[0];
+    expect(reqA.actionId).toBe("action.unsummons");
+    expect(reqA.keyCards).toHaveLength(2);
+    expect(reqA.keyCards.map((c: any) => c.id)).toEqual(["c-h2", "c-h5"]);
+    expect(reqA.targets?.[0]?.unitId).toBe("u-sol-1");
+    expect(reqA.selectedCostPayment?.drivenBulwarkUnitIds).toContain("u-bw-1");
+
+    // Cost Bulwark は既に drive 状態
+    const bwA = sessionA.state.players.p1.field.find((u: any) => u.unitId === "u-bw-1");
+    expect(bwA?.state).toBe("drive");
+    // Keys は手札から除去済み
+    expect(sessionA.state.players.p1.hand).toHaveLength(0);
+    // Target 兵士はまだフィールドに存在
+    expect(sessionA.state.players.p1.field.some((u: any) => u.unitId === "u-sol-1")).toBe(true);
+
+    // 2. Snapshot キャプチャと Restore
+    const snapshot = sessionA.createSnapshot();
+    const sessionB = GameSession.fromSnapshot(snapshot, standardRulePackage);
+
+    // 3. Restore 後の状態検証
+    expect(sessionB.state.stage.requests).toHaveLength(1);
+    const reqB = sessionB.state.stage.requests[0];
+    expect(reqB.id).toBe(reqA.id);
+    expect(reqB.actionId).toBe("action.unsummons");
+    expect(reqB.keyCards.map((c: any) => c.id)).toEqual(["c-h2", "c-h5"]);
+    expect(reqB.targets?.[0]?.unitId).toBe("u-sol-1");
+    expect(reqB.selectedCostPayment?.drivenBulwarkUnitIds).toEqual(reqA.selectedCostPayment?.drivenBulwarkUnitIds);
+
+    const bwB = sessionB.state.players.p1.field.find((u: any) => u.unitId === "u-bw-1");
+    expect(bwB?.state).toBe("drive");
+    expect(sessionB.state.players.p1.hand).toHaveLength(0);
+    expect(sessionB.state.players.p1.field.some((u: any) => u.unitId === "u-sol-1")).toBe(true);
+
+    // Snapshot 直後の StateHash 一致
+    expect(StateHasher.hash(sessionB.state)).toBe(StateHasher.hash(sessionA.state));
+
+    // 4. Session A と Session B の双方で p1 PASS -> p2 PASS を実行して解決
+    const passBoth = (sess: GameSession, stepChance: any) => {
+      expect(stepChance.type).toBe("WAITING_FOR_DECISION");
+      const p1Pass = stepChance.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      expect(p1Pass).toBeGreaterThanOrEqual(0);
+      const stepP2: any = sess.submitDecision({
+        decisionId: stepChance.request.decisionId,
+        stateVersion: stepChance.request.stateVersion,
+        selectedPatternRef: p1Pass,
+      });
+
+      expect(stepP2.type).toBe("WAITING_FOR_DECISION");
+      const p2Pass = stepP2.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      expect(p2Pass).toBeGreaterThanOrEqual(0);
+      sess.submitDecision({
+        decisionId: stepP2.request.decisionId,
+        stateVersion: stepP2.request.stateVersion,
+        selectedPatternRef: p2Pass,
+      });
+    };
+
+    passBoth(sessionA, stepChanceA);
+    const stepChanceB: any = sessionB.advance();
+    passBoth(sessionB, stepChanceB);
+
+    // 5. 解決後 Final StateHash 一致検証
+    expect(StateHasher.hash(sessionB.state)).toBe(StateHasher.hash(sessionA.state));
+
+    // 6. 双方で同じ Return 結果が成立していること
+    for (const sess of [sessionA, sessionB]) {
+      // 兵士カードとキーカードが手札に戻っていること
+      const hand = sess.state.players.p1.hand;
+      expect(hand.some((c: any) => c.id === "c-sol-1")).toBe(true);
+      expect(hand.some((c: any) => c.id === "c-h2")).toBe(true);
+      expect(hand.some((c: any) => c.id === "c-h5")).toBe(true);
+      expect(hand).toHaveLength(3);
+
+      // フィールドに兵士はおらず、防壁のみ drive で残っていること
+      expect(sess.state.players.p1.field.some((u: any) => u.unitId === "u-sol-1")).toBe(false);
+      const bw = sess.state.players.p1.field.find((u: any) => u.unitId === "u-bw-1");
+      expect(bw?.state).toBe("drive");
+
+      // 墓地は不変 (0枚)
+      expect(sess.state.players.p1.grave).toHaveLength(0);
+      expect(sess.state.stage.requests).toHaveLength(0);
+    }
   });
 
   // =========================================================================
@@ -1208,5 +1304,283 @@ describe("Official Regulation Phase 3.0-G - Return / 帰還 (action.unsummons) T
 
     const regResult = RegulationValidator.validateRegulation(catalog, "standard-pack");
     expect(regResult.simulatorImplemented).toBe(false);
+  });
+
+  // =========================================================================
+  // 24. 決定論的フレッシュリプレイ検証 (Deterministic Fresh Replay)
+  // =========================================================================
+  it("Test 24: Fresh Replay reproduces Return flow deterministically from ordered Decision Transcript", () => {
+    const keyH2 = { id: "c-h2", suit: "H", rank: "2", value: 2 };
+    const keyH5 = { id: "c-h5", suit: "H", rank: "5", value: 5 };
+    const solCard = { id: "c-sol-1", suit: "S", rank: "8", value: 8 };
+    const bwCard = { id: "c-bw-1", suit: "D", rank: "4", value: 4 };
+
+    const makeInitialState = () => ({
+      stateVersion: 1,
+      matchId: "match-test-24",
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          hand: [{ ...keyH2 }, { ...keyH5 }],
+          field: [
+            { unitId: "u-bw-1", componentId: "character.bulwark", state: "charge", cards: [{ ...bwCard }] },
+            { unitId: "u-sol-1", componentId: "character.soldier", state: "charge", cards: [{ ...solCard }] },
+          ],
+          life: [{ id: "l1" }],
+          grave: [],
+        },
+        p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+      },
+      stage: { requests: [], history: [] },
+    });
+
+    // --- Session A: 実セッション実行と Decision Transcript 記録 ---
+    const sessionA = new GameSession(makeInitialState(), standardRulePackage);
+    const transcript: number[] = [];
+
+    // Step 1: Action Request (p1 chooses action.unsummons targeting u-sol-1)
+    const stepA1: any = sessionA.advance();
+    expect(stepA1.type).toBe("WAITING_FOR_DECISION");
+    const unsummonsPat = stepA1.request.patterns.findIndex((p: any) => {
+      if (p.actionSelectionRef === undefined) return false;
+      const act = stepA1.request.catalog.actions[p.actionSelectionRef];
+      if (act.actionId !== "action.unsummons") return false;
+      const tgt = stepA1.request.catalog.targetSelections[p.targetSelectionRef];
+      return tgt?.targetUnitId === "u-sol-1";
+    });
+    expect(unsummonsPat).toBeGreaterThanOrEqual(0);
+    transcript.push(unsummonsPat);
+
+    // Step 2: Chance priority p1 PASS
+    const stepA2: any = sessionA.submitDecision({
+      decisionId: stepA1.request.decisionId,
+      stateVersion: stepA1.request.stateVersion,
+      selectedPatternRef: unsummonsPat,
+    });
+    expect(stepA2.type).toBe("WAITING_FOR_DECISION");
+    const p1Pass = stepA2.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    expect(p1Pass).toBeGreaterThanOrEqual(0);
+    transcript.push(p1Pass);
+
+    // Step 3: Chance priority p2 PASS -> triggers resolution
+    const stepA3: any = sessionA.submitDecision({
+      decisionId: stepA2.request.decisionId,
+      stateVersion: stepA2.request.stateVersion,
+      selectedPatternRef: p1Pass,
+    });
+    expect(stepA3.type).toBe("WAITING_FOR_DECISION");
+    const p2Pass = stepA3.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    expect(p2Pass).toBeGreaterThanOrEqual(0);
+    transcript.push(p2Pass);
+
+    sessionA.submitDecision({
+      decisionId: stepA3.request.decisionId,
+      stateVersion: stepA3.request.stateVersion,
+      selectedPatternRef: p2Pass,
+    });
+
+    const finalHashA = StateHasher.hash(sessionA.state);
+
+    // --- Session B: Fresh GameSession への Transcript 順次適用 (Replay) ---
+    // 途中 GameState のコピーは一切行わず、Fresh 初期状態から再構築
+    const sessionB = new GameSession(makeInitialState(), standardRulePackage);
+
+    let stepB: any = sessionB.advance();
+    for (let i = 0; i < transcript.length; i++) {
+      expect(stepB.type).toBe("WAITING_FOR_DECISION");
+      // runtime decisionId や stateVersion は sessionB 自身のものを利用し、selectedPatternRef のみ transcript から適用
+      stepB = sessionB.submitDecision({
+        decisionId: stepB.request.decisionId,
+        stateVersion: stepB.request.stateVersion,
+        selectedPatternRef: transcript[i],
+      });
+    }
+
+    const finalHashB = StateHasher.hash(sessionB.state);
+
+    // 1. StateHash 完全一致
+    expect(finalHashB).toBe(finalHashA);
+
+    // 2. Return 結果の完全一致
+    expect(sessionB.state.players.p1.hand).toHaveLength(3);
+    expect(sessionB.state.players.p1.hand.some((c: any) => c.id === "c-sol-1")).toBe(true);
+    expect(sessionB.state.players.p1.hand.some((c: any) => c.id === "c-h2")).toBe(true);
+    expect(sessionB.state.players.p1.hand.some((c: any) => c.id === "c-h5")).toBe(true);
+
+    expect(sessionB.state.players.p1.field.some((u: any) => u.unitId === "u-sol-1")).toBe(false);
+    const bwB = sessionB.state.players.p1.field.find((u: any) => u.unitId === "u-bw-1");
+    expect(bwB?.state).toBe("drive");
+
+    expect(sessionB.state.players.p1.grave).toHaveLength(0);
+    expect(sessionB.state.stage.requests).toHaveLength(0);
+
+    // 3. Replay 後の対戦相手視点 Observation で手札カードが非公開 (privacy-safe) であること
+    const p2Obs = ObservationFactory.createObservation(sessionB.state, "p2");
+    const p1ObsView = p2Obs.players.find((p) => p.playerId === "p1");
+    expect(p1ObsView?.handCount).toBe(3);
+    expect(p1ObsView?.handCards).toHaveLength(3);
+    for (const c of p1ObsView?.handCards || []) {
+      expect(c.visibility).toBe("HIDDEN");
+      expect((c as any).suit).toBeUndefined();
+      expect((c as any).rank).toBeUndefined();
+    }
+  });
+
+  // =========================================================================
+  // 25. 汎用 Action Identity 検証 (action.unsummons ハードコード完全除去)
+  // =========================================================================
+  it("Test 25: moveUnitToHand resolves cause.actionId dynamically without hardcoded action.unsummons fallback", () => {
+    const testSoldier = {
+      unitId: "u-dyn-1",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c-dyn-1", suit: "S", rank: "2", value: 2 }],
+    };
+
+    const state: any = {
+      players: {
+        p1: {
+          field: [testSoldier],
+          hand: [],
+        },
+      },
+    };
+
+    const emittedEvents: any[] = [];
+    const mockInterpreter: any = {
+      dispatchEvent: (evt: any) => emittedEvents.push(evt),
+    };
+    const dynamicHandler = moveUnitToHandHandler(expressionEvaluator, mockInterpreter);
+
+    // Case 1: currentAction.id が指定されている場合、その actionId が cause に設定される
+    const ctx1: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: testSoldier,
+      currentAction: { id: "action.customSpell" } as any,
+      currentRequest: { id: "req-dyn-1", actionId: "action.customSpell" } as any,
+    };
+    dynamicHandler({ target: "targetComponent", requiredState: "charge" }, ctx1);
+
+    expect(emittedEvents).toHaveLength(1);
+    expect(emittedEvents[0].type).toBe("cardMoved");
+    expect(emittedEvents[0].payload.cause?.actionId).toBe("action.customSpell");
+    expect(emittedEvents[0].payload.cause?.requestId).toBe("req-dyn-1");
+
+    // Case 2: currentAction がなく currentRequest.actionId のみの場合、currentRequest.actionId が設定される
+    const testSoldier2 = {
+      unitId: "u-dyn-2",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "c-dyn-2", suit: "S", rank: "3", value: 3 }],
+    };
+    state.players.p1.field.push(testSoldier2);
+
+    const ctx2: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: testSoldier2,
+      currentAction: undefined,
+      currentRequest: { id: "req-dyn-2", actionId: "action.fromRequestOnly" } as any,
+    };
+    dynamicHandler({ target: "targetComponent", requiredState: "charge" }, ctx2);
+
+    expect(emittedEvents).toHaveLength(2);
+    expect(emittedEvents[1].payload.cause?.actionId).toBe("action.fromRequestOnly");
+    expect(emittedEvents[1].payload.cause?.requestId).toBe("req-dyn-2");
+
+    // "action.unsummons" リテラルがどこにも漏洩・フォールバックしていないこと
+    for (const evt of emittedEvents) {
+      expect(evt.payload.cause?.actionId).not.toBe("action.unsummons");
+    }
+  });
+
+  // =========================================================================
+  // 26. Request Key SSOT & サイレントフォールバック排除検証
+  // =========================================================================
+  it("Test 26: moveRequestKeyCardsToHand strictly enforces currentRequest.keyCards SSOT without context fallback", () => {
+    const emittedEvents: any[] = [];
+    const mockInterpreter: any = {
+      dispatchEvent: (evt: any) => emittedEvents.push(evt),
+    };
+    const handler = moveRequestKeyCardsToHandHandler(mockInterpreter);
+
+    // 1. Negative Fallback: currentRequest.keyCards = [] かつ context.keyCards = [A, B]
+    // 期待: context.keyCards を一切フォールバックとして使わず、0枚移動（no-op）
+    const state1: any = {
+      players: {
+        p1: { hand: [] },
+      },
+    };
+    const cardA = { id: "c-key-a", suit: "H", rank: "2", value: 2 };
+    const cardB = { id: "c-key-b", suit: "H", rank: "3", value: 3 };
+
+    const ctx1: CommandContext = {
+      state: state1,
+      playerKey: "p1",
+      currentRequest: {
+        id: "req-ssot-1",
+        actionId: "action.test",
+        controller: "p1",
+        keyCards: [], // empty
+      } as any,
+      keyCards: [cardA, cardB], // context にのみ存在
+    };
+
+    handler({}, ctx1);
+
+    // 手札は空のままであり、cardMoved も発行されないこと (silent fallback なし)
+    expect(state1.players.p1.hand).toHaveLength(0);
+    expect(emittedEvents).toHaveLength(0);
+
+    // 2. Request Key Identity: currentRequest.keyCards = [A, B] かつ context.keyCards = [X, Y]
+    // 期待: 移動されるのは A, B であり、X, Y ではない
+    const cardX = { id: "c-key-x", suit: "S", rank: "5", value: 5 };
+    const cardY = { id: "c-key-y", suit: "S", rank: "6", value: 6 };
+
+    const ctx2: CommandContext = {
+      state: state1,
+      playerKey: "p1",
+      currentRequest: {
+        id: "req-ssot-2",
+        actionId: "action.test",
+        controller: "p1",
+        keyCards: [cardA, cardB], // 正当な SSOT
+      } as any,
+      keyCards: [cardX, cardY], // 異なるキーカード
+    };
+
+    handler({}, ctx2);
+
+    expect(state1.players.p1.hand).toHaveLength(2);
+    expect(state1.players.p1.hand.map((c: any) => c.id)).toEqual(["c-key-a", "c-key-b"]);
+    expect(state1.players.p1.hand.some((c: any) => c.id === "c-key-x")).toBe(false);
+    expect(state1.players.p1.hand.some((c: any) => c.id === "c-key-y")).toBe(false);
+
+    expect(emittedEvents).toHaveLength(2);
+    expect(emittedEvents[0].payload.card.id).toBe("c-key-a");
+    expect(emittedEvents[1].payload.card.id).toBe("c-key-b");
+
+    // 3. Malformed: request.keyCards === undefined の場合、fail-closed で throw
+    const ctx3: CommandContext = {
+      state: state1,
+      playerKey: "p1",
+      currentRequest: {
+        id: "req-ssot-3",
+        actionId: "action.test",
+        controller: "p1",
+        keyCards: undefined, // malformed
+      } as any,
+    };
+    expect(() => handler({}, ctx3)).toThrow("request.keyCards が未定義です");
+
+    // 4. Malformed: currentRequest 自体が存在しない場合、fail-closed で throw
+    const ctx4: CommandContext = {
+      state: state1,
+      playerKey: "p1",
+      currentRequest: undefined,
+    };
+    expect(() => handler({}, ctx4)).toThrow("currentRequest が存在しません");
   });
 });
