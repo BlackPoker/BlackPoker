@@ -5,10 +5,9 @@ on:
   push:
     branches: [master]
     paths:
-      - "tools/tutorial/**"
+      - "tutorial/**"
       - "tools/actionlist/original/act.yaml"
       - "tools/actionlist/original/frame.yaml"
-      - "tools/simulator/src/data/rules-vnext/official-base.yaml"
       - ".github/workflows/deploy-tutorial-pages.yml"
 
 permissions:
@@ -26,15 +25,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 依存関係をインストール
-        working-directory: tools/tutorial
+        working-directory: tutorial
         run: docker compose run --rm app npm ci
 
       - name: テスト
-        working-directory: tools/tutorial
+        working-directory: tutorial
         run: docker compose run --rm app npm test
 
       - name: GitHub Pages向けにビルド
-        working-directory: tools/tutorial
+        working-directory: tutorial
         run: docker compose run --rm -e VITE_BASE_PATH=/BlackPoker/tutorial/ app npm run build
 
       - name: gh-pagesへ配置
@@ -43,7 +42,7 @@ jobs:
           git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages
           rm -rf pages/tutorial
           mkdir -p pages/tutorial
-          cp -R tools/tutorial/dist/. pages/tutorial/
+          cp -R tutorial/dist/. pages/tutorial/
           cd pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
