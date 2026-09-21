@@ -4,21 +4,18 @@
 
 ## 開発
 
-Node.js 22以上を推奨します。
-
 ```bash
-cd tutorial
-pnpm install --frozen-lockfile
-pnpm dev
+cd tools/tutorial
+docker compose up --build
 ```
 
-ブラウザで `http://localhost:5173/` を開きます。サーバ、DB、ログインは不要です。
+ブラウザで `http://localhost:5174/` を開きます。サーバ、DB、ログインは不要です。Node.jsのインストールやNodeコマンドのホスト実行は不要です。
 
 ```bash
-pnpm test
-pnpm validate:tutorials
-pnpm build
-pnpm preview
+docker compose run --rm app npm test
+docker compose run --rm app npm run validate:tutorials
+docker compose run --rm app npm run build
+docker compose run --rm --service-ports app npm run preview -- --host 0.0.0.0 --port 5173
 ```
 
 ## アーキテクチャ
@@ -37,13 +34,13 @@ TutorialはSimulatorのUIやアプリケーションコードをimportしませ�
 - frame: `tools/actionlist/original/frame.yaml`
 - component: `tools/simulator/src/data/rules-vnext/official-base.yaml`
 
-`pnpm build`と`pnpm test`の前に `src/generated/ruleCatalog.ts` が再生成されます。シナリオが存在しないIDを参照すると、`Tutorial references unknown rule: action.xxx` の形式で失敗します。
+`npm run build`と`npm test`の前に `src/generated/ruleCatalog.ts` が再生成されます。これらのコマンドはDocker経由で実行してください。シナリオが存在しないIDを参照すると、`Tutorial references unknown rule: action.xxx` の形式で失敗します。
 
 ## シナリオの追加
 
 1. `src/data/tutorials/` に既存schemaと同じJSONを追加する
 2. `regulation`、`learn`、各stepの`ruleRefs`には正規YAMLに存在するIDだけを書く
-3. `pnpm validate:tutorials`と`pnpm test`を実行する
+3. Docker経由で`npm run validate:tutorials`と`npm test`を実行する
 4. `src/data/curriculum.ts`の該当コースを有効化し、アプリのシナリオ選択導線を追加する
 
 説明量は `difficulty` で区別できるため、将来は同じルール参照のまま`intermediate`や`advanced`の問題形式を追加できます。
@@ -53,10 +50,10 @@ TutorialはSimulatorのUIやアプリケーションコードをimportしませ�
 プロジェクトサイト配下で公開するときはbase pathを指定します。
 
 ```bash
-VITE_BASE_PATH=/BlackPoker/tutorial/ pnpm build
+docker compose run --rm -e VITE_BASE_PATH=/BlackPoker/tutorial/ app npm run build
 ```
 
-成果物は `tutorial/dist/` に生成されます。`.github/workflows/deploy-tutorial-pages.yml` はこの成果物を既存`gh-pages`ブランチの`tutorial/`へ配置し、既存の公式ルールドキュメントを残します。
+成果物は `tools/tutorial/dist/` に生成されます。`.github/workflows/deploy-tutorial-pages.yml` はこの成果物を既存`gh-pages`ブランチの`tutorial/`へ配置し、既存の公式ルールドキュメントを残します。
 
 リポジトリ名が異なるforkでは、workflowの`VITE_BASE_PATH`を `/<repository-name>/tutorial/` に変更してください。
 

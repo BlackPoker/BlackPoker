@@ -3,7 +3,6 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "vite",
     "generate:rules": "node scripts/generate-rule-catalog.mjs",
@@ -14,7 +13,6 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
@@ -25,6 +23,7 @@
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.66",
     "@types/react-dom": "^18.2.22",
+    "@vitejs/plugin-react": "^4.2.1",
     "jsdom": "^24.0.0",
     "typescript": "^5.2.2",
     "vite": "^5.2.0",

@@ -5,7 +5,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "tutorial/**"
+      - "tools/tutorial/**"
       - "tools/actionlist/original/act.yaml"
       - "tools/actionlist/original/frame.yaml"
       - "tools/simulator/src/data/rules-vnext/official-base.yaml"
@@ -25,37 +25,17 @@ jobs:
       - name: ソースを取得
         uses: actions/checkout@v4
 
-      - name: Node.jsを準備
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: pnpmを準備
-        uses: pnpm/action-setup@v4
-        with:
-          version: 11.19.0
-          run_install: false
-
-      - name: pnpmキャッシュを有効化
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: tutorial/pnpm-lock.yaml
-
       - name: 依存関係をインストール
-        working-directory: tutorial
-        run: pnpm install --frozen-lockfile
+        working-directory: tools/tutorial
+        run: docker compose run --rm app npm ci
 
       - name: テスト
-        working-directory: tutorial
-        run: pnpm test
+        working-directory: tools/tutorial
+        run: docker compose run --rm app npm test
 
       - name: GitHub Pages向けにビルド
-        working-directory: tutorial
-        env:
-          VITE_BASE_PATH: /BlackPoker/tutorial/
-        run: pnpm build
+        working-directory: tools/tutorial
+        run: docker compose run --rm -e VITE_BASE_PATH=/BlackPoker/tutorial/ app npm run build
 
       - name: gh-pagesへ配置
         shell: bash
@@ -63,7 +43,7 @@ jobs:
           git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages
           rm -rf pages/tutorial
           mkdir -p pages/tutorial
-          cp -R tutorial/dist/. pages/tutorial/
+          cp -R tools/tutorial/dist/. pages/tutorial/
           cd pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

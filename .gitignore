@@ -4,11 +4,13 @@
 [Bb]in
 [Ii]nclude
 [Ll]ib
-!tutorial/src/lib/
-!tutorial/src/lib/**
+!tools/tutorial/src/lib/
+!tools/tutorial/src/lib/**
 [Ll]ib64
 [Ll]ocal
 [Ss]cripts
+!tools/tutorial/scripts/
+!tools/tutorial/scripts/**
 pyvenv.cfg
 .venv
 pip-selfcheck.json
@@ -19,7 +21,7 @@ build/latex
 **/.DS_Store
 .DS_Store
 node_modules
-tutorial/dist/
+tools/tutorial/dist/
 
 source/_build
 docs/*
