@@ -4,6 +4,8 @@
 [Bb]in
 [Ii]nclude
 [Ll]ib
+!tutorial/src/lib/
+!tutorial/src/lib/**
 [Ll]ib64
 [Ll]ocal
 [Ss]cripts
@@ -17,6 +19,7 @@ build/latex
 **/.DS_Store
 .DS_Store
 node_modules
+tutorial/dist/
 
 source/_build
 docs/*
