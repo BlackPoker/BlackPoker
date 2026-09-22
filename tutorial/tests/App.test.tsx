@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import App from "../src/App";
 import scenario from "../src/data/tutorials/entry16.json";
-import { saveProgress } from "../src/lib/storage";
+import { loadProgress, saveProgress } from "../src/lib/storage";
 function at(id: string, extra = {}) {
   saveProgress(
     {
@@ -96,9 +96,9 @@ describe("hands-on tutorial", () => {
   it("早見をどの段階でも開き、ライトの魔法・コストを確認できる", async () => {
     render(<App />);
     await userEvent.click(
-      screen.getByRole("button", { name: "アクション早見" }),
+      screen.getByRole("button", { name: "ルール早見" }),
     );
-    const help = screen.getByRole("dialog", { name: "アクション早見" });
+    const help = screen.getByRole("dialog", { name: "ルール早見" });
     expect(within(help).getByRole("heading", { name: "アップ" })).toBeVisible();
     expect(
       within(help).getByRole("heading", { name: "英雄召喚" }),
@@ -114,7 +114,7 @@ describe("hands-on tutorial", () => {
     await userEvent.click(
       within(help).getByRole("button", { name: "早見を閉じる" }),
     );
-    expect(screen.queryByRole("dialog", { name: "アクション早見" })).toBeNull();
+    expect(screen.queryByRole("dialog", { name: "ルール早見" })).toBeNull();
   });
   it("モバイルでもメニューと早見にアクセスできる", async () => {
     Object.defineProperty(window, "innerWidth", {
@@ -138,5 +138,33 @@ describe("hands-on tutorial", () => {
     expect(screen.getByText("ここから実物カード")).toBeVisible();
     expect(screen.getAllByText("手元に7枚")).toHaveLength(2);
     expect(document.querySelectorAll(".slot-stack").length).toBeGreaterThan(0);
+  });
+  it("戻っても最高到達ステップと完了率を維持する", async () => {
+    const index = scenario.steps.findIndex((step) => step.id === "direct-damage");
+    at("direct-damage", { maxReachedStepIndex: index, completed: true });
+    render(<App />);
+    const before = screen.getByLabelText(/^全体の進捗/).getAttribute("aria-label");
+    await userEvent.click(screen.getAllByRole("button", { name: "← 戻る" })[0]);
+    expect(screen.getByRole("heading", { name: "今回は、ブロックしません。" })).toBeVisible();
+    expect(screen.getByLabelText(/^全体の進捗/).getAttribute("aria-label")).toBe(before);
+    expect(loadProgress(scenario.id, window.localStorage)).toMatchObject({
+      stepIndex: index - 1,
+      maxReachedStepIndex: index,
+      completed: true,
+    });
+  });
+  it("アクションとキャラクターを切り替え、主要キャラクターを検索できる", async () => {
+    render(<App />);
+    await userEvent.click(screen.getByRole("button", { name: "ルール早見" }));
+    const help = screen.getByRole("dialog", { name: "ルール早見" });
+    await userEvent.click(within(help).getByRole("tab", { name: "キャラクター" }));
+    for (const name of ["一般兵", "英雄", "エース", "防壁"]) {
+      const search = within(help).getByRole("textbox");
+      await userEvent.clear(search);
+      await userEvent.type(search, name);
+      expect(within(help).getByRole("heading", { name })).toBeVisible();
+    }
+    await userEvent.click(within(help).getByRole("tab", { name: "アクション" }));
+    expect(within(help).getByText("まず使うアクション")).toBeVisible();
   });
 });

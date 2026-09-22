@@ -41,6 +41,8 @@ export interface TutorialStep {
   operations: Operation[];
   checklist?: string[];
   chooseFirst?: boolean;
+  sequenceLabel?: string;
+  actionName?: string;
 }
 export interface TutorialScenario {
   schemaVersion: 2;
@@ -59,4 +61,5 @@ export interface TutorialProgress {
   updatedAt: string;
   applied?: boolean;
   firstPlayer?: Player;
+  maxReachedStepIndex?: number;
 }

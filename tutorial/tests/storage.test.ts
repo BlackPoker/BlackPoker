@@ -51,6 +51,23 @@ describe("progress storage", () => {
     );
     expect(loadProgress("lesson", storage).stepIndex).toBe(7);
   });
+  it("現在位置とは別に最高到達ステップを保存できる", () => {
+    const storage = makeStorage();
+    saveProgress(
+      {
+        scenarioId: "lesson",
+        stepIndex: 3,
+        maxReachedStepIndex: 12,
+        completed: false,
+        updatedAt: "",
+      },
+      storage,
+    );
+    expect(loadProgress("lesson", storage)).toMatchObject({
+      stepIndex: 3,
+      maxReachedStepIndex: 12,
+    });
+  });
 
   it("最初からやり直すと保存を消せる", () => {
     const storage = makeStorage();

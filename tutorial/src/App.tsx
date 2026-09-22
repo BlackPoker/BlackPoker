@@ -20,7 +20,10 @@ export default function App() {
   const chapterSteps = tutorial.steps.filter((s) => s.chapter === step.chapter);
   const position = chapterSteps.findIndex((s) => s.id === step.id) + 1;
   const percent = Math.round(
-    ((progress.stepIndex + (progress.applied ? 1 : 0)) /
+    ((progress.maxReachedStepIndex +
+      (progress.stepIndex === progress.maxReachedStepIndex && progress.applied
+        ? 1
+        : 0)) /
       tutorial.steps.length) *
       100,
   );
@@ -51,6 +54,7 @@ export default function App() {
         <CurriculumPanel
           steps={tutorial.steps}
           stepIndex={progress.stepIndex}
+          maxReachedStepIndex={progress.maxReachedStepIndex}
           onSelect={select}
           onClose={() => setMenuOpen(false)}
         />
@@ -64,12 +68,22 @@ export default function App() {
           >
             ☰
           </button>
+          <button
+            className="top-back"
+            disabled={progress.stepIndex === 0}
+            onClick={() => {
+              progress.previous();
+              setDetailsOpen(false);
+            }}
+          >
+            ← 戻る
+          </button>
           <div className="topbar-course">
             <span>BLACKPOKER TUTORIAL</span>
             <strong>ライト＋エントリー16</strong>
           </div>
           <button className="help-button" onClick={() => setHelpOpen(true)}>
-            アクション早見
+            ルール早見
           </button>
           <button
             className="restart-button"
@@ -118,6 +132,12 @@ export default function App() {
               <span />
               いまやること
             </p>
+            {(step.sequenceLabel || step.actionName) && (
+              <div className="step-context">
+                {step.actionName && <span>今回のアクション：{step.actionName}</span>}
+                {step.sequenceLabel && <strong>{step.sequenceLabel}</strong>}
+              </div>
+            )}
             <h1>{step.title}</h1>
             <p className="instruction">{step.instruction}</p>
             <div className={`mode-notice mode-${step.mode}`}>
@@ -245,7 +265,7 @@ export default function App() {
                 setDetailsOpen(false);
               }}
             >
-              ← 前へ
+              ← 戻る
             </button>
             <span>{step.chapterTitle}</span>
             <button onClick={() => setMenuOpen(true)}>一覧を見る</button>

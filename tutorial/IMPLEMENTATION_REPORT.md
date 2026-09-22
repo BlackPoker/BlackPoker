@@ -10,16 +10,16 @@
 
 ## 2. 新しい学習フロー
 
-4章・22操作に整理しました。白黒・zinc、左のロードマップ、モバイルドロワー、折りたたみ「なぜ？」を継続しています。
+4章・30操作に整理しました。白黒・zinc、左のロードマップ、モバイルドロワー、折りたたみ「なぜ？」を継続しています。
 
 | 章 | 操作数 | 目的 |
 | --- | ---: | --- |
-| 準備する | 4 | 固定カードを図の場所へ置く |
-| 練習バトル | 9 | 同じ盤面で基本操作を体験する |
+| 準備する | 4 | 勝利条件と盤面の場所を画面だけで知る |
+| 練習バトル | 17 | 同じ画面上の盤面で基本操作を体験する |
 | 本当のゲームを準備する | 8 | ランダムなEntry16を正式な順序で準備する |
 | 1戦やってみる | 1 | 常設の早見を使って対戦する |
 
-実物を操作 → 具体的な操作名のボタン → 操作後の盤面と短い用語説明 → 次の操作、という流れです。
+画面を見る → 具体的な操作名のボタン → 操作後の盤面と短い用語説明 → 次の操作、という流れです。実物カードは第3章から使います。
 PCとモバイルは同じ教材・同じプレイヤー位置を使います。
 
 ## 3. ディレクトリ配置
@@ -36,7 +36,7 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 
 ## 5. 新しいJSON schema
 
-`schemaVersion: 2`、シナリオIDは `entry16-hands-on-v2` です。
+`schemaVersion: 2`、シナリオIDは `entry16-hands-on-v3` です。
 
 | フィールド | 内容 |
 | --- | --- |
@@ -75,6 +75,14 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 7. A：エンドを宣言しBへターンを渡す。
 8. B：使用済みの防壁♦5を縦へ戻す。♥7は縦のまま。
 9. B：ライフから♠3・♦8を手札へ。
+10. B：ライフ最上段のAを墓地へ移し、防壁設置のコストLを払う。
+11. B：手札の♦8を裏向き・縦向きの防壁として置く。
+12. B：エンドを宣言しAへターンを渡す。
+13. A：横向きの防壁♦5を縦へ戻す。
+14. A：ライフから♦8・Aを手札へ。
+15. A：兵士♠2を横向きにしてアタック。
+16. B：兵士・防壁を指定せず、ブロックしないことを確認する。
+17. B：2点ダメージを受け、ライフ上2枚を墓地へ移す。
 
 すべてEntry16に含まれるカードです。準備後は各プレイヤーの全領域で16枚が保存されます。
 同一カードの回転や移動を太枠・点線・移動先プレビュー・矢印付き操作案内で示します。
@@ -93,7 +101,7 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 通常準備以降はカードの種類・ライフ枚数を画面で仮定しません。
 先攻A/Bだけを記録し、開始時ドローに反映します。通常対戦の進行は実物で管理します。
 
-## 8. アクション早見
+## 8. ルール早見
 
 ライト対応の19項目を正規YAMLのformatから抽出します。
 
@@ -110,25 +118,27 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 
 ## 9. PC表示確認
 
-1440×900の実ブラウザで全22操作を実行。
-準備、アタック、ブロック、墓地移動、召喚、ターン交代、先攻Bと開始ドロー、対戦用早見まで確認しました。
+1440×900の実ブラウザで、固定練習盤面、横向きカード、実物カード配置ガイドを確認しました。
 横方向のはみ出しはありません。公式配置図に合わせ、Aのライフ・墓地は右、Bは左に配置しました。
 
 ## 10. 390pxモバイル表示確認
 
-390×844で全22操作を実行。
+390×844で全30操作を実行。
 カードと移動先、縦横、墓地への移動、操作後の説明、ドロワー、早見検索と詳細を確認しました。
-先攻Aを選んだ状態で再読み込みし、操作する人とターンの復元を確認しました。
 横方向のはみ出しはありません。長い準備手順では縦スクロールを使います。
 次のステップではページ先頭へ戻すため、新しい操作する人・指示を見落としにくくしました。
 
+あわせて320×568、360×800、768×1024でも、ヘッダー、長文、配置ガイド、ルール早見を確認しました。
+
 ## 11. Tutorialテスト
 
-Docker経由でVitest 26件成功（schema 13、UI 7、保存 6）。
+Docker経由でVitest 32件成功（schema 15、UI 10、保存 7）。
 schema、参照ID、盤面の連続性、操作カード、16枚の保存、actor A/B、回転と墓地移動、
 進捗の保存・再開・リセット、旧進捗の無効化、先攻選択、開始ドロー、早見を検証しました。
 GitHub Pages用base pathでschema検証・TypeScript・Viteビルドが成功しています。
 Windows Dockerのファイル監視をポーリングに変更し、編集反映も確認しました。
+
+指定された `HowToBlackPoker-book.pdf` は作業環境内に存在せず、本文の直接確認はできませんでした。今回の説明は依頼文に列挙された観点と正規ルールソースを基準に構成しています。
 
 ## 12. 既存Simulator
 
@@ -164,21 +174,14 @@ Docker経由で既存19ファイル・113件のテストが成功しました。
 
 ## 14. 変更ファイル
 
-移動対象は旧 `tools/tutorial/` の全追跡ファイルです。主な変更・追加：
+今回変更したファイル：
 
-- `.gitignore`、`.github/workflows/deploy-tutorial-pages.yml`
-- `tutorial/Dockerfile`、`compose.yaml`、`package.json`、`vite.config.ts`、`tsconfig.json`
 - `tutorial/README.md`、本報告書
-- `tutorial/scripts/rule-source.mjs`、`generate-rule-catalog.mjs`、`validate-tutorials.mjs`
 - `tutorial/src/App.tsx`、`types.ts`、`styles.css`
-- `tutorial/src/components/TutorialBoard.tsx`（新規）、`ActionHelp.tsx`（新規）、`CurriculumPanel.tsx`、`RuleLinks.tsx`
-- `tutorial/src/data/curriculum.ts`、`data/tutorials/entry16.json`
-- `tutorial/src/generated/ruleCatalog.ts`
-- `tutorial/src/hooks/useTutorialProgress.ts`、`lib/storage.ts`、`lib/schema.ts`、`lib/schema.mjs`、`lib/schema.d.mts`
-- `tutorial/tests/App.test.tsx`、`schema.test.ts`、`storage.test.ts`、`setup.ts`
-
-旧CardVisualは継続盤面に置換して削除しました。
-`index.html`は配置移動とブラウザのテーマ色修正、`package-lock.json`、`main.tsx`、`vite-env.d.ts`は配置を移動しました。
+- `tutorial/src/components/ActionHelp.tsx`、`BeginnerGuide.tsx`、`CurriculumPanel.tsx`、`TutorialBoard.tsx`
+- `tutorial/src/data/tutorials/entry16.json`
+- `tutorial/src/hooks/useTutorialProgress.ts`、`lib/storage.ts`
+- `tutorial/tests/App.test.tsx`、`schema.test.ts`、`storage.test.ts`
 
 ## 15. コミット
 

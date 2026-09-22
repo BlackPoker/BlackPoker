@@ -23,12 +23,22 @@ export function TutorialBoard({
   real: boolean;
   stepId: string;
 }) {
-  const realHints: Record<Zone, string> = {
-    life: stepId === "real-life" ? "裏向き・16枚" : "裏向きの山",
-    hand: stepId === "real-hand" ? "手元に7枚" : "相手に見せない",
-    bulwarks: stepId === "preset-bulwark" ? "表・縦で1枚" : "ライフ側から置く",
-    soldiers: stepId === "preset-soldier" ? "表・縦で1枚" : "表向きの置き場",
-    grave: stepId === "first-player" ? "比較した札を置く" : "表向きで重ねる",
+  const realHints: Record<Zone, { main: string; sub: string }> = {
+    life: stepId === "real-life"
+      ? { main: "裏向きで16枚", sub: "ここに重ねる" }
+      : { main: "裏向きの束", sub: "一番上から引く" },
+    hand: stepId === "real-hand"
+      ? { main: "手元に7枚", sub: "相手に見せない" }
+      : { main: "手札", sub: "相手に見せない" },
+    bulwarks: stepId === "preset-bulwark"
+      ? { main: "表・縦で1枚", sub: "最初の防壁" }
+      : { main: "防壁の列", sub: "ライフ側から並べる" },
+    soldiers: stepId === "preset-soldier"
+      ? { main: "表・縦で1枚", sub: "最初の兵士" }
+      : { main: "表向きのカード", sub: "兵士はここ" },
+    grave: stepId === "first-player"
+      ? { main: "比べたカード", sub: "表向きで置く" }
+      : { main: "表向きの束", sub: "使い終わったカード" },
   };
 
   function zone(player: Player, zone: Zone) {
@@ -62,29 +72,29 @@ export function TutorialBoard({
         </span>
         <div className="zone-cards">
           {shown.map((c: BoardCard) => (
-            <span
-              key={c.card}
-              className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${related.some((o) => o.cards.includes(c.card)) ? "selected-card" : ""}`}
-              aria-label={`${player} ${cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
-            >
-              {c.face === "down" ? "BP" : cardName(c.card)}
+            <span className={`card-slot ${c.state}`} key={c.card}>
+              <span
+                className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${related.some((o) => o.cards.includes(c.card)) ? "selected-card" : ""}`}
+                aria-label={`${player} ${cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
+              >
+                {c.face === "down" ? "BP" : cardName(c.card)}
+              </span>
             </span>
           ))}
           {preview.slice(0, 2).map((c) => (
-            <span
-              key={"preview-" + c.card}
-              className={`board-card ghost-card ${c.state}`}
-              aria-label={`置く位置 ${cardName(c.card)}`}
-            >
-              {cardName(c.card)}
+            <span className={`card-slot ${c.state}`} key={"preview-" + c.card}>
+              <span className={`board-card ghost-card ${c.state}`} aria-label={`置く位置 ${cardName(c.card)}`}>
+                {cardName(c.card)}
+              </span>
             </span>
           ))}
           {!shown.length && !preview.length && real && (
             <span className={`real-placeholder placeholder-${zone}`}>
-              <span className="slot-stack" aria-hidden="true">
+              <span className={`slot-stack slot-${zone}`} aria-hidden="true">
                 <i /><i /><i />
               </span>
-              <small>{realHints[zone]}</small>
+              <strong>{realHints[zone].main}</strong>
+              <small>{realHints[zone].sub}</small>
             </span>
           )}
           {!shown.length && !preview.length && !real && <span className="empty-zone">—</span>}

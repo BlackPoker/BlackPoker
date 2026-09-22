@@ -13,9 +13,13 @@ export function useTutorialProgress(scenarioId: string, stepCount: number) {
     loadProgress(scenarioId, storage),
   );
   const stepIndex = Math.min(progress.stepIndex, Math.max(0, stepCount - 1));
+  const maxReachedStepIndex = Math.min(
+    Math.max(stepIndex, progress.maxReachedStepIndex ?? stepIndex),
+    Math.max(0, stepCount - 1),
+  );
   useEffect(
-    () => saveProgress({ ...progress, stepIndex }, storage),
-    [progress, stepIndex, storage],
+    () => saveProgress({ ...progress, stepIndex, maxReachedStepIndex }, storage),
+    [progress, stepIndex, maxReachedStepIndex, storage],
   );
   const update = (changes: Partial<TutorialProgress>) =>
     setProgress((p) => ({
@@ -25,6 +29,7 @@ export function useTutorialProgress(scenarioId: string, stepCount: number) {
     }));
   return {
     stepIndex,
+    maxReachedStepIndex,
     completed: progress.completed,
     applied: !!progress.applied,
     firstPlayer: progress.firstPlayer,
@@ -34,6 +39,10 @@ export function useTutorialProgress(scenarioId: string, stepCount: number) {
     next: () =>
       update({
         stepIndex: Math.min(stepIndex + 1, stepCount - 1),
+        maxReachedStepIndex: Math.max(
+          maxReachedStepIndex,
+          Math.min(stepIndex + 1, stepCount - 1),
+        ),
         applied: false,
         completed: stepIndex === stepCount - 1,
       }),
@@ -41,13 +50,15 @@ export function useTutorialProgress(scenarioId: string, stepCount: number) {
       update({
         stepIndex: Math.max(0, stepIndex - 1),
         applied: false,
-        completed: false,
       }),
     goTo: (index: number) =>
       update({
         stepIndex: Math.max(0, Math.min(index, stepCount - 1)),
+        maxReachedStepIndex: Math.max(
+          maxReachedStepIndex,
+          Math.max(0, Math.min(index, stepCount - 1)),
+        ),
         applied: false,
-        completed: false,
       }),
     restart: () => {
       clearProgress(storage);

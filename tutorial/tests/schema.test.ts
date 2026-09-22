@@ -79,6 +79,14 @@ describe("tutorial schema", () => {
     expect(ids[0]).toBe("welcome");
     expect(ids.at(-1)).toBe("free-play");
   });
+  it("防壁設置とノーブロックダメージを固定盤面で体験できる", () => {
+    const ids = scenario.steps.map((step) => step.id);
+    expect(ids).toContain("set-bulwark-cost-l");
+    expect(ids).toContain("set-bulwark-place");
+    expect(ids).toContain("no-block");
+    expect(ids).toContain("direct-damage");
+    expect(scenario.steps.find((step) => step.id === "direct-damage")!.mode).toBe("fixed");
+  });
   it("通常準備ではランダムなカードを決めつけない", () => {
     for (const step of scenario.steps.filter((s) => s.mode === "real"))
       for (const b of [step.board.before, step.board.after])

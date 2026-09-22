@@ -20,6 +20,7 @@ export function resolveBrowserStorage(): StorageLike | null {
 export const initialProgress = (scenarioId: string): TutorialProgress => ({
   scenarioId,
   stepIndex: 0,
+  maxReachedStepIndex: 0,
   completed: false,
   updatedAt: new Date(0).toISOString(),
 });
@@ -42,6 +43,12 @@ export function loadProgress(
     return {
       scenarioId,
       stepIndex: Number(value.stepIndex),
+      maxReachedStepIndex: Math.max(
+        Number(value.stepIndex),
+        Number.isInteger(value.maxReachedStepIndex)
+          ? Number(value.maxReachedStepIndex)
+          : Number(value.stepIndex),
+      ),
       completed: value.completed === true,
       applied: value.applied === true,
       firstPlayer:

@@ -3,11 +3,13 @@ import type { TutorialStep } from "../types";
 export function CurriculumPanel({
   steps,
   stepIndex,
+  maxReachedStepIndex,
   onSelect,
   onClose,
 }: {
   steps: TutorialStep[];
   stepIndex: number;
+  maxReachedStepIndex: number;
   onSelect: (index: number) => void;
   onClose?: () => void;
 }) {
@@ -57,7 +59,7 @@ export function CurriculumPanel({
                       aria-current={s.index === stepIndex ? "step" : undefined}
                       onClick={() => onSelect(s.index)}
                     >
-                      <span>{s.index < stepIndex ? "✓" : "・"}</span>
+                      <span>{s.index < maxReachedStepIndex ? "✓" : "・"}</span>
                       <b>{s.title}</b>
                     </button>
                   ))}

@@ -9,6 +9,183 @@
   --lime: #18181b;
   --paper: #ffffff;
 }
+
+/* 子ども向け説明・カードの安全領域 */
+.card-slot {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 44px;
+}
+.zone-hand .card-slot {
+  width: 36px;
+  height: 38px;
+  flex-basis: 36px;
+}
+.real-placeholder strong {
+  max-width: 100%;
+  font-size: 8px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.slot-hand i:nth-child(1) { transform: rotate(-12deg) translate(-5px, 1px); }
+.slot-hand i:nth-child(2) { transform: rotate(12deg) translate(5px, 1px); }
+.slot-hand i:nth-child(3) { transform: translate(0, -2px); }
+.slot-soldiers i:nth-child(1),
+.slot-soldiers i:nth-child(2),
+.slot-bulwarks i:nth-child(1),
+.slot-bulwarks i:nth-child(2) { display: none; }
+.cost-primer > .cost-moves {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.cost-moves article {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px 7px;
+  padding: 9px;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+  background: white;
+}
+.cost-moves article > b { grid-row: 1 / 5; font-size: 20px; }
+.cost-moves article > span,
+.cost-moves article > i,
+.cost-moves article > small {
+  grid-column: 2;
+  min-width: 0;
+  font-size: 9px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.cost-moves article > i { color: #71717a; font-style: normal; }
+.cost-moves article > small { color: #52525b; font-weight: 700; }
+.term-list {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 7px 10px;
+}
+.term-list dt { font-weight: 700; }
+.term-list dd { margin: 0; }
+.help-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  flex-shrink: 0;
+  border-bottom: 1px solid #d4d4d8;
+}
+.help-tabs button {
+  min-height: 44px;
+  border: 0;
+  border-right: 1px solid #e4e4e7;
+  background: #fafafa;
+  font-size: 12px;
+  font-weight: 700;
+}
+.help-tabs button[aria-selected="true"] { color: white; background: #18181b; }
+.easy-rule dt { font-weight: 700; }
+.cost-code {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.how-list {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+.how-list li {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+.how-list li b {
+  width: 23px;
+  height: 23px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: white;
+  background: #18181b;
+  font-size: 10px;
+}
+.character-intro {
+  padding: 14px;
+  border: 1px solid #d4d4d8;
+  border-radius: 7px;
+  background: #fafafa;
+}
+.character-intro p { margin-bottom: 0; }
+.character-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+.character-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #d4d4d8;
+  border-radius: 7px;
+}
+.character-card > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.character-card h3 { margin: 0; font-size: 16px; }
+.character-card > div span { color: #52525b; font-size: 11px; }
+.character-card ul {
+  margin: 10px 0;
+  padding-left: 18px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.character-card dl {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 5px;
+}
+.character-card dd { margin: 0; overflow-wrap: anywhere; }
+.top-back {
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid #d4d4d8;
+  border-radius: 5px;
+  color: #18181b;
+  background: white;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.top-back:disabled { opacity: 0.35; cursor: not-allowed; }
+.step-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  margin-bottom: 8px;
+}
+.step-context span { color: #52525b; font-size: 10px; }
+.step-context strong {
+  padding: 3px 7px;
+  border-radius: 4px;
+  color: white;
+  background: #18181b;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+@media (max-width: 520px) {
+  .cost-primer > .cost-moves,
+  .character-list { grid-template-columns: 1fr; }
+  .top-back { padding-inline: 7px; }
+  .card-slot { width: 39px; height: 41px; flex-basis: 39px; }
+  .zone-hand .card-slot { width: 32px; height: 36px; flex-basis: 32px; }
+}
 * {
   box-sizing: border-box;
 }
@@ -1212,7 +1389,7 @@ button {
 }
 .board-card.drive {
   transform: rotate(90deg);
-  margin: 0 8px;
+  margin: 0;
 }
 .board-card.face-down {
   background: repeating-linear-gradient(
