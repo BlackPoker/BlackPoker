@@ -21,9 +21,10 @@ describe("hands-on tutorial", () => {
     const user = userEvent.setup();
     render(<App />);
     expect(
-      screen.getByRole("heading", { name: "トランプを2組、用意しましょう。" }),
+      screen.getByRole("heading", { name: "まずは、画面だけで練習します。" }),
     ).toBeVisible();
-    await user.click(screen.getByRole("button", { name: /2人の場所を決めた/ }));
+    expect(screen.getByText("実物カードはまだ使いません")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: /画面の向きを確認する/ }));
     expect(screen.getByRole("status")).toHaveTextContent("プレイヤーBが上");
     await user.click(screen.getByRole("button", { name: /次の操作へ/ }));
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER A");
@@ -34,7 +35,7 @@ describe("hands-on tutorial", () => {
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER B");
     expect(screen.getByTestId("actor")).toHaveTextContent("ターン：PLAYER A");
     await userEvent.click(
-      screen.getByRole("button", { name: /♥7でブロックした/ }),
+      screen.getByRole("button", { name: /♥7でブロックする/ }),
     );
     expect(
       within(screen.getByTestId("B-soldiers")).getByLabelText(
@@ -47,14 +48,14 @@ describe("hands-on tutorial", () => {
     const view = render(<App />);
     expect(screen.getByLabelText("A ♣6 表向き 縦向き")).toBeVisible();
     await userEvent.click(
-      screen.getByRole("button", { name: /♣6を横向きにした/ }),
+      screen.getByRole("button", { name: /♣6でアタックする/ }),
     );
     expect(screen.getByLabelText("A ♣6 表向き 横向き")).toBeVisible();
     view.unmount();
     at("damage");
     render(<App />);
     await userEvent.click(
-      screen.getByRole("button", { name: /♣6を墓地へ置いた/ }),
+      screen.getByRole("button", { name: /ダメージ判定を見る/ }),
     );
     expect(
       within(screen.getByTestId("A-grave")).getByLabelText(/♣6/),
@@ -67,7 +68,7 @@ describe("hands-on tutorial", () => {
     at("attack");
     const view = render(<App />);
     await userEvent.click(
-      screen.getByRole("button", { name: /♣6を横向きにした/ }),
+      screen.getByRole("button", { name: /♣6でアタックする/ }),
     );
     view.unmount();
     render(<App />);
@@ -77,7 +78,7 @@ describe("hands-on tutorial", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "やり直す" }));
     expect(
-      screen.getByRole("heading", { name: "トランプを2組、用意しましょう。" }),
+      screen.getByRole("heading", { name: "まずは、画面だけで練習します。" }),
     ).toBeVisible();
   });
   it("先攻決定なしで進めず、選んだBが開始時1枚を引く", async () => {
@@ -102,11 +103,14 @@ describe("hands-on tutorial", () => {
     expect(
       within(help).getByRole("heading", { name: "英雄召喚" }),
     ).toBeVisible();
+    expect(within(help).getByText("まず使うアクション")).toBeVisible();
+    expect(within(help).getByText("その他のアクション")).toBeVisible();
+    expect(within(help).getAllByText("1点ダメージを受ける").length).toBeGreaterThan(0);
     expect(
       within(help).queryByRole("heading", { name: "クイック召喚" }),
     ).toBeNull();
     await userEvent.type(within(help).getByRole("textbox"), "兵士召喚");
-    expect(within(help).getByText(/縦向きの防壁1体を横に/)).toBeVisible();
+    expect(within(help).getAllByText(/防壁をドライブする/).length).toBeGreaterThan(0);
     await userEvent.click(
       within(help).getByRole("button", { name: "早見を閉じる" }),
     );
@@ -126,5 +130,13 @@ describe("hands-on tutorial", () => {
       screen.getByLabelText("チュートリアル全体の進捗"),
     ).toBeInTheDocument();
     expect(document.querySelectorAll(".chapter-group")).toHaveLength(4);
+    expect(document.querySelectorAll(".learning-roadmap li")).toHaveLength(8);
+  });
+  it("実物カードの準備では置き場ガイドを表示する", () => {
+    at("real-hand");
+    render(<App />);
+    expect(screen.getByText("ここから実物カード")).toBeVisible();
+    expect(screen.getAllByText("手元に7枚")).toHaveLength(2);
+    expect(document.querySelectorAll(".slot-stack").length).toBeGreaterThan(0);
   });
 });

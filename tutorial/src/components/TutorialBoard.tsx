@@ -14,13 +14,23 @@ export function TutorialBoard({
   operations,
   applied,
   real,
+  stepId,
 }: {
   board: BoardState;
   after: BoardState;
   operations: Operation[];
   applied: boolean;
   real: boolean;
+  stepId: string;
 }) {
+  const realHints: Record<Zone, string> = {
+    life: stepId === "real-life" ? "裏向き・16枚" : "裏向きの山",
+    hand: stepId === "real-hand" ? "手元に7枚" : "相手に見せない",
+    bulwarks: stepId === "preset-bulwark" ? "表・縦で1枚" : "ライフ側から置く",
+    soldiers: stepId === "preset-soldier" ? "表・縦で1枚" : "表向きの置き場",
+    grave: stepId === "first-player" ? "比較した札を置く" : "表向きで重ねる",
+  };
+
   function zone(player: Player, zone: Zone) {
     const cards = board[player][zone];
     const related = operations.filter((o) => o.player === player);
@@ -69,9 +79,15 @@ export function TutorialBoard({
               {cardName(c.card)}
             </span>
           ))}
-          {!shown.length && !preview.length && (
-            <span className="empty-zone">{real ? "実物のカード" : "—"}</span>
+          {!shown.length && !preview.length && real && (
+            <span className={`real-placeholder placeholder-${zone}`}>
+              <span className="slot-stack" aria-hidden="true">
+                <i /><i /><i />
+              </span>
+              <small>{realHints[zone]}</small>
+            </span>
           )}
+          {!shown.length && !preview.length && !real && <span className="empty-zone">—</span>}
         </div>
         {target && (
           <small className="target-label">
@@ -92,7 +108,7 @@ export function TutorialBoard({
     >
       <figcaption>
         {real
-          ? "配置ガイド · カードと枚数は実物で確認"
+          ? "実物カードの置き場ガイド · 薄いカード枠へ置きます"
           : applied
             ? "操作後の盤面"
             : "操作前の盤面"}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import scenario from "../src/data/tutorials/entry16.json";
 import { ruleCatalog } from "../src/generated/ruleCatalog";
 import { validateScenario } from "../src/lib/schema";
+import { formatDifferences, learningCourses } from "../src/data/curriculum";
 describe("tutorial schema", () => {
   it("全データのschema・参照・盤面連続性が正しい", () =>
     expect(validateScenario(scenario, ruleCatalog)).toEqual([]));
@@ -82,5 +83,11 @@ describe("tutorial schema", () => {
     for (const step of scenario.steps.filter((s) => s.mode === "real"))
       for (const b of [step.board.before, step.board.after])
         expect(Object.values(b.A).flat()).toHaveLength(0);
+  });
+  it("8コースのうち最初だけ利用でき、フォーマット差分は別に算出する", () => {
+    expect(learningCourses).toHaveLength(8);
+    expect(learningCourses.filter((course) => course.status === "available")).toHaveLength(1);
+    expect(formatDifferences.map((format) => format.id)).toEqual(["std", "pro", "mast"]);
+    expect(formatDifferences.every((format) => format.addedActions.length > 0)).toBe(true);
   });
 });

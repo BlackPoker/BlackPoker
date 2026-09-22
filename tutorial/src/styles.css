@@ -735,6 +735,305 @@ button {
   }
 }
 
+/* 学習ロードマップと初心者ガイド */
+.learning-roadmap {
+  margin-top: 24px;
+}
+.roadmap-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 7px 9px;
+}
+.roadmap-heading strong {
+  font-size: 12px;
+}
+.roadmap-heading small {
+  color: #71717a;
+  font-size: 9px;
+  text-align: right;
+}
+.learning-roadmap ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.learning-roadmap li {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 7px 9px;
+  border: 1px solid #e4e4e7;
+  border-radius: 5px;
+  background: #fafafa;
+}
+.learning-roadmap li > span,
+.learning-roadmap li > small {
+  color: #71717a;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+.learning-roadmap li > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 10px;
+}
+.learning-roadmap li.available {
+  color: white;
+  background: #18181b;
+  border-color: #18181b;
+}
+.learning-roadmap li.available > span,
+.learning-roadmap li.available > small {
+  color: #d4d4d8;
+}
+.format-intro {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e4e4e7;
+}
+.mode-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px 12px;
+  margin: 10px 0 12px;
+  padding: 8px 10px;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  background: #f4f4f5;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.mode-notice b {
+  letter-spacing: 0.05em;
+}
+.mode-notice span {
+  color: #52525b;
+}
+.real-placeholder {
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: 100%;
+  color: #71717a;
+}
+.real-placeholder small {
+  max-width: 100%;
+  font-size: 8px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.slot-stack {
+  position: relative;
+  display: block;
+  width: 31px;
+  height: 39px;
+}
+.slot-stack i {
+  position: absolute;
+  inset: 0;
+  border: 1px dashed #a1a1aa;
+  border-radius: 4px;
+  background: repeating-linear-gradient(45deg, #fff, #fff 4px, #f4f4f5 4px, #f4f4f5 6px);
+}
+.slot-stack i:nth-child(1) { transform: translate(-3px, -2px); }
+.slot-stack i:nth-child(2) { transform: translate(2px, 1px); }
+.slot-stack i:nth-child(3) { transform: translate(0, 0); }
+.beginner-guide {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  background: #fafafa;
+}
+.guide-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+.guide-heading h3 {
+  margin: 2px 0 0;
+  font-size: 18px;
+}
+.guide-heading > span {
+  color: #71717a;
+  font-size: 9px;
+}
+.notation-grid,
+.cost-primer > div {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 12px 0;
+}
+.notation-grid p,
+.cost-primer > div p {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid #e4e4e7;
+  border-radius: 5px;
+  background: white;
+}
+.notation-grid b,
+.cost-primer > div b {
+  font-size: 17px;
+}
+.notation-grid span,
+.cost-primer > div span {
+  min-width: 0;
+  font-size: 10px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.beginner-guide > details {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e4e4e7;
+}
+.beginner-guide summary {
+  font-weight: 700;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.auto-flow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin: 8px 0;
+}
+.auto-flow span {
+  padding: 4px 7px;
+  border: 1px solid #a1a1aa;
+  border-radius: 4px;
+  background: white;
+  font-size: 10px;
+}
+.auto-flow i {
+  color: #71717a;
+  font-style: normal;
+}
+.action-group {
+  margin-top: 24px;
+}
+.action-group-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-bottom: 2px solid #18181b;
+}
+.action-group-title h3 {
+  margin: 0;
+  font-size: 16px;
+}
+.action-group-title span {
+  color: #71717a;
+  font-size: 10px;
+}
+
+/* 長い日本語や補助ラベルを狭い画面でも重ねない */
+.topbar > *,
+.lesson-progress > div > *,
+.actor-banner > *,
+.table-zone,
+.operation-guide p,
+.help-action dd,
+.help-scroll summary,
+.chapter-list button b {
+  min-width: 0;
+}
+.lesson-card h1,
+.instruction,
+.actor-banner,
+.operation-guide p,
+.help-action dd,
+.help-scroll p,
+.help-scroll summary,
+.chapter-list button b,
+.zone-label,
+.target-label {
+  overflow-wrap: anywhere;
+}
+.target-label {
+  position: static;
+  display: inline-flex;
+  margin-top: 3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: white;
+  background: #18181b;
+  line-height: 1.25;
+}
+.table-zone.destination {
+  padding-bottom: 4px;
+}
+
+@media (max-width: 520px) {
+  .topbar {
+    gap: 6px;
+    padding-inline: 10px;
+  }
+  .help-button {
+    margin: 0 0 0 auto;
+    padding: 8px;
+    white-space: nowrap;
+  }
+  .lesson-progress > div:first-child {
+    gap: 8px;
+  }
+  .lesson-progress span {
+    max-width: 46%;
+    line-height: 1.35;
+    letter-spacing: 0.08em;
+  }
+  .lesson-progress strong {
+    white-space: nowrap;
+  }
+  .actor-banner {
+    align-items: flex-start;
+    line-height: 1.4;
+  }
+  .notation-grid,
+  .cost-primer > div {
+    grid-template-columns: 1fr;
+  }
+  .action-help > header,
+  .help-scroll {
+    padding-inline: 15px;
+  }
+  .beginner-guide {
+    padding: 12px;
+  }
+  .guide-heading {
+    align-items: flex-start;
+  }
+  .help-action dl {
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+  .real-placeholder small {
+    font-size: 7px;
+  }
+  .slot-stack {
+    width: 25px;
+    height: 32px;
+  }
+  .zone-cards {
+    gap: 2px;
+  }
+}
+
 @media (max-width: 390px) {
   .lesson-card {
     padding-inline: 17px;
@@ -945,13 +1244,19 @@ button {
 }
 .table-zone.destination {
   border: 2px dashed #18181b;
+  padding-bottom: 4px;
 }
 .target-label {
-  position: absolute;
-  right: 3px;
-  bottom: 2px;
+  position: static;
+  display: inline-flex;
+  margin-top: 3px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  color: white;
+  background: #18181b;
   font-size: 8px;
   font-weight: 700;
+  line-height: 1.25;
 }
 .operation-guide {
   margin-bottom: 12px;

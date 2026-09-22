@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ruleCatalog } from "../generated/ruleCatalog";
+import { BeginnerGuide } from "./BeginnerGuide";
 const uses: Record<string, string> = {
   end: "行動を終えてターンを渡す",
   charge: "次のターンの場を準備する",
@@ -22,12 +23,22 @@ const uses: Record<string, string> = {
   search: "Jokerでライフからカードを探す",
 };
 const costNames: Record<string, string> = {
-  B: "縦向きの防壁1体を横に",
-  L: "ライフの上1枚を墓地へ",
-  D: "キーカードとは別に手札1枚を捨てる",
-  S: "キャラクター1体を墓地へ",
-  C: "対象のキャラクターを横に",
+  B: "防壁をドライブする",
+  L: "1点ダメージを受ける",
+  D: "手札を1枚捨てる",
+  S: "キャラクター1体を墓地に移す",
+  C: "キーユニットのキャラクターをドライブする",
 };
+const firstActionIds = new Set([
+  "end",
+  "charge",
+  "draw",
+  "attack",
+  "block",
+  "damageJudge",
+  "setBulwark",
+  "summonsSoldier",
+]);
 export function ActionHelp({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -40,6 +51,10 @@ export function ActionHelp({ onClose }: { onClose: () => void }) {
       (a.formats as readonly string[]).includes("lite") &&
       (a.name + a.group + a.key).includes(query),
   );
+  const groups = [
+    ["まず使うアクション", actions.filter(([id]) => firstActionIds.has(id))],
+    ["その他のアクション", actions.filter(([id]) => !firstActionIds.has(id))],
+  ] as const;
   return (
     <dialog
       className="action-help"
@@ -57,6 +72,7 @@ export function ActionHelp({ onClose }: { onClose: () => void }) {
         </button>
       </header>
       <div className="help-scroll">
+        <BeginnerGuide />
         <details>
           <summary>1戦の進め方・困ったとき</summary>
           <p>
@@ -98,8 +114,16 @@ export function ActionHelp({ onClose }: { onClose: () => void }) {
           }
           種類。覚える必要はありません。キーカードとコストは別に用意します。
         </p>
-        {actions.map(([id, a]) => (
-          <article key={id} className="help-action">
+        {groups.map(
+          ([title, items]) =>
+            items.length > 0 && (
+              <section className="action-group" key={title}>
+                <div className="action-group-title">
+                  <h3>{title}</h3>
+                  <span>{items.length}件</span>
+                </div>
+                {items.map(([id, a]) => (
+                  <article key={id} className="help-action">
             <h3>{a.name}</h3>
             <p>{uses[id] || a.group}</p>
             {id === "search" && (
@@ -135,8 +159,11 @@ export function ActionHelp({ onClose }: { onClose: () => void }) {
                 公式ルール ↗
               </a>
             </details>
-          </article>
-        ))}
+                  </article>
+                ))}
+              </section>
+            ),
+        )}
         {!actions.length && <p>一致するアクションはありません。</p>}
       </div>
     </dialog>

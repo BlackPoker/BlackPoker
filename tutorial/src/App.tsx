@@ -120,9 +120,18 @@ export default function App() {
             </p>
             <h1>{step.title}</h1>
             <p className="instruction">{step.instruction}</p>
+            <div className={`mode-notice mode-${step.mode}`}>
+              {step.mode === "fixed" ? (
+                <><b>画面だけで練習</b><span>実物カードはまだ使いません</span></>
+              ) : (
+                <><b>ここから実物カード</b><span>薄いカード枠を置き場にしてください</span></>
+              )}
+            </div>
             {step.checklist && (
               <details className="deck-check">
-                <summary>用意する16枚を確認</summary>
+                <summary>
+                  {step.mode === "fixed" ? "画面に出る16枚を確認" : "用意する16枚を確認"}
+                </summary>
                 <div>
                   {step.checklist.map((c) => (
                     <span key={c}>{cardName(c)}</span>
@@ -153,11 +162,12 @@ export default function App() {
               operations={step.operations}
               applied={progress.applied}
               real={step.mode === "real"}
+              stepId={step.id}
             />
             {!progress.applied && (
               <div
                 className="operation-guide"
-                aria-label="動かすカードと移動先"
+                aria-label={step.mode === "fixed" ? "画面で変わるカード" : "動かすカードと移動先"}
               >
                 {step.operations.map((o, i) => (
                   <p key={i}>
@@ -241,7 +251,9 @@ export default function App() {
             <button onClick={() => setMenuOpen(true)}>一覧を見る</button>
           </div>
           <p className="physical-note">
-            実物を動かす → ボタンを押す → 盤面を確認
+            {step.mode === "fixed"
+              ? "画面で動きを見る → ボタンを押す → 操作後を確認"
+              : "実物を動かす → ボタンを押す → 配置を確認"}
           </p>
         </div>
       </main>

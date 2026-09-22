@@ -1,4 +1,4 @@
-import { curriculum } from "../data/curriculum";
+import { formatDifferences, learningCourses } from "../data/curriculum";
 import type { TutorialStep } from "../types";
 export function CurriculumPanel({
   steps,
@@ -66,12 +66,30 @@ export function CurriculumPanel({
             );
           })}
         </div>
+        <section className="learning-roadmap" aria-labelledby="roadmap-title">
+          <div className="roadmap-heading">
+            <strong id="roadmap-title">学習ロードマップ</strong>
+            <small>8つのコースを順に学びます</small>
+          </div>
+          <ol>
+            {learningCourses.map((course, index) => (
+              <li className={course.status} key={course.id}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{course.title}</strong>
+                <small>{course.status === "available" ? "学習中" : "LOCK"}</small>
+              </li>
+            ))}
+          </ol>
+        </section>
         <details className="format-differences">
-          <summary>次のフォーマットでは？</summary>
-          {curriculum.slice(1).map((c) => (
+          <summary>フォーマット差分</summary>
+          <p className="format-intro">
+            学習コースとは別に、フォーマットが上がると使えるアクションが増えます。
+          </p>
+          {formatDifferences.map((c) => (
             <p key={c.id}>
               <strong>{c.title}で追加</strong>
-              <small>{c.subtitle}</small>
+              <small>{c.addedActions.join("・") || "追加なし"}</small>
             </p>
           ))}
           <p>
