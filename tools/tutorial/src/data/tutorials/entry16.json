@@ -80,7 +80,7 @@
       "title": "PLAYER Aの盤面を見てみよう。",
       "instruction": "手元に持つカードが「手札」。戦うカードが「兵士（へいし）」。カードを置いて戦う場所が「場」です。",
       "actionLabel": "画面に3枚を表示する",
-      "explanation": "♣6は兵士、♦5は練習用の表向き防壁、♠2は手札です。場は兵士や防壁を置く場所。今は画面の位置関係だけ見れば十分です。",
+      "explanation": "♣6は兵士、BPの裏面は練習用の防壁、♠2は手札です。通常の防壁は種類が見えないように裏向きで置きます。今は画面の位置関係だけ見れば十分です。",
       "learned": "縦向きが「チャージ」です。",
       "ruleRefs": [
         "character.soldier",
@@ -158,7 +158,7 @@
           "cards": [
             "D5"
           ],
-          "label": "♦5 → 防壁（表・縦）"
+          "label": "カード → 防壁（裏・縦）"
         },
         {
           "player": "A",
@@ -180,7 +180,7 @@
       "title": "PLAYER Bの盤面も見てみよう。",
       "instruction": "攻撃を防ぐカードが「防壁（ぼうへき）」。縦向きは使える状態、横向きは使った状態です。",
       "actionLabel": "画面に2枚を表示する",
-      "explanation": "♥7は兵士です。♦5はチャージを体験するため、使用済みの防壁として横向きにしておきます。これは通常の開始手順ではなく教材用の途中盤面です。",
+      "explanation": "♥7は兵士です。BPの裏面はチャージを体験するため、使用済みの防壁として横向きにしておきます。これは通常の開始手順ではなく教材用の途中盤面です。",
       "learned": "横向きが「ドライブ」です。",
       "ruleRefs": [
         "character.soldier",
@@ -288,7 +288,7 @@
           "cards": [
             "D5"
           ],
-          "label": "♦5 → 防壁（横）"
+          "label": "防壁カード → 防壁（裏・横）"
         }
       ]
     },
@@ -549,7 +549,7 @@
             "S3",
             "D8"
           ],
-          "label": "上から♠3・♦8 → ライフ"
+          "label": "上から♠3・♢8 → ライフ"
         },
         {
           "player": "B",
@@ -559,7 +559,7 @@
             "S3",
             "D8"
           ],
-          "label": "上から♠3・♦8 → ライフ"
+          "label": "上から♠3・♢8 → ライフ"
         }
       ],
       "checklist": [
@@ -1781,8 +1781,8 @@
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
       "actor": "A",
-      "title": "♦5を横向きに。",
-      "instruction": "兵士召喚のコストBとして、防壁の♦5が画面上で横向きになります。",
+      "title": "防壁を横向きに。",
+      "instruction": "兵士召喚のコストBとして、裏向きの防壁が画面上で横向きになります。",
       "actionLabel": "コストBを画面で払う",
       "actionName": "兵士召喚（しょうかん）",
       "sequenceLabel": "STEP 1 / 3",
@@ -2170,7 +2170,7 @@
           "cards": [
             "D5"
           ],
-          "label": "♦5：縦 → 横"
+          "label": "防壁：縦 → 横"
         }
       ]
     },
@@ -3367,8 +3367,8 @@
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
       "actor": "B",
-      "title": "横向きの♦5を、縦に。",
-      "instruction": "エンド後にチャージが自動で起き、PLAYER Bの防壁♦5が縦向きへ戻ります。",
+      "title": "横向きの防壁を、縦に。",
+      "instruction": "エンド後にチャージが自動で起き、PLAYER Bの裏向きの防壁が縦向きへ戻ります。",
       "actionLabel": "自動チャージを見る",
       "actionName": "チャージ",
       "explanation": "場に残った同じカードを再び使えるようにします。これがターン交代後のチャージです。",
@@ -3755,7 +3755,7 @@
           "cards": [
             "D5"
           ],
-          "label": "♦5：横 → 縦"
+          "label": "防壁：横 → 縦"
         }
       ]
     },
@@ -3766,7 +3766,7 @@
       "eyebrow": "FIXED PRACTICE",
       "actor": "B",
       "title": "ライフから2枚、手札へ。",
-      "instruction": "チャージ後にドローが自動で起き、♠3と♦8が画面上で手札へ移ります。",
+      "instruction": "チャージ後にドローが自動で起き、♠3と♢8が画面上で手札へ移ります。",
       "actionLabel": "自動ドローを見る",
       "actionName": "ドロー",
       "explanation": "この固定盤面にはライフが14枚あるので2枚引きます。残りが少ないときの枚数は早見のドローで確認できます。",
@@ -4155,7 +4155,7 @@
             "S3",
             "D8"
           ],
-          "label": "♠3・♦8：ライフ → 手札"
+          "label": "♠3・♢8：ライフ → 手札"
         }
       ]
     },
@@ -4186,9 +4186,9 @@
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
       "actor": "B",
-      "title": "手札の♦8を、裏向きの防壁へ。",
+      "title": "手札の♢8を、裏向きの防壁へ。",
       "instruction": "手札1枚を、裏向き・チャージ（縦向き）で防壁の場所へ動かします。",
-      "actionLabel": "♦8を防壁にする",
+      "actionLabel": "♢8を防壁にする",
       "actionName": "防壁設置（ぼうへきせっち）",
       "sequenceLabel": "STEP 2 / 2",
       "explanation": "防壁設置は1ターンに1回。新しい防壁はライフ側から順に置き、左右を入れ替えません。",
@@ -4199,7 +4199,7 @@
         "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"},
         "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"}
       },
-      "operations": [{"player":"B","from":"hand","to":"bulwarks","cards":["D8"],"label":"手札の♦8 → 防壁（裏・縦）"}]
+      "operations": [{"player":"B","from":"hand","to":"bulwarks","cards":["D8"],"label":"手札の♢8 → 防壁（裏・縦）"}]
     },
     {
       "id": "end-to-a",
@@ -4227,8 +4227,8 @@
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
       "actor": "A",
-      "title": "PLAYER Aの♦5を縦向きに。",
-      "instruction": "ターン開始のチャージが自動で起きます。横向きだった防壁♦5が、使える縦向きへ戻ります。",
+      "title": "PLAYER Aの防壁を縦向きに。",
+      "instruction": "ターン開始のチャージが自動で起きます。横向きだった裏向きの防壁が、使える縦向きへ戻ります。",
       "actionLabel": "自動チャージを見る",
       "actionName": "チャージ",
       "explanation": "チャージは自分で選んで起こす行動ではありません。エンドのあとに自動で起きます。",
@@ -4239,7 +4239,7 @@
         "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
         "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
-      "operations": [{"player":"A","from":"bulwarks","to":"bulwarks","cards":["D5"],"label":"防壁♦5：横 → 縦"}]
+      "operations": [{"player":"A","from":"bulwarks","to":"bulwarks","cards":["D5"],"label":"防壁：横 → 縦"}]
     },
     {
       "id": "draw-a",
@@ -4248,7 +4248,7 @@
       "eyebrow": "FIXED PRACTICE",
       "actor": "A",
       "title": "ライフから2枚、手札へ。",
-      "instruction": "チャージのあとにドローが自動で起きます。♦8とAがライフから手札へ動きます。",
+      "instruction": "チャージのあとにドローが自動で起きます。♢8とAがライフから手札へ動きます。",
       "actionLabel": "自動ドローを見る",
       "actionName": "ドロー",
       "explanation": "現行ルールでは通常2枚を引きます。ライフが2枚以下なら1枚です。",
@@ -4259,7 +4259,7 @@
         "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
         "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
-      "operations": [{"player":"A","from":"life","to":"hand","cards":["D8","SA"],"label":"♦8・A：ライフ → 手札"}]
+      "operations": [{"player":"A","from":"life","to":"hand","cards":["D8","SA"],"label":"♢8・A：ライフ → 手札"}]
     },
     {
       "id": "direct-attack",

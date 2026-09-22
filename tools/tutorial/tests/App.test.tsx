@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import App from "../src/App";
 import scenario from "../src/data/tutorials/entry16.json";
 import { loadProgress, saveProgress } from "../src/lib/storage";
+import { cardName } from "../src/lib/cards";
 function at(id: string, extra = {}) {
   saveProgress(
     {
@@ -89,9 +90,9 @@ describe("hands-on tutorial", () => {
     await userEvent.click(screen.getByRole("button", { name: /先攻を決め、/ }));
     await userEvent.click(screen.getByRole("button", { name: /次の操作へ/ }));
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER B");
-    expect(
-      screen.getByText("ライフ → 手札（1枚）", { exact: false }),
-    ).toBeVisible();
+    const guide = screen.getByRole("region", { name: "カードの動かし方" });
+    expect(within(guide).getByText("ライフ")).toBeVisible();
+    expect(within(guide).getByText("手札")).toBeVisible();
   });
   it("早見をどの段階でも開き、ライトの魔法・コストを確認できる", async () => {
     render(<App />);
@@ -166,5 +167,49 @@ describe("hands-on tutorial", () => {
     }
     await userEvent.click(within(help).getByRole("tab", { name: "アクション" }));
     expect(within(help).getByText("まず使うアクション")).toBeVisible();
+  });
+  it("通常の防壁は種類を見せず裏向きで表示する", async () => {
+    at("set-bulwark-place");
+    render(<App />);
+    const beforeZone = within(screen.getByTestId("B-bulwarks"));
+    expect(beforeZone.getByLabelText("置く位置 防壁の裏向きカード")).toHaveTextContent("BP");
+    expect(beforeZone.queryByText("♢8")).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: /♢8を防壁にする/ }));
+    const zone = within(screen.getByTestId("B-bulwarks"));
+    expect(zone.getAllByLabelText(/防壁の裏向きカード 裏向き 縦向き/).length).toBeGreaterThan(0);
+    expect(zone.queryByText("♢8")).toBeNull();
+  });
+  it("ゲーム開始時のプリセット防壁だけ表向きで案内する", () => {
+    at("preset-bulwark");
+    render(<App />);
+    expect(screen.getAllByText("表・縦で1枚", { exact: false }).length).toBeGreaterThan(0);
+    expect(screen.getByText(/ゲーム開始時だけ、防壁は表向き/)).toBeVisible();
+    expect(screen.getByText(/通常の「防壁設置」では裏向き/)).toBeVisible();
+  });
+  it("カード名とブランド表記を統一する", () => {
+    expect(cardName("D5")).toBe("♢5");
+    render(<App />);
+    expect(screen.getAllByText("BlackPoker", { exact: false }).length).toBeGreaterThan(0);
+    expect(document.body).not.toHaveTextContent("BLACKPOKER");
+    expect(document.body).not.toHaveTextContent("Black Poker");
+    expect(document.body).not.toHaveTextContent("♦");
+    expect(JSON.stringify(scenario)).not.toContain("♦");
+  });
+  it("戻るはトップバーになく、主操作の左に固定する", () => {
+    render(<App />);
+    const topbar = document.querySelector(".topbar");
+    const actions = document.querySelector(".step-actions");
+    expect(topbar?.querySelector('[aria-label="← 戻る"]')).toBeNull();
+    expect(actions?.children[0]).toHaveAttribute("aria-label", "← 戻る");
+    expect(actions?.children[1]).toHaveClass("primary-button");
+    expect(actions?.children[0]).toBeDisabled();
+  });
+  it("MoveGuideに移動元・矢印・移動先を表示する", () => {
+    at("summon");
+    render(<App />);
+    const guide = screen.getByRole("region", { name: "カードの動かし方" });
+    expect(within(guide).getByText("手札")).toBeVisible();
+    expect(within(guide).getByText("兵士")).toBeVisible();
+    expect(within(guide).getByText("→")).toBeVisible();
   });
 });

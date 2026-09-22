@@ -1,4 +1,5 @@
 import { formatDifferences, learningCourses } from "../data/curriculum";
+import blackPokerLogo from "../assets/blackpoker-logo.svg";
 import type { TutorialStep } from "../types";
 export function CurriculumPanel({
   steps,
@@ -18,9 +19,9 @@ export function CurriculumPanel({
     <aside className="curriculum" aria-label="チュートリアル全体の進捗">
       <div className="curriculum-head">
         <div>
-          <span className="brand-mark">BP</span>
+          <img className="brand-logo" src={blackPokerLogo} alt="" />
           <strong>BlackPoker</strong>
-          <small>TUTORIAL</small>
+          <small>Tutorial</small>
         </div>
         <button
           className="icon-button"

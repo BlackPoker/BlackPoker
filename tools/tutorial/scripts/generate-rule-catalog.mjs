@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { loadRuleCatalog, repositoryRoot } from "./rule-source.mjs";
-const directory = path.join(repositoryRoot, "tutorial/src/generated");
+const directory = path.join(repositoryRoot, "tools/tutorial/src/generated");
 fs.mkdirSync(directory, { recursive: true });
 fs.writeFileSync(
   path.join(directory, "ruleCatalog.ts"),
@@ -9,4 +9,4 @@ fs.writeFileSync(
     JSON.stringify(loadRuleCatalog(), null, 2) +
     " as const;\n",
 );
-console.log("Generated tutorial/src/generated/ruleCatalog.ts");
+console.log("Generated tools/tutorial/src/generated/ruleCatalog.ts");

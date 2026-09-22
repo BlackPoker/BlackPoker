@@ -7,7 +7,7 @@
 Docker Desktopを起動し、リポジトリ直下から実行します。
 
 ```powershell
-cd tutorial
+cd tools/tutorial
 docker compose up --build
 ```
 
@@ -24,7 +24,7 @@ WindowsのDocker共有フォルダにも対応するため、Viteのファイル
 
 ## 検証
 
-初回は依存関係を用意します。以降のコマンドはすべて `tutorial/` で実行してください。
+初回は依存関係を用意します。以降のコマンドはすべて `tools/tutorial/` で実行してください。
 
 ```powershell
 docker compose run --rm app npm ci
@@ -81,7 +81,7 @@ YAMLの変更で共通手順そのものを自動追従する仕組みではな�
 
 ## GitHub Pages
 
-成果物は `tutorial/dist/` です。workflowは `tutorial/**` と正規YAMLを監視し、Dockerでテスト・ビルドします。
+成果物は `tools/tutorial/dist/` です。workflowは `tools/tutorial/**` と正規YAMLを監視し、Dockerでテスト・ビルドします。
 公開先は [BlackPoker Tutorial](https://blackpoker.github.io/BlackPoker/tutorial/) のままです。
 gh-pagesの `tutorial/` のみを更新します。forkの場合は `VITE_BASE_PATH` のリポジトリ名を変更してください。
 

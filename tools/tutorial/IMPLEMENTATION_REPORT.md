@@ -24,7 +24,7 @@ PCとモバイルは同じ教材・同じプレイヤー位置を使います。
 
 ## 3. ディレクトリ配置
 
-アプリはリポジトリ直下の `tutorial/`、テストは `tutorial/tests/` へ移動しました。
+アプリは `tools/tutorial/`、テストは `tools/tutorial/tests/` に配置しました。
 Dockerの作業場所・マウント・README・GitHub Pages workflow・gitignoreも移動に対応しました。
 PagesのURLは `/BlackPoker/tutorial/` を維持します。
 
@@ -60,26 +60,26 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 準備：
 
 1. トランプ2組を用意し、プレイヤーAを手前、Bを向かいにする。
-2. A：兵士♣6と防壁♦5を表・縦、手札♠2を置く。
-3. B：兵士♥7を表・縦、防壁♦5を表・横に置く。Bの防壁は後でチャージを練習するため使用済みを表す。
-4. Entry16の残りをライフへ。両者とも上から♠3・♦8、残りの順は自由。Aは13枚、Bは14枚。シャッフルしない。
+2. A：兵士♣6を表・縦、防壁を裏・縦、手札♠2を置く。
+3. B：兵士♥7を表・縦、防壁を裏・横に置く。Bの防壁は後でチャージを練習するため使用済みを表す。
+4. Entry16の残りをライフへ。両者とも上から♠3・♢8、残りの順は自由。Aは13枚、Bは14枚。シャッフルしない。
 
 練習バトル：
 
 1. A：♣6を横にしてアタック。
 2. B：♥7で♣6をブロックと宣言。♥7は縦のまま。
 3. A：6と7を比較し、♣6を墓地へ。♥7は場に残る。
-4. A：♠2の召喚を宣言し、防壁♦5を横にする。
+4. A：♠2の召喚を宣言し、裏向きの防壁を横にする。
 5. A：ライフ最上段の♠3を表にして墓地へ。
 6. A：手札♠2を表・縦で兵士へ。4〜6は1回の兵士召喚を分割した練習。
 7. A：エンドを宣言しBへターンを渡す。
-8. B：使用済みの防壁♦5を縦へ戻す。♥7は縦のまま。
-9. B：ライフから♠3・♦8を手札へ。
+8. B：使用済みの裏向き防壁を縦へ戻す。♥7は縦のまま。
+9. B：ライフから♠3・♢8を手札へ。
 10. B：ライフ最上段のAを墓地へ移し、防壁設置のコストLを払う。
-11. B：手札の♦8を裏向き・縦向きの防壁として置く。
+11. B：手札の♢8を裏向き・縦向きの防壁として置く。
 12. B：エンドを宣言しAへターンを渡す。
-13. A：横向きの防壁♦5を縦へ戻す。
-14. A：ライフから♦8・Aを手札へ。
+13. A：横向きの裏向き防壁を縦へ戻す。
+14. A：ライフから♢8・Aを手札へ。
 15. A：兵士♠2を横向きにしてアタック。
 16. B：兵士・防壁を指定せず、ブロックしないことを確認する。
 17. B：2点ダメージを受け、ライフ上2枚を墓地へ移す。
@@ -132,13 +132,13 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 
 ## 11. Tutorialテスト
 
-Docker経由でVitest 32件成功（schema 15、UI 10、保存 7）。
+Docker経由でVitest 37件成功（schema 15、UI 15、保存 7）。
 schema、参照ID、盤面の連続性、操作カード、16枚の保存、actor A/B、回転と墓地移動、
 進捗の保存・再開・リセット、旧進捗の無効化、先攻選択、開始ドロー、早見を検証しました。
 GitHub Pages用base pathでschema検証・TypeScript・Viteビルドが成功しています。
 Windows Dockerのファイル監視をポーリングに変更し、編集反映も確認しました。
 
-指定された `HowToBlackPoker-book.pdf` は作業環境内に存在せず、本文の直接確認はできませんでした。今回の説明は依頼文に列挙された観点と正規ルールソースを基準に構成しています。
+指定された `tools/tutorial/reference/QuickStartGuide.pdf` は作業環境内に存在しませんでした。そのため内容は推測せず、`QUICKSTART_COVERAGE.md` も作成していません。QuickStart Guideとの完全照合だけは未完で、今回のUIとルール表示は正規ルールソースを基準にしています。
 
 ## 12. 既存Simulator
 
@@ -176,12 +176,12 @@ Docker経由で既存19ファイル・113件のテストが成功しました。
 
 今回変更したファイル：
 
-- `tutorial/README.md`、本報告書
-- `tutorial/src/App.tsx`、`types.ts`、`styles.css`
-- `tutorial/src/components/ActionHelp.tsx`、`BeginnerGuide.tsx`、`CurriculumPanel.tsx`、`TutorialBoard.tsx`
-- `tutorial/src/data/tutorials/entry16.json`
-- `tutorial/src/hooks/useTutorialProgress.ts`、`lib/storage.ts`
-- `tutorial/tests/App.test.tsx`、`schema.test.ts`、`storage.test.ts`
+- `tools/tutorial/README.md`、本報告書
+- `tools/tutorial/src/App.tsx`、`types.ts`、`styles.css`
+- `tools/tutorial/src/components/ActionHelp.tsx`、`BeginnerGuide.tsx`、`CurriculumPanel.tsx`、`TutorialBoard.tsx`、`MoveGuide.tsx`
+- `tools/tutorial/src/data/tutorials/entry16.json`
+- `tools/tutorial/src/hooks/useTutorialProgress.ts`、`lib/storage.ts`、`lib/cards.ts`
+- `tools/tutorial/tests/App.test.tsx`、`schema.test.ts`、`storage.test.ts`
 
 ## 15. コミット
 

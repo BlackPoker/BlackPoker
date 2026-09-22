@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { parse } from "yaml";
 export const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
-  "../..",
+  "../../..",
 );
 const read = (file) =>
   parse(fs.readFileSync(path.join(repositoryRoot, file), "utf8"));

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { loadRuleCatalog, repositoryRoot } from "./rule-source.mjs";
 import { validateScenario } from "../src/lib/schema.mjs";
-const directory = path.join(repositoryRoot, "tutorial/src/data/tutorials");
+const directory = path.join(repositoryRoot, "tools/tutorial/src/data/tutorials");
 const errors = fs
   .readdirSync(directory)
   .filter((f) => f.endsWith(".json"))

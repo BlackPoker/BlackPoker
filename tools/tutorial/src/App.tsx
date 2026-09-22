@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import scenario from "./data/tutorials/entry16.json";
-import { TutorialBoard, cardName } from "./components/TutorialBoard";
+import { TutorialBoard } from "./components/TutorialBoard";
+import { MoveGuide } from "./components/MoveGuide";
 import { ActionHelp } from "./components/ActionHelp";
 import { CurriculumPanel } from "./components/CurriculumPanel";
 import { RuleLinks } from "./components/RuleLinks";
 import { useTutorialProgress } from "./hooks/useTutorialProgress";
-import type { TutorialScenario } from "./types";
+import { cardName } from "./lib/cards";
+import type { Operation, TutorialScenario } from "./types";
 const tutorial = scenario as TutorialScenario;
 export default function App() {
   const progress = useTutorialProgress(tutorial.id, tutorial.steps.length);
@@ -38,6 +40,16 @@ export default function App() {
     step.id === "start-draw"
       ? { ...board, turn: progress.firstPlayer || null }
       : board;
+  const guideOperations: Operation[] =
+    step.id === "start-draw" && progress.firstPlayer
+      ? [{
+          player: progress.firstPlayer,
+          from: "life",
+          to: "hand",
+          cards: [],
+          label: "ライフから手札へ1枚動かす",
+        }]
+      : step.operations;
   const select = (index: number) => {
     progress.goTo(index);
     setDetailsOpen(false);
@@ -68,18 +80,8 @@ export default function App() {
           >
             ☰
           </button>
-          <button
-            className="top-back"
-            disabled={progress.stepIndex === 0}
-            onClick={() => {
-              progress.previous();
-              setDetailsOpen(false);
-            }}
-          >
-            ← 戻る
-          </button>
           <div className="topbar-course">
-            <span>BLACKPOKER TUTORIAL</span>
+            <span>BlackPoker Tutorial</span>
             <strong>ライト＋エントリー16</strong>
           </div>
           <button className="help-button" onClick={() => setHelpOpen(true)}>
@@ -147,6 +149,11 @@ export default function App() {
                 <><b>ここから実物カード</b><span>薄いカード枠を置き場にしてください</span></>
               )}
             </div>
+            {step.id === "preset-bulwark" && (
+              <p className="preset-note">
+                ゲーム開始時だけ、防壁は表向きで置きます。通常の「防壁設置」では裏向きです。
+              </p>
+            )}
             {step.checklist && (
               <details className="deck-check">
                 <summary>
@@ -179,27 +186,18 @@ export default function App() {
             <TutorialBoard
               board={selectedBoard}
               after={step.board.after}
-              operations={step.operations}
+              operations={guideOperations}
               applied={progress.applied}
               real={step.mode === "real"}
               stepId={step.id}
             />
             {!progress.applied && (
-              <div
-                className="operation-guide"
-                aria-label={step.mode === "fixed" ? "画面で変わるカード" : "動かすカードと移動先"}
-              >
-                {step.operations.map((o, i) => (
-                  <p key={i}>
-                    <b>PLAYER {o.player}</b> {o.label}
-                  </p>
-                ))}
-                {step.id === "start-draw" && progress.firstPlayer && (
-                  <p>
-                    <b>PLAYER {progress.firstPlayer}</b> ライフ → 手札（1枚）
-                  </p>
-                )}
-              </div>
+              <MoveGuide
+                operations={guideOperations}
+                before={step.board.before}
+                after={step.board.after}
+                hideBulwarkCards={step.mode === "fixed"}
+              />
             )}
             {progress.applied && (
               <div className="learned" role="status">
@@ -207,29 +205,42 @@ export default function App() {
                 <p>{step.learned}</p>
               </div>
             )}
-            <button
-              className="primary-button"
-              disabled={
-                (step.chooseFirst || step.actor === "first") &&
-                !progress.firstPlayer
-              }
-              onClick={() => {
-                if (step.id === "free-play") {
-                  progress.apply();
-                  setHelpOpen(true);
-                } else if (progress.applied) {
-                  progress.next();
+            <div className="step-actions">
+              <button
+                className="step-back"
+                aria-label="← 戻る"
+                disabled={progress.stepIndex === 0}
+                onClick={() => {
+                  progress.previous();
                   setDetailsOpen(false);
-                } else progress.apply();
-              }}
-            >
-              {step.id === "free-play"
-                ? step.actionLabel
-                : progress.applied
-                  ? "次の操作へ"
-                  : step.actionLabel}
-              <span>→</span>
-            </button>
+                }}
+              >
+                <span aria-hidden="true">←</span><span>戻る</span>
+              </button>
+              <button
+                className="primary-button"
+                disabled={
+                  (step.chooseFirst || step.actor === "first") &&
+                  !progress.firstPlayer
+                }
+                onClick={() => {
+                  if (step.id === "free-play") {
+                    progress.apply();
+                    setHelpOpen(true);
+                  } else if (progress.applied) {
+                    progress.next();
+                    setDetailsOpen(false);
+                  } else progress.apply();
+                }}
+              >
+                {step.id === "free-play"
+                  ? step.actionLabel
+                  : progress.applied
+                    ? "次の操作へ"
+                    : step.actionLabel}
+                <span>→</span>
+              </button>
+            </div>
             <button
               className="why-toggle"
               onClick={() => setDetailsOpen((v) => !v)}
@@ -258,15 +269,6 @@ export default function App() {
             )}
           </article>
           <div className="lesson-nav">
-            <button
-              disabled={progress.stepIndex === 0}
-              onClick={() => {
-                progress.previous();
-                setDetailsOpen(false);
-              }}
-            >
-              ← 戻る
-            </button>
             <span>{step.chapterTitle}</span>
             <button onClick={() => setMenuOpen(true)}>一覧を見る</button>
           </div>
