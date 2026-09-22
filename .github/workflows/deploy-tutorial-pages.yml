@@ -3,9 +3,8 @@ name: deploy_tutorial_pages
 on:
   workflow_dispatch:
   push:
-    branches:
-      - master
-      - "635-kaizen-チュートリアルサイト作成"
+    branches-ignore:
+      - gh-pages
     paths:
       - "tools/tutorial/**"
       - "tools/actionlist/original/act.yaml"
@@ -16,13 +15,19 @@ permissions:
   contents: write
 
 concurrency:
-  group: tutorial-pages
+  group: tutorial-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test-and-deploy:
+  test-and-build-tutorial:
+    name: test & build tutorial
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
+      - name: Set output
+        id: vars
+        run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
       - name: ソースを取得
         uses: actions/checkout@v4
 
@@ -30,13 +35,22 @@ jobs:
         working-directory: tools/tutorial
         run: docker compose run --rm app npm ci
 
-      - name: テスト
+      - name: Tutorialテスト
         working-directory: tools/tutorial
         run: docker compose run --rm app npm test
 
+      - name: schemaを検証
+        working-directory: tools/tutorial
+        run: docker compose run --rm app npm run validate:tutorials
+
       - name: GitHub Pages向けにビルド
         working-directory: tools/tutorial
-        run: docker compose run --rm -e VITE_BASE_PATH=/BlackPoker/tutorial/ app npm run build
+        run: >-
+          docker compose run --rm
+          -e VITE_BASE_PATH=/BlackPoker/${{ steps.vars.outputs.short_ref }}/tutorial/
+          -e VITE_BUILD_SHA=${{ github.sha }}
+          -e VITE_BUILD_REF=${{ steps.vars.outputs.short_ref }}
+          app npm run build
 
       - name: build成果物を検証
         working-directory: tools/tutorial
@@ -44,20 +58,62 @@ jobs:
         run: |
           test -f dist/index.html
           find dist/assets -type f -print -quit | grep -q .
-          grep -q '/BlackPoker/tutorial/assets/' dist/index.html
+          grep -Fq '/BlackPoker/${{ steps.vars.outputs.short_ref }}/tutorial/assets/' dist/index.html
 
-      - name: gh-pagesへ配置
+      - name: Tutorial成果物を保存
+        uses: actions/upload-artifact@v4
+        with:
+          name: tutorial-dist
+          path: tools/tutorial/dist
+          retention-days: 1
+
+  publish-tutorial:
+    name: publish tutorial to gh-pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: test-and-build-tutorial
+    steps:
+      - name: Set output
+        id: vars
+        run: echo "short_ref=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
+
+      - name: gh-pagesを取得
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: pages
+
+      - name: Tutorial成果物を取得
+        uses: actions/download-artifact@v4
+        with:
+          name: tutorial-dist
+          path: temp_tutorial
+
+      - name: ブランチ別Tutorialを公開
         shell: bash
         run: |
-          git clone --branch gh-pages --single-branch "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" pages
-          rm -rf pages/tutorial
-          mkdir -p pages/tutorial
-          cp -R tools/tutorial/dist/. pages/tutorial/
-          cd pages
+          SHORT_REF="${{ steps.vars.outputs.short_ref }}"
+          mkdir -p "./pages/${SHORT_REF}"
+          rm -rf "./pages/${SHORT_REF}/tutorial"
+          mkdir -p "./pages/${SHORT_REF}/tutorial"
+          cp -a temp_tutorial/. "./pages/${SHORT_REF}/tutorial/"
+
+          cd ./pages
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add tutorial
-          git diff --cached --quiet || git commit -m "docs: チュートリアルサイトを更新"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git add -- "${SHORT_REF}/tutorial"
+          if git diff --staged --quiet; then
+            echo "No changes in tutorial (${SHORT_REF})."
+          else
+            git commit -m "docs: Tutorialを更新 (${SHORT_REF})"
+            pushed=false
+            for i in {1..5}; do
+              if git pull --rebase origin gh-pages && git push origin HEAD:gh-pages; then
+                pushed=true
+                break
+              fi
+              echo "Push failed, retrying in 3s... (attempt $i)"
+              sleep 3
+            done
+            test "$pushed" = true
+          fi

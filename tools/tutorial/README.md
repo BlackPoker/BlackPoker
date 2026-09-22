@@ -87,15 +87,20 @@ PDFが存在しない状態では内容を推測せず、coverage表も作成し
 ## GitHub Pages
 
 成果物は `tools/tutorial/dist/` です。workflowは `tools/tutorial/**` と正規YAMLを監視し、Dockerでテスト・ビルドします。
-公開先は [BlackPoker Tutorial](https://blackpoker.github.io/BlackPoker/tutorial/) です。
-gh-pagesの `tutorial/` のみを更新します。テストまたはbuildに失敗した場合はgh-pagesを更新しません。
+公開先はブランチ別の `https://blackpoker.github.io/BlackPoker/<branch>/tutorial/` です。
+gh-pagesの `<branch>/tutorial/` のみを更新します。テストまたはbuildに失敗した場合はgh-pagesを更新しません。
 
-現在は次のpushを自動公開の対象にしています。
+代表的な公開URL：
 
-- `635-kaizen-チュートリアルサイト作成`：マージ前の暫定公開用。masterへマージ後は対象から外す予定です。
-- `master`：正式なデプロイ元。
+- 開発ブランチ：[635-kaizen-チュートリアルサイト作成/tutorial](https://blackpoker.github.io/BlackPoker/635-kaizen-%E3%83%81%E3%83%A5%E3%83%BC%E3%83%88%E3%83%AA%E3%82%A2%E3%83%AB%E3%82%B5%E3%82%A4%E3%83%88%E4%BD%9C%E6%88%90/tutorial/)
+- master：[master/tutorial](https://blackpoker.github.io/BlackPoker/master/tutorial/)
+
+SimulatorとTutorialは同じGitFlowでブランチ別プレビューを生成します。
+
+- Simulator：`https://blackpoker.github.io/BlackPoker/<branch>/playtest/`
+- Tutorial：`https://blackpoker.github.io/BlackPoker/<branch>/tutorial/`
 
 手動で再公開する場合は、GitHub Actionsの `deploy_tutorial_pages` を開き、`Run workflow` を実行します。
-Pages用buildでは `VITE_BASE_PATH=/BlackPoker/tutorial/` を指定します。forkの場合はリポジトリ名に合わせて変更してください。
+Pages用buildでは `VITE_BASE_PATH=/BlackPoker/<branch>/tutorial/` を指定します。forkの場合はリポジトリ名に合わせて変更してください。
 
 設計・全操作・公式ルールの確認結果は [実装報告](IMPLEMENTATION_REPORT.md) を参照してください。
