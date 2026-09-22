@@ -5,11 +5,22 @@ import { MoveGuide } from "./components/MoveGuide";
 import { ActionHelp } from "./components/ActionHelp";
 import { CurriculumPanel } from "./components/CurriculumPanel";
 import { RuleLinks } from "./components/RuleLinks";
+import { TutorialIntro } from "./components/TutorialIntro";
 import { useTutorialProgress } from "./hooks/useTutorialProgress";
 import { cardName } from "./lib/cards";
+import {
+  clearIntroComplete,
+  loadIntroComplete,
+  resolveBrowserStorage,
+  saveIntroComplete,
+} from "./lib/storage";
 import type { Operation, TutorialScenario } from "./types";
 const tutorial = scenario as TutorialScenario;
 export default function App() {
+  const storage = resolveBrowserStorage();
+  const [introComplete, setIntroComplete] = useState(() =>
+    loadIntroComplete(storage),
+  );
   const progress = useTutorialProgress(tutorial.id, tutorial.steps.length);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -55,6 +66,16 @@ export default function App() {
     setDetailsOpen(false);
     setMenuOpen(false);
   };
+  if (!introComplete) {
+    return (
+      <TutorialIntro
+        onComplete={() => {
+          saveIntroComplete(storage);
+          setIntroComplete(true);
+        }}
+      />
+    );
+  }
   return (
     <div className="app-shell">
       <button
@@ -289,13 +310,15 @@ export default function App() {
             aria-labelledby="restart-title"
           >
             <h2 id="restart-title">最初からやり直しますか？</h2>
-            <p>保存された進捗と先攻の選択を消します。</p>
+            <p>保存された進捗と先攻の選択を消し、導入から始めます。</p>
             <div>
               <button onClick={() => setRestartOpen(false)}>キャンセル</button>
               <button
                 className="danger"
                 onClick={() => {
                   progress.restart();
+                  clearIntroComplete(storage);
+                  setIntroComplete(false);
                   setRestartOpen(false);
                   setDetailsOpen(false);
                 }}

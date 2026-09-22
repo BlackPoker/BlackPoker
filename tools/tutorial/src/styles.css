@@ -946,6 +946,555 @@ button {
   }
 }
 
+/* Tutorial本編へ入る前の3画面イントロ */
+.intro-shell {
+  min-height: 100dvh;
+  padding: 0 24px 40px;
+  color: #18181b;
+  background:
+    radial-gradient(circle at 50% 0, #ffffff 0, #f7f7f8 46%, #ededf0 100%);
+}
+.intro-header {
+  width: min(1040px, 100%);
+  min-height: 78px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  border-bottom: 1px solid #d4d4d8;
+}
+.intro-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.intro-brand img {
+  width: 34px;
+  height: 34px;
+}
+.intro-brand span {
+  display: grid;
+  line-height: 1.05;
+}
+.intro-brand strong {
+  font-family: "Times New Roman", "Yu Mincho", serif;
+  font-size: 18px;
+}
+.intro-brand small,
+.intro-count {
+  color: #71717a;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.intro-panel {
+  width: min(960px, 100%);
+  margin: 30px auto 0;
+  padding: 24px clamp(22px, 5vw, 64px) 28px;
+  border: 1px solid #d4d4d8;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 24px 70px rgba(24, 24, 27, 0.1);
+}
+.intro-progress {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+  width: 108px;
+  margin: 0 auto 22px;
+}
+.intro-progress span {
+  height: 3px;
+  border-radius: 3px;
+  background: #d4d4d8;
+}
+.intro-progress span.active {
+  background: #18181b;
+}
+.intro-page {
+  text-align: center;
+  animation: reveal 0.24s ease;
+}
+.intro-kicker {
+  margin: 0 0 7px;
+  color: #71717a;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+.intro-page h1 {
+  margin: 0;
+  font-family: "Times New Roman", "Yu Mincho", serif;
+  font-size: clamp(28px, 4.1vw, 44px);
+  line-height: 1.3;
+}
+.intro-lead {
+  margin: 12px 0 20px;
+  font-size: clamp(21px, 3.1vw, 34px);
+  font-weight: 800;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+.intro-lead strong {
+  display: inline-block;
+  padding-inline: 0.12em;
+  font-size: 1.32em;
+  border-bottom: 5px solid #18181b;
+}
+.intro-mobile-break {
+  display: none;
+}
+.intro-board {
+  width: min(620px, 100%);
+  margin: 0 auto;
+  padding: 12px 16px;
+  border: 1px solid #a1a1aa;
+  border-radius: 11px;
+  background: #f4f4f5;
+}
+.intro-board-player {
+  display: grid;
+  grid-template-columns: 84px repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 8px;
+}
+.intro-board-player > strong {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.intro-board-player > div {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  min-height: 60px;
+  padding: 5px;
+  border: 1px solid #d4d4d8;
+  border-radius: 5px;
+  background: #ffffff;
+}
+.intro-board-player small {
+  color: #52525b;
+  font-size: 9px;
+}
+.intro-board-player > div > span {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.intro-card {
+  position: relative;
+  z-index: 2;
+  width: 32px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 32px;
+  border: 1px solid #52525b;
+  border-radius: 4px;
+  color: #18181b;
+  background: #ffffff;
+  font-family: Georgia, serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+.intro-card.down {
+  color: #52525b;
+  background: repeating-linear-gradient(45deg, #ffffff, #ffffff 3px, #d4d4d8 3px, #d4d4d8 5px);
+  font-family: inherit;
+  font-size: 8px;
+}
+.intro-stack .intro-card + .intro-card {
+  z-index: 1;
+  margin-left: -27px;
+  transform: translate(4px, -3px);
+}
+.intro-battle-line {
+  position: relative;
+  height: 22px;
+  display: grid;
+  place-items: center;
+}
+.intro-battle-line::before {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto;
+  border-top: 1px dashed #a1a1aa;
+}
+.intro-battle-line span {
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+  color: #71717a;
+  background: #f4f4f5;
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+.intro-facts {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 14px;
+}
+.intro-facts span {
+  padding: 6px 10px;
+  border: 1px solid #d4d4d8;
+  border-radius: 999px;
+  background: #ffffff;
+  font-size: 10px;
+}
+.intro-caption,
+.intro-reassurance {
+  margin: 11px 0 0;
+  color: #52525b;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.intro-term {
+  width: min(540px, 100%);
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-left: 4px solid #18181b;
+  background: #f4f4f5;
+  text-align: left;
+}
+.intro-term b {
+  flex: 0 0 auto;
+  font-size: 16px;
+}
+.intro-term span {
+  font-size: 11px;
+  line-height: 1.6;
+}
+.intro-win-flow {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr 24px 1fr;
+  align-items: stretch;
+  gap: 7px;
+}
+.intro-win-flow > div {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 7px;
+  min-height: 150px;
+  padding: 15px 10px;
+  border: 1px solid #d4d4d8;
+  border-radius: 9px;
+  background: #fafafa;
+}
+.intro-win-flow strong {
+  font-size: 13px;
+  line-height: 1.4;
+}
+.intro-win-flow small {
+  color: #71717a;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.intro-flow-icon {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.intro-flow-icon.attack .intro-card {
+  transform: rotate(90deg);
+}
+.intro-flow-icon.attack b {
+  margin-left: 8px;
+  font-size: 20px;
+}
+.intro-flow-icon.life {
+  position: relative;
+}
+.intro-flow-icon.life i {
+  position: absolute;
+  z-index: 3;
+  right: -8px;
+  top: -4px;
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  color: white;
+  background: #18181b;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 800;
+}
+.intro-flow-arrow {
+  align-self: center;
+  font-size: 19px;
+  transform: rotate(-90deg);
+}
+.intro-course-card {
+  width: min(620px, 100%);
+  margin: 18px auto 13px;
+  padding: 20px clamp(18px, 4vw, 38px);
+  border-radius: 12px;
+  color: white;
+  background: #18181b;
+}
+.intro-course-card small {
+  display: block;
+  color: #d4d4d8;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+}
+.intro-course-card strong {
+  display: block;
+  margin-top: 5px;
+  font-family: "Times New Roman", "Yu Mincho", serif;
+  font-size: clamp(23px, 3.5vw, 34px);
+}
+.intro-course-card p {
+  margin: 9px auto 0;
+  max-width: 470px;
+  color: #e4e4e7;
+  font-size: 11px;
+  line-height: 1.75;
+}
+.intro-levels {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #a1a1aa;
+}
+.intro-levels span {
+  position: relative;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.intro-levels .current {
+  color: #18181b;
+}
+.intro-levels small {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  color: #52525b;
+  font-size: 7px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.intro-levels i {
+  color: #d4d4d8;
+  font-style: normal;
+}
+.intro-reassurance {
+  margin-top: 23px;
+  font-weight: 700;
+}
+.intro-no-cards {
+  width: min(620px, 100%);
+  margin: 12px auto 0;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 13px;
+  padding: 12px 16px;
+  border: 1px solid #d4d4d8;
+  border-radius: 8px;
+  background: #fafafa;
+  text-align: left;
+}
+.intro-no-cards > span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 48px;
+  border: 2px dashed #71717a;
+  border-radius: 4px;
+  color: #71717a;
+}
+.intro-no-cards p {
+  margin: 0;
+  color: #52525b;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.intro-no-cards strong {
+  display: block;
+  color: #18181b;
+}
+.intro-actions {
+  display: grid;
+  grid-template-columns: minmax(88px, auto) minmax(180px, 280px);
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid #e4e4e7;
+}
+.intro-actions button {
+  min-height: 48px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+.intro-back {
+  border: 1px solid #d4d4d8;
+  color: #18181b;
+  background: #ffffff;
+}
+.intro-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #18181b;
+  color: #ffffff;
+  background: #18181b;
+}
+.intro-actions > .intro-next {
+  grid-column: 2;
+}
+.intro-start {
+  font-size: 13px !important;
+}
+
+@media (max-width: 640px) {
+  .intro-shell {
+    padding: 0 10px 22px;
+  }
+  .intro-header {
+    min-height: 62px;
+    padding-inline: 7px;
+  }
+  .intro-panel {
+    margin-top: 12px;
+    padding: 18px 14px 17px;
+    border-radius: 12px;
+  }
+  .intro-progress {
+    margin-bottom: 17px;
+  }
+  .intro-mobile-break {
+    display: initial;
+  }
+  .intro-page h1 {
+    font-size: 27px;
+  }
+  .intro-lead {
+    margin: 9px 0 15px;
+    font-size: 22px;
+  }
+  .intro-board {
+    padding: 8px;
+  }
+  .intro-board-player {
+    grid-template-columns: 48px repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .intro-board-player > strong {
+    font-size: 8px;
+  }
+  .intro-board-player > div {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 3px;
+    min-height: 66px;
+    padding: 4px 2px;
+  }
+  .intro-board-player small {
+    font-size: 8px;
+  }
+  .intro-board-player > div > span {
+    gap: 2px;
+  }
+  .intro-card {
+    width: 27px;
+    height: 38px;
+    flex-basis: 27px;
+    font-size: 10px;
+  }
+  .intro-stack .intro-card + .intro-card {
+    margin-left: -23px;
+  }
+  .intro-caption {
+    margin-top: 8px;
+  }
+  .intro-term {
+    align-items: flex-start;
+    gap: 9px;
+    margin-bottom: 12px;
+    padding: 8px 10px;
+  }
+  .intro-win-flow {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+  .intro-win-flow > div {
+    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    justify-items: start;
+    gap: 2px 8px;
+    min-height: 86px;
+    padding: 9px 12px;
+    text-align: left;
+  }
+  .intro-flow-icon {
+    grid-row: 1 / 3;
+    width: 68px;
+  }
+  .intro-flow-icon.life i {
+    right: 3px;
+    top: -6px;
+  }
+  .intro-flow-arrow {
+    justify-self: center;
+    line-height: 1;
+    transform: none;
+  }
+  .intro-course-card {
+    margin-top: 13px;
+    padding: 15px 14px;
+  }
+  .intro-course-card p {
+    line-height: 1.6;
+  }
+  .intro-levels {
+    gap: 5px;
+  }
+  .intro-levels span {
+    font-size: 7px;
+  }
+  .intro-reassurance {
+    margin-top: 21px;
+  }
+  .intro-no-cards {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
+  }
+  .intro-no-cards > span {
+    width: 31px;
+    height: 40px;
+  }
+  .intro-actions {
+    grid-template-columns: minmax(84px, auto) minmax(0, 1fr);
+    margin-top: 15px;
+    padding-top: 15px;
+  }
+  .intro-actions button {
+    min-height: 50px;
+    padding-inline: 12px;
+  }
+}
+
 /* 学習ロードマップと初心者ガイド */
 .learning-roadmap {
   margin-top: 24px;

@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  clearIntroComplete,
   clearProgress,
+  introStorageKey,
+  loadIntroComplete,
   loadProgress,
   progressStorageKey,
   resolveBrowserStorage,
+  saveIntroComplete,
   saveProgress,
   type StorageLike,
 } from "../src/lib/storage";
@@ -74,6 +78,16 @@ describe("progress storage", () => {
     storage.setItem(progressStorageKey, "saved");
     clearProgress(storage);
     expect(storage.getItem(progressStorageKey)).toBeNull();
+  });
+
+  it("INTRO完了状態を進捗とは別に保存・削除できる", () => {
+    const storage = makeStorage();
+    expect(loadIntroComplete(storage)).toBe(false);
+    saveIntroComplete(storage);
+    expect(storage.getItem(introStorageKey)).toBe("complete");
+    expect(loadIntroComplete(storage)).toBe(true);
+    clearIntroComplete(storage);
+    expect(loadIntroComplete(storage)).toBe(false);
   });
 
   it("壊れた保存データを安全に無視する", () => {

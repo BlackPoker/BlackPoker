@@ -1,6 +1,7 @@
 import type { TutorialProgress } from "../types";
 
 const STORAGE_KEY = "blackpoker-tutorial-progress-v1";
+const INTRO_STORAGE_KEY = "blackpoker-tutorial-intro-v1";
 
 export interface StorageLike {
   getItem(key: string): string | null;
@@ -85,4 +86,29 @@ export function clearProgress(storage?: StorageLike | null): void {
   }
 }
 
+export function loadIntroComplete(storage?: StorageLike | null): boolean {
+  try {
+    return storage?.getItem(INTRO_STORAGE_KEY) === "complete";
+  } catch {
+    return false;
+  }
+}
+
+export function saveIntroComplete(storage?: StorageLike | null): void {
+  try {
+    storage?.setItem(INTRO_STORAGE_KEY, "complete");
+  } catch {
+    /* 保存不可でも導入から学習へ進める。 */
+  }
+}
+
+export function clearIntroComplete(storage?: StorageLike | null): void {
+  try {
+    storage?.removeItem(INTRO_STORAGE_KEY);
+  } catch {
+    /* 保存領域がなくても問題ない。 */
+  }
+}
+
 export const progressStorageKey = STORAGE_KEY;
+export const introStorageKey = INTRO_STORAGE_KEY;

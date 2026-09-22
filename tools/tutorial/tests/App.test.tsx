@@ -1,9 +1,15 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import App from "../src/App";
 import scenario from "../src/data/tutorials/entry16.json";
-import { loadProgress, saveProgress } from "../src/lib/storage";
+import {
+  clearIntroComplete,
+  loadIntroComplete,
+  loadProgress,
+  saveIntroComplete,
+  saveProgress,
+} from "../src/lib/storage";
 import { cardName } from "../src/lib/cards";
 function at(id: string, extra = {}) {
   saveProgress(
@@ -18,6 +24,50 @@ function at(id: string, extra = {}) {
   );
 }
 describe("hands-on tutorial", () => {
+  beforeEach(() => saveIntroComplete(window.localStorage));
+
+  it("初回アクセスでは3画面のINTROから既存Tutorialへ進む", async () => {
+    clearIntroComplete(window.localStorage);
+    const user = userEvent.setup();
+    render(<App />);
+
+    expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
+    expect(screen.getByText("トランプだけで、", { exact: false })).toBeVisible();
+    expect(screen.getByLabelText(/対戦盤面のイメージ/)).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /次へ/ }));
+    expect(screen.getByRole("heading", { name: "どうなったら勝ち？" })).toBeVisible();
+    expect(screen.getByText(/相手のライフを/)).toBeVisible();
+    expect(screen.getByText(/山札を「ライフ」/)).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /次へ/ }));
+    expect(screen.getByRole("heading", { name: /まずは一番簡単な.*ルールから/ })).toBeVisible();
+    expect(screen.getByText("ライト＋エントリー16")).toBeVisible();
+    expect(screen.getByText(/実物カードは、まだ用意しなくてOK/)).toBeVisible();
+
+    await user.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
+    expect(screen.getByRole("heading", { name: "まずは、画面だけで練習します。" })).toBeVisible();
+    expect(loadIntroComplete(window.localStorage)).toBe(true);
+  });
+
+  it("INTROを通っても保存済みのTutorial進捗を維持する", async () => {
+    at("attack", { maxReachedStepIndex: 14, firstPlayer: "B" });
+    clearIntroComplete(window.localStorage);
+    const saved = loadProgress(scenario.id, window.localStorage);
+    render(<App />);
+
+    await userEvent.click(screen.getByRole("button", { name: /次へ/ }));
+    await userEvent.click(screen.getByRole("button", { name: /次へ/ }));
+    await userEvent.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
+
+    expect(screen.getByRole("heading", { name: "♣6でアタック！" })).toBeVisible();
+    expect(loadProgress(scenario.id, window.localStorage)).toMatchObject({
+      stepIndex: saved.stepIndex,
+      maxReachedStepIndex: saved.maxReachedStepIndex,
+      firstPlayer: "B",
+    });
+  });
+
   it("操作を確定してから用語と次の操作を表示する", async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -79,8 +129,10 @@ describe("hands-on tutorial", () => {
     );
     await userEvent.click(screen.getByRole("button", { name: "やり直す" }));
     expect(
-      screen.getByRole("heading", { name: "まずは、画面だけで練習します。" }),
+      screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ }),
     ).toBeVisible();
+    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(0);
+    expect(loadIntroComplete(window.localStorage)).toBe(false);
   });
   it("先攻決定なしで進めず、選んだBが開始時1枚を引く", async () => {
     at("first-player");
