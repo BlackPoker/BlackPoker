@@ -87,6 +87,15 @@ describe("tutorial schema", () => {
     expect(ids).toContain("direct-damage");
     expect(scenario.steps.find((step) => step.id === "direct-damage")!.mode).toBe("fixed");
   });
+  it("固定練習に登場する通常防壁はscenario上で裏向き", () => {
+    const bulwarks = scenario.steps
+      .filter((step) => step.mode === "fixed")
+      .flatMap((step) => [step.board.before, step.board.after])
+      .flatMap((board) => [board.A.bulwarks, board.B.bulwarks])
+      .flat();
+    expect(bulwarks.length).toBeGreaterThan(0);
+    expect(bulwarks.every((card) => card.face === "down")).toBe(true);
+  });
   it("通常準備ではランダムなカードを決めつけない", () => {
     for (const step of scenario.steps.filter((s) => s.mode === "real"))
       for (const b of [step.board.before, step.board.after])

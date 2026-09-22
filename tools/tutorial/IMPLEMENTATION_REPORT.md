@@ -132,7 +132,7 @@ SimulatorのUI、ロジック、official-base.yamlは読み込みません。
 
 ## 11. Tutorialテスト
 
-Docker経由でVitest 37件成功（schema 15、UI 15、保存 7）。
+Docker経由でVitest 40件成功（schema 16、UI 17、保存 7）。
 schema、参照ID、盤面の連続性、操作カード、16枚の保存、actor A/B、回転と墓地移動、
 進捗の保存・再開・リセット、旧進捗の無効化、先攻選択、開始ドロー、早見を検証しました。
 GitHub Pages用base pathでschema検証・TypeScript・Viteビルドが成功しています。
@@ -172,6 +172,8 @@ Docker経由で既存19ファイル・113件のテストが成功しました。
 正規ソースは書き換えず、Tutorialでは「開始時プリセットは共通手順に従い表向き」「通常の防壁設置はYAMLに従い裏向き」と個別に案内しています。
 表向きプリセットとキャラクター定義の一般表記の関係は、公式側で明文化を検討できる点です。
 
+固定練習の通常防壁はscenarioデータ自体を `face: "down"` とし、描画側は防壁ゾーンやモードによる上書きを行いません。これにより、将来scenarioで `before` を裏向き、`after` を表向きに指定した防壁公開もそのまま描画できます。
+
 ## 14. 変更ファイル
 
 今回変更したファイル：
@@ -181,7 +183,8 @@ Docker経由で既存19ファイル・113件のテストが成功しました。
 - `tools/tutorial/src/components/ActionHelp.tsx`、`BeginnerGuide.tsx`、`CurriculumPanel.tsx`、`TutorialBoard.tsx`、`MoveGuide.tsx`
 - `tools/tutorial/src/data/tutorials/entry16.json`
 - `tools/tutorial/src/hooks/useTutorialProgress.ts`、`lib/storage.ts`、`lib/cards.ts`
-- `tools/tutorial/tests/App.test.tsx`、`schema.test.ts`、`storage.test.ts`
+- `tools/tutorial/tests/App.test.tsx`、`TutorialBoard.test.tsx`、`schema.test.ts`、`storage.test.ts`
+- `tools/tutorial/reference/README.md`
 
 ## 15. コミット
 

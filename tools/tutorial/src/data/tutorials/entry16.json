@@ -124,7 +124,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -207,7 +207,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -242,7 +242,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -261,7 +261,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -327,7 +327,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -346,7 +346,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -374,7 +374,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -459,7 +459,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -617,7 +617,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -702,7 +702,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -801,7 +801,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -886,7 +886,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1015,7 +1015,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -1100,7 +1100,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1199,7 +1199,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -1284,7 +1284,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1413,7 +1413,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -1498,7 +1498,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1591,7 +1591,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -1682,7 +1682,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1806,7 +1806,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -1897,7 +1897,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -1990,7 +1990,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2081,7 +2081,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2205,7 +2205,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2296,7 +2296,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2389,7 +2389,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2480,7 +2480,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2605,7 +2605,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2696,7 +2696,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2789,7 +2789,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -2880,7 +2880,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3003,7 +3003,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3094,7 +3094,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3187,7 +3187,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3278,7 +3278,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3391,7 +3391,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3482,7 +3482,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3575,7 +3575,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3666,7 +3666,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -3789,7 +3789,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -3880,7 +3880,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -3973,7 +3973,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "drive"
               }
             ],
@@ -4075,7 +4075,7 @@
             "bulwarks": [
               {
                 "card": "D5",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
               }
             ],
@@ -4175,8 +4175,8 @@
       "ruleRefs": ["action.setBulwark"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SA","face":"down","state":"charge"},{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[]},"turn":"B"},
-        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"}
+        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SA","face":"down","state":"charge"},{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[]},"turn":"B"},
+        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"}
       },
       "operations": [{"player":"B","from":"life","to":"grave","cards":["SA"],"label":"ライフのA → 墓地（1点ダメージ）"}]
     },
@@ -4196,8 +4196,8 @@
       "ruleRefs": ["action.setBulwark", "character.bulwark"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"},
-        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"}
+        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"},{"card":"D8","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"},
+        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"}
       },
       "operations": [{"player":"B","from":"hand","to":"bulwarks","cards":["D8"],"label":"手札の♢8 → 防壁（裏・縦）"}]
     },
@@ -4216,8 +4216,8 @@
       "ruleRefs": ["action.end"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"},
-        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"B"},
+        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": []
     },
@@ -4236,8 +4236,8 @@
       "ruleRefs": ["action.charge"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
-        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"drive"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
+        "after": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": [{"player":"A","from":"bulwarks","to":"bulwarks","cards":["D5"],"label":"防壁：横 → 縦"}]
     },
@@ -4256,8 +4256,8 @@
       "ruleRefs": ["action.draw"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
-        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"D8","face":"down","state":"charge"},{"card":"SA","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
+        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": [{"player":"A","from":"life","to":"hand","cards":["D8","SA"],"label":"♢8・A：ライフ → 手札"}]
     },
@@ -4277,8 +4277,8 @@
       "ruleRefs": ["action.attack"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
-        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
+        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": [{"player":"A","from":"soldiers","to":"soldiers","cards":["S2"],"label":"兵士♠2：縦 → 横"}]
     },
@@ -4298,8 +4298,8 @@
       "ruleRefs": ["action.block"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
-        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
+        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": []
     },
@@ -4319,8 +4319,8 @@
       "ruleRefs": ["action.damageJudge"],
       "mode": "fixed",
       "board": {
-        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
-        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"up","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"},{"card":"S2","face":"up","state":"charge"},{"card":"SK","face":"up","state":"charge"}]},"turn":"A"}
+        "before": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"S2","face":"down","state":"charge"},{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"}]},"turn":"A"},
+        "after": {"A":{"hand":[{"card":"D8","face":"up","state":"charge"},{"card":"SA","face":"up","state":"charge"}],"soldiers":[{"card":"S2","face":"up","state":"drive"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"}],"life":[{"card":"SK","face":"down","state":"charge"},{"card":"H4","face":"down","state":"charge"},{"card":"H7","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"C6","face":"up","state":"charge"},{"card":"S3","face":"up","state":"charge"}]},"B":{"hand":[{"card":"S3","face":"up","state":"charge"}],"soldiers":[{"card":"H7","face":"up","state":"charge"}],"bulwarks":[{"card":"D5","face":"down","state":"charge"},{"card":"D8","face":"down","state":"charge"}],"life":[{"card":"H4","face":"down","state":"charge"},{"card":"HJ","face":"down","state":"charge"},{"card":"HQ","face":"down","state":"charge"},{"card":"D10","face":"down","state":"charge"},{"card":"DQ","face":"down","state":"charge"},{"card":"CA","face":"down","state":"charge"},{"card":"C6","face":"down","state":"charge"},{"card":"C9","face":"down","state":"charge"},{"card":"CK","face":"down","state":"charge"}],"grave":[{"card":"SA","face":"up","state":"charge"},{"card":"S2","face":"up","state":"charge"},{"card":"SK","face":"up","state":"charge"}]},"turn":"A"}
       },
       "operations": [{"player":"B","from":"life","to":"grave","cards":["S2","SK"],"label":"ライフ上2枚 → 墓地（2点ダメージ）"}]
     },

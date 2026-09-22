@@ -74,6 +74,11 @@ YAMLの変更で共通手順そのものを自動追従する仕組みではな�
 - `src/lib/storage.ts`：ステップ・操作確認状態・先攻を保存。
 - `tests/`：schema、画面操作、保存の検証。
 
+## QuickStart Guideの参照資料
+
+今後の完全照合に使うPDFは `tools/tutorial/reference/QuickStartGuide.pdf` に配置します。
+PDFが存在しない状態では内容を推測せず、coverage表も作成しません。
+
 新シナリオでは `board.before` / `board.after` を完全な教材状態として記述します。
 固定区間では前の `after` と次の `before` が一致する必要があります。
 `operations` は操作案内と強調表示専用であり、盤面の効果処理には使いません。

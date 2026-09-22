@@ -73,26 +73,21 @@ export function TutorialBoard({
         <div className="zone-cards">
           {shown.map((c: BoardCard) => (
             <span className={`card-slot ${c.state}`} key={c.card}>
-              {(() => {
-                const face = zone === "bulwarks" && !real ? "down" : c.face;
-                return (
               <span
-                className={`board-card ${c.state} ${face === "down" ? "face-down" : ""} ${related.some((o) => o.cards.includes(c.card)) ? "selected-card" : ""}`}
-                aria-label={`${player} ${face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
+                className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${related.some((o) => o.cards.includes(c.card)) ? "selected-card" : ""}`}
+                aria-label={`${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
               >
-                {face === "down" ? "BP" : cardName(c.card)}
+                {c.face === "down" ? "BP" : cardName(c.card)}
               </span>
-                );
-              })()}
             </span>
           ))}
           {preview.slice(0, 2).map((c) => (
             <span className={`card-slot ${c.state}`} key={"preview-" + c.card}>
               <span
-                className={`board-card ghost-card ${c.state} ${zone === "bulwarks" ? "face-down" : ""}`}
-                aria-label={zone === "bulwarks" ? "置く位置 防壁の裏向きカード" : `置く位置 ${cardName(c.card)}`}
+                className={`board-card ghost-card ${c.state} ${c.face === "down" ? "face-down" : ""}`}
+                aria-label={c.face === "down" ? `置く位置 ${labels[zone]}の裏向きカード` : `置く位置 ${cardName(c.card)}`}
               >
-                {zone === "bulwarks" ? "BP" : cardName(c.card)}
+                {c.face === "down" ? "BP" : cardName(c.card)}
               </span>
             </span>
           ))}
