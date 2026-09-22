@@ -3,7 +3,9 @@ name: deploy_tutorial_pages
 on:
   workflow_dispatch:
   push:
-    branches: [master]
+    branches:
+      - master
+      - "635-kaizen-チュートリアルサイト作成"
     paths:
       - "tools/tutorial/**"
       - "tools/actionlist/original/act.yaml"
@@ -35,6 +37,14 @@ jobs:
       - name: GitHub Pages向けにビルド
         working-directory: tools/tutorial
         run: docker compose run --rm -e VITE_BASE_PATH=/BlackPoker/tutorial/ app npm run build
+
+      - name: build成果物を検証
+        working-directory: tools/tutorial
+        shell: bash
+        run: |
+          test -f dist/index.html
+          find dist/assets -type f -print -quit | grep -q .
+          grep -q '/BlackPoker/tutorial/assets/' dist/index.html
 
       - name: gh-pagesへ配置
         shell: bash

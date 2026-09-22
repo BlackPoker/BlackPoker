@@ -87,7 +87,15 @@ PDFが存在しない状態では内容を推測せず、coverage表も作成し
 ## GitHub Pages
 
 成果物は `tools/tutorial/dist/` です。workflowは `tools/tutorial/**` と正規YAMLを監視し、Dockerでテスト・ビルドします。
-公開先は [BlackPoker Tutorial](https://blackpoker.github.io/BlackPoker/tutorial/) のままです。
-gh-pagesの `tutorial/` のみを更新します。forkの場合は `VITE_BASE_PATH` のリポジトリ名を変更してください。
+公開先は [BlackPoker Tutorial](https://blackpoker.github.io/BlackPoker/tutorial/) です。
+gh-pagesの `tutorial/` のみを更新します。テストまたはbuildに失敗した場合はgh-pagesを更新しません。
+
+現在は次のpushを自動公開の対象にしています。
+
+- `635-kaizen-チュートリアルサイト作成`：マージ前の暫定公開用。masterへマージ後は対象から外す予定です。
+- `master`：正式なデプロイ元。
+
+手動で再公開する場合は、GitHub Actionsの `deploy_tutorial_pages` を開き、`Run workflow` を実行します。
+Pages用buildでは `VITE_BASE_PATH=/BlackPoker/tutorial/` を指定します。forkの場合はリポジトリ名に合わせて変更してください。
 
 設計・全操作・公式ルールの確認結果は [実装報告](IMPLEMENTATION_REPORT.md) を参照してください。
