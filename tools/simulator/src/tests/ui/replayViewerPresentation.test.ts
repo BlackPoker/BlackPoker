@@ -12,7 +12,11 @@ import { renderToString } from "react-dom/server";
 import {
   ReplayViewerModal,
   initializeReplayViewerBundle,
+  resolveReplayViewerTrailingNormalization,
+  ReplayViewerSource,
 } from "../../ui/replay/ReplayViewerModal";
+import * as ReplayVerificationService from "../../ui/playtest/ReplayVerificationService";
+import * as ReplayReconstructionService from "../../engine/replay/ReplayReconstructionService";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { startMatchAttempt } from "../../engine/playtest/PlaytestEnvironmentController";
@@ -26,8 +30,9 @@ import {
   createDecisionTranscriptEntry,
   PlaytestDecisionTranscriptEntryV1,
 } from "../../ui/playtest/PlaytestDecisionTranscript";
+import { ReplayPlanV1 } from "../../engine/replay/ReplayTypes";
 
-describe("ReplayViewerPresentation Tests (Phase 4.0-B)", () => {
+describe("ReplayViewerPresentation Tests (Phase 4.0-B-R1)", () => {
   const catalog = loadRegulationCatalogForBrowser();
   const fullRulePackage = loadRulePackageForBrowser();
   const currentBuildSha = "local";
@@ -108,7 +113,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B)", () => {
     expect(html).toBe("");
   });
 
-  it("2. isOpen が true かつ initialBundle がない場合、Empty State（JSON読込待ち）が描画されること", () => {
+  it("2. isOpen が true かつ initialBundle がない場合、Empty State（JSON読込待ち）が描画されソースバッジがないこと", () => {
     const html = renderToString(
       React.createElement(ReplayViewerModal, {
         isOpen: true,
@@ -131,47 +136,116 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B)", () => {
     expect(html).not.toContain("|◀");
     expect(html).not.toContain("▶ 再生");
     expect(html).not.toContain('type="range"');
+
+    // ソースバッジが存在しないこと
+    expect(html).not.toContain("現在の対戦");
   });
 
-  it("3. isOpen が true かつ 有効な initialBundle が渡された場合、ナビゲーション操作・現在位置・視点切替・バッジが描画されること", () => {
+  it("3. renderToString 実行時に render 内部で Replay 再構築・検証が実行されないこと (No Render-Side Reconstruction)", () => {
     const bundle = createSampleBundle(42);
 
-    const html = renderToString(
+    const verifySpy = vi.spyOn(ReplayVerificationService, "verifyDiagnosticReplayBundleV1");
+    const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch");
+
+    try {
+      const html = renderToString(
+        React.createElement(ReplayViewerModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          catalog,
+          fullRulePackage,
+          currentBuildSha,
+          initialBundle: bundle,
+          initialSource: "live",
+        })
+      );
+
+      // useState lazy initializer や render body 内での重い再構築・検証は一切呼ばれていないこと
+      expect(verifySpy).toHaveBeenCalledTimes(0);
+      expect(reconSpy).toHaveBeenCalledTimes(0);
+
+      // レンダリング自体はクラッシュせず正常に行われること
+      expect(html).toContain("Replay Viewer");
+      expect(html).toContain("現在の対戦");
+    } finally {
+      verifySpy.mockRestore();
+      reconSpy.mockRestore();
+    }
+  });
+
+  it("4. 明示的 ReplayViewerSource に応じたバッジ表示契約 (live -> 現在の対戦, json -> JSON, なし -> 非表示)", () => {
+    // 4-A: live source
+    const htmlLive = renderToString(
       React.createElement(ReplayViewerModal, {
         isOpen: true,
         onClose: dummyOnClose,
         catalog,
         fullRulePackage,
         currentBuildSha,
-        initialBundle: bundle,
+        initialSource: "live",
       })
     );
+    expect(htmlLive).toContain("現在の対戦");
 
-    // ヘッダー情報
-    expect(html).toContain("Replay Viewer");
-    expect(html).toContain("VERIFIED");
-    expect(html).toContain("現在の対戦");
+    // 4-B: json source
+    const htmlJson = renderToString(
+      React.createElement(ReplayViewerModal, {
+        isOpen: true,
+        onClose: dummyOnClose,
+        catalog,
+        fullRulePackage,
+        currentBuildSha,
+        initialSource: "json",
+      })
+    );
+    expect(htmlJson).toContain("JSON");
+    expect(htmlJson).not.toContain("現在の対戦");
 
-    // ナビゲーション操作
-    expect(html).toContain("|◀");
-    expect(html).toContain("◀");
-    expect(html).toContain("▶ 再生");
-    expect(html).toContain("▶");
-    expect(html).toContain("▶|");
-
-    // 現在位置インジケータ
-    expect(html).toContain("Decision");
-    expect(html).toContain("(初期状態)");
-
-    // 視点切替
-    expect(html).toContain("Player A 視点");
-    expect(html).toContain("Player B 視点");
-
-    // シークバー (スライダー)
-    expect(html).toContain('type="range"');
+    // 4-C: no source
+    const htmlNone = renderToString(
+      React.createElement(ReplayViewerModal, {
+        isOpen: true,
+        onClose: dummyOnClose,
+        catalog,
+        fullRulePackage,
+        currentBuildSha,
+      })
+    );
+    expect(htmlNone).not.toContain("現在の対戦");
   });
 
-  it("4. initializeReplayViewerBundle Pure Helper による決定論的状態生成と Stale State 防止契約", () => {
+  it("5. resolveReplayViewerTrailingNormalization ヘルパーの決定論的判定契約", () => {
+    const dummyDecisions: any[] = [{ seq: 1 }, { seq: 2 }, { seq: 3 }];
+    const basePlan: ReplayPlanV1 = {
+      environmentId: "core-battle",
+      sourceBuild: { sha: "test", ref: "test" },
+      decisions: dummyDecisions,
+      expected: { status: "WAITING_FOR_DECISION", rawState: {} },
+    };
+
+    // 1. expected === WAITING_FOR_DECISION, 末尾 -> EXTERNAL_DECISION_BOUNDARY
+    expect(resolveReplayViewerTrailingNormalization(basePlan, 3)).toBe("EXTERNAL_DECISION_BOUNDARY");
+
+    // 2. expected === FINISHED, 末尾 -> EXTERNAL_DECISION_BOUNDARY
+    const finishedPlan: ReplayPlanV1 = {
+      ...basePlan,
+      expected: { status: "FINISHED", rawState: {} },
+    };
+    expect(resolveReplayViewerTrailingNormalization(finishedPlan, 3)).toBe("EXTERNAL_DECISION_BOUNDARY");
+
+    // 3. expected === PROGRESSED, 末尾手前 -> EXTERNAL_DECISION_BOUNDARY
+    const progressedPlan: ReplayPlanV1 = {
+      ...basePlan,
+      expected: { status: "PROGRESSED", rawState: {} },
+    };
+    expect(resolveReplayViewerTrailingNormalization(progressedPlan, 2)).toBe("EXTERNAL_DECISION_BOUNDARY");
+    expect(resolveReplayViewerTrailingNormalization(progressedPlan, 0)).toBe("EXTERNAL_DECISION_BOUNDARY");
+
+    // 4. expected === PROGRESSED, 末尾 (currentIndex === totalDecisions) -> EXACT_AFTER_TRANSCRIPT
+    expect(resolveReplayViewerTrailingNormalization(progressedPlan, 3)).toBe("EXACT_AFTER_TRANSCRIPT");
+  });
+
+  it("6. initializeReplayViewerBundle Pure Helper による決定論的状態生成と Stale State 防止契約", () => {
     const bundleA = createSampleBundle(100);
     const bundleB = createSampleBundle(200);
 

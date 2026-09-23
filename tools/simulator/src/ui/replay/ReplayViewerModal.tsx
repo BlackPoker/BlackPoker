@@ -18,8 +18,8 @@ import {
 import { createReplayPlanFromDiagnosticBundleV1 } from "../playtest/DiagnosticReplayAdapter";
 
 /**
- * Diagnostic Bundle から ReplayPlanV1 と ReplayVerificationOutcome を初期構築する Pure Helper。
- * SSR レンダリング時や初期マウント時の状態同期、および単体テストで利用されます。
+ * Diagnostic Bundle から ReplayPlanV1 と ReplayVerificationOutcome を構築する Pure Helper。
+ * React の render 外（useEffect、イベントハンドラ、単体・結合テスト等）で利用されます。
  */
 export function initializeReplayViewerBundle(
   bundle: unknown,
@@ -59,6 +59,23 @@ export function initializeReplayViewerBundle(
   };
 }
 
+export type ReplayViewerSource = "live" | "json";
+
+/**
+ * Replay Viewer における trailingNormalization を解決する Pure Helper。
+ * 末尾かつ expected.status === "PROGRESSED" の場合のみ "EXACT_AFTER_TRANSCRIPT" を使用し、
+ * それ以外は "EXTERNAL_DECISION_BOUNDARY" を使用します。
+ */
+export function resolveReplayViewerTrailingNormalization(
+  plan: ReplayPlanV1,
+  currentIndex: number
+): "EXTERNAL_DECISION_BOUNDARY" | "EXACT_AFTER_TRANSCRIPT" {
+  const isTranscriptEnd = currentIndex === plan.decisions.length;
+  return isTranscriptEnd && plan.expected?.status === "PROGRESSED"
+    ? "EXACT_AFTER_TRANSCRIPT"
+    : "EXTERNAL_DECISION_BOUNDARY";
+}
+
 export interface ReplayViewerModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
@@ -66,6 +83,7 @@ export interface ReplayViewerModalProps {
   readonly fullRulePackage: RulePackage;
   readonly currentBuildSha: string;
   readonly initialBundle?: unknown;
+  readonly initialSource?: ReplayViewerSource;
 }
 
 export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
@@ -75,24 +93,15 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   fullRulePackage,
   currentBuildSha,
   initialBundle,
+  initialSource,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [rawBundle, setRawBundle] = useState<unknown | null>(initialBundle ?? null);
+  const [rawBundle, setRawBundle] = useState<unknown | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [sourceType, setSourceType] = useState<"live" | "file" | null>(initialBundle ? "live" : null);
-
-  const [initialInitState] = useState(() => {
-    if (initialBundle) {
-      return initializeReplayViewerBundle(initialBundle, { currentBuildSha, catalog, fullRulePackage });
-    }
-    return { plan: null, verificationOutcome: null };
-  });
-
-  const [plan, setPlan] = useState<ReplayPlanV1 | null>(initialInitState.plan);
-  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(
-    initialInitState.verificationOutcome
-  );
+  const [sourceType, setSourceType] = useState<ReplayViewerSource | null>(initialSource ?? null);
+  const [plan, setPlan] = useState<ReplayPlanV1 | null>(null);
+  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [viewerPerspective, setViewerPerspective] = useState<"p1" | "p2">("p1");
@@ -110,7 +119,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   };
 
   // バンドルの読み込み処理
-  const loadBundle = (bundle: unknown, source: "live" | "file" = "file") => {
+  const loadBundle = (bundle: unknown, source: ReplayViewerSource) => {
     resetViewerState();
     setRawBundle(bundle);
     setSourceType(source);
@@ -141,19 +150,19 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     setVerificationOutcome(outcome);
   };
 
-  const lastLoadedBundleRef = useRef<unknown>(initialBundle ?? null);
+  const lastLoadedBundleRef = useRef<unknown>(null);
 
   useEffect(() => {
     if (!isOpen) return;
 
     if (initialBundle) {
-      loadBundle(initialBundle, "live");
+      loadBundle(initialBundle, initialSource ?? "json");
       lastLoadedBundleRef.current = initialBundle;
     } else {
       resetViewerState();
       lastLoadedBundleRef.current = null;
     }
-  }, [isOpen, initialBundle]);
+  }, [isOpen, initialBundle, initialSource]);
 
   // モーダルクローズ時やEscapeキー
   useEffect(() => {
@@ -180,7 +189,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
       const text = await file.text();
       const parseResult = parseDiagnosticJson(text);
       if (parseResult.type === "SUCCESS") {
-        loadBundle(parseResult.value, "file");
+        loadBundle(parseResult.value, "json");
       } else {
         setParseError(parseResult.message);
       }
@@ -220,11 +229,13 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   // 現在の index に対する再構築
   const reconResult: ReconstructMatchResult | null = useMemo(() => {
     if (!plan) return null;
+    const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, currentIndex);
     return reconstructMatch({
       environmentId: plan.environmentId,
       seed: plan.seed,
       transcript: plan.decisions,
       decisionCount: currentIndex,
+      trailingNormalization,
       catalog,
       fullRulePackage,
       expectedRulePackage: plan.sourceRulePackage,
@@ -359,7 +370,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
                 現在の対戦
               </span>
             )}
-            {sourceType === "file" && (
+            {sourceType === "json" && (
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
                 JSON
               </span>
@@ -563,7 +574,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
           {plan && reconResult?.status === "TECHNICAL_ERROR" && (
             <div className="p-3 rounded border border-red-200 bg-red-50 text-xs text-red-900 font-mono">
               <div className="font-bold mb-1">✕ Replay 再構築エラー (Technical Error)</div>
-              <div>{reconResult.error}</div>
+              <div>Replayの再構築中に技術的エラーが発生しました。</div>
             </div>
           )}
 

@@ -6,7 +6,9 @@
  * Replay Viewer 基盤へ直接接続した際の決定論的再現性・非破壊性・検証をテスト。
  */
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+import { GameSession } from "../../engine/session/GameSession";
+import { resolveReplayViewerTrailingNormalization } from "../../ui/replay/ReplayViewerModal";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 import { startMatchAttempt } from "../../engine/playtest/PlaytestEnvironmentController";
@@ -380,6 +382,133 @@ describe("Live Match Direct Replay Integration Tests (Phase 4.0-B)", () => {
         expect(card.visibility).toBe("KNOWN");
         expect((card as any).suit).toBeDefined();
       }
+    }
+  });
+
+  it("4. PROGRESSED Exact Last Replay: submitDecision が PROGRESSED を返した時点の exact state と StateHash が完全一致すること", () => {
+    const environmentId = "official:standard-pack";
+    const testSeed = 20260923;
+
+    const outcome = startMatchAttempt({
+      environmentId,
+      seedInput: String(testSeed),
+      catalog,
+      fullRulePackage,
+    });
+    expect(outcome.type).toBe("READY");
+    if (outcome.type !== "READY") return;
+
+    const session = outcome.session;
+    let step = outcome.initialStep;
+    while (step.type === "PROGRESSED") {
+      step = session.advance();
+    }
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    if (step.type !== "WAITING_FOR_DECISION") return;
+
+    const req = step.request;
+    const transcriptEntry: PlaytestDecisionTranscriptEntryV1 = {
+      seq: 1,
+      actor: "human",
+      playerId: req.playerId as "p1" | "p2",
+      decisionId: req.decisionId,
+      stateVersion: req.stateVersion,
+      response: {
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        selectedPatternRef: 0,
+      },
+    };
+
+    // submitDecision 実行直後 (PROGRESSED) をシミュレート (既存 Replay test fixture 準拠)
+    let returnProgressed = true;
+    const originalSubmit = GameSession.prototype.submitDecision;
+    const submitSpy = vi.spyOn(GameSession.prototype, "submitDecision").mockImplementation(function (
+      this: GameSession,
+      resp
+    ) {
+      if (returnProgressed) {
+        originalSubmit.apply(this, [resp]);
+        return { type: "PROGRESSED" };
+      }
+      return originalSubmit.apply(this, [resp]);
+    });
+
+    try {
+      const progressedStep = session.submitDecision(transcriptEntry.response);
+      expect(progressedStep.type).toBe("PROGRESSED");
+
+      // advance() を呼ぶ前の exact session.state と StateHash を記録
+      const sourceStateHash = StateHasher.hash(session.state);
+
+      // PROGRESSED 時点で Diagnostic Bundle を生成
+      const bundle = buildPlaytestDiagnosticBundleV1(
+        assemblePlaytestDiagnosticBundleParams({
+          build: { sha: "local", ref: "local" },
+          generatedAt: new Date().toISOString(),
+          activeMatch: outcome.activeMatch,
+          activePlaytestSettings: {
+            matchMode: "humanVsHuman",
+            humanSeat: "p1",
+            policyId: "firstLegal",
+          },
+          activeSeatControllers: createSeatControllers("humanVsHuman"),
+          rawState: captureDiagnosticRawState(session.state),
+          logs: [],
+          traces: [],
+          canonicalMatchLog: session.getMatchLog(),
+          currentStep: progressedStep,
+          decisionTranscript: [transcriptEntry],
+        })
+      );
+
+      expect(bundle.match.status).toBe("PROGRESSED");
+
+      // 1. Adapter による Plan 生成
+      const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, { currentBuildSha: "local" });
+      expect(planResult.type).toBe("READY");
+      if (planResult.type !== "READY") return;
+
+      const plan = planResult.plan;
+      expect(plan.expected.status).toBe("PROGRESSED");
+      expect(plan.decisions.length).toBe(1);
+
+      // 2. Replay Verification が VERIFIED であること
+      const verification = verifyDiagnosticReplayBundleV1(bundle, {
+        currentBuildSha: "local",
+        catalog,
+        fullRulePackage,
+      });
+      expect(verification.type).toBe("VERIFIED");
+
+      // 3. resolveReplayViewerTrailingNormalization の判定確認
+      // Decision 0 (未末尾) -> EXTERNAL_DECISION_BOUNDARY
+      const normBeforeLast = resolveReplayViewerTrailingNormalization(plan, 0);
+      expect(normBeforeLast).toBe("EXTERNAL_DECISION_BOUNDARY");
+
+      // Decision 1 (末尾かつ PROGRESSED) -> EXACT_AFTER_TRANSCRIPT
+      const normLast = resolveReplayViewerTrailingNormalization(plan, 1);
+      expect(normLast).toBe("EXACT_AFTER_TRANSCRIPT");
+
+      // 4. Viewer と同じ normalization を用いて Last を再構築
+      const reconLast = reconstructMatch({
+        environmentId: plan.environmentId,
+        seed: plan.seed,
+        transcript: plan.decisions,
+        decisionCount: 1,
+        trailingNormalization: normLast,
+        catalog,
+        fullRulePackage,
+        expectedRulePackage: plan.sourceRulePackage,
+      });
+
+      expect(reconLast.status).toBe("SUCCESS");
+      if (reconLast.status === "SUCCESS") {
+        expect(reconLast.currentStep?.type).toBe("PROGRESSED");
+        expect(StateHasher.hash(reconLast.currentGameState)).toBe(sourceStateHash);
+      }
+    } finally {
+      submitSpy.mockRestore();
     }
   });
 });

@@ -71,7 +71,7 @@ import {
 import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { ReplayVerifyModal } from "../replay/ReplayVerifyModal";
-import { ReplayViewerModal } from "../replay/ReplayViewerModal";
+import { ReplayViewerModal, ReplayViewerSource } from "../replay/ReplayViewerModal";
 import {
   reconstructMatch,
   findUndoTruncationIndex,
@@ -179,9 +179,11 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
   const [isReplayViewerOpen, setIsReplayViewerOpen] = useState(false);
   const [replayViewerInitialBundle, setReplayViewerInitialBundle] = useState<unknown | null>(null);
+  const [replayViewerInitialSource, setReplayViewerInitialSource] = useState<ReplayViewerSource | null>(null);
 
-  const handleOpenReplayViewer = useCallback((bundle?: unknown) => {
+  const handleOpenReplayViewer = useCallback((bundle?: unknown, source: ReplayViewerSource = "json") => {
     setReplayViewerInitialBundle(bundle ?? null);
+    setReplayViewerInitialSource(bundle ? source : null);
     setIsReplayViewerOpen(true);
   }, []);
 
@@ -1042,9 +1044,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         return;
       }
       setReplayViewerInitialBundle(bundle);
+      setReplayViewerInitialSource("live");
       setIsReplayViewerOpen(true);
     } else {
       setReplayViewerInitialBundle(null);
+      setReplayViewerInitialSource(null);
       setIsReplayViewerOpen(true);
     }
   }, [activeMatch, buildCurrentDiagnosticBundle]);
@@ -1830,7 +1834,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         onClose={() => setIsReplayVerifyModalOpen(false)}
         onVerify={handleVerifyReplayBundle}
         currentBuildSha={currentBuildSha}
-        onOpenReplayViewer={(bundle) => handleOpenReplayViewer(bundle)}
+        onOpenReplayViewer={(bundle) => handleOpenReplayViewer(bundle, "json")}
       />
 
       {/* 7. Replay Viewer モーダル */}
@@ -1841,6 +1845,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         fullRulePackage={fullRulePackage}
         currentBuildSha={currentBuildSha}
         initialBundle={replayViewerInitialBundle}
+        initialSource={replayViewerInitialSource ?? undefined}
       />
     </div>
 
