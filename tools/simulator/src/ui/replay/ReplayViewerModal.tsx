@@ -84,6 +84,34 @@ export interface ReplayViewerModalProps {
   readonly currentBuildSha: string;
   readonly initialBundle?: unknown;
   readonly initialSource?: ReplayViewerSource;
+  readonly initialPlan?: ReplayPlanV1 | null;
+  readonly initialVerificationOutcome?: ReplayVerificationOutcome | null;
+  readonly initialReconResult?: ReconstructMatchResult | null;
+}
+
+export interface ViewerReconState {
+  readonly plan: ReplayPlanV1 | null;
+  readonly index: number;
+  readonly result: ReconstructMatchResult | null;
+}
+
+/**
+ * 現在の plan と currentIndex に合致する再構築結果のみを解決する Pure Helper。
+ * ステップ切り替え時の Stale State（旧インデックスの盤面表示）を確実に防止します。
+ */
+export function resolveActiveReconstructResult(
+  reconState: ViewerReconState,
+  currentPlan: ReplayPlanV1 | null,
+  currentIndex: number
+): ReconstructMatchResult | null {
+  if (
+    currentPlan !== null &&
+    reconState.plan === currentPlan &&
+    reconState.index === currentIndex
+  ) {
+    return reconState.result;
+  }
+  return null;
 }
 
 export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
@@ -94,17 +122,29 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   currentBuildSha,
   initialBundle,
   initialSource,
+  initialPlan,
+  initialVerificationOutcome,
+  initialReconResult,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [rawBundle, setRawBundle] = useState<unknown | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<ReplayViewerSource | null>(initialSource ?? null);
-  const [plan, setPlan] = useState<ReplayPlanV1 | null>(null);
-  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(null);
+  const [plan, setPlan] = useState<ReplayPlanV1 | null>(initialPlan ?? null);
+  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(
+    initialVerificationOutcome ?? null
+  );
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [viewerPerspective, setViewerPerspective] = useState<"p1" | "p2">("p1");
+
+  // 再構築状態管理 (render 外で更新)
+  const [reconState, setReconState] = useState<ViewerReconState>(() => ({
+    plan: initialPlan ?? null,
+    index: 0,
+    result: initialReconResult ?? null,
+  }));
 
   // ビューア内部状態の完全リセット (stale state 防止)
   const resetViewerState = () => {
@@ -116,6 +156,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     setIsPlaying(false);
     setViewerPerspective("p1");
     setSourceType(null);
+    setReconState({ plan: null, index: 0, result: null });
   };
 
   // バンドルの読み込み処理
@@ -158,11 +199,16 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     if (initialBundle) {
       loadBundle(initialBundle, initialSource ?? "json");
       lastLoadedBundleRef.current = initialBundle;
+    } else if (initialPlan) {
+      setPlan(initialPlan);
+      if (initialVerificationOutcome !== undefined) {
+        setVerificationOutcome(initialVerificationOutcome);
+      }
     } else {
       resetViewerState();
       lastLoadedBundleRef.current = null;
     }
-  }, [isOpen, initialBundle, initialSource]);
+  }, [isOpen, initialBundle, initialSource, initialPlan, initialVerificationOutcome]);
 
   // モーダルクローズ時やEscapeキー
   useEffect(() => {
@@ -226,21 +272,53 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     return () => clearInterval(interval);
   }, [isPlaying, plan, maxViewableIndex]);
 
-  // 現在の index に対する再構築
-  const reconResult: ReconstructMatchResult | null = useMemo(() => {
-    if (!plan) return null;
-    const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, currentIndex);
-    return reconstructMatch({
-      environmentId: plan.environmentId,
-      seed: plan.seed,
-      transcript: plan.decisions,
-      decisionCount: currentIndex,
-      trailingNormalization,
-      catalog,
-      fullRulePackage,
-      expectedRulePackage: plan.sourceRulePackage,
-    });
+  // 現在の index に対する再構築 (useEffect 内で非同期/描画外実行し、render パスから完全に排除)
+  useEffect(() => {
+    if (!plan) {
+      setReconState({ plan: null, index: 0, result: null });
+      return;
+    }
+
+    let cancelled = false;
+    try {
+      const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, currentIndex);
+      const result = reconstructMatch({
+        environmentId: plan.environmentId,
+        seed: plan.seed,
+        transcript: plan.decisions,
+        decisionCount: currentIndex,
+        trailingNormalization,
+        catalog,
+        fullRulePackage,
+        expectedRulePackage: plan.sourceRulePackage,
+      });
+      if (!cancelled) {
+        setReconState({
+          plan,
+          index: currentIndex,
+          result,
+        });
+      }
+    } catch (e: any) {
+      if (!cancelled) {
+        setReconState({
+          plan,
+          index: currentIndex,
+          result: {
+            status: "TECHNICAL_ERROR",
+            error: e?.message ?? String(e),
+          },
+        });
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
   }, [plan, currentIndex, catalog, fullRulePackage]);
+
+  // 現在の plan と currentIndex に合致する再構築結果のみを有効とする（stale 表示の防止）
+  const reconResult = resolveActiveReconstructResult(reconState, plan, currentIndex);
 
   // 直前の Decision 情報およびカタログ正式参照からの Action / Effect 表示 (index > 0 のとき)
   const lastExecutedDecision = useMemo(() => {
@@ -556,6 +634,12 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
               <div className="text-xs text-zinc-500 max-w-sm">
                 右上の「JSON読込」ボタンから Diagnostic Bundle (.json) を選択して対戦履歴を再生してください。
               </div>
+            </div>
+          )}
+
+          {plan && !reconResult && !parseError && (
+            <div className="p-8 text-center flex flex-col items-center justify-center gap-2 text-zinc-500 text-xs font-mono">
+              <div className="animate-pulse">盤面を読み込み中...</div>
             </div>
           )}
 
