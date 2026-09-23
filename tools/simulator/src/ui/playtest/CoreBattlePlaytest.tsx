@@ -43,6 +43,7 @@ import { MobileDecisionDock } from "../decision/MobileDecisionDock";
 import { MobileBottomSheet, SheetMode } from "../game/MobileBottomSheet";
 import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
+import { PlaytestSeedMode, generateAutoSeed, generateNextAutoSeed } from "./PlaytestSeed";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
 import { ActionFeedbackComposer } from "../../engine/session/playtest/ActionFeedbackComposer";
@@ -92,6 +93,8 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(() =>
     chooseDefaultPlaytestEnvironment(getAvailableEnvironments(catalog))
   );
+  const [seedMode, setSeedMode] = useState<PlaytestSeedMode>("auto");
+  const [pendingAutoSeed, setPendingAutoSeed] = useState<number>(() => generateAutoSeed());
   const [seedInput, setSeedInput] = useState<string>("42");
   const [pendingMatchMode, setPendingMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [pendingHumanSeat, setPendingHumanSeat] = useState<"p1" | "p2">("p1");
@@ -241,7 +244,12 @@ export const CoreBattlePlaytest: React.FC = () => {
       overridePolicyId?: PlaytestPolicyId
     ) => {
       const env = overrideEnv ?? selectedEnvironmentId;
-      const seed = overrideSeedInput ?? seedInput;
+      const isOfficial = isOfficialEnvironment(env);
+      const seed = overrideSeedInput ?? (
+        isOfficial
+          ? (seedMode === "auto" ? String(pendingAutoSeed) : seedInput)
+          : seedInput
+      );
       const mode = overrideMode ?? pendingMatchMode;
       // Human vs AI では Human 席を常に "p1" へ正規化 (URLパラメータや復元設定の p2 も吸収)
       const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
@@ -308,6 +316,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat,
         policyId,
       });
+      // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
+      if (seedMode === "auto") {
+        const currentSeed = outcome.activeMatch.seed ?? Number(seed);
+        setPendingAutoSeed(generateNextAutoSeed(currentSeed));
+      }
       setActiveSeatControllers(seatControllers);
       setActivePolicies(policies);
       setActiveMatchMode(mode);
@@ -426,6 +439,8 @@ export const CoreBattlePlaytest: React.FC = () => {
     },
     [
       selectedEnvironmentId,
+      seedMode,
+      pendingAutoSeed,
       seedInput,
       pendingMatchMode,
       pendingHumanSeat,
@@ -454,6 +469,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         setPendingHumanSeat(normalizeHumanSeatForMode(bootstrap.config.mode, bootstrap.config.humanSeat));
         setPendingPolicyId(bootstrap.config.policyId);
         setSeedInput(bootstrap.config.seedInput);
+        setSeedMode("manual");
 
         if (bootstrap.warnings.length > 0) {
           setShareNotice({
@@ -485,17 +501,53 @@ export const CoreBattlePlaytest: React.FC = () => {
     }
   }, [catalog]);
 
-  // 現在の Pending 設定から Canonical Share URL を生成してクリップボードにコピー
+  // 現在の Pending 設定または対戦中 (Active) 設定から Canonical Share URL を生成してクリップボードにコピー
   const handleCopyShareUrl = useCallback(async () => {
     if (typeof window === "undefined") return;
-    const config: PlaytestShareConfigV1 = {
-      version: 1,
-      environmentId: selectedEnvironmentId,
-      mode: pendingMatchMode,
-      humanSeat: normalizeHumanSeatForMode(pendingMatchMode, pendingHumanSeat),
-      policyId: pendingPolicyId,
-      seedInput: seedInput,
-    };
+
+    let config: PlaytestShareConfigV1;
+    if (activeMatch && activePlaytestSettings) {
+      // 対戦中 (Active Match) の共有: activeMatch.seed のみを SSOT とする
+      const isOfficial = isOfficialEnvironment(activeMatch.environmentId);
+      let activeSeedStr = "";
+      if (isOfficial) {
+        if (typeof activeMatch.seed !== "number" || !Number.isSafeInteger(activeMatch.seed)) {
+          // Fail-closed: official active match without valid seed number
+          setShareNotice({
+            type: "error",
+            message: "対戦中Seedが未確定のため共有URLを生成できませんでした",
+          });
+          setTimeout(() => {
+            setShareNotice((prev) => (prev?.type === "error" ? null : prev));
+          }, 3000);
+          return;
+        }
+        activeSeedStr = String(activeMatch.seed);
+      }
+      config = {
+        version: 1,
+        environmentId: activeMatch.environmentId,
+        mode: activePlaytestSettings.matchMode,
+        humanSeat: normalizeHumanSeatForMode(activePlaytestSettings.matchMode, activePlaytestSettings.humanSeat),
+        policyId: activePlaytestSettings.policyId,
+        seedInput: activeSeedStr,
+      };
+    } else {
+      // 対戦前 (Pending 設定) の共有
+      const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
+      const seedForUrl = isOfficial
+        ? (seedMode === "auto" ? String(pendingAutoSeed) : seedInput)
+        : seedInput;
+
+      config = {
+        version: 1,
+        environmentId: selectedEnvironmentId,
+        mode: pendingMatchMode,
+        humanSeat: normalizeHumanSeatForMode(pendingMatchMode, pendingHumanSeat),
+        policyId: pendingPolicyId,
+        seedInput: seedForUrl,
+      };
+    }
 
     const url = buildPlaytestShareUrl(window.location.href, config, catalog);
     const success = await copyTextToClipboard(url);
@@ -519,7 +571,18 @@ export const CoreBattlePlaytest: React.FC = () => {
     setTimeout(() => {
       setShareNotice((prev) => (prev?.type === "success" || prev?.type === "error" ? null : prev));
     }, 3000);
-  }, [selectedEnvironmentId, pendingMatchMode, pendingHumanSeat, pendingPolicyId, seedInput, catalog]);
+  }, [
+    activeMatch,
+    activePlaytestSettings,
+    selectedEnvironmentId,
+    pendingMatchMode,
+    pendingHumanSeat,
+    pendingPolicyId,
+    seedMode,
+    pendingAutoSeed,
+    seedInput,
+    catalog,
+  ]);
 
   // 盤面ユニットクリック時のトグルハンドラ
   const handleUnitClick = useCallback(
@@ -1206,25 +1269,46 @@ export const CoreBattlePlaytest: React.FC = () => {
               ))}
             </select>
 
-            {isOfficialEnvironment(selectedEnvironmentId) && (
-              <>
-                <span
-                  className="text-[9px] font-bold text-zinc-400 ml-1 cursor-help"
-                  title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
-                >
-                  対戦SEED:
+            {activeMatch ? (
+              <div className="flex items-center gap-1 ml-1">
+                <span className="text-[9px] font-bold text-zinc-400">Seed:</span>
+                <span className="text-[11px] font-mono font-bold text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
+                  {activeMatch.seed}
                 </span>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  value={seedInput}
-                  onChange={(e) => setSeedInput(e.target.value)}
-                  className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
-                  placeholder="42"
-                  title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
-                />
-              </>
+              </div>
+            ) : (
+              isOfficialEnvironment(selectedEnvironmentId) && (
+                seedMode === "auto" ? (
+                  <div className="flex items-center gap-1 ml-1">
+                    <span className="text-[9px] font-bold text-zinc-400">次回Seed:</span>
+                    <span
+                      className="text-[11px] font-mono font-bold text-zinc-700 bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-200"
+                      title="対戦開始時に自動適用される次回Seedです"
+                    >
+                      {pendingAutoSeed}
+                    </span>
+                  </div>
+                ) : (
+                  <>
+                    <span
+                      className="text-[9px] font-bold text-zinc-400 ml-1 cursor-help"
+                      title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
+                    >
+                      対戦SEED:
+                    </span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={seedInput}
+                      onChange={(e) => setSeedInput(e.target.value)}
+                      className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
+                      placeholder="42"
+                      title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
+                    />
+                  </>
+                )
+              )
             )}
 
             {/* 対戦モード & AI 設定 (PC用) */}
@@ -1384,6 +1468,9 @@ export const CoreBattlePlaytest: React.FC = () => {
             onSelectMatchMode={handleSelectMatchMode}
             policyId={pendingPolicyId}
             onSelectPolicyId={setPendingPolicyId}
+            seedMode={seedMode}
+            onSeedModeChange={setSeedMode}
+            pendingAutoSeed={pendingAutoSeed}
             seedInput={seedInput}
             onSeedInputChange={setSeedInput}
             setupNotice={setupNotice}
@@ -1606,6 +1693,10 @@ export const CoreBattlePlaytest: React.FC = () => {
         selectedEnvironmentId={selectedEnvironmentId}
         onSelectEnvironment={setSelectedEnvironmentId}
         environmentOptions={environmentOptions}
+        activeMatchSeed={activeMatch?.seed}
+        seedMode={seedMode}
+        onSeedModeChange={setSeedMode}
+        pendingAutoSeed={pendingAutoSeed}
         showSeedInput={isOfficialEnvironment(selectedEnvironmentId)}
         seedInput={seedInput}
         onSeedInputChange={setSeedInput}

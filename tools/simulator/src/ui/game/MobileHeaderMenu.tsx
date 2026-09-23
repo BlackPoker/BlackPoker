@@ -6,12 +6,18 @@ import {
   PLAYTEST_POLICY_OPTIONS,
 } from "../../engine/playtest/PlaytestSeatController";
 
+import { PlaytestSeedMode } from "../playtest/PlaytestSeed";
+
 export interface MobileHeaderMenuProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly selectedEnvironmentId: string;
   readonly onSelectEnvironment: (envId: string) => void;
   readonly environmentOptions: readonly EnvironmentOption[];
+  readonly activeMatchSeed?: number;
+  readonly seedMode?: PlaytestSeedMode;
+  readonly onSeedModeChange?: (mode: PlaytestSeedMode) => void;
+  readonly pendingAutoSeed?: number;
   readonly showSeedInput: boolean;
   readonly seedInput?: string;
   readonly onSeedInputChange?: (val: string) => void;
@@ -39,6 +45,10 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   selectedEnvironmentId,
   onSelectEnvironment,
   environmentOptions,
+  activeMatchSeed,
+  seedMode = "auto",
+  onSeedModeChange,
+  pendingAutoSeed,
   showSeedInput,
   seedInput = "42",
   onSeedInputChange,
@@ -101,25 +111,63 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </select>
         </div>
 
-        {/* Seed 入力 (Official 環境のみ条件付き表示) */}
-        {showSeedInput && (
-          <div className="flex flex-col gap-1">
+        {/* Active Match Seed 表示 (対戦中) */}
+        {activeMatchSeed !== undefined && (
+          <div className="flex items-center justify-between p-2.5 rounded bg-zinc-100 border border-zinc-200 font-mono">
+            <span className="text-[11px] font-bold text-zinc-600">対戦SEED (Active Seed):</span>
+            <span className="text-xs font-black text-zinc-950">{activeMatchSeed}</span>
+          </div>
+        )}
+
+        {/* Seed 設定 (未対戦時 & Official 環境のみ表示) */}
+        {activeMatchSeed === undefined && showSeedInput && (
+          <div className="flex flex-col gap-1.5 p-2.5 rounded bg-zinc-50 border border-zinc-200">
             <label
-              className="text-[11px] font-mono font-bold text-zinc-500 cursor-help"
+              className="text-[11px] font-mono font-bold text-zinc-600 cursor-help"
               title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
-              対戦SEED (乱数シード・非負整数):
+              対戦SEED (Match Seed):
             </label>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={seedInput}
-              onChange={(e) => onSeedInputChange?.(e.target.value)}
-              className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
-              placeholder="42"
-              title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
-            />
+            <div className="flex flex-col gap-1.5 text-xs font-mono">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="radio"
+                  name="mobileSeedMode"
+                  value="auto"
+                  checked={seedMode === "auto"}
+                  onChange={() => onSeedModeChange?.("auto")}
+                  className="text-zinc-950 focus:ring-zinc-950"
+                />
+                <span className="font-bold text-zinc-900">自動（推奨）</span>
+                {seedMode === "auto" && pendingAutoSeed !== undefined && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">
+                    {`次回 Seed: ${pendingAutoSeed}`}
+                  </span>
+                )}
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="radio"
+                  name="mobileSeedMode"
+                  value="manual"
+                  checked={seedMode === "manual"}
+                  onChange={() => onSeedModeChange?.("manual")}
+                  className="text-zinc-950 focus:ring-zinc-950"
+                />
+                <span className="font-bold text-zinc-900">固定</span>
+              </label>
+              {seedMode === "manual" && (
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={seedInput}
+                  onChange={(e) => onSeedInputChange?.(e.target.value)}
+                  className="w-full text-xs font-mono font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px] mt-1"
+                  placeholder="42"
+                />
+              )}
+            </div>
           </div>
         )}
 

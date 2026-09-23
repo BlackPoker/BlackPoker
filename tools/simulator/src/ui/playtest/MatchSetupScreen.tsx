@@ -10,6 +10,8 @@ import {
   PLAYTEST_POLICY_OPTIONS,
 } from "../../engine/playtest/PlaytestSeatController";
 
+import { PlaytestSeedMode } from "./PlaytestSeed";
+
 export interface MatchSetupScreenProps {
   /** 利用可能な環境オプション一覧 */
   readonly environmentOptions: readonly EnvironmentOption[];
@@ -27,6 +29,13 @@ export interface MatchSetupScreenProps {
   readonly policyId: PlaytestPolicyId;
   /** AI Policy 変更コールバック */
   readonly onSelectPolicyId: (policyId: PlaytestPolicyId) => void;
+
+  /** 対戦 Seed モード ("auto" | "manual") */
+  readonly seedMode?: PlaytestSeedMode;
+  /** 対戦 Seed モード変更コールバック */
+  readonly onSeedModeChange?: (mode: PlaytestSeedMode) => void;
+  /** 次回適用される予定の Auto Seed (プレビュー用) */
+  readonly pendingAutoSeed?: number;
 
   /** 対戦 Seed 入力文字列 */
   readonly seedInput: string;
@@ -57,6 +66,9 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   onSelectMatchMode,
   policyId,
   onSelectPolicyId,
+  seedMode = "auto",
+  onSeedModeChange,
+  pendingAutoSeed,
   seedInput,
   onSeedInputChange,
   setupNotice,
@@ -260,31 +272,79 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
           </div>
         )}
 
-        {/* D. 対戦SEED入力 */}
+        {/* D. 対戦SEED設定 */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold font-mono text-zinc-700 flex items-center justify-between">
             <span>対戦SEED (Match Seed):</span>
             {isOfficial ? (
-              <span className="text-[10px] text-zinc-500 font-normal">※非負整数</span>
+              <span className="text-[10px] text-zinc-500 font-normal">※非負整数 (0〜4294967295)</span>
             ) : (
               <span className="text-[10px] text-zinc-400 font-normal">※Core Battle専用</span>
             )}
           </label>
+          {isOfficial && (
+            <p className="text-[11px] text-zinc-500 font-mono -mt-0.5">
+              初期山札シャッフルおよび初期配置を決定論的に再現します（AI DNAとは異なります）
+            </p>
+          )}
 
           {isOfficial ? (
-            <div>
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                value={seedInput}
-                onChange={(e) => onSeedInputChange(e.target.value)}
-                placeholder="42"
-                className="w-full text-xs sm:text-sm font-mono font-bold py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:ring-2 focus:ring-zinc-950 focus:outline-none min-h-[44px]"
-              />
-              <p className="text-[11px] text-zinc-500 font-mono mt-1">
-                初期山札シャッフルおよび初期配置を決定論的に再現します（AI DNAとは異なります）
-              </p>
+            <div className="flex flex-col gap-2 p-3 bg-zinc-50 rounded-lg border border-zinc-200">
+              {/* 自動（推奨） オプション */}
+              <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                <input
+                  type="radio"
+                  name="seedMode"
+                  value="auto"
+                  checked={seedMode === "auto"}
+                  onChange={() => onSeedModeChange?.("auto")}
+                  className="mt-0.5 text-zinc-950 focus:ring-zinc-950"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold font-mono text-zinc-900">自動（推奨）</span>
+                    {seedMode === "auto" && pendingAutoSeed !== undefined && (
+                      <span className="text-[11px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800">
+                        {`次回 Seed: ${pendingAutoSeed}`}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-zinc-500 font-mono mt-0.5 leading-relaxed">
+                    対戦ごとに新しいSeedを使用します。使用したSeedは対戦・Replay・共有URLに保存されます。
+                  </p>
+                </div>
+              </label>
+
+              {/* 固定 オプション */}
+              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-2 border-t border-zinc-200">
+                <input
+                  type="radio"
+                  name="seedMode"
+                  value="manual"
+                  checked={seedMode === "manual"}
+                  onChange={() => onSeedModeChange?.("manual")}
+                  className="mt-0.5 text-zinc-950 focus:ring-zinc-950"
+                />
+                <div className="flex-1">
+                  <span className="text-xs font-bold font-mono text-zinc-900">固定</span>
+                  <p className="text-[11px] text-zinc-500 font-mono mt-0.5 leading-relaxed">
+                    同じ初期状態を再現したい場合に使用します。
+                  </p>
+                  {seedMode === "manual" && (
+                    <div className="mt-2">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        value={seedInput}
+                        onChange={(e) => onSeedInputChange(e.target.value)}
+                        placeholder="42"
+                        className="w-full text-xs sm:text-sm font-mono font-bold py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:ring-2 focus:ring-zinc-950 focus:outline-none min-h-[44px]"
+                      />
+                    </div>
+                  )}
+                </div>
+              </label>
             </div>
           ) : (
             <div>

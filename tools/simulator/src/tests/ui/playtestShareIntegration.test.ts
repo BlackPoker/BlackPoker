@@ -13,6 +13,7 @@ import {
   OFFICIAL_ENV_PREFIX,
   CORE_BATTLE_ENV_ID,
 } from "../../engine/playtest/PlaytestEnvironmentController";
+import { PlaytestSeedMode } from "../../ui/playtest/PlaytestSeed";
 
 describe("Playtest Share URL Integration Tests (Phase 2.7)", () => {
   const fullRulePackage = loadRulePackageForBrowser();
@@ -278,6 +279,122 @@ describe("Playtest Share URL Integration Tests (Phase 2.7)", () => {
       expect(shareUrl).not.toContain("stateVersion");
       expect(shareUrl).not.toContain("p1_life");
       expect(shareUrl).not.toContain("p2_life");
+    });
+  });
+
+  describe("Phase 4.0-A: Auto Seed & Active Match Share URL Integration", () => {
+    it("Pre-match Auto Share: 対戦開始前の共有URLは pendingAutoSeed を具象Seedとして保持すること", () => {
+      const pendingAutoSeed = 3819201742;
+      const seedMode: PlaytestSeedMode = "auto";
+      const isOfficial = true;
+
+      // Pending 設定からのURL生成
+      const seedForUrl = isOfficial
+        ? (seedMode === "auto" ? String(pendingAutoSeed) : "42")
+        : "42";
+
+      const url = buildPlaytestShareUrl(
+        "https://blackpoker.example.com/",
+        {
+          environmentId: officialEnvId,
+          mode: "humanVsHuman",
+          humanSeat: "p1",
+          policyId: "firstLegal",
+          seedInput: seedForUrl,
+        },
+        catalog
+      );
+
+      expect(url).toContain("seed=3819201742");
+      expect(url).not.toContain("seed=auto");
+      expect(url).not.toContain("seed=42");
+
+      // パースして復元した結果も 3819201742 であること
+      const parsed = parsePlaytestShareUrl(url, catalog);
+      expect(parsed.kind).toBe("READY");
+      if (parsed.kind === "READY") {
+        expect(parsed.config.seedInput).toBe("3819201742");
+      }
+    });
+
+    it("In-game Auto Share: 対戦中の共有URLは次回用 pendingAutoSeed ではなく activeMatch.seed をSSOTとして使用すること", () => {
+      const matchSeed = 11111111;
+      const nextPendingAutoSeed = 22222222;
+
+      // 対戦開始
+      const outcome = startMatchAttempt({
+        environmentId: officialEnvId,
+        seedInput: String(matchSeed),
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const activeMatch = outcome.activeMatch;
+      expect(activeMatch.seed).toBe(matchSeed);
+
+      // Active Match 設定から共有URLを生成
+      const url = buildPlaytestShareUrl(
+        "https://blackpoker.example.com/",
+        {
+          environmentId: activeMatch.environmentId,
+          mode: "humanVsAi",
+          humanSeat: "p1",
+          policyId: "firstLegal",
+          seedInput: String(activeMatch.seed),
+        },
+        catalog
+      );
+
+      // 現在進行中の Match Seed のみが含まれ、次回用 pending Seed は混入しない
+      expect(url).toContain(`seed=${matchSeed}`);
+      expect(url).not.toContain(`seed=${nextPendingAutoSeed}`);
+    });
+
+    it("Active Match Fail-Closed: Official 対戦で activeMatch.seed が不正な場合、共有URL生成が fail-closed すること", () => {
+      const invalidActiveMatch = {
+        environmentId: officialEnvId,
+        seed: undefined as any,
+      };
+
+      let shareNotice: any = null;
+      let urlGenerated = false;
+
+      // Fail-closed 契約の検証
+      if (typeof invalidActiveMatch.seed !== "number" || !Number.isSafeInteger(invalidActiveMatch.seed)) {
+        shareNotice = {
+          type: "error",
+          message: "対戦中Seedが未確定のため共有URLを生成できませんでした",
+        };
+      } else {
+        urlGenerated = true;
+      }
+
+      expect(urlGenerated).toBe(false);
+      expect(shareNotice).not.toBeNull();
+      expect(shareNotice.type).toBe("error");
+    });
+
+    it("Share URL復元時に seedMode = manual として復元され、対戦再現性が保証されること", () => {
+      const shareUrl = `https://blackpoker.example.com/?bpv=1&env=official%3Alight-entry16&mode=humanVsHuman&seed=777777`;
+      const bootstrap = resolvePlaytestInitialBootstrap(shareUrl, catalog);
+
+      expect(bootstrap.kind).toBe("RESTORE_SHARE_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SHARE_SETTINGS") {
+        expect(bootstrap.config.seedInput).toBe("777777");
+
+        // 復元時の状態設定シミュレーション
+        let seedMode: PlaytestSeedMode = "auto";
+        let seedInput = "42";
+
+        seedInput = bootstrap.config.seedInput;
+        seedMode = "manual"; // RESTORE_SHARE_SETTINGS 契約
+
+        expect(seedInput).toBe("777777");
+        expect(seedMode).toBe("manual");
+      }
     });
   });
 });

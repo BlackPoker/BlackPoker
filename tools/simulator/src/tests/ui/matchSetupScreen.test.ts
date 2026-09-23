@@ -140,13 +140,14 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
       expect(bootstrap.config.seedInput).toBe("999");
     }
 
-    // 自動開始されないため、UIはMatchSetupScreenをこの復元設定で表示する
+    // 自動開始されないため、UIはMatchSetupScreenをこの復元設定で表示する (Share URL復元時は manual 固定 Seed)
     const html = renderToString(
       React.createElement(MatchSetupScreen, {
         ...defaultProps,
         selectedEnvironmentId: "official:light-entry16",
         matchMode: "humanVsAi",
         policyId: "manualGenericGenome",
+        seedMode: "manual",
         seedInput: "999",
       })
     );
@@ -283,5 +284,44 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
       expect(html).toContain("対戦設定 (Match Setup)");
       expect(html).toContain("対戦開始");
     }
+  });
+
+  it("Test K: Auto Seed / Manual Seed UI の切り替えおよび表示 (Phase 4.0-A)", () => {
+    // 1. デフォルト (Auto Mode): 自動（推奨）が選択され、pendingAutoSeed が表示されること
+    const autoHtml = renderToString(
+      React.createElement(MatchSetupScreen, {
+        ...defaultProps,
+        selectedEnvironmentId: "official:light-entry16",
+        seedMode: "auto",
+        pendingAutoSeed: 1234567890,
+      })
+    );
+    expect(autoHtml).toContain("自動（推奨）");
+    expect(autoHtml).toContain("次回 Seed: 1234567890");
+    expect(autoHtml).toContain("対戦ごとに新しいSeedを使用します");
+
+    // 2. Manual Mode: 固定が選択され、seedInput 入力欄が表示されること
+    const manualHtml = renderToString(
+      React.createElement(MatchSetupScreen, {
+        ...defaultProps,
+        selectedEnvironmentId: "official:light-entry16",
+        seedMode: "manual",
+        seedInput: "4242",
+      })
+    );
+    expect(manualHtml).toContain("固定");
+    expect(manualHtml).toContain("同じ初期状態を再現したい場合に使用します");
+    expect(manualHtml).toContain("4242");
+
+    // 3. Core Battle: Seed Mode の切替 UI は表示されず固定盤面メッセージが表示されること
+    const coreHtml = renderToString(
+      React.createElement(MatchSetupScreen, {
+        ...defaultProps,
+        selectedEnvironmentId: CORE_BATTLE_ENV_ID,
+      })
+    );
+    expect(coreHtml).not.toContain("自動（推奨）");
+    expect(coreHtml).toContain("42 (固定)");
+    expect(coreHtml).toContain("※Core Battleは固定盤面のため対戦SEEDは使用しません");
   });
 });
