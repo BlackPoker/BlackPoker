@@ -3,10 +3,12 @@ import {
   ScenarioPlayerV1,
   ScenarioUnitV1,
   ScenarioCardRefV1,
-  ScenarioZoneConfigV1,
   ScenarioValidationError,
+  ScenarioValidationErrorCode,
   ScenarioValidationResult,
   SCENARIO_SCHEMA_VERSION,
+  parseScenarioDefinitionV1,
+  normalizeScenarioDefinitionV1,
 } from "../../domain/scenario/ScenarioTypes";
 import { RegulationCatalog, CardDefinition } from "../../domain/regulation/RegulationDefinition";
 import { RulePackage } from "../../domain/rules/RulePackage";
@@ -23,6 +25,10 @@ import { deriveSeed, shuffleCards } from "../random/DeterministicShuffle";
 import { verifyCardConservation, InGameCard } from "../regulation/OfficialRegulationMatchSetup";
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
+import {
+  validateUnitAgainstComponentDefinition,
+  validatePlaytestPreset,
+} from "../session/playtest/validatePlaytestPreset";
 
 export interface ScenarioCompilerOptions {
   readonly playerNames?: {
@@ -123,118 +129,31 @@ export class ScenarioCompiler {
     definition: ScenarioDefinitionV1,
     catalog: RegulationCatalog
   ): ScenarioValidationResult {
-    const errors: ScenarioValidationError[] = [];
-
-    // 1. スキーマバージョン検証
-    if (definition.version !== SCENARIO_SCHEMA_VERSION) {
-      errors.push({
-        code: "UNSUPPORTED_VERSION",
-        path: "version",
-        message: `サポートされていないScenarioバージョンです (${definition.version})。バージョン ${SCENARIO_SCHEMA_VERSION} を指定してください。`,
-      });
+    const parseResult = parseScenarioDefinitionV1(definition);
+    if (!parseResult.success) {
+      return {
+        valid: false,
+        errors: parseResult.errors,
+      };
     }
 
-    // 2. 環境 ID 検証 (Core Battle は V1 対象外)
-    if (!definition.environmentId || typeof definition.environmentId !== "string") {
+    const errors: ScenarioValidationError[] = [];
+    const regId = extractRegulationId(definition.environmentId);
+    if (!regId) {
       errors.push({
         code: "UNSUPPORTED_ENVIRONMENT",
         path: "environmentId",
-        message: "environmentId が指定されていません。",
-      });
-    } else if (definition.environmentId === "core-battle") {
-      errors.push({
-        code: "UNSUPPORTED_ENVIRONMENT",
-        path: "environmentId",
-        message: "Core Battle は開発用プリセットのため Scenario Builder V1 の対象外です。公式レギュレーションを指定してください。",
+        message: `不正な環境ID形式です: "${definition.environmentId}"。"official:<regulationId>" 形式で指定してください。`,
       });
     } else {
-      const regId = extractRegulationId(definition.environmentId);
-      if (!regId) {
+      const regValidation = RegulationValidator.validateRegulation(catalog, regId);
+      if (!regValidation.ruleLegal || !regValidation.simulatorImplemented) {
         errors.push({
           code: "UNSUPPORTED_ENVIRONMENT",
           path: "environmentId",
-          message: `不正な環境ID形式です: "${definition.environmentId}"。"official:<regulationId>" 形式で指定してください。`,
-        });
-      } else {
-        const regValidation = RegulationValidator.validateRegulation(catalog, regId);
-        if (!regValidation.ruleLegal || !regValidation.simulatorImplemented) {
-          errors.push({
-            code: "UNSUPPORTED_ENVIRONMENT",
-            path: "environmentId",
-            message: `レギュレーション "${regId}" は未実装またはカタログに存在しません。`,
-          });
-        }
-      }
-    }
-
-    // 3. Seed 検証
-    if (
-      typeof definition.seed !== "number" ||
-      !Number.isSafeInteger(definition.seed) ||
-      definition.seed < 0
-    ) {
-      errors.push({
-        code: "INVALID_SEED",
-        path: "seed",
-        message: `無効なSeedです (${definition.seed})。非負の安全な整数を指定してください。`,
-      });
-    }
-
-    // 4. Player 指定検証
-    if (definition.turnPlayer !== "p1" && definition.turnPlayer !== "p2") {
-      errors.push({
-        code: "INVALID_PLAYER",
-        path: "turnPlayer",
-        message: `無効なturnPlayerです ("${definition.turnPlayer}")。"p1" または "p2" を指定してください。`,
-      });
-    }
-    if (definition.chancePlayer !== "p1" && definition.chancePlayer !== "p2") {
-      errors.push({
-        code: "INVALID_PLAYER",
-        path: "chancePlayer",
-        message: `無効なchancePlayerです ("${definition.chancePlayer}")。"p1" または "p2" を指定してください。`,
-      });
-    }
-
-    // 5. プレイヤー定義構造検証
-    if (!definition.players || typeof definition.players !== "object") {
-      errors.push({
-        code: "SCHEMA_VIOLATION",
-        path: "players",
-        message: "players オブジェクトが未定義です。",
-      });
-    } else {
-      if (!definition.players.p1) {
-        errors.push({
-          code: "SCHEMA_VIOLATION",
-          path: "players.p1",
-          message: "players.p1 が未定義です。",
+          message: `レギュレーション "${regId}" は未実装またはカタログに存在しません。`,
         });
       }
-      if (!definition.players.p2) {
-        errors.push({
-          code: "SCHEMA_VIOLATION",
-          path: "players.p2",
-          message: "players.p2 が未定義です。",
-        });
-      }
-    }
-
-    // 6. Stage / Phase 禁止検証
-    const defAny = definition as any;
-    if (defAny.stage && Array.isArray(defAny.stage.requests) && defAny.stage.requests.length > 0) {
-      errors.push({
-        code: "UNSUPPORTED_STAGE",
-        path: "stage",
-        message: "Scenario Builder V1 では非空の Stage.requests はサポートされていません。Stage は空にしてください。",
-      });
-    }
-    if (defAny.phase !== undefined || defAny.turnPhase !== undefined || defAny.currentPhase !== undefined) {
-      errors.push({
-        code: "SCHEMA_VIOLATION",
-        path: "phase",
-        message: "BlackPoker にゲーム進行上の Phase は存在しません。Phase フィールドは含めないでください。",
-      });
     }
 
     return {
@@ -291,20 +210,23 @@ export class ScenarioCompiler {
       multisetTotalCount.set(key, (multisetTotalCount.get(key) ?? 0) + 1);
     }
 
-    // 決定論的 definitionHash と matchId の導出
-    const canonicalStr = canonicalJsonSerialize(definition);
+    // 決定論的 definitionHash と matchId の導出 (正規化済み定義を使用)
+    const normalizedDef = normalizeScenarioDefinitionV1(definition);
+    const canonicalStr = canonicalJsonSerialize(normalizedDef);
     const definitionHash = stableFnv1a32Hex(canonicalStr);
     const matchId =
-      options?.matchId || `match-scenario-${regulation.id}-${definition.seed}-${definitionHash}`;
+      options?.matchId || `match-scenario-${regulation.id}-${normalizedDef.seed}-${definitionHash}`;
 
     const p1Name = options?.playerNames?.p1 || "Player A";
     const p2Name = options?.playerNames?.p2 || "Player B";
+
+    const frameHasPack = typeof frame.setup.packCount === "number" && frame.setup.packCount > 0;
 
     // プレイヤーごとのカード解決・配置
     const compiledPlayers: { p1?: any; p2?: any } = {};
 
     for (const playerKey of ["p1", "p2"] as const) {
-      const scenarioPlayer = definition.players[playerKey] || {};
+      const scenarioPlayer = normalizedDef.players[playerKey] || {};
       const allocatedPhysicalIndices = new Set<number>();
 
       const resolveCardRef = (
@@ -393,6 +315,10 @@ export class ScenarioCompiler {
         };
       };
 
+      // ========================================================
+      // STEP 1: すべての明示指定カードの物理予約 (2-Step Allocation)
+      // ========================================================
+
       // 1. フィールドユニット配置
       const fieldUnits: any[] = [];
       if (scenarioPlayer.field) {
@@ -417,43 +343,72 @@ export class ScenarioCompiler {
               continue;
             }
 
-            // state 検証
-            if (u.state && u.state !== "charge" && u.state !== "drive") {
+            if (compDef.zone !== "field") {
               errors.push({
-                code: "INVALID_UNIT_STATE",
-                path: `${uPath}.state`,
-                message: `無効なユニット状態です: "${u.state}" ("charge" または "drive" を指定してください)。`,
+                code: "UNSUPPORTED_COMPONENT",
+                path: `${uPath}.componentId`,
+                message: `コンポーネント "${u.componentId}" は field 配置可能なコンポーネントではありません (定義zone: "${compDef.zone}")。`,
               });
+              continue;
             }
 
-            // face 検証
-            if (u.face && u.face !== "up" && u.face !== "down") {
+            if (!Array.isArray(u.cards) || u.cards.length === 0) {
               errors.push({
-                code: "INVALID_UNIT_FACE",
-                path: `${uPath}.face`,
-                message: `無効な向きです: "${u.face}" ("up" または "down" を指定してください)。`,
+                code: "SCHEMA_VIOLATION",
+                path: `${uPath}.cards`,
+                message: "ユニットには少なくとも1枚のカード (cards) を指定する必要があります。",
               });
+              continue;
             }
 
-            const card = resolveCardRef(u.card, `${uPath}.card`);
-            if (card) {
-              const kind = compDef.display?.kind || compDef.name || "ユニット";
-              const labels = compDef.properties?.labels || compDef.display?.labels || [];
-              const defaultFace = compDef.id === "character.bulwark" ? "down" : "up";
+            const resolvedCards: InGameCard[] = [];
+            for (let cIdx = 0; cIdx < u.cards.length; cIdx++) {
+              const card = resolveCardRef(u.cards[cIdx], `${uPath}.cards[${cIdx}]`);
+              if (card) resolvedCards.push(card);
+            }
 
-              fieldUnits.push({
+            const kind = compDef.display?.kind || compDef.name || "ユニット";
+            const labels = compDef.properties?.labels || compDef.display?.labels || [];
+            const defaultFace = compDef.id === "character.bulwark" ? "down" : "up";
+            const unitFace = u.face || defaultFace;
+            const unitState = u.state || "charge";
+
+            const unitValidationErrors = validateUnitAgainstComponentDefinition(
+              {
                 unitId: `unit-${playerKey}-${compDef.id}-${uIdx}`,
                 componentId: compDef.id,
+                cards: resolvedCards,
+                state: unitState,
+                face: unitFace,
                 kind,
-                state: u.state || "charge",
-                face: u.face || defaultFace,
-                cards: [card],
-                labels: [...labels],
-                enteredFieldBeforeGame: true,
-                enteredFieldTurn: 0,
-                enteredTurn: 0,
+              },
+              compDef,
+              { playerKey, unitIndex: uIdx }
+            );
+
+            for (const vErr of unitValidationErrors) {
+              let code: ScenarioValidationErrorCode = "UNSUPPORTED_COMPONENT";
+              if (vErr.includes("state")) code = "INVALID_UNIT_STATE";
+              else if (vErr.includes("face")) code = "INVALID_UNIT_FACE";
+              errors.push({
+                code,
+                path: uPath,
+                message: vErr,
               });
             }
+
+            fieldUnits.push({
+              unitId: `unit-${playerKey}-${compDef.id}-${uIdx}`,
+              componentId: compDef.id,
+              kind,
+              state: unitState,
+              face: unitFace,
+              cards: resolvedCards,
+              labels: [...labels],
+              enteredFieldBeforeGame: true,
+              enteredFieldTurn: 0,
+              enteredTurn: 0,
+            });
           }
         }
       }
@@ -505,15 +460,47 @@ export class ScenarioCompiler {
         }
       }
 
-      // 4. Pack & Life 配置と決定論的補完
-      // 残り物理カードテンプレートの収集
+      // 4. Pack 明示指定カードの事前予約
+      const packConfig = scenarioPlayer.pack;
+      const packCards: InGameCard[] = [];
+
+      if (packConfig) {
+        if (!frameHasPack && ((packConfig.count !== undefined && packConfig.count > 0) || (packConfig.cards && packConfig.cards.length > 0))) {
+          errors.push({
+            code: "INVALID_ZONE_CONFIG",
+            path: `players.${playerKey}.pack`,
+            message: `レギュレーション "${regulation.id}" のフレーム "${frame.id}" には山札 (Pack) が存在しないため、pack を指定することはできません。`,
+          });
+        }
+        if (packConfig.cards) {
+          for (let pIdx = 0; pIdx < packConfig.cards.length; pIdx++) {
+            const c = resolveCardRef(packConfig.cards[pIdx], `players.${playerKey}.pack.cards[${pIdx}]`);
+            if (c) packCards.push(c);
+          }
+        }
+      }
+
+      // 5. Life 明示指定カードの事前予約
+      const lifeConfig = scenarioPlayer.life;
+      const lifeCards: InGameCard[] = [];
+
+      if (lifeConfig?.cards) {
+        for (let lIdx = 0; lIdx < lifeConfig.cards.length; lIdx++) {
+          const c = resolveCardRef(lifeConfig.cards[lIdx], `players.${playerKey}.life.cards[${lIdx}]`);
+          if (c) lifeCards.push(c);
+        }
+      }
+
+      // ========================================================
+      // STEP 2: 残り物理プール収集と決定論的補完
+      // ========================================================
       const remainingTemplates = physicalTemplates.filter(
         (t) => !allocatedPhysicalIndices.has(t.physicalIndex)
       );
 
       // 決定論的シャッフル (プレイヤー独立ストリーム)
       const playerCompletionRng = new SeededRandom(
-        deriveSeed(definition.seed, `${playerKey}-scenario-completion`)
+        deriveSeed(normalizedDef.seed, `${playerKey}-scenario-completion`)
       );
       const shuffledRemainingCards: InGameCard[] = shuffleCards(
         remainingTemplates.map((t) => ({
@@ -525,52 +512,30 @@ export class ScenarioCompiler {
         playerCompletionRng
       );
 
-      // Pack 処理
-      let packCards: InGameCard[] = [];
+      // Pack 不足分の補完
       let targetPackCount: number | undefined = undefined;
-      let packConfig: ScenarioZoneConfigV1 | undefined = undefined;
-
-      if (scenarioPlayer.pack) {
-        if (Array.isArray(scenarioPlayer.pack)) {
-          packConfig = { cards: scenarioPlayer.pack };
-        } else if (typeof scenarioPlayer.pack === "object") {
-          packConfig = scenarioPlayer.pack as ScenarioZoneConfigV1;
-        } else {
-          errors.push({
-            code: "INVALID_ZONE_CONFIG",
-            path: `players.${playerKey}.pack`,
-            message: "pack は配列または ScenarioZoneConfigV1 オブジェクトでなければなりません。",
-          });
-        }
-      }
-
-      if (packConfig) {
-        if (packConfig.cards) {
-          for (let pIdx = 0; pIdx < packConfig.cards.length; pIdx++) {
-            const c = resolveCardRef(packConfig.cards[pIdx], `players.${playerKey}.pack.cards[${pIdx}]`);
-            if (c) packCards.push(c);
+      if (frameHasPack) {
+        if (packConfig) {
+          if (packConfig.count !== undefined) {
+            if (packConfig.count < packCards.length) {
+              errors.push({
+                code: "INVALID_ZONE_CONFIG",
+                path: `players.${playerKey}.pack.count`,
+                message: `pack の目標枚数 (${packConfig.count}) は指定された固定カード枚数 (${packCards.length}) 以上でなければなりません。`,
+              });
+            }
+            targetPackCount = packConfig.count;
+          } else {
+            targetPackCount = packCards.length;
           }
-        }
-        if (packConfig.count !== undefined) {
-          if (packConfig.count < packCards.length) {
-            errors.push({
-              code: "INVALID_ZONE_CONFIG",
-              path: `players.${playerKey}.pack.count`,
-              message: `pack の目標枚数 (${packConfig.count}) は指定された固定カード枚数 (${packCards.length}) 以上でなければなりません。`,
-            });
-          }
-          targetPackCount = packConfig.count;
         } else {
-          targetPackCount = packCards.length;
+          // デフォルトで Frame の packCount 枚を割り当て
+          targetPackCount = frame.setup.packCount;
         }
-      } else if (frame.setup.packCount !== undefined && frame.setup.packCount > 0) {
-        // デフォルトで Frame の packCount 枚を割り当て
-        targetPackCount = frame.setup.packCount;
       } else {
         targetPackCount = 0;
       }
 
-      // Pack 不足分の補完
       const neededForPack = (targetPackCount ?? 0) - packCards.length;
       if (neededForPack > 0) {
         if (shuffledRemainingCards.length < neededForPack) {
@@ -584,32 +549,9 @@ export class ScenarioCompiler {
         }
       }
 
-      // Life 処理
-      let lifeCards: InGameCard[] = [];
+      // Life 不足分の補完
       let targetLifeCount: number | undefined = undefined;
-      let lifeConfig: ScenarioZoneConfigV1 | undefined = undefined;
-
-      if (scenarioPlayer.life) {
-        if (Array.isArray(scenarioPlayer.life)) {
-          lifeConfig = { cards: scenarioPlayer.life };
-        } else if (typeof scenarioPlayer.life === "object") {
-          lifeConfig = scenarioPlayer.life as ScenarioZoneConfigV1;
-        } else {
-          errors.push({
-            code: "INVALID_ZONE_CONFIG",
-            path: `players.${playerKey}.life`,
-            message: "life は配列または ScenarioZoneConfigV1 オブジェクトでなければなりません。",
-          });
-        }
-      }
-
       if (lifeConfig) {
-        if (lifeConfig.cards) {
-          for (let lIdx = 0; lIdx < lifeConfig.cards.length; lIdx++) {
-            const c = resolveCardRef(lifeConfig.cards[lIdx], `players.${playerKey}.life.cards[${lIdx}]`);
-            if (c) lifeCards.push(c);
-          }
-        }
         if (lifeConfig.count !== undefined) {
           if (lifeConfig.count < lifeCards.length) {
             errors.push({
@@ -622,7 +564,6 @@ export class ScenarioCompiler {
         }
       }
 
-      // Life 不足分の補完
       if (targetLifeCount !== undefined) {
         const neededForLife = targetLifeCount - lifeCards.length;
         if (neededForLife > 0) {
@@ -651,7 +592,7 @@ export class ScenarioCompiler {
 
       // Pack オブジェクトの構成
       let packObj: any = undefined;
-      if (packCards.length > 0) {
+      if (frameHasPack || packCards.length > 0) {
         packObj = {
           count: packCards.length,
           opened: false,
@@ -694,7 +635,7 @@ export class ScenarioCompiler {
     }
 
     // Canonical GameState の正規化構築
-    const nonTurnPlayer: PlayerKey = definition.turnPlayer === "p1" ? "p2" : "p1";
+    const nonTurnPlayer: PlayerKey = normalizedDef.turnPlayer === "p1" ? "p2" : "p1";
     const state: any = {
       stateVersion: 1,
       version: 1,
@@ -702,10 +643,10 @@ export class ScenarioCompiler {
       regulationId: regulation.id,
       formatId: regulation.formatId,
       frameId: regulation.frameId,
-      turnPlayer: definition.turnPlayer,
-      chancePlayer: definition.chancePlayer,
+      turnPlayer: normalizedDef.turnPlayer,
+      chancePlayer: normalizedDef.chancePlayer,
       nonTurnPlayer,
-      turnCount: definition.turnCount ?? 1,
+      turnCount: normalizedDef.turnCount,
       actionCount: 0,
       turnUsage: {},
       stage: { requests: [], history: [] },
@@ -717,9 +658,23 @@ export class ScenarioCompiler {
       },
     };
 
+    // 最終 Preset 検証
+    const presetValidation = validatePlaytestPreset(state, officialRulePackage);
+    if (!presetValidation.valid) {
+      return {
+        type: "VALIDATION_ERROR",
+        kind: "VALIDATION_ERROR",
+        errors: presetValidation.errors.map((msg) => ({
+          code: "VALIDATION_ERROR",
+          path: "state",
+          message: msg,
+        })),
+      };
+    }
+
     const session = new GameSession(state, officialRulePackage, {
       matchId,
-      matchSeed: definition.seed,
+      matchSeed: normalizedDef.seed,
     });
 
     return {

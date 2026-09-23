@@ -85,6 +85,20 @@ import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 
+export interface PreparedMatch {
+  readonly session: GameSession;
+  readonly activeMatch: ActiveMatchContext;
+  readonly mode: PlaytestMatchMode;
+  readonly humanSeat: "p1" | "p2";
+  readonly policyId: PlaytestPolicyId;
+  readonly seatControllers: PlaytestSeatControllers;
+  readonly policies: Record<string, DecisionPolicy>;
+  readonly initialStep: GameSessionStep;
+  readonly initialLogs?: readonly { readonly message: string; readonly level: "info" | "action" | "system"; readonly state?: any }[];
+  readonly initialTraces?: readonly { readonly category: string; readonly message: string; readonly state?: any }[];
+  readonly isAutoSeedRotate?: boolean;
+}
+
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
@@ -261,49 +275,38 @@ export const CoreBattlePlaytest: React.FC = () => {
     setIsAiProcessing(false);
   }, [resetFeedbackFlash]);
 
-  // 通常対戦および Scenario 対戦で共有する READY match commit 処理
+  // 通常対戦および Scenario 対戦で共有する READY match の原子確定 (Atomic Commit) 処理
+  // 失敗し得る処理 (コンパイル、セッション生成、AIポリシー初期化等) はすべて Prepare 段階で完了させ、
+  // この関数内では例外・失敗を起こさず原子的にアクティブ対戦を切り替えます。
   const commitReadyMatch = useCallback(
-    async (params: {
-      readonly session: GameSession;
-      readonly activeMatch: ActiveMatchContext;
-      readonly mode: PlaytestMatchMode;
-      readonly humanSeat: "p1" | "p2";
-      readonly policyId: PlaytestPolicyId;
-      readonly initialStep: GameSessionStep;
-      readonly initialLogs?: readonly { readonly message: string; readonly level: "info" | "action" | "system"; readonly state?: any }[];
-      readonly initialTraces?: readonly { readonly category: string; readonly message: string; readonly state?: any }[];
-      readonly isAutoSeedRotate?: boolean;
-    }) => {
+    async (prepared: PreparedMatch) => {
       const {
         session,
         activeMatch: newActiveMatch,
         mode,
         humanSeat,
         policyId,
+        seatControllers,
+        policies,
         initialStep,
         initialLogs = [],
         initialTraces = [],
         isAutoSeedRotate = false,
-      } = params;
+      } = prepared;
 
-      // SeatControllers & Policies 生成
-      const seatControllers = createSeatControllers(mode, humanSeat, policyId);
-      let policies: Record<string, DecisionPolicy> = {};
-      try {
-        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, newActiveMatch.seed);
-      } catch (err: any) {
-        setRuntimeNotice({
-          type: "TECHNICAL_ERROR",
-          title: "AI Policy 初期化エラー",
-          message: err.message,
-          environmentName: newActiveMatch.environmentName,
-          seed: newActiveMatch.seed,
-        });
-        addLog(`[AI_ERROR] ${err.message}`, "system");
-        return;
-      }
+      // 遷移状態の原子的一括リセット
+      resetFeedbackFlash();
+      setHighlightedRequestId(null);
+      setSelectedUnitIds([]);
+      setSheetMode("collapsed");
+      setIsPassAndPlayWaiting(false);
+      setPresetValidationErrors([]);
+      setRuntimeNotice(null);
+      setIsAiProcessing(false);
+      decisionSeqRef.current = 1;
+      decisionTranscriptRef.current = [];
 
-      // READY 成功時のみ commit
+      // READY match の確定コミット
       sessionRef.current = session;
       setGameState(JSON.parse(JSON.stringify(session.state)));
       setActiveMatch(newActiveMatch);
@@ -312,6 +315,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat,
         policyId,
       });
+      // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
       // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
       if (isAutoSeedRotate && seedMode === "auto") {
         const currentSeed = newActiveMatch.seed ?? Number(seedInput);
@@ -457,8 +461,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
       const policyId = overridePolicyId ?? pendingPolicyId;
 
-      resetMatchState();
-
+      // 1. Prepare: マッチ生成試行 (失敗時は既存アクティブ対戦を破壊しない)
       const outcome = startMatchAttempt({
         environmentId: env,
         seedInput: seed,
@@ -477,12 +480,32 @@ export const CoreBattlePlaytest: React.FC = () => {
         return;
       }
 
+      // 2. Prepare: SeatController および AI Policy の生成・初期化
+      const seatControllers = createSeatControllers(mode, humanSeat, policyId);
+      let policies: Record<string, DecisionPolicy>;
+      try {
+        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, outcome.activeMatch.seed);
+      } catch (err: any) {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "AI Policy 初期化エラー",
+          message: err.message,
+          environmentName: outcome.activeMatch.environmentName,
+          seed: outcome.activeMatch.seed,
+        });
+        addLog(`[AI_ERROR] ${err.message}`, "system");
+        return;
+      }
+
+      // 3. Commit: Atomic commit
       await commitReadyMatch({
         session: outcome.session,
         activeMatch: outcome.activeMatch,
         mode,
         humanSeat,
         policyId,
+        seatControllers,
+        policies,
         initialStep: outcome.initialStep,
         initialLogs: outcome.logs,
         initialTraces: outcome.traces,
@@ -499,7 +522,6 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingPolicyId,
       catalog,
       fullRulePackage,
-      resetMatchState,
       commitReadyMatch,
       addLog,
     ]
@@ -508,8 +530,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   // Scenario 開始ハンドラ (ScenarioDefinitionV1 から決定論的初期盤面を生成して対戦開始)
   const handleStartScenario = useCallback(
     async (definition: ScenarioDefinitionV1) => {
-      resetMatchState();
-
+      // 1. Prepare: Scenario コンパイル (失敗時は既存アクティブ対戦を一切破壊しない)
       const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage);
       if (outcome.type !== "READY") {
         setRuntimeNotice({
@@ -519,6 +540,41 @@ export const CoreBattlePlaytest: React.FC = () => {
           environmentName: definition.environmentId,
           seed: definition.seed,
         });
+        return;
+      }
+
+      // 2. Prepare: 初期ステップの前進
+      let initialStep: GameSessionStep;
+      try {
+        initialStep = outcome.session.advance();
+      } catch (err: any) {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "Scenario 初期ステップ実行エラー",
+          message: err.message,
+          environmentName: definition.environmentId,
+          seed: definition.seed,
+        });
+        return;
+      }
+
+      // 3. Prepare: SeatController および AI Policy の初期化
+      const mode = pendingMatchMode;
+      const humanSeat = normalizeHumanSeatForMode(mode, pendingHumanSeat);
+      const policyId = pendingPolicyId;
+      const seatControllers = createSeatControllers(mode, humanSeat, policyId);
+      let policies: Record<string, DecisionPolicy>;
+      try {
+        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, definition.seed);
+      } catch (err: any) {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "AI Policy 初期化エラー",
+          message: err.message,
+          environmentName: definition.environmentId,
+          seed: definition.seed,
+        });
+        addLog(`[AI_ERROR] ${err.message}`, "system");
         return;
       }
 
@@ -535,14 +591,14 @@ export const CoreBattlePlaytest: React.FC = () => {
         isScenario: true,
       };
 
-      const initialStep = outcome.session.advance();
-
-      await commitReadyMatch({
+      const prepared: PreparedMatch = {
         session: outcome.session,
         activeMatch: activeMatchCtx,
-        mode: pendingMatchMode,
-        humanSeat: pendingHumanSeat,
-        policyId: pendingPolicyId,
+        mode,
+        humanSeat,
+        policyId,
+        seatControllers,
+        policies,
         initialStep,
         initialLogs: [
           { message: `[START] Scenarioを開始しました (Match ID: ${outcome.matchId})`, level: "info", state: outcome.state },
@@ -552,7 +608,10 @@ export const CoreBattlePlaytest: React.FC = () => {
           { category: "SCENARIO_START", message: `Scenario開始 (Seed: ${definition.seed})`, state: outcome.state },
         ],
         isAutoSeedRotate: false,
-      });
+      };
+
+      // 4. Commit: Atomic commit (ここに至るまでに失敗し得る処理はすべて検証・準備完了済み)
+      await commitReadyMatch(prepared);
     },
     [
       catalog,
@@ -560,8 +619,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingMatchMode,
       pendingHumanSeat,
       pendingPolicyId,
-      resetMatchState,
       commitReadyMatch,
+      addLog,
     ]
   );
 

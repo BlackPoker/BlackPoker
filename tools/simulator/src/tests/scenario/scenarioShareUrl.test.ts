@@ -7,6 +7,8 @@ import {
   stringToUrlSafeBase64,
   urlSafeBase64ToString,
   MAX_SCENARIO_PAYLOAD_BYTES,
+  MAX_SCENARIO_ENCODED_BYTES,
+  getUtf8ByteLength,
   SCENARIO_URL_PARAM_KEY,
 } from "../../ui/scenario/ScenarioShareUrl";
 import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
@@ -14,7 +16,7 @@ import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
 describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
   const sampleScenario: ScenarioDefinitionV1 = {
     version: 1,
-    environmentId: "official:light-entry16",
+    environmentId: "official:standard-pack",
     seed: 12345,
     turnPlayer: "p1",
     chancePlayer: "p2",
@@ -27,19 +29,17 @@ describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
         field: [
           {
             componentId: "character.hero",
-            card: { suit: "H", rank: "Q" },
+            cards: [{ suit: "H", rank: "Q" }],
             state: "drive",
             face: "up",
           },
         ],
         grave: [{ suit: "C", rank: "6" }],
-        life: { count: 3 },
-        pack: { count: 10 },
+        life: { cards: [{ suit: "D", rank: "5" }], count: 3 },
+        pack: { cards: [{ suit: "D", rank: "8" }], count: 10 },
       },
       p2: {
         hand: [{ suit: "S", rank: "3" }],
-        field: [],
-        grave: [],
         life: { count: 4 },
         pack: { count: 11 },
       },
@@ -122,17 +122,17 @@ describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
 
     expect(result.success).toBe(false);
     if (result.success === false) {
-      expect(result.error).toContain("未知または未対応のシナリオバージョン");
+      expect(result.error).toContain("UNSUPPORTED_VERSION");
     }
   });
 
   it("9: ペイロードサイズ超過 (> 64KB) は fail-closed で拒絶されること", () => {
-    const hugeString = "A".repeat(MAX_SCENARIO_PAYLOAD_BYTES + 10);
+    const hugeString = "A".repeat(MAX_SCENARIO_ENCODED_BYTES + 10);
     const result = decodeScenarioDefinitionV1FromUrlParam(hugeString);
 
     expect(result.success).toBe(false);
     if (result.success === false) {
-      expect(result.error).toContain("許容サイズ");
+      expect(result.error).toContain("超過");
     }
   });
 
@@ -162,5 +162,32 @@ describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     const missingPlayers = { ...sampleScenario, players: undefined };
     const r3 = decodeScenarioDefinitionV1FromUrlParam(stringToUrlSafeBase64(JSON.stringify(missingPlayers)));
     expect(r3.success).toBe(false);
+  });
+
+  it("12: 非Base64URL文字 (+, /, =) や不正なパディング長は fail-closed で拒絶されること", () => {
+    // Non-URL-safe standard Base64 characters
+    expect(decodeScenarioDefinitionV1FromUrlParam("ab+cd==").success).toBe(false);
+    expect(decodeScenarioDefinitionV1FromUrlParam("ab/cd==").success).toBe(false);
+    // Invalid length (length % 4 === 1 is impossible in valid base64)
+    expect(decodeScenarioDefinitionV1FromUrlParam("abcde").success).toBe(false);
+  });
+
+  it("13: デコード後 UTF-8 バイト数超過 (> 64KB) は fail-closed で拒絶されること", () => {
+    // 87384 chars in Base64 can decode up to 65538 bytes (> 65536).
+    // Construct a payload whose Base64 encoded length is <= MAX_SCENARIO_ENCODED_BYTES (87384),
+    // but decoded UTF-8 length is > MAX_SCENARIO_PAYLOAD_BYTES (65536).
+    const baseObj = { ...sampleScenario, description: "" };
+    const baseLen = getUtf8ByteLength(JSON.stringify(baseObj));
+    const targetDescLen = 65537 - baseLen;
+    const largeDef = { ...sampleScenario, description: "x".repeat(targetDescLen) };
+    const jsonStr = JSON.stringify(largeDef);
+    const encoded = stringToUrlSafeBase64(jsonStr);
+
+    expect(encoded.length).toBeLessThanOrEqual(MAX_SCENARIO_ENCODED_BYTES);
+    const result = decodeScenarioDefinitionV1FromUrlParam(encoded);
+    expect(result.success).toBe(false);
+    if (result.success === false) {
+      expect(result.error).toContain("上限 (65536 bytes) を超過しています");
+    }
   });
 });

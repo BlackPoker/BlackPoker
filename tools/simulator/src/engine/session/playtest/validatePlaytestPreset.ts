@@ -6,7 +6,7 @@ export interface PresetValidationResult {
 }
 
 // スーツの正規化 ("H", "heart", "hearts" -> "heart")
-function normalizeSuit(suit?: string): string {
+export function normalizeSuit(suit?: string): string {
   if (!suit) return "";
   const s = suit.toLowerCase();
   if (s === "h" || s === "heart" || s === "hearts") return "heart";
@@ -18,7 +18,7 @@ function normalizeSuit(suit?: string): string {
 }
 
 // ランクが範囲内に含まれるかチェック
-function isRankInRange(rank: string, rangeStr: string): boolean {
+export function isRankInRange(rank: string, rangeStr: string): boolean {
   if (!rank || !rangeStr) return true;
   const standardRanks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
   const rankIndex = standardRanks.indexOf(rank.toUpperCase());
@@ -33,6 +33,117 @@ function isRankInRange(rank: string, rangeStr: string): boolean {
   }
 
   return rank.toUpperCase() === rangeStr.trim().toUpperCase();
+}
+
+export interface UnitValidationTarget {
+  readonly unitId?: string;
+  readonly componentId: string;
+  readonly cards: readonly { readonly suit: string; readonly rank: string; [k: string]: any }[];
+  readonly state?: string;
+  readonly face?: string;
+  readonly kind?: string;
+}
+
+/**
+ * ユニット定義とコンポーネント定義の整合性を検証する純粋関数。
+ * field 配置可能であること (compDef.zone === 'field')、カード条件、state、face、初期制約を検査します。
+ */
+export function validateUnitAgainstComponentDefinition(
+  unit: UnitValidationTarget,
+  compDef: ComponentDefinition,
+  options?: { readonly playerKey?: string; readonly unitIndex?: number }
+): string[] {
+  const errors: string[] = [];
+  const pKey = options?.playerKey ? `プレイヤー ${options.playerKey} の` : "";
+  const unitLabel = unit.unitId || `ユニット[${options?.unitIndex ?? 0}]`;
+
+  // 1. Zone 検証: field 配置可能であること (compDef.zone === "field" が必須)
+  if (compDef.zone !== "field") {
+    errors.push(
+      `${pKey}ユニット ${unitLabel} (${compDef.id}) は field 配置可能なコンポーネントではありません (定義zone: '${compDef.zone}')`
+    );
+  }
+
+  // 2. 防壁の裏向き (face = down) 初期状態確認
+  if (compDef.id === "character.bulwark" || unit.kind === "防壁") {
+    if (unit.face !== "down") {
+      errors.push(
+        `${pKey}防壁 ${unitLabel} は初期状態で face: 'down' である必要があります`
+      );
+    }
+  }
+
+  // 3. state 検証 (charge / drive)
+  if (unit.state && unit.state !== "charge" && unit.state !== "drive") {
+    errors.push(
+      `${pKey}ユニット ${unitLabel} の state '${unit.state}' は無効です ('charge' または 'drive' を指定してください)`
+    );
+  }
+
+  // 4. face 検証 (up / down)
+  if (unit.face && unit.face !== "up" && unit.face !== "down") {
+    errors.push(
+      `${pKey}ユニット ${unitLabel} の face '${unit.face}' は無効です ('up' または 'down' を指定してください)`
+    );
+  }
+
+  // 5. unitCondition.cards の検証
+  const unitCards = Array.isArray(unit.cards) ? unit.cards : [];
+  if (unitCards.length === 0) {
+    errors.push(`${pKey}ユニット ${unitLabel} (${compDef.id}) にカードが設定されていません`);
+  }
+
+  const cardCond = (compDef as any).unitCondition?.cards;
+  if (cardCond) {
+    // 固定枚数
+    if (cardCond.count !== undefined && unitCards.length !== cardCond.count) {
+      errors.push(
+        `${pKey}ユニット ${unitLabel} (${compDef.id}) のカード枚数は ${cardCond.count} 枚である必要があります (実際: ${unitCards.length}枚)`
+      );
+    }
+    // 最小枚数
+    if (cardCond.minCount !== undefined && unitCards.length < cardCond.minCount) {
+      errors.push(
+        `${pKey}ユニット ${unitLabel} (${compDef.id}) のカード枚数は最低 ${cardCond.minCount} 枚必要です (実際: ${unitCards.length}枚)`
+      );
+    }
+    // 最大枚数
+    if (cardCond.maxCount !== undefined && unitCards.length > cardCond.maxCount) {
+      errors.push(
+        `${pKey}ユニット ${unitLabel} (${compDef.id}) のカード枚数は最大 ${cardCond.maxCount} 枚までです (実際: ${unitCards.length}枚)`
+      );
+    }
+
+    // スーツ検証
+    if (cardCond.suit) {
+      const allowedSuits: string[] = Array.isArray(cardCond.suit)
+        ? cardCond.suit.map(normalizeSuit)
+        : [normalizeSuit(cardCond.suit)];
+
+      for (const c of unitCards) {
+        const cardSuitNorm = normalizeSuit(c.suit);
+        if (!allowedSuits.includes(cardSuitNorm)) {
+          errors.push(
+            `${pKey}ユニット ${unitLabel} (${compDef.id}) のカードスーツ '${c.suit}' は許可されていません (許可: ${allowedSuits.join(", ")})`
+          );
+        }
+      }
+    }
+
+    // ランク検証
+    if (cardCond.rank) {
+      const rankRange = String(cardCond.rank);
+      for (const c of unitCards) {
+        if (!isRankInRange(c.rank, rankRange)) {
+          errors.push(
+            `${pKey}ユニット ${unitLabel} (${compDef.id}) のカードランク '${c.rank}' は範囲 '${rankRange}' に含まれていません`
+          );
+        }
+      }
+    }
+  }
+
+  return errors;
 }
 
 /**
@@ -130,7 +241,8 @@ export function validatePlaytestPreset(
     if (!Array.isArray(player.field)) {
       errors.push(`プレイヤー ${pKey} の field が配列ではありません`);
     } else {
-      for (const unit of player.field) {
+      for (let uIdx = 0; uIdx < player.field.length; uIdx++) {
+        const unit = player.field[uIdx];
         if (!unit.unitId) {
           errors.push(`プレイヤー ${pKey} のユニットに unitId がありません`);
           continue;
@@ -145,54 +257,12 @@ export function validatePlaytestPreset(
           continue;
         }
 
-        // 防壁の裏向き (face = down) 確認
-        if (unit.componentId === "character.bulwark" || unit.kind === "防壁") {
-          if (unit.face !== "down") {
-            errors.push(
-              `プレイヤー ${pKey} の防壁 ${unit.unitId} は初期状態で face: 'down' である必要があります`
-            );
-          }
-        }
-
-        // unitCondition の検証 (cards 条件)
-        const unitCards = Array.isArray(unit.cards) ? unit.cards : [];
-        const cardCond = (compDef as any).unitCondition?.cards;
-        if (cardCond) {
-          // 枚数検証
-          if (cardCond.count !== undefined && unitCards.length !== cardCond.count) {
-            errors.push(
-              `ユニット ${unit.unitId} (${compDef.id}) のカード枚数は ${cardCond.count} 枚である必要があります (実際: ${unitCards.length}枚)`
-            );
-          }
-
-          // スーツ検証
-          if (cardCond.suit) {
-            const allowedSuits: string[] = Array.isArray(cardCond.suit)
-              ? cardCond.suit.map(normalizeSuit)
-              : [normalizeSuit(cardCond.suit)];
-
-            for (const c of unitCards) {
-              const cardSuitNorm = normalizeSuit(c.suit);
-              if (!allowedSuits.includes(cardSuitNorm)) {
-                errors.push(
-                  `ユニット ${unit.unitId} (${compDef.id}) のカードスーツ '${c.suit}' は許可されていません (許可: ${allowedSuits.join(", ")})`
-                );
-              }
-            }
-          }
-
-          // ランク検証
-          if (cardCond.rank) {
-            const rankRange = String(cardCond.rank);
-            for (const c of unitCards) {
-              if (!isRankInRange(c.rank, rankRange)) {
-                errors.push(
-                  `ユニット ${unit.unitId} (${compDef.id}) のカードランク '${c.rank}' は範囲 '${rankRange}' に含まれていません`
-                );
-              }
-            }
-          }
-        }
+        // 共通 helper による適合性検証
+        const unitErrors = validateUnitAgainstComponentDefinition(unit, compDef, {
+          playerKey: pKey,
+          unitIndex: uIdx,
+        });
+        errors.push(...unitErrors);
       }
     }
   }

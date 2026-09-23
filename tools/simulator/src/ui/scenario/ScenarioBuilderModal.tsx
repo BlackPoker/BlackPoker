@@ -83,6 +83,18 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [p1Field, setP1Field] = useState<ScenarioUnitV1[]>(
     initialDefinition?.players?.p1?.field ? [...initialDefinition.players.p1.field] : []
   );
+  const [p1LifeCards, setP1LifeCards] = useState<ScenarioCardRefV1[]>(
+    initialDefinition?.players?.p1?.life?.cards ? [...initialDefinition.players.p1.life.cards] : []
+  );
+  const [p1LifeCount, setP1LifeCount] = useState<number | undefined>(
+    initialDefinition?.players?.p1?.life?.count
+  );
+  const [p1PackCards, setP1PackCards] = useState<ScenarioCardRefV1[]>(
+    initialDefinition?.players?.p1?.pack?.cards ? [...initialDefinition.players.p1.pack.cards] : []
+  );
+  const [p1PackCount, setP1PackCount] = useState<number | undefined>(
+    initialDefinition?.players?.p1?.pack?.count
+  );
 
   const [p2Hand, setP2Hand] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []
@@ -92,6 +104,18 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   );
   const [p2Field, setP2Field] = useState<ScenarioUnitV1[]>(
     initialDefinition?.players?.p2?.field ? [...initialDefinition.players.p2.field] : []
+  );
+  const [p2LifeCards, setP2LifeCards] = useState<ScenarioCardRefV1[]>(
+    initialDefinition?.players?.p2?.life?.cards ? [...initialDefinition.players.p2.life.cards] : []
+  );
+  const [p2LifeCount, setP2LifeCount] = useState<number | undefined>(
+    initialDefinition?.players?.p2?.life?.count
+  );
+  const [p2PackCards, setP2PackCards] = useState<ScenarioCardRefV1[]>(
+    initialDefinition?.players?.p2?.pack?.cards ? [...initialDefinition.players.p2.pack.cards] : []
+  );
+  const [p2PackCount, setP2PackCount] = useState<number | undefined>(
+    initialDefinition?.players?.p2?.pack?.count
   );
 
   // URL 読込・共有用ステート
@@ -114,6 +138,38 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   // 現在の入力から ScenarioDefinitionV1 を構築
   const currentDefinition: ScenarioDefinitionV1 = useMemo(() => {
+    const buildPlayerConfig = (
+      hand: ScenarioCardRefV1[],
+      field: ScenarioUnitV1[],
+      grave: ScenarioCardRefV1[],
+      lifeCards: ScenarioCardRefV1[],
+      lifeCount: number | undefined,
+      packCards: ScenarioCardRefV1[],
+      packCount: number | undefined
+    ): ScenarioPlayerV1 => {
+      return {
+        ...(hand.length > 0 ? { hand } : {}),
+        ...(field.length > 0 ? { field } : {}),
+        ...(grave.length > 0 ? { grave } : {}),
+        ...(lifeCards.length > 0 || lifeCount !== undefined
+          ? {
+              life: {
+                ...(lifeCards.length > 0 ? { cards: lifeCards } : {}),
+                ...(lifeCount !== undefined ? { count: lifeCount } : {}),
+              },
+            }
+          : {}),
+        ...(packCards.length > 0 || packCount !== undefined
+          ? {
+              pack: {
+                ...(packCards.length > 0 ? { cards: packCards } : {}),
+                ...(packCount !== undefined ? { count: packCount } : {}),
+              },
+            }
+          : {}),
+      };
+    };
+
     return {
       version: 1,
       name: name.trim() || undefined,
@@ -124,19 +180,33 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       chancePlayer,
       turnCount,
       players: {
-        p1: {
-          hand: p1Hand.length > 0 ? p1Hand : undefined,
-          field: p1Field.length > 0 ? p1Field : undefined,
-          grave: p1Grave.length > 0 ? p1Grave : undefined,
-        },
-        p2: {
-          hand: p2Hand.length > 0 ? p2Hand : undefined,
-          field: p2Field.length > 0 ? p2Field : undefined,
-          grave: p2Grave.length > 0 ? p2Grave : undefined,
-        },
+        p1: buildPlayerConfig(p1Hand, p1Field, p1Grave, p1LifeCards, p1LifeCount, p1PackCards, p1PackCount),
+        p2: buildPlayerConfig(p2Hand, p2Field, p2Grave, p2LifeCards, p2LifeCount, p2PackCards, p2PackCount),
       },
     };
-  }, [name, description, environmentId, seed, turnPlayer, chancePlayer, turnCount, p1Hand, p1Field, p1Grave, p2Hand, p2Field, p2Grave]);
+  }, [
+    name,
+    description,
+    environmentId,
+    seed,
+    turnPlayer,
+    chancePlayer,
+    turnCount,
+    p1Hand,
+    p1Field,
+    p1Grave,
+    p1LifeCards,
+    p1LifeCount,
+    p1PackCards,
+    p1PackCount,
+    p2Hand,
+    p2Field,
+    p2Grave,
+    p2LifeCards,
+    p2LifeCount,
+    p2PackCards,
+    p2PackCount,
+  ]);
 
   // リアルタイムコンパイル検証
   const compileOutcome: ScenarioCompileOutcome = useMemo(() => {
@@ -147,29 +217,61 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "p1");
 
   // カード追加ハンドラ
-  const handleAddCard = (playerKey: "p1" | "p2", zone: "hand" | "grave", card: ScenarioCardRefV1) => {
+  const handleAddCard = (
+    playerKey: "p1" | "p2",
+    zone: "hand" | "grave" | "life" | "pack",
+    card: ScenarioCardRefV1
+  ) => {
     if (playerKey === "p1") {
       if (zone === "hand") setP1Hand((prev) => [...prev, card]);
-      else setP1Grave((prev) => [...prev, card]);
+      else if (zone === "grave") setP1Grave((prev) => [...prev, card]);
+      else if (zone === "life") setP1LifeCards((prev) => [...prev, card]);
+      else if (zone === "pack") setP1PackCards((prev) => [...prev, card]);
     } else {
       if (zone === "hand") setP2Hand((prev) => [...prev, card]);
-      else setP2Grave((prev) => [...prev, card]);
+      else if (zone === "grave") setP2Grave((prev) => [...prev, card]);
+      else if (zone === "life") setP2LifeCards((prev) => [...prev, card]);
+      else if (zone === "pack") setP2PackCards((prev) => [...prev, card]);
     }
   };
 
-  const handleRemoveCard = (playerKey: "p1" | "p2", zone: "hand" | "grave", index: number) => {
+  const handleRemoveCard = (
+    playerKey: "p1" | "p2",
+    zone: "hand" | "grave" | "life" | "pack",
+    index: number
+  ) => {
     if (playerKey === "p1") {
       if (zone === "hand") setP1Hand((prev) => prev.filter((_, i) => i !== index));
-      else setP1Grave((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "grave") setP1Grave((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "life") setP1LifeCards((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "pack") setP1PackCards((prev) => prev.filter((_, i) => i !== index));
     } else {
       if (zone === "hand") setP2Hand((prev) => prev.filter((_, i) => i !== index));
-      else setP2Grave((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "grave") setP2Grave((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "life") setP2LifeCards((prev) => prev.filter((_, i) => i !== index));
+      else if (zone === "pack") setP2PackCards((prev) => prev.filter((_, i) => i !== index));
     }
+  };
+
+  const handleSetLifeCount = (playerKey: "p1" | "p2", count: number | undefined) => {
+    if (playerKey === "p1") setP1LifeCount(count);
+    else setP2LifeCount(count);
+  };
+
+  const handleSetPackCount = (playerKey: "p1" | "p2", count: number | undefined) => {
+    if (playerKey === "p1") setP1PackCount(count);
+    else setP2PackCount(count);
   };
 
   // ユニット追加ハンドラ
-  const handleAddUnit = (playerKey: "p1" | "p2", compId: string, card: ScenarioCardRefV1, state: "charge" | "drive", face: "up" | "down") => {
-    const newUnit: ScenarioUnitV1 = { componentId: compId, card, state, face };
+  const handleAddUnit = (
+    playerKey: "p1" | "p2",
+    compId: string,
+    card: ScenarioCardRefV1,
+    state: "charge" | "drive",
+    face: "up" | "down"
+  ) => {
+    const newUnit: ScenarioUnitV1 = { componentId: compId, cards: [card], state, face };
     if (playerKey === "p1") {
       setP1Field((prev) => [...prev, newUnit]);
     } else {
@@ -203,7 +305,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setTimeout(() => setShareNotice(null), 3000);
   };
 
-  // URL / コード読込ハンドラ
+  // URL / コード読込ハンドラ (全領域を完全復元)
   const handleLoadFromUrl = () => {
     const raw = urlInput.trim();
     if (!raw) return;
@@ -229,10 +331,18 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP1Hand(def.players?.p1?.hand ? [...def.players.p1.hand] : []);
     setP1Field(def.players?.p1?.field ? [...def.players.p1.field] : []);
     setP1Grave(def.players?.p1?.grave ? [...def.players.p1.grave] : []);
+    setP1LifeCards(def.players?.p1?.life?.cards ? [...def.players.p1.life.cards] : []);
+    setP1LifeCount(def.players?.p1?.life?.count);
+    setP1PackCards(def.players?.p1?.pack?.cards ? [...def.players.p1.pack.cards] : []);
+    setP1PackCount(def.players?.p1?.pack?.count);
 
     setP2Hand(def.players?.p2?.hand ? [...def.players.p2.hand] : []);
     setP2Field(def.players?.p2?.field ? [...def.players.p2.field] : []);
     setP2Grave(def.players?.p2?.grave ? [...def.players.p2.grave] : []);
+    setP2LifeCards(def.players?.p2?.life?.cards ? [...def.players.p2.life.cards] : []);
+    setP2LifeCount(def.players?.p2?.life?.count);
+    setP2PackCards(def.players?.p2?.pack?.cards ? [...def.players.p2.pack.cards] : []);
+    setP2PackCount(def.players?.p2?.pack?.count);
 
     setShareNotice({ type: "success", message: "シナリオを正常に読み込みました。" });
     setUrlInput("");
@@ -282,7 +392,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 : "border-transparent text-zinc-400 hover:text-zinc-600"
             }`}
           >
-            Player A (先手/P1)
+            Player A (P1)
           </button>
           <button
             onClick={() => setActiveTab("p2")}
@@ -292,7 +402,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 : "border-transparent text-zinc-400 hover:text-zinc-600"
             }`}
           >
-            Player B (後手/P2)
+            Player B (P2)
           </button>
           <button
             onClick={() => setActiveTab("settings")}
@@ -455,8 +565,14 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
               hand={activeTab === "p1" ? p1Hand : p2Hand}
               field={activeTab === "p1" ? p1Field : p2Field}
               grave={activeTab === "p1" ? p1Grave : p2Grave}
+              lifeCards={activeTab === "p1" ? p1LifeCards : p2LifeCards}
+              lifeCount={activeTab === "p1" ? p1LifeCount : p2LifeCount}
+              packCards={activeTab === "p1" ? p1PackCards : p2PackCards}
+              packCount={activeTab === "p1" ? p1PackCount : p2PackCount}
               onAddCard={(zone, card) => handleAddCard(activeTab, zone, card)}
               onRemoveCard={(zone, idx) => handleRemoveCard(activeTab, zone, idx)}
+              onSetLifeCount={(cnt) => handleSetLifeCount(activeTab, cnt)}
+              onSetPackCount={(cnt) => handleSetPackCount(activeTab, cnt)}
               onAddUnit={(comp, card, state, face) => handleAddUnit(activeTab, comp, card, state, face)}
               onRemoveUnit={(idx) => handleRemoveUnit(activeTab, idx)}
               deckCards={currentDeckCards}
@@ -523,8 +639,14 @@ interface PlayerZoneEditorProps {
   readonly hand: readonly ScenarioCardRefV1[];
   readonly field: readonly ScenarioUnitV1[];
   readonly grave: readonly ScenarioCardRefV1[];
-  readonly onAddCard: (zone: "hand" | "grave", card: ScenarioCardRefV1) => void;
-  readonly onRemoveCard: (zone: "hand" | "grave", index: number) => void;
+  readonly lifeCards: readonly ScenarioCardRefV1[];
+  readonly lifeCount?: number;
+  readonly packCards: readonly ScenarioCardRefV1[];
+  readonly packCount?: number;
+  readonly onAddCard: (zone: "hand" | "grave" | "life" | "pack", card: ScenarioCardRefV1) => void;
+  readonly onRemoveCard: (zone: "hand" | "grave" | "life" | "pack", index: number) => void;
+  readonly onSetLifeCount: (count: number | undefined) => void;
+  readonly onSetPackCount: (count: number | undefined) => void;
   readonly onAddUnit: (compId: string, card: ScenarioCardRefV1, state: "charge" | "drive", face: "up" | "down") => void;
   readonly onRemoveUnit: (index: number) => void;
   readonly deckCards: readonly { suit: string; rank: string }[];
@@ -536,8 +658,14 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   hand,
   field,
   grave,
+  lifeCards,
+  lifeCount,
+  packCards,
+  packCount,
   onAddCard,
   onRemoveCard,
+  onSetLifeCount,
+  onSetPackCount,
   onAddUnit,
   onRemoveUnit,
   deckCards,
@@ -551,7 +679,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   const [selectedState, setSelectedState] = useState<"charge" | "drive">("charge");
   const [selectedFace, setSelectedFace] = useState<"up" | "down">("up");
 
-  const playerName = playerKey === "p1" ? "Player A" : "Player B";
+  const playerName = playerKey === "p1" ? "Player A (P1)" : "Player B (P2)";
 
   // 有効なランク一覧（選択中スートに適合するもの）
   const availableRanks = useMemo(() => {
@@ -615,6 +743,20 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           >
             + 墓地に追加
           </button>
+
+          <button
+            onClick={() => onAddCard("life", { suit: selectedSuit, rank: selectedRank })}
+            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+          >
+            + ライフ固定に追加
+          </button>
+
+          <button
+            onClick={() => onAddCard("pack", { suit: selectedSuit, rank: selectedRank })}
+            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+          >
+            + 山札固定に追加
+          </button>
         </div>
 
         {/* ユニット追加設定 */}
@@ -670,7 +812,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
       </div>
 
       {/* ゾーンごとの配置一覧表示 */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 font-mono text-xs">
         {/* 手札 */}
         <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
           <div className="flex items-center justify-between border-b pb-1.5">
@@ -707,22 +849,27 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <span className="text-zinc-400 italic text-[11px]">指定なし (初期プリセットなし)</span>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {field.map((u, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
-                >
-                  <span>
-                    {u.componentId.replace("character.", "")} ({u.card.suit}{u.card.rank}) [{u.state}/{u.face}]
-                  </span>
-                  <button
-                    onClick={() => onRemoveUnit(i)}
-                    className="text-zinc-400 hover:text-red-600 font-bold text-xs"
+              {field.map((u, i) => {
+                const cardLabel = u.cards && u.cards.length > 0
+                  ? u.cards.map((c) => `${c.suit}${c.rank}`).join(", ")
+                  : "カードなし";
+                return (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
                   >
-                    ×
-                  </button>
-                </div>
-              ))}
+                    <span>
+                      {u.componentId.replace("character.", "")} ({cardLabel}) [{u.state}/{u.face}]
+                    </span>
+                    <button
+                      onClick={() => onRemoveUnit(i)}
+                      className="text-zinc-400 hover:text-red-600 font-bold text-xs"
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -757,6 +904,90 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   </span>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {/* ライフ */}
+        <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
+          <div className="flex items-center justify-between border-b pb-1.5">
+            <span className="font-bold text-zinc-800">ライフ (Life)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-zinc-500">目標枚数:</span>
+            <input
+              type="number"
+              min="0"
+              value={lifeCount ?? ""}
+              placeholder="自動"
+              onChange={(e) =>
+                onSetLifeCount(
+                  e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
+                )
+              }
+              className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+            />
+          </div>
+          {lifeCards.length === 0 ? (
+            <span className="text-zinc-400 italic text-[11px]">固定カードなし</span>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {lifeCards.map((c, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200 rounded font-bold text-rose-800 text-[10px]"
+                >
+                  {c.suit}{c.rank}
+                  <button
+                    onClick={() => onRemoveCard("life", i)}
+                    className="text-rose-400 hover:text-red-600 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 山札 */}
+        <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
+          <div className="flex items-center justify-between border-b pb-1.5">
+            <span className="font-bold text-zinc-800">山札 (Pack)</span>
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-zinc-500">目標枚数:</span>
+            <input
+              type="number"
+              min="0"
+              value={packCount ?? ""}
+              placeholder="自動"
+              onChange={(e) =>
+                onSetPackCount(
+                  e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
+                )
+              }
+              className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+            />
+          </div>
+          {packCards.length === 0 ? (
+            <span className="text-zinc-400 italic text-[11px]">固定カードなし</span>
+          ) : (
+            <div className="flex flex-wrap gap-1.5">
+              {packCards.map((c, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
+                >
+                  {c.suit}{c.rank}
+                  <button
+                    onClick={() => onRemoveCard("pack", i)}
+                    className="text-sky-400 hover:text-red-600 font-bold"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
             </div>
           )}
         </div>

@@ -1,10 +1,13 @@
 import {
   ScenarioDefinitionV1,
   SCENARIO_SCHEMA_VERSION,
+  parseScenarioDefinitionV1,
+  normalizeScenarioDefinitionV1,
 } from "../../domain/scenario/ScenarioTypes";
 
 export const SCENARIO_URL_PARAM_KEY = "scenario";
-export const MAX_SCENARIO_PAYLOAD_BYTES = 65536; // 64 KB
+export const MAX_SCENARIO_PAYLOAD_BYTES = 65536; // 64 KB (decoded JSON UTF-8 payload limit)
+export const MAX_SCENARIO_ENCODED_BYTES = 87384; // Base64URL safe ceiling: ceil(65536 * 4 / 3) + 4
 
 export type ScenarioDecodeResult =
   | {
@@ -15,6 +18,18 @@ export type ScenarioDecodeResult =
       readonly success: false;
       readonly error: string;
     };
+
+const BASE64_URL_PATTERN = /^[A-Za-z0-9_-]+={0,2}$/;
+
+/**
+ * 文字列の UTF-8 バイト長を取得します。
+ */
+export function getUtf8ByteLength(str: string): number {
+  if (typeof Buffer !== "undefined") {
+    return Buffer.byteLength(str, "utf8");
+  }
+  return new TextEncoder().encode(str).length;
+}
 
 /**
  * UTF-8 文字列を URL-safe Base64 文字列へ変換（Browser / Node.js 双方で安全に動作）
@@ -54,13 +69,23 @@ export function urlSafeBase64ToString(base64Url: string): string {
 
 /**
  * ScenarioDefinitionV1 を URL パラメータ用文字列へエンコードします。
- * Raw GameState は含めず、高レベル Scenario 定義のみを直列化します。
+ * Raw GameState は含めず、高レベル Scenario 定義を正規化した上で直列化します。
  */
 export function encodeScenarioDefinitionV1ToUrlParam(def: ScenarioDefinitionV1): string {
-  if (def.version !== SCENARIO_SCHEMA_VERSION) {
-    throw new Error(`サポートされていないScenarioバージョンです (${def.version})。`);
+  const parseRes = parseScenarioDefinitionV1(def);
+  if (!parseRes.success) {
+    throw new Error(
+      "無効なシナリオ定義です: " + parseRes.errors.map((e) => e.message).join(", ")
+    );
   }
-  const jsonStr = JSON.stringify(def);
+  const canonical = normalizeScenarioDefinitionV1(parseRes.definition);
+  const jsonStr = JSON.stringify(canonical);
+  const byteLen = getUtf8ByteLength(jsonStr);
+  if (byteLen > MAX_SCENARIO_PAYLOAD_BYTES) {
+    throw new Error(
+      `シナリオ定義のJSONサイズ (${byteLen} bytes) が上限 (${MAX_SCENARIO_PAYLOAD_BYTES} bytes) を超過しています。`
+    );
+  }
   return stringToUrlSafeBase64(jsonStr);
 }
 
@@ -74,10 +99,19 @@ export function decodeScenarioDefinitionV1FromUrlParam(param: string): ScenarioD
   }
 
   const trimmed = param.trim();
-  if (trimmed.length > MAX_SCENARIO_PAYLOAD_BYTES) {
+  const encodedBytes = getUtf8ByteLength(trimmed);
+  if (encodedBytes > MAX_SCENARIO_ENCODED_BYTES) {
     return {
       success: false,
-      error: `シナリオパラメータが許容サイズ (${MAX_SCENARIO_PAYLOAD_BYTES} bytes) を超過しています。`,
+      error: `シナリオパラメータが許容エンコードサイズ (${MAX_SCENARIO_ENCODED_BYTES} bytes) を超過しています。`,
+    };
+  }
+
+  // Base64URL 厳格フォーマットチェック (文字種および長さ % 4 !== 1)
+  if (!BASE64_URL_PATTERN.test(trimmed) || trimmed.length % 4 === 1) {
+    return {
+      success: false,
+      error: "シナリオパラメータのBase64URL形式が不正です (Malformed Base64URL)。",
     };
   }
 
@@ -85,7 +119,18 @@ export function decodeScenarioDefinitionV1FromUrlParam(param: string): ScenarioD
   try {
     jsonStr = urlSafeBase64ToString(trimmed);
   } catch (err: any) {
-    return { success: false, error: "シナリオパラメータのBase64デコードに失敗しました (Malformed payload)。" };
+    return {
+      success: false,
+      error: "シナリオパラメータのBase64デコードに失敗しました (Malformed payload)。",
+    };
+  }
+
+  const decodedBytes = getUtf8ByteLength(jsonStr);
+  if (decodedBytes > MAX_SCENARIO_PAYLOAD_BYTES) {
+    return {
+      success: false,
+      error: `デコード後のシナリオJSONサイズ (${decodedBytes} bytes) が上限 (${MAX_SCENARIO_PAYLOAD_BYTES} bytes) を超過しています。`,
+    };
   }
 
   let parsed: any;
@@ -95,48 +140,19 @@ export function decodeScenarioDefinitionV1FromUrlParam(param: string): ScenarioD
     return { success: false, error: "シナリオパラメータのJSONパースに失敗しました。" };
   }
 
-  if (!parsed || typeof parsed !== "object") {
-    return { success: false, error: "シナリオ定義がオブジェクトではありません。" };
-  }
-
-  if (parsed.version !== SCENARIO_SCHEMA_VERSION) {
+  const parseRes = parseScenarioDefinitionV1(parsed);
+  if (!parseRes.success) {
     return {
       success: false,
-      error: `未知または未対応のシナリオバージョンです (${parsed.version})。現行バージョンは ${SCENARIO_SCHEMA_VERSION} です。`,
+      error: parseRes.errors
+        .map((e) => `[${e.code}] ${e.path ? `${e.path}: ` : ""}${e.message}`)
+        .join("; "),
     };
-  }
-
-  if (!parsed.environmentId || typeof parsed.environmentId !== "string") {
-    return { success: false, error: "environmentId が指定されていないか文字列ではありません。" };
-  }
-
-  if (typeof parsed.seed !== "number" || !Number.isSafeInteger(parsed.seed) || parsed.seed < 0) {
-    return { success: false, error: "seed は非負の安全な整数でなければなりません。" };
-  }
-
-  if (parsed.turnPlayer !== "p1" && parsed.turnPlayer !== "p2") {
-    return { success: false, error: "turnPlayer は 'p1' または 'p2' でなければなりません。" };
-  }
-
-  if (parsed.chancePlayer !== "p1" && parsed.chancePlayer !== "p2") {
-    return { success: false, error: "chancePlayer は 'p1' または 'p2' でなければなりません。" };
-  }
-
-  if (!parsed.players || typeof parsed.players !== "object" || !parsed.players.p1 || !parsed.players.p2) {
-    return { success: false, error: "players.p1 および players.p2 の定義が必要です。" };
-  }
-
-  // Phase や Stage などの不正フィールド検出
-  if (parsed.stage?.requests && Array.isArray(parsed.stage.requests) && parsed.stage.requests.length > 0) {
-    return { success: false, error: "Scenario Builder V1 では非空の stage.requests は許可されていません。" };
-  }
-  if (parsed.phase !== undefined || parsed.turnPhase !== undefined || parsed.currentPhase !== undefined) {
-    return { success: false, error: "BlackPoker にゲーム進行上の Phase は存在しません。" };
   }
 
   return {
     success: true,
-    definition: parsed as ScenarioDefinitionV1,
+    definition: normalizeScenarioDefinitionV1(parseRes.definition),
   };
 }
 

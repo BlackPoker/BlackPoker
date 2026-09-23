@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { compileScenarioDefinitionV1 } from "../../engine/scenario/ScenarioCompiler";
-import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import { ScenarioDefinitionV1, normalizeScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
 
@@ -10,6 +10,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
 
   // Helper to create a minimal valid scenario for light-entry16 (16 cards deck)
   // Entry16 cards: SA, S2, S3, SK, H4, H7, HJ, HQ, D5, D8, D10, DQ, CA, C6, C9, CK
+  // Note: entry16 frame has no pack (setup.packCount is undefined). All remaining cards go to life.
   function createMinimalLightScenario(seed: number = 42): ScenarioDefinitionV1 {
     return {
       version: 1,
@@ -29,19 +30,17 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
           field: [
             {
               componentId: "character.hero",
-              card: { suit: "H", rank: "Q" },
+              cards: [{ suit: "H", rank: "Q" }],
             },
           ],
           grave: [{ suit: "C", rank: "6" }],
-          life: { count: 3 },
-          pack: { count: 9 }, // Total 16 cards (2 + 1 + 1 + 3 + 9 = 16)
+          life: { count: 12 }, // Total 16 cards (2 + 1 + 1 + 12 = 16)
         },
         p2: {
           hand: [{ suit: "S", rank: "3" }],
           field: [],
           grave: [],
-          life: { count: 4 },
-          pack: { count: 11 }, // Total 16 cards (1 + 0 + 0 + 4 + 11 = 16)
+          life: { count: 15 }, // Total 16 cards (1 + 0 + 0 + 15 = 16)
         },
       },
     };
@@ -65,7 +64,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
           field: [
             {
               componentId: "character.soldier",
-              card: { suit: "H", rank: "10" },
+              cards: [{ suit: "H", rank: "10" }],
             },
           ],
           grave: [
@@ -112,15 +111,15 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(state.players.p1.hand.length).toBe(2);
     expect(state.players.p1.field.length).toBe(1);
     expect(state.players.p1.grave.length).toBe(1);
-    expect(state.players.p1.life.length).toBe(3);
-    expect(state.players.p1.pack.cards.length).toBe(9);
+    expect(state.players.p1.life.length).toBe(12);
+    expect(state.players.p1.pack).toBeUndefined();
 
     // P2 zones
     expect(state.players.p2.hand.length).toBe(1);
     expect(state.players.p2.field.length).toBe(0);
     expect(state.players.p2.grave.length).toBe(0);
-    expect(state.players.p2.life.length).toBe(4);
-    expect(state.players.p2.pack.cards.length).toBe(11);
+    expect(state.players.p2.life.length).toBe(15);
+    expect(state.players.p2.pack).toBeUndefined();
   });
 
   it("2: 同一Definition + 同一Seedで100% byte-for-byte 完全一致する決定論的生成", () => {
@@ -157,8 +156,8 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
   });
 
   it("4: 異なるSeedでは明示指定Zoneは維持され、未指定補完カードのみ決定論的に変化すること", () => {
-    const s1 = createMinimalLightScenario(100);
-    const s2 = createMinimalLightScenario(200);
+    const s1 = createMinimalStandardScenario(100);
+    const s2 = createMinimalStandardScenario(200);
 
     const r1 = compileScenarioDefinitionV1(s1, catalog, fullRulePackage);
     const r2 = compileScenarioDefinitionV1(s2, catalog, fullRulePackage);
@@ -303,7 +302,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(result.state.players.p2.graveTopCardId).toBeUndefined();
   });
 
-  it("10: カード保存則: デッキ枚数超過または重複・未定義カードで DECK_COMPLETION_IMPOSSIBLE / CARD_NOT_IN_REGULATION_DECK エラーとなること", () => {
+  it("10: カード保存則: デッキ枚数超過または重複・未定義カードで DUPLICATE_CARD / DECK_COMPLETION_IMPOSSIBLE エラーとなること", () => {
     // Duplicate card in hand (entry16 only has one SA)
     const duplicateScenario: ScenarioDefinitionV1 = {
       ...createMinimalLightScenario(42),
@@ -322,7 +321,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     const result = compileScenarioDefinitionV1(duplicateScenario, catalog, fullRulePackage);
     expect(result.kind).toBe("VALIDATION_ERROR");
     if (result.kind === "VALIDATION_ERROR") {
-      expect(result.errors.some(e => e.code === "DECK_COMPLETION_IMPOSSIBLE")).toBe(true);
+      expect(result.errors.some(e => e.code === "DUPLICATE_CARD" || e.code === "DECK_COMPLETION_IMPOSSIBLE")).toBe(true);
     }
   });
 
@@ -336,5 +335,193 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(["WAITING_FOR_DECISION", "PROGRESSED"]).toContain(initialStep.type);
     expect(result.session.state).toBeDefined();
     expect(result.session.createSnapshot()).toBeDefined();
+  });
+
+  it("12: 2-Step Allocation: Life/Pack の固定カードが補完前に予約され、未指定シャッフルプールに混入・重複しないこと", () => {
+    const base = createMinimalStandardScenario(500);
+    // P1: Life に D5, Pack に D8 を明示固定
+    const scenario: ScenarioDefinitionV1 = {
+      ...base,
+      players: {
+        ...base.players,
+        p1: {
+          ...base.players.p1,
+          life: {
+            cards: [{ suit: "D", rank: "5" }],
+            count: 5,
+          },
+          pack: {
+            cards: [{ suit: "D", rank: "8" }],
+            count: 43,
+          },
+        },
+      },
+    };
+
+    const result = compileScenarioDefinitionV1(scenario, catalog, fullRulePackage);
+    expect(result.kind).toBe("READY");
+    if (result.kind !== "READY") return;
+
+    const p1 = result.state.players.p1;
+    // Life の先頭に D5 が含まれる
+    expect(p1.life[0].suit).toBe("D");
+    expect(p1.life[0].rank).toBe("5");
+    expect(p1.life.length).toBe(5);
+
+    // Pack の先頭に D8 が含まれる
+    expect(p1.pack.cards[0].suit).toBe("D");
+    expect(p1.pack.cards[0].rank).toBe("8");
+    expect(p1.pack.cards.length).toBe(43);
+
+    // D5, D8 が他の領域や補完カード内に重複出現していないこと
+    const allCards = [
+      ...p1.hand,
+      ...p1.field.flatMap((u: any) => u.cards),
+      ...p1.grave,
+      ...p1.life,
+      ...p1.pack.cards,
+    ];
+    const d5Count = allCards.filter((c: any) => c.suit === "D" && c.rank === "5").length;
+    const d8Count = allCards.filter((c: any) => c.suit === "D" && c.rank === "8").length;
+    expect(d5Count).toBe(1);
+    expect(d8Count).toBe(1);
+  });
+
+  it("13: Frame が Pack を持たない環境 (light-entry16) で pack が指定された場合は INVALID_ZONE_CONFIG で拒絶されること", () => {
+    const invalidScenario: ScenarioDefinitionV1 = {
+      ...createMinimalLightScenario(42),
+      players: {
+        ...createMinimalLightScenario(42).players,
+        p1: {
+          ...createMinimalLightScenario(42).players.p1,
+          pack: { count: 5 }, // entry16 has no pack!
+        },
+      },
+    };
+
+    const result = compileScenarioDefinitionV1(invalidScenario, catalog, fullRulePackage);
+    expect(result.kind).toBe("VALIDATION_ERROR");
+    if (result.kind === "VALIDATION_ERROR") {
+      expect(result.errors.some(e => e.code === "INVALID_ZONE_CONFIG")).toBe(true);
+    }
+  });
+
+  it("14: ユニットの cards 空配列または compDef.zone !== 'field' のコンポーネント配置が拒絶されること", () => {
+    // Empty cards array
+    const emptyCardsUnitScenario: ScenarioDefinitionV1 = {
+      ...createMinimalLightScenario(42),
+      players: {
+        ...createMinimalLightScenario(42).players,
+        p1: {
+          ...createMinimalLightScenario(42).players.p1,
+          field: [
+            {
+              componentId: "character.hero",
+              cards: [],
+            },
+          ],
+        },
+      },
+    };
+
+    const r1 = compileScenarioDefinitionV1(emptyCardsUnitScenario, catalog, fullRulePackage);
+    expect(r1.kind).toBe("VALIDATION_ERROR");
+    if (r1.kind === "VALIDATION_ERROR") {
+      expect(r1.errors.some(e => e.code === "SCHEMA_VIOLATION")).toBe(true);
+    }
+
+    // Non-field component (e.g. system or action component)
+    const nonFieldScenario: ScenarioDefinitionV1 = {
+      ...createMinimalLightScenario(42),
+      players: {
+        ...createMinimalLightScenario(42).players,
+        p1: {
+          ...createMinimalLightScenario(42).players.p1,
+          field: [
+            {
+              componentId: "action.attack",
+              cards: [{ suit: "H", rank: "Q" }],
+            },
+          ],
+        },
+      },
+    };
+
+    const r2 = compileScenarioDefinitionV1(nonFieldScenario, catalog, fullRulePackage);
+    expect(r2.kind).toBe("VALIDATION_ERROR");
+    if (r2.kind === "VALIDATION_ERROR") {
+      expect(r2.errors.some(e => e.code === "UNSUPPORTED_COMPONENT")).toBe(true);
+    }
+  });
+
+  it("15: 未知プロパティや不正な数値 (turnCount < 1, seed < 0) が SCHEMA_VIOLATION で拒絶されること", () => {
+    const rawWithUnknown: any = {
+      ...createMinimalLightScenario(42),
+      unknownKey: "prohibited",
+    };
+
+    const r1 = compileScenarioDefinitionV1(rawWithUnknown, catalog, fullRulePackage);
+    expect(r1.kind).toBe("VALIDATION_ERROR");
+    if (r1.kind === "VALIDATION_ERROR") {
+      expect(r1.errors.some(e => e.code === "SCHEMA_VIOLATION")).toBe(true);
+    }
+
+    const invalidTurnCount: any = {
+      ...createMinimalLightScenario(42),
+      turnCount: 0,
+    };
+    const r2 = compileScenarioDefinitionV1(invalidTurnCount, catalog, fullRulePackage);
+    expect(r2.kind).toBe("VALIDATION_ERROR");
+    if (r2.kind === "VALIDATION_ERROR") {
+      expect(r2.errors.some(e => e.code === "SCHEMA_VIOLATION")).toBe(true);
+    }
+  });
+
+  it("16: normalizeScenarioDefinitionV1 によりプロパティ順序やデフォルト値が正規化され、同一の definitionHash を生成すること", () => {
+    const def1: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:light-entry16",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+        },
+        p2: {
+          hand: [{ suit: "S", rank: "2" }],
+        },
+      },
+    };
+
+    // def2 has turnCount undefined (default 1), different key order
+    const def2: any = {
+      environmentId: "official:light-entry16",
+      seed: 42,
+      version: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p2: {
+          hand: [{ suit: "S", rank: "2" }],
+        },
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+        },
+      },
+    };
+
+    const norm1 = normalizeScenarioDefinitionV1(def1);
+    const norm2 = normalizeScenarioDefinitionV1(def2);
+    expect(norm1).toEqual(norm2);
+
+    const r1 = compileScenarioDefinitionV1(def1, catalog, fullRulePackage);
+    const r2 = compileScenarioDefinitionV1(def2, catalog, fullRulePackage);
+    expect(r1.kind).toBe("READY");
+    expect(r2.kind).toBe("READY");
+    if (r1.kind === "READY" && r2.kind === "READY") {
+      expect(r1.definitionHash).toBe(r2.definitionHash);
+    }
   });
 });
