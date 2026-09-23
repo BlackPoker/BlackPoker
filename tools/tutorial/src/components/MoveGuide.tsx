@@ -16,18 +16,16 @@ export function MoveGuide({
   operations,
   before,
   after,
-  hideBulwarkCards = false,
 }: {
   operations: Operation[];
   before: BoardState;
   after: BoardState;
-  hideBulwarkCards?: boolean;
 }) {
   if (!operations.length) return null;
 
   return (
-    <section className="move-guide" aria-label="カードの動かし方">
-      <strong className="move-guide-title">カードの動かし方</strong>
+    <section className="move-guide" aria-label="実物ではこう動かす">
+      <strong className="move-guide-title">実物ではこう動かす</strong>
       <div className="move-guide-list">
         {operations.map((operation, index) => {
           const card = operation.cards[0];
@@ -41,14 +39,9 @@ export function MoveGuide({
           const cards = operation.cards.length
             ? operation.cards.map(cardName).join("・")
             : "実物カード";
-          const sourceCards = hideBulwarkCards && operation.from === "bulwarks"
-            ? "裏向きカード"
-            : cards;
-          const destinationCards = hideBulwarkCards && operation.to === "bulwarks"
-            ? "裏向きカード"
-            : sameZone
-              ? cards
-              : "ここへ";
+          const sourceCards = cards;
+          const destinationCards = sameZone ? cards :
+            operation.to === "bulwarks" ? "実物カード・裏向き" : "実物カード";
 
           return (
             <article className="move-row" key={`${operation.player}-${index}`}>

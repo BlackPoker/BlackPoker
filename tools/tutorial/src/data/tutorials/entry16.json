@@ -20,6 +20,7 @@
   "steps": [
     {
       "id": "welcome",
+      "cause": { "phase": "setup", "text": "固定された対戦例の盤面を画面に表示しました。" },
       "chapter": "prepare",
       "chapterTitle": "準備する",
       "eyebrow": "LET’S PLAY",
@@ -73,6 +74,7 @@
     },
     {
       "id": "practice-a",
+      "cause": { "phase": "setup", "text": "練習用のPLAYER Aの兵士・防壁・手札を画面に配置しました。" },
       "chapter": "prepare",
       "chapterTitle": "準備する",
       "eyebrow": "LET’S PLAY",
@@ -173,6 +175,7 @@
     },
     {
       "id": "practice-b",
+      "cause": { "phase": "setup", "text": "練習用のPLAYER Bの兵士と防壁を画面に配置しました。" },
       "chapter": "prepare",
       "chapterTitle": "準備する",
       "eyebrow": "LET’S PLAY",
@@ -294,6 +297,7 @@
     },
     {
       "id": "practice-life",
+      "cause": { "phase": "setup", "text": "両プレイヤーの練習用ライフを画面に配置しました。" },
       "chapter": "prepare",
       "chapterTitle": "準備する",
       "eyebrow": "LET’S PLAY",
@@ -583,6 +587,7 @@
     },
     {
       "id": "attack",
+      "cause": { "phase": "resolve", "actionId": "attack", "text": "アタックの解決で、アタッカーの♣6がチャージからドライブになりました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -981,6 +986,7 @@
     },
     {
       "id": "block",
+      "cause": { "phase": "trigger", "actionId": "block", "text": "アタックの解決でブロックが誘発し、♥7がブロッカーに指定されました。カードは縦向きのままです。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -1379,6 +1385,8 @@
     },
     {
       "id": "damage",
+      "cause": { "phase": "resolve", "actionId": "damageJudge", "text": "ブロックの解決で誘発したダメージ判定が解決し、数字の小さい♣6が墓地へ移りました。" },
+      "alternate": { "title": "もしブロックしなかったら？", "text": "ブロッカーがいなければ、ダメージ判定でアタッカーの数字ぶん相手のライフにダメージを与えます。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -1777,6 +1785,7 @@
     },
     {
       "id": "summon-cost-b",
+      "cause": { "phase": "request", "actionId": "summonsSoldier", "text": "兵士召喚のリクエスト時にコストBを払い、防壁をドライブしました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -2176,6 +2185,7 @@
     },
     {
       "id": "summon-cost-l",
+      "cause": { "phase": "request", "actionId": "summonsSoldier", "text": "兵士召喚のリクエスト時にコストLを払い、1点ダメージでライフの♠3が墓地へ移りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -2575,6 +2585,7 @@
     },
     {
       "id": "summon",
+      "cause": { "phase": "resolve", "actionId": "summonsSoldier", "text": "兵士召喚の解決で、手札の♠2が兵士として場に出ました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -2975,6 +2986,7 @@
     },
     {
       "id": "end",
+      "cause": { "phase": "resolve", "actionId": "end", "text": "エンドの解決で、ターンがPLAYER Bへ渡りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -3363,6 +3375,7 @@
     },
     {
       "id": "charge",
+      "cause": { "phase": "trigger", "actionId": "charge", "text": "エンドの解決でチャージが誘発し、その解決でPLAYER Bの防壁が縦向きに戻りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -3761,6 +3774,7 @@
     },
     {
       "id": "draw",
+      "cause": { "phase": "trigger", "actionId": "draw", "text": "チャージの解決でドローが誘発し、その解決で2枚がライフから手札へ移りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4161,6 +4175,7 @@
     },
     {
       "id": "set-bulwark-cost-l",
+      "cause": { "phase": "request", "actionId": "setBulwark", "text": "防壁設置のリクエスト時にコストLを払い、1点ダメージでライフのAが墓地へ移りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4182,6 +4197,7 @@
     },
     {
       "id": "set-bulwark-place",
+      "cause": { "phase": "resolve", "actionId": "setBulwark", "text": "防壁設置の解決で、手札の1枚が裏向き・縦向きの防壁として場に出ました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4203,6 +4219,7 @@
     },
     {
       "id": "end-to-a",
+      "cause": { "phase": "resolve", "actionId": "end", "text": "エンドの解決で、ターンがPLAYER Aへ渡りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4223,6 +4240,7 @@
     },
     {
       "id": "charge-a",
+      "cause": { "phase": "trigger", "actionId": "charge", "text": "エンドの解決でチャージが誘発し、その解決でPLAYER Aの防壁が縦向きに戻りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4243,6 +4261,7 @@
     },
     {
       "id": "draw-a",
+      "cause": { "phase": "trigger", "actionId": "draw", "text": "チャージの解決でドローが誘発し、その解決で2枚がライフから手札へ移りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4263,6 +4282,7 @@
     },
     {
       "id": "direct-attack",
+      "cause": { "phase": "resolve", "actionId": "attack", "text": "アタックの解決で、アタッカーの♠2がチャージからドライブになりました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4284,6 +4304,7 @@
     },
     {
       "id": "no-block",
+      "cause": { "phase": "trigger", "actionId": "block", "text": "アタックの解決でブロックが誘発しました。PLAYER Bはブロッカーを指定しなかったため、カードは動きません。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
@@ -4305,6 +4326,7 @@
     },
     {
       "id": "direct-damage",
+      "cause": { "phase": "resolve", "actionId": "damageJudge", "text": "ブロックの解決で誘発したダメージ判定が解決し、ブロッカーがいないためPLAYER Bのライフ2枚が墓地へ移りました。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",

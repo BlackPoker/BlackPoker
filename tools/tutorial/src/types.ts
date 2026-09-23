@@ -24,6 +24,11 @@ export interface Operation {
   cards: string[];
   label: string;
 }
+export interface MovementCause {
+  phase: "request" | "resolve" | "trigger" | "setup";
+  actionId?: string;
+  text: string;
+}
 export interface TutorialStep {
   id: string;
   chapter: string;
@@ -43,6 +48,8 @@ export interface TutorialStep {
   chooseFirst?: boolean;
   sequenceLabel?: string;
   actionName?: string;
+  cause?: MovementCause;
+  alternate?: { title: string; text: string };
 }
 export interface TutorialScenario {
   schemaVersion: 2;

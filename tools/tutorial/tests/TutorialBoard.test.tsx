@@ -29,6 +29,7 @@ describe("TutorialBoardの防壁face表示", () => {
     render(
       <TutorialBoard
         board={board}
+        before={board}
         after={board}
         operations={[]}
         applied={false}
@@ -57,6 +58,7 @@ describe("TutorialBoardの防壁face表示", () => {
     const view = render(
       <TutorialBoard
         board={before}
+        before={before}
         after={after}
         operations={operation}
         applied={false}
@@ -69,6 +71,7 @@ describe("TutorialBoardの防壁face表示", () => {
     view.rerender(
       <TutorialBoard
         board={after}
+        before={before}
         after={after}
         operations={operation}
         applied

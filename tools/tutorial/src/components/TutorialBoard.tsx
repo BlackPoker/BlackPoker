@@ -8,8 +8,63 @@ const labels: Record<Zone, string> = {
   grave: "墓地",
   hand: "手札",
 };
+const stateName = (state?: BoardCard["state"]) =>
+  state === "drive" ? "ドライブ" : "チャージ";
+
+function MovementLane({
+  player,
+  operations,
+  before,
+  after,
+}: {
+  player: Player;
+  operations: Operation[];
+  before: BoardState;
+  after: BoardState;
+}) {
+  if (!operations.length) return null;
+  return (
+    <div className="board-movements" aria-label={`PLAYER ${player}のカード変化`}>
+      {operations.map((operation, index) => {
+        const sameZone = operation.from === operation.to;
+        const first = operation.cards[0];
+        const fromCard = before[player][operation.from].find((card) => card.card === first);
+        const toCard = after[player][operation.to].find((card) => card.card === first);
+        const privateBulwark = (operation.from === "bulwarks" || operation.to === "bulwarks")
+          && (toCard?.face === "down" || (!toCard && fromCard?.face === "down"));
+        const stateChanged = !!fromCard && !!toCard && fromCard.state !== toCard.state;
+        const cardText = privateBulwark
+          ? "裏向きの防壁"
+          : operation.cards.length > 1
+            ? `${operation.cards.length}枚のカード`
+            : first
+              ? cardName(first)
+              : "カード";
+        const change = sameZone
+          ? stateChanged
+            ? `${cardText}：${stateName(fromCard?.state)} → ${stateName(toCard?.state)}`
+            : fromCard
+              ? operation.label
+              : `${cardText}：${labels[operation.to]}に表示`
+          : `${cardText}：${labels[operation.from]} → ${labels[operation.to]}`;
+        return (
+          <div className="board-movement" key={`${player}-${index}`}>
+            <span className="movement-from">{stateChanged ? stateName(fromCard?.state) : labels[operation.from]}</span>
+            <span className="movement-path" aria-hidden="true">
+              <span className="movement-token">{stateChanged ? "↻" : cardText}</span>
+              <span className="movement-arrow">{stateChanged || !sameZone ? "→" : "・"}</span>
+            </span>
+            <span className="movement-to">{stateChanged ? stateName(toCard?.state) : labels[operation.to]}</span>
+            <span className="movement-description">{change}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 export function TutorialBoard({
   board,
+  before,
   after,
   operations,
   applied,
@@ -17,6 +72,7 @@ export function TutorialBoard({
   stepId,
 }: {
   board: BoardState;
+  before: BoardState;
   after: BoardState;
   operations: Operation[];
   applied: boolean;
@@ -25,7 +81,7 @@ export function TutorialBoard({
 }) {
   const realHints: Record<Zone, { main: string; sub: string }> = {
     life: stepId === "real-life"
-      ? { main: "裏向きで16枚", sub: "ここに重ねる" }
+      ? { main: "裏向きで16枚", sub: "実物カードの束" }
       : { main: "裏向きの束", sub: "一番上から引く" },
     hand: stepId === "real-hand"
       ? { main: "手元に7枚", sub: "相手に見せない" }
@@ -35,7 +91,7 @@ export function TutorialBoard({
       : { main: "防壁の列", sub: "ライフ側から並べる" },
     soldiers: stepId === "preset-soldier"
       ? { main: "表・縦で1枚", sub: "最初の兵士" }
-      : { main: "表向きのカード", sub: "兵士はここ" },
+      : { main: "表向きのカード", sub: "兵士の置き場" },
     grave: stepId === "first-player"
       ? { main: "比べたカード", sub: "表向きで置く" }
       : { main: "表向きの束", sub: "使い終わったカード" },
@@ -44,16 +100,7 @@ export function TutorialBoard({
   function zone(player: Player, zone: Zone) {
     const cards = board[player][zone];
     const related = operations.filter((o) => o.player === player);
-    const target = related.some((o) => o.to === zone);
-    const source = related.some((o) => o.from === zone);
-    const preview =
-      !applied && !real
-        ? after[player][zone].filter(
-            (c) =>
-              !cards.some((existing) => existing.card === c.card) &&
-              related.some((o) => o.to === zone && o.cards.includes(c.card)),
-          )
-        : [];
+    const changed = !real && related.some((o) => (applied ? o.to : o.from) === zone);
     const stack = zone === "life" || zone === "grave";
     const shown = stack
       ? zone === "life"
@@ -64,7 +111,7 @@ export function TutorialBoard({
       <div
         key={zone}
         data-testid={player + "-" + zone}
-        className={`table-zone ${target ? "destination" : ""} ${source ? "source" : ""} zone-${zone}`}
+        className={`table-zone ${changed ? "changed-zone" : ""} zone-${zone}`}
       >
         <span className="zone-label">
           {labels[zone]}
@@ -74,24 +121,14 @@ export function TutorialBoard({
           {shown.map((c: BoardCard) => (
             <span className={`card-slot ${c.state}`} key={c.card}>
               <span
-                className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${related.some((o) => o.cards.includes(c.card)) ? "selected-card" : ""}`}
+                className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${changed && related.some((o) => o.cards.includes(c.card)) ? "changed-card" : ""}`}
                 aria-label={`${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
               >
                 {c.face === "down" ? "BP" : cardName(c.card)}
               </span>
             </span>
           ))}
-          {preview.slice(0, 2).map((c) => (
-            <span className={`card-slot ${c.state}`} key={"preview-" + c.card}>
-              <span
-                className={`board-card ghost-card ${c.state} ${c.face === "down" ? "face-down" : ""}`}
-                aria-label={c.face === "down" ? `置く位置 ${labels[zone]}の裏向きカード` : `置く位置 ${cardName(c.card)}`}
-              >
-                {c.face === "down" ? "BP" : cardName(c.card)}
-              </span>
-            </span>
-          ))}
-          {!shown.length && !preview.length && real && (
+          {!shown.length && real && (
             <span className={`real-placeholder placeholder-${zone}`}>
               <span className={`slot-stack slot-${zone}`} aria-hidden="true">
                 <i /><i /><i />
@@ -100,17 +137,8 @@ export function TutorialBoard({
               <small>{realHints[zone].sub}</small>
             </span>
           )}
-          {!shown.length && !preview.length && !real && <span className="empty-zone">—</span>}
+          {!shown.length && !real && <span className="empty-zone">—</span>}
         </div>
-        {target && (
-          <small className="target-label">
-            {applied
-              ? "確認"
-              : related.some((o) => o.from === zone && o.to === zone)
-                ? "ここを操作"
-                : "↓ ここへ"}
-          </small>
-        )}
       </div>
     );
   }
@@ -121,9 +149,9 @@ export function TutorialBoard({
     >
       <figcaption>
         {real
-          ? "実物カードの置き場ガイド · 薄いカード枠へ置きます"
+          ? "実物カードの置き場ガイド"
           : applied
-            ? "操作後の盤面"
+            ? "変化後の盤面"
             : "操作前の盤面"}
       </figcaption>
       {(["B", "A"] as const).map((p) => (
@@ -142,6 +170,14 @@ export function TutorialBoard({
               : ["grave", "bulwarks", "soldiers", "life", "hand"]
             ).map((z) => zone(p, z as Zone))}
           </div>
+          {!real && applied && (
+            <MovementLane
+              player={p}
+              operations={operations.filter((operation) => operation.player === p)}
+              before={before}
+              after={after}
+            />
+          )}
         </section>
       ))}
     </figure>

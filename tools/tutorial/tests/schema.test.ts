@@ -58,6 +58,16 @@ describe("tutorial schema", () => {
       "Operation card is absent from its board",
     );
   });
+  it("動きの理由に正規アクションとrequest・resolve・triggerを使用する", () => {
+    const fixed = scenario.steps.filter((step) => step.mode === "fixed");
+    expect(fixed.every((step) => step.cause)).toBe(true);
+    expect(new Set(fixed.map((step) => step.cause!.phase))).toEqual(
+      new Set(["setup", "request", "resolve", "trigger"]),
+    );
+    const invalid = structuredClone(scenario);
+    invalid.steps[4].cause!.actionId = "unknown";
+    expect(validateScenario(invalid, ruleCatalog)).toContain("Invalid movement cause");
+  });
   it("固定練習はEntry16のカードのみ、準備後は各自16枚を維持", () => {
     const deck = new Set(
       scenario.steps.find((s) => s.id === "real-deck")!.checklist,

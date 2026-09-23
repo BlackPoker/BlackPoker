@@ -23,6 +23,7 @@ export default function App() {
   );
   const progress = useTutorialProgress(tutorial.id, tutorial.steps.length);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [alternateOpen, setAlternateOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [restartOpen, setRestartOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
@@ -64,6 +65,7 @@ export default function App() {
   const select = (index: number) => {
     progress.goTo(index);
     setDetailsOpen(false);
+    setAlternateOpen(false);
     setMenuOpen(false);
   };
   if (!introComplete) {
@@ -135,7 +137,7 @@ export default function App() {
         <div className="lesson-scroll">
           <article className="lesson-card">
             <div className="actor-banner" data-testid="actor">
-              <small>操作する人</small>
+              <small>{step.mode === "fixed" ? "注目する人" : "操作する人"}</small>
               <strong>
                 {actor === "both"
                   ? "PLAYER A ＋ PLAYER B"
@@ -153,7 +155,7 @@ export default function App() {
             </div>
             <p className="now-label">
               <span />
-              いまやること
+              {step.mode === "fixed" ? "盤面の変化" : "いまやること"}
             </p>
             {(step.sequenceLabel || step.actionName) && (
               <div className="step-context">
@@ -161,13 +163,21 @@ export default function App() {
                 {step.sequenceLabel && <strong>{step.sequenceLabel}</strong>}
               </div>
             )}
-            <h1>{step.title}</h1>
-            <p className="instruction">{step.instruction}</p>
+            <h1>{step.mode === "fixed" && !progress.applied && step.operations.length
+              ? "次の盤面の変化を見てみましょう。"
+              : step.title}</h1>
+            <p className="instruction">
+              {step.mode === "fixed" && step.operations.length
+                ? progress.applied
+                  ? "盤面でカードの変化を確認してください。"
+                  : "「次へ」を押すと、カードの変化が盤面に表示されます。"
+                : step.instruction}
+            </p>
             <div className={`mode-notice mode-${step.mode}`}>
               {step.mode === "fixed" ? (
                 <><b>画面だけで練習</b><span>実物カードはまだ使いません</span></>
               ) : (
-                <><b>ここから実物カード</b><span>薄いカード枠を置き場にしてください</span></>
+                <><b>ここから実物カード</b><span>画面は実物カードの置き場ガイドです</span></>
               )}
             </div>
             {step.id === "preset-bulwark" && (
@@ -206,24 +216,44 @@ export default function App() {
             )}
             <TutorialBoard
               board={selectedBoard}
+              before={step.board.before}
               after={step.board.after}
               operations={guideOperations}
               applied={progress.applied}
               real={step.mode === "real"}
               stepId={step.id}
             />
-            {!progress.applied && (
+            {step.mode === "real" && !progress.applied && (
               <MoveGuide
                 operations={guideOperations}
                 before={step.board.before}
                 after={step.board.after}
-                hideBulwarkCards={step.mode === "fixed"}
               />
             )}
-            {progress.applied && (
+            {step.mode === "fixed" && progress.applied && (
               <div className="learned" role="status">
-                <strong>✓ 操作を確認しました</strong>
+                <strong>盤面の変化を確認</strong>
+                {step.cause && <p>{step.cause.text}</p>}
+                {step.chapter === "prepare" && step.id !== "welcome" &&
+                  <p>{step.instruction}</p>}
                 <p>{step.learned}</p>
+              </div>
+            )}
+            {step.mode === "fixed" && progress.applied && step.alternate && (
+              <div className="alternate-example">
+                <button
+                  className="alternate-toggle"
+                  aria-expanded={alternateOpen}
+                  onClick={() => setAlternateOpen((value) => !value)}
+                >
+                  別の展開を見る <span aria-hidden="true">{alternateOpen ? "−" : "＋"}</span>
+                </button>
+                {alternateOpen && (
+                  <div className="alternate-content">
+                    <strong>{step.alternate.title}</strong>
+                    <p>{step.alternate.text}</p>
+                  </div>
+                )}
               </div>
             )}
             <div className="step-actions">
@@ -234,6 +264,7 @@ export default function App() {
                 onClick={() => {
                   progress.previous();
                   setDetailsOpen(false);
+                  setAlternateOpen(false);
                 }}
               >
                 <span aria-hidden="true">←</span><span>戻る</span>
@@ -248,17 +279,18 @@ export default function App() {
                   if (step.id === "free-play") {
                     progress.apply();
                     setHelpOpen(true);
+                  } else if (step.mode === "real") {
+                    progress.next();
+                    setDetailsOpen(false);
+                    setAlternateOpen(false);
                   } else if (progress.applied) {
                     progress.next();
                     setDetailsOpen(false);
+                    setAlternateOpen(false);
                   } else progress.apply();
                 }}
               >
-                {step.id === "free-play"
-                  ? step.actionLabel
-                  : progress.applied
-                    ? "次の操作へ"
-                    : step.actionLabel}
+                {step.id === "free-play" ? "対戦を始める" : "次へ"}
                 <span>→</span>
               </button>
             </div>
@@ -269,12 +301,21 @@ export default function App() {
             >
               <span>
                 <i>?</i>
-                <b>なぜ？</b>
+                <b>解説を見る</b>
               </span>
               <span>{detailsOpen ? "−" : "＋"}</span>
             </button>
             {detailsOpen && (
               <div className="why-content">
+                {step.cause && (
+                  <p className="cause-phase">
+                    {step.cause.phase === "request" ? "リクエスト時" :
+                      step.cause.phase === "resolve" ? "解決時" :
+                        step.cause.phase === "trigger" ? "誘発したアクション" : "練習の準備"}
+                    {step.actionName && ` · ${step.actionName}`}
+                  </p>
+                )}
+                {step.mode === "fixed" && <p>{step.instruction}</p>}
                 <p>{step.explanation}</p>
                 <RuleLinks refs={step.ruleRefs} />
                 {step.chapter === "setup" && (
@@ -295,8 +336,8 @@ export default function App() {
           </div>
           <p className="physical-note">
             {step.mode === "fixed"
-              ? "画面で動きを見る → ボタンを押す → 操作後を確認"
-              : "実物を動かす → ボタンを押す → 配置を確認"}
+              ? "次へ → 盤面の変化を見る → 次へ"
+              : "実物カードを動かす → 次へ"}
           </p>
         </div>
       </main>

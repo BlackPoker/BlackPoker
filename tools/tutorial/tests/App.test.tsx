@@ -60,7 +60,7 @@ describe("hands-on tutorial", () => {
     await userEvent.click(screen.getByRole("button", { name: /次へ/ }));
     await userEvent.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
 
-    expect(screen.getByRole("heading", { name: "♣6でアタック！" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "次の盤面の変化を見てみましょう。" })).toBeVisible();
     expect(loadProgress(scenario.id, window.localStorage)).toMatchObject({
       stepIndex: saved.stepIndex,
       maxReachedStepIndex: saved.maxReachedStepIndex,
@@ -68,26 +68,25 @@ describe("hands-on tutorial", () => {
     });
   });
 
-  it("操作を確定してから用語と次の操作を表示する", async () => {
+  it("固定練習は次へだけで盤面変化と次のステップを表示する", async () => {
     const user = userEvent.setup();
     render(<App />);
     expect(
       screen.getByRole("heading", { name: "まずは、画面だけで練習します。" }),
     ).toBeVisible();
     expect(screen.getByText("実物カードはまだ使いません")).toBeVisible();
-    await user.click(screen.getByRole("button", { name: /画面の向きを確認する/ }));
+    await user.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByRole("status")).toHaveTextContent("プレイヤーBが上");
-    await user.click(screen.getByRole("button", { name: /次の操作へ/ }));
+    await user.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER A");
+    expect(screen.queryByText(/ここへ/)).toBeNull();
   });
   it("actor BでもターンAを維持し、ブロックで兵士を回転しない", async () => {
     at("block");
     render(<App />);
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER B");
     expect(screen.getByTestId("actor")).toHaveTextContent("ターン：PLAYER A");
-    await userEvent.click(
-      screen.getByRole("button", { name: /♥7でブロックする/ }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(
       within(screen.getByTestId("B-soldiers")).getByLabelText(
         "B ♥7 表向き 縦向き",
@@ -98,16 +97,15 @@ describe("hands-on tutorial", () => {
     at("attack");
     const view = render(<App />);
     expect(screen.getByLabelText("A ♣6 表向き 縦向き")).toBeVisible();
-    await userEvent.click(
-      screen.getByRole("button", { name: /♣6でアタックする/ }),
-    );
+    expect(screen.queryByText(/アタックの解決で/)).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByLabelText("A ♣6 表向き 横向き")).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent("アタックの解決で");
+    expect(screen.getByLabelText("PLAYER Aのカード変化")).toHaveTextContent("♣6：チャージ → ドライブ");
     view.unmount();
     at("damage");
     render(<App />);
-    await userEvent.click(
-      screen.getByRole("button", { name: /ダメージ判定を見る/ }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(
       within(screen.getByTestId("A-grave")).getByLabelText(/♣6/),
     ).toBeVisible();
@@ -115,12 +113,50 @@ describe("hands-on tutorial", () => {
       within(screen.getByTestId("A-soldiers")).queryByLabelText(/♣6/),
     ).toBeNull();
   });
+  it("固定練習は解説を開かず次へだけで実物カードの準備まで進める", () => {
+    at("welcome");
+    render(<App />);
+    const fixedSteps = scenario.steps.filter((step) => step.mode === "fixed");
+    for (const [index, step] of fixedSteps.entries()) {
+      expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(index);
+      fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+      expect(loadProgress(scenario.id, window.localStorage).applied).toBe(true);
+      expect(screen.getByRole("status")).toHaveTextContent(step.learned);
+      fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+    }
+    expect(screen.getByText("ここから実物カード")).toBeVisible();
+    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(fixedSteps.length);
+    expect(screen.queryByText(/解説を見る/, { selector: ".why-content *" })).toBeNull();
+  });
+  it("request・resolve・triggerの教材上の理由を変化後に表示する", async () => {
+    for (const [id, phrase, phase] of [
+      ["summon-cost-b", "コストB", "リクエスト時"],
+      ["summon", "兵士として場に出ました", "解決時"],
+      ["charge", "チャージが誘発", "誘発したアクション"],
+    ]) {
+      at(id);
+      const view = render(<App />);
+      expect(screen.queryByRole("status")).toBeNull();
+      await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
+      expect(screen.getByRole("status")).toHaveTextContent(phrase);
+      await userEvent.click(screen.getByRole("button", { name: /解説を見る/ }));
+      expect(document.querySelector(".cause-phase")).toHaveTextContent(phase);
+      view.unmount();
+    }
+  });
+  it("別の展開を開いても本編の進捗は変わらない", async () => {
+    at("damage");
+    render(<App />);
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
+    const before = loadProgress(scenario.id, window.localStorage).stepIndex;
+    await userEvent.click(screen.getByRole("button", { name: /別の展開を見る/ }));
+    expect(screen.getByText("もしブロックしなかったら？")).toBeVisible();
+    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(before);
+  });
   it("操作後の盤面を再開し最初からやり直せる", async () => {
     at("attack");
     const view = render(<App />);
-    await userEvent.click(
-      screen.getByRole("button", { name: /♣6でアタックする/ }),
-    );
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     view.unmount();
     render(<App />);
     expect(screen.getByLabelText("A ♣6 表向き 横向き")).toBeVisible();
@@ -137,12 +173,11 @@ describe("hands-on tutorial", () => {
   it("先攻決定なしで進めず、選んだBが開始時1枚を引く", async () => {
     at("first-player");
     render(<App />);
-    expect(screen.getByRole("button", { name: /先攻を決め、/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeDisabled();
     await userEvent.click(screen.getByRole("radio", { name: "PLAYER B" }));
-    await userEvent.click(screen.getByRole("button", { name: /先攻を決め、/ }));
-    await userEvent.click(screen.getByRole("button", { name: /次の操作へ/ }));
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByTestId("actor")).toHaveTextContent("PLAYER B");
-    const guide = screen.getByRole("region", { name: "カードの動かし方" });
+    const guide = screen.getByRole("region", { name: "実物ではこう動かす" });
     expect(within(guide).getByText("ライフ")).toBeVisible();
     expect(within(guide).getByText("手札")).toBeVisible();
   });
@@ -191,6 +226,8 @@ describe("hands-on tutorial", () => {
     expect(screen.getByText("ここから実物カード")).toBeVisible();
     expect(screen.getAllByText("手元に7枚")).toHaveLength(2);
     expect(document.querySelectorAll(".slot-stack").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/ここへ/)).toBeNull();
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeVisible();
   });
   it("戻っても最高到達ステップと完了率を維持する", async () => {
     const index = scenario.steps.findIndex((step) => step.id === "direct-damage");
@@ -224,9 +261,9 @@ describe("hands-on tutorial", () => {
     at("set-bulwark-place");
     render(<App />);
     const beforeZone = within(screen.getByTestId("B-bulwarks"));
-    expect(beforeZone.getByLabelText("置く位置 防壁の裏向きカード")).toHaveTextContent("BP");
+    expect(beforeZone.getAllByLabelText(/防壁の裏向きカード/).length).toBeGreaterThan(0);
     expect(beforeZone.queryByText("♢8")).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: /♢8を防壁にする/ }));
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     const zone = within(screen.getByTestId("B-bulwarks"));
     expect(zone.getAllByLabelText(/防壁の裏向きカード 裏向き 縦向き/).length).toBeGreaterThan(0);
     expect(zone.queryByText("♢8")).toBeNull();
@@ -256,12 +293,15 @@ describe("hands-on tutorial", () => {
     expect(actions?.children[1]).toHaveClass("primary-button");
     expect(actions?.children[0]).toBeDisabled();
   });
-  it("MoveGuideに移動元・矢印・移動先を表示する", () => {
+  it("固定練習の盤面内に移動元・矢印・移動先を表示する", async () => {
     at("summon");
     render(<App />);
-    const guide = screen.getByRole("region", { name: "カードの動かし方" });
-    expect(within(guide).getByText("手札")).toBeVisible();
-    expect(within(guide).getByText("兵士")).toBeVisible();
-    expect(within(guide).getByText("→")).toBeVisible();
+    expect(screen.queryByRole("region", { name: "カードの動かし方" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
+    const lane = screen.getByLabelText("PLAYER Aのカード変化");
+    expect(lane).toHaveTextContent("手札");
+    expect(lane).toHaveTextContent("兵士");
+    expect(lane).toHaveTextContent("→");
+    expect(screen.queryByText(/ここへ/)).toBeNull();
   });
 });

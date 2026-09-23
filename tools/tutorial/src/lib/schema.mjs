@@ -71,6 +71,21 @@ export function validateScenario(value, catalog) {
     chapters.add(s.chapter);
     if (!Array.isArray(s.ruleRefs)) errors.push("ruleRefs must be an array");
     else refs.push(...s.ruleRefs);
+    if (s.cause !== undefined) {
+      if (
+        !s.cause ||
+        !["request", "resolve", "trigger", "setup"].includes(s.cause.phase) ||
+        typeof s.cause.text !== "string" ||
+        !s.cause.text ||
+        (s.cause.actionId !== undefined &&
+          (typeof s.cause.actionId !== "string" ||
+            !Object.hasOwn(catalog.actions || {}, s.cause.actionId)))
+      ) errors.push("Invalid movement cause");
+    }
+    if (s.alternate !== undefined &&
+      (!s.alternate || typeof s.alternate.title !== "string" ||
+        !s.alternate.title || typeof s.alternate.text !== "string" ||
+        !s.alternate.text)) errors.push("Invalid alternate example");
     for (const phase of ["before", "after"]) {
       const board = s.board?.[phase];
       if (!board || ![null, "A", "B"].includes(board.turn))
