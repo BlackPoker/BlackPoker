@@ -8,10 +8,11 @@ describe("Scenario Phase Keyword Audit (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => 
     "src/engine/scenario/ScenarioCompiler.ts",
     "src/ui/scenario/ScenarioShareUrl.ts",
     "src/ui/scenario/ScenarioBuilderModal.tsx",
+    "src/engine/playtest/PlaytestEnvironmentController.ts",
     "src/ui/playtest/CoreBattlePlaytest.tsx",
-    "src/ui/playtest/PlaytestDiagnosticBundle.ts",
-    "src/engine/session/playtest/validatePlaytestPreset.ts",
-    "src/engine/session/playtest/createCoreBattlePlaytest.ts",
+    "src/ui/playtest/MatchSetupScreen.tsx",
+    "src/ui/game/MobileHeaderMenu.tsx",
+    "src/engine/playtest/ScenarioMatchCoordinator.ts",
   ];
 
   it("Scenario Builder の新設ファイルにゲームドメイン・State 上の Phase 概念が存在しないこと", () => {

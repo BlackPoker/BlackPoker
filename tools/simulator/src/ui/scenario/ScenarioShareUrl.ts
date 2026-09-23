@@ -7,7 +7,8 @@ import {
 
 export const SCENARIO_URL_PARAM_KEY = "scenario";
 export const MAX_SCENARIO_PAYLOAD_BYTES = 65536; // 64 KB (decoded JSON UTF-8 payload limit)
-export const MAX_SCENARIO_ENCODED_BYTES = 87384; // Base64URL safe ceiling: ceil(65536 * 4 / 3) + 4
+export const MAX_SCENARIO_ENCODED_CHARS = Math.ceil(MAX_SCENARIO_PAYLOAD_BYTES / 3) * 4; // 87384 chars (4/3 of 64KB aligned to 4)
+export const MAX_SCENARIO_ENCODED_BYTES = MAX_SCENARIO_ENCODED_CHARS;
 
 export type ScenarioDecodeResult =
   | {
@@ -19,7 +20,7 @@ export type ScenarioDecodeResult =
       readonly error: string;
     };
 
-const BASE64_URL_PATTERN = /^[A-Za-z0-9_-]+={0,2}$/;
+const BASE64_URL_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 /**
  * 文字列の UTF-8 バイト長を取得します。
@@ -98,16 +99,25 @@ export function decodeScenarioDefinitionV1FromUrlParam(param: string): ScenarioD
     return { success: false, error: "シナリオパラメータが空または無効です。" };
   }
 
-  const trimmed = param.trim();
-  const encodedBytes = getUtf8ByteLength(trimmed);
-  if (encodedBytes > MAX_SCENARIO_ENCODED_BYTES) {
+  // 空白文字 (スペース, 改行等) が含まれる場合は fail-closed で拒絶
+  if (/\s/.test(param)) {
     return {
       success: false,
-      error: `シナリオパラメータが許容エンコードサイズ (${MAX_SCENARIO_ENCODED_BYTES} bytes) を超過しています。`,
+      error: "シナリオパラメータに空白文字が含まれています。",
     };
   }
 
-  // Base64URL 厳格フォーマットチェック (文字種および長さ % 4 !== 1)
+  const trimmed = param.trim();
+
+  // 文字数制約の検査
+  if (trimmed.length > MAX_SCENARIO_ENCODED_CHARS) {
+    return {
+      success: false,
+      error: `シナリオパラメータが許容エンコード文字数 (${MAX_SCENARIO_ENCODED_CHARS} chars) を超過しています。`,
+    };
+  }
+
+  // Base64URL 厳格フォーマットチェック (padding '=' の禁止、文字種および長さ % 4 !== 1)
   if (!BASE64_URL_PATTERN.test(trimmed) || trimmed.length % 4 === 1) {
     return {
       success: false,
@@ -122,6 +132,15 @@ export function decodeScenarioDefinitionV1FromUrlParam(param: string): ScenarioD
     return {
       success: false,
       error: "シナリオパラメータのBase64デコードに失敗しました (Malformed payload)。",
+    };
+  }
+
+  // Canonical Base64URL 再検証: 再エンコード結果が入力と厳密一致することを確認 (寛容デコードによるバイパス防止)
+  const reEncoded = stringToUrlSafeBase64(jsonStr);
+  if (reEncoded !== trimmed) {
+    return {
+      success: false,
+      error: "シナリオパラメータのBase64URL形式が正準(Canonical)ではありません (Malformed Base64URL)。",
     };
   }
 

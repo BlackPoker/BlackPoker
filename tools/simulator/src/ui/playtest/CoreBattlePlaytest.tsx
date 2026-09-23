@@ -85,19 +85,12 @@ import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 
-export interface PreparedMatch {
-  readonly session: GameSession;
-  readonly activeMatch: ActiveMatchContext;
-  readonly mode: PlaytestMatchMode;
-  readonly humanSeat: "p1" | "p2";
-  readonly policyId: PlaytestPolicyId;
-  readonly seatControllers: PlaytestSeatControllers;
-  readonly policies: Record<string, DecisionPolicy>;
-  readonly initialStep: GameSessionStep;
-  readonly initialLogs?: readonly { readonly message: string; readonly level: "info" | "action" | "system"; readonly state?: any }[];
-  readonly initialTraces?: readonly { readonly category: string; readonly message: string; readonly state?: any }[];
-  readonly isAutoSeedRotate?: boolean;
-}
+import {
+  PreparedMatch,
+  prepareScenarioMatchAttempt,
+} from "../../engine/playtest/ScenarioMatchCoordinator";
+
+export type { PreparedMatch };
 
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
@@ -530,88 +523,31 @@ export const CoreBattlePlaytest: React.FC = () => {
   // Scenario 開始ハンドラ (ScenarioDefinitionV1 から決定論的初期盤面を生成して対戦開始)
   const handleStartScenario = useCallback(
     async (definition: ScenarioDefinitionV1) => {
-      // 1. Prepare: Scenario コンパイル (失敗時は既存アクティブ対戦を一切破壊しない)
-      const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage);
-      if (outcome.type !== "READY") {
+      const result = prepareScenarioMatchAttempt({
+        definition,
+        catalog,
+        fullRulePackage,
+        mode: pendingMatchMode,
+        humanSeat: pendingHumanSeat,
+        policyId: pendingPolicyId,
+      });
+
+      if (result.status !== "READY") {
         setRuntimeNotice({
           type: "TECHNICAL_ERROR",
-          title: "Scenario コンパイルエラー",
-          message: outcome.errors.map((e) => `[${e.code}] ${e.path ? `${e.path}: ` : ""}${e.message}`).join("\n"),
+          title: result.title,
+          message: result.error,
           environmentName: definition.environmentId,
           seed: definition.seed,
         });
+        if (result.title.includes("AI")) {
+          addLog(`[AI_ERROR] ${result.error}`, "system");
+        }
         return;
       }
 
-      // 2. Prepare: 初期ステップの前進
-      let initialStep: GameSessionStep;
-      try {
-        initialStep = outcome.session.advance();
-      } catch (err: any) {
-        setRuntimeNotice({
-          type: "TECHNICAL_ERROR",
-          title: "Scenario 初期ステップ実行エラー",
-          message: err.message,
-          environmentName: definition.environmentId,
-          seed: definition.seed,
-        });
-        return;
-      }
-
-      // 3. Prepare: SeatController および AI Policy の初期化
-      const mode = pendingMatchMode;
-      const humanSeat = normalizeHumanSeatForMode(mode, pendingHumanSeat);
-      const policyId = pendingPolicyId;
-      const seatControllers = createSeatControllers(mode, humanSeat, policyId);
-      let policies: Record<string, DecisionPolicy>;
-      try {
-        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, definition.seed);
-      } catch (err: any) {
-        setRuntimeNotice({
-          type: "TECHNICAL_ERROR",
-          title: "AI Policy 初期化エラー",
-          message: err.message,
-          environmentName: definition.environmentId,
-          seed: definition.seed,
-        });
-        addLog(`[AI_ERROR] ${err.message}`, "system");
-        return;
-      }
-
-      const regId = extractRegulationId(definition.environmentId);
-      const regDef = regId ? catalog.regulations.get(regId) : undefined;
-      const regName = regDef?.name || definition.environmentId;
-
-      const activeMatchCtx: ActiveMatchContext = {
-        environmentId: definition.environmentId,
-        environmentName: `${regName} (Scenario)`,
-        regulationId: regId ?? undefined,
-        seed: definition.seed,
-        rulePackage: outcome.rulePackage,
-        isScenario: true,
-      };
-
-      const prepared: PreparedMatch = {
-        session: outcome.session,
-        activeMatch: activeMatchCtx,
-        mode,
-        humanSeat,
-        policyId,
-        seatControllers,
-        policies,
-        initialStep,
-        initialLogs: [
-          { message: `[START] Scenarioを開始しました (Match ID: ${outcome.matchId})`, level: "info", state: outcome.state },
-          { message: `[SCENARIO] Turn Player: ${definition.turnPlayer}, Chance Player: ${definition.chancePlayer}, Seed: ${definition.seed}`, level: "info", state: outcome.state },
-        ],
-        initialTraces: [
-          { category: "SCENARIO_START", message: `Scenario開始 (Seed: ${definition.seed})`, state: outcome.state },
-        ],
-        isAutoSeedRotate: false,
-      };
-
-      // 4. Commit: Atomic commit (ここに至るまでに失敗し得る処理はすべて検証・準備完了済み)
-      await commitReadyMatch(prepared);
+      // Commit: Atomic commit (ここに至るまでに失敗し得る処理はすべて検証・準備完了済み)
+      await commitReadyMatch(result.prepared);
     },
     [
       catalog,
@@ -1367,10 +1303,12 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
   }, [currentStep, isPassAndPlayWaiting, isAiProcessing, isHumanTurnWaiting, handleDecisionSubmit]);
 
   if (presetValidationErrors.length > 0) {

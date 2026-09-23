@@ -38,8 +38,8 @@ export interface ScenarioZoneConfigV1 {
 export interface ScenarioUnitV1 {
   readonly componentId: string;
   readonly cards: readonly ScenarioCardRefV1[];
-  readonly state?: "charge" | "drive";
-  readonly face?: "up" | "down";
+  readonly state: "charge" | "drive";
+  readonly face: "up" | "down";
 }
 
 /**
@@ -549,19 +549,19 @@ export function parseScenarioDefinitionV1(raw: unknown): ScenarioParseResult {
               }
             }
 
-            if (u.state !== undefined && u.state !== "charge" && u.state !== "drive") {
+            if (u.state === undefined || (u.state !== "charge" && u.state !== "drive")) {
               errors.push({
                 code: "INVALID_UNIT_STATE",
                 path: `${uPath}.state`,
-                message: `無効なユニット状態です: "${u.state}" ("charge" または "drive" を指定してください)。`,
+                message: `ユニットの state は必須であり、"charge" または "drive" を指定してください (現在: "${u.state}")。`,
               });
             }
 
-            if (u.face !== undefined && u.face !== "up" && u.face !== "down") {
+            if (u.face === undefined || (u.face !== "up" && u.face !== "down")) {
               errors.push({
                 code: "INVALID_UNIT_FACE",
                 path: `${uPath}.face`,
-                message: `無効な向きです: "${u.face}" ("up" または "down" を指定してください)。`,
+                message: `ユニットの face は必須であり、"up" または "down" を指定してください (現在: "${u.face}")。`,
               });
             }
           }
@@ -607,19 +607,16 @@ export function normalizeScenarioDefinitionV1(def: ScenarioDefinitionV1): Scenar
       : undefined;
 
     const field = p.field && p.field.length > 0
-      ? p.field.map((u) => {
-          const defaultFace = u.componentId === "character.bulwark" ? "down" : "up";
-          return {
-            componentId: u.componentId,
-            cards: u.cards.map((c) => ({
-              suit: c.suit,
-              rank: c.rank,
-              ...(c.occurrence !== undefined ? { occurrence: c.occurrence } : {}),
-            })),
-            state: u.state ?? "charge",
-            face: u.face ?? defaultFace,
-          };
-        })
+      ? p.field.map((u) => ({
+          componentId: u.componentId,
+          cards: u.cards.map((c) => ({
+            suit: c.suit,
+            rank: c.rank,
+            ...(c.occurrence !== undefined ? { occurrence: c.occurrence } : {}),
+          })),
+          state: u.state,
+          face: u.face,
+        }))
       : undefined;
 
     let life: ScenarioZoneConfigV1 | undefined = undefined;

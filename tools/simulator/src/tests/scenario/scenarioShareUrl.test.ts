@@ -164,12 +164,21 @@ describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(r3.success).toBe(false);
   });
 
-  it("12: 非Base64URL文字 (+, /, =) や不正なパディング長は fail-closed で拒絶されること", () => {
-    // Non-URL-safe standard Base64 characters
-    expect(decodeScenarioDefinitionV1FromUrlParam("ab+cd==").success).toBe(false);
-    expect(decodeScenarioDefinitionV1FromUrlParam("ab/cd==").success).toBe(false);
-    // Invalid length (length % 4 === 1 is impossible in valid base64)
+  it("12: 非Canonical Base64URL (padding '=', '+', '/', 不正長, 空白文字) は fail-closed で拒絶されること", () => {
+    // 1. Single / double padding '=' 単独の拒絶
+    expect(decodeScenarioDefinitionV1FromUrlParam("YWJjZA==").success).toBe(false);
+    expect(decodeScenarioDefinitionV1FromUrlParam("YWJjZA=").success).toBe(false);
+
+    // 2. 標準Base64文字 ('+', '/') の拒絶
+    expect(decodeScenarioDefinitionV1FromUrlParam("ab+cd").success).toBe(false);
+    expect(decodeScenarioDefinitionV1FromUrlParam("ab/cd").success).toBe(false);
+
+    // 3. 不正長 (length % 4 === 1 は Base64 で数学的にあり得ない)
     expect(decodeScenarioDefinitionV1FromUrlParam("abcde").success).toBe(false);
+
+    // 4. 空白文字 (スペース, 改行等)
+    expect(decodeScenarioDefinitionV1FromUrlParam(" abc ").success).toBe(false);
+    expect(decodeScenarioDefinitionV1FromUrlParam("abc\n").success).toBe(false);
   });
 
   it("13: デコード後 UTF-8 バイト数超過 (> 64KB) は fail-closed で拒絶されること", () => {

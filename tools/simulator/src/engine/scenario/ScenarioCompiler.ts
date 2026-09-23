@@ -369,9 +369,8 @@ export class ScenarioCompiler {
 
             const kind = compDef.display?.kind || compDef.name || "ユニット";
             const labels = compDef.properties?.labels || compDef.display?.labels || [];
-            const defaultFace = compDef.id === "character.bulwark" ? "down" : "up";
-            const unitFace = u.face || defaultFace;
-            const unitState = u.state || "charge";
+            const unitFace = u.face;
+            const unitState = u.state;
 
             const unitValidationErrors = validateUnitAgainstComponentDefinition(
               {
@@ -388,8 +387,8 @@ export class ScenarioCompiler {
 
             for (const vErr of unitValidationErrors) {
               let code: ScenarioValidationErrorCode = "UNSUPPORTED_COMPONENT";
-              if (vErr.includes("state")) code = "INVALID_UNIT_STATE";
-              else if (vErr.includes("face")) code = "INVALID_UNIT_FACE";
+              if (vErr.includes("state") || vErr.includes("状態")) code = "INVALID_UNIT_STATE";
+              else if (vErr.includes("face") || vErr.includes("向き")) code = "INVALID_UNIT_FACE";
               errors.push({
                 code,
                 path: uPath,

@@ -1,16 +1,17 @@
 import React from "react";
+import TestRenderer, { act } from "react-test-renderer";
 import { renderToString } from "react-dom/server";
 import { describe, it, expect, vi } from "vitest";
 import { ScenarioBuilderModal } from "../../ui/scenario/ScenarioBuilderModal";
+import { CoreBattlePlaytest } from "../../ui/playtest/CoreBattlePlaytest";
+import { MatchSetupScreen } from "../../ui/playtest/MatchSetupScreen";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
-import { ActiveMatchContext, startMatchAttempt } from "../../engine/playtest/PlaytestEnvironmentController";
+import { ActiveMatchContext } from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioDefinitionV1, normalizeScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
-import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
 import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory";
-import { createSeatControllers, normalizeHumanSeatForMode } from "../../engine/playtest/PlaytestSeatController";
 import { encodeScenarioDefinitionV1ToUrlParam, decodeScenarioDefinitionV1FromUrlParam } from "../../ui/scenario/ScenarioShareUrl";
-import { PreparedMatch } from "../../ui/playtest/CoreBattlePlaytest";
+import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
 
 describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -37,6 +38,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
           {
             componentId: "character.hero",
             cards: [{ suit: "H", rank: "Q" }],
+            state: "charge",
+            face: "up",
           },
         ],
         grave: [{ suit: "C", rank: "6" }],
@@ -183,7 +186,7 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(html).toContain("バリデーションエラー");
   });
 
-  it("6: UI Round-Trip: Definition A -> URL encode -> URL import -> UI state -> Export Definition B == A", () => {
+  it("6: UI Round-Trip: 実Component lifecycleを通した URL 共有・復元検証 (normalize(B) == normalize(A))", () => {
     const defA: ScenarioDefinitionV1 = {
       version: 1,
       environmentId: "official:light-entry16",
@@ -216,163 +219,60 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       },
     };
 
-    // 1. Encode to URL param
+    // 1. URL パラメータにエンコード
     const param = encodeScenarioDefinitionV1ToUrlParam(defA);
-    // 2. Decode from URL param
-    const decodeResult = decodeScenarioDefinitionV1FromUrlParam(param);
-    expect(decodeResult.success).toBe(true);
-    if (!decodeResult.success) return;
 
-    const imported = decodeResult.definition;
-
-    // 3. Simulate UI state restoration as in ScenarioBuilderModal.handleLoadFromUrl
-    const uiP1Hand = imported.players?.p1?.hand ? [...imported.players.p1.hand] : [];
-    const uiP1Field = imported.players?.p1?.field ? [...imported.players.p1.field] : [];
-    const uiP1Grave = imported.players?.p1?.grave ? [...imported.players.p1.grave] : [];
-    const uiP1LifeCards = imported.players?.p1?.life?.cards ? [...imported.players.p1.life.cards] : [];
-    const uiP1LifeCount = imported.players?.p1?.life?.count;
-    const uiP1PackCards = imported.players?.p1?.pack?.cards ? [...imported.players.p1.pack.cards] : [];
-    const uiP1PackCount = imported.players?.p1?.pack?.count;
-
-    const uiP2Hand = imported.players?.p2?.hand ? [...imported.players.p2.hand] : [];
-    const uiP2Field = imported.players?.p2?.field ? [...imported.players.p2.field] : [];
-    const uiP2Grave = imported.players?.p2?.grave ? [...imported.players.p2.grave] : [];
-    const uiP2LifeCards = imported.players?.p2?.life?.cards ? [...imported.players.p2.life.cards] : [];
-    const uiP2LifeCount = imported.players?.p2?.life?.count;
-    const uiP2PackCards = imported.players?.p2?.pack?.cards ? [...imported.players.p2.pack.cards] : [];
-    const uiP2PackCount = imported.players?.p2?.pack?.count;
-
-    // 4. Reconstruct Definition B from UI state as in currentDefinition
-    const buildPlayerConfig = (
-      hand: any[],
-      field: any[],
-      grave: any[],
-      lifeCards: any[],
-      lifeCount: number | undefined,
-      packCards: any[],
-      packCount: number | undefined
-    ) => ({
-      ...(hand.length > 0 ? { hand } : {}),
-      ...(field.length > 0 ? { field } : {}),
-      ...(grave.length > 0 ? { grave } : {}),
-      ...(lifeCards.length > 0 || lifeCount !== undefined
-        ? {
-            life: {
-              ...(lifeCards.length > 0 ? { cards: lifeCards } : {}),
-              ...(lifeCount !== undefined ? { count: lifeCount } : {}),
-            },
-          }
-        : {}),
-      ...(packCards.length > 0 || packCount !== undefined
-        ? {
-            pack: {
-              ...(packCards.length > 0 ? { cards: packCards } : {}),
-              ...(packCount !== undefined ? { count: packCount } : {}),
-            },
-          }
-        : {}),
+    // 2. 実Component lifecycle によるマウント
+    const onStartScenario = vi.fn();
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "settings",
+          catalog,
+          fullRulePackage,
+          onClose: dummyOnClose,
+          onStartScenario,
+        })
+      );
     });
 
-    const defB: ScenarioDefinitionV1 = {
-      version: 1,
-      name: imported.name,
-      description: imported.description,
-      environmentId: imported.environmentId,
-      seed: imported.seed,
-      turnPlayer: imported.turnPlayer,
-      chancePlayer: imported.chancePlayer,
-      turnCount: imported.turnCount,
-      players: {
-        p1: buildPlayerConfig(uiP1Hand, uiP1Field, uiP1Grave, uiP1LifeCards, uiP1LifeCount, uiP1PackCards, uiP1PackCount),
-        p2: buildPlayerConfig(uiP2Hand, uiP2Field, uiP2Grave, uiP2LifeCards, uiP2LifeCount, uiP2PackCards, uiP2PackCount),
-      },
-    };
+    // 3. URL input onChange
+    const urlInput = testRenderer.root.findByProps({
+      placeholder: "シナリオ共有URLまたはパラメータを入力...",
+    });
+    act(() => {
+      urlInput.props.onChange({ target: { value: param } });
+    });
 
-    // 5. Verification: normalized A and B are identical
+    // 4. "読込" onClick
+    const buttons = testRenderer.root.findAllByType("button");
+    const loadButton = buttons.find((b) => b.children.includes("読込"));
+    expect(loadButton).toBeDefined();
+    act(() => {
+      loadButton!.props.onClick();
+    });
+
+    // 5. "Scenario 開始" onClick
+    const startButton = testRenderer.root.findAllByType("button").find((b) => {
+      const spanTexts = b.findAllByType("span").map((s) => s.children.join("")).join("");
+      return spanTexts.includes("Scenario 開始") || (Array.isArray(b.children) && b.children.includes("Scenario 開始"));
+    });
+    expect(startButton).toBeDefined();
+    act(() => {
+      startButton!.props.onClick();
+    });
+
+    // 6. Callback 経由で渡された defB が defA と正規化一致すること
+    expect(onStartScenario).toHaveBeenCalledTimes(1);
+    const defB = onStartScenario.mock.calls[0][0];
     expect(normalizeScenarioDefinitionV1(defB)).toEqual(normalizeScenarioDefinitionV1(defA));
-
-    // 6. Verification: UI renders with defB successfully without errors
-    const html = renderToString(
-      React.createElement(ScenarioBuilderModal, {
-        isOpen: true,
-        catalog,
-        fullRulePackage,
-        initialDefinition: defB,
-        onClose: dummyOnClose,
-        onStartScenario: dummyOnStartScenario,
-      })
-    );
-    expect(html).toContain("バリデーション正常");
   });
 
-  it("7: Atomic Start: 実Production経路による compile failure / policy failure 双方で既存Active Matchが完全保持されること", async () => {
-    // 1. Initial State: Start Match A (Active Match)
-    const matchAOutcome = startMatchAttempt({
-      environmentId: "official:light-entry16",
-      seedInput: "42",
-      catalog,
-      fullRulePackage,
-    });
-    expect(matchAOutcome.type).toBe("READY");
-    if (matchAOutcome.type !== "READY") return;
-
-    let activeSession = matchAOutcome.session;
-    let activeMatchContext = matchAOutcome.activeMatch;
-    const initialMatchAStateSnapshot = JSON.stringify(activeSession.state);
-
-    // Simulated atomic coordinator matching CoreBattlePlaytest exactly
-    const runAtomicScenarioStart = async (def: ScenarioDefinitionV1): Promise<{ success: boolean; notice?: any }> => {
-      // 1. Prepare: Compile
-      const outcome = ScenarioCompiler.compile(def, catalog, fullRulePackage);
-      if (outcome.type !== "READY") {
-        return {
-          success: false,
-          notice: { type: "TECHNICAL_ERROR", message: "Scenario コンパイルエラー" },
-        };
-      }
-
-      // 2. Prepare: Session advance
-      let initialStep: any;
-      try {
-        initialStep = outcome.session.advance();
-      } catch (err: any) {
-        return { success: false, notice: { type: "TECHNICAL_ERROR", message: err.message } };
-      }
-
-      // 3. Prepare: SeatController and Policies
-      const seatControllers = createSeatControllers("humanVsAi", "p1", "firstLegal");
-      let policies: any;
-      try {
-        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, def.seed);
-      } catch (err: any) {
-        return { success: false, notice: { type: "TECHNICAL_ERROR", message: "AI Policy 初期化エラー" } };
-      }
-
-      // 4. Commit: Atomic commit (Only reached if all prepare steps succeed!)
-      const prepared: PreparedMatch = {
-        session: outcome.session,
-        activeMatch: {
-          environmentId: def.environmentId,
-          environmentName: "Scenario Match",
-          seed: def.seed,
-          rulePackage: outcome.rulePackage,
-          isScenario: true,
-        },
-        mode: "humanVsAi",
-        humanSeat: "p1",
-        policyId: "firstLegal",
-        seatControllers,
-        policies,
-        initialStep,
-      };
-
-      // Atomic commit
-      activeSession = prepared.session;
-      activeMatchContext = prepared.activeMatch;
-      return { success: true };
-    };
-
-    // Case 1: Compile Failure -> Match A must be 100% preserved
+  it("7: Atomic Start: 実Production Coordinator および CoreBattlePlaytest lifecycle による atomic 契約検証", async () => {
+    // Part 1: Coordinator (prepareScenarioMatchAttempt) の直接検証
+    // Case 1: Compile Failure -> PREPARE_ERROR
     const invalidScenario: ScenarioDefinitionV1 = {
       ...minimalValidScenario,
       players: {
@@ -381,39 +281,193 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
           ...minimalValidScenario.players.p1,
           hand: [
             { suit: "S", rank: "A" },
-            { suit: "S", rank: "A" }, // duplicate SA
+            { suit: "S", rank: "A" }, // 重複カード
           ],
         },
       },
     };
 
-    const res1 = await runAtomicScenarioStart(invalidScenario);
-    expect(res1.success).toBe(false);
-    expect(res1.notice?.message).toBe("Scenario コンパイルエラー");
-    // Verify Match A is completely unchanged
-    expect(activeMatchContext.environmentId).toBe("official:light-entry16");
-    expect(activeMatchContext.isScenario).toBeUndefined();
-    expect(JSON.stringify(activeSession.state)).toBe(initialMatchAStateSnapshot);
+    const coordRes1 = prepareScenarioMatchAttempt({
+      definition: invalidScenario,
+      catalog,
+      fullRulePackage,
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "firstLegal",
+    });
+    expect(coordRes1.status).toBe("PREPARE_ERROR");
+    if (coordRes1.status === "PREPARE_ERROR") {
+      expect(coordRes1.title).toContain("Scenario コンパイルエラー");
+    }
 
-    // Case 2: Policy Initialization Failure -> Match A must be 100% preserved
+    // Case 2: Policy Initialization Failure -> PREPARE_ERROR
     const policySpy = vi.spyOn(PlaytestPolicyFactory, "createPoliciesForMatch").mockImplementationOnce(() => {
       throw new Error("Simulated policy creation failure");
     });
-
-    const res2 = await runAtomicScenarioStart(minimalValidScenario);
-    expect(res2.success).toBe(false);
-    expect(res2.notice?.message).toBe("AI Policy 初期化エラー");
-    // Verify Match A is completely unchanged
-    expect(activeMatchContext.environmentId).toBe("official:light-entry16");
-    expect(activeMatchContext.isScenario).toBeUndefined();
-    expect(JSON.stringify(activeSession.state)).toBe(initialMatchAStateSnapshot);
-
+    const coordRes2 = prepareScenarioMatchAttempt({
+      definition: minimalValidScenario,
+      catalog,
+      fullRulePackage,
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "firstLegal",
+    });
+    expect(coordRes2.status).toBe("PREPARE_ERROR");
+    if (coordRes2.status === "PREPARE_ERROR") {
+      expect(coordRes2.title).toContain("AI Policy 初期化エラー");
+    }
     policySpy.mockRestore();
 
-    // Case 3: Valid Scenario -> Atomic Commit succeeds and switches to Match B
-    const res3 = await runAtomicScenarioStart(minimalValidScenario);
-    expect(res3.success).toBe(true);
-    expect(activeMatchContext.isScenario).toBe(true);
-    expect(JSON.stringify(activeSession.state)).not.toBe(initialMatchAStateSnapshot);
+    // Case 3: Valid -> READY
+    const coordRes3 = prepareScenarioMatchAttempt({
+      definition: minimalValidScenario,
+      catalog,
+      fullRulePackage,
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "firstLegal",
+    });
+    expect(coordRes3.status).toBe("READY");
+    if (coordRes3.status === "READY") {
+      expect(coordRes3.prepared.activeMatch.isScenario).toBe(true);
+      expect(coordRes3.prepared.session).toBeDefined();
+    }
+
+    // Part 2: CoreBattlePlaytest 実Component lifecycle を通した統合テスト
+    // Active Match A が存在する状態で invalid scenario を開始しても Match A が完全保持されること
+    let playtestRenderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      playtestRenderer = TestRenderer.create(React.createElement(CoreBattlePlaytest));
+    });
+
+    // MatchSetupScreen から Match A を開始
+    const setupScreen = playtestRenderer.root.findByType(MatchSetupScreen);
+    await act(async () => {
+      setupScreen.props.onStartMatch();
+    });
+
+    // Match A が開始され、対戦環境IDが表示されていることを確認
+    const initialTreeSnapshot = JSON.stringify(playtestRenderer.toJSON());
+    expect(initialTreeSnapshot).toContain("official:light-entry16");
+
+    // ScenarioBuilderModal の onStartScenario に invalidScenario を渡す
+    const scenarioModal = playtestRenderer.root.findByType(ScenarioBuilderModal);
+    await act(async () => {
+      await scenarioModal.props.onStartScenario(invalidScenario);
+    });
+
+    // コンパイルエラー通知が表示されるが、既存の Match A 盤面およびセッションは破壊されず完全保持される
+    const errorTreeSnapshot = JSON.stringify(playtestRenderer.toJSON());
+    expect(errorTreeSnapshot).toContain("Scenario コンパイルエラー");
+    expect(errorTreeSnapshot).toContain("official:light-entry16");
+
+    // 次に validScenario を開始 -> 原子的コミットが成功し Scenario 対戦へ切り替わる
+    await act(async () => {
+      await scenarioModal.props.onStartScenario(minimalValidScenario);
+    });
+
+    // Scenario 対戦に切り替わり fail-closed 契約（Replay/診断保存の無効化等）が適用されている
+    const scenarioTreeSnapshot = JSON.stringify(playtestRenderer.toJSON());
+    expect(scenarioTreeSnapshot).toContain("Scenarioから開始した対戦のReplay");
+  });
+
+  it("8: UIから複数カードUnit (character.armedSoldier, cards 2枚以上) を新規作成して配置できること", () => {
+    const onStartScenario = vi.fn();
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "p1",
+          catalog,
+          fullRulePackage,
+          initialDefinition: {
+            ...minimalValidScenario,
+            players: {
+              ...minimalValidScenario.players,
+              p1: {
+                ...minimalValidScenario.players.p1,
+                hand: [], // SA, SK を Unit に使うため手札を空にして重複を防止
+                field: [],
+                life: { count: 13 }, // 16 - 2(field) - 1(grave) = 13 (全16枚の保存則を満たす)
+              },
+            },
+          },
+          onClose: dummyOnClose,
+          onStartScenario,
+        })
+      );
+    });
+
+    // 1. armedSoldier を選択
+    const selects = testRenderer.root.findAllByType("select");
+    const compSelect = selects.find(
+      (s) =>
+        s.props.children &&
+        s.props.children.some(
+          (opt: any) => opt?.props?.value === "character.armedSoldier"
+        )
+    );
+    expect(compSelect).toBeDefined();
+    act(() => {
+      compSelect!.props.onChange({ target: { value: "character.armedSoldier" } });
+    });
+
+    // 2. 1枚目カード (S A) をステージングに追加
+    const addDraftBtn = testRenderer.root
+      .findAllByType("button")
+      .find((b) => b.children.includes("+ ユニット構成カードに追加"));
+    expect(addDraftBtn).toBeDefined();
+    act(() => {
+      addDraftBtn!.props.onClick();
+    });
+
+    // 3. 2枚目カード (S K) を選択してステージングに追加
+    const rankSelect = selects.find((s) => s.props.value === "A");
+    expect(rankSelect).toBeDefined();
+    act(() => {
+      rankSelect!.props.onChange({ target: { value: "K" } });
+    });
+    act(() => {
+      addDraftBtn!.props.onClick();
+    });
+
+    // 4. "+ フィールドにユニット配置" をクリック
+    const deployBtn = testRenderer.root
+      .findAllByType("button")
+      .find((b) => b.children.includes("+ フィールドにユニット配置"));
+    expect(deployBtn).toBeDefined();
+    act(() => {
+      deployBtn!.props.onClick();
+    });
+
+    // 5. フィールド表示に 2枚カード構成の armedSoldier が表示されていることを検証
+    const unitSpan = testRenderer.root
+      .findAllByType("span")
+      .find((s) => s.children.includes("armedSoldier"));
+    expect(unitSpan).toBeDefined();
+    expect(unitSpan!.children.join("")).toContain("armedSoldier (SA, SK) [charge/up]");
+
+    // 6. "Scenario 開始" をクリックしてコールバックの Definition を検証
+    const startButton = testRenderer.root.findAllByType("button").find((b) => {
+      const spanTexts = b.findAllByType("span").map((s) => s.children.join("")).join("");
+      return spanTexts.includes("Scenario 開始") || (Array.isArray(b.children) && b.children.includes("Scenario 開始"));
+    });
+    expect(startButton).toBeDefined();
+    act(() => {
+      startButton!.props.onClick();
+    });
+
+    expect(onStartScenario).toHaveBeenCalledTimes(1);
+    const emittedDef = onStartScenario.mock.calls[0][0];
+    const p1Field = emittedDef.players.p1.field;
+    expect(p1Field).toHaveLength(1);
+    expect(p1Field[0].componentId).toBe("character.armedSoldier");
+    expect(p1Field[0].cards).toEqual([
+      { suit: "S", rank: "A" },
+      { suit: "S", rank: "K" },
+    ]);
+    expect(p1Field[0].state).toBe("charge");
+    expect(p1Field[0].face).toBe("up");
   });
 });

@@ -31,6 +31,8 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
             {
               componentId: "character.hero",
               cards: [{ suit: "H", rank: "Q" }],
+              state: "charge",
+              face: "up",
             },
           ],
           grave: [{ suit: "C", rank: "6" }],
@@ -65,6 +67,8 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
             {
               componentId: "character.soldier",
               cards: [{ suit: "H", rank: "10" }],
+              state: "charge",
+              face: "up",
             },
           ],
           grave: [
@@ -418,6 +422,8 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
             {
               componentId: "character.hero",
               cards: [],
+              state: "charge",
+              face: "up",
             },
           ],
         },
@@ -441,6 +447,8 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
             {
               componentId: "action.attack",
               cards: [{ suit: "H", rank: "Q" }],
+              state: "charge",
+              face: "up",
             },
           ],
         },
@@ -522,6 +530,33 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(r2.kind).toBe("READY");
     if (r1.kind === "READY" && r2.kind === "READY") {
       expect(r1.definitionHash).toBe(r2.definitionHash);
+    }
+  });
+
+  it("17: コンポーネントの向き (face) が YAML ComponentDefinition の unitCondition.face に反する場合は拒絶されること", () => {
+    // character.hero requires face: "up" per official-base.yaml. If specified as "down", reject with INVALID_UNIT_FACE
+    const invalidHeroFace: ScenarioDefinitionV1 = {
+      ...createMinimalLightScenario(42),
+      players: {
+        ...createMinimalLightScenario(42).players,
+        p1: {
+          ...createMinimalLightScenario(42).players.p1,
+          field: [
+            {
+              componentId: "character.hero",
+              cards: [{ suit: "H", rank: "Q" }],
+              state: "charge",
+              face: "down", // YAML defines unitCondition.face: up!
+            },
+          ],
+        },
+      },
+    };
+
+    const r1 = compileScenarioDefinitionV1(invalidHeroFace, catalog, fullRulePackage);
+    expect(r1.kind).toBe("VALIDATION_ERROR");
+    if (r1.kind === "VALIDATION_ERROR") {
+      expect(r1.errors.some((e) => e.code === "INVALID_UNIT_FACE")).toBe(true);
     }
   });
 });

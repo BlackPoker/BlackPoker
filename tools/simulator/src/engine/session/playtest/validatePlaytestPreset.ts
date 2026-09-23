@@ -64,11 +64,13 @@ export function validateUnitAgainstComponentDefinition(
     );
   }
 
-  // 2. 防壁の裏向き (face = down) 初期状態確認
-  if (compDef.id === "character.bulwark" || unit.kind === "防壁") {
-    if (unit.face !== "down") {
+  // 2. face 条件の検証 (YAML ComponentDefinition SSOT)
+  const expectedFace = (compDef as any).unitCondition?.face;
+  if (expectedFace !== undefined) {
+    const actualFace = unit.face ?? "up";
+    if (actualFace !== expectedFace) {
       errors.push(
-        `${pKey}防壁 ${unitLabel} は初期状態で face: 'down' である必要があります`
+        `${pKey}ユニット ${unitLabel} (${compDef.id}) の face (向き) '${actualFace}' がコンポーネント定義の条件 '${expectedFace}' と一致しません`
       );
     }
   }

@@ -263,15 +263,16 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     else setP2PackCount(count);
   };
 
-  // ユニット追加ハンドラ
+  // ユニット追加ハンドラ (複数カードユニット対応)
   const handleAddUnit = (
     playerKey: "p1" | "p2",
     compId: string,
-    card: ScenarioCardRefV1,
+    cards: ScenarioCardRefV1[],
     state: "charge" | "drive",
     face: "up" | "down"
   ) => {
-    const newUnit: ScenarioUnitV1 = { componentId: compId, cards: [card], state, face };
+    if (cards.length === 0) return;
+    const newUnit: ScenarioUnitV1 = { componentId: compId, cards, state, face };
     if (playerKey === "p1") {
       setP1Field((prev) => [...prev, newUnit]);
     } else {
@@ -573,7 +574,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
               onRemoveCard={(zone, idx) => handleRemoveCard(activeTab, zone, idx)}
               onSetLifeCount={(cnt) => handleSetLifeCount(activeTab, cnt)}
               onSetPackCount={(cnt) => handleSetPackCount(activeTab, cnt)}
-              onAddUnit={(comp, card, state, face) => handleAddUnit(activeTab, comp, card, state, face)}
+              onAddUnit={(comp, cards, state, face) => handleAddUnit(activeTab, comp, cards, state, face)}
               onRemoveUnit={(idx) => handleRemoveUnit(activeTab, idx)}
               deckCards={currentDeckCards}
               components={availableComponents}
@@ -647,7 +648,7 @@ interface PlayerZoneEditorProps {
   readonly onRemoveCard: (zone: "hand" | "grave" | "life" | "pack", index: number) => void;
   readonly onSetLifeCount: (count: number | undefined) => void;
   readonly onSetPackCount: (count: number | undefined) => void;
-  readonly onAddUnit: (compId: string, card: ScenarioCardRefV1, state: "charge" | "drive", face: "up" | "down") => void;
+  readonly onAddUnit: (compId: string, cards: ScenarioCardRefV1[], state: "charge" | "drive", face: "up" | "down") => void;
   readonly onRemoveUnit: (index: number) => void;
   readonly deckCards: readonly { suit: string; rank: string }[];
   readonly components: readonly { id: string; name?: string; display?: any }[];
@@ -678,6 +679,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   );
   const [selectedState, setSelectedState] = useState<"charge" | "drive">("charge");
   const [selectedFace, setSelectedFace] = useState<"up" | "down">("up");
+  const [draftUnitCards, setDraftUnitCards] = useState<ScenarioCardRefV1[]>([]);
 
   const playerName = playerKey === "p1" ? "Player A (P1)" : "Player B (P2)";
 
@@ -760,54 +762,97 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
         </div>
 
         {/* ユニット追加設定 */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-zinc-200">
-          <div className="flex items-center gap-1.5">
-            <span className="text-zinc-500 font-bold">Component:</span>
-            <select
-              value={selectedComponentId}
-              onChange={(e) => setSelectedComponentId(e.target.value)}
-              className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+        <div className="flex flex-col gap-2 pt-2 border-t border-zinc-200">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">Component:</span>
+              <select
+                value={selectedComponentId}
+                onChange={(e) => setSelectedComponentId(e.target.value)}
+                className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+              >
+                {components.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name || c.id}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">State:</span>
+              <select
+                value={selectedState}
+                onChange={(e) => setSelectedState(e.target.value as "charge" | "drive")}
+                className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+              >
+                <option value="charge">Charge</option>
+                <option value="drive">Drive</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-zinc-500 font-bold">Face:</span>
+              <select
+                value={selectedFace}
+                onChange={(e) => setSelectedFace(e.target.value as "up" | "down")}
+                className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+              >
+                <option value="up">表 (Up)</option>
+                <option value="down">裏 (Down)</option>
+              </select>
+            </div>
+
+            <button
+              onClick={() => setDraftUnitCards((prev) => [...prev, { suit: selectedSuit, rank: selectedRank }])}
+              className="px-3 py-1.5 bg-blue-50 border border-blue-300 text-blue-800 hover:bg-blue-100 rounded font-bold shadow-sm"
             >
-              {components.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name || c.id}
-                </option>
-              ))}
-            </select>
+              + ユニット構成カードに追加
+            </button>
+
+            <button
+              onClick={() => {
+                const cardsToDeploy =
+                  draftUnitCards.length > 0
+                    ? draftUnitCards
+                    : [{ suit: selectedSuit, rank: selectedRank }];
+                onAddUnit(selectedComponentId, cardsToDeploy, selectedState, selectedFace);
+                setDraftUnitCards([]);
+              }}
+              className="px-3 py-1.5 bg-zinc-950 text-white hover:bg-zinc-800 rounded font-bold shadow-sm"
+            >
+              + フィールドにユニット配置
+            </button>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-zinc-500 font-bold">State:</span>
-            <select
-              value={selectedState}
-              onChange={(e) => setSelectedState(e.target.value as "charge" | "drive")}
-              className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
-            >
-              <option value="charge">Charge</option>
-              <option value="drive">Drive</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="text-zinc-500 font-bold">Face:</span>
-            <select
-              value={selectedFace}
-              onChange={(e) => setSelectedFace(e.target.value as "up" | "down")}
-              className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
-            >
-              <option value="up">表 (Up)</option>
-              <option value="down">裏 (Down)</option>
-            </select>
-          </div>
-
-          <button
-            onClick={() =>
-              onAddUnit(selectedComponentId, { suit: selectedSuit, rank: selectedRank }, selectedState, selectedFace)
-            }
-            className="px-3 py-1.5 bg-zinc-950 text-white hover:bg-zinc-800 rounded font-bold shadow-sm"
-          >
-            + フィールドにユニット配置
-          </button>
+          {/* ドラフトユニット構成カード一覧 */}
+          {draftUnitCards.length > 0 && (
+            <div className="flex items-center gap-2 p-2 bg-blue-50/50 border border-blue-200 rounded">
+              <span className="text-blue-900 font-bold">構成カード ({draftUnitCards.length}枚):</span>
+              <div className="flex flex-wrap gap-1.5">
+                {draftUnitCards.map((c, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px]"
+                  >
+                    {c.suit}{c.rank}
+                    <button
+                      onClick={() => setDraftUnitCards((prev) => prev.filter((_, i) => i !== idx))}
+                      className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => setDraftUnitCards([])}
+                className="ml-auto text-xs text-zinc-500 hover:text-zinc-700 underline"
+              >
+                クリア
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
