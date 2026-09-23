@@ -56,6 +56,8 @@ export interface MatchSetupScreenProps {
   readonly onStartMatch: () => void;
   /** Replay検証ボタン押下時のハンドラ */
   readonly onOpenReplayVerify: () => void;
+  /** Scenario Builder モーダルを開くハンドラ */
+  readonly onOpenScenarioBuilder?: () => void;
 }
 
 export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
@@ -76,6 +78,7 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   presetValidationErrors = [],
   onStartMatch,
   onOpenReplayVerify,
+  onOpenScenarioBuilder,
 }) => {
   const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
   const selectedEnvOpt = environmentOptions.find((opt) => opt.id === selectedEnvironmentId);
@@ -362,8 +365,18 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
         </div>
       </div>
 
-      {/* F. プライマリ アクション: [対戦開始] */}
+      {/* F. プライマリ アクション: [対戦開始] & [Scenario Builder] */}
       <div className="mt-6 pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-end gap-3">
+        {onOpenScenarioBuilder && (
+          <button
+            type="button"
+            onClick={onOpenScenarioBuilder}
+            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer font-mono"
+          >
+            <span>🛠️</span>
+            <span>Scenario Builder</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={onStartMatch}

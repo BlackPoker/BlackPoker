@@ -13,6 +13,7 @@ import {
   getAvailableEnvironments,
   chooseDefaultPlaytestEnvironment,
   startMatchAttempt,
+  extractRegulationId,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
   PlaytestMatchMode,
@@ -78,6 +79,9 @@ import {
 } from "../../engine/replay/ReplayReconstructionService";
 import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
 import { PlaytestPerspectiveResolver } from "./PlaytestPerspectiveResolver";
+import { ScenarioBuilderModal } from "../scenario/ScenarioBuilderModal";
+import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 
@@ -178,6 +182,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
   const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
   const [isReplayViewerOpen, setIsReplayViewerOpen] = useState(false);
+  const [isScenarioBuilderOpen, setIsScenarioBuilderOpen] = useState(false);
   const [replayViewerInitialBundle, setReplayViewerInitialBundle] = useState<unknown | null>(null);
   const [replayViewerInitialSource, setReplayViewerInitialSource] = useState<ReplayViewerSource | null>(null);
 
@@ -237,91 +242,79 @@ export const CoreBattlePlaytest: React.FC = () => {
     setPendingHumanSeat((current) => normalizeHumanSeatForMode(mode, current));
   }, []);
 
-  // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
-  const startNewGame = useCallback(
-    async (
-      overrideEnv?: string,
-      overrideSeedInput?: string,
-      overrideMode?: PlaytestMatchMode,
-      overrideHumanSeat?: "p1" | "p2",
-      overridePolicyId?: PlaytestPolicyId
-    ) => {
-      const env = overrideEnv ?? selectedEnvironmentId;
-      const isOfficial = isOfficialEnvironment(env);
-      const seed = overrideSeedInput ?? (
-        isOfficial
-          ? (seedMode === "auto" ? String(pendingAutoSeed) : seedInput)
-          : seedInput
-      );
-      const mode = overrideMode ?? pendingMatchMode;
-      // Human vs AI では Human 席を常に "p1" へ正規化 (URLパラメータや復元設定の p2 も吸収)
-      const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
-      const policyId = overridePolicyId ?? pendingPolicyId;
+  // 失敗時・開始時に直前のセッション状態を安全にリセット
+  const resetMatchState = useCallback(() => {
+    resetFeedbackFlash();
+    setHighlightedRequestId(null);
+    sessionRef.current = null;
+    setGameState(null);
+    setCurrentStep(null);
+    setActiveMatch(null);
+    setActivePlaytestSettings(null);
+    decisionSeqRef.current = 1;
+    decisionTranscriptRef.current = [];
+    setSelectedUnitIds([]);
+    setSheetMode("collapsed");
+    setIsPassAndPlayWaiting(false);
+    setPresetValidationErrors([]);
+    setRuntimeNotice(null);
+    setIsAiProcessing(false);
+  }, [resetFeedbackFlash]);
 
-      // 失敗時・開始時に直前のセッション状態を安全にリセット
-      resetFeedbackFlash();
-      setHighlightedRequestId(null);
-      sessionRef.current = null;
-      setGameState(null);
-      setCurrentStep(null);
-      setActiveMatch(null);
-      setActivePlaytestSettings(null);
-      decisionSeqRef.current = 1;
-      decisionTranscriptRef.current = [];
-      setSelectedUnitIds([]);
-      setSheetMode("collapsed");
-      setIsPassAndPlayWaiting(false);
-      setPresetValidationErrors([]);
-      setRuntimeNotice(null);
-      setIsAiProcessing(false);
-
-      const outcome = startMatchAttempt({
-        environmentId: env,
-        seedInput: seed,
-        catalog,
-        fullRulePackage,
-      });
-
-      if (outcome.type !== "READY") {
-        setSetupNotice(outcome.setupNotice);
-        if (outcome.presetValidationErrors && outcome.presetValidationErrors.length > 0) {
-          setPresetValidationErrors([...outcome.presetValidationErrors]);
-        }
-        for (const l of outcome.logs) {
-          addLog(l.message, l.level);
-        }
-        return;
-      }
+  // 通常対戦および Scenario 対戦で共有する READY match commit 処理
+  const commitReadyMatch = useCallback(
+    async (params: {
+      readonly session: GameSession;
+      readonly activeMatch: ActiveMatchContext;
+      readonly mode: PlaytestMatchMode;
+      readonly humanSeat: "p1" | "p2";
+      readonly policyId: PlaytestPolicyId;
+      readonly initialStep: GameSessionStep;
+      readonly initialLogs?: readonly { readonly message: string; readonly level: "info" | "action" | "system"; readonly state?: any }[];
+      readonly initialTraces?: readonly { readonly category: string; readonly message: string; readonly state?: any }[];
+      readonly isAutoSeedRotate?: boolean;
+    }) => {
+      const {
+        session,
+        activeMatch: newActiveMatch,
+        mode,
+        humanSeat,
+        policyId,
+        initialStep,
+        initialLogs = [],
+        initialTraces = [],
+        isAutoSeedRotate = false,
+      } = params;
 
       // SeatControllers & Policies 生成
       const seatControllers = createSeatControllers(mode, humanSeat, policyId);
       let policies: Record<string, DecisionPolicy> = {};
       try {
-        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, outcome.activeMatch.seed);
+        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, newActiveMatch.seed);
       } catch (err: any) {
         setRuntimeNotice({
           type: "TECHNICAL_ERROR",
           title: "AI Policy 初期化エラー",
           message: err.message,
-          environmentName: outcome.activeMatch.environmentName,
-          seed: outcome.activeMatch.seed,
+          environmentName: newActiveMatch.environmentName,
+          seed: newActiveMatch.seed,
         });
         addLog(`[AI_ERROR] ${err.message}`, "system");
         return;
       }
 
       // READY 成功時のみ commit
-      sessionRef.current = outcome.session;
-      setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
-      setActiveMatch(outcome.activeMatch);
+      sessionRef.current = session;
+      setGameState(JSON.parse(JSON.stringify(session.state)));
+      setActiveMatch(newActiveMatch);
       setActivePlaytestSettings({
         matchMode: mode,
         humanSeat,
         policyId,
       });
       // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
-      if (seedMode === "auto") {
-        const currentSeed = outcome.activeMatch.seed ?? Number(seed);
+      if (isAutoSeedRotate && seedMode === "auto") {
+        const currentSeed = newActiveMatch.seed ?? Number(seedInput);
         setPendingAutoSeed(generateNextAutoSeed(currentSeed));
       }
       setActiveSeatControllers(seatControllers);
@@ -335,15 +328,15 @@ export const CoreBattlePlaytest: React.FC = () => {
       seqRef.current = 1;
       setLatestEventMessage("ゲーム開始準備完了");
 
-      for (const l of outcome.logs) {
+      for (const l of initialLogs) {
         addLog(l.message, l.level, l.state);
       }
-      for (const t of outcome.traces) {
+      for (const t of initialTraces) {
         addTrace(t.category, t.message, t.state);
       }
 
       // 初期ステップの処理
-      let step = outcome.initialStep;
+      let step = initialStep;
       if (mode === "humanVsAi") {
         const needsAiAdvance =
           step.type === "PROGRESSED" ||
@@ -355,11 +348,11 @@ export const CoreBattlePlaytest: React.FC = () => {
             step.type === "WAITING_FOR_DECISION"
               ? `AI (${step.request.playerId}) 判断のため自動実行を開始`
               : `PROGRESSED ステップのため自動進行を開始`;
-          addTrace("AI_TURN_START", advanceLogMsg, outcome.session.state);
+          addTrace("AI_TURN_START", advanceLogMsg, session.state);
           setIsAiProcessing(true);
 
           const aiResult = await advanceAutomatedDecisions(
-            outcome.session,
+            session,
             step,
             seatControllers,
             policies,
@@ -396,26 +389,26 @@ export const CoreBattlePlaytest: React.FC = () => {
               title: "AI Policy 実行時エラー",
               message: aiResult.error.message,
               details: aiResult.error.stack,
-              environmentName: outcome.activeMatch.environmentName,
-              seed: outcome.activeMatch.seed,
+              environmentName: newActiveMatch.environmentName,
+              seed: newActiveMatch.seed,
             });
             addLog(`[AI_ERROR] ${aiResult.error.message}`, "system");
-            addTrace("AI_ERROR", aiResult.error.message, outcome.session.state);
+            addTrace("AI_ERROR", aiResult.error.message, session.state);
             setCurrentStep(aiResult.lastStep || step);
-            setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+            setGameState(JSON.parse(JSON.stringify(session.state)));
             return;
           }
 
           step = aiResult.step;
           setCurrentStep(step);
-          setGameState(JSON.parse(JSON.stringify(outcome.session.state)));
+          setGameState(JSON.parse(JSON.stringify(session.state)));
 
           if (step.type === "WAITING_FOR_DECISION") {
             lastActivePlayerRef.current = step.request.playerId;
             setPendingPlayerKey(step.request.playerId);
-            addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, outcome.session.state);
+            addTrace("DECISION_REQUEST", `判断待機 (${step.request.playerId})`, session.state);
           } else if (step.type === "FINISHED") {
-            const nextState = outcome.session.state;
+            const nextState = session.state;
             const winnerName =
               nextState.players?.[step.result.winner || ""]?.name ||
               (step.result.winner === "p1" ? "Player A" : "Player B");
@@ -434,11 +427,67 @@ export const CoreBattlePlaytest: React.FC = () => {
         if (mode === "humanVsHuman" && enablePassAndPlay) {
           setIsPassAndPlayWaiting(true);
         }
-        addTrace("DECISION_REQUEST", `判断待機 (${initPlayer})`, outcome.session.state);
+        addTrace("DECISION_REQUEST", `判断待機 (${initPlayer})`, session.state);
         setCurrentStep(step);
       } else {
         setCurrentStep(step);
       }
+    },
+    [seedMode, seedInput, enablePassAndPlay, enqueueFeedbackFlash, addLog, addTrace]
+  );
+
+  // 新しい対戦の開始 (Pending 設定を元に対戦開始を試行)
+  const startNewGame = useCallback(
+    async (
+      overrideEnv?: string,
+      overrideSeedInput?: string,
+      overrideMode?: PlaytestMatchMode,
+      overrideHumanSeat?: "p1" | "p2",
+      overridePolicyId?: PlaytestPolicyId
+    ) => {
+      const env = overrideEnv ?? selectedEnvironmentId;
+      const isOfficial = isOfficialEnvironment(env);
+      const seed = overrideSeedInput ?? (
+        isOfficial
+          ? (seedMode === "auto" ? String(pendingAutoSeed) : seedInput)
+          : seedInput
+      );
+      const mode = overrideMode ?? pendingMatchMode;
+      // Human vs AI では Human 席を常に "p1" へ正規化 (URLパラメータや復元設定の p2 も吸収)
+      const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
+      const policyId = overridePolicyId ?? pendingPolicyId;
+
+      resetMatchState();
+
+      const outcome = startMatchAttempt({
+        environmentId: env,
+        seedInput: seed,
+        catalog,
+        fullRulePackage,
+      });
+
+      if (outcome.type !== "READY") {
+        setSetupNotice(outcome.setupNotice);
+        if (outcome.presetValidationErrors && outcome.presetValidationErrors.length > 0) {
+          setPresetValidationErrors([...outcome.presetValidationErrors]);
+        }
+        for (const l of outcome.logs) {
+          addLog(l.message, l.level);
+        }
+        return;
+      }
+
+      await commitReadyMatch({
+        session: outcome.session,
+        activeMatch: outcome.activeMatch,
+        mode,
+        humanSeat,
+        policyId,
+        initialStep: outcome.initialStep,
+        initialLogs: outcome.logs,
+        initialTraces: outcome.traces,
+        isAutoSeedRotate: true,
+      });
     },
     [
       selectedEnvironmentId,
@@ -450,9 +499,69 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingPolicyId,
       catalog,
       fullRulePackage,
-      enablePassAndPlay,
+      resetMatchState,
+      commitReadyMatch,
       addLog,
-      addTrace,
+    ]
+  );
+
+  // Scenario 開始ハンドラ (ScenarioDefinitionV1 から決定論的初期盤面を生成して対戦開始)
+  const handleStartScenario = useCallback(
+    async (definition: ScenarioDefinitionV1) => {
+      resetMatchState();
+
+      const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage);
+      if (outcome.type !== "READY") {
+        setRuntimeNotice({
+          type: "TECHNICAL_ERROR",
+          title: "Scenario コンパイルエラー",
+          message: outcome.errors.map((e) => `[${e.code}] ${e.path ? `${e.path}: ` : ""}${e.message}`).join("\n"),
+          environmentName: definition.environmentId,
+          seed: definition.seed,
+        });
+        return;
+      }
+
+      const regId = extractRegulationId(definition.environmentId);
+      const regDef = regId ? catalog.regulations.get(regId) : undefined;
+      const regName = regDef?.name || definition.environmentId;
+
+      const activeMatchCtx: ActiveMatchContext = {
+        environmentId: definition.environmentId,
+        environmentName: `${regName} (Scenario)`,
+        regulationId: regId ?? undefined,
+        seed: definition.seed,
+        rulePackage: outcome.rulePackage,
+        isScenario: true,
+      };
+
+      const initialStep = outcome.session.advance();
+
+      await commitReadyMatch({
+        session: outcome.session,
+        activeMatch: activeMatchCtx,
+        mode: pendingMatchMode,
+        humanSeat: pendingHumanSeat,
+        policyId: pendingPolicyId,
+        initialStep,
+        initialLogs: [
+          { message: `[START] Scenarioを開始しました (Match ID: ${outcome.matchId})`, level: "info", state: outcome.state },
+          { message: `[SCENARIO] Turn Player: ${definition.turnPlayer}, Chance Player: ${definition.chancePlayer}, Seed: ${definition.seed}`, level: "info", state: outcome.state },
+        ],
+        initialTraces: [
+          { category: "SCENARIO_START", message: `Scenario開始 (Seed: ${definition.seed})`, state: outcome.state },
+        ],
+        isAutoSeedRotate: false,
+      });
+    },
+    [
+      catalog,
+      fullRulePackage,
+      pendingMatchMode,
+      pendingHumanSeat,
+      pendingPolicyId,
+      resetMatchState,
+      commitReadyMatch,
     ]
   );
 
@@ -816,10 +925,11 @@ export const CoreBattlePlaytest: React.FC = () => {
     ]
   );
 
-  // 意思決定履歴から取り消し可能な Human Decision が存在するか判定
+  // 意思決定履歴から取り消し可能な Human Decision が存在するか判定 (Scenario 起点時は未対応のため不可)
   const canUndo = Boolean(
     !isAiProcessing &&
     activeMatch &&
+    !activeMatch.isScenario &&
     sessionRef.current &&
     findUndoTruncationIndex(decisionTranscriptRef.current) >= 0
   );
@@ -827,6 +937,16 @@ export const CoreBattlePlaytest: React.FC = () => {
   // In-Game Undo ハンドラ (直前の Human Decision 前まで fresh GameSession & AI Policy 状態を再構築)
   const handleUndo = useCallback(async () => {
     if (!sessionRef.current || !activeMatch) return;
+    if (activeMatch.isScenario) {
+      setShareNotice({
+        type: "error",
+        message: "Scenarioから開始した対戦のUndoは現在未対応です",
+      });
+      setTimeout(() => {
+        setShareNotice((prev) => (prev?.type === "error" ? null : prev));
+      }, 3000);
+      return;
+    }
     const currentTranscript = decisionTranscriptRef.current;
     const targetCount = findUndoTruncationIndex(currentTranscript);
     if (targetCount < 0) return;
@@ -973,13 +1093,13 @@ export const CoreBattlePlaytest: React.FC = () => {
   }, []);
 
 
-  // 診断データ一括保存 (Playtest Diagnostic Bundle v1)
-  const isDiagnosticAvailable = Boolean(activeMatch && activePlaytestSettings && sessionRef.current);
+  // 診断データ一括保存 (Playtest Diagnostic Bundle v1 - Scenario 起点対戦は未対応のため不可)
+  const isDiagnosticAvailable = Boolean(activeMatch && !activeMatch.isScenario && activePlaytestSettings && sessionRef.current);
 
   // 現在の対戦状態から PlaytestDiagnosticBundleV1 を構築する共通ヘルパー
   const buildCurrentDiagnosticBundle = useCallback((): PlaytestDiagnosticBundleV1 | null => {
     const session = sessionRef.current;
-    if (!session || !activeMatch || !activePlaytestSettings) return null;
+    if (!session || !activeMatch || activeMatch.isScenario || !activePlaytestSettings) return null;
 
     // session.state を正とする (UI snapshot の gameState ではなく Session state のディープコピー)
     const generatedAt = new Date().toISOString();
@@ -1016,6 +1136,17 @@ export const CoreBattlePlaytest: React.FC = () => {
   ]);
 
   const handleDownloadDiagnostic = useCallback(() => {
+    if (activeMatch?.isScenario) {
+      setShareNotice({
+        type: "error",
+        message: "Scenarioから開始した対戦の診断データ保存は現在未対応です",
+      });
+      setTimeout(() => {
+        setShareNotice((prev) => (prev?.type === "error" ? null : prev));
+      }, 3000);
+      return;
+    }
+
     const bundle = buildCurrentDiagnosticBundle();
     if (!bundle || !activeMatch) return;
 
@@ -1031,6 +1162,17 @@ export const CoreBattlePlaytest: React.FC = () => {
   // 現在の対戦を直接 Replay Viewer で開くハンドラ (未対戦時は空の JSON 読込用 Viewer を開く)
   const handleOpenCurrentReplay = useCallback(() => {
     if (activeMatch) {
+      if (activeMatch.isScenario) {
+        setShareNotice({
+          type: "error",
+          message: "Scenarioから開始した対戦のReplayは現在未対応です",
+        });
+        setTimeout(() => {
+          setShareNotice((prev) => (prev?.type === "error" ? null : prev));
+        }, 3000);
+        return;
+      }
+
       const bundle = buildCurrentDiagnosticBundle();
       if (!bundle) {
         // Fail-closed: 対戦中状態が存在するにもかかわらず Bundle 生成に失敗した場合
@@ -1418,17 +1560,41 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
 
           <button
-            onClick={() => setIsReplayVerifyModalOpen(true)}
-            title="Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"
+            onClick={() => setIsScenarioBuilderOpen(true)}
+            title="Scenario Builder を開いて初期盤面を作成・読み込みます"
             className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
+          >
+            🛠️ Scenario Builder
+          </button>
+
+          <button
+            onClick={() => setIsReplayVerifyModalOpen(true)}
+            disabled={Boolean(activeMatch?.isScenario)}
+            title={activeMatch?.isScenario ? "Scenarioから開始した対戦のReplay検証は現在未対応です" : "Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"}
+            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
+              activeMatch?.isScenario
+                ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
+                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
+            }`}
           >
             Replay検証
           </button>
 
           <button
             onClick={() => handleOpenCurrentReplay()}
-            title={activeMatch ? "現在の対戦をリプレイ" : "Diagnostic JSON を読み込んでリプレイ"}
-            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
+            disabled={Boolean(activeMatch?.isScenario)}
+            title={
+              activeMatch?.isScenario
+                ? "Scenarioから開始した対戦のReplayは現在未対応です"
+                : activeMatch
+                ? "現在の対戦をリプレイ"
+                : "Diagnostic JSON を読み込んでリプレイ"
+            }
+            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
+              activeMatch?.isScenario
+                ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
+                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
+            }`}
           >
             Replay Viewer
           </button>
@@ -1512,6 +1678,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             presetValidationErrors={presetValidationErrors}
             onStartMatch={() => startNewGame()}
             onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
+            onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
           />
         </main>
       ) : (
@@ -1750,6 +1917,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         isDiagnosticAvailable={isDiagnosticAvailable}
         onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
         onOpenReplayViewer={() => handleOpenCurrentReplay()}
+        onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
       />
 
 
@@ -1823,8 +1991,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           reason={currentStep.result.reason}
           logs={logs}
           onRestart={() => startNewGame()}
-          onDownloadDiagnostic={handleDownloadDiagnostic}
-          onOpenReplayViewer={handleOpenCurrentReplay}
+          onDownloadDiagnostic={activeMatch?.isScenario ? undefined : handleDownloadDiagnostic}
+          onOpenReplayViewer={activeMatch?.isScenario ? undefined : handleOpenCurrentReplay}
         />
       )}
 
@@ -1846,6 +2014,15 @@ export const CoreBattlePlaytest: React.FC = () => {
         currentBuildSha={currentBuildSha}
         initialBundle={replayViewerInitialBundle}
         initialSource={replayViewerInitialSource ?? undefined}
+      />
+
+      {/* 8. Scenario Builder モーダル */}
+      <ScenarioBuilderModal
+        isOpen={isScenarioBuilderOpen}
+        onClose={() => setIsScenarioBuilderOpen(false)}
+        catalog={catalog}
+        fullRulePackage={fullRulePackage}
+        onStartScenario={handleStartScenario}
       />
     </div>
 

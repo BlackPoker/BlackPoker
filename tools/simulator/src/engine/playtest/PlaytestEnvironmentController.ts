@@ -20,6 +20,7 @@ export interface ActiveMatchContext {
   readonly regulationId?: string;
   readonly seed?: number;
   readonly rulePackage: RulePackage;
+  readonly isScenario?: boolean;
 }
 
 /**

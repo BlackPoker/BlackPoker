@@ -37,6 +37,7 @@ export interface MobileHeaderMenuProps {
   readonly isDiagnosticAvailable?: boolean;
   readonly onOpenReplayVerify?: () => void;
   readonly onOpenReplayViewer?: () => void;
+  readonly onOpenScenarioBuilder?: () => void;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -68,6 +69,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   isDiagnosticAvailable = true,
   onOpenReplayVerify,
   onOpenReplayViewer,
+  onOpenScenarioBuilder,
 }) => {
 
   if (!isOpen) return null;
@@ -279,6 +281,26 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
             </div>
             <span className="text-[10px] text-zinc-500 font-normal">
               ※ 保存済みJSONの再現性を検証
+            </span>
+          </button>
+        )}
+
+        {/* Scenario Builder ボタン (モバイルメニュー内) */}
+        {onOpenScenarioBuilder && (
+          <button
+            onClick={() => {
+              onClose();
+              onOpenScenarioBuilder();
+            }}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title="Scenario Builder を開いて初期盤面を作成・読み込みます"
+          >
+            <div className="flex items-center gap-1.5">
+              <span>🛠️</span>
+              <span>Scenario Builder</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-normal">
+              ※ 初期盤面の作成・読込・共有
             </span>
           </button>
         )}
