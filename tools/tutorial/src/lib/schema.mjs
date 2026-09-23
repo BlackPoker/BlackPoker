@@ -86,6 +86,13 @@ export function validateScenario(value, catalog) {
       (!s.alternate || typeof s.alternate.title !== "string" ||
         !s.alternate.title || typeof s.alternate.text !== "string" ||
         !s.alternate.text)) errors.push("Invalid alternate example");
+    if (s.focusZones !== undefined &&
+      (!Array.isArray(s.focusZones) || s.focusZones.some((focus) =>
+        !["A", "B"].includes(focus?.player) || !zones.includes(focus?.zone))))
+      errors.push("Invalid focusZones");
+    if (s.placementGuide !== undefined &&
+      (typeof s.placementGuide !== "string" || !s.placementGuide))
+      errors.push("Invalid placementGuide");
     for (const phase of ["before", "after"]) {
       const board = s.board?.[phase];
       if (!board || ![null, "A", "B"].includes(board.turn))
@@ -115,6 +122,8 @@ export function validateScenario(value, catalog) {
     }
     if (!Array.isArray(s.operations))
       errors.push("operations must be an array");
+    else if (s.cause?.phase === "setup" && s.operations.length)
+      errors.push("Setup step must not contain game operations");
     else
       for (const o of s.operations) {
         if (

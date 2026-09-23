@@ -58,6 +58,12 @@ describe("tutorial schema", () => {
       "Operation card is absent from its board",
     );
   });
+  it("setupの教材表示をゲーム上のoperationとして記録しない", () => {
+    const value = structuredClone(scenario);
+    value.steps[1].operations = [{ player: "A", from: "hand", to: "soldiers",
+      cards: ["C6"], label: "教材用の配置" }];
+    expect(validateScenario(value, ruleCatalog)).toContain("Setup step must not contain game operations");
+  });
   it("動きの理由に正規アクションとrequest・resolve・triggerを使用する", () => {
     const fixed = scenario.steps.filter((step) => step.mode === "fixed");
     expect(fixed.every((step) => step.cause)).toBe(true);

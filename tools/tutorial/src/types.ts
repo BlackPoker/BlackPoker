@@ -44,6 +44,8 @@ export interface TutorialStep {
   mode: "fixed" | "real";
   board: { before: BoardState; after: BoardState };
   operations: Operation[];
+  focusZones?: { player: Player; zone: Zone }[];
+  placementGuide?: string;
   checklist?: string[];
   chooseFirst?: boolean;
   sequenceLabel?: string;

@@ -155,7 +155,7 @@ export default function App() {
             </div>
             <p className="now-label">
               <span />
-              {step.mode === "fixed" ? "盤面の変化" : "いまやること"}
+              {step.cause?.phase === "setup" ? "盤面を知る" : step.mode === "fixed" ? "盤面の変化" : "いまやること"}
             </p>
             {(step.sequenceLabel || step.actionName) && (
               <div className="step-context">
@@ -170,9 +170,12 @@ export default function App() {
               {step.mode === "fixed" && step.operations.length
                 ? progress.applied
                   ? "盤面でカードの変化を確認してください。"
-                  : "「次へ」を押すと、カードの変化が盤面に表示されます。"
+                  : step.operations.some((operation) => operation.from !== operation.to)
+                    ? "矢印が次に起こる移動を示します。「次へ」で結果を確認しましょう。"
+                    : "カードの向きや指定に注目し、「次へ」で結果を確認しましょう。"
                 : step.instruction}
             </p>
+            {step.placementGuide && <p className="placement-guide">{step.placementGuide}</p>}
             <div className={`mode-notice mode-${step.mode}`}>
               {step.mode === "fixed" ? (
                 <><b>画面だけで練習</b><span>実物カードはまだ使いません</span></>
@@ -223,6 +226,7 @@ export default function App() {
               real={step.mode === "real"}
               stepId={step.id}
               cause={step.cause}
+              focusZones={step.focusZones}
             />
             {step.mode === "real" && !progress.applied && (
               <MoveGuide
@@ -233,7 +237,7 @@ export default function App() {
             )}
             {step.mode === "fixed" && progress.applied && (
               <div className="learned" role="status">
-                <strong>盤面の変化を確認</strong>
+                <strong>{step.cause?.phase === "setup" ? "盤面を確認" : "盤面の変化を確認"}</strong>
                 {step.cause && <p>{step.cause.text}</p>}
                 {step.chapter === "prepare" && step.id !== "welcome" &&
                   <p>{step.instruction}</p>}

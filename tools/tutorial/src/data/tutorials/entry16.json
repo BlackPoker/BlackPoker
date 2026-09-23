@@ -20,14 +20,17 @@
   "steps": [
     {
       "id": "welcome",
-      "cause": { "phase": "setup", "text": "固定された対戦例の盤面を画面に表示しました。" },
+      "cause": {
+        "phase": "setup",
+        "text": "対戦途中の練習用盤面です。カードは最初からこの位置にあります。"
+      },
       "chapter": "prepare",
       "chapterTitle": "準備する",
       "eyebrow": "LET’S PLAY",
       "actor": "both",
-      "title": "まずは、画面だけで練習します。",
-      "instruction": "BlackPokerは2人で遊ぶ対戦ゲーム。兵士で攻撃し、相手のライフを0枚にしたら勝ちです。",
-      "actionLabel": "画面の向きを確認する",
+      "title": "まず、対戦途中の盤面を見てみましょう。",
+      "instruction": "PLAYER Aが下、PLAYER Bが上です。実物カードはまだ不要です。",
+      "actionLabel": "盤面の向きを確認する",
       "explanation": "実物カードはまだ用意しません。画面ではPLAYER Aが下、PLAYER Bが上です。カードの移動は画面が再現するので、操作前後を見比べます。",
       "learned": "画面ではプレイヤーBが上、プレイヤーAが下です。",
       "ruleRefs": [
@@ -37,78 +40,6 @@
       "board": {
         "before": {
           "A": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "B": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        },
-        "after": {
-          "A": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "B": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        }
-      },
-      "operations": []
-    },
-    {
-      "id": "practice-a",
-      "cause": { "phase": "setup", "text": "練習用のPLAYER Aの兵士・防壁・手札を画面に配置しました。" },
-      "chapter": "prepare",
-      "chapterTitle": "準備する",
-      "eyebrow": "LET’S PLAY",
-      "actor": "A",
-      "title": "PLAYER Aの盤面を見てみよう。",
-      "instruction": "手元に持つカードが「手札」。戦うカードが「兵士（へいし）」。カードを置いて戦う場所が「場」です。",
-      "actionLabel": "画面に3枚を表示する",
-      "explanation": "♣6は兵士、BPの裏面は練習用の防壁、♠2は手札です。通常の防壁は種類が見えないように裏向きで置きます。今は画面の位置関係だけ見れば十分です。",
-      "learned": "縦向きが「チャージ」です。",
-      "ruleRefs": [
-        "character.soldier",
-        "character.bulwark"
-      ],
-      "mode": "fixed",
-      "board": {
-        "before": {
-          "A": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "B": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        },
-        "after": {
-          "A": {
             "hand": [
               {
                 "card": "S2",
@@ -130,126 +61,73 @@
                 "state": "charge"
               }
             ],
-            "life": [],
-            "grave": []
-          },
-          "B": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        }
-      },
-      "operations": [
-        {
-          "player": "A",
-          "from": "hand",
-          "to": "soldiers",
-          "cards": [
-            "C6"
-          ],
-          "label": "♣6 → 兵士"
-        },
-        {
-          "player": "A",
-          "from": "hand",
-          "to": "bulwarks",
-          "cards": [
-            "D5"
-          ],
-          "label": "カード → 防壁（裏・縦）"
-        },
-        {
-          "player": "A",
-          "from": "hand",
-          "to": "hand",
-          "cards": [
-            "S2"
-          ],
-          "label": "♠2 → 手札"
-        }
-      ]
-    },
-    {
-      "id": "practice-b",
-      "cause": { "phase": "setup", "text": "練習用のPLAYER Bの兵士と防壁を画面に配置しました。" },
-      "chapter": "prepare",
-      "chapterTitle": "準備する",
-      "eyebrow": "LET’S PLAY",
-      "actor": "B",
-      "title": "PLAYER Bの盤面も見てみよう。",
-      "instruction": "攻撃を防ぐカードが「防壁（ぼうへき）」。縦向きは使える状態、横向きは使った状態です。",
-      "actionLabel": "画面に2枚を表示する",
-      "explanation": "♥7は兵士です。BPの裏面はチャージを体験するため、使用済みの防壁として横向きにしておきます。これは通常の開始手順ではなく教材用の途中盤面です。",
-      "learned": "横向きが「ドライブ」です。",
-      "ruleRefs": [
-        "character.soldier",
-        "character.bulwark"
-      ],
-      "mode": "fixed",
-      "board": {
-        "before": {
-          "A": {
-            "hand": [
+            "life": [
               {
-                "card": "S2",
-                "face": "up",
+                "card": "S3",
+                "face": "down",
                 "state": "charge"
-              }
-            ],
-            "soldiers": [
+              },
               {
-                "card": "C6",
-                "face": "up",
+                "card": "D8",
+                "face": "down",
                 "state": "charge"
-              }
-            ],
-            "bulwarks": [
+              },
               {
-                "card": "D5",
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
                 "face": "down",
                 "state": "charge"
               }
             ],
-            "life": [],
-            "grave": []
-          },
-          "B": {
-            "hand": [],
-            "soldiers": [],
-            "bulwarks": [],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        },
-        "after": {
-          "A": {
-            "hand": [
-              {
-                "card": "S2",
-                "face": "up",
-                "state": "charge"
-              }
-            ],
-            "soldiers": [
-              {
-                "card": "C6",
-                "face": "up",
-                "state": "charge"
-              }
-            ],
-            "bulwarks": [
-              {
-                "card": "D5",
-                "face": "down",
-                "state": "charge"
-              }
-            ],
-            "life": [],
             "grave": []
           },
           "B": {
@@ -268,96 +146,81 @@
                 "state": "drive"
               }
             ],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
-        }
-      },
-      "operations": [
-        {
-          "player": "B",
-          "from": "hand",
-          "to": "soldiers",
-          "cards": [
-            "H7"
-          ],
-          "label": "♥7 → 兵士（縦）"
-        },
-        {
-          "player": "B",
-          "from": "hand",
-          "to": "bulwarks",
-          "cards": [
-            "D5"
-          ],
-          "label": "防壁カード → 防壁（裏・横）"
-        }
-      ]
-    },
-    {
-      "id": "practice-life",
-      "cause": { "phase": "setup", "text": "両プレイヤーの練習用ライフを画面に配置しました。" },
-      "chapter": "prepare",
-      "chapterTitle": "準備する",
-      "eyebrow": "LET’S PLAY",
-      "actor": "both",
-      "title": "ライフの山も画面で準備。",
-      "instruction": "裏向きの山が「ライフ」。残り体力と、カードを引く山の2つの役目があります。使い終わったカードは「墓地（ぼち）」へ置きます。",
-      "actionLabel": "画面にライフを表示する",
-      "explanation": "練習盤面はエントリー16のカードだけで構成されています。PLAYER Aは画面上の3枚を除く13枚、PLAYER Bは2枚を除く14枚がライフです。",
-      "learned": "ライフは山札であり、残り体力でもあります。",
-      "ruleRefs": [
-        "frame.entry16"
-      ],
-      "mode": "fixed",
-      "board": {
-        "before": {
-          "A": {
-            "hand": [
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
               {
                 "card": "S2",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
-              }
-            ],
-            "soldiers": [
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
               {
                 "card": "C6",
-                "face": "up",
+                "face": "down",
                 "state": "charge"
-              }
-            ],
-            "bulwarks": [
+              },
               {
-                "card": "D5",
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
                 "face": "down",
                 "state": "charge"
               }
             ],
-            "life": [],
             "grave": []
           },
-          "B": {
-            "hand": [],
-            "soldiers": [
-              {
-                "card": "H7",
-                "face": "up",
-                "state": "charge"
-              }
-            ],
-            "bulwarks": [
-              {
-                "card": "D5",
-                "face": "down",
-                "state": "drive"
-              }
-            ],
-            "life": [],
-            "grave": []
-          },
-          "turn": null
+          "turn": "A"
         },
         "after": {
           "A": {
@@ -544,28 +407,1207 @@
           "turn": "A"
         }
       },
-      "operations": [
+      "operations": [],
+      "focusZones": []
+    },
+    {
+      "id": "practice-a",
+      "cause": {
+        "phase": "setup",
+        "text": "PLAYER A側のカードに注目します。盤面を作る操作ではありません。"
+      },
+      "chapter": "prepare",
+      "chapterTitle": "準備する",
+      "eyebrow": "LET’S PLAY",
+      "actor": "A",
+      "title": "PLAYER Aの盤面を見てみよう。",
+      "instruction": "手元の♠2が手札、♣6が兵士、BPの裏面が防壁です。",
+      "actionLabel": "PLAYER A側を見る",
+      "explanation": "♣6は兵士、BPの裏面は練習用の防壁、♠2は手札です。通常の防壁は種類が見えないように裏向きで置きます。今は画面の位置関係だけ見れば十分です。",
+      "learned": "縦向きが「チャージ」です。",
+      "ruleRefs": [
+        "character.soldier",
+        "character.bulwark"
+      ],
+      "mode": "fixed",
+      "board": {
+        "before": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        },
+        "after": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        }
+      },
+      "operations": [],
+      "focusZones": [
         {
           "player": "A",
-          "from": "hand",
-          "to": "life",
-          "cards": [
-            "S3",
-            "D8"
-          ],
-          "label": "上から♠3・♢8 → ライフ"
+          "zone": "hand"
+        },
+        {
+          "player": "A",
+          "zone": "soldiers"
+        },
+        {
+          "player": "A",
+          "zone": "bulwarks"
+        }
+      ]
+    },
+    {
+      "id": "practice-b",
+      "cause": {
+        "phase": "setup",
+        "text": "PLAYER B側のカードに注目します。盤面を作る操作ではありません。"
+      },
+      "chapter": "prepare",
+      "chapterTitle": "準備する",
+      "eyebrow": "LET’S PLAY",
+      "actor": "B",
+      "title": "PLAYER Bの盤面も見てみよう。",
+      "instruction": "♥7は兵士。横向きの裏面カードは、すでに使った状態の防壁です。",
+      "actionLabel": "PLAYER B側を見る",
+      "explanation": "♥7は兵士です。BPの裏面はチャージを体験するため、使用済みの防壁として横向きにしておきます。これは通常の開始手順ではなく教材用の途中盤面です。",
+      "learned": "横向きが「ドライブ」です。",
+      "ruleRefs": [
+        "character.soldier",
+        "character.bulwark"
+      ],
+      "mode": "fixed",
+      "board": {
+        "before": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        },
+        "after": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        }
+      },
+      "operations": [],
+      "focusZones": [
+        {
+          "player": "B",
+          "zone": "soldiers"
         },
         {
           "player": "B",
-          "from": "hand",
-          "to": "life",
-          "cards": [
-            "S3",
-            "D8"
-          ],
-          "label": "上から♠3・♢8 → ライフ"
+          "zone": "bulwarks"
         }
+      ]
+    },
+    {
+      "id": "practice-life",
+      "cause": {
+        "phase": "setup",
+        "text": "両プレイヤーのライフと墓地に注目します。"
+      },
+      "chapter": "prepare",
+      "chapterTitle": "準備する",
+      "eyebrow": "LET’S PLAY",
+      "actor": "both",
+      "title": "ライフの山を見てみよう。",
+      "instruction": "裏向きの山がライフ。使い終わったカードは墓地へ置きます。",
+      "actionLabel": "ライフと墓地を見る",
+      "explanation": "練習盤面はエントリー16のカードだけで構成されています。PLAYER Aは画面上の3枚を除く13枚、PLAYER Bは2枚を除く14枚がライフです。",
+      "learned": "ライフは山札であり、残り体力でもあります。",
+      "ruleRefs": [
+        "frame.entry16"
       ],
+      "mode": "fixed",
+      "board": {
+        "before": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        },
+        "after": {
+          "A": {
+            "hand": [
+              {
+                "card": "S2",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "soldiers": [
+              {
+                "card": "C6",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H7",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "B": {
+            "hand": [],
+            "soldiers": [
+              {
+                "card": "H7",
+                "face": "up",
+                "state": "charge"
+              }
+            ],
+            "bulwarks": [
+              {
+                "card": "D5",
+                "face": "down",
+                "state": "drive"
+              }
+            ],
+            "life": [
+              {
+                "card": "S3",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D8",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "S2",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "SK",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "H4",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HJ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "HQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "D10",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "DQ",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CA",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C6",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "C9",
+                "face": "down",
+                "state": "charge"
+              },
+              {
+                "card": "CK",
+                "face": "down",
+                "state": "charge"
+              }
+            ],
+            "grave": []
+          },
+          "turn": "A"
+        }
+      },
+      "operations": [],
       "checklist": [
         "SA",
         "S2",
@@ -583,6 +1625,24 @@
         "C6",
         "C9",
         "CK"
+      ],
+      "focusZones": [
+        {
+          "player": "A",
+          "zone": "life"
+        },
+        {
+          "player": "A",
+          "zone": "grave"
+        },
+        {
+          "player": "B",
+          "zone": "life"
+        },
+        {
+          "player": "B",
+          "zone": "grave"
+        }
       ]
     },
     {
@@ -4521,22 +5581,8 @@
           "turn": null
         }
       },
-      "operations": [
-        {
-          "player": "A",
-          "from": "hand",
-          "to": "life",
-          "cards": [],
-          "label": "16枚 → ライフ"
-        },
-        {
-          "player": "B",
-          "from": "hand",
-          "to": "life",
-          "cards": [],
-          "label": "16枚 → ライフ"
-        }
-      ]
+      "operations": [],
+      "placementGuide": "16枚を混ぜ、手札を経由せず、各自のライフの位置へ裏向きの束として置きます。"
     },
     {
       "id": "real-hand",

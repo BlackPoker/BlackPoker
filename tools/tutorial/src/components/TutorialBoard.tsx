@@ -49,6 +49,7 @@ export function TutorialBoard({
   real,
   stepId,
   cause,
+  focusZones = [],
 }: {
   board: BoardState;
   before: BoardState;
@@ -58,6 +59,7 @@ export function TutorialBoard({
   real: boolean;
   stepId: string;
   cause?: MovementCause;
+  focusZones?: { player: Player; zone: Zone }[];
 }) {
   const [boardElement, setBoardElement] = useState<HTMLElement | null>(null);
   const realHints: Record<Zone, { main: string; sub: string }> = {
@@ -81,8 +83,10 @@ export function TutorialBoard({
   function zone(player: Player, zone: Zone) {
     const cards = board[player][zone];
     const related = operations.filter((o) => o.player === player);
-    const changed = !real && related.some((o) => (applied ? o.to : o.from) === zone);
-    const annotations = !real && applied ? related.filter((o) => o.to === zone)
+    const focused = cause?.phase === "setup" && focusZones.some((focus) => focus.player === player && focus.zone === zone);
+    const changed = !real && cause?.phase !== "setup" && related.some((o) => (applied ? o.to : o.from) === zone);
+    const annotations = !real && cause?.phase !== "setup" ? related.filter((o) => o.to === zone &&
+      (applied || o.from === o.to))
       .map((operation) => movement(operation, before, after)) : [];
     const stack = zone === "life" || zone === "grave";
     const shown = stack
@@ -95,7 +99,7 @@ export function TutorialBoard({
         key={zone}
         data-zone={zone}
         data-testid={player + "-" + zone}
-        className={`table-zone ${changed ? "changed-zone" : ""} zone-${zone}`}
+        className={`table-zone ${changed ? "changed-zone" : ""} ${focused ? "focused-zone" : ""} zone-${zone}`}
       >
         <span className="zone-label">
           {labels[zone]}
@@ -105,6 +109,7 @@ export function TutorialBoard({
           {shown.map((c: BoardCard) => (
             <span className={`card-slot ${c.state}`} key={c.card}>
               <span
+                data-card={c.card}
                 className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${changed && related.some((o) => o.cards.includes(c.card)) ? "changed-card" : ""}`}
                 aria-label={`${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
               >
@@ -140,7 +145,9 @@ export function TutorialBoard({
       <figcaption>
         {real
           ? "実物カードの置き場ガイド"
-          : applied
+          : cause?.phase === "setup"
+            ? "対戦途中の練習用盤面"
+            : applied
             ? "変化後の盤面"
             : "操作前の盤面"}
       </figcaption>
@@ -170,7 +177,7 @@ export function TutorialBoard({
           </div>
         </section>
       ))}
-      {!real && applied && boardElement &&
+      {!real && !applied && cause?.phase !== "setup" && boardElement &&
         <BoardOverlay board={boardElement} operations={operations} />}
       {!real && applied && (
         <ul className="visually-hidden" aria-label="カードの変化">

@@ -1990,6 +1990,18 @@ button {
   border-color: #71717a;
   background: #f4f4f5;
 }
+.table-zone.focused-zone {
+  border-color: #52525b;
+  background: #f4f4f5;
+  box-shadow: inset 0 0 0 1px #a1a1aa;
+}
+.placement-guide {
+  padding: 8px 10px;
+  border-left: 3px solid #52525b;
+  background: #f4f4f5;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .board-overlay {
   position: absolute;
   inset: 0;
@@ -2000,9 +2012,9 @@ button {
   z-index: 2;
 }
 .board-route {
-  fill: none;
   stroke: #18181b;
   stroke-width: 2;
+  opacity: 0.78;
   stroke-linecap: round;
   stroke-linejoin: round;
   animation: board-route-in 0.35s ease-out;

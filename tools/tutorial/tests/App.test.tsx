@@ -46,7 +46,7 @@ describe("hands-on tutorial", () => {
     expect(screen.getByText(/実物カードは、まだ用意しなくてOK/)).toBeVisible();
 
     await user.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
-    expect(screen.getByRole("heading", { name: "まずは、画面だけで練習します。" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "まず、対戦途中の盤面を見てみましょう。" })).toBeVisible();
     expect(loadIntroComplete(window.localStorage)).toBe(true);
   });
 
@@ -72,7 +72,7 @@ describe("hands-on tutorial", () => {
     const user = userEvent.setup();
     render(<App />);
     expect(
-      screen.getByRole("heading", { name: "まずは、画面だけで練習します。" }),
+      screen.getByRole("heading", { name: "まず、対戦途中の盤面を見てみましょう。" }),
     ).toBeVisible();
     expect(screen.getByText("実物カードはまだ使いません")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "次へ →" }));
@@ -293,13 +293,14 @@ describe("hands-on tutorial", () => {
     expect(actions?.children[1]).toHaveClass("primary-button");
     expect(actions?.children[0]).toBeDisabled();
   });
-  it("固定練習は下部の移動表を使わず盤面SVGと読み上げテキストを表示する", async () => {
+  it("固定練習はbeforeでSVG予告、afterで読み上げテキストを表示する", async () => {
     at("summon");
     render(<App />);
     expect(screen.queryByRole("region", { name: "カードの動かし方" })).toBeNull();
+    expect(document.querySelector('line.board-route[data-from="hand"][data-to="soldiers"]')).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(document.querySelector(".board-movements")).toBeNull();
-    expect(document.querySelector("svg.board-overlay")).toBeInTheDocument();
+    expect(document.querySelector("svg.board-overlay")).toBeNull();
     const changes = screen.getByRole("list", { name: "カードの変化" });
     expect(changes).toHaveTextContent("♠2：手札 → 兵士");
     expect(within(screen.getByTestId("A-soldiers")).getByText("♠2が移動")).toBeVisible();
