@@ -56,6 +56,7 @@ import {
   PlaytestShareConfigV1,
 } from "./PlaytestShareUrl";
 import {
+  PlaytestDiagnosticBundleV1,
   buildPlaytestDiagnosticBundleV1,
   generateDiagnosticFilename,
   captureDiagnosticRawState,
@@ -973,9 +974,10 @@ export const CoreBattlePlaytest: React.FC = () => {
   // 診断データ一括保存 (Playtest Diagnostic Bundle v1)
   const isDiagnosticAvailable = Boolean(activeMatch && activePlaytestSettings && sessionRef.current);
 
-  const handleDownloadDiagnostic = useCallback(() => {
+  // 現在の対戦状態から PlaytestDiagnosticBundleV1 を構築する共通ヘルパー
+  const buildCurrentDiagnosticBundle = useCallback((): PlaytestDiagnosticBundleV1 | null => {
     const session = sessionRef.current;
-    if (!session || !activeMatch || !activePlaytestSettings) return;
+    if (!session || !activeMatch || !activePlaytestSettings) return null;
 
     // session.state を正とする (UI snapshot の gameState ではなく Session state のディープコピー)
     const generatedAt = new Date().toISOString();
@@ -985,7 +987,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     };
     const rawState = captureDiagnosticRawState(session.state);
 
-    const bundle = buildPlaytestDiagnosticBundleV1(
+    return buildPlaytestDiagnosticBundleV1(
       assemblePlaytestDiagnosticBundleParams({
         build,
         generatedAt,
@@ -1001,14 +1003,6 @@ export const CoreBattlePlaytest: React.FC = () => {
         runtimeNotice: runtimeNotice || undefined,
       })
     );
-
-    const filename = generateDiagnosticFilename({
-      environmentName: activeMatch.environmentName,
-      seed: activeMatch.seed,
-      generatedAt: bundle.generatedAt,
-    });
-
-    downloadJsonFile(filename, bundle);
   }, [
     activeMatch,
     activePlaytestSettings,
@@ -1018,6 +1012,42 @@ export const CoreBattlePlaytest: React.FC = () => {
     traces,
     runtimeNotice,
   ]);
+
+  const handleDownloadDiagnostic = useCallback(() => {
+    const bundle = buildCurrentDiagnosticBundle();
+    if (!bundle || !activeMatch) return;
+
+    const filename = generateDiagnosticFilename({
+      environmentName: activeMatch.environmentName,
+      seed: activeMatch.seed,
+      generatedAt: bundle.generatedAt,
+    });
+
+    downloadJsonFile(filename, bundle);
+  }, [buildCurrentDiagnosticBundle, activeMatch]);
+
+  // 現在の対戦を直接 Replay Viewer で開くハンドラ (未対戦時は空の JSON 読込用 Viewer を開く)
+  const handleOpenCurrentReplay = useCallback(() => {
+    if (activeMatch) {
+      const bundle = buildCurrentDiagnosticBundle();
+      if (!bundle) {
+        // Fail-closed: 対戦中状態が存在するにもかかわらず Bundle 生成に失敗した場合
+        setShareNotice({
+          type: "error",
+          message: "現在の対戦データ生成に失敗したためReplayを開けませんでした",
+        });
+        setTimeout(() => {
+          setShareNotice((prev) => (prev?.type === "error" ? null : prev));
+        }, 3000);
+        return;
+      }
+      setReplayViewerInitialBundle(bundle);
+      setIsReplayViewerOpen(true);
+    } else {
+      setReplayViewerInitialBundle(null);
+      setIsReplayViewerOpen(true);
+    }
+  }, [activeMatch, buildCurrentDiagnosticBundle]);
 
   // Replay 検証サービス連携（現在進行中の対戦には一切影響を与えない）
   const currentBuildSha = (import.meta as any).env?.VITE_BUILD_SHA
@@ -1392,8 +1422,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           </button>
 
           <button
-            onClick={() => handleOpenReplayViewer()}
-            title="Diagnostic JSON を読み込み、盤面を1手ずつ再生・確認します"
+            onClick={() => handleOpenCurrentReplay()}
+            title={activeMatch ? "現在の対戦をリプレイ" : "Diagnostic JSON を読み込んでリプレイ"}
             className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
           >
             Replay Viewer
@@ -1715,7 +1745,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         onDownloadDiagnostic={handleDownloadDiagnostic}
         isDiagnosticAvailable={isDiagnosticAvailable}
         onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
-        onOpenReplayViewer={() => handleOpenReplayViewer()}
+        onOpenReplayViewer={() => handleOpenCurrentReplay()}
       />
 
 
@@ -1790,6 +1820,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           logs={logs}
           onRestart={() => startNewGame()}
           onDownloadDiagnostic={handleDownloadDiagnostic}
+          onOpenReplayViewer={handleOpenCurrentReplay}
         />
       )}
 

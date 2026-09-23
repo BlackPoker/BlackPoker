@@ -7,6 +7,7 @@ export interface GameOverOverlayProps {
   logs?: any[];
   onRestart: () => void;
   onDownloadDiagnostic?: () => void;
+  onOpenReplayViewer?: () => void;
 }
 
 export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
@@ -16,6 +17,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
   logs = [],
   onRestart,
   onDownloadDiagnostic,
+  onOpenReplayViewer,
 }) => {
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -55,11 +57,19 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
             診断保存
           </button>
         )}
+        {onOpenReplayViewer && (
+          <button
+            onClick={onOpenReplayViewer}
+            className="px-2.5 py-1 text-[10px] font-bold bg-zinc-800 hover:bg-zinc-700 text-white rounded transition"
+          >
+            リプレイ
+          </button>
+        )}
         <button
           onClick={onRestart}
           className="px-2.5 py-1 text-[10px] font-bold bg-zinc-950 hover:bg-zinc-800 text-white rounded transition"
         >
-          Replay
+          再戦
         </button>
       </div>
     );
@@ -120,11 +130,24 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
           </button>
         )}
 
+        {onOpenReplayViewer && (
+          <button
+            onClick={() => {
+              setMinimized(true);
+              onOpenReplayViewer();
+            }}
+            className="w-full py-2.5 px-6 bg-zinc-900 hover:bg-zinc-800 active:scale-95 text-white font-bold rounded shadow transition-all text-sm font-mono mb-2 flex items-center justify-center gap-2"
+          >
+            <span>▶</span>
+            <span>リプレイを見る</span>
+          </button>
+        )}
+
         <button
           onClick={onRestart}
           className="w-full py-2.5 px-6 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold rounded shadow transition-all text-sm font-mono"
         >
-          もう一度対戦する (Replay)
+          もう一度対戦する
         </button>
       </div>
     </div>

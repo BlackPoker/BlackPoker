@@ -17,6 +17,48 @@ import {
 } from "../playtest/ReplayVerificationService";
 import { createReplayPlanFromDiagnosticBundleV1 } from "../playtest/DiagnosticReplayAdapter";
 
+/**
+ * Diagnostic Bundle から ReplayPlanV1 と ReplayVerificationOutcome を初期構築する Pure Helper。
+ * SSR レンダリング時や初期マウント時の状態同期、および単体テストで利用されます。
+ */
+export function initializeReplayViewerBundle(
+  bundle: unknown,
+  options: {
+    readonly currentBuildSha: string;
+    readonly catalog: RegulationCatalog;
+    readonly fullRulePackage: RulePackage;
+  }
+): {
+  readonly plan: ReplayPlanV1 | null;
+  readonly verificationOutcome: ReplayVerificationOutcome;
+} {
+  const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, {
+    currentBuildSha: options.currentBuildSha,
+  });
+  if (planResult.type === "INCOMPATIBLE") {
+    return {
+      plan: null,
+      verificationOutcome: {
+        type: "INCOMPATIBLE",
+        code: planResult.code,
+        message: planResult.message,
+        currentBuildSha: options.currentBuildSha,
+      },
+    };
+  }
+
+  const outcome = verifyDiagnosticReplayBundleV1(bundle, {
+    currentBuildSha: options.currentBuildSha,
+    catalog: options.catalog,
+    fullRulePackage: options.fullRulePackage,
+  });
+
+  return {
+    plan: planResult.plan,
+    verificationOutcome: outcome,
+  };
+}
+
 export interface ReplayViewerModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
@@ -38,16 +80,40 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
 
   const [rawBundle, setRawBundle] = useState<unknown | null>(initialBundle ?? null);
   const [parseError, setParseError] = useState<string | null>(null);
-  const [plan, setPlan] = useState<ReplayPlanV1 | null>(null);
-  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(null);
+  const [sourceType, setSourceType] = useState<"live" | "file" | null>(initialBundle ? "live" : null);
+
+  const [initialInitState] = useState(() => {
+    if (initialBundle) {
+      return initializeReplayViewerBundle(initialBundle, { currentBuildSha, catalog, fullRulePackage });
+    }
+    return { plan: null, verificationOutcome: null };
+  });
+
+  const [plan, setPlan] = useState<ReplayPlanV1 | null>(initialInitState.plan);
+  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(
+    initialInitState.verificationOutcome
+  );
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [viewerPerspective, setViewerPerspective] = useState<"p1" | "p2">("p1");
 
-  // 初期バンドルの読み込み処理
-  const loadBundle = (bundle: unknown) => {
+  // ビューア内部状態の完全リセット (stale state 防止)
+  const resetViewerState = () => {
+    setRawBundle(null);
     setParseError(null);
+    setPlan(null);
+    setVerificationOutcome(null);
+    setCurrentIndex(0);
+    setIsPlaying(false);
+    setViewerPerspective("p1");
+    setSourceType(null);
+  };
+
+  // バンドルの読み込み処理
+  const loadBundle = (bundle: unknown, source: "live" | "file" = "file") => {
+    resetViewerState();
     setRawBundle(bundle);
+    setSourceType(source);
 
     // 1. Adapter による Plan 生成
     const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, { currentBuildSha });
@@ -75,9 +141,17 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     setVerificationOutcome(outcome);
   };
 
+  const lastLoadedBundleRef = useRef<unknown>(initialBundle ?? null);
+
   useEffect(() => {
-    if (isOpen && initialBundle) {
-      loadBundle(initialBundle);
+    if (!isOpen) return;
+
+    if (initialBundle) {
+      loadBundle(initialBundle, "live");
+      lastLoadedBundleRef.current = initialBundle;
+    } else {
+      resetViewerState();
+      lastLoadedBundleRef.current = null;
     }
   }, [isOpen, initialBundle]);
 
@@ -99,22 +173,19 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     e.target.value = "";
     if (!file) return;
 
+    // 新しいファイルを選択した時点で過去の Replay 状態をクリア（stale fallback 防止）
+    resetViewerState();
+
     try {
       const text = await file.text();
       const parseResult = parseDiagnosticJson(text);
       if (parseResult.type === "SUCCESS") {
-        loadBundle(parseResult.value);
+        loadBundle(parseResult.value, "file");
       } else {
         setParseError(parseResult.message);
-        setPlan(null);
-        setRawBundle(null);
-        setVerificationOutcome(null);
       }
     } catch {
       setParseError("ファイルの読み込み中にエラーが発生しました。");
-      setPlan(null);
-      setRawBundle(null);
-      setVerificationOutcome(null);
     }
   };
 
@@ -281,6 +352,16 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
                 }`}
               >
                 {verificationOutcome.type}
+              </span>
+            )}
+            {sourceType === "live" && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-indigo-950/80 text-indigo-300 border border-indigo-700">
+                現在の対戦
+              </span>
+            )}
+            {sourceType === "file" && (
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
+                JSON
               </span>
             )}
           </div>
@@ -476,6 +557,13 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
                   Path: {reconResult.difference.path}
                 </div>
               )}
+            </div>
+          )}
+
+          {plan && reconResult?.status === "TECHNICAL_ERROR" && (
+            <div className="p-3 rounded border border-red-200 bg-red-50 text-xs text-red-900 font-mono">
+              <div className="font-bold mb-1">✕ Replay 再構築エラー (Technical Error)</div>
+              <div>{reconResult.error}</div>
             </div>
           )}
 

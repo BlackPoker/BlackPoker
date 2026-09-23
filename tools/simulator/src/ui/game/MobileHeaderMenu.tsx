@@ -291,14 +291,14 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
               onOpenReplayViewer();
             }}
             className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
-            title="Diagnostic JSON を読み込み、盤面を1Decisionずつ再生・確認します"
+            title={activeMatchSeed !== undefined ? "現在の対戦をリプレイ" : "Diagnostic JSON を読み込み、盤面を1Decisionずつ再生・確認します"}
           >
             <div className="flex items-center gap-1.5">
               <span>▶</span>
               <span>Replay Viewer</span>
             </div>
             <span className="text-[10px] text-zinc-500 font-normal">
-              ※ 盤面を1手ずつ確認・再生
+              {activeMatchSeed !== undefined ? "※ 現在の対戦を1手ずつ確認・再生" : "※ 盤面を1手ずつ確認・再生"}
             </span>
           </button>
         )}
