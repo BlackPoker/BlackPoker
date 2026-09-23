@@ -1,5 +1,7 @@
-import type { BoardCard, BoardState, Operation, Player, Zone } from "../types";
+import { useState } from "react";
+import type { BoardCard, BoardState, MovementCause, Operation, Player, Zone } from "../types";
 import { cardName } from "../lib/cards";
+import { BoardOverlay } from "./BoardOverlay";
 export { cardName } from "../lib/cards";
 const labels: Record<Zone, string> = {
   life: "ライフ",
@@ -11,56 +13,32 @@ const labels: Record<Zone, string> = {
 const stateName = (state?: BoardCard["state"]) =>
   state === "drive" ? "ドライブ" : "チャージ";
 
-function MovementLane({
-  player,
-  operations,
-  before,
-  after,
-}: {
-  player: Player;
-  operations: Operation[];
-  before: BoardState;
-  after: BoardState;
-}) {
-  if (!operations.length) return null;
-  return (
-    <div className="board-movements" aria-label={`PLAYER ${player}のカード変化`}>
-      {operations.map((operation, index) => {
-        const sameZone = operation.from === operation.to;
-        const first = operation.cards[0];
-        const fromCard = before[player][operation.from].find((card) => card.card === first);
-        const toCard = after[player][operation.to].find((card) => card.card === first);
-        const privateBulwark = (operation.from === "bulwarks" || operation.to === "bulwarks")
-          && (toCard?.face === "down" || (!toCard && fromCard?.face === "down"));
-        const stateChanged = !!fromCard && !!toCard && fromCard.state !== toCard.state;
-        const cardText = privateBulwark
-          ? "裏向きの防壁"
-          : operation.cards.length > 1
-            ? `${operation.cards.length}枚のカード`
-            : first
-              ? cardName(first)
-              : "カード";
-        const change = sameZone
-          ? stateChanged
-            ? `${cardText}：${stateName(fromCard?.state)} → ${stateName(toCard?.state)}`
-            : fromCard
-              ? operation.label
-              : `${cardText}：${labels[operation.to]}に表示`
-          : `${cardText}：${labels[operation.from]} → ${labels[operation.to]}`;
-        return (
-          <div className="board-movement" key={`${player}-${index}`}>
-            <span className="movement-from">{stateChanged ? stateName(fromCard?.state) : labels[operation.from]}</span>
-            <span className="movement-path" aria-hidden="true">
-              <span className="movement-token">{stateChanged ? "↻" : cardText}</span>
-              <span className="movement-arrow">{stateChanged || !sameZone ? "→" : "・"}</span>
-            </span>
-            <span className="movement-to">{stateChanged ? stateName(toCard?.state) : labels[operation.to]}</span>
-            <span className="movement-description">{change}</span>
-          </div>
-        );
-      })}
-    </div>
-  );
+function movement(operation: Operation, before: BoardState, after: BoardState) {
+  const first = operation.cards[0];
+  const fromCard = before[operation.player][operation.from].find((card) => card.card === first);
+  const toCard = after[operation.player][operation.to].find((card) => card.card === first);
+  const hidden = (operation.from === "bulwarks" || operation.to === "bulwarks")
+    && (toCard?.face === "down" || (!toCard && fromCard?.face === "down"));
+  const name = hidden ? "裏向きの防壁" : operation.cards.length > 1
+    ? `${operation.cards.length}枚のカード` : first ? cardName(first) : "カード";
+  if (operation.from !== operation.to) {
+    return { kind: "route", text: `${name}：${labels[operation.from]} → ${labels[operation.to]}`,
+      chip: `${name}が移動` };
+  }
+  if (fromCard && toCard && fromCard.state !== toCard.state) {
+    return { kind: "state", text: `${name}：${stateName(fromCard.state)} → ${stateName(toCard.state)}`,
+      chip: `↻ ${stateName(fromCard.state)} → ${stateName(toCard.state)}` };
+  }
+  if (fromCard && toCard && fromCard.face !== toCard.face) {
+    return { kind: "state", text: `${name}：${fromCard.face === "down" ? "裏" : "表"} → ${toCard.face === "down" ? "裏" : "表"}`,
+      chip: "↻ 表示を変更" };
+  }
+  if (!fromCard && toCard) {
+    return { kind: "appear", text: `${name}：${labels[operation.to]}に追加`, chip: `${name}を追加` };
+  }
+  const blocker = operation.label.includes("ブロック");
+  return { kind: "mark", text: blocker ? `${name}：ブロッカーに指定` : operation.label,
+    chip: blocker ? "ブロッカーに指定" : "カードは移動なし" };
 }
 export function TutorialBoard({
   board,
@@ -70,6 +48,7 @@ export function TutorialBoard({
   applied,
   real,
   stepId,
+  cause,
 }: {
   board: BoardState;
   before: BoardState;
@@ -78,7 +57,9 @@ export function TutorialBoard({
   applied: boolean;
   real: boolean;
   stepId: string;
+  cause?: MovementCause;
 }) {
+  const [boardElement, setBoardElement] = useState<HTMLElement | null>(null);
   const realHints: Record<Zone, { main: string; sub: string }> = {
     life: stepId === "real-life"
       ? { main: "裏向きで16枚", sub: "実物カードの束" }
@@ -101,6 +82,8 @@ export function TutorialBoard({
     const cards = board[player][zone];
     const related = operations.filter((o) => o.player === player);
     const changed = !real && related.some((o) => (applied ? o.to : o.from) === zone);
+    const annotations = !real && applied ? related.filter((o) => o.to === zone)
+      .map((operation) => movement(operation, before, after)) : [];
     const stack = zone === "life" || zone === "grave";
     const shown = stack
       ? zone === "life"
@@ -110,6 +93,7 @@ export function TutorialBoard({
     return (
       <div
         key={zone}
+        data-zone={zone}
         data-testid={player + "-" + zone}
         className={`table-zone ${changed ? "changed-zone" : ""} zone-${zone}`}
       >
@@ -139,11 +123,17 @@ export function TutorialBoard({
           )}
           {!shown.length && !real && <span className="empty-zone">—</span>}
         </div>
+        {annotations.map((annotation, index) => (
+          <span className={`zone-motion-label motion-${annotation.kind}`} key={index} aria-hidden="true">
+            {annotation.chip}
+          </span>
+        ))}
       </div>
     );
   }
   return (
     <figure
+      ref={setBoardElement}
       className="persistent-board"
       aria-label={real ? "実物カードの配置ガイド" : "練習の盤面"}
     >
@@ -154,6 +144,11 @@ export function TutorialBoard({
             ? "変化後の盤面"
             : "操作前の盤面"}
       </figcaption>
+      {!real && applied && before.turn !== after.turn && (
+        <div className="turn-motion" aria-label={`ターン：PLAYER ${before.turn}からPLAYER ${after.turn}へ`}>
+          PLAYER {before.turn} <span aria-hidden="true">→</span> PLAYER {after.turn}
+        </div>
+      )}
       {(["B", "A"] as const).map((p) => (
         <section
           key={p}
@@ -163,6 +158,9 @@ export function TutorialBoard({
           <header>
             <strong>PLAYER {p}</strong>
             {board.turn === p && <span>いまのターン</span>}
+            {!real && applied && !operations.length && before.turn === after.turn &&
+              cause && cause.phase !== "setup" && board.turn === p &&
+              <span className="board-still-label">カード移動なし</span>}
           </header>
           <div className="table-zones">
             {(p === "A"
@@ -170,16 +168,20 @@ export function TutorialBoard({
               : ["grave", "bulwarks", "soldiers", "life", "hand"]
             ).map((z) => zone(p, z as Zone))}
           </div>
-          {!real && applied && (
-            <MovementLane
-              player={p}
-              operations={operations.filter((operation) => operation.player === p)}
-              before={before}
-              after={after}
-            />
-          )}
         </section>
       ))}
+      {!real && applied && boardElement &&
+        <BoardOverlay board={boardElement} operations={operations} />}
+      {!real && applied && (
+        <ul className="visually-hidden" aria-label="カードの変化">
+          {operations.map((operation, index) => (
+            <li key={index}>PLAYER {operation.player}：{movement(operation, before, after).text}</li>
+          ))}
+          {before.turn !== after.turn && <li>ターン：PLAYER {before.turn} → PLAYER {after.turn}</li>}
+          {!operations.length && before.turn === after.turn && cause && cause.phase !== "setup" &&
+            <li>カード移動なし</li>}
+        </ul>
+      )}
     </figure>
   );
 }

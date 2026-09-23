@@ -1848,6 +1848,7 @@ button {
   color: #52525b;
 }
 .persistent-board {
+  position: relative;
   margin: 14px 0;
   border: 1px solid #d4d4d8;
   background: #fafafa;
@@ -1884,7 +1885,7 @@ button {
 .table-zones {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
-  gap: 6px;
+  gap: 12px;
 }
 .table-zone {
   position: relative;
@@ -1989,68 +1990,54 @@ button {
   border-color: #71717a;
   background: #f4f4f5;
 }
-.board-movements {
-  display: grid;
-  gap: 6px;
-  margin-top: 8px;
+.board-overlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 2;
 }
-.board-movement {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(52px, 1fr) minmax(90px, 2fr) minmax(52px, 1fr);
-  align-items: center;
-  gap: 4px 8px;
-  padding: 7px 10px;
-  border: 1px solid #d4d4d8;
-  border-radius: 6px;
-  background: #ffffff;
-  text-align: center;
+.board-route {
+  fill: none;
+  stroke: #18181b;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: board-route-in 0.35s ease-out;
 }
-.movement-from,
-.movement-to {
-  min-width: 0;
-  color: #52525b;
-  font-size: 10px;
-  font-weight: 700;
-}
-.movement-path {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 5px;
-  padding: 0 7px;
-  border-bottom: 1px solid #a1a1aa;
-}
-.movement-token {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 2px 5px;
-  border: 1px solid #71717a;
-  border-radius: 4px;
+.zone-motion-label {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  margin: 3px auto 0;
+  padding: 2px 4px;
+  border-radius: 3px;
   color: #18181b;
-  background: #fafafa;
-  font-size: 10px;
+  background: #e4e4e7;
+  font-size: 9px;
   font-weight: 700;
-  animation: card-route 0.35s ease-out;
-}
-.movement-arrow {
-  flex: 0 0 auto;
-  color: #18181b;
-  background: #fff;
-  font-size: 16px;
-  font-weight: 800;
-}
-.movement-description {
-  grid-column: 1 / -1;
-  min-width: 0;
+  line-height: 1.25;
   overflow-wrap: anywhere;
-  color: #3f3f46;
+  animation: board-label-in 0.35s ease-out;
+}
+.zone-motion-label.motion-state,
+.zone-motion-label.motion-mark { background: #d4d4d8; }
+.turn-motion {
+  padding: 5px 8px;
+  color: #18181b;
+  background: #e4e4e7;
+  text-align: center;
   font-size: 10px;
-  font-weight: 700;
-  line-height: 1.45;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.turn-motion span { margin-inline: 10px; font-size: 14px; }
+.player-half header .board-still-label {
+  margin-left: auto;
+  color: #18181b;
+  background: #e4e4e7;
 }
 .alternate-example {
   margin: 9px 0 15px;
@@ -2085,9 +2072,13 @@ button {
   font-size: 10px !important;
   font-weight: 700;
 }
-@keyframes card-route {
-  from { opacity: 0.35; transform: translateX(-24px); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes board-route-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes board-label-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 @keyframes board-card-flash {
   from { box-shadow: 0 0 0 7px rgba(24, 24, 27, 0.2); }
@@ -2447,7 +2438,7 @@ a:focus-visible {
     padding: 7px;
   }
   .table-zones {
-    gap: 4px;
+    gap: 10px;
   }
   .zone-label {
     font-size: 9px;

@@ -101,7 +101,7 @@ describe("hands-on tutorial", () => {
     await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByLabelText("A ♣6 表向き 横向き")).toBeVisible();
     expect(screen.getByRole("status")).toHaveTextContent("アタックの解決で");
-    expect(screen.getByLabelText("PLAYER Aのカード変化")).toHaveTextContent("♣6：チャージ → ドライブ");
+    expect(screen.getByRole("list", { name: "カードの変化" })).toHaveTextContent("♣6：チャージ → ドライブ");
     view.unmount();
     at("damage");
     render(<App />);
@@ -293,15 +293,16 @@ describe("hands-on tutorial", () => {
     expect(actions?.children[1]).toHaveClass("primary-button");
     expect(actions?.children[0]).toBeDisabled();
   });
-  it("固定練習の盤面内に移動元・矢印・移動先を表示する", async () => {
+  it("固定練習は下部の移動表を使わず盤面SVGと読み上げテキストを表示する", async () => {
     at("summon");
     render(<App />);
     expect(screen.queryByRole("region", { name: "カードの動かし方" })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    const lane = screen.getByLabelText("PLAYER Aのカード変化");
-    expect(lane).toHaveTextContent("手札");
-    expect(lane).toHaveTextContent("兵士");
-    expect(lane).toHaveTextContent("→");
+    expect(document.querySelector(".board-movements")).toBeNull();
+    expect(document.querySelector("svg.board-overlay")).toBeInTheDocument();
+    const changes = screen.getByRole("list", { name: "カードの変化" });
+    expect(changes).toHaveTextContent("♠2：手札 → 兵士");
+    expect(within(screen.getByTestId("A-soldiers")).getByText("♠2が移動")).toBeVisible();
     expect(screen.queryByText(/ここへ/)).toBeNull();
   });
 });

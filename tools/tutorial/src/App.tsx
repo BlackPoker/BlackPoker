@@ -222,6 +222,7 @@ export default function App() {
               applied={progress.applied}
               real={step.mode === "real"}
               stepId={step.id}
+              cause={step.cause}
             />
             {step.mode === "real" && !progress.applied && (
               <MoveGuide
