@@ -9,6 +9,7 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
 import { renderToString } from "react-dom/server";
+import TestRenderer, { act } from "react-test-renderer";
 import {
   ReplayViewerModal,
   initializeReplayViewerBundle,
@@ -33,7 +34,7 @@ import {
 } from "../../ui/playtest/PlaytestDecisionTranscript";
 import { ReplayPlanV1 } from "../../engine/replay/ReplayTypes";
 
-describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
+describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
   const catalog = loadRegulationCatalogForBrowser();
   const fullRulePackage = loadRulePackageForBrowser();
   const currentBuildSha = "local";
@@ -174,45 +175,142 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     }
   });
 
-  it("4. renderToString 実行時に plan が既にロードされている状態 (initialPlan) であっても render 内部で reconstructMatch が実行されないこと (Eliminating Test Gap: No Render Reconstruction on Pre-loaded Plan)", () => {
+  it("4. initialBundle からの本物の React Lifecycle (mount -> bundle load -> plan更新 -> 再構築effect -> reconState更新 -> 盤面描画) と render時非実行の検証", () => {
     const bundle = createSampleBundle(42);
-    const { plan, verificationOutcome } = initializeReplayViewerBundle(bundle, {
-      currentBuildSha,
-      catalog,
-      fullRulePackage,
-    });
-    expect(plan).not.toBeNull();
+    let renderPhaseCalls = 0;
+    let effectPhaseCalls = 0;
 
-    const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch");
+    const actualReconstructMatch = ReplayReconstructionService.reconstructMatch;
+    const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch").mockImplementation((...args) => {
+      const stack = new Error().stack || "";
+      // React の renderPhase 中であれば stack に renderWithHooks が含まれる
+      if (stack.includes("renderWithHooks")) {
+        renderPhaseCalls++;
+      } else {
+        effectPhaseCalls++;
+      }
+      return actualReconstructMatch(...args);
+    });
 
     try {
-      const html = renderToString(
+      let renderer!: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          React.createElement(ReplayViewerModal, {
+            isOpen: true,
+            onClose: dummyOnClose,
+            catalog,
+            fullRulePackage,
+            currentBuildSha,
+            initialBundle: bundle,
+            initialSource: "live",
+          })
+        );
+      });
+
+      // 1. render パスでの reconstructMatch 呼び出しは厳密に 0 回であること (useMemo / render body からの完全排除)
+      expect(renderPhaseCalls).toBe(0);
+
+      // 2. effect パスによってのみ呼び出されていること (1回以上)
+      expect(effectPhaseCalls).toBeGreaterThanOrEqual(1);
+      expect(reconSpy).toHaveBeenCalled();
+
+      // 3. 最終的に本物の Lifecycle を経て盤面が正常に描画されていること
+      const renderedJson = JSON.stringify(renderer.toJSON());
+      expect(renderedJson).toContain("Replay Viewer");
+      expect(renderedJson).toContain("現在の対戦");
+      expect(renderedJson).toContain("初期盤面（判断実行前）");
+      expect(renderedJson).toContain("Player A");
+    } finally {
+      reconSpy.mockRestore();
+    }
+  });
+
+  it("5. Decision移動Lifecycle (Decision 0 -> Next -> Decision 1) における Stale State 防止と盤面更新の検証", () => {
+    const bundle = createSampleBundle(42);
+    let renderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      renderer = TestRenderer.create(
         React.createElement(ReplayViewerModal, {
           isOpen: true,
           onClose: dummyOnClose,
           catalog,
           fullRulePackage,
           currentBuildSha,
-          initialPlan: plan,
-          initialVerificationOutcome: verificationOutcome,
+          initialBundle: bundle,
           initialSource: "live",
         })
       );
+    });
 
-      // plan がロード済みの状態でも、render パスで reconstructMatch は一切呼ばれないこと
-      expect(reconSpy).toHaveBeenCalledTimes(0);
+    // 初期状態: Decision 0
+    expect(JSON.stringify(renderer.toJSON())).toContain("初期盤面（判断実行前）");
 
-      // コントロールバーやロード中表示がクラッシュせず正常に描画されること
-      expect(html).toContain("Replay Viewer");
-      expect(html).toContain("現在の対戦");
-      expect(html).toContain("Decision");
-      expect(html).toContain("盤面を読み込み中...");
-    } finally {
-      reconSpy.mockRestore();
-    }
+    // Next ボタンを取得
+    const nextBtn = renderer.root.find((el) => el.props["aria-label"] === "1つ次のDecisionへ");
+    expect(nextBtn).toBeDefined();
+    expect(nextBtn.props.disabled).toBe(false);
+
+    // 次へ進める
+    act(() => {
+      nextBtn.props.onClick();
+    });
+
+    // Decision 1 に進んだ後の盤面が表示されていること
+    const renderedJson = JSON.stringify(renderer.toJSON());
+    expect(renderedJson).toContain("Seq #");
+    expect(renderedJson).toContain("Player A");
+    expect(renderedJson).toContain("選択パターン");
   });
 
-  it("5. resolveActiveReconstructResult Pure Helper による決定論的解決と Stale State 防止契約", () => {
+  it("6. 同一 Component Instance での Bundle A -> Bundle B 切替における Stale 破棄・Source 更新・再構築検証", () => {
+    const bundleA = createSampleBundle(100);
+    const bundleB = createSampleBundle(200);
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      renderer = TestRenderer.create(
+        React.createElement(ReplayViewerModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          catalog,
+          fullRulePackage,
+          currentBuildSha,
+          initialBundle: bundleA,
+          initialSource: "live",
+        })
+      );
+    });
+
+    // Bundle A の状態確認 (Seed 100, Source: "live")
+    expect(JSON.stringify(renderer.toJSON())).toContain("現在の対戦");
+    expect(renderer.root.findByProps({ matchSeed: 100 })).toBeDefined();
+
+    // 同一インスタンスのまま Bundle B (Seed 200, Source: "json") へ更新
+    act(() => {
+      renderer.update(
+        React.createElement(ReplayViewerModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          catalog,
+          fullRulePackage,
+          currentBuildSha,
+          initialBundle: bundleB,
+          initialSource: "json",
+        })
+      );
+    });
+
+    // Bundle B の状態へ切り替わっていること
+    const renderedJson = JSON.stringify(renderer.toJSON());
+    expect(renderedJson).toContain("JSON");
+    expect(renderedJson).not.toContain("現在の対戦");
+    expect(renderer.root.findByProps({ matchSeed: 200 })).toBeDefined();
+    expect(renderer.root.findAllByProps({ matchSeed: 100 }).length).toBe(0);
+  });
+
+  it("7. resolveActiveReconstructResult Pure Helper による決定論的解決と Stale State 防止契約", () => {
     const dummyPlanA: ReplayPlanV1 = {
       environmentId: "core-battle",
       sourceBuild: { sha: "test", ref: "test" },
@@ -264,61 +362,8 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     expect(resolveActiveReconstructResult(stateNullResult, dummyPlanA, 1)).toBeNull();
   });
 
-  it("6. initialPlan と 事前計算された initialReconResult が渡された場合、render 内で reconstructMatch を呼ぶことなく即時盤面を描画できること", () => {
-    const bundle = createSampleBundle(42);
-    const { plan, verificationOutcome } = initializeReplayViewerBundle(bundle, {
-      currentBuildSha,
-      catalog,
-      fullRulePackage,
-    });
-    expect(plan).not.toBeNull();
-
-    // 描画外で事前に再構築を完了させておく
-    const precomputedResult = ReplayReconstructionService.reconstructMatch({
-      environmentId: plan!.environmentId,
-      seed: plan!.seed,
-      transcript: plan!.decisions,
-      decisionCount: 0,
-      trailingNormalization: "EXTERNAL_DECISION_BOUNDARY",
-      catalog,
-      fullRulePackage,
-      expectedRulePackage: plan!.sourceRulePackage,
-    });
-    expect(precomputedResult.status).toBe("SUCCESS");
-
-    const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch");
-
-    try {
-      const html = renderToString(
-        React.createElement(ReplayViewerModal, {
-          isOpen: true,
-          onClose: dummyOnClose,
-          catalog,
-          fullRulePackage,
-          currentBuildSha,
-          initialPlan: plan,
-          initialVerificationOutcome: verificationOutcome,
-          initialReconResult: precomputedResult,
-          initialSource: "live",
-        })
-      );
-
-      // render パスで reconstructMatch は一度も実行されないこと
-      expect(reconSpy).toHaveBeenCalledTimes(0);
-
-      // 盤面情報 (GameStatusBar、Player A、初期盤面表示) が即時描画されていること
-      expect(html).toContain("Replay Viewer");
-      expect(html).toContain("Decision");
-      expect(html).toContain("初期盤面（判断実行前）");
-      expect(html).toContain("Player A");
-      expect(html).not.toContain("盤面を読み込み中...");
-    } finally {
-      reconSpy.mockRestore();
-    }
-  });
-
-  it("7. 明示的 ReplayViewerSource に応じたバッジ表示契約 (live -> 現在の対戦, json -> JSON, なし -> 非表示)", () => {
-    // 7-A: live source
+  it("8. 明示的 ReplayViewerSource に応じたバッジ表示契約 (live -> 現在の対戦, json -> JSON, なし -> 非表示)", () => {
+    // 8-A: live source
     const htmlLive = renderToString(
       React.createElement(ReplayViewerModal, {
         isOpen: true,
@@ -331,7 +376,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     );
     expect(htmlLive).toContain("現在の対戦");
 
-    // 7-B: json source
+    // 8-B: json source
     const htmlJson = renderToString(
       React.createElement(ReplayViewerModal, {
         isOpen: true,
@@ -345,7 +390,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     expect(htmlJson).toContain("JSON");
     expect(htmlJson).not.toContain("現在の対戦");
 
-    // 7-C: no source
+    // 8-C: no source
     const htmlNone = renderToString(
       React.createElement(ReplayViewerModal, {
         isOpen: true,
@@ -358,7 +403,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     expect(htmlNone).not.toContain("現在の対戦");
   });
 
-  it("8. resolveReplayViewerTrailingNormalization ヘルパーの決定論的判定契約", () => {
+  it("9. resolveReplayViewerTrailingNormalization ヘルパーの決定論的判定契約", () => {
     const dummyDecisions: any[] = [{ seq: 1 }, { seq: 2 }, { seq: 3 }];
     const basePlan: ReplayPlanV1 = {
       environmentId: "core-battle",
@@ -389,7 +434,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2)", () => {
     expect(resolveReplayViewerTrailingNormalization(progressedPlan, 3)).toBe("EXACT_AFTER_TRANSCRIPT");
   });
 
-  it("9. initializeReplayViewerBundle Pure Helper による決定論的状態生成と Stale State 防止契約", () => {
+  it("10. initializeReplayViewerBundle Pure Helper による決定論的状態生成と Stale State 防止契約", () => {
     const bundleA = createSampleBundle(100);
     const bundleB = createSampleBundle(200);
 

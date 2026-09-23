@@ -84,9 +84,6 @@ export interface ReplayViewerModalProps {
   readonly currentBuildSha: string;
   readonly initialBundle?: unknown;
   readonly initialSource?: ReplayViewerSource;
-  readonly initialPlan?: ReplayPlanV1 | null;
-  readonly initialVerificationOutcome?: ReplayVerificationOutcome | null;
-  readonly initialReconResult?: ReconstructMatchResult | null;
 }
 
 export interface ViewerReconState {
@@ -122,29 +119,24 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   currentBuildSha,
   initialBundle,
   initialSource,
-  initialPlan,
-  initialVerificationOutcome,
-  initialReconResult,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [rawBundle, setRawBundle] = useState<unknown | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<ReplayViewerSource | null>(initialSource ?? null);
-  const [plan, setPlan] = useState<ReplayPlanV1 | null>(initialPlan ?? null);
-  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(
-    initialVerificationOutcome ?? null
-  );
+  const [plan, setPlan] = useState<ReplayPlanV1 | null>(null);
+  const [verificationOutcome, setVerificationOutcome] = useState<ReplayVerificationOutcome | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [viewerPerspective, setViewerPerspective] = useState<"p1" | "p2">("p1");
 
   // 再構築状態管理 (render 外で更新)
-  const [reconState, setReconState] = useState<ViewerReconState>(() => ({
-    plan: initialPlan ?? null,
+  const [reconState, setReconState] = useState<ViewerReconState>({
+    plan: null,
     index: 0,
-    result: initialReconResult ?? null,
-  }));
+    result: null,
+  });
 
   // ビューア内部状態の完全リセット (stale state 防止)
   const resetViewerState = () => {
@@ -199,20 +191,15 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     if (initialBundle) {
       loadBundle(initialBundle, initialSource ?? "json");
       lastLoadedBundleRef.current = initialBundle;
-    } else if (initialPlan) {
-      setPlan(initialPlan);
-      if (initialVerificationOutcome !== undefined) {
-        setVerificationOutcome(initialVerificationOutcome);
-      }
     } else {
       resetViewerState();
       lastLoadedBundleRef.current = null;
     }
-  }, [isOpen, initialBundle, initialSource, initialPlan, initialVerificationOutcome]);
+  }, [isOpen, initialBundle, initialSource]);
 
   // モーダルクローズ時やEscapeキー
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || typeof window === "undefined") return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
