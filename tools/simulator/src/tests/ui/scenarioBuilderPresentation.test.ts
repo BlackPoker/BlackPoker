@@ -787,7 +787,10 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
             players: {
               p1: {
                 hand: [{ suit: "H", rank: "7" }],
-                life: { count: 2 },
+                life: {
+                  cards: [{ suit: "H", rank: "A" }, { suit: "S", rank: "K" }],
+                  count: 3,
+                },
               },
               p2: {
                 life: { count: 37 },
@@ -817,13 +820,24 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(buttonTexts).toContain("A");
     expect(buttonTexts).toContain("K");
 
-    // 3. ライフ目標枚数指定に伴う墓地自動補完注記の存在確認
+    // 3. UX 文言の改善確認 (デッキ: -> 使用カード:, 説明文の更新)
+    expect(snapshot).toContain("使用カード:");
+    expect(snapshot).toContain("必要な条件だけ指定すると、残りのカードは合法な局面になるよう自動補完されます");
+    expect(snapshot).not.toContain("デッキ: 54枚");
+
+    // 4. ライフ目標枚数指定に伴う墓地自動補完注記の存在確認
     expect(snapshot).toContain("※ ライフ指定に伴い残余カードは自動補完");
 
-    // 4. AUTOバッジの存在確認 (ライフ count 2 で fixed 0 -> AUTO × 2)
-    expect(snapshot).toContain("AUTO × 2");
+    // 5. ライフ TOP UI の存在確認 (先頭カードに (TOP), 2枚目には付与されない, 説明注記)
+    expect(snapshot).toContain("※ 上から順に配置（先頭がTOP）");
+    expect(snapshot).toContain("♡A (TOP)");
+    expect(snapshot).toContain("♠K");
+    expect(snapshot).not.toContain("♠K (TOP)");
 
-    // 5. 手札の目標枚数を 5 に変更 -> AUTO × 4 バッジが表示されること
+    // 6. AUTOバッジの存在確認 (ライフ count 3 で fixed 2 -> AUTO × 1)
+    expect(snapshot).toContain("AUTO × 1");
+
+    // 7. 手札の目標枚数を 5 に変更 -> AUTO × 4 バッジが表示されること
     const inputs = testRenderer.root.findAllByType("input");
     const handCountInput = inputs.find(
       (inp) => inp.props.value === 1 && inp.props.placeholder === "自動"

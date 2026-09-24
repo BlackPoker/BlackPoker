@@ -80,11 +80,11 @@ export class ScenarioAuthoringResolver {
     const frameHasPack = typeof frame.setup.packCount === "number" && frame.setup.packCount > 0;
 
     // 2. メタデータの検証
-    if (typeof draft.seed !== "number" || !Number.isInteger(draft.seed) || draft.seed < 0) {
+    if (typeof draft.seed !== "number" || !Number.isSafeInteger(draft.seed) || draft.seed < 0) {
       errors.push({
         code: "INVALID_SEED",
         path: "seed",
-        message: "seed は 0 以上の整数でなければなりません。",
+        message: "seed は 0 以上の安全な整数 (safe integer >= 0) でなければなりません。",
       });
     }
 
@@ -104,11 +104,11 @@ export class ScenarioAuthoringResolver {
       });
     }
 
-    if (draft.turnCount !== undefined && (typeof draft.turnCount !== "number" || !Number.isInteger(draft.turnCount) || draft.turnCount < 1)) {
+    if (draft.turnCount !== undefined && (typeof draft.turnCount !== "number" || !Number.isSafeInteger(draft.turnCount) || draft.turnCount < 1)) {
       errors.push({
         code: "SCHEMA_VIOLATION",
         path: "turnCount",
-        message: "turnCount は 1 以上の整数でなければなりません。",
+        message: "turnCount は 1 以上の安全な整数 (safe integer >= 1) でなければなりません。",
       });
     }
 
@@ -309,7 +309,17 @@ export class ScenarioAuthoringResolver {
         } else {
           const handObj = playerDraft.hand as ScenarioAuthoringHandDraftV1;
           fixedHandRefs = handObj.fixedCards ?? [];
-          targetHandCount = handObj.count;
+          if (handObj.count !== undefined) {
+            if (typeof handObj.count !== "number" || !Number.isSafeInteger(handObj.count) || handObj.count < 0) {
+              errors.push({
+                code: "INVALID_ZONE_CONFIG",
+                path: `players.${playerKey}.hand.count`,
+                message: "hand の目標枚数は 0 以上の安全な整数 (safe integer >= 0) でなければなりません。",
+              });
+            } else {
+              targetHandCount = handObj.count;
+            }
+          }
         }
       }
 
@@ -357,7 +367,15 @@ export class ScenarioAuthoringResolver {
           fixedPackRefs = playerDraft.pack.cards;
         }
         if (playerDraft.pack.count !== undefined) {
-          targetPackCount = playerDraft.pack.count;
+          if (typeof playerDraft.pack.count !== "number" || !Number.isSafeInteger(playerDraft.pack.count) || playerDraft.pack.count < 0) {
+            errors.push({
+              code: "INVALID_ZONE_CONFIG",
+              path: `players.${playerKey}.pack.count`,
+              message: "pack の目標枚数は 0 以上の安全な整数 (safe integer >= 0) でなければなりません。",
+            });
+          } else {
+            targetPackCount = playerDraft.pack.count;
+          }
         }
       }
 
@@ -379,7 +397,15 @@ export class ScenarioAuthoringResolver {
           fixedLifeRefs = playerDraft.life.cards;
         }
         if (playerDraft.life.count !== undefined) {
-          targetLifeCount = playerDraft.life.count;
+          if (typeof playerDraft.life.count !== "number" || !Number.isSafeInteger(playerDraft.life.count) || playerDraft.life.count < 0) {
+            errors.push({
+              code: "INVALID_ZONE_CONFIG",
+              path: `players.${playerKey}.life.count`,
+              message: "life の目標枚数は 0 以上の安全な整数 (safe integer >= 0) でなければなりません。",
+            });
+          } else {
+            targetLifeCount = playerDraft.life.count;
+          }
         }
       }
 

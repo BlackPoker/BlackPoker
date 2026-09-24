@@ -512,7 +512,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 初期盤面設定 (Initial Setup)
               </h2>
               <p className="text-[11px] text-zinc-500 font-mono">
-                公式レギュレーションの初期配置を高レベルに編集・共有します
+                必要な条件だけ指定すると、残りのカードは合法な局面になるよう自動補完されます
               </p>
             </div>
           </div>
@@ -543,7 +543,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           {currentDeckProfile && (
             <div className="flex items-center gap-2 text-[11px] text-zinc-600">
               <span className="px-2 py-0.5 bg-white border border-zinc-300 rounded font-bold">
-                デッキ: {currentDeckProfile.cardCount}枚
+                使用カード: {currentDeckProfile.cardCount}枚
               </span>
               {currentDeckProfile.notice && (
                 <span className="hidden sm:inline text-zinc-500">
@@ -860,39 +860,12 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
     return Array.from(new Set(ranks));
   }, [deckCards, selectedSuit]);
 
-  // 汎用自動 occurrence 解決ヘルパー (同一 suit/rank が複数ある Deck Profile 全般に対応)
-  const resolveNextCardRef = useCallback(
+  // カードピッカーから新規追加するカードは { suit, rank } のみ（occurrence決定はScenarioAuthoringResolverに委譲）
+  const createNewCardRef = useCallback(
     (suit: "S" | "H" | "D" | "C" | "J", rank: string): ScenarioCardRefV1 => {
-      const matchingDeckCards = deckCards.filter((c) => c.suit === suit && c.rank === rank);
-      if (matchingDeckCards.length <= 1) {
-        return { suit, rank };
-      }
-
-      // 該当プレイヤーの全領域 + ドラフト中カードから既使用 occurrence を収集
-      const usedOccurrences = new Set<number>();
-      const checkCard = (c: ScenarioCardRefV1) => {
-        if (c.suit === suit && c.rank === rank && c.occurrence !== undefined) {
-          usedOccurrences.add(c.occurrence);
-        }
-      };
-
-      hand.forEach(checkCard);
-      grave.forEach(checkCard);
-      lifeCards.forEach(checkCard);
-      packCards.forEach(checkCard);
-      field.forEach((u) => u.cards?.forEach(checkCard));
-      draftUnitCards.forEach(checkCard);
-
-      for (let i = 0; i < matchingDeckCards.length; i++) {
-        if (!usedOccurrences.has(i)) {
-          return { suit, rank, occurrence: i };
-        }
-      }
-
-      // 全枚数使用済みの場合は matchingDeckCards.length を付与（バリデーションで fail-closed 検出）
-      return { suit, rank, occurrence: matchingDeckCards.length };
+      return { suit, rank };
     },
-    [deckCards, hand, grave, lifeCards, packCards, field, draftUnitCards]
+    []
   );
 
   return (
@@ -1001,21 +974,21 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           {/* 追加ボタン群 */}
           <div className="flex flex-wrap items-center gap-2 pt-1">
             <button
-              onClick={() => onAddCard("hand", resolveNextCardRef(selectedSuit, selectedRank))}
+              onClick={() => onAddCard("hand", createNewCardRef(selectedSuit, selectedRank))}
               className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
             >
               + 手札に追加
             </button>
 
             <button
-              onClick={() => onAddCard("grave", resolveNextCardRef(selectedSuit, selectedRank))}
+              onClick={() => onAddCard("grave", createNewCardRef(selectedSuit, selectedRank))}
               className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
             >
               + 墓地に追加
             </button>
 
             <button
-              onClick={() => onAddCard("life", resolveNextCardRef(selectedSuit, selectedRank))}
+              onClick={() => onAddCard("life", createNewCardRef(selectedSuit, selectedRank))}
               className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
             >
               + ライフ固定に追加
@@ -1023,7 +996,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
 
             {frameHasPack && (
               <button
-                onClick={() => onAddCard("pack", resolveNextCardRef(selectedSuit, selectedRank))}
+                onClick={() => onAddCard("pack", createNewCardRef(selectedSuit, selectedRank))}
                 className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
               >
                 + パック固定に追加
@@ -1075,7 +1048,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             </div>
 
             <button
-              onClick={() => setDraftUnitCards((prev) => [...prev, resolveNextCardRef(selectedSuit, selectedRank)])}
+              onClick={() => setDraftUnitCards((prev) => [...prev, createNewCardRef(selectedSuit, selectedRank)])}
               className="px-3 py-1.5 bg-blue-50 border border-blue-300 text-blue-800 hover:bg-blue-100 rounded font-bold shadow-sm"
             >
               + ユニット構成カードに追加
@@ -1086,7 +1059,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 const cardsToDeploy =
                   draftUnitCards.length > 0
                     ? draftUnitCards
-                    : [resolveNextCardRef(selectedSuit, selectedRank)];
+                    : [createNewCardRef(selectedSuit, selectedRank)];
                 onAddUnit(selectedComponentId, cardsToDeploy, selectedState, selectedFace);
                 setDraftUnitCards([]);
               }}
@@ -1235,7 +1208,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                         : "bg-zinc-100 border-zinc-300 text-zinc-800"
                     }`}
                   >
-                    {formatScenarioCardChip(c)}{isTop ? " (TOP)" : ""}
+                    {`${formatScenarioCardChip(c)}${isTop ? " (TOP)" : ""}`}
                     <button
                       onClick={() => onRemoveCard("grave", i)}
                       className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -1259,6 +1232,9 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
               </span>
             )}
           </div>
+          <p className="text-[10px] text-zinc-500 font-mono italic">
+            ※ 上から順に配置（先頭がTOP）
+          </p>
           <div className="flex items-center gap-1.5 text-[11px]">
             <span className="text-zinc-500">目標枚数:</span>
             <input
@@ -1278,20 +1254,27 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <span className="text-zinc-400 italic text-[11px]">固定カードなし</span>
           ) : (
             <div className="flex flex-wrap gap-1.5">
-              {lifeCards.map((c, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200 rounded font-bold text-rose-800 text-[10px]"
-                >
-                  {formatScenarioCardChip(c)}
-                  <button
-                    onClick={() => onRemoveCard("life", i)}
-                    className="text-rose-400 hover:text-red-600 font-bold"
+              {lifeCards.map((c, i) => {
+                const isTop = i === 0;
+                return (
+                  <span
+                    key={i}
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold text-[10px] ${
+                      isTop
+                        ? "bg-rose-100 border-rose-300 text-rose-900"
+                        : "bg-rose-50 border-rose-200 text-rose-800"
+                    }`}
                   >
-                    ×
-                  </button>
-                </span>
-              ))}
+                    {`${formatScenarioCardChip(c)}${isTop ? " (TOP)" : ""}`}
+                    <button
+                      onClick={() => onRemoveCard("life", i)}
+                      className="text-rose-400 hover:text-red-600 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
             </div>
           )}
         </div>

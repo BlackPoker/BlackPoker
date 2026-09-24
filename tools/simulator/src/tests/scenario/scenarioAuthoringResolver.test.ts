@@ -448,4 +448,78 @@ describe("ScenarioAuthoringResolver Unit Tests (BP-SIM-SCENARIO-1.2-POSITION-AUT
       expect(resPack.errors.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack"))).toBe(true);
     }
   });
+
+  // Test L: 数値入力の fail-closed 検証 (seed, turnCount, hand.count, life.count, pack.count)
+  it("Test L: -1, 1.5, NaN, Infinity, MAX_SAFE_INTEGER + 1 などの不正数値を拒否すること", () => {
+    const invalidNumbers = [-1, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1];
+
+    const baseDraft: ScenarioAuthoringDraftV1 = {
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {},
+        p2: {},
+      },
+    };
+
+    // 1. seed 検証
+    for (const val of invalidNumbers) {
+      const draft = { ...baseDraft, seed: val as any };
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_SEED" && e.path === "seed")).toBe(true);
+    }
+
+    // 2. turnCount 検証 (0, -1, 1.5, NaN, Infinity, MAX_SAFE_INTEGER + 1)
+    for (const val of [0, ...invalidNumbers]) {
+      const draft = { ...baseDraft, turnCount: val as any };
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "SCHEMA_VIOLATION" && e.path === "turnCount")).toBe(true);
+    }
+
+    // 3. hand.count 検証
+    for (const val of invalidNumbers) {
+      const draft: ScenarioAuthoringDraftV1 = {
+        ...baseDraft,
+        players: {
+          p1: { hand: { count: val as any } },
+          p2: {},
+        },
+      };
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("hand.count"))).toBe(true);
+    }
+
+    // 4. life.count 検証
+    for (const val of invalidNumbers) {
+      const draft: ScenarioAuthoringDraftV1 = {
+        ...baseDraft,
+        players: {
+          p1: { life: { count: val as any } },
+          p2: {},
+        },
+      };
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("life.count"))).toBe(true);
+    }
+
+    // 5. pack.count 検証
+    for (const val of invalidNumbers) {
+      const draft: ScenarioAuthoringDraftV1 = {
+        ...baseDraft,
+        players: {
+          p1: { pack: { count: val as any } },
+          p2: {},
+        },
+      };
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack.count"))).toBe(true);
+    }
+  });
 });
