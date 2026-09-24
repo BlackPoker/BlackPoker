@@ -69,7 +69,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     expect(html).toContain("初期盤面設定");
     expect(html).toContain("Initial Setup");
-    expect(html).toContain("対戦環境 (公式レギュレーションのみ):");
+    expect(html).toContain("対戦レギュレーション:");
+    expect(html).not.toContain("対戦環境 (公式レギュレーションのみ):");
     expect(html).toContain("Turn Player:");
     expect(html).toContain("Chance Player:");
     expect(html).toContain("初期盤面で対戦開始");
@@ -224,7 +225,11 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     // 1. URL パラメータにエンコード
     const param = encodeScenarioDefinitionV1ToUrlParam(defA);
 
-    // 2. 実Component lifecycle によるマウント
+    // 2. ブラウザURL復元契約に基づき、URLからデコードされた Definition を initialDefinition として渡す
+    const decodeResult = decodeScenarioDefinitionV1FromUrlParam(param);
+    expect(decodeResult.success).toBe(true);
+    if (!decodeResult.success) return;
+
     const onStartScenario = vi.fn();
     let testRenderer!: TestRenderer.ReactTestRenderer;
     act(() => {
@@ -234,29 +239,20 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
           initialTab: "settings",
           catalog,
           fullRulePackage,
+          initialDefinition: decodeResult.definition,
           onClose: dummyOnClose,
           onStartScenario,
         })
       );
     });
 
-    // 3. URL input onChange
-    const urlInput = testRenderer.root.findByProps({
-      placeholder: "シナリオ共有URLまたはパラメータを入力...",
-    });
-    act(() => {
-      urlInput.props.onChange({ target: { value: param } });
-    });
-
-    // 4. "読込" onClick
+    // 3. 手動URL入力欄および読込ボタンが存在しないことを確認 (Issue D)
+    const inputs = testRenderer.root.findAllByType("input");
+    expect(inputs.some((inp) => inp.props.placeholder === "シナリオ共有URLまたはパラメータを入力...")).toBe(false);
     const buttons = testRenderer.root.findAllByType("button");
-    const loadButton = buttons.find((b) => b.children.includes("読込"));
-    expect(loadButton).toBeDefined();
-    act(() => {
-      loadButton!.props.onClick();
-    });
+    expect(buttons.some((b) => Array.isArray(b.children) && b.children.includes("読込"))).toBe(false);
 
-    // 5. "初期盤面で対戦開始" onClick
+    // 4. "初期盤面で対戦開始" onClick
     const startButton = testRenderer.root.findAllByType("button").find((b) => {
       const spanTexts = b.findAllByType("span").map((s) => s.children.join("")).join("");
       return spanTexts.includes("初期盤面で対戦開始") || (Array.isArray(b.children) && b.children.includes("初期盤面で対戦開始"));
@@ -266,7 +262,7 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       startButton!.props.onClick();
     });
 
-    // 6. Callback 経由で渡された defB が defA と正規化一致すること
+    // 5. Callback 経由で渡された defB が defA と正規化一致すること
     expect(onStartScenario).toHaveBeenCalledTimes(1);
     const defB = onStartScenario.mock.calls[0][0];
     expect(normalizeScenarioDefinitionV1(defB)).toEqual(normalizeScenarioDefinitionV1(defA));
@@ -684,26 +680,11 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
           initialTab: "settings",
           catalog,
           fullRulePackage,
+          initialDefinition: invalidGiantScenario,
           onClose: dummyOnClose,
           onStartScenario: dummyOnStartScenario,
         })
       );
-    });
-
-    // URL input に流し込んで "読込"
-    const urlInput = testRenderer.root.findByProps({
-      placeholder: "シナリオ共有URLまたはパラメータを入力...",
-    });
-    act(() => {
-      urlInput.props.onChange({ target: { value: param } });
-    });
-
-    const loadButton = testRenderer.root
-      .findAllByType("button")
-      .find((b) => b.children.includes("読込"));
-    expect(loadButton).toBeDefined();
-    act(() => {
-      loadButton!.props.onClick();
     });
 
     // バリデーションエラーとして character.giant の未対応エラーが表示され、開始ボタンが無効化されること

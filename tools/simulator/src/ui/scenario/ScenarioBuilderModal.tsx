@@ -18,9 +18,7 @@ import {
 } from "../../engine/scenario/ScenarioCompiler";
 import {
   encodeScenarioDefinitionV1ToUrlParam,
-  decodeScenarioDefinitionV1FromUrlParam,
   buildScenarioShareUrl,
-  parseScenarioShareUrl,
 } from "./ScenarioShareUrl";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { OFFICIAL_ENV_PREFIX, extractRegulationId } from "../../engine/playtest/PlaytestEnvironmentController";
@@ -182,8 +180,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP2PackCount(initialDefinition.players?.p2?.pack?.count);
   }, [initialDefinition, defaultEnvId]);
 
-  // URL 読込・共有用ステート
-  const [urlInput, setUrlInput] = useState<string>("");
+  // 共有通知用ステート
   const [shareNotice, setShareNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   // 現在の環境に対応する Canonical Deck Profile の解決
@@ -388,50 +385,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setTimeout(() => setShareNotice(null), 3000);
   };
 
-  // URL / コード読込ハンドラ (全領域を完全復元)
-  const handleLoadFromUrl = () => {
-    const raw = urlInput.trim();
-    if (!raw) return;
-    const result = raw.includes("=") || raw.includes("?")
-      ? parseScenarioShareUrl(raw)
-      : decodeScenarioDefinitionV1FromUrlParam(raw);
-
-    if (result.success === false) {
-      setShareNotice({ type: "error", message: `読込失敗: ${result.error}` });
-      setTimeout(() => setShareNotice(null), 4000);
-      return;
-    }
-
-    const def = result.definition;
-    setEnvironmentId(def.environmentId);
-    setSeed(def.seed);
-    setTurnPlayer(def.turnPlayer);
-    setChancePlayer(def.chancePlayer);
-    setTurnCount(def.turnCount ?? 1);
-    setName(def.name ?? "");
-    setDescription(def.description ?? "");
-
-    setP1Hand(def.players?.p1?.hand ? [...def.players.p1.hand] : []);
-    setP1Field(def.players?.p1?.field ? [...def.players.p1.field] : []);
-    setP1Grave(def.players?.p1?.grave ? [...def.players.p1.grave] : []);
-    setP1LifeCards(def.players?.p1?.life?.cards ? [...def.players.p1.life.cards] : []);
-    setP1LifeCount(def.players?.p1?.life?.count);
-    setP1PackCards(def.players?.p1?.pack?.cards ? [...def.players.p1.pack.cards] : []);
-    setP1PackCount(def.players?.p1?.pack?.count);
-
-    setP2Hand(def.players?.p2?.hand ? [...def.players.p2.hand] : []);
-    setP2Field(def.players?.p2?.field ? [...def.players.p2.field] : []);
-    setP2Grave(def.players?.p2?.grave ? [...def.players.p2.grave] : []);
-    setP2LifeCards(def.players?.p2?.life?.cards ? [...def.players.p2.life.cards] : []);
-    setP2LifeCount(def.players?.p2?.life?.count);
-    setP2PackCards(def.players?.p2?.pack?.cards ? [...def.players.p2.pack.cards] : []);
-    setP2PackCount(def.players?.p2?.pack?.count);
-
-    setShareNotice({ type: "success", message: "シナリオを正常に読み込みました。" });
-    setUrlInput("");
-    setTimeout(() => setShareNotice(null), 4000);
-  };
-
   // Scenario 開始
   const handleStart = () => {
     if (compileOutcome.type !== "READY") return;
@@ -545,24 +498,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
           {activeTab === "settings" && (
             <div className="flex flex-col gap-5">
-              {/* 環境選択 (Core Battle は除外) */}
-              <div>
-                <label className="block text-xs font-bold text-zinc-700 font-mono mb-1">
-                  対戦環境 (公式レギュレーションのみ):
-                </label>
-                <select
-                  value={environmentId}
-                  onChange={(e) => setEnvironmentId(e.target.value)}
-                  className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:ring-2 focus:ring-zinc-950 focus:outline-none"
-                >
-                  {officialEnvironments.map((env) => (
-                    <option key={env.id} value={env.id}>
-                      {env.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Seed 入力 */}
               <div>
                 <label className="block text-xs font-bold text-zinc-700 font-mono mb-1">
@@ -641,31 +576,19 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 </div>
               </div>
 
-              {/* URL 共有・読込 */}
-              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-3 font-mono">
-                <span className="text-xs font-bold text-zinc-800">共有・読込 (Share & Import)</span>
-                <div className="flex flex-col sm:flex-row gap-2">
+              {/* URL 共有 */}
+              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-2.5 font-mono">
+                <span className="text-xs font-bold text-zinc-800">共有 (Share)</span>
+                <p className="text-[11px] text-zinc-600">
+                  共有URLをブラウザで開くと、この初期盤面設定が復元されます。
+                </p>
+                <div>
                   <button
                     onClick={handleCopyShareUrl}
                     title="入力中の初期盤面設定を共有URLとしてコピーします"
                     className="px-4 py-2 bg-white border border-zinc-300 hover:bg-zinc-100 text-zinc-900 font-bold text-xs rounded-lg shadow-sm transition"
                   >
                     この初期盤面を共有
-                  </button>
-                </div>
-                <div className="flex gap-2 mt-1">
-                  <input
-                    type="text"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="シナリオ共有URLまたはパラメータを入力..."
-                    className="flex-1 text-xs p-2 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:outline-none"
-                  />
-                  <button
-                    onClick={handleLoadFromUrl}
-                    className="px-4 py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-lg shadow-sm transition"
-                  >
-                    読込
                   </button>
                 </div>
               </div>

@@ -20,19 +20,20 @@ export function normalizeSuit(suit?: string): string {
 // ランクが範囲内に含まれるかチェック
 export function isRankInRange(rank: string, rangeStr: string): boolean {
   if (!rank || !rangeStr) return true;
-  const standardRanks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-  const rankIndex = standardRanks.indexOf(rank.toUpperCase());
-  if (rankIndex === -1) return false;
 
-  if (rangeStr.includes("..")) {
-    const [minStr, maxStr] = rangeStr.split("..");
-    const minIdx = standardRanks.indexOf(minStr.trim().toUpperCase());
-    const maxIdx = standardRanks.indexOf(maxStr.trim().toUpperCase());
-    if (minIdx === -1 || maxIdx === -1) return false;
-    return rankIndex >= minIdx && rankIndex <= maxIdx;
+  if (!rangeStr.includes("..")) {
+    return rank.trim().toUpperCase() === rangeStr.trim().toUpperCase();
   }
 
-  return rank.toUpperCase() === rangeStr.trim().toUpperCase();
+  const standardRanks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+  const rankIndex = standardRanks.indexOf(rank.trim().toUpperCase());
+  if (rankIndex === -1) return false;
+
+  const [minStr, maxStr] = rangeStr.split("..");
+  const minIdx = standardRanks.indexOf(minStr.trim().toUpperCase());
+  const maxIdx = standardRanks.indexOf(maxStr.trim().toUpperCase());
+  if (minIdx === -1 || maxIdx === -1) return false;
+  return rankIndex >= minIdx && rankIndex <= maxIdx;
 }
 
 export interface UnitValidationTarget {

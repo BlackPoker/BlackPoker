@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import {
   AttackerBlockMap,
@@ -10,12 +10,14 @@ interface BlockAssignmentEditorProps {
   request: DecisionRequest;
   onSelectPattern: (patternRef: number) => void;
   unitNumberMap: Map<string, { badge: string; label: string; fullLabel?: string; unitView: any }>;
+  onExactPatternRefChange?: (patternRef: number | null) => void;
 }
 
 export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
   request,
   onSelectPattern,
   unitNumberMap,
+  onExactPatternRefChange,
 }) => {
   const effectSelections = request.catalog.effectSelections || [];
 
@@ -99,6 +101,10 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
   const exactPatternRef = useMemo(() => {
     return findExactMatchPatternRef(assignments, effectSelections);
   }, [assignments, effectSelections]);
+
+  useEffect(() => {
+    onExactPatternRefChange?.(exactPatternRef);
+  }, [exactPatternRef, onExactPatternRefChange]);
 
   const handleSubmit = () => {
     if (exactPatternRef !== null) {
@@ -264,6 +270,14 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
         >
           <span>この割当てで決定</span>
         </button>
+
+        {/* ショートカット操作ガイド */}
+        <div className="pt-1.5 border-t border-zinc-200 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+          <span>
+            SHORTCUT: <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = この割当てで決定
+          </span>
+          <span className="text-zinc-400">BlackPoker Core Battle</span>
+        </div>
       </div>
     </div>
   );

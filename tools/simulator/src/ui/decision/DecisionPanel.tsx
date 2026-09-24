@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
@@ -19,6 +19,7 @@ export interface DecisionPanelProps {
   readonly battleRelationMap?: Map<string, UnitBattleDisplayInfo> | ReadonlyMap<string, UnitBattleDisplayInfo>;
   readonly onUndo?: () => void;
   readonly canUndo?: boolean;
+  readonly disabled?: boolean;
 }
 
 
@@ -87,6 +88,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   battleRelationMap,
   onUndo,
   canUndo,
+  disabled,
 }) => {
 
   const catalog = request.catalog;
@@ -98,15 +100,23 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const [selectedCostRef, setSelectedCostRef] = useState<number | null>(initialCostRef ?? null);
   const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(initialTargetRef ?? null);
   const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
+  const [selectedBlockPatternRef, setSelectedBlockPatternRef] = useState<number | null>(null);
+  const isSubmittedRef = useRef(false);
+  const lastDecisionIdRef = useRef(request.decisionId);
 
   // decisionId 切替時の選択状態リセット (Defense-in-depth)
   useEffect(() => {
-    setSelectedActionRef(null);
-    setSelectedKeyRef(null);
-    setSelectedCostRef(null);
-    setSelectedTargetRef(null);
-    setSelectedEffectPatternRef(null);
-  }, [request.decisionId]);
+    if (lastDecisionIdRef.current !== request.decisionId) {
+      lastDecisionIdRef.current = request.decisionId;
+      setSelectedActionRef(initialActionRef ?? null);
+      setSelectedKeyRef(null);
+      setSelectedCostRef(initialCostRef ?? null);
+      setSelectedTargetRef(initialTargetRef ?? null);
+      setSelectedEffectPatternRef(null);
+      setSelectedBlockPatternRef(null);
+      isSubmittedRef.current = false;
+    }
+  }, [request.decisionId, initialActionRef, initialCostRef, initialTargetRef]);
 
   // 選択中ターゲットのリクエストIDハイライト連携
   useEffect(() => {
@@ -458,8 +468,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     });
   }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
 
+  const selectedAction = selectedActionRef !== null ? catalog.actions[selectedActionRef] : null;
+  const selectedKey = selectedKeyRef !== null ? catalog.cardSelections[selectedKeyRef] : null;
+  const selectedCost = selectedCostRef !== null ? catalog.costPayments[selectedCostRef] : null;
+  const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
+
   const handleActionSubmit = (autoPass: boolean = false) => {
     if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
+    if (isSubmittedRef.current) return;
+    isSubmittedRef.current = true;
     onSubmit(
       {
         decisionId: request.decisionId,
@@ -472,6 +489,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   const handleEffectSubmit = () => {
     if (selectedEffectPatternRef === null) return;
+    if (isSubmittedRef.current) return;
+    isSubmittedRef.current = true;
     onSubmit({
       decisionId: request.decisionId,
       stateVersion: request.stateVersion,
@@ -482,12 +501,105 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const passPatternIndex = patterns.findIndex((p) => p.kind === "PASS");
   const handlePass = () => {
     if (passPatternIndex === -1) return;
+    if (isSubmittedRef.current) return;
+    isSubmittedRef.current = true;
     onSubmit({
       decisionId: request.decisionId,
       stateVersion: request.stateVersion,
       selectedPatternRef: passPatternIndex,
     });
   };
+
+  // キーボードショートカット (Enter: 決定 / Shift+Enter: リクエストのみ)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (disabled) return;
+      if (isSubmittedRef.current) return;
+
+      // 1. IME composition check
+      if (e.isComposing || (e as any).keyCode === 229) return;
+
+      // 2. Repeat check (長押し repeat submit 防止)
+      if (e.repeat) return;
+
+      // 3. Modifier key check: only Shift is allowed for Shift+Enter; Ctrl, Alt, Meta are forbidden
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      // 4. Input target check (input, textarea, select, contentEditable)
+      const target = e.target as HTMLElement | null;
+      if (target) {
+        const tagName = target.tagName;
+        if (tagName === "INPUT" || tagName === "TEXTAREA" || tagName === "SELECT" || target.isContentEditable) {
+          return;
+        }
+      }
+
+      if (e.key === "Enter") {
+        const isEffectOrZoneTop =
+          request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION";
+
+        if (!isEffectOrZoneTop) {
+          // ACTION_REQUEST
+          if (finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1) {
+            const isImmediate = selectedAction?.speed === "immediate";
+            if (isImmediate) {
+              e.preventDefault();
+              handleActionSubmit(false);
+            } else {
+              if (e.shiftKey) {
+                e.preventDefault();
+                handleActionSubmit(false);
+              } else {
+                e.preventDefault();
+                handleActionSubmit(true);
+              }
+            }
+          }
+        } else {
+          // EFFECT_RESOLUTION / ZONE_TOP_SELECTION
+          const isBlockAssignment = (catalog.effectSelections || []).some(
+            (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
+          );
+          if (isBlockAssignment) {
+            if (selectedBlockPatternRef !== null) {
+              e.preventDefault();
+              if (!isSubmittedRef.current) {
+                isSubmittedRef.current = true;
+                onSubmit({
+                  decisionId: request.decisionId,
+                  stateVersion: request.stateVersion,
+                  selectedPatternRef: selectedBlockPatternRef,
+                });
+              }
+            }
+          } else {
+            if (selectedEffectPatternRef !== null) {
+              e.preventDefault();
+              handleEffectSubmit();
+            }
+          }
+        }
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [
+    disabled,
+    request.decisionId,
+    request.stateVersion,
+    request.source?.type,
+    finalMatchedPatternIndex,
+    selectedAction?.speed,
+    selectedEffectPatternRef,
+    selectedBlockPatternRef,
+    catalog.effectSelections,
+    onSubmit,
+  ]);
 
   // EFFECT_RESOLUTION / ZONE_TOP_SELECTION 時の UI
   if (request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION") {
@@ -527,6 +639,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           <BlockAssignmentEditor
             request={request}
             onSelectPattern={(patternRef) => {
+              if (isSubmittedRef.current) return;
+              isSubmittedRef.current = true;
               onSubmit({
                 decisionId: request.decisionId,
                 stateVersion: request.stateVersion,
@@ -534,6 +648,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               });
             }}
             unitNumberMap={unitNumberMap}
+            onExactPatternRefChange={setSelectedBlockPatternRef}
           />
         ) : (
           <div className="space-y-2.5">
@@ -589,14 +704,20 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             )}
           </div>
         )}
+
+        {/* ショートカット操作ガイド */}
+        <div className="pt-2 border-t border-zinc-200 mt-2 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+          <span className="flex items-center gap-1.5 flex-wrap">
+            <span>SHORTCUT:</span>
+            <span>
+              <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = {isBlockAssignment ? "この割当てで決定" : "決定して解決する"}
+            </span>
+          </span>
+          <span className="text-zinc-400 shrink-0">BlackPoker Core Battle</span>
+        </div>
       </div>
     );
   }
-
-  const selectedAction = selectedActionRef !== null ? catalog.actions[selectedActionRef] : null;
-  const selectedKey = selectedKeyRef !== null ? catalog.cardSelections[selectedKeyRef] : null;
-  const selectedCost = selectedCostRef !== null ? catalog.costPayments[selectedCostRef] : null;
-  const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
 
   return (
     <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
@@ -825,8 +946,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
         {/* ショートカット操作ガイド */}
         <div className="pt-1.5 border-t border-zinc-200 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
-          <span>SHORTCUT: <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">P</strong> = PASS</span>
-          <span className="text-zinc-400">BlackPoker Core Battle</span>
+          <span className="flex items-center gap-1.5 flex-wrap">
+            <span>SHORTCUT:</span>
+            <span>
+              <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">P</strong> = PASS
+            </span>
+            <span>
+              <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = {selectedAction?.speed === "immediate" ? "リクエスト" : "決定 (リクエスト＆PASS)"}
+            </span>
+            {selectedAction && selectedAction.speed !== "immediate" && (
+              <span>
+                <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Shift+Enter</strong> = リクエストのみ
+              </span>
+            )}
+          </span>
+          <span className="text-zinc-400 shrink-0">BlackPoker Core Battle</span>
         </div>
       </div>
     </div>

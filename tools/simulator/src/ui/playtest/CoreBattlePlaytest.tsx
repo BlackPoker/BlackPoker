@@ -1313,12 +1313,21 @@ export const CoreBattlePlaytest: React.FC = () => {
     }
   }, [isDesktop, isHumanTurnWaiting, currentStep, sheetMode]);
 
+  // モーダルまたは交代待機表示中フラグ
+  const isModalOpen =
+    isMobileMenuOpen ||
+    isReplayVerifyModalOpen ||
+    isReplayViewerOpen ||
+    isScenarioBuilderOpen ||
+    isPassAndPlayWaiting;
+
   // キーボードショートカット (P: PASS)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isPassAndPlayWaiting || isAiProcessing || !isHumanTurnWaiting) return;
-      const target = e.target as HTMLElement;
-      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT")) {
+      if (isPassAndPlayWaiting || isAiProcessing || !isHumanTurnWaiting || isModalOpen) return;
+      if (e.isComposing || (e as any).keyCode === 229 || e.repeat) return;
+      const target = e.target as HTMLElement | null;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)) {
         return;
       }
 
@@ -1345,7 +1354,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [currentStep, isPassAndPlayWaiting, isAiProcessing, isHumanTurnWaiting, handleDecisionSubmit]);
+  }, [currentStep, isPassAndPlayWaiting, isAiProcessing, isHumanTurnWaiting, isModalOpen, handleDecisionSubmit]);
 
   if (presetValidationErrors.length > 0) {
     return (
@@ -1406,6 +1415,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       battleRelationMap={battleRelationMap}
       onUndo={handleUndo}
       canUndo={canUndo}
+      disabled={isModalOpen}
     />
 
   ) : isAiProcessing ? (
