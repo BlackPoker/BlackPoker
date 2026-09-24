@@ -22,6 +22,8 @@ import {
 } from "./ScenarioShareUrl";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { OFFICIAL_ENV_PREFIX, extractRegulationId } from "../../engine/playtest/PlaytestEnvironmentController";
+import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
+import { ScenarioAuthoringDraftV1 } from "../../domain/scenario/ScenarioAuthoringTypes";
 
 export interface ScenarioBuilderModalProps {
   readonly isOpen: boolean;
@@ -111,6 +113,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [p1Hand, setP1Hand] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p1?.hand ? [...initialDefinition.players.p1.hand] : []
   );
+  const [p1HandCount, setP1HandCount] = useState<number | undefined>(
+    initialDefinition?.players?.p1?.hand?.length
+  );
   const [p1Grave, setP1Grave] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p1?.grave ? [...initialDefinition.players.p1.grave] : []
   );
@@ -132,6 +137,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   const [p2Hand, setP2Hand] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []
+  );
+  const [p2HandCount, setP2HandCount] = useState<number | undefined>(
+    initialDefinition?.players?.p2?.hand?.length
   );
   const [p2Grave, setP2Grave] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p2?.grave ? [...initialDefinition.players.p2.grave] : []
@@ -164,6 +172,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setDescription(initialDefinition.description ?? "");
 
     setP1Hand(initialDefinition.players?.p1?.hand ? [...initialDefinition.players.p1.hand] : []);
+    setP1HandCount(initialDefinition.players?.p1?.hand?.length);
     setP1Grave(initialDefinition.players?.p1?.grave ? [...initialDefinition.players.p1.grave] : []);
     setP1Field(initialDefinition.players?.p1?.field ? [...initialDefinition.players.p1.field] : []);
     setP1LifeCards(initialDefinition.players?.p1?.life?.cards ? [...initialDefinition.players.p1.life.cards] : []);
@@ -172,6 +181,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP1PackCount(initialDefinition.players?.p1?.pack?.count);
 
     setP2Hand(initialDefinition.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []);
+    setP2HandCount(initialDefinition.players?.p2?.hand?.length);
     setP2Grave(initialDefinition.players?.p2?.grave ? [...initialDefinition.players.p2.grave] : []);
     setP2Field(initialDefinition.players?.p2?.field ? [...initialDefinition.players.p2.field] : []);
     setP2LifeCards(initialDefinition.players?.p2?.life?.cards ? [...initialDefinition.players.p2.life.cards] : []);
@@ -215,40 +225,112 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     return currentOfficialRulePackage.components.filter((c) => c.type === "character");
   }, [currentOfficialRulePackage]);
 
-  // 現在の入力から ScenarioDefinitionV1 を構築
-  const currentDefinition: ScenarioDefinitionV1 = useMemo(() => {
-    const buildPlayerConfig = (
-      hand: ScenarioCardRefV1[],
-      field: ScenarioUnitV1[],
-      grave: ScenarioCardRefV1[],
-      lifeCards: ScenarioCardRefV1[],
-      lifeCount: number | undefined,
-      packCards: ScenarioCardRefV1[],
-      packCount: number | undefined
-    ): ScenarioPlayerV1 => {
-      return {
-        ...(hand.length > 0 ? { hand } : {}),
-        ...(field.length > 0 ? { field } : {}),
-        ...(grave.length > 0 ? { grave } : {}),
-        ...(lifeCards.length > 0 || lifeCount !== undefined
-          ? {
-              life: {
-                ...(lifeCards.length > 0 ? { cards: lifeCards } : {}),
-                ...(lifeCount !== undefined ? { count: lifeCount } : {}),
-              },
-            }
-          : {}),
-        ...(packCards.length > 0 || packCount !== undefined
-          ? {
-              pack: {
-                ...(packCards.length > 0 ? { cards: packCards } : {}),
-                ...(packCount !== undefined ? { count: packCount } : {}),
-              },
-            }
-          : {}),
-      };
-    };
+  // 選択中フレームおよびパックの有無
+  const currentFrame = useMemo(() => {
+    const regId = extractRegulationId(environmentId);
+    if (!regId) return null;
+    const val = RegulationValidator.validateRegulation(catalog, regId);
+    return val.frame ?? null;
+  }, [catalog, environmentId]);
 
+  const currentFrameHasPack = useMemo(() => {
+    return typeof currentFrame?.setup.packCount === "number" && currentFrame.setup.packCount > 0;
+  }, [currentFrame]);
+
+  const defaultPackCount = useMemo(() => {
+    return currentFrame?.setup.packCount;
+  }, [currentFrame]);
+
+  // 部分指定ドラフトの構築
+  const authoringDraft: ScenarioAuthoringDraftV1 = useMemo(() => {
+    return {
+      environmentId,
+      seed,
+      turnPlayer,
+      chancePlayer,
+      turnCount,
+      name: name.trim() || undefined,
+      description: description.trim() || undefined,
+      players: {
+        p1: {
+          hand: {
+            count: p1HandCount,
+            fixedCards: p1Hand.length > 0 ? p1Hand : undefined,
+          },
+          field: p1Field.length > 0 ? p1Field : undefined,
+          grave: {
+            explicitCards: p1Grave.length > 0 ? p1Grave : undefined,
+          },
+          life: {
+            count: p1LifeCount,
+            fixedTopCards: p1LifeCards.length > 0 ? p1LifeCards : undefined,
+          },
+          pack: currentFrameHasPack
+            ? {
+                count: p1PackCount,
+                fixedCards: p1PackCards.length > 0 ? p1PackCards : undefined,
+              }
+            : undefined,
+        },
+        p2: {
+          hand: {
+            count: p2HandCount,
+            fixedCards: p2Hand.length > 0 ? p2Hand : undefined,
+          },
+          field: p2Field.length > 0 ? p2Field : undefined,
+          grave: {
+            explicitCards: p2Grave.length > 0 ? p2Grave : undefined,
+          },
+          life: {
+            count: p2LifeCount,
+            fixedTopCards: p2LifeCards.length > 0 ? p2LifeCards : undefined,
+          },
+          pack: currentFrameHasPack
+            ? {
+                count: p2PackCount,
+                fixedCards: p2PackCards.length > 0 ? p2PackCards : undefined,
+              }
+            : undefined,
+        },
+      },
+    };
+  }, [
+    environmentId,
+    seed,
+    turnPlayer,
+    chancePlayer,
+    turnCount,
+    name,
+    description,
+    p1Hand,
+    p1HandCount,
+    p1Field,
+    p1Grave,
+    p1LifeCards,
+    p1LifeCount,
+    p1PackCards,
+    p1PackCount,
+    p2Hand,
+    p2HandCount,
+    p2Field,
+    p2Grave,
+    p2LifeCards,
+    p2LifeCount,
+    p2PackCards,
+    p2PackCount,
+    currentFrameHasPack,
+  ]);
+
+  // ScenarioAuthoringResolver による自動補完解決
+  const authoringResult = useMemo(() => {
+    return ScenarioAuthoringResolver.resolve(authoringDraft, catalog);
+  }, [authoringDraft, catalog]);
+
+  // Canonical な ScenarioDefinitionV1 (Resolver解決結果またはエラー時フォールバック)
+  const currentDefinition: ScenarioDefinitionV1 = useMemo(() => {
+    if (authoringResult.success) {
+      return authoringResult.definition;
+    }
     return {
       version: 1,
       name: name.trim() || undefined,
@@ -259,11 +341,24 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       chancePlayer,
       turnCount,
       players: {
-        p1: buildPlayerConfig(p1Hand, p1Field, p1Grave, p1LifeCards, p1LifeCount, p1PackCards, p1PackCount),
-        p2: buildPlayerConfig(p2Hand, p2Field, p2Grave, p2LifeCards, p2LifeCount, p2PackCards, p2PackCount),
+        p1: {
+          ...(p1Hand.length > 0 ? { hand: p1Hand } : {}),
+          ...(p1Field.length > 0 ? { field: p1Field } : {}),
+          ...(p1Grave.length > 0 ? { grave: p1Grave } : {}),
+          ...(p1LifeCards.length > 0 || p1LifeCount !== undefined ? { life: { cards: p1LifeCards, count: p1LifeCount } } : {}),
+          ...(p1PackCards.length > 0 || p1PackCount !== undefined ? { pack: { cards: p1PackCards, count: p1PackCount } } : {}),
+        },
+        p2: {
+          ...(p2Hand.length > 0 ? { hand: p2Hand } : {}),
+          ...(p2Field.length > 0 ? { field: p2Field } : {}),
+          ...(p2Grave.length > 0 ? { grave: p2Grave } : {}),
+          ...(p2LifeCards.length > 0 || p2LifeCount !== undefined ? { life: { cards: p2LifeCards, count: p2LifeCount } } : {}),
+          ...(p2PackCards.length > 0 || p2PackCount !== undefined ? { pack: { cards: p2PackCards, count: p2PackCount } } : {}),
+        },
       },
     };
   }, [
+    authoringResult,
     name,
     description,
     environmentId,
@@ -289,8 +384,15 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   // リアルタイムコンパイル検証
   const compileOutcome: ScenarioCompileOutcome = useMemo(() => {
-    return ScenarioCompiler.compile(currentDefinition, catalog, fullRulePackage);
-  }, [currentDefinition, catalog, fullRulePackage]);
+    if (!authoringResult.success) {
+      return {
+        type: "VALIDATION_ERROR",
+        kind: "VALIDATION_ERROR",
+        errors: authoringResult.errors,
+      };
+    }
+    return ScenarioCompiler.compile(authoringResult.definition, catalog, fullRulePackage);
+  }, [authoringResult, catalog, fullRulePackage]);
 
   // カード追加用ローカル入力ステート (P1/P2共通または個別)
   const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "settings");
@@ -330,6 +432,11 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       else if (zone === "life") setP2LifeCards((prev) => prev.filter((_, i) => i !== index));
       else if (zone === "pack") setP2PackCards((prev) => prev.filter((_, i) => i !== index));
     }
+  };
+
+  const handleSetHandCount = (playerKey: "p1" | "p2", count: number | undefined) => {
+    if (playerKey === "p1") setP1HandCount(count);
+    else setP2HandCount(count);
   };
 
   const handleSetLifeCount = (playerKey: "p1" | "p2", count: number | undefined) => {
@@ -599,14 +706,18 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             <PlayerZoneEditor
               playerKey={activeTab}
               hand={activeTab === "p1" ? p1Hand : p2Hand}
+              handCount={activeTab === "p1" ? p1HandCount : p2HandCount}
               field={activeTab === "p1" ? p1Field : p2Field}
               grave={activeTab === "p1" ? p1Grave : p2Grave}
               lifeCards={activeTab === "p1" ? p1LifeCards : p2LifeCards}
               lifeCount={activeTab === "p1" ? p1LifeCount : p2LifeCount}
               packCards={activeTab === "p1" ? p1PackCards : p2PackCards}
               packCount={activeTab === "p1" ? p1PackCount : p2PackCount}
+              defaultPackCount={defaultPackCount}
+              frameHasPack={currentFrameHasPack}
               onAddCard={(zone, card) => handleAddCard(activeTab, zone, card)}
               onRemoveCard={(zone, idx) => handleRemoveCard(activeTab, zone, idx)}
+              onSetHandCount={(cnt) => handleSetHandCount(activeTab, cnt)}
               onSetLifeCount={(cnt) => handleSetLifeCount(activeTab, cnt)}
               onSetPackCount={(cnt) => handleSetPackCount(activeTab, cnt)}
               onAddUnit={(comp, cards, state, face) => handleAddUnit(activeTab, comp, cards, state, face)}
@@ -670,14 +781,18 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 interface PlayerZoneEditorProps {
   readonly playerKey: "p1" | "p2";
   readonly hand: readonly ScenarioCardRefV1[];
+  readonly handCount?: number;
   readonly field: readonly ScenarioUnitV1[];
   readonly grave: readonly ScenarioCardRefV1[];
   readonly lifeCards: readonly ScenarioCardRefV1[];
   readonly lifeCount?: number;
   readonly packCards: readonly ScenarioCardRefV1[];
   readonly packCount?: number;
+  readonly defaultPackCount?: number;
+  readonly frameHasPack: boolean;
   readonly onAddCard: (zone: "hand" | "grave" | "life" | "pack", card: ScenarioCardRefV1) => void;
   readonly onRemoveCard: (zone: "hand" | "grave" | "life" | "pack", index: number) => void;
+  readonly onSetHandCount: (count: number | undefined) => void;
   readonly onSetLifeCount: (count: number | undefined) => void;
   readonly onSetPackCount: (count: number | undefined) => void;
   readonly onAddUnit: (compId: string, cards: ScenarioCardRefV1[], state: "charge" | "drive", face: "up" | "down") => void;
@@ -689,14 +804,18 @@ interface PlayerZoneEditorProps {
 const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   playerKey,
   hand,
+  handCount,
   field,
   grave,
   lifeCards,
   lifeCount,
   packCards,
   packCount,
+  defaultPackCount,
+  frameHasPack,
   onAddCard,
   onRemoveCard,
+  onSetHandCount,
   onSetLifeCount,
   onSetPackCount,
   onAddUnit,
@@ -781,9 +900,52 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
       {/* カードセレクター */}
       <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-3 font-mono text-xs">
         <span className="font-bold text-zinc-800">カード / ユニット追加 ({playerName}):</span>
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5">
-            <span className="text-zinc-500 font-bold">Suit:</span>
+        <div className="flex flex-col gap-2.5">
+          {/* スート選択: タップボタン + セレクト */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-zinc-500 font-bold min-w-[36px]">Suit:</span>
+            <div className="flex flex-wrap items-center gap-1">
+              {(["S", "H", "D", "C"] as const).map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    setSelectedSuit(s);
+                    const ranks = deckCards.filter((c) => c.suit === s).map((c) => c.rank);
+                    if (ranks.length > 0 && !ranks.includes(selectedRank)) {
+                      setSelectedRank(ranks[0]);
+                    }
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-bold transition ${
+                    selectedSuit === s
+                      ? "bg-zinc-950 text-white shadow-sm"
+                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  {formatScenarioSuitOptionLabel(s)}
+                </button>
+              ))}
+              {deckCards.some((c) => c.suit === "J") && (
+                <button
+                  key="J"
+                  type="button"
+                  onClick={() => {
+                    setSelectedSuit("J");
+                    const ranks = deckCards.filter((c) => c.suit === "J").map((c) => c.rank);
+                    if (ranks.length > 0 && !ranks.includes(selectedRank)) {
+                      setSelectedRank(ranks[0]);
+                    }
+                  }}
+                  className={`px-2.5 py-1 rounded text-xs font-bold transition ${
+                    selectedSuit === "J"
+                      ? "bg-zinc-950 text-white shadow-sm"
+                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  Joker
+                </button>
+              )}
+            </div>
             <select
               value={selectedSuit}
               onChange={(e) => {
@@ -794,7 +956,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   setSelectedRank(ranks[0]);
                 }
               }}
-              className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
             >
               <option value="S">♠</option>
               <option value="H">♡</option>
@@ -804,12 +966,29 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             </select>
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="text-zinc-500 font-bold">Rank:</span>
+          {/* ランク選択: タップボタン + セレクト */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-zinc-500 font-bold min-w-[36px]">Rank:</span>
+            <div className="flex flex-wrap items-center gap-1">
+              {availableRanks.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setSelectedRank(r)}
+                  className={`px-2 py-0.5 rounded text-xs font-bold transition ${
+                    selectedRank === r
+                      ? "bg-zinc-950 text-white shadow-sm"
+                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                  }`}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
             <select
               value={selectedRank}
               onChange={(e) => setSelectedRank(e.target.value)}
-              className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
             >
               {availableRanks.map((r) => (
                 <option key={r} value={r}>
@@ -819,33 +998,38 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             </select>
           </div>
 
-          <button
-            onClick={() => onAddCard("hand", resolveNextCardRef(selectedSuit, selectedRank))}
-            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
-          >
-            + 手札に追加
-          </button>
+          {/* 追加ボタン群 */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <button
+              onClick={() => onAddCard("hand", resolveNextCardRef(selectedSuit, selectedRank))}
+              className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+            >
+              + 手札に追加
+            </button>
 
-          <button
-            onClick={() => onAddCard("grave", resolveNextCardRef(selectedSuit, selectedRank))}
-            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
-          >
-            + 墓地に追加
-          </button>
+            <button
+              onClick={() => onAddCard("grave", resolveNextCardRef(selectedSuit, selectedRank))}
+              className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+            >
+              + 墓地に追加
+            </button>
 
-          <button
-            onClick={() => onAddCard("life", resolveNextCardRef(selectedSuit, selectedRank))}
-            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
-          >
-            + ライフ固定に追加
-          </button>
+            <button
+              onClick={() => onAddCard("life", resolveNextCardRef(selectedSuit, selectedRank))}
+              className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+            >
+              + ライフ固定に追加
+            </button>
 
-          <button
-            onClick={() => onAddCard("pack", resolveNextCardRef(selectedSuit, selectedRank))}
-            className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
-          >
-            + パック固定に追加
-          </button>
+            {frameHasPack && (
+              <button
+                onClick={() => onAddCard("pack", resolveNextCardRef(selectedSuit, selectedRank))}
+                className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
+              >
+                + パック固定に追加
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ユニット追加設定 */}
@@ -949,6 +1133,26 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
         <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
           <div className="flex items-center justify-between border-b pb-1.5">
             <span className="font-bold text-zinc-800">手札 (Hand: {hand.length}枚)</span>
+            {handCount !== undefined && handCount > hand.length && (
+              <span className="px-1.5 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">
+                {`AUTO × ${handCount - hand.length}`}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <span className="text-zinc-500">目標枚数:</span>
+            <input
+              type="number"
+              min="0"
+              value={handCount ?? ""}
+              placeholder="自動"
+              onChange={(e) =>
+                onSetHandCount(
+                  e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
+                )
+              }
+              className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+            />
           </div>
           {hand.length === 0 ? (
             <span className="text-zinc-400 italic text-[11px]">指定なし</span>
@@ -1011,6 +1215,11 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           <div className="flex items-center justify-between border-b pb-1.5">
             <span className="font-bold text-zinc-800">墓地 (Grave: {grave.length}枚)</span>
           </div>
+          {lifeCount !== undefined && (
+            <p className="text-[10px] text-zinc-500 font-mono italic">
+              ※ ライフ指定に伴い残余カードは自動補完
+            </p>
+          )}
           {grave.length === 0 ? (
             <span className="text-zinc-400 italic text-[11px]">空</span>
           ) : (
@@ -1044,6 +1253,11 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
         <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
           <div className="flex items-center justify-between border-b pb-1.5">
             <span className="font-bold text-zinc-800">ライフ (Life)</span>
+            {lifeCount !== undefined && lifeCount > lifeCards.length && (
+              <span className="px-1.5 py-0.5 bg-rose-100 text-rose-800 rounded font-bold text-[10px]">
+                {`AUTO × ${lifeCount - lifeCards.length}`}
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5 text-[11px]">
             <span className="text-zinc-500">目標枚数:</span>
@@ -1086,41 +1300,62 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
         <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
           <div className="flex items-center justify-between border-b pb-1.5">
             <span className="font-bold text-zinc-800">パック (Pack)</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-[11px]">
-            <span className="text-zinc-500">目標枚数:</span>
-            <input
-              type="number"
-              min="0"
-              value={packCount ?? ""}
-              placeholder="自動"
-              onChange={(e) =>
-                onSetPackCount(
-                  e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
-                )
+            {frameHasPack && (() => {
+              const target = packCount !== undefined ? packCount : (defaultPackCount ?? 0);
+              if (target > packCards.length) {
+                return (
+                  <span className="px-1.5 py-0.5 bg-sky-100 text-sky-800 rounded font-bold text-[10px]">
+                    {`AUTO × ${target - packCards.length}`}
+                  </span>
+                );
               }
-              className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
-            />
+              return null;
+            })()}
           </div>
-          {packCards.length === 0 ? (
-            <span className="text-zinc-400 italic text-[11px]">固定カードなし</span>
-          ) : (
-            <div className="flex flex-wrap gap-1.5">
-              {packCards.map((c, i) => (
-                <span
-                  key={i}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
-                >
-                  {formatScenarioCardChip(c)}
-                  <button
-                    onClick={() => onRemoveCard("pack", i)}
-                    className="text-sky-400 hover:text-red-600 font-bold"
-                  >
-                    ×
-                  </button>
+          {frameHasPack ? (
+            <>
+              <div className="flex items-center gap-1.5 text-[11px]">
+                <span className="text-zinc-500">目標枚数:</span>
+                <input
+                  type="number"
+                  min="0"
+                  value={packCount ?? ""}
+                  placeholder={defaultPackCount !== undefined ? `${defaultPackCount}` : "自動"}
+                  onChange={(e) =>
+                    onSetPackCount(
+                      e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
+                    )
+                  }
+                  className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+                />
+              </div>
+              {packCards.length === 0 ? (
+                <span className="text-zinc-400 italic text-[11px]">
+                  {packCount === undefined && defaultPackCount !== undefined
+                    ? `固定なし (${defaultPackCount}枚自動補完)`
+                    : "固定カードなし"}
                 </span>
-              ))}
-            </div>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {packCards.map((c, i) => (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
+                    >
+                      {formatScenarioCardChip(c)}
+                      <button
+                        onClick={() => onRemoveCard("pack", i)}
+                        className="text-sky-400 hover:text-red-600 font-bold"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <span className="text-zinc-400 italic text-[11px]">パックなし</span>
           )}
         </div>
       </div>

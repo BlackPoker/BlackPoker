@@ -12,6 +12,7 @@ import { ScenarioDefinitionV1, normalizeScenarioDefinitionV1 } from "../../domai
 import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory";
 import { encodeScenarioDefinitionV1ToUrlParam, decodeScenarioDefinitionV1FromUrlParam } from "../../ui/scenario/ScenarioShareUrl";
 import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
+import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
 
 describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -190,7 +191,7 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
   });
 
   it("6: UI Round-Trip: 実Component lifecycleを通した URL 共有・復元検証 (normalize(B) == normalize(A))", () => {
-    const defA: ScenarioDefinitionV1 = {
+    const rawDefA: ScenarioDefinitionV1 = {
       version: 1,
       environmentId: "official:light-entry16",
       seed: 888,
@@ -221,6 +222,12 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
         },
       },
     };
+
+    // Position Authoring により Canonical な ScenarioDefinitionV1 を解決
+    const resolveA = ScenarioAuthoringResolver.resolve(rawDefA, catalog);
+    expect(resolveA.success).toBe(true);
+    if (!resolveA.success) return;
+    const defA = resolveA.definition;
 
     // 1. URL パラメータにエンコード
     const param = encodeScenarioDefinitionV1ToUrlParam(defA);
@@ -760,5 +767,73 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     const emitted = onStartScenario.mock.calls[0][0];
     expect(emitted.players.p1.hand[0]).toEqual({ suit: "J", rank: "Joker", occurrence: 0 });
     expect(emitted.players.p1.grave[0]).toEqual({ suit: "J", rank: "Joker", occurrence: 1 });
+  });
+
+  it("14: Position Authoring UI 要素 (Hand/Life 目標枚数, AUTO バッジ, 墓地自動補完注記, スート/ランク タップボタン) のレンダリングと動作検証", () => {
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "p1",
+          catalog,
+          fullRulePackage,
+          initialDefinition: {
+            version: 1,
+            environmentId: "official:standard-pack",
+            seed: 2026,
+            turnPlayer: "p1",
+            chancePlayer: "p1",
+            players: {
+              p1: {
+                hand: [{ suit: "H", rank: "7" }],
+                life: { count: 2 },
+              },
+              p2: {
+                life: { count: 37 },
+              },
+            },
+          },
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+        })
+      );
+    });
+
+    const snapshot = JSON.stringify(testRenderer.toJSON());
+
+    // 1. スートタップボタン (♠, ♡, ♢, ♣, Joker) の存在確認
+    const buttons = testRenderer.root.findAllByType("button");
+    const buttonTexts = buttons.map((b) =>
+      Array.isArray(b.children) ? b.children.join("") : ""
+    );
+    expect(buttonTexts).toContain("♠");
+    expect(buttonTexts).toContain("♡");
+    expect(buttonTexts).toContain("♢");
+    expect(buttonTexts).toContain("♣");
+    expect(buttonTexts).toContain("Joker");
+
+    // 2. ランクタップボタンの存在確認
+    expect(buttonTexts).toContain("A");
+    expect(buttonTexts).toContain("K");
+
+    // 3. ライフ目標枚数指定に伴う墓地自動補完注記の存在確認
+    expect(snapshot).toContain("※ ライフ指定に伴い残余カードは自動補完");
+
+    // 4. AUTOバッジの存在確認 (ライフ count 2 で fixed 0 -> AUTO × 2)
+    expect(snapshot).toContain("AUTO × 2");
+
+    // 5. 手札の目標枚数を 5 に変更 -> AUTO × 4 バッジが表示されること
+    const inputs = testRenderer.root.findAllByType("input");
+    const handCountInput = inputs.find(
+      (inp) => inp.props.value === 1 && inp.props.placeholder === "自動"
+    );
+    expect(handCountInput).toBeDefined();
+    act(() => {
+      handCountInput!.props.onChange({ target: { value: "5" } });
+    });
+
+    const updatedSnapshot = JSON.stringify(testRenderer.toJSON());
+    expect(updatedSnapshot).toContain("AUTO × 4");
   });
 });
