@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   ScenarioDefinitionV1,
   ScenarioPlayerV1,
@@ -10,6 +10,8 @@ import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition"
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { SimulatorDeckProfileResolver } from "../../engine/regulation/SimulatorDeckProfileResolver";
+import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
+import { formatCardDisplay } from "../../engine/rules/cardUtils";
 import {
   ScenarioCompiler,
   ScenarioCompileOutcome,
@@ -31,6 +33,40 @@ export interface ScenarioBuilderModalProps {
   readonly onStartScenario: (definition: ScenarioDefinitionV1) => void;
   readonly initialDefinition?: ScenarioDefinitionV1;
   readonly initialTab?: "p1" | "p2" | "settings";
+}
+
+/**
+ * 初期盤面設定用のスート表示用ラベル。
+ * 厳密に ♠ / ♡ / ♢ / ♣ / Joker を返し、内部スートコード (S 等) は併記しません。
+ */
+export function formatScenarioSuitOptionLabel(suit: string): string {
+  switch (suit) {
+    case "S":
+      return "♠";
+    case "H":
+      return "♡";
+    case "D":
+      return "♢";
+    case "C":
+      return "♣";
+    case "J":
+      return "Joker";
+    default:
+      return suit;
+  }
+}
+
+/**
+ * ユーザー向けカードチップ表示。
+ * ♠A, ♡3, ♢10, ♣K, Joker 形式で表示し、
+ * occurrence がある場合は "Joker 1", "Joker 2" のように分かりやすく番号を付与します。
+ */
+export function formatScenarioCardChip(card: ScenarioCardRefV1): string {
+  const base = formatCardDisplay(card);
+  if (card.occurrence !== undefined) {
+    return `${base} ${card.occurrence + 1}`;
+  }
+  return base;
 }
 
 const DEFAULT_SUITS: readonly ("S" | "H" | "D" | "C" | "J")[] = ["S", "H", "D", "C"];
@@ -122,19 +158,37 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [urlInput, setUrlInput] = useState<string>("");
   const [shareNotice, setShareNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // 現在の環境に対応する Canonical Deck Profile のカード候補
-  const currentDeckCards = useMemo(() => {
+  // 現在の環境に対応する Canonical Deck Profile の解決
+  const currentDeckProfile = useMemo(() => {
     const regId = extractRegulationId(environmentId);
-    if (!regId) return [];
+    if (!regId) return null;
     const val = RegulationValidator.validateRegulation(catalog, regId);
-    if (!val.frame) return [];
-    return SimulatorDeckProfileResolver.resolveDeckProfile(val.frame, regId).cards;
+    if (!val.frame) return null;
+    return SimulatorDeckProfileResolver.resolveDeckProfile(val.frame, regId);
   }, [catalog, environmentId]);
 
-  // 利用可能なコンポーネント定義一覧
+  const currentDeckCards = useMemo(() => {
+    return currentDeckProfile ? currentDeckProfile.cards : [];
+  }, [currentDeckProfile]);
+
+  // 選択中レギュレーションの RulePackage (SSOT)
+  const currentOfficialRulePackage = useMemo(() => {
+    const regId = extractRegulationId(environmentId);
+    if (!regId) return fullRulePackage;
+    const val = RegulationValidator.validateRegulation(catalog, regId);
+    if (!val.regulation || !val.format || !val.frame) return fullRulePackage;
+    return RegulationRulePackageSelector.selectRulePackage(
+      fullRulePackage,
+      val.format,
+      val.regulation,
+      val.frame
+    );
+  }, [catalog, environmentId, fullRulePackage]);
+
+  // 利用可能なコンポーネント定義一覧 (SSOT に基づき Extra なしでは巨人を自然に除外)
   const availableComponents = useMemo(() => {
-    return fullRulePackage.components.filter((c) => c.type === "character");
-  }, [fullRulePackage]);
+    return currentOfficialRulePackage.components.filter((c) => c.type === "character");
+  }, [currentOfficialRulePackage]);
 
   // 現在の入力から ScenarioDefinitionV1 を構築
   const currentDefinition: ScenarioDefinitionV1 = useMemo(() => {
@@ -214,7 +268,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   }, [currentDefinition, catalog, fullRulePackage]);
 
   // カード追加用ローカル入力ステート (P1/P2共通または個別)
-  const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "p1");
+  const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "settings");
 
   // カード追加ハンドラ
   const handleAddCard = (
@@ -365,10 +419,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
         {/* モーダルヘッダー */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 bg-zinc-50">
           <div className="flex items-center gap-3">
-            <span className="text-xl">🛠️</span>
             <div>
               <h2 className="text-base font-black text-zinc-950 font-serif">
-                Scenario Builder (初期局面ビルダー)
+                初期盤面設定 (Initial Setup)
               </h2>
               <p className="text-[11px] text-zinc-500 font-mono">
                 公式レギュレーションの初期配置を高レベルに編集・共有します
@@ -383,8 +436,48 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           </button>
         </div>
 
+        {/* 常設レギュレーション選択バー (Regulation-First) */}
+        <div className="px-6 py-3 bg-zinc-100 border-b border-zinc-200 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-zinc-700">対戦レギュレーション:</span>
+            <select
+              value={environmentId}
+              onChange={(e) => setEnvironmentId(e.target.value)}
+              className="p-1.5 rounded-lg border border-zinc-300 bg-white font-bold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-950"
+            >
+              {officialEnvironments.map((env) => (
+                <option key={env.id} value={env.id}>
+                  {env.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {currentDeckProfile && (
+            <div className="flex items-center gap-2 text-[11px] text-zinc-600">
+              <span className="px-2 py-0.5 bg-white border border-zinc-300 rounded font-bold">
+                デッキ: {currentDeckProfile.cardCount}枚
+              </span>
+              {currentDeckProfile.notice && (
+                <span className="hidden sm:inline text-zinc-500">
+                  ({currentDeckProfile.notice})
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* タブナビゲーション */}
         <div className="flex border-b border-zinc-200 px-6 bg-white font-mono text-xs font-bold">
+          <button
+            onClick={() => setActiveTab("settings")}
+            className={`py-2.5 px-4 border-b-2 transition ${
+              activeTab === "settings"
+                ? "border-zinc-950 text-zinc-950"
+                : "border-transparent text-zinc-400 hover:text-zinc-600"
+            }`}
+          >
+            基本設定・共有
+          </button>
           <button
             onClick={() => setActiveTab("p1")}
             className={`py-2.5 px-4 border-b-2 transition ${
@@ -404,16 +497,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             }`}
           >
             Player B (P2)
-          </button>
-          <button
-            onClick={() => setActiveTab("settings")}
-            className={`py-2.5 px-4 border-b-2 transition ${
-              activeTab === "settings"
-                ? "border-zinc-950 text-zinc-950"
-                : "border-transparent text-zinc-400 hover:text-zinc-600"
-            }`}
-          >
-            環境・ターン設定・共有
           </button>
         </div>
 
@@ -585,7 +668,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           <div className="mt-2 p-4 rounded-xl border font-mono text-xs">
             {compileOutcome.type === "READY" ? (
               <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 -m-4 p-4 rounded-xl">
-                <span>✅</span>
                 <span className="font-bold">
                   バリデーション正常: Canonical 初期盤面を構築可能です (Match ID: {compileOutcome.matchId})
                 </span>
@@ -593,7 +675,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             ) : (
               <div className="flex flex-col gap-1.5 text-red-700 bg-red-50 -m-4 p-4 rounded-xl">
                 <div className="flex items-center gap-1.5 font-bold">
-                  <span>⚠️</span>
                   <span>バリデーションエラー ({compileOutcome.errors.length} 件):</span>
                 </div>
                 <ul className="list-disc list-inside space-y-0.5 text-[11px]">
@@ -626,8 +707,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
             }`}
           >
-            <span>⚔️</span>
-            <span>Scenario 開始</span>
+            <span>初期盤面で対戦開始</span>
           </button>
         </div>
       </div>
@@ -683,11 +763,66 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
 
   const playerName = playerKey === "p1" ? "Player A (P1)" : "Player B (P2)";
 
+  // レギュレーション変更時 (deckCards / components 変更時) のセレクターローカル状態正規化
+  useEffect(() => {
+    const suitCards = deckCards.filter((c) => c.suit === selectedSuit);
+    if (suitCards.length === 0) {
+      const firstCard = deckCards[0];
+      if (firstCard) {
+        setSelectedSuit(firstCard.suit as any);
+        setSelectedRank(firstCard.rank);
+      }
+    } else if (!suitCards.some((c) => c.rank === selectedRank)) {
+      setSelectedRank(suitCards[0].rank);
+    }
+  }, [deckCards, selectedSuit, selectedRank]);
+
+  useEffect(() => {
+    if (components.length > 0 && !components.some((c) => c.id === selectedComponentId)) {
+      setSelectedComponentId(components[0].id);
+    }
+  }, [components, selectedComponentId]);
+
   // 有効なランク一覧（選択中スートに適合するもの）
   const availableRanks = useMemo(() => {
     const ranks = deckCards.filter((c) => c.suit === selectedSuit).map((c) => c.rank);
     return Array.from(new Set(ranks));
   }, [deckCards, selectedSuit]);
+
+  // 汎用自動 occurrence 解決ヘルパー (同一 suit/rank が複数ある Deck Profile 全般に対応)
+  const resolveNextCardRef = useCallback(
+    (suit: "S" | "H" | "D" | "C" | "J", rank: string): ScenarioCardRefV1 => {
+      const matchingDeckCards = deckCards.filter((c) => c.suit === suit && c.rank === rank);
+      if (matchingDeckCards.length <= 1) {
+        return { suit, rank };
+      }
+
+      // 該当プレイヤーの全領域 + ドラフト中カードから既使用 occurrence を収集
+      const usedOccurrences = new Set<number>();
+      const checkCard = (c: ScenarioCardRefV1) => {
+        if (c.suit === suit && c.rank === rank && c.occurrence !== undefined) {
+          usedOccurrences.add(c.occurrence);
+        }
+      };
+
+      hand.forEach(checkCard);
+      grave.forEach(checkCard);
+      lifeCards.forEach(checkCard);
+      packCards.forEach(checkCard);
+      field.forEach((u) => u.cards?.forEach(checkCard));
+      draftUnitCards.forEach(checkCard);
+
+      for (let i = 0; i < matchingDeckCards.length; i++) {
+        if (!usedOccurrences.has(i)) {
+          return { suit, rank, occurrence: i };
+        }
+      }
+
+      // 全枚数使用済みの場合は matchingDeckCards.length を付与（バリデーションで fail-closed 検出）
+      return { suit, rank, occurrence: matchingDeckCards.length };
+    },
+    [deckCards, hand, grave, lifeCards, packCards, field, draftUnitCards]
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -709,11 +844,11 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
               }}
               className="p-1.5 rounded border border-zinc-300 bg-white font-bold"
             >
-              <option value="S">♠ (S)</option>
-              <option value="H">♡ (H)</option>
-              <option value="D">♢ (D)</option>
-              <option value="C">♣ (C)</option>
-              {deckCards.some((c) => c.suit === "J") && <option value="J">★ (J)</option>}
+              <option value="S">♠</option>
+              <option value="H">♡</option>
+              <option value="D">♢</option>
+              <option value="C">♣</option>
+              {deckCards.some((c) => c.suit === "J") && <option value="J">Joker</option>}
             </select>
           </div>
 
@@ -733,31 +868,31 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           </div>
 
           <button
-            onClick={() => onAddCard("hand", { suit: selectedSuit, rank: selectedRank })}
+            onClick={() => onAddCard("hand", resolveNextCardRef(selectedSuit, selectedRank))}
             className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
           >
             + 手札に追加
           </button>
 
           <button
-            onClick={() => onAddCard("grave", { suit: selectedSuit, rank: selectedRank })}
+            onClick={() => onAddCard("grave", resolveNextCardRef(selectedSuit, selectedRank))}
             className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
           >
             + 墓地に追加
           </button>
 
           <button
-            onClick={() => onAddCard("life", { suit: selectedSuit, rank: selectedRank })}
+            onClick={() => onAddCard("life", resolveNextCardRef(selectedSuit, selectedRank))}
             className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
           >
             + ライフ固定に追加
           </button>
 
           <button
-            onClick={() => onAddCard("pack", { suit: selectedSuit, rank: selectedRank })}
+            onClick={() => onAddCard("pack", resolveNextCardRef(selectedSuit, selectedRank))}
             className="px-3 py-1.5 bg-white border border-zinc-300 hover:bg-zinc-100 rounded font-bold shadow-sm"
           >
-            + 山札固定に追加
+            + パック固定に追加
           </button>
         </div>
 
@@ -804,7 +939,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             </div>
 
             <button
-              onClick={() => setDraftUnitCards((prev) => [...prev, { suit: selectedSuit, rank: selectedRank }])}
+              onClick={() => setDraftUnitCards((prev) => [...prev, resolveNextCardRef(selectedSuit, selectedRank)])}
               className="px-3 py-1.5 bg-blue-50 border border-blue-300 text-blue-800 hover:bg-blue-100 rounded font-bold shadow-sm"
             >
               + ユニット構成カードに追加
@@ -815,7 +950,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 const cardsToDeploy =
                   draftUnitCards.length > 0
                     ? draftUnitCards
-                    : [{ suit: selectedSuit, rank: selectedRank }];
+                    : [resolveNextCardRef(selectedSuit, selectedRank)];
                 onAddUnit(selectedComponentId, cardsToDeploy, selectedState, selectedFace);
                 setDraftUnitCards([]);
               }}
@@ -835,7 +970,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                     key={idx}
                     className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px]"
                   >
-                    {c.suit}{c.rank}
+                    {formatScenarioCardChip(c)}
                     <button
                       onClick={() => setDraftUnitCards((prev) => prev.filter((_, i) => i !== idx))}
                       className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -872,7 +1007,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   key={i}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800"
                 >
-                  {c.suit}{c.rank}
+                  {formatScenarioCardChip(c)}
                   <button
                     onClick={() => onRemoveCard("hand", i)}
                     className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -896,7 +1031,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <div className="flex flex-col gap-1.5">
               {field.map((u, i) => {
                 const cardLabel = u.cards && u.cards.length > 0
-                  ? u.cards.map((c) => `${c.suit}${c.rank}`).join(", ")
+                  ? u.cards.map(formatScenarioCardChip).join(", ")
                   : "カードなし";
                 return (
                   <div
@@ -939,7 +1074,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                         : "bg-zinc-100 border-zinc-300 text-zinc-800"
                     }`}
                   >
-                    {c.suit}{c.rank}{isTop ? " (TOP)" : ""}
+                    {formatScenarioCardChip(c)}{isTop ? " (TOP)" : ""}
                     <button
                       onClick={() => onRemoveCard("grave", i)}
                       className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -982,7 +1117,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   key={i}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-rose-50 border border-rose-200 rounded font-bold text-rose-800 text-[10px]"
                 >
-                  {c.suit}{c.rank}
+                  {formatScenarioCardChip(c)}
                   <button
                     onClick={() => onRemoveCard("life", i)}
                     className="text-rose-400 hover:text-red-600 font-bold"
@@ -995,10 +1130,10 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           )}
         </div>
 
-        {/* 山札 */}
+        {/* パック */}
         <div className="p-3 bg-white rounded-xl border border-zinc-200 flex flex-col gap-2">
           <div className="flex items-center justify-between border-b pb-1.5">
-            <span className="font-bold text-zinc-800">山札 (Pack)</span>
+            <span className="font-bold text-zinc-800">パック (Pack)</span>
           </div>
           <div className="flex items-center gap-1.5 text-[11px]">
             <span className="text-zinc-500">目標枚数:</span>
@@ -1024,7 +1159,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   key={i}
                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
                 >
-                  {c.suit}{c.rank}
+                  {formatScenarioCardChip(c)}
                   <button
                     onClick={() => onRemoveCard("pack", i)}
                     className="text-sky-400 hover:text-red-600 font-bold"

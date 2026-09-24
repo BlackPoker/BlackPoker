@@ -10,9 +10,8 @@ import { RegulationValidator } from "../../engine/regulation/RegulationValidator
 import {
   SimulatorDeckProfileResolver,
   STANDARD_52_DECK_CARDS,
-  STANDARD_53_DECK_CARDS,
-  STANDARD_52_FIXTURE_NOTICE,
-  STANDARD_53_FIXTURE_NOTICE,
+  STANDARD_54_DECK_CARDS,
+  STANDARD_54_FIXTURE_NOTICE,
 } from "../../engine/regulation/SimulatorDeckProfileResolver";
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 import { OfficialRegulationMatchFactory } from "../../engine/regulation/OfficialRegulationMatchFactory";
@@ -131,19 +130,24 @@ describe("Official Regulation Phase 3.0-A - Standard + Pack Foundation & Fixture
     expect(session.state.regulationId).toBe("standard-pack");
   });
 
-  it("Test H & I: standard-pack fixture resolves to 53 cards with exactly 1 Joker", async () => {
+  it("Test H & I: standard-pack fixture resolves to 54 cards with exactly 2 Jokers", async () => {
     const frame = await getFrame("pack");
     const profile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, "standard-pack");
 
-    expect(profile.id).toBe("standard53");
-    expect(profile.cardCount).toBe(53);
-    expect(profile.cards.length).toBe(53);
-    expect(profile.notice).toBe(STANDARD_53_FIXTURE_NOTICE);
+    expect(profile.id).toBe("standard54");
+    expect(profile.cardCount).toBe(54);
+    expect(profile.cards.length).toBe(54);
+    expect(profile.notice).toBe(STANDARD_54_FIXTURE_NOTICE);
 
-    // Joker は exactly 1 枚
+    // Joker は exactly 2 枚
     const jokers = profile.cards.filter((c) => c.rank === "Joker");
-    expect(jokers.length).toBe(1);
+    expect(jokers.length).toBe(2);
     expect(jokers[0]).toEqual({
+      suit: "J",
+      rank: "Joker",
+      value: 0,
+    });
+    expect(jokers[1]).toEqual({
       suit: "J",
       rank: "Joker",
       value: 0,
@@ -166,18 +170,18 @@ describe("Official Regulation Phase 3.0-A - Standard + Pack Foundation & Fixture
     const p2 = SimulatorDeckProfileResolver.resolveDeckProfile(frame, "standard-pack");
 
     expect(p1.cards).toBe(p2.cards);
-    expect(Object.isFrozen(STANDARD_53_DECK_CARDS)).toBe(true);
+    expect(Object.isFrozen(STANDARD_54_DECK_CARDS)).toBe(true);
   });
 
-  it("Test K: light-pack fixture remains standard52 (52 cards, 0 Jokers)", async () => {
+  it("Test K: light-pack fixture resolves to standard54 (54 cards, 2 Jokers)", async () => {
     const frame = await getFrame("pack");
     const profile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, "light-pack");
 
-    expect(profile.id).toBe("standard52");
-    expect(profile.cardCount).toBe(52);
-    expect(profile.cards.length).toBe(52);
-    expect(profile.notice).toBe(STANDARD_52_FIXTURE_NOTICE);
-    expect(profile.cards.some((c) => c.rank === "Joker")).toBe(false);
+    expect(profile.id).toBe("standard54");
+    expect(profile.cardCount).toBe(54);
+    expect(profile.cards.length).toBe(54);
+    expect(profile.notice).toBe(STANDARD_54_FIXTURE_NOTICE);
+    expect(profile.cards.filter((c) => c.rank === "Joker").length).toBe(2);
   });
 
   it("Test L: light-pack same-seed setup remains completely unchanged", async () => {
@@ -267,10 +271,10 @@ describe("Official Regulation Phase 3.0-A - Standard + Pack Foundation & Fixture
 
   it("Test P: Notice resolution SSOT by regulationId", () => {
     expect(SimulatorDeckProfileResolver.getDeckProfileNotice("light-pack")).toBe(
-      STANDARD_52_FIXTURE_NOTICE
+      STANDARD_54_FIXTURE_NOTICE
     );
     expect(SimulatorDeckProfileResolver.getDeckProfileNotice("standard-pack")).toBe(
-      STANDARD_53_FIXTURE_NOTICE
+      STANDARD_54_FIXTURE_NOTICE
     );
     expect(SimulatorDeckProfileResolver.getDeckProfileNotice("light-entry16")).toBeUndefined();
     expect(SimulatorDeckProfileResolver.getDeckProfileNotice(undefined)).toBeUndefined();

@@ -468,7 +468,7 @@ export class ScenarioCompiler {
           errors.push({
             code: "INVALID_ZONE_CONFIG",
             path: `players.${playerKey}.pack`,
-            message: `レギュレーション "${regulation.id}" のフレーム "${frame.id}" には山札 (Pack) が存在しないため、pack を指定することはできません。`,
+            message: `レギュレーション "${regulation.id}" のフレーム "${frame.id}" にはパック (Pack) が存在しないため、pack を指定することはできません。`,
           });
         }
         if (packConfig.cards) {

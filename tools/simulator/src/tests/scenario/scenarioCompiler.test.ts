@@ -48,7 +48,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     };
   }
 
-  // Helper to create a minimal valid scenario for standard-pack (53 cards: 52 standard + 1 Joker)
+  // Helper to create a minimal valid scenario for standard-pack (54 cards: 52 standard + 2 Jokers)
   function createMinimalStandardScenario(seed: number = 100): ScenarioDefinitionV1 {
     return {
       version: 1,
@@ -61,7 +61,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
         p1: {
           hand: [
             { suit: "S", rank: "A" },
-            { suit: "J", rank: "Joker" },
+            { suit: "J", rank: "Joker", occurrence: 0 },
           ],
           field: [
             {
@@ -76,14 +76,14 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
             { suit: "C", rank: "3" }, // tail card
           ],
           life: { count: 5 },
-          pack: { count: 43 }, // 2 + 1 + 2 + 5 + 43 = 53
+          pack: { count: 44 }, // 2 + 1 + 2 + 5 + 44 = 54
         },
         p2: {
           hand: [{ suit: "D", rank: "A" }],
           field: [],
           grave: [],
           life: { count: 5 },
-          pack: { count: 47 }, // 1 + 5 + 47 = 53
+          pack: { count: 48 }, // 1 + 5 + 48 = 54
         },
       },
     };
@@ -234,7 +234,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     const r2 = compileScenarioDefinitionV1(invalidJoker2, catalog, fullRulePackage);
     expect(r2.kind).toBe("VALIDATION_ERROR");
 
-    // Non-existent occurrence for single-instance card (standard-pack has 1 Joker, so occurrence 1 does not exist)
+    // Non-existent occurrence (standard-pack has 2 Jokers, so occurrence 2 does not exist)
     const invalidOccurrence: ScenarioDefinitionV1 = {
       ...validScenario,
       players: {
@@ -243,7 +243,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
           ...validScenario.players.p1,
           hand: [
             { suit: "S", rank: "A" },
-            { suit: "J", rank: "Joker", occurrence: 1 },
+            { suit: "J", rank: "Joker", occurrence: 2 },
           ],
         },
       },
@@ -356,7 +356,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
           },
           pack: {
             cards: [{ suit: "D", rank: "8" }],
-            count: 43,
+            count: 44,
           },
         },
       },
@@ -375,7 +375,7 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     // Pack の先頭に D8 が含まれる
     expect(p1.pack.cards[0].suit).toBe("D");
     expect(p1.pack.cards[0].rank).toBe("8");
-    expect(p1.pack.cards.length).toBe(43);
+    expect(p1.pack.cards.length).toBe(44);
 
     // D5, D8 が他の領域や補完カード内に重複出現していないこと
     const allCards = [
@@ -557,6 +557,141 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
     expect(r1.kind).toBe("VALIDATION_ERROR");
     if (r1.kind === "VALIDATION_ERROR") {
       expect(r1.errors.some((e) => e.code === "INVALID_UNIT_FACE")).toBe(true);
+    }
+  });
+
+  it("18: (テスト E) Light+Pack / Standard+Pack で Joker 2枚 (occurrence: 0, 1) を別Zoneに配置して正常コンパイルできること", () => {
+    // 54枚デッキ (52通常 + 2 Joker)
+    const validTwoJokersScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          grave: [{ suit: "J", rank: "Joker", occurrence: 1 }],
+          life: { count: 38 }, // 54 - 1(hand) - 1(grave) - 14(pack) = 38
+          pack: { count: 14 },
+        },
+        p2: {
+          life: { count: 40 },
+          pack: { count: 14 },
+        },
+      },
+    };
+
+    const res = compileScenarioDefinitionV1(validTwoJokersScenario, catalog, fullRulePackage);
+    if (res.kind === "VALIDATION_ERROR") {
+      throw new Error("Test 18 errors: " + JSON.stringify(res.errors));
+    }
+    expect(res.kind).toBe("READY");
+    if (res.kind === "READY") {
+      const p1 = res.state.players.p1;
+      expect(p1.hand).toHaveLength(1);
+      expect(p1.hand[0].rank).toBe("Joker");
+      expect(p1.grave).toHaveLength(1);
+      expect(p1.grave[0].rank).toBe("Joker");
+      expect(p1.hand[0].id).not.toBe(p1.grave[0].id);
+    }
+  });
+
+  it("19: (テスト E) Light+Pack / Standard+Pack で Joker の occurrence 未指定は AMBIGUOUS_CARD_REFERENCE、存在しない occurrence は INVALID_CARD_REF で拒絶されること", () => {
+    // 1. occurrence 省略
+    const ambiguousJokerScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:light-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "J", rank: "Joker" }], // occurrence 省略!
+        },
+        p2: {},
+      },
+    };
+
+    const resAmbiguous = compileScenarioDefinitionV1(ambiguousJokerScenario, catalog, fullRulePackage);
+    expect(resAmbiguous.kind).toBe("VALIDATION_ERROR");
+    if (resAmbiguous.kind === "VALIDATION_ERROR") {
+      expect(resAmbiguous.errors.some((e) => e.code === "AMBIGUOUS_CARD_REFERENCE")).toBe(true);
+    }
+
+    // 2. occurrence 2 (2枚デッキなので最大 occurrence は 1)
+    const invalidOccScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:light-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "J", rank: "Joker", occurrence: 2 }],
+        },
+        p2: {},
+      },
+    };
+
+    const resInvalidOcc = compileScenarioDefinitionV1(invalidOccScenario, catalog, fullRulePackage);
+    expect(resInvalidOcc.kind).toBe("VALIDATION_ERROR");
+    if (resInvalidOcc.kind === "VALIDATION_ERROR") {
+      expect(resInvalidOcc.errors.some((e) => e.code === "INVALID_CARD_REF")).toBe(true);
+    }
+  });
+
+  it("20: (テスト F) Entry16 (light-entry16) で Joker を指定した場合は INVALID_CARD_REF で拒絶され、16枚構成を維持していること", () => {
+    const entry16WithJoker: ScenarioDefinitionV1 = {
+      ...createMinimalLightScenario(42),
+      players: {
+        ...createMinimalLightScenario(42).players,
+        p1: {
+          ...createMinimalLightScenario(42).players.p1,
+          hand: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      },
+    };
+
+    const res = compileScenarioDefinitionV1(entry16WithJoker, catalog, fullRulePackage);
+    expect(res.kind).toBe("VALIDATION_ERROR");
+    if (res.kind === "VALIDATION_ERROR") {
+      expect(res.errors.some((e) => e.code === "INVALID_CARD_REF")).toBe(true);
+    }
+  });
+
+  it("21: (テスト H) Extra を要するコンポーネント (character.giant) が Light / Standard で指定された場合は UNSUPPORTED_COMPONENT で拒絶されること", () => {
+    for (const envId of ["official:light-entry16", "official:light-pack", "official:standard-pack"]) {
+      const scenarioWithGiant: ScenarioDefinitionV1 = {
+        version: 1,
+        environmentId: envId,
+        seed: 42,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        turnCount: 1,
+        players: {
+          p1: {
+            field: [
+              {
+                componentId: "character.giant", // Extra 限定キャラクター
+                cards: [{ suit: "S", rank: "A" }],
+                state: "charge",
+                face: "up",
+              },
+            ],
+          },
+          p2: {},
+        },
+      };
+
+      const res = compileScenarioDefinitionV1(scenarioWithGiant, catalog, fullRulePackage);
+      expect(res.kind).toBe("VALIDATION_ERROR");
+      if (res.kind === "VALIDATION_ERROR") {
+        expect(res.errors.some((e) => e.code === "UNSUPPORTED_COMPONENT")).toBe(true);
+      }
     }
   });
 });

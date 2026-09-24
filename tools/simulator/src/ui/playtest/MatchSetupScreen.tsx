@@ -371,18 +371,16 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
           <button
             type="button"
             onClick={onOpenScenarioBuilder}
-            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center gap-1.5 min-h-[48px] cursor-pointer font-mono"
+            className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-zinc-50 border border-zinc-300 text-zinc-800 font-bold text-sm rounded-xl shadow-sm transition flex items-center justify-center min-h-[48px] cursor-pointer font-mono"
           >
-            <span>🛠️</span>
-            <span>Scenario Builder</span>
+            <span>初期盤面設定</span>
           </button>
         )}
         <button
           type="button"
           onClick={onStartMatch}
-          className="w-full sm:w-auto px-8 py-3 bg-zinc-950 hover:bg-zinc-800 active:scale-98 text-white font-black text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2 min-h-[48px] cursor-pointer tracking-wide font-mono"
+          className="w-full sm:w-auto px-8 py-3 bg-zinc-950 hover:bg-zinc-800 active:scale-98 text-white font-black text-sm rounded-xl shadow-md transition flex items-center justify-center min-h-[48px] cursor-pointer tracking-wide font-mono"
         >
-          <span>⚔️</span>
           <span>対戦開始</span>
         </button>
       </div>

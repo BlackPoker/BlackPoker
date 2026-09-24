@@ -198,18 +198,59 @@ export function validatePlaytestPreset(
     }
 
     // 3. 同一プレイヤー内でのカード（suit + rank）重複チェック
-    const seenCards = new Map<string, string>(); // "suit:rank" -> zone
+    const seenCardIds = new Map<string, string>(); // card.id -> zone
+    const seenCardCounts = new Map<string, { count: number; firstZone: string }>(); // "suit:rank" -> count & first zone
+
+    const getMaxAllowedCardCount = (suit: string, rank: string): number => {
+      const normSuit = normalizeSuit(suit);
+      if (normSuit === "joker" || (typeof rank === "string" && rank.toLowerCase() === "joker")) {
+        if (state.regulationId === "light-pack" || state.regulationId === "standard-pack") {
+          return 2;
+        }
+        if (state.regulationId === "light-entry16") {
+          return 0;
+        }
+        return 2; // デフォルト (Joker 2枚の公式レギュレーション対応)
+      }
+      return 1;
+    };
 
     const checkCardUnique = (card: any, zone: string) => {
       if (!card || !card.suit || card.rank === undefined) return;
+
+      // 物理IDの重複チェック
+      if (card.id) {
+        if (seenCardIds.has(card.id)) {
+          const prevZone = seenCardIds.get(card.id);
+          errors.push(
+            `プレイヤー ${pKey} 内でカード ID ${card.id} が重複しています (${prevZone} と ${zone})`
+          );
+        } else {
+          seenCardIds.set(card.id, zone);
+        }
+      }
+
+      // レギュレーションごとの最大許容枚数チェック
       const key = `${normalizeSuit(card.suit)}:${card.rank}`;
-      if (seenCards.has(key)) {
-        const prevZone = seenCards.get(key);
+      const maxAllowed = getMaxAllowedCardCount(card.suit, card.rank);
+      if (maxAllowed === 0) {
         errors.push(
-          `プレイヤー ${pKey} 内でカード ${card.suit}${card.rank} が重複しています (${prevZone} と ${zone})`
+          `プレイヤー ${pKey} のレギュレーション "${state.regulationId || "unknown"}" ではカード ${card.suit}${card.rank} は使用できません`
         );
+        return;
+      }
+
+      const existing = seenCardCounts.get(key);
+      if (existing) {
+        if (existing.count >= maxAllowed) {
+          errors.push(
+            `プレイヤー ${pKey} 内でカード ${card.suit}${card.rank} が重複しています (${existing.firstZone} と ${zone})`
+          );
+        } else {
+          existing.count += 1;
+        }
       } else {
-        seenCards.set(key, zone);
+        seenCardCounts.set(key, { count: 1, firstZone: zone });
       }
     };
 
@@ -237,6 +278,9 @@ export function validatePlaytestPreset(
           checkCardUnique(g, "grave");
         }
       });
+    }
+    if (player.pack && Array.isArray(player.pack.cards)) {
+      player.pack.cards.forEach((c: any) => checkCardUnique(c, "pack"));
     }
 
     // 4. Field ユニットの検証

@@ -59,6 +59,27 @@ export const STANDARD_53_DECK_CARDS: readonly CardDefinition[] = Object.freeze([
 export const STANDARD_53_FIXTURE_NOTICE = "現在のSimulatorでは53枚デッキFixture（標準52枚 + Joker 1枚）を使用します";
 
 /**
+ * 決定論的な標準54枚デッキFixtureカードリスト (♠/♡/♢/♣ × A〜K 計52枚 + Joker 2枚)
+ * 公式ルール第9.1.2版 Pack Frame のデッキ40枚以上要件を満たし、
+ * Light + Pack および Standard + Pack で Joker 2枚を実プレイ可能とする Simulator 用の決定論的プレイアブル Fixture。
+ */
+export const STANDARD_54_DECK_CARDS: readonly CardDefinition[] = Object.freeze([
+  ...STANDARD_52_DECK_CARDS,
+  {
+    suit: "J",
+    rank: "Joker",
+    value: 0,
+  },
+  {
+    suit: "J",
+    rank: "Joker",
+    value: 0,
+  },
+]);
+
+export const STANDARD_54_FIXTURE_NOTICE = "現在のSimulatorでは54枚デッキFixture（標準52枚 + Joker 2枚）を使用します";
+
+/**
  * Simulator 内での対戦デッキプロファイルを解決する単一の情報源 (SSOT)。
  * Frame 定義（公式ルール制約）から Simulator 用の具体的 Fixture を決定論的に解決します。
  */
@@ -89,34 +110,34 @@ export class SimulatorDeckProfileResolver {
 
     if (frame.deck.type === "constructed") {
       if (regulationId === "light-pack") {
-        if (STANDARD_52_DECK_CARDS.length < frame.deck.minCards) {
+        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
           throw new Error(
-            `標準52枚Fixtureのカード数 (${STANDARD_52_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
+            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
           );
         }
         return {
-          id: "standard52",
-          name: "標準52枚デッキFixture",
-          description: "♠/♡/♢/♣ A〜K 各1枚 (52枚)",
-          cardCount: STANDARD_52_DECK_CARDS.length,
-          cards: STANDARD_52_DECK_CARDS,
-          notice: STANDARD_52_FIXTURE_NOTICE,
+          id: "standard54",
+          name: "標準54枚デッキFixture",
+          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
+          cardCount: STANDARD_54_DECK_CARDS.length,
+          cards: STANDARD_54_DECK_CARDS,
+          notice: STANDARD_54_FIXTURE_NOTICE,
         };
       }
 
       if (regulationId === "standard-pack") {
-        if (STANDARD_53_DECK_CARDS.length < frame.deck.minCards) {
+        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
           throw new Error(
-            `標準53枚Fixtureのカード数 (${STANDARD_53_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
+            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
           );
         }
         return {
-          id: "standard53",
-          name: "標準53枚デッキFixture",
-          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 1枚 (53枚)",
-          cardCount: STANDARD_53_DECK_CARDS.length,
-          cards: STANDARD_53_DECK_CARDS,
-          notice: STANDARD_53_FIXTURE_NOTICE,
+          id: "standard54",
+          name: "標準54枚デッキFixture",
+          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
+          cardCount: STANDARD_54_DECK_CARDS.length,
+          cards: STANDARD_54_DECK_CARDS,
+          notice: STANDARD_54_FIXTURE_NOTICE,
         };
       }
 
@@ -133,11 +154,8 @@ export class SimulatorDeckProfileResolver {
     regulationId?: string,
     _frameId?: string
   ): string | undefined {
-    if (regulationId === "light-pack") {
-      return STANDARD_52_FIXTURE_NOTICE;
-    }
-    if (regulationId === "standard-pack") {
-      return STANDARD_53_FIXTURE_NOTICE;
+    if (regulationId === "light-pack" || regulationId === "standard-pack") {
+      return STANDARD_54_FIXTURE_NOTICE;
     }
     return undefined;
   }

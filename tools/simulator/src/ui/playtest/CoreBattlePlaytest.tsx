@@ -1558,10 +1558,10 @@ export const CoreBattlePlaytest: React.FC = () => {
 
           <button
             onClick={() => setIsScenarioBuilderOpen(true)}
-            title="Scenario Builder を開いて初期盤面を作成・読み込みます"
+            title="初期盤面設定を開いて初期盤面を作成・読み込みます"
             className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
           >
-            🛠️ Scenario Builder
+            初期盤面設定
           </button>
 
           <button

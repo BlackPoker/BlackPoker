@@ -169,13 +169,21 @@ export class OfficialRegulationMatchSetup {
     const deckProfile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, regulation.id);
     const expectedDeck = deckProfile.cards;
 
-    const buildDeck = (playerKey: PlayerKey): InGameCard[] =>
-      expectedDeck.map((c) => ({
-        id: `${playerKey}-c-${c.suit}${c.rank}`,
-        suit: c.suit,
-        rank: c.rank,
-        value: c.value !== undefined ? c.value : rankToValue(c.rank),
-      }));
+    const buildDeck = (playerKey: PlayerKey): InGameCard[] => {
+      const occurrenceMap = new Map<string, number>();
+      return expectedDeck.map((c) => {
+        const key = `${c.suit}-${c.rank}`;
+        const occ = occurrenceMap.get(key) ?? 0;
+        occurrenceMap.set(key, occ + 1);
+        const occSuffix = occ > 0 ? `#${occ}` : "";
+        return {
+          id: `${playerKey}-c-${c.suit}${c.rank}${occSuffix}`,
+          suit: c.suit,
+          rank: c.rank,
+          value: c.value !== undefined ? c.value : rankToValue(c.rank),
+        };
+      });
+    };
 
     const p1RawDeck = buildDeck("p1");
     const p2RawDeck = buildDeck("p2");

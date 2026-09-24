@@ -293,11 +293,10 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
               onOpenScenarioBuilder();
             }}
             className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
-            title="Scenario Builder を開いて初期盤面を作成・読み込みます"
+            title="初期盤面設定を開いて初期盤面を作成・読み込みます"
           >
             <div className="flex items-center gap-1.5">
-              <span>🛠️</span>
-              <span>Scenario Builder</span>
+              <span>初期盤面設定</span>
             </div>
             <span className="text-[10px] text-zinc-500 font-normal">
               ※ 初期盤面の作成・読込・共有

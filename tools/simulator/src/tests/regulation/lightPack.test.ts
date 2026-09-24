@@ -60,7 +60,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
   });
 
   // Test A: Pack Setup (8.3.1.2 step-by-step)
-  it("Test A: Pack Setup (8.3.1.2 step-by-step) sets up 52 cards deck, 14 pack, and correct zone sizes", async () => {
+  it("Test A: Pack Setup (8.3.1.2 step-by-step) sets up 54 cards deck, 14 pack, and correct zone sizes", async () => {
     const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
       catalog,
       fullRulePackage: lightPackRulePackage,
@@ -78,11 +78,11 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
       expect(p.pack.opened).toBe(false);
       expect(p.pack.cards.length).toBe(14);
 
-      // Field has 1 bulwark and 1 soldier (as defined in pack.yaml preset)
+      // Field has 1 bulwark and 1 preset combat unit (as defined in pack.yaml preset)
       const bulwarks = p.field.filter((u: any) => u.componentId === "character.bulwark");
-      const soldiers = p.field.filter((u: any) => u.componentId === "character.soldier");
+      const combatUnits = p.field.filter((u: any) => u.componentId !== "character.bulwark");
       expect(bulwarks.length).toBe(1);
-      expect(soldiers.length).toBe(1);
+      expect(combatUnits.length).toBe(1);
     }
 
     // Turn player drew 1 extra card at game start
@@ -97,7 +97,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
       state.players[tp].pack.cards.length +
       state.players[tp].field.length +
       (state.players[tp].grave?.length || 0);
-    expect(tpTotalCards).toBe(52);
+    expect(tpTotalCards).toBe(54);
 
     const ntpTotalCards =
       state.players[ntp].hand.length +
@@ -105,11 +105,11 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
       state.players[ntp].pack.cards.length +
       state.players[ntp].field.length +
       (state.players[ntp].grave?.length || 0);
-    expect(ntpTotalCards).toBe(52);
+    expect(ntpTotalCards).toBe(54);
   });
 
   // Test B: Card Conservation
-  it("Test B: Card Conservation - Exact 52-card multiset conservation across all zones", async () => {
+  it("Test B: Card Conservation - Exact 54-card multiset conservation across all zones", async () => {
     const session = await OfficialRegulationMatchFactory.createSession("light-pack", 42, {
       catalog,
       fullRulePackage: lightPackRulePackage,
@@ -127,9 +127,9 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
         ...(p.fog ? p.fog.flatMap((f: any) => (f.card ? [f.card] : [])) : []),
       ];
 
-      expect(allCards.length).toBe(52);
+      expect(allCards.length).toBe(54);
       const cardIds = new Set(allCards.map((c) => c.id));
-      expect(cardIds.size).toBe(52);
+      expect(cardIds.size).toBe(54);
     }
   });
 
@@ -616,7 +616,7 @@ describe("Official Regulation Phase 2.0: Light + Pack Foundation Tests (A to X)"
 
     expect(lightPackOpt).toBeDefined();
     expect(lightPackOpt?.isOfficial).toBe(true);
-    expect(lightPackOpt?.deckProfileNotice).toContain("標準52枚デッキ");
+    expect(lightPackOpt?.deckProfileNotice).toContain("54枚デッキ");
   });
 
   // Test O: Secret Selection Boundary

@@ -8,8 +8,8 @@ import { OfficialRegulationMatchFactory } from "../../engine/regulation/Official
 import { OfficialRegulationMatchSetup, verifyCardConservation } from "../../engine/regulation/OfficialRegulationMatchSetup";
 import {
   SimulatorDeckProfileResolver,
-  STANDARD_53_DECK_CARDS,
-  STANDARD_53_FIXTURE_NOTICE,
+  STANDARD_54_DECK_CARDS,
+  STANDARD_54_FIXTURE_NOTICE,
   STANDARD_52_FIXTURE_NOTICE,
 } from "../../engine/regulation/SimulatorDeckProfileResolver";
 import {
@@ -277,28 +277,29 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
   // =========================================================================
   // Group H: 53 fixture profile, 1 Joker, notice, simulator fixture declaration
   // =========================================================================
-  describe("Group H: 53-Card Deck Fixture Profile & Notice", () => {
-    it("H1: resolves to standard53 profile with 53 cards, exactly 1 Joker, and correct notice", () => {
+  describe("Group H: 54-Card Deck Fixture Profile & Notice", () => {
+    it("H1: resolves to standard54 profile with 54 cards, exactly 2 Jokers, and correct notice", () => {
       const packFrame = catalog.frames.get("pack")!;
       const profile = SimulatorDeckProfileResolver.resolveDeckProfile(packFrame, "standard-pack");
 
-      expect(profile.id).toBe("standard53");
-      expect(profile.cardCount).toBe(53);
-      expect(profile.cards.length).toBe(53);
-      expect(profile.notice).toBe(STANDARD_53_FIXTURE_NOTICE);
+      expect(profile.id).toBe("standard54");
+      expect(profile.cardCount).toBe(54);
+      expect(profile.cards.length).toBe(54);
+      expect(profile.notice).toBe(STANDARD_54_FIXTURE_NOTICE);
 
       const jokers = profile.cards.filter((c) => c.rank === "Joker");
-      expect(jokers.length).toBe(1);
+      expect(jokers.length).toBe(2);
       expect(jokers[0]).toEqual({ suit: "J", rank: "Joker", value: 0 });
+      expect(jokers[1]).toEqual({ suit: "J", rank: "Joker", value: 0 });
 
       const nonJokers = profile.cards.filter((c) => c.rank !== "Joker");
       expect(nonJokers.length).toBe(52);
     });
 
-    it("H2: standard53 fixture is declared as a Simulator deterministic fixture, not an official deck limitation", () => {
+    it("H2: standard54 fixture is declared as a Simulator deterministic fixture, not an official deck limitation", () => {
       // Notice 文言が Simulator 固有の Fixture である旨を明示していること
-      expect(STANDARD_53_FIXTURE_NOTICE).toContain("現在のSimulatorでは53枚デッキFixture");
-      expect(STANDARD_53_FIXTURE_NOTICE).not.toContain("公式ルールではJokerは1枚まで");
+      expect(STANDARD_54_FIXTURE_NOTICE).toContain("現在のSimulatorでは54枚デッキFixture");
+      expect(STANDARD_54_FIXTURE_NOTICE).not.toContain("公式ルールではJokerは1枚まで");
     });
   });
 
@@ -357,7 +358,7 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       expect(stdPack?.name).toBe("スタンダード + パック (公式)");
       expect(stdPack?.isOfficial).toBe(true);
       expect(stdPack?.regulationId).toBe("standard-pack");
-      expect(stdPack?.deckProfileNotice).toBe(STANDARD_53_FIXTURE_NOTICE);
+      expect(stdPack?.deckProfileNotice).toBe(STANDARD_54_FIXTURE_NOTICE);
     });
 
     it("K2: chooseDefaultPlaytestEnvironment preserves the default contract (first official environment)", () => {
@@ -412,8 +413,8 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
         const p2 = outcome.state.players.p2;
 
         // Verify card conservation SSOT
-        verifyCardConservation("p1", p1, STANDARD_53_DECK_CARDS);
-        verifyCardConservation("p2", p2, STANDARD_53_DECK_CARDS);
+        verifyCardConservation("p1", p1, STANDARD_54_DECK_CARDS);
+        verifyCardConservation("p2", p2, STANDARD_54_DECK_CARDS);
 
         // Specific area counts
         expect(p1.pack.cards.length).toBe(14);
@@ -434,10 +435,10 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
         expect(outcome.state.players[secondPlayer].hand.length).toBe(7);
         expect(p1.hand.length + p2.hand.length).toBe(15);
 
-        // 先攻: 53 - 14(pack) - 8(hand) - 2(field) = 29 (life + grave)
-        // 後攻: 53 - 14(pack) - 7(hand) - 2(field) = 30 (life + grave)
-        expect(outcome.state.players[firstPlayer].life.length + outcome.state.players[firstPlayer].grave.length).toBe(29);
-        expect(outcome.state.players[secondPlayer].life.length + outcome.state.players[secondPlayer].grave.length).toBe(30);
+        // 先攻: 54 - 14(pack) - 8(hand) - 2(field) = 30 (life + grave)
+        // 後攻: 54 - 14(pack) - 7(hand) - 2(field) = 31 (life + grave)
+        expect(outcome.state.players[firstPlayer].life.length + outcome.state.players[firstPlayer].grave.length).toBe(30);
+        expect(outcome.state.players[secondPlayer].life.length + outcome.state.players[secondPlayer].grave.length).toBe(31);
 
         // ID uniqueness and distinct player prefixes
         const p1Ids: string[] = [
@@ -447,8 +448,8 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
           ...p1.life.map((c: any) => c.id),
           ...p1.grave.flatMap((e: any) => e.cards.map((c: any) => c.id)),
         ];
-        expect(p1Ids.length).toBe(53);
-        expect(new Set(p1Ids).size).toBe(53);
+        expect(p1Ids.length).toBe(54);
+        expect(new Set(p1Ids).size).toBe(54);
         p1Ids.forEach((id) => expect(id.startsWith("p1-c-")).toBe(true));
 
         const p2Ids: string[] = [
@@ -458,8 +459,8 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
           ...p2.life.map((c: any) => c.id),
           ...p2.grave.flatMap((e: any) => e.cards.map((c: any) => c.id)),
         ];
-        expect(p2Ids.length).toBe(53);
-        expect(new Set(p2Ids).size).toBe(53);
+        expect(p2Ids.length).toBe(54);
+        expect(new Set(p2Ids).size).toBe(54);
         p2Ids.forEach((id) => expect(id.startsWith("p2-c-")).toBe(true));
 
         // P1 and P2 IDs are disjoint
@@ -467,9 +468,9 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
           expect(p2Ids).not.toContain(id);
         }
 
-        // Exactly 1 Joker per player
-        expect(p1Ids.filter((id) => id.includes("Joker")).length).toBe(1);
-        expect(p2Ids.filter((id) => id.includes("Joker")).length).toBe(1);
+        // Exactly 2 Jokers per player
+        expect(p1Ids.filter((id) => id.includes("Joker")).length).toBe(2);
+        expect(p2Ids.filter((id) => id.includes("Joker")).length).toBe(2);
       });
     }
   });
@@ -696,8 +697,8 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       // 自然終了（ライフ0）かつステップ上限未満で完了すること
       expect(result.completed).toBe(true);
       expect(result.totalDecisions).toBeLessThan(STEP_CAP);
-      expect(result.totalDecisions).toBe(261); // 決定論的検証
-      expect(result.turnCount).toBe(17);
+      expect(result.totalDecisions).toBe(171); // 54枚デッキ (Joker 2枚) での決定論的検証
+      expect(result.turnCount).toBe(9);
       expect(result.winner).toBe("p1");
       expect(result.reason).toContain("ライフが0になりました");
       expect(session.state.players.p2.life.length).toBe(0);
