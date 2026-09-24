@@ -500,10 +500,10 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
       })
     );
 
-    // ダイアログ外枠のスタイリング検証
+    // ダイアログ外枠のスタイリング検証 (1024px未満のモバイル/タブレットでは95dvh、1024px以上のデスクトップのみlg:h-auto)
     expect(html).toContain("h-[95dvh]");
-    expect(html).toContain("sm:h-auto");
-    expect(html).toContain("sm:max-h-[95vh]");
+    expect(html).toContain("lg:h-auto");
+    expect(html).toContain("lg:max-h-[95vh]");
     expect(html).toContain("overflow-y-auto");
   });
 
@@ -677,6 +677,164 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
       });
       const stoppedPlayBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
       expect(stoppedPlayBtn).toBeDefined();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("16. Auto-play中に再構築結果が DIVERGED となった場合、error UIをコミットして自動再生を即時停止し以降進行しないこと", () => {
+    vi.useFakeTimers();
+    try {
+      const bundle = createSampleBundle(42, 2);
+      let renderer!: TestRenderer.ReactTestRenderer;
+
+      act(() => {
+        renderer = TestRenderer.create(
+          React.createElement(ReplayViewerModal, {
+            isOpen: true,
+            onClose: dummyOnClose,
+            catalog,
+            fullRulePackage,
+            currentBuildSha,
+            initialBundle: bundle,
+            initialSource: "live",
+          })
+        );
+      });
+
+      const playBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+      expect(playBtn).toBeDefined();
+
+      // 自動再生を開始
+      act(() => {
+        playBtn.props.onClick();
+      });
+
+      // 1200ms 進行 -> Decision 1 は正常に進行
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+      expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["1"]);
+
+      // 次の Decision 2 再構築で DIVERGED エラーを返すように spy 設定
+      const actualReconstructMatch = ReplayReconstructionService.reconstructMatch;
+      const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch").mockImplementation((params) => {
+        if (params.decisionCount === 2) {
+          return {
+            status: "DIVERGED",
+            code: "STATE_MISMATCH",
+            message: "Simulated Replay Divergence at Decision 2",
+            stepIndex: 2,
+            decisionSeq: 2,
+            executedDecisions: 1,
+            totalDecisions: 2,
+            replayedDecisions: [],
+          };
+        }
+        return actualReconstructMatch(params);
+      });
+
+      try {
+        // 1200ms 進行 -> Decision 2 への進行時に DIVERGED 発生
+        act(() => {
+          vi.advanceTimersByTime(1200);
+        });
+
+        // 1. target index (Decision 2) がアトミックにコミットされていること
+        expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+
+        // 2. target error UI が表示され、旧盤面が表示されていないこと
+        const jsonAfterError = JSON.stringify(renderer.toJSON());
+        expect(jsonAfterError).toContain("Replay Diverged");
+        expect(jsonAfterError).toContain("Simulated Replay Divergence at Decision 2");
+        expect(jsonAfterError).not.toContain("盤面を読み込み中...");
+
+        // 3. 自動再生が即座に停止されていること (再生ボタンの表示が「自動再生」に戻っていること)
+        const stoppedPlayBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+        expect(stoppedPlayBtn).toBeDefined();
+
+        // 4. さらに時間が経過しても（1200ms x 2 回）、それ以上 index は進まないこと
+        act(() => {
+          vi.advanceTimersByTime(2400);
+        });
+        expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+      } finally {
+        reconSpy.mockRestore();
+      }
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("17. Auto-play中に再構築で例外 (throw -> TECHNICAL_ERROR) が発生した場合、error UIをコミットして自動再生を即時停止し以降進行しないこと", () => {
+    vi.useFakeTimers();
+    try {
+      const bundle = createSampleBundle(42, 2);
+      let renderer!: TestRenderer.ReactTestRenderer;
+
+      act(() => {
+        renderer = TestRenderer.create(
+          React.createElement(ReplayViewerModal, {
+            isOpen: true,
+            onClose: dummyOnClose,
+            catalog,
+            fullRulePackage,
+            currentBuildSha,
+            initialBundle: bundle,
+            initialSource: "live",
+          })
+        );
+      });
+
+      const playBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+      expect(playBtn).toBeDefined();
+
+      // 自動再生を開始
+      act(() => {
+        playBtn.props.onClick();
+      });
+
+      // 1200ms 進行 -> Decision 1 は正常に進行
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+      expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["1"]);
+
+      // 次の Decision 2 再構築で throw するように spy 設定
+      const actualReconstructMatch = ReplayReconstructionService.reconstructMatch;
+      const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch").mockImplementation((params) => {
+        if (params.decisionCount === 2) {
+          throw new Error("Simulated Engine Panic during reconstruction");
+        }
+        return actualReconstructMatch(params);
+      });
+
+      try {
+        // 1200ms 進行 -> Decision 2 への進行時に throw 発生
+        act(() => {
+          vi.advanceTimersByTime(1200);
+        });
+
+        // 1. target index (Decision 2) がアトミックにコミットされていること
+        expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+
+        // 2. Technical Error UI が表示され、旧盤面が表示されていないこと
+        const jsonAfterError = JSON.stringify(renderer.toJSON());
+        expect(jsonAfterError).toContain("Replay 再構築エラー (Technical Error)");
+        expect(jsonAfterError).not.toContain("盤面を読み込み中...");
+
+        // 3. 自動再生が即座に停止されていること (再生ボタンの表示が「自動再生」に戻っていること)
+        const stoppedPlayBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+        expect(stoppedPlayBtn).toBeDefined();
+
+        // 4. さらに時間が経過しても（1200ms x 2 回）、それ以上 index は進まないこと
+        act(() => {
+          vi.advanceTimersByTime(2400);
+        });
+        expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+      } finally {
+        reconSpy.mockRestore();
+      }
     } finally {
       vi.useRealTimers();
     }

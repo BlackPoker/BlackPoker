@@ -307,6 +307,9 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
           index: clampedIndex,
           result,
         });
+        if (result.status !== "SUCCESS") {
+          setIsPlaying(false);
+        }
       } catch (e: any) {
         setCurrentIndex(clampedIndex);
         setReconState({
@@ -317,6 +320,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
             error: e?.message ?? String(e),
           },
         });
+        setIsPlaying(false);
       }
     },
     [plan, catalog, fullRulePackage]
@@ -383,6 +387,9 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
           index: currentIndex,
           result,
         });
+        if (result.status !== "SUCCESS") {
+          setIsPlaying(false);
+        }
       }
     } catch (e: any) {
       if (!cancelled) {
@@ -394,6 +401,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
             error: e?.message ?? String(e),
           },
         });
+        setIsPlaying(false);
       }
     }
 
@@ -505,7 +513,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
       aria-label="Replay Viewer"
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-zinc-950/70 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-4xl h-[95dvh] sm:h-auto sm:max-h-[95vh] flex flex-col bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden font-sans">
+      <div className="relative w-full max-w-4xl h-[95dvh] lg:h-auto lg:max-h-[95vh] flex flex-col bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden font-sans">
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 text-white border-b border-zinc-800 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
