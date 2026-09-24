@@ -1,4 +1,7 @@
-import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import {
+  ScenarioDefinitionV1,
+  normalizeScenarioDefinitionV1,
+} from "../../domain/scenario/ScenarioTypes";
 import { ScenarioCompiler } from "../scenario/ScenarioCompiler";
 import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition";
 import { RulePackage } from "../../domain/rules/RulePackage";
@@ -108,14 +111,16 @@ export function prepareScenarioMatchAttempt(
   const regDef = regId ? catalog.regulations.get(regId) : undefined;
   const regName = regDef?.name || definition.environmentId;
 
+  const canonicalDefinition = normalizeScenarioDefinitionV1(definition);
+
   const activeMatchCtx: ActiveMatchContext = {
-    environmentId: definition.environmentId,
+    environmentId: canonicalDefinition.environmentId,
     environmentName: `${regName} (Scenario)`,
     regulationId: regId ?? undefined,
-    seed: definition.seed,
+    seed: canonicalDefinition.seed,
     rulePackage: outcome.rulePackage,
     isScenario: true,
-    scenarioDefinition: definition,
+    scenarioDefinition: canonicalDefinition,
   };
 
   const prepared: PreparedMatch = {
