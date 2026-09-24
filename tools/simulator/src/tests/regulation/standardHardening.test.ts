@@ -697,8 +697,8 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       // 自然終了（ライフ0）かつステップ上限未満で完了すること
       expect(result.completed).toBe(true);
       expect(result.totalDecisions).toBeLessThan(STEP_CAP);
-      expect(result.totalDecisions).toBe(171); // 54枚デッキ (Joker 2枚) での決定論的検証
-      expect(result.turnCount).toBe(9);
+      expect(result.totalDecisions).toBe(126); // 54枚デッキ (Joker 2枚) / 兵士分類ターゲット修正後の決定論的検証
+      expect(result.turnCount).toBe(7);
       expect(result.winner).toBe("p1");
       expect(result.reason).toContain("ライフが0になりました");
       expect(session.state.players.p2.life.length).toBe(0);

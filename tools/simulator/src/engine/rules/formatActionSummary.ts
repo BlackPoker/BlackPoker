@@ -44,14 +44,20 @@ export function formatActionSummary(action: ActionDefinition): string {
   if (action.targets && action.targets.length > 0) {
     const target = action.targets[0];
     if (target.condition) {
-      if (target.condition.component === "character.soldier") {
+      if (
+        target.condition.component === "character.soldier" ||
+        target.condition.characterType === "soldier"
+      ) {
         targetStr = "対象: 兵士1体";
-      } else if (target.condition.component === "character.bulwark") {
+      } else if (
+        target.condition.component === "character.bulwark" ||
+        target.condition.characterType === "bulwark"
+      ) {
         targetStr = "対象: 防壁1体";
       } else if (target.condition.type === "player" && target.condition.relation === "opponent") {
         targetStr = "対象: 対戦相手1人";
       } else {
-        targetStr = `対象: ${target.condition.component || target.condition.type}`;
+        targetStr = `対象: ${target.condition.characterType || target.condition.component || target.condition.type}`;
       }
     }
   }

@@ -36,7 +36,7 @@ export class TargetSelectionEnumerator {
     for (const targetDef of action.targets) {
       const cond = targetDef.condition;
       let targetType = targetDef.type || (targetDef as any).targetType || (cond ? cond.type : undefined);
-      if (!targetType && (cond?.component || cond?.componentType || targetDef.id === "target" || targetDef.id === "targetUnit")) {
+      if (!targetType && (cond?.component || cond?.componentType || cond?.characterType || targetDef.id === "target" || targetDef.id === "targetUnit")) {
         targetType = "unit";
       }
 

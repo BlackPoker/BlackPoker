@@ -369,6 +369,7 @@ export class CommandRegistry {
             (tType === "unit" ||
               tDef.condition?.component ||
               tDef.condition?.componentType ||
+              tDef.condition?.characterType ||
               tDef.type === "unit") &&
             context.targetComponent
           ) {

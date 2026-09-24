@@ -20,8 +20,9 @@ actions:
 
     targets:
       - id: target
+        type: unit
         condition:
-          component: character.soldier
+          characterType: soldier
 
     text:
       effect: 対象とした兵士のサイズは、このターンが終わるまでキーカードの数字分加算される。その印としてフォグにキーカードを置き、アップとする。
