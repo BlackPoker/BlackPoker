@@ -154,6 +154,34 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     initialDefinition?.players?.p2?.pack?.count
   );
 
+  // initialDefinition 変更時の同期
+  useEffect(() => {
+    if (!initialDefinition) return;
+    setEnvironmentId(initialDefinition.environmentId ?? defaultEnvId);
+    setSeed(initialDefinition.seed ?? 42);
+    setTurnPlayer(initialDefinition.turnPlayer ?? "p1");
+    setChancePlayer(initialDefinition.chancePlayer ?? "p1");
+    setTurnCount(initialDefinition.turnCount ?? 1);
+    setName(initialDefinition.name ?? "");
+    setDescription(initialDefinition.description ?? "");
+
+    setP1Hand(initialDefinition.players?.p1?.hand ? [...initialDefinition.players.p1.hand] : []);
+    setP1Grave(initialDefinition.players?.p1?.grave ? [...initialDefinition.players.p1.grave] : []);
+    setP1Field(initialDefinition.players?.p1?.field ? [...initialDefinition.players.p1.field] : []);
+    setP1LifeCards(initialDefinition.players?.p1?.life?.cards ? [...initialDefinition.players.p1.life.cards] : []);
+    setP1LifeCount(initialDefinition.players?.p1?.life?.count);
+    setP1PackCards(initialDefinition.players?.p1?.pack?.cards ? [...initialDefinition.players.p1.pack.cards] : []);
+    setP1PackCount(initialDefinition.players?.p1?.pack?.count);
+
+    setP2Hand(initialDefinition.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []);
+    setP2Grave(initialDefinition.players?.p2?.grave ? [...initialDefinition.players.p2.grave] : []);
+    setP2Field(initialDefinition.players?.p2?.field ? [...initialDefinition.players.p2.field] : []);
+    setP2LifeCards(initialDefinition.players?.p2?.life?.cards ? [...initialDefinition.players.p2.life.cards] : []);
+    setP2LifeCount(initialDefinition.players?.p2?.life?.count);
+    setP2PackCards(initialDefinition.players?.p2?.pack?.cards ? [...initialDefinition.players.p2.pack.cards] : []);
+    setP2PackCount(initialDefinition.players?.p2?.pack?.count);
+  }, [initialDefinition, defaultEnvId]);
+
   // URL 読込・共有用ステート
   const [urlInput, setUrlInput] = useState<string>("");
   const [shareNotice, setShareNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -619,9 +647,10 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={handleCopyShareUrl}
+                    title="入力中の初期盤面設定を共有URLとしてコピーします"
                     className="px-4 py-2 bg-white border border-zinc-300 hover:bg-zinc-100 text-zinc-900 font-bold text-xs rounded-lg shadow-sm transition"
                   >
-                    共有URLをコピー
+                    この初期盤面を共有
                   </button>
                 </div>
                 <div className="flex gap-2 mt-1">

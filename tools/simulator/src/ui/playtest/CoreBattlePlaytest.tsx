@@ -190,6 +190,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
   const [isReplayViewerOpen, setIsReplayViewerOpen] = useState(false);
   const [isScenarioBuilderOpen, setIsScenarioBuilderOpen] = useState(false);
+  const [restoredScenarioDefinition, setRestoredScenarioDefinition] = useState<ScenarioDefinitionV1 | null>(null);
   const [replayViewerInitialBundle, setReplayViewerInitialBundle] = useState<unknown | null>(null);
   const [replayViewerInitialSource, setReplayViewerInitialSource] = useState<ReplayViewerSource | null>(null);
 
@@ -442,6 +443,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       overrideHumanSeat?: "p1" | "p2",
       overridePolicyId?: PlaytestPolicyId
     ) => {
+      setRestoredScenarioDefinition(null);
       const env = overrideEnv ?? selectedEnvironmentId;
       const isOfficial = isOfficialEnvironment(env);
       const seed = overrideSeedInput ?? (
@@ -523,6 +525,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   // Scenario 開始ハンドラ (ScenarioDefinitionV1 から決定論的初期盤面を生成して対戦開始)
   const handleStartScenario = useCallback(
     async (definition: ScenarioDefinitionV1) => {
+      setRestoredScenarioDefinition(definition);
       const result = prepareScenarioMatchAttempt({
         definition,
         catalog,
@@ -569,6 +572,31 @@ export const CoreBattlePlaytest: React.FC = () => {
     const bootstrap = resolvePlaytestInitialBootstrap(search, catalog);
 
     switch (bootstrap.kind) {
+      case "RESTORE_SCENARIO_SETTINGS": {
+        setSelectedEnvironmentId(bootstrap.config.environmentId);
+        setPendingMatchMode(bootstrap.config.mode);
+        // Human vs AI の場合は "p1" に正規化
+        setPendingHumanSeat(normalizeHumanSeatForMode(bootstrap.config.mode, bootstrap.config.humanSeat));
+        setPendingPolicyId(bootstrap.config.policyId);
+        setSeedInput(bootstrap.config.seedInput);
+        setSeedMode("manual");
+        setRestoredScenarioDefinition(bootstrap.definition);
+        setIsScenarioBuilderOpen(true);
+
+        if (bootstrap.warnings.length > 0) {
+          setShareNotice({
+            type: "warning",
+            message: `シナリオ共有URLの設定を読み込みました (${bootstrap.warnings.join(", ")})`,
+          });
+        } else {
+          setShareNotice({
+            type: "info",
+            message: "シナリオ共有URLの設定を読み込み、初期盤面設定を開きました",
+          });
+        }
+        // Share URL の場合は自動対戦開始を行わない (Auto Start 禁止)
+        break;
+      }
       case "RESTORE_SHARE_SETTINGS": {
         setSelectedEnvironmentId(bootstrap.config.environmentId);
         setPendingMatchMode(bootstrap.config.mode);
@@ -638,6 +666,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: normalizeHumanSeatForMode(activePlaytestSettings.matchMode, activePlaytestSettings.humanSeat),
         policyId: activePlaytestSettings.policyId,
         seedInput: activeSeedStr,
+        scenarioDefinition: activeMatch.isScenario ? activeMatch.scenarioDefinition : undefined,
       };
     } else {
       // 対戦前 (Pending 設定) の共有
@@ -646,6 +675,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         ? (seedMode === "auto" ? String(pendingAutoSeed) : seedInput)
         : seedInput;
 
+      let scenarioDefToShare: ScenarioDefinitionV1 | undefined = undefined;
+      if (restoredScenarioDefinition && restoredScenarioDefinition.environmentId === selectedEnvironmentId) {
+        scenarioDefToShare = restoredScenarioDefinition;
+      }
+
       config = {
         version: 1,
         environmentId: selectedEnvironmentId,
@@ -653,6 +687,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: normalizeHumanSeatForMode(pendingMatchMode, pendingHumanSeat),
         policyId: pendingPolicyId,
         seedInput: seedForUrl,
+        scenarioDefinition: scenarioDefToShare,
       };
     }
 
@@ -666,7 +701,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
       setShareNotice({
         type: "success",
-        message: "共有URLをクリップボードにコピーしました",
+        message: "開始条件の共有URLをクリップボードにコピーしました",
       });
     } else {
       setShareNotice({
@@ -688,6 +723,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     seedMode,
     pendingAutoSeed,
     seedInput,
+    restoredScenarioDefinition,
     catalog,
   ]);
 
@@ -1515,6 +1551,15 @@ export const CoreBattlePlaytest: React.FC = () => {
                 </select>
               </>
             )}
+
+            {/* 開始条件を共有 (Settings / Match Info エリアに配置) */}
+            <button
+              onClick={handleCopyShareUrl}
+              title="現在の盤面ではなく、この対戦を開始した設定・初期盤面を共有します"
+              className="ml-2 px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
+            >
+              開始条件を共有
+            </button>
           </div>
         </div>
 
@@ -1596,15 +1641,6 @@ export const CoreBattlePlaytest: React.FC = () => {
             Replay Viewer
           </button>
 
-
-          <button
-            onClick={handleCopyShareUrl}
-            title="現在の対戦設定を共有するURLをコピー"
-            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1"
-          >
-            共有URLをコピー
-          </button>
-
           <button
             onClick={() => startNewGame()}
             className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
@@ -1676,6 +1712,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             onStartMatch={() => startNewGame()}
             onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
             onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
+            onCopyShareUrl={handleCopyShareUrl}
           />
         </main>
       ) : (
@@ -2020,6 +2057,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         catalog={catalog}
         fullRulePackage={fullRulePackage}
         onStartScenario={handleStartScenario}
+        initialDefinition={restoredScenarioDefinition ?? undefined}
       />
     </div>
 

@@ -10,6 +10,8 @@ import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../session/p
 import { MatchSetupCoordinator } from "../session/setup/MatchSetupCoordinator";
 import { getPlaytestRulePackage } from "../rules/RulePackageSelector";
 
+import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+
 /**
  * 現在成立して進行中の対戦コンテキスト。
  * GameSession が成立した対戦のみを表し、未成立時は null となる。
@@ -21,6 +23,7 @@ export interface ActiveMatchContext {
   readonly seed?: number;
   readonly rulePackage: RulePackage;
   readonly isScenario?: boolean;
+  readonly scenarioDefinition?: ScenarioDefinitionV1;
 }
 
 /**

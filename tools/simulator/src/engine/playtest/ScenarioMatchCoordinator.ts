@@ -115,6 +115,7 @@ export function prepareScenarioMatchAttempt(
     seed: definition.seed,
     rulePackage: outcome.rulePackage,
     isScenario: true,
+    scenarioDefinition: definition,
   };
 
   const prepared: PreparedMatch = {

@@ -9,6 +9,8 @@ import {
 } from "../../ui/playtest/PlaytestShareUrl";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { validateSeed } from "../../engine/playtest/PlaytestEnvironmentController";
+import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import { encodeScenarioDefinitionV1ToUrlParam } from "../../ui/scenario/ScenarioShareUrl";
 
 describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -351,6 +353,173 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
 
       const bootstrapNonShare = resolvePlaytestInitialBootstrap("?foo=bar&debug=true", catalog);
       expect(bootstrapNonShare.kind).toBe("SHOW_SETUP");
+    });
+  });
+
+  // R2: Scenario Share URL 統合テスト
+  describe("R2: Scenario Share URL 統合 & Fail-Closed", () => {
+    const sampleScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 777,
+      turnPlayer: "p1",
+      chancePlayer: "p2",
+      turnCount: 2,
+      name: "Playtest Share Scenario",
+      description: "Scenario for playtest share integration",
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          field: [
+            {
+              componentId: "character.hero",
+              cards: [{ suit: "H", rank: "K" }],
+              state: "drive",
+              face: "up",
+            },
+          ],
+          grave: [{ suit: "C", rank: "2" }],
+          life: { cards: [{ suit: "D", rank: "3" }], count: 2 },
+          pack: { cards: [{ suit: "D", rank: "4" }], count: 12 },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "10" }],
+          life: { count: 3 },
+          pack: { count: 13 },
+        },
+      },
+    };
+
+    it("1: Scenario 付き設定の serialize -> parse round-trip が完全であること", () => {
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: sampleScenario.environmentId,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "manualGenericGenome",
+        seedInput: String(sampleScenario.seed),
+        scenarioDefinition: sampleScenario,
+      };
+
+      const query = serializePlaytestShareUrl(config, catalog);
+      expect(query).toContain("scenario=");
+      expect(query).toContain("env=official%3Astandard-pack");
+      expect(query).toContain("mode=humanVsAi");
+      expect(query).toContain("seed=777");
+
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("READY");
+      if (result.kind === "READY") {
+        expect(result.config.scenarioDefinition).toEqual(sampleScenario);
+        expect(result.config.environmentId).toBe(sampleScenario.environmentId);
+        expect(result.config.seedInput).toBe(String(sampleScenario.seed));
+        expect(result.config.mode).toBe("humanVsAi");
+        expect(result.config.humanSeat).toBe("p1");
+        expect(result.config.policyId).toBe("manualGenericGenome");
+      }
+    });
+
+    it("2: Scenario 共有URLから resolvePlaytestInitialBootstrap が RESTORE_SCENARIO_SETTINGS を返すこと", () => {
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: sampleScenario.environmentId,
+        mode: "humanVsHuman",
+        humanSeat: "p1",
+        policyId: "firstLegal",
+        seedInput: String(sampleScenario.seed),
+        scenarioDefinition: sampleScenario,
+      };
+
+      const query = serializePlaytestShareUrl(config, catalog);
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SCENARIO_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SCENARIO_SETTINGS") {
+        expect(bootstrap.definition).toEqual(sampleScenario);
+        expect(bootstrap.config.environmentId).toBe("official:standard-pack");
+        expect(bootstrap.config.mode).toBe("humanVsHuman");
+      }
+    });
+
+    it("3: URL env と scenario environmentId の不一致は INVALID_SHARE で fail-closed すること", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      // env=official:light-entry16 だが scenario は official:standard-pack
+      const query = `?bpv=1&env=official:light-entry16&seed=777&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("環境IDの不一致");
+      }
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+    });
+
+    it("4: URL seed と scenario seed の不一致は INVALID_SHARE で fail-closed すること", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      // seed=999 だが scenario は 777
+      const query = `?bpv=1&env=official:standard-pack&seed=999&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("Seedの不一致");
+      }
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+    });
+
+    it("5: 未実装レギュレーションのシナリオは INVALID_SHARE で fail-closed すること", () => {
+      const invalidDef: ScenarioDefinitionV1 = {
+        ...sampleScenario,
+        environmentId: "official:unimplemented-extra",
+      };
+      const encoded = encodeScenarioDefinitionV1ToUrlParam(invalidDef);
+      const query = `?bpv=1&scenario=${encoded}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+    });
+
+    it("6: 不正な Base64 / JSON シナリオは INVALID_SHARE で fail-closed すること", () => {
+      const query = `?bpv=1&scenario=invalid-base64-payload!!!`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+    });
+
+    it("7: 未知バージョン (bpv=999) + scenario は UNSUPPORTED_VERSION を返すこと", () => {
+      const encoded = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=999&scenario=${encoded}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("UNSUPPORTED_VERSION");
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("SHOW_SHARE_WARNING");
+    });
+
+    it("8: buildPlaytestShareUrl で通常対戦の共有時に既存の scenario パラメータが安全に除去されること", () => {
+      const currentUrlWithScenario = `https://blackpoker.example.com/playtest/?scenario=oldScenarioData&foo=keepMe`;
+      const normalConfig: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: "official:light-entry16",
+        mode: "humanVsHuman",
+        humanSeat: "p1",
+        policyId: "firstLegal",
+        seedInput: "42",
+      };
+
+      const builtUrl = buildPlaytestShareUrl(currentUrlWithScenario, normalConfig, catalog);
+      expect(builtUrl).not.toContain("scenario=");
+      expect(builtUrl).toContain("foo=keepMe");
+      expect(builtUrl).toContain("env=official%3Alight-entry16");
+    });
+
+    it("9: SHARE_PARAM_KEYS に 'scenario' が含まれること", () => {
+      expect(SHARE_PARAM_KEYS).toContain("scenario");
     });
   });
 });

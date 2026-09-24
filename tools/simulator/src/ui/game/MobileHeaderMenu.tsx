@@ -232,15 +232,16 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </label>
         )}
 
-        {/* 共有URLをコピーボタン */}
+        {/* 開始条件を共有ボタン */}
         {onCopyShareUrl && (
           <button
             onClick={() => {
               onCopyShareUrl();
             }}
+            title="現在の盤面ではなく、この対戦を開始した設定・初期盤面を共有します"
             className="w-full py-2.5 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
           >
-            <span>共有URLをコピー</span>
+            <span>開始条件を共有</span>
           </button>
         )}
 

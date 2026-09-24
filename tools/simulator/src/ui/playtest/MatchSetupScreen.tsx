@@ -58,6 +58,8 @@ export interface MatchSetupScreenProps {
   readonly onOpenReplayVerify: () => void;
   /** Scenario Builder モーダルを開くハンドラ */
   readonly onOpenScenarioBuilder?: () => void;
+  /** 共有URLコピーハンドラ */
+  readonly onCopyShareUrl?: () => void;
 }
 
 export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
@@ -79,6 +81,7 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   onStartMatch,
   onOpenReplayVerify,
   onOpenScenarioBuilder,
+  onCopyShareUrl,
 }) => {
   const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
   const selectedEnvOpt = environmentOptions.find((opt) => opt.id === selectedEnvironmentId);
@@ -364,6 +367,23 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
           )}
         </div>
       </div>
+
+      {/* 共有セクション (Secondary) */}
+      {onCopyShareUrl && (
+        <div className="mt-4 pt-3 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-50 p-3 rounded-lg border font-mono">
+          <div className="text-xs text-zinc-600">
+            <span className="font-bold text-zinc-800">共有:</span> この対戦設定（環境・モード・AI・Seed）を共有URLとしてコピーします
+          </div>
+          <button
+            type="button"
+            onClick={onCopyShareUrl}
+            title="現在の対戦設定を共有URLとしてコピーします"
+            className="w-full sm:w-auto px-4 py-2 bg-white hover:bg-zinc-100 border border-zinc-300 text-zinc-800 font-bold text-xs rounded-lg shadow-sm transition flex items-center justify-center min-h-[38px] cursor-pointer whitespace-nowrap"
+          >
+            <span>この対戦設定を共有</span>
+          </button>
+        </div>
+      )}
 
       {/* F. プライマリ アクション: [対戦開始] & [Scenario Builder] */}
       <div className="mt-6 pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-end gap-3">
