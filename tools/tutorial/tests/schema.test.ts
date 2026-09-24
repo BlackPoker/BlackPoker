@@ -6,6 +6,26 @@ import { formatDifferences, learningCourses } from "../src/data/curriculum";
 describe("tutorial schema", () => {
   it("全データのschema・参照・盤面連続性が正しい", () =>
     expect(validateScenario(scenario, ruleCatalog)).toEqual([]));
+  it("sceneが存在しないfixed stepを参照したら拒否", () => {
+    const value = structuredClone(scenario);
+    value.scenes[1].stepIds[0] = "unknown-step";
+    expect(validateScenario(value, ruleCatalog)).toContain("Scene references unknown fixed step: unknown-step");
+  });
+  it("sceneの表示方法も検証する", () => {
+    const value = structuredClone(scenario);
+    value.scenes[0].presentation = "unknown";
+    expect(validateScenario(value, ruleCatalog)).toContain("Invalid scene presentation");
+  });
+  it("fixed stepのscene重複と漏れを拒否", () => {
+    const duplicate = structuredClone(scenario);
+    duplicate.scenes[2].stepIds.push("attack");
+    duplicate.scenes[2].cues.push("重複");
+    expect(validateScenario(duplicate, ruleCatalog)).toContain("Fixed step belongs to multiple scenes: attack");
+    const missing = structuredClone(scenario);
+    missing.scenes[1].stepIds.pop();
+    missing.scenes[1].cues.pop();
+    expect(validateScenario(missing, ruleCatalog)).toContain("Fixed step is missing from scenes");
+  });
   it.each(["action.unknown", "character.unknown", "fog.unknown"])(
     "不明な参照 %s を拒否",
     (ref) => {

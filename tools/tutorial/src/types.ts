@@ -53,6 +53,15 @@ export interface TutorialStep {
   cause?: MovementCause;
   alternate?: { title: string; text: string };
 }
+export interface TutorialScene {
+  id: string;
+  title: string;
+  presentation: "static" | "auto";
+  stepIds: string[];
+  cues: string[];
+  intro: string;
+  summary: string;
+}
 export interface TutorialScenario {
   schemaVersion: 2;
   id: string;
@@ -61,6 +70,7 @@ export interface TutorialScenario {
   difficulty: "beginner" | "intermediate" | "advanced";
   regulation: { format: string; frame: string };
   learn: RuleRef[];
+  scenes: TutorialScene[];
   steps: TutorialStep[];
 }
 export interface TutorialProgress {

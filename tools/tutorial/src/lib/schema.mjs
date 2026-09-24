@@ -156,6 +156,38 @@ export function validateScenario(value, catalog) {
       errors.push("Fixed board continuity is broken");
     previous = s;
   }
+  if (!Array.isArray(value.scenes) || !value.scenes.length) {
+    errors.push("Tutorial scenes are required");
+  } else {
+    const stepById = new Map(value.steps.map((step) => [step?.id, step]));
+    const sceneIds = new Set(), usedSteps = new Set(), ordered = [];
+    for (const scene of value.scenes) {
+      if (!scene || typeof scene.id !== "string" || !scene.id || sceneIds.has(scene.id)) {
+        errors.push("Missing or duplicate scene id");
+        continue;
+      }
+      sceneIds.add(scene.id);
+      if (!["static", "auto"].includes(scene.presentation)) errors.push("Invalid scene presentation");
+      if (![scene.title, scene.intro, scene.summary].every((text) => typeof text === "string" && text))
+        errors.push("Invalid scene text");
+      if (!Array.isArray(scene.stepIds) || !scene.stepIds.length ||
+        !Array.isArray(scene.cues) || scene.cues.length !== scene.stepIds?.length ||
+        scene.cues.some((cue) => typeof cue !== "string" || !cue)) {
+        errors.push("Invalid scene steps or cues");
+        continue;
+      }
+      for (const id of scene.stepIds) {
+        const step = stepById.get(id);
+        if (!step || step.mode !== "fixed") errors.push("Scene references unknown fixed step: " + id);
+        if (usedSteps.has(id)) errors.push("Fixed step belongs to multiple scenes: " + id);
+        usedSteps.add(id);
+        ordered.push(id);
+      }
+    }
+    const fixedIds = value.steps.filter((step) => step?.mode === "fixed").map((step) => step.id);
+    if (fixedIds.some((id) => !usedSteps.has(id))) errors.push("Fixed step is missing from scenes");
+    if (JSON.stringify(ordered) !== JSON.stringify(fixedIds)) errors.push("Scene step order is invalid");
+  }
   for (const ref of refs) {
     const error = validateRuleRef(ref, catalog);
     if (error) errors.push(error);

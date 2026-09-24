@@ -1,20 +1,20 @@
 import { formatDifferences, learningCourses } from "../data/curriculum";
 import blackPokerLogo from "../assets/blackpoker-logo.svg";
-import type { TutorialStep } from "../types";
+import type { LearningUnit } from "../lib/scenes";
 export function CurriculumPanel({
-  steps,
-  stepIndex,
-  maxReachedStepIndex,
+  units,
+  unitIndex,
+  maxReachedUnitIndex,
   onSelect,
   onClose,
 }: {
-  steps: TutorialStep[];
-  stepIndex: number;
-  maxReachedStepIndex: number;
+  units: LearningUnit[];
+  unitIndex: number;
+  maxReachedUnitIndex: number;
   onSelect: (index: number) => void;
   onClose?: () => void;
 }) {
-  const chapters = [...new Set(steps.map((s) => s.chapter))];
+  const chapters = [...new Set(units.map((unit) => unit.chapter))];
   return (
     <aside className="curriculum" aria-label="チュートリアル全体の進捗">
       <div className="curriculum-head">
@@ -42,25 +42,25 @@ export function CurriculumPanel({
             </div>
           </div>
           {chapters.map((chapter, i) => {
-            const items = steps
-              .map((s, index) => ({ ...s, index }))
-              .filter((s) => s.chapter === chapter);
-            const active = steps[stepIndex].chapter === chapter;
+            const items = units
+              .map((unit, index) => ({ ...unit, index }))
+              .filter((unit) => unit.chapter === chapter);
+            const active = units[unitIndex].chapter === chapter;
             return (
               <details className="chapter-group" key={chapter} open={active}>
                 <summary>
                   {i + 1}. {items[0].chapterTitle}
-                  <small>{items.length}操作</small>
+                  <small>{items.length}場面</small>
                 </summary>
                 <div className="chapter-list">
                   {items.map((s) => (
                     <button
                       key={s.id}
-                      className={s.index === stepIndex ? "current" : ""}
-                      aria-current={s.index === stepIndex ? "step" : undefined}
-                      onClick={() => onSelect(s.index)}
+                      className={s.index === unitIndex ? "current" : ""}
+                      aria-current={s.index === unitIndex ? "step" : undefined}
+                      onClick={() => onSelect(s.firstStepIndex)}
                     >
-                      <span>{s.index < maxReachedStepIndex ? "✓" : "・"}</span>
+                      <span>{s.index < maxReachedUnitIndex ? "✓" : "・"}</span>
                       <b>{s.title}</b>
                     </button>
                   ))}

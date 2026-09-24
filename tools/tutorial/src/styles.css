@@ -2002,6 +2002,58 @@ button {
   font-size: 12px;
   line-height: 1.5;
 }
+.scene-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 9px 11px;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  background: #fafafa;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.scene-progress strong { color: #18181b; font-variant-numeric: tabular-nums; }
+.scene-progress span { font-weight: 700; }
+.scene-progress small { margin-left: auto; color: #71717a; }
+.scene-overview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+.scene-overview span {
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #d4d4d8;
+  border-radius: 5px;
+  background: #fafafa;
+  color: #52525b;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.scene-overview b { display: block; color: #18181b; }
+.scene-replay {
+  display: block;
+  margin: 0 0 12px auto;
+  padding: 6px 10px;
+  border: 1px solid #a1a1aa;
+  border-radius: 5px;
+  background: #fff;
+  color: #27272a;
+  font-size: 11px;
+  font-weight: 700;
+}
+.scene-detail { padding: 10px 0; border-top: 1px solid #e4e4e7; }
+.scene-detail h2 { margin: 0 0 6px; font-size: 14px; }
+.scene-detail .cause-phase { margin: 2px 0; }
+@media (max-width: 600px) {
+  .scene-overview { grid-template-columns: 1fr; gap: 5px; }
+  .scene-overview span { padding: 6px 9px; }
+  .scene-overview b { display: inline; margin-right: 7px; }
+}
 .board-overlay {
   position: absolute;
   inset: 0;

@@ -7,15 +7,24 @@ import { CurriculumPanel } from "./components/CurriculumPanel";
 import { RuleLinks } from "./components/RuleLinks";
 import { TutorialIntro } from "./components/TutorialIntro";
 import { useTutorialProgress } from "./hooks/useTutorialProgress";
+import { useScenePlayback } from "./hooks/useScenePlayback";
 import { cardName } from "./lib/cards";
+import { learningUnits, unitIndexForStep } from "./lib/scenes";
 import {
   clearIntroComplete,
   loadIntroComplete,
   resolveBrowserStorage,
   saveIntroComplete,
 } from "./lib/storage";
-import type { Operation, TutorialScenario } from "./types";
+import type { Operation, TutorialScenario, TutorialStep } from "./types";
 const tutorial = scenario as TutorialScenario;
+const units = learningUnits(tutorial);
+function shortResult(step: TutorialStep) {
+  if (!step.operations.length) return step.learned;
+  const phase = step.cause?.phase === "request" ? "コスト支払い" :
+    step.cause?.phase === "trigger" ? "誘発" : "解決";
+  return `${phase}：${step.operations.map((operation) => operation.label).join(" / ")}`;
+}
 export default function App() {
   const storage = resolveBrowserStorage();
   const [introComplete, setIntroComplete] = useState(() =>
@@ -27,18 +36,26 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [restartOpen, setRestartOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const step = tutorial.steps[progress.stepIndex];
+  const unitIndex = unitIndexForStep(units, progress.stepIndex);
+  const unit = units[unitIndex];
+  const scene = unit.scene;
+  const playback = useScenePlayback(scene);
+  const step = tutorial.steps[scene
+    ? unit.firstStepIndex + playback.microIndex
+    : progress.stepIndex];
+  const applied = scene ? playback.applied : progress.applied;
+  const maxReachedUnitIndex = unitIndexForStep(units, progress.maxReachedStepIndex);
   useEffect(() => {
     window.scrollTo?.({ top: 0 });
-  }, [progress.stepIndex]);
-  const chapterSteps = tutorial.steps.filter((s) => s.chapter === step.chapter);
-  const position = chapterSteps.findIndex((s) => s.id === step.id) + 1;
+  }, [unitIndex]);
+  const chapterUnits = units.filter((item) => item.chapter === unit.chapter);
+  const position = chapterUnits.findIndex((item) => item.id === unit.id) + 1;
   const percent = Math.round(
-    ((progress.maxReachedStepIndex +
-      (progress.stepIndex === progress.maxReachedStepIndex && progress.applied
+    ((maxReachedUnitIndex +
+      (unitIndex === maxReachedUnitIndex && (scene ? playback.complete : progress.applied)
         ? 1
         : 0)) /
-      tutorial.steps.length) *
+      units.length) *
       100,
   );
   const actor =
@@ -47,7 +64,7 @@ export default function App() {
       : step.actor === "first"
         ? progress.firstPlayer
         : step.actor;
-  const board = step.board[progress.applied ? "after" : "before"];
+  const board = step.board[applied ? "after" : "before"];
   const selectedBoard =
     step.id === "start-draw"
       ? { ...board, turn: progress.firstPlayer || null }
@@ -63,7 +80,8 @@ export default function App() {
         }]
       : step.operations;
   const select = (index: number) => {
-    progress.goTo(index);
+    if (index === unit.firstStepIndex && scene) playback.replay();
+    else progress.goTo(index);
     setDetailsOpen(false);
     setAlternateOpen(false);
     setMenuOpen(false);
@@ -87,9 +105,9 @@ export default function App() {
       />
       <div className={`sidebar-wrap ${menuOpen ? "open" : ""}`}>
         <CurriculumPanel
-          steps={tutorial.steps}
-          stepIndex={progress.stepIndex}
-          maxReachedStepIndex={progress.maxReachedStepIndex}
+          units={units}
+          unitIndex={unitIndex}
+          maxReachedUnitIndex={maxReachedUnitIndex}
           onSelect={select}
           onClose={() => setMenuOpen(false)}
         />
@@ -126,7 +144,7 @@ export default function App() {
             <span>{step.chapterTitle}</span>
             <strong>
               {position}
-              <small> / {chapterSteps.length}</small>
+              <small> / {chapterUnits.length}</small>
             </strong>
             <em>全体 {percent}%</em>
           </div>
@@ -155,26 +173,38 @@ export default function App() {
             </div>
             <p className="now-label">
               <span />
-              {step.cause?.phase === "setup" ? "盤面を知る" : step.mode === "fixed" ? "盤面の変化" : "いまやること"}
+              {scene ? "画面で体験" : "いまやること"}
             </p>
-            {(step.sequenceLabel || step.actionName) && (
+            {!scene && (step.sequenceLabel || step.actionName) && (
               <div className="step-context">
                 {step.actionName && <span>今回のアクション：{step.actionName}</span>}
                 {step.sequenceLabel && <strong>{step.sequenceLabel}</strong>}
               </div>
             )}
-            <h1>{step.mode === "fixed" && !progress.applied && step.operations.length
-              ? "次の盤面の変化を見てみましょう。"
-              : step.title}</h1>
+            <h1>{scene ? scene.title : step.title}</h1>
             <p className="instruction">
-              {step.mode === "fixed" && step.operations.length
-                ? progress.applied
-                  ? "盤面でカードの変化を確認してください。"
-                  : step.operations.some((operation) => operation.from !== operation.to)
-                    ? "矢印が次に起こる移動を示します。「次へ」で結果を確認しましょう。"
-                    : "カードの向きや指定に注目し、「次へ」で結果を確認しましょう。"
-                : step.instruction}
+              {scene ? scene.intro : step.instruction}
             </p>
+            {scene?.presentation === "auto" && !playback.complete && (
+              <div className="scene-progress" aria-live="polite">
+                <strong>{playback.microIndex + 1} / {scene.stepIds.length}</strong>
+                <span>{scene.cues[playback.microIndex]}</span>
+                <small>{applied ? "結果" : "次に起こること"}</small>
+              </div>
+            )}
+            {scene?.presentation === "static" && (
+              <div className="scene-overview" aria-label="盤面の見かた">
+                <span><b>PLAYER A / B</b> 下がA・上がB</span>
+                <span><b>カードの置き場</b> 手札・兵士・防壁・ライフ・墓地</span>
+                <span><b>カードの向き</b> 縦がチャージ・横がドライブ</span>
+              </div>
+            )}
+            {scene && applied && (
+              <div className="learned scene-result" role="status">
+                <strong>{playback.complete ? "この場面のまとめ" : scene.cues[playback.microIndex]}</strong>
+                <p>{playback.complete ? scene.summary : shortResult(step)}</p>
+              </div>
+            )}
             {step.placementGuide && <p className="placement-guide">{step.placementGuide}</p>}
             <div className={`mode-notice mode-${step.mode}`}>
               {step.mode === "fixed" ? (
@@ -222,7 +252,7 @@ export default function App() {
               before={step.board.before}
               after={step.board.after}
               operations={guideOperations}
-              applied={progress.applied}
+              applied={applied}
               real={step.mode === "real"}
               stepId={step.id}
               cause={step.cause}
@@ -235,16 +265,7 @@ export default function App() {
                 after={step.board.after}
               />
             )}
-            {step.mode === "fixed" && progress.applied && (
-              <div className="learned" role="status">
-                <strong>{step.cause?.phase === "setup" ? "盤面を確認" : "盤面の変化を確認"}</strong>
-                {step.cause && <p>{step.cause.text}</p>}
-                {step.chapter === "prepare" && step.id !== "welcome" &&
-                  <p>{step.instruction}</p>}
-                <p>{step.learned}</p>
-              </div>
-            )}
-            {step.mode === "fixed" && progress.applied && step.alternate && (
+            {scene && playback.complete && tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).some((item) => item.alternate) && (
               <div className="alternate-example">
                 <button
                   className="alternate-toggle"
@@ -255,8 +276,11 @@ export default function App() {
                 </button>
                 {alternateOpen && (
                   <div className="alternate-content">
-                    <strong>{step.alternate.title}</strong>
-                    <p>{step.alternate.text}</p>
+                    {tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1)
+                      .filter((item) => item.alternate).map((item) => <div key={item.id}>
+                        <strong>{item.alternate!.title}</strong>
+                        <p>{item.alternate!.text}</p>
+                      </div>)}
                   </div>
                 )}
               </div>
@@ -265,9 +289,9 @@ export default function App() {
               <button
                 className="step-back"
                 aria-label="← 戻る"
-                disabled={progress.stepIndex === 0}
+                disabled={unitIndex === 0}
                 onClick={() => {
-                  progress.previous();
+                  progress.goTo(units[unitIndex - 1].firstStepIndex);
                   setDetailsOpen(false);
                   setAlternateOpen(false);
                 }}
@@ -277,28 +301,35 @@ export default function App() {
               <button
                 className="primary-button"
                 disabled={
-                  (step.chooseFirst || step.actor === "first") &&
-                  !progress.firstPlayer
+                  (scene && !playback.complete) ||
+                  ((step.chooseFirst || step.actor === "first") && !progress.firstPlayer)
                 }
                 onClick={() => {
-                  if (step.id === "free-play") {
+                  if (scene) {
+                    progress.goTo(units[unitIndex + 1].firstStepIndex);
+                    setDetailsOpen(false);
+                    setAlternateOpen(false);
+                  } else if (step.id === "free-play") {
                     progress.apply();
                     setHelpOpen(true);
                   } else if (step.mode === "real") {
                     progress.next();
                     setDetailsOpen(false);
                     setAlternateOpen(false);
-                  } else if (progress.applied) {
-                    progress.next();
-                    setDetailsOpen(false);
-                    setAlternateOpen(false);
-                  } else progress.apply();
+                  }
                 }}
               >
-                {step.id === "free-play" ? "対戦を始める" : "次へ"}
-                <span>→</span>
+                {scene && !playback.complete ? "再生中…" : step.id === "free-play" ? "対戦を始める" : "次へ"}
+                {(!scene || playback.complete) && <span>→</span>}
               </button>
             </div>
+            {scene?.presentation === "auto" && playback.complete && (
+              <button className="scene-replay" onClick={() => {
+                playback.replay();
+                setDetailsOpen(false);
+                setAlternateOpen(false);
+              }}>↻ もう一度見る</button>
+            )}
             <button
               className="why-toggle"
               onClick={() => setDetailsOpen((v) => !v)}
@@ -312,7 +343,20 @@ export default function App() {
             </button>
             {detailsOpen && (
               <div className="why-content">
-                {step.cause && (
+                {scene ? tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).map((item, index) => (
+                  <section className="scene-detail" key={item.id}>
+                    <h2>{index + 1}. {scene.cues[index]}</h2>
+                    {item.cause && <p className="cause-phase">
+                      {item.cause.phase === "request" ? "リクエスト時" :
+                        item.cause.phase === "resolve" ? "解決時" :
+                          item.cause.phase === "trigger" ? "誘発したアクション" : "練習の準備"}
+                      {item.actionName && ` · ${item.actionName}`}
+                    </p>}
+                    {item.cause && <p>{item.cause.text}</p>}
+                    <p>{item.explanation}</p>
+                    <RuleLinks refs={item.ruleRefs} />
+                  </section>
+                )) : <>{step.cause && (
                   <p className="cause-phase">
                     {step.cause.phase === "request" ? "リクエスト時" :
                       step.cause.phase === "resolve" ? "解決時" :
@@ -320,7 +364,6 @@ export default function App() {
                     {step.actionName && ` · ${step.actionName}`}
                   </p>
                 )}
-                {step.mode === "fixed" && <p>{step.instruction}</p>}
                 <p>{step.explanation}</p>
                 <RuleLinks refs={step.ruleRefs} />
                 {step.chapter === "setup" && (
@@ -332,6 +375,7 @@ export default function App() {
                     公式の共通ゲーム開始手順 ↗
                   </a>
                 )}
+                </>}
               </div>
             )}
           </article>
@@ -340,8 +384,8 @@ export default function App() {
             <button onClick={() => setMenuOpen(true)}>一覧を見る</button>
           </div>
           <p className="physical-note">
-            {step.mode === "fixed"
-              ? "次へ → 盤面の変化を見る → 次へ"
+            {scene
+              ? "場面を自動再生 → まとめを見る → 次へ"
               : "実物カードを動かす → 次へ"}
           </p>
         </div>

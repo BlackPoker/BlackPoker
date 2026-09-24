@@ -17,6 +17,62 @@
     "action.charge",
     "action.draw"
   ],
+  "scenes": [
+    {
+      "id": "board-overview",
+      "title": "盤面を知る",
+      "presentation": "static",
+      "stepIds": ["welcome", "practice-a", "practice-b", "practice-life"],
+      "cues": ["対戦途中の盤面", "PLAYER A", "PLAYER B", "ライフと墓地"],
+      "intro": "カードはすでにこの位置にあります。PLAYER A・Bの置き場を一度に見てみましょう。",
+      "summary": "手札・兵士・防壁・ライフ・墓地の位置を確認できました。縦はチャージ、横はドライブです。"
+    },
+    {
+      "id": "first-battle",
+      "title": "攻撃してみる",
+      "presentation": "auto",
+      "stepIds": ["attack", "block", "damage"],
+      "cues": ["アタック", "ブロック", "ダメージ判定"],
+      "intro": "♣6の攻撃から、ブロックとダメージ判定までを続けて見ます。",
+      "summary": "♣6がアタックし、♥7がブロック。数字を比べ、♣6が墓地へ移動しました。"
+    },
+    {
+      "id": "summon-soldier",
+      "title": "兵士を召喚する",
+      "presentation": "auto",
+      "stepIds": ["summon-cost-b", "summon-cost-l", "summon"],
+      "cues": ["コストB", "コストL", "召喚"],
+      "intro": "防壁とライフでコストを払い、♠2を兵士として場に出します。",
+      "summary": "B：防壁をドライブ。L：1点ダメージ。その後、♠2が兵士として場に出ました。"
+    },
+    {
+      "id": "pass-turn",
+      "title": "ターンを渡す",
+      "presentation": "auto",
+      "stepIds": ["end", "charge", "draw"],
+      "cues": ["エンド", "チャージ", "ドロー"],
+      "intro": "エンド後、相手のカードがチャージされ、ライフからカードを引きます。",
+      "summary": "エンドでPLAYER Bへ。ターン開始時にチャージとドローが続きます。"
+    },
+    {
+      "id": "player-b-turn",
+      "title": "PLAYER Bのターン",
+      "presentation": "auto",
+      "stepIds": ["set-bulwark-cost-l", "set-bulwark-place", "end-to-a", "charge-a", "draw-a"],
+      "cues": ["防壁設置のコストL", "防壁を置く", "エンド", "チャージ", "ドロー"],
+      "intro": "PLAYER Bが防壁を置き、ターンがPLAYER Aへ戻るまでを見ます。",
+      "summary": "PLAYER Bも行動してエンド。PLAYER Aのターン開始時にチャージとドローが起こります。"
+    },
+    {
+      "id": "unblocked-attack",
+      "title": "ブロックしなかったら？",
+      "presentation": "auto",
+      "stepIds": ["direct-attack", "no-block", "direct-damage"],
+      "cues": ["アタック", "ブロックなし", "ライフにダメージ"],
+      "intro": "♠2の攻撃をブロックしなかった場合を見ます。",
+      "summary": "ブロックされなかったため、PLAYER Bのライフ2枚が墓地へ移動しました。"
+    }
+  ],
   "steps": [
     {
       "id": "welcome",
