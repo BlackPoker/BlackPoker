@@ -5,6 +5,13 @@ import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 
 describe("PlaytestPolicyFactory Tests", () => {
   describe("1. Policy インスタンスの生成", () => {
+    it("PlaytestConservativePolicy が正常に生成されること", () => {
+      const policy = PlaytestPolicyFactory.createPolicy("playtestConservative", undefined, "p2");
+      expect(policy).toBeDefined();
+      expect(policy.descriptor.kind).toBe("playtestConservative");
+      expect(policy.descriptor.name).toBe("PlaytestConservative");
+    });
+
     it("FirstLegalPolicy が正常に生成されること", () => {
       const policy = PlaytestPolicyFactory.createPolicy("firstLegal", undefined, "p2");
       expect(policy).toBeDefined();

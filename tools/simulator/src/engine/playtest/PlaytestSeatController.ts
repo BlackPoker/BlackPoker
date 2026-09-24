@@ -11,6 +11,7 @@ export type PlaytestMatchMode = "humanVsHuman" | "humanVsAi";
  * Playtest UIで選択可能な既存AI Policy ID
  */
 export type PlaytestPolicyId =
+  | "playtestConservative"
   | "firstLegal"
   | "seededRandom"
   | "manualGenericGenome"
@@ -28,6 +29,11 @@ export interface PlaytestPolicyOption {
 }
 
 export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
+  {
+    id: "playtestConservative",
+    label: "Conservative (Playtest推奨)",
+    description: "手札を温存しながら基本行動を行う、動作確認向けの決定論的AI",
+  },
   {
     id: "firstLegal",
     label: "FirstLegal (Baseline)",

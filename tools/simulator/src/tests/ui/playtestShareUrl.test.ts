@@ -37,6 +37,29 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
     }
   });
 
+  // A2. PlaytestConservative Human vs AI round-trip
+  it("A2: PlaytestConservative Human vs AI round-trip で policy=playtestConservative を保持・復元できること", () => {
+    const config: PlaytestShareConfigV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "playtestConservative",
+      seedInput: "42",
+    };
+
+    const query = serializePlaytestShareUrl(config, catalog);
+    expect(query).toBe("?bpv=1&env=official%3Astandard-pack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=42");
+
+    const result = parsePlaytestShareUrl(query, catalog);
+    expect(result.kind).toBe("READY");
+    if (result.kind === "READY") {
+      expect(result.config).toEqual(config);
+      expect(result.config.policyId).toBe("playtestConservative");
+      expect(result.warnings.length).toBe(0);
+    }
+  });
+
   // B. Human vs Human canonicalization
   it("B: Human vs Human canonicalization で human / policy が URL に含まれないこと", () => {
     const config: PlaytestShareConfigV1 = {

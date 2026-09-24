@@ -1,4 +1,5 @@
 import { DecisionPolicy, FirstLegalPolicy, RandomPolicy } from "../simulation/DecisionPolicy";
+import { PlaytestConservativePolicy } from "./PlaytestConservativePolicy";
 import { SeededRandom } from "../random/RandomSource";
 import { GenomePolicy } from "../ai/GenomePolicy";
 import { DecisionDNACodec } from "../ai/DecisionDNACodec";
@@ -31,6 +32,9 @@ export class PlaytestPolicyFactory {
     seat: string
   ): DecisionPolicy {
     switch (policyId) {
+      case "playtestConservative":
+        return new PlaytestConservativePolicy();
+
       case "firstLegal":
         return new FirstLegalPolicy(false);
 

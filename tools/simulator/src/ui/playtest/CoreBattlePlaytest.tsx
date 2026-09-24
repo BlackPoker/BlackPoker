@@ -110,7 +110,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [seedInput, setSeedInput] = useState<string>("42");
   const [pendingMatchMode, setPendingMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [pendingHumanSeat, setPendingHumanSeat] = useState<"p1" | "p2">("p1");
-  const [pendingPolicyId, setPendingPolicyId] = useState<PlaytestPolicyId>("firstLegal");
+  const [pendingPolicyId, setPendingPolicyId] = useState<PlaytestPolicyId>("playtestConservative");
 
   // Active 設定（現在進行中の対戦セッションの設定。未成立時は null）
   const [activeMatch, setActiveMatch] = useState<ActiveMatchContext | null>(null);
