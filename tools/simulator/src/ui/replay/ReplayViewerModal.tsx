@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import React, { useState, useEffect, useMemo, useRef, useCallback, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition";
 import { RulePackage } from "../../domain/rules/RulePackage";
@@ -111,6 +111,23 @@ export function resolveActiveReconstructResult(
   return null;
 }
 
+/**
+ * スクロール位置復元用の Pure Helper。
+ * ステップ進行時に直前のスクロール位置を維持しつつ、コンテンツ高の変化に応じて clamp します。
+ */
+export function resolveRestoredScrollTop(
+  savedScrollTop: number,
+  scrollHeight: number,
+  clientHeight: number
+): number {
+  if (savedScrollTop <= 0) return 0;
+  const maxScrollTop = Math.max(0, scrollHeight - clientHeight);
+  return Math.min(savedScrollTop, maxScrollTop);
+}
+
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   isOpen,
   onClose,
@@ -121,6 +138,8 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   initialSource,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const contentScrollRef = useRef<HTMLDivElement | null>(null);
+  const lastScrollTopRef = useRef<number>(0);
 
   const [rawBundle, setRawBundle] = useState<unknown | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
@@ -149,6 +168,10 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     setViewerPerspective("p1");
     setSourceType(null);
     setReconState({ plan: null, index: 0, result: null });
+    lastScrollTopRef.current = 0;
+    if (contentScrollRef.current) {
+      contentScrollRef.current.scrollTop = 0;
+    }
   };
 
   // バンドルの読み込み処理
@@ -243,26 +266,101 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     return totalDecisions;
   }, [plan, verificationOutcome, totalDecisions]);
 
-  // 自動再生タイマー
+  const currentIndexRef = useRef<number>(currentIndex);
+  currentIndexRef.current = currentIndex;
+
+  const reconStateRef = useRef<ViewerReconState>(reconState);
+  reconStateRef.current = reconState;
+
+  const maxViewableIndexRef = useRef<number>(maxViewableIndex);
+  maxViewableIndexRef.current = maxViewableIndex;
+
+  // 統合ナビゲーションヘルパー: targetIndex への移動と再構築をアトミックに実行し、ステップ切り替え中の中間ローディング（Dark Flash）を防止
+  const navigateToReplayIndex = useCallback(
+    (targetIndex: number) => {
+      if (!plan) return;
+      const clampedIndex = Math.max(0, Math.min(maxViewableIndexRef.current, targetIndex));
+      if (
+        clampedIndex === currentIndexRef.current &&
+        reconStateRef.current.plan === plan &&
+        reconStateRef.current.index === clampedIndex &&
+        reconStateRef.current.result !== null
+      ) {
+        return;
+      }
+
+      try {
+        const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, clampedIndex);
+        const result = reconstructMatch({
+          environmentId: plan.environmentId,
+          seed: plan.seed,
+          transcript: plan.decisions,
+          decisionCount: clampedIndex,
+          trailingNormalization,
+          catalog,
+          fullRulePackage,
+          expectedRulePackage: plan.sourceRulePackage,
+        });
+        setCurrentIndex(clampedIndex);
+        setReconState({
+          plan,
+          index: clampedIndex,
+          result,
+        });
+      } catch (e: any) {
+        setCurrentIndex(clampedIndex);
+        setReconState({
+          plan,
+          index: clampedIndex,
+          result: {
+            status: "TECHNICAL_ERROR",
+            error: e?.message ?? String(e),
+          },
+        });
+      }
+    },
+    [plan, catalog, fullRulePackage]
+  );
+
+  // 自動再生タイマー (各ステップを navigateToReplayIndex 経由でアトミックに更新)
   useEffect(() => {
     if (!isPlaying || !plan) return;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => {
-        if (prev < maxViewableIndex) {
-          return prev + 1;
-        } else {
-          setIsPlaying(false);
-          return prev;
-        }
-      });
+      const nextIndex = currentIndexRef.current + 1;
+      if (nextIndex <= maxViewableIndexRef.current) {
+        navigateToReplayIndex(nextIndex);
+      } else {
+        setIsPlaying(false);
+      }
     }, 1200);
     return () => clearInterval(interval);
-  }, [isPlaying, plan, maxViewableIndex]);
+  }, [isPlaying, plan, navigateToReplayIndex]);
 
-  // 現在の index に対する再構築 (useEffect 内で非同期/描画外実行し、render パスから完全に排除)
+  // スクロール位置の復元 (ステップ進行後、DOM更新直後に前回の scrollTop を clamp して適用)
+  useIsomorphicLayoutEffect(() => {
+    if (contentScrollRef.current) {
+      const el = contentScrollRef.current;
+      const targetScrollTop = resolveRestoredScrollTop(
+        lastScrollTopRef.current,
+        el.scrollHeight,
+        el.clientHeight
+      );
+      el.scrollTop = targetScrollTop;
+    }
+  }, [currentIndex]);
+
+  // 現在の index に対する再構築 (初期バンドル読み込み時やカタログ更新時用。navigateToReplayIndex で既にセットされている場合はスキップ)
   useEffect(() => {
     if (!plan) {
       setReconState({ plan: null, index: 0, result: null });
+      return;
+    }
+
+    if (
+      reconState.plan === plan &&
+      reconState.index === currentIndex &&
+      reconState.result !== null
+    ) {
       return;
     }
 
@@ -302,7 +400,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [plan, currentIndex, catalog, fullRulePackage]);
+  }, [plan, currentIndex, catalog, fullRulePackage, reconState.plan, reconState.index, reconState.result]);
 
   // 現在の plan と currentIndex に合致する再構築結果のみを有効とする（stale 表示の防止）
   const reconResult = resolveActiveReconstructResult(reconState, plan, currentIndex);
@@ -355,19 +453,19 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
   // ナビゲーション操作
   const handleFirst = () => {
     setIsPlaying(false);
-    setCurrentIndex(0);
+    navigateToReplayIndex(0);
   };
   const handlePrev = () => {
     setIsPlaying(false);
-    setCurrentIndex((prev) => Math.max(0, prev - 1));
+    navigateToReplayIndex(currentIndex - 1);
   };
   const handleNext = () => {
     setIsPlaying(false);
-    setCurrentIndex((prev) => Math.min(maxViewableIndex, prev + 1));
+    navigateToReplayIndex(currentIndex + 1);
   };
   const handleLast = () => {
     setIsPlaying(false);
-    setCurrentIndex(maxViewableIndex);
+    navigateToReplayIndex(maxViewableIndex);
   };
 
   if (!isOpen) return null;
@@ -407,7 +505,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
       aria-label="Replay Viewer"
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-zinc-950/70 backdrop-blur-sm"
     >
-      <div className="relative w-full max-w-4xl max-h-[95vh] flex flex-col bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden font-sans">
+      <div className="relative w-full max-w-4xl h-[95dvh] sm:h-auto sm:max-h-[95vh] flex flex-col bg-white rounded-xl shadow-2xl border border-zinc-200 overflow-hidden font-sans">
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-3 py-2 bg-zinc-900 text-white border-b border-zinc-800 shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
@@ -566,7 +664,7 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
                 value={currentIndex}
                 onChange={(e) => {
                   setIsPlaying(false);
-                  setCurrentIndex(Number(e.target.value));
+                  navigateToReplayIndex(Number(e.target.value));
                 }}
                 className="w-full accent-zinc-950 cursor-pointer"
               />
@@ -607,7 +705,13 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
         )}
 
         {/* メインコンテンツ領域 */}
-        <div className="flex-1 overflow-y-auto p-2 sm:p-4 flex flex-col gap-3">
+        <div
+          ref={contentScrollRef}
+          onScroll={(e) => {
+            lastScrollTopRef.current = e.currentTarget.scrollTop;
+          }}
+          className="flex-1 overflow-y-auto p-2 sm:p-4 flex flex-col gap-3"
+        >
           {parseError && (
             <div className="p-3 rounded border border-red-200 bg-red-50 text-red-800 text-xs font-mono">
               ✕ {parseError}

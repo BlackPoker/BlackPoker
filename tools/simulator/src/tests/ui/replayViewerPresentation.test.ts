@@ -15,6 +15,7 @@ import {
   initializeReplayViewerBundle,
   resolveReplayViewerTrailingNormalization,
   resolveActiveReconstructResult,
+  resolveRestoredScrollTop,
   ReplayViewerSource,
 } from "../../ui/replay/ReplayViewerModal";
 import * as ReplayVerificationService from "../../ui/playtest/ReplayVerificationService";
@@ -41,7 +42,7 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
   const dummyOnClose = vi.fn();
 
   // サンプル対戦 Bundle を生成するヘルパー
-  function createSampleBundle(seed: number = 42) {
+  function createSampleBundle(seed: number = 42, decisionTargetCount: number = 1) {
     const outcome = startMatchAttempt({
       environmentId: "official:standard-pack",
       seedInput: String(seed),
@@ -56,19 +57,22 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
     let step = outcome.initialStep;
     const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
 
-    // 1 Decision 実行
-    while (step.type === "PROGRESSED") {
-      step = session.advance();
-    }
-    if (step.type === "WAITING_FOR_DECISION") {
+    // Decision 実行
+    let executed = 0;
+    while (executed < decisionTargetCount) {
+      while (step.type === "PROGRESSED") {
+        step = session.advance();
+      }
+      if (step.type !== "WAITING_FOR_DECISION") break;
       const passIndex = step.request.patterns.findIndex((p) => p.kind === "PASS");
       const resp = {
         decisionId: step.request.decisionId,
         stateVersion: step.request.stateVersion,
         selectedPatternRef: passIndex >= 0 ? passIndex : 0,
       };
+      executed++;
       transcript.push(
-        createDecisionTranscriptEntry(1, {
+        createDecisionTranscriptEntry(executed, {
           actor: "human",
           playerId: step.request.playerId as "p1" | "p2",
           decisionId: resp.decisionId,
@@ -466,5 +470,215 @@ describe("ReplayViewerPresentation Tests (Phase 4.0-B-R2-R1)", () => {
     expect(stateB.plan).not.toBeNull();
     expect(stateB.plan?.seed).toBe(200);
     expect(stateB.verificationOutcome.type).toBe("VERIFIED");
+  });
+
+  it("11. resolveRestoredScrollTop Pure Helper によるスクロール位置維持と clamp 契約", () => {
+    // 1. 0 以下の場合は 0 を返却
+    expect(resolveRestoredScrollTop(0, 1000, 400)).toBe(0);
+    expect(resolveRestoredScrollTop(-50, 1000, 400)).toBe(0);
+
+    // 2. スクロール領域が画面内に収まる場合（scrollHeight <= clientHeight）は 0 を返却
+    expect(resolveRestoredScrollTop(200, 400, 400)).toBe(0);
+    expect(resolveRestoredScrollTop(200, 300, 400)).toBe(0);
+
+    // 3. 最大スクロール可能範囲内の場合はそのままの scrollTop を返却
+    // maxScroll = 1000 - 400 = 600
+    expect(resolveRestoredScrollTop(350, 1000, 400)).toBe(350);
+
+    // 4. 最大スクロール可能範囲を超えている場合は maxScroll に clamp して返却
+    expect(resolveRestoredScrollTop(750, 1000, 400)).toBe(600);
+  });
+
+  it("12. モバイル表示安定化スタイリング契約 (h-[95dvh] sm:h-auto sm:max-h-[95vh] による高さ崩れとDark Flash防止)", () => {
+    const html = renderToString(
+      React.createElement(ReplayViewerModal, {
+        isOpen: true,
+        onClose: dummyOnClose,
+        catalog,
+        fullRulePackage,
+        currentBuildSha,
+      })
+    );
+
+    // ダイアログ外枠のスタイリング検証
+    expect(html).toContain("h-[95dvh]");
+    expect(html).toContain("sm:h-auto");
+    expect(html).toContain("sm:max-h-[95vh]");
+    expect(html).toContain("overflow-y-auto");
+  });
+
+  it("13. Step進行時 (0 -> 1 -> 2) における中間ローディング (「盤面を読み込み中...」) 非発生・アトミック更新の検証", () => {
+    const bundle = createSampleBundle(42, 2);
+    let renderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      renderer = TestRenderer.create(
+        React.createElement(ReplayViewerModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          catalog,
+          fullRulePackage,
+          currentBuildSha,
+          initialBundle: bundle,
+          initialSource: "live",
+        })
+      );
+    });
+
+    // 初期状態: Decision 0
+    let json = JSON.stringify(renderer.toJSON());
+    expect(json).toContain("初期盤面（判断実行前）");
+    expect(json).not.toContain("盤面を読み込み中...");
+
+    const nextBtn = renderer.root.find((el) => el.props["aria-label"] === "1つ次のDecisionへ");
+
+    // Decision 0 -> Decision 1 へ進める
+    act(() => {
+      nextBtn.props.onClick();
+    });
+
+    // アトミックに更新され、中間ローディング文言が一切表示されず、Seq # / Player A が描画されること
+    json = JSON.stringify(renderer.toJSON());
+    expect(json).not.toContain("盤面を読み込み中...");
+    expect(json).toContain("Seq #");
+    expect(json).toContain("Player A");
+    expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["1"]);
+
+    // Decision 1 -> Decision 2 へ進める
+    act(() => {
+      nextBtn.props.onClick();
+    });
+
+    json = JSON.stringify(renderer.toJSON());
+    expect(json).not.toContain("盤面を読み込み中...");
+    expect(json).toContain("Seq #");
+    expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+  });
+
+  it("14. 各ナビゲーション操作 (Next / Prev / Slider / First) での再構築回数の決定論的検証 (ステップあたり厳密に1回、重複実行なし)", () => {
+    const bundle = createSampleBundle(42, 2);
+    let renderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      renderer = TestRenderer.create(
+        React.createElement(ReplayViewerModal, {
+          isOpen: true,
+          onClose: dummyOnClose,
+          catalog,
+          fullRulePackage,
+          currentBuildSha,
+          initialBundle: bundle,
+          initialSource: "live",
+        })
+      );
+    });
+
+    const reconSpy = vi.spyOn(ReplayReconstructionService, "reconstructMatch");
+    reconSpy.mockClear();
+
+    const nextBtn = renderer.root.find((el) => el.props["aria-label"] === "1つ次のDecisionへ");
+    const prevBtn = renderer.root.find((el) => el.props["aria-label"] === "1つ前のDecisionへ");
+    const firstBtn = renderer.root.find((el) => el.props["aria-label"] === "最初のDecisionへ");
+    const slider = renderer.root.find((el) => el.props.type === "range");
+
+    // 1. Next: 0 -> 1 (呼び出し厳密に1回)
+    act(() => {
+      nextBtn.props.onClick();
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(1);
+
+    // 2. Next: 1 -> 2 (呼び出し厳密に1回)
+    reconSpy.mockClear();
+    act(() => {
+      nextBtn.props.onClick();
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(1);
+
+    // 3. Prev: 2 -> 1 (呼び出し厳密に1回)
+    reconSpy.mockClear();
+    act(() => {
+      prevBtn.props.onClick();
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(1);
+
+    // 4. First: 1 -> 0 (呼び出し厳密に1回)
+    reconSpy.mockClear();
+    act(() => {
+      firstBtn.props.onClick();
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(1);
+
+    // 5. Slider: 0 -> 2 (呼び出し厳密に1回)
+    reconSpy.mockClear();
+    act(() => {
+      slider.props.onChange({ target: { value: 2 } });
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(1);
+
+    // 6. 同一インデックスへの再移動 (2 -> 2): スキップされ呼び出し 0 回
+    reconSpy.mockClear();
+    act(() => {
+      slider.props.onChange({ target: { value: 2 } });
+    });
+    expect(reconSpy).toHaveBeenCalledTimes(0);
+
+    reconSpy.mockRestore();
+  });
+
+  it("15. 自動再生 (Auto-play) タイマー進行時における中間ローディング非発生と自動停止の検証", () => {
+    vi.useFakeTimers();
+    try {
+      const bundle = createSampleBundle(42, 2);
+      let renderer!: TestRenderer.ReactTestRenderer;
+
+      act(() => {
+        renderer = TestRenderer.create(
+          React.createElement(ReplayViewerModal, {
+            isOpen: true,
+            onClose: dummyOnClose,
+            catalog,
+            fullRulePackage,
+            currentBuildSha,
+            initialBundle: bundle,
+            initialSource: "live",
+          })
+        );
+      });
+
+      const playBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+      expect(playBtn).toBeDefined();
+
+      // 自動再生を開始
+      act(() => {
+        playBtn.props.onClick();
+      });
+
+      // 1200ms 進行 -> Decision 1
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+      let json = JSON.stringify(renderer.toJSON());
+      expect(json).not.toContain("盤面を読み込み中...");
+      expect(json).toContain("Seq #");
+      expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["1"]);
+
+      // さらに 1200ms 進行 -> Decision 2
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+      json = JSON.stringify(renderer.toJSON());
+      expect(json).not.toContain("盤面を読み込み中...");
+      expect(json).toContain("Seq #");
+      expect(renderer.root.findByProps({ className: "text-sm text-zinc-950" }).children).toEqual(["2"]);
+
+      // さらに 1200ms 進行 -> 末尾に達したため自動停止
+      act(() => {
+        vi.advanceTimersByTime(1200);
+      });
+      const stoppedPlayBtn = renderer.root.find((el) => el.props["aria-label"] === "自動再生");
+      expect(stoppedPlayBtn).toBeDefined();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
