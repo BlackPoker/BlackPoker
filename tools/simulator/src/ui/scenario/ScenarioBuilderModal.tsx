@@ -150,9 +150,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   useEffect(() => {
     if (initialMode) setMatchMode(initialMode);
     if (initialPolicyId) setSelectedPolicyId(initialPolicyId);
-    if (initialChallengeDefinition !== undefined) {
-      setIsChallengeEnabled(Boolean(initialChallengeDefinition));
-    }
+    setIsChallengeEnabled(Boolean(initialChallengeDefinition));
   }, [initialMode, initialPolicyId, initialChallengeDefinition]);
 
   // プレイヤーごとのカード配置 Draft

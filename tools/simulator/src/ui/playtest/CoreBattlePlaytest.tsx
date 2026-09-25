@@ -337,14 +337,6 @@ export const CoreBattlePlaytest: React.FC = () => {
       setActiveChallenge(initialChallengeRuntime);
       activeChallengeRef.current = initialChallengeRuntime;
 
-      if (initialChallengeRuntime && initialChallengeRuntime.status !== "ACTIVE") {
-        if (initialChallengeRuntime.status === "CLEARED") {
-          addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${initialChallengeRuntime.reason})`, "system");
-        } else {
-          addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${initialChallengeRuntime.reason})`, "system");
-        }
-      }
-
       // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
       if (isAutoSeedRotate && seedMode === "auto") {
         const currentSeed = newActiveMatch.seed ?? Number(seedInput);
@@ -366,6 +358,15 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
       for (const t of initialTraces) {
         addTrace(t.category, t.message, t.state);
+      }
+
+      // 初期ステップで既に Challenge が Terminal に達している場合 (CLEARED / FAILED)
+      if (initialChallengeRuntime && initialChallengeRuntime.status !== "ACTIVE") {
+        if (initialChallengeRuntime.status === "CLEARED") {
+          addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${initialChallengeRuntime.reason})`, "system");
+        } else {
+          addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${initialChallengeRuntime.reason})`, "system");
+        }
       }
 
       // 初期ステップの処理
@@ -2040,21 +2041,21 @@ export const CoreBattlePlaytest: React.FC = () => {
                     </span>
                   </div>
                   <span className="text-xs text-zinc-600">
-                    Challenger: {activeChallenge.challenger === "p1" ? "Player A (先手)" : "Player B (後手)"}
+                    Challenger: {activeChallenge.challenger === "p1" ? "Player A (P1)" : "Player B (P2)"}
                   </span>
                 </div>
                 <p className="text-xs mt-1">
                   {activeChallenge.status === "CLEARED"
-                    ? "🎉 チャレンジ条件を達成しました！"
+                    ? "🎉 チャレンジ達成！ このターン中に勝利しました。"
                     : activeChallenge.status === "FAILED"
                     ? activeChallenge.reason === "TURN_ENDED_BEFORE_WIN"
-                      ? "ターン終了前に相手ライフを削り切ることができませんでした。"
+                      ? "このターン中に勝利条件を達成できませんでした。"
                       : activeChallenge.reason === "OPPONENT_WON"
                       ? "相手プレイヤーが勝利しました。"
                       : activeChallenge.reason === "GAME_FINISHED_WITHOUT_CHALLENGER_WIN"
                       ? "勝利条件を達成できずにゲームが終了しました。"
                       : `チャレンジ失敗 (${activeChallenge.reason})`
-                    : `現在のターン (Turn ${activeChallenge.initialTurnCount}) が終了する前に相手のライフを0にして勝利してください。`}
+                    : `現在のターンが終了する前に勝利してください。`}
                 </p>
               </div>
             )}

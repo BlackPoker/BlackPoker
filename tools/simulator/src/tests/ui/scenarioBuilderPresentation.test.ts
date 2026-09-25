@@ -989,4 +989,51 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       challengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
     });
   });
+
+  it("24: initialChallengeDefinition が defined → undefined に切り替わった際に isChallengeEnabled が確実に false へ同期すること", () => {
+    let testRenderer: TestRenderer.ReactTestRenderer = null as any;
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "settings",
+          catalog,
+          fullRulePackage,
+          initialDefinition: minimalValidScenario,
+          initialChallengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+        })
+      );
+    });
+
+    // 1. initialChallengeDefinition あり -> checkbox checked
+    const inputs = testRenderer.root.findAllByType("input");
+    const challengeCheckbox = inputs.find((inp) => inp.props.type === "checkbox");
+    expect(challengeCheckbox).toBeDefined();
+    expect(challengeCheckbox!.props.checked).toBe(true);
+
+    // 2. 同一の mounted インスタンスへ initialChallengeDefinition = undefined を再 props 渡し
+    act(() => {
+      testRenderer.update(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "settings",
+          catalog,
+          fullRulePackage,
+          initialDefinition: minimalValidScenario,
+          initialChallengeDefinition: undefined,
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+        })
+      );
+    });
+
+    // 3. remount なしで checkbox が false (unchecked) へ同期されていること
+    const updatedInputs = testRenderer.root.findAllByType("input");
+    const updatedCheckbox = updatedInputs.find((inp) => inp.props.type === "checkbox");
+    expect(updatedCheckbox).toBeDefined();
+    expect(updatedCheckbox!.props.checked).toBe(false);
+  });
 });
