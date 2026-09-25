@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
 import { ScenarioAuthoringDraftV1 } from "../../domain/scenario/ScenarioAuthoringTypes";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
@@ -20,6 +20,7 @@ import { ChallengeEvaluator } from "../../engine/challenge/ChallengeEvaluator";
 import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
 import { isHumanSeat } from "../../engine/playtest/PlaytestSeatController";
 import { GameSessionStep } from "../../engine/session/GameSession";
+import { advanceAutomatedDecisions } from "../../engine/playtest/HumanVsPolicyController";
 
 describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORING)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -238,7 +239,7 @@ describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORIN
     expect(reCompile.type).toBe("READY");
   });
 
-  it("4: TSUME-2018-001 の正統共有URL (Human vs AI, Conservative, Challenge) とターン終了時の FAILED 連鎖停止検証", () => {
+  it("4: TSUME-2018-001 の正統共有URL (Human vs AI, Conservative, Challenge) とターン終了時の FAILED 連鎖停止検証", async () => {
     const resolveResult = ScenarioAuthoringResolver.resolve(tsume2018Draft, catalog);
     expect(resolveResult.success).toBe(true);
     if (!resolveResult.success) return;
@@ -287,7 +288,11 @@ describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORIN
     expect(attempt.status).toBe("READY");
     if (attempt.status !== "READY") return;
 
-    const { session, initialStep, seatControllers } = attempt.prepared;
+    const { session, initialStep, seatControllers, policies } = attempt.prepared;
+    const p2Policy = policies.p2;
+    expect(p2Policy).toBeDefined();
+    const chooseSpy = vi.spyOn(p2Policy, "choose");
+    const decideSpy = p2Policy.decide ? vi.spyOn(p2Policy, "decide") : undefined;
 
     // Challenge 初期化
     let challenge = ChallengeEvaluator.initialize(
@@ -302,7 +307,7 @@ describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORIN
     challenge = ChallengeEvaluator.evaluate(challenge, initialStep, session.state);
     expect(challenge.status).toBe("ACTIVE");
 
-    // P1 (Human) がターンエンド (action.end) を宣言
+    // P1 (Human) がターンエンド (action.end) を宣言 (Pattern index 固定値禁止: findIndex で動的探索)
     expect(initialStep.type).toBe("WAITING_FOR_DECISION");
     if (initialStep.type !== "WAITING_FOR_DECISION") return;
 
@@ -318,40 +323,83 @@ describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORIN
       selectedPatternRef: endPatternIndex,
     });
 
-    challenge = ChallengeEvaluator.evaluate(challenge, currentStep, session.state);
+    // production 対戦ループ: P1 (Human) は action.end の解決まで PASS を選択し、
+    // AI 側は advanceAutomatedDecisions (Generic stop hook 付き) で進行
+    let aiResult: any;
+    const allAiRecords: any[] = [];
+    const stopHook = (step: any, state: any) => {
+      if (challenge.status === "ACTIVE") {
+        const updated = ChallengeEvaluator.evaluate(challenge, step, state);
+        challenge = updated;
+        if (updated.status !== "ACTIVE") {
+          return true;
+        }
+      }
+      return false;
+    };
 
-    // ステージ上の action.end が解決してターンが終了するまで PASS を選択
-    let passGuard = 0;
-    while (
-      challenge.status === "ACTIVE" &&
-      currentStep.type === "WAITING_FOR_DECISION" &&
-      passGuard++ < 10
-    ) {
-      const passIndex = currentStep.request.patterns.findIndex((p: any) => p.kind === "PASS");
-      if (passIndex === -1) break;
-      currentStep = session.submitDecision({
-        decisionId: currentStep.request.decisionId,
-        stateVersion: currentStep.request.stateVersion,
-        selectedPatternRef: passIndex,
-      });
-      challenge = ChallengeEvaluator.evaluate(challenge, currentStep, session.state);
+    while (challenge.status === "ACTIVE" && currentStep.type === "WAITING_FOR_DECISION") {
+      if (currentStep.request.playerId === "p1") {
+        // Human の手番: PASS を選択
+        const passIndex = currentStep.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        expect(passIndex).toBeGreaterThanOrEqual(0);
+        currentStep = session.submitDecision({
+          decisionId: currentStep.request.decisionId,
+          stateVersion: currentStep.request.stateVersion,
+          selectedPatternRef: passIndex,
+        });
+        challenge = ChallengeEvaluator.evaluate(challenge, currentStep, session.state);
+      } else {
+        // AI の手番: advanceAutomatedDecisions を Generic stop hook 付きで実行
+        aiResult = await advanceAutomatedDecisions(
+          session,
+          currentStep,
+          seatControllers,
+          policies,
+          {
+            viewerPlayerId: "p1",
+            shouldStopAfterStep: stopHook,
+          }
+        );
+        allAiRecords.push(...aiResult.records);
+        currentStep = aiResult.step;
+        if (aiResult.status === "STOPPED" && aiResult.reason === "EXTERNAL_STOP") {
+          break;
+        }
+      }
     }
 
-    // P1 のターン終了により deadline crossed -> FAILED (TURN_ENDED_BEFORE_WIN)
+    // 1. advanceAutomatedDecisions の停止結果: deadline crossing 時に EXTERNAL_STOP で停止
+    expect(aiResult).toBeDefined();
+    expect(aiResult.status).toBe("STOPPED");
+    expect(aiResult.reason).toBe("EXTERNAL_STOP");
+    expect(allAiRecords.length).toBeGreaterThanOrEqual(1);
+
+    // すべての AI Decision Record は Turn 1 内 (Turn 2 のメイン行動は 0 件)
+    for (const rec of allAiRecords) {
+      expect(rec.prevState.turnCount).toBe(1);
+    }
+
+    // Turn 2 かつ P2 の Decision Record が 1 件も存在しないこと
+    const turn2AiRecords = allAiRecords.filter(
+      (rec) => rec.prevState.turnCount === 2 && rec.playerId === "p2"
+    );
+    expect(turn2AiRecords.length).toBe(0);
+
+    // 2. Policy spy 検証: policy 呼び出し回数が Turn 1 内の record 件数と完全一致し、Turn 2 で呼ばれていないこと
+    expect(chooseSpy.mock.calls.length).toBe(allAiRecords.length);
+
+    // 3. Challenge の状態検証: deadline crossing により FAILED
     expect(challenge.status).toBe("FAILED");
     expect(challenge.reason).toBe("TURN_ENDED_BEFORE_WIN");
 
-    // チャレンジが Terminal (FAILED) のため、AI の自動進行は実行されない（ブロックされる）
-    const isChallengeTerminal = challenge.status !== "ACTIVE";
-    expect(isChallengeTerminal).toBe(true);
+    // 4. Deadline-crossing step の保持検証:
+    // GameSession は Turn 2 / turnPlayer: p2 で待機状態にあり、壊されていないこと
+    expect(session.state.turnCount).toBe(2);
+    expect(session.state.turnPlayer).toBe("p2");
 
-    const shouldAiAdvance =
-      !isChallengeTerminal &&
-      currentStep.type === "WAITING_FOR_DECISION" &&
-      !isHumanSeat(seatControllers, currentStep.request.playerId);
-    expect(shouldAiAdvance).toBe(false);
-
-    // 不変条件: GameSession は改変されず、P2 の Life が 0 にされたり偽の match.finished が記録されないこと
+    // 5. GameSession 不変条件:
+    // Life 偽造なし、fake match.finished なし
     expect(session.state.players.p1.life.length).toBe(2);
     expect(session.state.players.p2.life.length).toBe(37);
     const events = session.getMatchLog().events;

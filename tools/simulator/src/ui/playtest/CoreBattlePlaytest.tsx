@@ -287,6 +287,25 @@ export const CoreBattlePlaytest: React.FC = () => {
     setIsAiProcessing(false);
   }, [resetFeedbackFlash]);
 
+  // Challenge 実行中に AI 自動進行ループの各ステップ境界で停止を判定する Generic hook 生成
+  const createChallengeStopHook = useCallback(() => {
+    return (step: GameSessionStep, state: unknown): boolean => {
+      if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
+        const updated = ChallengeEvaluator.evaluate(
+          activeChallengeRef.current,
+          step,
+          state as any
+        );
+        activeChallengeRef.current = updated;
+        if (updated.status !== "ACTIVE") {
+          setActiveChallenge(updated);
+          return true;
+        }
+      }
+      return false;
+    };
+  }, []);
+
   // 通常対戦および Scenario 対戦で共有する READY match の原子確定 (Atomic Commit) 処理
   // 失敗し得る処理 (コンパイル、セッション生成、AIポリシー初期化等) はすべて Prepare 段階で完了させ、
   // この関数内では例外・失敗を起こさず原子的にアクティブ対戦を切り替えます。
@@ -389,12 +408,16 @@ export const CoreBattlePlaytest: React.FC = () => {
           addTrace("AI_TURN_START", advanceLogMsg, session.state);
           setIsAiProcessing(true);
 
+          const challengeStatusBeforeAi = activeChallengeRef.current?.status;
           const aiResult = await advanceAutomatedDecisions(
             session,
             step,
             seatControllers,
             policies,
-            { viewerPlayerId: humanSeat }
+            {
+              viewerPlayerId: humanSeat,
+              shouldStopAfterStep: activeChallengeRef.current ? createChallengeStopHook() : undefined,
+            }
           );
 
           setIsAiProcessing(false);
@@ -441,7 +464,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           setCurrentStep(step);
           setGameState(JSON.parse(JSON.stringify(session.state)));
 
-          // AI 進行後の Challenge 評価
+          // AI 進行後の Challenge 評価 (まだ ACTIVE の場合は最終ステップで評価)
           if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
             const updated = ChallengeEvaluator.evaluate(
               activeChallengeRef.current,
@@ -450,12 +473,19 @@ export const CoreBattlePlaytest: React.FC = () => {
             );
             activeChallengeRef.current = updated;
             setActiveChallenge(updated);
-            if (updated.status !== "ACTIVE") {
-              if (updated.status === "CLEARED") {
-                addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system");
-              } else {
-                addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system");
-              }
+          }
+
+          // AI 進行中 (hook) または進行直後に Terminal に遷移した場合にログ出力
+          if (
+            challengeStatusBeforeAi === "ACTIVE" &&
+            activeChallengeRef.current &&
+            activeChallengeRef.current.status !== "ACTIVE"
+          ) {
+            const term = activeChallengeRef.current;
+            if (term.status === "CLEARED") {
+              addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${term.reason})`, "system", session.state);
+            } else {
+              addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${term.reason})`, "system", session.state);
             }
           }
 
@@ -1043,12 +1073,16 @@ export const CoreBattlePlaytest: React.FC = () => {
       if (shouldAutoAdvance) {
         setIsAiProcessing(true);
 
+        const challengeStatusBeforeAi = activeChallengeRef.current?.status;
         const aiResult = await advanceAutomatedDecisions(
           session,
           nextStep,
           activeSeatControllers,
           activePolicies,
-          { viewerPlayerId: activeHumanSeat }
+          {
+            viewerPlayerId: activeHumanSeat,
+            shouldStopAfterStep: activeChallengeRef.current ? createChallengeStopHook() : undefined,
+          }
         );
 
         setIsAiProcessing(false);
@@ -1094,17 +1128,24 @@ export const CoreBattlePlaytest: React.FC = () => {
         nextStep = aiResult.step;
         nextState = JSON.parse(JSON.stringify(session.state));
 
-        // Challenge 評価 (AI 進行後)
+        // Challenge 評価 (AI 進行後: まだ ACTIVE の場合は最終ステップで評価)
         if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
           const updated = ChallengeEvaluator.evaluate(activeChallengeRef.current, nextStep, nextState);
           activeChallengeRef.current = updated;
           setActiveChallenge(updated);
-          if (updated.status !== "ACTIVE") {
-            if (updated.status === "CLEARED") {
-              addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system", nextState);
-            } else {
-              addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system", nextState);
-            }
+        }
+
+        // AI 進行中 (hook) または進行直後に Terminal に遷移した場合にログ出力
+        if (
+          challengeStatusBeforeAi === "ACTIVE" &&
+          activeChallengeRef.current &&
+          activeChallengeRef.current.status !== "ACTIVE"
+        ) {
+          const term = activeChallengeRef.current;
+          if (term.status === "CLEARED") {
+            addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${term.reason})`, "system", nextState);
+          } else {
+            addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${term.reason})`, "system", nextState);
           }
         }
       }

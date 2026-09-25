@@ -377,4 +377,125 @@ describe("HumanVsPolicyController Tests", () => {
       }
     });
   });
+
+  describe("3. shouldStopAfterStep 外部停止 hook の検証", () => {
+    function setupRealSession() {
+      const fullPackage = loadRulePackageForBrowser();
+      const playtestPackage = getPlaytestRulePackage(fullPackage);
+      const rawState = createCoreBattlePresetState();
+      const setupResult = MatchSetupCoordinator.setupMatch(rawState);
+      const session = new GameSession(setupResult.state, playtestPackage);
+      const initialStep = session.advance();
+      return { session, initialStep };
+    }
+
+    it("A: hook なしの場合、既存の通常自動進行動作 (HUMAN_TURN または FINISHED) を維持すること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const aiPlayer = (initialStep as any).request.playerId;
+      const humanPlayer = aiPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      const result = await advanceAutomatedDecisions(
+        session,
+        initialStep,
+        seatControllers,
+        policies
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(["HUMAN_TURN", "FINISHED"]).toContain(result.reason);
+        expect(result.records.length).toBeGreaterThanOrEqual(1);
+      }
+    });
+
+    it("B: AI submit 直後に hook が true を返した場合、次の Decision へ進まず EXTERNAL_STOP で停止すること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const aiPlayer = (initialStep as any).request.playerId;
+      const humanPlayer = aiPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      let hookCallCount = 0;
+      const result = await advanceAutomatedDecisions(
+        session,
+        initialStep,
+        seatControllers,
+        policies,
+        {
+          shouldStopAfterStep: () => {
+            hookCallCount++;
+            return true;
+          },
+        }
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(result.reason).toBe("EXTERNAL_STOP");
+        expect(hookCallCount).toBe(1);
+        expect(result.records.length).toBe(1);
+      }
+    });
+
+    it("C: PROGRESSED -> session.advance 直後に hook が true を返した場合、次の Decision へ進まず EXTERNAL_STOP で停止すること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const humanPlayer = (initialStep as any).request.playerId;
+      const aiPlayer = humanPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      const progressedStep: GameSessionStep = { type: "PROGRESSED" };
+      let hookCallCount = 0;
+
+      const result = await advanceAutomatedDecisions(
+        session,
+        progressedStep,
+        seatControllers,
+        policies,
+        {
+          shouldStopAfterStep: () => {
+            hookCallCount++;
+            return true;
+          },
+        }
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(result.reason).toBe("EXTERNAL_STOP");
+        expect(hookCallCount).toBe(1);
+        expect(result.records.length).toBe(0);
+      }
+    });
+
+    it("D: hook が false を返し続ける場合、通常どおり進行すること", async () => {
+      const { session, initialStep } = setupRealSession();
+      const aiPlayer = (initialStep as any).request.playerId;
+      const humanPlayer = aiPlayer === "p1" ? "p2" : "p1";
+      const seatControllers = createSeatControllers("humanVsAi", humanPlayer, "firstLegal");
+      const policies = { [aiPlayer]: new FirstLegalPolicy() };
+
+      let hookCallCount = 0;
+      const result = await advanceAutomatedDecisions(
+        session,
+        initialStep,
+        seatControllers,
+        policies,
+        {
+          shouldStopAfterStep: () => {
+            hookCallCount++;
+            return false;
+          },
+        }
+      );
+
+      expect(result.status).toBe("STOPPED");
+      if (result.status === "STOPPED") {
+        expect(["HUMAN_TURN", "FINISHED"]).toContain(result.reason);
+        expect(hookCallCount).toBeGreaterThanOrEqual(1);
+      }
+    });
+  });
 });

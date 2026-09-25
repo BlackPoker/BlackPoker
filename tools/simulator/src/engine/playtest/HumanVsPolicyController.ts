@@ -29,7 +29,7 @@ export interface AutomatedDecisionRecord {
 export type AutomatedAdvanceResult =
   | {
       readonly status: "STOPPED";
-      readonly reason: "HUMAN_TURN" | "FINISHED";
+      readonly reason: "HUMAN_TURN" | "FINISHED" | "EXTERNAL_STOP";
       readonly step: GameSessionStep;
       readonly records: readonly AutomatedDecisionRecord[];
     }
@@ -85,16 +85,19 @@ export function validateDecisionResponse(
  * - UI向け非同期契約: policy.decide が存在すれば非同期呼び出し、なければ同期 choose を Promise 化。
  * - 人工ウェイト (Artificial Delay) は含みません。
  */
+export interface AutomatedAdvanceOptions {
+  readonly maxAutomatedDecisions?: number;
+  readonly maxProgressSteps?: number;
+  readonly viewerPlayerId?: PlayerKey;
+  readonly shouldStopAfterStep?: (step: GameSessionStep, state: unknown) => boolean;
+}
+
 export async function advanceAutomatedDecisions(
   session: GameSession,
   initialStep: GameSessionStep,
   seatControllers: PlaytestSeatControllers,
   policies: Record<string, DecisionPolicy>,
-  options?: {
-    maxAutomatedDecisions?: number;
-    maxProgressSteps?: number;
-    viewerPlayerId?: PlayerKey;
-  }
+  options?: AutomatedAdvanceOptions
 ): Promise<AutomatedAdvanceResult> {
   const maxDecisions = options?.maxAutomatedDecisions ?? 500;
   const maxProgressSteps = options?.maxProgressSteps ?? 1000;
@@ -138,6 +141,17 @@ export async function advanceAutomatedDecisions(
           lastStep: currentStep,
         };
       }
+
+      // 外部停止 hook の評価 (PROGRESSED -> session.advance 後)
+      if (options?.shouldStopAfterStep?.(currentStep, session.state)) {
+        return {
+          status: "STOPPED",
+          reason: "EXTERNAL_STOP",
+          step: currentStep,
+          records,
+        };
+      }
+
       continue;
     }
 
@@ -237,6 +251,17 @@ export async function advanceAutomatedDecisions(
 
       currentStep = nextStep;
       decisionCount++;
+
+      // 外部停止 hook の評価 (AI Decision -> session.submitDecision 後)
+      if (options?.shouldStopAfterStep?.(currentStep, session.state)) {
+        return {
+          status: "STOPPED",
+          reason: "EXTERNAL_STOP",
+          step: currentStep,
+          records,
+        };
+      }
+
       continue;
     }
 
