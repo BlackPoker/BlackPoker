@@ -24,15 +24,40 @@ import { copyTextToClipboard } from "../utils/clipboard";
 import { OFFICIAL_ENV_PREFIX, extractRegulationId } from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
 import { ScenarioAuthoringDraftV1 } from "../../domain/scenario/ScenarioAuthoringTypes";
+import {
+  PlaytestMatchMode,
+  PlaytestPolicyId,
+  PLAYTEST_POLICY_OPTIONS,
+} from "../../engine/playtest/PlaytestSeatController";
+import { ChallengeDefinitionV1 } from "../../domain/challenge/ChallengeDefinition";
+
+export interface ScenarioStartOptions {
+  readonly mode: PlaytestMatchMode;
+  readonly humanSeat: "p1" | "p2";
+  readonly policyId: PlaytestPolicyId;
+  readonly challengeDefinition?: ChallengeDefinitionV1;
+}
+
+export interface ScenarioShareOptions {
+  readonly definition: ScenarioDefinitionV1;
+  readonly mode: PlaytestMatchMode;
+  readonly humanSeat: "p1" | "p2";
+  readonly policyId: PlaytestPolicyId;
+  readonly challengeDefinition?: ChallengeDefinitionV1;
+}
 
 export interface ScenarioBuilderModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly catalog: RegulationCatalog;
   readonly fullRulePackage: RulePackage;
-  readonly onStartScenario: (definition: ScenarioDefinitionV1) => void;
+  readonly onStartScenario: (definition: ScenarioDefinitionV1, options?: ScenarioStartOptions) => void;
+  readonly onShareScenario?: (options: ScenarioShareOptions) => Promise<boolean> | boolean;
   readonly initialDefinition?: ScenarioDefinitionV1;
   readonly initialTab?: "p1" | "p2" | "settings";
+  readonly initialMode?: PlaytestMatchMode;
+  readonly initialPolicyId?: PlaytestPolicyId;
+  readonly initialChallengeDefinition?: ChallengeDefinitionV1;
 }
 
 /**
@@ -77,8 +102,12 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   catalog,
   fullRulePackage,
   onStartScenario,
+  onShareScenario,
   initialDefinition,
   initialTab,
+  initialMode,
+  initialPolicyId,
+  initialChallengeDefinition,
 }) => {
   // 利用可能な公式環境一覧（simulatorImplemented === true のみ。Core Battle は対象外）
   const officialEnvironments = useMemo(() => {
@@ -108,6 +137,23 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [turnCount, setTurnCount] = useState<number>(initialDefinition?.turnCount ?? 1);
   const [name, setName] = useState<string>(initialDefinition?.name ?? "");
   const [description, setDescription] = useState<string>(initialDefinition?.description ?? "");
+
+  // 対戦設定 & チャレンジ設定
+  const [matchMode, setMatchMode] = useState<PlaytestMatchMode>(initialMode ?? "humanVsHuman");
+  const [selectedPolicyId, setSelectedPolicyId] = useState<PlaytestPolicyId>(
+    initialPolicyId ?? "playtestConservative"
+  );
+  const [isChallengeEnabled, setIsChallengeEnabled] = useState<boolean>(
+    Boolean(initialChallengeDefinition)
+  );
+
+  useEffect(() => {
+    if (initialMode) setMatchMode(initialMode);
+    if (initialPolicyId) setSelectedPolicyId(initialPolicyId);
+    if (initialChallengeDefinition !== undefined) {
+      setIsChallengeEnabled(Boolean(initialChallengeDefinition));
+    }
+  }, [initialMode, initialPolicyId, initialChallengeDefinition]);
 
   // プレイヤーごとのカード配置 Draft
   const [p1Hand, setP1Hand] = useState<ScenarioCardRefV1[]>(
@@ -477,14 +523,33 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   // 共有 URL コピーハンドラ
   const handleCopyShareUrl = async () => {
     try {
-      const url = typeof window !== "undefined"
-        ? buildScenarioShareUrl(window.location.href, currentDefinition)
-        : `?scenario=${encodeScenarioDefinitionV1ToUrlParam(currentDefinition)}`;
-      const success = await copyTextToClipboard(url);
-      if (success) {
-        setShareNotice({ type: "success", message: "Scenario共有URLをクリップボードにコピーしました。" });
+      const challengeDef: ChallengeDefinitionV1 | undefined = isChallengeEnabled
+        ? { version: 1, kind: "WIN_CURRENT_TURN" }
+        : undefined;
+
+      if (onShareScenario) {
+        const success = await onShareScenario({
+          definition: currentDefinition,
+          mode: matchMode,
+          humanSeat: "p1",
+          policyId: selectedPolicyId,
+          challengeDefinition: challengeDef,
+        });
+        if (success) {
+          setShareNotice({ type: "success", message: "共有URLをクリップボードにコピーしました。" });
+        } else {
+          setShareNotice({ type: "error", message: "URLのコピーに失敗しました。" });
+        }
       } else {
-        setShareNotice({ type: "error", message: "URLのコピーに失敗しました。" });
+        const url = typeof window !== "undefined"
+          ? buildScenarioShareUrl(window.location.href, currentDefinition)
+          : `?scenario=${encodeScenarioDefinitionV1ToUrlParam(currentDefinition)}`;
+        const success = await copyTextToClipboard(url);
+        if (success) {
+          setShareNotice({ type: "success", message: "Scenario共有URLをクリップボードにコピーしました。" });
+        } else {
+          setShareNotice({ type: "error", message: "URLのコピーに失敗しました。" });
+        }
       }
     } catch (err: any) {
       setShareNotice({ type: "error", message: err.message || "共有URL生成エラー" });
@@ -495,7 +560,15 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   // Scenario 開始
   const handleStart = () => {
     if (compileOutcome.type !== "READY") return;
-    onStartScenario(currentDefinition);
+    const challengeDef: ChallengeDefinitionV1 | undefined = isChallengeEnabled
+      ? { version: 1, kind: "WIN_CURRENT_TURN" }
+      : undefined;
+    onStartScenario(currentDefinition, {
+      mode: matchMode,
+      humanSeat: "p1",
+      policyId: selectedPolicyId,
+      challengeDefinition: challengeDef,
+    });
     onClose();
   };
 
@@ -681,6 +754,85 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                     className="w-full text-xs font-mono p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:outline-none"
                   />
                 </div>
+              </div>
+
+              {/* 対戦モード & AI 設定 */}
+              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-3 font-mono">
+                <span className="text-xs font-bold text-zinc-800">対戦相手設定 (Match Mode)</span>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-800">
+                    <input
+                      type="radio"
+                      name="scenarioMatchMode"
+                      value="humanVsHuman"
+                      checked={matchMode === "humanVsHuman"}
+                      onChange={() => setMatchMode("humanVsHuman")}
+                      className="text-zinc-900 focus:ring-zinc-950"
+                    />
+                    Human vs Human (対人・2人操作)
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-800">
+                    <input
+                      type="radio"
+                      name="scenarioMatchMode"
+                      value="humanVsAi"
+                      checked={matchMode === "humanVsAi"}
+                      onChange={() => setMatchMode("humanVsAi")}
+                      className="text-zinc-900 focus:ring-zinc-950"
+                    />
+                    Human vs AI (1人プレイ / AI対戦)
+                  </label>
+                </div>
+
+                {matchMode === "humanVsAi" && (
+                  <div className="mt-2 pt-3 border-t border-zinc-200 flex flex-col gap-2">
+                    <div className="flex items-center gap-4 text-xs">
+                      <span className="text-zinc-600 font-bold">席構成:</span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-zinc-800">
+                        Player A (P1): Human
+                      </span>
+                      <span className="bg-white px-2 py-0.5 rounded border border-zinc-300 text-zinc-800">
+                        Player B (P2): AI
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-zinc-700 mb-1">AI Policy:</label>
+                      <select
+                        value={selectedPolicyId}
+                        onChange={(e) => setSelectedPolicyId(e.target.value as PlaytestPolicyId)}
+                        className="w-full text-xs font-bold p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:outline-none"
+                      >
+                        {PLAYTEST_POLICY_OPTIONS.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.label} ({opt.description})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Challenge 設定 */}
+              <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-2.5 font-mono">
+                <span className="text-xs font-bold text-zinc-800">チャレンジ設定 (Challenge)</span>
+                <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-zinc-900">
+                  <input
+                    type="checkbox"
+                    checked={isChallengeEnabled}
+                    onChange={(e) => setIsChallengeEnabled(e.target.checked)}
+                    className="rounded text-zinc-900 focus:ring-zinc-950"
+                  />
+                  このターンで勝利する (WIN_CURRENT_TURN)
+                </label>
+                <p className="text-[11px] text-zinc-600">
+                  現在の手番プレイヤーが、ターン終了前に勝利するとクリアです。
+                </p>
+                {isChallengeEnabled && matchMode === "humanVsHuman" && (
+                  <p className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                    ※ Human vs HumanでもChallengeは利用できます。1人で問題を解く場合はHuman vs AIを選択してください。
+                  </p>
+                )}
               </div>
 
               {/* URL 共有 */}

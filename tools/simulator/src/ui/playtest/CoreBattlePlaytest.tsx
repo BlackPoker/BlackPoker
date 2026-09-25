@@ -79,9 +79,18 @@ import {
 } from "../../engine/replay/ReplayReconstructionService";
 import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
 import { PlaytestPerspectiveResolver } from "./PlaytestPerspectiveResolver";
-import { ScenarioBuilderModal } from "../scenario/ScenarioBuilderModal";
+import {
+  ScenarioBuilderModal,
+  ScenarioStartOptions,
+  ScenarioShareOptions,
+} from "../scenario/ScenarioBuilderModal";
 import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
 import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
+import { ChallengeDefinitionV1 } from "../../domain/challenge/ChallengeDefinition";
+import {
+  ChallengeEvaluator,
+  ChallengeRuntimeState,
+} from "../../engine/challenge/ChallengeEvaluator";
 import logoUrl from "../../assets/blackpoker-logo.svg";
 
 
@@ -121,6 +130,13 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [activePolicies, setActivePolicies] = useState<Record<string, DecisionPolicy>>({});
   const [activeMatchMode, setActiveMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [activeHumanSeat, setActiveHumanSeat] = useState<"p1" | "p2">("p1");
+
+  // Challenge State (GameSessionとは別管理の局面チャレンジ実行時状態)
+  const [activeChallenge, setActiveChallenge] = useState<ChallengeRuntimeState | null>(null);
+  const activeChallengeRef = useRef<ChallengeRuntimeState | null>(null);
+  const [pendingChallengeDefinition, setPendingChallengeDefinition] = useState<ChallengeDefinitionV1 | undefined>(
+    undefined
+  );
 
   // Decision Transcript 管理 (単調増加 seq と受理された意思決定ログ)
   const decisionSeqRef = useRef<number>(1);
@@ -259,6 +275,8 @@ export const CoreBattlePlaytest: React.FC = () => {
     setCurrentStep(null);
     setActiveMatch(null);
     setActivePlaytestSettings(null);
+    setActiveChallenge(null);
+    activeChallengeRef.current = null;
     decisionSeqRef.current = 1;
     decisionTranscriptRef.current = [];
     setSelectedUnitIds([]);
@@ -273,7 +291,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   // 失敗し得る処理 (コンパイル、セッション生成、AIポリシー初期化等) はすべて Prepare 段階で完了させ、
   // この関数内では例外・失敗を起こさず原子的にアクティブ対戦を切り替えます。
   const commitReadyMatch = useCallback(
-    async (prepared: PreparedMatch) => {
+    async (prepared: PreparedMatch, challengeDefinition?: ChallengeDefinitionV1) => {
       const {
         session,
         activeMatch: newActiveMatch,
@@ -309,7 +327,24 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat,
         policyId,
       });
-      // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
+
+      // Challenge の初期化 & 初期ステップ観測 (GameSession とは完全に分離)
+      let initialChallengeRuntime: ChallengeRuntimeState | null = null;
+      if (challengeDefinition) {
+        const initRuntime = ChallengeEvaluator.initialize(challengeDefinition, session.state);
+        initialChallengeRuntime = ChallengeEvaluator.evaluate(initRuntime, initialStep, session.state);
+      }
+      setActiveChallenge(initialChallengeRuntime);
+      activeChallengeRef.current = initialChallengeRuntime;
+
+      if (initialChallengeRuntime && initialChallengeRuntime.status !== "ACTIVE") {
+        if (initialChallengeRuntime.status === "CLEARED") {
+          addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${initialChallengeRuntime.reason})`, "system");
+        } else {
+          addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${initialChallengeRuntime.reason})`, "system");
+        }
+      }
+
       // Auto モードの場合は直前対戦の Seed と確実に異なる次回用 Seed を生成して rotate
       if (isAutoSeedRotate && seedMode === "auto") {
         const currentSeed = newActiveMatch.seed ?? Number(seedInput);
@@ -336,9 +371,13 @@ export const CoreBattlePlaytest: React.FC = () => {
       // 初期ステップの処理
       let step = initialStep;
       if (mode === "humanVsAi") {
+        const isInitialChallengeTerminal = Boolean(
+          initialChallengeRuntime && initialChallengeRuntime.status !== "ACTIVE"
+        );
         const needsAiAdvance =
-          step.type === "PROGRESSED" ||
-          (step.type === "WAITING_FOR_DECISION" && !isHumanSeat(seatControllers, step.request.playerId));
+          !isInitialChallengeTerminal &&
+          (step.type === "PROGRESSED" ||
+            (step.type === "WAITING_FOR_DECISION" && !isHumanSeat(seatControllers, step.request.playerId)));
 
         if (needsAiAdvance) {
           setIsPassAndPlayWaiting(false);
@@ -401,6 +440,24 @@ export const CoreBattlePlaytest: React.FC = () => {
           setCurrentStep(step);
           setGameState(JSON.parse(JSON.stringify(session.state)));
 
+          // AI 進行後の Challenge 評価
+          if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
+            const updated = ChallengeEvaluator.evaluate(
+              activeChallengeRef.current,
+              step,
+              session.state
+            );
+            activeChallengeRef.current = updated;
+            setActiveChallenge(updated);
+            if (updated.status !== "ACTIVE") {
+              if (updated.status === "CLEARED") {
+                addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system");
+              } else {
+                addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system");
+              }
+            }
+          }
+
           if (step.type === "WAITING_FOR_DECISION") {
             lastActivePlayerRef.current = step.request.playerId;
             setPendingPlayerKey(step.request.playerId);
@@ -444,6 +501,9 @@ export const CoreBattlePlaytest: React.FC = () => {
       overridePolicyId?: PlaytestPolicyId
     ) => {
       setRestoredScenarioDefinition(null);
+      setPendingChallengeDefinition(undefined);
+      setActiveChallenge(null);
+      activeChallengeRef.current = null;
       const env = overrideEnv ?? selectedEnvironmentId;
       const isOfficial = isOfficialEnvironment(env);
       const seed = overrideSeedInput ?? (
@@ -524,15 +584,25 @@ export const CoreBattlePlaytest: React.FC = () => {
 
   // Scenario 開始ハンドラ (ScenarioDefinitionV1 から決定論的初期盤面を生成して対戦開始)
   const handleStartScenario = useCallback(
-    async (definition: ScenarioDefinitionV1) => {
+    async (definition: ScenarioDefinitionV1, options?: ScenarioStartOptions) => {
+      const effectiveMode = options?.mode ?? pendingMatchMode;
+      const effectiveHumanSeat = options?.humanSeat ?? pendingHumanSeat;
+      const effectivePolicyId = options?.policyId ?? pendingPolicyId;
+      const effectiveChallengeDef = options?.challengeDefinition ?? pendingChallengeDefinition;
+
       setRestoredScenarioDefinition(definition);
+      setPendingMatchMode(effectiveMode);
+      setPendingHumanSeat(effectiveHumanSeat);
+      setPendingPolicyId(effectivePolicyId);
+      setPendingChallengeDefinition(effectiveChallengeDef);
+
       const result = prepareScenarioMatchAttempt({
         definition,
         catalog,
         fullRulePackage,
-        mode: pendingMatchMode,
-        humanSeat: pendingHumanSeat,
-        policyId: pendingPolicyId,
+        mode: effectiveMode,
+        humanSeat: effectiveHumanSeat,
+        policyId: effectivePolicyId,
       });
 
       if (result.status !== "READY") {
@@ -550,7 +620,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       }
 
       // Commit: Atomic commit (ここに至るまでに失敗し得る処理はすべて検証・準備完了済み)
-      await commitReadyMatch(result.prepared);
+      await commitReadyMatch(result.prepared, effectiveChallengeDef);
     },
     [
       catalog,
@@ -558,9 +628,46 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingMatchMode,
       pendingHumanSeat,
       pendingPolicyId,
+      pendingChallengeDefinition,
       commitReadyMatch,
       addLog,
     ]
+  );
+
+  // ScenarioBuilderModal からの共有デリゲートハンドラ (mode/human/policy/challenge を保持した共有URL生成)
+  const handleShareScenarioFromModal = useCallback(
+    async (options: ScenarioShareOptions) => {
+      setRestoredScenarioDefinition(options.definition);
+      setPendingMatchMode(options.mode);
+      setPendingHumanSeat(options.humanSeat);
+      setPendingPolicyId(options.policyId);
+      setPendingChallengeDefinition(options.challengeDefinition);
+
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: options.definition.environmentId,
+        mode: options.mode,
+        humanSeat: options.humanSeat,
+        policyId: options.policyId,
+        seedInput: String(options.definition.seed),
+        scenarioDefinition: options.definition,
+        challengeDefinition: options.challengeDefinition,
+      };
+
+      const url = buildPlaytestShareUrl(
+        typeof window !== "undefined" ? window.location.href : "https://simulator.blackpoker.org/playtest",
+        config,
+        catalog
+      );
+      const success = await copyTextToClipboard(url);
+      if (success && typeof window !== "undefined") {
+        try {
+          window.history.replaceState(null, "", url);
+        } catch (_) {}
+      }
+      return success;
+    },
+    [catalog]
   );
 
   // Share URL 解析および初回マウント処理 (ライフサイクル中1回のみ実行)
@@ -581,6 +688,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         setSeedInput(bootstrap.config.seedInput);
         setSeedMode("manual");
         setRestoredScenarioDefinition(bootstrap.definition);
+        setPendingChallengeDefinition(bootstrap.config.challengeDefinition);
         setIsScenarioBuilderOpen(true);
 
         if (bootstrap.warnings.length > 0) {
@@ -667,6 +775,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         policyId: activePlaytestSettings.policyId,
         seedInput: activeSeedStr,
         scenarioDefinition: activeMatch.isScenario ? activeMatch.scenarioDefinition : undefined,
+        challengeDefinition: activeMatch.isScenario ? activeChallenge?.definition : undefined,
       };
     } else {
       // 対戦前 (Pending 設定) の共有
@@ -688,6 +797,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         policyId: pendingPolicyId,
         seedInput: seedForUrl,
         scenarioDefinition: scenarioDefToShare,
+        challengeDefinition: scenarioDefToShare ? pendingChallengeDefinition : undefined,
       };
     }
 
@@ -716,10 +826,12 @@ export const CoreBattlePlaytest: React.FC = () => {
   }, [
     activeMatch,
     activePlaytestSettings,
+    activeChallenge,
     selectedEnvironmentId,
     pendingMatchMode,
     pendingHumanSeat,
     pendingPolicyId,
+    pendingChallengeDefinition,
     seedMode,
     pendingAutoSeed,
     seedInput,
@@ -748,6 +860,11 @@ export const CoreBattlePlaytest: React.FC = () => {
     async (response: DecisionResponse, options?: { autoPass?: boolean }) => {
       const session = sessionRef.current;
       if (!session) return;
+
+      // チャレンジが既に終了 (CLEARED / FAILED) している場合は意思決定の提出を受け付けない
+      if (activeChallengeRef.current && activeChallengeRef.current.status !== "ACTIVE") {
+        return;
+      }
 
       // モバイル Bottom Sheet を最小化
       setSheetMode("collapsed");
@@ -801,6 +918,35 @@ export const CoreBattlePlaytest: React.FC = () => {
         enqueueFeedbackFlash(ActionFeedbackComposer.compose(generatedEvents));
       }
 
+      // Challenge 評価 (Human Decision 直後)
+      let isChallengeTerminal = false;
+      if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
+        const updated = ChallengeEvaluator.evaluate(activeChallengeRef.current, nextStep, nextState);
+        activeChallengeRef.current = updated;
+        setActiveChallenge(updated);
+        if (updated.status !== "ACTIVE") {
+          isChallengeTerminal = true;
+          if (updated.status === "CLEARED") {
+            addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system", nextState);
+          } else {
+            addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system", nextState);
+          }
+        }
+      }
+
+      if (isChallengeTerminal) {
+        setCurrentStep(nextStep);
+        setGameState(nextState);
+        if (nextStep.type === "FINISHED") {
+          const winnerName =
+            nextState.players?.[nextStep.result.winner || ""]?.name ||
+            (nextStep.result.winner === "p1" ? "Player A" : "Player B");
+          addLog(`[FINISH] ゲーム終了: 勝者【${winnerName}】(${nextStep.result.reason})`, "system", nextState);
+          addTrace("GAME_FINISHED", `勝者: ${winnerName} (${nextStep.result.reason})`, nextState);
+        }
+        return;
+      }
+
       // 「リクエスト＆PASS」が指定されており、次のステップが同一プレイヤーの判断要求（PASS可能）なら自動PASS (Human操作補助)
       if (
         options?.autoPass &&
@@ -837,6 +983,21 @@ export const CoreBattlePlaytest: React.FC = () => {
           });
           decisionTranscriptRef.current.push(entry);
 
+          // Challenge 評価 (AutoPass 直後)
+          if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
+            const updated = ChallengeEvaluator.evaluate(activeChallengeRef.current, nextStep, nextState);
+            activeChallengeRef.current = updated;
+            setActiveChallenge(updated);
+            if (updated.status !== "ACTIVE") {
+              isChallengeTerminal = true;
+              if (updated.status === "CLEARED") {
+                addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system", nextState);
+              } else {
+                addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system", nextState);
+              }
+            }
+          }
+
           const autoEvents = ViewerAwareGameEventFormatter.formatStateTransition(
             prevState,
             nextState,
@@ -850,6 +1011,19 @@ export const CoreBattlePlaytest: React.FC = () => {
           if (autoEvents.length > 0) {
             enqueueFeedbackFlash(ActionFeedbackComposer.compose(autoEvents));
           }
+
+          if (isChallengeTerminal) {
+            setCurrentStep(nextStep);
+            setGameState(nextState);
+            if (nextStep.type === "FINISHED") {
+              const winnerName =
+                nextState.players?.[nextStep.result.winner || ""]?.name ||
+                (nextStep.result.winner === "p1" ? "Player A" : "Player B");
+              addLog(`[FINISH] ゲーム終了: 勝者【${winnerName}】(${nextStep.result.reason})`, "system", nextState);
+              addTrace("GAME_FINISHED", `勝者: ${winnerName} (${nextStep.result.reason})`, nextState);
+            }
+            return;
+          }
         }
       }
 
@@ -859,6 +1033,7 @@ export const CoreBattlePlaytest: React.FC = () => {
 
       // 2. 次の手番が AI (POLICY) または PROGRESSED の場合、自動進行ループを実行
       const shouldAutoAdvance =
+        !isChallengeTerminal &&
         activeMatchMode === "humanVsAi" &&
         (nextStep.type === "PROGRESSED" ||
           (nextStep.type === "WAITING_FOR_DECISION" &&
@@ -917,6 +1092,20 @@ export const CoreBattlePlaytest: React.FC = () => {
 
         nextStep = aiResult.step;
         nextState = JSON.parse(JSON.stringify(session.state));
+
+        // Challenge 評価 (AI 進行後)
+        if (activeChallengeRef.current && activeChallengeRef.current.status === "ACTIVE") {
+          const updated = ChallengeEvaluator.evaluate(activeChallengeRef.current, nextStep, nextState);
+          activeChallengeRef.current = updated;
+          setActiveChallenge(updated);
+          if (updated.status !== "ACTIVE") {
+            if (updated.status === "CLEARED") {
+              addLog(`[CHALLENGE_CLEARED] チャレンジ達成！ (${updated.reason})`, "system", nextState);
+            } else {
+              addLog(`[CHALLENGE_FAILED] チャレンジ失敗 (${updated.reason})`, "system", nextState);
+            }
+          }
+        }
       }
 
       setCurrentStep(nextStep);
@@ -1288,7 +1477,12 @@ export const CoreBattlePlaytest: React.FC = () => {
   }, [currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request.decisionId : null]);
 
   // 人間プレイヤーの判断待機中フラグ
+  const isChallengeTerminal = Boolean(
+    activeChallenge && activeChallenge.status !== "ACTIVE"
+  );
+
   const isHumanTurnWaiting =
+    !isChallengeTerminal &&
     currentStep?.type === "WAITING_FOR_DECISION" &&
     (activeMatchMode === "humanVsHuman" || currentStep.request.playerId === activeHumanSeat) &&
     !isAiProcessing;
@@ -1810,6 +2004,61 @@ export const CoreBattlePlaytest: React.FC = () => {
               />
             )}
 
+            {/* チャレンジ状態バナー (Generic Challenge Layer) */}
+            {activeChallenge && (
+              <div
+                data-testid="challenge-status-banner"
+                className={`p-3 rounded border font-mono ${
+                  activeChallenge.status === "CLEARED"
+                    ? "bg-emerald-50 border-emerald-400 text-emerald-950"
+                    : activeChallenge.status === "FAILED"
+                    ? "bg-rose-50 border-rose-400 text-rose-950"
+                    : "bg-amber-50 border-amber-400 text-amber-950"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-xs text-white font-bold ${
+                        activeChallenge.status === "CLEARED"
+                          ? "bg-emerald-600"
+                          : activeChallenge.status === "FAILED"
+                          ? "bg-rose-600"
+                          : "bg-amber-600"
+                      }`}
+                    >
+                      {activeChallenge.status === "CLEARED"
+                        ? "CHALLENGE CLEARED"
+                        : activeChallenge.status === "FAILED"
+                        ? "CHALLENGE FAILED"
+                        : "CHALLENGE ACTIVE"}
+                    </span>
+                    <span className="font-bold text-sm">
+                      {activeChallenge.definition.kind === "WIN_CURRENT_TURN"
+                        ? "このターンで勝利せよ！"
+                        : activeChallenge.definition.kind}
+                    </span>
+                  </div>
+                  <span className="text-xs text-zinc-600">
+                    Challenger: {activeChallenge.challenger === "p1" ? "Player A (先手)" : "Player B (後手)"}
+                  </span>
+                </div>
+                <p className="text-xs mt-1">
+                  {activeChallenge.status === "CLEARED"
+                    ? "🎉 チャレンジ条件を達成しました！"
+                    : activeChallenge.status === "FAILED"
+                    ? activeChallenge.reason === "TURN_ENDED_BEFORE_WIN"
+                      ? "ターン終了前に相手ライフを削り切ることができませんでした。"
+                      : activeChallenge.reason === "OPPONENT_WON"
+                      ? "相手プレイヤーが勝利しました。"
+                      : activeChallenge.reason === "GAME_FINISHED_WITHOUT_CHALLENGER_WIN"
+                      ? "勝利条件を達成できずにゲームが終了しました。"
+                      : `チャレンジ失敗 (${activeChallenge.reason})`
+                    : `現在のターン (Turn ${activeChallenge.initialTurnCount}) が終了する前に相手のライフを0にして勝利してください。`}
+                </p>
+              </div>
+            )}
+
             {/* 上部プレイヤー (Top Player: 対戦相手 / 非操作側) の盤面 (Observation 準拠) */}
             {topViewModel && gameState?.players?.[topPlayerKey] && (
               <PlayerBoard
@@ -2067,7 +2316,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         catalog={catalog}
         fullRulePackage={fullRulePackage}
         onStartScenario={handleStartScenario}
+        onShareScenario={handleShareScenarioFromModal}
         initialDefinition={restoredScenarioDefinition ?? undefined}
+        initialMode={pendingMatchMode}
+        initialPolicyId={pendingPolicyId}
+        initialChallengeDefinition={pendingChallengeDefinition}
       />
     </div>
 

@@ -11,6 +11,15 @@ import {
   MAX_SCENARIO_ENCODED_CHARS,
   getUtf8ByteLength,
 } from "../../ui/scenario/ScenarioShareUrl";
+import {
+  buildPlaytestShareUrl,
+  parsePlaytestShareUrl,
+  PlaytestShareConfigV1,
+} from "../../ui/playtest/PlaytestShareUrl";
+import { ChallengeEvaluator } from "../../engine/challenge/ChallengeEvaluator";
+import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
+import { isHumanSeat } from "../../engine/playtest/PlaytestSeatController";
+import { GameSessionStep } from "../../engine/session/GameSession";
 
 describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORING)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -227,5 +236,125 @@ describe("TSUME-2018-001 Acceptance Tests (BP-SIM-SCENARIO-1.2-POSITION-AUTHORIN
     // デコードした定義で ScenarioCompiler が正常動作すること
     const reCompile = ScenarioCompiler.compile(decodeResult.definition, catalog, fullRulePackage);
     expect(reCompile.type).toBe("READY");
+  });
+
+  it("4: TSUME-2018-001 の正統共有URL (Human vs AI, Conservative, Challenge) とターン終了時の FAILED 連鎖停止検証", () => {
+    const resolveResult = ScenarioAuthoringResolver.resolve(tsume2018Draft, catalog);
+    expect(resolveResult.success).toBe(true);
+    if (!resolveResult.success) return;
+
+    const def = resolveResult.definition;
+
+    // 1. Playtest Share URL の生成・検証 (モード, AIポリシー, チャレンジを完全包含)
+    const shareConfig: PlaytestShareConfigV1 = {
+      version: 1,
+      environmentId: def.environmentId,
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "playtestConservative",
+      seedInput: String(def.seed),
+      scenarioDefinition: def,
+      challengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+    };
+
+    const shareUrl = buildPlaytestShareUrl("https://simulator.blackpoker.org/playtest", shareConfig, catalog);
+    expect(shareUrl).toContain("bpv=1");
+    expect(shareUrl).toContain("mode=humanVsAi");
+    expect(shareUrl).toContain("human=p1");
+    expect(shareUrl).toContain("policy=playtestConservative");
+    expect(shareUrl).toContain("challenge=c1.winCurrentTurn");
+    expect(shareUrl).toContain("scenario=z1.");
+
+    // URL 復元の検証
+    const parsed = parsePlaytestShareUrl(shareUrl, catalog);
+    expect(parsed.kind).toBe("READY");
+    if (parsed.kind !== "READY") return;
+    expect(parsed.config.mode).toBe("humanVsAi");
+    expect(parsed.config.humanSeat).toBe("p1");
+    expect(parsed.config.policyId).toBe("playtestConservative");
+    expect(parsed.config.challengeDefinition).toEqual({ version: 1, kind: "WIN_CURRENT_TURN" });
+    expect(parsed.config.scenarioDefinition).toEqual(def);
+
+    // 2. 対戦準備と Challenge ライフサイクルの結合検証
+    const attempt = prepareScenarioMatchAttempt({
+      definition: def,
+      catalog,
+      fullRulePackage,
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "playtestConservative",
+    });
+    expect(attempt.status).toBe("READY");
+    if (attempt.status !== "READY") return;
+
+    const { session, initialStep, seatControllers } = attempt.prepared;
+
+    // Challenge 初期化
+    let challenge = ChallengeEvaluator.initialize(
+      { version: 1, kind: "WIN_CURRENT_TURN" },
+      session.state
+    );
+    expect(challenge.status).toBe("ACTIVE");
+    expect(challenge.challenger).toBe("p1");
+    expect(challenge.initialTurnPlayer).toBe("p1");
+    expect(challenge.initialTurnCount).toBe(1);
+
+    challenge = ChallengeEvaluator.evaluate(challenge, initialStep, session.state);
+    expect(challenge.status).toBe("ACTIVE");
+
+    // P1 (Human) がターンエンド (action.end) を宣言
+    expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+    if (initialStep.type !== "WAITING_FOR_DECISION") return;
+
+    let currentStep: GameSessionStep = initialStep;
+    const endPatternIndex = initialStep.request.patterns.findIndex(
+      (p: any) => p.patternId?.includes("action.end")
+    );
+    expect(endPatternIndex).toBeGreaterThanOrEqual(0);
+
+    currentStep = session.submitDecision({
+      decisionId: initialStep.request.decisionId,
+      stateVersion: initialStep.request.stateVersion,
+      selectedPatternRef: endPatternIndex,
+    });
+
+    challenge = ChallengeEvaluator.evaluate(challenge, currentStep, session.state);
+
+    // ステージ上の action.end が解決してターンが終了するまで PASS を選択
+    let passGuard = 0;
+    while (
+      challenge.status === "ACTIVE" &&
+      currentStep.type === "WAITING_FOR_DECISION" &&
+      passGuard++ < 10
+    ) {
+      const passIndex = currentStep.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      if (passIndex === -1) break;
+      currentStep = session.submitDecision({
+        decisionId: currentStep.request.decisionId,
+        stateVersion: currentStep.request.stateVersion,
+        selectedPatternRef: passIndex,
+      });
+      challenge = ChallengeEvaluator.evaluate(challenge, currentStep, session.state);
+    }
+
+    // P1 のターン終了により deadline crossed -> FAILED (TURN_ENDED_BEFORE_WIN)
+    expect(challenge.status).toBe("FAILED");
+    expect(challenge.reason).toBe("TURN_ENDED_BEFORE_WIN");
+
+    // チャレンジが Terminal (FAILED) のため、AI の自動進行は実行されない（ブロックされる）
+    const isChallengeTerminal = challenge.status !== "ACTIVE";
+    expect(isChallengeTerminal).toBe(true);
+
+    const shouldAiAdvance =
+      !isChallengeTerminal &&
+      currentStep.type === "WAITING_FOR_DECISION" &&
+      !isHumanSeat(seatControllers, currentStep.request.playerId);
+    expect(shouldAiAdvance).toBe(false);
+
+    // 不変条件: GameSession は改変されず、P2 の Life が 0 にされたり偽の match.finished が記録されないこと
+    expect(session.state.players.p1.life.length).toBe(2);
+    expect(session.state.players.p2.life.length).toBe(37);
+    const events = session.getMatchLog().events;
+    expect(events.some((e: any) => e.type === "match.finished")).toBe(false);
   });
 });

@@ -683,4 +683,79 @@ describe("Playtest Share URL Integration Tests (Phase 2.7 & BP-SIM-SHARE-1.0)", 
       expect(html).not.toContain("共有URLをコピー");
     });
   });
+
+  describe("Challenge Integration with Playtest Share & Scenario Bootstrap (BP-SIM-CHALLENGE-1.0-WIN-CURRENT-TURN)", () => {
+    const sampleScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 2026,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      name: "Challenge Bootstrap Test",
+      description: "Test challenge bootstrap and clean share",
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          field: [],
+          life: { count: 5 },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "K" }],
+          field: [],
+          life: { count: 5 },
+        },
+      },
+    };
+
+    it("1: Challenge 付き Scenario 共有 URL が resolvePlaytestInitialBootstrap で RESTORE_SCENARIO_SETTINGS として抽出され、challengeDefinition が保持されること", () => {
+      const shareConfig: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: sampleScenario.environmentId,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+        seedInput: String(sampleScenario.seed),
+        scenarioDefinition: sampleScenario,
+        challengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+      };
+
+      const url = buildPlaytestShareUrl("https://simulator.blackpoker.org/playtest", shareConfig, catalog);
+      expect(url).toContain("challenge=c1.winCurrentTurn");
+      expect(url).toContain("scenario=");
+
+      const bootstrap = resolvePlaytestInitialBootstrap(url, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SCENARIO_SETTINGS");
+      if (bootstrap.kind !== "RESTORE_SCENARIO_SETTINGS") return;
+
+      expect(bootstrap.config.challengeDefinition).toEqual({ version: 1, kind: "WIN_CURRENT_TURN" });
+      expect(bootstrap.config.mode).toBe("humanVsAi");
+      expect(bootstrap.config.humanSeat).toBe("p1");
+      expect(bootstrap.config.policyId).toBe("playtestConservative");
+      expect(bootstrap.definition).toEqual(normalizeScenarioDefinitionV1(sampleScenario));
+    });
+
+    it("2: 通常対戦の共有時は URL から challenge パラメータが除去されること", () => {
+      const previousChallengeUrl =
+        "https://simulator.blackpoker.org/playtest?bpv=1&challenge=c1.winCurrentTurn&scenario=dummyPayload&env=official:standard-pack";
+
+      const cleanUrl = buildPlaytestShareUrl(
+        previousChallengeUrl,
+        {
+          environmentId: "official:standard-pack",
+          mode: "humanVsHuman",
+          humanSeat: "p1",
+          policyId: "firstLegal",
+          seedInput: "42",
+          scenarioDefinition: undefined,
+          challengeDefinition: undefined,
+        },
+        catalog
+      );
+
+      expect(cleanUrl).not.toContain("challenge=");
+      expect(cleanUrl).not.toContain("scenario=");
+      expect(cleanUrl).toContain("env=official%3Astandard-pack");
+    });
+  });
 });

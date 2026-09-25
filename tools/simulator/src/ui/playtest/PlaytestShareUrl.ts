@@ -19,8 +19,14 @@ import {
   encodeScenarioDefinitionV1ToUrlParam,
   SCENARIO_URL_PARAM_KEY,
 } from "../scenario/ScenarioShareUrl";
+import {
+  ChallengeDefinitionV1,
+  isChallengeDefinitionV1,
+} from "../../domain/challenge/ChallengeDefinition";
 
 export const SHARE_URL_VERSION = 1 as const;
+export const CHALLENGE_URL_PARAM_KEY = "challenge";
+
 export const SHARE_PARAM_KEYS = [
   "bpv",
   "env",
@@ -28,8 +34,45 @@ export const SHARE_PARAM_KEYS = [
   "human",
   "policy",
   "seed",
+  "challenge",
   "scenario",
 ] as const;
+
+export const CHALLENGE_CODE_WIN_CURRENT_TURN = "c1.winCurrentTurn";
+const CHALLENGE_PREFIX_PATTERN = /^c([0-9]+)\./;
+
+export function encodeChallengeDefinitionToUrlParam(def: ChallengeDefinitionV1): string {
+  if (def.version === 1 && def.kind === "WIN_CURRENT_TURN") {
+    return CHALLENGE_CODE_WIN_CURRENT_TURN;
+  }
+  throw new Error(`未対応のチャレンジ定義です (version: ${(def as any)?.version}, kind: ${(def as any)?.kind})`);
+}
+
+export function decodeChallengeDefinitionFromUrlParam(
+  param: string
+):
+  | { readonly success: true; readonly definition: ChallengeDefinitionV1 }
+  | { readonly success: false; readonly error: string } {
+  if (param === CHALLENGE_CODE_WIN_CURRENT_TURN) {
+    return {
+      success: true,
+      definition: { version: 1, kind: "WIN_CURRENT_TURN" },
+    };
+  }
+
+  const match = param.match(CHALLENGE_PREFIX_PATTERN);
+  if (match) {
+    return {
+      success: false,
+      error: `未対応のチャレンジフォーマットです (Unsupported challenge format: c${match[1]})。`,
+    };
+  }
+
+  return {
+    success: false,
+    error: `無効なチャレンジパラメータです: "${param}"。`,
+  };
+}
 
 /**
  * Playtest 共有設定 (Schema v1)
@@ -42,6 +85,7 @@ export interface PlaytestShareConfigV1 {
   readonly policyId: PlaytestPolicyId;
   readonly seedInput: string;
   readonly scenarioDefinition?: ScenarioDefinitionV1;
+  readonly challengeDefinition?: ChallengeDefinitionV1;
 }
 
 /**
@@ -106,7 +150,18 @@ export function parsePlaytestShareUrl(
 
   const params = new URLSearchParams(queryStr);
   const scenarioParam = params.get(SCENARIO_URL_PARAM_KEY);
+  const challengeParam = params.get(CHALLENGE_URL_PARAM_KEY);
   const bpv = params.get("bpv");
+
+  // MVP制約: challenge パラメータが存在するのに scenario が存在しない場合は fail-closed (INVALID_SHARE)
+  if (challengeParam !== null && scenarioParam === null) {
+    const err = "チャレンジパラメータ (challenge) はシナリオ共有URLでのみ利用可能です。";
+    return {
+      kind: "INVALID_SHARE",
+      error: err,
+      warnings: [err],
+    };
+  }
 
   // 1. Scenario パラメータが存在する場合 (Scenario Share URL)
   if (scenarioParam !== null) {
@@ -128,6 +183,20 @@ export function parsePlaytestShareUrl(
     }
 
     const def = decodeRes.definition;
+
+    // Challenge パラメータの解析 (指定時のみ。不正/未知フォーマットは fail-closed)
+    let challengeDefinition: ChallengeDefinitionV1 | undefined = undefined;
+    if (challengeParam !== null) {
+      const decodeChallengeRes = decodeChallengeDefinitionFromUrlParam(challengeParam);
+      if (decodeChallengeRes.success === false) {
+        return {
+          kind: "INVALID_SHARE",
+          error: decodeChallengeRes.error,
+          warnings: [decodeChallengeRes.error],
+        };
+      }
+      challengeDefinition = decodeChallengeRes.definition;
+    }
 
     // レギュレーション検証 (Simulator 未実装 Regulation 等の排除)
     const regId = extractRegulationId(def.environmentId);
@@ -230,6 +299,7 @@ export function parsePlaytestShareUrl(
         policyId,
         seedInput: String(def.seed),
         scenarioDefinition: def,
+        challengeDefinition,
       },
       warnings,
     };
@@ -412,6 +482,7 @@ export function serializePlaytestShareUrl(
     readonly policyId?: PlaytestPolicyId;
     readonly seedInput?: string;
     readonly scenarioDefinition?: ScenarioDefinitionV1;
+    readonly challengeDefinition?: ChallengeDefinitionV1;
   },
   _catalog?: RegulationCatalog
 ): string {
@@ -430,6 +501,12 @@ export function serializePlaytestShareUrl(
       params.set("policy", config.policyId || "firstLegal");
     }
     params.set("seed", String(def.seed));
+    if (config.challengeDefinition) {
+      params.set(
+        CHALLENGE_URL_PARAM_KEY,
+        encodeChallengeDefinitionToUrlParam(config.challengeDefinition)
+      );
+    }
     params.set("scenario", encodeScenarioDefinitionV1ToUrlParam(def));
     return `?${params.toString()}`;
   }
@@ -469,6 +546,7 @@ export function buildPlaytestShareUrl(
     readonly policyId?: PlaytestPolicyId;
     readonly seedInput?: string;
     readonly scenarioDefinition?: ScenarioDefinitionV1;
+    readonly challengeDefinition?: ChallengeDefinitionV1;
   },
   catalog?: RegulationCatalog
 ): string {

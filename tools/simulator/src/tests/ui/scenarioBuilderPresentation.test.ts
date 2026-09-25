@@ -850,4 +850,143 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     const updatedSnapshot = JSON.stringify(testRenderer.toJSON());
     expect(updatedSnapshot).toContain("AUTO × 4");
   });
+
+  it("21: Match Mode, AI Policy, Challenge 設定 UI が正常に表示され初期値が反映されること", () => {
+    const html = renderToString(
+      React.createElement(ScenarioBuilderModal, {
+        isOpen: true,
+        initialTab: "settings",
+        catalog,
+        fullRulePackage,
+        initialDefinition: minimalValidScenario,
+        initialMode: "humanVsAi",
+        initialPolicyId: "playtestConservative",
+        initialChallengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+        onClose: dummyOnClose,
+        onStartScenario: dummyOnStartScenario,
+      })
+    );
+
+    // 対戦モード
+    expect(html).toContain("対戦相手設定 (Match Mode)");
+    expect(html).toContain("Human vs Human");
+    expect(html).toContain("Human vs AI");
+
+    // AI Policy
+    expect(html).toContain("AI Policy:");
+    expect(html).toContain("Conservative");
+
+    // チャレンジ
+    expect(html).toContain("チャレンジ設定 (Challenge)");
+    expect(html).toContain("このターンで勝利する (WIN_CURRENT_TURN)");
+    expect(html).toContain("現在の手番プレイヤーが、ターン終了前に勝利するとクリアです。");
+  });
+
+  it("22: onShareScenario デリゲートが提供されている場合、モード・AI・チャレンジを含めて親へ委譲されること", async () => {
+    const mockOnShare = vi.fn().mockResolvedValue(true);
+    let testRenderer: TestRenderer.ReactTestRenderer = null as any;
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "settings",
+          catalog,
+          fullRulePackage,
+          initialDefinition: minimalValidScenario,
+          initialMode: "humanVsAi",
+          initialPolicyId: "playtestConservative",
+          initialChallengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+          onShareScenario: mockOnShare,
+        })
+      );
+    });
+
+    const getElementText = (instance: TestRenderer.ReactTestInstance): string => {
+      let text = "";
+      for (const child of instance.children) {
+        if (typeof child === "string") {
+          text += child;
+        } else if (typeof child === "object" && child !== null && "children" in child) {
+          text += getElementText(child as any);
+        }
+      }
+      return text;
+    };
+
+    const buttons = testRenderer.root.findAllByType("button");
+    const shareButton = buttons.find((b) =>
+      getElementText(b).includes("この初期盤面を共有")
+    );
+    expect(shareButton).toBeDefined();
+
+    await act(async () => {
+      await shareButton!.props.onClick();
+    });
+
+    expect(mockOnShare).toHaveBeenCalledTimes(1);
+    const callArg = mockOnShare.mock.calls[0][0];
+    expect(callArg.mode).toBe("humanVsAi");
+    expect(callArg.humanSeat).toBe("p1");
+    expect(callArg.policyId).toBe("playtestConservative");
+    expect(callArg.challengeDefinition).toEqual({ version: 1, kind: "WIN_CURRENT_TURN" });
+    expect(callArg.definition).toBeDefined();
+  });
+
+  it("23: onStartScenario 実行時に mode, humanSeat, policyId, challengeDefinition がオプションとして伝達されること", async () => {
+    const mockOnStart = vi.fn();
+    let testRenderer: TestRenderer.ReactTestRenderer = null as any;
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "settings",
+          catalog,
+          fullRulePackage,
+          initialDefinition: minimalValidScenario,
+          initialMode: "humanVsAi",
+          initialPolicyId: "playtestConservative",
+          initialChallengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+          onClose: dummyOnClose,
+          onStartScenario: mockOnStart,
+        })
+      );
+    });
+
+    const getElementText = (instance: TestRenderer.ReactTestInstance): string => {
+      let text = "";
+      for (const child of instance.children) {
+        if (typeof child === "string") {
+          text += child;
+        } else if (typeof child === "object" && child !== null && "children" in child) {
+          text += getElementText(child as any);
+        }
+      }
+      return text;
+    };
+
+    const buttons = testRenderer.root.findAllByType("button");
+    const startButton = buttons.find((b) =>
+      getElementText(b).includes("初期盤面で対戦開始")
+    );
+    expect(startButton).toBeDefined();
+
+    await act(async () => {
+      await startButton!.props.onClick();
+    });
+
+    expect(mockOnStart).toHaveBeenCalledTimes(1);
+    const startDef = mockOnStart.mock.calls[0][0];
+    const startOptions = mockOnStart.mock.calls[0][1];
+    expect(startDef).toBeDefined();
+    expect(startOptions).toEqual({
+      mode: "humanVsAi",
+      humanSeat: "p1",
+      policyId: "playtestConservative",
+      challengeDefinition: { version: 1, kind: "WIN_CURRENT_TURN" },
+    });
+  });
 });

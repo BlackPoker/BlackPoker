@@ -6,11 +6,14 @@ import {
   buildPlaytestShareUrl,
   PlaytestShareConfigV1,
   SHARE_PARAM_KEYS,
+  CHALLENGE_URL_PARAM_KEY,
+  CHALLENGE_CODE_WIN_CURRENT_TURN,
 } from "../../ui/playtest/PlaytestShareUrl";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { validateSeed } from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
 import { encodeScenarioDefinitionV1ToUrlParam } from "../../ui/scenario/ScenarioShareUrl";
+import { ChallengeDefinitionV1 } from "../../domain/challenge/ChallengeDefinition";
 
 describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -543,6 +546,175 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
 
     it("9: SHARE_PARAM_KEYS に 'scenario' が含まれること", () => {
       expect(SHARE_PARAM_KEYS).toContain("scenario");
+    });
+  });
+
+  // R3: Challenge Share Transport (BP-SIM-CHALLENGE-1.0-WIN-CURRENT-TURN)
+  describe("R3: Challenge Share Transport (BP-SIM-CHALLENGE-1.0-WIN-CURRENT-TURN)", () => {
+    const sampleScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 777,
+      turnPlayer: "p1",
+      chancePlayer: "p2",
+      turnCount: 1,
+      name: "Challenge Test Scenario",
+      description: "Scenario for challenge share testing",
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          life: { count: 2 },
+          pack: { count: 14 },
+        },
+        p2: {
+          life: { count: 3 },
+          pack: { count: 14 },
+        },
+      },
+    };
+
+    const challengeDef: ChallengeDefinitionV1 = {
+      version: 1,
+      kind: "WIN_CURRENT_TURN",
+    };
+
+    it("A: challengeなし legacy URL -> existing behavior (READY, challengeDefinition is undefined)", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&env=official:standard-pack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=777&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("READY");
+      if (result.kind === "READY") {
+        expect(result.config.challengeDefinition).toBeUndefined();
+        expect(result.config.scenarioDefinition).toEqual(sampleScenario);
+      }
+    });
+
+    it("B & C: Scenario + challenge=c1.winCurrentTurn -> READY, challenge Definition 復元", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&env=official:standard-pack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=777&challenge=c1.winCurrentTurn&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("READY");
+      if (result.kind === "READY") {
+        expect(result.config.challengeDefinition).toEqual(challengeDef);
+        expect(result.config.scenarioDefinition).toEqual(sampleScenario);
+        expect(result.config.mode).toBe("humanVsAi");
+        expect(result.config.humanSeat).toBe("p1");
+        expect(result.config.policyId).toBe("playtestConservative");
+      }
+    });
+
+    it("D: challenge=c2.unknown -> INVALID_SHARE (fail-closed)", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&scenario=${encodedScenario}&challenge=c2.surviveThreeTurns`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("Unsupported challenge format: c2");
+      }
+    });
+
+    it("E: challenge=garbage -> INVALID_SHARE (fail-closed)", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&scenario=${encodedScenario}&challenge=invalid-garbage-challenge`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("無効なチャレンジパラメータ");
+      }
+    });
+
+    it("F: challenge without scenario -> INVALID_SHARE (fail-closed, MVP constraint)", () => {
+      const query = `?bpv=1&env=official:standard-pack&mode=humanVsAi&challenge=c1.winCurrentTurn&seed=42`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("シナリオ共有URLでのみ利用可能");
+      }
+    });
+
+    it("G: Scenario compression z1 と Challenge の共存 (round-trip serialize -> parse)", () => {
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: sampleScenario.environmentId,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+        seedInput: String(sampleScenario.seed),
+        scenarioDefinition: sampleScenario,
+        challengeDefinition: challengeDef,
+      };
+
+      const serialized = serializePlaytestShareUrl(config, catalog);
+      expect(serialized).toContain("challenge=c1.winCurrentTurn");
+      expect(serialized).toContain("scenario=z1.");
+
+      const parsed = parsePlaytestShareUrl(serialized, catalog);
+      expect(parsed.kind).toBe("READY");
+      if (parsed.kind === "READY") {
+        expect(parsed.config.challengeDefinition).toEqual(challengeDef);
+        expect(parsed.config.scenarioDefinition).toEqual(sampleScenario);
+        expect(parsed.config.mode).toBe("humanVsAi");
+        expect(parsed.config.policyId).toBe("playtestConservative");
+      }
+    });
+
+    it("H: env mismatch existing fail-closed維持 (challenge 付きでも維持されること)", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&env=official:light-entry16&challenge=c1.winCurrentTurn&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("環境IDの不一致");
+      }
+    });
+
+    it("I: seed mismatch existing fail-closed維持 (challenge 付きでも維持されること)", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&env=official:standard-pack&seed=999&challenge=c1.winCurrentTurn&scenario=${encodedScenario}`;
+      const result = parsePlaytestShareUrl(query, catalog);
+      expect(result.kind).toBe("INVALID_SHARE");
+      if (result.kind === "INVALID_SHARE") {
+        expect(result.error).toContain("Seedの不一致");
+      }
+    });
+
+    it("J: mode/human/policy 復元維持", () => {
+      const encodedScenario = encodeScenarioDefinitionV1ToUrlParam(sampleScenario);
+      const query = `?bpv=1&env=official:standard-pack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=777&challenge=c1.winCurrentTurn&scenario=${encodedScenario}`;
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SCENARIO_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SCENARIO_SETTINGS") {
+        expect(bootstrap.config.mode).toBe("humanVsAi");
+        expect(bootstrap.config.humanSeat).toBe("p1");
+        expect(bootstrap.config.policyId).toBe("playtestConservative");
+        expect(bootstrap.config.challengeDefinition).toEqual(challengeDef);
+      }
+    });
+
+    it("K: SHARE_PARAM_KEYS に 'challenge' が含まれること", () => {
+      expect(SHARE_PARAM_KEYS).toContain("challenge");
+    });
+
+    it("L: buildPlaytestShareUrl で challenge パラメータが非Shareパラメータとして重複しないこと", () => {
+      const currentUrl = "https://simulator.blackpoker.org/playtest?challenge=c1.winCurrentTurn&custom=123";
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: sampleScenario.environmentId,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+        seedInput: String(sampleScenario.seed),
+        scenarioDefinition: sampleScenario,
+        challengeDefinition: challengeDef,
+      };
+
+      const built = buildPlaytestShareUrl(currentUrl, config, catalog);
+      // challenge パラメータは 1 つだけ存在すること
+      const urlObj = new URL(built);
+      const allChallengeParams = urlObj.searchParams.getAll("challenge");
+      expect(allChallengeParams).toHaveLength(1);
+      expect(allChallengeParams[0]).toBe("c1.winCurrentTurn");
+      expect(urlObj.searchParams.get("custom")).toBe("123");
     });
   });
 });
