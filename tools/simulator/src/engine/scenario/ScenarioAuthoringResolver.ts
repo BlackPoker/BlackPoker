@@ -354,11 +354,23 @@ export class ScenarioAuthoringResolver {
       let fixedPackRefs: readonly ScenarioCardRefV1[] = [];
       let targetPackCount: number | undefined = undefined;
       if (playerDraft.pack) {
-        if (!frameHasPack && ((playerDraft.pack.count !== undefined && playerDraft.pack.count > 0) || ("fixedCards" in playerDraft.pack && playerDraft.pack.fixedCards && playerDraft.pack.fixedCards.length > 0) || ("cards" in playerDraft.pack && playerDraft.pack.cards && playerDraft.pack.cards.length > 0))) {
+        if (!frameHasPack && (
+          playerDraft.pack.opened !== undefined ||
+          (playerDraft.pack.count !== undefined && playerDraft.pack.count > 0) ||
+          ("fixedCards" in playerDraft.pack && playerDraft.pack.fixedCards && playerDraft.pack.fixedCards.length > 0) ||
+          ("cards" in playerDraft.pack && playerDraft.pack.cards && playerDraft.pack.cards.length > 0)
+        )) {
           errors.push({
             code: "INVALID_ZONE_CONFIG",
             path: `players.${playerKey}.pack`,
             message: `レギュレーション "${regulation.id}" のフレーム "${frame.id}" にはパック (Pack) が存在しないため、pack を指定することはできません。`,
+          });
+        }
+        if (playerDraft.pack.opened !== undefined && typeof playerDraft.pack.opened !== "boolean") {
+          errors.push({
+            code: "INVALID_ZONE_CONFIG",
+            path: `players.${playerKey}.pack.opened`,
+            message: "pack.opened は真偽値 (true / false) でなければなりません。",
           });
         }
         if ("fixedCards" in playerDraft.pack && playerDraft.pack.fixedCards) {
@@ -553,11 +565,12 @@ export class ScenarioAuthoringResolver {
               },
             }
           : {}),
-        ...(frameHasPack && (resolvedPackCards.length > 0 || finalPackCount !== undefined)
+        ...(frameHasPack && (resolvedPackCards.length > 0 || finalPackCount !== undefined || playerDraft.pack?.opened !== undefined)
           ? {
               pack: {
                 ...(resolvedPackCards.length > 0 ? { cards: resolvedPackCards } : {}),
                 ...(finalPackCount !== undefined ? { count: finalPackCount } : {}),
+                ...(playerDraft.pack?.opened !== undefined ? { opened: playerDraft.pack.opened } : {}),
               },
             }
           : {}),

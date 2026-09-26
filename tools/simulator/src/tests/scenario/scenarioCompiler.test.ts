@@ -1,8 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { compileScenarioDefinitionV1 } from "../../engine/scenario/ScenarioCompiler";
-import { ScenarioDefinitionV1, normalizeScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import {
+  ScenarioDefinitionV1,
+  normalizeScenarioDefinitionV1,
+  parseScenarioDefinitionV1,
+} from "../../domain/scenario/ScenarioTypes";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
+import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator";
+import { ActionRequestValidator, ValidationError } from "../../engine/rules/ActionRequestValidator";
 
 describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -693,5 +699,190 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
         expect(res.errors.some((e) => e.code === "UNSUPPORTED_COMPONENT")).toBe(true);
       }
     }
+  });
+
+  it("22: (BP-SIM-SCENARIO-1.3) pack.opened: true が GameState.players[p].pack.opened === true へ正常にコンパイルされること", () => {
+    const scenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14, opened: true },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14, opened: false },
+        },
+      },
+    };
+
+    const res = compileScenarioDefinitionV1(scenario, catalog, fullRulePackage);
+    expect(res.kind).toBe("READY");
+    if (res.kind === "READY") {
+      expect(res.state.players.p1.pack.opened).toBe(true);
+      expect(res.state.players.p2.pack.opened).toBe(false);
+    }
+  });
+
+  it("23: (BP-SIM-SCENARIO-1.3) pack.opened 省略時はデフォルトで false となり、明示的 false も維持されること", () => {
+    const scenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14 }, // opened 未指定 -> デフォルト false
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14, opened: false },
+        },
+      },
+    };
+
+    const res = compileScenarioDefinitionV1(scenario, catalog, fullRulePackage);
+    expect(res.kind).toBe("READY");
+    if (res.kind === "READY") {
+      expect(res.state.players.p1.pack.opened).toBe(false);
+      expect(res.state.players.p2.pack.opened).toBe(false);
+    }
+  });
+
+  it("24: (BP-SIM-SCENARIO-1.3) life に opened プロパティを指定した場合は fail-closed (SCHEMA_VIOLATION) で拒絶されること", () => {
+    const rawScenarioWithLifeOpened = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          life: { count: 5, opened: true }, // 不正: life に opened は存在しない
+        },
+        p2: {},
+      },
+    };
+
+    const parseRes = parseScenarioDefinitionV1(rawScenarioWithLifeOpened);
+    expect(parseRes.success).toBe(false);
+    expect(parseRes.errors?.some((e) => e.code === "SCHEMA_VIOLATION" && e.path.includes("life.opened"))).toBe(true);
+
+    const compileRes = compileScenarioDefinitionV1(rawScenarioWithLifeOpened as any, catalog, fullRulePackage);
+    expect(compileRes.kind).toBe("VALIDATION_ERROR");
+    if (compileRes.kind === "VALIDATION_ERROR") {
+      expect(compileRes.errors.some((e) => e.code === "SCHEMA_VIOLATION" && e.path.includes("life.opened"))).toBe(true);
+    }
+  });
+
+  it("25: (BP-SIM-SCENARIO-1.3) pack.opened に boolean 以外の型 (文字列や数値等) を指定した場合は fail-closed で拒絶されること", () => {
+    const invalidOpenedValues = ["true", "false", 1, 0, null, {}];
+
+    for (const val of invalidOpenedValues) {
+      const rawScenario = {
+        version: 1,
+        environmentId: "official:standard-pack",
+        seed: 42,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        turnCount: 1,
+        players: {
+          p1: {
+            pack: { count: 14, opened: val },
+          },
+          p2: {},
+        },
+      };
+
+      const parseRes = parseScenarioDefinitionV1(rawScenario);
+      expect(parseRes.success).toBe(false);
+      expect(parseRes.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack.opened"))).toBe(true);
+
+      const compileRes = compileScenarioDefinitionV1(rawScenario as any, catalog, fullRulePackage);
+      expect(compileRes.kind).toBe("VALIDATION_ERROR");
+      if (compileRes.kind === "VALIDATION_ERROR") {
+        expect(compileRes.errors.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack.opened"))).toBe(true);
+      }
+    }
+  });
+
+  it("26: (BP-SIM-SCENARIO-1.3) パックのないフレーム (light-entry16) で pack.opened を指定した場合は fail-closed (INVALID_ZONE_CONFIG) で拒絶されること", () => {
+    for (const openedVal of [true, false]) {
+      const scenarioWithoutPack: ScenarioDefinitionV1 = {
+        version: 1,
+        environmentId: "official:light-entry16", // entry16 は packCount 未定義
+        seed: 42,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        turnCount: 1,
+        players: {
+          p1: {
+            pack: { opened: openedVal },
+          },
+          p2: {},
+        },
+      };
+
+      const res = compileScenarioDefinitionV1(scenarioWithoutPack, catalog, fullRulePackage);
+      expect(res.kind).toBe("VALIDATION_ERROR");
+      if (res.kind === "VALIDATION_ERROR") {
+        expect(res.errors.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("players.p1.pack"))).toBe(true);
+      }
+    }
+  });
+
+  it("27: (BP-SIM-SCENARIO-1.3) 初期 pack.opened: true の局面では、ゲームルール上の action.packOpen が非合法アクションとなり実行不能であること", () => {
+    const scenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:light-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14, opened: true },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14, opened: false },
+        },
+      },
+    };
+
+    const res = compileScenarioDefinitionV1(scenario, catalog, fullRulePackage);
+    expect(res.kind).toBe("READY");
+    if (res.kind !== "READY") return;
+
+    const state = res.state;
+    const rulePackage = res.rulePackage;
+
+    // 1. LegalPatternGenerator で action.packOpen が除外されていること
+    const decisionRes = LegalPatternGenerator.generateActionRequestDecision(
+      state,
+      "p1",
+      rulePackage
+    );
+    const packOpenPattern = decisionRes.request.patterns.find(
+      (p) => p.kind === "ACTION" && decisionRes.request.catalog.actions[p.actionSelectionRef!].actionId === "action.packOpen"
+    );
+    expect(packOpenPattern).toBeUndefined();
+
+    // 2. ActionRequestValidator に直接渡しても ValidationError が発生すること
+    const validator = new ActionRequestValidator();
+    const actionDef = rulePackage.actions.find((a: any) => a.id === "action.packOpen")!;
+    expect(() => {
+      validator.validateActionRequest(actionDef, { state, playerKey: "p1" });
+    }).toThrow(ValidationError);
   });
 });

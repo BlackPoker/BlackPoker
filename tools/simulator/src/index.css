@@ -16,6 +16,18 @@
   letter-spacing: 0.03em;
 }
 
+/* Card Glyph Typography for Enhanced Legibility */
+.bp-card-glyph {
+  font-family:
+    "Times New Roman",
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    serif;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
 /* Custom Scrollbar for Light Monotone Theme */
 ::-webkit-scrollbar {
   width: 6px;

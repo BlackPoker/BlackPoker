@@ -2,6 +2,7 @@ import {
   ScenarioCardRefV1,
   ScenarioUnitV1,
   ScenarioZoneConfigV1,
+  ScenarioPackConfigV1,
   ScenarioDefinitionV1,
   ScenarioValidationError,
 } from "./ScenarioTypes";
@@ -44,6 +45,7 @@ export interface ScenarioAuthoringPackDraftV1 {
   readonly count?: number;
   readonly fixedCards?: readonly ScenarioCardRefV1[];
   readonly cards?: readonly ScenarioCardRefV1[]; // fixedCards のエイリアス
+  readonly opened?: boolean;
 }
 
 /**
@@ -54,7 +56,7 @@ export interface ScenarioAuthoringPlayerDraftV1 {
   readonly life?: ScenarioAuthoringLifeDraftV1 | ScenarioZoneConfigV1;
   readonly field?: readonly ScenarioUnitV1[];
   readonly grave?: ScenarioAuthoringGraveDraftV1 | readonly ScenarioCardRefV1[];
-  readonly pack?: ScenarioAuthoringPackDraftV1 | ScenarioZoneConfigV1;
+  readonly pack?: ScenarioAuthoringPackDraftV1 | ScenarioPackConfigV1;
 }
 
 /**

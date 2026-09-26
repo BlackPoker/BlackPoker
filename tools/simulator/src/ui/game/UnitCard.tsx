@@ -313,7 +313,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         {/* 2行目: カードスート/数字 + SIZE/数字 */}
         <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
           <div className="flex items-center gap-0.5">
-            <span className="font-bold text-zinc-950">
+            <span className="font-bold text-zinc-950 bp-card-glyph text-[13px]">
               {mobileCardText}
             </span>
             {extraCardCount > 0 && !isHiddenFromViewer && (

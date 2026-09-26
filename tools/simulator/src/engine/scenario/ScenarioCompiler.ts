@@ -464,7 +464,11 @@ export class ScenarioCompiler {
       const packCards: InGameCard[] = [];
 
       if (packConfig) {
-        if (!frameHasPack && ((packConfig.count !== undefined && packConfig.count > 0) || (packConfig.cards && packConfig.cards.length > 0))) {
+        if (!frameHasPack && (
+          packConfig.opened !== undefined ||
+          (packConfig.count !== undefined && packConfig.count > 0) ||
+          (packConfig.cards && packConfig.cards.length > 0)
+        )) {
           errors.push({
             code: "INVALID_ZONE_CONFIG",
             path: `players.${playerKey}.pack`,
@@ -594,7 +598,7 @@ export class ScenarioCompiler {
       if (frameHasPack || packCards.length > 0) {
         packObj = {
           count: packCards.length,
-          opened: false,
+          opened: packConfig?.opened === true,
           cards: packCards,
         };
       }

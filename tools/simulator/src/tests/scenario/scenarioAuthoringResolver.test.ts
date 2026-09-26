@@ -522,4 +522,76 @@ describe("ScenarioAuthoringResolver Unit Tests (BP-SIM-SCENARIO-1.2-POSITION-AUT
       expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack.count"))).toBe(true);
     }
   });
+
+  // Test M: (BP-SIM-SCENARIO-1.3) pack.opened: true / false が ScenarioDefinitionV1 に保持されること
+  it("Test M: (BP-SIM-SCENARIO-1.3) draft の pack.opened: true / false が解決後の ScenarioDefinitionV1 に正確に反映されること", () => {
+    const draft: ScenarioAuthoringDraftV1 = {
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          hand: { count: 5 },
+          pack: { opened: true },
+        },
+        p2: {
+          hand: { count: 5 },
+          pack: { opened: false },
+        },
+      },
+    };
+
+    const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+    expect(res.success).toBe(true);
+    if (res.success) {
+      expect(res.definition.players.p1.pack?.opened).toBe(true);
+      expect(res.definition.players.p2.pack?.opened).toBe(false);
+    }
+  });
+
+  // Test N: (BP-SIM-SCENARIO-1.3) パックのないフレームで pack.opened を指定した場合は fail-closed (INVALID_ZONE_CONFIG)
+  it("Test N: (BP-SIM-SCENARIO-1.3) パックのないフレーム (light-entry16) で pack.opened を指定した場合は拒絶されること", () => {
+    for (const openedVal of [true, false]) {
+      const draft: ScenarioAuthoringDraftV1 = {
+        environmentId: "official:light-entry16",
+        seed: 42,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: {
+            pack: { opened: openedVal },
+          },
+          p2: {},
+        },
+      };
+
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("players.p1.pack"))).toBe(true);
+    }
+  });
+
+  // Test O: (BP-SIM-SCENARIO-1.3) pack.opened に不正な型を指定した場合は INVALID_ZONE_CONFIG で拒絶されること
+  it("Test O: (BP-SIM-SCENARIO-1.3) pack.opened に boolean 以外の型を指定した場合は INVALID_ZONE_CONFIG で拒絶されること", () => {
+    const invalidValues = ["true", "false", 1, 0, null, {}];
+    for (const val of invalidValues) {
+      const draft: ScenarioAuthoringDraftV1 = {
+        environmentId: "official:standard-pack",
+        seed: 42,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        players: {
+          p1: {
+            pack: { opened: val as any },
+          },
+          p2: {},
+        },
+      };
+
+      const res = ScenarioAuthoringResolver.resolve(draft, catalog);
+      expect(res.success).toBe(false);
+      expect(res.errors?.some((e) => e.code === "INVALID_ZONE_CONFIG" && e.path.includes("pack.opened"))).toBe(true);
+    }
+  });
 });

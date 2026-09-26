@@ -178,6 +178,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [p1PackCount, setP1PackCount] = useState<number | undefined>(
     initialDefinition?.players?.p1?.pack?.count
   );
+  const [p1PackOpened, setP1PackOpened] = useState<boolean>(
+    initialDefinition?.players?.p1?.pack?.opened === true
+  );
 
   const [p2Hand, setP2Hand] = useState<ScenarioCardRefV1[]>(
     initialDefinition?.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []
@@ -203,10 +206,17 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [p2PackCount, setP2PackCount] = useState<number | undefined>(
     initialDefinition?.players?.p2?.pack?.count
   );
+  const [p2PackOpened, setP2PackOpened] = useState<boolean>(
+    initialDefinition?.players?.p2?.pack?.opened === true
+  );
 
   // initialDefinition 変更時の同期
   useEffect(() => {
-    if (!initialDefinition) return;
+    if (!initialDefinition) {
+      setP1PackOpened(false);
+      setP2PackOpened(false);
+      return;
+    }
     setEnvironmentId(initialDefinition.environmentId ?? defaultEnvId);
     setSeed(initialDefinition.seed ?? 42);
     setTurnPlayer(initialDefinition.turnPlayer ?? "p1");
@@ -223,6 +233,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP1LifeCount(initialDefinition.players?.p1?.life?.count);
     setP1PackCards(initialDefinition.players?.p1?.pack?.cards ? [...initialDefinition.players.p1.pack.cards] : []);
     setP1PackCount(initialDefinition.players?.p1?.pack?.count);
+    setP1PackOpened(initialDefinition.players?.p1?.pack?.opened === true);
 
     setP2Hand(initialDefinition.players?.p2?.hand ? [...initialDefinition.players.p2.hand] : []);
     setP2HandCount(initialDefinition.players?.p2?.hand?.length);
@@ -232,6 +243,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP2LifeCount(initialDefinition.players?.p2?.life?.count);
     setP2PackCards(initialDefinition.players?.p2?.pack?.cards ? [...initialDefinition.players.p2.pack.cards] : []);
     setP2PackCount(initialDefinition.players?.p2?.pack?.count);
+    setP2PackOpened(initialDefinition.players?.p2?.pack?.opened === true);
   }, [initialDefinition, defaultEnvId]);
 
   // 共有通知用ステート
@@ -313,6 +325,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             ? {
                 count: p1PackCount,
                 fixedCards: p1PackCards.length > 0 ? p1PackCards : undefined,
+                opened: p1PackOpened,
               }
             : undefined,
         },
@@ -333,6 +346,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             ? {
                 count: p2PackCount,
                 fixedCards: p2PackCards.length > 0 ? p2PackCards : undefined,
+                opened: p2PackOpened,
               }
             : undefined,
         },
@@ -354,6 +368,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     p1LifeCount,
     p1PackCards,
     p1PackCount,
+    p1PackOpened,
     p2Hand,
     p2HandCount,
     p2Field,
@@ -362,6 +377,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     p2LifeCount,
     p2PackCards,
     p2PackCount,
+    p2PackOpened,
     currentFrameHasPack,
   ]);
 
@@ -863,6 +879,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
               lifeCount={activeTab === "p1" ? p1LifeCount : p2LifeCount}
               packCards={activeTab === "p1" ? p1PackCards : p2PackCards}
               packCount={activeTab === "p1" ? p1PackCount : p2PackCount}
+              packOpened={activeTab === "p1" ? p1PackOpened : p2PackOpened}
               defaultPackCount={defaultPackCount}
               frameHasPack={currentFrameHasPack}
               onAddCard={(zone, card) => handleAddCard(activeTab, zone, card)}
@@ -870,6 +887,13 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
               onSetHandCount={(cnt) => handleSetHandCount(activeTab, cnt)}
               onSetLifeCount={(cnt) => handleSetLifeCount(activeTab, cnt)}
               onSetPackCount={(cnt) => handleSetPackCount(activeTab, cnt)}
+              onSetPackOpened={(opened) => {
+                if (activeTab === "p1") {
+                  setP1PackOpened(opened);
+                } else {
+                  setP2PackOpened(opened);
+                }
+              }}
               onAddUnit={(comp, cards, state, face) => handleAddUnit(activeTab, comp, cards, state, face)}
               onRemoveUnit={(idx) => handleRemoveUnit(activeTab, idx)}
               deckCards={currentDeckCards}
@@ -938,6 +962,7 @@ interface PlayerZoneEditorProps {
   readonly lifeCount?: number;
   readonly packCards: readonly ScenarioCardRefV1[];
   readonly packCount?: number;
+  readonly packOpened: boolean;
   readonly defaultPackCount?: number;
   readonly frameHasPack: boolean;
   readonly onAddCard: (zone: "hand" | "grave" | "life" | "pack", card: ScenarioCardRefV1) => void;
@@ -945,6 +970,7 @@ interface PlayerZoneEditorProps {
   readonly onSetHandCount: (count: number | undefined) => void;
   readonly onSetLifeCount: (count: number | undefined) => void;
   readonly onSetPackCount: (count: number | undefined) => void;
+  readonly onSetPackOpened: (opened: boolean) => void;
   readonly onAddUnit: (compId: string, cards: ScenarioCardRefV1[], state: "charge" | "drive", face: "up" | "down") => void;
   readonly onRemoveUnit: (index: number) => void;
   readonly deckCards: readonly { suit: string; rank: string }[];
@@ -961,6 +987,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   lifeCount,
   packCards,
   packCount,
+  packOpened,
   defaultPackCount,
   frameHasPack,
   onAddCard,
@@ -968,6 +995,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
   onSetHandCount,
   onSetLifeCount,
   onSetPackCount,
+  onSetPackOpened,
   onAddUnit,
   onRemoveUnit,
   deckCards,
@@ -1039,7 +1067,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-xs font-bold transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
                     selectedSuit === s
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1059,7 +1087,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-xs font-bold transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
                     selectedSuit === "J"
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1079,7 +1107,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   setSelectedRank(ranks[0]);
                 }
               }}
-              className="p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-glyph"
             >
               <option value="S">♠</option>
               <option value="H">♡</option>
@@ -1098,7 +1126,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   key={r}
                   type="button"
                   onClick={() => setSelectedRank(r)}
-                  className={`px-2 py-0.5 rounded text-xs font-bold transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
                     selectedRank === r
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1111,7 +1139,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <select
               value={selectedRank}
               onChange={(e) => setSelectedRank(e.target.value)}
-              className="p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-glyph"
             >
               {availableRanks.map((r) => (
                 <option key={r} value={r}>
@@ -1227,7 +1255,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 {draftUnitCards.map((c, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px]"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px] bp-card-glyph"
                   >
                     {formatScenarioCardChip(c)}
                     <button
@@ -1284,7 +1312,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
               {hand.map((c, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 bp-card-glyph"
                 >
                   {formatScenarioCardChip(c)}
                   <button
@@ -1317,7 +1345,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                     key={i}
                     className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
                   >
-                    <span>
+                    <span className="bp-card-glyph">
                       {u.componentId.replace("character.", "")} ({cardLabel}) [{u.state}/{u.face}]
                     </span>
                     <button
@@ -1352,7 +1380,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 return (
                   <span
                     key={i}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold ${
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold bp-card-glyph ${
                       isTop
                         ? "bg-amber-50 border-amber-300 text-amber-900"
                         : "bg-zinc-100 border-zinc-300 text-zinc-800"
@@ -1409,7 +1437,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 return (
                   <span
                     key={i}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold text-[10px] ${
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold text-[10px] bp-card-glyph ${
                       isTop
                         ? "bg-rose-100 border-rose-300 text-rose-900"
                         : "bg-rose-50 border-rose-200 text-rose-800"
@@ -1447,21 +1475,38 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           </div>
           {frameHasPack ? (
             <>
-              <div className="flex items-center gap-1.5 text-[11px]">
-                <span className="text-zinc-500">目標枚数:</span>
-                <input
-                  type="number"
-                  min="0"
-                  value={packCount ?? ""}
-                  placeholder={defaultPackCount !== undefined ? `${defaultPackCount}` : "自動"}
-                  onChange={(e) =>
-                    onSetPackCount(
-                      e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
-                    )
-                  }
-                  className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
-                />
+              <div className="flex flex-wrap items-center gap-3 text-[11px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-zinc-500">目標枚数:</span>
+                  <input
+                    type="number"
+                    min="0"
+                    value={packCount ?? ""}
+                    placeholder={defaultPackCount !== undefined ? `${defaultPackCount}` : "自動"}
+                    onChange={(e) =>
+                      onSetPackCount(
+                        e.target.value === "" ? undefined : Math.max(0, parseInt(e.target.value, 10) || 0)
+                      )
+                    }
+                    className="w-16 p-1 rounded border border-zinc-300 bg-white font-bold text-xs"
+                  />
+                </div>
+                <label className="flex items-center gap-1.5 cursor-pointer font-bold text-zinc-800 select-none">
+                  <input
+                    type="checkbox"
+                    checked={packOpened}
+                    onChange={(e) => onSetPackOpened(e.target.checked)}
+                    className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-900"
+                  />
+                  <span>開封済み</span>
+                </label>
               </div>
+              {packOpened && (
+                <div className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded p-1.5 space-y-0.5">
+                  <p>※ 開封済みの場合、パック開封アクションは使用できません。</p>
+                  <p>※ 開封済みにしてもPack枚数は自動変更されません。</p>
+                </div>
+              )}
               {packCards.length === 0 ? (
                 <span className="text-zinc-400 italic text-[11px]">
                   {packCount === undefined && defaultPackCount !== undefined
@@ -1473,7 +1518,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   {packCards.map((c, i) => (
                     <span
                       key={i}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px] bp-card-glyph"
                     >
                       {formatScenarioCardChip(c)}
                       <button

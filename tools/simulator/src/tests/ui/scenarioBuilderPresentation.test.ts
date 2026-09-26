@@ -1036,4 +1036,116 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(updatedCheckbox).toBeDefined();
     expect(updatedCheckbox!.props.checked).toBe(false);
   });
+
+  it("19: Pack 開封済みチェックボックスの表示・トグル・注意文表示の検証 (BP-SIM-SCENARIO-1.3)", () => {
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+    let startedDef: any = null;
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "p1",
+          catalog,
+          fullRulePackage,
+          initialDefinition: {
+            ...minimalValidScenario,
+            environmentId: "official:standard-pack", // packCount: 14 を持つフレーム
+            players: {
+              ...minimalValidScenario.players,
+              p1: {
+                ...minimalValidScenario.players.p1,
+                pack: { count: 14, opened: false },
+              },
+            },
+          },
+          onClose: dummyOnClose,
+          onStartScenario: (def) => {
+            startedDef = def;
+          },
+        })
+      );
+    });
+
+    // 1. Pack エリアに "開封済み" チェックボックスが存在すること
+    const checkboxes = testRenderer.root.findAllByType("input").filter((i) => i.props.type === "checkbox");
+    // p1 タブなので pack 開封済みチェックボックスが存在
+    const packCheckbox = checkboxes[0];
+    expect(packCheckbox).toBeDefined();
+    expect(packCheckbox.props.checked).toBe(false);
+
+    // 未チェック時は注意文が表示されないこと
+    const textContentBefore = testRenderer.root
+      .findAllByType("p")
+      .map((p) => (Array.isArray(p.children) ? p.children.join("") : p.children))
+      .join(" ");
+    expect(textContentBefore).not.toContain("パック開封アクションは使用できません");
+
+    // 2. チェックボックスをクリック (開封済みに変更)
+    act(() => {
+      packCheckbox.props.onChange({ target: { checked: true } });
+    });
+
+    // チェック状態の更新
+    expect(packCheckbox.props.checked).toBe(true);
+
+    // 注意文が表示されること
+    const textContentAfter = testRenderer.root
+      .findAllByType("p")
+      .map((p) => (Array.isArray(p.children) ? p.children.join("") : p.children))
+      .join(" ");
+    expect(textContentAfter).toContain("開封済みの場合、パック開封アクションは使用できません。");
+    expect(textContentAfter).toContain("開封済みにしてもPack枚数は自動変更されません。");
+
+    // 3. "初期盤面で対戦開始" を押して生成された ScenarioDefinitionV1 の pack.opened が true であること
+    const startButton = testRenderer.root.findAllByType("button").find((b) => {
+      const spanTexts = b.findAllByType("span").map((s) => s.children.join("")).join("");
+      return spanTexts.includes("初期盤面で対戦開始") || (Array.isArray(b.children) && b.children.includes("初期盤面で対戦開始"));
+    });
+    expect(startButton).toBeDefined();
+    act(() => {
+      startButton!.props.onClick();
+    });
+
+    expect(startedDef).toBeDefined();
+    expect(startedDef.players.p1.pack.opened).toBe(true);
+  });
+
+  it("20: カードセレクターボタンとカードチップに bp-card-glyph と text-sm が適用されていること (BP-SIM-SCENARIO-1.3)", () => {
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "p1",
+          catalog,
+          fullRulePackage,
+          initialDefinition: {
+            ...minimalValidScenario,
+            environmentId: "official:standard-pack",
+          },
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+        })
+      );
+    });
+
+    // スート選択ボタン (♠, ♡, ♢, ♣) に text-sm と bp-card-glyph が適用されていること
+    const buttons = testRenderer.root.findAllByType("button");
+    const spadeButton = buttons.find((b) => {
+      return Array.isArray(b.children) && b.children.includes("♠");
+    });
+    expect(spadeButton).toBeDefined();
+    expect(spadeButton!.props.className).toContain("text-sm");
+    expect(spadeButton!.props.className).toContain("bp-card-glyph");
+
+    // ランク選択ボタン (A) に text-sm と bp-card-glyph が適用されていること
+    const rankAButton = buttons.find((b) => {
+      return Array.isArray(b.children) && b.children.includes("A");
+    });
+    expect(rankAButton).toBeDefined();
+    expect(rankAButton!.props.className).toContain("text-sm");
+    expect(rankAButton!.props.className).toContain("bp-card-glyph");
+  });
 });

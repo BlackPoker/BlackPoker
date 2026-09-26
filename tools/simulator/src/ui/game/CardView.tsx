@@ -75,10 +75,10 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitCompact
             ? "flex"
             : "flex sm:hidden"
-        } items-center justify-center gap-0.5 leading-none font-mono font-bold text-xs`}
+        } items-center justify-center gap-0.5 leading-none bp-card-glyph font-bold text-[13px]`}
       >
         <span>{suitSymbol}</span>
-        <span className="font-black">{displayRank}</span>
+        <span className="font-bold">{displayRank}</span>
       </div>
 
       {/* Desktop: 従来のトランプ風表示 (左上rank, 中央suit) */}
@@ -89,7 +89,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitDesktop
             ? "block"
             : "hidden sm:block"
-        } text-left leading-none text-[10px] font-mono font-black`}
+        } text-left leading-none text-[13px] font-bold bp-card-glyph`}
       >
         {displayRank}
       </div>
@@ -100,7 +100,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitDesktop
             ? "block"
             : "hidden sm:block"
-        } text-center leading-none text-sm my-auto`}
+        } text-center leading-none text-[17px] bp-card-glyph my-auto`}
       >
         {suitSymbol}
       </div>

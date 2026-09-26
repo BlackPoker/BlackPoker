@@ -23,11 +23,19 @@ export interface ScenarioCardRefV1 {
 }
 
 /**
- * Life や Pack などの Zone 設定。
+ * Life などの Zone 設定。
  */
 export interface ScenarioZoneConfigV1 {
   readonly cards?: readonly ScenarioCardRefV1[];
   readonly count?: number;
+}
+
+/**
+ * Pack Zone 設定。
+ * 初期開封状態 (opened) を指定可能。未指定時は false。
+ */
+export interface ScenarioPackConfigV1 extends ScenarioZoneConfigV1 {
+  readonly opened?: boolean;
 }
 
 /**
@@ -54,7 +62,7 @@ export interface ScenarioPlayerV1 {
    * 配列の末尾（最後の要素）が墓地最上段 (graveTop) として決定論的に扱われます。
    */
   readonly grave?: readonly ScenarioCardRefV1[];
-  readonly pack?: ScenarioZoneConfigV1;
+  readonly pack?: ScenarioPackConfigV1;
 }
 
 /**
@@ -131,9 +139,15 @@ const PLAYER_ALLOWED_KEYS = new Set([
   "pack",
 ]);
 
-const ZONE_CONFIG_ALLOWED_KEYS = new Set([
+const LIFE_CONFIG_ALLOWED_KEYS = new Set([
   "cards",
   "count",
+]);
+
+const PACK_CONFIG_ALLOWED_KEYS = new Set([
+  "cards",
+  "count",
+  "opened",
 ]);
 
 const UNIT_ALLOWED_KEYS = new Set([
@@ -420,7 +434,7 @@ export function parseScenarioDefinitionV1(raw: unknown): ScenarioParseResult {
             message: "life はオブジェクト (ScenarioZoneConfigV1) でなければなりません。",
           });
         } else {
-          checkUnknownKeys(p.life, ZONE_CONFIG_ALLOWED_KEYS, `players.${pKey}.life`, errors);
+          checkUnknownKeys(p.life, LIFE_CONFIG_ALLOWED_KEYS, `players.${pKey}.life`, errors);
           let cardsLen = 0;
           if (p.life.cards !== undefined) {
             if (!Array.isArray(p.life.cards)) {
@@ -464,10 +478,10 @@ export function parseScenarioDefinitionV1(raw: unknown): ScenarioParseResult {
           errors.push({
             code: "SCHEMA_VIOLATION",
             path: `players.${pKey}.pack`,
-            message: "pack はオブジェクト (ScenarioZoneConfigV1) でなければなりません。",
+            message: "pack はオブジェクト (ScenarioPackConfigV1) でなければなりません。",
           });
         } else {
-          checkUnknownKeys(p.pack, ZONE_CONFIG_ALLOWED_KEYS, `players.${pKey}.pack`, errors);
+          checkUnknownKeys(p.pack, PACK_CONFIG_ALLOWED_KEYS, `players.${pKey}.pack`, errors);
           let cardsLen = 0;
           if (p.pack.cards !== undefined) {
             if (!Array.isArray(p.pack.cards)) {
@@ -499,6 +513,15 @@ export function parseScenarioDefinitionV1(raw: unknown): ScenarioParseResult {
                 code: "INVALID_ZONE_CONFIG",
                 path: `players.${pKey}.pack.count`,
                 message: `pack の目標枚数 (${p.pack.count}) は指定された固定カード枚数 (${cardsLen}) 以上でなければなりません。`,
+              });
+            }
+          }
+          if (p.pack.opened !== undefined) {
+            if (typeof p.pack.opened !== "boolean") {
+              errors.push({
+                code: "INVALID_ZONE_CONFIG",
+                path: `players.${pKey}.pack.opened`,
+                message: `無効な pack.opened です (${p.pack.opened})。真偽値 (true / false) を指定してください。`,
               });
             }
           }
@@ -637,7 +660,7 @@ export function normalizeScenarioDefinitionV1(def: ScenarioDefinitionV1): Scenar
       }
     }
 
-    let pack: ScenarioZoneConfigV1 | undefined = undefined;
+    let pack: ScenarioPackConfigV1 | undefined = undefined;
     if (p.pack) {
       const packCards = p.pack.cards && p.pack.cards.length > 0
         ? p.pack.cards.map((c) => ({
@@ -647,10 +670,12 @@ export function normalizeScenarioDefinitionV1(def: ScenarioDefinitionV1): Scenar
           }))
         : undefined;
       const count = p.pack.count;
-      if (packCards !== undefined || count !== undefined) {
+      const opened = p.pack.opened !== undefined ? p.pack.opened : undefined;
+      if (packCards !== undefined || count !== undefined || opened !== undefined) {
         pack = {
           ...(packCards !== undefined ? { cards: packCards } : {}),
           ...(count !== undefined ? { count } : {}),
+          ...(opened !== undefined ? { opened } : {}),
         };
       }
     }
