@@ -1345,8 +1345,8 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                     key={i}
                     className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
                   >
-                    <span className="bp-card-glyph">
-                      {u.componentId.replace("character.", "")} ({cardLabel}) [{u.state}/{u.face}]
+                    <span>
+                      {u.componentId.replace("character.", "")} (<span className="bp-card-glyph">{cardLabel}</span>) [{u.state}/{u.face}]
                     </span>
                     <button
                       onClick={() => onRemoveUnit(i)}
@@ -1380,13 +1380,14 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 return (
                   <span
                     key={i}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold bp-card-glyph ${
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold ${
                       isTop
                         ? "bg-amber-50 border-amber-300 text-amber-900"
                         : "bg-zinc-100 border-zinc-300 text-zinc-800"
                     }`}
                   >
-                    {`${formatScenarioCardChip(c)}${isTop ? " (TOP)" : ""}`}
+                    <span className="bp-card-glyph">{formatScenarioCardChip(c)}</span>
+                    {isTop && <span className="text-[10px] text-amber-900 font-bold ml-1">(TOP)</span>}
                     <button
                       onClick={() => onRemoveCard("grave", i)}
                       className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -1437,13 +1438,14 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 return (
                   <span
                     key={i}
-                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold text-[10px] bp-card-glyph ${
+                    className={`inline-flex items-center gap-1 px-2 py-0.5 border rounded font-bold text-[10px] ${
                       isTop
                         ? "bg-rose-100 border-rose-300 text-rose-900"
                         : "bg-rose-50 border-rose-200 text-rose-800"
                     }`}
                   >
-                    {`${formatScenarioCardChip(c)}${isTop ? " (TOP)" : ""}`}
+                    <span className="bp-card-glyph">{formatScenarioCardChip(c)}</span>
+                    {isTop && <span className="text-[10px] text-rose-900 font-bold ml-1">(TOP)</span>}
                     <button
                       onClick={() => onRemoveCard("life", i)}
                       className="text-rose-400 hover:text-red-600 font-bold"

@@ -451,7 +451,12 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       .findAllByType("span")
       .find((s) => s.children.includes("armedSoldier"));
     expect(unitSpan).toBeDefined();
-    expect(unitSpan!.children.join("")).toContain("armedSoldier (♠A, ♠K) [charge/up]");
+    const unitText = unitSpan!.children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join("");
+    expect(unitText).toContain("armedSoldier (♠A, ♠K) [charge/up]");
+    const cardGlyph = unitSpan!.findByProps({ className: "bp-card-glyph" });
+    expect(cardGlyph.children.join("")).toBe("♠A, ♠K");
 
     // 6. "初期盤面で対戦開始" をクリックしてコールバックの Definition を検証
     const startButton = testRenderer.root.findAllByType("button").find((b) => {
@@ -830,9 +835,31 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     // 5. ライフ TOP UI の存在確認 (先頭カードに (TOP), 2枚目には付与されない, 説明注記)
     expect(snapshot).toContain("※ 上から順に配置（先頭がTOP）");
-    expect(snapshot).toContain("♡A (TOP)");
+    expect(snapshot).toContain("♡A");
+    expect(snapshot).toContain("(TOP)");
     expect(snapshot).toContain("♠K");
     expect(snapshot).not.toContain("♠K (TOP)");
+
+    // ライフカードチップの取得と検証 (カード識別子のみ bp-card-glyph であり、(TOP) は分離されていること)
+    const lifeChips = testRenderer.root.findAll((el) => {
+      return (
+        el.type === "span" &&
+        typeof el.props.className === "string" &&
+        el.props.className.includes("bg-rose-") &&
+        el.props.className.includes("inline-flex")
+      );
+    });
+    expect(lifeChips.length).toBeGreaterThanOrEqual(2);
+    const firstChipGlyph = lifeChips[0].findByProps({ className: "bp-card-glyph" });
+    expect(firstChipGlyph.children.join("")).toBe("♡A");
+    const firstChipText = lifeChips[0].children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join(" ");
+    expect(firstChipText).toContain("(TOP)");
+    const secondChipText = lifeChips[1].children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join(" ");
+    expect(secondChipText).not.toContain("(TOP)");
 
     // 6. AUTOバッジの存在確認 (ライフ count 3 で fixed 2 -> AUTO × 1)
     expect(snapshot).toContain("AUTO × 1");
@@ -1147,5 +1174,111 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(rankAButton).toBeDefined();
     expect(rankAButton!.props.className).toContain("text-sm");
     expect(rankAButton!.props.className).toContain("bp-card-glyph");
+  });
+
+  it("22: (BP-SIM-SCENARIO-1.3-R1) Fieldユニット表示およびGrave/Lifeチップにおいて、bp-card-glyph がカード識別子のみに限定され、ユニット名・状態や (TOP) ラベルを包含しないこと", () => {
+    let testRenderer!: TestRenderer.ReactTestRenderer;
+
+    const defWithFieldAndChips: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          field: [
+            {
+              componentId: "character.soldier",
+              cards: [{ suit: "S", rank: "3" }],
+              state: "charge",
+              face: "up",
+            },
+          ],
+          grave: [{ suit: "C", rank: "6" }],
+          life: { cards: [{ suit: "D", rank: "5" }], count: 3 },
+          pack: { count: 14 },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+        },
+      },
+    };
+
+    act(() => {
+      testRenderer = TestRenderer.create(
+        React.createElement(ScenarioBuilderModal, {
+          isOpen: true,
+          initialTab: "p1",
+          catalog,
+          fullRulePackage,
+          initialDefinition: defWithFieldAndChips,
+          onClose: dummyOnClose,
+          onStartScenario: dummyOnStartScenario,
+        })
+      );
+    });
+
+    // 1. Field ユニット表示の検証
+    const unitSpan = testRenderer.root
+      .findAllByType("span")
+      .find((s) => s.children.includes("soldier"));
+    expect(unitSpan).toBeDefined();
+    // 親 span は bp-card-glyph を持たない
+    expect(unitSpan!.props.className || "").not.toContain("bp-card-glyph");
+
+    // カード識別子のみ bp-card-glyph を持つ
+    const fieldCardGlyph = unitSpan!.findByProps({ className: "bp-card-glyph" });
+    expect(fieldCardGlyph.children.join("")).toBe("♠3");
+
+    // ユニット名・状態を含む全体の合成テキスト
+    const unitFullText = unitSpan!.children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join("");
+    expect(unitFullText).toBe("soldier (♠3) [charge/up]");
+
+    // 2. Grave チップの検証
+    const graveChip = testRenderer.root.findAll((el) => {
+      return (
+        el.type === "span" &&
+        typeof el.props.className === "string" &&
+        el.props.className.includes("bg-amber-50") &&
+        el.props.className.includes("inline-flex")
+      );
+    })[0];
+    expect(graveChip).toBeDefined();
+    // 親 chip は bp-card-glyph を持たない
+    expect(graveChip.props.className).not.toContain("bp-card-glyph");
+    // カード識別子のみ bp-card-glyph
+    const graveCardGlyph = graveChip.findByProps({ className: "bp-card-glyph" });
+    expect(graveCardGlyph.children.join("")).toBe("♣6");
+    // (TOP) は bp-card-glyph の外
+    const graveTexts = graveChip.children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join(" ");
+    expect(graveTexts).toContain("(TOP)");
+
+    // 3. Life チップの検証
+    const lifeChip = testRenderer.root.findAll((el) => {
+      return (
+        el.type === "span" &&
+        typeof el.props.className === "string" &&
+        el.props.className.includes("bg-rose-100") &&
+        el.props.className.includes("inline-flex")
+      );
+    })[0];
+    expect(lifeChip).toBeDefined();
+    // 親 chip は bp-card-glyph を持たない
+    expect(lifeChip.props.className).not.toContain("bp-card-glyph");
+    // カード識別子のみ bp-card-glyph
+    const lifeCardGlyph = lifeChip.findByProps({ className: "bp-card-glyph" });
+    expect(lifeCardGlyph.children.join("")).toBe("♢5");
+    // (TOP) は bp-card-glyph の外
+    const lifeTexts = lifeChip.children
+      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
+      .join(" ");
+    expect(lifeTexts).toContain("(TOP)");
   });
 });

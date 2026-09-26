@@ -885,4 +885,98 @@ describe("ScenarioCompiler Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION)", () => {
       validator.validateActionRequest(actionDef, { state, playerKey: "p1" });
     }).toThrow(ValidationError);
   });
+
+  it("28: (BP-SIM-SCENARIO-1.3-R1) pack.opened 省略と明示的 false が同一の Canonical Definition / definitionHash / matchId を生成し、true では異なる hash を生成すること", () => {
+    // defAbsent: pack.opened 未指定
+    const defAbsent: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14 },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14 },
+        },
+      },
+    };
+
+    // defFalse: pack.opened: false (明示的指定)
+    const defFalse: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14, opened: false },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14, opened: false },
+        },
+      },
+    };
+
+    // defTrue: pack.opened: true
+    const defTrue: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14, opened: true },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14 },
+        },
+      },
+    };
+
+    // 1. normalizeScenarioDefinitionV1 の同値性
+    const normAbsent = normalizeScenarioDefinitionV1(defAbsent);
+    const normFalse = normalizeScenarioDefinitionV1(defFalse);
+    const normTrue = normalizeScenarioDefinitionV1(defTrue);
+
+    expect(normAbsent).toEqual(normFalse);
+    expect(normAbsent).not.toEqual(normTrue);
+
+    // 2. compile 結果の definitionHash および matchId の同値性・分離性
+    const resAbsent = compileScenarioDefinitionV1(defAbsent, catalog, fullRulePackage);
+    const resFalse = compileScenarioDefinitionV1(defFalse, catalog, fullRulePackage);
+    const resTrue = compileScenarioDefinitionV1(defTrue, catalog, fullRulePackage);
+
+    expect(resAbsent.kind).toBe("READY");
+    expect(resFalse.kind).toBe("READY");
+    expect(resTrue.kind).toBe("READY");
+
+    if (resAbsent.kind === "READY" && resFalse.kind === "READY" && resTrue.kind === "READY") {
+      // absent vs false -> 完全一致
+      expect(resAbsent.definitionHash).toBe(resFalse.definitionHash);
+      expect(resAbsent.matchId).toBe(resFalse.matchId);
+
+      // absent vs true -> 分離
+      expect(resAbsent.definitionHash).not.toBe(resTrue.definitionHash);
+      expect(resAbsent.matchId).not.toBe(resTrue.matchId);
+
+      // state の検証: absent/false は opened: false、true は opened: true
+      expect(resAbsent.state.players.p1.pack.opened).toBe(false);
+      expect(resFalse.state.players.p1.pack.opened).toBe(false);
+      expect(resTrue.state.players.p1.pack.opened).toBe(true);
+    }
+  });
 });

@@ -460,14 +460,16 @@ export class ScenarioCompiler {
       }
 
       // 4. Pack 明示指定カードの事前予約
+      const rawPackConfig = definition.players?.[playerKey]?.pack;
       const packConfig = scenarioPlayer.pack;
       const packCards: InGameCard[] = [];
 
-      if (packConfig) {
+      const declaredPack = rawPackConfig || packConfig;
+      if (declaredPack) {
         if (!frameHasPack && (
-          packConfig.opened !== undefined ||
-          (packConfig.count !== undefined && packConfig.count > 0) ||
-          (packConfig.cards && packConfig.cards.length > 0)
+          declaredPack.opened !== undefined ||
+          (declaredPack.count !== undefined && declaredPack.count > 0) ||
+          (declaredPack.cards && declaredPack.cards.length > 0)
         )) {
           errors.push({
             code: "INVALID_ZONE_CONFIG",
@@ -475,7 +477,7 @@ export class ScenarioCompiler {
             message: `レギュレーション "${regulation.id}" のフレーム "${frame.id}" にはパック (Pack) が存在しないため、pack を指定することはできません。`,
           });
         }
-        if (packConfig.cards) {
+        if (packConfig?.cards) {
           for (let pIdx = 0; pIdx < packConfig.cards.length; pIdx++) {
             const c = resolveCardRef(packConfig.cards[pIdx], `players.${playerKey}.pack.cards[${pIdx}]`);
             if (c) packCards.push(c);

@@ -716,5 +716,54 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
       expect(allChallengeParams[0]).toBe("c1.winCurrentTurn");
       expect(urlObj.searchParams.get("custom")).toBe("123");
     });
+
+    it("M: (BP-SIM-SCENARIO-1.3-R1) pack.opened: true を含むシナリオの Playtest Share URL round-trip", () => {
+      const scenarioWithPackOpened: ScenarioDefinitionV1 = {
+        version: 1,
+        environmentId: "official:standard-pack",
+        seed: 777,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        turnCount: 1,
+        players: {
+          p1: {
+            hand: [{ suit: "S", rank: "A" }],
+            pack: { count: 14, opened: true },
+          },
+          p2: {
+            hand: [{ suit: "H", rank: "A" }],
+            pack: { count: 14 },
+          },
+        },
+      };
+
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: scenarioWithPackOpened.environmentId,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+        seedInput: String(scenarioWithPackOpened.seed),
+        scenarioDefinition: scenarioWithPackOpened,
+      };
+
+      // 1. URL 生成
+      const currentUrl = "https://simulator.blackpoker.org/playtest";
+      const fullUrl = buildPlaytestShareUrl(currentUrl, config, catalog);
+      expect(fullUrl).toContain("bpv=1");
+      expect(fullUrl).toContain("scenario=z1.");
+
+      // 2. URL パース
+      const parsed = parsePlaytestShareUrl(fullUrl, catalog);
+      expect(parsed.kind).toBe("READY");
+      if (parsed.kind === "READY") {
+        expect(parsed.config.scenarioDefinition).toBeDefined();
+        const def = parsed.config.scenarioDefinition!;
+        // p1 の opened: true が正確に保持・復元されること
+        expect(def.players.p1.pack?.opened).toBe(true);
+        // p2 は Canonical に省略されること
+        expect(def.players.p2.pack?.opened).toBeUndefined();
+      }
+    });
   });
 });

@@ -22,6 +22,8 @@ import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
 import { ScenarioAuthoringDraftV1 } from "../../domain/scenario/ScenarioAuthoringTypes";
 import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
 import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader";
+import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
+import { ScenarioCompiler } from "../../engine/scenario/ScenarioCompiler";
 
 describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION & BP-SIM-SHARE-1.1-SCENARIO-COMPRESSION)", () => {
   const catalog = loadRegulationCatalogForBrowser();
@@ -447,6 +449,51 @@ describe("ScenarioShareUrl Unit Tests (BP-SIM-SCENARIO-1.0-FOUNDATION & BP-SIM-S
     if (decodedLegacy.success && decodedZ1.success) {
       expect(decodedLegacy.definition).toEqual(decodedZ1.definition);
       expect(decodedZ1.definition).toEqual(def);
+    }
+  });
+
+  it("21: (BP-SIM-SCENARIO-1.3-R1) pack.opened: true / absent の z1 URL 共有 round-trip とコンパイル健全性", () => {
+    const fullRulePackage = loadRulePackageForBrowser();
+
+    const scenarioWithPack: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [{ suit: "S", rank: "A" }],
+          pack: { count: 14, opened: true },
+        },
+        p2: {
+          hand: [{ suit: "H", rank: "A" }],
+          pack: { count: 14 }, // absent -> canonical: opened omitted
+        },
+      },
+    };
+
+    // 1. URL エンコード (z1形式)
+    const param = encodeScenarioDefinitionV1ToUrlParam(scenarioWithPack);
+    expect(param.startsWith(SCENARIO_COMPRESSION_PREFIX)).toBe(true);
+
+    // 2. URL デコード
+    const decodeResult = decodeScenarioDefinitionV1FromUrlParam(param);
+    expect(decodeResult.success).toBe(true);
+    if (!decodeResult.success) return;
+
+    const decoded = decodeResult.definition;
+    // Canonical 表現: p1 は opened: true, p2 は opened: undefined (省略)
+    expect(decoded.players.p1.pack?.opened).toBe(true);
+    expect(decoded.players.p2.pack?.opened).toBeUndefined();
+
+    // 3. コンパイル後の GameState: p1 は true, p2 は false
+    const compileResult = ScenarioCompiler.compile(decoded, catalog, fullRulePackage);
+    expect(compileResult.kind).toBe("READY");
+    if (compileResult.kind === "READY") {
+      expect(compileResult.state.players.p1.pack.opened).toBe(true);
+      expect(compileResult.state.players.p2.pack.opened).toBe(false);
     }
   });
 });

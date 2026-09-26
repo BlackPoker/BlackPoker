@@ -565,12 +565,12 @@ export class ScenarioAuthoringResolver {
               },
             }
           : {}),
-        ...(frameHasPack && (resolvedPackCards.length > 0 || finalPackCount !== undefined || playerDraft.pack?.opened !== undefined)
+        ...(frameHasPack && (resolvedPackCards.length > 0 || finalPackCount !== undefined || playerDraft.pack?.opened === true)
           ? {
               pack: {
                 ...(resolvedPackCards.length > 0 ? { cards: resolvedPackCards } : {}),
                 ...(finalPackCount !== undefined ? { count: finalPackCount } : {}),
-                ...(playerDraft.pack?.opened !== undefined ? { opened: playerDraft.pack.opened } : {}),
+                ...(playerDraft.pack?.opened === true ? { opened: true } : {}),
               },
             }
           : {}),

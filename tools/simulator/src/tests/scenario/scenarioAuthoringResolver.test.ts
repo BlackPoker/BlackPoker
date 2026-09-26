@@ -523,8 +523,8 @@ describe("ScenarioAuthoringResolver Unit Tests (BP-SIM-SCENARIO-1.2-POSITION-AUT
     }
   });
 
-  // Test M: (BP-SIM-SCENARIO-1.3) pack.opened: true / false が ScenarioDefinitionV1 に保持されること
-  it("Test M: (BP-SIM-SCENARIO-1.3) draft の pack.opened: true / false が解決後の ScenarioDefinitionV1 に正確に反映されること", () => {
+  // Test M: (BP-SIM-SCENARIO-1.3 & BP-SIM-SCENARIO-1.3-R1) pack.opened: true は保持され、false は Canonical Definition では省略されること
+  it("Test M: (BP-SIM-SCENARIO-1.3 & BP-SIM-SCENARIO-1.3-R1) draft の pack.opened: true は解決後の ScenarioDefinitionV1 に反映され、false は Canonical に省略されること", () => {
     const draft: ScenarioAuthoringDraftV1 = {
       environmentId: "official:standard-pack",
       seed: 42,
@@ -546,7 +546,15 @@ describe("ScenarioAuthoringResolver Unit Tests (BP-SIM-SCENARIO-1.2-POSITION-AUT
     expect(res.success).toBe(true);
     if (res.success) {
       expect(res.definition.players.p1.pack?.opened).toBe(true);
-      expect(res.definition.players.p2.pack?.opened).toBe(false);
+      expect(res.definition.players.p2.pack?.opened).toBeUndefined();
+
+      // Compiler semantics: opened absent compiles to pack.opened = false
+      const compiled = ScenarioCompiler.compile(res.definition, catalog, fullRulePackage);
+      expect(compiled.kind).toBe("READY");
+      if (compiled.kind === "READY") {
+        expect(compiled.state.players.p1.pack.opened).toBe(true);
+        expect(compiled.state.players.p2.pack.opened).toBe(false);
+      }
     }
   });
 

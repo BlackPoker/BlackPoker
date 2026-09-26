@@ -670,12 +670,12 @@ export function normalizeScenarioDefinitionV1(def: ScenarioDefinitionV1): Scenar
           }))
         : undefined;
       const count = p.pack.count;
-      const opened = p.pack.opened !== undefined ? p.pack.opened : undefined;
+      const opened = p.pack.opened === true ? true : undefined;
       if (packCards !== undefined || count !== undefined || opened !== undefined) {
         pack = {
           ...(packCards !== undefined ? { cards: packCards } : {}),
           ...(count !== undefined ? { count } : {}),
-          ...(opened !== undefined ? { opened } : {}),
+          ...(opened !== undefined ? { opened: true } : {}),
         };
       }
     }
