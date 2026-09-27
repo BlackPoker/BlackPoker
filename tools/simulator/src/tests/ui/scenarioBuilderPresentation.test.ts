@@ -459,8 +459,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       return "";
     };
     expect(extractText(unitSpan)).toContain("armedSoldier (♠A, ♠K) [charge/up]");
-    const cardSuits = unitSpan!.findAllByProps({ className: "bp-card-suit" });
-    const cardRanks = unitSpan!.findAllByProps({ className: "bp-card-rank" });
+    const cardSuits = unitSpan!.findAll((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-suit"));
+    const cardRanks = unitSpan!.findAll((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-rank"));
     expect(cardSuits.map((s) => s.children.join(""))).toEqual(["♠", "♠"]);
     expect(cardRanks.map((r) => r.children.join(""))).toEqual(["A", "K"]);
 
@@ -487,11 +487,11 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(p1Field[0].face).toBe("up");
   });
 
-  it("9: スート選択肢表記 (♠, ♡, ♢, ♣, Joker) とカードチップ表示の厳格検証 (BP-SIM-SCENARIO-1.1-UI-POLISH)", () => {
+  it("9: スート選択肢表記 (♠, ♥, ♦, ♣, Joker) とカードチップ表示の厳格検証 (BP-SIM-SCENARIO-1.1-UI-POLISH)", () => {
     // 1. helper functions の検証
     expect(formatScenarioSuitOptionLabel("S")).toBe("♠");
-    expect(formatScenarioSuitOptionLabel("H")).toBe("♡");
-    expect(formatScenarioSuitOptionLabel("D")).toBe("♢");
+    expect(formatScenarioSuitOptionLabel("H")).toBe("♥");
+    expect(formatScenarioSuitOptionLabel("D")).toBe("♦");
     expect(formatScenarioSuitOptionLabel("C")).toBe("♣");
     expect(formatScenarioSuitOptionLabel("J")).toBe("Joker");
 
@@ -532,8 +532,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     const options = suitSelect!.findAllByType("option");
     const optionTexts = options.map((o) => o.children.join(""));
-    // 選択肢が "♠", "♡", "♢", "♣", "Joker" であり、(S) や (H) などの内部英字コードが含まれていないこと
-    expect(optionTexts).toEqual(["♠", "♡", "♢", "♣", "Joker"]);
+    // 選択肢が "♠", "♥", "♦", "♣", "Joker" であり、(S) や (H) などの内部英字コードが含まれていないこと
+    expect(optionTexts).toEqual(["♠", "♥", "♦", "♣", "Joker"]);
     expect(optionTexts.join("")).not.toContain("(S)");
     expect(optionTexts.join("")).not.toContain("(H)");
 
@@ -816,14 +816,14 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     const snapshot = JSON.stringify(testRenderer.toJSON());
 
-    // 1. スートタップボタン (♠, ♡, ♢, ♣, Joker) の存在確認
+    // 1. スートタップボタン (♠, ♥, ♦, ♣, Joker) の存在確認
     const buttons = testRenderer.root.findAllByType("button");
     const buttonTexts = buttons.map((b) =>
       Array.isArray(b.children) ? b.children.join("") : ""
     );
     expect(buttonTexts).toContain("♠");
-    expect(buttonTexts).toContain("♡");
-    expect(buttonTexts).toContain("♢");
+    expect(buttonTexts).toContain("♥");
+    expect(buttonTexts).toContain("♦");
     expect(buttonTexts).toContain("♣");
     expect(buttonTexts).toContain("Joker");
 
@@ -841,7 +841,7 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     // 5. ライフ TOP UI の存在確認 (先頭カードに (TOP), 2枚目には付与されない, 説明注記)
     expect(snapshot).toContain("※ 上から順に配置（先頭がTOP）");
-    expect(snapshot).toContain("♡");
+    expect(snapshot).toContain("♥");
     expect(snapshot).toContain("A");
     expect(snapshot).toContain("(TOP)");
     expect(snapshot).toContain("♠");
@@ -858,9 +858,9 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     });
     expect(lifeChips.length).toBeGreaterThanOrEqual(2);
-    const firstChipSuit = lifeChips[0].findByProps({ className: "bp-card-suit" });
-    const firstChipRank = lifeChips[0].findByProps({ className: "bp-card-rank" });
-    expect(firstChipSuit.children.join("")).toBe("♡");
+    const firstChipSuit = lifeChips[0].find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-suit"))!;
+    const firstChipRank = lifeChips[0].find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-rank"))!;
+    expect(firstChipSuit.children.join("")).toBe("♥");
     expect(firstChipRank.children.join("")).toBe("A");
     const extractChipText = (node: any): string => {
       if (typeof node === "string" || typeof node === "number") return String(node);
@@ -1169,14 +1169,23 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     });
 
-    // スート選択ボタン (♠, ♡, ♢, ♣) に text-sm と bp-card-suit が適用されていること
+    // スート選択ボタン (♠, ♥, ♦, ♣) に text-base と bp-card-suit が適用され、赤スートに bp-card-suit-red と text-[#a22041] が適用されていること
     const buttons = testRenderer.root.findAllByType("button");
     const spadeButton = buttons.find((b) => {
       return Array.isArray(b.children) && b.children.includes("♠");
     });
     expect(spadeButton).toBeDefined();
-    expect(spadeButton!.props.className).toContain("text-sm");
+    expect(spadeButton!.props.className).toContain("text-base");
     expect(spadeButton!.props.className).toContain("bp-card-suit");
+
+    const heartButton = buttons.find((b) => {
+      return Array.isArray(b.children) && b.children.includes("♥");
+    });
+    expect(heartButton).toBeDefined();
+    expect(heartButton!.props.className).toContain("text-base");
+    expect(heartButton!.props.className).toContain("bp-card-suit");
+    expect(heartButton!.props.className).toContain("bp-card-suit-red");
+    expect(heartButton!.props.className).toContain("text-[#a22041]");
 
     // ランク選択ボタン (A) に text-sm と bp-card-rank が適用されていること
     const rankAButton = buttons.find((b) => {
@@ -1250,8 +1259,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(unitSpan!.props.className || "").not.toContain("bp-card-rank");
 
     // カード識別子のみ bp-card-suit / bp-card-rank を持つ
-    const fieldCardSuit = unitSpan!.findByProps({ className: "bp-card-suit" });
-    const fieldCardRank = unitSpan!.findByProps({ className: "bp-card-rank" });
+    const fieldCardSuit = unitSpan!.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-suit"))!;
+    const fieldCardRank = unitSpan!.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-rank"))!;
     expect(fieldCardSuit.children.join("")).toBe("♠");
     expect(fieldCardRank.children.join("")).toBe("3");
 
@@ -1273,8 +1282,8 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(graveChip.props.className).not.toContain("bp-card-suit");
     expect(graveChip.props.className).not.toContain("bp-card-rank");
     // カード識別子のみ bp-card-suit / bp-card-rank
-    const graveCardSuit = graveChip.findByProps({ className: "bp-card-suit" });
-    const graveCardRank = graveChip.findByProps({ className: "bp-card-rank" });
+    const graveCardSuit = graveChip.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-suit"))!;
+    const graveCardRank = graveChip.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-rank"))!;
     expect(graveCardSuit.children.join("")).toBe("♣");
     expect(graveCardRank.children.join("")).toBe("6");
     // (TOP) は bp-card-suit / bp-card-rank の外
@@ -1295,9 +1304,11 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(lifeChip.props.className).not.toContain("bp-card-suit");
     expect(lifeChip.props.className).not.toContain("bp-card-rank");
     // カード識別子のみ bp-card-suit / bp-card-rank
-    const lifeCardSuit = lifeChip.findByProps({ className: "bp-card-suit" });
-    const lifeCardRank = lifeChip.findByProps({ className: "bp-card-rank" });
-    expect(lifeCardSuit.children.join("")).toBe("♢");
+    const lifeCardSuit = lifeChip.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-suit"))!;
+    const lifeCardRank = lifeChip.find((el) => typeof el.props.className === "string" && el.props.className.includes("bp-card-rank"))!;
+    expect(lifeCardSuit.children.join("")).toBe("♦");
+    expect(lifeCardSuit.props.className).toContain("bp-card-suit-red");
+    expect(lifeCardSuit.props.className).toContain("text-[#a22041]");
     expect(lifeCardRank.children.join("")).toBe("5");
     // (TOP) は bp-card-suit / bp-card-rank の外
     const lifeTexts = extractText(lifeChip);

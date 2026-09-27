@@ -335,7 +335,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
         })
       );
 
-      expect(html).toContain("♡");
+      expect(html).toContain("♥");
       expect(html).toContain("J");
       // Desktop block is hidden when explicit compact is true
       expect(html).not.toContain("hidden sm:block");
@@ -355,7 +355,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       expect(html).toContain("ring-2 ring-zinc-950");
       expect(html).toContain("cursor-pointer");
       expect(html).toContain('role="button"');
-      expect(html).toContain('aria-label="♢A"');
+      expect(html).toContain('aria-label="♦A"');
     });
   });
 

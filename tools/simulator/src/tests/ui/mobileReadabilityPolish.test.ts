@@ -253,7 +253,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       );
 
       // ♦10 (♢10) を含む
-      expect(html).toContain("♢10");
+      expect(html).toMatch(/[♦♢]10/);
       // text-red-600 を含まない
       expect(html).not.toContain("text-red-600");
       // text-zinc-950 を含む

@@ -4,7 +4,7 @@ import { MultiCardUnitStack } from "./MultiCardUnitStack";
 import { UnitDetailModal } from "./UnitDetailModal";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { getUnitDisplayName } from "../../engine/rules/characterUtils";
-import { formatSuitSymbol } from "../../engine/rules/cardUtils";
+import { formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
 
 
 export interface UnitCardProps {
@@ -71,12 +71,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   const primaryCard = Array.isArray(unit.cards) && unit.cards.length > 0 ? unit.cards[0] : null;
   let primaryCardSuit: string | null = null;
   let primaryCardRank: string | null = null;
+  let isPrimaryCardRed = false;
   let mobileCardFallback = "—";
   if (isHiddenFromViewer) {
     mobileCardFallback = "🂠";
   } else if (primaryCard) {
-    primaryCardSuit = formatSuitSymbol(primaryCard.suit);
+    primaryCardSuit = formatOfficialSuitSymbol(primaryCard.suit);
     primaryCardRank = primaryCard.rank !== undefined ? String(primaryCard.rank) : "";
+    isPrimaryCardRed = isRedSuit(primaryCard.suit);
   }
   const extraCardCount = Array.isArray(unit.cards) && unit.cards.length > 1 ? unit.cards.length - 1 : 0;
 
@@ -316,7 +318,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           <div className="flex items-center gap-0.5">
             {primaryCardSuit && primaryCardRank ? (
               <span className="text-zinc-950 text-[13px] inline-flex items-center">
-                <span className="bp-card-suit">{primaryCardSuit}</span>
+                <span className={`bp-card-suit text-[15px] ${isPrimaryCardRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{primaryCardSuit}</span>
                 <span className="bp-card-rank font-bold">{primaryCardRank}</span>
               </span>
             ) : (

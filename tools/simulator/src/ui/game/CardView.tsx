@@ -1,5 +1,5 @@
 import React from "react";
-import { formatSuitSymbol, isJokerCard } from "../../engine/rules/cardUtils";
+import { formatOfficialSuitSymbol, isJokerCard, isRedSuit } from "../../engine/rules/cardUtils";
 
 export interface CardViewProps {
   card?: {
@@ -48,8 +48,10 @@ export const CardView: React.FC<CardViewProps> = ({
   }
 
   const isJoker = isJokerCard(card);
-  const suitSymbol = isJoker ? "★" : formatSuitSymbol(card.suit);
+  const suitSymbol = isJoker ? "★" : formatOfficialSuitSymbol(card.suit);
   const displayRank = isJoker ? "JK" : card.rank || "";
+  const isRed = !isJoker && isRedSuit(card.suit);
+  const redSuitClass = isRed ? "text-[#a22041] bp-card-suit-red" : "";
 
   // compact prop が明示指定されている場合はそれに従い、未指定の場合は responsive (sm breakpoint)
   const isExplicitCompact = compact === true;
@@ -77,7 +79,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : "flex sm:hidden"
         } items-center justify-center gap-0.5 leading-none`}
       >
-        <span className="bp-card-suit text-[13px]">{suitSymbol}</span>
+        <span className={`bp-card-suit text-[15px] ${redSuitClass}`}>{suitSymbol}</span>
         <span className="bp-card-rank font-bold text-[13px]">{displayRank}</span>
       </div>
 
@@ -100,13 +102,10 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitDesktop
             ? "block"
             : "hidden sm:block"
-        } text-center leading-none text-[17px] bp-card-suit my-auto`}
+        } text-center leading-none text-[20px] bp-card-suit my-auto ${redSuitClass}`}
       >
         {suitSymbol}
       </div>
     </div>
   );
 };
-
-
-

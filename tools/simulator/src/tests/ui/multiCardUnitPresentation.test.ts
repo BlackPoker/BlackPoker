@@ -163,7 +163,7 @@ describe("Multi-card Unit Presentation Tests", () => {
       expect(html).toContain("8");
       // ? に隠蔽されない
       expect(html).not.toContain("?");
-      expect(html).toContain("♢");
+      expect(html).toMatch(/[♦♢]/);
     });
 
     it("C: 兵士の複数枚構成 (装備兵) が UnitCard 上でスタック表示される", () => {
@@ -634,7 +634,7 @@ describe("Multi-card Unit Presentation Tests", () => {
       expect(html).toContain("DRIVE");
       expect(html).toContain("構成カード (2枚)");
       expect(html).toContain("♠");
-      expect(html).toContain("♡");
+      expect(html).toMatch(/[♥♡]/);
     });
 
     it("Test K: CHARGE状態の単体ユニットのモーダルが正常に描画されること", () => {

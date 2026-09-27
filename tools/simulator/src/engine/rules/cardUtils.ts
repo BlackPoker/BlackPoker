@@ -31,6 +31,39 @@ export function formatSuitSymbol(suit?: string): string {
   }
 }
 
+/**
+ * 公式Webフォント (suit-regular.woff) 対応のスート記号を返します。
+ * suit-regular.woff に含まれるグリフ (♠=0x2660, ♣=0x2663, ♥=0x2665, ♦=0x2666) へマッピングし、
+ * OS依存フォントへのフォールバックや絵文字化を防ぎます。
+ */
+export function formatOfficialSuitSymbol(suit?: string): string {
+  const norm = normalizeSuit(suit);
+  switch (norm) {
+    case "spade":
+      return "♠";
+    case "heart":
+      return "♥";
+    case "diamond":
+      return "♦";
+    case "club":
+      return "♣";
+    case "joker":
+      return "★";
+    default:
+      return suit || "";
+  }
+}
+
+/**
+ * 赤スート (Heart, Diamond) かどうかを判定します。
+ * ActionList公式カラー (#a22041) の適用判定に使用します。
+ */
+export function isRedSuit(suit?: string): boolean {
+  const norm = normalizeSuit(suit);
+  return norm === "heart" || norm === "diamond";
+}
+
+
 export function isJokerCard(card?: any): boolean {
   if (!card) return false;
   return (

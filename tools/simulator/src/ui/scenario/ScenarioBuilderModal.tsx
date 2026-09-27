@@ -11,7 +11,7 @@ import { RulePackage } from "../../domain/rules/RulePackage";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { SimulatorDeckProfileResolver } from "../../engine/regulation/SimulatorDeckProfileResolver";
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
-import { formatCardDisplay } from "../../engine/rules/cardUtils";
+import { formatCardDisplay, formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
 import {
   ScenarioCompiler,
   ScenarioCompileOutcome,
@@ -62,16 +62,16 @@ export interface ScenarioBuilderModalProps {
 
 /**
  * 初期盤面設定用のスート表示用ラベル。
- * 厳密に ♠ / ♡ / ♢ / ♣ / Joker を返し、内部スートコード (S 等) は併記しません。
+ * 公式Webフォント (suit-regular.woff) に準拠し、♠ / ♥ / ♦ / ♣ / Joker を返し、内部スートコード (S 等) は併記しません。
  */
 export function formatScenarioSuitOptionLabel(suit: string): string {
   switch (suit) {
     case "S":
       return "♠";
     case "H":
-      return "♡";
+      return "♥";
     case "D":
-      return "♢";
+      return "♦";
     case "C":
       return "♣";
     case "J":
@@ -96,7 +96,7 @@ export function formatScenarioCardChip(card: ScenarioCardRefV1): string {
 
 /**
  * ユーザー向けカード識別子表示コンポーネント。
- * Suit には公式ルール準拠の Open Sans (.bp-card-suit)、
+ * Suit には公式ルール準拠の Webfont (.bp-card-suit)、
  * Rank には明朝/Serif (.bp-card-rank) を分離して適用します。
  */
 export interface ScenarioCardIdentityProps {
@@ -116,12 +116,13 @@ export const ScenarioCardIdentity: React.FC<ScenarioCardIdentityProps> = ({ card
     );
   }
 
-  const suitSymbol = formatScenarioSuitOptionLabel(card.suit);
+  const suitSymbol = formatOfficialSuitSymbol(card.suit);
+  const isRed = isRedSuit(card.suit);
   const rank = card.rank;
 
   return (
     <span className={`inline-flex items-center ${className}`}>
-      <span className="bp-card-suit">{suitSymbol}</span>
+      <span className={`bp-card-suit text-[1.15em] ${isRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{suitSymbol}</span>
       <span className="bp-card-rank">{rank}</span>
       {occurrenceSuffix && <span className="text-[10px] font-sans opacity-75">{occurrenceSuffix}</span>}
     </span>
@@ -1090,26 +1091,34 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-zinc-500 font-bold min-w-[36px]">Suit:</span>
             <div className="flex flex-wrap items-center gap-1">
-              {(["S", "H", "D", "C"] as const).map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => {
-                    setSelectedSuit(s);
-                    const ranks = deckCards.filter((c) => c.suit === s).map((c) => c.rank);
-                    if (ranks.length > 0 && !ranks.includes(selectedRank)) {
-                      setSelectedRank(ranks[0]);
-                    }
-                  }}
-                  className={`px-2.5 py-1 rounded text-sm bp-card-suit transition ${
-                    selectedSuit === s
-                      ? "bg-zinc-950 text-white shadow-sm"
-                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
-                  }`}
-                >
-                  {formatScenarioSuitOptionLabel(s)}
-                </button>
-              ))}
+              {(["S", "H", "D", "C"] as const).map((s) => {
+                const isRed = isRedSuit(s);
+                const isSelected = selectedSuit === s;
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSuit(s);
+                      const ranks = deckCards.filter((c) => c.suit === s).map((c) => c.rank);
+                      if (ranks.length > 0 && !ranks.includes(selectedRank)) {
+                        setSelectedRank(ranks[0]);
+                      }
+                    }}
+                    className={`px-2.5 py-1 rounded text-base bp-card-suit transition ${
+                      isSelected
+                        ? isRed
+                          ? "bg-[#a22041] text-white shadow-sm font-bold"
+                          : "bg-zinc-950 text-white shadow-sm font-bold"
+                        : isRed
+                        ? "bg-white border border-zinc-300 text-[#a22041] bp-card-suit-red hover:bg-zinc-100 font-normal"
+                        : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-normal"
+                    }`}
+                  >
+                    {formatScenarioSuitOptionLabel(s)}
+                  </button>
+                );
+              })}
               {deckCards.some((c) => c.suit === "J") && (
                 <button
                   key="J"
@@ -1123,8 +1132,8 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   }}
                   className={`px-2.5 py-1 rounded text-sm bp-card-suit transition ${
                     selectedSuit === "J"
-                      ? "bg-zinc-950 text-white shadow-sm"
-                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+                      ? "bg-zinc-950 text-white shadow-sm font-bold"
+                      : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100 font-normal"
                   }`}
                 >
                   Joker
@@ -1144,8 +1153,8 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
               className="p-1 rounded border border-zinc-300 bg-white text-sm bp-card-suit"
             >
               <option value="S">♠</option>
-              <option value="H">♡</option>
-              <option value="D">♢</option>
+              <option value="H">♥</option>
+              <option value="D">♦</option>
               <option value="C">♣</option>
               {deckCards.some((c) => c.suit === "J") && <option value="J">Joker</option>}
             </select>

@@ -497,8 +497,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
         })
       );
 
-      // ♢7 が表示される
-      expect(html).toContain("♢7");
+      // ♢7 (または公式Webフォント ♦7) が表示される
+      expect(html).toMatch(/[♦♢]7/);
       expect(html).toContain("数:");
       expect(html).toContain("7");
     });
