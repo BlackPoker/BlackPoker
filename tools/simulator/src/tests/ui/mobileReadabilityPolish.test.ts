@@ -29,26 +29,24 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       blockedByBadges: ["B①"],
     };
 
-    it("テスト1: mobile compact 兵士で Target 番号 ① が欠けずに描画され、内側寄り配置クラスを含む", () => {
+    it("テスト1: mobile compact 兵士で選択マーカーがチェックマーク (✓) として描画される", () => {
       const html = renderToString(
         React.createElement(UnitCard, {
           unit: mockSoldier,
           battleDisplayInfo: mockDisplayInfo,
           showCardDetails: true,
-          selectionMarker: { badge: "①", isSelected: false },
+          selectionMarker: { badge: "①", isSelected: true },
         })
       );
 
-      // Target relation badge ①
-      expect(html).toContain("①");
-      // selectionMarker がモバイルで内側へ寄せるクラス (-top-2 -left-1) を持つこと
-      expect(html).toContain("-top-2 -left-1 sm:-top-3.5 sm:-left-2.5");
-      // selectionMarker のサイズがモバイルで w-5 h-5 (10px) であること
-      expect(html).toContain("w-5 h-5 sm:w-7 sm:h-7");
-      expect(html).toContain("text-[10px] sm:text-sm");
+      // selectionMarker のチェックマーク
+      expect(html).toContain("✓");
+      // 通し番号バッジは廃止
+      expect(html).not.toContain("title=\"Target番号\"");
+      expect(html).toContain("B①");
     });
 
-    it("テスト2: ①, ② 等が selectionMarker と battleRole (ATK/BLK) と共存できる", () => {
+    it("テスト2: selectionMarker (✓) と battleRole (ATK/BLK) と共存できる", () => {
       const html = renderToString(
         React.createElement(UnitCard, {
           unit: mockSoldier,
@@ -58,10 +56,8 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         })
       );
 
-      // selectionMarker の ②
-      expect(html).toContain("②");
-      // Target 番号の ①
-      expect(html).toContain("①");
+      // selectionMarker の ✓
+      expect(html).toContain("✓");
       // バトルロール (ATK 攻撃中)
       expect(html).toContain("ATK 攻撃中");
       // 選択状態のスタイル
@@ -303,8 +299,10 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         })
       );
 
-      expect(html).toContain("🂠");
-      expect(html).toContain("?");
+      expect(html).toContain("B①");
+      expect(html).toContain("防壁");
+      expect(html).not.toContain("🂠");
+      expect(html).not.toContain("数: ?");
       // スート記号が漏洩していないこと
       expect(html).not.toContain("♠");
       expect(html).not.toContain("♡");
@@ -338,7 +336,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       expect(html).toContain("mt-0.5 pt-0.5 border-t border-zinc-200");
     });
 
-    it("PlayerBoard の soldierRow / bulwarkRow に pt-2 sm:pt-3.5 の上部余白が確保されている", () => {
+    it("PlayerBoard の soldierRow / bulwarkRow に p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 の余白が確保されている", () => {
       const vm: PlayerBoardViewModel = {
         playerKey: "p1",
         name: "Player 1",
@@ -379,8 +377,8 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         })
       );
 
-      // soldierRow と bulwarkRow のスクロール親要素に pt-2 sm:pt-3.5 が設定されていること
-      expect(html).toContain("p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar");
+      // soldierRow と bulwarkRow のスクロール親要素に p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 が設定されていること
+      expect(html).toContain("p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar");
     });
   });
 });

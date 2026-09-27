@@ -442,12 +442,18 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
         })
       );
 
-      // Verify owner-relative disambiguation:
-      // Attacker shows badge ① with "相手 ♡6 一般兵"
-      // Blocker candidate shows badge ① with "自分 ♠5 一般兵"
-      expect(html).toContain("相手 ♡6 一般兵");
-      expect(html).toContain("自分 ♠5 一般兵");
-      expect(html).toContain("①");
+      // Verify owner-relative disambiguation and real-play identity (sequential target numbers abolished):
+      // Attacker shows "相手 一般兵 ♥6"
+      // Blocker candidate shows "自分 一般兵 ♠5"
+      expect(html).toContain("相手");
+      expect(html).toContain("自分");
+      expect(html).toContain("一般兵");
+      expect(html).toContain("♥");
+      expect(html).toContain("6");
+      expect(html).toContain("♠");
+      expect(html).toContain("5");
+      expect(html).not.toContain("相手 ①");
+      expect(html).not.toContain("自分 ①");
     });
 
     it("renders owner-relative fullLabel in pattern selection (e.g. attacker selection)", () => {
@@ -473,8 +479,13 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
         })
       );
 
-      // Verify fullLabel with owner prefix: "自分 ① ♠5 一般兵 のみ"
-      expect(html).toContain("自分 ① ♠5 一般兵 のみ");
+      // Verify label with owner prefix: "自分 一般兵 ♠5 のみ" (sequential ① abolished)
+      expect(html).toContain("自分");
+      expect(html).toContain("一般兵");
+      expect(html).toContain("♠");
+      expect(html).toContain("5");
+      expect(html).toContain("のみ");
+      expect(html).not.toContain("自分 ①");
     });
 
     it("falls back to BattleRelationPresenter.buildPresentationMap when battleRelationMap is omitted, maintaining SSOT", () => {
@@ -486,10 +497,16 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
         })
       );
 
-      // Verify that even without battleRelationMap prop, SSOT is maintained and numbers/prefixes match
-      expect(html).toContain("相手 ♡6 一般兵");
-      expect(html).toContain("自分 ♠5 一般兵");
-      expect(html).toContain("①");
+      // Verify that even without battleRelationMap prop, SSOT is maintained and prefixes match
+      expect(html).toContain("相手");
+      expect(html).toContain("自分");
+      expect(html).toContain("一般兵");
+      expect(html).toContain("♥");
+      expect(html).toContain("6");
+      expect(html).toContain("♠");
+      expect(html).toContain("5");
+      expect(html).not.toContain("相手 ①");
+      expect(html).not.toContain("自分 ①");
     });
   });
 
@@ -574,8 +591,8 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
       );
       expect(presetHtml).toContain("B①");
       expect(presetHtml).toContain("防壁配置: ライフ側から ①");
-      // Target 番号バッジと B① が別要素であること
-      expect(presetHtml).toContain(`<span>${presetInfo?.badge}</span>`);
+      // Target 番号バッジは廃止され、B① のみが表示されること
+      expect(presetHtml).not.toContain(`<span>${presetInfo?.badge}</span>`);
 
       const addedHtml = renderToString(
         React.createElement(UnitCard, {
@@ -586,7 +603,7 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
       );
       expect(addedHtml).toContain("B②");
       expect(addedHtml).toContain("防壁配置: ライフ側から ②");
-      expect(addedHtml).toContain(`<span>${addedInfo?.badge}</span>`);
+      expect(addedHtml).not.toContain(`<span>${addedInfo?.badge}</span>`);
     });
   });
 });

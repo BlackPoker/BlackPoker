@@ -3,6 +3,7 @@ import { renderToString } from "react-dom/server";
 import { describe, it, expect, vi } from "vitest";
 import { CardView } from "../../ui/game/CardView";
 import { PlayerBoard } from "../../ui/game/PlayerBoard";
+import { UnitCard } from "../../ui/game/UnitCard";
 import { DecisionPanel } from "../../ui/decision/DecisionPanel";
 import { formatCardDisplay, formatSuitSymbol } from "../../engine/rules/cardUtils";
 import { OfficialRegulationMatchFactory } from "../../engine/regulation/OfficialRegulationMatchFactory";
@@ -249,8 +250,10 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       );
 
       // Should display standardized suit symbol and rank
-      expect(html).toContain("♠10");
-      expect(html).toContain("♡J");
+      expect(html).toContain("♠");
+      expect(html).toContain("10");
+      expect(html).toContain("♥");
+      expect(html).toContain("J");
       // Should NOT contain raw ASCII card code [s10] or [hJ]
       expect(html).not.toContain("[s10]");
       expect(html).not.toContain("[hJ]");
@@ -260,9 +263,9 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
   });
 
   // =========================================================================
-  // Test D: Mobile Row Headers
+  // Test D: Mobile Row Headers & Opponent Hidden Bulwark
   // =========================================================================
-  describe("Test D: Mobile Row Headers", () => {
+  describe("Test D: Mobile Row Headers & Opponent Hidden Bulwark", () => {
     it("D.1: PlayerBoard hides soldier and bulwark headers on mobile (hidden sm:flex)", () => {
       const mockViewModel: any = {
         playerKey: "p1",
@@ -302,6 +305,29 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       // Unit cards are still rendered in their rows
       expect(html).toContain("u-soldier-1");
       expect(html).toContain("u-bulwark-1");
+    });
+
+    it("D.2: Mobile opponent hidden bulwark is compressed to 1 line without 🂠 or 数: ?", () => {
+      const opponentBulwark = {
+        unitId: "u-opp-bulwark",
+        kind: "防壁",
+        componentId: "character.bulwark",
+        face: "down",
+        cards: [{ visibility: "HIDDEN" }],
+      };
+      const html = renderToString(
+        React.createElement(UnitCard, {
+          unit: opponentBulwark,
+          isBulwark: true,
+          showCardDetails: false,
+          isFaceDown: true,
+        })
+      );
+      // Contains 1st line title and bulwark marker
+      expect(html).toContain("防壁");
+      // Opponent hidden bulwark on mobile does NOT render 🂠 or 数: ?
+      expect(html).not.toContain("🂠");
+      expect(html).not.toContain("数: ?");
     });
   });
 
@@ -367,7 +393,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       );
 
       // In explicit compact view, the desktop elements are hidden and only 1 active compact suit is shown
-      expect(htmlCompact).toContain("bp-card-suit text-[15px]");
+      expect(htmlCompact).toContain("bp-card-suit text-[18px]");
       expect(htmlCompact).toContain("♠");
       expect(htmlCompact).toContain("9");
       // Desktop block is hidden

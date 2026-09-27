@@ -49,7 +49,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
   });
 
   // 2. Desktop CardView のタイポグラフィとサイズ検証
-  it("2: Desktop CardView で Rank に bp-card-rank text-[13px] font-bold、Suit に bp-card-suit text-[20px] が適用され、font-mono が除去されていること", () => {
+  it("2: Desktop CardView で Rank に bp-card-rank text-[13px] font-bold、Suit に bp-card-suit text-[22px] が適用され、font-mono が除去されていること", () => {
     const htmlSpade = renderToString(
       React.createElement(CardView, {
         card: { id: "c-1", suit: "S", rank: "10", value: 10 },
@@ -59,8 +59,8 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
 
     // Rank element (desktop)
     expect(htmlSpade).toContain("text-[13px] font-bold bp-card-rank");
-    // Suit element (desktop: text-[20px] で Rank より大きく強調)
-    expect(htmlSpade).toContain("text-[20px] bp-card-suit my-auto");
+    // Suit element (desktop: text-[22px] で Rank より大きく強調)
+    expect(htmlSpade).toContain("text-[22px] bp-card-suit my-auto");
     // Suit symbol
     expect(htmlSpade).toContain("♠");
     expect(htmlSpade).toContain("10");
@@ -76,14 +76,14 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         compact: false,
       })
     );
-    expect(htmlHeart).toContain("text-[20px] bp-card-suit my-auto");
+    expect(htmlHeart).toContain("text-[22px] bp-card-suit my-auto");
     expect(htmlHeart).toContain("bp-card-suit-red");
     expect(htmlHeart).toContain("text-[#a22041]");
     expect(htmlHeart).toContain("♥");
   });
 
   // 3. Mobile Compact CardView のタイポグラフィとサイズ検証
-  it("3: Mobile Compact CardView で 1行表示に bp-card-suit text-[15px] と bp-card-rank font-bold text-[13px] が分離適用され、赤スートに bp-card-suit-red が適用されること", () => {
+  it("3: Mobile Compact CardView で 1行表示に bp-card-suit text-[18px] と bp-card-rank font-bold text-[13px] が分離適用され、赤スートに bp-card-suit-red が適用されること", () => {
     const html = renderToString(
       React.createElement(CardView, {
         card: { id: "c-2", suit: "H", rank: "J", value: 11 },
@@ -91,7 +91,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
       })
     );
 
-    expect(html).toContain("bp-card-suit text-[15px]");
+    expect(html).toContain("bp-card-suit text-[18px]");
     expect(html).toContain("bp-card-suit-red");
     expect(html).toContain("text-[#a22041]");
     expect(html).toContain("bp-card-rank font-bold text-[13px]");
@@ -100,7 +100,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
   });
 
   // 4. Mobile UnitCard のタイポグラフィとサイズ検証
-  it("4: Mobile UnitCard の primaryCard 表示に bp-card-suit text-[15px] と bp-card-rank が分離適用され、赤スートに bp-card-suit-red が適用されること", () => {
+  it("4: Mobile UnitCard の primaryCard 表示に bp-card-suit text-[18px] と bp-card-rank が分離適用され、赤スートに bp-card-suit-red が適用されること", () => {
     const unitClub = {
       unitId: "u-soldier-1",
       kind: "兵士",
@@ -117,7 +117,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     );
 
     // Mobile card text container with separated suit and rank
-    expect(htmlClub).toContain("bp-card-suit text-[15px]");
+    expect(htmlClub).toContain("bp-card-suit text-[18px]");
     expect(htmlClub).toContain("bp-card-rank");
     expect(htmlClub).toContain("♣");
     expect(htmlClub).toContain("K");
@@ -138,7 +138,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         unit: unitDiam,
       })
     );
-    expect(htmlDiam).toContain("bp-card-suit text-[15px]");
+    expect(htmlDiam).toContain("bp-card-suit text-[18px]");
     expect(htmlDiam).toContain("bp-card-suit-red");
     expect(htmlDiam).toContain("text-[#a22041]");
     expect(htmlDiam).toContain("♦");
@@ -231,7 +231,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         })
       );
       expect(htmlDesktop).toContain("bp-card-suit");
-      expect(htmlDesktop).toContain("text-[20px]");
+      expect(htmlDesktop).toContain("text-[22px]");
       expect(htmlDesktop).toContain("bp-card-rank");
       expect(htmlDesktop).toContain("text-[13px]");
       expect(htmlDesktop).toContain(tc.expectedSymbol);
@@ -251,7 +251,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         })
       );
       expect(htmlCompact).toContain("bp-card-suit");
-      expect(htmlCompact).toContain("text-[15px]");
+      expect(htmlCompact).toContain("text-[18px]");
       expect(htmlCompact).toContain("bp-card-rank");
       expect(htmlCompact).toContain("text-[13px]");
       expect(htmlCompact).toContain(tc.expectedSymbol);

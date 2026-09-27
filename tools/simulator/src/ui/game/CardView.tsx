@@ -79,7 +79,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : "flex sm:hidden"
         } items-center justify-center gap-0.5 leading-none`}
       >
-        <span className={`bp-card-suit text-[15px] ${redSuitClass}`}>{suitSymbol}</span>
+        <span className={`bp-card-suit text-[18px] ${redSuitClass}`}>{suitSymbol}</span>
         <span className="bp-card-rank font-bold text-[13px]">{displayRank}</span>
       </div>
 
@@ -102,7 +102,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitDesktop
             ? "block"
             : "hidden sm:block"
-        } text-center leading-none text-[20px] bp-card-suit my-auto ${redSuitClass}`}
+        } text-center leading-none text-[22px] bp-card-suit my-auto ${redSuitClass}`}
       >
         {suitSymbol}
       </div>

@@ -5,7 +5,8 @@ import { FogDetailPopover } from "./FogDetailPopover";
 import { PlayerZoneStrip, ZoneSummaryItem } from "./PlayerZoneStrip";
 import { PlayerBoardViewModel } from "./PlayerObservationPresenter";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
-import { formatSuitSymbol } from "../../engine/rules/cardUtils";
+import { formatCardDisplay, formatOfficialSuitSymbol } from "../../engine/rules/cardUtils";
+import { RichCardText } from "../common/RichCardText";
 
 export interface PlayerBoardProps {
   readonly playerKey: string;
@@ -53,7 +54,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   // 墓地トップカードの表示用バッジ
   const graveTopText = viewModel.graveTopCard
-    ? `${formatSuitSymbol(viewModel.graveTopCard.suit)}${viewModel.graveTopCard.rank || ""}`
+    ? formatCardDisplay(viewModel.graveTopCard)
     : "";
   const graveTopBadge = graveTopText ? `TOP: ${graveTopText}` : undefined;
 
@@ -111,26 +112,26 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
     );
   };
 
-  // 兵士列 (中央寄り・右寄せ)
+  // 兵士列 (センター寄せ)
   const soldierRow = soldierUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
       <div className="text-[9px] font-mono font-bold text-zinc-500 hidden sm:flex items-center justify-end">
         <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
-      <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
+      <div className="flex gap-0.5 sm:gap-1.5 p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar">
         {soldierUnits.map((u: any) => renderUnitCard(u))}
       </div>
     </div>
   ) : null;
 
-  // 防壁列 (外側・右詰め / ライフ側から ①, ②...)
+  // 防壁列 (外側・センター寄せ / ライフ側から ①, ②...)
   // 画面表示を左→右で見ると [③] [②] [①] となり ① がライフ側(右端)
   const bulwarkRow = bulwarkUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
       <div className="text-[9px] font-mono font-bold text-zinc-500 hidden sm:flex items-center justify-end">
         <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
-      <div className="flex gap-1 sm:gap-1.5 p-1 pt-2 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-end overflow-x-auto no-scrollbar">
+      <div className="flex gap-0.5 sm:gap-1.5 p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar">
         {[...bulwarkUnits].reverse().map((u: any) => renderUnitCard(u))}
       </div>
     </div>

@@ -5,6 +5,7 @@ import {
   canAssignBlocker,
   findExactMatchPatternRef,
 } from "./blockAssignmentUtils";
+import { RichCardText } from "../common/RichCardText";
 
 interface BlockAssignmentEditorProps {
   request: DecisionRequest;
@@ -141,14 +142,9 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
               {/* アタッカー情報ヘッダー */}
               <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
                 <div className="flex items-center gap-2">
-                  {atkInfo.badge && (
-                    <span className="w-5 h-5 rounded-full bg-zinc-950 text-white text-xs font-black flex items-center justify-center">
-                      {atkInfo.badge}
-                    </span>
-                  )}
                   <div className="font-bold text-sm text-zinc-950 flex items-center gap-1.5 font-mono">
                     <span className="text-zinc-950 font-black">[ATTACKER]</span>
-                    <span>{atkInfo.label}</span>
+                    <span><RichCardText text={atkInfo.label} /></span>
                   </div>
                 </div>
 
@@ -203,12 +199,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                           >
                             ✓
                           </span>
-                          {blkInfo.badge && (
-                            <span className="w-5 h-5 rounded-full bg-zinc-100 text-zinc-900 border border-zinc-300 text-xs font-mono font-black flex items-center justify-center">
-                              {blkInfo.badge}
-                            </span>
-                          )}
-                          <span className="font-bold">{blkInfo.label}</span>
+                          <span className="font-bold"><RichCardText text={blkInfo.label} /></span>
                         </div>
 
                         {isSelected && (
@@ -241,15 +232,22 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
               const blkIds = assignments[attacker.unitId] || [];
               const blkLabels = blkIds.map((id) => {
                 const info = getUnitDisplay(id);
-                return `${info.badge} ${info.label}`;
+                return info.label;
               });
 
               return (
                 <div key={attacker.unitId} className="flex items-center gap-1.5 text-zinc-800 font-mono text-xs">
-                  <span className="font-bold text-zinc-950">{atkInfo.badge} {atkInfo.label}</span>
+                  <span className="font-bold text-zinc-950"><RichCardText text={atkInfo.label} /></span>
                   <span className="text-zinc-400">←</span>
                   {blkLabels.length > 0 ? (
-                    <span className="font-bold text-zinc-950">{blkLabels.join(" + ")}</span>
+                    <span className="font-bold text-zinc-950">
+                      {blkLabels.map((lbl, idx) => (
+                        <React.Fragment key={idx}>
+                          {idx > 0 && " + "}
+                          <RichCardText text={lbl} />
+                        </React.Fragment>
+                      ))}
+                    </span>
                   ) : (
                     <span className="text-zinc-400 italic">ブロックなし</span>
                   )}

@@ -5,6 +5,7 @@ import { UnitDetailModal } from "./UnitDetailModal";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { getUnitDisplayName } from "../../engine/rules/characterUtils";
 import { formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
+import { RichCardText } from "../common/RichCardText";
 
 
 export interface UnitCardProps {
@@ -12,6 +13,8 @@ export interface UnitCardProps {
   field?: readonly any[];
   fogs?: readonly any[];
   showCardDetails?: boolean;
+  isBulwark?: boolean;
+  isFaceDown?: boolean;
   selectionMarker?: {
     badge: string; // "①", "②" 等
     isSelected: boolean;
@@ -25,12 +28,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   field = [],
   fogs,
   showCardDetails = true,
+  isBulwark: propIsBulwark,
+  isFaceDown: propIsFaceDown,
   selectionMarker,
   battleDisplayInfo,
   onClick,
 }) => {
-  const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
-  const isFaceDown = unit.face === "down";
+  const isBulwark = propIsBulwark ?? (unit.componentId === "character.bulwark" || unit.kind === "防壁");
+  const isFaceDown = propIsFaceDown ?? (unit.face === "down");
   const isDrive = unit.state === "drive";
   const battleRole = battleDisplayInfo?.role || unit.battle?.role;
   const unitDisplayName = getUnitDisplayName(unit, field);
@@ -104,17 +109,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           : "bg-white border border-zinc-300 shadow-sm"
       }`}
     >
-      {/* 選択可能・選択中バッジ (①, ②) - モバイルでは内側に寄せ見切れ防止 (-top-2 -left-1, w-5 h-5) */}
-      {selectionMarker && (
-        <div className="absolute -top-2 -left-1 sm:-top-3.5 sm:-left-2.5 z-20">
-          <span
-            className={`flex items-center justify-center w-5 h-5 sm:w-7 sm:h-7 rounded-full text-[10px] sm:text-sm font-mono font-black shadow-md border-2 ${
-              selectionMarker.isSelected
-                ? "bg-zinc-950 border-zinc-950 text-white ring-2 ring-zinc-950 scale-110"
-                : "bg-white border-zinc-950 text-zinc-950 hover:bg-zinc-100"
-            }`}
-          >
-            {selectionMarker.badge}
+      {/* 選択中インジケーター (チェックマークのみ・番号バッジは非表示) */}
+      {selectionMarker?.isSelected && (
+        <div className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-2 z-20">
+          <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs font-mono font-black shadow-md bg-zinc-950 text-white border-2 border-white">
+            ✓
           </span>
         </div>
       )}
@@ -132,18 +131,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                 <span>{bulwarkPosBadge}</span>
                 <span>防壁</span>
               </span>
-              {battleDisplayInfo?.badge && (
-                <span
-                  className="text-[8px] font-mono font-normal text-zinc-500 bg-zinc-100 border border-zinc-300 rounded px-1 py-0.2"
-                  title="Target番号"
-                >
-                  <span>{battleDisplayInfo.badge}</span>
-                </span>
-              )}
             </div>
           ) : (
             <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-1 uppercase tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-300">
-              {battleDisplayInfo ? <span>{battleDisplayInfo.badge}</span> : null}
               <span>{unitDisplayName}</span>
             </span>
           )}
@@ -163,21 +153,29 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         {battleRole === "attacker" && (
           <div className="w-full bg-zinc-950 text-white text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-950">
             <span>ATTACK 攻撃中</span>
-            {battleDisplayInfo?.blockedByBadges && battleDisplayInfo.blockedByBadges.length > 0 && (
+            {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0 ? (
+              <span className="bg-white text-zinc-950 px-1 rounded text-[8px] font-mono font-bold">
+                ← {battleDisplayInfo.blockedByHumanLabels.join(" ")}
+              </span>
+            ) : battleDisplayInfo?.blockedByBadges && battleDisplayInfo.blockedByBadges.length > 0 ? (
               <span className="bg-white text-zinc-950 px-1 rounded text-[8px] font-mono font-bold">
                 ← {battleDisplayInfo.blockedByBadges.join(" ")}
               </span>
-            )}
+            ) : null}
           </div>
         )}
         {battleRole === "blocker" && (
           <div className="w-full bg-zinc-100 text-zinc-950 text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-400">
             <span>BLOCK 防御中</span>
-            {battleDisplayInfo?.targetBadge && (
+            {battleDisplayInfo?.targetHumanLabel ? (
+              <span className="bg-zinc-950 text-white px-1 rounded text-[8px] font-mono font-bold">
+                → {battleDisplayInfo.targetHumanLabel}
+              </span>
+            ) : battleDisplayInfo?.targetBadge ? (
               <span className="bg-zinc-950 text-white px-1 rounded text-[8px] font-mono font-bold">
                 → {battleDisplayInfo.targetBadge}
               </span>
-            )}
+            ) : null}
           </div>
         )}
 
@@ -204,8 +202,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               const cardCode = f.card?.code || (f.card?.suit && f.card?.rank ? `${f.card.suit}${f.card.rank}` : "");
               const formattedCard = cardCode
                 .replace(/S/g, "♠")
-                .replace(/H/g, "♡")
-                .replace(/D/g, "♢")
+                .replace(/H/g, "♥")
+                .replace(/D/g, "♦")
                 .replace(/C/g, "♣");
               const ownerLabel = f.ownerPlayerId === "p1" ? "A" : f.ownerPlayerId === "p2" ? "B" : "";
 
@@ -217,7 +215,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                   data-testid="fog-chip"
                 >
                   <span>{`${isUp ? "↑" : "↓"}${Math.abs(amount)}`}</span>
-                  {formattedCard && <span className="text-zinc-500 font-normal">[{formattedCard}]</span>}
+                  {formattedCard && <span className="text-zinc-500 font-normal">[<RichCardText text={formattedCard} />]</span>}
                 </span>
               );
             })}
@@ -270,19 +268,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
                 {bulwarkPosBadge}
               </span>
               <span className="text-[9px] font-bold text-zinc-900 font-sans">防壁</span>
-              {battleDisplayInfo?.badge && (
-                <span className="text-[7px] font-mono text-zinc-400 shrink-0">
-                  <span>{battleDisplayInfo.badge}</span>
-                </span>
-              )}
             </div>
           ) : (
             <div className="flex items-center gap-0.5 truncate">
-              {battleDisplayInfo && (
-                <span className="bg-zinc-100 text-zinc-800 border border-zinc-300 font-mono font-black text-[9px] px-1 py-0.2 rounded shrink-0">
-                  <span>{battleDisplayInfo.badge}</span>
-                </span>
-              )}
               <span className="text-[9px] font-bold text-zinc-900 font-sans truncate">
                 {unitDisplayName}
               </span>
@@ -304,46 +292,50 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         {/* バトルロール表示 (モバイル) */}
         {battleRole === "attacker" && (
           <div className="w-full bg-zinc-950 text-white text-[7px] font-mono font-black text-center py-0.2 rounded my-0.5">
-            ATK 攻撃中
+            {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0
+              ? `ATK ← ${battleDisplayInfo.blockedByHumanLabels.join(" ")}`
+              : "ATK 攻撃中"}
           </div>
         )}
         {battleRole === "blocker" && (
           <div className="w-full bg-zinc-100 border border-zinc-400 text-zinc-950 text-[7px] font-mono font-black text-center py-0.2 rounded my-0.5">
-            BLK 防御中
+            {battleDisplayInfo?.targetHumanLabel
+              ? `BLK → ${battleDisplayInfo.targetHumanLabel}`
+              : "BLK 防御中"}
           </div>
         )}
 
-        {/* 2行目: カードスート/数字 + SIZE/数字 */}
-        <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
-          <div className="flex items-center gap-0.5">
-            {primaryCardSuit && primaryCardRank ? (
-              <span className="text-zinc-950 text-[13px] inline-flex items-center">
-                <span className={`bp-card-suit text-[15px] ${isPrimaryCardRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{primaryCardSuit}</span>
-                <span className="bp-card-rank font-bold">{primaryCardRank}</span>
-              </span>
-            ) : (
-              <span className="font-bold text-zinc-950 text-[13px]">
-                {mobileCardFallback}
-              </span>
-            )}
-            {extraCardCount > 0 && !isHiddenFromViewer && (
-              <span className="text-[7px] font-mono text-zinc-500 bg-zinc-100 px-0.5 rounded border border-zinc-300">
-                {`+${extraCardCount}`}
-              </span>
-            )}
-          </div>
+        {/* 2行目: カードスート/数字 + SIZE (相手の伏せ防壁は非表示にして1行に圧縮) */}
+        {!(isBulwark && isHiddenFromViewer) && (
+          <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
+            <div className="flex items-center gap-0.5">
+              {primaryCardSuit && primaryCardRank ? (
+                <span className="text-zinc-950 text-[13px] inline-flex items-center">
+                  <span className={`bp-card-suit text-[18px] ${isPrimaryCardRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{primaryCardSuit}</span>
+                  <span className="bp-card-rank font-bold">{primaryCardRank}</span>
+                </span>
+              ) : (
+                <span className="font-bold text-zinc-950 text-[13px]">
+                  {mobileCardFallback}
+                </span>
+              )}
+              {extraCardCount > 0 && !isHiddenFromViewer && (
+                <span className="text-[7px] font-mono text-zinc-500 bg-zinc-100 px-0.5 rounded border border-zinc-300">
+                  {`+${extraCardCount}`}
+                </span>
+              )}
+            </div>
 
-          <div className="flex items-center gap-0.5">
-            <span className="text-[8px] text-zinc-400 font-bold">
-              {isBulwark ? "数:" : "S:"}
-            </span>
-            <span className="font-black text-zinc-950 text-[11px]">
-              {isBulwark
-                ? (isHiddenFromViewer ? "?" : bulwarkRank || "—")
-                : (isHiddenFromViewer ? "?" : displaySize)}
-            </span>
+            {!isBulwark && (
+              <div className="flex items-center gap-0.5">
+                <span className="text-[8px] text-zinc-400 font-bold">S:</span>
+                <span className="font-black text-zinc-950 text-[11px]">
+                  {isHiddenFromViewer ? "?" : displaySize}
+                </span>
+              </div>
+            )}
           </div>
-        </div>
+        )}
 
         {/* Fog サマリー (モバイル) */}
         {!isBulwark && fogs && fogs.length > 0 && (

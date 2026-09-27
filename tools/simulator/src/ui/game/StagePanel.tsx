@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import type { ActionRequest } from "../../domain/rules/RulePackage";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { StageTargetPresenter, getStageRequestDisplayIndex } from "./StageTargetPresenter";
+import { RichCardText } from "../common/RichCardText";
 
 export interface StagePanelProps {
   requests: any[];
@@ -14,8 +15,8 @@ function formatCardCodeDisplay(code?: string): string {
   if (!code) return "";
   return code
     .replace(/S/g, "♠")
-    .replace(/H/g, "♡")
-    .replace(/D/g, "♢")
+    .replace(/H/g, "♥")
+    .replace(/D/g, "♦")
     .replace(/C/g, "♣");
 }
 
@@ -166,17 +167,17 @@ export const StagePanel: React.FC<StagePanelProps> = ({
                     <span className="flex items-center gap-1">
                       <span className="text-zinc-500 font-bold">Key:</span>
                       <span className="font-bold text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">
-                        {keyCodes}
+                        <RichCardText text={keyCodes} />
                       </span>
                     </span>
                   )}
                   <span className="flex items-center gap-1">
-                    <span className="font-bold text-zinc-800">{costLabel}</span>
+                    <span className="font-bold text-zinc-800"><RichCardText text={costLabel} /></span>
                   </span>
                   {targetStr && (
                     <span className="flex items-center gap-1">
                       <span className="text-zinc-500 font-bold">Target:</span>
-                      <span className="text-zinc-800">{targetStr}</span>
+                      <span className="text-zinc-800"><RichCardText text={targetStr} /></span>
                     </span>
                   )}
                 </div>

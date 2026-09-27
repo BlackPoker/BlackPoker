@@ -8,13 +8,16 @@ import { PlayerObservation } from "../../domain/decision/PlayerObservation";
 export interface UnitBattleDisplayInfo {
   readonly unitId: string;
   readonly badge: string; // Target番号: "①", "②" 等 (Player内で一意)
-  readonly label: string; // "① ♠6 一般兵", "② 防壁" 等
+  readonly label: string; // "① ♠6 一般兵", "② 防壁" 等 (Legacy)
+  readonly humanLabel?: string; // "一般兵 ♠6", "防壁①" 等 (Human Identifier)
   readonly ownerPlayerKey?: string; // "p1" | "p2"
   readonly bulwarkPosition?: string; // 防壁のみ: ライフ側から "①", "②", "③" 等 (物理配置番号)
   readonly role?: "attacker" | "blocker";
   readonly targetUnitId?: string; // ブロッカーが対象としているアタッカーID
   readonly targetBadge?: string; // 自分がブロックしているアタッカーの番号 (例: "①")
+  readonly targetHumanLabel?: string; // 自分がブロックしているアタッカーのHumanLabel (例: "一般兵 ♠6")
   readonly blockedByBadges: readonly string[]; // 自分をブロックしているブロッカーの番号リスト (例: ["②"])
+  readonly blockedByHumanLabels?: readonly string[]; // 自分をブロックしているブロッカーのHumanLabelリスト (例: ["防壁①"])
 }
 
 export class BattleRelationPresenter {
@@ -76,22 +79,25 @@ export class BattleRelationPresenter {
           const cardCode = firstCard.code || `${firstCard.suit}${firstCard.rank || ""}`;
           formattedCard = cardCode
             .replace(/S/g, "♠")
-            .replace(/H/g, "♡")
-            .replace(/D/g, "♢")
+            .replace(/H/g, "♥")
+            .replace(/D/g, "♦")
             .replace(/C/g, "♣");
         }
 
         const kind = unit.kind || "一般兵";
         const label = `${badge} ${formattedCard ? `${formattedCard} ` : ""}${kind}`;
+        const humanLabel = `${kind}${formattedCard ? ` ${formattedCard}` : ""}`.trim();
 
         const info: UnitBattleDisplayInfo = {
           unitId: unit.unitId,
           badge,
           label,
+          humanLabel,
           ownerPlayerKey: pKey,
           role: unit.battle?.role,
           targetUnitId: unit.battle?.blocksUnitId,
           blockedByBadges: [],
+          blockedByHumanLabels: [],
         };
         map.set(unit.unitId, info);
         allUnitsWithPlayer.push({ unit, ownerPlayerKey: pKey });
@@ -112,23 +118,26 @@ export class BattleRelationPresenter {
           const cardCode = firstCard.code || `${firstCard.suit}${firstCard.rank || ""}`;
           formattedCard = cardCode
             .replace(/S/g, "♠")
-            .replace(/H/g, "♡")
-            .replace(/D/g, "♢")
+            .replace(/H/g, "♥")
+            .replace(/D/g, "♦")
             .replace(/C/g, "♣");
         }
 
         const kind = unit.kind || "防壁";
         const label = `${badge} ${formattedCard ? `${formattedCard} ` : ""}${kind}`;
+        const humanLabel = `防壁${bulwarkPosition}`;
 
         const info: UnitBattleDisplayInfo = {
           unitId: unit.unitId,
           badge,
           label,
+          humanLabel,
           ownerPlayerKey: pKey,
           bulwarkPosition,
           role: unit.battle?.role,
           targetUnitId: unit.battle?.blocksUnitId,
           blockedByBadges: [],
+          blockedByHumanLabels: [],
         };
         map.set(unit.unitId, info);
         allUnitsWithPlayer.push({ unit, ownerPlayerKey: pKey });
@@ -143,12 +152,15 @@ export class BattleRelationPresenter {
       if (unit.battle?.role === "blocker" && unit.battle?.blocksUnitId) {
         const attackerInfo = map.get(unit.battle.blocksUnitId);
         if (attackerInfo) {
-          // ブロッカー側にアタッカー番号を設定
+          // ブロッカー側にアタッカー番号・HumanLabelを設定
           (info as any).targetBadge = attackerInfo.badge;
+          (info as any).targetHumanLabel = attackerInfo.humanLabel;
 
-          // アタッカー側にブロッカー番号を追加 (複数ブロッカー対応)
+          // アタッカー側にブロッカー番号・HumanLabelを追加 (複数ブロッカー対応)
           const existingBlockers = [...attackerInfo.blockedByBadges, info.badge];
           (attackerInfo as any).blockedByBadges = existingBlockers;
+          const existingBlockerLabels = [...(attackerInfo.blockedByHumanLabels || []), info.humanLabel];
+          (attackerInfo as any).blockedByHumanLabels = existingBlockerLabels;
         }
       }
     }

@@ -2,9 +2,10 @@ import React, { useState, useMemo, useEffect, useRef } from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
-import { formatCardDisplay, formatCardList, formatSuitSymbol } from "../../engine/rules/cardUtils";
+import { formatCardDisplay, formatCardList, formatSuitSymbol, formatOfficialSuitSymbol } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
 import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
+import { RichCardText } from "../common/RichCardText";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
@@ -48,7 +49,7 @@ export function formatCostPaymentDisplay(
       const card = decisionPlayer?.handCards?.find(
         (c: any) => (c.cardInstanceId && c.cardInstanceId === cId) || c.id === cId
       );
-      return card ? formatCardDisplay(card) : cId;
+      return card ? formatOfficialSuitSymbol(formatCardDisplay(card)) : cId;
     });
     parts.push(`手札 ${cardLabels.join(", ")} 破棄`);
   }
@@ -59,7 +60,7 @@ export function formatCostPaymentDisplay(
       const info = battleRelationMap?.get(bId);
       const bulwarkPos = info?.bulwarkPosition ?? "";
       const unit = decisionPlayer?.field?.find((u: any) => u.unitId === bId);
-      const cardText = unit?.cards?.[0] ? formatCardDisplay(unit.cards[0]) : "";
+      const cardText = unit?.cards?.[0] ? formatOfficialSuitSymbol(formatCardDisplay(unit.cards[0])) : "";
       return `防壁${bulwarkPos}${cardText ? ` ${cardText}` : ""}`;
     });
     parts.push(bulwarkLabels.join(", "));
@@ -334,13 +335,20 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       const unitType = unit?.kind || (unit?.componentId === "character.bulwark" ? "防壁" : "一般兵");
       const cardPart = cardStr ? `${cardStr} ` : "";
 
-      // label: badge 単体を描画する UI 向け（二重の①を避けるため badge なし）
-      const label = `${ownerPrefix}${cardPart}${unitType}`.trim();
+      let humanLabel = relInfo?.humanLabel;
+      if (!humanLabel) {
+        if (unit?.componentId === "character.bulwark" || unitType === "防壁") {
+          humanLabel = relInfo?.bulwarkPosition ? `防壁${relInfo.bulwarkPosition}` : "防壁";
+        } else {
+          humanLabel = `${unitType}${cardPart ? ` ${cardPart.trim()}` : ""}`.trim();
+        }
+      }
 
-      // fullLabel: パターン一覧テキスト用（"自分 ① ♠5 一般兵", "相手 ① ♠6 一般兵"）
-      const fullLabel = badge
-        ? `${ownerPrefix}${badge} ${cardPart}${unitType}`.trim()
-        : `${ownerPrefix}${cardPart}${unitType}`.trim();
+      // label: 実プレイ準拠の人間識別名（二重の①等のターゲット通し番号は廃止）
+      const label = `${ownerPrefix}${humanLabel}`.trim();
+
+      // fullLabel: パターン一覧テキスト用（実プレイ準拠）
+      const fullLabel = label;
 
       map.set(unitId, {
         badge,
@@ -366,8 +374,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           const formattedCards = (eff.selectedValues || []).map((val) => formatCardDisplay(val) || val);
           label = `カード選択: ${formattedCards.join(", ")}`;
         }
-        // ASCII 短縮コード (s10, hJ, dA, cK 等) が含まれている場合の安全な表示変換 (SSOT: formatCardDisplay / formatSuitSymbol)
-        label = label.replace(/\b([shdcSHDC])(10|[2-9ajqkAJQK])\b/g, (_m, s, r) => `${formatSuitSymbol(s)}${r.toUpperCase()}`);
+        // ASCII 短縮コード (s10, hJ, dA, cK 等) が含まれている場合の安全な表示変換 (SSOT: formatCardDisplay / formatOfficialSuitSymbol)
+        label = label.replace(/\b([shdcSHDC])(10|[2-9ajqkAJQK])\b/g, (_m, s, r) => `${formatOfficialSuitSymbol(s)}${r.toUpperCase()}`);
         return {
           patternIndex: idx,
           label,
@@ -382,7 +390,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         }
         const unitLabels = eff.selectedValues.map((uId: string) => {
           const info = unitNumberMap.get(uId);
-          return info ? (info as any).fullLabel || info.label : uId;
+          return info ? info.label : uId;
         });
         const isSingle = eff.selectedValues.length === 1;
         const label = isSingle ? `${unitLabels[0]} のみ` : unitLabels.join(" + ");
@@ -393,13 +401,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       if (eff.assignments && eff.assignments.length > 0) {
         const asgnStrs = eff.assignments.map((asgn: any) => {
           const srcInfo = unitNumberMap.get(asgn.sourceUnitId);
-          const srcLabel = srcInfo ? (srcInfo as any).fullLabel || srcInfo.label : asgn.sourceUnitId;
+          const srcLabel = srcInfo ? srcInfo.label : asgn.sourceUnitId;
           if (!asgn.selectedUnitIds || asgn.selectedUnitIds.length === 0) {
             return `${srcLabel} (ブロックなし)`;
           }
           const blkLabels = asgn.selectedUnitIds.map((bId: string) => {
             const bInfo = unitNumberMap.get(bId);
-            return bInfo ? (bInfo as any).fullLabel || bInfo.label : bId;
+            return bInfo ? bInfo.label : bId;
           });
           return `${srcLabel} ← ${blkLabels.join(" + ")}`;
         });
@@ -653,7 +661,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         ) : (
           <div className="space-y-2.5">
             <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-              選択肢（盤面の ①, ② をタップまたは下記から選択）:
+              選択肢（盤面をタップまたは下記から選択）:
             </label>
 
             <div className="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-1">
@@ -679,7 +687,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                       >
                         ✓
                       </span>
-                      <span className="font-bold text-xs leading-snug">{hp.label}</span>
+                      <span className="font-bold text-xs leading-snug">
+                        <RichCardText text={hp.label} />
+                      </span>
                     </div>
                   </button>
                 );
@@ -691,7 +701,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                 <div className="text-xs text-zinc-600 font-mono truncate">
                   選択中:{" "}
                   <span className="font-bold text-zinc-950">
-                    {humanReadableEffectPatterns[selectedEffectPatternRef]?.label}
+                    <RichCardText text={humanReadableEffectPatterns[selectedEffectPatternRef]?.label || ""} />
                   </span>
                 </div>
                 <button
@@ -768,9 +778,21 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       {selectedAction && (
         <div className="flex flex-wrap items-center gap-2 p-1.5 bg-zinc-50 rounded border border-zinc-200 text-[11px] mb-2.5 font-mono text-zinc-800">
           <span className="font-bold text-zinc-950">Action: {selectedAction.actionName || selectedAction.actionId}</span>
-          {selectedKey && <span className="text-zinc-600">| Key: {selectedKey.displayCodes.join("+")}</span>}
-          {selectedCost && <span className="text-zinc-600">| Cost: {selectedCost.summary}</span>}
-          {selectedTarget && <span className="text-zinc-600">| Target: {selectedTarget.displayName}</span>}
+          {selectedKey && (
+            <span className="text-zinc-600">
+              | Key: <RichCardText text={selectedKey.displayCodes.join("+")} />
+            </span>
+          )}
+          {selectedCost && (
+            <span className="text-zinc-600">
+              | Cost: <RichCardText text={selectedCost.summary} />
+            </span>
+          )}
+          {selectedTarget && (
+            <span className="text-zinc-600">
+              | Target: <RichCardText text={selectedTarget.displayName} />
+            </span>
+          )}
         </div>
       )}
 
@@ -824,7 +846,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                         : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
                     }`}
                   >
-                    <div className="font-mono font-bold text-xs">{keySel.displayCodes.join("+")}</div>
+                    <div className="font-mono font-bold text-xs">
+                      <RichCardText text={keySel.displayCodes.join("+")} />
+                    </div>
                   </button>
                 );
               })}
@@ -853,7 +877,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     }`}
                   >
                     <div className="font-mono font-bold text-xs">
-                      {formatCostPaymentDisplay(costSel, request, battleRelationMap)}
+                      <RichCardText text={formatCostPaymentDisplay(costSel, request, battleRelationMap)} />
                     </div>
                   </button>
                 );
@@ -891,7 +915,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-bold text-xs leading-snug">
-                        {target.primaryLabel || target.displayName}
+                        <RichCardText text={target.primaryLabel || target.displayName} />
                       </span>
                       {isSelected && (
                         <span className="text-[9px] font-mono font-bold px-1 rounded bg-zinc-950 text-white shrink-0 ml-1">
@@ -905,7 +929,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                           isSelected ? "text-zinc-700 font-medium" : "text-zinc-500"
                         }`}
                       >
-                        {target.secondaryLabel}
+                        <RichCardText text={target.secondaryLabel} />
                       </span>
                     )}
                   </button>

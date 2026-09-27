@@ -350,9 +350,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       // B① が存在し、防壁の主たる位置識別子として描画される
       expect(html).toContain("B①");
       expect(html).toContain("防壁配置: ライフ側から ①");
-      // Target 番号 ② も secondary として存在
-      expect(html).toContain("②");
-      expect(html).toContain("title=\"Target番号\"");
+      // Target 番号 ② は廃止されていること
+      expect(html).not.toContain("title=\"Target番号\"");
     });
 
     it("4.2: Bコスト支払いUIの '防壁① ♠2' と盤面の 'B①' が1対1で整合する", () => {
@@ -460,9 +459,11 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
         })
       );
 
-      // カードバック 🂠 が表示され、スートや数字は一切漏洩しない
-      expect(html).toContain("🂠");
-      expect(html).toContain("?");
+      // モバイル相手伏せ防壁は1行圧縮され、カードバック 🂠 や ? は描画されない
+      expect(html).toContain("B①");
+      expect(html).toContain("防壁");
+      expect(html).not.toContain("🂠");
+      expect(html).not.toContain("数: ?");
       // 存在しないスートやランク
       expect(html).not.toContain("♠");
       expect(html).not.toContain("♡");
@@ -499,7 +500,6 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
 
       // ♢7 (または公式Webフォント ♦7) が表示される
       expect(html).toMatch(/[♦♢]7/);
-      expect(html).toContain("数:");
       expect(html).toContain("7");
     });
   });

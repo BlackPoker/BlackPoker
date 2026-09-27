@@ -1,6 +1,7 @@
 import React from "react";
 import { createPortal } from "react-dom";
 import { CardView } from "./CardView";
+import { RichCardText } from "../common/RichCardText";
 
 export interface UnitDetailModalProps {
   readonly isOpen: boolean;
@@ -65,7 +66,9 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-sm font-bold font-serif">{unitDisplayName}</span>
+            <span className="text-sm font-bold font-serif">
+              <RichCardText text={unitDisplayName} />
+            </span>
             {classification && (
               <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-100 border border-zinc-300 text-zinc-700 font-bold">
                 {classification}
@@ -144,8 +147,8 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
                 const cardCode = f.card?.code || (f.card?.suit && f.card?.rank ? `${f.card.suit}${f.card.rank}` : "");
                 const formattedCard = cardCode
                   .replace(/S/g, "♠")
-                  .replace(/H/g, "♡")
-                  .replace(/D/g, "♢")
+                  .replace(/H/g, "♥")
+                  .replace(/D/g, "♦")
                   .replace(/C/g, "♣");
                 const ownerLabel = f.ownerPlayerId === "p1" ? "Player A" : f.ownerPlayerId === "p2" ? "Player B" : "";
 
@@ -156,7 +159,11 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({
                         {isUp ? "↑ アップ" : "↓ ダウン"}
                       </span>
                       <span className="font-black">{`(${amount >= 0 ? `+${amount}` : amount})`}</span>
-                      {formattedCard && <span className="text-zinc-600 font-medium">[{formattedCard}]</span>}
+                      {formattedCard && (
+                        <span className="text-zinc-600 font-medium">
+                          [<RichCardText text={formattedCard} />]
+                        </span>
+                      )}
                     </span>
                     {ownerLabel && <span className="text-[9px] text-zinc-400">{`by ${ownerLabel}`}</span>}
                   </div>

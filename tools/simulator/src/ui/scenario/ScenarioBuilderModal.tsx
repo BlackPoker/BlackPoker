@@ -122,7 +122,7 @@ export const ScenarioCardIdentity: React.FC<ScenarioCardIdentityProps> = ({ card
 
   return (
     <span className={`inline-flex items-center ${className}`}>
-      <span className={`bp-card-suit text-[1.15em] ${isRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{suitSymbol}</span>
+      <span className={`bp-card-suit text-[1.25em] ${isRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{suitSymbol}</span>
       <span className="bp-card-rank">{rank}</span>
       {occurrenceSuffix && <span className="text-[10px] font-sans opacity-75">{occurrenceSuffix}</span>}
     </span>

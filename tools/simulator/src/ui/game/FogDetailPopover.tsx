@@ -1,4 +1,5 @@
 import React from "react";
+import { RichCardText } from "../common/RichCardText";
 
 export interface FogDetailPopoverProps {
   playerKey: string;
@@ -12,8 +13,8 @@ function formatCardCodeDisplay(code?: string): string {
   if (!code) return "";
   return code
     .replace(/S/g, "♠")
-    .replace(/H/g, "♡")
-    .replace(/D/g, "♢")
+    .replace(/H/g, "♥")
+    .replace(/D/g, "♦")
     .replace(/C/g, "♣");
 }
 
@@ -69,7 +70,7 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
                       <span>{isUp ? "↑ アップ" : "↓ ダウン"}</span>
                       {formattedCard && (
                         <span className="bg-white px-1 py-0.2 rounded text-[10px] border border-zinc-300 text-zinc-950 font-bold">
-                          {formattedCard}
+                          <RichCardText text={formattedCard} />
                         </span>
                       )}
                     </span>
@@ -81,7 +82,7 @@ export const FogDetailPopover: React.FC<FogDetailPopoverProps> = ({
                   <div className="text-[10px] text-zinc-600 grid grid-cols-2 gap-2 pt-1 border-t border-zinc-200">
                     <div>
                       <span className="text-zinc-400 font-bold block text-[9px]">対象:</span>
-                      <span className="font-semibold text-zinc-900">{targetLabel}</span>
+                      <span className="font-semibold text-zinc-900"><RichCardText text={targetLabel} /></span>
                     </div>
                     <div>
                       <span className="text-zinc-400 font-bold block text-[9px]">作成者:</span>

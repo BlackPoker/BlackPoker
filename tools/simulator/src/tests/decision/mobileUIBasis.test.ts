@@ -570,7 +570,7 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", ()
       expect(map.get("u-a")?.badge).toBe("①");
       expect(map.get("u-a")?.label).toContain("♠6");
       expect(map.get("u-b")?.badge).toBe("①");
-      expect(map.get("u-b")?.label).toContain("♡8");
+      expect(map.get("u-b")?.label).toContain("♥8");
     });
   });
 });
