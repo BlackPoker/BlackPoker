@@ -9,16 +9,25 @@ import { formatSuitSymbol, formatCardDisplay } from "../../engine/rules/cardUtil
 
 describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILITY-PACK-STATE - Scope A)", () => {
   // 1. CSS SSOT 定義の検証
-  it("1: index.css に .bp-card-suit, .bp-card-rank が定義され、スートとランクの書体が分離されていること", () => {
+  it("1: index.css に @font-face (BlackPoker Suit) と .bp-card-suit, .bp-card-rank が定義され、Webfont と書体分離が指定されていること", () => {
     const cssPath = path.resolve(__dirname, "../../index.css");
     const cssContent = fs.readFileSync(cssPath, "utf-8");
 
-    // Suit: Open Sans 系
-    expect(cssContent).toContain(".bp-card-suit");
-    expect(cssContent).toContain('"Open Sans", sans-serif');
-    expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Times New Roman/);
+    // @font-face 定義の検証 (A, B, C, D)
+    expect(cssContent).toContain("@font-face");
+    expect(cssContent).toContain('font-family: "BlackPoker Suit"');
+    expect(cssContent).toContain('src: url("./assets/fonts/suit-regular.woff") format("woff")');
+    expect(cssContent).toContain("font-style: normal");
+    expect(cssContent).toMatch(/@font-face[^{]*\{[^}]*font-weight:\s*400/);
 
-    // Rank: Serif / 明朝系
+    // Suit: BlackPoker Suit を first family とし、font-weight: 400 (E, F, H)
+    expect(cssContent).toContain(".bp-card-suit");
+    expect(cssContent).toContain('font-family: "BlackPoker Suit", "Open Sans", sans-serif');
+    expect(cssContent).toMatch(/\.bp-card-suit[^{]*\{[^}]*font-weight:\s*400/);
+    expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Times New Roman/);
+    expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Yu Mincho/);
+
+    // Rank: Serif / 明朝系維持 (G)
     expect(cssContent).toContain(".bp-card-rank");
     expect(cssContent).toContain("Times New Roman");
     expect(cssContent).toContain("Yu Mincho");
@@ -91,8 +100,17 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     expect(html).toContain("K");
   });
 
-  // 5. 絵文字バリエーションセレクター禁止の検証
-  it("5: スート記号 (♠, ♡, ♢, ♣) に絵文字バリエーションセレクター (\\uFE0F) が含まれないこと", () => {
+  // 5. 絵文字バリエーションセレクター禁止とシンボルコントラクト維持の検証
+  it("5: スート記号 (♠, ♡, ♢, ♣) に絵文字バリエーションセレクター (\\uFE0F) が含まれず、アウトライン表記 (♡, ♢) が維持されていること", () => {
+    expect(formatSuitSymbol("S")).toBe("♠");
+    expect(formatSuitSymbol("H")).toBe("♡");
+    expect(formatSuitSymbol("D")).toBe("♢");
+    expect(formatSuitSymbol("C")).toBe("♣");
+
+    // filled 化 (♥, ♦) されていないこと
+    expect(formatSuitSymbol("H")).not.toBe("♥");
+    expect(formatSuitSymbol("D")).not.toBe("♦");
+
     const suits = ["S", "H", "D", "C"];
     for (const s of suits) {
       const symbol = formatSuitSymbol(s);
@@ -132,5 +150,13 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     );
     expect(htmlCompact).toContain("★");
     expect(htmlCompact).toContain("JK");
+  });
+
+  // 7. フォントアセット存在検証
+  it("7: suit-regular.woff フォントファイルが assets/fonts に存在し、ファイルサイズが正常であること", () => {
+    const fontPath = path.resolve(__dirname, "../../assets/fonts/suit-regular.woff");
+    expect(fs.existsSync(fontPath)).toBe(true);
+    const stats = fs.statSync(fontPath);
+    expect(stats.size).toBe(1652);
   });
 });

@@ -75,7 +75,7 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitCompact
             ? "flex"
             : "flex sm:hidden"
-        } items-center justify-center gap-0.5 leading-none font-bold`}
+        } items-center justify-center gap-0.5 leading-none`}
       >
         <span className="bp-card-suit text-[13px]">{suitSymbol}</span>
         <span className="bp-card-rank font-bold text-[13px]">{displayRank}</span>

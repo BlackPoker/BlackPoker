@@ -315,9 +315,9 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
           <div className="flex items-center gap-0.5">
             {primaryCardSuit && primaryCardRank ? (
-              <span className="font-bold text-zinc-950 text-[13px] inline-flex items-center">
+              <span className="text-zinc-950 text-[13px] inline-flex items-center">
                 <span className="bp-card-suit">{primaryCardSuit}</span>
-                <span className="bp-card-rank">{primaryCardRank}</span>
+                <span className="bp-card-rank font-bold">{primaryCardRank}</span>
               </span>
             ) : (
               <span className="font-bold text-zinc-950 text-[13px]">

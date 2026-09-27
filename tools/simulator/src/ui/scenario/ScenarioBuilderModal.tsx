@@ -1101,7 +1101,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-suit transition ${
+                  className={`px-2.5 py-1 rounded text-sm bp-card-suit transition ${
                     selectedSuit === s
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1121,7 +1121,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-suit transition ${
+                  className={`px-2.5 py-1 rounded text-sm bp-card-suit transition ${
                     selectedSuit === "J"
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1141,7 +1141,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   setSelectedRank(ranks[0]);
                 }
               }}
-              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-suit"
+              className="p-1 rounded border border-zinc-300 bg-white text-sm bp-card-suit"
             >
               <option value="S">♠</option>
               <option value="H">♡</option>

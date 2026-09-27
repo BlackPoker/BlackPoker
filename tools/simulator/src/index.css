@@ -16,10 +16,19 @@
   letter-spacing: 0.03em;
 }
 
+/* Official BlackPoker Suit Webfont */
+@font-face {
+  font-family: "BlackPoker Suit";
+  src: url("./assets/fonts/suit-regular.woff") format("woff");
+  font-style: normal;
+  font-weight: 400;
+}
+
 /* Card Typography for Enhanced Legibility */
 .bp-card-suit {
-  font-family: "Open Sans", sans-serif;
-  font-weight: 700;
+  font-family: "BlackPoker Suit", "Open Sans", sans-serif;
+  font-weight: 400;
+  font-style: normal;
   line-height: 1;
 }
 
