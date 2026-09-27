@@ -45,6 +45,8 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
     expect(html).toContain("対戦設定 (Match Setup)");
     expect(html).toContain("対戦開始");
     expect(html).toContain("Replay検証");
+    // (BP-SIM-UI-1.4-MATCH-SETUP-SUIT-FIX) タイトル左の装飾用 ♠ が存在しないこと
+    expect(html).not.toContain("♠");
   });
 
   it("Test B: 公式環境存在時のデフォルト選択 (最初の公式レギュレーションが選択されること)", () => {

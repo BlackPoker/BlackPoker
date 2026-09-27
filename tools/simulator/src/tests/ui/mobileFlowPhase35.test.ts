@@ -357,6 +357,22 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       expect(html).toContain('role="button"');
       expect(html).toContain('aria-label="♦A"');
     });
+
+    it("E.4: (BP-SIM-UI-1.4-MATCH-SETUP-SUIT-FIX) CardView in mobile compact view does not render duplicate suit", () => {
+      const htmlCompact = renderToString(
+        React.createElement(CardView, {
+          card: { id: "c-test-spade", suit: "S", rank: "9" },
+          compact: true,
+        })
+      );
+
+      // In explicit compact view, the desktop elements are hidden and only 1 active compact suit is shown
+      expect(htmlCompact).toContain("bp-card-suit text-[15px]");
+      expect(htmlCompact).toContain("♠");
+      expect(htmlCompact).toContain("9");
+      // Desktop block is hidden
+      expect(htmlCompact).not.toContain("hidden sm:block");
+    });
   });
 
   // =========================================================================

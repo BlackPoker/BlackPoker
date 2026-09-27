@@ -24,43 +24,42 @@
   font-weight: 400;
 }
 
-/* Card Typography for Enhanced Legibility */
-.bp-card-suit {
-  font-family: "BlackPoker Suit", "Open Sans", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  line-height: 1;
-  display: inline-block;
-  vertical-align: middle;
-}
+@layer components {
+  /* Card Typography for Enhanced Legibility */
+  .bp-card-suit {
+    font-family: "BlackPoker Suit", "Open Sans", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+  }
 
-/* Official ActionList Red for Heart and Diamond Suits */
-.bp-card-suit-red {
-  color: #a22041;
-}
+  /* Official ActionList Red for Heart and Diamond Suits */
+  .bp-card-suit-red {
+    color: #a22041;
+  }
 
+  .bp-card-rank {
+    font-family:
+      "Times New Roman",
+      "Yu Mincho",
+      "Hiragino Mincho ProN",
+      serif;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
 
-.bp-card-rank {
-  font-family:
-    "Times New Roman",
-    "Yu Mincho",
-    "Hiragino Mincho ProN",
-    serif;
-  font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: lining-nums tabular-nums;
-}
-
-/* Card Glyph Typography (Legacy Alias) */
-.bp-card-glyph {
-  font-family:
-    "Times New Roman",
-    "Yu Mincho",
-    "Hiragino Mincho ProN",
-    serif;
-  font-weight: 700;
-  line-height: 1;
-  font-variant-numeric: lining-nums tabular-nums;
+  /* Card Glyph Typography (Legacy Alias) */
+  .bp-card-glyph {
+    font-family:
+      "Times New Roman",
+      "Yu Mincho",
+      "Hiragino Mincho ProN",
+      serif;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
 }
 
 /* Custom Scrollbar for Light Monotone Theme */

@@ -264,4 +264,32 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
       }
     }
   });
+
+  // 9. CSS Layer & Display Override 防止検証 (BP-SIM-UI-1.4-MATCH-SETUP-SUIT-FIX)
+  it("9: (BP-SIM-UI-1.4-MATCH-SETUP-SUIT-FIX) index.css の .bp-card-suit が @layer components 内に定義され、display: inline-block 等のレイアウトプロパティを持たず、Tailwindの .hidden を妨げないこと", () => {
+    const cssPath = path.resolve(__dirname, "../../index.css");
+    const cssContent = fs.readFileSync(cssPath, "utf-8");
+
+    // @layer components 内に配置されていること
+    expect(cssContent).toMatch(/@layer\s+components\s*\{[\s\S]*\.bp-card-suit[\s\S]*\}/);
+
+    // .bp-card-suit 自体に display: inline-block 等が指定されていないこと（.hidden を override しない）
+    const suitBlockMatch = cssContent.match(/\.bp-card-suit\s*\{([^}]*)\}/);
+    expect(suitBlockMatch).not.toBeNull();
+    const suitBlockContent = suitBlockMatch![1];
+    expect(suitBlockContent).not.toContain("display");
+    expect(suitBlockContent).not.toContain("inline-block");
+
+    // compact={true} 時にデスクトップ用の suit コンテナが非表示 (hidden) になり、重複表示されないこと
+    const htmlCompact = renderToString(
+      React.createElement(CardView, {
+        card: { id: "c-test-compact", suit: "S", rank: "9", value: 9 },
+        compact: true,
+      })
+    );
+    // compact表示では desktop 側の "hidden sm:block" は生成されず "hidden" となり、
+    // かつ .bp-card-suit に display が無いため .hidden (display: none) がブラウザで正常に機能する
+    expect(htmlCompact).toContain("hidden");
+    expect(htmlCompact).not.toContain("hidden sm:block");
+  });
 });
