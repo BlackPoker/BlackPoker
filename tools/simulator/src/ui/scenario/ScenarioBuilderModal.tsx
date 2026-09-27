@@ -94,6 +94,40 @@ export function formatScenarioCardChip(card: ScenarioCardRefV1): string {
   return base;
 }
 
+/**
+ * ユーザー向けカード識別子表示コンポーネント。
+ * Suit には公式ルール準拠の Open Sans (.bp-card-suit)、
+ * Rank には明朝/Serif (.bp-card-rank) を分離して適用します。
+ */
+export interface ScenarioCardIdentityProps {
+  readonly card: ScenarioCardRefV1;
+  readonly className?: string;
+}
+
+export const ScenarioCardIdentity: React.FC<ScenarioCardIdentityProps> = ({ card, className = "" }) => {
+  const isJoker = card.suit === "J" || card.rank === "Joker" || card.rank === "JOKER";
+  const occurrenceSuffix = card.occurrence !== undefined ? ` ${card.occurrence + 1}` : "";
+
+  if (isJoker) {
+    return (
+      <span className={`inline-flex items-center ${className}`}>
+        <span className="bp-card-rank font-bold">{`Joker${occurrenceSuffix}`}</span>
+      </span>
+    );
+  }
+
+  const suitSymbol = formatScenarioSuitOptionLabel(card.suit);
+  const rank = card.rank;
+
+  return (
+    <span className={`inline-flex items-center ${className}`}>
+      <span className="bp-card-suit">{suitSymbol}</span>
+      <span className="bp-card-rank">{rank}</span>
+      {occurrenceSuffix && <span className="text-[10px] font-sans opacity-75">{occurrenceSuffix}</span>}
+    </span>
+  );
+};
+
 const DEFAULT_SUITS: readonly ("S" | "H" | "D" | "C" | "J")[] = ["S", "H", "D", "C"];
 
 export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
@@ -1067,7 +1101,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-suit transition ${
                     selectedSuit === s
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1087,7 +1121,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                       setSelectedRank(ranks[0]);
                     }
                   }}
-                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-suit transition ${
                     selectedSuit === "J"
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1107,7 +1141,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   setSelectedRank(ranks[0]);
                 }
               }}
-              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-glyph"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-suit"
             >
               <option value="S">♠</option>
               <option value="H">♡</option>
@@ -1126,7 +1160,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   key={r}
                   type="button"
                   onClick={() => setSelectedRank(r)}
-                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-glyph transition ${
+                  className={`px-2.5 py-1 rounded text-sm font-bold bp-card-rank transition ${
                     selectedRank === r
                       ? "bg-zinc-950 text-white shadow-sm"
                       : "bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
@@ -1139,7 +1173,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <select
               value={selectedRank}
               onChange={(e) => setSelectedRank(e.target.value)}
-              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-glyph"
+              className="p-1 rounded border border-zinc-300 bg-white font-bold text-sm bp-card-rank"
             >
               {availableRanks.map((r) => (
                 <option key={r} value={r}>
@@ -1255,9 +1289,9 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                 {draftUnitCards.map((c, idx) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px] bp-card-glyph"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 bg-white border border-blue-300 rounded font-bold text-blue-900 text-[11px]"
                   >
-                    {formatScenarioCardChip(c)}
+                    <ScenarioCardIdentity card={c} />
                     <button
                       onClick={() => setDraftUnitCards((prev) => prev.filter((_, i) => i !== idx))}
                       className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -1312,9 +1346,9 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
               {hand.map((c, i) => (
                 <span
                   key={i}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 bp-card-glyph"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800"
                 >
-                  {formatScenarioCardChip(c)}
+                  <ScenarioCardIdentity card={c} />
                   <button
                     onClick={() => onRemoveCard("hand", i)}
                     className="text-zinc-400 hover:text-red-600 font-bold text-[10px]"
@@ -1336,27 +1370,33 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
             <span className="text-zinc-400 italic text-[11px]">指定なし (初期プリセットなし)</span>
           ) : (
             <div className="flex flex-col gap-1.5">
-              {field.map((u, i) => {
-                const cardLabel = u.cards && u.cards.length > 0
-                  ? u.cards.map(formatScenarioCardChip).join(", ")
-                  : "カードなし";
-                return (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
+              {field.map((u, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-2 py-1 bg-zinc-100 border border-zinc-300 rounded font-bold text-zinc-800 text-[11px]"
+                >
+                  <span>
+                    {u.componentId.replace("character.", "")} (
+                    {u.cards && u.cards.length > 0 ? (
+                      u.cards.map((c, cIdx) => (
+                        <React.Fragment key={cIdx}>
+                          {cIdx > 0 && ", "}
+                          <ScenarioCardIdentity card={c} />
+                        </React.Fragment>
+                      ))
+                    ) : (
+                      "カードなし"
+                    )}
+                    ) [{u.state}/{u.face}]
+                  </span>
+                  <button
+                    onClick={() => onRemoveUnit(i)}
+                    className="text-zinc-400 hover:text-red-600 font-bold text-xs"
                   >
-                    <span>
-                      {u.componentId.replace("character.", "")} (<span className="bp-card-glyph">{cardLabel}</span>) [{u.state}/{u.face}]
-                    </span>
-                    <button
-                      onClick={() => onRemoveUnit(i)}
-                      className="text-zinc-400 hover:text-red-600 font-bold text-xs"
-                    >
-                      ×
-                    </button>
-                  </div>
-                );
-              })}
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -1386,7 +1426,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                         : "bg-zinc-100 border-zinc-300 text-zinc-800"
                     }`}
                   >
-                    <span className="bp-card-glyph">{formatScenarioCardChip(c)}</span>
+                    <ScenarioCardIdentity card={c} />
                     {isTop && <span className="text-[10px] text-amber-900 font-bold ml-1">(TOP)</span>}
                     <button
                       onClick={() => onRemoveCard("grave", i)}
@@ -1444,7 +1484,7 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                         : "bg-rose-50 border-rose-200 text-rose-800"
                     }`}
                   >
-                    <span className="bp-card-glyph">{formatScenarioCardChip(c)}</span>
+                    <ScenarioCardIdentity card={c} />
                     {isTop && <span className="text-[10px] text-rose-900 font-bold ml-1">(TOP)</span>}
                     <button
                       onClick={() => onRemoveCard("life", i)}
@@ -1520,9 +1560,9 @@ const PlayerZoneEditor: React.FC<PlayerZoneEditorProps> = ({
                   {packCards.map((c, i) => (
                     <span
                       key={i}
-                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px] bp-card-glyph"
+                      className="inline-flex items-center gap-1 px-2 py-0.5 bg-sky-50 border border-sky-200 rounded font-bold text-sky-800 text-[10px]"
                     >
-                      {formatScenarioCardChip(c)}
+                      <ScenarioCardIdentity card={c} />
                       <button
                         onClick={() => onRemoveCard("pack", i)}
                         className="text-sky-400 hover:text-red-600 font-bold"

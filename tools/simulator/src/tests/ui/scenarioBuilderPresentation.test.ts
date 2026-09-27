@@ -451,12 +451,18 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       .findAllByType("span")
       .find((s) => s.children.includes("armedSoldier"));
     expect(unitSpan).toBeDefined();
-    const unitText = unitSpan!.children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join("");
-    expect(unitText).toContain("armedSoldier (♠A, ♠K) [charge/up]");
-    const cardGlyph = unitSpan!.findByProps({ className: "bp-card-glyph" });
-    expect(cardGlyph.children.join("")).toBe("♠A, ♠K");
+    const extractText = (node: any): string => {
+      if (typeof node === "string" || typeof node === "number") return String(node);
+      if (!node) return "";
+      if (Array.isArray(node)) return node.map(extractText).join("");
+      if (node.children) return extractText(node.children);
+      return "";
+    };
+    expect(extractText(unitSpan)).toContain("armedSoldier (♠A, ♠K) [charge/up]");
+    const cardSuits = unitSpan!.findAllByProps({ className: "bp-card-suit" });
+    const cardRanks = unitSpan!.findAllByProps({ className: "bp-card-rank" });
+    expect(cardSuits.map((s) => s.children.join(""))).toEqual(["♠", "♠"]);
+    expect(cardRanks.map((r) => r.children.join(""))).toEqual(["A", "K"]);
 
     // 6. "初期盤面で対戦開始" をクリックしてコールバックの Definition を検証
     const startButton = testRenderer.root.findAllByType("button").find((b) => {
@@ -835,9 +841,11 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
 
     // 5. ライフ TOP UI の存在確認 (先頭カードに (TOP), 2枚目には付与されない, 説明注記)
     expect(snapshot).toContain("※ 上から順に配置（先頭がTOP）");
-    expect(snapshot).toContain("♡A");
+    expect(snapshot).toContain("♡");
+    expect(snapshot).toContain("A");
     expect(snapshot).toContain("(TOP)");
-    expect(snapshot).toContain("♠K");
+    expect(snapshot).toContain("♠");
+    expect(snapshot).toContain("K");
     expect(snapshot).not.toContain("♠K (TOP)");
 
     // ライフカードチップの取得と検証 (カード識別子のみ bp-card-glyph であり、(TOP) は分離されていること)
@@ -850,16 +858,19 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     });
     expect(lifeChips.length).toBeGreaterThanOrEqual(2);
-    const firstChipGlyph = lifeChips[0].findByProps({ className: "bp-card-glyph" });
-    expect(firstChipGlyph.children.join("")).toBe("♡A");
-    const firstChipText = lifeChips[0].children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join(" ");
-    expect(firstChipText).toContain("(TOP)");
-    const secondChipText = lifeChips[1].children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join(" ");
-    expect(secondChipText).not.toContain("(TOP)");
+    const firstChipSuit = lifeChips[0].findByProps({ className: "bp-card-suit" });
+    const firstChipRank = lifeChips[0].findByProps({ className: "bp-card-rank" });
+    expect(firstChipSuit.children.join("")).toBe("♡");
+    expect(firstChipRank.children.join("")).toBe("A");
+    const extractChipText = (node: any): string => {
+      if (typeof node === "string" || typeof node === "number") return String(node);
+      if (!node) return "";
+      if (Array.isArray(node)) return node.map(extractChipText).join(" ");
+      if (node.children) return extractChipText(node.children);
+      return "";
+    };
+    expect(extractChipText(lifeChips[0])).toContain("(TOP)");
+    expect(extractChipText(lifeChips[1])).not.toContain("(TOP)");
 
     // 6. AUTOバッジの存在確認 (ライフ count 3 で fixed 2 -> AUTO × 1)
     expect(snapshot).toContain("AUTO × 1");
@@ -1138,7 +1149,7 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
     expect(startedDef.players.p1.pack.opened).toBe(true);
   });
 
-  it("20: カードセレクターボタンとカードチップに bp-card-glyph と text-sm が適用されていること (BP-SIM-SCENARIO-1.3)", () => {
+  it("20: カードセレクターボタンとカードチップに bp-card-suit / bp-card-rank と text-sm が適用されていること (BP-SIM-SCENARIO-1.3-R2)", () => {
     let testRenderer!: TestRenderer.ReactTestRenderer;
 
     act(() => {
@@ -1158,25 +1169,25 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     });
 
-    // スート選択ボタン (♠, ♡, ♢, ♣) に text-sm と bp-card-glyph が適用されていること
+    // スート選択ボタン (♠, ♡, ♢, ♣) に text-sm と bp-card-suit が適用されていること
     const buttons = testRenderer.root.findAllByType("button");
     const spadeButton = buttons.find((b) => {
       return Array.isArray(b.children) && b.children.includes("♠");
     });
     expect(spadeButton).toBeDefined();
     expect(spadeButton!.props.className).toContain("text-sm");
-    expect(spadeButton!.props.className).toContain("bp-card-glyph");
+    expect(spadeButton!.props.className).toContain("bp-card-suit");
 
-    // ランク選択ボタン (A) に text-sm と bp-card-glyph が適用されていること
+    // ランク選択ボタン (A) に text-sm と bp-card-rank が適用されていること
     const rankAButton = buttons.find((b) => {
       return Array.isArray(b.children) && b.children.includes("A");
     });
     expect(rankAButton).toBeDefined();
     expect(rankAButton!.props.className).toContain("text-sm");
-    expect(rankAButton!.props.className).toContain("bp-card-glyph");
+    expect(rankAButton!.props.className).toContain("bp-card-rank");
   });
 
-  it("22: (BP-SIM-SCENARIO-1.3-R1) Fieldユニット表示およびGrave/Lifeチップにおいて、bp-card-glyph がカード識別子のみに限定され、ユニット名・状態や (TOP) ラベルを包含しないこと", () => {
+  it("22: (BP-SIM-SCENARIO-1.3-R2) Fieldユニット表示およびGrave/Lifeチップにおいて、bp-card-suit と bp-card-rank がカード識別子のみに限定され、ユニット名・状態や (TOP) ラベルを包含しないこと", () => {
     let testRenderer!: TestRenderer.ReactTestRenderer;
 
     const defWithFieldAndChips: ScenarioDefinitionV1 = {
@@ -1221,22 +1232,31 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     });
 
+    const extractText = (node: any): string => {
+      if (typeof node === "string" || typeof node === "number") return String(node);
+      if (!node) return "";
+      if (Array.isArray(node)) return node.map(extractText).join("");
+      if (node.children) return extractText(node.children);
+      return "";
+    };
+
     // 1. Field ユニット表示の検証
     const unitSpan = testRenderer.root
       .findAllByType("span")
       .find((s) => s.children.includes("soldier"));
     expect(unitSpan).toBeDefined();
-    // 親 span は bp-card-glyph を持たない
-    expect(unitSpan!.props.className || "").not.toContain("bp-card-glyph");
+    // 親 span は bp-card-suit / bp-card-rank を持たない
+    expect(unitSpan!.props.className || "").not.toContain("bp-card-suit");
+    expect(unitSpan!.props.className || "").not.toContain("bp-card-rank");
 
-    // カード識別子のみ bp-card-glyph を持つ
-    const fieldCardGlyph = unitSpan!.findByProps({ className: "bp-card-glyph" });
-    expect(fieldCardGlyph.children.join("")).toBe("♠3");
+    // カード識別子のみ bp-card-suit / bp-card-rank を持つ
+    const fieldCardSuit = unitSpan!.findByProps({ className: "bp-card-suit" });
+    const fieldCardRank = unitSpan!.findByProps({ className: "bp-card-rank" });
+    expect(fieldCardSuit.children.join("")).toBe("♠");
+    expect(fieldCardRank.children.join("")).toBe("3");
 
     // ユニット名・状態を含む全体の合成テキスト
-    const unitFullText = unitSpan!.children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join("");
+    const unitFullText = extractText(unitSpan);
     expect(unitFullText).toBe("soldier (♠3) [charge/up]");
 
     // 2. Grave チップの検証
@@ -1249,15 +1269,16 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     })[0];
     expect(graveChip).toBeDefined();
-    // 親 chip は bp-card-glyph を持たない
-    expect(graveChip.props.className).not.toContain("bp-card-glyph");
-    // カード識別子のみ bp-card-glyph
-    const graveCardGlyph = graveChip.findByProps({ className: "bp-card-glyph" });
-    expect(graveCardGlyph.children.join("")).toBe("♣6");
-    // (TOP) は bp-card-glyph の外
-    const graveTexts = graveChip.children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join(" ");
+    // 親 chip は bp-card-suit / bp-card-rank を持たない
+    expect(graveChip.props.className).not.toContain("bp-card-suit");
+    expect(graveChip.props.className).not.toContain("bp-card-rank");
+    // カード識別子のみ bp-card-suit / bp-card-rank
+    const graveCardSuit = graveChip.findByProps({ className: "bp-card-suit" });
+    const graveCardRank = graveChip.findByProps({ className: "bp-card-rank" });
+    expect(graveCardSuit.children.join("")).toBe("♣");
+    expect(graveCardRank.children.join("")).toBe("6");
+    // (TOP) は bp-card-suit / bp-card-rank の外
+    const graveTexts = extractText(graveChip);
     expect(graveTexts).toContain("(TOP)");
 
     // 3. Life チップの検証
@@ -1270,15 +1291,16 @@ describe("ScenarioBuilderPresentation Unit & Integration Tests (BP-SIM-SCENARIO-
       );
     })[0];
     expect(lifeChip).toBeDefined();
-    // 親 chip は bp-card-glyph を持たない
-    expect(lifeChip.props.className).not.toContain("bp-card-glyph");
-    // カード識別子のみ bp-card-glyph
-    const lifeCardGlyph = lifeChip.findByProps({ className: "bp-card-glyph" });
-    expect(lifeCardGlyph.children.join("")).toBe("♢5");
-    // (TOP) は bp-card-glyph の外
-    const lifeTexts = lifeChip.children
-      .map((c) => (typeof c === "string" ? c : (c as any).children.join("")))
-      .join(" ");
+    // 親 chip は bp-card-suit / bp-card-rank を持たない
+    expect(lifeChip.props.className).not.toContain("bp-card-suit");
+    expect(lifeChip.props.className).not.toContain("bp-card-rank");
+    // カード識別子のみ bp-card-suit / bp-card-rank
+    const lifeCardSuit = lifeChip.findByProps({ className: "bp-card-suit" });
+    const lifeCardRank = lifeChip.findByProps({ className: "bp-card-rank" });
+    expect(lifeCardSuit.children.join("")).toBe("♢");
+    expect(lifeCardRank.children.join("")).toBe("5");
+    // (TOP) は bp-card-suit / bp-card-rank の外
+    const lifeTexts = extractText(lifeChip);
     expect(lifeTexts).toContain("(TOP)");
   });
 });

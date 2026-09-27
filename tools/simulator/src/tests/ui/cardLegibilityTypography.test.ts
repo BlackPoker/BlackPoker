@@ -9,20 +9,29 @@ import { formatSuitSymbol, formatCardDisplay } from "../../engine/rules/cardUtil
 
 describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILITY-PACK-STATE - Scope A)", () => {
   // 1. CSS SSOT 定義の検証
-  it("1: index.css に .bp-card-glyph が定義され、Serif/明朝系フォントスタックと等幅数字が指定されていること", () => {
+  it("1: index.css に .bp-card-suit, .bp-card-rank が定義され、スートとランクの書体が分離されていること", () => {
     const cssPath = path.resolve(__dirname, "../../index.css");
     const cssContent = fs.readFileSync(cssPath, "utf-8");
 
-    expect(cssContent).toContain(".bp-card-glyph");
+    // Suit: Open Sans 系
+    expect(cssContent).toContain(".bp-card-suit");
+    expect(cssContent).toContain('"Open Sans", sans-serif');
+    expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Times New Roman/);
+
+    // Rank: Serif / 明朝系
+    expect(cssContent).toContain(".bp-card-rank");
     expect(cssContent).toContain("Times New Roman");
     expect(cssContent).toContain("Yu Mincho");
     expect(cssContent).toContain("Hiragino Mincho ProN");
     expect(cssContent).toContain("serif");
     expect(cssContent).toContain("font-variant-numeric: lining-nums tabular-nums");
+
+    // 後方互換 alias
+    expect(cssContent).toContain(".bp-card-glyph");
   });
 
   // 2. Desktop CardView のタイポグラフィとサイズ検証
-  it("2: Desktop CardView で Rank に bp-card-glyph text-[13px] font-bold が適用され、font-mono が除去されていること", () => {
+  it("2: Desktop CardView で Rank に bp-card-rank text-[13px] font-bold、Suit に bp-card-suit text-[17px] が適用され、font-mono が除去されていること", () => {
     const html = renderToString(
       React.createElement(CardView, {
         card: { id: "c-1", suit: "S", rank: "10", value: 10 },
@@ -31,9 +40,9 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     );
 
     // Rank element (desktop)
-    expect(html).toContain("text-[13px] font-bold bp-card-glyph");
+    expect(html).toContain("text-[13px] font-bold bp-card-rank");
     // Suit element (desktop: text-[17px])
-    expect(html).toContain("text-[17px] bp-card-glyph my-auto");
+    expect(html).toContain("text-[17px] bp-card-suit my-auto");
     // Suit symbol
     expect(html).toContain("♠");
     expect(html).toContain("10");
@@ -44,7 +53,7 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
   });
 
   // 3. Mobile Compact CardView のタイポグラフィとサイズ検証
-  it("3: Mobile Compact CardView で 1行表示に bp-card-glyph font-bold text-[13px] が適用されていること", () => {
+  it("3: Mobile Compact CardView で 1行表示に bp-card-suit text-[13px] と bp-card-rank font-bold text-[13px] が分離適用されていること", () => {
     const html = renderToString(
       React.createElement(CardView, {
         card: { id: "c-2", suit: "H", rank: "J", value: 11 },
@@ -52,13 +61,14 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
       })
     );
 
-    expect(html).toContain("bp-card-glyph font-bold text-[13px]");
+    expect(html).toContain("bp-card-suit text-[13px]");
+    expect(html).toContain("bp-card-rank font-bold text-[13px]");
     expect(html).toContain("♡");
     expect(html).toContain("J");
   });
 
   // 4. Mobile UnitCard のタイポグラフィとサイズ検証
-  it("4: Mobile UnitCard の primaryCard 表示に bp-card-glyph text-[13px] font-bold が適用されていること", () => {
+  it("4: Mobile UnitCard の primaryCard 表示に bp-card-suit と bp-card-rank が分離適用されていること", () => {
     const unit = {
       unitId: "u-soldier-1",
       kind: "兵士",
@@ -74,9 +84,11 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
       })
     );
 
-    // Mobile card text container
-    expect(html).toContain("font-bold text-zinc-950 bp-card-glyph text-[13px]");
-    expect(html).toContain("♣K");
+    // Mobile card text container with separated suit and rank
+    expect(html).toContain("bp-card-suit");
+    expect(html).toContain("bp-card-rank");
+    expect(html).toContain("♣");
+    expect(html).toContain("K");
   });
 
   // 5. 絵文字バリエーションセレクター禁止の検証

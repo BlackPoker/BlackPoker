@@ -16,7 +16,25 @@
   letter-spacing: 0.03em;
 }
 
-/* Card Glyph Typography for Enhanced Legibility */
+/* Card Typography for Enhanced Legibility */
+.bp-card-suit {
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.bp-card-rank {
+  font-family:
+    "Times New Roman",
+    "Yu Mincho",
+    "Hiragino Mincho ProN",
+    serif;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Card Glyph Typography (Legacy Alias) */
 .bp-card-glyph {
   font-family:
     "Times New Roman",

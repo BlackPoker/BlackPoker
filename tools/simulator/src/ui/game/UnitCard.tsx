@@ -69,13 +69,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
   // モバイル表示用: 1枚目カードのフォーマット
   const primaryCard = Array.isArray(unit.cards) && unit.cards.length > 0 ? unit.cards[0] : null;
-  let mobileCardText = "—";
+  let primaryCardSuit: string | null = null;
+  let primaryCardRank: string | null = null;
+  let mobileCardFallback = "—";
   if (isHiddenFromViewer) {
-    mobileCardText = "🂠";
+    mobileCardFallback = "🂠";
   } else if (primaryCard) {
-    const sym = formatSuitSymbol(primaryCard.suit);
-    const rk = primaryCard.rank !== undefined ? String(primaryCard.rank) : "";
-    mobileCardText = `${sym}${rk}`;
+    primaryCardSuit = formatSuitSymbol(primaryCard.suit);
+    primaryCardRank = primaryCard.rank !== undefined ? String(primaryCard.rank) : "";
   }
   const extraCardCount = Array.isArray(unit.cards) && unit.cards.length > 1 ? unit.cards.length - 1 : 0;
 
@@ -313,9 +314,16 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         {/* 2行目: カードスート/数字 + SIZE/数字 */}
         <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
           <div className="flex items-center gap-0.5">
-            <span className="font-bold text-zinc-950 bp-card-glyph text-[13px]">
-              {mobileCardText}
-            </span>
+            {primaryCardSuit && primaryCardRank ? (
+              <span className="font-bold text-zinc-950 text-[13px] inline-flex items-center">
+                <span className="bp-card-suit">{primaryCardSuit}</span>
+                <span className="bp-card-rank">{primaryCardRank}</span>
+              </span>
+            ) : (
+              <span className="font-bold text-zinc-950 text-[13px]">
+                {mobileCardFallback}
+              </span>
+            )}
             {extraCardCount > 0 && !isHiddenFromViewer && (
               <span className="text-[7px] font-mono text-zinc-500 bg-zinc-100 px-0.5 rounded border border-zinc-300">
                 {`+${extraCardCount}`}
