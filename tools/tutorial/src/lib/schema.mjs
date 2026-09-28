@@ -1,3 +1,4 @@
+import { deriveInteractions, interactionBoard, sameCard } from "./interaction.mjs";
 const buckets = {
   action: "actions",
   character: "characters",
@@ -93,6 +94,24 @@ export function validateScenario(value, catalog) {
     if (s.placementGuide !== undefined &&
       (typeof s.placementGuide !== "string" || !s.placementGuide))
       errors.push("Invalid placementGuide");
+    if (s.boardNote !== undefined && (typeof s.boardNote !== "string" || !s.boardNote)) errors.push("Invalid boardNote");
+    if (s.interaction !== undefined) {
+      const interaction = s.interaction;
+      if (!interaction || !["action", "select-target"].includes(interaction.kind)) errors.push("Invalid interaction kind");
+      else if (interaction.kind === "action") {
+        if (typeof interaction.label !== "string" || !interaction.label || s.operations?.length)
+          errors.push("Action interaction must have a label and no operations");
+      } else {
+        const target = interaction.targetCard;
+        if (!target || !["A", "B"].includes(target.player) || !zones.includes(target.zone) ||
+          !s.board?.before?.[target.player]?.[target.zone]?.some((c) => c.card === target.card))
+          errors.push("Invalid interaction targetCard");
+        if (s.operations?.length !== 1 || s.operations[0]?.cards?.length !== 1 ||
+          s.operations[0]?.from !== s.operations[0]?.to ||
+          JSON.stringify(s.board?.before) !== JSON.stringify(s.board?.after))
+          errors.push("Target interaction contradicts operation");
+      }
+    }
     for (const phase of ["before", "after"]) {
       const board = s.board?.[phase];
       if (!board || ![null, "A", "B"].includes(board.turn))
@@ -167,7 +186,7 @@ export function validateScenario(value, catalog) {
         continue;
       }
       sceneIds.add(scene.id);
-      if (!["static", "auto"].includes(scene.presentation)) errors.push("Invalid scene presentation");
+      if (!["static", "interactive"].includes(scene.presentation)) errors.push("Invalid scene presentation");
       if (![scene.title, scene.intro, scene.summary].every((text) => typeof text === "string" && text))
         errors.push("Invalid scene text");
       if (!Array.isArray(scene.stepIds) || !scene.stepIds.length ||
@@ -179,6 +198,28 @@ export function validateScenario(value, catalog) {
       for (const id of scene.stepIds) {
         const step = stepById.get(id);
         if (!step || step.mode !== "fixed") errors.push("Scene references unknown fixed step: " + id);
+        else if (scene.presentation === "static") {
+          if (step.operations?.length || step.interaction || JSON.stringify(step.board?.before) !== JSON.stringify(step.board?.after))
+            errors.push("Static scene must not require interaction");
+        } else if (scene.presentation === "interactive") {
+          try {
+            const commands = deriveInteractions(step);
+            if (!commands.length || commands.some((c) => c.kind === "unsupported")) errors.push("Interactive step is not operable: " + id);
+            for (const [index, command] of commands.entries()) {
+              if (command.kind === "action") {
+                if (["A", "B"].some((p) => JSON.stringify(step.board.before[p]) !== JSON.stringify(step.board.after[p])))
+                  errors.push("Action interaction cannot move cards");
+                continue;
+              }
+              const { player, zone, card } = command.source;
+              const before = interactionBoard(step, index)[player][zone];
+              const to = command.kind === "move-card" ? command.to : zone;
+              if (!before.some((c) => c.card === card) || !step.board.after[player][to].some((c) => c.card === card) ||
+                (zone === "life" && before[0]?.card !== card)) errors.push("Interaction contradicts operation order: " + id);
+              if (command.kind === "select-target" && sameCard(command.source, command.target)) errors.push("Invalid interaction targetCard");
+            }
+          } catch { errors.push("Interactive step is not operable: " + id); }
+        }
         if (usedSteps.has(id)) errors.push("Fixed step belongs to multiple scenes: " + id);
         usedSteps.add(id);
         ordered.push(id);

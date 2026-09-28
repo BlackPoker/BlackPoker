@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { BoardCard, BoardState, MovementCause, Operation, Player, Zone } from "../types";
 import { cardName } from "../lib/cards";
 import { BoardOverlay } from "./BoardOverlay";
+import { sameCard } from "../lib/interaction.mjs";
+import type { CardLocation, InteractionCommand, InteractionInput } from "../lib/interaction.mjs";
 export { cardName } from "../lib/cards";
 const labels: Record<Zone, string> = {
   life: "ライフ",
@@ -50,6 +52,8 @@ export function TutorialBoard({
   stepId,
   cause,
   focusZones = [],
+  interaction,
+  boardNote,
 }: {
   board: BoardState;
   before: BoardState;
@@ -60,8 +64,25 @@ export function TutorialBoard({
   stepId: string;
   cause?: MovementCause;
   focusZones?: { player: Player; zone: Zone }[];
+  boardNote?: string;
+  interaction?: {
+    command?: InteractionCommand; selected: CardLocation | null;
+    pending: boolean; complete: boolean; mistakes: number;
+    onInput: (input: InteractionInput) => void;
+  };
 }) {
   const [boardElement, setBoardElement] = useState<HTMLElement | null>(null);
+  const gesture = useRef<{ source: CardLocation; x: number; y: number; active: boolean; name: string } | null>(null);
+  const suppressClickUntil = useRef(0);
+  const [ghost, setGhost] = useState<{ x: number; y: number; name: string } | null>(null);
+  const interactive = !real && !!interaction;
+  const command = interaction?.command;
+  const available = interactive && !interaction.pending && !interaction.complete;
+  const selected = interaction?.selected;
+  const guideOperations = interactive
+    ? selected && command?.kind === "move-card" && available
+      ? [{ ...command.operation, cards: [selected.card] }] : []
+    : operations;
   const realHints: Record<Zone, { main: string; sub: string }> = {
     life: stepId === "real-life"
       ? { main: "裏向きで16枚", sub: "実物カードの束" }
@@ -85,7 +106,7 @@ export function TutorialBoard({
     const related = operations.filter((o) => o.player === player);
     const focused = cause?.phase === "setup" && focusZones.some((focus) => focus.player === player && focus.zone === zone);
     const changed = !real && cause?.phase !== "setup" && related.some((o) => (applied ? o.to : o.from) === zone);
-    const annotations = !real && cause?.phase !== "setup" ? related.filter((o) => o.to === zone &&
+    const annotations = !real && cause?.phase !== "setup" && (!interactive || interaction.pending || applied) ? related.filter((o) => o.to === zone &&
       (applied || o.from === o.to))
       .map((operation) => movement(operation, before, after)) : [];
     const stack = zone === "life" || zone === "grave";
@@ -94,29 +115,76 @@ export function TutorialBoard({
         ? cards.slice(0, 1)
         : cards.slice(-1)
       : cards;
+    const destination = available && !!selected && command?.kind === "move-card"
+      && command.source.player === player && command.to === zone;
     return (
       <div
         key={zone}
         data-zone={zone}
+        data-player={player}
         data-testid={player + "-" + zone}
-        className={`table-zone ${changed ? "changed-zone" : ""} ${focused ? "focused-zone" : ""} zone-${zone}`}
+        className={`table-zone ${changed ? "changed-zone" : ""} ${focused ? "focused-zone" : ""} ${destination ? "destination-zone" : ""} zone-${zone}`}
       >
+        {interactive && <button type="button" className="zone-hit"
+          aria-label={`PLAYER ${player}の${labels[zone]}${destination ? "へ移す" : ""}`}
+          onClick={() => interaction.onInput({ kind: "zone", player, zone })} />}
         <span className="zone-label">
           {labels[zone]}
           {!real && cards.length > 0 && <small> {cards.length}枚</small>}
         </span>
         <div className="zone-cards">
-          {shown.map((c: BoardCard) => (
-            <span className={`card-slot ${c.state}`} key={c.card}>
+          {shown.map((c: BoardCard) => {
+            const location = { player, zone, card: c.card };
+            const isSelected = sameCard(selected, location);
+            const expected = available && command && "source" in command && sameCard(command.source, location);
+            const target = available && selected && command?.kind === "select-target" && sameCard(command.target, location);
+            const name = `${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`;
+            const CardSlot = interactive ? "button" : "span";
+            return <CardSlot className={`card-slot ${c.state} ${isSelected ? "selected-card" : ""} ${expected || target ? "expected-card" : ""} ${interaction?.mistakes ? "strong-hint" : ""}`} key={c.card}
+              {...(interactive ? { type: "button" as const, "aria-label": name, "aria-pressed": isSelected } : {})}
+              onClick={interactive ? () => {
+                if (Date.now() < suppressClickUntil.current) return;
+                interaction.onInput({ kind: "card", card: location });
+              } : undefined}
+              onPointerDown={interactive ? (event) => {
+                if (!available || command?.kind !== "move-card" || !["mouse", "pen"].includes(event.pointerType) || event.button !== 0) return;
+                gesture.current = { source: location, x: event.clientX, y: event.clientY, active: false,
+                  name: c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card) };
+                event.currentTarget.setPointerCapture?.(event.pointerId);
+              } : undefined}
+              onPointerMove={interactive ? (event) => {
+                const current = gesture.current;
+                if (!current || Math.hypot(event.clientX - current.x, event.clientY - current.y) < 7) return;
+                if (!current.active) {
+                  current.active = true;
+                  if (!isSelected) interaction.onInput({ kind: "card", card: location });
+                }
+                setGhost({ x: event.clientX, y: event.clientY, name: current.name });
+              } : undefined}
+              onPointerUp={interactive ? (event) => {
+                const current = gesture.current;
+                gesture.current = null;
+                setGhost(null);
+                if (!current?.active) return;
+                suppressClickUntil.current = Date.now() + 400;
+                const destination = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-zone][data-player]");
+                interaction.onInput({ kind: "drop", source: current.source,
+                  player: destination?.dataset.player as Player | undefined,
+                  zone: destination?.dataset.zone as Zone | undefined });
+                destination?.querySelector<HTMLButtonElement>(".zone-hit")?.focus({ preventScroll: true });
+              } : undefined}
+              onPointerCancel={() => { gesture.current = null; setGhost(null); }}>
               <span
                 data-card={c.card}
                 className={`board-card ${c.state} ${c.face === "down" ? "face-down" : ""} ${changed && related.some((o) => o.cards.includes(c.card)) ? "changed-card" : ""}`}
-                aria-label={`${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`}
+                aria-label={interactive ? undefined : name}
+                aria-hidden={interactive || undefined}
               >
                 {c.face === "down" ? "BP" : cardName(c.card)}
               </span>
-            </span>
-          ))}
+              {isSelected && <small className="selection-label" aria-hidden="true">選択中</small>}
+            </CardSlot>;
+          })}
           {!shown.length && real && (
             <span className={`real-placeholder placeholder-${zone}`}>
               <span className={`slot-stack slot-${zone}`} aria-hidden="true">
@@ -139,7 +207,7 @@ export function TutorialBoard({
   return (
     <figure
       ref={setBoardElement}
-      className="persistent-board"
+      className={`persistent-board ${interactive ? "interactive-board" : ""}`}
       aria-label={real ? "実物カードの配置ガイド" : "練習の盤面"}
     >
       <figcaption>
@@ -151,6 +219,8 @@ export function TutorialBoard({
             ? "変化後の盤面"
             : "操作前の盤面"}
       </figcaption>
+      {boardNote && <div className="board-note">{boardNote}</div>}
+      {ghost && <div className="card-ghost" aria-hidden="true" style={{ left: ghost.x + 12, top: ghost.y + 12 }}>{ghost.name}</div>}
       {!real && applied && before.turn !== after.turn && (
         <div className="turn-motion" aria-label={`ターン：PLAYER ${before.turn}からPLAYER ${after.turn}へ`}>
           PLAYER {before.turn} <span aria-hidden="true">→</span> PLAYER {after.turn}
@@ -177,8 +247,8 @@ export function TutorialBoard({
           </div>
         </section>
       ))}
-      {!real && !applied && cause?.phase !== "setup" && boardElement &&
-        <BoardOverlay board={boardElement} operations={operations} />}
+      {!real && !applied && cause?.phase !== "setup" && boardElement && guideOperations.length > 0 &&
+        <BoardOverlay board={boardElement} operations={guideOperations} />}
       {!real && applied && (
         <ul className="visually-hidden" aria-label="カードの変化">
           {operations.map((operation, index) => (

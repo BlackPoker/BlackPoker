@@ -52,11 +52,15 @@ export interface TutorialStep {
   actionName?: string;
   cause?: MovementCause;
   alternate?: { title: string; text: string };
+  interaction?:
+    | { kind: "select-target"; targetCard: { player: Player; zone: Zone; card: string } }
+    | { kind: "action"; label: string };
+  boardNote?: string;
 }
 export interface TutorialScene {
   id: string;
   title: string;
-  presentation: "static" | "auto";
+  presentation: "static" | "interactive";
   stepIds: string[];
   cues: string[];
   intro: string;

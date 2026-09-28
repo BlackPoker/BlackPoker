@@ -7,7 +7,7 @@ import { CurriculumPanel } from "./components/CurriculumPanel";
 import { RuleLinks } from "./components/RuleLinks";
 import { TutorialIntro } from "./components/TutorialIntro";
 import { useTutorialProgress } from "./hooks/useTutorialProgress";
-import { useScenePlayback } from "./hooks/useScenePlayback";
+import { useSceneInteraction } from "./hooks/useSceneInteraction";
 import { cardName } from "./lib/cards";
 import { learningUnits, unitIndexForStep } from "./lib/scenes";
 import {
@@ -16,15 +16,9 @@ import {
   resolveBrowserStorage,
   saveIntroComplete,
 } from "./lib/storage";
-import type { Operation, TutorialScenario, TutorialStep } from "./types";
+import type { Operation, TutorialScenario } from "./types";
 const tutorial = scenario as TutorialScenario;
 const units = learningUnits(tutorial);
-function shortResult(step: TutorialStep) {
-  if (!step.operations.length) return step.learned;
-  const phase = step.cause?.phase === "request" ? "コスト支払い" :
-    step.cause?.phase === "trigger" ? "誘発" : "解決";
-  return `${phase}：${step.operations.map((operation) => operation.label).join(" / ")}`;
-}
 export default function App() {
   const storage = resolveBrowserStorage();
   const [introComplete, setIntroComplete] = useState(() =>
@@ -39,20 +33,20 @@ export default function App() {
   const unitIndex = unitIndexForStep(units, progress.stepIndex);
   const unit = units[unitIndex];
   const scene = unit.scene;
-  const playback = useScenePlayback(scene);
+  const interaction = useSceneInteraction(scene, scene ? tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1) : []);
   const step = tutorial.steps[scene
-    ? unit.firstStepIndex + playback.microIndex
+    ? unit.firstStepIndex + interaction.microIndex
     : progress.stepIndex];
-  const applied = scene ? playback.applied : progress.applied;
+  const applied = scene ? interaction.applied : progress.applied;
   const maxReachedUnitIndex = unitIndexForStep(units, progress.maxReachedStepIndex);
   useEffect(() => {
     window.scrollTo?.({ top: 0 });
   }, [unitIndex]);
   const chapterUnits = units.filter((item) => item.chapter === unit.chapter);
   const position = chapterUnits.findIndex((item) => item.id === unit.id) + 1;
-  const percent = Math.round(
+  const percent = progress.completed ? 100 : Math.round(
     ((maxReachedUnitIndex +
-      (unitIndex === maxReachedUnitIndex && (scene ? playback.complete : progress.applied)
+      (unitIndex === maxReachedUnitIndex && (scene ? interaction.hasCompleted : progress.applied)
         ? 1
         : 0)) /
       units.length) *
@@ -64,7 +58,7 @@ export default function App() {
       : step.actor === "first"
         ? progress.firstPlayer
         : step.actor;
-  const board = step.board[applied ? "after" : "before"];
+  const board = scene ? interaction.board! : step.board[applied ? "after" : "before"];
   const selectedBoard =
     step.id === "start-draw"
       ? { ...board, turn: progress.firstPlayer || null }
@@ -78,9 +72,14 @@ export default function App() {
           cards: [],
           label: "ライフから手札へ1枚動かす",
         }]
-      : step.operations;
+      : scene && interaction.pending && interaction.completedActions
+        ? step.operations.flatMap((operation) => {
+          const completed = interaction.commands[interaction.completedActions - 1];
+          return completed && "source" in completed && completed.operation === operation
+            ? [{ ...operation, cards: [completed.source.card] }] : [];
+        }) : step.operations;
   const select = (index: number) => {
-    if (index === unit.firstStepIndex && scene) playback.replay();
+    if (index === unit.firstStepIndex && scene) interaction.replay();
     else progress.goTo(index);
     setDetailsOpen(false);
     setAlternateOpen(false);
@@ -155,7 +154,7 @@ export default function App() {
         <div className="lesson-scroll">
           <article className="lesson-card">
             <div className="actor-banner" data-testid="actor">
-              <small>{step.mode === "fixed" ? "注目する人" : "操作する人"}</small>
+              <small>{scene?.presentation === "static" ? "注目する人" : "操作する人"}</small>
               <strong>
                 {actor === "both"
                   ? "PLAYER A ＋ PLAYER B"
@@ -185,11 +184,11 @@ export default function App() {
             <p className="instruction">
               {scene ? scene.intro : step.instruction}
             </p>
-            {scene?.presentation === "auto" && !playback.complete && (
+            {scene?.presentation === "interactive" && !interaction.complete && (
               <div className="scene-progress" aria-live="polite">
-                <strong>{playback.microIndex + 1} / {scene.stepIds.length}</strong>
-                <span>{scene.cues[playback.microIndex]}</span>
-                <small>{applied ? "結果" : "次に起こること"}</small>
+                <strong>{interaction.microIndex + 1} / {scene.stepIds.length}</strong>
+                <span>{scene.cues[interaction.microIndex]}</span>
+                {interaction.commands.length > 1 && <small>{interaction.pending ? interaction.completedActions : interaction.completedActions + 1} / {interaction.commands.length}枚目</small>}
               </div>
             )}
             {scene?.presentation === "static" && (
@@ -199,10 +198,10 @@ export default function App() {
                 <span><b>カードの向き</b> 縦がチャージ・横がドライブ</span>
               </div>
             )}
-            {scene && applied && (
+            {scene && interaction.complete && (
               <div className="learned scene-result" role="status">
-                <strong>{playback.complete ? "この場面のまとめ" : scene.cues[playback.microIndex]}</strong>
-                <p>{playback.complete ? scene.summary : shortResult(step)}</p>
+                <strong>この場面のまとめ</strong>
+                <p>{scene.summary}</p>
               </div>
             )}
             {step.placementGuide && <p className="placement-guide">{step.placementGuide}</p>}
@@ -247,16 +246,32 @@ export default function App() {
                 ))}
               </fieldset>
             )}
+            {scene && <div className="interaction-guide" aria-live="polite" aria-atomic="true">
+              {interaction.lastResult && <p className="interaction-result">✓ {interaction.lastResult}</p>}
+              {!interaction.complete && <strong>{interaction.pending ? "操作できました" : interaction.prompt}</strong>}
+              {scene.presentation === "static" && <strong>置き場をタップすると説明が出ます。</strong>}
+              {interaction.feedback && <p className="interaction-feedback">{interaction.feedback}</p>}
+              {!interaction.complete && step.cause?.phase === "trigger" && step.operations.some((operation) => operation.from === operation.to) &&
+                interaction.commands.every((command) => command.kind === "tap-card") && <small>自動で起きるチャージを、カード操作としてなぞります。</small>}
+              {!interaction.complete && step.cause?.phase === "trigger" && step.operations.some((operation) => operation.to === "hand") &&
+                <small>自動で起きるドローをなぞります。今回は2枚引いてみましょう。</small>}
+              {!interaction.complete && interaction.command?.kind === "action" && !interaction.pending &&
+                <button className="interaction-action" onClick={() => interaction.attempt({ kind: "action" })}>{interaction.command.label}</button>}
+            </div>}
             <TutorialBoard
               board={selectedBoard}
               before={step.board.before}
               after={step.board.after}
               operations={guideOperations}
-              applied={applied}
+              applied={applied || !!(scene && interaction.pending)}
               real={step.mode === "real"}
               stepId={step.id}
               cause={step.cause}
               focusZones={step.focusZones}
+              boardNote={step.boardNote}
+              interaction={scene ? { command: interaction.command, selected: interaction.selected,
+                pending: interaction.pending, complete: interaction.complete,
+                mistakes: interaction.mistakes, onInput: interaction.attempt } : undefined}
             />
             {step.mode === "real" && !progress.applied && (
               <MoveGuide
@@ -265,7 +280,7 @@ export default function App() {
                 after={step.board.after}
               />
             )}
-            {scene && playback.complete && tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).some((item) => item.alternate) && (
+            {scene && interaction.complete && tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).some((item) => item.alternate) && (
               <div className="alternate-example">
                 <button
                   className="alternate-toggle"
@@ -298,10 +313,9 @@ export default function App() {
               >
                 <span aria-hidden="true">←</span><span>戻る</span>
               </button>
-              <button
+              {(!scene || interaction.complete) && <button
                 className="primary-button"
                 disabled={
-                  (scene && !playback.complete) ||
                   ((step.chooseFirst || step.actor === "first") && !progress.firstPlayer)
                 }
                 onClick={() => {
@@ -319,16 +333,16 @@ export default function App() {
                   }
                 }}
               >
-                {scene && !playback.complete ? "再生中…" : step.id === "free-play" ? "対戦を始める" : "次へ"}
-                {(!scene || playback.complete) && <span>→</span>}
-              </button>
+                {step.id === "free-play" ? "対戦を始める" : "次へ"}
+                <span>→</span>
+              </button>}
             </div>
-            {scene?.presentation === "auto" && playback.complete && (
+            {scene?.presentation === "interactive" && interaction.complete && (
               <button className="scene-replay" onClick={() => {
-                playback.replay();
+                interaction.replay();
                 setDetailsOpen(false);
                 setAlternateOpen(false);
-              }}>↻ もう一度見る</button>
+              }}>↻ もう一度やる</button>
             )}
             <button
               className="why-toggle"
@@ -385,7 +399,7 @@ export default function App() {
           </div>
           <p className="physical-note">
             {scene
-              ? "場面を自動再生 → まとめを見る → 次へ"
+              ? "画面のカードを操作 → 場面を完了 → 次へ"
               : "実物カードを動かす → 次へ"}
           </p>
         </div>
@@ -407,6 +421,7 @@ export default function App() {
                 className="danger"
                 onClick={() => {
                   progress.restart();
+                  interaction.replay();
                   clearIntroComplete(storage);
                   setIntroComplete(false);
                   setRestartOpen(false);

@@ -1,208 +1,237 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "../src/App";
 import scenario from "../src/data/tutorials/entry16.json";
-import { PREVIEW_MS, RESULT_MS } from "../src/hooks/useScenePlayback";
-import { learningUnits } from "../src/lib/scenes";
-import { clearIntroComplete, loadIntroComplete, loadProgress, saveIntroComplete, saveProgress } from "../src/lib/storage";
-import type { TutorialScenario } from "../src/types";
-
-const units = learningUnits(scenario as TutorialScenario);
+import { RESULT_MS } from "../src/hooks/useSceneInteraction";
+import { deriveInteractions } from "../src/lib/interaction.mjs";
+import { clearIntroComplete, loadProgress, saveIntroComplete, saveProgress } from "../src/lib/storage";
+import type { TutorialStep } from "../src/types";
 function at(id: string, extra = {}) {
-  saveProgress({ scenarioId: scenario.id,
-    stepIndex: scenario.steps.findIndex((step) => step.id === id),
+  saveProgress({ scenarioId: scenario.id, stepIndex: scenario.steps.findIndex((s) => s.id === id),
     completed: false, updatedAt: "", ...extra }, window.localStorage);
 }
-function tick(ms: number) { act(() => vi.advanceTimersByTime(ms)); }
-function finishMicroSteps(count: number) {
-  for (let i = 0; i < count; i++) { tick(PREVIEW_MS); tick(RESULT_MS); }
+const wait = () => act(() => { vi.advanceTimersByTime(RESULT_MS); });
+const card = (player: string, code: string) => document.querySelector(`.player-${player} [data-card="${code}"]`)!.closest("button")!;
+const zone = (player: string, name: string) => within(screen.getByTestId(`${player}-${name}`)).getByRole("button", { name: /^PLAYER/ });
+const tap = (player: string, code: string) => fireEvent.click(card(player, code));
+const move = (player: string, code: string, destination: string) => { tap(player, code); fireEvent.click(zone(player, destination)); };
+function perform(id: string) {
+  const step = scenario.steps.find((s) => s.id === id) as TutorialStep;
+  for (const command of deriveInteractions(step)) {
+    if (command.kind === "action") fireEvent.click(screen.getByRole("button", { name: command.label }));
+    else {
+      tap(command.source.player, command.source.card);
+      if (command.kind === "move-card") fireEvent.click(zone(command.source.player, command.to));
+      if (command.kind === "select-target") tap(command.target.player, command.target.card);
+    }
+    wait();
+  }
 }
-
-describe("scene単位のTutorial", () => {
-  beforeEach(() => { window.localStorage.clear(); saveIntroComplete(window.localStorage); });
-  afterEach(() => { vi.useRealTimers(); });
-
-  it("3画面のINTROから完成済み盤面sceneへ進み、やり直すとINTROへ戻る", () => {
-    clearIntroComplete(window.localStorage);
-    render(<App />);
+describe("画面でカードを操作するTutorial", () => {
+  beforeEach(() => { vi.useFakeTimers(); window.localStorage.clear(); saveIntroComplete(window.localStorage); });
+  afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
+  it("3画面INTRO・探索盤面・最初からやり直すを維持する", () => {
+    clearIntroComplete(window.localStorage); render(<App />);
     expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
     expect(screen.getByRole("heading", { name: "どうなったら勝ち？" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
-    expect(screen.getByText("ライト＋エントリー16")).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
     expect(screen.getByRole("heading", { name: "盤面を知る" })).toBeVisible();
-    expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♣6");
-    expect(screen.getByTestId("B-soldiers")).toHaveTextContent("♥7");
+    fireEvent.click(zone("A", "soldiers"));
+    expect(screen.getByText("兵士：攻撃やブロックに使います。")).toBeVisible();
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
     expect(document.querySelector(".board-route")).toBeNull();
-    expect(loadIntroComplete(window.localStorage)).toBe(true);
+    expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♣6");
     fireEvent.click(screen.getByRole("button", { name: "最初からやり直す" }));
     fireEvent.click(screen.getByRole("button", { name: "やり直す" }));
     expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
-    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(0);
   });
-
-  it("盤面を知るは1回の次へだけで攻撃sceneへ進む", () => {
-    render(<App />);
-    expect(screen.getByText(/縦がチャージ・横がドライブ/)).toBeVisible();
+  it("時間経過だけでは進まず、scene途中にNextを出さない", () => {
+    at("attack"); render(<App />);
+    act(() => { vi.advanceTimersByTime(60000); });
+    expect(card("A", "C6")).toHaveAccessibleName("A ♣6 表向き 縦向き");
+    expect(screen.queryByRole("button", { name: /次へ|再生中/ })).toBeNull();
+  });
+  it("兵士召喚を防壁→ライフ→手札の操作で完了する", () => {
+    at("summon-cost-b"); render(<App />); tap("A", "D5");
+    expect(card("A", "D5")).toHaveAccessibleName(/横向き/); wait();
+    expect(document.querySelector(".interaction-guide")).toHaveTextContent("ライフの一番上");
+    expect(document.querySelector(".interaction-guide")).not.toHaveTextContent("♠3");
+    move("A", "S3", "grave"); wait();
+    expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
+    move("A", "S2", "soldiers"); wait();
+    expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♠2");
     expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
-    expect(screen.queryByRole("button", { name: /もう一度見る/ })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    expect(screen.getByRole("heading", { name: "攻撃してみる" })).toBeVisible();
-    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(4);
   });
-
-  it("攻撃sceneはattack→block→damageをクリックなしで再生し、完了後だけ次へ進める", () => {
-    vi.useFakeTimers(); at("attack"); render(<App />);
-    expect(screen.getByRole("button", { name: "再生中…" })).toBeDisabled();
-    expect(screen.getByLabelText("A ♣6 表向き 縦向き")).toBeVisible();
-    tick(PREVIEW_MS);
-    expect(screen.getByLabelText("A ♣6 表向き 横向き")).toBeVisible();
-    expect(screen.getByRole("status")).toHaveTextContent("アタック");
-    tick(RESULT_MS);
-    expect(screen.getByText("2 / 3")).toBeVisible();
-    expect(screen.getByText("ブロック", { selector: ".scene-progress span" })).toBeVisible();
-    tick(PREVIEW_MS);
-    expect(screen.getByRole("status")).toHaveTextContent("ブロック");
-    tick(RESULT_MS);
-    expect(document.querySelector('line.board-route[data-from="soldiers"][data-to="grave"]')).toBeInTheDocument();
-    tick(PREVIEW_MS);
-    expect(within(screen.getByTestId("A-grave")).getByLabelText(/♣6/)).toBeVisible();
-    tick(RESULT_MS);
-    expect(screen.getByText("この場面のまとめ")).toBeVisible();
-    fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    expect(screen.getByRole("heading", { name: "兵士を召喚する" })).toBeVisible();
-  });
-
-  it("兵士召喚sceneはB→L→解決を自動再生し、直線矢印を予告する", () => {
-    vi.useFakeTimers(); at("summon-cost-b"); render(<App />);
-    expect(screen.getByText("1 / 3")).toBeVisible();
-    tick(PREVIEW_MS);
-    expect(screen.getByRole("status")).toHaveTextContent("コストB");
-    tick(RESULT_MS);
+  it("選択解除・誤source・誤destinationでカードを動かさない", () => {
+    at("summon-cost-b"); render(<App />); perform("summon-cost-b"); tap("B", "D5");
+    expect(document.querySelector(".interaction-feedback")).toHaveTextContent("ライフの一番上");
+    tap("A", "S3");
+    expect(card("A", "S3")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("A-grave")).toHaveClass("destination-zone");
     expect(document.querySelector('line.board-route[data-from="life"][data-to="grave"]')).toBeInTheDocument();
-    tick(PREVIEW_MS);
-    expect(screen.getByRole("status")).toHaveTextContent("コストL");
-    tick(RESULT_MS);
-    expect(document.querySelector('line.board-route[data-from="hand"][data-to="soldiers"]')).toBeInTheDocument();
-    tick(PREVIEW_MS); tick(RESULT_MS);
-    expect(screen.getByText("この場面のまとめ")).toBeVisible();
-    expect(screen.getByText(/B：防壁をドライブ。L：1点ダメージ/)).toBeVisible();
-  });
-
-  it("もう一度見るはsceneだけを再生し保存進捗と最高到達を巻き戻さない", () => {
-    vi.useFakeTimers(); at("summon-cost-l", { maxReachedStepIndex: 21 }); render(<App />);
-    expect(screen.getByRole("heading", { name: "兵士を召喚する" })).toBeVisible();
-    expect(screen.getByText("1 / 3")).toBeVisible();
-    finishMicroSteps(3);
-    const saved = loadProgress(scenario.id, window.localStorage);
-    fireEvent.click(screen.getByRole("button", { name: /もう一度見る/ }));
-    expect(screen.getByText("1 / 3")).toBeVisible();
-    expect(screen.getByRole("button", { name: "再生中…" })).toBeDisabled();
-    expect(loadProgress(scenario.id, window.localStorage)).toMatchObject({
-      stepIndex: saved.stepIndex, maxReachedStepIndex: saved.maxReachedStepIndex,
-    });
-  });
-
-  it("古いstepIndexは対応sceneに復帰し、最高到達sceneも保持する", () => {
-    at("summon-cost-l", { maxReachedStepIndex: 20 });
-    render(<App />);
-    expect(screen.getByRole("heading", { name: "兵士を召喚する" })).toBeVisible();
-    expect(screen.getByText("1 / 3")).toBeVisible();
-    expect(screen.getByLabelText(/^全体の進捗/)).toHaveAttribute("aria-label", "全体の進捗 33%");
-    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(8);
-  });
-
-  it("戻ってもmaxReachedと解放済みsceneを維持する", () => {
-    at("summon-cost-l", { maxReachedStepIndex: 20 }); render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "← 戻る" }));
-    expect(screen.getByRole("heading", { name: "攻撃してみる" })).toBeVisible();
-    expect(loadProgress(scenario.id, window.localStorage).maxReachedStepIndex).toBe(20);
-    const menu = screen.getByLabelText("チュートリアル全体の進捗");
-    fireEvent.click(within(menu).getByRole("button", { name: /PLAYER Bのターン/ }));
-    expect(screen.getByRole("heading", { name: "PLAYER Bのターン" })).toBeVisible();
-  });
-
-  it("解説を見るでscene内の各処理・phase・公式リンクを参照できる", () => {
-    at("summon-cost-b"); render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: /解説を見る/ }));
-    const detail = document.querySelector(".why-content")!;
-    expect(within(detail as HTMLElement).getByRole("heading", { name: /1\. コストB/ })).toBeVisible();
-    expect(within(detail as HTMLElement).getByRole("heading", { name: /2\. コストL/ })).toBeVisible();
-    expect(within(detail as HTMLElement).getByRole("heading", { name: /3\. 召喚/ })).toBeVisible();
-    expect(detail).toHaveTextContent("リクエスト時");
-    expect(detail).toHaveTextContent("解決時");
-    expect(detail.querySelectorAll("a").length).toBeGreaterThan(0);
-  });
-
-  it("sidebarと進捗はmicro stepではなくsceneを表示する", () => {
-    at("summon-cost-l"); render(<App />);
-    const practice = document.querySelectorAll(".chapter-group")[1];
-    expect(practice.querySelectorAll(".chapter-list button")).toHaveLength(5);
-    expect(practice).toHaveTextContent("兵士を召喚する");
-    expect(practice).not.toHaveTextContent("防壁を横向きに。");
-    expect(screen.getByLabelText(/^全体の進捗/)).toHaveTextContent("2 / 5");
-    expect(units.filter((unit) => unit.mode === "fixed")).toHaveLength(6);
-  });
-
-  it("状態変更にはゾーン移動矢印を出さず、通常の移動には直線を使う", () => {
-    vi.useFakeTimers(); at("attack"); render(<App />);
+    tap("A", "S3");
+    expect(card("A", "S3")).toHaveAttribute("aria-pressed", "false");
     expect(document.querySelector(".board-route")).toBeNull();
-    tick(PREVIEW_MS); tick(RESULT_MS); tick(PREVIEW_MS); tick(RESULT_MS);
-    expect(document.querySelector('line.board-route[data-from="soldiers"][data-to="grave"]')).toBeInTheDocument();
-    expect(document.querySelector("path.board-route")).toBeNull();
+    tap("A", "S3"); fireEvent.click(zone("B", "grave"));
+    expect(screen.getByTestId("A-life").querySelector('[data-card="S3"]')).toBeInTheDocument();
+    expect(screen.getByTestId("A-grave").querySelector('[data-card="S3"]')).toBeNull();
   });
-
-  it("reduced motionでも処理順と結果・理由が離散的に読める", () => {
-    vi.useFakeTimers(); at("attack");
-    vi.stubGlobal("matchMedia", () => ({ matches: true, addListener: vi.fn(), removeListener: vi.fn() }));
-    render(<App />);
-    expect(screen.getByText("1 / 3")).toBeVisible();
-    tick(PREVIEW_MS);
-    expect(screen.getByRole("status")).toHaveTextContent("アタック");
-    tick(RESULT_MS);
-    expect(screen.getByText("2 / 3")).toBeVisible();
-    vi.unstubAllGlobals();
+  it("EnterとSpaceでカード選択と移動先確定ができる", async () => {
+    at("summon-cost-b"); render(<App />); perform("summon-cost-b");
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    card("A", "S3").focus(); await user.keyboard("{Enter}");
+    expect(card("A", "S3")).toHaveAttribute("aria-pressed", "true");
+    zone("A", "grave").focus(); await user.keyboard(" ");
+    expect(screen.getByTestId("A-grave")).toHaveTextContent("♠3");
   });
-
-  it("実物カードの操作は意味ごとに次へで進み、先攻選択なしでは進めない", () => {
+  it("攻撃→ブロッカーと対象指定→ダメージを自分で操作する", () => {
+    at("attack"); render(<App />); perform("attack");
+    expect(card("A", "C6")).toHaveAccessibleName(/横向き/);
+    tap("B", "H7"); expect(card("A", "C6")).toHaveClass("expected-card"); tap("A", "C6");
+    expect(card("B", "H7")).toHaveAccessibleName(/縦向き/);
+    expect(document.querySelector(".interaction-result")).toHaveTextContent("♥7が♣6をブロック");
+    expect(document.querySelector(".interaction-guide")).not.toHaveTextContent("自動で起きるチャージ");
+    wait(); expect(screen.getByText(/6 < 7/)).toBeVisible(); perform("damage");
+    expect(screen.getByTestId("A-grave")).toHaveTextContent("♣6");
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+  });
+  it("エンド→チャージ→2枚を1枚ずつドローする", () => {
+    at("end"); render(<App />); perform("end");
+    expect(screen.getByTestId("actor")).toHaveTextContent("ターン：PLAYER B");
+    expect(screen.getByText(/自動で起きるチャージ/)).toBeVisible(); perform("charge");
+    move("B", "S3", "hand");
+    expect(document.querySelector(".scene-progress small")).toHaveTextContent("1 / 2枚目");
+    expect(screen.getByTestId("B-hand")).toHaveTextContent("♠3");
+    expect(screen.getByTestId("B-hand")).not.toHaveTextContent("♢8");
+    expect(card("B", "D8")).toHaveAccessibleName(/ライフの裏向きカード/);
+    wait(); move("B", "D8", "hand"); wait();
+    expect(screen.getByTestId("B-hand")).toHaveTextContent("♢8");
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+  });
+  it("PLAYER Bの防壁は裏向きで置き、ターンを戻す", () => {
+    at("set-bulwark-cost-l"); render(<App />);
+    perform("set-bulwark-cost-l"); perform("set-bulwark-place");
+    expect(card("B", "D8")).toHaveAccessibleName(/防壁の裏向きカード/);
+    perform("end-to-a"); perform("charge-a"); perform("draw-a");
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+  });
+  it("ブロックしないとライフを1枚ずつ2回墓地へ動かす", () => {
+    at("direct-attack"); render(<App />); perform("direct-attack"); perform("no-block");
+    move("B", "S2", "grave");
+    expect(screen.getByTestId("B-grave")).toHaveTextContent("♠2");
+    expect(card("B", "SK")).toHaveAccessibleName(/ライフの裏向きカード/);
+    wait(); move("B", "SK", "grave"); wait();
+    expect(screen.getByTestId("B-grave")).toHaveTextContent("♠K");
+    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+  });
+  it("解説の開閉でも選択を維持し、replayでも保存進捗を巻き戻さない", () => {
+    at("summon-cost-l", { maxReachedStepIndex: 21 }); render(<App />);
+    expect(screen.getByRole("heading", { name: "兵士を召喚する" })).toBeVisible();
+    perform("summon-cost-b"); tap("A", "S3");
+    fireEvent.click(screen.getByRole("button", { name: /解説を見る/ }));
+    expect(document.querySelector(".why-content")).toHaveTextContent("リクエスト時");
+    expect(document.querySelector(".why-content")).not.toHaveTextContent("♠3");
+    fireEvent.click(screen.getByRole("button", { name: /解説を見る/ }));
+    expect(card("A", "S3")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(zone("A", "grave")); wait(); perform("summon");
+    const saved = loadProgress(scenario.id, window.localStorage);
+    fireEvent.click(screen.getByRole("button", { name: /もう一度やる/ }));
+    expect(card("A", "D5")).toHaveAccessibleName(/縦向き/);
+    expect(loadProgress(scenario.id, window.localStorage)).toEqual(saved);
+    expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
+  });
+  it("6sceneの次へと20ゲーム操作で実物の準備へ進む", () => {
+    render(<App />); let count = 0;
+    for (const scene of scenario.scenes) {
+      if (scene.presentation === "interactive") for (const id of scene.stepIds) {
+        count += deriveInteractions(scenario.steps.find((s) => s.id === id) as TutorialStep).length; perform(id);
+      }
+      fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+    }
+    expect(count).toBe(20);
+    expect(screen.getByText("ここから実物カード")).toBeVisible();
+    expect(document.querySelector(".interactive-board")).toBeNull();
+  });
+  it("もう一度やるでも表示上の最高進捗を巻き戻さない", () => {
+    at("summon-cost-b"); render(<App />);
+    perform("summon-cost-b"); perform("summon-cost-l"); perform("summon");
+    expect(screen.getByLabelText("全体の進捗 20%")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: /もう一度やる/ }));
+    expect(screen.getByLabelText("全体の進捗 20%")).toBeVisible();
+  });
+  it("sidebar・最高到達・早見・8コースを維持する", () => {
+    at("summon-cost-l", { maxReachedStepIndex: 20 }); render(<App />);
+    expect(document.querySelectorAll(".chapter-group")[1].querySelectorAll(".chapter-list button")).toHaveLength(5);
+    fireEvent.click(screen.getByRole("button", { name: "← 戻る" }));
+    expect(loadProgress(scenario.id, window.localStorage).maxReachedStepIndex).toBe(20);
+    expect(document.querySelectorAll(".learning-roadmap li")).toHaveLength(8);
+    fireEvent.click(screen.getByRole("button", { name: "ルール早見" }));
+    expect(screen.getByRole("dialog", { name: "ルール早見" })).toBeVisible();
+  });
+  it("realモードの各実物操作と先攻決定を維持する", () => {
     at("real-deck"); render(<App />);
     for (const id of ["shuffle", "real-life", "real-hand", "preset-bulwark", "preset-soldier", "first-player"]) {
       fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-      expect(screen.getByRole("heading", { name: scenario.steps.find((step) => step.id === id)!.title })).toBeVisible();
+      expect(screen.getByRole("heading", { name: scenario.steps.find((s) => s.id === id)!.title })).toBeVisible();
     }
     expect(screen.getByRole("button", { name: "次へ →" })).toBeDisabled();
     fireEvent.click(screen.getByRole("radio", { name: "PLAYER B" }));
     fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
     expect(screen.getByRole("heading", { name: "先攻だけ、1枚引きます。" })).toBeVisible();
-    expect(screen.getByRole("region", { name: "実物ではこう動かす" })).toHaveTextContent("ライフ");
     fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    expect(screen.getByRole("heading", { name: "早見を開いて、1戦開始。" })).toBeVisible();
-  });
-
-  it("固定6sceneだけを進めれば実物カード準備が始まる", () => {
-    vi.useFakeTimers(); render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    for (const count of [3, 3, 3, 5, 3]) {
-      expect(screen.getByRole("button", { name: "再生中…" })).toBeDisabled();
-      finishMicroSteps(count);
-      fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-    }
-    expect(screen.getByText("ここから実物カード")).toBeVisible();
-    expect(loadProgress(scenario.id, window.localStorage).stepIndex).toBe(21);
-  });
-
-  it("INTRO開始から実物カード開始までのprimary操作を45回から9回にする", () => {
-    const fixedStepCount = scenario.steps.filter((step) => step.mode === "fixed").length;
-    const fixedSceneCount = units.filter((unit) => unit.mode === "fixed").length;
-    expect(3 + fixedStepCount * 2).toBe(45);
-    expect(3 + fixedSceneCount).toBe(9);
-  });
-
-  it("ルール早見とロードマップを維持する", () => {
-    render(<App />);
-    expect(document.querySelectorAll(".learning-roadmap li")).toHaveLength(8);
-    fireEvent.click(screen.getByRole("button", { name: "ルール早見" }));
+    fireEvent.click(screen.getByRole("button", { name: "対戦を始める →" }));
     expect(screen.getByRole("dialog", { name: "ルール早見" })).toBeVisible();
+  });
+  it("reduced motionでも成功後の順序を維持する", () => {
+    vi.stubGlobal("matchMedia", () => ({ matches: true }));
+    at("attack"); render(<App />); tap("A", "C6");
+    expect(card("A", "C6")).toHaveAccessibleName(/横向き/);
+    act(() => { vi.advanceTimersByTime(300); });
+    expect(screen.getByText("2 / 3")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
+  });
+  it("mouse dragはghostと移動先を示し、誤dropで戻り、正しいdropだけ成功する", () => {
+    class TestPointerEvent extends MouseEvent {
+      pointerType: string;
+      constructor(type: string, options: PointerEventInit = {}) { super(type, options); this.pointerType = options.pointerType || "mouse"; }
+    }
+    vi.stubGlobal("PointerEvent", TestPointerEvent);
+    at("summon-cost-b"); render(<App />); perform("summon-cost-b");
+    const source = card("A", "S3");
+    const previousHitTest = document.elementFromPoint;
+    const hitTest = vi.fn(() => screen.getByTestId("B-grave"));
+    document.elementFromPoint = hitTest;
+    try {
+      fireEvent.pointerDown(source, { pointerType: "mouse", button: 0, clientX: 0, clientY: 0 });
+      fireEvent.pointerMove(source, { pointerType: "mouse", clientX: 20, clientY: 20 });
+      expect(document.querySelector(".card-ghost")).toHaveTextContent("ライフの裏向きカード");
+      expect(screen.getByTestId("A-grave")).toHaveClass("destination-zone");
+      fireEvent.pointerUp(source, { pointerType: "mouse", clientX: 30, clientY: 30 });
+      expect(document.querySelector(".card-ghost")).toBeNull();
+      expect(screen.getByTestId("A-life").querySelector('[data-card="S3"]')).toBeInTheDocument();
+      hitTest.mockReturnValue(screen.getByTestId("A-grave"));
+      fireEvent.pointerDown(source, { pointerType: "pen", button: 0, clientX: 0, clientY: 0 });
+      fireEvent.pointerMove(source, { pointerType: "pen", clientX: 20, clientY: 20 });
+      fireEvent.pointerUp(source, { pointerType: "pen", clientX: 30, clientY: 30 });
+      expect(screen.getByTestId("A-grave")).toHaveTextContent("♠3");
+    } finally { document.elementFromPoint = previousHitTest; }
+  });
+  it("touchの移動をdragとして奪わず、移動先の既存カードにもタップできる", () => {
+    class TestPointerEvent extends MouseEvent {
+      pointerType = "touch";
+    }
+    vi.stubGlobal("PointerEvent", TestPointerEvent);
+    at("summon-cost-b"); render(<App />); perform("summon-cost-b");
+    const source = card("A", "S3");
+    fireEvent.pointerDown(source, { button: 0, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(source, { clientX: 20, clientY: 80 });
+    expect(document.querySelector(".card-ghost")).toBeNull();
+    expect(source).toHaveAttribute("aria-pressed", "false");
+    fireEvent.pointerCancel(source);
+    tap("A", "S3"); tap("A", "C6");
+    expect(screen.getByTestId("A-grave")).toHaveTextContent("♠3");
   });
 });

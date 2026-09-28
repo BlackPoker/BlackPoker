@@ -4,6 +4,29 @@ import { ruleCatalog } from "../src/generated/ruleCatalog";
 import { validateScenario } from "../src/lib/schema";
 import { formatDifferences, learningCourses } from "../src/data/curriculum";
 describe("tutorial schema", () => {
+  it("無効なinteractionと対象カードを拒否する", () => {
+    const value = structuredClone(scenario) as any;
+    const block = value.steps.find((s: any) => s.id === "block");
+    block.interaction.kind = "unknown";
+    expect(validateScenario(value, ruleCatalog)).toContain("Invalid interaction kind");
+    block.interaction.kind = "select-target";
+    block.interaction.targetCard.card = "CK";
+    expect(validateScenario(value, ruleCatalog)).toContain("Invalid interaction targetCard");
+  });
+  it("操作不能・operation矛盾・静止sceneの操作を拒否する", () => {
+    const value = structuredClone(scenario) as any;
+    value.steps.find((s: any) => s.id === "block").interaction = undefined;
+    expect(validateScenario(value, ruleCatalog)).toContain("Interactive step is not operable: block");
+    value.steps.find((s: any) => s.id === "attack").interaction = { kind: "action", label: "実行" };
+    expect(validateScenario(value, ruleCatalog)).toContain("Action interaction must have a label and no operations");
+    value.steps[0].interaction = { kind: "action", label: "実行" };
+    expect(validateScenario(value, ruleCatalog)).toContain("Static scene must not require interaction");
+  });
+  it("ライフの順番を逆転した操作を拒否する", () => {
+    const value = structuredClone(scenario);
+    value.steps.find((s) => s.id === "draw")!.operations[0].cards.reverse();
+    expect(validateScenario(value, ruleCatalog)).toContain("Interaction contradicts operation order: draw");
+  });
   it("全データのschema・参照・盤面連続性が正しい", () =>
     expect(validateScenario(scenario, ruleCatalog)).toEqual([]));
   it("sceneが存在しないfixed stepを参照したら拒否", () => {
