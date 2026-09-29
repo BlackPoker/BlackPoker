@@ -1,0 +1,847 @@
+{
+  "schemaVersion": 1,
+  "id": "interactive-howto",
+  "title": "Interactive HowToBlackPoker",
+  "categories": [
+    {
+      "id": "combat",
+      "title": "まず戦ってみる"
+    },
+    {
+      "id": "forces",
+      "title": "戦力を増やす"
+    },
+    {
+      "id": "magic",
+      "title": "魔法を使う"
+    },
+    {
+      "id": "tactics",
+      "title": "攻防を深く知る"
+    },
+    {
+      "id": "requests",
+      "title": "リクエストの処理を知る"
+    },
+    {
+      "id": "triggers",
+      "title": "誘発を知る"
+    },
+    {
+      "id": "real",
+      "title": "Entry16で遊ぶ"
+    },
+    {
+      "id": "extra",
+      "title": "Joker特別Lesson"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "first-battle",
+      "title": "まず戦ってみよう",
+      "category": "combat",
+      "shortDescription": "兵士で攻撃し、相手の兵士で守ります。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [],
+      "sceneIds": [
+        "first-battle"
+      ],
+      "actionIds": [
+        "attack",
+        "block",
+        "damageJudge"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.attack",
+        "action.block",
+        "action.damageJudge"
+      ],
+      "cards": [
+        "C6",
+        "H7"
+      ],
+      "explainer": {
+        "type": "flow",
+        "title": "戦闘は3段階",
+        "items": [
+          {
+            "title": "アタック",
+            "text": "兵士を横向きにして攻撃。"
+          },
+          {
+            "title": "ブロック",
+            "text": "相手は兵士や防壁で守れます。"
+          },
+          {
+            "title": "ダメージ判定",
+            "text": "兵士同士なら数字を比較。今回は 6 < 7。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "unblocked-attack",
+      "title": "ブロックしなかったら？",
+      "category": "combat",
+      "shortDescription": "守られなかった兵士の数字だけ、ライフが減ります。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [
+        "unblocked-attack"
+      ],
+      "actionIds": [],
+      "reviewActionIds": [
+        "attack",
+        "block",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.damageJudge"
+      ],
+      "cards": [
+        "S2"
+      ],
+      "explainer": {
+        "type": "example",
+        "title": "2の攻撃 → ライフ2枚",
+        "text": "このLesson専用の盤面から始めます。今回は守らず、ライフの上から1枚ずつ墓地へ動かします。",
+        "equation": "♠2 → 2点",
+        "cards": [
+          "S2"
+        ]
+      }
+    },
+    {
+      "id": "soldier",
+      "title": "兵士を召喚する",
+      "category": "forces",
+      "shortDescription": "防壁とライフを使い、手札の♠2を兵士にします。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [
+        "summon-soldier"
+      ],
+      "actionIds": [
+        "summonsSoldier"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.summonsSoldier",
+        "character.soldier",
+        "character.hero",
+        "character.ace"
+      ],
+      "cards": [
+        "D5",
+        "S2"
+      ],
+      "explainer": {
+        "type": "compare",
+        "title": "兵士にも種類があります",
+        "characterIds": [
+          "soldier",
+          "hero",
+          "ace"
+        ],
+        "text": "今回は一般兵。防壁を横にし、1点ダメージを受けてから、手札の2〜10を場に出します。"
+      }
+    },
+    {
+      "id": "bulwark",
+      "title": "防壁を増やす",
+      "category": "forces",
+      "shortDescription": "手札を裏向きで置き、次のターンまで体験します。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [
+        "player-b-turn"
+      ],
+      "actionIds": [
+        "setBulwark"
+      ],
+      "reviewActionIds": [
+        "end",
+        "charge",
+        "draw"
+      ],
+      "ruleRefs": [
+        "action.setBulwark"
+      ],
+      "cards": [
+        "D8"
+      ],
+      "explainer": {
+        "type": "flow",
+        "title": "防壁は裏向きで置く",
+        "items": [
+          {
+            "title": "1点ダメージ",
+            "text": "ライフの上1枚を墓地へ。"
+          },
+          {
+            "title": "防壁設置",
+            "text": "手札1枚を裏向き・縦向きで置く。"
+          },
+          {
+            "title": "相手のターンへ",
+            "text": "今回は続けてエンドも試します。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "hero",
+      "title": "英雄を出す",
+      "category": "forces",
+      "shortDescription": "召喚・装備の操作Lessonは準備中です。公式定義は解説から確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "summonsHero"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.summonsHero"
+      ],
+      "cards": [
+        "HJ"
+      ]
+    },
+    {
+      "id": "ace",
+      "title": "エースを出す",
+      "category": "forces",
+      "shortDescription": "召喚・装備の操作Lessonは準備中です。公式定義は解説から確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "summonsAce"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.summonsAce"
+      ],
+      "cards": [
+        "SA"
+      ]
+    },
+    {
+      "id": "equipment",
+      "title": "カードを重ねる",
+      "category": "forces",
+      "shortDescription": "召喚・装備の操作Lessonは準備中です。公式定義は解説から確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "mountSoldier"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.mountSoldier"
+      ],
+      "cards": [
+        "C9"
+      ]
+    },
+    {
+      "id": "pass-turn",
+      "title": "ターンを渡す",
+      "category": "forces",
+      "shortDescription": "エンドの後、チャージとドローが続きます。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [
+        "pass-turn"
+      ],
+      "actionIds": [
+        "end",
+        "charge",
+        "draw"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.end",
+        "action.charge",
+        "action.draw"
+      ],
+      "cards": [],
+      "explainer": {
+        "type": "flow",
+        "title": "次の人の番へ",
+        "items": [
+          {
+            "title": "エンド",
+            "text": "相手へターンを渡す。"
+          },
+          {
+            "title": "チャージ",
+            "text": "相手の場のカードが縦向きに戻る。"
+          },
+          {
+            "title": "ドロー",
+            "text": "通常は2枚。ライフ2枚以下なら1枚。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "reading-actions",
+      "title": "アクションの読み方",
+      "category": "magic",
+      "shortDescription": "アップの表示を見て、魔法Lessonへの準備をします。",
+      "difficulty": "beginner",
+      "status": "reading",
+      "prerequisites": [
+        "soldier"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.up"
+      ],
+      "cards": [],
+      "explainer": {
+        "type": "anatomy",
+        "effectSummary": "兵士の数字を、このターンだけ足す。",
+        "title": "魔法の表示を見てみよう",
+        "actionId": "up",
+        "text": "これは読み方のミニ解説です。アップを実際に操作するLessonは準備中です。"
+      }
+    },
+    {
+      "id": "up",
+      "title": "アップ",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "up"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.up"
+      ],
+      "cards": [
+        "H4",
+        "C6"
+      ],
+      "explainer": {
+        "type": "example",
+        "title": "数字を大きくする",
+        "text": "♥4のアップで、♣6のサイズがこのターンだけ10に。操作Lessonは準備中です。",
+        "equation": "6 ＋ 4 ＝ 10",
+        "cards": [
+          "C6",
+          "H4"
+        ]
+      }
+    },
+    {
+      "id": "down",
+      "title": "ダウン",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "down"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.down"
+      ],
+      "cards": [
+        "S2",
+        "H7"
+      ]
+    },
+    {
+      "id": "twist",
+      "title": "ツイスト",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "twist"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.twist"
+      ],
+      "cards": [
+        "D5",
+        "H7"
+      ]
+    },
+    {
+      "id": "counter",
+      "title": "カウンター",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "counter"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.counter"
+      ],
+      "cards": [
+        "C6",
+        "H4"
+      ]
+    },
+    {
+      "id": "throwing",
+      "title": "投擲",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "throwing"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.throwing"
+      ],
+      "cards": [
+        "S3",
+        "C9"
+      ]
+    },
+    {
+      "id": "destroyBulwark",
+      "title": "防壁破壊",
+      "category": "magic",
+      "shortDescription": "カード操作は準備中です。必要なカード・コスト・効果を解説で確認できます。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "destroyBulwark"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.destroyBulwark"
+      ],
+      "cards": [
+        "H4",
+        "D5"
+      ]
+    },
+    {
+      "id": "bulwark-block",
+      "title": "防壁で守ってみる",
+      "category": "tactics",
+      "shortDescription": "裏向きの防壁で守り、数字を公開します。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [
+        "bulwark-block"
+      ],
+      "actionIds": [],
+      "reviewActionIds": [
+        "block",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.block",
+        "action.damageJudge",
+        "character.bulwark"
+      ],
+      "cards": [
+        "C6"
+      ],
+      "explainer": {
+        "type": "flow",
+        "title": "防壁は大小ではなく、一致を見る",
+        "items": [
+          {
+            "title": "防壁を選ぶ",
+            "text": "攻撃してきた兵士を指定します。"
+          },
+          {
+            "title": "表向きにする",
+            "text": "同じ数字を含む攻撃側なら、その兵士も墓地へ。"
+          },
+          {
+            "title": "防壁は墓地へ",
+            "text": "Jokerの防壁でも攻撃側を墓地へ。今回は数字を確かめます。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "multi-attack",
+      "title": "まとめてアタック",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "attack"
+      ],
+      "ruleRefs": [
+        "action.attack"
+      ],
+      "cards": []
+    },
+    {
+      "id": "multi-block",
+      "title": "力を合わせて守る",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "block",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.block",
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "equal-numbers",
+      "title": "同じ数字なら？",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "combat-magic",
+      "title": "戦闘中に数字が変わる",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "down",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.down",
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "lost-target",
+      "title": "対象がいなくなったら",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "down"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.down"
+      ],
+      "cards": []
+    },
+    {
+      "id": "chance",
+      "title": "チャンスと解決",
+      "category": "requests",
+      "shortDescription": "アップとダウンを操作した後に、STAGE・パス・解決順を学ぶ予定です。",
+      "difficulty": "intermediate",
+      "status": "pending",
+      "prerequisites": [
+        "up",
+        "down",
+        "twist",
+        "counter"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "down"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.down"
+      ],
+      "cards": []
+    },
+    {
+      "id": "speed",
+      "title": "スピードの違い",
+      "category": "requests",
+      "shortDescription": "通常はステージ経由、即時はステージを使わず解決します。操作Lessonは準備中です。",
+      "difficulty": "intermediate",
+      "status": "pending",
+      "prerequisites": [
+        "chance"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "setBulwark"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.setBulwark"
+      ],
+      "cards": []
+    },
+    {
+      "id": "triggers",
+      "title": "自動で続いた理由",
+      "category": "triggers",
+      "shortDescription": "戦闘、ターン交代で体験した流れを、誘発として振り返る予定です。",
+      "difficulty": "intermediate",
+      "status": "pending",
+      "prerequisites": [
+        "chance",
+        "pass-turn",
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "block",
+        "damageJudge",
+        "charge",
+        "draw"
+      ],
+      "ruleRefs": [
+        "action.block",
+        "action.damageJudge",
+        "action.charge",
+        "action.draw"
+      ],
+      "cards": []
+    },
+    {
+      "id": "generation",
+      "title": "世代交代をたどる",
+      "category": "triggers",
+      "shortDescription": "Aや絵札が場から墓地へ移った後、ライフをめくる操作を学ぶ予定です。",
+      "difficulty": "intermediate",
+      "status": "pending",
+      "prerequisites": [
+        "triggers"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "nextGeneration"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.nextGeneration"
+      ],
+      "cards": [
+        "HJ",
+        "SA"
+      ]
+    },
+    {
+      "id": "simultaneous",
+      "title": "同時に誘発したら",
+      "category": "triggers",
+      "shortDescription": "最後にAP・NAP・コントローラーと処理順を扱います。操作Lessonは準備中です。",
+      "difficulty": "intermediate",
+      "status": "pending",
+      "prerequisites": [
+        "generation"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.nextGeneration"
+      ],
+      "cards": []
+    },
+    {
+      "id": "real-game",
+      "title": "Entry16で遊ぶ",
+      "category": "real",
+      "shortDescription": "ここで初めて実物カードを用意し、自分たちの1戦へ。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "first-battle",
+        "soldier",
+        "pass-turn"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "frame.entry16"
+      ],
+      "cards": [],
+      "realStepIds": [
+        "real-deck",
+        "shuffle",
+        "real-life",
+        "real-hand",
+        "preset-bulwark",
+        "preset-soldier",
+        "first-player",
+        "start-draw",
+        "free-play"
+      ],
+      "explainer": {
+        "type": "flow",
+        "title": "画面から、実物のカードへ",
+        "items": [
+          {
+            "title": "16枚を用意",
+            "text": "1人1セット。画面でカードを確認できます。"
+          },
+          {
+            "title": "シャッフルして準備",
+            "text": "7枚の手札とプリセットを用意。"
+          },
+          {
+            "title": "先攻を決めて開始",
+            "text": "先攻だけ最初に1枚ドロー。"
+          }
+        ]
+      }
+    },
+    {
+      "id": "search",
+      "title": "Joker特別Lesson：サーチ",
+      "category": "extra",
+      "shortDescription": "Entry16とは別教材。Jokerで探す・公開する・手札へ・シャッフルを学ぶ予定です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "reading-actions"
+      ],
+      "sceneIds": [],
+      "actionIds": [
+        "search"
+      ],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "action.search"
+      ],
+      "cards": [
+        "Joker"
+      ]
+    },
+    {
+      "id": "board-overview",
+      "title": "盤面を確認する",
+      "category": "combat",
+      "shortDescription": "置き場の名前をタップして復習できます。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [],
+      "sceneIds": [
+        "board-overview"
+      ],
+      "actionIds": [],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "frame.entry16"
+      ],
+      "cards": [],
+      "optional": true
+    }
+  ]
+}

@@ -120,7 +120,7 @@ export function TutorialIntro({ onComplete }: { onComplete: () => void }) {
             <p className="intro-reassurance">最初から、すべてのルールを覚える必要はありません。</p>
             <div className="intro-no-cards">
               <span aria-hidden="true">▣</span>
-              <p><strong>実物カードは、まだ用意しなくてOK。</strong>まず画面だけで1ターンを体験し、その後で実際のトランプを使います。</p>
+              <p><strong>実物カードは、まだ用意しなくてOK。</strong>まず画面のカードを操作して戦い方を体験し、その後で実際のトランプを使います。</p>
             </div>
           </div>
         )}

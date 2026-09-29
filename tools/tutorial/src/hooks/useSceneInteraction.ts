@@ -33,6 +33,8 @@ function resultText(command: InteractionCommand, step: TutorialStep, board: Boar
     return `${step.cause?.phase === "request" ? "コストL：1点ダメージ。" : ""}${card?.face === "up" ? cardName(card.card) : "裏向きのカード"}を${zoneNames[command.to]}へ移しました。`;
   }
   const card = board[command.source.player][command.source.zone].find((c) => c.card === command.source.card);
+  const previous = step.board.before[command.source.player][command.source.zone].find((c) => c.card === command.source.card);
+  if (card?.face !== previous?.face) return `${card?.face === "up" ? cardName(card.card) + "を表向きに公開しました。" : "カードを裏向きにしました。"}`;
   return `${step.cause?.phase === "request" ? "コストB" : step.actionName || "状態変更"}：${name}を${card?.state === "drive" ? "ドライブ（横向き）" : "チャージ（縦向き）"}にしました。`;
 }
 interface State {

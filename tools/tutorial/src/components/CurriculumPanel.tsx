@@ -1,27 +1,24 @@
 import { formatDifferences, learningCourses } from "../data/curriculum";
 import blackPokerLogo from "../assets/blackpoker-logo.svg";
-import type { LearningUnit } from "../lib/scenes";
+import { learningPath } from "../data/lessons";
 export function CurriculumPanel({
-  units,
-  unitIndex,
-  maxReachedUnitIndex,
+  lessonId,
+  completedIds,
   onSelect,
   onClose,
 }: {
-  units: LearningUnit[];
-  unitIndex: number;
-  maxReachedUnitIndex: number;
-  onSelect: (index: number) => void;
+  lessonId: string;
+  completedIds: string[];
+  onSelect: (id: string) => void;
   onClose?: () => void;
 }) {
-  const chapters = [...new Set(units.map((unit) => unit.chapter))];
   return (
     <aside className="curriculum" aria-label="チュートリアル全体の進捗">
       <div className="curriculum-head">
         <div>
           <img className="brand-logo" src={blackPokerLogo} alt="" />
           <strong>BlackPoker</strong>
-          <small>Tutorial</small>
+          <small>Interactive HowTo</small>
         </div>
         <button
           className="icon-button"
@@ -32,36 +29,34 @@ export function CurriculumPanel({
         </button>
       </div>
       <nav>
-        <p className="nav-label">4つの章で、最初の1戦へ</p>
+        <p className="nav-label">Lesson一覧 · 復習はどこからでも</p>
         <div className="course active-course">
           <div>
             <span>01</span>
             <div>
-              <strong>入門</strong>
-              <small>ライト＋エントリー16</small>
+              <strong>Entry16基礎コース</strong>
+              <small>見る → 触る → 理解する</small>
             </div>
           </div>
-          {chapters.map((chapter, i) => {
-            const items = units
-              .map((unit, index) => ({ ...unit, index }))
-              .filter((unit) => unit.chapter === chapter);
-            const active = units[unitIndex].chapter === chapter;
+          {learningPath.categories.map((chapter, i) => {
+            const items = learningPath.lessons.filter((lesson) => lesson.category === chapter.id);
+            const active = items.some((lesson) => lesson.id === lessonId);
             return (
-              <details className="chapter-group" key={chapter} open={active}>
+              <details className="chapter-group" key={chapter.id} open={active}>
                 <summary>
-                  {i + 1}. {items[0].chapterTitle}
-                  <small>{items.length}場面</small>
+                  {chapter.id === "extra" ? "＋" : `${i + 1}.`} {chapter.title}
+                  <small>{items.length} Lesson</small>
                 </summary>
                 <div className="chapter-list">
                   {items.map((s) => (
                     <button
                       key={s.id}
-                      className={s.index === unitIndex ? "current" : ""}
-                      aria-current={s.index === unitIndex ? "step" : undefined}
-                      onClick={() => onSelect(s.firstStepIndex)}
+                      className={s.id === lessonId ? "current" : ""}
+                      aria-current={s.id === lessonId ? "step" : undefined}
+                      onClick={() => onSelect(s.id)}
                     >
-                      <span>{s.index < maxReachedUnitIndex ? "✓" : "・"}</span>
-                      <b>{s.title}</b>
+                      <span>{completedIds.includes(s.id) ? "✓" : "・"}</span>
+                      <b>{s.title}<small>{s.status === "pending" ? "準備中" : s.status === "reading" ? "ミニ解説" : s.optional ? "任意の復習" : "操作できます"}</small></b>
                     </button>
                   ))}
                 </div>

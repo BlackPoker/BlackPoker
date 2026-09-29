@@ -7,6 +7,7 @@ import { RESULT_MS } from "../src/hooks/useSceneInteraction";
 import { deriveInteractions } from "../src/lib/interaction.mjs";
 import { clearIntroComplete, loadProgress, saveIntroComplete, saveProgress } from "../src/lib/storage";
 import type { TutorialStep } from "../src/types";
+import { lessonStorageKey } from "../src/lib/lesson-storage";
 function at(id: string, extra = {}) {
   saveProgress({ scenarioId: scenario.id, stepIndex: scenario.steps.findIndex((s) => s.id === id),
     completed: false, updatedAt: "", ...extra }, window.localStorage);
@@ -31,17 +32,17 @@ function perform(id: string) {
 describe("画面でカードを操作するTutorial", () => {
   beforeEach(() => { vi.useFakeTimers(); window.localStorage.clear(); saveIntroComplete(window.localStorage); });
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
-  it("3画面INTRO・探索盤面・最初からやり直すを維持する", () => {
+  it("3画面INTROから戦闘のミニ解説へ進み、最初からやり直せる", () => {
     clearIntroComplete(window.localStorage); render(<App />);
     expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
     expect(screen.getByRole("heading", { name: "どうなったら勝ち？" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
     fireEvent.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
-    expect(screen.getByRole("heading", { name: "盤面を知る" })).toBeVisible();
-    fireEvent.click(zone("A", "soldiers"));
-    expect(screen.getByText("兵士：攻撃やブロックに使います。")).toBeVisible();
-    expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+    expect(screen.getByRole("heading", { name: "まず戦ってみよう" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "戦闘は3段階" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
+    expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
     expect(document.querySelector(".board-route")).toBeNull();
     expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♣6");
     fireEvent.click(screen.getByRole("button", { name: "最初からやり直す" }));
@@ -143,28 +144,33 @@ describe("画面でカードを操作するTutorial", () => {
     expect(loadProgress(scenario.id, window.localStorage)).toEqual(saved);
     expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
   });
-  it("6sceneの次へと20ゲーム操作で実物の準備へ進む", () => {
-    render(<App />); let count = 0;
+  it("既存6sceneの全20ゲーム操作と実物モードを維持する", () => {
+    let count = 0;
     for (const scene of scenario.scenes) {
+      window.localStorage.removeItem(lessonStorageKey);
+      at(scene.stepIds[scene.presentation === "static" ? 1 : 0]);
+      const view = render(<App />);
       if (scene.presentation === "interactive") for (const id of scene.stepIds) {
         count += deriveInteractions(scenario.steps.find((s) => s.id === id) as TutorialStep).length; perform(id);
       }
-      fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+      expect(screen.getByRole("button", { name: "次へ →" })).toBeEnabled();
+      view.unmount();
     }
     expect(count).toBe(20);
+    window.localStorage.removeItem(lessonStorageKey); at("real-deck"); render(<App />);
     expect(screen.getByText("ここから実物カード")).toBeVisible();
     expect(document.querySelector(".interactive-board")).toBeNull();
   });
   it("もう一度やるでも表示上の最高進捗を巻き戻さない", () => {
     at("summon-cost-b"); render(<App />);
     perform("summon-cost-b"); perform("summon-cost-l"); perform("summon");
-    expect(screen.getByLabelText("全体の進捗 20%")).toBeVisible();
+    const percent = screen.getByLabelText(/^全体の進捗/).getAttribute("aria-label");
     fireEvent.click(screen.getByRole("button", { name: /もう一度やる/ }));
-    expect(screen.getByLabelText("全体の進捗 20%")).toBeVisible();
+    expect(screen.getByLabelText(percent!)).toBeVisible();
   });
   it("sidebar・最高到達・早見・8コースを維持する", () => {
     at("summon-cost-l", { maxReachedStepIndex: 20 }); render(<App />);
-    expect(document.querySelectorAll(".chapter-group")[1].querySelectorAll(".chapter-list button")).toHaveLength(5);
+    expect(document.querySelectorAll(".chapter-group")).toHaveLength(8);
     fireEvent.click(screen.getByRole("button", { name: "← 戻る" }));
     expect(loadProgress(scenario.id, window.localStorage).maxReachedStepIndex).toBe(20);
     expect(document.querySelectorAll(".learning-roadmap li")).toHaveLength(8);

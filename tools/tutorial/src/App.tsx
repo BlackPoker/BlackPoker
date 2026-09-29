@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import scenario from "./data/tutorials/entry16.json";
+import { entryScenario, learningPath, lessonById, scenarios } from "./data/lessons";
+import { LessonExplainer, ActionDefinition } from "./components/LessonExplainer";
+import { ruleCatalog } from "./generated/ruleCatalog";
+import { loadLessonProgress, saveLessonProgress, lessonStorageKey } from "./lib/lesson-storage";
 import { TutorialBoard } from "./components/TutorialBoard";
 import { MoveGuide } from "./components/MoveGuide";
 import { ActionHelp } from "./components/ActionHelp";
@@ -16,21 +19,28 @@ import {
   resolveBrowserStorage,
   saveIntroComplete,
 } from "./lib/storage";
-import type { Operation, TutorialScenario } from "./types";
-const tutorial = scenario as TutorialScenario;
-const units = learningUnits(tutorial);
+import type { Operation } from "./types";
 export default function App() {
   const storage = resolveBrowserStorage();
   const [introComplete, setIntroComplete] = useState(() =>
     loadIntroComplete(storage),
   );
-  const progress = useTutorialProgress(tutorial.id, tutorial.steps.length);
+  const progress = useTutorialProgress(entryScenario.id, entryScenario.steps.length);
+  const [lessonProgress, setLessonProgress] = useState(() => loadLessonProgress(storage, progress.stepIndex));
+  const lesson = lessonById(lessonProgress.lessonId);
+  const [explaining, setExplaining] = useState(() => {
+    // 旧保存からの再開はカード操作に戻す。新規・新形式の再読込はミニ解説から。
+    try { return !!storage?.getItem(lessonStorageKey) || progress.stepIndex === 0; } catch { return true; }
+  });
+  const tutorial = scenarios.find((s) => lesson.sceneIds.some((id) => s.scenes.some((scene) => scene.id === id))) || entryScenario;
+  const units = learningUnits(tutorial);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [alternateOpen, setAlternateOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [restartOpen, setRestartOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const unitIndex = unitIndexForStep(units, progress.stepIndex);
+  const unitIndex = lesson.sceneIds.length ? units.findIndex((u) => u.id === lesson.sceneIds[0]) :
+    lesson.realStepIds ? Math.max(units.findIndex((u) => u.id === lesson.realStepIds![0]), unitIndexForStep(units, progress.stepIndex)) : 1;
   const unit = units[unitIndex];
   const scene = unit.scene;
   const interaction = useSceneInteraction(scene, scene ? tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1) : []);
@@ -38,20 +48,20 @@ export default function App() {
     ? unit.firstStepIndex + interaction.microIndex
     : progress.stepIndex];
   const applied = scene ? interaction.applied : progress.applied;
-  const maxReachedUnitIndex = unitIndexForStep(units, progress.maxReachedStepIndex);
+  const showingPractice = lesson.status === "ready" && (!explaining || !lesson.explainer);
+  const availableLessons = learningPath.lessons.filter((l) => l.status !== "pending" && !l.optional);
+  const completeLesson = () => setLessonProgress((p) => p.completedIds.includes(lesson.id) ? p :
+    { ...p, completedIds: [...p.completedIds, lesson.id] });
+  useEffect(() => saveLessonProgress(storage, lessonProgress), [storage, lessonProgress]);
+  useEffect(() => {
+    if (showingPractice && scene && interaction.complete) completeLesson();
+  }, [showingPractice, scene?.id, interaction.complete]);
   useEffect(() => {
     window.scrollTo?.({ top: 0 });
-  }, [unitIndex]);
-  const chapterUnits = units.filter((item) => item.chapter === unit.chapter);
-  const position = chapterUnits.findIndex((item) => item.id === unit.id) + 1;
-  const percent = progress.completed ? 100 : Math.round(
-    ((maxReachedUnitIndex +
-      (unitIndex === maxReachedUnitIndex && (scene ? interaction.hasCompleted : progress.applied)
-        ? 1
-        : 0)) /
-      units.length) *
-      100,
-  );
+  }, [unitIndex, lesson.id, explaining]);
+  const completedCount = availableLessons.filter((l) => lessonProgress.completedIds.includes(l.id)).length;
+  const percent = Math.round(completedCount / availableLessons.length * 100);
+  const categoryTitle = learningPath.categories.find((c) => c.id === lesson.category)!.title;
   const actor =
     step.id === "free-play" && progress.applied
       ? "both"
@@ -78,12 +88,22 @@ export default function App() {
           return completed && "source" in completed && completed.operation === operation
             ? [{ ...operation, cards: [completed.source.card] }] : [];
         }) : step.operations;
-  const select = (index: number) => {
-    if (index === unit.firstStepIndex && scene) interaction.replay();
-    else progress.goTo(index);
+  const select = (id: string) => {
+    const target = lessonById(id);
+    setLessonProgress((p) => ({ ...p, lessonId: id }));
+    setExplaining(true);
+    // 解説だけのLessonを経由して同じsceneへ戻っても、fixtureの先頭から復習する。
+    interaction.replay();
+    const legacyScene = entryScenario.scenes.find((s) => target.sceneIds.includes(s.id));
+    const index = entryScenario.steps.findIndex((s) => s.id === (legacyScene?.stepIds[0] || target.realStepIds?.[0]));
+    if (index >= 0) progress.goTo(index);
     setDetailsOpen(false);
     setAlternateOpen(false);
     setMenuOpen(false);
+  };
+  const nextLesson = () => {
+    const index = availableLessons.findIndex((l) => l.id === lesson.id);
+    select(availableLessons[(index + 1) % availableLessons.length].id);
   };
   if (!introComplete) {
     return (
@@ -104,9 +124,8 @@ export default function App() {
       />
       <div className={`sidebar-wrap ${menuOpen ? "open" : ""}`}>
         <CurriculumPanel
-          units={units}
-          unitIndex={unitIndex}
-          maxReachedUnitIndex={maxReachedUnitIndex}
+          lessonId={lesson.id}
+          completedIds={lessonProgress.completedIds}
           onSelect={select}
           onClose={() => setMenuOpen(false)}
         />
@@ -121,8 +140,8 @@ export default function App() {
             ☰
           </button>
           <div className="topbar-course">
-            <span>BlackPoker Tutorial</span>
-            <strong>ライト＋エントリー16</strong>
+            <span>BlackPoker</span>
+            <strong>Interactive HowTo</strong>
           </div>
           <button className="help-button" onClick={() => setHelpOpen(true)}>
             ルール早見
@@ -140,10 +159,10 @@ export default function App() {
           aria-label={`全体の進捗 ${percent}%`}
         >
           <div>
-            <span>{step.chapterTitle}</span>
+            <span>{categoryTitle}</span>
             <strong>
-              {position}
-              <small> / {chapterUnits.length}</small>
+              {completedCount}
+              <small> / {availableLessons.length} 公開Lesson完了</small>
             </strong>
             <em>全体 {percent}%</em>
           </div>
@@ -153,6 +172,13 @@ export default function App() {
         </section>
         <div className="lesson-scroll">
           <article className="lesson-card">
+            {!showingPractice ? <LessonExplainer key={lesson.id} lesson={lesson}
+              prerequisiteTitles={lesson.prerequisites.map((id) => ({ id, title: lessonById(id).title }))}
+              onLesson={select} onStart={() => {
+                if (lesson.realStepIds && !lesson.realStepIds.includes(entryScenario.steps[progress.stepIndex].id))
+                  progress.goTo(entryScenario.steps.findIndex((s) => s.id === lesson.realStepIds![0]));
+                setExplaining(false);
+              }} onNext={() => { completeLesson(); nextLesson(); }} /> : <>
             <div className="actor-banner" data-testid="actor">
               <small>{scene?.presentation === "static" ? "注目する人" : "操作する人"}</small>
               <strong>
@@ -180,9 +206,9 @@ export default function App() {
                 {step.sequenceLabel && <strong>{step.sequenceLabel}</strong>}
               </div>
             )}
-            <h1>{scene ? scene.title : step.title}</h1>
+            <h1>{scene ? lesson.title : step.title}</h1>
             <p className="instruction">
-              {scene ? scene.intro : step.instruction}
+              {scene ? lesson.shortDescription : step.instruction}
             </p>
             {scene?.presentation === "interactive" && !interaction.complete && (
               <div className="scene-progress" aria-live="polite">
@@ -200,7 +226,7 @@ export default function App() {
             )}
             {scene && interaction.complete && (
               <div className="learned scene-result" role="status">
-                <strong>この場面のまとめ</strong>
+                <strong>Lesson完了</strong>
                 <p>{scene.summary}</p>
               </div>
             )}
@@ -304,9 +330,10 @@ export default function App() {
               <button
                 className="step-back"
                 aria-label="← 戻る"
-                disabled={unitIndex === 0}
                 onClick={() => {
-                  progress.goTo(units[unitIndex - 1].firstStepIndex);
+                  if (!scene && progress.stepIndex > entryScenario.steps.findIndex((s) => s.id === lesson.realStepIds?.[0])) progress.previous();
+                  else if (lesson.explainer) setExplaining(true);
+                  else setMenuOpen(true);
                   setDetailsOpen(false);
                   setAlternateOpen(false);
                 }}
@@ -320,11 +347,12 @@ export default function App() {
                 }
                 onClick={() => {
                   if (scene) {
-                    progress.goTo(units[unitIndex + 1].firstStepIndex);
+                    nextLesson();
                     setDetailsOpen(false);
                     setAlternateOpen(false);
                   } else if (step.id === "free-play") {
                     progress.apply();
+                    completeLesson();
                     setHelpOpen(true);
                   } else if (step.mode === "real") {
                     progress.next();
@@ -357,6 +385,8 @@ export default function App() {
             </button>
             {detailsOpen && (
               <div className="why-content">
+                {[...new Set([...lesson.actionIds, ...lesson.reviewActionIds])].map((id) =>
+                  <details key={id}><summary>アクションの定義：{ruleCatalog.actions[id as keyof typeof ruleCatalog.actions].name}</summary><ActionDefinition id={id} /></details>)}
                 {scene ? tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).map((item, index) => (
                   <section className="scene-detail" key={item.id}>
                     <h2>{index + 1}. {scene.cues[index]}</h2>
@@ -392,13 +422,14 @@ export default function App() {
                 </>}
               </div>
             )}
+            </>}
           </article>
           <div className="lesson-nav">
-            <span>{step.chapterTitle}</span>
+            <span>{categoryTitle}</span>
             <button onClick={() => setMenuOpen(true)}>一覧を見る</button>
           </div>
           <p className="physical-note">
-            {scene
+            {!showingPractice ? lesson.status === "pending" ? "準備中のLessonは、解説と公式ルールを確認できます" : "短い解説 → やってみる。準備中のLessonは一覧から確認できます" : scene
               ? "画面のカードを操作 → 場面を完了 → 次へ"
               : "実物カードを動かす → 次へ"}
           </p>
@@ -421,6 +452,8 @@ export default function App() {
                 className="danger"
                 onClick={() => {
                   progress.restart();
+                  setLessonProgress({ lessonId: "first-battle", completedIds: [] });
+                  setExplaining(true);
                   interaction.replay();
                   clearIntroComplete(storage);
                   setIntroComplete(false);
