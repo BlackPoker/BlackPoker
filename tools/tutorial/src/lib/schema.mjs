@@ -217,6 +217,9 @@ export function validateScenario(value, catalog) {
               if (!before.some((c) => c.card === card) || !step.board.after[player][to].some((c) => c.card === card) ||
                 (zone === "life" && before[0]?.card !== card)) errors.push("Interaction contradicts operation order: " + id);
               if (command.kind === "select-target" && sameCard(command.source, command.target)) errors.push("Invalid interaction targetCard");
+              if (command.kind === "select-target" && step.cause?.actionId === "block" &&
+                before.find((c) => c.card === card)?.state !== "charge")
+                errors.push("Blocker must be charged: " + id);
             }
           } catch { errors.push("Interactive step is not operable: " + id); }
         }

@@ -8,16 +8,16 @@
       "title": "まず戦ってみる"
     },
     {
+      "id": "tactics",
+      "title": "攻防を深く知る"
+    },
+    {
       "id": "forces",
       "title": "戦力を増やす"
     },
     {
       "id": "magic",
       "title": "魔法を使う"
-    },
-    {
-      "id": "tactics",
-      "title": "攻防を深く知る"
     },
     {
       "id": "requests",
@@ -38,15 +38,35 @@
   ],
   "lessons": [
     {
-      "id": "first-battle",
-      "title": "まず戦ってみよう",
+      "id": "board-overview",
+      "title": "まずは盤面を見てみよう",
       "category": "combat",
-      "shortDescription": "兵士で攻撃し、相手の兵士で守ります。",
+      "shortDescription": "相手のライフを0枚にしたら勝ち。まずカードの置き場と向きを見てみましょう。",
       "difficulty": "beginner",
       "status": "ready",
       "prerequisites": [],
       "sceneIds": [
-        "first-battle"
+        "board-overview"
+      ],
+      "actionIds": [],
+      "reviewActionIds": [],
+      "ruleRefs": [
+        "frame.entry16"
+      ],
+      "cards": []
+    },
+    {
+      "id": "unblocked-attack",
+      "title": "まずは攻撃してみよう",
+      "category": "combat",
+      "shortDescription": "守られなかった攻撃は、相手のライフを減らします。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "board-overview"
+      ],
+      "sceneIds": [
+        "unblocked-attack"
       ],
       "actionIds": [
         "attack",
@@ -60,40 +80,39 @@
         "action.damageJudge"
       ],
       "cards": [
-        "C6",
-        "H7"
+        "S2"
       ],
       "explainer": {
         "type": "flow",
-        "title": "戦闘は3段階",
+        "title": "守らなかったら、どうなる？",
         "items": [
           {
             "title": "アタック",
-            "text": "兵士を横向きにして攻撃。"
+            "text": "♠2をチャージ（縦）からドライブ（横）にして攻撃。"
           },
           {
             "title": "ブロック",
-            "text": "相手は兵士や防壁で守れます。"
+            "text": "今回はブロッカーを指定しません。守らないことも選べます。"
           },
           {
             "title": "ダメージ判定",
-            "text": "兵士同士なら数字を比較。今回は 6 < 7。"
+            "text": "2の攻撃でライフが2枚減ります。1枚ずつ墓地へ動かしましょう。"
           }
         ]
       }
     },
     {
-      "id": "unblocked-attack",
-      "title": "ブロックしなかったら？",
+      "id": "first-battle",
+      "title": "兵士で守ってみる",
       "category": "combat",
-      "shortDescription": "守られなかった兵士の数字だけ、ライフが減ります。",
+      "shortDescription": "今度は♥7で♣6を守り、ライフを守ります。",
       "difficulty": "beginner",
       "status": "ready",
       "prerequisites": [
-        "first-battle"
+        "unblocked-attack"
       ],
       "sceneIds": [
-        "unblocked-attack"
+        "first-battle"
       ],
       "actionIds": [],
       "reviewActionIds": [
@@ -102,20 +121,177 @@
         "damageJudge"
       ],
       "ruleRefs": [
+        "action.attack",
+        "action.block",
         "action.damageJudge"
       ],
       "cards": [
-        "S2"
+        "C6",
+        "H7"
       ],
       "explainer": {
         "type": "example",
-        "title": "2の攻撃 → ライフ2枚",
-        "text": "このLesson専用の盤面から始めます。今回は守らず、ライフの上から1枚ずつ墓地へ動かします。",
-        "equation": "♠2 → 2点",
+        "title": "6と7、どちらが強い？",
+        "equation": "6 < 7",
         "cards": [
-          "S2"
+          "C6",
+          "H7"
+        ],
+        "text": "攻撃する♣6を、♥7でブロック。小さい6の兵士が墓地へ行き、ライフは減りません。"
+      }
+    },
+    {
+      "id": "bulwark-block",
+      "title": "防壁で守ってみる",
+      "category": "combat",
+      "shortDescription": "裏向きの防壁で守り、数字を公開します。",
+      "difficulty": "beginner",
+      "status": "ready",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [
+        "bulwark-block"
+      ],
+      "actionIds": [],
+      "reviewActionIds": [
+        "block",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.block",
+        "action.damageJudge",
+        "character.bulwark"
+      ],
+      "cards": [
+        "C6"
+      ],
+      "explainer": {
+        "type": "flow",
+        "title": "防壁は大小ではなく、一致を見る",
+        "items": [
+          {
+            "title": "防壁を選ぶ",
+            "text": "縦向きの防壁を選び、攻撃してきた兵士を指定します。防壁の向きは変えません。"
+          },
+          {
+            "title": "表向きにする",
+            "text": "同じ数字を含む攻撃側なら、その兵士も墓地へ。"
+          },
+          {
+            "title": "防壁は墓地へ",
+            "text": "Jokerの防壁でも攻撃側を墓地へ。今回は数字を確かめます。"
+          }
         ]
       }
+    },
+    {
+      "id": "multi-attack",
+      "title": "まとめてアタック",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "attack"
+      ],
+      "ruleRefs": [
+        "action.attack"
+      ],
+      "cards": []
+    },
+    {
+      "id": "multi-block",
+      "title": "力を合わせて守る",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "block",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.block",
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "equal-numbers",
+      "title": "同じ数字なら？",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "combat-magic",
+      "title": "戦闘中に数字が変わる",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "down",
+        "damageJudge"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.down",
+        "action.damageJudge"
+      ],
+      "cards": []
+    },
+    {
+      "id": "lost-target",
+      "title": "対象がいなくなったら",
+      "category": "tactics",
+      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
+      "difficulty": "beginner",
+      "status": "pending",
+      "prerequisites": [
+        "first-battle"
+      ],
+      "sceneIds": [],
+      "actionIds": [],
+      "reviewActionIds": [
+        "up",
+        "down"
+      ],
+      "ruleRefs": [
+        "action.up",
+        "action.down"
+      ],
+      "cards": []
     },
     {
       "id": "soldier",
@@ -485,159 +661,6 @@
       ]
     },
     {
-      "id": "bulwark-block",
-      "title": "防壁で守ってみる",
-      "category": "tactics",
-      "shortDescription": "裏向きの防壁で守り、数字を公開します。",
-      "difficulty": "beginner",
-      "status": "ready",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [
-        "bulwark-block"
-      ],
-      "actionIds": [],
-      "reviewActionIds": [
-        "block",
-        "damageJudge"
-      ],
-      "ruleRefs": [
-        "action.block",
-        "action.damageJudge",
-        "character.bulwark"
-      ],
-      "cards": [
-        "C6"
-      ],
-      "explainer": {
-        "type": "flow",
-        "title": "防壁は大小ではなく、一致を見る",
-        "items": [
-          {
-            "title": "防壁を選ぶ",
-            "text": "攻撃してきた兵士を指定します。"
-          },
-          {
-            "title": "表向きにする",
-            "text": "同じ数字を含む攻撃側なら、その兵士も墓地へ。"
-          },
-          {
-            "title": "防壁は墓地へ",
-            "text": "Jokerの防壁でも攻撃側を墓地へ。今回は数字を確かめます。"
-          }
-        ]
-      }
-    },
-    {
-      "id": "multi-attack",
-      "title": "まとめてアタック",
-      "category": "tactics",
-      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
-      "difficulty": "beginner",
-      "status": "pending",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [],
-      "actionIds": [],
-      "reviewActionIds": [
-        "attack"
-      ],
-      "ruleRefs": [
-        "action.attack"
-      ],
-      "cards": []
-    },
-    {
-      "id": "multi-block",
-      "title": "力を合わせて守る",
-      "category": "tactics",
-      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
-      "difficulty": "beginner",
-      "status": "pending",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [],
-      "actionIds": [],
-      "reviewActionIds": [
-        "block",
-        "damageJudge"
-      ],
-      "ruleRefs": [
-        "action.block",
-        "action.damageJudge"
-      ],
-      "cards": []
-    },
-    {
-      "id": "equal-numbers",
-      "title": "同じ数字なら？",
-      "category": "tactics",
-      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
-      "difficulty": "beginner",
-      "status": "pending",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [],
-      "actionIds": [],
-      "reviewActionIds": [
-        "damageJudge"
-      ],
-      "ruleRefs": [
-        "action.damageJudge"
-      ],
-      "cards": []
-    },
-    {
-      "id": "combat-magic",
-      "title": "戦闘中に数字が変わる",
-      "category": "tactics",
-      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
-      "difficulty": "beginner",
-      "status": "pending",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [],
-      "actionIds": [],
-      "reviewActionIds": [
-        "up",
-        "down",
-        "damageJudge"
-      ],
-      "ruleRefs": [
-        "action.up",
-        "action.down",
-        "action.damageJudge"
-      ],
-      "cards": []
-    },
-    {
-      "id": "lost-target",
-      "title": "対象がいなくなったら",
-      "category": "tactics",
-      "shortDescription": "応用の固定盤面とカード操作は準備中です。",
-      "difficulty": "beginner",
-      "status": "pending",
-      "prerequisites": [
-        "first-battle"
-      ],
-      "sceneIds": [],
-      "actionIds": [],
-      "reviewActionIds": [
-        "up",
-        "down"
-      ],
-      "ruleRefs": [
-        "action.up",
-        "action.down"
-      ],
-      "cards": []
-    },
-    {
       "id": "chance",
       "title": "チャンスと解決",
       "category": "requests",
@@ -823,25 +846,6 @@
       "cards": [
         "Joker"
       ]
-    },
-    {
-      "id": "board-overview",
-      "title": "盤面を確認する",
-      "category": "combat",
-      "shortDescription": "置き場の名前をタップして復習できます。",
-      "difficulty": "beginner",
-      "status": "ready",
-      "prerequisites": [],
-      "sceneIds": [
-        "board-overview"
-      ],
-      "actionIds": [],
-      "reviewActionIds": [],
-      "ruleRefs": [
-        "frame.entry16"
-      ],
-      "cards": [],
-      "optional": true
     }
   ]
 }

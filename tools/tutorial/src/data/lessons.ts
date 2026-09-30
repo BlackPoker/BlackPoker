@@ -24,7 +24,7 @@ export const bulwarkScenario = makeBulwarkFixture(entryScenario);
 export const scenarios = [entryScenario, bulwarkScenario];
 export const lessonById = (id: string) => learningPath.lessons.find((lesson) => lesson.id === id)!;
 export function legacyLesson(stepIndex: number) {
-  if (stepIndex === 0) return lessonById("first-battle");
+  if (stepIndex === 0) return lessonById("board-overview");
   const step = entryScenario.steps[Math.min(stepIndex, entryScenario.steps.length - 1)];
   return learningPath.lessons.find((lesson) => lesson.realStepIds?.includes(step.id) ||
     lesson.sceneIds.some((id) => entryScenario.scenes.find((scene) => scene.id === id)?.stepIds.includes(step.id))) || lessonById("first-battle");

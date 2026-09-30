@@ -2,7 +2,23 @@
 
 この文書はSphinxの生成先 `docs/` から分離し、Tutorialと同じ場所で管理する。
 
-## 実装前の調査と方針
+## 初心者向けの推奨順（今回の更新）
+
+基準: `3f4ba3e8569f2de19205b0584c2f946cfaac1e7b`。開始時にoriginをfetchし、local / remoteの一致を確認。
+
+ゲームの目的（INTRO） → 盤面・向き → 守らない攻撃 → 兵士ブロック → 防壁ブロック → 応用の攻防 → 戦力・コスト → 魔法 → リクエスト → 誘発 → Entry16実戦。
+
+|Lesson ID|初回の役割|推奨前提|
+|---|---|---|
+|board-overview|5つの置き場の探索と縦＝チャージ／横＝ドライブの図。全タップは不要|なし|
+|unblocked-attack|最初の攻撃。ブロックは誘発するが、ブロッカーを指定しない。ライフを1枚ずつ減らす|board-overview|
+|first-battle|兵士で守る。6 < 7を比較し、ライフが守られる|unblocked-attack|
+|bulwark-block|裏向き・チャージの防壁で守る。公開して数字一致を確認、攻撃側と防壁を墓地へ|first-battle|
+
+いずれも推奨前提でありロックではない。防壁Lessonはcombatへ移し、tacticsの応用はその後へ配置。準備中は「次へ」で飛ばし、一覧から参照できる。魔法やコストの大量追加は行わない。
+3つの戦闘アクションの主担当は最初に体験するunblocked-attackへ移し、兵士・防壁のブロックはreviewとして扱う。
+
+## 既存構造の調査と方針（前回）
 
 基準: local / origin ともに `82ed1bc4735390cff4df588f2257bd7b79b9700e`。
 正規情報は `tools/actionlist/original/act.yaml`、`frame.yaml`、`source/common/common-action.rst` と現行コアフロー。
@@ -15,9 +31,9 @@ Docker内の `loadRuleCatalog()` でLite対象を列挙すると19件。件数�
 
 |対象|actionId|教材Lesson|使用カード例|必要interaction|現状 → 今回|
 |---|---|---|---|---|---|
-|アタック|attack|まず戦ってみよう|♣6|tap-card|実装済 → 移行|
-|ブロック|block|まず戦ってみよう|♥7 → ♣6|select-target|実装済 → 移行|
-|ダメージ判定|damageJudge|まず戦ってみよう|6 < 7、♣6|move-card|実装済 → 移行|
+|アタック|attack|まずは攻撃してみよう|♠2|tap-card|実装済、最初の戦闘へ|
+|ブロック|block|まずは攻撃してみよう|指定なし（兵士Lessonで♥7 → ♣6を復習）|action / select-target|実装済、処理を省かない|
+|ダメージ判定|damageJudge|まずは攻撃してみよう|♠2 → ライフ2枚（兵士Lessonで6 < 7を復習）|move-card|実装済、1枚ずつ操作|
 |防壁設置|setBulwark|防壁を増やす|♢8、ライフ上|move-card|実装済 → 移行|
 |兵士召喚|summonsSoldier|兵士を召喚する|防壁♢5、♠2|tap-card / move-card|実装済 → 移行|
 |英雄召喚|summonsHero|英雄を出す|♥J、2防壁|複数コスト / move-card|未実装 → 準備中|
@@ -44,7 +60,7 @@ Docker内の `loadRuleCatalog()` でLite対象を列挙すると19件。件数�
 |一般兵 / 英雄 / エース|character.soldier / hero / ace|戦力の比較|2〜10 / J〜K / A|charListから比較、一般兵の操作のみ完備|
 |装備兵|character.armedsoldier / mountSoldier|カードを重ねる|同スート、数字合計、Aを含むと速攻|準備中、公式リンク|
 |防壁|character.bulwark / damageJudge|防壁で守ってみる|Bの♣6防壁とAの♣6兵士|新規fixture、選択→公開→攻撃側→防壁の順に墓地|
-|ブロックなし|damageJudge|守らなかったら？|♠2、ライフ2枚|既存fixture再利用|
+|ブロックなし|damageJudge|まずは攻撃してみよう|♠2、ライフ2枚|既存fixture再利用、最初の戦闘|
 |複数アタック|attack|まとめてアタック|♣6、♠2|準備中|
 |複数ブロック|block / damageJudge|力を合わせて守る|♠K VS ♥7＋♣9|準備中|
 |同数|damageJudge|同じ数字なら？|A・Bそれぞれの♣6|準備中|
@@ -56,12 +72,13 @@ Docker内の `loadRuleCatalog()` でLite対象を列挙すると19件。件数�
 |誘発4|nextGeneration|世代交代をたどる|A/J/Q/Kが場から墓地へ|準備中|
 |誘発5|現行core flow|同時に誘発したら|AP / NAP / controller|準備中、後段のみ。順序を勝手に簡略化しない|
 |Entry16開始|frame.entry16 / 共通開始手順|Entry16で遊ぶ|16枚→7枚→プリセット→先攻→1ドロー|既存realモード9操作維持|
-|ゾーンと向き|既存盤面ガイド|盤面を確認する|PLAYER A/B、5ゾーン|任意の復習、最初に強制しない|
+|ゾーンと向き|common-component.rst / chargedrive|まずは盤面を見てみよう|PLAYER A/B、5ゾーン、縦横比較図|初回おすすめ。全タップは要求しない|
 
 ## 現行ルール確認の要点
 
 - アタックは1ターン1回、チャージ状態の攻撃キャラクター。出たターンは速攻がなければ攻撃不可。
-- 兵士ブロックはチャージ状態で複数可。兵士同士は数字（複数なら合計）を比べ、同数なら両方墓地。
+- ドライブ状態のキャラクターはブロッカーに指定できない（防壁も含む）。兵士ブロックは複数可。兵士同士は数字（複数なら合計）を比べ、同数なら両方墓地。
+- 防壁fixtureは元盤面のdriveを引き継がず、down / chargeを明示する。指定ではドライブせず、damageJudgeで公開して数字一致を判定。検証はdriveのブロッカーを拒否する。
 - 防壁は公開後、Jokerまたは防壁の数字が攻撃側カードに含まれると攻撃側を墓地。その後、防壁を墓地。大小比較ではない。
 - 防壁設置L・裏向きチャージ・1ターン1回。開始時プリセットとは区別。
 - 一般兵BL / 2〜10、英雄BBL / J〜K、エースL / A。装備BL / 同スート、サイズ・速攻はcharList参照。
@@ -88,6 +105,6 @@ Docker内の `loadRuleCatalog()` でLite対象を列挙すると19件。件数�
 
 ## 今回の実装結果
 
-公開済みは戦闘、ブロックなし、兵士召喚、防壁設置とターン交代、エンドとチャージ・ドロー、防壁ブロック、実物準備の7操作Lessonと、読み方の1ミニ解説。これに任意の盤面復習を加える。その他20Lessonは準備中。
+公開済みは戦闘、ブロックなし、兵士召喚、防壁設置とターン交代、エンドとチャージ・ドロー、防壁ブロック、実物準備の7操作Lessonと、読み方の1ミニ解説、盤面探索の1Lesson。盤面探索を初回導線に含め、進捗は9Lessonを分母とする。その他20Lessonは準備中。
 主担当アクションの割当は19/19だが、操作体験として実装済みなのは8アクション（attack / block / damageJudge / setBulwark / summonsSoldier / end / charge / draw）。この2種類のcoverageを混同しない。
 旧6sceneの正解操作・タップ→タップ・PCドラッグ・キーボードは変更せず再利用。hookには表裏変更時の成功文だけを追加した。

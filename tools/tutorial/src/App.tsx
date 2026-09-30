@@ -9,6 +9,7 @@ import { ActionHelp } from "./components/ActionHelp";
 import { CurriculumPanel } from "./components/CurriculumPanel";
 import { RuleLinks } from "./components/RuleLinks";
 import { TutorialIntro } from "./components/TutorialIntro";
+import { CardOrientation } from "./components/CardOrientation";
 import { useTutorialProgress } from "./hooks/useTutorialProgress";
 import { useSceneInteraction } from "./hooks/useSceneInteraction";
 import { cardName } from "./lib/cards";
@@ -54,8 +55,8 @@ export default function App() {
     { ...p, completedIds: [...p.completedIds, lesson.id] });
   useEffect(() => saveLessonProgress(storage, lessonProgress), [storage, lessonProgress]);
   useEffect(() => {
-    if (showingPractice && scene && interaction.complete) completeLesson();
-  }, [showingPractice, scene?.id, interaction.complete]);
+    if (introComplete && showingPractice && scene && interaction.complete) completeLesson();
+  }, [introComplete, showingPractice, scene?.id, interaction.complete]);
   useEffect(() => {
     window.scrollTo?.({ top: 0 });
   }, [unitIndex, lesson.id, explaining]);
@@ -116,7 +117,7 @@ export default function App() {
     );
   }
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${showingPractice && scene ? "practice-view" : ""}`}>
       <button
         aria-label="学習メニューを閉じる"
         className={`mobile-scrim ${menuOpen ? "show" : ""}`}
@@ -196,10 +197,10 @@ export default function App() {
                     : "練習の準備"}
               </span>
             </div>
-            <p className="now-label">
+            {!scene && <p className="now-label">
               <span />
               {scene ? "画面で体験" : "いまやること"}
-            </p>
+            </p>}
             {!scene && (step.sequenceLabel || step.actionName) && (
               <div className="step-context">
                 {step.actionName && <span>今回のアクション：{step.actionName}</span>}
@@ -207,9 +208,9 @@ export default function App() {
               </div>
             )}
             <h1>{scene ? lesson.title : step.title}</h1>
-            <p className="instruction">
+            {(!scene || scene.presentation === "static") && <p className="instruction">
               {scene ? lesson.shortDescription : step.instruction}
-            </p>
+            </p>}
             {scene?.presentation === "interactive" && !interaction.complete && (
               <div className="scene-progress" aria-live="polite">
                 <strong>{interaction.microIndex + 1} / {scene.stepIds.length}</strong>
@@ -218,32 +219,22 @@ export default function App() {
               </div>
             )}
             {scene?.presentation === "static" && (
-              <div className="scene-overview" aria-label="盤面の見かた">
-                <span><b>PLAYER A / B</b> 下がA・上がB</span>
-                <span><b>カードの置き場</b> 手札・兵士・防壁・ライフ・墓地</span>
-                <span><b>カードの向き</b> 縦がチャージ・横がドライブ</span>
-              </div>
-            )}
-            {scene && interaction.complete && (
-              <div className="learned scene-result" role="status">
-                <strong>Lesson完了</strong>
-                <p>{scene.summary}</p>
-              </div>
+              <CardOrientation />
             )}
             {step.placementGuide && <p className="placement-guide">{step.placementGuide}</p>}
-            <div className={`mode-notice mode-${step.mode}`}>
+            {!scene && <div className={`mode-notice mode-${step.mode}`}>
               {step.mode === "fixed" ? (
                 <><b>画面だけで練習</b><span>実物カードはまだ使いません</span></>
               ) : (
                 <><b>ここから実物カード</b><span>画面は実物カードの置き場ガイドです</span></>
               )}
-            </div>
+            </div>}
             {step.id === "preset-bulwark" && (
               <p className="preset-note">
                 ゲーム開始時だけ、防壁は表向きで置きます。通常の「防壁設置」では裏向きです。
               </p>
             )}
-            {step.checklist && (
+            {step.checklist && !scene && (
               <details className="deck-check">
                 <summary>
                   {step.mode === "fixed" ? "画面に出る16枚を確認" : "用意する16枚を確認"}
@@ -273,9 +264,9 @@ export default function App() {
               </fieldset>
             )}
             {scene && <div className="interaction-guide" aria-live="polite" aria-atomic="true">
-              {interaction.lastResult && <p className="interaction-result">✓ {interaction.lastResult}</p>}
-              {!interaction.complete && <strong>{interaction.pending ? "操作できました" : interaction.prompt}</strong>}
-              {scene.presentation === "static" && <strong>置き場をタップすると説明が出ます。</strong>}
+              {interaction.pending && interaction.lastResult && <p className="interaction-result">✓ {interaction.lastResult}</p>}
+              {!interaction.complete && !interaction.pending && !interaction.feedback && <strong>{interaction.prompt}</strong>}
+              {scene.presentation === "static" && !interaction.feedback && <strong>置き場をタップして確認。下がA・上がBです。</strong>}
               {interaction.feedback && <p className="interaction-feedback">{interaction.feedback}</p>}
               {!interaction.complete && step.cause?.phase === "trigger" && step.operations.some((operation) => operation.from === operation.to) &&
                 interaction.commands.every((command) => command.kind === "tap-card") && <small>自動で起きるチャージを、カード操作としてなぞります。</small>}
@@ -299,6 +290,12 @@ export default function App() {
                 pending: interaction.pending, complete: interaction.complete,
                 mistakes: interaction.mistakes, onInput: interaction.attempt } : undefined}
             />
+            {scene?.presentation === "interactive" && interaction.complete && (
+              <div className="learned scene-result" role="status">
+                <strong>Lesson完了</strong>
+                <p>{scene.summary}</p>
+              </div>
+            )}
             {step.mode === "real" && !progress.applied && (
               <MoveGuide
                 operations={guideOperations}
@@ -385,6 +382,12 @@ export default function App() {
             </button>
             {detailsOpen && (
               <div className="why-content">
+                {scene && <>
+                  <p>{lesson.shortDescription} 実物カードは不要です。</p>
+                  <CardOrientation />
+                  <p>チャージは未使用、ドライブは使用済みの状態です。使えるアクションの条件はそれぞれ異なります。</p>
+                  <a href="https://blackpoker.github.io/BlackPoker/master/common/common.html#chargedrive" target="_blank" rel="noreferrer">公式ルール：チャージとドライブ ↗</a>
+                </>}
                 {[...new Set([...lesson.actionIds, ...lesson.reviewActionIds])].map((id) =>
                   <details key={id}><summary>アクションの定義：{ruleCatalog.actions[id as keyof typeof ruleCatalog.actions].name}</summary><ActionDefinition id={id} /></details>)}
                 {scene ? tutorial.steps.slice(unit.firstStepIndex, unit.lastStepIndex + 1).map((item, index) => (
@@ -452,7 +455,7 @@ export default function App() {
                 className="danger"
                 onClick={() => {
                   progress.restart();
-                  setLessonProgress({ lessonId: "first-battle", completedIds: [] });
+                  setLessonProgress({ lessonId: "board-overview", completedIds: [] });
                   setExplaining(true);
                   interaction.replay();
                   clearIntroComplete(storage);

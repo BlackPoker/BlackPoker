@@ -2017,24 +2017,6 @@ button {
 .scene-progress strong { color: #18181b; font-variant-numeric: tabular-nums; }
 .scene-progress span { font-weight: 700; }
 .scene-progress small { margin-left: auto; color: #71717a; }
-.scene-overview {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin: 12px 0;
-}
-.scene-overview span {
-  min-width: 0;
-  padding: 9px;
-  border: 1px solid #d4d4d8;
-  border-radius: 5px;
-  background: #fafafa;
-  color: #52525b;
-  font-size: 11px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.scene-overview b { display: block; color: #18181b; }
 .scene-replay {
   display: block;
   margin: 0 0 12px auto;
@@ -2096,11 +2078,6 @@ button {
   .interaction-guide { top: 66px; }
   .interactive-board .card-slot { width: 44px; height: 48px; flex-basis: 44px; }
   .interactive-board .table-zones { gap: 6px; grid-template-columns: minmax(54px, 1fr) minmax(94px, 1.6fr) minmax(54px, 1fr); }
-}
-@media (max-width: 600px) {
-  .scene-overview { grid-template-columns: 1fr; gap: 5px; }
-  .scene-overview span { padding: 6px 9px; }
-  .scene-overview b { display: inline; margin-right: 7px; }
 }
 .board-overlay {
   position: absolute;
@@ -2577,6 +2554,42 @@ a:focus-visible {
   }
 }
 /* Lessonの解説は盤面操作から独立。小画面で横スクロールを作らない。 */
+/* 触る画面では盤面を優先。カード本体と操作領域のサイズは変えない。 */
+.practice-view .lesson-card { padding: 24px 30px; }
+.practice-view .actor-banner { padding-bottom: 6px; margin-bottom: 8px; gap: 4px 8px; }
+.practice-view .lesson-card h1 { font-size: clamp(22px, 2.2vw, 30px); }
+.practice-view .instruction { margin: 6px 0; line-height: 1.5; }
+.practice-view .scene-progress { margin: 6px 0; padding: 4px 0; background: none; border: 0; }
+.practice-view .interaction-guide { position: static; margin-top: 6px; padding: 8px 10px; min-height: 38px; }
+.practice-view .interaction-guide:empty { display: none; }
+.practice-view .persistent-board { margin: 8px 0 12px; }
+.orientation-primer { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+.orientation-primer > div { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.orientation-primer b, .orientation-primer small { display: block; line-height: 1.5; }
+.orientation-primer b { font-size: 12px; }
+.orientation-primer small { color: #52525b; font-size: 11px; }
+.orientation-card { display: grid; place-items: center; width: 28px; height: 40px; flex-shrink: 0; border: 1px solid #71717a; border-radius: 4px; background: white; font-family: Georgia, serif; font-size: 13px; }
+.orientation-card.horizontal { width: 40px; height: 28px; }
+@media (max-width: 860px) {
+  .topbar { height: 48px; padding-inline: 12px; }
+  .topbar button { min-height: 44px; }
+  .topbar .icon-button, .topbar .restart-button { min-width: 44px; }
+  .lesson-progress { padding: 8px 16px 0; }
+  .lesson-progress > div:first-child { gap: 6px; }
+  .lesson-progress span { letter-spacing: 0; }
+  .lesson-progress strong { font-size: 14px; }
+  .lesson-progress em { display: none; }
+  .progress-track { margin-top: 4px; height: 3px; }
+  .lesson-scroll { padding: 8px 10px 20px; }
+  .practice-view .lesson-card { padding: 12px; }
+  .practice-view .actor-banner > span { width: auto; margin-left: auto; font-size: 9px; }
+  .practice-view .actor-banner strong { font-size: 12px; letter-spacing: 0; }
+  .practice-view .instruction { font-size: 12px; }
+  .practice-view .persistent-board figcaption { padding: 4px; }
+  .chapter-group summary small { display: inline; margin-left: 8px; }
+  .curriculum nav { padding-top: 12px; }
+  .chapter-list button { min-height: 44px; }
+}
 .lesson-explainer { min-width: 0; }
 .lesson-explainer > small { color: #71717a; letter-spacing: .08em; }
 .concept-slide { margin: 24px 0; padding: clamp(16px, 3vw, 28px); background: #fafafa; border: 1px solid #d4d4d8; border-radius: 12px; }

@@ -32,22 +32,33 @@ function perform(id: string) {
 describe("画面でカードを操作するTutorial", () => {
   beforeEach(() => { vi.useFakeTimers(); window.localStorage.clear(); saveIntroComplete(window.localStorage); });
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
-  it("3画面INTROから戦闘のミニ解説へ進み、最初からやり直せる", () => {
+  it("3画面INTROから盤面と向きを確認し、最初の攻撃へ進み、最初からやり直せる", () => {
     clearIntroComplete(window.localStorage); render(<App />);
     expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
+    expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).completedIds).toEqual([]);
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
     expect(screen.getByRole("heading", { name: "どうなったら勝ち？" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: /次へ/ }));
     fireEvent.click(screen.getByRole("button", { name: /画面で練習してみる/ }));
-    expect(screen.getByRole("heading", { name: "まず戦ってみよう" })).toBeVisible();
-    expect(screen.getByRole("heading", { name: "戦闘は3段階" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "まずは盤面を見てみよう" })).toBeVisible();
+    expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).completedIds).toEqual(["board-overview"]);
+    expect(screen.getByRole("figure", { name: "カードの向き：チャージとドライブ" })).toBeVisible();
+    expect(screen.getByText("縦＝チャージ")).toBeVisible();
+    expect(screen.getByText("横＝ドライブ")).toBeVisible();
+    expect(screen.queryByText("Lesson完了")).toBeNull();
+    // 置き場を全てクリックする必要はなく、そのまま次へ進める。
+    fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+    expect(screen.getByRole("heading", { name: "まずは攻撃してみよう" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "守らなかったら、どうなる？" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
     expect(screen.queryByRole("button", { name: "次へ →" })).toBeNull();
     expect(document.querySelector(".board-route")).toBeNull();
-    expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♣6");
+    expect(screen.getByTestId("A-soldiers")).toHaveTextContent("♠2");
     fireEvent.click(screen.getByRole("button", { name: "最初からやり直す" }));
     fireEvent.click(screen.getByRole("button", { name: "やり直す" }));
     expect(screen.getByRole("heading", { name: /BlackPokerって.*どんなゲーム？/ })).toBeVisible();
+    expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).lessonId).toBe("board-overview");
+    expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).completedIds).toEqual([]);
   });
   it("時間経過だけでは進まず、scene途中にNextを出さない", () => {
     at("attack"); render(<App />);

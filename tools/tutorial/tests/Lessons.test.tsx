@@ -18,9 +18,39 @@ function selectLesson(title: string) {
 }
 beforeEach(() => { localStorage.clear(); saveIntroComplete(localStorage); vi.useFakeTimers(); });
 afterEach(() => { vi.useRealTimers(); });
+it("盤面→守らない攻撃→兵士→防壁へ連続操作でき、公開済みの完了記録を再読込して保持する", () => {
+  const view = render(<App />);
+  expect(screen.getByRole("heading", { name: lessonById("board-overview").title })).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+  for (const id of ["unblocked-attack", "first-battle", "bulwark-block"]) {
+    expect(screen.getByRole("heading", { name: lessonById(id).title, level: 1 })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
+    const scenario = id === "bulwark-block" ? bulwarkScenario : entryScenario;
+    const scene = scenario.scenes.find((s) => s.id === id)!;
+    for (const stepId of scene.stepIds) {
+      const step = scenario.steps.find((s) => s.id === stepId)!;
+      for (const command of deriveInteractions(step)) {
+        if (command.kind === "action") fireEvent.click(screen.getByRole("button", { name: command.label }));
+        else {
+          fireEvent.click(card(command.source.player, command.source.card));
+          if (command.kind === "select-target") fireEvent.click(card(command.target.player, command.target.card));
+          if (command.kind === "move-card") fireEvent.click(within(screen.getByTestId(`${command.source.player}-${command.to}`)).getByRole("button", { name: /^PLAYER/ }));
+        }
+        advance();
+      }
+    }
+    expect(screen.getByText("Lesson完了")).toBeVisible();
+    if (id !== "bulwark-block") fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
+  }
+  const saved = JSON.parse(localStorage.getItem(lessonStorageKey)!);
+  expect(saved.completedIds).toEqual(["board-overview", "unblocked-attack", "first-battle", "bulwark-block"]);
+  view.unmount(); render(<App />);
+  expect(screen.getByRole("heading", { name: "防壁で守ってみる", level: 1 })).toBeVisible();
+  expect(JSON.parse(localStorage.getItem(lessonStorageKey)!)).toEqual(saved);
+});
 it("動画なしで説明→操作→完了→次Lessonへ進める", () => {
-  render(<App />);
-  expect(screen.getByRole("heading", { name: "戦闘は3段階" })).toBeVisible();
+  render(<App />); selectLesson("兵士で守ってみる");
+  expect(screen.getByRole("heading", { name: "6と7、どちらが強い？" })).toBeVisible();
   expect(screen.queryByRole("button", { name: "動画で見る" })).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
   fireEvent.click(card("A", "C6")); advance();
@@ -30,16 +60,16 @@ it("動画なしで説明→操作→完了→次Lessonへ進める", () => {
   expect(screen.getByText("Lesson完了")).toBeVisible();
   expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).completedIds).toContain("first-battle");
   fireEvent.click(screen.getByRole("button", { name: "次へ →" }));
-  expect(screen.getByRole("heading", { name: "2の攻撃 → ライフ2枚" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: lessonById("bulwark-block").explainer!.title })).toBeVisible();
 });
 it("解説だけのLessonを経由した戦闘の復習も初期盤面に戻り、完了記録は維持する", () => {
-  render(<App />);
+  render(<App />); selectLesson("兵士で守ってみる");
   fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
   fireEvent.click(card("A", "C6")); advance();
   fireEvent.click(card("B", "H7")); fireEvent.click(card("A", "C6")); advance();
   fireEvent.click(card("A", "C6"));
   fireEvent.click(within(screen.getByTestId("A-grave")).getByRole("button", { name: /^PLAYER/ })); advance();
-  selectLesson("アップ"); selectLesson("まず戦ってみよう");
+  selectLesson("アップ"); selectLesson("兵士で守ってみる");
   fireEvent.click(screen.getByRole("button", { name: "やってみる →" }));
   expect(card("A", "C6")).toHaveAccessibleName("A ♣6 表向き 縦向き");
   expect(screen.queryByText("Lesson完了")).toBeNull();
@@ -55,7 +85,7 @@ it("準備中へ直接アクセスでき、完了扱いせず、最高到達を�
   expect(screen.queryByRole("button", { name: "やってみる →" })).toBeNull();
   fireEvent.click(screen.getByText("解説を見る", { selector: "summary" }));
   expect(document.querySelector(".lesson-definitions")).toHaveTextContent("クイック");
-  selectLesson("まず戦ってみよう");
+  selectLesson("兵士で守ってみる");
   expect(loadProgress(entryScenario.id, localStorage).maxReachedStepIndex).toBe(max);
   expect(JSON.parse(localStorage.getItem(lessonStorageKey)!).completedIds).not.toContain("up");
 });
@@ -96,7 +126,7 @@ it("任意動画はクリック後だけ開き、旧版注記・autoplayなし�
   expect(document.querySelector("iframe")!.src).not.toContain("autoplay");
   fireEvent.click(screen.getByRole("button", { name: "動画を閉じる" }));
   expect(document.querySelector("iframe")).toBeNull();
-  expect(screen.getByRole("heading", { name: "戦闘は3段階" })).toBeVisible();
+  expect(screen.getByRole("heading", { name: "6と7、どちらが強い？" })).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "やってみる →" })); expect(start).toHaveBeenCalledOnce();
 });
 it.each(["first-battle", "soldier", "reading-actions", "unblocked-attack"])("%sの解説presentationを描画する", (id) => {

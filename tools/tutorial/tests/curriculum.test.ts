@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { learningPath, entryScenario, bulwarkScenario, legacyLesson } from "../src/data/lessons";
+import { learningPath, entryScenario, bulwarkScenario, legacyLesson, lessonById } from "../src/data/lessons";
 import { ruleCatalog } from "../src/generated/ruleCatalog";
 import { validateCurriculum, youtubeEmbed } from "../src/lib/curriculum-schema.mjs";
 import { validateScenario } from "../src/lib/schema.mjs";
@@ -8,6 +8,34 @@ import { loadLessonProgress, saveLessonProgress, lessonStorageKey } from "../src
 
 const validate = (data: unknown) => validateCurriculum(data, ruleCatalog, [entryScenario, bulwarkScenario]);
 describe("現行YAMLに基づくLesson構造", () => {
+  it("推奨入口は盤面→攻撃→兵士ブロック→防壁、前提は強制ロックにしない", () => {
+    const ids = ["board-overview", "unblocked-attack", "first-battle", "bulwark-block"];
+    expect(learningPath.lessons.slice(0, 4).map((l) => l.id)).toEqual(ids);
+    ids.forEach((id, index) => {
+      expect(lessonById(id).optional).not.toBe(true);
+      expect(lessonById(id).prerequisites).toEqual(index ? [ids[index - 1]] : []);
+    });
+    expect(learningPath.lessons.findIndex((l) => l.id === "equal-numbers")).toBeLessThan(learningPath.lessons.findIndex((l) => l.id === "soldier"));
+    expect(lessonById("unblocked-attack").explainer).toMatchObject({ type: "flow", items: [
+      { title: "アタック" }, { title: "ブロック", text: expect.stringContaining("指定しません") }, { title: "ダメージ判定" },
+    ] });
+  });
+  it("ブロッカーの防壁は裏向き・チャージで、宣言してもドライブしない", () => {
+    const [choose, reveal] = bulwarkScenario.steps;
+    for (const phase of ["before", "after"] as const)
+      expect(choose.board[phase].B.bulwarks[0]).toMatchObject({ face: "down", state: "charge" });
+    expect(reveal.board.after.B.bulwarks[0]).toMatchObject({ face: "up", state: "charge" });
+    expect(bulwarkScenario.steps.at(-1)!.board.after.B.life).toEqual(choose.board.before.B.life);
+  });
+  it.each([bulwarkScenario, entryScenario])("ドライブ状態の防壁・兵士をブロッカーにする教材を拒否する", (source) => {
+    const invalid = structuredClone(source);
+    const step = invalid.steps.find((s) => s.interaction?.kind === "select-target")!;
+    const command = deriveInteractions(step)[0];
+    if (command.kind !== "select-target") throw new Error("select-target expected");
+    for (const phase of ["before", "after"] as const)
+      step.board[phase][command.source.player][command.source.zone].find((c) => c.card === command.source.card)!.state = "drive";
+    expect(validateScenario(invalid, ruleCatalog)).toContain("Blocker must be charged: " + step.id);
+  });
   it("Liteの全IDを1つずつ主担当へ割り当て、再登場はreviewとして明示する", () => {
     expect(validate(learningPath)).toEqual([]);
     expect(learningPath.lessons.flatMap((l) => l.actionIds).sort()).toEqual([...ruleCatalog.formats.lite.actions].sort());
@@ -16,9 +44,9 @@ describe("現行YAMLに基づくLesson構造", () => {
     ["duplicate", "Duplicate lesson id", (data: any) => data.lessons.push(data.lessons[0])],
     ["prerequisite", "Invalid prerequisite", (data: any) => data.lessons[0].prerequisites.push("missing")],
     ["scene", "Unknown scene", (data: any) => data.lessons[0].sceneIds.push("missing")],
-    ["coverage", "Missing Lite coverage", (data: any) => data.lessons[0].actionIds.pop()],
-    ["owner", "Duplicate action owner", (data: any) => data.lessons[1].actionIds.push("attack")],
-    ["explainer", "Invalid explainer", (data: any) => data.lessons[0].explainer.type = "unknown"],
+    ["coverage", "Missing Lite coverage", (data: any) => data.lessons.find((l: any) => l.id === "unblocked-attack").actionIds.pop()],
+    ["owner", "Duplicate action owner", (data: any) => data.lessons[2].actionIds.push("attack")],
+    ["explainer", "Invalid explainer", (data: any) => data.lessons[1].explainer.type = "unknown"],
     ["media", "Invalid media", (data: any) => data.lessons[0].media = { type: "youtube", url: "javascript:alert(1)" }],
     ["cycle", "Cyclic prerequisite", (data: any) => data.lessons[0].prerequisites.push("unblocked-attack")],
     ["pending", "Non-ready lesson", (data: any) => data.lessons[0].status = "pending"],
@@ -73,6 +101,6 @@ describe("現行YAMLに基づくLesson構造", () => {
     expect(loadLessonProgress(localStorage, index).completedIds).toEqual(["soldier"]);
     localStorage.setItem(lessonStorageKey, "{");
     expect(loadLessonProgress(localStorage, index).lessonId).toBe("soldier");
-    expect(loadLessonProgress(null, 0).lessonId).toBe("first-battle");
+    expect(loadLessonProgress(null, 0).lessonId).toBe("board-overview");
   });
 });

@@ -1,103 +1,104 @@
-# Interactive HowToBlackPoker 実装・検証報告
+# Interactive HowToBlackPoker 初心者導線の改善報告
 
-基準HEAD: `82ed1bc4735390cff4df588f2257bd7b79b9700e`。開始時にoriginをfetchし、同一HEADであることを確認した。
+基準HEAD: `3f4ba3e8569f2de19205b0584c2f946cfaac1e7b`。
+開始時にoriginをfetchし、localとremoteが同一であることを確認した。
 
-## 構成と公開範囲
+## 1–3. 防壁blockの原因・修正・初期state
 
-INTRO → ミニ解説 → 自分でカード操作 → Lesson完了、という導線へ移行した。詳細な現行定義は「解説を見る」で開く。既存interaction engine、6scene・30micro step、realモード、ルール早見、8コースのロードマップを保持する。
+`makeBulwarkFixture` は既存blockのbeforeをcloneし、BのD5とC6を交換した後、faceだけをdownにしていた。元盤面の防壁はdriveのため、横向きの防壁をブロッカーに指定する誤った教材になっていた。
 
-|分類|今回公開した内容|準備中|
+修正後は `face: "down", state: "charge"` を明示する。選択→アタッカー指定では状態を変えない。damageJudgeで表向きに公開し、6が一致する攻撃側を墓地へ、その後防壁を墓地へ移す。ライフは減らない。
+
+現行act.yamlのattack / block / damageJudgeとcharList.bulwark、common-component.rstのチャージ／ドライブを確認。ドライブ状態のキャラクターは防壁を含めブロッカーに指定できない。schemaにも、ブロックのselect-targetのsourceがchargeであることの検証を追加した。これは教材整合性検証であり、新しいゲームエンジンではない。
+
+## 4–11. 初心者導線・前提・解説
+
+変更前: INTRO → 兵士同士の戦闘 → ブロックなし → 戦力・魔法 → 防壁。盤面確認は末尾の任意復習。
+
+変更後: INTRO（勝ち方） → **盤面と向き → 守らない攻撃 → 兵士で守る → 防壁で守る** → 応用の攻防 → 戦力・コスト → 魔法 → リクエスト → 誘発 → 実物Entry16。
+
+|ID|タイトル・役割|prerequisites|
 |---|---|---|
-|1. まず戦ってみる|最初の戦闘、ブロックなし、任意の盤面復習|なし|
-|2. 戦力を増やす|兵士の比較・召喚、防壁設置、ターン交代|英雄召喚、エース召喚、装備|
-|3. 魔法を使う|アクションの読み方（ミニ解説のみ）|アップ、ダウン、ツイスト、カウンター、投擲、防壁破壊の操作|
-|4. 攻防を深く知る|防壁ブロック|複数アタック、複数ブロック、同数、戦闘中の魔法、対象消失|
-|5. リクエストの処理を知る|入口・参照・推奨前提のみ|チャンス、スピードの操作|
-|6. 誘発を知る|入口・参照・推奨前提のみ|誘発の復習、世代交代、同時誘発の操作|
-|7. Entry16で遊ぶ|実物カード準備から対戦まで9操作|なし|
-|別枠：Joker特別Lesson|入口と公式参照|サーチの操作|
+|board-overview|まずは盤面を見てみよう。5つの領域をタップして説明。全タップ不要|[]|
+|unblocked-attack|まずは攻撃してみよう。アタック→ブロックで指定なし→判定→ライフ2枚|board-overview|
+|first-battle|兵士で守ってみる。大きな♣6・♥7と「6 < 7」でライフを守る意味を示す|unblocked-attack|
+|bulwark-block|防壁で守ってみる。大小比較ではなく数字一致|first-battle|
 
-公開済みは7操作Lesson＋読み方1Lesson、別に任意の盤面復習。未完成20Lessonは明示的に「準備中」とし、完了記録を付けられない。おすすめ導線は公開済みLessonだけを進む。一覧は準備中も閲覧でき、prerequisitesによる強制ロックはない。
+board-overviewのoptionalを外し、新規・リセット時の入口にする。既存保存のLesson IDと旧30操作のインデックスは変更しない。進捗の分母は盤面確認を含む9Lesson。完了集合は保持する。
+盤面確認の完了記録はINTRO終了後に盤面が表示されてから行う。INTRO表示中やリセット直後に先取りで完了扱いしないこともテストした。
 
-## 最初の戦闘・解説画面
+INTROの「相手のライフ0枚で勝ち」は既に明瞭なので、重複ページは追加せず、盤面確認の短文へ接続した。向きはCardOrientationの縦・横カード図で攻撃前に説明する。最初のflowでも「チャージ（縦）からドライブ（横）」とつなぐ。厳密な定義へのリンクと使用条件は「解説を見る」で確認できる。
 
-INTRO直後は「まず戦ってみよう」。3段階のflowを見て「やってみる」を押すと、♣6をタップしてアタック、♥7→♣6を指定してブロック、6 < 7を確認して♣6を墓地へ移す。事前の盤面探索は必須にしない。
+unblocked-attackのcause / actionIdは維持し、ボタンを「ブロッカーを指定しない」とした。ブロック処理が起きないという意味にはしない。戦闘3アクションの主担当をこのLessonへ移し、兵士ブロックはreviewに変更。Lite19の主担当coverageを維持する。
 
-`LessonExplainer` は共通のタイトル・状態・CTA・詳細・任意動画を提供する。`ConceptSlide` は次の4型を描画する。
+防壁をcombatに移し、兵士ブロックの直後に配置。応用tacticsを戦力の前へ並べた。準備中20Lessonは一覧から自由に参照でき、「次へ」は公開済みのみを進む。prerequisitesはロックではない。flow / compare / anatomy / exampleはすべて維持。
 
-- flow：戦闘・ターン交代・防壁設置。PCでは横並び、スマホでは縦と矢印。
-- anatomy：アップのタイミング・スピード・コスト・キーカード・対象を生成カタログから表示。効果は短い教材要約、全文は詳細へ。
-- compare：一般兵・英雄・エースのキー、サイズ、ラベルをcharList由来のカタログから比較。
-- example：Entry16の大きなカード図と式。ブロックなしの「♠2 → 2点」、アップの「6＋4＝10」（操作は準備中）。
+## 12–13. 縦方向の圧縮
 
-動画は任意のYouTube metadata（URL/title/note/edition）。ユーザー操作後だけダイアログに読み込み、autoplayしない。閉じると同じLesson・元のフォーカスへ戻る。旧版は注意書きを必ず表示する。実在の教材URLは提供されていないため、現在のLessonには動画を登録していない。開閉・注記・URL検証はコンポーネントテストで確認した。
+- 操作中の「画面で体験」とshortDescription、実物不要の繰り返し通知を外す。説明はミニ解説と詳細に残す。
+- 上部に積まれていた完了summaryを盤面後へ移し、操作完了時だけ表示。静的な探索で開始直後の「Lesson完了」は出さない。
+- 成功結果は短い結果表示中だけ出し、次の指示と積み重ねない。誤操作時も同じ指示を二重表示しない。aria-liveは維持。
+- スマホのtopbarを64pxから48pxへ、カテゴリ・進捗を1行へ。actor・ターンの折返し、カード外の余白を整理。desktopのヘッダーは維持。
+- 操作案内のstickyを外し、盤面への重なりを避ける。カード本体は縮小せず、操作領域はスマホ44×48px以上を維持。
+- 一覧は現在カテゴリのみ開く既存構造を継続。スマホのカテゴリ名と件数を1行にまとめる。
+- 独立Lesson・scene内部の継続盤面・operation / interaction・矢印・選択表示はそのまま再利用。
 
-## 教材盤面・ルール・将来Lesson
+## 14. 390×844の実ブラウザ確認
 
-Entry16の16枚は変更していない。旧sceneの開始時beforeを各Lessonの独立fixtureとして再利用する。Lesson間で前の対戦を継続するとは案内せず、盤面を戻す架空のゲーム操作も挿入しない。scene内部のbefore/after・順次操作・整合性検証は維持した。
+同じローカルURL・viewportで、Lesson操作開始時のページ最上部から.persistent-board上端までをDOM矩形で測定（scrollYを加算、開始時scrollY=0）。小数点以下は丸めた。
 
-新しい防壁ブロックfixtureでは、Bの防壁を選択→Aの攻撃側を指定→防壁を表に公開→6が一致したAの♣6を墓地へ→Bの防壁も墓地へ、を4操作として追加した。同じプレイヤー内のカード重複はなく、双方の16枚を保存する。防壁は兵士同士の大小比較ではない。
+|画面|変更前|変更後|改善|
+|---|---:|---:|---:|
+|盤面と向き|645px|316px|329px上へ|
+|守らない攻撃|485px|251px|234px上へ|
+|兵士ブロック|485px|251px|234px上へ|
+|防壁ブロック|485px|251px|234px上へ|
 
-Liteアクション対応表・キャラクター・基本ルール・必要interactionは [LEARNING_MAP.md](LEARNING_MAP.md) に記載。現行YAMLから機械的に列挙した19アクションすべてに主担当Lessonを1つ割り当て、復習はreviewActionIdsとして区別した。**19/19は割当coverageであり、操作実装coverageではない。操作体験は8アクションが実装済み。**
+盤面確認の盤面下端は818pxで、844pxのファーストビュー内に両プレイヤーの全領域が入る。攻撃開始時の下端は753px。盤面の操作領域最小幅44pxを実測。横overflowなし。
 
-チャンスは魔法の後、誘発はチャンスと具体的な戦闘・ターン交代の後に配置。将来のSTAGE・パス・逆順解決、誘発の段階化、世代交代、AP/NAP/controllerの教材方針は対応表に記録した。現エンジンに未対応のステージ・フォグ・サイズ修正・条件付き探索を、見た目だけ実装済みにしない。サーチはJoker別教材であり、Entry16へJokerを追加しない。
+INTROの勝ち方 → 盤面・向き → ライフ説明のタップ → 最初のflow → ♠2のアタック → ブロッカー指定なし → ライフ2枚を1枚ずつ墓地へ → 兵士Lesson → アタック・♥7で指定・♣6を墓地へ → 防壁Lesson → 縦向き防壁を指定・公開・攻撃側と防壁を墓地へ、を通し操作した。
 
-現行 `act.yaml` の全Liteアクション、charList、frame.yamlのEntry16、common-action.rst、triggerflow.puml / triggerflow_detail.pumlを確認。特に防壁の数字一致・Joker判定、ドロー2枚（ライフ2以下なら1枚）、召喚コスト、魔法のキー・対象・speed、世代交代・サーチを確認した。
+選択カード・移動先・矢印、ブロック前後の防壁の縦向き、ライフが守られる結果、完了時だけのまとめを確認。新しいsticky案内が盤面を覆うことはない。メニューは現在combatだけ開き、準備中20Lessonが一度に露出しない。見出し・ボタン・比較図・縦のflowに重なりなし。
 
-旧資料からは依頼文で示された「1画面1概念」「流れ」「比較」「具体例の後に仕組み」を採用した。旧ドロー選択制、旧「通常効果／即時効果」「速攻魔法」「召喚酔い」や古い誘発処理は移植していない。未提供PDF・動画の全文を読んだ、または完全照合したとは扱わない。
+## 15. 1440×900の実ブラウザ確認
 
-## エンジン・検証・保存
+横並び3段階flowと余白、大きな盤面、サイドバーを確認。誤ったカードでは進まず案内が出る。Enterでアタック・ブロッカー選択、Spaceで対象確定、PCドラッグで♣6を墓地へ移し、完了できた。詳細から公式のブロック定義を参照でき、ルール早見の開閉も正常。DOMでviewport1440×900、横overflowなしを確認。
 
-`interaction.mjs` と `TutorialBoard` は変更なし。hookにはface変更時に「表向きに公開」と結果を伝える処理だけを追加。Lessonを選び直した場合は、解説専用Lessonを経由した復習でもscene先頭へ戻る。
+## 16–19. テスト結果
 
-新curriculum schemaはID重複、前提の存在・循環、scene参照・重複、real手順の順序、主担当actionIdの欠落・重複、復習参照、説明型、任意動画を検証する。現時点では1Lessonは1sceneまたは既存real手順全体とし、未対応の複数scene指定を黙って無視しない。
+Node系コマンドはすべて既存Docker compose内で実行。Simulatorソース・Docker・ブランチ別Pages・workflowは変更していない。
 
-旧localStorageのscenarioId、30操作のstepIndex、maxReachedStepIndex、先攻、完了状態を維持。新Lesson保存は別キーで現在ID・完了集合を保持する。旧最高到達から新Lessonの完了を推測しないため、Lesson完了数は新たな指標である。復習・再操作で完了集合と最高到達は減らない。「最初からやり直す」は双方をリセットしてINTROへ戻る。
-
-## 検証結果
-
-すべてのNode実行はDocker内で実施した。
-
-|検証|結果|
+|確認|結果|
 |---|---|
-|Tutorial全テスト|8ファイル、98件成功|
-|データ検証|scenario、curriculum、Lite coverage、参照、fixture連続性すべて成功|
-|production build|TypeScript・Vite成功。VITE_BASE_PATH=/BlackPoker/tutorial/|
-|Simulator回帰|19ファイル、113件成功|
-|既存6scene|全20ゲーム操作の回帰成功|
-|realモード|9操作、先攻選択、開始時1ドロー、早見への遷移成功|
-|追加検証|動画なし完了、説明→操作→次Lesson、直接移動、準備中、保存互換、防壁公開、復習初期化、動画開閉成功|
+|Tutorial全テスト|8ファイル、103件成功（従来98件＋5件）|
+|tutorial data validation|scenario・curriculum・Lite coverage・参照・fixture整合性が成功|
+|production build|TypeScript / Vite成功、VITE_BASE_PATH=/BlackPoker/tutorial/|
+|Simulator全回帰|19ファイル、113件成功|
 
-390×844ではINTRO、最初の戦闘flow、カードのクリック操作、ブロック対象指定、墓地への移動、Lesson完了、解説、mobile drawer、直接Lesson移動、比較・読み方・example、real入口と配置ガイドを確認。flowの親子クラス名の衝突を修正し、見出しと一覧の重なりを解消。比較文はスマホで全幅にして詰まりを解消した。横方向のoverflowなし（document幅375px、viewport390px）。
+追加・更新した検証: 防壁down/charge、指定でドライブしない、公開後の処理とライフ保護、driveの防壁・兵士fixture拒否、初回4Lessonの順序と前提、INTRO後の探索・向き・攻撃、通し操作と再読込。既存tap / drag / keyboard / 誤操作 / scene完了 / 保存互換 / 先攻 / real / 早見 / pending / 直接移動の回帰は維持。
 
-1440×900ではINTRO、横並びflow、Enterによるアタック、クリックによるブロック、PCドラッグによる墓地移動、完了、解説、一覧と直接移動、新防壁Lesson全操作、realへの遷移、横並びcompareを確認。viewportは1440×900、横overflowなし。ブラウザのerror/warnログは0件。実際の動画は未登録のため実ブラウザで外部動画を再生していない。
+初心者目線の自己レビューでは、勝ち方→置き場→向き→攻撃の目的→守る意味→守り方の違いが、短い説明と自分の操作でつながることを確認した。全体は3つの戦闘Lessonと短い盤面探索の再利用で、未実装魔法の大量追加やアーキテクチャ変更はない。
 
-検証用ローカルタブを閉じ、viewport設定は元に戻した。ユーザーが開いている公開サイトのタブは変更していない。
+## 20. 変更ファイル一覧
 
-## 変更ファイル
-
-すべて `tools/tutorial/` 内。配置、Docker設定、package files、既存GitHub Pages workflow、Simulatorのソースは変更なし。
+すべてtools/tutorial/内。
 
 - README.md
-- LEARNING_MAP.md
 - HOWTO_REPORT.md
-- scripts/validate-tutorials.mjs
+- LEARNING_MAP.md
 - src/App.tsx
-- src/components/CurriculumPanel.tsx
-- src/components/TutorialIntro.tsx
-- src/components/LessonExplainer.tsx
+- src/components/CardOrientation.tsx（追加）
 - src/data/learning-path.json
 - src/data/lessons.ts
 - src/data/bulwark-fixture.mjs
-- src/data/bulwark-fixture.d.mts
-- src/data/tutorials/entry16.json（実物準備の見出しのみ）
-- src/hooks/useSceneInteraction.ts
-- src/lib/curriculum-schema.mjs
-- src/lib/curriculum-schema.d.mts
-- src/lib/lesson-storage.ts
+- src/data/tutorials/entry16.json
+- src/lib/schema.mjs
 - src/styles.css
 - tests/App.test.tsx
 - tests/Lessons.test.tsx
 - tests/curriculum.test.ts
 
-コミットSHA、push先・結果、local/remote HEAD一致、最終statusは、コミット・push後の完了メッセージに記載する。
+## 21–25. コミットとpush
+
+現在の作業ブランチ `635-kaizen-チュートリアルサイト作成` にコミットし、originの同名ブランチへpushする。
+コミット自身のSHAはファイルへ自己参照で記録できないため、実行後のSHA・push結果・local/remote HEAD一致・最終git statusを完了メッセージに記載する。

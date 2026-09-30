@@ -7,7 +7,8 @@ export function makeBulwarkFixture(base) {
     if (card.card === "C6") card.card = "D5";
     else if (card.card === "D5") card.card = "C6";
   }
-  board.B.bulwarks.find((card) => card.card === "C6").face = "down";
+  // この独立教材ではブロッカーに指定できる、裏向き・チャージ状態から始める。
+  Object.assign(board.B.bulwarks.find((card) => card.card === "C6"), { face: "down", state: "charge" });
   const steps = [];
   const add = (id, title, player, from, to, change, extra = {}) => {
     const before = structuredClone(board);

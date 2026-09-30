@@ -29,12 +29,12 @@
     },
     {
       "id": "first-battle",
-      "title": "攻撃してみる",
+      "title": "兵士で守ってみる",
       "presentation": "interactive",
       "stepIds": ["attack", "block", "damage"],
       "cues": ["アタック", "ブロック", "ダメージ判定"],
       "intro": "♣6で攻撃し、♥7で守ってみましょう。光る枠のカードをタップします。",
-      "summary": "♣6がアタックし、♥7がブロック。数字を比べ、♣6が墓地へ移動しました。"
+      "summary": "♣6がアタックし、♥7がブロック。6 < 7なので♣6が墓地へ。ライフは減らずに守れました。"
     },
     {
       "id": "summon-soldier",
@@ -65,10 +65,10 @@
     },
     {
       "id": "unblocked-attack",
-      "title": "ブロックしなかったら？",
+      "title": "まずは攻撃してみよう",
       "presentation": "interactive",
       "stepIds": ["direct-attack", "no-block", "direct-damage"],
-      "cues": ["アタック", "ブロックなし", "ライフにダメージ"],
+      "cues": ["アタック", "ブロック（今回は守らない）", "ライフにダメージ"],
       "intro": "♠2で攻撃し、ブロックせずに進めます。数字の2に応じて、ライフを1枚ずつ墓地へ移しましょう。",
       "summary": "ブロックされなかったため、PLAYER Bのライフ2枚が墓地へ移動しました。"
     }
@@ -5424,15 +5424,15 @@
     },
     {
       "id": "no-block",
-      "interaction": { "kind": "action", "label": "ブロックしない" },
+      "interaction": { "kind": "action", "label": "ブロッカーを指定しない" },
       "cause": { "phase": "trigger", "actionId": "block", "text": "アタックの解決でブロックが誘発しました。PLAYER Bはブロッカーを指定しなかったため、カードは動きません。" },
       "chapter": "practice",
       "chapterTitle": "練習バトル",
       "eyebrow": "FIXED PRACTICE",
       "actor": "B",
-      "title": "今回は、ブロックしません。",
+      "title": "ブロック：今回はブロッカーを指定しません。",
       "instruction": "PLAYER Bは兵士や防壁を選ばず、攻撃をそのまま受けます。カードの向きは変わりません。",
-      "actionLabel": "ブロックしないを選ぶ",
+      "actionLabel": "ブロッカーを指定しないを選ぶ",
       "actionName": "ブロック",
       "sequenceLabel": "STEP 2 / 3",
       "explanation": "ブロックは攻撃を防ぐキャラクターを選ぶアクションです。何も選ばないこともできます。",
