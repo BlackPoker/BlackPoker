@@ -24,12 +24,14 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       unitId: "soldier-1",
       badge: "①",
       label: "① ♠5 一般兵",
+      humanLabel: "一般兵 ♠5",
       ownerPlayerKey: "p1",
       role: "attacker",
+      blockedByHumanLabels: ["防壁①"],
       blockedByBadges: ["B①"],
     };
 
-    it("テスト1: mobile compact 兵士で選択マーカーがチェックマーク (✓) として描画される", () => {
+    it("テスト1: mobile compact 兵士で選択マーカーがチェックマーク (✓) として描画され、Legacy通し番号は表示されない", () => {
       const html = renderToString(
         React.createElement(UnitCard, {
           unit: mockSoldier,
@@ -43,7 +45,9 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       expect(html).toContain("✓");
       // 通し番号バッジは廃止
       expect(html).not.toContain("title=\"Target番号\"");
-      expect(html).toContain("B①");
+      // blockedBy は HumanLabel (防壁①) を使用し、Legacy blockedByBadges (B①) は表示しない
+      expect(html).toContain("防壁①");
+      expect(html).not.toContain("B①");
     });
 
     it("テスト2: selectionMarker (✓) と battleRole (ATK/BLK) と共存できる", () => {
@@ -58,8 +62,9 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
 
       // selectionMarker の ✓
       expect(html).toContain("✓");
-      // バトルロール (ATK 攻撃中)
-      expect(html).toContain("ATK 攻撃中");
+      // バトルロール (ATK)
+      expect(html).toContain("ATK");
+      expect(html).toContain("防壁①");
       // 選択状態のスタイル
       expect(html).toContain("ring-zinc-950");
     });

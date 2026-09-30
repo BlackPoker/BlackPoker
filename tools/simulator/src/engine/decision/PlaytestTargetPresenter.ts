@@ -1,7 +1,7 @@
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { getUnitDisplayName } from "../rules/characterUtils";
-import { formatSuitSymbol, formatCardDisplay } from "../rules/cardUtils";
+import { formatOfficialSuitSymbol, formatSuitSymbol, formatCardDisplay } from "../rules/cardUtils";
 
 export interface FormattedTargetLabels {
   readonly primaryLabel: string;
@@ -67,30 +67,52 @@ export class PlaytestTargetPresenter {
   ): FormattedTargetLabels {
     const pName = ownerPlayerKey === "p1" ? "Player A" : "Player B";
     const unitLabel = unit ? getUnitDisplayName(unit, field) : "ユニット";
-    const primaryLabel = `${pName} の ${unitLabel}`;
 
     const isBulwark = unit?.componentId === "character.bulwark" || unit?.kind === "防壁";
     const isFaceDown = unit?.face === "down";
     const isOpponent = viewerPlayerId && ownerPlayerKey !== viewerPlayerId;
 
-    const stateLabel = (unit?.state ? unit.state : "charge").toLowerCase();
-
-    // 伏せ防壁または非公開ユニットの場合: カード内容は伏せカード記号 🂠 で隠蔽 (相手視点のみ)
-    let cardStr = "";
-    if (isBulwark && isFaceDown && isOpponent) {
-      cardStr = "🂠";
-    } else if (unit?.cards && unit.cards.length > 0) {
-      if (isOpponent && isFaceDown) {
-        cardStr = "🂠";
-      } else {
-        cardStr = unit.cards.map((c: any) => `${formatSuitSymbol(c.suit)}${c.rank}`).join("+");
+    let displayUnitName = unitLabel;
+    if (!isBulwark && unit) {
+      const firstCard = unit.cards?.[0];
+      const isHidden = (isOpponent && isFaceDown) || firstCard?.visibility === "HIDDEN";
+      if (firstCard && !isHidden && (firstCard.suit || firstCard.code)) {
+        let formattedCard = "";
+        if (firstCard.code) {
+          formattedCard = firstCard.code
+            .replace(/S/g, "♠")
+            .replace(/H/g, "♥")
+            .replace(/D/g, "♦")
+            .replace(/C/g, "♣")
+            .replace(/♡/g, "♥")
+            .replace(/♢/g, "♦");
+        } else if (firstCard.suit) {
+          const sym = formatOfficialSuitSymbol(firstCard.suit);
+          const rank = firstCard.rank !== undefined ? String(firstCard.rank) : "";
+          formattedCard = `${sym}${rank}`;
+        }
+        if (formattedCard) {
+          displayUnitName = `${unitLabel} ${formattedCard}`.trim();
+        }
       }
     }
 
+    const primaryLabel = `${pName} の ${displayUnitName}`;
+    const stateLabel = (unit?.state ? unit.state : "charge").toLowerCase();
     const secondaryParts: string[] = [];
-    if (cardStr) secondaryParts.push(`[${cardStr}]`);
-    secondaryParts.push(`(${stateLabel})`);
 
+    // 防壁かつ自プレイヤー視点（非相手）でカードが存在する場合のみカードを表示可能
+    if (isBulwark && !isOpponent && unit?.cards && unit.cards.length > 0) {
+      const firstCard = unit.cards[0];
+      if (firstCard && firstCard.visibility !== "HIDDEN") {
+        const cardDisplay = formatCardDisplay(firstCard);
+        if (cardDisplay && cardDisplay !== "🂠") {
+          secondaryParts.push(`[${cardDisplay}]`);
+        }
+      }
+    }
+
+    secondaryParts.push(`(${stateLabel})`);
     const secondaryLabel = secondaryParts.join(" ");
     const displayName = `${primaryLabel} ${secondaryLabel}`;
 

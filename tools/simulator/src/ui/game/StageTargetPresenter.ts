@@ -60,11 +60,11 @@ export class StageTargetPresenter {
           if (unitId) {
             const unitInfo = battleRelationMap?.get(unitId);
             if (unitInfo) {
-              // 既存 battleRelationMap の安定バッジ・ラベル（例: "① ♣6 一般兵", "② 防壁"）を再利用
               const relationPrefix = viewerPlayerId && unitInfo.ownerPlayerKey
                 ? (unitInfo.ownerPlayerKey === viewerPlayerId ? "自分 " : "相手 ")
                 : "";
-              labels.push(`${relationPrefix}${unitInfo.label}`);
+              const targetName = unitInfo.humanLabel || "対象ユニット";
+              labels.push(`${relationPrefix}${targetName}`);
             } else {
               // canonical identity は存在するが、現在盤面に存在しない場合 (Target Lost)
               labels.push("対象Unit（現在盤面に存在しません）");

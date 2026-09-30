@@ -27,7 +27,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
   });
 
   describe("StageTargetPresenter.buildStageTargetPresentation", () => {
-    it("Test A: 同種一般兵2体存在時のターゲット個別識別 (canonical unitId による盤面番号・カード・役職の付与)", () => {
+    it("Test A: 同種一般兵2体存在時のターゲット個別識別 (humanLabel による実プレイ識別、Legacy番号の非表示)", () => {
       const battleMap = new Map<string, UnitBattleDisplayInfo>([
         [
           "u-soldier-1",
@@ -35,6 +35,8 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-soldier-1",
             badge: "①",
             label: "① ♠5 一般兵",
+            humanLabel: "一般兵 ♠5",
+            ownerPlayerKey: "p1",
             blockedByBadges: [],
           },
         ],
@@ -44,6 +46,8 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-soldier-2",
             badge: "②",
             label: "② ♣6 一般兵",
+            humanLabel: "一般兵 ♣6",
+            ownerPlayerKey: "p1",
             blockedByBadges: [],
           },
         ],
@@ -61,15 +65,17 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
         },
       ];
 
-      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
+      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap, "p1");
       const labels = presentation.requestTargetLabels.get("req-1");
 
       expect(labels).toBeDefined();
       expect(labels).toHaveLength(1);
-      expect(labels?.[0]).toBe("② ♣6 一般兵");
+      expect(labels?.[0]).toBe("自分 一般兵 ♣6");
+      expect(labels?.[0]).not.toContain("①");
+      expect(labels?.[0]).not.toContain("②");
     });
 
-    it("Test B: 相手裏向き防壁ターゲット時の秘密保持 (カードコード非漏洩)", () => {
+    it("Test B: 相手裏向き防壁ターゲット時の秘密保持 (カードコード非漏洩・防壁物理配置番号)", () => {
       const battleMap = new Map<string, UnitBattleDisplayInfo>([
         [
           "u-bulwark-opp",
@@ -77,6 +83,8 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-bulwark-opp",
             badge: "④",
             label: "④ 防壁",
+            humanLabel: "防壁①",
+            ownerPlayerKey: "p2",
             blockedByBadges: [],
           },
         ],
@@ -94,11 +102,12 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
         },
       ];
 
-      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
+      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap, "p1");
       const labels = presentation.requestTargetLabels.get("req-destroy-bulwark");
 
       expect(labels).toBeDefined();
-      expect(labels?.[0]).toBe("④ 防壁");
+      expect(labels?.[0]).toBe("相手 防壁①");
+      expect(labels?.[0]).not.toContain("④");
       expect(labels?.[0]).not.toContain("♠");
       expect(labels?.[0]).not.toContain("♡");
       expect(labels?.[0]).not.toContain("♢");
@@ -182,6 +191,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-1",
             badge: "①",
             label: "① ♠A 英雄",
+            humanLabel: "英雄 ♠A",
             blockedByBadges: [],
           },
         ],
@@ -191,6 +201,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-2",
             badge: "②",
             label: "② ♣2 一般兵",
+            humanLabel: "一般兵 ♣2",
             blockedByBadges: [],
           },
         ],
@@ -214,7 +225,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
       const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
       const labels = presentation.requestTargetLabels.get("req-multi");
 
-      expect(labels).toEqual(["② ♣2 一般兵", "① ♠A 英雄"]);
+      expect(labels).toEqual(["一般兵 ♣2", "英雄 ♠A"]);
     });
 
     it("Test F: displayName/card/action名/配列位置等からidentityを推測しないこと", () => {
@@ -238,6 +249,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-1",
             badge: "①",
             label: "① ♠A 英雄",
+            humanLabel: "英雄 ♠A",
             blockedByBadges: [],
           },
         ],
@@ -257,6 +269,7 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
             unitId: "u-hidden-bulwark",
             badge: "③",
             label: "③ 防壁",
+            humanLabel: "防壁①",
             blockedByBadges: [],
           },
         ],
@@ -278,8 +291,43 @@ describe("StageTargetPresenter (UI Phase 3.1-R1)", () => {
       const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
       const label = presentation.requestTargetLabels.get("req-target-bulwark")?.[0];
 
-      expect(label).toBe("③ 防壁");
+      expect(label).toBe("防壁①");
       expect(label).not.toMatch(/[♠♡♢♣]/);
+      expect(label).not.toContain("③");
+    });
+
+    it("Test G.2: humanLabelが未定義の場合は「対象ユニット」へfail closedし、Legacy label (①等) を再表示しないこと", () => {
+      const battleMap = new Map<string, UnitBattleDisplayInfo>([
+        [
+          "u-legacy",
+          {
+            unitId: "u-legacy",
+            badge: "①",
+            label: "① ♠5 一般兵",
+            // humanLabel: undefined
+            blockedByBadges: [],
+          },
+        ],
+      ]);
+
+      const requests: ActionRequest[] = [
+        {
+          id: "req-legacy-fail-closed",
+          actionId: "action.down",
+          controller: "p1",
+          keyCards: [],
+          status: "pending",
+          sequence: 1,
+          targets: [{ type: "unit", unitId: "u-legacy", kind: "soldier", componentId: "c-legacy" }],
+        },
+      ];
+
+      const presentation = StageTargetPresenter.buildStageTargetPresentation(requests, battleMap);
+      const label = presentation.requestTargetLabels.get("req-legacy-fail-closed")?.[0];
+
+      expect(label).toBe("対象ユニット");
+      expect(label).not.toContain("①");
+      expect(label).not.toContain("♠5");
     });
 
     it("Test H: Target lost (対象Unitまたは対象Requestが既に離脱している場合の安全な表示)", () => {

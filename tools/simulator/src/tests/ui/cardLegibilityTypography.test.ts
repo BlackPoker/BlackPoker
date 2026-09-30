@@ -292,4 +292,84 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     expect(htmlCompact).toContain("hidden");
     expect(htmlCompact).not.toContain("hidden sm:block");
   });
+
+  // 10. UnitCard battle relation: Legacy Sequential badge への fallback 廃止検証 (BP-SIM-UI-1.5-R1-HUMAN-IDENTITY-CLOSURE)
+  it("10: (BP-SIM-UI-1.5-R1-HUMAN-IDENTITY-CLOSURE) UnitCard の battle relation で humanLabel が存在しない場合でも targetBadge / blockedByBadges の丸数字へ fallback せず、generic 表示で fail closed すること", () => {
+    // 10.1: アタッカーで blockedByHumanLabels なし・blockedByBadges ありの場合
+    const attackerUnit = {
+      unitId: "u-atk",
+      kind: "一般兵",
+      state: "charge",
+      face: "up",
+      cards: [{ suit: "S", rank: "10" }],
+    };
+    const attackerBattleInfo: any = {
+      unitId: "u-atk",
+      role: "attacker",
+      badge: "①",
+      label: "① ♠10 一般兵",
+      blockedByHumanLabels: [],
+      blockedByBadges: ["②", "③"],
+    };
+
+    const htmlAttacker = renderToString(
+      React.createElement(UnitCard, {
+        unit: attackerUnit,
+        battleDisplayInfo: attackerBattleInfo,
+      })
+    );
+    // 丸数字への fallback は行われず、generic 表示となる
+    expect(htmlAttacker).toContain("ATTACK 攻撃中");
+    expect(htmlAttacker).toContain("ATK 攻撃中");
+    expect(htmlAttacker).not.toContain("②");
+    expect(htmlAttacker).not.toContain("③");
+
+    // 10.2: ブロッカーで targetHumanLabel なし・targetBadge ありの場合
+    const blockerUnit = {
+      unitId: "u-blk",
+      kind: "一般兵",
+      state: "charge",
+      face: "up",
+      cards: [{ suit: "C", rank: "2" }],
+    };
+    const blockerBattleInfo: any = {
+      unitId: "u-blk",
+      role: "blocker",
+      badge: "②",
+      label: "② ♣2 一般兵",
+      targetBadge: "①",
+    };
+
+    const htmlBlocker = renderToString(
+      React.createElement(UnitCard, {
+        unit: blockerUnit,
+        battleDisplayInfo: blockerBattleInfo,
+      })
+    );
+    // 丸数字への fallback は行われず、generic 表示となる
+    expect(htmlBlocker).toContain("BLOCK 防御中");
+    expect(htmlBlocker).toContain("BLK 防御中");
+    expect(htmlBlocker).not.toContain("①");
+
+    // 10.3: humanLabel が正常に存在する場合は RichCardText 経由で公式スートとともに表示されること
+    const validBlockerBattleInfo: any = {
+      unitId: "u-blk",
+      role: "blocker",
+      badge: "②",
+      label: "② ♣2 一般兵",
+      targetHumanLabel: "一般兵 ♠10",
+      targetBadge: "①",
+    };
+    const htmlValidBlocker = renderToString(
+      React.createElement(UnitCard, {
+        unit: blockerUnit,
+        battleDisplayInfo: validBlockerBattleInfo,
+      })
+    );
+    expect(htmlValidBlocker).toContain("一般兵");
+    expect(htmlValidBlocker).toContain("bp-card-suit");
+    expect(htmlValidBlocker).toContain("♠");
+    expect(htmlValidBlocker).toContain("10");
+    expect(htmlValidBlocker).not.toContain("①");
+  });
 });

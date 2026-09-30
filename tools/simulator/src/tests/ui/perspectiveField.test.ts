@@ -307,8 +307,8 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
   // 5. Relative Ownership Labels in StageTargetPresenter
   describe("5. StageTargetPresenter Relative Ownership Prefix", () => {
     const battleMap = new Map([
-      ["u-p2-1", { unitId: "u-p2-1", badge: "①", label: "① ♠6 一般兵", ownerPlayerKey: "p2", blockedByBadges: [] }],
-      ["u-p1-1", { unitId: "u-p1-1", badge: "①", label: "① ♡K 一般兵", ownerPlayerKey: "p1", blockedByBadges: [] }],
+      ["u-p2-1", { unitId: "u-p2-1", badge: "①", label: "① ♠6 一般兵", humanLabel: "一般兵 ♠6", ownerPlayerKey: "p2", blockedByBadges: [] }],
+      ["u-p1-1", { unitId: "u-p1-1", badge: "①", label: "① ♥K 一般兵", humanLabel: "一般兵 ♥K", ownerPlayerKey: "p1", blockedByBadges: [] }],
     ]);
 
     const reqTargetingP2Unit: ActionRequest = {
@@ -323,17 +323,17 @@ describe("UI Phase 3.2: Perspective & Battlefield Clarity Tests", () => {
 
     it("prepends '相手 ' when viewer is p1 targeting p2 unit", () => {
       const pres = StageTargetPresenter.buildStageTargetPresentation([reqTargetingP2Unit], battleMap, "p1");
-      expect(pres.requestTargetLabels.get("req-1")).toEqual(["相手 ① ♠6 一般兵"]);
+      expect(pres.requestTargetLabels.get("req-1")).toEqual(["相手 一般兵 ♠6"]);
     });
 
     it("prepends '自分 ' when viewer is p2 targeting p2 unit", () => {
       const pres = StageTargetPresenter.buildStageTargetPresentation([reqTargetingP2Unit], battleMap, "p2");
-      expect(pres.requestTargetLabels.get("req-1")).toEqual(["自分 ① ♠6 一般兵"]);
+      expect(pres.requestTargetLabels.get("req-1")).toEqual(["自分 一般兵 ♠6"]);
     });
 
     it("falls back to bare label when viewerPlayerId is omitted", () => {
       const pres = StageTargetPresenter.buildStageTargetPresentation([reqTargetingP2Unit], battleMap);
-      expect(pres.requestTargetLabels.get("req-1")).toEqual(["① ♠6 一般兵"]);
+      expect(pres.requestTargetLabels.get("req-1")).toEqual(["一般兵 ♠6"]);
     });
   });
 

@@ -39,12 +39,13 @@ describe("Playtest Target Presentation Tests", () => {
         cards: [{ suit: "D", rank: 8 }],
       };
 
-      // 英雄 (自分視点)
+      // 英雄 (自分視点: 代表カード ♠1 が primaryLabel に付与され、secondaryLabel は (charge))
       const heroLabels = PlaytestTargetPresenter.formatUnitTarget(heroUnit, "p1", [heroUnit], "p1");
-      expect(heroLabels.primaryLabel).toBe("Player A の 英雄");
-      expect(heroLabels.secondaryLabel).toContain("♠1");
+      expect(heroLabels.primaryLabel).toBe("Player A の 英雄 ♠1");
+      expect(heroLabels.secondaryLabel).toBe("(charge)");
+      expect(heroLabels.displayName).toBe("Player A の 英雄 ♠1 (charge)");
 
-      // 相手の伏せ防壁 (非公開情報保護: カードコードを隠蔽)
+      // 相手の伏せ防壁 (非公開情報保護: カードコード非漏洩・🂠も不要)
       const bulwarkOpponentLabels = PlaytestTargetPresenter.formatUnitTarget(
         bulwarkUnit,
         "p2",
@@ -52,10 +53,40 @@ describe("Playtest Target Presentation Tests", () => {
         "p1" // viewer is p1, unit owner is p2
       );
       expect(bulwarkOpponentLabels.primaryLabel).toBe("Player B の 防壁①");
-      expect(bulwarkOpponentLabels.secondaryLabel).toContain("🂠");
-      expect(bulwarkOpponentLabels.secondaryLabel).toContain("charge");
+      expect(bulwarkOpponentLabels.secondaryLabel).toBe("(charge)");
+      expect(bulwarkOpponentLabels.secondaryLabel).not.toContain("🂠");
       expect(bulwarkOpponentLabels.secondaryLabel).not.toContain("D8");
       expect(bulwarkOpponentLabels.secondaryLabel).not.toContain("♢8");
+      expect(bulwarkOpponentLabels.displayName).toBe("Player B の 防壁① (charge)");
+    });
+
+    it("Soldier target: 複数カード構成の一般兵でも代表カード unit.cards[0] のみ表示し全カード列挙を行わないこと", () => {
+      const multiCardSoldier = {
+        unitId: "u-multi-soldier",
+        kind: "一般兵",
+        state: "charge",
+        face: "up",
+        cards: [
+          { suit: "S", rank: 10 },
+          { suit: "C", rank: 4 },
+          { suit: "D", rank: 3 },
+        ],
+      };
+
+      const labels = PlaytestTargetPresenter.formatUnitTarget(
+        multiCardSoldier,
+        "p1",
+        [multiCardSoldier],
+        "p1"
+      );
+
+      expect(labels.primaryLabel).toBe("Player A の 一般兵 ♠10");
+      expect(labels.secondaryLabel).toBe("(charge)");
+      expect(labels.secondaryLabel).not.toContain("♣4");
+      expect(labels.secondaryLabel).not.toContain("♦3");
+      expect(labels.displayName).toBe("Player A の 一般兵 ♠10 (charge)");
+      expect(labels.displayName).not.toContain("♣4");
+      expect(labels.displayName).not.toContain("♦3");
     });
 
     it("A: viewer=p1, owner=p1 の伏せ防壁 (♢8) は primaryLabel: 'Player A の 防壁①', secondaryLabel/displayName で ♢8 が確認でき 🂠 ではないこと", () => {
@@ -83,7 +114,7 @@ describe("Playtest Target Presentation Tests", () => {
       expect(labels.displayName).not.toContain("🂠");
     });
 
-    it("B: viewer=p1, owner=p2 の伏せ防壁 (♢8) は ♢8 / D8 / rank 8 が漏洩せず 🂠 が表示されること", () => {
+    it("B: viewer=p1, owner=p2 の伏せ防壁 (♢8) は ♢8 / D8 / rank 8 が漏洩せず、🂠も不要で (charge) 表示となること", () => {
       const bulwarkUnit = {
         unitId: "u-bulwark-p2",
         kind: "防壁",
@@ -101,12 +132,13 @@ describe("Playtest Target Presentation Tests", () => {
       );
 
       expect(labels.primaryLabel).toBe("Player B の 防壁①");
-      expect(labels.secondaryLabel).toContain("🂠");
-      expect(labels.secondaryLabel).toContain("charge");
+      expect(labels.secondaryLabel).toBe("(charge)");
+      expect(labels.secondaryLabel).not.toContain("🂠");
       expect(labels.secondaryLabel).not.toContain("♢8");
       expect(labels.secondaryLabel).not.toContain("D8");
       expect(labels.secondaryLabel).not.toContain("8");
-      expect(labels.displayName).toBe("Player B の 防壁① [🂠] (charge)");
+      expect(labels.displayName).toBe("Player B の 防壁① (charge)");
+      expect(labels.displayName).not.toContain("🂠");
       expect(labels.displayName).not.toContain("♢8");
       expect(labels.displayName).not.toContain("D8");
       expect(labels.displayName).not.toContain("8");
@@ -199,10 +231,12 @@ describe("Playtest Target Presentation Tests", () => {
       expect(allTexts).not.toContain("♢8");
       expect(allTexts).not.toContain("♢");
       expect(allTexts).not.toContain("8");
-      // 伏せ防壁であることを示す安全なラベルであること
+      // 伏せ防壁であることを示す安全なラベルであること (🂠は不要で (charge) のみ)
       expect(bulwarkTarget!.primaryLabel).toBe("Player B の 防壁①");
-      expect(bulwarkTarget!.secondaryLabel).toContain("🂠");
-      expect(bulwarkTarget!.secondaryLabel).toContain("charge");
+      expect(bulwarkTarget!.secondaryLabel).toBe("(charge)");
+      expect(bulwarkTarget!.secondaryLabel).not.toContain("🂠");
+      expect(bulwarkTarget!.displayName).toBe("Player B の 防壁① (charge)");
+      expect(bulwarkTarget!.displayName).not.toContain("🂠");
     });
 
     it("C: TargetSelectionEnumerator経由でも requesterPlayerKey=p1 に対し、A (自分p1の伏せ防壁: ♢8表示・🂠なし) と B (相手p2の伏せ防壁: 🂠表示・情報漏洩なし) が同じ契約になること", () => {
@@ -252,16 +286,17 @@ describe("Playtest Target Presentation Tests", () => {
       expect(ownTarget!.displayName).toBe("Player A の 防壁① [♢8] (charge)");
       expect(ownTarget!.displayName).not.toContain("🂠");
 
-      // B 検証: 相手の伏せ防壁 (♢8 / D8 / rank 8 が漏洩せず、🂠が表示される)
+      // B 検証: 相手の伏せ防壁 (♢8 / D8 / rank 8 が漏洩せず、🂠も不要で (charge) 表示となる)
       const oppTarget = results.find((t) => t.targetUnitId === "u-p2-bulwark");
       expect(oppTarget).toBeDefined();
       expect(oppTarget!.primaryLabel).toBe("Player B の 防壁①");
-      expect(oppTarget!.secondaryLabel).toContain("🂠");
-      expect(oppTarget!.secondaryLabel).toContain("charge");
+      expect(oppTarget!.secondaryLabel).toBe("(charge)");
+      expect(oppTarget!.secondaryLabel).not.toContain("🂠");
       expect(oppTarget!.secondaryLabel).not.toContain("♢8");
       expect(oppTarget!.secondaryLabel).not.toContain("D8");
       expect(oppTarget!.secondaryLabel).not.toContain("8");
-      expect(oppTarget!.displayName).toBe("Player B の 防壁① [🂠] (charge)");
+      expect(oppTarget!.displayName).toBe("Player B の 防壁① (charge)");
+      expect(oppTarget!.displayName).not.toContain("🂠");
       expect(oppTarget!.displayName).not.toContain("♢8");
       expect(oppTarget!.displayName).not.toContain("D8");
       expect(oppTarget!.displayName).not.toContain("8");

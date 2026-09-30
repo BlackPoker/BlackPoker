@@ -197,10 +197,13 @@ describe("Phase 21B.2: UI/UX Hardening & Bug Fix Tests", () => {
           "p1",
           rulePackage.components
         );
-        // 相手 (p2) の裏向き防壁は隠蔽されること
+        // 相手 (p2) の裏向き防壁はカード内容・🂠ともに隠蔽されること
         const opponentBulwark = targets.find((t) => t.targetPlayerKey === "p2" && t.displayName?.includes("防壁"));
         if (opponentBulwark) {
-          expect(opponentBulwark.displayName).toContain("🂠");
+          expect(opponentBulwark.displayName).not.toContain("🂠");
+          expect(opponentBulwark.displayName).toBe("Player B の 防壁① (charge)");
+          expect(opponentBulwark.displayName).not.toMatch(/[♠♡♢♣]/);
+          expect(opponentBulwark.displayName).not.toContain("4");
         }
         // 自分 (p1) の裏向き防壁は本人にはカード内容が表示され 🂠 ではないこと
         const ownBulwark = targets.find((t) => t.targetPlayerKey === "p1" && t.displayName?.includes("防壁"));
