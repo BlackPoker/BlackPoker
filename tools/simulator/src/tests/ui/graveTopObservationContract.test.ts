@@ -406,11 +406,14 @@ describe("UI Phase 3.4-R1: Grave Top Observation Contract Tests", () => {
         })
       );
 
-      // ZoneStrip 上の TOP バッジに動的期待値が表示されること
-      expect(html).toContain(`TOP: ${expectedDisplay}`);
+      // ZoneStrip 上の TOP バッジに動的期待値が表示されること (RichCardText 経由)
+      expect(html).toContain("TOP:");
+      expect(html).toContain("bp-card-suit");
+      expect(html).toContain(expectedRank);
 
-      // モーダル内に「墓地トップ（公開）: <expectedDisplay>」が表示されること
-      expect(html).toContain(`墓地トップ（公開）: ${expectedDisplay}`);
+      // モーダル内に「墓地トップ（公開）:」が表示されること
+      expect(html).toContain("墓地トップ（公開）:");
+      expect(html).toContain(expectedRank);
 
       // 「墓地は空です」や fail-safe 誤表示にならないこと
       expect(html).not.toContain("墓地は空です");

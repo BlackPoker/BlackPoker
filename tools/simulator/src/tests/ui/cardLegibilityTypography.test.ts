@@ -5,6 +5,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { CardView } from "../../ui/game/CardView";
 import { UnitCard } from "../../ui/game/UnitCard";
+import { MultiCardUnitStack } from "../../ui/game/MultiCardUnitStack";
+import { RichCardText } from "../../ui/common/RichCardText";
 import {
   formatSuitSymbol,
   formatOfficialSuitSymbol,
@@ -26,9 +28,13 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     expect(cssContent).toMatch(/@font-face[^{]*\{[^}]*font-weight:\s*400/);
 
     // Suit: BlackPoker Suit を first family とし、font-weight: 400 (E, F, H)
+    // 視覚的垂直位置補正 (position: relative; top: -0.08em) および display 指定の非混入 (Tailwind .hidden保護)
     expect(cssContent).toContain(".bp-card-suit");
     expect(cssContent).toContain('font-family: "BlackPoker Suit", "Open Sans", sans-serif');
     expect(cssContent).toMatch(/\.bp-card-suit[^{]*\{[^}]*font-weight:\s*400/);
+    expect(cssContent).toMatch(/\.bp-card-suit[^{]*\{[^}]*position:\s*relative/);
+    expect(cssContent).toMatch(/\.bp-card-suit[^{]*\{[^}]*top:\s*-0\.08em/);
+    expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*display:/);
     expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Times New Roman/);
     expect(cssContent).not.toMatch(/\.bp-card-suit[^{]*\{[^}]*Yu Mincho/);
 
@@ -183,17 +189,17 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
   });
 
   // 6. Joker の表示形式
-  it("6: Joker カードが ★ および JK / Joker として正しく表示されること", () => {
+  it("6: Joker カードが ★ および J (統一表記) として正しく表示されること", () => {
     const jokerCard = { id: "c-jk", suit: "J", rank: "Joker", value: 0 };
     const htmlDesktop = renderToString(
       React.createElement(CardView, {
         card: jokerCard,
         compact: false,
       })
-
     );
     expect(htmlDesktop).toContain("★");
-    expect(htmlDesktop).toContain("JK");
+    expect(htmlDesktop).toContain("J");
+    expect(htmlDesktop).not.toContain("JK");
 
     const htmlCompact = renderToString(
       React.createElement(CardView, {
@@ -202,7 +208,8 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
       })
     );
     expect(htmlCompact).toContain("★");
-    expect(htmlCompact).toContain("JK");
+    expect(htmlCompact).toContain("J");
+    expect(htmlCompact).not.toContain("JK");
   });
 
   // 7. フォントアセット存在検証
@@ -371,5 +378,71 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     expect(htmlValidBlocker).toContain("♠");
     expect(htmlValidBlocker).toContain("10");
     expect(htmlValidBlocker).not.toContain("①");
+  });
+
+  // 11. BP-SIM-UI-1.6: Joker 表記 ★J 統一と RichCardText 正規化
+  it("11: Joker 表記が ★J に統一され、RichCardText で各種Joker表記 (Joker, JK, ★JK, ★J) が ★J へ正規化されること", () => {
+    // RichCardText による正規化
+    const htmlJoker1 = renderToString(React.createElement(RichCardText, { text: "Joker" }));
+    expect(htmlJoker1).toContain("★");
+    expect(htmlJoker1).toContain("J");
+    expect(htmlJoker1).not.toContain("JK");
+
+    const htmlJoker2 = renderToString(React.createElement(RichCardText, { text: "JK" }));
+    expect(htmlJoker2).toContain("★");
+    expect(htmlJoker2).toContain("J");
+    expect(htmlJoker2).not.toContain("JK");
+
+    const htmlJoker3 = renderToString(React.createElement(RichCardText, { text: "★JK" }));
+    expect(htmlJoker3).toContain("★");
+    expect(htmlJoker3).toContain("J");
+    expect(htmlJoker3).not.toContain("JK");
+
+    const htmlJoker4 = renderToString(React.createElement(RichCardText, { text: "★J" }));
+    expect(htmlJoker4).toContain("★");
+    expect(htmlJoker4).toContain("J");
+
+    // UnitCard モバイル表示での Joker ★J
+    const jokerUnit = {
+      unitId: "u-joker",
+      kind: "兵士",
+      componentId: "character.soldier",
+      state: "charge" as const,
+      face: "up" as const,
+      cards: [{ id: "c-joker-card", suit: "J", rank: "0", value: 0 }],
+    };
+    const htmlUnit = renderToString(React.createElement(UnitCard, { unit: jokerUnit }));
+    expect(htmlUnit).toContain("★");
+    expect(htmlUnit).toContain("J");
+    expect(htmlUnit).not.toContain("JK");
+  });
+
+  // 12. BP-SIM-UI-1.6: MultiCardUnitStack のカードサイズ size='md' とスタック寸法
+  it("12: MultiCardUnitStack が size='md' のカードを採用し、48px x 56px のフットプリントと 40px x 52px のスタックレイヤーを持つこと", () => {
+    // 単一カード
+    const singleCardHtml = renderToString(
+      React.createElement(MultiCardUnitStack, {
+        cards: [{ id: "c-1", suit: "S", rank: "A" }],
+      })
+    );
+    // size='md' のクラス (h-7 sm:h-[52px]) を含むこと (size='sm' は sm:h-[40px])
+    expect(singleCardHtml).toContain("sm:h-[52px]");
+    expect(singleCardHtml).not.toContain("sm:h-[40px]");
+
+    // 複数枚カード
+    const multiCardHtml = renderToString(
+      React.createElement(MultiCardUnitStack, {
+        cards: [
+          { id: "c-1", suit: "S", rank: "A" },
+          { id: "c-2", suit: "H", rank: "K" },
+          { id: "c-3", suit: "D", rank: "Q" },
+        ],
+      })
+    );
+    expect(multiCardHtml).toContain("width:48px");
+    expect(multiCardHtml).toContain("height:56px");
+    expect(multiCardHtml).toContain("width:40px");
+    expect(multiCardHtml).toContain("height:52px");
+    expect(multiCardHtml).toContain("sm:h-[52px]");
   });
 });

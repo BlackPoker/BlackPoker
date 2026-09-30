@@ -49,7 +49,7 @@ export const CardView: React.FC<CardViewProps> = ({
 
   const isJoker = isJokerCard(card);
   const suitSymbol = isJoker ? "★" : formatOfficialSuitSymbol(card.suit);
-  const displayRank = isJoker ? "JK" : card.rank || "";
+  const displayRank = isJoker ? "J" : card.rank || "";
   const isRed = !isJoker && isRedSuit(card.suit);
   const redSuitClass = isRed ? "text-[#a22041] bp-card-suit-red" : "";
 

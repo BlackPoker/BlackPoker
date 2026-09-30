@@ -31,6 +31,8 @@
     font-weight: 400;
     font-style: normal;
     line-height: 1;
+    position: relative;
+    top: -0.08em;
   }
 
   /* Official ActionList Red for Heart and Diamond Suits */

@@ -29,7 +29,7 @@ export const MultiCardUnitStack: React.FC<MultiCardUnitStackProps> = ({
   if (cardCount === 1) {
     return (
       <div className="flex flex-col items-center justify-center">
-        <CardView card={cards[0]} faceDown={faceDown} size="sm" />
+        <CardView card={cards[0]} faceDown={faceDown} size="md" />
       </div>
     );
   }
@@ -44,8 +44,8 @@ export const MultiCardUnitStack: React.FC<MultiCardUnitStackProps> = ({
       <div
         className="relative flex items-center justify-center cursor-pointer group"
         style={{
-          width: "44px",
-          height: "46px",
+          width: "48px",
+          height: "56px",
         }}
         onClick={(e) => {
           if (onOpenDetail) {
@@ -61,9 +61,9 @@ export const MultiCardUnitStack: React.FC<MultiCardUnitStackProps> = ({
           <div
             className="absolute rounded border border-zinc-400 bg-zinc-200 shadow-xs pointer-events-none transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
             style={{
-              width: "32px",
-              height: "40px",
-              left: "-4px",
+              width: "40px",
+              height: "52px",
+              left: "-6px",
               top: "-4px",
               zIndex: 1,
             }}
@@ -75,9 +75,9 @@ export const MultiCardUnitStack: React.FC<MultiCardUnitStackProps> = ({
           <div
             className="absolute rounded border border-zinc-400 bg-zinc-100 shadow-xs pointer-events-none transition-transform group-hover:-translate-x-0.5 group-hover:-translate-y-0.5"
             style={{
-              width: "32px",
-              height: "40px",
-              left: "-2px",
+              width: "40px",
+              height: "52px",
+              left: "-3px",
               top: "-2px",
               zIndex: 2,
             }}
@@ -93,7 +93,7 @@ export const MultiCardUnitStack: React.FC<MultiCardUnitStackProps> = ({
 
         {/* 前面メインカード (cards[0]) */}
         <div className="relative z-10">
-          <CardView card={cards[0]} faceDown={faceDown} size="sm" />
+          <CardView card={cards[0]} faceDown={faceDown} size="md" />
         </div>
 
         {/* 枚数バッジ (×N) */}

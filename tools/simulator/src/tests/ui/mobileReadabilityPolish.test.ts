@@ -104,11 +104,14 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         })
       );
 
-      // ZoneStrip 上のバッジ形式
-      expect(html).toContain("TOP: ♠3");
+      // ZoneStrip 上のバッジ形式 (RichCardText 経由)
+      expect(html).toContain("TOP:");
+      expect(html).toContain("bp-card-suit");
+      expect(html).toContain("♠");
+      expect(html).toContain("3");
 
       // モーダル内部の表示テキスト
-      expect(html).toContain("墓地トップ（公開）: ♠3");
+      expect(html).toContain("墓地トップ（公開）:");
       // 総枚数表示
       expect(html).toContain("8 枚");
       // 「墓地は空です」と誤認表示されない

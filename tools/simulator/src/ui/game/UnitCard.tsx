@@ -4,7 +4,7 @@ import { MultiCardUnitStack } from "./MultiCardUnitStack";
 import { UnitDetailModal } from "./UnitDetailModal";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
 import { getUnitDisplayName } from "../../engine/rules/characterUtils";
-import { formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
+import { formatOfficialSuitSymbol, isJokerCard, isRedSuit } from "../../engine/rules/cardUtils";
 import { RichCardText } from "../common/RichCardText";
 
 
@@ -81,9 +81,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({
   if (isHiddenFromViewer) {
     mobileCardFallback = "🂠";
   } else if (primaryCard) {
-    primaryCardSuit = formatOfficialSuitSymbol(primaryCard.suit);
-    primaryCardRank = primaryCard.rank !== undefined ? String(primaryCard.rank) : "";
-    isPrimaryCardRed = isRedSuit(primaryCard.suit);
+    const isJoker = isJokerCard(primaryCard);
+    primaryCardSuit = isJoker ? "★" : formatOfficialSuitSymbol(primaryCard.suit);
+    primaryCardRank = isJoker ? "J" : (primaryCard.rank !== undefined ? String(primaryCard.rank) : "");
+    isPrimaryCardRed = !isJoker && isRedSuit(primaryCard.suit);
   }
   const extraCardCount = Array.isArray(unit.cards) && unit.cards.length > 1 ? unit.cards.length - 1 : 0;
 

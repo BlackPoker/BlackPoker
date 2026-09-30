@@ -5,7 +5,7 @@ import { FogDetailPopover } from "./FogDetailPopover";
 import { PlayerZoneStrip, ZoneSummaryItem } from "./PlayerZoneStrip";
 import { PlayerBoardViewModel } from "./PlayerObservationPresenter";
 import type { UnitBattleDisplayInfo } from "./BattleRelationPresenter";
-import { formatCardDisplay, formatOfficialSuitSymbol } from "../../engine/rules/cardUtils";
+import { formatCardDisplay, formatOfficialSuitSymbol, isJokerCard } from "../../engine/rules/cardUtils";
 import { RichCardText } from "../common/RichCardText";
 
 export interface PlayerBoardProps {
@@ -53,10 +53,19 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const pack = viewModel.pack;
 
   // 墓地トップカードの表示用バッジ
-  const graveTopText = viewModel.graveTopCard
-    ? formatCardDisplay(viewModel.graveTopCard)
-    : "";
-  const graveTopBadge = graveTopText ? `TOP: ${graveTopText}` : undefined;
+  let graveTopText = "";
+  if (viewModel.graveTopCard) {
+    if (isJokerCard(viewModel.graveTopCard)) {
+      graveTopText = "★J";
+    } else {
+      graveTopText = formatCardDisplay(viewModel.graveTopCard);
+    }
+  }
+  const graveTopBadge = graveTopText ? (
+    <span>
+      TOP: <RichCardText text={graveTopText} />
+    </span>
+  ) : undefined;
 
   // ZoneStrip 用アイテム（将来の切札・Pack・Rare Card 拡張に対応）
   const zoneItems: ZoneSummaryItem[] = [
@@ -223,7 +232,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
                 ) : viewModel.graveTopCard ? (
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-zinc-700 font-mono">
-                      {`墓地トップ（公開）: ${graveTopText}`}
+                      墓地トップ（公開）: <RichCardText text={graveTopText} />
                     </span>
                     <CardView card={viewModel.graveTopCard} size="sm" />
                   </div>
@@ -312,36 +321,29 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
         </div>
       </div>
 
-      {/* 4. 手札 (Hand) - 相手手札は枚数のみ、自分手札はカード内容表示 */}
-      <div>
-        {!isViewer ? (
-          <div className="flex items-center justify-between px-2 py-1 rounded bg-zinc-50 border border-zinc-200 text-xs font-mono">
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">HAND</span>
-            <span className="text-xs font-black text-zinc-950 font-mono">手札 {handCount}枚</span>
+      {/* 4. 手札 (Hand) - 自分手札のみカード内容表示 (相手手札はHeader HANDカウントのみ表示) */}
+      {isViewer && (
+        <div>
+          <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
+            <span>HAND (手札: {handCount}枚)</span>
           </div>
-        ) : (
-          <div>
-            <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
-              <span>HAND (手札: {handCount}枚)</span>
-            </div>
 
-            <div className="flex gap-1 sm:gap-1.5 min-h-[36px] sm:min-h-[60px] p-1 sm:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
-              {handCards.length > 0 ? (
-                handCards.map((card: any, idx: number) => (
-                  <CardView
-                    key={card.id || card.cardInstanceId || idx}
-                    card={card}
-                    faceDown={Boolean(card.faceDown)}
-                    size="md"
-                  />
-                ))
-              ) : (
-                <div className="text-xs text-zinc-400 italic py-1 pl-1">手札なし</div>
-              )}
-            </div>
+          <div className="flex gap-1 sm:gap-1.5 min-h-[36px] sm:min-h-[60px] p-1 sm:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
+            {handCards.length > 0 ? (
+              handCards.map((card: any, idx: number) => (
+                <CardView
+                  key={card.id || card.cardInstanceId || idx}
+                  card={card}
+                  faceDown={Boolean(card.faceDown)}
+                  size="md"
+                />
+              ))
+            ) : (
+              <div className="text-xs text-zinc-400 italic py-1 pl-1">手札なし</div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

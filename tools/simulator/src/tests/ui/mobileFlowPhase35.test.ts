@@ -600,8 +600,10 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
           position: "top",
         })
       );
-      expect(htmlOpponent).toContain("HAND");
-      expect(htmlOpponent).toMatch(new RegExp(`手札.*${p1ViewOfP2.handCount}.*枚`));
+      // 相手ボード (!isViewer) は Header に HAND: <count> のみを表示し、下部の重複手札行は削除されていること
+      expect(htmlOpponent).toContain("HAND:");
+      expect(htmlOpponent).toContain(String(p1ViewOfP2.handCount));
+      expect(htmlOpponent).not.toContain("手札");
       // Ensure none of opponent's private hand card IDs are rendered in the HTML
       const opponentHandCardIds = session.state.players.p2.hand.map((c) => c.id);
       for (const cid of opponentHandCardIds) {

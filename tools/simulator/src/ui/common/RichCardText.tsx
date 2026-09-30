@@ -15,9 +15,10 @@ export const RichCardText: React.FC<RichCardTextProps> = ({ text, className = ""
   if (!text) return null;
 
   // カード記号・コードの正規表現:
-  // 1. Unicode スート: ♠, ♥, ♦, ♣, ♡, ♢ + (ランク: 10, 2-9, A, J, Q, K, JK, Joker)
+  // 1. Unicode スート: ♠, ♥, ♦, ♣, ♡, ♢, ★ + (ランク: 10, 2-9, A, J, Q, K, JK, Joker)
   // 2. ASCII スートコード: 単語境界で S, H, D, C + (ランク: 10, 2-9, A, J, Q, K)
-  const cardRegex = /(?:([♠♥♦♣♡♢])(10|[2-9ajqkAJQK]|JK|Joker|JOKER)?|\b([shdcSHDC])(10|[2-9ajqkAJQK])\b)/g;
+  // 3. 単体 Joker 表記: Joker, JK
+  const cardRegex = /(?:([♠♥♦♣♡♢★])(10|[2-9ajqkAJQK]|JK|Joker|JOKER)?|\b([shdcSHDC])(10|[2-9ajqkAJQK])\b|\b(Joker|JK|joker|jk)\b)/g;
 
   const elements: React.ReactNode[] = [];
   let lastIndex = 0;
@@ -28,11 +29,17 @@ export const RichCardText: React.FC<RichCardTextProps> = ({ text, className = ""
       elements.push(text.slice(lastIndex, match.index));
     }
 
-    const rawSuit = match[1] || match[3];
-    const rawRank = match[2] || match[4] || "";
+    const isStandaloneJoker = Boolean(match[5]);
+    const rawSuit = isStandaloneJoker ? "★" : (match[1] || match[3]);
+    let rawRank = isStandaloneJoker ? "J" : (match[2] || match[4] || "");
 
-    const officialSuit = formatOfficialSuitSymbol(rawSuit);
-    const isRed = isRedSuit(rawSuit);
+    const isJoker = rawSuit === "★" || rawSuit?.toLowerCase() === "joker" || isStandaloneJoker;
+    if (isJoker) {
+      rawRank = "J";
+    }
+
+    const officialSuit = isJoker ? "★" : formatOfficialSuitSymbol(rawSuit);
+    const isRed = !isJoker && isRedSuit(rawSuit);
     const redClass = isRed ? "text-[#a22041] bp-card-suit-red" : "";
 
     elements.push(
