@@ -57,21 +57,13 @@ describe("Official Regulation Catalog & Validation Tests (AO 1-7)", () => {
 
   it("3. pro + entry16 should be ruleLegal=true, recommended=false, simulatorImplemented=false", async () => {
     const catalog = await loadRegulationCatalog();
-    const mockCatalog = {
-      ...catalog,
-      formats: new Map([
-        ...catalog.formats.entries(),
-        ["pro", { id: "pro", name: "プロ", actions: [], components: [] }],
-      ]),
-    };
-
-    const result = RegulationValidator.validateCombination(mockCatalog as any, "pro", "entry16");
+    const result = RegulationValidator.validateCombination(catalog, "pro", "entry16");
     expect(result.ruleLegal).toBe(true);
     expect(result.recommended).toBe(false);
     expect(result.simulatorImplemented).toBe(false);
 
     expect(() =>
-      RegulationValidator.validateCombination(mockCatalog as any, "pro", "entry16", {
+      RegulationValidator.validateCombination(catalog, "pro", "entry16", {
         assertImplemented: true,
       })
     ).toThrow(SimulatorNotImplementedError);

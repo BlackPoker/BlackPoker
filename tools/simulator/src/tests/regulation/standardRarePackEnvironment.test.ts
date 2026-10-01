@@ -55,11 +55,10 @@ describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RARE
     });
 
     it("Non-implemented combinations remain false (pro:rarePack, light:rarePack, master:rarePack)", () => {
-      const catalogWithAllFormats = {
+      const catalogWithMaster = {
         ...catalog,
         formats: new Map([
           ...catalog.formats.entries(),
-          ["pro", { id: "pro", name: "プロ", actions: [], components: [] }],
           ["master", { id: "master", name: "マスター", actions: [], components: [] }],
         ]),
       };
@@ -71,23 +70,16 @@ describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RARE
       ];
 
       for (const { formatId, frameId } of notImplemented) {
-        const val = RegulationValidator.validateCombination(catalogWithAllFormats as any, formatId, frameId);
+        const val = RegulationValidator.validateCombination(catalogWithMaster as any, formatId, frameId);
         expect(val.simulatorImplemented).toBe(false);
         expect(() =>
-          RegulationValidator.validateCombination(catalogWithAllFormats as any, formatId, frameId, { assertImplemented: true })
+          RegulationValidator.validateCombination(catalogWithMaster as any, formatId, frameId, { assertImplemented: true })
         ).toThrow(SimulatorNotImplementedError);
       }
     });
 
     it("pro:rarePack is ruleLegal and recommended, but simulatorImplemented is false", () => {
-      const catalogWithPro = {
-        ...catalog,
-        formats: new Map([
-          ...catalog.formats.entries(),
-          ["pro", { id: "pro", name: "プロ", actions: [], components: [] }],
-        ]),
-      };
-      const val = RegulationValidator.validateCombination(catalogWithPro as any, "pro", "rarePack");
+      const val = RegulationValidator.validateCombination(catalog, "pro", "rarePack");
       expect(val.ruleLegal).toBe(true);
       expect(val.recommended).toBe(true);
       expect(val.simulatorImplemented).toBe(false);

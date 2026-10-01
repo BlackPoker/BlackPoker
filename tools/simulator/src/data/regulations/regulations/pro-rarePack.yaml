@@ -1,0 +1,6 @@
+id: pro-rarePack
+name: プロ + レアパック
+formatId: pro
+frameId: rarePack
+sourceRulesVersion: 9.1.2
+description: 公式BlackPoker レギュレーション (プロフォーマット + レアパックフレーム)
