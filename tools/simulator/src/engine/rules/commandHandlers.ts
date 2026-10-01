@@ -21,7 +21,7 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
 import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
-import { isCardInGameZones } from "./cardUtils";
+import { isCardInGameZones, isSamePrintedCard, isJokerCard } from "./cardUtils";
 import { deriveRuntimeShuffleSeed, shuffleDeterministic } from "../random/DeterministicShuffle";
 import { SeededRandom } from "../random/RandomSource";
 
@@ -1956,6 +1956,126 @@ export function moveRequestKeyCardsToHandHandler(
       };
       effectInterpreter.dispatchEvent(event, context);
     }
+  };
+}
+
+/**
+ * matchRequestKeyCards: 対象リクエストのキーカードと指定カードの一致判定（印刷同一カード等）を行い、
+ * 結果真偽値を context.results[resultId] に格納する。
+ *
+ * 【Fail-Closed 契約 (Amendment 1 & 2)】
+ * - resultId 欠落・不正、未知の predicate、未解決 binding、malformed な request / keyCards / card は
+ *   すべて例外を throw します (false への丸め込み禁止)。
+ * - 合法なカード同士を評価した結果、samePrintedCard に合致しない場合のみ context.results[resultId] = false とします。
+ */
+export function matchRequestKeyCardsHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    if (!args || typeof args !== "object") {
+      throw new Error("matchRequestKeyCards: 引数がオブジェクトではありません");
+    }
+
+    const { request, card, predicate, resultId } = args;
+
+    // 1. resultId の検証
+    if (typeof resultId !== "string" || resultId.trim().length === 0) {
+      throw new Error(
+        `matchRequestKeyCards: resultId は空でない文字列である必要があります (指定値: ${JSON.stringify(resultId)})`
+      );
+    }
+
+    // 2. predicate の検証
+    if (predicate !== "samePrintedCard") {
+      throw new Error(
+        `matchRequestKeyCards: 未知またはサポートされていない predicate です: ${JSON.stringify(predicate)}`
+      );
+    }
+
+    // 3. Request binding の解決 (Generic Binding Resolution)
+    let targetReq: any = undefined;
+    if (request === "targetRequest") {
+      targetReq = context.targetRequest;
+      if (!targetReq && context.currentRequest?.targets) {
+        const reqTarget = context.currentRequest.targets.find((t) => t.type === "request");
+        if (reqTarget && "requestId" in reqTarget && reqTarget.requestId && context.state.stage?.requests) {
+          targetReq = context.state.stage.requests.find((r: any) => r.id === reqTarget.requestId);
+        }
+      }
+    } else {
+      throw new Error(
+        `matchRequestKeyCards: 未知または解決できない request binding です: ${JSON.stringify(request)}`
+      );
+    }
+
+    if (!targetReq || typeof targetReq !== "object") {
+      throw new Error(
+        `matchRequestKeyCards: targetRequest が解決できないか、不正なリクエストオブジェクトです: ${JSON.stringify(targetReq)}`
+      );
+    }
+
+    // 4. targetRequest.keyCards の検証 (malformed fail-closed)
+    const targetKeyCards = Array.isArray(targetReq.keyCards)
+      ? targetReq.keyCards
+      : ((targetReq as any).keyCard ? [(targetReq as any).keyCard] : undefined);
+
+    if (!Array.isArray(targetKeyCards) || targetKeyCards.length === 0) {
+      throw new Error(
+        `matchRequestKeyCards: targetRequest に有効なキーカードが存在しません (requestId: ${targetReq.id})`
+      );
+    }
+
+    for (const tkc of targetKeyCards) {
+      if (!tkc || typeof tkc !== "object") {
+        throw new Error(
+          `matchRequestKeyCards: targetRequest のキーカード要素が不正です (requestId: ${targetReq.id})`
+        );
+      }
+      const isTargetJoker = isJokerCard(tkc);
+      if (!isTargetJoker && (!tkc.suit || tkc.rank === undefined || tkc.rank === null)) {
+        throw new Error(
+          `matchRequestKeyCards: targetRequest のキーカードのスートまたはランクが欠落しています (requestId: ${targetReq.id})`
+        );
+      }
+    }
+
+    // 5. Card binding の解決 (Generic Binding Resolution)
+    let sourceCard: any = undefined;
+    if (card === "key") {
+      sourceCard =
+        context.keyCard ||
+        (Array.isArray(context.keyCards) && context.keyCards.length > 0 ? context.keyCards[0] : undefined) ||
+        (Array.isArray(context.currentRequest?.keyCards) && context.currentRequest.keyCards.length > 0
+          ? context.currentRequest.keyCards[0]
+          : undefined);
+    } else {
+      throw new Error(
+        `matchRequestKeyCards: 未知または解決できない card binding です: ${JSON.stringify(card)}`
+      );
+    }
+
+    if (!sourceCard || typeof sourceCard !== "object") {
+      throw new Error(
+        `matchRequestKeyCards: source card が解決できないか、不正なカードオブジェクトです: ${JSON.stringify(sourceCard)}`
+      );
+    }
+
+    // 6. sourceCard の妥当性検証 (malformed fail-closed)
+    const isSourceJoker = isJokerCard(sourceCard);
+    if (!isSourceJoker && (!sourceCard.suit || sourceCard.rank === undefined || sourceCard.rank === null)) {
+      throw new Error(
+        `matchRequestKeyCards: source card のスートまたはランクが欠落しています: ${JSON.stringify(sourceCard)}`
+      );
+    }
+
+    // 7. 合法カード同士の比較評価
+    if (!context.results) {
+      context.results = {};
+    }
+
+    const isMatch = targetKeyCards.some((tc: any) => isSamePrintedCard(sourceCard, tc));
+    context.results[resultId] = isMatch;
   };
 }
 

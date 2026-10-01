@@ -30,6 +30,7 @@ import {
   deploySelectedCardsAsUnitsHandler,
   moveUnitToHandHandler,
   moveRequestKeyCardsToHandHandler,
+  matchRequestKeyCardsHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -650,10 +651,14 @@ export class CommandRegistry {
 
     // 対象妥当かつ効果定義がある場合は実行
     if (targetValidation.isValid) {
+      if (!context.results) {
+        context.results = {};
+      }
       let resolveContext: CommandContext = context;
       if (action.effect) {
         resolveContext = {
           ...context,
+          results: context.results,
           playerKey: request.controller,
           keyCards: request.keyCards && request.keyCards.length > 0 ? request.keyCards : context.keyCards,
           keyCard:
@@ -834,8 +839,13 @@ export class CommandRegistry {
       }
     }
 
+    if (!context.results) {
+      context.results = {};
+    }
+
     const resolveContext: CommandContext = {
       ...context,
+      results: context.results,
       playerKey: request.controller,
       keyCards: request.keyCards,
       keyCard: request.keyCards && request.keyCards.length === 1 ? request.keyCards[0] : undefined,
@@ -1153,5 +1163,6 @@ export class CommandRegistry {
     this.register("deploySelectedCardsAsUnits", deploySelectedCardsAsUnitsHandler(this.effectInterpreter));
     this.register("moveUnitToHand", moveUnitToHandHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("moveRequestKeyCardsToHand", moveRequestKeyCardsToHandHandler(this.effectInterpreter));
+    this.register("matchRequestKeyCards", matchRequestKeyCardsHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

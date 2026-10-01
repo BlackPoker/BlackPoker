@@ -1,0 +1,45 @@
+﻿actions:
+  - id: action.trapCounter
+    name: 罠カウンター
+    ruby: わなかうんたー
+    type: rareCardOperation
+
+    request:
+      trigger: direct
+      speed: immediate
+      timing: quick
+
+    key:
+      id: key
+      count: 1
+      condition:
+        card:
+          zone: rare
+
+    targets:
+      - id: targetRequest
+        type: request
+        condition:
+          status: pending
+          keyCards:
+            count: [1, 2]
+
+    text:
+      effect: >
+        対象リクエストのキーカードのいずれかが、
+        このアクションのキーカードと同じ場合、
+        対象リクエストをステージから取り除き、
+        対象リクエストのキーカードを墓地に移す。
+
+    effect:
+      - matchRequestKeyCards:
+          request: targetRequest
+          card: key
+          predicate: samePrintedCard
+          resultId: trapMatch
+      - ifResult:
+          id: trapMatch
+          equals: true
+          then:
+            - cancelRequest:
+                target: targetRequest

@@ -258,3 +258,35 @@ export function isCardInGameZones(cardId: string, state: any): boolean {
   return false;
 }
 
+/**
+ * 2枚のカードが印刷上同じカード（same printed card）であるかを判定します。
+ * - physical card ID や出現順 (occurrence) は比較しません。
+ * - ジョーカー (isJokerCard) 同士は一致 (true) と判定します。
+ * - それ以外は normalized suit の一致 かつ canonical rank 文字列の一致を評価します。
+ *   ※ "1" と "A" の自動同一視や rankToValue による数値比較は行いません。
+ * - null/undefined または不正なカード表現の場合は fail-closed で false を返します。
+ */
+export function isSamePrintedCard(a?: any, b?: any): boolean {
+  if (!a || !b) return false;
+  if (typeof a !== "object" || typeof b !== "object") return false;
+
+  const isJokerA = isJokerCard(a);
+  const isJokerB = isJokerCard(b);
+  if (isJokerA || isJokerB) {
+    return isJokerA && isJokerB;
+  }
+
+  if (!a.suit || a.rank === undefined || a.rank === null) return false;
+  if (!b.suit || b.rank === undefined || b.rank === null) return false;
+
+  const suitA = normalizeSuit(a.suit);
+  const suitB = normalizeSuit(b.suit);
+  if (!suitA || !suitB || suitA !== suitB) return false;
+
+  const rankA = String(a.rank).trim().toUpperCase();
+  const rankB = String(b.rank).trim().toUpperCase();
+  if (rankA.length === 0 || rankB.length === 0) return false;
+
+  return rankA === rankB;
+}
+

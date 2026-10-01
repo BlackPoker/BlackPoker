@@ -8,6 +8,7 @@ actions:
   - action.packOpen
   - action.rareDraw
   - action.rareSummon
+  - action.trapCounter
 deck:
   type: constructed
   minCards: 40
