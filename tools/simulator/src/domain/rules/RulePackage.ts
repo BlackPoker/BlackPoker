@@ -61,6 +61,7 @@ export type ActionDefinition = {
     conditions?: Array<Record<string, any>>;
     count?: number;
     sameSuit?: boolean;
+    visibilityOnRequest?: "public" | "hidden" | string;
   };
   targets?: Array<{
     id: string;

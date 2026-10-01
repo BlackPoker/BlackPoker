@@ -90,6 +90,7 @@ export interface RequestView {
   readonly status: string;
   readonly sequence: number;
   readonly definitionOwner?: string;
+  readonly keyCards?: readonly CardView[];
 }
 
 export interface GameEventView {

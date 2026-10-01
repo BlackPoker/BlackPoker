@@ -6,6 +6,7 @@ import { CommandRegistry, CommandContext } from "../rules/CommandRegistry";
 import { CostResolver } from "../rules/CostResolver";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { ActionCostEvaluator } from "../rules/ActionCostEvaluator";
+import { resolveKeyCardSourceZone, getKeyCardsFromSource } from "../rules/keyCardUtils";
 
 /**
  * 選択された LegalPattern の検証、復元、および ActionRequest の構築を行うクラス。
@@ -89,9 +90,11 @@ export class PatternExecutor {
       const cardSel = catalog.cardSelections[pattern.keyCardSelectionRef];
       if (cardSel && cardSel.cardIds.length > 0) {
         const player = state.players?.[request.playerId];
-        if (player?.hand) {
+        if (player) {
+          const sourceZone = resolveKeyCardSourceZone(actionDef);
+          const sourceCards = getKeyCardsFromSource(player, sourceZone);
           for (const cardId of cardSel.cardIds) {
-            const card = player.hand.find((c: any) => c.id === cardId);
+            const card = sourceCards.find((c: any) => c.id === cardId);
             if (card) keyCards.push(card);
           }
         }

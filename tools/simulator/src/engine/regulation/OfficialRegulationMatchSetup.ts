@@ -73,7 +73,8 @@ export function findMatchingPresetSoldierComponent(
 export function verifyCardConservation(
   playerKey: PlayerKey,
   player: any,
-  expectedDeck: readonly CardDefinition[]
+  expectedDeck: readonly CardDefinition[],
+  stateOrAdditionalCards?: any
 ): void {
   const cards: InGameCard[] = [];
 
@@ -116,6 +117,18 @@ export function verifyCardConservation(
     for (const fogEntry of player.fog) {
       if (fogEntry.card && fogEntry.card.id) {
         cards.push(fogEntry.card);
+      }
+    }
+  }
+  // Stage Key Cards (リクエスト中に一時保持されているカード)
+  if (stateOrAdditionalCards) {
+    if (Array.isArray(stateOrAdditionalCards)) {
+      cards.push(...stateOrAdditionalCards);
+    } else if (stateOrAdditionalCards.stage && Array.isArray(stateOrAdditionalCards.stage.requests)) {
+      for (const req of stateOrAdditionalCards.stage.requests) {
+        if (req.controller === playerKey && Array.isArray(req.keyCards)) {
+          cards.push(...req.keyCards);
+        }
       }
     }
   }

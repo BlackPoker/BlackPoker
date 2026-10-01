@@ -2,6 +2,8 @@ import {
   PlayerObservation,
   PlayerObservationView,
   CardView,
+  KnownCardView,
+  HiddenCardView,
   UnitView,
   FogView,
   RequestView,
@@ -11,6 +13,8 @@ import {
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { AbilityEvaluator } from "../rules/AbilityEvaluator";
 import { findPhysicalCardInGrave } from "../rules/graveCardUtils";
+import { resolveKeyCardVisibilityOnRequest } from "../rules/keyCardUtils";
+import { rankToValue } from "../rules/cardUtils";
 
 const abilityEvaluator = new AbilityEvaluator();
 
@@ -173,6 +177,35 @@ export class ObservationFactory {
     if (state && state.stage?.requests && Array.isArray(state.stage.requests)) {
       for (const req of state.stage.requests) {
         stageRequestRefs.push(req.id);
+
+        let requestKeyCards: CardView[] | undefined = undefined;
+        if (req.keyCards && Array.isArray(req.keyCards) && req.keyCards.length > 0) {
+          const visibilityOnRequest = req.action
+            ? resolveKeyCardVisibilityOnRequest(req.action)
+            : "hidden";
+          const isPublic = visibilityOnRequest === "public";
+          const isController = req.controller === viewerPlayerId;
+
+          requestKeyCards = req.keyCards.map((card: any) => {
+            if (isPublic || isController) {
+              return {
+                visibility: "KNOWN",
+                cardInstanceId: card.id,
+                suit: card.suit,
+                rank: card.rank,
+                value: card.value ?? rankToValue(card.rank),
+                faceUp: true,
+                code: card.code,
+              } as KnownCardView;
+            } else {
+              return {
+                visibility: "HIDDEN",
+                faceUp: false,
+              } as HiddenCardView;
+            }
+          });
+        }
+
         stageRequests.push({
           requestId: req.id,
           actionId: req.actionId,
@@ -181,6 +214,7 @@ export class ObservationFactory {
           status: req.status,
           sequence: req.sequence,
           definitionOwner: req.definitionOwner,
+          keyCards: requestKeyCards,
         });
       }
     }

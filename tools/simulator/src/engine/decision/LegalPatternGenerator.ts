@@ -13,6 +13,7 @@ import { CommandContext } from "../rules/CommandRegistry";
 import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay, normalizeSuit } from "../rules/cardUtils";
 import { validateOptionSelectionDefinition } from "../rules/OptionSelectionValidator";
+import { resolveKeyCardSourceZone, getKeyCardsFromSource } from "../rules/keyCardUtils";
 
 
 export interface DecisionGenerationMetrics {
@@ -64,8 +65,10 @@ export class LegalPatternGenerator {
     }> = [];
 
     for (const action of candidateActions) {
-      // 2. キーカード候補の列挙
-      const keyCardCombinations = this.enumerateKeyCardCombinations(action, player?.hand || []);
+      // 2. キーカード候補の列挙 (SSOT: key source zone)
+      const sourceZone = resolveKeyCardSourceZone(action);
+      const sourceCards = getKeyCardsFromSource(player, sourceZone);
+      const keyCardCombinations = this.enumerateKeyCardCombinations(action, sourceCards);
       totalKeyCards += keyCardCombinations.length;
 
       // Effective Cost の導出 (SSOT)
@@ -92,7 +95,8 @@ export class LegalPatternGenerator {
         const costPayments = CostPaymentEnumerator.enumeratePayments(
           effectiveCost,
           player,
-          keyCardSet
+          keyCardSet,
+          rulePackage.components
         );
         totalCosts += costPayments.length;
 
@@ -201,7 +205,7 @@ export class LegalPatternGenerator {
     };
 
     const getCostPaymentRef = (cost: CostPayment): number => {
-      const key = `${cost.discardedCardIds.join(",")}|${cost.drivenBulwarkUnitIds.join(",")}|${cost.lifeCount}`;
+      const key = `${cost.discardedCardIds.join(",")}|${cost.drivenBulwarkUnitIds.join(",")}|${cost.sacrificedUnitIds?.join(",") || ""}|${cost.lifeCount}`;
       if (costMap.has(key)) return costMap.get(key)!;
       const ref = costPaymentCatalog.length;
       costPaymentCatalog.push(cost);
@@ -226,7 +230,7 @@ export class LegalPatternGenerator {
       const targetRef = getTargetSelectionRef(rp.targetSelection);
 
       const keyStr = rp.keyCards.map((c) => c.id).join(",");
-      const costStr = `${rp.costPayment.discardedCardIds.join(",")}-${rp.costPayment.drivenBulwarkUnitIds.join(",")}-${rp.costPayment.lifeCount}`;
+      const costStr = `${rp.costPayment.discardedCardIds.join(",")}-${rp.costPayment.drivenBulwarkUnitIds.join(",")}-${rp.costPayment.sacrificedUnitIds?.join(",") || ""}-${rp.costPayment.lifeCount}`;
       const targetStr = rp.targetSelection.targetUnitId || rp.targetSelection.targetPlayerKey || rp.targetSelection.targetRequestId || "none";
       const patternId = `pat-${rp.action.id}-${keyStr || "nokey"}-${costStr}-${targetStr}`;
 

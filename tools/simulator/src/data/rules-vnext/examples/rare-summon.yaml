@@ -1,0 +1,34 @@
+actions:
+  - id: action.rareSummon
+    name: レア召喚
+    ruby: れあしょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: S
+
+    key:
+      id: key
+      condition:
+        card:
+          zone: rare
+      visibilityOnRequest: public
+
+    activationCondition:
+      zoneCount:
+        player: controller
+        zone: life
+        atMost: 9
+
+    text:
+      effect: キーカードを兵士として表向きかつチャージ状態で場に出す。
+
+    effect:
+      - summonUnit:
+          card: key
+          face: up
+          state: charge

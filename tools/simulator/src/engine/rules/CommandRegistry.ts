@@ -44,6 +44,11 @@ import { MatchLogRecorder, normalizeCardLocation } from "../log/MatchLogRecorder
 import { validateTargetsAtResolution } from "./ResolutionTargetValidator";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { EffectPathCodec } from "./EffectPathCodec";
+import {
+  resolveKeyCardSourceZone,
+  removeKeyCardsFromSource,
+  resolveKeyCardVisibilityOnRequest,
+} from "./keyCardUtils";
 
 export interface CreateRequestOptions {
   readonly selectedCostPayment?: CostPayment;
@@ -305,7 +310,7 @@ export class CommandRegistry {
     context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
     const seq = context.state.nextRequestSeq;
 
-    // 4. 投入カードのリスト化 & 手札からの取り除き（Requestに付属）
+    // 4. 投入カードのリスト化 & 元ゾーンからの取り除き（Requestに付属）
     const actualCards =
       context.keyCards && context.keyCards.length > 0
         ? context.keyCards
@@ -314,16 +319,16 @@ export class CommandRegistry {
         : [];
 
     const player = context.state.players?.[context.playerKey];
-    if (player && Array.isArray(player.hand) && actualCards.length > 0) {
-      const actualCardIds = new Set(actualCards.map((c: any) => c.id));
-      player.hand = player.hand.filter((c: any) => !actualCardIds.has(c.id));
+    if (player && actualCards.length > 0) {
+      const sourceZone = resolveKeyCardSourceZone(action);
+      removeKeyCardsFromSource(player, sourceZone, actualCards);
       for (const card of actualCards) {
         this.effectInterpreter.dispatchEvent(
           {
             type: "cardMoved",
             payload: {
               card,
-              fromZone: "hand",
+              fromZone: sourceZone,
               toZone: "request",
               playerKey: context.playerKey,
               requestId: `req-${seq}`,
@@ -331,6 +336,24 @@ export class CommandRegistry {
           },
           context
         );
+      }
+
+      const visibilityOnRequest = resolveKeyCardVisibilityOnRequest(action);
+      if (visibilityOnRequest === "public") {
+        for (const card of actualCards) {
+          this.effectInterpreter.dispatchEvent(
+            {
+              type: "cardRevealed",
+              payload: {
+                card,
+                playerKey: context.playerKey,
+                target: "all",
+                sourceZone,
+              },
+            },
+            context
+          );
+        }
       }
     }
 
@@ -1103,7 +1126,7 @@ export class CommandRegistry {
    */
   private registerDefaults() {
     this.register("createFog", createFogHandler(this.expressionEvaluator, this.effectInterpreter));
-    this.register("summonUnit", summonUnitHandler());
+    this.register("summonUnit", summonUnitHandler(this.effectInterpreter));
     this.register("removeFog", removeFogHandler());
     this.register("moveToGraveyard", moveToGraveyardHandler(this.effectInterpreter));
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());

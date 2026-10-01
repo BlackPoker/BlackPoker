@@ -1,6 +1,8 @@
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { parseCost, CostSymbol } from "../rules/CostParser";
 import { formatSuitSymbol } from "../rules/cardUtils";
+import { ComponentDefinition } from "../../domain/rules/RulePackage";
+import { isCharacterComponent } from "../rules/characterUtils";
 
 /**
  * コスト支払い候補の全列挙を行うクラス。
@@ -12,7 +14,8 @@ export class CostPaymentEnumerator {
   static enumeratePayments(
     costStr: string | undefined,
     player: any,
-    excludedCardIds: ReadonlySet<string> = new Set()
+    excludedCardIds: ReadonlySet<string> = new Set(),
+    components: readonly ComponentDefinition[] = []
   ): CostPayment[] {
     if (!costStr || costStr.trim() === "") {
       return [
@@ -36,11 +39,13 @@ export class CostPaymentEnumerator {
     let requiredD = 0;
     let requiredL = 0;
     let requiredB = 0;
+    let requiredS = 0;
 
     for (const sym of symbols) {
       if (sym === "D") requiredD++;
       else if (sym === "L") requiredL++;
       else if (sym === "B") requiredB++;
+      else if (sym === "S") requiredS++;
     }
 
     // 1. D (Discard) 候補の列挙
@@ -71,7 +76,19 @@ export class CostPaymentEnumerator {
       requiredB
     );
 
-    // 3. L (Life) 候補
+    // 3. S (Sacrifice) 候補の列挙
+    const availableCharacters = player?.field
+      ? player.field.filter((u: any) => isCharacterComponent(u, components))
+      : [];
+    if (availableCharacters.length < requiredS) {
+      return []; // キャラクター不足
+    }
+    const sacrificeCombinations: string[][] = this.getCombinations<string>(
+      availableCharacters.map((u: any) => u.unitId as string).sort(),
+      requiredS
+    );
+
+    // 4. L (Life) 候補
     const actualLife = player?.life
       ? (Array.isArray(player.life) ? player.life.length : Number(player.life))
       : 0;
@@ -87,43 +104,52 @@ export class CostPaymentEnumerator {
       }
     }
 
-    // 4. 直積の生成
+    // 5. 直積の生成
     const results: CostPayment[] = [];
     for (const discarded of discardCombinations) {
       for (const driven of bulwarkCombinations) {
-        const parts: string[] = [];
-        if (discarded.length > 0) {
-          const cardLabels = discarded.map((id) => {
-            const card = handCardMap.get(id);
-            return card ? `${formatSuitSymbol(card.suit)}${card.rank}` : id;
-          });
-          parts.push(`$D (${cardLabels.join(", ")} 破棄)`);
-        }
-        if (driven.length > 0) {
-          const bulwarkLabels = driven.map((id) => {
-            const u = availableBulwarks.find((b: any) => b.unitId === id);
-            return u ? `防壁 #${id.slice(-4)}` : id;
-          });
-          parts.push(`$B (${bulwarkLabels.join(", ")} ドライブ)`);
-        }
-        if (requiredL > 0) {
-          parts.push(`$L (${requiredL}点 ライフ消費)`);
-        }
+        for (const sacrificed of sacrificeCombinations) {
+          const parts: string[] = [];
+          if (discarded.length > 0) {
+            const cardLabels = discarded.map((id) => {
+              const card = handCardMap.get(id);
+              return card ? `${formatSuitSymbol(card.suit)}${card.rank}` : id;
+            });
+            parts.push(`$D (${cardLabels.join(", ")} 破棄)`);
+          }
+          if (driven.length > 0) {
+            const bulwarkLabels = driven.map((id) => {
+              const u = availableBulwarks.find((b: any) => b.unitId === id);
+              return u ? `防壁 #${id.slice(-4)}` : id;
+            });
+            parts.push(`$B (${bulwarkLabels.join(", ")} ドライブ)`);
+          }
+          if (sacrificed.length > 0) {
+            const charLabels = sacrificed.map((id) => {
+              const u = availableCharacters.find((c: any) => c.unitId === id);
+              return u?.name || u?.kind || id;
+            });
+            parts.push(`$S (${charLabels.join(", ")} 墓地)`);
+          }
+          if (requiredL > 0) {
+            parts.push(`$L (${requiredL}点 ライフ消費)`);
+          }
 
-        results.push({
-          discardedCardIds: Object.freeze<string[]>([...discarded]),
-          drivenBulwarkUnitIds: Object.freeze<string[]>([...driven]),
-          sacrificedUnitIds: Object.freeze<string[]>([]),
-          lifeCount: requiredL,
-          summary: parts.length > 0 ? parts.join(", ") : "コストなし",
-        });
+          results.push({
+            discardedCardIds: Object.freeze<string[]>([...discarded]),
+            drivenBulwarkUnitIds: Object.freeze<string[]>([...driven]),
+            sacrificedUnitIds: Object.freeze<string[]>([...sacrificed]),
+            lifeCount: requiredL,
+            summary: parts.length > 0 ? parts.join(", ") : "コストなし",
+          });
+        }
       }
     }
 
     // 安定ソート（再現性確保）
     results.sort((a, b) => {
-      const aKey = `${a.discardedCardIds.join(",")}|${a.drivenBulwarkUnitIds.join(",")}|${a.lifeCount}`;
-      const bKey = `${b.discardedCardIds.join(",")}|${b.drivenBulwarkUnitIds.join(",")}|${b.lifeCount}`;
+      const aKey = `${a.discardedCardIds.join(",")}|${a.drivenBulwarkUnitIds.join(",")}|${a.sacrificedUnitIds.join(",")}|${a.lifeCount}`;
+      const bKey = `${b.discardedCardIds.join(",")}|${b.drivenBulwarkUnitIds.join(",")}|${b.sacrificedUnitIds.join(",")}|${b.lifeCount}`;
       return aKey.localeCompare(bKey);
     });
 

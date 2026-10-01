@@ -10,6 +10,7 @@ import {
 } from "./targetConditionUtils";
 import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
 import { ActionCostEvaluator, InvalidActionCostError } from "./ActionCostEvaluator";
+import { resolveKeyCardSourceZone, validateKeyCardsInSource } from "./keyCardUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -207,6 +208,13 @@ export class ActionRequestValidator {
         throw new ValidationError(
           `キーカードの枚数が一致しません。要求: ${expectedCount}枚, 実際: ${actualCards.length}枚`
         );
+      }
+
+      // 元ゾーン (source zone) の検証
+      const sourceZone = resolveKeyCardSourceZone(action);
+      const player = context.state?.players?.[context.playerKey];
+      if (player && sourceZone === "rare") {
+        validateKeyCardsInSource(player, sourceZone, actualCards);
       }
 
       // 条件の検証

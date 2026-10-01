@@ -144,13 +144,13 @@ export function buildFieldUnitFromComponent(params: {
 /**
  * summonUnit: ユニットの召喚
  */
-export function summonUnitHandler(): CommandHandler {
+export function summonUnitHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
     const { component, face, state, card } = args;
     const player = context.state.players[context.playerKey];
     if (!player) throw new Error(`プレイヤーが見つかりません: ${context.playerKey}`);
 
-    // 召喚に使用するカードの解決 (keyCard または selection.<id>)
+    // 召喚に使用するカードの解決 (keyCard または selection.<id> または card オブジェクト)
     let unitCard: any = undefined;
     if (typeof card === "string" && card.startsWith("selection.")) {
       const selId = card.replace("selection.", "");
@@ -163,8 +163,14 @@ export function summonUnitHandler(): CommandHandler {
           unitCard = val;
         }
       }
+    } else if (typeof card === "object" && card !== null) {
+      unitCard = card;
     } else if (context.keyCard) {
       unitCard = context.keyCard;
+    } else if (context.keyCards && context.keyCards.length > 0) {
+      unitCard = context.keyCards[0];
+    } else if (context.currentRequest?.keyCards && context.currentRequest.keyCards.length > 0) {
+      unitCard = context.currentRequest.keyCards[0];
     }
 
     // card が指定されているにもかかわらずカードが解決できない場合は、cards: [] の空ユニット生成を阻止
@@ -172,8 +178,25 @@ export function summonUnitHandler(): CommandHandler {
       return;
     }
 
+    let targetComponent = component;
+    if (!targetComponent && unitCard) {
+      const resolvedComp = resolveComponentForUnit({
+        cards: [unitCard],
+        face: face || "up",
+        zone: "field",
+        components: context.components || [],
+        componentType: "character",
+      });
+      if (getCharacterType(resolvedComp, context.components || []) !== "soldier") {
+        throw new Error(
+          `summonUnit: 解決されたコンポーネント '${resolvedComp.id}' の characterType が 'soldier' ではありません (fail-closed)`
+        );
+      }
+      targetComponent = resolvedComp.id;
+    }
+
     const newUnit = buildFieldUnitFromComponent({
-      componentId: component,
+      componentId: targetComponent,
       playerKey: context.playerKey,
       card: unitCard,
       face: face || "up",
@@ -182,6 +205,15 @@ export function summonUnitHandler(): CommandHandler {
       stateVersion: context.state.stateVersion || 1,
       turnCount: context.state.turnCount ?? 1,
     });
+
+    // 召喚元ゾーンの特定 (request or hand)
+    let fromZone: string = "hand";
+    if (
+      context.currentRequest?.keyCards?.some((c: any) => c.id === unitCard?.id) ||
+      context.keyCards?.some((c: any) => c.id === unitCard?.id)
+    ) {
+      fromZone = "request";
+    }
 
     // 手札から召喚カードを消費（手札にある場合のみ）
     if (unitCard && Array.isArray(player.hand)) {
@@ -192,6 +224,28 @@ export function summonUnitHandler(): CommandHandler {
       player.field = [];
     }
     player.field.push(newUnit);
+
+    if (effectInterpreter && unitCard) {
+      effectInterpreter.dispatchEvent(
+        {
+          type: "cardMoved",
+          payload: {
+            card: unitCard,
+            fromZone,
+            toZone: "field",
+            playerKey: context.playerKey,
+            targetUnitId: newUnit.unitId,
+            cause: {
+              type: "effect",
+              command: "summonUnit",
+              actionId: context.currentAction?.id || context.currentRequest?.actionId,
+              requestId: context.currentRequest?.id,
+            },
+          },
+        },
+        context
+      );
+    }
   };
 }
 

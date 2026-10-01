@@ -1,4 +1,4 @@
-export const VALID_COST_SYMBOLS = ["B", "L", "D"] as const;
+export const VALID_COST_SYMBOLS = ["B", "L", "D", "S"] as const;
 export type CostSymbol = typeof VALID_COST_SYMBOLS[number];
 
 /**

@@ -2,6 +2,8 @@ import { CommandContext } from "./CommandRegistry";
 import { CostSymbol, parseCost } from "./CostParser";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
+import { isCharacterComponent } from "./characterUtils";
+import { moveUnitToGraveyard } from "./unitMovementUtils";
 
 /**
  * 新YAML DSLにおけるアクションコスト（D, L, Bなど）の判定・支払いを担当するクラス。
@@ -19,12 +21,7 @@ export class CostResolver {
   ): boolean {
     if (!costPayment) return false;
 
-    // 1. sacrificedUnitIds が存在する場合は reject（D/B/L のみに限定）
-    if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
-      return false;
-    }
-
-    // 2. ID 重複検証（discardedCardIds, drivenBulwarkUnitIds に重複がないこと）
+    // 1. ID 重複検証（discardedCardIds, drivenBulwarkUnitIds, sacrificedUnitIds に重複がないこと）
     const discarded = costPayment.discardedCardIds || [];
     if (new Set(discarded).size !== discarded.length) {
       return false;
@@ -35,7 +32,12 @@ export class CostResolver {
       return false;
     }
 
-    // 3. Key Card との重複検証 (context が渡されている場合)
+    const sacrificed = costPayment.sacrificedUnitIds || [];
+    if (new Set(sacrificed).size !== sacrificed.length) {
+      return false;
+    }
+
+    // 2. Key Card との重複検証 (context が渡されている場合)
     if (context) {
       const keyCardIds = new Set<string>();
       if (context.keyCard?.id) keyCardIds.add(context.keyCard.id);
@@ -51,7 +53,7 @@ export class CostResolver {
       }
     }
 
-    // 4. 要求シンボルの集計
+    // 3. 要求シンボルの集計
     let symbols: readonly CostSymbol[];
     if (typeof requiredCost === "string") {
       if (!requiredCost || requiredCost.trim() === "") {
@@ -70,18 +72,26 @@ export class CostResolver {
     let requiredD = 0;
     let requiredB = 0;
     let requiredL = 0;
+    let requiredS = 0;
 
     for (const sym of symbols) {
       if (sym === "D") requiredD++;
       else if (sym === "B") requiredB++;
       else if (sym === "L") requiredL++;
+      else if (sym === "S") requiredS++;
     }
 
     const actualD = discarded.length;
     const actualB = driven.length;
     const actualL = costPayment.lifeCount || 0;
+    const actualS = sacrificed.length;
 
-    return actualD === requiredD && actualB === requiredB && actualL === requiredL;
+    return (
+      actualD === requiredD &&
+      actualB === requiredB &&
+      actualL === requiredL &&
+      actualS === requiredS
+    );
   }
 
   /**
@@ -100,15 +110,15 @@ export class CostResolver {
         return false;
       }
     } else {
-      // requiredCost が直接渡されなくても、重複・Keyカード重複・sacrificedUnitIdsは常時検証
-      if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
-        return false;
-      }
+      // requiredCost が直接渡されなくても、重複・Keyカード重複は常時検証
       const discarded = costPayment.discardedCardIds || [];
       if (new Set(discarded).size !== discarded.length) return false;
 
       const driven = costPayment.drivenBulwarkUnitIds || [];
       if (new Set(driven).size !== driven.length) return false;
+
+      const sacrificed = costPayment.sacrificedUnitIds || [];
+      if (new Set(sacrificed).size !== sacrificed.length) return false;
 
       if (context) {
         const keyCardIds = new Set<string>();
@@ -151,6 +161,16 @@ export class CostResolver {
         ? (Array.isArray(player.life) ? player.life.length : Number(player.life))
         : 0;
       if (actualLife < costPayment.lifeCount) return false;
+    }
+
+    // 4. 生贄キャラクターの存在とキャラクター種別確認
+    if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
+      if (!player.field) return false;
+      for (const unitId of costPayment.sacrificedUnitIds) {
+        const unit = player.field.find((u: any) => u.unitId === unitId);
+        if (!unit) return false;
+        if (!isCharacterComponent(unit, context.components)) return false;
+      }
     }
 
     return true;
@@ -266,6 +286,27 @@ export class CostResolver {
       }
     }
 
+    // 4. 指定されたキャラクターを生贄に捧げる（墓地へ移動）
+    if (costPayment.sacrificedUnitIds && costPayment.sacrificedUnitIds.length > 0) {
+      for (const unitId of costPayment.sacrificedUnitIds) {
+        const unit = player.field?.find((u: any) => u.unitId === unitId);
+        if (!unit) {
+          throw new Error(`コストとして指定されたキャラクターが見つかりません: ${unitId}`);
+        }
+        if (!isCharacterComponent(unit, context.components)) {
+          throw new Error(`コストとして指定されたユニットはキャラクターではありません: ${unitId}`);
+        }
+        moveUnitToGraveyard(
+          unit,
+          context.playerKey,
+          context.state,
+          effectInterpreter,
+          context,
+          { cause: { type: "cost", symbol: "S" } }
+        );
+      }
+    }
+
   }
   /**
    * プレイヤーが指定されたコスト文字列を支払うことが可能か判定します。
@@ -291,11 +332,13 @@ export class CostResolver {
     let requiredD = 0;
     let requiredL = 0;
     let requiredB = 0;
+    let requiredS = 0;
 
     for (const sym of symbols) {
       if (sym === "D") requiredD++;
       else if (sym === "L") requiredL++;
       else if (sym === "B") requiredB++;
+      else if (sym === "S") requiredS++;
     }
 
     // 1. D (Discard) 手札リソース検証
@@ -318,6 +361,12 @@ export class CostResolver {
         u.state === "charge"
     ) : [];
     if (bulwarks.length < requiredB) return false;
+
+    // 4. S (Sacrifice) キャラクターリソース検証
+    const characters = player.field ? player.field.filter(
+      (u: any) => isCharacterComponent(u, context.components)
+    ) : [];
+    if (characters.length < requiredS) return false;
 
     return true;
   }
@@ -439,6 +488,23 @@ export class CostResolver {
         },
       };
       effectInterpreter.dispatchEvent(event, context);
+    } else if (sym === "S") {
+      // フィールド上のキャラクター1体を生贄に捧げる
+      const charIndex = player.field?.findIndex(
+        (u: any) => isCharacterComponent(u, context.components)
+      );
+      if (charIndex === undefined || charIndex === -1) {
+        throw new Error("コストSを支払うためのキャラクターが不足しています。");
+      }
+      const unit = player.field[charIndex];
+      moveUnitToGraveyard(
+        unit,
+        context.playerKey,
+        context.state,
+        effectInterpreter,
+        context,
+        { cause: { type: "cost", symbol: "S" } }
+      );
     }
   }
 }
