@@ -889,7 +889,7 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
 
     const events = logRecorder.getEvents();
 
-    // Trap Counter itself: request.created, request.resolve.started, request.resolved
+    // 1. Trap Counter itself: request.created, request.resolve.started, request.resolved
     const trapCreated = events.find((e: any) => e.type === "request.created" && e.actionRef === "action.trapCounter");
     expect(trapCreated).toBeDefined();
 
@@ -899,17 +899,37 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
     const trapResolved = events.find((e: any) => e.type === "request.resolved" && e.actionRef === "action.trapCounter");
     expect(trapResolved).toBeDefined();
 
-    // Trap Counter: NO stage.pushed
+    // 2. Trap Counter: NO stage.pushed and NO card.revealed
     const trapPushed = events.find((e: any) => e.type === "stage.pushed" && e.actionRef === "action.trapCounter");
     expect(trapPushed).toBeUndefined();
 
-    // Target Request: stage.popped, request.cancelled
+    const revealed = events.find((e: any) => e.type === "card.revealed");
+    expect(revealed).toBeUndefined();
+
+    // 3. Target Request: stage.popped, request.cancelled
     const targetPopped = events.find((e: any) => e.type === "stage.popped" && e.requestId === "req-up-1");
     expect(targetPopped).toBeDefined();
 
     const targetCancelled = events.find((e: any) => e.type === "request.cancelled" && e.requestId === "req-up-1");
     expect(targetCancelled).toBeDefined();
     expect((targetCancelled as any).reason).toBe("countered");
+
+    // 4. Trap Counter own Rare: card.moved rare -> request, card.moved request -> grave
+    const trapRareMoved: any[] = events.filter((e: any) => e.type === "card.moved" && e.cardId === trapRare.id);
+    expect(trapRareMoved).toHaveLength(2);
+    expect(trapRareMoved[0].from.kind).toBe("zone");
+    expect(trapRareMoved[0].from.zone).toBe("rare");
+    expect(trapRareMoved[0].to.kind).toBe("request");
+    expect(trapRareMoved[1].from.kind).toBe("request");
+    expect(trapRareMoved[1].to.kind).toBe("zone");
+    expect(trapRareMoved[1].to.zone).toBe("grave");
+
+    // 5. Target Key Card: card.moved request -> grave
+    const targetKeyMoved: any[] = events.filter((e: any) => e.type === "card.moved" && e.cardId === targetKey.id);
+    expect(targetKeyMoved).toHaveLength(1);
+    expect(targetKeyMoved[0].from.kind).toBe("request");
+    expect(targetKeyMoved[0].to.kind).toBe("zone");
+    expect(targetKeyMoved[0].to.zone).toBe("grave");
   });
 
   // P. Canonical Logs on Mismatch
@@ -957,16 +977,39 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
 
     const events = logRecorder.getEvents();
 
-    // Target request logs should NOT be emitted
-    const targetCancelled = events.find((e: any) => e.type === "request.cancelled" && e.requestId === "req-up-1");
-    expect(targetCancelled).toBeUndefined();
+    // 1. Trap Counter own Rare: rare -> request and request -> grave
+    const trapRareMoved: any[] = events.filter((e: any) => e.type === "card.moved" && e.cardId === trapRare.id);
+    expect(trapRareMoved).toHaveLength(2);
+    expect(trapRareMoved[0].from.kind).toBe("zone");
+    expect(trapRareMoved[0].from.zone).toBe("rare");
+    expect(trapRareMoved[0].to.kind).toBe("request");
+    expect(trapRareMoved[1].from.kind).toBe("request");
+    expect(trapRareMoved[1].to.kind).toBe("zone");
+    expect(trapRareMoved[1].to.zone).toBe("grave");
 
-    const targetPopped = events.find((e: any) => e.type === "stage.popped" && e.requestId === "req-up-1");
-    expect(targetPopped).toBeUndefined();
-
-    // Trap Counter own lifecycle is completed
+    // 2. Trap Counter own lifecycle is completed
+    const trapCreated = events.find((e: any) => e.type === "request.created" && e.actionRef === "action.trapCounter");
+    expect(trapCreated).toBeDefined();
+    const trapStarted = events.find((e: any) => e.type === "request.resolve.started" && e.actionRef === "action.trapCounter");
+    expect(trapStarted).toBeDefined();
     const trapResolved = events.find((e: any) => e.type === "request.resolved" && e.actionRef === "action.trapCounter");
     expect(trapResolved).toBeDefined();
+
+    const trapPushed = events.find((e: any) => e.type === "stage.pushed" && e.actionRef === "action.trapCounter");
+    expect(trapPushed).toBeUndefined();
+    const revealed = events.find((e: any) => e.type === "card.revealed");
+    expect(revealed).toBeUndefined();
+
+    // 3. Target request logs: NONE
+    const targetCancelled = events.find((e: any) => e.type === "request.cancelled");
+    expect(targetCancelled).toBeUndefined();
+
+    const targetPopped = events.find((e: any) => e.type === "stage.popped");
+    expect(targetPopped).toBeUndefined();
+
+    // 4. Target key request -> grave: NONE
+    const targetKeyMoved = events.filter((e: any) => e.type === "card.moved" && e.cardId === targetKey.id);
+    expect(targetKeyMoved).toHaveLength(0);
   });
 
   // Q. Visibility / No Reveal
@@ -1019,8 +1062,8 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
     expect(revealedEvents).toHaveLength(0);
   });
 
-  // R. 54-card Conservation
-  it("R: 54-card conservation holds before, during transient state, and after Trap Counter resolution", async () => {
+  // R. 54-card Conservation (Match and Mismatch Cases)
+  it("R1 (Match Case): 54-card conservation holds before, during transient state, and after Trap Counter cancellation", async () => {
     const reg = await getRegulation("standard-rarePack");
     const frame = await getFrame("rarePack");
     const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rarePackRulePackage, 42);
@@ -1028,26 +1071,43 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
     if (outcome.type !== "READY") return;
 
     const state = outcome.state;
-    // Verify 54 cards at start
+    // 1. Verify 54 cards at start
     OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
-    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
-
-    // Give p2 a card from hand to create an Up request on stage
-    const p2Card = state.players.p2.hand.pop();
-    const targetReq = {
-      id: "req-p2-up",
-      actionId: "action.up",
-      controller: "p2",
-      status: "pending",
-      keyCards: [p2Card],
-    };
-    state.stage.requests.push(targetReq);
-
-    // Verify conservation while targetReq is on stage
     OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
 
     const trapRare = state.players.p1.rareCards[0];
     expect(trapRare).toBeDefined();
+
+    // Explicitly configure matching card for p2: same printed card (same suit, same rank)
+    let matchingCard: any = undefined;
+    const p2HandIdx = state.players.p2.hand.findIndex(
+      (c: any) => c.suit === trapRare.suit && c.rank === trapRare.rank
+    );
+    if (p2HandIdx >= 0) {
+      matchingCard = state.players.p2.hand.splice(p2HandIdx, 1)[0];
+    } else {
+      const p2LifeIdx = state.players.p2.life.findIndex(
+        (c: any) => c.suit === trapRare.suit && c.rank === trapRare.rank
+      );
+      if (p2LifeIdx >= 0) {
+        matchingCard = state.players.p2.life.splice(p2LifeIdx, 1)[0];
+      }
+    }
+    expect(matchingCard).toBeDefined();
+    expect(isSamePrintedCard(trapRare, matchingCard)).toBe(true);
+
+    const targetReq = {
+      id: "req-p2-target-match",
+      actionId: "action.up",
+      controller: "p2",
+      status: "pending",
+      keyCards: [matchingCard],
+    };
+    state.stage.requests.push(targetReq);
+
+    // Verify conservation while targetReq is on stage
+    OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
+    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
 
     const context: CommandContext = {
       state,
@@ -1055,11 +1115,11 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
       keyCards: [trapRare],
       keyCard: trapRare,
       targetRequest: targetReq as any,
-      actions: rulePackage.actions,
-      components: rulePackage.components,
+      actions: rarePackRulePackage.actions,
+      components: rarePackRulePackage.components,
     };
 
-    // 1. Transient state: createRequest called, before resolveRequest
+    // 2. Transient state: createRequest called, before resolveRequest
     const request = registry.createRequest(trapAction, context);
 
     // During transient state, Trap Counter is immediate and not on stage, so its keyCards are passed as additionalCards
@@ -1071,10 +1131,96 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
     );
     OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
 
-    // 2. Resolve request
+    // 3. Resolve request
     registry.resolveRequest(request, context);
 
-    // Fully resolved: Trap rare is now in p1 grave, target key card is in p2 grave (if match) or on stage (if mismatch)
+    // Fully resolved: target request cancelled, target key in p2 grave, trap rare in p1 grave
+    expect(targetReq.status).toBe("cancelled");
+    expect(state.stage.requests.some((r: any) => r.id === targetReq.id)).toBe(false);
+    expect(state.players.p1.grave.some((c: any) => c.id === trapRare.id)).toBe(true);
+    expect(state.players.p2.grave.some((c: any) => c.id === matchingCard.id)).toBe(true);
+
+    OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
+    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
+  });
+
+  it("R2 (Mismatch Case): 54-card conservation holds before, during transient state, and after Trap Counter mismatch resolution", async () => {
+    const reg = await getRegulation("standard-rarePack");
+    const frame = await getFrame("rarePack");
+    const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rarePackRulePackage, 42);
+    expect(outcome.type).toBe("READY");
+    if (outcome.type !== "READY") return;
+
+    const state = outcome.state;
+    // 1. Verify 54 cards at start
+    OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
+    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
+
+    const trapRare = state.players.p1.rareCards[0];
+    expect(trapRare).toBeDefined();
+
+    // Explicitly configure mismatching card for p2: different printed card
+    let mismatchCard: any = undefined;
+    const p2HandIdx = state.players.p2.hand.findIndex(
+      (c: any) => !isSamePrintedCard(trapRare, c)
+    );
+    if (p2HandIdx >= 0) {
+      mismatchCard = state.players.p2.hand.splice(p2HandIdx, 1)[0];
+    } else {
+      const p2LifeIdx = state.players.p2.life.findIndex(
+        (c: any) => !isSamePrintedCard(trapRare, c)
+      );
+      if (p2LifeIdx >= 0) {
+        mismatchCard = state.players.p2.life.splice(p2LifeIdx, 1)[0];
+      }
+    }
+    expect(mismatchCard).toBeDefined();
+    expect(isSamePrintedCard(trapRare, mismatchCard)).toBe(false);
+
+    const targetReq = {
+      id: "req-p2-target-mismatch",
+      actionId: "action.up",
+      controller: "p2",
+      status: "pending",
+      keyCards: [mismatchCard],
+    };
+    state.stage.requests.push(targetReq);
+
+    // Verify conservation while targetReq is on stage
+    OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
+    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      keyCards: [trapRare],
+      keyCard: trapRare,
+      targetRequest: targetReq as any,
+      actions: rarePackRulePackage.actions,
+      components: rarePackRulePackage.components,
+    };
+
+    // 2. Transient state: createRequest called, before resolveRequest
+    const request = registry.createRequest(trapAction, context);
+
+    // During transient state, Trap Counter is immediate and not on stage, so its keyCards are passed as additionalCards
+    OfficialRegulationMatchSetup.verifyCardConservation(
+      "p1",
+      state.players.p1,
+      STANDARD_54_DECK_CARDS,
+      request.keyCards
+    );
+    OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
+
+    // 3. Resolve request
+    registry.resolveRequest(request, context);
+
+    // Fully resolved: target request remains on Stage, mismatchCard is on request, trap rare is in p1 grave
+    expect(targetReq.status).toBe("pending");
+    expect(state.stage.requests.some((r: any) => r.id === targetReq.id)).toBe(true);
+    expect(state.players.p1.grave.some((c: any) => c.id === trapRare.id)).toBe(true);
+    expect(state.players.p2.grave.some((c: any) => c.id === mismatchCard.id)).toBe(false);
+
     OfficialRegulationMatchSetup.verifyCardConservation("p1", state.players.p1, STANDARD_54_DECK_CARDS, state);
     OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, STANDARD_54_DECK_CARDS, state);
   });
