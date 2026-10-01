@@ -21,7 +21,7 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
 import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
-import { isCardInGameZones, isSamePrintedCard, isJokerCard } from "./cardUtils";
+import { isCardInGameZones, isSamePrintedCard, isCanonicalPrintedCard, isJokerCard } from "./cardUtils";
 import { deriveRuntimeShuffleSeed, shuffleDeterministic } from "../random/DeterministicShuffle";
 import { SeededRandom } from "../random/RandomSource";
 
@@ -2027,15 +2027,9 @@ export function matchRequestKeyCardsHandler(
     }
 
     for (const tkc of targetKeyCards) {
-      if (!tkc || typeof tkc !== "object") {
+      if (!isCanonicalPrintedCard(tkc)) {
         throw new Error(
-          `matchRequestKeyCards: targetRequest のキーカード要素が不正です (requestId: ${targetReq.id})`
-        );
-      }
-      const isTargetJoker = isJokerCard(tkc);
-      if (!isTargetJoker && (!tkc.suit || tkc.rank === undefined || tkc.rank === null)) {
-        throw new Error(
-          `matchRequestKeyCards: targetRequest のキーカードのスートまたはランクが欠落しています (requestId: ${targetReq.id})`
+          `matchRequestKeyCards: targetRequest のキーカードが不正なカード表現です (requestId: ${targetReq.id}, card: ${JSON.stringify(tkc)})`
         );
       }
     }
@@ -2061,11 +2055,9 @@ export function matchRequestKeyCardsHandler(
       );
     }
 
-    // 6. sourceCard の妥当性検証 (malformed fail-closed)
-    const isSourceJoker = isJokerCard(sourceCard);
-    if (!isSourceJoker && (!sourceCard.suit || sourceCard.rank === undefined || sourceCard.rank === null)) {
+    if (!isCanonicalPrintedCard(sourceCard)) {
       throw new Error(
-        `matchRequestKeyCards: source card のスートまたはランクが欠落しています: ${JSON.stringify(sourceCard)}`
+        `matchRequestKeyCards: source card が不正なカード表現です: ${JSON.stringify(sourceCard)}`
       );
     }
 

@@ -9,7 +9,14 @@ import { TargetSelectionEnumerator } from "../../engine/decision/TargetSelection
 import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
 import { ExpressionEvaluator } from "../../engine/rules/ExpressionEvaluator";
 import { matchRequestKeyCardsHandler } from "../../engine/rules/commandHandlers";
-import { isSamePrintedCard, normalizeSuit, isJokerCard } from "../../engine/rules/cardUtils";
+import {
+  isSamePrintedCard,
+  isCanonicalPrintedCard,
+  isCanonicalJokerCard,
+  isCanonicalNormalCard,
+  normalizeSuit,
+  isJokerCard,
+} from "../../engine/rules/cardUtils";
 import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup";
 import { STANDARD_54_DECK_CARDS } from "../../engine/regulation/SimulatorDeckProfileResolver";
 import {
@@ -1291,7 +1298,7 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
           { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
           { targetRequest: { id: "r1", keyCards: [{ id: "bad-card" }] }, keyCard: sourceCard } as any
         )
-      ).toThrow("targetRequest のキーカードのスートまたはランクが欠落しています");
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
     });
 
     it("throws exception on malformed source card", () => {
@@ -1303,21 +1310,153 @@ describe("Trap Counter (action.trapCounter) Comprehensive Tests [BP-SIM-REG-4.0-
           { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
           { targetRequest: targetReq, keyCard: { id: "bad-source" } } as any
         )
-      ).toThrow("source card のスートまたはランクが欠落しています");
+      ).toThrow("source card が不正なカード表現です");
     });
   });
 
-  // Amendment 3: Rank Semantics
-  describe("Amendment 3: Rank Semantics", () => {
-    it("isSamePrintedCard does NOT automatically treat '1' and 'A' as same card", () => {
-      const cardA = { id: "c-A", suit: "S", rank: "A", value: 1 };
-      const card1 = { id: "c-1", suit: "S", rank: "1", value: 1 };
+  // BP-SIM-REG-4.0-D-R2: Canonical Printed-Card Identity Hardening
+  describe("BP-SIM-REG-4.0-D-R2: Canonical Printed-Card Identity Hardening", () => {
+    const handler = matchRequestKeyCardsHandler(new ExpressionEvaluator());
 
-      expect(isSamePrintedCard(cardA, card1)).toBe(false);
-      expect(isSamePrintedCard(card1, cardA)).toBe(false);
+    it("canonical Joker vs canonical Joker -> true (including different physical Joker IDs)", () => {
+      const joker1 = { id: "j-phys-1", suit: "J", rank: "Joker" };
+      const joker2 = { id: "j-phys-2", suit: "joker", rank: "JOKER" };
+      expect(isCanonicalJokerCard(joker1)).toBe(true);
+      expect(isCanonicalJokerCard(joker2)).toBe(true);
+      expect(isSamePrintedCard(joker1, joker2)).toBe(true);
+      expect(isSamePrintedCard(joker2, joker1)).toBe(true);
 
-      const cardA2 = { id: "c-A2", suit: "S", rank: "a", value: 1 };
-      expect(isSamePrintedCard(cardA, cardA2)).toBe(true); // Case-insensitive matches
+      const targetReq = { id: "req-j", status: "pending", keyCards: [joker1] };
+      const context: any = { targetRequest: targetReq, keyCard: joker2, results: {} };
+      handler({ request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "jMatch" }, context);
+      expect(context.results.jMatch).toBe(true);
+    });
+
+    it("invalid printed cards throw exception in handler and return false in isSamePrintedCard", () => {
+      const validJoker = { id: "j1", suit: "J", rank: "Joker" };
+      const validS7 = { id: "s7", suit: "S", rank: "7" };
+
+      // 1. {suit: "J", rank: "7"}
+      const j7 = { id: "bad-j7", suit: "J", rank: "7" };
+      expect(isCanonicalPrintedCard(j7)).toBe(false);
+      expect(isSamePrintedCard(j7, validJoker)).toBe(false);
+      expect(isSamePrintedCard(validJoker, j7)).toBe(false);
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [j7] }, keyCard: validJoker } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [validJoker] }, keyCard: j7 } as any
+        )
+      ).toThrow("source card が不正なカード表現です");
+
+      // 2. {suit: "S", rank: "0"}
+      const s0 = { id: "bad-s0", suit: "S", rank: "0" };
+      expect(isCanonicalPrintedCard(s0)).toBe(false);
+      expect(isSamePrintedCard(s0, validJoker)).toBe(false);
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [s0] }, keyCard: validJoker } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+
+      // 3. {suit: "J"} (missing rank)
+      const jMissingRank = { id: "bad-j-norank", suit: "J" };
+      expect(isCanonicalPrintedCard(jMissingRank)).toBe(false);
+      expect(isSamePrintedCard(jMissingRank, validJoker)).toBe(false);
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [jMissingRank] }, keyCard: validJoker } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+
+      // 4. {suit: "X", rank: "7"} (invalid suit)
+      const x7 = { id: "bad-x7", suit: "X", rank: "7" };
+      expect(isCanonicalPrintedCard(x7)).toBe(false);
+      expect(isSamePrintedCard(x7, validS7)).toBe(false);
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [x7] }, keyCard: validS7 } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+
+      // 5. {suit: "S", rank: "FOO"} (invalid rank)
+      const sFoo = { id: "bad-sfoo", suit: "S", rank: "FOO" };
+      expect(isCanonicalPrintedCard(sFoo)).toBe(false);
+      expect(isSamePrintedCard(sFoo, validS7)).toBe(false);
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [sFoo] }, keyCard: validS7 } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+    });
+
+    it("S/A vs S/a -> true (case-insensitive canonical rank)", () => {
+      const sA = { id: "c-A", suit: "S", rank: "A" };
+      const sLowerA = { id: "c-a", suit: "S", rank: "a" };
+      expect(isCanonicalNormalCard(sA)).toBe(true);
+      expect(isCanonicalNormalCard(sLowerA)).toBe(true);
+      expect(isSamePrintedCard(sA, sLowerA)).toBe(true);
+
+      const targetReq = { id: "req-sa", status: "pending", keyCards: [sLowerA] };
+      const context: any = { targetRequest: targetReq, keyCard: sA, results: {} };
+      handler({ request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "saMatch" }, context);
+      expect(context.results.saMatch).toBe(true);
+    });
+
+    it("S/A vs S/1 -> false in isSamePrintedCard, throws in handler (S/1 is outside canonical rank)", () => {
+      const sA = { id: "c-A", suit: "S", rank: "A" };
+      const s1 = { id: "c-1", suit: "S", rank: "1" };
+      expect(isCanonicalPrintedCard(sA)).toBe(true);
+      expect(isCanonicalPrintedCard(s1)).toBe(false);
+      expect(isSamePrintedCard(sA, s1)).toBe(false);
+      expect(isSamePrintedCard(s1, sA)).toBe(false);
+
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [s1] }, keyCard: sA } as any
+        )
+      ).toThrow("targetRequest のキーカードが不正なカード表現です");
+
+      expect(() =>
+        handler(
+          { request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "res" },
+          { targetRequest: { id: "r1", keyCards: [sA] }, keyCard: s1 } as any
+        )
+      ).toThrow("source card が不正なカード表現です");
+    });
+
+    it("regression: standard S/H/D/C A-K comparisons behave correctly and legal mismatch sets false", () => {
+      const suits = ["S", "H", "D", "C"];
+      const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+
+      for (const s of suits) {
+        for (const r of ranks) {
+          const card1 = { id: `${s}${r}-1`, suit: s, rank: r };
+          const card2 = { id: `${s}${r}-2`, suit: s, rank: r };
+          expect(isCanonicalPrintedCard(card1)).toBe(true);
+          expect(isSamePrintedCard(card1, card2)).toBe(true);
+        }
+      }
+
+      // Legal mismatch: S/7 vs H/7
+      const s7 = { id: "s7", suit: "S", rank: "7" };
+      const h7 = { id: "h7", suit: "H", rank: "7" };
+      expect(isSamePrintedCard(s7, h7)).toBe(false);
+
+      const targetReq = { id: "req-h7", status: "pending", keyCards: [h7] };
+      const context: any = { targetRequest: targetReq, keyCard: s7, results: {} };
+      handler({ request: "targetRequest", card: "key", predicate: "samePrintedCard", resultId: "mismatchRes" }, context);
+      expect(context.results.mismatchRes).toBe(false);
     });
   });
 

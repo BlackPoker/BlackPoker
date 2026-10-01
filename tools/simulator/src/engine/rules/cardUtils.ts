@@ -258,35 +258,87 @@ export function isCardInGameZones(cardId: string, state: any): boolean {
   return false;
 }
 
+export const CANONICAL_NORMAL_SUITS = new Set([
+  "spade",
+  "heart",
+  "diamond",
+  "club",
+]);
+
+export const CANONICAL_NORMAL_RANKS = new Set([
+  "A",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "J",
+  "Q",
+  "K",
+]);
+
+/**
+ * Canonical Joker 判定:
+ * suit を normalizeSuit して "joker" かつ rank を大文字・トリムして "JOKER" であること。
+ */
+export function isCanonicalJokerCard(card?: any): boolean {
+  if (!card || typeof card !== "object") return false;
+  if (!card.suit || card.rank === undefined || card.rank === null) return false;
+  const suitNorm = normalizeSuit(card.suit);
+  const rankNorm = String(card.rank).trim().toUpperCase();
+  return suitNorm === "joker" && rankNorm === "JOKER";
+}
+
+/**
+ * Canonical Normal Card 判定:
+ * suit が S/H/D/C または normalizeSuit で "spade"/"heart"/"diamond"/"club" へ正規化可能
+ * かつ rank が A, 2..10, J, Q, K のいずれか（大文字・トリム後）であること。
+ */
+export function isCanonicalNormalCard(card?: any): boolean {
+  if (!card || typeof card !== "object") return false;
+  if (!card.suit || card.rank === undefined || card.rank === null) return false;
+  const suitNorm = normalizeSuit(card.suit);
+  const rankNorm = String(card.rank).trim().toUpperCase();
+  return CANONICAL_NORMAL_SUITS.has(suitNorm) && CANONICAL_NORMAL_RANKS.has(rankNorm);
+}
+
+/**
+ * Canonical Printed Card 判定:
+ * Canonical Joker または Canonical Normal Card のいずれかであること。
+ */
+export function isCanonicalPrintedCard(card?: any): boolean {
+  return isCanonicalJokerCard(card) || isCanonicalNormalCard(card);
+}
+
 /**
  * 2枚のカードが印刷上同じカード（same printed card）であるかを判定します。
  * - physical card ID や出現順 (occurrence) は比較しません。
- * - ジョーカー (isJokerCard) 同士は一致 (true) と判定します。
- * - それ以外は normalized suit の一致 かつ canonical rank 文字列の一致を評価します。
- *   ※ "1" と "A" の自動同一視や rankToValue による数値比較は行いません。
- * - null/undefined または不正なカード表現の場合は fail-closed で false を返します。
+ * - 両方が canonical printed card でなければ fail-closed で false を返します。
+ * - Canonical Joker 同士は一致 (true) と判定します。
+ * - Normal Card 同士は normalized suit の一致 かつ canonical rank 文字列の一致を評価します。
+ *   ※ "1" と "A" の同一視は行いません（"1" は canonical rank 外）。
  */
 export function isSamePrintedCard(a?: any, b?: any): boolean {
-  if (!a || !b) return false;
-  if (typeof a !== "object" || typeof b !== "object") return false;
+  if (!isCanonicalPrintedCard(a) || !isCanonicalPrintedCard(b)) {
+    return false;
+  }
 
-  const isJokerA = isJokerCard(a);
-  const isJokerB = isJokerCard(b);
+  const isJokerA = isCanonicalJokerCard(a);
+  const isJokerB = isCanonicalJokerCard(b);
   if (isJokerA || isJokerB) {
     return isJokerA && isJokerB;
   }
 
-  if (!a.suit || a.rank === undefined || a.rank === null) return false;
-  if (!b.suit || b.rank === undefined || b.rank === null) return false;
-
   const suitA = normalizeSuit(a.suit);
   const suitB = normalizeSuit(b.suit);
-  if (!suitA || !suitB || suitA !== suitB) return false;
+  if (suitA !== suitB) return false;
 
   const rankA = String(a.rank).trim().toUpperCase();
   const rankB = String(b.rank).trim().toUpperCase();
-  if (rankA.length === 0 || rankB.length === 0) return false;
-
   return rankA === rankB;
 }
 
