@@ -344,7 +344,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       expect(html).toContain("mt-0.5 pt-0.5 border-t border-zinc-200");
     });
 
-    it("PlayerBoard の soldierRow / bulwarkRow に p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 の余白が確保されている", () => {
+    it("PlayerBoard の soldierRow / bulwarkRow に p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 の余白が確保されている", () => {
       const vm: PlayerBoardViewModel = {
         playerKey: "p1",
         name: "Player 1",
@@ -385,8 +385,8 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         })
       );
 
-      // soldierRow と bulwarkRow のスクロール親要素に p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 が設定されていること
-      expect(html).toContain("p-0.5 pt-0.5 sm:p-1 sm:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar");
+      // soldierRow と bulwarkRow のスクロール親要素に p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 が設定されていること
+      expect(html).toContain("p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar");
     });
   });
 });

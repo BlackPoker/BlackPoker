@@ -92,10 +92,10 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     <div
       onClick={handleClick}
       title={`Debug ID: ${unit.unitId}`}
-      className={`relative flex flex-col items-center p-1 sm:p-1.5 rounded border transition-all select-none min-w-[76px] sm:min-w-[104px] ${
+      className={`relative flex flex-col items-center p-1 lg:p-1.5 rounded border transition-all select-none min-w-[76px] lg:min-w-[104px] ${
         isClickable
           ? "cursor-pointer hover:border-zinc-950 hover:scale-[1.02] active:scale-[0.98]"
-          : "cursor-pointer sm:cursor-default"
+          : "cursor-pointer lg:cursor-default"
       } ${
         selectionMarker?.isSelected
           ? "bg-zinc-100 border-zinc-950 ring-2 ring-zinc-950 shadow-md"
@@ -112,15 +112,15 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     >
       {/* 選択中インジケーター (チェックマークのみ・番号バッジは非表示) */}
       {selectionMarker?.isSelected && (
-        <div className="absolute -top-1.5 -left-1 sm:-top-2 sm:-left-2 z-20">
-          <span className="flex items-center justify-center w-4 h-4 sm:w-5 sm:h-5 rounded-full text-[10px] sm:text-xs font-mono font-black shadow-md bg-zinc-950 text-white border-2 border-white">
+        <div className="absolute -top-1.5 -left-1 lg:-top-2 lg:-left-2 z-20">
+          <span className="flex items-center justify-center w-4 h-4 lg:w-5 lg:h-5 rounded-full text-[10px] lg:text-xs font-mono font-black shadow-md bg-zinc-950 text-white border-2 border-white">
             ✓
           </span>
         </div>
       )}
 
-      {/* ===================== DESKTOP 表示 (sm:以上) ===================== */}
-      <div className="hidden sm:flex flex-col items-center w-full">
+      {/* ===================== DESKTOP 表示 (lg:以上) ===================== */}
+      <div className="hidden lg:flex flex-col items-center w-full">
         {/* ユニット種別 & 状態バッジ */}
         <div className="flex items-center justify-between w-full mb-1 gap-1">
           {isBulwark ? (
@@ -248,8 +248,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         </div>
       </div>
 
-      {/* ===================== MOBILE 要約表示 (sm:未満) ===================== */}
-      <div className="flex sm:hidden flex-col w-full justify-between gap-0.5">
+      {/* ===================== COMPACT 要約表示 (lg:未満) ===================== */}
+      <div className="flex lg:hidden flex-col w-full justify-between gap-0.5">
         {/* 1行目: 識別子 + 状態(↑/→) */}
         <div className="flex items-center justify-between w-full gap-0.5">
           {isBulwark ? (

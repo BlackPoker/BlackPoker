@@ -297,10 +297,10 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
         })
       );
 
-      // Soldier header has hidden sm:flex
-      expect(html).toContain("hidden sm:flex items-center justify-end");
+      // Soldier header has hidden lg:flex
+      expect(html).toContain("hidden lg:flex items-center justify-end");
       expect(html).toContain("兵士 (1体)");
-      // Bulwark header has hidden sm:flex
+      // Bulwark header has hidden lg:flex
       expect(html).toContain("防壁 (1体・ライフ側 →)");
       // Unit cards are still rendered in their rows
       expect(html).toContain("u-soldier-1");
@@ -335,7 +335,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
   // Test E: Mobile Hand Compact
   // =========================================================================
   describe("Test E: Mobile Hand Compact", () => {
-    it("E.1: CardView contains responsive compact classes (h-7 sm:h-[52px] for size=md)", () => {
+    it("E.1: CardView contains responsive compact classes (h-7 lg:h-[52px] for size=md)", () => {
       const html = renderToString(
         React.createElement(CardView, {
           card: { id: "c-1", suit: "S", rank: "10" },
@@ -344,13 +344,13 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       );
 
       // Size class has compact mobile height and desktop standard height
-      expect(html).toContain("w-9 sm:w-10 h-7 sm:h-[52px]");
-      // Mobile compact single-line element (flex sm:hidden)
-      expect(html).toContain("flex sm:hidden");
+      expect(html).toContain("w-9 lg:w-10 h-7 lg:h-[52px]");
+      // Mobile compact single-line element (flex lg:hidden)
+      expect(html).toContain("flex lg:hidden");
       expect(html).toContain("♠");
       expect(html).toContain("10");
-      // Desktop traditional element (hidden sm:block)
-      expect(html).toContain("hidden sm:block");
+      // Desktop traditional element (hidden lg:block)
+      expect(html).toContain("hidden lg:block");
     });
 
     it("E.2: CardView explicit compact prop forces compact view", () => {
@@ -364,7 +364,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       expect(html).toContain("♥");
       expect(html).toContain("J");
       // Desktop block is hidden when explicit compact is true
-      expect(html).not.toContain("hidden sm:block");
+      expect(html).not.toContain("hidden lg:block");
     });
 
     it("E.3: CardView preserves selected, selectable, and click attributes", () => {
@@ -397,7 +397,7 @@ describe("UI Phase 3.5: Mobile Flow / Compact UI / Official Action Order Tests",
       expect(htmlCompact).toContain("♠");
       expect(htmlCompact).toContain("9");
       // Desktop block is hidden
-      expect(htmlCompact).not.toContain("hidden sm:block");
+      expect(htmlCompact).not.toContain("hidden lg:block");
     });
   });
 

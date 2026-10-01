@@ -28,10 +28,26 @@ export const CardView: React.FC<CardViewProps> = ({
   selected = false,
   selectable = false,
 }) => {
+  // compact prop が明示指定されている場合はそれに従い、未指定の場合は responsive (lg breakpoint)
+  const isExplicitCompact = compact === true;
+  const isExplicitDesktop = compact === false;
+
   const sizeClasses = {
-    sm: "w-7 sm:w-8 h-6 sm:h-[40px] text-xs",
-    md: "w-9 sm:w-10 h-7 sm:h-[52px] text-xs sm:text-sm",
-    lg: "w-11 sm:w-14 h-9 sm:h-[72px] text-sm sm:text-base",
+    sm: isExplicitDesktop
+      ? "w-8 h-[40px] text-xs"
+      : isExplicitCompact
+      ? "w-7 h-6 text-xs"
+      : "w-7 lg:w-8 h-6 lg:h-[40px] text-xs",
+    md: isExplicitDesktop
+      ? "w-10 h-[52px] text-xs lg:text-sm"
+      : isExplicitCompact
+      ? "w-9 h-7 text-xs"
+      : "w-9 lg:w-10 h-7 lg:h-[52px] text-xs lg:text-sm",
+    lg: isExplicitDesktop
+      ? "w-14 h-[72px] text-sm lg:text-base"
+      : isExplicitCompact
+      ? "w-11 h-9 text-sm"
+      : "w-11 lg:w-14 h-9 lg:h-[72px] text-sm lg:text-base",
   }[size];
 
   if (faceDown || !card) {
@@ -53,14 +69,16 @@ export const CardView: React.FC<CardViewProps> = ({
   const isRed = !isJoker && isRedSuit(card.suit);
   const redSuitClass = isRed ? "text-[#a22041] bp-card-suit-red" : "";
 
-  // compact prop が明示指定されている場合はそれに従い、未指定の場合は responsive (sm breakpoint)
-  const isExplicitCompact = compact === true;
-  const isExplicitDesktop = compact === false;
-
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center justify-center sm:flex-col sm:justify-between p-0.5 sm:p-1 rounded border ${
+      className={`inline-flex items-center justify-center ${
+        isExplicitDesktop
+          ? "flex-col justify-between p-1"
+          : isExplicitCompact
+          ? "p-0.5"
+          : "lg:flex-col lg:justify-between p-0.5 lg:p-1"
+      } rounded border ${
         selected
           ? "border-zinc-950 bg-zinc-950 text-white ring-2 ring-zinc-950 shadow"
           : "border-zinc-400 bg-white text-zinc-950 shadow-sm hover:border-zinc-700"
@@ -69,14 +87,14 @@ export const CardView: React.FC<CardViewProps> = ({
       aria-label={`${suitSymbol}${displayRank}`}
       role={onClick ? "button" : undefined}
     >
-      {/* Mobile compact: 1行中心表示 (♠10) */}
+      {/* Mobile/Compact: 1行中心表示 (♠10) */}
       <div
         className={`${
           isExplicitDesktop
             ? "hidden"
             : isExplicitCompact
             ? "flex"
-            : "flex sm:hidden"
+            : "flex lg:hidden"
         } items-center justify-center gap-0.5 leading-none`}
       >
         <span className={`bp-card-suit text-[18px] ${redSuitClass}`}>{suitSymbol}</span>
@@ -90,7 +108,7 @@ export const CardView: React.FC<CardViewProps> = ({
             ? "hidden"
             : isExplicitDesktop
             ? "block"
-            : "hidden sm:block"
+            : "hidden lg:block"
         } text-left leading-none text-[13px] font-bold bp-card-rank`}
       >
         {displayRank}
@@ -101,7 +119,7 @@ export const CardView: React.FC<CardViewProps> = ({
             ? "hidden"
             : isExplicitDesktop
             ? "block"
-            : "hidden sm:block"
+            : "hidden lg:block"
         } text-center leading-none text-[22px] bp-card-suit my-auto ${redSuitClass}`}
       >
         {suitSymbol}

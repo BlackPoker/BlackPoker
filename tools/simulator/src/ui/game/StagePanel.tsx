@@ -37,8 +37,8 @@ export const StagePanel: React.FC<StagePanelProps> = ({
   const reversedRequests = requests.slice().reverse();
 
   return (
-    <div className="flex flex-col p-1.5 sm:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
-      <div className="flex items-center justify-between border-b pb-1 sm:pb-1.5 mb-1 sm:mb-1.5 border-zinc-200">
+    <div className="flex flex-col p-1.5 lg:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
+      <div className="flex items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 lg:mb-1.5 border-zinc-200">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
             STAGE (LIFO)
@@ -56,7 +56,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({
               {showAllMobile ? "TOPのみ表示" : `全${requests.length}件表示`}
             </button>
           )}
-          <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">
+          <span className="text-[10px] text-zinc-500 font-mono hidden lg:inline">
             ※ 上 (TOP) から順に解決
           </span>
         </div>

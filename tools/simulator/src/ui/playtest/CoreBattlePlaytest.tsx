@@ -1693,24 +1693,24 @@ export const CoreBattlePlaytest: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-4 w-px bg-zinc-300 mx-1 hidden sm:block" />
+          <div className="h-4 w-px bg-zinc-300 mx-1 hidden lg:block" />
 
-          {/* バッジ群 (PC / タブレット用) */}
-          <div className="hidden sm:flex items-center gap-1.5 font-mono">
+          {/* バッジ群 (Desktop用) */}
+          <div className="hidden lg:flex items-center gap-1.5 font-mono">
             <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-zinc-950 text-white uppercase tracking-wider">
               PLAYTEST
             </span>
             <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-zinc-100 border border-zinc-300 text-zinc-700">
               PREVIEW
             </span>
-            <span className="text-[9px] text-zinc-400 font-mono hidden md:inline">
+            <span className="text-[9px] text-zinc-400 font-mono hidden lg:inline">
               {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
               {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
             </span>
           </div>
 
-          {/* Environment Selector & Seed (PC用・Catalog由来動的列挙) */}
-          <div className="hidden md:flex items-center gap-1.5 ml-1 font-mono">
+          {/* Environment Selector & Seed (Desktop用・Catalog由来動的列挙) */}
+          <div className="hidden lg:flex items-center gap-1.5 ml-1 font-mono">
             <span className="text-[9px] font-bold text-zinc-400">Env:</span>
             <select
               value={selectedEnvironmentId}
@@ -1809,8 +1809,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           </div>
         </div>
 
-        {/* コントロールボタン群 (PC用) */}
-        <div className="hidden sm:flex items-center gap-2 font-mono">
+        {/* コントロールボタン群 (Desktop用) */}
+        <div className="hidden lg:flex items-center gap-2 font-mono">
           {pendingMatchMode === "humanVsHuman" && (
             <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
               <input
@@ -1896,7 +1896,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
 
         {/* Mobile メニューボタン (⋯) */}
-        <div className="sm:hidden flex items-center gap-1">
+        <div className="lg:hidden flex items-center gap-1">
           <button
             onClick={() => setIsMobileMenuOpen(true)}
             className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-300 bg-white hover:bg-zinc-100 active:bg-zinc-200 text-zinc-950 text-base font-bold shadow-sm transition min-h-[44px] min-w-[44px]"
@@ -1963,9 +1963,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         </main>
       ) : (
         /* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */
-        <main className="flex-1 p-1 sm:p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-1 sm:gap-2 pb-24 lg:pb-2">
+        <main className="flex-1 p-1 lg:p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-2 pb-24 lg:pb-2">
           {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-          <div className="lg:col-span-7 flex flex-col gap-1 sm:gap-1.5">
+          <div className="lg:col-span-7 flex flex-col gap-1 lg:gap-1.5">
             {/* セットアップ通知バナー (対戦中のみ) */}
             {setupNotice && (
               <div className={`p-3 rounded border font-mono ${

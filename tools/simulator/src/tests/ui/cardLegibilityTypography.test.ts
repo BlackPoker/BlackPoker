@@ -294,10 +294,10 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         compact: true,
       })
     );
-    // compact表示では desktop 側の "hidden sm:block" は生成されず "hidden" となり、
+    // compact表示では desktop 側の "hidden lg:block" は生成されず "hidden" となり、
     // かつ .bp-card-suit に display が無いため .hidden (display: none) がブラウザで正常に機能する
     expect(htmlCompact).toContain("hidden");
-    expect(htmlCompact).not.toContain("hidden sm:block");
+    expect(htmlCompact).not.toContain("hidden lg:block");
   });
 
   // 10. UnitCard battle relation: Legacy Sequential badge への fallback 廃止検証 (BP-SIM-UI-1.5-R1-HUMAN-IDENTITY-CLOSURE)
@@ -425,9 +425,9 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
         cards: [{ id: "c-1", suit: "S", rank: "A" }],
       })
     );
-    // size='md' のクラス (h-7 sm:h-[52px]) を含むこと (size='sm' は sm:h-[40px])
-    expect(singleCardHtml).toContain("sm:h-[52px]");
-    expect(singleCardHtml).not.toContain("sm:h-[40px]");
+    // size='md' のクラス (h-7 lg:h-[52px]) を含むこと (size='sm' は lg:h-[40px])
+    expect(singleCardHtml).toContain("lg:h-[52px]");
+    expect(singleCardHtml).not.toContain("lg:h-[40px]");
 
     // 複数枚カード
     const multiCardHtml = renderToString(
@@ -443,6 +443,30 @@ describe("Card Legibility & Typography Tests (BP-SIM-SCENARIO-1.3-CARD-LEGIBILIT
     expect(multiCardHtml).toContain("height:56px");
     expect(multiCardHtml).toContain("width:40px");
     expect(multiCardHtml).toContain("height:52px");
-    expect(multiCardHtml).toContain("sm:h-[52px]");
+    expect(multiCardHtml).toContain("lg:h-[52px]");
+  });
+
+  // 13. BP-SIM-UI-1.7: Core Responsive Breakpoint SSOT (1024px / lg)
+  it("13: (BP-SIM-UI-1.7) Responsive ブレークポイントが lg (1024px) に統一され、UnitCard / CardView が lg を基準に切り替わること", () => {
+    // UnitCard
+    const unit = {
+      unitId: "u-resp",
+      kind: "一般兵",
+      state: "charge" as const,
+      face: "up" as const,
+      cards: [{ id: "c-1", suit: "S", rank: "10" }],
+    };
+    const unitHtml = renderToString(React.createElement(UnitCard, { unit }));
+    expect(unitHtml).toContain("hidden lg:flex");
+    expect(unitHtml).toContain("flex lg:hidden");
+    expect(unitHtml).not.toContain("hidden sm:flex");
+    expect(unitHtml).not.toContain("flex sm:hidden");
+
+    // CardView (responsive / compact 未指定)
+    const cardHtml = renderToString(React.createElement(CardView, { card: { id: "c-1", suit: "S", rank: "10" } }));
+    expect(cardHtml).toContain("flex lg:hidden");
+    expect(cardHtml).toContain("hidden lg:block");
+    expect(cardHtml).not.toContain("flex sm:hidden");
+    expect(cardHtml).not.toContain("hidden sm:block");
   });
 });

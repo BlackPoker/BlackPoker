@@ -298,14 +298,14 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
 
   // 改善3: スマホ表示の余白削減
   describe("改善3: レスポンシブ余白圧縮クラスの適用確認", () => {
-    it("3.1: PlayerBoard, PlayerZoneStrip, StagePanel, DecisionPanel に sm: プレフィックス付きレスポンシブパディングが存在する", () => {
+    it("3.1: PlayerBoard, PlayerZoneStrip, StagePanel, DecisionPanel に lg: プレフィックス付きレスポンシブパディングが存在する", () => {
       // PlayerZoneStrip
       const stripHtml = renderToString(
         React.createElement(PlayerZoneStrip, {
           items: [{ id: "test", label: "TEST", count: 1 }],
         })
       );
-      expect(stripHtml).toContain("py-0.5 sm:py-1");
+      expect(stripHtml).toContain("py-0.5 lg:py-1");
 
       // StagePanel
       const stageHtml = renderToString(
@@ -313,8 +313,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
           requests: [],
         })
       );
-      expect(stageHtml).toContain("p-1.5 sm:p-2");
-      expect(stageHtml).toContain("pb-1 sm:pb-1.5");
+      expect(stageHtml).toContain("p-1.5 lg:p-2");
+      expect(stageHtml).toContain("pb-1 lg:pb-1.5");
     });
   });
 
@@ -400,7 +400,7 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       blockedByBadges: [],
     };
 
-    it("5.1: モバイル要約表示 (sm:hidden) と デスクトップ表示 (hidden sm:flex) の両方が描画される", () => {
+    it("5.1: モバイル要約表示 (lg:hidden) と デスクトップ表示 (hidden lg:flex) の両方が描画される", () => {
       const html = renderToString(
         React.createElement(UnitCard, {
           unit: soldierUnit,
@@ -409,8 +409,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
         })
       );
 
-      expect(html).toContain("flex sm:hidden");
-      expect(html).toContain("hidden sm:flex");
+      expect(html).toContain("flex lg:hidden");
+      expect(html).toContain("hidden lg:flex");
     });
 
     it("5.2: モバイル要約表示にスート+数字 (♠6), 種別, 状態 (矢印 ↑/→), SIZE が含まれる", () => {
