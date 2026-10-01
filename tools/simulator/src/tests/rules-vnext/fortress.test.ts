@@ -25,10 +25,15 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should prevent throwing damage when fortress is face up and self has character", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
+    const keyCards = [
+      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     // プレイヤーBが要塞 (trumps) を持ち、場 (field) に兵士がいる
     const state = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -58,11 +63,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       } as Record<string, any>
     };
 
-    const keyCards = [
-      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
-
     const context: CommandContext = {
       state,
       playerKey: "p1",
@@ -84,10 +84,15 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should NOT prevent throwing damage when fortress is face up but self has NO character", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
+    const keyCards = [
+      { id: "key-spade-1", suit: "S", rank: "A", value: 1 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     // プレイヤーB：field は空
     const state = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -109,11 +114,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       } as Record<string, any>
     };
 
-    const keyCards = [
-      { id: "key-spade-1", suit: "S", rank: "A", value: 1 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
-
     const context: CommandContext = {
       state,
       playerKey: "p1",
@@ -134,10 +134,15 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should NOT prevent throwing damage when fortress is face down or missing", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
+    const keyCards = [
+      { id: "key-spade-1", suit: "S", rank: "A", value: 1 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     // 要塞が裏向き (face: down)
     const stateWithDownFortress = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -164,11 +169,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
         }
       } as Record<string, any>
     };
-
-    const keyCards = [
-      { id: "key-spade-1", suit: "S", rank: "A", value: 1 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
 
     const contextWithDownFortress: CommandContext = {
       state: stateWithDownFortress,
@@ -208,9 +208,15 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       ]
     };
 
+    // キーカードはスペードを含まない (Heart + Club)
+    const keyCards = [
+      { id: "key-heart-2", suit: "H", rank: "2", value: 2 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     const state = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -238,12 +244,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
       } as Record<string, any>
     };
 
-    // キーカードはスペードを含まない (Heart + Club)
-    const keyCards = [
-      { id: "key-heart-2", suit: "H", rank: "2", value: 2 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
-
     const context: CommandContext = {
       state,
       playerKey: "p1",
@@ -264,9 +264,14 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should NOT trigger cardMoved event when damage is prevented by fortress", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
+    const keyCards = [
+      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     const state = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -293,11 +298,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
         }
       } as Record<string, any>
     };
-
-    const keyCards = [
-      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
 
     const context: CommandContext = {
       state,
@@ -337,10 +337,15 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
   it("should prevent throwing damage when using a custom shield component with preventDamage ability", () => {
     const throwingAction = rulePackage.actions.find((a) => a.id === "action.throwing")!;
 
+    const keyCards = [
+      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+    ];
+
     // プレイヤーBが customShield を持ち、場に兵士がいる
     const state = {
       players: {
-        p1: { name: "Player A", hand: [], field: [], grave: [], life: [] },
+        p1: { name: "Player A", hand: [...keyCards], field: [], grave: [], life: [] },
         p2: {
           name: "Player B",
           hand: [],
@@ -367,11 +372,6 @@ describe("Fortress Active Ability Integration Test (New YAML)", () => {
         }
       } as Record<string, any>
     };
-
-    const keyCards = [
-      { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
-      { id: "key-club-2", suit: "C", rank: "2", value: 2 },
-    ];
 
     // テスト用のコンポーネント定義リスト。trump.customShield を追加する
     const customComponents = [

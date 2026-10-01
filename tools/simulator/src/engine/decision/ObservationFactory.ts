@@ -140,7 +140,7 @@ export class ObservationFactory {
 
         // 8. レアカードの処理（枚数は完全公開、内容はオーナー本人のみKNOWN、対戦相手は非公開）
         let rareCards: RareCardView | undefined = undefined;
-        if (p.rareCards && Array.isArray(p.rareCards) && p.rareCards.length > 0) {
+        if (p.rareCards && Array.isArray(p.rareCards)) {
           const rawRareCards = p.rareCards;
           rareCards = {
             count: rawRareCards.length,

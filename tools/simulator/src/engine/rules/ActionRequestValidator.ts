@@ -213,9 +213,10 @@ export class ActionRequestValidator {
       // 元ゾーン (source zone) の検証
       const sourceZone = resolveKeyCardSourceZone(action);
       const player = context.state?.players?.[context.playerKey];
-      if (player && sourceZone === "rare") {
-        validateKeyCardsInSource(player, sourceZone, actualCards);
+      if (!player) {
+        throw new ValidationError(`プレイヤー '${context.playerKey}' が存在しません。`);
       }
+      validateKeyCardsInSource(player, sourceZone, actualCards);
 
       // 条件の検証
       if (keyDef.conditions && Array.isArray(keyDef.conditions)) {

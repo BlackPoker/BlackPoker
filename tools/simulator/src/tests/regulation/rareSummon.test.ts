@@ -676,4 +676,112 @@ describe("BP-SIM-REG-4.0-C: Rare Summon Official Semantics & Integration", () =>
     expect(moveReqToGrave).toBeDefined();
     expect(state.players.p1.grave.some((c: any) => c.id === rareCardCancel.id || c.cards?.[0]?.id === rareCardCancel.id)).toBe(true);
   });
+
+  it("Q: Quick timing on non-empty stage & Rare visibility transition (Sections 7 & 8)", async () => {
+    const reg = await getRegulation("standard-rarePack");
+    const frame = await getFrame("rarePack");
+    const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rarePackRulePackage, 77777);
+    expect(outcome.type).toBe("READY");
+    if (outcome.type !== "READY") return;
+
+    const session = new GameSession(outcome.state, rarePackRulePackage);
+
+    // Set p1 life <= 9
+    session.state.players.p1.life = session.state.players.p1.life.slice(0, 5); // 5 life <= 9
+    const p1RareCard = session.state.players.p1.rareCards[0];
+    expect(p1RareCard).toBeDefined();
+
+    // 1. Before Rare Summon: Opponent (p2) Observation:
+    // Rare count = 1, Rare content = hidden / unavailable
+    const obsBeforeP2 = ObservationFactory.createObservation(session.state, "p2");
+    const p1ViewBefore = obsBeforeP2.players.find((p) => p.playerId === "p1")!;
+    expect(p1ViewBefore.rareCards?.count).toBe(1);
+    expect(p1ViewBefore.rareCards?.canViewCards).toBe(false);
+    expect(p1ViewBefore.rareCards?.cards).toEqual([]);
+
+    // 2. Non-empty Stage setup: Stage already has an existing request
+    const existingReq = {
+      id: "req-existing-1",
+      sequence: 1,
+      actionId: "action.twist",
+      controller: "p2",
+      status: "pending",
+      keyCards: [{ id: "c-twist-key", suit: "D", rank: "4", value: 4 }],
+    } as any;
+    session.state.stage = {
+      requests: [existingReq],
+      history: [],
+    };
+
+    // p1 has Chance
+    session.state.chancePlayer = "p1";
+    session.state.turnPlayer = "p2";
+
+    // 3. Section 7: Rare Summon controller has chance on non-empty stage ->
+    // LegalPatternGenerator MUST include action.rareSummon (quick timing allows non-empty stage)
+    const { request: decReq } = LegalPatternGenerator.generateActionRequestDecision(
+      session.state,
+      "p1",
+      rarePackRulePackage
+    );
+
+    const rareSummonPatterns = decReq.patterns.filter(
+      (p) => p.kind === "ACTION" && decReq.catalog.actions[p.actionSelectionRef!]?.actionId === "action.rareSummon"
+    );
+    expect(rareSummonPatterns.length).toBeGreaterThan(0);
+
+    // In contrast, main action (e.g. summonSoldier or setBulwark) must NOT appear on non-empty stage
+    const mainActionPatterns = decReq.patterns.filter((p) => {
+      if (p.kind !== "ACTION") return false;
+      const act = decReq.catalog.actions[p.actionSelectionRef!];
+      return act?.actionId === "action.summonSoldier" || act?.actionId === "action.setBulwark";
+    });
+    expect(mainActionPatterns.length).toBe(0);
+
+    // 4. Submit Rare Summon request
+    const sacUnit = session.state.players.p1.field[0]; // preset unit on field
+    expect(sacUnit).toBeDefined();
+
+    const rareSummonAction = rarePackRulePackage.actions.find((a) => a.id === "action.rareSummon")!;
+    const context: CommandContext = {
+      state: session.state,
+      playerKey: "p1",
+      keyCard: p1RareCard,
+      keyCards: [p1RareCard],
+      actions: rarePackRulePackage.actions,
+      components: rarePackRulePackage.components,
+    };
+
+    const rareSummonReq = session.registry.createRequest(rareSummonAction, context, {
+      selectedCostPayment: makeCostPayment({
+        sacrificedUnitIds: [sacUnit.unitId],
+        summary: "$S",
+      }),
+    });
+
+    // Rare Summon pushed onto stage: existing request, Rare Summon
+    // Rare Summon is TOP of stack
+    expect(session.state.stage.requests.length).toBe(2);
+    expect(session.state.stage.requests[0].id).toBe("req-existing-1");
+    expect(session.state.stage.requests[1].id).toBe(rareSummonReq.id);
+
+    // 5. Section 8: Transition assertion after Rare Summon Request is formed:
+    // Opponent Observation: Rare count = 0
+    // Stage Request key card: Opponent also gets KNOWN card with id, suit, rank, value
+    const obsAfterP2 = ObservationFactory.createObservation(session.state, "p2");
+    const p1ViewAfter = obsAfterP2.players.find((p) => p.playerId === "p1")!;
+    expect(p1ViewAfter.rareCards?.count).toBe(0);
+
+    const stagedReqP2 = obsAfterP2.stageRequests.find((r) => r.requestId === rareSummonReq.id);
+    expect(stagedReqP2).toBeDefined();
+    expect(stagedReqP2!.keyCards).toBeDefined();
+    expect(stagedReqP2!.keyCards!.length).toBe(1);
+
+    const knownKeyCard = stagedReqP2!.keyCards![0] as KnownCardView;
+    expect(knownKeyCard.visibility).toBe("KNOWN");
+    expect(knownKeyCard.cardInstanceId).toBe(p1RareCard.id);
+    expect(knownKeyCard.suit).toBe(p1RareCard.suit);
+    expect(knownKeyCard.rank).toBe(p1RareCard.rank);
+    expect(knownKeyCard.value).toBe(p1RareCard.value);
+  });
 });

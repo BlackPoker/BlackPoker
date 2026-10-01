@@ -206,12 +206,9 @@ export function summonUnitHandler(effectInterpreter?: EffectInterpreter): Comman
       turnCount: context.state.turnCount ?? 1,
     });
 
-    // 召喚元ゾーンの特定 (request or hand)
+    // 召喚元ゾーンの特定 (canonical fromZone: currentRequest.keyCards に存在する場合のみ "request"、それ以外は "hand")
     let fromZone: string = "hand";
-    if (
-      context.currentRequest?.keyCards?.some((c: any) => c.id === unitCard?.id) ||
-      context.keyCards?.some((c: any) => c.id === unitCard?.id)
-    ) {
+    if (context.currentRequest?.keyCards?.some((c: any) => c.id === unitCard?.id)) {
       fromZone = "request";
     }
 

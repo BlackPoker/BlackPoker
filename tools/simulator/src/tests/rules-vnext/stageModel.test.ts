@@ -87,7 +87,7 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
           ],
-          hand: [handCard1, handCard2, costCard1, costCard2],
+          hand: [costCard1, costCard2, handCard1, handCard2],
           field: [targetUnit],
           grave: [],
           fog: [],
@@ -201,7 +201,7 @@ describe("Stage and ActionRequest Model Integration Tests (New YAML)", () => {
           life: [
             { id: "life-1", suit: "S", rank: "2", value: 2 },
           ],
-          hand: [handCard1, handCard2, costCard1, costCard2],
+          hand: [costCard1, costCard2, handCard1, handCard2],
           field: [targetUnit],
           grave: [],
           fog: [],

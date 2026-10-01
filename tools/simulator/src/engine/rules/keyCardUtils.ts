@@ -57,28 +57,59 @@ export function getKeyCardsFromSource(player: any, sourceZone: KeyCardSourceZone
 
 /**
  * 対象プレイヤーの対応ゾーンから使用されたキーカードを除去します。
+ * 全カードの存在・重複なし・有効ゾーンであることを事前確認し、1枚でも不正なら状態変更せず fail-closed (all-or-nothing)。
  */
 export function removeKeyCardsFromSource(
   player: any,
   sourceZone: KeyCardSourceZone,
   cardsToRemove: readonly any[]
 ): void {
-  if (!player || cardsToRemove.length === 0) return;
-  const cardIds = new Set(cardsToRemove.map((c: any) => c.id));
+  if (!player) {
+    throw new Error("プレイヤーが存在しません (fail-closed)");
+  }
+  if (cardsToRemove.length === 0) return;
 
+  let sourceCards: any[];
   if (sourceZone === "hand") {
-    if (Array.isArray(player.hand)) {
-      player.hand = player.hand.filter((c: any) => !cardIds.has(c.id));
+    if (!Array.isArray(player.hand)) {
+      throw new Error("プレイヤーの手札が配列ではありません (fail-closed)");
     }
-    return;
-  }
-  if (sourceZone === "rare") {
-    if (Array.isArray(player.rareCards)) {
-      player.rareCards = player.rareCards.filter((c: any) => !cardIds.has(c.id));
+    sourceCards = player.hand;
+  } else if (sourceZone === "rare") {
+    if (!Array.isArray(player.rareCards)) {
+      throw new Error("プレイヤーのレアカード置き場が配列ではありません (fail-closed)");
     }
-    return;
+    sourceCards = player.rareCards;
+  } else {
+    throw new Error(`未知のキーカード元ゾーンです: '${sourceZone}' (fail-closed)`);
   }
-  throw new Error(`未知のキーカード元ゾーンです: '${sourceZone}' (fail-closed)`);
+
+  const seenIds = new Set<string>();
+  for (const c of cardsToRemove) {
+    if (!c || !c.id) {
+      throw new Error("除去対象カードまたはカードIDが不正です (fail-closed)");
+    }
+    if (seenIds.has(c.id)) {
+      throw new Error(`除去対象カードIDに重複が存在します: '${c.id}' (fail-closed)`);
+    }
+    seenIds.add(c.id);
+  }
+
+  const sourceCardIdSet = new Set(sourceCards.map((c: any) => c?.id));
+  for (const cardId of seenIds) {
+    if (!sourceCardIdSet.has(cardId)) {
+      throw new Error(
+        `除去対象カード '${cardId}' が元ゾーン '${sourceZone}' に存在しません (fail-closed)`
+      );
+    }
+  }
+
+  // 全て確認できた後に一括で除去 (all-or-nothing)
+  if (sourceZone === "hand") {
+    player.hand = player.hand.filter((c: any) => !seenIds.has(c.id));
+  } else if (sourceZone === "rare") {
+    player.rareCards = player.rareCards.filter((c: any) => !seenIds.has(c.id));
+  }
 }
 
 /**
@@ -89,14 +120,42 @@ export function validateKeyCardsInSource(
   sourceZone: KeyCardSourceZone,
   cardsToValidate: readonly any[]
 ): void {
+  if (!player) {
+    throw new ValidationError("プレイヤーが存在しません。");
+  }
   if (cardsToValidate.length === 0) return;
-  const sourceCards = getKeyCardsFromSource(player, sourceZone);
-  const sourceCardIds = new Set(sourceCards.map((c: any) => c.id));
 
+  let sourceCards: any[];
+  if (sourceZone === "hand") {
+    if (!Array.isArray(player.hand)) {
+      throw new ValidationError("プレイヤーの手札が配列ではありません。");
+    }
+    sourceCards = player.hand;
+  } else if (sourceZone === "rare") {
+    if (!Array.isArray(player.rareCards)) {
+      throw new ValidationError("プレイヤーのレアカード置き場が配列ではありません。");
+    }
+    sourceCards = player.rareCards;
+  } else {
+    throw new ValidationError(`未知のキーカード元ゾーンです: '${sourceZone}'`);
+  }
+
+  const seenIds = new Set<string>();
   for (const c of cardsToValidate) {
-    if (!c || !sourceCardIds.has(c.id)) {
+    if (!c || !c.id) {
+      throw new ValidationError("キーカードまたはカードIDが不正です。");
+    }
+    if (seenIds.has(c.id)) {
+      throw new ValidationError(`キーカードIDに重複が存在します: '${c.id}'`);
+    }
+    seenIds.add(c.id);
+  }
+
+  const sourceCardIdSet = new Set(sourceCards.map((c: any) => c?.id));
+  for (const cardId of seenIds) {
+    if (!sourceCardIdSet.has(cardId)) {
       throw new ValidationError(
-        `キーカード '${c?.id || "unknown"}' が指定元ゾーン '${sourceZone}' に存在しません。`
+        `キーカード '${cardId}' が指定元ゾーン '${sourceZone}' に存在しません。`
       );
     }
   }

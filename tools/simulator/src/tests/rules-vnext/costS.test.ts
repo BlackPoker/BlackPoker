@@ -281,5 +281,145 @@ describe("Cost S (Sacrifice) Unit Tests", () => {
       expect(state.players.p1.field.length).toBe(0);
       expect(state.players.p1.grave.length).toBe(1);
     });
+
+    it("9.A: Rejects duplicate sacrificedUnitIds in matchesCost and canPaySelection", () => {
+      const resolver = new CostResolver();
+      const soldier = {
+        unitId: "u-dup-1",
+        componentId: "character.soldier",
+        kind: "一般兵",
+        state: "charge",
+        cards: [{ id: "c-dup-1", suit: "S", rank: "5", value: 5 }],
+      };
+      const state = {
+        players: {
+          p1: { field: [soldier], grave: [] },
+        },
+      } as any;
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+      };
+
+      const dupPayment = makeCostPayment({
+        sacrificedUnitIds: ["u-dup-1", "u-dup-1"],
+        summary: "$S (dup)",
+      });
+
+      // matchesCost rejects duplicates
+      expect(resolver.matchesCost(dupPayment, "S")).toBe(false);
+      // canPaySelection rejects duplicates
+      expect(resolver.canPaySelection(dupPayment, context, "S")).toBe(false);
+    });
+
+    it("9.B: Non-character (ComponentDefinition.type !== 'character') is rejected as Cost S candidate and in canPaySelection", () => {
+      const resolver = new CostResolver();
+      const customComponents = [
+        ...rulePackage.components,
+        {
+          id: "field.arena",
+          name: "競技場",
+          type: "field" as const,
+          zone: "field",
+          properties: {},
+        },
+      ];
+
+      const nonCharUnit = {
+        unitId: "u-arena",
+        componentId: "field.arena",
+        kind: "競技場",
+        cards: [{ id: "c-arena", suit: "H", rank: "10", value: 10 }],
+      };
+
+      const player = {
+        field: [nonCharUnit],
+        hand: [],
+        grave: [],
+      };
+
+      // CostPaymentEnumerator does not enumerate non-character as Cost S candidate
+      const payments = CostPaymentEnumerator.enumeratePayments("S", player, new Set(), customComponents);
+      expect(payments.length).toBe(0);
+
+      // canPaySelection rejects non-character
+      const state = {
+        players: {
+          p1: player,
+        },
+      } as any;
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: customComponents,
+      };
+
+      const payment = makeCostPayment({
+        sacrificedUnitIds: ["u-arena"],
+        summary: "$S (arena)",
+      });
+      expect(resolver.canPaySelection(payment, context, "S")).toBe(false);
+    });
+
+    it("9.C: Multi-card character Cost S conservation (wrapper preserved, all physical cards moved to grave with individual events)", () => {
+      const resolver = new CostResolver();
+      const card1 = { id: "c-multi-1", suit: "S", rank: "5", value: 5 };
+      const card2 = { id: "c-multi-2", suit: "S", rank: "9", value: 9 };
+      const multiUnit = {
+        unitId: "u-multi",
+        componentId: "character.soldier",
+        kind: "一般兵",
+        state: "charge",
+        cards: [card1, card2],
+      };
+
+      const state = {
+        players: {
+          p1: { field: [multiUnit], grave: [] },
+        },
+      } as any;
+      const events: any[] = [];
+      const mockInterpreter = {
+        dispatchEvent: (evt: any) => events.push(evt),
+      };
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+      };
+
+      const payment = makeCostPayment({
+        sacrificedUnitIds: ["u-multi"],
+        summary: "$S (multi)",
+      });
+
+      expect(resolver.canPaySelection(payment, context, "S")).toBe(true);
+
+      resolver.paySelection(payment, context, mockInterpreter);
+
+      // Field count should be 0
+      expect(state.players.p1.field.length).toBe(0);
+
+      // Grave has exactly 1 unit wrapper (not split!)
+      expect(state.players.p1.grave.length).toBe(1);
+      const graveUnit = state.players.p1.grave[0];
+      expect(graveUnit.unitId).toBe("u-multi");
+      expect(graveUnit.cards.length).toBe(2);
+      expect(graveUnit.cards.map((c: any) => c.id)).toEqual(["c-multi-1", "c-multi-2"]);
+
+      // Individual cardMoved events emitted for each card in the unit
+      const cardMovedEvents = events.filter((e) => e.type === "cardMoved" && e.payload?.toZone === "grave");
+      expect(cardMovedEvents.length).toBe(2);
+      expect(cardMovedEvents[0].payload.card.id).toBe("c-multi-1");
+      expect(cardMovedEvents[0].payload.fromZone).toBe("field");
+      expect(cardMovedEvents[0].payload.cause).toEqual({ type: "cost", symbol: "S" });
+      expect(cardMovedEvents[1].payload.card.id).toBe("c-multi-2");
+      expect(cardMovedEvents[1].payload.fromZone).toBe("field");
+      expect(cardMovedEvents[1].payload.cause).toEqual({ type: "cost", symbol: "S" });
+    });
   });
 });
