@@ -25,6 +25,10 @@ export interface PlayerBoardViewModel {
   readonly canViewFullGrave: boolean;
   // Pack
   readonly pack?: PackView;
+  // Rare
+  readonly rareCount?: number;
+  readonly rareCards?: readonly any[];
+  readonly canViewRareCards?: boolean;
 }
 
 /**
@@ -67,6 +71,9 @@ export class PlayerObservationPresenter {
         graveCards: [],
         canViewFullGrave: playerKey === viewerPlayerId,
         pack: undefined,
+        rareCount: 0,
+        rareCards: [],
+        canViewRareCards: false,
       };
     }
 
@@ -87,6 +94,9 @@ export class PlayerObservationPresenter {
       graveCards: obsPlayer.grave,
       canViewFullGrave: obsPlayer.canViewFullGrave,
       pack: obsPlayer.pack,
+      rareCount: obsPlayer.rareCards?.count ?? 0,
+      rareCards: obsPlayer.rareCards?.cards ?? [],
+      canViewRareCards: obsPlayer.rareCards?.canViewCards ?? false,
     };
   }
 }

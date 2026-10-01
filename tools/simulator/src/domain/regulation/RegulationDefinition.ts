@@ -44,6 +44,7 @@ export type FrameDeckDefinition =
 export interface FrameSetupDefinition {
   readonly initialHandCount: number;
   readonly packCount?: number;
+  readonly rareCardCount?: number;
   readonly preset: {
     readonly bulwarkCount: number;
     readonly soldierCount: number;

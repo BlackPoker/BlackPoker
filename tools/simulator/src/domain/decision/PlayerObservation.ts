@@ -49,6 +49,12 @@ export interface PackView {
   readonly canViewCards: boolean;
 }
 
+export interface RareCardView {
+  readonly count: number;
+  readonly cards: readonly CardView[];
+  readonly canViewCards: boolean;
+}
+
 export interface PlayerObservationView {
   readonly playerId: PlayerKey;
   readonly name: string;
@@ -73,6 +79,7 @@ export interface PlayerObservationView {
   readonly grave: readonly (UnitView | CardView)[];
   readonly canViewFullGrave: boolean;
   readonly pack?: PackView;
+  readonly rareCards?: RareCardView;
 }
 
 export interface RequestView {

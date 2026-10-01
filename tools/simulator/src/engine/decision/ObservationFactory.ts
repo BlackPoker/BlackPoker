@@ -6,6 +6,7 @@ import {
   FogView,
   RequestView,
   PackView,
+  RareCardView,
 } from "../../domain/decision/PlayerObservation";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { AbilityEvaluator } from "../rules/AbilityEvaluator";
@@ -133,6 +134,17 @@ export class ObservationFactory {
           }
         }
 
+        // 8. レアカードの処理（枚数は完全公開、内容はオーナー本人のみKNOWN、対戦相手は非公開）
+        let rareCards: RareCardView | undefined = undefined;
+        if (p.rareCards && Array.isArray(p.rareCards) && p.rareCards.length > 0) {
+          const rawRareCards = p.rareCards;
+          rareCards = {
+            count: rawRareCards.length,
+            cards: isViewer ? rawRareCards.map((c: any) => this.mapCard(c, true)) : [],
+            canViewCards: isViewer,
+          };
+        }
+
         playersView.push({
           playerId: pKey as PlayerKey,
           name: p.name || pKey,
@@ -149,6 +161,7 @@ export class ObservationFactory {
           grave,
           canViewFullGrave: isViewer,
           pack,
+          rareCards,
         });
       }
     }

@@ -94,6 +94,27 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
     });
   }
 
+  if (viewModel.rareCount !== undefined && viewModel.rareCount > 0) {
+    let rareBadge: React.ReactNode = undefined;
+    if (viewModel.canViewRareCards && viewModel.rareCards && viewModel.rareCards.length > 0) {
+      const rareCard = viewModel.rareCards[0];
+      const cardText =
+        rareCard.suit === "J" || rareCard.rank === "Joker"
+          ? "★J"
+          : formatCardDisplay(rareCard);
+      if (cardText) {
+        rareBadge = <RichCardText text={cardText} />;
+      }
+    }
+
+    zoneItems.push({
+      id: "rare",
+      label: "RARE",
+      count: viewModel.rareCount,
+      badge: rareBadge,
+    });
+  }
+
   // フィールドユニットの兵士・防壁分離
   const soldierUnits = fieldUnits.filter(
     (u: any) => u.componentId !== "character.bulwark" && u.kind !== "防壁"

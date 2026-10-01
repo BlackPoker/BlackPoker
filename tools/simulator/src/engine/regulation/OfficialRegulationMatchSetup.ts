@@ -107,6 +107,10 @@ export function verifyCardConservation(
   if (player.pack && Array.isArray(player.pack.cards)) {
     cards.push(...player.pack.cards);
   }
+  // Rare Cards
+  if (Array.isArray(player.rareCards)) {
+    cards.push(...player.rareCards);
+  }
   // Fog (キーカード等のカードオブジェクト)
   if (Array.isArray(player.fog)) {
     for (const fogEntry of player.fog) {
@@ -188,14 +192,89 @@ export class OfficialRegulationMatchSetup {
     const p1RawDeck = buildDeck("p1");
     const p2RawDeck = buildDeck("p2");
 
-    // 2. 独立した乱数ストリームで Seeded Shuffle (P1, P2 それぞれ独立)
+    // 2. Rare Card 抽出 (公式ルール第9.1.2版 8.3.1.3: shuffle より前に取り分ける)
+    const rareCardCount = frame.setup.rareCardCount ?? 0;
+    if (!Number.isInteger(rareCardCount) || rareCardCount < 0) {
+      throw new Error(`不正な rareCardCount です: ${rareCardCount}`);
+    }
+
+    const selectRareCards = (
+      rawDeck: InGameCard[],
+      count: number,
+      selections?: readonly any[]
+    ): { rareCards: InGameCard[]; remainingDeck: InGameCard[] } => {
+      if (count === 0) {
+        return { rareCards: [], remainingDeck: [...rawDeck] };
+      }
+      if (!selections || selections.length !== count) {
+        throw new Error(
+          `Rare Card selection の指定件数 (${selections?.length ?? 0}) が rareCardCount (${count}) と一致しません`
+        );
+      }
+
+      const selectedRareCards: InGameCard[] = [];
+      const remaining = [...rawDeck];
+      const selectedIds = new Set<string>();
+
+      for (const sel of selections) {
+        const occTarget = sel.occurrence ?? 0;
+        if (occTarget < 0) {
+          throw new Error(`不正な occurrence です: ${occTarget}`);
+        }
+
+        let occCount = 0;
+        let foundIndex = -1;
+        for (let i = 0; i < remaining.length; i++) {
+          const card = remaining[i];
+          if (card.suit === sel.suit && card.rank === sel.rank) {
+            if (occCount === occTarget) {
+              foundIndex = i;
+              break;
+            }
+            occCount++;
+          }
+        }
+
+        if (foundIndex === -1) {
+          throw new Error(
+            `指定された Rare Card (${sel.suit}${sel.rank}, occurrence: ${occTarget}) がデッキ内に見つかりません`
+          );
+        }
+
+        const [card] = remaining.splice(foundIndex, 1);
+        if (selectedIds.has(card.id)) {
+          throw new Error(`同一の Rare Card が重複して選択されました: ${card.id}`);
+        }
+        selectedIds.add(card.id);
+        selectedRareCards.push(card);
+      }
+
+      const minCards = frame.deck.type === "constructed" ? frame.deck.minCards : 0;
+      if (remaining.length < minCards) {
+        throw new Error(
+          `Rare Card 取り分け後の残り枚数 (${remaining.length}) が最小デッキ要件 (${minCards}) を下回っています`
+        );
+      }
+
+      return { rareCards: selectedRareCards, remainingDeck: remaining };
+    };
+
+    const p1RareResult = selectRareCards(p1RawDeck, rareCardCount, deckProfile.defaultRareCardSelections);
+    const p2RareResult = selectRareCards(p2RawDeck, rareCardCount, deckProfile.defaultRareCardSelections);
+
+    const p1RareCards = p1RareResult.rareCards;
+    const p2RareCards = p2RareResult.rareCards;
+    const p1RemainingDeck = p1RareResult.remainingDeck;
+    const p2RemainingDeck = p2RareResult.remainingDeck;
+
+    // 3. 独立した乱数ストリームで Seeded Shuffle (P1, P2 それぞれ独立)
     const p1Rng = new SeededRandom(deriveSeed(matchSeed, "p1-deck"));
     const p2Rng = new SeededRandom(deriveSeed(matchSeed, "p2-deck"));
 
-    const p1Shuffled = shuffleCards(p1RawDeck, p1Rng);
-    const p2Shuffled = shuffleCards(p2RawDeck, p2Rng);
+    const p1Shuffled = shuffleCards(p1RemainingDeck, p1Rng);
+    const p2Shuffled = shuffleCards(p2RemainingDeck, p2Rng);
 
-    // 3. 初期配置 (8.3.1.1 vs 8.3.1.2)
+    // 4. 初期配置 (8.3.1.1 vs 8.3.1.2 vs 8.3.1.3)
     // packCount が指定されている場合: 上から packCount 枚を取り除いて伏せた Pack とし、残りを Life とする
     let p1Pack: any = undefined;
     let p2Pack: any = undefined;
@@ -238,6 +317,7 @@ export class OfficialRegulationMatchSetup {
           fog: [],
           trump: [],
           pack: p1Pack,
+          rareCards: p1RareCards,
         },
         p2: {
           name: p2Name,
@@ -248,6 +328,7 @@ export class OfficialRegulationMatchSetup {
           fog: [],
           trump: [],
           pack: p2Pack,
+          rareCards: p2RareCards,
         },
       },
     };

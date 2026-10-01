@@ -1,0 +1,6 @@
+id: standard-rarePack
+name: スタンダード + レアパック
+formatId: standard
+frameId: rarePack
+sourceRulesVersion: 9.1.2
+description: 公式BlackPoker レギュレーション (スタンダードフォーマット + レアパックフレーム)

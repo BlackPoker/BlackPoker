@@ -1,5 +1,11 @@
 import { CardDefinition, FrameDefinition, SimulatorNotImplementedError } from "../../domain/regulation/RegulationDefinition";
 
+export interface CardOccurrenceSelection {
+  readonly suit: "S" | "H" | "D" | "C" | "J";
+  readonly rank: string;
+  readonly occurrence?: number;
+}
+
 export interface SimulatorDeckProfile {
   readonly id: string;
   readonly name?: string;
@@ -7,6 +13,7 @@ export interface SimulatorDeckProfile {
   readonly cardCount: number;
   readonly cards: readonly CardDefinition[];
   readonly notice?: string;
+  readonly defaultRareCardSelections?: readonly CardOccurrenceSelection[];
 }
 
 const SUITS = ["S", "H", "D", "C"] as const;
@@ -141,6 +148,29 @@ export class SimulatorDeckProfileResolver {
         };
       }
 
+      if (regulationId === "standard-rarePack") {
+        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
+          throw new Error(
+            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
+          );
+        }
+        return {
+          id: "standard54",
+          name: "標準54枚デッキFixture",
+          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
+          cardCount: STANDARD_54_DECK_CARDS.length,
+          cards: STANDARD_54_DECK_CARDS,
+          notice: STANDARD_54_FIXTURE_NOTICE,
+          defaultRareCardSelections: [
+            {
+              suit: "J",
+              rank: "Joker",
+              occurrence: 0,
+            },
+          ],
+        };
+      }
+
       throw new SimulatorNotImplementedError(regulationId || "custom", frame.id);
     }
 
@@ -154,7 +184,11 @@ export class SimulatorDeckProfileResolver {
     regulationId?: string,
     _frameId?: string
   ): string | undefined {
-    if (regulationId === "light-pack" || regulationId === "standard-pack") {
+    if (
+      regulationId === "light-pack" ||
+      regulationId === "standard-pack" ||
+      regulationId === "standard-rarePack"
+    ) {
       return STANDARD_54_FIXTURE_NOTICE;
     }
     return undefined;
