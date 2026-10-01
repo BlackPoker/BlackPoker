@@ -1442,7 +1442,13 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
         if (sourceCards.length === 0) {
           return;
         }
-        cardToMove = sourceCards[0];
+        if (sourceCards.length === 1) {
+          cardToMove = sourceCards[0];
+        } else {
+          throw new Error(
+            `moveCard: 移動元ゾーン '${fromZone}' に複数のカードが存在するため、明示的なカード指定 (card/target) なしに移動できません (fail-closed, 件数: ${sourceCards.length})`
+          );
+        }
       } else {
         return;
       }

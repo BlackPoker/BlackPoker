@@ -18,6 +18,7 @@ import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import { ActionActivationConditionEvaluator } from "../../engine/rules/ActionActivationConditionEvaluator";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { KnownCardView } from "../../domain/decision/PlayerObservation";
+import { moveCardHandler } from "../../engine/rules/commandHandlers";
 
 describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
   let catalog: any;
@@ -100,7 +101,8 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     const rareDrawDef = rarePackRulePackage.actions.find((a) => a.id === "action.rareDraw")!;
 
     // 1. Life = 10: Not legal
-    state.players[turnPlayer].life = state.players[turnPlayer].life.slice(0, 10);
+    const excessLife10 = state.players[turnPlayer].life.splice(10);
+    state.players[turnPlayer].grave.push(...excessLife10);
     expect(state.players[turnPlayer].life.length).toBe(10);
 
     const decision10 = LegalPatternGenerator.generateActionRequestDecision(state, turnPlayer, rarePackRulePackage);
@@ -121,7 +123,8 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     expect(evalRes10.isLegal).toBe(false);
 
     // 2. Life = 9: Legal
-    state.players[turnPlayer].life = state.players[turnPlayer].life.slice(0, 9);
+    const excessLife9 = state.players[turnPlayer].life.splice(9);
+    state.players[turnPlayer].grave.push(...excessLife9);
     expect(state.players[turnPlayer].life.length).toBe(9);
 
     const decision9 = LegalPatternGenerator.generateActionRequestDecision(state, turnPlayer, rarePackRulePackage);
@@ -153,8 +156,18 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     const turnPlayer = session.state.turnPlayer;
     const opponentPlayer = turnPlayer === "p1" ? "p2" : "p1";
 
-    // Set life to 9 to satisfy activation condition
-    session.state.players[turnPlayer].life = session.state.players[turnPlayer].life.slice(0, 9);
+    // Set life to 9 to satisfy activation condition by moving excess life to grave
+    const excessLife = session.state.players[turnPlayer].life.splice(9);
+    session.state.players[turnPlayer].grave.push(...excessLife);
+
+    // Verify 54 card conservation before Rare Draw
+    expect(() => {
+      OfficialRegulationMatchSetup.verifyCardConservation(
+        turnPlayer,
+        session.state.players[turnPlayer],
+        STANDARD_54_DECK_CARDS
+      );
+    }).not.toThrow();
 
     // Verify initial conditions
     expect(session.state.players[turnPlayer].rareCards.length).toBe(1);
@@ -189,7 +202,15 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     expect(movedCard).toBeDefined();
     expect(movedCard).toBe(initialRareCard); // exact physical object reference
 
-    // E. Card conservation across all zones
+    // E. Real 54-card conservation across all zones
+    expect(() => {
+      OfficialRegulationMatchSetup.verifyCardConservation(
+        turnPlayer,
+        session.state.players[turnPlayer],
+        STANDARD_54_DECK_CARDS
+      );
+    }).not.toThrow();
+
     const playerState = session.state.players[turnPlayer];
     const allCards = [
       ...playerState.hand,
@@ -199,9 +220,9 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
       ...playerState.field.flatMap((u: any) => (Array.isArray(u.cards) ? u.cards : u.card ? [u.card] : [])),
       ...(playerState.rareCards || []),
     ];
-    // Note: life was reduced from 39 to 9 (-30 cards) for test fixture setup; all remaining 24 cards are strictly unique
+    expect(allCards.length).toBe(54);
     const cardIds = new Set(allCards.map((c: any) => c.id));
-    expect(cardIds.size).toBe(allCards.length);
+    expect(cardIds.size).toBe(54);
 
     // G. No reveal: No card.revealed event in match log
     const matchLog = session.getMatchLog();
@@ -270,7 +291,8 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     const turnPlayer = session.state.turnPlayer;
 
     // Set life to 9 and empty rareCards
-    session.state.players[turnPlayer].life = session.state.players[turnPlayer].life.slice(0, 9);
+    const excessLife = session.state.players[turnPlayer].life.splice(9);
+    session.state.players[turnPlayer].grave.push(...excessLife);
     session.state.players[turnPlayer].rareCards = [];
 
     const handBefore = session.state.players[turnPlayer].hand.length;
@@ -297,5 +319,86 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     // Hand count remains unchanged, rareCards remains empty
     expect(session.state.players[turnPlayer].hand.length).toBe(handBefore);
     expect(session.state.players[turnPlayer].rareCards.length).toBe(0);
+  });
+
+  // K. moveCard omitted-card generic semantics regression
+  describe("moveCard omitted-card generic semantics", () => {
+    const handler = moveCardHandler();
+
+    it("0 cards in source zone: clean no-op resolution", () => {
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            rareCards: [],
+            hand: [],
+          },
+        },
+      };
+      const context: any = { playerKey: "p1", state };
+      expect(() => {
+        handler({ from: "rare", to: "hand" }, context);
+      }).not.toThrow();
+      expect(state.players.p1.rareCards.length).toBe(0);
+      expect(state.players.p1.hand.length).toBe(0);
+    });
+
+    it("1 card in source zone: auto-selects and moves single card", () => {
+      const card = { id: "card-single", suit: "J", rank: "Joker" };
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            rareCards: [card],
+            hand: [],
+          },
+        },
+      };
+      const context: any = { playerKey: "p1", state };
+      handler({ from: "rare", to: "hand" }, context);
+      expect(state.players.p1.rareCards.length).toBe(0);
+      expect(state.players.p1.hand.length).toBe(1);
+      expect(state.players.p1.hand[0]).toBe(card);
+    });
+
+    it("2+ cards in source zone without card/target: fail-closed throws error", () => {
+      const card1 = { id: "card-1", suit: "S", rank: "A" };
+      const card2 = { id: "card-2", suit: "H", rank: "K" };
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            rareCards: [card1, card2],
+            hand: [],
+          },
+        },
+      };
+      const context: any = { playerKey: "p1", state };
+      expect(() => {
+        handler({ from: "rare", to: "hand" }, context);
+      }).toThrow(/明示的なカード指定.*なしに移動できません/);
+      expect(state.players.p1.rareCards.length).toBe(2);
+      expect(state.players.p1.hand.length).toBe(0);
+    });
+
+    it("2+ cards in source zone with explicit card: moves specified card correctly", () => {
+      const card1 = { id: "card-1", suit: "S", rank: "A" };
+      const card2 = { id: "card-2", suit: "H", rank: "K" };
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            rareCards: [card1, card2],
+            hand: [],
+          },
+        },
+      };
+      const context: any = { playerKey: "p1", state };
+      handler({ from: "rare", to: "hand", card: "card-2" }, context);
+      expect(state.players.p1.rareCards.length).toBe(1);
+      expect(state.players.p1.rareCards[0]).toBe(card1);
+      expect(state.players.p1.hand.length).toBe(1);
+      expect(state.players.p1.hand[0]).toBe(card2);
+    });
   });
 });
