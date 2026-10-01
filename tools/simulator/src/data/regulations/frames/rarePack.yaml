@@ -6,6 +6,7 @@ recommendedFormatIds:
   - pro
 actions:
   - action.packOpen
+  - action.rareDraw
 deck:
   type: constructed
   minCards: 40

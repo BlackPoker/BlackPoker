@@ -16,6 +16,14 @@ export interface ActionActivationCondition {
     readonly equals?: any;
     readonly notEquals?: any;
   };
+  readonly zoneCount?: {
+    readonly player?: "controller" | "opponent" | "turnPlayer" | "self" | string;
+    readonly zone: string;
+    readonly atMost?: number;
+    readonly atLeast?: number;
+    readonly equals?: number;
+    readonly notEquals?: number;
+  };
 }
 
 export interface ActionTargetCondition {

@@ -683,6 +683,8 @@ export class EffectInterpreter {
       cardPool = Array.isArray(player.pack?.cards) ? [...player.pack.cards] : [];
     } else if (zone === "life") {
       cardPool = Array.isArray(player.life) ? [...player.life] : [];
+    } else if (zone === "rare" || zone === "rareCards") {
+      cardPool = Array.isArray(player.rareCards) ? [...player.rareCards] : [];
     }
 
     // 候補カードの絞り込み

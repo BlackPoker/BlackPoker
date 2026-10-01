@@ -1,0 +1,25 @@
+actions:
+  - id: action.rareDraw
+    name: レアドロー
+    ruby: れあどろー
+    type: rareCardOperation
+
+    request:
+      trigger: direct
+      speed: immediate
+      timing: quick
+
+    activationCondition:
+      zoneCount:
+        player: controller
+        zone: life
+        atMost: 9
+
+    text:
+      summary: レアカードを1枚手札に加える。
+      effect: レアカードを1枚手札に加える。
+
+    effect:
+      - moveCard:
+          from: rare
+          to: hand

@@ -250,6 +250,10 @@ export function isCardInGameZones(cardId: string, state: any): boolean {
     if (player.pack && Array.isArray(player.pack.cards) && player.pack.cards.some((c: any) => c?.id === cardId)) {
       return true;
     }
+    // 7. rareCards
+    if (Array.isArray(player.rareCards) && player.rareCards.some((c: any) => c?.id === cardId)) {
+      return true;
+    }
   }
   return false;
 }

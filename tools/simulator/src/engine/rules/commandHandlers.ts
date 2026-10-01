@@ -1409,11 +1409,6 @@ function resolveSelectionCard(cardRef: any, selections?: Record<string, any>): a
  */
 export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandHandler {
   return (args, context) => {
-    let cardToMove = resolveSelectionCard(args.card ?? args.target, context.selections);
-    if (!cardToMove) {
-      return;
-    }
-
     const fromZone = args.from;
     const toZone = args.to;
     const playerKey = args.player === "opponent"
@@ -1431,12 +1426,26 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
       sourceCards = player.grave;
     } else if (fromZone === "life") {
       sourceCards = player.life;
+    } else if (fromZone === "rare" || fromZone === "rareCards") {
+      sourceCards = player.rareCards || [];
     } else {
       throw new Error(`moveCard: 未対応の移動元ゾーンです (${fromZone})`);
     }
 
     if (!Array.isArray(sourceCards)) {
       throw new Error(`moveCard: 移動元ゾーン '${fromZone}' にカード配列が存在しません`);
+    }
+
+    let cardToMove = resolveSelectionCard(args.card ?? args.target, context.selections);
+    if (!cardToMove) {
+      if (args.card === undefined && args.target === undefined) {
+        if (sourceCards.length === 0) {
+          return;
+        }
+        cardToMove = sourceCards[0];
+      } else {
+        return;
+      }
     }
 
     const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
@@ -1471,6 +1480,9 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
     } else if (toZone === "life") {
       if (!Array.isArray(player.life)) player.life = [];
       destCards = player.life;
+    } else if (toZone === "rare" || toZone === "rareCards") {
+      if (!Array.isArray(player.rareCards)) player.rareCards = [];
+      destCards = player.rareCards;
     } else {
       throw new Error(`moveCard: 未対応の移動先ゾーンです (${toZone})`);
     }

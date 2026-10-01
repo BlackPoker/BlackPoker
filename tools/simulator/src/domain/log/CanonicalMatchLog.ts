@@ -31,7 +31,7 @@ export type CanonicalGameEventType =
   | "zone.top.changed";
 
 
-export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack";
+export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack" | "rare";
 
 export type CardLocation =
   | {
