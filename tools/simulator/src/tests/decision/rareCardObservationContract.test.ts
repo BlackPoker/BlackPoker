@@ -50,7 +50,7 @@ describe("Rare Card Observation & UI Presentation Contracts (BP-SIM-REG-4.0-A)",
     if (rareCard?.visibility === "KNOWN") {
       expect(rareCard.suit).toBe("J");
       expect(rareCard.rank).toBe("Joker");
-      expect(rareCard.faceUp).toBe(true);
+      expect(rareCard.faceUp).toBe(false);
       expect(rareCard.cardInstanceId).toBe("p1-c-JJoker");
     }
   });

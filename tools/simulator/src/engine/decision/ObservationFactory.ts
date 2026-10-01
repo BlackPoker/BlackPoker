@@ -140,7 +140,7 @@ export class ObservationFactory {
           const rawRareCards = p.rareCards;
           rareCards = {
             count: rawRareCards.length,
-            cards: isViewer ? rawRareCards.map((c: any) => this.mapCard(c, true)) : [],
+            cards: isViewer ? rawRareCards.map((c: any) => this.mapCard(c, false)) : [],
             canViewCards: isViewer,
           };
         }

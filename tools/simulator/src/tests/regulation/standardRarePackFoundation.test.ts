@@ -247,4 +247,30 @@ describe("Official Regulation Phase 4.0-A - Standard + Rare Pack Foundation & Se
       OfficialRegulationMatchSetup.setupMatch(reg, invalidFrameCountMismatch as any, fullRulePackage, 42)
     ).toThrow(/指定件数.*一致しません/);
   });
+
+  // minCards official semantics: original deck minCards=54, rare=1, remaining=53 -> succeeds!
+  it("minCards official semantics: minCards validated on original deck; remaining < minCards after rare extraction is legal", async () => {
+    const reg = await getRegulation("standard-rarePack");
+    const frameWithMin54 = {
+      ...(await getFrame("rarePack")),
+      deck: {
+        type: "constructed",
+        minCards: 54,
+      },
+    };
+
+    // Original deck is 54 cards (= minCards 54).
+    // After rare extraction of 1 card, remaining deck is 53 cards (< minCards 54).
+    // Official semantics: this is legal and setup succeeds!
+    const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frameWithMin54 as any, fullRulePackage, 42);
+    expect(outcome.type).toBe("READY");
+    if (outcome.type === "READY") {
+      expect(outcome.state.players.p1.rareCards.length).toBe(1);
+      expect(outcome.state.players.p1.pack.cards.length).toBe(14);
+      expect(() => {
+        OfficialRegulationMatchSetup.verifyCardConservation("p1", outcome.state.players.p1, STANDARD_54_DECK_CARDS);
+        OfficialRegulationMatchSetup.verifyCardConservation("p2", outcome.state.players.p2, STANDARD_54_DECK_CARDS);
+      }).not.toThrow();
+    }
+  });
 });

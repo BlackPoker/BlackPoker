@@ -249,13 +249,6 @@ export class OfficialRegulationMatchSetup {
         selectedRareCards.push(card);
       }
 
-      const minCards = frame.deck.type === "constructed" ? frame.deck.minCards : 0;
-      if (remaining.length < minCards) {
-        throw new Error(
-          `Rare Card 取り分け後の残り枚数 (${remaining.length}) が最小デッキ要件 (${minCards}) を下回っています`
-        );
-      }
-
       return { rareCards: selectedRareCards, remainingDeck: remaining };
     };
 
