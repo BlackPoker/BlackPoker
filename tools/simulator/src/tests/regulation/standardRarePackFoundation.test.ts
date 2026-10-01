@@ -61,29 +61,41 @@ describe("Official Regulation Phase 4.0-A - Standard + Rare Pack Foundation & Se
     expect(reg.sourceRulesVersion).toBe("9.1.2");
   });
 
-  // C. RegulationValidator contract: ruleLegal=true, recommended=true, simulatorImplemented=false
-  it("C: RegulationValidator validates standard-rarePack as legal, recommended, but NOT simulatorImplemented", async () => {
+  // C. RegulationValidator contract: ruleLegal=true, recommended=true, simulatorImplemented=true
+  it("C: RegulationValidator validates standard-rarePack as legal, recommended, and simulatorImplemented", async () => {
     const validation = RegulationValidator.validateRegulation(catalog, "standard-rarePack");
     expect(validation.ruleLegal).toBe(true);
     expect(validation.recommended).toBe(true);
-    expect(validation.simulatorImplemented).toBe(false);
+    expect(validation.simulatorImplemented).toBe(true);
+    expect(() =>
+      RegulationValidator.validateRegulation(catalog, "standard-rarePack", { assertImplemented: true })
+    ).not.toThrow();
   });
 
-  // D. getAvailableEnvironments: standard-rarePack is ABSENT
-  it("D: getAvailableEnvironments does NOT list standard-rarePack", async () => {
+  // D. getAvailableEnvironments: standard-rarePack is PRESENT
+  it("D: getAvailableEnvironments lists official:standard-rarePack exactly once with notice", async () => {
     const envs = getAvailableEnvironments(catalog);
-    const found = envs.find((e) => e.regulationId === "standard-rarePack" || e.id === "official:standard-rarePack");
-    expect(found).toBeUndefined();
+    const matches = envs.filter(
+      (e) => e.regulationId === "standard-rarePack" || e.id === "official:standard-rarePack"
+    );
+    expect(matches).toHaveLength(1);
+    const found = matches[0];
+    expect(found.id).toBe("official:standard-rarePack");
+    expect(found.name).toBe("スタンダード + レアパック (公式)");
+    expect(found.isOfficial).toBe(true);
+    expect(found.regulationId).toBe("standard-rarePack");
+    expect(found.deckProfileNotice).toBe(STANDARD_54_FIXTURE_NOTICE);
   });
 
-  // E. createSession: standard-rarePack throws SimulatorNotImplementedError
-  it("E: OfficialRegulationMatchFactory.createSession('standard-rarePack') throws SimulatorNotImplementedError", async () => {
-    await expect(
-      OfficialRegulationMatchFactory.createSession("standard-rarePack", 42, {
-        catalog,
-        fullRulePackage,
-      })
-    ).rejects.toThrow(SimulatorNotImplementedError);
+  // E. createSession: standard-rarePack creates session successfully
+  it("E: OfficialRegulationMatchFactory.createSession('standard-rarePack') creates session successfully", async () => {
+    const session = await OfficialRegulationMatchFactory.createSession("standard-rarePack", 42, {
+      catalog,
+      fullRulePackage,
+    });
+    expect(session).toBeDefined();
+    expect(session.state.regulationId).toBe("standard-rarePack");
+    expect(session.rulePackage.id).toBe("official-standard-rarePack");
   });
 
   // F & G. Deck Profile Resolver contract: 54 cards, 2 Jokers, default rare selection Joker 1枚
