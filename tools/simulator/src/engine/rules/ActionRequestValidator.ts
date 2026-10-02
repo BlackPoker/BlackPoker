@@ -11,6 +11,7 @@ import {
 import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
 import { ActionCostEvaluator, InvalidActionCostError } from "./ActionCostEvaluator";
 import { resolveKeyCardSourceZone, validateKeyCardsInSource, resolveCanonicalKeyCardsInSource } from "./keyCardUtils";
+import { isActiveStageRequest } from "./ActionTargetService";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -299,9 +300,9 @@ export class ActionRequestValidator {
               `ターゲットリクエスト ${targetReq.id} はステージ上に存在しません。`
             );
           }
-          if (matchedStageReq.status === "resolved" || matchedStageReq.status === "cancelled") {
+          if (!isActiveStageRequest(matchedStageReq)) {
             throw new ValidationError(
-              `ターゲットリクエスト ${targetReq.id} は無効化または解決済みです。`
+              `ターゲットリクエスト ${targetReq.id} はアクティブではありません (status: ${matchedStageReq.status})。`
             );
           }
         } else if (targetType === "unit") {

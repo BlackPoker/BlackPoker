@@ -23,6 +23,14 @@ export interface TargetReplacementResult {
 }
 
 /**
+ * ステージ上のリクエストが構造的にアクティブ（pending または resolving）であるかを判定します。
+ * resolved, cancelled, undefined, 未知のステータスはすべて false（非アクティブ）となります。
+ */
+export function isActiveStageRequest(request: any): boolean {
+  return request?.status === "pending" || request?.status === "resolving";
+}
+
+/**
  * ActionDefinition.targets を SSOT とする汎用ターゲット管理基盤。
  * Action ID によるハードコードを行わず、DSL 定義に基づきターゲット候補の列挙、
  * 検証、正規化、および安全なアトミック差し替えを実行します。
@@ -261,9 +269,8 @@ export class ActionTargetService {
     } else if (targetType === "request") {
       const stageRequests = state.stage?.requests || [];
       for (const req of stageRequests) {
-        // 構造的アクティブ判定: pending または resolving のみ (省略時は pending とみなす)
-        const reqStatus = req.status ?? "pending";
-        if (reqStatus !== "pending" && reqStatus !== "resolving") {
+        // 構造的アクティブ判定: pending または resolving のみ (正の判定)
+        if (!isActiveStageRequest(req)) {
           continue;
         }
 
@@ -470,8 +477,8 @@ export class ActionTargetService {
       const matchedReq = matches[0];
 
       // 構造的アクティブ判定 (pending または resolving のみ)
-      if (matchedReq.status === "resolved" || matchedReq.status === "cancelled") {
-        throw new Error(`ターゲットリクエスト [${reqId}] は無効化または解決済みです (status: ${matchedReq.status})。`);
+      if (!isActiveStageRequest(matchedReq)) {
+        throw new Error(`ターゲットリクエスト [${reqId}] はアクティブではありません (status: ${matchedReq.status})。`);
       }
 
       // 自分自身のリクエストは対象不可 (変更対象のリクエスト自身)
@@ -582,12 +589,32 @@ export class ActionTargetService {
       selection
     );
 
-    // 3. 現在設定されているターゲット（previousTarget）の特定
-    let previousTarget: ActionRequestTarget | undefined = undefined;
-    if (targetRequest.targets && targetRequest.targets.length > 0) {
-      previousTarget =
-        targetRequest.targets.find((t: any) => (t.targetDefinitionId || t.id) === targetDef.id) ||
-        (action.targets?.length === 1 && targetRequest.targets.length === 1 ? targetRequest.targets[0] : undefined);
+    // 3. 既存ターゲット（previousTarget）およびスロットインデックスの解決
+    // replaceTarget は「既存の対象を変更する」操作であり、新規スロットの追加は禁止 (Fail-closed)
+    if (!targetRequest.targets || targetRequest.targets.length === 0) {
+      throw new Error(`リクエスト [${targetRequest.id}] には変更対象の既存ターゲットが存在しません。`);
+    }
+
+    let targetIdx = targetRequest.targets.findIndex(
+      (t: any) => (t.targetDefinitionId || t.id) === targetDef.id
+    );
+
+    // レガシー単一ターゲット互換:
+    // ActionDefinition の targets が1つ、かつ Request の targets も1つで、
+    // 既存ターゲットが targetDefinitionId/id を欠いている場合はその単一スロットを置き換える
+    if (targetIdx === -1 && action.targets?.length === 1 && targetRequest.targets.length === 1) {
+      targetIdx = 0;
+    }
+
+    if (targetIdx === -1) {
+      throw new Error(
+        `変更対象のスロット [${targetDef.id}] がリクエスト [${targetRequest.id}] の既存ターゲットに見つかりません。`
+      );
+    }
+
+    const previousTarget: ActionRequestTarget = targetRequest.targets[targetIdx];
+    if (!previousTarget) {
+      throw new Error(`変更対象の既存ターゲットスロット [${targetDef.id}] が未定義です。`);
     }
 
     // 4. 現在の State から Canonical な実体を再取得し、元 Action の条件で再検証
@@ -610,18 +637,9 @@ export class ActionTargetService {
       };
     }
 
-    // 6. 原子的（アトミック）差し替え
-    const nextTargets = targetRequest.targets ? [...targetRequest.targets] : [];
-    const idx = nextTargets.findIndex(
-      (t: any) => (t.targetDefinitionId || t.id) === targetDef.id
-    );
-    if (idx !== -1) {
-      nextTargets[idx] = canonicalNewTarget;
-    } else if (nextTargets.length === 0 || (action.targets?.length === 1 && nextTargets.length === 1)) {
-      nextTargets[0] = canonicalNewTarget;
-    } else {
-      nextTargets.push(canonicalNewTarget);
-    }
+    // 6. 原子的（アトミック）差し替え (既存スロットのみ上書き、push経路は完全排除)
+    const nextTargets = [...targetRequest.targets];
+    nextTargets[targetIdx] = canonicalNewTarget;
     targetRequest.targets = nextTargets;
 
     // 7. 互換性プロパティの更新

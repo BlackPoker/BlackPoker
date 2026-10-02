@@ -159,6 +159,7 @@ describe("Playtest Target Presentation Tests", () => {
           id: "req-target-1",
           actionId: "action.attack",
           controller: "p1",
+          status: "pending",
           action: { name: "攻撃" },
         },
       ];

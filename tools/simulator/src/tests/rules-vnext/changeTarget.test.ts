@@ -823,6 +823,100 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
         )
       ).toThrow("ターゲット種別が不適合です。期待: unit, 実際: player");
     });
+
+    it("6.9: Request with status: undefined is excluded from candidate enumeration and fails closed on apply (Section 16 Case A)", () => {
+      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+      const counterReq: any = {
+        id: "req-counter",
+        actionId: "action.counter",
+        action: counterAction,
+        controller: "p2",
+        keyCards: [{ suit: "club", rank: "5", value: 5 }],
+        status: "pending",
+        targets: [{ type: "request", requestId: "req-orig", actionId: "action.attack", targetDefinitionId: "targetRequest" }],
+      };
+
+      const malformedReq: any = {
+        id: "req-malformed",
+        actionId: "action.attack",
+        controller: "p1",
+        keyCards: [{ suit: "spade", rank: "A" }],
+        // status is undefined!
+      };
+
+      const state = {
+        stage: { requests: [counterReq, malformedReq], history: [] },
+        players: { p1: {}, p2: {} },
+      };
+
+      // Candidate enumeration excludes malformedReq
+      const candidates = ActionTargetService.enumerateReplacementTargets(
+        counterReq,
+        state,
+        rulePackage.components
+      );
+      expect(candidates.some((c) => c.targetRequestId === "req-malformed")).toBe(false);
+
+      // Manual apply attempt fails closed
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          counterReq,
+          { targetType: "request", targetRequestId: "req-malformed", targetDefinitionId: "targetRequest" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ターゲットリクエスト [req-malformed] はアクティブではありません");
+
+      // Original target untouched
+      expect((counterReq.targets[0] as any).requestId).toBe("req-orig");
+    });
+
+    it("6.10: Request with unexpected-status is excluded from candidate enumeration and fails closed on apply (Section 16 Case B)", () => {
+      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+      const counterReq: any = {
+        id: "req-counter",
+        actionId: "action.counter",
+        action: counterAction,
+        controller: "p2",
+        keyCards: [{ suit: "club", rank: "5", value: 5 }],
+        status: "pending",
+        targets: [{ type: "request", requestId: "req-orig", actionId: "action.attack", targetDefinitionId: "targetRequest" }],
+      };
+
+      const malformedReq: any = {
+        id: "req-malformed-status",
+        actionId: "action.attack",
+        controller: "p1",
+        keyCards: [{ suit: "spade", rank: "A" }],
+        status: "unexpected-status" as any,
+      };
+
+      const state = {
+        stage: { requests: [counterReq, malformedReq], history: [] },
+        players: { p1: {}, p2: {} },
+      };
+
+      // Candidate enumeration excludes malformedReq
+      const candidates = ActionTargetService.enumerateReplacementTargets(
+        counterReq,
+        state,
+        rulePackage.components
+      );
+      expect(candidates.some((c) => c.targetRequestId === "req-malformed-status")).toBe(false);
+
+      // Manual apply attempt fails closed
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          counterReq,
+          { targetType: "request", targetRequestId: "req-malformed-status", targetDefinitionId: "targetRequest" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ターゲットリクエスト [req-malformed-status] はアクティブではありません");
+
+      // Original target untouched
+      expect((counterReq.targets[0] as any).requestId).toBe("req-orig");
+    });
   });
 
   // =========================================================================
@@ -1015,6 +1109,93 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
       expect(decReq.catalog.targetSelections).toHaveLength(2);
       expect(decReq.catalog.targetSelections[0].targetDefinitionId).toBe("targetA");
       expect(decReq.catalog.targetSelections[1].targetDefinitionId).toBe("targetB");
+    });
+
+    it("8.4: Single-target Action with request targets: [] throws error on replaceTarget and creates no target (Section 17)", () => {
+      const singleTargetAction: any = {
+        id: "action.singleStrike",
+        name: "単撃",
+        type: "magic",
+        targets: [{ id: "target", type: "unit" }],
+      };
+
+      const targetReq: any = {
+        id: "req-single-empty",
+        actionId: "action.singleStrike",
+        action: singleTargetAction,
+        controller: "p1",
+        status: "pending",
+        targets: [], // empty targets!
+      };
+
+      const state = {
+        players: {
+          p2: { field: [{ unitId: "u-1", componentId: "character.soldier", kind: "character" }] },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p2", targetUnitId: "u-1", targetDefinitionId: "target" },
+          state,
+          rulePackage.components,
+          "target",
+          [singleTargetAction]
+        )
+      ).toThrow("変更対象の既存ターゲットが存在しません。");
+
+      // Verify no target was created/pushed
+      expect(targetReq.targets).toEqual([]);
+    });
+
+    it("8.5: Multi-target Action where request has only targetA throws error when replacing targetB (Section 18)", () => {
+      const multiAction: any = {
+        id: "action.multiDual",
+        name: "二連",
+        type: "magic",
+        targets: [
+          { id: "targetA", type: "unit" },
+          { id: "targetB", type: "unit" },
+        ],
+      };
+
+      const targetReq: any = {
+        id: "req-multi-partial",
+        actionId: "action.multiDual",
+        action: multiAction,
+        controller: "p1",
+        status: "pending",
+        targets: [
+          { type: "unit", unitId: "u-s1", kind: "character", componentId: "character.soldier", targetDefinitionId: "targetA" },
+        ], // Only targetA exists, targetB is missing!
+      };
+
+      const state = {
+        players: {
+          p2: {
+            field: [
+              { unitId: "u-s1", componentId: "character.soldier", kind: "character" },
+              { unitId: "u-s2", componentId: "character.soldier", kind: "character" },
+            ],
+          },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p2", targetUnitId: "u-s2", targetDefinitionId: "targetB" },
+          state,
+          rulePackage.components,
+          "targetB",
+          [multiAction]
+        )
+      ).toThrow("変更対象のスロット [targetB] がリクエスト [req-multi-partial] の既存ターゲットに見つかりません。");
+
+      // Verify targetB was not appended
+      expect(targetReq.targets).toHaveLength(1);
+      expect((targetReq.targets[0] as any).targetDefinitionId).toBe("targetA");
     });
   });
 
@@ -1415,6 +1596,111 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
       expect(resolveRes?.type).toBe("COMPLETED");
       // Change Target effect was skipped due to TARGET_INVALID_AT_RESOLUTION
       expect(ctReq.status).toBe("resolved");
+    });
+
+    it("9.5: Same-target selection in GameSession resolves Change Target, preserves target, and emits zero request.target.changed events (Section 20)", () => {
+      const soldierA = {
+        unitId: "u-sA",
+        componentId: "character.soldier",
+        kind: "character",
+        state: "charge",
+        cards: [{ id: "c-card-A", suit: "spade", rank: "2" }],
+      };
+
+      const ctKeys = [
+        { id: "c-c1", suit: "club", rank: "A", value: 1 },
+        { id: "c-c2", suit: "club", rank: "2", value: 2 },
+      ];
+      const killKeys = [
+        { id: "c-s1", suit: "spade", rank: "A", value: 1 },
+        { id: "c-s2", suit: "spade", rank: "2", value: 2 },
+      ];
+
+      const customState = {
+        matchId: "match-ct-same-target",
+        stateVersion: 1,
+        turnPlayer: "p2",
+        chancePlayer: "p2",
+        players: {
+          p1: {
+            hand: ctKeys,
+            field: [soldierA],
+            grave: [],
+            life: [{ id: "l-p1", suit: "heart", rank: "A" }],
+          },
+          p2: {
+            hand: killKeys,
+            field: [],
+            grave: [],
+            life: [{ id: "l-p2", suit: "heart", rank: "A" }],
+          },
+        },
+        stage: { requests: [] as any[], history: [] as any[] },
+      };
+
+      const session = new GameSession(customState, rulePackage, {
+        matchId: "match-ct-same-target",
+      });
+
+      // P2 requests Kill targeting Soldier A
+      session.state.chancePlayer = "p2";
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const killReq = session.registry.createRequest(killAction, {
+        state: session.state,
+        playerKey: "p2",
+        keyCards: killKeys,
+        targetComponent: soldierA,
+      });
+
+      // P1 requests Change Target targeting Kill
+      session.state.chancePlayer = "p1";
+      const ctReq = session.registry.createRequest(changeTargetAction, {
+        state: session.state,
+        playerKey: "p1",
+        keyCards: ctKeys,
+        targetRequest: killReq,
+      });
+
+      // Both players pass to start resolution of Change Target
+      const step1 = resolveStageTopWithPasses(session)!;
+      expect(step1.type).toBe("WAITING_FOR_DECISION");
+      const dec1 = (step1 as any).request;
+      expect(dec1.source.type).toBe("EFFECT_RESOLUTION");
+
+      // Select Soldier A (same target)
+      const targetPatternIdx = dec1.patterns.findIndex((p: any) => {
+        const eff = dec1.catalog.effectSelections[p.effectSelectionRef];
+        return eff?.targetSelection?.targetUnitId === soldierA.unitId;
+      });
+      expect(targetPatternIdx).toBeGreaterThanOrEqual(0);
+
+      session.submitDecision({
+        decisionId: dec1.decisionId,
+        stateVersion: dec1.stateVersion,
+        selectedPatternRef: targetPatternIdx,
+      });
+
+      // Change Target resolved normally! Both players pass to resolve Kill
+      resolveStageTopWithPasses(session);
+
+      // Kill resolved targeting Soldier A: Soldier A is sent to grave
+      const p1Field = session.state.players.p1.field;
+      const p1Grave = session.state.players.p1.grave;
+      expect(p1Field.some((u: any) => u.unitId === soldierA.unitId)).toBe(false);
+      expect(
+        p1Grave.some(
+          (u: any) => u.unitId === soldierA.unitId || u.cards?.some((c: any) => c.id === "c-card-A")
+        )
+      ).toBe(true);
+
+      // Key cards normal lifecycle: Change Target key cards in p1 grave, Kill key cards in p2 grave
+      expect(session.state.players.p1.grave.some((c: any) => c.id === "c-c1")).toBe(true);
+      expect(session.state.players.p2.grave.some((c: any) => c.id === "c-s1")).toBe(true);
+
+      // CRITICAL: request.target.changed event must NOT be emitted for same-target no-op!
+      const logEvents = session.getMatchLog().events;
+      const targetChangedEvents = logEvents.filter((e) => e.type === "request.target.changed");
+      expect(targetChangedEvents).toHaveLength(0);
     });
   });
 
