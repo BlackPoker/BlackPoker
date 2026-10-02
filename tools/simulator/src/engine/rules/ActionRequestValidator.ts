@@ -10,7 +10,7 @@ import {
 } from "./targetConditionUtils";
 import { ActionActivationConditionEvaluator } from "./ActionActivationConditionEvaluator";
 import { ActionCostEvaluator, InvalidActionCostError } from "./ActionCostEvaluator";
-import { resolveKeyCardSourceZone, validateKeyCardsInSource } from "./keyCardUtils";
+import { resolveKeyCardSourceZone, validateKeyCardsInSource, resolveCanonicalKeyCardsInSource } from "./keyCardUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -194,6 +194,7 @@ export class ActionRequestValidator {
     }
 
     // 1. キーカード (key) のバリデーション
+    let canonicalKeyCards: any[] = [];
     if (action.key) {
       const keyDef = action.key;
       const expectedCount = keyDef.count !== undefined ? keyDef.count : 1;
@@ -210,23 +211,23 @@ export class ActionRequestValidator {
         );
       }
 
-      // 元ゾーン (source zone) の検証
+      // 元ゾーン (source zone) の検証 & 物理カード Identity の Canonical 解決
       const sourceZone = resolveKeyCardSourceZone(action);
       const player = context.state?.players?.[context.playerKey];
       if (!player) {
         throw new ValidationError(`プレイヤー '${context.playerKey}' が存在しません。`);
       }
-      validateKeyCardsInSource(player, sourceZone, actualCards);
+      canonicalKeyCards = resolveCanonicalKeyCardsInSource(player, sourceZone, actualCards);
 
-      // 条件の検証
+      // 条件の検証 (Caller 提供プロパティではなく State 上の canonicalKeyCards を使用)
       if (keyDef.conditions && Array.isArray(keyDef.conditions)) {
-        if (!matchConditions(actualCards, keyDef.conditions)) {
+        if (!matchConditions(canonicalKeyCards, keyDef.conditions)) {
           throw new ValidationError("キーカードが要求される複数条件を満たしていません。");
         }
       } else if (keyDef.condition) {
         const cond = keyDef.condition.card;
         if (cond) {
-          for (const card of actualCards) {
+          for (const card of canonicalKeyCards) {
             if (!card) {
               throw new ValidationError("キーカードが存在しません。");
             }
@@ -237,15 +238,15 @@ export class ActionRequestValidator {
         }
       }
 
-      // sameSuit の検証
+      // sameSuit の検証 (canonicalKeyCards を使用)
       if (keyDef.sameSuit) {
-        if (actualCards.length > 1) {
+        if (canonicalKeyCards.length > 1) {
           const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
-          const firstSuit = normalizeSuit(actualCards[0]?.suit);
+          const firstSuit = normalizeSuit(canonicalKeyCards[0]?.suit);
           if (!allowedSuits.has(firstSuit)) {
             throw new ValidationError("キーカードのスートが不正です。");
           }
-          const allSame = actualCards.every((c) => normalizeSuit(c?.suit) === firstSuit);
+          const allSame = canonicalKeyCards.every((c) => normalizeSuit(c?.suit) === firstSuit);
           if (!allSame) {
             throw new ValidationError("キーカードのスートが一致していません。");
           }
@@ -350,9 +351,14 @@ export class ActionRequestValidator {
               }
             }
 
+            const keyCardForTarget =
+              canonicalKeyCards.length > 0
+                ? canonicalKeyCards[0]
+                : context.keyCard || (context.keyCards && context.keyCards[0]);
+
             const res = evaluateUnitTargetCondition(context.targetComponent, cond, {
               components: context.components,
-              keyCard: context.keyCard || (context.keyCards && context.keyCards[0]),
+              keyCard: keyCardForTarget,
               playerKey: context.playerKey,
               unitOwnerKey,
             });

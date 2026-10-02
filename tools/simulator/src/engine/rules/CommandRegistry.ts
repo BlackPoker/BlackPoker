@@ -49,6 +49,8 @@ import {
   resolveKeyCardSourceZone,
   removeKeyCardsFromSource,
   resolveKeyCardVisibilityOnRequest,
+  resolveCanonicalKeyCardsInSource,
+  KeyCardSourceZone,
 } from "./keyCardUtils";
 
 export interface CreateRequestOptions {
@@ -270,8 +272,23 @@ export class CommandRegistry {
     context: CommandContext,
     options?: CreateRequestOptions
   ): ActionRequest {
-    // 1. 事前検証
+    // 1. 事前検証 (Key Card の Canonical 物理 Identity 解決・存在・一意性・条件検証を含む)
     this.validateAction(action, context);
+
+    // 1.5. キーカードの物理IdentityをState上のCanonical Cardへ解決 (Cost消費やState変更の前)
+    const player = context.state.players?.[context.playerKey];
+    let canonicalKeyCards: any[] = [];
+    let sourceZone: KeyCardSourceZone = "hand";
+    if (action.key && player) {
+      sourceZone = resolveKeyCardSourceZone(action);
+      const submittedCards =
+        context.keyCards && context.keyCards.length > 0
+          ? context.keyCards
+          : context.keyCard
+          ? [context.keyCard]
+          : [];
+      canonicalKeyCards = resolveCanonicalKeyCardsInSource(player, sourceZone, submittedCards);
+    }
 
     // 2. コスト支払い（リクエスト成立時に即時消費）
     const effectiveCost = this.costEvaluator.resolveEffectiveCost(
@@ -311,19 +328,10 @@ export class CommandRegistry {
     context.state.nextRequestSeq = (context.state.nextRequestSeq || 0) + 1;
     const seq = context.state.nextRequestSeq;
 
-    // 4. 投入カードのリスト化 & 元ゾーンからの取り除き（Requestに付属）
-    const actualCards =
-      context.keyCards && context.keyCards.length > 0
-        ? context.keyCards
-        : context.keyCard
-        ? [context.keyCard]
-        : [];
-
-    const player = context.state.players?.[context.playerKey];
-    if (player && actualCards.length > 0) {
-      const sourceZone = resolveKeyCardSourceZone(action);
-      removeKeyCardsFromSource(player, sourceZone, actualCards);
-      for (const card of actualCards) {
+    // 4. Canonical キーカードの元ゾーンからの取り除き & イベント発行（Requestに付属）
+    if (player && canonicalKeyCards.length > 0) {
+      removeKeyCardsFromSource(player, sourceZone, canonicalKeyCards);
+      for (const card of canonicalKeyCards) {
         this.effectInterpreter.dispatchEvent(
           {
             type: "cardMoved",
@@ -341,7 +349,7 @@ export class CommandRegistry {
 
       const visibilityOnRequest = resolveKeyCardVisibilityOnRequest(action);
       if (visibilityOnRequest === "public") {
-        for (const card of actualCards) {
+        for (const card of canonicalKeyCards) {
           this.effectInterpreter.dispatchEvent(
             {
               type: "cardRevealed",
@@ -440,7 +448,7 @@ export class CommandRegistry {
       id: `req-${seq}`,
       actionId: action.id,
       controller: context.playerKey,
-      keyCards: actualCards,
+      keyCards: canonicalKeyCards,
       targets,
       cost: action.cost,
       selectedCostPayment: options?.selectedCostPayment,
@@ -464,7 +472,7 @@ export class CommandRegistry {
         timing: action.request?.timing,
         decisionId: options?.decisionId,
         sourcePatternId: options?.sourcePatternId,
-        keyCardIds: actualCards.map((c: any) => c.id).filter(Boolean),
+        keyCardIds: canonicalKeyCards.map((c: any) => c.id).filter(Boolean),
         targetRefs: targets,
       });
     }

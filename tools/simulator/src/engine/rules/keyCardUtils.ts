@@ -59,7 +59,7 @@ export function getKeyCardsFromSource(player: any, sourceZone: KeyCardSourceZone
 
 /**
  * 対象プレイヤーの対応ゾーンから使用されたキーカードを除去します。
- * 全カードの存在・重複なし・有効ゾーンであることを事前確認し、1枚でも不正なら状態変更せず fail-closed (all-or-nothing)。
+ * 全カードの存在・重複なし・有効ゾーン・一意であることを事前確認し、1枚でも不正なら状態変更せず fail-closed (all-or-nothing)。
  */
 export function removeKeyCardsFromSource(
   player: any,
@@ -69,7 +69,7 @@ export function removeKeyCardsFromSource(
   if (!player) {
     throw new Error("プレイヤーが存在しません (fail-closed)");
   }
-  if (cardsToRemove.length === 0) return;
+  if (!cardsToRemove || cardsToRemove.length === 0) return;
 
   let sourceCards: any[];
   if (sourceZone === "hand") {
@@ -88,7 +88,7 @@ export function removeKeyCardsFromSource(
 
   const seenIds = new Set<string>();
   for (const c of cardsToRemove) {
-    if (!c || !c.id) {
+    if (!c || typeof c.id !== "string" || c.id.trim() === "") {
       throw new Error("除去対象カードまたはカードIDが不正です (fail-closed)");
     }
     if (seenIds.has(c.id)) {
@@ -97,11 +97,16 @@ export function removeKeyCardsFromSource(
     seenIds.add(c.id);
   }
 
-  const sourceCardIdSet = new Set(sourceCards.map((c: any) => c?.id));
   for (const cardId of seenIds) {
-    if (!sourceCardIdSet.has(cardId)) {
+    const matches = sourceCards.filter((c: any) => c && c.id === cardId);
+    if (matches.length === 0) {
       throw new Error(
         `除去対象カード '${cardId}' が元ゾーン '${sourceZone}' に存在しません (fail-closed)`
+      );
+    }
+    if (matches.length > 1) {
+      throw new Error(
+        `除去対象カード '${cardId}' が元ゾーン '${sourceZone}' に複数存在します (fail-closed)`
       );
     }
   }
@@ -115,17 +120,31 @@ export function removeKeyCardsFromSource(
 }
 
 /**
- * 投入されたキーカードが本当に対象ゾーンに存在するかを検証します。
+ * 投入されたキーカード参照から、プレイヤーの指定元ゾーンに存在する Canonical な Card オブジェクト一覧を一意に解決します。
+ *
+ * 物理カード Identity 契約:
+ * 1. 投入されたカード参照（およびそのプロパティ）は信頼されず、ID のみが reference として扱われます。
+ * 2. 実際のカード属性 (suit, rank, value, etc.) の SSOT は Game State 内の元ゾーンに存在するオブジェクトです。
+ * 3. 以下のいずれかの違反がある場合は即座に fail-closed で例外 (ValidationError) をスローします:
+ *    - プレイヤーが存在しない
+ *    - 指定元ゾーンが不正 / 配列でない
+ *    - 投入カードが null / undefined または 有効な文字列 ID を持たない
+ *    - 同一リクエスト内で投入カード ID に重複が存在する
+ *    - 元ゾーン内に該当 ID を持つカードが存在しない (0件)
+ *    - 元ゾーン内に同一 ID を持つカードが複数存在する (2件以上: ambiguous / corrupt physical identity)
+ * 4. 解決された Canonical Card は、State 自身が保持する参照そのものを要求順序通りに返却します。
  */
-export function validateKeyCardsInSource(
+export function resolveCanonicalKeyCardsInSource(
   player: any,
   sourceZone: KeyCardSourceZone,
-  cardsToValidate: readonly any[]
-): void {
+  submittedCards: readonly any[]
+): any[] {
   if (!player) {
     throw new ValidationError("プレイヤーが存在しません。");
   }
-  if (cardsToValidate.length === 0) return;
+  if (!submittedCards || submittedCards.length === 0) {
+    return [];
+  }
 
   let sourceCards: any[];
   if (sourceZone === "hand") {
@@ -142,25 +161,53 @@ export function validateKeyCardsInSource(
     throw new ValidationError(`未知のキーカード元ゾーンです: '${sourceZone}'`);
   }
 
-  const seenIds = new Set<string>();
-  for (const c of cardsToValidate) {
-    if (!c || !c.id) {
+  // 1. 投入カード自身の妥当性および投入リスト内での重複チェック
+  const seenSubmittedIds = new Set<string>();
+  for (const card of submittedCards) {
+    if (!card || typeof card.id !== "string" || card.id.trim() === "") {
       throw new ValidationError("キーカードまたはカードIDが不正です。");
     }
-    if (seenIds.has(c.id)) {
-      throw new ValidationError(`キーカードIDに重複が存在します: '${c.id}'`);
+    if (seenSubmittedIds.has(card.id)) {
+      throw new ValidationError(`キーカードIDに重複が存在します: '${card.id}'`);
     }
-    seenIds.add(c.id);
+    seenSubmittedIds.add(card.id);
   }
 
-  const sourceCardIdSet = new Set(sourceCards.map((c: any) => c?.id));
-  for (const cardId of seenIds) {
-    if (!sourceCardIdSet.has(cardId)) {
+  // 2. 元ゾーンからの Canonical Card 解決
+  const canonicalCards: any[] = [];
+  for (const submitted of submittedCards) {
+    const cardId = submitted.id;
+    const matches = sourceCards.filter((c: any) => c && c.id === cardId);
+
+    if (matches.length === 0) {
       throw new ValidationError(
         `キーカード '${cardId}' が指定元ゾーン '${sourceZone}' に存在しません。`
       );
     }
+
+    if (matches.length > 1) {
+      throw new ValidationError(
+        `指定元ゾーン '${sourceZone}' に同一の物理カードID '${cardId}' が複数存在します (fail-closed)`
+      );
+    }
+
+    // 正確に1件の一致: State 上の Canonical オブジェクトそのものを採用
+    canonicalCards.push(matches[0]);
   }
+
+  return canonicalCards;
+}
+
+/**
+ * 投入されたキーカードが本当に対象ゾーンに存在するかを検証します。
+ * 内部で resolveCanonicalKeyCardsInSource を利用して fail-closed に検証します。
+ */
+export function validateKeyCardsInSource(
+  player: any,
+  sourceZone: KeyCardSourceZone,
+  cardsToValidate: readonly any[]
+): void {
+  resolveCanonicalKeyCardsInSource(player, sourceZone, cardsToValidate);
 }
 
 /**

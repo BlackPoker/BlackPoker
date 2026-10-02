@@ -7,6 +7,7 @@ import {
   resolveKeyCardSourceZone,
   validateKeyCardsInSource,
   removeKeyCardsFromSource,
+  resolveCanonicalKeyCardsInSource,
 } from "../../engine/rules/keyCardUtils";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { EffectInterpreter } from "../../engine/rules/EffectInterpreter";
@@ -250,6 +251,23 @@ describe("BP-SIM-REG-4.0-C-R1: Key Card Source Validation & Canonical Movement",
         removeKeyCardsFromSource(player, "hand", [cardA, cardA]);
       }).toThrow(/重複が存在します/);
       expect(player.hand.length).toBe(2);
+
+      // 4. ambiguous duplicate card ID in source zone -> fail-closed without mutating
+      const corruptPlayer = {
+        hand: [cardA, { ...cardA, rank: "6" }],
+      };
+      expect(() => {
+        removeKeyCardsFromSource(corruptPlayer, "hand", [cardA]);
+      }).toThrow(/複数存在します/);
+      expect(corruptPlayer.hand.length).toBe(2);
+
+      // 5. validateKeyCardsInSource and resolveCanonicalKeyCardsInSource reject ambiguous duplicate card ID in source zone
+      expect(() => {
+        validateKeyCardsInSource(corruptPlayer, "hand", [cardA]);
+      }).toThrow(/複数存在します/);
+      expect(() => {
+        resolveCanonicalKeyCardsInSource(corruptPlayer, "hand", [cardA]);
+      }).toThrow(/複数存在します/);
     });
   });
 
