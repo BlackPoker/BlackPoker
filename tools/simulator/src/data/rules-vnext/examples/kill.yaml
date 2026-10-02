@@ -1,0 +1,31 @@
+actions:
+  - id: action.kill
+    name: キル
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: spade
+          rank: "A..10"
+          zone: hand
+
+    targets:
+      - id: target
+        type: unit
+        condition:
+          characterType: soldier
+
+    text:
+      effect: 対象とした兵士を墓地に移す。
+
+    effect:
+      - moveToGraveyard:
+          target: target
