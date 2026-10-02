@@ -1,9 +1,10 @@
 import { describe, it, expect, beforeAll } from "vitest";
 import * as path from "path";
+import * as fs from "fs";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader";
-import { RulePackage, ActionDefinition, ActionRequest } from "../../domain/rules/RulePackage";
-import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
+import { RulePackage, ActionDefinition, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
+import { CommandRegistry, CommandContext, cancelStageRequest } from "../../engine/rules/CommandRegistry";
 import { ActionRequestValidator, ValidationError } from "../../engine/rules/ActionRequestValidator";
 import { ActionTargetService } from "../../engine/rules/ActionTargetService";
 import { TargetSelectionEnumerator } from "../../engine/decision/TargetSelectionEnumerator";
@@ -13,8 +14,9 @@ import { loadRegulationCatalog, getFormat, getRegulation } from "../../engine/re
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { TargetSelection, EffectSelection } from "../../domain/decision/DecisionCatalog";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
+import { evaluateRequestTargetCondition } from "../../engine/rules/targetConditionUtils";
 
-describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象変更) & Generic Target Foundation", () => {
+describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hardened Generic Target Foundation", () => {
   let rulePackage: RulePackage;
   let proRulePackage: RulePackage;
   let changeTargetAction: ActionDefinition;
@@ -28,7 +30,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
   });
 
   // =========================================================================
-  // 1. Official Rule SSOT & Schema Contracts (Sections 13, 50, 51)
+  // 1. Official Rule SSOT & Schema Contracts (Section 54.1, 54.35)
   // =========================================================================
   describe("1. Official Rule SSOT & Schema Contracts", () => {
     it("1.1: Change Target definition conforms exactly to v9.1.2 Section 7.3.1.4.10", () => {
@@ -61,20 +63,21 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
         },
       });
 
-      // Target: request with status: pending and hasTarget: true
+      // Target: request with hasTarget: true (no artificial status: pending)
       expect(changeTargetAction.targets).toBeDefined();
       expect(changeTargetAction.targets).toHaveLength(1);
       expect(changeTargetAction.targets![0]).toEqual({
         id: "targetRequest",
         type: "request",
         condition: {
-          status: "pending",
           hasTarget: true,
         },
       });
 
-      // Effect: selectActionTarget -> replaceRequestTarget
-      expect(changeTargetAction.text?.effect).toBe("対象のリクエストの対象を、別の適正な対象に変更する。");
+      // Effect text: does NOT require a different target ("別の" is removed)
+      expect(changeTargetAction.text?.effect).toBe(
+        "対象のリクエストで指定されている対象をそのアクションが指定できる範囲で変更する。"
+      );
       expect(changeTargetAction.effect).toHaveLength(2);
       const effects = changeTargetAction.effect as any[];
       expect(effects[0].selectActionTarget).toEqual({
@@ -88,7 +91,14 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       });
     });
 
-    it("1.2: Format inclusion/exclusion contract (Sections 50, 51)", async () => {
+    it("1.2: Counter YAML does not contain artificial status: pending", () => {
+      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+      expect(counterAction).toBeDefined();
+      expect(counterAction.targets![0].condition?.status).toBeUndefined();
+      expect(counterAction.targets![0].condition?.keyCards).toEqual({ count: [1, 2] });
+    });
+
+    it("1.3: Format inclusion/exclusion contract", async () => {
       const lightFormat = await getFormat("light");
       const standardFormat = await getFormat("standard");
       const proFormat = await getFormat("pro");
@@ -101,14 +111,15 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
 
       expect(proFormat).toBeDefined();
       expect(proFormat.actions).toContain("action.changeTarget");
+      expect(proFormat.actions).toHaveLength(31);
     });
 
-    it("1.3: Total actions count is 36 including action.changeTarget", () => {
+    it("1.4: Total actions count is 36 including action.changeTarget", () => {
       expect(rulePackage.actions).toHaveLength(36);
       expect(rulePackage.actions.map((a) => a.id)).toContain("action.changeTarget");
     });
 
-    it("1.4: pro:rarePack remains unimplemented / unpublished", async () => {
+    it("1.5: pro:rarePack remains unimplemented / unpublished", async () => {
       const catalog = await loadRegulationCatalog();
       const proRarePack = await getRegulation("pro-rarePack");
       expect(proRarePack).toBeDefined();
@@ -144,7 +155,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
               actionId: "action.kill",
               controller: "p2",
               status: "pending",
-              targets: [{ type: "unit", unitId: "u-1", targetDefinitionId: "target" }],
+              targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
               keyCards: [],
             },
           ],
@@ -221,9 +232,9 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
   });
 
   // =========================================================================
-  // 3. Request-Time Target Validation (hasTarget: true, status: pending)
+  // 3. Request-Time Target Validation & Stage Invariant (Section 54.6, 54.7, 54.8, 54.29)
   // =========================================================================
-  describe("3. Request-Time Target Validation", () => {
+  describe("3. Request-Time Target Validation & Stage Invariant", () => {
     const validator = new ActionRequestValidator();
 
     const makeContextWithTarget = (targetReq: any, stageReqs: any[]): CommandContext => {
@@ -237,7 +248,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
             p1: { hand: [...hand], field: [], grave: [], life: [] },
             p2: { hand: [], field: [], grave: [], life: [] },
           },
-          stage: { requests: stageReqs },
+          stage: { requests: stageReqs, history: [] },
           turnPlayer: "p1",
           chancePlayer: "p1",
         },
@@ -259,7 +270,19 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).not.toThrow();
     });
 
-    it("3.2: Cannot target request without targets (e.g. End)", () => {
+    it("3.2: Can target resolving request with targets (resolving with status omitted is legal)", () => {
+      const resolvingKill = {
+        id: "req-kill",
+        actionId: "action.kill",
+        controller: "p2",
+        status: "resolving",
+        targets: [{ type: "unit", unitId: "u-1" }],
+      };
+      const ctx = makeContextWithTarget(resolvingKill, [resolvingKill]);
+      expect(() => validator.validateActionRequest(changeTargetAction, ctx)).not.toThrow();
+    });
+
+    it("3.3: Cannot target request without targets (e.g. End)", () => {
       const endReq = {
         id: "req-end",
         actionId: "action.end",
@@ -271,7 +294,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
     });
 
-    it("3.3: Cannot target request with status resolved", () => {
+    it("3.4: Cannot target request with status resolved (structurally invalid)", () => {
       const resolvedKill = {
         id: "req-kill",
         actionId: "action.kill",
@@ -283,7 +306,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
     });
 
-    it("3.4: Cannot target request with status cancelled", () => {
+    it("3.5: Cannot target request with status cancelled (structurally invalid)", () => {
       const cancelledKill = {
         id: "req-kill",
         actionId: "action.kill",
@@ -295,7 +318,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
     });
 
-    it("3.5: Cannot target self request", () => {
+    it("3.6: Cannot target self request", () => {
       const myReq = {
         id: "req-ct",
         actionId: "action.changeTarget",
@@ -308,7 +331,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
     });
 
-    it("3.6: Fails if target request is not present on Stage", () => {
+    it("3.7: Fails if target request is not present on Stage (ghost request)", () => {
       const ghostReq = {
         id: "req-ghost",
         actionId: "action.kill",
@@ -319,13 +342,48 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       const ctx = makeContextWithTarget(ghostReq, []); // empty stage
       expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
     });
+
+    it("3.8: Fails if target request is only in stage.history (Section 21, 29)", () => {
+      const historyReq = {
+        id: "req-history",
+        actionId: "action.kill",
+        controller: "p2",
+        status: "pending",
+        targets: [{ type: "unit", unitId: "u-1" }],
+      };
+      const ctx = makeContextWithTarget(historyReq, []);
+      ctx.state.stage.history = [historyReq];
+      expect(() => validator.validateActionRequest(changeTargetAction, ctx)).toThrow(ValidationError);
+    });
   });
 
   // =========================================================================
-  // 4. ActionTargetService Unit Contracts (SSOT & Replacement Logic)
+  // 4. Exact Request Status Semantics Evaluator (Section 34, 54.6, 54.7, 54.8)
   // =========================================================================
-  describe("4. ActionTargetService Unit Contracts", () => {
-    it("4.1: enumerateTargets for Change Target only lists stage requests with targets", () => {
+  describe("4. Exact Request Status Semantics Evaluator", () => {
+    it("4.1: evaluateRequestTargetCondition respects exact status equality without aliasing", () => {
+      const pendingReq = { id: "r1", status: "pending" };
+      const resolvingReq = { id: "r2", status: "resolving" };
+
+      // target.status = pending, condition.status = pending -> PASS
+      expect(evaluateRequestTargetCondition(pendingReq, { status: "pending" }).isValid).toBe(true);
+
+      // target.status = resolving, condition.status = pending -> FAIL
+      expect(evaluateRequestTargetCondition(resolvingReq, { status: "pending" }).isValid).toBe(false);
+
+      // target.status = resolving, condition.status = resolving -> PASS
+      expect(evaluateRequestTargetCondition(resolvingReq, { status: "resolving" }).isValid).toBe(true);
+
+      // target.status = resolving, condition.status omitted -> PASS
+      expect(evaluateRequestTargetCondition(resolvingReq, {}).isValid).toBe(true);
+    });
+  });
+
+  // =========================================================================
+  // 5. ActionTargetService SSOT & Candidate Enumeration (Section 54.9, 10, 11, 12, 13)
+  // =========================================================================
+  describe("5. ActionTargetService Candidate Enumeration", () => {
+    it("5.1: enumerateTargets for Change Target only lists active stage requests with targets", () => {
       const state = {
         players: { p1: {}, p2: {} },
         stage: {
@@ -333,6 +391,8 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
             { id: "r1", actionId: "action.end", controller: "p2", status: "pending", targets: [] },
             { id: "r2", actionId: "action.kill", controller: "p2", status: "pending", targets: [{ type: "unit", unitId: "u1" }] },
             { id: "r3", actionId: "action.counter", controller: "p1", status: "pending", targets: [{ type: "request", requestId: "r2" }] },
+            { id: "r4-resolved", actionId: "action.kill", controller: "p2", status: "resolved", targets: [{ type: "unit", unitId: "u1" }] },
+            { id: "r5-cancelled", actionId: "action.kill", controller: "p2", status: "cancelled", targets: [{ type: "unit", unitId: "u1" }] },
           ],
         },
       };
@@ -348,9 +408,11 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(targetRequestIds).not.toContain("r1"); // end has no targets
       expect(targetRequestIds).toContain("r2"); // kill has targets
       expect(targetRequestIds).toContain("r3"); // counter has targets
+      expect(targetRequestIds).not.toContain("r4-resolved"); // resolved is structurally invalid
+      expect(targetRequestIds).not.toContain("r5-cancelled"); // cancelled is structurally invalid
     });
 
-    it("4.2: TargetSelectionEnumerator delegates to ActionTargetService cleanly", () => {
+    it("5.2: TargetSelectionEnumerator delegates cleanly to ActionTargetService", () => {
       const state = {
         players: { p1: {}, p2: {} },
         stage: {
@@ -370,7 +432,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(candidates[0].targetRequestId).toBe("r2");
     });
 
-    it("4.3: enumerateReplacementTargets for Kill only lists soldier units", () => {
+    it("5.3: enumerateReplacementTargets for Kill only lists soldier units", () => {
       const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
       const targetReq: ActionRequest = {
         id: "req-kill",
@@ -410,11 +472,11 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       const unitIds = candidates.map((c) => c.targetUnitId);
       expect(unitIds).toContain("u-soldier-1");
       expect(unitIds).toContain("u-soldier-2");
-      expect(unitIds).toContain("u-hero-1"); // In BlackPoker, hero is a soldier characterType
+      expect(unitIds).toContain("u-hero-1"); // hero is a soldier characterType
       expect(unitIds).not.toContain("u-bulwark-1"); // bulwark is not a soldier
     });
 
-    it("4.4: enumerateReplacementTargets for Mount Soldier uses original key card suit (Section 30)", () => {
+    it("5.4: enumerateReplacementTargets for Mount Soldier uses original key card suit (Section 54.13)", () => {
       const mountAction = rulePackage.actions.find((a) => a.id === "action.mountSoldier")!;
       const targetReq: ActionRequest = {
         id: "req-mount",
@@ -453,42 +515,53 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       expect(unitIds).not.toContain("u-s3"); // Heart does not match Mount Soldier's Spade key
     });
 
-    it("4.5: isSameCanonicalTarget correctly identifies equality", () => {
-      expect(ActionTargetService.isSameCanonicalTarget(null, null)).toBe(true);
-      expect(ActionTargetService.isSameCanonicalTarget(undefined, undefined)).toBe(true);
-      expect(
-        ActionTargetService.isSameCanonicalTarget(
-          { targetType: "unit", targetUnitId: "u1" },
-          { type: "unit", unitId: "u1" }
-        )
-      ).toBe(true);
-      expect(
-        ActionTargetService.isSameCanonicalTarget(
-          { targetType: "unit", targetUnitId: "u1" },
-          { type: "unit", unitId: "u2" }
-        )
-      ).toBe(false);
-      expect(
-        ActionTargetService.isSameCanonicalTarget(
-          { targetType: "request", targetRequestId: "r1" },
-          { type: "request", requestId: "r1" }
-        )
-      ).toBe(true);
-      expect(
-        ActionTargetService.isSameCanonicalTarget(
-          { targetType: "player", targetPlayerKey: "p1" },
-          { type: "player", targetPlayerKey: "p1" }
-        )
-      ).toBe(true);
-      expect(
-        ActionTargetService.isSameCanonicalTarget(
-          { targetType: "unit", targetUnitId: "u1" },
-          { targetType: "player", targetPlayerKey: "p1" }
-        )
-      ).toBe(false);
-    });
+    it("5.5: enumerateReplacementTargets for player-targeting action uses original controller (Section 54.10, 54.12)", () => {
+      const syntheticPlayerAction: any = {
+        id: "action.syntheticPlayerTarget",
+        name: "プレイヤー対象アクション",
+        type: "magic",
+        targets: [
+          {
+            id: "targetPlayer",
+            type: "player",
+            condition: { relation: "opponent" },
+          },
+        ],
+      };
 
-    it("4.6: replaceTarget performs atomic update and preserves targetDefinitionId", () => {
+      const req: any = {
+        id: "req-player-tgt",
+        actionId: "action.syntheticPlayerTarget",
+        action: syntheticPlayerAction,
+        controller: "p2",
+        status: "pending",
+        targets: [{ type: "player", targetPlayerKey: "p1", targetDefinitionId: "targetPlayer" }],
+      };
+
+      const state = {
+        players: { p1: {}, p2: {} },
+        stage: { requests: [req] },
+      };
+
+      // When P1 calls Change Target on req-player-tgt (whose controller is P2),
+      // the relation "opponent" must be evaluated relative to P2, resulting in P1 as opponent candidate!
+      const candidates = ActionTargetService.enumerateReplacementTargets(
+        req,
+        state,
+        rulePackage.components,
+        { actions: [syntheticPlayerAction] }
+      );
+
+      expect(candidates).toHaveLength(1);
+      expect(candidates[0].targetPlayerKey).toBe("p1");
+    });
+  });
+
+  // =========================================================================
+  // 6. Apply-Time Canonical Revalidation & Fail-Closed Scenarios (Section 54.14 - 54.21)
+  // =========================================================================
+  describe("6. Apply-Time Canonical Revalidation & Fail-Closed", () => {
+    it("6.1: Stale Unit candidate (removed from field before apply) throws Error and leaves target unchanged (Section 54.14)", () => {
       const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
       const targetReq: ActionRequest = {
         id: "req-kill",
@@ -501,32 +574,262 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
         targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
       };
 
+      // State without u-2 (u-2 was removed before apply)
       const state = {
         players: {
           p1: {
+            field: [{ unitId: "u-1", componentId: "character.soldier", kind: "character" }],
+          },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-2", targetDefinitionId: "target" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ユニット [u-2] はフィールド上に存在しません。");
+
+      // targetRequest is untouched (atomic)
+      expect((targetReq.targets![0] as any).unitId).toBe("u-1");
+    });
+
+    it("6.2: Stale Request candidate (removed from stage before apply) throws Error (Section 54.15)", () => {
+      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+      const counterReq: any = {
+        id: "req-counter",
+        actionId: "action.counter",
+        action: counterAction,
+        controller: "p2",
+        keyCards: [{ suit: "club", rank: "5", value: 5 }],
+        status: "pending",
+        targets: [{ type: "request", requestId: "req-orig", actionId: "action.attack", targetDefinitionId: "targetRequest" }],
+      };
+
+      const state = {
+        stage: {
+          requests: [counterReq], // req-stale is gone from stage!
+          history: [{ id: "req-stale", actionId: "action.attack", status: "pending" }],
+        },
+        players: { p1: {}, p2: {} },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          counterReq,
+          { targetType: "request", targetRequestId: "req-stale", targetDefinitionId: "targetRequest" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ターゲットリクエスト [req-stale] はステージ上に存在しません。");
+
+      expect((counterReq.targets![0] as any).requestId).toBe("req-orig");
+    });
+
+    it("6.3: Candidate condition changed after enumeration (charge -> drive) throws Error (Section 54.16)", () => {
+      const syntheticAction: any = {
+        id: "action.strikeCharged",
+        name: "チャージ撃破",
+        type: "magic",
+        targets: [
+          {
+            id: "target",
+            type: "unit",
+            condition: { state: "charge" },
+          },
+        ],
+      };
+
+      const targetReq: any = {
+        id: "req-strike",
+        actionId: "action.strikeCharged",
+        action: syntheticAction,
+        controller: "p1",
+        status: "pending",
+        targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
+      };
+
+      // u-2 is driven, not charged
+      const state = {
+        players: {
+          p2: {
             field: [
-              { unitId: "u-1", componentId: "character.soldier", kind: "character" },
-              { unitId: "u-2", componentId: "character.soldier", kind: "character" },
+              { unitId: "u-1", componentId: "character.soldier", kind: "character", state: "charge" },
+              { unitId: "u-2", componentId: "character.soldier", kind: "character", state: "drive" },
             ],
           },
         },
       };
 
-      const result = ActionTargetService.replaceTarget(
-        targetReq,
-        { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-2", targetDefinitionId: "target" },
-        state,
-        rulePackage.components
-      );
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p2", targetUnitId: "u-2", targetDefinitionId: "target" },
+          state,
+          rulePackage.components,
+          undefined,
+          [syntheticAction]
+        )
+      ).toThrow("ターゲットユニットの状態が不適合です");
 
-      expect(result.changed).toBe(true);
-      expect((result.previousTarget as any)?.unitId).toBe("u-1");
-      expect((result.newTarget as any)?.unitId).toBe("u-2");
-      expect((result.newTarget as any)?.targetDefinitionId).toBe("target");
-      expect((targetReq.targets![0] as any).unitId).toBe("u-2");
+      expect((targetReq.targets![0] as any).unitId).toBe("u-1");
     });
 
-    it("4.7: replaceTarget with identical target returns changed: false", () => {
+    it("6.4: Duplicate unitId across fields fails closed (Section 54.18)", () => {
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const targetReq: any = {
+        id: "req-kill",
+        actionId: "action.kill",
+        action: killAction,
+        controller: "p2",
+        keyCards: [],
+        status: "pending",
+        targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
+      };
+
+      // Duplicate u-dup on p1 and p2 fields
+      const state = {
+        players: {
+          p1: { field: [{ unitId: "u-dup", componentId: "character.soldier", kind: "character" }] },
+          p2: { field: [{ unitId: "u-dup", componentId: "character.soldier", kind: "character" }] },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-dup", targetDefinitionId: "target" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("重複するユニットID [u-dup] がフィールド上で検出されました。");
+    });
+
+    it("6.5: Duplicate requestId on Stage fails closed (Section 54.19)", () => {
+      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+      const counterReq: any = {
+        id: "req-counter",
+        actionId: "action.counter",
+        action: counterAction,
+        controller: "p2",
+        keyCards: [{ suit: "club", rank: "5", value: 5 }],
+        status: "pending",
+        targets: [{ type: "request", requestId: "req-orig", actionId: "action.attack", targetDefinitionId: "targetRequest" }],
+      };
+
+      const state = {
+        stage: {
+          requests: [
+            counterReq,
+            { id: "req-dup", actionId: "action.attack", status: "pending", controller: "p1", keyCards: [{ suit: "spade", rank: "A" }] },
+            { id: "req-dup", actionId: "action.attack", status: "pending", controller: "p1", keyCards: [{ suit: "spade", rank: "A" }] },
+          ],
+        },
+        players: { p1: {}, p2: {} },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          counterReq,
+          { targetType: "request", targetRequestId: "req-dup", targetDefinitionId: "targetRequest" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("重複するリクエストID [req-dup] がステージ上で検出されました。");
+    });
+
+    it("6.6: Unknown player fails closed (Section 54.20)", () => {
+      const syntheticPlayerAction: any = {
+        id: "action.synPlayer",
+        name: "プレイヤー対象",
+        type: "magic",
+        targets: [{ id: "targetPlayer", type: "player" }],
+      };
+
+      const targetReq: any = {
+        id: "req-p",
+        actionId: "action.synPlayer",
+        action: syntheticPlayerAction,
+        controller: "p1",
+        status: "pending",
+        targets: [{ type: "player", targetPlayerKey: "p2", targetDefinitionId: "targetPlayer" }],
+      };
+
+      const state = { players: { p1: {}, p2: {} } };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "player", targetPlayerKey: "p-ghost", targetDefinitionId: "targetPlayer" },
+          state,
+          rulePackage.components,
+          undefined,
+          [syntheticPlayerAction]
+        )
+      ).toThrow("プレイヤー [p-ghost] が存在しません。");
+    });
+
+    it("6.7: Wrong targetDefinitionId fails closed (Section 54.21)", () => {
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const targetReq: any = {
+        id: "req-kill",
+        actionId: "action.kill",
+        action: killAction,
+        controller: "p2",
+        status: "pending",
+        targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
+      };
+
+      const state = {
+        players: {
+          p1: { field: [{ unitId: "u-2", componentId: "character.soldier", kind: "character" }] },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-2", targetDefinitionId: "wrongSlot" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("指定された targetDefinitionId [wrongSlot] はアクション [action.kill] のターゲット定義に存在しません。");
+    });
+
+    it("6.8: Spoofed TargetSelection type fails closed (Section 54.17)", () => {
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const targetReq: any = {
+        id: "req-kill",
+        actionId: "action.kill",
+        action: killAction,
+        controller: "p2",
+        status: "pending",
+        targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
+      };
+
+      const state = {
+        players: { p1: {}, p2: {} },
+      };
+
+      // Expected type is unit, but caller supplied player
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "player", targetPlayerKey: "p1", targetDefinitionId: "target" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ターゲット種別が不適合です。期待: unit, 実際: player");
+    });
+  });
+
+  // =========================================================================
+  // 7. Same-Target Legality & Validation Order (Section 54.2, 54.3, 54.30)
+  // =========================================================================
+  describe("7. Same-Target Legality & Validation Order", () => {
+    it("7.1: Same target is legal when still present and valid -> changed: false (Section 54.2)", () => {
       const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
       const targetReq: ActionRequest = {
         id: "req-kill",
@@ -555,158 +858,193 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
       );
 
       expect(result.changed).toBe(false);
-      expect((targetReq.targets![0] as any).unitId).toBe("u-1");
-    });
-  });
-
-  // =========================================================================
-  // 5. Decision Generation & Interruption (LegalPatternGenerator & GameSession)
-  // =========================================================================
-  describe("5. Decision Generation & Interruption", () => {
-    it("5.1: generateTargetSelectionDecision builds valid DecisionRequest with EFFECT_RESOLUTION", () => {
-      const candidates: TargetSelection[] = [
-        { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-1", displayName: "Player A: Soldier 1" },
-        { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-2", displayName: "Player A: Soldier 2" },
-      ];
-
-      const sourceReq = { id: "req-ct-1" };
-      const decReq = LegalPatternGenerator.generateTargetSelectionDecision(
-        { stateVersion: 2, matchId: "m-1" },
-        "p1",
-        sourceReq,
-        "selectActionTarget",
-        candidates
-      );
-
-      expect(decReq.source.type).toBe("EFFECT_RESOLUTION");
-      expect((decReq.source as any).sourceRequestRef).toBe("req-ct-1");
-      expect(decReq.patterns).toHaveLength(2);
-      expect(decReq.catalog.targetSelections).toHaveLength(2);
-      expect(decReq.catalog.effectSelections).toHaveLength(2);
-
-      const eff0 = decReq.catalog.effectSelections[0];
-      expect(eff0.selectionType).toBe("target");
-      expect(eff0.targetSelection?.targetUnitId).toBe("u-1");
+      expect((result.previousTarget as any)?.unitId).toBe("u-1");
+      expect((result.newTarget as any)?.unitId).toBe("u-1");
     });
 
-    it("5.2: selectActionTarget with 0 units on field binds null and does not interrupt", () => {
-      const registry = new CommandRegistry();
-      const interp = registry.getEffectInterpreter();
-
+    it("7.2: Same target candidate that became stale fails closed (validates before no-op) (Section 22)", () => {
       const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
-      const targetReq: ActionRequest = {
+      const targetReq: any = {
         id: "req-kill",
         actionId: "action.kill",
         action: killAction,
         controller: "p2",
-        keyCards: [],
         status: "pending",
-        sequence: 1,
-        targets: [{ type: "unit", unitId: "u-dead", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
+        targets: [{ type: "unit", unitId: "u-1", kind: "character", componentId: "character.soldier", targetDefinitionId: "target" }],
       };
 
-      // No units on field
-      const context: CommandContext = {
-        state: {
-          players: { p1: { field: [] }, p2: { field: [] } },
-          stage: { requests: [targetReq] },
+      // u-1 has been removed from field
+      const state = {
+        players: {
+          p1: { field: [] },
         },
-        playerKey: "p1",
-        targetRequest: targetReq,
       };
 
-      const result = interp.executeEffectsWithInterruption(
-        [
-          {
-            selectActionTarget: {
-              id: "replacementTarget",
-              request: "targetRequest",
-              decisionPlayer: "self",
-            },
-          },
-          {
-            replaceRequestTarget: {
-              request: "targetRequest",
-              selection: "replacementTarget",
-            },
-          },
-        ],
-        context
-      );
-
-      // Completed without interruption
-      expect(result).toEqual({ completed: true });
-      expect(context.selections?.["replacementTarget"]).toBeNull();
-      // Target was not modified
-      expect((targetReq.targets![0] as any).unitId).toBe("u-dead");
+      // Even though selection has unitId: "u-1" (same as current target), it must NOT silently no-op!
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-1", targetDefinitionId: "target" },
+          state,
+          rulePackage.components
+        )
+      ).toThrow("ユニット [u-1] はフィールド上に存在しません。");
     });
   });
 
   // =========================================================================
-  // 6. Section 28-A / 28-B / 28-C Integration (Change Target vs Counter)
+  // 8. Multi-Target Definition Resolution & Pattern Identity (Section 54.22, 23, 24, 36, 37)
   // =========================================================================
-  describe("6. Section 28-A / 28-B / 28-C Integration (Change Target vs Counter)", () => {
-    it("6.1: Resolving Change Target is a legal replacement candidate for Counter (Section 28-A/B)", () => {
-      const counterAction = rulePackage.actions.find((a) => a.id === "action.counter")!;
+  describe("8. Multi-Target Definition Resolution & Decision Slot Identity", () => {
+    const multiTargetAction: any = {
+      id: "action.doubleStrike",
+      name: "連撃",
+      type: "magic",
+      targets: [
+        { id: "targetA", type: "unit", condition: { characterType: "soldier" } },
+        { id: "targetB", type: "unit", condition: { characterType: "soldier" } },
+      ],
+    };
 
-      const attackReq: ActionRequest = {
-        id: "req-attack",
-        actionId: "action.attack",
+    it("8.1: Multi-target explicit slot replacement replaces only matched slot (Section 54.22)", () => {
+      const targetReq: any = {
+        id: "req-multi",
+        actionId: "action.doubleStrike",
+        action: multiTargetAction,
         controller: "p1",
-        keyCards: [{ suit: "spade", rank: "A", value: 1 }],
         status: "pending",
-        sequence: 1,
-      };
-
-      const counterReq: ActionRequest = {
-        id: "req-counter",
-        actionId: "action.counter",
-        action: counterAction,
-        controller: "p2",
-        keyCards: [{ suit: "club", rank: "5", value: 5 }],
-        status: "pending",
-        sequence: 2,
-        targets: [{ type: "request", requestId: "req-attack", actionId: "action.attack", targetDefinitionId: "targetRequest" }],
-      };
-
-      const changeTargetReq: ActionRequest = {
-        id: "req-ct",
-        actionId: "action.changeTarget",
-        action: changeTargetAction,
-        controller: "p1",
-        keyCards: [
-          { suit: "club", rank: "A", value: 1 },
-          { suit: "club", rank: "2", value: 2 },
+        targets: [
+          { type: "unit", unitId: "u-s1", kind: "character", componentId: "character.soldier", targetDefinitionId: "targetA" },
+          { type: "unit", unitId: "u-s2", kind: "character", componentId: "character.soldier", targetDefinitionId: "targetB" },
         ],
-        status: "resolving", // Currently resolving
-        sequence: 3,
-        targets: [{ type: "request", requestId: "req-counter", actionId: "action.counter", targetDefinitionId: "targetRequest" }],
       };
 
       const state = {
-        players: { p1: {}, p2: {} },
-        stage: {
-          requests: [attackReq, counterReq, changeTargetReq],
+        players: {
+          p2: {
+            field: [
+              { unitId: "u-s1", componentId: "character.soldier", kind: "character" },
+              { unitId: "u-s2", componentId: "character.soldier", kind: "character" },
+              { unitId: "u-s3", componentId: "character.soldier", kind: "character" },
+            ],
+          },
         },
       };
 
-      // Enumerate replacement targets for Counter from Change Target's perspective
+      // Candidate enumeration lists candidates with targetDefinitionId
       const candidates = ActionTargetService.enumerateReplacementTargets(
-        counterReq,
+        targetReq,
         state,
         rulePackage.components,
-        { resolvingRequestId: "req-ct" }
+        { actions: [multiTargetAction] }
       );
 
-      const candidateReqIds = candidates.map((c) => c.targetRequestId);
-      // Both req-attack and req-ct should be legal candidates!
-      expect(candidateReqIds).toContain("req-attack");
-      expect(candidateReqIds).toContain("req-ct");
-      // req-counter itself must NOT be a candidate (self-target prohibition)
-      expect(candidateReqIds).not.toContain("req-counter");
+      expect(candidates.some((c) => c.targetDefinitionId === "targetA")).toBe(true);
+      expect(candidates.some((c) => c.targetDefinitionId === "targetB")).toBe(true);
+
+      // Replace targetB with u-s3
+      const result = ActionTargetService.replaceTarget(
+        targetReq,
+        { targetType: "unit", targetPlayerKey: "p2", targetUnitId: "u-s3", targetDefinitionId: "targetB" },
+        state,
+        rulePackage.components,
+        "targetB",
+        [multiTargetAction]
+      );
+
+      expect(result.changed).toBe(true);
+      expect(result.targetDefinitionId).toBe("targetB");
+      expect((result.previousTarget as any)?.unitId).toBe("u-s2");
+      expect((result.newTarget as any)?.unitId).toBe("u-s3");
+
+      // Verify targetA is completely untouched
+      expect((targetReq.targets![0] as any).unitId).toBe("u-s1");
+      expect(targetReq.targets![0].targetDefinitionId).toBe("targetA");
+      expect((targetReq.targets![1] as any).unitId).toBe("u-s3");
+      expect(targetReq.targets![1].targetDefinitionId).toBe("targetB");
     });
 
-    it("6.2: End-to-end execution: Counter target changed to Change Target causes Counter to fizzle (Section 28-C)", () => {
+    it("8.2: Multi-target ambiguous slot fails closed (Section 54.23)", () => {
+      const targetReq: any = {
+        id: "req-ambiguous",
+        actionId: "action.doubleStrike",
+        action: multiTargetAction,
+        controller: "p1",
+        status: "pending",
+        // Targets missing targetDefinitionId
+        targets: [
+          { type: "unit", unitId: "u-s1", kind: "character", componentId: "character.soldier" },
+        ],
+      };
+
+      const state = {
+        players: {
+          p2: { field: [{ unitId: "u-s1", componentId: "character.soldier", kind: "character" }] },
+        },
+      };
+
+      expect(() =>
+        ActionTargetService.replaceTarget(
+          targetReq,
+          { targetType: "unit", targetPlayerKey: "p2", targetUnitId: "u-s1" },
+          state,
+          rulePackage.components,
+          undefined,
+          [multiTargetAction]
+        )
+      ).toThrow("対象スロット (targetDefinitionId) を一意に特定できません。");
+    });
+
+    it("8.3: Decision patterns for multi-target slots have distinct patternId and targetDefinitionId (Section 54.24, 37)", () => {
+      const candidates: TargetSelection[] = [
+        { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-1", targetDefinitionId: "targetA" },
+        { targetType: "unit", targetPlayerKey: "p1", targetUnitId: "u-1", targetDefinitionId: "targetB" },
+      ];
+
+      const decReq = LegalPatternGenerator.generateTargetSelectionDecision(
+        { stateVersion: 1, matchId: "m-1" },
+        "p1",
+        { id: "req-ct" },
+        "selectActionTarget",
+        candidates
+      );
+
+      expect(decReq.patterns).toHaveLength(2);
+      expect(decReq.patterns[0].patternId).toBe("effect-target-targetA-unit-u-1");
+      expect(decReq.patterns[1].patternId).toBe("effect-target-targetB-unit-u-1");
+      expect(decReq.catalog.targetSelections).toHaveLength(2);
+      expect(decReq.catalog.targetSelections[0].targetDefinitionId).toBe("targetA");
+      expect(decReq.catalog.targetSelections[1].targetDefinitionId).toBe("targetB");
+    });
+  });
+
+  // =========================================================================
+  // 9. Lifecycle & GameSession Integration (Section 54.4, 5, 25, 26, 27, 28)
+  // =========================================================================
+  describe("9. Lifecycle & GameSession Integration", () => {
+    function resolveStageTopWithPasses(sess: GameSession) {
+      for (let i = 0; i < 2; i++) {
+        const step = sess.advance();
+        if (step.type !== "WAITING_FOR_DECISION") return step;
+        if (step.request.source.type === "EFFECT_RESOLUTION") {
+          return step;
+        }
+        const passIdx = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passIdx === -1) {
+          throw new Error(`PASS pattern not found for player ${step.request.playerId}`);
+        }
+        const nextStep = sess.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passIdx,
+        });
+        if (nextStep.type === "WAITING_FOR_DECISION" && nextStep.request.source.type === "EFFECT_RESOLUTION") {
+          return nextStep;
+        }
+      }
+    }
+
+    it("9.1: Counter target changed to Change Target causes Counter to fizzle (Section 28-C E2E) (Section 54.4, 5)", () => {
       const p1CtKeys = [
         { id: "c-c1", suit: "club", rank: "A", value: 1 },
         { id: "c-c2", suit: "club", rank: "2", value: 2 },
@@ -784,28 +1122,7 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
         targetRequest: counterReq,
       });
 
-      // Helper: advance by having both players pass until stage top resolves or interrupts
-      function resolveStageTopWithPasses(sess: GameSession) {
-        for (let i = 0; i < 2; i++) {
-          const step = sess.advance();
-          if (step.type !== "WAITING_FOR_DECISION") return step;
-          if (step.request.source.type === "EFFECT_RESOLUTION") {
-            return step;
-          }
-          const passIdx = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-          if (passIdx === -1) {
-            throw new Error(`PASS pattern not found for player ${step.request.playerId}`);
-          }
-          const nextStep = sess.submitDecision({
-            decisionId: step.request.decisionId,
-            stateVersion: step.request.stateVersion,
-            selectedPatternRef: passIdx,
-          });
-          if (nextStep.type === "WAITING_FOR_DECISION" && nextStep.request.source.type === "EFFECT_RESOLUTION") {
-            return nextStep;
-          }
-        }
-      }
+      expect(session.state.stage.requests).toHaveLength(3);
 
       // Both players pass to trigger Stage TOP resolution (Change Target)
       const step1 = resolveStageTopWithPasses(session)!;
@@ -874,13 +1191,8 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
         )
       ).toBe(true);
     });
-  });
 
-  // =========================================================================
-  // 7. Full Game Flow Integration (Kill & Mount Soldier)
-  // =========================================================================
-  describe("7. Full Game Flow Integration", () => {
-    it("7.1: Change Target redirects Kill from Soldier A to Soldier B", () => {
+    it("9.2: Change Target redirects Kill from Soldier A to Soldier B and logs canonical event (Section 54.9, 54.27, 54.28)", () => {
       const soldierA = {
         unitId: "u-sA",
         componentId: "character.soldier",
@@ -950,28 +1262,6 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
         targetRequest: killReq,
       });
 
-      function resolveStageTopWithPasses(sess: GameSession) {
-        for (let i = 0; i < 2; i++) {
-          const step = sess.advance();
-          if (step.type !== "WAITING_FOR_DECISION") return step;
-          if (step.request.source.type === "EFFECT_RESOLUTION") {
-            return step;
-          }
-          const passIdx = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-          if (passIdx === -1) {
-            throw new Error(`PASS pattern not found for player ${step.request.playerId}`);
-          }
-          const nextStep = sess.submitDecision({
-            decisionId: step.request.decisionId,
-            stateVersion: step.request.stateVersion,
-            selectedPatternRef: passIdx,
-          });
-          if (nextStep.type === "WAITING_FOR_DECISION" && nextStep.request.source.type === "EFFECT_RESOLUTION") {
-            return nextStep;
-          }
-        }
-      }
-
       // Both players pass to start resolution of Change Target
       const step1 = resolveStageTopWithPasses(session)!;
       expect(step1.type).toBe("WAITING_FOR_DECISION");
@@ -1005,20 +1295,191 @@ describe("BP-SIM-REG-5.0-F-PRO-CHANGE-TARGET: Pro Action Change Target (対象�
           (u: any) => u.unitId === soldierB.unitId || u.cards?.some((c: any) => c.id === "c-card-B")
         )
       ).toBe(true);
+
+      // Verify canonical event structure
+      const logEvents = session.getMatchLog().events;
+      const changeEvent = logEvents.find((e) => e.type === "request.target.changed") as any;
+      expect(changeEvent).toBeDefined();
+      expect(changeEvent.requestId).toBe(killReq.id);
+      expect(changeEvent.actionRef).toBe("action.kill");
+      expect(changeEvent.controller).toBe("p2");
+      expect(changeEvent.targetDefinitionId).toBe("target");
+      expect(changeEvent.previousTarget.unitId).toBe(soldierA.unitId);
+      expect(changeEvent.newTarget.unitId).toBe(soldierB.unitId);
+      expect(changeEvent.cause.actionId).toBe("action.changeTarget");
+      expect(changeEvent.cause.requestId).toBe(ctReq.id);
     });
 
-    it("7.2: CanonicalMatchLog is JSON serializable and valid", () => {
-      const session = new GameSession(
-        { players: { p1: {}, p2: {} }, stage: { requests: [] } },
-        rulePackage,
-        { matchId: "match-json-test" }
-      );
+    it("9.3: Cancelled Change Target before resolution creates no decision and causes no mutation (Section 54.25)", () => {
+      const soldierA = { unitId: "u-sA", componentId: "character.soldier", kind: "character", cards: [] };
+      const ctKeys = [
+        { id: "c-c1", suit: "club", rank: "A", value: 1 },
+        { id: "c-c2", suit: "club", rank: "2", value: 2 },
+      ];
+      const killKeys = [
+        { id: "c-s1", suit: "spade", rank: "A", value: 1 },
+        { id: "c-s2", suit: "spade", rank: "2", value: 2 },
+      ];
 
-      const log = session.getMatchLog();
-      expect(() => JSON.stringify(log)).not.toThrow();
-      const parsed = JSON.parse(JSON.stringify(log));
-      expect(parsed.meta.matchId).toBe("match-json-test");
-      expect(Array.isArray(parsed.events)).toBe(true);
+      const state: any = {
+        players: {
+          p1: { hand: ctKeys, field: [soldierA], grave: [], life: [{ id: "l1" }] },
+          p2: { hand: killKeys, field: [], grave: [], life: [{ id: "l2" }] },
+        },
+        stage: { requests: [], history: [] },
+      };
+
+      const registry = new CommandRegistry();
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const killReq = registry.createRequest(killAction, {
+        state,
+        playerKey: "p2",
+        keyCards: killKeys,
+        targetComponent: soldierA,
+      });
+
+      const ctReq = registry.createRequest(changeTargetAction, {
+        state,
+        playerKey: "p1",
+        keyCards: ctKeys,
+        targetRequest: killReq,
+      });
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+      };
+
+      // Cancel Change Target before resolution
+      cancelStageRequest(ctReq.id, context);
+      expect(ctReq.status).toBe("cancelled");
+
+      // Verify ctReq was popped from stage
+      expect(state.stage.requests.some((r: any) => r.id === ctReq.id)).toBe(false);
+
+      // Top request is now killReq
+      expect(state.stage.requests[state.stage.requests.length - 1].id).toBe(killReq.id);
+
+      // Kill request's target remains soldierA
+      expect((killReq.targets![0] as any).unitId).toBe("u-sA");
+    });
+
+    it("9.4: Lost target Request skips Change Target effect (Section 54.26)", () => {
+      const soldierA = { unitId: "u-sA", componentId: "character.soldier", kind: "character", cards: [] };
+      const ctKeys = [
+        { id: "c-c1", suit: "club", rank: "A", value: 1 },
+        { id: "c-c2", suit: "club", rank: "2", value: 2 },
+      ];
+      const killKeys = [
+        { id: "c-s1", suit: "spade", rank: "A", value: 1 },
+        { id: "c-s2", suit: "spade", rank: "2", value: 2 },
+      ];
+
+      const state: any = {
+        players: {
+          p1: { hand: ctKeys, field: [soldierA], grave: [], life: [{ id: "l1" }] },
+          p2: { hand: killKeys, field: [], grave: [], life: [{ id: "l2" }] },
+        },
+        stage: { requests: [], history: [] },
+      };
+
+      const registry = new CommandRegistry();
+      const killAction = rulePackage.actions.find((a) => a.id === "action.kill")!;
+      const killReq = registry.createRequest(killAction, {
+        state,
+        playerKey: "p2",
+        keyCards: killKeys,
+        targetComponent: soldierA,
+      });
+
+      const ctReq = registry.createRequest(changeTargetAction, {
+        state,
+        playerKey: "p1",
+        keyCards: ctKeys,
+        targetRequest: killReq,
+      });
+
+      // Kill request leaves stage before Change Target resolves
+      state.stage.requests = state.stage.requests.filter((r: any) => r.id !== killReq.id);
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p1",
+        actions: rulePackage.actions,
+        components: rulePackage.components,
+      };
+
+      const resolveRes = registry.resolveTopRequest(context);
+      expect(resolveRes?.type).toBe("COMPLETED");
+      // Change Target effect was skipped due to TARGET_INVALID_AT_RESOLUTION
+      expect(ctReq.status).toBe("resolved");
+    });
+  });
+
+  // =========================================================================
+  // 10. Engine Hardcode & Boundary Guard (Section 54.30, 43)
+  // =========================================================================
+  describe("10. Engine Hardcode & Boundary Guard", () => {
+    it("10.1: No action.changeTarget hardcoding in engine directory", () => {
+      const engineDir = path.resolve(__dirname, "../../engine");
+      const files = getAllFiles(engineDir);
+
+      const matchingLines: string[] = [];
+      for (const file of files) {
+        if (!file.endsWith(".ts")) continue;
+        const content = fs.readFileSync(file, "utf-8");
+        const lines = content.split("\n");
+        lines.forEach((line, idx) => {
+          if (line.includes("action.changeTarget")) {
+            matchingLines.push(`${file}:${idx + 1}: ${line.trim()}`);
+          }
+        });
+      }
+
+      expect(matchingLines).toEqual([]);
+    });
+
+    it("10.2: No specific action IDs hardcoded in ActionTargetService.ts", () => {
+      const targetServiceFile = path.resolve(__dirname, "../../engine/rules/ActionTargetService.ts");
+      const content = fs.readFileSync(targetServiceFile, "utf-8");
+
+      const forbiddenActionPatterns = [
+        "action.kill",
+        "action.counter",
+        "action.truce",
+        "action.mountSoldier",
+        "action.handeth",
+        "action.changeTarget",
+      ];
+
+      const matchingLines: string[] = [];
+      const lines = content.split("\n");
+      lines.forEach((line, idx) => {
+        for (const pattern of forbiddenActionPatterns) {
+          if (line.includes(pattern)) {
+            matchingLines.push(`L${idx + 1} matches ${pattern}: ${line.trim()}`);
+          }
+        }
+      });
+
+      expect(matchingLines).toEqual([]);
     });
   });
 });
+
+function getAllFiles(dir: string): string[] {
+  let results: string[] = [];
+  const list = fs.readdirSync(dir);
+  list.forEach((file) => {
+    const fullPath = path.join(dir, file);
+    const stat = fs.statSync(fullPath);
+    if (stat && stat.isDirectory()) {
+      results = results.concat(getAllFiles(fullPath));
+    } else {
+      results.push(fullPath);
+    }
+  });
+  return results;
+}

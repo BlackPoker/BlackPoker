@@ -293,10 +293,15 @@ export class ActionRequestValidator {
             throw new ValidationError("自分自身のリクエストを対象にすることはできません。");
           }
           const stageReqs = context.state.stage?.requests || [];
-          const exists = stageReqs.some((r: any) => r.id === targetReq.id);
-          if (!exists) {
+          const matchedStageReq = stageReqs.find((r: any) => r.id === targetReq.id);
+          if (!matchedStageReq) {
             throw new ValidationError(
               `ターゲットリクエスト ${targetReq.id} はステージ上に存在しません。`
+            );
+          }
+          if (matchedStageReq.status === "resolved" || matchedStageReq.status === "cancelled") {
+            throw new ValidationError(
+              `ターゲットリクエスト ${targetReq.id} は無効化または解決済みです。`
             );
           }
         } else if (targetType === "unit") {

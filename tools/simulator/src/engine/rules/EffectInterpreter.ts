@@ -642,7 +642,8 @@ export class EffectInterpreter {
           context.state,
           context.components || [],
           {
-            resolvingRequestId: context.currentRequest?.id,
+            targetDefinitionId: args.targetDefinitionId,
+            actions: context.actions,
           }
         );
 

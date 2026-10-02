@@ -214,7 +214,7 @@ export class LegalPatternGenerator {
     };
 
     const getTargetSelectionRef = (target: TargetSelection): number => {
-      const key = `${target.targetType}:${target.targetPlayerKey || ""}:${target.targetUnitId || ""}:${target.targetRequestId || ""}`;
+      const key = `${target.targetDefinitionId || ""}:${target.targetType}:${target.targetPlayerKey || ""}:${target.targetUnitId || ""}:${target.targetRequestId || ""}`;
       if (targetMap.has(key)) return targetMap.get(key)!;
       const ref = targetSelectionCatalog.length;
       targetSelectionCatalog.push(target);
@@ -545,22 +545,34 @@ export class LegalPatternGenerator {
     const targetSelections: TargetSelection[] = [];
     const patterns: LegalPattern[] = [];
 
+    const targetMap = new Map<string, number>();
+
     candidates.forEach((target, index) => {
-      targetSelections.push(target);
+      let targetRef = targetSelections.length;
+      const key = `${target.targetDefinitionId || ""}:${target.targetType}:${target.targetPlayerKey || ""}:${target.targetUnitId || ""}:${target.targetRequestId || ""}`;
+      if (targetMap.has(key)) {
+        targetRef = targetMap.get(key)!;
+      } else {
+        targetSelections.push(target);
+        targetMap.set(key, targetRef);
+      }
+
       const summary = target.displayName || target.primaryLabel || `対象: ${target.targetType}`;
       const effSel: EffectSelection = {
         selectionType: "target",
         targetSelection: target,
         summary,
       };
+      const effRef = effectSelections.length;
       effectSelections.push(effSel);
 
+      const slot = target.targetDefinitionId || "target";
       const targetRefStr = target.targetUnitId || target.targetRequestId || target.targetPlayerKey || "none";
       const pattern: LegalPattern = {
-        patternId: `effect-target-${index}-${targetRefStr}`,
+        patternId: `effect-target-${slot}-${target.targetType}-${targetRefStr}`,
         kind: "EFFECT_SELECTION",
-        effectSelectionRef: index,
-        targetSelectionRef: index,
+        effectSelectionRef: effRef,
+        targetSelectionRef: targetRef,
       };
       patterns.push(pattern);
     });

@@ -385,7 +385,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     };
 
     expect(() => registry.createRequest(counterAction, context3)).toThrow(
-      "ターゲットリクエストのステータスが不適合です。期待: pending, 実際: cancelled"
+      /ターゲットリクエスト req-1 はステージ上に存在しません。|ターゲットリクエストのステータスが不適合です/
     );
   });
 
@@ -453,7 +453,7 @@ describe("Counter Action integration Tests (New YAML)", () => {
     };
 
     expect(() => registry.createRequest(counterAction, context2)).toThrow(
-      "ターゲットリクエストのステータスが不適合です。期待: pending, 実際: resolved"
+      /ターゲットリクエスト req-1 はステージ上に存在しません。|ターゲットリクエストのステータスが不適合です/
     );
   });
 

@@ -137,18 +137,13 @@ export function evaluateRequestTargetCondition(
     return { isValid: true };
   }
 
-  // 1. status: "pending" 等の一致 (解決中リクエストもステージ上のアクティブなリクエストとしてpendingに適合)
-  if (condition.status) {
-    const isStatusMatch =
-      targetRequest.status === condition.status ||
-      (condition.status === "pending" && targetRequest.status === "resolving");
-    if (!isStatusMatch) {
-      return {
-        isValid: false,
-        reason: "TARGET_CONDITION_UNMET",
-        detail: `ターゲットリクエストのステータスが不適合です。期待: ${condition.status}, 実際: ${targetRequest.status}`,
-      };
-    }
+  // 1. status: ステータス完全一致
+  if (condition.status !== undefined && targetRequest.status !== condition.status) {
+    return {
+      isValid: false,
+      reason: "TARGET_CONDITION_UNMET",
+      detail: `ターゲットリクエストのステータスが不適合です。期待: ${condition.status}, 実際: ${targetRequest.status}`,
+    };
   }
 
   // 2. keyCards: キーカード枚数条件 (例: count: [1, 2])

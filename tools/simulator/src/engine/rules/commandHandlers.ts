@@ -1105,7 +1105,9 @@ export function replaceRequestTargetHandler(
       targetReq,
       targetSelection,
       context.state,
-      context.components || []
+      context.components || [],
+      args.targetDefinitionId,
+      context.actions || []
     );
 
     if (replaceResult.changed) {

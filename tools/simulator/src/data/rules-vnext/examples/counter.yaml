@@ -23,7 +23,6 @@ actions:
       - id: targetRequest
         type: request
         condition:
-          status: pending
           keyCards:
             count: [1, 2]
 

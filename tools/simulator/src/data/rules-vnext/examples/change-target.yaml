@@ -22,11 +22,10 @@ actions:
       - id: targetRequest
         type: request
         condition:
-          status: pending
           hasTarget: true
 
     text:
-      effect: 対象のリクエストの対象を、別の適正な対象に変更する。
+      effect: 対象のリクエストで指定されている対象をそのアクションが指定できる範囲で変更する。
 
     effect:
       - selectActionTarget:
