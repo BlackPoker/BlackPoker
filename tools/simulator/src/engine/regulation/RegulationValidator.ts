@@ -36,7 +36,7 @@ export class RegulationValidator {
    * 【公式ルール第9.1.2版 2.3 & 8.3.1】
    * - ruleLegal: どの組み合わせでも公式ルール上は対戦可能であるため常に true。
    * - recommended: frame.recommendedFormatIds に formatId が含まれるかどうか（Table 2.1 推奨レギュレーション準拠）。
-   * - simulatorImplemented: 現行 Simulator で公式実装されているのは "light + entry16", "light + pack", "standard + pack", "standard + rarePack"。
+   * - simulatorImplemented: 現行 Simulator で公式実装されているのは "light + entry16", "light + pack", "standard + pack"。
    */
   public static validateCombination(
     catalog: RegulationCatalog,
@@ -63,7 +63,6 @@ export class RegulationValidator {
       "light:entry16",
       "light:pack",
       "standard:pack",
-      "standard:rarePack",
     ]);
     const simulatorImplemented = IMPLEMENTED_COMBINATIONS.has(`${formatId}:${frameId}`);
 
