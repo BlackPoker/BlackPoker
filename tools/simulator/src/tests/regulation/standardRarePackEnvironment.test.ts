@@ -23,7 +23,7 @@ import {
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { SimulatorNotImplementedError } from "../../domain/regulation/RegulationDefinition";
 
-describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SOURCE-SEMANTIC-GATE]", () => {
+describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RAREPACK-ENVIRONMENT / REOPENED]", () => {
   let catalog: any;
   let fullRulePackage: any;
 
@@ -37,11 +37,12 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
 
   // Section 10: Regulation Gate Regression
   describe("Regulation Gate Regression", () => {
-    it("Implemented combinations: light:entry16, light:pack, standard:pack are true", () => {
+    it("Implemented combinations: light:entry16, light:pack, standard:pack, standard:rarePack are true", () => {
       const implemented = [
         { formatId: "light", frameId: "entry16" },
         { formatId: "light", frameId: "pack" },
         { formatId: "standard", frameId: "pack" },
+        { formatId: "standard", frameId: "rarePack" },
       ];
 
       for (const { formatId, frameId } of implemented) {
@@ -53,7 +54,7 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
       }
     });
 
-    it("Non-implemented combinations remain false (standard:rarePack, pro:rarePack, light:rarePack, master:rarePack)", () => {
+    it("Non-implemented combinations remain false (pro:rarePack, light:rarePack, master:rarePack)", () => {
       const catalogWithMaster = {
         ...catalog,
         formats: new Map([
@@ -63,7 +64,6 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
       };
 
       const notImplemented = [
-        { formatId: "standard", frameId: "rarePack" },
         { formatId: "pro", frameId: "rarePack" },
         { formatId: "light", frameId: "rarePack" },
         { formatId: "master", frameId: "rarePack" },
@@ -76,16 +76,6 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
           RegulationValidator.validateCombination(catalogWithMaster as any, formatId, frameId, { assertImplemented: true })
         ).toThrow(SimulatorNotImplementedError);
       }
-    });
-
-    it("standard:rarePack is ruleLegal and recommended, but simulatorImplemented is false (semantic-gated)", () => {
-      const val = RegulationValidator.validateCombination(catalog, "standard", "rarePack");
-      expect(val.ruleLegal).toBe(true);
-      expect(val.recommended).toBe(true);
-      expect(val.simulatorImplemented).toBe(false);
-      expect(() =>
-        RegulationValidator.validateCombination(catalog, "standard", "rarePack", { assertImplemented: true })
-      ).toThrow(SimulatorNotImplementedError);
     });
 
     it("pro:rarePack is ruleLegal and recommended, but simulatorImplemented is false", () => {
@@ -154,7 +144,7 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
 
   // Section 12: Browser Catalog / UI Environment Gate
   describe("Browser Catalog / UI Environment Gate", () => {
-    it("loadRegulationCatalogForBrowser loads standard-rarePack (present) but validates simulatorImplemented=false and ABSENT from getAvailableEnvironments", () => {
+    it("loadRegulationCatalogForBrowser loads standard-rarePack and validates simulatorImplemented=true", () => {
       const browserCatalog = loadRegulationCatalogForBrowser();
       expect(browserCatalog).toBeDefined();
 
@@ -167,17 +157,21 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
       const validation = RegulationValidator.validateRegulation(browserCatalog, "standard-rarePack");
       expect(validation.ruleLegal).toBe(true);
       expect(validation.recommended).toBe(true);
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
 
       const envs = getAvailableEnvironments(browserCatalog);
       const match = envs.find((e) => e.id === "official:standard-rarePack");
-      expect(match).toBeUndefined();
+      expect(match).toBeDefined();
+      expect(match?.name).toBe("スタンダード + レアパック (公式)");
+      expect(match?.isOfficial).toBe(true);
+      expect(match?.regulationId).toBe("standard-rarePack");
+      expect(match?.deckProfileNotice).toBe(STANDARD_54_FIXTURE_NOTICE);
     });
   });
 
-  // Section 13: Semantic Gated Environment Contract & Factory Fail-Closed
-  describe("Semantic Gated Environment Contract & Factory Fail-Closed", () => {
-    it("startMatchAttempt with official:standard-rarePack must NOT produce READY", () => {
+  // Section 13, 14, 15: Playtest Environment E2E & Initial State / Decision Smoke
+  describe("Playtest Environment E2E & Initial State Smoke", () => {
+    it("startMatchAttempt creates READY match with standard-rarePack, 54-card conservation, and initial legal actions", () => {
       const outcome = startMatchAttempt({
         environmentId: "official:standard-rarePack",
         seedInput: "42",
@@ -185,19 +179,74 @@ describe("Standard + Rare Pack Semantic Gate Tests [BP-SIM-REG-4.0-F-RARE-KEY-SO
         fullRulePackage,
       });
 
-      expect(outcome.type).not.toBe("READY");
-      expect(outcome.activeMatch).toBeNull();
-      expect(outcome.type).toBe("TECHNICAL_ERROR");
-      expect((outcome as any).setupNotice?.errorName).toBe("SimulatorNotImplementedError");
+      expect(outcome.type).toBe("READY");
+
+      if (outcome.type === "READY") {
+        expect(outcome.activeMatch).toBeDefined();
+        expect(outcome.activeMatch.environmentId).toBe("official:standard-rarePack");
+        expect(outcome.activeMatch.environmentName).toBe("スタンダード + レアパック (公式)");
+        expect(outcome.activeMatch.regulationId).toBe("standard-rarePack");
+        expect(outcome.activeMatch.seed).toBe(42);
+        expect(outcome.activeMatch.rulePackage.id).toBe("official-standard-rarePack");
+        expect(outcome.setupNotice).toBeNull();
+        expect(outcome.presetValidationErrors).toEqual([]);
+
+        const state = outcome.session.state;
+        const p1 = state.players.p1;
+        const p2 = state.players.p2;
+
+        // Section 14: Rare Card & Pack setup
+        expect(p1.rareCards).toHaveLength(1);
+        expect(p2.rareCards).toHaveLength(1);
+        expect(p1.rareCards[0].suit).toBe("J");
+        expect(p1.rareCards[0].rank).toBe("Joker");
+        expect(p1.rareCards[0].id).toBe("p1-c-JJoker");
+
+        expect(p1.pack.cards).toHaveLength(14);
+        expect(p2.pack.cards).toHaveLength(14);
+
+        // 54-card conservation check
+        expect(() => {
+          OfficialRegulationMatchSetup.verifyCardConservation("p1", p1, STANDARD_54_DECK_CARDS);
+          OfficialRegulationMatchSetup.verifyCardConservation("p2", p2, STANDARD_54_DECK_CARDS);
+        }).not.toThrow();
+
+        // Section 15: Initial Decision Smoke Test
+        expect(outcome.initialStep).toBeDefined();
+        expect(outcome.initialStep.type).toBe("WAITING_FOR_DECISION");
+
+        if (outcome.initialStep.type === "WAITING_FOR_DECISION") {
+          const req = outcome.initialStep.request;
+          const legalActionIds = (req.patterns || [])
+            .map((p: any) =>
+              p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef]?.actionId : undefined
+            )
+            .filter((id: any): id is string => typeof id === "string");
+
+          // action.packOpen is available for chance holder
+          expect(legalActionIds).toContain("action.packOpen");
+
+          // action.rareDraw and action.rareSummon require Life <= 9, so NOT available at game start
+          expect(legalActionIds).not.toContain("action.rareDraw");
+          expect(legalActionIds).not.toContain("action.rareSummon");
+
+          // action.trapCounter requires a pending request on Stage, so NOT available at game start
+          expect(legalActionIds).not.toContain("action.trapCounter");
+        }
+      }
     });
 
-    it("OfficialRegulationMatchFactory.createSession('standard-rarePack') throws SimulatorNotImplementedError", async () => {
-      await expect(
-        OfficialRegulationMatchFactory.createSession("standard-rarePack", 42, {
-          catalog,
-          fullRulePackage,
-        })
-      ).rejects.toThrow(SimulatorNotImplementedError);
+    it("OfficialRegulationMatchFactory.createSession creates fresh session successfully", async () => {
+      const session = await OfficialRegulationMatchFactory.createSession("standard-rarePack", 42, {
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(session).toBeDefined();
+      expect(session.state.regulationId).toBe("standard-rarePack");
+      expect(session.rulePackage.id).toBe("official-standard-rarePack");
+      expect(session.state.players.p1.rareCards).toHaveLength(1);
+      expect(session.state.players.p1.pack.cards).toHaveLength(14);
     });
   });
 });

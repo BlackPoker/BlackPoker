@@ -5,8 +5,10 @@ export type KeyCardSourceZone = "hand" | "rare";
 
 /**
  * アクション定義からキーカードの供給元ゾーン (key source zone) を解決します。
- * デフォルトは "hand"。明示指定がある場合は "hand" または "rare" のみ許可します。
- * 未知のゾーン指定は fail-closed で例外をスローします。
+ * デフォルトは手札 ("hand") です。
+ * レアカード関連アクション（レア召喚・罠カウンター等）では、ルール作者公認の正当な例外として
+ * コントローラーのレアカード置き場 ("rare") が直接の供給元ゾーンとして明示指定されます。
+ * 明示指定がある場合は "hand" または "rare" のみ許可し、未知のゾーン指定は fail-closed で例外をスローします。
  */
 export function resolveKeyCardSourceZone(action: ActionDefinition): KeyCardSourceZone {
   if (!action.key) {

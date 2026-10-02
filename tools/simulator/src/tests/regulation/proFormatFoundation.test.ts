@@ -147,7 +147,7 @@ describe("Pro Format Foundation & pro-rarePack Regulation Tests [BP-SIM-REG-5.0-
 
   // Section 17: Available Environment Contract
   describe("Available Environment Contract", () => {
-    it("getAvailableEnvironments does NOT list official:pro-rarePack or official:standard-rarePack", () => {
+    it("getAvailableEnvironments does NOT list official:pro-rarePack, while official:standard-rarePack remains present", () => {
       const envs = getAvailableEnvironments(catalog);
       const proRarePack = envs.find(
         (e) => e.regulationId === "pro-rarePack" || e.id === "official:pro-rarePack"
@@ -157,7 +157,8 @@ describe("Pro Format Foundation & pro-rarePack Regulation Tests [BP-SIM-REG-5.0-
       const standardRarePack = envs.find(
         (e) => e.regulationId === "standard-rarePack" || e.id === "official:standard-rarePack"
       );
-      expect(standardRarePack).toBeUndefined();
+      expect(standardRarePack).toBeDefined();
+      expect(standardRarePack?.isOfficial).toBe(true);
     });
   });
 
