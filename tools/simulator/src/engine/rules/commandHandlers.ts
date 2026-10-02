@@ -1505,22 +1505,49 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
       }
     }
 
-    const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
-    const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c.unitId === cardId || c === cardToMove));
-    if (cardIdx === -1) {
-      throw new Error(`moveCard: 移動元ゾーン '${fromZone}' に対象カードが見つかりません: ${cardId}`);
-    }
-
-    const candidate = sourceCards[cardIdx];
+    let actualCard: any;
     if (fromZone === "grave") {
-      if (candidate.unitId || Array.isArray(candidate.cards) || candidate.kind || !candidate.suit || !candidate.rank) {
+      const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
+      if (typeof cardId !== "string" || !cardId) {
+        throw new Error(`moveCard: 移動対象のカードIDが不正です`);
+      }
+
+      // Unit wrapper自体が直接移動対象として指定された場合は拒絶 (fail-closed, lightPack Test Y Contract)
+      const matchedWrapper = sourceCards.find(
+        (c: any) => c && (c.unitId === cardId || (c.id === cardId && (Array.isArray(c.cards) || c.kind)))
+      );
+      if (matchedWrapper) {
         throw new Error(`moveCard: 墓地内のUnit wrapperまたは未対応形式のエントリは移動できません: ${cardId}`);
       }
-    }
 
-    const [actualCard] = sourceCards.splice(cardIdx, 1);
-    if (fromZone === "pack" && player.pack) {
-      player.pack.count = player.pack.cards?.length ?? 0;
+      // 墓地内の物理カード（直接CardおよびUnit wrapper内包カード）を検索 (重複時fail-closed)
+      const location = findPhysicalCardInGrave(sourceCards, cardId);
+      if (!location) {
+        throw new Error(`moveCard: 移動元ゾーン 'grave' に対象カードが見つかりません: ${cardId}`);
+      }
+      const canonicalCard = location.card;
+      if (!canonicalCard || !canonicalCard.suit || !canonicalCard.rank) {
+        throw new Error(`moveCard: 墓地内の対象カード形式が不正です: ${cardId}`);
+      }
+
+      // GraveTopCoordinator を通じて墓地からカードを除去し、Grave TOP 不変条件を更新
+      actualCard = GraveTopCoordinator.removeCardFromGrave(
+        player,
+        cardId,
+        context.state,
+        playerKey,
+        context.logRecorder
+      );
+    } else {
+      const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
+      const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c.unitId === cardId || c === cardToMove));
+      if (cardIdx === -1) {
+        throw new Error(`moveCard: 移動元ゾーン '${fromZone}' に対象カードが見つかりません: ${cardId}`);
+      }
+      actualCard = sourceCards.splice(cardIdx, 1)[0];
+      if (fromZone === "pack" && player.pack) {
+        player.pack.count = player.pack.cards?.length ?? 0;
+      }
     }
 
     let destCards: any[] | undefined;
@@ -1609,19 +1636,40 @@ export function revealCardHandler(effectInterpreter?: EffectInterpreter): Comman
     let actualCard = cardToReveal;
     let detectedSourceZone = args.sourceZone || args.from;
     const player = context.state.players?.[context.playerKey];
+    const cardId = typeof cardToReveal === "object" && cardToReveal !== null ? cardToReveal.id : cardToReveal;
 
-    if (typeof cardToReveal === "string") {
+    if (detectedSourceZone === "grave") {
+      if (!player || !Array.isArray(player.grave)) {
+        throw new Error(`revealCard: 移動元ゾーン 'grave' にカード配列が存在しません`);
+      }
+      if (typeof cardId !== "string" || !cardId) {
+        throw new Error(`revealCard: 公開対象のカードIDが不正です`);
+      }
+      const location = findPhysicalCardInGrave(player.grave, cardId);
+      if (!location) {
+        throw new Error(`revealCard: 移動元ゾーン 'grave' に対象カードが見つかりません: ${cardId}`);
+      }
+      if (!location.card || !location.card.suit || !location.card.rank) {
+        throw new Error(`revealCard: 墓地内の対象カード形式が不正です: ${cardId}`);
+      }
+      actualCard = location.card;
+    } else if (typeof cardToReveal === "string") {
       if (player) {
-        // Generic zone resolver for known zones (life, pack, hand)
+        // Generic zone resolver for known zones (life, pack, hand, grave)
         const inPack = Array.isArray(player.pack?.cards) ? player.pack.cards.find((c: any) => c?.id === cardToReveal) : undefined;
         const inHand = Array.isArray(player.hand) ? player.hand.find((c: any) => c?.id === cardToReveal) : undefined;
         const inLife = Array.isArray(player.life) ? player.life.find((c: any) => c?.id === cardToReveal) : undefined;
+        let inGraveLoc: any = undefined;
+        if (!inPack && !inHand && !inLife && Array.isArray(player.grave) && typeof cardId === "string" && cardId) {
+          inGraveLoc = findPhysicalCardInGrave(player.grave, cardId);
+        }
 
-        actualCard = inPack || inHand || inLife || { id: cardToReveal };
+        actualCard = inPack || inHand || inLife || inGraveLoc?.card || { id: cardToReveal };
         if (!detectedSourceZone) {
           if (inLife) detectedSourceZone = "life";
           else if (inPack) detectedSourceZone = "pack";
           else if (inHand) detectedSourceZone = "hand";
+          else if (inGraveLoc) detectedSourceZone = "grave";
         }
       }
     } else if (typeof cardToReveal === "object" && cardToReveal !== null) {
@@ -1632,6 +1680,12 @@ export function revealCardHandler(effectInterpreter?: EffectInterpreter): Comman
           detectedSourceZone = "pack";
         } else if (Array.isArray(player.hand) && player.hand.some((c: any) => c?.id === cardToReveal.id)) {
           detectedSourceZone = "hand";
+        } else if (Array.isArray(player.grave) && typeof cardId === "string" && cardId) {
+          const inGraveLoc = findPhysicalCardInGrave(player.grave, cardId);
+          if (inGraveLoc) {
+            detectedSourceZone = "grave";
+            actualCard = inGraveLoc.card;
+          }
         }
       }
     }

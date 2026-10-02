@@ -1,0 +1,40 @@
+actions:
+  - id: action.reunion
+    name: 再会
+    ruby: さいかい
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: heart
+          rank: "A..10"
+          zone: hand
+
+    text:
+      effect: 自分の墓地からカードを1枚選び対戦相手に見せ手札に加える。
+
+    effect:
+      - selectCards:
+          id: reunionCard
+          player: self
+          zone: grave
+          count: 1
+
+      - revealCard:
+          card: selection.reunionCard
+          target: opponent
+          sourceZone: grave
+
+      - moveCard:
+          card: selection.reunionCard
+          from: grave
+          to: hand
+          player: self
