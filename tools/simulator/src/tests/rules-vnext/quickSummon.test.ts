@@ -64,7 +64,7 @@ function countTotalCards(state: any): number {
   return count;
 }
 
-describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turnRelation Evaluator", () => {
+describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verification", () => {
   let fullRulePackage: RulePackage;
   let proRulePackage: RulePackage;
   let standardRulePackage: RulePackage;
@@ -103,7 +103,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
   });
 
   // =========================================================================
-  // 1. Generic turnRelation Condition Evaluator Tests
+  // 1. Generic turnRelation Condition Evaluator Tests (Section 7)
   // =========================================================================
   describe("1. Generic turnRelation Evaluation (ActionActivationConditionEvaluator)", () => {
     const baseState = {
@@ -194,7 +194,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(resP2.isLegal).toBe(true);
     });
 
-    it("1.5: Fail-closed on unsupported player spec", () => {
+    it("1.5 (G): Fail-closed on unsupported player spec", () => {
       const cond = {
         turnRelation: {
           player: "opponent" as any,
@@ -210,7 +210,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(res.reason).toContain("未対応のプレイヤースペック");
     });
 
-    it("1.6: Fail-closed on unsupported relation spec", () => {
+    it("1.6 (H): Fail-closed on unsupported relation spec", () => {
       const cond = {
         turnRelation: {
           player: "controller" as const,
@@ -245,7 +245,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(res.reason).toContain("ターンプレイヤーが未定義または無効");
     });
 
-    it("1.8: Fail-closed on inconsistent state where nonTurnPlayer === turnPlayer", () => {
+    it("1.8 (F): Fail-closed on inconsistent state where nonTurnPlayer === turnPlayer", () => {
       const inconsistentState = {
         turnPlayer: "p1",
         nonTurnPlayer: "p1",
@@ -265,7 +265,109 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(res.reason).toContain("状態不整合");
     });
 
-    it("1.9: Fail-closed on unknown condition operator", () => {
+    it("1.9 (A): Fail-closed on missing relation property in turnRelation", () => {
+      const cond = {
+        turnRelation: {
+          player: "controller",
+        } as any,
+      };
+
+      const res = ActionActivationConditionEvaluator.evaluate(cond, {
+        state: baseState,
+        playerKey: "p2",
+      });
+      expect(res.isLegal).toBe(false);
+      expect(res.reason).toContain("未対応または未定義の relation");
+    });
+
+    it("1.10 (B): Fail-closed when state.players is missing entirely", () => {
+      const stateNoPlayers = {
+        turnPlayer: "p1",
+        nonTurnPlayer: "p2",
+      };
+      const cond = {
+        turnRelation: {
+          relation: "nonTurnPlayer" as const,
+        },
+      };
+
+      const res = ActionActivationConditionEvaluator.evaluate(cond, {
+        state: stateNoPlayers,
+        playerKey: "p2",
+      });
+      expect(res.isLegal).toBe(false);
+      expect(res.reason).toContain("プレイヤー状態が存在しません");
+    });
+
+    it("1.11 (C): Fail-closed when controller does not exist in state.players", () => {
+      const stateMissingController = {
+        turnPlayer: "p1",
+        nonTurnPlayer: "p2",
+        players: {
+          p1: { hand: [] },
+        },
+      };
+      const cond = {
+        turnRelation: {
+          relation: "nonTurnPlayer" as const,
+        },
+      };
+
+      const res = ActionActivationConditionEvaluator.evaluate(cond, {
+        state: stateMissingController,
+        playerKey: "p2",
+      });
+      expect(res.isLegal).toBe(false);
+      expect(res.reason).toContain("プレイヤー状態が存在しません: p2");
+    });
+
+    it("1.12 (D): Fail-closed when turnPlayer does not exist in state.players", () => {
+      const stateMissingTurnPlayer = {
+        turnPlayer: "p99",
+        nonTurnPlayer: "p2",
+        players: {
+          p1: { hand: [] },
+          p2: { hand: [] },
+        },
+      };
+      const cond = {
+        turnRelation: {
+          relation: "nonTurnPlayer" as const,
+        },
+      };
+
+      const res = ActionActivationConditionEvaluator.evaluate(cond, {
+        state: stateMissingTurnPlayer,
+        playerKey: "p2",
+      });
+      expect(res.isLegal).toBe(false);
+      expect(res.reason).toContain("ターンプレイヤー 'p99' が state.players に存在しません");
+    });
+
+    it("1.13 (E): Fail-closed when nonTurnPlayer exists but does not exist in state.players", () => {
+      const stateMissingNonTurnPlayer = {
+        turnPlayer: "p1",
+        nonTurnPlayer: "p99",
+        players: {
+          p1: { hand: [] },
+          p2: { hand: [] },
+        },
+      };
+      const cond = {
+        turnRelation: {
+          relation: "nonTurnPlayer" as const,
+        },
+      };
+
+      const res = ActionActivationConditionEvaluator.evaluate(cond, {
+        state: stateMissingNonTurnPlayer,
+        playerKey: "p2",
+      });
+      expect(res.isLegal).toBe(false);
+      expect(res.reason).toContain("非ターンプレイヤー 'p99' が無効または state.players に存在しません");
+    });
+
+    it("1.14: Fail-closed on unknown condition operator", () => {
       const cond = {
         invalidOperator: { foo: "bar" },
       } as any;
@@ -278,7 +380,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(res.reason).toContain("未対応の起動条件オペレータ");
     });
 
-    it("1.10: Evaluates composition of turnRelation and zoneCount fail-closed", () => {
+    it("1.15: Evaluates composition of turnRelation and zoneCount fail-closed", () => {
       const cond = {
         turnRelation: {
           relation: "nonTurnPlayer" as const,
@@ -290,7 +392,6 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
         },
       };
 
-      // p2 is nonTurnPlayer (turnRelation passes), but hand has 2 cards (< 3, zoneCount fails)
       const testState = {
         turnPlayer: "p1",
         nonTurnPlayer: "p2",
@@ -310,7 +411,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
   });
 
   // =========================================================================
-  // 2. Action Definition & Regulation Catalog Contract
+  // 2. Action Definition & Regulation Catalog Contract (Section 4, 14)
   // =========================================================================
   describe("2. Quick Summon Definition & Regulation Catalog Contract", () => {
     it("2.1: Matches official BlackPoker v9.1.2 definition specifications", () => {
@@ -516,10 +617,84 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
   });
 
   // =========================================================================
-  // 4. Effect Resolution: selectOption (Ace vs Bulwark) & Card Conservation
+  // 4. Illegal Activation No-Mutation Contract (Section 8)
   // =========================================================================
-  describe("4. Effect Resolution & Card Conservation", () => {
-    it("4.1: Selecting 'ace' summons Ace unit face up in charge state with card from request", () => {
+  describe("4. Illegal Activation No-Mutation Contract", () => {
+    it("4.1: Attempted activation by turnPlayer does NOT mutate state (hand, grave, field, stage, version) and records no events", () => {
+      const aceCard = { id: "p1-ace", suit: "S", rank: "A", value: 1 };
+      const costCard = { id: "p1-cost", suit: "H", rank: "7", value: 7 };
+
+      const state: any = {
+        stateVersion: 10,
+        turnPlayer: "p1",
+        chancePlayer: "p1",
+        nonTurnPlayer: "p2",
+        stage: { requests: [] },
+        players: {
+          p1: {
+            hand: [aceCard, costCard],
+            field: [],
+            life: [{ id: "p1-l1" }],
+            grave: [],
+          },
+          p2: { hand: [], field: [], life: [{ id: "p2-l1" }], grave: [] },
+        },
+      };
+
+      const session = new GameSession(state, proRulePackage);
+
+      // Snapshot before
+      const handBefore = JSON.parse(JSON.stringify(state.players.p1.hand));
+      const graveBefore = JSON.parse(JSON.stringify(state.players.p1.grave));
+      const fieldBefore = JSON.parse(JSON.stringify(state.players.p1.field));
+      const stageBefore = JSON.parse(JSON.stringify(state.stage.requests));
+      const stateVersionBefore = state.stateVersion;
+
+      // 1. LegalPatternGenerator public path
+      const d1: any = session.advance();
+      expect(d1.type).toBe("WAITING_FOR_DECISION");
+      const qsPattern = d1.request.patterns.find(
+        (p: any) =>
+          p.kind === "ACTION" &&
+          d1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.quickSummonsAce"
+      );
+      expect(qsPattern).toBeUndefined();
+
+      // 2. ActionRequestValidator public path
+      const validator = new ActionRequestValidator();
+      expect(() => {
+        validator.validateActionRequest(quickSummonDef, {
+          state: session.state,
+          playerKey: "p1",
+          keyCard: aceCard,
+          components: proRulePackage.components,
+        });
+      }).toThrow(ValidationError);
+
+      // 3. Verify state is completely unmutated
+      expect(session.state.players.p1.hand).toEqual(handBefore);
+      expect(session.state.players.p1.grave).toEqual(graveBefore);
+      expect(session.state.players.p1.field).toEqual(fieldBefore);
+      expect(session.state.stage.requests).toEqual(stageBefore);
+      expect(session.state.stateVersion).toBe(stateVersionBefore);
+
+      // 4. Verify no Quick Summon events were recorded
+      const matchLog = session.getMatchLog();
+      const forbiddenEvents = matchLog.events.filter((e) => {
+        if ((e as any).actionRef === "action.quickSummonsAce") return true;
+        if (e.type === "card.moved" && ((e as any).cardId === aceCard.id || (e as any).cardId === costCard.id))
+          return true;
+        return false;
+      });
+      expect(forbiddenEvents).toHaveLength(0);
+    });
+  });
+
+  // =========================================================================
+  // 5. Effect Resolution: selectOption & Selection Fail-Closed Regression (Section 11)
+  // =========================================================================
+  describe("5. Effect Resolution & Selection Fail-Closed Regression", () => {
+    it("5.1: Selecting 'ace' summons Ace unit face up in charge state with card from request", () => {
       const aceCard = { id: "c-ace-1", suit: "S", rank: "A", value: 1 };
       const costCard = { id: "c-cost-1", suit: "D", rank: "5", value: 5 };
 
@@ -611,7 +786,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(totalCardsAfter).toBe(totalCardsBefore);
     });
 
-    it("4.2: Selecting 'bulwark' summons Bulwark unit face down in charge state with card from request", () => {
+    it("5.2: Selecting 'bulwark' summons Bulwark unit face down in charge state with card from request", () => {
       const aceCard = { id: "c-ace-2", suit: "H", rank: "A", value: 1 };
       const costCard = { id: "c-cost-2", suit: "C", rank: "9", value: 9 };
 
@@ -683,13 +858,163 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       const totalCardsAfter = countTotalCards(state);
       expect(totalCardsAfter).toBe(totalCardsBefore);
     });
+
+    it("5.3: Selection fail-closed: invalid selection value throws Error and leaves field unmutated", () => {
+      const aceCard = { id: "c-ace-err1", suit: "S", rank: "A", value: 1 };
+      const state: any = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p2",
+        nonTurnPlayer: "p2",
+        stage: {
+          requests: [
+            {
+              id: "req-err-1",
+              actionId: "action.quickSummonsAce",
+              controller: "p2",
+              speed: "normal",
+              timing: "quick",
+              keyCards: [aceCard],
+              status: "pending",
+            },
+          ],
+        },
+        players: {
+          p1: { hand: [], field: [], grave: [], life: [] },
+          p2: { hand: [], field: [], grave: [], life: [] },
+        },
+      };
+
+      const registry = new CommandRegistry();
+      const expr = new ExpressionEvaluator();
+      const ability = new AbilityEvaluator();
+      const interp = new EffectInterpreter(registry, expr, ability);
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p2",
+        keyCards: [aceCard],
+        keyCard: aceCard,
+        currentAction: quickSummonDef,
+        currentRequest: state.stage.requests[0],
+        actions: proRulePackage.actions,
+        components: proRulePackage.components,
+        selections: { summonMode: ["invalidMode"] },
+      };
+
+      expect(() => {
+        interp.executeEffectsWithInterruption(quickSummonDef.effect!, context, [1]);
+      }).toThrow(/未知の選択値/);
+
+      expect(state.players.p2.field).toHaveLength(0);
+    });
+
+    it("5.4: Selection fail-closed: missing selection throws Error and leaves field unmutated", () => {
+      const aceCard = { id: "c-ace-err2", suit: "S", rank: "A", value: 1 };
+      const state: any = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p2",
+        nonTurnPlayer: "p2",
+        stage: {
+          requests: [
+            {
+              id: "req-err-2",
+              actionId: "action.quickSummonsAce",
+              controller: "p2",
+              speed: "normal",
+              timing: "quick",
+              keyCards: [aceCard],
+              status: "pending",
+            },
+          ],
+        },
+        players: {
+          p1: { hand: [], field: [], grave: [], life: [] },
+          p2: { hand: [], field: [], grave: [], life: [] },
+        },
+      };
+
+      const registry = new CommandRegistry();
+      const expr = new ExpressionEvaluator();
+      const ability = new AbilityEvaluator();
+      const interp = new EffectInterpreter(registry, expr, ability);
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p2",
+        keyCards: [aceCard],
+        keyCard: aceCard,
+        currentAction: quickSummonDef,
+        currentRequest: state.stage.requests[0],
+        actions: proRulePackage.actions,
+        components: proRulePackage.components,
+        selections: {},
+      };
+
+      expect(() => {
+        interp.executeEffectsWithInterruption(quickSummonDef.effect!, context, [1]);
+      }).toThrow(/選択結果が見つかりません/);
+
+      expect(state.players.p2.field).toHaveLength(0);
+    });
+
+    it("5.5: Selection fail-closed: multiple selection values throws Error and leaves field unmutated", () => {
+      const aceCard = { id: "c-ace-err3", suit: "S", rank: "A", value: 1 };
+      const state: any = {
+        stateVersion: 1,
+        turnPlayer: "p1",
+        chancePlayer: "p2",
+        nonTurnPlayer: "p2",
+        stage: {
+          requests: [
+            {
+              id: "req-err-3",
+              actionId: "action.quickSummonsAce",
+              controller: "p2",
+              speed: "normal",
+              timing: "quick",
+              keyCards: [aceCard],
+              status: "pending",
+            },
+          ],
+        },
+        players: {
+          p1: { hand: [], field: [], grave: [], life: [] },
+          p2: { hand: [], field: [], grave: [], life: [] },
+        },
+      };
+
+      const registry = new CommandRegistry();
+      const expr = new ExpressionEvaluator();
+      const ability = new AbilityEvaluator();
+      const interp = new EffectInterpreter(registry, expr, ability);
+
+      const context: CommandContext = {
+        state,
+        playerKey: "p2",
+        keyCards: [aceCard],
+        keyCard: aceCard,
+        currentAction: quickSummonDef,
+        currentRequest: state.stage.requests[0],
+        actions: proRulePackage.actions,
+        components: proRulePackage.components,
+        selections: { summonMode: ["ace", "bulwark"] },
+      };
+
+      expect(() => {
+        interp.executeEffectsWithInterruption(quickSummonDef.effect!, context, [1]);
+      }).toThrow(/1つのみ指定/);
+
+      expect(state.players.p2.field).toHaveLength(0);
+    });
   });
 
   // =========================================================================
-  // 5. Cancelled Request (Countered)
+  // 6. Cancelled Request (Countered) Regression (Section 12)
   // =========================================================================
-  describe("5. Cancelled Request (Countered)", () => {
-    it("5.1: When Quick Summon request is cancelled, key card moves to grave and no unit is summoned", () => {
+  describe("6. Cancelled Request (Countered) Regression", () => {
+    it("6.1: When Quick Summon request is cancelled, key card moves to grave and no unit is summoned", () => {
       const aceCard = { id: "c-ace-c", suit: "S", rank: "A", value: 1 };
       const costCard = { id: "c-cost-c", suit: "H", rank: "8", value: 8 };
 
@@ -748,10 +1073,10 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
   });
 
   // =========================================================================
-  // 6. GameSession End-to-End Tests
+  // 7. GameSession End-to-End & Canonical Match Log Contract (Section 9, 10)
   // =========================================================================
-  describe("6. GameSession End-to-End Integration", () => {
-    it("6.1: Full GameSession flow for Quick Summon -> Ace mode", () => {
+  describe("7. GameSession End-to-End & Canonical Match Log Contract", () => {
+    it("7.1: Full GameSession flow for Quick Summon -> Ace mode with Canonical Match Log verification", () => {
       const aceCard = { id: "p2-ace", suit: "S", rank: "A", value: 1 };
       const costCard = { id: "p2-cost", suit: "D", rank: "6", value: 6 };
       const extraCard = { id: "p2-extra", suit: "H", rank: "10", value: 10 };
@@ -780,7 +1105,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       };
 
       const totalCardsBefore = countTotalCards(state);
-      const session = new GameSession(state, proRulePackage);
+      const session = new GameSession(state, proRulePackage, { matchId: "match-test-qs-ace-log" });
 
       // Step 1: Advance -> p2 decision request
       const d1: any = session.advance();
@@ -788,7 +1113,9 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(d1.request.playerId).toBe("p2");
 
       const qsPatternIdx = d1.request.patterns.findIndex(
-        (p: any) => p.kind === "ACTION" && d1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.quickSummonsAce"
+        (p: any) =>
+          p.kind === "ACTION" &&
+          d1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.quickSummonsAce"
       );
       expect(qsPatternIdx).toBeGreaterThanOrEqual(0);
 
@@ -814,11 +1141,11 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(session.state.players.p2.hand).toHaveLength(1);
       expect(session.state.players.p2.hand[0].id).toBe(remainingCardId);
       expect(session.state.players.p2.grave).toHaveLength(1);
-      const graveCardId = session.state.players.p2.grave[0]?.cards?.[0]?.id ?? session.state.players.p2.grave[0]?.id;
+      const graveCardId =
+        session.state.players.p2.grave[0]?.cards?.[0]?.id ?? session.state.players.p2.grave[0]?.id;
       expect(graveCardId).toBe(discardedCardId);
 
       // Step 3: Priority passes to resolve stage
-      // Both players PASS to trigger stage resolution
       const passP1 = d2.request.patterns.findIndex((p: any) => p.kind === "PASS");
       const d3: any = session.submitDecision({
         decisionId: d2.request.decisionId,
@@ -847,7 +1174,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(acePatternIdx).toBeGreaterThanOrEqual(0);
 
       // Step 4: Submit 'ace' option
-      const d5: any = session.submitDecision({
+      session.submitDecision({
         decisionId: d4.request.decisionId,
         stateVersion: d4.request.stateVersion,
         selectedPatternRef: acePatternIdx,
@@ -870,9 +1197,98 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       // 54-card conservation
       const totalCardsAfter = countTotalCards(session.state);
       expect(totalCardsAfter).toBe(totalCardsBefore);
+
+      // =====================================================================
+      // Canonical Match Log Verification (Section 9)
+      // =====================================================================
+      const matchLog = session.getMatchLog();
+      const eventTypes = matchLog.events.map((e) => e.type);
+
+      expect(eventTypes).toContain("request.created");
+      expect(eventTypes).toContain("stage.pushed");
+      expect(eventTypes).toContain("card.moved");
+      expect(eventTypes).toContain("request.resolve.started");
+      expect(eventTypes).toContain("stage.popped");
+      expect(eventTypes).toContain("request.resolved");
+
+      const reqCreated = matchLog.events.find(
+        (e) => e.type === "request.created" && (e as any).actionRef === "action.quickSummonsAce"
+      );
+      expect(reqCreated).toBeDefined();
+
+      const stagePushed = matchLog.events.find(
+        (e) => e.type === "stage.pushed" && (e as any).actionRef === "action.quickSummonsAce"
+      );
+      expect(stagePushed).toBeDefined();
+
+      const cardMovedEvents = matchLog.events.filter((e) => e.type === "card.moved") as any[];
+
+      // Key A: hand -> request
+      const keyHandToReq = cardMovedEvents.find(
+        (e) =>
+          e.cardId === aceCard.id &&
+          e.from.kind === "zone" &&
+          e.from.zone === "hand" &&
+          e.to.kind === "request"
+      );
+      expect(keyHandToReq).toBeDefined();
+
+      // D cost card: hand -> grave with cause.type == "cost" or cause.symbol == "D"
+      const costHandToGrave = cardMovedEvents.find(
+        (e) =>
+          e.cardId === discardedCardId &&
+          e.from.kind === "zone" &&
+          e.from.zone === "hand" &&
+          e.to.kind === "zone" &&
+          e.to.zone === "grave" &&
+          (e.cause?.type === "cost" || (e.cause as any)?.symbol === "D")
+      );
+      expect(costHandToGrave).toBeDefined();
+
+      // request.resolve.started
+      const reqResolveStarted = matchLog.events.find(
+        (e) => e.type === "request.resolve.started" && (e as any).actionRef === "action.quickSummonsAce"
+      );
+      expect(reqResolveStarted).toBeDefined();
+
+      // Key A: request -> field
+      const keyReqToField = cardMovedEvents.find(
+        (e) =>
+          e.cardId === aceCard.id &&
+          e.from.kind === "request" &&
+          e.to.kind === "zone" &&
+          e.to.zone === "field"
+      );
+      expect(keyReqToField).toBeDefined();
+
+      // stage.popped
+      const stagePopped = matchLog.events.find(
+        (e) => e.type === "stage.popped" && (e as any).actionRef === "action.quickSummonsAce"
+      );
+      expect(stagePopped).toBeDefined();
+
+      // request.resolved
+      const reqResolved = matchLog.events.find(
+        (e) => e.type === "request.resolved" && (e as any).actionRef === "action.quickSummonsAce"
+      );
+      expect(reqResolved).toBeDefined();
+
+      // Canonical event order: created < stage.pushed < resolve.started < card.moved (req->field) < stage.popped < resolved
+      const idxReqCreated = matchLog.events.indexOf(reqCreated!);
+      const idxStagePushed = matchLog.events.indexOf(stagePushed!);
+      const idxResolveStarted = matchLog.events.indexOf(reqResolveStarted!);
+      const idxKeyReqToField = matchLog.events.indexOf(keyReqToField!);
+      const idxStagePopped = matchLog.events.indexOf(stagePopped!);
+      const idxReqResolved = matchLog.events.indexOf(reqResolved!);
+
+      expect(idxReqCreated).toBeLessThan(idxStagePushed);
+      expect(idxStagePushed).toBeLessThan(idxResolveStarted);
+      expect(idxResolveStarted).toBeLessThan(idxKeyReqToField);
+      expect(idxKeyReqToField).toBeLessThan(idxStagePopped);
+      expect(idxStagePopped).toBeLessThan(idxReqResolved);
     });
 
-    it("6.2: Full GameSession flow for Quick Summon -> Bulwark mode", () => {
+    it("7.2: Full GameSession flow for Quick Summon -> Bulwark mode with Canonical Match Log verification (Section 10)", () => {
       const aceCard = { id: "p2-ace-bw", suit: "S", rank: "A", value: 1 };
       const costCard = { id: "p2-cost-bw", suit: "D", rank: "6", value: 6 };
       const extraCard = { id: "p2-extra-bw", suit: "H", rank: "10", value: 10 };
@@ -901,12 +1317,14 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       };
 
       const totalCardsBefore = countTotalCards(state);
-      const session = new GameSession(state, proRulePackage);
+      const session = new GameSession(state, proRulePackage, { matchId: "match-test-qs-bw-log" });
 
       // Advance -> p2 decision
       const d1: any = session.advance();
       const qsPatternIdx = d1.request.patterns.findIndex(
-        (p: any) => p.kind === "ACTION" && d1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.quickSummonsAce"
+        (p: any) =>
+          p.kind === "ACTION" &&
+          d1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.quickSummonsAce"
       );
 
       // Submit Quick Summon
@@ -949,7 +1367,7 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
         selectedPatternRef: bulwarkPatternIdx,
       });
 
-      // Verification: Bulwark summoned to p2 field
+      // Verification: Bulwark summoned to p2 field (Section 10)
       expect(session.state.players.p2.field).toHaveLength(1);
       const bulwarkUnit = session.state.players.p2.field[0];
       expect(bulwarkUnit.componentId).toBe("character.bulwark");
@@ -957,9 +1375,27 @@ describe("BP-SIM-REG-5.0-B: Quick Summon (action.quickSummonsAce) & Generic turn
       expect(bulwarkUnit.state).toBe("charge");
       expect(bulwarkUnit.cards[0].id).toBe(aceCard.id);
 
+      // No duplicate Key A
+      const allFieldCardIds = session.state.players.p2.field.flatMap((u: any) =>
+        (u.cards || []).map((c: any) => c.id)
+      );
+      expect(allFieldCardIds.filter((id: string) => id === aceCard.id)).toHaveLength(1);
+
       // Conservation
       const totalCardsAfter = countTotalCards(session.state);
       expect(totalCardsAfter).toBe(totalCardsBefore);
+
+      // Canonical Match Log: Key A moves request -> field
+      const matchLog = session.getMatchLog();
+      const cardMovedEvents = matchLog.events.filter((e) => e.type === "card.moved") as any[];
+      const keyReqToField = cardMovedEvents.find(
+        (e) =>
+          e.cardId === aceCard.id &&
+          e.from.kind === "request" &&
+          e.to.kind === "zone" &&
+          e.to.zone === "field"
+      );
+      expect(keyReqToField).toBeDefined();
     });
   });
 });
