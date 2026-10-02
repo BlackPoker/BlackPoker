@@ -114,9 +114,10 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
       expect(proFormat.actions).toHaveLength(31);
     });
 
-    it("1.4: Total actions count is 36 including action.changeTarget", () => {
-      expect(rulePackage.actions).toHaveLength(36);
+    it("1.4: Total actions count is 37 including action.changeTarget and action.reverse", () => {
+      expect(rulePackage.actions).toHaveLength(37);
       expect(rulePackage.actions.map((a) => a.id)).toContain("action.changeTarget");
+      expect(rulePackage.actions.map((a) => a.id)).toContain("action.reverse");
     });
 
     it("1.5: pro:rarePack remains unimplemented / unpublished", async () => {

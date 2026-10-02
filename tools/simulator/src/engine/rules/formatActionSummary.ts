@@ -21,21 +21,25 @@ export function formatActionSummary(action: ActionDefinition): string {
   // キーカード条件の解析
   let keyStr = "";
   if (action.key) {
-    const suitMap: Record<string, string> = { heart: "♡", spade: "♠", diamond: "♢", club: "♣" };
-    if (action.key.condition && action.key.condition.card) {
-      const card = action.key.condition.card;
-      const suit = card.suit ? suitMap[card.suit] || card.suit : "";
-      const rank = (card.rank || "").replace(/\.\./g, "-");
-      keyStr = (suit || rank) ? `★${suit}${rank}` : "";
-    } else if (action.key.conditions) {
-      // 複数キーカード条件の解析
-      const subKeys = action.key.conditions.map((cond: any) => {
-        const card = cond.card || cond;
+    if (action.key.sameRank) {
+      keyStr = action.key.count ? `★同じ数字を${action.key.count}枚` : "★同じ数字";
+    } else {
+      const suitMap: Record<string, string> = { heart: "♡", spade: "♠", diamond: "♢", club: "♣" };
+      if (action.key.condition && action.key.condition.card) {
+        const card = action.key.condition.card;
         const suit = card.suit ? suitMap[card.suit] || card.suit : "";
         const rank = (card.rank || "").replace(/\.\./g, "-");
-        return `${suit}${rank}`;
-      });
-      keyStr = `★${subKeys.join(" + ")}`;
+        keyStr = (suit || rank) ? `★${suit}${rank}` : "";
+      } else if (action.key.conditions) {
+        // 複数キーカード条件の解析
+        const subKeys = action.key.conditions.map((cond: any) => {
+          const card = cond.card || cond;
+          const suit = card.suit ? suitMap[card.suit] || card.suit : "";
+          const rank = (card.rank || "").replace(/\.\./g, "-");
+          return `${suit}${rank}`;
+        });
+        keyStr = `★${subKeys.join(" + ")}`;
+      }
     }
   }
 
@@ -54,6 +58,12 @@ export function formatActionSummary(action: ActionDefinition): string {
         target.condition.characterType === "bulwark"
       ) {
         targetStr = "対象: 防壁1体";
+      } else if (
+        target.condition.componentType === "character" ||
+        target.condition.characterType === "character" ||
+        target.condition.type === "character"
+      ) {
+        targetStr = "対象: キャラクター1体";
       } else if (target.condition.type === "player" && target.condition.relation === "opponent") {
         targetStr = "対象: 対戦相手1人";
       } else {

@@ -33,6 +33,8 @@ import {
   moveRequestKeyCardsToHandHandler,
   matchRequestKeyCardsHandler,
   replaceRequestTargetHandler,
+  setUnitStateHandler,
+  transformCharacterHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -835,7 +837,14 @@ export class CommandRegistry {
       for (const t of request.targets) {
         if (t.type === "unit") {
           if (!targetComponent) {
-            targetComponent = (player?.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined) || t;
+            let found: any = player?.field ? player.field.find((u: any) => u.unitId === t.unitId) : undefined;
+            if (!found && context.state.players) {
+              for (const p of Object.values<any>(context.state.players)) {
+                found = p?.field ? p.field.find((u: any) => u.unitId === t.unitId) : undefined;
+                if (found) break;
+              }
+            }
+            targetComponent = found || t;
           }
         } else if (t.type === "player") {
           if (!targetPlayerKey) {
@@ -1193,5 +1202,7 @@ export class CommandRegistry {
     this.register("moveRequestKeyCardsToHand", moveRequestKeyCardsToHandHandler(this.effectInterpreter));
     this.register("matchRequestKeyCards", matchRequestKeyCardsHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("replaceRequestTarget", replaceRequestTargetHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("setUnitState", setUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("transformCharacter", transformCharacterHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

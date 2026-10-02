@@ -17,6 +17,7 @@ import { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionTargetService } from "./ActionTargetService";
+import { CharacterTransformService } from "./CharacterTransformService";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -2204,7 +2205,145 @@ export function matchRequestKeyCardsHandler(
   };
 }
 
+/**
+ * setUnitState: 対象ユニットのチャージ/ドライブ状態を指定された状態に設定する
+ */
+export function setUnitStateHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, state } = args;
+    let targetUnit = context.targetComponent;
 
+    if (!targetUnit && target) {
+      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
+      if (resolvedTargetId) {
+        for (const pKey of Object.keys(context.state.players || {})) {
+          const player = context.state.players[pKey];
+          if (player.field) {
+            const u = player.field.find((unit: any) => unit.unitId === resolvedTargetId);
+            if (u) {
+              targetUnit = u;
+              break;
+            }
+          }
+        }
+      }
+    }
 
+    if (!targetUnit) {
+      throw new Error("状態変更対象のユニットが見つかりません。");
+    }
 
+    let desiredState = expressionEvaluator.resolveBindingValue(state, context);
+    if (!desiredState && context.selections && typeof state === "string" && state.startsWith("selection.")) {
+      const selKey = state.slice("selection.".length);
+      desiredState = context.selections[selKey];
+    }
+    if (Array.isArray(desiredState)) {
+      desiredState = desiredState[0];
+    }
 
+    if (desiredState !== "charge" && desiredState !== "drive") {
+      throw new Error(`設定できない状態です。期待: charge または drive, 実際: ${desiredState}`);
+    }
+
+    const oldState = targetUnit.state;
+    if (oldState === desiredState) {
+      // no-op, false unitStateChanged event は発行しない
+      return;
+    }
+
+    targetUnit.state = desiredState;
+
+    if (effectInterpreter) {
+      // イベント発行 (unitStateChanged)
+      const event = {
+        type: "unitStateChanged",
+        payload: {
+          unitId: targetUnit.unitId,
+          fromState: oldState,
+          toState: desiredState,
+          playerKey: context.playerKey,
+          cause: {
+            type: "effect",
+            command: "setUnitState",
+            actionId: context.currentAction?.id || context.currentRequest?.actionId,
+            requestId: context.currentRequest?.id,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(event, context);
+    }
+  };
+}
+
+/**
+ * transformCharacter: 対象キャラクターの形態を変形する
+ */
+export function transformCharacterHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { target, destination, clearReceivedEffects, clearBattleRole } = args;
+
+    let targetUnit = context.targetComponent;
+    if (!targetUnit && target) {
+      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
+      if (resolvedTargetId) {
+        for (const pKey of Object.keys(context.state.players || {})) {
+          const player = context.state.players[pKey];
+          if (player.field) {
+            const u = player.field.find((unit: any) => unit.unitId === resolvedTargetId);
+            if (u) {
+              targetUnit = u;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!targetUnit) {
+      throw new Error("変形対象のユニットが見つかりません。");
+    }
+
+    const transformResult = CharacterTransformService.transformCharacter({
+      targetUnit,
+      state: context.state,
+      components: context.components || [],
+      options: {
+        destination: destination ? expressionEvaluator.resolveBindingValue(destination, context) : "opposite",
+        clearReceivedEffects: clearReceivedEffects !== undefined ? Boolean(clearReceivedEffects) : true,
+        clearBattleRole: clearBattleRole !== undefined ? Boolean(clearBattleRole) : true,
+      },
+    });
+
+    const logRecorder =
+      context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;
+    if (logRecorder) {
+      logRecorder.record({
+        type: "unit.transformed",
+        stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+        playerId: transformResult.ownerKey,
+        sourceUnitId: transformResult.sourceUnitId,
+        sourceComponentId: transformResult.sourceComponentId,
+        sourceCharacterType: transformResult.sourceCharacterType,
+        results: transformResult.results.map((r) => ({
+          unitId: r.unitId,
+          componentId: r.componentId,
+          characterType: r.characterType,
+          cardIds: r.cardIds,
+          face: r.face,
+          state: r.state,
+        })),
+        cause: {
+          actionId: context.currentAction?.id || context.currentRequest?.actionId,
+          requestId: context.currentRequest?.id,
+        },
+      });
+    }
+  };
+}

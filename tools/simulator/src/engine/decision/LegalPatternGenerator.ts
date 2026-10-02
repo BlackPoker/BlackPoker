@@ -14,6 +14,7 @@ import { isSoldierType } from "../rules/characterUtils";
 import { formatSuitSymbol, matchesSuit, matchesRank, rankToValue, formatCardCodeShort, formatCardDisplay, normalizeSuit } from "../rules/cardUtils";
 import { validateOptionSelectionDefinition } from "../rules/OptionSelectionValidator";
 import { resolveKeyCardSourceZone, getKeyCardsFromSource } from "../rules/keyCardUtils";
+import { matchesKeyGroupConstraints } from "../rules/keyCardGroupUtils";
 
 
 export interface DecisionGenerationMetrics {
@@ -404,15 +405,7 @@ export class LegalPatternGenerator {
       return [[]];
     }
 
-    if (keyDef.sameSuit) {
-      const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
-      results = results.filter((combo) => {
-        if (combo.length <= 1) return true;
-        const firstSuit = normalizeSuit(combo[0]?.suit);
-        if (!allowedSuits.has(firstSuit)) return false;
-        return combo.every((c) => normalizeSuit(c?.suit) === firstSuit);
-      });
-    }
+    results = results.filter((combo) => matchesKeyGroupConstraints(combo, keyDef).isValid);
 
     return results;
   }

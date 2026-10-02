@@ -29,7 +29,8 @@ export type CanonicalGameEventType =
   | "card.revealed"
   | "zone.shuffled"
   | "zone.top.changed"
-  | "request.target.changed";
+  | "request.target.changed"
+  | "unit.transformed";
 
 
 export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack" | "rare";
@@ -261,6 +262,28 @@ export interface ZoneTopChangedEvent extends CanonicalGameEventBase {
   readonly cardId?: string;
 }
 
+export interface TransformedUnitResult {
+  readonly unitId: string;
+  readonly componentId: string;
+  readonly characterType: string;
+  readonly cardIds: readonly string[];
+  readonly face: "up" | "down" | string;
+  readonly state: "charge" | "drive" | string;
+}
+
+export interface UnitTransformedEvent extends CanonicalGameEventBase {
+  readonly type: "unit.transformed";
+  readonly playerId: string;
+  readonly sourceUnitId: string;
+  readonly sourceComponentId: string;
+  readonly sourceCharacterType: string;
+  readonly results: readonly TransformedUnitResult[];
+  readonly cause?: {
+    readonly actionId?: string;
+    readonly requestId?: string;
+  };
+}
+
 export type CanonicalGameEvent =
   | MatchStartedEvent
   | MatchFinishedEvent
@@ -283,7 +306,8 @@ export type CanonicalGameEvent =
   | CardRevealedEvent
   | ZoneShuffledEvent
   | ZoneTopChangedEvent
-  | RequestTargetChangedEvent;
+  | RequestTargetChangedEvent
+  | UnitTransformedEvent;
 
 
 export interface CanonicalMatchLogMeta {

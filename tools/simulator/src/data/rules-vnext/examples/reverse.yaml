@@ -1,0 +1,47 @@
+actions:
+  - id: action.reverse
+    name: リバース
+    ruby: りばーす
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      sameRank: true
+      condition:
+        card:
+          zone: hand
+
+    targets:
+      - id: target
+        type: unit
+        condition:
+          componentType: character
+
+    text:
+      effect: 必要であれば対象のキャラクターをチャージ状態またはドライブ状態にする。対象が兵士の場合は防壁にし、対象が防壁の場合は兵士にする。変換前に受けていた効果、能力は無くなる。対象がアタッカーまたはブロッカーの場合は解除する。
+
+    effect:
+      - selectOption:
+          id: reverseState
+          chooser: controller
+          options:
+            - value: charge
+              label: チャージ状態
+            - value: drive
+              label: ドライブ状態
+
+      - setUnitState:
+          target: target
+          state: selection.reverseState
+
+      - transformCharacter:
+          target: target
+          destination: opposite
+          clearReceivedEffects: true
+          clearBattleRole: true

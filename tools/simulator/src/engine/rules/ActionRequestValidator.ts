@@ -12,6 +12,7 @@ import { ActionActivationConditionEvaluator } from "./ActionActivationConditionE
 import { ActionCostEvaluator, InvalidActionCostError } from "./ActionCostEvaluator";
 import { resolveKeyCardSourceZone, validateKeyCardsInSource, resolveCanonicalKeyCardsInSource } from "./keyCardUtils";
 import { isActiveStageRequest } from "./ActionTargetService";
+import { matchesKeyGroupConstraints } from "./keyCardGroupUtils";
 
 /**
  * バリデーションエラーを表すカスタム例外クラス
@@ -239,19 +240,10 @@ export class ActionRequestValidator {
         }
       }
 
-      // sameSuit の検証 (canonicalKeyCards を使用)
-      if (keyDef.sameSuit) {
-        if (canonicalKeyCards.length > 1) {
-          const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
-          const firstSuit = normalizeSuit(canonicalKeyCards[0]?.suit);
-          if (!allowedSuits.has(firstSuit)) {
-            throw new ValidationError("キーカードのスートが不正です。");
-          }
-          const allSame = canonicalKeyCards.every((c) => normalizeSuit(c?.suit) === firstSuit);
-          if (!allSame) {
-            throw new ValidationError("キーカードのスートが一致していません。");
-          }
-        }
+      // キーカードグループ制約 (sameSuit, sameRank 等) の検証 (canonicalKeyCards を使用)
+      const groupCheck = matchesKeyGroupConstraints(canonicalKeyCards, keyDef);
+      if (!groupCheck.isValid) {
+        throw new ValidationError(groupCheck.reason || "キーカードの組み合わせ条件を満たしていません。");
       }
     }
 
