@@ -1,0 +1,39 @@
+actions:
+  - id: action.changeTarget
+    name: 対象変更
+    ruby: たいしょうへんこう
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: club
+          rank: "A..10"
+          zone: hand
+
+    targets:
+      - id: targetRequest
+        type: request
+        condition:
+          status: pending
+          hasTarget: true
+
+    text:
+      effect: 対象のリクエストの対象を、別の適正な対象に変更する。
+
+    effect:
+      - selectActionTarget:
+          id: replacementTarget
+          request: targetRequest
+          decisionPlayer: self
+
+      - replaceRequestTarget:
+          request: targetRequest
+          selection: replacementTarget

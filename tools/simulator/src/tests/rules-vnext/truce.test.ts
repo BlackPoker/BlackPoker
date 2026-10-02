@@ -101,9 +101,9 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
       expect(proFormat.actions).toContain("action.truce");
       expect(proFormat.actions).toHaveLength(31);
 
-      // Full RulePackage action count: 35
-      expect(rulePackage.actions).toHaveLength(35);
-      expect(proRulePackage.actions).toHaveLength(35);
+      // Full RulePackage action count: 36 (includes action.changeTarget)
+      expect(rulePackage.actions).toHaveLength(36);
+      expect(proRulePackage.actions).toHaveLength(36);
     });
   });
 

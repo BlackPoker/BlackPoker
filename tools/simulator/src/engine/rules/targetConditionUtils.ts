@@ -77,15 +77,16 @@ export function evaluateUnitTargetCondition(
   }
 
   // 5. relation: "self" (自軍) / "opponent" (敵軍)
-  if (condition.relation && context.playerKey && context.unitOwnerKey) {
-    if (condition.relation === "self" && context.unitOwnerKey !== context.playerKey) {
+  const targetRelation = condition.relation || condition.owner;
+  if (targetRelation && context.playerKey && context.unitOwnerKey) {
+    if (targetRelation === "self" && context.unitOwnerKey !== context.playerKey) {
       return {
         isValid: false,
         reason: "TARGET_CONDITION_UNMET",
         detail: "ターゲットユニットは自分のフィールドに存在する必要があります。",
       };
     }
-    if (condition.relation === "opponent" && context.unitOwnerKey === context.playerKey) {
+    if (targetRelation === "opponent" && context.unitOwnerKey === context.playerKey) {
       return {
         isValid: false,
         reason: "TARGET_CONDITION_UNMET",
@@ -136,13 +137,18 @@ export function evaluateRequestTargetCondition(
     return { isValid: true };
   }
 
-  // 1. status: "pending" 等の一致
-  if (condition.status && targetRequest.status !== condition.status) {
-    return {
-      isValid: false,
-      reason: "TARGET_CONDITION_UNMET",
-      detail: `ターゲットリクエストのステータスが不適合です。期待: ${condition.status}, 実際: ${targetRequest.status}`,
-    };
+  // 1. status: "pending" 等の一致 (解決中リクエストもステージ上のアクティブなリクエストとしてpendingに適合)
+  if (condition.status) {
+    const isStatusMatch =
+      targetRequest.status === condition.status ||
+      (condition.status === "pending" && targetRequest.status === "resolving");
+    if (!isStatusMatch) {
+      return {
+        isValid: false,
+        reason: "TARGET_CONDITION_UNMET",
+        detail: `ターゲットリクエストのステータスが不適合です。期待: ${condition.status}, 実際: ${targetRequest.status}`,
+      };
+    }
   }
 
   // 2. keyCards: キーカード枚数条件 (例: count: [1, 2])

@@ -28,7 +28,8 @@ export type CanonicalGameEventType =
   | "card.moved"
   | "card.revealed"
   | "zone.shuffled"
-  | "zone.top.changed";
+  | "zone.top.changed"
+  | "request.target.changed";
 
 
 export type CardZoneName = "hand" | "field" | "grave" | "fog" | "life" | "pack" | "rare";
@@ -134,6 +135,20 @@ export interface RequestCancelledEvent extends CanonicalGameEventBase {
   readonly actionRef: string;
   readonly controller: string;
   readonly reason?: string;
+}
+
+export interface RequestTargetChangedEvent extends CanonicalGameEventBase {
+  readonly type: "request.target.changed";
+  readonly requestId: string;
+  readonly actionRef: string;
+  readonly controller: string;
+  readonly targetDefinitionId?: string;
+  readonly previousTarget?: any;
+  readonly newTarget?: any;
+  readonly cause?: {
+    readonly actionId?: string;
+    readonly requestId?: string;
+  };
 }
 
 export interface TriggerDetectedEvent extends CanonicalGameEventBase {
@@ -267,7 +282,8 @@ export type CanonicalGameEvent =
   | CardMovedEvent
   | CardRevealedEvent
   | ZoneShuffledEvent
-  | ZoneTopChangedEvent;
+  | ZoneTopChangedEvent
+  | RequestTargetChangedEvent;
 
 
 export interface CanonicalMatchLogMeta {

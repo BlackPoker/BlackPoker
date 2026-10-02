@@ -525,6 +525,77 @@ export class LegalPatternGenerator {
   }
 
   /**
+   * 対象選択（EFFECT_SELECTION - target / selectActionTarget 等）用 DecisionRequest を生成します。
+   */
+  static generateTargetSelectionDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: any,
+    effectStepId: string,
+    candidates: TargetSelection[],
+    options?: { stateVersion?: number; matchId?: string; decisionId?: string; selectionId?: string }
+  ): DecisionRequest {
+    const stateVersion = options?.stateVersion ?? (state.stateVersion || 1);
+    const matchId = options?.matchId ?? (state.matchId || "match-1");
+    const decisionId = options?.decisionId ?? `dec-tgt-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const observation = ObservationFactory.createObservation(state, playerId);
+
+    const effectSelections: EffectSelection[] = [];
+    const targetSelections: TargetSelection[] = [];
+    const patterns: LegalPattern[] = [];
+
+    candidates.forEach((target, index) => {
+      targetSelections.push(target);
+      const summary = target.displayName || target.primaryLabel || `対象: ${target.targetType}`;
+      const effSel: EffectSelection = {
+        selectionType: "target",
+        targetSelection: target,
+        summary,
+      };
+      effectSelections.push(effSel);
+
+      const targetRefStr = target.targetUnitId || target.targetRequestId || target.targetPlayerKey || "none";
+      const pattern: LegalPattern = {
+        patternId: `effect-target-${index}-${targetRefStr}`,
+        kind: "EFFECT_SELECTION",
+        effectSelectionRef: index,
+        targetSelectionRef: index,
+      };
+      patterns.push(pattern);
+    });
+
+    const catalog: DecisionCatalog = {
+      actions: [],
+      cardSelections: [],
+      unitSelections: [],
+      costPayments: [],
+      targetSelections,
+      effectSelections,
+      orderSelections: [],
+    };
+
+    const source: DecisionSource = {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: sourceRequest.id,
+      effectStepId,
+      playerId,
+    };
+
+    return {
+      protocolVersion: "1.0.0",
+      decisionId,
+      stateVersion,
+      matchId,
+      playerId,
+      source,
+      catalog,
+      patterns,
+      observation,
+    };
+  }
+
+  /**
    * カード選択（EFFECT_SELECTION - card / discardDownTo 等）用 DecisionRequest を生成します。
    */
   static generateCardSelectionDecision(

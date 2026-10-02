@@ -1,5 +1,6 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
+import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { PlayerKey, RequestRef } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry } from "../rules/CommandRegistry";
@@ -705,12 +706,14 @@ export class GameSession {
       const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
       let selectedValues: readonly string[] | undefined = undefined;
       let assignments: readonly any[] | undefined = undefined;
+      let targetSelection: TargetSelection | undefined = undefined;
 
       if (pattern.effectSelectionRef !== undefined) {
         const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
         if (effSel) {
           selectedValues = effSel.selectedValues;
           assignments = effSel.assignments;
+          targetSelection = effSel.targetSelection;
         }
       } else if (pattern.orderSelectionRef !== undefined) {
         const ordSel = this.pendingDecision.catalog.orderSelections[pattern.orderSelectionRef];
@@ -724,7 +727,8 @@ export class GameSession {
         this.continuation!,
         selectedValues,
         this.resolvingContext!,
-        assignments
+        assignments,
+        targetSelection
       );
 
       if (resumeResult.type === "WAITING_FOR_DECISION") {

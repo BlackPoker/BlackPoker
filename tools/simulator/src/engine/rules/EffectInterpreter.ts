@@ -9,6 +9,7 @@ import { validateOptionSelectionDefinition } from "./OptionSelectionValidator";
 import { validatePartialOrder, validateCompleteOrder } from "./OrderSelectionValidator";
 import { enumeratePhysicalCardsInGrave } from "./graveCardUtils";
 import { EffectPathCodec, EffectBranchCode, BranchIdentity } from "./EffectPathCodec";
+import { ActionTargetService } from "./ActionTargetService";
 
 export class NonInterruptibleEffectExecutionError extends Error {
   constructor(message: string) {
@@ -22,7 +23,7 @@ export interface EffectInterruption {
   readonly effectIndex: number;
   readonly effectStepId: string;
   readonly selectionId: string;
-  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option" | "order" | "zoneTop";
+  readonly selectionType?: "unit" | "unitAssignment" | "card" | "option" | "order" | "zoneTop" | "target";
   readonly candidates: any[];
   readonly attackers?: any[];
   readonly requiredCount?: number;
@@ -613,6 +614,51 @@ export class EffectInterpreter {
           selectionId,
           selectionType: "order",
           candidates: cards,
+          decisionPlayerKey,
+          effectPath: EffectPathCodec.createTopLevelPath(i),
+        };
+      }
+
+      if (name === "selectActionTarget") {
+        const selectionId = args.id || "replacementTarget";
+        if (context.selections && context.selections[selectionId] !== undefined) {
+          continue;
+        }
+
+        const decisionPlayerKey = this.resolveDecisionPlayerKey(args.decisionPlayer || args.chooser || "self", context);
+
+        let targetRequest = context.targetRequest;
+        if (!targetRequest && args.request) {
+          const reqId = this.expressionEvaluator.resolveBindingValue(args.request, context);
+          targetRequest = (context.state.stage?.requests || []).find((r: any) => r.id === reqId || r.id === args.request);
+        }
+
+        if (!targetRequest) {
+          throw new Error("selectActionTarget: 対象となるリクエストが見つかりません。");
+        }
+
+        const candidates = ActionTargetService.enumerateReplacementTargets(
+          targetRequest,
+          context.state,
+          context.components || [],
+          {
+            resolvingRequestId: context.currentRequest?.id,
+          }
+        );
+
+        if (candidates.length === 0) {
+          if (!context.selections) context.selections = {};
+          context.selections[selectionId] = null;
+          continue;
+        }
+
+        return {
+          interrupted: true,
+          effectIndex: i,
+          effectStepId: name,
+          selectionId,
+          selectionType: "target",
+          candidates,
           decisionPlayerKey,
           effectPath: EffectPathCodec.createTopLevelPath(i),
         };

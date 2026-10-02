@@ -32,13 +32,14 @@ import {
   moveUnitToHandHandler,
   moveRequestKeyCardsToHandHandler,
   matchRequestKeyCardsHandler,
+  replaceRequestTargetHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
 import { TriggerResolver } from "./TriggerResolver";
 import { RequestBufferProcessor } from "./RequestBufferProcessor";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
-import { CostPayment } from "../../domain/decision/DecisionCatalog";
+import { CostPayment, TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { EffectContinuation } from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 import { isCardInGameZones } from "./cardUtils";
@@ -789,7 +790,8 @@ export class CommandRegistry {
     continuation: EffectContinuation,
     selectedValues: readonly string[] | undefined,
     context: CommandContext,
-    assignments?: readonly any[]
+    assignments?: readonly any[],
+    targetSelection?: TargetSelection
   ): {
     type: "COMPLETED" | "WAITING_FOR_DECISION";
     request: ActionRequest;
@@ -808,7 +810,10 @@ export class CommandRegistry {
     let selections = context.selections;
     if (continuation.effectStepId !== "zoneTopSelection") {
       const selectionKey = continuation.selectionId || continuation.effectStepId;
-      const valueToStore: any = assignments !== undefined ? assignments : selectedValues;
+      let valueToStore: any = assignments !== undefined ? assignments : selectedValues;
+      if (targetSelection !== undefined) {
+        valueToStore = targetSelection;
+      }
 
       if (!context.selections) {
         context.selections = {};
@@ -1016,6 +1021,19 @@ export class CommandRegistry {
           currentSelections: context.selections,
         }
       );
+    } else if (execResult.selectionType === "target") {
+      return LegalPatternGenerator.generateTargetSelectionDecision(
+        context.state,
+        decisionPlayerId,
+        request,
+        execResult.effectStepId,
+        execResult.candidates,
+        {
+          selectionId: execResult.selectionId,
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+        }
+      );
     } else {
       return LegalPatternGenerator.generateEffectSelectionDecision(
         context.state,
@@ -1174,5 +1192,6 @@ export class CommandRegistry {
     this.register("moveUnitToHand", moveUnitToHandHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("moveRequestKeyCardsToHand", moveRequestKeyCardsToHandHandler(this.effectInterpreter));
     this.register("matchRequestKeyCards", matchRequestKeyCardsHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("replaceRequestTarget", replaceRequestTargetHandler(this.expressionEvaluator, this.effectInterpreter));
   }
 }

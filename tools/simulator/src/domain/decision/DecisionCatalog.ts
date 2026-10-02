@@ -57,6 +57,7 @@ export interface TargetSelection {
   readonly displayName?: string;
   readonly primaryLabel?: string;
   readonly secondaryLabel?: string;
+  readonly targetDefinitionId?: string;
 }
 
 /**
@@ -71,9 +72,10 @@ export interface UnitAssignment {
  * 効果解決時選択要素
  */
 export interface EffectSelection {
-  readonly selectionType: "unit" | "unitAssignment" | string;
+  readonly selectionType: "unit" | "unitAssignment" | "target" | string;
   readonly selectedValues?: readonly string[];
   readonly assignments?: readonly UnitAssignment[];
+  readonly targetSelection?: TargetSelection;
   readonly summary?: string;
 }
 

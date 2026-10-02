@@ -15,6 +15,8 @@ import { validateCompleteOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
 import { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
+import { TargetSelection } from "../../domain/decision/DecisionCatalog";
+import { ActionTargetService } from "./ActionTargetService";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -1060,6 +1062,72 @@ export function cancelRequestHandler(
 export function cleanupBattleStateHandler(): CommandHandler {
   return (_args, context) => {
     cleanupTransientBattleState(context.state);
+  };
+}
+
+/**
+ * replaceRequestTarget: 対象リクエストのターゲットを差し替える
+ */
+export function replaceRequestTargetHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { request, selection } = args;
+
+    let targetReq = context.targetRequest;
+    if (!targetReq && request) {
+      const reqId = expressionEvaluator.resolveBindingValue(request, context);
+      targetReq = (context.state.stage?.requests || []).find(
+        (r: any) => r.id === reqId || r.id === request
+      );
+    }
+
+    if (!targetReq) {
+      throw new Error("replaceRequestTarget: 変更対象のリクエストが見つかりません。");
+    }
+
+    const hasSelection = context.selections && selection in context.selections;
+    const rawSelection = hasSelection
+      ? context.selections[selection]
+      : expressionEvaluator.resolveBindingValue(selection, context);
+
+    // 候補0件等の場合、selectionはnull/undefined -> no-op
+    if (rawSelection === null || rawSelection === undefined) {
+      return;
+    }
+
+    const targetSelection: TargetSelection = Array.isArray(rawSelection)
+      ? rawSelection[0]
+      : rawSelection;
+
+    const replaceResult = ActionTargetService.replaceTarget(
+      targetReq,
+      targetSelection,
+      context.state,
+      context.components || []
+    );
+
+    if (replaceResult.changed) {
+      const logRecorder =
+        context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;
+      if (logRecorder) {
+        logRecorder.record({
+          type: "request.target.changed",
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          requestId: targetReq.id,
+          actionRef: targetReq.actionId,
+          controller: targetReq.controller,
+          targetDefinitionId: replaceResult.targetDefinitionId,
+          previousTarget: replaceResult.previousTarget,
+          newTarget: replaceResult.newTarget,
+          cause: {
+            actionId: context.currentAction?.id,
+            requestId: context.currentRequest?.id,
+          },
+        });
+      }
+    }
   };
 }
 
