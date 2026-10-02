@@ -1,5 +1,6 @@
 import { ComponentDefinition } from "../../domain/rules/RulePackage";
 import { isCharacterComponent, getCharacterType, resolveComponentForUnit } from "./characterUtils";
+import { isCanonicalPrintedCard } from "./cardUtils";
 
 export interface CharacterTransformOptions {
   readonly destination?: "opposite" | "soldier" | "bulwark" | string;
@@ -141,6 +142,11 @@ export class CharacterTransformService {
       }
       if (seenSourceCardIds.has(card.id)) {
         throw new Error(`変形対象の構成カードIDに重複が存在します: '${card.id}' (fail-closed)。`);
+      }
+      if (!isCanonicalPrintedCard(card)) {
+        throw new Error(
+          `変形対象の構成カード '${card.id}' がCanonical Printed Cardではありません (fail-closed)。`
+        );
       }
       seenSourceCardIds.add(card.id);
       sourceCardIds.push(card.id);

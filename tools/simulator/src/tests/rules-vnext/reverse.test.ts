@@ -887,6 +887,159 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
       expect(state.players.p1.field).toHaveLength(2);
       expect(state.players.p1.field[0].componentId).toBe("character.soldier");
     });
+
+    it("6.8: Section 7 test: Malformed normal card throws fail-closed with UNCHANGED state before mutation", () => {
+      const malformedCard = { id: "bad-card", suit: "banana", rank: "999" };
+      const soldier = {
+        unitId: "malformed-soldier",
+        componentId: "character.soldier",
+        state: "charge",
+        face: "up",
+        battle: { role: "attacker", targetPlayerKey: "p2" },
+        cards: [malformedCard],
+      };
+
+      const fogCard = { id: "fog-c", suit: "H", rank: "3" };
+      const fogEntry = {
+        componentId: "fog.up",
+        card: fogCard,
+        bindings: { target: "malformed-soldier", amount: 3 },
+      };
+
+      const state: any = {
+        players: {
+          p1: {
+            field: [soldier],
+            fog: [fogEntry],
+          },
+          p2: { field: [] },
+        },
+      };
+
+      // Snapshot before transform attempt
+      const stateSnapshotBefore = JSON.parse(JSON.stringify(state));
+
+      expect(() => {
+        CharacterTransformService.transformCharacter({
+          targetUnit: soldier,
+          state,
+          components: rulePackage.components,
+          options: { clearReceivedEffects: true, clearBattleRole: true },
+        });
+      }).toThrow(/Canonical Printed Cardではありません/);
+
+      // Section 11: Deep verification that state is completely UNCHANGED
+      expect(state).toEqual(stateSnapshotBefore);
+      expect(state.players.p1.field).toHaveLength(1);
+      expect(state.players.p1.field[0].unitId).toBe("malformed-soldier");
+      expect(state.players.p1.field[0].componentId).toBe("character.soldier");
+      expect(state.players.p1.field[0].battle?.role).toBe("attacker");
+      expect(state.players.p1.fog[0].bindings.target).toBe("malformed-soldier");
+    });
+
+    it("6.9: Section 8 test: Malformed Joker ({suit:'H', rank:'0'}) throws fail-closed with UNCHANGED state", () => {
+      const badJoker = { id: "bad-joker", suit: "H", rank: "0" };
+      const soldier = {
+        unitId: "bad-joker-sol",
+        componentId: "character.soldier",
+        state: "charge",
+        face: "up",
+        cards: [badJoker],
+      };
+
+      const state: any = {
+        players: {
+          p1: { field: [soldier] },
+        },
+      };
+
+      const stateSnapshotBefore = JSON.parse(JSON.stringify(state));
+
+      expect(() => {
+        CharacterTransformService.transformCharacter({
+          targetUnit: soldier,
+          state,
+          components: rulePackage.components,
+        });
+      }).toThrow(/Canonical Printed Cardではありません/);
+
+      expect(state).toEqual(stateSnapshotBefore);
+    });
+
+    it("6.10: Section 9 test: Valid Canonical Joker ({suit:'joker', rank:'JOKER'}) PASSES transformation", () => {
+      const goodJoker = { id: "good-joker", suit: "joker", rank: "JOKER" };
+      const magician = {
+        unitId: "magician-unit",
+        componentId: "character.magician",
+        state: "charge",
+        face: "up",
+        cards: [goodJoker],
+      };
+
+      const state: any = {
+        players: {
+          p1: { field: [magician] },
+        },
+      };
+
+      const result = CharacterTransformService.transformCharacter({
+        targetUnit: magician,
+        state,
+        components: rulePackage.components,
+      });
+
+      expect(result.results).toHaveLength(1);
+      expect(result.results[0].componentId).toBe("character.bulwark");
+      expect(result.results[0].characterType).toBe("bulwark");
+      expect(state.players.p1.field[0].componentId).toBe("character.bulwark");
+    });
+
+    it("6.11: Section 10 test: Multi-card Soldier with one malformed card causes entire transform to FAIL-CLOSED (no partial split)", () => {
+      const cardA = { id: "card-valid", suit: "S", rank: "8", value: 8 };
+      const cardB = { id: "card-malformed", suit: "banana", rank: "999" };
+      const armedSoldier = {
+        unitId: "armed-partial-test",
+        componentId: "character.armedSoldier",
+        state: "charge",
+        face: "up",
+        battle: { role: "attacker", targetPlayerKey: "p2" },
+        cards: [cardA, cardB],
+      };
+
+      const fogEntry = {
+        componentId: "fog.up",
+        card: { id: "fc", suit: "H", rank: "2" },
+        bindings: { target: "armed-partial-test", amount: 2 },
+      };
+
+      const state: any = {
+        players: {
+          p1: {
+            field: [armedSoldier],
+            fog: [fogEntry],
+          },
+          p2: { field: [] },
+        },
+      };
+
+      const stateSnapshotBefore = JSON.parse(JSON.stringify(state));
+
+      expect(() => {
+        CharacterTransformService.transformCharacter({
+          targetUnit: armedSoldier,
+          state,
+          components: rulePackage.components,
+          options: { clearReceivedEffects: true, clearBattleRole: true },
+        });
+      }).toThrow(/Canonical Printed Cardではありません/);
+
+      // Section 10 & 11: Entire transformation fails closed, NO partial split!
+      expect(state).toEqual(stateSnapshotBefore);
+      expect(state.players.p1.field).toHaveLength(1);
+      expect(state.players.p1.field[0].unitId).toBe("armed-partial-test");
+      expect(state.players.p1.field[0].battle?.role).toBe("attacker");
+      expect(state.players.p1.fog[0].bindings.target).toBe("armed-partial-test");
+    });
   });
 
   // ---------------------------------------------------------------------------
