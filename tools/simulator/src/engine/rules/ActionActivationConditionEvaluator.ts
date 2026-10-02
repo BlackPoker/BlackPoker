@@ -29,8 +29,10 @@ export class ActionActivationConditionEvaluator {
       return { isLegal: false, reason: "起動条件オペレータが指定されていません" };
     }
 
-    // サポートする condition operator: zoneState, zoneCount
-    const unsupportedKeys = conditionKeys.filter((k) => k !== "zoneState" && k !== "zoneCount");
+    // サポートする condition operator: turnRelation, zoneState, zoneCount
+    const unsupportedKeys = conditionKeys.filter(
+      (k) => k !== "turnRelation" && k !== "zoneState" && k !== "zoneCount"
+    );
     if (unsupportedKeys.length > 0) {
       return {
         isLegal: false,
@@ -38,8 +40,15 @@ export class ActionActivationConditionEvaluator {
       };
     }
 
-    if (!condition.zoneState && !condition.zoneCount) {
+    if (!condition.turnRelation && !condition.zoneState && !condition.zoneCount) {
       return { isLegal: false, reason: "対応可能な起動条件オペレータが存在しません" };
+    }
+
+    if (condition.turnRelation) {
+      const turnResult = this.evaluateTurnRelation(condition.turnRelation, context);
+      if (!turnResult.isLegal) {
+        return turnResult;
+      }
     }
 
     if (condition.zoneState) {
@@ -53,6 +62,80 @@ export class ActionActivationConditionEvaluator {
       const countResult = this.evaluateZoneCount(condition.zoneCount, context);
       if (!countResult.isLegal) {
         return countResult;
+      }
+    }
+
+    return { isLegal: true };
+  }
+
+  private static evaluateTurnRelation(
+    turnRelation: NonNullable<ActionActivationCondition["turnRelation"]>,
+    context: {
+      readonly state: any;
+      readonly playerKey: PlayerKey;
+    }
+  ): EvaluationResult {
+    if (!turnRelation || typeof turnRelation !== "object" || Array.isArray(turnRelation)) {
+      return { isLegal: false, reason: "turnRelation が無効なオブジェクトです" };
+    }
+
+    const { player: playerSpec = "controller", relation } = turnRelation;
+
+    if (playerSpec !== "controller" && playerSpec !== "self") {
+      return { isLegal: false, reason: `未対応のプレイヤースペックです: ${playerSpec}` };
+    }
+
+    const targetPlayerKey = context.playerKey;
+    if (!targetPlayerKey || typeof targetPlayerKey !== "string") {
+      return { isLegal: false, reason: "対象プレイヤーを解決できません" };
+    }
+
+    const player = context.state?.players?.[targetPlayerKey];
+    if (!player) {
+      return { isLegal: false, reason: `プレイヤー状態が存在しません: ${targetPlayerKey}` };
+    }
+
+    if (relation !== "turnPlayer" && relation !== "nonTurnPlayer") {
+      return { isLegal: false, reason: `未対応または未定義の relation です: ${relation}` };
+    }
+
+    const turnPlayer = context.state?.turnPlayer;
+    if (!turnPlayer || typeof turnPlayer !== "string") {
+      return { isLegal: false, reason: "ターンプレイヤーが未定義または無効です" };
+    }
+    if (!context.state?.players?.[turnPlayer]) {
+      return { isLegal: false, reason: `ターンプレイヤー '${turnPlayer}' が state.players に存在しません` };
+    }
+
+    const nonTurnPlayer = context.state?.nonTurnPlayer;
+    if (nonTurnPlayer !== undefined) {
+      if (typeof nonTurnPlayer !== "string" || !context.state?.players?.[nonTurnPlayer]) {
+        return { isLegal: false, reason: `非ターンプレイヤー '${nonTurnPlayer}' が無効または state.players に存在しません` };
+      }
+      if (nonTurnPlayer === turnPlayer) {
+        return { isLegal: false, reason: "turnPlayer と nonTurnPlayer が同一プレイヤーに設定されています (状態不整合)" };
+      }
+    }
+
+    if (relation === "turnPlayer") {
+      if (targetPlayerKey !== turnPlayer) {
+        return {
+          isLegal: false,
+          reason: `起動条件不適合: プレイヤー '${targetPlayerKey}' はターンプレイヤー (${turnPlayer}) ではありません`,
+        };
+      }
+    } else if (relation === "nonTurnPlayer") {
+      if (targetPlayerKey === turnPlayer) {
+        return {
+          isLegal: false,
+          reason: `起動条件不適合: プレイヤー '${targetPlayerKey}' は非ターンプレイヤーではありません (現在ターンプレイヤーです)`,
+        };
+      }
+      if (nonTurnPlayer !== undefined && targetPlayerKey !== nonTurnPlayer) {
+        return {
+          isLegal: false,
+          reason: `起動条件不適合: プレイヤー '${targetPlayerKey}' は指定された非ターンプレイヤー (${nonTurnPlayer}) と一致しません`,
+        };
       }
     }
 

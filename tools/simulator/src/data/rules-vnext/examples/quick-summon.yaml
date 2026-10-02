@@ -1,0 +1,56 @@
+actions:
+  - id: action.quickSummonsAce
+    name: クイック召喚
+    ruby: くいっくしょうかん
+    type: summon
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: D
+
+    key:
+      id: key
+      count: 1
+      condition:
+        card:
+          rank: "A"
+          zone: hand
+
+    activationCondition:
+      turnRelation:
+        player: controller
+        relation: nonTurnPlayer
+
+    text:
+      effect: >
+        キーカードをエースとして表向きかつチャージ状態で場に出す。
+        もしくは、キーカードを防壁として裏向きかつチャージ状態で場に出す。
+
+    effect:
+      - selectOption:
+          id: summonMode
+          chooser: controller
+          options:
+            - value: ace
+              label: エースとして場に出す
+            - value: bulwark
+              label: 防壁として場に出す
+
+      - ifSelection:
+          selection: summonMode
+          equals: ace
+          then:
+            - summonUnit:
+                card: key
+                component: character.ace
+                face: up
+                state: charge
+          else:
+            - summonUnit:
+                card: key
+                component: character.bulwark
+                face: down
+                state: charge

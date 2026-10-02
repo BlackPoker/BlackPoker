@@ -9,6 +9,10 @@ export type RulePackage = {
 };
 
 export interface ActionActivationCondition {
+  readonly turnRelation?: {
+    readonly player?: "controller" | "self" | string;
+    readonly relation: "turnPlayer" | "nonTurnPlayer" | string;
+  };
   readonly zoneState?: {
     readonly player?: "controller" | "opponent" | "turnPlayer" | "self" | string;
     readonly zone: string;
