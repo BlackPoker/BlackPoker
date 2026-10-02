@@ -744,23 +744,29 @@ export class GameSession {
       }
 
       // 解決完了
+      const finishedRequest = this.resolvingRequest;
       this.pendingDecision = undefined;
       this.continuation = undefined;
       this.resolvingRequest = undefined;
       this.resolvingContext = undefined;
 
-      // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
-      const prevChance = this.state.chancePlayer;
-      const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
-      this.state.chancePlayer = turnPlayer;
-      if (prevChance !== turnPlayer) {
-        this.logRecorder.record({
-          type: "chance.changed",
-          stateVersion: this.stateVersion,
-          fromChancePlayer: prevChance,
-          toChancePlayer: turnPlayer,
-          reason: "effectResolved",
-        });
+      const actionDef = finishedRequest?.action ?? (finishedRequest ? this.rulePackage.actions.find((a) => a.id === finishedRequest.actionId) : undefined);
+      const isImmediateMagic = actionDef?.request?.speed === "immediate" && actionDef?.type === "magic";
+
+      if (!isImmediateMagic) {
+        // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+        const prevChance = this.state.chancePlayer;
+        const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+        this.state.chancePlayer = turnPlayer;
+        if (prevChance !== turnPlayer) {
+          this.logRecorder.record({
+            type: "chance.changed",
+            stateVersion: this.stateVersion,
+            fromChancePlayer: prevChance,
+            toChancePlayer: turnPlayer,
+            reason: "effectResolved",
+          });
+        }
       }
 
       return this.advance();

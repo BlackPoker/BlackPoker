@@ -10,6 +10,7 @@ import { validatePartialOrder, validateCompleteOrder } from "./OrderSelectionVal
 import { enumeratePhysicalCardsInGrave } from "./graveCardUtils";
 import { EffectPathCodec, EffectBranchCode, BranchIdentity } from "./EffectPathCodec";
 import { ActionTargetService } from "./ActionTargetService";
+import { ZoneCardResolver } from "./ZoneCardResolver";
 
 export class NonInterruptibleEffectExecutionError extends Error {
   constructor(message: string) {
@@ -729,7 +730,9 @@ export class EffectInterpreter {
     } else if (zone === "pack") {
       cardPool = Array.isArray(player.pack?.cards) ? [...player.pack.cards] : [];
     } else if (zone === "life") {
-      cardPool = Array.isArray(player.life) ? [...player.life] : [];
+      cardPool = Array.isArray(player.life)
+        ? ZoneCardResolver.enumerateCanonicalCards(player.life, "life")
+        : [];
     } else if (zone === "rare" || zone === "rareCards") {
       cardPool = Array.isArray(player.rareCards) ? [...player.rareCards] : [];
     }

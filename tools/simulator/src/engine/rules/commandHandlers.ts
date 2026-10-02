@@ -18,6 +18,7 @@ import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionTargetService } from "./ActionTargetService";
 import { CharacterTransformService } from "./CharacterTransformService";
+import { ZoneCardResolver } from "./ZoneCardResolver";
 
 
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
@@ -1618,6 +1619,12 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
         playerKey,
         context.logRecorder
       );
+    } else if (fromZone === "life") {
+      const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
+      if (typeof cardId !== "string" || !cardId.trim()) {
+        throw new Error(`moveCard: 移動対象のカードIDが不正です (fail-closed)`);
+      }
+      actualCard = ZoneCardResolver.removeCanonicalCardById(sourceCards, cardId, "life");
     } else {
       const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
       const cardIdx = sourceCards.findIndex((c: any) => c && (c.id === cardId || c.unitId === cardId || c === cardToMove));
@@ -1733,6 +1740,14 @@ export function revealCardHandler(effectInterpreter?: EffectInterpreter): Comman
         throw new Error(`revealCard: 墓地内の対象カード形式が不正です: ${cardId}`);
       }
       actualCard = location.card;
+    } else if (detectedSourceZone === "life") {
+      if (!player || !Array.isArray(player.life)) {
+        throw new Error(`revealCard: 移動元ゾーン 'life' にカード配列が存在しません (fail-closed)`);
+      }
+      if (typeof cardId !== "string" || !cardId.trim()) {
+        throw new Error(`revealCard: 公開対象のカードIDが不正です (fail-closed)`);
+      }
+      actualCard = ZoneCardResolver.resolveCanonicalCardById(player.life, cardId, "life");
     } else if (typeof cardToReveal === "string") {
       if (player) {
         // Generic zone resolver for known zones (life, pack, hand, grave)
