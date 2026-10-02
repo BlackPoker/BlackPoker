@@ -1,44 +1,37 @@
-import { normalizeSuit, isJokerCard } from "./cardUtils";
+import {
+  normalizeSuit,
+  isCanonicalPrintedCard,
+  isCanonicalJokerCard,
+} from "./cardUtils";
 
 /**
  * カードの公式表記に基づき、Canonical なカード数値を厳格に取得します (Fail-Closed)。
- * 
+ *
+ * SSOT: cardUtils.ts (isCanonicalPrintedCard, isCanonicalJokerCard)
+ *
  * 認識される公式カード数値:
- * - Joker = 0
+ * - Canonical Joker = 0
  * - A = 1
  * - 2..10 = 2..10
  * - J = 11
  * - Q = 12
  * - K = 13
  * 
- * 不正・未知のランクやスートの場合は undefined を返し、
- * 0 に暗黙フォールバックして Joker と誤判定されることを防ぎます。
+ * 不正・非Canonicalなランクやスート（"1", "11", "12", "13", {suit:"H", rank:"0"} 等）は
+ * undefined を返し、Joker や通常カードとして誤認識されることを防ぎます。
  */
 export function getCanonicalCardNumber(card: any): number | undefined {
-  if (!card || typeof card !== "object") return undefined;
-
-  // Joker 判定
-  if (isJokerCard(card)) {
-    return 0;
-  }
-
-  // スートが指定されている場合の検証（Joker でない場合は標準スートであることを要求）
-  if (card.suit !== undefined && card.suit !== null) {
-    const normSuit = normalizeSuit(card.suit);
-    const allowedSuits = new Set(["spade", "heart", "diamond", "club"]);
-    if (!allowedSuits.has(normSuit)) {
-      return undefined;
-    }
-  }
-
-  if (card.rank === undefined || card.rank === null) {
+  if (!isCanonicalPrintedCard(card)) {
     return undefined;
+  }
+
+  if (isCanonicalJokerCard(card)) {
+    return 0;
   }
 
   const r = String(card.rank).toUpperCase().trim();
   switch (r) {
     case "A":
-    case "1":
       return 1;
     case "2":
       return 2;
@@ -59,17 +52,11 @@ export function getCanonicalCardNumber(card: any): number | undefined {
     case "10":
       return 10;
     case "J":
-    case "11":
       return 11;
     case "Q":
-    case "12":
       return 12;
     case "K":
-    case "13":
       return 13;
-    case "0":
-    case "JOKER":
-      return 0;
     default:
       return undefined;
   }
@@ -83,6 +70,7 @@ export interface KeyGroupConstraintResult {
 /**
  * 複数キーカードにおけるグループ制約 (sameSuit, sameRank 等) を一元的に検証します (SSOT)。
  * 
+ * - 物理カードID重複チェック: 同一のカードIDが複数回使用されている場合は fail-closed
  * - sameSuit: 全カードが標準4スートの同一スートであること (Joker 除外)
  * - sameRank: 全カードが認識可能な公式カード数値を持ち、すべて同一数値であること
  */
@@ -96,6 +84,17 @@ export function matchesKeyGroupConstraints(
 ): KeyGroupConstraintResult {
   if (!keyDef || !cards || cards.length <= 1) {
     return { isValid: true };
+  }
+
+  // 0. 物理カードIDの一意性チェック (重複使用の禁止)
+  const seenIds = new Set<string>();
+  for (const c of cards) {
+    if (c && typeof c.id === "string" && c.id.trim() !== "") {
+      if (seenIds.has(c.id)) {
+        return { isValid: false, reason: "同一のキーカードが重複して指定されています。" };
+      }
+      seenIds.add(c.id);
+    }
   }
 
   // 1. sameSuit の検証

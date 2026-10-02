@@ -2214,26 +2214,52 @@ export function setUnitStateHandler(
 ): CommandHandler {
   return (args, context) => {
     const { target, state } = args;
-    let targetUnit = context.targetComponent;
 
-    if (!targetUnit && target) {
-      const resolvedTargetId = expressionEvaluator.resolveBindingValue(target, context);
-      if (resolvedTargetId) {
-        for (const pKey of Object.keys(context.state.players || {})) {
-          const player = context.state.players[pKey];
-          if (player.field) {
-            const u = player.field.find((unit: any) => unit.unitId === resolvedTargetId);
-            if (u) {
-              targetUnit = u;
-              break;
-            }
+    // Section 4: target unitId を取得
+    let targetUnitId: string | undefined;
+    if (context.targetComponent) {
+      targetUnitId =
+        typeof context.targetComponent === "string"
+          ? context.targetComponent
+          : context.targetComponent.unitId;
+    }
+    if (!targetUnitId && target) {
+      const resolved = expressionEvaluator.resolveBindingValue(target, context);
+      if (typeof resolved === "string") {
+        targetUnitId = resolved;
+      } else if (resolved && typeof resolved === "object" && resolved.unitId) {
+        targetUnitId = resolved.unitId;
+      }
+    }
+
+    if (!targetUnitId) {
+      throw new Error("状態変更対象のユニットIDが特定できません (fail-closed)。");
+    }
+
+    // Section 4: CURRENT state.players[*].field を全走査
+    const matches: Array<{ unit: any; ownerKey: string }> = [];
+    for (const [pKey, player] of Object.entries<any>(context.state?.players || {})) {
+      if (Array.isArray(player?.field)) {
+        for (const u of player.field) {
+          if (u && u.unitId === targetUnitId) {
+            matches.push({ unit: u, ownerKey: pKey });
           }
         }
       }
     }
 
-    if (!targetUnit) {
-      throw new Error("状態変更対象のユニットが見つかりません。");
+    if (matches.length === 0) {
+      throw new Error(`状態変更対象のユニット '${targetUnitId}' がフィールド上に存在しません (fail-closed)。`);
+    }
+    if (matches.length > 1) {
+      throw new Error(`重複するユニットID '${targetUnitId}' がフィールド上で検出されました (fail-closed)。`);
+    }
+
+    const { unit: canonicalUnit, ownerKey: targetOwnerKey } = matches[0];
+
+    // Section 4: isCharacterComponent(...) を要求
+    if (!isCharacterComponent(canonicalUnit, context.components || [])) {
+      throw new Error(`ユニット '${targetUnitId}' はキャラクターではありません (fail-closed)。`);
     }
 
     let desiredState = expressionEvaluator.resolveBindingValue(state, context);
@@ -2246,26 +2272,26 @@ export function setUnitStateHandler(
     }
 
     if (desiredState !== "charge" && desiredState !== "drive") {
-      throw new Error(`設定できない状態です。期待: charge または drive, 実際: ${desiredState}`);
+      throw new Error(`設定できない状態です。期待: charge または drive, 実際: ${desiredState} (fail-closed)`);
     }
 
-    const oldState = targetUnit.state;
+    const oldState = canonicalUnit.state;
     if (oldState === desiredState) {
       // no-op, false unitStateChanged event は発行しない
       return;
     }
 
-    targetUnit.state = desiredState;
+    canonicalUnit.state = desiredState;
 
     if (effectInterpreter) {
-      // イベント発行 (unitStateChanged)
+      // Section 5: playerKey は Canonical target Unit の実際の ownerKey
       const event = {
         type: "unitStateChanged",
         payload: {
-          unitId: targetUnit.unitId,
+          unitId: canonicalUnit.unitId,
           fromState: oldState,
           toState: desiredState,
-          playerKey: context.playerKey,
+          playerKey: targetOwnerKey,
           cause: {
             type: "effect",
             command: "setUnitState",
@@ -2287,7 +2313,7 @@ export function transformCharacterHandler(
   effectInterpreter?: EffectInterpreter
 ): CommandHandler {
   return (args, context) => {
-    const { target, destination, clearReceivedEffects, clearBattleRole } = args;
+    const { target, destination, state, clearReceivedEffects, clearBattleRole } = args;
 
     let targetUnit = context.targetComponent;
     if (!targetUnit && target) {
@@ -2310,16 +2336,50 @@ export function transformCharacterHandler(
       throw new Error("変形対象のユニットが見つかりません。");
     }
 
+    // Section 6: requested state の解決
+    let requestedState: string | undefined;
+    if (state !== undefined) {
+      requestedState = expressionEvaluator.resolveBindingValue(state, context);
+      if (!requestedState && context.selections && typeof state === "string" && state.startsWith("selection.")) {
+        const selKey = state.slice("selection.".length);
+        requestedState = context.selections[selKey];
+      }
+      if (Array.isArray(requestedState)) {
+        requestedState = requestedState[0];
+      }
+    }
+
     const transformResult = CharacterTransformService.transformCharacter({
       targetUnit,
       state: context.state,
       components: context.components || [],
       options: {
         destination: destination ? expressionEvaluator.resolveBindingValue(destination, context) : "opposite",
+        state: requestedState,
         clearReceivedEffects: clearReceivedEffects !== undefined ? Boolean(clearReceivedEffects) : true,
         clearBattleRole: clearBattleRole !== undefined ? Boolean(clearBattleRole) : true,
       },
     });
+
+    // Section 10: oldState != selectedState の場合だけ unitStateChanged を 1 回発行
+    if (transformResult.stateChanged && effectInterpreter) {
+      const stateEvent = {
+        type: "unitStateChanged",
+        payload: {
+          unitId: transformResult.sourceUnitId,
+          fromState: transformResult.oldState,
+          toState: transformResult.selectedState,
+          playerKey: transformResult.ownerKey, // actual owner
+          cause: {
+            type: "effect",
+            command: "transformCharacter",
+            actionId: context.currentAction?.id || context.currentRequest?.actionId,
+            requestId: context.currentRequest?.id,
+          },
+        },
+      };
+      effectInterpreter.dispatchEvent(stateEvent, context);
+    }
 
     const logRecorder =
       context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;

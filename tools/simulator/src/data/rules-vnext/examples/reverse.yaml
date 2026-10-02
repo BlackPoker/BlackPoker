@@ -36,12 +36,9 @@ actions:
             - value: drive
               label: ドライブ状態
 
-      - setUnitState:
-          target: target
-          state: selection.reverseState
-
       - transformCharacter:
           target: target
           destination: opposite
+          state: selection.reverseState
           clearReceivedEffects: true
           clearBattleRole: true
