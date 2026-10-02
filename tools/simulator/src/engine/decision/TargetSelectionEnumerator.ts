@@ -84,6 +84,7 @@ export class TargetSelectionEnumerator {
         const stageRequests = state.stage?.requests || [];
         for (const req of stageRequests) {
           if (cond?.status && req.status !== cond.status) continue;
+          if (cond?.actionId !== undefined && req.actionId !== cond.actionId) continue;
           if (cond?.keyCards) {
             const reqKeyCards = Array.isArray(req.keyCards)
               ? req.keyCards

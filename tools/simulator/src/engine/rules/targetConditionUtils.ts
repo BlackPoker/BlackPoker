@@ -173,6 +173,15 @@ export function evaluateRequestTargetCondition(
     }
   }
 
+  // 4. actionId: 対象リクエストのアクションID完全一致
+  if (condition.actionId !== undefined && targetRequest.actionId !== condition.actionId) {
+    return {
+      isValid: false,
+      reason: "TARGET_CONDITION_UNMET",
+      detail: `ターゲットリクエストのアクションIDが不適合です。期待: ${condition.actionId}, 実際: ${targetRequest.actionId}`,
+    };
+  }
+
   return { isValid: true };
 }
 

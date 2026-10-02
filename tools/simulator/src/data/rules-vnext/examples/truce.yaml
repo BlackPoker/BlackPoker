@@ -1,0 +1,35 @@
+actions:
+  - id: action.truce
+    name: 停戦
+    ruby: ていせん
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: diamond
+          rank: "A..10"
+          zone: hand
+
+    targets:
+      - id: targetRequest
+        type: request
+        condition:
+          status: pending
+          actionId: action.damageJudge
+
+    text:
+      effect: 対象のリクエストを無効にし、対象のリクエストをステージから取り除く。
+
+    effect:
+      - cancelRequest:
+          target: targetRequest
+
+      - cleanupBattleState: {}

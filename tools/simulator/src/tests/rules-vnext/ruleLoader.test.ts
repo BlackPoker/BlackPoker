@@ -55,9 +55,11 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(browserActionIds).toContain("action.kill");
     expect(nodeActionIds).toContain("action.reunion");
     expect(browserActionIds).toContain("action.reunion");
+    expect(nodeActionIds).toContain("action.truce");
+    expect(browserActionIds).toContain("action.truce");
 
-    // 実総数の確認 (全34アクション、全11コンポーネント)
-    expect(browserActionIds.length).toBe(34);
+    // 実総数の確認 (全35アクション、全11コンポーネント)
+    expect(browserActionIds.length).toBe(35);
     expect(browserCompIds.length).toBe(11);
   });
 

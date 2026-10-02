@@ -20,7 +20,7 @@ import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
-import { calculateDamageJudge, applyDamageJudgeResult } from "./damageJudgeUtils";
+import { calculateDamageJudge, applyDamageJudgeResult, cleanupTransientBattleState } from "./damageJudgeUtils";
 import { isCardInGameZones, isSamePrintedCard, isCanonicalPrintedCard, isJokerCard } from "./cardUtils";
 import { deriveRuntimeShuffleSeed, shuffleDeterministic } from "../random/DeterministicShuffle";
 import { SeededRandom } from "../random/RandomSource";
@@ -1051,6 +1051,15 @@ export function cancelRequestHandler(
     }
 
     cancelStageRequest(requestId, context, effectInterpreter);
+  };
+}
+
+/**
+ * cleanupBattleState: 戦闘キャンセル時などにフィールド上のユニットに残存する一時的な battle 状態をクリーンアップする
+ */
+export function cleanupBattleStateHandler(): CommandHandler {
+  return (_args, context) => {
+    cleanupTransientBattleState(context.state);
   };
 }
 

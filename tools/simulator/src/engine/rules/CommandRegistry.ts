@@ -11,6 +11,7 @@ import {
   takeUntilLegacyCardHandler,
   dealDamageHandler,
   cancelRequestHandler,
+  cleanupBattleStateHandler,
   toggleUnitStateHandler,
   cleanupFogsHandler,
   endTurnHandler,
@@ -1150,6 +1151,7 @@ export class CommandRegistry {
     this.register("takeUntilLegacyCard", takeUntilLegacyCardHandler());
     this.register("dealDamage", dealDamageHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter));
     this.register("cancelRequest", cancelRequestHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register("cleanupBattleState", cleanupBattleStateHandler());
 
     this.register("toggleUnitState", toggleUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("cleanupFogs", cleanupFogsHandler(this.effectInterpreter));

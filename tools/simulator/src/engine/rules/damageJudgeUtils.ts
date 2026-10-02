@@ -429,3 +429,27 @@ export function applyDamageJudgeResult(
     }
   }
 }
+
+/**
+ * 戦闘キャンセル時などにフィールド上および墓地内のユニットに残存する一時的な battle 状態をクリーンアップします。
+ */
+export function cleanupTransientBattleState(state: any): void {
+  if (!state?.players) return;
+  for (const playerKey of Object.keys(state.players)) {
+    const player = state.players[playerKey];
+    if (Array.isArray(player?.field)) {
+      for (const unit of player.field) {
+        if (unit && unit.battle) {
+          delete unit.battle;
+        }
+      }
+    }
+    if (Array.isArray(player?.grave)) {
+      for (const entry of player.grave) {
+        if (entry && entry.battle) {
+          delete entry.battle;
+        }
+      }
+    }
+  }
+}
