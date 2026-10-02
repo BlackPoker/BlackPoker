@@ -601,8 +601,16 @@ export class ActionTargetService {
 
     // レガシー単一ターゲット互換:
     // ActionDefinition の targets が1つ、かつ Request の targets も1つで、
-    // 既存ターゲットが targetDefinitionId/id を欠いている場合はその単一スロットを置き換える
-    if (targetIdx === -1 && action.targets?.length === 1 && targetRequest.targets.length === 1) {
+    // 既存ターゲットがスロット識別子 (targetDefinitionId / id) を欠いている場合のみその単一スロットを置き換える。
+    // 明示的なスロット識別子が存在して不一致の場合は Fail-Closed とする。
+    const existingTarget = targetRequest.targets[0];
+    const existingSlotId = existingTarget?.targetDefinitionId ?? (existingTarget as any)?.id;
+    if (
+      targetIdx === -1 &&
+      action.targets?.length === 1 &&
+      targetRequest.targets.length === 1 &&
+      !existingSlotId
+    ) {
       targetIdx = 0;
     }
 
