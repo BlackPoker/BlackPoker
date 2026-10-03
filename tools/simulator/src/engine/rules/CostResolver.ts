@@ -2,7 +2,7 @@ import { CommandContext } from "./CommandRegistry";
 import { CostSymbol, parseCost } from "./CostParser";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
-import { isCharacterComponent } from "./characterUtils";
+import { isCharacterComponent, isBulwarkType } from "./characterUtils";
 import { moveUnitToGraveyard } from "./unitMovementUtils";
 
 /**
@@ -151,7 +151,7 @@ export class CostResolver {
       if (!player.field) return false;
       for (const unitId of costPayment.drivenBulwarkUnitIds) {
         const bulwark = player.field.find((u: any) => u.unitId === unitId);
-        if (!bulwark || bulwark.state !== "charge") return false;
+        if (!bulwark || !isBulwarkType(bulwark, context?.components) || bulwark.state !== "charge") return false;
       }
     }
 
@@ -228,6 +228,9 @@ export class CostResolver {
         const bulwark = player.field?.find((u: any) => u.unitId === unitId);
         if (!bulwark) {
           throw new Error(`コストとして指定された防壁が見つかりません: ${unitId}`);
+        }
+        if (!isBulwarkType(bulwark, context.components)) {
+          throw new Error(`コストとして指定されたユニットは防壁ではありません: ${unitId}`);
         }
         if (bulwark.state !== "charge") {
           throw new Error(`コストとして指定された防壁がチャージ状態ではありません: ${unitId}`);
@@ -357,7 +360,7 @@ export class CostResolver {
     // 3. B (Bulwark) チャージ防壁リソース検証
     const bulwarks = player.field ? player.field.filter(
       (u: any) =>
-        (u.componentId === "character.bulwark" || u.kind === "防壁") &&
+        isBulwarkType(u, context.components) &&
         u.state === "charge"
     ) : [];
     if (bulwarks.length < requiredB) return false;
@@ -465,7 +468,7 @@ export class CostResolver {
       // チャージ状態の防壁1体をドライブ状態にする
       const bulwark = player.field.find(
         (u: any) =>
-          (u.componentId === "character.bulwark" || u.kind === "防壁") &&
+          isBulwarkType(u, context.components) &&
           u.state === "charge"
       );
 

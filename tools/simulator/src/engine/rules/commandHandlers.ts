@@ -13,7 +13,7 @@ import {
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
-import { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
+import { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
 import { ActionTargetService } from "./ActionTargetService";
@@ -1489,7 +1489,7 @@ export function declareBlockHandler(
 }
 
 export type { MoveUnitMetadata } from "./unitMovementUtils";
-export { moveUnitToGraveyard, moveUnitToHand } from "./unitMovementUtils";
+export { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 
 /**
  * judgeDamage: 全アタッカーおよびブロッカーの戦闘を判定し、直接ダメージおよび敗北ユニットの墓地移動を行う
@@ -1977,41 +1977,48 @@ export function moveUnitToHandHandler(
   return (args, context) => {
     const { target, requiredState } = args;
 
-    // 1. ターゲットユニットの解決
-    let targetUnit: any = context.targetComponent;
+    // 1. ターゲットユニットIDの解決
+    let targetUnitId: string | undefined;
     if (target) {
-      const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
-      if (typeof resolvedTarget === "string") {
-        for (const p of Object.values<any>(context.state.players || {})) {
-          const u = p.field?.find((unit: any) => unit.unitId === resolvedTarget);
-          if (u) {
-            targetUnit = u;
-            break;
+      if (target === "targetComponent" && context.targetComponent?.unitId) {
+        targetUnitId = context.targetComponent.unitId;
+      } else {
+        const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+        if (typeof resolvedTarget === "string") {
+          const foundOnField = Object.values<any>(context.state?.players || {}).some(
+            (p: any) => p?.field?.some((u: any) => u?.unitId === resolvedTarget)
+          );
+          if (foundOnField) {
+            targetUnitId = resolvedTarget;
+          } else if (context.targetComponent?.unitId) {
+            targetUnitId = context.targetComponent.unitId;
+          } else {
+            targetUnitId = resolvedTarget;
           }
+        } else if (resolvedTarget && typeof resolvedTarget === "object" && resolvedTarget.unitId) {
+          targetUnitId = resolvedTarget.unitId;
         }
-      } else if (resolvedTarget && typeof resolvedTarget === "object" && resolvedTarget.unitId) {
-        targetUnit = resolvedTarget;
       }
     }
+    if (!targetUnitId && context.targetComponent?.unitId) {
+      targetUnitId = context.targetComponent.unitId;
+    }
 
-    if (!targetUnit) {
+    if (!targetUnitId || typeof targetUnitId !== "string") {
       throw new Error(`moveUnitToHand: 対象ユニットが見つかりません (target: ${JSON.stringify(target)}) (fail-closed)`);
     }
 
+    // Canonical なユニットと所有者を state から直接解決 (クライアント渡しの target オブジェクトの state を信用しない)
+    const { unit: canonicalUnit, ownerKey: ownerPlayerKey } = resolveUniqueFieldUnitById(context.state, targetUnitId);
+
     // 2. requiredState の検証 (Rule 5.4.4 準拠の正常 no-op)
-    if (requiredState !== undefined && targetUnit.state !== requiredState) {
+    if (requiredState !== undefined && canonicalUnit.state !== requiredState) {
       return; // 条件不一致時は何もしない (アクション全体は失敗させない)
     }
 
-    // 3. オーナーの特定
-    const ownerPlayerKey = findUnitOwnerPlayerKey(context.state, targetUnit.unitId);
-    if (!ownerPlayerKey) {
-      throw new Error(`moveUnitToHand: オーナープレイヤーが見つかりません: ${targetUnit.unitId} (fail-closed)`);
-    }
-
-    // 4. generic moveUnitToHand primitive の呼び出し
+    // 3. generic moveUnitToHand primitive の呼び出し
     moveUnitToHand(
-      targetUnit,
+      canonicalUnit,
       ownerPlayerKey,
       context.state,
       effectInterpreter,
@@ -2056,7 +2063,7 @@ export function moveRequestKeyCardsToHandHandler(
     }
 
     const controllerKey = request.controller || context.playerKey;
-    const player = context.state.players?.[controllerKey];
+    const player = context.state?.players?.[controllerKey];
     if (!player) {
       throw new Error(`moveRequestKeyCardsToHand: コントローラーが見つかりません: ${controllerKey} (fail-closed)`);
     }
@@ -2064,17 +2071,22 @@ export function moveRequestKeyCardsToHandHandler(
     // --- 事前バリデーション (all-or-nothing: 変更前に全件検証) ---
     const cardIds = new Set<string>();
     for (const card of keyCards) {
-      if (!card || !card.id) {
-        throw new Error("moveRequestKeyCardsToHand: キーカードにIDが存在しません (fail-closed)");
+      if (!card || !card.id || typeof card.id !== "string") {
+        throw new Error("moveRequestKeyCardsToHand: キーカードに有効なIDが存在しません (fail-closed)");
       }
       if (cardIds.has(card.id)) {
         throw new Error(`moveRequestKeyCardsToHand: 重複キーカードIDが存在します: ${card.id} (fail-closed)`);
       }
       cardIds.add(card.id);
 
-      // 手札に既に同一カードが存在しないか検証
-      if (Array.isArray(player.hand) && player.hand.some((c: any) => c?.id === card.id)) {
-        throw new Error(`moveRequestKeyCardsToHand: キーカード (${card.id}) は既に手札に存在します (fail-closed)`);
+      // Canonical Printed Card 検証 (fail-closed)
+      if (!isCanonicalPrintedCard(card)) {
+        throw new Error(`moveRequestKeyCardsToHand: キーカード (${card.id}) が Canonical Printed Card ではありません (fail-closed)`);
+      }
+
+      // 既存通常ゲームゾーンに存在していないか検証 (手札、フィールド、ライフ、墓地等に既に存在してはいけない)
+      if (isCardInGameZones(card.id, context.state)) {
+        throw new Error(`moveRequestKeyCardsToHand: キーカード (${card.id}) は既にゲームゾーンに存在します (fail-closed)`);
       }
     }
 

@@ -2,7 +2,7 @@ import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { parseCost, CostSymbol } from "../rules/CostParser";
 import { formatSuitSymbol } from "../rules/cardUtils";
 import { ComponentDefinition } from "../../domain/rules/RulePackage";
-import { isCharacterComponent } from "../rules/characterUtils";
+import { isCharacterComponent, isBulwarkType } from "../rules/characterUtils";
 
 /**
  * コスト支払い候補の全列挙を行うクラス。
@@ -64,7 +64,7 @@ export class CostPaymentEnumerator {
     const availableBulwarks = player?.field
       ? player.field.filter(
           (u: any) =>
-            (u.componentId === "character.bulwark" || u.kind === "防壁") &&
+            isBulwarkType(u, components) &&
             u.state === "charge"
         )
       : [];
