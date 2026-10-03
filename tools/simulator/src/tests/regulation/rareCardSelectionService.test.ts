@@ -9,7 +9,9 @@ import {
 import {
   STANDARD_54_DECK_CARDS,
   SimulatorDeckProfile,
+  SimulatorDeckProfileResolver,
 } from "../../engine/regulation/SimulatorDeckProfileResolver";
+import { FrameDefinition } from "../../domain/regulation/RegulationDefinition";
 import { InGameCard } from "../../engine/regulation/OfficialRegulationMatchSetup";
 
 describe("RareCardSelectionService Unit Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]", () => {
@@ -311,6 +313,65 @@ describe("RareCardSelectionService Unit Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]"
 
       // Validation check
       const validation = validateSelections(standardProfile, 3, result);
+      expect(validation.valid).toBe(true);
+    });
+  });
+
+  describe("SimulatorDeckProfileResolver Rare Card SSOT Tests [BP-SIM-REG-5.0-J-R2]", () => {
+    it("synthetic constructed frame with id='rarePack' but rareCardCount=0 produces undefined defaultRareCardSelections", () => {
+      const syntheticFrame: FrameDefinition = {
+        id: "rarePack",
+        name: "Synthetic RarePack Frame with rareCardCount=0",
+        recommendedFormatIds: ["standard"],
+        deck: {
+          type: "constructed",
+          minCards: 40,
+        },
+        setup: {
+          initialHandCount: 7,
+          packCount: 14,
+          rareCardCount: 0,
+          preset: {
+            bulwarkCount: 1,
+            soldierCount: 2,
+          },
+        },
+      };
+
+      const profile = SimulatorDeckProfileResolver.resolveDeckProfile(syntheticFrame);
+      expect(profile.defaultRareCardSelections).toBeUndefined();
+    });
+
+    it("synthetic constructed frame with non-rarePack id but rareCardCount=2 enables default selection foundation", () => {
+      const syntheticFrame: FrameDefinition = {
+        id: "customNonRarePackFrame",
+        name: "Synthetic Custom Frame with rareCardCount=2",
+        recommendedFormatIds: ["standard"],
+        deck: {
+          type: "constructed",
+          minCards: 40,
+        },
+        setup: {
+          initialHandCount: 7,
+          packCount: 14,
+          rareCardCount: 2,
+          preset: {
+            bulwarkCount: 1,
+            soldierCount: 2,
+          },
+        },
+      };
+
+      const profile = SimulatorDeckProfileResolver.resolveDeckProfile(syntheticFrame);
+      expect(profile.defaultRareCardSelections).toBeDefined();
+
+      // Verify that default selection foundation works for rareCardCount=2
+      const defaults = RareCardSelectionService.resolveDefaultRareCardSelections(profile, 2);
+      expect(defaults).toHaveLength(2);
+      expect(defaults[0]).toEqual({ suit: "J", rank: "Joker", occurrence: 0 });
+      expect(defaults[1]).toEqual({ suit: "J", rank: "Joker", occurrence: 1 });
+
+      const validation = validateSelections(profile, 2, defaults);
       expect(validation.valid).toBe(true);
     });
   });

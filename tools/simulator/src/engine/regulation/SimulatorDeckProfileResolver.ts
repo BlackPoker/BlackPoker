@@ -123,9 +123,8 @@ export class SimulatorDeckProfileResolver {
         );
       }
 
-      const hasRareCards =
-        frame.id === "rarePack" ||
-        (frame.setup?.rareCardCount !== undefined && frame.setup.rareCardCount > 0);
+      const rareCardCount = frame.setup?.rareCardCount ?? 0;
+      const hasRareCards = rareCardCount > 0;
 
       return {
         id: "standard54",

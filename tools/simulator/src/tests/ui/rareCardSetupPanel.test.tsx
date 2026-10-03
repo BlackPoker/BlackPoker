@@ -417,5 +417,66 @@ describe("RareCardSetupPanel UI Component Tests [BP-SIM-REG-5.0-J-RARE-SELECTION
         ],
       });
     });
+
+    it("Human vs Human with rareCardCount = 2: Completed view strictly protects hidden information (no card identities leaked in DOM)", () => {
+      const handleReset = vi.fn();
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={2}
+            matchMode="humanVsHuman"
+            confirmedSelections={{
+              p1: [
+                { suit: "S", rank: "A", occurrence: 0 },
+                { suit: "S", rank: "2", occurrence: 0 },
+              ],
+              p2: [
+                { suit: "H", rank: "K", occurrence: 0 },
+                { suit: "H", rank: "Q", occurrence: 0 },
+              ],
+            }}
+            onConfirmSelections={vi.fn()}
+            onResetSelections={handleReset}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+      const completed = root.findByProps({ "data-testid": "rare-setup-completed" });
+      expect(completed).toBeDefined();
+
+      const summaryText = JSON.stringify(renderer!.toJSON());
+      expect(summaryText).toContain("レアカード設定完了");
+      expect(summaryText).toContain("Player A:");
+      expect(summaryText).toContain("レアカード選択済み");
+      expect(summaryText).toContain("(2枚)");
+      expect(summaryText).toContain("Player B:");
+
+      // STRICT PRIVACY CONTRACT: All 4 selected cards (P1: ♠A, ♠2 / P2: ♥K, ♥Q) MUST NOT appear in rendered tree / DOM
+      // 1. Display labels
+      expect(summaryText).not.toContain("♠A");
+      expect(summaryText).not.toContain("♠2");
+      expect(summaryText).not.toContain("♥K");
+      expect(summaryText).not.toContain("♥Q");
+
+      // 2. Suit / rank display
+      expect(summaryText).not.toContain("♠");
+      expect(summaryText).not.toContain("♥");
+      expect(summaryText).not.toContain("Joker");
+
+      // 3. Card identity and rank tokens
+      expect(summaryText).not.toContain("\"A\"");
+      expect(summaryText).not.toContain("\"K\"");
+      expect(summaryText).not.toContain("\"Q\"");
+
+      // Reset button still works
+      const resetButton = root.findByProps({ "data-testid": "reset-rare-button" });
+      act(() => {
+        resetButton.props.onClick();
+      });
+      expect(handleReset).toHaveBeenCalledTimes(1);
+    });
   });
 });

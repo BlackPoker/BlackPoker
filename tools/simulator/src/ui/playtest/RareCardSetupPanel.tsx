@@ -177,7 +177,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             </span>
             <div className="flex items-center gap-1.5">
               <span className="text-emerald-700 font-bold">レアカード選択済み</span>
-              <span className="text-[11px] text-emerald-600">({rareCardCount}枚)</span>
+              <span className="text-[11px] text-emerald-600">{`(${rareCardCount}枚)`}</span>
             </div>
           </div>
           <div className="p-2.5 rounded-lg bg-white border border-emerald-200 flex items-center justify-between">
@@ -188,7 +188,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
               <span className="text-emerald-700 font-bold">
                 {matchMode === "humanVsHuman" ? "レアカード選択済み" : "自動選択（非公開）"}
               </span>
-              <span className="text-[11px] text-emerald-600">({rareCardCount}枚)</span>
+              <span className="text-[11px] text-emerald-600">{`(${rareCardCount}枚)`}</span>
             </div>
           </div>
         </div>
