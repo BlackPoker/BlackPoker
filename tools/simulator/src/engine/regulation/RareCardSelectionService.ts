@@ -147,7 +147,71 @@ export function validateSelections(
 }
 
 /**
+ * デッキプロファイルから要求枚数分の決定論的デフォルトレアカード選択を解決します。
+ */
+export function resolveDefaultRareCardSelections(
+  deckProfile: SimulatorDeckProfile,
+  rareCardCount: number
+): CardOccurrenceSelection[] {
+  if (!Number.isInteger(rareCardCount) || rareCardCount <= 0) {
+    return [];
+  }
+
+  const candidates = enumerateCandidates(deckProfile);
+  const selected: CardOccurrenceSelection[] = [];
+  const selectedKeys = new Set<string>();
+
+  // 1. deckProfile.defaultRareCardSelections が定義されていれば順次採用
+  if (deckProfile.defaultRareCardSelections) {
+    for (const sel of deckProfile.defaultRareCardSelections) {
+      if (selected.length >= rareCardCount) break;
+      const occ = sel.occurrence ?? 0;
+      const key = `${sel.suit}-${sel.rank}-${occ}`;
+      const exists = candidates.some(
+        (c) => c.suit === sel.suit && c.rank === sel.rank && c.occurrence === occ
+      );
+      if (exists && !selectedKeys.has(key)) {
+        selectedKeys.add(key);
+        selected.push({
+          suit: sel.suit,
+          rank: sel.rank,
+          occurrence: occ,
+        });
+      }
+    }
+  }
+
+  // 2. まだ不足している場合、Joker 候補を優先して決定論的に補完
+  if (selected.length < rareCardCount) {
+    const jokers = candidates.filter((c) => c.suit === "J" || c.rank === "Joker");
+    for (const j of jokers) {
+      if (selected.length >= rareCardCount) break;
+      const key = `${j.suit}-${j.rank}-${j.occurrence}`;
+      if (!selectedKeys.has(key)) {
+        selectedKeys.add(key);
+        selected.push({ suit: j.suit, rank: j.rank, occurrence: j.occurrence });
+      }
+    }
+  }
+
+  // 3. それでも不足している場合、candidates のデッキ順に先頭から決定論的に補完
+  if (selected.length < rareCardCount) {
+    for (const c of candidates) {
+      if (selected.length >= rareCardCount) break;
+      const key = `${c.suit}-${c.rank}-${c.occurrence}`;
+      if (!selectedKeys.has(key)) {
+        selectedKeys.add(key);
+        selected.push({ suit: c.suit, rank: c.rank, occurrence: c.occurrence });
+      }
+    }
+  }
+
+  return selected;
+}
+
+/**
  * 生デッキから指定されたレアカードをシャッフル前に取り分けます（公式ルール第9.1.2版 8.3.1.3）。
+ * 物理カードの occurrence は常に元の rawDeck の不変な初期インデックスに対して解決されます。
  */
 export function extractRareCards(
   rawDeck: InGameCard[],
@@ -157,9 +221,22 @@ export function extractRareCards(
     return { rareCards: [], remainingDeck: [...rawDeck] };
   }
 
+  // 1. rawDeck の全カードの物理 occurrence をデッキ順（immutable）にマッピング
+  const rawOccurrenceMap = new Map<string, number>();
+  const cardIndexBySelectionKey = new Map<string, number>();
+
+  for (let i = 0; i < rawDeck.length; i++) {
+    const card = rawDeck[i];
+    const baseKey = `${card.suit}-${card.rank}`;
+    const occ = rawOccurrenceMap.get(baseKey) ?? 0;
+    rawOccurrenceMap.set(baseKey, occ + 1);
+    const key = `${baseKey}-${occ}`;
+    cardIndexBySelectionKey.set(key, i);
+  }
+
+  // 2. 全 selection を検証し、対象の rawDeck index を収集
+  const selectedIndexSet = new Set<number>();
   const selectedRareCards: InGameCard[] = [];
-  const remaining = [...rawDeck];
-  const selectedIds = new Set<string>();
 
   for (const sel of selections) {
     const occTarget = sel.occurrence ?? 0;
@@ -167,34 +244,29 @@ export function extractRareCards(
       throw new Error(`不正な occurrence です: ${occTarget}`);
     }
 
-    let occCount = 0;
-    let foundIndex = -1;
-    for (let i = 0; i < remaining.length; i++) {
-      const card = remaining[i];
-      if (card.suit === sel.suit && card.rank === sel.rank) {
-        if (occCount === occTarget) {
-          foundIndex = i;
-          break;
-        }
-        occCount++;
-      }
-    }
+    const key = `${sel.suit}-${sel.rank}-${occTarget}`;
+    const rawIndex = cardIndexBySelectionKey.get(key);
 
-    if (foundIndex === -1) {
+    if (rawIndex === undefined) {
       throw new Error(
-        `指定された Rare Card (${sel.suit}${sel.rank}, occurrence: ${occTarget}) がデッキ内に見つかりません`
+        `指定された Rare Card (${formatRareCardLabel(sel.suit, sel.rank, occTarget)}) がデッキ内に見つかりません`
       );
     }
 
-    const [card] = remaining.splice(foundIndex, 1);
-    if (selectedIds.has(card.id)) {
-      throw new Error(`同一の Rare Card が重複して選択されました: ${card.id}`);
+    if (selectedIndexSet.has(rawIndex)) {
+      throw new Error(
+        `同一の Rare Card が重複して選択されました: ${rawDeck[rawIndex].id}`
+      );
     }
-    selectedIds.add(card.id);
-    selectedRareCards.push(card);
+
+    selectedIndexSet.add(rawIndex);
+    selectedRareCards.push(rawDeck[rawIndex]);
   }
 
-  return { rareCards: selectedRareCards, remainingDeck: remaining };
+  // 3. remainingDeck を rawDeck の元の順序を維持して構築（選択された index を除外）
+  const remainingDeck = rawDeck.filter((_, idx) => !selectedIndexSet.has(idx));
+
+  return { rareCards: selectedRareCards, remainingDeck };
 }
 
 /**
@@ -205,4 +277,5 @@ export class RareCardSelectionService {
   public static validateSelections = validateSelections;
   public static extractRareCards = extractRareCards;
   public static formatRareCardLabel = formatRareCardLabel;
+  public static resolveDefaultRareCardSelections = resolveDefaultRareCardSelections;
 }

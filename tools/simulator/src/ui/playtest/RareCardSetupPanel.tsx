@@ -42,7 +42,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
 }) => {
   const [internalStep, setInternalStep] = useState<SetupStep>("p1_selecting");
   const [localP1Selection, setLocalP1Selection] = useState<CardOccurrenceSelection[]>([]);
-  const [selectedCandidateId, setSelectedCandidateId] = useState<string | null>(null);
+  const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
 
   // 全候補カードの列挙 (SSOT)
   const candidates = useMemo(
@@ -55,6 +55,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
   const isP2Confirmed =
     matchMode === "humanVsAi" || (confirmedSelections.p2?.length ?? 0) === rareCardCount;
   const isAllConfirmed = isP1Confirmed && isP2Confirmed;
+  const isSelectionComplete = selectedCandidateIds.length === rareCardCount;
 
   // 候補カードのスート別グループ化
   const groupedCandidates = useMemo(() => {
@@ -72,60 +73,77 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
     return groups.filter((g) => g.cards.length > 0);
   }, [candidates]);
 
+  // トグル選択ハンドラ (上限 rareCardCount まで、選択中カードは解除)
+  const handleToggleCandidate = (candidateId: string) => {
+    setSelectedCandidateIds((prev) => {
+      if (prev.includes(candidateId)) {
+        return prev.filter((id) => id !== candidateId);
+      }
+      if (prev.length >= rareCardCount) {
+        return prev;
+      }
+      return [...prev, candidateId];
+    });
+  };
+
   // リセットハンドラ
   const handleReset = () => {
     setInternalStep("p1_selecting");
     setLocalP1Selection([]);
-    setSelectedCandidateId(null);
+    setSelectedCandidateIds([]);
     onResetSelections();
   };
 
   // P1 確定ハンドラ
   const handleConfirmP1 = () => {
-    if (!selectedCandidateId) return;
-    const matched = candidates.find((c) => c.id === selectedCandidateId);
-    if (!matched) return;
-
-    const sel: CardOccurrenceSelection = {
-      suit: matched.suit,
-      rank: matched.rank,
-      occurrence: matched.occurrence,
-    };
+    if (!isSelectionComplete) return;
+    const selections: CardOccurrenceSelection[] = [];
+    for (const id of selectedCandidateIds) {
+      const matched = candidates.find((c) => c.id === id);
+      if (!matched) return;
+      selections.push({
+        suit: matched.suit,
+        rank: matched.rank,
+        occurrence: matched.occurrence,
+      });
+    }
 
     if (matchMode === "humanVsHuman") {
-      setLocalP1Selection([sel]);
-      setSelectedCandidateId(null);
+      setLocalP1Selection(selections);
+      setSelectedCandidateIds([]);
       setInternalStep("handoff");
     } else {
       // Human vs AI
-      onConfirmSelections({ p1: [sel] });
-      setSelectedCandidateId(null);
+      onConfirmSelections({ p1: selections });
+      setSelectedCandidateIds([]);
     }
   };
 
   // Handoff 完了ハンドラ (Player B へ)
   const handleProceedToP2 = () => {
     setInternalStep("p2_selecting");
-    setSelectedCandidateId(null);
+    setSelectedCandidateIds([]);
   };
 
   // P2 確定ハンドラ
   const handleConfirmP2 = () => {
-    if (!selectedCandidateId) return;
-    const matched = candidates.find((c) => c.id === selectedCandidateId);
-    if (!matched) return;
-
-    const sel: CardOccurrenceSelection = {
-      suit: matched.suit,
-      rank: matched.rank,
-      occurrence: matched.occurrence,
-    };
+    if (!isSelectionComplete) return;
+    const selections: CardOccurrenceSelection[] = [];
+    for (const id of selectedCandidateIds) {
+      const matched = candidates.find((c) => c.id === id);
+      if (!matched) return;
+      selections.push({
+        suit: matched.suit,
+        rank: matched.rank,
+        occurrence: matched.occurrence,
+      });
+    }
 
     onConfirmSelections({
       p1: localP1Selection,
-      p2: [sel],
+      p2: selections,
     });
-    setSelectedCandidateId(null);
+    setSelectedCandidateIds([]);
   };
 
   // 1. 全確定済み完了ビュー (プライバシー保護: カード情報は一切DOMに含まない)
@@ -157,15 +175,21 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             <span className="font-bold text-zinc-800">
               {matchMode === "humanVsHuman" ? "Player A:" : "Player:"}
             </span>
-            <span className="text-emerald-700 font-bold">レアカード選択済み</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-emerald-700 font-bold">レアカード選択済み</span>
+              <span className="text-[11px] text-emerald-600">({rareCardCount}枚)</span>
+            </div>
           </div>
           <div className="p-2.5 rounded-lg bg-white border border-emerald-200 flex items-center justify-between">
             <span className="font-bold text-zinc-800">
               {matchMode === "humanVsHuman" ? "Player B:" : "AI:"}
             </span>
-            <span className="text-emerald-700 font-bold">
-              {matchMode === "humanVsHuman" ? "レアカード選択済み" : "自動選択（非公開）"}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-emerald-700 font-bold">
+                {matchMode === "humanVsHuman" ? "レアカード選択済み" : "自動選択（非公開）"}
+              </span>
+              <span className="text-[11px] text-emerald-600">({rareCardCount}枚)</span>
+            </div>
           </div>
         </div>
 
@@ -214,7 +238,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
     ? "Player A: レアカード選択 (1/2)"
     : "レアカード選択 (Player)";
 
-  const stepPrompt = "デッキからレアカードとして伏せるカードを1枚選んでください（非公開情報）";
+  const stepPrompt = `デッキからレアカードとして伏せるカードを${rareCardCount}枚選んでください（非公開情報）`;
 
   return (
     <div
@@ -244,7 +268,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             <div className="text-[10px] font-bold text-zinc-500">{group.label}</div>
             <div className="grid grid-cols-7 sm:grid-cols-13 gap-1">
               {group.cards.map((candidate) => {
-                const isSelected = selectedCandidateId === candidate.id;
+                const isSelected = selectedCandidateIds.includes(candidate.id);
                 const isHeartOrDiamond = candidate.suit === "H" || candidate.suit === "D";
                 const isJoker = candidate.suit === "J";
 
@@ -252,7 +276,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
                   <button
                     key={candidate.id}
                     type="button"
-                    onClick={() => setSelectedCandidateId(candidate.id)}
+                    onClick={() => handleToggleCandidate(candidate.id)}
                     aria-label={candidate.displayLabel}
                     className={`min-h-[44px] min-w-[36px] p-1 rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center cursor-pointer select-none ${
                       isSelected
@@ -296,20 +320,21 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
       {/* アクションフッター */}
       <div className="pt-2 border-t border-zinc-200 flex items-center justify-between gap-3">
         <div className="text-[11px] text-zinc-600">
-          {selectedCandidateId ? (
-            <span className="font-bold text-zinc-900">選択中: 1枚選択されています</span>
-          ) : (
-            <span className="text-zinc-500">カードをクリックして選択してください</span>
+          <span className="font-bold text-zinc-900">
+            {`選択中: ${selectedCandidateIds.length} / ${rareCardCount} 枚`}
+          </span>
+          {selectedCandidateIds.length === 0 && (
+            <span className="text-zinc-500 ml-2">（カードをクリックして選択）</span>
           )}
         </div>
 
         <button
           type="button"
           data-testid="confirm-rare-button"
-          disabled={!selectedCandidateId}
+          disabled={!isSelectionComplete}
           onClick={isP2Step ? handleConfirmP2 : handleConfirmP1}
           className={`px-5 py-2 text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center min-h-[44px] cursor-pointer ${
-            selectedCandidateId
+            isSelectionComplete
               ? "bg-zinc-950 hover:bg-zinc-800 text-white"
               : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
           }`}

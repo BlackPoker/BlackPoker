@@ -116,78 +116,53 @@ export class SimulatorDeckProfileResolver {
     }
 
     if (frame.deck.type === "constructed") {
-      if (regulationId === "light-pack") {
-        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
-          throw new Error(
-            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
-          );
-        }
-        return {
-          id: "standard54",
-          name: "標準54枚デッキFixture",
-          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
-          cardCount: STANDARD_54_DECK_CARDS.length,
-          cards: STANDARD_54_DECK_CARDS,
-          notice: STANDARD_54_FIXTURE_NOTICE,
-        };
+      const minCards = frame.deck.minCards;
+      if (STANDARD_54_DECK_CARDS.length < minCards) {
+        throw new Error(
+          `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${minCards}) を満たしていません`
+        );
       }
 
-      if (regulationId === "standard-pack") {
-        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
-          throw new Error(
-            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
-          );
-        }
-        return {
-          id: "standard54",
-          name: "標準54枚デッキFixture",
-          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
-          cardCount: STANDARD_54_DECK_CARDS.length,
-          cards: STANDARD_54_DECK_CARDS,
-          notice: STANDARD_54_FIXTURE_NOTICE,
-        };
-      }
+      const hasRareCards =
+        frame.id === "rarePack" ||
+        (frame.setup?.rareCardCount !== undefined && frame.setup.rareCardCount > 0);
 
-      if (regulationId === "standard-rarePack") {
-        if (STANDARD_54_DECK_CARDS.length < frame.deck.minCards) {
-          throw new Error(
-            `標準54枚Fixtureのカード数 (${STANDARD_54_DECK_CARDS.length}) がフレーム最小要件 (${frame.deck.minCards}) を満たしていません`
-          );
-        }
-        return {
-          id: "standard54",
-          name: "標準54枚デッキFixture",
-          description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
-          cardCount: STANDARD_54_DECK_CARDS.length,
-          cards: STANDARD_54_DECK_CARDS,
-          notice: STANDARD_54_FIXTURE_NOTICE,
-          defaultRareCardSelections: [
-            {
-              suit: "J",
-              rank: "Joker",
-              occurrence: 0,
-            },
-          ],
-        };
-      }
-
-      throw new SimulatorNotImplementedError(regulationId || "custom", frame.id);
+      return {
+        id: "standard54",
+        name: "標準54枚デッキFixture",
+        description: "♠/♡/♢/♣ A〜K 各1枚 + Joker 2枚 (54枚)",
+        cardCount: STANDARD_54_DECK_CARDS.length,
+        cards: STANDARD_54_DECK_CARDS,
+        notice: STANDARD_54_FIXTURE_NOTICE,
+        defaultRareCardSelections: hasRareCards
+          ? [
+              {
+                suit: "J",
+                rank: "Joker",
+                occurrence: 0,
+              },
+            ]
+          : undefined,
+      };
     }
 
     throw new Error(`未知のデッキ種別です: ${(frame.deck as any).type}`);
   }
 
   /**
-   * レギュレーションIDから、UI表示用の DeckProfile 案内文（Notice）を取得します。
+   * レギュレーションIDまたはフレームIDから、UI表示用の DeckProfile 案内文（Notice）を取得します。
    */
   public static getDeckProfileNotice(
     regulationId?: string,
-    _frameId?: string
+    frameId?: string
   ): string | undefined {
     if (
+      frameId === "pack" ||
+      frameId === "rarePack" ||
       regulationId === "light-pack" ||
       regulationId === "standard-pack" ||
-      regulationId === "standard-rarePack"
+      regulationId === "standard-rarePack" ||
+      regulationId === "pro-rarePack"
     ) {
       return STANDARD_54_FIXTURE_NOTICE;
     }

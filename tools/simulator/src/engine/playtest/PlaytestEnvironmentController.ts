@@ -459,12 +459,34 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           }
         | undefined = undefined;
 
+      if (rareCardCount === 0) {
+        if (
+          (request.rareCardSelections?.p1 && request.rareCardSelections.p1.length > 0) ||
+          (request.rareCardSelections?.p2 && request.rareCardSelections.p2.length > 0)
+        ) {
+          const notice: SetupNotice = {
+            type: "VALIDATION_ERROR",
+            title: "レアカード設定エラー",
+            message: "レアカードが不要な環境ですが、選択が指定されています。",
+          };
+          logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+          return {
+            type: "VALIDATION_ERROR",
+            activeMatch: null,
+            setupNotice: notice,
+            presetValidationErrors: [],
+            logs,
+            traces,
+          };
+        }
+      }
+
       if (rareCardCount > 0) {
         if (request.matchMode === "humanVsHuman") {
           const p1Sel = request.rareCardSelections?.p1;
           const p2Sel = request.rareCardSelections?.p2;
 
-          if (!p1Sel || p1Sel.length === 0) {
+          if (!p1Sel || p1Sel.length !== rareCardCount) {
             const notice: SetupNotice = {
               type: "VALIDATION_ERROR",
               title: "レアカード選択エラー (Rare Card Selection Error)",
@@ -505,7 +527,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
             };
           }
 
-          if (!p2Sel || p2Sel.length === 0) {
+          if (!p2Sel || p2Sel.length !== rareCardCount) {
             const notice: SetupNotice = {
               type: "VALIDATION_ERROR",
               title: "レアカード選択エラー (Rare Card Selection Error)",
@@ -549,7 +571,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           effectiveRareSelections = { p1: p1Sel, p2: p2Sel };
         } else if (request.matchMode === "humanVsAi") {
           const p1Sel = request.rareCardSelections?.p1;
-          if (!p1Sel || p1Sel.length === 0) {
+          if (!p1Sel || p1Sel.length !== rareCardCount) {
             const notice: SetupNotice = {
               type: "VALIDATION_ERROR",
               title: "レアカード選択エラー (Rare Card Selection Error)",
@@ -590,7 +612,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
             };
           }
 
-          const aiSel = request.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
+          const aiSel = request.rareCardSelections?.p2 ?? RareCardSelectionService.resolveDefaultRareCardSelections(deckProfile, rareCardCount);
           if (aiSel) {
             const aiValidation = RareCardSelectionService.validateSelections(
               deckProfile,
@@ -665,9 +687,10 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
             }
             effectiveRareSelections = request.rareCardSelections;
           } else {
+            const defaults = RareCardSelectionService.resolveDefaultRareCardSelections(deckProfile, rareCardCount);
             effectiveRareSelections = {
-              p1: deckProfile.defaultRareCardSelections,
-              p2: deckProfile.defaultRareCardSelections,
+              p1: defaults,
+              p2: defaults,
             };
           }
         }

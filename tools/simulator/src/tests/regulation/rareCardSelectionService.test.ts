@@ -220,6 +220,50 @@ describe("RareCardSelectionService Unit Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]"
       expect(remainingDeck.find((c) => c.id === jokersInRaw[0].id)).toBeDefined();
     });
 
+    it("extracts multiple occurrences with order invariance and identical remaining deck", () => {
+      const rawDeck1 = createMockRawDeck();
+      const rawDeck2 = createMockRawDeck();
+
+      const res1 = extractRareCards(rawDeck1, [
+        { suit: "J", rank: "Joker", occurrence: 0 },
+        { suit: "J", rank: "Joker", occurrence: 1 },
+      ]);
+
+      const res2 = extractRareCards(rawDeck2, [
+        { suit: "J", rank: "Joker", occurrence: 1 },
+        { suit: "J", rank: "Joker", occurrence: 0 },
+      ]);
+
+      // Both extractions extract exactly 2 cards and leave 52
+      expect(res1.rareCards).toHaveLength(2);
+      expect(res2.rareCards).toHaveLength(2);
+      expect(res1.remainingDeck).toHaveLength(52);
+      expect(res2.remainingDeck).toHaveLength(52);
+
+      // Remaining decks must be identical
+      expect(res1.remainingDeck).toEqual(res2.remainingDeck);
+
+      // Remaining deck has 0 Jokers
+      const remainingJokers = res1.remainingDeck.filter(
+        (c) => c.suit === "J" || c.rank === "Joker"
+      );
+      expect(remainingJokers).toHaveLength(0);
+
+      // Selections order determines rareCards order
+      expect(res1.rareCards[0].id).toBe(res2.rareCards[1].id);
+      expect(res1.rareCards[1].id).toBe(res2.rareCards[0].id);
+    });
+
+    it("throws error when duplicate physical cards are selected in extractRareCards", () => {
+      const rawDeck = createMockRawDeck();
+      expect(() =>
+        extractRareCards(rawDeck, [
+          { suit: "J", rank: "Joker", occurrence: 0 },
+          { suit: "J", rank: "Joker", occurrence: 0 },
+        ])
+      ).toThrow("同一の Rare Card が重複して選択されました");
+    });
+
     it("returns empty rareCards and unchanged remainingDeck when selections are empty", () => {
       const rawDeck = createMockRawDeck();
       const { rareCards, remainingDeck } = extractRareCards(rawDeck, []);
@@ -233,6 +277,41 @@ describe("RareCardSelectionService Unit Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]"
       expect(() =>
         extractRareCards(rawDeck, [{ suit: "S", rank: "A", occurrence: 5 }])
       ).toThrow("見つかりません");
+    });
+  });
+
+  describe("resolveDefaultRareCardSelections", () => {
+    it("returns empty array when rareCardCount is 0", () => {
+      const result = RareCardSelectionService.resolveDefaultRareCardSelections(standardProfile, 0);
+      expect(result).toEqual([]);
+    });
+
+    it("resolves N=1 from deckProfile defaultRareCardSelections", () => {
+      const result = RareCardSelectionService.resolveDefaultRareCardSelections(standardProfile, 1);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ suit: "J", rank: "Joker", occurrence: 0 });
+    });
+
+    it("resolves N=2 deterministically with non-duplicate physical cards (both Jokers)", () => {
+      const result = RareCardSelectionService.resolveDefaultRareCardSelections(standardProfile, 2);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ suit: "J", rank: "Joker", occurrence: 0 });
+      expect(result[1]).toEqual({ suit: "J", rank: "Joker", occurrence: 1 });
+
+      // Validation check
+      const validation = validateSelections(standardProfile, 2, result);
+      expect(validation.valid).toBe(true);
+    });
+
+    it("resolves N=3 deterministically with non-duplicate physical cards", () => {
+      const result = RareCardSelectionService.resolveDefaultRareCardSelections(standardProfile, 3);
+      expect(result).toHaveLength(3);
+      const uniqueKeys = new Set(result.map((s) => `${s.suit}-${s.rank}-${s.occurrence}`));
+      expect(uniqueKeys.size).toBe(3);
+
+      // Validation check
+      const validation = validateSelections(standardProfile, 3, result);
+      expect(validation.valid).toBe(true);
     });
   });
 });

@@ -64,20 +64,23 @@ export function decodeRareCardSelectionsFromUrlParam(
   const selections: CardOccurrenceSelection[] = [];
   for (const part of parts) {
     const tokens = part.split(".");
-    if (tokens.length < 2) {
+    if (tokens.length < 2 || tokens.length > 3) {
       return { success: false, error: `無効なレアカード形式です: "${part}"` };
     }
     const suit = tokens[0] as any;
     const rank = tokens[1];
-    const occurrence = tokens[2] !== undefined ? parseInt(tokens[2], 10) : 0;
+    let occurrence = 0;
+    if (tokens.length === 3) {
+      if (!/^(0|[1-9]\d*)$/.test(tokens[2])) {
+        return { success: false, error: `無効な occurrence です: "${tokens[2]}"` };
+      }
+      occurrence = Number(tokens[2]);
+    }
     if (!["S", "H", "D", "C", "J"].includes(suit)) {
       return { success: false, error: `無効なスートです: "${suit}"` };
     }
     if (!rank || rank.trim() === "") {
       return { success: false, error: `無効なランクです: "${rank}"` };
-    }
-    if (!Number.isInteger(occurrence) || occurrence < 0) {
-      return { success: false, error: `無効な occurrence です: "${occurrence}"` };
     }
     selections.push({ suit, rank, occurrence });
   }

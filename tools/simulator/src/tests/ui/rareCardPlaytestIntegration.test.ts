@@ -14,12 +14,14 @@ import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader"
 import {
   buildPlaytestShareUrl,
   parsePlaytestShareUrl,
+  decodeRareCardSelectionsFromUrlParam,
 } from "../../ui/playtest/PlaytestShareUrl";
 import { buildPlaytestDiagnosticBundleV1 } from "../../ui/playtest/PlaytestDiagnosticBundle";
 import { createReplayPlanFromDiagnosticBundleV1 } from "../../ui/playtest/DiagnosticReplayAdapter";
 import { reconstructMatch } from "../../engine/replay/ReplayReconstructionService";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { OfficialRegulationMatchFactory } from "../../engine/regulation/OfficialRegulationMatchFactory";
+import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup";
 import { SimulatorNotImplementedError } from "../../domain/regulation/RegulationDefinition";
 
 describe("Rare Card Playtest Integration Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]", () => {
@@ -97,6 +99,23 @@ describe("Rare Card Playtest Integration Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]
       expect(res.type).toBe("VALIDATION_ERROR");
       if (res.type === "VALIDATION_ERROR") {
         expect(res.setupNotice?.message).toContain("Player A のレアカード選択が不正です");
+      }
+    });
+
+    it("fails with VALIDATION_ERROR if selections are provided for environment with rareCardCount = 0", () => {
+      const res = startMatchAttempt({
+        environmentId: "official:standard-pack",
+        matchMode: "humanVsAi",
+        seedInput: "42",
+        rareCardSelections: {
+          p1: [{ suit: "S", rank: "A", occurrence: 0 }],
+        },
+        catalog,
+        fullRulePackage,
+      });
+      expect(res.type).toBe("VALIDATION_ERROR");
+      if (res.type === "VALIDATION_ERROR") {
+        expect(res.setupNotice?.message).toContain("レアカードが不要な環境ですが、選択が指定されています。");
       }
     });
 
@@ -312,6 +331,48 @@ describe("Rare Card Playtest Integration Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]
         expect(parsed.warnings.some((w) => w.includes("レアカードが未選択です"))).toBe(true);
       }
     });
+
+    describe("decodeRareCardSelectionsFromUrlParam Strict Occurrence Validation", () => {
+      it("rejects non-numeric, decimal, negative, empty, and padded occurrence tokens", () => {
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.1abc").success).toBe(false);
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.-1").success).toBe(false);
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.1.5").success).toBe(false);
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.").success).toBe(false);
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.01").success).toBe(false);
+        expect(decodeRareCardSelectionsFromUrlParam("S.A.NaN").success).toBe(false);
+      });
+
+      it("accepts valid occurrence tokens 0, 1, 2...", () => {
+        const res0 = decodeRareCardSelectionsFromUrlParam("S.A.0");
+        expect(res0.success).toBe(true);
+        if (res0.success) {
+          expect(res0.selections[0].occurrence).toBe(0);
+        }
+
+        const res1 = decodeRareCardSelectionsFromUrlParam("S.A.1");
+        expect(res1.success).toBe(true);
+        if (res1.success) {
+          expect(res1.selections[0].occurrence).toBe(1);
+        }
+
+        const resDefault = decodeRareCardSelectionsFromUrlParam("S.A");
+        expect(resDefault.success).toBe(true);
+        if (resDefault.success) {
+          expect(resDefault.selections[0].occurrence).toBe(0);
+        }
+      });
+
+      it("adds warning in parsePlaytestShareUrl when occurrence is malformed in query", () => {
+        const parsed = parsePlaytestShareUrl(
+          "https://example.com/playtest?bpv=1&env=official:standard-rarePack&mode=humanVsAi&rc1=S.A.1abc",
+          catalog
+        );
+        expect(parsed.kind).toBe("READY");
+        if (parsed.kind === "READY") {
+          expect(parsed.warnings.some((w) => w.includes("Player A のレアカード設定が無効です"))).toBe(true);
+        }
+      });
+    });
   });
 
   describe("Diagnostic Bundle & Replay Reconstruction", () => {
@@ -442,6 +503,47 @@ describe("Rare Card Playtest Integration Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]
           fullRulePackage,
         })
       ).rejects.toThrow(SimulatorNotImplementedError);
+    });
+
+    it("OfficialRegulationMatchSetup can construct initial match state for Pro + RarePack (Engine-level setup)", () => {
+      const proRegulation = catalog.regulations.get("pro-rarePack")!;
+      expect(proRegulation).toBeDefined();
+      const rarePackFrame = catalog.frames.get("rarePack")!;
+      expect(rarePackFrame).toBeDefined();
+
+      // Engine-level setup directly using OfficialRegulationMatchSetup (without public factory gate)
+      const outcome = OfficialRegulationMatchSetup.setupMatch(
+        proRegulation,
+        rarePackFrame,
+        fullRulePackage,
+        42
+      );
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      expect(outcome.state.players.p1.rareCards).toHaveLength(1);
+      expect(outcome.state.players.p2.rareCards).toHaveLength(1);
+
+      // With explicit rare card selections
+      const explicitOutcome = OfficialRegulationMatchSetup.setupMatch(
+        proRegulation,
+        rarePackFrame,
+        fullRulePackage,
+        42,
+        {
+          rareCardSelections: {
+            p1: [{ suit: "S", rank: "A", occurrence: 0 }],
+            p2: [{ suit: "H", rank: "K", occurrence: 0 }],
+          },
+        }
+      );
+      expect(explicitOutcome.type).toBe("READY");
+      if (explicitOutcome.type !== "READY") return;
+
+      expect(explicitOutcome.state.players.p1.rareCards[0].suit).toBe("S");
+      expect(explicitOutcome.state.players.p1.rareCards[0].rank).toBe("A");
+      expect(explicitOutcome.state.players.p2.rareCards[0].suit).toBe("H");
+      expect(explicitOutcome.state.players.p2.rareCards[0].rank).toBe("K");
     });
   });
 });

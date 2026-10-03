@@ -243,4 +243,179 @@ describe("RareCardSetupPanel UI Component Tests [BP-SIM-REG-5.0-J-RARE-SELECTION
     expect(text).toContain("自動選択（非公開）");
     expect(text).not.toContain("♦Q");
   });
+
+  describe("Generic Multi-Card Selection (rareCardCount = 2)", () => {
+    it("requires 2 cards selected before confirm is enabled, toggles cards, and prevents exceeding 2 cards", () => {
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={2}
+            matchMode="humanVsAi"
+            confirmedSelections={{}}
+            onConfirmSelections={vi.fn()}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+      const text = JSON.stringify(renderer!.toJSON());
+      expect(text).toContain("2枚選んでください");
+      expect(text).toContain("選択中: 0 / 2 枚");
+
+      const confirmButton = root.findByProps({ "data-testid": "confirm-rare-button" });
+      expect(confirmButton.props.disabled).toBe(true);
+
+      const spadeA = root.findByProps({ "aria-label": "♠A" });
+      const spade2 = root.findByProps({ "aria-label": "♠2" });
+      const spade3 = root.findByProps({ "aria-label": "♠3" });
+
+      // Select 1 card
+      act(() => {
+        spadeA.props.onClick();
+      });
+      expect(confirmButton.props.disabled).toBe(true);
+      expect(JSON.stringify(renderer!.toJSON())).toContain("選択中: 1 / 2 枚");
+
+      // Clicking same card deselects it
+      act(() => {
+        spadeA.props.onClick();
+      });
+      expect(confirmButton.props.disabled).toBe(true);
+      expect(JSON.stringify(renderer!.toJSON())).toContain("選択中: 0 / 2 枚");
+
+      // Select 2 cards
+      act(() => {
+        spadeA.props.onClick();
+        spade2.props.onClick();
+      });
+      expect(confirmButton.props.disabled).toBe(false);
+      expect(JSON.stringify(renderer!.toJSON())).toContain("選択中: 2 / 2 枚");
+
+      // Attempt to select 3rd card - must not exceed 2 cards
+      act(() => {
+        spade3.props.onClick();
+      });
+      expect(confirmButton.props.disabled).toBe(false);
+      expect(JSON.stringify(renderer!.toJSON())).toContain("選択中: 2 / 2 枚");
+    });
+
+    it("Human vs Human with rareCardCount = 2: both players select 2 cards with strict privacy during handoff and completion", () => {
+      const handleConfirm = vi.fn();
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={2}
+            matchMode="humanVsHuman"
+            confirmedSelections={{}}
+            onConfirmSelections={handleConfirm}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+
+      // P1 selects Spade A and Spade 2
+      const spadeA = root.findByProps({ "aria-label": "♠A" });
+      const spade2 = root.findByProps({ "aria-label": "♠2" });
+      act(() => {
+        spadeA.props.onClick();
+        spade2.props.onClick();
+      });
+
+      const confirmButtonP1 = root.findByProps({ "data-testid": "confirm-rare-button" });
+      expect(confirmButtonP1.props.disabled).toBe(false);
+
+      act(() => {
+        confirmButtonP1.props.onClick();
+      });
+
+      // Handoff screen
+      const handoffText = JSON.stringify(renderer!.toJSON());
+      expect(handoffText).toContain("Player B に画面を渡してください");
+      expect(handoffText).not.toContain("♠A");
+      expect(handoffText).not.toContain("♠2");
+
+      // Proceed to P2
+      const proceedButton = root.findByProps({ "data-testid": "proceed-p2-button" });
+      act(() => {
+        proceedButton.props.onClick();
+      });
+
+      // P2 selects Heart K and Heart Q
+      const heartK = root.findByProps({ "aria-label": "♥K" });
+      const heartQ = root.findByProps({ "aria-label": "♥Q" });
+      act(() => {
+        heartK.props.onClick();
+        heartQ.props.onClick();
+      });
+
+      const confirmButtonP2 = root.findByProps({ "data-testid": "confirm-rare-button" });
+      act(() => {
+        confirmButtonP2.props.onClick();
+      });
+
+      expect(handleConfirm).toHaveBeenCalledWith({
+        p1: [
+          { suit: "S", rank: "A", occurrence: 0 },
+          { suit: "S", rank: "2", occurrence: 0 },
+        ],
+        p2: [
+          { suit: "H", rank: "K", occurrence: 0 },
+          { suit: "H", rank: "Q", occurrence: 0 },
+        ],
+      });
+    });
+
+    it("Human vs AI with rareCardCount = 2: Human selects 2 cards and callback receives 2 selections", () => {
+      const handleConfirm = vi.fn();
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={2}
+            matchMode="humanVsAi"
+            confirmedSelections={{}}
+            onConfirmSelections={handleConfirm}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+
+      // Select Joker 1 and Joker 2
+      const jokers = root.findAll(
+        (node) =>
+          node.type === "button" &&
+          (node.props["aria-label"] === "Joker" || node.props["aria-label"] === "Joker (#2)")
+      );
+      expect(jokers).toHaveLength(2);
+
+      act(() => {
+        jokers[0].props.onClick();
+        jokers[1].props.onClick();
+      });
+
+      const confirmButton = root.findByProps({ "data-testid": "confirm-rare-button" });
+      expect(confirmButton.props.disabled).toBe(false);
+
+      act(() => {
+        confirmButton.props.onClick();
+      });
+
+      expect(handleConfirm).toHaveBeenCalledWith({
+        p1: [
+          { suit: "J", rank: "Joker", occurrence: 0 },
+          { suit: "J", rank: "Joker", occurrence: 1 },
+        ],
+      });
+    });
+  });
 });

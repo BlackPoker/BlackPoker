@@ -15,7 +15,11 @@ import { SeededRandom, RandomSource } from "../random/RandomSource";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { rankToValue, matchesRank } from "../rules/cardUtils";
-import { SimulatorDeckProfileResolver, CardOccurrenceSelection } from "./SimulatorDeckProfileResolver";
+import {
+  SimulatorDeckProfileResolver,
+  SimulatorDeckProfile,
+  CardOccurrenceSelection,
+} from "./SimulatorDeckProfileResolver";
 import { RareCardSelectionService } from "./RareCardSelectionService";
 
 export interface InGameCard {
@@ -35,6 +39,7 @@ export interface OfficialRegulationSetupOptions {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly deckProfile?: SimulatorDeckProfile;
 }
 
 import {
@@ -188,7 +193,7 @@ export class OfficialRegulationMatchSetup {
     const p2Name = options?.playerNames?.p2 || "Player B";
 
     // 1. デッキプロファイル解決 (SSOT) から P1, P2 のデッキを生成 (ID 一意化)
-    const deckProfile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, regulation.id);
+    const deckProfile = options?.deckProfile ?? SimulatorDeckProfileResolver.resolveDeckProfile(frame, regulation.id);
     const expectedDeck = deckProfile.cards;
 
     const buildDeck = (playerKey: PlayerKey): InGameCard[] => {
@@ -219,15 +224,13 @@ export class OfficialRegulationMatchSetup {
     const p1Selections = options?.rareCardSelections?.p1 ?? deckProfile.defaultRareCardSelections;
     const p2Selections = options?.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
 
-    if (rareCardCount > 0) {
-      const p1Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p1Selections);
-      if (!p1Val.valid) {
-        throw new Error(`Player A の Rare Card 選択エラー: ${p1Val.errors.join(", ")}`);
-      }
-      const p2Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p2Selections);
-      if (!p2Val.valid) {
-        throw new Error(`Player B の Rare Card 選択エラー: ${p2Val.errors.join(", ")}`);
-      }
+    const p1Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p1Selections);
+    if (!p1Val.valid) {
+      throw new Error(`Player A の Rare Card 選択エラー: ${p1Val.errors.join(", ")}`);
+    }
+    const p2Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p2Selections);
+    if (!p2Val.valid) {
+      throw new Error(`Player B の Rare Card 選択エラー: ${p2Val.errors.join(", ")}`);
     }
 
     const p1RareResult = RareCardSelectionService.extractRareCards(p1RawDeck, p1Selections ?? []);
