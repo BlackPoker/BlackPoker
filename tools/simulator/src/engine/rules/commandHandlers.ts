@@ -1979,33 +1979,39 @@ export function moveUnitToHandHandler(
 
     // 1. ターゲットユニットIDの解決
     let targetUnitId: string | undefined;
-    if (target) {
-      if (target === "targetComponent" && context.targetComponent?.unitId) {
+    if (target !== undefined) {
+      let resolvedTarget: any;
+      if (target === "targetComponent" && context.targetComponent) {
+        resolvedTarget = context.targetComponent;
+      } else {
+        resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
+      }
+
+      if (typeof resolvedTarget === "string" && resolvedTarget.trim().length > 0) {
+        targetUnitId = resolvedTarget;
+      } else if (
+        resolvedTarget &&
+        typeof resolvedTarget === "object" &&
+        typeof resolvedTarget.unitId === "string" &&
+        resolvedTarget.unitId.trim().length > 0
+      ) {
+        targetUnitId = resolvedTarget.unitId;
+      } else {
+        throw new Error(
+          `moveUnitToHand: 明示的に指定された target の解決結果が不正です: target=${JSON.stringify(target)}, resolved=${JSON.stringify(resolvedTarget)} (fail-closed)`
+        );
+      }
+    } else {
+      // args.target === undefined: 既存の互換性のため context.targetComponent?.unitId を暗黙使用
+      if (
+        context.targetComponent?.unitId &&
+        typeof context.targetComponent.unitId === "string" &&
+        context.targetComponent.unitId.trim().length > 0
+      ) {
         targetUnitId = context.targetComponent.unitId;
       } else {
-        const resolvedTarget = expressionEvaluator.resolveBindingValue(target, context);
-        if (typeof resolvedTarget === "string") {
-          const foundOnField = Object.values<any>(context.state?.players || {}).some(
-            (p: any) => p?.field?.some((u: any) => u?.unitId === resolvedTarget)
-          );
-          if (foundOnField) {
-            targetUnitId = resolvedTarget;
-          } else if (context.targetComponent?.unitId) {
-            targetUnitId = context.targetComponent.unitId;
-          } else {
-            targetUnitId = resolvedTarget;
-          }
-        } else if (resolvedTarget && typeof resolvedTarget === "object" && resolvedTarget.unitId) {
-          targetUnitId = resolvedTarget.unitId;
-        }
+        throw new Error("moveUnitToHand: target が未指定かつ context.targetComponent が存在しません (fail-closed)");
       }
-    }
-    if (!targetUnitId && context.targetComponent?.unitId) {
-      targetUnitId = context.targetComponent.unitId;
-    }
-
-    if (!targetUnitId || typeof targetUnitId !== "string") {
-      throw new Error(`moveUnitToHand: 対象ユニットが見つかりません (target: ${JSON.stringify(target)}) (fail-closed)`);
     }
 
     // Canonical なユニットと所有者を state から直接解決 (クライアント渡しの target オブジェクトの state を信用しない)
@@ -2049,6 +2055,18 @@ export function moveRequestKeyCardsToHandHandler(
       throw new Error("moveRequestKeyCardsToHand: currentRequest が存在しません (fail-closed)");
     }
 
+    if (!request.controller || typeof request.controller !== "string" || request.controller.trim().length === 0) {
+      throw new Error(
+        `moveRequestKeyCardsToHand: request.controller が無効または未指定です: ${JSON.stringify(request.controller)} (fail-closed)`
+      );
+    }
+
+    const controllerKey = request.controller;
+    const player = context.state?.players?.[controllerKey];
+    if (!player) {
+      throw new Error(`moveRequestKeyCardsToHand: コントローラーが見つかりません: ${controllerKey} (fail-closed)`);
+    }
+
     if (request.keyCards === undefined) {
       throw new Error("moveRequestKeyCardsToHand: request.keyCards が未定義です (fail-closed)");
     }
@@ -2060,12 +2078,6 @@ export function moveRequestKeyCardsToHandHandler(
 
     if (keyCards.length === 0) {
       return;
-    }
-
-    const controllerKey = request.controller || context.playerKey;
-    const player = context.state?.players?.[controllerKey];
-    if (!player) {
-      throw new Error(`moveRequestKeyCardsToHand: コントローラーが見つかりません: ${controllerKey} (fail-closed)`);
     }
 
     // --- 事前バリデーション (all-or-nothing: 変更前に全件検証) ---

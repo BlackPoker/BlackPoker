@@ -127,7 +127,7 @@ export function moveUnitToHand(
   }
 
   // --- 事前バリデーション (all-or-nothing: 変更前に全件検証) ---
-  if (!unit || !unit.unitId || typeof unit.unitId !== "string") {
+  if (!unit || !unit.unitId || typeof unit.unitId !== "string" || unit.unitId.trim().length === 0) {
     throw new Error("moveUnitToHand: 対象ユニットが無効です (fail-closed)");
   }
 
@@ -137,28 +137,33 @@ export function moveUnitToHand(
     throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) の所有者 (${resolved.ownerKey}) と指定プレイヤー (${playerKey}) が一致しません (fail-closed)`);
   }
 
-  if (!Array.isArray(unit.cards) || unit.cards.length === 0) {
-    throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) の構成カードが0枚または不正です (fail-closed)`);
+  const canonicalUnit = resolved.unit;
+  if (!canonicalUnit) {
+    throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) の実体が存在しません (fail-closed)`);
+  }
+
+  if (!Array.isArray(canonicalUnit.cards) || canonicalUnit.cards.length === 0) {
+    throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) の構成カードが0枚または不正です (fail-closed)`);
   }
 
   const cardIds = new Set<string>();
-  for (const card of unit.cards) {
-    if (!card || !card.id || typeof card.id !== "string") {
-      throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) のカードに有効なIDが存在しません (fail-closed)`);
+  for (const card of canonicalUnit.cards) {
+    if (!card || !card.id || typeof card.id !== "string" || card.id.trim().length === 0) {
+      throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) のカードに有効なIDが存在しません (fail-closed)`);
     }
     if (cardIds.has(card.id)) {
-      throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) 内に重複カードIDが存在します: ${card.id} (fail-closed)`);
+      throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) 内に重複カードIDが存在します: ${card.id} (fail-closed)`);
     }
     cardIds.add(card.id);
 
     if (!isCanonicalPrintedCard(card)) {
-      throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) に非Canonicalカードが含まれています: ${JSON.stringify(card)} (fail-closed)`);
+      throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) に非Canonicalカードが含まれています: ${JSON.stringify(card)} (fail-closed)`);
     }
   }
 
   // 手札に既に同一カードIDが存在しないか検証
   if (Array.isArray(player.hand)) {
-    for (const card of unit.cards) {
+    for (const card of canonicalUnit.cards) {
       if (player.hand.some((c: any) => c?.id === card.id)) {
         throw new Error(`moveUnitToHand: カード (${card.id}) は既に手札に存在します (fail-closed)`);
       }
@@ -169,36 +174,36 @@ export function moveUnitToHand(
   if (!Array.isArray(player.field)) {
     throw new Error(`moveUnitToHand: プレイヤー (${playerKey}) の field が配列ではありません (fail-closed)`);
   }
-  const unitIndex = player.field.findIndex((u: any) => u.unitId === unit.unitId);
+  const unitIndex = player.field.findIndex((u: any) => u.unitId === canonicalUnit.unitId);
   if (unitIndex === -1) {
-    throw new Error(`moveUnitToHand: ユニット (${unit.unitId}) がプレイヤー (${playerKey}) のフィールドに見つかりません (fail-closed)`);
+    throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) がプレイヤー (${playerKey}) のフィールドに見つかりません (fail-closed)`);
   }
 
   // --- 状態変更処理 ---
-  // 移動前に battle snapshot と characterType を保持
-  const combatSnapshot = metadata?.combatSnapshot || (unit.battle ? { ...unit.battle } : undefined);
-  const characterType = metadata?.characterType || getCharacterType(unit, context?.components);
+  // 移動前に battle snapshot と characterType を保持 (canonicalUnit を SSOT とする)
+  const combatSnapshot = metadata?.combatSnapshot || (canonicalUnit.battle ? { ...canonicalUnit.battle } : undefined);
+  const characterType = metadata?.characterType || getCharacterType(canonicalUnit, context?.components);
 
   // フィールドから除外
   player.field.splice(unitIndex, 1);
 
   // battle 情報を完全に削除
-  if (unit.battle) {
-    delete unit.battle;
+  if (canonicalUnit.battle) {
+    delete canonicalUnit.battle;
   }
 
   if (!Array.isArray(player.hand)) {
     player.hand = [];
   }
 
-  // physical cards を hand 末尾へ追加（Unit.cards の既存順序を完全維持）
+  // physical cards を hand 末尾へ追加（canonicalUnit.cards の既存順序を完全維持）
   // Unit wrapper 自体は hand へ入れず、カード実体のみを格納
-  for (const card of unit.cards) {
+  for (const card of canonicalUnit.cards) {
     player.hand.push(card);
   }
 
   // 各カードについて cardMoved イベントを発行 (fromZone: "field", toZone: "hand")
-  for (const card of unit.cards) {
+  for (const card of canonicalUnit.cards) {
     const event = {
       type: "cardMoved",
       payload: {

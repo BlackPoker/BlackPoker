@@ -1558,9 +1558,452 @@ describe("action.unsummons (帰還) & Generic Character Hand-Return Foundation [
   });
 
   // ===========================================================================
-  // 14. Generic Engine Guard
+  // 14. BP-SIM-REG-5.0-I-R1 Mandatory Regressions
   // ===========================================================================
-  it("50. Generic Engine Guard: tools/simulator/src/engine contains ZERO occurrences of 'action.unsummons'", () => {
+  it("50. Canonical Authority: Spoofed caller Unit object with fake cards moves canonical cards only, ignoring fake caller cards", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const realCard = { id: "real-card", suit: "spade", rank: "5" };
+    const fakeCard = { id: "fake-card", suit: "heart", rank: "K" };
+
+    const state: any = {
+      players: {
+        p1: {
+          hand: [],
+          field: [
+            {
+              unitId: "unit-a",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [realCard],
+              battle: { role: "attacker", targetPlayerKey: "p2" },
+            },
+          ],
+        },
+      },
+    };
+
+    const spoofedUnit = {
+      unitId: "unit-a",
+      componentId: "character.bulwark",
+      state: "drive",
+      cards: [fakeCard],
+      battle: { role: "blocker" },
+    };
+
+    moveUnitToHand(spoofedUnit, "p1", state, mockInterpreter as any, { components: rulePackage.components });
+
+    // Field: unit-a removed
+    expect(state.players.p1.field).toHaveLength(0);
+
+    // Hand: contains real-card, does NOT contain fake-card
+    expect(state.players.p1.hand).toHaveLength(1);
+    expect(state.players.p1.hand[0]).toEqual(realCard);
+
+    // Event: emitted for real-card only, characterType and combat derived from canonical unit
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe("cardMoved");
+    expect(events[0].payload.card).toEqual(realCard);
+    expect(events[0].payload.characterType).toBe("soldier");
+    expect(events[0].payload.combat?.role).toBe("attacker");
+  });
+
+  it("51. Canonical Authority: Spoofed caller Unit with malformed cards does not poison valid canonical State Unit movement", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const realCard = { id: "real-card", suit: "spade", rank: "5" };
+
+    const state: any = {
+      players: {
+        p1: {
+          hand: [],
+          field: [
+            {
+              unitId: "unit-a",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [realCard],
+            },
+          ],
+        },
+      },
+    };
+
+    const malformedCallerUnit = {
+      unitId: "unit-a",
+      cards: [{ id: "fake", suit: "banana", rank: "999" }],
+    };
+
+    expect(() => {
+      moveUnitToHand(malformedCallerUnit, "p1", state, mockInterpreter as any, { components: rulePackage.components });
+    }).not.toThrow();
+
+    expect(state.players.p1.field).toHaveLength(0);
+    expect(state.players.p1.hand).toHaveLength(1);
+    expect(state.players.p1.hand[0]).toEqual(realCard);
+  });
+
+  it("52. Canonical Authority: Malformed card in canonical State Unit FAILS-CLOSED (no mutation, no events)", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+
+    const state: any = {
+      players: {
+        p1: {
+          hand: [],
+          field: [
+            {
+              unitId: "unit-bad",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [{ id: "bad-card", suit: "spade", rank: "999" }], // invalid rank!
+            },
+          ],
+        },
+      },
+    };
+
+    const callerUnit = {
+      unitId: "unit-bad",
+      cards: [{ id: "valid-card", suit: "spade", rank: "5" }],
+    };
+
+    expect(() => {
+      moveUnitToHand(callerUnit, "p1", state, mockInterpreter as any, { components: rulePackage.components });
+    }).toThrow(/非Canonicalカード/);
+
+    expect(state.players.p1.field).toHaveLength(1);
+    expect(state.players.p1.hand).toHaveLength(0);
+    expect(events).toHaveLength(0);
+  });
+
+  it("53. Explicit Target Resolution: Missing explicit target while context.targetComponent is valid FAILS-CLOSED without silent fallback", () => {
+    const exprEval = new ExpressionEvaluator();
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const handler = moveUnitToHandHandler(exprEval, mockInterpreter as any);
+
+    const unitA = {
+      unitId: "unit-a",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "ca", suit: "spade", rank: "3" }],
+    };
+
+    const state: any = {
+      players: {
+        p1: {
+          field: [unitA],
+          hand: [],
+        },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: unitA, // Valid Unit A in context
+      components: rulePackage.components,
+    };
+
+    // Explicit target points to missing unit B
+    expect(() => {
+      handler({ target: "unit-b", requiredState: "charge" }, context);
+    }).toThrow(/見つかりません/);
+
+    // Unit A must remain on field unchanged (NO silent fallback!)
+    expect(state.players.p1.field).toHaveLength(1);
+    expect(state.players.p1.field[0]).toBe(unitA);
+    expect(state.players.p1.hand).toHaveLength(0);
+    expect(events).toHaveLength(0);
+  });
+
+  it("54. Explicit Target Resolution: Explicit target B is chosen over context.targetComponent A", () => {
+    const exprEval = new ExpressionEvaluator();
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const handler = moveUnitToHandHandler(exprEval, mockInterpreter as any);
+
+    const unitA = {
+      unitId: "unit-a",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "ca", suit: "spade", rank: "3" }],
+    };
+    const unitB = {
+      unitId: "unit-b",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "cb", suit: "heart", rank: "7" }],
+    };
+
+    const state: any = {
+      players: {
+        p1: {
+          field: [unitA, unitB],
+          hand: [],
+        },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: unitA, // context has A
+      components: rulePackage.components,
+    };
+
+    // Explicit target specifies B
+    handler({ target: "unit-b", requiredState: "charge" }, context);
+
+    // B moved to hand, A remains on field!
+    expect(state.players.p1.field).toHaveLength(1);
+    expect(state.players.p1.field[0]).toBe(unitA);
+    expect(state.players.p1.hand).toHaveLength(1);
+    expect(state.players.p1.hand[0].id).toBe("cb");
+  });
+
+  it("55. Explicit Target Resolution: Explicit malformed target (null, number, {}, { unitId: '' }) FAILS-CLOSED without fallback", () => {
+    const exprEval = new ExpressionEvaluator();
+    const mockInterpreter = createMockInterpreter();
+    const handler = moveUnitToHandHandler(exprEval, mockInterpreter as any);
+
+    const unitA = {
+      unitId: "unit-a",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: "ca", suit: "spade", rank: "3" }],
+    };
+
+    const state: any = {
+      players: {
+        p1: {
+          field: [unitA],
+          hand: [],
+        },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      targetComponent: unitA,
+      components: rulePackage.components,
+    };
+
+    // null
+    expect(() => handler({ target: null, requiredState: "charge" }, context)).toThrow(/不正/);
+    // number
+    expect(() => handler({ target: 123, requiredState: "charge" }, context)).toThrow(/不正/);
+    // {}
+    expect(() => handler({ target: {}, requiredState: "charge" }, context)).toThrow(/不正/);
+    // { unitId: "" }
+    expect(() => handler({ target: { unitId: "" }, requiredState: "charge" }, context)).toThrow(/不正/);
+
+    expect(state.players.p1.field).toHaveLength(1);
+    expect(state.players.p1.hand).toHaveLength(0);
+  });
+
+  it("56. Request Controller Authority: Missing request.controller FAILS-CLOSED without fallback to context.playerKey", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const handler = moveRequestKeyCardsToHandHandler(mockInterpreter as any);
+
+    const k1 = { id: "k1", suit: "spade", rank: "2" };
+    const state: any = {
+      players: {
+        p1: { hand: [] },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      currentRequest: {
+        id: "req-1",
+        actionId: "action.unsummons",
+        controller: undefined as any, // Missing controller!
+        keyCards: [k1],
+      } as any,
+    };
+
+    expect(() => handler({}, context)).toThrow(/request.controller が無効または未指定です/);
+    expect(state.players.p1.hand).toHaveLength(0);
+    expect(events).toHaveLength(0);
+  });
+
+  it("57. Request Controller Authority: Unknown request.controller ('ghost') FAILS-CLOSED", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const handler = moveRequestKeyCardsToHandHandler(mockInterpreter as any);
+
+    const k1 = { id: "k1", suit: "spade", rank: "2" };
+    const state: any = {
+      players: {
+        p1: { hand: [] },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      currentRequest: {
+        id: "req-1",
+        actionId: "action.unsummons",
+        controller: "ghost", // Unknown player!
+        keyCards: [k1],
+      } as any,
+    };
+
+    expect(() => handler({}, context)).toThrow(/コントローラーが見つかりません: ghost/);
+    expect(state.players.p1.hand).toHaveLength(0);
+    expect(events).toHaveLength(0);
+  });
+
+  it("58. Request Controller Authority: When request.controller ('p1') != context.playerKey ('p2'), cards return to controller's Hand", () => {
+    const events: any[] = [];
+    const mockInterpreter = createMockInterpreter(events);
+    const handler = moveRequestKeyCardsToHandHandler(mockInterpreter as any);
+
+    const k1 = { id: "k1", suit: "spade", rank: "2" };
+    const state: any = {
+      players: {
+        p1: { hand: [] },
+        p2: { hand: [] },
+      },
+    };
+
+    const context: CommandContext = {
+      state,
+      playerKey: "p2", // Context player is p2
+      currentRequest: {
+        id: "req-1",
+        actionId: "action.unsummons",
+        controller: "p1", // Request controller is p1
+        keyCards: [k1],
+      } as any,
+    };
+
+    handler({}, context);
+
+    // p1 hand gets the card, p2 hand remains empty!
+    expect(state.players.p1.hand).toHaveLength(1);
+    expect(state.players.p1.hand[0]).toEqual(k1);
+    expect(state.players.p2.hand).toHaveLength(0);
+
+    expect(events).toHaveLength(1);
+    expect(events[0].payload.playerKey).toBe("p1");
+  });
+
+  it("59. GameSession E2E: Full Unsummons lifecycle with drive target: target stays on field, key cards return to hand, chance returns to turnPlayer", () => {
+    const k1 = { id: "k1", suit: "spade", rank: "4" };
+    const k2 = { id: "k2", suit: "spade", rank: "8" };
+    const soldierCard = { id: "solc", suit: "diamond", rank: "5" };
+    const bulwarkCard = { id: "bwc", suit: "heart", rank: "7" };
+
+    const driveSoldier = {
+      unitId: "my-drive-soldier",
+      componentId: "character.soldier",
+      state: "drive", // Target is in drive state
+      cards: [soldierCard],
+    };
+    const paymentBulwark = {
+      unitId: "my-bulwark",
+      componentId: "character.bulwark",
+      state: "charge",
+      cards: [bulwarkCard],
+    };
+
+    const state: any = {
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          hand: [k1, k2],
+          field: [paymentBulwark, driveSoldier],
+          life: [{ id: "lp1", suit: "spade", rank: "A" }],
+          grave: [],
+          fog: [],
+        },
+        p2: {
+          hand: [],
+          field: [],
+          life: [{ id: "lp2", suit: "heart", rank: "A" }],
+          grave: [],
+          fog: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      turnCount: 1,
+      phase: "main",
+    };
+
+    const session = new GameSession(state, rulePackage);
+
+    // Step 1: P1 requests Unsummons targeting driveSoldier
+    let step: any = session.advance();
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    expect(step.request.playerId).toBe("p1");
+
+    // Find pattern that targets my-drive-soldier
+    const unsummonsIdx = step.request.patterns.findIndex((p: any) => {
+      if (p.actionSelectionRef === undefined) return false;
+      const act = step.request.catalog.actions[p.actionSelectionRef];
+      if (act?.actionId !== "action.unsummons") return false;
+      if (p.targetSelectionRef === undefined) return false;
+      const targetSel = step.request.catalog.targetSelections[p.targetSelectionRef];
+      return targetSel?.targetUnitId === "my-drive-soldier";
+    });
+    expect(unsummonsIdx).toBeGreaterThanOrEqual(0);
+
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: unsummonsIdx,
+    });
+
+    // Cost B paid: bulwark is drive
+    expect(paymentBulwark.state).toBe("drive");
+    expect(state.stage.requests).toHaveLength(1);
+
+    // P1 pass
+    const passIdx1 = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: passIdx1,
+    });
+
+    // P2 pass -> resolves!
+    const passIdx2 = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: passIdx2,
+    });
+
+    // Resolution:
+    // 1. Target driveSoldier REMAINS on Field in drive state (moveUnitToHand was no-op)
+    expect(state.players.p1.field).toHaveLength(2);
+    expect(driveSoldier.state).toBe("drive");
+
+    // 2. Both key cards returned to Hand
+    expect(state.players.p1.hand).toHaveLength(2);
+    const handIds = state.players.p1.hand.map((c: any) => c.id);
+    expect(handIds).toContain("k1");
+    expect(handIds).toContain("k2");
+
+    // 3. Stage cleared
+    expect(state.stage.requests).toHaveLength(0);
+
+    // 4. Chance returns to turnPlayer (p1)
+    expect(state.chancePlayer).toBe("p1");
+  });
+
+  // ===========================================================================
+  // 15. Generic Engine Guard
+  // ===========================================================================
+  it("60. Generic Engine Guard: tools/simulator/src/engine contains ZERO occurrences of 'action.unsummons'", () => {
     const engineDir = path.resolve(__dirname, "../../engine");
     const grepEngine = (dir: string): string[] => {
       const results: string[] = [];
