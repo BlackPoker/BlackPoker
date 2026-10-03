@@ -15,7 +15,8 @@ import { SeededRandom, RandomSource } from "../random/RandomSource";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { rankToValue, matchesRank } from "../rules/cardUtils";
-import { SimulatorDeckProfileResolver } from "./SimulatorDeckProfileResolver";
+import { SimulatorDeckProfileResolver, CardOccurrenceSelection } from "./SimulatorDeckProfileResolver";
+import { RareCardSelectionService } from "./RareCardSelectionService";
 
 export interface InGameCard {
   readonly id: string;
@@ -29,6 +30,10 @@ export interface OfficialRegulationSetupOptions {
   readonly playerNames?: {
     readonly p1?: string;
     readonly p2?: string;
+  };
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
   };
 }
 
@@ -211,62 +216,22 @@ export class OfficialRegulationMatchSetup {
       throw new Error(`不正な rareCardCount です: ${rareCardCount}`);
     }
 
-    const selectRareCards = (
-      rawDeck: InGameCard[],
-      count: number,
-      selections?: readonly any[]
-    ): { rareCards: InGameCard[]; remainingDeck: InGameCard[] } => {
-      if (count === 0) {
-        return { rareCards: [], remainingDeck: [...rawDeck] };
+    const p1Selections = options?.rareCardSelections?.p1 ?? deckProfile.defaultRareCardSelections;
+    const p2Selections = options?.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
+
+    if (rareCardCount > 0) {
+      const p1Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p1Selections);
+      if (!p1Val.valid) {
+        throw new Error(`Player A の Rare Card 選択エラー: ${p1Val.errors.join(", ")}`);
       }
-      if (!selections || selections.length !== count) {
-        throw new Error(
-          `Rare Card selection の指定件数 (${selections?.length ?? 0}) が rareCardCount (${count}) と一致しません`
-        );
+      const p2Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p2Selections);
+      if (!p2Val.valid) {
+        throw new Error(`Player B の Rare Card 選択エラー: ${p2Val.errors.join(", ")}`);
       }
+    }
 
-      const selectedRareCards: InGameCard[] = [];
-      const remaining = [...rawDeck];
-      const selectedIds = new Set<string>();
-
-      for (const sel of selections) {
-        const occTarget = sel.occurrence ?? 0;
-        if (occTarget < 0) {
-          throw new Error(`不正な occurrence です: ${occTarget}`);
-        }
-
-        let occCount = 0;
-        let foundIndex = -1;
-        for (let i = 0; i < remaining.length; i++) {
-          const card = remaining[i];
-          if (card.suit === sel.suit && card.rank === sel.rank) {
-            if (occCount === occTarget) {
-              foundIndex = i;
-              break;
-            }
-            occCount++;
-          }
-        }
-
-        if (foundIndex === -1) {
-          throw new Error(
-            `指定された Rare Card (${sel.suit}${sel.rank}, occurrence: ${occTarget}) がデッキ内に見つかりません`
-          );
-        }
-
-        const [card] = remaining.splice(foundIndex, 1);
-        if (selectedIds.has(card.id)) {
-          throw new Error(`同一の Rare Card が重複して選択されました: ${card.id}`);
-        }
-        selectedIds.add(card.id);
-        selectedRareCards.push(card);
-      }
-
-      return { rareCards: selectedRareCards, remainingDeck: remaining };
-    };
-
-    const p1RareResult = selectRareCards(p1RawDeck, rareCardCount, deckProfile.defaultRareCardSelections);
-    const p2RareResult = selectRareCards(p2RawDeck, rareCardCount, deckProfile.defaultRareCardSelections);
+    const p1RareResult = RareCardSelectionService.extractRareCards(p1RawDeck, p1Selections ?? []);
+    const p2RareResult = RareCardSelectionService.extractRareCards(p2RawDeck, p2Selections ?? []);
 
     const p1RareCards = p1RareResult.rareCards;
     const p2RareCards = p2RareResult.rareCards;

@@ -5,7 +5,9 @@ import { validatePlaytestPreset } from "../session/playtest/validatePlaytestPres
 import { RegulationValidator } from "../regulation/RegulationValidator";
 import { RegulationRulePackageSelector } from "../regulation/RegulationRulePackageSelector";
 import { OfficialRegulationMatchSetup } from "../regulation/OfficialRegulationMatchSetup";
-import { SimulatorDeckProfileResolver } from "../regulation/SimulatorDeckProfileResolver";
+import { SimulatorDeckProfileResolver, CardOccurrenceSelection } from "../regulation/SimulatorDeckProfileResolver";
+import { RareCardSelectionService } from "../regulation/RareCardSelectionService";
+import { PlaytestMatchMode } from "./PlaytestSeatController";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../session/playtest/createCoreBattlePlaytest";
 import { MatchSetupCoordinator } from "../session/setup/MatchSetupCoordinator";
 import { getPlaytestRulePackage } from "../rules/RulePackageSelector";
@@ -24,6 +26,10 @@ export interface ActiveMatchContext {
   readonly rulePackage: RulePackage;
   readonly isScenario?: boolean;
   readonly scenarioDefinition?: ScenarioDefinitionV1;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 /**
@@ -74,6 +80,9 @@ export interface EnvironmentOption {
   readonly isOfficial: boolean;
   readonly regulationId?: string;
   readonly deckProfileNotice?: string;
+  readonly setupRequirements?: {
+    readonly rareCardCount: number;
+  };
 }
 
 /**
@@ -148,6 +157,9 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
       id: CORE_BATTLE_ENV_ID,
       name: "Core Battle（開発・検証）",
       isOfficial: false,
+      setupRequirements: {
+        rareCardCount: 0,
+      },
     },
   ];
 
@@ -158,12 +170,16 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
         reg.id,
         validation.frame?.id
       );
+      const rareCardCount = validation.frame?.setup.rareCardCount ?? 0;
       options.push({
         id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
         name: `${reg.name} (公式)`,
         isOfficial: true,
         regulationId: reg.id,
         deckProfileNotice,
+        setupRequirements: {
+          rareCardCount,
+        },
       });
     }
   }
@@ -226,6 +242,11 @@ export interface MatchStartRequest {
   readonly catalog: RegulationCatalog;
   readonly fullRulePackage: RulePackage;
   readonly playerNames?: { readonly p1: string; readonly p2: string };
+  readonly matchMode?: PlaytestMatchMode;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 export type MatchStartOutcome =
@@ -425,6 +446,233 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
         validation.frame!
       );
 
+      const rareCardCount = validation.frame?.setup.rareCardCount ?? 0;
+      const deckProfile = SimulatorDeckProfileResolver.resolveDeckProfile(
+        validation.frame!,
+        regulation.id
+      );
+
+      let effectiveRareSelections:
+        | {
+            p1?: readonly CardOccurrenceSelection[];
+            p2?: readonly CardOccurrenceSelection[];
+          }
+        | undefined = undefined;
+
+      if (rareCardCount > 0) {
+        if (request.matchMode === "humanVsHuman") {
+          const p1Sel = request.rareCardSelections?.p1;
+          const p2Sel = request.rareCardSelections?.p2;
+
+          if (!p1Sel || p1Sel.length === 0) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: "Player A のレアカードが選択されていません。",
+              details: `必要枚数: ${rareCardCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p1Validation = RareCardSelectionService.validateSelections(
+            deckProfile,
+            rareCardCount,
+            p1Sel
+          );
+          if (!p1Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: `Player A のレアカード選択が不正です: ${p1Validation.errors.join(", ")}`,
+              details: p1Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          if (!p2Sel || p2Sel.length === 0) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: "Player B のレアカードが選択されていません。",
+              details: `必要枚数: ${rareCardCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p2Validation = RareCardSelectionService.validateSelections(
+            deckProfile,
+            rareCardCount,
+            p2Sel
+          );
+          if (!p2Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: `Player B のレアカード選択が不正です: ${p2Validation.errors.join(", ")}`,
+              details: p2Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          effectiveRareSelections = { p1: p1Sel, p2: p2Sel };
+        } else if (request.matchMode === "humanVsAi") {
+          const p1Sel = request.rareCardSelections?.p1;
+          if (!p1Sel || p1Sel.length === 0) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: "プレイヤーのレアカードが選択されていません。",
+              details: `必要枚数: ${rareCardCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p1Validation = RareCardSelectionService.validateSelections(
+            deckProfile,
+            rareCardCount,
+            p1Sel
+          );
+          if (!p1Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "レアカード選択エラー (Rare Card Selection Error)",
+              message: `プレイヤーのレアカード選択が不正です: ${p1Validation.errors.join(", ")}`,
+              details: p1Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const aiSel = request.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
+          if (aiSel) {
+            const aiValidation = RareCardSelectionService.validateSelections(
+              deckProfile,
+              rareCardCount,
+              aiSel
+            );
+            if (!aiValidation.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "AIレアカード設定エラー",
+                message: `AIのレアカード設定が不正です: ${aiValidation.errors.join(", ")}`,
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          effectiveRareSelections = { p1: p1Sel, p2: aiSel };
+        } else {
+          // matchMode undefined (automated test / headless callers)
+          if (request.rareCardSelections?.p1 || request.rareCardSelections?.p2) {
+            if (request.rareCardSelections.p1) {
+              const val = RareCardSelectionService.validateSelections(
+                deckProfile,
+                rareCardCount,
+                request.rareCardSelections.p1
+              );
+              if (!val.valid) {
+                const notice: SetupNotice = {
+                  type: "VALIDATION_ERROR",
+                  title: "レアカード選択エラー",
+                  message: val.errors.join(", "),
+                };
+                return {
+                  type: "VALIDATION_ERROR",
+                  activeMatch: null,
+                  setupNotice: notice,
+                  presetValidationErrors: [],
+                  logs,
+                  traces,
+                };
+              }
+            }
+            if (request.rareCardSelections.p2) {
+              const val = RareCardSelectionService.validateSelections(
+                deckProfile,
+                rareCardCount,
+                request.rareCardSelections.p2
+              );
+              if (!val.valid) {
+                const notice: SetupNotice = {
+                  type: "VALIDATION_ERROR",
+                  title: "レアカード選択エラー",
+                  message: val.errors.join(", "),
+                };
+                return {
+                  type: "VALIDATION_ERROR",
+                  activeMatch: null,
+                  setupNotice: notice,
+                  presetValidationErrors: [],
+                  logs,
+                  traces,
+                };
+              }
+            }
+            effectiveRareSelections = request.rareCardSelections;
+          } else {
+            effectiveRareSelections = {
+              p1: deckProfile.defaultRareCardSelections,
+              p2: deckProfile.defaultRareCardSelections,
+            };
+          }
+        }
+      }
+
       const outcome = OfficialRegulationMatchSetup.setupMatch(
         validation.regulation!,
         validation.frame!,
@@ -433,6 +681,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
         {
           matchId: `match-official-${seed}`,
           playerNames: request.playerNames ?? { p1: "Player A", p2: "Player B" },
+          rareCardSelections: effectiveRareSelections,
         }
       );
 
@@ -505,6 +754,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           regulationId: regulation.id,
           seed,
           rulePackage: officialRulePackage,
+          rareCardSelections: effectiveRareSelections,
         },
         initialStep,
         setupNotice: null,

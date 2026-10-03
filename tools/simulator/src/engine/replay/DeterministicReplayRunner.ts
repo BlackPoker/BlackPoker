@@ -136,6 +136,7 @@ export function runDeterministicReplay(
     const recon = reconstructMatch({
       environmentId: plan.environmentId,
       seed: plan.seed,
+      rareCardSelections: plan.rareCardSelections,
       transcript: plan.decisions,
       decisionCount: plan.decisions.length,
       trailingNormalization,

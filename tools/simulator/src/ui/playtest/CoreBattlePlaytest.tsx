@@ -16,6 +16,10 @@ import {
   extractRegulationId,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
+  SimulatorDeckProfileResolver,
+  CardOccurrenceSelection,
+} from "../../engine/regulation/SimulatorDeckProfileResolver";
+import {
   PlaytestMatchMode,
   PlaytestPolicyId,
   PLAYTEST_POLICY_OPTIONS,
@@ -120,6 +124,20 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [pendingMatchMode, setPendingMatchMode] = useState<PlaytestMatchMode>("humanVsHuman");
   const [pendingHumanSeat, setPendingHumanSeat] = useState<"p1" | "p2">("p1");
   const [pendingPolicyId, setPendingPolicyId] = useState<PlaytestPolicyId>("playtestConservative");
+  const [pendingRareCardSelections, setPendingRareCardSelections] = useState<{
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  }>({});
+
+  const currentDeckProfile = useMemo(() => {
+    const regId = extractRegulationId(selectedEnvironmentId);
+    if (!regId) return undefined;
+    const reg = catalog.regulations.get(regId);
+    if (!reg) return undefined;
+    const frame = catalog.frames.get(reg.frameId);
+    if (!frame) return undefined;
+    return SimulatorDeckProfileResolver.resolveDeckProfile(frame, reg.id);
+  }, [catalog, selectedEnvironmentId]);
 
   // Active 設定（現在進行中の対戦セッションの設定。未成立時は null）
   const [activeMatch, setActiveMatch] = useState<ActiveMatchContext | null>(null);
@@ -260,10 +278,17 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
-  // 対戦モード選択ハンドラ (humanVsAi への変更時は常に pendingHumanSeat を "p1" に正規化)
+  // 対戦環境選択ハンドラ (環境変更時は未確定のレアカード選択をリセット)
+  const handleSelectEnvironment = useCallback((envId: string) => {
+    setSelectedEnvironmentId(envId);
+    setPendingRareCardSelections({});
+  }, []);
+
+  // 対戦モード選択ハンドラ (humanVsAi への変更時は常に pendingHumanSeat を "p1" に正規化、レアカード選択リセット)
   const handleSelectMatchMode = useCallback((mode: PlaytestMatchMode) => {
     setPendingMatchMode(mode);
     setPendingHumanSeat((current) => normalizeHumanSeatForMode(mode, current));
+    setPendingRareCardSelections({});
   }, []);
 
   // 失敗時・開始時に直前のセッション状態を安全にリセット
@@ -345,6 +370,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         matchMode: mode,
         humanSeat,
         policyId,
+        rareCardSelections: newActiveMatch.rareCardSelections,
       });
 
       // Challenge の初期化 & 初期ステップ観測 (GameSession とは完全に分離)
@@ -553,6 +579,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         seedInput: seed,
         catalog,
         fullRulePackage,
+        matchMode: mode,
+        rareCardSelections: pendingRareCardSelections,
       });
 
       if (outcome.type !== "READY") {
@@ -606,6 +634,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingMatchMode,
       pendingHumanSeat,
       pendingPolicyId,
+      pendingRareCardSelections,
       catalog,
       fullRulePackage,
       commitReadyMatch,
@@ -744,6 +773,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         setPendingPolicyId(bootstrap.config.policyId);
         setSeedInput(bootstrap.config.seedInput);
         setSeedMode("manual");
+        if (bootstrap.config.rareCardSelections) {
+          setPendingRareCardSelections(bootstrap.config.rareCardSelections);
+        } else {
+          setPendingRareCardSelections({});
+        }
 
         if (bootstrap.warnings.length > 0) {
           setShareNotice({
@@ -805,6 +839,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: normalizeHumanSeatForMode(activePlaytestSettings.matchMode, activePlaytestSettings.humanSeat),
         policyId: activePlaytestSettings.policyId,
         seedInput: activeSeedStr,
+        rareCardSelections: activePlaytestSettings.rareCardSelections,
         scenarioDefinition: activeMatch.isScenario ? activeMatch.scenarioDefinition : undefined,
         challengeDefinition: activeMatch.isScenario ? activeChallenge?.definition : undefined,
       };
@@ -827,6 +862,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: normalizeHumanSeatForMode(pendingMatchMode, pendingHumanSeat),
         policyId: pendingPolicyId,
         seedInput: seedForUrl,
+        rareCardSelections: pendingRareCardSelections,
         scenarioDefinition: scenarioDefToShare,
         challengeDefinition: scenarioDefToShare ? pendingChallengeDefinition : undefined,
       };
@@ -862,6 +898,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     pendingMatchMode,
     pendingHumanSeat,
     pendingPolicyId,
+    pendingRareCardSelections,
     pendingChallengeDefinition,
     seedMode,
     pendingAutoSeed,
@@ -1714,7 +1751,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             <span className="text-[9px] font-bold text-zinc-400">Env:</span>
             <select
               value={selectedEnvironmentId}
-              onChange={(e) => setSelectedEnvironmentId(e.target.value)}
+              onChange={(e) => handleSelectEnvironment(e.target.value)}
               className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
             >
               {environmentOptions.map((opt) => (
@@ -1942,7 +1979,7 @@ export const CoreBattlePlaytest: React.FC = () => {
           <MatchSetupScreen
             environmentOptions={environmentOptions}
             selectedEnvironmentId={selectedEnvironmentId}
-            onSelectEnvironment={setSelectedEnvironmentId}
+            onSelectEnvironment={handleSelectEnvironment}
             matchMode={pendingMatchMode}
             onSelectMatchMode={handleSelectMatchMode}
             policyId={pendingPolicyId}
@@ -1955,6 +1992,10 @@ export const CoreBattlePlaytest: React.FC = () => {
             setupNotice={setupNotice}
             shareNotice={shareNotice}
             presetValidationErrors={presetValidationErrors}
+            deckProfile={currentDeckProfile}
+            confirmedRareCardSelections={pendingRareCardSelections}
+            onConfirmRareCardSelections={setPendingRareCardSelections}
+            onResetRareCardSelections={() => setPendingRareCardSelections({})}
             onStartMatch={() => startNewGame()}
             onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
             onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
@@ -2227,7 +2268,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         selectedEnvironmentId={selectedEnvironmentId}
-        onSelectEnvironment={setSelectedEnvironmentId}
+        onSelectEnvironment={handleSelectEnvironment}
         environmentOptions={environmentOptions}
         activeMatchSeed={activeMatch?.seed}
         seedMode={seedMode}

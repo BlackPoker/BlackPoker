@@ -17,6 +17,8 @@ import type {
   ReplayDifference,
 } from "./ReplayTypes";
 
+import type { CardOccurrenceSelection } from "../regulation/SimulatorDeckProfileResolver";
+
 export const MAX_AUTO_PROGRESS_STEPS = 10000;
 
 export interface ReplayExecutedDecision {
@@ -27,6 +29,10 @@ export interface ReplayExecutedDecision {
 export interface ReconstructMatchParams {
   readonly environmentId: string;
   readonly seed?: number;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
   readonly transcript: readonly ReplayDecisionEntryV1[];
   readonly decisionCount?: number;
   readonly trailingNormalization?: "EXTERNAL_DECISION_BOUNDARY" | "EXACT_AFTER_TRANSCRIPT";
@@ -98,6 +104,7 @@ export function reconstructMatch(
     const outcome = startMatchAttempt({
       environmentId: params.environmentId,
       seedInput: params.seed !== undefined ? String(params.seed) : "",
+      rareCardSelections: params.rareCardSelections,
       catalog: params.catalog,
       fullRulePackage: params.fullRulePackage,
     });

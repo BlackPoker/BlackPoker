@@ -222,6 +222,7 @@ export function createReplayPlanFromDiagnosticBundleV1(
             version: b.match.rulePackageVersion,
           }
         : undefined,
+    rareCardSelections: b.match.rareCardSelections,
     decisions,
     expected: {
       status: b.match.status,

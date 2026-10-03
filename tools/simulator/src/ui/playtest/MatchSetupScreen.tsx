@@ -9,6 +9,11 @@ import {
   PlaytestPolicyId,
   PLAYTEST_POLICY_OPTIONS,
 } from "../../engine/playtest/PlaytestSeatController";
+import {
+  SimulatorDeckProfile,
+  CardOccurrenceSelection,
+} from "../../engine/regulation/SimulatorDeckProfileResolver";
+import { RareCardSetupPanel } from "./RareCardSetupPanel";
 
 import { PlaytestSeedMode } from "./PlaytestSeed";
 
@@ -52,6 +57,21 @@ export interface MatchSetupScreenProps {
   /** プリセット検証エラー */
   readonly presetValidationErrors?: readonly string[];
 
+  /** レアカード設定要件（デッキプロファイル） */
+  readonly deckProfile?: SimulatorDeckProfile;
+  /** 確定済みのレアカード選択 */
+  readonly confirmedRareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
+  /** レアカード確定コールバック */
+  readonly onConfirmRareCardSelections?: (selections: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  }) => void;
+  /** レアカードリセットコールバック */
+  readonly onResetRareCardSelections?: () => void;
+
   /** 対戦開始ボタン押下時のハンドラ */
   readonly onStartMatch: () => void;
   /** Replay検証ボタン押下時のハンドラ */
@@ -78,6 +98,10 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   setupNotice,
   shareNotice,
   presetValidationErrors = [],
+  deckProfile,
+  confirmedRareCardSelections,
+  onConfirmRareCardSelections,
+  onResetRareCardSelections,
   onStartMatch,
   onOpenReplayVerify,
   onOpenScenarioBuilder,
@@ -86,6 +110,13 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
   const selectedEnvOpt = environmentOptions.find((opt) => opt.id === selectedEnvironmentId);
   const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((opt) => opt.id === policyId);
+
+  const rareCardCount = selectedEnvOpt?.setupRequirements?.rareCardCount ?? 0;
+  const isP1RareReady = (confirmedRareCardSelections?.p1?.length ?? 0) === rareCardCount;
+  const isP2RareReady =
+    matchMode === "humanVsAi" || (confirmedRareCardSelections?.p2?.length ?? 0) === rareCardCount;
+  const isRareReady = rareCardCount === 0 || (isP1RareReady && isP2RareReady);
+  const canStartMatch = isRareReady;
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 my-2 bg-white rounded-xl border border-zinc-200 shadow-md font-sans">
@@ -273,6 +304,23 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
           </div>
         )}
 
+        {/* C-2. レアカード設定 (rareCardCount > 0 の場合のみ表示) */}
+        {rareCardCount > 0 && deckProfile && (
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-bold font-mono text-zinc-700">
+              レアカード設定 (Rare Card Selection):
+            </label>
+            <RareCardSetupPanel
+              deckProfile={deckProfile}
+              rareCardCount={rareCardCount}
+              matchMode={matchMode}
+              confirmedSelections={confirmedRareCardSelections ?? {}}
+              onConfirmSelections={(sels) => onConfirmRareCardSelections?.(sels)}
+              onResetSelections={() => onResetRareCardSelections?.()}
+            />
+          </div>
+        )}
+
         {/* D. 対戦SEED設定 */}
         <div className="flex flex-col gap-1.5">
           <label className="text-xs font-bold font-mono text-zinc-700 flex items-center justify-between">
@@ -382,6 +430,11 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
 
       {/* F. プライマリ アクション: [対戦開始] & [Scenario Builder] */}
       <div className="mt-6 pt-4 border-t border-zinc-200 flex flex-col sm:flex-row items-center justify-end gap-3">
+        {!canStartMatch && (
+          <span className="text-[11px] font-mono text-amber-700 font-bold">
+            ※レアカードの選択を完了してください
+          </span>
+        )}
         {onOpenScenarioBuilder && (
           <button
             type="button"
@@ -393,8 +446,14 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
         )}
         <button
           type="button"
+          disabled={!canStartMatch}
           onClick={onStartMatch}
-          className="w-full sm:w-auto px-8 py-3 bg-zinc-950 hover:bg-zinc-800 active:scale-98 text-white font-black text-sm rounded-xl shadow-md transition flex items-center justify-center min-h-[48px] cursor-pointer tracking-wide font-mono"
+          title={!canStartMatch ? "レアカードの選択を完了してください" : undefined}
+          className={`w-full sm:w-auto px-8 py-3 font-black text-sm rounded-xl shadow-md transition flex items-center justify-center min-h-[48px] tracking-wide font-mono ${
+            canStartMatch
+              ? "bg-zinc-950 hover:bg-zinc-800 active:scale-98 text-white cursor-pointer"
+              : "bg-zinc-200 text-zinc-400 cursor-not-allowed shadow-none"
+          }`}
         >
           <span>対戦開始</span>
         </button>

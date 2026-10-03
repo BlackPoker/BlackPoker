@@ -23,6 +23,7 @@ import {
   ChallengeDefinitionV1,
   isChallengeDefinitionV1,
 } from "../../domain/challenge/ChallengeDefinition";
+import type { CardOccurrenceSelection } from "../../engine/regulation/SimulatorDeckProfileResolver";
 
 export const SHARE_URL_VERSION = 1 as const;
 export const CHALLENGE_URL_PARAM_KEY = "challenge";
@@ -36,10 +37,52 @@ export const SHARE_PARAM_KEYS = [
   "seed",
   "challenge",
   "scenario",
+  "rc1",
+  "rc2",
 ] as const;
 
 export const CHALLENGE_CODE_WIN_CURRENT_TURN = "c1.winCurrentTurn";
 const CHALLENGE_PREFIX_PATTERN = /^c([0-9]+)\./;
+
+export function encodeRareCardSelectionsToUrlParam(
+  selections: readonly CardOccurrenceSelection[]
+): string {
+  return selections
+    .map((s) => `${s.suit}.${s.rank}.${s.occurrence ?? 0}`)
+    .join(",");
+}
+
+export function decodeRareCardSelectionsFromUrlParam(
+  param: string
+):
+  | { readonly success: true; readonly selections: CardOccurrenceSelection[] }
+  | { readonly success: false; readonly error: string } {
+  if (!param || typeof param !== "string") {
+    return { success: false, error: "レアカードパラメータが空です。" };
+  }
+  const parts = param.split(",");
+  const selections: CardOccurrenceSelection[] = [];
+  for (const part of parts) {
+    const tokens = part.split(".");
+    if (tokens.length < 2) {
+      return { success: false, error: `無効なレアカード形式です: "${part}"` };
+    }
+    const suit = tokens[0] as any;
+    const rank = tokens[1];
+    const occurrence = tokens[2] !== undefined ? parseInt(tokens[2], 10) : 0;
+    if (!["S", "H", "D", "C", "J"].includes(suit)) {
+      return { success: false, error: `無効なスートです: "${suit}"` };
+    }
+    if (!rank || rank.trim() === "") {
+      return { success: false, error: `無効なランクです: "${rank}"` };
+    }
+    if (!Number.isInteger(occurrence) || occurrence < 0) {
+      return { success: false, error: `無効な occurrence です: "${occurrence}"` };
+    }
+    selections.push({ suit, rank, occurrence });
+  }
+  return { success: true, selections };
+}
 
 export function encodeChallengeDefinitionToUrlParam(def: ChallengeDefinitionV1): string {
   if (def.version === 1 && def.kind === "WIN_CURRENT_TURN") {
@@ -86,6 +129,10 @@ export interface PlaytestShareConfigV1 {
   readonly seedInput: string;
   readonly scenarioDefinition?: ScenarioDefinitionV1;
   readonly challengeDefinition?: ChallengeDefinitionV1;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 /**
@@ -417,6 +464,51 @@ export function parsePlaytestShareUrl(
     seedInput = "42";
   }
 
+  // 5. Rare Card Selections (rc1, rc2) の検証 & デコード
+  const rawRc1 = params.get("rc1");
+  const rawRc2 = params.get("rc2");
+  let rareCardSelections: { p1?: readonly CardOccurrenceSelection[]; p2?: readonly CardOccurrenceSelection[] } | undefined = undefined;
+
+  const matchedEnv = availableEnvs.find((e) => e.id === environmentId);
+  const rareCardCount = matchedEnv?.setupRequirements?.rareCardCount ?? 0;
+
+  if (rareCardCount > 0) {
+    let p1Selections: CardOccurrenceSelection[] | undefined = undefined;
+    let p2Selections: CardOccurrenceSelection[] | undefined = undefined;
+
+    if (rawRc1 !== null) {
+      const decoded1 = decodeRareCardSelectionsFromUrlParam(rawRc1);
+      if (decoded1.success === false) {
+        warnings.push(`Player A のレアカード設定が無効です: "${rawRc1}" (${decoded1.error})。`);
+      } else {
+        p1Selections = decoded1.selections;
+      }
+    }
+
+    if (mode === "humanVsHuman" && rawRc2 !== null) {
+      const decoded2 = decodeRareCardSelectionsFromUrlParam(rawRc2);
+      if (decoded2.success === false) {
+        warnings.push(`Player B のレアカード設定が無効です: "${rawRc2}" (${decoded2.error})。`);
+      } else {
+        p2Selections = decoded2.selections;
+      }
+    }
+
+    if (p1Selections || p2Selections) {
+      rareCardSelections = {
+        ...(p1Selections ? { p1: p1Selections } : {}),
+        ...(p2Selections ? { p2: p2Selections } : {}),
+      };
+      warnings.push("共有URLにレアカード選択情報（非公開情報）が含まれています。");
+    } else {
+      warnings.push("レアカードが未選択です。対戦を開始するにはレアカードを選択してください。");
+    }
+  } else {
+    if (rawRc1 !== null || rawRc2 !== null) {
+      warnings.push(`レアカードを使用しない環境 (${environmentId}) ではレアカード設定は不要なため無視されました。`);
+    }
+  }
+
   return {
     kind: "READY",
     config: {
@@ -426,6 +518,7 @@ export function parsePlaytestShareUrl(
       humanSeat,
       policyId,
       seedInput,
+      ...(rareCardSelections ? { rareCardSelections } : {}),
     },
     warnings,
   };
@@ -483,6 +576,10 @@ export function serializePlaytestShareUrl(
     readonly seedInput?: string;
     readonly scenarioDefinition?: ScenarioDefinitionV1;
     readonly challengeDefinition?: ChallengeDefinitionV1;
+    readonly rareCardSelections?: {
+      readonly p1?: readonly CardOccurrenceSelection[];
+      readonly p2?: readonly CardOccurrenceSelection[];
+    };
   },
   _catalog?: RegulationCatalog
 ): string {
@@ -530,6 +627,14 @@ export function serializePlaytestShareUrl(
     params.set("seed", seedVal.valid ? (config.seedInput || "42").trim() : "42");
   }
 
+  // 7. rc1 & rc2 (Rare Card Selections)
+  if (config.rareCardSelections?.p1 && config.rareCardSelections.p1.length > 0) {
+    params.set("rc1", encodeRareCardSelectionsToUrlParam(config.rareCardSelections.p1));
+  }
+  if (config.mode === "humanVsHuman" && config.rareCardSelections?.p2 && config.rareCardSelections.p2.length > 0) {
+    params.set("rc2", encodeRareCardSelectionsToUrlParam(config.rareCardSelections.p2));
+  }
+
   return `?${params.toString()}`;
 }
 
@@ -547,6 +652,10 @@ export function buildPlaytestShareUrl(
     readonly seedInput?: string;
     readonly scenarioDefinition?: ScenarioDefinitionV1;
     readonly challengeDefinition?: ChallengeDefinitionV1;
+    readonly rareCardSelections?: {
+      readonly p1?: readonly CardOccurrenceSelection[];
+      readonly p2?: readonly CardOccurrenceSelection[];
+    };
   },
   catalog?: RegulationCatalog
 ): string {

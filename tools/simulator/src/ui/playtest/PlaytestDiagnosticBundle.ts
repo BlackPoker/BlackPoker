@@ -7,6 +7,7 @@ import {
 } from "../../engine/playtest/PlaytestSeatController";
 import { GameSessionStep } from "../../engine/session/GameSession";
 import type { PlaytestDecisionTranscriptEntryV1 } from "./PlaytestDecisionTranscript";
+import type { CardOccurrenceSelection } from "../../engine/regulation/SimulatorDeckProfileResolver";
 
 export type { PlaytestDecisionTranscriptEntryV1 };
 
@@ -18,6 +19,10 @@ export interface ActivePlaytestSettings {
   readonly matchMode: PlaytestMatchMode;
   readonly humanSeat?: "p1" | "p2";
   readonly policyId?: PlaytestPolicyId;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 /**
@@ -51,6 +56,11 @@ export interface PlaytestDiagnosticBundleV1 {
     readonly matchMode: "humanVsHuman" | "humanVsAi";
     readonly humanSeat?: "p1" | "p2";
     readonly policyId?: string;
+
+    readonly rareCardSelections?: {
+      readonly p1?: readonly CardOccurrenceSelection[];
+      readonly p2?: readonly CardOccurrenceSelection[];
+    };
 
     readonly seatControllers: unknown;
 
@@ -239,6 +249,8 @@ export function buildPlaytestDiagnosticBundleV1(
       matchMode: params.activePlaytestSettings?.matchMode,
       humanSeat: params.activePlaytestSettings?.humanSeat,
       policyId: params.activePlaytestSettings?.policyId,
+
+      rareCardSelections: params.activePlaytestSettings?.rareCardSelections ?? params.activeMatch?.rareCardSelections,
 
       seatControllers: params.seatControllers
         ? {

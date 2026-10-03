@@ -5,6 +5,8 @@
  * Engine層に配置し、UI層やReact、ブラウザDOMには一切依存しない。
  */
 
+import type { CardOccurrenceSelection } from "../regulation/SimulatorDeckProfileResolver";
+
 export type ReplayDecisionEntryV1 = {
   seq: number;
   actor: "human" | "policy" | "autoPass";
@@ -26,6 +28,10 @@ export type ReplayPlanV1 = {
   sourceRulePackage?: {
     id?: string;
     version?: string;
+  };
+  rareCardSelections?: {
+    p1?: readonly CardOccurrenceSelection[];
+    p2?: readonly CardOccurrenceSelection[];
   };
   decisions: readonly ReplayDecisionEntryV1[];
   expected: {
