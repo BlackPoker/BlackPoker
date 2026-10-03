@@ -1467,4 +1467,296 @@ describe("action.search (サーチ) & Immediate Life Selection Tests [BP-SIM-REG
     const found = searchInDir(engineDir, "action.search");
     expect(found).toEqual([]);
   });
+
+  // ===========================================================================
+  // 36. Pack Open Generic Regression (BP-SIM-REG-5.0-H-R1-SEARCH-GENERIC-IMMEDIATE-CHANCE)
+  // ===========================================================================
+  it("36. Pack Open Generic Regression: non-magic Immediate Action preserves chancePlayer when Stage non-empty", () => {
+    const normalReq = {
+      id: "req-p1-attack",
+      actionId: "action.attack",
+      controller: "p1",
+      status: "pending" as const,
+      sequence: 1,
+      keyCards: [],
+    };
+
+    const state: any = {
+      turnPlayer: "p1",
+      chancePlayer: "p2",
+      matchSeed: 7777,
+      stage: {
+        requests: [normalReq],
+        history: [],
+      },
+      players: {
+        p1: { hand: [], life: [{ id: "c-p1-1", suit: "S", rank: "A" }], field: [] },
+        p2: {
+          hand: [],
+          life: [{ id: "c-p2-1", suit: "H", rank: "7" }],
+          field: [],
+          pack: {
+            opened: false,
+            cards: [
+              { id: "pk-1", suit: "S", rank: "K" },
+              { id: "pk-2", suit: "D", rank: "Q" },
+            ],
+          },
+        },
+      },
+    };
+
+    const session = new GameSession(state, rulePackage, { matchSeed: 7777 });
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step1.request.playerId).toBe("p2");
+
+    // p2 requests action.packOpen
+    const packOpenPatIdx = step1.request.patterns.findIndex((p: any) => {
+      const act = step1.request.catalog.actions[p.actionSelectionRef!];
+      return act?.actionId === "action.packOpen";
+    });
+    expect(packOpenPatIdx).toBeGreaterThanOrEqual(0);
+
+    const step2 = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: packOpenPatIdx,
+    });
+
+    // Immediate action -> directly pauses for EFFECT_RESOLUTION
+    expect(step2.type).toBe("WAITING_FOR_DECISION");
+    if (step2.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step2.request.source.type).toBe("EFFECT_RESOLUTION");
+    expect(step2.request.playerId).toBe("p2");
+
+    // Choose pk-1
+    const chooseCardPatIdx = step2.request.patterns.findIndex((p: any) => {
+      const eff = step2.request.catalog.effectSelections[p.effectSelectionRef!];
+      return eff?.selectedValues?.includes("pk-1");
+    });
+    expect(chooseCardPatIdx).toBeGreaterThanOrEqual(0);
+
+    session.submitDecision({
+      decisionId: step2.request.decisionId,
+      stateVersion: step2.request.stateVersion,
+      selectedPatternRef: chooseCardPatIdx,
+    });
+
+    // Verification:
+    // 1. Pack Open never placed on Stage, Request X still on Stage
+    expect(state.stage.requests).toHaveLength(1);
+    expect(state.stage.requests[0].id).toBe("req-p1-attack");
+
+    // 2. Selected card moved to p2 Hand
+    expect(state.players.p2.hand.map((c: any) => c.id)).toContain("pk-1");
+
+    // 3. Pack opened
+    expect(state.players.p2.pack.opened).toBe(true);
+    expect(state.players.p2.pack.cards.map((c: any) => c.id)).toEqual(["pk-2"]);
+
+    // 4. CRITICAL: chancePlayer MUST REMAIN p2!
+    expect(state.chancePlayer).toBe("p2");
+  });
+
+  // ===========================================================================
+  // 37. Stage-backed Effect Decision Regression (BP-SIM-REG-5.0-H-R1-SEARCH-GENERIC-IMMEDIATE-CHANCE)
+  // ===========================================================================
+  it("37. Stage-backed Effect Decision Regression: Stage Request pausing for EFFECT_RESOLUTION resets Chance to turnPlayer", () => {
+    const reunionAction = rulePackage.actions.find((a) => a.id === "action.reunion")!;
+    expect(reunionAction).toBeDefined();
+
+    const stagedReq = {
+      id: "req-reunion-1",
+      actionId: "action.reunion",
+      action: reunionAction,
+      controller: "p1",
+      status: "pending" as const,
+      sequence: 1,
+      keyCards: [
+        { id: "k1", suit: "H", rank: "3" },
+        { id: "k2", suit: "H", rank: "5" },
+      ],
+    };
+
+    const state: any = {
+      turnPlayer: "p1",
+      chancePlayer: "p2",
+      matchSeed: 8888,
+      stage: {
+        requests: [stagedReq],
+        history: [],
+      },
+      players: {
+        p1: {
+          hand: [],
+          life: [{ id: "c-p1-1", suit: "S", rank: "A" }],
+          field: [],
+          grave: [
+            { id: "g-p1-1", suit: "S", rank: "K" },
+            { id: "g-p1-2", suit: "D", rank: "10" },
+          ],
+        },
+        p2: {
+          hand: [],
+          life: [{ id: "c-p2-1", suit: "H", rank: "7" }],
+          field: [],
+          grave: [],
+        },
+      },
+    };
+
+    const session = new GameSession(state, rulePackage, { matchSeed: 8888 });
+
+    // p2 passes
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    const p2PassIdx = step1.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    expect(p2PassIdx).toBeGreaterThanOrEqual(0);
+
+    const step2 = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: p2PassIdx,
+    });
+
+    // p1 passes
+    expect(step2.type).toBe("WAITING_FOR_DECISION");
+    if (step2.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    const p1PassIdx = step2.request.patterns.findIndex((p: any) => p.kind === "PASS");
+    expect(p1PassIdx).toBeGreaterThanOrEqual(0);
+
+    const step3 = session.submitDecision({
+      decisionId: step2.request.decisionId,
+      stateVersion: step2.request.stateVersion,
+      selectedPatternRef: p1PassIdx,
+    });
+
+    // All passed -> Stage top (Reunion) resolves -> pauses for selectCards from grave
+    expect(step3.type).toBe("WAITING_FOR_DECISION");
+    if (step3.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step3.request.source.type).toBe("EFFECT_RESOLUTION");
+    expect(step3.request.playerId).toBe("p1");
+
+    // Before resume: Request is still physically on Stage!
+    expect(state.stage.requests.some((r: any) => r.id === "req-reunion-1")).toBe(true);
+
+    // Choose grave card g-p1-1
+    const chooseGraveIdx = step3.request.patterns.findIndex((p: any) => {
+      const eff = step3.request.catalog.effectSelections[p.effectSelectionRef!];
+      return eff?.selectedValues?.includes("g-p1-1");
+    });
+    expect(chooseGraveIdx).toBeGreaterThanOrEqual(0);
+
+    session.submitDecision({
+      decisionId: step3.request.decisionId,
+      stateVersion: step3.request.stateVersion,
+      selectedPatternRef: chooseGraveIdx,
+    });
+
+    // Verification:
+    // 1. Request removed from Stage
+    expect(state.stage.requests.some((r: any) => r.id === "req-reunion-1")).toBe(false);
+
+    // 2. Chosen card moved to p1 Hand
+    expect(state.players.p1.hand.map((c: any) => c.id)).toContain("g-p1-1");
+
+    // 3. Stage-backed resolution resets Chance to turnPlayer (p1)
+    expect(state.chancePlayer).toBe("p1");
+  });
+
+  // ===========================================================================
+  // 38. Immediate Main Regression (Set Bulwark) (BP-SIM-REG-5.0-H-R1-SEARCH-GENERIC-IMMEDIATE-CHANCE)
+  // ===========================================================================
+  it("38. Immediate Main Regression: action.setBulwark completes via generic non-stage path without breaking chance", () => {
+    const bulwarkComponent = rulePackage.components.find((c) => c.id === "character.bulwark")!;
+    expect(bulwarkComponent).toBeDefined();
+
+    const state: any = {
+      turnCount: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      matchSeed: 9999,
+      stage: {
+        requests: [],
+        history: [],
+      },
+      players: {
+        p1: {
+          hand: [{ id: "c-p1-b1", suit: "S", rank: "4" }],
+          life: [{ id: "c-p1-1", suit: "S", rank: "A" }],
+          field: [],
+          grave: [],
+        },
+        p2: {
+          hand: [],
+          life: [{ id: "c-p2-1", suit: "H", rank: "7" }],
+          field: [],
+          grave: [],
+        },
+      },
+    };
+
+    const session = new GameSession(state, rulePackage, { matchSeed: 9999 });
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step1.request.playerId).toBe("p1");
+
+    const bulwarkPatIdx = step1.request.patterns.findIndex((p: any) => {
+      const act = step1.request.catalog.actions[p.actionSelectionRef!];
+      return act?.actionId === "action.setBulwark";
+    });
+    expect(bulwarkPatIdx).toBeGreaterThanOrEqual(0);
+
+    const step2 = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: bulwarkPatIdx,
+    });
+
+    // Pauses for EFFECT_RESOLUTION (selecting card from hand for bulwark)
+    expect(step2.type).toBe("WAITING_FOR_DECISION");
+    if (step2.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+    expect(step2.request.source.type).toBe("EFFECT_RESOLUTION");
+    expect(step2.request.playerId).toBe("p1");
+
+    const chooseCardPatIdx = step2.request.patterns.findIndex((p: any) => {
+      const eff = step2.request.catalog.effectSelections[p.effectSelectionRef!];
+      return eff?.selectedValues?.includes("c-p1-b1");
+    });
+    expect(chooseCardPatIdx).toBeGreaterThanOrEqual(0);
+
+    session.submitDecision({
+      decisionId: step2.request.decisionId,
+      stateVersion: step2.request.stateVersion,
+      selectedPatternRef: chooseCardPatIdx,
+    });
+
+    // Verification:
+    // Bulwark set on field
+    expect(state.players.p1.field).toHaveLength(1);
+    expect(state.players.p1.field[0].componentId).toBe("character.bulwark");
+    expect(state.players.p1.field[0].cards[0].id).toBe("c-p1-b1");
+
+    // Hand empty
+    expect(state.players.p1.hand).toHaveLength(0);
+
+    // Stage was not used
+    expect(state.stage.requests).toHaveLength(0);
+
+    // chancePlayer is still p1
+    expect(state.chancePlayer).toBe("p1");
+  });
+
+  // ===========================================================================
+  // 39. Zero Hardcoding Check for GameSession
+  // ===========================================================================
+  it("39. Generic Engine Guard: Zero hardcoding of 'action.packOpen' in GameSession.ts", () => {
+    const gameSessionPath = path.resolve(__dirname, "../../engine/session/GameSession.ts");
+    const content = fs.readFileSync(gameSessionPath, "utf-8");
+    expect(content.includes("action.packOpen")).toBe(false);
+  });
 });

@@ -655,6 +655,13 @@ export class GameSession {
 
       // 7. 通常Stage Request continuation check (中断されたリクエストの効果解決中だった場合は、再開)
       if (this.resolvingRequest && this.continuation) {
+        const resolvingRequest = this.resolvingRequest;
+        const wasStageBacked =
+          !!resolvingRequest &&
+          !!this.state.stage?.requests?.some(
+            (r: any) => r.id === resolvingRequest.id
+          );
+
         const resumeResult = this.registry.resumeRequest(
           this.resolvingRequest,
           this.continuation,
@@ -680,18 +687,20 @@ export class GameSession {
         this.resolvingRequest = undefined;
         this.resolvingContext = undefined;
 
-        // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
-        const prevChance = this.state.chancePlayer;
-        const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
-        this.state.chancePlayer = turnPlayer;
-        if (prevChance !== turnPlayer) {
-          this.logRecorder.record({
-            type: "chance.changed",
-            stateVersion: this.stateVersion,
-            fromChancePlayer: prevChance,
-            toChancePlayer: turnPlayer,
-            reason: "effectResolved",
-          });
+        if (wasStageBacked) {
+          // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
+          const prevChance = this.state.chancePlayer;
+          const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+          this.state.chancePlayer = turnPlayer;
+          if (prevChance !== turnPlayer) {
+            this.logRecorder.record({
+              type: "chance.changed",
+              stateVersion: this.stateVersion,
+              fromChancePlayer: prevChance,
+              toChancePlayer: turnPlayer,
+              reason: "effectResolved",
+            });
+          }
         }
 
         return this.advance();
@@ -722,6 +731,13 @@ export class GameSession {
         }
       }
 
+      const resolvingRequest = this.resolvingRequest;
+      const wasStageBacked =
+        !!resolvingRequest &&
+        !!this.state.stage?.requests?.some(
+          (r: any) => r.id === resolvingRequest.id
+        );
+
       const resumeResult = this.registry.resumeRequest(
         this.resolvingRequest!,
         this.continuation!,
@@ -744,16 +760,12 @@ export class GameSession {
       }
 
       // 解決完了
-      const finishedRequest = this.resolvingRequest;
       this.pendingDecision = undefined;
       this.continuation = undefined;
       this.resolvingRequest = undefined;
       this.resolvingContext = undefined;
 
-      const actionDef = finishedRequest?.action ?? (finishedRequest ? this.rulePackage.actions.find((a) => a.id === finishedRequest.actionId) : undefined);
-      const isImmediateMagic = actionDef?.request?.speed === "immediate" && actionDef?.type === "magic";
-
-      if (!isImmediateMagic) {
+      if (wasStageBacked) {
         // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
         const prevChance = this.state.chancePlayer;
         const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
