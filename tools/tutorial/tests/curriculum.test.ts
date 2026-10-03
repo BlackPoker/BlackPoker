@@ -23,9 +23,9 @@ describe("現行YAMLに基づくLesson構造", () => {
   it("ブロッカーの防壁は裏向き・チャージで、宣言してもドライブしない", () => {
     const [choose, reveal] = bulwarkScenario.steps;
     for (const phase of ["before", "after"] as const)
-      expect(choose.board[phase].B.bulwarks[0]).toMatchObject({ face: "down", state: "charge" });
-    expect(reveal.board.after.B.bulwarks[0]).toMatchObject({ face: "up", state: "charge" });
-    expect(bulwarkScenario.steps.at(-1)!.board.after.B.life).toEqual(choose.board.before.B.life);
+      expect(choose.board[phase].A.bulwarks[0]).toMatchObject({ face: "down", state: "charge" });
+    expect(reveal.board.after.A.bulwarks[0]).toMatchObject({ face: "up", state: "charge" });
+    expect(bulwarkScenario.steps.at(-1)!.board.after.A.life).toEqual(choose.board.before.A.life);
   });
   it.each([bulwarkScenario, entryScenario])("ドライブ状態の防壁・兵士をブロッカーにする教材を拒否する", (source) => {
     const invalid = structuredClone(source);
@@ -71,10 +71,10 @@ describe("現行YAMLに基づくLesson構造", () => {
     expect(validateScenario(bulwarkScenario, ruleCatalog)).toEqual([]);
     const [choose, reveal, attacker, grave] = bulwarkScenario.steps;
     expect(deriveInteractions(choose)[0].kind).toBe("select-target");
-    expect(reveal.board.before.B.bulwarks[0].face).toBe("down");
-    expect(interactionBoard(reveal, 1).B.bulwarks[0].face).toBe("up");
-    expect(attacker.board.after.A.grave.map((c) => c.card)).toContain("C6");
-    expect(grave.board.after.B.grave.map((c) => c.card)).toContain("C6");
+    expect(reveal.board.before.A.bulwarks[0].face).toBe("down");
+    expect(interactionBoard(reveal, 1).A.bulwarks[0].face).toBe("up");
+    expect(attacker.board.after.B.grave.map((c) => c.card)).toContain("C6");
+    expect(grave.board.after.A.grave.map((c) => c.card)).toContain("C6");
     const deck = entryScenario.steps.find((s) => s.id === "real-deck")!.checklist!;
     for (const step of bulwarkScenario.steps) for (const phase of ["before", "after"] as const) for (const player of ["A", "B"] as const)
       expect(Object.values(step.board[phase][player]).flat().map((c) => c.card).sort()).toEqual([...deck].sort());

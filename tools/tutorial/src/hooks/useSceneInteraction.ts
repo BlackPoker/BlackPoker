@@ -20,9 +20,9 @@ function visibleName(location: CardLocation, board: BoardState) {
 function instruction(command: InteractionCommand | undefined, selected: CardLocation | null, board: BoardState) {
   if (!command) return "置き場をタップしてみましょう。";
   if (command.kind === "action") return `「${command.label}」を押してください。`;
-  if (selected && command.kind === "move-card") return `PLAYER ${command.source.player}の${zoneNames[command.to]}をタップしてください。`;
+  if (selected && command.kind === "move-card") return `${command.source.player === "A" ? "あなた" : "相手"}の${zoneNames[command.to]}をタップしてください。`;
   if (selected && command.kind === "select-target") return `${visibleName(command.target, board)}をタップして、ブロックする相手を指定してください。`;
-  return `PLAYER ${command.source.player}の${visibleName(command.source, board)}をタップしてください。`;
+  return `${command.source.player === "A" ? "あなた" : "相手"}の${visibleName(command.source, board)}をタップしてください。`;
 }
 function resultText(command: InteractionCommand, step: TutorialStep, board: BoardState) {
   if (command.kind === "action") return step.learned;
@@ -47,15 +47,27 @@ const initial = (scene?: TutorialScene): State => ({ sceneId: scene?.id ?? null,
   hasCompleted: !scene || scene.presentation === "static",
   feedback: "", lastResult: "", mistakes: 0 });
 
-export function useSceneInteraction(scene: TutorialScene | undefined, steps: TutorialStep[]) {
-  const [state, setState] = useState(() => initial(scene));
+export function useSceneInteraction(scene: TutorialScene | undefined, steps: TutorialStep[], options: { enabled?: boolean; initialCompleted?: boolean } = {}) {
+  const restored = () => options.initialCompleted && scene?.presentation === "interactive"
+    ? { ...initial(scene), microIndex: steps.length - 1, completedActions: deriveInteractions(steps[steps.length - 1]).length, complete: true, hasCompleted: true }
+    : initial(scene);
+  const [state, setState] = useState(restored);
   const current = state.sceneId === (scene?.id ?? null) ? state : initial(scene);
   const step = steps[current.microIndex];
   const commands = step ? deriveInteractions(step) : [];
   const board = step ? interactionBoard(step, current.completedActions) : undefined;
   const command = commands[current.completedActions];
-  useEffect(() => setState(initial(scene)), [scene?.id]);
-  // 時間で操作は行わない。成功した操作の結果を読める間だけ待つ。
+  useEffect(() => setState(restored()), [scene?.id]);
+  // ユーザー側は入力待ち。相手側の処理だけをデータのautomatic指定で順次表示。
+  useEffect(() => {
+    if (options.enabled === false || !step?.automatic || current.pending || current.complete || !command) return;
+    const timer = window.setTimeout(() => {
+      const count = current.completedActions + 1;
+      setState((s) => ({ ...s, completedActions: count, pending: true, selected: null, feedback: "",
+        lastResult: resultText(command, step, interactionBoard(step, count)) }));
+    }, 1100);
+    return () => window.clearTimeout(timer);
+  }, [options.enabled, step?.id, current.pending, current.complete, current.completedActions]);
   useEffect(() => {
     if (!state.pending || state.sceneId !== scene?.id) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -74,7 +86,7 @@ export function useSceneInteraction(scene: TutorialScene | undefined, steps: Tut
       if (zone) setState((s) => ({ ...s, feedback: zoneDescriptions[zone] }));
       return;
     }
-    if (current.pending || current.complete || !step || !board) return;
+    if (options.enabled === false || current.pending || current.complete || !step || !board || step.automatic) return;
     const outcome = attemptInteraction(command, current.selected, input);
     if (outcome === "success") {
       const count = current.completedActions + 1;

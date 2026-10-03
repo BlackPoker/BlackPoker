@@ -1,6 +1,7 @@
 import { formatDifferences, learningCourses } from "../data/curriculum";
 import blackPokerLogo from "../assets/blackpoker-logo.svg";
 import { learningPath } from "../data/lessons";
+import { bookSections } from "../data/book";
 export function CurriculumPanel({
   lessonId,
   completedIds,
@@ -13,7 +14,7 @@ export function CurriculumPanel({
   onClose?: () => void;
 }) {
   return (
-    <aside className="curriculum" aria-label="チュートリアル全体の進捗">
+    <aside className="curriculum" aria-label="HowToの目次">
       <div className="curriculum-head">
         <div>
           <img className="brand-logo" src={blackPokerLogo} alt="" />
@@ -29,7 +30,7 @@ export function CurriculumPanel({
         </button>
       </div>
       <nav>
-        <p className="nav-label">Lesson一覧 · 復習はどこからでも</p>
+        <p className="nav-label">目次 · 読みたいところへスクロール</p>
         <div className="course active-course">
           <div>
             <span>01</span>
@@ -38,14 +39,14 @@ export function CurriculumPanel({
               <small>見る → 触る → 理解する</small>
             </div>
           </div>
-          {learningPath.categories.map((chapter, i) => {
-            const items = learningPath.lessons.filter((lesson) => lesson.category === chapter.id);
+          {[{ id: "intro", title: "BlackPokerを知る" }, ...learningPath.categories].map((chapter, i) => {
+            const items = bookSections.filter((section) => section.category === chapter.id);
             const active = items.some((lesson) => lesson.id === lessonId);
             return (
-              <details className="chapter-group" key={chapter.id} open={active}>
+              <details className="chapter-group" key={chapter.id} open={active || chapter.id === "intro" || chapter.id === "combat"}>
                 <summary>
                   {chapter.id === "extra" ? "＋" : `${i + 1}.`} {chapter.title}
-                  <small>{items.length} Lesson</small>
+                  <small>{items.length} 項目</small>
                 </summary>
                 <div className="chapter-list">
                   {items.map((s) => (
@@ -55,8 +56,8 @@ export function CurriculumPanel({
                       aria-current={s.id === lessonId ? "step" : undefined}
                       onClick={() => onSelect(s.id)}
                     >
-                      <span>{completedIds.includes(s.id) ? "✓" : "・"}</span>
-                      <b>{s.title}<small>{s.status === "pending" ? "準備中" : s.status === "reading" ? "ミニ解説" : s.optional ? "任意の復習" : "操作できます"}</small></b>
+                      <span>{completedIds.includes(s.id) ? "✓" : String(bookSections.indexOf(s) + 1).padStart(2, "0")}</span>
+                      <b>{s.title}<small>{s.lesson?.status === "pending" ? "準備中" : s.lesson?.status === "reading" || s.kind !== "lesson" ? "読む" : s.lesson?.optional ? "任意の復習" : "触ってみる"}</small></b>
                     </button>
                   ))}
                 </div>

@@ -1,6 +1,6 @@
 import data from "./learning-path.json";
 import scenario from "./tutorials/entry16.json";
-import { makeBulwarkFixture } from "./bulwark-fixture.mjs";
+import { makeBookFixtures } from "./book-fixtures.mjs";
 import type { RuleRef, TutorialScenario } from "../types";
 
 export type Explainer =
@@ -20,8 +20,8 @@ export interface Lesson {
 export const learningPath = data as { schemaVersion: number; id: string; title: string;
   categories: { id: string; title: string }[]; lessons: Lesson[] };
 export const entryScenario = scenario as TutorialScenario;
-export const bulwarkScenario = makeBulwarkFixture(entryScenario);
-export const scenarios = [entryScenario, bulwarkScenario];
+export const scenarios = makeBookFixtures(entryScenario);
+export const bulwarkScenario = scenarios.find((scenario) => scenario.id === "bulwark-fixture-v1")!;
 export const lessonById = (id: string) => learningPath.lessons.find((lesson) => lesson.id === id)!;
 export function legacyLesson(stepIndex: number) {
   if (stepIndex === 0) return lessonById("board-overview");

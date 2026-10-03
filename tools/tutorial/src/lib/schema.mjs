@@ -20,6 +20,7 @@ export function validateScenario(value, catalog) {
   if (!value || typeof value !== "object")
     return ["Tutorial scenario must be an object"];
   const errors = [];
+  if (value.userPlayer !== undefined && !["A", "B"].includes(value.userPlayer)) errors.push("Invalid userPlayer");
   if (value.schemaVersion !== 2)
     errors.push("Unsupported tutorial schemaVersion");
   if (!value.id || !value.title)
@@ -59,6 +60,10 @@ export function validateScenario(value, catalog) {
     if (!["A", "B", "both", "first"].includes(s.actor))
       errors.push("Invalid actor");
     if (!["fixed", "real"].includes(s.mode)) errors.push("Invalid mode");
+    if (s.automatic !== undefined && typeof s.automatic !== "boolean") errors.push("Invalid automatic step");
+    if (value.userPlayer && s.mode === "fixed" && s.cause?.phase !== "setup" && !s.automatic &&
+      (s.actor !== value.userPlayer || (Array.isArray(s.operations) && s.operations.some((operation) => operation?.player !== value.userPlayer))))
+      errors.push("Manual interaction must belong to userPlayer: " + s.id);
     if (s.chooseFirst !== undefined && typeof s.chooseFirst !== "boolean")
       errors.push("Invalid first player selection");
     if (
@@ -175,7 +180,7 @@ export function validateScenario(value, catalog) {
       errors.push("Fixed board continuity is broken");
     previous = s;
   }
-  if (!Array.isArray(value.scenes) || !value.scenes.length) {
+  if (!Array.isArray(value.scenes) || (!value.scenes.length && value.steps.some((step) => step.mode === "fixed"))) {
     errors.push("Tutorial scenes are required");
   } else {
     const stepById = new Map(value.steps.map((step) => [step?.id, step]));

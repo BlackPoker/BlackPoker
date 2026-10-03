@@ -96,7 +96,7 @@
           },
           {
             "title": "ダメージ判定",
-            "text": "2の攻撃でライフが2枚減ります。1枚ずつ墓地へ動かしましょう。"
+            "text": "攻撃が通ったので、相手のライフが1枚ずつ、合計2枚減ります。"
           }
         ]
       }
@@ -335,7 +335,7 @@
       "id": "bulwark",
       "title": "防壁を増やす",
       "category": "forces",
-      "shortDescription": "手札を裏向きで置き、次のターンまで体験します。",
+      "shortDescription": "コストLで1点ダメージを受け、手札を裏向き・チャージで防壁にします。",
       "difficulty": "beginner",
       "status": "ready",
       "prerequisites": [
@@ -347,11 +347,7 @@
       "actionIds": [
         "setBulwark"
       ],
-      "reviewActionIds": [
-        "end",
-        "charge",
-        "draw"
-      ],
+      "reviewActionIds": [],
       "ruleRefs": [
         "action.setBulwark"
       ],
@@ -369,10 +365,6 @@
           {
             "title": "防壁設置",
             "text": "手札1枚を裏向き・縦向きで置く。"
-          },
-          {
-            "title": "相手のターンへ",
-            "text": "今回は続けてエンドも試します。"
           }
         ]
       }

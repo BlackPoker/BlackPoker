@@ -2610,7 +2610,7 @@ a:focus-visible {
 .concept-example { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: center; }
 .concept-example > strong { font-size: clamp(24px, 4vw, 40px); }
 .example-cards { display: flex; gap: 12px; }
-.example-cards span { border: 2px solid #27272a; border-radius: 9px; background: white; display: grid; place-items: center; width: 76px; height: 110px; font-size: 28px; }
+.example-cards > .playing-card { width: 76px; height: 110px; font-size: 28px; }
 .pending-notice { background: #f4f4f5; padding: 16px; border-left: 3px solid #52525b; }
 .pending-notice b { display: block; }
 .lesson-definitions, .lesson-prerequisites { margin-top: 20px; padding-top: 16px; border-top: 1px solid #e4e4e7; }

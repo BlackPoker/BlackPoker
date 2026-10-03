@@ -47,8 +47,8 @@ describe("TutorialBoardの防壁face表示", () => {
     const playerA = within(screen.getByTestId("A-bulwarks"));
     const playerB = within(screen.getByTestId("B-bulwarks"));
     expect(playerA.getByLabelText("A 防壁の裏向きカード 裏向き 縦向き")).toHaveTextContent("BP");
-    expect(playerA.queryByText("♢5")).toBeNull();
-    expect(playerB.getByLabelText("B ♢8 表向き 縦向き")).toHaveTextContent("♢8");
+    expect(playerA.queryByText("♦5")).toBeNull();
+    expect(playerB.getByLabelText("B ♦8 表向き 縦向き")).toHaveTextContent("8♦");
   });
 
   it("scenarioのbefore: downからafter: upへの公開を描画できる", () => {
@@ -85,7 +85,7 @@ describe("TutorialBoardの防壁face表示", () => {
         stepId="reveal-test"
       />,
     );
-    expect(within(screen.getByTestId("A-bulwarks")).getByText("♢5")).toBeVisible();
+    expect(within(screen.getByTestId("A-bulwarks")).getByLabelText("A ♦5 表向き 縦向き")).toBeVisible();
   });
 });
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Explainer, Lesson } from "../data/lessons";
-import { ruleCatalog } from "../generated/ruleCatalog";
-import { cardName } from "../lib/cards";
+import { ruleCatalog } from "../lib/rule-display";
+import { PlayingCard } from "./PlayingCard";
 import { youtubeEmbed } from "../lib/curriculum-schema.mjs";
 import { RuleLinks } from "./RuleLinks";
 
@@ -37,7 +37,7 @@ export function ConceptSlide({ explainer: e }: { explainer: Explainer }) {
       </dl><small>タイミング＝いつ使えるか／スピード＝どう処理されるか</small></div>;
     })()}
     {e.type === "example" && <div className="concept-example"><div className="example-cards">
-      {e.cards.map((card) => <span key={card}>{cardName(card)}</span>)}
+      {e.cards.map((card) => <PlayingCard key={card} code={card} />)}
     </div><strong>{e.equation}</strong></div>}
   </section>;
 }
@@ -56,6 +56,13 @@ function VideoDialog({ media, onClose }: { media: NonNullable<Lesson["media"]>; 
     <p>{media.note}</p>
     <iframe title={media.title} src={youtubeEmbed(media.url) || undefined} allowFullScreen referrerPolicy="strict-origin-when-cross-origin" />
   </dialog>;
+}
+
+export function LessonMedia({ media }: { media: Lesson["media"] }) {
+  const [open, setOpen] = useState(false);
+  if (!media) return null;
+  return <><button className="lesson-media-button" onClick={() => setOpen(true)}>動画で見る</button>
+    {open && <VideoDialog media={media} onClose={() => setOpen(false)} />}</>;
 }
 
 export function LessonExplainer({ lesson, onStart, onNext, onLesson, prerequisiteTitles }: {

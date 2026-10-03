@@ -1,104 +1,86 @@
-# Interactive HowToBlackPoker 初心者導線の改善報告
+# 縦スクロールInteractive HowTo 実装報告
 
-基準HEAD: `3f4ba3e8569f2de19205b0584c2f946cfaac1e7b`。
-開始時にoriginをfetchし、localとremoteが同一であることを確認した。
+基準HEAD: `05577b2b9d7c104e6104aef9f820d158722f4c8b`。作業開始時にfetchし、local / origin一致、git status cleanを確認。
+対象は `tools/tutorial/` のみ。Simulatorソース、正規YAML、Docker構成、Pages workflowとブランチ別公開方式は変更していない。
 
-## 1–3. 防壁blockの原因・修正・初期state
+## 1〜7. 1冊の教材として読む
 
-`makeBulwarkFixture` は既存blockのbeforeをcloneし、BのD5とC6を交換した後、faceだけをdownにしていた。元盤面の防壁はdriveのため、横向きの防壁をブロッカーに指定する誤った教材になっていた。
+1. Appは単一Lessonを置換せず、解放済みのHowToSectionを順番に描画する。表紙はBlackPoker / Interactive HowTo、短い説明、はじめるだけ。
+2. 次へは次の公開Sectionを解放し、DOM追加後にscrollIntoViewする。準備中は自動導線では飛ばす。
+3. 到達済みSectionはkeyを固定してマウントを保持する。説明・選択・盤面が残り、通常の上スクロールで読み返せる。専用の戻るは不要。
+4. 左メニューは目次。導入を含む全項目に直接ジャンプでき、未到達も開ける。モバイルはdrawerを閉じて移動。前提は案内でありロックしない。
+5. INTRO3画面をabout / game-purpose / entry16の通常本文へ統合。独立INTROや二重表示はなく、続いて盤面・独立した向きSectionを読む。
+6. #game-purpose / #board / #orientation / #unblocked-attack / #soldier-block / #bulwark-blockなどのanchorに対応。旧Lesson IDのhashも別名として受け付ける。routerは追加していない。
+7. 再読込は有効なhashを優先し、なければ最後に開いたSectionへ復帰。完了盤面は最終状態、未完了の操作はSection先頭から復習する。pixel位置と途中のmicro入力は保存対象外。scrollspyは追加せず、目次・次へ・本文へのフォーカス/入力で現在地を更新する。
 
-修正後は `face: "down", state: "charge"` を明示する。選択→アタッカー指定では状態を変えない。damageJudgeで表向きに公開し、6が一致する攻撃側を墓地へ、その後防壁を墓地へ移す。ライフは減らない。
+## 8〜13. あなた側と教材の責務
 
-現行act.yamlのattack / block / damageJudgeとcharList.bulwark、common-component.rstのチャージ／ドライブを確認。ドライブ状態のキャラクターは防壁を含めブロッカーに指定できない。schemaにも、ブロックのselect-targetのsourceがchargeであることの検証を追加した。これは教材整合性検証であり、新しいゲームエンジンではない。
+8. book fixtureにuserPlayer: Aを明示。手動stepのactor・操作元playerがAであることをCLI検証とテストで保証する。大きな「操作する人」帯は廃止し、「あなたの」「相手の」と案内する。
+9. 全盤面の描画順はB→A。B＝相手を上、A＝あなたを下に固定。盤面Sectionで、Tutorialの説明上の約束であることを一度説明する。
+10. 守らない攻撃、兵士ブロック、防壁ブロック、防壁設置、ターン終了からBの入力要求を除いた。兵士召喚もA。例外はBのカードをブロック対象として選ぶ入力で、Bを操作するものではない。実物準備の先攻は実際の対戦結果によりA/Bどちらも選べる。
+11. Bのアタックは初期盤面で完了済みにする。相手のブロックなし・ダメージ・墓地移動・チャージ・ドローはautomaticで短く順次表示。1枚ごとの変化を見せ、任意のユーザー操作を時間だけで進めない。場面の流れにチェックと矢印を残し「攻撃が通った→だからライフが減る」を示す。
+12. 防壁設置fixtureは旧player-b-turnのうちL支払いと設置だけを独立して複製し、A側へ変換。手札→down / chargeの防壁で完了。end / charge / drawは含まない。
+13. ターン終了SectionはAがエンド、相手ターンへ、Bがチャージ、ライフから順に2枚ドロー。今回の教材条件で2枚を表示し、現行ルールの「ライフ2枚以下なら1枚」は詳説で維持。
 
-## 4–11. 初心者導線・前提・解説
+## 14〜20. 簡略トランプ
 
-変更前: INTRO → 兵士同士の戦闘 → ブロックなし → 戦力・魔法 → 防壁。盤面確認は末尾の任意復習。
+14. PlayingCard / CardFaceを共通化し、TutorialBoard・INTRO・向き図・比較例・実物デッキ例に使用。判定engineとは分離。
+15. ♥ / ♦は赤（#b91c1c）。
+16. ♠ / ♣は黒（#18181b）。スート記号自体も必ず表示し、色だけに依存しない。
+17. 中央にrank、その下にsuitを1組だけ。角の重複数字、逆さ数字、巨大な中央スートは追加しない。
+18. A / J / Q / K / 10を半角で表示。H7・D8・S2・C6を含む共通部品テストで確認。
+19. chargeは縦、driveはカード全体を90度回転。数字とスートを再配置せず、認識できる大きさを保持。
+20. 裏面ではrank / suitをDOMに出さずBPだけを表示。BoardCard.faceをそのまま描画する。防壁のdown→up、ブロック時にdriveにならないことも回帰検証。
+表示用カタログのみ旧白抜き記号を♥♦へ正規化し、生成カタログ・正規YAMLとcanonical card IDは変えていない。
 
-変更後: INTRO（勝ち方） → **盤面と向き → 守らない攻撃 → 兵士で守る → 防壁で守る** → 応用の攻防 → 戦力・コスト → 魔法 → リクエスト → 誘発 → 実物Entry16。
+## 21. 保存と互換
 
-|ID|タイトル・役割|prerequisites|
+新キー `blackpoker-howto-book-v1` にlastSectionId / unlockedIds / completedIdsを保存する。
+旧 `blackpoker-howto-lessons-v1` は読取り移行して内容を保持。旧30操作キーはstepIndex・maxReachedStepIndex・firstPlayerを維持し、実物準備で継続利用。
+旧完了IDを引き継ぎ、最高到達だけから完了は推測しない。準備中・未知ID・重複は除外する。bookキー破損時も旧Lessonから復元可能。明示的なやり直し確認時だけ全進捗と先攻をリセットする。
+
+## 22〜23. 実ブラウザ確認
+
+IABとDocker内のChromiumで確認。再現可能な任意検証は `scripts/verify-browser.cjs`。
+Playwright依存は一時Docker内だけにインストールし、アプリpackage / workflowには追加していない。
+
+|項目|390×844|1440×900|
 |---|---|---|
-|board-overview|まずは盤面を見てみよう。5つの領域をタップして説明。全タップ不要|[]|
-|unblocked-attack|まずは攻撃してみよう。アタック→ブロックで指定なし→判定→ライフ2枚|board-overview|
-|first-battle|兵士で守ってみる。大きな♣6・♥7と「6 < 7」でライフを守る意味を示す|unblocked-attack|
-|bulwark-block|防壁で守ってみる。大小比較ではなく数字一致|first-battle|
+|本文|表紙→導入3項目→盤面→向き→攻撃→守らない→ライフ減少→兵士ブロック→防壁ブロックまで通過|目次から移動し、本文と過去盤面が残る|
+|スクロール|次へで下へ移動、上スクロールで過去を閲覧、drawerからINTROへ戻る|Section jump、再読込で現在地へ復帰|
+|見出し/盤面|見出し約60px、攻撃盤面上端約202px（以前251pxより上）|見出し約20px、本文最大幅820px|
+|操作|タップ、ブロック対象指定、公開、墓地移動。Bの入力要求なし|実マウスdragでAのライフ→墓地、Enter/Spaceで手札→兵士。防壁設置だけで完了|
+|表示|Aが下・Bが上、横overflowなし、カード操作幅44px以上|Aが下・Bが上、横overflowなし、赤黒/数字/スートを確認|
+|状態保持|過去8Sectionが消えない|完了済み盤面を再読込後も保持|
 
-board-overviewのoptionalを外し、新規・リセット時の入口にする。既存保存のLesson IDと旧30操作のインデックスは変更しない。進捗の分母は盤面確認を含む9Lesson。完了集合は保持する。
-盤面確認の完了記録はINTRO終了後に盤面が表示されてから行う。INTRO表示中やリセット直後に先取りで完了扱いしないこともテストした。
+IABでの攻撃盤面は約218px（スクロールバー・Windowsフォントあり）、Docker Chromiumでは約202px。いずれも同じ390×844で既存251pxから悪化していない。
+reduced motionはscrollIntoViewをautoにし、CSSの回転transition等も無効化することをテストで確認。
+画像は `test-results/browser/mobile-390x844.png`、`desktop-1440x900.png`、`desktop-drag-1440x900.png` に保存（生成物としてGit対象外）。
 
-INTROの「相手のライフ0枚で勝ち」は既に明瞭なので、重複ページは追加せず、盤面確認の短文へ接続した。向きはCardOrientationの縦・横カード図で攻撃前に説明する。最初のflowでも「チャージ（縦）からドライブ（横）」とつなぐ。厳密な定義へのリンクと使用条件は「解説を見る」で確認できる。
+## 24〜27. 検証結果
 
-unblocked-attackのcause / actionIdは維持し、ボタンを「ブロッカーを指定しない」とした。ブロック処理が起きないという意味にはしない。戦闘3アクションの主担当をこのLessonへ移し、兵士ブロックはreviewに変更。Lite19の主担当coverageを維持する。
+- Tutorial: 10ファイル、128テスト成功。カード1組/赤黒、A操作、壁の責務、append、目次、hash、reload、保存互換、reduced motion、誤操作、keyboard、drag、touchを検証。
+- 教材検証: 成功。旧30操作と生成fixture、before/after連続性、現行ルール参照、Lite担当coverageを検証。
+- production build: 成功。`VITE_BASE_PATH=/BlackPoker/tutorial/` を指定してassetsのbase pathも確認。ブランチ用base pathを設定する既存workflowは変更なし。
+- Simulator: 19ファイル、113テスト成功。ソース変更なし。
+- Docker Chromium: 実ブラウザ検証スクリプトPASS。pageerrorなし。黒rgb(24,24,27)、赤rgb(185,28,28)を実測。
 
-防壁をcombatに移し、兵士ブロックの直後に配置。応用tacticsを戦力の前へ並べた。準備中20Lessonは一覧から自由に参照でき、「次へ」は公開済みのみを進む。prerequisitesはロックではない。flow / compare / anatomy / exampleはすべて維持。
+複数盤面が同時に存在するため、SVG marker IDをuseIdで一意化し、別Sectionへのdropを拒否した。既存カードを移動先としてタップできる動作も維持。
 
-## 12–13. 縦方向の圧縮
+## 28. 変更ファイル
 
-- 操作中の「画面で体験」とshortDescription、実物不要の繰り返し通知を外す。説明はミニ解説と詳細に残す。
-- 上部に積まれていた完了summaryを盤面後へ移し、操作完了時だけ表示。静的な探索で開始直後の「Lesson完了」は出さない。
-- 成功結果は短い結果表示中だけ出し、次の指示と積み重ねない。誤操作時も同じ指示を二重表示しない。aria-liveは維持。
-- スマホのtopbarを64pxから48pxへ、カテゴリ・進捗を1行へ。actor・ターンの折返し、カード外の余白を整理。desktopのヘッダーは維持。
-- 操作案内のstickyを外し、盤面への重なりを避ける。カード本体は縮小せず、操作領域はスマホ44×48px以上を維持。
-- 一覧は現在カテゴリのみ開く既存構造を継続。スマホのカテゴリ名と件数を1行にまとめる。
-- 独立Lesson・scene内部の継続盤面・operation / interaction・矢印・選択表示はそのまま再利用。
+すべて `tools/tutorial/` 内。
 
-## 14. 390×844の実ブラウザ確認
+- 文書・生成物設定: `.gitignore`, `README.md`, `HOWTO_REPORT.md`, `LEARNING_MAP.md`, `implementation_plan.md`
+- 検証: `scripts/validate-tutorials.mjs`, `scripts/verify-browser.cjs`
+- 本文: `src/App.tsx`, `src/main.tsx`, `src/book.css`, `src/styles.css`
+- UI: `src/components/HowToSection.tsx`, `LessonPractice.tsx`, `RealPractice.tsx`, `PlayingCard.tsx`, `TutorialIntro.tsx`, `TutorialBoard.tsx`, `BoardOverlay.tsx`, `CardOrientation.tsx`, `CurriculumPanel.tsx`, `LessonExplainer.tsx`, `ActionHelp.tsx`
+- 教材: `src/data/book.ts`, `book-fixtures.mjs`, `book-fixtures.d.mts`, `lessons.ts`, `learning-path.json`, `tutorials/entry16.json`（最後のJSONは表示記号のみ）
+- 状態・検証・表示: `src/hooks/useSceneInteraction.ts`, `src/types.ts`, `src/lib/book-storage.ts`, `book-scroll.ts`, `rule-display.ts`, `cards.ts`, `schema.mjs`
+- テスト: `tests/App.test.tsx`, `Lessons.test.tsx`, `TutorialBoard.test.tsx`, `curriculum.test.ts`, `setup.ts`, `PlayingCard.test.tsx`, `book.test.ts`, `book-helpers.ts`
 
-同じローカルURL・viewportで、Lesson操作開始時のページ最上部から.persistent-board上端までをDOM矩形で測定（scrollYを加算、開始時scrollY=0）。小数点以下は丸めた。
+## 29〜35. コミットと公開ブランチ
 
-|画面|変更前|変更後|改善|
-|---|---:|---:|---:|
-|盤面と向き|645px|316px|329px上へ|
-|守らない攻撃|485px|251px|234px上へ|
-|兵士ブロック|485px|251px|234px上へ|
-|防壁ブロック|485px|251px|234px上へ|
-
-盤面確認の盤面下端は818pxで、844pxのファーストビュー内に両プレイヤーの全領域が入る。攻撃開始時の下端は753px。盤面の操作領域最小幅44pxを実測。横overflowなし。
-
-INTROの勝ち方 → 盤面・向き → ライフ説明のタップ → 最初のflow → ♠2のアタック → ブロッカー指定なし → ライフ2枚を1枚ずつ墓地へ → 兵士Lesson → アタック・♥7で指定・♣6を墓地へ → 防壁Lesson → 縦向き防壁を指定・公開・攻撃側と防壁を墓地へ、を通し操作した。
-
-選択カード・移動先・矢印、ブロック前後の防壁の縦向き、ライフが守られる結果、完了時だけのまとめを確認。新しいsticky案内が盤面を覆うことはない。メニューは現在combatだけ開き、準備中20Lessonが一度に露出しない。見出し・ボタン・比較図・縦のflowに重なりなし。
-
-## 15. 1440×900の実ブラウザ確認
-
-横並び3段階flowと余白、大きな盤面、サイドバーを確認。誤ったカードでは進まず案内が出る。Enterでアタック・ブロッカー選択、Spaceで対象確定、PCドラッグで♣6を墓地へ移し、完了できた。詳細から公式のブロック定義を参照でき、ルール早見の開閉も正常。DOMでviewport1440×900、横overflowなしを確認。
-
-## 16–19. テスト結果
-
-Node系コマンドはすべて既存Docker compose内で実行。Simulatorソース・Docker・ブランチ別Pages・workflowは変更していない。
-
-|確認|結果|
-|---|---|
-|Tutorial全テスト|8ファイル、103件成功（従来98件＋5件）|
-|tutorial data validation|scenario・curriculum・Lite coverage・参照・fixture整合性が成功|
-|production build|TypeScript / Vite成功、VITE_BASE_PATH=/BlackPoker/tutorial/|
-|Simulator全回帰|19ファイル、113件成功|
-
-追加・更新した検証: 防壁down/charge、指定でドライブしない、公開後の処理とライフ保護、driveの防壁・兵士fixture拒否、初回4Lessonの順序と前提、INTRO後の探索・向き・攻撃、通し操作と再読込。既存tap / drag / keyboard / 誤操作 / scene完了 / 保存互換 / 先攻 / real / 早見 / pending / 直接移動の回帰は維持。
-
-初心者目線の自己レビューでは、勝ち方→置き場→向き→攻撃の目的→守る意味→守り方の違いが、短い説明と自分の操作でつながることを確認した。全体は3つの戦闘Lessonと短い盤面探索の再利用で、未実装魔法の大量追加やアーキテクチャ変更はない。
-
-## 20. 変更ファイル一覧
-
-すべてtools/tutorial/内。
-
-- README.md
-- HOWTO_REPORT.md
-- LEARNING_MAP.md
-- src/App.tsx
-- src/components/CardOrientation.tsx（追加）
-- src/data/learning-path.json
-- src/data/lessons.ts
-- src/data/bulwark-fixture.mjs
-- src/data/tutorials/entry16.json
-- src/lib/schema.mjs
-- src/styles.css
-- tests/App.test.tsx
-- tests/Lessons.test.tsx
-- tests/curriculum.test.ts
-
-## 21–25. コミットとpush
-
-現在の作業ブランチ `635-kaizen-チュートリアルサイト作成` にコミットし、originの同名ブランチへpushする。
-コミット自身のSHAはファイルへ自己参照で記録できないため、実行後のSHA・push結果・local/remote HEAD一致・最終git statusを完了メッセージに記載する。
+現在の作業ブランチ `635-kaizen-チュートリアルサイト作成` へ日本語コミットを作成してoriginへpushする。
+コミット自身のSHAを本文へ埋め込むことはできないため、コミットSHA・push結果・local HEAD・remote HEAD・一致・最終cleanの実測結果は作業完了メッセージに記載する。
+pushはブランチ更新であり、GitHub Actionsのデプロイ完了確認とは区別する。

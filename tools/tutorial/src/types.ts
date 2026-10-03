@@ -56,6 +56,8 @@ export interface TutorialStep {
     | { kind: "select-target"; targetCard: { player: Player; zone: Zone; card: string } }
     | { kind: "action"; label: string };
   boardNote?: string;
+  /** 相手側の処理。ユーザー入力を要求せず、結果を順に表示する。 */
+  automatic?: boolean;
 }
 export interface TutorialScene {
   id: string;
@@ -68,6 +70,7 @@ export interface TutorialScene {
 }
 export interface TutorialScenario {
   schemaVersion: 2;
+  userPlayer?: Player;
   id: string;
   title: string;
   description: string;

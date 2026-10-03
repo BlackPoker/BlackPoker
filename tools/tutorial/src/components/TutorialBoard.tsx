@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import type { BoardCard, BoardState, MovementCause, Operation, Player, Zone } from "../types";
 import { cardName } from "../lib/cards";
 import { BoardOverlay } from "./BoardOverlay";
+import { CardFace } from "./PlayingCard";
 import { sameCard } from "../lib/interaction.mjs";
 import type { CardLocation, InteractionCommand, InteractionInput } from "../lib/interaction.mjs";
 export { cardName } from "../lib/cards";
@@ -167,7 +168,9 @@ export function TutorialBoard({
                 setGhost(null);
                 if (!current?.active) return;
                 suppressClickUntil.current = Date.now() + 400;
-                const destination = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-zone][data-player]");
+                const hit = document.elementFromPoint(event.clientX, event.clientY)?.closest<HTMLElement>("[data-zone][data-player]");
+                // 本文に複数の盤面が残るため、別Sectionへのdropは受け付けない。
+                const destination = hit && boardElement?.contains(hit) ? hit : undefined;
                 interaction.onInput({ kind: "drop", source: current.source,
                   player: destination?.dataset.player as Player | undefined,
                   zone: destination?.dataset.zone as Zone | undefined });
@@ -180,7 +183,7 @@ export function TutorialBoard({
                 aria-label={interactive ? undefined : name}
                 aria-hidden={interactive || undefined}
               >
-                {c.face === "down" ? "BP" : cardName(c.card)}
+                <CardFace code={c.card} face={c.face} />
               </span>
               {isSelected && <small className="selection-label" aria-hidden="true">選択中</small>}
             </CardSlot>;
@@ -233,7 +236,7 @@ export function TutorialBoard({
           aria-label={`プレイヤー${p}の盤面`}
         >
           <header>
-            <strong>PLAYER {p}</strong>
+            <strong>PLAYER {p} · {p === "A" ? "あなた" : "相手"}</strong>
             {board.turn === p && <span>いまのターン</span>}
             {!real && applied && !operations.length && before.turn === after.turn &&
               cause && cause.phase !== "setup" && board.turn === p &&

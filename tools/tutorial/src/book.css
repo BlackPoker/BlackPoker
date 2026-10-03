@@ -1,0 +1,72 @@
+/* 本文は1冊の縦スクロール。各Sectionの盤面と入力状態をDOMに保持する。 */
+.book-body { max-width: 884px; padding: 24px 24px 72px; margin: 0 auto; }
+.book-cover { padding: 32px 16px; scroll-margin-top: 20px; }
+.book-cover > img { width: 70px; height: 70px; object-fit: contain; }
+.book-cover h1 { margin: 12px 0; font-size: clamp(28px, 4vw, 40px); }
+.book-cover h1 small { display: block; font-size: 17px; letter-spacing: .08em; margin-top: 6px; }
+.book-cover p { font-size: 14px; line-height: 1.8; }
+.book-cover .book-progress { font-size: 11px; color: #52525b; margin-top: 24px; }
+.howto-section { scroll-margin-top: 20px; padding: 24px; margin: 0 0 28px; min-width: 0; }
+.section-heading { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; margin-bottom: 10px; }
+.section-heading h2 { flex: 1; min-width: 0; margin: 0; font-size: clamp(20px, 2.3vw, 28px); line-height: 1.45; overflow-wrap: anywhere; }
+.section-number { font-size: 12px; color: #71717a; font-variant-numeric: tabular-nums; }
+.section-completed { font-size: 10px; color: #52525b; white-space: nowrap; }
+.section-summary { font-size: 13px; line-height: 1.65; margin: 6px 0 10px; }
+.section-next { margin-top: 12px; min-height: 44px; }
+.howto-section .primary-button { max-width: 100%; }
+.howto-section .lesson-definitions, .howto-section .lesson-prerequisites { margin-top: 12px; padding-top: 8px; }
+.howto-section summary { min-height: 44px; padding-block: 10px; }
+.book-practice .interaction-guide { position: static; margin: 6px 0; padding: 8px 10px; min-height: 0; }
+.book-practice .interaction-guide:empty { display: none; }
+.book-practice .persistent-board { margin: 8px 0 12px; }
+.book-practice .scene-result { margin: 10px 0; }
+.micro-trail { display: flex; flex-wrap: wrap; gap: 4px 8px; padding: 0; margin: 8px 0; list-style: none; font-size: 10px; line-height: 1.5; color: #71717a; }
+.micro-trail li:not(:last-child)::after { content: " →"; margin-left: 8px; }
+.micro-trail .reached { color: #18181b; }
+.micro-trail [aria-current] { font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+.real-section { border-top: 1px solid #d4d4d8; margin-top: 24px; padding-top: 16px; scroll-margin-top: 20px; }
+.real-section h3 { line-height: 1.5; font-size: 19px; }
+.real-section > p { line-height: 1.7; font-size: 13px; }
+.book-intro .intro-lead { margin-top: 8px; font-size: clamp(22px, 3vw, 32px); }
+.book-intro .intro-kicker { display: none; }
+.book-intro .intro-page { animation: none; }
+.book-intro .intro-board { margin: 18px 0; }
+/* 1枚につきrankとsuitが1組。裏面では両方とも描画しない。 */
+.playing-card { display: inline-grid; place-items: center; width: 36px; height: 50px; flex-shrink: 0; border: 1px solid #3f3f46; border-radius: 4px; background: #fff; color: #18181b; font-family: Georgia, serif; font-size: 18px; font-weight: 700; vertical-align: middle; }
+.playing-card.drive { transform: rotate(90deg); }
+.playing-card.face-down { background: repeating-linear-gradient(45deg, #e4e4e7, #e4e4e7 2px, #fafafa 2px, #fafafa 5px); }
+.card-face { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; gap: 1px; letter-spacing: 0; }
+.card-rank { font-weight: 800; font-size: 1em; }
+.card-suit { font-size: .9em; }
+.red-suit { color: #b91c1c; }
+.black-suit { color: #18181b; }
+.card-back-mark { font-size: 10px; color: #52525b; }
+.orientation-primer > div { gap: 14px; padding: 8px; }
+.orientation-primer .playing-card { margin-inline: 6px; }
+.book-intro .intro-card { font-size: 16px; }
+.book-shell .interactive-board .card-slot { min-width: 44px; min-height: 48px; }
+.book-shell .interactive-board .zone-hand .card-slot { width: 44px; height: 48px; flex-basis: 44px; }
+.howto-section h2:focus-visible, .real-section h3:focus-visible { outline: 2px solid #52525b; outline-offset: 4px; }
+@media (max-width: 860px) {
+  .book-body { padding: 12px 10px 32px; }
+  .book-cover { padding: 20px 6px; scroll-margin-top: 60px; }
+  .howto-section { padding: 12px; margin-bottom: 20px; scroll-margin-top: 60px; }
+  .real-section { scroll-margin-top: 60px; }
+  .section-heading { gap: 6px; margin-bottom: 6px; }
+  .section-heading h2 { font-size: 21px; }
+  .section-completed { flex-basis: 100%; padding-left: 22px; }
+  .section-summary { font-size: 12px; line-height: 1.55; }
+  .book-practice .persistent-board figcaption { padding: 4px; }
+  .book-practice .interaction-guide { padding: 6px 8px; }
+  .book-practice .interaction-guide strong { font-size: 12px; }
+  .book-practice .interaction-guide small { font-size: 10px; }
+  .book-shell .board-card { font-size: 14px; }
+  .book-shell .zone-hand .board-card { font-size: 12px; }
+  .book-shell .player-half > header strong { font-size: 10px; letter-spacing: 0; }
+  .orientation-primer { gap: 8px; }
+  .orientation-primer > div { flex-wrap: wrap; justify-content: center; text-align: center; }
+  .book-intro .intro-card { font-size: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .book-shell *, .book-shell *::before, .book-shell *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
+}

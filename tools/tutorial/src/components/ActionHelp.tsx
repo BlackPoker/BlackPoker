@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ruleCatalog } from "../generated/ruleCatalog";
+import { ruleCatalog } from "../lib/rule-display";
 import { BeginnerGuide } from "./BeginnerGuide";
 
 const uses: Record<string, string> = {

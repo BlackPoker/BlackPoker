@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "react";
+import { useId, useLayoutEffect, useState } from "react";
 import type { Operation, Player, Zone } from "../types";
 
 type Line = { key: string; player: Player; from: Zone; to: Zone; x1: number; y1: number; x2: number; y2: number; card: boolean };
@@ -39,6 +39,7 @@ export function BoardOverlay({ board, operations }: {
   board: HTMLElement;
   operations: Operation[];
 }) {
+  const arrowId = `board-arrowhead-${useId().replace(/:/g, "")}`;
   const [layout, setLayout] = useState({ width: 0, height: 0, lines: [] as Line[] });
   useLayoutEffect(() => {
     const update = () => setLayout(measure(board, operations));
@@ -59,7 +60,7 @@ export function BoardOverlay({ board, operations }: {
       viewBox={`0 0 ${layout.width || 1} ${layout.height || 1}`}
       preserveAspectRatio="none">
       <defs>
-        <marker id="board-arrowhead" markerWidth="8" markerHeight="8"
+        <marker id={arrowId} markerWidth="8" markerHeight="8"
           refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
           <path d="M 0 0 L 8 4 L 0 8 z" fill="#18181b" />
         </marker>
@@ -68,7 +69,7 @@ export function BoardOverlay({ board, operations }: {
         data-route-kind="zone" data-player={line.player}
         data-from={line.from} data-to={line.to} data-source={line.card ? "card" : "zone"}
         x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2}
-        markerEnd="url(#board-arrowhead)" />)}
+        markerEnd={`url(#${arrowId})`} />)}
     </svg>
   );
 }
