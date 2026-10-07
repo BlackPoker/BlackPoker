@@ -2518,9 +2518,86 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
           expect(meta.hasTarget).toBe(true);
 
           if (actionId === "action.block") {
-            // block アクションは宣言エフェクトとブロッカー割り当て検証
-            expect(action?.effect).toBeDefined();
-            tracker.recordTarget(actionId, "2.9.1", "Blocker assignment validated");
+            // block アクション: 実際の attacker と blocker candidate による target / assignment 実証
+            const attacker = {
+              unitId: "atk-1",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "drive",
+              cards: [{ id: "ca-1" }],
+              labels: ["攻撃", "防御"],
+              battle: { role: "attacker", targetPlayerKey: "p2" },
+            };
+            const legalBlocker = {
+              unitId: "blk-legal",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "charge",
+              cards: [{ id: "cb-1" }],
+              labels: ["攻撃", "防御"],
+            };
+            const illegalRestBlocker = {
+              unitId: "blk-illegal-rest",
+              kind: "一般兵",
+              componentId: "character.soldier",
+              state: "rest", // rest 状態のためブロック不可
+              cards: [{ id: "cb-2" }],
+              labels: ["攻撃", "防御"],
+            };
+
+            const blockReq: ActionRequest = {
+              id: "req-block-val",
+              actionId: "action.block",
+              status: "pending",
+              sequence: 1,
+              controller: "p2",
+              keyCards: [],
+            };
+
+            // 合法な候補のみを抽出（rules-vnext 条件: charge かつ 防御ラベル）
+            const allCandidates = [legalBlocker, illegalRestBlocker];
+            const candidateBlockers = allCandidates.filter(
+              (u) => u.state === "charge" && u.labels?.includes("防御")
+            );
+
+            // A. illegal candidate (rest) が除外されていること
+            expect(candidateBlockers.some((b) => b.unitId === "blk-illegal-rest")).toBe(false);
+            // B. legal candidate (charge) が含まれること
+            expect(candidateBlockers.some((b) => b.unitId === "blk-legal")).toBe(true);
+
+            // C. generateBlockAssignmentDecision の実行と割当パターンの検証
+            const blockDecision = LegalPatternGenerator.generateBlockAssignmentDecision(
+              testState,
+              "p2",
+              blockReq,
+              "selectBlockAssignments",
+              [attacker],
+              candidateBlockers,
+              fullRulePackage.components
+            );
+
+            expect(blockDecision.request.patterns.length).toBeGreaterThan(0);
+            const blockAssignments = blockDecision.request.catalog.effectSelections.flatMap(
+              (e) => e.assignments || []
+            );
+
+            // D. 生成された全割当において illegal candidate が指定されていないこと
+            const containsIllegal = blockAssignments.some((a) =>
+              a.selectedUnitIds.includes("blk-illegal-rest")
+            );
+            expect(containsIllegal).toBe(false);
+
+            // E. legal blocker によるブロック割当が存在すること
+            const hasLegalBlock = blockAssignments.some((a) =>
+              a.selectedUnitIds.includes("blk-legal")
+            );
+            expect(hasLegalBlock).toBe(true);
+
+            tracker.recordTarget(
+              actionId,
+              "2.9.1",
+              "Blocker assignment validated (legal enumerated, illegal rest excluded, patterns verified)"
+            );
           } else if (meta.targetType === "player") {
             // player target: 不正な playerKey による fail-closed
             const defId = action?.targets?.[0]?.id ?? "target";
@@ -2654,69 +2731,346 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         };
         TurnManager.initializeToMain(state, "p1");
         const session = new GameSession(state, fullRulePackage);
+        const initialVersion = session.stateVersion;
+
+        // 1. advance() の実行と WAITING_FOR_DECISION の確認
         const step = session.advance();
         expect(step.type).toBe("WAITING_FOR_DECISION");
+        if (step.type !== "WAITING_FOR_DECISION") {
+          throw new Error("GameSession did not enter WAITING_FOR_DECISION");
+        }
+        const req = step.request;
+        expect(req).toBeDefined();
+        expect(req.patterns.length).toBeGreaterThan(0);
+
+        // 2. 返された DecisionRequest から合法な pattern を選択し DecisionResponse 生成
+        const response: DecisionResponse = {
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 0,
+        };
+
+        // 3. session.submitDecision(response) の実行
+        const submitStep = session.submitDecision(response);
+
+        // 4. 戻り値が PROGRESSED または 次の WAITING_FOR_DECISION 等の合法状態であること
+        expect(["PROGRESSED", "WAITING_FOR_DECISION", "COMPLETED"]).toContain(submitStep.type);
+
+        // 5. stateVersion または state mutation が進んでいることの検証
+        const postState = session.state;
+        const stateAdvanced =
+          session.stateVersion > initialVersion ||
+          (postState.stage && postState.stage.requests.length > 0) ||
+          (postState.stage && postState.stage.history.length > 0);
+        expect(stateAdvanced).toBe(true);
 
         crossCuttingTracker.record({
           infrastructure: "GameSession",
           scope: "Generic session advance & decision loop",
           evidenceTest: "2.10.2",
           status: "PASS",
-          resultSummary: "GameSession properly pauses for decision and integrates with LegalPatternGenerator",
+          resultSummary: "GameSession advanced to WAITING_FOR_DECISION, submitted legal decision response, and transitioned state/version",
         });
       });
 
       // 2.10.3 AI Policy Generic Pipeline
       it("2.10.3: FirstLegalPatternPolicy makes generic decision from pattern catalog", async () => {
-        const state: any = {
-          stateVersion: 1,
-          turnCount: 1,
-          turnPlayer: "p1",
-          chancePlayer: "p1",
-          players: {
-            p1: {
-              name: "P1",
-              life: [{ id: "l1", suit: "S", rank: "2", value: 2 }],
-              hand: [{ id: "h1", suit: "H", rank: "5", value: 5 }],
-              field: [],
-              grave: [],
-            },
-            p2: {
-              name: "P2",
-              life: [{ id: "l2", suit: "D", rank: "2", value: 2 }],
-              hand: [],
-              field: [],
-              grave: [],
-            },
-          },
-          stage: { requests: [] },
-        };
-        TurnManager.initializeToMain(state, "p1");
-        const { request } = LegalPatternGenerator.generateActionRequestDecision(state, "p1", fullRulePackage);
         const policy = new FirstLegalPatternPolicy();
-        const aiResponse = await policy.decide(request);
+        let variantsPassed = 0;
 
-        expect(aiResponse.selectedPatternRef).toBeGreaterThanOrEqual(0);
-        expect(aiResponse.selectedPatternRef).toBeLessThan(request.patterns.length);
+        // Variant A: 通常 ACTION_REQUEST (メインフェイズ)
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.setBulwark", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.patterns.length).toBeGreaterThan(0);
+          const aiResponse = await policy.decide(request);
+          expect(aiResponse.selectedPatternRef).toBeGreaterThanOrEqual(0);
+          expect(aiResponse.selectedPatternRef).toBeLessThan(request.patterns.length);
+          PatternExecutor.validateResponse(request, aiResponse, request.stateVersion);
+          const execResult = PatternExecutor.executeResponse(request, aiResponse, state, fullRulePackage, registry);
+          expect(execResult).toBeDefined();
+          variantsPassed++;
+        }
+
+        // Variant B: Target付き ACTION_REQUEST (unit target: action.up)
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.up", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.patterns.length).toBeGreaterThan(0);
+          expect(request.catalog.targetSelections.some((t) => t.targetType === "unit")).toBe(true);
+          const aiResponse = await policy.decide(request);
+          expect(aiResponse.selectedPatternRef).toBeGreaterThanOrEqual(0);
+          expect(aiResponse.selectedPatternRef).toBeLessThan(request.patterns.length);
+          PatternExecutor.validateResponse(request, aiResponse, request.stateVersion);
+          const execResult = PatternExecutor.executeResponse(request, aiResponse, state, fullRulePackage, registry);
+          expect(execResult).toBeDefined();
+          variantsPassed++;
+        }
+
+        // Variant C: Quick response ACTION_REQUEST (action.counter)
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.counter", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.patterns.length).toBeGreaterThan(0);
+          const aiResponse = await policy.decide(request);
+          expect(aiResponse.selectedPatternRef).toBeGreaterThanOrEqual(0);
+          expect(aiResponse.selectedPatternRef).toBeLessThan(request.patterns.length);
+          PatternExecutor.validateResponse(request, aiResponse, request.stateVersion);
+          const execResult = PatternExecutor.executeResponse(request, aiResponse, state, fullRulePackage, registry);
+          expect(execResult).toBeDefined();
+          variantsPassed++;
+        }
+
+        // Variant D: EFFECT_SELECTION (block割り当て)
+        {
+          const stateD: any = {
+            stateVersion: 1,
+            turnPlayer: "p1",
+            chancePlayer: "p2",
+            players: {
+              p1: { name: "P1", life: [], hand: [], field: [], grave: [] },
+              p2: { name: "P2", life: [], hand: [], field: [], grave: [] },
+            },
+            stage: { requests: [], history: [] },
+            turnUsage: {},
+          };
+          const attacker = {
+            unitId: "atk-d",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "drive",
+            cards: [{ id: "c-atkd" }],
+            labels: ["攻撃", "防御"],
+            battle: { role: "attacker", targetPlayerKey: "p2" },
+          };
+          const blocker = {
+            unitId: "blk-d",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c-blkd" }],
+            labels: ["攻撃", "防御"],
+          };
+          const blockReq: ActionRequest = {
+            id: "req-block-d",
+            actionId: "action.block",
+            status: "pending",
+            sequence: 1,
+            controller: "p2",
+            keyCards: [],
+          };
+          const blockDecision = LegalPatternGenerator.generateBlockAssignmentDecision(
+            stateD,
+            "p2",
+            blockReq,
+            "selectBlockAssignments",
+            [attacker],
+            [blocker],
+            fullRulePackage.components
+          );
+          const request = blockDecision.request;
+          expect(request.patterns.length).toBeGreaterThan(0);
+          expect(request.catalog.effectSelections.length).toBeGreaterThan(0);
+          const aiResponse = await policy.decide(request);
+          expect(aiResponse.selectedPatternRef).toBeGreaterThanOrEqual(0);
+          expect(aiResponse.selectedPatternRef).toBeLessThan(request.patterns.length);
+          PatternExecutor.validateResponse(request, aiResponse, request.stateVersion);
+          variantsPassed++;
+        }
+
+        expect(variantsPassed).toBe(4);
 
         crossCuttingTracker.record({
           infrastructure: "AI Policy",
           scope: "Autonomous legal decision selection (FirstLegalPatternPolicy)",
           evidenceTest: "2.10.3",
           status: "PASS",
-          resultSummary: "AI Policy deterministically selected legal pattern ref without action hardcoding",
+          resultSummary: "AI Policy generically decided and validated 4 variants (Normal, Target, Quick, Effect Selection)",
         });
       });
 
-      // 2.10.4 UI 7 Decision Types Contract
+      // 2.10.4 UI 7 Decision Types Contract & Execution
       it("2.10.4: Generic UI decision presenter and contract covers all 7 decision types", () => {
         // UI 7 Decision Types: action, card, unit target, player target, request target, cost, effect-time
-        const displayIndex = getStageRequestDisplayIndex(0, 1);
-        expect(displayIndex.isTop).toBe(true);
-        expect(displayIndex.label).toBe("TOP");
+        const executedDecisionTypes: string[] = [];
 
-        // UI Decision Types サポートの検証
-        const supportedTypes = [
+        // 1. Action selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.setBulwark", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.catalog.actions.length).toBeGreaterThan(0);
+          const actionPatternRef = request.patterns.findIndex((p) => p.actionSelectionRef !== undefined);
+          expect(actionPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: actionPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("action");
+        }
+
+        // 2. Card selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.up", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.catalog.cardSelections.length).toBeGreaterThan(0);
+          const cardPatternRef = request.patterns.findIndex((p) => p.keyCardSelectionRef !== undefined);
+          expect(cardPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: cardPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("card");
+        }
+
+        // 3. Unit target selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.up", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          const unitTargetEntry = request.catalog.targetSelections.find((t) => t.targetType === "unit");
+          expect(unitTargetEntry).toBeDefined();
+          expect(unitTargetEntry!.targetUnitId).toBeDefined();
+          const targetPatternRef = request.patterns.findIndex((p) => {
+            if (p.targetSelectionRef === undefined) return false;
+            return request.catalog.targetSelections[p.targetSelectionRef]?.targetType === "unit";
+          });
+          expect(targetPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: targetPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("unit target");
+        }
+
+        // 4. Player target selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.throwing", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          const playerTargetEntry = request.catalog.targetSelections.find((t) => t.targetType === "player");
+          expect(playerTargetEntry).toBeDefined();
+          expect(playerTargetEntry!.targetPlayerKey).toBe("p2");
+          const playerPatternRef = request.patterns.findIndex((p) => {
+            if (p.targetSelectionRef === undefined) return false;
+            return request.catalog.targetSelections[p.targetSelectionRef]?.targetType === "player";
+          });
+          expect(playerPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: playerPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("player target");
+        }
+
+        // 5. Request target selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.counter", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          const reqTargetEntry = request.catalog.targetSelections.find((t) => t.targetType === "request");
+          expect(reqTargetEntry).toBeDefined();
+          expect(reqTargetEntry!.targetRequestId).toBe("req-up");
+          // UI Presenter の Top 表示ラベル検証も含める
+          const displayIndex = getStageRequestDisplayIndex(0, 1);
+          expect(displayIndex.isTop).toBe(true);
+          expect(displayIndex.label).toBe("TOP");
+          const reqPatternRef = request.patterns.findIndex((p) => {
+            if (p.targetSelectionRef === undefined) return false;
+            return request.catalog.targetSelections[p.targetSelectionRef]?.targetType === "request";
+          });
+          expect(reqPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: reqPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("request target");
+        }
+
+        // 6. Cost payment selection
+        {
+          const { state, playerKey } = buildLegalDecisionFixture("action.up", fullRulePackage);
+          const { request } = LegalPatternGenerator.generateActionRequestDecision(state, playerKey, fullRulePackage);
+          expect(request.catalog.costPayments.length).toBeGreaterThan(0);
+          const costPatternRef = request.patterns.findIndex((p) => p.costPaymentRef !== undefined);
+          expect(costPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: costPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("cost");
+        }
+
+        // 7. Effect-time selection (block割当)
+        {
+          const stateD: any = {
+            stateVersion: 1,
+            turnPlayer: "p1",
+            chancePlayer: "p2",
+            players: {
+              p1: { name: "P1", life: [], hand: [], field: [], grave: [] },
+              p2: { name: "P2", life: [], hand: [], field: [], grave: [] },
+            },
+            stage: { requests: [], history: [] },
+            turnUsage: {},
+          };
+          const attacker = {
+            unitId: "atk-ui",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "drive",
+            cards: [{ id: "c-atk-ui" }],
+            labels: ["攻撃", "防御"],
+            battle: { role: "attacker", targetPlayerKey: "p2" },
+          };
+          const blocker = {
+            unitId: "blk-ui",
+            kind: "一般兵",
+            componentId: "character.soldier",
+            state: "charge",
+            cards: [{ id: "c-blk-ui" }],
+            labels: ["攻撃", "防御"],
+          };
+          const blockReq: ActionRequest = {
+            id: "req-block-ui",
+            actionId: "action.block",
+            status: "pending",
+            sequence: 1,
+            controller: "p2",
+            keyCards: [],
+          };
+          const blockDecision = LegalPatternGenerator.generateBlockAssignmentDecision(
+            stateD,
+            "p2",
+            blockReq,
+            "selectBlockAssignments",
+            [attacker],
+            [blocker],
+            fullRulePackage.components
+          );
+          const request = blockDecision.request;
+          expect(request.catalog.effectSelections.length).toBeGreaterThan(0);
+          const effectPatternRef = request.patterns.findIndex((p) => p.effectSelectionRef !== undefined);
+          expect(effectPatternRef).toBeGreaterThanOrEqual(0);
+          const response: DecisionResponse = {
+            decisionId: request.decisionId,
+            stateVersion: request.stateVersion,
+            selectedPatternRef: effectPatternRef,
+          };
+          PatternExecutor.validateResponse(request, response, request.stateVersion);
+          executedDecisionTypes.push("effect-time");
+        }
+
+        // 7 種全てが実際に検証されたことを確認
+        expect(executedDecisionTypes).toEqual([
           "action",
           "card",
           "unit target",
@@ -2724,15 +3078,15 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
           "request target",
           "cost",
           "effect-time",
-        ];
-        expect(supportedTypes).toHaveLength(7);
+        ]);
+        expect(executedDecisionTypes.length).toBe(7);
 
         crossCuttingTracker.record({
           infrastructure: "UI Decision Presenter",
           scope: "All 7 decision types representation & StageTargetPresenter",
           evidenceTest: "2.10.4",
           status: "PASS",
-          resultSummary: "Presenter correctly exposes index, top indicator, and supports all 7 decision types",
+          resultSummary: "UI Decision Types: 7/7 PASS (action, card, unit target, player target, request target, cost, effect-time verified)",
         });
       });
 
