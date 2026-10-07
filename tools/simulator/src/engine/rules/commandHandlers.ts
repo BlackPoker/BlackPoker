@@ -12,7 +12,7 @@ import {
 } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
-import { findPhysicalCardInGrave, removePhysicalCardFromGrave } from "./graveCardUtils";
+import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike } from "./graveCardUtils";
 import { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
@@ -1595,7 +1595,7 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
 
       // Unit wrapper自体が直接移動対象として指定された場合は拒絶 (fail-closed, lightPack Test Y Contract)
       const matchedWrapper = sourceCards.find(
-        (c: any) => c && (c.unitId === cardId || (c.id === cardId && (Array.isArray(c.cards) || c.kind)))
+        (c: any) => c && !isCardLike(c) && (c.unitId === cardId || c.id === cardId)
       );
       if (matchedWrapper) {
         throw new Error(`moveCard: 墓地内のUnit wrapperまたは未対応形式のエントリは移動できません: ${cardId}`);
