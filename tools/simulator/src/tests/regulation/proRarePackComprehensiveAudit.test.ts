@@ -2889,9 +2889,9 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         });
       });
 
-      // 2.10.4 UI 7 Decision Types Contract & Execution
-      it("2.10.4: Generic UI decision presenter and contract covers all 7 decision types", () => {
-        // UI 7 Decision Types: action, card, unit target, player target, request target, cost, effect-time
+      // 2.10.4 UI Decision Protocol & Component Evidence Contract
+      it("2.10.4: Decision Protocol 7 Types validated and references UI Component 7/7 evidence", () => {
+        // Decision Protocol 7 Types: action, card, unit target, player target, request target, cost, effect-time
         const executedDecisionTypes: string[] = [];
 
         // 1. Action selection
@@ -3083,10 +3083,10 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
 
         crossCuttingTracker.record({
           infrastructure: "UI Decision Presenter",
-          scope: "All 7 decision types representation & StageTargetPresenter",
-          evidenceTest: "2.10.4",
+          scope: "UI Component 7 Decision Types & StageTargetPresenter",
+          evidenceTest: "decisionPanelDecisionTypes.test.tsx / 2.10.4",
           status: "PASS",
-          resultSummary: "UI Decision Types: 7/7 PASS (action, card, unit target, player target, request target, cost, effect-time verified)",
+          resultSummary: "UI Component Decision Types: 7/7 PASS (verified via DecisionPanel component tests); Decision Protocol: PASS",
         });
       });
 
