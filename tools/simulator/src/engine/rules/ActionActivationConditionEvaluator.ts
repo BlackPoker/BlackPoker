@@ -29,9 +29,9 @@ export class ActionActivationConditionEvaluator {
       return { isLegal: false, reason: "起動条件オペレータが指定されていません" };
     }
 
-    // サポートする condition operator: turnRelation, zoneState, zoneCount
+    // サポートする condition operator: all, any, turnRelation, zoneState, zoneCount
     const unsupportedKeys = conditionKeys.filter(
-      (k) => k !== "turnRelation" && k !== "zoneState" && k !== "zoneCount"
+      (k) => k !== "all" && k !== "any" && k !== "turnRelation" && k !== "zoneState" && k !== "zoneCount"
     );
     if (unsupportedKeys.length > 0) {
       return {
@@ -40,8 +40,40 @@ export class ActionActivationConditionEvaluator {
       };
     }
 
-    if (!condition.turnRelation && !condition.zoneState && !condition.zoneCount) {
+    if (!condition.all && !condition.any && !condition.turnRelation && !condition.zoneState && !condition.zoneCount) {
       return { isLegal: false, reason: "対応可能な起動条件オペレータが存在しません" };
+    }
+
+    if (condition.all) {
+      if (!Array.isArray(condition.all) || condition.all.length === 0) {
+        return { isLegal: false, reason: "all オペレータには非空の配列を指定してください" };
+      }
+      for (const subCondition of condition.all) {
+        const subResult = this.evaluate(subCondition, context);
+        if (!subResult.isLegal) {
+          return subResult;
+        }
+      }
+    }
+
+    if (condition.any) {
+      if (!Array.isArray(condition.any) || condition.any.length === 0) {
+        return { isLegal: false, reason: "any オペレータには非空の配列を指定してください" };
+      }
+      let anyLegal = false;
+      let lastReason = "any オペレータのいずれの条件も満たしていません";
+      for (const subCondition of condition.any) {
+        const subResult = this.evaluate(subCondition, context);
+        if (subResult.isLegal) {
+          anyLegal = true;
+          break;
+        } else if (subResult.reason) {
+          lastReason = subResult.reason;
+        }
+      }
+      if (!anyLegal) {
+        return { isLegal: false, reason: lastReason };
+      }
     }
 
     if (condition.turnRelation) {

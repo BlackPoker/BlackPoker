@@ -36,6 +36,8 @@ import { buildPlaytestDiagnosticBundleV1 } from "../../ui/playtest/PlaytestDiagn
 import { createReplayPlanFromDiagnosticBundleV1 } from "../../ui/playtest/DiagnosticReplayAdapter";
 import { runDeterministicReplay } from "../../engine/replay/DeterministicReplayRunner";
 import { createSeatControllers } from "../../engine/playtest/PlaytestSeatController";
+import { PlaytestConservativePolicy } from "../../engine/playtest/PlaytestConservativePolicy";
+import { advanceAutomatedDecisions } from "../../engine/playtest/HumanVsPolicyController";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import {
   RegulationCatalog,
@@ -3889,6 +3891,234 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       expect(completed + capped).toBe(NUM_SEEDS);
       expect(errors).toBe(0);
       expect(engineLoops).toBe(0);
+    });
+  });
+
+  // =========================================================================
+  // 8. Incident Reproduction & Regression: Rare Draw Empty-Zone Infinite AI Loop
+  //    Work ID: BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1
+  // =========================================================================
+  describe("8. Incident Reproduction & Regression: Rare Draw Empty-Zone Loop [BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1]", () => {
+    it("8.1 Reproduction: In official:pro-rarePack, when player rareCards is empty, action.rareDraw MUST NOT be legal in LegalPatternGenerator", async () => {
+      const reg = await getRegulation("pro-rarePack");
+      const frame = catalog.frames.get("rarePack")!;
+      const proRulePackage = RegulationRulePackageSelector.selectRulePackage(
+        fullRulePackage,
+        catalog.formats.get("pro")!,
+        reg,
+        frame
+      );
+
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, proRulePackage, 1516619958, {
+        matchId: "repro-empty-rare",
+        playerNames: { p1: "Human", p2: "AI" },
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const state = outcome.state;
+      // P2 のライフを 9 にし、rareCards を空にする (Incident 状態)
+      const excessLife = state.players.p2.life.splice(9);
+      state.players.p2.grave.push(...excessLife);
+      state.players.p2.rareCards = [];
+      state.turnPlayer = "p1";
+      state.chancePlayer = "p2";
+      expect(state.players.p2.life.length).toBe(9);
+      expect(state.players.p2.rareCards.length).toBe(0);
+
+      const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p2", proRulePackage);
+      const rareDrawPattern = decision.request.patterns.find(
+        (p) =>
+          p.kind === "ACTION" &&
+          decision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+      );
+      // 空の Rare Zone では action.rareDraw が絶対に提示されないこと
+      expect(rareDrawPattern).toBeUndefined();
+    });
+
+    it("8.2 Positive & Post-Resolution: Rare Draw is legal when rareCards has 1 card, and immediately disappears upon resolution", async () => {
+      const reg = await getRegulation("pro-rarePack");
+      const frame = catalog.frames.get("rarePack")!;
+      const proRulePackage = RegulationRulePackageSelector.selectRulePackage(
+        fullRulePackage,
+        catalog.formats.get("pro")!,
+        reg,
+        frame
+      );
+
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, proRulePackage, 1516619958, {
+        matchId: "positive-rare-draw",
+        playerNames: { p1: "Human", p2: "AI" },
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const session = new GameSession(outcome.state, proRulePackage);
+
+      // P2 のライフを 9 に設定
+      const excessLife = session.state.players.p2.life.splice(9);
+      session.state.players.p2.grave.push(...excessLife);
+      expect(session.state.players.p2.life.length).toBe(9);
+      expect(session.state.players.p2.rareCards.length).toBe(1);
+
+      session.state.turnPlayer = "p1";
+      session.state.chancePlayer = "p2";
+
+      // 1. Rare Cards が 1 枚ある時は Legal Pattern として提示される
+      const preDecision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
+      const preRareDrawIndex = preDecision.request.patterns.findIndex(
+        (p) =>
+          p.kind === "ACTION" &&
+          preDecision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+      );
+      expect(preRareDrawIndex).toBeGreaterThanOrEqual(0);
+
+      // 2. Rare Draw を実行 -> Hand にカードが移動し、Rare Zone が 0 になる
+      const preHandCount = session.state.players.p2.hand.length;
+
+      const step = session.advance();
+      if (step.type === "WAITING_FOR_DECISION" && step.request.playerId === "p2") {
+        const patternIdx = step.request.patterns.findIndex(
+          (p) =>
+            p.kind === "ACTION" &&
+            step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+        );
+        expect(patternIdx).toBeGreaterThanOrEqual(0);
+        session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: patternIdx,
+        });
+
+        expect(session.state.players.p2.rareCards.length).toBe(0);
+        expect(session.state.players.p2.hand.length).toBe(preHandCount + 1);
+
+        // 3. 解決直後: 次の意思決定リクエストにおいて action.rareDraw は完全に消滅していること
+        session.state.chancePlayer = "p2";
+        const postDecision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
+        const postRareDrawPattern = postDecision.request.patterns.find(
+          (p) =>
+            p.kind === "ACTION" &&
+            postDecision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+        );
+        expect(postRareDrawPattern).toBeUndefined();
+      }
+    });
+
+    it("8.3 AI Loop Regression with Pending Stage: PlaytestConservative does NOT loop infinitely on empty rareCards and proceeds to stage/pass", async () => {
+      const reg = await getRegulation("pro-rarePack");
+      const frame = catalog.frames.get("rarePack")!;
+      const proRulePackage = RegulationRulePackageSelector.selectRulePackage(
+        fullRulePackage,
+        catalog.formats.get("pro")!,
+        reg,
+        frame
+      );
+
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, proRulePackage, 1516619958, {
+        matchId: "ai-loop-regression",
+        playerNames: { p1: "Human", p2: "AI" },
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const session = new GameSession(outcome.state, proRulePackage);
+
+      // P2 ライフ 9、rareCards = [] (Incident 直前状態を再現)
+      const excessLife = session.state.players.p2.life.splice(9);
+      session.state.players.p2.grave.push(...excessLife);
+      session.state.players.p2.rareCards = [];
+
+      // Stage にダミーのリクエスト (mountSoldier / 装備) が積載されている状況
+      session.state.stage.requests.push({
+        requestId: "pending-stage-req-1",
+        actionId: "action.mountSoldier",
+        controller: "p1",
+        definitionOwner: "p1",
+        targets: [],
+        stepIndex: 1,
+      } as any);
+
+      session.state.turnPlayer = "p1";
+      session.state.chancePlayer = "p2"; // AI がクイック判断を求められる
+
+      const initialStep = session.advance();
+
+      const seatControllers = createSeatControllers("humanVsAi", "p1");
+      const policies = {
+        p2: new PlaytestConservativePolicy(),
+      };
+
+      const loopResult = await advanceAutomatedDecisions(session, initialStep, seatControllers, policies, {
+        maxAutomatedDecisions: 50, // 500回待たずに、50回以内ですぐに人間手番または正常停止へ進むことを確認
+      });
+
+      // TECHNICAL_ERROR (安全上限超過) にならず、正常停止 (STOPPED: HUMAN_TURN) または STAGE 処理へ進むこと
+      expect(loopResult.status).not.toBe("TECHNICAL_ERROR");
+      expect(loopResult.records.length).toBeLessThan(10); // 無限ループせず数ステップで完了
+    });
+
+    it("8.4 Incident Seed 1516619958 Smoke: Simulation with PlaytestConservative completes without hitting AI 500 safety limit", async () => {
+      const availableEnvs = getAvailableEnvironments(catalog);
+      const proEnv = availableEnvs.find((e) => e.regulationId === "pro-rarePack")!;
+
+      const outcome = startMatchAttempt({
+        environmentId: proEnv.id,
+        seedInput: "1516619958",
+        catalog,
+        fullRulePackage,
+        matchMode: "humanVsAi",
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const session = outcome.session;
+      const seatControllers = createSeatControllers("humanVsAi", "p1");
+      const policies = {
+        p2: new PlaytestConservativePolicy(),
+      };
+
+      const humanPolicy = new FirstLegalPolicy();
+      let currentStep = session.advance();
+      let totalAiDecisions = 0;
+      for (let turn = 0; turn < 20; turn++) {
+        if (session.state.winner) break;
+        const loopResult = await advanceAutomatedDecisions(session, currentStep, seatControllers, policies, {
+          maxAutomatedDecisions: 100,
+        });
+        if (loopResult.status === "TECHNICAL_ERROR") {
+          throw loopResult.error;
+        }
+        totalAiDecisions += loopResult.records.length;
+        if (loopResult.status === "STOPPED" && loopResult.reason === "FINISHED") {
+          break;
+        }
+        if (loopResult.status === "STOPPED" && loopResult.step.type === "WAITING_FOR_DECISION") {
+          // 人間 (p1) の手番なら FirstLegal で進める
+          const p1Decision = loopResult.step.request;
+          const firstLegal = humanPolicy.choose(p1Decision);
+          currentStep = session.submitDecision(firstLegal);
+        } else {
+          break;
+        }
+      }
+      expect(totalAiDecisions).toBeGreaterThanOrEqual(0);
     });
   });
 });

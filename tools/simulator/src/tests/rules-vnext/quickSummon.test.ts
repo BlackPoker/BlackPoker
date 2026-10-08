@@ -408,6 +408,72 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       expect(res.isLegal).toBe(false);
       expect(res.reason).toContain("下限 (3) 未満");
     });
+
+    it("1.16: Evaluates generic logical operators (all and any) fail-closed and recursively [BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1]", () => {
+      const testState = {
+        turnPlayer: "p1",
+        nonTurnPlayer: "p2",
+        players: {
+          p1: { hand: [{ id: "c1" }] },
+          p2: {
+            life: [1, 2, 3, 4, 5, 6, 7, 8, 9], // length 9
+            rareCards: [{ id: "r1" }], // length 1
+          },
+        },
+      };
+
+      // 1. all 演算子: 全て満たす場合 true
+      const condAllSuccess = {
+        all: [
+          { zoneCount: { player: "controller" as const, zone: "life", atMost: 9 } },
+          { zoneCount: { player: "controller" as const, zone: "rare", atLeast: 1 } },
+        ],
+      };
+      const resAllSuccess = ActionActivationConditionEvaluator.evaluate(condAllSuccess, {
+        state: testState,
+        playerKey: "p2",
+      });
+      expect(resAllSuccess.isLegal).toBe(true);
+
+      // 2. all 演算子: 1つでも不適合なら false (fail-closed)
+      const testStateEmptyRare = {
+        ...testState,
+        players: {
+          ...testState.players,
+          p2: {
+            ...testState.players.p2,
+            rareCards: [], // length 0
+          },
+        },
+      };
+      const resAllFail = ActionActivationConditionEvaluator.evaluate(condAllSuccess, {
+        state: testStateEmptyRare,
+        playerKey: "p2",
+      });
+      expect(resAllFail.isLegal).toBe(false);
+      expect(resAllFail.reason).toContain("下限 (1) 未満");
+
+      // 3. all 演算子: 空配列は fail-closed
+      const resEmptyAll = ActionActivationConditionEvaluator.evaluate({ all: [] } as any, {
+        state: testState,
+        playerKey: "p2",
+      });
+      expect(resEmptyAll.isLegal).toBe(false);
+      expect(resEmptyAll.reason).toContain("all オペレータには非空の配列を指定してください");
+
+      // 4. any 演算子
+      const condAny = {
+        any: [
+          { zoneCount: { player: "controller" as const, zone: "life", atMost: 5 } }, // false (life is 9)
+          { zoneCount: { player: "controller" as const, zone: "rare", atLeast: 1 } }, // true (rare is 1)
+        ],
+      };
+      const resAny = ActionActivationConditionEvaluator.evaluate(condAny, {
+        state: testState,
+        playerKey: "p2",
+      });
+      expect(resAny.isLegal).toBe(true);
+    });
   });
 
   // =========================================================================

@@ -69,11 +69,22 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     expect(action!.targets).toBeUndefined();
 
     expect(action!.activationCondition).toBeDefined();
-    expect(action!.activationCondition!.zoneCount).toEqual({
-      player: "controller",
-      zone: "life",
-      atMost: 9,
-    });
+    expect(action!.activationCondition!.all).toEqual([
+      {
+        zoneCount: {
+          player: "controller",
+          zone: "life",
+          atMost: 9,
+        },
+      },
+      {
+        zoneCount: {
+          player: "controller",
+          zone: "rare",
+          atLeast: 1,
+        },
+      },
+    ]);
   });
 
   // B. Regulation package contract
@@ -87,8 +98,8 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     expect(standardPackActionIds).not.toContain("action.rareDraw");
   });
 
-  // C. Activation boundary contract
-  it("C: Activation boundary: life = 10 is illegal, life = 9 is legal for both generator and validator", async () => {
+  // C. Activation boundary contract (3点セット: life>9: illegal, life<=9+rare>=1: legal, life<=9+rare==0: illegal)
+  it("C: Activation boundary: life = 10 is illegal, life = 9 + rare >= 1 is legal, life = 9 + rare = 0 is illegal [BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1]", async () => {
     const reg = await getRegulation("standard-rarePack");
     const frame = await getFrame("rarePack");
     const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rarePackRulePackage, 42);
@@ -100,10 +111,11 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     const validator = new ActionRequestValidator();
     const rareDrawDef = rarePackRulePackage.actions.find((a) => a.id === "action.rareDraw")!;
 
-    // 1. Life = 10: Not legal
+    // 1. Life = 10, rare = 1: Not legal (life boundary)
     const excessLife10 = state.players[turnPlayer].life.splice(10);
     state.players[turnPlayer].grave.push(...excessLife10);
     expect(state.players[turnPlayer].life.length).toBe(10);
+    expect(state.players[turnPlayer].rareCards.length).toBeGreaterThanOrEqual(1);
 
     const decision10 = LegalPatternGenerator.generateActionRequestDecision(state, turnPlayer, rarePackRulePackage);
     const pattern10 = decision10.request.patterns.find(
@@ -122,10 +134,11 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     });
     expect(evalRes10.isLegal).toBe(false);
 
-    // 2. Life = 9: Legal
+    // 2. Life = 9, rare = 1: Legal (positive case)
     const excessLife9 = state.players[turnPlayer].life.splice(9);
     state.players[turnPlayer].grave.push(...excessLife9);
     expect(state.players[turnPlayer].life.length).toBe(9);
+    expect(state.players[turnPlayer].rareCards.length).toBe(1);
 
     const decision9 = LegalPatternGenerator.generateActionRequestDecision(state, turnPlayer, rarePackRulePackage);
     const pattern9 = decision9.request.patterns.find(
@@ -142,6 +155,30 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
       playerKey: turnPlayer,
     });
     expect(evalRes9.isLegal).toBe(true);
+
+    // 3. Life = 9, rare = 0: Not legal (reproduction of Incident: empty rare zone)
+    const savedRares = state.players[turnPlayer].rareCards.splice(0);
+    expect(state.players[turnPlayer].rareCards.length).toBe(0);
+
+    const decisionEmptyRare = LegalPatternGenerator.generateActionRequestDecision(state, turnPlayer, rarePackRulePackage);
+    const patternEmptyRare = decisionEmptyRare.request.patterns.find(
+      (p) => p.kind === "ACTION" && decisionEmptyRare.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+    );
+    expect(patternEmptyRare).toBeUndefined();
+
+    expect(() => {
+      validator.validateActionRequest(rareDrawDef, { state, playerKey: turnPlayer });
+    }).toThrow(ValidationError);
+
+    const evalResEmptyRare = ActionActivationConditionEvaluator.evaluate(rareDrawDef.activationCondition, {
+      state,
+      playerKey: turnPlayer,
+    });
+    expect(evalResEmptyRare.isLegal).toBe(false);
+    expect(evalResEmptyRare.reason).toContain("下限 (1) 未満");
+
+    // リストア
+    state.players[turnPlayer].rareCards.push(...savedRares);
   });
 
   // D, E, G, H, I: Resolution, physical card conservation, no reveal, canonical match log, immediate semantics
@@ -201,6 +238,19 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     const movedCard = session.state.players[turnPlayer].hand.find((c: any) => c.id === initialRareCard.id);
     expect(movedCard).toBeDefined();
     expect(movedCard).toBe(initialRareCard); // exact physical object reference
+
+    // D2. Post-resolution: Once rareCards is 0, subsequent LegalPatternGenerator MUST NOT offer action.rareDraw [BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1]
+    const postResolutionDecision = LegalPatternGenerator.generateActionRequestDecision(
+      session.state,
+      turnPlayer,
+      rarePackRulePackage
+    );
+    const postRareDrawPattern = postResolutionDecision.request.patterns.find(
+      (p) =>
+        p.kind === "ACTION" &&
+        postResolutionDecision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+    );
+    expect(postRareDrawPattern).toBeUndefined();
 
     // E. Real 54-card conservation across all zones
     expect(() => {
@@ -279,8 +329,8 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     }
   });
 
-  // J. Clean fizzle when rare zone is empty
-  it("J: Clean fizzle: executing Rare Draw when rare zone is empty does not throw and preserves state", async () => {
+  // J. Empty rare zone: Illegal for legal pattern generator, clean fizzle if resolved
+  it("J: Empty rare zone: Rare Draw is illegal in LegalPatternGenerator; resolution when rare zone is empty cleanly fizzles without throwing [BP-SIM-BUG-RAREDRAW-EMPTY-ZONE-LOOP-R1]", async () => {
     const reg = await getRegulation("standard-rarePack");
     const frame = await getFrame("rarePack");
     const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rarePackRulePackage, 42);
@@ -302,17 +352,19 @@ describe("BP-SIM-REG-4.0-B: Rare Draw Official Semantics & Integration", () => {
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") return;
 
+    // 1. Rare Zone が空の時は Legal Pattern として提示されないこと
     const patternIndex = step.request.patterns.findIndex(
       (p) => p.kind === "ACTION" && step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
     );
-    expect(patternIndex).toBeGreaterThanOrEqual(0);
+    expect(patternIndex).toBe(-1);
 
-    // Submit Rare Draw decision with empty rareCards
+    // 2. Resolution 時に稀なレース等で空の Rare Zone から解決された場合もクラッシュせず状態を保つこと
+    const handler = moveCardHandler();
     expect(() => {
-      session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: patternIndex,
+      handler({ from: "rare", to: "hand" }, {
+        state: session.state,
+        playerKey: turnPlayer,
+        selections: {},
       });
     }).not.toThrow();
 

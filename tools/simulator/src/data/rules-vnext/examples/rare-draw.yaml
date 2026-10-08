@@ -10,10 +10,15 @@ actions:
       timing: quick
 
     activationCondition:
-      zoneCount:
-        player: controller
-        zone: life
-        atMost: 9
+      all:
+        - zoneCount:
+            player: controller
+            zone: life
+            atMost: 9
+        - zoneCount:
+            player: controller
+            zone: rare
+            atLeast: 1
 
     text:
       summary: レアカードを1枚手札に加える。
