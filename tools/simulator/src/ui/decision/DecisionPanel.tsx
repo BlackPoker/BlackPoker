@@ -303,12 +303,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       }
     }
 
-    // catalog.effectSelections に含まれる candidateUnitIds を収集
+    // catalog.effectSelections に含まれる candidateUnitIds を収集 (カード選択は除外)
     const candidateUnitIds = new Set<string>();
     for (const eff of (catalog.effectSelections || [])) {
+      if (eff.selectionType === "card") continue;
       if (eff.selectedValues) {
         for (const uId of eff.selectedValues) {
-          candidateUnitIds.add(uId);
+          if (allFieldUnits.has(uId) || eff.selectionType === "unit" || eff.selectionType === "target") {
+            candidateUnitIds.add(uId);
+          }
         }
       }
       if (eff.assignments) {
@@ -321,33 +324,80 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       }
     }
 
+    const NUMBER_BADGES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯"];
+
     // candidateUnitIds それぞれについて、effectiveBattleRelationMap (SSOT) から情報を取得
-    for (const unitId of candidateUnitIds) {
+    const candidateUnitIdList = Array.from(candidateUnitIds);
+    candidateUnitIdList.forEach((unitId, index) => {
       const fieldEntry = allFieldUnits.get(unitId);
       const relInfo = effectiveBattleRelationMap.get(unitId);
       const ownerPlayerKey = relInfo?.ownerPlayerKey || fieldEntry?.ownerPlayerKey;
       const isOwner = ownerPlayerKey === request.playerId;
-      const ownerPrefix = ownerPlayerKey ? (isOwner ? "自分 " : "相手 ") : "";
 
-      const badge = relInfo?.badge || "";
+      // プレイヤー表示名の解決 (SSOT: request.observation.players または Player A / Player B)
+      const playerObj = request.observation?.players?.find((p) => p.playerId === ownerPlayerKey);
+      const playerName = playerObj?.name || (ownerPlayerKey === "p1" ? "Player A" : ownerPlayerKey === "p2" ? "Player B" : "");
+      const relationPrefix = ownerPlayerKey ? (isOwner ? "自分" : "相手") : "";
+      const playerPrefix = relationPrefix
+        ? (playerName ? `${relationPrefix} ${playerName} の` : `${relationPrefix} `)
+        : (playerName ? `${playerName} の` : "");
+
+      // バッジ番号: effectiveBattleRelationMap に既存バッジがあれば優先、なければ出現順に決定論的付与
+      const badge = relInfo?.badge || NUMBER_BADGES[index] || `[${index + 1}]`;
+
       const unit = fieldEntry?.unit;
-      const cardStr = formatCardList(unit?.cards || []);
       const unitType = unit?.kind || (unit?.componentId === "character.bulwark" ? "防壁" : "一般兵");
-      const cardPart = cardStr ? `${cardStr} ` : "";
+
+      // 実カード情報の抽出 (秘匿境界 fail-closed を厳守)
+      // 相手の伏せカード (face === "down" かつ !isOwner) や visibility === "HIDDEN" は秘匿
+      const isFaceDown = unit?.face === "down";
+      const isHidden = (!isOwner && isFaceDown) || unit?.cards?.some((c: any) => c.visibility === "HIDDEN");
+
+      let cardStr = "";
+      if (!isHidden && unit?.cards && Array.isArray(unit.cards) && unit.cards.length > 0) {
+        const formatted = unit.cards
+          .map((c: any) => {
+            if (c.code) {
+              return c.code
+                .replace(/S/g, "♠")
+                .replace(/H/g, "♥")
+                .replace(/D/g, "♦")
+                .replace(/C/g, "♣")
+                .replace(/♡/g, "♥")
+                .replace(/♢/g, "♦");
+            }
+            if (c.suit) {
+              const sym = formatOfficialSuitSymbol(c.suit);
+              const rank = c.rank !== undefined ? String(c.rank) : "";
+              return `${sym}${rank}`;
+            }
+            return "";
+          })
+          .filter(Boolean);
+        if (formatted.length > 0) {
+          cardStr = formatted.join(", ");
+        }
+      }
 
       let humanLabel = relInfo?.humanLabel;
       if (!humanLabel) {
         if (unit?.componentId === "character.bulwark" || unitType === "防壁") {
-          humanLabel = relInfo?.bulwarkPosition ? `防壁${relInfo.bulwarkPosition}` : "防壁";
+          const bulwarkPos = relInfo?.bulwarkPosition ? `防壁${relInfo.bulwarkPosition}` : "防壁";
+          humanLabel = `${playerPrefix}${bulwarkPos}${cardStr ? `（${cardStr}）` : ""}`;
         } else {
-          humanLabel = `${unitType}${cardPart ? ` ${cardPart.trim()}` : ""}`.trim();
+          humanLabel = `${playerPrefix}${unitType}${cardStr ? `（${cardStr}）` : ""}`;
+        }
+      } else {
+        if (!humanLabel.includes("Player") && !humanLabel.includes("自分") && !humanLabel.includes("相手") && playerPrefix) {
+          humanLabel = `${playerPrefix}${humanLabel}`;
+        }
+        if (cardStr && !humanLabel.includes("（") && !humanLabel.includes("(")) {
+          humanLabel = `${humanLabel}（${cardStr}）`;
         }
       }
 
-      // label: 実プレイ準拠の人間識別名（二重の①等のターゲット通し番号は廃止）
-      const label = `${ownerPrefix}${humanLabel}`.trim();
-
-      // fullLabel: パターン一覧テキスト用（実プレイ準拠）
+      // label: バッジ＋人間識別名（例: "① Player B の一般兵（♣3）"）
+      const label = badge ? `${badge} ${humanLabel}`.trim() : humanLabel.trim();
       const fullLabel = label;
 
       map.set(unitId, {
@@ -356,14 +406,14 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         fullLabel,
         unitView: unit,
       });
-    }
+    });
 
     return map;
   }, [catalog.effectSelections, request.observation, request.playerId, effectiveBattleRelationMap]);
 
   // EFFECT_RESOLUTION 用の人間可読パターンリスト
   const humanReadableEffectPatterns = useMemo(() => {
-    return patterns.map((p, idx) => {
+    const rawPatterns = patterns.map((p, idx) => {
       const eff = p.effectSelectionRef !== undefined ? catalog.effectSelections[p.effectSelectionRef] : undefined;
       if (!eff) return { patternIndex: idx, label: "効果の選択", selectedValues: [] };
 
@@ -383,18 +433,26 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         };
       }
 
-      // 1. アタッカー選択 (selectedValues)
+      // 1. ユニット選択 / 選択肢 (selectedValues)
       if (eff.selectedValues !== undefined) {
         if (eff.selectedValues.length === 0) {
-          return { patternIndex: idx, label: "アタッカーなし (0体)", selectedValues: [] };
+          return { patternIndex: idx, label: "なし (0体)", selectedValues: [] };
         }
-        const unitLabels = eff.selectedValues.map((uId: string) => {
-          const info = unitNumberMap.get(uId);
-          return info ? info.label : uId;
-        });
-        const isSingle = eff.selectedValues.length === 1;
-        const label = isSingle ? `${unitLabels[0]} のみ` : unitLabels.join(" + ");
-        return { patternIndex: idx, label, selectedValues: eff.selectedValues };
+        const isUnitSelection = eff.selectedValues.some((val: string) => unitNumberMap.has(val));
+        if (isUnitSelection) {
+          const unitLabels = eff.selectedValues.map((uId: string) => {
+            const info = unitNumberMap.get(uId);
+            return info ? info.label : uId;
+          });
+          const isSingle = eff.selectedValues.length === 1;
+          const isAttackerSelection = eff.selectionType === "unit";
+          const label = isSingle && isAttackerSelection ? `${unitLabels[0]} のみ` : unitLabels.join(" + ");
+          return { patternIndex: idx, label, selectedValues: eff.selectedValues };
+        }
+
+        // ユニットIDではないオプション選択 (例: ["charge"], ["drive"] 等)
+        const optLabel = eff.summary || eff.selectedValues.join(", ");
+        return { patternIndex: idx, label: optLabel, selectedValues: eff.selectedValues };
       }
 
       // 2. ブロッカー割当て (assignments)
@@ -418,6 +476,30 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         patternIndex: idx,
         label: eff.summary || "選択肢",
         selectedValues: [],
+      };
+    });
+
+    // 衝突回避ガード (同一ラベルが複数存在する場合、[1], [2] を自動付与して完全解消)
+    const labelCounts = new Map<string, number>();
+    for (const item of rawPatterns) {
+      labelCounts.set(item.label, (labelCounts.get(item.label) || 0) + 1);
+    }
+    const hasCollision = Array.from(labelCounts.values()).some((count) => count > 1);
+    if (!hasCollision) {
+      return rawPatterns;
+    }
+
+    const seenIndices = new Map<string, number>();
+    return rawPatterns.map((item) => {
+      const count = labelCounts.get(item.label) || 0;
+      if (count <= 1) {
+        return item;
+      }
+      const currentIndex = (seenIndices.get(item.label) || 0) + 1;
+      seenIndices.set(item.label, currentIndex);
+      return {
+        ...item,
+        label: `${item.label} [${currentIndex}]`,
       };
     });
   }, [patterns, catalog, unitNumberMap]);
@@ -615,6 +697,29 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     const isBlockAssignment = (catalog.effectSelections || []).some(
       (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
     );
+    const isCardSelection = (catalog.effectSelections || []).some(
+      (eff) => eff.selectionType === "card"
+    );
+    const isUnitSelection =
+      !isCardSelection &&
+      (catalog.effectSelections || []).some(
+        (eff) =>
+          (eff.selectedValues && eff.selectedValues.some((v: string) => unitNumberMap.has(v))) ||
+          eff.selectionType === "target" ||
+          eff.selectionType === "unit"
+      );
+
+    const headerTitle = isZoneTopSelection
+      ? "墓地TOPを選択"
+      : isBlockAssignment
+      ? "ブロッカー指定"
+      : isUnitSelection
+      ? "対象ユニットを選択"
+      : "効果を選択";
+
+    const guideLabel = isUnitSelection
+      ? "対象ユニットを選択（盤面をタップまたは下記から選択）:"
+      : "選択肢（盤面をタップまたは下記から選択）:";
 
     return (
       <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
@@ -624,7 +729,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               {isZoneTopSelection ? "ZONE TOP SELECTION" : "EFFECT SELECTION"}
             </span>
             <h2 className="text-sm font-bold text-zinc-950 mt-0.5 tracking-wide">
-              {request.playerId === "p1" ? "Player A" : "Player B"} の{isZoneTopSelection ? "墓地TOPを選択" : isBlockAssignment ? "ブロッカー指定" : "効果を選択"}
+              {request.playerId === "p1" ? "Player A" : "Player B"} の{headerTitle}
             </h2>
           </div>
 
@@ -661,7 +766,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         ) : (
           <div className="space-y-2.5">
             <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-              選択肢（盤面をタップまたは下記から選択）:
+              {guideLabel}
             </label>
 
             <div className="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-1">

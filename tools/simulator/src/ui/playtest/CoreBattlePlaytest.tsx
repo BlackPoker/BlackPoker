@@ -2253,7 +2253,7 @@ export const CoreBattlePlaytest: React.FC = () => {
                   currentStep.request.source.type === "ZONE_TOP_SELECTION"
                     ? "墓地TOP選択"
                     : currentStep.request.source.type === "EFFECT_RESOLUTION"
-                    ? "効果選択"
+                    ? "効果・対象選択"
                     : "行動選択"
                 }`
               : "行動選択"

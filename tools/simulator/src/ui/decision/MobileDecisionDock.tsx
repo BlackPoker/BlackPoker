@@ -52,11 +52,11 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-zinc-950 animate-pulse" />
             <span className="font-bold text-zinc-950">
-              {playerName} の{isZoneTopSelection ? "墓地TOP選択" : isEffectResolution ? "効果選択" : "行動選択"}
+              {playerName} の{isZoneTopSelection ? "墓地TOP選択" : isEffectResolution ? "効果・対象選択" : "行動選択"}
             </span>
           </div>
           <span className="text-zinc-500 text-[10px]">
-            {isZoneTopSelection ? "ZONE TOP" : isEffectResolution ? "EFFECT" : `${request.patterns.length} 選択肢`}
+            {isZoneTopSelection ? "ZONE TOP" : isEffectResolution ? "EFFECT / TARGET" : `${request.patterns.length} 選択肢`}
           </span>
         </div>
 

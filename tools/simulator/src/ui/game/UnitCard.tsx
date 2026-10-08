@@ -110,11 +110,25 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           : "bg-white border border-zinc-300 shadow-sm"
       }`}
     >
-      {/* 選択中インジケーター (チェックマークのみ・番号バッジは非表示) */}
-      {selectionMarker?.isSelected && (
+      {/* 選択・候補インジケーター (番号バッジ ①, ②... & 選択時は ✓ を併記) */}
+      {selectionMarker && (
         <div className="absolute -top-1.5 -left-1 lg:-top-2 lg:-left-2 z-20">
-          <span className="flex items-center justify-center w-4 h-4 lg:w-5 lg:h-5 rounded-full text-[10px] lg:text-xs font-mono font-black shadow-md bg-zinc-950 text-white border-2 border-white">
-            ✓
+          <span
+            className={`flex items-center justify-center px-1 min-w-[18px] h-4 lg:min-w-[22px] lg:h-5 rounded-full text-[10px] lg:text-xs font-mono font-black shadow-md border-2 ${
+              selectionMarker.isSelected
+                ? "bg-zinc-950 text-white border-white ring-1 ring-zinc-950"
+                : "bg-white text-zinc-950 border-zinc-700"
+            }`}
+          >
+            {selectionMarker.badge ? (
+              selectionMarker.isSelected ? (
+                <span>{selectionMarker.badge}✓</span>
+              ) : (
+                <span>{selectionMarker.badge}</span>
+              )
+            ) : selectionMarker.isSelected ? (
+              "✓"
+            ) : null}
           </span>
         </div>
       )}
