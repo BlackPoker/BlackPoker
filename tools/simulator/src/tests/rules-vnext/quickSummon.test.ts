@@ -444,7 +444,7 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       expect(inStandard).toBe(false);
     });
 
-    it("2.3: pro:rarePack regulation exists with simulatorImplemented: false", async () => {
+    it("2.3: pro:rarePack regulation exists with simulatorImplemented: true", async () => {
       const catalog = await loadRegulationCatalog();
       const proRarePack = await getRegulation("pro-rarePack");
       expect(proRarePack).toBeDefined();
@@ -452,7 +452,7 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       expect(proRarePack.frameId).toBe("rarePack");
 
       const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
     });
   });
 

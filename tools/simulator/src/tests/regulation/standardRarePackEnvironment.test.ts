@@ -54,7 +54,7 @@ describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RARE
       }
     });
 
-    it("Non-implemented combinations remain false (pro:rarePack, light:rarePack, master:rarePack)", () => {
+    it("Non-implemented combinations remain false (light:rarePack, master:rarePack)", () => {
       const catalogWithMaster = {
         ...catalog,
         formats: new Map([
@@ -64,7 +64,6 @@ describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RARE
       };
 
       const notImplemented = [
-        { formatId: "pro", frameId: "rarePack" },
         { formatId: "light", frameId: "rarePack" },
         { formatId: "master", frameId: "rarePack" },
       ];
@@ -78,11 +77,11 @@ describe("Standard + Rare Pack Environment Tests [BP-SIM-REG-4.0-E-STANDARD-RARE
       }
     });
 
-    it("pro:rarePack is ruleLegal and recommended, but simulatorImplemented is false", () => {
+    it("pro:rarePack is ruleLegal, recommended, and simulatorImplemented is true", () => {
       const val = RegulationValidator.validateCombination(catalog, "pro", "rarePack");
       expect(val.ruleLegal).toBe(true);
       expect(val.recommended).toBe(true);
-      expect(val.simulatorImplemented).toBe(false);
+      expect(val.simulatorImplemented).toBe(true);
     });
   });
 

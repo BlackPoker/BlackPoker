@@ -1188,7 +1188,7 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
       expect(targets[0].targetRequestId).toBe("req-up-c");
     });
 
-    it("10.2: pro:rarePack remains simulatorImplemented: false (unimplemented Pro actions remain)", async () => {
+    it("10.2: pro:rarePack is now simulatorImplemented: true", async () => {
       const catalog = await loadRegulationCatalog();
       const proRarePack = await getRegulation("pro-rarePack");
       expect(proRarePack).toBeDefined();
@@ -1196,7 +1196,7 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
       expect(proRarePack.frameId).toBe("rarePack");
 
       const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
     });
   });
 });

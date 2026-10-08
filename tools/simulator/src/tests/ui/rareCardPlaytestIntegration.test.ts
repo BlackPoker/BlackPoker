@@ -485,24 +485,24 @@ describe("Rare Card Playtest Integration Tests [BP-SIM-REG-5.0-J-RARE-SELECTION]
     });
   });
 
-  describe("Publication Guard for Pro + RarePack", () => {
-    it("pro:rarePack remains unpublished (simulatorImplemented: false)", () => {
+  describe("Publication Contract for Pro + RarePack", () => {
+    it("pro:rarePack is published (simulatorImplemented: true)", () => {
       const val = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
       expect(val.ruleLegal).toBe(true);
       expect(val.recommended).toBe(true);
-      expect(val.simulatorImplemented).toBe(false);
+      expect(val.simulatorImplemented).toBe(true);
 
       const availableEnvs = getAvailableEnvironments(catalog);
-      expect(availableEnvs.some((e) => e.id === "official:pro-rarePack")).toBe(false);
+      expect(availableEnvs.some((e) => e.id === "official:pro-rarePack")).toBe(true);
     });
 
-    it("OfficialRegulationMatchFactory rejects pro:rarePack with SimulatorNotImplementedError", async () => {
-      await expect(
-        OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
-          catalog,
-          fullRulePackage,
-        })
-      ).rejects.toThrow(SimulatorNotImplementedError);
+    it("OfficialRegulationMatchFactory creates pro:rarePack session successfully", async () => {
+      const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
+        catalog,
+        fullRulePackage,
+      });
+      expect(session).toBeDefined();
+      expect(session.state.regulationId).toBe("pro-rarePack");
     });
 
     it("OfficialRegulationMatchSetup can construct initial match state for Pro + RarePack (Engine-level setup)", () => {

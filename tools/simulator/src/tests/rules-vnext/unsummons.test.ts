@@ -133,7 +133,7 @@ describe("action.unsummons (帰還) & Generic Character Hand-Return Foundation [
     expect(rulePackage.actions.some((a) => a.id === "action.unsummons")).toBe(true);
   });
 
-  it("3. Pro Publication Guard: pro:rarePack remains unpublished (simulatorImplemented: false)", async () => {
+  it("3. Pro Publication Contract: pro:rarePack is now published (simulatorImplemented: true)", async () => {
     const catalog = await loadRegulationCatalog();
     const proRarePack = await getRegulation("pro-rarePack");
     expect(proRarePack).toBeDefined();
@@ -141,7 +141,7 @@ describe("action.unsummons (帰還) & Generic Character Hand-Return Foundation [
     expect(proRarePack.frameId).toBe("rarePack");
 
     const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
-    expect(validation.simulatorImplemented).toBe(false);
+    expect(validation.simulatorImplemented).toBe(true);
   });
 
   // ===========================================================================

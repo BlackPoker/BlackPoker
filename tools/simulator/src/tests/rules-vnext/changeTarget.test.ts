@@ -120,7 +120,7 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
       expect(rulePackage.actions.map((a) => a.id)).toContain("action.reverse");
     });
 
-    it("1.5: pro:rarePack remains unimplemented / unpublished", async () => {
+    it("1.5: pro:rarePack is now implemented / published", async () => {
       const catalog = await loadRegulationCatalog();
       const proRarePack = await getRegulation("pro-rarePack");
       expect(proRarePack).toBeDefined();
@@ -128,7 +128,7 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
       expect(proRarePack.frameId).toBe("rarePack");
 
       const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
     });
   });
 

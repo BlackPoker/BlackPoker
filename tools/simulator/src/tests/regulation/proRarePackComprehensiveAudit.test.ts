@@ -1836,9 +1836,6 @@ function buildLegalDecisionFixture(actionId: string, rulePackage: RulePackage): 
 describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMPREHENSIVE-AUDIT]", () => {
   let catalog: RegulationCatalog;
   let fullRulePackage: RulePackage;
-  let gateFlippedCatalog: RegulationCatalog;
-  let originalValidateCombination: typeof RegulationValidator.validateCombination;
-  let globalSpy: any;
   let registry: CommandRegistry;
   let harness: ActionExecutionHarness;
   let tracker: ActionExecutionTracker;
@@ -1854,38 +1851,6 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
     harness = new ActionExecutionHarness(fullRulePackage, registry);
     tracker = new ActionExecutionTracker();
     crossCuttingTracker = new CrossCuttingAuditTracker();
-
-    // Gate-Flip Simulation Catalog の構築 (Test-local fixture)
-    gateFlippedCatalog = {
-      formats: new Map(catalog.formats),
-      frames: new Map(catalog.frames),
-      regulations: new Map(catalog.regulations),
-    };
-
-    originalValidateCombination = RegulationValidator.validateCombination.bind(RegulationValidator);
-
-    globalSpy = vi.spyOn(RegulationValidator, "validateCombination").mockImplementation(
-      (catalogParam, formatId, frameId, options) => {
-        if (catalogParam === gateFlippedCatalog && formatId === "pro" && frameId === "rarePack") {
-          const format = catalogParam.formats.get(formatId);
-          const frame = catalogParam.frames.get(frameId);
-          return {
-            ruleLegal: true,
-            recommended: true,
-            simulatorImplemented: true,
-            regulation: options?.regulation,
-            format,
-            frame,
-          };
-        }
-        return originalValidateCombination(catalogParam, formatId, frameId, options);
-      }
-    );
-  });
-
-  afterAll(() => {
-    globalSpy?.mockRestore();
-    vi.restoreAllMocks();
   });
 
   // =========================================================================
@@ -3464,12 +3429,12 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
   });
 
   // =========================================================================
-  // Section 4: Gate-Flip Simulation & Hypothetical Public Path (必須テスト 6, 7, 8, 9, 10, 11, 12)
+  // Section 4: Public Path & Official Match Execution (必須テスト 6, 7, 8, 9, 10, 11, 12)
   // =========================================================================
-  describe("Section 4: Gate-Flip Simulation & Hypothetical Public Path", () => {
-    it("4.1 (必須 6, 10): test-only enabled Pro+RarePack setup succeeds with exact setup order and no hand routing", async () => {
-      const reg = gateFlippedCatalog.regulations.get("pro-rarePack")!;
-      const frame = gateFlippedCatalog.frames.get(reg.frameId)!;
+  describe("Section 4: Public Path & Official Match Execution", () => {
+    it("4.1 (必須 6, 10): Pro+RarePack setup succeeds with exact setup order and no hand routing", async () => {
+      const reg = catalog.regulations.get("pro-rarePack")!;
+      const frame = catalog.frames.get(reg.frameId)!;
 
       const profile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, reg.id);
       expect(profile.cards).toHaveLength(54);
@@ -3512,9 +3477,9 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       OfficialRegulationMatchSetup.verifyCardConservation("p2", state.players.p2, profile.cards);
     });
 
-    it("4.2 (必須 7): test-only enabled OfficialRegulationMatchFactory succeeds and creates playable GameSession", async () => {
+    it("4.2 (必須 7): OfficialRegulationMatchFactory succeeds and creates playable GameSession", async () => {
       const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
-        catalog: gateFlippedCatalog,
+        catalog,
         fullRulePackage,
       });
 
@@ -3526,8 +3491,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       expect(state.players.p2.life.length).toBeGreaterThan(0);
     });
 
-    it("4.3 (必須 8): test-only enabled PlaytestEnvironmentController starts match and produces READY outcome", () => {
-      const availableEnvs = getAvailableEnvironments(gateFlippedCatalog);
+    it("4.3 (必須 8): PlaytestEnvironmentController starts match and produces READY outcome", () => {
+      const availableEnvs = getAvailableEnvironments(catalog);
       const proEnv = availableEnvs.find((e) => e.regulationId === "pro-rarePack");
       expect(proEnv).toBeDefined();
       expect(proEnv?.isOfficial).toBe(true);
@@ -3535,7 +3500,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       const request: MatchStartRequest = {
         environmentId: proEnv!.id,
         seedInput: "42",
-        catalog: gateFlippedCatalog,
+        catalog,
         fullRulePackage,
         matchMode: "humanVsAi",
         rareCardSelections: {
@@ -3552,9 +3517,9 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       expect(outcome.initialStep).toBeDefined();
     });
 
-    it("4.4 (必須 9): test-only enabled GameSession correctly enumerates legal decisions for Pro+RarePack", async () => {
+    it("4.4 (必須 9): GameSession correctly enumerates legal decisions for Pro+RarePack", async () => {
       const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
-        catalog: gateFlippedCatalog,
+        catalog,
         fullRulePackage,
       });
 
@@ -3570,8 +3535,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
     });
 
     it("4.5 (必須 11): H2H Rare selection maintains strict privacy contracts in DOM/state", async () => {
-      const reg = gateFlippedCatalog.regulations.get("pro-rarePack")!;
-      const frame = gateFlippedCatalog.frames.get(reg.frameId)!;
+      const reg = catalog.regulations.get("pro-rarePack")!;
+      const frame = catalog.frames.get(reg.frameId)!;
       const profile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, reg.id);
 
       // P1: ♠A, P2: ♥K
@@ -3600,8 +3565,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
     });
 
     it("4.6 (必須 12): HvsAI / Headless uses deterministic default Rare selections", async () => {
-      const reg = gateFlippedCatalog.regulations.get("pro-rarePack")!;
-      const frame = gateFlippedCatalog.frames.get(reg.frameId)!;
+      const reg = catalog.regulations.get("pro-rarePack")!;
+      const frame = catalog.frames.get(reg.frameId)!;
       const profile = SimulatorDeckProfileResolver.resolveDeckProfile(frame, reg.id);
 
       const defaults = profile.defaultRareCardSelections!;
@@ -3638,7 +3603,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
 
       for (let seed = 1; seed <= NUM_SEEDS; seed++) {
         const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", seed, {
-          catalog: gateFlippedCatalog,
+          catalog,
           fullRulePackage,
         });
 
@@ -3705,7 +3670,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       const outcome = startMatchAttempt({
         environmentId: "official:pro-rarePack",
         seedInput: "42",
-        catalog: gateFlippedCatalog,
+        catalog,
         fullRulePackage,
       });
 
@@ -3772,7 +3737,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       if (planResult.type !== "READY") return;
 
       const replayResult = runDeterministicReplay(planResult.plan, {
-        catalog: gateFlippedCatalog,
+        catalog,
         fullRulePackage,
       });
 
@@ -3785,49 +3750,55 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
   });
 
   // =========================================================================
-  // Section 7: Publication Guard Regression (Strict Production Checks)
+  // Section 7: Publication Verification & Production Integrity Checks
   // =========================================================================
-  describe("Section 7: Publication Guard Regression (Strict Production Checks)", () => {
-    it("7.1 (必須 16): Production catalog validates pro:rarePack as simulatorImplemented === false", () => {
+  describe("Section 7: Publication Verification & Production Integrity Checks", () => {
+    it("7.1 (必須 16): Production catalog validates pro:rarePack as simulatorImplemented === true", () => {
       const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
       expect(validation.ruleLegal).toBe(true);
       expect(validation.recommended).toBe(true);
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
 
       const browserCatalog = loadRegulationCatalogForBrowser();
       const browserValidation = RegulationValidator.validateRegulation(browserCatalog, "pro-rarePack");
-      expect(browserValidation.simulatorImplemented).toBe(false);
+      expect(browserValidation.simulatorImplemented).toBe(true);
     });
 
-    it("7.2 (必須 17): Production available environments does NOT include official:pro-rarePack (exactly 5 items including Core Battle)", () => {
+    it("7.2 (必須 17): Production available environments includes official:pro-rarePack (exactly 6 items including Core Battle)", () => {
       const envs = getAvailableEnvironments(catalog);
       const proEnv = envs.find(
         (e) => e.regulationId === "pro-rarePack" || e.id === "official:pro-rarePack"
       );
-      expect(proEnv).toBeUndefined();
+      expect(proEnv).toBeDefined();
+      expect(proEnv?.isOfficial).toBe(true);
 
-      expect(envs).toHaveLength(5);
+      expect(envs).toHaveLength(6);
       const officialIds = envs.filter((e) => e.isOfficial).map((e) => e.regulationId);
       expect(officialIds.sort()).toEqual(
-        ["light-entry16", "light-pack", "standard-pack", "standard-rarePack"].sort()
+        ["light-entry16", "light-pack", "standard-pack", "standard-rarePack", "pro-rarePack"].sort()
       );
     });
 
-    it("7.3 (必須 18): Production OfficialRegulationMatchFactory rejects pro-rarePack with SimulatorNotImplementedError", async () => {
-      await expect(
-        OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
-          catalog,
-          fullRulePackage,
-        })
-      ).rejects.toThrow(SimulatorNotImplementedError);
+    it("7.3 (必須 18): Production OfficialRegulationMatchFactory creates pro-rarePack session successfully", async () => {
+      const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
+        catalog,
+        fullRulePackage,
+      });
+      expect(session).toBeDefined();
+      expect(session.state.regulationId).toBe("pro-rarePack");
+      expect(session.state.players.p1.rareCards).toHaveLength(1);
+      expect(session.state.players.p2.rareCards).toHaveLength(1);
+      expect(session.state.players.p1.life.length).toBeGreaterThan(0);
+      expect(session.state.players.p2.life.length).toBeGreaterThan(0);
     });
 
-    it("7.4 (必須 19): All 4 existing public environments continue to work correctly in production catalog", async () => {
+    it("7.4 (必須 19): All 5 official environments continue to work correctly in production catalog", async () => {
       const publicRegs = [
         "light-entry16",
         "light-pack",
         "standard-pack",
         "standard-rarePack",
+        "pro-rarePack",
       ];
 
       for (const regId of publicRegs) {
@@ -3843,6 +3814,39 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         expect(session).toBeDefined();
         expect(session.state.players.p1.life.length).toBeGreaterThan(0);
         expect(session.state.players.p2.life.length).toBeGreaterThan(0);
+      }
+    });
+
+    it("7.5 (必須 20): Production official:pro-rarePack environment completes 10 seeds bounded AI smoke test without errors", () => {
+      const availableEnvs = getAvailableEnvironments(catalog);
+      const proEnv = availableEnvs.find((e) => e.regulationId === "pro-rarePack");
+      expect(proEnv).toBeDefined();
+
+      for (let seed = 1; seed <= 10; seed++) {
+        const outcome = startMatchAttempt({
+          environmentId: proEnv!.id,
+          seedInput: String(seed),
+          catalog,
+          fullRulePackage,
+          rareCardSelections: {
+            p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          },
+        });
+        expect(outcome.type).toBe("READY");
+        if (outcome.type !== "READY") continue;
+
+        const session = outcome.session;
+        const policies = {
+          p1: new FirstLegalPolicy(false),
+          p2: new FirstLegalPolicy(false),
+        };
+
+        const result = SimulationRunner.run(session, policies, {
+          maxDecisions: 40,
+        });
+        expect(result.totalDecisions).toBeGreaterThan(0);
+        expect(session.state.players.p1.life.length).toBeGreaterThanOrEqual(0);
+        expect(session.state.players.p2.life.length).toBeGreaterThanOrEqual(0);
       }
     });
   });

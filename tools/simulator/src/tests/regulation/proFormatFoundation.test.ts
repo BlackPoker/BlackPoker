@@ -133,26 +133,28 @@ describe("Pro Format Foundation & pro-rarePack Regulation Tests [BP-SIM-REG-5.0-
       expect(reg.sourceRulesVersion).toBe("9.1.2");
     });
 
-    it("Section 10 & 16: RegulationValidator validates pro-rarePack as legal, recommended, but NOT simulatorImplemented", () => {
+    it("Section 10 & 16: RegulationValidator validates pro-rarePack as legal, recommended, and simulatorImplemented", () => {
       const validation = RegulationValidator.validateRegulation(catalog, "pro-rarePack");
       expect(validation.ruleLegal).toBe(true);
       expect(validation.recommended).toBe(true);
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
 
-      expect(() =>
-        RegulationValidator.validateRegulation(catalog, "pro-rarePack", { assertImplemented: true })
-      ).toThrow(SimulatorNotImplementedError);
+      const assertValidation = RegulationValidator.validateRegulation(catalog, "pro-rarePack", {
+        assertImplemented: true,
+      });
+      expect(assertValidation.simulatorImplemented).toBe(true);
     });
   });
 
   // Section 17: Available Environment Contract
   describe("Available Environment Contract", () => {
-    it("getAvailableEnvironments does NOT list official:pro-rarePack, while official:standard-rarePack remains present", () => {
+    it("getAvailableEnvironments lists official:pro-rarePack along with official:standard-rarePack", () => {
       const envs = getAvailableEnvironments(catalog);
       const proRarePack = envs.find(
         (e) => e.regulationId === "pro-rarePack" || e.id === "official:pro-rarePack"
       );
-      expect(proRarePack).toBeUndefined();
+      expect(proRarePack).toBeDefined();
+      expect(proRarePack?.isOfficial).toBe(true);
 
       const standardRarePack = envs.find(
         (e) => e.regulationId === "standard-rarePack" || e.id === "official:standard-rarePack"
@@ -162,21 +164,21 @@ describe("Pro Format Foundation & pro-rarePack Regulation Tests [BP-SIM-REG-5.0-
     });
   });
 
-  // Section 18: Official Factory Fail-Closed
-  describe("Official Factory Fail-Closed", () => {
-    it("OfficialRegulationMatchFactory.createSession('pro-rarePack') throws SimulatorNotImplementedError", async () => {
-      await expect(
-        OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
-          catalog,
-          fullRulePackage,
-        })
-      ).rejects.toThrow(SimulatorNotImplementedError);
+  // Section 18: Official Factory Success
+  describe("Official Factory Success", () => {
+    it("OfficialRegulationMatchFactory.createSession('pro-rarePack') succeeds", async () => {
+      const session = await OfficialRegulationMatchFactory.createSession("pro-rarePack", 42, {
+        catalog,
+        fullRulePackage,
+      });
+      expect(session).toBeDefined();
+      expect(session.state.regulationId).toBe("pro-rarePack");
     });
   });
 
   // Section 19: Browser Catalog Contract
   describe("Browser Catalog Contract", () => {
-    it("BrowserRegulationLoader loads pro format and pro-rarePack regulation with simulatorImplemented=false", () => {
+    it("BrowserRegulationLoader loads pro format and pro-rarePack regulation with simulatorImplemented=true", () => {
       const browserCatalog = loadRegulationCatalogForBrowser();
       expect(browserCatalog).toBeDefined();
 
@@ -192,13 +194,14 @@ describe("Pro Format Foundation & pro-rarePack Regulation Tests [BP-SIM-REG-5.0-
       const validation = RegulationValidator.validateRegulation(browserCatalog, "pro-rarePack");
       expect(validation.ruleLegal).toBe(true);
       expect(validation.recommended).toBe(true);
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
 
       const envs = getAvailableEnvironments(browserCatalog);
       const proEnv = envs.find(
         (e) => e.regulationId === "pro-rarePack" || e.id === "official:pro-rarePack"
       );
-      expect(proEnv).toBeUndefined();
+      expect(proEnv).toBeDefined();
+      expect(proEnv?.isOfficial).toBe(true);
     });
   });
 });
