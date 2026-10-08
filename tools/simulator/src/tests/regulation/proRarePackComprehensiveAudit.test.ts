@@ -3985,35 +3985,43 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       const preHandCount = session.state.players.p2.hand.length;
 
       const step = session.advance();
-      if (step.type === "WAITING_FOR_DECISION" && step.request.playerId === "p2") {
-        const patternIdx = step.request.patterns.findIndex(
-          (p) =>
-            p.kind === "ACTION" &&
-            step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
-        );
-        expect(patternIdx).toBeGreaterThanOrEqual(0);
-        session.submitDecision({
-          decisionId: step.request.decisionId,
-          stateVersion: step.request.stateVersion,
-          selectedPatternRef: patternIdx,
-        });
-
-        expect(session.state.players.p2.rareCards.length).toBe(0);
-        expect(session.state.players.p2.hand.length).toBe(preHandCount + 1);
-
-        // 3. 解決直後: 次の意思決定リクエストにおいて action.rareDraw は完全に消滅していること
-        session.state.chancePlayer = "p2";
-        const postDecision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
-        const postRareDrawPattern = postDecision.request.patterns.find(
-          (p) =>
-            p.kind === "ACTION" &&
-            postDecision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
-        );
-        expect(postRareDrawPattern).toBeUndefined();
+      // Section 3: false-positive 経路を排除し、必ず WAITING_FOR_DECISION かつ p2 であることを保証
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") {
+        throw new Error(`Expected step.type to be WAITING_FOR_DECISION, got: ${step.type}`);
       }
+      expect(step.request.playerId).toBe("p2");
+      if (step.request.playerId !== "p2") {
+        throw new Error(`Expected step.request.playerId to be p2, got: ${step.request.playerId}`);
+      }
+
+      const patternIdx = step.request.patterns.findIndex(
+        (p) =>
+          p.kind === "ACTION" &&
+          step.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+      );
+      expect(patternIdx).toBeGreaterThanOrEqual(0);
+      session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: patternIdx,
+      });
+
+      expect(session.state.players.p2.rareCards.length).toBe(0);
+      expect(session.state.players.p2.hand.length).toBe(preHandCount + 1);
+
+      // 3. 解決直後: 次の意思決定リクエストにおいて action.rareDraw は完全に消滅していること
+      session.state.chancePlayer = "p2";
+      const postDecision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
+      const postRareDrawPattern = postDecision.request.patterns.find(
+        (p) =>
+          p.kind === "ACTION" &&
+          postDecision.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+      );
+      expect(postRareDrawPattern).toBeUndefined();
     });
 
-    it("8.3 AI Loop Regression with Pending Stage: PlaytestConservative does NOT loop infinitely on empty rareCards and proceeds to stage/pass", async () => {
+    it("8.3 Continuous AI Decision Progression: Rare Draw executed once via AI -> rare=0 -> subsequent AI decisions do NOT loop on rareDraw and proceed to stage/human turn without reaching safety limit", async () => {
       const reg = await getRegulation("pro-rarePack");
       const frame = catalog.frames.get("rarePack")!;
       const proRulePackage = RegulationRulePackageSelector.selectRulePackage(
@@ -4024,7 +4032,128 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       );
 
       const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, proRulePackage, 1516619958, {
-        matchId: "ai-loop-regression",
+        matchId: "continuous-ai-regression",
+        playerNames: { p1: "Human", p2: "AI" },
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const session = new GameSession(outcome.state, proRulePackage);
+
+      // P2 ライフ 9、rareCards = 1 枚 (初期状態)
+      const excessLife = session.state.players.p2.life.splice(9);
+      session.state.players.p2.grave.push(...excessLife);
+      expect(session.state.players.p2.life.length).toBe(9);
+      expect(session.state.players.p2.rareCards.length).toBe(1);
+
+      // Stage に P1 の pending request (mountSoldier 等) を積載
+      session.state.stage.requests.push({
+        requestId: "pending-stage-req-cont-1",
+        actionId: "action.mountSoldier",
+        controller: "p1",
+        definitionOwner: "p1",
+        targets: [],
+        stepIndex: 1,
+      } as any);
+
+      session.state.turnPlayer = "p1";
+      session.state.chancePlayer = "p2"; // AI がクイック判断機会を持つ
+
+      const preHandCount = session.state.players.p2.hand.length;
+
+      const initialStep = session.advance();
+      expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+      if (initialStep.type !== "WAITING_FOR_DECISION") {
+        throw new Error(`Expected WAITING_FOR_DECISION, got: ${initialStep.type}`);
+      }
+      expect(initialStep.request.playerId).toBe("p2");
+      if (initialStep.request.playerId !== "p2") {
+        throw new Error(`Expected p2, got: ${initialStep.request.playerId}`);
+      }
+
+      // 初期リクエストに action.rareDraw が含まれることを確認
+      const initialHasRareDraw = initialStep.request.patterns.some(
+        (p) => p.kind === "ACTION" && initialStep.request.catalog.actions[p.actionSelectionRef!].actionId === "action.rareDraw"
+      );
+      expect(initialHasRareDraw).toBe(true);
+
+      const seatControllers = createSeatControllers("humanVsAi", "p1");
+      const policies = {
+        p2: new PlaytestConservativePolicy(),
+      };
+
+      // AI 自動意思決定ループを開始 (上限 50 回)
+      const loopResult = await advanceAutomatedDecisions(session, initialStep, seatControllers, policies, {
+        maxAutomatedDecisions: 50,
+      });
+
+      // 1. 安全上限超過 (TECHNICAL_ERROR) にならず正常停止すること
+      expect(loopResult.status).not.toBe("TECHNICAL_ERROR");
+      expect(loopResult.status).toBe("STOPPED");
+      if (loopResult.status === "STOPPED") {
+        expect(["HUMAN_TURN", "FINISHED", "EXTERNAL_STOP"]).toContain(loopResult.reason);
+      }
+
+      // 2. AI が Rare Draw を実行した回数は「ちょうど 1 回」であること
+      const rareDrawRecordIndices = loopResult.records
+        .map((r, idx) => ({ r, idx }))
+        .filter(({ r }) => {
+          const pattern = r.request.patterns[r.response.selectedPatternRef];
+          const actionRef = pattern?.actionSelectionRef;
+          return actionRef !== undefined && r.request.catalog.actions[actionRef]?.actionId === "action.rareDraw";
+        });
+      expect(rareDrawRecordIndices.length).toBe(1);
+
+      const rdIdx = rareDrawRecordIndices[0].idx;
+      const rdRecord = rareDrawRecordIndices[0].r;
+
+      // 3. Rare Draw 実行直後の状態変化: Rare Zone は 0 枚になり、手札は 1 枚増加
+      expect(rdRecord.prevState.players.p2.rareCards.length).toBe(1);
+      expect(rdRecord.nextState.players.p2.rareCards.length).toBe(0);
+      expect(rdRecord.nextState.players.p2.hand.length).toBe(rdRecord.prevState.players.p2.hand.length + 1);
+
+      // 最終状態でも Rare Zone は 0 枚を維持
+      expect(session.state.players.p2.rareCards.length).toBe(0);
+
+      // 4. Rare Draw 解決以降 (rdIdx + 1 以降) の p2 のリクエストにおいて、action.rareDraw は二度と提示されていないこと
+      for (let i = rdIdx + 1; i < loopResult.records.length; i++) {
+        const rec = loopResult.records[i];
+        if (rec.playerId === "p2") {
+          const subsequentHasRareDraw = rec.request.patterns.some(
+            (p) => p.kind === "ACTION" && rec.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.rareDraw"
+          );
+          expect(subsequentHasRareDraw).toBe(false);
+        }
+      }
+
+      // ループ終了後も p2 に対して action.rareDraw が非合法であることを直接検証
+      session.state.chancePlayer = "p2";
+      const finalP2Decision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
+      const finalHasRareDraw = finalP2Decision.request.patterns.some(
+        (p) => p.kind === "ACTION" && finalP2Decision.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.rareDraw"
+      );
+      expect(finalHasRareDraw).toBe(false);
+
+      // 5. 意思決定回数が安全上限 (500) を遥かに下回る数回で正常に完了していること
+      expect(loopResult.records.length).toBeLessThan(10);
+    });
+
+    it("8.4 Empty-Zone Immediate Bypass Regression: PlaytestConservative does NOT loop on initially empty rareCards and proceeds to stage/human turn", async () => {
+      const reg = await getRegulation("pro-rarePack");
+      const frame = catalog.frames.get("rarePack")!;
+      const proRulePackage = RegulationRulePackageSelector.selectRulePackage(
+        fullRulePackage,
+        catalog.formats.get("pro")!,
+        reg,
+        frame
+      );
+
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, proRulePackage, 1516619958, {
+        matchId: "ai-loop-regression-empty-zone",
         playerNames: { p1: "Human", p2: "AI" },
         rareCardSelections: {
           p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
@@ -4040,6 +4169,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       const excessLife = session.state.players.p2.life.splice(9);
       session.state.players.p2.grave.push(...excessLife);
       session.state.players.p2.rareCards = [];
+      expect(session.state.players.p2.life.length).toBe(9);
+      expect(session.state.players.p2.rareCards.length).toBe(0);
 
       // Stage にダミーのリクエスト (mountSoldier / 装備) が積載されている状況
       session.state.stage.requests.push({
@@ -4055,6 +4186,10 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       session.state.chancePlayer = "p2"; // AI がクイック判断を求められる
 
       const initialStep = session.advance();
+      expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+      if (initialStep.type !== "WAITING_FOR_DECISION") {
+        throw new Error(`Expected WAITING_FOR_DECISION, got: ${initialStep.type}`);
+      }
 
       const seatControllers = createSeatControllers("humanVsAi", "p1");
       const policies = {
@@ -4065,12 +4200,28 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         maxAutomatedDecisions: 50, // 500回待たずに、50回以内ですぐに人間手番または正常停止へ進むことを確認
       });
 
-      // TECHNICAL_ERROR (安全上限超過) にならず、正常停止 (STOPPED: HUMAN_TURN) または STAGE 処理へ進むこと
+      // 1. TECHNICAL_ERROR (安全上限超過) にならず正常停止すること
       expect(loopResult.status).not.toBe("TECHNICAL_ERROR");
-      expect(loopResult.records.length).toBeLessThan(10); // 無限ループせず数ステップで完了
+      expect(loopResult.status).toBe("STOPPED");
+      if (loopResult.status === "STOPPED") {
+        expect(["HUMAN_TURN", "FINISHED", "EXTERNAL_STOP"]).toContain(loopResult.reason);
+      }
+
+      // 2. Rare Draw が一度も選ばれていないこと
+      const rareDrawSelected = loopResult.records.some((r) => {
+        const pattern = r.request.patterns[r.response.selectedPatternRef];
+        const actionRef = pattern?.actionSelectionRef;
+        return actionRef !== undefined && r.request.catalog.actions[actionRef]?.actionId === "action.rareDraw";
+      });
+      expect(rareDrawSelected).toBe(false);
+
+      // 3. 無限ループせず数ステップで完了
+      expect(loopResult.records.length).toBeLessThan(10);
     });
 
-    it("8.4 Incident Seed 1516619958 Smoke: Simulation with PlaytestConservative completes without hitting AI 500 safety limit", async () => {
+    it("8.5 Seed 1516619958 General Progression Smoke: Simulation with PlaytestConservative proceeds without hitting AI 500 safety limit (General Smoke)", async () => {
+      // Note: This test is a general progression smoke on fixed seed 1516619958.
+      // It is not an exact incident reproduction of human player decisions (for exact continuous regression, see 8.3).
       const availableEnvs = getAvailableEnvironments(catalog);
       const proEnv = availableEnvs.find((e) => e.regulationId === "pro-rarePack")!;
 
@@ -4097,15 +4248,20 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       const humanPolicy = new FirstLegalPolicy();
       let currentStep = session.advance();
       let totalAiDecisions = 0;
+      let turnsExecuted = 0;
+
       for (let turn = 0; turn < 20; turn++) {
         if (session.state.winner) break;
         const loopResult = await advanceAutomatedDecisions(session, currentStep, seatControllers, policies, {
           maxAutomatedDecisions: 100,
         });
+        expect(loopResult.status).not.toBe("TECHNICAL_ERROR");
         if (loopResult.status === "TECHNICAL_ERROR") {
           throw loopResult.error;
         }
         totalAiDecisions += loopResult.records.length;
+        turnsExecuted++;
+
         if (loopResult.status === "STOPPED" && loopResult.reason === "FINISHED") {
           break;
         }
@@ -4118,7 +4274,10 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
           break;
         }
       }
-      expect(totalAiDecisions).toBeGreaterThanOrEqual(0);
+
+      // Tautology (>= 0) を排除し、実際に AI が安全上限に抵触せず複数回意思決定を行ったことを検証
+      expect(totalAiDecisions).toBeGreaterThan(0);
+      expect(turnsExecuted).toBeGreaterThan(0);
     });
   });
 });
