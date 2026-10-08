@@ -766,4 +766,92 @@ describe("PlaytestShareUrl Unit Tests (UI Phase 2.7)", () => {
       }
     });
   });
+
+  // =========================================================================
+  // Pro + RarePack Share URL Round-Trip [BP-SIM-REG-5.0-L-R1]
+  // =========================================================================
+  describe("Pro + RarePack Share URL Round-Trip [BP-SIM-REG-5.0-L-R1]", () => {
+    it("Pro-A: Human vs AI round-trip で official:pro-rarePack が正しくエンコード・デコード・復元されること", () => {
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: "official:pro-rarePack",
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+        seedInput: "42",
+      };
+
+      const query = serializePlaytestShareUrl(config, catalog);
+      expect(query).toContain("env=official%3Apro-rarePack");
+      expect(query).toBe(
+        "?bpv=1&env=official%3Apro-rarePack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=42"
+      );
+
+      const parseResult = parsePlaytestShareUrl(query, catalog);
+      expect(parseResult.kind).toBe("READY");
+      if (parseResult.kind === "READY") {
+        expect(parseResult.config.environmentId).toBe("official:pro-rarePack");
+        expect(parseResult.config.mode).toBe("humanVsAi");
+        expect(parseResult.config.humanSeat).toBe("p1");
+        expect(parseResult.config.policyId).toBe("playtestConservative");
+        expect(parseResult.config.seedInput).toBe("42");
+        // レアカード未選択の案内警告のみ付与され、不正パラメータ警告は0件であること
+        const parameterErrors = parseResult.warnings.filter(
+          (w) => !w.includes("レアカードが未選択です")
+        );
+        expect(parameterErrors).toHaveLength(0);
+        expect(parseResult.warnings).toContain("レアカードが未選択です。対戦を開始するにはレアカードを選択してください。");
+      }
+
+      // Bootstrap 解決の検証
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SHARE_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SHARE_SETTINGS") {
+        expect(bootstrap.config.environmentId).toBe("official:pro-rarePack");
+        expect(bootstrap.config.mode).toBe("humanVsAi");
+        expect(bootstrap.config.humanSeat).toBe("p1");
+        expect(bootstrap.config.policyId).toBe("playtestConservative");
+        expect(bootstrap.config.seedInput).toBe("42");
+      }
+    });
+
+    it("Pro-B: Human vs Human round-trip で official:pro-rarePack が canonical 省略規則に従い正しく動作すること", () => {
+      const config: PlaytestShareConfigV1 = {
+        version: 1,
+        environmentId: "official:pro-rarePack",
+        mode: "humanVsHuman",
+        humanSeat: "p1", // canonical rule により省略される
+        policyId: "playtestConservative", // canonical rule により省略される
+        seedInput: "42",
+      };
+
+      const query = serializePlaytestShareUrl(config, catalog);
+      expect(query).toContain("env=official%3Apro-rarePack");
+      expect(query).not.toContain("human=");
+      expect(query).not.toContain("policy=");
+      expect(query).toBe("?bpv=1&env=official%3Apro-rarePack&mode=humanVsHuman&seed=42");
+
+      const parseResult = parsePlaytestShareUrl(query, catalog);
+      expect(parseResult.kind).toBe("READY");
+      if (parseResult.kind === "READY") {
+        expect(parseResult.config.environmentId).toBe("official:pro-rarePack");
+        expect(parseResult.config.mode).toBe("humanVsHuman");
+        expect(parseResult.config.seedInput).toBe("42");
+        // レアカード未選択の案内警告のみ付与され、不正パラメータ警告は0件であること
+        const parameterErrors = parseResult.warnings.filter(
+          (w) => !w.includes("レアカードが未選択です")
+        );
+        expect(parameterErrors).toHaveLength(0);
+        expect(parseResult.warnings).toContain("レアカードが未選択です。対戦を開始するにはレアカードを選択してください。");
+      }
+
+      const bootstrap = resolvePlaytestInitialBootstrap(query, catalog);
+      expect(bootstrap.kind).toBe("RESTORE_SHARE_SETTINGS");
+      if (bootstrap.kind === "RESTORE_SHARE_SETTINGS") {
+        expect(bootstrap.config.environmentId).toBe("official:pro-rarePack");
+        expect(bootstrap.config.mode).toBe("humanVsHuman");
+        expect(bootstrap.config.seedInput).toBe("42");
+      }
+    });
+  });
 });

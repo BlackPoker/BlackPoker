@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToString } from "react-dom/server";
+import TestRenderer, { act } from "react-test-renderer";
 import { describe, it, expect, vi } from "vitest";
 import { MatchSetupScreen } from "../../ui/playtest/MatchSetupScreen";
 import {
@@ -325,5 +326,118 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
     expect(coreHtml).not.toContain("自動（推奨）");
     expect(coreHtml).toContain("42 (固定)");
     expect(coreHtml).toContain("※Core Battleは固定盤面のため対戦SEEDは使用しません");
+  });
+
+  // =========================================================================
+  // Pro + RarePack Publication UI Evidence (UI Phase 3.1 & 5.0-L-R1)
+  // =========================================================================
+  describe("Pro + RarePack Publication UI Evidence in MatchSetupScreen [BP-SIM-REG-5.0-L-R1]", () => {
+    it("A. Environment List: getAvailableEnvironments includes official:pro-rarePack with correct regulationId and rareCardCount", () => {
+      const proEnv = availableEnvs.find((e) => e.id === "official:pro-rarePack");
+      expect(proEnv).toBeDefined();
+      expect(proEnv?.regulationId).toBe("pro-rarePack");
+      expect(proEnv?.isOfficial).toBe(true);
+
+      const frame = catalog.frames.get("rarePack");
+      expect(frame).toBeDefined();
+      expect(proEnv?.setupRequirements?.rareCardCount).toBe(frame?.setup.rareCardCount);
+      expect(proEnv?.setupRequirements?.rareCardCount).toBe(1);
+    });
+
+    it("B. Render: MatchSetupScreen renders 'プロ + レアパック' option from production environmentOptions", () => {
+      const html = renderToString(
+        React.createElement(MatchSetupScreen, {
+          ...defaultProps,
+          selectedEnvironmentId: "official:pro-rarePack",
+        })
+      );
+      expect(html).toContain("プロ + レアパック");
+      expect(html).toContain('value="official:pro-rarePack"');
+    });
+
+    it("C. Select: changing environment select triggers onSelectEnvironment('official:pro-rarePack')", () => {
+      const onSelectEnvironment = vi.fn();
+      let testRenderer: any;
+      act(() => {
+        testRenderer = TestRenderer.create(
+          React.createElement(MatchSetupScreen, {
+            ...defaultProps,
+            selectedEnvironmentId: "official:light-entry16",
+            onSelectEnvironment,
+          })
+        );
+      });
+
+      const select = testRenderer.root.findByType("select");
+      act(() => {
+        select.props.onChange({ target: { value: "official:pro-rarePack" } });
+      });
+
+      expect(onSelectEnvironment).toHaveBeenCalledWith("official:pro-rarePack");
+    });
+
+    it("D. Start: onStartMatch is triggered when match is ready with confirmed rare card selections", () => {
+      const onStartMatch = vi.fn();
+      let testRenderer: any;
+      act(() => {
+        testRenderer = TestRenderer.create(
+          React.createElement(MatchSetupScreen, {
+            ...defaultProps,
+            selectedEnvironmentId: "official:pro-rarePack",
+            matchMode: "humanVsAi",
+            confirmedRareCardSelections: {
+              p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+            },
+            onStartMatch,
+          })
+        );
+      });
+
+      const buttons = testRenderer.root.findAllByType("button");
+      const startButton = buttons.find((b: any) => b.props.onClick === onStartMatch);
+      expect(startButton).toBeDefined();
+      expect(startButton.props.disabled).toBe(false);
+
+      act(() => {
+        startButton.props.onClick();
+      });
+
+      expect(onStartMatch).toHaveBeenCalled();
+    });
+
+    it("E. Production Start Contract: startMatchAttempt behaves canonically with and without rare selections", () => {
+      // 1. レアカード未選択時は VALIDATION_ERROR となる canonical contract
+      const withoutRare = startMatchAttempt({
+        environmentId: "official:pro-rarePack",
+        seedInput: "42",
+        catalog,
+        fullRulePackage,
+        matchMode: "humanVsAi",
+      });
+      expect(withoutRare.type).toBe("VALIDATION_ERROR");
+      expect(withoutRare.activeMatch).toBeNull();
+      if (withoutRare.type === "VALIDATION_ERROR") {
+        expect(withoutRare.setupNotice.type).toBe("VALIDATION_ERROR");
+      }
+
+      // 2. レアカード選択指定時は READY となり session が成立する canonical contract
+      const withRare = startMatchAttempt({
+        environmentId: "official:pro-rarePack",
+        seedInput: "42",
+        catalog,
+        fullRulePackage,
+        matchMode: "humanVsAi",
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+        },
+      });
+      expect(withRare.type).toBe("READY");
+      if (withRare.type === "READY") {
+        expect(withRare.activeMatch.environmentId).toBe("official:pro-rarePack");
+        expect(withRare.session).toBeDefined();
+        expect(withRare.session.state.players.p1.rareCards).toHaveLength(1);
+        expect(withRare.initialStep).toBeDefined();
+      }
+    });
   });
 });

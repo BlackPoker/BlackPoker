@@ -3817,37 +3817,78 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       }
     });
 
-    it("7.5 (必須 20): Production official:pro-rarePack environment completes 10 seeds bounded AI smoke test without errors", () => {
+    it("7.5 (必須 20): Production official:pro-rarePack environment completes 10 seeds bounded AI smoke test with classified results", () => {
       const availableEnvs = getAvailableEnvironments(catalog);
       const proEnv = availableEnvs.find((e) => e.regulationId === "pro-rarePack");
       expect(proEnv).toBeDefined();
 
-      for (let seed = 1; seed <= 10; seed++) {
-        const outcome = startMatchAttempt({
-          environmentId: proEnv!.id,
-          seedInput: String(seed),
-          catalog,
-          fullRulePackage,
-          rareCardSelections: {
-            p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
-          },
-        });
-        expect(outcome.type).toBe("READY");
-        if (outcome.type !== "READY") continue;
+      const NUM_SEEDS = 10;
+      const MAX_DECISIONS = 40;
 
-        const session = outcome.session;
-        const policies = {
-          p1: new FirstLegalPolicy(false),
-          p2: new FirstLegalPolicy(false),
-        };
+      let completed = 0;
+      let capped = 0;
+      let errors = 0;
+      let engineLoops = 0;
+      const cappedSeeds: number[] = [];
+      const errorDetails: { seed: number; message: string }[] = [];
 
-        const result = SimulationRunner.run(session, policies, {
-          maxDecisions: 40,
-        });
-        expect(result.totalDecisions).toBeGreaterThan(0);
-        expect(session.state.players.p1.life.length).toBeGreaterThanOrEqual(0);
-        expect(session.state.players.p2.life.length).toBeGreaterThanOrEqual(0);
+      for (let seed = 1; seed <= NUM_SEEDS; seed++) {
+        try {
+          const outcome = startMatchAttempt({
+            environmentId: proEnv!.id,
+            seedInput: String(seed),
+            catalog,
+            fullRulePackage,
+            rareCardSelections: {
+              p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+            },
+          });
+          expect(outcome.type).toBe("READY");
+          if (outcome.type !== "READY") {
+            errors++;
+            errorDetails.push({ seed, message: `startMatchAttempt failed: ${outcome.type}` });
+            continue;
+          }
+
+          const session = outcome.session;
+          const policies = {
+            p1: new FirstLegalPolicy(false),
+            p2: new FirstLegalPolicy(false),
+          };
+
+          const result = SimulationRunner.run(session, policies, {
+            maxDecisions: MAX_DECISIONS,
+          });
+
+          expect(result.totalDecisions).toBeGreaterThan(0);
+          expect(session.state.players.p1.life.length).toBeGreaterThanOrEqual(0);
+          expect(session.state.players.p2.life.length).toBeGreaterThanOrEqual(0);
+
+          if (result.completed === true) {
+            completed++;
+          } else if (result.completed === false && result.totalDecisions === MAX_DECISIONS) {
+            capped++;
+            cappedSeeds.push(seed);
+          } else {
+            // 異常な早期打ち切りや非標準リターン
+            engineLoops++;
+          }
+        } catch (err: any) {
+          errors++;
+          errorDetails.push({ seed, message: err?.message || String(err) });
+        }
       }
+
+      console.log(`\n[10-Seed Production Smoke Summary]`);
+      console.log(`Seeds: ${NUM_SEEDS}`);
+      console.log(`Completed: ${completed}`);
+      console.log(`Capped: ${capped} (Seeds: ${cappedSeeds.join(", ") || "none"})`);
+      console.log(`Errors: ${errors}`);
+      console.log(`Engine Loops Observed: ${engineLoops}\n`);
+
+      expect(completed + capped).toBe(NUM_SEEDS);
+      expect(errors).toBe(0);
+      expect(engineLoops).toBe(0);
     });
   });
 });
