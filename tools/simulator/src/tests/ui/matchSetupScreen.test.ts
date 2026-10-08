@@ -440,4 +440,106 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
       }
     });
   });
+
+  // =========================================================================
+  // Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R1]
+  // =========================================================================
+  describe("Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R1]", () => {
+    it("A. UI Option Render Order: MatchSetupScreen renders environment options in exact difficulty order (Light < Standard < Pro)", () => {
+      let testRenderer: any;
+      act(() => {
+        testRenderer = TestRenderer.create(
+          React.createElement(MatchSetupScreen, {
+            ...defaultProps,
+            environmentOptions: availableEnvs,
+          })
+        );
+      });
+
+      const select = testRenderer.root.findByType("select");
+      const optionValues = select.props.children.map((child: any) => child.props.value);
+
+      expect(optionValues).toEqual([
+        "core-battle",
+        "official:light-entry16",
+        "official:light-pack",
+        "official:standard-pack",
+        "official:standard-rarePack",
+        "official:pro-rarePack",
+      ]);
+
+      // Pro が Standard より後にレンダリングされていることを確認
+      const standardIndices = optionValues
+        .map((v: string, i: number) => (v.includes("standard") ? i : -1))
+        .filter((i: number) => i !== -1);
+      const proIndices = optionValues
+        .map((v: string, i: number) => (v.includes("pro") ? i : -1))
+        .filter((i: number) => i !== -1);
+
+      expect(Math.max(...standardIndices)).toBeLessThan(Math.min(...proIndices));
+    });
+
+    it("B. Deep Link / Share URL Round-trip: official:pro-rarePack is restored correctly despite being last in order", () => {
+      const shareUrl =
+        "https://blackpoker.github.io/playtest/?bpv=1&env=official%3Apro-rarePack&mode=humanVsAi&human=p1&policy=playtestConservative&seed=42";
+      const result = parsePlaytestShareUrl(shareUrl, catalog);
+
+      expect(result.kind).toBe("READY");
+      if (result.kind === "READY") {
+        expect(result.config.environmentId).toBe("official:pro-rarePack");
+        expect(result.config.mode).toBe("humanVsAi");
+        expect(result.config.humanSeat).toBe("p1");
+        expect(result.config.policyId).toBe("playtestConservative");
+        expect(result.config.seedInput).toBe("42");
+      }
+    });
+
+    it("C. RarePack Setup Flow: Selecting official:pro-rarePack preserves frame.setup.rareCardCount requirement and blocks start until ready", () => {
+      const proOpt = availableEnvs.find((opt) => opt.id === "official:pro-rarePack");
+      expect(proOpt).toBeDefined();
+      expect(proOpt?.setupRequirements?.rareCardCount).toBe(1);
+
+      // rareCardCount === 1 のため、未選択時は start match 不可 (disabled)
+      let testRenderer: any;
+      act(() => {
+        testRenderer = TestRenderer.create(
+          React.createElement(MatchSetupScreen, {
+            ...defaultProps,
+            environmentOptions: availableEnvs,
+            selectedEnvironmentId: "official:pro-rarePack",
+            confirmedRareCardSelections: {}, // 未選択
+          })
+        );
+      });
+
+      const buttons = testRenderer.root.findAllByType("button");
+      const startButton = buttons.find((b: any) =>
+        b.props.children?.props?.children === "対戦開始" || b.props.children === "対戦開始"
+      );
+      expect(startButton).toBeDefined();
+      expect(startButton.props.disabled).toBe(true);
+
+      // レアカード選択確定後は押下可能
+      let readyRenderer: any;
+      act(() => {
+        readyRenderer = TestRenderer.create(
+          React.createElement(MatchSetupScreen, {
+            ...defaultProps,
+            environmentOptions: availableEnvs,
+            selectedEnvironmentId: "official:pro-rarePack",
+            matchMode: "humanVsAi",
+            confirmedRareCardSelections: {
+              p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+            },
+          })
+        );
+      });
+      const readyButtons = readyRenderer.root.findAllByType("button");
+      const readyStartButton = readyButtons.find((b: any) =>
+        b.props.children?.props?.children === "対戦開始" || b.props.children === "対戦開始"
+      );
+      expect(readyStartButton).toBeDefined();
+      expect(readyStartButton.props.disabled).toBe(false);
+    });
+  });
 });

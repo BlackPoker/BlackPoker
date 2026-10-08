@@ -152,6 +152,96 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
       expect(isOfficialEnvironment("official:custom-reg-id")).toBe(true);
       expect(extractRegulationId("official:custom-reg-id")).toBe("custom-reg-id");
     });
+
+    it("Format Difficulty Order: Light < Standard < Pro の難易度順に決定論的ソートされること [BP-SIM-UI-ENV-ORDER-R1]", () => {
+      const options = getAvailableEnvironments(catalog);
+      const envIds = options.map((o) => o.id);
+
+      // 期待される完全決定論的順序
+      expect(envIds).toEqual([
+        "core-battle",
+        "official:light-entry16",
+        "official:light-pack",
+        "official:standard-pack",
+        "official:standard-rarePack",
+        "official:pro-rarePack",
+      ]);
+
+      // Core Battle が先頭
+      expect(envIds[0]).toBe("core-battle");
+
+      // Light系 < Standard系 < Pro系の階層順序を厳密検証
+      const lightIndices = envIds.filter((id) => id.includes("light")).map((id) => envIds.indexOf(id));
+      const standardIndices = envIds.filter((id) => id.includes("standard")).map((id) => envIds.indexOf(id));
+      const proIndices = envIds.filter((id) => id.includes("pro")).map((id) => envIds.indexOf(id));
+
+      expect(lightIndices.length).toBeGreaterThan(0);
+      expect(standardIndices.length).toBeGreaterThan(0);
+      expect(proIndices.length).toBeGreaterThan(0);
+
+      const maxLightIndex = Math.max(...lightIndices);
+      const minStandardIndex = Math.min(...standardIndices);
+      const maxStandardIndex = Math.max(...standardIndices);
+      const minProIndex = Math.min(...proIndices);
+
+      // Light系すべてがStandard系すべてより前
+      expect(maxLightIndex).toBeLessThan(minStandardIndex);
+      // Standard系すべてがPro系すべてより前（ProがStandardより上に来ないこと）
+      expect(maxStandardIndex).toBeLessThan(minProIndex);
+    });
+
+    it("Catalog order independence: Map 挿入順を逆順・シャッフルしても同一の難易度順が返されること [BP-SIM-UI-ENV-ORDER-R1]", () => {
+      // 意図的に Pro → Standard → Light の順で regulations を挿入した Catalog を構築
+      const reversedRegulations = new Map([
+        ["pro-rarePack", catalog.regulations.get("pro-rarePack")!],
+        ["standard-rarePack", catalog.regulations.get("standard-rarePack")!],
+        ["standard-pack", catalog.regulations.get("standard-pack")!],
+        ["light-pack", catalog.regulations.get("light-pack")!],
+        ["light-entry16", catalog.regulations.get("light-entry16")!],
+      ]);
+
+      const reversedCatalog = {
+        ...catalog,
+        regulations: reversedRegulations,
+      };
+
+      const reversedOptions = getAvailableEnvironments(reversedCatalog);
+      const reversedIds = reversedOptions.map((o) => o.id);
+
+      expect(reversedIds).toEqual([
+        "core-battle",
+        "official:light-entry16",
+        "official:light-pack",
+        "official:standard-pack",
+        "official:standard-rarePack",
+        "official:pro-rarePack",
+      ]);
+
+      // ランダム順でも同一順序になることを確認
+      const shuffledRegulations = new Map([
+        ["standard-rarePack", catalog.regulations.get("standard-rarePack")!],
+        ["light-pack", catalog.regulations.get("light-pack")!],
+        ["pro-rarePack", catalog.regulations.get("pro-rarePack")!],
+        ["light-entry16", catalog.regulations.get("light-entry16")!],
+        ["standard-pack", catalog.regulations.get("standard-pack")!],
+      ]);
+      const shuffledCatalog = {
+        ...catalog,
+        regulations: shuffledRegulations,
+      };
+
+      const shuffledOptions = getAvailableEnvironments(shuffledCatalog);
+      const shuffledIds = shuffledOptions.map((o) => o.id);
+
+      expect(shuffledIds).toEqual([
+        "core-battle",
+        "official:light-entry16",
+        "official:light-pack",
+        "official:standard-pack",
+        "official:standard-rarePack",
+        "official:pro-rarePack",
+      ]);
+    });
   });
 
   describe("Contract N & Pure State Transitions: Pending vs Active", () => {

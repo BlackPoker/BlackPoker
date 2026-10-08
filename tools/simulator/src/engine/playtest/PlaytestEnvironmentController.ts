@@ -148,8 +148,29 @@ export function validateSeed(seedInput: string): SeedValidationResult {
 }
 
 /**
+ * フォーマットの表示難易度ランク（小さいほど初級・平易）。
+ * Light (100) < Standard (200) < Pro (300)
+ */
+export const FORMAT_PRESENTATION_ORDER: Record<string, number> = {
+  light: 100,
+  standard: 200,
+  pro: 300,
+};
+
+/**
+ * 同一フォーマット内におけるフレームの表示順序（既存仕様維持）。
+ * entry16 (10) < pack (20) < rarePack (30)
+ */
+export const FRAME_PRESENTATION_ORDER: Record<string, number> = {
+  entry16: 10,
+  pack: 20,
+  rarePack: 30,
+};
+
+/**
  * レギュレーションカタログから、実装済み（simulatorImplemented === true）の公式環境を動的に列挙します。
- * Core Battle（擬似環境）を常に先頭に含みます。
+ * Core Battle（擬似環境）を常に先頭に含み、公式環境は難易度順（Light < Standard < Pro）に決定論的ソートされます。
+ * Catalog の Map 登録順に依存しません。
  */
 export function getAvailableEnvironments(catalog: RegulationCatalog): EnvironmentOption[] {
   const options: EnvironmentOption[] = [
@@ -163,6 +184,13 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
     },
   ];
 
+  const officialCandidates: {
+    readonly option: EnvironmentOption;
+    readonly formatOrder: number;
+    readonly frameOrder: number;
+    readonly regId: string;
+  }[] = [];
+
   for (const reg of catalog.regulations.values()) {
     const validation = RegulationValidator.validateRegulation(catalog, reg.id);
     if (validation.simulatorImplemented) {
@@ -171,17 +199,39 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
         validation.frame?.id
       );
       const rareCardCount = validation.frame?.setup.rareCardCount ?? 0;
-      options.push({
-        id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
-        name: `${reg.name} (公式)`,
-        isOfficial: true,
-        regulationId: reg.id,
-        deckProfileNotice,
-        setupRequirements: {
-          rareCardCount,
+      const formatOrder = FORMAT_PRESENTATION_ORDER[reg.formatId] ?? 999;
+      const frameOrder = FRAME_PRESENTATION_ORDER[reg.frameId] ?? 99;
+
+      officialCandidates.push({
+        option: {
+          id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
+          name: `${reg.name} (公式)`,
+          isOfficial: true,
+          regulationId: reg.id,
+          deckProfileNotice,
+          setupRequirements: {
+            rareCardCount,
+          },
         },
+        formatOrder,
+        frameOrder,
+        regId: reg.id,
       });
     }
+  }
+
+  officialCandidates.sort((a, b) => {
+    if (a.formatOrder !== b.formatOrder) {
+      return a.formatOrder - b.formatOrder;
+    }
+    if (a.frameOrder !== b.frameOrder) {
+      return a.frameOrder - b.frameOrder;
+    }
+    return a.regId.localeCompare(b.regId);
+  });
+
+  for (const item of officialCandidates) {
+    options.push(item.option);
   }
 
   return options;
