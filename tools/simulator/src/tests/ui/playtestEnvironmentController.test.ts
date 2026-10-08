@@ -153,7 +153,7 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
       expect(extractRegulationId("official:custom-reg-id")).toBe("custom-reg-id");
     });
 
-    it("Format Difficulty Order: Light < Standard < Pro の難易度順に決定論的ソートされること [BP-SIM-UI-ENV-ORDER-R1]", () => {
+    it("Format Difficulty Order: Light < Standard < Pro の難易度順に決定論的ソートされること [BP-SIM-UI-ENV-ORDER-R2]", () => {
       const options = getAvailableEnvironments(catalog);
       const envIds = options.map((o) => o.id);
 
@@ -190,7 +190,7 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
       expect(maxStandardIndex).toBeLessThan(minProIndex);
     });
 
-    it("Catalog order independence: Map 挿入順を逆順・シャッフルしても同一の難易度順が返されること [BP-SIM-UI-ENV-ORDER-R1]", () => {
+    it("Catalog order independence: Map 挿入順を逆順・シャッフルしても同一の難易度順が返されること [BP-SIM-UI-ENV-ORDER-R2]", () => {
       // 意図的に Pro → Standard → Light の順で regulations を挿入した Catalog を構築
       const reversedRegulations = new Map([
         ["pro-rarePack", catalog.regulations.get("pro-rarePack")!],

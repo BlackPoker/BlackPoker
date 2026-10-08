@@ -158,18 +158,9 @@ export const FORMAT_PRESENTATION_ORDER: Record<string, number> = {
 };
 
 /**
- * 同一フォーマット内におけるフレームの表示順序（既存仕様維持）。
- * entry16 (10) < pack (20) < rarePack (30)
- */
-export const FRAME_PRESENTATION_ORDER: Record<string, number> = {
-  entry16: 10,
-  pack: 20,
-  rarePack: 30,
-};
-
-/**
  * レギュレーションカタログから、実装済み（simulatorImplemented === true）の公式環境を動的に列挙します。
- * Core Battle（擬似環境）を常に先頭に含み、公式環境は難易度順（Light < Standard < Pro）に決定論的ソートされます。
+ * Core Battle（擬似環境）を常に先頭に含み、公式環境はFormat難易度順（Light < Standard < Pro）に決定論的ソートされます。
+ * 同一 Format 内は意味論を持たない決定論的 tie-break（regId.localeCompare）により順序付けされ、
  * Catalog の Map 登録順に依存しません。
  */
 export function getAvailableEnvironments(catalog: RegulationCatalog): EnvironmentOption[] {
@@ -187,7 +178,6 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
   const officialCandidates: {
     readonly option: EnvironmentOption;
     readonly formatOrder: number;
-    readonly frameOrder: number;
     readonly regId: string;
   }[] = [];
 
@@ -200,7 +190,6 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
       );
       const rareCardCount = validation.frame?.setup.rareCardCount ?? 0;
       const formatOrder = FORMAT_PRESENTATION_ORDER[reg.formatId] ?? 999;
-      const frameOrder = FRAME_PRESENTATION_ORDER[reg.frameId] ?? 99;
 
       officialCandidates.push({
         option: {
@@ -214,7 +203,6 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
           },
         },
         formatOrder,
-        frameOrder,
         regId: reg.id,
       });
     }
@@ -223,9 +211,6 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
   officialCandidates.sort((a, b) => {
     if (a.formatOrder !== b.formatOrder) {
       return a.formatOrder - b.formatOrder;
-    }
-    if (a.frameOrder !== b.frameOrder) {
-      return a.frameOrder - b.frameOrder;
     }
     return a.regId.localeCompare(b.regId);
   });

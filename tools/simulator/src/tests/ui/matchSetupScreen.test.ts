@@ -442,9 +442,9 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
   });
 
   // =========================================================================
-  // Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R1]
+  // Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R2]
   // =========================================================================
-  describe("Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R1]", () => {
+  describe("Environment Presentation Order & Regression Verification [BP-SIM-UI-ENV-ORDER-R2]", () => {
     it("A. UI Option Render Order: MatchSetupScreen renders environment options in exact difficulty order (Light < Standard < Pro)", () => {
       let testRenderer: any;
       act(() => {
