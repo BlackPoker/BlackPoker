@@ -142,27 +142,31 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
     );
   };
 
-  // 兵士列 (センター寄せ)
+  // 兵士列 (センター寄せ / 多数時は左端見切れなくスクロール可能)
   const soldierRow = soldierUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
       <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end">
         <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
-      <div className="flex gap-0.5 lg:gap-1.5 p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar">
-        {soldierUnits.map((u: any) => renderUnitCard(u))}
+      <div className="p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 overflow-x-auto no-scrollbar">
+        <div className="flex gap-0.5 lg:gap-1.5 items-center justify-center min-w-full w-max">
+          {soldierUnits.map((u: any) => renderUnitCard(u))}
+        </div>
       </div>
     </div>
   ) : null;
 
-  // 防壁列 (外側・センター寄せ / ライフ側から ①, ②...)
+  // 防壁列 (外側・センター寄せ / ライフ側から ①, ②... / 多数時は左端見切れなくスクロール可能)
   // 画面表示を左→右で見ると [③] [②] [①] となり ① がライフ側(右端)
   const bulwarkRow = bulwarkUnits.length > 0 ? (
     <div className="flex flex-col gap-0.5">
       <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end">
         <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
-      <div className="flex gap-0.5 lg:gap-1.5 p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar">
-        {[...bulwarkUnits].reverse().map((u: any) => renderUnitCard(u))}
+      <div className="p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 overflow-x-auto no-scrollbar">
+        <div className="flex gap-0.5 lg:gap-1.5 items-center justify-center min-w-full w-max">
+          {[...bulwarkUnits].reverse().map((u: any) => renderUnitCard(u))}
+        </div>
       </div>
     </div>
   ) : null;

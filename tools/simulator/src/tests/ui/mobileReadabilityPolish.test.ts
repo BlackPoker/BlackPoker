@@ -386,7 +386,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       );
 
       // soldierRow と bulwarkRow のスクロール親要素に p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 が設定されていること
-      expect(html).toContain("p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 items-center justify-center overflow-x-auto no-scrollbar");
+      expect(html).toContain("p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 overflow-x-auto no-scrollbar");
     });
   });
 });
