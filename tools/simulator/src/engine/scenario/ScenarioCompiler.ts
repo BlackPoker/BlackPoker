@@ -29,6 +29,10 @@ import {
   validateUnitAgainstComponentDefinition,
   validatePlaytestPreset,
 } from "../session/playtest/validatePlaytestPreset";
+import {
+  RareCardSelectionService,
+  CardOccurrenceSelection,
+} from "../regulation/RareCardSelectionService";
 
 export interface ScenarioCompilerOptions {
   readonly playerNames?: {
@@ -36,6 +40,10 @@ export interface ScenarioCompilerOptions {
     readonly p2?: string;
   };
   readonly matchId?: string;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 export type ScenarioCompileOutcome =
@@ -318,6 +326,36 @@ export class ScenarioCompiler {
       // ========================================================
       // STEP 1: すべての明示指定カードの物理予約 (2-Step Allocation)
       // ========================================================
+
+      // 0. Rare Card 事前物理予約 (rareCardCount > 0 の場合)
+      const rareCardCount = frame.setup.rareCardCount ?? 0;
+      const playerRareCards: InGameCard[] = [];
+      if (rareCardCount > 0) {
+        const playerRareSelections =
+          options?.rareCardSelections?.[playerKey] ??
+          deckProfile.defaultRareCardSelections ??
+          RareCardSelectionService.resolveDefaultRareCardSelections(deckProfile, rareCardCount);
+
+        const val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, playerRareSelections);
+        if (!val.valid) {
+          errors.push({
+            code: "VALIDATION_ERROR",
+            path: `players.${playerKey}.rareCards`,
+            message: `レアカード選択エラー: ${val.errors.join(", ")}`,
+          });
+        } else {
+          for (let rIdx = 0; rIdx < playerRareSelections.length; rIdx++) {
+            const sel = playerRareSelections[rIdx];
+            const resolved = resolveCardRef(
+              { suit: sel.suit, rank: sel.rank, occurrence: sel.occurrence },
+              `players.${playerKey}.rareCards[${rIdx}]`
+            );
+            if (resolved) {
+              playerRareCards.push(resolved);
+            }
+          }
+        }
+      }
 
       // 1. フィールドユニット配置
       const fieldUnits: any[] = [];
@@ -615,6 +653,7 @@ export class ScenarioCompiler {
         fog: [],
         trump: [],
         pack: packObj,
+        rareCards: playerRareCards,
       };
 
       // カード保存則検証

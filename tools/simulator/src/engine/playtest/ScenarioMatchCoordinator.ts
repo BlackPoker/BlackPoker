@@ -19,6 +19,7 @@ import {
 import { PlaytestPolicyFactory } from "./PlaytestPolicyFactory";
 import { GameSession, GameSessionStep } from "../session/GameSession";
 import { DecisionPolicy } from "../simulation/DecisionPolicy";
+import { CardOccurrenceSelection } from "../regulation/RareCardSelectionService";
 
 /**
  * 確定コミット待ちの準備済み対戦コンテキスト
@@ -44,6 +45,10 @@ export interface PrepareScenarioMatchParams {
   readonly mode: PlaytestMatchMode;
   readonly humanSeat: "p1" | "p2";
   readonly policyId: PlaytestPolicyId;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 export type PrepareScenarioMatchResult =
@@ -68,7 +73,9 @@ export function prepareScenarioMatchAttempt(
   const { definition, catalog, fullRulePackage, mode, humanSeat: rawHumanSeat, policyId } = params;
 
   // 1. Prepare: Scenario コンパイル
-  const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage);
+  const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage, {
+    rareCardSelections: params.rareCardSelections,
+  });
   if (outcome.type !== "READY") {
     const errorMsg = outcome.errors
       .map((e) => `[${e.code}] ${e.path ? `${e.path}: ` : ""}${e.message}`)
@@ -119,6 +126,7 @@ export function prepareScenarioMatchAttempt(
     regulationId: regId ?? undefined,
     seed: canonicalDefinition.seed,
     rulePackage: outcome.rulePackage,
+    rareCardSelections: params.rareCardSelections,
     isScenario: true,
     scenarioDefinition: canonicalDefinition,
   };

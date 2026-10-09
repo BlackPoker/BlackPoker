@@ -5,6 +5,8 @@ import {
 } from "./SimulatorDeckProfileResolver";
 import { rankToValue } from "../rules/cardUtils";
 
+export type { CardOccurrenceSelection };
+
 /**
  * レアカード選択候補の定義。
  * デッキプロファイル内の各物理カード（重複 occurrence を含む）を一意に識別します。

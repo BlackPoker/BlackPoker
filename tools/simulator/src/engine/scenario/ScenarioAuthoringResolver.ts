@@ -18,6 +18,7 @@ import {
 import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition";
 import { RegulationValidator } from "../regulation/RegulationValidator";
 import { SimulatorDeckProfileResolver } from "../regulation/SimulatorDeckProfileResolver";
+import { RareCardSelectionService } from "../regulation/RareCardSelectionService";
 import { extractRegulationId } from "../playtest/PlaytestEnvironmentController";
 import { SeededRandom } from "../random/RandomSource";
 import { deriveSeed, shuffleCards } from "../random/DeterministicShuffle";
@@ -259,6 +260,23 @@ export class ScenarioAuthoringResolver {
       // ========================================================
       // STEP 1: すべての固定・明示指定カードの事前物理予約
       // ========================================================
+
+      // 0. Rare Card 事前物理予約 (rareCardCount > 0 の場合)
+      const rareCardCount = frame.setup.rareCardCount ?? 0;
+      if (rareCardCount > 0) {
+        const playerRareSelections =
+          draft.rareCardSelections?.[playerKey] ??
+          deckProfile.defaultRareCardSelections ??
+          RareCardSelectionService.resolveDefaultRareCardSelections(deckProfile, rareCardCount);
+
+        for (let rIdx = 0; rIdx < playerRareSelections.length; rIdx++) {
+          const sel = playerRareSelections[rIdx];
+          resolveCardRef(
+            { suit: sel.suit, rank: sel.rank, occurrence: sel.occurrence },
+            `players.${playerKey}.rareCardSelections[${rIdx}]`
+          );
+        }
+      }
 
       // 1. フィールドユニット予約
       const resolvedFieldUnits: ScenarioUnitV1[] = [];

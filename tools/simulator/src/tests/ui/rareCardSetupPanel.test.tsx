@@ -479,4 +479,127 @@ describe("RareCardSetupPanel UI Component Tests [BP-SIM-REG-5.0-J-RARE-SELECTION
       expect(handleReset).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe("Polish 1: Single-tap switch & Typography Tests [BP-SIM-PRO-RAREPACK-POLISH-1]", () => {
+    it("1タップ切替: rareCardCount=1 のとき、未選択カードをタップすると即座に選択が置き換わる", () => {
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={1}
+            matchMode="humanVsAi"
+            confirmedSelections={{}}
+            onConfirmSelections={vi.fn()}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+      const spadeA = root.findByProps({ "aria-label": "♠A" });
+      const spadeK = root.findByProps({ "aria-label": "♠K" });
+
+      // 1. ♠A を選択
+      act(() => {
+        spadeA.props.onClick();
+      });
+      expect(spadeA.props.className).toContain("bg-zinc-950");
+      expect(spadeK.props.className).toContain("bg-white");
+
+      // 2. ♠K をタップ -> 1タップで ♠A から ♠K に置換される
+      act(() => {
+        spadeK.props.onClick();
+      });
+      expect(spadeA.props.className).toContain("bg-white");
+      expect(spadeK.props.className).toContain("bg-zinc-950");
+    });
+
+    it("選択解除: 選択中カードを再タップすると選択解除される", () => {
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={1}
+            matchMode="humanVsAi"
+            confirmedSelections={{}}
+            onConfirmSelections={vi.fn()}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+      const spadeA = root.findByProps({ "aria-label": "♠A" });
+      const confirmButton = root.findByProps({ "data-testid": "confirm-rare-button" });
+
+      // 1. ♠A を選択
+      act(() => {
+        spadeA.props.onClick();
+      });
+      expect(spadeA.props.className).toContain("bg-zinc-950");
+      expect(confirmButton.props.disabled).toBe(false);
+
+      // 2. ♠A を再タップ -> 選択解除
+      act(() => {
+        spadeA.props.onClick();
+      });
+      expect(spadeA.props.className).toContain("bg-white");
+      expect(confirmButton.props.disabled).toBe(true);
+    });
+
+    it("Typography統一: カード候補の表示に .bp-card-suit, .bp-card-rank, .bp-card-suit-red が適用されている", () => {
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          <RareCardSetupPanel
+            deckProfile={standardProfile}
+            rareCardCount={1}
+            matchMode="humanVsAi"
+            confirmedSelections={{}}
+            onConfirmSelections={vi.fn()}
+            onResetSelections={vi.fn()}
+          />
+        );
+      });
+
+      const root = renderer!.root;
+
+      // 1. 赤スート (♥A): bp-card-suit, text-[#a22041], bp-card-suit-red, bp-card-rank
+      const heartA = root.findByProps({ "aria-label": "♥A" });
+      const heartSpans = heartA.findAllByType("span");
+      const heartSuitSpan = heartSpans.find((s) => s.props.className?.includes("bp-card-suit"));
+      expect(heartSuitSpan).toBeDefined();
+      expect(heartSuitSpan!.props.className).toContain("text-[#a22041]");
+      expect(heartSuitSpan!.props.className).toContain("bp-card-suit-red");
+
+      const heartRankSpan = heartSpans.find((s) => s.props.className?.includes("bp-card-rank"));
+      expect(heartRankSpan).toBeDefined();
+      expect(heartRankSpan!.props.children).toBe("A");
+
+      // 2. 黒スート (♠K): bp-card-suit, bp-card-rank
+      const spadeK = root.findByProps({ "aria-label": "♠K" });
+      const spadeSpans = spadeK.findAllByType("span");
+      const spadeSuitSpan = spadeSpans.find((s) => s.props.className?.includes("bp-card-suit"));
+      expect(spadeSuitSpan).toBeDefined();
+      expect(spadeSuitSpan!.props.className).not.toContain("bp-card-suit-red");
+
+      const spadeRankSpan = spadeSpans.find((s) => s.props.className?.includes("bp-card-rank"));
+      expect(spadeRankSpan).toBeDefined();
+      expect(spadeRankSpan!.props.children).toBe("K");
+
+      // 3. Joker: ★, bp-card-rank
+      const joker = root.findByProps({ "aria-label": "Joker" });
+      const jokerSpans = joker.findAllByType("span");
+      const jokerSuitSpan = jokerSpans.find((s) => s.props.className?.includes("bp-card-suit"));
+      expect(jokerSuitSpan).toBeDefined();
+      expect(jokerSuitSpan!.props.children).toBe("★");
+
+      const jokerRankSpan = jokerSpans.find((s) => s.props.className?.includes("bp-card-rank"));
+      expect(jokerRankSpan).toBeDefined();
+      expect(jokerRankSpan!.props.children).toBe("Joker");
+    });
+  });
 });
+

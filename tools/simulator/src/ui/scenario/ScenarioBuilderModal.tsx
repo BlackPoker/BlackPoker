@@ -30,12 +30,21 @@ import {
   PLAYTEST_POLICY_OPTIONS,
 } from "../../engine/playtest/PlaytestSeatController";
 import { ChallengeDefinitionV1 } from "../../domain/challenge/ChallengeDefinition";
+import { RareCardSetupPanel } from "../playtest/RareCardSetupPanel";
+import {
+  RareCardSelectionService,
+  CardOccurrenceSelection,
+} from "../../engine/regulation/RareCardSelectionService";
 
 export interface ScenarioStartOptions {
   readonly mode: PlaytestMatchMode;
   readonly humanSeat: "p1" | "p2";
   readonly policyId: PlaytestPolicyId;
   readonly challengeDefinition?: ChallengeDefinitionV1;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 export interface ScenarioShareOptions {
@@ -44,6 +53,10 @@ export interface ScenarioShareOptions {
   readonly humanSeat: "p1" | "p2";
   readonly policyId: PlaytestPolicyId;
   readonly challengeDefinition?: ChallengeDefinitionV1;
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 export interface ScenarioBuilderModalProps {
@@ -58,6 +71,10 @@ export interface ScenarioBuilderModalProps {
   readonly initialMode?: PlaytestMatchMode;
   readonly initialPolicyId?: PlaytestPolicyId;
   readonly initialChallengeDefinition?: ChallengeDefinitionV1;
+  readonly initialRareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 /**
@@ -143,6 +160,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   initialMode,
   initialPolicyId,
   initialChallengeDefinition,
+  initialRareCardSelections,
 }) => {
   // 利用可能な公式環境一覧（simulatorImplemented === true のみ。Core Battle は対象外）
   const officialEnvironments = useMemo(() => {
@@ -172,6 +190,12 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [turnCount, setTurnCount] = useState<number>(initialDefinition?.turnCount ?? 1);
   const [name, setName] = useState<string>(initialDefinition?.name ?? "");
   const [description, setDescription] = useState<string>(initialDefinition?.description ?? "");
+
+  // レアカード選択 Draft
+  const [rareCardSelections, setRareCardSelections] = useState<{
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  }>(initialRareCardSelections ?? {});
 
   // 対戦設定 & チャレンジ設定
   const [matchMode, setMatchMode] = useState<PlaytestMatchMode>(initialMode ?? "humanVsHuman");
@@ -332,8 +356,30 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     return currentFrame?.setup.packCount;
   }, [currentFrame]);
 
+  // 環境変更時のレアカード自動解決
+  useEffect(() => {
+    const rareCount = currentFrame?.setup.rareCardCount ?? 0;
+    if (currentFrame && rareCount > 0 && currentDeckProfile) {
+      const defaults =
+        currentDeckProfile.defaultRareCardSelections ??
+        RareCardSelectionService.resolveDefaultRareCardSelections(currentDeckProfile, rareCount);
+      setRareCardSelections((prev) => {
+        const isP1Valid = prev.p1 && prev.p1.length === rareCount;
+        const isP2Valid = prev.p2 && prev.p2.length === rareCount;
+        if (isP1Valid && isP2Valid) return prev;
+        return {
+          p1: isP1Valid ? prev.p1 : defaults,
+          p2: isP2Valid ? prev.p2 : defaults,
+        };
+      });
+    } else {
+      setRareCardSelections({});
+    }
+  }, [environmentId, currentFrame, currentDeckProfile]);
+
   // 部分指定ドラフトの構築
   const authoringDraft: ScenarioAuthoringDraftV1 = useMemo(() => {
+    const rareCount = currentFrame?.setup.rareCardCount ?? 0;
     return {
       environmentId,
       seed,
@@ -342,6 +388,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       turnCount,
       name: name.trim() || undefined,
       description: description.trim() || undefined,
+      rareCardSelections: rareCount > 0 ? rareCardSelections : undefined,
       players: {
         p1: {
           hand: {
@@ -395,6 +442,8 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     turnCount,
     name,
     description,
+    rareCardSelections,
+    currentFrame,
     p1Hand,
     p1HandCount,
     p1Field,
@@ -486,8 +535,11 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
         errors: authoringResult.errors,
       };
     }
-    return ScenarioCompiler.compile(authoringResult.definition, catalog, fullRulePackage);
-  }, [authoringResult, catalog, fullRulePackage]);
+    const rareCount = currentFrame?.setup.rareCardCount ?? 0;
+    return ScenarioCompiler.compile(authoringResult.definition, catalog, fullRulePackage, {
+      rareCardSelections: rareCount > 0 ? rareCardSelections : undefined,
+    });
+  }, [authoringResult, catalog, fullRulePackage, currentFrame, rareCardSelections]);
 
   // カード追加用ローカル入力ステート (P1/P2共通または個別)
   const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "settings");
@@ -569,6 +621,12 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     }
   };
 
+  const rareCardCount = currentFrame?.setup.rareCardCount ?? 0;
+  const isP1RareReady = rareCardCount === 0 || (rareCardSelections?.p1?.length ?? 0) === rareCardCount;
+  const isP2RareReady =
+    rareCardCount === 0 || matchMode === "humanVsAi" || (rareCardSelections?.p2?.length ?? 0) === rareCardCount;
+  const isRareReady = isP1RareReady && isP2RareReady;
+
   // 共有 URL コピーハンドラ
   const handleCopyShareUrl = async () => {
     try {
@@ -583,6 +641,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           humanSeat: "p1",
           policyId: selectedPolicyId,
           challengeDefinition: challengeDef,
+          rareCardSelections: rareCardCount > 0 ? rareCardSelections : undefined,
         });
         if (success) {
           setShareNotice({ type: "success", message: "共有URLをクリップボードにコピーしました。" });
@@ -608,7 +667,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   // Scenario 開始
   const handleStart = () => {
-    if (compileOutcome.type !== "READY") return;
+    if (compileOutcome.type !== "READY" || !isRareReady) return;
     const challengeDef: ChallengeDefinitionV1 | undefined = isChallengeEnabled
       ? { version: 1, kind: "WIN_CURRENT_TURN" }
       : undefined;
@@ -617,6 +676,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       humanSeat: "p1",
       policyId: selectedPolicyId,
       challengeDefinition: challengeDef,
+      rareCardSelections: rareCardCount > 0 ? rareCardSelections : undefined,
     });
     onClose();
   };
@@ -862,6 +922,23 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 )}
               </div>
 
+              {/* レアカード設定 (rareCardCount > 0 の場合のみ表示) */}
+              {rareCardCount > 0 && currentDeckProfile && (
+                <div className="flex flex-col gap-1.5 font-mono">
+                  <label className="text-xs font-bold text-zinc-800">
+                    レアカード設定 (Rare Card Selection):
+                  </label>
+                  <RareCardSetupPanel
+                    deckProfile={currentDeckProfile}
+                    rareCardCount={rareCardCount}
+                    matchMode={matchMode}
+                    confirmedSelections={rareCardSelections}
+                    onConfirmSelections={(sels) => setRareCardSelections(sels)}
+                    onResetSelections={() => setRareCardSelections({})}
+                  />
+                </div>
+              )}
+
               {/* Challenge 設定 */}
               <div className="p-4 bg-zinc-50 rounded-xl border border-zinc-200 flex flex-col gap-2.5 font-mono">
                 <span className="text-xs font-bold text-zinc-800">チャレンジ設定 (Challenge)</span>
@@ -972,9 +1049,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           </button>
           <button
             onClick={handleStart}
-            disabled={compileOutcome.type !== "READY"}
+            disabled={compileOutcome.type !== "READY" || !isRareReady}
             className={`px-6 py-2.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center gap-2 ${
-              compileOutcome.type === "READY"
+              compileOutcome.type === "READY" && isRareReady
                 ? "bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer"
                 : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
             }`}

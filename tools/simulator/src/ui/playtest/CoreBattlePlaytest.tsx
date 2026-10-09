@@ -677,12 +677,16 @@ export const CoreBattlePlaytest: React.FC = () => {
       const effectiveHumanSeat = options?.humanSeat ?? pendingHumanSeat;
       const effectivePolicyId = options?.policyId ?? pendingPolicyId;
       const effectiveChallengeDef = options?.challengeDefinition ?? pendingChallengeDefinition;
+      const effectiveRareSelections = options?.rareCardSelections ?? pendingRareCardSelections;
 
       setRestoredScenarioDefinition(definition);
       setPendingMatchMode(effectiveMode);
       setPendingHumanSeat(effectiveHumanSeat);
       setPendingPolicyId(effectivePolicyId);
       setPendingChallengeDefinition(effectiveChallengeDef);
+      if (options?.rareCardSelections) {
+        setPendingRareCardSelections(options.rareCardSelections);
+      }
 
       const result = prepareScenarioMatchAttempt({
         definition,
@@ -691,6 +695,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         mode: effectiveMode,
         humanSeat: effectiveHumanSeat,
         policyId: effectivePolicyId,
+        rareCardSelections: effectiveRareSelections,
       });
 
       if (result.status !== "READY") {
@@ -716,20 +721,25 @@ export const CoreBattlePlaytest: React.FC = () => {
       pendingMatchMode,
       pendingHumanSeat,
       pendingPolicyId,
+      pendingRareCardSelections,
       pendingChallengeDefinition,
       commitReadyMatch,
       addLog,
     ]
   );
 
-  // ScenarioBuilderModal からの共有デリゲートハンドラ (mode/human/policy/challenge を保持した共有URL生成)
+  // ScenarioBuilderModal からの共有デリゲートハンドラ (mode/human/policy/challenge/rare を保持した共有URL生成)
   const handleShareScenarioFromModal = useCallback(
     async (options: ScenarioShareOptions) => {
+      const effectiveRareSelections = options.rareCardSelections ?? pendingRareCardSelections;
       setRestoredScenarioDefinition(options.definition);
       setPendingMatchMode(options.mode);
       setPendingHumanSeat(options.humanSeat);
       setPendingPolicyId(options.policyId);
       setPendingChallengeDefinition(options.challengeDefinition);
+      if (options.rareCardSelections) {
+        setPendingRareCardSelections(options.rareCardSelections);
+      }
 
       const config: PlaytestShareConfigV1 = {
         version: 1,
@@ -738,6 +748,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: options.humanSeat,
         policyId: options.policyId,
         seedInput: String(options.definition.seed),
+        rareCardSelections: effectiveRareSelections,
         scenarioDefinition: options.definition,
         challengeDefinition: options.challengeDefinition,
       };
@@ -2431,6 +2442,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         initialMode={pendingMatchMode}
         initialPolicyId={pendingPolicyId}
         initialChallengeDefinition={pendingChallengeDefinition}
+        initialRareCardSelections={pendingRareCardSelections}
       />
     </div>
 

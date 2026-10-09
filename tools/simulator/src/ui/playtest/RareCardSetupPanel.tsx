@@ -8,6 +8,7 @@ import {
   RareCardSelectionService,
   RareCardCandidate,
 } from "../../engine/regulation/RareCardSelectionService";
+import { formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
 
 export interface RareCardSetupPanelProps {
   /** デッキプロファイル (SSOT) */
@@ -73,11 +74,14 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
     return groups.filter((g) => g.cards.length > 0);
   }, [candidates]);
 
-  // トグル選択ハンドラ (上限 rareCardCount まで、選択中カードは解除)
+  // トグル選択ハンドラ (rareCardCount === 1 のときは未選択カードをタップしたら即座に置換、選択済みは解除)
   const handleToggleCandidate = (candidateId: string) => {
     setSelectedCandidateIds((prev) => {
       if (prev.includes(candidateId)) {
         return prev.filter((id) => id !== candidateId);
+      }
+      if (rareCardCount === 1) {
+        return [candidateId];
       }
       if (prev.length >= rareCardCount) {
         return prev;
@@ -269,8 +273,9 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             <div className="grid grid-cols-7 sm:grid-cols-13 gap-1">
               {group.cards.map((candidate) => {
                 const isSelected = selectedCandidateIds.includes(candidate.id);
-                const isHeartOrDiamond = candidate.suit === "H" || candidate.suit === "D";
+                const isRed = isRedSuit(candidate.suit);
                 const isJoker = candidate.suit === "J";
+                const suitSymbol = isJoker ? "★" : formatOfficialSuitSymbol(candidate.suit);
 
                 return (
                   <button
@@ -285,29 +290,25 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
                     }`}
                   >
                     <span
-                      className={`text-[11px] font-black ${
+                      className={`bp-card-suit text-[16px] leading-none ${
                         isSelected
                           ? "text-white"
-                          : isHeartOrDiamond
-                          ? "text-red-600"
-                          : isJoker
-                          ? "text-purple-600"
+                          : isRed
+                          ? "text-[#a22041] bp-card-suit-red"
                           : "text-zinc-900"
                       }`}
                     >
-                      {candidate.suit === "S"
-                        ? "♠"
-                        : candidate.suit === "H"
-                        ? "♥"
-                        : candidate.suit === "D"
-                        ? "♦"
-                        : candidate.suit === "C"
-                        ? "♣"
-                        : "★"}
+                      {suitSymbol}
                     </span>
-                    <span className="text-[10px] leading-none">{candidate.rank}</span>
+                    <span
+                      className={`bp-card-rank text-[12px] font-bold leading-none ${
+                        isSelected ? "text-white" : "text-zinc-900"
+                      }`}
+                    >
+                      {candidate.rank}
+                    </span>
                     {candidate.occurrence > 0 && (
-                      <span className="text-[8px] opacity-75 leading-none">#{candidate.occurrence + 1}</span>
+                      <span className="text-[8px] font-sans opacity-75 leading-none mt-0.5">#{candidate.occurrence + 1}</span>
                     )}
                   </button>
                 );

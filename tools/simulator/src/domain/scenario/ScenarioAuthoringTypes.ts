@@ -6,6 +6,7 @@ import {
   ScenarioDefinitionV1,
   ScenarioValidationError,
 } from "./ScenarioTypes";
+import { CardOccurrenceSelection } from "../../engine/regulation/RareCardSelectionService";
 
 /**
  * 手札ドラフト設定
@@ -74,6 +75,10 @@ export interface ScenarioAuthoringDraftV1 {
   readonly players: {
     readonly p1: ScenarioAuthoringPlayerDraftV1;
     readonly p2: ScenarioAuthoringPlayerDraftV1;
+  };
+  readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
   };
 }
 
