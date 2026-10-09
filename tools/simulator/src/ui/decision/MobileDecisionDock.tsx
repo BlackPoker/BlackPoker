@@ -2,9 +2,11 @@ import React from "react";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { SheetMode } from "../game/MobileBottomSheet";
+import { CardView } from "../game/CardView";
 
 export interface MobileDecisionDockProps {
   readonly request: DecisionRequest | null;
+  readonly handCards?: readonly any[];
   readonly onOpenSheet: () => void;
   readonly onSubmit: (response: DecisionResponse, options?: { autoPass?: boolean }) => void;
   readonly sheetMode: SheetMode;
@@ -14,6 +16,7 @@ export interface MobileDecisionDockProps {
 
 export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
   request,
+  handCards,
   onOpenSheet,
   onSubmit,
   sheetMode,
@@ -27,7 +30,14 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
 
   const isZoneTopSelection = request.source.type === "ZONE_TOP_SELECTION";
   const isEffectResolution = request.source.type === "EFFECT_RESOLUTION" || isZoneTopSelection;
-  const playerName = request.playerId === "p1" ? "Player A" : "Player B";
+  const playerPrefix = request.playerId === "p1" ? "P1" : "P2";
+
+  let decisionLabel = playerPrefix;
+  if (isZoneTopSelection) {
+    decisionLabel = `${playerPrefix} 墓地TOP`;
+  } else if (isEffectResolution) {
+    decisionLabel = `${playerPrefix} 効果選択`;
+  }
 
   // PASS パターンの検索（UI独自判定ではなく、request.patterns内のkind === "PASS"のみ使用）
   const passPatternIndex = request.patterns.findIndex((p) => p.kind === "PASS");
@@ -48,15 +58,36 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
     <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-zinc-300 shadow-2xl p-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
       <div className="max-w-md mx-auto flex flex-col gap-1.5">
         {/* サマリーバー */}
-        <div className="flex items-center justify-between text-[11px] font-mono px-1">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 text-[11px] font-mono px-1 min-h-[26px]">
+          <div className="flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-zinc-950 animate-pulse" />
-            <span className="font-bold text-zinc-950">
-              {playerName} の{isZoneTopSelection ? "墓地TOP選択" : isEffectResolution ? "効果・対象選択" : "行動選択"}
+            <span className="font-bold text-zinc-950 whitespace-nowrap">
+              {decisionLabel}
             </span>
           </div>
-          <span className="text-zinc-500 text-[10px]">
-            {isZoneTopSelection ? "ZONE TOP" : isEffectResolution ? "EFFECT / TARGET" : `${request.patterns.length} 選択肢`}
+
+          {/* 操作プレイヤーの手札一覧 (Viewerから見て可視な手札のみ。横スクロール可能) */}
+          <div
+            data-testid="mobile-dock-hand-cards"
+            className="flex-1 min-w-0 flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5"
+          >
+            {handCards && handCards.length > 0 && handCards.map((card: any, idx: number) => {
+              if (card.visibility === "HIDDEN" || card.faceUp === false) {
+                return null;
+              }
+              return (
+                <CardView
+                  key={card.id || card.cardInstanceId || idx}
+                  card={card}
+                  size="sm"
+                  compact={true}
+                />
+              );
+            })}
+          </div>
+
+          <span className="text-zinc-500 text-[10px] shrink-0 whitespace-nowrap">
+            {isZoneTopSelection ? "ZONE TOP" : isEffectResolution ? "EFFECT" : `${request.patterns.length}択`}
           </span>
         </div>
 

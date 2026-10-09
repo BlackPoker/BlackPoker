@@ -180,19 +180,19 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       {/* 1. プレイヤーサマリーヘッダー (PlayerSummary) */}
       <div className="flex flex-wrap items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 lg:mb-1.5 border-zinc-200 gap-1">
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-bold text-zinc-950 tracking-wide">
+          <span className="text-[12.5px] lg:text-xs font-bold text-zinc-950 tracking-wide">
             {name}
           </span>
-          <span className="text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-100 text-zinc-700 border border-zinc-300">
+          <span className="text-[9.5px] lg:text-[9px] font-mono font-bold px-1 py-0.2 rounded bg-zinc-100 text-zinc-700 border border-zinc-300">
             {(playerKey || viewModel.playerKey || "").toUpperCase()}
           </span>
           {isTurnPlayer && (
-            <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-900 border border-zinc-400">
+            <span className="text-[9.5px] lg:text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-200 text-zinc-900 border border-zinc-400">
               TURN
             </span>
           )}
           {isChancePlayer && (
-            <span className="text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-950 text-white shadow-sm">
+            <span className="text-[9.5px] lg:text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-950 text-white shadow-sm">
               CHANCE
             </span>
           )}
@@ -201,13 +201,13 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
         {/* ライフ & 手札サマリー */}
         <div className="flex items-center gap-1.5 font-mono">
           <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[26px]">
-            <span className="text-[10px] font-bold text-zinc-500">LIFE:</span>
-            <span className="text-xs font-black text-zinc-950">{lifeDisplay}</span>
+            <span className="text-[10.5px] lg:text-[10px] font-bold text-zinc-500">LIFE:</span>
+            <span className="text-[12.5px] lg:text-xs font-black text-zinc-950">{lifeDisplay}</span>
           </div>
 
           <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[26px]">
-            <span className="text-[10px] font-bold text-zinc-500">HAND:</span>
-            <span className="text-xs font-black text-zinc-950">{handCount}</span>
+            <span className="text-[10.5px] lg:text-[10px] font-bold text-zinc-500">HAND:</span>
+            <span className="text-[12.5px] lg:text-xs font-black text-zinc-950">{handCount}</span>
           </div>
         </div>
       </div>
@@ -317,7 +317,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
       {/* 3. フィールド (Units) - 兵士列 / 防壁列の分離 */}
       <div className="mb-1 lg:mb-1.5">
-        <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
+        <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
           <span>FIELD (ユニット: {fieldUnits.length}体)</span>
         </div>
 
@@ -345,7 +345,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       {/* 4. 手札 (Hand) - 自分手札のみカード内容表示 (相手手札はHeader HANDカウントのみ表示) */}
       {isViewer && (
         <div>
-          <div className="text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
+          <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
             <span>HAND (手札: {handCount}枚)</span>
           </div>
 
@@ -357,6 +357,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
                   card={card}
                   faceDown={Boolean(card.faceDown)}
                   size="md"
+                  inPlayerBoard={true}
                 />
               ))
             ) : (

@@ -269,23 +269,23 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           {isBulwark ? (
             <div className="flex items-center gap-0.5 truncate">
               <span
-                className="bg-zinc-950 text-white font-mono font-black text-[9px] px-1 py-0.2 rounded shadow-sm shrink-0"
+                className="bg-zinc-950 text-white font-mono font-black text-[9.5px] px-1 py-0.2 rounded shadow-sm shrink-0"
                 title={bulwarkPos ? `防壁配置: ライフ側から ${bulwarkPos}` : undefined}
               >
                 {bulwarkPosBadge}
               </span>
-              <span className="text-[9px] font-bold text-zinc-900 font-sans">防壁</span>
+              <span className="text-[9.5px] font-bold text-zinc-900 font-sans">防壁</span>
             </div>
           ) : (
             <div className="flex items-center gap-0.5 truncate">
-              <span className="text-[9px] font-bold text-zinc-900 font-sans truncate">
+              <span className="text-[9.5px] font-bold text-zinc-900 font-sans truncate">
                 {unitDisplayName}
               </span>
             </div>
           )}
 
           <span
-            className={`text-[8px] font-mono font-bold px-1 py-0.2 rounded shrink-0 ${
+            className={`text-[8.5px] font-mono font-bold px-1 py-0.2 rounded shrink-0 ${
               isDrive
                 ? "bg-zinc-100 text-zinc-500 border border-zinc-300"
                 : "bg-zinc-950 text-white font-black"
@@ -298,14 +298,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* バトルロール表示 (モバイル) */}
         {battleRole === "attacker" && (
-          <div className="w-full bg-zinc-950 text-white text-[7px] font-mono font-black text-center py-0.2 rounded my-0.5">
+          <div className="w-full bg-zinc-950 text-white text-[7.5px] font-mono font-black text-center py-0.2 rounded my-0.5">
             {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0 ? (
               <span>ATK ← <RichCardText text={battleDisplayInfo.blockedByHumanLabels.join(" ")} /></span>
             ) : "ATK 攻撃中"}
           </div>
         )}
         {battleRole === "blocker" && (
-          <div className="w-full bg-zinc-100 border border-zinc-400 text-zinc-950 text-[7px] font-mono font-black text-center py-0.2 rounded my-0.5">
+          <div className="w-full bg-zinc-100 border border-zinc-400 text-zinc-950 text-[7.5px] font-mono font-black text-center py-0.2 rounded my-0.5">
             {battleDisplayInfo?.targetHumanLabel ? (
               <span>BLK → <RichCardText text={battleDisplayInfo.targetHumanLabel} /></span>
             ) : "BLK 防御中"}
@@ -314,20 +314,20 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* 2行目: カードスート/数字 + SIZE (相手の伏せ防壁は非表示にして1行に圧縮) */}
         {!(isBulwark && isHiddenFromViewer) && (
-          <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10px] font-mono">
+          <div className="flex items-center justify-between w-full mt-0.5 pt-0.5 border-t border-zinc-200 text-[10.5px] font-mono">
             <div className="flex items-center gap-0.5">
               {primaryCardSuit && primaryCardRank ? (
-                <span className="text-zinc-950 text-[13px] inline-flex items-center">
-                  <span className={`bp-card-suit text-[18px] ${isPrimaryCardRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{primaryCardSuit}</span>
+                <span className="text-zinc-950 text-[14px] inline-flex items-center bp-card-board">
+                  <span className={`bp-card-suit text-[20px] ${isPrimaryCardRed ? "text-[#a22041] bp-card-suit-red" : ""}`}>{primaryCardSuit}</span>
                   <span className="bp-card-rank font-bold">{primaryCardRank}</span>
                 </span>
               ) : (
-                <span className="font-bold text-zinc-950 text-[13px]">
+                <span className="font-bold text-zinc-950 text-[14px]">
                   {mobileCardFallback}
                 </span>
               )}
               {extraCardCount > 0 && !isHiddenFromViewer && (
-                <span className="text-[7px] font-mono text-zinc-500 bg-zinc-100 px-0.5 rounded border border-zinc-300">
+                <span className="text-[7.5px] font-mono text-zinc-500 bg-zinc-100 px-0.5 rounded border border-zinc-300">
                   {`+${extraCardCount}`}
                 </span>
               )}
@@ -335,8 +335,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
             {!isBulwark && (
               <div className="flex items-center gap-0.5">
-                <span className="text-[8px] text-zinc-400 font-bold">S:</span>
-                <span className="font-black text-zinc-950 text-[11px]">
+                <span className="text-[8.5px] text-zinc-400 font-bold">S:</span>
+                <span className="font-black text-zinc-950 text-[11.5px]">
                   {isHiddenFromViewer ? "?" : displaySize}
                 </span>
               </div>
@@ -346,7 +346,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* Fog サマリー (モバイル) */}
         {!isBulwark && fogs && fogs.length > 0 && (
-          <div className="mt-0.5 flex items-center justify-end gap-0.5 text-[7px] font-mono text-zinc-500">
+          <div className="mt-0.5 flex items-center justify-end gap-0.5 text-[7.5px] font-mono text-zinc-500">
             {fogs.slice(0, 2).map((f, idx) => {
               const amount = f.bindings?.amount || 0;
               return (

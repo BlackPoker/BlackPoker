@@ -16,6 +16,7 @@ export interface CardViewProps {
   onClick?: () => void;
   selected?: boolean;
   selectable?: boolean;
+  inPlayerBoard?: boolean;
 }
 
 export const CardView: React.FC<CardViewProps> = ({
@@ -27,6 +28,7 @@ export const CardView: React.FC<CardViewProps> = ({
   onClick,
   selected = false,
   selectable = false,
+  inPlayerBoard = false,
 }) => {
   // compact prop が明示指定されている場合はそれに従い、未指定の場合は responsive (lg breakpoint)
   const isExplicitCompact = compact === true;
@@ -95,10 +97,10 @@ export const CardView: React.FC<CardViewProps> = ({
             : isExplicitCompact
             ? "flex"
             : "flex lg:hidden"
-        } items-center justify-center gap-0.5 leading-none`}
+        } items-center justify-center gap-0.5 leading-none ${inPlayerBoard ? "bp-card-board" : ""}`}
       >
-        <span className={`bp-card-suit text-[18px] ${redSuitClass}`}>{suitSymbol}</span>
-        <span className="bp-card-rank font-bold text-[13px]">{displayRank}</span>
+        <span className={`bp-card-suit ${inPlayerBoard ? "text-[20px]" : "text-[18px]"} ${redSuitClass}`}>{suitSymbol}</span>
+        <span className={`bp-card-rank font-bold ${inPlayerBoard ? "text-[14px]" : "text-[13px]"}`}>{displayRank}</span>
       </div>
 
       {/* Desktop: 従来のトランプ風表示 (左上rank, 中央suit) */}

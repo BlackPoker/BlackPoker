@@ -2271,6 +2271,11 @@ export const CoreBattlePlaytest: React.FC = () => {
       {isHumanTurnWaiting && currentStep?.type === "WAITING_FOR_DECISION" && (
         <MobileDecisionDock
           request={currentStep.request}
+          handCards={
+            (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.isViewer
+              ? (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.handCards
+              : []
+          }
           onOpenSheet={() => setSheetMode("half")}
           onSubmit={handleDecisionSubmit}
           sheetMode={sheetMode}

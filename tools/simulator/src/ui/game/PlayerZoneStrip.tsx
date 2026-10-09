@@ -26,7 +26,7 @@ export const PlayerZoneStrip: React.FC<PlayerZoneStripProps> = ({
 
   return (
     <div
-      className={`flex items-center gap-1 lg:gap-1.5 overflow-x-auto py-0.5 lg:py-1 font-mono text-[9px] lg:text-[10px] no-scrollbar ${className}`}
+      className={`flex items-center gap-1 lg:gap-1.5 overflow-x-auto py-0.5 lg:py-1 font-mono text-[9.5px] lg:text-[10px] no-scrollbar ${className}`}
     >
       {items.map((item) => {
         const isClickable = Boolean(item.onClick) && !item.disabled;
@@ -50,7 +50,7 @@ export const PlayerZoneStrip: React.FC<PlayerZoneStripProps> = ({
               </span>
             )}
             {item.badge && (
-              <span className="px-1 py-0.2 rounded bg-zinc-200 text-zinc-800 text-[9px] font-bold inline-flex items-center gap-0.5">
+              <span className="px-1 py-0.2 rounded bg-zinc-200 text-zinc-800 text-[9.5px] lg:text-[9px] font-bold inline-flex items-center gap-0.5">
                 {item.badge}
               </span>
             )}
