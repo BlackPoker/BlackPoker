@@ -80,6 +80,7 @@ import { ReplayViewerModal, ReplayViewerSource } from "../replay/ReplayViewerMod
 import {
   reconstructMatch,
   findUndoTruncationIndex,
+  type ReconstructMatchParams,
 } from "../../engine/replay/ReplayReconstructionService";
 import { verifyDiagnosticReplayBundleV1 } from "./ReplayVerificationService";
 import { PlaytestPerspectiveResolver } from "./PlaytestPerspectiveResolver";
@@ -104,6 +105,33 @@ import {
 } from "../../engine/playtest/ScenarioMatchCoordinator";
 
 export type { PreparedMatch };
+
+/**
+ * In-Game Undo 用の ReconstructMatchParams を構築します。
+ * 成立済み ActiveMatch の SSOT (environmentId, seed, rareCardSelections, rulePackage) を確実に引き継ぎます。
+ */
+export interface BuildUndoReconstructParamsArgs {
+  readonly activeMatch: ActiveMatchContext;
+  readonly targetTranscript: readonly any[];
+  readonly catalog: any;
+  readonly fullRulePackage: any;
+}
+
+export function buildUndoReconstructParams(
+  args: BuildUndoReconstructParamsArgs
+): ReconstructMatchParams {
+  return {
+    environmentId: args.activeMatch.environmentId,
+    seed: args.activeMatch.seed,
+    rareCardSelections: args.activeMatch.rareCardSelections,
+    transcript: args.targetTranscript,
+    decisionCount: args.targetTranscript.length,
+    catalog: args.catalog,
+    fullRulePackage: args.fullRulePackage,
+    expectedRulePackage: args.activeMatch.rulePackage,
+  };
+}
+
 
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
@@ -1252,16 +1280,15 @@ export const CoreBattlePlaytest: React.FC = () => {
 
     const targetTranscript = currentTranscript.slice(0, targetCount);
 
-    // 1. fresh GameSession を決定論的に再構築
-    const recon = reconstructMatch({
-      environmentId: activeMatch.environmentId,
-      seed: activeMatch.seed,
-      transcript: targetTranscript,
-      decisionCount: targetTranscript.length,
-      catalog,
-      fullRulePackage,
-      expectedRulePackage: activeMatch.rulePackage,
-    });
+    // 1. fresh GameSession を決定論的に再構築 (成立済み Rare Card 選択を引き継ぐ)
+    const recon = reconstructMatch(
+      buildUndoReconstructParams({
+        activeMatch,
+        targetTranscript,
+        catalog,
+        fullRulePackage,
+      })
+    );
 
     if (recon.status !== "SUCCESS") {
       setRuntimeNotice({
