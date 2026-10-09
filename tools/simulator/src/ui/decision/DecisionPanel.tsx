@@ -6,6 +6,7 @@ import { formatCardDisplay, formatCardList, formatSuitSymbol, formatOfficialSuit
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
 import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 import { RichCardText } from "../common/RichCardText";
+import { CardView } from "../game/CardView";
 
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
@@ -102,6 +103,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(initialTargetRef ?? null);
   const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
   const [selectedBlockPatternRef, setSelectedBlockPatternRef] = useState<number | null>(null);
+  const [firstSelectedCardId, setFirstSelectedCardId] = useState<string | null>(null);
   const isSubmittedRef = useRef(false);
   const lastDecisionIdRef = useRef(request.decisionId);
 
@@ -115,6 +117,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       setSelectedTargetRef(initialTargetRef ?? null);
       setSelectedEffectPatternRef(null);
       setSelectedBlockPatternRef(null);
+      setFirstSelectedCardId(null);
       isSubmittedRef.current = false;
     }
   }, [request.decisionId, initialActionRef, initialCostRef, initialTargetRef]);
@@ -198,6 +201,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   // アクション選択ハンドラ
   const handleSelectAction = (actRef: number) => {
     setSelectedActionRef(actRef);
+    setFirstSelectedCardId(null);
 
     const acts = patterns.filter((p) => p.actionSelectionRef === actRef);
     const keyRefs = Array.from(
@@ -268,6 +272,123 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     setSelectedTargetRef(targetRef);
     const target = catalog.targetSelections[targetRef];
     onHighlightRequest?.(target?.targetRequestId);
+  };
+
+  // --- 2枚キーカード段階選択 (Progressive Selector) ロジック ---
+
+  // 判断プレイヤーの手札（自プレイヤーの公開手札のみ参照し、Hidden Information を厳格保護）
+  const decisionPlayer = useMemo(() => {
+    return request.observation?.players?.find((p) => p.playerId === request.playerId);
+  }, [request.observation, request.playerId]);
+
+  const handCards = useMemo(() => {
+    return decisionPlayer?.handCards || [];
+  }, [decisionPlayer]);
+
+  // 全ての合法キーカード選択肢が 2枚のカードを要求しているか判定
+  const isTwoKeyCardAction = useMemo(() => {
+    if (availableKeyRefs.length === 0) return false;
+    return availableKeyRefs.every((ref) => {
+      const sel = catalog.cardSelections[ref];
+      return sel && sel.cardIds && sel.cardIds.length === 2;
+    });
+  }, [availableKeyRefs, catalog.cardSelections]);
+
+  // cardId から手札カードおよび表示用テキストを取得
+  const getCardInfo = (cardId: string) => {
+    const rawCard = handCards.find((c: any) => (c.cardInstanceId && c.cardInstanceId === cardId) || c.id === cardId);
+    const card: { id?: string; suit?: string; rank?: string; value?: number; code?: string } | undefined =
+      rawCard && !("visibility" in rawCard && rawCard.visibility === "HIDDEN") ? (rawCard as any) : undefined;
+    let displayCode = "";
+    for (const ref of availableKeyRefs) {
+      const sel = catalog.cardSelections[ref];
+      if (sel) {
+        const idx = sel.cardIds.indexOf(cardId);
+        if (idx !== -1 && sel.displayCodes?.[idx]) {
+          displayCode = sel.displayCodes[idx];
+          break;
+        }
+      }
+    }
+    if (!displayCode && rawCard) {
+      displayCode = formatOfficialSuitSymbol(formatCardDisplay(rawCard));
+    }
+    if (!displayCode) {
+      displayCode = cardId;
+    }
+    return { card, displayCode };
+  };
+
+  // 手札順でカードIDをソート
+  const sortCardIdsByHand = (cardIds: string[]) => {
+    return [...cardIds].sort((a, b) => {
+      const idxA = handCards.findIndex((c: any) => (c.cardInstanceId && c.cardInstanceId === a) || c.id === a);
+      const idxB = handCards.findIndex((c: any) => (c.cardInstanceId && c.cardInstanceId === b) || c.id === b);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.localeCompare(b);
+    });
+  };
+
+  // 1枚目候補カードID一覧 (重複排除 & 手札順ソート)
+  const step1CardIds = useMemo(() => {
+    if (!isTwoKeyCardAction) return [];
+    const idSet = new Set<string>();
+    for (const ref of availableKeyRefs) {
+      const sel = catalog.cardSelections[ref];
+      if (sel?.cardIds) {
+        for (const cid of sel.cardIds) {
+          idSet.add(cid);
+        }
+      }
+    }
+    return sortCardIdsByHand(Array.from(idSet));
+  }, [isTwoKeyCardAction, availableKeyRefs, catalog.cardSelections, handCards]);
+
+  // 2枚目候補カードID一覧 (1枚目とペアを組める相手のみ抽出 & 重複排除 & 手札順ソート)
+  const step2CardIds = useMemo(() => {
+    if (!isTwoKeyCardAction || !firstSelectedCardId) return [];
+    const idSet = new Set<string>();
+    for (const ref of availableKeyRefs) {
+      const sel = catalog.cardSelections[ref];
+      if (sel?.cardIds && sel.cardIds.includes(firstSelectedCardId)) {
+        for (const cid of sel.cardIds) {
+          if (cid !== firstSelectedCardId) {
+            idSet.add(cid);
+          } else {
+            const count = sel.cardIds.filter((id) => id === firstSelectedCardId).length;
+            if (count > 1) {
+              idSet.add(cid);
+            }
+          }
+        }
+      }
+    }
+    return sortCardIdsByHand(Array.from(idSet));
+  }, [isTwoKeyCardAction, firstSelectedCardId, availableKeyRefs, catalog.cardSelections, handCards]);
+
+  // 2枚目選択時のハンドラ (既存の keyCardSelectionRef を検索・解決)
+  const handleSelectSecondCard = (secondCardId: string) => {
+    if (!firstSelectedCardId) return;
+    const matchedKeyRef = availableKeyRefs.find((ref) => {
+      const sel = catalog.cardSelections[ref];
+      if (!sel || !sel.cardIds || sel.cardIds.length !== 2) return false;
+      if (firstSelectedCardId === secondCardId) {
+        return sel.cardIds[0] === firstSelectedCardId && sel.cardIds[1] === secondCardId;
+      }
+      return sel.cardIds.includes(firstSelectedCardId) && sel.cardIds.includes(secondCardId);
+    });
+
+    if (matchedKeyRef !== undefined) {
+      handleSelectKey(matchedKeyRef);
+    }
+  };
+
+  // 2段階選択のリセットハンドラ
+  const handleResetTwoKeySelection = () => {
+    setFirstSelectedCardId(null);
+    handleSelectKey(undefined);
   };
 
 
@@ -934,30 +1055,159 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         {/* ステップ2: キーカード選択 */}
         {selectedActionRef !== null && availableKeyRefs.length > 0 && (
           <div>
-            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
-              2. キーカード（任意）
-            </label>
-            <div className="grid grid-cols-3 gap-1.5">
-              {availableKeyRefs.map((keyRef) => {
-                const keySel = catalog.cardSelections[keyRef];
-                const isSelected = selectedKeyRef === keyRef;
-                return (
-                  <button
-                    key={keyRef}
-                    onClick={() => handleSelectKey(keyRef)}
-                    className={`rounded border p-1 sm:p-1.5 text-center transition ${
-                      isSelected
-                        ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
-                        : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
-                    }`}
-                  >
-                    <div className="font-mono font-bold text-xs">
-                      <RichCardText text={keySel.displayCodes.join("+")} />
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+                2. キーカード（任意）
+              </label>
+              {isTwoKeyCardAction && (selectedKeyRef !== null || firstSelectedCardId !== null) && (
+                <button
+                  type="button"
+                  onClick={handleResetTwoKeySelection}
+                  className="text-[10px] font-mono font-bold text-zinc-600 hover:text-zinc-950 underline px-1 py-0.5"
+                >
+                  選択し直す
+                </button>
+              )}
             </div>
+
+            {isTwoKeyCardAction ? (
+              <div className="space-y-2 rounded border border-zinc-200 bg-zinc-50/50 p-2">
+                {selectedKeyRef !== null && selectedKey ? (
+                  // ペア確定状態
+                  <div className="flex items-center justify-between gap-2 p-1.5 bg-white rounded border border-zinc-300 shadow-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-mono font-bold text-zinc-500">確定ペア:</span>
+                      <div className="flex items-center gap-1 font-mono font-bold text-xs text-zinc-950">
+                        {selectedKey.cardIds.map((cid, i) => {
+                          const info = getCardInfo(cid);
+                          return (
+                            <React.Fragment key={cid}>
+                              {i > 0 && <span className="text-zinc-400 font-bold">+</span>}
+                              {info.card ? (
+                                <CardView card={info.card} size="sm" compact={true} />
+                              ) : (
+                                <span className="px-1.5 py-0.5 rounded border border-zinc-200 bg-zinc-100">
+                                  <RichCardText text={info.displayCode} />
+                                </span>
+                              )}
+                            </React.Fragment>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleResetTwoKeySelection}
+                      className="px-2.5 py-1 text-xs font-mono font-bold text-zinc-700 bg-zinc-100 hover:bg-zinc-200 rounded border border-zinc-300 transition shrink-0 active:scale-95"
+                    >
+                      変更
+                    </button>
+                  </div>
+                ) : firstSelectedCardId !== null ? (
+                  // 1枚目選択済み、2枚目選択待ち
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-zinc-500 uppercase">1枚目:</span>
+                        {(() => {
+                          const info = getCardInfo(firstSelectedCardId);
+                          return info.card ? (
+                            <CardView card={info.card} size="sm" compact={true} />
+                          ) : (
+                            <span className="font-bold text-zinc-950 px-1.5 py-0.5 rounded border border-zinc-200 bg-white">
+                              <RichCardText text={info.displayCode} />
+                            </span>
+                          );
+                        })()}
+                        <span className="text-[10px] text-zinc-400 font-bold">→ 2枚目を選択</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setFirstSelectedCardId(null)}
+                        className="text-[10px] text-zinc-500 hover:text-zinc-900 underline"
+                      >
+                        取消
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {step2CardIds.map((cid) => {
+                        const info = getCardInfo(cid);
+                        return (
+                          <button
+                            key={cid}
+                            type="button"
+                            onClick={() => handleSelectSecondCard(cid)}
+                            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded border border-zinc-300 bg-white hover:border-zinc-500 hover:bg-zinc-50 active:scale-95 transition shadow-sm"
+                            aria-label={`2枚目として ${info.displayCode} を選択`}
+                          >
+                            {info.card ? (
+                              <CardView card={info.card} size="sm" compact={true} />
+                            ) : (
+                              <span className="font-mono font-bold text-xs px-1">
+                                <RichCardText text={info.displayCode} />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  // 1枚目未選択
+                  <div className="space-y-1.5">
+                    <div className="text-[10px] font-mono font-bold text-zinc-500">
+                      1枚目のキーカードを選択してください:
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {step1CardIds.map((cid) => {
+                        const info = getCardInfo(cid);
+                        return (
+                          <button
+                            key={cid}
+                            type="button"
+                            onClick={() => setFirstSelectedCardId(cid)}
+                            className="min-h-[44px] min-w-[44px] flex items-center justify-center p-1 rounded border border-zinc-300 bg-white hover:border-zinc-500 hover:bg-zinc-50 active:scale-95 transition shadow-sm"
+                            aria-label={`1枚目として ${info.displayCode} を選択`}
+                          >
+                            {info.card ? (
+                              <CardView card={info.card} size="sm" compact={true} />
+                            ) : (
+                              <span className="font-mono font-bold text-xs px-1">
+                                <RichCardText text={info.displayCode} />
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // 従来の一覧表示 (1枚Key Card または混在時)
+              <div className="grid grid-cols-3 gap-1.5">
+                {availableKeyRefs.map((keyRef) => {
+                  const keySel = catalog.cardSelections[keyRef];
+                  const isSelected = selectedKeyRef === keyRef;
+                  return (
+                    <button
+                      key={keyRef}
+                      onClick={() => handleSelectKey(keyRef)}
+                      className={`min-h-[40px] rounded border p-1 sm:p-1.5 text-center transition ${
+                        isSelected
+                          ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
+                          : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <div className="font-mono font-bold text-xs">
+                        <RichCardText text={keySel.displayCodes.join("+")} />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
 
