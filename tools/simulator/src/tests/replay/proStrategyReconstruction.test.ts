@@ -36,6 +36,11 @@ import {
   SHARE_PARAM_KEYS,
   buildPlaytestShareUrl,
 } from "../../ui/playtest/PlaytestShareUrl";
+import {
+  PlaytestDecisionTranscriptEntryV1,
+  createDecisionTranscriptEntry,
+} from "../../ui/playtest/PlaytestDecisionTranscript";
+import type { ReplayPlanV1 } from "../../engine/replay/ReplayTypes";
 
 describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Replay & Diagnostic", () => {
   let catalog: any;
@@ -79,11 +84,59 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
   const validH2HP1Rare: CardOccurrenceSelection[] = [{ suit: "J", rank: "Joker", occurrence: 0 }];
   const validH2HP2Rare: CardOccurrenceSelection[] = [{ suit: "J", rank: "Joker", occurrence: 1 }];
 
+  // ヘルパー: 指定セッションから指定回数の Decision を進行し、Transcript と最終 step を返す
+  function progressDecisions(
+    session: any,
+    initialStep: any,
+    targetCount: number
+  ): {
+    transcript: PlaytestDecisionTranscriptEntryV1[];
+    currentStep: any;
+  } {
+    let step = initialStep;
+    const transcript: PlaytestDecisionTranscriptEntryV1[] = [];
+
+    for (let i = 0; i < targetCount; i++) {
+      while (step.type === "PROGRESSED") {
+        step = session.advance();
+      }
+      if (step.type !== "WAITING_FOR_DECISION") {
+        break;
+      }
+      const req = step.request;
+      const selectedPatternRef = 0; // FirstLegal
+      const entry = createDecisionTranscriptEntry(transcript.length + 1, {
+        actor: i % 2 === 0 ? "human" : "policy",
+        playerId: req.playerId,
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        response: {
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef,
+        },
+      });
+      transcript.push(entry);
+
+      step = session.submitDecision({
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        selectedPatternRef,
+      });
+    }
+
+    while (step.type === "PROGRESSED") {
+      step = session.advance();
+    }
+
+    return { transcript, currentStep: step };
+  }
+
   // =========================================================================
-  // 1. Human vs Human Reconstruction (Section 10, 23)
+  // 1. Human vs Human Reconstruction (Section 10, 23, Phase 3 R1)
   // =========================================================================
   describe("1. Human vs Human Reconstruction & Determinism", () => {
-    it("reconstructs match with exact Scenario cards, Rare cards, pack, life, hand and legal patterns", async () => {
+    it("reconstructs match with exact Scenario cards, Rare cards, pack, life, hand and legal patterns at decision 0", async () => {
       const restore = enableProStrategyInValidator();
       try {
         const seed = 42;
@@ -145,6 +198,94 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
           expect(reconPatterns).toEqual(livePatterns);
           expect(reconPatterns.length).toBeGreaterThan(0);
         }
+      } finally {
+        restore();
+      }
+    });
+
+    it("reconstructs match after progressing 3+ decisions with exact boundary match (stateVersion, playerId, source, patterns, GameState)", async () => {
+      const restore = enableProStrategyInValidator();
+      try {
+        const seed = 42;
+        // 1. Live Match 開始
+        const startReq: MatchStartRequest = {
+          catalog,
+          fullRulePackage,
+          environmentId: "official:pro-strategy",
+          matchMode: "humanVsHuman",
+          seedInput: String(seed),
+          rareCardSelections: { p1: validH2HP1Rare, p2: validH2HP2Rare },
+          scenarioHandSelections: { p1: validH2HP1Scenario, p2: validH2HP2Scenario },
+        };
+        const liveRes = await startMatchAttempt(startReq);
+        expect(liveRes.type).toBe("READY");
+        if (liveRes.type !== "READY") return;
+
+        // 2. 3件以上の Decision を進行
+        const { transcript, currentStep: liveTargetStep } = progressDecisions(
+          liveRes.session,
+          liveRes.initialStep,
+          3
+        );
+        expect(transcript.length).toBeGreaterThanOrEqual(3);
+
+        const liveTargetState = liveRes.session.state;
+
+        // 3. reconstructMatch で同一条件・Transcript から再構築
+        const reconParams: ReconstructMatchParams = {
+          environmentId: "official:pro-strategy",
+          seed,
+          rareCardSelections: liveRes.activeMatch.rareCardSelections,
+          scenarioHandSelections: liveRes.activeMatch.scenarioHandSelections,
+          transcript,
+          decisionCount: transcript.length,
+          trailingNormalization: "EXTERNAL_DECISION_BOUNDARY",
+          catalog,
+          fullRulePackage,
+        };
+        const reconRes = reconstructMatch(reconParams);
+
+        expect(reconRes.status).toBe("SUCCESS");
+        if (reconRes.status !== "SUCCESS") return;
+
+        expect(reconRes.executedDecisions).toBe(transcript.length);
+        const reconTargetState = reconRes.session.state;
+
+        // 対象 Decision 境界の比較
+        // A. Step Type
+        expect(reconRes.currentStep.type).toBe(liveTargetStep.type);
+
+        // B. StateVersion
+        expect(reconTargetState.stateVersion).toBe(liveTargetState.stateVersion);
+
+        // C. ActivePlayer
+        expect(reconTargetState.activePlayer).toBe(liveTargetState.activePlayer);
+
+        // D. DecisionRequest (WAITING_FOR_DECISION の場合)
+        if (
+          liveTargetStep.type === "WAITING_FOR_DECISION" &&
+          reconRes.currentStep.type === "WAITING_FOR_DECISION"
+        ) {
+          const liveReq = liveTargetStep.request;
+          const reconReq = reconRes.currentStep.request;
+
+          // playerId
+          expect(reconReq.playerId).toBe(liveReq.playerId);
+
+          // source
+          expect(reconReq.source).toEqual(liveReq.source);
+
+          // legal pattern count & ordered pattern IDs
+          const livePatternIds = liveReq.patterns.map((p: any) => p.patternId);
+          const reconPatternIds = reconReq.patterns.map((p: any) => p.patternId);
+          expect(reconPatternIds.length).toBe(livePatternIds.length);
+          expect(reconPatternIds).toEqual(livePatternIds);
+        }
+
+        // E. GameState 完全一致
+        expect(JSON.parse(JSON.stringify(reconTargetState))).toEqual(
+          JSON.parse(JSON.stringify(liveTargetState))
+        );
       } finally {
         restore();
       }
@@ -270,9 +411,9 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
   });
 
   // =========================================================================
-  // 4. Wrong Scenario Reconstruction (Section 12)
+  // 4. ReconstructMatch Low-Level Contract (Section 12)
   // =========================================================================
-  describe("4. Wrong Scenario Divergence Detection", () => {
+  describe("4. ReconstructMatch faithfully applies supplied scenario selections (low-level contract)", () => {
     it("detects mismatch/divergence when an incorrect scenario card is passed to reconstruction", async () => {
       const restore = enableProStrategyInValidator();
       try {
@@ -320,7 +461,7 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
   });
 
   // =========================================================================
-  // 5. UI Undo Integration (Section 14)
+  // 5. UI Undo Integration (Section 14, Phase 3 R1)
   // =========================================================================
   describe("5. UI Undo Helper Integration", () => {
     it("buildUndoReconstructParams correctly propagates scenarioHandSelections from activeMatch", async () => {
@@ -354,6 +495,71 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
 
         const reconRes = reconstructMatch(params);
         expect(reconRes.status).toBe("SUCCESS");
+      } finally {
+        restore();
+      }
+    });
+
+    it("undoes decisions to a target transcript prefix using buildUndoReconstructParams preserving Scenario Hand", async () => {
+      const restore = enableProStrategyInValidator();
+      try {
+        const seed = 42;
+        const startReq: MatchStartRequest = {
+          catalog,
+          fullRulePackage,
+          environmentId: "official:pro-strategy",
+          matchMode: "humanVsHuman",
+          seedInput: String(seed),
+          rareCardSelections: { p1: validH2HP1Rare, p2: validH2HP2Rare },
+          scenarioHandSelections: { p1: validH2HP1Scenario, p2: validH2HP2Scenario },
+        };
+        const liveRes = await startMatchAttempt(startReq);
+        expect(liveRes.type).toBe("READY");
+        if (liveRes.type !== "READY") return;
+
+        // 3 Decisions 進行
+        const { transcript } = progressDecisions(liveRes.session, liveRes.initialStep, 3);
+        expect(transcript.length).toBeGreaterThanOrEqual(3);
+
+        // 1手前 (2 Decisions) へ戻すための targetTranscript
+        const targetTranscript = transcript.slice(0, 2);
+
+        // buildUndoReconstructParams でパラメータ構築
+        const undoParams = buildUndoReconstructParams({
+          activeMatch: liveRes.activeMatch,
+          targetTranscript,
+          catalog,
+          fullRulePackage,
+        });
+
+        // 成立済み Scenario Hand が caller 側で確実に引き渡されていること
+        expect(undoParams.scenarioHandSelections).toBe(liveRes.activeMatch.scenarioHandSelections);
+
+        const undoReconRes = reconstructMatch(undoParams);
+        expect(undoReconRes.status).toBe("SUCCESS");
+        if (undoReconRes.status !== "SUCCESS") return;
+
+        expect(undoReconRes.executedDecisions).toBe(2);
+
+        // 2手目時点の基準状態を別途 reconstructMatch して一致を検証
+        const baselineParams: ReconstructMatchParams = {
+          environmentId: "official:pro-strategy",
+          seed,
+          rareCardSelections: liveRes.activeMatch.rareCardSelections,
+          scenarioHandSelections: liveRes.activeMatch.scenarioHandSelections,
+          transcript: targetTranscript,
+          decisionCount: 2,
+          trailingNormalization: "EXTERNAL_DECISION_BOUNDARY",
+          catalog,
+          fullRulePackage,
+        };
+        const baselineRes = reconstructMatch(baselineParams);
+        expect(baselineRes.status).toBe("SUCCESS");
+        if (baselineRes.status !== "SUCCESS") return;
+
+        expect(JSON.parse(JSON.stringify(undoReconRes.session.state))).toEqual(
+          JSON.parse(JSON.stringify(baselineRes.session.state))
+        );
       } finally {
         restore();
       }
@@ -398,13 +604,33 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
         const res = await startMatchAttempt(startReq);
         expect(res.type).toBe("READY");
         if (res.type === "READY") {
-          // P1 Hand contains Joker occurrence 0
+          // P1 Hand contains Joker occurrence 0 -> canonical id: p1-c-JJoker
           const jokerInHand = res.session.state.players.p1.hand.find((c) => c.suit === "J" && c.rank === "Joker");
           expect(jokerInHand).toBeDefined();
+          expect(jokerInHand?.id).toBe("p1-c-JJoker");
 
-          // P1 Rare contains Joker occurrence 1
+          // P1 Rare contains Joker occurrence 1 -> canonical id: p1-c-JJoker#1
           const jokerInRare = res.session.state.players.p1.rareCards.find((c) => c.suit === "J" && c.rank === "Joker");
           expect(jokerInRare).toBeDefined();
+          expect(jokerInRare?.id).toBe("p1-c-JJoker#1");
+
+          // reconstructMatch 後も同一の canonical card id が保持されること
+          const recon = reconstructMatch({
+            environmentId: "official:pro-strategy",
+            seed: 42,
+            rareCardSelections: res.activeMatch.rareCardSelections,
+            scenarioHandSelections: res.activeMatch.scenarioHandSelections,
+            transcript: [],
+            catalog,
+            fullRulePackage,
+          });
+          expect(recon.status).toBe("SUCCESS");
+          if (recon.status === "SUCCESS") {
+            const reconJokerInHand = recon.session.state.players.p1.hand.find((c) => c.suit === "J" && c.rank === "Joker");
+            const reconJokerInRare = recon.session.state.players.p1.rareCards.find((c) => c.suit === "J" && c.rank === "Joker");
+            expect(reconJokerInHand?.id).toBe("p1-c-JJoker");
+            expect(reconJokerInRare?.id).toBe("p1-c-JJoker#1");
+          }
         }
       } finally {
         restore();
@@ -489,12 +715,188 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
         restore();
       }
     });
+
+    it("builds multi-decision diagnostic bundle, converts to ReplayPlan, and verifies replay to VERIFIED", async () => {
+      const restore = enableProStrategyInValidator();
+      try {
+        const seed = 42;
+        const startReq: MatchStartRequest = {
+          catalog,
+          fullRulePackage,
+          environmentId: "official:pro-strategy",
+          matchMode: "humanVsHuman",
+          seedInput: String(seed),
+          rareCardSelections: { p1: validH2HP1Rare, p2: validH2HP2Rare },
+          scenarioHandSelections: { p1: validH2HP1Scenario, p2: validH2HP2Scenario },
+        };
+        const liveRes = await startMatchAttempt(startReq);
+        expect(liveRes.type).toBe("READY");
+        if (liveRes.type !== "READY") return;
+
+        // 3 Decisions 進行
+        const { transcript, currentStep: liveTargetStep } = progressDecisions(
+          liveRes.session,
+          liveRes.initialStep,
+          3
+        );
+        expect(transcript.length).toBeGreaterThanOrEqual(3);
+
+        const session = liveRes.session;
+        const activeMatch = liveRes.activeMatch;
+
+        // Multi-Decision Diagnostic Bundle を生成
+        const bundle = buildPlaytestDiagnosticBundleV1(
+          assemblePlaytestDiagnosticBundleParams({
+            build: { sha: "local", ref: "local" },
+            generatedAt: new Date().toISOString(),
+            activeMatch,
+            activePlaytestSettings: {
+              matchMode: "humanVsHuman",
+              rareCardSelections: activeMatch.rareCardSelections,
+              scenarioHandSelections: activeMatch.scenarioHandSelections,
+            },
+            activeSeatControllers: { p1: { kind: "HUMAN" }, p2: { kind: "HUMAN" } },
+            rawState: JSON.parse(JSON.stringify(session.state)),
+            logs: [],
+            traces: [],
+            canonicalMatchLog: session.getMatchLog(),
+            currentStep: liveTargetStep,
+            decisionTranscript: transcript,
+          })
+        );
+
+        expect(bundle.containsHiddenInformation).toBe(true);
+        expect(bundle.match.scenarioHandSelections).toEqual({
+          p1: validH2HP1Scenario,
+          p2: validH2HP2Scenario,
+        });
+
+        // DiagnosticReplayAdapter で ReplayPlan を生成
+        const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, { currentBuildSha: "local" });
+        expect(planResult.type).toBe("READY");
+        if (planResult.type !== "READY") return;
+
+        expect(planResult.plan.decisions.length).toBe(transcript.length);
+        expect(planResult.plan.scenarioHandSelections).toEqual({
+          p1: validH2HP1Scenario,
+          p2: validH2HP2Scenario,
+        });
+
+        // DeterministicReplayRunner で再実行
+        const replayResult = runDeterministicReplay(planResult.plan, {
+          catalog,
+          fullRulePackage,
+        });
+
+        expect(replayResult.status).toBe("VERIFIED");
+        if (replayResult.status === "VERIFIED") {
+          expect(replayResult.executedDecisions).toBeGreaterThanOrEqual(3);
+          expect(replayResult.totalDecisions).toBeGreaterThanOrEqual(3);
+        }
+      } finally {
+        restore();
+      }
+    });
   });
 
   // =========================================================================
-  // 8. Share URL Privacy Contract (Section 18)
+  // 8. Tampered Scenario Replay Verification (Section 9, 10, 11)
   // =========================================================================
-  describe("8. Share URL Privacy Contract", () => {
+  describe("8. Tampered Scenario Replay Verification", () => {
+    it("verifies original multi-decision replay as VERIFIED and rejects tampered scenario replay with divergence", async () => {
+      const restore = enableProStrategyInValidator();
+      try {
+        const seed = 42;
+        // 1. Live Match 開始
+        const startReq: MatchStartRequest = {
+          catalog,
+          fullRulePackage,
+          environmentId: "official:pro-strategy",
+          matchMode: "humanVsHuman",
+          seedInput: String(seed),
+          rareCardSelections: { p1: validH2HP1Rare, p2: validH2HP2Rare },
+          scenarioHandSelections: { p1: validH2HP1Scenario, p2: validH2HP2Scenario },
+        };
+        const liveRes = await startMatchAttempt(startReq);
+        expect(liveRes.type).toBe("READY");
+        if (liveRes.type !== "READY") return;
+
+        // 3 Decisions 進行
+        const { transcript, currentStep: liveTargetStep } = progressDecisions(
+          liveRes.session,
+          liveRes.initialStep,
+          3
+        );
+        expect(transcript.length).toBeGreaterThanOrEqual(3);
+
+        const liveTargetState = liveRes.session.state;
+
+        // 2. 正常な Original ReplayPlan を構築
+        const originalPlan: ReplayPlanV1 = {
+          environmentId: "official:pro-strategy",
+          seed,
+          sourceBuild: { sha: "local", ref: "local" },
+          rareCardSelections: liveRes.activeMatch.rareCardSelections,
+          scenarioHandSelections: liveRes.activeMatch.scenarioHandSelections,
+          decisions: transcript,
+          expected: {
+            status: liveTargetStep.type as any,
+            rawState: JSON.parse(JSON.stringify(liveTargetState)),
+            currentDecisionRequest:
+              liveTargetStep.type === "WAITING_FOR_DECISION"
+                ? (liveTargetStep as any).request
+                : undefined,
+          },
+        };
+
+        // 3. Original Replay 実行 -> VERIFIED
+        const originalResult = runDeterministicReplay(originalPlan, {
+          catalog,
+          fullRulePackage,
+        });
+        expect(originalResult.status).toBe("VERIFIED");
+        if (originalResult.status === "VERIFIED") {
+          expect(originalResult.executedDecisions).toBe(transcript.length);
+        }
+
+        // 4. 改ざん: scenarioHandSelections.p1 の 1 physical card だけを変更
+        // ♠A (S.A.0) -> ♠2 (S.2.0)
+        const tamperedP1Scenario: CardOccurrenceSelection[] = [
+          { suit: "S", rank: "2", occurrence: 0 },
+          { suit: "H", rank: "K", occurrence: 0 },
+          { suit: "D", rank: "Q", occurrence: 0 },
+        ];
+
+        const tamperedPlan: ReplayPlanV1 = {
+          ...originalPlan,
+          scenarioHandSelections: {
+            p1: tamperedP1Scenario,
+            p2: validH2HP2Scenario,
+          },
+        };
+
+        // 5. 改ざん Replay 実行 -> NOT VERIFIED かつ DIVERGED
+        const tamperedResult = runDeterministicReplay(tamperedPlan, {
+          catalog,
+          fullRulePackage,
+        });
+
+        expect(tamperedResult.status).not.toBe("VERIFIED");
+        expect(tamperedResult.status).toBe("DIVERGED");
+        if (tamperedResult.status === "DIVERGED") {
+          // Late pattern error (PATTERN_REF_OUT_OF_RANGE) ではないこと！
+          expect(tamperedResult.code).not.toBe("PATTERN_REF_OUT_OF_RANGE");
+        }
+      } finally {
+        restore();
+      }
+    });
+  });
+
+  // =========================================================================
+  // 9. Share URL Privacy Contract (Section 18)
+  // =========================================================================
+  describe("9. Share URL Privacy Contract", () => {
     it("ensures Scenario Hand card identities are NEVER encoded into share URLs", () => {
       const fullUrl = buildPlaytestShareUrl("https://example.com/simulator", {
         environmentId: "official:pro-strategy",
@@ -519,9 +921,9 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
   });
 
   // =========================================================================
-  // 9. Existing Environments Regression (Section 20, 21)
+  // 10. Existing Environments Regression (Section 17, 20, 21)
   // =========================================================================
-  describe("9. Existing Environments Regression", () => {
+  describe("10. Existing Environments Regression", () => {
     it("reconstructMatch succeeds for official:pro-rarePack without scenarioHandSelections", () => {
       const reconRarePack = reconstructMatch({
         environmentId: "official:pro-rarePack",
@@ -560,6 +962,34 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
       });
 
       expect(reconPack.status).toBe("SUCCESS");
+    });
+
+    it("reconstructMatch succeeds for official:light-pack without any extra selections", () => {
+      const reconLightPack = reconstructMatch({
+        environmentId: "official:light-pack",
+        seed: 42,
+        transcript: [],
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(reconLightPack.status).toBe("SUCCESS");
+    });
+
+    it("reconstructMatch succeeds for official:standard-rarePack without scenarioHandSelections", () => {
+      const reconStandardRarePack = reconstructMatch({
+        environmentId: "official:standard-rarePack",
+        seed: 42,
+        rareCardSelections: {
+          p1: [{ suit: "J", rank: "Joker", occurrence: 0 }],
+          p2: [{ suit: "J", rank: "Joker", occurrence: 1 }],
+        },
+        transcript: [],
+        catalog,
+        fullRulePackage,
+      });
+
+      expect(reconStandardRarePack.status).toBe("SUCCESS");
     });
   });
 });
