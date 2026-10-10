@@ -5,29 +5,24 @@ import {
   SimulatorDeckProfile,
 } from "../../engine/regulation/SimulatorDeckProfileResolver";
 import {
-  RareCardSelectionService,
-  RareCardCandidate,
-} from "../../engine/regulation/RareCardSelectionService";
+  ScenarioHandSelectionService,
+  ScenarioHandCandidate,
+} from "../../engine/regulation/ScenarioHandSelectionService";
 import { formatOfficialSuitSymbol, isRedSuit } from "../../engine/rules/cardUtils";
 
-export interface RareCardSetupPanelProps {
+export interface ScenarioHandSetupPanelProps {
   /** デッキプロファイル (SSOT) */
   readonly deckProfile: SimulatorDeckProfile;
-  /** 必要レアカード枚数 */
-  readonly rareCardCount: number;
+  /** 必要シナリオ手札枚数 */
+  readonly scenarioHandCount: number;
   /** 対戦モード */
   readonly matchMode: PlaytestMatchMode;
-  /** 確定済みのレアカード選択 */
+  /** 確定済みのシナリオ手札選択 */
   readonly confirmedSelections: {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
-  /** 排他除外カード（シナリオ手札等で使用済みのカード） */
-  readonly excludedSelections?: {
-    readonly p1?: readonly CardOccurrenceSelection[];
-    readonly p2?: readonly CardOccurrenceSelection[];
-  };
-  /** レアカード確定コールバック */
+  /** シナリオ手札確定コールバック */
   readonly onConfirmSelections: (selections: {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
@@ -38,12 +33,11 @@ export interface RareCardSetupPanelProps {
 
 type SetupStep = "p1_selecting" | "handoff" | "p2_selecting";
 
-export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
+export const ScenarioHandSetupPanel: React.FC<ScenarioHandSetupPanelProps> = ({
   deckProfile,
-  rareCardCount,
+  scenarioHandCount,
   matchMode,
   confirmedSelections,
-  excludedSelections,
   onConfirmSelections,
   onResetSelections,
 }) => {
@@ -53,20 +47,20 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
 
   // 全候補カードの列挙 (SSOT)
   const candidates = useMemo(
-    () => RareCardSelectionService.enumerateCandidates(deckProfile),
+    () => ScenarioHandSelectionService.enumerateCandidates(deckProfile),
     [deckProfile]
   );
 
   // 確定完了フラグ
-  const isP1Confirmed = (confirmedSelections.p1?.length ?? 0) === rareCardCount;
+  const isP1Confirmed = (confirmedSelections.p1?.length ?? 0) === scenarioHandCount;
   const isP2Confirmed =
-    matchMode === "humanVsAi" || (confirmedSelections.p2?.length ?? 0) === rareCardCount;
+    matchMode === "humanVsAi" || (confirmedSelections.p2?.length ?? 0) === scenarioHandCount;
   const isAllConfirmed = isP1Confirmed && isP2Confirmed;
-  const isSelectionComplete = selectedCandidateIds.length === rareCardCount;
+  const isSelectionComplete = selectedCandidateIds.length === scenarioHandCount;
 
   // 候補カードのスート別グループ化
   const groupedCandidates = useMemo(() => {
-    const groups: { suit: string; label: string; cards: RareCardCandidate[] }[] = [
+    const groups: { suit: string; label: string; cards: ScenarioHandCandidate[] }[] = [
       { suit: "S", label: "スペード (♠)", cards: [] },
       { suit: "H", label: "ハート (♥)", cards: [] },
       { suit: "D", label: "ダイヤ (♦)", cards: [] },
@@ -80,33 +74,14 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
     return groups.filter((g) => g.cards.length > 0);
   }, [candidates]);
 
-  // 現在のステップに応じた排他除外キーセット (シナリオ手札等で使用済みの物理カード)
-  const currentExcludedKeySet = useMemo(() => {
-    const isP2 = matchMode === "humanVsHuman" && internalStep === "p2_selecting";
-    const targetExcluded = isP2 ? excludedSelections?.p2 : excludedSelections?.p1;
-    const set = new Set<string>();
-    if (targetExcluded) {
-      for (const sel of targetExcluded) {
-        set.add(`${sel.suit}-${sel.rank}-${sel.occurrence ?? 0}`);
-      }
-    }
-    return set;
-  }, [matchMode, internalStep, excludedSelections]);
-
-  // トグル選択ハンドラ (rareCardCount === 1 のときは未選択カードをタップしたら即座に置換、選択済みは解除)
+  // トグル選択ハンドラ (上限 scenarioHandCount 枚、選択済みは解除)
   const handleToggleCandidate = (candidateId: string) => {
-    if (currentExcludedKeySet.has(candidateId)) {
-      return; // 排他カードは選択不可
-    }
     setSelectedCandidateIds((prev) => {
       if (prev.includes(candidateId)) {
         return prev.filter((id) => id !== candidateId);
       }
-      if (rareCardCount === 1) {
-        return [candidateId];
-      }
-      if (prev.length >= rareCardCount) {
-        return prev;
+      if (prev.length >= scenarioHandCount) {
+        return prev; // 4枚目は追加不可
       }
       return [...prev, candidateId];
     });
@@ -176,19 +151,19 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
   if (isAllConfirmed) {
     return (
       <div
-        data-testid="rare-setup-completed"
-        className="p-4 rounded-xl border border-emerald-300 bg-emerald-50 flex flex-col gap-3 font-mono"
+        data-testid="scenario-setup-completed"
+        className="p-4 rounded-xl border border-blue-300 bg-blue-50 flex flex-col gap-3 font-mono"
       >
-        <div className="flex items-center justify-between border-b border-emerald-200 pb-2">
+        <div className="flex items-center justify-between border-b border-blue-200 pb-2">
           <div className="flex items-center gap-2">
-            <span className="text-emerald-700 text-sm font-black">✓</span>
-            <span className="text-xs font-bold text-emerald-950">
-              レアカード設定完了 (Rare Card Ready)
+            <span className="text-blue-700 text-sm font-black">✓</span>
+            <span className="text-xs font-bold text-blue-950">
+              シナリオ手札設定完了 (Scenario Hand Ready)
             </span>
           </div>
           <button
             type="button"
-            data-testid="reset-rare-button"
+            data-testid="reset-scenario-button"
             onClick={handleReset}
             className="text-[11px] font-bold text-zinc-600 hover:text-zinc-950 px-2 py-1 rounded border border-zinc-300 bg-white hover:bg-zinc-50 transition min-h-[36px] cursor-pointer"
           >
@@ -197,30 +172,30 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          <div className="p-2.5 rounded-lg bg-white border border-emerald-200 flex items-center justify-between">
+          <div className="p-2.5 rounded-lg bg-white border border-blue-200 flex items-center justify-between">
             <span className="font-bold text-zinc-800">
               {matchMode === "humanVsHuman" ? "Player A:" : "Player:"}
             </span>
             <div className="flex items-center gap-1.5">
-              <span className="text-emerald-700 font-bold">レアカード選択済み</span>
-              <span className="text-[11px] text-emerald-600">{`(${rareCardCount}枚)`}</span>
+              <span className="text-blue-700 font-bold">シナリオ手札選択済み</span>
+              <span className="text-[11px] text-blue-600">{`(${scenarioHandCount}枚)`}</span>
             </div>
           </div>
-          <div className="p-2.5 rounded-lg bg-white border border-emerald-200 flex items-center justify-between">
+          <div className="p-2.5 rounded-lg bg-white border border-blue-200 flex items-center justify-between">
             <span className="font-bold text-zinc-800">
               {matchMode === "humanVsHuman" ? "Player B:" : "AI:"}
             </span>
             <div className="flex items-center gap-1.5">
-              <span className="text-emerald-700 font-bold">
-                {matchMode === "humanVsHuman" ? "レアカード選択済み" : "自動選択（非公開）"}
+              <span className="text-blue-700 font-bold">
+                {matchMode === "humanVsHuman" ? "シナリオ手札選択済み" : "自動選択（非公開）"}
               </span>
-              <span className="text-[11px] text-emerald-600">{`(${rareCardCount}枚)`}</span>
+              <span className="text-[11px] text-blue-600">{`(${scenarioHandCount}枚)`}</span>
             </div>
           </div>
         </div>
 
-        <p className="text-[10px] text-emerald-800 leading-relaxed">
-          ※レアカードは伏せられた状態でゲームが開始されます。対戦相手のレアカードは非公開情報として保護されています。
+        <p className="text-[10px] text-blue-800 leading-relaxed">
+          ※シナリオ手札はゲーム開始時に最初の手札へ入ります。対戦相手のシナリオ手札は非公開情報として保護されています。
         </p>
       </div>
     );
@@ -230,7 +205,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
   if (matchMode === "humanVsHuman" && internalStep === "handoff") {
     return (
       <div
-        data-testid="rare-setup-handoff"
+        data-testid="scenario-setup-handoff"
         className="p-6 rounded-xl border border-amber-300 bg-amber-50 flex flex-col items-center justify-center gap-4 text-center font-mono"
       >
         <div className="w-12 h-12 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center text-xl">
@@ -241,12 +216,12 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             Player B に画面を渡してください
           </h3>
           <p className="text-xs text-amber-800 leading-relaxed max-w-md">
-            Player A のレアカード選択は保護されました。画面を Player B に渡し、準備ができたら進んでください。
+            Player A のシナリオ手札は保護されました。画面を Player B に渡し、準備ができたら進んでください。
           </p>
         </div>
         <button
           type="button"
-          data-testid="proceed-p2-button"
+          data-testid="proceed-p2-scenario-button"
           onClick={handleProceedToP2}
           className="mt-2 px-6 py-2.5 bg-zinc-950 hover:bg-zinc-800 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center justify-center min-h-[44px] cursor-pointer"
         >
@@ -259,23 +234,23 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
   // 3. 選択画面 (P1 selecting or P2 selecting)
   const isP2Step = matchMode === "humanVsHuman" && internalStep === "p2_selecting";
   const stepTitle = isP2Step
-    ? "Player B: レアカード選択 (2/2)"
+    ? `Player B: シナリオ手札選択 (2/2)`
     : matchMode === "humanVsHuman"
-    ? "Player A: レアカード選択 (1/2)"
-    : "レアカード選択 (Player)";
+    ? `Player A: シナリオ手札選択 (1/2)`
+    : "シナリオ手札選択 (Player)";
 
-  const stepPrompt = `デッキからレアカードとして伏せるカードを${rareCardCount}枚選んでください（非公開情報）`;
+  const stepPrompt = `デッキから最初の手札に入れるカードを${scenarioHandCount}枚選んでください（非公開情報）`;
 
   return (
     <div
-      data-testid="rare-setup-panel"
+      data-testid="scenario-setup-panel"
       className="p-4 rounded-xl border border-zinc-300 bg-zinc-50 flex flex-col gap-3 font-mono"
     >
       {/* ヘッダー */}
       <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
         <div>
           <h3 className="text-xs sm:text-sm font-black text-zinc-950 flex items-center gap-1.5">
-            <span>🎴</span>
+            <span>📜</span>
             <span>{stepTitle}</span>
           </h3>
           <p className="text-[11px] text-zinc-600 mt-0.5">{stepPrompt}</p>
@@ -295,7 +270,6 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
             <div className="grid grid-cols-7 sm:grid-cols-13 gap-1">
               {group.cards.map((candidate) => {
                 const isSelected = selectedCandidateIds.includes(candidate.id);
-                const isExcluded = currentExcludedKeySet.has(candidate.id);
                 const isRed = isRedSuit(candidate.suit);
                 const isJoker = candidate.suit === "J";
                 const suitSymbol = isJoker ? "★" : formatOfficialSuitSymbol(candidate.suit);
@@ -304,23 +278,17 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
                   <button
                     key={candidate.id}
                     type="button"
-                    disabled={isExcluded}
                     onClick={() => handleToggleCandidate(candidate.id)}
                     aria-label={candidate.displayLabel}
-                    title={isExcluded ? "シナリオ手札で使用中" : undefined}
-                    className={`min-h-[44px] min-w-[36px] p-1 rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center select-none ${
-                      isExcluded
-                        ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-40 shadow-none"
-                        : isSelected
-                        ? "bg-zinc-950 text-white border-zinc-950 shadow-md ring-2 ring-zinc-950 ring-offset-1 cursor-pointer"
-                        : "bg-white hover:bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm cursor-pointer"
+                    className={`min-h-[44px] min-w-[36px] p-1 rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center cursor-pointer select-none ${
+                      isSelected
+                        ? "bg-zinc-950 text-white border-zinc-950 shadow-md ring-2 ring-zinc-950 ring-offset-1"
+                        : "bg-white hover:bg-zinc-100 text-zinc-900 border-zinc-200 shadow-sm"
                     }`}
                   >
                     <span
                       className={`bp-card-suit text-[16px] leading-none ${
-                        isExcluded
-                          ? "text-zinc-400"
-                          : isSelected
+                        isSelected
                           ? "text-white"
                           : isRed
                           ? "text-[#a22041] bp-card-suit-red"
@@ -331,7 +299,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
                     </span>
                     <span
                       className={`bp-card-rank text-[12px] font-bold leading-none ${
-                        isExcluded ? "text-zinc-400" : isSelected ? "text-white" : "text-zinc-900"
+                        isSelected ? "text-white" : "text-zinc-900"
                       }`}
                     >
                       {candidate.rank}
@@ -351,16 +319,16 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
       <div className="pt-2 border-t border-zinc-200 flex items-center justify-between gap-3">
         <div className="text-[11px] text-zinc-600">
           <span className="font-bold text-zinc-900">
-            {`選択中: ${selectedCandidateIds.length} / ${rareCardCount} 枚`}
+            {`選択中: ${selectedCandidateIds.length} / ${scenarioHandCount} 枚`}
           </span>
-          {selectedCandidateIds.length === 0 && (
-            <span className="text-zinc-500 ml-2">（カードをクリックして選択）</span>
+          {selectedCandidateIds.length < scenarioHandCount && (
+            <span className="text-zinc-500 ml-2">（あと {scenarioHandCount - selectedCandidateIds.length} 枚選択してください）</span>
           )}
         </div>
 
         <button
           type="button"
-          data-testid="confirm-rare-button"
+          data-testid="confirm-scenario-button"
           disabled={!isSelectionComplete}
           onClick={isP2Step ? handleConfirmP2 : handleConfirmP1}
           className={`px-5 py-2 text-xs font-bold rounded-lg shadow-sm transition flex items-center justify-center min-h-[44px] cursor-pointer ${
@@ -369,7 +337,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
               : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
           }`}
         >
-          <span>このレアカードで確定</span>
+          <span>このシナリオ手札で確定</span>
         </button>
       </div>
     </div>

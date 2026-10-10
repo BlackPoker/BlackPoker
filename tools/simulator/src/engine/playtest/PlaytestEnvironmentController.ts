@@ -7,6 +7,8 @@ import { RegulationRulePackageSelector } from "../regulation/RegulationRulePacka
 import { OfficialRegulationMatchSetup } from "../regulation/OfficialRegulationMatchSetup";
 import { SimulatorDeckProfileResolver, CardOccurrenceSelection } from "../regulation/SimulatorDeckProfileResolver";
 import { RareCardSelectionService } from "../regulation/RareCardSelectionService";
+import { ScenarioHandSelectionService } from "../regulation/ScenarioHandSelectionService";
+import { PhysicalCardReservation } from "../regulation/PhysicalCardReservation";
 import { PlaytestMatchMode } from "./PlaytestSeatController";
 import { createCoreBattlePresetState, CORE_BATTLE_PRESET_ID } from "../session/playtest/createCoreBattlePlaytest";
 import { MatchSetupCoordinator } from "../session/setup/MatchSetupCoordinator";
@@ -27,6 +29,10 @@ export interface ActiveMatchContext {
   readonly isScenario?: boolean;
   readonly scenarioDefinition?: ScenarioDefinitionV1;
   readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
+  readonly scenarioHandSelections?: {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
@@ -82,6 +88,7 @@ export interface EnvironmentOption {
   readonly deckProfileNotice?: string;
   readonly setupRequirements?: {
     readonly rareCardCount: number;
+    readonly scenarioHandCount?: number;
   };
 }
 
@@ -171,6 +178,7 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
       isOfficial: false,
       setupRequirements: {
         rareCardCount: 0,
+        scenarioHandCount: 0,
       },
     },
   ];
@@ -189,6 +197,7 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
         validation.frame?.id
       );
       const rareCardCount = validation.frame?.setup.rareCardCount ?? 0;
+      const scenarioHandCount = validation.frame?.setup.scenarioHandCount ?? 0;
       const formatOrder = FORMAT_PRESENTATION_ORDER[reg.formatId] ?? 999;
 
       officialCandidates.push({
@@ -200,6 +209,7 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
           deckProfileNotice,
           setupRequirements: {
             rareCardCount,
+            scenarioHandCount,
           },
         },
         formatOrder,
@@ -279,6 +289,10 @@ export interface MatchStartRequest {
   readonly playerNames?: { readonly p1: string; readonly p2: string };
   readonly matchMode?: PlaytestMatchMode;
   readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
+  readonly scenarioHandSelections?: {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
@@ -731,6 +745,351 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
         }
       }
 
+      // 4. Scenario Hand 選択の解決と検証
+      const scenarioHandCount = validation.frame?.setup.scenarioHandCount ?? 0;
+      let effectiveScenarioSelections:
+        | {
+            p1?: readonly CardOccurrenceSelection[];
+            p2?: readonly CardOccurrenceSelection[];
+          }
+        | undefined = undefined;
+
+      if (scenarioHandCount === 0) {
+        if (
+          (request.scenarioHandSelections?.p1 && request.scenarioHandSelections.p1.length > 0) ||
+          (request.scenarioHandSelections?.p2 && request.scenarioHandSelections.p2.length > 0)
+        ) {
+          const notice: SetupNotice = {
+            type: "VALIDATION_ERROR",
+            title: "シナリオ手札設定エラー",
+            message: "シナリオ手札が不要な環境ですが、選択が指定されています。",
+          };
+          logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+          return {
+            type: "VALIDATION_ERROR",
+            activeMatch: null,
+            setupNotice: notice,
+            presetValidationErrors: [],
+            logs,
+            traces,
+          };
+        }
+      }
+
+      if (scenarioHandCount > 0) {
+        if (request.matchMode === "humanVsHuman") {
+          const p1Sel = request.scenarioHandSelections?.p1;
+          const p2Sel = request.scenarioHandSelections?.p2;
+
+          if (!p1Sel || p1Sel.length !== scenarioHandCount) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: "Player A のシナリオ手札が選択されていません。",
+              details: `必要枚数: ${scenarioHandCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p1Validation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            p1Sel
+          );
+          if (!p1Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: `Player A のシナリオ手札選択が不正です: ${p1Validation.errors.join(", ")}`,
+              details: p1Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          if (!p2Sel || p2Sel.length !== scenarioHandCount) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: "Player B のシナリオ手札が選択されていません。",
+              details: `必要枚数: ${scenarioHandCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p2Validation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            p2Sel
+          );
+          if (!p2Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: `Player B のシナリオ手札選択が不正です: ${p2Validation.errors.join(", ")}`,
+              details: p2Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          // Rare Card との排他チェック
+          if (effectiveRareSelections?.p1) {
+            const p1Mutual = PhysicalCardReservation.validateMutualExclusion(p1Sel, effectiveRareSelections.p1);
+            if (!p1Mutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "物理カード重複エラー (Mutual Exclusion Error)",
+                message: `Player A のシナリオ手札とレアカードで重複があります: ${p1Mutual.errors.join(", ")}`,
+                details: p1Mutual.errors.join(", "),
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          if (effectiveRareSelections?.p2) {
+            const p2Mutual = PhysicalCardReservation.validateMutualExclusion(p2Sel, effectiveRareSelections.p2);
+            if (!p2Mutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "物理カード重複エラー (Mutual Exclusion Error)",
+                message: `Player B のシナリオ手札とレアカードで重複があります: ${p2Mutual.errors.join(", ")}`,
+                details: p2Mutual.errors.join(", "),
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          effectiveScenarioSelections = { p1: p1Sel, p2: p2Sel };
+        } else if (request.matchMode === "humanVsAi") {
+          const p1Sel = request.scenarioHandSelections?.p1;
+          if (!p1Sel || p1Sel.length !== scenarioHandCount) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: "プレイヤーのシナリオ手札が選択されていません。",
+              details: `必要枚数: ${scenarioHandCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p1Validation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            p1Sel
+          );
+          if (!p1Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: `プレイヤーのシナリオ手札選択が不正です: ${p1Validation.errors.join(", ")}`,
+              details: p1Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          if (effectiveRareSelections?.p1) {
+            const p1Mutual = PhysicalCardReservation.validateMutualExclusion(p1Sel, effectiveRareSelections.p1);
+            if (!p1Mutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "物理カード重複エラー (Mutual Exclusion Error)",
+                message: `プレイヤーのシナリオ手札とレアカードで重複があります: ${p1Mutual.errors.join(", ")}`,
+                details: p1Mutual.errors.join(", "),
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          // AI (P2) 自動選択
+          const aiScenarioSel = request.scenarioHandSelections?.p2 ?? ScenarioHandSelectionService.resolveAutoSelections({
+            deckProfile,
+            scenarioHandCount,
+            excludedSelections: effectiveRareSelections?.p2,
+            matchSeed: seed,
+            playerKey: "p2",
+          });
+
+          const aiValidation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            aiScenarioSel
+          );
+          if (!aiValidation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "AIシナリオ手札設定エラー",
+              message: `AIのシナリオ手札設定が不正です: ${aiValidation.errors.join(", ")}`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          if (effectiveRareSelections?.p2) {
+            const aiMutual = PhysicalCardReservation.validateMutualExclusion(aiScenarioSel, effectiveRareSelections.p2);
+            if (!aiMutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "AI物理カード重複エラー",
+                message: `AIのシナリオ手札とレアカードで重複があります: ${aiMutual.errors.join(", ")}`,
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          effectiveScenarioSelections = { p1: p1Sel, p2: aiScenarioSel };
+        } else {
+          // matchMode undefined (automated test / headless callers)
+          if (request.scenarioHandSelections?.p1 || request.scenarioHandSelections?.p2) {
+            if (request.scenarioHandSelections.p1) {
+              const val = ScenarioHandSelectionService.validateSelections(
+                deckProfile,
+                scenarioHandCount,
+                request.scenarioHandSelections.p1
+              );
+              if (!val.valid) {
+                const notice: SetupNotice = {
+                  type: "VALIDATION_ERROR",
+                  title: "シナリオ手札選択エラー",
+                  message: val.errors.join(", "),
+                };
+                return {
+                  type: "VALIDATION_ERROR",
+                  activeMatch: null,
+                  setupNotice: notice,
+                  presetValidationErrors: [],
+                  logs,
+                  traces,
+                };
+              }
+            }
+            if (request.scenarioHandSelections.p2) {
+              const val = ScenarioHandSelectionService.validateSelections(
+                deckProfile,
+                scenarioHandCount,
+                request.scenarioHandSelections.p2
+              );
+              if (!val.valid) {
+                const notice: SetupNotice = {
+                  type: "VALIDATION_ERROR",
+                  title: "シナリオ手札選択エラー",
+                  message: val.errors.join(", "),
+                };
+                return {
+                  type: "VALIDATION_ERROR",
+                  activeMatch: null,
+                  setupNotice: notice,
+                  presetValidationErrors: [],
+                  logs,
+                  traces,
+                };
+              }
+            }
+            effectiveScenarioSelections = request.scenarioHandSelections;
+          } else {
+            // 暗黙補完は行わず Fail-closed
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー",
+              message: "シナリオ手札の選択が必要です。",
+            };
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+        }
+      }
+
       const outcome = OfficialRegulationMatchSetup.setupMatch(
         validation.regulation!,
         validation.frame!,
@@ -740,6 +1099,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           matchId: `match-official-${seed}`,
           playerNames: request.playerNames ?? { p1: "Player A", p2: "Player B" },
           rareCardSelections: effectiveRareSelections,
+          scenarioHandSelections: effectiveScenarioSelections,
         }
       );
 
@@ -813,6 +1173,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           seed,
           rulePackage: officialRulePackage,
           rareCardSelections: effectiveRareSelections,
+          scenarioHandSelections: effectiveScenarioSelections,
         },
         initialStep,
         setupNotice: null,

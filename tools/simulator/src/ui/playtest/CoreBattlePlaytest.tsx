@@ -156,6 +156,10 @@ export const CoreBattlePlaytest: React.FC = () => {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   }>({});
+  const [pendingScenarioHandSelections, setPendingScenarioHandSelections] = useState<{
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  }>({});
 
   const currentDeckProfile = useMemo(() => {
     const regId = extractRegulationId(selectedEnvironmentId);
@@ -306,17 +310,19 @@ export const CoreBattlePlaytest: React.FC = () => {
     setLogs((prev) => [...prev, entry]);
   }, []);
 
-  // 対戦環境選択ハンドラ (環境変更時は未確定のレアカード選択をリセット)
+  // 対戦環境選択ハンドラ (環境変更時は未確定のレアカード・シナリオ手札選択をリセット)
   const handleSelectEnvironment = useCallback((envId: string) => {
     setSelectedEnvironmentId(envId);
     setPendingRareCardSelections({});
+    setPendingScenarioHandSelections({});
   }, []);
 
-  // 対戦モード選択ハンドラ (humanVsAi への変更時は常に pendingHumanSeat を "p1" に正規化、レアカード選択リセット)
+  // 対戦モード選択ハンドラ (humanVsAi への変更時は常に pendingHumanSeat を "p1" に正規化、レアカード・シナリオ手札選択リセット)
   const handleSelectMatchMode = useCallback((mode: PlaytestMatchMode) => {
     setPendingMatchMode(mode);
     setPendingHumanSeat((current) => normalizeHumanSeatForMode(mode, current));
     setPendingRareCardSelections({});
+    setPendingScenarioHandSelections({});
   }, []);
 
   // 失敗時・開始時に直前のセッション状態を安全にリセット
@@ -609,6 +615,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         fullRulePackage,
         matchMode: mode,
         rareCardSelections: pendingRareCardSelections,
+        scenarioHandSelections: pendingScenarioHandSelections,
       });
 
       if (outcome.type !== "READY") {
@@ -2031,6 +2038,9 @@ export const CoreBattlePlaytest: React.FC = () => {
             shareNotice={shareNotice}
             presetValidationErrors={presetValidationErrors}
             deckProfile={currentDeckProfile}
+            confirmedScenarioHandSelections={pendingScenarioHandSelections}
+            onConfirmScenarioHandSelections={setPendingScenarioHandSelections}
+            onResetScenarioHandSelections={() => setPendingScenarioHandSelections({})}
             confirmedRareCardSelections={pendingRareCardSelections}
             onConfirmRareCardSelections={setPendingRareCardSelections}
             onResetRareCardSelections={() => setPendingRareCardSelections({})}
