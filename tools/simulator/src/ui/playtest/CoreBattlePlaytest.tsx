@@ -2463,6 +2463,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         onStartScenario={handleStartScenario}
         onShareScenario={handleShareScenarioFromModal}
         initialDefinition={restoredScenarioDefinition ?? undefined}
+        initialEnvironmentId={selectedEnvironmentId}
         initialMode={pendingMatchMode}
         initialPolicyId={pendingPolicyId}
         initialChallengeDefinition={pendingChallengeDefinition}

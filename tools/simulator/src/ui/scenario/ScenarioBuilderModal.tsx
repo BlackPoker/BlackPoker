@@ -21,7 +21,11 @@ import {
   buildScenarioShareUrl,
 } from "./ScenarioShareUrl";
 import { copyTextToClipboard } from "../utils/clipboard";
-import { OFFICIAL_ENV_PREFIX, extractRegulationId } from "../../engine/playtest/PlaytestEnvironmentController";
+import {
+  OFFICIAL_ENV_PREFIX,
+  extractRegulationId,
+  getAvailableEnvironments,
+} from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
 import { ScenarioAuthoringDraftV1 } from "../../domain/scenario/ScenarioAuthoringTypes";
 import {
@@ -67,6 +71,7 @@ export interface ScenarioBuilderModalProps {
   readonly onStartScenario: (definition: ScenarioDefinitionV1, options?: ScenarioStartOptions) => void;
   readonly onShareScenario?: (options: ScenarioShareOptions) => Promise<boolean> | boolean;
   readonly initialDefinition?: ScenarioDefinitionV1;
+  readonly initialEnvironmentId?: string;
   readonly initialTab?: "p1" | "p2" | "settings";
   readonly initialMode?: PlaytestMatchMode;
   readonly initialPolicyId?: PlaytestPolicyId;
@@ -156,6 +161,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   onStartScenario,
   onShareScenario,
   initialDefinition,
+  initialEnvironmentId,
   initialTab,
   initialMode,
   initialPolicyId,
@@ -163,27 +169,34 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   initialRareCardSelections,
 }) => {
   // 利用可能な公式環境一覧（simulatorImplemented === true のみ。Core Battle は対象外）
+  // 通常対戦画面 (getAvailableEnvironments) と同一の順序・定義 (SSOT) を使用
   const officialEnvironments = useMemo(() => {
-    const list: { id: string; name: string; regulationId: string }[] = [];
-    for (const reg of catalog.regulations.values()) {
-      const validation = RegulationValidator.validateRegulation(catalog, reg.id);
-      if (validation.simulatorImplemented) {
-        list.push({
-          id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
-          name: `${reg.name} (公式)`,
-          regulationId: reg.id,
-        });
-      }
-    }
-    return list;
+    return getAvailableEnvironments(catalog)
+      .filter((env) => env.isOfficial && env.id !== "official:core-battle")
+      .map((env) => ({
+        id: env.id,
+        name: `${env.name} (公式)`,
+        regulationId: env.regulationId,
+      }));
   }, [catalog]);
+
+  const resolveTargetEnvironmentId = useCallback(
+    (targetId: string | undefined): string | undefined => {
+      if (!targetId || targetId === "official:core-battle") return undefined;
+      return officialEnvironments.some((env) => env.id === targetId) ? targetId : undefined;
+    },
+    [officialEnvironments]
+  );
 
   const defaultEnvId = officialEnvironments.length > 0 ? officialEnvironments[0].id : "official:light-entry16";
 
+  const initialResolvedEnvId =
+    resolveTargetEnvironmentId(initialDefinition?.environmentId) ??
+    resolveTargetEnvironmentId(initialEnvironmentId) ??
+    defaultEnvId;
+
   // モーダル内部の Draft State
-  const [environmentId, setEnvironmentId] = useState<string>(
-    initialDefinition?.environmentId ?? defaultEnvId
-  );
+  const [environmentId, setEnvironmentId] = useState<string>(initialResolvedEnvId);
   const [seed, setSeed] = useState<number>(initialDefinition?.seed ?? 42);
   const [turnPlayer, setTurnPlayer] = useState<"p1" | "p2">(initialDefinition?.turnPlayer ?? "p1");
   const [chancePlayer, setChancePlayer] = useState<"p1" | "p2">(initialDefinition?.chancePlayer ?? "p1");
@@ -269,14 +282,21 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     initialDefinition?.players?.p2?.pack?.opened === true
   );
 
-  // initialDefinition 変更時の同期
+  // isOpen / initialDefinition 変更時の同期
   useEffect(() => {
+    if (!isOpen) return;
+
+    const targetEnvId =
+      resolveTargetEnvironmentId(initialDefinition?.environmentId) ??
+      resolveTargetEnvironmentId(initialEnvironmentId) ??
+      defaultEnvId;
+    setEnvironmentId(targetEnvId);
+
     if (!initialDefinition) {
       setP1PackOpened(false);
       setP2PackOpened(false);
       return;
     }
-    setEnvironmentId(initialDefinition.environmentId ?? defaultEnvId);
     setSeed(initialDefinition.seed ?? 42);
     setTurnPlayer(initialDefinition.turnPlayer ?? "p1");
     setChancePlayer(initialDefinition.chancePlayer ?? "p1");
@@ -303,7 +323,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP2PackCards(initialDefinition.players?.p2?.pack?.cards ? [...initialDefinition.players.p2.pack.cards] : []);
     setP2PackCount(initialDefinition.players?.p2?.pack?.count);
     setP2PackOpened(initialDefinition.players?.p2?.pack?.opened === true);
-  }, [initialDefinition, defaultEnvId]);
+  }, [isOpen, initialDefinition, initialEnvironmentId, defaultEnvId, resolveTargetEnvironmentId]);
 
   // 共有通知用ステート
   const [shareNotice, setShareNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -364,8 +384,14 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
         currentDeckProfile.defaultRareCardSelections ??
         RareCardSelectionService.resolveDefaultRareCardSelections(currentDeckProfile, rareCount);
       setRareCardSelections((prev) => {
-        const isP1Valid = prev.p1 && prev.p1.length === rareCount;
-        const isP2Valid = prev.p2 && prev.p2.length === rareCount;
+        const isP1Valid =
+          Boolean(prev.p1) &&
+          prev.p1!.length === rareCount &&
+          RareCardSelectionService.validateSelections(currentDeckProfile, rareCount, prev.p1).valid;
+        const isP2Valid =
+          Boolean(prev.p2) &&
+          prev.p2!.length === rareCount &&
+          RareCardSelectionService.validateSelections(currentDeckProfile, rareCount, prev.p2).valid;
         if (isP1Valid && isP2Valid) return prev;
         return {
           p1: isP1Valid ? prev.p1 : defaults,
@@ -721,6 +747,19 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                 </option>
               ))}
             </select>
+            {rareCardCount > 0 && (
+              <span
+                data-testid="scenario-builder-rare-badge"
+                className="px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-300 rounded font-bold flex items-center gap-1 text-[11px]"
+              >
+                <span>レアカード: {rareCardCount}枚</span>
+                {isRareReady ? (
+                  <span className="text-emerald-700" title="レアカード選択完了">✓</span>
+                ) : (
+                  <span className="text-amber-700" title="レアカード要選択">要選択</span>
+                )}
+              </span>
+            )}
           </div>
           {currentDeckProfile && (
             <div className="flex items-center gap-2 text-[11px] text-zinc-600">
@@ -740,13 +779,21 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
         <div className="flex border-b border-zinc-200 px-6 bg-white font-mono text-xs font-bold">
           <button
             onClick={() => setActiveTab("settings")}
-            className={`py-2.5 px-4 border-b-2 transition ${
+            className={`py-2.5 px-4 border-b-2 transition flex items-center gap-1.5 ${
               activeTab === "settings"
                 ? "border-zinc-950 text-zinc-950"
                 : "border-transparent text-zinc-400 hover:text-zinc-600"
             }`}
           >
-            基本設定・共有
+            <span>基本設定・共有</span>
+            {rareCardCount > 0 && (
+              <span
+                data-testid="scenario-builder-settings-rare-indicator"
+                className="text-[10px] px-1.5 py-0.2 bg-amber-100 text-amber-900 border border-amber-300 rounded font-bold"
+              >
+                レア設定{isRareReady ? "" : " !"}
+              </span>
+            )}
           </button>
           <button
             onClick={() => setActiveTab("p1")}
@@ -782,6 +829,33 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
               }`}
             >
               {shareNotice.message}
+            </div>
+          )}
+
+          {/* P1 / P2 タブ閲覧時のレアカードサマリー & 設定誘導 */}
+          {activeTab !== "settings" && rareCardCount > 0 && (
+            <div
+              data-testid="scenario-builder-tab-rare-summary"
+              className="p-3 bg-amber-50/70 border border-amber-200 rounded-xl text-xs font-mono flex flex-wrap items-center justify-between gap-2"
+            >
+              <div className="flex items-center gap-2 text-amber-900">
+                <span className="font-bold">レアカード設定 ({rareCardCount}枚必要):</span>
+                <span>
+                  P1: {rareCardSelections.p1 && rareCardSelections.p1.length > 0
+                    ? rareCardSelections.p1.map((s) => `${formatOfficialSuitSymbol(s.suit)}${s.rank}`).join(", ")
+                    : "未選択"}
+                  {" / "}
+                  P2: {rareCardSelections.p2 && rareCardSelections.p2.length > 0
+                    ? rareCardSelections.p2.map((s) => `${formatOfficialSuitSymbol(s.suit)}${s.rank}`).join(", ")
+                    : "未選択"}
+                </span>
+              </div>
+              <button
+                onClick={() => setActiveTab("settings")}
+                className="text-[11px] font-bold text-amber-800 underline hover:text-amber-950 cursor-pointer"
+              >
+                基本設定タブで変更
+              </button>
             </div>
           )}
 
@@ -1047,17 +1121,27 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
           >
             キャンセル
           </button>
-          <button
-            onClick={handleStart}
-            disabled={compileOutcome.type !== "READY" || !isRareReady}
-            className={`px-6 py-2.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center gap-2 ${
-              compileOutcome.type === "READY" && isRareReady
-                ? "bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer"
-                : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
-            }`}
-          >
-            <span>初期盤面で対戦開始</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {!isRareReady && (
+              <span
+                data-testid="scenario-builder-rare-incomplete-warning"
+                className="text-[11px] text-amber-700 font-bold"
+              >
+                ※ レアカードの選択を確定してください
+              </span>
+            )}
+            <button
+              onClick={handleStart}
+              disabled={compileOutcome.type !== "READY" || !isRareReady}
+              className={`px-6 py-2.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center gap-2 ${
+                compileOutcome.type === "READY" && isRareReady
+                  ? "bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer"
+                  : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+              }`}
+            >
+              <span>初期盤面で対戦開始</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
