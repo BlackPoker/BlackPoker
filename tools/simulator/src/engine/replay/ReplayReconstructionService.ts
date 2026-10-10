@@ -33,6 +33,10 @@ export interface ReconstructMatchParams {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly scenarioHandSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
   readonly transcript: readonly ReplayDecisionEntryV1[];
   readonly decisionCount?: number;
   readonly trailingNormalization?: "EXTERNAL_DECISION_BOUNDARY" | "EXACT_AFTER_TRANSCRIPT";
@@ -105,6 +109,7 @@ export function reconstructMatch(
       environmentId: params.environmentId,
       seedInput: params.seed !== undefined ? String(params.seed) : "",
       rareCardSelections: params.rareCardSelections,
+      scenarioHandSelections: params.scenarioHandSelections,
       catalog: params.catalog,
       fullRulePackage: params.fullRulePackage,
     });

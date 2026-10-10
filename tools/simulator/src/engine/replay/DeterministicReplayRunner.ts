@@ -137,6 +137,7 @@ export function runDeterministicReplay(
       environmentId: plan.environmentId,
       seed: plan.seed,
       rareCardSelections: plan.rareCardSelections,
+      scenarioHandSelections: plan.scenarioHandSelections,
       transcript: plan.decisions,
       decisionCount: plan.decisions.length,
       trailingNormalization,

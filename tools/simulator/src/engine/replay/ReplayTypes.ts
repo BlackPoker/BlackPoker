@@ -33,6 +33,10 @@ export type ReplayPlanV1 = {
     p1?: readonly CardOccurrenceSelection[];
     p2?: readonly CardOccurrenceSelection[];
   };
+  scenarioHandSelections?: {
+    p1?: readonly CardOccurrenceSelection[];
+    p2?: readonly CardOccurrenceSelection[];
+  };
   decisions: readonly ReplayDecisionEntryV1[];
   expected: {
     status: "WAITING_FOR_DECISION" | "PROGRESSED" | "FINISHED";

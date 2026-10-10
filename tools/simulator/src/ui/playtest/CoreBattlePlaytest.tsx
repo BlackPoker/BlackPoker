@@ -124,6 +124,7 @@ export function buildUndoReconstructParams(
     environmentId: args.activeMatch.environmentId,
     seed: args.activeMatch.seed,
     rareCardSelections: args.activeMatch.rareCardSelections,
+    scenarioHandSelections: args.activeMatch.scenarioHandSelections,
     transcript: args.targetTranscript,
     decisionCount: args.targetTranscript.length,
     catalog: args.catalog,
@@ -405,6 +406,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat,
         policyId,
         rareCardSelections: newActiveMatch.rareCardSelections,
+        scenarioHandSelections: newActiveMatch.scenarioHandSelections,
       });
 
       // Challenge の初期化 & 初期ステップ観測 (GameSession とは完全に分離)

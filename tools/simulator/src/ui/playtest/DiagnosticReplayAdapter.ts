@@ -223,6 +223,7 @@ export function createReplayPlanFromDiagnosticBundleV1(
           }
         : undefined,
     rareCardSelections: b.match.rareCardSelections,
+    scenarioHandSelections: b.match.scenarioHandSelections,
     decisions,
     expected: {
       status: b.match.status,

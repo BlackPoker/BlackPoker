@@ -23,6 +23,10 @@ export interface ActivePlaytestSettings {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly scenarioHandSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
 }
 
 /**
@@ -58,6 +62,11 @@ export interface PlaytestDiagnosticBundleV1 {
     readonly policyId?: string;
 
     readonly rareCardSelections?: {
+      readonly p1?: readonly CardOccurrenceSelection[];
+      readonly p2?: readonly CardOccurrenceSelection[];
+    };
+
+    readonly scenarioHandSelections?: {
       readonly p1?: readonly CardOccurrenceSelection[];
       readonly p2?: readonly CardOccurrenceSelection[];
     };
@@ -251,6 +260,7 @@ export function buildPlaytestDiagnosticBundleV1(
       policyId: params.activePlaytestSettings?.policyId,
 
       rareCardSelections: params.activePlaytestSettings?.rareCardSelections ?? params.activeMatch?.rareCardSelections,
+      scenarioHandSelections: params.activePlaytestSettings?.scenarioHandSelections ?? params.activeMatch?.scenarioHandSelections,
 
       seatControllers: params.seatControllers
         ? {
