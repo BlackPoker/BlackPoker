@@ -262,5 +262,144 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-2: PlaytestEnvironmentController Scenario Ha
         restore();
       }
     });
+
+    describe("4. Headless Validation Contract [BP-SIM-PRO-STRATEGY-PHASE-2-R1]", () => {
+      it("A. rejects when scenarioHandSelections is completely undefined (VALIDATION_ERROR, not TECHNICAL_ERROR)", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            // matchMode undefined
+            seedInput: "42",
+            rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
+            scenarioHandSelections: undefined,
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("VALIDATION_ERROR");
+          expect(res.type).not.toBe("TECHNICAL_ERROR");
+          if (res.type === "VALIDATION_ERROR") {
+            expect(res.setupNotice?.message).toContain("シナリオ手札の選択が必要です");
+          }
+        } finally {
+          restore();
+        }
+      });
+
+      it("B. rejects when only P1 scenario is provided (VALIDATION_ERROR: Player B missing)", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            seedInput: "42",
+            rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
+            scenarioHandSelections: { p1: validP1Scenario },
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("VALIDATION_ERROR");
+          expect(res.type).not.toBe("TECHNICAL_ERROR");
+          if (res.type === "VALIDATION_ERROR") {
+            expect(res.setupNotice?.message).toContain("Player B のシナリオ手札が選択されていません");
+          }
+        } finally {
+          restore();
+        }
+      });
+
+      it("C. rejects when only P2 scenario is provided (VALIDATION_ERROR: Player A missing)", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            seedInput: "42",
+            rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
+            scenarioHandSelections: { p2: validP2Scenario },
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("VALIDATION_ERROR");
+          expect(res.type).not.toBe("TECHNICAL_ERROR");
+          if (res.type === "VALIDATION_ERROR") {
+            expect(res.setupNotice?.message).toContain("Player A のシナリオ手札が選択されていません");
+          }
+        } finally {
+          restore();
+        }
+      });
+
+      it("D. succeeds when both P1 and P2 scenario are valid", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            seedInput: "42",
+            rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
+            scenarioHandSelections: { p1: validP1Scenario, p2: validP2Scenario },
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("READY");
+        } finally {
+          restore();
+        }
+      });
+
+      it("E. rejects when P1 Scenario overlaps with P1 Rare (VALIDATION_ERROR, not TECHNICAL_ERROR)", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            seedInput: "42",
+            rareCardSelections: {
+              p1: [{ suit: "S", rank: "A" }], // overlaps with validP1Scenario (S-A)
+              p2: validP2Rare,
+            },
+            scenarioHandSelections: { p1: validP1Scenario, p2: validP2Scenario },
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("VALIDATION_ERROR");
+          expect(res.type).not.toBe("TECHNICAL_ERROR");
+          if (res.type === "VALIDATION_ERROR") {
+            expect(res.setupNotice?.title).toContain("物理カード重複エラー");
+            expect(res.setupNotice?.message).toContain("Player A のシナリオ手札とレアカードで重複があります");
+          }
+        } finally {
+          restore();
+        }
+      });
+
+      it("F. rejects when P2 Scenario overlaps with P2 Rare (VALIDATION_ERROR, not TECHNICAL_ERROR)", async () => {
+        const restore = enableProStrategyInValidator();
+        try {
+          const req: MatchStartRequest = {
+            catalog: testCatalog,
+            fullRulePackage,
+            environmentId: "official:pro-strategy",
+            seedInput: "42",
+            rareCardSelections: {
+              p1: validP1Rare,
+              p2: [{ suit: "C", rank: "J" }], // overlaps with validP2Scenario (C-J)
+            },
+            scenarioHandSelections: { p1: validP1Scenario, p2: validP2Scenario },
+          };
+          const res = await startMatchAttempt(req);
+          expect(res.type).toBe("VALIDATION_ERROR");
+          expect(res.type).not.toBe("TECHNICAL_ERROR");
+          if (res.type === "VALIDATION_ERROR") {
+            expect(res.setupNotice?.title).toContain("物理カード重複エラー");
+            expect(res.setupNotice?.message).toContain("Player B のシナリオ手札とレアカードで重複があります");
+          }
+        } finally {
+          restore();
+        }
+      });
+    });
   });
 });

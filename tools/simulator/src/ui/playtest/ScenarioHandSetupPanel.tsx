@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { PlaytestMatchMode } from "../../engine/playtest/PlaytestSeatController";
 import {
   CardOccurrenceSelection,
@@ -44,6 +44,22 @@ export const ScenarioHandSetupPanel: React.FC<ScenarioHandSetupPanelProps> = ({
   const [internalStep, setInternalStep] = useState<SetupStep>("p1_selecting");
   const [localP1Selection, setLocalP1Selection] = useState<CardOccurrenceSelection[]>([]);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
+
+  // matchMode や scenarioHandCount 変更時、内部状態を完全にリセット
+  useEffect(() => {
+    setInternalStep("p1_selecting");
+    setLocalP1Selection([]);
+    setSelectedCandidateIds([]);
+  }, [matchMode, scenarioHandCount]);
+
+  // 外部からの confirmedSelections リセットを検知した場合も内部状態を初期化
+  useEffect(() => {
+    if (!confirmedSelections.p1 || confirmedSelections.p1.length === 0) {
+      setInternalStep("p1_selecting");
+      setLocalP1Selection([]);
+      setSelectedCandidateIds([]);
+    }
+  }, [confirmedSelections.p1]);
 
   // 全候補カードの列挙 (SSOT)
   const candidates = useMemo(
@@ -278,6 +294,7 @@ export const ScenarioHandSetupPanel: React.FC<ScenarioHandSetupPanelProps> = ({
                   <button
                     key={candidate.id}
                     type="button"
+                    data-testid="scenario-candidate-card"
                     onClick={() => handleToggleCandidate(candidate.id)}
                     aria-label={candidate.displayLabel}
                     className={`min-h-[44px] min-w-[36px] p-1 rounded-lg border text-xs font-bold transition flex flex-col items-center justify-center cursor-pointer select-none ${

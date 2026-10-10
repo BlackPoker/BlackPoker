@@ -1025,59 +1025,18 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
           effectiveScenarioSelections = { p1: p1Sel, p2: aiScenarioSel };
         } else {
           // matchMode undefined (automated test / headless callers)
-          if (request.scenarioHandSelections?.p1 || request.scenarioHandSelections?.p2) {
-            if (request.scenarioHandSelections.p1) {
-              const val = ScenarioHandSelectionService.validateSelections(
-                deckProfile,
-                scenarioHandCount,
-                request.scenarioHandSelections.p1
-              );
-              if (!val.valid) {
-                const notice: SetupNotice = {
-                  type: "VALIDATION_ERROR",
-                  title: "シナリオ手札選択エラー",
-                  message: val.errors.join(", "),
-                };
-                return {
-                  type: "VALIDATION_ERROR",
-                  activeMatch: null,
-                  setupNotice: notice,
-                  presetValidationErrors: [],
-                  logs,
-                  traces,
-                };
-              }
-            }
-            if (request.scenarioHandSelections.p2) {
-              const val = ScenarioHandSelectionService.validateSelections(
-                deckProfile,
-                scenarioHandCount,
-                request.scenarioHandSelections.p2
-              );
-              if (!val.valid) {
-                const notice: SetupNotice = {
-                  type: "VALIDATION_ERROR",
-                  title: "シナリオ手札選択エラー",
-                  message: val.errors.join(", "),
-                };
-                return {
-                  type: "VALIDATION_ERROR",
-                  activeMatch: null,
-                  setupNotice: notice,
-                  presetValidationErrors: [],
-                  logs,
-                  traces,
-                };
-              }
-            }
-            effectiveScenarioSelections = request.scenarioHandSelections;
-          } else {
-            // 暗黙補完は行わず Fail-closed
+          // Headless 環境では P1 と P2 両方の Scenario Hand が明示的に必須
+          const p1Sel = request.scenarioHandSelections?.p1;
+          const p2Sel = request.scenarioHandSelections?.p2;
+
+          if (!p1Sel && !p2Sel) {
             const notice: SetupNotice = {
               type: "VALIDATION_ERROR",
-              title: "シナリオ手札選択エラー",
-              message: "シナリオ手札の選択が必要です。",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: "シナリオ手札の選択が必要です (Player A, Player B 共に未指定)。",
+              details: `必要枚数: 各${scenarioHandCount}枚`,
             };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
             return {
               type: "VALIDATION_ERROR",
               activeMatch: null,
@@ -1087,6 +1046,137 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
               traces,
             };
           }
+
+          if (!p1Sel || p1Sel.length !== scenarioHandCount) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: !p1Sel
+                ? "Player A のシナリオ手札が選択されていません。"
+                : `Player A のシナリオ手札の枚数が不正です (指定: ${p1Sel.length}枚, 必要: ${scenarioHandCount}枚)。`,
+              details: `必要枚数: ${scenarioHandCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p1Validation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            p1Sel
+          );
+          if (!p1Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: `Player A のシナリオ手札選択が不正です: ${p1Validation.errors.join(", ")}`,
+              details: p1Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          if (!p2Sel || p2Sel.length !== scenarioHandCount) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: !p2Sel
+                ? "Player B のシナリオ手札が選択されていません。"
+                : `Player B のシナリオ手札の枚数が不正です (指定: ${p2Sel.length}枚, 必要: ${scenarioHandCount}枚)。`,
+              details: `必要枚数: ${scenarioHandCount}枚`,
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          const p2Validation = ScenarioHandSelectionService.validateSelections(
+            deckProfile,
+            scenarioHandCount,
+            p2Sel
+          );
+          if (!p2Validation.valid) {
+            const notice: SetupNotice = {
+              type: "VALIDATION_ERROR",
+              title: "シナリオ手札選択エラー (Scenario Hand Selection Error)",
+              message: `Player B のシナリオ手札選択が不正です: ${p2Validation.errors.join(", ")}`,
+              details: p2Validation.errors.join(", "),
+            };
+            logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+            return {
+              type: "VALIDATION_ERROR",
+              activeMatch: null,
+              setupNotice: notice,
+              presetValidationErrors: [],
+              logs,
+              traces,
+            };
+          }
+
+          // Headless でも Rare Card との相互排他チェックを Setup input validation として実施
+          if (effectiveRareSelections?.p1) {
+            const p1Mutual = PhysicalCardReservation.validateMutualExclusion(p1Sel, effectiveRareSelections.p1);
+            if (!p1Mutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "物理カード重複エラー (Mutual Exclusion Error)",
+                message: `Player A のシナリオ手札とレアカードで重複があります: ${p1Mutual.errors.join(", ")}`,
+                details: p1Mutual.errors.join(", "),
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          if (effectiveRareSelections?.p2) {
+            const p2Mutual = PhysicalCardReservation.validateMutualExclusion(p2Sel, effectiveRareSelections.p2);
+            if (!p2Mutual.valid) {
+              const notice: SetupNotice = {
+                type: "VALIDATION_ERROR",
+                title: "物理カード重複エラー (Mutual Exclusion Error)",
+                message: `Player B のシナリオ手札とレアカードで重複があります: ${p2Mutual.errors.join(", ")}`,
+                details: p2Mutual.errors.join(", "),
+              };
+              logs.push({ message: `[VALIDATION_ERROR] ${notice.message}`, level: "system" });
+              return {
+                type: "VALIDATION_ERROR",
+                activeMatch: null,
+                setupNotice: notice,
+                presetValidationErrors: [],
+                logs,
+                traces,
+              };
+            }
+          }
+
+          effectiveScenarioSelections = { p1: p1Sel, p2: p2Sel };
         }
       }
 

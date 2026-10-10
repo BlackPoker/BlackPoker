@@ -342,6 +342,7 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
               シナリオ手札設定 (Scenario Hand Selection):
             </label>
             <ScenarioHandSetupPanel
+              key={`scenario-setup-${selectedEnvironmentId}-${matchMode}-${deckProfile.id}-${scenarioHandCount}`}
               deckProfile={deckProfile}
               scenarioHandCount={scenarioHandCount}
               matchMode={matchMode}
@@ -362,15 +363,33 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
             <label className="text-xs font-bold font-mono text-zinc-700">
               レアカード設定 (Rare Card Selection):
             </label>
-            <RareCardSetupPanel
-              deckProfile={deckProfile}
-              rareCardCount={rareCardCount}
-              matchMode={matchMode}
-              confirmedSelections={confirmedRareCardSelections ?? {}}
-              excludedSelections={confirmedScenarioHandSelections}
-              onConfirmSelections={(sels) => onConfirmRareCardSelections?.(sels)}
-              onResetSelections={() => onResetRareCardSelections?.()}
-            />
+            {scenarioHandCount > 0 && !isScenarioReady ? (
+              <div
+                data-testid="rare-setup-locked"
+                className="p-4 rounded-xl border border-dashed border-zinc-300 bg-zinc-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-zinc-500 font-mono text-xs"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-zinc-400 text-sm">🔒</span>
+                  <span className="font-bold text-zinc-700">
+                    レアカード設定はロックされています
+                  </span>
+                </div>
+                <span className="text-[11px] text-zinc-500">
+                  ※先にシナリオ手札の選択を完了してください
+                </span>
+              </div>
+            ) : (
+              <RareCardSetupPanel
+                key={`rare-setup-${selectedEnvironmentId}-${matchMode}-${deckProfile.id}-${rareCardCount}`}
+                deckProfile={deckProfile}
+                rareCardCount={rareCardCount}
+                matchMode={matchMode}
+                confirmedSelections={confirmedRareCardSelections ?? {}}
+                excludedSelections={confirmedScenarioHandSelections}
+                onConfirmSelections={(sels) => onConfirmRareCardSelections?.(sels)}
+                onResetSelections={() => onResetRareCardSelections?.()}
+              />
+            )}
           </div>
         )}
 

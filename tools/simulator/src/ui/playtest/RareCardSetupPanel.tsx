@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { PlaytestMatchMode } from "../../engine/playtest/PlaytestSeatController";
 import {
   CardOccurrenceSelection,
@@ -50,6 +50,22 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
   const [internalStep, setInternalStep] = useState<SetupStep>("p1_selecting");
   const [localP1Selection, setLocalP1Selection] = useState<CardOccurrenceSelection[]>([]);
   const [selectedCandidateIds, setSelectedCandidateIds] = useState<string[]>([]);
+
+  // matchMode や rareCardCount 変更時、内部状態を完全にリセット
+  useEffect(() => {
+    setInternalStep("p1_selecting");
+    setLocalP1Selection([]);
+    setSelectedCandidateIds([]);
+  }, [matchMode, rareCardCount]);
+
+  // 外部からの confirmedSelections リセットを検知した場合も内部状態を初期化
+  useEffect(() => {
+    if (!confirmedSelections.p1 || confirmedSelections.p1.length === 0) {
+      setInternalStep("p1_selecting");
+      setLocalP1Selection([]);
+      setSelectedCandidateIds([]);
+    }
+  }, [confirmedSelections.p1]);
 
   // 全候補カードの列挙 (SSOT)
   const candidates = useMemo(
@@ -304,6 +320,7 @@ export const RareCardSetupPanel: React.FC<RareCardSetupPanelProps> = ({
                   <button
                     key={candidate.id}
                     type="button"
+                    data-testid="rare-candidate-card"
                     disabled={isExcluded}
                     onClick={() => handleToggleCandidate(candidate.id)}
                     aria-label={candidate.displayLabel}
