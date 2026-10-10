@@ -7,6 +7,7 @@ export interface MobileBottomSheetProps {
   readonly onModeChange: (mode: SheetMode) => void;
   readonly onClose: () => void;
   readonly title?: string;
+  readonly persistentContent?: React.ReactNode;
   readonly children: React.ReactNode;
 }
 
@@ -15,6 +16,7 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
   onModeChange,
   onClose,
   title,
+  persistentContent,
   children,
 }) => {
   const isVisible = mode !== "collapsed";
@@ -104,8 +106,21 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
             </div>
           </div>
 
+          {/* 持続表示領域 (Persistent Hand Strip 等: shrink-0, overflow-y-auto の外) */}
+          {persistentContent && (
+            <div
+              data-testid="mobile-sheet-persistent-content"
+              className="shrink-0 border-b border-zinc-200 bg-white/95 px-2.5 py-1"
+            >
+              {persistentContent}
+            </div>
+          )}
+
           {/* コンテンツ領域（DecisionPanel） */}
-          <div className="p-2.5 overflow-y-auto flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div
+            data-testid="mobile-sheet-decision-content"
+            className="p-2.5 overflow-y-auto flex-1 pb-[max(1rem,env(safe-area-inset-bottom))]"
+          >
             {children}
           </div>
         </div>

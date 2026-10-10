@@ -45,6 +45,7 @@ import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
 import { DebugPanel, TraceEntry } from "../debug/DebugPanel";
 import { MobileDecisionDock } from "../decision/MobileDecisionDock";
+import { MobileVisibleHandStrip } from "../decision/MobileVisibleHandStrip";
 import { MobileBottomSheet, SheetMode } from "../game/MobileBottomSheet";
 import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
@@ -2283,11 +2284,6 @@ export const CoreBattlePlaytest: React.FC = () => {
       {isHumanTurnWaiting && currentStep?.type === "WAITING_FOR_DECISION" && (
         <MobileDecisionDock
           request={currentStep.request}
-          handCards={
-            (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.isViewer
-              ? (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.handCards
-              : []
-          }
           onOpenSheet={() => setSheetMode("half")}
           onSubmit={handleDecisionSubmit}
           sheetMode={sheetMode}
@@ -2312,6 +2308,17 @@ export const CoreBattlePlaytest: React.FC = () => {
                     : "行動選択"
                 }`
               : "行動選択"
+          }
+          persistentContent={
+            <MobileVisibleHandStrip
+              handCards={
+                currentStep?.type === "WAITING_FOR_DECISION" &&
+                !isPassAndPlayWaiting &&
+                (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.isViewer
+                  ? (currentStep.request.playerId === "p1" ? p1ViewModel : p2ViewModel)?.handCards
+                  : undefined
+              }
+            />
           }
         >
           {decisionPanelContent}

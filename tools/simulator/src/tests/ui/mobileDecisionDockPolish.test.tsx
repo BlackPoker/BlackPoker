@@ -100,35 +100,29 @@ describe("BP-SIM-PRO-RAREPACK-POLISH-2: Mobile UI & PlayerBoard Readability", ()
     });
   });
 
-  describe("2. Mobile Decision Dock への手札表示とレイアウト", () => {
-    it("可視手札が渡された場合、サマリーバー内にCardView compactで描画される", () => {
+  describe("2. Mobile Decision Dock のクリーンなレイアウトと重複排除 (BP-SIM-UI-MOBILE-HAND-VISIBILITY-R1)", () => {
+    it("collapsed 時の Mobile Decision Dock に不要な手札重複表示 (data-testid='mobile-dock-hand-cards') が存在しないこと", () => {
       const request = createMockRequest();
       const html = renderToString(
         <MobileDecisionDock
           request={request}
-          handCards={mockCards}
           sheetMode="collapsed"
           onOpenSheet={() => {}}
           onSubmit={() => {}}
         />
       );
 
-      expect(html).toContain("data-testid=\"mobile-dock-hand-cards\"");
-      // ♠A, ♦3, ♣K の表示
-      expect(html).toContain("♠");
-      expect(html).toContain("A");
-      expect(html).toContain("♦");
-      expect(html).toContain("3");
-      expect(html).toContain("♣");
-      expect(html).toContain("K");
+      // 盤面の PlayerBoard が手札を表示するため、Dock には手札コンテナを出さない
+      expect(html).not.toContain("data-testid=\"mobile-dock-hand-cards\"");
+      expect(html).not.toContain("bp-card-suit");
+      expect(html).not.toContain("bp-card-rank");
     });
 
-    it("手札コンテナは横スクロール可能 (overflow-x-auto) かつラベルやバッジは固定 (shrink-0)", () => {
+    it("サマリーバーはプレイヤー表示と択数のみをスリムに表示し、アクションボタンを独立配置する", () => {
       const request = createMockRequest();
       const html = renderToString(
         <MobileDecisionDock
           request={request}
-          handCards={mockCards}
           sheetMode="collapsed"
           onOpenSheet={() => {}}
           onSubmit={() => {}}
@@ -137,61 +131,33 @@ describe("BP-SIM-PRO-RAREPACK-POLISH-2: Mobile UI & PlayerBoard Readability", ()
         />
       );
 
-      // 横スクロール可能コンテナ
-      expect(html).toContain("overflow-x-auto");
-      expect(html).toContain("no-scrollbar");
-      expect(html).toContain("flex-1 min-w-0");
+      // サマリーバーの表示
+      expect(html).toContain("P1");
+      expect(html).toContain("2択");
 
-      // 固定要素
-      expect(html).toContain("shrink-0");
-
-      // アクションボタンが押し出されない構造 (コンテナ外に独立配置)
+      // アクションボタンが安定して配置されること
       expect(html).toContain("PASS");
       expect(html).toContain("行動を選ぶ");
       expect(html).toContain("戻る");
     });
   });
 
-  describe("3. Hidden Information (非公開情報) の保護", () => {
-    it("非公開カード (visibility: 'HIDDEN' または faceUp: false) のSuit/Rank/内容はDOMに出力されない", () => {
+  describe("3. Mobile Decision Dock の情報保護と責務分離", () => {
+    it("Dock 自身はカード identity を出力せず、手札非公開情報が漏洩しない構造を維持する", () => {
       const request = createMockRequest();
-      const hiddenCards = [
-        { id: "secret-1", visibility: "HIDDEN", faceUp: false, suit: "H", rank: "Q" },
-        { id: "secret-2", visibility: "HIDDEN", faceUp: false, code: "HQ" },
-      ];
       const html = renderToString(
         <MobileDecisionDock
           request={request}
-          handCards={hiddenCards}
           sheetMode="collapsed"
           onOpenSheet={() => {}}
           onSubmit={() => {}}
         />
       );
 
-      expect(html).not.toContain("♥");
-      expect(html).not.toContain(">Q<");
-      expect(html).not.toContain("HQ");
-      expect(html).not.toContain("secret-1");
-      expect(html).not.toContain("secret-2");
-    });
-
-    it("handCardsが空 (相手の手番など) の場合はDockに手札カードが出力されない", () => {
-      const request = createMockRequest({ playerId: "p2" });
-      const html = renderToString(
-        <MobileDecisionDock
-          request={request}
-          handCards={[]}
-          sheetMode="collapsed"
-          onOpenSheet={() => {}}
-          onSubmit={() => {}}
-        />
-      );
-
-      // 手札コンテナ内にカード要素が存在しない
-      expect(html).toContain("data-testid=\"mobile-dock-hand-cards\"");
+      // カード要素が一切出力されない
       expect(html).not.toContain("bp-card-suit");
       expect(html).not.toContain("bp-card-rank");
+      expect(html).not.toContain("data-testid=\"mobile-dock-hand-cards\"");
     });
   });
 
