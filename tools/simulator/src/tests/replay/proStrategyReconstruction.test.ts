@@ -53,22 +53,9 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-3: Scenario Hand Reconstruction, Undo, Repla
     fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
   });
 
-  // テスト用: pro:strategy の simulatorImplemented を一時的にモックするヘルパー
+  // Phase 4 で pro:strategy が正式公開されたため、Validator のモックは不要 (no-op restore 関数を返却)
   const enableProStrategyInValidator = () => {
-    const original = RegulationValidator.validateCombination.bind(RegulationValidator);
-    const spy = vi.spyOn(RegulationValidator, "validateCombination").mockImplementation((cat, fmt, frm, opts) => {
-      if (fmt === "pro" && frm === "strategy") {
-        const res = original(cat, fmt, frm, { ...opts, assertImplemented: false });
-        return {
-          ...res,
-          simulatorImplemented: true,
-        };
-      }
-      return original(cat, fmt, frm, opts);
-    });
-    return () => {
-      spy.mockRestore();
-    };
+    return () => {};
   };
 
   const validH2HP1Scenario: CardOccurrenceSelection[] = [

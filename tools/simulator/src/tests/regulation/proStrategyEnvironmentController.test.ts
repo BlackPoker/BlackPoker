@@ -25,26 +25,35 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-2: PlaytestEnvironmentController Scenario Ha
   });
 
   describe("1. Environment Selector & SetupRequirements Contract", () => {
-    it("pro-strategy is NOT exposed in getAvailableEnvironments (simulatorImplemented = false)", () => {
+    it("pro-strategy is exposed in getAvailableEnvironments (simulatorImplemented = true)", () => {
       const val = RegulationValidator.validateCombination(catalog, "pro", "strategy");
-      expect(val.simulatorImplemented).toBe(false);
+      expect(val.simulatorImplemented).toBe(true);
 
       const envs = getAvailableEnvironments(catalog);
       const proStrategyEnv = envs.find(
         (e) => e.regulationId === "pro-strategy" || e.id === "official:pro-strategy"
       );
-      expect(proStrategyEnv).toBeUndefined();
+      expect(proStrategyEnv).toBeDefined();
+      expect(proStrategyEnv?.id).toBe("official:pro-strategy");
+      expect(proStrategyEnv?.name).toBe("プロ + ストラテジー (公式)");
+      expect(proStrategyEnv?.setupRequirements?.scenarioHandCount).toBe(3);
+      expect(proStrategyEnv?.setupRequirements?.rareCardCount).toBe(1);
     });
 
-    it("available environments correctly reflect setupRequirements (rareCardCount and scenarioHandCount = 0)", () => {
+    it("available environments correctly reflect setupRequirements", () => {
       const envs = getAvailableEnvironments(catalog);
       for (const env of envs) {
         expect(env.setupRequirements).toBeDefined();
-        expect(env.setupRequirements?.scenarioHandCount).toBe(0);
-        if (env.id.includes("rarePack")) {
+        if (env.id === "official:pro-strategy") {
+          expect(env.setupRequirements?.scenarioHandCount).toBe(3);
           expect(env.setupRequirements?.rareCardCount).toBe(1);
         } else {
-          expect(env.setupRequirements?.rareCardCount).toBe(0);
+          expect(env.setupRequirements?.scenarioHandCount).toBe(0);
+          if (env.id.includes("rarePack")) {
+            expect(env.setupRequirements?.rareCardCount).toBe(1);
+          } else {
+            expect(env.setupRequirements?.rareCardCount).toBe(0);
+          }
         }
       }
     });
@@ -105,22 +114,9 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-2: PlaytestEnvironmentController Scenario Ha
     const validP1Rare: CardOccurrenceSelection[] = [{ suit: "J", rank: "Joker", occurrence: 0 }];
     const validP2Rare: CardOccurrenceSelection[] = [{ suit: "J", rank: "Joker", occurrence: 1 }];
 
-    // 一時的に vi.spyOn で simulatorImplemented をモックして検証し、テスト後に元に戻す
+    // Phase 4 で pro:strategy が正式公開されたため、Validator のモックは不要 (no-op restore 関数を返却)
     const enableProStrategyInValidator = () => {
-      const original = RegulationValidator.validateCombination.bind(RegulationValidator);
-      const spy = vi.spyOn(RegulationValidator, "validateCombination").mockImplementation((cat, fmt, frm, opts) => {
-        if (fmt === "pro" && frm === "strategy") {
-          const res = original(cat, fmt, frm, { ...opts, assertImplemented: false });
-          return {
-            ...res,
-            simulatorImplemented: true,
-          };
-        }
-        return original(cat, fmt, frm, opts);
-      });
-      return () => {
-        spy.mockRestore();
-      };
+      return () => {};
     };
 
     it("Human vs Human: requires both P1 and P2 scenarioHandSelections", async () => {

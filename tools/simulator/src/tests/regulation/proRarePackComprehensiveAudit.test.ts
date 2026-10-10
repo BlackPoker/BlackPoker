@@ -3774,10 +3774,10 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       expect(proEnv).toBeDefined();
       expect(proEnv?.isOfficial).toBe(true);
 
-      expect(envs).toHaveLength(6);
+      expect(envs).toHaveLength(7);
       const officialIds = envs.filter((e) => e.isOfficial).map((e) => e.regulationId);
       expect(officialIds.sort()).toEqual(
-        ["light-entry16", "light-pack", "standard-pack", "standard-rarePack", "pro-rarePack"].sort()
+        ["light-entry16", "light-pack", "standard-pack", "standard-rarePack", "pro-rarePack", "pro-strategy"].sort()
       );
     });
 

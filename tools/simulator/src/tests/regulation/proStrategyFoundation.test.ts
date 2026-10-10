@@ -459,16 +459,20 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-1: Pro + Strategy Foundation & Physical Rese
       expect(totalRareDraft).toBe(54);
     });
 
-    it("Scope boundary: pro-strategy is NOT yet exposed in Environment Selector (simulatorImplemented=false)", async () => {
+    it("Publication Gate: pro-strategy is exposed in Environment Selector (simulatorImplemented=true)", async () => {
       const catalog = await loadRegulationCatalog();
       const validation = RegulationValidator.validateRegulation(catalog, "pro-strategy");
       expect(validation.ruleLegal).toBe(true);
       expect(validation.recommended).toBe(true);
-      expect(validation.simulatorImplemented).toBe(false);
+      expect(validation.simulatorImplemented).toBe(true);
 
       const envs = getAvailableEnvironments(catalog);
       const exposed = envs.filter((e) => e.regulationId === "pro-strategy" || e.id === "official:pro-strategy");
-      expect(exposed).toHaveLength(0);
+      expect(exposed).toHaveLength(1);
+      expect(exposed[0].id).toBe("official:pro-strategy");
+      expect(exposed[0].name).toBe("プロ + ストラテジー (公式)");
+      expect(exposed[0].setupRequirements?.scenarioHandCount).toBe(3);
+      expect(exposed[0].setupRequirements?.rareCardCount).toBe(1);
     });
   });
 });
