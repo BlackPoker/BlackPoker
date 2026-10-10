@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import {
   ScenarioDefinitionV1,
   ScenarioPlayerV1,
@@ -172,13 +172,22 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   // 通常対戦画面 (getAvailableEnvironments) と同一の順序・定義 (SSOT) を使用
   const officialEnvironments = useMemo(() => {
     return getAvailableEnvironments(catalog)
-      .filter((env) => env.isOfficial && env.id !== "official:core-battle")
-      .map((env) => ({
-        id: env.id,
-        name: `${env.name} (公式)`,
-        regulationId: env.regulationId,
-      }));
+      .filter((env) => env.isOfficial && env.id !== "official:core-battle");
   }, [catalog]);
+
+  const resolveDeckProfileForEnv = useCallback(
+    (envId: string) => {
+      const regId = extractRegulationId(envId);
+      if (!regId) return null;
+      const val = RegulationValidator.validateRegulation(catalog, regId);
+      if (!val.frame) return null;
+      return {
+        frame: val.frame,
+        deckProfile: SimulatorDeckProfileResolver.resolveDeckProfile(val.frame, regId),
+      };
+    },
+    [catalog]
+  );
 
   const resolveTargetEnvironmentId = useCallback(
     (targetId: string | undefined): string | undefined => {
@@ -204,11 +213,32 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const [name, setName] = useState<string>(initialDefinition?.name ?? "");
   const [description, setDescription] = useState<string>(initialDefinition?.description ?? "");
 
-  // レアカード選択 Draft
+  // レアカード選択 Draft (初回マウント時の安全な検証初期化)
   const [rareCardSelections, setRareCardSelections] = useState<{
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
-  }>(initialRareCardSelections ?? {});
+  }>(() => {
+    const resolved = resolveDeckProfileForEnv(initialResolvedEnvId);
+    const rareCount = resolved?.frame.setup.rareCardCount ?? 0;
+    if (resolved?.deckProfile && rareCount > 0) {
+      const defaults =
+        resolved.deckProfile.defaultRareCardSelections ??
+        RareCardSelectionService.resolveDefaultRareCardSelections(resolved.deckProfile, rareCount);
+      const p1Valid =
+        Boolean(initialRareCardSelections?.p1) &&
+        initialRareCardSelections!.p1!.length === rareCount &&
+        RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, initialRareCardSelections!.p1).valid;
+      const p2Valid =
+        Boolean(initialRareCardSelections?.p2) &&
+        initialRareCardSelections!.p2!.length === rareCount &&
+        RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, initialRareCardSelections!.p2).valid;
+      return {
+        p1: p1Valid ? initialRareCardSelections!.p1 : defaults,
+        p2: p2Valid ? initialRareCardSelections!.p2 : defaults,
+      };
+    }
+    return {};
+  });
 
   // 対戦設定 & チャレンジ設定
   const [matchMode, setMatchMode] = useState<PlaytestMatchMode>(initialMode ?? "humanVsHuman");
@@ -282,8 +312,13 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     initialDefinition?.players?.p2?.pack?.opened === true
   );
 
+  const prevIsOpenRef = useRef<boolean>(false);
+
   // isOpen / initialDefinition 変更時の同期
   useEffect(() => {
+    const wasOpen = prevIsOpenRef.current;
+    prevIsOpenRef.current = isOpen;
+
     if (!isOpen) return;
 
     const targetEnvId =
@@ -291,6 +326,32 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
       resolveTargetEnvironmentId(initialEnvironmentId) ??
       defaultEnvId;
     setEnvironmentId(targetEnvId);
+
+    // closed -> open の遷移時のみ、最新の initialRareCardSelections を対象環境に対して検証して同期
+    if (!wasOpen) {
+      const resolved = resolveDeckProfileForEnv(targetEnvId);
+      const rareCount = resolved?.frame.setup.rareCardCount ?? 0;
+      if (resolved?.deckProfile && rareCount > 0) {
+        const defaults =
+          resolved.deckProfile.defaultRareCardSelections ??
+          RareCardSelectionService.resolveDefaultRareCardSelections(resolved.deckProfile, rareCount);
+        const p1Valid =
+          Boolean(initialRareCardSelections?.p1) &&
+          initialRareCardSelections!.p1!.length === rareCount &&
+          RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, initialRareCardSelections!.p1).valid;
+        const p2Valid =
+          Boolean(initialRareCardSelections?.p2) &&
+          initialRareCardSelections!.p2!.length === rareCount &&
+          RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, initialRareCardSelections!.p2).valid;
+
+        setRareCardSelections({
+          p1: p1Valid ? initialRareCardSelections!.p1 : defaults,
+          p2: p2Valid ? initialRareCardSelections!.p2 : defaults,
+        });
+      } else {
+        setRareCardSelections({});
+      }
+    }
 
     if (!initialDefinition) {
       setP1PackOpened(false);
@@ -323,7 +384,47 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     setP2PackCards(initialDefinition.players?.p2?.pack?.cards ? [...initialDefinition.players.p2.pack.cards] : []);
     setP2PackCount(initialDefinition.players?.p2?.pack?.count);
     setP2PackOpened(initialDefinition.players?.p2?.pack?.opened === true);
-  }, [isOpen, initialDefinition, initialEnvironmentId, defaultEnvId, resolveTargetEnvironmentId]);
+  }, [
+    isOpen,
+    initialDefinition,
+    initialEnvironmentId,
+    initialRareCardSelections,
+    defaultEnvId,
+    resolveTargetEnvironmentId,
+    resolveDeckProfileForEnv,
+  ]);
+
+  // ユーザーによる対戦環境（レギュレーション）変更ハンドラ
+  const handleEnvironmentChange = useCallback(
+    (newEnvId: string) => {
+      setEnvironmentId(newEnvId);
+      const resolved = resolveDeckProfileForEnv(newEnvId);
+      const rareCount = resolved?.frame.setup.rareCardCount ?? 0;
+      if (resolved?.deckProfile && rareCount > 0) {
+        const defaults =
+          resolved.deckProfile.defaultRareCardSelections ??
+          RareCardSelectionService.resolveDefaultRareCardSelections(resolved.deckProfile, rareCount);
+        setRareCardSelections((prev) => {
+          const isP1Valid =
+            Boolean(prev.p1) &&
+            prev.p1!.length === rareCount &&
+            RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, prev.p1).valid;
+          const isP2Valid =
+            Boolean(prev.p2) &&
+            prev.p2!.length === rareCount &&
+            RareCardSelectionService.validateSelections(resolved.deckProfile, rareCount, prev.p2).valid;
+          if (isP1Valid && isP2Valid) return prev;
+          return {
+            p1: isP1Valid ? prev.p1 : defaults,
+            p2: isP2Valid ? prev.p2 : defaults,
+          };
+        });
+      } else {
+        setRareCardSelections({});
+      }
+    },
+    [resolveDeckProfileForEnv]
+  );
 
   // 共有通知用ステート
   const [shareNotice, setShareNotice] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -375,33 +476,6 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   const defaultPackCount = useMemo(() => {
     return currentFrame?.setup.packCount;
   }, [currentFrame]);
-
-  // 環境変更時のレアカード自動解決
-  useEffect(() => {
-    const rareCount = currentFrame?.setup.rareCardCount ?? 0;
-    if (currentFrame && rareCount > 0 && currentDeckProfile) {
-      const defaults =
-        currentDeckProfile.defaultRareCardSelections ??
-        RareCardSelectionService.resolveDefaultRareCardSelections(currentDeckProfile, rareCount);
-      setRareCardSelections((prev) => {
-        const isP1Valid =
-          Boolean(prev.p1) &&
-          prev.p1!.length === rareCount &&
-          RareCardSelectionService.validateSelections(currentDeckProfile, rareCount, prev.p1).valid;
-        const isP2Valid =
-          Boolean(prev.p2) &&
-          prev.p2!.length === rareCount &&
-          RareCardSelectionService.validateSelections(currentDeckProfile, rareCount, prev.p2).valid;
-        if (isP1Valid && isP2Valid) return prev;
-        return {
-          p1: isP1Valid ? prev.p1 : defaults,
-          p2: isP2Valid ? prev.p2 : defaults,
-        };
-      });
-    } else {
-      setRareCardSelections({});
-    }
-  }, [environmentId, currentFrame, currentDeckProfile]);
 
   // 部分指定ドラフトの構築
   const authoringDraft: ScenarioAuthoringDraftV1 = useMemo(() => {
@@ -738,7 +812,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             <span className="font-bold text-zinc-700">対戦レギュレーション:</span>
             <select
               value={environmentId}
-              onChange={(e) => setEnvironmentId(e.target.value)}
+              onChange={(e) => handleEnvironmentChange(e.target.value)}
               className="p-1.5 rounded-lg border border-zinc-300 bg-white font-bold text-zinc-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-950"
             >
               {officialEnvironments.map((env) => (

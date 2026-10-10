@@ -7,6 +7,9 @@ import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader"
 import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
 import { getAvailableEnvironments } from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
+import { SimulatorDeckProfileResolver } from "../../engine/regulation/SimulatorDeckProfileResolver";
+import { RareCardSelectionService } from "../../engine/regulation/RareCardSelectionService";
 
 function extractText(node: any): string {
   if (typeof node === "string" || typeof node === "number") return String(node);
@@ -63,7 +66,7 @@ describe("ScenarioBuilderModal RarePack Integration [BP-SIM-SCENARIO-RAREPACK-IN
     },
   };
 
-  it("1. 対戦環境の並び順が通常対戦画面 (getAvailableEnvironments) と完全一致すること (SSOT)", () => {
+  it("1. 対戦環境の並び順および表示名が通常対戦画面 (getAvailableEnvironments) と完全一致すること (SSOT)", () => {
     const expectedEnvironments = getAvailableEnvironments(catalog)
       .filter((env) => env.isOfficial && env.id !== "official:core-battle");
 
@@ -86,8 +89,15 @@ describe("ScenarioBuilderModal RarePack Integration [BP-SIM-SCENARIO-RAREPACK-IN
     expect(options.length).toBe(expectedEnvironments.length);
     for (let i = 0; i < expectedEnvironments.length; i++) {
       expect(options[i].props.value).toBe(expectedEnvironments[i].id);
-      expect(extractText(options[i])).toBe(`${expectedEnvironments[i].name} (公式)`);
+      expect(extractText(options[i])).toBe(expectedEnvironments[i].name);
+      expect(extractText(options[i])).not.toContain("(公式) (公式)");
     }
+
+    // 明示assert: 「プロ + レアパック (公式)」が存在し、二重「(公式)」がないこと
+    const proRarePackOption = options.find((opt) => opt.props.value === "official:pro-rarePack");
+    expect(proRarePackOption).toBeDefined();
+    expect(extractText(proRarePackOption)).toBe("プロ + レアパック (公式)");
+    expect(extractText(proRarePackOption)).not.toContain("(公式) (公式)");
   });
 
   it("2. 通常対戦画面で pro-rarePack 選択中に初期盤面設定を開いた場合、最初から pro-rarePack が選択されていること", () => {
@@ -418,5 +428,182 @@ describe("ScenarioBuilderModal RarePack Integration [BP-SIM-SCENARIO-RAREPACK-IN
 
     // settings タブ内の RareCardSetupPanel が表示されていること
     expect(root!.root.findByProps({ rareCardCount: 1 })).toBeDefined();
+  });
+
+  it("11. closed mount -> props update -> open ライフサイクルでの Rare Card 引き継ぎ (P1 ♠K / P2 ♥Q)", () => {
+    // Step 1: ScenarioBuilderModal を closed で mount (初期は light-entry16)
+    let root: TestRenderer.ReactTestRenderer | null = null;
+    act(() => {
+      root = TestRenderer.create(
+        <ScenarioBuilderModal
+          isOpen={false}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:light-entry16"
+          initialRareCardSelections={{}}
+          initialMode="humanVsHuman"
+        />
+      );
+    });
+
+    // Step 2: 親コンポーネント側で通常対戦設定が pro-rarePack + P1 ♠K, P2 ♥Q に変更され props が update (依然 closed)
+    act(() => {
+      root!.update(
+        <ScenarioBuilderModal
+          isOpen={false}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:pro-rarePack"
+          initialRareCardSelections={{
+            p1: [{ suit: "S", rank: "K", occurrence: 0 }],
+            p2: [{ suit: "H", rank: "Q", occurrence: 0 }],
+          }}
+          initialMode="humanVsHuman"
+        />
+      );
+    });
+
+    // Step 3: remount せず isOpen=true に update (モーダルオープン)
+    act(() => {
+      root!.update(
+        <ScenarioBuilderModal
+          isOpen={true}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:pro-rarePack"
+          initialRareCardSelections={{
+            p1: [{ suit: "S", rank: "K", occurrence: 0 }],
+            p2: [{ suit: "H", rank: "Q", occurrence: 0 }],
+          }}
+          initialMode="humanVsHuman"
+        />
+      );
+    });
+
+    // モーダルオープン時、環境が pro-rarePack になり、P1 ♠K / P2 ♥Q が保持されていること
+    const select = root!.root.findAllByType("select")[0];
+    expect(select.props.value).toBe("official:pro-rarePack");
+
+    const rarePanel = root!.root.findByProps({ rareCardCount: 1 });
+    expect(rarePanel.props.confirmedSelections.p1).toEqual([{ suit: "S", rank: "K", occurrence: 0 }]);
+    expect(rarePanel.props.confirmedSelections.p2).toEqual([{ suit: "H", rank: "Q", occurrence: 0 }]);
+  });
+
+  it("12. 不正な initialRareCardSelections に対するバリデーションとデフォルトフォールバック", () => {
+    let root: TestRenderer.ReactTestRenderer | null = null;
+    act(() => {
+      root = TestRenderer.create(
+        <ScenarioBuilderModal
+          isOpen={false}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:light-entry16"
+        />
+      );
+    });
+
+    // pro-rarePack では存在しない無効カード (suit: "X") を渡して open
+    act(() => {
+      root!.update(
+        <ScenarioBuilderModal
+          isOpen={true}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:pro-rarePack"
+          initialRareCardSelections={{
+            p1: [{ suit: "X" as any, rank: "99", occurrence: 0 }],
+          }}
+        />
+      );
+    });
+
+    const rarePanel = root!.root.findByProps({ rareCardCount: 1 });
+    // 不正なカードはフォールバックされ、デフォルトの Joker が適用されること
+    expect(rarePanel.props.confirmedSelections.p1).toEqual([{ suit: "J", rank: "Joker", occurrence: 0 }]);
+  });
+
+  it("13. open 後の環境切替時の独立性保持 (pro-rarePack -> light -> pro-rarePack で初期値は復活しない)", () => {
+    let root: TestRenderer.ReactTestRenderer | null = null;
+    act(() => {
+      root = TestRenderer.create(
+        <ScenarioBuilderModal
+          isOpen={true}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:pro-rarePack"
+          initialRareCardSelections={{
+            p1: [{ suit: "S", rank: "K", occurrence: 0 }],
+          }}
+        />
+      );
+    });
+
+    // open 直後は ♠K
+    let rarePanel = root!.root.findByProps({ rareCardCount: 1 });
+    expect(rarePanel.props.confirmedSelections.p1).toEqual([{ suit: "S", rank: "K", occurrence: 0 }]);
+
+    // light-entry16 に変更
+    const select = root!.root.findAllByType("select")[0];
+    act(() => {
+      select.props.onChange({ target: { value: "official:light-entry16" } });
+    });
+    expect(root!.root.findAllByProps({ rareCardCount: 1 })).toHaveLength(0);
+
+    // 再度 pro-rarePack に変更
+    act(() => {
+      select.props.onChange({ target: { value: "official:pro-rarePack" } });
+    });
+
+    // 環境変更契約に従い、デフォルトの Joker が選ばれ、initialRareCardSelections (♠K) は復活しない
+    rarePanel = root!.root.findByProps({ rareCardCount: 1 });
+    expect(rarePanel.props.confirmedSelections.p1).toEqual([{ suit: "J", rank: "Joker", occurrence: 0 }]);
+  });
+
+  it("14. standard-rarePack における初期盤面設定の汎用動作検証 (ID hardcodeなし)", () => {
+    let root: TestRenderer.ReactTestRenderer | null = null;
+    act(() => {
+      root = TestRenderer.create(
+        <ScenarioBuilderModal
+          isOpen={true}
+          onClose={vi.fn()}
+          catalog={catalog}
+          fullRulePackage={fullRulePackage}
+          onStartScenario={vi.fn()}
+          initialEnvironmentId="official:standard-rarePack"
+        />
+      );
+    });
+
+    const select = root!.root.findAllByType("select")[0];
+    expect(select.props.value).toBe("official:standard-rarePack");
+
+    // standard-rarePack も rareCardCount === 1 であり、レアカードUIが表示されること
+    const rareBadge = root!.root.findByProps({ "data-testid": "scenario-builder-rare-badge" });
+    expect(rareBadge).toBeDefined();
+    expect(extractText(rareBadge)).toContain("レアカード: 1枚");
+
+    const rarePanel = root!.root.findByProps({ rareCardCount: 1 });
+    expect(rarePanel).toBeDefined();
+    expect(rarePanel.props.deckProfile).toBeDefined();
+
+    // ♠K 等の選択が正常に行えること
+    act(() => {
+      rarePanel.props.onConfirmSelections({
+        p1: [{ suit: "S", rank: "K", occurrence: 0 }],
+      });
+    });
+    expect(rarePanel.props.confirmedSelections.p1).toEqual([{ suit: "S", rank: "K", occurrence: 0 }]);
   });
 });
