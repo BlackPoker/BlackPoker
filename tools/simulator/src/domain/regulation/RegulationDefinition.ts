@@ -43,6 +43,7 @@ export type FrameDeckDefinition =
  */
 export interface FrameSetupDefinition {
   readonly initialHandCount: number;
+  readonly scenarioHandCount?: number;
   readonly packCount?: number;
   readonly rareCardCount?: number;
   readonly preset: {

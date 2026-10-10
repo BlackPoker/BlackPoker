@@ -1,0 +1,22 @@
+id: strategy
+name: ストラテジー
+description: 公式BlackPoker ストラテジーフレーム (第9.1.2版 8.3.1.4)
+recommendedFormatIds:
+  - pro
+  - mast
+actions:
+  - action.packOpen
+  - action.rareDraw
+  - action.rareSummon
+  - action.trapCounter
+deck:
+  type: constructed
+  minCards: 40
+setup:
+  initialHandCount: 7
+  scenarioHandCount: 3
+  rareCardCount: 1
+  packCount: 14
+  preset:
+    bulwarkCount: 1
+    soldierCount: 1

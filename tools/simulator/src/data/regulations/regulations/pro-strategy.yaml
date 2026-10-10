@@ -1,0 +1,6 @@
+id: pro-strategy
+name: プロ + ストラテジー
+formatId: pro
+frameId: strategy
+sourceRulesVersion: 9.1.2
+description: 公式BlackPoker レギュレーション (プロフォーマット + ストラテジーフレーム)

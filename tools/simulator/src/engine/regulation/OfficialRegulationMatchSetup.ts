@@ -21,6 +21,7 @@ import {
   CardOccurrenceSelection,
 } from "./SimulatorDeckProfileResolver";
 import { RareCardSelectionService } from "./RareCardSelectionService";
+import { PhysicalCardReservation } from "./PhysicalCardReservation";
 
 export interface InGameCard {
   readonly id: string;
@@ -36,6 +37,10 @@ export interface OfficialRegulationSetupOptions {
     readonly p2?: string;
   };
   readonly rareCardSelections?: {
+    readonly p1?: readonly CardOccurrenceSelection[];
+    readonly p2?: readonly CardOccurrenceSelection[];
+  };
+  readonly scenarioHandSelections?: {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
@@ -179,15 +184,15 @@ export class OfficialRegulationMatchSetup {
   public static verifyCardConservation = verifyCardConservation;
 
   /**
-   * 公式ゲーム開始手順（公式ルール第9.1.2版 3.9 & 8.3.1.1）を実行し、ゲーム初期状態を構築します。
+   * 共通プリセットや先攻決定を行う前の、初期ゾーン配分完了時点の GameState ドラフトを構築します。
+   * Strategy Frame 等の配分検証（Pack 14, Rare 1, Life 32, Hand 7）に利用可能です。
    */
-  public static setupMatch(
+  public static setupDraftZones(
     regulation: RegulationDefinition,
     frame: FrameDefinition,
-    rulePackage: RulePackage,
     matchSeed: number,
     options?: OfficialRegulationSetupOptions
-  ): SetupOutcome {
+  ): any {
     const matchId = options?.matchId || `match-official-${matchSeed}`;
     const p1Name = options?.playerNames?.p1 || "Player A";
     const p2Name = options?.playerNames?.p2 || "Player B";
@@ -215,31 +220,99 @@ export class OfficialRegulationMatchSetup {
     const p1RawDeck = buildDeck("p1");
     const p2RawDeck = buildDeck("p2");
 
-    // 2. Rare Card 抽出 (公式ルール第9.1.2版 8.3.1.3: shuffle より前に取り分ける)
+    // 2. シャッフル前予約 (Pre-shuffle Reservation) の検証と抽出
+    const scenarioHandCount = frame.setup.scenarioHandCount ?? 0;
+    if (!Number.isInteger(scenarioHandCount) || scenarioHandCount < 0) {
+      throw new Error(`不正な scenarioHandCount です: ${scenarioHandCount}`);
+    }
+
     const rareCardCount = frame.setup.rareCardCount ?? 0;
     if (!Number.isInteger(rareCardCount) || rareCardCount < 0) {
       throw new Error(`不正な rareCardCount です: ${rareCardCount}`);
     }
 
-    const p1Selections = options?.rareCardSelections?.p1 ?? deckProfile.defaultRareCardSelections;
-    const p2Selections = options?.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
-
-    const p1Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p1Selections);
-    if (!p1Val.valid) {
-      throw new Error(`Player A の Rare Card 選択エラー: ${p1Val.errors.join(", ")}`);
+    // シナリオ手札のバリデーション (Fail-closed: 要求枚数に対して未指定または枚数不一致なら即座にエラー)
+    if (scenarioHandCount > 0) {
+      const p1ScenarioVal = PhysicalCardReservation.validateScenarioHandSelections(
+        deckProfile,
+        scenarioHandCount,
+        options?.scenarioHandSelections?.p1
+      );
+      if (!p1ScenarioVal.valid) {
+        throw new Error(`Player A のシナリオ手札選択エラー: ${p1ScenarioVal.errors.join(", ")}`);
+      }
+      const p2ScenarioVal = PhysicalCardReservation.validateScenarioHandSelections(
+        deckProfile,
+        scenarioHandCount,
+        options?.scenarioHandSelections?.p2
+      );
+      if (!p2ScenarioVal.valid) {
+        throw new Error(`Player B のシナリオ手札選択エラー: ${p2ScenarioVal.errors.join(", ")}`);
+      }
     }
-    const p2Val = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p2Selections);
-    if (!p2Val.valid) {
-      throw new Error(`Player B の Rare Card 選択エラー: ${p2Val.errors.join(", ")}`);
+
+    // レアカードのバリデーション
+    const p1RareSelections = options?.rareCardSelections?.p1 ?? deckProfile.defaultRareCardSelections;
+    const p2RareSelections = options?.rareCardSelections?.p2 ?? deckProfile.defaultRareCardSelections;
+
+    const p1RareVal = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p1RareSelections);
+    if (!p1RareVal.valid) {
+      throw new Error(`Player A の Rare Card 選択エラー: ${p1RareVal.errors.join(", ")}`);
+    }
+    const p2RareVal = RareCardSelectionService.validateSelections(deckProfile, rareCardCount, p2RareSelections);
+    if (!p2RareVal.valid) {
+      throw new Error(`Player B の Rare Card 選択エラー: ${p2RareVal.errors.join(", ")}`);
     }
 
-    const p1RareResult = RareCardSelectionService.extractRareCards(p1RawDeck, p1Selections ?? []);
-    const p2RareResult = RareCardSelectionService.extractRareCards(p2RawDeck, p2Selections ?? []);
+    // シナリオ手札とレアカードの相互重複排他チェック (同一 Occurrence の重複禁止)
+    if (scenarioHandCount > 0 && rareCardCount > 0) {
+      const p1MutualVal = PhysicalCardReservation.validateMutualExclusion(
+        options?.scenarioHandSelections?.p1,
+        p1RareSelections
+      );
+      if (!p1MutualVal.valid) {
+        throw new Error(`Player A の物理カード重複エラー: ${p1MutualVal.errors.join(", ")}`);
+      }
+      const p2MutualVal = PhysicalCardReservation.validateMutualExclusion(
+        options?.scenarioHandSelections?.p2,
+        p2RareSelections
+      );
+      if (!p2MutualVal.valid) {
+        throw new Error(`Player B の物理カード重複エラー: ${p2MutualVal.errors.join(", ")}`);
+      }
+    }
 
-    const p1RareCards = p1RareResult.rareCards;
-    const p2RareCards = p2RareResult.rareCards;
-    const p1RemainingDeck = p1RareResult.remainingDeck;
-    const p2RemainingDeck = p2RareResult.remainingDeck;
+    // 予約カードの抽出 (Pre-shuffle Reservation)
+    let p1RareCards: InGameCard[] = [];
+    let p2RareCards: InGameCard[] = [];
+    let p1ScenarioCards: InGameCard[] = [];
+    let p2ScenarioCards: InGameCard[] = [];
+    let p1RemainingDeck: InGameCard[];
+    let p2RemainingDeck: InGameCard[];
+
+    if (scenarioHandCount > 0) {
+      const p1Outcome = PhysicalCardReservation.extractReservations(p1RawDeck, {
+        scenarioHand: options?.scenarioHandSelections?.p1,
+        rareCards: p1RareSelections,
+      });
+      const p2Outcome = PhysicalCardReservation.extractReservations(p2RawDeck, {
+        scenarioHand: options?.scenarioHandSelections?.p2,
+        rareCards: p2RareSelections,
+      });
+      p1ScenarioCards = p1Outcome.reservedScenarioHandCards;
+      p2ScenarioCards = p2Outcome.reservedScenarioHandCards;
+      p1RareCards = p1Outcome.reservedRareCards;
+      p2RareCards = p2Outcome.reservedRareCards;
+      p1RemainingDeck = p1Outcome.remainingDeck;
+      p2RemainingDeck = p2Outcome.remainingDeck;
+    } else {
+      const p1RareResult = RareCardSelectionService.extractRareCards(p1RawDeck, p1RareSelections ?? []);
+      const p2RareResult = RareCardSelectionService.extractRareCards(p2RawDeck, p2RareSelections ?? []);
+      p1RareCards = p1RareResult.rareCards;
+      p2RareCards = p2RareResult.rareCards;
+      p1RemainingDeck = p1RareResult.remainingDeck;
+      p2RemainingDeck = p2RareResult.remainingDeck;
+    }
 
     // 3. 独立した乱数ストリームで Seeded Shuffle (P1, P2 それぞれ独立)
     const p1Rng = new SeededRandom(deriveSeed(matchSeed, "p1-deck"));
@@ -248,8 +321,7 @@ export class OfficialRegulationMatchSetup {
     const p1Shuffled = shuffleCards(p1RemainingDeck, p1Rng);
     const p2Shuffled = shuffleCards(p2RemainingDeck, p2Rng);
 
-    // 4. 初期配置 (8.3.1.1 vs 8.3.1.2 vs 8.3.1.3)
-    // packCount が指定されている場合: 上から packCount 枚を取り除いて伏せた Pack とし、残りを Life とする
+    // 4. 初期配置 (Pack & Life)
     let p1Pack: any = undefined;
     let p2Pack: any = undefined;
     let p1Life: InGameCard[];
@@ -310,11 +382,42 @@ export class OfficialRegulationMatchSetup {
     const p1 = state.players.p1;
     const p2 = state.players.p2;
 
-    // 4. 初期手札 7枚を Life 先頭から引く
-    for (let i = 0; i < frame.setup.initialHandCount; i++) {
+    // 5. 初期手札配分
+    // Strategy では randomInitialHandCount (initialHandCount - scenarioHandCount = 7 - 3 = 4枚) を Life から引き、
+    // 予約した Scenario Hand 3枚を追加して合計 7枚とする。
+    // scenarioHandCount が未定義または 0 の場合は initialHandCount (7枚) すべてを Life から引く（完全後方互換）。
+    const randomInitialHandCount = frame.setup.initialHandCount - scenarioHandCount;
+    for (let i = 0; i < randomInitialHandCount; i++) {
       p1.hand.push(p1.life.shift());
       p2.hand.push(p2.life.shift());
     }
+
+    if (p1ScenarioCards.length > 0) {
+      p1.hand.push(...p1ScenarioCards);
+    }
+    if (p2ScenarioCards.length > 0) {
+      p2.hand.push(...p2ScenarioCards);
+    }
+
+    return state;
+  }
+
+  /**
+   * 公式ゲーム開始手順（公式ルール第9.1.2版 3.9 & 8.3.1.1）を実行し、ゲーム初期状態を構築します。
+   */
+  public static setupMatch(
+    regulation: RegulationDefinition,
+    frame: FrameDefinition,
+    rulePackage: RulePackage,
+    matchSeed: number,
+    options?: OfficialRegulationSetupOptions
+  ): SetupOutcome {
+    const deckProfile = options?.deckProfile ?? SimulatorDeckProfileResolver.resolveDeckProfile(frame, regulation.id);
+    const expectedDeck = deckProfile.cards;
+
+    const state = OfficialRegulationMatchSetup.setupDraftZones(regulation, frame, matchSeed, options);
+    const p1 = state.players.p1;
+    const p2 = state.players.p2;
 
     // 5. 共通プリセット (3.9.1)
     for (const playerKey of ["p1", "p2"] as const) {
