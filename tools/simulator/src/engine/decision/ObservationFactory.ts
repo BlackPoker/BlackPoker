@@ -7,6 +7,7 @@ import {
   UnitView,
   FogView,
   RequestView,
+  TargetView,
   PackView,
   RareCardView,
 } from "../../domain/decision/PlayerObservation";
@@ -206,6 +207,22 @@ export class ObservationFactory {
           });
         }
 
+        let requestTarget: TargetView | undefined = undefined;
+        const rawTarget = (req.targets && Array.isArray(req.targets) && req.targets.length > 0)
+          ? req.targets[0]
+          : (req.target || undefined);
+
+        if (rawTarget) {
+          const tType = rawTarget.type || rawTarget.targetType || "other";
+          requestTarget = {
+            targetType: tType,
+            targetPlayerKey: rawTarget.targetPlayerKey || (tType === "player" ? rawTarget.id || rawTarget.playerId : undefined),
+            targetUnitId: rawTarget.unitId || rawTarget.targetUnitId,
+            targetRequestId: rawTarget.requestId || rawTarget.targetRequestId,
+            displayName: rawTarget.displayName || rawTarget.name,
+          };
+        }
+
         stageRequests.push({
           requestId: req.id,
           actionId: req.actionId,
@@ -215,6 +232,7 @@ export class ObservationFactory {
           sequence: req.sequence,
           definitionOwner: req.definitionOwner,
           keyCards: requestKeyCards,
+          target: requestTarget,
         });
       }
     }

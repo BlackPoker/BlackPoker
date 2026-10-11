@@ -500,6 +500,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };
@@ -583,6 +584,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };
@@ -636,10 +638,21 @@ export class LegalPatternGenerator {
       }
 
 
+      const cards = combo.map((c: any) => ({
+        visibility: "KNOWN" as const,
+        cardInstanceId: c.id,
+        suit: c.suit,
+        rank: c.rank,
+        value: typeof c.value === "number" ? c.value : rankToValue(c.rank),
+        faceUp: true,
+        code: c.code,
+      }));
+
       const effSel = {
         selectionType: "card",
         selectedValues,
         summary,
+        cards,
       };
       effectSelections.push(effSel);
 
@@ -665,6 +678,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };
@@ -739,6 +753,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };
@@ -822,6 +837,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };
@@ -976,6 +992,7 @@ export class LegalPatternGenerator {
     const source: DecisionSource = {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: sourceRequest.id,
+      sourceActionId: sourceRequest.actionId,
       effectStepId,
       playerId,
     };

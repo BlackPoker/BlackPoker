@@ -14,6 +14,7 @@ export type DecisionSource =
       readonly sourceRequestRef: RequestRef;
       readonly effectStepId: string;
       readonly playerId?: PlayerKey;
+      readonly sourceActionId?: string;
     }
   | {
       readonly type: "ZONE_TOP_SELECTION";

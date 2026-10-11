@@ -1,3 +1,5 @@
+import { CardView } from "./PlayerObservation";
+
 export type ActionSelectionRef = number;
 export type CardSelectionRef = number;
 export type UnitSelectionRef = number;
@@ -77,6 +79,7 @@ export interface EffectSelection {
   readonly assignments?: readonly UnitAssignment[];
   readonly targetSelection?: TargetSelection;
   readonly summary?: string;
+  readonly cards?: readonly CardView[];
 }
 
 /**

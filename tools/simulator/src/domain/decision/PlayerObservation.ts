@@ -82,6 +82,14 @@ export interface PlayerObservationView {
   readonly rareCards?: RareCardView;
 }
 
+export interface TargetView {
+  readonly targetType: "unit" | "player" | "request" | "none" | "other" | string;
+  readonly targetPlayerKey?: PlayerKey;
+  readonly targetUnitId?: string;
+  readonly targetRequestId?: RequestRef;
+  readonly displayName?: string;
+}
+
 export interface RequestView {
   readonly requestId: RequestRef;
   readonly actionId: string;
@@ -91,6 +99,7 @@ export interface RequestView {
   readonly sequence: number;
   readonly definitionOwner?: string;
   readonly keyCards?: readonly CardView[];
+  readonly target?: TargetView;
 }
 
 export interface GameEventView {

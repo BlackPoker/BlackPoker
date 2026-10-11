@@ -329,6 +329,13 @@ export class DecisionFeatureEncoder {
         if (reqView.keyCards) {
           sourceKeyCards = reqView.keyCards;
         }
+        if (reqView.target) {
+          sourceTargetSelection = reqView.target;
+        }
+      }
+      // Stage外（即時解決等）フォールバック
+      if (!sourceActionId && request.source.sourceActionId) {
+        sourceActionId = request.source.sourceActionId;
       }
       if (request.source.playerId) {
         sourceController = sourceController ?? request.source.playerId;
@@ -1014,11 +1021,18 @@ export class DecisionFeatureEncoder {
                 }
               }
 
+              // 状態選択 (charge / drive) の判定
+              if (val === "charge") {
+                effUnitChargeCount++;
+              } else if (val === "drive") {
+                effUnitDriveCount++;
+              }
+
               // カードとしてマッチするか判定
-              const c = allKnownCardsMap.get(val);
+              const c = allKnownCardsMap.get(val) || (es as any).cards?.find((card: any) => card.cardInstanceId === val);
               if (c || selType === "card") {
                 effCardCount++;
-                if (c) {
+                if (c && c.visibility === "KNOWN") {
                   selectedKnownCards.push(c);
                 }
               }

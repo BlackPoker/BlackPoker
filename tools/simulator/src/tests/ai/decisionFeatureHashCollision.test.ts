@@ -82,20 +82,40 @@ describe("StableIdentityEncoder & Hash Collision Diagnostics (Feature Schema v3)
     expect(collisions.length).toBe(0);
   });
 
-  it("diagnoses Effect Step ID collision across common effect steps", () => {
-    const effectStepIds = [
-      "selectAttacker",
-      "selectBlocker",
-      "discardDownTo",
-      "bulwarkCard",
-      "chooseOption",
-      "charge",
-      "drive",
-      "selectTarget",
-      "payCost",
-      "reunionSelect",
-      "revolutionSelect",
-    ];
+  it("diagnoses Effect Step ID collision across comprehensive real-code step IDs", () => {
+    // 実コード (EffectInterpreter, GameSession, LegalPatternGenerator, rules-vnext) から棚卸しした全実態ステップID
+    const effectStepIds = Array.from(
+      new Set([
+        // 1. EffectInterpreter commands
+        "selectUnits",
+        "selectBlockAssignments",
+        "selectUnitAssignments",
+        "selectCards",
+        "selectCard",
+        "selectDiscardCards",
+        "discardDownTo",
+        "selectOption",
+        "selectUnitCardOrder",
+        "selectActionTarget",
+        "zoneTopSelection",
+        // 2. GameSession / Trigger system
+        "_triggerImmediateFinalization",
+        // 3. Real Engine Actions & LegalPatternGenerator steps
+        "selectAttacker",
+        "selectBlocker",
+        "selectTargetUnit",
+        "selectSearchCard",
+        "chooseTransformState",
+        "selectCustomUnits",
+        "selectLifeCard",
+        // 4. Extended / Regulation steps
+        "payCost",
+        "reunionSelect",
+        "revolutionSelect",
+        "bulwarkCard",
+        "chooseOption",
+      ])
+    );
 
     const signatureMap = new Map<string, string[]>();
     for (const stepId of effectStepIds) {
@@ -108,6 +128,12 @@ describe("StableIdentityEncoder & Hash Collision Diagnostics (Feature Schema v3)
     }
 
     const collisions = Array.from(signatureMap.entries()).filter(([_, steps]) => steps.length > 1);
+    console.log(
+      `Effect Step ID Count: ${effectStepIds.length}, Unique Signatures: ${signatureMap.size}, Collisions: ${collisions.length}`
+    );
+    if (collisions.length > 0) {
+      console.warn("Detected Effect Step ID collisions:", JSON.stringify(collisions, null, 2));
+    }
     expect(collisions.length).toBe(0);
   });
 });
