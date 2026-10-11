@@ -3,7 +3,11 @@ import { createPortal } from "react-dom";
 import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { ObservationFactory } from "../../engine/decision/ObservationFactory";
-import { reconstructMatch, ReconstructMatchResult } from "../../engine/replay/ReplayReconstructionService";
+import {
+  reconstructMatch,
+  ReconstructMatchResult,
+  ReconstructMatchParams,
+} from "../../engine/replay/ReplayReconstructionService";
 import type { ReplayPlanV1 } from "../../engine/replay/ReplayTypes";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 import { PlayerBoard } from "../game/PlayerBoard";
@@ -74,6 +78,34 @@ export function resolveReplayViewerTrailingNormalization(
   return isTranscriptEnd && plan.expected?.status === "PROGRESSED"
     ? "EXACT_AFTER_TRANSCRIPT"
     : "EXTERNAL_DECISION_BOUNDARY";
+}
+
+/**
+ * Replay Viewer 用の再構築パラメータを ReplayPlanV1 から構築する Pure Helper。
+ * Setup Context（rareCardSelections, scenarioHandSelections）を含む全要素を一元的に伝播します。
+ */
+export function buildReplayViewerReconstructParams(args: {
+  readonly plan: ReplayPlanV1;
+  readonly decisionCount: number;
+  readonly catalog: RegulationCatalog;
+  readonly fullRulePackage: RulePackage;
+}): ReconstructMatchParams {
+  const trailingNormalization = resolveReplayViewerTrailingNormalization(
+    args.plan,
+    args.decisionCount
+  );
+  return {
+    environmentId: args.plan.environmentId,
+    seed: args.plan.seed,
+    rareCardSelections: args.plan.rareCardSelections,
+    scenarioHandSelections: args.plan.scenarioHandSelections,
+    transcript: args.plan.decisions,
+    decisionCount: args.decisionCount,
+    trailingNormalization,
+    catalog: args.catalog,
+    fullRulePackage: args.fullRulePackage,
+    expectedRulePackage: args.plan.sourceRulePackage,
+  };
 }
 
 export interface ReplayViewerModalProps {
@@ -290,17 +322,13 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
       }
 
       try {
-        const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, clampedIndex);
-        const result = reconstructMatch({
-          environmentId: plan.environmentId,
-          seed: plan.seed,
-          transcript: plan.decisions,
+        const params = buildReplayViewerReconstructParams({
+          plan,
           decisionCount: clampedIndex,
-          trailingNormalization,
           catalog,
           fullRulePackage,
-          expectedRulePackage: plan.sourceRulePackage,
         });
+        const result = reconstructMatch(params);
         setCurrentIndex(clampedIndex);
         setReconState({
           plan,
@@ -370,17 +398,13 @@ export const ReplayViewerModal: React.FC<ReplayViewerModalProps> = ({
 
     let cancelled = false;
     try {
-      const trailingNormalization = resolveReplayViewerTrailingNormalization(plan, currentIndex);
-      const result = reconstructMatch({
-        environmentId: plan.environmentId,
-        seed: plan.seed,
-        transcript: plan.decisions,
+      const params = buildReplayViewerReconstructParams({
+        plan,
         decisionCount: currentIndex,
-        trailingNormalization,
         catalog,
         fullRulePackage,
-        expectedRulePackage: plan.sourceRulePackage,
       });
+      const result = reconstructMatch(params);
       if (!cancelled) {
         setReconState({
           plan,
