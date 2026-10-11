@@ -246,13 +246,15 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     };
   };
 
-  it("A. Feature Schema v1 の次元数と名前配列が正しく固定されていること", () => {
-    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(1);
-    expect(FEATURE_SCHEMA_VERSION).toBe(1);
+  it("A. Feature Schema v2 の次元数と名前配列が正しく固定されていること", () => {
+    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(2);
+    expect(FEATURE_SCHEMA_VERSION).toBe(2);
     expect(CONTEXT_FEATURE_NAMES.length).toBe(CONTEXT_FEATURE_DIMENSION);
     expect(PATTERN_FEATURE_NAMES.length).toBe(PATTERN_FEATURE_DIMENSION);
     expect(DecisionFeatureEncoder.CONTEXT_DIMENSION).toBe(CONTEXT_FEATURE_DIMENSION);
     expect(DecisionFeatureEncoder.PATTERN_DIMENSION).toBe(PATTERN_FEATURE_DIMENSION);
+    expect(CONTEXT_FEATURE_DIMENSION).toBe(100);
+    expect(PATTERN_FEATURE_DIMENSION).toBe(60);
   });
 
   it("B. 同一の DecisionRequest を複数回エンコードした際、結果が 100% 完全一致すること", () => {
@@ -271,7 +273,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const json = JSON.stringify(encoded);
     const parsed = JSON.parse(json);
 
-    expect(parsed.featureSchemaVersion).toBe(1);
+    expect(parsed.featureSchemaVersion).toBe(2);
     expect(parsed.context.values).toEqual(encoded.context.values);
     expect(parsed.patterns.length).toBe(encoded.patterns.length);
     expect(parsed.patterns[0].values).toEqual(encoded.patterns[0].values);
@@ -821,7 +823,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
 
     expect(() => {
       const encoded = DecisionFeatureEncoder.encode(reqFuture);
-      expect(encoded.featureSchemaVersion).toBe(1);
+      expect(encoded.featureSchemaVersion).toBe(2);
       expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
       expect(encoded.patterns[1].values.length).toBe(PATTERN_FEATURE_DIMENSION);
     }).not.toThrow();
@@ -837,7 +839,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     if (step.type === "WAITING_FOR_DECISION") {
       const encoded = DecisionFeatureEncoder.encode(step.request);
 
-      expect(encoded.featureSchemaVersion).toBe(1);
+      expect(encoded.featureSchemaVersion).toBe(2);
       expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
       expect(encoded.patterns.length).toBe(step.request.patterns.length);
 
@@ -965,7 +967,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     // 5. エンコード実行
     const encoded = DecisionFeatureEncoder.encode(effReq);
 
-    expect(encoded.featureSchemaVersion).toBe(1);
+    expect(encoded.featureSchemaVersion).toBe(2);
     expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
     for (const val of encoded.context.values) {
       expect(Number.isFinite(val)).toBe(true);

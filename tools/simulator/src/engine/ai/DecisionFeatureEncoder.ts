@@ -1,3 +1,23 @@
+/**
+ * DecisionFeatureEncoder.ts
+ *
+ * BlackPoker Simulator - AI Feature Schema v2
+ *
+ * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 2)。
+ *
+ * 【入力境界の原則】
+ * 本エンコーダーの入力は合法的観測情報である Readonly<DecisionRequest> のみです。
+ * 生の GameState、GameSession、Snapshot、RulePackage への直接アクセスは行いません。
+ *
+ * 【秘密情報保護・プライバシー】
+ * 観測不能な相手手札中身、相手伏せ防壁、未開封パック中身、相手 Life 10枚以上時の正確な枚数などは
+ * 一切特徴量へ含めず、公開観測情報のみから安全にエンコードします。
+ *
+ * 【Master + Extra 互換原則】
+ * 特定のアクション名 (action.attack 等) やコンポーネント ID をハードコードせず、
+ * タイミング、スピード、コスト支払い、対象、カード/ユニット属性の汎用メタデータのみを特徴量化します。
+ */
+
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { CardView, KnownCardView, UnitView } from "../../domain/decision/PlayerObservation";
 import { generateLogicalPatternKey } from "../../domain/decision/LogicalPatternKey";
@@ -10,22 +30,11 @@ import {
   EncodedDecisionFeatures,
   DecisionPatternFeatures,
 } from "../../domain/ai/DecisionFeatureTypes";
+import {
+  KnownCardAggregateEncoder,
+  EMPTY_KNOWN_CARD_AGGREGATE,
+} from "./KnownCardAggregateEncoder";
 
-/**
- * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 1)。
- *
- * 【入力境界の原則】
- * 本エンコーダーの入力は合法的観測情報である Readonly<DecisionRequest> のみです。
- * 生の GameState、GameSession、Snapshot、RulePackage への直接アクセスは行いません。
- *
- * 【秘密情報保護・プライバシー】
- * 観測不能な相手手札、相手伏せ防壁、相手Life 10枚以上時の正確な枚数などは一切特徴量へ含めず、
- * 公開観測情報のみから安全にエンコードします。
- *
- * 【Master + Extra 互換原則】
- * 特定のアクション名 (action.attack 等) やコンポーネント ID をハードコードせず、
- * タイミング、スピード、コスト支払い、対象、カード/ユニット属性の汎用メタデータのみを特徴量化します。
- */
 export class DecisionFeatureEncoder {
   public static readonly SCHEMA_VERSION = FEATURE_SCHEMA_VERSION;
   public static readonly CONTEXT_DIMENSION = CONTEXT_FEATURE_DIMENSION;
@@ -49,7 +58,7 @@ export class DecisionFeatureEncoder {
   }
 
   /**
-   * 盤面・文脈特徴量 (Context Feature Vector) をエンコード
+   * 盤面・文脈特徴量 (Context Feature Vector: 100次元) をエンコード
    */
   private static encodeContext(request: Readonly<DecisionRequest>): number[] {
     const obs = request.observation;
@@ -58,87 +67,364 @@ export class DecisionFeatureEncoder {
     const selfPlayer = obs.players?.find((p) => p.playerId === viewerId || p.isViewer);
     const opponentPlayer = obs.players?.find((p) => p.playerId !== viewerId && !p.isViewer);
 
-    // 1. Decision Source
+    // 1. Decision Context (8)
     const sourceIsAction = request.source?.type === "ACTION_REQUEST" ? 1 : 0;
     const sourceIsEffect = request.source?.type === "EFFECT_RESOLUTION" ? 1 : 0;
-
-    // 2. Turn / Chance (Viewer Relative)
     const selfIsTurn = obs.turnPlayerId === viewerId ? 1 : 0;
     const selfIsChance = obs.chancePlayerId === viewerId ? 1 : 0;
     const oppIsTurn = obs.turnPlayerId && obs.turnPlayerId !== viewerId ? 1 : 0;
     const oppIsChance = obs.chancePlayerId && obs.chancePlayerId !== viewerId ? 1 : 0;
-
-    // 3. Stage
+    const turnCount = typeof obs.turnCount === "number" && Number.isFinite(obs.turnCount) ? obs.turnCount : 0;
     const stageDepth = obs.stageRequests
       ? obs.stageRequests.length
       : obs.stageRequestRefs
         ? obs.stageRequestRefs.length
         : 0;
 
-    // 4. Legal Pattern Counts
+    // 2. Legal Pattern Counts & Actionability (11)
+    const catalog = request.catalog;
     const patterns = request.patterns || [];
     const legalPatternCount = patterns.length;
     let legalActionCount = 0;
     let legalPassCount = 0;
     let legalEffectCount = 0;
+    let legalNonPassCount = 0;
+    let legalSpeedNormalCount = 0;
+    let legalSpeedImmediateCount = 0;
+    let legalTimingMainCount = 0;
+    let legalTimingQuickCount = 0;
+    let legalTimingBlockCount = 0;
+    let legalTimingDamageJudgeCount = 0;
 
-    for (const p of patterns) {
-      if (p.kind === "ACTION") legalActionCount++;
-      else if (p.kind === "PASS") legalPassCount++;
-      else if (p.kind === "EFFECT_SELECTION") legalEffectCount++;
+    for (let i = 0; i < patterns.length; i++) {
+      const p = patterns[i];
+      if (p.kind === "ACTION") {
+        legalActionCount++;
+        legalNonPassCount++;
+        if (p.actionSelectionRef !== undefined && catalog?.actions) {
+          const act = catalog.actions[p.actionSelectionRef];
+          if (act) {
+            const sp = act.speed?.toLowerCase();
+            if (sp === "normal") legalSpeedNormalCount++;
+            else if (sp === "immediate") legalSpeedImmediateCount++;
+
+            const tm = act.timing?.toLowerCase();
+            if (tm === "main") legalTimingMainCount++;
+            else if (tm === "quick") legalTimingQuickCount++;
+            else if (tm === "block") legalTimingBlockCount++;
+            else if (tm === "damagejudge" || tm === "damage_judge") legalTimingDamageJudgeCount++;
+          }
+        }
+      } else if (p.kind === "PASS") {
+        legalPassCount++;
+      } else if (p.kind === "EFFECT_SELECTION") {
+        legalEffectCount++;
+        legalNonPassCount++;
+      } else {
+        legalNonPassCount++;
+      }
     }
 
-    // 5. Self (Viewer Relative)
+    // 3. Self - Life & Hand (18)
     const selfLifeCount = selfPlayer?.lifeCount ?? 0;
     const selfHandCount = selfPlayer?.handCount ?? selfPlayer?.handCards?.length ?? 0;
-    const selfFieldCount = selfPlayer?.field?.length ?? 0;
-    const selfFogCount = selfPlayer?.fog?.length ?? 0;
-    const selfTrumpCount = selfPlayer?.trumps?.length ?? 0;
-    const selfGraveCount = selfPlayer?.graveCount ?? selfPlayer?.grave?.length ?? 0;
+    const selfHandAggregate = KnownCardAggregateEncoder.encode(selfPlayer?.handCards);
+    const selfHandKnownCount = selfHandAggregate.count;
+    const selfHandSpadeCount = selfHandAggregate.spadeCount;
+    const selfHandHeartCount = selfHandAggregate.heartCount;
+    const selfHandDiamondCount = selfHandAggregate.diamondCount;
+    const selfHandClubCount = selfHandAggregate.clubCount;
+    const selfHandJokerCount = selfHandAggregate.jokerCount;
+    const selfHandNumericCount = selfHandAggregate.numericCount;
+    const selfHandAceCount = selfHandAggregate.aceCount;
+    const selfHandJackCount = selfHandAggregate.jackCount;
+    const selfHandQueenCount = selfHandAggregate.queenCount;
+    const selfHandKingCount = selfHandAggregate.kingCount;
+    const selfHandValueSum = selfHandAggregate.valueSum;
+    const selfHandValueMax = selfHandAggregate.valueMax;
+    const selfHandValueMin = selfHandAggregate.valueMin;
+    const selfHandPairRankCount = selfHandAggregate.pairRankCount;
+    const selfHandMaxRankMultiplicity = selfHandAggregate.maxRankMultiplicity;
 
-    // 6. Opponent (Viewer Relative - Secret-Safe)
+    // 4. Self - Field & Components (9)
+    const selfField = selfPlayer?.field || [];
+    const selfFieldCount = selfField.length;
+    let selfFieldChargeCount = 0;
+    let selfFieldDriveCount = 0;
+    let selfFieldFaceUpCount = 0;
+    let selfFieldFaceDownCount = 0;
+    let selfFieldSizeSum = 0;
+    let selfFieldSizeMax = 0;
+    let selfFieldAttackerCount = 0;
+    let selfFieldBlockerCount = 0;
+
+    for (let i = 0; i < selfField.length; i++) {
+      const u = selfField[i];
+      if (u.state === "charge") selfFieldChargeCount++;
+      else if (u.state === "drive") selfFieldDriveCount++;
+
+      if (u.face === "up") selfFieldFaceUpCount++;
+      else if (u.face === "down") selfFieldFaceDownCount++;
+
+      const sz = typeof u.currentSize === "number" && Number.isFinite(u.currentSize) ? u.currentSize : 0;
+      selfFieldSizeSum += sz;
+      if (sz > selfFieldSizeMax) selfFieldSizeMax = sz;
+
+      if (u.battle?.role === "attacker") selfFieldAttackerCount++;
+      else if (u.battle?.role === "blocker") selfFieldBlockerCount++;
+    }
+
+    // 5. Self - Fog, Trump, Grave, Pack, Rare (18)
+    const selfFog = selfPlayer?.fog || [];
+    const selfFogCount = selfFog.length;
+    let selfFogCardKnownCount = 0;
+    for (let i = 0; i < selfFog.length; i++) {
+      if (selfFog[i].card && selfFog[i].card?.visibility === "KNOWN") {
+        selfFogCardKnownCount++;
+      }
+    }
+
+    const selfTrumps = selfPlayer?.trumps || [];
+    const selfTrumpCount = selfTrumps.length;
+    let selfTrumpChargeCount = 0;
+    let selfTrumpDriveCount = 0;
+    let selfTrumpSizeSum = 0;
+    for (let i = 0; i < selfTrumps.length; i++) {
+      const t = selfTrumps[i];
+      if (t.state === "charge") selfTrumpChargeCount++;
+      else if (t.state === "drive") selfTrumpDriveCount++;
+      const sz = typeof t.currentSize === "number" && Number.isFinite(t.currentSize) ? t.currentSize : 0;
+      selfTrumpSizeSum += sz;
+    }
+
+    const selfGraveCount = selfPlayer?.graveCount ?? selfPlayer?.grave?.length ?? 0;
+    const selfGraveTopKnown = selfPlayer?.graveTopCard && selfPlayer.graveTopCard.visibility === "KNOWN" ? 1 : 0;
+    const selfGraveTopValue = selfGraveTopKnown && selfPlayer?.graveTopCard && "value" in selfPlayer.graveTopCard
+      ? (selfPlayer.graveTopCard as any).value ?? 0
+      : 0;
+    const selfGraveTopIsJoker = selfGraveTopKnown && selfPlayer?.graveTopCard && "suit" in selfPlayer.graveTopCard
+      ? ((selfPlayer.graveTopCard as any).suit === "J" || (selfPlayer.graveTopCard as any).rank === "Joker" ? 1 : 0)
+      : 0;
+
+    const selfPack = selfPlayer?.pack;
+    const selfPackCount = selfPack?.count ?? 0;
+    const selfPackOpened = selfPack?.opened ? 1 : 0;
+    const selfPackCanViewCards = selfPack?.canViewCards ? 1 : 0;
+    const selfPackAggregate = selfPack?.canViewCards ? KnownCardAggregateEncoder.encode(selfPack.cards) : EMPTY_KNOWN_CARD_AGGREGATE;
+    const selfPackKnownCardCount = selfPackAggregate.count;
+    const selfPackKnownValueSum = selfPackAggregate.valueSum;
+
+    const selfRare = selfPlayer?.rareCards;
+    const selfRareCount = selfRare?.count ?? 0;
+    const selfRareCanViewCards = selfRare?.canViewCards ? 1 : 0;
+    const selfRareAggregate = selfRare?.canViewCards ? KnownCardAggregateEncoder.encode(selfRare.cards) : EMPTY_KNOWN_CARD_AGGREGATE;
+    const selfRareKnownCardCount = selfRareAggregate.count;
+
+    // 6. Opponent - Observable Information (Secret-Safe) (26)
     const oppLifeKnown = opponentPlayer?.lifeCount !== undefined ? 1 : 0;
     const oppLifeVisibleCount = opponentPlayer?.lifeCount ?? 0;
     const oppLifeIs10Plus = opponentPlayer && opponentPlayer.lifeCount === undefined ? 1 : 0;
     const oppHandCount = opponentPlayer?.handCount ?? opponentPlayer?.handCards?.length ?? 0;
-    const oppFieldCount = opponentPlayer?.field?.length ?? 0;
-    const oppFogCount = opponentPlayer?.fog?.length ?? 0;
-    const oppTrumpCount = opponentPlayer?.trumps?.length ?? 0;
+
+    const oppField = opponentPlayer?.field || [];
+    const oppFieldCount = oppField.length;
+    let oppFieldChargeCount = 0;
+    let oppFieldDriveCount = 0;
+    let oppFieldFaceUpCount = 0;
+    let oppFieldFaceDownCount = 0;
+    let oppFieldSizeSum = 0;
+    let oppFieldSizeMax = 0;
+    let oppFieldAttackerCount = 0;
+    let oppFieldBlockerCount = 0;
+
+    for (let i = 0; i < oppField.length; i++) {
+      const u = oppField[i];
+      if (u.state === "charge") oppFieldChargeCount++;
+      else if (u.state === "drive") oppFieldDriveCount++;
+
+      if (u.face === "up") oppFieldFaceUpCount++;
+      else if (u.face === "down") oppFieldFaceDownCount++;
+
+      const sz = typeof u.currentSize === "number" && Number.isFinite(u.currentSize) ? u.currentSize : 0;
+      oppFieldSizeSum += sz;
+      if (sz > oppFieldSizeMax) oppFieldSizeMax = sz;
+
+      if (u.battle?.role === "attacker") oppFieldAttackerCount++;
+      else if (u.battle?.role === "blocker") oppFieldBlockerCount++;
+    }
+
+    const oppFog = opponentPlayer?.fog || [];
+    const oppFogCount = oppFog.length;
+    let oppFogCardKnownCount = 0;
+    for (let i = 0; i < oppFog.length; i++) {
+      if (oppFog[i].card && oppFog[i].card?.visibility === "KNOWN") {
+        oppFogCardKnownCount++;
+      }
+    }
+
+    const oppTrumps = opponentPlayer?.trumps || [];
+    const oppTrumpCount = oppTrumps.length;
+    let oppTrumpChargeCount = 0;
+    let oppTrumpDriveCount = 0;
+    let oppTrumpSizeSum = 0;
+    for (let i = 0; i < oppTrumps.length; i++) {
+      const t = oppTrumps[i];
+      if (t.state === "charge") oppTrumpChargeCount++;
+      else if (t.state === "drive") oppTrumpDriveCount++;
+      const sz = typeof t.currentSize === "number" && Number.isFinite(t.currentSize) ? t.currentSize : 0;
+      oppTrumpSizeSum += sz;
+    }
+
     const oppGraveCount = opponentPlayer?.graveCount ?? opponentPlayer?.grave?.length ?? 0;
+    const oppGraveTopKnown = opponentPlayer?.graveTopCard && opponentPlayer.graveTopCard.visibility === "KNOWN" ? 1 : 0;
+    const oppGraveTopValue = oppGraveTopKnown && opponentPlayer?.graveTopCard && "value" in opponentPlayer.graveTopCard
+      ? (opponentPlayer.graveTopCard as any).value ?? 0
+      : 0;
+    const oppGraveTopIsJoker = oppGraveTopKnown && opponentPlayer?.graveTopCard && "suit" in opponentPlayer.graveTopCard
+      ? ((opponentPlayer.graveTopCard as any).suit === "J" || (opponentPlayer.graveTopCard as any).rank === "Joker" ? 1 : 0)
+      : 0;
+
+    const oppPack = opponentPlayer?.pack;
+    const oppPackCount = oppPack?.count ?? 0;
+    const oppPackOpened = oppPack?.opened ? 1 : 0;
+    const oppRare = opponentPlayer?.rareCards;
+    const oppRareCount = oppRare?.count ?? 0;
+
+    // 7. Relative State (Viewer Relative Deltas) (10)
+    const relativeHandCount = selfHandCount - oppHandCount;
+    const relativeFieldCount = selfFieldCount - oppFieldCount;
+    const relativeFieldSizeSum = selfFieldSizeSum - oppFieldSizeSum;
+    const relativeFogCount = selfFogCount - oppFogCount;
+    const relativeGraveCount = selfGraveCount - oppGraveCount;
+    const relativePackCount = selfPackCount - oppPackCount;
+    const relativeRareCount = selfRareCount - oppRareCount;
+    const relativeTrumpCount = selfTrumpCount - oppTrumpCount;
+
+    // Life 差分: 相手のライフが正確に分かる (oppLifeKnown === 1) かつ 自分も分かる場合のみ
+    const relativeLifeKnown = oppLifeKnown === 1 && typeof selfPlayer?.lifeCount === "number" ? 1 : 0;
+    const relativeLifeCount = relativeLifeKnown === 1 ? selfLifeCount - oppLifeVisibleCount : 0;
 
     const values = [
+      // 1. Decision Context (8)
       sourceIsAction,
       sourceIsEffect,
       selfIsTurn,
       selfIsChance,
       oppIsTurn,
       oppIsChance,
+      turnCount,
       stageDepth,
+
+      // 2. Legal Pattern Counts & Actionability (11)
       legalPatternCount,
       legalActionCount,
       legalPassCount,
       legalEffectCount,
+      legalNonPassCount,
+      legalSpeedNormalCount,
+      legalSpeedImmediateCount,
+      legalTimingMainCount,
+      legalTimingQuickCount,
+      legalTimingBlockCount,
+      legalTimingDamageJudgeCount,
+
+      // 3. Self - Life & Hand (18)
       selfLifeCount,
       selfHandCount,
+      selfHandKnownCount,
+      selfHandSpadeCount,
+      selfHandHeartCount,
+      selfHandDiamondCount,
+      selfHandClubCount,
+      selfHandJokerCount,
+      selfHandNumericCount,
+      selfHandAceCount,
+      selfHandJackCount,
+      selfHandQueenCount,
+      selfHandKingCount,
+      selfHandValueSum,
+      selfHandValueMax,
+      selfHandValueMin,
+      selfHandPairRankCount,
+      selfHandMaxRankMultiplicity,
+
+      // 4. Self - Field & Components (9)
       selfFieldCount,
+      selfFieldChargeCount,
+      selfFieldDriveCount,
+      selfFieldFaceUpCount,
+      selfFieldFaceDownCount,
+      selfFieldSizeSum,
+      selfFieldSizeMax,
+      selfFieldAttackerCount,
+      selfFieldBlockerCount,
+
+      // 5. Self - Fog, Trump, Grave, Pack, Rare (18)
       selfFogCount,
+      selfFogCardKnownCount,
       selfTrumpCount,
+      selfTrumpChargeCount,
+      selfTrumpDriveCount,
+      selfTrumpSizeSum,
       selfGraveCount,
+      selfGraveTopKnown,
+      selfGraveTopValue,
+      selfGraveTopIsJoker,
+      selfPackCount,
+      selfPackOpened,
+      selfPackCanViewCards,
+      selfPackKnownCardCount,
+      selfPackKnownValueSum,
+      selfRareCount,
+      selfRareCanViewCards,
+      selfRareKnownCardCount,
+
+      // 6. Opponent - Observable Information (Secret-Safe) (26)
       oppLifeKnown,
       oppLifeVisibleCount,
       oppLifeIs10Plus,
       oppHandCount,
       oppFieldCount,
+      oppFieldChargeCount,
+      oppFieldDriveCount,
+      oppFieldFaceUpCount,
+      oppFieldFaceDownCount,
+      oppFieldSizeSum,
+      oppFieldSizeMax,
+      oppFieldAttackerCount,
+      oppFieldBlockerCount,
       oppFogCount,
+      oppFogCardKnownCount,
       oppTrumpCount,
+      oppTrumpChargeCount,
+      oppTrumpDriveCount,
+      oppTrumpSizeSum,
       oppGraveCount,
+      oppGraveTopKnown,
+      oppGraveTopValue,
+      oppGraveTopIsJoker,
+      oppPackCount,
+      oppPackOpened,
+      oppRareCount,
+
+      // 7. Relative State (Viewer Relative Deltas) (10)
+      relativeHandCount,
+      relativeFieldCount,
+      relativeFieldSizeSum,
+      relativeFogCount,
+      relativeGraveCount,
+      relativePackCount,
+      relativeRareCount,
+      relativeTrumpCount,
+      relativeLifeKnown,
+      relativeLifeCount,
     ];
 
     return values.map((v) => (Number.isFinite(v) ? v : 0));
   }
 
   /**
-   * 合法パターン群 (Pattern Feature Vectors) をエンコード
+   * 合法パターン群 (Pattern Feature Vectors: 60次元) をエンコード
    */
   private static encodePatterns(request: Readonly<DecisionRequest>): DecisionPatternFeatures[] {
     const catalog = request.catalog;
@@ -224,6 +510,7 @@ export class DecisionFeatureEncoder {
       let costDrivenBulwarkCount = 0;
       let costSacrificedUnitCount = 0;
       let costLifeCount = 0;
+      let costTotalItemCount = 0;
 
       if (p.costPaymentRef !== undefined && catalog?.costPayments) {
         const cp = catalog.costPayments[p.costPaymentRef];
@@ -233,6 +520,7 @@ export class DecisionFeatureEncoder {
           costDrivenBulwarkCount = cp.drivenBulwarkUnitIds?.length ?? 0;
           costSacrificedUnitCount = cp.sacrificedUnitIds?.length ?? 0;
           costLifeCount = cp.lifeCount ?? 0;
+          costTotalItemCount = costDiscardCount + costDrivenBulwarkCount + costSacrificedUnitCount + costLifeCount;
         }
       }
 
@@ -242,28 +530,48 @@ export class DecisionFeatureEncoder {
       let keyCardKnownCount = 0;
       let keyCardValueSum = 0;
       let keyCardValueMax = 0;
+      let keyCardValueMin = 0;
       let keyCardSpadeCount = 0;
       let keyCardHeartCount = 0;
       let keyCardDiamondCount = 0;
       let keyCardClubCount = 0;
+      let keyCardJokerCount = 0;
 
       if (p.keyCardSelectionRef !== undefined && catalog?.cardSelections) {
         const cs = catalog.cardSelections[p.keyCardSelectionRef];
-        if (cs && cs.cardIds) {
+        const cardList: any[] = cs?.cardIds ?? (cs as any)?.cards ?? [];
+        if (cs && cardList.length > 0) {
           hasKeyCard = 1;
-          keyCardCount = cs.cardIds.length;
-          for (const cid of cs.cardIds) {
-            const card = selfHandCardsMap.get(cid);
-            if (card) {
+          keyCardCount = cardList.length;
+
+          let minVal = Infinity;
+          for (const cardRef of cardList) {
+            const instanceId = typeof cardRef === "string" ? cardRef : (cardRef.cardInstanceId || cardRef.id);
+            const knownCard = instanceId ? selfHandCardsMap.get(instanceId) : undefined;
+            if (knownCard) {
               keyCardKnownCount++;
-              keyCardValueSum += card.value ?? 0;
-              keyCardValueMax = Math.max(keyCardValueMax, card.value ?? 0);
-              const suit = card.suit?.toLowerCase();
-              if (suit === "spade" || suit === "spades" || suit === "s") keyCardSpadeCount++;
-              else if (suit === "heart" || suit === "hearts" || suit === "h") keyCardHeartCount++;
-              else if (suit === "diamond" || suit === "diamonds" || suit === "d") keyCardDiamondCount++;
-              else if (suit === "club" || suit === "clubs" || suit === "c") keyCardClubCount++;
+              const val = knownCard.value ?? 0;
+              keyCardValueSum += val;
+              if (val > keyCardValueMax) keyCardValueMax = val;
+              if (val < minVal) minVal = val;
+
+              const suit = (knownCard.suit || "").toUpperCase();
+              const rank = (knownCard.rank || "").toUpperCase();
+              if (suit === "J" || suit === "JOKER" || rank === "JOKER") {
+                keyCardJokerCount++;
+              } else if (suit === "S" || suit === "SPADE") {
+                keyCardSpadeCount++;
+              } else if (suit === "H" || suit === "HEART") {
+                keyCardHeartCount++;
+              } else if (suit === "D" || suit === "DIAMOND") {
+                keyCardDiamondCount++;
+              } else if (suit === "C" || suit === "CLUB") {
+                keyCardClubCount++;
+              }
             }
+          }
+          if (minVal !== Infinity) {
+            keyCardValueMin = minVal;
           }
         }
       }
@@ -280,18 +588,23 @@ export class DecisionFeatureEncoder {
 
       if (p.keyUnitSelectionRef !== undefined && catalog?.unitSelections) {
         const us = catalog.unitSelections[p.keyUnitSelectionRef];
-        if (us && us.unitIds) {
+        const unitList: any[] = us?.unitIds ?? (us as any)?.units ?? [];
+        if (us && unitList.length > 0) {
           hasKeyUnit = 1;
-          keyUnitCount = us.unitIds.length;
-          for (const uid of us.unitIds) {
-            const entry = allUnitsMap.get(uid);
+          keyUnitCount = unitList.length;
+
+          for (const uRef of unitList) {
+            const uId = typeof uRef === "string" ? uRef : (uRef.unitId || uRef.id);
+            const entry = uId ? allUnitsMap.get(uId) : undefined;
             if (entry) {
               const u = entry.unit;
-              const size = u.currentSize ?? 0;
-              selectedUnitSizeSum += size;
-              selectedUnitSizeMax = Math.max(selectedUnitSizeMax, size);
+              const sz = u.currentSize ?? 0;
+              selectedUnitSizeSum += sz;
+              if (sz > selectedUnitSizeMax) selectedUnitSizeMax = sz;
+
               if (u.state === "charge") selectedUnitChargeCount++;
               else if (u.state === "drive") selectedUnitDriveCount++;
+
               if (u.face === "up") selectedUnitFaceUpCount++;
               else if (u.face === "down") selectedUnitFaceDownCount++;
             }
@@ -318,28 +631,32 @@ export class DecisionFeatureEncoder {
         const ts = catalog.targetSelections[p.targetSelectionRef];
         if (ts) {
           hasTarget = 1;
-          if (ts.targetType === "player") {
+          const k = ((ts as any).kind || ts.targetType || "").toLowerCase();
+          const pKey = ts.targetPlayerKey || (ts as any).playerKey;
+          const uId = ts.targetUnitId || (ts as any).unitId;
+
+          if (k === "player") {
             targetIsPlayer = 1;
-            if (ts.targetPlayerKey === viewerId) targetIsSelf = 1;
-            else if (ts.targetPlayerKey) targetIsOpponent = 1;
-          } else if (ts.targetType === "unit") {
+            if (pKey === viewerId) targetIsSelf = 1;
+            else if (pKey) targetIsOpponent = 1;
+          } else if (k === "unit") {
             targetIsUnit = 1;
-            if (ts.targetUnitId) {
-              const entry = allUnitsMap.get(ts.targetUnitId);
-              if (entry) {
-                if (entry.owner === "self") targetIsSelf = 1;
-                else targetIsOpponent = 1;
-                const u = entry.unit;
-                targetUnitSize = u.currentSize ?? 0;
-                if (u.state === "charge") targetUnitIsCharge = 1;
-                else if (u.state === "drive") targetUnitIsDrive = 1;
-                if (u.face === "up") targetUnitFaceUp = 1;
-                else if (u.face === "down") targetUnitFaceDown = 1;
-              }
+            const entry = uId ? allUnitsMap.get(uId) : undefined;
+            if (entry) {
+              if (entry.owner === "self") targetIsSelf = 1;
+              else if (entry.owner === "opponent") targetIsOpponent = 1;
+
+              const u = entry.unit;
+              targetUnitSize = u.currentSize ?? 0;
+              if (u.state === "charge") targetUnitIsCharge = 1;
+              else if (u.state === "drive") targetUnitIsDrive = 1;
+
+              if (u.face === "up") targetUnitFaceUp = 1;
+              else if (u.face === "down") targetUnitFaceDown = 1;
             }
-          } else if (ts.targetType === "request") {
+          } else if (k === "request") {
             targetIsRequest = 1;
-          } else if (ts.targetType === "none") {
+          } else if (k === "none") {
             targetIsNone = 1;
           } else {
             targetIsOther = 1;
@@ -360,15 +677,17 @@ export class DecisionFeatureEncoder {
         const es = catalog.effectSelections[p.effectSelectionRef];
         if (es) {
           hasEffectSelection = 1;
-          if (es.selectionType === "unit") effectTypeUnit = 1;
-          else if (es.selectionType === "unitAssignment") effectTypeUnitAssignment = 1;
+          const k = ((es as any).kind || es.selectionType || "").toLowerCase();
+          if (k === "unit") effectTypeUnit = 1;
+          else if (k === "unit_assignment" || k === "unitassignment" || k === "assignment") effectTypeUnitAssignment = 1;
           else effectTypeOther = 1;
 
-          effectSelectedValueCount = es.selectedValues?.length ?? 0;
-          effectAssignmentCount = es.assignments?.length ?? 0;
+          if (es.selectedValues) effectSelectedValueCount = es.selectedValues.length;
           if (es.assignments) {
+            effectAssignmentCount = es.assignments.length;
             for (const a of es.assignments) {
-              effectAssignedUnitTotal += a.selectedUnitIds?.length ?? 0;
+              const assignedUnits = a.selectedUnitIds || (a as any).unitIds;
+              if (assignedUnits) effectAssignedUnitTotal += assignedUnits.length;
             }
           }
         }
@@ -382,16 +701,18 @@ export class DecisionFeatureEncoder {
         const os = catalog.orderSelections[p.orderSelectionRef];
         if (os) {
           hasOrderSelection = 1;
-          orderedItemCount = os.orderedIds?.length ?? 0;
+          const ordered = os.orderedIds || (os as any).orderedItemIds;
+          if (ordered) orderedItemCount = ordered.length;
         }
       }
 
-      const rawValues = [
-        // 1. Kind
+      const patternValues = [
+        // 1. Pattern Kind
         isAction,
         isPass,
         isEffect,
         isOther,
+
         // 2. Action Metadata
         hasAction,
         speedNormal,
@@ -402,23 +723,29 @@ export class DecisionFeatureEncoder {
         timingBlock,
         timingDamageJudge,
         timingOther,
-        // 3. Cost
+
+        // 3. Cost Payment
         hasCost,
         costDiscardCount,
         costDrivenBulwarkCount,
         costSacrificedUnitCount,
         costLifeCount,
-        // 4. Key Card
+        costTotalItemCount,
+
+        // 4. Key Card Selection
         hasKeyCard,
         keyCardCount,
         keyCardKnownCount,
         keyCardValueSum,
         keyCardValueMax,
+        keyCardValueMin,
         keyCardSpadeCount,
         keyCardHeartCount,
         keyCardDiamondCount,
         keyCardClubCount,
-        // 5. Key Unit
+        keyCardJokerCount,
+
+        // 5. Key Unit Selection
         hasKeyUnit,
         keyUnitCount,
         selectedUnitSizeSum,
@@ -427,7 +754,8 @@ export class DecisionFeatureEncoder {
         selectedUnitDriveCount,
         selectedUnitFaceUpCount,
         selectedUnitFaceDownCount,
-        // 6. Target
+
+        // 6. Target Selection
         hasTarget,
         targetIsPlayer,
         targetIsUnit,
@@ -441,6 +769,7 @@ export class DecisionFeatureEncoder {
         targetUnitIsDrive,
         targetUnitFaceUp,
         targetUnitFaceDown,
+
         // 7. Effect Selection
         hasEffectSelection,
         effectTypeUnit,
@@ -449,27 +778,21 @@ export class DecisionFeatureEncoder {
         effectSelectedValueCount,
         effectAssignmentCount,
         effectAssignedUnitTotal,
+
         // 8. Order Selection
         hasOrderSelection,
         orderedItemCount,
       ];
 
-      const logicalKey = generateLogicalPatternKey({
-        kind: p.kind || "UNKNOWN",
-        actionSelectionRef: p.actionSelectionRef,
-        keyCardSelectionRef: p.keyCardSelectionRef,
-        keyUnitSelectionRef: p.keyUnitSelectionRef,
-        costPaymentRef: p.costPaymentRef,
-        targetSelectionRef: p.targetSelectionRef,
-        effectSelectionRef: p.effectSelectionRef,
-        orderSelectionRef: p.orderSelectionRef,
-      });
+      const sanitizedValues = patternValues.map((v) => (Number.isFinite(v) ? v : 0));
+
+      const logicalKey = generateLogicalPatternKey(p);
 
       encodedPatterns.push({
-        patternRef: i,
-        kind: p.kind || "UNKNOWN",
+        patternRef: (p as any).patternRef ?? i,
+        kind: p.kind,
         logicalPatternKey: logicalKey,
-        values: rawValues.map((v) => (Number.isFinite(v) ? v : 0)),
+        values: sanitizedValues,
       });
     }
 

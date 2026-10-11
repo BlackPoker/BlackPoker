@@ -6,6 +6,10 @@ import {
   OfficialBaselineMeasurementConfig,
 } from "../../domain/ai/OfficialBaselineMeasurementTypes";
 import {
+  CONTEXT_FEATURE_DIMENSION,
+  PATTERN_FEATURE_DIMENSION,
+} from "../../domain/ai/DecisionFeatureTypes";
+import {
   canonicalJsonStringify,
   computeLogicalDigest,
   OfficialBaselineMeasurementRunner,
@@ -287,11 +291,11 @@ describe("Official Baseline Measurement Tests (Phase 3.3)", () => {
       });
 
       const coverage = accumulator.getActivationCoverage();
-      expect(coverage.context.totalFeatures).toBe(25);
+      expect(coverage.context.totalFeatures).toBe(CONTEXT_FEATURE_DIMENSION);
       expect(coverage.context.activatedFeatures).toBeGreaterThan(0);
-      expect(coverage.context.neverActivatedFeatures.length).toBeLessThan(25);
+      expect(coverage.context.neverActivatedFeatures.length).toBeLessThan(CONTEXT_FEATURE_DIMENSION);
 
-      expect(coverage.pattern.totalFeatures).toBe(57);
+      expect(coverage.pattern.totalFeatures).toBe(PATTERN_FEATURE_DIMENSION);
       expect(coverage.pattern.activatedFeatures).toBeGreaterThan(0);
     });
 

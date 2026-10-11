@@ -813,10 +813,10 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
       expect(session.state.players.p1.graveTopCardId).toBeDefined();
     });
 
-    it("FEATURE_SCHEMA_VERSION = 1 and DNA dimension = 1482 remain strictly intact", () => {
-      expect(FEATURE_SCHEMA_VERSION).toBe(1);
+    it("FEATURE_SCHEMA_VERSION = 2 and DNA dimension = 6060 remain strictly intact", () => {
+      expect(FEATURE_SCHEMA_VERSION).toBe(2);
       const dna = createManualGenericGenomeDNA();
-      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
+      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(6060);
     });
   });
 

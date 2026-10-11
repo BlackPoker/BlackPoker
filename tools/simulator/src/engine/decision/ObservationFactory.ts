@@ -223,6 +223,7 @@ export class ObservationFactory {
       viewerPlayerId,
       turnPlayerId: state?.turnPlayer,
       chancePlayerId: state?.chancePlayer,
+      turnCount: typeof state?.turnCount === "number" ? state.turnCount : 0,
       players: playersView,
       stageRequestRefs,
       stageRequests,

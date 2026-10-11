@@ -1498,13 +1498,13 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
     expect(session.state.players.p2.field.length).toBe(0);
   });
 
-  it("Test 28: FEATURE_SCHEMA_VERSION remains 1 without new features", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(1);
+  it("Test 28: FEATURE_SCHEMA_VERSION is 2 for AI Feature Schema v2", () => {
+    expect(FEATURE_SCHEMA_VERSION).toBe(2);
   });
 
-  it("Test 29: ManualGenericGenome DNA dimension remains exactly 1482 weights", () => {
+  it("Test 29: ManualGenericGenome DNA dimension matches DNA_TOTAL_WEIGHTS (6060 weights)", () => {
     const dna = createManualGenericGenomeDNA();
-    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(6060);
   });
 
   // =========================================================================

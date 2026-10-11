@@ -32,11 +32,12 @@
 | **Logical Result / Runtime Metrics Separation** | **IMPLEMENTED** | `BatchMatchResult` / `BatchSimulationRuntimeMetrics` 分離 | `src/tests/simulation/batchSimulation.test.ts` | 同一Seedでの100% Logical JSON一致保証 |
 | **Master + Extra Generic Compatibility** | **IMPLEMENTED** | Action / Component 非依存な抽象インターフェース設計 | `BatchSimulationRunner.ts`, `DecisionFeatureEncoder.ts` | 拡張DSL追加での改修不要 |
 | **Failure Reproduction Recipe** | **IMPLEMENTED** | `BatchFailureRecord` (`baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`) | `src/tests/simulation/batchSimulation.test.ts` | 失敗試合の同一プラン再構築保証 |
-| **Decision Feature Schema v1** | **IMPLEMENTED** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 1`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 固定次元・順序保証（Context 25次元, Pattern 57次元） |
-| **Generic Feature Encoder v1** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | DecisionRequest のみを入力とする決定論的エンコーダー |
+| **Decision Feature Schema v2** | **IMPLEMENTED** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
+| **Generic Feature Encoder v2** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | 観測可能合法情報を完全網羅（turnCount, Hand統計, Field, Grave, Pack, Rare, Fog, Trump, Relative） |
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
-| **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
-| **Decision DNA v1 format** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 1482次元 (Context 25, Pattern 57, Inter 1425) |
+| **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿、未開封パック中身秘匿) | `src/tests/ai/decisionFeaturePrivacyV2.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
+| **Decision DNA v1 format (v2 Schema Compatible)** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 6060次元 (Pattern 60, Interaction 6000), v1 DNA は fail-closed 拒絶 |
+| **Standard + Pack Target Foundation** | **IMPLEMENTED** | `src/engine/regulation/OfficialRegulationMatchSetup.ts` | `src/tests/ai/standardPackGenomeE2E.test.ts` | official:standard-pack での Genome 対戦・決定論・Pack観測 E2E 完走 |
 | **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
 | **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
 | **Factory Entry Validation** | **IMPLEMENTED** | `DecisionDNACodec.createZeroDecisionDNA` | `src/tests/ai/decisionDNA.test.ts` | clone 前先行 validation、truthy 判定廃止、null/array/cycle 安全拒絶 |

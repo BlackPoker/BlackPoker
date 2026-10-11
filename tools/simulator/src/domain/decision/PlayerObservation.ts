@@ -111,6 +111,7 @@ export interface PlayerObservation {
   readonly viewerPlayerId: PlayerKey;
   readonly turnPlayerId?: PlayerKey;
   readonly chancePlayerId?: PlayerKey;
+  readonly turnCount?: number;
   readonly players: readonly PlayerObservationView[];
   readonly stageRequestRefs: readonly RequestRef[];
   readonly stageRequests: readonly RequestView[];

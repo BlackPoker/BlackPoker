@@ -881,9 +881,9 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
   // 17. スキーマ・DNA次元の安定性
   // =========================================================================
   it("Test 17: Feature schema version and DNA dimension remain stable", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(1);
+    expect(FEATURE_SCHEMA_VERSION).toBe(2);
     const dna = createManualGenericGenomeDNA();
-    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(1482);
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(6060);
   });
 
   // =========================================================================
