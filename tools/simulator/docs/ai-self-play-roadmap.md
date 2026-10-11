@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-REG-1.0-20260905-1240`
-更新日時: 2026-09-05 12:40 JST
+作業ID: `BP-SIM-AI-FEATURE-SCHEMA-V2-R1`
+更新日時: 2026-10-12 02:00 JST
 
 ---
 
@@ -32,12 +32,12 @@
 | **Logical Result / Runtime Metrics Separation** | **IMPLEMENTED** | `BatchMatchResult` / `BatchSimulationRuntimeMetrics` 分離 | `src/tests/simulation/batchSimulation.test.ts` | 同一Seedでの100% Logical JSON一致保証 |
 | **Master + Extra Generic Compatibility** | **IMPLEMENTED** | Action / Component 非依存な抽象インターフェース設計 | `BatchSimulationRunner.ts`, `DecisionFeatureEncoder.ts` | 拡張DSL追加での改修不要 |
 | **Failure Reproduction Recipe** | **IMPLEMENTED** | `BatchFailureRecord` (`baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`) | `src/tests/simulation/batchSimulation.test.ts` | 失敗試合の同一プラン再構築保証 |
-| **Decision Feature Schema v2** | **IMPLEMENTED** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
-| **Generic Feature Encoder v2** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | 観測可能合法情報を完全網羅（turnCount, Hand統計, Field, Grave, Pack, Rare, Fog, Trump, Relative） |
-| **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
-| **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿、未開封パック中身秘匿) | `src/tests/ai/decisionFeaturePrivacyV2.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
-| **Decision DNA v1 format (v2 Schema Compatible)** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 6060次元 (Pattern 60, Interaction 6000), v1 DNA は fail-closed 拒絶 |
-| **Standard + Pack Target Foundation** | **IMPLEMENTED** | `src/engine/regulation/OfficialRegulationMatchSetup.ts` | `src/tests/ai/standardPackGenomeE2E.test.ts` | official:standard-pack での Genome 対戦・決定論・Pack観測 E2E 完走 |
+| **Decision Feature Schema v2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts`, `decisionFeatureObservationPrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
+| **Generic Feature Encoder v2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | 主要な合法観測カテゴリをv2として実装（turnCount, Hand統計, Field, Grave, Pack, Rare, Fog, Trump, Relative） |
+| **Viewer-relative Encoding** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
+| **Secret-safe Feature Encoding** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿、相手裏向き切札/防壁秘匿、未開封パック中身秘匿) | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureObservationPrivacyV2.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
+| **Decision DNA v1 format (v2 Schema Compatible)** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 6060次元 (Pattern 60, Interaction 6000), v1 DNA は fail-closed 拒絶 |
+| **Standard + Pack Target Foundation** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/regulation/OfficialRegulationMatchSetup.ts` | `src/tests/ai/standardPackGenomeE2E.test.ts` | official:standard-pack での Genome 対戦・決定論・Pack観測・turnCount進行 E2E 完走 |
 | **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
 | **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
 | **Factory Entry Validation** | **IMPLEMENTED** | `DecisionDNACodec.createZeroDecisionDNA` | `src/tests/ai/decisionDNA.test.ts` | clone 前先行 validation、truthy 判定廃止、null/array/cycle 安全拒絶 |
@@ -52,8 +52,8 @@
 | **Official Regulation Environment** | **IMPLEMENTED (Light + Entry16)** | `src/engine/regulation/OfficialRegulationMatchFactory.ts` | `src/tests/regulation/*.test.ts`, `npm run simulate:official` | 公式ルール第9.1.2版に基づく公式対戦環境。CORE-BATTLE 結果は公式評価ではなく Core 検証用 |
 | **Official Baseline Measurement** | **IMPLEMENTED** | `src/engine/regulation/OfficialBaselineMeasurementRunner.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts`, `npm run measure:official-baseline` | 公式Light+Entry16での600戦定量計測基盤 (Phase 3.3) |
 | **Official Setup Viability Audit** | **IMPLEMENTED** | `src/engine/regulation/OfficialSetupAuditor.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 大量シードでの公式セットアップ成立監査 (100 Seeds) |
-| **Feature Collision Diagnostics** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 57次元同一ベクトル衝突の透明な検出・集計 |
-| **Feature Activation Coverage** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | Context 25 / Pattern 57 特徴量の実戦活性化率集計 |
+| **Feature Collision Diagnostics** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 同一Pattern特徴量ベクトル衝突の透明な検出・集計（動的次元参照） |
+| **Feature Activation Coverage** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | Context / Pattern 特徴量の実戦活性化率集計（動的次元参照） |
 | **Genome Argmax Tie Diagnostics** | **IMPLEMENTED** | `src/engine/ai/DecisionFeatureDiagnosticObserver.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | GenomeScorer による最善手タイ発生率の集計 |
 | **Baseline Repeatability** | **IMPLEMENTED** | `src/engine/ai/OfficialBaselineMeasurementRunner.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | Run A == Run B による 100% 論理ダイジェスト一致検証 |
 | **Composite Fitness** | **MISSING / FUTURE** | - | - | 単一スコア評価・適応度関数 (Phase 4.0 で策定) |

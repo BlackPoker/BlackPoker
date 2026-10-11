@@ -335,8 +335,10 @@ export class ObservationFactory {
         })
       : [];
 
-    // 防壁には currentSize を設定せず、兵士などのユニットには state 全体評価の現在サイズを設定
-    const currentSize = !isBulwark && state
+    // 防壁、および相手の裏向きユニットは秘密情報保護のため currentSize を公開しない (undefined)
+    // （相手の伏せ切札や伏せユニットの秘密カード数値漏洩を防止する generic なプライバシー境界保護）
+    const shouldHideSize = isBulwark || (!isViewerOwner && isFaceDown);
+    const currentSize = !shouldHideSize && state
       ? abilityEvaluator.calculateUnitSize(unit, state)
       : undefined;
 

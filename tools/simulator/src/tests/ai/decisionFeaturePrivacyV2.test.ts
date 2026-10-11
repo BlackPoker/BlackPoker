@@ -7,7 +7,7 @@ import {
   EncodedDecisionFeatures,
 } from "../../domain/ai/DecisionFeatureTypes";
 
-describe("Decision Feature Schema v2 - Privacy Invariance & Positive Controls", () => {
+describe("Decision Feature Schema v2 - Encoder-Level Defensive Privacy Tests", () => {
   const expectNumericFeaturesEqual = (
     a: EncodedDecisionFeatures,
     b: EncodedDecisionFeatures
@@ -339,7 +339,7 @@ describe("Decision Feature Schema v2 - Privacy Invariance & Positive Controls", 
       expectNumericFeaturesEqual(baseEnc, modEnc);
     });
 
-    it("1-3. 相手裏向きフォグ/切札の秘密カード改変に対して特徴量が 100% 不変であること", () => {
+    it("1-3. 相手裏向きユニット（切札含む）の非公開カード改変 (opaqueCardId変更) に対して特徴量が 100% 不変であること", () => {
       const baseReq = createBaseDecisionRequest();
       const modReq: DecisionRequest = {
         ...baseReq,
@@ -349,15 +349,16 @@ describe("Decision Feature Schema v2 - Privacy Invariance & Positive Controls", 
             if (p.playerId === "p2") {
               return {
                 ...p,
-                fog: [
+                field: [
                   {
-                    fogId: "fog-p2-1",
-                    componentId: "character.fog",
-                    card: {
-                      visibility: "HIDDEN",
-                      opaqueCardId: "op-completely-different-fog",
-                      faceUp: false,
-                    },
+                    ...p.field[0],
+                    cards: [
+                      {
+                        visibility: "HIDDEN",
+                        opaqueCardId: "op-completely-different-facedown",
+                        faceUp: false,
+                      },
+                    ],
                   },
                 ],
               };

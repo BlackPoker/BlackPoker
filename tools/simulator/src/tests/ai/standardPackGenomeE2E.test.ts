@@ -47,7 +47,7 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
       throw new Error(`Failed to setup standard-pack match: ${outcome.reason}`);
     }
 
-    return new GameSession(outcome.state, rulePackage);
+    return new GameSession(outcome.state, rulePackage, { matchSeed: seed });
   };
 
   it("1. official:standard-pack での初期盤面セットアップと Pack / turnCount 特徴量の合法観測", () => {
@@ -77,6 +77,20 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
     // 初期状態では未開封
     expect(encoded.context.values[selfPackOpenedIdx]).toBe(0);
 
+    // Standard + Pack では Rare Card や Trump (切札) は存在しないため、特徴量は 0
+    const selfRareIdx = CONTEXT_FEATURE_NAMES.indexOf("self_rare_count");
+    const oppRareIdx = CONTEXT_FEATURE_NAMES.indexOf("opponent_rare_count");
+    const selfTrumpIdx = CONTEXT_FEATURE_NAMES.indexOf("self_trump_count");
+    const oppTrumpIdx = CONTEXT_FEATURE_NAMES.indexOf("opponent_trump_count");
+    expect(selfRareIdx).toBeGreaterThanOrEqual(0);
+    expect(oppRareIdx).toBeGreaterThanOrEqual(0);
+    expect(selfTrumpIdx).toBeGreaterThanOrEqual(0);
+    expect(oppTrumpIdx).toBeGreaterThanOrEqual(0);
+    expect(encoded.context.values[selfRareIdx]).toBe(0);
+    expect(encoded.context.values[oppRareIdx]).toBe(0);
+    expect(encoded.context.values[selfTrumpIdx]).toBe(0);
+    expect(encoded.context.values[oppTrumpIdx]).toBe(0);
+
     // 全パターンが 60 次元でエンコードされていること
     expect(encoded.patterns.length).toBe(req.patterns.length);
     for (const pat of encoded.patterns) {
@@ -87,26 +101,39 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
     }
   });
 
-  it("2. GenomePolicy による判断・対戦進行と turnCount 進行の確認", () => {
+  it("2. GenomePolicy による判断・対戦進行と turnCount 進行の確認 (turnCount >= 2 実証)", () => {
     const session = setupStandardPackSession(100);
 
-    // アタックおよび通常アクションを好む Genome
-    const dnaA = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-aggro-a" });
+    // 汎用特徴量による意思決定:
+    // Action ID ハードコードを行わず、汎用メタデータ（アクション、キーカード、コスト、パス、効果選択）のみで
+    // エンドターンやパスを含む対戦フローが進行し turnCount が 2 以上へ進むことを実証
+    const dnaA = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-pass-a" });
+    const dnaB = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-active-b" });
+
     const actIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_action");
     const passIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_pass");
-    (dnaA.patternWeights as number[])[actIdx] = 2.0;
-    (dnaA.patternWeights as number[])[passIdx] = 0.5;
+    const effIdx = PATTERN_FEATURE_NAMES.indexOf("pattern_is_effect_selection");
+    const keyCardIdx = PATTERN_FEATURE_NAMES.indexOf("has_key_card");
+    const costIdx = PATTERN_FEATURE_NAMES.indexOf("has_cost");
 
-    const dnaB = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-pass-b" });
-    (dnaB.patternWeights as number[])[passIdx] = 1.0;
+    // dnaB (先攻 p2) はアクションを好むが、キーカードやコストを要しないアクション (action.end 等) をより高く評価し、効果選択も解決する
+    (dnaB.patternWeights as number[])[actIdx] = 2.0;
+    (dnaB.patternWeights as number[])[keyCardIdx] = -1.0;
+    (dnaB.patternWeights as number[])[costIdx] = -1.0;
+    (dnaB.patternWeights as number[])[passIdx] = 0.5;
+    (dnaB.patternWeights as number[])[effIdx] = 3.0;
+
+    // dnaA (後攻 p1) はパス・効果選択を適切に行う
+    (dnaA.patternWeights as number[])[passIdx] = 1.0;
+    (dnaA.patternWeights as number[])[effIdx] = 2.0;
 
     const policyA = new GenomePolicy(dnaA);
     const policyB = new GenomePolicy(dnaB);
 
     let steps = 0;
-    const maxSteps = 20;
+    const maxSteps = 100;
     let initialTurnCount = 1;
-    let finalTurnCount = 1;
+    let maxObservedTurnCount = 1;
 
     while (steps < maxSteps) {
       const step = session.advance();
@@ -114,14 +141,27 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
       if (step.type !== "WAITING_FOR_DECISION") break;
 
       const req = step.request;
+      const currentTurn = req.observation.turnCount ?? 1;
       if (steps === 0) {
-        initialTurnCount = req.observation.turnCount ?? 1;
+        initialTurnCount = currentTurn;
       }
-      finalTurnCount = req.observation.turnCount ?? 1;
+      if (currentTurn > maxObservedTurnCount) {
+        maxObservedTurnCount = currentTurn;
+      }
 
       const encoded = DecisionFeatureEncoder.encode(req);
       const tcIdx = CONTEXT_FEATURE_NAMES.indexOf("turn_count");
       expect(encoded.context.values[tcIdx]).toBe(req.observation.turnCount);
+
+      // 対戦進行中も Standard + Pack では Rare / Trump は 0 であること
+      const selfRareIdx = CONTEXT_FEATURE_NAMES.indexOf("self_rare_count");
+      const oppRareIdx = CONTEXT_FEATURE_NAMES.indexOf("opponent_rare_count");
+      const selfTrumpIdx = CONTEXT_FEATURE_NAMES.indexOf("self_trump_count");
+      const oppTrumpIdx = CONTEXT_FEATURE_NAMES.indexOf("opponent_trump_count");
+      expect(encoded.context.values[selfRareIdx]).toBe(0);
+      expect(encoded.context.values[oppRareIdx]).toBe(0);
+      expect(encoded.context.values[selfTrumpIdx]).toBe(0);
+      expect(encoded.context.values[oppTrumpIdx]).toBe(0);
 
       const policy = req.playerId === "p1" ? policyA : policyB;
       const decision = policy.choose(req);
@@ -131,11 +171,18 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
 
       session.submitDecision(decision);
       steps++;
+
+      // turnCount が 2 以上に進んだことを確認したら早期に十分な証拠が得られたとみなせる
+      if (maxObservedTurnCount >= 2 && steps >= 10) {
+        if (steps >= 15) break;
+      }
     }
 
     expect(steps).toBeGreaterThan(0);
-    // 少なくとも数手進行したこと
-    expect(finalTurnCount).toBeGreaterThanOrEqual(initialTurnCount);
+    expect(initialTurnCount).toBe(1);
+    // turnCount が 1 から 2 以上へ進んだことを厳格に実証
+    expect(maxObservedTurnCount).toBeGreaterThan(initialTurnCount);
+    expect(maxObservedTurnCount).toBeGreaterThanOrEqual(2);
   });
 
   it("3. 同一シードにおける決定論的再現性 (Determinism): 特徴量と行動選択の 100% 一致", () => {
