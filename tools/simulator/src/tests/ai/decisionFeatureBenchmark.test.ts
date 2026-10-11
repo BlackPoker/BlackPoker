@@ -15,7 +15,7 @@ import { PATTERN_FEATURE_NAMES } from "../../domain/ai/DecisionFeatureTypes";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("Lightweight Benchmark (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
+describe("Lightweight Benchmark (BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1 - Feature Schema v3)", () => {
   let catalog: RegulationCatalog;
   let rulePackage: RulePackage;
 

@@ -73,14 +73,14 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
   };
 
   describe("AA. Decision DNA Format & Validation", () => {
-    it("1. 定数と次元数が正しく定義されていること (100, 60, 6000, 6060)", () => {
+    it("1. 定数と次元数が正しく定義されていること (163, 111, 18093, 18204)", () => {
       expect(DNA_FORMAT_VERSION).toBe(1);
-      expect(DNA_CONTEXT_DIMENSION).toBe(100);
-      expect(DNA_PATTERN_DIMENSION).toBe(60);
-      expect(DNA_INTERACTION_DIMENSION).toBe(100 * 60);
-      expect(DNA_INTERACTION_DIMENSION).toBe(6000);
-      expect(DNA_TOTAL_WEIGHTS).toBe(60 + 6000);
-      expect(DNA_TOTAL_WEIGHTS).toBe(6060);
+      expect(DNA_CONTEXT_DIMENSION).toBe(163);
+      expect(DNA_PATTERN_DIMENSION).toBe(111);
+      expect(DNA_INTERACTION_DIMENSION).toBe(163 * 111);
+      expect(DNA_INTERACTION_DIMENSION).toBe(18093);
+      expect(DNA_TOTAL_WEIGHTS).toBe(111 + 18093);
+      expect(DNA_TOTAL_WEIGHTS).toBe(18204);
       expect(SCORING_MODEL_V1).toBe("linear-bilinear-v1");
     });
 
@@ -88,12 +88,12 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA({ id: "zero-001", name: "Zero Agent" });
 
       expect(zeroDna.dnaFormatVersion).toBe(1);
-      expect(zeroDna.featureSchemaVersion).toBe(2);
+      expect(zeroDna.featureSchemaVersion).toBe(3);
       expect(zeroDna.scoringModel).toBe("linear-bilinear-v1");
-      expect(zeroDna.contextDimension).toBe(100);
-      expect(zeroDna.patternDimension).toBe(60);
-      expect(zeroDna.patternWeights.length).toBe(60);
-      expect(zeroDna.contextPatternWeights.length).toBe(6000);
+      expect(zeroDna.contextDimension).toBe(163);
+      expect(zeroDna.patternDimension).toBe(111);
+      expect(zeroDna.patternWeights.length).toBe(111);
+      expect(zeroDna.contextPatternWeights.length).toBe(18093);
       expect(zeroDna.patternWeights.every((w) => w === 0)).toBe(true);
       expect(zeroDna.contextPatternWeights.every((w) => w === 0)).toBe(true);
       expect(zeroDna.metadata?.name).toBe("Zero Agent");
@@ -127,6 +127,10 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       );
       // v1 DNA (featureSchemaVersion: 1) は fail-closed で拒絶
       expect(() => DecisionDNACodec.validate({ ...valid, featureSchemaVersion: 1 })).toThrow(
+        DecisionDNAValidationError
+      );
+      // v2 DNA (featureSchemaVersion: 2) は fail-closed で拒絶
+      expect(() => DecisionDNACodec.validate({ ...valid, featureSchemaVersion: 2 })).toThrow(
         DecisionDNAValidationError
       );
       expect(() => DecisionDNACodec.validate({ ...valid, scoringModel: "unknown-nn-v1" })).toThrow(

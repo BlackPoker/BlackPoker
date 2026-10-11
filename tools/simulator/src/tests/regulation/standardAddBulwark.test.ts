@@ -1555,12 +1555,12 @@ describe("Official Regulation Phase 3.0-C - Add Bulwark & Partial Effect Resolut
     expect(session.state.players.p1.field.length).toBeGreaterThanOrEqual(1);
   });
 
-  it("Test 56: FEATURE_SCHEMA_VERSION is 2 for AI Feature Schema v2", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(2);
+  it("Test 56: FEATURE_SCHEMA_VERSION is 3 for AI Feature Schema v3", () => {
+    expect(FEATURE_SCHEMA_VERSION).toBe(3);
   });
 
-  it("Test 57: ManualGenericGenome DNA dimension matches DNA_TOTAL_WEIGHTS (6060 weights)", () => {
+  it("Test 57: ManualGenericGenome DNA dimension matches DNA_TOTAL_WEIGHTS (18204 weights)", () => {
     const dna = createManualGenericGenomeDNA();
-    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(6060);
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(18204);
   });
 });

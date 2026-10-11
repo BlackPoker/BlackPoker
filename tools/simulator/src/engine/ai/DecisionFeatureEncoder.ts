@@ -1,25 +1,25 @@
 /**
  * DecisionFeatureEncoder.ts
  *
- * BlackPoker Simulator - AI Feature Schema v2
+ * BlackPoker Simulator - AI Feature Schema v3
  *
- * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 2)。
+ * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 3)。
  *
  * 【入力境界の原則】
  * 本エンコーダーの入力は合法的観測情報である Readonly<DecisionRequest> のみです。
  * 生の GameState、GameSession、Snapshot、RulePackage への直接アクセスは行いません。
  *
  * 【秘密情報保護・プライバシー】
- * 観測不能な相手手札中身、相手伏せ防壁、未開封パック中身、相手 Life 10枚以上時の正確な枚数などは
+ * 観測不能な相手手札中身、相手伏せ防壁/切札、未開封パック中身、相手 Life 10枚以上時の正確な枚数などは
  * 一切特徴量へ含めず、公開観測情報のみから安全にエンコードします。
  *
- * 【Master + Extra 互換原則】
- * 特定のアクション名 (action.attack 等) やコンポーネント ID をハードコードせず、
- * タイミング、スピード、コスト支払い、対象、カード/ユニット属性の汎用メタデータのみを特徴量化します。
+ * 【Master + Extra 汎用原則】
+ * 特定のアクション名 (action.attack 等) に対する手動ルールや個別 one-hot カラムをハードコードせず、
+ * 固定長 multi-bucket hashing (StableIdentityEncoder) および汎用メタデータによって表現します。
  */
 
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
-import { CardView, KnownCardView, UnitView } from "../../domain/decision/PlayerObservation";
+import { CardView, KnownCardView, UnitView, RequestView } from "../../domain/decision/PlayerObservation";
 import { generateLogicalPatternKey } from "../../domain/decision/LogicalPatternKey";
 import {
   CONTEXT_FEATURE_NAMES,
@@ -34,6 +34,7 @@ import {
   KnownCardAggregateEncoder,
   EMPTY_KNOWN_CARD_AGGREGATE,
 } from "./KnownCardAggregateEncoder";
+import { StableIdentityEncoder } from "./StableIdentityEncoder";
 
 export class DecisionFeatureEncoder {
   public static readonly SCHEMA_VERSION = FEATURE_SCHEMA_VERSION;
@@ -58,7 +59,7 @@ export class DecisionFeatureEncoder {
   }
 
   /**
-   * 盤面・文脈特徴量 (Context Feature Vector: 100次元) をエンコード
+   * 盤面・文脈特徴量 (Context Feature Vector: 163次元) をエンコード
    */
   private static encodeContext(request: Readonly<DecisionRequest>): number[] {
     const obs = request.observation;
@@ -304,6 +305,151 @@ export class DecisionFeatureEncoder {
     const relativeLifeKnown = oppLifeKnown === 1 && typeof selfPlayer?.lifeCount === "number" ? 1 : 0;
     const relativeLifeCount = relativeLifeKnown === 1 ? selfLifeCount - oppLifeVisibleCount : 0;
 
+    // 8. Request Context (Viewer Relative) (63)
+    const requestHasSource = request.source !== undefined ? 1 : 0;
+    const requestSourceIsAction = request.source?.type === "ACTION_REQUEST" ? 1 : 0;
+    const requestSourceIsEffect = request.source?.type === "EFFECT_RESOLUTION" ? 1 : 0;
+    const requestSourceIsZoneTop = request.source?.type === "ZONE_TOP_SELECTION" ? 1 : 0;
+
+    let sourceActionId: string | undefined = undefined;
+    let sourceEffectStepId: string | undefined = undefined;
+    let sourceController: string | undefined = undefined;
+    let sourceSpeed: string | undefined = undefined;
+    let sourceTiming: string | undefined = undefined;
+    let sourceKeyCards: readonly CardView[] = [];
+    let sourceTargetSelection: any = undefined;
+
+    if (request.source?.type === "EFFECT_RESOLUTION") {
+      sourceEffectStepId = request.source.effectStepId;
+      const ref = request.source.sourceRequestRef;
+      const reqView = obs.stageRequests?.find((r) => r.requestId === ref);
+      if (reqView) {
+        sourceActionId = reqView.actionId;
+        sourceController = reqView.controller;
+        if (reqView.keyCards) {
+          sourceKeyCards = reqView.keyCards;
+        }
+      }
+      if (request.source.playerId) {
+        sourceController = sourceController ?? request.source.playerId;
+      }
+    } else if (request.source?.type === "ACTION_REQUEST") {
+      sourceController = request.source.playerId;
+    } else if (request.source?.type === "ZONE_TOP_SELECTION") {
+      sourceController = request.source.playerId;
+    }
+
+    // カタログから Action メタデータ (speed, timing) を補完
+    if (sourceActionId && catalog?.actions) {
+      const catAct = catalog.actions.find((a) => a.actionId === sourceActionId);
+      if (catAct) {
+        sourceSpeed = catAct.speed;
+        sourceTiming = catAct.timing;
+      }
+    }
+
+    const requestSourceControllerIsSelf = sourceController === viewerId ? 1 : 0;
+    const requestSourceControllerIsOpponent = sourceController && sourceController !== viewerId ? 1 : 0;
+
+    // 8.2 Action Stable Identity (16 buckets)
+    const actionBuckets = StableIdentityEncoder.encodeActionIdentity(sourceActionId);
+
+    // 8.3 Effect Step Stable Identity (16 buckets)
+    const effectStepBuckets = StableIdentityEncoder.encodeEffectStepIdentity(sourceEffectStepId);
+
+    // 8.4 Action Metadata (8)
+    let reqSpeedNormal = 0;
+    let reqSpeedImmediate = 0;
+    let reqSpeedOther = 0;
+    if (sourceSpeed) {
+      const sp = sourceSpeed.toLowerCase();
+      if (sp === "normal") reqSpeedNormal = 1;
+      else if (sp === "immediate") reqSpeedImmediate = 1;
+      else reqSpeedOther = 1;
+    }
+
+    let reqTimingMain = 0;
+    let reqTimingQuick = 0;
+    let reqTimingBlock = 0;
+    let reqTimingDamageJudge = 0;
+    let reqTimingOther = 0;
+    if (sourceTiming) {
+      const tm = sourceTiming.toLowerCase();
+      if (tm === "main") reqTimingMain = 1;
+      else if (tm === "quick") reqTimingQuick = 1;
+      else if (tm === "block") reqTimingBlock = 1;
+      else if (tm === "damagejudge" || tm === "damage_judge") reqTimingDamageJudge = 1;
+      else reqTimingOther = 1;
+    }
+
+    // 8.5 Source Request Visible Key Card Aggregate (5)
+    let reqKeyCardCount = sourceKeyCards.length;
+    let reqKeyCardKnownCount = 0;
+    let reqKeyCardValueSum = 0;
+    let reqKeyCardValueMax = 0;
+    let reqKeyCardValueMin = 0;
+    let reqMinVal = Infinity;
+
+    for (let i = 0; i < sourceKeyCards.length; i++) {
+      const c = sourceKeyCards[i];
+      if (c && c.visibility === "KNOWN") {
+        reqKeyCardKnownCount++;
+        const val = (c as KnownCardView).value ?? 0;
+        reqKeyCardValueSum += val;
+        if (val > reqKeyCardValueMax) reqKeyCardValueMax = val;
+        if (val < reqMinVal) reqMinVal = val;
+      }
+    }
+    if (reqMinVal !== Infinity) {
+      reqKeyCardValueMin = reqMinVal;
+    }
+
+    // 8.6 Source Request Target Semantics (12)
+    let reqTargetIsPlayer = 0;
+    let reqTargetIsUnit = 0;
+    let reqTargetIsRequest = 0;
+    let reqTargetIsNone = 0;
+    let reqTargetIsOther = 0;
+    let reqTargetIsSelf = 0;
+    let reqTargetIsOpponent = 0;
+    let reqTargetUnitSize = 0;
+    let reqTargetUnitIsCharge = 0;
+    let reqTargetUnitIsDrive = 0;
+    let reqTargetUnitFaceUp = 0;
+    let reqTargetUnitFaceDown = 0;
+
+    if (sourceTargetSelection) {
+      const k = ((sourceTargetSelection as any).kind || sourceTargetSelection.targetType || "").toLowerCase();
+      const pKey = sourceTargetSelection.targetPlayerKey;
+      const uId = sourceTargetSelection.targetUnitId;
+
+      if (k === "player") {
+        reqTargetIsPlayer = 1;
+        if (pKey === viewerId) reqTargetIsSelf = 1;
+        else if (pKey) reqTargetIsOpponent = 1;
+      } else if (k === "unit") {
+        reqTargetIsUnit = 1;
+        // ターゲットユニットが合法的観測にあるか確認
+        const u = selfField.find((unit) => unit.unitId === uId) || oppField.find((unit) => unit.unitId === uId);
+        if (u) {
+          if (selfField.some((unit) => unit.unitId === uId)) reqTargetIsSelf = 1;
+          else reqTargetIsOpponent = 1;
+
+          reqTargetUnitSize = u.currentSize ?? 0;
+          if (u.state === "charge") reqTargetUnitIsCharge = 1;
+          else if (u.state === "drive") reqTargetUnitIsDrive = 1;
+          if (u.face === "up") reqTargetUnitFaceUp = 1;
+          else if (u.face === "down") reqTargetUnitFaceDown = 1;
+        }
+      } else if (k === "request") {
+        reqTargetIsRequest = 1;
+      } else if (k === "none") {
+        reqTargetIsNone = 1;
+      } else {
+        reqTargetIsOther = 1;
+      }
+    }
+
     const values = [
       // 1. Decision Context (8)
       sourceIsAction,
@@ -418,13 +564,58 @@ export class DecisionFeatureEncoder {
       relativeTrumpCount,
       relativeLifeKnown,
       relativeLifeCount,
+
+      // 8. Request Context (Viewer Relative) (63)
+      requestHasSource,
+      requestSourceIsAction,
+      requestSourceIsEffect,
+      requestSourceIsZoneTop,
+      requestSourceControllerIsSelf,
+      requestSourceControllerIsOpponent,
+
+      // 8.2 Action buckets (16)
+      ...actionBuckets,
+
+      // 8.3 Effect Step buckets (16)
+      ...effectStepBuckets,
+
+      // 8.4 Action Metadata (8)
+      reqSpeedNormal,
+      reqSpeedImmediate,
+      reqSpeedOther,
+      reqTimingMain,
+      reqTimingQuick,
+      reqTimingBlock,
+      reqTimingDamageJudge,
+      reqTimingOther,
+
+      // 8.5 Source Key Cards (5)
+      reqKeyCardCount,
+      reqKeyCardKnownCount,
+      reqKeyCardValueSum,
+      reqKeyCardValueMax,
+      reqKeyCardValueMin,
+
+      // 8.6 Source Target (12)
+      reqTargetIsPlayer,
+      reqTargetIsUnit,
+      reqTargetIsRequest,
+      reqTargetIsNone,
+      reqTargetIsOther,
+      reqTargetIsSelf,
+      reqTargetIsOpponent,
+      reqTargetUnitSize,
+      reqTargetUnitIsCharge,
+      reqTargetUnitIsDrive,
+      reqTargetUnitFaceUp,
+      reqTargetUnitFaceDown,
     ];
 
     return values.map((v) => (Number.isFinite(v) ? v : 0));
   }
 
   /**
-   * 合法パターン群 (Pattern Feature Vectors: 60次元) をエンコード
+   * 合法パターン群 (Pattern Feature Vectors: 111次元) をエンコード
    */
   private static encodePatterns(request: Readonly<DecisionRequest>): DecisionPatternFeatures[] {
     const catalog = request.catalog;
@@ -434,17 +625,77 @@ export class DecisionFeatureEncoder {
     const selfPlayer = obs.players?.find((p) => p.playerId === viewerId || p.isViewer);
     const opponentPlayer = obs.players?.find((p) => p.playerId !== viewerId && !p.isViewer);
 
-    // カード検索用マップ (Self Hand)
-    const selfHandCardsMap = new Map<string, KnownCardView>();
+    // 1. カード検索用マップ (合法的観測内の KNOWN カード全件)
+    const allKnownCardsMap = new Map<string, KnownCardView>();
     if (selfPlayer?.handCards) {
       for (const c of selfPlayer.handCards) {
-        if (c.visibility === "KNOWN") {
-          selfHandCardsMap.set(c.cardInstanceId, c);
+        if (c.visibility === "KNOWN") allKnownCardsMap.set(c.cardInstanceId, c);
+      }
+    }
+    // Field / Trumps cards
+    const registerUnitCards = (units?: readonly UnitView[]) => {
+      if (!units) return;
+      for (const u of units) {
+        if (u.cards) {
+          for (const c of u.cards) {
+            if (c.visibility === "KNOWN") allKnownCardsMap.set(c.cardInstanceId, c);
+          }
+        }
+      }
+    };
+    registerUnitCards(selfPlayer?.field);
+    registerUnitCards(selfPlayer?.trumps);
+    registerUnitCards(opponentPlayer?.field);
+    registerUnitCards(opponentPlayer?.trumps);
+
+    // Fog cards
+    for (const p of obs.players || []) {
+      if (p.fog) {
+        for (const f of p.fog) {
+          if (f.card && f.card.visibility === "KNOWN") {
+            allKnownCardsMap.set(f.card.cardInstanceId, f.card);
+          }
+        }
+      }
+    }
+    // Grave cards
+    for (const p of obs.players || []) {
+      if (p.graveTopCard && p.graveTopCard.visibility === "KNOWN") {
+        allKnownCardsMap.set(p.graveTopCard.cardInstanceId, p.graveTopCard);
+      }
+      if (p.isViewer && p.grave) {
+        for (const g of p.grave) {
+          if ("visibility" in g && g.visibility === "KNOWN") {
+            allKnownCardsMap.set(g.cardInstanceId, g as KnownCardView);
+          }
+        }
+      }
+    }
+    // Pack & Rare cards
+    for (const p of obs.players || []) {
+      if (p.pack?.canViewCards && p.pack.cards) {
+        for (const c of p.pack.cards) {
+          if (c.visibility === "KNOWN") allKnownCardsMap.set(c.cardInstanceId, c);
+        }
+      }
+      if (p.rareCards?.canViewCards && p.rareCards.cards) {
+        for (const c of p.rareCards.cards) {
+          if (c.visibility === "KNOWN") allKnownCardsMap.set(c.cardInstanceId, c);
+        }
+      }
+    }
+    // StageRequests KeyCards
+    if (obs.stageRequests) {
+      for (const reqView of obs.stageRequests) {
+        if (reqView.keyCards) {
+          for (const c of reqView.keyCards) {
+            if (c.visibility === "KNOWN") allKnownCardsMap.set(c.cardInstanceId, c);
+          }
         }
       }
     }
 
-    // ユニット検索用マップ (Self & Opponent)
+    // 2. ユニット検索用マップ (Self & Opponent)
     const allUnitsMap = new Map<string, { unit: UnitView; owner: "self" | "opponent" }>();
     if (selfPlayer) {
       if (selfPlayer.field) {
@@ -469,13 +720,13 @@ export class DecisionFeatureEncoder {
     for (let i = 0; i < patterns.length; i++) {
       const p = patterns[i];
 
-      // 1. Pattern Kind
+      // 1. Pattern Kind (4)
       const isAction = p.kind === "ACTION" ? 1 : 0;
       const isPass = p.kind === "PASS" ? 1 : 0;
       const isEffect = p.kind === "EFFECT_SELECTION" ? 1 : 0;
       const isOther = !isAction && !isPass && !isEffect ? 1 : 0;
 
-      // 2. Action Metadata
+      // 2. Action Metadata (9)
       let hasAction = 0;
       let speedNormal = 0;
       let speedImmediate = 0;
@@ -504,7 +755,7 @@ export class DecisionFeatureEncoder {
         }
       }
 
-      // 3. Cost Payment
+      // 3. Cost Payment (6)
       let hasCost = 0;
       let costDiscardCount = 0;
       let costDrivenBulwarkCount = 0;
@@ -524,7 +775,7 @@ export class DecisionFeatureEncoder {
         }
       }
 
-      // 4. Key Card Selection
+      // 4. Key Card Selection (11)
       let hasKeyCard = 0;
       let keyCardCount = 0;
       let keyCardKnownCount = 0;
@@ -547,7 +798,7 @@ export class DecisionFeatureEncoder {
           let minVal = Infinity;
           for (const cardRef of cardList) {
             const instanceId = typeof cardRef === "string" ? cardRef : (cardRef.cardInstanceId || cardRef.id);
-            const knownCard = instanceId ? selfHandCardsMap.get(instanceId) : undefined;
+            const knownCard = instanceId ? allKnownCardsMap.get(instanceId) : undefined;
             if (knownCard) {
               keyCardKnownCount++;
               const val = knownCard.value ?? 0;
@@ -576,7 +827,7 @@ export class DecisionFeatureEncoder {
         }
       }
 
-      // 5. Key Unit Selection
+      // 5. Key Unit Selection (8)
       let hasKeyUnit = 0;
       let keyUnitCount = 0;
       let selectedUnitSizeSum = 0;
@@ -612,7 +863,7 @@ export class DecisionFeatureEncoder {
         }
       }
 
-      // 6. Target Selection
+      // 6. Target Selection (13)
       let hasTarget = 0;
       let targetIsPlayer = 0;
       let targetIsUnit = 0;
@@ -664,7 +915,7 @@ export class DecisionFeatureEncoder {
         }
       }
 
-      // 7. Effect Selection
+      // 7. Effect Selection - Base Metadata (7)
       let hasEffectSelection = 0;
       let effectTypeUnit = 0;
       let effectTypeUnitAssignment = 0;
@@ -673,27 +924,219 @@ export class DecisionFeatureEncoder {
       let effectAssignmentCount = 0;
       let effectAssignedUnitTotal = 0;
 
+      // 8. Generic Effect Selection - Unit Aggregate (12)
+      let effUnitCount = 0;
+      let effSelfUnitCount = 0;
+      let effOppUnitCount = 0;
+      let effUnitChargeCount = 0;
+      let effUnitDriveCount = 0;
+      let effUnitFaceUpCount = 0;
+      let effUnitFaceDownCount = 0;
+      let effUnitSizeSum = 0;
+      let effUnitSizeMax = 0;
+      let effUnitSizeMin = 0;
+      let effUnitAttackerCount = 0;
+      let effUnitBlockerCount = 0;
+
+      // 9. Generic Effect Selection - Card Aggregate (17)
+      const selectedKnownCards: KnownCardView[] = [];
+      let effCardCount = 0;
+
+      // 10. Generic Effect Selection - Player / Request Semantics (6)
+      let effPlayerCount = 0;
+      let effPlayerIsSelf = 0;
+      let effPlayerIsOpponent = 0;
+      let effRequestCount = 0;
+      let effRequestIsSelf = 0;
+      let effRequestIsOpponent = 0;
+
+      // 11. Generic Effect Selection - Unit Assignment Semantics (13)
+      let effAssignSourceCount = 0;
+      let effAssignSelectedCount = 0;
+      let effAssignSourceSizeSum = 0;
+      let effAssignSourceSizeMax = 0;
+      let effAssignSourceSizeMin = 0;
+      let effAssignSelectedSizeSum = 0;
+      let effAssignSelectedSizeMax = 0;
+      let effAssignSelectedSizeMin = 0;
+      let effAssignSizeDeltaSum = 0;
+      let effAssignPositiveDeltaCount = 0;
+      let effAssignNegativeDeltaCount = 0;
+      let effAssignSelfToOppCount = 0;
+      let effAssignOppToSelfCount = 0;
+
+      // 12. Generic Effect Selection - Coverage Ratio (3)
+      let effCandidateCount = 0;
+      let effSelectedCount = 0;
+      let effCoverageRatio = 0;
+
       if (p.effectSelectionRef !== undefined && catalog?.effectSelections) {
         const es = catalog.effectSelections[p.effectSelectionRef];
         if (es) {
           hasEffectSelection = 1;
-          const k = ((es as any).kind || es.selectionType || "").toLowerCase();
-          if (k === "unit") effectTypeUnit = 1;
-          else if (k === "unit_assignment" || k === "unitassignment" || k === "assignment") effectTypeUnitAssignment = 1;
+          effCandidateCount = catalog.effectSelections.length;
+
+          const selType = ((es as any).kind || es.selectionType || "").toLowerCase();
+          if (selType === "unit") effectTypeUnit = 1;
+          else if (selType === "unit_assignment" || selType === "unitassignment" || selType === "assignment") effectTypeUnitAssignment = 1;
           else effectTypeOther = 1;
 
-          if (es.selectedValues) effectSelectedValueCount = es.selectedValues.length;
+          if (es.selectedValues) {
+            effectSelectedValueCount = es.selectedValues.length;
+            effSelectedCount = es.selectedValues.length;
+
+            // ユニット選択またはカード選択の検査
+            let minUnitSize = Infinity;
+
+            for (const val of es.selectedValues) {
+              // ユニットとしてマッチするか判定
+              const uEntry = allUnitsMap.get(val);
+              if (uEntry || selType === "unit") {
+                effUnitCount++;
+                if (uEntry) {
+                  if (uEntry.owner === "self") effSelfUnitCount++;
+                  else effOppUnitCount++;
+
+                  const u = uEntry.unit;
+                  const sz = u.currentSize ?? 0;
+                  effUnitSizeSum += sz;
+                  if (sz > effUnitSizeMax) effUnitSizeMax = sz;
+                  if (sz < minUnitSize) minUnitSize = sz;
+
+                  if (u.state === "charge") effUnitChargeCount++;
+                  else if (u.state === "drive") effUnitDriveCount++;
+
+                  if (u.face === "up") effUnitFaceUpCount++;
+                  else if (u.face === "down") effUnitFaceDownCount++;
+
+                  if (u.battle?.role === "attacker") effUnitAttackerCount++;
+                  else if (u.battle?.role === "blocker") effUnitBlockerCount++;
+                }
+              }
+
+              // カードとしてマッチするか判定
+              const c = allKnownCardsMap.get(val);
+              if (c || selType === "card") {
+                effCardCount++;
+                if (c) {
+                  selectedKnownCards.push(c);
+                }
+              }
+
+              // プレイヤーとしてマッチするか判定
+              if (val === viewerId) {
+                effPlayerCount++;
+                effPlayerIsSelf = 1;
+              } else if (obs.players?.some((pl) => pl.playerId === val)) {
+                effPlayerCount++;
+                effPlayerIsOpponent = 1;
+              }
+
+              // リクエストとしてマッチするか判定
+              const reqMatch = obs.stageRequests?.find((sr) => sr.requestId === val);
+              if (reqMatch) {
+                effRequestCount++;
+                if (reqMatch.controller === viewerId) effRequestIsSelf = 1;
+                else effRequestIsOpponent = 1;
+              }
+            }
+
+            if (minUnitSize !== Infinity) {
+              effUnitSizeMin = minUnitSize;
+            }
+          }
+
+          // Assignment の詳細集計
           if (es.assignments) {
             effectAssignmentCount = es.assignments.length;
+            effAssignSourceCount = es.assignments.length;
+            effCandidateCount = Math.max(effCandidateCount, catalog.effectSelections.length);
+
+            let minSourceSize = Infinity;
+            let minSelectedSize = Infinity;
+
             for (const a of es.assignments) {
-              const assignedUnits = a.selectedUnitIds || (a as any).unitIds;
-              if (assignedUnits) effectAssignedUnitTotal += assignedUnits.length;
+              const assignedUnits = a.selectedUnitIds || (a as any).unitIds || [];
+              effectAssignedUnitTotal += assignedUnits.length;
+              effAssignSelectedCount += assignedUnits.length;
+
+              // Source ユニットのサイズ集計
+              const srcEntry = allUnitsMap.get(a.sourceUnitId);
+              let srcSize = 0;
+              let srcOwner: "self" | "opponent" | undefined = undefined;
+              if (srcEntry) {
+                srcSize = srcEntry.unit.currentSize ?? 0;
+                srcOwner = srcEntry.owner;
+                effAssignSourceSizeSum += srcSize;
+                if (srcSize > effAssignSourceSizeMax) effAssignSourceSizeMax = srcSize;
+                if (srcSize < minSourceSize) minSourceSize = srcSize;
+              }
+
+              // Selected ユニット群のサイズ集計
+              let targetGroupSize = 0;
+              for (const uId of assignedUnits) {
+                const tgtEntry = allUnitsMap.get(uId);
+                if (tgtEntry) {
+                  const tgtSize = tgtEntry.unit.currentSize ?? 0;
+                  targetGroupSize += tgtSize;
+                  effAssignSelectedSizeSum += tgtSize;
+                  if (tgtSize > effAssignSelectedSizeMax) effAssignSelectedSizeMax = tgtSize;
+                  if (tgtSize < minSelectedSize) minSelectedSize = tgtSize;
+
+                  if (tgtEntry.owner === "self" && srcOwner === "opponent") {
+                    effAssignSelfToOppCount++;
+                  } else if (tgtEntry.owner === "opponent" && srcOwner === "self") {
+                    effAssignOppToSelfCount++;
+                  }
+                }
+              }
+
+              // Delta 集計 (Selected - Source)
+              if (assignedUnits.length > 0) {
+                const delta = targetGroupSize - srcSize;
+                effAssignSizeDeltaSum += delta;
+                if (delta > 0) effAssignPositiveDeltaCount++;
+                else if (delta < 0) effAssignNegativeDeltaCount++;
+              }
             }
+
+            if (minSourceSize !== Infinity) effAssignSourceSizeMin = minSourceSize;
+            if (minSelectedSize !== Infinity) effAssignSelectedSizeMin = minSelectedSize;
+
+            if (effSelectedCount === 0) {
+              effSelectedCount = effAssignSelectedCount;
+            }
+          }
+
+          if (effCandidateCount > 0) {
+            effCoverageRatio = effSelectedCount / effCandidateCount;
           }
         }
       }
 
-      // 8. Order Selection
+      // カード集計のエンコード (KnownCardAggregateEncoder を再利用)
+      const effCardAggregate = selectedKnownCards.length > 0
+        ? KnownCardAggregateEncoder.encode(selectedKnownCards)
+        : EMPTY_KNOWN_CARD_AGGREGATE;
+
+      const effCardKnownCount = effCardAggregate.count;
+      const effCardSpadeCount = effCardAggregate.spadeCount;
+      const effCardHeartCount = effCardAggregate.heartCount;
+      const effCardDiamondCount = effCardAggregate.diamondCount;
+      const effCardClubCount = effCardAggregate.clubCount;
+      const effCardJokerCount = effCardAggregate.jokerCount;
+      const effCardNumericCount = effCardAggregate.numericCount;
+      const effCardAceCount = effCardAggregate.aceCount;
+      const effCardJackCount = effCardAggregate.jackCount;
+      const effCardQueenCount = effCardAggregate.queenCount;
+      const effCardKingCount = effCardAggregate.kingCount;
+      const effCardValueSum = effCardAggregate.valueSum;
+      const effCardValueMax = effCardAggregate.valueMax;
+      const effCardValueMin = effCardAggregate.valueMin;
+      const effCardPairRankCount = effCardAggregate.pairRankCount;
+      const effCardMaxRankMultiplicity = effCardAggregate.maxRankMultiplicity;
+
+      // 13. Order Selection (2)
       let hasOrderSelection = 0;
       let orderedItemCount = 0;
 
@@ -707,13 +1150,13 @@ export class DecisionFeatureEncoder {
       }
 
       const patternValues = [
-        // 1. Pattern Kind
+        // 1. Pattern Kind (4)
         isAction,
         isPass,
         isEffect,
         isOther,
 
-        // 2. Action Metadata
+        // 2. Action Metadata (9)
         hasAction,
         speedNormal,
         speedImmediate,
@@ -724,7 +1167,7 @@ export class DecisionFeatureEncoder {
         timingDamageJudge,
         timingOther,
 
-        // 3. Cost Payment
+        // 3. Cost Payment (6)
         hasCost,
         costDiscardCount,
         costDrivenBulwarkCount,
@@ -732,7 +1175,7 @@ export class DecisionFeatureEncoder {
         costLifeCount,
         costTotalItemCount,
 
-        // 4. Key Card Selection
+        // 4. Key Card Selection (11)
         hasKeyCard,
         keyCardCount,
         keyCardKnownCount,
@@ -745,7 +1188,7 @@ export class DecisionFeatureEncoder {
         keyCardClubCount,
         keyCardJokerCount,
 
-        // 5. Key Unit Selection
+        // 5. Key Unit Selection (8)
         hasKeyUnit,
         keyUnitCount,
         selectedUnitSizeSum,
@@ -755,7 +1198,7 @@ export class DecisionFeatureEncoder {
         selectedUnitFaceUpCount,
         selectedUnitFaceDownCount,
 
-        // 6. Target Selection
+        // 6. Target Selection (13)
         hasTarget,
         targetIsPlayer,
         targetIsUnit,
@@ -770,7 +1213,7 @@ export class DecisionFeatureEncoder {
         targetUnitFaceUp,
         targetUnitFaceDown,
 
-        // 7. Effect Selection
+        // 7. Effect Selection - Base Metadata (7)
         hasEffectSelection,
         effectTypeUnit,
         effectTypeUnitAssignment,
@@ -779,13 +1222,73 @@ export class DecisionFeatureEncoder {
         effectAssignmentCount,
         effectAssignedUnitTotal,
 
-        // 8. Order Selection
+        // 8. Generic Effect Selection - Unit Aggregate (12)
+        effUnitCount,
+        effSelfUnitCount,
+        effOppUnitCount,
+        effUnitChargeCount,
+        effUnitDriveCount,
+        effUnitFaceUpCount,
+        effUnitFaceDownCount,
+        effUnitSizeSum,
+        effUnitSizeMax,
+        effUnitSizeMin,
+        effUnitAttackerCount,
+        effUnitBlockerCount,
+
+        // 9. Generic Effect Selection - Card Aggregate (17)
+        effCardCount,
+        effCardKnownCount,
+        effCardSpadeCount,
+        effCardHeartCount,
+        effCardDiamondCount,
+        effCardClubCount,
+        effCardJokerCount,
+        effCardNumericCount,
+        effCardAceCount,
+        effCardJackCount,
+        effCardQueenCount,
+        effCardKingCount,
+        effCardValueSum,
+        effCardValueMax,
+        effCardValueMin,
+        effCardPairRankCount,
+        effCardMaxRankMultiplicity,
+
+        // 10. Generic Effect Selection - Player / Request Semantics (6)
+        effPlayerCount,
+        effPlayerIsSelf,
+        effPlayerIsOpponent,
+        effRequestCount,
+        effRequestIsSelf,
+        effRequestIsOpponent,
+
+        // 11. Generic Effect Selection - Unit Assignment Semantics (13)
+        effAssignSourceCount,
+        effAssignSelectedCount,
+        effAssignSourceSizeSum,
+        effAssignSourceSizeMax,
+        effAssignSourceSizeMin,
+        effAssignSelectedSizeSum,
+        effAssignSelectedSizeMax,
+        effAssignSelectedSizeMin,
+        effAssignSizeDeltaSum,
+        effAssignPositiveDeltaCount,
+        effAssignNegativeDeltaCount,
+        effAssignSelfToOppCount,
+        effAssignOppToSelfCount,
+
+        // 12. Generic Effect Selection - Coverage Ratio (3)
+        effCandidateCount,
+        effSelectedCount,
+        effCoverageRatio,
+
+        // 13. Order Selection (2)
         hasOrderSelection,
         orderedItemCount,
       ];
 
       const sanitizedValues = patternValues.map((v) => (Number.isFinite(v) ? v : 0));
-
       const logicalKey = generateLogicalPatternKey(p);
 
       encodedPatterns.push({

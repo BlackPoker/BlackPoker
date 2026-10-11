@@ -845,11 +845,11 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
   });
 
   // =========================================================================
-  // Test W: FEATURE_SCHEMA_VERSION = 1 & DNA dimension 1482 & AI compatibility
+  // Test W: FEATURE_SCHEMA_VERSION = 3 & DNA dimension 18204 & AI compatibility
   // =========================================================================
   it("Test W: AI feature schema version and DNA dimension remain unchanged and compatible", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(2);
-    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(2);
+    expect(FEATURE_SCHEMA_VERSION).toBe(3);
+    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(3);
 
     const heartKey = { id: "h-3", suit: "H", rank: "3", value: 3 };
     const state = {
@@ -875,7 +875,7 @@ describe("Official Regulation Phase 3.0-B - Magician & Generic Cost Modifier Tes
 
     // Feature encoding
     const encoded = DecisionFeatureEncoder.encode(res.request);
-    expect(encoded.featureSchemaVersion).toBe(2);
+    expect(encoded.featureSchemaVersion).toBe(3);
 
     // AI Policies evaluation
     const firstLegal = new FirstLegalPolicy();

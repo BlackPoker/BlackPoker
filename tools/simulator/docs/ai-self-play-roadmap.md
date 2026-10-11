@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-FEATURE-SCHEMA-V2-R1`
-更新日時: 2026-10-12 02:00 JST
+作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1`
+更新日時: 2026-10-12 03:00 JST
 
 ---
 
@@ -32,11 +32,13 @@
 | **Logical Result / Runtime Metrics Separation** | **IMPLEMENTED** | `BatchMatchResult` / `BatchSimulationRuntimeMetrics` 分離 | `src/tests/simulation/batchSimulation.test.ts` | 同一Seedでの100% Logical JSON一致保証 |
 | **Master + Extra Generic Compatibility** | **IMPLEMENTED** | Action / Component 非依存な抽象インターフェース設計 | `BatchSimulationRunner.ts`, `DecisionFeatureEncoder.ts` | 拡張DSL追加での改修不要 |
 | **Failure Reproduction Recipe** | **IMPLEMENTED** | `BatchFailureRecord` (`baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`) | `src/tests/simulation/batchSimulation.test.ts` | 失敗試合の同一プラン再構築保証 |
-| **Decision Feature Schema v2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts`, `decisionFeatureObservationPrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
-| **Generic Feature Encoder v2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | 主要な合法観測カテゴリをv2として実装（turnCount, Hand統計, Field, Grave, Pack, Rare, Fog, Trump, Relative） |
+| **Decision Feature Schema v1** | **SUPERSEDED** | `featureSchemaVersion: 1` | `src/tests/ai/decisionFeatureEncoder.test.ts` (初期プロトタイプ) | Context 25, Pattern 57 (計 1482 weights) |
+| **Decision Feature Schema v2** | **SUPERSEDED BY FEATURE SCHEMA v3** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
+| **Decision Feature Schema v3** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 3`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeatureDownUpScorer.test.ts`, `decisionFeatureEffectSelectionRegression.test.ts` | Request-Conditioned Generic Selection (Context 163次元, Pattern 111次元, 合計 18204 weights) |
+| **Generic Feature Encoder v3** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts` | Request Context (Action multi-hash 16, EffectStep multi-hash 16, metadata, key cards) + Generic Selection (Unit, Card, Assignment, Player, Ratio) |
 | **Viewer-relative Encoding** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `DecisionFeatureEncoder` (相手Life 10+、伏せカード秘匿、相手裏向き切札/防壁秘匿、未開封パック中身秘匿) | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureObservationPrivacyV2.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断 |
-| **Decision DNA v1 format (v2 Schema Compatible)** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 6060次元 (Pattern 60, Interaction 6000), v1 DNA は fail-closed 拒絶 |
+| **Decision DNA v1 format (v3 Schema Compatible)** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 18204次元 (Pattern 111, Interaction 18093), 旧 v1/v2 DNA は fail-closed 拒絶 |
 | **Standard + Pack Target Foundation** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/regulation/OfficialRegulationMatchSetup.ts` | `src/tests/ai/standardPackGenomeE2E.test.ts` | official:standard-pack での Genome 対戦・決定論・Pack観測・turnCount進行 E2E 完走 |
 | **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
 | **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
@@ -68,375 +70,111 @@
 
 ---
 
-## 2. Match Snapshot & Resume Foundation (Phase 1.2.1)
+## 2. Feature Coverage Table (13 カテゴリ)
 
-```text
-GameSession (WAITING_FOR_DECISION などの Stable Boundary)
-    ↓
-session.createSnapshot() ──> GameSessionSnapshot (JSON-safe DTO, Version: 1)
-    │                         ├─ metadata (matchId, rulePackageRef: RulePackage.id, rulesVersion: RulePackage.version, createdAt)
-    │                         ├─ gameState (Raw GameState clone)
-    │                         ├─ gameStateHash ("sh2-..." State Hash v2)
-    │                         ├─ session (consecutivePassCount, pendingDecision, continuation, resolvingRequest, resolvingContext)
-    │                         └─ matchLog (CanonicalMatchLog prefix)
-    ↓
-JSON.stringify(snapshot) / JSON.parse(json) (JSON Round-Trip 保証)
-    ↓
-GameSession.fromSnapshot(snapshot, rulePackage) (検証: Version, 必須フィールド, State Hash 照合, RulePackage id/version 照合)
-    ↓
-Restored GameSession (同じ DecisionResponse を適用して Original と同一の GameState 遷移を再開)
-```
-
----
-
-## 3. Batch Simulation & Failure Isolation Foundation (Phase 1.3 / 1.3.1)
-
-```text
-BatchSimulationRunner.run(options)
-    │
-    ├─ 0. validateOptions(options) ──> 不正設定は即時 throw (BatchSimulationConfigurationError, ファクトリ未呼出)
-    │
-    ├─ for matchIndex = 0 .. matchCount - 1:
-    │     │
-    │     ├─ planMatch(baseSeed, matchIndex)
-    │     │     ├─ matchSeed = deriveSeed(baseSeed, matchIndex, "match")
-    │     │     ├─ p1Seed    = deriveSeed(baseSeed, matchIndex, "p1")
-    │     │     └─ p2Seed    = deriveSeed(baseSeed, matchIndex, "p2")
-    │     │
-    │     ├─ try {
-    │     │     session  = options.sessionFactory(context)   // fresh instance (別オブジェクト参照)
-    │     │     policies = options.policyFactory(context)    // fresh instance with derived seeds
-    │     │     result   = SimulationRunner.run(session, policies, { maxDecisions })
-    │     │  } catch (err) {
-    │     │     record BatchFailureRecord (phase, error, seeds)
-    │     │     continue next match (Failure Isolation)
-    │     │  }
-    │     │
-    │     └─ compact BatchMatchResult (COMPLETED | INCOMPLETE | FAILED) (durationMs は分離)
-    │
-    ├─ calculateSummary() ──> BatchSimulationSummary (totalExecutionTimeMs は分離)
-    └─ runtimeMetrics     ──> BatchSimulationRuntimeMetrics (非決定論的実行時メトリクス)
-```
+| カテゴリ | カバレッジステータス | 説明・実装実態 |
+|---|---|---|
+| **1. Board Context** | **FULL** | 盤面全体、ターン進行、ライフ、手札統計、フィールドユニット、フォグ、切札、墓地、パック、レア、相対差分（100次元） |
+| **2. Request Source** | **FULL** | `request_has_source`, `is_action`, `is_effect`, `is_zone_top`, コントローラー相対関係 (self/opponent) (6次元) |
+| **3. Source Action Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット multi-hash (FNV-1a + Murmur3 fmix 3-hash 方式、現行37種無衝突) |
+| **4. Effect Step Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット multi-hash (主要ステップ無衝突) |
+| **5. Source Request Semantics** | **FULL** | speed (normal/immediate/other), timing (main/quick/block/damage_judge/other), visible key-card aggregate (count, known, value sum/max/min), target semantics (25次元) |
+| **6. Target Selection** | **FULL** | targetType (player/unit/request/none/other), targetOwner (self/opponent), target unit size, charge, drive, face up/down (13次元) |
+| **7. Key Card / Key Unit** | **FULL** | key card (count, known, values, suits), key unit (count, size sum/max, charge, drive, face) (19次元) |
+| **8. Effect Unit Selection** | **FULL** | unit count, self/opp count, charge, drive, face up/down, size sum/max/min, attacker, blocker (12次元) |
+| **9. Effect Card Selection** | **FULL** | `KnownCardAggregateEncoder` 再利用による card count, known count, suits, ranks, value sum/max/min, pair, multiplicity (17次元) |
+| **10. Unit Assignment** | **FULL** | source/selected count, source/selected size sum/max/min, size delta sum, positive/negative delta count, self->opp, opp->self (13次元) |
+| **11. Selection Coverage Ratio** | **FULL** | candidate count, selected count, coverage ratio (3次元) |
+| **12. Order Selection** | **PARTIAL** | `has_order_selection`, `ordered_item_count` (2次元)。複雑な順序特徴量は安定性のため将来拡張 |
+| **13. Effect Result Context** | **DEFERRED** | 現シミュレータでは sourceAction / effectStep / board observation で判断局面を100%一意に識別可能なため未導入。多段階複合効果の途中事実が必要になった段階で設計 |
+| **14. Privacy Boundary** | **FULL** | 相手手札中身、相手伏せ防壁/切札、未公開サイズ、未開封パック中身、相手Life 10+ を完全秘匿 |
 
 ---
 
-## 4. Decision Feature Contract v1 & Generic Feature Encoder (Phase 3.0 / Phase 3.0.1 完了状態)
-
-AI の実装安全性を高めるため、Phase 3.0 ではまず Feature Contract / Generic Encoder を確立し、DNA 形式・Genome Policy の実装を Phase 3.1 へ分離しました。さらに Phase 3.0.1 において視点対称性、実 Core 連携、ID 不変性の検証保証を補強しました。
+## 3. Decision Feature Schema v3 & Request-Conditioned Scoring (Phase 3.0 / 3.1)
 
 ### アーキテクチャとデータフロー
 ```text
-DecisionRequest (合法的AI入力境界: observation + catalog + patterns)
+DecisionRequest (合法的AI入力境界: observation + catalog + patterns + source)
     ↓
 DecisionFeatureEncoder.encode(request)
     │
-    ├─ Context Features (25次元, Viewer-Relative, Secret-Safe)
-    │     ├─ Decision Source (ACTION_REQUEST / EFFECT_RESOLUTION)
-    │     ├─ Turn / Chance Relative Roles (self / opponent)
-    │     ├─ Stage Depth
-    │     ├─ Legal Pattern Counts (total, action, pass, effect)
-    │     ├─ Self Public State (life, hand, field, fog, trump, grave)
-    │     └─ Opponent Public State (life visible/is10plus, hand, field, fog, trump, grave)
+    ├─ Context Features (163次元, Viewer-Relative, Secret-Safe)
+    │     ├─ Decision Context (8次元)
+    │     ├─ Legal Pattern Counts (11次元)
+    │     ├─ Self Public State: Hand / Field / Grave / Pack / Rare / Fog / Trump (45次元)
+    │     ├─ Opponent Public State (26次元)
+    │     ├─ Relative State (10次元)
+    │     └─ Request Context (63次元)
+    │           ├─ Source Existence & Controller Relation (6次元)
+    │           ├─ Source Action Stable Identity (16 buckets)
+    │           ├─ Source Effect Step Stable Identity (16 buckets)
+    │           ├─ Source Action Metadata: Speed & Timing (8次元)
+    │           ├─ Source Key Cards Aggregate (5次元)
+    │           └─ Source Target Semantics (12次元)
     │
-    └─ Pattern Features (各パターン 57次元, Generic Traits)
-          ├─ Pattern Kind (action, pass, effect_selection, other)
-          ├─ Action Metadata (speed: normal/immediate/other, timing: main/quick/block/damage_judge/other)
-          ├─ Cost Payment (discard count, bulwark count, sacrifice count, life count)
-          ├─ Key Card (count, known count, value sum, value max, spade/heart/diamond/club count)
-          ├─ Key Unit (count, size sum, size max, charge/drive, face up/down)
-          ├─ Target (player/unit/request/none, self/opponent, target unit size/state/face)
-          ├─ Effect Selection (unit/assignment/other, value count, assignment count, unit total)
-          └─ Order Selection (ordered item count)
+    └─ Pattern Features (各パターン 111次元, Generic Traits)
+          ├─ Pattern Kind (4次元)
+          ├─ Action Metadata (9次元)
+          ├─ Cost Payment (6次元)
+          ├─ Key Card (11次元)
+          ├─ Key Unit (8次元)
+          ├─ Target (13次元)
+          ├─ Effect Selection Base Metadata (7次元)
+          ├─ Generic Effect Unit Selection (12次元)
+          ├─ Generic Effect Card Selection (17次元)
+          ├─ Generic Effect Player / Request (6次元)
+          ├─ Generic Effect Unit Assignment (13次元)
+          ├─ Selection Coverage Ratio (3次元)
+          └─ Order Selection (2次元)
     ↓
-EncodedDecisionFeatures (featureSchemaVersion: 1, JSON-Safe, Finite Numbers)
-```
-
-### Feature Schema v1 定義一覧
-
-#### Context Feature Names (25次元)
-1. `source_is_action_request`
-2. `source_is_effect_resolution`
-3. `self_is_turn_player`
-4. `self_is_chance_player`
-5. `opponent_is_turn_player`
-6. `opponent_is_chance_player`
-7. `stage_depth`
-8. `legal_pattern_count`
-9. `legal_action_pattern_count`
-10. `legal_pass_pattern_count`
-11. `legal_effect_selection_pattern_count`
-12. `self_life_count`
-13. `self_hand_count`
-14. `self_field_count`
-15. `self_fog_count`
-16. `self_trump_count`
-17. `self_grave_count`
-18. `opponent_life_known`
-19. `opponent_life_visible_count`
-20. `opponent_life_is_10plus`
-21. `opponent_hand_count`
-22. `opponent_field_count`
-23. `opponent_fog_count`
-24. `opponent_trump_count`
-25. `opponent_grave_count`
-
-#### Pattern Feature Names (57次元)
-1. `pattern_is_action`
-2. `pattern_is_pass`
-3. `pattern_is_effect_selection`
-4. `pattern_is_other`
-5. `has_action`
-6. `action_speed_normal`
-7. `action_speed_immediate`
-8. `action_speed_other`
-9. `action_timing_main`
-10. `action_timing_quick`
-11. `action_timing_block`
-12. `action_timing_damage_judge`
-13. `action_timing_other`
-14. `has_cost`
-15. `cost_discard_count`
-16. `cost_driven_bulwark_count`
-17. `cost_sacrificed_unit_count`
-18. `cost_life_count`
-19. `has_key_card`
-20. `key_card_count`
-21. `key_card_known_count`
-22. `key_card_value_sum`
-23. `key_card_value_max`
-24. `key_card_spade_count`
-25. `key_card_heart_count`
-26. `key_card_diamond_count`
-27. `key_card_club_count`
-28. `has_key_unit`
-29. `key_unit_count`
-30. `selected_unit_size_sum`
-31. `selected_unit_size_max`
-32. `selected_unit_charge_count`
-33. `selected_unit_drive_count`
-34. `selected_unit_face_up_count`
-35. `selected_unit_face_down_count`
-36. `has_target`
-37. `target_is_player`
-38. `target_is_unit`
-39. `target_is_request`
-40. `target_is_none`
-41. `target_is_other`
-42. `target_is_self`
-43. `target_is_opponent`
-44. `target_unit_size`
-45. `target_unit_is_charge`
-46. `target_unit_is_drive`
-47. `target_unit_face_up`
-48. `target_unit_face_down`
-49. `has_effect_selection`
-50. `effect_type_unit`
-51. `effect_type_unit_assignment`
-52. `effect_type_other`
-53. `effect_selected_value_count`
-54. `effect_assignment_count`
-55. `effect_assigned_unit_total`
-56. `has_order_selection`
-57. `ordered_item_count`
-
-### Privacy & Versioning Contract
-1. **Privacy Contract**:
-   - `DecisionFeatureEncoder` の入力は `Readonly<DecisionRequest>` のみ。
-   - `GameState`, `GameSession`, `Snapshot`, `RulePackage` への直接アクセス・裏口参照は禁止。
-   - 相手手札の非公開カード、相手伏せ防壁、相手Life 10枚以上時の正確な枚数は完全に秘匿。
-   - 実行時動的 ID (`decisionId`, `matchId`, `opaqueCardId`, `cardInstanceId`, `unitId` 等の文字列) や表示用文字列 (`player.name`, `actionName`, `displayName`, `summary`) は特徴量値として使用禁止。
-   - すべての特徴量値は有限数値 (`Number.isFinite(v) === true`)。
-2. **Versioning Contract**:
-   - 特徴量の意味論や次元数を変更する場合にのみ `featureSchemaVersion` をインクリメント (例: v2)。
-   - 単なる新規 Action や Component の追加（既存 DSL で表現可能）では、固定次元数・汎用メタデータにより `featureSchemaVersion: 1` を維持。
-3. **Master + Extra 互換原則**:
-   - `action.attack` などの特定アクション名や component ID のハードコード、Action ID のハッシュバケット特徴量は一切使用しません。
-   - 将来より高度な Action 意味理解が必要な場合は、Action ID hardcode ではなく汎用的な semantic traits として別途設計します。
-
-### Phase 3.0.1 検証保証
-1. **Full Viewer Symmetry 保証**:
-   - Context 特徴量だけでなく全 Pattern 特徴量ベクトル（および `logicalPatternKey`）について、鏡像関係の盤面・カタログでプレイヤー視点（viewer）が入れ替わった場合でも、相対特徴量が 100% 完全一致することをテスト検証。
-2. **実 GameSession EFFECT_RESOLUTION 統合保証**:
-   - 手動作成（synthetic）の `EFFECT_SELECTION` のみならず、実際の `GameSession` の Stage 解決フロー（Attack 宣言 $\rightarrow$ P1 PASS $\rightarrow$ P2 PASS）から生成された `source.type === "EFFECT_RESOLUTION"` の `DecisionRequest` を `DecisionFeatureEncoder` でエンコードし、固定次元数・有限数値・`source_is_effect_resolution: 1`・`pattern_is_effect_selection: 1` が成立することをテスト検証。
-3. **Runtime / Presentation / Opaque / ID Rename 不変性保証**:
-   - Context および全 Pattern 特徴量ベクトルについて、実行時動的 ID (`decisionId`, `matchId`, `stateVersion`)、表示用文字列 (`player.name`, `actionName`, `displayName`, `summary`)、非公開カード Opaque ID (`opaqueCardId`)、および参照関係を維持したエンティティ ID 一括リネーム (`cardInstanceId`, `unitId`) に対し、全数値特徴量が 100% 一致することをテスト検証。
-
----
-
-## 5. Decision DNA v1 & Deterministic Genome Policy (Phase 3.1)
-
-### Decision DNA v1 Architecture
-```text
-EncodedDecisionFeatures (Context Vector 25次元 + Pattern Vectors 57次元)
+EncodedDecisionFeatures (featureSchemaVersion: 3, JSON-Safe, Finite Numbers)
     ↓
 GenomeScorer (Pure Functional / Stateless)
     score(p) = Σ w_j * p_j + Σ Σ M_ij * c_i * p_j
-    (Pattern Weights: 57次元 + Context-Pattern Interaction Weights: 1425次元 = 計 1482 重み)
+    (Pattern Weights: 111次元 + Context-Pattern Interaction Weights: 163 * 111 = 18093次元 = 計 18204 重み)
     ↓
-Deterministic Argmax Selection
-    - 最高スコアの合法手 (pattern) を選択
-    - 同点時は最小 patternRef インデックスを優先 (RNG 非依存の完全決定論的タイブレーク)
-    ↓
-DecisionResponse (Action / Pass / EffectSelection)
+Deterministic Argmax Selection (タイブレーク: 最小 patternRef)
 ```
 
-### DNA Structure & Validation Contract
-1. **Version & DTO Contract**:
-   - `dnaFormatVersion: 1`, `featureSchemaVersion: 1`, `scoringModel: "linear-bilinear-v1"`
-   - `contextDimension: 25`, `patternDimension: 57`, `totalWeights: 1482`
-   - `patternWeights: number[]` (57次元)
-   - `contextPatternWeights: number[]` (1425次元, row-major: `c_idx * 57 + p_idx`)
-   - `DecisionDNACodec.validate(dna)` による厳格な次元・有限数値 (NaN / Infinity 除外) 検証
-   - `DecisionDNACodec.clone(dna)` による外部 mutation からの完全保護
-2. **Context-only Additive Weight を除外する数学的根拠**:
-   - 行動選択は $\arg\max_{p \in \mathcal{P}} \text{score}(p)$ で行われる。
-   - 仮に Context 単独のバイアス項 $\sum_{i} u_i c_i$ を加算した場合、同一リクエスト内のすべての合法手 $p$ に対してこの値は同一の定数値 $C = \sum_{i} u_i c_i$ となる。
-   - 任意の定数 $C$ に対して $\arg\max_p (\text{score}(p) + C) = \arg\max_p \text{score}(p)$ が常に成立するため、Context 単独バイアスは行動順位付けに一切寄与せず相殺される（識別不能な Dead Weight）。
-   - パラメータの冗長性排除と探索空間の最小化のため、Context 単独重みはモデルから完全に除外している。
-3. **RNG 独立性 & 決定論的タイブレーク**:
-   - `GenomePolicy` は乱数源 (`RandomSource`) を一切必要とせず、乱数消費も発生しない純粋決定論的写像 `(DecisionRequest, DecisionDNA) -> DecisionResponse` を実現。
-   - 複数手が同点（重みゼロの初期状態を含む）の場合は、`DecisionRequest.legalPatterns` における最小の `patternRef`（先頭合法手）を一意に選択する。
-4. **Master + Extra 互換原則**:
-   - 特定の Action タイプやルールの決め打ちを行わず、`DecisionFeatureEncoder` が生成する汎用特徴量に対して重み付けを行うため、ルール拡張（Master / Extra）に対しても同一 DNA 構造で完全動作。
-5. **DNA Artifact 保存と分離契約**:
-   - 1482 重みは DNA 単体 JSON アーティファクトとして保存・管理され、Match Log や `PolicyDescriptor` の内部にはシリアライズされない。
-   - `PolicyDescriptor.metadata` には `dnaFormatVersion`, `featureSchemaVersion`, `scoringModel`, `dnaId`, `dnaName` などの軽量メタデータのみを保持し、Canonical Match Log や State Hash の肥大化を防止。
+### Request-Conditioned Scoring の設計根拠 (Down vs Up)
+従来の Feature Schema v2 では「何個選んだか」「選んだユニットのサイズ」は観測できたものの、「どの Action や Request の効果として選んでいるか」が弱かったため、例えば：
+- Down でサイズ8の兵士を選ぶ（裏向き配置）
+- Up でサイズ8の兵士を選ぶ（表向き配置）
+という全く異なる判断が同一盤面で同一の重み評価を受ける制約がありました。
 
-### DNA JSON Artifact Contract & Validation (Phase 3.1.1)
-1. **JSON-Safe Metadata Contract**:
-   - `DecisionDNAMetadata` に含まれるすべてのプロパティ値は厳格に `JSONValue`（`string`, 有限 `number`, `boolean`, `null`, `readonly JSONValue[]`, プレーンオブジェクト `{ [key: string]: JSONValue }`）に限定されます。
-   - `number` 型は `Number.isFinite(v) === true` を必須とし、`NaN`, `Infinity`, `-Infinity` は即座に `DecisionDNAValidationError` として拒絶されます（JSON シリアライズ時の `null` 縮退を防止）。
-   - `BigInt`, `function`, `Symbol`, `Date`, `RegExp`, `Map`, `Set`, カスタムクラスインスタンス、および循環参照（cyclic reference）は厳格に禁止・拒絶されます。
-2. **Recursive Validation & Cycle Detection**:
-   - `DecisionDNACodec.validateMetadata()` により、ネストされた配列・オブジェクトを再帰的に検証します。
-   - 探索パス集合（active traversal path）を用いたサイクル検知により、循環参照を含む構造に対しても無限再帰やスタックオーバーフローを起こさず即座に例外をスローします。
-3. **Deep Clone Isolation**:
-   - `DecisionDNACodec.clone()` は、重み配列だけでなく `metadata` 内のネストされた配列およびオブジェクトを再帰的にディープクローンします。
-   - クローンされた DNA や `GenomePolicy.getDNA()` の戻り値、または Policy 生成後の呼び出し元 DNA のプロパティを変更しても、元の DNA および Policy 内部の DNA との間に参照共有は一切残りません。
-4. **Metadata Scoring Independence**:
-   - `metadata` は管理・記録（世代、適応度、タグ、実験パラメータ等）のための純粋なメタ情報であり、`GenomeScorer.score` および `GenomePolicy.choose` の行動選択には一切関与しません。
-   - `metadata` の有無や内容変更によって、出力されるスコアベクトルおよび `selectedPatternRef` は 100% 不変です。
-### Factory Entry Validation (Phase 3.1.2)
-1. **先行 Validation 順序の強制**:
-   - `DecisionDNACodec.createZeroDecisionDNA(metadata)` は、`metadata !== undefined` の場合、ディープクローン処理 (`deepCloneMetadata`) を呼び出す前に必ず `validateMetadata(metadata)` を先行実行します。
-   - 不正な型情報（`Date`, `Map`, `Set`, `RegExp`, カスタムクラスインスタンス等）がクローン処理でプレーンオブジェクト `{}` 等へ変形・偽装されてバリデーションを通過する脆弱性を完全に排除しました。
-2. **Cycle Safety & Runtime Protection**:
-   - 循環参照（cyclic metadata）が公開 Factory 入口に渡された場合でも、クローンによる無限再帰やスタックオーバーフロー (`RangeError: Maximum call stack size exceeded`) を起こさず、閉路検知により即座に `DecisionDNAValidationError` として安全に拒絶されます。
-3. **厳格な型境界**:
-   - `if (metadata)` のような truthy 判定を廃止し、`if (metadata !== undefined)` による厳格判定を採用。`null` や `array` などの不正値が渡された場合も、サイレントに `undefined` 扱いすることなく確実に `DecisionDNAValidationError` として拒絶されます。
-4. **シミュレータ実装言語の原則**:
-   - BlackPoker Simulator の実装、テスト、補助スクリプト、検証ロジック、データ変換は原則として **TypeScript / Node.js** へ統一します。
-   - ユーザーからの明示的な承認がない限り、Python（`.py` スクリプト、仮想環境、pytest 等）は一切使用・導入しません。
+Feature Schema v3 では、Request Context に `request_action_bucket_*` および `request_effect_step_bucket_*` を導入したことにより：
+- Down リクエスト $\times$ サイズ8の選択
+- Up リクエスト $\times$ サイズ8の選択
+が異なる Context $\times$ Pattern 相互作用重み ($M_{ij}$) を持つことが可能となり、DNA が「Down では小型、Up では大型」を自然に学習・差別化できるようになりました（`decisionFeatureDownUpScorer.test.ts` にて Scorer レベルで直接証明済み）。
+
+Action ID や Effect Step ID に対する個別 one-hot カラムや手動 if 分岐は一切導入せず、固定長 multi-hash (StableIdentityEncoder) と汎用メタデータによって表現されているため、将来 Master や Extra で新アクションが追加されても Feature Schema の変更や DNA の次元数変更は不要です。
 
 ---
 
-## 6. Policy Experiment Harness & Baseline Evaluation (Phase 3.2)
+## 4. Privacy & Versioning Contract
 
-### 1. 階層アーキテクチャ（第二のシミュレーションループを作らない）
-```text
-PolicyExperimentRunner
-        ↓ (Leg 1 & Leg 2 のバッチ実行)
-BatchSimulationRunner.run()
-        ↓ (各試合の実行)
-SimulationRunner.run()
-        ↓
-GameSession
-```
-- 実験専用のゲーム進行ループは一切新設せず、既存の `BatchSimulationRunner.run()` をそのまま再利用します。
-- `GameSession`, `Core Flow`, `Stage`, `Chance`, `Observation`, `BatchSimulationRunner` 本体は変更しません。
-
-### 2. Seat Swap 契約 & 決定論的 Paired Match Plan
-- 基本単位: Participant A vs Participant B の Pairwise 実験。
-- **Leg 1**: `p1 = A, p2 = B`（LegId: `"leg-a-as-p1"`）
-- **Leg 2**: `p1 = B, p2 = A`（LegId: `"leg-b-as-p1"`）
-- **同一Seed群保証**: Leg 1 と Leg 2 は同一の `baseSeed` および `matchesPerSeat` で計画され、同一 `matchIndex` で `matchSeed` と `playerSeeds` が完全に一致します。
-- これにより、BlackPoker の先攻・後攻バイアスを完全に分離し、ポリシー自身の選択性能を公平に比較評価します。
-
-### 3. 論理結果と実行時・診断メトリクスの完全分離
-- **Logical Experiment Result**:
-  - `experimentResultVersion: 1`
-  - `PolicyExperimentLogicalFailure` には `matchIndex`, `matchId`, `baseSeed`, `matchSeed`, `playerSeeds`, `phase`, `errorName` のみを保持。
-  - 実行時動的生成文字列（`decisionId` 等）が含まれ得る `errorMessage` およびスタックトレース `errorStack` は Logical Result から厳格に排除し、`PolicyExperimentRuntimeMetrics` / 診断領域へ分離。
-  - 関数（`sessionFactory`, `policyFactory`）や Genome の 1482 重み配列は結果 JSON に保持せず、参照情報（`id`, `name`, `artifactRef`）のみを保存。
-  - 同一設定での再実行時、`JSON.stringify(logicalResult)` は 100% 決定論的に一致します。
-
-### 4. Outcome Summary 保存則 & ステータス分離
-- **保存則保証**:
-  - `wins + losses + draws === completedMatches`
-  - `completedMatches + incompleteMatches + failedMatches === scheduledMatches`
-- **ステータス厳格分離**:
-  - `INCOMPLETE`（最大判断回数到達等）および `FAILED`（例外発生）は **Draw（引き分け）には数えません**。
-  - `winRateOnCompleted` の分母は `completedMatches` のみとします。
-
-### 5. 汎用 Decision Behavior 計測
-- 軽量ラッパー `DecisionBehaviorObserverPolicy` により、意思決定の選択内容（`selectedPatternRef`）を 100% 透過しつつ、外部 Accumulator へ意思決定を通知。
-- Action 固有の名称や Component ID（`action.attack` 等）は集計せず、汎用パターン種別（`ACTION`, `PASS`, `EFFECT_SELECTION`, `OTHER`）および決定元（`ACTION_REQUEST`, `EFFECT_RESOLUTION`）のみを集計。
-- 母集団は `COMPLETED`, `INCOMPLETE`, `FAILED` にかかわらず、観測されたすべての正常意思決定を対象とします（0件時は rate = 0）。
-
-### 6. 単一 Fitness の未定義 & Evolution 前段階の明記
-- Phase 3.2 では単一の Composite Fitness（`winRate * 0.7 + ...`）や適応度関数は一切定義していません。
-- 目的は「強い AI を作ること」や「進化させること」ではなく、**「ポリシー間の行動差と勝敗傾向を正確かつ決定論的に測る観測基盤」** を確立することです。
-
-### 7. Genome 実験結果の完全再現要件
-- 実験結果の完全再現には、以下が必要です:
-  - 実験設定（`baseSeed`, `matchesPerSeat`, `maxDecisionsPerMatch`）
-  - ルール環境（`environmentRef`, `RulePackage`）
-  - 各 Participant の Policy 実装
-  - Genome Policy の場合は、外部保存された **Decision DNA JSON Artifact**（1482 weights + metadata）
-
-### 8. Master + Extra 互換原則
-- Experiment Harness（`PolicyExperimentRunner`, `DecisionBehaviorObserverPolicy`）は特定のアクションIDやコンポーネント定義を一切直接解釈しません。
-- 既存 Core / Decision / Feature Schema で表現可能なアクション追加（Master + Extra DSL）に対して、Experiment Harness の改修は原則不要です。
+1. **Privacy Contract**:
+   - `DecisionFeatureEncoder` の入力は `Readonly<DecisionRequest>` のみ。
+   - `GameState`, `GameSession`, `Snapshot`, `RulePackage` への直接アクセス・裏口参照は厳禁。
+   - 相手手札の非公開カード、相手伏せ防壁/切札、相手裏向きユニットの `currentSize`、相手Life 10枚以上時の正確な枚数、未開封パックの中身は完全に秘匿。
+   - 実行時動的 ID (`decisionId`, `matchId`, `opaqueCardId`, `cardInstanceId`, `unitId` 等の文字列) や表示用文字列 (`player.name`, `actionName`, `displayName`, `summary`) は特徴量値として使用禁止。
+   - すべての特徴量値は有限数値 (`Number.isFinite(v) === true`)。
+2. **Versioning & Fail-Closed Contract**:
+   - `FEATURE_SCHEMA_VERSION = 3`, `DNA_FORMAT_VERSION = 1`, `scoringModel: "linear-bilinear-v1"`。
+   - 旧 v1 DNA (`featureSchemaVersion: 1`) および 旧 v2 DNA (`featureSchemaVersion: 2`) は、暗黙の zero padding やマイグレーションを行わず、`DecisionDNAValidationError` により **Fail-Closed で拒絶** されます。
+3. **Master + Extra 互換原則**:
+   - 特定の Action ID に対する手動ルール（`if (actionId === "action.down")` 等）は一切使用しません。
+   - 新規 Action や Trump 追加時も、`StableIdentityEncoder` の固定長 multi-bucket hashing によりスキーマ変更不要で即座に観測・学習可能です（`action.synthetic.alpha/beta` による実証済み）。
 
 ---
 
-## 7. Official Regulation Environment (Official Regulation Phase 1.0)
+## 5. Future Architecture (Phase 4.0 予定)
 
-### 1. CORE-BATTLE-001 と公式レギュレーションの分離
-- **CORE-BATTLE-001 の位置づけ**:
-  - `CORE-BATTLE-001` はシミュレータの Core Flow、Stage、決定論、Snapshot、Batch、Feature Encoder、Experiment Harness 等の内部エンジニアリング検証を目的とした人工的な最小対戦環境です。
-  - **`CORE-BATTLE-001` による勝敗、性能、メトリクス結果は、BlackPoker の公式なゲームバランス評価や AI 性能評価としては扱いません**。
-- **公式レギュレーション（Light + Entry16）の確立**:
-  - BlackPoker 公式ルール（第9.1.2版）に準拠した初の公式対戦環境「ライト（Format）」+「エントリー16（Frame）」を E2E 構築しました。
-  - 今後の AI ポリシー評価、強化学習、自己対戦実験は本公式レギュレーション環境を基準として行われます。
-
-### 2. Format と Frame の分離と合法性
-- **ルール上の合法性と推奨の分離**:
-  - 公式ルール 2.3 に基づき、すべての Format と Frame の組み合わせはルール上合法（`ruleLegal: true`）として扱われます。
-  - 推奨レギュレーション（Table 2.1）は `recommendedFormatIds` として表現され、非推奨の組み合わせもルール違反（`RULE_INVALID`）ではなく `NOT_RECOMMENDED` と判定されます。
-  - Simulator Phase 1.0 で未実装の組み合わせ（Standard/Pro/Master）については、ルール違反ではなく `SIMULATOR_NOT_IMPLEMENTED` としてフェイルファストします。
-
-### 3. エントリー16 プレゲームセットアップ
-- **固定16枚デッキ & カード保存則**:
-  - 各プレイヤーは指定の16枚（♠A,2,3,K, ♡4,7,J,Q, ♢5,8,10,Q, ♣A,6,9,K; Jokerなし）をデッキとして使用。
-  - シード付きシャッフルを経て、全16枚を Life ゾーンへ配置。
-  - Life から7枚を初期手札として引く。
-  - 防壁プリセット: Life から1枚を裏向き防壁として配置。
-  - 兵士プリセット: Life の一番上から条件に合致する1枚を取り出し、初期兵士として配置。不適格なカードの場合は墓地へ送り、Life の一番上から再試行。Life が枯渇した場合は公式ルール 3.9.1 の規定に基づきゲーム上の敗北（SetupOutcome: TERMINAL）として処理。
-  - 先攻決定後、先攻プレイヤーが Life から1枚ドローしてゲーム開始。先攻決定中またはゲーム開始ドロー時に Life が枯渇した場合は公式ルール第9.1.2版に勝敗規定が存在しないため勝敗を推測せず SetupOutcome: RULE_UNSPECIFIED として処理。
-  - 各プレイヤーの全カード枚数（Hand + Field + Bulwark + Life + Grave）はゲーム中常に厳格に 16 枚を保存。
-
-### 4. アタック制限ルール（プリセット兵 vs 召喚兵）
-- **プリセット兵（`enteredFieldBeforeGame: true`）**:
-  - ゲーム開始前から戦場に配置されているため、Turn 1 / 自身の最初のターンから通常通り攻撃宣言可能。
-- **ゲーム中召喚兵（`enteredFieldTurn === currentTurn`）**:
-  - 召喚されたターン中は攻撃不可（チャージ状態であっても不可、同ターン内に再チャージされても不可）。
-  - ただし、エース（Ace）等の即時攻撃能力（`<速攻>` / haste）を持つユニットは召喚ターンでも攻撃可能。
-
-### 5. Policy Experiment Harness とのシームレス統合
-- `OfficialRegulationMatchFactory.createSessionFactory()` は、Phase 3.2 の `PolicyExperimentRunner` や `BatchSimulationRunner` に渡す `sessionFactory` を直接生成できます。
-- これにより、公式レギュレーション下での Pairwise AI 対戦実験（Leg 1/2 の座席入替、同一シード決定論評価）が追加実装なしで即座に実行可能です。
-
----
-
-## 8. Future Architecture (Phase 4.0 予定)
-
-### Self-Play Evolution Cycle (Phase 4.0 予定)
+### Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
 1. **Population**: 100 DNA
 2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価
 3. **Fitness Evaluation**: 勝率、平均ターン数、ライフ残量、対戦成果に基づく適応度評価
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
-
-
