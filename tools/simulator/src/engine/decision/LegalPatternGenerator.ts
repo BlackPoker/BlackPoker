@@ -458,7 +458,7 @@ export class LegalPatternGenerator {
     const matchId = options?.matchId ?? (state.matchId || "match-1");
     const decisionId = options?.decisionId ?? `dec-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     // 候補ユニット群から空集合を含む 2^N 通りの組み合わせ（全部分集合）を列挙
     const powerSet = this.getPowerSet(candidates);
@@ -472,10 +472,11 @@ export class LegalPatternGenerator {
         ? "アタッカーなし (0体)"
         : `アタッカー: ${subset.map((u) => u.kind || u.unitId).join(", ")}`;
 
-      const effSel = {
+      const effSel: EffectSelection = {
         selectionType: "unit",
         selectedValues,
         summary,
+        candidateCount: candidates.length,
       };
       effectSelections.push(effSel);
 
@@ -533,7 +534,7 @@ export class LegalPatternGenerator {
     const matchId = options?.matchId ?? (state.matchId || "match-1");
     const decisionId = options?.decisionId ?? `dec-tgt-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     const effectSelections: EffectSelection[] = [];
     const targetSelections: TargetSelection[] = [];
@@ -556,6 +557,7 @@ export class LegalPatternGenerator {
         selectionType: "target",
         targetSelection: target,
         summary,
+        candidateCount: candidates.length,
       };
       const effRef = effectSelections.length;
       effectSelections.push(effSel);
@@ -618,7 +620,7 @@ export class LegalPatternGenerator {
     const matchId = options?.matchId ?? (state.matchId || "match-1");
     const decisionId = options?.decisionId ?? `dec-card-eff-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     // candidates から requiredCount 枚の組み合わせ（k-combinations）を生成
     const combos = this.getCombinations(candidates, Math.min(requiredCount, candidates.length));
@@ -648,11 +650,12 @@ export class LegalPatternGenerator {
         code: c.code,
       }));
 
-      const effSel = {
+      const effSel: EffectSelection = {
         selectionType: "card",
         selectedValues,
         summary,
         cards,
+        candidateCount: candidates.length,
       };
       effectSelections.push(effSel);
 
@@ -716,7 +719,7 @@ export class LegalPatternGenerator {
     const selectionId = extraOptions?.selectionId || effectStepId || "option";
     const validated = validateOptionSelectionDefinition({ id: selectionId, options });
 
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     const effectSelections: any[] = [];
     const patterns: LegalPattern[] = [];
@@ -725,10 +728,11 @@ export class LegalPatternGenerator {
       const selectedValues = [opt.value];
       const summary = opt.label || `選択: ${opt.value}`;
 
-      const effSel = {
+      const effSel: EffectSelection = {
         selectionType: "option",
         selectedValues,
         summary,
+        candidateCount: validated.options.length,
       };
       effectSelections.push(effSel);
 
@@ -798,7 +802,7 @@ export class LegalPatternGenerator {
       ? options!.currentSelections![selectionId]
       : [];
 
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     // 未決定の候補カード群
     const remainingCards = candidates.filter((c) => !partialOrder.includes(c.id));
@@ -878,7 +882,7 @@ export class LegalPatternGenerator {
     const decisionId = `dec-eff-${sourceRequest.id}-${effectStepId}-${Date.now()}`;
     const stateVersion = state?.stateVersion ?? state?.version ?? 1;
     const matchId = state?.matchId ?? "match-local";
-    const observation = ObservationFactory.createObservation(state, playerId);
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
 
     // アタッカー群に対するブロッカー割当ての全合法パターンをバックトラッキングで列挙
     const allAssignments: UnitAssignment[][] = [];
@@ -970,6 +974,7 @@ export class LegalPatternGenerator {
         selectionType: "unitAssignment",
         assignments,
         summary,
+        candidateCount: candidateBlockers.length,
       });
 
       patterns.push({

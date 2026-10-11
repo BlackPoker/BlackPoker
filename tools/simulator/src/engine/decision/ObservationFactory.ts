@@ -30,7 +30,11 @@ export class ObservationFactory {
   /**
    * 観戦プレイヤー視点の PlayerObservation を生成
    */
-  static createObservation(state: any, viewerPlayerId: PlayerKey): PlayerObservation {
+  static createObservation(
+    state: any,
+    viewerPlayerId: PlayerKey,
+    options?: { currentRequest?: any }
+  ): PlayerObservation {
     const playersView: PlayerObservationView[] = [];
 
     if (state && state.players) {
@@ -178,62 +182,16 @@ export class ObservationFactory {
     if (state && state.stage?.requests && Array.isArray(state.stage.requests)) {
       for (const req of state.stage.requests) {
         stageRequestRefs.push(req.id);
+        stageRequests.push(this.mapRequestToView(req, viewerPlayerId));
+      }
+    }
 
-        let requestKeyCards: CardView[] | undefined = undefined;
-        if (req.keyCards && Array.isArray(req.keyCards) && req.keyCards.length > 0) {
-          const visibilityOnRequest = req.action
-            ? resolveKeyCardVisibilityOnRequest(req.action)
-            : "hidden";
-          const isPublic = visibilityOnRequest === "public";
-          const isController = req.controller === viewerPlayerId;
-
-          requestKeyCards = req.keyCards.map((card: any) => {
-            if (isPublic || isController) {
-              return {
-                visibility: "KNOWN",
-                cardInstanceId: card.id,
-                suit: card.suit,
-                rank: card.rank,
-                value: card.value ?? rankToValue(card.rank),
-                faceUp: true,
-                code: card.code,
-              } as KnownCardView;
-            } else {
-              return {
-                visibility: "HIDDEN",
-                faceUp: false,
-              } as HiddenCardView;
-            }
-          });
-        }
-
-        let requestTarget: TargetView | undefined = undefined;
-        const rawTarget = (req.targets && Array.isArray(req.targets) && req.targets.length > 0)
-          ? req.targets[0]
-          : (req.target || undefined);
-
-        if (rawTarget) {
-          const tType = rawTarget.type || rawTarget.targetType || "other";
-          requestTarget = {
-            targetType: tType,
-            targetPlayerKey: rawTarget.targetPlayerKey || (tType === "player" ? rawTarget.id || rawTarget.playerId : undefined),
-            targetUnitId: rawTarget.unitId || rawTarget.targetUnitId,
-            targetRequestId: rawTarget.requestId || rawTarget.targetRequestId,
-            displayName: rawTarget.displayName || rawTarget.name,
-          };
-        }
-
-        stageRequests.push({
-          requestId: req.id,
-          actionId: req.actionId,
-          actionName: req.action?.name || req.actionId,
-          controller: req.controller,
-          status: req.status,
-          sequence: req.sequence,
-          definitionOwner: req.definitionOwner,
-          keyCards: requestKeyCards,
-          target: requestTarget,
-        });
+    // 即時解決中など、ステージ外の現在解決中リクエストを合法的に補完
+    if (options?.currentRequest && options.currentRequest.id) {
+      const curReq = options.currentRequest;
+      if (!stageRequests.some((r) => r.requestId === curReq.id)) {
+        stageRequestRefs.push(curReq.id);
+        stageRequests.push(this.mapRequestToView(curReq, viewerPlayerId));
       }
     }
 
@@ -376,6 +334,66 @@ export class ObservationFactory {
             blocksUnitId: unit.battle.blocksUnitId,
           }
         : undefined,
+    };
+  }
+
+  private static mapRequestToView(req: any, viewerPlayerId: PlayerKey): RequestView {
+    let requestKeyCards: CardView[] | undefined = undefined;
+    if (req.keyCards && Array.isArray(req.keyCards) && req.keyCards.length > 0) {
+      const visibilityOnRequest = req.action
+        ? resolveKeyCardVisibilityOnRequest(req.action)
+        : "hidden";
+      const isPublic = visibilityOnRequest === "public";
+      const isController = req.controller === viewerPlayerId;
+
+      requestKeyCards = req.keyCards.map((card: any) => {
+        if (isPublic || isController) {
+          return {
+            visibility: "KNOWN",
+            cardInstanceId: card.id,
+            suit: card.suit,
+            rank: card.rank,
+            value: card.value ?? rankToValue(card.rank),
+            faceUp: true,
+            code: card.code,
+          } as KnownCardView;
+        } else {
+          return {
+            visibility: "HIDDEN",
+            faceUp: false,
+          } as HiddenCardView;
+        }
+      });
+    }
+
+    let requestTarget: TargetView | undefined = undefined;
+    const rawTarget = (req.targets && Array.isArray(req.targets) && req.targets.length > 0)
+      ? req.targets[0]
+      : (req.target || undefined);
+
+    if (rawTarget) {
+      const tType = rawTarget.type || rawTarget.targetType || "other";
+      requestTarget = {
+        targetType: tType,
+        targetPlayerKey: rawTarget.targetPlayerKey || (tType === "player" ? rawTarget.id || rawTarget.playerId : undefined),
+        targetUnitId: rawTarget.unitId || rawTarget.targetUnitId,
+        targetRequestId: rawTarget.requestId || rawTarget.targetRequestId,
+        displayName: rawTarget.displayName || rawTarget.name,
+      };
+    }
+
+    return {
+      requestId: req.id,
+      actionId: req.actionId,
+      actionName: req.action?.name || req.actionId,
+      actionSpeed: req.action?.request?.speed || (req.action as any)?.speed || (req as any)?.speed,
+      actionTiming: req.action?.request?.timing || (req.action as any)?.timing || (req as any)?.timing,
+      controller: req.controller,
+      status: req.status,
+      sequence: req.sequence,
+      definitionOwner: req.definitionOwner,
+      keyCards: requestKeyCards,
+      target: requestTarget,
     };
   }
 }

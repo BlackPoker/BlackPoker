@@ -8,7 +8,7 @@ import { RulePackage } from "../../domain/rules/RulePackage";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe("StableIdentityEncoder & Hash Collision Diagnostics (Feature Schema v3)", () => {
+describe("StableIdentityEncoder & Hash Collision Diagnostics (Feature Schema v4)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -135,5 +135,37 @@ describe("StableIdentityEncoder & Hash Collision Diagnostics (Feature Schema v3)
       console.warn("Detected Effect Step ID collisions:", JSON.stringify(collisions, null, 2));
     }
     expect(collisions.length).toBe(0);
+  });
+
+  it("diagnoses Option Value collision across standard and generic options", () => {
+    const optionValues = [
+      "charge",
+      "drive",
+      "send_to_grave",
+      "keep_in_play",
+      "mode_a",
+      "mode_b",
+      "mode_alpha",
+      "mode_beta",
+      "future_trump_mode_x",
+    ];
+
+    const signatureMap = new Map<string, string[]>();
+    for (const opt of optionValues) {
+      const vec = StableIdentityEncoder.encodeOptionIdentity(opt);
+      const sig = vec.join("");
+      if (!signatureMap.has(sig)) {
+        signatureMap.set(sig, []);
+      }
+      signatureMap.get(sig)!.push(opt);
+    }
+
+    const collisions = Array.from(signatureMap.entries()).filter(([_, opts]) => opts.length > 1);
+    expect(collisions.length).toBe(0);
+
+    // charge と drive の非衝突
+    expect(StableIdentityEncoder.encodeOptionIdentity("charge")).not.toEqual(
+      StableIdentityEncoder.encodeOptionIdentity("drive")
+    );
   });
 });

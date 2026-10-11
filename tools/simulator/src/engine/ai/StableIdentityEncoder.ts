@@ -92,4 +92,32 @@ export class StableIdentityEncoder {
   public static encodeEffectStepIdentity(effectStepId: string | undefined | null): number[] {
     return this.encodeIdentifier(effectStepId, this.BUCKET_COUNT, this.HASH_COUNT);
   }
+
+  /**
+   * 単一の Option 値を 16次元バケットベクトルへエンコード
+   */
+  public static encodeOptionIdentity(option: string | undefined | null): number[] {
+    return this.encodeIdentifier(option, this.BUCKET_COUNT, this.HASH_COUNT);
+  }
+
+  /**
+   * 複数の Option 値を固定長 16次元バケットベクトルへエンコード (Bucket-wise OR)
+   */
+  public static encodeOptionIdentities(options: readonly string[] | undefined | null): number[] {
+    const vector = new Array<number>(this.BUCKET_COUNT).fill(0);
+    if (!options || !Array.isArray(options) || options.length === 0) {
+      return vector;
+    }
+
+    for (const opt of options) {
+      const single = this.encodeOptionIdentity(opt);
+      for (let i = 0; i < this.BUCKET_COUNT; i++) {
+        if (single[i] === 1) {
+          vector[i] = 1;
+        }
+      }
+    }
+
+    return vector;
+  }
 }

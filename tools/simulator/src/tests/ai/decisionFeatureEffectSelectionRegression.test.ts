@@ -5,7 +5,7 @@ import { DecisionFeatureEncoder } from "../../engine/ai/DecisionFeatureEncoder";
 import { PATTERN_FEATURE_NAMES, CONTEXT_FEATURE_NAMES, FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes";
 import { StableIdentityEncoder } from "../../engine/ai/StableIdentityEncoder";
 
-describe("Generic Effect Selection Regression & Synthetic Future Action (Feature Schema v3)", () => {
+describe("Generic Effect Selection Regression & Synthetic Future Action (Feature Schema v4)", () => {
   /**
    * 共通の基本 DecisionRequest ファクトリ
    */
@@ -277,6 +277,7 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       const posDeltaIdx = PATTERN_FEATURE_NAMES.indexOf("effect_assignment_positive_delta_count");
       const negDeltaIdx = PATTERN_FEATURE_NAMES.indexOf("effect_assignment_negative_delta_count");
       const selfToOppIdx = PATTERN_FEATURE_NAMES.indexOf("effect_assignment_self_to_opp_count");
+      const oppToSelfIdx = PATTERN_FEATURE_NAMES.indexOf("effect_assignment_opp_to_self_count");
 
       // 0体ブロック (スルー)
       expect(encoded.patterns[0].values[assignSelCountIdx]).toBe(0);
@@ -289,7 +290,8 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       expect(encoded.patterns[1].values[deltaSumIdx]).toBe(-3);
       expect(encoded.patterns[1].values[posDeltaIdx]).toBe(0);
       expect(encoded.patterns[1].values[negDeltaIdx]).toBe(1);
-      expect(encoded.patterns[1].values[selfToOppIdx]).toBe(1); // self unit -> opp unit
+      expect(encoded.patterns[1].values[oppToSelfIdx]).toBe(1); // opp attack -> self blocker
+      expect(encoded.patterns[1].values[selfToOppIdx]).toBe(0);
 
       // Size 8 でブロック (Delta = 8 - 5 = +3, positive delta count = 1)
       expect(encoded.patterns[2].values[assignSelCountIdx]).toBe(1);
@@ -297,7 +299,8 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       expect(encoded.patterns[2].values[deltaSumIdx]).toBe(3);
       expect(encoded.patterns[2].values[posDeltaIdx]).toBe(1);
       expect(encoded.patterns[2].values[negDeltaIdx]).toBe(0);
-      expect(encoded.patterns[2].values[selfToOppIdx]).toBe(1);
+      expect(encoded.patterns[2].values[oppToSelfIdx]).toBe(1);
+      expect(encoded.patterns[2].values[selfToOppIdx]).toBe(0);
 
       // 全て相互に異なる
       expect(encoded.patterns[0].values).not.toEqual(encoded.patterns[1].values);

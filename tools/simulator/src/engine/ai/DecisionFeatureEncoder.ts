@@ -332,6 +332,12 @@ export class DecisionFeatureEncoder {
         if (reqView.target) {
           sourceTargetSelection = reqView.target;
         }
+        if (reqView.actionSpeed) {
+          sourceSpeed = reqView.actionSpeed;
+        }
+        if (reqView.actionTiming) {
+          sourceTiming = reqView.actionTiming;
+        }
       }
       // Stage外（即時解決等）フォールバック
       if (!sourceActionId && request.source.sourceActionId) {
@@ -762,6 +768,15 @@ export class DecisionFeatureEncoder {
         }
       }
 
+      // 3. Candidate Action Stable Identity (16 buckets)
+      let candidateActionBuckets: readonly number[] = new Array(16).fill(0);
+      if (isAction && p.actionSelectionRef !== undefined && catalog?.actions) {
+        const act = catalog.actions[p.actionSelectionRef];
+        if (act && act.actionId) {
+          candidateActionBuckets = StableIdentityEncoder.encodeActionIdentity(act.actionId);
+        }
+      }
+
       // 3. Cost Payment (6)
       let hasCost = 0;
       let costDiscardCount = 0;
@@ -972,6 +987,9 @@ export class DecisionFeatureEncoder {
       let effAssignSelfToOppCount = 0;
       let effAssignOppToSelfCount = 0;
 
+      // 10.5 Generic Effect Selection - Option Stable Identity (16 buckets)
+      let effectOptionBuckets: readonly number[] = new Array(16).fill(0);
+
       // 12. Generic Effect Selection - Coverage Ratio (3)
       let effCandidateCount = 0;
       let effSelectedCount = 0;
@@ -981,12 +999,16 @@ export class DecisionFeatureEncoder {
         const es = catalog.effectSelections[p.effectSelectionRef];
         if (es) {
           hasEffectSelection = 1;
-          effCandidateCount = catalog.effectSelections.length;
+          effCandidateCount = es.candidateCount ?? 0;
 
           const selType = ((es as any).kind || es.selectionType || "").toLowerCase();
           if (selType === "unit") effectTypeUnit = 1;
           else if (selType === "unit_assignment" || selType === "unitassignment" || selType === "assignment") effectTypeUnitAssignment = 1;
           else effectTypeOther = 1;
+
+          if (selType === "option" && es.selectedValues) {
+            effectOptionBuckets = StableIdentityEncoder.encodeOptionIdentities(es.selectedValues);
+          }
 
           if (es.selectedValues) {
             effectSelectedValueCount = es.selectedValues.length;
@@ -1019,13 +1041,6 @@ export class DecisionFeatureEncoder {
                   if (u.battle?.role === "attacker") effUnitAttackerCount++;
                   else if (u.battle?.role === "blocker") effUnitBlockerCount++;
                 }
-              }
-
-              // 状態選択 (charge / drive) の判定
-              if (val === "charge") {
-                effUnitChargeCount++;
-              } else if (val === "drive") {
-                effUnitDriveCount++;
               }
 
               // カードとしてマッチするか判定
@@ -1064,7 +1079,6 @@ export class DecisionFeatureEncoder {
           if (es.assignments) {
             effectAssignmentCount = es.assignments.length;
             effAssignSourceCount = es.assignments.length;
-            effCandidateCount = Math.max(effCandidateCount, catalog.effectSelections.length);
 
             let minSourceSize = Infinity;
             let minSelectedSize = Infinity;
@@ -1098,9 +1112,9 @@ export class DecisionFeatureEncoder {
                   if (tgtSize < minSelectedSize) minSelectedSize = tgtSize;
 
                   if (tgtEntry.owner === "self" && srcOwner === "opponent") {
-                    effAssignSelfToOppCount++;
-                  } else if (tgtEntry.owner === "opponent" && srcOwner === "self") {
                     effAssignOppToSelfCount++;
+                  } else if (tgtEntry.owner === "opponent" && srcOwner === "self") {
+                    effAssignSelfToOppCount++;
                   }
                 }
               }
@@ -1181,7 +1195,10 @@ export class DecisionFeatureEncoder {
         timingDamageJudge,
         timingOther,
 
-        // 3. Cost Payment (6)
+        // 3. Candidate Action Stable Identity (16 buckets)
+        ...candidateActionBuckets,
+
+        // 4. Cost Payment (6)
         hasCost,
         costDiscardCount,
         costDrivenBulwarkCount,
@@ -1189,7 +1206,7 @@ export class DecisionFeatureEncoder {
         costLifeCount,
         costTotalItemCount,
 
-        // 4. Key Card Selection (11)
+        // 5. Key Card Selection (11)
         hasKeyCard,
         keyCardCount,
         keyCardKnownCount,
@@ -1202,7 +1219,7 @@ export class DecisionFeatureEncoder {
         keyCardClubCount,
         keyCardJokerCount,
 
-        // 5. Key Unit Selection (8)
+        // 6. Key Unit Selection (8)
         hasKeyUnit,
         keyUnitCount,
         selectedUnitSizeSum,
@@ -1212,7 +1229,7 @@ export class DecisionFeatureEncoder {
         selectedUnitFaceUpCount,
         selectedUnitFaceDownCount,
 
-        // 6. Target Selection (13)
+        // 7. Target Selection (13)
         hasTarget,
         targetIsPlayer,
         targetIsUnit,
@@ -1227,7 +1244,7 @@ export class DecisionFeatureEncoder {
         targetUnitFaceUp,
         targetUnitFaceDown,
 
-        // 7. Effect Selection - Base Metadata (7)
+        // 8. Effect Selection - Base Metadata (7)
         hasEffectSelection,
         effectTypeUnit,
         effectTypeUnitAssignment,
@@ -1236,7 +1253,7 @@ export class DecisionFeatureEncoder {
         effectAssignmentCount,
         effectAssignedUnitTotal,
 
-        // 8. Generic Effect Selection - Unit Aggregate (12)
+        // 9. Generic Effect Selection - Unit Aggregate (12)
         effUnitCount,
         effSelfUnitCount,
         effOppUnitCount,
@@ -1250,7 +1267,7 @@ export class DecisionFeatureEncoder {
         effUnitAttackerCount,
         effUnitBlockerCount,
 
-        // 9. Generic Effect Selection - Card Aggregate (17)
+        // 10. Generic Effect Selection - Card Aggregate (17)
         effCardCount,
         effCardKnownCount,
         effCardSpadeCount,
@@ -1269,7 +1286,10 @@ export class DecisionFeatureEncoder {
         effCardPairRankCount,
         effCardMaxRankMultiplicity,
 
-        // 10. Generic Effect Selection - Player / Request Semantics (6)
+        // 11. Generic Effect Selection - Option Stable Identity (16 buckets)
+        ...effectOptionBuckets,
+
+        // 12. Generic Effect Selection - Player / Request Semantics (6)
         effPlayerCount,
         effPlayerIsSelf,
         effPlayerIsOpponent,
@@ -1277,7 +1297,7 @@ export class DecisionFeatureEncoder {
         effRequestIsSelf,
         effRequestIsOpponent,
 
-        // 11. Generic Effect Selection - Unit Assignment Semantics (13)
+        // 13. Generic Effect Selection - Unit Assignment Semantics (13)
         effAssignSourceCount,
         effAssignSelectedCount,
         effAssignSourceSizeSum,
@@ -1292,12 +1312,12 @@ export class DecisionFeatureEncoder {
         effAssignSelfToOppCount,
         effAssignOppToSelfCount,
 
-        // 12. Generic Effect Selection - Coverage Ratio (3)
+        // 14. Generic Effect Selection - Coverage Ratio (3)
         effCandidateCount,
         effSelectedCount,
         effCoverageRatio,
 
-        // 13. Order Selection (2)
+        // 15. Order Selection (2)
         hasOrderSelection,
         orderedItemCount,
       ];

@@ -94,6 +94,8 @@ export interface RequestView {
   readonly requestId: RequestRef;
   readonly actionId: string;
   readonly actionName?: string;
+  readonly actionSpeed?: string;
+  readonly actionTiming?: string;
   readonly controller: PlayerKey;
   readonly status: string;
   readonly sequence: number;

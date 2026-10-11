@@ -1110,11 +1110,11 @@ describe("Official Standard Post-Acceptance Bugfix: Reanimate Component Re-evalu
       expect(s3.state.players.p1.field.some((u: any) => u.componentId === "character.magician")).toBe(true);
     });
 
-    it("Test 6.4: Invariants verification (FEATURE_SCHEMA_VERSION = 3, DNA = 18204, SNAPSHOT_FORMAT_VERSION = 1)", () => {
-      expect(FEATURE_SCHEMA_VERSION).toBe(3);
+    it("Test 6.4: Invariants verification (FEATURE_SCHEMA_VERSION = 4, DNA = 23452, SNAPSHOT_FORMAT_VERSION = 1)", () => {
+      expect(FEATURE_SCHEMA_VERSION).toBe(4);
       expect(SNAPSHOT_FORMAT_VERSION).toBe(1);
       const dna = createManualGenericGenomeDNA();
-      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(18204);
+      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23452);
     });
   });
 

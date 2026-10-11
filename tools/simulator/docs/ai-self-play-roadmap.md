@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1-R1`
-更新日時: 2026-10-12 04:00 JST
+作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1-R2`
+更新日時: 2026-10-12 08:30 JST
 
 ---
 
@@ -33,12 +33,13 @@
 | **Master + Extra Generic Compatibility** | **IMPLEMENTED** | Action / Component 非依存な抽象インターフェース設計 | `BatchSimulationRunner.ts`, `DecisionFeatureEncoder.ts` | 拡張DSL追加での改修不要 |
 | **Failure Reproduction Recipe** | **IMPLEMENTED** | `BatchFailureRecord` (`baseSeed`, `matchIndex`, `matchSeed`, `playerSeeds`) | `src/tests/simulation/batchSimulation.test.ts` | 失敗試合の同一プラン再構築保証 |
 | **Decision Feature Schema v1** | **SUPERSEDED** | `featureSchemaVersion: 1` | `src/tests/ai/decisionFeatureEncoder.test.ts` (初期プロトタイプ) | Context 25, Pattern 57 (計 1482 weights) |
-| **Decision Feature Schema v2** | **SUPERSEDED BY FEATURE SCHEMA v3** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 2`) | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
-| **Decision Feature Schema v3** | **IMPLEMENTED (R1 VALIDATED)** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 3`) | `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureRequestTarget.test.ts`, `decisionFeatureHashCollision.test.ts` | Request-Conditioned Generic Selection (Context 163次元, Pattern 111次元, 合計 18204 weights) |
-| **Generic Feature Encoder v3** | **IMPLEMENTED (R1 VALIDATED)** | `src/engine/ai/DecisionFeatureEncoder.ts` | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Request Context (Action multi-hash 16, EffectStep multi-hash 16, metadata, key cards, generic target) + Generic Selection |
-| **Viewer-relative Encoding** | **IMPLEMENTED (R1 VALIDATED)** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
-| **Secret-safe Feature Encoding** | **IMPLEMENTED (R1 VALIDATED)** | `DecisionFeatureEncoder`, `ObservationFactory` | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断、相手伏せユニット対象時の秘密漏洩防止 |
-| **Decision DNA v1 format (v3 Schema Compatible)** | **IMPLEMENTED (R1 VALIDATED)** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 18204次元 (Pattern 111, Interaction 18093), 旧 v1/v2 DNA は fail-closed 拒絶 |
+| **Decision Feature Schema v2** | **SUPERSEDED** | `featureSchemaVersion: 2` | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
+| **Decision Feature Schema v3** | **SUPERSEDED BY FEATURE SCHEMA v4** | `featureSchemaVersion: 3` | `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureRequestTarget.test.ts` | Request Context 163, Pattern 111 (計 18204 weights) |
+| **Decision Feature Schema v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 4`) | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Request Context 163次元, Pattern 143次元, 合計 23,452 weights (Candidate Action Identity + Generic Option Identity) |
+| **Generic Feature Encoder v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts` | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts` | Candidate Action 16 buckets, Option 16 buckets, Source Speed/Timing 伝搬, Assignment 方向修正, Coverage Ratio セマンティクス修正 |
+| **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
+| **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder`, `ObservationFactory` | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断、相手伏せユニット対象時の秘密漏洩防止 |
+| **Decision DNA v1 format (v4 Schema Compatible)** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 23,452次元 (Pattern 143, Interaction 23,309), 旧 v1/v2/v3 DNA は fail-closed 拒絶 |
 | **Standard + Pack Target Foundation** | **IMPLEMENTED** | `src/engine/regulation/OfficialRegulationMatchSetup.ts` | `src/tests/ai/standardPackGenomeE2E.test.ts` | official:standard-pack での Genome 対戦・決定論・Pack観測・turnCount進行 E2E 完走 |
 | **DNA JSON Artifact Contract** | **IMPLEMENTED** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | JSONValue型、有限数、プレーンJSONオブジェクト保証 |
 | **Recursive Metadata Validation** | **IMPLEMENTED** | `DecisionDNACodec.validateMetadata` | `src/tests/ai/decisionDNA.test.ts` | 非有限数、BigInt、関数、Symbol、Date、Map、Set、循環参照拒絶 |
@@ -70,7 +71,7 @@
 
 ---
 
-## 2. Feature Coverage Table (14 カテゴリ)
+## 2. Feature Coverage Table (16 カテゴリ)
 
 | カテゴリ | カバレッジステータス | 説明・実装実態・テスト検証 Evidence |
 |---|---|---|
@@ -78,16 +79,18 @@
 | **2. Request Source** | **FULL** | `request_has_source`, `is_action`, `is_effect`, `is_zone_top`, コントローラー相対関係 (self/opponent) (6次元)。`decisionFeatureRealActionEvidence.test.ts` にて実リクエストから抽出検証。 |
 | **3. Source Action Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット multi-hash。RulePackage 内現行37種のアクションIDにおいて衝突0件を実証 (`decisionFeatureHashCollision.test.ts`)。 |
 | **4. Effect Step Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット multi-hash。Engine/ルール実装実態棚卸し全23種のステップIDにおいて衝突0件を実証 (`decisionFeatureHashCollision.test.ts`)。 |
-| **5. Source Request Semantics** | **FULL** | speed (normal/immediate/other), timing (main/quick/block/damage_judge/other), visible key-card aggregate (5次元), generic target (12次元) (計 25次元)。`decisionFeatureRealActionEvidence.test.ts` にて検証。 |
-| **6. Target Selection** | **FULL** | targetType (player/unit/request/none/other), targetOwner (self/opponent), target unit size, charge, drive, face up/down (13次元)。`decisionFeatureRequestTarget.test.ts` にて全経路検証。 |
-| **7. Key Card / Key Unit** | **FULL** | key card (count, known, values, suits: 11次元), key unit (count, size sum/max, charge, drive, face: 8次元) (計 19次元)。`decisionFeatureEncoder.test.ts` にて検証。 |
-| **8. Effect Unit Selection** | **FULL** | unit count, self/opp count, charge, drive, face up/down, size sum/max/min, attacker, blocker (12次元)。`action.attack`, `action.reverse` 等の実機実行でパターン識別を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
-| **9. Effect Card Selection** | **FULL** | `KnownCardAggregateEncoder` による card count, known count, suits, ranks, value sum/max/min, pair, multiplicity (17次元)。`action.search` での Ace vs Numeric 識別を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
-| **10. Unit Assignment** | **FULL** | source/selected count, source/selected size sum/max/min, size delta sum, positive/negative delta count, self->opp, opp->self (13次元)。`action.block` での PASS vs 迎撃ブロック識別を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
-| **11. Selection Coverage Ratio** | **FULL** | candidate count, selected count, coverage ratio (3次元)。`decisionFeatureEncoder.test.ts` にて全選択/部分選択の比率計算を検証。 |
-| **12. Order Selection** | **PARTIAL** | `has_order_selection`, `ordered_item_count` (2次元)。順序選択の有無と件数は捉えるが、詳細な並び順特徴量は安定性のため将来拡張として留保。 |
-| **13. Effect Result Context** | **DEFERRED** | 現シミュレータでは sourceAction / effectStep / board observation で判断局面を100%一意に識別可能なため未導入。多段階複合効果の途中事実が必要になった段階で設計。 |
-| **14. Privacy Boundary** | **FULL** | 相手手札中身、相手伏せ防壁/切札、未公開サイズ、未開封パック中身、相手Life 10+、相手伏せユニット対象時の秘密カードを完全秘匿。`decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` にて完全遮断を実証。 |
+| **5. Source Request Semantics** | **FULL** | speed (normal/immediate/other), timing (main/quick/block/damage_judge/other), visible key-card aggregate (5次元), generic target (12次元) (計 25次元)。Stage Request / 即時解決中リクエストから ObservationFactory 経由で漏洩なく伝搬し実機検証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
+| **6. Candidate Action Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット。ACTION Pattern 候補のアクションそのものの Stable Identity をエンコード。同一メタデータ (`action.synthetic.alpha` vs `beta`) において相互作用重みによる選好逆転を Scorer レベルで直接証明 (`decisionFeatureCandidateAction.test.ts`)。 |
+| **7. Target Selection** | **FULL** | targetType (player/unit/request/none/other), targetOwner (self/opponent), target unit size, charge, drive, face up/down (13次元)。`decisionFeatureRequestTarget.test.ts` にて全経路検証。 |
+| **8. Key Card / Key Unit** | **FULL** | key card (count, known, values, suits: 11次元), key unit (count, size sum/max, charge, drive, face: 8次元) (計 19次元)。`decisionFeatureEncoder.test.ts` にて検証。 |
+| **9. Effect Unit Selection** | **FULL** | unit count, self/opp count, charge, drive, face up/down, size sum/max/min, attacker, blocker (12次元)。`action.attack` の実機実行でパターン識別を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
+| **10. Effect Card Selection** | **FULL** | `KnownCardAggregateEncoder` による card count, known count, suits, ranks, value sum/max/min, pair, multiplicity (17次元)。`action.search` での Ace vs Numeric 識別を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
+| **11. Generic Option Identity** | **FULL** | `StableIdentityEncoder` による固定長 16 バケット。EFFECT_SELECTION (option) の任意文字列候補値をエンコード。charge/drive のクリーンな分離、将来未知 options (`send_to_grave`, `future_trump_mode_x`) の識別、および Scorer レベルでの選好学習を直接証明 (`decisionFeatureGenericOption.test.ts`)。 |
+| **12. Unit Assignment** | **FULL** | source/selected count, source/selected size sum/max/min, size delta sum, positive/negative delta count, self->opp, opp->self (13次元)。セマンティクスを厳密化し、`action.block` 実戦において相手アタッカーへの自軍ブロッカー指定が正しく `opp_to_self = 1`, `self_to_opp = 0` となることを実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
+| **13. Selection Coverage Ratio** | **FULL** | candidate count, selected count, coverage ratio (3次元)。`candidateCount` のセマンティクスを Power Set パターン件数から候補 Universe 数（ユニット数、カード数、オプション数等）へ是正。`action.attack` にて 0体/1体/2体選択で 0.0, 0.5, 1.0 の正確なカバレッジ比率を実証 (`decisionFeatureRealActionEvidence.test.ts`)。 |
+| **14. Order Selection** | **PARTIAL** | `has_order_selection`, `ordered_item_count` (2次元)。順序選択の有無と件数は捉えるが、詳細な並び順特徴量は安定性のため将来拡張として留保。 |
+| **15. Down vs Up Differentiation** | **FULL** | Direct Action としての性質に基づき、Request Context の Action Identity バケットによる候補差別化および Scorer レベルでの選好学習 (Down $\rightarrow$ Small, Up $\rightarrow$ Large) を直接証明 (`decisionFeatureDownUpScorer.test.ts`, `decisionFeatureRealActionEvidence.test.ts`)。 |
+| **16. Privacy Boundary** | **FULL** | 相手手札中身、相手伏せ防壁/切札、未公開サイズ、未開封パック中身、相手Life 10+、相手伏せユニット対象時の秘密カードを完全秘匿。`decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` にて完全遮断を実証。 |
 
 ---
 

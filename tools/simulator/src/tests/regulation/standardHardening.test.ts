@@ -540,10 +540,10 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       expect(respRnd.selectedPatternRef).toBeGreaterThanOrEqual(0);
       expect(respRnd.selectedPatternRef).toBeLessThan(req.patterns.length);
 
-      // 3. GenomePolicy (DNA 18204 weights & FEATURE_SCHEMA_VERSION = 3)
-      expect(FEATURE_SCHEMA_VERSION).toBe(3);
+      // 3. GenomePolicy (DNA 23452 weights & FEATURE_SCHEMA_VERSION = 4)
+      expect(FEATURE_SCHEMA_VERSION).toBe(4);
       const dna = createManualGenericGenomeDNA();
-      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(18204);
+      expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23452);
 
       const genomePolicy = new GenomePolicy(dna, "TestGenomePolicy");
       const respGen = genomePolicy.choose(req);

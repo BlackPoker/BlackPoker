@@ -19,9 +19,9 @@
  */
 
 /**
- * Decision Feature Schema Version (Version 3)
+ * Decision Feature Schema Version (Version 4)
  */
-export const FEATURE_SCHEMA_VERSION = 3;
+export const FEATURE_SCHEMA_VERSION = 4;
 
 /**
  * Ordered list of Context Feature names (Version 3)
@@ -242,7 +242,25 @@ export const PATTERN_FEATURE_NAMES = [
   "action_timing_damage_judge",
   "action_timing_other",
 
-  // 3. Cost Payment (6)
+  // 3. Candidate Action Stable Identity (16 buckets)
+  "candidate_action_bucket_0",
+  "candidate_action_bucket_1",
+  "candidate_action_bucket_2",
+  "candidate_action_bucket_3",
+  "candidate_action_bucket_4",
+  "candidate_action_bucket_5",
+  "candidate_action_bucket_6",
+  "candidate_action_bucket_7",
+  "candidate_action_bucket_8",
+  "candidate_action_bucket_9",
+  "candidate_action_bucket_10",
+  "candidate_action_bucket_11",
+  "candidate_action_bucket_12",
+  "candidate_action_bucket_13",
+  "candidate_action_bucket_14",
+  "candidate_action_bucket_15",
+
+  // 4. Cost Payment (6)
   "has_cost",
   "cost_discard_count",
   "cost_driven_bulwark_count",
@@ -250,7 +268,7 @@ export const PATTERN_FEATURE_NAMES = [
   "cost_life_count",
   "cost_total_item_count",
 
-  // 4. Key Card Selection (11)
+  // 5. Key Card Selection (11)
   "has_key_card",
   "key_card_count",
   "key_card_known_count",
@@ -263,7 +281,7 @@ export const PATTERN_FEATURE_NAMES = [
   "key_card_club_count",
   "key_card_joker_count",
 
-  // 5. Key Unit Selection (8)
+  // 6. Key Unit Selection (8)
   "has_key_unit",
   "key_unit_count",
   "selected_unit_size_sum",
@@ -273,7 +291,7 @@ export const PATTERN_FEATURE_NAMES = [
   "selected_unit_face_up_count",
   "selected_unit_face_down_count",
 
-  // 6. Target Selection (13)
+  // 7. Target Selection (13)
   "has_target",
   "target_is_player",
   "target_is_unit",
@@ -288,7 +306,7 @@ export const PATTERN_FEATURE_NAMES = [
   "target_unit_face_up",
   "target_unit_face_down",
 
-  // 7. Effect Selection - Base Metadata (7)
+  // 8. Effect Selection - Base Metadata (7)
   "has_effect_selection",
   "effect_type_unit",
   "effect_type_unit_assignment",
@@ -297,7 +315,7 @@ export const PATTERN_FEATURE_NAMES = [
   "effect_assignment_count",
   "effect_assigned_unit_total",
 
-  // 8. Generic Effect Selection - Unit Aggregate (12)
+  // 9. Generic Effect Selection - Unit Aggregate (12)
   "effect_selected_unit_count",
   "effect_selected_self_unit_count",
   "effect_selected_opponent_unit_count",
@@ -311,7 +329,7 @@ export const PATTERN_FEATURE_NAMES = [
   "effect_selected_unit_attacker_count",
   "effect_selected_unit_blocker_count",
 
-  // 9. Generic Effect Selection - Card Aggregate (17)
+  // 10. Generic Effect Selection - Card Aggregate (17)
   "effect_selected_card_count",
   "effect_selected_card_known_count",
   "effect_selected_card_spade_count",
@@ -330,7 +348,25 @@ export const PATTERN_FEATURE_NAMES = [
   "effect_selected_card_pair_rank_count",
   "effect_selected_card_max_rank_multiplicity",
 
-  // 10. Generic Effect Selection - Player / Request Semantics (6)
+  // 11. Generic Effect Selection - Option Stable Identity (16 buckets)
+  "effect_option_bucket_0",
+  "effect_option_bucket_1",
+  "effect_option_bucket_2",
+  "effect_option_bucket_3",
+  "effect_option_bucket_4",
+  "effect_option_bucket_5",
+  "effect_option_bucket_6",
+  "effect_option_bucket_7",
+  "effect_option_bucket_8",
+  "effect_option_bucket_9",
+  "effect_option_bucket_10",
+  "effect_option_bucket_11",
+  "effect_option_bucket_12",
+  "effect_option_bucket_13",
+  "effect_option_bucket_14",
+  "effect_option_bucket_15",
+
+  // 12. Generic Effect Selection - Player / Request Semantics (6)
   "effect_selected_player_count",
   "effect_selected_player_is_self",
   "effect_selected_player_is_opponent",
@@ -338,7 +374,7 @@ export const PATTERN_FEATURE_NAMES = [
   "effect_selected_request_is_self",
   "effect_selected_request_is_opponent",
 
-  // 11. Generic Effect Selection - Unit Assignment Semantics (13)
+  // 13. Generic Effect Selection - Unit Assignment Semantics (13)
   "effect_assignment_source_count",
   "effect_assignment_selected_count",
   "effect_assignment_source_size_sum",
@@ -353,12 +389,12 @@ export const PATTERN_FEATURE_NAMES = [
   "effect_assignment_self_to_opp_count",
   "effect_assignment_opp_to_self_count",
 
-  // 12. Generic Effect Selection - Coverage Ratio (3)
+  // 14. Generic Effect Selection - Coverage Ratio (3)
   "effect_selection_candidate_count",
   "effect_selection_selected_count",
   "effect_selection_coverage_ratio",
 
-  // 13. Order Selection (2)
+  // 15. Order Selection (2)
   "has_order_selection",
   "ordered_item_count",
 ] as const;

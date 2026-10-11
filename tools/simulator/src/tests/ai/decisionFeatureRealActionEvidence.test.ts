@@ -9,7 +9,7 @@ import { ObservationFactory } from "../../engine/decision/ObservationFactory";
 import { CONTEXT_FEATURE_NAMES, PATTERN_FEATURE_NAMES, FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 
-describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
+describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
   let rulePackage: RulePackage;
 
   beforeAll(async () => {
@@ -51,7 +51,7 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
   // 1. Attack Real Path
   // =========================================================================
   describe("1. Attack Real Path (Authoritative GameSession Execution)", () => {
-    it("extracts Action Identity, Effect Step Identity, and distinguishes 0/1/multi attacker combinations", () => {
+    it("extracts Action Identity, speed/timing metadata, and distinguishes 0/1/multi attacker combinations with correct coverage ratios", () => {
       const soldier1 = {
         unitId: "soldier-1",
         kind: "一般兵",
@@ -137,7 +137,6 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
       assertWaiting(step4);
       const effReq = step4.request;
       assertEffectSource(effReq.source);
-      // 実ルール定義上のコマンド名（selectUnits）
       expect(effReq.source.effectStepId).toBe("selectUnits");
 
       // 実リクエストをエンコード
@@ -150,16 +149,20 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
         expect(getContextValue(encoded, `request_action_bucket_${i}`)).toBe(expectedActionBuckets[i]);
       }
 
-      // 2. Effect Step Identity は selectUnits のバケットと完全一致
+      // 2. Action Speed & Timing メタデータが非ゼロ
+      expect(getContextValue(encoded, "request_action_speed_normal")).toBe(1);
+      expect(getContextValue(encoded, "request_action_timing_main")).toBe(1);
+
+      // 3. Effect Step Identity は selectUnits のバケットと完全一致
       const expectedStepBuckets = StableIdentityEncoder.encodeEffectStepIdentity("selectUnits");
       for (let i = 0; i < 16; i++) {
         expect(getContextValue(encoded, `request_effect_step_bucket_${i}`)).toBe(expectedStepBuckets[i]);
       }
 
-      // 3. パターン数は 2^2 = 4 (0体, soldier-1, soldier-2, 両方)
+      // 4. パターン数は 2^2 = 4 (0体, soldier-1, soldier-2, 両方)
       expect(encoded.patterns).toHaveLength(4);
 
-      // 4. 各パターンの特徴量が明確に区別可能
+      // 5. 各パターンの特徴量と Coverage Ratio を検証 (Universe = 2体)
       const p0 = encoded.patterns.find((p) => {
         const eff = effReq.catalog.effectSelections[p.patternRef];
         return eff.selectedValues?.length === 0;
@@ -177,18 +180,29 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
         return eff.selectedValues?.length === 2;
       })!;
 
-      // 0体
+      // 0体: candidateCount = 2, selectedCount = 0, coverageRatio = 0.0
       expect(getPatternValue(p0, "effect_selected_unit_count")).toBe(0);
       expect(getPatternValue(p0, "effect_selected_unit_size_sum")).toBe(0);
-      // soldier-1 (Size 6)
+      expect(getPatternValue(p0, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(p0, "effect_selection_coverage_ratio")).toBe(0.0);
+
+      // soldier-1 (Size 6): candidateCount = 2, selectedCount = 1, coverageRatio = 0.5
       expect(getPatternValue(p1, "effect_selected_unit_count")).toBe(1);
       expect(getPatternValue(p1, "effect_selected_unit_size_sum")).toBe(6);
-      // soldier-2 (Size 7)
+      expect(getPatternValue(p1, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(p1, "effect_selection_coverage_ratio")).toBe(0.5);
+
+      // soldier-2 (Size 7): candidateCount = 2, selectedCount = 1, coverageRatio = 0.5
       expect(getPatternValue(p2, "effect_selected_unit_count")).toBe(1);
       expect(getPatternValue(p2, "effect_selected_unit_size_sum")).toBe(7);
-      // 両方 (合計 Size 13)
+      expect(getPatternValue(p2, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(p2, "effect_selection_coverage_ratio")).toBe(0.5);
+
+      // 両方 (Size 13): candidateCount = 2, selectedCount = 2, coverageRatio = 1.0
       expect(getPatternValue(p3, "effect_selected_unit_count")).toBe(2);
       expect(getPatternValue(p3, "effect_selected_unit_size_sum")).toBe(13);
+      expect(getPatternValue(p3, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(p3, "effect_selection_coverage_ratio")).toBe(1.0);
 
       expect(p0.values).not.toEqual(p1.values);
       expect(p1.values).not.toEqual(p2.values);
@@ -200,7 +214,7 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
   // 2. Block Real Path
   // =========================================================================
   describe("2. Block Real Path (Authoritative GameSession Execution)", () => {
-    it("extracts Block Action Identity and distinguishes PASS vs unit assignment blocker choices", () => {
+    it("extracts Block Action Identity, speed/timing metadata, and correctly distinguishes opp_to_self assignment direction", () => {
       const attackerSoldier = {
         unitId: "u-atk-1",
         kind: "一般兵",
@@ -295,6 +309,10 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
         expect(getContextValue(encoded, `request_action_bucket_${i}`)).toBe(expectedBlockBuckets[i]);
       }
 
+      // Action Speed & Timing メタデータが非ゼロ (Block action 定義は normal / main)
+      expect(getContextValue(encoded, "request_action_speed_normal")).toBe(1);
+      expect(getContextValue(encoded, "request_action_timing_main")).toBe(1);
+
       // ブロッカー割り当てのパターンが存在
       expect(encoded.patterns.length).toBeGreaterThanOrEqual(2);
 
@@ -316,17 +334,29 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
 
       expect(getPatternValue(passPattern!, "effect_assignment_selected_count")).toBe(0);
       expect(getPatternValue(blockPattern!, "effect_assignment_selected_count")).toBe(1);
+
       // ブロッカー Size 6 vs アタッカー Size 5 -> Delta = +1
       expect(getPatternValue(blockPattern!, "effect_assignment_positive_delta_count")).toBe(1);
+
+      // 【Unit Assignment 方向性検証】
+      // 攻撃側: p1 (opponent, source)
+      // 防御側: p2 (self viewer, selected)
+      // opponent の攻撃に対して self のユニットを割り当てるため、opp_to_self = 1, self_to_opp = 0
+      expect(getPatternValue(blockPattern!, "effect_assignment_opp_to_self_count")).toBe(1);
+      expect(getPatternValue(blockPattern!, "effect_assignment_self_to_opp_count")).toBe(0);
     });
   });
 
   // =========================================================================
-  // 3. Down / Up Real Path
+  // 3. Down vs Up Synthetic Contract & Action Differentiation
   // =========================================================================
-  describe("3. Down vs Up Real Path", () => {
+  describe("3. Down vs Up Synthetic Contract & Action Differentiation", () => {
+    // 理由説明:
+    // Down (action.down) および Up (action.up) は Direct Action であり、発動時に target を指定して解決するため、
+    // 効果解決中にプレイヤーへの sub-decision 要求は発生しない。
+    // 本テストは Request Context の Action Identity Bucket による差別化を検証する契約テストであり、
+    // GenomeScorer での選好学習は decisionFeatureDownUpScorer.test.ts で直接証明されている。
     it("distinguishes Down and Up actions on the same unit through Request Context buckets", () => {
-      // 共通のユニット
       const soldier = {
         unitId: "soldier-target",
         kind: "一般兵",
@@ -354,7 +384,6 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
         },
       };
 
-      // Down Request
       const stateDown: any = {
         ...baseState,
         stage: {
@@ -371,7 +400,6 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
         },
       };
 
-      // Up Request
       const stateUp: any = {
         ...baseState,
         stage: {
@@ -397,7 +425,6 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
       const encDown = DecisionFeatureEncoder.encode(reqDown);
       const encUp = DecisionFeatureEncoder.encode(reqUp);
 
-      // 両者の Context Feature は Action Identity Bucket の差異により確実に異なる
       expect(encDown.context.values).not.toEqual(encUp.context.values);
 
       const downBuckets = StableIdentityEncoder.encodeActionIdentity("action.down");
@@ -415,7 +442,7 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
   // 4. Search Real Path
   // =========================================================================
   describe("4. Search Real Path (Authoritative Card Selection)", () => {
-    it("distinguishes Ace vs numeric card selection in real Search effect resolution", () => {
+    it("distinguishes Ace vs numeric card selection and extracts speed/timing metadata in real Search effect resolution", () => {
       const state: any = {
         stateVersion: 1,
         matchId: "match-search",
@@ -459,7 +486,13 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
 
       assertWaiting(nextStep);
       const searchReq = nextStep.request;
-      expect(searchReq.source.type).toBe("EFFECT_RESOLUTION");
+      const searchSource = searchReq.source;
+      assertEffectSource(searchSource);
+      const sourceReqRef = searchSource.sourceRequestRef;
+
+      const foundReqView = searchReq.observation.stageRequests?.find((r) => r.requestId === sourceReqRef);
+      expect(foundReqView).toBeDefined();
+      expect(foundReqView?.actionSpeed).toBe("immediate");
 
       const encoded = DecisionFeatureEncoder.encode(searchReq);
 
@@ -468,6 +501,10 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
       for (let i = 0; i < 16; i++) {
         expect(getContextValue(encoded, `request_action_bucket_${i}`)).toBe(expectedSearchBuckets[i]);
       }
+
+      // Action Speed & Timing メタデータが非ゼロ (Search action 定義は immediate / quick)
+      expect(getContextValue(encoded, "request_action_speed_immediate")).toBe(1);
+      expect(getContextValue(encoded, "request_action_timing_quick")).toBe(1);
 
       // ライフのカード群（♠A vs ♥7）が候補としてエンコードされ区別可能
       expect(encoded.patterns.length).toBeGreaterThanOrEqual(2);
@@ -487,99 +524,149 @@ describe("Real Decision Path Feature Evidence (Feature Schema v3)", () => {
       expect(getPatternValue(acePattern, "effect_selected_card_ace_count")).toBe(1);
       expect(getPatternValue(acePattern, "effect_selected_card_numeric_count")).toBe(0);
       expect(getPatternValue(acePattern, "effect_selected_card_value_sum")).toBe(1);
+      expect(getPatternValue(acePattern, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(acePattern, "effect_selection_coverage_ratio")).toBe(0.5);
 
       expect(getPatternValue(numPattern, "effect_selected_card_ace_count")).toBe(0);
       expect(getPatternValue(numPattern, "effect_selected_card_numeric_count")).toBe(1);
       expect(getPatternValue(numPattern, "effect_selected_card_value_sum")).toBe(7);
+      expect(getPatternValue(numPattern, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(numPattern, "effect_selection_coverage_ratio")).toBe(0.5);
 
       expect(acePattern.values).not.toEqual(numPattern.values);
     });
   });
 
   // =========================================================================
-  // 5. Reverse Real Path
+  // 5. Reverse Real Path (Authoritative GameSession Execution)
   // =========================================================================
-  describe("5. Reverse Real Path", () => {
-    it("extracts Reverse Action Identity and preserves option selection semantics", () => {
+  describe("5. Reverse Real Path (Authoritative GameSession Execution)", () => {
+    it("executes action.reverse in real GameSession, reaches option decision, and extracts speed/timing and option bucket features", () => {
+      // action.reverse: Hand に同Rank 2枚 (Key), 場に対象 Unit 1体
+      const targetSoldier = {
+        unitId: "u-rev-target",
+        kind: "一般兵",
+        componentId: "character.soldier",
+        state: "drive",
+        face: "up",
+        cards: [{ id: "c-rev-u", suit: "D", rank: "5", value: 5 }],
+      };
+
       const state: any = {
         stateVersion: 1,
-        matchId: "match-rev",
+        matchId: "match-real-rev",
         turnPlayer: "p1",
         chancePlayer: "p1",
         turnCount: 1,
-        stage: {
-          requests: [
-            {
-              id: "req-rev-1",
-              actionId: "action.reverse",
-              controller: "p1",
-              status: "resolving",
-              sequence: 1,
-              targets: [{ type: "unit", unitId: "u-target" }],
-            },
-          ],
-        },
         players: {
           p1: {
-            hand: [],
-            field: [
-              {
-                unitId: "u-target",
-                kind: "一般兵",
-                state: "drive",
-                face: "up",
-                cards: [{ id: "c1", suit: "S", rank: "3", value: 3 }],
-              },
+            name: "Player A",
+            life: [{ id: "l1", suit: "S", rank: "A", value: 1 }],
+            hand: [
+              { id: "key-h4", suit: "H", rank: "4", value: 4 },
+              { id: "key-s4", suit: "S", rank: "4", value: 4 },
             ],
-            life: [{ id: "l1" }],
+            field: [targetSoldier],
+            fog: [],
             grave: [],
           },
-          p2: { hand: [], field: [], life: [{ id: "l2" }], grave: [] },
+          p2: {
+            name: "Player B",
+            life: [{ id: "l2", suit: "D", rank: "K", value: 13 }],
+            hand: [],
+            field: [],
+            fog: [],
+            grave: [],
+          },
         },
+        stage: { requests: [], history: [] },
+        requestBuffer: { requests: [], history: [] },
       };
 
-      const obs = ObservationFactory.createObservation(state, "p1");
-      const req: DecisionRequest = {
-        protocolVersion: "1.0.0",
-        matchId: "match-rev",
-        decisionId: "dec-rev-1",
-        stateVersion: 1,
-        playerId: "p1",
-        source: {
-          type: "EFFECT_RESOLUTION",
-          sourceRequestRef: "req-rev-1",
-          sourceActionId: "action.reverse",
-          effectStepId: "chooseTransformState",
-          playerId: "p1",
-        },
-        observation: obs,
-        catalog: {
-          actions: [],
-          cardSelections: [],
-          unitSelections: [],
-          costPayments: [],
-          targetSelections: [],
-          effectSelections: [
-            { selectionType: "option", selectedValues: ["charge"], summary: "チャージ選択" },
-            { selectionType: "option", selectedValues: ["drive"], summary: "ドライブ選択" },
-          ],
-          orderSelections: [],
-        },
-        patterns: [
-          { patternId: "p-charge", kind: "EFFECT_SELECTION", effectSelectionRef: 0 },
-          { patternId: "p-drive", kind: "EFFECT_SELECTION", effectSelectionRef: 1 },
-        ],
-      };
+      const session = new GameSession(state, rulePackage);
 
-      const encoded = DecisionFeatureEncoder.encode(req);
+      // Step 1: p1 が action.reverse をリクエスト
+      const s1 = session.advance();
+      assertWaiting(s1);
 
-      const revBuckets = StableIdentityEncoder.encodeActionIdentity("action.reverse");
+      const revIdx = s1.request.patterns.findIndex((p: any) => {
+        return s1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.reverse";
+      });
+      expect(revIdx).toBeGreaterThanOrEqual(0);
+
+      session.submitDecision({
+        decisionId: s1.request.decisionId,
+        stateVersion: s1.request.stateVersion,
+        selectedPatternRef: revIdx,
+      });
+
+      // Step 2: p1 PASS
+      const s2 = session.advance();
+      assertWaiting(s2);
+      session.submitDecision({
+        decisionId: s2.request.decisionId,
+        stateVersion: s2.request.stateVersion,
+        selectedPatternRef: findPassPatternIndex(s2.request),
+      });
+
+      // Step 3: p2 PASS -> 連続PASS成立で Reverse 解決開始 (selectOption へ遷移)
+      const s3 = session.advance();
+      assertWaiting(s3);
+      const s4 = session.submitDecision({
+        decisionId: s3.request.decisionId,
+        stateVersion: s3.request.stateVersion,
+        selectedPatternRef: findPassPatternIndex(s3.request),
+      });
+
+      assertWaiting(s4);
+      const revReq = s4.request;
+      assertEffectSource(revReq.source);
+      expect(revReq.source.sourceActionId).toBe("action.reverse");
+
+      const encoded = DecisionFeatureEncoder.encode(revReq);
+      expect(encoded.featureSchemaVersion).toBe(FEATURE_SCHEMA_VERSION);
+
+      // 1. Action Identity は action.reverse のバケットと完全一致
+      const expectedRevBuckets = StableIdentityEncoder.encodeActionIdentity("action.reverse");
       for (let i = 0; i < 16; i++) {
-        expect(getContextValue(encoded, `request_action_bucket_${i}`)).toBe(revBuckets[i]);
+        expect(getContextValue(encoded, `request_action_bucket_${i}`)).toBe(expectedRevBuckets[i]);
       }
 
+      // 2. Action Speed & Timing メタデータが非ゼロ (Reverse は normal / quick)
+      expect(getContextValue(encoded, "request_action_speed_normal")).toBe(1);
+      expect(getContextValue(encoded, "request_action_timing_quick")).toBe(1);
+
+      // 3. Option Selection カタログに charge と drive が存在
+      expect(revReq.catalog.effectSelections).toHaveLength(2);
       expect(encoded.patterns).toHaveLength(2);
-      expect(encoded.patterns[0].values).not.toEqual(encoded.patterns[1].values);
+
+      const chargePat = encoded.patterns.find((p) => {
+        const eff = revReq.catalog.effectSelections[p.patternRef];
+        return eff.selectedValues?.includes("charge");
+      })!;
+      const drivePat = encoded.patterns.find((p) => {
+        const eff = revReq.catalog.effectSelections[p.patternRef];
+        return eff.selectedValues?.includes("drive");
+      })!;
+
+      expect(chargePat).toBeDefined();
+      expect(drivePat).toBeDefined();
+
+      // 4. effect_option_bucket_0..15 の検証
+      const chargeBuckets = StableIdentityEncoder.encodeOptionIdentity("charge");
+      const driveBuckets = StableIdentityEncoder.encodeOptionIdentity("drive");
+      for (let b = 0; b < 16; b++) {
+        expect(getPatternValue(chargePat, `effect_option_bucket_${b}`)).toBe(chargeBuckets[b]);
+        expect(getPatternValue(drivePat, `effect_option_bucket_${b}`)).toBe(driveBuckets[b]);
+      }
+
+      // 5. Coverage Ratio の検証 (options = 2, selected = 1)
+      expect(getPatternValue(chargePat, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(chargePat, "effect_selection_coverage_ratio")).toBe(0.5);
+      expect(getPatternValue(drivePat, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(drivePat, "effect_selection_coverage_ratio")).toBe(0.5);
+
+      expect(chargePat.values).not.toEqual(drivePat.values);
     });
   });
 

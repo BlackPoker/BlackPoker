@@ -80,6 +80,7 @@ export interface EffectSelection {
   readonly targetSelection?: TargetSelection;
   readonly summary?: string;
   readonly cards?: readonly CardView[];
+  readonly candidateCount?: number;
 }
 
 /**
