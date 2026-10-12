@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1-R3`
-更新日時: 2026-10-12 14:30 JST
+作業ID: `BP-SIM-AI-GENOME-SENSITIVITY-V1`
+更新日時: 2026-10-12 18:30 JST
 
 ---
 
@@ -52,6 +52,7 @@
 | **Participant Outcome Summary** | **IMPLEMENTED** | `PolicyExperimentRunner.ts` | `src/tests/ai/policyExperiment.test.ts` | 保存則、asP1/asP2、winRateOnCompleted |
 | **Generic Behavior Metrics** | **IMPLEMENTED** | `src/engine/ai/DecisionBehaviorObserverPolicy.ts` | `src/tests/ai/policyExperiment.test.ts` | 外部 Accumulator、Pattern Kind / Source 集計 |
 | **Baseline Policy Suite** | **IMPLEMENTED** | `src/engine/ai/BaselinePolicies.ts` | `src/tests/ai/policyExperiment.test.ts`, `simulate:experiment` | FirstLegal, Random, Zero, ManualGeneric |
+| **Genome Sensitivity / Policy Separability V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/GenomeSensitivityEvaluator.ts`, `src/engine/ai/GenomeSensitivityDNAFactory.ts` | `src/tests/ai/genomeSensitivity.test.ts`, `npm run simulate:genome-sensitivity` | DNA の違いが「スコア差 → 意思決定差 → 実対戦での行動差」として決定論的・再現可能に観測できることを実証 |
 | **Official Regulation Environment** | **IMPLEMENTED (Light + Entry16)** | `src/engine/regulation/OfficialRegulationMatchFactory.ts` | `src/tests/regulation/*.test.ts`, `npm run simulate:official` | 公式ルール第9.1.2版に基づく公式対戦環境。CORE-BATTLE 結果は公式評価ではなく Core 検証用 |
 | **Official Baseline Measurement** | **IMPLEMENTED** | `src/engine/regulation/OfficialBaselineMeasurementRunner.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts`, `npm run measure:official-baseline` | 公式Light+Entry16での600戦定量計測基盤 (Phase 3.3) |
 | **Official Setup Viability Audit** | **IMPLEMENTED** | `src/engine/regulation/OfficialSetupAuditor.ts` | `src/tests/ai/officialBaselineMeasurement.test.ts` | 大量シードでの公式セットアップ成立監査 (100 Seeds) |
@@ -356,7 +357,43 @@ GameSession
 
 ---
 
-## 10. Future Architecture (Phase 4.0 予定)
+## 10. Genome Sensitivity & Policy Separability Foundation (BP-SIM-AI-GENOME-SENSITIVITY-V1)
+
+Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
+
+### 1. 目的と位置づけ
+- Evolution Engine (Phase 4.0) を実装する前の不可欠な前提確認として、Decision Feature Schema v4 / Decision DNA v1 / GenomePolicy において、
+  **「DNAの違い $\rightarrow$ スコア差 $\rightarrow$ 意思決定差 $\rightarrow$ 実対戦での行動差」**
+  として実際に観測できることを、決定論的かつ再現可能なエビデンスとして確立しました。
+- DNA が単にファイル保存できる数値配列ではなく、Production Path 上で明確な行動変化をもたらすことを実証しています。
+
+### 2. アーキテクチャ原則
+- **第二の Simulation Loop を作らない**:
+  対戦評価は既存の `PolicyExperimentRunner` $\rightarrow$ `BatchSimulationRunner` $\rightarrow$ `SimulationRunner` $\rightarrow$ `GameSession` の本番経路を完全再利用。
+- **意思決定評価ロジックの非複製**:
+  特徴量エンコードは `DecisionFeatureEncoder`、スコアリングは `GenomeScorer`、選択規則は `GenomePolicy`（Argmax + 最小 patternRef タイブレーク）の既存実装を使用。
+- **汎用特徴量のみによる行動分離**:
+  特定 Action ID や Component ID への手動分岐・重みを一切排除し、`pattern_is_action` や `pattern_is_pass` などの汎用特徴量のみでコントラスト DNA を構成。
+
+### 3. 実証されたエビデンス体系
+1. **Decision-Level Linear Weight Sensitivity**:
+   - `pattern_is_action` (+5.0) vs `pattern_is_pass` (+5.0) の汎用重み差分により、実 GameSession リクエストにおいて 158 パターンすべてでスコア差（差分 8.0）が発生し、DNA A は `patternRef 0 (ACTION)`、DNA B は `patternRef 157 (PASS)` を選択（選択分離: `SEPARATED`）。
+2. **Context × Pattern Interaction Weight Sensitivity**:
+   - 実戦で活性化した Context Feature（例: `turn_count`, `self_is_turn_player` 等）と Pattern Feature の相互作用重み $M_{ij}$（`DecisionDNACodec.getContextPatternWeightIndex()` 経由）の変更により、スコア差が発生することを実証。
+3. **Inactive Gene Negative Control**:
+   - 当該リクエストで非活性（値が 0）な Context Feature の重みを変更しても、全合法手のスコアおよび選択が完全に不変（差分 0）であることを実証。DNA $\rightarrow$ 活性特徴量 $\rightarrow$ スコアの因果関係を証明。
+4. **Same DNA & Metadata Negative Controls**:
+   - DNA A とその完全 clone、および metadata のみ異なる同一重み DNA を比較した場合、スコア・選択・差分が完全一致（差分 0）することを実証。
+5. **Match-Level Policy Separability**:
+   - 公式レギュレーション `official:standard-pack` 上で Seat Swap（Leg 1: A=p1, B=p2 / Leg 2: B=p1, A=p2）対戦を実行。
+   - FAILED 試合 0 件で全スケジュール対戦を正常完走。
+   - Generic 行動メトリクスにおいて、Participant A は Action 選択率 2.4%、Pass 選択率 97.0%、Participant B は Action 選択率 0.0%、Pass 選択率 100.0% を記録し、再現可能な行動差（Action 差 -2.4%, Pass 差 +3.0%）を実証。
+6. **決定論性 (Determinism)**:
+   - 同一設定での再実行において、論理結果（Logical Result）が 100% 完全一致（JSON round-trip 完全同一）することを確認。
+
+---
+
+## 11. Future Architecture (Phase 4.0 予定)
 
 ### Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
 1. **Population**: 100 DNA
@@ -365,3 +402,4 @@ GameSession
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+
