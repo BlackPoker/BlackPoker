@@ -404,7 +404,11 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 ## 11. Future Architecture (Phase 4.0 予定)
 
 ### 1. Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
-1. **Population**: 100 DNA
+1. **Population Model (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1)**:
+   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (※ TypeScript 本番実装は未実装)
+   - **母集団規模**: `populationSize = 100` (Provisional Default, configurable $\ge 2$)
+   - **不変スナップショット**: 世代評価中のメンバー追加・削除禁止。DNA と Fitness の厳格な分離（DNA オブジェクトへスコアを直接書き込まない）。
+   - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
 2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価 (Seat Swap / Multi Seed 公平性保証)
 3. **Fitness Evaluation (Outcome-First V1, BP-SIM-AI-FITNESS-EVAL-V1)**:
    - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`FitnessEvaluator`, `FitnessEvaluationTypes`)
@@ -416,8 +420,16 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **0 試合完了の厳格な扱い**: `completedMatches === 0` の場合は `provisionalScore = null`（0 勝全敗 0.0 と区別）。
    - **※ 未実装コンポーネント**: Population, Selection, Crossover, Mutation, Generation / Evolution Loop は未実装のまま維持。
    - ※詳細設計仕様: `tools/simulator/docs/ai-fitness-design-v1.md` 参照。
-4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
-5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
-6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+4. **Parent Selection (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1)**:
+   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (※ TypeScript 本番実装は未実装)
+   - **選択プール**: `VALID` 個体のみ（`fitnessScore = 0.0` の全敗個体も適格候補。`INSUFFICIENT_EVIDENCE` および `INVALID` は完全除外）。
+   - **Tier 2 の処遇**: VALID 不足時も Tier 2 を暫定スコア順に繰り上げ昇格させず、`REEVALUATION_REQUIRED` として対戦再評価を要求。
+   - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Default $k = 3$, Seeded Deterministic PRNG）。
+   - **同点タイブレーク**: 配列順バイアスを排除したシード付き決定論的タイブレーク。
+   - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ単調非減少を保証）。
+   - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
+5. **Genetic Operators (Phase 4.0 予定)**: Crossover, Mutation $\rightarrow$ 次世代生成 (※ 未実装)
+6. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
+7. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
 
 
