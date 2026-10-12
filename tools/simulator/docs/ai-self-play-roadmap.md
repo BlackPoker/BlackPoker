@@ -427,8 +427,18 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Engineering Default $k = 3$, Seeded Deterministic PRNG）。
    - **同点タイブレーク**: 配列順・ID順バイアスを排除したシード付き決定論的タイブレーク。
    - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ best-known genotype の消失を防止。※自己対戦環境変化に伴う measured fitness の単調非減少は保証しない）。
-   - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
-5. **Genetic Operators (Phase 4.0 予定)**: Crossover, Mutation $\rightarrow$ 次世代生成 (※ 未実装)
+5. **Genetic Operators & Runtime Telemetry (BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1)**:
+   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW**
+   - **交叉方式 (Crossover)**: Block-Segmented Uniform Crossover ($P_x = 0.5$、`patternWeights` と `contextPatternWeights` を独立処理、ルール非依存・位置バイアスなし)。
+   - **突然変異方式 (Mutation)**: Per-Gene Gaussian Perturbation with Clamping ($p_m = 0.01$, $\sigma = 0.05$, clamp $[-10.0, +10.0]$、非有限値完全排除)。
+   - **自己交配回避 & リトライ**: 同一 `genomeId` ペア検知時に最大 3 回リトライ、枯渇時も無性生殖+変異として受容しクラッシュ・不適格個体フォールバックを防止。
+   - **シード領域分離**: `generationSeed` から `selectionSeed` と各オフスプリングの `offspringSeed` を独立派生し、選択と遺伝操作の乱数干渉を排除。
+   - **エリート継承**: Genotype は完全保存、**Fitness Score は非継承（次世代で必ず再評価）**。
+   - **次世代母集団境界**: `populationSize = eliteCount + offspringCount`（Provisional Default = 100、可変 $\ge 2$）。
+   - **実行時間計測テレメトリ**: 1 試合ごとの `elapsedMs`（高精度モノトニッククロック `performance.now()`、COMPLETED/INCOMPLETE/FAILED 全対応）、バッチ集計（平均・中央値・p95）、DNA/世代単位時間、ハードウェア・並列度（`concurrency`）メタデータ。
+   - **実行時成果物方針**: 大量生ログ（`matches.jsonl` 等）は Git 管理対象外（`.gitignore` に `tools/simulator/.artifacts/` を追加）。
+   - ※詳細設計仕様: `tools/simulator/docs/ai-genetic-operators-design-v1.md` 参照。
+   - ※実装ステータス: Crossover, Mutation, Generation Runner, Evolution Loop のプロダクションコードは未実装。
 6. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 7. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
 
