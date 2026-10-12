@@ -18,12 +18,14 @@ import {
   GeneticOperatorConfig,
   DEFAULT_GENETIC_OPERATOR_CONFIG,
   GeneticOperatorError,
+  GeneticOperatorConfigurationError,
   getSelfMatingRetryStreamKey,
 } from "../../domain/ai/GeneticOperatorTypes";
 import {
   PopulationSnapshot,
   FitnessEvaluationSnapshot,
   PopulationSelectionConfig,
+  DEFAULT_POPULATION_SELECTION_CONFIG,
   SelectedParent,
   ComparableEvaluationContext,
 } from "../../domain/ai/PopulationSelectionTypes";
@@ -45,6 +47,30 @@ export interface AssembleParentPairParams {
 }
 
 export class ParentPairAssembler {
+  /**
+   * maxSelfMatingRetries の厳格なバリデーションと解決 (Fail-Fast)
+   */
+  private static resolveMaxSelfMatingRetries(
+    config?: Partial<GeneticOperatorConfig>
+  ): number {
+    const value =
+      config?.maxSelfMatingRetries !== undefined
+        ? config.maxSelfMatingRetries
+        : DEFAULT_GENETIC_OPERATOR_CONFIG.maxSelfMatingRetries;
+
+    if (
+      typeof value !== "number" ||
+      !Number.isFinite(value) ||
+      !Number.isInteger(value) ||
+      value < 0
+    ) {
+      throw new GeneticOperatorConfigurationError(
+        `Invalid maxSelfMatingRetries: must be a non-negative integer, received ${value}`
+      );
+    }
+    return value;
+  }
+
   /**
    * 単純な親ペアの生成（自己交配リトライを行わない直接生成）
    */
@@ -89,6 +115,11 @@ export class ParentPairAssembler {
       );
     }
 
+    // operatorConfig の maxSelfMatingRetries を即座に Fail-Fast バリデーション
+    const maxRetries = ParentPairAssembler.resolveMaxSelfMatingRetries(
+      params.operatorConfig
+    );
+
     // 1. 同一ゲノムIDでない場合はそのままペア確定
     if (parentA.genomeId !== parentB.genomeId) {
       return Object.freeze({
@@ -106,7 +137,7 @@ export class ParentPairAssembler {
       });
     }
 
-    // 3. 適格候補数の確認 (validCount >= 2 かどうか)
+    // 3. 母集団・適応度スナップショットの整合性判定
     const readiness = PopulationSelector.assessReadiness(
       params.population,
       params.fitnessSnapshot,
@@ -114,19 +145,49 @@ export class ParentPairAssembler {
       params.expectedContext
     );
 
+    // INVALID_POPULATION または INCOMPARABLE_EVALUATION の場合は黙って飲み込まず Fail-Closed
+    if (readiness.status === "INVALID_POPULATION") {
+      throw new GeneticOperatorError(
+        `ParentPairAssembler: Population snapshot is invalid: ${
+          readiness.reason ?? "Unknown integrity error"
+        }`
+      );
+    }
+
+    if (readiness.status === "INCOMPARABLE_EVALUATION") {
+      throw new GeneticOperatorError(
+        `ParentPairAssembler: Incomparable evaluation context: ${
+          readiness.reason ?? "Evaluation context mismatch"
+        }`
+      );
+    }
+
     // 有効個体数が 2 未満の場合は再選択しても別個体を選びようがないため、そのまま自己交配受容
-    if (readiness.status !== "READY" || readiness.validCount < 2) {
+    if (readiness.validCount < 2) {
       return Object.freeze({
         parentA,
         parentB,
       });
     }
 
-    // 4. 独立リトライストリームによる親 B の再選択
-    const maxRetries =
-      params.operatorConfig?.maxSelfMatingRetries !== undefined
-        ? params.operatorConfig.maxSelfMatingRetries
-        : DEFAULT_GENETIC_OPERATOR_CONFIG.maxSelfMatingRetries;
+    // 4. Retry 専用の effective selection config 構築
+    // validCount >= 2 であれば、たとえ Standard Selection が REEVALUATION_REQUIRED であっても Retry を試行可能
+    const configuredTournamentSize =
+      params.selectionConfig?.tournamentSize !== undefined
+        ? params.selectionConfig.tournamentSize
+        : DEFAULT_POPULATION_SELECTION_CONFIG.tournamentSize;
+
+    const effectiveTournamentSize = Math.max(
+      2,
+      Math.min(configuredTournamentSize, readiness.validCount)
+    );
+
+    const retrySelectionConfig: PopulationSelectionConfig = Object.freeze({
+      ...DEFAULT_POPULATION_SELECTION_CONFIG,
+      ...params.selectionConfig,
+      tournamentSize: effectiveTournamentSize,
+      minimumValidPopulationCount: 2,
+    });
 
     let selectedParentB = parentB;
 
@@ -137,7 +198,7 @@ export class ParentPairAssembler {
       const candidateB = PopulationSelector.selectParent(
         params.population,
         params.fitnessSnapshot,
-        params.selectionConfig,
+        retrySelectionConfig,
         retrySeed,
         params.expectedContext
       );

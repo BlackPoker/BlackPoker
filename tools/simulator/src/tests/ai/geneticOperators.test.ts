@@ -475,9 +475,60 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
     });
 
     it("Test 21 & 22: assembleParentPair handles candidate readiness (< 2 candidates)", () => {
-      const { population, fitness } = createDummyPopulation(1);
-      const parentA = createSelectedParent("genome-0", 0.0);
-      const parentB = createSelectedParent("genome-0", 0.0); // self-mating
+      // Population has 2 entries (valid structure), but only 1 is VALID (validCount = 1 < 2)
+      const pop0: PopulationEntry = {
+        genomeId: "genome-0",
+        dnaRef: "ref-0",
+        generation: 1,
+        dna: createParentDNA("genome-0", 0.1),
+      };
+      const pop1: PopulationEntry = {
+        genomeId: "genome-1",
+        dnaRef: "ref-1",
+        generation: 1,
+        dna: createParentDNA("genome-1", 0.2),
+      };
+
+      const fit0: PopulationFitnessEntry = {
+        genomeId: "genome-0",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.5,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 50,
+          losses: 50,
+          draws: 0,
+        },
+      };
+      const fit1: PopulationFitnessEntry = {
+        genomeId: "genome-1",
+        result: {
+          status: "INSUFFICIENT_EVIDENCE",
+          fitnessScore: null,
+          provisionalScore: 0.8,
+          completedMatches: 10,
+          completionRate: 0.1,
+          scheduledMatches: 100,
+          wins: 8,
+          losses: 2,
+          draws: 0,
+        },
+      };
+
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [pop0, pop1],
+      };
+      const fitness: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [fit0, fit1],
+      };
+
+      const parentA = createSelectedParent("genome-0", 0.1, 0.5);
+      const parentB = createSelectedParent("genome-0", 0.1, 0.5); // self-mating
 
       const pair = ParentPairAssembler.assembleParentPair({
         parentA,
@@ -491,7 +542,78 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
       expect(pair.parentB.genomeId).toBe("genome-0");
     });
 
-    it("Test 21: assembleParentPair retries and succeeds when alternative candidate is available", () => {
+    it("Test A: exactly 2 VALID candidates allows Self-Mating Retry under default tournamentSize=3", () => {
+      // Default PopulationSelectionConfig has tournamentSize = 3, minValid = 2.
+      // With validCount = 2, Standard Selection is REEVALUATION_REQUIRED.
+      // But Self-Mating Retry must succeed with effective tournamentSize = 2!
+      const popA: PopulationEntry = {
+        genomeId: "genome-A",
+        dnaRef: "ref-A",
+        generation: 1,
+        dna: createParentDNA("genome-A", 0.1),
+      };
+      const popB: PopulationEntry = {
+        genomeId: "genome-B",
+        dnaRef: "ref-B",
+        generation: 1,
+        dna: createParentDNA("genome-B", 0.9),
+      };
+
+      const fitA: PopulationFitnessEntry = {
+        genomeId: "genome-A",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.2,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 20,
+          losses: 80,
+          draws: 0,
+        },
+      };
+      const fitB: PopulationFitnessEntry = {
+        genomeId: "genome-B",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.8,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 80,
+          losses: 20,
+          draws: 0,
+        },
+      };
+
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [popA, popB],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [fitA, fitB],
+      };
+
+      const parentA = createSelectedParent("genome-A", 0.1, 0.2);
+      const initialParentB = createSelectedParent("genome-A", 0.1, 0.2); // Self-Mating initial
+
+      const pair = ParentPairAssembler.assembleParentPair({
+        parentA,
+        parentB: initialParentB,
+        population,
+        fitnessSnapshot,
+        offspringSeed: 4024959625,
+      });
+
+      expect(pair.parentA.genomeId).toBe("genome-A");
+      // B has higher fitness, so 2-candidate tournament selects B
+      expect(pair.parentB.genomeId).toBe("genome-B");
+      expect(pair.parentB.genomeId).not.toBe(pair.parentA.genomeId);
+    });
+
+    it("Test B: assembleParentPair retries and succeeds when alternative candidate is available (assert not.toBe)", () => {
       const { population, fitness } = createDummyPopulation(5);
       const parentA = createSelectedParent("genome-0", 0.0);
       const parentB = createSelectedParent("genome-0", 0.0); // self-mating initial
@@ -506,16 +628,134 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
       });
 
       expect(pair.parentA.genomeId).toBe("genome-0");
-      // Since there are 5 candidates with tournamentSize=2, retry selects a different winner
-      expect(pair.parentB.genomeId).toBeDefined();
+      expect(pair.parentB.genomeId).not.toBe(parentA.genomeId);
     });
 
-    it("Test 23: assembleParentPair accepts self-mating on retry exhaustion without crashing", () => {
+    it("Test C: assembleParentPair accepts self-mating on retry exhaustion without crashing (maxSelfMatingRetries > 0)", () => {
+      // Create population where Parent A has highest fitness (1.0) and B has 0.0
+      // In 2-candidate tournaments, Parent A will always win and be picked repeatedly
+      const popA: PopulationEntry = {
+        genomeId: "genome-A",
+        dnaRef: "ref-A",
+        generation: 1,
+        dna: createParentDNA("genome-A", 1.0),
+      };
+      const popB: PopulationEntry = {
+        genomeId: "genome-B",
+        dnaRef: "ref-B",
+        generation: 1,
+        dna: createParentDNA("genome-B", 0.0),
+      };
+
+      const fitA: PopulationFitnessEntry = {
+        genomeId: "genome-A",
+        result: {
+          status: "VALID",
+          fitnessScore: 1.0,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 100,
+          losses: 0,
+          draws: 0,
+        },
+      };
+      const fitB: PopulationFitnessEntry = {
+        genomeId: "genome-B",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.0,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 0,
+          losses: 100,
+          draws: 0,
+        },
+      };
+
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [popA, popB],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [fitA, fitB],
+      };
+
+      const parentA = createSelectedParent("genome-A", 1.0, 1.0);
+      const parentB = createSelectedParent("genome-A", 1.0, 1.0); // self-mating initial
+
+      const pair = ParentPairAssembler.assembleParentPair({
+        parentA,
+        parentB,
+        population,
+        fitnessSnapshot,
+        offspringSeed: 12345,
+        operatorConfig: { maxSelfMatingRetries: 3 },
+      });
+
+      // Retries exhausted because A wins every tournament -> safely accepts A + A
+      expect(pair.parentA.genomeId).toBe("genome-A");
+      expect(pair.parentB.genomeId).toBe("genome-A");
+    });
+
+    it("Test D: assembleParentPair fails-fast on invalid maxSelfMatingRetries", () => {
       const { population, fitness } = createDummyPopulation(5);
       const parentA = createSelectedParent("genome-0", 0.0);
-      const parentB = createSelectedParent("genome-0", 0.0); // self-mating
+      const parentB = createSelectedParent("genome-0", 0.0);
 
-      // Configure maxSelfMatingRetries to 0 so retries are exhausted immediately
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot: fitness,
+          offspringSeed: 12345,
+          operatorConfig: { maxSelfMatingRetries: -1 },
+        });
+      }).toThrowError(GeneticOperatorConfigurationError);
+
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot: fitness,
+          offspringSeed: 12345,
+          operatorConfig: { maxSelfMatingRetries: 1.5 },
+        });
+      }).toThrowError(GeneticOperatorConfigurationError);
+
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot: fitness,
+          offspringSeed: 12345,
+          operatorConfig: { maxSelfMatingRetries: NaN },
+        });
+      }).toThrowError(GeneticOperatorConfigurationError);
+
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot: fitness,
+          offspringSeed: 12345,
+          operatorConfig: { maxSelfMatingRetries: Infinity },
+        });
+      }).toThrowError(GeneticOperatorConfigurationError);
+    });
+
+    it("Test E: assembleParentPair accepts maxSelfMatingRetries = 0 as valid", () => {
+      const { population, fitness } = createDummyPopulation(5);
+      const parentA = createSelectedParent("genome-0", 0.0);
+      const parentB = createSelectedParent("genome-0", 0.0);
+
       const pair = ParentPairAssembler.assembleParentPair({
         parentA,
         parentB,
@@ -527,6 +767,163 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
 
       expect(pair.parentA.genomeId).toBe("genome-0");
       expect(pair.parentB.genomeId).toBe("genome-0");
+    });
+
+    it("Test F: assembleParentPair fails-closed on INVALID_POPULATION", () => {
+      // 1:1 mapping violation between population and fitness snapshot
+      const popA: PopulationEntry = {
+        genomeId: "genome-A",
+        dnaRef: "ref-A",
+        generation: 1,
+        dna: createParentDNA("genome-A", 0.1),
+      };
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [popA],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [], // Empty fitness entries -> INVALID_POPULATION
+      };
+
+      const parentA = createSelectedParent("genome-A", 0.1);
+      const parentB = createSelectedParent("genome-A", 0.1);
+
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot,
+          offspringSeed: 12345,
+        });
+      }).toThrowError(GeneticOperatorError);
+    });
+
+    it("Test G: assembleParentPair fails-closed on INCOMPARABLE_EVALUATION", () => {
+      const { population, fitness } = createDummyPopulation(5);
+      const parentA = createSelectedParent("genome-0", 0.0);
+      const parentB = createSelectedParent("genome-0", 0.0);
+
+      const mismatchContext: ComparableEvaluationContext = {
+        ...dummyContext,
+        generation: 999, // Mismatched generation
+      };
+
+      expect(() => {
+        ParentPairAssembler.assembleParentPair({
+          parentA,
+          parentB,
+          population,
+          fitnessSnapshot: fitness,
+          offspringSeed: 12345,
+          expectedContext: mismatchContext,
+        });
+      }).toThrowError(GeneticOperatorError);
+    });
+
+    it("Optional: Self-Mating Retry NEVER selects INSUFFICIENT or INVALID candidates", () => {
+      const popA: PopulationEntry = {
+        genomeId: "genome-A",
+        dnaRef: "ref-A",
+        generation: 1,
+        dna: createParentDNA("genome-A", 0.1),
+      };
+      const popB: PopulationEntry = {
+        genomeId: "genome-B",
+        dnaRef: "ref-B",
+        generation: 1,
+        dna: createParentDNA("genome-B", 0.9),
+      };
+      const popC: PopulationEntry = {
+        genomeId: "genome-C",
+        dnaRef: "ref-C",
+        generation: 1,
+        dna: createParentDNA("genome-C", 0.5),
+      };
+      const popD: PopulationEntry = {
+        genomeId: "genome-D",
+        dnaRef: "ref-D",
+        generation: 1,
+        dna: createParentDNA("genome-D", 0.5),
+      };
+
+      const fitA: PopulationFitnessEntry = {
+        genomeId: "genome-A",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.2,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 20,
+          losses: 80,
+          draws: 0,
+        },
+      };
+      const fitB: PopulationFitnessEntry = {
+        genomeId: "genome-B",
+        result: {
+          status: "VALID",
+          fitnessScore: 0.8,
+          completedMatches: 100,
+          completionRate: 1.0,
+          scheduledMatches: 100,
+          wins: 80,
+          losses: 20,
+          draws: 0,
+        },
+      };
+      const fitC: PopulationFitnessEntry = {
+        genomeId: "genome-C",
+        result: {
+          status: "INSUFFICIENT_EVIDENCE",
+          fitnessScore: null,
+          provisionalScore: 0.99, // Even with higher provisionalScore!
+          completedMatches: 10,
+          completionRate: 0.1,
+          scheduledMatches: 100,
+          wins: 10,
+          losses: 0,
+          draws: 0,
+        },
+      };
+      const fitD: PopulationFitnessEntry = {
+        genomeId: "genome-D",
+        result: {
+          status: "INVALID",
+          fitnessScore: null,
+          failedMatches: 1,
+          scheduledMatches: 100,
+        },
+      };
+
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [popA, popB, popC, popD],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [fitA, fitB, fitC, fitD],
+      };
+
+      const parentA = createSelectedParent("genome-A", 0.1, 0.2);
+      const initialParentB = createSelectedParent("genome-A", 0.1, 0.2);
+
+      const pair = ParentPairAssembler.assembleParentPair({
+        parentA,
+        parentB: initialParentB,
+        population,
+        fitnessSnapshot,
+        offspringSeed: 4024959625,
+      });
+
+      expect(pair.parentA.genomeId).toBe("genome-A");
+      expect(pair.parentB.genomeId).toBe("genome-B");
+      expect(pair.parentB.genomeId).not.toBe("genome-C");
+      expect(pair.parentB.genomeId).not.toBe("genome-D");
     });
 
     it("Test 24: stream isolation across crossover, mutation, and retry", () => {
