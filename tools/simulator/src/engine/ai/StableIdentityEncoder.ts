@@ -1,7 +1,7 @@
 /**
  * StableIdentityEncoder.ts
  *
- * BlackPoker Simulator - AI Feature Schema v3
+ * BlackPoker Simulator - AI Feature Schema v4
  *
  * 【設計原則】
  * 1. 固定長 (Fixed Dimension):

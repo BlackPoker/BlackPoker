@@ -124,7 +124,21 @@ export interface PlayerObservation {
   readonly chancePlayerId?: PlayerKey;
   readonly turnCount?: number;
   readonly players: readonly PlayerObservationView[];
+  /**
+   * 実際の state.stage.requests に存在するリクエストの ID リスト。
+   * Stage 外の即時アクション等は含まれない。
+   */
   readonly stageRequestRefs: readonly RequestRef[];
+  /**
+   * 実際の state.stage.requests に存在するリクエストのサニタイズされた View リスト。
+   * Stage 外の即時アクション等は含まれない。
+   */
   readonly stageRequests: readonly RequestView[];
+  /**
+   * 即時解決アクション等、Stage を介さずに解決中の効果（EFFECT_RESOLUTION）の
+   * 発生元リクエストのサニタイズされた View。
+   * Stage 上のリクエストである場合はここには重複格納されず stageRequests 側を参照する。
+   */
+  readonly effectSourceRequest?: RequestView;
   readonly recentEvents: readonly GameEventView[];
 }

@@ -1,9 +1,9 @@
 /**
  * DecisionFeatureEncoder.ts
  *
- * BlackPoker Simulator - AI Feature Schema v3
+ * BlackPoker Simulator - AI Feature Schema v4
  *
- * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 3)。
+ * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 4)。
  *
  * 【入力境界の原則】
  * 本エンコーダーの入力は合法的観測情報である Readonly<DecisionRequest> のみです。
@@ -322,7 +322,15 @@ export class DecisionFeatureEncoder {
     if (request.source?.type === "EFFECT_RESOLUTION") {
       sourceEffectStepId = request.source.effectStepId;
       const ref = request.source.sourceRequestRef;
-      const reqView = obs.stageRequests?.find((r) => r.requestId === ref);
+
+      // 1. Stage 上のリクエストから解決
+      let reqView = obs.stageRequests?.find((r) => r.requestId === ref);
+
+      // 2. 一致しなければ Stage 外 Source Request (effectSourceRequest) から解決
+      if (!reqView && obs.effectSourceRequest && obs.effectSourceRequest.requestId === ref) {
+        reqView = obs.effectSourceRequest;
+      }
+
       if (reqView) {
         sourceActionId = reqView.actionId;
         sourceController = reqView.controller;

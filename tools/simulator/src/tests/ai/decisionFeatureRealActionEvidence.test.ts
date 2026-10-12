@@ -143,6 +143,14 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       const encoded = DecisionFeatureEncoder.encode(effReq);
       expect(encoded.featureSchemaVersion).toBe(FEATURE_SCHEMA_VERSION);
 
+      // 【Stage Semantics 検証】
+      // Attack は Stage-backed のため、実 Stage 深度は 1
+      expect(session.state.stage.requests.length).toBe(1);
+      expect(effReq.observation.stageRequests.length).toBe(1);
+      expect(effReq.observation.stageRequestRefs.length).toBe(1);
+      expect(effReq.observation.effectSourceRequest).toBeUndefined();
+      expect(getContextValue(encoded, "stage_depth")).toBe(1);
+
       // 1. Action Identity は action.attack のバケットと完全一致
       const expectedActionBuckets = StableIdentityEncoder.encodeActionIdentity("action.attack");
       for (let i = 0; i < 16; i++) {
@@ -490,11 +498,22 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       assertEffectSource(searchSource);
       const sourceReqRef = searchSource.sourceRequestRef;
 
-      const foundReqView = searchReq.observation.stageRequests?.find((r) => r.requestId === sourceReqRef);
-      expect(foundReqView).toBeDefined();
-      expect(foundReqView?.actionSpeed).toBe("immediate");
+      // 【Stage Semantics 検証】
+      // action.search は immediate のため、実 Stage は空
+      expect(session.state.stage.requests.length).toBe(0);
+      expect(searchReq.observation.stageRequests.length).toBe(0);
+      expect(searchReq.observation.stageRequestRefs.length).toBe(0);
+
+      // Stage 外 Source Request View として effectSourceRequest に格納
+      expect(searchReq.observation.effectSourceRequest).toBeDefined();
+      expect(searchReq.observation.effectSourceRequest?.requestId).toBe(sourceReqRef);
+      expect(searchReq.observation.effectSourceRequest?.actionSpeed).toBe("immediate");
+      expect(searchReq.observation.effectSourceRequest?.actionTiming).toBe("quick");
 
       const encoded = DecisionFeatureEncoder.encode(searchReq);
+
+      // stage_depth は実 Stage 深度の 0
+      expect(getContextValue(encoded, "stage_depth")).toBe(0);
 
       // Action Identity は action.search に対応
       const expectedSearchBuckets = StableIdentityEncoder.encodeActionIdentity("action.search");
@@ -625,6 +644,14 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
 
       const encoded = DecisionFeatureEncoder.encode(revReq);
       expect(encoded.featureSchemaVersion).toBe(FEATURE_SCHEMA_VERSION);
+
+      // 【Stage Semantics 検証】
+      // Reverse は Stage-backed のため、実 Stage 深度と一致
+      expect(session.state.stage.requests.length).toBe(1);
+      expect(revReq.observation.stageRequests.length).toBe(1);
+      expect(revReq.observation.stageRequestRefs.length).toBe(1);
+      expect(revReq.observation.effectSourceRequest).toBeUndefined();
+      expect(getContextValue(encoded, "stage_depth")).toBe(1);
 
       // 1. Action Identity は action.reverse のバケットと完全一致
       const expectedRevBuckets = StableIdentityEncoder.encodeActionIdentity("action.reverse");

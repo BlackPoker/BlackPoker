@@ -175,7 +175,7 @@ export class ObservationFactory {
       }
     }
 
-    // ステージリクエストの処理
+    // ステージリクエストの処理（実際に state.stage.requests に存在するリクエストのみ）
     const stageRequests: RequestView[] = [];
     const stageRequestRefs: string[] = [];
 
@@ -186,12 +186,13 @@ export class ObservationFactory {
       }
     }
 
-    // 即時解決中など、ステージ外の現在解決中リクエストを合法的に補完
+    // Stage 外（即時解決等）の現在解決中リクエストを分離して設定（Stage に既に存在する場合は重複させない）
+    let effectSourceRequest: RequestView | undefined = undefined;
     if (options?.currentRequest && options.currentRequest.id) {
       const curReq = options.currentRequest;
-      if (!stageRequests.some((r) => r.requestId === curReq.id)) {
-        stageRequestRefs.push(curReq.id);
-        stageRequests.push(this.mapRequestToView(curReq, viewerPlayerId));
+      const isAlreadyInStage = stageRequests.some((r) => r.requestId === curReq.id);
+      if (!isAlreadyInStage) {
+        effectSourceRequest = this.mapRequestToView(curReq, viewerPlayerId);
       }
     }
 
@@ -203,6 +204,7 @@ export class ObservationFactory {
       players: playersView,
       stageRequestRefs,
       stageRequests,
+      effectSourceRequest,
       recentEvents: [],
     };
   }

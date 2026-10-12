@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1-R2`
-更新日時: 2026-10-12 08:30 JST
+作業ID: `BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1-R3`
+更新日時: 2026-10-12 14:30 JST
 
 ---
 
@@ -35,8 +35,8 @@
 | **Decision Feature Schema v1** | **SUPERSEDED** | `featureSchemaVersion: 1` | `src/tests/ai/decisionFeatureEncoder.test.ts` (初期プロトタイプ) | Context 25, Pattern 57 (計 1482 weights) |
 | **Decision Feature Schema v2** | **SUPERSEDED** | `featureSchemaVersion: 2` | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
 | **Decision Feature Schema v3** | **SUPERSEDED BY FEATURE SCHEMA v4** | `featureSchemaVersion: 3` | `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureRequestTarget.test.ts` | Request Context 163, Pattern 111 (計 18204 weights) |
-| **Decision Feature Schema v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 4`) | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Request Context 163次元, Pattern 143次元, 合計 23,452 weights (Candidate Action Identity + Generic Option Identity) |
-| **Generic Feature Encoder v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts` | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts` | Candidate Action 16 buckets, Option 16 buckets, Source Speed/Timing 伝搬, Assignment 方向修正, Coverage Ratio セマンティクス修正 |
+| **Decision Feature Schema v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 4`) | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts`, `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureStageSemantics.test.ts` | Request Context 163次元, Pattern 143次元, 合計 23,452 weights (Candidate Action Identity + Generic Option Identity) |
+| **Generic Feature Encoder v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts`, `src/engine/decision/ObservationFactory.ts` | `decisionFeatureStageSemantics.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Stage Semantics Preservation (`stageRequests` = true Stage only, Stage外Source = `effectSourceRequest`), Candidate Action 16 buckets, Option 16 buckets, Source Speed/Timing 伝搬, Assignment 方向修正, Coverage Ratio セマンティクス修正 |
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder`, `ObservationFactory` | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断、相手伏せユニット対象時の秘密漏洩防止 |
 | **Decision DNA v1 format (v4 Schema Compatible)** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionDNATypes.ts`, `src/engine/ai/DecisionDNACodec.ts` | `src/tests/ai/decisionDNA.test.ts` | 23,452次元 (Pattern 143, Interaction 23,309), 旧 v1/v2/v3 DNA は fail-closed 拒絶 |
@@ -329,7 +329,7 @@ GameSession
 
 ---
 
-## 9. Privacy & Versioning Contract
+## 9. Privacy, Stage Semantics & Versioning Contract
 
 1. **Privacy Contract**:
    - `DecisionFeatureEncoder` の入力は `Readonly<DecisionRequest>` のみ。
@@ -337,13 +337,20 @@ GameSession
    - 相手手札の非公開カード、相手伏せ防壁/切札、相手裏向きユニットの `currentSize`、相手Life 10枚以上時の正確な枚数、未開封パックの中身は完全に秘匿。
    - 実行時動的 ID (`decisionId`, `matchId`, `opaqueCardId`, `cardInstanceId`, `unitId` 等の文字列) や表示用文字列 (`player.name`, `actionName`, `displayName`, `summary`) は特徴量値として使用禁止。
    - すべての特徴量値は有限数値 (`Number.isFinite(v) === true`)。
-2. **Versioning & Fail-Closed Contract**:
-   - `FEATURE_SCHEMA_VERSION = 3`, `DNA_FORMAT_VERSION = 1`, `scoringModel: "linear-bilinear-v1"`。
-   - 旧 v1 DNA (`featureSchemaVersion: 1`) および 旧 v2 DNA (`featureSchemaVersion: 2`) は、暗黙の zero padding やマイグレーションを行わず、`DecisionDNAValidationError` により **Fail-Closed で拒絶** されます。
-3. **Master + Extra 互換原則**:
-   - 特定の Action ID に対する手動ルール（`if (actionId === "action.down")` 等）は一切使用しません。
+2. **Stage Semantics Preservation Contract**:
+   - `PlayerObservation.stageRequests` および `stageRequestRefs` には、**実際に `state.stage.requests` に存在する Request のみ** を格納する。
+   - `stage_depth` 特徴量は厳格に実 Stage 上のリクエスト数（`obs.stageRequests.length`）のみを反映する。
+   - 即時解決アクション等の Stage 外 Source Request は `PlayerObservation.effectSourceRequest?: RequestView` という別キャリアで安全かつサニタイズされた View として伝搬する。
+   - Stage 上に既に存在するリクエストは `stageRequests` から参照され、`effectSourceRequest` への二重計上は行われない。
+   - これにより、`effect_selected_request_*` 等の Request 選択特徴量に Stage 外の偽リクエストが混入することを防止する。
+3. **Versioning & Fail-Closed Contract**:
+   - `FEATURE_SCHEMA_VERSION = 4`, `DNA_FORMAT_VERSION = 1`, `scoringModel: "linear-bilinear-v1"`。
+   - 総次元数: Context 163次元, Pattern 143次元, Total 23,452 重み。
+   - 旧 v1, v2, v3 DNA は、暗黙の zero padding やマイグレーションを行わず、`DecisionDNAValidationError` により **Fail-Closed で拒絶** されます。
+4. **Master + Extra 互換原則**:
+   - 特定のアクション名に対する手動ルール（`if (actionId === "action.down")` 等）は一切使用しません。
    - 新規 Action や Trump 追加時も、`StableIdentityEncoder` の固定長 multi-bucket hashing によりスキーマ変更不要で即座に観測・学習可能です（`action.synthetic.alpha/beta` による実証済み）。
-4. **シミュレータ実装言語の原則**:
+5. **シミュレータ実装言語の原則**:
    - BlackPoker Simulator の実装、テスト、補助スクリプト、検証ロジック、データ変換はすべて **TypeScript / Node.js**（および Docker, npm, shell command）へ統一します。
    - Python（`python`, `python3`, `pip`, `venv`, `pytest`, `*.py` 等）は一切使用・導入・作成しません。
 

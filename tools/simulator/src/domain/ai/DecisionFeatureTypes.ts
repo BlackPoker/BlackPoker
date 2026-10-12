@@ -1,7 +1,7 @@
 /**
  * DecisionFeatureTypes.ts
  *
- * BlackPoker Simulator - AI Feature Schema v3
+ * BlackPoker Simulator - AI Feature Schema v4
  *
  * 【設計原則】
  * 1. 汎用観測情報の完全網羅:
