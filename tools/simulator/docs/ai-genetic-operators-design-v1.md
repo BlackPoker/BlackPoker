@@ -1,7 +1,7 @@
 # BlackPoker Simulator Genetic Operators Design V1
-# + Runtime Performance Telemetry / Artifact Policy (Follow-up R1)
+# + Runtime Performance Telemetry / Artifact Policy (Follow-up R2)
 
-作業ID: `BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1-R1`  
+作業ID: `BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1-R2`  
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -12,6 +12,8 @@
 - `tools/simulator/src/engine/ai/DecisionDNACodec.ts` (Implemented)
 - `tools/simulator/src/domain/ai/PopulationSelectionTypes.ts` (Implemented)
 - `tools/simulator/src/engine/ai/PopulationSelector.ts` (Implemented)
+- `tools/simulator/src/engine/random/RandomSource.ts` (Implemented)
+- `tools/simulator/src/engine/random/DeterministicShuffle.ts` (Implemented)
 - `tools/simulator/src/engine/simulation/BatchSimulationRunner.ts` (Implemented)
 
 ---
@@ -22,12 +24,29 @@
 
 さらに、今後の大規模自動対戦および世代交代実験において、必要な計算資源と所要時間を正確に見積もり・分析可能とするための **実行時間計測テレメトリ（Runtime Performance Telemetry）** および **実行時成果物保存方針（Runtime Artifact Policy）** を確定する。
 
-### R1 Follow-up における厳格化事項
-1. **1試合の実時間計測境界 (`matchTotalElapsedMs`)**: 単なるシミュレーションループのみでなく、セッション生成・レギュレーションセットアップ等の実コストを含んだ総経過時間を主指標（Canonical Metric）として確立。
-2. **並列実行時のバッチ時間とスループット定義**: 個別試合時間の単純和（`sumMatchTotalElapsedMs`）と実際のバッチ経過時間（`batchWallClockElapsedMs`）を明確に分離し、並列度（`concurrency`）を考慮したスループット計算式を定義。
-3. **Seed Derivation Algorithm の厳密化 (`seed-derivation-v1`)**: 曖昧な文字列ハッシュではなく、純粋 uint32 境界・固定 uint32 ドメインタグ・アバランシェミキサーによる決定論的アルゴリズムと Known Test Vectors を明記。
-4. **Mutation 決定論契約の厳密化 (`deterministic-normal-approx-v1`)**: 初等超越関数（`Math.log`, `Math.sqrt`, `Math.cos`）に依存しない Irwin-Hall / CLT 近似正規分布を採用し、移植性の高い決定論保証境界を確立。非有限値検知時は Fail-Closed で例外停止。
-5. **決定論的 Offspring Identity**: 世代番号とオフスプリングインデックスに基づく決定論的 ID（`gen-000012-offspring-000042`）を確定し、乱数 UUID や時刻依存を完全排除。
+### R2 Follow-up における確定・厳格化事項
+1. **PRNG 消費規約の完全固定 (Finding 1)**:
+   - `SeededRandom.next()` から 32-bit 符号なし整数を生成する Canonical 変換関数 `nextUint32V1(rng)` を定義（1 呼出 = 正確に 1 回の PRNG draw 消費）。`nextInt()` の raw word 生成使用は禁止。
+   - 正規ノイズ近似用 16-bit 整数は `nextUint32V1(rng) >>> 16`（上位 16 ビット）に完全固定（1 個 = 1 PRNG draw）。
+2. **乱数ストリームの完全分離**:
+   - 1 個の Offspring 生成内においても、Crossover 用シードと Mutation 用シードを独立派生させ、一方のアルゴリズム変更が他方の乱数列に波及しないようストリームを完全分離。
+   - 自己交配回避リトライ（Self-Mating Retry）も独立ストリームからシードを派生。
+3. **既存 Seed 導出ユーティリティの再利用 (Option A 採用)**:
+   - Simulator 内の Seed 体系の重複・増殖を防ぐため、R1 Draft で新設された独自 `seed-derivation-v1` は採用せず、既存の `DeterministicShuffle.ts` の `deriveSeed(baseSeed, streamKey)` を Canonical 方式として再利用。
+   - 固定 Evolution Stream Keys（`evolution-selection-v1`, `evolution-offspring-v1-${i}`, `evolution-crossover-v1`, `evolution-mutation-v1`, `evolution-self-mating-retry-v1-${r}`）と Known Test Vectors を明記。
+4. **Crossover & Mutation の PRNG 乱数消費スケジュール確定**:
+   - Crossover: 遺伝子巡回順序を `patternWeights` (143) $\rightarrow$ `contextPatternWeights` (23,309) に固定。各遺伝子につき exactly 1 draw（合計 23,452 draws 固定）。
+   - Mutation: 各遺伝子につき判定 1 draw。変異時のみ追加 12 draws（上位 16 ビット）。総 draw 数は $23,452 + 12 \times \text{mutatedGeneCount}$。
+   - 変異率変更時の決定論スコープ（同一 config, seed, input に対して成立）を明記。
+5. **Cross-Platform 決定論性の保証境界厳格化 (Finding 2)**:
+   - 過剰保証を排除。同一 Node.js ランタイム、同一実装バージョン、同一 DNA、同一設定、同一シード、同一ストリームキーにおいて bit-exact を保証。
+   - 異種アーキテクチャ（x64 vs arm64）や OS 間は「Cross-Platform Conformance Target」として定義し、将来のテストによる実測検証を経て Supported Runtime Matrix を拡大する。
+6. **Timing 用語と統計値算出規約の厳密化 (Finding 3)**:
+   - `sumMatchTotalElapsedMs` を「CPU work」「CPU time」「CPU換算仕事量」と呼ばず、「Aggregate Match Latency」または「Sum of Per-Match Wall-Clock Latencies」（各試合 wall-clock latency の単純和）として定義。`CPU Time Recorded: NO` を明記。
+   - スループット計算の分母はバッチ全体の実ウォールクロック時間 `batchWallClockElapsedMs`。
+   - Median（奇数: 中央値、偶数: 中央2値の平均、0試合時: Fail-Fast / NA）および P95（Nearest-Rank Method、補間不使用）の計算規約を確定。
+7. **Artifact Root 表記の統一**:
+   - Canonical Artifact Root を `tools/simulator/.artifacts/ai-runs/<runId>/` に統一（`tools/simulator/runs/` 誤記の排除）。Git 管理対象外。
 
 > [!IMPORTANT]
 > **本作業のスコープ境界**  
@@ -57,6 +76,9 @@
   - `VALID` 個体のみが通常選択プール（Standard Selection Pool）の対象。
   - 決定論的 Mulberry32 トーナメント選択（Provisional Default $k=3$、`selectionSeed` 明示入力必須）。
   - エリート選択（Provisional Default $E=1$）。
+- **RandomSource & DeterministicShuffle**:
+  - `SeededRandom`: Mulberry32 アルゴリズムに基づく 32-bit PRNG。
+  - `deriveSeed(baseSeed, streamKey)`: 32-bit FNV-1a による決定論的ストリーム派生。
 
 ### 2.2 遺伝的操作子の基本原則（Rule-Agnostic 原則）
 Crossover および Mutation は、BlackPoker の個別ルールや特定アクションに依存してはならない。
@@ -74,15 +96,17 @@ Crossover および Mutation は、BlackPoker の個別ルールや特定アク�
 ## 3. Scope & Non-Goals (スコープと非目標)
 
 ### 3.1 本設計のスコープ
-- Crossover オペレータの候補比較、V1 推奨方式、構造的粒度の定義。
-- Mutation オペレータの候補比較、V1 推奨方式（`deterministic-normal-approx-v1`）、変異パラメータ・数値クランプ・Fail-Closed 契約の定義。
-- Parent Pair 契約と Self-Mating 回避・リトライ規約。
-- Seed Domain Separation モデルと `seed-derivation-v1`（アルゴリズム、固定 uint32 タグ、Test Vectors）。
+- PRNG 消費規約（`nextUint32V1`, `uint16` 上位16ビット、1 draw 単位の明確化）。
+- Crossover オペレータの推奨方式（Block-Segmented Uniform Crossover）、遺伝子順序、消費 draw 数。
+- Mutation オペレータの推奨方式（`deterministic-normal-approx-v1`）、遺伝子順序、判定 draw・ノイズ draw 数、非有限値 Fail-Closed 契約。
+- Crossover / Mutation / Self-Mating Retry の乱数ストリーム分離設計。
+- 既存 `deriveSeed(baseSeed, streamKey)` 再利用に基づく Seed 体系および固定 Evolution Stream Keys。
 - 決定論的 Offspring Identity（`gen-000012-offspring-000042`）および Lineage（系統情報）の表現形式。
 - Elite Inheritance（ジェノタイプ完全保存と Fitness 非継承）の境界定義。
 - 次世代 Population 生成境界（`populationSize = eliteCount + offspringCount`）。
 - 実行時間計測テレメトリ（1 試合 `matchTotalElapsedMs` 主指標、setup/simulation 内訳、バッチ時間、並列スループット）。
-- 実行環境・ハードウェア・実験メタデータの構造定義。
+- Timing 用語の厳格化（`sumMatchTotalElapsedMs` を CPU time / CPU work と呼ばない、`CPU Time Recorded: NO`）。
+- 統計量（Median, P95 Nearest-Rank Method）の厳密な算出アルゴリズム。
 - 実行時成果物の保存レイアウト（`.artifacts/ai-runs/<runId>/`）と Git 除外方針。
 
 ### 3.2 Non-Goals (本作業で実施しないこと)
@@ -122,29 +146,38 @@ V1 においては、**Block-Segmented Uniform Crossover** を採用する。
 
 ---
 
-## 6. Crossover Granularity (交叉の粒度と重み構造整合)
+## 6. Crossover Granularity & PRNG Consumption Contract (交叉の粒度と乱数消費規約)
 
-Decision DNA v1 の内部構造に基づき、交叉を適用する論理的粒度を定義する。
+### 6.1 重み構造と巡回順序
+`DecisionDNATypes.ts` に定義されている 2 つの重みブロックを以下の **Canonical 順序** で巡回する:
+1. `patternWeights`: 143 次元（インデックス $0 \dots 142$）
+2. `contextPatternWeights`: 23,309 次元（行優先フラット配列、インデックス $0 \dots 23308$）
 
-### 6.1 既存の Decision DNA v1 構造
-`DecisionDNATypes.ts` に定義されている構造は以下の 2 つの重みブロックのみである（存在しない架空のブロックは一切定義しない）:
-1. `patternWeights`: 143 次元（パターンバイアスベクトル）
-2. `contextPatternWeights`: 23,309 次元（コンテキスト $\times$ パターンの双線形相互作用行列、行優先フラット配列）
-※ `contextWeights` 単体は V1 には存在しない（Argmax 意思決定において定数項として相殺されるため）。
+総重み遺伝子数: $143 + 23,309 = \mathbf{23,452}$ 次元。
 
-### 6.2 粒度の選択肢比較
-- **Flat Full-Array Uniform Crossover**: 23,452 次元を 1 本のフラット配列とみなし、全要素を一様に $P_x = 0.5$ で選択。
-- **Block-Level Unit Swap**: `patternWeights` 全体を親 A から、`contextPatternWeights` 全体を親 B から選ぶ（粒度が粗すぎる）。
-- **Block-Segmented Uniform Crossover (推奨)**:
-  - `patternWeights`（143 要素）に対して独立に Uniform Crossover（$P_x = 0.5$）を適用。
-  - `contextPatternWeights`（23,309 要素）に対して独立に Uniform Crossover（$P_x = 0.5$）を適用。
-  - 各ブロックの境界を意識し、型安全な DTO 構造を維持したままオフスプリングを生成する。
+### 6.2 PRNG Draw 消費スケジュール
+- 各遺伝子につき、**exactly 1 回の `nextUint32V1(rng)`** を消費する。
+- 判定ロジック:
+  - $\text{word} < \text{0x80000000}$ (2147483648) $\implies$ 親 A の重みを採用
+  - $\text{word} \ge \text{0x80000000}$ (2147483648) $\implies$ 親 B の重みを採用
+  - これにより、$P_x = 0.5$（50% 確率）の等確率交叉が厳密に成立する。
+- **Crossover 総 Draw 数**:
+  $$\text{Total Crossover Draws} = \mathbf{23,452} \quad (\text{完全固定})$$
+- `metadata` やその他の補助フィールドに対して PRNG draw は一切消費しない。
 
 ---
 
-## 7. Parent Pair Contract (親ペア入力契約)
+## 7. Parent Pair Contract & Assembler Responsibility (親ペア契約と責務境界)
 
-親ペアは、先行する Population Selection レイヤ（`PopulationSelector`）から提供される。
+### 7.1 厳格な責務境界
+1. **Population Selection レイヤの責務**:
+   - `PopulationSelector` は、評価スナップショットとトーナメント選択に基づき、個別の「親候補（Selected Parent）」を選出する。
+2. **Parent Pair Assembler の責務**:
+   - 選出された親候補から Parent A と Parent B のペアリングを構築する。
+   - 同一ゲノム ID による自己交配の検知と、後述のリトライ（Self-Mating Retry）を統括する。
+3. **Crossover レイヤの責務**:
+   - 既に確定した `GeneticParentPair` を受け取り、交叉処理を実行する。
+   - **Crossover 内部で親の再選択を行ってはならない**。
 
 ```typescript
 export interface GeneticParentPair {
@@ -153,7 +186,7 @@ export interface GeneticParentPair {
 }
 ```
 
-### 厳格な契約境界
+### 7.2 厳格な契約境界
 1. **Fitness の再計算・再確認禁止**: Crossover レイヤは親の `fitnessScore` や勝敗統計を再検証しない。Selection レイヤが選出した出力をそのまま信用して受容する。
 2. **provisionalScore の参照禁止**: Selection レイヤを通過した個体のみが渡されるため、Crossover 側で `provisionalScore` を覗き見たり、それに応じて交叉確率を変動させたりしてはならない。
 3. **DNA の不変性**: 入力された親 DNA オブジェクト（`parentA.dna`, `parentB.dna`）を変更（mutate）してはならず、必ず新たな DNA オブジェクトを構築して返却する。
@@ -172,7 +205,9 @@ export interface GeneticParentPair {
 - **Case 1 に対するリトライ契約**:
   - Selection Pool 内の適格個体数（`validPoolSize`）が 2 以上の場合、親 B の再選択（Retry）を試行する。
   - **最大リトライ回数**: `maxSelfMatingRetries = 3`（Provisional Default）。
-  - リトライ時のシード消費: `deriveSeedV1(offspringSeed, SELF_MATING_RETRY_V1, retryIndex)` を用いて決定論的に進行する。
+  - **独立リトライシード**:
+    $$\text{retrySeed} = \text{deriveSeed}(\text{offspringSeed}, \text{"evolution-self-mating-retry-v1-" } + \text{retryIndex})$$
+    - リトライ操作は独立した乱数ストリームを消費し、**Crossover ストリームおよび Mutation ストリームを一切消費・汚染しない**。
   - **リトライ枯渇時の動作（Fail-Closed 原則の維持）**:
     - リトライを 3 回繰り返しても同一個体が選ばれ続けた場合、あるいは `validPoolSize === 1` の極限状態の場合、**例外終了（クラッシュ）はさせず、自己交配（Self-Mating）として受容する**。
     - 自己交配の場合、Crossover は実質的に親 A のクローンを出力し、その後の Mutation によって多様性を導入する（無性生殖＋変異モデル）。
@@ -205,7 +240,8 @@ $$w'_i = \text{clamp}(w_i + \delta_i, \text{mutationClampMin}, \text{mutationCla
 ここで、摂動量 $\delta_i$ は **初等超越関数（`Math.log`, `Math.sqrt`, `Math.cos` 等）を使用しない Irwin-Hall / 中心極限定理（CLT）整数和近似アルゴリズム** により算出する。
 
 #### 10.1 整数 PRNG による正規分布近似アルゴリズム
-Mulberry32 PRNG から 16-bit 整数乱数 $u_k \in [0, 65535]$ を 12 個生成する:
+Mulberry32 PRNG から 16-bit 整数乱数 $u_k \in [0, 65535]$ を 12 個サンプリングする。  
+後述の PRNG 消費規約に基づき、各 $u_k$ は `nextUint32V1(rng) >>> 16`（上位 16 ビット）とする:
 
 $$S = \sum_{k=1}^{12} u_k$$
 
@@ -222,15 +258,15 @@ $$\text{normalApprox} = \frac{S - 393210}{65536}$$
 $$\delta_i = \text{mutationSigma} \times \text{normalApprox}$$
 
 #### 10.2 選定理由
-1. **移植性と決定論性（Transcendental Math の排除）**: Box-Muller で使用される `Math.log` や `Math.cos` は、CPU アーキテクチャ（x86 vs ARM）や JS エンジンの実装差により最下位ビット（ULP）の微小差が生じる可能性がある。本近似方式は 32-bit 整数加算・乗算のみで完結するため、環境を跨いだ完全な再現性を担保できる。
+1. **移植性と決定論性（Transcendental Math の排除）**: Box-Muller で使用される `Math.log` や `Math.cos` は、CPU アーキテクチャや JS エンジンの実装差により最下位ビットの微小差が生じる可能性がある。本近似方式は 32-bit 整数加算・乗算のみで完結するため、環境を跨いだ高い再現性を担保できる。
 2. **計算効率**: 超越関数呼び出しがなく、高速な整数加算 12 回で済むため、23,452 次元の変異処理を極めて低コストで実行できる。
 3. **有界性**: 出力は厳密に $[-6, +6] \times \sigma$ の範囲に収まるため、極端な特異点が発生しない。
 
 ---
 
-## 11. Mutation Parameters & Provisional Defaults (突然変異パラメータと暫定デフォルト)
+## 11. Mutation Parameters & PRNG Consumption Contract (突然変異パラメータと乱数消費規約)
 
-V1 における突然変異パラメータおよびそのエンジニアリングデフォルト値は以下の通りとする。
+### 11.1 パラメータとエンジニアリングデフォルト
 
 | パラメータ名 | 型 | Provisional Default | 意味と役割 |
 | :--- | :--- | :--- | :--- |
@@ -239,20 +275,34 @@ V1 における突然変異パラメータおよびそのエンジニアリン�
 | `mutationClampMin` | `number` | `-10.0` | 変異後の重み下限値。 |
 | `mutationClampMax` | `number` | `+10.0` | 変異後の重み上限値。 |
 
-### 11.1 変異発生判定の uint32 閾値規約
+設定検証において、必ず $0 \le \text{mutationRate} \le 1$ かつ $\text{mutationClampMin} < \text{mutationClampMax}$ である有限数を検証する。
+
+### 11.2 変異発生判定の uint32 閾値規約
 浮動小数点比較の丸め誤差を排除するため、変異判定は 32-bit 整数空間で厳密に行う:
 
-$$\text{threshold} = \lfloor \text{mutationRate} \times 4294967296 \rfloor$$
+$$\text{threshold} = \begin{cases} 4294967296 & (\text{mutationRate} === 1) \\ \lfloor \text{mutationRate} \times 4294967296 \rfloor & (\text{otherwise}) \end{cases}$$
 
-Mulberry32 から得られた 32-bit 符号なし整数 `randomUint32` に対し:
-$$\text{randomUint32} < \text{threshold} \implies \text{変異実行}$$
+Mulberry32 から得られた 32-bit 符号なし整数 `word`（`nextUint32V1(rng)`）に対し:
+$$\text{word} < \text{threshold} \implies \text{変異実行}$$
 
-- **境界挙動**:
-  - `mutationRate = 0`: $\text{threshold} = 0$ となり、いかなる乱数値に対しても変異は発生しない（変異率 0% 保証）。
-  - `mutationRate = 1`: $\text{threshold} = 4294967296$ となり、全遺伝子で無条件に変異が発生する（変異率 100% 保証）。
+- `mutationRate = 0`: $\text{threshold} = 0 \implies$ 変異率 0% 保証。
+- `mutationRate = 1`: $\text{threshold} = 4294967296 \implies$ 全遺伝子で無条件変異（変異率 100% 保証）。
 
-### 11.2 パラメータ制約
-設定検証において、必ず $\text{mutationClampMin} < \text{mutationClampMax}$ であることを検証する。
+### 11.3 遺伝子巡回順序と PRNG Draw 消費スケジュール
+- **Canonical 順序**:
+  1. `patternWeights` ($0 \dots 142$)
+  2. `contextPatternWeights` ($0 \dots 23308$)
+- **各遺伝子における PRNG Draw 消費**:
+  - **Step 1 (変異判定)**: exactly 1 回の `nextUint32V1(rng)` を消費。
+  - **Step 2 (非変異時)**: `word >= threshold` の場合、追加の PRNG draw は **0 回**（消費なし）。
+  - **Step 3 (変異時)**: `word < threshold` の場合、**exactly 12 回の `nextUint32V1(rng)`** を追加消費。各 word の上位 16 ビット（`w >>> 16`）を $u_1 \dots u_{12}$ として使用。
+- **1 個体の Mutation 総 Draw 数式**:
+  $$\text{Total Mutation Draws} = \mathbf{23,452} + 12 \times \text{mutatedGeneCount}$$
+
+### 11.4 変異率変更時の決定論スコープ
+`mutationRate` を変更した場合、変異判定結果が変化するため、以降の PRNG 消費位置（アライメント）も変化し得る。  
+これは V1 の設計として完全に許容される。  
+すなわち、決定論性（Determinism Contract）は **同一設定・同一シード・同一入力** に対して成立するものであり、異なる `mutationRate` 間でノイズストリームの同一性までは保証しない。
 
 ---
 
@@ -275,7 +325,7 @@ $$\text{randomUint32} < \text{threshold} \implies \text{変異実行}$$
 
 ---
 
-## 13. Genetic Seed Contract & Mulberry32 PRNG (決定論的シード契約)
+## 13. PRNG Consumption Contract & Determinism Scope (乱数消費規約と再現性境界)
 
 遺伝的操作は、**完全な決定論的再現性（Seeded Determinism）** を持たなければならない。
 
@@ -287,75 +337,124 @@ crypto.randomUUID()
 環境時刻・プロセスPIDに基づく非決定論的乱数
 ```
 
-### 13.1 乱数生成器の契約
-- 32-bit 整数のシード値 `geneticSeed` を入力として受け取る。
-- 既存の `PopulationSelector` やシミュレータコアと同様に、**Mulberry32 PRNG** アルゴリズムを使用する。
-
-### 13.2 決定論保証境界（Determinism Scope）
-- **同一ランタイム・同一プラットフォーム**: 同一の親ペア、同一の設定、同一の `geneticSeed`、同一の `seed-derivation-v1`、同一のオペレータバージョンであれば、生成されるオフスプリング DNA の全 23,452 重みは **ビット単位で 100% 完全一致** する。
-- **クロスプラットフォーム（x86 vs ARM 等）**: `deterministic-normal-approx-v1` は初等超越関数を含まないため、標準的な IEEE 754 準拠環境において極めて高い再現性を維持する。
-
----
-
-## 14. Seed Domain Separation Model & `seed-derivation-v1`
-
-Selection の乱数ストリームと、Genetic Operators の乱数ストリームを同一の線形乱数消費列で暗黙共有してはならない。
-
-### 14.1 既存ユーティリティの整理と位置づけ
-既存コードベースには、対戦シミュレーション用の `DeterministicShuffle.deriveSeed` および `BatchSimulationRunner.deriveSeed` が存在する。これらは文字列テンプレート結合（`${baseSeed}:${streamKey}`）と FNV-1a を用いている。
-AI 進化・遺伝操作においては、文字列アロケーションオーバーヘッドおよびエンコーディング曖昧性を完全に排除するため、純粋な uint32 ワード境界の **`seed-derivation-v1`** を正式定義する。
-
-### 14.2 `seed-derivation-v1` アルゴリズム仕様
-入力は 3 つの 32-bit 符号なし整数（`parentSeed`, `domainTag`, `index`）を受け取り、決定論的に 1 つの 32-bit 符号なし整数を出力する。
+### 13.1 Canonical uint32 変換関数 (`nextUint32V1`)
+既存 `RandomSource` インターフェース（`SeededRandom`）の `next()` は $[0, 1)$ の浮動小数点数を返す。  
+遺伝的操作において 32-bit 符号なし整数（word）を得るための標準変換関数を以下のように固定する:
 
 ```typescript
-export function deriveSeedV1(
-  parentSeed: number,
-  domainTag: number,
-  index: number
-): number {
-  let h = 2166136261 >>> 0; // FNV-1a 32-bit offset basis
-
-  // Word 1: parentSeed
-  h ^= (parentSeed >>> 0);
-  h = Math.imul(h, 16777619) >>> 0; // FNV-1a prime
-
-  // Word 2: domainTag
-  h ^= (domainTag >>> 0);
-  h = Math.imul(h, 16777619) >>> 0;
-
-  // Word 3: index
-  h ^= (index >>> 0);
-  h = Math.imul(h, 16777619) >>> 0;
-
-  // Final Avalanche Mixer (Murmur3 fmix32)
-  h ^= h >>> 16;
-  h = Math.imul(h, 0x85ebca6b) >>> 0;
-  h ^= h >>> 13;
-  h = Math.imul(h, 0xc2b2ae35) >>> 0;
-  h ^= h >>> 16;
-
-  return h >>> 0;
+export function nextUint32V1(rng: RandomSource): number {
+  return Math.floor(rng.next() * 4294967296) >>> 0;
 }
 ```
 
-### 14.3 固定 uint32 ドメインタグ定義
-文字列ハッシュではなく、明確な 32-bit 定数タグを使用する:
+- **契約**: 1 回の `nextUint32V1(rng)` 呼び出しは、`rng.next()` を **正確に 1 回消費** する。
+- **禁止**: `nextInt()` を遺伝操作の生の乱数ワード生成に使用してはならない（範囲変換の内部計算によるアライメントズレを防ぐため）。
 
-| タグ定数名 | 16進数値 (uint32) | 意味・ASCII表現 |
+### 13.2 Canonical uint16 変換規約
+Irwin-Hall 正規ノイズ近似で使用する 16-bit 乱数 $u_k$ は、以下のように定義する:
+
+```typescript
+const word = nextUint32V1(rng);
+const u16 = word >>> 16; // 上位 16 ビット (upper 16 bits)
+```
+
+- **契約**: 必ず **上位 16 ビット** を使用する。下位 16 ビットを使用する実装は許容しない。
+- 1 個の $u_k$ 生成 = 1 回の PRNG draw（`nextUint32V1`）。
+
+### 13.3 決定論性保証境界（Determinism Scope）
+過剰保証（「あらゆる未知の環境でビット完全一致」等）を排除し、V1 において正式に保証する境界を以下に限定する:
+
+- **正式保証スコープ (Supported Deterministic Runtime)**:
+  - 同一のサポート対象 Node.js ランタイム（例: Node.js v20.x LTS）
+  - 同一のオペレータ実装バージョン
+  - 同一の入力 Decision DNA
+  - 同一の Genetic Config
+  - 同一の Seed 値
+  - 同一の Stream Key 契約
+  上記が満たされる場合、生成される Offspring DNA の全 23,452 重みは **ビット単位で 100% 完全一致（Bit-exact Reproduction）** する。
+
+- **クロスプラットフォーム（Cross-Platform Conformance Target）**:
+  - CPU アーキテクチャ（x64 vs arm64）や OS（Linux, Windows, macOS）間については、設計段階で bit-exact を断言しない。
+  - 代わりに「Cross-Platform Conformance Target」として位置づけ、Production 実装後に同一の Test Vector を複数環境で実行して bit-exact を実測検証する。
+  - 実測で bit-exact が確認された環境のみを「Supported Deterministic Runtime Matrix」に追加する。
+  - 万一、将来のクロスプラットフォームテストでビット差が検出された場合は、直ちにゲーム性や Fitness の破壊（Game/Fitness Correctness Failure）とは扱わず、「遺伝操作子の移植性課題（Genetic Operator Portability Issue）」として切り分ける。
+
+---
+
+## 14. Seed Architecture Decision & Domain Separation (シード体系判断と領域分離)
+
+### 14.1 既存ユーティリティ再利用の決定 (Option A 採用)
+シミュレータコードベース内における Seed 導出方式の重複・増殖を防ぐため、設計判断を行う:
+
+- **Option A (採用)**: `tools/simulator/src/engine/random/DeterministicShuffle.ts` の既存 `deriveSeed(baseSeed, streamKey)` を Evolution でも再利用する。
+  - **採用理由**:
+    1. 既に実装・単体テスト済みであり、安定稼働の実績がある。
+    2. 32-bit FNV-1a アルゴリズムにより完全な決定論性を持つ。
+    3. 文字列キーによる直感的かつ柔軟なドメイン分離が可能。
+    4. シミュレータ内で複数の異なる Seed ハッシュ体系が乱立するのを防ぎ、アーキテクチャの一貫性を維持できる。
+    5. 遺伝操作の実行頻度に対し、文字列ハッシュ計算のオーバーヘッドは対戦シミュレーション全体と比較して極めて軽微であり、性能ボトルネックにならない。
+- **Option B (不採用・廃止)**: R1 Draft で提案された純粋 uint32 ワードベースの独自 `seed-derivation-v1`（FNV word + Murmur3 fmix32）。
+  - **理由**: Option A の既存ユーティリティで要件（決定論性・ドメイン分離）が完全に満たされており、第 2 のシード導出方式を新設する技術的必要性がないため不採用とする。
+
+### 14.2 既存 `deriveSeed` の仕様
+```typescript
+export function deriveSeed(baseSeed: number, streamKey: string): number {
+  const str = `${baseSeed}:${streamKey}`;
+  let hash = 2166136261 >>> 0;
+  for (let i = 0; i < str.length; i++) {
+    hash ^= str.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash >>> 0;
+}
+```
+
+### 14.3 Canonical Evolution Stream Keys
+進化処理における各サブストリームのキー文字列は、以下の **固定フォーマット** に完全統一する（表記揺れ厳禁）:
+
+| 用途 | Stream Key フォーマット | 具体例 |
 | :--- | :--- | :--- |
-| `SELECTION_V1` | `0x53454c31` | トーナメント選択用乱数ストリーム (`"SEL1"`) |
-| `OFFSPRING_V1` | `0x4f464631` | 子個体生成（交叉・変異）用乱数ストリーム (`"OFF1"`) |
-| `SELF_MATING_RETRY_V1` | `0x534d5231` | 自己交配回避リトライ用乱数ストリーム (`"SMR1"`) |
+| トーナメント選択 | `evolution-selection-v1` | `evolution-selection-v1` |
+| 子個体ベースシード | `evolution-offspring-v1-${offspringIndex}` | `evolution-offspring-v1-0`, `evolution-offspring-v1-42` |
+| 交叉乱数ストリーム | `evolution-crossover-v1` | `evolution-crossover-v1` |
+| 突然変異乱数ストリーム | `evolution-mutation-v1` | `evolution-mutation-v1` |
+| 自己交配リトライ | `evolution-self-mating-retry-v1-${retryIndex}` | `evolution-self-mating-retry-v1-0`, `evolution-self-mating-retry-v1-1` |
 
-### 14.4 Known Test Vectors (実装時検証用テストベクトル)
-以下のテストベクトルを Canonical Reference として定義する:
+### 14.4 シード派生階層モデル (Hierarchical Derivation Model)
+```text
+generationSeed
+  ├── deriveSeed(generationSeed, "evolution-selection-v1")
+  │     └── selectionSeed (トーナメント親選択に使用)
+  │
+  ├── deriveSeed(generationSeed, "evolution-offspring-v1-0")
+  │     └── offspringSeed[0]
+  │           ├── deriveSeed(offspringSeed[0], "evolution-crossover-v1")
+  │           │     └── crossoverSeed (交叉オペレータに使用)
+  │           ├── deriveSeed(offspringSeed[0], "evolution-mutation-v1")
+  │           │     └── mutationSeed (変異オペレータに使用)
+  │           └── deriveSeed(offspringSeed[0], "evolution-self-mating-retry-v1-0")
+  │                 └── retrySeed[0] (自己交配リトライ親選択に使用)
+  │
+  └── deriveSeed(generationSeed, "evolution-offspring-v1-1")
+        └── offspringSeed[1]
+              └── ...
+```
 
-1. `deriveSeedV1(12345, 0x53454c31, 0) === 792183663` (`0x2f37bf6f`)
-2. `deriveSeedV1(12345, 0x4f464631, 0) === 2335402472` (`0x8b3359e8`)
-3. `deriveSeedV1(12345, 0x4f464631, 1) === 3485246005` (`0xcfbd7235`)
-4. `deriveSeedV1(0, 0x53454c31, 0) === 791699075` (`0x2f305a83`)
-5. `deriveSeedV1(2335402472, 0x534d5231, 0) === 76806788` (`0x0493f484`)
+### 14.5 Evolution Known Test Vectors (実装時検証用テストベクトル)
+`generationSeed = 12345` に対する Canonical Test Vectors を以下のように定義する:
+
+1. **Selection Seed**:
+   `deriveSeed(12345, "evolution-selection-v1") === 1967515842` (`0x7545e8c2`)
+2. **Offspring 0 Base Seed**:
+   `deriveSeed(12345, "evolution-offspring-v1-0") === 4024959625` (`0xefe80289`)
+3. **Offspring 1 Base Seed**:
+   `deriveSeed(12345, "evolution-offspring-v1-1") === 4008182006` (`0xeee800f6`)
+4. **Crossover Seed (for Offspring 0)**:
+   `deriveSeed(4024959625, "evolution-crossover-v1") === 3354403331` (`0xc7f02203`)
+5. **Mutation Seed (for Offspring 0)**:
+   `deriveSeed(4024959625, "evolution-mutation-v1") === 88400338` (`0x0544e1d2`)
+6. **Self-Mating Retry 0 Seed (for Offspring 0)**:
+   `deriveSeed(4024959625, "evolution-self-mating-retry-v1-0") === 1504965328` (`0x59b3f2d0`)
 
 ---
 
@@ -385,8 +484,10 @@ export interface OffspringLineageMetadata {
   readonly parentGenomeIds: readonly string[]; // [parentAId, parentBId] または [parentAId]
   readonly crossoverOperatorVersion: "block-segmented-uniform-v1" | "none";
   readonly mutationOperatorVersion: "deterministic-normal-approx-v1" | "none";
-  readonly seedDerivationVersion: "seed-derivation-v1";
-  readonly geneticSeed: number;
+  readonly seedDerivationVersion: "derive-seed-fnv1a-v1";
+  readonly offspringSeed: number;
+  readonly crossoverSeed?: number;
+  readonly mutationSeed?: number;
 }
 ```
 ※ Fitness スコアは系統メタデータには記録しない。
@@ -480,7 +581,7 @@ export interface MatchTimingRecord {
   readonly participantBId: string;
   readonly seatAssignment: "P1_A_P2_B" | "P1_B_P2_A";
   readonly status: "COMPLETED" | "INCOMPLETE" | "FAILED";
-  readonly matchTotalElapsedMs: number;  // 主指標
+  readonly matchTotalElapsedMs: number;  // 主指標 (wall-clock latency)
   readonly simulationElapsedMs?: number; // 内訳: シミュレーションループ時間
   readonly setupElapsedMs?: number;      // 内訳: セットアップ時間
   readonly decisionCount: number;        // 手数
@@ -489,35 +590,53 @@ export interface MatchTimingRecord {
 
 ---
 
-## 21. Batch / DNA / Generation Timing (バッチ・DNA・世代単位の集計仕様)
+## 21. Batch Timing, Throughput & Statistics Contract (バッチ時間・スループット・統計値契約)
 
-### 21.1 バッチ時間メトリクスの分離（Finding 2）
-並列実行（`concurrency > 1`）において、個別試合時間の単純和とバッチ全体の経過時間は一致しないため、用語を厳格に分離する:
+### 21.1 バッチ時間メトリクス用語の厳格化 (Finding 3)
+用語の混乱を防ぐため、以下の定義を厳格に順守する:
 
-- **`sumMatchTotalElapsedMs`**: $\sum_{i=1}^{M} \text{matchTotalElapsedMs}_i$（全試合の累積処理時間、CPU 換算仕事量）。
-- **`batchWallClockElapsedMs`**: バッチ開始から全試合終了・集計完了までの実際のウォールクロック経過時間。
-- **スループット計算式**:
+- **`matchTotalElapsedMs`**: 1 試合のウォールクロック所要時間（Wall-Clock Latency）。
+- **`sumMatchTotalElapsedMs`**: 各試合の `matchTotalElapsedMs` の単純和。
+  - **重要**: 本指標を **「CPU work」「CPU time」「CPU換算仕事量」と呼んではならない**。
+  - 正式な定義名: **「Aggregate Match Latency」** または **「Sum of Per-Match Wall-Clock Latencies」**。
+  - 今回の実装では CPU 時間そのものは計測しない（`CPU Time Recorded: NO`）。
+- **`batchWallClockElapsedMs`**: バッチ全体の実際のウォールクロック経過時間（バッチ開始から全試合完了・集計終了まで）。
+- **`matchesPerSecond` (実スループット)**:
   $$\text{matchesPerSecond} = \frac{\text{matchCount}}{\text{batchWallClockElapsedMs} / 1000}$$
-  ※ 並列実行時に `sumMatchTotalElapsedMs` を分母として用いることは厳禁。
+  ※ 並列実行時（`concurrency > 1`）に `sumMatchTotalElapsedMs` を分母として用いることは厳禁。
 
-### 21.2 バッチ集計メトリクス一覧
-一定の対戦バッチ終了時に、以下の統計量を集計・記録する:
-- `matchCount`: 総試合数
-- `completedCount`, `incompleteCount`, `failedCount`: 状態別試合数
-- `sumMatchTotalElapsedMs`: 個別試合時間の総和
-- `batchWallClockElapsedMs`: バッチの実ウォールクロック経過時間
-- `meanMatchTotalElapsedMs`: 算術平均 (`sumMatchTotalElapsedMs / matchCount`)
-- `medianMatchTotalElapsedMs`: 中央値 (p50)
-- `p95MatchTotalElapsedMs`: 95 パーセンタイル
-- `minMatchTotalElapsedMs`, `maxMatchTotalElapsedMs`: 最小・最大時間
-- `matchesPerSecond`: 秒間処理試合数
-- `concurrency`: 実行並列度
+### 21.2 統計値算出規約 (Median & P95 Contract)
+集計環境や言語処理系に依存しない一意な統計値算出アルゴリズムを以下のように確定する:
 
-### 21.3 `run-summary.json` 必須出力項目
+#### A. 中央値 (Median)
+ソート済み昇順サンプル $x[0 \dots n-1]$ に対し:
+- $n$ が奇数の場合: 中央の要素 $x[(n - 1) / 2]$
+- $n$ が偶数の場合: 中央の 2 要素の算術平均 $(x[n / 2 - 1] + x[n / 2]) / 2$
+- $n = 0$（試合数 0）の場合: Timing Summary 生成不可として Fail-Fast または `null` / Not Available とする（曖昧な 0 埋めは行わない）。
+
+#### B. 95 パーセンタイル (P95 Nearest-Rank Method)
+補間方式（Linear Interpolation 等）によるランタイム差異を排除するため、**最近傍ランク法（Nearest-Rank Method）** を Canonical 方式とする:
+- ソート済み昇順サンプル $x[0 \dots n-1]$ に対し:
+  $$\text{rank} = \lceil 0.95 \times n \rceil$$
+  $$\text{index} = \max(0, \text{rank} - 1)$$
+  $$\text{p95} = x[\text{index}]$$
+- これにより、どの環境でも同一のレイテンシログから完全に同一の p95 値が計算できる。
+
+### 21.3 将来の PC 性能比較における指標
+異なる PC 環境間で処理能力を比較・ベンチマークする際は、以下の指標群を主要比較対象とする:
+1. `meanMatchTotalElapsedMs`
+2. `p95MatchTotalElapsedMs`
+3. `batchWallClockElapsedMs`
+4. `matchesPerSecond`
+5. `concurrency`
+6. ハードウェア情報 (`cpuModel`, `nodeVersion`, `platform`, `arch`)
+※ `sumMatchTotalElapsedMs` は補助的な分析値としてのみ扱う。
+
+### 21.4 `run-summary.json` スキーマ
 ```json
 {
   "runId": "20261013T090000Z-gen001",
-  "buildSha": "09b26c9452b1ee516f3cc30c6ee3d1d03fe93395",
+  "buildSha": "41a4d3114dba2c2eccff7f21e23572cd9f3ad7f2",
   "buildRef": "BlackPoker/issue551-core-flow",
   "startedAt": "2026-10-13T09:00:00.000Z",
   "finishedAt": "2026-10-13T09:02:30.000Z",
@@ -573,6 +692,8 @@ export interface ExecutionEnvironmentMetadata {
 
 ## 24. Artifact Layout (.artifacts/ai-runs/<runId>/)
 
+成果物ルートの表記は、ドキュメント・ロードマップ・報告書のすべてで **`tools/simulator/.artifacts/ai-runs/<runId>/`** に完全統一する（`tools/simulator/runs/` 等の表記は禁止）。
+
 ```text
 tools/simulator/.artifacts/ai-runs/<runId>/
 ├── run-summary.json             # ラン全体のメタデータと集計統計（軽量）
@@ -620,7 +741,7 @@ tools/simulator/.artifacts/ai-runs/<runId>/
 
 ### Case F: 100 試合の実行時間集計
 - **条件**: 100 試合のバッチ対戦が実行され、各試合の `matchTotalElapsedMs` が記録される。
-- **動作**: `sumMatchTotalElapsedMs`, `meanMatchTotalElapsedMs`, `medianMatchTotalElapsedMs`, `p95MatchTotalElapsedMs` 等が集計・出力される。
+- **動作**: `sumMatchTotalElapsedMs`（単純和）, `meanMatchTotalElapsedMs`, `medianMatchTotalElapsedMs`, `p95MatchTotalElapsedMs` 等が集計・出力される。
 
 ### Case G: 同一 Seed・異なるハードウェア環境での実行
 - **条件**: 同一の対戦シード系列を用いて、PC A（Intel Core i7）と PC B（Apple M2）で対戦を実行。
@@ -642,24 +763,46 @@ tools/simulator/.artifacts/ai-runs/<runId>/
   - 正しいスループット: $\text{matchesPerSecond} = 100 / (1500 / 1000) = 66.67\text{ matches/sec}$。
   - 誤った計算式（$100 / (10000 / 1000) = 10$）は使用しない。
 
-### Case K: シード導出の決定論性 (Finding 3)
-- **条件**: `generationSeed = 12345` に対し、`deriveSeedV1` を実行。
+### Case K: シード導出の決定論性と Known Test Vectors (R2 Option A)
+- **条件**: `generationSeed = 12345` に対し、既存の `deriveSeed(baseSeed, streamKey)` を実行。
 - **動作**:
-  - `deriveSeedV1(12345, 0x53454c31, 0)` は常に `792183663` を返却。
-  - `deriveSeedV1(12345, 0x4f464631, 0)` は常に `2335402472` を返却。
-  - Known Test Vectors と完全一致する。
+  - `deriveSeed(12345, "evolution-selection-v1") === 1967515842`
+  - `deriveSeed(12345, "evolution-offspring-v1-0") === 4024959625`
+  - `deriveSeed(4024959625, "evolution-crossover-v1") === 3354403331`
+  - `deriveSeed(4024959625, "evolution-mutation-v1") === 88400338`
+  - `deriveSeed(4024959625, "evolution-self-mating-retry-v1-0") === 1504965328`
+  - Known Test Vectors と 100% 完全一致する。
 
-### Case L: 同一親・同一 geneticSeed・同一オペレータバージョン (Finding 4)
-- **条件**: 同一の親ペア、同一の `geneticSeed`、オペレータバージョン `deterministic-normal-approx-v1`。
+### Case L: 同一親・同一 geneticSeed・同一オペレータバージョン
+- **条件**: 同一の親ペア、同一の `geneticSeed`、同一のオペレータバージョン。
 - **動作**: 生成されるオフスプリング DNA の重み配列は 100% 同一となる。
 
-### Case M: 同一親・異なるハードウェア環境 (Finding 4)
+### Case M: クロスプラットフォーム適合性ターゲット (Finding 2)
 - **条件**: PC A（x86_64）と PC B（ARM64）で同一の入力からオフスプリングを生成。
-- **動作**: 超越関数を排除した整数和正規分布近似により、定義された決定論スコープ内で同一の DNA を再現する。
+- **動作**: 超越関数を排除した整数和正規分布近似により、高精度の再現性を目指す。Production 実装後に実測テストを実施し、一致が確認された環境を Supported Deterministic Runtime Matrix へ追加する。
 
-### Case N: 同一 Generation Build Input と決定論的 genomeId (Finding 5)
+### Case N: 同一 Generation Build Input と決定論的 genomeId
 - **条件**: 世代 12 において 100 個体を生成。
 - **動作**: オフスプリング ID は常に `gen-000012-offspring-000000` から `gen-000012-offspring-000098` までの完全同一の決定論的文字列系列となる。
+
+### Case O: PRNG Draw 消費スケジュールの完全再現性 (R2 Finding 1)
+- **条件**: 全 23,452 遺伝子の個体に対し、Crossover と Mutation を実行。
+- **動作**:
+  - Crossover: 23,452 回の `nextUint32V1()` を正確に消費。
+  - Mutation: 23,452 回の変異判定 draw を消費。変異が 230 箇所発生した場合、追加で $230 \times 12 = 2,760$ 回の draw を消費。
+  - Mutation 総 draw 数: $23,452 + 2,760 = 26,212$ draws。
+  - 同一シードであれば、変異箇所・ノイズ値・乱数消費回数が 1 draw もズレることなく完全に再現する。
+
+### Case P: Median および P95 の計算例 (R2 Finding 3)
+- **条件**: 4 試合のレイテンシサンプル `[10, 20, 30, 40]` ms（ソート済み）。
+- **動作**:
+  - サンプル数 $n = 4$（偶数）。
+  - 中央値（Median）: 中央 2 要素（20 と 30）の算術平均 $\implies (20 + 30) / 2 = \mathbf{25.0\text{ ms}}$。
+  - 95 パーセンタイル（P95 Nearest-Rank）:
+    $$\text{rank} = \lceil 0.95 \times 4 \rceil = \lceil 3.8 \rceil = 4$$
+    $$\text{index} = \max(0, 4 - 1) = 3$$
+    $$\text{p95} = x[3] = \mathbf{40.0\text{ ms}}$$
+  - 補間を行わないため、任意の実装言語・環境で完全に同一の値が得られる。
 
 ---
 
