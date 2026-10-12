@@ -403,11 +403,18 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 
 ## 11. Future Architecture (Phase 4.0 予定)
 
-### Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
+### 1. Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
 1. **Population**: 100 DNA
-2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価
-3. **Fitness Evaluation**: 勝率、平均ターン数、ライフ残量、対戦成果に基づく適応度評価
+2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価 (Seat Swap / Multi Seed 公平性保証)
+3. **Fitness Evaluation (Outcome-First V1)**:
+   - **最重要原則**: "Victory is the objective. Life is a resource, not a score."
+   - **主評価指標**: 勝敗結果（Outcome）に基づく Match Point Average (MPA: Win=1.0, Draw=0.5, Loss=0.0 on Completed Matches)。
+   - **Telemetry 分離**: 残りライフ（Remaining Life）、ターン数（Turn Count）、被ダメージ等は Fitness 計算から完全に除外。分析・研究・異常検知のための Telemetry メトリクスとして独立記録。
+   - **厳格なステータス分離**: `FAILED != LOSS`（Fail-Closed ゲートにより即座に失格/除外）、`INCOMPLETE != DRAW`（未決着は引き分けに含めず除外）。
+   - **Evidence Sufficiency**: 完了試合数不足による勝率過大評価（サンプル不足ハッキング）を防止する判定ゲートを導入。
+   - ※詳細設計仕様: `tools/simulator/docs/ai-fitness-design-v1.md` 参照。
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 6. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+
 
