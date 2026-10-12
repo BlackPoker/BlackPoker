@@ -149,15 +149,15 @@ DNA A を「勝率 $100\%$ だから最強」と判定して次世代に残す�
 ```typescript
 type FitnessEvaluationStatus =
   | "VALID"                  // 評価証拠が十分であり、Authoritative Fitness Score を持つ
-  | "INSUFFICIENT_EVIDENCE"  // 完了試合数または完了率が不足。Authoritative Score は持たず暫定参考値のみ
+  | "INSUFFICIENT_EVIDENCE"  // 完了試合数または完了率が不足。Authoritative Score は持たず保留
   | "INVALID";               // FAILED 試合が存在し失格。Authoritative Score を一切持たない
 
 type FitnessEvaluationResult =
   | {
       readonly status: "VALID";
       readonly fitnessScore: number; // [0.0, 1.0] 有界の実数値 (Authoritative)
-      readonly completedMatches: number;
-      readonly completionRate: number;
+      readonly completedMatches: number; // >= minimumCompletedMatches (> 0)
+      readonly completionRate: number; // >= minimumCompletionRate
       readonly scheduledMatches: number;
       readonly wins: number;
       readonly losses: number;
@@ -165,8 +165,8 @@ type FitnessEvaluationResult =
     }
   | {
       readonly status: "INSUFFICIENT_EVIDENCE";
-      readonly fitnessScore: null; // Authoritative スコアなし（次世代選択では保留扱い）
-      readonly provisionalScore: number; // 参考用 MPA (非公式)
+      readonly fitnessScore: null; // Authoritative スコアなし（通常の次世代選択対象外）
+      readonly provisionalScore: number | null; // 参考用 MPA (completedMatches > 0 のみ算出。completedMatches === 0 では null)
       readonly completedMatches: number;
       readonly completionRate: number;
       readonly scheduledMatches: number;
@@ -181,6 +181,11 @@ type FitnessEvaluationResult =
       readonly scheduledMatches: number;
     };
 ```
+
+> **重要: 0 試合完了時の `provisionalScore` 契約**
+> `completedMatches === 0`（1 試合も完了していない）場合、`provisionalScore` は `0.0` ではなく厳格に **`null`** とする。
+> 0 試合完了は「全敗（0 勝）」ではなく「データ不在」であり、安易に `0.0` と縮退・推測してはならない。
+
 
 ### 6.3 VALID 条件と判定規則
 評価ステータスは、以下の論理式に基づき決定論的に判定される。
@@ -259,8 +264,8 @@ Fitness V1 として、**案 B（Match Point Average: MPA）をベースとし�
   │     ├─ Else if completedMatches < minCompletedMatches
   │     │       OR completionRate < minCompletionRate:
   │     │     Status = "INSUFFICIENT_EVIDENCE"
-  │     │     FitnessScore = null (Authoritative スコアなし・保留)
-  │     │     ProvisionalScore = MPA (参考暫定値)
+  │     │     FitnessScore = null (Authoritative スコアなし・通常選択対象外)
+  │     │     ProvisionalScore = (completedMatches > 0) ? MPA : null
   │     │
   │     └─ Else (failedMatches === 0
   │              AND completedMatches >= minCompletedMatches
@@ -271,12 +276,22 @@ Fitness V1 として、**案 B（Match Point Average: MPA）をベースとし�
   ├─► [Phase 2: Outcome Fitness Calculation]
   │     MPA = (Wins * 1.0 + Draws * 0.5) / CompletedMatches
   │     (※ VALID 個体のみが Authoritative FitnessScore として確定)
+  │     (※ INSUFFICIENT 個体は completedMatches > 0 の場合のみ参考暫定値として保持)
   │
   ├─► [Phase 3: Population Selection Priority]
-  │     次世代選択の優先度 (Tier 階層ソート):
-  │       Tier 1: Status === "VALID"（Authoritative FitnessScore 降順）
-  │       Tier 2: Status === "INSUFFICIENT_EVIDENCE"（CompletionRate 降順 $\rightarrow$ ProvisionalScore 降順）
-  │       Tier 3: Status === "INVALID"（FitnessScore 不在、選択プールから即時完全破棄）
+  │     次世代選択プールの構造:
+  │       [通常選択プール (Standard Selection Pool)]:
+  │         Tier 1: Status === "VALID" のみ
+  │                 （Authoritative FitnessScore 降順で淘汰・選択を実行）
+  │
+  │       [通常選択除外 / 保留 (Quarantined)]:
+  │         Tier 2: Status === "INSUFFICIENT_EVIDENCE"
+  │                 （通常の次世代親個体選択対象から除外。
+  │                   母集団全滅時のフォールバック扱いは Evolution Selection 設計へ委ねる）
+  │
+  │       [即時破棄 / 失格 (Disqualified & Discarded)]:
+  │         Tier 3: Status === "INVALID"
+  │                 （FitnessScore 不在、選択プールから即時完全破棄）
   │
   └─► [Phase 4: Telemetry Separation (Sidecar Archive)]
         Life, Turns, Damage, Action Rates をメタデータとして保存
@@ -287,7 +302,8 @@ Fitness V1 として、**案 B（Match Point Average: MPA）をベースとし�
 ### 設計推奨理由
 1. **ゲーム性の歪みゼロ**: 勝利（1.0）と引き分け（0.5）のみを評価し、ライフ残量等の戦略的リソースに干渉しない。
 2. **完全な Fail-Closed**: クラッシュした個体は `FitnessScore = null` として Tier 3 に隔離され、絶対に増殖・生存しない（「通常個体のスコア 0.0」と誤認されない）。
-3. **遅延戦法の抑止**: 未決着多発個体は完了数または完了率不足により `FitnessScore = null`（Tier 2）に隔離され、過大評価されない。
+3. **遅延戦法の抑止**: 未決着多発個体は完了数または完了率不足により `FitnessScore = null`（Tier 2）として**通常の選択プールから完全に除外**され、過大評価・次世代拡散されない。
+4. **0 試合完了の厳格な扱い**: 完了試合が 0 試合の個体は `provisionalScore = null` となり、勝率 0.0（全敗）と誤認されない。
 
 ---
 
@@ -313,7 +329,7 @@ Fitness 評価においても、`BP-SIM-AI-GENOME-SENSITIVITY-V1` で実証さ�
 | **Remaining Life** | ライフを減らさないために過剰防御や消極的パスを繰り返し、勝機を逃す。また、ライフを犠牲にした強力なコンボを学習できなくなる。 | **Fitness から完全除外**。Telemetry にのみ分離。 |
 | **Turn Count** | 「短時間で終わらせる」ために勝率を度外視して無謀な突撃を行い、早期自滅する。または長期戦コントロール戦略が不当に淘汰される。 | **Fitness から完全除外**。Telemetry にのみ分離。 |
 | **Damage Dealt** | 相手のライフを削ることだけに執着し、相手の反撃やリソース枯渇を無視して敗北する。 | **Fitness から完全除外**。Telemetry にのみ分離。 |
-| **Incomplete Abuse** | 決着をつけずに意図的に引き延ばし、少ない完了試合での偶然の勝率を誇大に見せる。 | **Evidence Sufficiency Gate** により、未決着多発個体を低 Tier へ隔離。 |
+| **Incomplete Abuse** | 決着をつけずに意図的に引き延ばし、少ない完了試合での偶然の勝率を誇大に見せる。 | **Evidence Sufficiency Gate** により、未決着多発個体を Tier 2（通常選択除外）へ隔離。 |
 | **Crash Exploitation** | 不利な局面で意図的または偶発的に例外を発生させ、敗北を免れようとする。 | **Fail-Closed Gate** により、FAILED > 0 は即座に INVALID / 失格。 |
 
 ---
@@ -375,23 +391,31 @@ Fitness V1 では計算の透明性と決定論性を最優先し、同一世代
 - **DNA A**: 100 試合スケジュール、2 試合完了（2 勝 0 敗）、98 試合未決着（INCOMPLETE）
 - **DNA B**: 100 試合スケジュール、90 試合完了（60 勝 30 敗）、10 試合未決着
 - **判定**:
-  - DNA A: `completedMatches = 2 < 10`（絶対数不足）のため、Status は **`INSUFFICIENT_EVIDENCE`**（Tier 2、`fitnessScore = null`、暫定 MPA = 1.0）。
-  - DNA B: `completedMatches = 90 >= 10` かつ `completionRate = 90% >= 50%` のため、Status は **`VALID`**（Tier 1、`fitnessScore = 60 / 90 = 0.667`）。
-  - **結果: DNA B が上位**。DNA A は完了試合不足により保留され、見かけの「勝率 100%」による不当な最上位獲得を阻止する。
+  - DNA A: `completedMatches = 2 < 10`（絶対数不足）のため、Status は **`INSUFFICIENT_EVIDENCE`**（Tier 2）。`fitnessScore = null`、暫定 MPA = 1.0。**通常の次世代親個体選択プールから除外（保留）**。
+  - DNA B: `completedMatches = 90 >= 10` かつ `completionRate = 90% >= 50%` のため、Status は **`VALID`**（Tier 1）。`fitnessScore = 60 / 90 = 0.667`。通常の選択対象。
+  - **結果: DNA B が選択対象（上位）**。DNA A は完了試合不足により通常選択プールから除外され、見かけの「勝率 100%」による不当な次世代親獲得を阻止する。
 
 #### Case B-2: 完了数は閾値を満たすが完了率（CompletionRate）が低い
 - **DNA C**: 1,000 試合スケジュール、20 試合完了（20 勝 0 敗）、980 試合未決着（INCOMPLETE）
 - **DNA D**: 1,000 試合スケジュール、800 試合完了（500 勝 300 敗）、200 試合未決着（INCOMPLETE）
 - **判定**:
-  - DNA C: `completedMatches = 20 >= 10`（絶対数は満たす）だが、`completionRate = 20 / 1000 = 2.0% < 50%`（完了率が閾値未満）。Status は **`INSUFFICIENT_EVIDENCE`**（Tier 2、`fitnessScore = null`、暫定 MPA = 1.0）。
-  - DNA D: `completedMatches = 800 >= 10` かつ `completionRate = 800 / 1000 = 80.0% >= 50%`。Status は **`VALID`**（Tier 1、`fitnessScore = 500 / 800 = 0.625`）。
-  - **結果: DNA D が上位**。DNA C は大量の試合を引き延ばして完了率が 2% に留まっているため保留となり、過大評価されない。
+  - DNA C: `completedMatches = 20 >= 10`（絶対数は満たす）だが、`completionRate = 20 / 1000 = 2.0% < 50%`（完了率が閾値未満）。Status は **`INSUFFICIENT_EVIDENCE`**（Tier 2）。`fitnessScore = null`、暫定 MPA = 1.0。**通常の次世代親個体選択プールから除外（保留）**。
+  - DNA D: `completedMatches = 800 >= 10` かつ `completionRate = 800 / 1000 = 80.0% >= 50%`。Status は **`VALID`**（Tier 1）。`fitnessScore = 500 / 800 = 0.625`。通常の選択対象。
+  - **結果: DNA D が選択対象（上位）**。DNA C は大量の試合を引き延ばして完了率が 2% に留まっているため通常選択プールから除外され、過大評価されない。
+
+#### Case B-3: 完了試合が 0 試合の個体 (provisionalScore = null)
+- **DNA E**: 100 試合スケジュール、0 試合完了、100 試合未決着（INCOMPLETE）
+- **DNA F**: 100 試合スケジュール、100 試合完了（0 勝 100 敗、全敗）
+- **判定**:
+  - DNA E: `completedMatches = 0` のため、Status は **`INSUFFICIENT_EVIDENCE`**（Tier 2）。`fitnessScore = null` かつ **`provisionalScore = null`**（「勝率 0.0」ではなく「データ不在」として記録）。通常の選択プールから除外。
+  - DNA F: `completedMatches = 100 >= 10` かつ `completionRate = 100% >= 50%`、`failedMatches = 0` のため、Status は **`VALID`**（Tier 1）。`fitnessScore = 0.0`（0 勝全敗による正規の 0.0）。
+  - **結果: DNA F は正規のスコア 0.0 を持つ通常個体であり、DNA E（データ不在 null）とは意味論的にも型上も完全に区別される**。
 
 ### Case C: クラッシュ発生個体
 - **DNA A**: 100 試合スケジュール、90 勝 9 敗 1 FAILED
 - **DNA B**: 100 試合スケジュール、50 勝 50 敗 0 FAILED
 - **判定**:
-  - DNA A: `failedMatches = 1 > 0` のため、Status は **`INVALID`**（Tier 3、失格）。**`fitnessScore = null`**（Authoritative スコアを剥奪され、通常個体のスコア 0.0 とは異なりランキング比較対象から除外）。
+  - DNA A: `failedMatches = 1 > 0` のため、Status は **`INVALID`**（Tier 3、失格）。**`fitnessScore = null`**（Authoritative スコアを剥奪され、通常個体のスコア 0.0 とは異なり選択プールから即時破棄）。
   - DNA B: Status は **`VALID`**（Tier 1）、`fitnessScore = 50 / 100 = 0.50`。
   - **結果: DNA B が上位（DNA A は即時淘汰・破棄）**。クラッシュを起こす個体はいかに勝率が高くとも排除される。
 
@@ -426,7 +450,7 @@ Fitness V1 では計算の透明性と決定論性を最優先し、同一世代
 
 1. **公式レギュレーションにおける試合完了ステップ数（maxDecisions）の適正値**:
    現行の公式レギュレーション（`standard-pack`）では、DNA の行動特性によっては手数上限（現在 CLI デフォルト 500）に達して INCOMPLETE となる試合が存在する。進化実験を効率的に回すための推奨ステップ上限、あるいは引き分け判定条件の整備について継続検討する。
-2. **Tier 2（INSUFFICIENT_EVIDENCE）個体の次世代への取り扱い**:
-   母集団の大部分が未決着となった初期世代において、全滅を回避するためのフォールバック選択アルゴリズム（例: CompletionRate 順での暫定救済）の具体設計。
+2. **Tier 2（INSUFFICIENT_EVIDENCE）個体の非常時フォールバック選択アルゴリズム**:
+   初期世代において未決着が多発し、Tier 1（VALID）個体数が次世代親プール定員（Population の指定枠）に満たない場合の**非常時フォールバック（Tier 2 fallback）処理の具体設計**。これは Fitness 評価層の責務ではなく、Phase 4.0 の Evolution Selection（親個体選択アルゴリズム）の設計課題として整理・検討する（例: CompletionRate 降順での暫定救済、あるいは前世代エリートの再起用など）。
 3. **対戦相手プールの選定**:
    世代内自己対戦（Population 内ランダムマッチ）とするか、固定された Baseline AI（ランダム、ヒューリスティック等）との対戦とするかの実験プロトコルの策定。
