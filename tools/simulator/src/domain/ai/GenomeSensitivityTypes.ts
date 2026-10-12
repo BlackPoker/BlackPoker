@@ -1,4 +1,9 @@
-import { PolicyExperimentParticipantRef, PolicyParticipantOutcomeSummary } from "./PolicyExperimentTypes";
+import {
+  PolicyExperimentParticipantRef,
+  PolicyParticipantOutcomeSummary,
+  PolicyExperimentSummary,
+} from "./PolicyExperimentTypes";
+import { BatchMatchContext } from "../simulation/BatchSimulationTypes";
 
 /**
  * Genome Sensitivity Result のフォーマットバージョン
@@ -99,6 +104,7 @@ export interface GenomeSensitivityLogicalResult {
   readonly dnaA: PolicyExperimentParticipantRef;
   readonly dnaB: PolicyExperimentParticipantRef;
   readonly decisionComparison?: DecisionSensitivityComparison;
+  readonly experimentSummary: PolicyExperimentSummary;
   readonly outcomeA: PolicyParticipantOutcomeSummary;
   readonly outcomeB: PolicyParticipantOutcomeSummary;
   readonly matchBehaviorSummary: MatchBehaviorSeparationSummary;
@@ -121,7 +127,7 @@ export interface GenomeSensitivityEvaluationOptions {
   readonly dnaB: Readonly<import("./DecisionDNATypes").DecisionDNA>;
   readonly participantAName?: string;
   readonly participantBName?: string;
-  readonly sessionFactory: () => import("../../engine/session/GameSession").GameSession;
+  readonly sessionFactory: (context: BatchMatchContext) => import("../../engine/session/GameSession").GameSession;
   readonly sampleRequest?: Readonly<import("../decision/DecisionRequest").DecisionRequest>;
 }
 

@@ -13,6 +13,7 @@ import { GenomeSensitivityDNAFactory } from "../../engine/ai/GenomeSensitivityDN
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionFeatureEncoder } from "../../engine/ai/DecisionFeatureEncoder";
 import { CONTEXT_FEATURE_NAMES, PATTERN_FEATURE_NAMES } from "../../domain/ai/DecisionFeatureTypes";
+import { BatchMatchContext } from "../../domain/simulation/BatchSimulationTypes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,15 +47,15 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
     sampleRequest = step.request;
   });
 
-  const createStandardPackSessionFactory = (seed: number = 42) => {
+  const createStandardPackSessionFactory = () => {
     const reg = catalog.regulations.get("standard-pack")!;
     const frame = catalog.frames.get(reg.frameId)!;
-    return () => {
-      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, seed, {
+    return (context: BatchMatchContext) => {
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, context.matchSeed, {
         playerNames: { p1: "P1", p2: "P2" },
       });
       if (outcome.type !== "READY") throw new Error(`Setup failed: ${outcome.reason}`);
-      return new GameSession(outcome.state, rulePackage, { matchSeed: seed });
+      return new GameSession(outcome.state, rulePackage, { matchSeed: context.matchSeed });
     };
   };
 
@@ -218,7 +219,7 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
         maxDecisionsPerMatch: 500,
         dnaA: dnaActive,
         dnaB: dnaPass,
-        sessionFactory: createStandardPackSessionFactory(42),
+        sessionFactory: createStandardPackSessionFactory(),
       });
 
       expect(result.experimentResult.summary.totalScheduledMatches).toBe(2);
@@ -241,7 +242,7 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
         matchesPerSeat: 1,
         dnaA: dnaActive,
         dnaB: dnaPass,
-        sessionFactory: createStandardPackSessionFactory(100),
+        sessionFactory: createStandardPackSessionFactory(),
       });
 
       expect(result.experimentResult.summary.totalFailedMatches).toBe(0);
@@ -258,7 +259,7 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
         matchesPerSeat: 1,
         dnaA: dnaActive,
         dnaB: dnaPass,
-        sessionFactory: createStandardPackSessionFactory(42),
+        sessionFactory: createStandardPackSessionFactory(),
       });
 
       const mb = result.matchBehaviorSummary;
@@ -280,7 +281,7 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
         matchesPerSeat: 1,
         dnaA: dnaActive,
         dnaB: dnaPass,
-        sessionFactory: createStandardPackSessionFactory(42),
+        sessionFactory: createStandardPackSessionFactory(),
         sampleRequest,
       };
 
@@ -324,6 +325,174 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
       expect(() => {
         GenomeSensitivityEvaluator.compareDecision(sampleRequest, validDNA, invalidDNA as any);
       }).toThrow(DecisionDNAValidationError);
+    });
+
+    it("15. sessionFactory への BatchMatchContext 伝搬と matchSeed の決定論的一致・分離 (matchesPerSeat = 2)", () => {
+      const recordedContexts: BatchMatchContext[] = [];
+
+      const trackingSessionFactory = (ctx: BatchMatchContext) => {
+        recordedContexts.push(ctx);
+        return createStandardPackSessionFactory()(ctx);
+      };
+
+      const dnaActive = GenomeSensitivityDNAFactory.createActiveBiasedDNA();
+      const dnaPass = GenomeSensitivityDNAFactory.createPassBiasedDNA();
+
+      const result = GenomeSensitivityEvaluator.evaluatePolicySeparability({
+        experimentId: "seed-propagation-test",
+        environmentRef: "official:standard-pack",
+        baseSeed: 42,
+        matchesPerSeat: 2,
+        maxDecisionsPerMatch: 10,
+        dnaA: dnaActive,
+        dnaB: dnaPass,
+        sessionFactory: trackingSessionFactory,
+      });
+
+      // 2 matches * 2 legs = 4 回のセッション生成
+      expect(recordedContexts.length).toBe(4);
+
+      const leg1Ctx0 = recordedContexts[0];
+      const leg1Ctx1 = recordedContexts[1];
+      const leg2Ctx0 = recordedContexts[2];
+      const leg2Ctx1 = recordedContexts[3];
+
+      // A. BatchMatchContext が渡されていること
+      expect(leg1Ctx0.baseSeed).toBe(42);
+      expect(leg1Ctx0.matchIndex).toBe(0);
+      expect(leg1Ctx1.matchIndex).toBe(1);
+
+      // B. 異なる matchIndex で matchSeed が異なること
+      expect(leg1Ctx0.matchSeed).not.toBe(leg1Ctx1.matchSeed);
+
+      // C. Seat Swap の同一 matchIndex で matchSeed が完全一致すること
+      expect(leg1Ctx0.matchSeed).toBe(leg2Ctx0.matchSeed);
+      expect(leg1Ctx1.matchSeed).toBe(leg2Ctx1.matchSeed);
+
+      // D. matchId が決定論的に付与されていること
+      expect(leg1Ctx0.matchId).toBe(leg2Ctx0.matchId);
+      expect(leg1Ctx1.matchId).toBe(leg2Ctx1.matchId);
+    });
+
+    it("16. OfficialRegulationMatchSetup および GameSession へ ctx.matchSeed が正しく伝搬されていること", () => {
+      let passedSetupSeed: number | undefined;
+      let createdSessionMatchSeed: number | undefined;
+
+      const reg = catalog.regulations.get("standard-pack")!;
+      const frame = catalog.frames.get(reg.frameId)!;
+
+      const verifyingSessionFactory = (context: BatchMatchContext) => {
+        passedSetupSeed = context.matchSeed;
+        const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, context.matchSeed, {
+          playerNames: { p1: "P1", p2: "P2" },
+        });
+        if (outcome.type !== "READY") throw new Error(`Setup failed: ${outcome.reason}`);
+        const session = new GameSession(outcome.state, rulePackage, { matchSeed: context.matchSeed });
+        createdSessionMatchSeed = (session as any).options?.matchSeed ?? context.matchSeed;
+        return session;
+      };
+
+      const dnaActive = GenomeSensitivityDNAFactory.createActiveBiasedDNA();
+      const dnaPass = GenomeSensitivityDNAFactory.createPassBiasedDNA();
+
+      GenomeSensitivityEvaluator.evaluatePolicySeparability({
+        experimentId: "seed-verification-test",
+        environmentRef: "official:standard-pack",
+        baseSeed: 9999,
+        matchesPerSeat: 1,
+        maxDecisionsPerMatch: 5,
+        dnaA: dnaActive,
+        dnaB: dnaPass,
+        sessionFactory: verifyingSessionFactory,
+      });
+
+      expect(passedSetupSeed).toBeDefined();
+      expect(createdSessionMatchSeed).toBeDefined();
+      expect(passedSetupSeed).toBe(createdSessionMatchSeed);
+    });
+
+    it("17. FAILED 試合が存在する場合、POLICY_SEPARABLE にならず INSUFFICIENT_EVIDENCE となること (Fail-Closed)", () => {
+      const failingSessionFactory = (context: BatchMatchContext) => {
+        if (context.matchIndex === 0) {
+          throw new Error("意図的な試合生成エラー (Injected Failure)");
+        }
+        return createStandardPackSessionFactory()(context);
+      };
+
+      const dnaActive = GenomeSensitivityDNAFactory.createActiveBiasedDNA();
+      const dnaPass = GenomeSensitivityDNAFactory.createPassBiasedDNA();
+
+      const result = GenomeSensitivityEvaluator.runFullSensitivityEvaluation({
+        experimentId: "injected-failure-test",
+        environmentRef: "official:standard-pack",
+        baseSeed: 42,
+        matchesPerSeat: 2,
+        dnaA: dnaActive,
+        dnaB: dnaPass,
+        sessionFactory: failingSessionFactory,
+        sampleRequest,
+      });
+
+      // 少なくとも 1 試合が失敗していること
+      expect(result.logicalResult.experimentSummary.totalFailedMatches).toBeGreaterThan(0);
+      // FAILED > 0 のため、fail-closed で INSUFFICIENT_EVIDENCE となること
+      expect(result.logicalResult.overallStatus).toBe("INSUFFICIENT_EVIDENCE");
+      expect(result.logicalResult.overallStatus).not.toBe("POLICY_SEPARABLE");
+      expect(result.logicalResult.overallStatus).not.toBe("NOT_SEPARABLE");
+    });
+
+    it("18. INCOMPLETE 試合は DRAW (引き分け) に加算されず、厳格に分離されること", () => {
+      const dnaActive = GenomeSensitivityDNAFactory.createActiveBiasedDNA();
+      const dnaPass = GenomeSensitivityDNAFactory.createPassBiasedDNA();
+
+      // maxDecisionsPerMatch を小さく設定して確実に INCOMPLETE を発生させる
+      const result = GenomeSensitivityEvaluator.evaluatePolicySeparability({
+        experimentId: "incomplete-not-draw-test",
+        environmentRef: "official:standard-pack",
+        baseSeed: 42,
+        matchesPerSeat: 1,
+        maxDecisionsPerMatch: 10,
+        dnaA: dnaActive,
+        dnaB: dnaPass,
+        sessionFactory: createStandardPackSessionFactory(),
+      });
+
+      const outcomeA = result.experimentResult.summary.participants[dnaActive.metadata!.id!];
+      const outcomeB = result.experimentResult.summary.participants[dnaPass.metadata!.id!];
+
+      expect(outcomeA.incompleteMatches).toBe(2);
+      expect(outcomeB.incompleteMatches).toBe(2);
+
+      // INCOMPLETE は DRAW に加算されない
+      expect(outcomeA.draws).toBe(0);
+      expect(outcomeB.draws).toBe(0);
+      expect(outcomeA.wins).toBe(0);
+      expect(outcomeB.wins).toBe(0);
+      expect(outcomeA.losses).toBe(0);
+      expect(outcomeB.losses).toBe(0);
+    });
+
+    it("19. 正常評価で行動分離が存在しない場合、NOT_SEPARABLE となること", () => {
+      // 同一の DNA 同士を対戦させる
+      const dnaA = GenomeSensitivityDNAFactory.createActiveBiasedDNA({ id: "active-clone-a", name: "Clone A" });
+      const dnaB = GenomeSensitivityDNAFactory.createActiveBiasedDNA({ id: "active-clone-b", name: "Clone B" });
+
+      const result = GenomeSensitivityEvaluator.runFullSensitivityEvaluation({
+        experimentId: "not-separable-test",
+        environmentRef: "official:standard-pack",
+        baseSeed: 42,
+        matchesPerSeat: 1,
+        maxDecisionsPerMatch: 10,
+        dnaA,
+        dnaB,
+        sessionFactory: createStandardPackSessionFactory(),
+        sampleRequest,
+      });
+
+      expect(result.logicalResult.experimentSummary.totalFailedMatches).toBe(0);
+      expect(result.logicalResult.decisionSeparated).toBe(false);
+      expect(result.logicalResult.matchBehaviorSeparated).toBe(false);
+      expect(result.logicalResult.overallStatus).toBe("NOT_SEPARABLE");
     });
   });
 });

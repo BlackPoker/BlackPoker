@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENOME-SENSITIVITY-V1`
-更新日時: 2026-10-12 18:30 JST
+作業ID: `BP-SIM-AI-GENOME-SENSITIVITY-V1-R1`
+更新日時: 2026-10-12 19:10 JST
 
 ---
 
@@ -357,7 +357,7 @@ GameSession
 
 ---
 
-## 10. Genome Sensitivity & Policy Separability Foundation (BP-SIM-AI-GENOME-SENSITIVITY-V1)
+## 10. Genome Sensitivity & Policy Separability Foundation (BP-SIM-AI-GENOME-SENSITIVITY-V1 / V1-R1)
 
 Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 
@@ -370,10 +370,18 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 ### 2. アーキテクチャ原則
 - **第二の Simulation Loop を作らない**:
   対戦評価は既存の `PolicyExperimentRunner` $\rightarrow$ `BatchSimulationRunner` $\rightarrow$ `SimulationRunner` $\rightarrow$ `GameSession` の本番経路を完全再利用。
+- **BatchMatchContext の透過的伝搬 (R1)**:
+  `GenomeSensitivityEvaluationOptions.sessionFactory` は `(context: BatchMatchContext) => GameSession` を受け取り、`BatchSimulationRunner` が決定論的に生成した各試合固有の `ctx.matchSeed` を `OfficialRegulationMatchSetup.setupMatch()` および `GameSession` へ確実に伝搬します。
+- **Seat Swap の公平性 (R1)**:
+  同一 `baseSeed` において、同じ `matchIndex`（Leg 1 と Leg 2）では完全に同一の `matchSeed` が使用され、異なる `matchIndex` では異なる derived seed が使用されることで、先攻・後攻バイアスを排除した公平な対戦環境を保証します。
 - **意思決定評価ロジックの非複製**:
   特徴量エンコードは `DecisionFeatureEncoder`、スコアリングは `GenomeScorer`、選択規則は `GenomePolicy`（Argmax + 最小 patternRef タイブレーク）の既存実装を使用。
 - **汎用特徴量のみによる行動分離**:
   特定 Action ID や Component ID への手動分岐・重みを一切排除し、`pattern_is_action` や `pattern_is_pass` などの汎用特徴量のみでコントラスト DNA を構成。
+- **厳格な Fail-Closed 総合判定 (R1)**:
+  対戦実験中に 1 件でも FAILED 試合が存在する場合（`totalFailedMatches > 0`）、いかなる場合も `POLICY_SEPARABLE` と判定せず、`INSUFFICIENT_EVIDENCE` として安全にフェイルクローズします。
+- **INCOMPLETE と DRAW の厳格な分離 (R1)**:
+  最大意思決定手数（`maxDecisionsPerMatch`）到達などによる中断試合（INCOMPLETE）は「引き分け（DRAW）」としては集計・表示せず、厳密に `Incomplete` として分離します。
 
 ### 3. 実証されたエビデンス体系
 1. **Decision-Level Linear Weight Sensitivity**:
@@ -389,7 +397,7 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - FAILED 試合 0 件で全スケジュール対戦を正常完走。
    - Generic 行動メトリクスにおいて、Participant A は Action 選択率 2.4%、Pass 選択率 97.0%、Participant B は Action 選択率 0.0%、Pass 選択率 100.0% を記録し、再現可能な行動差（Action 差 -2.4%, Pass 差 +3.0%）を実証。
 6. **決定論性 (Determinism)**:
-   - 同一設定での再実行において、論理結果（Logical Result）が 100% 完全一致（JSON round-trip 完全同一）することを確認。
+   - 同一設定での再実行において、論理結果（Logical Result）および matchSeed sequence が 100% 完全一致（JSON round-trip 完全同一）することを確認。
 
 ---
 

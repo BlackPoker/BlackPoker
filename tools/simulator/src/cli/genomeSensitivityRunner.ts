@@ -7,6 +7,7 @@ import { GameSession } from "../engine/session/GameSession";
 import { GenomeSensitivityEvaluator } from "../engine/ai/GenomeSensitivityEvaluator";
 import { GenomeSensitivityDNAFactory } from "../engine/ai/GenomeSensitivityDNAFactory";
 import { DecisionRequest } from "../domain/decision/DecisionRequest";
+import { BatchMatchContext } from "../domain/simulation/BatchSimulationTypes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -75,25 +76,30 @@ async function main() {
     throw new Error(`Frame '${reg.frameId}' が見つかりません。`);
   }
 
-  // 2. セッションファクトリ
-  let sampleRequest: DecisionRequest | undefined;
-  const sessionFactory = () => {
-    const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, cliArgs.baseSeed, {
+  // 2. セッションファクトリ (各試合固有の context.matchSeed を伝搬)
+  const sessionFactory = (context: BatchMatchContext) => {
+    const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, context.matchSeed, {
       playerNames: { p1: "Active Biased AI", p2: "Pass Biased AI" },
     });
     if (outcome.type !== "READY") {
       throw new Error(`セットアップ失敗: ${outcome.reason}`);
     }
-    const session = new GameSession(outcome.state, rulePackage, { matchSeed: cliArgs.baseSeed });
+    const session = new GameSession(outcome.state, rulePackage, { matchSeed: context.matchSeed });
     return session;
   };
 
-  // サンプル意思決定リクエストの抽出 (Decision-level 比較用)
+  // サンプル意思決定リクエストの抽出 (Decision-level 比較用: baseSeed を使用)
+  let sampleRequest: DecisionRequest | undefined;
   {
-    const sampleSession = sessionFactory();
-    const step = sampleSession.advance();
-    if (step.type === "WAITING_FOR_DECISION") {
-      sampleRequest = step.request;
+    const sampleOutcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, cliArgs.baseSeed, {
+      playerNames: { p1: "Active Biased AI", p2: "Pass Biased AI" },
+    });
+    if (sampleOutcome.type === "READY") {
+      const sampleSession = new GameSession(sampleOutcome.state, rulePackage, { matchSeed: cliArgs.baseSeed });
+      const step = sampleSession.advance();
+      if (step.type === "WAITING_FOR_DECISION") {
+        sampleRequest = step.request;
+      }
     }
   }
 
@@ -136,8 +142,8 @@ async function main() {
   }
   console.log("");
 
-  // 6. Match Behavior 結果の表示
-  console.log("--- [2] Match-Level Generic Behavior ---");
+  // 6. Match Behavior & Outcome 結果の表示
+  console.log("--- [2] Match-Level Generic Behavior & Outcomes ---");
   const mb = lr.matchBehaviorSummary;
   console.log(`Participant A (${mb.participantAId}):`);
   console.log(`  Decisions:       ${mb.metricsA.totalObservedDecisions}`);
@@ -159,11 +165,34 @@ async function main() {
   console.log(`  Behavior Status: ${mb.behaviorSeparated ? "SEPARATED (Behavior Difference Observed)" : "IDENTICAL"}`);
   console.log("");
 
+  console.log(`Match Outcomes (Scheduled: ${lr.experimentSummary.totalScheduledMatches}, Completed: ${lr.experimentSummary.totalCompletedMatches}, Incomplete: ${lr.experimentSummary.totalIncompleteMatches}, Failed: ${lr.experimentSummary.totalFailedMatches}):`);
+  console.log(`  Participant A (${lr.outcomeA.participantId}):`);
+  console.log(`    Scheduled:     ${lr.outcomeA.scheduledMatches}`);
+  console.log(`    Completed:     ${lr.outcomeA.completedMatches}`);
+  console.log(`    Wins:          ${lr.outcomeA.wins}`);
+  console.log(`    Losses:        ${lr.outcomeA.losses}`);
+  console.log(`    Draws:         ${lr.outcomeA.draws}`);
+  console.log(`    Incomplete:    ${lr.outcomeA.incompleteMatches}`);
+  console.log(`    Failed:        ${lr.outcomeA.failedMatches}`);
+  console.log(`    Win Rate:      ${lr.outcomeA.completedMatches > 0 ? (lr.outcomeA.winRateOnCompleted * 100).toFixed(1) + "%" : "N/A (No completed matches)"}`);
+
+  console.log(`  Participant B (${lr.outcomeB.participantId}):`);
+  console.log(`    Scheduled:     ${lr.outcomeB.scheduledMatches}`);
+  console.log(`    Completed:     ${lr.outcomeB.completedMatches}`);
+  console.log(`    Wins:          ${lr.outcomeB.wins}`);
+  console.log(`    Losses:        ${lr.outcomeB.losses}`);
+  console.log(`    Draws:         ${lr.outcomeB.draws}`);
+  console.log(`    Incomplete:    ${lr.outcomeB.incompleteMatches}`);
+  console.log(`    Failed:        ${lr.outcomeB.failedMatches}`);
+  console.log(`    Win Rate:      ${lr.outcomeB.completedMatches > 0 ? (lr.outcomeB.winRateOnCompleted * 100).toFixed(1) + "%" : "N/A (No completed matches)"}`);
+  console.log("");
+
   // 7. Determinism & Overall Status
   console.log("--- [3] Verification Summary ---");
   console.log(`Decision Level:    ${lr.decisionSeparated ? "SEPARATED" : "NOT_SEPARATED"}`);
   console.log(`Match Behavior:    ${lr.matchBehaviorSeparated ? "SEPARATED" : "NOT_SEPARATED"}`);
   console.log(`Determinism:       ${lr.deterministic ? "PASS (100% Identical on Repeat)" : "FAIL"}`);
+  console.log(`Failed Matches:    ${lr.experimentSummary.totalFailedMatches}`);
   console.log(`Execution Time:    ${result.runtimeMetrics.executionDurationMs} ms`);
   console.log("--------------------------------------------------------------------------------");
   console.log(`OVERALL STATUS:    ${lr.overallStatus}`);

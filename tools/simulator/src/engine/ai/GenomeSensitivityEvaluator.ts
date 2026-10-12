@@ -274,9 +274,11 @@ export class GenomeSensitivityEvaluator {
     const decisionSeparated = decisionComparison ? decisionComparison.selectionSeparated : false;
     const matchBehaviorSeparated = matchBehaviorSummary.behaviorSeparated;
 
-    // 仮のステータス (決定論性検証前)
+    // FAILED 試合が存在する場合は fail-closed で INSUFFICIENT_EVIDENCE
     let overallStatus: GenomeSensitivityStatus = "INSUFFICIENT_EVIDENCE";
-    if (decisionSeparated && matchBehaviorSeparated) {
+    if (experimentResult.summary.totalFailedMatches > 0) {
+      overallStatus = "INSUFFICIENT_EVIDENCE";
+    } else if (decisionSeparated && matchBehaviorSeparated) {
       overallStatus = "POLICY_SEPARABLE";
     } else if (!decisionSeparated && !matchBehaviorSeparated) {
       overallStatus = "NOT_SEPARABLE";
@@ -293,6 +295,7 @@ export class GenomeSensitivityEvaluator {
       dnaA: { id: idA, name: nameA, artifactRef: `dna:artifact:${idA}` },
       dnaB: { id: idB, name: nameB, artifactRef: `dna:artifact:${idB}` },
       decisionComparison,
+      experimentSummary: experimentResult.summary,
       outcomeA,
       outcomeB,
       matchBehaviorSummary,
@@ -322,7 +325,9 @@ export class GenomeSensitivityEvaluator {
     const deterministic = json1 === json2;
 
     let overallStatus: GenomeSensitivityStatus = "INSUFFICIENT_EVIDENCE";
-    if (deterministic) {
+    if (logical1.experimentSummary.totalFailedMatches > 0) {
+      overallStatus = "INSUFFICIENT_EVIDENCE";
+    } else if (deterministic) {
       if (logical1.decisionSeparated && logical1.matchBehaviorSeparated) {
         overallStatus = "POLICY_SEPARABLE";
       } else if (!logical1.decisionSeparated && !logical1.matchBehaviorSeparated) {
