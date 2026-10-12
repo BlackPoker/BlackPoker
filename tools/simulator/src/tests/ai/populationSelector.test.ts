@@ -13,7 +13,10 @@ import {
   PopulationSelectionExecutionError,
 } from "../../domain/ai/PopulationSelectionTypes";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec";
-import { DEFAULT_FITNESS_EVALUATION_CONFIG } from "../../domain/ai/FitnessEvaluationTypes";
+import {
+  DEFAULT_FITNESS_EVALUATION_CONFIG,
+  FitnessEvaluationResult,
+} from "../../domain/ai/FitnessEvaluationTypes";
 import { FitnessEvaluator } from "../../engine/ai/FitnessEvaluator";
 import {
   PolicyParticipantOutcomeSummary,
@@ -45,22 +48,46 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
     fitnessScore: number | null,
     provisionalScore: number | null = null,
     context?: ComparableEvaluationContext
-  ): PopulationFitnessEntry => ({
-    genomeId,
-    result: {
-      status,
-      fitnessScore,
-      provisionalScore,
-      completedMatches: status === "VALID" ? 100 : status === "INSUFFICIENT_EVIDENCE" ? 50 : 20,
-      completionRate: status === "VALID" ? 1.0 : 0.5,
-      scheduledMatches: 100,
-      wins: fitnessScore !== null ? Math.round(fitnessScore * 100) : 0,
-      losses: fitnessScore !== null ? 100 - Math.round(fitnessScore * 100) : 50,
-      draws: 0,
-      failedMatches: status === "INVALID" ? 1 : 0,
-    },
-    context,
-  });
+  ): PopulationFitnessEntry => {
+    let result: FitnessEvaluationResult;
+    if (status === "VALID") {
+      result = {
+        status: "VALID",
+        fitnessScore: fitnessScore ?? 0.0,
+        completedMatches: 100,
+        completionRate: 1.0,
+        scheduledMatches: 100,
+        wins: Math.round((fitnessScore ?? 0.0) * 100),
+        losses: 100 - Math.round((fitnessScore ?? 0.0) * 100),
+        draws: 0,
+      };
+    } else if (status === "INSUFFICIENT_EVIDENCE") {
+      result = {
+        status: "INSUFFICIENT_EVIDENCE",
+        fitnessScore: null,
+        provisionalScore,
+        completedMatches: 50,
+        completionRate: 0.5,
+        scheduledMatches: 100,
+        wins: provisionalScore !== null ? Math.round(provisionalScore * 50) : 0,
+        losses: provisionalScore !== null ? 50 - Math.round(provisionalScore * 50) : 50,
+        draws: 0,
+      };
+    } else {
+      result = {
+        status: "INVALID",
+        fitnessScore: null,
+        failedMatches: 1,
+        scheduledMatches: 100,
+      };
+    }
+
+    return {
+      genomeId,
+      result,
+      context,
+    };
+  };
 
   describe("A. Unit Tests (Specification Conformance)", () => {
     it("Test 1: Mixed pool (VALID, INSUFFICIENT, INVALID) -> only VALID enters Standard Selection Pool", () => {
