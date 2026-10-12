@@ -404,8 +404,8 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 ## 11. Future Architecture (Phase 4.0 予定)
 
 ### 1. Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
-1. **Population Model (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1)**:
-   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (※ TypeScript 本番実装は未実装)
+1. **Population Model (BP-SIM-AI-POPULATION-SELECTION-V1)**:
+   - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`PopulationSnapshot`, `PopulationSelectionTypes`)
    - **母集団規模**: `populationSize = 100` (Provisional Default, configurable $\ge 2$)
    - **不変スナップショット**: 世代評価中のメンバー追加・削除禁止。DNA と Fitness の厳格な分離（DNA オブジェクトへスコアを直接書き込まない）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
@@ -418,14 +418,14 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **厳格なステータス分離**: `FAILED != LOSS`（Fail-Closed ゲートにより即座に失格/除外。Authoritative Fitness Score 不在 `fitnessScore: null`）、`INCOMPLETE != DRAW`（未決着は引き分けに含めず除外）。
    - **Evidence Sufficiency (VALID 条件)**: `failedMatches === 0 AND completedMatches >= minimumCompletedMatches AND completionRate >= minimumCompletionRate` を満たす場合のみ `VALID`（Authoritative Score 確定）。不足時は `INSUFFICIENT_EVIDENCE` として保留（通常選択プール除外、過大評価防止）。※閾値は初期仮値（Provisional Defaults: minCompleted=10, minRate=50%）。
    - **0 試合完了の厳格な扱い**: `completedMatches === 0` の場合は `provisionalScore = null`（0 勝全敗 0.0 と区別）。
-   - **※ 未実装コンポーネント**: Population, Selection, Crossover, Mutation, Generation / Evolution Loop は未実装のまま維持。
+   - **※ 未実装コンポーネント**: Crossover, Mutation, Generation / Evolution Loop は未実装のまま維持。
    - ※詳細設計仕様: `tools/simulator/docs/ai-fitness-design-v1.md` 参照。
-4. **Parent Selection (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1 / V1-R1)**:
-   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (※ TypeScript 本番実装は未実装)
+4. **Parent Selection (BP-SIM-AI-POPULATION-SELECTION-V1)**:
+   - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`PopulationSelector`, `PopulationSelectionTypes`)
    - **選択プール**: `VALID` 個体のみ（`fitnessScore = 0.0` の全敗個体も適格候補。`INSUFFICIENT_EVIDENCE` および `INVALID` は完全除外）。
    - **READY 条件 & サンプリング規約**: 1トーナメント内非復元抽出（without replacement）、トーナメント間再利用可。`validCount >= max(minValidPopulationCount, tournamentSize)` を満たす場合のみ `READY`（不足時は `REEVALUATION_REQUIRED`）。
    - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Engineering Default $k = 3$, Seeded Deterministic PRNG）。
-   - **同点タイブレーク**: 配列順バイアスを排除したシード付き決定論的タイブレーク。
+   - **同点タイブレーク**: 配列順・ID順バイアスを排除したシード付き決定論的タイブレーク。
    - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ best-known genotype の消失を防止。※自己対戦環境変化に伴う measured fitness の単調非減少は保証しない）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
 5. **Genetic Operators (Phase 4.0 予定)**: Crossover, Mutation $\rightarrow$ 次世代生成 (※ 未実装)
