@@ -245,7 +245,7 @@ Fitness V1 の最重要原則（"Victory is the objective. Life is a resource, n
 
 ```text
 【V1 確定方針】
-VALID 個体数が Selection の下限（minimumValidPopulationCount）を満たさない場合、
+VALID 個体数が Selection の下限（max(minimumValidPopulationCount, tournamentSize)）を満たさない場合、
 Selection は実行されず、ステータス「REEVALUATION_REQUIRED」を出力して停止する。
 
 証拠不足（Evidence Sufficiency 不足）を Selection レイヤの小細工で推測・救済してはならない。
@@ -274,18 +274,25 @@ type SelectionReadinessStatus =
    - 母集団サイズが不正（`length < 2`）、`genomeId` の重複、または Fitness 結果との 1:1 対応が崩れている場合 $\Longrightarrow$ **`INVALID_POPULATION`**。
 2. **比較可能性チェック**:
    - 全個体の評価コンテキストが同一でない場合 $\Longrightarrow$ **`INCOMPARABLE_EVALUATION`**。
-3. **VALID 個体数チェック**:
+3. **VALID 個体数 & トーナメント実行可能性チェック (READY 条件)**:
    - $\text{validCount} = |\{ e \in \text{Population} \mid \text{fitness}(e).\text{status} === \text{"VALID"} \}|$
-   - $\text{validCount} < \text{minimumValidPopulationCount}$ $\Longrightarrow$ **`REEVALUATION_REQUIRED`**。
+   - 有性交叉ペアを形成し、かつ 1 トーナメント内を非復元抽出（without replacement）で構成可能であるための必要十分条件を検証する：
+     $$\text{status} = \text{"READY"} \iff \text{validCount} \ge \max(\text{minimumValidPopulationCount}, \text{tournamentSize})$$
+   - $\text{validCount} < \max(\text{minimumValidPopulationCount}, \text{tournamentSize})$ $\Longrightarrow$ **`REEVALUATION_REQUIRED`**。
      - $\text{validCount} = 0$: 完全証拠不足。
      - $\text{validCount} = 1$: 単一個体のみでは有性交叉ペアを形成できないため不足。
+     - $\text{validCount} = 2$ かつ $\text{tournamentSize} = 3$: 交叉下限（2個体）は満たすが、トーナメントサイズ（3個体）を非復元で構成できないため不足（`REEVALUATION_REQUIRED`）。
 4. **選択準備完了**:
    - 上記をすべてクリアした場合 $\Longrightarrow$ **`READY`**（Selection アルゴリズムへ進行）。
 
-### Minimum Valid Population パラメータ
+### Minimum Valid Population & Tournament Size パラメータ
 - `minimumValidPopulationCount`:
   - **Provisional Default: 2**（有性交叉に必要な最低個体数）
-  - 将来の設定拡張として `minimumValidPopulationRate`（例: 0.20 = 20% 以上が VALID であること）の併用を許容。
+- `tournamentSize`:
+  - **Provisional Engineering Default: 3**（トーナメントサイズ $k$）
+- **READY 条件の導出**:
+  デフォルト設定下（`minValid = 2, tournamentSize = 3`）での READY 下限は $\max(2, 3) = 3$ となり、$\text{validCount} \ge 3$ が必要となる。
+- 将来の設定拡張として `minimumValidPopulationRate`（例: 0.20 = 20% 以上が VALID であること）の併用を許容。
 
 ---
 
@@ -308,21 +315,29 @@ VALID な個体集合から次世代の親ペア（Parent A, Parent B）を選�
 
 ## 12. Recommended Selection V1: Tournament Selection
 
-Fitness V1 の特性（MPA が $[0.0, 1.0]$ の有界値であり、初期世代では全敗 0.0 や同点 0.5 が頻発すること）に最も適合する方式として、**トーナメント選択（Tournament Selection）を V1 推奨アルゴリズムとして確定する**。
+Fitness V1 の特性（MPA が $[0.0, 1.0]$ の有界値であり、初期世代では全敗 0.0 や同点 0.5 が頻発すること）に適合する方式として、**トーナメント選択（Tournament Selection）を V1 推奨アルゴリズムとして確定する**。
 
-### 12.1 アルゴリズムの定義
-1. 母集団から次世代を形成するために必要な回数（例: 各個体生成ごとに 2 親）だけトーナメントを実行する。
-2. 1 回のトーナメントでは、Standard Selection Pool から復元抽出（with replacement）により $k$ 個体を一様ランダムにサンプリングする。
-3. サンプリングされた $k$ 個体の中で、Authoritative `fitnessScore` が最も高い個体を勝者（親）として選出する。
+### 12.1 アルゴリズムの定義とサンプリング規約 (Sampling Semantics)
+1. **トーナメント実行回数**:
+   母集団から次世代を形成するために必要な回数（例: 各個体生成ごとに 2 親）だけトーナメントを反復実行する。
+2. **サンプリング規約の確定**:
+   - **1 トーナメント内 (Within a Tournament)**: **非復元抽出（without replacement）**。
+     同一トーナメント内に同一個体が重複してサンプリングされることはない。これにより、確実に $k$ 体の異なる候補間での競争が保証され、同一候補同士の比較（無意味な自己対決）を排除する。
+   - **トーナメント間 (Across Tournaments)**: **候補再利用可能（with replacement across tournaments）**。
+     母集団内の個体は各トーナメント終了後にプールへ戻され、次回以降のトーナメントでも再びサンプリング候補となる。これにより、適応度の高い優良個体が複数のトーナメントで選出される機会を担保する。
+3. **勝者決定**:
+   サンプリングされた $k$ 個体の中で、Authoritative `fitnessScore` が最も高い個体を勝者（親）として選出する。同点時はシード付き決定論的タイブレークを適用する。
 
 ### 12.2 Tournament Size ($k$) の設計
-- **Provisional Default**: **`tournamentSize = 3`**
-- **工学的根拠**:
+- **Provisional Engineering Default**: **`tournamentSize = 3`**
+- **位置づけ**:
+  $k = 3$ は遺伝的アルゴリズム（GA）の文献で広く用いられる一般的な工学的初期値（Provisional Engineering Default）であり、「最適」や「最も優れている」と断言するものではない。BlackPoker 固有のゲーム性における適正な選択圧（探索と活用のトレードオフ）は、今後の進化実験を通じて実証的に決定・検証されるハイパーパラメータである。
+- **選択圧の特性**:
   - $k = 1$: 純粋な一様ランダム選択（選択圧ゼロ、進化が停滞）。
   - $k = 2$: 穏やかな選択圧。多様性を高く維持するが、収束が遅い。
-  - $k = 3$: 標準的な GA において最も広く用いられるバランスの良い選択圧。適度にエリートを優遇しつつ下位の多様性も残す。
+  - $k = 3$: 標準的な工学デフォルト。適度にエリートを優遇しつつ下位の多様性も残す。
   - $k \ge 5$: 強すぎる選択圧。少数の高スコア個体へ急激に集約し、局所解（早熟収束: Premature Convergence）に陥るリスクが高い。
-- **制約**: $2 \le k \le \text{validCount}$。呼出側から override 可能。
+- **制約**: $2 \le k \le \text{validCount}$（READY 条件 $\text{validCount} \ge \max(\text{minimumValidPopulationCount}, \text{tournamentSize})$ により構造的に保証）。呼出側から override 可能。
 
 ---
 
@@ -394,12 +409,17 @@ Match Point Average（MPA）は離散的な試合数から計算されるため�
 
 | 方式 | 特徴 | リスク |
 |---|---|---|
-| **$E = 0$ (エリートなし)** | 探索空間を広く維持。 | 優秀な解が交叉や変異によって失われ、世代間で最高適応度が後退する。 |
-| **$E = 1 \sim 2$ (推奨)** | **最高適応度の単調非減少を保証**。98% 以上の枠は進化探索に残る。 | 適切なバランス。多様性喪失のリスクは極めて低い。 |
+| **$E = 0$ (エリートなし)** | 探索空間を広く維持。 | 優秀な解が交叉や変異によって失われ、世代間で最良遺伝子型が後退する。 |
+| **$E = 1 \sim 2$ (推奨)** | **best-known genotype の消失を防止**。98% 以上の枠は進化探索に残る。 | 適切なバランス。多様性喪失のリスクは極めて低い。 |
 | **$E \ge 10$ (過剰エリート)** | 初期収束が高速。 | **早熟収束（Premature Convergence）**。同一系統が母集団を占拠し進化が停止する。 |
 
-### 16.3 V1 推奨設計
+### 16.3 V1 推奨設計と評価値変動の契約
 - **Provisional Default**: **`eliteCount = 1`**（Population 100 に対して 1 個体のみ保存）
+- **役割**: **best-known genotype（最良既知遺伝子型）の消失・破壊を防ぐこと**。
+- **重要契約: measured fitness の単調非減少は保証しない**:
+  自己対戦（Self-Play）進化では、世代ごとに母集団全体の強さや対戦相手構成（Evaluation Context）が動的に変化する。
+  したがって、前世代で最高スコア（例: 0.85）を獲得した Elite DNA であっても、対戦相手が強化された次世代で再評価された場合、観測される `fitnessScore` が低下する（例: 0.70）ことは自然であり、Contract 違反ではない。
+  Elitism はゲノムの物理的保存を保証するものであり、対戦環境が変動する中での「測定スコア（measured fitness）の単調非減少」を保証するものではない。
 - **選定規則**:
   - Standard Selection Pool（`VALID`）の最上位個体から選出。
   - 同点首位が複数存在する場合は、Seeded Deterministic Tie-Break により 1 個体を確定。
@@ -472,8 +492,9 @@ class PopulationSelectionIntegrityError extends Error {
 
 ### Case B: VALID 不足母集団 (1 VALID, 99 INSUFFICIENT)
 - **入力**: 100 個体中、1 個体のみ `VALID`、99 個体が未決着過多により `INSUFFICIENT_EVIDENCE`。
+- **設定**: `minimumValidPopulationCount = 2`, `tournamentSize = 3`（デフォルト設定）。
 - **判定**:
-  - $\text{validCount} = 1 < \text{minimumValidPopulationCount} (2)$。
+  - $\text{validCount} = 1 < \max(2, 3) = 3$。
   - Tier 2 の個体を暫定スコア順に繰り上げ昇格させることはしない。
   - **結果: ステータス `REEVALUATION_REQUIRED` を返して停止**。追加の手数上限での再対戦を要求。
 
@@ -514,6 +535,24 @@ class PopulationSelectionIntegrityError extends Error {
 - **判定**:
   - 欠損個体を勝手に無視して除外してはならない。
   - **結果: `PopulationSelectionIntegrityError` として即時停止**。
+
+### Case H: VALID 2個体・トーナメントサイズ 3 の挙動 (validCount = 2, tournamentSize = 3)
+- **入力**: 100 個体中、2 個体のみ `VALID`（DNA A: 0.80, DNA B: 0.70）、98 個体が `INSUFFICIENT_EVIDENCE`。
+- **設定**: `minimumValidPopulationCount = 2`, `tournamentSize = 3`（デフォルト設定）。
+- **判定**:
+  - 交叉ペア形成に必要な最低個体数（`minimumValidPopulationCount = 2`）は満たす。
+  - しかし、1 トーナメント内を非復元抽出（without replacement）で構成するために必要な個体数 `tournamentSize = 3` を満たさない（$\text{validCount} = 2 < \max(2, 3) = 3$）。
+  - トーナメントが実行不可能であるため、READY とは判定できない。
+  - **結果: ステータス `REEVALUATION_REQUIRED` を返して安全に停止する**。
+
+### Case I: Elite DNA の次世代再評価と measured fitness 低下
+- **シナリオ**:
+  - **世代 $g$**: DNA A が `VALID`, `fitnessScore = 0.85` で最優秀となり、Elite（$E = 1$）として無変更で世代 $g+1$ へ継承。
+  - **世代 $g+1$**: 世代 $g+1$ の母集団全体と対戦評価を実施。母集団全体のスキル水準向上や相手戦略の変化により、DNA A の再評価スコアが `fitnessScore = 0.70` に低下。
+- **判定**:
+  - Elitism の契約目的は「best-known genotype（最良既知遺伝子型）の消失・破壊防止」である。
+  - 対戦相手プールが世代ごとに進化・変化する自己対戦環境下において、「測定スコア（measured fitness）の単調非減少」は保証されない。
+  - **結果: DNA A のスコア低下（0.85 $\rightarrow$ 0.70）は自然かつ正当な振る舞いであり、Contract 違反ではない**。
 
 ---
 

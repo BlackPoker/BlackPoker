@@ -420,13 +420,13 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **0 試合完了の厳格な扱い**: `completedMatches === 0` の場合は `provisionalScore = null`（0 勝全敗 0.0 と区別）。
    - **※ 未実装コンポーネント**: Population, Selection, Crossover, Mutation, Generation / Evolution Loop は未実装のまま維持。
    - ※詳細設計仕様: `tools/simulator/docs/ai-fitness-design-v1.md` 参照。
-4. **Parent Selection (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1)**:
+4. **Parent Selection (BP-SIM-AI-POPULATION-SELECTION-DESIGN-V1 / V1-R1)**:
    - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (※ TypeScript 本番実装は未実装)
    - **選択プール**: `VALID` 個体のみ（`fitnessScore = 0.0` の全敗個体も適格候補。`INSUFFICIENT_EVIDENCE` および `INVALID` は完全除外）。
-   - **Tier 2 の処遇**: VALID 不足時も Tier 2 を暫定スコア順に繰り上げ昇格させず、`REEVALUATION_REQUIRED` として対戦再評価を要求。
-   - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Default $k = 3$, Seeded Deterministic PRNG）。
+   - **READY 条件 & サンプリング規約**: 1トーナメント内非復元抽出（without replacement）、トーナメント間再利用可。`validCount >= max(minValidPopulationCount, tournamentSize)` を満たす場合のみ `READY`（不足時は `REEVALUATION_REQUIRED`）。
+   - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Engineering Default $k = 3$, Seeded Deterministic PRNG）。
    - **同点タイブレーク**: 配列順バイアスを排除したシード付き決定論的タイブレーク。
-   - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ単調非減少を保証）。
+   - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ best-known genotype の消失を防止。※自己対戦環境変化に伴う measured fitness の単調非減少は保証しない）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-population-selection-design-v1.md` 参照。
 5. **Genetic Operators (Phase 4.0 予定)**: Crossover, Mutation $\rightarrow$ 次世代生成 (※ 未実装)
 6. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
