@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "tracks": [
+    {
+      "id": "first-game",
+      "title": "まず遊ぶ",
+      "sectionIds": ["about", "game-purpose", "board-overview", "orientation", "unblocked-attack", "first-battle", "bulwark-block", "soldier", "pass-turn", "first-game-ready", "entry16", "real-game"]
+    },
+    {
+      "id": "learn-more",
+      "title": "もっと覚える",
+      "sectionIds": ["bulwark", "hero", "ace", "equipment", "multi-attack", "multi-block", "equal-numbers", "combat-magic", "lost-target", "up", "down", "twist", "counter", "throwing", "destroyBulwark", "chance", "speed", "triggers", "generation", "simultaneous", "search"]
+    },
+    {
+      "id": "reference",
+      "title": "調べる",
+      "sectionIds": ["reading-actions"]
+    }
+  ]
+}

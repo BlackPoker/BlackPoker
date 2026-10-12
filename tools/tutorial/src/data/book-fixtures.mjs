@@ -49,6 +49,10 @@ export function makeBookFixtures(base) {
       steps[2].instruction = "チャージに続いて、相手がライフからドローします。";
       scene.intro = "あなたがエンドすると、相手のターンが始まります。";
     }
+    if (scene.id === "summon-soldier") {
+      scene.intro = "攻撃や守りに使う兵士を増やしましょう。まず、あなたの防壁を横にします。";
+      scene.summary = "防壁を横にし、1点ダメージを受けて、♠2を兵士にしました。出したターンはまだ攻撃できません。";
+    }
     scene.stepIds = steps.map((step) => step.id);
     return { ...structuredClone(base), id: `book-${scene.id}`, userPlayer: "A", scenes: [scene], steps };
   });

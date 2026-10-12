@@ -11,15 +11,15 @@ import { section, card, zone, tap, move, destination, wait, automatic, next, sel
 describe("1冊のInteractive HowTo", () => {
   beforeEach(() => { vi.useFakeTimers(); vi.mocked(HTMLElement.prototype.scrollIntoView).mockClear(); });
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); });
-  it("表紙から導入3項目・盤面・向きへappendし、過去DOMを残してscrollする", () => {
+  it("表紙から導入2項目・盤面・向きへappendし、過去DOMを残してscrollする", () => {
     render(<App />);
     expect(document.querySelectorAll("[data-section-id]")).toHaveLength(0);
     fireEvent.click(screen.getByRole("button", { name: "はじめる ↓" }));
     const first = section("about");
-    for (const id of ["about", "game-purpose", "entry16", "board-overview"]) next(id);
+    for (const id of ["about", "game-purpose", "board-overview"]) next(id);
     expect(section("orientation")).toHaveTextContent("縦＝チャージ");
     expect(section("about")).toBe(first);
-    expect(document.querySelectorAll("[data-section-id]")).toHaveLength(5);
+    expect(document.querySelectorAll("[data-section-id]")).toHaveLength(4);
     expect(HTMLElement.prototype.scrollIntoView).toHaveBeenLastCalledWith({ behavior: "smooth", block: "start" });
     expect(document.activeElement).toBe(document.getElementById("orientation-title"));
     expect(window.location.hash).toBe("#orientation");

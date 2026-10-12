@@ -1,17 +1,19 @@
 import { formatDifferences, learningCourses } from "../data/curriculum";
 import blackPokerLogo from "../assets/blackpoker-logo.svg";
-import { learningPath } from "../data/lessons";
-import { bookSections } from "../data/book";
+import { bookSections, bookTracks } from "../data/book";
+import { RuleLinks } from "./RuleLinks";
 export function CurriculumPanel({
   lessonId,
   completedIds,
   onSelect,
   onClose,
+  onHelp,
 }: {
   lessonId: string;
   completedIds: string[];
   onSelect: (id: string) => void;
   onClose?: () => void;
+  onHelp?: () => void;
 }) {
   return (
     <aside className="curriculum" aria-label="HowToの目次">
@@ -35,18 +37,18 @@ export function CurriculumPanel({
           <div>
             <span>01</span>
             <div>
-              <strong>Entry16基礎コース</strong>
-              <small>見る → 触る → 理解する</small>
+              <strong>まず1ゲームするためのコース</strong>
+              <small>必要なことから、触って覚える</small>
             </div>
           </div>
-          {[{ id: "intro", title: "BlackPokerを知る" }, ...learningPath.categories].map((chapter, i) => {
-            const items = bookSections.filter((section) => section.category === chapter.id);
+          {bookTracks.map((chapter) => {
+            const items = bookSections.filter((section) => section.track === chapter.id);
             const active = items.some((lesson) => lesson.id === lessonId);
             return (
-              <details className="chapter-group" key={chapter.id} open={active || chapter.id === "intro" || chapter.id === "combat"}>
+              <details className="chapter-group" data-track={chapter.id} key={chapter.id} open={active || chapter.id === "first-game"}>
                 <summary>
-                  {chapter.id === "extra" ? "＋" : `${i + 1}.`} {chapter.title}
-                  <small>{items.length} 項目</small>
+                  {chapter.title}
+                  {chapter.id === "first-game" && <small>最初のゲームまで</small>}
                 </summary>
                 <div className="chapter-list">
                   {items.map((s) => (
@@ -56,19 +58,31 @@ export function CurriculumPanel({
                       aria-current={s.id === lessonId ? "step" : undefined}
                       onClick={() => onSelect(s.id)}
                     >
-                      <span>{completedIds.includes(s.id) ? "✓" : String(bookSections.indexOf(s) + 1).padStart(2, "0")}</span>
+                      <span>{completedIds.includes(s.id) ? "✓" : String(items.indexOf(s) + 1).padStart(2, "0")}</span>
                       <b>{s.title}<small>{s.lesson?.status === "pending" ? "準備中" : s.lesson?.status === "reading" || s.kind !== "lesson" ? "読む" : s.lesson?.optional ? "任意の復習" : "触ってみる"}</small></b>
                     </button>
                   ))}
                 </div>
+                {chapter.id === "reference" && <>
+                  <button className="reference-link" onClick={onHelp}>ルール早見を開く</button>
+                  <RuleLinks refs={["frame.entry16"]} />
+                  <Roadmap />
+                </>}
               </details>
             );
           })}
         </div>
+      </nav>
+    </aside>
+  );
+}
+
+function Roadmap() {
+  return <>
         <section className="learning-roadmap" aria-labelledby="roadmap-title">
           <div className="roadmap-heading">
             <strong id="roadmap-title">学習ロードマップ</strong>
-            <small>8つのコースを順に学びます</small>
+            <small>もっと遊びたくなったら</small>
           </div>
           <ol>
             {learningCourses.map((course, index) => (
@@ -95,7 +109,5 @@ export function CurriculumPanel({
             追加アクションは正規ルールの対応フォーマットから表示しています。
           </p>
         </details>
-      </nav>
-    </aside>
-  );
+  </>;
 }

@@ -6,7 +6,7 @@ import { ActionDefinition, ConceptSlide } from "./LessonExplainer";
 import { RuleLinks } from "./RuleLinks";
 
 export function LessonPractice({ lesson, active, completed, onComplete, onNext }: {
-  lesson: Lesson; active: boolean; completed: boolean; onComplete: (id: string) => void; onNext: () => void;
+  lesson: Lesson; active: boolean; completed: boolean; onComplete: (id: string) => void; onNext?: () => void;
 }) {
   const scenario = scenarios.find((item) => item.scenes.some((scene) => scene.id === lesson.sceneIds[0]))!;
   const scene = scenario.scenes[0];
@@ -44,7 +44,7 @@ export function LessonPractice({ lesson, active, completed, onComplete, onNext }
     {interaction.complete && scene.presentation === "interactive" && <div className="learned scene-result" role="status">
       <strong>このSectionの操作は完了</strong><p>{scene.summary}</p>
     </div>}
-    {interaction.complete && <button className="primary-button section-next" onClick={onNext}>次へ →</button>}
+    {interaction.complete && onNext && <button className="primary-button section-next" onClick={onNext}>次へ →</button>}
     {interaction.complete && scene.presentation === "interactive" &&
       <button className="scene-replay" onClick={interaction.replay}>↻ もう一度やる</button>}
     <details className="lesson-definitions"><summary>解説を見る</summary>

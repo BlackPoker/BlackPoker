@@ -59,6 +59,7 @@ export function IntroContent({ kind }: { kind: "about" | "game-purpose" | "entry
               <span><b>専用カード不要</b></span>
             </div>
             <p className="intro-caption">兵士を出して攻撃したり、魔法を使ったりして戦います。</p>
+            <p className="intro-reassurance">最初は画面のカードで練習。実物のトランプは、まだ不要です。</p>
           </div>
         )}
 
@@ -74,22 +75,21 @@ export function IntroContent({ kind }: { kind: "about" | "game-purpose" | "entry
 
         {kind === "entry16" && (
           <div className="intro-page">
-            <p className="intro-kicker">最初のコース</p>
+            <p className="intro-kicker">実物カードを用意しよう</p>
 
             <div className="intro-course-card">
-              <small>今回使うルール</small>
-              <strong>ライト＋エントリー16</strong>
-              <p>普通のトランプから16枚だけを使って、BlackPokerの基本を学ぶ初心者向けルールです。</p>
+              <strong>普通のトランプから、<br />1人16枚だけ。</strong>
+              <p>今回は16枚だけ使う入門ルールで遊びます。次の画面で、使うカードと置き方を確認しましょう。</p>
+              <small>正式には「ライト＋エントリー16」です。</small>
             </div>
+            <details className="lesson-definitions"><summary>BlackPokerにはさらに遊び方があります</summary>
             <div className="intro-levels" aria-label="段階的な遊び方">
               <span className="current">LIGHT<small>いまここ</small></span>
               <i>→</i><span>STANDARD</span><i>→</i><span>PRO</span><i>→</i><span>MASTER</span>
             </div>
+            <p>使えるアクションが増える4つのフォーマットです。今は覚えなくて大丈夫。目次の「調べる」から学習ロードマップも確認できます。</p>
+            </details>
             <p className="intro-reassurance">最初から、すべてのルールを覚える必要はありません。</p>
-            <div className="intro-no-cards">
-              <span aria-hidden="true">▣</span>
-              <p><strong>実物カードは、まだ用意しなくてOK。</strong>まず画面のカードを操作して戦い方を体験し、その後で実際のトランプを使います。</p>
-            </div>
           </div>
         )}
 

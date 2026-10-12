@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { entryScenario } from "./data/lessons";
-import { bookSections, nextSection, publishedSections, sectionById, sectionFromHash, unlockThrough } from "./data/book";
+import { bookSections, nextSection, firstGameSections, sectionById, sectionFromHash, unlockThrough } from "./data/book";
 import { loadBookProgress, saveBookProgress, emptyBook } from "./lib/book-storage";
 import { lessonStorageKey } from "./lib/lesson-storage";
 import { clearIntroComplete, resolveBrowserStorage } from "./lib/storage";
@@ -12,6 +12,7 @@ import { IntroContent } from "./components/TutorialIntro";
 import { CardOrientation } from "./components/CardOrientation";
 import { LessonPractice } from "./components/LessonPractice";
 import { RealPractice } from "./components/RealPractice";
+import { FirstGameChoices } from "./components/FirstGameChoices";
 import { ConceptSlide, ActionDefinition, LessonMedia } from "./components/LessonExplainer";
 import { RuleLinks } from "./components/RuleLinks";
 import { ActionHelp } from "./components/ActionHelp";
@@ -23,7 +24,7 @@ export default function App() {
   const [book, setBook] = useState(() => {
     const saved = loadBookProgress(storage, legacy.stepIndex);
     const target = sectionFromHash(window.location.hash);
-    return target ? { ...saved, lastSectionId: target.id, unlockedIds: unlockThrough(target.id, saved.unlockedIds) } : saved;
+    return target && target.id !== saved.lastSectionId ? { ...saved, lastSectionId: target.id, unlockedIds: unlockThrough(target.id, saved.unlockedIds) } : saved;
   });
   const [scrollRequest, setScrollRequest] = useState({ id: book.lastSectionId, serial: 0, smooth: false });
   const [edition, setEdition] = useState(0);
@@ -63,11 +64,11 @@ export default function App() {
     window.addEventListener("hashchange", hashChanged);
     return () => window.removeEventListener("hashchange", hashChanged);
   }, [openSection]);
-  const count = publishedSections.filter((section) => book.completedIds.includes(section.id)).length;
+  const count = firstGameSections.filter((section) => book.completedIds.includes(section.id)).length;
   return <div className="app-shell book-shell">
     <button aria-label="目次を閉じる" className={`mobile-scrim ${menuOpen ? "show" : ""}`} onClick={() => setMenuOpen(false)} />
     <div className={`sidebar-wrap ${menuOpen ? "open" : ""}`}>
-      <CurriculumPanel lessonId={book.lastSectionId} completedIds={book.completedIds} onSelect={openSection} onClose={() => setMenuOpen(false)} />
+      <CurriculumPanel lessonId={book.lastSectionId} completedIds={book.completedIds} onSelect={openSection} onHelp={() => { setMenuOpen(false); setHelpOpen(true); }} onClose={() => setMenuOpen(false)} />
     </div>
     <main className="lesson-shell">
       <header className="topbar">
@@ -79,24 +80,27 @@ export default function App() {
       <div className="book-body" key={edition}>
         <section id="cover" className="book-cover" aria-label="Interactive HowToの表紙" onFocusCapture={() => activate("cover")}>
           <img src={blackPokerLogo} alt="" /><h1>BlackPoker<small>Interactive HowTo</small></h1>
-          <p>トランプだけで遊ぶ、2人用対戦カードゲーム。<br />読み進めながら、画面のカードを触って覚えましょう。</p>
+          <p>トランプだけで遊ぶ、2人用対戦カードゲーム。<br />まずは画面のカードを触って、最初の1ゲームへ。</p>
           <button className="primary-button" onClick={() => openSection("about")}>はじめる ↓</button>
-          <p className="book-progress" aria-label="全体の進捗">{count} / {publishedSections.length} Section完了 · 前の説明は上へスクロールして読めます</p>
+          <p className="book-progress" aria-label="まず遊ぶの進捗">まず遊ぶ {count} / {firstGameSections.length} · 最初のゲームまで<br />前の説明は上へスクロールして読めます</p>
         </section>
         {bookSections.filter((section) => book.unlockedIds.includes(section.id)).map((section) => {
           const lesson = section.lesson;
           const next = nextSection(section.id);
-          return <HowToSection key={section.id} section={section} number={bookSections.indexOf(section) + 1}
+          return <HowToSection key={section.id} section={section} number={bookSections.filter((s) => s.track === section.track).indexOf(section) + 1}
             completed={book.completedIds.includes(section.id)} onActivate={() => activate(section.id)}>
             {section.kind === "intro" && <><IntroContent kind={section.id as "about" | "game-purpose" | "entry16"} />
               <button className="primary-button section-next" onClick={() => continueFrom(section.id)}>次へ →</button></>}
             {section.kind === "orientation" && <><p className="section-summary">縦と横で、カードの状態を表します。</p><CardOrientation />
               <p className="section-summary">このあと兵士を横向きにして、アタックしてみましょう。</p>
               <button className="primary-button section-next" onClick={() => continueFrom(section.id)}>次へ →</button></>}
+            {section.kind === "milestone" && <FirstGameChoices onSelect={(id) => { complete(section.id); openSection(id); }} onHelp={() => setHelpOpen(true)} />}
             {lesson?.status === "ready" && lesson.sceneIds.length > 0 && <LessonPractice lesson={lesson}
               active={book.lastSectionId === section.id} completed={book.completedIds.includes(section.id)}
-              onComplete={complete} onNext={() => continueFrom(section.id)} />}
-            {lesson?.realStepIds && <RealPractice progress={legacy} onComplete={() => { complete(section.id); setHelpOpen(true); }} />}
+              onComplete={complete} onNext={next ? () => continueFrom(section.id) : undefined} />}
+            {lesson?.realStepIds && <><RealPractice progress={legacy} onComplete={() => {
+              complete(section.id); requestAnimationFrame(() => scrollToSection("after-game"));
+            }} />{book.completedIds.includes(section.id) && <FirstGameChoices afterGame onSelect={openSection} onHelp={() => setHelpOpen(true)} />}</>}
             {lesson && lesson.status !== "ready" && <>
               <p className="section-summary">{lesson.shortDescription}</p>
               {lesson.status === "pending" ? <p className="pending-notice">このSectionのカード操作は準備中です。</p>
@@ -108,6 +112,9 @@ export default function App() {
               </details>
               {next && <button className="primary-button section-next" onClick={() => lesson.status === "pending" ? openSection(next.id) : continueFrom(section.id)}>
                 {lesson.status === "pending" ? "公開済みの続きへ" : "読み終えて次へ"} →
+              </button>}
+              {!next && lesson.status === "reading" && <button className="scene-replay" onClick={() => complete(section.id)}>
+                {book.completedIds.includes(section.id) ? "✓ 確認済み" : "読み終えた"}
               </button>}
             </>}
             {lesson && <LessonMedia media={lesson.media} />}

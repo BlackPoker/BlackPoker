@@ -4,22 +4,30 @@
 
 ## 初心者向けの推奨順（今回の更新）
 
-基準: `05577b2b9d7c104e6104aef9f820d158722f4c8b`。開始時にoriginをfetchし、local / remoteの一致を確認。
+基準: `e41b60d9dd924288971b3e99753a3f27b1ae4f00`。開始時にoriginをfetchし、local / remoteの一致とcleanを確認。
 
-表紙 → BlackPokerとは → ゲームの目的 → Entry16について → 盤面 → カードの向き → 守らない攻撃 → 兵士ブロック → 防壁ブロック → 応用の攻防 → 戦力・コスト → 魔法 → リクエスト → 誘発 → Entry16実戦。
+第1ゴールは全ルール理解ではなく、最初の1ゲームを始められること。
+
+- **first-game**：about → game-purpose → board-overview → orientation → unblocked-attack → first-battle → bulwark-block → soldier → pass-turn → first-game-ready → entry16 → real-game。12項目だけを初戦の進捗に数える。
+- **learn-more**：防壁設置と準備中20項目。既存の戦力・応用戦闘・魔法・リクエスト・誘発・Joker分類は教材内部に残す。目次は初期折りたたみ。直接アクセスは可能だが初戦へ自動挿入しない。
+- **reference**：アクションの読み方、早見、公式ルール、ロードマップ、フォーマット差分。初期折りたたみで、詳細定義は必要なときに開く。
+
+実物カードの直前に「1人16枚だけ」と伝える。正式名称は補足、4フォーマット体系図はdetails内。first-game-readyでは実物対戦を主CTAにし、応用と早見を補助とする。実物開始後にも任意の学習先を案内する。
 
 |Lesson ID|初回の役割|推奨前提|
 |---|---|---|
-|about / game-purpose / entry16|導入も本文・目次に載せる。専用のINTRO画面は廃止|なし|
+|about / game-purpose|何のゲームか・勝ち方からすぐ盤面へ。最初は実物不要と案内|なし|
+|entry16|実物準備直前へ移動。旧ID/hashは維持|first-game-ready（表示順）|
 |board-overview|5つの置き場の探索とA＝あなた、B＝相手の説明。全タップは不要|なし|
 |orientation|縦＝チャージ／横＝ドライブの図。独立したSection|board-overview（表示順）|
 |unblocked-attack|Aの♠2で攻撃。Bはブロッカーを指定せず、Bのライフを1枚ずつ自動で減らす|board-overview|
 |first-battle（anchor: soldier-block）|Bが攻撃済み。Aの♥7で守り、6 < 7で相手の兵士が自動で墓地へ|unblocked-attack|
 |bulwark-block|Aの裏向き・チャージ防壁で守る。公開・一致後、Bの兵士は自動、Aの防壁は操作して墓地へ|first-battle|
-|bulwark|AのL支払い・手札1枚の防壁設置の2操作だけ|soldier|
-|pass-turn|Aのエンド操作後、Bのチャージとドローを自動表示|bulwark|
+|bulwark|learn-moreへ。AのL支払い・手札1枚の防壁設置の2操作を維持|soldier|
+|pass-turn|Aのエンド操作後、Bのチャージとドローを自動表示|soldier|
+|first-game-ready|ここまでで一度遊んでよいと伝え、実物カードへ|pass-turn（表示順）|
 
-いずれも推奨前提でありロックではない。防壁Lessonはcombatへ移し、tacticsの応用はその後へ配置。準備中は「次へ」で飛ばし、目次から直接開ける。本文は到達したSectionを保持し、次へで追加・スクロールする。魔法やコストの大量追加は行わない。
+いずれも推奨前提でありロックではない。防壁ブロックは初戦、防壁設置は応用へ分離する。現行 `frame.entry16` が参照する共通開始手順では防壁を表向きにプリセットするため、追加設置を初戦の開始前に必修とする必要はない。通常設置を禁止する変更ではない。準備中は「次へ」で飛ばし、目次から直接開ける。本文は到達したSectionを保持し、同じtrack内で追加・スクロールする。魔法の操作は今回追加しない。
 3つの戦闘アクションの主担当は最初に体験するunblocked-attackへ移し、兵士・防壁のブロックはreviewとして扱う。
 
 ## 既存構造の調査と方針（前回）

@@ -21,6 +21,19 @@ fs.mkdirSync(output, { recursive: true });
     await section(id).locator('.interaction-guide').filter({ hasText: text }).waitFor();
   };
   const complete = async (id) => section(id).getByRole('status').waitFor();
+  const settleScroll = async () => {
+    const settled = await page.evaluate(() => new Promise((resolve) => {
+      let previous = scrollY, stable = 0, frames = 0;
+      const check = () => {
+        stable = Math.abs(scrollY - previous) < .1 ? stable + 1 : 0;
+        previous = scrollY;
+        if (stable >= 10 || ++frames >= 180) resolve(stable >= 10);
+        else requestAnimationFrame(check);
+      };
+      requestAnimationFrame(check);
+    }));
+    assert.equal(settled, true);
+  };
   const metrics = async (id) => section(id).evaluate((element) => ({
     sectionTop: element.getBoundingClientRect().top,
     boardDistance: element.querySelector('.persistent-board')?.getBoundingClientRect().top - element.getBoundingClientRect().top,
@@ -35,10 +48,13 @@ fs.mkdirSync(output, { recursive: true });
     if (url.hostname === 'host.docker.internal') url.hostname = (await dns.lookup(url.hostname, { family: 4 })).address;
     await page.goto(url.href);
     await page.getByRole('button', { name: 'はじめる ↓' }).click();
-    for (const id of ['about', 'game-purpose', 'entry16', 'board-overview', 'orientation']) {
+    assert.equal(await page.locator('[data-track="learn-more"]').getAttribute('open'), null);
+    assert.equal(await page.locator('[data-track="reference"]').getAttribute('open'), null);
+    for (const id of ['about', 'game-purpose', 'board-overview', 'orientation']) {
       assert.equal(await section(id).count(), 1);
       await next(id);
     }
+    assert.equal(await section('entry16').count(), 0);
     const attack = 'unblocked-attack';
     // smooth scroll完了を位置で待つ（固定sleepに依存しない）。
     await page.waitForFunction(() => Math.abs(document.getElementById('unblocked-attack').getBoundingClientRect().top - 60) < 2);
@@ -67,8 +83,37 @@ fs.mkdirSync(output, { recursive: true });
     await card(wall, 'A', 'C6').click();
     await zone(wall, 'A', 'grave').getByRole('button', { name: 'PLAYER Aの墓地へ移す' }).click();
     await complete(wall);
-    assert.equal(await page.locator('[data-section-id]').count(), 8);
+    assert.equal(await page.locator('[data-section-id]').count(), 7);
+    await next(wall);
+    await card('soldier', 'A', 'D5').click();
+    await waitForPrompt('soldier', 'ライフの一番上');
+    await card('soldier', 'A', 'S3').click();
+    await card('soldier', 'A', 'C6').click(); // 墓地の既存カードを宛先としてタップ
+    await waitForPrompt('soldier', 'あなたの♠2');
+    await card('soldier', 'A', 'S2').click();
+    await zone('soldier', 'A', 'soldiers').getByRole('button', { name: 'PLAYER Aの兵士へ移す' }).click();
+    await complete('soldier'); await next('soldier');
+    await section('pass-turn').getByRole('button', { name: 'エンド', exact: true }).click();
+    await complete('pass-turn'); await next('pass-turn');
+    await page.waitForFunction(() => { const r = document.getElementById('first-game-ready').getBoundingClientRect(); return r.top >= 58 && r.bottom < innerHeight; });
+    await settleScroll();
+    await page.screenshot({ path: path.join(output, 'mobile-milestone-390x844.png') });
+    await section('first-game-ready').getByRole('button', { name: '実物カードで遊ぶ →' }).click();
+    assert.equal(await page.getByLabel('段階的な遊び方').isVisible(), false);
+    await next('entry16');
+    for (let i = 0; i < 6; i++) await section('real-game').getByRole('button', { name: /準備できた/ }).last().click();
+    await section('real-game').getByRole('radio', { name: 'PLAYER A', exact: true }).check();
+    for (let i = 0; i < 2; i++) await section('real-game').getByRole('button', { name: /準備できた/ }).last().click();
+    await section('real-game').getByRole('button', { name: '対戦を始める', exact: true }).click();
+    await page.locator('#after-game').waitFor();
+    assert.equal(await page.getByLabel('まず遊ぶの進捗').textContent().then((v) => v.includes('12 / 12')), true);
+    assert.equal(await section('bulwark').count(), 0);
+    assert.equal(await section('up').count(), 0);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+    findings.mobileFullRoute = '表紙から実物9操作・対戦開始まで完了、応用の強制なし';
+    await settleScroll();
     const scrollBefore = await page.evaluate(() => scrollY);
+    await page.mouse.move(200, 400);
     await page.mouse.wheel(0, -700);
     await page.waitForFunction((before) => scrollY < before - 500, scrollBefore);
     assert.equal(await section('first-battle').count(), 1);
@@ -77,12 +122,23 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.getByRole('button', { name: '目次を開く' }).getAttribute('aria-expanded'), 'false');
     assert.match(page.url(), /#about$/);
     assert.equal(await section(wall).count(), 1);
+    await settleScroll();
+    await page.getByRole('button', { name: '目次を開く' }).click();
+    await page.waitForFunction(() => {
+      const drawer = document.querySelector('.sidebar-wrap');
+      return getComputedStyle(drawer).transform === 'matrix(1, 0, 0, 1, 0, 0)';
+    });
+    const drawerRect = await page.getByRole('complementary', { name: 'HowToの目次' }).boundingBox();
+    assert.equal(drawerRect.y, 0);
+    assert.ok(drawerRect.height >= 840);
+    await page.screenshot({ path: path.join(output, 'mobile-toc-390x844.png') });
+    await page.getByRole('button', { name: 'メニューを閉じる', exact: true }).click();
 
     await page.setViewportSize({ width: 1440, height: 900 });
     const contents = page.getByRole('complementary', { name: 'HowToの目次' });
-    await contents.locator('summary').filter({ hasText: '戦力を増やす' }).click();
     await contents.getByRole('button', { name: /兵士を召喚する/ }).click();
     const summon = 'soldier';
+    await section(summon).getByRole('button', { name: /もう一度やる/ }).click();
     await waitForPrompt(summon, '裏向きの防壁');
     await card(summon, 'A', 'D5').press('Enter');
     await waitForPrompt(summon, 'ライフの一番上');
@@ -115,7 +171,7 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await section(wall).count(), 1);
     assert.equal(await section(summon).getByRole('status').count(), 1);
     assert.match(page.url(), /#unblocked-attack$/);
-    await contents.locator('summary').filter({ hasText: '戦力を増やす' }).click();
+    await contents.locator('[data-track="learn-more"] > summary').click();
     await contents.getByRole('button', { name: /防壁を増やす/ }).click();
     const setup = 'bulwark';
     await card(setup, 'A', 'SA').click();
@@ -126,7 +182,15 @@ fs.mkdirSync(output, { recursive: true });
     await card(setup, 'A', 'D5').click();
     await complete(setup);
     assert.match(await card(setup, 'A', 'D8').getAttribute('aria-label'), /裏向き 縦向き/);
-    assert.equal(await section('pass-turn').count(), 0);
+    assert.equal(await section('pass-turn').count(), 1); // 以前の本文を保持
+    await contents.getByRole('button', { name: /カウンター/ }).click();
+    assert.match(page.url(), /#counter$/);
+    assert.ok((await section('counter').textContent()).includes('準備中'));
+    await section('counter').getByText('解説と公式ルールを見る', { exact: true }).click();
+    assert.ok(await section('counter').getByRole('link').count() > 0);
+    await page.getByRole('button', { name: 'ルール早見', exact: true }).click();
+    await page.getByRole('dialog', { name: 'ルール早見' }).waitFor();
+    findings.reference = '応用直行・hash・折りたたみ公式リンク・早見ダイアログ確認';
     assert.deepEqual(errors, []);
     console.log(JSON.stringify({ result: 'PASS', ...findings, screenshots: output }, null, 2));
   } finally { await browser.close(); }

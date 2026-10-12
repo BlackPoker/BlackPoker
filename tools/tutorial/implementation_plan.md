@@ -1,4 +1,17 @@
-# 縦スクロールHowToへの変更計画
+# 最初の1ゲームを始めるHowToへの改善計画
+
+基準: e41b60d9dd924288971b3e99753a3f27b1ae4f00（開始時fetch、local / origin一致、clean）。
+
+1. 既存8ファイル・教材データ・公開範囲を確認し、既存機能、部分対応、未対応、旧導線との矛盾を整理する。
+2. book-layoutにfirst-game / learn-more / referenceを定義。Entry16を実物直前へ送り、milestoneを追加。既存操作エンジンは変更しない。
+3. 目次・進捗・次への意味をtrackに合わせ、Referenceと体系説明は折りたたみへ。防壁設置はプリセットを根拠に応用へ移す。
+4. 旧保存の解放範囲を保持する。hash・旧Lesson/30操作保存・先攻は維持し、順序変更で勝手に解放しない。
+5. DockerでTutorial全テスト・schema・build・Simulator回帰、390×844全導線と1440×900の入力・Referenceを実ブラウザ検証する。
+6. 初心者自己レビュー・文書更新・差分確認後、日本語コミット、現在ブランチへpush、local/remote一致とcleanを確認する。
+
+検証結果と実装判断はHOWTO_REPORT.mdの最新報告に記載する。
+
+## 前回の計画・実施記録（履歴）
 
 基準: 05577b2b9d7c104e6104aef9f820d158722f4c8b（fetch後local / origin一致、開始時clean）。
 

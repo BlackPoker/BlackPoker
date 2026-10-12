@@ -14,13 +14,14 @@ export function loadBookProgress(storage: StorageLike | null, legacyIndex = 0): 
       const last = sectionById(value.lastSectionId) ? value.lastSectionId : "cover";
       const completed = [...new Set<string>(value.completedIds.filter((id: unknown): id is string =>
         typeof id === "string" && !!sectionById(id) && sectionById(id)!.lesson?.status !== "pending"))];
-      return { lastSectionId: last, unlockedIds: [...new Set([...unlockThrough(last, unlocked), ...completed])], completedIds: completed };
+      // entry16が後方へ移っても保存済みの解放範囲を勝手に広げない。IDと保存キーは互換。
+      return { lastSectionId: last, unlockedIds: [...new Set([...unlocked, ...completed, ...(last === "cover" ? [] : [last])])], completedIds: completed };
     }
     // 旧キーは読み取りだけ。旧Lesson・30操作のどちらからも続きへ移行する。
     if (loadIntroComplete(storage) || storage?.getItem(lessonStorageKey) || (legacyIndex > 0 && storage?.getItem(progressStorageKey))) {
       const old = loadLessonProgress(storage, legacyIndex);
-      return { lastSectionId: old.lessonId, unlockedIds: unlockThrough(old.lessonId, old.completedIds),
-        completedIds: [...new Set(["about", "game-purpose", "entry16", ...old.completedIds])] };
+      const completedIds = [...new Set(["about", "game-purpose", "entry16", ...old.completedIds])];
+      return { lastSectionId: old.lessonId, unlockedIds: unlockThrough(old.lessonId, completedIds), completedIds };
     }
   } catch { /* 保存禁止・破損時にも教材を開ける。旧データは削除しない。 */ }
   return emptyBook();

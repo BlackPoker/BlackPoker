@@ -4,6 +4,7 @@ import { loadRuleCatalog, repositoryRoot } from "./rule-source.mjs";
 import { validateScenario } from "../src/lib/schema.mjs";
 import { validateCurriculum } from "../src/lib/curriculum-schema.mjs";
 import { makeBookFixtures } from "../src/data/book-fixtures.mjs";
+import { validateBookLayout } from "../src/lib/book-schema.mjs";
 const directory = path.join(repositoryRoot, "tools/tutorial/src/data/tutorials");
 const errors = fs
   .readdirSync(directory)
@@ -17,9 +18,11 @@ const errors = fs
 const entry = JSON.parse(fs.readFileSync(path.join(directory, "entry16.json"), "utf8"));
 const fixtures = makeBookFixtures(entry);
 fixtures.forEach((fixture) => errors.push(...validateScenario(fixture, loadRuleCatalog()).map((error) => fixture.id + ": " + error)));
-errors.push(...validateCurriculum(JSON.parse(fs.readFileSync(path.join(directory, "../learning-path.json"), "utf8")), loadRuleCatalog(), fixtures));
+const curriculum = JSON.parse(fs.readFileSync(path.join(directory, "../learning-path.json"), "utf8"));
+errors.push(...validateCurriculum(curriculum, loadRuleCatalog(), fixtures));
+errors.push(...validateBookLayout(JSON.parse(fs.readFileSync(path.join(directory, "../book-layout.json"), "utf8")), curriculum.lessons));
 if (errors.length) {
   console.error(errors.join("\n"));
   process.exit(1);
 }
-console.log("Tutorial scenarios, curriculum, Lite coverage, rule references and fixture continuity are valid.");
+console.log("Tutorial scenarios, book tracks, curriculum, Lite coverage, rule references and fixture continuity are valid.");
