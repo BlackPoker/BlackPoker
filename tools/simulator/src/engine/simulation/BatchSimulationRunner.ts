@@ -2,6 +2,7 @@ import { GameSession } from "../session/GameSession";
 import { SimulationRunner, SimulationResult } from "./SimulationRunner";
 import { DecisionPolicy } from "./DecisionPolicy";
 import {
+  BATCH_RUNTIME_TELEMETRY_VERSION,
   BATCH_SIMULATION_RESULT_VERSION,
   BatchFailureRecord,
   BatchMatchContext,
@@ -31,6 +32,7 @@ import {
  */
 export class BatchSimulationRunner {
   public static readonly VERSION = BATCH_SIMULATION_RESULT_VERSION;
+  public static readonly TELEMETRY_VERSION = BATCH_RUNTIME_TELEMETRY_VERSION;
 
   /**
    * バッチ実行オプションを検証 (開始前 fail-fast)
@@ -128,13 +130,99 @@ export class BatchSimulationRunner {
   }
 
   /**
+   * 試合ごとのメトリクスとバッチ全体の経過時間から、テレメトリ統計サマリーを算出
+   */
+  public static calculateRuntimeMetrics(
+    matchMetrics: readonly BatchMatchRuntimeMetrics[],
+    batchWallClockElapsedMs: number,
+    concurrency: number = 1
+  ): BatchSimulationRuntimeMetrics {
+    const executedMatchCount = matchMetrics.length;
+    if (executedMatchCount === 0) {
+      return {
+        runtimeTelemetryVersion: BATCH_RUNTIME_TELEMETRY_VERSION,
+        executedMatchCount: 0,
+        concurrency,
+        batchWallClockElapsedMs,
+        sumMatchTotalElapsedMs: 0,
+        meanMatchTotalElapsedMs: 0,
+        medianMatchTotalElapsedMs: 0,
+        p95MatchTotalElapsedMs: 0,
+        minMatchTotalElapsedMs: 0,
+        maxMatchTotalElapsedMs: 0,
+        matchesPerSecond: 0,
+        totalDecisionCount: 0,
+        meanMsPerDecision: 0,
+        matchMetrics,
+        totalExecutionTimeMs: batchWallClockElapsedMs,
+      };
+    }
+
+    const sortedLatencies = matchMetrics
+      .map((m) => m.matchTotalElapsedMs)
+      .slice()
+      .sort((a, b) => a - b);
+
+    const sumMatchTotalElapsedMs = matchMetrics.reduce((acc, m) => acc + m.matchTotalElapsedMs, 0);
+    const meanMatchTotalElapsedMs = sumMatchTotalElapsedMs / executedMatchCount;
+    const minMatchTotalElapsedMs = sortedLatencies[0];
+    const maxMatchTotalElapsedMs = sortedLatencies[sortedLatencies.length - 1];
+
+    // Median (奇数なら中央、偶数なら中央2要素の算術平均)
+    const n = sortedLatencies.length;
+    let medianMatchTotalElapsedMs: number;
+    if (n % 2 === 1) {
+      medianMatchTotalElapsedMs = sortedLatencies[Math.floor(n / 2)];
+    } else {
+      medianMatchTotalElapsedMs = (sortedLatencies[n / 2 - 1] + sortedLatencies[n / 2]) / 2;
+    }
+
+    // P95 Nearest-Rank Method: rank = ceil(0.95 * n), index = max(0, rank - 1)
+    const rank = Math.ceil(0.95 * n);
+    const index = Math.max(0, rank - 1);
+    const p95MatchTotalElapsedMs = sortedLatencies[index];
+
+    // Throughput: matchesPerSecond = executedMatchCount / (batchWallClockElapsedMs / 1000)
+    const matchesPerSecond =
+      batchWallClockElapsedMs > 0
+        ? executedMatchCount / (batchWallClockElapsedMs / 1000)
+        : 0;
+
+    // Total Decisions & Mean Ms Per Decision
+    const totalDecisionCount = matchMetrics.reduce((acc, m) => acc + m.totalDecisions, 0);
+    const sumSimulationElapsedMs = matchMetrics.reduce((acc, m) => acc + (m.simulationElapsedMs ?? 0), 0);
+    const meanMsPerDecision =
+      totalDecisionCount > 0
+        ? (sumSimulationElapsedMs > 0 ? sumSimulationElapsedMs : sumMatchTotalElapsedMs) / totalDecisionCount
+        : 0;
+
+    return {
+      runtimeTelemetryVersion: BATCH_RUNTIME_TELEMETRY_VERSION,
+      executedMatchCount,
+      concurrency,
+      batchWallClockElapsedMs,
+      sumMatchTotalElapsedMs,
+      meanMatchTotalElapsedMs,
+      medianMatchTotalElapsedMs,
+      p95MatchTotalElapsedMs,
+      minMatchTotalElapsedMs,
+      maxMatchTotalElapsedMs,
+      matchesPerSecond,
+      totalDecisionCount,
+      meanMsPerDecision,
+      matchMetrics,
+      totalExecutionTimeMs: batchWallClockElapsedMs,
+    };
+  }
+
+  /**
    * 複数の試合を決定論的・安全・独立に実行
    */
   public static run(options: BatchSimulationOptions): BatchSimulationResult {
     // 0. 開始前検証 (fail-fast)
     this.validateOptions(options);
 
-    const startTime = Date.now();
+    const batchStartTime = globalThis.performance.now();
     const matchCount = options.matchCount;
     const baseSeed = options.baseSeed;
     const maxDecisions = options.maxDecisionsPerMatch ?? 500;
@@ -145,7 +233,7 @@ export class BatchSimulationRunner {
     const failures: BatchFailureRecord[] = [];
 
     for (let i = 0; i < matchCount; i++) {
-      const matchStartTime = Date.now();
+      const matchStartTime = globalThis.performance.now();
       const plan = this.planMatch(baseSeed, i);
       const context: BatchMatchContext = {
         matchIndex: plan.matchIndex,
@@ -159,31 +247,39 @@ export class BatchSimulationRunner {
       let policies: Record<string, DecisionPolicy> | undefined;
       let simResult: SimulationResult | undefined;
       let failureRecord: BatchFailureRecord | undefined;
+      let setupElapsedMs = 0;
+      let simulationElapsedMs = 0;
 
       try {
-        // 1. Session 生成
+        // 1. Session 生成 & 2. Policy 生成 (Setup Phase)
         let phase: "SESSION_FACTORY" | "POLICY_FACTORY" | "RUNNER" = "SESSION_FACTORY";
+        const setupStartTime = globalThis.performance.now();
         try {
           session = options.sessionFactory(context);
         } catch (err: any) {
+          setupElapsedMs = globalThis.performance.now() - setupStartTime;
           throw { phase, error: err };
         }
 
-        // 2. Policy 生成
         phase = "POLICY_FACTORY";
         try {
           policies = options.policyFactory(context);
         } catch (err: any) {
+          setupElapsedMs = globalThis.performance.now() - setupStartTime;
           throw { phase, error: err };
         }
+        setupElapsedMs = globalThis.performance.now() - setupStartTime;
 
-        // 3. 実行
+        // 3. 実行 (Simulation Phase)
         phase = "RUNNER";
+        const simStartTime = globalThis.performance.now();
         try {
           simResult = SimulationRunner.run(session, policies, {
             maxDecisions,
           });
+          simulationElapsedMs = globalThis.performance.now() - simStartTime;
         } catch (err: any) {
+          simulationElapsedMs = globalThis.performance.now() - simStartTime;
           throw { phase, error: err };
         }
       } catch (wrapper: any) {
@@ -207,11 +303,29 @@ export class BatchSimulationRunner {
         failures.push(failureRecord);
       }
 
-      const matchDuration = Date.now() - matchStartTime;
-      matchMetrics.push({
+      const matchEndTime = globalThis.performance.now();
+      const matchTotalElapsedMs = matchEndTime - matchStartTime;
+
+      const matchStatus: BatchMatchStatus = failureRecord
+        ? "FAILED"
+        : simResult?.completed
+        ? "COMPLETED"
+        : "INCOMPLETE";
+
+      const totalDecisions = simResult ? simResult.totalDecisions : 0;
+      const turnCount = simResult ? simResult.turnCount : 0;
+
+      const matchMetric: BatchMatchRuntimeMetrics = {
         matchIndex: i,
-        durationMs: matchDuration,
-      });
+        matchId: plan.matchId,
+        status: matchStatus,
+        matchTotalElapsedMs,
+        setupElapsedMs,
+        simulationElapsedMs,
+        totalDecisions,
+        durationMs: matchTotalElapsedMs,
+      };
+      matchMetrics.push(matchMetric);
 
       let matchResult: BatchMatchResult;
       if (failureRecord) {
@@ -227,16 +341,15 @@ export class BatchSimulationRunner {
           failure: failureRecord,
         };
       } else if (simResult) {
-        const status: BatchMatchStatus = simResult.completed ? "COMPLETED" : "INCOMPLETE";
         matchResult = {
           matchIndex: i,
           matchId: plan.matchId,
-          status,
+          status: matchStatus,
           completed: simResult.completed,
           winner: simResult.winner,
           reason: simResult.reason,
-          totalDecisions: simResult.totalDecisions,
-          turnCount: simResult.turnCount,
+          totalDecisions,
+          turnCount,
           finalStateHash: simResult.finalStateHash,
           matchSeed: plan.matchSeed,
           playerSeeds: plan.playerSeeds,
@@ -258,10 +371,14 @@ export class BatchSimulationRunner {
       matches.push(matchResult);
 
       if (options.onMatchCompleted) {
-        options.onMatchCompleted(matchResult, {
-          completedCount: matches.length,
-          totalCount: matchCount,
-        });
+        options.onMatchCompleted(
+          matchResult,
+          {
+            completedCount: matches.length,
+            totalCount: matchCount,
+          },
+          matchMetric
+        );
       }
 
       if (failureRecord && stopOnError) {
@@ -269,12 +386,10 @@ export class BatchSimulationRunner {
       }
     }
 
-    const totalExecutionTimeMs = Date.now() - startTime;
     const summary = this.calculateSummary(matches);
-    const runtimeMetrics: BatchSimulationRuntimeMetrics = {
-      totalExecutionTimeMs,
-      matchMetrics,
-    };
+    const batchEndTime = globalThis.performance.now();
+    const batchWallClockElapsedMs = batchEndTime - batchStartTime;
+    const runtimeMetrics = this.calculateRuntimeMetrics(matchMetrics, batchWallClockElapsedMs);
 
     return {
       batchResultVersion: this.VERSION,

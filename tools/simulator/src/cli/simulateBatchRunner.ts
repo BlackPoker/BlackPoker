@@ -9,40 +9,60 @@ import { BatchSimulationRunner } from "../engine/simulation/BatchSimulationRunne
 import { RandomPolicy } from "../engine/simulation/DecisionPolicy";
 import { SeededRandom } from "../engine/random/RandomSource";
 import { StateHasher } from "../engine/simulation/StateHasher";
+import { RuntimeArtifactWriter } from "./support/RuntimeArtifactWriter";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function main() {
+  const args = process.argv.slice(2);
+  let quiet = false;
+  let saveArtifacts = true;
+  const positionalArgs: string[] = [];
+
+  for (const arg of args) {
+    if (arg === "--quiet") {
+      quiet = true;
+    } else if (arg === "--no-artifacts") {
+      saveArtifacts = false;
+    } else if (arg.startsWith("-")) {
+      console.warn(`[Warning] 未知のオプションです: "${arg}" (無視されます)`);
+    } else {
+      positionalArgs.push(arg);
+    }
+  }
+
   let matchCount = 20;
-  if (process.argv[2] !== undefined) {
-    const raw = process.argv[2];
-    const parsed = Number(raw);
+  if (positionalArgs[0] !== undefined) {
+    const parsed = Number(positionalArgs[0]);
     if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed < 1) {
-      console.error(`[Error] 不正な matchCount 引数が指定されました: "${raw}" (1以上の整数を指定してください)`);
+      console.error(`[Error] 不正な matchCount 引数が指定されました: "${positionalArgs[0]}" (1以上の整数を指定してください)`);
       process.exit(1);
     }
     matchCount = parsed;
   }
 
   let baseSeed = 42;
-  if (process.argv[3] !== undefined) {
-    const raw = process.argv[3];
-    const parsed = Number(raw);
+  if (positionalArgs[1] !== undefined) {
+    const parsed = Number(positionalArgs[1]);
     if (!Number.isFinite(parsed)) {
-      console.error(`[Error] 不正な baseSeed 引数が指定されました: "${raw}" (有限の数値を指定してください)`);
+      console.error(`[Error] 不正な baseSeed 引数が指定されました: "${positionalArgs[1]}" (有限の数値を指定してください)`);
       process.exit(1);
     }
     baseSeed = parsed;
   }
 
-  console.log("================================================================================");
-  console.log(`  BLACKPOKER BATCH SIMULATION (BaseSeed: ${baseSeed}, Matches: ${matchCount})`);
-  console.log("================================================================================");
+  if (!quiet) {
+    console.log("================================================================================");
+    console.log(`  BLACKPOKER BATCH SIMULATION (BaseSeed: ${baseSeed}, Matches: ${matchCount})`);
+    console.log("================================================================================");
+  }
 
   const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
   const fullPackage = await loadRulePackageFromDirectory(rulesDir);
   const rulePackage = getPlaytestRulePackage(fullPackage);
+
+  const startedAt = new Date().toISOString();
 
   const result = BatchSimulationRunner.run({
     matchCount,
@@ -59,7 +79,10 @@ async function main() {
         p2: new RandomPolicy(new SeededRandom(ctx.playerSeeds.p2), "RandomAI-P2"),
       };
     },
-    onMatchCompleted: (match, progress) => {
+    onMatchCompleted: (match, progress, metrics) => {
+      if (quiet) {
+        return;
+      }
       if (
         progress.completedCount <= 5 ||
         progress.completedCount % 5 === 0 ||
@@ -70,12 +93,17 @@ async function main() {
         const turnsLabel = `Turns: ${String(match.turnCount).padStart(2, " ")}`;
         const decisionsLabel = `Decisions: ${String(match.totalDecisions).padStart(3, " ")}`;
         const hashLabel = match.finalStateHash ? match.finalStateHash.slice(0, 16) : "N/A";
+        const elapsedLabel = metrics
+          ? `Elapsed: ${metrics.matchTotalElapsedMs.toFixed(2)} ms`
+          : "N/A";
         console.log(
-          `[Match ${String(progress.completedCount).padStart(3, " ")}/${progress.totalCount}] ${match.matchId} | ${statusLabel} | Winner: ${winnerLabel} | ${turnsLabel} | ${decisionsLabel} | Hash: ${hashLabel}`
+          `[Match ${String(progress.completedCount).padStart(3, " ")}/${progress.totalCount}] ${match.matchId} | ${statusLabel} | Winner: ${winnerLabel} | ${turnsLabel} | ${decisionsLabel} | Hash: ${hashLabel} | ${elapsedLabel}`
         );
       }
     },
   });
+
+  const finishedAt = new Date().toISOString();
 
   console.log("\n--------------------------------------------------------------------------------");
   console.log("  BATCH SIMULATION SUMMARY (Logical Results)");
@@ -92,7 +120,41 @@ async function main() {
   console.log(`Win Rates:            ${JSON.stringify(result.summary.winRates)}`);
   console.log(`Avg Decisions/Match:  ${result.summary.averageDecisionsPerCompletedMatch}`);
   console.log(`Avg Turns/Match:      ${result.summary.averageTurnsPerCompletedMatch}`);
-  console.log(`Total Execution Time: ${result.runtimeMetrics?.totalExecutionTimeMs ?? "N/A"} ms (Runtime Metrics)`);
+
+  const rm = result.runtimeMetrics;
+  console.log("\n--------------------------------------------------------------------------------");
+  console.log("  RUNTIME TELEMETRY & PERFORMANCE METRICS");
+  console.log("--------------------------------------------------------------------------------");
+  console.log(`Telemetry Version:     ${rm?.runtimeTelemetryVersion ?? "N/A"}`);
+  console.log(`Executed Matches:      ${rm?.executedMatchCount ?? result.matches.length}`);
+  console.log(`Concurrency:           ${rm?.concurrency ?? 1}`);
+  console.log(`Batch Wall-Clock Time: ${rm ? rm.batchWallClockElapsedMs.toFixed(2) : "N/A"} ms`);
+  console.log(`Aggregate Match Lat:   ${rm ? rm.sumMatchTotalElapsedMs.toFixed(2) : "N/A"} ms (Sum of Per-Match Wall-Clock Latencies)`);
+  console.log(`Throughput:            ${rm ? rm.matchesPerSecond.toFixed(2) : "N/A"} matches/sec`);
+  console.log(`Mean Latency / Match:  ${rm ? rm.meanMatchTotalElapsedMs.toFixed(2) : "N/A"} ms`);
+  console.log(`Median Latency / Match:${rm ? rm.medianMatchTotalElapsedMs.toFixed(2) : "N/A"} ms`);
+  console.log(`P95 Latency / Match:   ${rm ? rm.p95MatchTotalElapsedMs.toFixed(2) : "N/A"} ms (Nearest-Rank Method)`);
+  console.log(`Min / Max Latency:     ${rm ? `${rm.minMatchTotalElapsedMs.toFixed(2)} ms / ${rm.maxMatchTotalElapsedMs.toFixed(2)} ms` : "N/A"}`);
+  console.log(`Total Decisions:       ${rm?.totalDecisionCount ?? "N/A"}`);
+  console.log(`Mean Time / Decision:  ${rm ? rm.meanMsPerDecision.toFixed(4) : "N/A"} ms`);
+
+  if (saveArtifacts) {
+    const artifactRes = RuntimeArtifactWriter.write(result, {
+      startedAt,
+      finishedAt,
+    });
+    console.log("\n--------------------------------------------------------------------------------");
+    console.log("  RUNTIME ARTIFACT PERSISTENCE");
+    console.log("--------------------------------------------------------------------------------");
+    console.log(`Artifact Root:  ${artifactRes.runDir}`);
+    console.log(`Run ID:         ${artifactRes.runId}`);
+    console.log(`Summary JSON:   ${artifactRes.summaryPath}`);
+    console.log(`Matches JSONL:  ${artifactRes.matchesPath}`);
+    console.log(`Timing JSONL:   ${artifactRes.timingPath}`);
+    console.log(`Errors JSONL:   ${artifactRes.errorsPath}`);
+  } else {
+    console.log("\n[INFO] Artifact persistence is disabled (--no-artifacts specified).");
+  }
   console.log("================================================================================");
 
   if (result.failures.length > 0) {
