@@ -1,7 +1,7 @@
 # BlackPoker Simulator Genetic Operators Design V1
-# + Runtime Performance Telemetry / Artifact Policy
+# + Runtime Performance Telemetry / Artifact Policy (Follow-up R1)
 
-新規作業ID: `BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1`  
+作業ID: `BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1-R1`  
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -12,6 +12,7 @@
 - `tools/simulator/src/engine/ai/DecisionDNACodec.ts` (Implemented)
 - `tools/simulator/src/domain/ai/PopulationSelectionTypes.ts` (Implemented)
 - `tools/simulator/src/engine/ai/PopulationSelector.ts` (Implemented)
+- `tools/simulator/src/engine/simulation/BatchSimulationRunner.ts` (Implemented)
 
 ---
 
@@ -21,20 +22,16 @@
 
 さらに、今後の大規模自動対戦および世代交代実験において、必要な計算資源と所要時間を正確に見積もり・分析可能とするための **実行時間計測テレメトリ（Runtime Performance Telemetry）** および **実行時成果物保存方針（Runtime Artifact Policy）** を確定する。
 
-### 解決する課題
-1. **交叉（Crossover）の設計**: 23,452 次元の巨大な線形・双線形決定 DNA（Decision DNA）に対して、ゲーム規則非依存（Rule-Agnostic）でありながら既存の特徴量相関を不当に破壊しない交叉方式の選定。
-2. **突然変異（Mutation）の設計**: 数値的発散や `NaN` / `Infinity` を防ぎ、重み空間を連続的かつ安全に探索する変異方式とパラメータ契約。
-3. **自己交配（Self-Mating）の回避とリトライ契約**: トーナメント選択で同一個体が親 A・B に選ばれた場合の安全なハンドリング。
-4. **乱数シード領域分離（Seed Domain Separation）**: 選択シードと遺伝操作シードの干渉を排除し、完全な決定論的再現性を保証。
-5. **エリート継承（Elite Inheritance）の境界**: エリート個体のジェノタイプ（DNA）保存と、**Fitness Score 非継承（世代ごとの再評価必須）** の厳格な分離。
-6. **次世代母集団構成境界**: エリート枠とオフスプリング枠による次世代生成契約（固定値 100 のハードコード排除）。
-7. **実行時間テレメトリ（Runtime Performance Telemetry）**: 1 試合単位の所要時間（`elapsedMs`）、DNA 評価時間、世代全体時間の計測規約。
-8. **実行時成果物方針（Runtime Artifact Policy）**: 大量対戦ログ（JSONL 等）を Git リポジトリに混入させず、ローカル成果物ディレクトリ（`.artifacts/ai-runs/<runId>/`）へ集約・隔離する管理方針。
+### R1 Follow-up における厳格化事項
+1. **1試合の実時間計測境界 (`matchTotalElapsedMs`)**: 単なるシミュレーションループのみでなく、セッション生成・レギュレーションセットアップ等の実コストを含んだ総経過時間を主指標（Canonical Metric）として確立。
+2. **並列実行時のバッチ時間とスループット定義**: 個別試合時間の単純和（`sumMatchTotalElapsedMs`）と実際のバッチ経過時間（`batchWallClockElapsedMs`）を明確に分離し、並列度（`concurrency`）を考慮したスループット計算式を定義。
+3. **Seed Derivation Algorithm の厳密化 (`seed-derivation-v1`)**: 曖昧な文字列ハッシュではなく、純粋 uint32 境界・固定 uint32 ドメインタグ・アバランシェミキサーによる決定論的アルゴリズムと Known Test Vectors を明記。
+4. **Mutation 決定論契約の厳密化 (`deterministic-normal-approx-v1`)**: 初等超越関数（`Math.log`, `Math.sqrt`, `Math.cos`）に依存しない Irwin-Hall / CLT 近似正規分布を採用し、移植性の高い決定論保証境界を確立。非有限値検知時は Fail-Closed で例外停止。
+5. **決定論的 Offspring Identity**: 世代番号とオフスプリングインデックスに基づく決定論的 ID（`gen-000012-offspring-000042`）を確定し、乱数 UUID や時刻依存を完全排除。
 
 > [!IMPORTANT]
 > **本作業のスコープ境界**  
-> 本ドキュメントは **DESIGN ONLY（設計仕様の策定）** であり、Crossover、Mutation、Generation Runner、Evolution Loop のプロダクションコード（TypeScript）の実装は行いません。  
-> ただし、将来の自動対戦ログを Git 管理外とするための `.gitignore` への最小変更（1行追加）のみを許容・実施します。
+> 本ドキュメントは **DESIGN ONLY（設計仕様の確定のみ）** であり、Crossover、Mutation、Generation Runner、Evolution Loop、Telemetry 計測のプロダクションコード（TypeScript）の実装は行いません。
 
 ---
 
@@ -47,7 +44,7 @@
   - 重み構造:
     - `patternWeights`: 143 次元（パターンバイアス）
     - `contextPatternWeights`: 163（コンテキスト特徴量） $\times$ 143（パターン特徴量） = 23,309 次元（行優先フラット配列）
-    - 総重み次元数: 143 + 23,309 = 23,452 次元
+    - 総重み次元数: 143 + 23,309 = **23,452 次元**
     - `metadata`: JSON-safe DTO（スコアリング計算には影響を与えない）
 - **GenomePolicy / GenomeScorer**: 決定論的 Argmax ポリシー。
 - **Outcome-First Fitness Design & Evaluation V1**:
@@ -58,7 +55,7 @@
 - **Population & Tournament Selection V1 + R1**:
   - Population と Fitness は別スナップショットとして管理（DNA への Fitness 直接書き込み禁止）。
   - `VALID` 個体のみが通常選択プール（Standard Selection Pool）の対象。
-  - 決定論的 Mulberry32 トーナメント選択（Provisional Default $k=3$）。
+  - 決定論的 Mulberry32 トーナメント選択（Provisional Default $k=3$、`selectionSeed` 明示入力必須）。
   - エリート選択（Provisional Default $E=1$）。
 
 ### 2.2 遺伝的操作子の基本原則（Rule-Agnostic 原則）
@@ -78,13 +75,13 @@ Crossover および Mutation は、BlackPoker の個別ルールや特定アク�
 
 ### 3.1 本設計のスコープ
 - Crossover オペレータの候補比較、V1 推奨方式、構造的粒度の定義。
-- Mutation オペレータの候補比較、V1 推奨方式、変異パラメータ・数値クランプの定義。
+- Mutation オペレータの候補比較、V1 推奨方式（`deterministic-normal-approx-v1`）、変異パラメータ・数値クランプ・Fail-Closed 契約の定義。
 - Parent Pair 契約と Self-Mating 回避・リトライ規約。
-- Seed Domain Separation（選択用 PRNG と遺伝操作用 PRNG の分離モデル）。
-- Offspring Identity および Lineage（系統情報）の表現形式。
-- Elite Inheritance（ジェノタイプ継承と Fitness 非継承）の境界定義。
+- Seed Domain Separation モデルと `seed-derivation-v1`（アルゴリズム、固定 uint32 タグ、Test Vectors）。
+- 決定論的 Offspring Identity（`gen-000012-offspring-000042`）および Lineage（系統情報）の表現形式。
+- Elite Inheritance（ジェノタイプ完全保存と Fitness 非継承）の境界定義。
 - 次世代 Population 生成境界（`populationSize = eliteCount + offspringCount`）。
-- 実行時間計測テレメトリ（1 試合 `elapsedMs`、集計メトリクス、DNA/世代単位時間）。
+- 実行時間計測テレメトリ（1 試合 `matchTotalElapsedMs` 主指標、setup/simulation 内訳、バッチ時間、並列スループット）。
 - 実行環境・ハードウェア・実験メタデータの構造定義。
 - 実行時成果物の保存レイアウト（`.artifacts/ai-runs/<runId>/`）と Git 除外方針。
 
@@ -175,7 +172,7 @@ export interface GeneticParentPair {
 - **Case 1 に対するリトライ契約**:
   - Selection Pool 内の適格個体数（`validPoolSize`）が 2 以上の場合、親 B の再選択（Retry）を試行する。
   - **最大リトライ回数**: `maxSelfMatingRetries = 3`（Provisional Default）。
-  - リトライ時のシード消費: 派生シードを用いて決定論的に進行する。
+  - リトライ時のシード消費: `deriveSeedV1(offspringSeed, SELF_MATING_RETRY_V1, retryIndex)` を用いて決定論的に進行する。
   - **リトライ枯渇時の動作（Fail-Closed 原則の維持）**:
     - リトライを 3 回繰り返しても同一個体が選ばれ続けた場合、あるいは `validPoolSize === 1` の極限状態の場合、**例外終了（クラッシュ）はさせず、自己交配（Self-Mating）として受容する**。
     - 自己交配の場合、Crossover は実質的に親 A のクローンを出力し、その後の Mutation によって多様性を導入する（無性生殖＋変異モデル）。
@@ -199,18 +196,35 @@ export interface GeneticParentPair {
 
 ## 10. Recommended Mutation V1 (V1推奨突然変異方式)
 
-### 推奨: Per-Gene Gaussian Perturbation with Clamping (クランプ付き各遺伝子ガウス摂動)
+### 推奨: Deterministic Normal-Like Perturbation V1 (`deterministic-normal-approx-v1`)
 
-各重み $w_i$ に対し、独立確率 $p_m$（`mutationRate`）で以下のようにガウスノイズを加算する。
+各重み $w_i$ に対し、独立確率 $p_m$（`mutationRate`）で決定論的正規分布近似ノイズを加算する。
 
-$$w'_i = \text{clamp}(w_i + \mathcal{N}(0, \sigma^2), -W_{\text{max}}, +W_{\text{max}})$$
+$$w'_i = \text{clamp}(w_i + \delta_i, \text{mutationClampMin}, \text{mutationClampMax})$$
 
-ここで、$\mathcal{N}(0, \sigma^2)$ は決定論的擬似乱数から Box-Muller 変換により生成される標準正規分布乱数に $\sigma$（`mutationSigma`）を乗じた値である。
+ここで、摂動量 $\delta_i$ は **初等超越関数（`Math.log`, `Math.sqrt`, `Math.cos` 等）を使用しない Irwin-Hall / 中心極限定理（CLT）整数和近似アルゴリズム** により算出する。
 
-#### 選定理由
-1. **局所探索の連続性**: 既存の優れた重み値の近傍を探索できるため、破壊的なランダム置換（Replacement）に比べて進化的改善が蓄積しやすい。
-2. **大域的探索の共存**: ガウス分布の裾野により、稀に大きな重み変動が発生し、局所解からの脱出が可能。
-3. **クランプによる安全性**: 極端な値の発散を物理的に防止する。
+#### 10.1 整数 PRNG による正規分布近似アルゴリズム
+Mulberry32 PRNG から 16-bit 整数乱数 $u_k \in [0, 65535]$ を 12 個生成する:
+
+$$S = \sum_{k=1}^{12} u_k$$
+
+期待値オフセット:
+$$E[S] = 12 \times 32767.5 = 393,210 \quad (\text{完全な整数})$$
+
+分散および標準偏差:
+$$V[S] = 12 \times \frac{65536^2 - 1}{12} \approx 65536^2 \implies \sigma_S \approx 65536$$
+
+正規化近似値:
+$$\text{normalApprox} = \frac{S - 393210}{65536}$$
+
+摂動量:
+$$\delta_i = \text{mutationSigma} \times \text{normalApprox}$$
+
+#### 10.2 選定理由
+1. **移植性と決定論性（Transcendental Math の排除）**: Box-Muller で使用される `Math.log` や `Math.cos` は、CPU アーキテクチャ（x86 vs ARM）や JS エンジンの実装差により最下位ビット（ULP）の微小差が生じる可能性がある。本近似方式は 32-bit 整数加算・乗算のみで完結するため、環境を跨いだ完全な再現性を担保できる。
+2. **計算効率**: 超越関数呼び出しがなく、高速な整数加算 12 回で済むため、23,452 次元の変異処理を極めて低コストで実行できる。
+3. **有界性**: 出力は厳密に $[-6, +6] \times \sigma$ の範囲に収まるため、極端な特異点が発生しない。
 
 ---
 
@@ -221,30 +235,43 @@ V1 における突然変異パラメータおよびそのエンジニアリン�
 | パラメータ名 | 型 | Provisional Default | 意味と役割 |
 | :--- | :--- | :--- | :--- |
 | `mutationRate` ($p_m$) | `number` | `0.01` (1.0%) | 各重みが変異対象となる確率。全 23,452 重みのうち平均約 234 個が変異。 |
-| `mutationSigma` ($\sigma$) | `number` | `0.05` | ガウスノイズの標準偏差。重みの微小調整に適した摂動規模。 |
+| `mutationSigma` ($\sigma$) | `number` | `0.05` | 摂動規模（標準偏差相当）。重みの微小調整に適した規模。 |
 | `mutationClampMin` | `number` | `-10.0` | 変異後の重み下限値。 |
 | `mutationClampMax` | `number` | `+10.0` | 変異後の重み上限値。 |
 
-> [!NOTE]
-> これらのデフォルト値は初期設計用の仮値（Provisional Engineering Defaults）であり、「最適値」と断定するものではない。BlackPoker の実戦における適正値は、将来の自己対戦ベンチマーク実験によって調整・確立する。
+### 11.1 変異発生判定の uint32 閾値規約
+浮動小数点比較の丸め誤差を排除するため、変異判定は 32-bit 整数空間で厳密に行う:
+
+$$\text{threshold} = \lfloor \text{mutationRate} \times 4294967296 \rfloor$$
+
+Mulberry32 から得られた 32-bit 符号なし整数 `randomUint32` に対し:
+$$\text{randomUint32} < \text{threshold} \implies \text{変異実行}$$
+
+- **境界挙動**:
+  - `mutationRate = 0`: $\text{threshold} = 0$ となり、いかなる乱数値に対しても変異は発生しない（変異率 0% 保証）。
+  - `mutationRate = 1`: $\text{threshold} = 4294967296$ となり、全遺伝子で無条件に変異が発生する（変異率 100% 保証）。
+
+### 11.2 パラメータ制約
+設定検証において、必ず $\text{mutationClampMin} < \text{mutationClampMax}$ であることを検証する。
 
 ---
 
-## 12. Numeric Safety & Weight Clamping (数値安全性と重みクランプ)
+## 12. Numeric Safety & Weight Clamping (数値安全性と Fail-Closed 契約)
 
-### 12.1 不正数値の完全排除
-突然変異および交叉処理の出力において、以下の値が発生することは厳格に禁止される:
+### 12.1 不正数値の完全排除と Fail-Closed 規約
+突然変異および交叉処理の出力において、以下の非有限値が発生することは厳格に禁止される:
 - `NaN`
 - `Infinity`
 - `-Infinity`
 
+> [!IMPORTANT]
+> **非有限値検知時の Fail-Closed 契約**  
+> 演算途中で万一非有限値が検出された場合、**元の重みへサイレントにフォールバック（隠蔽）してはならず**、直ちに `GeneticOperatorError` をスローして安全に処理を中断・失敗（Fail-Closed）させなければならない。
+
 ### 12.2 重みクランプ契約
 - 加算結果が上限値 `+10.0` を超えた場合は `+10.0` へクランプする。
 - 加算結果が下限値 `-10.0` を下回った場合は `-10.0` へクランプする。
-- 浮動小数点演算の誤差により万一非有限値（Non-finite）が検出された場合は、変異前の元の重み値を保持するか、安全に例外を送出してフェイルクローズする。
-
-### 12.3 既存 DecisionDNACodec との完全整合
-生成されたオフスプリング DNA は、既存の `DecisionDNACodec.validateDecisionDNA()` の契約を 100% 満たす。新たな重複したバリデーション体系は構築せず、既存の公式スキーマ定義に従う。
+- 既存の `DecisionDNACodec.validateDecisionDNA()`（全要素が有限浮動小数点数であること）と 100% 整合する。
 
 ---
 
@@ -260,64 +287,109 @@ crypto.randomUUID()
 環境時刻・プロセスPIDに基づく非決定論的乱数
 ```
 
-### 乱数生成器の契約
+### 13.1 乱数生成器の契約
 - 32-bit 整数のシード値 `geneticSeed` を入力として受け取る。
 - 既存の `PopulationSelector` やシミュレータコアと同様に、**Mulberry32 PRNG** アルゴリズムを使用する。
-- 同一の親ペア、同一のオペレータ設定、同一の `geneticSeed` が与えられた場合、生成されるオフスプリング DNA の全 23,452 重みは **ビット単位で 100% 完全一致** しなければならない。
+
+### 13.2 決定論保証境界（Determinism Scope）
+- **同一ランタイム・同一プラットフォーム**: 同一の親ペア、同一の設定、同一の `geneticSeed`、同一の `seed-derivation-v1`、同一のオペレータバージョンであれば、生成されるオフスプリング DNA の全 23,452 重みは **ビット単位で 100% 完全一致** する。
+- **クロスプラットフォーム（x86 vs ARM 等）**: `deterministic-normal-approx-v1` は初等超越関数を含まないため、標準的な IEEE 754 準拠環境において極めて高い再現性を維持する。
 
 ---
 
-## 14. Seed Domain Separation Model (シード領域分離モデル)
+## 14. Seed Domain Separation Model & `seed-derivation-v1`
 
 Selection の乱数ストリームと、Genetic Operators の乱数ストリームを同一の線形乱数消費列で暗黙共有してはならない。
 
-```mermaid
-flowchart TD
-    GenSeed["generationSeed (uint32)"]
-    
-    GenSeed -->|Domain Hash: 'selection'| SelSeed["selectionSeed (uint32)"]
-    GenSeed -->|Domain Hash: 'offspring_0'| OffSeed0["offspringSeed[0] (uint32)"]
-    GenSeed -->|Domain Hash: 'offspring_1'| OffSeed1["offspringSeed[1] (uint32)"]
-    GenSeed -->|Domain Hash: 'offspring_i'| OffSeedI["offspringSeed[i] (uint32)"]
+### 14.1 既存ユーティリティの整理と位置づけ
+既存コードベースには、対戦シミュレーション用の `DeterministicShuffle.deriveSeed` および `BatchSimulationRunner.deriveSeed` が存在する。これらは文字列テンプレート結合（`${baseSeed}:${streamKey}`）と FNV-1a を用いている。
+AI 進化・遺伝操作においては、文字列アロケーションオーバーヘッドおよびエンコーディング曖昧性を完全に排除するため、純粋な uint32 ワード境界の **`seed-derivation-v1`** を正式定義する。
 
-    SelSeed --> Tourney["Tournament Selection Pool"]
-    
-    subgraph OffspringStream["Offspring i PRNG Stream"]
-        OffSeedI --> CrossPRNG["Crossover PRNG (Px判定)"]
-        CrossPRNG --> MutPRNG["Mutation PRNG (Pm判定, Box-Muller)"]
-    end
+### 14.2 `seed-derivation-v1` アルゴリズム仕様
+入力は 3 つの 32-bit 符号なし整数（`parentSeed`, `domainTag`, `index`）を受け取り、決定論的に 1 つの 32-bit 符号なし整数を出力する。
 
-    style GenSeed fill:#f9f,stroke:#333
-    style SelSeed fill:#bbf,stroke:#333
-    style OffSeedI fill:#dfd,stroke:#333
+```typescript
+export function deriveSeedV1(
+  parentSeed: number,
+  domainTag: number,
+  index: number
+): number {
+  let h = 2166136261 >>> 0; // FNV-1a 32-bit offset basis
+
+  // Word 1: parentSeed
+  h ^= (parentSeed >>> 0);
+  h = Math.imul(h, 16777619) >>> 0; // FNV-1a prime
+
+  // Word 2: domainTag
+  h ^= (domainTag >>> 0);
+  h = Math.imul(h, 16777619) >>> 0;
+
+  // Word 3: index
+  h ^= (index >>> 0);
+  h = Math.imul(h, 16777619) >>> 0;
+
+  // Final Avalanche Mixer (Murmur3 fmix32)
+  h ^= h >>> 16;
+  h = Math.imul(h, 0x85ebca6b) >>> 0;
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35) >>> 0;
+  h ^= h >>> 16;
+
+  return h >>> 0;
+}
 ```
 
-### 領域分離の利点
-1. **局所変更の隔離**: 交叉率や変異率を変更しても、親の選択結果（Tournament Selection の当選系列）が一切変化しない。
-2. **個体ごとの独立再現**: オフスプリング $i$ の生成は `offspringSeed[i]` のみに依存するため、並列計算環境でもシード消費順序の競合による非決定論が発生しない。
+### 14.3 固定 uint32 ドメインタグ定義
+文字列ハッシュではなく、明確な 32-bit 定数タグを使用する:
+
+| タグ定数名 | 16進数値 (uint32) | 意味・ASCII表現 |
+| :--- | :--- | :--- |
+| `SELECTION_V1` | `0x53454c31` | トーナメント選択用乱数ストリーム (`"SEL1"`) |
+| `OFFSPRING_V1` | `0x4f464631` | 子個体生成（交叉・変異）用乱数ストリーム (`"OFF1"`) |
+| `SELF_MATING_RETRY_V1` | `0x534d5231` | 自己交配回避リトライ用乱数ストリーム (`"SMR1"`) |
+
+### 14.4 Known Test Vectors (実装時検証用テストベクトル)
+以下のテストベクトルを Canonical Reference として定義する:
+
+1. `deriveSeedV1(12345, 0x53454c31, 0) === 792183663` (`0x2f37bf6f`)
+2. `deriveSeedV1(12345, 0x4f464631, 0) === 2335402472` (`0x8b3359e8`)
+3. `deriveSeedV1(12345, 0x4f464631, 1) === 3485246005` (`0xcfbd7235`)
+4. `deriveSeedV1(0, 0x53454c31, 0) === 791699075` (`0x2f305a83`)
+5. `deriveSeedV1(2335402472, 0x534d5231, 0) === 76806788` (`0x0493f484`)
 
 ---
 
 ## 15. Offspring Identity / Lineage (子個体識別と系統追跡契約)
 
-新たに生成されたオフスプリングは、両親とは異なる一意のゲノム識別子（`genomeId`）を付与される。
+### 15.1 決定論的 Offspring genomeId 規約
+世代スナップショットの完全な再現性を保証するため、`genomeId` に `randomUUID` やタイムスタンプを使用してはならない。
 
-### 15.1 最小系統メタデータ（Lineage Contract）
-オフスプリングの `metadata`（`DecisionDNAMetadata`）には、将来の系統追跡・可視化に必要な最小限の情報を記録可能とする。
+- **フォーマット**: `gen-${pad(generation, 6)}-offspring-${pad(offspringIndex, 6)}`
+- **具体例**:
+  - 世代 12 の 0 番目の子: `gen-000012-offspring-000000`
+  - 世代 12 の 42 番目の子: `gen-000012-offspring-000042`
+
+### 15.2 エリート個体の Identity
+- エリート個体は新規 Offspring ではなく既存 genotype の継続であるため、**既存の `genomeId` をそのまま維持** する。
+- 一方、`PopulationEntry.generation` は新世代番号（$g+1$）へ更新される。
+- これにより、同一 DNA が複数世代にわたって生き残っていることが ID から透過的に追跡可能となる。
+
+### 15.3 系統メタデータ (Lineage Contract)
+オフスプリングの `metadata`（`DecisionDNAMetadata`）には、以下を記録可能とする:
 
 ```typescript
 export interface OffspringLineageMetadata {
   readonly genomeId: string;
   readonly generation: number;
+  readonly offspringIndex: number;
   readonly parentGenomeIds: readonly string[]; // [parentAId, parentBId] または [parentAId]
-  readonly crossoverOperator: "block-uniform-v1" | "none";
-  readonly mutationOperator: "gaussian-perturbation-v1" | "none";
+  readonly crossoverOperatorVersion: "block-segmented-uniform-v1" | "none";
+  readonly mutationOperatorVersion: "deterministic-normal-approx-v1" | "none";
+  readonly seedDerivationVersion: "seed-derivation-v1";
   readonly geneticSeed: number;
 }
 ```
-
-> [!NOTE]
-> 巨大な家系図データベースや全世代の DNA 差分ツリーをオンメモリに保持することは非目標とする。各個体が自身の直前の親 ID と適用オペレータを自己完結的に保持する軽量構造に留める。
+※ Fitness スコアは系統メタデータには記録しない。
 
 ---
 
@@ -340,9 +412,6 @@ Fitness Non-Inheritance:
   Fitness_{elite}(g+1) = Evaluate(DNA_{elite}(g+1), Context(g+1))
   ※ Fitness(g) の持ち越しは厳禁
 ```
-
-### 16.2 理由
-自己対戦環境においては、集団全体の DNA 構成が世代ごとに変化するため、同一の DNA であっても世代 $g$ と世代 $g+1$ で測定される適応度（Measured Fitness）は本質的に異なり得る。過去のスコアを持ち越すことは評価コンテキストの一貫性を破壊する。
 
 ---
 
@@ -368,17 +437,11 @@ $$\text{populationSize} = \text{eliteCount} + \text{offspringCount}$$
 多様性指標（遺伝的距離、行動エントロピー、ユニーク手番率等）を、**Fitness スコアや Selection スコアに直接加算・混合することは厳禁**とする。
 BlackPoker の進化適応度は、あくまで「対戦結果（Outcome）」のみによって決定されなければならない（Outcome-First 原則）。
 
-### 18.2 許容される多様性制御手段（将来の探索空間）
-- 突然変異率（`mutationRate`）および摂動規模（`mutationSigma`）の動的調整。
-- 重複個体（同一 DNA）の検出とトーナメント選択プールでの抑制。
-- トーナメントサイズ $k$ の調整による選択圧力の緩和。
-- これらはすべてオペレータおよび選択アルゴリズムのパラメータ制御として行い、評価関数は汚染しない。
-
 ---
 
 ## 19. Runtime Performance Telemetry Principles (実行時間計測の基本方針)
 
-今後、世代交代や大規模自己対戦を安定して運用するためには、「1 世代に何分かかるのか」「10,000 試合を回すのに何時間必要か」を正確に予測・把握できなければならない。
+「1 試合に何 ms かかったか」「100 万試合を回すのに何時間必要か」を正確に予測・把握できなければならない。
 
 ### 19.1 最重要原則
 1. **観測専用（Observation Only）**: 計測された実行時間（Elapsed Time）は、テレメトリおよび計算資源見積もり専用であり、**ゲームロジック、意思決定、Fitness 計算、選択処理には 1 ピコ秒たりとも影響を与えてはならない**。
@@ -389,13 +452,24 @@ BlackPoker の進化適応度は、あくまで「対戦結果（Outcome）」�
 
 ## 20. Match Timing Contract (1試合単位の計測仕様)
 
-### 20.1 1 試合の定義と計測境界
-- **計測開始点**: `GameSession` の対戦ループ実行直前（初期化完了直後）。
-- **計測終了点**: 対戦終了判定（勝利、引き分け、最大手数到達、または例外発生）直後。
-- ログ書き込み時間や世代セットアップ時間は含めない。
+### 20.1 主指標: `matchTotalElapsedMs` (Canonical Metric)
+将来の対戦計算時間の見積もり（$\text{Total Time} \approx N \times \text{meanMatchTotalElapsedMs}$）に用いる Canonical Metric は **`matchTotalElapsedMs`** とする。
 
-### 20.2 Match Timing Record の構造
-各試合の実行結果ログには、最低限以下のフィールドを含める。
+- **計測開始境界**: 1 試合に必要な処理の開始（Session 生成 / Match Setup 呼び出し直前）。
+- **計測終了境界**: シミュレーションが完了し、最終 Match Result / Status が確定した直後。
+- **内訳指標**:
+  - `matchTotalElapsedMs`: **必須**。1 試合の全処理ウォールクロック時間。
+  - `simulationElapsedMs`: **推奨・準必須**。`GameSession.step()` ループ純粋実行時間。
+  - `setupElapsedMs`: **推奨 / オプション**。Session 生成・Regulation セットアップ所要時間。
+  - 関係式: `matchTotalElapsedMs >= setupElapsedMs + simulationElapsedMs`（フレームワークの微小オーバーヘッドを許容）。
+
+### 20.2 FAILED / INCOMPLETE における計測保持
+- `COMPLETED` だけでなく、`INCOMPLETE`（手数上限到達中断）や `FAILED`（例外発生）の全試合で必ず `matchTotalElapsedMs` を記録する。
+- 例外発生時も try-finally により Timing Record を欠落させない。
+
+### 20.3 ログ I/O コストの分離
+- 個別試合の `matchTotalElapsedMs` からは、ディスクへの生ログ書き込み（I/O）所要時間を原則除外する。
+- これにより、純粋な計算コストと I/O コストを分離して評価できる。
 
 ```typescript
 export interface MatchTimingRecord {
@@ -406,52 +480,66 @@ export interface MatchTimingRecord {
   readonly participantBId: string;
   readonly seatAssignment: "P1_A_P2_B" | "P1_B_P2_A";
   readonly status: "COMPLETED" | "INCOMPLETE" | "FAILED";
-  readonly elapsedMs: number;       // 高精度浮動小数点（ミリ秒）
-  readonly decisionCount: number;  // 実行された意思決定手数
+  readonly matchTotalElapsedMs: number;  // 主指標
+  readonly simulationElapsedMs?: number; // 内訳: シミュレーションループ時間
+  readonly setupElapsedMs?: number;      // 内訳: セットアップ時間
+  readonly decisionCount: number;        // 手数
 }
 ```
-
-> [!IMPORTANT]
-> **すべてのステータスで計測**: `COMPLETED` だけでなく、`INCOMPLETE`（手数上限中断）や `FAILED`（エラー）の試合においても `elapsedMs` を必ず記録する。これにより、異常な長時間化やクラッシュ箇所の性能的特定が可能となる。
 
 ---
 
 ## 21. Batch / DNA / Generation Timing (バッチ・DNA・世代単位の集計仕様)
 
-### 21.1 バッチ集計メトリクス（Batch Timing Summary）
-一定の対戦バッチ終了時に、以下の統計量を集計・記録する。
+### 21.1 バッチ時間メトリクスの分離（Finding 2）
+並列実行（`concurrency > 1`）において、個別試合時間の単純和とバッチ全体の経過時間は一致しないため、用語を厳格に分離する:
 
+- **`sumMatchTotalElapsedMs`**: $\sum_{i=1}^{M} \text{matchTotalElapsedMs}_i$（全試合の累積処理時間、CPU 換算仕事量）。
+- **`batchWallClockElapsedMs`**: バッチ開始から全試合終了・集計完了までの実際のウォールクロック経過時間。
+- **スループット計算式**:
+  $$\text{matchesPerSecond} = \frac{\text{matchCount}}{\text{batchWallClockElapsedMs} / 1000}$$
+  ※ 並列実行時に `sumMatchTotalElapsedMs` を分母として用いることは厳禁。
+
+### 21.2 バッチ集計メトリクス一覧
+一定の対戦バッチ終了時に、以下の統計量を集計・記録する:
 - `matchCount`: 総試合数
-- `completedCount`: 正常完了数
-- `incompleteCount`: 手数上限到達等の中断数
-- `failedCount`: 例外・エラー数
-- `totalElapsedMs`: バッチ内試合の累積実行時間（ミリ秒）
-- `meanElapsedMs`: 試合所要時間の算術平均
-- `medianElapsedMs`: 中央値（p50）
-- `p95ElapsedMs`: 95 パーセンタイル
-- `minElapsedMs`: 最小時間
-- `maxElapsedMs`: 最大時間
-- `matchesPerSecond`: 秒間処理試合数（スループット）
-- `totalDecisionCount`: 総意思決定手数
-- `meanMsPerDecision`: 1 手番あたりの平均所要時間
+- `completedCount`, `incompleteCount`, `failedCount`: 状態別試合数
+- `sumMatchTotalElapsedMs`: 個別試合時間の総和
+- `batchWallClockElapsedMs`: バッチの実ウォールクロック経過時間
+- `meanMatchTotalElapsedMs`: 算術平均 (`sumMatchTotalElapsedMs / matchCount`)
+- `medianMatchTotalElapsedMs`: 中央値 (p50)
+- `p95MatchTotalElapsedMs`: 95 パーセンタイル
+- `minMatchTotalElapsedMs`, `maxMatchTotalElapsedMs`: 最小・最大時間
+- `matchesPerSecond`: 秒間処理試合数
+- `concurrency`: 実行並列度
 
-### 21.2 DNA 評価単位の時間（DNA Evaluation Timing）
-1 個の DNA を評価するために複数試合を実行する場合、個体ごとの総評価時間 `evaluationElapsedMs` を記録可能とする。これにより、母集団 100 個体の評価時間の外挿が可能となる。
-
-### 21.3 世代全体時間（Generation Timing）
-世代交代ループ 1 サイクル全体の経過時間を記録する。
-- `generationElapsedMs`（必須）: 世代開始から次世代母集団生成までの総ウォールクロック時間。
-- 内訳（推奨）:
-  - `evaluationElapsedMs`: 対戦実行フェーズ
-  - `fitnessElapsedMs`: 適応度集計フェーズ
-  - `selectionElapsedMs`: 親選択フェーズ
-  - `geneticOperatorsElapsedMs`: 交叉・変異・次世代生成フェーズ
+### 21.3 `run-summary.json` 必須出力項目
+```json
+{
+  "runId": "20261013T090000Z-gen001",
+  "buildSha": "09b26c9452b1ee516f3cc30c6ee3d1d03fe93395",
+  "buildRef": "BlackPoker/issue551-core-flow",
+  "startedAt": "2026-10-13T09:00:00.000Z",
+  "finishedAt": "2026-10-13T09:02:30.000Z",
+  "matchCount": 1000,
+  "completedCount": 998,
+  "incompleteCount": 2,
+  "failedCount": 0,
+  "sumMatchTotalElapsedMs": 95400.5,
+  "batchWallClockElapsedMs": 14200.2,
+  "meanMatchTotalElapsedMs": 95.4,
+  "medianMatchTotalElapsedMs": 92.1,
+  "p95MatchTotalElapsedMs": 138.5,
+  "minMatchTotalElapsedMs": 62.0,
+  "maxMatchTotalElapsedMs": 280.4,
+  "matchesPerSecond": 70.42,
+  "concurrency": 8
+}
+```
 
 ---
 
 ## 22. Execution Environment & Hardware Metadata (実行環境・ハードウェアメタデータ仕様)
-
-実行速度のベンチマーク比較を意味あるものにするため、各実行ラン（Run）のメタデータとして以下を記録する。
 
 ```typescript
 export interface ExecutionEnvironmentMetadata {
@@ -466,22 +554,6 @@ export interface ExecutionEnvironmentMetadata {
 }
 ```
 
-```typescript
-export interface ExperimentMetadata {
-  readonly regulationId: string;
-  readonly frameId: string;
-  readonly rulePackageId: string;
-  readonly rulePackageVersion: string;
-  readonly populationSize: number;
-  readonly matchesPerParticipant: number;
-  readonly maxDecisionsPerMatch: number;
-  readonly seedScheduleIdentity: string;
-}
-```
-
-> [!NOTE]
-> メタデータ取得は Node.js 標準 API（`os`, `process`）のみを使用し、Python や OS 固有の外部コマンドに依存しない。
-
 ---
 
 ## 23. Runtime Artifact Policy (実行時成果物方針)
@@ -495,14 +567,11 @@ export interface ExperimentMetadata {
   - ベンチマーク詳細時間ログ（`timing.jsonl`）
   - エラーダンプ（`errors.jsonl`）
   - 大量対戦の集計ファイル（`run-summary.json`）
-- **成果物ルート**: `tools/simulator/.artifacts/`
-- **Git 除外設定**: ルートの `.gitignore` に `tools/simulator/.artifacts/` を追加し、意図しないコミットを物理的に防止する。
+- **成果物ルート**: `tools/simulator/.artifacts/`（`.gitignore` に登録済み）。
 
 ---
 
 ## 24. Artifact Layout (.artifacts/ai-runs/<runId>/)
-
-実行時成果物は、一意のラン識別子（`runId`、例: `20261013T090000Z-gen001`）を持つディレクトリ内に整理・出力される。
 
 ```text
 tools/simulator/.artifacts/ai-runs/<runId>/
@@ -512,21 +581,13 @@ tools/simulator/.artifacts/ai-runs/<runId>/
 └── errors.jsonl                 # 発生したエラー・例外スタック（0件の場合は空）
 ```
 
-### JSONL 形式の採用理由
-1. **ストリーミング追記**: 1 試合終了ごとに 1 行ずつ追記（Append）できるため、10 万試合の対戦でも全件をメモリに保持する必要がない。
-2. **クラッシュ耐性**: プロセスが途中で中断しても、直前の完了試合までのログがディスク上に完全に残る。
-
 ---
 
 ## 25. Git Policy (厳格なGit非コミット方針)
 
-### 25.1 コミット境界の厳格な分離
-- 自動対戦ログはローカル環境および CI 実行環境でのみ生成・保持される。
-- Independent Review やエビデンス確認において生ログが必要とされる場合であっても、ファイルを Git にコミットしてプッシュしてはならない。
-
-### 25.2 Independent Review への成果物伝達契約
-Antigravity が自己対戦やベンチマークを実行した場合、最終報告チャットにおいて以下の情報を明記する:
-- **Artifact Root**: 相対パスまたは絶対パス（例: `tools/simulator/.artifacts/ai-runs/<runId>/`）
+### 25.1 Independent Review への成果物伝達契約
+自己対戦やベンチマークを実行した場合、最終報告チャットにおいて以下の情報を明記する:
+- **Artifact Root**: `tools/simulator/.artifacts/ai-runs/<runId>/`
 - **Run ID**: ラン識別子
 - **生成ファイル一覧**: `run-summary.json`, `matches.jsonl` 等
 - **主要集計サマリ**: `run-summary.json` の主要抜粋
@@ -547,39 +608,58 @@ Antigravity が自己対戦やベンチマークを実行した場合、最終�
 
 ### Case C: 同一 genomeId の親ペア (自己交配)
 - **条件**: トーナメント選択で同一個体（ID: `genome-001`）が親 A と親 B の両方に選出。母集団内の適格個体数は 5 個体。
-- **動作**:
-  1. `parentA.genomeId === parentB.genomeId` を検知。
-  2. 親 B の再選択（Retry）を実行。
-  3. 最大 3 回のリトライで異なる親 B（例: `genome-004`）が選ばれれば正常に交配。
-  4. 万一 3 回連続で `genome-001` が選ばれ続けた場合は、例外停止せず自己交配を受容し、親 A の変異クローンを出力する（無性生殖）。適格でない個体へのフォールバックは絶対に行わない。
+- **動作**: 親 B の再選択（Retry）を実行（最大 3 回）。リトライ枯渇時も例外停止せず自己交配を受容し、親 A の変異クローンを出力する。適格でない個体へのフォールバックは絶対に行わない。
 
 ### Case D: エリート個体の継承
 - **条件**: 世代 $g$ で最高適応度（$0.85$）を記録した個体 `genome-elite`。
-- **動作**:
-  - ジェノタイプ（DNA 重み）は変異・交叉を一切受けず、そのまま世代 $g+1$ に引き継がれる。
-  - 前世代の適応度スコア $0.85$ は破棄され、世代 $g+1$ の母集団との対戦によってゼロから再評価される。
+- **動作**: ジェノタイプ（DNA 重み）はそのまま世代 $g+1$ に引き継がれるが、前世代の適応度スコア $0.85$ は破棄され、ゼロから再評価される。
 
-### Case E: 突然変異による非有限値の発生防止
-- **条件**: 既存の重みが $+9.98$ のとき、ガウス変異により $+0.08$ が加算される。
-- **動作**: 合計 $+10.06$ はクランプ上限 $+10.0$ により安全にクランプされ、`+10.0` が出力される。`NaN` や `Infinity` の発生は完全に防止される。
+### Case E: 突然変異による非有限値の発生防止 (Fail-Closed)
+- **条件**: 変異計算過程で `NaN` や `Infinity` が検出された場合。
+- **動作**: サイレントフォールバックを行わず、直ちに `GeneticOperatorError` をスローして安全に処理を中断する。
 
 ### Case F: 100 試合の実行時間集計
-- **条件**: 100 試合のバッチ対戦が実行され、各試合の `elapsedMs` が記録される。
-- **動作**:
-  - `totalElapsedMs`（例: 12,450 ms）、`meanElapsedMs`（124.5 ms）、`medianElapsedMs`（118.0 ms）、`p95ElapsedMs`（185.2 ms）、`minElapsedMs`（82.0 ms）、`maxElapsedMs`（240.0 ms）が決定論的に算出・出力される。
+- **条件**: 100 試合のバッチ対戦が実行され、各試合の `matchTotalElapsedMs` が記録される。
+- **動作**: `sumMatchTotalElapsedMs`, `meanMatchTotalElapsedMs`, `medianMatchTotalElapsedMs`, `p95MatchTotalElapsedMs` 等が集計・出力される。
 
 ### Case G: 同一 Seed・異なるハードウェア環境での実行
 - **条件**: 同一の対戦シード系列を用いて、PC A（Intel Core i7）と PC B（Apple M2）で対戦を実行。
-- **結果**:
-  - 勝敗結果、ターン数、手番行動などのゲーム論理結果は 100% 完全一致する（Game Determinism 保証）。
-  - `elapsedMs` は CPU 性能やクロック周波数に応じて異なる値となる（Timing の非決定論性の受容）。
+- **結果**: ゲーム論理結果は 100% 完全一致するが、`matchTotalElapsedMs` はハードウェア性能に応じて異なる（Timing の非決定論性の受容）。
 
 ### Case H: 並列度 1 vs 並列度 8 (Concurrency の区別)
 - **条件**: 800 試合を実行。Case H1 は `concurrency = 1`、Case H2 は `concurrency = 8`。
+- **動作**: 1 試合あたりの個別レイテンシ（`meanMatchTotalElapsedMs`）は約 120 ms で同等だが、バッチ全体のウォールクロック時間（`batchWallClockElapsedMs`）は Case H1 で約 96 秒、Case H2 で約 15 秒となる。
+
+### Case I: 1 試合の実時間内訳と将来計算時間算出 (Finding 1)
+- **条件**: 1 試合の計測において、`setupElapsedMs = 5.2 ms`, `simulationElapsedMs = 94.8 ms`。
 - **動作**:
-  - 1 試合あたりの個別レイテンシ（`meanElapsedMs`）は約 120 ms で同等。
-  - しかし全体の経過時間（Wall-clock time）は、Case H1 が約 96 秒であるのに対し、Case H2 は約 15 秒となる。
-  - メタデータに `concurrency` が記録されているため、総計算時間と並列スループットを混同せずに正確に見積もることが可能となる。
+  - `matchTotalElapsedMs = 100.0 ms` として記録される。
+  - 将来の計算量見積もり（例: 1,000,000 試合）には、シミュレーション時間（94.8 ms）ではなく、セッション生成コストを含んだ **100.0 ms** を使用する（$1,000,000 \times 100.0\text{ ms} = 100,000\text{ 秒} \approx 27.78\text{ 時間}$）。
+
+### Case J: 並列バッチスループット算出 (Finding 2)
+- **条件**: 100 試合を `concurrency = 8` で実行。`sumMatchTotalElapsedMs = 10,000 ms`, `batchWallClockElapsedMs = 1,500 ms`。
+- **動作**:
+  - 正しいスループット: $\text{matchesPerSecond} = 100 / (1500 / 1000) = 66.67\text{ matches/sec}$。
+  - 誤った計算式（$100 / (10000 / 1000) = 10$）は使用しない。
+
+### Case K: シード導出の決定論性 (Finding 3)
+- **条件**: `generationSeed = 12345` に対し、`deriveSeedV1` を実行。
+- **動作**:
+  - `deriveSeedV1(12345, 0x53454c31, 0)` は常に `792183663` を返却。
+  - `deriveSeedV1(12345, 0x4f464631, 0)` は常に `2335402472` を返却。
+  - Known Test Vectors と完全一致する。
+
+### Case L: 同一親・同一 geneticSeed・同一オペレータバージョン (Finding 4)
+- **条件**: 同一の親ペア、同一の `geneticSeed`、オペレータバージョン `deterministic-normal-approx-v1`。
+- **動作**: 生成されるオフスプリング DNA の重み配列は 100% 同一となる。
+
+### Case M: 同一親・異なるハードウェア環境 (Finding 4)
+- **条件**: PC A（x86_64）と PC B（ARM64）で同一の入力からオフスプリングを生成。
+- **動作**: 超越関数を排除した整数和正規分布近似により、定義された決定論スコープ内で同一の DNA を再現する。
+
+### Case N: 同一 Generation Build Input と決定論的 genomeId (Finding 5)
+- **条件**: 世代 12 において 100 個体を生成。
+- **動作**: オフスプリング ID は常に `gen-000012-offspring-000000` から `gen-000012-offspring-000098` までの完全同一の決定論的文字列系列となる。
 
 ---
 
@@ -595,7 +675,7 @@ Antigravity が自己対戦やベンチマークを実行した場合、最終�
 ## 28. Open Questions (将来の検討課題)
 
 1. **双線形相互作用ブロックの局所構造保存**:
-   - 行優先フラット配列の完全一様交叉では、同一コンテキスト行（特定の戦況下での 143 パターンに対する相対重み）の相関が崩れやすい可能性がある。将来、行単位の交叉（Row-wise Uniform Crossover）を比較実験すべきか。
+   - 行優先フラット配列の完全一様交叉では、同一コンテキスト行の相関が崩れやすい可能性がある。将来、行単位の交叉（Row-wise Uniform Crossover）を比較実験すべきか。
 2. **自己適応型突然変異（Self-Adaptive Mutation Rate）**:
    - 世代経過に伴い進化が停滞した場合に変異率 $\sigma$ や $p_m$ を自動調整する仕組みを導入すべきか。
 3. **同義 DNA（クローン）の検出コスト**:

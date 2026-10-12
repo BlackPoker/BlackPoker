@@ -427,16 +427,17 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **推奨アルゴリズム**: トーナメント選択（Tournament Selection, Provisional Engineering Default $k = 3$, Seeded Deterministic PRNG）。
    - **同点タイブレーク**: 配列順・ID順バイアスを排除したシード付き決定論的タイブレーク。
    - **エリート保存**: Provisional Default $E = 1$（早熟収束を防ぎつつ best-known genotype の消失を防止。※自己対戦環境変化に伴う measured fitness の単調非減少は保証しない）。
-5. **Genetic Operators & Runtime Telemetry (BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1)**:
+5. **Genetic Operators & Runtime Telemetry (BP-SIM-AI-GENETIC-OPERATORS-DESIGN-V1-R1)**:
    - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW**
    - **交叉方式 (Crossover)**: Block-Segmented Uniform Crossover ($P_x = 0.5$、`patternWeights` と `contextPatternWeights` を独立処理、ルール非依存・位置バイアスなし)。
-   - **突然変異方式 (Mutation)**: Per-Gene Gaussian Perturbation with Clamping ($p_m = 0.01$, $\sigma = 0.05$, clamp $[-10.0, +10.0]$、非有限値完全排除)。
+   - **突然変異方式 (Mutation)**: Deterministic Normal-Like Perturbation V1 (`deterministic-normal-approx-v1`、$p_m = 0.01$, $\sigma = 0.05$, clamp $[-10.0, +10.0]$、初等超越関数完全排除、uint32 閾値判定、非有限値検知時 Fail-Closed 例外停止)。
    - **自己交配回避 & リトライ**: 同一 `genomeId` ペア検知時に最大 3 回リトライ、枯渇時も無性生殖+変異として受容しクラッシュ・不適格個体フォールバックを防止。
-   - **シード領域分離**: `generationSeed` から `selectionSeed` と各オフスプリングの `offspringSeed` を独立派生し、選択と遺伝操作の乱数干渉を排除。
+   - **シード領域分離 (Seed Derivation V1)**: `seed-derivation-v1` により `generationSeed` から `selectionSeed` (`SELECTION_V1 = 0x53454c31`)、`offspringSeed` (`OFFSPRING_V1 = 0x4f464631`)、`retrySeed` (`SELF_MATING_RETRY_V1 = 0x534d5231`) を独立派生。純粋 uint32 境界・Known Test Vectors 準拠。
+   - **決定論的 Offspring Identity**: `gen-${pad(generation, 6)}-offspring-${pad(offspringIndex, 6)}` 形式（UUID・時刻完全排除）。エリートは既存 `genomeId` を保持。
    - **エリート継承**: Genotype は完全保存、**Fitness Score は非継承（次世代で必ず再評価）**。
    - **次世代母集団境界**: `populationSize = eliteCount + offspringCount`（Provisional Default = 100、可変 $\ge 2$）。
-   - **実行時間計測テレメトリ**: 1 試合ごとの `elapsedMs`（高精度モノトニッククロック `performance.now()`、COMPLETED/INCOMPLETE/FAILED 全対応）、バッチ集計（平均・中央値・p95）、DNA/世代単位時間、ハードウェア・並列度（`concurrency`）メタデータ。
-   - **実行時成果物方針**: 大量生ログ（`matches.jsonl` 等）は Git 管理対象外（`.gitignore` に `tools/simulator/.artifacts/` を追加）。
+   - **実行時間計測テレメトリ**: 1 試合の主指標 `matchTotalElapsedMs`（Session生成・Setupを含む実時間、COMPLETED/INCOMPLETE/FAILED 全対応）、バッチ集計における累積仕事量 `sumMatchTotalElapsedMs` と実経過時間 `batchWallClockElapsedMs` の分離、並列度 `concurrency` を考慮したスループット算出公式。
+   - **実行時成果物方針**: 大量生ログ（`matches.jsonl` 等）は Git 管理対象外（`.gitignore` に `tools/simulator/.artifacts/` を登録済み）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-genetic-operators-design-v1.md` 参照。
    - ※実装ステータス: Crossover, Mutation, Generation Runner, Evolution Loop のプロダクションコードは未実装。
 6. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
