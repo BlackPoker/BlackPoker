@@ -15,6 +15,8 @@ import {
   BatchSimulationResult,
   BatchSimulationRuntimeMetrics,
   BatchSimulationSummary,
+  RUNTIME_TIMING_EPSILON_MS,
+  RuntimeTelemetryValidationError,
 } from "../../domain/simulation/BatchSimulationTypes";
 
 /**
@@ -137,27 +139,65 @@ export class BatchSimulationRunner {
     batchWallClockElapsedMs: number,
     concurrency: number = 1
   ): BatchSimulationRuntimeMetrics {
-    const executedMatchCount = matchMetrics.length;
-    if (executedMatchCount === 0) {
-      return {
-        runtimeTelemetryVersion: BATCH_RUNTIME_TELEMETRY_VERSION,
-        executedMatchCount: 0,
-        concurrency,
-        batchWallClockElapsedMs,
-        sumMatchTotalElapsedMs: 0,
-        meanMatchTotalElapsedMs: 0,
-        medianMatchTotalElapsedMs: 0,
-        p95MatchTotalElapsedMs: 0,
-        minMatchTotalElapsedMs: 0,
-        maxMatchTotalElapsedMs: 0,
-        matchesPerSecond: 0,
-        totalDecisionCount: 0,
-        meanMsPerDecision: 0,
-        matchMetrics,
-        totalExecutionTimeMs: batchWallClockElapsedMs,
-      };
+    if (!Array.isArray(matchMetrics) || matchMetrics.length === 0) {
+      throw new RuntimeTelemetryValidationError("Cannot calculate runtime metrics from empty matchMetrics array.");
     }
 
+    if (
+      typeof batchWallClockElapsedMs !== "number" ||
+      !Number.isFinite(batchWallClockElapsedMs) ||
+      batchWallClockElapsedMs <= 0
+    ) {
+      throw new RuntimeTelemetryValidationError(
+        `Invalid batchWallClockElapsedMs: must be a finite positive number (> 0). Received: ${batchWallClockElapsedMs}`
+      );
+    }
+
+    if (
+      typeof concurrency !== "number" ||
+      !Number.isFinite(concurrency) ||
+      !Number.isInteger(concurrency) ||
+      concurrency < 1
+    ) {
+      throw new RuntimeTelemetryValidationError(
+        `Invalid concurrency: must be a finite positive integer (>= 1). Received: ${concurrency}`
+      );
+    }
+
+    for (const m of matchMetrics) {
+      if (typeof m.matchTotalElapsedMs !== "number" || !Number.isFinite(m.matchTotalElapsedMs) || m.matchTotalElapsedMs < 0) {
+        throw new RuntimeTelemetryValidationError(
+          `Invalid matchTotalElapsedMs at index ${m.matchIndex}: must be a finite non-negative number. Received: ${m.matchTotalElapsedMs}`
+        );
+      }
+      if (typeof m.setupElapsedMs !== "number" || !Number.isFinite(m.setupElapsedMs) || m.setupElapsedMs < 0) {
+        throw new RuntimeTelemetryValidationError(
+          `Invalid setupElapsedMs at index ${m.matchIndex}: must be a finite non-negative number. Received: ${m.setupElapsedMs}`
+        );
+      }
+      if (typeof m.simulationElapsedMs !== "number" || !Number.isFinite(m.simulationElapsedMs) || m.simulationElapsedMs < 0) {
+        throw new RuntimeTelemetryValidationError(
+          `Invalid simulationElapsedMs at index ${m.matchIndex}: must be a finite non-negative number. Received: ${m.simulationElapsedMs}`
+        );
+      }
+      if (typeof m.totalDecisions !== "number" || !Number.isFinite(m.totalDecisions) || !Number.isInteger(m.totalDecisions) || m.totalDecisions < 0) {
+        throw new RuntimeTelemetryValidationError(
+          `Invalid totalDecisions at index ${m.matchIndex}: must be a finite non-negative integer. Received: ${m.totalDecisions}`
+        );
+      }
+      if (m.setupElapsedMs + m.simulationElapsedMs > m.matchTotalElapsedMs + RUNTIME_TIMING_EPSILON_MS) {
+        throw new RuntimeTelemetryValidationError(
+          `Timing breakdown integrity violation at index ${m.matchIndex}: setupElapsedMs (${m.setupElapsedMs}) + simulationElapsedMs (${m.simulationElapsedMs}) exceeds matchTotalElapsedMs (${m.matchTotalElapsedMs})`
+        );
+      }
+      if (m.durationMs !== m.matchTotalElapsedMs) {
+        throw new RuntimeTelemetryValidationError(
+          `Alias mismatch at index ${m.matchIndex}: durationMs (${m.durationMs}) does not equal matchTotalElapsedMs (${m.matchTotalElapsedMs})`
+        );
+      }
+    }
+
+    const executedMatchCount = matchMetrics.length;
     const sortedLatencies = matchMetrics
       .map((m) => m.matchTotalElapsedMs)
       .slice()
@@ -183,18 +223,12 @@ export class BatchSimulationRunner {
     const p95MatchTotalElapsedMs = sortedLatencies[index];
 
     // Throughput: matchesPerSecond = executedMatchCount / (batchWallClockElapsedMs / 1000)
-    const matchesPerSecond =
-      batchWallClockElapsedMs > 0
-        ? executedMatchCount / (batchWallClockElapsedMs / 1000)
-        : 0;
+    const matchesPerSecond = executedMatchCount / (batchWallClockElapsedMs / 1000);
 
-    // Total Decisions & Mean Ms Per Decision
+    // Total Decisions & End-to-End Mean Ms Per Decision
     const totalDecisionCount = matchMetrics.reduce((acc, m) => acc + m.totalDecisions, 0);
-    const sumSimulationElapsedMs = matchMetrics.reduce((acc, m) => acc + (m.simulationElapsedMs ?? 0), 0);
     const meanMsPerDecision =
-      totalDecisionCount > 0
-        ? (sumSimulationElapsedMs > 0 ? sumSimulationElapsedMs : sumMatchTotalElapsedMs) / totalDecisionCount
-        : 0;
+      totalDecisionCount > 0 ? sumMatchTotalElapsedMs / totalDecisionCount : null;
 
     return {
       runtimeTelemetryVersion: BATCH_RUNTIME_TELEMETRY_VERSION,
@@ -303,30 +337,6 @@ export class BatchSimulationRunner {
         failures.push(failureRecord);
       }
 
-      const matchEndTime = globalThis.performance.now();
-      const matchTotalElapsedMs = matchEndTime - matchStartTime;
-
-      const matchStatus: BatchMatchStatus = failureRecord
-        ? "FAILED"
-        : simResult?.completed
-        ? "COMPLETED"
-        : "INCOMPLETE";
-
-      const totalDecisions = simResult ? simResult.totalDecisions : 0;
-      const turnCount = simResult ? simResult.turnCount : 0;
-
-      const matchMetric: BatchMatchRuntimeMetrics = {
-        matchIndex: i,
-        matchId: plan.matchId,
-        status: matchStatus,
-        matchTotalElapsedMs,
-        setupElapsedMs,
-        simulationElapsedMs,
-        totalDecisions,
-        durationMs: matchTotalElapsedMs,
-      };
-      matchMetrics.push(matchMetric);
-
       let matchResult: BatchMatchResult;
       if (failureRecord) {
         matchResult = {
@@ -341,15 +351,16 @@ export class BatchSimulationRunner {
           failure: failureRecord,
         };
       } else if (simResult) {
+        const status: BatchMatchStatus = simResult.completed ? "COMPLETED" : "INCOMPLETE";
         matchResult = {
           matchIndex: i,
           matchId: plan.matchId,
-          status: matchStatus,
+          status,
           completed: simResult.completed,
           winner: simResult.winner,
           reason: simResult.reason,
-          totalDecisions,
-          turnCount,
+          totalDecisions: simResult.totalDecisions,
+          turnCount: simResult.turnCount,
           finalStateHash: simResult.finalStateHash,
           matchSeed: plan.matchSeed,
           playerSeeds: plan.playerSeeds,
@@ -368,6 +379,21 @@ export class BatchSimulationRunner {
         };
       }
 
+      // Canonical Match End Boundary: matchResult確定直後かつcallback呼出前
+      const matchEndTime = globalThis.performance.now();
+      const matchTotalElapsedMs = matchEndTime - matchStartTime;
+
+      const matchMetric: BatchMatchRuntimeMetrics = {
+        matchIndex: i,
+        matchId: plan.matchId,
+        status: matchResult.status,
+        matchTotalElapsedMs,
+        setupElapsedMs,
+        simulationElapsedMs,
+        totalDecisions: matchResult.totalDecisions,
+        durationMs: matchTotalElapsedMs,
+      };
+      matchMetrics.push(matchMetric);
       matches.push(matchResult);
 
       if (options.onMatchCompleted) {

@@ -22,6 +22,21 @@ export class BatchSimulationConfigurationError extends Error {
 }
 
 /**
+ * 実行時テレメトリの標本不備・計測不整合を示すエラー
+ */
+export class RuntimeTelemetryValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "RuntimeTelemetryValidationError";
+  }
+}
+
+/**
+ * タイマー計測の内訳検証における浮動小数点数演算ノイズ許容微小値 (ms)
+ */
+export const RUNTIME_TIMING_EPSILON_MS = 1e-6;
+
+/**
  * 単一試合の実行ステータス
  * - COMPLETED: 正常に決着がついた (winner, reason あり)
  * - INCOMPLETE: 最大判断回数 (maxDecisionsPerMatch) 到達等で決着がつかずに終了
@@ -155,8 +170,8 @@ export interface BatchSimulationRuntimeMetrics {
   readonly matchesPerSecond: number;
   /** バッチ全体の総意思決定回数 */
   readonly totalDecisionCount: number;
-  /** 意思決定1回あたりの平均所要時間 (ms) */
-  readonly meanMsPerDecision: number;
+  /** 意思決定1回あたりの平均所要時間 (ms, 総意思決定回数が 0 の場合は測定不能として null) */
+  readonly meanMsPerDecision: number | null;
   /** 全試合の個別実行時メトリクス */
   readonly matchMetrics: readonly BatchMatchRuntimeMetrics[];
   /**

@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import {
   BATCH_RUNTIME_TELEMETRY_VERSION,
   BatchSimulationResult,
+  RuntimeTelemetryValidationError,
 } from "../../domain/simulation/BatchSimulationTypes";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,12 +15,12 @@ const __dirname = path.dirname(__filename);
  * 実行環境・ハードウェアのメタデータ情報
  */
 export interface ExecutionEnvironmentMetadata {
-  readonly buildSha: string;
-  readonly buildRef: string;
+  readonly buildSha: string | null;
+  readonly buildRef: string | null;
   readonly nodeVersion: string;
   readonly platform: string;
   readonly arch: string;
-  readonly cpuModel: string;
+  readonly cpuModel: string | null;
   readonly logicalCpuCount: number;
   readonly concurrency: number;
 }
@@ -30,12 +31,14 @@ export interface ExecutionEnvironmentMetadata {
 export interface RuntimeArtifactWriterOptions {
   /** 成果物ルートディレクトリ (デフォルト: tools/simulator/.artifacts/ai-runs) */
   readonly artifactRootDir?: string;
-  /** 明示的な Run ID (未指定時はタイムスタンプとランダム値から自動生成) */
+  /** 明示的な Run ID (未指定時はタイムスタンプとランダムサフィックスから自動生成) */
   readonly runId?: string;
   /** バッチ開始時刻 (ISO 文字列) */
   readonly startedAt?: string;
   /** バッチ終了時刻 (ISO 文字列) */
   readonly finishedAt?: string;
+  /** 1試合あたりの最大意思決定回数 (Benchmark Recipe 必須項目) */
+  readonly maxDecisionsPerMatch: number;
 }
 
 /**
@@ -70,7 +73,7 @@ export class RuntimeArtifactWriter {
   }
 
   /**
-   * 一意な Run ID を決定論的タイムスタンプ形式で生成
+   * 一意な Run ID を生成 (timestamp + random suffix artifact identifier)
    * 形式: YYYYMMDDTHHmmssZ-<hex6>
    */
   public static generateRunId(date: Date = new Date()): string {
@@ -88,29 +91,72 @@ export class RuntimeArtifactWriter {
   }
 
   /**
-   * 現在の実行環境メタデータを収集
+   * 現在の実行環境メタデータを収集 (環境変数および Node 標準 API のみ使用し、外部 Git コマンドは実行しない)
    */
   public static getEnvironmentMetadata(concurrency: number = 1): ExecutionEnvironmentMetadata {
     const cpus = os.cpus();
+    const buildSha =
+      process.env.BP_BUILD_SHA ||
+      process.env.GITHUB_SHA ||
+      process.env.VITE_BUILD_SHA ||
+      process.env.GIT_SHA ||
+      null;
+    const buildRef =
+      process.env.BP_BUILD_REF ||
+      process.env.GITHUB_REF_NAME ||
+      process.env.VITE_BUILD_REF ||
+      process.env.GIT_REF ||
+      null;
+    const cpuModel =
+      cpus && cpus[0] && typeof cpus[0].model === "string" && cpus[0].model.length > 0
+        ? cpus[0].model
+        : null;
+    const logicalCpuCount = cpus && typeof cpus.length === "number" && cpus.length > 0 ? cpus.length : 1;
+
     return {
-      buildSha: process.env.GITHUB_SHA || process.env.GIT_SHA || "local-dev",
-      buildRef: process.env.GITHUB_REF_NAME || process.env.GIT_REF || "BlackPoker/issue551-core-flow",
+      buildSha,
+      buildRef,
       nodeVersion: process.version,
       platform: process.platform,
       arch: process.arch,
-      cpuModel: cpus && cpus[0] ? cpus[0].model : "unknown",
-      logicalCpuCount: cpus ? cpus.length : 1,
+      cpuModel,
+      logicalCpuCount,
       concurrency,
     };
   }
 
   /**
-   * バッチシミュレーション結果を成果物ディレクトリに出力
+   * バッチシミュレーション結果を成果物ディレクトリに出力 (Fail-Closed: runtimeMetrics 必須)
    */
   public static write(
     simulationResult: BatchSimulationResult,
-    options: RuntimeArtifactWriterOptions = {}
+    options: RuntimeArtifactWriterOptions
   ): RuntimeArtifactWriterResult {
+    if (!simulationResult || typeof simulationResult !== "object") {
+      throw new RuntimeTelemetryValidationError("Cannot write runtime artifacts: simulationResult must be a valid object.");
+    }
+
+    if (!simulationResult.runtimeMetrics) {
+      throw new RuntimeTelemetryValidationError(
+        "Cannot write runtime artifacts: simulationResult.runtimeMetrics is required (Fail-Closed contract)."
+      );
+    }
+
+    if (!options || typeof options !== "object") {
+      throw new RuntimeTelemetryValidationError("Cannot write runtime artifacts: options must be a valid object.");
+    }
+
+    if (
+      typeof options.maxDecisionsPerMatch !== "number" ||
+      !Number.isFinite(options.maxDecisionsPerMatch) ||
+      !Number.isInteger(options.maxDecisionsPerMatch) ||
+      options.maxDecisionsPerMatch < 1
+    ) {
+      throw new RuntimeTelemetryValidationError(
+        `Invalid maxDecisionsPerMatch in writer options: must be a finite positive integer (>= 1). Received: ${options.maxDecisionsPerMatch}`
+      );
+    }
+
     const rootDir = options.artifactRootDir || this.getDefaultArtifactRootDir();
     let baseRunId = options.runId || this.generateRunId();
     let runId = baseRunId;
@@ -126,15 +172,15 @@ export class RuntimeArtifactWriter {
     fs.mkdirSync(runDir, { recursive: true });
 
     const rm = simulationResult.runtimeMetrics;
-    const envMeta = this.getEnvironmentMetadata(rm?.concurrency ?? 1);
+    const envMeta = this.getEnvironmentMetadata(rm.concurrency);
 
     const startedAt = options.startedAt || new Date().toISOString();
     const finishedAt = options.finishedAt || new Date().toISOString();
 
-    // 1. run-summary.json
+    // 1. run-summary.json (Benchmark Recipe & Exact Telemetry, 偽フォールバック排除)
     const summaryData: Record<string, any> = {
       runId,
-      runtimeTelemetryVersion: rm?.runtimeTelemetryVersion ?? BATCH_RUNTIME_TELEMETRY_VERSION,
+      runtimeTelemetryVersion: rm.runtimeTelemetryVersion,
       buildSha: envMeta.buildSha,
       buildRef: envMeta.buildRef,
       nodeVersion: envMeta.nodeVersion,
@@ -142,12 +188,14 @@ export class RuntimeArtifactWriter {
       arch: envMeta.arch,
       cpuModel: envMeta.cpuModel,
       logicalCpuCount: envMeta.logicalCpuCount,
-      concurrency: envMeta.concurrency,
+      concurrency: rm.concurrency,
       startedAt,
       finishedAt,
       baseSeed: simulationResult.baseSeed,
       matchCount: simulationResult.matchCount,
-      executedMatchCount: rm?.executedMatchCount ?? simulationResult.matches.length,
+      requestedMatchCount: simulationResult.matchCount,
+      executedMatchCount: rm.executedMatchCount,
+      maxDecisionsPerMatch: options.maxDecisionsPerMatch,
       completedCount: simulationResult.summary.completedCount,
       incompleteCount: simulationResult.summary.incompleteCount,
       failedCount: simulationResult.summary.failedCount,
@@ -156,16 +204,16 @@ export class RuntimeArtifactWriter {
       winRates: simulationResult.summary.winRates,
       averageDecisionsPerCompletedMatch: simulationResult.summary.averageDecisionsPerCompletedMatch,
       averageTurnsPerCompletedMatch: simulationResult.summary.averageTurnsPerCompletedMatch,
-      sumMatchTotalElapsedMs: rm?.sumMatchTotalElapsedMs ?? 0,
-      batchWallClockElapsedMs: rm?.batchWallClockElapsedMs ?? rm?.totalExecutionTimeMs ?? 0,
-      meanMatchTotalElapsedMs: rm?.meanMatchTotalElapsedMs ?? 0,
-      medianMatchTotalElapsedMs: rm?.medianMatchTotalElapsedMs ?? 0,
-      p95MatchTotalElapsedMs: rm?.p95MatchTotalElapsedMs ?? 0,
-      minMatchTotalElapsedMs: rm?.minMatchTotalElapsedMs ?? 0,
-      maxMatchTotalElapsedMs: rm?.maxMatchTotalElapsedMs ?? 0,
-      matchesPerSecond: rm?.matchesPerSecond ?? 0,
-      totalDecisionCount: rm?.totalDecisionCount ?? 0,
-      meanMsPerDecision: rm?.meanMsPerDecision ?? 0,
+      sumMatchTotalElapsedMs: rm.sumMatchTotalElapsedMs,
+      batchWallClockElapsedMs: rm.batchWallClockElapsedMs,
+      meanMatchTotalElapsedMs: rm.meanMatchTotalElapsedMs,
+      medianMatchTotalElapsedMs: rm.medianMatchTotalElapsedMs,
+      p95MatchTotalElapsedMs: rm.p95MatchTotalElapsedMs,
+      minMatchTotalElapsedMs: rm.minMatchTotalElapsedMs,
+      maxMatchTotalElapsedMs: rm.maxMatchTotalElapsedMs,
+      matchesPerSecond: rm.matchesPerSecond,
+      totalDecisionCount: rm.totalDecisionCount,
+      meanMsPerDecision: rm.meanMsPerDecision,
     };
 
     const summaryPath = path.join(runDir, "run-summary.json");

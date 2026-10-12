@@ -6,9 +6,10 @@ import { RuntimeArtifactWriter } from "../../cli/support/RuntimeArtifactWriter";
 import {
   BATCH_RUNTIME_TELEMETRY_VERSION,
   BatchSimulationResult,
+  RuntimeTelemetryValidationError,
 } from "../../domain/simulation/BatchSimulationTypes";
 
-describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1)", () => {
+describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1-R1)", () => {
   let tempBaseDir: string;
 
   beforeEach(() => {
@@ -130,13 +131,14 @@ describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1)", () => {
     },
   });
 
-  it("1. 正常系バッチ結果が指定ルート配下に4ファイルで正しく保存されること", () => {
+  it("Test P & 基本出力. 正常系バッチ結果が Benchmark Recipe を含め正しく保存されること", () => {
     const simResult = createDummySimulationResult(false);
     const writeResult = RuntimeArtifactWriter.write(simResult, {
       artifactRootDir: tempBaseDir,
       runId: "test-run-001",
       startedAt: "2026-10-13T09:00:00.000Z",
       finishedAt: "2026-10-13T09:00:01.000Z",
+      maxDecisionsPerMatch: 500,
     });
 
     expect(writeResult.runId).toBe("test-run-001");
@@ -146,18 +148,19 @@ describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1)", () => {
     expect(fs.existsSync(writeResult.timingPath)).toBe(true);
     expect(fs.existsSync(writeResult.errorsPath)).toBe(true);
 
-    // run-summary.json の検証
+    // run-summary.json の検証 (Benchmark Recipe 項目)
     const summaryRaw = fs.readFileSync(writeResult.summaryPath, "utf8");
     const summary = JSON.parse(summaryRaw);
     expect(summary.runId).toBe("test-run-001");
     expect(summary.runtimeTelemetryVersion).toBe(BATCH_RUNTIME_TELEMETRY_VERSION);
-    expect(summary.matchCount).toBe(2);
+    expect(summary.requestedMatchCount).toBe(2);
     expect(summary.executedMatchCount).toBe(2);
+    expect(summary.baseSeed).toBe(42);
+    expect(summary.maxDecisionsPerMatch).toBe(500);
+    expect(summary.concurrency).toBe(1);
     expect(summary.completedCount).toBe(2);
     expect(summary.failedCount).toBe(0);
     expect(summary.meanMatchTotalElapsedMs).toBe(55.1);
-    expect(summary.nodeVersion).toBeDefined();
-    expect(summary.platform).toBeDefined();
 
     // matches.jsonl の検証 (2行)
     const matchesLines = fs.readFileSync(writeResult.matchesPath, "utf8").trim().split("\n");
@@ -174,11 +177,61 @@ describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1)", () => {
     expect(errorsContent).toBe("");
   });
 
-  it("2. エラー発生時に errors.jsonl に詳細が出力されること", () => {
+  it("Test M. runtimeMetrics 欠落時に RuntimeTelemetryValidationError を throw すること (Fail-Closed)", () => {
+    const simResult = createDummySimulationResult(false);
+    const brokenResult = { ...simResult, runtimeMetrics: undefined };
+
+    expect(() => {
+      RuntimeArtifactWriter.write(brokenResult as any, {
+        artifactRootDir: tempBaseDir,
+        runId: "test-run-broken",
+        maxDecisionsPerMatch: 500,
+      });
+    }).toThrow(RuntimeTelemetryValidationError);
+  });
+
+  it("Test N. 関連環境変数が未設定の場合に buildSha === null, buildRef === null となること (偽フォールバック完全撤廃)", () => {
+    const originalEnv = { ...process.env };
+    delete process.env.BP_BUILD_SHA;
+    delete process.env.GITHUB_SHA;
+    delete process.env.VITE_BUILD_SHA;
+    delete process.env.GIT_SHA;
+    delete process.env.BP_BUILD_REF;
+    delete process.env.GITHUB_REF_NAME;
+    delete process.env.VITE_BUILD_REF;
+    delete process.env.GIT_REF;
+
+    try {
+      const meta = RuntimeArtifactWriter.getEnvironmentMetadata(1);
+      expect(meta.buildSha).toBeNull();
+      expect(meta.buildRef).toBeNull();
+      expect(meta.buildSha).not.toBe("local-dev");
+      expect(meta.buildRef).not.toBe("BlackPoker/issue551-core-flow");
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
+  it("Test O. BP_BUILD_SHA および BP_BUILD_REF 設定時に完全一致すること", () => {
+    const originalEnv = { ...process.env };
+    process.env.BP_BUILD_SHA = "test-exact-sha-123456";
+    process.env.BP_BUILD_REF = "test-exact-ref-branch";
+
+    try {
+      const meta = RuntimeArtifactWriter.getEnvironmentMetadata(1);
+      expect(meta.buildSha).toBe("test-exact-sha-123456");
+      expect(meta.buildRef).toBe("test-exact-ref-branch");
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
+  it("エラー発生時に errors.jsonl に詳細が出力されること", () => {
     const simResult = createDummySimulationResult(true);
     const writeResult = RuntimeArtifactWriter.write(simResult, {
       artifactRootDir: tempBaseDir,
       runId: "test-run-err",
+      maxDecisionsPerMatch: 500,
     });
 
     const errorLines = fs.readFileSync(writeResult.errorsPath, "utf8").trim().split("\n");
@@ -188,17 +241,19 @@ describe("RuntimeArtifactWriter Tests (BP-SIM-AI-RUNTIME-TELEMETRY-V1)", () => {
     expect(err.errorMessage).toBe("Simulated test error");
   });
 
-  it("3. 同名の Run ID が既に存在する場合、サフィックスで衝突回避されること", () => {
+  it("同名の Run ID が既に存在する場合、サフィックスで衝突回避されること", () => {
     const simResult = createDummySimulationResult(false);
     const res1 = RuntimeArtifactWriter.write(simResult, {
       artifactRootDir: tempBaseDir,
       runId: "same-id",
+      maxDecisionsPerMatch: 500,
     });
     expect(res1.runId).toBe("same-id");
 
     const res2 = RuntimeArtifactWriter.write(simResult, {
       artifactRootDir: tempBaseDir,
       runId: "same-id",
+      maxDecisionsPerMatch: 500,
     });
     expect(res2.runId).toBe("same-id-1");
     expect(fs.existsSync(res2.runDir)).toBe(true);

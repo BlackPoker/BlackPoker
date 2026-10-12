@@ -64,10 +64,12 @@ async function main() {
 
   const startedAt = new Date().toISOString();
 
+  const maxDecisionsPerMatch = 500;
+
   const result = BatchSimulationRunner.run({
     matchCount,
     baseSeed,
-    maxDecisionsPerMatch: 500,
+    maxDecisionsPerMatch,
     sessionFactory: (_ctx) => {
       const rawState = createCoreBattlePresetState();
       const setupResult = MatchSetupCoordinator.setupMatch(rawState);
@@ -136,12 +138,13 @@ async function main() {
   console.log(`P95 Latency / Match:   ${rm ? rm.p95MatchTotalElapsedMs.toFixed(2) : "N/A"} ms (Nearest-Rank Method)`);
   console.log(`Min / Max Latency:     ${rm ? `${rm.minMatchTotalElapsedMs.toFixed(2)} ms / ${rm.maxMatchTotalElapsedMs.toFixed(2)} ms` : "N/A"}`);
   console.log(`Total Decisions:       ${rm?.totalDecisionCount ?? "N/A"}`);
-  console.log(`Mean Time / Decision:  ${rm ? rm.meanMsPerDecision.toFixed(4) : "N/A"} ms`);
+  console.log(`Mean Time / Decision:  ${rm && rm.meanMsPerDecision !== null ? `${rm.meanMsPerDecision.toFixed(4)} ms` : "N/A"}`);
 
   if (saveArtifacts) {
     const artifactRes = RuntimeArtifactWriter.write(result, {
       startedAt,
       finishedAt,
+      maxDecisionsPerMatch,
     });
     console.log("\n--------------------------------------------------------------------------------");
     console.log("  RUNTIME ARTIFACT PERSISTENCE");
