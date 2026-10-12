@@ -1,4 +1,62 @@
-# 最初の1ゲームを始めるInteractive HowTo 実装報告
+# 盤面レイアウトとアタック／ブロック 実装報告
+
+基準HEAD: `150beb8e66de5d2d65babe3e5b84ab993294eaff`。開始時にfetch・status・local / origin HEADを確認し、一致・cleanだった。対象は `tools/tutorial/` のみ。正規ルール、Simulator、Docker、Pages workflow・公開方式、基礎30操作JSONは変更しない。
+
+## 1〜5. 問題整理とアタック図
+
+従来は「♠2でアタック」の個別操作が先行し、1体ずつ別の攻撃を起こす印象があった。兵士ブロックも♥7→相手♣6の2段階指定のため、自分の兵士が相手兵士を攻撃しているように読めた。盤面では兵士と防壁の独立行が弱く、相手手札の表面が見えていた。
+
+`AttackConceptDiagram` をカードの向きの直後、実操作の直前に追加。3体のうち♠2・♣6だけにチェックと横向き表示を付け、♥7は縦向きで「今回は選ばない」。選んだ2体だけの線を1回のアタックへまとめ、終点を「相手プレイヤー」にする。相手の兵士・防壁を攻撃対象として並べない。「アタックは1ターンに1回」を黒いラベル、「そのアタックに参加する兵士をまとめて選ぶ」を短文で表示する。
+
+詳細は既存のActionDefinitionから正規attackを参照。`<攻撃>`・複数指定可・ドライブ不可・出たターン原則不可と `<速攻>` の例外を閉じたdetails内で読める。正規act.yamlのattack / block / damageJudgeを確認しており、教材都合のルール変更はない。新しいSectionや複数アタックLessonは追加せず、次は既存の♠2だけの操作。
+
+## 6〜11. 単体指定と戦闘接続
+
+- 変更前：あなたの♥7→相手の♣6を選ぶ。変更後：あなたの♥7を1回タップするだけ。今回は相手アタッカーが1体なので対応が自動で決まる旨を短く表示。防壁の単体指定も同じ方式。
+- 汎用 `designate-card` を追加。任意のlabelとsourceを持ち、Lesson IDで分岐しない。既存のselect-targetは残す。schemaは1枚指定、同じzone、before / after完全一致を検証し、blockではchargeであることも確認する。
+- ♥7はchargeのまま。盤面のカード状態を変えず、教材側の指定完了状態から「ブロッカー」を表示。相手♣6には最初から「アタック中」。replayでは指定・結果を解除する。
+- `CombatLink` は方向のない線＋BLOCK＋双方の役割を表示する専用component。裏向き防壁は公開前にカード名を出さない。結果後もその戦闘の対応として残す。
+- `BoardOverlay` 自体は変更しない。移動矢印と戦闘接続を分離。相手の非公開手札からの移動は既存のzone起点フォールバックを使う。
+
+## 12〜16. 盤面と手札
+
+上から「相手の補助領域／相手の防壁／相手の兵士／対戦中央／あなたの兵士／あなたの防壁／あなたの補助領域」。B上・A下を維持し、説明はあなた／相手を優先する。兵士と防壁は390pxでもそれぞれ独立した横1行。正式ルールにない前列・後列等の名称は追加しない。
+
+ライフ・墓地・手札は `support-zones` として灰色のまとまりに分離し、兵士／防壁の `battlefield` と区別。カード幅30px以上、操作領域44px以上を確認した。相手の手札は「相手の手札・N枚」のみで、カード表面もカード名のaria属性も出さない。ドロー結果の読み上げも枚数表示。自分の手札は従来どおり。将来必要な公開だけstepの `revealOpponentHand: true` で明示する。
+
+## 17〜20. 結果・replay・accessibility
+
+- 兵士：6 < 7 → 相手♣6が墓地 → あなた♥7は場に残る → あなたのライフはそのまま（減らない）。
+- 防壁：公開して6 = 6 → 相手♣6が墓地 → 防壁も墓地 → あなたのライフはそのまま（減らない）。兵士の大小比較と、防壁の一致等の違いを短く補足。
+- 守られない例：攻撃が通る → 相手ライフ2枚減少。3つの結果を同じresult領域で比較できる。
+- 攻撃replayの横に、盤面を戻す練習であり実戦は1ターン1回という注意を表示。召喚したターンの攻撃不可は維持。
+- 図はfigureのaria-labelと短文、BLOCKはgroupの対応説明と役割テキスト、結果は名前付きリスト。線だけに意味を依存しない。タップ・Enter / Space等の既存操作を維持。
+
+## 21〜26. 検証
+
+すべてDocker内で実行。Tutorial **155 tests / 12 files成功**、教材・schema・連続盤面・ルール参照・book構造の検証成功、`VITE_BASE_PATH=/BlackPoker/tutorial/` production build成功。Simulator **113 tests / 19 files成功**（ソース変更なし）。
+
+追加のcombatテストは11件。図の2/3指定・相手プレイヤー終点・Section数維持・1回指定・誤入力・charge維持・汎用ラベル・盤面変更拒否・BLOCK・replay・3種の結果・行順・手札の公開例外・不正metadataを検証。既存テストの手札／ブロック期待値も更新。
+
+- **390×844実ブラウザ**：表紙→向き→図→攻撃→兵士ブロック→防壁ブロック→召喚→ターン交代→実物9操作・対戦開始まで成功。進捗12/12、不要な応用追加なし。図は横overflow・文字重なりなし。自分のカードだけでブロック指定、BLOCKは非方向の線。手札非公開・44px操作領域を確認。兵士／防壁各行の幅328px。
+- **1440×900実ブラウザ**：図の最大幅を抑え間延びを防ぐ。B防壁→B兵士→A兵士→A防壁の上下関係と独立行（幅748px）、ライフから墓地への実マウスdrag、キーボード指定、hash移動、reload、ルール早見を確認。横overflowなし。
+- Docker Chromium / Playwrightで実入力を検証し、スクリーンショットを目視確認。画像は `test-results/browser/`（git対象外）。ユーザーテストではなく開発者による確認であり、Pagesデプロイ完了の確認とは別。
+
+## 27. 追加・変更ファイル（すべてtools/tutorial/配下）
+
+- 追加：`src/components/AttackConceptDiagram.tsx`、`src/components/CombatLink.tsx`、`tests/combat.test.tsx`
+- UI：`src/App.tsx`、`src/book.css`、`src/components/LessonPractice.tsx`、`src/components/TutorialBoard.tsx`
+- データ・操作：`src/types.ts`、`src/data/book-fixtures.mjs`、`src/data/learning-path.json`、`src/hooks/useSceneInteraction.ts`、`src/lib/interaction.mjs`、`src/lib/interaction.d.mts`、`src/lib/schema.mjs`
+- 回帰：`tests/App.test.tsx`、`tests/TutorialBoard.test.tsx`、`tests/book.test.ts`、`tests/curriculum.test.ts`、`scripts/verify-browser.cjs`
+- 説明：`README.md`、`LEARNING_MAP.md`、`HOWTO_REPORT.md`
+
+## 28〜34. Git引き渡し
+
+現在の `635-kaizen-チュートリアルサイト作成` をoriginへpushし、実際のremote HEADとlocal HEADの完全一致および最終status cleanを確認する。コミット自身のSHAを埋め込む循環を避け、SHA・push結果・local / remote HEAD・statusの確定値は完了メッセージで報告する。
+
+---
+
+# 前回：最初の1ゲームを始めるInteractive HowTo 実装報告
 
 基準HEAD: `e41b60d9dd924288971b3e99753a3f27b1ae4f00`。作業開始時に `git fetch` / status / local HEAD / origin HEADを確認し、一致・cleanだった。
 対象は `tools/tutorial/` のみ。正規ルール、Simulator、Docker構成、GitHub Pages workflow・ブランチ別公開方式は変更しない。

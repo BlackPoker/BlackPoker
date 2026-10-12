@@ -10,6 +10,7 @@ import { CurriculumPanel } from "./components/CurriculumPanel";
 import { HowToSection } from "./components/HowToSection";
 import { IntroContent } from "./components/TutorialIntro";
 import { CardOrientation } from "./components/CardOrientation";
+import { AttackConceptDiagram } from "./components/AttackConceptDiagram";
 import { LessonPractice } from "./components/LessonPractice";
 import { RealPractice } from "./components/RealPractice";
 import { FirstGameChoices } from "./components/FirstGameChoices";
@@ -92,7 +93,7 @@ export default function App() {
             {section.kind === "intro" && <><IntroContent kind={section.id as "about" | "game-purpose" | "entry16"} />
               <button className="primary-button section-next" onClick={() => continueFrom(section.id)}>次へ →</button></>}
             {section.kind === "orientation" && <><p className="section-summary">縦と横で、カードの状態を表します。</p><CardOrientation />
-              <p className="section-summary">このあと兵士を横向きにして、アタックしてみましょう。</p>
+              <AttackConceptDiagram />
               <button className="primary-button section-next" onClick={() => continueFrom(section.id)}>次へ →</button></>}
             {section.kind === "milestone" && <FirstGameChoices onSelect={(id) => { complete(section.id); openSection(id); }} onHelp={() => setHelpOpen(true)} />}
             {lesson?.status === "ready" && lesson.sceneIds.length > 0 && <LessonPractice lesson={lesson}

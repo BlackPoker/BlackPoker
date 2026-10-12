@@ -29,9 +29,9 @@ describe("現行YAMLに基づくLesson構造", () => {
   });
   it.each([bulwarkScenario, entryScenario])("ドライブ状態の防壁・兵士をブロッカーにする教材を拒否する", (source) => {
     const invalid = structuredClone(source);
-    const step = invalid.steps.find((s) => s.interaction?.kind === "select-target")!;
+    const step = invalid.steps.find((s) => ["select-target", "designate-card"].includes(s.interaction?.kind || ""))!;
     const command = deriveInteractions(step)[0];
-    if (command.kind !== "select-target") throw new Error("select-target expected");
+    if (command.kind !== "select-target" && command.kind !== "designate-card") throw new Error("designation expected");
     for (const phase of ["before", "after"] as const)
       step.board[phase][command.source.player][command.source.zone].find((c) => c.card === command.source.card)!.state = "drive";
     expect(validateScenario(invalid, ruleCatalog)).toContain("Blocker must be charged: " + step.id);
@@ -70,7 +70,7 @@ describe("現行YAMLに基づくLesson構造", () => {
   it("防壁fixtureはEntry16だけで成立し、face公開・同数の攻撃側・防壁を順に処理する", () => {
     expect(validateScenario(bulwarkScenario, ruleCatalog)).toEqual([]);
     const [choose, reveal, attacker, grave] = bulwarkScenario.steps;
-    expect(deriveInteractions(choose)[0].kind).toBe("select-target");
+    expect(deriveInteractions(choose)[0].kind).toBe("designate-card");
     expect(reveal.board.before.A.bulwarks[0].face).toBe("down");
     expect(interactionBoard(reveal, 1).A.bulwarks[0].face).toBe("up");
     expect(attacker.board.after.B.grave.map((c) => c.card)).toContain("C6");

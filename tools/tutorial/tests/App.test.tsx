@@ -83,19 +83,19 @@ describe("1冊のInteractive HowTo", () => {
     expect(zone(id, "B", "grave").querySelector('[data-card="SK"]')).toBeInTheDocument();
     expect(within(section(id)).getByRole("button", { name: "次へ →" })).toBeEnabled();
   });
-  it("兵士ブロックは相手が攻撃済み、Aのブロッカー→Bの対象指定で完了する", () => {
+  it("兵士ブロックは自分の♥7を1回指定し、相手をクリックしない", () => {
     hash("soldier-block"); render(<App />);
     tap("first-battle", "A", "H7");
-    expect(card("first-battle", "B", "C6")).toHaveClass("expected-card");
-    tap("first-battle", "B", "C6");
+    expect(card("first-battle", "B", "C6")).not.toHaveClass("expected-card");
     expect(card("first-battle", "A", "H7")).toHaveAccessibleName(/縦向き/);
-    expect(section("first-battle").querySelector(".interaction-result")).toHaveTextContent("♥7が♣6をブロック");
+    expect(section("first-battle").querySelector(".interaction-result")).toHaveTextContent("♥7をブロッカーに指定");
+    expect(section("first-battle").querySelector(".combat-link")).toHaveTextContent("BLOCK");
     wait(); automatic();
     expect(zone("first-battle", "B", "grave").querySelector('[data-card="C6"]')).toBeInTheDocument();
   });
   it("防壁は選択で向きを変えず、公開→相手の墓地→あなたの防壁を墓地へ", () => {
     const id = "bulwark-block"; hash(id); render(<App />);
-    tap(id, "A", "C6"); tap(id, "B", "C6");
+    tap(id, "A", "C6");
     expect(card(id, "A", "C6")).toHaveAccessibleName(/裏向き 縦向き/); wait();
     tap(id, "A", "C6");
     expect(card(id, "A", "C6")).toHaveAccessibleName(/表向き 縦向き/); wait(); automatic();
@@ -124,10 +124,13 @@ describe("1冊のInteractive HowTo", () => {
     fireEvent.click(end); wait(); automatic();
     expect(card(id, "B", "D5")).toHaveAccessibleName(/縦向き/);
     automatic();
-    expect(zone(id, "B", "hand").querySelector('[data-card="S3"]')).toBeInTheDocument();
+    const beforeHand = entryScenario.steps.find((s) => s.id === "draw")!.board.before.B.hand.length;
+    expect(zone(id, "B", "hand")).toHaveTextContent(`${beforeHand + 1}枚`);
+    expect(zone(id, "B", "hand").querySelector('[data-card="S3"]')).toBeNull();
     expect(zone(id, "B", "hand").querySelector('[data-card="D8"]')).toBeNull();
     automatic();
-    expect(zone(id, "B", "hand").querySelector('[data-card="D8"]')).toBeInTheDocument();
+    expect(zone(id, "B", "hand")).toHaveTextContent(`${beforeHand + 2}枚`);
+    expect(zone(id, "B", "hand").querySelector('[data-card="D8"]')).toBeNull();
   });
   it("選択解除・誤source・誤destinationで盤面を変更せず、矢印を選択時だけ出す", () => {
     const id = "soldier"; hash(id); render(<App />); tap(id, "A", "D5"); wait(); tap(id, "B", "D5");

@@ -29,6 +29,14 @@ export interface MovementCause {
   actionId?: string;
   text: string;
 }
+export interface CardLocation { player: Player; zone: Zone; card: string }
+export interface CombatExample {
+  attacker: CardLocation;
+  blocker?: CardLocation;
+  designationStepId?: string;
+  result: string[];
+  comparison: string;
+}
 export interface TutorialStep {
   id: string;
   chapter: string;
@@ -54,7 +62,9 @@ export interface TutorialStep {
   alternate?: { title: string; text: string };
   interaction?:
     | { kind: "select-target"; targetCard: { player: Player; zone: Zone; card: string } }
+    | { kind: "designate-card"; label: string }
     | { kind: "action"; label: string };
+  revealOpponentHand?: boolean;
   boardNote?: string;
   /** 相手側の処理。ユーザー入力を要求せず、結果を順に表示する。 */
   automatic?: boolean;
@@ -67,6 +77,8 @@ export interface TutorialScene {
   cues: string[];
   intro: string;
   summary: string;
+  combat?: CombatExample;
+  replayNote?: string;
 }
 export interface TutorialScenario {
   schemaVersion: 2;

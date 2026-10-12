@@ -12,6 +12,9 @@ export function LessonPractice({ lesson, active, completed, onComplete, onNext }
   const scene = scenario.scenes[0];
   const interaction = useSceneInteraction(scene, scenario.steps, { enabled: active, initialCompleted: completed });
   const step = interaction.step!;
+  const designationIndex = scenario.steps.findIndex((item) => item.id === scene.combat?.designationStepId);
+  const designated = designationIndex >= 0 && (interaction.microIndex > designationIndex ||
+    (interaction.microIndex === designationIndex && interaction.completedActions > 0));
   useEffect(() => {
     if (scene.presentation === "interactive" && interaction.complete) onComplete(lesson.id);
   }, [interaction.complete, lesson.id, onComplete, scene.presentation]);
@@ -22,6 +25,7 @@ export function LessonPractice({ lesson, active, completed, onComplete, onNext }
     }) : step.operations;
   return <div className="book-practice">
     <p className="section-summary">{scene.presentation === "static" ? "TutorialではあなたがPLAYER A（下）、相手がPLAYER B（上）です。ルール上の違いではありません。" : scene.intro}</p>
+    {scene.combat?.blocker && <p className="combat-hint">今回はアタッカーが1体なので、ブロックする相手は自動で決まります。</p>}
     {scene.presentation === "interactive" && <ol className="micro-trail" aria-label="この場面の流れ">
       {scene.cues.map((cue, index) => <li key={index} className={index <= interaction.microIndex ? "reached" : ""}
         aria-current={!interaction.complete && index === interaction.microIndex ? "step" : undefined}>
@@ -38,15 +42,19 @@ export function LessonPractice({ lesson, active, completed, onComplete, onNext }
     <TutorialBoard board={interaction.board!} before={step.board.before} after={step.board.after}
       operations={operations} applied={interaction.applied || interaction.pending} real={false} stepId={step.id}
       cause={step.cause} focusZones={step.focusZones}
+      combat={scene.combat} designated={designated} revealOpponentHand={step.revealOpponentHand}
       interaction={{ command: interaction.command, selected: interaction.selected,
         pending: interaction.pending || !!step.automatic, complete: interaction.complete,
         mistakes: interaction.mistakes, onInput: interaction.attempt }} />
     {interaction.complete && scene.presentation === "interactive" && <div className="learned scene-result" role="status">
       <strong>このSectionの操作は完了</strong><p>{scene.summary}</p>
+      {scene.combat && <><ol className="combat-result" aria-label="戦闘結果">{scene.combat.result.map((text) => <li key={text}>{text}</li>)}</ol>
+        <p>{scene.combat.comparison}</p></>}
     </div>}
     {interaction.complete && onNext && <button className="primary-button section-next" onClick={onNext}>次へ →</button>}
     {interaction.complete && scene.presentation === "interactive" &&
       <button className="scene-replay" onClick={interaction.replay}>↻ もう一度やる</button>}
+    {interaction.complete && scene.replayNote && <p className="replay-note">{scene.replayNote}</p>}
     <details className="lesson-definitions"><summary>解説を見る</summary>
       {lesson.explainer && <ConceptSlide explainer={lesson.explainer} />}
       {scenario.steps.map((item, index) => <div className="scene-detail" key={item.id}>

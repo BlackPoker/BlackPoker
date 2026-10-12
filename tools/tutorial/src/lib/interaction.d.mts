@@ -4,6 +4,7 @@ export type InteractionCommand =
   | { kind: "action"; label: string }
   | { kind: "move-card"; source: CardLocation; to: Zone; operation: Operation }
   | { kind: "tap-card" | "unsupported"; source: CardLocation; operation: Operation }
+  | { kind: "designate-card"; source: CardLocation; label: string; operation: Operation }
   | { kind: "select-target"; source: CardLocation; target: CardLocation; operation: Operation };
 export type InteractionInput =
   | { kind: "card"; card: CardLocation }

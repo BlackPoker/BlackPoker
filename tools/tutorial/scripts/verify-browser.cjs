@@ -42,6 +42,21 @@ fs.mkdirSync(output, { recursive: true });
     minTarget: Math.min(...[...element.querySelectorAll('.card-slot')].map((card) => card.getBoundingClientRect().width)),
   }));
   const findings = {};
+  const checkBattlefield = async (id) => {
+    const layout = await section(id).evaluate((root) => {
+      const rect = (selector) => { const r = root.querySelector(selector).getBoundingClientRect(); return { top: r.top, bottom: r.bottom, width: r.width }; };
+      return { bWall: rect('.player-B .zone-bulwarks'), bSoldier: rect('.player-B .zone-soldiers'),
+        aSoldier: rect('.player-A .zone-soldiers'), aWall: rect('.player-A .zone-bulwarks'),
+        hiddenHand: root.querySelector('.player-B .zone-hand [data-card]') === null,
+        cardWidth: root.querySelector('.board-card').getBoundingClientRect().width };
+    });
+    assert.ok(layout.bWall.bottom <= layout.bSoldier.top);
+    assert.ok(layout.bSoldier.bottom <= layout.aSoldier.top);
+    assert.ok(layout.aSoldier.bottom <= layout.aWall.top);
+    assert.equal(layout.hiddenHand, true);
+    assert.ok(layout.cardWidth >= 30);
+    return layout;
+  };
   try {
     const url = new URL(baseURL);
     // Viteの開発用Host制限を広げず、DockerホストのIPでローカルサーバーへ接続。
@@ -52,6 +67,15 @@ fs.mkdirSync(output, { recursive: true });
     assert.equal(await page.locator('[data-track="reference"]').getAttribute('open'), null);
     for (const id of ['about', 'game-purpose', 'board-overview', 'orientation']) {
       assert.equal(await section(id).count(), 1);
+      if (id === 'orientation') {
+        const diagram = section(id).locator('.attack-concept');
+        await diagram.scrollIntoViewIfNeeded(); await settleScroll();
+        assert.equal(await diagram.locator('[data-attacker="true"]').count(), 2);
+        assert.equal(await diagram.locator('[data-attacker="false"]').count(), 1);
+        assert.equal(await diagram.locator('.attack-player-flow .playing-card').count(), 0);
+        assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+        await page.screenshot({ path: path.join(output, 'mobile-attack-concept-390x844.png') });
+      }
       await next(id);
     }
     assert.equal(await section('entry16').count(), 0);
@@ -59,6 +83,7 @@ fs.mkdirSync(output, { recursive: true });
     // smooth scroll完了を位置で待つ（固定sleepに依存しない）。
     await page.waitForFunction(() => Math.abs(document.getElementById('unblocked-attack').getBoundingClientRect().top - 60) < 2);
     findings.mobile = await metrics(attack);
+    findings.mobileLayout = await checkBattlefield(attack);
     assert.equal(findings.mobile.overflow, false);
     assert.ok(findings.mobile.boardDistance + findings.mobile.sectionTop < 251);
     assert.ok(findings.mobile.minTarget >= 44);
@@ -69,12 +94,18 @@ fs.mkdirSync(output, { recursive: true });
     await complete(attack); // Bの入力なしでライフ2枚まで進む
     assert.equal(await zone(attack, 'B', 'grave').locator('[data-card="SK"]').count(), 1);
     await next(attack);
+    await settleScroll();
+    assert.match(await card('first-battle', 'B', 'C6').getAttribute('aria-label'), /アタック中/);
     await card('first-battle', 'A', 'H7').click();
-    await card('first-battle', 'B', 'C6').click();
+    assert.match(await card('first-battle', 'A', 'H7').getAttribute('aria-label'), /縦向き ブロッカー/);
+    await page.screenshot({ path: path.join(output, 'mobile-block-390x844.png') });
     await complete('first-battle');
+    assert.match(await section('first-battle').locator('.combat-result').textContent(), /ライフ.*減らない/);
+    await section('first-battle').locator('.persistent-board').screenshot({ path: path.join(output, 'mobile-block-board.png') });
     await next('first-battle');
+    await settleScroll();
     const wall = 'bulwark-block';
-    await card(wall, 'A', 'C6').click(); await card(wall, 'B', 'C6').click();
+    await card(wall, 'A', 'C6').click();
     assert.match(await card(wall, 'A', 'C6').getAttribute('aria-label'), /裏向き 縦向き/);
     await waitForPrompt(wall, 'あなたの裏向きの防壁');
     await card(wall, 'A', 'C6').click();
@@ -83,6 +114,9 @@ fs.mkdirSync(output, { recursive: true });
     await card(wall, 'A', 'C6').click();
     await zone(wall, 'A', 'grave').getByRole('button', { name: 'PLAYER Aの墓地へ移す' }).click();
     await complete(wall);
+    assert.match(await section(wall).locator('.combat-result').textContent(), /数字が一致.*墓地.*減らない/);
+    await section(wall).locator('.scene-result').scrollIntoViewIfNeeded(); await settleScroll();
+    await page.screenshot({ path: path.join(output, 'mobile-wall-result-390x844.png') });
     assert.equal(await page.locator('[data-section-id]').count(), 7);
     await next(wall);
     await card('soldier', 'A', 'D5').click();
@@ -136,12 +170,20 @@ fs.mkdirSync(output, { recursive: true });
 
     await page.setViewportSize({ width: 1440, height: 900 });
     const contents = page.getByRole('complementary', { name: 'HowToの目次' });
+    await contents.getByRole('button', { name: /カードの向き/ }).click();
+    await section('orientation').locator('.attack-concept').scrollIntoViewIfNeeded(); await settleScroll();
+    await page.screenshot({ path: path.join(output, 'desktop-attack-concept-1440x900.png') });
+    await contents.getByRole('button', { name: /兵士で守ってみる/ }).click();
+    await section('first-battle').getByRole('button', { name: /もう一度やる/ }).click();
+    await card('first-battle', 'A', 'H7').press('Enter');
+    await complete('first-battle');
     await contents.getByRole('button', { name: /兵士を召喚する/ }).click();
     const summon = 'soldier';
     await section(summon).getByRole('button', { name: /もう一度やる/ }).click();
     await waitForPrompt(summon, '裏向きの防壁');
     await card(summon, 'A', 'D5').press('Enter');
     await waitForPrompt(summon, 'ライフの一番上');
+    await card(summon, 'A', 'S3').scrollIntoViewIfNeeded(); await settleScroll();
     // native pointer events：マウスでライフ→墓地へドラッグ。
     const source = await card(summon, 'A', 'S3').boundingBox();
     const target = await zone(summon, 'A', 'grave').boundingBox();
@@ -161,6 +203,7 @@ fs.mkdirSync(output, { recursive: true });
     await contents.getByRole('button', { name: /まずは攻撃してみよう/ }).click();
     await page.waitForFunction(() => Math.abs(document.getElementById('unblocked-attack').getBoundingClientRect().top - 20) < 2);
     findings.desktop = await metrics(attack);
+    findings.desktopLayout = await checkBattlefield(attack);
     assert.equal(findings.desktop.overflow, false);
     await page.screenshot({ path: path.join(output, 'desktop-1440x900.png') });
     findings.cardColors = await section(attack).locator('.card-face').evaluateAll((cards) => [...new Map(cards.map((card) => [card.className, getComputedStyle(card).color])).entries()]);

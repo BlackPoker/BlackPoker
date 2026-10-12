@@ -40,6 +40,43 @@
 .book-intro .intro-page { animation: none; }
 .book-intro .intro-board { margin: 18px 0; }
 /* 1枚につきrankとsuitが1組。裏面では両方とも描画しない。 */
+.attack-concept { margin: 18px 0 8px; padding: 14px; border: 1px solid #d4d4d8; border-radius: 10px; background: #fafafa; max-width: 520px; }
+.attack-concept h3 { margin: 0 0 8px; font-size: 18px; }
+.attack-limit { display: inline-block; background: #18181b; color: white; padding: 6px 10px; border-radius: 5px; font-size: 14px; }
+.attack-concept p { font-size: 12px; line-height: 1.6; margin: 10px 0; }
+.attack-example-cards { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; }
+.attack-example-cards > div { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 0; }
+.attack-example-cards small { font-size: 11px; text-align: center; }
+.attack-example-cards [data-attacker="true"] small { font-weight: bold; }
+.attack-join { width: calc(100% * 2 / 3); height: 20px; display: flex; justify-content: center; }
+.attack-join span { width: 50%; border: solid #52525b; border-width: 0 2px 2px; position: relative; }
+.attack-join span::after { content: ""; position: absolute; width: 2px; height: 12px; background: #52525b; left: 50%; bottom: -12px; }
+.attack-player-flow { width: calc(100% * 2 / 3); display: flex; flex-direction: column; align-items: center; margin-top: 12px; font-size: 12px; gap: 2px; }
+.attack-player-flow b { border: 1px solid #71717a; border-radius: 5px; padding: 7px 15px; background: white; }
+.attack-practice-note { font-weight: bold; }
+.combat-hint, .replay-note { color: #52525b; font-size: 11px; line-height: 1.6; }
+/* 兵士と防壁はそれぞれ横1列。サポート領域とは枠・背景を分ける。 */
+.persistent-board .player-B { border-bottom: 0; }
+.battlefield { display: grid; grid-template-areas: "soldiers" "bulwarks"; gap: 6px; padding-block: 6px; }
+.player-B .battlefield { grid-template-areas: "bulwarks" "soldiers"; }
+.persistent-board .battlefield .table-zone { display: grid; grid-template-columns: 62px minmax(0, 1fr); align-items: center; min-height: 68px; padding: 5px 8px; border-color: #a1a1aa; }
+.battlefield .zone-motion-label { grid-column: 2; }
+.battlefield .zone-soldiers { border-left: 3px solid #3f3f46; }
+.support-zones { display: grid; grid-template-columns: 1fr 1.2fr 1fr; grid-template-areas: "life hand grave"; gap: 6px; padding: 6px; background: #e4e4e7; border-radius: 6px; }
+.player-B .support-zones { grid-template-areas: "grave hand life"; }
+.support-zones .zone-hand { gap: 0; padding-inline: 3px; }
+.private-hand-count { font-size: 18px; font-weight: bold; padding: 6px 0; }
+.private-hand-count small { display: block; font-size: 9px; font-weight: normal; line-height: 1.3; }
+.battle-center { border-block: 3px double #71717a; padding: 5px; text-align: center; font-size: 10px; color: #52525b; }
+.combat-link { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px; align-items: center; font-size: 12px; color: #18181b; }
+.combat-link small { display: block; font-size: 10px; }
+.combat-connection { display: flex; align-items: center; gap: 4px; font-size: 11px; }
+.combat-connection::before, .combat-connection::after { content: ""; width: 16px; border-top: 2px solid #52525b; }
+.persistent-board .card-slot.combat-card { display: flex; flex-direction: column; justify-content: center; width: 78px; height: 72px; flex-basis: 78px; gap: 5px; }
+.card-combat-label { font-size: 10px; line-height: 1.3; background: #18181b; color: #fff; border-radius: 3px; padding: 2px 5px; white-space: nowrap; }
+.combat-result { padding-left: 20px; line-height: 1.8; font-size: 13px; }
+.combat-result li:last-child { font-weight: bold; }
+.book-shell .board-card { width: 30px; height: 40px; }
 .playing-card { display: inline-grid; place-items: center; width: 36px; height: 50px; flex-shrink: 0; border: 1px solid #3f3f46; border-radius: 4px; background: #fff; color: #18181b; font-family: Georgia, serif; font-size: 18px; font-weight: 700; vertical-align: middle; }
 .playing-card.drive { transform: rotate(90deg); }
 .playing-card.face-down { background: repeating-linear-gradient(45deg, #e4e4e7, #e4e4e7 2px, #fafafa 2px, #fafafa 5px); }

@@ -61,6 +61,7 @@ export function validateScenario(value, catalog) {
       errors.push("Invalid actor");
     if (!["fixed", "real"].includes(s.mode)) errors.push("Invalid mode");
     if (s.automatic !== undefined && typeof s.automatic !== "boolean") errors.push("Invalid automatic step");
+    if (s.revealOpponentHand !== undefined && typeof s.revealOpponentHand !== "boolean") errors.push("Invalid revealOpponentHand");
     if (value.userPlayer && s.mode === "fixed" && s.cause?.phase !== "setup" && !s.automatic &&
       (s.actor !== value.userPlayer || (Array.isArray(s.operations) && s.operations.some((operation) => operation?.player !== value.userPlayer))))
       errors.push("Manual interaction must belong to userPlayer: " + s.id);
@@ -102,10 +103,14 @@ export function validateScenario(value, catalog) {
     if (s.boardNote !== undefined && (typeof s.boardNote !== "string" || !s.boardNote)) errors.push("Invalid boardNote");
     if (s.interaction !== undefined) {
       const interaction = s.interaction;
-      if (!interaction || !["action", "select-target"].includes(interaction.kind)) errors.push("Invalid interaction kind");
+      if (!interaction || !["action", "select-target", "designate-card"].includes(interaction.kind)) errors.push("Invalid interaction kind");
       else if (interaction.kind === "action") {
         if (typeof interaction.label !== "string" || !interaction.label || s.operations?.length)
           errors.push("Action interaction must have a label and no operations");
+      } else if (interaction.kind === "designate-card") {
+        if (typeof interaction.label !== "string" || !interaction.label ||
+          s.operations?.length !== 1 || s.operations[0]?.cards?.length !== 1 || s.operations[0]?.from !== s.operations[0]?.to ||
+          JSON.stringify(s.board?.before) !== JSON.stringify(s.board?.after)) errors.push("Designation interaction must not change board");
       } else {
         const target = interaction.targetCard;
         if (!target || !["A", "B"].includes(target.player) || !zones.includes(target.zone) ||
@@ -191,6 +196,25 @@ export function validateScenario(value, catalog) {
         continue;
       }
       sceneIds.add(scene.id);
+      if (scene.replayNote !== undefined && (typeof scene.replayNote !== "string" || !scene.replayNote)) errors.push("Invalid replayNote");
+      if (scene.combat !== undefined) {
+        const combat = scene.combat;
+        const validLocation = (location) => location && ["A", "B"].includes(location.player) &&
+          ["soldiers", "bulwarks"].includes(location.zone) &&
+          stepById.get(scene.stepIds?.[0])?.board?.before?.[location.player]?.[location.zone]?.some((c) => c.card === location.card);
+        if (!combat || !validLocation(combat.attacker) ||
+          !Array.isArray(combat.result) || !combat.result.length || combat.result.some((s) => typeof s !== "string" || !s) ||
+          typeof combat.comparison !== "string" || !combat.comparison) errors.push("Invalid combat example");
+        if (combat?.blocker) {
+          const designation = stepById.get(combat.designationStepId);
+          const operation = designation?.operations?.[0];
+          if (!validLocation(combat.blocker) || combat.attacker?.player === combat.blocker.player ||
+            !scene.stepIds?.includes(combat.designationStepId) ||
+            !["designate-card", "select-target"].includes(designation?.interaction?.kind) ||
+            operation?.player !== combat.blocker.player || operation?.from !== combat.blocker.zone ||
+            !operation?.cards?.includes(combat.blocker.card)) errors.push("Invalid combat designation");
+        }
+      }
       if (!["static", "interactive"].includes(scene.presentation)) errors.push("Invalid scene presentation");
       if (![scene.title, scene.intro, scene.summary].every((text) => typeof text === "string" && text))
         errors.push("Invalid scene text");
@@ -222,7 +246,7 @@ export function validateScenario(value, catalog) {
               if (!before.some((c) => c.card === card) || !step.board.after[player][to].some((c) => c.card === card) ||
                 (zone === "life" && before[0]?.card !== card)) errors.push("Interaction contradicts operation order: " + id);
               if (command.kind === "select-target" && sameCard(command.source, command.target)) errors.push("Invalid interaction targetCard");
-              if (command.kind === "select-target" && step.cause?.actionId === "block" &&
+              if (["select-target", "designate-card"].includes(command.kind) && step.cause?.actionId === "block" &&
                 before.find((c) => c.card === card)?.state !== "charge")
                 errors.push("Blocker must be charged: " + id);
             }

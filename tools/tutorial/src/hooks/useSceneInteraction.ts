@@ -20,6 +20,7 @@ function visibleName(location: CardLocation, board: BoardState) {
 function instruction(command: InteractionCommand | undefined, selected: CardLocation | null, board: BoardState) {
   if (!command) return "置き場をタップしてみましょう。";
   if (command.kind === "action") return `「${command.label}」を押してください。`;
+  if (command.kind === "designate-card") return `${command.source.player === "A" ? "あなた" : "相手"}の${visibleName(command.source, board)}をタップして、${command.label}に指定してください。`;
   if (selected && command.kind === "move-card") return `${command.source.player === "A" ? "あなた" : "相手"}の${zoneNames[command.to]}をタップしてください。`;
   if (selected && command.kind === "select-target") return `${visibleName(command.target, board)}をタップして、ブロックする相手を指定してください。`;
   return `${command.source.player === "A" ? "あなた" : "相手"}の${visibleName(command.source, board)}をタップしてください。`;
@@ -27,8 +28,10 @@ function instruction(command: InteractionCommand | undefined, selected: CardLoca
 function resultText(command: InteractionCommand, step: TutorialStep, board: BoardState) {
   if (command.kind === "action") return step.learned;
   const name = visibleName(command.source, step.board.before);
+  if (command.kind === "designate-card") return `${name}を${command.label}に指定しました。向きと置き場はそのままです。`;
   if (command.kind === "select-target") return `${name}が${visibleName(command.target, board)}をブロック。向きはそのままです。`;
   if (command.kind === "move-card") {
+    if (command.source.player === "B" && command.to === "hand" && !step.revealOpponentHand) return "相手の手札が1枚増えました。内容は相手だけが見ます。";
     const card = board[command.source.player][command.to].find((c) => c.card === command.source.card);
     return `${step.cause?.phase === "request" ? "コストL：1点ダメージ。" : ""}${card?.face === "up" ? cardName(card.card) : "裏向きのカード"}を${zoneNames[command.to]}へ移しました。`;
   }

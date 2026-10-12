@@ -170,7 +170,7 @@ describe("固定盤面の変化表示", () => {
       real={false} stepId={step.id} cause={step.cause} />);
     const route = document.querySelector(`line.board-route[data-from="${from}"][data-to="${to}"]`);
     expect(route).toBeInTheDocument();
-    expect(route).toHaveAttribute("data-source", "card");
+    expect(route).toHaveAttribute("data-source", from === "hand" && step.operations[0].player === "B" ? "zone" : "card");
     expect(document.querySelector("path.board-route")).toBeNull();
   });
 

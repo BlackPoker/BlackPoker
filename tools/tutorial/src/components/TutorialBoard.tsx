@@ -1,5 +1,6 @@
-import { useRef, useState } from "react";
-import type { BoardCard, BoardState, MovementCause, Operation, Player, Zone } from "../types";
+import { Fragment, useRef, useState } from "react";
+import type { BoardCard, BoardState, CombatExample, MovementCause, Operation, Player, Zone } from "../types";
+import { CombatLink } from "./CombatLink";
 import { cardName } from "../lib/cards";
 import { BoardOverlay } from "./BoardOverlay";
 import { CardFace } from "./PlayingCard";
@@ -55,6 +56,9 @@ export function TutorialBoard({
   focusZones = [],
   interaction,
   boardNote,
+  combat,
+  designated = false,
+  revealOpponentHand = false,
 }: {
   board: BoardState;
   before: BoardState;
@@ -66,6 +70,9 @@ export function TutorialBoard({
   cause?: MovementCause;
   focusZones?: { player: Player; zone: Zone }[];
   boardNote?: string;
+  combat?: CombatExample;
+  designated?: boolean;
+  revealOpponentHand?: boolean;
   interaction?: {
     command?: InteractionCommand; selected: CardLocation | null;
     pending: boolean; complete: boolean; mistakes: number;
@@ -104,14 +111,15 @@ export function TutorialBoard({
 
   function zone(player: Player, zone: Zone) {
     const cards = board[player][zone];
+    const privateHand = !real && player === "B" && zone === "hand" && !revealOpponentHand;
     const related = operations.filter((o) => o.player === player);
     const focused = cause?.phase === "setup" && focusZones.some((focus) => focus.player === player && focus.zone === zone);
     const changed = !real && cause?.phase !== "setup" && related.some((o) => (applied ? o.to : o.from) === zone);
-    const annotations = !real && cause?.phase !== "setup" && (!interactive || interaction.pending || applied) ? related.filter((o) => o.to === zone &&
+    const annotations = !privateHand && !real && cause?.phase !== "setup" && (!interactive || interaction.pending || applied) ? related.filter((o) => o.to === zone &&
       (applied || o.from === o.to))
       .map((operation) => movement(operation, before, after)) : [];
     const stack = zone === "life" || zone === "grave";
-    const shown = stack
+    const shown = privateHand ? [] : stack
       ? zone === "life"
         ? cards.slice(0, 1)
         : cards.slice(-1)
@@ -130,8 +138,8 @@ export function TutorialBoard({
           aria-label={`PLAYER ${player}の${labels[zone]}${destination ? "へ移す" : ""}`}
           onClick={() => interaction.onInput({ kind: "zone", player, zone })} />}
         <span className="zone-label">
-          {labels[zone]}
-          {!real && cards.length > 0 && <small> {cards.length}枚</small>}
+          {privateHand ? "相手の手札" : labels[zone]}
+          {!real && !privateHand && cards.length > 0 && <small> {cards.length}枚</small>}
         </span>
         <div className="zone-cards">
           {shown.map((c: BoardCard) => {
@@ -139,9 +147,11 @@ export function TutorialBoard({
             const isSelected = sameCard(selected, location);
             const expected = available && command && "source" in command && sameCard(command.source, location);
             const target = available && selected && command?.kind === "select-target" && sameCard(command.target, location);
-            const name = `${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}`;
+            const combatRole = sameCard(combat?.attacker, location) && c.state === "drive" ? "アタック中" :
+              designated && sameCard(combat?.blocker, location) ? "ブロッカー" : "";
+            const name = `${player} ${c.face === "down" ? `${labels[zone]}の裏向きカード` : cardName(c.card)} ${c.face === "down" ? "裏向き" : "表向き"} ${c.state === "drive" ? "横向き" : "縦向き"}${combatRole ? ` ${combatRole}` : ""}`;
             const CardSlot = interactive ? "button" : "span";
-            return <CardSlot className={`card-slot ${c.state} ${isSelected ? "selected-card" : ""} ${expected || target ? "expected-card" : ""} ${interaction?.mistakes ? "strong-hint" : ""}`} key={c.card}
+            return <CardSlot className={`card-slot ${c.state} ${combatRole ? "combat-card" : ""} ${isSelected ? "selected-card" : ""} ${expected || target ? "expected-card" : ""} ${interaction?.mistakes ? "strong-hint" : ""}`} key={c.card}
               {...(interactive ? { type: "button" as const, "aria-label": name, "aria-pressed": isSelected } : {})}
               onClick={interactive ? () => {
                 if (Date.now() < suppressClickUntil.current) return;
@@ -186,6 +196,7 @@ export function TutorialBoard({
                 <CardFace code={c.card} face={c.face} />
               </span>
               {isSelected && <small className="selection-label" aria-hidden="true">選択中</small>}
+              {combatRole && <small className="card-combat-label" aria-hidden="true">{combatRole}</small>}
             </CardSlot>;
           })}
           {!shown.length && real && (
@@ -197,7 +208,8 @@ export function TutorialBoard({
               <small>{realHints[zone].sub}</small>
             </span>
           )}
-          {!shown.length && !real && <span className="empty-zone">—</span>}
+          {privateHand && <span className="private-hand-count">{cards.length}枚<small>内容は相手だけが見ます</small></span>}
+          {!shown.length && !real && !privateHand && <span className="empty-zone">—</span>}
         </div>
         {annotations.map((annotation, index) => (
           <span className={`zone-motion-label motion-${annotation.kind}`} key={index} aria-hidden="true">
@@ -229,7 +241,7 @@ export function TutorialBoard({
           PLAYER {before.turn} <span aria-hidden="true">→</span> PLAYER {after.turn}
         </div>
       )}
-      {(["B", "A"] as const).map((p) => (
+      {(["B", "A"] as const).map((p) => (<Fragment key={p}>
         <section
           key={p}
           className={`player-half player-${p}`}
@@ -242,20 +254,22 @@ export function TutorialBoard({
               cause && cause.phase !== "setup" && board.turn === p &&
               <span className="board-still-label">カード移動なし</span>}
           </header>
-          <div className="table-zones">
-            {(p === "A"
-              ? ["life", "soldiers", "bulwarks", "grave", "hand"]
-              : ["grave", "bulwarks", "soldiers", "life", "hand"]
-            ).map((z) => zone(p, z as Zone))}
+          {p === "B" && <div className="support-zones" role="group" aria-label="相手のライフ・墓地・手札">{(["grave", "hand", "life"] as const).map((z) => zone(p, z))}</div>}
+          <div className="battlefield" role="group" aria-label={`${p === "A" ? "あなた" : "相手"}の兵士・防壁の置き場`}>
+            {(p === "A" ? ["soldiers", "bulwarks"] as const : ["bulwarks", "soldiers"] as const).map((z) => zone(p, z))}
           </div>
+          {p === "A" && <div className="support-zones" role="group" aria-label="あなたのライフ・墓地・手札">{(["life", "hand", "grave"] as const).map((z) => zone(p, z))}</div>}
         </section>
+        {p === "B" && <div className="battle-center">{combat && designated ? <CombatLink combat={combat} board={board} /> : <span>対戦中央</span>}</div>}
+      </Fragment>
       ))}
       {!real && !applied && cause?.phase !== "setup" && boardElement && guideOperations.length > 0 &&
         <BoardOverlay board={boardElement} operations={guideOperations} />}
       {!real && applied && (
         <ul className="visually-hidden" aria-label="カードの変化">
           {operations.map((operation, index) => (
-            <li key={index}>PLAYER {operation.player}：{movement(operation, before, after).text}</li>
+            <li key={index}>PLAYER {operation.player}：{operation.player === "B" && operation.to === "hand" && !revealOpponentHand
+              ? `手札へ${operation.cards.length}枚移しました` : movement(operation, before, after).text}</li>
           ))}
           {before.turn !== after.turn && <li>ターン：PLAYER {before.turn} → PLAYER {after.turn}</li>}
           {!operations.length && before.turn === after.turn && cause && cause.phase !== "setup" &&

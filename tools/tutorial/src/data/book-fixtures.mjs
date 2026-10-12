@@ -27,6 +27,14 @@ export function makeBookFixtures(base) {
       steps.forEach(swapPlayers);
       scene.intro = "相手が♣6でアタックしました。あなたの♥7で守ります。";
       steps[0].boardNote = scene.intro;
+      steps[0].interaction = { kind: "designate-card", label: "ブロッカー" };
+      steps[0].explanation = "アタック後、防御するあなたが♥7をブロッカーに指定します。今回はアタッカーが♣6だけなので対応先は自動です。♥7の向きは変わりません。";
+      scene.cues = ["あなたの兵士をブロッカーに", "6 < 7：ライフは減らない"];
+      scene.combat = { attacker: { player: "B", zone: "soldiers", card: "C6" },
+        blocker: { player: "A", zone: "soldiers", card: "H7" }, designationStepId: steps[0].id,
+        result: ["6 < 7", "相手の♣6 → 墓地", "あなたの♥7は場に残る", "あなたのライフ → そのまま（減らない）"],
+        comparison: "兵士は数字の大小を比較。この例では♥7が勝ち、ライフを守りました。" };
+      scene.summary = "6 < 7なので相手の♣6が墓地へ。あなたのライフは減りません。";
       steps[1].automatic = true;
       steps[1].instruction = "6 ＜ 7：相手の♣6が墓地へ移ります。";
     }
@@ -41,7 +49,10 @@ export function makeBookFixtures(base) {
       steps.slice(1).forEach((step) => { step.automatic = true; });
       steps[1].instruction = "相手はブロッカーを指定しません。攻撃が通りました。";
       steps[2].instruction = "攻撃が通ったので、相手のライフが1枚ずつ、合計2枚減ります。";
-      scene.intro = "あなたの♠2でアタック。今回は相手がブロックしない例です。";
+      scene.intro = "アタックは1ターンに1回。今回は♠2だけをアタッカーにします。";
+      scene.replayNote = "これは練習のやり直しです。実際のゲームではアタックは1ターンに1回です。";
+      scene.combat = { attacker: { player: "A", zone: "soldiers", card: "S2" },
+        result: ["相手が守らず、攻撃が通る", "相手のライフ → 2枚減る"], comparison: "守られなければ、攻撃する兵士の数字だけライフが減ります。" };
     }
     if (scene.id === "pass-turn") {
       steps.slice(1).forEach((step) => { step.automatic = true; });
@@ -63,6 +74,13 @@ export function makeBookFixtures(base) {
   wall.steps.find((step) => step.id === "wall-attacker").instruction = "数字が一致したので、相手の♣6が墓地へ移ります。";
   wall.scenes[0].intro = "相手が♣6でアタックしました。あなたの裏向き・チャージ状態の防壁で守ります。";
   wall.steps[0].boardNote = wall.scenes[0].intro;
+  wall.steps[0].interaction = { kind: "designate-card", label: "ブロッカー" };
+  wall.steps[0].explanation = "今回はアタッカーが1体なので、防壁をブロッカーに指定すると対応先は自動で決まります。向きは縦のままです。";
+  wall.scenes[0].combat = { attacker: { player: "B", zone: "soldiers", card: "C6" },
+    blocker: { player: "A", zone: "bulwarks", card: "C6" }, designationStepId: wall.steps[0].id,
+    result: ["防壁を公開：6 = 6で数字が一致", "相手の♣6 → 墓地", "あなたの防壁も → 墓地", "あなたのライフ → そのまま（減らない）"],
+    comparison: "兵士は大小比較、防壁は一致などの条件判定。防壁は数字が一致しなくても墓地へ移り、ライフを守ります。" };
+  wall.scenes[0].summary += "あなたのライフは減りません。";
   fixtures.push(wall);
   // 実物の開始手順は順序・先攻選択を変更しない。固定sceneの重複登録はしない。
   fixtures.push({ ...structuredClone(base), id: "book-real", scenes: [], steps: structuredClone(base.steps.filter((step) => step.mode === "real")) });

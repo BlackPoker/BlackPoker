@@ -4,6 +4,8 @@ export function deriveInteractions(step) {
     return [{ kind: "action", label: step.interaction.label }];
   return (step.operations || []).flatMap((operation) => operation.cards.map((card) => {
     const source = { player: operation.player, zone: operation.from, card };
+    if (step.interaction?.kind === "designate-card")
+      return { kind: "designate-card", source, label: step.interaction.label, operation };
     if (step.interaction?.kind === "select-target")
       return { kind: "select-target", source, target: step.interaction.targetCard, operation };
     if (operation.from !== operation.to)
@@ -21,7 +23,7 @@ export function interactionBoard(step, completed) {
   if (completed >= commands.length && commands.length) return structuredClone(step.board.after);
   const board = structuredClone(step.board.before);
   for (const command of commands.slice(0, completed)) {
-    if (!command.source || command.kind === "select-target") continue;
+    if (!command.source || command.kind === "select-target" || command.kind === "designate-card") continue;
     const { player, zone, card } = command.source;
     const to = command.kind === "move-card" ? command.to : zone;
     const result = step.board.after[player][to].find((c) => c.card === card);
@@ -51,7 +53,7 @@ export function attemptInteraction(command, selected, input) {
       return input.card.player === command.source.player && input.card.zone === command.to ? "success" : "wrong-target";
     if (command.kind === "select-target" && sameCard(selected, command.source))
       return sameCard(command.target, input.card) ? "success" : "wrong-target";
-    if (sameCard(command.source, input.card)) return command.kind === "tap-card" ? "success" : "select";
+    if (sameCard(command.source, input.card)) return ["tap-card", "designate-card"].includes(command.kind) ? "success" : "select";
   }
   return "wrong-source";
 }

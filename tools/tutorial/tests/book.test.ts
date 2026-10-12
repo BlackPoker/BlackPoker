@@ -21,7 +21,8 @@ describe("Aを操作する独立fixture", () => {
   });
   it("未指定のB操作を検証エラーにし、Bを対象に選ぶ操作は許可する", () => {
     const wall = structuredClone(scenarios.find((s) => s.scenes[0]?.id === "bulwark-block")!);
-    expect(wall.steps[0].interaction).toMatchObject({ targetCard: { player: "B" } });
+    expect(wall.steps[0].interaction).toMatchObject({ kind: "designate-card" });
+    expect(wall.scenes[0].combat?.attacker.player).toBe("B");
     wall.steps[2].automatic = false;
     expect(validateScenario(wall, ruleCatalog)).toContain("Manual interaction must belong to userPlayer: wall-attacker");
     (wall.steps[0] as any).operations = {};
