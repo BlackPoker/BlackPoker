@@ -115,6 +115,27 @@ export class PopulationSelector {
   }
 
   /**
+   * selectionSeed の厳格なバリデーション (Fail-Fast)
+   *
+   * 規約:
+   * - finite integer のみ許可 (NaN, Infinity, -Infinity, 小数は拒絶)
+   * - 0 は合法 (明示指定として許可)
+   * - undefined / 未指定は拒絶 (暗黙 0 へのフォールバック禁止)
+   */
+  public static validateSelectionSeed(selectionSeed: unknown): number {
+    if (
+      typeof selectionSeed !== "number" ||
+      !Number.isFinite(selectionSeed) ||
+      !Number.isInteger(selectionSeed)
+    ) {
+      throw new PopulationSelectionConfigurationError(
+        `Invalid selectionSeed: must be a finite integer, got ${selectionSeed}`
+      );
+    }
+    return selectionSeed;
+  }
+
+  /**
    * 母集団スナップショットおよび適応度評価スナップショットのデータ整合性検証 (Fail-Fast)
    *
    * 違反がある場合は PopulationSelectionIntegrityError をスローする。
@@ -345,6 +366,18 @@ export class PopulationSelector {
     }
 
     if (
+      fitnessSnapshot.context.generation !== fitnessSnapshot.generation ||
+      fitnessSnapshot.context.generation !== population.generation
+    ) {
+      return {
+        status: "INCOMPARABLE_EVALUATION",
+        validCount: 0,
+        requiredCount,
+        reason: `ComparableEvaluationContext generation (${fitnessSnapshot.context.generation}) does not match fitnessSnapshot generation (${fitnessSnapshot.generation}) or population generation (${population.generation})`,
+      };
+    }
+
+    if (
       expectedContext &&
       !isComparableEvaluationContextEqual(fitnessSnapshot.context, expectedContext)
     ) {
@@ -513,8 +546,8 @@ export class PopulationSelector {
   public static selectParent(
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    config?: Partial<PopulationSelectionConfig>,
-    selectionSeed?: number,
+    config: Partial<PopulationSelectionConfig> | undefined,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): SelectedParent {
     const results = PopulationSelector.selectParents(
@@ -539,10 +572,12 @@ export class PopulationSelector {
     count: number,
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    config?: Partial<PopulationSelectionConfig>,
-    selectionSeed?: number,
+    config: Partial<PopulationSelectionConfig> | undefined,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): readonly SelectedParent[] {
+    const validatedSeed = PopulationSelector.validateSelectionSeed(selectionSeed);
+
     if (
       typeof count !== "number" ||
       !Number.isFinite(count) ||
@@ -579,7 +614,7 @@ export class PopulationSelector {
       fitnessSnapshot
     );
 
-    const rng = new SeededRandom(selectionSeed ?? 0);
+    const rng = new SeededRandom(validatedSeed);
     const selected: SelectedParent[] = [];
 
     for (let i = 0; i < count; i++) {
@@ -605,10 +640,11 @@ export class PopulationSelector {
   public static selectElites(
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    config?: Partial<PopulationSelectionConfig>,
-    selectionSeed?: number,
+    config: Partial<PopulationSelectionConfig> | undefined,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): readonly SelectedParent[] {
+    const validatedSeed = PopulationSelector.validateSelectionSeed(selectionSeed);
     const resolvedConfig = PopulationSelector.validateConfig(config);
     if (resolvedConfig.eliteCount === 0) {
       return Object.freeze([]);
@@ -656,7 +692,7 @@ export class PopulationSelector {
     }
 
     const descendingScores = Array.from(scoreMap.keys()).sort((a, b) => b - a);
-    const rng = new SeededRandom(selectionSeed ?? 0);
+    const rng = new SeededRandom(validatedSeed);
     const elites: SelectedParent[] = [];
     let remainingSlots = resolvedConfig.eliteCount;
 
@@ -734,7 +770,7 @@ export class PopulationSelector {
   public selectParent(
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    selectionSeed?: number,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): SelectedParent {
     return PopulationSelector.selectParent(
@@ -750,7 +786,7 @@ export class PopulationSelector {
     count: number,
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    selectionSeed?: number,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): readonly SelectedParent[] {
     return PopulationSelector.selectParents(
@@ -766,7 +802,7 @@ export class PopulationSelector {
   public selectElites(
     population: PopulationSnapshot,
     fitnessSnapshot: FitnessEvaluationSnapshot,
-    selectionSeed?: number,
+    selectionSeed: number,
     expectedContext?: ComparableEvaluationContext
   ): readonly SelectedParent[] {
     return PopulationSelector.selectElites(

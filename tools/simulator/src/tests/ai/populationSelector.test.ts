@@ -449,7 +449,7 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
       expect(counts.get("DNA_C")).toBeGreaterThan(15);
     });
 
-    it("Test 13: Provisional score negative control (INSUFFICIENT with provisionalScore 1.0 never selected)", () => {
+    it("Test 13: Provisional score negative control (INSUFFICIENT with provisionalScore 1.0 never selected, and varying provisionalScore produces identical sequence)", () => {
       const population: PopulationSnapshot = {
         generation: 1,
         entries: [
@@ -460,28 +460,55 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
         ],
       };
 
-      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+      // Case A: provisionalScore = 0.1
+      const fitnessSnapshotA: FitnessEvaluationSnapshot = {
         generation: 1,
         context: dummyContext,
         entries: [
           createFitnessEntry("DNA_VALID1", "VALID", 0.1),
           createFitnessEntry("DNA_VALID2", "VALID", 0.1),
           createFitnessEntry("DNA_VALID3", "VALID", 0.1),
-          // 見かけ上 1.00 だが INSUFFICIENT
+          createFitnessEntry("DNA_INSUFFICIENT", "INSUFFICIENT_EVIDENCE", null, 0.1),
+        ],
+      };
+
+      // Case B: provisionalScore = 1.0 (見かけ上最高スコア)
+      const fitnessSnapshotB: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_VALID1", "VALID", 0.1),
+          createFitnessEntry("DNA_VALID2", "VALID", 0.1),
+          createFitnessEntry("DNA_VALID3", "VALID", 0.1),
           createFitnessEntry("DNA_INSUFFICIENT", "INSUFFICIENT_EVIDENCE", null, 1.0),
         ],
       };
 
-      const parents = PopulationSelector.selectParents(
+      const parentsA = PopulationSelector.selectParents(
         50,
         population,
-        fitnessSnapshot,
+        fitnessSnapshotA,
         undefined,
         42
       );
 
-      const insufficientCount = parents.filter((p) => p.genomeId === "DNA_INSUFFICIENT").length;
-      expect(insufficientCount).toBe(0);
+      const parentsB = PopulationSelector.selectParents(
+        50,
+        population,
+        fitnessSnapshotB,
+        undefined,
+        42
+      );
+
+      // INSUFFICIENT 個体は一切選択されない
+      const insufficientCountA = parentsA.filter((p) => p.genomeId === "DNA_INSUFFICIENT").length;
+      const insufficientCountB = parentsB.filter((p) => p.genomeId === "DNA_INSUFFICIENT").length;
+      expect(insufficientCountA).toBe(0);
+      expect(insufficientCountB).toBe(0);
+
+      // provisionalScore の変更が Selection 結果に一切影響を与えないことを証明 (Negative Control)
+      expect(JSON.stringify(parentsA)).toBe(JSON.stringify(parentsB));
+      expect(parentsA).toEqual(parentsB);
     });
 
     it("Test 14: Invalid exclusion (INVALID with failedMatches never selected)", () => {
@@ -518,7 +545,102 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
       expect(invalidCount).toBe(0);
     });
 
-    it("Test 15: Comparable context mismatch -> INCOMPARABLE_EVALUATION", () => {
+    it("Test 15-A (Test A): Snapshot context generation mismatch -> INCOMPARABLE_EVALUATION", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [
+          createDummyEntry("DNA_01", 1),
+          createDummyEntry("DNA_02", 1),
+          createDummyEntry("DNA_03", 1),
+        ],
+      };
+
+      const mismatchedContext: ComparableEvaluationContext = {
+        ...dummyContext,
+        generation: 2, // mismatch with population & fitnessSnapshot (generation 1)
+      };
+
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: mismatchedContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      const readiness = PopulationSelector.assessReadiness(population, fitnessSnapshot);
+      expect(readiness.status).toBe("INCOMPARABLE_EVALUATION");
+    });
+
+    it("Test 15-B (Test B): Execution on context generation mismatch throws PopulationSelectionExecutionError with INCOMPARABLE_EVALUATION", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [
+          createDummyEntry("DNA_01", 1),
+          createDummyEntry("DNA_02", 1),
+          createDummyEntry("DNA_03", 1),
+        ],
+      };
+
+      const mismatchedContext: ComparableEvaluationContext = {
+        ...dummyContext,
+        generation: 2,
+      };
+
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: mismatchedContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, 42)
+      ).toThrowError(PopulationSelectionExecutionError);
+
+      try {
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, 42);
+      } catch (err) {
+        expect(err).toBeInstanceOf(PopulationSelectionExecutionError);
+        expect((err as PopulationSelectionExecutionError).readinessStatus).toBe("INCOMPARABLE_EVALUATION");
+      }
+    });
+
+    it("Test 15-C (Test C): Individual entry context generation mismatch -> INCOMPARABLE_EVALUATION", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [
+          createDummyEntry("DNA_01", 1),
+          createDummyEntry("DNA_02", 1),
+          createDummyEntry("DNA_03", 1),
+        ],
+      };
+
+      const individualMismatchedContext: ComparableEvaluationContext = {
+        ...dummyContext,
+        generation: 2, // mismatch with snapshotContext (generation 1)
+      };
+
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6, null, individualMismatchedContext),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      const readiness = PopulationSelector.assessReadiness(population, fitnessSnapshot);
+      expect(readiness.status).toBe("INCOMPARABLE_EVALUATION");
+    });
+
+    it("Test 15-D: Expected context mismatch -> INCOMPARABLE_EVALUATION", () => {
       const population: PopulationSnapshot = {
         generation: 1,
         entries: [
@@ -654,19 +776,41 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
       ).toThrow(PopulationSelectionIntegrityError);
     });
 
-    it("Test 20: Config validation checks boundaries (minValid < 2, tournamentSize < 2, eliteCount < 0)", () => {
+    it("Test 20: Config validation checks boundaries, NaN, and fractions", () => {
+      // minimumValidPopulationCount
       expect(() =>
         PopulationSelector.validateConfig({ minimumValidPopulationCount: 1 })
       ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ minimumValidPopulationCount: NaN })
+      ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ minimumValidPopulationCount: 2.5 })
+      ).toThrow(PopulationSelectionConfigurationError);
 
+      // tournamentSize
       expect(() =>
         PopulationSelector.validateConfig({ tournamentSize: 1 })
       ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ tournamentSize: NaN })
+      ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ tournamentSize: 2.5 })
+      ).toThrow(PopulationSelectionConfigurationError);
 
+      // eliteCount
       expect(() =>
         PopulationSelector.validateConfig({ eliteCount: -1 })
       ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ eliteCount: NaN })
+      ).toThrow(PopulationSelectionConfigurationError);
+      expect(() =>
+        PopulationSelector.validateConfig({ eliteCount: 0.5 })
+      ).toThrow(PopulationSelectionConfigurationError);
 
+      // Valid configuration
       const valid = PopulationSelector.validateConfig({
         minimumValidPopulationCount: 4,
         tournamentSize: 4,
@@ -757,6 +901,163 @@ describe("Population & Tournament Selection Core V1 (BP-SIM-AI-POPULATION-SELECT
       expect(run1).toEqual(run2);
       expect(run1).toHaveLength(1);
       expect(run1[0].fitnessScore).toBe(0.85);
+    });
+
+    it("Test 24 (Test D): selectionSeed = 0 is accepted and operates normally", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [
+          createDummyEntry("DNA_01"),
+          createDummyEntry("DNA_02"),
+          createDummyEntry("DNA_03"),
+        ],
+      };
+
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      // selectionSeed = 0 (明示的0)
+      const parents = PopulationSelector.selectParents(
+        5,
+        population,
+        fitnessSnapshot,
+        undefined,
+        0
+      );
+      expect(parents).toHaveLength(5);
+
+      const elites = PopulationSelector.selectElites(
+        population,
+        fitnessSnapshot,
+        undefined,
+        0
+      );
+      expect(elites).toHaveLength(1);
+    });
+
+    it("Test 25 (Test E): selectionSeed = NaN throws PopulationSelectionConfigurationError", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [createDummyEntry("DNA_01"), createDummyEntry("DNA_02"), createDummyEntry("DNA_03")],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, NaN)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectElites(population, fitnessSnapshot, undefined, NaN)
+      ).toThrow(PopulationSelectionConfigurationError);
+    });
+
+    it("Test 26 (Test F): selectionSeed = Infinity / -Infinity throws PopulationSelectionConfigurationError", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [createDummyEntry("DNA_01"), createDummyEntry("DNA_02"), createDummyEntry("DNA_03")],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, Infinity)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, -Infinity)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectElites(population, fitnessSnapshot, undefined, Infinity)
+      ).toThrow(PopulationSelectionConfigurationError);
+    });
+
+    it("Test 27 (Test G): selectionSeed = 1.5 (fraction) throws PopulationSelectionConfigurationError", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [createDummyEntry("DNA_01"), createDummyEntry("DNA_02"), createDummyEntry("DNA_03")],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, 1.5)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectElites(population, fitnessSnapshot, undefined, 1.5)
+      ).toThrow(PopulationSelectionConfigurationError);
+    });
+
+    it("Test 28 (Test H): selectionSeed omitted / undefined throws PopulationSelectionConfigurationError at runtime boundary", () => {
+      const population: PopulationSnapshot = {
+        generation: 1,
+        entries: [createDummyEntry("DNA_01"), createDummyEntry("DNA_02"), createDummyEntry("DNA_03")],
+      };
+      const fitnessSnapshot: FitnessEvaluationSnapshot = {
+        generation: 1,
+        context: dummyContext,
+        entries: [
+          createFitnessEntry("DNA_01", "VALID", 0.7),
+          createFitnessEntry("DNA_02", "VALID", 0.6),
+          createFitnessEntry("DNA_03", "VALID", 0.5),
+        ],
+      };
+
+      // 型安全の迂回 (JS呼出や未検証入力相当)
+      expect(() =>
+        PopulationSelector.selectParents(1, population, fitnessSnapshot, undefined, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectParent(population, fitnessSnapshot, undefined, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        PopulationSelector.selectElites(population, fitnessSnapshot, undefined, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      const selector = new PopulationSelector();
+      expect(() =>
+        selector.selectParents(1, population, fitnessSnapshot, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        selector.selectParent(population, fitnessSnapshot, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
+
+      expect(() =>
+        selector.selectElites(population, fitnessSnapshot, undefined as unknown as number)
+      ).toThrow(PopulationSelectionConfigurationError);
     });
   });
 
