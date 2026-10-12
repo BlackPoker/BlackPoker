@@ -72,14 +72,17 @@ export class GenomeSensitivityDNAFactory {
       throw new Error(`未知の Pattern Feature 名: ${patternFeatureName}`);
     }
 
-    const cloned = DecisionDNACodec.clone(baseDna);
-    if (metadata) {
-      cloned.metadata = { ...cloned.metadata, ...metadata };
-    }
+    const patternWeights = [...baseDna.patternWeights];
+    patternWeights[pIdx] += weightDelta;
 
-    (cloned.patternWeights as number[])[pIdx] += weightDelta;
-    DecisionDNACodec.validate(cloned);
-    return cloned;
+    const modified: DecisionDNA = {
+      ...DecisionDNACodec.clone(baseDna),
+      patternWeights,
+      metadata: metadata ? { ...baseDna.metadata, ...metadata } : baseDna.metadata,
+    };
+
+    DecisionDNACodec.validate(modified);
+    return modified;
   }
 
   /**
@@ -103,13 +106,16 @@ export class GenomeSensitivityDNAFactory {
     }
 
     const weightIndex = DecisionDNACodec.getContextPatternWeightIndex(cIdx, pIdx);
-    const cloned = DecisionDNACodec.clone(baseDna);
-    if (metadata) {
-      cloned.metadata = { ...cloned.metadata, ...metadata };
-    }
+    const contextPatternWeights = [...baseDna.contextPatternWeights];
+    contextPatternWeights[weightIndex] += weightDelta;
 
-    (cloned.contextPatternWeights as number[])[weightIndex] += weightDelta;
-    DecisionDNACodec.validate(cloned);
-    return cloned;
+    const modified: DecisionDNA = {
+      ...DecisionDNACodec.clone(baseDna),
+      contextPatternWeights,
+      metadata: metadata ? { ...baseDna.metadata, ...metadata } : baseDna.metadata,
+    };
+
+    DecisionDNACodec.validate(modified);
+    return modified;
   }
 }
