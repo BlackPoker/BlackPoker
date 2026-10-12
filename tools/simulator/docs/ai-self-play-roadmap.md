@@ -406,12 +406,15 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 ### 1. Self-Play Evolution Cycle (BP-SIM-AI-EVOLUTION-V1 予定)
 1. **Population**: 100 DNA
 2. **Generation Self-Play**: `BatchSimulationRunner` および `PolicyExperimentRunner` を用いた世代内評価 (Seat Swap / Multi Seed 公平性保証)
-3. **Fitness Evaluation (Outcome-First V1)**:
+3. **Fitness Evaluation (Outcome-First V1, BP-SIM-AI-FITNESS-EVAL-V1)**:
+   - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`FitnessEvaluator`, `FitnessEvaluationTypes`)
    - **最重要原則**: "Victory is the objective. Life is a resource, not a score."
    - **主評価指標**: 勝敗結果（Outcome）に基づく Match Point Average (MPA: Win=1.0, Draw=0.5, Loss=0.0 on Completed Matches)。
    - **Telemetry 分離**: 残りライフ（Remaining Life）、ターン数（Turn Count）、被ダメージ等は Fitness 計算から完全に除外。分析・研究・異常検知のための Telemetry メトリクスとして独立記録。
    - **厳格なステータス分離**: `FAILED != LOSS`（Fail-Closed ゲートにより即座に失格/除外。Authoritative Fitness Score 不在 `fitnessScore: null`）、`INCOMPLETE != DRAW`（未決着は引き分けに含めず除外）。
-   - **Evidence Sufficiency (VALID 条件)**: `failedMatches === 0 AND completedMatches >= minimumCompletedMatches AND completionRate >= minimumCompletionRate` を満たす場合のみ `VALID`（Authoritative Score 確定）。不足時は `INSUFFICIENT_EVIDENCE` として保留（過大評価防止）。※閾値は初期仮値（Provisional Defaults）。
+   - **Evidence Sufficiency (VALID 条件)**: `failedMatches === 0 AND completedMatches >= minimumCompletedMatches AND completionRate >= minimumCompletionRate` を満たす場合のみ `VALID`（Authoritative Score 確定）。不足時は `INSUFFICIENT_EVIDENCE` として保留（通常選択プール除外、過大評価防止）。※閾値は初期仮値（Provisional Defaults: minCompleted=10, minRate=50%）。
+   - **0 試合完了の厳格な扱い**: `completedMatches === 0` の場合は `provisionalScore = null`（0 勝全敗 0.0 と区別）。
+   - **※ 未実装コンポーネント**: Population, Selection, Crossover, Mutation, Generation / Evolution Loop は未実装のまま維持。
    - ※詳細設計仕様: `tools/simulator/docs/ai-fitness-design-v1.md` 参照。
 4. **Genetic Operators**: Selection, Crossover, Mutation $\rightarrow$ 次世代生成
 5. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
