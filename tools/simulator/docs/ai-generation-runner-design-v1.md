@@ -1,7 +1,7 @@
-# BlackPoker Simulator Generation Runner Design V1 (Follow-up R3)
+# BlackPoker Simulator Generation Runner Design V1 (Follow-up R4)
 # (Generation g 自己対戦評価・適応度集計・次世代遷移実行境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R3`
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R4`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -39,7 +39,23 @@ $$\text{PopulationSnapshot}(g) \xrightarrow{\text{Self-Play Evaluation}} \text{F
 
 Generation Runner は、母集団 $N$ 個体の全ペアによる決定論的 **Double Round Robin（二重総当たり戦）** スケジュールを構築・実行し、勝敗結果を `FitnessEvaluator` へ委譲して客観的な適応度スナップショットを生成した上で、`GenerationBuilder` を通じて次世代母集団を安全かつアトミックに導出する。
 
-### R3 Follow-up における確定・厳格化事項
+### R4 Follow-up における確定・厳格化事項
+1. **Canonical Error Taxonomy の厳格な境界確定**:
+   - `GenerationRunnerConfigurationError`: 開始前（Preflight）に検出可能な全静的設定不備（不正な `generationSeed`、不正な `environment`、母集団サイズ $N < 2$、`pairRepetitions < 1`、`maxDecisionsPerMatch < 1`、不正な `builderConfig`、`eliteCount >= resolvedPopulationSize`、証拠不足等）。
+   - `GenerationRunnerIntegrityError`: 内部計算の保存則違反、重複個体 ID、重複 `matchIndex`、結果件数不一致、Comparable Context 不整合、および **Runner ↔ Builder 間の Contract Drift**（Readiness Preflight で `READY` だったにもかかわらず、Builder が予期せず reject または `GenerationBuilderExecutionError` をスローした場合）。
+   - `GenerationRunnerExecutionError`: **実際の Match Execution 中（対戦実行ループ内）に発生した実行時障害のみ**（`phase`: `"SESSION_FACTORY"` | `"POLICY_FACTORY"` | `"RUNNER"`）。
+2. **`GenerationRunnerExecutionError` の Match Execution 専用化とダミー診断の完全排除**:
+   - `GenerationRunnerExecutionError` は必ず実在する試合（`phase`、`matchIndex`、`p1GenomeId`、`p2GenomeId`、`causeName`）を指す契約とし、非対戦フェーズの例外をこの型で表すことを厳格に禁止。
+   - Builder Contract Drift を表現するために `phase = "RUNNER"` や `matchIndex = -1`、`matchIndex = 0`、空文字 `genomeId` などの偽・ダミー診断情報を作成することを厳格に禁止。
+   - `GenerationRunnerExecutionPhase` に `"BUILDER"` を追加しない（`"SESSION_FACTORY" | "POLICY_FACTORY" | "RUNNER"` の 3 値を厳格に維持）。
+3. **Builder Contract Drift の `GenerationRunnerIntegrityError` への統一**:
+   - Runner が事前検証した契約（Preflight `READY`、有効個体数 $\ge \text{effectiveRequiredCount}$）と Builder 内部の判定が食い違う状態は、対戦中のランタイム例外ではなく、Runner ↔ Builder 間の契約不変条件違反（Contract Invariant Violation）であるため、`GenerationRunnerIntegrityError` としてスローする。
+   - Preflight READY 後の予期せぬ Builder rejection を `GenerationRunnerExecutionError` や正常な `REEVALUATION_REQUIRED` 論理結果へ誤変換しない。
+4. **`causeName` の安定診断契約と `causeMessage` の Debug Detail 化**:
+   - `GenerationRunnerExecutionError` の `causeName`（例: `Error.name`）は安定した診断識別情報として保持。
+   - `causeMessage` は外部例外や OS/Node ランタイム差異により変化し得るため Debug Detail 扱いとし、Logical Determinism / Deep Equal 保証の対象外とする。スタックトレースも Debug Detail 扱いとする。
+
+### R3 Follow-up における確定事項 (継続維持)
 1. **`maxDecisionsPerMatch` および `generationSeed` の事前 Fail-Fast Validation 契約確立 (Finding 1)**:
    - Runner は試合を 1 試合も開始する前に、`maxDecisionsPerMatch` を有限整数かつ $\ge 1$（`typeof === "number" && Number.isFinite() && Number.isInteger() && >= 1`）として厳格検証。`0`、負数、小数、`NaN`、`Infinity`、`-Infinity` はすべて `GenerationRunnerConfigurationError` で Fail-Fast 拒絶。
    - `generationSeed` についても有限整数（`Number.isFinite() && Number.isInteger()`）として厳格検証。`0` は合法値として受容し、小数（例: `1.5`）や非有限数（`NaN`、`Infinity`、`-Infinity`）は `GenerationRunnerConfigurationError` で Fail-Fast 拒絶。
@@ -84,7 +100,7 @@ Generation Runner は、母集団 $N$ 個体の全ペアによる決定論的 **
 4. **Readiness Preflight による完全な SelectionReadiness 取得 (Finding 4)**:
    - `GenerationBuilderExecutionError` が `readinessStatus` しか保持しない問題に対処し、Runner 自身が Builder 呼出前に `PopulationSelector.assessReadiness()` を先行実行。
    - Builder の Effective Readiness Gate（$\text{validCount} \ge \text{eliteCount}$）を考慮した `effectiveRequiredCount = max(requiredCount, eliteCount)` を算出し、不足時は Builder を呼び出さずに `status: "REEVALUATION_REQUIRED"` と完全な `SelectionReadiness` を返却。
-   - Preflight が READY なのに Builder が例外を返した場合は契約逸脱（Contract Drift）として Fail-Closed。
+   - Preflight が READY なのに Builder が例外を返した場合は契約逸脱（Contract Drift）として `GenerationRunnerIntegrityError` で Fail-Closed。
 5. **Prerequisite SHA 訂正および型定義・import の厳格化 (Finding 5)**:
    - 設計ヘッダーの先行仕様コミット SHA を Git 履歴上の実体 SHA へ訂正。
    - `FitnessEvaluationConfig` の import 元を `PopulationSelectionTypes` から `FitnessEvaluationTypes` へ是正。
@@ -248,11 +264,11 @@ Generation Runner は、**「世代 $g$ から世代 $g+1$ への遷移をちょ
 | 2. 設定・文脈構築 | Generation Runner | 全静的設定解決（`pairRepetitions`, `maxDecisions`, Fitness & Builder）、`eliteCount < populationSize` 事前検証、Canonical Context 一元構築 |
 | 3. 対戦計画 | Generation Runner | Canonical Double Round Robin スケジュール生成、Match Identity 付与、証拠数事前検証 |
 | 4. 試合実行 | Runner / Session / Policy | `SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER` の 3 フェーズ統一 Fail-Closed 境界下での逐次実行 |
-| 5. 失敗検出 | Generation Runner | 実行例外検出時のフェーズ診断情報（phase, matchIndex, p1, p2, cause）保持と即時 Fail-Closed 停止 |
+| 5. 失敗検出 | Generation Runner | 試合実行例外検出時の実在試合フェーズ診断情報（phase, matchIndex, p1, p2, cause）保持と即時 Fail-Closed 停止（Match Execution 専用） |
 | 6. 戦績集計 | Generation Runner | 完走試合結果から各個体の勝敗・引き分け・未決着数の決定論的集約（`failedMatches === 0`） |
 | 7. 適応度評価 | FitnessEvaluator | Outcome-First 契約に基づく MPA 算出、VALID / INSUFFICIENT 判定 |
 | 8. 適格性事前判定 | Generation Runner / Selector | `resolvedBuilderConfig.selectionConfig` と Effective Gate による事前検証（不足時 Builder 未呼出） |
-| 9. 次世代構築 | GenerationBuilder | 内部解決済み `resolvedBuilderConfig` による決定論的次世代アセンブリ（親選択、エリート、交叉・変異） |
+| 9. 次世代構築 | GenerationBuilder | 内部解決済み `resolvedBuilderConfig` による決定論的次世代アセンブリ（親選択、エリート、交叉・変異）。Preflight READY 後の予期せぬ rejection は `GenerationRunnerIntegrityError`（Contract Drift）として停止 |
 
 ---
 
@@ -693,26 +709,31 @@ for (const match of schedule) {
 }
 ```
 
-### 11.2 実行時例外の Fail-Closed 境界と診断契約 (Finding 2)
+### 11.2 実行時例外の Fail-Closed 境界と診断契約 (Finding 2 / R4 厳格化)
 現行のシミュレータ基盤には、エラーの原因が個体 DNA 起因か、セッション生成不備か、ルールエンジン実装バグか、インフラ障害（OOM等）かを客観的・安全に峻別する Failure Attribution 型が存在しない。
 したがって、V1 では:
 1. **フェーズ識別診断情報の保持 (Diagnostic Properties)**:
-   - `GenerationRunnerExecutionError` には、最低限次の診断情報を保持する:
-     - `phase`: 障害発生フェーズ（`"SESSION_FACTORY"` / `"POLICY_FACTORY"` / `"RUNNER"`）
-     - `matchIndex`: 失敗した試合の通し番号
-     - `p1GenomeId`: Player 1 の個体 ID
-     - `p2GenomeId`: Player 2 の個体 ID
-     - `causeName`: 原因エラーのクラス名／識別名（利用可能な場合）
-2. **動的揮発性データ（Volatile Runtime Data）の厳格な排除**:
+   - `GenerationRunnerExecutionError` は **対戦実行ループ内の障害専用** とし、最低限次の診断情報を保持する:
+     - `phase`: 障害発生フェーズ（`"SESSION_FACTORY"` / `"POLICY_FACTORY"` / `"RUNNER"` のいずれか）
+     - `matchIndex`: 失敗した実在試合の通し番号
+     - `p1GenomeId`: Player 1 の実在個体 ID
+     - `p2GenomeId`: Player 2 の実在個体 ID
+     - `causeName`: 原因エラーのクラス名／識別名（安定した診断識別情報として Canonical に保持）
+     - `causeMessage`: デバッグ用エラーメッセージ（※環境差異やランタイムメッセージ揺らぎを許容する Debug Detail であり、Logical Determinism / Deep Equal の比較保証対象外）
+   - スタックトレース（`stack`）も Debug Detail であり、決定論的比較契約には含めない。
+2. **実在試合専用契約とダミー診断の完全排除**:
+   - `GenerationRunnerExecutionError` は必ず実在する対戦試合を指す契約であり、非対戦フェーズ（Builder 等）の障害を表すために `phase = "RUNNER"` や `matchIndex = -1`、`matchIndex = 0`、空文字 `genomeId` などの偽・ダミー診断情報を生成することを厳格に禁止する。
+   - `GenerationRunnerExecutionPhase` に `"BUILDER"` を追加してはならない（`"SESSION_FACTORY" | "POLICY_FACTORY" | "RUNNER"` の 3 値を厳格に維持）。
+3. **動的揮発性データ（Volatile Runtime Data）の厳格な排除**:
    - 決定論的診断契約を汚染しないため、実行時の動的揮発性データ（実行時刻 timestamp, wall-clock, 実行マシンの絶対パス, ホスト名, 乱数 UUID 等）は Canonical diagnostics プロパティに必須として含めない。
-3. **全フェーズ例外の即時 Fail-Closed 停止**:
+4. **全フェーズ例外の即時 Fail-Closed 停止**:
    - `SESSION_FACTORY`、`POLICY_FACTORY`、`RUNNER` のいずれで例外が発生した場合も、エラーを握りつぶして試合レベル `FAILED` として特定個体の適応度へ流したり、個体を `INVALID` として自動淘汰したりしない。
    - **Runner 全体を `GenerationRunnerExecutionError` により Fail-Closed で即時停止** させる。
-4. **実行中断と後続処理の完全遮断 (No Partial Result, Zero Leak)**:
+5. **実行中断と後続処理の完全遮断 (No Partial Result, Zero Leak)**:
    - 1 試合でも例外が発生した場合、直ちに実行が停止されるため、残余の予定試合は一切実行されない。
    - 部分的な戦績サマリー集約は行われず、`FitnessEvaluationSnapshot` は生成されず、`GenerationBuilder` は呼び出されず、次世代母集団は一切生成されない。
    - 障害発生は `REEVALUATION_REQUIRED`（論理的適応度証拠不足）ではなく、**実行時障害（Execution Failure）** として明確に区別される。
-5. **正常完走時の全試合完了保証**:
+6. **正常完走時の全試合完了保証**:
    - したがって、Generation Runner が正常に `FitnessEvaluationSnapshot` の構築まで到達した場合、**全個体の全試合が `COMPLETED` または `INCOMPLETE` であり、`failedMatches === 0` が数学的・論理的に保証** される。
 
 ### 11.3 INCOMPLETE と DRAW の扱い
@@ -780,7 +801,7 @@ const buildResult = GenerationBuilder.buildNextGeneration({
   expectedContext: evaluationContext,
 });
 ```
-※もし Builder が予期せぬ `GenerationBuilderExecutionError` をスローした場合は、契約逸脱（Contract Drift）として `GenerationRunnerExecutionError` をスローする。
+※もし Runner の事前判定（Readiness Preflight）が `READY` であったにもかかわらず、同一の解決済み設定・コンテキストを渡した `GenerationBuilder` が予期せぬ例外（`GenerationBuilderExecutionError`、`REEVALUATION_REQUIRED`、`INVALID_POPULATION`、`INCOMPARABLE_EVALUATION` 等を含む）をスローまたは返却した場合は、正常な論理結果へのフォールバックや偽の試合診断情報（`matchIndex = -1` 等）を付与した `GenerationRunnerExecutionError` への誤変換を厳格に禁止し、Runner ↔ Builder 間のシステム契約不変条件違反（Contract Drift / Invariant Violation）として **`GenerationRunnerIntegrityError`** をスローして Fail-Closed 停止する。
 
 ---
 
@@ -868,20 +889,25 @@ export interface GenerationEvaluationManifest {
 ```text
 Error
  └─ GenerationRunnerError (基底型)
-      ├─ GenerationRunnerConfigurationError (開始前設定不備: N<2, R<1, 証拠不足等)
-      ├─ GenerationRunnerIntegrityError     (データ整合性違反: 重複ID, 保存則違反, Incomparable等)
-      └─ GenerationRunnerExecutionError     (実行障害: FAILED試合検出, Contract Drift等)
+      ├─ GenerationRunnerConfigurationError (開始前静的設定不備: N<2, R<1, 証拠不足, Builder設定不備等)
+      ├─ GenerationRunnerIntegrityError     (データ整合性違反: 重複ID, 保存則違反, Incomparable, Builder Contract Drift等)
+      └─ GenerationRunnerExecutionError     (試合実行障害専用: SESSION_FACTORY, POLICY_FACTORY, RUNNER例外)
 ```
 
 ### 15.1 エラー型と責務
 1. **`GenerationRunnerConfigurationError`**:
-   - 事前検証（Preflight Validation）で検出された設定不備（不正な `generationSeed`, 不正な `environment`, `populationSize < 2`, `pairRepetitions < 1`, `maxDecisionsPerMatch < 1`, 不正な `builderConfig`, `eliteCount >= populationSize`, 証拠不足等）を表す。
+   - 事前検証（Preflight Validation）で検出された開始前の静的設定不備（不正な `generationSeed`, 不正な `environment`, `populationSize < 2`, `pairRepetitions < 1`, `maxDecisionsPerMatch < 1`, 不正な `builderConfig`, `eliteCount >= resolvedPopulationSize`, 証拠不足等）を表す。
    - 対戦実行前に Fail-Fast で即時スローされる。
 2. **`GenerationRunnerIntegrityError`**:
-   - 内部計算の保存則違反、重複個体 ID、重複 `matchIndex`、結果件数不一致、または非互換コンテキスト等、システム論理の整合性破損を表す。
+   - 内部計算の保存則違反、重複個体 ID、重複 `matchIndex`、結果件数不一致、非互換コンテキスト、および **Runner ↔ Builder 間の Contract Drift（事前判定と生成判定の乖離）** を表す。
+   - Runner の事前判定（Readiness `READY`）と Builder の判定不一致、または Builder からの予期せぬ rejection / `GenerationBuilderExecutionError` を含む。
+   - Match-specific な診断情報（`matchIndex`, `p1`, `p2` 等）は要求せず、世代レベルのシステム不整合として扱う。偽・ダミーの match 診断情報は一切生成しない。
 3. **`GenerationRunnerExecutionError`**:
-   - 対戦実行ループ内の 3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）における実行時例外、または Generation Builder からの予期せぬ実行時例外（Contract Drift）を表す。
-   - 障害発生時の診断プロパティとして `phase`, `matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName`, `causeMessage` を保持する。
+   - **対戦実行ループ内の 3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）における試合実行時例外専用**。
+   - Builder の例外や非対戦フェーズの例外をこの型で表してはならない（`BUILDER` フェーズは追加しない）。
+   - 障害発生時の診断プロパティとして、必ず実在する試合を指す `phase`, `matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName` を保持する。
+   - `causeName`（例: `Error.name`）は安定した診断識別情報として Canonical に保持される。
+   - `causeMessage` はデバッグ用情報（Debug Detail）であり、環境・ランタイムによるメッセージ差異を許容し、Logical Determinism / Deep Equal の比較保証対象外とする。スタックトレースも Debug Detail とする。
    - 決定論性を害する動的揮発性データ（timestamp, absolute path, hostname, UUID）は厳格に排除される。
 
 ```typescript
@@ -927,7 +953,7 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
 
 ## 16. Canonical 60-Test Plan (検証テスト計画)
 
-将来のプロダクション実装（`BP-SIM-AI-GENERATION-RUNNER-V1`）において検証すべき全 60 項目の Canonical Test Plan を R3 契約に合わせて改訂・確定する。
+将来のプロダクション実装（`BP-SIM-AI-GENERATION-RUNNER-V1`）において検証すべき全 60 項目の Canonical Test Plan を R4 契約に合わせて改訂・確定する。
 
 ### Group A: Config & Context Validation (Tests 1–9)
 1. `N >= 2` の有効母集団を受容すること。
@@ -964,7 +990,7 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
 26. COMPLETED 試合における $p_2$ 勝利が、$p_2$ の win および $p_1$ の loss へ正確に集計されること。
 27. COMPLETED 試合における引き分けが、双方の draw へ正確に集計されること。
 28. INCOMPLETE 試合が draw として扱われず、双方の `incompleteMatches` へ厳密に集計されること。
-29. **[R3 改訂] 試合実行中の 3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）のいずれかで例外が発生した場合、障害フェーズ（`phase`）および診断プロパティ（`matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName`）を保持した `GenerationRunnerExecutionError` で即座に Fail-Closed 停止すること。**
+29. **[R4 改訂] 試合実行中の 3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）のいずれかで例外が発生した場合、実在する試合の障害フェーズ（`phase`）および診断プロパティ（`matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName`）を保持した `GenerationRunnerExecutionError` で即座に Fail-Closed 停止すること（`causeMessage` は Debug Detail として保持可能だが決定論的比較保証の対象外）。**
 30. **[R3 改訂] 試合実行例外による中断時、残余試合は一切実行されず、部分的な戦績サマリー集約は行われず、`FitnessEvaluationSnapshot` や次世代母集団が一切生成されない（Zero Side-effect / Zero Leak）こと。**
 31. 重複した `matchIndex` の結果が存在する場合、またはスケジュール計画数に対して実行結果が 1 件でも欠損している場合、`GenerationRunnerIntegrityError` で停止すること。
 32. 試合結果の参加個体 ID と計画個体 ID が不一致の場合、`GenerationRunnerIntegrityError` で停止すること。
@@ -985,7 +1011,7 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
 43. `GenerationBuilder` へ同一の `generationSeed` が透過的に渡されること。
 44. 正常遷移時、ステータス `ADVANCED` と世代 $g+1$ の母集団スナップショットが返却されること。
 45. **[R2 改訂] Readiness Preflight により有効個体数不足（standard または effective: `max(requiredCount, eliteCount)`）を `resolvedBuilderConfig.selectionConfig` に基づき検出し、Builder を呼び出すことなく `status: "REEVALUATION_REQUIRED"` と完全な `SelectionReadiness` を返却すること。**
-46. `REEVALUATION_REQUIRED` 時に Runner が勝手に再試行（Hidden Retry）を行わないこと。
+46. **[R4 改訂] Runner の Readiness Preflight が READY であるにもかかわらず、同一の解決済み設定・コンテキストを渡した `GenerationBuilder` が予期せぬ例外（`GenerationBuilderExecutionError`）をスローした場合、偽・ダミーの試合診断情報を含む `GenerationRunnerExecutionError` ではなく、Contract Drift として `GenerationRunnerIntegrityError` で Fail-Closed 停止すること（また勝手な再試行を行わないこと）。**
 
 ### Group G: Determinism & Metrics Separation (Tests 47–52)
 47. **[R1 改訂] 同一環境・同一入力で 2 回実行した際、`logicalResult` が Deep Equal に完全一致すること（`runtimeMetrics` は一致比較対象外）。**
@@ -1001,7 +1027,7 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
 55. 過去世代や Hall of Fame との対戦が存在しないこと。
 56. ファイルシステムや DB への永続化処理を行わないこと。
 57. 収集された Runtime Telemetry が適応度や選択結果に 1 ビットも影響を与えていないこと。
-58. **[R2 改訂] モックやダミーではない本番シミュレーション経路（`sessionFactory` $\rightarrow$ `GenomePolicy` $\rightarrow$ `SimulationRunner.run`）の 3 フェーズが単一の Fail-Closed 実行境界下で順次実行されていること。**
+58. **[R4 改訂] モックやダミーではない本番シミュレーション経路（`sessionFactory` $\rightarrow$ `GenomePolicy` $\rightarrow$ `SimulationRunner.run`）の 3 フェーズが単一の Fail-Closed 実行境界下で順次実行され、Match 実行時障害（`GenerationRunnerExecutionError`）と Builder Contract Drift（`GenerationRunnerIntegrityError`）のエラー責務が明確に分離されていること。**
 59. **[R3 改訂] `resolveCanonicalBuilderConfig` がモジュール内部ヘルパーとして隠蔽され公開 API としてエクスポートされていないこと、および Generation Runner が個別のアクション名（`action.attack` 等）を直接解釈しないこと。**
 60. 入力された現世代の `PopulationSnapshot(g)` が一切破壊・変更されていないこと。
 
@@ -1037,9 +1063,9 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
 - **決定**: **Runner 開始時に `resolveCanonicalBuilderConfig()`（モジュール内部ヘルパー、非エクスポート）により事前解決し、`eliteCount < populationSize` を含めて対戦前に `GenerationRunnerConfigurationError` で検証する**。
 - **根拠**: 対戦を何千試合も実行した後に Builder の設定エラーでクラッシュすることは計算資源の重大な浪費である。また、`eliteCount >= populationSize` は個体の実力不足による「再評価要求（`REEVALUATION_REQUIRED`）」ではなく明らかな設定不備である。事前解決した `resolvedBuilderConfig` を Readiness 評価および Builder 呼出にそのまま引き渡すことで、Runner と Builder 間の設定ドリフトを原理的に排除する。また、`resolveCanonicalBuilderConfig` は Runner 内部実装詳細であり、公開 API サーフェスには露出させない。
 
-### [Issue H] 試合実行中の 3 フェーズ（Session生成、Policy生成、Runner実行）の例外をどう扱うか？ (Finding 2)
-- **決定**: **3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）すべてを単一の Fail-Closed `try / catch` で包括し、いかなる例外も即座に障害フェーズ識別子と診断情報（`matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName`）を付与した `GenerationRunnerExecutionError` としてスローして対戦を即時中断する**。
-- **根拠**: 現行シミュレータには Failure Attribution 契約が存在せず、セッション生成やポリシー初期化、シミュレータ内部の例外を安全に特定 Genome の責任として `INVALID` 淘汰することはできない。1試合でも障害が発生した場合は残余試合を実行せず、中途半端な戦績集約や適応度スナップショット、次世代生成を一切行わず、クリーンに即時停止することが最善の堅牢性を保証する。また、動的揮発性データ（timestamp, absolute path, UUID 等）を診断情報から排除することで決定論的診断契約を保護する。
+### [Issue H] 試合実行中の 3 フェーズ（Session生成、Policy生成、Runner実行）の例外をどう扱うか？ (Finding 2 / R4 厳格化)
+- **決定**: **3 フェーズ（`SESSION_FACTORY`, `POLICY_FACTORY`, `RUNNER`）すべてを単一の Fail-Closed `try / catch` で包括し、いかなる例外も即座に障害フェーズ識別子と実在試合の診断情報（`matchIndex`, `p1GenomeId`, `p2GenomeId`, `causeName`）を付与した `GenerationRunnerExecutionError` としてスローして対戦を即時中断する**。
+- **根拠**: 現行シミュレータには Failure Attribution 契約が存在せず、セッション生成やポリシー初期化、シミュレータ内部の例外を安全に特定 Genome の責任として `INVALID` 淘汰することはできない。1試合でも障害が発生した場合は残余試合を実行せず、中途半端な戦績集約や適応度スナップショット、次世代生成を一切行わず、クリーンに即時停止することが最善の堅牢性を保証する。また、動的揮発性データ（timestamp, absolute path, UUID 等）を診断情報から排除することで決定論的診断契約を保護し、`causeMessage` およびスタックトレースは環境差異による揺らぎを許容する Debug Detail 扱いとする。
 
 ### [Issue I] `maxDecisionsPerMatch` と `generationSeed` の事前入力検証契約をどう定義するか？ (Finding 1)
 - **決定**:
@@ -1048,11 +1074,15 @@ export class GenerationRunnerExecutionError extends GenerationRunnerError {
   - 事前検証順序: 1. `generationSeed`, 2. `environment`, 3. `population`, 4. `pairRepetitions`, 5. `maxDecisionsPerMatch`, 6. `fitnessConfig`, 7. `builderConfig`, 8. `eliteCount < target populationSize`, 9. Schedule evidence preflight。
 - **根拠**: `SimulationRunner.run()` に渡される最大判断手数が不正な場合、対戦が未完了のまま誤って進行したり無限ループとなる恐れがある。また、シードの非有限数や小数はシード導出関数において NaN 汚染や契約破壊を引き起こす。全試合の実行を開始する前に厳格に Fail-Fast で拒絶することが必須である。
 
+### [Issue J] Generation Builder の契約逸脱（Contract Drift）をどのエラー型で表現すべきか？ (Finding R4)
+- **決定**: **`GenerationRunnerIntegrityError` としてスローし、`GenerationRunnerExecutionError` や偽・ダミーの Match 診断情報は一切使用しない**。
+- **根拠**: Runner の事前判定（Readiness `READY`）と Builder の判定が食い違った状態は、対戦中のランタイム例外ではなく、Runner ↔ Builder 間のシステム契約不変条件違反（Contract Invariant Violation）である。また、`GenerationRunnerExecutionError` は実在する試合情報（`phase`, `matchIndex`, `p1`, `p2`）を必須とする契約であり、Builder でダミーの `phase = "RUNNER"` や `matchIndex = -1` などを捏造することは型安全性を著しく破壊するため、Integrity Error へのマッピングが唯一 Canonical である。
+
 ---
 
 ## 18. Future Scope (将来の展望と分離境界)
 
-1. **BP-SIM-AI-GENERATION-RUNNER-V1**: 本 R3 設計書に基づく Generation Runner の TypeScript 実装および Canonical 60-Test のパス。
+1. **BP-SIM-AI-GENERATION-RUNNER-V1**: 本 R4 設計書に基づく Generation Runner の TypeScript 実装および Canonical 60-Test のパス。
 2. **BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1**: 複数世代を反復実行する Evolution Loop の設計（シード系列チェーン、収束条件、チェックポイント、ファイル永続化）。
 3. **Formal Failure Attribution Contract**: Genome 起因例外とインフラ障害を区別し、安全に Genome を失格判定する拡張契約。
 4. **Parallel Batch Execution**: Worker Threads 等による並列シミュレーション実行。
@@ -1197,6 +1227,10 @@ export class GenerationRunnerConfigurationError extends GenerationRunnerError {
   }
 }
 
+/**
+ * データ整合性違反、保存則違反、Comparable Context 不整合、
+ * または Runner ↔ Builder 間の Contract Drift (事前判定と生成判定の乖離) を表すエラー
+ */
 export class GenerationRunnerIntegrityError extends GenerationRunnerError {
   public constructor(message: string) {
     super(message);
@@ -1204,6 +1238,11 @@ export class GenerationRunnerIntegrityError extends GenerationRunnerError {
   }
 }
 
+/**
+ * 試合実行ループ内 (SESSION_FACTORY, POLICY_FACTORY, RUNNER) の実行時障害を表すエラー
+ * ※実在する試合の診断情報 (phase, matchIndex, p1, p2, causeName) を必須として保持する。
+ * ※causeMessage はデバッグ用情報 (Debug Detail) であり、決定論的比較保証の対象外。
+ */
 export class GenerationRunnerExecutionError extends GenerationRunnerError {
   public readonly phase: GenerationRunnerExecutionPhase;
   public readonly matchIndex: number;

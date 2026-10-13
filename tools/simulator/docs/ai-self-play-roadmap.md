@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R3`
-更新日時: 2026-10-13 22:36 JST
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R4`
+更新日時: 2026-10-13 22:58 JST
 
 ---
 
@@ -457,10 +457,10 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **dnaRef 規約**: Canonical Logical Ref (`genome:<genomeId>`) のみに完全固定。Local Logical DNA Reference であり、Global Artifact ID や Content Address ではない。
    - **決定論性保証**: Supported Deterministic Runtime 境界（同一 Node.js LTS、同一実装バージョン、同一入力、同一設定、同一シード、同一 Stream Key）において bit-exact / Deep Equal を保証。異種 OS / CPU アーキテクチャ間は Cross-Platform Conformance Target として実測検証。
    - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
-7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R3)**:
+7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R4)**:
    - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-generation-runner-design-v1.md`)
    - **実装ステータス**: **NOT IMPLEMENTED / FUTURE**
-   - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。R3 では入力検証契約（`maxDecisionsPerMatch` / `generationSeed`）の事前 Fail-Fast 化、実行障害フェーズ診断（`GenerationRunnerExecutionPhase` / 非揮発性診断プロパティ）の確立、およびビルダー設定解決処理の内部化（モジュール非公開化）を反映。
+   - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。R4 では Canonical Error Taxonomy を確定し、`GenerationRunnerExecutionError` を実在試合実行専用に限定、Builder Contract Drift（Preflight READY 後の予期せぬ rejection / 例外）を `GenerationRunnerIntegrityError` へ統一し、ダミー試合診断の捏造を完全排除。
    - **未実装コンポーネント維持**: Evolution Loop, Hall of Fame は未実装（NOT IMPLEMENTED / FUTURE）のまま維持。
 8. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 9. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
