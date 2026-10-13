@@ -7,6 +7,7 @@ import {
   BuildNextGenerationParams,
   canonicalOffspringDnaRef,
   DEFAULT_GENERATION_BUILDER_CONFIG,
+  GenerationBuilderConfig,
   GenerationBuilderConfigurationError,
   GenerationBuilderExecutionError,
   GenerationBuilderIntegrityError,
@@ -14,6 +15,7 @@ import {
 } from "../../domain/ai/GenerationBuilderTypes.js";
 import {
   ComparableEvaluationContext,
+  DEFAULT_POPULATION_SELECTION_CONFIG,
   FitnessEvaluationSnapshot,
   PopulationEntry,
   PopulationFitnessEntry,
@@ -32,7 +34,10 @@ import {
 } from "../../domain/ai/DecisionDNATypes.js";
 import { FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes.js";
 import { deriveSeed } from "../../engine/random/DeterministicShuffle.js";
-import { EVOLUTION_SELECTION_STREAM_KEY } from "../../domain/ai/GeneticOperatorTypes.js";
+import {
+  DEFAULT_GENETIC_OPERATOR_CONFIG,
+  EVOLUTION_SELECTION_STREAM_KEY,
+} from "../../domain/ai/GeneticOperatorTypes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -261,8 +266,42 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       }).toThrow(GenerationBuilderConfigurationError);
     });
 
-    it("Test 7: Generation mismatch throws GenerationBuilderConfigurationError", () => {
+    it("Test 7: Invalid eliteCount (negative, float, NaN) throws GenerationBuilderConfigurationError", () => {
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(6, 1);
+      const invalidEliteCounts = [-1, -5, 1.5, 0.5, NaN, Infinity, -Infinity];
+
+      for (const eliteCount of invalidEliteCounts) {
+        expect(() => {
+          GenerationBuilder.buildNextGeneration({
+            population,
+            fitnessSnapshot,
+            targetGeneration: 2,
+            generationSeed: 12345,
+            config: {
+              populationSize: 6,
+              selectionConfig: { eliteCount },
+            },
+          });
+        }).toThrow(GenerationBuilderConfigurationError);
+      }
+    });
+
+    it("Test 8: Generation and context alignment mismatch throws GenerationBuilderConfigurationError", () => {
+      const { population, fitnessSnapshot } = createValidPopulationAndFitness(6, 1);
+      const invalidTargetGens = [1, 0, 3, 10];
+
+      for (const targetGen of invalidTargetGens) {
+        expect(() => {
+          GenerationBuilder.buildNextGeneration({
+            population,
+            fitnessSnapshot,
+            targetGeneration: targetGen,
+            generationSeed: 12345,
+            config: { populationSize: 6 },
+          });
+        }).toThrow(GenerationBuilderConfigurationError);
+      }
+
       const mismatchedFitnessSnapshot: FitnessEvaluationSnapshot = {
         ...fitnessSnapshot,
         generation: 2,
@@ -294,23 +333,6 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       }).toThrow(GenerationBuilderConfigurationError);
     });
 
-    it("Test 8: targetGeneration !== generation + 1 throws GenerationBuilderConfigurationError", () => {
-      const { population, fitnessSnapshot } = createValidPopulationAndFitness(6, 1);
-      const invalidTargetGens = [1, 0, 3, 10];
-
-      for (const targetGen of invalidTargetGens) {
-        expect(() => {
-          GenerationBuilder.buildNextGeneration({
-            population,
-            fitnessSnapshot,
-            targetGeneration: targetGen,
-            generationSeed: 12345,
-            config: { populationSize: 6 },
-          });
-        }).toThrow(GenerationBuilderConfigurationError);
-      }
-    });
-
     it("Test 9: Invalid generationSeed (NaN, Infinity, float) throws GenerationBuilderConfigurationError", () => {
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(6, 1);
       const invalidSeeds = [NaN, Infinity, -Infinity, 12.34];
@@ -328,18 +350,43 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       }
     });
 
-    it("Test 10: Custom offspringDnaRefResolver does not exist in type and is ignored if passed dynamically", () => {
+    it("Test 10: GenerationBuilderConfig contains no custom resolver and rejects dynamic injection", () => {
+      // 1. Compile-time evidence: GenerationBuilderConfig 型に offspringDnaRefResolver は存在しない
+      const validConfig: GenerationBuilderConfig = {
+        populationSize: 6,
+        selectionConfig: DEFAULT_POPULATION_SELECTION_CONFIG,
+        geneticOperatorConfig: DEFAULT_GENETIC_OPERATOR_CONFIG,
+      };
+      expect(validConfig).toBeDefined();
+
+      type ConfigHasResolver = "offspringDnaRefResolver" extends keyof GenerationBuilderConfig ? true : false;
+      const hasResolver: ConfigHasResolver = false;
+      expect(hasResolver).toBe(false);
+
+      const _invalidConfigWithResolver: GenerationBuilderConfig = {
+        populationSize: 6,
+        selectionConfig: DEFAULT_POPULATION_SELECTION_CONFIG,
+        geneticOperatorConfig: DEFAULT_GENETIC_OPERATOR_CONFIG,
+        // @ts-expect-error offspringDnaRefResolver does not exist on GenerationBuilderConfig
+        offspringDnaRefResolver: () => "custom",
+      };
+      expect(_invalidConfigWithResolver).toBeDefined();
+
+      // 2. Runtime dynamic injection evidence: params.config 内部へ注入されても無視され canonical dnaRef のみ使用される
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(6, 1);
-      const paramsWithCustomResolver: any = {
+      const paramsWithInjectedConfig: any = {
         population,
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 12345,
-        config: { populationSize: 6, selectionConfig: { eliteCount: 1 } },
-        offspringDnaRefResolver: () => "custom-injected-ref",
+        config: {
+          populationSize: 6,
+          selectionConfig: { eliteCount: 1 },
+          offspringDnaRefResolver: () => "custom-injected-ref",
+        },
       };
 
-      const result = GenerationBuilder.buildNextGeneration(paramsWithCustomResolver);
+      const result = GenerationBuilder.buildNextGeneration(paramsWithInjectedConfig);
       // 子個体の dnaRef は custom ではなく必ず canonicalOffspringDnaRef ("genome:...") となる
       const offspringEntries = result.population.entries.slice(1);
       for (const entry of offspringEntries) {
@@ -1046,7 +1093,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       expect(resultOriginal).toStrictEqual(resultReversed);
     });
 
-    it("Test 35: Negative Control: changing generationSeed produces different offspring weights (Seed Sensitivity)", () => {
+    it("Test 35: Negative Control: changing generationSeed produces different offspring weights in this fixed fixture (Seed Sensitivity)", () => {
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(10, 1);
       const resultSeedA = GenerationBuilder.buildNextGeneration({
         population,
@@ -1071,7 +1118,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       });
 
       expect(resultSeedA.selectionSeed).not.toBe(resultSeedB.selectionSeed);
-      // エリートは同一適応度順序であれば同じ個体が選出されるが、子個体は異なるはず
+      // この固定 fixture において世代シードの変更により親選択・重みに差が生じることを Negative Control として確認
       expect(resultSeedA.offspringLineages).not.toEqual(resultSeedB.offspringLineages);
       expect(resultSeedA.population.entries[2].dna.patternWeights).not.toEqual(
         resultSeedB.population.entries[2].dna.patternWeights
@@ -1079,11 +1126,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
     });
 
     it("Test 36: Supported Deterministic Runtime boundary specification verification", () => {
-      // Determinism Contract は Node.js v20.x, Linux x86_64, V8 11.3+ を対象とし、
-      // 異なる JavaScript エンジン間での絶対一致は要求しない仕様であることを確認
+      // Determinism Contract は Supported Deterministic Runtime 上で保証され、
+      // 異なる JavaScript エンジンやプラットフォーム間の絶対一致（Cross-Platform）は Conformance Target であり
+      // Universal Contract として要求しない境界仕様を確認する
       expect(typeof process.versions.node).toBe("string");
       expect(typeof process.versions.v8).toBe("string");
-      // generationSeed の同一性に基づく決定論契約の存在をアサート
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(4, 1);
       const res = GenerationBuilder.buildNextGeneration({
         population,
@@ -1097,7 +1144,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
   });
 
   // ===========================================================================
-  // Tests 37-44: Implementation Guard Tests
+  // Tests 37-45: Implementation Guard Tests
   // ===========================================================================
   describe("6. Implementation Guard Tests", () => {
     it("Test 37: generationSeed = 0 is valid and operates normally", () => {
@@ -1219,16 +1266,23 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         },
       });
 
-      // 10 個の子個体に対して 20 回の親選出が行われ、すべてのペアが同一ではないこと
+      // 1. Lineage evidence: 10 個の子個体に対して 20 回の親選出が行われ、すべてのペアが同一ではないこと
       const pairs = result.offspringLineages.map(
         l => l.parentGenomeIds.join("-")
       );
       const uniquePairs = new Set(pairs);
       expect(uniquePairs.size).toBeGreaterThan(1);
+
+      // 2. Production Source inspection: PopulationSelector.selectParents が 1 回のみ呼び出される構造であることを確認
+      const enginePath = path.resolve(__dirname, "../../engine/ai/GenerationBuilder.ts");
+      const engineSource = fs.readFileSync(enginePath, "utf-8");
+      const selectParentsCalls = engineSource.match(/PopulationSelector\.selectParents/g);
+      expect(selectParentsCalls).not.toBeNull();
+      expect(selectParentsCalls!.length).toBe(1);
     });
 
-    it("Test 43: Self-mating fallback integration test (parentA === parentB is handled deterministically)", () => {
-      // 有効候補が 2 個体のみで同一個体が連続して選ばれる可能性のある構成
+    it("Test 43: Self-mating integration test (integration path operates deterministically)", () => {
+      // 有効候補が 2 個体のみの構成で ParentPairAssembler への委譲パイプラインが正常に完走することを確認
       const entries = [createDummyEntry("G0"), createDummyEntry("G1")];
       const fitnessEntries = [
         createFitnessEntry("G0", "VALID", 0.9, dummyContext),
@@ -1280,6 +1334,32 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       expect(combined).not.toContain("from 'node:path'");
       expect(combined).not.toContain("from \"path\"");
       expect(combined).not.toContain("from 'path'");
+    });
+
+    it("Test 45: Finding 1 Regression: undefined nested selectionConfig fields resolve to authoritative defaults without NaN", () => {
+      const { population, fitnessSnapshot } = createValidPopulationAndFitness(10, 1);
+      // eliteCount: undefined を明示的に渡した場合、Authoritative Validator により default eliteCount=1 に解決される
+      const result = GenerationBuilder.buildNextGeneration({
+        population,
+        fitnessSnapshot,
+        targetGeneration: 2,
+        generationSeed: 12345,
+        config: {
+          populationSize: 8,
+          selectionConfig: {
+            eliteCount: undefined,
+            tournamentSize: undefined,
+            minimumValidPopulationCount: undefined,
+          },
+        },
+      });
+
+      expect(result.eliteCount).toBe(1);
+      expect(result.offspringCount).toBe(7);
+      expect(Number.isNaN(result.offspringCount)).toBe(false);
+      expect(result.population.entries.length).toBe(8);
+      expect(result.eliteGenomeIds.length).toBe(1);
+      expect(result.offspringLineages.length).toBe(7);
     });
   });
 });

@@ -152,27 +152,24 @@ export class GenerationBuilder {
       );
     }
 
-    const resolvedSelectionConfig: PopulationSelectionConfig = {
-      ...DEFAULT_GENERATION_BUILDER_CONFIG.selectionConfig,
-      ...config?.selectionConfig,
-    };
-
-    const resolvedOperatorConfig: GeneticOperatorConfig = {
-      ...DEFAULT_GENERATION_BUILDER_CONFIG.geneticOperatorConfig,
-      ...config?.geneticOperatorConfig,
-    };
-
-    // サブコンポーネント設定検証
+    let resolvedSelectionConfig: PopulationSelectionConfig;
     try {
-      PopulationSelector.validateConfig(resolvedSelectionConfig);
+      resolvedSelectionConfig = PopulationSelector.validateConfig({
+        ...DEFAULT_GENERATION_BUILDER_CONFIG.selectionConfig,
+        ...config?.selectionConfig,
+      });
     } catch (err) {
       throw new GenerationBuilderConfigurationError(
         `Invalid selectionConfig: ${err instanceof Error ? err.message : String(err)}`
       );
     }
 
+    let resolvedOperatorConfig: GeneticOperatorConfig;
     try {
-      validateGeneticOperatorConfig(resolvedOperatorConfig);
+      resolvedOperatorConfig = validateGeneticOperatorConfig({
+        ...DEFAULT_GENERATION_BUILDER_CONFIG.geneticOperatorConfig,
+        ...config?.geneticOperatorConfig,
+      });
     } catch (err) {
       throw new GenerationBuilderConfigurationError(
         `Invalid geneticOperatorConfig: ${err instanceof Error ? err.message : String(err)}`
