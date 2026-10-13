@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R1`
-更新日時: 2026-10-13 11:15 JST
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R2`
+更新日時: 2026-10-13 11:37 JST
 
 ---
 
@@ -446,14 +446,15 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **実行時成果物方針**: 大量生ログ（`matches.jsonl` 等）は Git 管理対象外。成果物ルートは `tools/simulator/.artifacts/ai-runs/<runId>/` に統一（`.gitignore` 設定済み）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-genetic-operators-design-v1.md` 参照。
    - ※実装境界: Crossover, Mutation, Parent Pair Assembler, Offspring Generation の遺伝的操作子プリミティブ（V1）は実装・検証完了。Generation Runner, Evolution Loop, Hall of Fame, Runtime Match Telemetry は次段階のスコープ（未実装）。
-6. **Generation Builder / Next Generation Assembly (BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1 / V1-R1)**:
+6. **Generation Builder / Next Generation Assembly (BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1 / V1-R1 / V1-R2)**:
    - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-generation-builder-design-v1.md`)
    - **責務境界**: 世代 $g$ の `PopulationSnapshot` + `FitnessEvaluationSnapshot` から世代 $g+1$ の `PopulationSnapshot` を決定論的・Fail-Closed に構築。
+   - **母集団サイズ契約 (R2)**: `populationSize` は `finite integer >= 2` であり、アーキテクチャ上の恣意的な上限（例: $N \le 1000$ 等）は課さない。
    - **Effective Readiness (R1)**: Generation Builder 固有の要求条件 $\text{validCount} \ge \max(\text{standardRequiredValidCount}, \text{eliteCount})$ を定義。`validCount < eliteCount` の場合は `GenerationBuilderExecutionError`（`REEVALUATION_REQUIRED` 相当）で即時停止（エリート自動縮小や Tier 2 繰り上げ補完の完全禁止）。
    - **エリート継承**: Genotype は完全保存（ディープクローンによるオブジェクト参照隔離）、DNA metadata 不変、**Fitness は非継承（次世代でゼロから再評価）**。
    - **親選択・ペアリング**: 単一の決定論的親系列（$2M$ 体）を一括選出、隣接ペア化、`ParentPairAssembler` による自己交配回避リトライ（独立ストリーム）。
    - **dnaRef 規約 (R1)**: 外部コールバックを排除し、Canonical Logical Ref (`genome:<genomeId>`) のみに完全固定。Local Logical DNA Reference であり、Global Artifact ID や Content Address ではない。
-   - **決定論性保証 (R1)**: Same Seed に対する 100% 同一出力を正式保証。Different Seed に対する「必ず異なる」という過剰保証を排除し、固定 fixture による感度 Negative Control を規定。
+   - **決定論性保証 (R2)**: Genetic Operators Design V1-R2 に整合。同一 Node.js LTS、同一実装バージョン、同一入力、同一設定、同一シード、同一 Stream Key において bit-exact / Deep Equal を保証（Supported Deterministic Runtime 境界）。異種 OS / CPU アーキテクチャ間は Cross-Platform Conformance Target として実測検証。Different Seed に対する「必ず異なる」過剰保証を排除し、固定 fixture による感度 Negative Control を規定。
    - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
    - **未実装コンポーネント維持**: Generation Runner, Evolution Loop, Hall of Fame は未実装（MISSING / FUTURE）のまま維持。
 7. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存

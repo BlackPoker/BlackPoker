@@ -1,7 +1,7 @@
-# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R1)
+# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R2)
 # (Generation g $\rightarrow$ Generation g+1 次世代母集団構築境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R1`
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R2`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -25,6 +25,15 @@
 $$\text{PopulationSnapshot}(g) + \text{FitnessEvaluationSnapshot}(g) \xrightarrow{\quad\text{Generation Builder}\quad} \text{PopulationSnapshot}(g+1)$$
 
 として、世代 $g$ の評価済み母集団から世代 $g+1$ の未評価母集団スナップショットを **決定論的（Deterministic）かつ完全フェイルクローズ（Fail-Closed）** に組み立てる **Generation Builder / Next Generation Assembly** の境界契約（Boundary Contract）を定義する。
+
+### R2 Follow-up における確定・厳格化事項
+1. **決定論保証の境界整合 (Finding 1)**:
+   - 先行仕様 `ai-genetic-operators-design-v1.md` Section 13.3（Formal Accepted）に完全整合させ、無条件な「あらゆる未知の環境で100% bit-exact一致」という過剰保証表現を廃止。
+   - **Supported Deterministic Runtime 境界**: 同一のサポート対象ランタイム（Node.js LTS等）、同一実装バージョン、同一入力DNA、同一設定、同一シード、同一 Stream Key 契約において Bit-exact / Deep Equal な再現性を保証。
+   - **Cross-Platform Conformance Target**: 異なる OS（Linux, Windows, macOS）や CPU アーキテクチャ（x64, arm64）間は、テストベクトルにより実測検証される適合目標（Conformance Target）として位置付け。
+2. **未定義の Population 上限記述の完全削除 (Finding 2)**:
+   - Section 19.2 に記載されていた根拠のない「現行仕様 (N <= 1000)」および「N > 10000」等の未定義数値を削除。
+   - V1 の正式契約は `populationSize` は `finite integer >= 2` であり、アーキテクチャ上の恣意的な上限は課さないことを確認・明記。大規模個体数時のメモリ・ストリーミング処理は将来の拡張課題（Low / Future）として抽象的に整理。
 
 ### R1 Follow-up における確定・厳格化事項
 1. **Custom `offspringDnaRefResolver` の V1 からの完全廃止 (Finding 1)**:
@@ -204,6 +213,7 @@ export const DEFAULT_GENERATION_BUILDER_CONFIG: GenerationBuilderConfig = Object
 ### 4.3 populationSize の厳格なバリデーション
 - `populationSize` は **有限な正の整数** かつ **$\ge 2$** でなければならない。
 - **ハードコード 100 の禁止**: `populationSize` は設定可能でなければならず、20、100、500 等の任意の有効母集団サイズを受け入れなければならない。
+- **母集団サイズ上限の非強制**: V1 契約において、アーキテクチャ上の恣意的な上限（例: $N \le 1000$ 等）は一切設定しない。有限な正の整数 $\ge 2$ であれば任意のサイズを受け入れる（実行可能性やメモリ制限はホスト環境のリソースに依存）。
 - `NaN`、`Infinity`、負数、小数、0、1 は `GenerationBuilderConfigurationError` を送出して即座に拒絶する。
 
 ---
@@ -628,15 +638,32 @@ export class GenerationBuilderExecutionError extends Error {
 
 ## 16. Determinism & Seed Sensitivity Boundary (決定論性保証境界)
 
-決定論性に関する契約を 3 つのカテゴリに明確に分離する:
+決定論性に関する契約を、先行仕様 `ai-genetic-operators-design-v1.md` Section 13.3 に整合させ、次の 4 つのカテゴリに明確に定義する:
 
-### 16.1 A. Same Input Contract (完全決定論性)
-同一の `PopulationSnapshot(g)`、`FitnessEvaluationSnapshot(g)`、`GenerationBuilderConfig`、`targetGeneration`、および `generationSeed` が与えられた場合、生成される `GenerationBuildResult` は常にビット単位で完全一致（Deep Equal）することを **100% 保証** する。
+### 16.1 Supported Deterministic Runtime Contract (同一環境・同一入力での完全決定論性)
+過剰保証（「あらゆる未知の環境・プラットフォームでビット完全一致」等）を排除し、V1 において正式に保証するスコープを次のように限定する:
 
-### 16.2 B. Input Ordering Independence (入力順序非依存性)
-入力 `PopulationSnapshot.entries` や `FitnessEvaluationSnapshot.entries` の配列順序が任意にシャッフルされていたとしても、それらが同一の個体集合・スコア集合を表している限り、出力結果は **完全に同一** であることを保証する。
+- **正式保証スコープ (Supported Deterministic Runtime)**:
+  - 同一のサポート対象 Node.js ランタイム（例: Node.js v20.x LTS）
+  - 同一のオペレータ・ビルダー実装バージョン
+  - 同一の入力スナップショット（`PopulationSnapshot(g)`, `FitnessEvaluationSnapshot(g)`）
+  - 同一の `GenerationBuilderConfig`
+  - 同一の `targetGeneration`
+  - 同一の `generationSeed`
+  - 同一の Stream Key 契約（`generation-selection`, `generation-offspring-{k}`, `generation-mating-retry-{k}-{attempt}` 等）
 
-### 16.3 C. Seed Sensitivity Boundary (過剰保証の排除と Negative Control)
+上記が満たされる場合、生成される `GenerationBuildResult`（全エリートおよび子個体の DNA 重み、Lineage メタデータ、スナップショット構造）は常に **ビット単位・Deep Equal で 100% 完全一致（Bit-exact Reproduction）** することを保証する。
+
+### 16.2 Cross-Platform Conformance Target (クロスプラットフォーム適合目標)
+- CPU アーキテクチャ（x64 vs arm64）や OS（Linux, Windows, macOS）間については、設計段階で bit-exact を無条件に断言しない。
+- 先行仕様 `ai-genetic-operators-design-v1.md` Section 13.3 と同様、「Cross-Platform Conformance Target」として位置づけ、Production 実装後に同一の Test Vector を複数環境で実行して bit-exact を実測検証する。
+- 実測で一致が確認された環境のみを「Supported Deterministic Runtime Matrix」に追加する。
+- 異種環境間でビット差が検出された場合は、直ちにゲーム性や適応度の破壊（Game/Fitness Correctness Failure）とは扱わず、「浮動小数点演算・ランタイム移植性課題（Portability Issue）」として切り分ける。
+
+### 16.3 Input Ordering Independence (入力順序非依存性)
+同一の Supported Runtime 下において、入力 `PopulationSnapshot.entries` や `FitnessEvaluationSnapshot.entries` の配列順序が任意にシャッフルされていたとしても、それらが同一の個体集合・スコア集合を表している限り、出力結果は **完全に同一** であることを保証する。
+
+### 16.4 Seed Sensitivity Boundary (過剰保証の排除と Negative Control)
 - **契約**: 異なる `generationSeed` は、親選択、交叉点、突然変異値、自己交配リトライにおいて異なる PRNG ストリームを生成し得るため、出力結果は変化し得る（**may differ**）。
 - **過剰保証の排除**: 「異なる Seed ならば、いかなる入力に対しても必ず全 DNA が異なる（**must differ**）」という数学的普遍保証は行わない（確率的に同一の選択や同一の変異値が生じる可能性を契約上排除しない）。
 - **Negative Control**: 将来の実装テストにおいては、**固定された感度確認 fixture** に対し、Seed A と Seed B で少なくとも 1 つの親選択または Offspring DNA 差が生じることを、感度が存在することの Negative Control として実証する。
@@ -731,10 +758,11 @@ export class GenerationBuilderExecutionError extends Error {
 32. 出力母集団の配列順序が [Elites, Offspring] の順序と完全一致すること
 
 [Determinism & Pure Functionality]
-33. 同一の入力スナップショット・Config・Seed に対し、完全一致 (Deep Equal) な結果を返すこと (Same Input Contract)
+33. 同一の Supported Runtime・実装バージョン・入力スナップショット・Config・Seed に対し、完全一致 (Deep Equal) な結果を返すこと (Supported Deterministic Runtime Contract R2)
 34. 入力 Population / Fitness のエントリ配列順序を入れ替えても、同一の結果を返すこと (Input Ordering Independence)
 35. 固定感度確認 fixture に対し、Seed A と Seed B で少なくとも 1 つの選択または Offspring DNA 差が生じることを Negative Control として確認すること (Seed Sensitivity Boundary R1)
 36. 異なる Seed に対して「全入力で必ず結果が異なる」という Universal Contract を要求しないこと (過剰保証排除 R1)
+※ 将来の Cross-Platform Conformance は、Test Vector を用いた複数環境での実測検証テスト（Supported Matrix 追加検証）として別途実施する。
 ```
 
 ---
@@ -759,7 +787,7 @@ export class GenerationBuilderExecutionError extends Error {
 | **None (Solved)** | エリート DNA の不変性 | Clone Isolation を採用。DNA 自体は不変、Entry.generation のみ更新。 | 実装時に `DecisionDNACodec.clone` を利用。 |
 | **None (Solved)** | 親系列の PRNG 消費 | 単一の連続親系列（$2M$ 体）を一括選出する契約に確定。 | 実装時に `selectParents(2M)` を呼出。 |
 | **None (Solved)** | Seed Sensitivity | Same Seed 完全決定論、Different Seed は Negative Control fixture による感度確認。 | テストスイートに感度 Negative Control を配置。 |
-| **Low** | 大規模母集団時のメモリ | 現行仕様（$N \le 1000$）では全 DNA をインメモリ保持可能。 | 数万規模の場合はストリーミング生成を将来検討。 |
+| **Low (Future)** | 大規模母集団時のメモリ・ストリーミング | V1 契約では人口サイズ上限を設けないが（$N \ge 2$）、全 DNA はインメモリで構築される。 | 実行環境のヒープ制限を超えるような大規模母集団の要求が生じた場合、ストリーミング生成やチャンク処理を将来検討。 |
 | **Deferred** | Custom Resolver / Persistence | V1 から意図的に除外。 | DNA Artifact Persistence Layer 設計時に再検討。 |
 
 ---
