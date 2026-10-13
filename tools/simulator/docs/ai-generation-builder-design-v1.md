@@ -1,7 +1,7 @@
-# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R2)
+# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R3)
 # (Generation g $\rightarrow$ Generation g+1 次世代母集団構築境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R2`
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R3`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -25,6 +25,19 @@
 $$\text{PopulationSnapshot}(g) + \text{FitnessEvaluationSnapshot}(g) \xrightarrow{\quad\text{Generation Builder}\quad} \text{PopulationSnapshot}(g+1)$$
 
 として、世代 $g$ の評価済み母集団から世代 $g+1$ の未評価母集団スナップショットを **決定論的（Deterministic）かつ完全フェイルクローズ（Fail-Closed）** に組み立てる **Generation Builder / Next Generation Assembly** の境界契約（Boundary Contract）を定義する。
+
+### R3 Follow-up における確定・厳格化事項
+1. **Canonical Evolution Stream Key Contract への完全一致 (Finding 1)**:
+   - Section 16.1 に存在していた誤った Stream Key 例（`generation-selection`, `generation-offspring-{k}`, `generation-mating-retry-{k}-{attempt}`）を完全に削除。
+   - `deriveSeed(baseSeed, streamKey)` においては streamKey 文字列そのものが Seed 派生入力であるため、表記揺れや異なる文字列は数学的に異なる Seed を生成する。
+   - 先行仕様 `ai-genetic-operators-design-v1.md` Section 14.3 および本設計書 Section 8 に完全整合させ、次の **Canonical Evolution Stream Keys** に厳格固定（エイリアス・非推奨名としての残存も一切禁止）:
+     - `evolution-selection-v1`
+     - `evolution-offspring-v1-${offspringIndex}`
+     - `evolution-crossover-v1`
+     - `evolution-mutation-v1`
+     - `evolution-self-mating-retry-v1-${retryIndex}`
+2. **Test 33 契約条件の厳格化と明示 (Finding 2)**:
+   - Implementation Test Plan の Test 33 において、`targetGeneration`、`Canonical Evolution Stream Key Contract`、`Generation Builder implementation version`、`Genetic Operator implementation version` を明示し、Bit-exact / Deep Equal 完全一致契約を厳密化。
 
 ### R2 Follow-up における確定・厳格化事項
 1. **決定論保証の境界整合 (Finding 1)**:
@@ -645,12 +658,22 @@ export class GenerationBuilderExecutionError extends Error {
 
 - **正式保証スコープ (Supported Deterministic Runtime)**:
   - 同一のサポート対象 Node.js ランタイム（例: Node.js v20.x LTS）
-  - 同一のオペレータ・ビルダー実装バージョン
+  - 同一の Generation Builder 実装バージョン（`Generation Builder implementation version`）
+  - 同一の Genetic Operator 実装バージョン（`Genetic Operator implementation version`）
   - 同一の入力スナップショット（`PopulationSnapshot(g)`, `FitnessEvaluationSnapshot(g)`）
   - 同一の `GenerationBuilderConfig`
-  - 同一の `targetGeneration`
-  - 同一の `generationSeed`
-  - 同一の Stream Key 契約（`generation-selection`, `generation-offspring-{k}`, `generation-mating-retry-{k}-{attempt}` 等）
+  - 同一の目標世代番号（`targetGeneration`）
+  - 同一の世代ベースシード（`generationSeed`）
+  - 同一の **Canonical Evolution Stream Key Contract**:
+    - トーナメント親選択: `evolution-selection-v1`
+    - 子個体ベースシード: `evolution-offspring-v1-${offspringIndex}`
+    - 交叉乱数ストリーム: `evolution-crossover-v1`
+    - 突然変異乱数ストリーム: `evolution-mutation-v1`
+    - 自己交配リトライ: `evolution-self-mating-retry-v1-${retryIndex}`
+
+> [!NOTE]
+> **なぜ完全一致（Exact String）が不可欠なのか**:
+> `deriveSeed(baseSeed, streamKey)` においては、`streamKey` 文字列そのものが 32-bit FNV-1a ハッシュ関数の入力データとなります。したがって、表記の不一致（例: `generation-selection` vs `evolution-selection-v1`）は単なる名前の違いにとどまらず、数学的に全く異なる Seed 値を算出します。そのため、エイリアスや非推奨名としての残存を一切許容せず、本設計書 Section 8 および先行仕様 `ai-genetic-operators-design-v1.md` Section 14.3 に完全一致する Canonical Evolution Stream Keys のみを厳格に使用します。
 
 上記が満たされる場合、生成される `GenerationBuildResult`（全エリートおよび子個体の DNA 重み、Lineage メタデータ、スナップショット構造）は常に **ビット単位・Deep Equal で 100% 完全一致（Bit-exact Reproduction）** することを保証する。
 
@@ -758,7 +781,7 @@ export class GenerationBuilderExecutionError extends Error {
 32. 出力母集団の配列順序が [Elites, Offspring] の順序と完全一致すること
 
 [Determinism & Pure Functionality]
-33. 同一の Supported Runtime・実装バージョン・入力スナップショット・Config・Seed に対し、完全一致 (Deep Equal) な結果を返すこと (Supported Deterministic Runtime Contract R2)
+33. 同一の Supported Deterministic Runtime、同一の Generation Builder implementation version、同一の Genetic Operator implementation version、同一の PopulationSnapshot、同一の FitnessEvaluationSnapshot、同一の GenerationBuilderConfig、同一の targetGeneration、同一の generationSeed、および同一の Canonical Evolution Stream Key Contract（evolution-selection-v1, evolution-offspring-v1-${offspringIndex}, evolution-crossover-v1, evolution-mutation-v1, evolution-self-mating-retry-v1-${retryIndex}）に対し、生成される GenerationBuildResult が Bit-exact かつ Deep Equal で完全一致すること (Supported Deterministic Runtime Contract R3)
 34. 入力 Population / Fitness のエントリ配列順序を入れ替えても、同一の結果を返すこと (Input Ordering Independence)
 35. 固定感度確認 fixture に対し、Seed A と Seed B で少なくとも 1 つの選択または Offspring DNA 差が生じることを Negative Control として確認すること (Seed Sensitivity Boundary R1)
 36. 異なる Seed に対して「全入力で必ず結果が異なる」という Universal Contract を要求しないこと (過剰保証排除 R1)
