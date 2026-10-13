@@ -1,24 +1,24 @@
-# BlackPoker Simulator Generation Runner Design V1
+# BlackPoker Simulator Generation Runner Design V1 (Follow-up R1)
 # (Generation g 自己対戦評価・適応度集計・次世代遷移実行境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1`  
-ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R1`
+ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
 先行仕様（Prerequisites）:
-- `tools/simulator/docs/ai-fitness-design-v1.md` (Formal Accepted, SHA: `3b064b5f1b20351d2571680308399472875398a5`)
-- `tools/simulator/docs/ai-population-selection-design-v1.md` (Formal Accepted)
-- `tools/simulator/docs/ai-genetic-operators-design-v1.md` (Formal Accepted, SHA: `8a7fa95db288a50ae33f3890fb9ea37fe4342045`)
-- `tools/simulator/docs/ai-generation-builder-design-v1.md` (Formal Accepted, SHA: `a86c940b974ec7c3675c9debe4d91556fa9ea677`)
-- Generation Builder Production Implementation: `BP-SIM-AI-GENERATION-BUILDER-V1-R3` (Formal Accepted, SHA: `a1634df3bae143dd3401fff85ffb1180c082fcb7`)
+- `tools/simulator/docs/ai-fitness-design-v1.md` (Formal Accepted, SHA: `c30e4c07061382b0f73f2102dac0b6ece604dbfb`)
+- `tools/simulator/src/engine/ai/FitnessEvaluator.ts` (Formal Accepted Implementation, SHA: `774c9a84601bf149b3ba1585a6611b305989749f`)
+- `tools/simulator/docs/ai-population-selection-design-v1.md` (Formal Accepted R1, SHA: `5b1d3dc8cc64f6c35af1b970125e9218c4687068`)
+- `tools/simulator/src/engine/ai/PopulationSelector.ts` (Formal Accepted Implementation R1, SHA: `a52228ca88964b968f361e9f0693bc75b4a3ce10`)
+- `tools/simulator/docs/ai-genetic-operators-design-v1.md` (Formal Accepted R2, SHA: `8206639052944460682a58e5090e18aa3c161a17`)
+- `tools/simulator/src/engine/ai/GeneticOperators.ts` (Formal Accepted Implementation R1, SHA: `a349c2f0c606230b7a3523acbaa0be7473c120f7`)
+- Runtime Match Telemetry V1-R1 (Formal Accepted Implementation, SHA: `d9fe8377141f0308c9b91ee90f910d3c2aaf0023`)
+- `tools/simulator/docs/ai-generation-builder-design-v1.md` (Formal Accepted R4, SHA: `a86c940b974ec7c3675c9debe4d91556fa9ea677`)
+- `tools/simulator/src/engine/ai/GenerationBuilder.ts` (Formal Accepted Implementation R3, SHA: `a1634df3bae143dd3401fff85ffb1180c082fcb7`)
 - `tools/simulator/src/domain/ai/FitnessEvaluationTypes.ts` (Implemented)
-- `tools/simulator/src/engine/ai/FitnessEvaluator.ts` (Implemented)
 - `tools/simulator/src/domain/ai/PopulationSelectionTypes.ts` (Implemented)
-- `tools/simulator/src/engine/ai/PopulationSelector.ts` (Implemented)
 - `tools/simulator/src/domain/ai/GeneticOperatorTypes.ts` (Implemented)
-- `tools/simulator/src/engine/ai/GeneticOperators.ts` (Implemented)
 - `tools/simulator/src/domain/ai/GenerationBuilderTypes.ts` (Implemented)
-- `tools/simulator/src/engine/ai/GenerationBuilder.ts` (Implemented)
 - `tools/simulator/src/domain/simulation/BatchSimulationTypes.ts` (Implemented)
 - `tools/simulator/src/engine/simulation/BatchSimulationRunner.ts` (Implemented)
 - `tools/simulator/src/engine/simulation/SimulationRunner.ts` (Implemented)
@@ -31,13 +31,37 @@
 
 ## 1. Purpose (設計目的)
 
-本設計書は、BlackPoker Simulator AI 自己対戦進化（Phase 4.0: Self-Play Evolution）において、Formal Accepted 済みとなった **Fitness Evaluator**、**Population Selection**、**Genetic Operators**、**Runtime Telemetry**、および **Generation Builder** を垂直統合し、
+本設計書は、BlackPoker Simulator AI 自己対戦進化（Phase 4.0: Self-Play Evolution）において、先行して Formal Accepted 済みとなった **Fitness Evaluator**、**Population Selection**、**Genetic Operators**、**Runtime Match Telemetry**、および **Generation Builder** を垂直統合し、
 
 $$\text{PopulationSnapshot}(g) \xrightarrow{\text{Self-Play Evaluation}} \text{FitnessEvaluationSnapshot}(g) \xrightarrow{\text{GenerationBuilder}} \text{PopulationSnapshot}(g+1)$$
 
 という **「ちょうど1世代分（One Generation Only）」** の自己対戦評価・適応度集計・次世代遷移の実行境界（Generation Runner Execution Boundary）を定義する。
 
 Generation Runner は、母集団 $N$ 個体の全ペアによる決定論的 **Double Round Robin（二重総当たり戦）** スケジュールを構築・実行し、勝敗結果を `FitnessEvaluator` へ委譲して客観的な適応度スナップショットを生成した上で、`GenerationBuilder` を通じて次世代母集団を安全かつアトミックに導出する。
+
+### R1 Follow-up における確定・厳格化事項
+1. **Comparable Evaluation Context の Single Source of Truth 確立 (Finding 1)**:
+   - 外部から完成形の `ComparableEvaluationContext` を受け取る方式を完全廃止（`fitnessConfig` の二重 Source of Truth を排除）。
+   - 入力パラメータは環境固有の不変情報 `environment: GenerationRunnerEnvironmentContext` のみとし、`fitnessConfig`（Authoritative Resolved Config）、`generation`（`population.generation`）、`evaluationScheduleId`、`seedScheduleIdentity` はすべて Runner 内部で派生・構築する。
+   - スケジュール ID に `pairRepetitions` と `maxDecisionsPerMatch` を包含（`double-round-robin-v1:r=${pairRepetitions}:max-decisions=${maxDecisionsPerMatch}`）。
+   - シードスケジュール ID に `generationSeed` を包含（`evolution-evaluation-pair-v1:generation-seed=${generationSeed}`）。
+2. **Logical Deterministic Result と Runtime Telemetry Sidecar の完全分離 (Finding 2)**:
+   - `GenerationRunnerLogicalResult`（決定論的結果）と `GenerationRunnerRuntimeMetrics`（非決定論的実行時メトリクス）を明確に分離。
+   - `GenerationEvaluationManifest` から実行時間（wall-clock）やタイムスタンプを完全排除し、純粋な論理メタデータのみを保持。
+   - Deep Equal 一致保証のスコープを `GenerationRunnerLogicalResult` に限定。
+3. **FAILED 試合の Fail-Closed 境界と誤淘汰防止 (Finding 3)**:
+   - 現行 Simulator では例外の原因（Genome起因か、Rule Engineバグか、インフラ障害か）を自動帰属する Failure Attribution 型が存在しない。
+   - 1試合でも FAILED を検出した場合、当該個体の適応度へ流して `INVALID` とするのではなく、**Runner 全体を `GenerationRunnerExecutionError` で Fail-Closed 停止** させる。
+   - 正常個体の誤淘汰を防止し、FitnessEvaluationSnapshot まで到達した場合は全個体の `failedMatches === 0` を保証。
+4. **Readiness Preflight による完全な SelectionReadiness 取得 (Finding 4)**:
+   - `GenerationBuilderExecutionError` が `readinessStatus` しか保持しない問題に対処し、Runner 自身が Builder 呼出前に `PopulationSelector.assessReadiness()` を先行実行。
+   - Builder の Effective Readiness Gate（$\text{validCount} \ge \text{eliteCount}$）を考慮した `effectiveRequiredCount = max(requiredCount, eliteCount)` を算出し、不足時は Builder を呼び出さずに `status: "REEVALUATION_REQUIRED"` と完全な `SelectionReadiness` を返却。
+   - Preflight が READY なのに Builder が例外を返した場合は契約逸脱（Contract Drift）として Fail-Closed。
+5. **Prerequisite SHA 訂正および型定義・import の厳格化 (Finding 5)**:
+   - 設計ヘッダーの先行仕様コミット SHA を Git 履歴上の実体 SHA へ訂正。
+   - `FitnessEvaluationConfig` の import 元を `PopulationSelectionTypes` から `FitnessEvaluationTypes` へ是正。
+6. **V1 逐次実行契約の確定 (Finding 6)**:
+   - 現行本番 `BatchSimulationRunner` は逐次ループ実行であり並列バッチは未実装であるため、V1 Public Config から `concurrency` を削除し、**SEQUENTIAL EXECUTION ONLY** を正式契約とする（並列実行は将来スコープへ Deferred）。
 
 > [!IMPORTANT]
 > **本作業のスコープ境界 (DESIGN ONLY)**  
@@ -60,7 +84,7 @@ Generation Runner V1 の責務を単一世代遷移に厳密に集中させる�
 5. **永続化・チェックポイント (Persistence / Checkpoint / Resume)**:
    - ディスク（ファイルシステム）、データベースへの保存・復元、チェックポイント管理は含めない。
 6. **分散・並列実行基盤 (Distributed Execution / Cluster / GPU / Cloud)**:
-   - クラスタ分散実行、GPU 並列化、Mac mini 最適化等のインフラ関心事は含めない。
+   - クラスタ分散実行、GPU 並列化、マルチスレッド並列実行等のインフラ関心事は含めない（V1 は逐次実行固定）。
 7. **GUI / 進化可視化 (Evolution UI)**:
    - チャート描画、リアルタイム進捗画面等は含めない。
 8. **自動ハイパーパラメータチューニング (Auto Parameter Tuning)**:
@@ -104,43 +128,59 @@ Generation Runner は、BlackPoker Simulator のドメイン層とシミュレ�
                  for (let g = 0; g < maxGenerations; g++) { run(...) }
 ========================================================================================
                                            │
-                                           │ generationSeed(g)
+                                           │ generationSeed(g), environment
                                            ▼
 ┌──────────────────────────────────────────────────────────────────────────────────────┐
-│                        Generation Runner V1 (本設計スコープ)                          │
+│                     Generation Runner V1 (本設計スコープ: 逐次実行)                   │
 │                                                                                      │
-│  [Step 1] Population Validation                                                      │
+│  [Step 1] Population & Environment Validation                                        │
 │    PopulationSnapshot(g) の構造・一意性・不変性を検証 (N >= 2)                       │
+│    environment 不変文字列検証 (Fail-Fast)                                            │
 │                                                                                      │
-│  [Step 2] Canonical Double Round Robin Schedule Construction                         │
+│  [Step 2] Authoritative Config & Canonical Context Assembly                          │
+│    resolvedFitnessConfig = FitnessEvaluator.validateConfig(config.fitnessConfig)     │
+│    Canonical Schedule ID: double-round-robin-v1:r=${R}:max-decisions=${M}            │
+│    Canonical Seed ID: evolution-evaluation-pair-v1:generation-seed=${seed}           │
+│    Canonical ComparableEvaluationContext 構築 (Single Source of Truth)               │
+│                                                                                      │
+│  [Step 3] Canonical Double Round Robin Schedule Construction                         │
 │    Canonical Ordering (genomeId 昇順) -> 全ペア A vs B / B vs A 生成                 │
 │    Total Matches: N * (N - 1) * R (R = pairRepetitions)                              │
+│    Fitness Evidence Preflight: perGenomeScheduledMatches >= minimumCompletedMatches  │
 │                                                                                      │
-│  [Step 3] Deterministic Match Execution (Production Simulation Path)                 │
-│    for each match in schedule:                                                       │
+│  [Step 4] Sequential Match Execution (Production Simulation Path)                    │
+│    for each match in schedule (Canonical matchIndex 順次実行):                       │
 │      pairSeed = deriveSeed(generationSeed, streamKey)                                │
-│      GenomePolicy(p1.dna) vs GenomePolicy(p2.dna)                                    │
-│      GameSession.advance() via SimulationRunner.run()                                │
-│      Outcome: COMPLETED (Winner) | INCOMPLETE | FAILED                               │
+│      matchContext = buildMatchContext(matchIndex, pairSeed)                          │
+│      session = sessionFactory(matchContext)                                          │
+│      policies = { p1: new GenomePolicy(p1DNA), p2: new GenomePolicy(p2DNA) }         │
+│      result = SimulationRunner.run(session, policies, { maxDecisions })              │
+│      if (result is FAILED) -> throw GenerationRunnerExecutionError (Fail-Closed)     │
 │                                                                                      │
-│  [Step 4] Deterministic Outcome Aggregation                                          │
-│    全試合結果を各ゲノムの PolicyParticipantOutcomeSummary へ集約                      │
+│  [Step 5] Deterministic Outcome Aggregation                                          │
+│    全試合結果 (全件 failedMatches === 0) を PolicyParticipantOutcomeSummary へ集約   │
 │                                                                                      │
-│  [Step 5] Fitness Evaluation (Outcome-First V1)                                      │
+│  [Step 6] Fitness Evaluation (Outcome-First V1)                                      │
 │    FitnessEvaluator.evaluateParticipant() による評価                                 │
-│    -> FitnessEvaluationSnapshot(g) 構築 (1:1 整合)                                   │
+│    -> FitnessEvaluationSnapshot(g) 構築 (1:1 整合, Canonical Context 保持)           │
 │                                                                                      │
-│  [Step 6] Delegation to Generation Builder                                           │
+│  [Step 7] Readiness Preflight Check                                                  │
+│    readiness = PopulationSelector.assessReadiness(...)                               │
+│    effectiveRequiredCount = max(readiness.requiredCount, eliteCount)                 │
+│    if (readiness !== READY || validCount < effectiveRequiredCount)                   │
+│      -> return REEVALUATION_REQUIRED (Builder 未呼出, nextPopulation: undefined)     │
+│                                                                                      │
+│  [Step 8] Delegation to Generation Builder                                           │
 │    GenerationBuilder.buildNextGeneration({                                           │
 │      population, fitnessSnapshot, targetGeneration: g+1, generationSeed, ...         │
 │    })                                                                                │
 │                                                                                      │
-│  [Step 7] Return Generation Runner Result                                            │
-│    - ADVANCED: { population(g+1), buildResult, fitnessSnapshot(g), manifest }        │
-│    - REEVALUATION_REQUIRED: { fitnessSnapshot(g), reason, manifest }                 │
+│  [Step 9] Return Execution Result                                                    │
+│    - logicalResult: ADVANCED { nextPopulation(g+1), buildResult, fitnessSnapshot }   │
+│    - runtimeMetrics: GenerationRunnerRuntimeMetrics (Sidecar, Deep Equal 対象外)     │
 └──────────────────────────────────────────────────────────────────────────────────────┘
                                            │
-                                           │ GenerationRunnerResult
+                                           │ GenerationRunnerExecutionResult
                                            ▼
 ========================================================================================
                                  Evolution Loop (将来スコープ)
@@ -161,18 +201,37 @@ Generation Runner は、**「世代 $g$ から世代 $g+1$ への遷移をちょ
 ### 5.2 処理ステップの責務分担
 | ステップ | 担当コンポーネント | 責務内容 |
 |---|---|---|
-| 1. 入力検証 | Generation Runner | 母集団サイズ（$N \ge 2$）、世代番号整合性、シード値正当性の検証 |
-| 2. 対戦計画 | Generation Runner | Canonical Double Round Robin スケジュール生成、Match Identity 付与 |
-| 3. 試合実行 | SimulationRunner / GameSession | 本番シミュレーション経路を通じた対戦実行、合法的観測と Argmax 選択 |
-| 4. 戦績集計 | Generation Runner | 全試合結果から各個体の勝敗・引き分け・未決着・失敗数の決定論的集約 |
-| 5. 適応度評価 | FitnessEvaluator | Outcome-First 契約に基づく MPA 算出、VALID / INSUFFICIENT / INVALID 判定 |
-| 6. 次世代構築 | GenerationBuilder | 親選択、エリート選出、交叉・変異、次世代スナップショット（$g+1$）アセンブリ |
+| 1. 入力検証 | Generation Runner | 母集団サイズ（$N \ge 2$）、環境不変情報、シード値正当性の検証 |
+| 2. コンテキスト構築 | Generation Runner | Authoritative な設定解決と Canonical Comparable Context の一元構築 |
+| 3. 対戦計画 | Generation Runner | Canonical Double Round Robin スケジュール生成、Match Identity 付与 |
+| 4. 試合実行 | SimulationRunner / GameSession | 本番シミュレーション経路を通じた逐次対戦実行、合法的観測と Argmax 選択 |
+| 5. 失敗検出 | Generation Runner | FAILED 試合検出時の即座な Fail-Closed 例外停止（誤淘汰防止） |
+| 6. 戦績集計 | Generation Runner | 全試合結果から各個体の勝敗・引き分け・未決着数の決定論的集約 |
+| 7. 適応度評価 | FitnessEvaluator | Outcome-First 契約に基づく MPA 算出、VALID / INSUFFICIENT 判定 |
+| 8. 適格性事前判定 | Generation Runner / Selector | `PopulationSelector.assessReadiness` と Effective Gate による事前検証 |
+| 9. 次世代構築 | GenerationBuilder | 親選択、エリート選出、交叉・変異、次世代スナップショット（$g+1$）アセンブリ |
 
 ---
 
 ## 6. Input Types & Parameter Contracts (入力型契約)
 
+二重 Source of Truth を排除するため、`RunGenerationParams` は完成形の `ComparableEvaluationContext` ではなく、環境固有の不変情報のみを受け取る。
+
 ```typescript
+/**
+ * Generation Runner が受け取る環境固有の不変情報
+ */
+export interface GenerationRunnerEnvironmentContext {
+  /** ルールセット識別子 (非空, 例: "rules-vnext:playtest") */
+  readonly environmentRef: string;
+  /** レギュレーション識別子 (非空, 例: "light-entry16") */
+  readonly regulationId: string;
+  /** フレーム識別子 (非空, 例: "entry16") */
+  readonly frameId: string;
+  /** ルールパッケージ版数 (非空, 例: "9.1.2") */
+  readonly rulePackageVersion: string;
+}
+
 /**
  * Generation Runner の実行パラメータ
  */
@@ -183,8 +242,8 @@ export interface RunGenerationParams {
   /** 当該世代の自己対戦評価・親選択・子個体生成を統括する基本乱数シード (有限整数) */
   readonly generationSeed: number;
 
-  /** 同一世代の比較可能性を保証する評価コンテキスト情報 */
-  readonly context: ComparableEvaluationContext;
+  /** 環境固有の不変情報 (非空文字列を必須とする) */
+  readonly environment: GenerationRunnerEnvironmentContext;
 
   /**
    * 各試合固有の fresh な GameSession を生成するファクトリ関数
@@ -201,7 +260,15 @@ export interface RunGenerationParams {
 
 ## 7. Config (設定契約)
 
+V1 は逐次実行固定（Sequential Execution Only）とし、`concurrency` オプションは削除する。
+
 ```typescript
+import {
+  FitnessEvaluationConfig,
+  DEFAULT_FITNESS_EVALUATION_CONFIG,
+} from "./FitnessEvaluationTypes.js";
+import { GenerationBuilderConfig } from "./GenerationBuilderTypes.js";
+
 /**
  * Generation Runner 評価・実行設定
  */
@@ -220,12 +287,6 @@ export interface GenerationRunnerConfig {
 
   /** 次世代母集団アセンブリ設定 (Generation Builder 用) */
   readonly builderConfig?: Partial<GenerationBuilderConfig>;
-
-  /**
-   * 実行並列度 (有限正の整数 >= 1, デフォルト: 1)
-   * ※ Concurrency は execution concern であり、論理結果に一切影響を与えてはならない
-   */
-  readonly concurrency: number;
 }
 
 /**
@@ -235,449 +296,321 @@ export const DEFAULT_GENERATION_RUNNER_CONFIG: GenerationRunnerConfig = Object.f
   pairRepetitions: 1,
   maxDecisionsPerMatch: 500,
   fitnessConfig: DEFAULT_FITNESS_EVALUATION_CONFIG,
-  concurrency: 1,
 });
 ```
 
 ---
 
-## 8. Canonical Double Round Robin Schedule (対戦スケジュール)
+## 8. Canonical Comparable Evaluation Context (評価文脈の一元構築)
 
-### 8.1 採用理由 (Why Double Round Robin)
-Generation Runner V1 では、対戦スケジュール方式として **Double Round Robin（二重総当たり戦）** を固定採用する。理由は以下の通りである:
-1. **完全な対戦相手対称性**: すべての個体が母集団内の全く同一の相手集合と戦うため、対戦相手の引き（opponent sampling bias）による運の要素を完全に排除できる。
-2. **座席バイアスの相殺**: BlackPoker の先攻・後攻差を、全ペアでの side swap（$p_1$ と $p_2$ の入替）により数学的に完全に中和する。
-3. **適応度の高精度比較**: Tournament Selection が要求する「個体間の客観的な実力差」を最も偏りなく評価できる。
-4. **単純性と決定論性**: ランダムサンプリングやスイス式のような動的マッチングを排し、事前計画可能で再現性の高いスケジュール契約を実現する。
+### 8.1 Single Source of Truth
+Caller が個別に `context.fitnessConfig` や `context.generation` を指定することは禁止する。Runner は自身が解決した確定値から `ComparableEvaluationContext` を唯一の決定論的真実として構築する:
 
-### 8.2 試合数算定公式 (Match Count Formula)
-母集団個体数を $N$（$N \ge 2$）、ペア反復数を $R$（`pairRepetitions` $\ge 1$）とする。
+```typescript
+// 1. Fitness Config の正規解決 (Authoritative)
+const resolvedFitnessConfig = FitnessEvaluator.validateConfig(params.config?.fitnessConfig);
 
-- **非順序ペア総数 (Total Unordered Pairs)**:
-  $$\text{totalPairs} = \frac{N(N - 1)}{2}$$
-- **1ペア・1反復あたりの試合数**:
-  $$2 \quad (\text{Leg 0: } A=p_1, B=p_2 \quad / \quad \text{Leg 1: } B=p_1, A=p_2)$$
-- **世代全体の総試合数 (Total Scheduled Matches)**:
-  $$\text{totalMatches} = \frac{N(N - 1)}{2} \times 2 \times R = N(N - 1)R$$
-- **1個体あたりの予定試合数 (Per-Genome Scheduled Matches)**:
-  $$\text{perGenomeScheduledMatches} = 2(N - 1)R$$
-- **1個体あたりの座席別予定試合数**:
-  $$\text{matchesAsP1} = (N - 1)R, \quad \text{matchesAsP2} = (N - 1)R$$
+// 2. Schedule ID および Seed ID の導出
+const evaluationScheduleId = canonicalEvaluationScheduleId(
+  resolvedConfig.pairRepetitions,
+  resolvedConfig.maxDecisionsPerMatch
+);
+const seedScheduleIdentity = canonicalSeedScheduleIdentity(params.generationSeed);
 
-#### 代表的な規模での試算
-| 母集団規模 $N$ | 反復数 $R$ | 総試合数 $\text{totalMatches}$ | 個体あたり試合数 $\text{perGenome}$ | $p_1$ / $p_2$ 試合数 |
-|---|---|---|---|---|
-| $N = 2$ | $R = 1$ | 2 | 2 | 1 / 1 |
-| $N = 4$ | $R = 1$ | 12 | 6 | 3 / 3 |
-| $N = 4$ | $R = 2$ | 24 | 12 | 6 / 6 |
-| $N = 10$ | $R = 1$ | 90 | 18 | 9 / 9 |
-| $N = 100$ | $R = 1$ | **9,900** | **198** | **99 / 99** |
-| $N = 100$ | $R = 2$ | 19,800 | 396 | 198 / 198 |
+// 3. 一元化された Canonical Context の構築
+const evaluationContext: ComparableEvaluationContext = Object.freeze({
+  environmentRef: params.environment.environmentRef,
+  regulationId: params.environment.regulationId,
+  frameId: params.environment.frameId,
+  rulePackageVersion: params.environment.rulePackageVersion,
+  fitnessConfig: resolvedFitnessConfig,
+  generation: params.population.generation,
+  evaluationScheduleId,
+  seedScheduleIdentity,
+});
+```
 
-### 8.3 規模に関する注意 (Do Not Hardcode 100)
-Generation Builder のデフォルト個体数は 100 であるが、Generation Runner は $N = 100$ をハードコードしてはならない。任意の $N \ge 2$ について同一の計算式と契約が成立しなければならない。また、恣意的な上限（例: $N \le 1000$）は課さない。
+### 8.2 Canonical Evaluation Schedule ID 命名規則
+`pairRepetitions` と `maxDecisionsPerMatch` は対戦回数および未決着（INCOMPLETE）発生率を左右し、適応度判定に直接影響を与える比較可能条件である。したがって、これらを明示的に含める:
 
-### 8.4 適応度証拠の先行検証 (Fitness Evidence Preflight)
-`FitnessEvaluationConfig` の `minimumCompletedMatches` に対し、予定試合数が不足している場合（例: $N=2, R=1 \implies \text{perGenome}=2$ であるのに対し、$\text{minimumCompletedMatches} = 10$ の場合）、全試合が正常終了しても全個体が確実に `INSUFFICIENT_EVIDENCE` となり次世代へ進めない。
+```typescript
+export function canonicalEvaluationScheduleId(
+  pairRepetitions: number,
+  maxDecisionsPerMatch: number
+): string {
+  return `double-round-robin-v1:r=${pairRepetitions}:max-decisions=${maxDecisionsPerMatch}`;
+}
+```
+- 例: `double-round-robin-v1:r=1:max-decisions=500`
 
-したがって、Generation Runner は実行開始前の Preflight 検証において:
-$$\text{perGenomeScheduledMatches} < \text{fitnessConfig.minimumCompletedMatches}$$
-である場合、対戦を1試合も実行することなく **`GenerationRunnerConfigurationError` により Fail-Fast で即時停止** しなければならない。Runner が勝手に `pairRepetitions` を引き上げて帳尻を合わせてはならない。
+### 8.3 Canonical Seed Schedule Identity 命名規則
+異なる `generationSeed` で評価された適応度は同一のシード系列として比較してはならないため、シード値を明示的に含める:
+
+```typescript
+export function canonicalSeedScheduleIdentity(generationSeed: number): string {
+  return `evolution-evaluation-pair-v1:generation-seed=${generationSeed}`;
+}
+```
+- 例: `evolution-evaluation-pair-v1:generation-seed=42`
 
 ---
 
-## 9. Canonical Ordering & Pair Construction (カノニカル順序付け)
+## 9. Canonical Double Round Robin Schedule (対戦スケジュール)
 
-### 9.1 Population Canonical Ordering
-入力された `population.entries` の順序に依存しない決定論性を保証するため、スケジュール構築前に個体配列のシャローコピーを作成し、`genomeId` の昇順（UTF-16 code unit order）でソートする。
-- 元の `population.entries` 配列を変更（破壊）してはならない。
-- これにより、入力配列の順序がシャッフルされても、生成されるスケジュールおよび試合順序は 100% 不変となる。
+### 9.1 採用理由 (Why Double Round Robin)
+1. **完全な対戦相手対称性**: すべての個体が母集団内の全く同一の相手集合と戦うため、対戦相手の引き（opponent sampling bias）による運の要素を完全に排除できる。
+2. **座席バイアスの対称化**: Mirrored seed + side swap により、先攻・後攻の座席差および配牌差を対称化し、決定論的な paired comparison を可能にする。
+3. **適応度の高精度比較**: Tournament Selection が要求する「個体間の客観的な実力差」を最も偏りなく評価できる。
+4. **単純性と決定論性**: ランダムサンプリングを排し、事前計画可能で再現性の高いスケジュール契約を実現する。
 
-### 9.2 Canonical Pair Ordering
-ソート済み個体系列 $G_0 < G_1 < \dots < G_{N-1}$ に対し、以下の辞書順二重ループにより unordered pair を生成する:
+### 9.2 試合数算定公式 (Match Count Formula)
+母集団個体数を $N$（$N \ge 2$）、ペア反復数を $R$（`pairRepetitions` $\ge 1$）とする。
 
-```text
-pairIndex = 0
-for i = 0 .. N - 2:
-  for j = i + 1 .. N - 1:
-    // pairIndex: 0 .. (N*(N-1)/2 - 1)
-    pairIndex++
-```
+- **非順序ペア総数**: $\text{totalPairs} = \frac{N(N - 1)}{2}$
+- **世代全体の総試合数**: $\text{totalMatches} = N(N - 1)R$
+- **1個体あたりの予定試合数**: $\text{perGenomeScheduledMatches} = 2(N - 1)R$
+- **1個体あたりの座席別予定試合数**: $\text{matchesAsP1} = (N - 1)R, \quad \text{matchesAsP2} = (N - 1)R$
 
-### 9.3 Leg Ordering & Match Index
-各 unordered pair $(G_i, G_j)$ に対し、反復インデックス $r \in [0, R-1]$ に基づいて次の2つの Leg を連続して配置する:
+### 9.3 規模と上限の不在 (Do Not Hardcode 100)
+Generation Builder のデフォルト個体数は 100 であるが、Generation Runner は $N = 100$ をハードコードしない。任意の $N \ge 2$ について同一の計算式と契約が成立する。また、恣意的な上限（例: $N \le 1000$）は課さない。
+
+### 9.4 適応度証拠の先行検証 (Fitness Evidence Preflight)
+実行開始前の Preflight 検証において:
+$$\text{perGenomeScheduledMatches} < \text{resolvedFitnessConfig.minimumCompletedMatches}$$
+である場合、対戦を1試合も実行することなく **`GenerationRunnerConfigurationError` により Fail-Fast で即時停止** する。Runner が勝手に `pairRepetitions` を引き上げて帳尻を合わせてはならない。
+※なお、`minimumCompletionRate` は実際の対戦結果（未決着数）に依存するため事前判定はできず、対戦完了後の Fitness 評価層で判定される。
+
+---
+
+## 10. Ordering & Seed Derivation (順序付けとシード契約)
+
+### 10.1 Population Canonical Ordering
+入力された `population.entries` の順序に依存しない決定論性を保証するため、スケジュール構築前に個体配列のシャローコピーを作成し、`genomeId` の昇順（UTF-16 code unit order）でソートする（元配列非破壊）。
+
+### 10.2 Canonical Pair & Leg Ordering
+ソート済み個体系列 $G_0 < G_1 < \dots < G_{N-1}$ に対し、辞書順二重ループ ($i = 0 \dots N-2, j = i+1 \dots N-1$) により pair を生成し、各反復 $r \in [0, R-1]$ において次の順序で配置する:
 - **Leg 0**: $p_1 = G_i, \quad p_2 = G_j$
 - **Leg 1**: $p_1 = G_j, \quad p_2 = G_i$
 
-全体の `matchIndex` は、このカノニカル順序に従って $0$ から $\text{totalMatches} - 1$ まで連続した非負整数として一意に割り振られる。
+全体の `matchIndex` は、このカノニカル順序に従って $0$ から $\text{totalMatches} - 1$ まで連続した連番となる。
 
----
-
-## 10. Seed Derivation & Evaluation Stream Contract (シード導出契約)
-
-### 10.1 外部入力シード境界
-Generation Runner は、入力として外部から与えられた `generationSeed`（有限整数, 0 も合法）のみを使用する。
-Runner 自身が `Date.now()`、`Math.random()`、UUID 等からシードを自律生成することは厳禁とする。
-
-### 10.2 Evaluation Stream Key 契約
-Generation Builder や Genetic Operators の既存 Stream Key との衝突を完全に防止するため、Generation Runner 専用の Evaluation Stream Key を定義する。
-
+### 10.3 Evaluation Stream Key & Pair Seed
 ```typescript
-/**
- * Generation Runner 専用 Canonical Evaluation Stream Key 命名規則
- */
 export function getEvaluationPairStreamKey(pairIndex: number, repetitionIndex: number): string {
   return `evolution-evaluation-pair-v1-${pairIndex}-${repetitionIndex}`;
 }
 ```
-
-- 既存の `evolution-selection-v1`、`evolution-offspring-v1-*`、`evolution-crossover-v1`、`evolution-mutation-v1`、`evolution-self-mating-retry-v1-*` には一切変更を加えない。
-
-### 10.3 Pair Seed の導出
-各 unordered pair および反復ごとに、純粋関数 `deriveSeed`（32-bit FNV-1a）を用いて一意の `pairSeed` を導出する:
 $$\text{pairSeed} = \text{deriveSeed}(\text{generationSeed}, \text{getEvaluationPairStreamKey}(\text{pairIndex}, \text{repetitionIndex}))$$
 
-### 10.4 Mirrored Legs と Seed の安全性監査 (Mandatory Seed Semantics Audit)
-V1 の基本原則として、同一 pair / repetition の両 Leg（Leg 0 と Leg 1）で **同一の `pairSeed` を `matchSeed` として共用** する（Mirrored Leg Seed）。
-
-#### 本番ソースコードに基づくシード挙動監査結果
-`OfficialRegulationMatchSetup.setupDraftZones` の実装を監査した結果:
-```typescript
-const p1Rng = new SeededRandom(deriveSeed(matchSeed, "p1-deck"));
-const p2Rng = new SeededRandom(deriveSeed(matchSeed, "p2-deck"));
-const p1Shuffled = shuffleCards(p1RemainingDeck, p1Rng);
-const p2Shuffled = shuffleCards(p2RemainingDeck, p2Rng);
-```
-- **Leg 0 ($A=p_1, B=p_2$)**:
-  - 個体 $A$ のデッキは `deriveSeed(pairSeed, "p1-deck")` でシャッフルされる。
-  - 個体 $B$ のデッキは `deriveSeed(pairSeed, "p2-deck")` でシャッフルされる。
-- **Leg 1 ($B=p_1, A=p_2$)**:
-  - 個体 $B$ のデッキは `deriveSeed(pairSeed, "p1-deck")` でシャッフルされる。
-  - 個体 $A$ のデッキは `deriveSeed(pairSeed, "p2-deck")` でシャッフルされる。
-
-#### 監査の結論
-1. **完全な鏡像配牌 (Duplicate Deal)**:
-   個体 $B$ が Leg 1 で手にする山札のカード順は、個体 $A$ が Leg 0 で手にした山札のカード順と完全に一致する。同様に、個体 $A$ が Leg 1 で手にする山札は、個体 $B$ が Leg 0 で手にした山札と完全に一致する。これはコントラクトブリッジにおける「デュプリケート競技」と全く同一の完全対称・公平条件を実現する。
-2. **座席・先攻決定の対称性**:
-   `executeFirstPlayerDetermination` においても各座席の山札トップが比較されるため、Leg 0 で $p_1$ が先攻を獲得した場合、Leg 1 でも $p_1$（座席を交代した相手個体）が先攻を獲得する。両者ともに先攻と後攻の双方を全く同一の配牌条件下でプレイする。
-3. **ゲーム内ランダム性の完全分離**:
-   対戦中に発生するライフシャッフル等は `deriveRuntimeShuffleSeed(matchSeed, counter)`（ストリームプレフィックス: `runtime-shuffle-${counter}`）により独立導出されるため、デッキシャッフルと干渉しない。
-4. **既存実績との整合**:
-   本契約は、本番で安定稼働している `PolicyExperimentRunner`（Leg 1 と Leg 2 で同一 `baseSeed` を共用）の実績設計と 100% 整合しており、安全であることが実証された。
+### 10.4 Mirrored Leg Seed
+同一 pair / repetition の両 Leg（Leg 0 と Leg 1）で **同一の `pairSeed` を `matchSeed` として共用** する。
+- 座席を交代した同一デッキ配牌（Duplicate Deal）となり、座席バイアスが対称化される。
+- ゲーム内シャッフルは独立ストリーム `runtime-shuffle-${counter}` を使用するため干渉しない。
 
 ---
 
-## 11. Match Execution Path (本番シミュレーション経路)
+## 11. Match Execution & Outcome Classification (試合実行と勝敗分類)
 
-### 11.1 本番経路の直接再利用
-Generation Runner は、自己対戦専用の独自ルールエンジンや簡易戦闘ロジックを新設してはならない。必ず本番 Simulator の正規実行パイプラインを利用する:
-
-```text
-DecisionDNA (p1) ──> GenomePolicy ──┐
-                                     ├──> SimulationRunner.run(session, { p1, p2 }, options)
-DecisionDNA (p2) ──> GenomePolicy ──┘                     │
-                                                          ▼
-                                                  SimulationResult
-```
-
-### 11.2 インスタンス完全隔離 (Freshness Contract)
-各試合の実行にあたり:
-- `sessionFactory(ctx)` により、完全に独立した fresh な `GameSession` インスタンスを生成する。
-- 各プレイヤーの `GenomePolicy` は、当該試合の `p1.dna` および `p2.dna` から新しくインスタンス化する（内部でディープクローンされ状態汚染を遮断）。
-
----
-
-## 12. Outcome Classification (勝敗判定とステータス分類)
-
-`SimulationRunner.run()` の返却値（`SimulationResult`）および `BatchMatchResult` に従い、試合結果を厳密に 3 値分類する:
-
-```text
-┌────────────────────────────────────────────────────────────────────────┐
-│                        Match Outcome 3値分類                           │
-├─────────────────┬──────────────────────────────────────────────────────┤
-│ 1. COMPLETED    │ 正常に勝敗が決着、またはルール上の正規引き分け       │
-│                 │ (simResult.completed === true)                       │
-├─────────────────┼──────────────────────────────────────────────────────┤
-│ 2. INCOMPLETE   │ 最大判断手数 (maxDecisionsPerMatch) 到達等による未決着│
-│                 │ (simResult.completed === false) ※ DRAW とは厳格に区別│
-├─────────────────┼──────────────────────────────────────────────────────┤
-│ 3. FAILED       │ セッション初期化、ポリシー初期化、実行中の例外発生   │
-│                 │ (simResult 未到達、または捕捉された例外レコードあり) │
-└─────────────────┴──────────────────────────────────────────────────────┘
-```
-
-### 12.1 勝敗の帰属ルール
-1. **COMPLETED で $p_1$ 勝利 (`winner === "p1"`)**:
-   - $p_1$ ゲノム: `wins += 1`
-   - $p_2$ ゲノム: `losses += 1`
-2. **COMPLETED で $p_2$ 勝利 (`winner === "p2"`)**:
-   - $p_1$ ゲノム: `losses += 1`
-   - $p_2$ ゲノム: `wins += 1`
-3. **COMPLETED で引き分け (`winner === undefined`)**:
-   - 両ゲノム: `draws += 1`
-4. **INCOMPLETE (`completed === false`)**:
-   - **引き分け（Draw）としては絶対に計上しない**。
-   - `completedMatches` には含めず、両ゲノムの `incompleteMatches += 1` として記録。
-5. **FAILED**:
-   - 両ゲノムの `failedMatches += 1` として記録。
-
-### 12.2 インフラ例外と試合レベル FAILED の峻別
-- **試合レベル FAILED**: ルールエンジンや個別ポリシーの予期せぬ例外。結果レコードに記録され、Fitness 評価層で当該個体の失格（`status: "INVALID"`）として決定論的に処理される。
-- **インフラ例外 (Infrastructure Exception)**: Out of Memory、プロセス中断、外部 I/O 障害等のシステム崩壊。これらを試合レベルの FAILED として握りつぶして続行することは厳禁であり、Runner 全体を **Fail-Closed で直ちに throw 中断** させる。
-
----
-
-## 13. Per-Genome Outcome Aggregation (個体別戦績集約)
-
-全対戦完了後、各個体について集約された戦績は、既存の `PolicyParticipantOutcomeSummary` 型へ正確に変換される。
+### 11.1 逐次実行パイプライン (Production Path)
+Generation Runner は、各試合を `matchIndex` 順に逐次実行する:
 
 ```typescript
-export interface PolicyParticipantOutcomeSummary {
-  readonly participantId: string; // genomeId
-  readonly scheduledMatches: number; // 2 * (N - 1) * R
-  readonly completedMatches: number; // wins + losses + draws
-  readonly wins: number;
-  readonly losses: number;
-  readonly draws: number;
-  readonly incompleteMatches: number;
-  readonly failedMatches: number;
-  readonly winRateOnCompleted: number; // completedMatches > 0 ? wins / completedMatches : 0
-  readonly asP1: PolicyParticipantSeatSummary;
-  readonly asP2: PolicyParticipantSeatSummary;
+for (const match of schedule) {
+  const matchContext: BatchMatchContext = {
+    matchIndex: match.matchIndex,
+    matchId: generateLogicalMatchId(params.population.generation, match),
+    baseSeed: params.generationSeed,
+    matchSeed: match.matchSeed,
+    playerSeeds: {
+      p1: deriveSeed(match.matchSeed, "p1"),
+      p2: deriveSeed(match.matchSeed, "p2"),
+    },
+  };
+
+  const session = params.sessionFactory(matchContext);
+  const policies = {
+    p1: new GenomePolicy(match.p1Dna),
+    p2: new GenomePolicy(match.p2Dna),
+  };
+
+  let simResult: SimulationResult;
+  try {
+    simResult = SimulationRunner.run(session, policies, {
+      maxDecisions: resolvedConfig.maxDecisionsPerMatch,
+    });
+  } catch (err) {
+    // 予期せぬ例外発生時は試合レベル FAILED として即座に Fail-Closed 停止
+    throw new GenerationRunnerExecutionError(
+      `Match failed at index ${match.matchIndex}: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
+
+  // 正常終了ステータスの集計 (COMPLETED vs INCOMPLETE)
+  ...
 }
 ```
 
-### 保存則ゲート (Conservation Gates)
-集約結果は、次の等式を 1 件の例外もなく満たさなければならない:
+### 11.2 FAILED 試合の Fail-Closed 境界 (誤淘汰防止)
+現行のシミュレータ基盤には、エラーの原因が個体 DNA 起因か、ルールエンジン実装バグか、インフラ障害（OOM等）かを客観的・安全に峻別する Failure Attribution 型が存在しない。
+したがって、V1 では:
+- **1 試合でも FAILED を検出した場合、当該個体の適応度へ流すのではなく、Runner 全体を `GenerationRunnerExecutionError` により Fail-Closed で即時停止** する。
+- これにより、システム不具合による正常個体の誤淘汰（誤った `INVALID` 判定）を根本から防止する。
+- したがって、Generation Runner が `FitnessEvaluationSnapshot` の構築まで到達した場合、**全個体について `failedMatches === 0` が数学的に保証** される。
+
+### 11.3 INCOMPLETE と DRAW の扱い
+- **INCOMPLETE (`simResult.completed === false`)**:
+  - 最大判断手数到達等による未決着。
+  - **決して DRAW（引き分け）としては計上しない**。
+  - `completedMatches` には含めず、双方の `incompleteMatches += 1` として記録し、`FitnessEvaluator` の完了率（`completionRate`）判定に委譲する。
+- **COMPLETED DRAW (`simResult.completed === true && simResult.winner === undefined`)**:
+  - ルール上の正規引き分けのみ、双方の `draws += 1` として計上する。
+
+---
+
+## 12. Per-Genome Outcome Aggregation & Fitness (戦績集約と適応度評価)
+
+### 12.1 個体別戦績集約 (`PolicyParticipantOutcomeSummary`)
+全試合（全件 FAILED なし）の完了後、各個体の戦績を既存の `PolicyParticipantOutcomeSummary` へ集約する。次の保存則を満たさなければ `GenerationRunnerIntegrityError` をスローする:
 1. `wins + losses + draws === completedMatches`
-2. `completedMatches + incompleteMatches + failedMatches === scheduledMatches`
+2. `completedMatches + incompleteMatches === scheduledMatches` (failedMatches は 0)
 3. `asP1.scheduledMatches === (N - 1) * R`
 4. `asP2.scheduledMatches === (N - 1) * R`
 
----
-
-## 14. Fitness Evaluation (適応度評価委譲)
-
-Generation Runner 自身は独自の適応度算出ロジックを持たず、集約した `PolicyParticipantOutcomeSummary` を Formal Accepted 済みの **`FitnessEvaluator.evaluateParticipant()`** へそのまま渡して評価を委譲する。
-
-### 14.1 厳格な隔離原則 (Forbidden Fitness Inputs)
-以下の項目を Generation Runner から適応度計算へ混入させて加点・減点・補正を行うことを厳重に禁止する:
-- 残りライフ（Remaining Life）、与ダメージ・被ダメージ
-- ターン数（Turn Count）
-- 試合所要時間（Elapsed Time / Latency）、CPU時間、メモリ使用量
-- 意思決定手数（Total Decisions）
-- シミュレーションスループット（Matches per Second）
-
-### 14.2 3値評価ステータスの受容
-`FitnessEvaluator` の返却値（`FitnessEvaluationResult`）に従い、各個体は次のいずれかに決定される:
-- **`VALID`**: $\text{failedMatches} = 0 \land \text{completedMatches} \ge \text{minCompleted} \land \text{completionRate} \ge \text{minRate}$。Authoritative な適応度スコア（$0.0 \le \text{fitnessScore} \le 1.0$）を持つ。
-- **`INSUFFICIENT_EVIDENCE`**: 対戦完了数または完了率が不足。`fitnessScore = null`。
-- **`INVALID`**: $\text{failedMatches} > 0$。即座に失格・除外。`fitnessScore = null`。
-
-### 14.3 Fitness Evaluation Snapshot の構築
-全個体の評価結果から `FitnessEvaluationSnapshot(g)` を構築する:
-- `generation === population.generation` の厳密一致。
-- `entries` は `genomeId` 昇順でソートされ、入力母集団と完全な 1:1 対応を保持する。
+### 12.2 適応度評価委譲
+集約した各サマリーを `FitnessEvaluator.evaluateParticipant(summary, resolvedFitnessConfig)` へ渡して評価を委譲する。
+- 残りライフ、被ダメージ、ターン数、所要時間等のテレメトリは適応度計算へ一切混入させない。
+- 全個体の結果から `FitnessEvaluationSnapshot(g)` を構築する（`context` は Step 2 で構築した Canonical Context を保持）。
 
 ---
 
-## 15. Comparable Context (比較可能評価コンテキスト契約)
+## 13. Readiness Preflight & Generation Transition (適格性事前判定と次世代遷移)
 
-同一世代のすべての対戦および適応度評価は、同一の比較可能コンテキスト（`ComparableEvaluationContext`）下で実行されなければならない。
+### 13.1 Readiness Preflight Check
+Generation Builder の例外から `readinessStatus` を後付け推測するのではなく、Runner 自身が Builder 呼出前に **`PopulationSelector.assessReadiness()`** を正式実行する:
 
 ```typescript
-export interface ComparableEvaluationContext {
-  readonly environmentRef: string;
-  readonly regulationId: string;
-  readonly frameId: string;
-  readonly rulePackageVersion: string;
-  readonly fitnessConfig: FitnessEvaluationConfig;
-  readonly generation: number;
-  readonly evaluationScheduleId: string;     // "double-round-robin-v1"
-  readonly seedScheduleIdentity: string;     // "evolution-evaluation-pair-v1"
-}
-```
-
-- **`evaluationScheduleId`**: Double Round Robin 契約を示す決定論的 Logical ID（`"double-round-robin-v1"`）。日付・時刻・UUID・ファイルパスを含んではならない。
-- **`seedScheduleIdentity`**: シード派生契約を示す決定論的 Logical ID（`"evolution-evaluation-pair-v1"`）。
-
----
-
-## 16. Generation Builder Delegation (次世代構築への委譲)
-
-適応度評価スナップショット（`FitnessEvaluationSnapshot(g)`）が完成した後、次世代母集団の生成を Formal Accepted 済みの **`GenerationBuilder.buildNextGeneration()`** へ委譲する。
-
-```typescript
-const buildResult = GenerationBuilder.buildNextGeneration({
-  population: params.population,
+const readiness = PopulationSelector.assessReadiness(
+  params.population,
   fitnessSnapshot,
-  targetGeneration: params.population.generation + 1,
-  generationSeed: params.generationSeed, // 同一の generationSeed を透過的に渡す
-  config: params.config?.builderConfig,
-  expectedContext: params.context,
-});
+  resolvedConfig.builderConfig?.selectionConfig,
+  evaluationContext
+);
 ```
 
-### 16.1 シードの再派生を行わない原則 (Do Not Derive New Builder Seed)
-Generation Runner は、Generation Builder 用のシード（例: `builderSeed = deriveSeed(...)`）を新設してはならない。
-入力された `generationSeed` をそのまま Builder へ渡す。Generation Builder は内部で `evolution-selection-v1` や `evolution-offspring-v1-*` を用いてストリームを独立派生するため、Evaluation Stream との名前空間衝突は発生しない。
+### 13.2 Effective Readiness Gate
+Generation Builder には $\text{validCount} \ge \text{eliteCount}$ という Effective Gate が存在する。
+Runner はこれを事前考慮し、有効要求数を次のように定義する:
+$$\text{effectiveRequiredCount} = \max(\text{readiness.requiredCount}, \text{eliteCount})$$
 
-### 16.2 Generation Seed の所有権境界
-Generation Runner は `generationSeed(g)` を消費する側であり、次世代用シード `generationSeed(g+1)` を決定する権限を持たない。次世代シードの導出は上位の Evolution Loop の責務である。
+- **再評価要求判定**:
+  `readiness.status === "REEVALUATION_REQUIRED"` または `readiness.validCount < effectiveRequiredCount` の場合:
+  - **`GenerationBuilder.buildNextGeneration()` を呼び出してはならない**。
+  - 状態遷移を行わず、直ちに `status: "REEVALUATION_REQUIRED"` の論理結果を返却する。
+  - この際、`readiness` には `{ status: "REEVALUATION_REQUIRED", validCount: readiness.validCount, requiredCount: effectiveRequiredCount, reason: ... }` を格納し、次世代母集団は厳格に `undefined` とする。
+- **整合性エラー判定**:
+  `readiness.status === "INVALID_POPULATION"` または `"INCOMPARABLE_EVALUATION"` の場合は、論理的再評価ではなくシステム不整合であるため、`GenerationRunnerIntegrityError` をスローする。
+- **正常遷移判定**:
+  上記を満たし `readiness.status === "READY"` かつ `validCount >= effectiveRequiredCount` の場合のみ、`GenerationBuilder.buildNextGeneration()` を呼び出す。
+  ※もし Builder が予期せぬ `GenerationBuilderExecutionError` をスローした場合は、契約逸脱（Contract Drift）として `GenerationRunnerExecutionError` をスローする。
 
 ---
 
-## 17. Result & Status Model (実行結果モデル)
+## 14. Result Model & Determinism (結果モデルと決定論性)
 
-Generation Runner の返却値は、アトミックな状態遷移を表現する Discriminated Union とする:
+### 14.1 型定義と分離
+決定論的一致が保証される論理結果と、実行環境に依存する実行時メトリクスを構造的に完全分離する:
 
 ```typescript
 /**
- * 成功裏に次世代への遷移が完了した結果
+ * 世代交代が正常完了した論理結果
  */
 export interface GenerationRunnerAdvancedResult {
   readonly status: "ADVANCED";
-  /** 世代 g+1 の未評価母集団スナップショット */
   readonly nextPopulation: PopulationSnapshot;
-  /** 世代 g+1 構築の詳細メタデータ (エリートID, 子個体家系情報等) */
   readonly buildResult: GenerationBuildResult;
-  /** 世代 g の適応度評価スナップショット */
   readonly fitnessSnapshot: FitnessEvaluationSnapshot;
-  /** 評価実行マニフェスト (再現用メタデータ) */
   readonly manifest: GenerationEvaluationManifest;
 }
 
 /**
- * 適応度評価は完了したが、VALID 個体不足等により次世代へ進めない結果
+ * 適応度評価は完了したが次世代へ進めない論理結果
  */
 export interface GenerationRunnerReevaluationRequiredResult {
   readonly status: "REEVALUATION_REQUIRED";
-  /** 診断・分析用に保持される世代 g の適応度評価スナップショット */
   readonly fitnessSnapshot: FitnessEvaluationSnapshot;
-  /** 再評価が必要となった具体的理由 */
   readonly reason: string;
-  /** 選択適格性評価の詳細 */
   readonly readiness: SelectionReadiness;
-  /** 評価実行マニフェスト */
   readonly manifest: GenerationEvaluationManifest;
-  /** 次世代母集団は存在しない (undefined / null) */
   readonly nextPopulation?: undefined;
   readonly buildResult?: undefined;
 }
 
 /**
- * Generation Runner の実行結果型
+ * 決定論的論理結果 (Deep Equal 保証対象)
  */
-export type GenerationRunnerResult =
+export type GenerationRunnerLogicalResult =
   | GenerationRunnerAdvancedResult
   | GenerationRunnerReevaluationRequiredResult;
+
+/**
+ * 実行時メトリクス (Sidecar, Deep Equal 対象外)
+ */
+export interface GenerationRunnerRuntimeMetrics {
+  readonly totalExecutionTimeMs: number;
+  readonly matchExecutionElapsedMs: number;
+  readonly matchesPerSecond: number;
+  readonly totalDecisions: number;
+}
+
+/**
+ * Generation Runner の総合実行結果
+ */
+export interface GenerationRunnerExecutionResult {
+  readonly logicalResult: GenerationRunnerLogicalResult;
+  readonly runtimeMetrics?: GenerationRunnerRuntimeMetrics;
+}
 ```
 
-### 17.1 不完全な次世代母集団の完全禁止
-- `REEVALUATION_REQUIRED` の場合、空の母集団（Empty Population）や部分的な母集団（Partial Population）、あるいはフォールバック母集団を返却してはならない。次世代母集団は厳格に `undefined` とする。
-- これにより、上位の Evolution Loop は診断用スナップショットを検査した上で、安全に停止するか、対戦パラメータを見直して再評価するかを決定論的に判断できる。
+### 14.2 論理マニフェスト (Logical Manifest)
+`GenerationEvaluationManifest` には純粋な決定論的メタデータのみを含め、実行時間（wall-clock）やタイムスタンプは含めない:
+
+```typescript
+export interface GenerationEvaluationManifest {
+  readonly generation: number;
+  readonly populationSize: number;
+  readonly pairRepetitions: number;
+  readonly totalMatches: number;
+  readonly generationSeed: number;
+  readonly evaluationScheduleId: string;
+  readonly seedScheduleIdentity: string;
+}
+```
+
+### 14.3 決定論性保証境界 (Determinism Scope)
+- **Deep Equal 保証対象**: `GenerationRunnerExecutionResult.logicalResult` のみ。
+- **Supported Deterministic Runtime 境界**: 同一 Node.js LTS、同一実装版数、同一入力、同一設定、同一シード、同一 Stream Key 契約下において、Bit-exact / Deep Equal を保証。
+- **入力順序非依存性**: `population.entries` 配列をシャッフルして渡しても `logicalResult` は 100% 一致。
+- **メトリクスの非フィードバック**: `runtimeMetrics` は適応度・選択・次世代生成に一切関与しない。
 
 ---
 
-## 18. Error Taxonomy (エラー体系)
-
-Generation Runner における例外は、以下の 3 階層に厳格に分離する:
+## 15. Error Taxonomy (エラー体系)
 
 ```text
 Error
- └─ GenerationRunnerError (基底抽象型)
-      ├─ GenerationRunnerConfigurationError (開始前設定不備)
-      ├─ GenerationRunnerIntegrityError     (データ構造・保存則破壊)
-      └─ GenerationRunnerExecutionError     (実行時致命的障害)
+ └─ GenerationRunnerError (基底型)
+      ├─ GenerationRunnerConfigurationError (開始前設定不備: N<2, R<1, 証拠不足等)
+      ├─ GenerationRunnerIntegrityError     (データ整合性違反: 重複ID, 保存則違反, Incomparable等)
+      └─ GenerationRunnerExecutionError     (実行障害: FAILED試合検出, Contract Drift等)
 ```
 
-1. **`GenerationRunnerConfigurationError` (開始前 Fail-Fast)**:
-   - $N < 2$ の母集団指定。
-   - `pairRepetitions < 1`、非有限数、小数指定。
-   - `generationSeed` の非有限数指定。
-   - 予定試合数不足（$\text{perGenomeScheduledMatches} < \text{minimumCompletedMatches}$）。
-   - `sessionFactory` が関数でない。
-2. **`GenerationRunnerIntegrityError` (データ整合性違反)**:
-   - 母集団内の重複 `genomeId`。
-   - 世代番号の不一致（`population.generation !== context.generation`）。
-   - 試合結果の欠損、重複 `matchIndex`。
-   - 保存則違反（総試合数不一致、座席数不一致）。
-3. **`GenerationRunnerExecutionError` (予期せぬ実行障害)**:
-   - システムインフラ例外（OOM、致命的内部エラー）。
-   - なお、`REEVALUATION_REQUIRED` は例外ではなく `status: "REEVALUATION_REQUIRED"` の論理結果として返却される。
-
 ---
 
-## 19. Determinism (決定論性保証境界)
+## 16. Canonical 60-Test Plan (検証テスト計画)
 
-### 19.1 Supported Deterministic Runtime 境界
-先行仕様（`ai-genetic-operators-design-v1.md` / `ai-generation-builder-design-v1.md`）と完全整合させ、無条件な万能保証を排除し、以下の定義域において **Bit-exact / Deep Equal 完全再現性** を保証する:
+将来のプロダクション実装（`BP-SIM-AI-GENERATION-RUNNER-V1`）において検証すべき全 60 項目の Canonical Test Plan を R1 契約に合わせて改訂・確定する。
 
-- 同一のサポート対象ランタイム（Node.js LTS 等）
-- 同一の Generation Runner 実装バージョン
-- 同一の SimulationRunner / GameSession 実装バージョン
-- 同一の入力 `PopulationSnapshot(g)`
-- 同一の `generationSeed`
-- 同一の実行設定（`GenerationRunnerConfig`）
-- 同一のルール環境・レギュレーション
-- 同一の対戦スケジュール契約（`double-round-robin-v1`）
-- 同一のシード派生契約（`evolution-evaluation-pair-v1`）
-
-### 19.2 Cross-Platform Conformance Target
-異なる OS（Linux, Windows, macOS）や CPU アーキテクチャ（x64, arm64）間は、テストベクトルにより実測検証される適合目標（Conformance Target）とする。
-
-### 19.3 入力配列順序非依存性 (Input Order Independence)
-同一の個体集合において、`population.entries` 配列の並び順のみをランダムにシャッフルして渡しても、Canonical Ordering により生成されるスケジュール、試合シード系列、適応度スナップショット、および次世代母集団は **完全一致（Deep Equal）** する。
-
-### 19.4 実行完了順序非依存性 (Completion Order Independence)
-将来的に非同期実行や並列実行（Concurrency > 1）が導入された場合でも、Promise の完了順序やコールバック順序を戦績集計に反映させてはならない。必ず `matchIndex` または Canonical `genomeId` で再整列してから集計し、実行順序による非決定性を排除する。
-
----
-
-## 20. Concurrency (並列実行の扱い)
-
-- **Execution Concern vs Fitness Concern**:
-  並列度（`concurrency`）は計算効率に関する関心事（Execution Concern）であり、適応度評価や世代遷移の結果（Fitness Concern）に一切影響を与えてはならない。
-- $\text{concurrency} = 1$ で順次実行した場合と、$\text{concurrency} > 1$ で並行実行した場合の論理結果（`GenerationRunnerResult`）は、**完全一致（Deep Equal）** でなければならない。
-
----
-
-## 21. Runtime Telemetry Separation (実行時テレメトリの完全隔離)
-
-Generation Runner は、各試合の所要時間やバッチ全体の実行時メトリクスを観測・集計できる。ただし、次の原則を厳守する:
-
-1. **結果モデルへの独立同居**:
-   テレメトリデータは `GenerationEvaluationManifest.runtimeTelemetry` 等の専用フィールドに分離して格納する。
-2. **適応度・選択へのフィードバック禁止 (No Feedback Loop)**:
-   - 処理の速い個体を高評価してはならない。
-   - 処理の遅い個体を低評価してはならない。
-   - 意思決定手数やスループットを親選択・エリート選出・対戦相手決定の条件としてはならない。
-
----
-
-## 22. Complexity (計算量とスケーラビリティ)
-
-### 22.1 計算量
-- **試合数計算量**:
-  $$\mathcal{O}(N^2 R)$$
-  $N=100, R=1$ で 9,900 試合、$N=1,000, R=1$ で約 100 万試合となる。
-- **時間計算量**:
-  $$\mathcal{O}(N^2 R \times \text{AverageDecisionsPerMatch})$$
-
-### 22.2 メモリ計算量と V1 方式決定 (Streaming vs Materialization)
-- **V1 決定**:
-  $N=100, R=1$ の場合、対戦記述子（`GenerationEvaluationMatch`）は 9,900 件であり、全件をメモリ上に配列として実体化（Materialize）しても数メガバイト未満に収まる。
-  したがって、V1 では実装の明瞭性と検証容易性を最優先し、**インメモリでの一括スケジュール実体化（In-Memory Materialization）を基本採用** する。
-- **将来スケーラビリティ (Future Scalability)**:
-  $N \gg 1000$ 等の超大規模母集団に対しては、メモリ保護のための決定論的イテレータ（Deterministic Generator / Streaming Iterator）およびチャンク実行への移行を将来の課題として整理する。
-
----
-
-## 23. Canonical 60-Test Plan (検証テスト計画)
-
-将来のプロダクション実装（`BP-SIM-AI-GENERATION-RUNNER-V1`）において検証すべき全 60 項目の Canonical Test Plan を策定する。
-
-### Group A: Config Validation (Tests 1–9)
+### Group A: Config & Context Validation (Tests 1–9)
 1. `N >= 2` の有効母集団を受容すること。
 2. `pairRepetitions` のデフォルト値が 1 であること。
 3. `pairRepetitions = 0` を `GenerationRunnerConfigurationError` で reject すること。
@@ -688,7 +621,7 @@ Generation Runner は、各試合の所要時間やバッチ全体の実行時�
 8. `generationSeed` に非有限数（`NaN` / `Infinity`）を指定した場合 reject すること。
 9. $\text{perGenomeScheduledMatches} < \text{minimumCompletedMatches}$ の設定不備を対戦実行前に Fail-Fast で reject すること。
 
-### Group B: Schedule Construction (Tests 10–18)
+### Group B: Schedule Construction & Context Identity (Tests 10–18)
 10. $N=2, R=1$ において総試合数が正確に 2 試合であること。
 11. $N=3, R=1$ において総試合数が正確に 6 試合であること。
 12. $N=4, R=2$ において総試合数が正確に 24 試合であること。
@@ -699,49 +632,49 @@ Generation Runner は、各試合の所要時間やバッチ全体の実行時�
 17. スケジュールの `matchIndex` が 0 から連番で欠番なく連続していること。
 18. 入力母集団の `entries` 配列の順序を変更しても、生成されるスケジュールが完全に同一であること。
 
-### Group C: Seed Derivation (Tests 19–24)
+### Group C: Seed Derivation & Context Identifiers (Tests 19–24)
 19. 同一入力に対し、導出される全 `pairSeed` 系列が完全に同一であること。
 20. 母集団の入力順序を変更しても、全試合の `pairSeed` 系列が不変であること。
 21. 異なる `generationSeed` を与えた場合、固定 fixture においてシード系列が変化し得ること（Negative Control）。
 22. 異なるシードに対する過剰な万能相違保証（Universal Must-Differ）を課さないこと。
-23. 各 pair / repetition ごとに `pairSeed` が独立して分離導出されること。
-24. Generation Runner のシード派生が、既存の Generation Builder / Genetic Operators の Stream Key 契約に一切影響を与えないこと。
+23. `pairRepetitions` または `maxDecisionsPerMatch` が異なる場合、`evaluationScheduleId` が正しく差別化されること。
+24. `generationSeed` が異なる場合、`seedScheduleIdentity` が正しく差別化されること。
 
-### Group D: Outcome Aggregation (Tests 25–32)
+### Group D: Outcome Aggregation & Conservation (Tests 25–32)
 25. COMPLETED 試合における $p_1$ 勝利が、$p_1$ の win および $p_2$ の loss へ正確に集計されること。
 26. COMPLETED 試合における $p_2$ 勝利が、$p_2$ の win および $p_1$ の loss へ正確に集計されること。
 27. COMPLETED 試合における引き分けが、双方の draw へ正確に集計されること。
 28. INCOMPLETE 試合が draw として扱われず、双方の `incompleteMatches` へ厳密に集計されること。
-29. FAILED 試合が双方の `failedMatches` へ厳密に集計されること。
+29. **[R1 改訂] 1試合でも FAILED 試合が発生した場合、`GenerationRunnerExecutionError` で即座に Fail-Closed 停止し、Fitness Snapshot や次世代が生成されないこと。**
 30. スケジュール計画数に対して実行結果が 1 件でも欠損している場合、`GenerationRunnerIntegrityError` で停止すること。
 31. 重複した `matchIndex` の結果が存在する場合、`GenerationRunnerIntegrityError` で停止すること。
 32. 試合結果の参加個体 ID と計画個体 ID が不一致の場合、`GenerationRunnerIntegrityError` で停止すること。
 
-### Group E: Fitness Evaluation (Tests 33–39)
+### Group E: Fitness Evaluation & Attribution (Tests 33–39)
 33. 適応度評価が `FitnessEvaluator.evaluateParticipant()` へ正しく委譲されること。
 34. 残りライフ（Remaining Life）が適応度計算に一切使用されていないこと。
 35. ターン数（Turn Count）が適応度計算に一切使用されていないこと。
 36. 実行所要時間（Duration / Latency）が適応度計算に一切使用されていないこと。
 37. 全敗（wins = 0, draws = 0）の個体でも `VALID`（スコア 0.0）として適格保存されること。
-38. FAILED 試合が 1 件でも存在する個体が即座に `INVALID`（適応度 null）となること。
+38. **[R1 改訂] Generation Runner V1 が FAILED 試合を特定 Genome の INVALID として自動帰属せず、安全に Fail-Closed すること。**
 39. 完了試合数不足の個体が `INSUFFICIENT_EVIDENCE`（適応度 null）となること。
 
-### Group F: Generation Transition (Tests 40–46)
+### Group F: Readiness & Generation Transition (Tests 40–46)
 40. 生成された `FitnessEvaluationSnapshot` の世代番号が $g$ と厳密に一致すること。
 41. 母集団エントリと適応度エントリが完全な 1:1 対応を成していること。
 42. `GenerationBuilder` が目標世代 $g+1$ で正しく呼び出されること。
 43. `GenerationBuilder` へ同一の `generationSeed` が透過的に渡されること。
 44. 正常遷移時、ステータス `ADVANCED` と世代 $g+1$ の母集団スナップショットが返却されること。
-45. `GenerationBuilderExecutionError`（`REEVALUATION_REQUIRED`）発生時、ステータス `REEVALUATION_REQUIRED` が返り、次世代母集団が `undefined` であること。
+45. **[R1 改訂] Readiness Preflight により有効個体数不足（standard または effective）を検出し、Builder を呼び出すことなく `status: "REEVALUATION_REQUIRED"` と完全な `SelectionReadiness` を返却すること。**
 46. `REEVALUATION_REQUIRED` 時に Runner が勝手に再試行（Hidden Retry）を行わないこと。
 
-### Group G: Determinism (Tests 47–52)
-47. 同一ランタイム・同一バージョン・同一入力・同一設定・同一シードで 2 回実行した結果が Bit-exact / Deep Equal に完全一致すること。
-48. 入力母集団の配列シャッフルに対し、最終結果が完全一致すること。
-49. 試合の実行完了順序が変動しても、最終集約結果が完全一致すること。
-50. Concurrency 1 と Concurrency 2 の実行結果が意味論的に完全一致すること（並列化サポート時）。
-51. 出力データ構造内に `Date.now()` 等の動的タイムスタンプが一切含まれないこと。
-52. 出力データ構造内に UUID や外部ランダム値が一切含まれないこと。
+### Group G: Determinism & Metrics Separation (Tests 47–52)
+47. **[R1 改訂] 同一環境・同一入力で 2 回実行した際、`logicalResult` が Deep Equal に完全一致すること（`runtimeMetrics` は一致比較対象外）。**
+48. 入力母集団の配列シャッフルに対し、`logicalResult` が完全一致すること。
+49. **[R1 改訂] 結果集約の純粋ロジックにおいて、同一試合結果群が異なる完了順序で到着しても `matchIndex` 再整列により同一集約結果が得られること。**
+50. **[R1 改訂] Generation Runner V1 の Public Config に concurrency オプションが存在せず、実行が厳密に Sequential であること。**
+51. 出力論理データ構造内に動的タイムスタンプが一切含まれないこと。
+52. 出力論理データ構造内に UUID や外部ランダム値が一切含まれないこと。
 
 ### Group H: Boundary & Isolation (Tests 53–60)
 53. Generation Runner が 1 世代のみを実行し、自律的に次世代ループを開始しないこと。
@@ -755,55 +688,57 @@ Generation Runner は、各試合の所要時間やバッチ全体の実行時�
 
 ---
 
-## 24. Open Design Questions & Resolutions (設計課題と決定事項)
-
-設計過程において検討された主要論点と、その正式決定内容は以下の通りである:
+## 17. Open Design Questions & Resolutions (設計課題と決定事項)
 
 ### [Issue A] Mirrored Legs において同一 pairSeed を共用して安全か？
 - **決定**: **安全であり、正式採用する**。
-- **根拠**: 本番コードの監査により、同一シード下で座席を入れ替えた場合、両者が全く同一のデッキ配牌を相手の立場からプレイする「鏡像配牌（Duplicate Deal）」となり、先攻・後攻バイアスを最も美しく相殺できることが確認された。また、`PolicyExperimentRunner` でも同一方式が本番採用されている。
+- **根拠**: 同一シード下で座席を入れ替えた場合、両者が全く同一のデッキ配牌を相手の立場からプレイする「鏡像配牌（Duplicate Deal）」となり、先攻・後攻バイアスを対称化できる。`PolicyExperimentRunner` でも同一方式が本番採用されている。
 
 ### [Issue B] スケジュールを全件 Materialize するか、Iterator にするか？
 - **決定**: **V1 では In-Memory Materialization を正式採用する**。
-- **根拠**: V1 の標準規模（$N=100, R=1$）において 9,900 件の記述子配列は数メガバイト程度であり、メモリ圧迫のリスクが極めて低い。配列として実体化する方がスライシング、シャッフル検証、並列分散、テストが圧倒的にシンプルとなる。
+- **根拠**: $N=100, R=1$ において 9,900 件の記述子配列は数メガバイト程度であり、メモリ圧迫のリスクが極めて低い。配列として実体化する方がスライシング、シャッフル検証、テストが圧倒的にシンプルとなる。
 
 ### [Issue C] 既存の SimulationRunner で p1/p2 別 GenomePolicy をどう渡すか？
 - **決定**: **`policies: { p1: policyA, p2: policyB }` の標準辞書で渡す**。
-- **根拠**: `SimulationRunner.run(session, policies)` は第2引数として `Record<string, DecisionPolicy>` を受け取る仕様であり、`policies["p1"]` と `policies["p2"]` に各参加個体の `GenomePolicy` を渡すことで追加改修なしに完全対応できる。
+- **根拠**: `SimulationRunner.run(session, policies)` は第2引数として `Record<string, DecisionPolicy>` を受け取る本番仕様であり、追加改修なしに完全対応できる。
 
-### [Issue D] FAILED / INCOMPLETE の本番ステータスマッピングは？
-- **決定**: `simResult.completed ? "COMPLETED" : "INCOMPLETE"`、例外発生時は `"FAILED"` とする。
-- **根拠**: `BatchSimulationRunner` の本番マッピングと 100% 一致させ、`INCOMPLETE != DRAW` および `FAILED > 0 => INVALID` の契約を維持する。
+### [Issue D] FAILED / INCOMPLETE の本番ステータスマッピングと帰属は？
+- **決定**: `simResult.completed ? "COMPLETED" : "INCOMPLETE"`。例外発生時は **Runner 全体を Fail-Closed 停止** とする。
+- **根拠**: Failure Attribution 契約が存在しない V1 において、インフラやエンジン起因の障害を Genome の責任として `INVALID` にすると正常個体を誤淘汰する危険があるため、安全側に倒して Fail-Closed とする。
 
-### [Issue E] FitnessEvaluator へ渡す正確な入力型は？
-- **決定**: **`PolicyParticipantOutcomeSummary`**。
-- **根拠**: `FitnessEvaluator.evaluateParticipant(summary)` が要求する標準集約型をそのまま使用し、新しい並行型を作らない。
+### [Issue E] Comparable Context の二重 Source of Truth をどう排除するか？
+- **決定**: **外部からは `environment` のみを受け取り、Context は Runner 自身が一元構築する**。
+- **根拠**: `fitnessConfig`、`generation`、`evaluationScheduleId`、`seedScheduleIdentity` を Runner 解決値から自動導出することで、Caller による不整合な Context 入力を原理的に遮断する。
 
-### [Issue F] REEVALUATION_REQUIRED をどう表現するか（Result か Error か）？
-- **決定**: **Discriminated Union の結果型（`status: "REEVALUATION_REQUIRED"`）として表現する**。
-- **根拠**: 有効個体数不足は進化アルゴリズム上「起こり得る通常の探索状態」であり、システム例外ではない。例外を throw してプロセスを落とすのではなく、診断用 `FitnessEvaluationSnapshot` を保持した結果オブジェクトを返すことで、上位 Evolution Loop が再評価やリトライ方針を柔軟に決定できるようにする。
+### [Issue F] Readiness をどう取得し、REEVALUATION_REQUIRED をどう返すか？
+- **決定**: **Runner が `PopulationSelector.assessReadiness()` を先行実行し、不足時は Builder を呼ばずに Discriminated Union の論理結果として返す**。
+- **根拠**: Builder 例外への依存を排除し、完全な `SelectionReadiness`（有効数・要求数・理由）を診断用に保持したクリーンな論理結果を返却する。
 
 ---
 
-## 25. Future Scope (将来の展望と分離境界)
+## 18. Future Scope (将来の展望と分離境界)
 
-本設計の完了後、次の段階として以下の開発が計画される:
-1. **BP-SIM-AI-GENERATION-RUNNER-V1**: 本設計書に基づく Generation Runner の TypeScript 実装および Canonical 60-Test のパス。
+1. **BP-SIM-AI-GENERATION-RUNNER-V1**: 本 R1 設計書に基づく Generation Runner の TypeScript 実装および Canonical 60-Test のパス。
 2. **BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1**: 複数世代を反復実行する Evolution Loop の設計（シード系列チェーン、収束条件、チェックポイント、ファイル永続化）。
-3. **Phase 4.1 (Hall of Fame & Large Scale Evolution)**: 歴代チャンピオン個体の保存、大規模並列対戦、評価。
+3. **Formal Failure Attribution Contract**: Genome 起因例外とインフラ障害を区別し、安全に Genome を失格判定する拡張契約。
+4. **Parallel Batch Execution**: Worker Threads 等による並列シミュレーション実行。
+5. **Phase 4.1 (Hall of Fame & Large Scale Evolution)**: 歴代チャンピオン個体の保存、大規模並列対戦。
 
 ---
 
-## 26. Interface Reference (型定義一覧)
+## 19. Interface Reference (型定義一覧)
 
 ```typescript
 import {
   ComparableEvaluationContext,
-  FitnessEvaluationConfig,
   FitnessEvaluationSnapshot,
   PopulationSnapshot,
   SelectionReadiness,
 } from "./PopulationSelectionTypes.js";
+import {
+  FitnessEvaluationConfig,
+  DEFAULT_FITNESS_EVALUATION_CONFIG,
+} from "./FitnessEvaluationTypes.js";
 import {
   GenerationBuilderConfig,
   GenerationBuildResult,
@@ -831,18 +766,30 @@ export interface GenerationEvaluationManifest {
   readonly seedScheduleIdentity: string;
 }
 
+export interface GenerationRunnerEnvironmentContext {
+  readonly environmentRef: string;
+  readonly regulationId: string;
+  readonly frameId: string;
+  readonly rulePackageVersion: string;
+}
+
 export interface GenerationRunnerConfig {
   readonly pairRepetitions: number;
   readonly maxDecisionsPerMatch: number;
   readonly fitnessConfig: FitnessEvaluationConfig;
   readonly builderConfig?: Partial<GenerationBuilderConfig>;
-  readonly concurrency: number;
 }
+
+export const DEFAULT_GENERATION_RUNNER_CONFIG: GenerationRunnerConfig = Object.freeze({
+  pairRepetitions: 1,
+  maxDecisionsPerMatch: 500,
+  fitnessConfig: DEFAULT_FITNESS_EVALUATION_CONFIG,
+});
 
 export interface RunGenerationParams {
   readonly population: PopulationSnapshot;
   readonly generationSeed: number;
-  readonly context: ComparableEvaluationContext;
+  readonly environment: GenerationRunnerEnvironmentContext;
   readonly sessionFactory: (context: BatchMatchContext) => GameSession;
   readonly config?: Partial<GenerationRunnerConfig>;
 }
@@ -865,9 +812,21 @@ export interface GenerationRunnerReevaluationRequiredResult {
   readonly buildResult?: undefined;
 }
 
-export type GenerationRunnerResult =
+export type GenerationRunnerLogicalResult =
   | GenerationRunnerAdvancedResult
   | GenerationRunnerReevaluationRequiredResult;
+
+export interface GenerationRunnerRuntimeMetrics {
+  readonly totalExecutionTimeMs: number;
+  readonly matchExecutionElapsedMs: number;
+  readonly matchesPerSecond: number;
+  readonly totalDecisions: number;
+}
+
+export interface GenerationRunnerExecutionResult {
+  readonly logicalResult: GenerationRunnerLogicalResult;
+  readonly runtimeMetrics?: GenerationRunnerRuntimeMetrics;
+}
 
 export class GenerationRunnerError extends Error {
   public constructor(message: string) {
