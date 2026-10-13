@@ -19,6 +19,7 @@ import {
   FitnessEvaluationSnapshot,
   PopulationEntry,
   PopulationFitnessEntry,
+  PopulationSelectionConfig,
   PopulationSnapshot,
 } from "../../domain/ai/PopulationSelectionTypes.js";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
@@ -37,6 +38,7 @@ import { deriveSeed } from "../../engine/random/DeterministicShuffle.js";
 import {
   DEFAULT_GENETIC_OPERATOR_CONFIG,
   EVOLUTION_SELECTION_STREAM_KEY,
+  GeneticOperatorConfig,
 } from "../../domain/ai/GeneticOperatorTypes.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -137,6 +139,20 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
     return { population, fitnessSnapshot };
   };
 
+  const selectionConfig = (
+    overrides: Partial<PopulationSelectionConfig> = {}
+  ): PopulationSelectionConfig => ({
+    ...DEFAULT_POPULATION_SELECTION_CONFIG,
+    ...overrides,
+  });
+
+  const geneticConfig = (
+    overrides: Partial<GeneticOperatorConfig> = {}
+  ): GeneticOperatorConfig => ({
+    ...DEFAULT_GENETIC_OPERATOR_CONFIG,
+    ...overrides,
+  });
+
   // ===========================================================================
   // Tests 1-10: Config & Input Validation (Fail-Fast)
   // ===========================================================================
@@ -158,8 +174,51 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       expect(result.offspringLineages.length).toBe(99);
     });
 
-    it("Test 2: Partial configuration override works correctly", () => {
+    it("Test 2: Partial configuration override works correctly and enforces typed contract", () => {
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(10, 1);
+
+      // A. Typed Contract: populationSize のみの Partial は合法
+      const validPartialConfig: BuildNextGenerationParams = {
+        population,
+        fitnessSnapshot,
+        targetGeneration: 2,
+        generationSeed: 12345,
+        config: {
+          populationSize: 8,
+        },
+      };
+      expect(validPartialConfig).toBeDefined();
+
+      // B. Typed Contract: selectionConfig を指定する場合、full PopulationSelectionConfig なら合法
+      const validFullNestedConfig: BuildNextGenerationParams = {
+        population,
+        fitnessSnapshot,
+        targetGeneration: 2,
+        generationSeed: 12345,
+        config: {
+          populationSize: 8,
+          selectionConfig: selectionConfig({
+            eliteCount: 2,
+          }),
+        },
+      };
+      expect(validFullNestedConfig).toBeDefined();
+
+      // C. Typed Contract: 不完全な nested partial は typed API 上で型エラー
+      const _invalidIncompleteNestedConfig: BuildNextGenerationParams = {
+        population,
+        fitnessSnapshot,
+        targetGeneration: 2,
+        generationSeed: 12345,
+        config: {
+          // @ts-expect-error Type '{ eliteCount: number; }' is missing properties from 'PopulationSelectionConfig'
+          selectionConfig: {
+            eliteCount: 2,
+          },
+        },
+      };
+      expect(_invalidIncompleteNestedConfig).toBeDefined();
+
       const result = GenerationBuilder.buildNextGeneration({
         population,
         fitnessSnapshot,
@@ -167,9 +226,9 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 8,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             eliteCount: 2,
-          },
+          }),
         },
       });
 
@@ -207,7 +266,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 0 },
+          selectionConfig: selectionConfig({ eliteCount: 0 }),
         },
       });
 
@@ -227,7 +286,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -247,7 +306,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
           generationSeed: 12345,
           config: {
             populationSize: 6,
-            selectionConfig: { eliteCount: 6 },
+            selectionConfig: selectionConfig({ eliteCount: 6 }),
           },
         });
       }).toThrow(GenerationBuilderConfigurationError);
@@ -260,7 +319,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
           generationSeed: 12345,
           config: {
             populationSize: 6,
-            selectionConfig: { eliteCount: 10 },
+            selectionConfig: selectionConfig({ eliteCount: 10 }),
           },
         });
       }).toThrow(GenerationBuilderConfigurationError);
@@ -279,7 +338,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
             generationSeed: 12345,
             config: {
               populationSize: 6,
-              selectionConfig: { eliteCount },
+              selectionConfig: selectionConfig({ eliteCount }),
             },
           });
         }).toThrow(GenerationBuilderConfigurationError);
@@ -381,7 +440,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
           offspringDnaRefResolver: () => "custom-injected-ref",
         },
       };
@@ -529,11 +588,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
           generationSeed: 12345,
           config: {
             populationSize: 6,
-            selectionConfig: {
+            selectionConfig: selectionConfig({
               minimumValidPopulationCount: 2,
               tournamentSize: 2,
               eliteCount: 4,
-            },
+            }),
           },
         });
         expect.unreachable("Should have thrown");
@@ -573,11 +632,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 5,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             minimumValidPopulationCount: 2,
             tournamentSize: 2,
             eliteCount: 3,
-          },
+          }),
         },
       });
 
@@ -614,10 +673,10 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
           generationSeed: 12345,
           config: {
             populationSize: 4,
-            selectionConfig: {
+            selectionConfig: selectionConfig({
               minimumValidPopulationCount: 2,
               eliteCount: 3, // validCount is 2
-            },
+            }),
           },
         });
       }).toThrow(GenerationBuilderExecutionError);
@@ -644,11 +703,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 4,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             minimumValidPopulationCount: 2,
             tournamentSize: 2,
             eliteCount: 1,
-          },
+          }),
         },
       });
 
@@ -686,11 +745,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             minimumValidPopulationCount: 2,
             tournamentSize: 2,
             eliteCount: 2,
-          },
+          }),
         },
       });
 
@@ -731,11 +790,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             minimumValidPopulationCount: 2,
             tournamentSize: 2,
             eliteCount: 2,
-          },
+          }),
         },
       });
 
@@ -759,7 +818,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -785,7 +844,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -807,7 +866,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -831,7 +890,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -850,7 +909,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -867,7 +926,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -890,7 +949,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 10,
-          selectionConfig: { eliteCount: 3 },
+          selectionConfig: selectionConfig({ eliteCount: 3 }),
         },
       });
 
@@ -913,7 +972,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -934,7 +993,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -952,7 +1011,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -972,7 +1031,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 1 },
+          selectionConfig: selectionConfig({ eliteCount: 1 }),
         },
       });
 
@@ -991,7 +1050,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 20,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1009,7 +1068,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 12345,
         config: {
           populationSize: 6,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1037,7 +1096,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 77777,
         config: {
           populationSize: 8,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       };
 
@@ -1075,7 +1134,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 99999,
         config: {
           populationSize: 8,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1086,7 +1145,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 99999,
         config: {
           populationSize: 8,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1102,7 +1161,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 10001,
         config: {
           populationSize: 8,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1113,7 +1172,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 10002,
         config: {
           populationSize: 8,
-          selectionConfig: { eliteCount: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 2 }),
         },
       });
 
@@ -1137,7 +1196,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 54321,
-        config: { populationSize: 4, selectionConfig: { eliteCount: 1 } },
+        config: { populationSize: 4, selectionConfig: selectionConfig({ eliteCount: 1 }) },
       });
       expect(res.generationSeed).toBe(54321);
     });
@@ -1154,7 +1213,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 0,
-        config: { populationSize: 6, selectionConfig: { eliteCount: 1 } },
+        config: { populationSize: 6, selectionConfig: selectionConfig({ eliteCount: 1 }) },
       });
 
       expect(result.generationSeed).toBe(0);
@@ -1169,7 +1228,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 12345,
-        config: { populationSize: 6, selectionConfig: { eliteCount: 1 } },
+        config: { populationSize: 6, selectionConfig: selectionConfig({ eliteCount: 1 }) },
       });
 
       const expectedSelectionSeed = deriveSeed(12345, EVOLUTION_SELECTION_STREAM_KEY);
@@ -1206,11 +1265,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
           generationSeed: 12345,
           config: {
             populationSize: 4,
-            selectionConfig: {
+            selectionConfig: selectionConfig({
               minimumValidPopulationCount: 2,
               tournamentSize: 2,
               eliteCount: 1, // collidingId becomes elite
-            },
+            }),
           },
         });
       }).toThrow(GenerationBuilderIntegrityError);
@@ -1223,7 +1282,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 12345,
-        config: { populationSize: 6, selectionConfig: { eliteCount: 1 } },
+        config: { populationSize: 6, selectionConfig: selectionConfig({ eliteCount: 1 }) },
       });
 
       expect(Object.isFrozen(result)).toBe(true);
@@ -1246,7 +1305,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         fitnessSnapshot,
         targetGeneration: 2,
         generationSeed: 12345,
-        config: { populationSize: 6, selectionConfig: { eliteCount: 1 } },
+        config: { populationSize: 6, selectionConfig: selectionConfig({ eliteCount: 1 }) },
       });
 
       expect(JSON.stringify(population)).toBe(initialSnapshotJson);
@@ -1262,7 +1321,7 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 55555,
         config: {
           populationSize: 10,
-          selectionConfig: { eliteCount: 0, tournamentSize: 2 },
+          selectionConfig: selectionConfig({ eliteCount: 0, tournamentSize: 2 }),
         },
       });
 
@@ -1303,11 +1362,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
         generationSeed: 88888,
         config: {
           populationSize: 4,
-          selectionConfig: {
+          selectionConfig: selectionConfig({
             minimumValidPopulationCount: 2,
             tournamentSize: 2,
             eliteCount: 0,
-          },
+          }),
         },
       });
 
@@ -1336,10 +1395,11 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
       expect(combined).not.toContain("from 'path'");
     });
 
-    it("Test 45: Finding 1 Regression: undefined nested selectionConfig fields resolve to authoritative defaults without NaN", () => {
+    it("Test 45: Finding 1 Regression: runtime dynamic/untyped selectionConfig fields resolve to authoritative defaults without NaN", () => {
       const { population, fitnessSnapshot } = createValidPopulationAndFitness(10, 1);
-      // eliteCount: undefined を明示的に渡した場合、Authoritative Validator により default eliteCount=1 に解決される
-      const result = GenerationBuilder.buildNextGeneration({
+      // Untyped/dynamic call (e.g. from raw JSON or untyped caller) where nested selectionConfig is incomplete/undefined:
+      // Verifies runtime robustness of Authoritative Config Resolver even if bypasses static typing via cast.
+      const rawParams = {
         population,
         fitnessSnapshot,
         targetGeneration: 2,
@@ -1352,7 +1412,9 @@ describe("Generation Builder V1 (BP-SIM-AI-GENERATION-BUILDER-V1)", () => {
             minimumValidPopulationCount: undefined,
           },
         },
-      });
+      } as unknown as BuildNextGenerationParams;
+
+      const result = GenerationBuilder.buildNextGeneration(rawParams);
 
       expect(result.eliteCount).toBe(1);
       expect(result.offspringCount).toBe(7);

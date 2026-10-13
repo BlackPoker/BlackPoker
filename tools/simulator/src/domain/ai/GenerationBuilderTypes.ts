@@ -29,11 +29,7 @@ export interface BuildNextGenerationParams {
   readonly fitnessSnapshot: FitnessEvaluationSnapshot;
   readonly targetGeneration: number;
   readonly generationSeed: number;
-  readonly config?: {
-    readonly populationSize?: number;
-    readonly selectionConfig?: Partial<PopulationSelectionConfig>;
-    readonly geneticOperatorConfig?: Partial<GeneticOperatorConfig>;
-  };
+  readonly config?: Partial<GenerationBuilderConfig>;
   readonly expectedContext?: ComparableEvaluationContext;
 }
 
