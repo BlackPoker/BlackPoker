@@ -1,7 +1,7 @@
-# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R3)
+# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R4)
 # (Generation g $\rightarrow$ Generation g+1 次世代母集団構築境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R3`
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R4`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -26,9 +26,16 @@ $$\text{PopulationSnapshot}(g) + \text{FitnessEvaluationSnapshot}(g) \xrightarro
 
 として、世代 $g$ の評価済み母集団から世代 $g+1$ の未評価母集団スナップショットを **決定論的（Deterministic）かつ完全フェイルクローズ（Fail-Closed）** に組み立てる **Generation Builder / Next Generation Assembly** の境界契約（Boundary Contract）を定義する。
 
+### R4 Follow-up における確定・厳格化事項
+1. **旧・非Canonical Stream Key 文字列の完全除去 (Finding 1)**:
+   - 設計書内の解説文や注記に残存していた旧・非Canonical Stream Key文字列を完全に除去（例示や削除記録としての文字列残存も一切排除）。
+   - Canonical Evolution Stream Keys のみを使用・記載することを徹底。
+2. **決定論表現の統一 (Finding 2)**:
+   - Open Design Questions 等における「Same Seed 完全決定論」という短縮表現を改め、Supported Deterministic Runtime 境界（同一ランタイム・同一実装バージョン・同一入力・同一設定・同一シード・同一 Stream Key 契約）に揃えた記述へ統一。
+
 ### R3 Follow-up における確定・厳格化事項
 1. **Canonical Evolution Stream Key Contract への完全一致 (Finding 1)**:
-   - Section 16.1 に存在していた誤った Stream Key 例（`generation-selection`, `generation-offspring-{k}`, `generation-mating-retry-{k}-{attempt}`）を完全に削除。
+   - 設計書内の Stream Key 契約から旧・非Canonical 表記を完全に除去。
    - `deriveSeed(baseSeed, streamKey)` においては streamKey 文字列そのものが Seed 派生入力であるため、表記揺れや異なる文字列は数学的に異なる Seed を生成する。
    - 先行仕様 `ai-genetic-operators-design-v1.md` Section 14.3 および本設計書 Section 8 に完全整合させ、次の **Canonical Evolution Stream Keys** に厳格固定（エイリアス・非推奨名としての残存も一切禁止）:
      - `evolution-selection-v1`
@@ -673,7 +680,7 @@ export class GenerationBuilderExecutionError extends Error {
 
 > [!NOTE]
 > **なぜ完全一致（Exact String）が不可欠なのか**:
-> `deriveSeed(baseSeed, streamKey)` においては、`streamKey` 文字列そのものが 32-bit FNV-1a ハッシュ関数の入力データとなります。したがって、表記の不一致（例: `generation-selection` vs `evolution-selection-v1`）は単なる名前の違いにとどまらず、数学的に全く異なる Seed 値を算出します。そのため、エイリアスや非推奨名としての残存を一切許容せず、本設計書 Section 8 および先行仕様 `ai-genetic-operators-design-v1.md` Section 14.3 に完全一致する Canonical Evolution Stream Keys のみを厳格に使用します。
+> `deriveSeed(baseSeed, streamKey)` においては、`streamKey` 文字列そのものが 32-bit FNV-1a ハッシュ関数の入力データとなります。したがって、Canonical Evolution Stream Key Contract と 1 文字でも異なる非Canonical 表記は、数学的に全く異なる Seed 値を生成し得るため禁止します。そのため、エイリアスや旧表記の残存を一切許容せず、本設計書 Section 8 および先行仕様 `ai-genetic-operators-design-v1.md` Section 14.3 に完全一致する Canonical Evolution Stream Keys のみを厳格に使用します。
 
 上記が満たされる場合、生成される `GenerationBuildResult`（全エリートおよび子個体の DNA 重み、Lineage メタデータ、スナップショット構造）は常に **ビット単位・Deep Equal で 100% 完全一致（Bit-exact Reproduction）** することを保証する。
 
@@ -809,7 +816,7 @@ export class GenerationBuilderExecutionError extends Error {
 | **None (Solved)** | `validCount < eliteCount` | Generation Builder 固有の Effective Readiness で Gate 段階停止。 | 実装時に `validCount < eliteCount` チェックを追加。 |
 | **None (Solved)** | エリート DNA の不変性 | Clone Isolation を採用。DNA 自体は不変、Entry.generation のみ更新。 | 実装時に `DecisionDNACodec.clone` を利用。 |
 | **None (Solved)** | 親系列の PRNG 消費 | 単一の連続親系列（$2M$ 体）を一括選出する契約に確定。 | 実装時に `selectParents(2M)` を呼出。 |
-| **None (Solved)** | Seed Sensitivity | Same Seed 完全決定論、Different Seed は Negative Control fixture による感度確認。 | テストスイートに感度 Negative Control を配置。 |
+| **None (Solved)** | Seed Sensitivity | Supported Deterministic Runtime Contract 内では Same Seed / Same Contract で完全決定論。Different Seed は may differ であり、固定 fixture による Negative Control で感度を確認。 | テストスイートに感度 Negative Control を配置。 |
 | **Low (Future)** | 大規模母集団時のメモリ・ストリーミング | V1 契約では人口サイズ上限を設けないが（$N \ge 2$）、全 DNA はインメモリで構築される。 | 実行環境のヒープ制限を超えるような大規模母集団の要求が生じた場合、ストリーミング生成やチャンク処理を将来検討。 |
 | **Deferred** | Custom Resolver / Persistence | V1 から意図的に除外。 | DNA Artifact Persistence Layer 設計時に再検討。 |
 
