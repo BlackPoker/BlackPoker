@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENOME-SENSITIVITY-V1-R1`
-更新日時: 2026-10-12 19:10 JST
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1`
+更新日時: 2026-10-13 10:05 JST
 
 ---
 
@@ -67,7 +67,11 @@
 | **Canonical Match Log** | **IMPLEMENTED** | `src/domain/log/CanonicalMatchLog.ts`, `src/engine/log/MatchLogRecorder.ts` | `src/tests/rules-vnext/canonicalMatchLog.test.ts`, `GameSession.getMatchLog()` | Replay / ログ解析に活用 |
 | **AI Policy / RNG Checkpoint** | **MISSING / FUTURE** | - | - | Simulation Runner レベルでの乱数状態を含むチェックポイント |
 | **Policy versioning** | **IMPLEMENTED** | `PolicyDescriptor` (`kind`, `policyVersion`, `metadata`) | `src/engine/simulation/DecisionPolicy.ts` | Version 管理対応済み |
-| **Evolution** | **MISSING / FUTURE** | - | - | Phase 4.0 で策定 |
+| **Genetic Operators V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/GeneticOperators.ts`, `GeneticCrossover.ts`, `GeneticMutation.ts`, `ParentPairAssembler.ts` | `src/tests/ai/geneticOperators.test.ts` | Block-Segmented Uniform Crossover, Deterministic Normal Mutation, Self-Mating Retry |
+| **Runtime Match Telemetry V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/cli/support/RuntimeArtifactWriter.ts`, `BatchSimulationRunner.ts` | `src/tests/simulation/runtimeTelemetry.test.ts`, `src/tests/cli/runtimeArtifactWriter.test.ts` | Match/Batch wall-clock timing, Fail-Closed 統計, Benchmark Recipe |
+| **Generation Builder / Next Generation Assembly** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-generation-builder-design-v1.md` | - | 次世代母集団構築境界契約 (Generation g -> g+1) |
+| **Generation Runner** | **MISSING / FUTURE** | - | - | 世代交代実行ループ (将来) |
+| **Evolution Loop** | **MISSING / FUTURE** | - | - | 複数世代進化ループ (将来) |
 | **Hall of Fame** | **MISSING / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
@@ -442,7 +446,15 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **実行時成果物方針**: 大量生ログ（`matches.jsonl` 等）は Git 管理対象外。成果物ルートは `tools/simulator/.artifacts/ai-runs/<runId>/` に統一（`.gitignore` 設定済み）。
    - ※詳細設計仕様: `tools/simulator/docs/ai-genetic-operators-design-v1.md` 参照。
    - ※実装境界: Crossover, Mutation, Parent Pair Assembler, Offspring Generation の遺伝的操作子プリミティブ（V1）は実装・検証完了。Generation Runner, Evolution Loop, Hall of Fame, Runtime Match Telemetry は次段階のスコープ（未実装）。
-6. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
-7. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
+6. **Generation Builder / Next Generation Assembly (BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1)**:
+   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-generation-builder-design-v1.md`)
+   - **責務境界**: 世代 $g$ の `PopulationSnapshot` + `FitnessEvaluationSnapshot` から世代 $g+1$ の `PopulationSnapshot` を決定論的・Fail-Closed に構築。
+   - **エリート継承**: Genotype は完全保存（ディープクローンによるオブジェクト参照隔離）、DNA metadata 不変、**Fitness は非継承（次世代でゼロから再評価）**。
+   - **親選択・ペアリング**: 単一の決定論的親系列（$2M$ 体）を一括選出、隣接ペア化、`ParentPairAssembler` による自己交配回避リトライ（独立ストリーム）。
+   - **dnaRef 解決**: Canonical Logical Ref (`genome:<genomeId>`) をデフォルトとし、カスタムリゾルバを許容（NEW DESIGN DECISION）。
+   - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
+   - **未実装コンポーネント維持**: Generation Runner, Evolution Loop, Hall of Fame は未実装（MISSING / FUTURE）のまま維持。
+7. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
+8. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
 
 
