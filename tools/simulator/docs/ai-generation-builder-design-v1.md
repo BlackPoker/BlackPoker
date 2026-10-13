@@ -1,7 +1,7 @@
-# BlackPoker Simulator Next Generation Builder Design V1
+# BlackPoker Simulator Next Generation Builder Design V1 (Follow-up R1)
 # (Generation g $\rightarrow$ Generation g+1 次世代母集団構築境界契約)
 
-作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1`  
+作業ID: `BP-SIM-AI-GENERATION-BUILDER-DESIGN-V1-R1`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
 対象リポジトリ: `BlackPoker/BlackPoker`  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
@@ -26,14 +26,20 @@ $$\text{PopulationSnapshot}(g) + \text{FitnessEvaluationSnapshot}(g) \xrightarro
 
 として、世代 $g$ の評価済み母集団から世代 $g+1$ の未評価母集団スナップショットを **決定論的（Deterministic）かつ完全フェイルクローズ（Fail-Closed）** に組み立てる **Generation Builder / Next Generation Assembly** の境界契約（Boundary Contract）を定義する。
 
-### 解決する課題
-1. **次世代構築の境界契約の明確化**: 単なるスクリプトやループ処理ではなく、入力不変性・原子性（Atomicity）・完全検証を満たす次世代組み立てレイヤの責務分離。
-2. **Fitness 非継承原則の徹底**: エリート個体であっても前世代の適応度スコア（`fitnessScore`）を次世代へ絶対に持ち越さず、新世代においてゼロから再評価（Re-evaluated）させる契約。
-3. **エリート DNA の保存とオブジェクト隔離**: エリート DNA の重み配列およびメタデータを改変せず完全保存しつつ、スナップショット間の可変参照共有を防止するクローン隔離方式の確定。
-4. **乱数消費規約と親系列の一貫性**: 親選択における PRNG 状態の巻き戻りを防ぎ、1 本の連続した親系列から決定論的にペアを組み立てる方式の確定。
-5. **dnaRef 設計ギャップの解消**: メモリ上で生成された Offspring DNA に対し、`PopulationEntry.dnaRef` をどのように決定論的かつ安全に付与するかの方式確定（NEW DESIGN DECISION）。
-6. **系統情報（Lineage）と母集団の分離**: `PopulationEntry` や `DecisionDNA` に不要な系統フィールドを侵入させず、世代交代マニフェスト（`GenerationBuildResult`）として外部分離する境界の確定。
-7. **全か無か（All-or-Nothing）の原子性**: 1 体でも生成や検証に失敗した場合、部分的な母集団を返却せず、即座に例外停止するフェイルクローズ保証。
+### R1 Follow-up における確定・厳格化事項
+1. **Custom `offspringDnaRefResolver` の V1 からの完全廃止 (Finding 1)**:
+   - 外部コールバック（callback injection）による非決定性（`Date.now()`、`Math.random()`、I/O、外部状態依存）の混入リスクを根本排除するため、V1 ではリゾルバ関数を完全削除。
+2. **Offspring dnaRef を Canonical Logical Ref のみに固定**:
+   - `canonicalOffspringDnaRef(genomeId) = "genome:" + genomeId` の純粋・決定論的・副作用なし・I/O フリーの単一方式に完全固定。
+3. **dnaRef のスコープと境界の厳密化**:
+   - `genome:<genomeId>` は世代・母集団構築スコープ内での **Local Logical DNA Reference** であり、Global Artifact ID でも Content Address でも Physical File Reference でもないことを明確化。過剰なグローバル保証を排除。
+4. **`eliteCount > VALID count` 境界の確定と Generation Builder Effective Readiness (Finding 2)**:
+   - 既存の `PopulationSelector.assessReadiness()` を変更することなく、Generation Builder 固有の要求条件 $\text{generationBuilderRequiredValidCount} = \max(\text{standardRequiredValidCount}, \text{eliteCount})$ を定義。
+   - `validCount < eliteCount` の場合は `GenerationBuilderExecutionError`（`readinessStatus: "REEVALUATION_REQUIRED"` 相当）により Fail-Closed で即時停止。エリート自動縮小や Tier 2 / INVALID からの補完を厳禁。
+5. **Seed Sensitivity 保証の是正 (Finding 3)**:
+   - 「異なる Seed ならば必ず異なる Population となる」という過剰保証を排除。正式契約は「Same Seed $\implies$ Same Output (完全決定論)」とし、異なる Seed は「may differ（変化し得る）」とする。固定 fixture による感度確認を Negative Control として規定。
+6. **Implementation Test Plan の拡充**:
+   - 上記境界（Canonical dnaRef 固定、resolver 不在、Effective Readiness 停止、Tier 2 補完禁止、Seed 感度 Negative Control）を検証するテストを追加し、全 36 項目へ拡張。
 
 > [!IMPORTANT]
 > **本作業のスコープ境界**  
@@ -83,14 +89,15 @@ flowchart TD
     subgraph Inputs["Generation g Inputs"]
         PopG["PopulationSnapshot(g)"]
         FitG["FitnessEvaluationSnapshot(g)"]
-        Cfg["GenerationBuilderConfig"]
+        Cfg["GenerationBuilderConfig (No Callbacks)"]
         Seed["generationSeed"]
         TargetGen["targetGeneration (= g + 1)"]
     end
 
-    subgraph Gate["1. Gate & Integrity Verification"]
+    subgraph Gate["1. Gate & Effective Readiness Verification"]
         GenAlign{"Generation番号一致検証\n(pop.gen == fit.gen == fit.context.gen\n&& targetGen == pop.gen + 1)"}
-        Readiness{"PopulationSelector.assessReadiness()\n(VALID数 >= requiredCount)"}
+        StandardReadiness{"PopulationSelector.assessReadiness()\n(standardRequiredValidCount 検証)"}
+        EliteReadiness{"Effective Readiness 検証\n(validCount >= eliteCount)"}
     end
 
     subgraph Selection["2. Selection Phase"]
@@ -102,7 +109,7 @@ flowchart TD
         Pairing["隣接ペア取得: parents[2i], parents[2i+1]"]
         Assembler["ParentPairAssembler.assembleParentPair()\n(自己交配検知 & 独立リトライストリーム)"]
         GenOff["generateOffspring()\n(Crossover & Mutation & Codec Validation)"]
-        DnaRef["dnaRef 決定論的付与\n(Canonical Logical Ref)"]
+        DnaRef["dnaRef 付与: genome:genomeId\n(Canonical Logical Ref)"]
     end
 
     subgraph EliteAssembly["4. Elite Assembly"]
@@ -116,11 +123,14 @@ flowchart TD
     end
 
     Inputs --> GenAlign
-    GenAlign -- 一致 --> Readiness
+    GenAlign -- 一致 --> StandardReadiness
     GenAlign -- 不一致 --> FailClosed1["GenerationBuilderConfigurationError"]
 
-    Readiness -- READY --> Selection
-    Readiness -- 不足/不正 --> FailClosed2["GenerationBuilderExecutionError\n(REEVALUATION_REQUIRED 等)"]
+    StandardReadiness -- READY以外 --> FailClosed2["GenerationBuilderExecutionError / IntegrityError"]
+    StandardReadiness -- READY --> EliteReadiness
+
+    EliteReadiness -- validCount < eliteCount --> FailClosed3["GenerationBuilderExecutionError\n(REEVALUATION_REQUIRED 相当)"]
+    EliteReadiness -- 充足 --> Selection
 
     Selection --> ElitesSel
     Selection --> ParentsSel
@@ -134,7 +144,7 @@ flowchart TD
     OffspringAssembly --> IntegrityCheck
 
     IntegrityCheck -- 合格 --> Result
-    IntegrityCheck -- 不合格 --> FailClosed3["GenerationBuilderIntegrityError"]
+    IntegrityCheck -- 不合格 --> FailClosed4["GenerationBuilderIntegrityError"]
 
     style Gate fill:#fff3cd,stroke:#856404
     style Selection fill:#cce5ff,stroke:#004085
@@ -155,6 +165,7 @@ flowchart TD
 | **遺伝的操作** | `generateOffspring` の既存ファサードを呼び出す。 | 交叉・突然変異ロジックの直接組み直し。 |
 | **ゲームルール** | ルールに完全非依存。重み配列の次元数と Codec のみを参照。 | `GameSession`、`RulePackage`、Action ID、Card 構造の参照。 |
 | **実行時間テレメトリ** | なし。テレメトリ値を内部状態やアルゴリズムに利用しない。 | 処理時間による足切り、動的変異率変更、ログ出力。 |
+| **物理永続化 (I/O)** | なし。インメモリで純粋に次世代スナップショットを構築。 | `fs`, `path`, 外部ファイル保存、DB 保存、Git 操作。 |
 
 ---
 
@@ -162,7 +173,7 @@ flowchart TD
 
 Generation Builder の挙動を制御する設定パラメータを定義する。
 
-### 4.1 設定インターフェース定義
+### 4.1 設定インターフェース定義 (コールバック完全排除)
 
 ```typescript
 export interface GenerationBuilderConfig {
@@ -172,13 +183,13 @@ export interface GenerationBuilderConfig {
   readonly selectionConfig: PopulationSelectionConfig;
   /** 遺伝的操作子設定パラメータ (mutationRate, mutationSigma, clamp, maxRetries) */
   readonly geneticOperatorConfig: GeneticOperatorConfig;
-  /**
-   * オプション: 子個体 dnaRef 解決関数 (NEW DESIGN DECISION)
-   * 未指定時はデフォルトの Canonical Logical Ref ("genome:<genomeId>") を使用。
-   */
-  readonly offspringDnaRefResolver?: (genomeId: string, dna: DecisionDNA) => string;
 }
 ```
+
+> [!IMPORTANT]
+> **R1 確定事項: `offspringDnaRefResolver` コールバックの廃止**
+> V1 においては、外部関数インジェクション（`offspringDnaRefResolver` 等）は **一切持たせない**。
+> 外部コールバックは `Date.now()`、`Math.random()`、I/O、外部可変状態に依存可能であり、同一の入力・シードに対する完全な決定論性保証を破壊するためである。
 
 ### 4.2 設定の初期仮値 (Provisional Engineering Defaults)
 
@@ -211,25 +222,17 @@ Generation Builder においては、エリート保存数 $E$ に対し、次�
 
 $$0 \le \text{eliteCount} < \text{populationSize}$$
 
-#### 設計判断: なぜ `eliteCount === populationSize` を禁止するのか
-- **次世代生成の存在意義**: 進化世代交代（Generation Transition）の目的は、探索空間の探索（Exploration）と既存優秀解の活用（Exploitation）のバランスにある。もし `eliteCount === populationSize`（例: $E = 100, N = 100$）を許可すると、Offspring が 1 体も生成されず（$\text{offspringCount} = 0$）、次世代は前世代の完全なクローン複製となって探索が完全に停止する。
-- **既存仕様との整合**: `tools/simulator/docs/ai-genetic-operators-design-v1.md` Section 17.1 に明記された $0 \le \text{eliteCount} < \text{populationSize}$ 契約を厳格に継承する。
+- **`eliteCount === populationSize` の禁止**: Offspring が 1 体も生成されない構成（$\text{offspringCount} = 0$）は、探索を完全に停止させるため禁止する。
+- **既存仕様との整合**: `ai-genetic-operators-design-v1.md` Section 17.1 に明記された $0 \le \text{eliteCount} < \text{populationSize}$ 契約を厳格に継承する。
 - **Fail-Fast 検証**: `eliteCount >= populationSize`（または `eliteCount < 0`）の場合は、処理を開始する前に `GenerationBuilderConfigurationError` を送出する。
 
-### 5.3 現在世代サイズと次世代サイズの関係 (Size Invariance vs Scalability)
-- **設計判断**: 現在世代の母集団サイズ $N_g$（`population.entries.length`）と次世代の目標サイズ $N_{g+1}$（`config.populationSize`）が異なる場合（例: $N_g = 20 \rightarrow N_{g+1} = 100$）を **許可（Support）** する。
-- **理由**:
-  1. 初期世代（Generation 0）の小さな Seed 母集団から本番規模へのスケールアップや、計算リソースに応じた母集団サイズの動的調整を妨げない。
-  2. 親選択の適格性（`SelectionReadiness`）は、現在世代の VALID 個体プールに対して判定されるため、次世代サイズと現在サイズが異なっていてもアルゴリズム的な矛盾は生じない。
-  3. 暗黙に「現在世代サイズ＝次世代サイズ」と固定化することを防ぐ。
+### 5.3 現在世代サイズと次世代サイズの関係
+- 現在世代の母集団サイズ $N_g$（`population.entries.length`）と次世代の目標サイズ $N_{g+1}$（`config.populationSize`）が異なる場合（例: $N_g = 20 \rightarrow N_{g+1} = 100$）を **許可（Support）** する。
+- 親選択の適格性（`SelectionReadiness`）は現在世代の VALID 個体プールに対して判定されるため、目標サイズへの拡大・縮小を妨げない。
 
 ---
 
 ## 6. Generation Alignment & Preconditions (世代番号整合性契約)
-
-世代番号に関する誤指定やスナップショットの食い違いによるサイレントなデータ汚染を防ぐため、厳格な入力整合性ゲートを設ける。
-
-### 6.1 整合性バリデーション規則
 
 ```typescript
 // 世代整合性の Fail-Closed 検証
@@ -252,42 +255,79 @@ if (targetGeneration !== population.generation + 1) {
 }
 ```
 
-### 6.2 targetGeneration 明示入力契約の採用
-- **設計判断**: API 入力として `targetGeneration` を明示的に受け取り、`targetGeneration === population.generation + 1` を Fail-Fast で照合する契約を採用する。
-- **選定理由**:
-  1. `generateOffspring({ generation: targetGeneration, ... })` が生成対象世代番号を明示的に要求する既存契約と完全に一致する。
-  2. 呼び出し側が「どの世代を構築しようとしているか」の意図を表明し、Builder がそれを検証することで、世代番号のズレやループインデックスの誤りを呼び出し側境界で即座に検知できる。
+- API 入力として `targetGeneration` を明示的に受け取り、`targetGeneration === population.generation + 1` を Fail-Fast で照合する。
 
 ---
 
-## 7. Selection Readiness & Readiness Gate (親選択適格性ゲート)
+## 7. Selection Readiness & Generation Builder Effective Readiness (親選択適格性ゲートと Effective 判定)
 
-Generation Builder 自身は、Fitness スコアの計算やステータス評価を行わない。既存の `PopulationSelector.assessReadiness()` を呼び出し、その結果に完全に委譲する。
+### 7.1 Standard Selection Readiness を変更しない原則
+`PopulationSelector.assessReadiness()` の既存契約（`tools/simulator/docs/ai-population-selection-design-v1.md`）は Formal Accepted 済みであり、**一切変更しない**。
+既存の Standard Selection において要求される VALID 個体数は次式で定義されている:
 
-### 7.1 Readiness Gate 判定テーブル
+$$\text{standardRequiredValidCount} = \max(\text{minimumValidPopulationCount}, \text{tournamentSize})$$
 
-| `SelectionReadinessStatus` | Generation Builder の挙動 | 結果 |
-| :--- | :--- | :--- |
-| **`READY`** | 正常処理を続行し、親選択・エリート選出へ進む。 | 次世代構築へ進む |
-| **`REEVALUATION_REQUIRED`** | **即時停止（Fail-Closed）**。次世代母集団を一切生成しない。 | `GenerationBuilderExecutionError` 送出 |
-| **`INVALID_POPULATION`** | **即時停止（Fail-Fast）**。構造的不正を検知して停止。 | `GenerationBuilderIntegrityError` 送出 |
-| **`INCOMPARABLE_EVALUATION`** | **即時停止（Fail-Fast）**。評価コンテキスト不一致のため停止。 | `GenerationBuilderExecutionError` 送出 |
+### 7.2 Generation Builder 固有の Effective Required Valid Count
+Generation Builder は、親選択に加えて **エリート選出（$E$ 体）** を実行する。
+したがって、Generation Builder が世代交代を安全に開始するために必要な有効個体数は、次の **Effective Required Valid Count** となる:
 
-### 7.2 No Tier 2 Fallback 原則の徹底
-- `validCount < requiredCount` の場合、いかなる場合も `INSUFFICIENT_EVIDENCE`（Tier 2）の個体を `provisionalScore` 順で繰り上げて親やエリートにしてはならない。
-- 未完了試合や中断試合を多く含む個体を「勝率 100% だから」と過大評価して親に選出するリスクを完全に遮断する。
+$$\text{generationBuilderRequiredValidCount} = \max(\text{standardRequiredValidCount}, \text{eliteCount})$$
+
+$$\text{generationBuilderRequiredValidCount} = \max(\text{minimumValidPopulationCount}, \text{tournamentSize}, \text{eliteCount})$$
+
+### 7.3 Gate 実行シーケンスと Fail-Closed 停止契約
+Generation Builder は、次の 2 段階のゲート判定を実行する:
+
+1. **Step 1: Standard Readiness 判定**:
+   - `readiness = PopulationSelector.assessReadiness(population, fitnessSnapshot, config.selectionConfig, expectedContext)` を呼び出す。
+   - `readiness.status !== "READY"` の場合:
+     - `INVALID_POPULATION` $\implies$ 即座に `GenerationBuilderIntegrityError` を送出。
+     - `INCOMPARABLE_EVALUATION` $\implies$ 即座に `GenerationBuilderExecutionError` を送出。
+     - `REEVALUATION_REQUIRED` $\implies$ 即座に `GenerationBuilderExecutionError`（`readinessStatus: "REEVALUATION_REQUIRED"`）を送出。
+2. **Step 2: Effective Readiness 判定 (`validCount < eliteCount` の遮断)**:
+   - Step 1 が `READY` であっても、`readiness.validCount < config.selectionConfig.eliteCount` の場合:
+     - **即座に `GenerationBuilderExecutionError`（`readinessStatus: "REEVALUATION_REQUIRED"` 相当）を送出して停止する**。
+     - エリート選出（`selectElites`）の途中クラッシュに委ねず、**世代構築開始前の Gate 段階で確実にフェイルクローズ** する。
+
+### 7.4 なぜ `GenerationBuilderExecutionError` (REEVALUATION_REQUIRED) なのか
+- `eliteCount = 5`（母集団 100 に対し）という設定そのものは、静的設定として完全に正当（合法）である。
+- 問題は、**「現時点の対戦評価エビデンスにおいて、VALID 判定を得た個体が 5 体に満たない」** という動的実行状態にある。
+- したがって、これは `GenerationBuilderConfigurationError`（静的設定ミス）ではなく、対戦再評価を要求する `GenerationBuilderExecutionError`（`readinessStatus: "REEVALUATION_REQUIRED"` 相当）として停止するのがアーキテクチャ上最も正確である。
+
+### 7.5 絶対禁止事項 (No Auto Reduce & No Fallback)
+```text
+【Effective Readiness における絶対禁止事項】
+
+1. エリート保存数の自動縮小（Auto Reduce）禁止:
+   VALID 個体が 3 体しかないからといって、eliteCount を 5 から 3 へ勝手に引き下げて続行してはならない。
+   これはユーザー設定をサイレントに変更する危険な挙動である。
+
+2. INSUFFICIENT_EVIDENCE（Tier 2）の繰り上げ禁止:
+   不足する 2 体を provisionalScore の高い INSUFFICIENT_EVIDENCE 個体で穴埋めしてはならない。
+   証拠不十分の個体をエリートにしてはならない。
+
+3. INVALID（Tier 3）の繰り上げ禁止:
+   クラッシュ個体をエリート枠に補完してはならない。
+```
+
+### 7.6 Effective Readiness 判定テーブル具体例
+
+| ケース | `tournamentSize` | `eliteCount` | `validCount` | Standard Readiness | Generation Builder 判定 | 結果 |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Ex A** | 3 | 1 | 3 | `READY` (req: 3) | $\text{valid}(3) \ge \max(3, 1)$ | **READY (正常構築へ進む)** |
+| **Ex B** | 3 | 5 | 3 | `READY` (req: 3) | $\text{valid}(3) < \text{elite}(5)$ | **REEVALUATION_REQUIRED (即時停止)** |
+| **Ex C** | 3 | 5 | 5 | `READY` (req: 3) | $\text{valid}(5) \ge \max(3, 5)$ | **READY (正常構築へ進む)** |
+| **Ex D** | 3 | 0 | 3 | `READY` (req: 3) | $\text{valid}(3) \ge \max(3, 0)$ | **READY (正常構築へ進む)** |
 
 ---
 
 ## 8. Seed Hierarchy & PRNG Stream Architecture (シード体系と乱数消費規約)
 
-決定論的再現性の根幹となる Seed 体系は、既存の Formal Accepted 仕様（`DeterministicShuffle.ts` の `deriveSeed` および固定 Evolution Stream Keys）に完全準拠する。
-
 ### 8.1 generationSeed の型契約
-- `generationSeed` は **明示入力必須** とする。
-- `0` は正当なシード値として許容する。
+- `generationSeed` は **明示入力必須**。
+- `0` は正当なシード値として許容。
 - `undefined` や `null` の場合に `0` や `Date.now()` へフォールバックすることは **厳禁**。
-- 有限整数（`Number.isInteger(seed)`）であることを検証する。
+- 有限整数（`Number.isInteger(seed)`）であることを検証。
 
 ### 8.2 シード派生ツリー
 
@@ -327,21 +367,12 @@ const parentSequence = PopulationSelector.selectParents(
 );
 ```
 
-#### 禁止候補との比較
-- **禁止候補**: 各 Offspring $i$ のループ内で毎回 `selectParents(2, ..., selectionSeed)` を呼び出す設計。
-  - **禁止理由**: 毎回同一の `selectionSeed` で `SeededRandom` が初期化されるため、すべての Offspring において全く同一の親ペア（`parents[0], parents[1]`）が選ばれ続け、母集団の多様性が完全に崩壊する。
-- **採用方式の利点**: `selectParents` は内部で 1 つの `SeededRandom(selectionSeed)` を作成し、連続して $2M$ 回のトーナメント選択を実施するため、PRNG 状態が自然に進み、決定論的かつ偏りのない親系列が得られる。
-
-### 8.4 DESIGN FINDING: Elite Selection と Parent Selection の PRNG 状態
-- `PopulationSelector.selectElites()` と `PopulationSelector.selectParents()` は、それぞれ内部で `new SeededRandom(selectionSeed)` を独立してインスタンス化する。
-- したがって、エリート選出時に同点（Tie）が発生して PRNG が消費されたとしても、`selectParents()` の乱数列には一切影響を与えない（ストリームが言語ランタイムのインスタンス境界により自然に分離されている）。
-- **結論**: 現行の Formal Accepted Stream Key（`evolution-selection-v1`）を両者に渡す設計で何ら問題はなく、新たな Stream Key を無断新設する必要はない。
+- **禁止候補（ループ毎の個別選択）**: 各 Offspring $i$ で毎回 `selectParents(2, ..., selectionSeed)` を呼ぶと、毎回同一の `selectionSeed` で `SeededRandom` がリセットされ、全 Offspring が同一親ペアになって多様性が壊滅する。
+- **採用方式**: $2M$ 体を一括選出することで、1 つの `SeededRandom(selectionSeed)` インスタンス内で PRNG 状態が連続して進み、決定論的かつ偏りのない親系列が得られる。
 
 ---
 
 ## 9. Parent Selection & Pairing Flow (親選択とペアリング)
-
-生成された単一の親系列（`parentSequence: readonly SelectedParent[]`）から、各 Offspring 用の親ペアを組み立てる。
 
 ### 9.1 隣接ペア化 (Adjacent Pairing)
 Offspring $i$（$0 \le i < \text{offspringCount}$）に対する初期親ペアは、配列の連続する 2 要素とする:
@@ -366,8 +397,8 @@ const parentPair = ParentPairAssembler.assembleParentPair({
 });
 ```
 
-- **自己交配リトライの独立性**: `ParentPairAssembler` はリトライ時に `offspringSeed` から派生した独立ストリーム（`evolution-self-mating-retry-v1-${r}`）を使用するため、親選択全体の乱数列や他の Offspring の乱数系列を一切汚染しない。
-- **リトライ枯渇時の挙動**: `maxSelfMatingRetries` 回のリトライ後も同一個体となった場合、`ParentPairAssembler` の契約に従い、自己交配（無性生殖＋変異）として受容する。
+- `ParentPairAssembler` はリトライ時に `offspringSeed` から派生した独立ストリーム（`evolution-self-mating-retry-v1-${r}`）を使用するため、親選択全体の乱数列や他の Offspring の乱数系列を一切汚染しない。
+- リトライ枯渇時は、既存契約に従い自己交配（無性生殖＋変異）を受容する。
 
 ---
 
@@ -385,7 +416,6 @@ const parentPair = ParentPairAssembler.assembleParentPair({
 $$\text{genomeId} = \text{"gen-"} + \text{padStart}(g_{\text{target}}, 6, \text{"0"}) + \text{"-offspring-"} + \text{padStart}(i, 6, \text{"0"})$$
 
 - 例: `targetGeneration = 11, offspringIndex = 0` $\implies$ `"gen-000011-offspring-000000"`
-- 時刻、UUID、ランダム文字列の混入は一切禁止。
 
 ### 10.3 generateOffspring の呼出
 ```typescript
@@ -402,8 +432,6 @@ const generated = generateOffspring({
 ---
 
 ## 11. Elite Inheritance & DNA Immutability (エリート継承と不変性契約)
-
-エリート個体（前世代の最優秀個体群）の継承における境界契約を確定する。
 
 ### 11.1 エリート選出
 ```typescript
@@ -428,47 +456,68 @@ const elites = PopulationSelector.selectElites(
 | **`dna.metadata`** | **完全同一（書き換えない）** | DNA 自体を書き換えると「DNA 完全保存」に反するため。`dna.metadata.generation` は**誕生世代（Origin）**を表す。 |
 | **`fitnessScore`** | **継承禁止（一切含めない）** | **最重要原則**。次世代コンテキスト下で全個体と同列に再対戦・再評価されるため。 |
 
-### 11.3 オブジェクト参照隔離 (Clone Isolation vs Reference Reuse)
-- **設計判断**: エリートの DNA は、`DecisionDNACodec.clone(elite.dna)` により **ディープクローンして隔離（Clone Isolation）** する。
-- **比較検討**:
-  - *Option 1 (Reference Reuse)*: 既存 `dna` の参照をそのまま使い回す。
-    - 短所: もし将来のシミュレーションや外部ツールが誤って配列要素をインプレース変更した場合、世代 $g$ と世代 $g+1$ の両方のデータが同時に破壊されるリスクがある。
-  - *Option 2 (Clone Isolation - 採用)*: `DecisionDNACodec.clone()` を実行し、重み配列およびメタデータのディープコピーを作成する。
-    - 長所: JSON 等価性（Deep Equal）を 100% 保ちつつ、世代スナップショット間のオブジェクト可変参照共有を完全に断ち切ることができる。
-    - 性能: 母集団サイズ 100 に対しエリート数は通常 1〜5 体程度であり、クローンコストは極めて軽微。
+### 11.3 オブジェクト参照隔離 (Clone Isolation)
+- エリートの DNA は、`DecisionDNACodec.clone(elite.dna)` により **ディープクローンして隔離（Clone Isolation）** する。
+- JSON 等価性（Deep Equal）を 100% 保ちつつ、世代スナップショット間のオブジェクト可変参照共有を完全に排除する。
 
 ---
 
-## 12. dnaRef Resolution Strategy (NEW DESIGN DECISION)
+## 12. dnaRef Resolution Strategy & Scope (dnaRef 規約とスコープ境界)
 
-### 12.1 設計課題（Design Gap）
-`PopulationEntry` 型定義には `dnaRef: string`（安定した DNA アーティファクト参照）が必須である。  
-しかし、`generateOffspring()` はインメモリの `DecisionDNA` オブジェクトと `OffspringLineageMetadata` を生成する純粋関数であり、ディスク I/O やファイルパス決定の責務を持たない。  
-プロダクション実装時に即興で決め打ちすることを防ぐため、3 つの候補方式を比較評価する。
+### 12.1 候補方式の判定更新 (Finding 1 解決)
 
-### 12.2 候補方式の比較検討
+| 方式 | 概要 | 判定 | 理由 |
+| :--- | :--- | :--- | :--- |
+| **Option A<br>(Canonical Logical Ref)** | 決定論的論理 URI 形式。<br>`canonicalOffspringDnaRef(id) = "genome:" + id` | **V1 ADOPTED** | I/O 不要、副作用なし、純粋関数、完全な決定論性保証。 |
+| **Option B<br>(Configurable Resolver)** | 設定コールバックによる動的解決。 | **V1 DEFERRED<br>(FUTURE)** | コールバックの非決定性リスクを排除するため V1 では不採用。将来の Persistence Layer 設計時に再検討。 |
+| **Option C<br>(Unmaterialized Draft)** | 永続化完了までスナップショットを返さない二段階方式。 | **V1 NOT ADOPTED** | 不必要な中間レイヤが増加するため不採用。 |
 
-| 方式 | 概要 | 長所 | 短所 | 評価 |
-| :--- | :--- | :--- | :--- | :--- |
-| **Option A<br>(Canonical Logical Ref)** | 決定論的論理 URI 形式を採用。<br>例: `genome:<genomeId>` または `dna://<genomeId>` | ・I/O 不要で純粋関数として完結。<br>・完全な決定論性を保証。<br>・Generation Builder だけで即座に完全な `PopulationSnapshot` を構築可能。 | ・ファイルシステム上の物理パスや SHA ハッシュ文字列ではない。 | **V1 推奨基盤** |
-| **Option B<br>(Configurable Resolver)** | 設定にリゾルバ関数を持たせる。<br>`dnaRefResolver(genomeId, dna) => string`<br>デフォルトは Option A。 | ・ストレージ方針を Builder から完全分離。<br>・将来のファイル出力やハッシュ計算に柔軟対応可能。 | ・外部コールバックの非決定性を Builder が直接保証しづらい。 | **V1 拡張として統合** |
-| **Option C<br>(Unmaterialized Draft)** | Builder は `PopulationSnapshot` を返さず、未具現化 Draft を返す。保存後にスナップショット化。 | ・物理アーティファクト保存との意味論的一致が明確。 | ・Generation Builder 単体で `PopulationSnapshot` が完成しない。<br>・不必要な中間レイヤが増加。 | **不採用** |
+### 12.2 Canonical V1 dnaRef 規約
+V1 における Offspring の `dnaRef` は、以下の **純粋関数 1 方式のみに完全固定** する:
 
-### 12.3 採用方式 (NEW DESIGN DECISION)
-**Option A をベースとし、Option B の決定論的リゾルバをオプション許可するハイブリッド設計** を採用する。
+```typescript
+export function canonicalOffspringDnaRef(genomeId: string): string {
+  return `genome:${genomeId}`;
+}
+```
 
-1. **デフォルト挙動 (Canonical Logical Ref)**:
-   ```typescript
-   function defaultOffspringDnaRef(genomeId: string): string {
-     return `genome:${genomeId}`;
-   }
-   ```
-   - 例: `"genome:gen-000011-offspring-000000"`
-2. **エリート個体の `dnaRef`**:
-   - 前世代の `PopulationEntry.dnaRef` を **そのまま維持** する（同一 genotype 実体のため）。
-3. **カスタムリゾルバの許容**:
-   - `config.offspringDnaRefResolver` が指定された場合はそれを使用し、未指定時はデフォルトの Canonical Logical Ref を使用する。
-   - リゾルバの戻り値が非空文字列であることをバリデーションする。
+- **具体例**: `genome:gen-000011-offspring-000000`
+- **性質**:
+  - `pure`: 外部状態に一切依存しない。
+  - `deterministic`: 同一 `genomeId` に対し常に同一文字列を返す。
+  - `side-effect-free`: 一切の副作用がない。
+  - `I/O-free`: ファイルシステムやネットワークにアクセスしない。
+  - `Date.now()` / `Math.random()` の混入なし。
+
+### 12.3 dnaRef のスコープと境界 (過剰保証の排除)
+`genome:<genomeId>` の意味論的スコープを厳密に定義する:
+
+```text
+【dnaRef のスコープ定義】
+
+1. NOT a Global Artifact Identifier:
+   異なる Evolution Run や別環境において、同一の generation と offspringIndex から同一の genomeId
+   （例: gen-000011-offspring-000000）が生成され得る。したがって、Run を越えた大域的一意性は持たない。
+
+2. NOT a Content Address:
+   DNA の内容（重み配列の SHA-256 ハッシュ等）に基づくコンテンツアドレスではない。
+
+3. NOT a Physical File Reference:
+   ディスク上のファイルパス（.json）やデータベースの主キーではない。
+
+4. V1 での厳密な意味:
+   Generation / Population スナップショットのインメモリ構築において、
+   個体エントリーと DNA を論理的に紐付ける「Local Logical DNA Reference」。
+```
+
+- **禁止表現**: "globally unique DNA identifier", "content-addressed ID", "persistent artifact identifier", "immutable global URI" などの過剰な大域的保証表現は禁止する。
+
+### 12.4 エリート個体の `dnaRef`
+- エリート個体は、前世代の `PopulationEntry.dnaRef` を **そのまま維持** する（同一 genotype 実体への参照であるため）。
+
+### 12.5 将来の Persistence Layer との境界
+- 物理 DNA アーティファクトの保存（ディスク書き込み、ハッシュ計算、ファイルパス解決）が必要になった段階で、Generation Builder とは独立した **DNA Artifact Persistence Layer** を新設する。
+- Generation Builder 自身が `fs`, `path`, 外部 DB を直接扱うことは将来にわたって禁止する。
 
 ---
 
@@ -479,8 +528,6 @@ const elites = PopulationSelector.selectElites(
 - また、`DecisionDNATypes` も変更してはならない。
 
 ### 13.2 GenerationBuildResult 型定義 (Deterministic Transition Manifest)
-Generation Builder の成果物として、`PopulationSnapshot` と共に決定論的世代交代マニフェストを包含する `GenerationBuildResult` を新設する:
-
 ```typescript
 export interface GenerationBuildResult {
   /** 構築された次世代 (g+1) の母集団スナップショット */
@@ -513,39 +560,36 @@ export interface GenerationBuildResult {
   - 実行時間計測テレメトリ（ms、スループット）
   - 前世代の Fitness スコア（`fitnessScore` のコピー）
   - OS、CPU、ランタイム環境メタデータ
-- これにより、`GenerationBuildResult` は入力が同一であれば **1 ビットの狂いもなく完全一致する純粋な決定論的データオブジェクト** となる。
+  - dnaRef resolver コールバック関連情報
 
 ---
 
 ## 14. Next Generation Population Assembly (次世代母集団配列構築)
 
 ### 14.1 出力エントリの決定論的順序 (Canonical Ordering)
-次世代 `PopulationSnapshot.entries` の配列順序は、入力配列の順序に一切依存せず、以下の **固定順序** で直列化（Serialize）する:
+次世代 `PopulationSnapshot.entries` の配列順序は、以下の **固定順序** で直列化する:
 
 $$\text{entries} = [\text{elite}_0, \text{elite}_1, \dots, \text{elite}_{E-1}, \text{offspring}_0, \text{offspring}_1, \dots, \text{offspring}_{M-1}]$$
 
-1. **第 1 セグメント（Elites: $0 \le k < E$）**:
-   - `PopulationSelector.selectElites()` の返却順。
-2. **第 2 セグメント（Offspring: $0 \le i < M$）**:
-   - `offspringIndex` の昇順（$0, 1, \dots, M-1$）。
+1. **第 1 セグメント（Elites: $0 \le k < E$）**: `PopulationSelector.selectElites()` の返却順。
+2. **第 2 セグメント（Offspring: $0 \le i < M$）**: `offspringIndex` の昇順（$0, 1, \dots, M-1$）。
 
 ### 14.2 genomeId の一意性検証
-- 次世代母集団内の全 $N$ 体の `genomeId` は、厳格に一意でなければならない。
-- エリートの `genomeId` と新規 Offspring の `genomeId` が万一衝突した場合は、**即座に `GenerationBuilderIntegrityError` を送出して停止（Fail-Closed）** する。自動的なリネームや枝番付与による誤魔化しは禁止する。
+- 次世代母集団内の全 $N$ 体の `genomeId` は厳格に一意でなければならない。
+- エリート ID と Offspring ID の衝突検知時は、即座に `GenerationBuilderIntegrityError` を送出（自動リネーム禁止）。
 
 ---
 
 ## 15. Immutability, Atomicity & Error Taxonomy (不変性・原子性・エラー体系)
 
 ### 15.1 入力不変性 (Input Immutability)
-- Builder は、入力された `PopulationSnapshot(g)`、`FitnessEvaluationSnapshot(g)`、および `DecisionDNA` の内部状態を一切変更（破壊的ソート、push、splice、プロパティ代入等）してはならない。
+- 入力された `PopulationSnapshot(g)`、`FitnessEvaluationSnapshot(g)`、および `DecisionDNA` の内部状態を一切変更しない。
 
 ### 15.2 出力不変性 (Output Immutability)
-- 生成された `GenerationBuildResult`、`PopulationSnapshot`、`entries` 配列、`eliteGenomeIds` 配列、`offspringLineages` 配列は、すべて `Object.freeze` された浅い不変オブジェクトとして返却する。
+- 生成された `GenerationBuildResult`、`PopulationSnapshot`、各種配列はすべて `Object.freeze` して返却する。
 
 ### 15.3 原子性 (All-or-Nothing Atomic Build)
-- Generation Builder は、完全な次世代母集団（$N$ 体すべて）が正常に構築・検証された場合のみ結果を返却する。
-- 途中で例外が発生した場合、部分的に生成されたスナップショット（例: 50 体だけできたもの）を正常値として返却してはならない。
+- 完全な次世代母集団（$N$ 体すべて）が正常に構築・検証された場合のみ結果を返却する。部分的な母集団の返却は禁止。
 
 ### 15.4 エラー分類体系 (Error Taxonomy)
 
@@ -578,82 +622,73 @@ export class GenerationBuilderExecutionError extends Error {
 }
 ```
 
+- `validCount < eliteCount` による停止時は、`GenerationBuilderExecutionError` を送出し、`readinessStatus: "REEVALUATION_REQUIRED"` 相当のセマンティクスを付与する。
+
 ---
 
-## 16. Determinism & Input Order Independence (決定論性契約)
+## 16. Determinism & Seed Sensitivity Boundary (決定論性保証境界)
 
-### 16.1 決定論性の完全保証
-同一の `PopulationSnapshot(g)`、`FitnessEvaluationSnapshot(g)`、`GenerationBuilderConfig`、`targetGeneration`、および `generationSeed` が与えられた場合、生成される `GenerationBuildResult` は常にビット単位で完全一致（Deep Equal）しなければならない。
+決定論性に関する契約を 3 つのカテゴリに明確に分離する:
 
-### 16.2 入力順序非依存性 (Input Ordering Independence)
-- 入力 `PopulationSnapshot.entries` や `FitnessEvaluationSnapshot.entries` の配列順序が任意にシャッフルされていたとしても、それらが同一の個体集合・スコア集合を表している限り、次世代の出力結果（選出されるエリート、親ペア、生成される子個体、出力配列順）は **1 ミリも変化してはならない**。
-- `PopulationSelector` が内部で `genomeId` による正規ソートを実施しているため、Generation Builder 側で入力配列順に依存する処理を追加しないことで、この契約を保証する。
+### 16.1 A. Same Input Contract (完全決定論性)
+同一の `PopulationSnapshot(g)`、`FitnessEvaluationSnapshot(g)`、`GenerationBuilderConfig`、`targetGeneration`、および `generationSeed` が与えられた場合、生成される `GenerationBuildResult` は常にビット単位で完全一致（Deep Equal）することを **100% 保証** する。
 
-### 16.3 シード感度 (Seed Sensitivity)
-- `generationSeed` を変更した場合、親選択、交叉点、突然変異値が変化し、次世代母集団が異なる構成となることをテストで実証可能とする。
+### 16.2 B. Input Ordering Independence (入力順序非依存性)
+入力 `PopulationSnapshot.entries` や `FitnessEvaluationSnapshot.entries` の配列順序が任意にシャッフルされていたとしても、それらが同一の個体集合・スコア集合を表している限り、出力結果は **完全に同一** であることを保証する。
+
+### 16.3 C. Seed Sensitivity Boundary (過剰保証の排除と Negative Control)
+- **契約**: 異なる `generationSeed` は、親選択、交叉点、突然変異値、自己交配リトライにおいて異なる PRNG ストリームを生成し得るため、出力結果は変化し得る（**may differ**）。
+- **過剰保証の排除**: 「異なる Seed ならば、いかなる入力に対しても必ず全 DNA が異なる（**must differ**）」という数学的普遍保証は行わない（確率的に同一の選択や同一の変異値が生じる可能性を契約上排除しない）。
+- **Negative Control**: 将来の実装テストにおいては、**固定された感度確認 fixture** に対し、Seed A と Seed B で少なくとも 1 つの親選択または Offspring DNA 差が生じることを、感度が存在することの Negative Control として実証する。
 
 ---
 
 ## 17. Worked Examples (具体的適用シナリオ)
 
 ### Worked Example A: 通常の世代交代 (Normal Generation)
-- **入力**:
-  - `sourceGeneration`: 10
-  - `targetGeneration`: 11
-  - `populationSize`: 5
-  - `eliteCount`: 1
-  - `generationSeed`: 42
-- **算出**:
-  - `offspringCount`: $5 - 1 = 4$
-  - 必要親数: $4 \times 2 = 8$
-  - `offspringIndex`: $0, 1, 2, 3$
+- **入力**: `sourceGeneration: 10`, `targetGeneration: 11`, `populationSize: 5`, `eliteCount: 1`, `generationSeed: 42`
+- **算出**: `offspringCount`: 4, 必要親数: 8, `offspringIndex`: 0..3
 - **結果**:
-  - `entries[0]`: 前世代最高スコアのエリート（`genomeId: "gen-000010-offspring-000003"`, `generation: 11`）
-  - `entries[1]`: `gen-000011-offspring-000000` (`offspringIndex: 0`)
-  - `entries[2]`: `gen-000011-offspring-000001` (`offspringIndex: 1`)
-  - `entries[3]`: `gen-000011-offspring-000002` (`offspringIndex: 2`)
-  - `entries[4]`: `gen-000011-offspring-000003` (`offspringIndex: 3`)
+  - `entries[0]`: エリート（`genomeId: "gen-000010-offspring-000003"`, `dnaRef: "genome:gen-000010-offspring-000003"`, `generation: 11`）
+  - `entries[1..4]`: 子個体（`genomeId: "gen-000011-offspring-000000..03"`, `dnaRef: "genome:gen-000011-offspring-000000..03"`）
 
 ### Worked Example B: エリート保存なし (No Elite)
 - **入力**: `populationSize: 5`, `eliteCount: 0`
-- **算出**: `offspringCount: 5`
-- **結果**:
-  - エリート 0 体、子個体 5 体（`offspringIndex: 0..4`）
-  - 全エントリが新規 Offspring。
+- **結果**: エリート 0 体、子個体 5 体（全エントリが新規 Offspring）。
 
 ### Worked Example C: 最小有効母集団 (Minimum Population)
 - **入力**: `populationSize: 2`, `eliteCount: 1`
-- **算出**: `offspringCount: 1`（必要親数: 2）
-- **結果**:
-  - エリート 1 体、子個体 1 体（正当に成立）。
+- **結果**: エリート 1 体、子個体 1 体（正当に成立）。
 
 ### Worked Example D: 不正なエリート数 (Invalid Elite Count)
 - **入力**: `populationSize: 5`, `eliteCount: 5`
-- **挙動**: $E < N$ 違反を検知。
-- **結果**: `GenerationBuilderConfigurationError` を即座に送出して停止（子個体が 0 になる構成を排除）。
+- **結果**: $E < N$ 違反により `GenerationBuilderConfigurationError` 送出。
 
-### Worked Example E: 再評価要求 (Reevaluation Required)
-- **入力**: 母集団 20 体中、VALID 個体が 1 体のみ（他は対戦不足で `INSUFFICIENT_EVIDENCE`）。
-- **挙動**: `assessReadiness` が `REEVALUATION_REQUIRED` を返却。
-- **結果**: `GenerationBuilderExecutionError` を送出して即時停止。Tier 2 個体を繰り上げて次世代を作ることは絶対にしない。
+### Worked Example E: Standard READY だが Elite 不足 (Effective Readiness 停止)
+- **入力**: `populationSize: 10`, `eliteCount: 5`, `tournamentSize: 3`, `validCount: 3`
+- **挙動**: `PopulationSelector.assessReadiness()` は Standard として `READY` を返すが、`validCount (3) < eliteCount (5)` を検知。
+- **結果**: `GenerationBuilderExecutionError`（`readinessStatus: "REEVALUATION_REQUIRED"` 相当）で即時停止。エリート数を勝手に 3 に減らさず、INSUFFICIENT 個体で埋めない。
 
-### Worked Example F: エリートの Fitness 非継承 (Elite Fitness)
+### Worked Example F: 再評価要求 (Reevaluation Required)
+- **入力**: VALID 個体が 1 体のみ（`validCount: 1`）。
+- **結果**: `assessReadiness` が `REEVALUATION_REQUIRED` を返し、即座に例外停止。
+
+### Worked Example G: エリートの Fitness 非継承 (Elite Fitness)
 - **世代 10**: 個体 A の適応度 `fitnessScore = 0.95`（エリート選出）。
-- **世代 11**: 個体 A の DNA は完全保存されて次世代母集団に入るが、`PopulationEntry` には Fitness フィールドは存在しない。世代 11 の対戦が実施されるまで、個体 A の Fitness は存在せず、前世代の 0.95 は完全に破棄される。
+- **世代 11**: 個体 A の DNA は完全保存されるが、`PopulationEntry` に Fitness は存在せず、前世代スコア 0.95 は完全に破棄される。
 
-### Worked Example G: 自己交配リトライ (Self-Mating)
+### Worked Example H: 自己交配リトライ (Self-Mating)
 - **状況**: 親系列から取得したペアが `(IndX, IndX)` であった。
-- **挙動**: `ParentPairAssembler` がリトライストリーム（`evolution-self-mating-retry-v1-0`）から親 B を再サンプリング。
-- **結果**: 別個体 `IndY` が選ばれれば `(IndX, IndY)` として交叉。3 回リトライしても `IndX` のみの場合は `(IndX, IndX)` を受容して無性生殖＋変異を実施。Builder 自身はリトライロジックに関与しない。
+- **結果**: `ParentPairAssembler` が独立リトライストリームから親 B を再サンプリング。枯渇時は無性生殖＋変異として受容。
 
 ---
 
-## 18. Implementation Test Plan (将来実装時の必須テスト 30 項目)
+## 18. Implementation Test Plan (将来実装時の必須テスト 36 項目)
 
-将来の Production TypeScript 実装時に満たすべき必須テストスイートを以下のように策定する:
+将来の Production TypeScript 実装時に満たすべき必須テストスイート（全 36 項目）:
 
 ```text
-【Generation Builder 将来実装テストマトリクス (30項目)】
+【Generation Builder 将来実装テストマトリクス (36項目)】
 
 [Config Validation]
 1.  populationSize デフォルト 100 が正しく適用されること
@@ -665,35 +700,41 @@ export class GenerationBuilderExecutionError extends Error {
 7.  eliteCount 不正値 (負数, 小数) を Fail-Fast で reject すること
 8.  targetGeneration !== population.generation + 1 の不一致を reject すること
 9.  generationSeed 不正値 (NaN, Infinity, 非整数) を reject すること
+10. GenerationBuilderConfig に custom resolver コールバックが存在せず、注入不能であること (R1)
 
-[Readiness & Fail-Closed]
-10. assessReadiness が REEVALUATION_REQUIRED を返した時、即座に例外停止し母集団を生成しないこと
-11. assessReadiness が INVALID_POPULATION を返した時、即座に例外停止すること
-12. assessReadiness が INCOMPARABLE_EVALUATION を返した時、即座に例外停止すること
-13. VALID で fitnessScore = 0.0 (全敗) の個体も正当な選択候補として親・エリートになり得ること
-14. INSUFFICIENT_EVIDENCE (Tier 2) の個体が親・エリートに絶対に選出されないこと
-15. INVALID (Tier 3) の個体が親・エリートに絶対に選出されないこと
+[Effective Readiness & Fail-Closed]
+11. assessReadiness が REEVALUATION_REQUIRED を返した時、即座に例外停止し母集団を生成しないこと
+12. assessReadiness が INVALID_POPULATION を返した時、即座に例外停止すること
+13. assessReadiness が INCOMPARABLE_EVALUATION を返した時、即座に例外停止すること
+14. eliteCount=5, validCount=3, tournamentSize=3 の時、Standard READY 相当であっても Generation Builder は REEVALUATION_REQUIRED 相当で即時停止すること (Effective Readiness R1)
+15. eliteCount=5, validCount=5 の時、正常に Generation 構築へ進めること (R1)
+16. validCount < eliteCount の不足分を INSUFFICIENT_EVIDENCE や INVALID で絶対に補完・昇格させないこと (R1)
+17. VALID で fitnessScore = 0.0 (全敗) の個体も正当な選択候補として親・エリートになり得ること
+18. INSUFFICIENT_EVIDENCE (Tier 2) の個体が親・エリートに絶対に選出されないこと
+19. INVALID (Tier 3) の個体が親・エリートに絶対に選出されないこと
 
 [Elite Contract]
-16. エリート個体の genomeId が前世代と完全一致すること
-17. エリート個体の dnaRef が前世代と完全一致すること
-18. エリート個体の DNA 重み配列がビット単位で完全一致すること
-19. エリート個体の DNA がディープクローンされ、オブジェクト参照を共有していないこと
-20. エリート個体の DNA metadata (誕生世代等) が改変されず保存されていること
-21. エリート個体の前世代 Fitness スコアが次世代スナップショットに一切混入していないこと
+20. エリート個体の genomeId が前世代と完全一致すること
+21. エリート個体の dnaRef が前世代と完全一致すること
+22. エリート個体の DNA 重み配列がビット単位で完全一致すること
+23. エリート個体の DNA がディープクローンされ、オブジェクト参照を共有していないこと
+24. エリート個体の DNA metadata (誕生世代等) が改変されず保存されていること
+25. エリート個体の前世代 Fitness スコアが次世代スナップショットに一切混入していないこと
 
 [Offspring & Assembly Contract]
-22. 生成される子個体数が正確に populationSize - eliteCount であること
-23. 子個体の genomeId が "gen-XXXXXX-offspring-YYYYYY" 形式と完全一致すること
-24. 子個体の offspringIndex が 0 から M-1 まで連続していること
-25. 出力母集団の全エントリの entry.generation が targetGeneration と一致すること
-26. 出力母集団内の全 genomeId が一意であること
-27. 出力母集団の配列順序が [Elites, Offspring] の順序と完全一致すること
+26. 生成される子個体数が正確に populationSize - eliteCount であること
+27. 子個体の genomeId が "gen-XXXXXX-offspring-YYYYYY" 形式と完全一致すること
+28. 子個体の offspringIndex が 0 から M-1 まで連続していること
+29. 子個体の dnaRef が常に "genome:<genomeId>" 形式と完全一致すること (Canonical Logical Ref R1)
+30. 出力母集団の全エントリの entry.generation が targetGeneration と一致すること
+31. 出力母集団内の全 genomeId が一意であること
+32. 出力母集団の配列順序が [Elites, Offspring] の順序と完全一致すること
 
 [Determinism & Pure Functionality]
-28. 同一の入力スナップショット・Config・Seed に対し、完全一致 (Deep Equal) な結果を返すこと
-29. 入力 Population / Fitness のエントリ配列順序を入れ替えても、同一の結果を返すこと (順序非依存性)
-30. generationSeed を変更したとき、次世代母集団の結果が変化すること (ネガティブコントロール)
+33. 同一の入力スナップショット・Config・Seed に対し、完全一致 (Deep Equal) な結果を返すこと (Same Input Contract)
+34. 入力 Population / Fitness のエントリ配列順序を入れ替えても、同一の結果を返すこと (Input Ordering Independence)
+35. 固定感度確認 fixture に対し、Seed A と Seed B で少なくとも 1 つの選択または Offspring DNA 差が生じることを Negative Control として確認すること (Seed Sensitivity Boundary R1)
+36. 異なる Seed に対して「全入力で必ず結果が異なる」という Universal Contract を要求しないこと (過剰保証排除 R1)
 ```
 
 ---
@@ -701,7 +742,6 @@ export class GenerationBuilderExecutionError extends Error {
 ## 19. Explicit Non-Goals & Open Design Questions (非目標と設計課題)
 
 ### 19.1 明示的非目標 (Explicit Non-Goals)
-本設計および次フェーズの実装において、以下は明示的にスコープ外とする:
 - 対戦スケジュール実行エンジン（Generation Evaluation Schedule）
 - ラウンドロビン対戦やスイスドロー対戦のスケジューリング
 - 世代ループ（Evolution Loop）および停止基準（Stopping Criteria / Convergence Detection）
@@ -714,10 +754,13 @@ export class GenerationBuilderExecutionError extends Error {
 
 | 重要度 | 課題項目 | 現行方針 / 決定内容 | 将来フェーズでの扱い |
 | :--- | :--- | :--- | :--- |
-| **None (Solved)** | `dnaRef` の付与方式 | Section 12 にて Option A（`genome:<genomeId>`）を Canonical Logical Ref として採用し、カスタムリゾルバを許容。 | DNA アーティファクト保存レイヤ実装時に物理パスとの対応を確立。 |
-| **None (Solved)** | エリート DNA の不変性 | Section 11 にて Clone Isolation を採用。DNA 自体は不変、Entry.generation のみ更新。 | 実装時に `DecisionDNACodec.clone` を利用。 |
-| **None (Solved)** | 親系列の PRNG 消費 | Section 8 にて単一の連続親系列（$2M$ 体）を一括選出する契約に確定。 | 実装時に `selectParents(2M)` を呼出。 |
+| **None (Solved)** | `dnaRef` の付与方式 | Canonical Logical Ref (`genome:<genomeId>`) に完全固定。カスタムリゾルバは廃止。 | 物理 DNA アーティファクト保存レイヤ設計時に物理パスとの対応を確立。 |
+| **None (Solved)** | `validCount < eliteCount` | Generation Builder 固有の Effective Readiness で Gate 段階停止。 | 実装時に `validCount < eliteCount` チェックを追加。 |
+| **None (Solved)** | エリート DNA の不変性 | Clone Isolation を採用。DNA 自体は不変、Entry.generation のみ更新。 | 実装時に `DecisionDNACodec.clone` を利用。 |
+| **None (Solved)** | 親系列の PRNG 消費 | 単一の連続親系列（$2M$ 体）を一括選出する契約に確定。 | 実装時に `selectParents(2M)` を呼出。 |
+| **None (Solved)** | Seed Sensitivity | Same Seed 完全決定論、Different Seed は Negative Control fixture による感度確認。 | テストスイートに感度 Negative Control を配置。 |
 | **Low** | 大規模母集団時のメモリ | 現行仕様（$N \le 1000$）では全 DNA をインメモリ保持可能。 | 数万規模の場合はストリーミング生成を将来検討。 |
+| **Deferred** | Custom Resolver / Persistence | V1 から意図的に除外。 | DNA Artifact Persistence Layer 設計時に再検討。 |
 
 ---
 
@@ -738,13 +781,19 @@ import {
 } from "../../domain/ai/GeneticOperatorTypes";
 
 /**
- * Generation Builder 設定
+ * Generation Builder 設定 (コールバック不在)
  */
 export interface GenerationBuilderConfig {
   readonly populationSize: number;
   readonly selectionConfig: PopulationSelectionConfig;
   readonly geneticOperatorConfig: GeneticOperatorConfig;
-  readonly offspringDnaRefResolver?: (genomeId: string, dna: DecisionDNA) => string;
+}
+
+/**
+ * Canonical V1 Offspring dnaRef 解決関数
+ */
+export function canonicalOffspringDnaRef(genomeId: string): string {
+  return `genome:${genomeId}`;
 }
 
 /**
