@@ -179,8 +179,8 @@ export interface ScaleEvidenceExecutionReport {
 async function runScaleEvidence(): Promise<ScaleEvidenceExecutionReport> {
   const startTimeIso = new Date().toISOString();
   console.log("================================================================================");
-  console.log("  BLACKPOKER SIMULATOR - N=100 ONE-GENERATION SCALE EVIDENCE V1");
-  console.log("  Work ID: BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1");
+  console.log("  BLACKPOKER SIMULATOR - N=100 ONE-GENERATION SCALE EVIDENCE V1-R1");
+  console.log("  Work ID: BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1");
   console.log(`  Started at: ${startTimeIso}`);
   console.log("================================================================================");
 
@@ -514,7 +514,7 @@ async function runScaleEvidence(): Promise<ScaleEvidenceExecutionReport> {
 
   const cpus = os.cpus();
   const report: ScaleEvidenceExecutionReport = {
-    workId: "BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1",
+    workId: "BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1",
     timestamp: endTimeIso,
     environment: {
       nodeVersion: process.version,
@@ -571,7 +571,7 @@ async function runScaleEvidence(): Promise<ScaleEvidenceExecutionReport> {
         heapUsedBytes: memAfter.heapUsed,
         heapTotalBytes: memAfter.heapTotal,
       },
-      disclaimer: "Before/after snapshots only, not continuous peak memory.",
+      disclaimer: "These are before/after endpoint snapshots only. They do not establish peak memory, GC pressure/frequency, or absence of memory leaks.",
     },
     execution: {
       startTimeIso,

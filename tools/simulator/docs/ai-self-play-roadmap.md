@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1`
-更新日時: 2026-10-14 17:50 JST
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1`
+更新日時: 2026-10-14 18:55 JST
 
 ---
 
@@ -458,11 +458,11 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **dnaRef 規約**: Canonical Logical Ref (`genome:<genomeId>`) のみに完全固定。Local Logical DNA Reference であり、Global Artifact ID や Content Address ではない。
    - **決定論性保証**: Supported Deterministic Runtime 境界（同一 Node.js LTS、同一実装バージョン、同一入力、同一設定、同一シード、同一 Stream Key）において bit-exact / Deep Equal を保証。異種 OS / CPU アーキテクチャ間は Cross-Platform Conformance Target として実測検証。
    - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
-7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-V1 / BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1)**:
+7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-V1 / BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1)**:
    - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-generation-runner-design-v1.md`, SHA: `c45478bd23822689718f4c82ccb6befb8731a873`)
    - **実装ステータス**: **FORMAL ACCEPTED** (`tools/simulator/src/engine/ai/GenerationRunner.ts`, `tools/simulator/src/domain/ai/GenerationRunnerTypes.ts`, SHA: `2587017da393bd9c96172d5772ea5e0be3ebdb59`)
    - **Controlled Evidence**: **FORMAL ACCEPTED** (BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1-R1, `tools/simulator/src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, 30試合実機完走, g=0 -> g=1)
-   - **N=100 Scale Evidence**: **EXECUTED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1, `tools/simulator/src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md`, Official `light-entry16`, N=100, R=1, 9,900試合実機完走, g=0 -> g=1)
+   - **N=100 Scale Evidence**: **EXECUTED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1, `tools/simulator/src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md`, Official `light-entry16`, N=100, R=1, 9,900試合実機完走, g=0 -> g=1)
    - **Evolution Loop**: **NOT IMPLEMENTED / FUTURE**
    - **Parallel Evaluation**: **NOT IMPLEMENTED / FUTURE**
    - **Multi-Generation Evolution**: **NOT EXECUTED**
