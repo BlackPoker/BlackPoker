@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2`
-更新日時: 2026-10-14 23:59 JST
+作業ID: `BP-SIM-AI-EVOLUTION-LOOP-V1`
+更新日時: 2026-10-15 00:40 JST
 
 ---
 
@@ -73,7 +73,7 @@
 | **Generation Runner** | **FORMAL ACCEPTED** | `src/engine/ai/GenerationRunner.ts`, `src/domain/ai/GenerationRunnerTypes.ts` | `src/tests/ai/generationRunner.test.ts` (60 Canonical Tests) | 1世代自己対戦評価・適応度集計・次世代遷移 (Double Round Robin V1) |
 | **Controlled One-Generation Evidence V1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, 30試合実機検証 (g=0 -> g=1) |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md` | - | Official light-entry16, N=100, R=1, 9,900試合実機完走 (g=0 -> g=1) |
-| **Evolution Loop** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-evolution-loop-design-v1.md` (V1-R2) | - | 複数世代進化ループ設計 (Production は未実装) |
+| **Evolution Loop** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
@@ -464,16 +464,16 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **実装ステータス**: **FORMAL ACCEPTED** (`tools/simulator/src/engine/ai/GenerationRunner.ts`, `tools/simulator/src/domain/ai/GenerationRunnerTypes.ts`, SHA: `2587017da393bd9c96172d5772ea5e0be3ebdb59`)
    - **Controlled Evidence**: **FORMAL ACCEPTED** (BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1-R1, `tools/simulator/src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, 30試合実機完走, g=0 -> g=1, SHA: `269017fcd0cdc3ce55e2c3021f8a06c4fd9e49c7`)
    - **N=100 Scale Evidence**: **FORMAL ACCEPTED** (BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1, Independent Review, `tools/simulator/src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md`, Official `light-entry16`, N=100, R=1, 9,900試合実機完走, g=0 -> g=1, SHA: `0146f4ac6e071d8fd47f02e8f62f9dc37964ed30`)
-   - **Evolution Loop Design**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-evolution-loop-design-v1.md`)
-   - **Evolution Loop Production**: **NOT IMPLEMENTED**
+   - **Evolution Loop Design**: **FORMAL ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2, Independent Review, `tools/simulator/docs/ai-evolution-loop-design-v1.md`, SHA: `18bf6813bafb55be600f65d16bccd300528fbf27`)
+   - **Evolution Loop Production**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/EvolutionLoop.ts`, `tools/simulator/src/domain/ai/EvolutionLoopTypes.ts`, `tools/simulator/src/tests/ai/evolutionLoop.test.ts`)
    - **Controlled Multi-Generation Evidence**: **NOT EXECUTED**
    - **Parallel Evaluation**: **NOT IMPLEMENTED**
    - **Hall of Fame**: **NOT IMPLEMENTED**
    - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。Canonical Error Taxonomy（Configuration / Integrity / ExecutionError）、実在試合専用フェーズ診断（SESSION_FACTORY / POLICY_FACTORY / RUNNER）、Builder Contract Drift の `GenerationRunnerIntegrityError` 統一、Preflight Fail-Fast 検証、および結果モデルの論理／実行時メトリクス分離を完全実装。
-   - **未実装コンポーネント維持**: Evolution Loop Production, Parallel Evaluation, Hall of Fame は未実装（NOT IMPLEMENTED）のまま維持。
-8. **Evolution Loop (BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2)**:
-   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-evolution-loop-design-v1.md`)
-   - **実装ステータス**: **NOT IMPLEMENTED**
+   - **未実装コンポーネント維持**: Parallel Evaluation, Hall of Fame は未実装（NOT IMPLEMENTED）のまま維持。
+8. **Evolution Loop (BP-SIM-AI-EVOLUTION-LOOP-V1)**:
+   - **設計ステータス**: **FORMAL ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2, Independent Review, `tools/simulator/docs/ai-evolution-loop-design-v1.md`, SHA: `18bf6813bafb55be600f65d16bccd300528fbf27`)
+   - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/EvolutionLoop.ts`, `tools/simulator/src/domain/ai/EvolutionLoopTypes.ts`, `tools/simulator/src/tests/ai/evolutionLoop.test.ts`, 48 Canonical Tests)
    - **マルチ世代実機エビデンス**: **NOT EXECUTED**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。
 9. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
