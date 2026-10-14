@@ -1,7 +1,8 @@
 # BlackPoker Simulator AI Evolution Loop V1 設計仕様書
 
-作業ID: `BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1`  
-ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**  
+作業ID: `BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R1`
+ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**
+改訂版数: V1-R1
 作成日時: 2026-10-14  
 対象ブランチ: `BlackPoker/issue551-core-flow`  
 
@@ -14,8 +15,20 @@
 
 現時点のステータスは **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)** であり、独立レビューの完了まで Formal Accepted を宣言しない。
 
-### 1.2 本作業のスコープ境界
-- **作業種別**: **DESIGN ONLY**
+### 1.2 本改訂（V1-R1）の目的
+前版 V1 の独立レビューにおいて指摘された以下の課題を是正する：
+1. **プロセス遵守（Process Compliance）の厳格化**:
+   - Host Node/npm/npx の完全排除（Docker コンテナ内のみ許可）。
+   - 禁止内部パス（`.gemini/**`, `antigravity/brain/**`, `transcript*.jsonl` 等）への意図的アクセスの完全根絶。
+   - PowerShell による書き込み・スクリプト生成の禁止（参照専用の徹底）。
+   - 事実と乖離のない正確なコンプライアンス報告。
+2. **母集団規模契約（Population Size Contract）の明確化**:
+   - `EvolutionLoop` 自身は母集団サイズ（$N$）を固定・強制せず、Caller から渡された `runnerConfig` をそのまま各世代へ伝達する。
+   - 世代交代に伴う母集団サイズの変化（例: $g0: N=6 \rightarrow g1: N=100$）をアーキテクチャ上合法とする。
+   - 将来の Controlled Evidence（$N=6$, 3世代, 90試合）において、母集団サイズ $N=6$ が維持される根拠（Caller が `builderConfig.populationSize = 6` を明示すること）を契約上確定する。
+
+### 1.3 本作業のスコープ境界
+- **作業種別**: **DESIGN FOLLOW-UP ONLY**
 - **Production 実装の禁止**: 本フェーズにおいて `EvolutionLoop.ts`, `EvolutionLoopTypes.ts` 等のソースコードの作成・変更は行わない。
 - **テストコード作成の禁止**: `src/tests/ai/evolutionLoop.test.ts` 等の作成は行わない。
 - **実対戦実行の禁止**: 複数世代実対戦、ベンチマーク実行、スケーリング検証は行わない。
@@ -36,8 +49,9 @@
 | **Generation Runner Production V1** | **FORMAL ACCEPTED** | `2587017da393bd9c96172d5772ea5e0be3ebdb59` | `GenerationRunner.ts`, `GenerationRunnerTypes.ts`, Canonical 60 Tests |
 | **Controlled One-Generation Evidence V1-R1** | **FORMAL ACCEPTED** | `269017fcd0cdc3ce55e2c3021f8a06c4fd9e49c7` | Official light-entry16, $N=6$, $R=1$, 30 matches, $g=0 \rightarrow g=1$ 実機完走 |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `0146f4ac6e071d8fd47f02e8f62f9dc37964ed30` | Official light-entry16, $N=100$, $R=1$, 9,900 matches, 19.93 min, 8.28 matches/sec, 780,786 decisions, 9,900 COMPLETED, $g=0 \rightarrow g=1$ 単独実機完走 |
+| **Evolution Loop Design V1** | **SUPERSEDED BY R1** | `9809bb2bb3852d376be639b0a72f66dce2fd85ba` | 本仕様書により置換 |
 
-Expected Start HEAD: `0146f4ac6e071d8fd47f02e8f62f9dc37964ed30`
+Expected Start HEAD: `9809bb2bb3852d376be639b0a72f66dce2fd85ba`
 
 ---
 
@@ -49,10 +63,10 @@ Evolution Loop は、1世代実行プリミティブである `GenerationRunner`
 ```text
 +-----------------------------------------------------------------------------------+
 |                            EvolutionLoop (Orchestrator)                           |
-|  - Loop Config Validation (generationCount >= 1, campaignSeed)                    |
+|  - Loop Config Validation (generationCount >= 1, campaignSeed, SafeInteger)       |
 |  - Generation Seed Schedule (deriveSeed(campaignSeed, streamKey))                 |
 |  - Sequential Generation Invocation (g -> g+1 -> g+2 ...)                         |
-|  - Generation Chain Integrity Verification                                        |
+|  - Generation Chain Integrity Verification (generation, buildResult, population)  |
 |  - Immediate Logical Stop on REEVALUATION_REQUIRED                                |
 |  - Deterministic History Assembly (No full intermediate Population duplication)   |
 |  - Runtime Metrics Sidecar Separation                                             |
@@ -133,7 +147,7 @@ export interface RunEvolutionLoopParams {
 
 ---
 
-## 5. Configuration
+## 5. Configuration & Population Size Semantics
 
 ### 5.1 generationCount のセマンティクス
 `generationCount` は **「実行したい世代遷移（Transition）数」** と定義する。
@@ -149,15 +163,24 @@ export interface RunEvolutionLoopParams {
 - 目標世代の算出公式:
   $$\text{targetGeneration} = \text{initialPopulation.generation} + \text{generationCount}$$
 
-### 5.2 generationCount のバリデーション
+### 5.2 generationCount のバリデーション & 安全な整数演算
 - **許容型**: 有限な正の整数（`typeof v === "number" && Number.isFinite(v) && Number.isInteger(v) && v >= 1`）
+- **安全な整数範囲の検証**:
+  JavaScript の `number` 型における整数オーバーフローを防止するため、目標世代番号が安全な整数の範囲内であることを検証する：
+  ```typescript
+  if (!Number.isSafeInteger(initialPopulation.generation + config.generationCount)) {
+    throw new EvolutionLoopConfigurationError(
+      `targetGeneration (${initialPopulation.generation + config.generationCount}) exceeds Number.MAX_SAFE_INTEGER`
+    );
+  }
+  ```
 - **拒絶対象**:
   - `0`: 拒絶（遷移なしのループ実行は無効）
   - 負の整数（`-1`, `-5` 等）: 拒絶
   - 小数（`1.5`, `2.1` 等）: 拒絶
   - `NaN`, `Infinity`, `-Infinity`: 拒絶
   - 非数値型（`string`, `null`, `undefined` 等）: 拒絶
-- **アーキテクチャ上の上限**: 100 や 1000 といった恣意的な上限値はアーキテクチャ仕様として固定せず、計算機資源と利用者の判断に委ねる。
+- **アーキテクチャ上の上限**: 100 や 1000 といった恣意的な上限値は課さない。
 
 ### 5.3 campaignSeed のセマンティクスとバリデーション
 `campaignSeed` は進化ループ全体のルート基準シードである。
@@ -172,7 +195,30 @@ export interface RunEvolutionLoopParams {
   - `NaN`, `Infinity`, `-Infinity`: 拒絶
   - 非数値型: 拒絶
 
-### 5.4 世代間の環境・設定の固定
+### 5.4 母集団規模セマンティクス（Population Size Contract）
+Evolution Loop Core における母集団規模の取り扱い方針を以下のように厳格に定義する：
+
+1. **EvolutionLoop によるサイズ不変性の非強制**:
+   - `EvolutionLoop` 自身は、母集団サイズ（$N$）が世代間で一定であることを強制しない。
+   - `initialPopulation.entries.length` と次世代の母集団サイズを一致させるために、`EvolutionLoop` が `runnerConfig` や `builderConfig` を自動的に書き換えることは厳格に禁止する。
+2. **GenerationRunner / GenerationBuilder 契約の尊重**:
+   - 母集団サイズの決定および変更は、`GenerationRunner` および `GenerationBuilder` の既存契約（`builderConfig.populationSize`）に従う。
+   - `EvolutionLoop` は、Caller から渡された `runnerConfig` をそのまま全世代の `GenerationRunner.run` へ渡す。
+3. **母集団サイズ変更の合法性（Variable Population Size is Legal）**:
+   - 例えば、初期母集団が $N=6$ であり、`runnerConfig.builderConfig.populationSize = 100` が指定されていた場合：
+     - 第 0 世代の対戦評価: $N=6$（30 試合）
+     - 第 0 世代 $\rightarrow$ 第 1 世代の GenerationBuilder: $N=100$ を生成
+     - 第 1 世代の対戦評価: $N=100$（9,900 試合）
+     という遷移はアーキテクチャ上完全に合法である。
+   - これはエラーではなく、設定された契約に忠実な実行結果として受容される。
+4. **暗黙のサイズ一定仮定の排除**:
+   - `EvolutionLoop` は `currentPopulation.entries.length === initialPopulation.entries.length` をループ完全性（Integrity）の条件としてはならない。
+5. **母集団の不変性（No Size Mutation by Loop）**:
+   - `EvolutionLoop` は母集団エントリの追加、削除、クローン再構成、水増し、切り捨て（truncate）を行わない。直前の Runner が生成した `nextPopulation` をそのまま次世代の入力として引き渡す。
+6. **サイズ一定を望む場合の Caller 責務**:
+   - キャンペーンにおいて全世代の母集団サイズを一定（例: $N=6$）に保ちたい場合、**Caller が `runnerConfig.builderConfig.populationSize = 6` を明示的に指定する責務を持つ**。
+
+### 5.5 世代間の環境・設定の固定
 Evolution Loop V1 において、以下の設定は全世代にわたって完全に固定される：
 - **`environment`**: `environmentRef`, `regulationId`, `frameId`, `rulePackageVersion` は全世代不変。
 - **`sessionFactory`**: ループ開始時に渡された同一ファクトリを全世代の Runner へ引き渡す。
@@ -262,6 +308,12 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
   const requestedTransitions = params.config.generationCount;
   const targetGeneration = initialGeneration + requestedTransitions;
 
+  if (!Number.isSafeInteger(targetGeneration)) {
+    throw new EvolutionLoopConfigurationError(
+      `targetGeneration (${targetGeneration}) exceeds Number.MAX_SAFE_INTEGER`
+    );
+  }
+
   const manifest: EvolutionLoopManifest = {
     initialGeneration,
     requestedTransitions,
@@ -283,6 +335,7 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
     );
 
     // Runner 呼出 (One-Generation Primitive)
+    // runnerConfig は caller 指定のまま無改変で渡す
     const runnerResult = GenerationRunner.run({
       population: currentPopulation,
       generationSeed,
@@ -362,7 +415,7 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
       },
     });
 
-    // 次世代母集団へ更新
+    // 次世代母集団へ更新 (サイズ変更があってもそのまま継承)
     currentPopulation = logicalResult.nextPopulation;
   }
 
@@ -402,6 +455,7 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
 2. 反復回数 $R$（`pairRepetitions`）や最大手数（`maxDecisionsPerMatch`）を自動的に増やして再実行する
 3. 適応度評価の閾値（`minimumCompletedMatches`, `minimumCompletionRate` 等）を自動的に緩和する
 4. エリート個体を水増ししたり、不適格個体を繰り上げて無理に次世代を生成する
+5. 母集団サイズ（`populationSize`）を勝手に変更して救済する
 
 ### 9.3 完了遷移数と最終母集団の保証
 - **`completedTransitions`**: 正常に `ADVANCED` を達成した先行ステップ数を正確に記録する（例: $g0 \rightarrow g1$ 成功後に $g1$ で停止した場合、`completedTransitions = 1`）。
@@ -431,7 +485,7 @@ Error
 1. **`EvolutionLoopConfigurationError`**:
    - `generationCount` が正の整数でない（0, 負数, 小数, NaN, Infinity）。
    - `campaignSeed` が有限な整数でない（小数, NaN, Infinity）。
-   - 目標世代の整数計算オーバーフロー等の静的不備。
+   - `initialGeneration + generationCount` が安全な整数の範囲外（`!Number.isSafeInteger`）。
 2. **`EvolutionLoopIntegrityError`**:
    - `GenerationRunner` が返した結果が世代チェーン契約と矛盾している場合（後述の Chain Integrity 参照）。
 3. **`GenerationRunnerError` の透過伝搬**:
@@ -455,6 +509,10 @@ Error
    $$\text{runnerResult.logicalResult.buildResult.sourceGeneration} === \text{sourceGeneration}$$
 5. **ADVANCED 時の Builder Target Generation 照合**:
    $$\text{runnerResult.logicalResult.buildResult.targetGeneration} === \text{sourceGeneration} + 1$$
+6. **ADVANCED 時の Builder Population Size 照合**:
+   $$\text{runnerResult.logicalResult.buildResult.populationSize} === \text{runnerResult.logicalResult.nextPopulation.entries.length}$$
+7. **ADVANCED 時の Population オブジェクト同一性照合**:
+   $$\text{runnerResult.logicalResult.buildResult.population} === \text{runnerResult.logicalResult.nextPopulation}$$
 
 ---
 
@@ -672,7 +730,7 @@ export interface EvolutionLoopExecutionResult {
 
 ## 18. Canonical 48 Tests
 
-将来の Production 実装（`BP-SIM-AI-EVOLUTION-LOOP-V1`）において実装すべきカノニカルな 48 のテストケースを以下に定義する。テスト番号は完全に固定する。
+将来の Production 実装（`BP-SIM-AI-EVOLUTION-LOOP-V1`）において実装すべきカノニカルな 48 のテストケースを以下に定義する。テスト件数は 48 件を厳格に維持する。
 
 ### Group A — Config & Seed Validation (Tests 1–10)
 - **Test 1**: `generationCount = 1` が正常に受容されること。
@@ -682,7 +740,7 @@ export interface EvolutionLoopExecutionResult {
 - **Test 5**: `campaignSeed = 0` が合法なシードとして受容されること。
 - **Test 6**: `campaignSeed` が負の整数の場合、合法なシードとして受容されること。
 - **Test 7**: `campaignSeed` が小数、`NaN`, `Infinity` の場合、`EvolutionLoopConfigurationError` で拒絶されること。
-- **Test 8**: `targetGeneration` が `initialGeneration + generationCount` と等しいこと。
+- **Test 8**: `targetGeneration` が `initialGeneration + generationCount` と等しく、かつ `!Number.isSafeInteger` の場合に `EvolutionLoopConfigurationError` で拒絶されること。
 - **Test 9**: Canonical な Generation Stream Key（`evolution-loop-generation-v1-${g}`）が正確に生成されること。
 - **Test 10**: Canonical Seed Vectors（42, 0, -1）の導出結果が設計書第7章の値と完全一致すること。
 
@@ -695,14 +753,14 @@ export interface EvolutionLoopExecutionResult {
 - **Test 16**: Loop Seed Schedule Identity（`evolution-loop-generation-v1:campaign-seed=${campaignSeed}`）が正確であること。
 - **Test 17**: シード値の一意性に関する過剰な前提（衝突が絶対に起きないという仮定）がコード上に埋め込まれていないこと。
 
-### Group C — Successful Multi-Generation Transition (Tests 18–27)
+### Group C — Successful Multi-Generation Transition & Population Contract (Tests 18–27)
 - **Test 18**: `generationCount = 1` の場合、`GenerationRunner.run` が正確に1回呼び出されること。
 - **Test 19**: `generationCount = 3` の場合、`GenerationRunner.run` が正確に3回順次呼び出されること。
 - **Test 20**: 各ステップの Runner 呼出において、`population.generation` が $g, g+1, g+2$ と順次進むこと。
 - **Test 21**: 全ての Runner 呼出に対して同一の `environment` コンテキストが渡されること。
 - **Test 22**: 全ての Runner 呼出に対して同一の `sessionFactory` が渡されること。
-- **Test 23**: 全ての Runner 呼出に対して同一の `runnerConfig` が渡されること。
-- **Test 24**: 前世代の `nextPopulation` がそのまま次世代の入力 `population` として渡されること。
+- **Test 23**: 全ての Runner 呼出に対して同一の `runnerConfig` が無改変で渡され、`EvolutionLoop` が `runnerConfig.builderConfig.populationSize` を自動変更・上書き・補完しないこと。
+- **Test 24**: 前世代の `nextPopulation` がそのまま次世代の入力 `population` として直接渡され、Builder 設定により母集団サイズ $N$ が変化した場合（例: 初期 $N=2$ から Builder target $N=3$ への遷移）であっても、生成された $N=3$ の `nextPopulation` がそのまま次の世代の入力となり、`EvolutionLoop` が初期サイズ $N=2$ へ戻したり truncate/水増ししたりしないこと。
 - **Test 25**: `COMPLETED` 結果の `finalPopulation.generation` が `targetGeneration` と厳密に一致すること。
 - **Test 26**: `generations` 履歴配列の長さが `generationCount` と厳密に一致すること。
 - **Test 27**: 渡された `initialPopulation` オブジェクトが変更されず不変（Immutable）を維持していること。
@@ -714,13 +772,13 @@ export interface EvolutionLoopExecutionResult {
 - **Test 31**: `REEVALUATION_REQUIRED` 発生時に別シードでの再試行が行われないこと。
 - **Test 32**: 停止後の後続世代に対して `GenerationRunner.run` が呼び出されないこと。
 - **Test 33**: 停止理由（`reason`）および選考準備状況（`readiness`）が結果オブジェクトへ正確に転記されること。
-- **Test 34**: 停止時の `finalPopulation` が直近に成功した未評価母集団と一致すること。
+- **Test 34**: 停止時の `finalPopulation` が直近に成功した未評価母集団（または初期母集団）と一致すること。
 
 ### Group E — Integrity Verification & Error Propagation (Tests 35–40)
 - **Test 35**: Runner 結果の `manifest.generation` が `sourceGeneration` と不一致の場合、`EvolutionLoopIntegrityError` が発生すること。
 - **Test 36**: Runner 結果の `fitnessSnapshot.generation` が `sourceGeneration` と不一致の場合、`EvolutionLoopIntegrityError` が発生すること。
 - **Test 37**: `ADVANCED` なのに `nextPopulation.generation !== sourceGeneration + 1` の場合、`EvolutionLoopIntegrityError` が発生すること。
-- **Test 38**: `buildResult` の世代番号が不整合な場合、`EvolutionLoopIntegrityError` が発生すること。
+- **Test 38**: `buildResult` の世代番号が不整合、または `buildResult.populationSize !== nextPopulation.entries.length` の場合、`EvolutionLoopIntegrityError` が発生すること。
 - **Test 39**: Runner が `GenerationRunnerExecutionError` を throw した場合、そのまま透過して上位へ伝搬すること。
 - **Test 40**: Runner が `GenerationRunnerConfigurationError` または `GenerationRunnerIntegrityError` を throw した場合、そのまま透過して上位へ伝搬すること。
 
@@ -736,18 +794,32 @@ export interface EvolutionLoopExecutionResult {
 
 ---
 
-## 19. Future N=6 Controlled Evidence
+## 19. Future N=6 Controlled Evidence Specification
 
 本設計が Formal Accepted となり、Production 実装およびテストが完了した後の最初の実機エビデンス計画を以下のように定義する（**現フェーズでは実行しない**）。
 
 - **環境規約**: `light-entry16`
-- **母集団規模**: $N = 6$
+- **初期母集団規模**: $N = 6$
 - **初期世代**: $g = 0$
 - **要求世代遷移数**: `generationCount = 3`（目標世代 $g = 3$）
 - **基準シード**: `campaignSeed = 42`
 - **対戦スケジュール**: Double Round Robin ($R = 1$)
 - **最大手数**: `maxDecisionsPerMatch = 500`
-- **実行方式**: Sequential V1
+- **Runner Config 指定**:
+  ```typescript
+  runnerConfig: {
+    pairRepetitions: 1,
+    maxDecisionsPerMatch: 500,
+    builderConfig: {
+      populationSize: 6,
+    },
+  }
+  ```
+  ※ `GenerationRunner` の `resolveCanonicalBuilderConfig` 契約により、トップレベル partial で `populationSize: 6` を指定することで、デフォルトの選択設定（$k=3, E=1$）および遺伝操作設定を維持したまま、次世代母集団サイズを 6 に固定する。
+- **対戦数および母集団規模の成立根拠（Conditional Wording）**:
+  「本エビデンスでは Caller が `runnerConfig.builderConfig.populationSize = 6` を明示的に固定するため、全世代が `ADVANCED` した場合、各世代の評価対象母集団サイズは $N=6$ を維持し、1世代あたり 30 試合（$6 \times 5 \times 1 = 30$）、3 遷移で合計 90 試合となる」
+- **初期母集団 DNA（Initial DNA）**:
+  本エビデンスの目的は強度評価ではなくループセマンティクス（決定論性、整合性、遷移制御）の実機実証であるため、`DecisionDNACodec.createZeroDecisionDNA` 等を用いた決定論的なベースライン個体群（deterministic valid baseline population）を使用する。
 - **期待値（全世代 ADVANCED 時）**:
   - `GenerationRunner` 呼出回数: 3 回
   - 1世代あたりの対戦数: 30 試合
