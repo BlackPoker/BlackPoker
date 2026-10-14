@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R4`
-更新日時: 2026-10-13 22:58 JST
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-V1`
+更新日時: 2026-10-14 00:50 JST
 
 ---
 
@@ -70,7 +70,7 @@
 | **Genetic Operators V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/GeneticOperators.ts`, `GeneticCrossover.ts`, `GeneticMutation.ts`, `ParentPairAssembler.ts` | `src/tests/ai/geneticOperators.test.ts` | Block-Segmented Uniform Crossover, Deterministic Normal Mutation, Self-Mating Retry |
 | **Runtime Match Telemetry V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/cli/support/RuntimeArtifactWriter.ts`, `BatchSimulationRunner.ts` | `src/tests/simulation/runtimeTelemetry.test.ts`, `src/tests/cli/runtimeArtifactWriter.test.ts` | Match/Batch wall-clock timing, Fail-Closed 統計, Benchmark Recipe |
 | **Generation Builder / Next Generation Assembly** | **FORMAL ACCEPTED** | `src/engine/ai/GenerationBuilder.ts`, `docs/ai-generation-builder-design-v1.md` | `src/tests/ai/generationBuilder.test.ts` | 次世代母集団構築境界契約 (Generation g -> g+1) |
-| **Generation Runner** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-generation-runner-design-v1.md` | - | 1世代自己対戦評価・適応度集計・次世代遷移 (Double Round Robin V1) |
+| **Generation Runner** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/GenerationRunner.ts`, `src/domain/ai/GenerationRunnerTypes.ts` | `src/tests/ai/generationRunner.test.ts` (60 Canonical Tests) | 1世代自己対戦評価・適応度集計・次世代遷移 (Double Round Robin V1) |
 | **Evolution Loop** | **NOT IMPLEMENTED / FUTURE** | - | - | 複数世代進化ループ (将来) |
 | **Hall of Fame** | **MISSING / FUTURE** | - | - | Phase 4.0 で策定 |
 
@@ -457,10 +457,10 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **dnaRef 規約**: Canonical Logical Ref (`genome:<genomeId>`) のみに完全固定。Local Logical DNA Reference であり、Global Artifact ID や Content Address ではない。
    - **決定論性保証**: Supported Deterministic Runtime 境界（同一 Node.js LTS、同一実装バージョン、同一入力、同一設定、同一シード、同一 Stream Key）において bit-exact / Deep Equal を保証。異種 OS / CPU アーキテクチャ間は Cross-Platform Conformance Target として実測検証。
    - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
-7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-DESIGN-V1-R4)**:
-   - **設計ステータス**: **DESIGNED / PENDING INDEPENDENT REVIEW** (`tools/simulator/docs/ai-generation-runner-design-v1.md`)
-   - **実装ステータス**: **NOT IMPLEMENTED / FUTURE**
-   - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。R4 では Canonical Error Taxonomy を確定し、`GenerationRunnerExecutionError` を実在試合実行専用に限定、Builder Contract Drift（Preflight READY 後の予期せぬ rejection / 例外）を `GenerationRunnerIntegrityError` へ統一し、ダミー試合診断の捏造を完全排除。
+7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-V1)**:
+   - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-generation-runner-design-v1.md`, SHA: `c45478bd23822689718f4c82ccb6befb8731a873`)
+   - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/GenerationRunner.ts`, `tools/simulator/src/domain/ai/GenerationRunnerTypes.ts`, `tools/simulator/src/tests/ai/generationRunner.test.ts`)
+   - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。Canonical Error Taxonomy（Configuration / Integrity / ExecutionError）、実在試合専用フェーズ診断（SESSION_FACTORY / POLICY_FACTORY / RUNNER）、Builder Contract Drift の `GenerationRunnerIntegrityError` 統一、Preflight Fail-Fast 検証、および結果モデルの論理／実行時メトリクス分離を完全実装。
    - **未実装コンポーネント維持**: Evolution Loop, Hall of Fame は未実装（NOT IMPLEMENTED / FUTURE）のまま維持。
 8. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 9. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
