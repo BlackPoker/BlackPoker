@@ -1,10 +1,10 @@
 # BlackPoker Simulator AI Evolution Loop V1 設計仕様書
 
-作業ID: `BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R1`
+作業ID: `BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2`
 ステータス: **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)**
-改訂版数: V1-R1
-作成日時: 2026-10-14  
-対象ブランチ: `BlackPoker/issue551-core-flow`  
+改訂版数: V1-R2
+作成日時: 2026-10-14
+対象ブランチ: `BlackPoker/issue551-core-flow`
 
 ---
 
@@ -15,17 +15,20 @@
 
 現時点のステータスは **PROPOSED / DESIGNED (PENDING INDEPENDENT REVIEW)** であり、独立レビューの完了まで Formal Accepted を宣言しない。
 
-### 1.2 本改訂（V1-R1）の目的
-前版 V1 の独立レビューにおいて指摘された以下の課題を是正する：
-1. **プロセス遵守（Process Compliance）の厳格化**:
-   - Host Node/npm/npx の完全排除（Docker コンテナ内のみ許可）。
-   - 禁止内部パス（`.gemini/**`, `antigravity/brain/**`, `transcript*.jsonl` 等）への意図的アクセスの完全根絶。
-   - PowerShell による書き込み・スクリプト生成の禁止（参照専用の徹底）。
-   - 事実と乖離のない正確なコンプライアンス報告。
-2. **母集団規模契約（Population Size Contract）の明確化**:
-   - `EvolutionLoop` 自身は母集団サイズ（$N$）を固定・強制せず、Caller から渡された `runnerConfig` をそのまま各世代へ伝達する。
-   - 世代交代に伴う母集団サイズの変化（例: $g0: N=6 \rightarrow g1: N=100$）をアーキテクチャ上合法とする。
-   - 将来の Controlled Evidence（$N=6$, 3世代, 90試合）において、母集団サイズ $N=6$ が維持される根拠（Caller が `builderConfig.populationSize = 6` を明示すること）を契約上確定する。
+### 1.2 本改訂（V1-R2）の目的
+前版 V1-R1 の独立レビューにおいて指摘された過剰な実装依存を解消する：
+1. **オブジェクト参照同一性（Reference Equality）への依存の削除**:
+   - 前版で要求していた `buildResult.population === nextPopulation` という JavaScript オブジェクト参照同一性チェックを Chain Integrity 条件から削除する。
+   - 現在の `GenerationRunner` の内部実装では `nextPopulation: buildResult.population` と同一参照を返しているが、これは Public Logical Contract として型定義上固定されたものではなく、実装詳細（Implementation Detail）に過ぎない。
+   - 将来 `GenerationRunner` が不変性保護やキャッシュ分離等の目的でディープクローンされた意味的等価オブジェクト（semantic equivalent distinct object）を返した場合でも、Public Logical Contract が満たされている限り正常に動作を継続できるよう、不要な密結合を排除する。
+2. **代替としての全ゲノム Deep Equal の非導入**:
+   - 参照同一性を削除した代替として、`EvolutionLoop` 内で `buildResult.population` と `nextPopulation` の全 DNA 重みやエントリを Deep Equal 検査するような過剰な責務拡張は行わない。
+   - `GenerationRunner` が所有する単一世代の論理契約を信頼し、`EvolutionLoop` は世代間のチェーン整合性（世代番号、母集団サイズの一致、`nextPopulation` の引き渡し）の検証に専念する。
+3. **前版までの確定事項の完全維持**:
+   - プロセス遵守（Host Node/npm 禁止、禁止内部パス不使用、PowerShell 書き込み禁止）。
+   - 母集団規模契約（`EvolutionLoop` は $N$ 一定を強制せず、`runnerConfig` を透過伝達し、Variable $N$ を合法とする）。
+   - シードスケジュール体系（直接導出、前世代シード非連鎖、カノニカルテストベクトル）。
+   - カノニカル 48 テストの構成維持（Test 38 の文言を明瞭化）。
 
 ### 1.3 本作業のスコープ境界
 - **作業種別**: **DESIGN FOLLOW-UP ONLY**
@@ -49,9 +52,9 @@
 | **Generation Runner Production V1** | **FORMAL ACCEPTED** | `2587017da393bd9c96172d5772ea5e0be3ebdb59` | `GenerationRunner.ts`, `GenerationRunnerTypes.ts`, Canonical 60 Tests |
 | **Controlled One-Generation Evidence V1-R1** | **FORMAL ACCEPTED** | `269017fcd0cdc3ce55e2c3021f8a06c4fd9e49c7` | Official light-entry16, $N=6$, $R=1$, 30 matches, $g=0 \rightarrow g=1$ 実機完走 |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `0146f4ac6e071d8fd47f02e8f62f9dc37964ed30` | Official light-entry16, $N=100$, $R=1$, 9,900 matches, 19.93 min, 8.28 matches/sec, 780,786 decisions, 9,900 COMPLETED, $g=0 \rightarrow g=1$ 単独実機完走 |
-| **Evolution Loop Design V1** | **SUPERSEDED BY R1** | `9809bb2bb3852d376be639b0a72f66dce2fd85ba` | 本仕様書により置換 |
+| **Evolution Loop Design V1-R1** | **SUPERSEDED BY R2** | `a57ca180d733b8352cca8d7aad29dd17a074a8f2` | 本仕様書により置換 |
 
-Expected Start HEAD: `9809bb2bb3852d376be639b0a72f66dce2fd85ba`
+Expected Start HEAD: `a57ca180d733b8352cca8d7aad29dd17a074a8f2`
 
 ---
 
@@ -214,7 +217,7 @@ Evolution Loop Core における母集団規模の取り扱い方針を以下の
 4. **暗黙のサイズ一定仮定の排除**:
    - `EvolutionLoop` は `currentPopulation.entries.length === initialPopulation.entries.length` をループ完全性（Integrity）の条件としてはならない。
 5. **母集団の不変性（No Size Mutation by Loop）**:
-   - `EvolutionLoop` は母集団エントリの追加、削除、クローン再構成、水増し、切り捨て（truncate）を行わない。直前の Runner が生成した `nextPopulation` をそのまま次世代の入力として引き渡す。
+   - `EvolutionLoop` は母集団エントリの追加、削除、クローン再構成、水増し、切り捨て（truncate）を行わない。直前の Runner が生成した `logicalResult.nextPopulation` をそのまま次世代の入力として引き渡す。
 6. **サイズ一定を望む場合の Caller 責務**:
    - キャンペーンにおいて全世代の母集団サイズを一定（例: $N=6$）に保ちたい場合、**Caller が `runnerConfig.builderConfig.populationSize = 6` を明示的に指定する責務を持つ**。
 
@@ -346,7 +349,7 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
 
     const { logicalResult, runtimeMetrics } = runnerResult;
 
-    // 世代チェーン整合性の検証
+    // 世代チェーン整合性の検証 (Public Contract レベルの検証)
     verifyGenerationChainIntegrity(sourceGeneration, logicalResult);
 
     // 実行時レコードの記録
@@ -415,7 +418,7 @@ function runEvolutionLoop(params: RunEvolutionLoopParams): EvolutionLoopExecutio
       },
     });
 
-    // 次世代母集団へ更新 (サイズ変更があってもそのまま継承)
+    // 次世代母集団へ更新 (Authoritative Source: logicalResult.nextPopulation)
     currentPopulation = logicalResult.nextPopulation;
   }
 
@@ -511,8 +514,18 @@ Error
    $$\text{runnerResult.logicalResult.buildResult.targetGeneration} === \text{sourceGeneration} + 1$$
 6. **ADVANCED 時の Builder Population Size 照合**:
    $$\text{runnerResult.logicalResult.buildResult.populationSize} === \text{runnerResult.logicalResult.nextPopulation.entries.length}$$
-7. **ADVANCED 時の Population オブジェクト同一性照合**:
-   $$\text{runnerResult.logicalResult.buildResult.population} === \text{runnerResult.logicalResult.nextPopulation}$$
+
+### 11.2 オブジェクト参照同一性（Reference Equality）への非依存
+`EvolutionLoop` は、`GenerationRunner` の内部実装詳細であるオブジェクト同一性（Pointer Equality / Reference Identity）に依存しない。
+
+- **禁止事項**:
+  - `buildResult.population === nextPopulation`
+  - `Object.is(buildResult.population, nextPopulation)`
+  などの参照比較を Chain Integrity 条件としてはならない。
+- **設計根拠**:
+  `GenerationRunnerAdvancedResult` 型定義における Public Logical Contract は `nextPopulation: PopulationSnapshot` および `buildResult: GenerationBuildResult` の双方が存在することを保証しているが、両者が同一メモリアドレスを指していることまでは要求していない。将来 `GenerationRunner` がクローンや防御的コピーを返した場合でも、世代番号（`generation`）および母集団サイズ（`populationSize === entries.length`）が合致していれば、進化ループは正常に成立する。
+- **過剰な Deep Equal の非導入**:
+  参照比較を削除した代替として、全ゲノム DNA の Deep Equal 検査を `EvolutionLoop` に導入しない。単一世代の完全性は `GenerationRunner` の責務境界において保証されており、`EvolutionLoop` は世代間チェーンの論理契約（世代番号の連続性とサイズ整合性）のみを検証する。
 
 ---
 
@@ -778,7 +791,7 @@ export interface EvolutionLoopExecutionResult {
 - **Test 35**: Runner 結果の `manifest.generation` が `sourceGeneration` と不一致の場合、`EvolutionLoopIntegrityError` が発生すること。
 - **Test 36**: Runner 結果の `fitnessSnapshot.generation` が `sourceGeneration` と不一致の場合、`EvolutionLoopIntegrityError` が発生すること。
 - **Test 37**: `ADVANCED` なのに `nextPopulation.generation !== sourceGeneration + 1` の場合、`EvolutionLoopIntegrityError` が発生すること。
-- **Test 38**: `buildResult` の世代番号が不整合、または `buildResult.populationSize !== nextPopulation.entries.length` の場合、`EvolutionLoopIntegrityError` が発生すること。
+- **Test 38**: ADVANCED 結果について、`buildResult.sourceGeneration`, `buildResult.targetGeneration`, `buildResult.populationSize` の整合性を検証し、不整合時に `EvolutionLoopIntegrityError` が発生すること。ただし `buildResult.population` と `nextPopulation` のオブジェクト参照同一性（Reference Equality）は要求せず、意味的に同等な別オブジェクト参照であっても Public Contract（世代番号、サイズ等）が成立していれば正常受容すること。
 - **Test 39**: Runner が `GenerationRunnerExecutionError` を throw した場合、そのまま透過して上位へ伝搬すること。
 - **Test 40**: Runner が `GenerationRunnerConfigurationError` または `GenerationRunnerIntegrityError` を throw した場合、そのまま透過して上位へ伝搬すること。
 
