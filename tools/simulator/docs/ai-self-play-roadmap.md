@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1`
-更新日時: 2026-10-15 01:45 JST
+作業ID: `BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1`
+更新日時: 2026-10-15 02:20 JST
 
 ---
 
@@ -74,7 +74,8 @@
 | **Controlled One-Generation Evidence V1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, 30試合実機検証 (g=0 -> g=1) |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md` | - | Official light-entry16, N=100, R=1, 9,900試合実機完走 (g=0 -> g=1) |
 | **Evolution Loop** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
-| **Controlled Multi-Generation Evidence V1** | **BLOCKED (REEVALUATION_REQUIRED at g=1)** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
+| **Controlled Multi-Generation Evidence V1** | **BLOCKED / NOT ACCEPTED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
+| **Evolution g1 Incomplete Analysis V1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
@@ -467,10 +468,11 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **N=100 Scale Evidence**: **FORMAL ACCEPTED** (BP-SIM-AI-GENERATION-RUNNER-SCALE-EVIDENCE-V1-R1, Independent Review, `tools/simulator/src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md`, Official `light-entry16`, N=100, R=1, 9,900試合実機完走, g=0 -> g=1, SHA: `0146f4ac6e071d8fd47f02e8f62f9dc37964ed30`)
    - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。Canonical Error Taxonomy（Configuration / Integrity / ExecutionError）、実在試合専用フェーズ診断（SESSION_FACTORY / POLICY_FACTORY / RUNNER）、Builder Contract Drift の `GenerationRunnerIntegrityError` 統一、Preflight Fail-Fast 検証、および結果モデルの論理／実行時メトリクス分離を完全実装。
    - **未実装コンポーネント維持**: Parallel Evaluation, Hall of Fame は未実装（NOT IMPLEMENTED）のまま維持。
-8. **Evolution Loop (BP-SIM-AI-EVOLUTION-LOOP-V1 / BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1)**:
+8. **Evolution Loop (BP-SIM-AI-EVOLUTION-LOOP-V1 / BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1 / BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1)**:
    - **設計ステータス**: **FORMAL ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-DESIGN-V1-R2, Independent Review, `tools/simulator/docs/ai-evolution-loop-design-v1.md`, SHA: `18bf6813bafb55be600f65d16bccd300528fbf27`)
    - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/EvolutionLoop.ts`, `tools/simulator/src/domain/ai/EvolutionLoopTypes.ts`, `tools/simulator/src/tests/ai/evolutionLoop.test.ts`, 48 Canonical Tests)
-   - **Controlled Multi-Generation Evidence**: **BLOCKED (REEVALUATION_REQUIRED at g=1)** (BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1, `tools/simulator/src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, g=0 30試合完走・世代交代成功, g=1 28/30試合未完了による有効個体不足)
+   - **Controlled Multi-Generation Evidence**: **BLOCKED / NOT ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1, `tools/simulator/src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, g=0 30試合完走・世代交代成功, g=1 28/30試合未完了による有効個体不足)
+   - **Evolution g1 Incomplete Analysis V1**: **ANALYZED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1, `tools/simulator/src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md`, Generation 1 28/30未完了試合の決定論的分析, PROGRESSING_LONG_MATCH / Turn 1 PASS過剰選好の特定)
    - **Parallel Evaluation**: **NOT IMPLEMENTED**
    - **Hall of Fame**: **NOT IMPLEMENTED**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。
