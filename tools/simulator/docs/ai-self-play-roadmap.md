@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1`
-更新日時: 2026-10-14 16:00 JST
+作業ID: `BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1-R1`
+更新日時: 2026-10-14 16:25 JST
 
 ---
 
@@ -458,10 +458,10 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **dnaRef 規約**: Canonical Logical Ref (`genome:<genomeId>`) のみに完全固定。Local Logical DNA Reference であり、Global Artifact ID や Content Address ではない。
    - **決定論性保証**: Supported Deterministic Runtime 境界（同一 Node.js LTS、同一実装バージョン、同一入力、同一設定、同一シード、同一 Stream Key）において bit-exact / Deep Equal を保証。異種 OS / CPU アーキテクチャ間は Cross-Platform Conformance Target として実測検証。
    - **Lineage 境界**: `PopulationEntry` や DNA を汚染せず、`GenerationBuildResult` として分離。
-7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-V1 / BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1)**:
+7. **Generation Runner (BP-SIM-AI-GENERATION-RUNNER-V1 / BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1-R1)**:
    - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-generation-runner-design-v1.md`, SHA: `c45478bd23822689718f4c82ccb6befb8731a873`)
    - **実装ステータス**: **FORMAL ACCEPTED** (`tools/simulator/src/engine/ai/GenerationRunner.ts`, `tools/simulator/src/domain/ai/GenerationRunnerTypes.ts`, SHA: `2587017da393bd9c96172d5772ea5e0be3ebdb59`)
-   - **Controlled Evidence**: **EXECUTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, 30試合実機完走, g=0 -> g=1)
+   - **Controlled Evidence**: **EXECUTED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-GENERATION-RUNNER-EVIDENCE-V1-R1, `tools/simulator/src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, 30試合実機完走, g=0 -> g=1)
    - **N=100 One-Generation Evidence**: **NOT EXECUTED**
    - **Evolution Loop**: **NOT IMPLEMENTED / FUTURE**
    - **責務境界**: 世代 $g$ の自己対戦評価（Double Round Robin V1）、適応度集計（`FitnessEvaluator`）、次世代遷移（`GenerationBuilder`）を決定論的・Fail-Closed に実行する「ちょうど1世代」の実行境界。Canonical Error Taxonomy（Configuration / Integrity / ExecutionError）、実在試合専用フェーズ診断（SESSION_FACTORY / POLICY_FACTORY / RUNNER）、Builder Contract Drift の `GenerationRunnerIntegrityError` 統一、Preflight Fail-Fast 検証、および結果モデルの論理／実行時メトリクス分離を完全実装。
