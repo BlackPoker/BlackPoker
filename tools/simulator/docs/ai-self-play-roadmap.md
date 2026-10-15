@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R1`
-更新日時: 2026-10-15 11:25 JST
+作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R2`
+更新日時: 2026-10-15 12:15 JST
 
 ---
 
@@ -77,7 +77,8 @@
 | **Controlled Multi-Generation Evidence V1** | **BLOCKED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
 | **Evolution g1 Incomplete Analysis V1** | **FOLLOW-UP REQUIRED** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
 | **Evolution g1 DNA PASS Score Analysis V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | V1 分析（プロセス再実行問題により R1 へ差し替え） |
-| **Evolution g1 DNA PASS Score Analysis V1-R1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.json` | - | R1 再検証（二重再構築A/B完全一致, 全分解保存則, 連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証, 個体別Top-3 Ablation完走実証） |
+| **Evolution g1 DNA PASS Score Analysis V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.json` | - | R1 再検証（JSON アーティファクトの perGenomeContributors キー欠陥により R2 へ差し替え） |
+| **Evolution g1 DNA PASS Score Analysis V1-R2** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.json` | - | R2 アーティファクト修復（perGenomeContributors 5オフスプリング完全修復、二重再構築A/B完全一致、全分解保存則、連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証、個体別Top-3 Ablation完走実証） |
 | **Rule-side PASS / Core Flow** | **SEPARATE DISCUSSION** | - | - | 別ブランチ・別会話にて検討中 |
 | **Feature Scaling Design** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |
 | **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |

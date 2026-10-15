@@ -565,11 +565,11 @@ function createAblatedDna(dna: DecisionDNA, genesToZero: Array<{ type: string; i
 // Main Analysis Runner
 // -----------------------------------------------------------------------------
 
-async function runPassScoreAnalysisR1() {
+async function runPassScoreAnalysisR2() {
   const startTime = Date.now();
   console.log("================================================================================");
-  console.log("  BLACKPOKER SIMULATOR - DECISION DNA PASS SCORE ROOT CAUSE ANALYSIS V1-R1");
-  console.log("  Work ID: BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R1");
+  console.log("  BLACKPOKER SIMULATOR - DECISION DNA PASS SCORE ROOT CAUSE ANALYSIS V1-R2");
+  console.log("  Work ID: BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R2");
   console.log("================================================================================");
 
   // 1. 環境とルールの初期化
@@ -1581,21 +1581,49 @@ async function runPassScoreAnalysisR1() {
     };
   });
 
-  // Top per-genome contributors
+  // 9. Top per-genome contributors (derived from actual g1 population, never INITIAL_GENOME_IDS)
+  const g1ContributorGenomeIds = popA.entries
+    .map((e) => e.genomeId)
+    .filter((id) => id !== "genome-001");
+
+  const EXPECTED_OFFSPRING_IDS = [
+    "gen-000001-offspring-000000",
+    "gen-000001-offspring-000001",
+    "gen-000001-offspring-000002",
+    "gen-000001-offspring-000003",
+    "gen-000001-offspring-000004",
+  ];
+
+  assertAnalysis(
+    g1ContributorGenomeIds.length === 5,
+    `Expected 5 g1 offspring contributor IDs, got ${g1ContributorGenomeIds.length}`
+  );
+  assertAnalysis(
+    JSON.stringify([...g1ContributorGenomeIds].sort()) ===
+      JSON.stringify([...EXPECTED_OFFSPRING_IDS].sort()),
+    `g1ContributorGenomeIds set mismatch: got ${g1ContributorGenomeIds.join(", ")}`
+  );
+
   const perGenomeTop10: Record<string, PerGenomeContributorRecord[]> = {};
-  for (const gid of INITIAL_GENOME_IDS) {
-    if (gid === "genome-001") continue;
-    perGenomeTop10[gid] = Array.from(perGenomeContributorMap.values())
+  for (const gid of g1ContributorGenomeIds) {
+    const list = Array.from(perGenomeContributorMap.values())
       .filter((rec) => rec.genomeId === gid)
-      .sort((a, b) => b.cumulativeDelta - a.cumulativeDelta)
+      .sort((a, b) => {
+        if (b.cumulativeDelta !== a.cumulativeDelta) {
+          return b.cumulativeDelta - a.cumulativeDelta;
+        }
+        return a.geneId.localeCompare(b.geneId);
+      })
       .slice(0, 10);
+    assertAnalysis(list.length > 0, `Contributor list for ${gid} must not be empty`);
+    perGenomeTop10[gid] = list;
   }
 
   const finalReport = {
-    workId: "BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R1",
+    workId: "BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R2",
     timestamp: new Date().toISOString(),
     nodeVersion: process.version,
-    sourceCommit: "f03ee9769c5129bed808598b15269bcae88b82af",
+    sourceCommit: "c345b66185f4521b1a4715225ebef10567fa34cf",
     recipe: {
       regulation: "light-entry16",
       populationSize: 6,
@@ -1634,7 +1662,7 @@ async function runPassScoreAnalysisR1() {
       historicalIncompleteCounts,
       historicalMismatchStatus: "DISCREPANCY_NOTED",
       historicalCause: "UNRESOLVED",
-      canonicalIdentityGoingForward: "R1 Behavioral DNA Digests",
+      canonicalIdentityGoingForward: "R1/R2 Behavioral DNA Digests",
     },
     matchSummary: {
       totalScheduled: schedule.length,
@@ -1719,20 +1747,102 @@ async function runPassScoreAnalysisR1() {
     },
   };
 
-  const jsonOutPath = path.resolve(__dirname, "../../docs/ai-evolution-dna-pass-score-analysis-v1-r1.json");
+  // Pre-write Artifact Self-Validation
+  validateFinalReport(finalReport, dnaMap);
+  console.log("  -> Artifact Self-Validation: PASSED (perGenomeContributors 5 keys, exact IDs, weights & digests verified)");
+
+  const jsonOutPath = path.resolve(__dirname, "../../docs/ai-evolution-dna-pass-score-analysis-v1-r2.json");
   fs.writeFileSync(jsonOutPath, JSON.stringify(finalReport, null, 2), "utf-8");
   console.log(`  -> JSON artifact written to: ${jsonOutPath}`);
 
   const elapsedMs = Date.now() - startTime;
   console.log("\n================================================================================");
-  console.log("  ANALYSIS V1-R1 COMPLETED SUCCESSFULLY");
+  console.log("  ANALYSIS V1-R2 COMPLETED SUCCESSFULLY");
   console.log(`  Elapsed Time: ${elapsedMs} ms (${(elapsedMs / 1000).toFixed(2)} s)`);
   console.log("================================================================================");
 
   return finalReport;
 }
 
-runPassScoreAnalysisR1().catch((err) => {
+function validateFinalReport(report: any, dnaMap: Map<string, DecisionDNA>): void {
+  // 1. perGenomeContributors keys
+  const keys = Object.keys(report.perGenomeContributors);
+  assertAnalysis(keys.length === 5, `perGenomeContributors must have 5 keys, got ${keys.length}`);
+  const expectedSet = new Set([
+    "gen-000001-offspring-000000",
+    "gen-000001-offspring-000001",
+    "gen-000001-offspring-000002",
+    "gen-000001-offspring-000003",
+    "gen-000001-offspring-000004",
+  ]);
+  for (const k of keys) {
+    assertAnalysis(expectedSet.has(k), `Unexpected contributor key: ${k}`);
+    const entries: PerGenomeContributorRecord[] = report.perGenomeContributors[k];
+    assertAnalysis(entries.length > 0, `Empty contributor array for ${k}`);
+    const targetDna = dnaMap.get(k);
+    assertAnalysis(targetDna !== undefined, `DNA not found for ${k}`);
+
+    for (const item of entries) {
+      assertAnalysis(
+        item.genomeId === k,
+        `item.genomeId (${item.genomeId}) does not match key (${k})`
+      );
+      assertAnalysis(item.cumulativeDelta > 0, `item.cumulativeDelta must be positive`);
+      assertAnalysis(item.decisionCoverage > 0, `item.decisionCoverage must be > 0`);
+
+      let actualWeight = 0;
+      if (item.type === "PATTERN") {
+        actualWeight = targetDna.patternWeights[item.patternIndex] ?? 0;
+        assertAnalysis(
+          item.patternFeatureName === PATTERN_FEATURE_NAMES[item.patternIndex],
+          `Pattern feature name mismatch: ${item.patternFeatureName} vs ${PATTERN_FEATURE_NAMES[item.patternIndex]}`
+        );
+      } else {
+        const flatIdx = item.contextIndex! * DNA_PATTERN_DIMENSION + item.patternIndex;
+        actualWeight = targetDna.contextPatternWeights[flatIdx] ?? 0;
+        assertAnalysis(
+          item.contextFeatureName === CONTEXT_FEATURE_NAMES[item.contextIndex!],
+          `Context feature name mismatch: ${item.contextFeatureName} vs ${CONTEXT_FEATURE_NAMES[item.contextIndex!]}`
+        );
+        assertAnalysis(
+          item.patternFeatureName === PATTERN_FEATURE_NAMES[item.patternIndex],
+          `Pattern feature name mismatch: ${item.patternFeatureName} vs ${PATTERN_FEATURE_NAMES[item.patternIndex]}`
+        );
+      }
+      assertAnalysis(
+        item.weight === actualWeight,
+        `Weight mismatch for ${item.geneId}: recorded ${item.weight} !== actual ${actualWeight}`
+      );
+      assertAnalysis(actualWeight !== 0, `Recorded weight is 0 for ${item.geneId}`);
+    }
+  }
+
+  // 2. Behavioral DNA Digests verification against canonical R1 digests
+  const expectedDigests: Record<string, string> = {
+    "genome-001": "5451a0e0fae1fd3ec443a05eb37e850e93df5339586219c28a39f2beedaee70b",
+    "gen-000001-offspring-000000": "e910fb0179250515c90320a591a99efa79867c3c85144225e70a34317b2cdf0f",
+    "gen-000001-offspring-000001": "a0810ed39b3bbf9de7b9efb0a5eea030661f9098b970c6d874c483793e026c7b",
+    "gen-000001-offspring-000002": "c9fc8719869a8062dfba5366e3386bebf09015b23394f47fdf4dd412aba75526",
+    "gen-000001-offspring-000003": "6de8e5f46c2aa8103c9c8d618a26c89983fe06d00e90c8ac86729fd891393b71",
+    "gen-000001-offspring-000004": "62ced23c80f14d2e74a2376374871fd6e0147cac55bd7385025404147bb21cb4",
+  };
+  for (const entry of report.behavioralDnaDigests) {
+    const exp = expectedDigests[entry.genomeId];
+    assertAnalysis(
+      exp !== undefined && exp === entry.behavioralDnaDigest,
+      `Behavioral digest mismatch for ${entry.genomeId}: ${entry.behavioralDnaDigest} !== ${exp}`
+    );
+  }
+
+  // 3. Match outcomes
+  assertAnalysis(report.matchSummary.completedCount === 2, "Completed matches must be 2");
+  assertAnalysis(report.matchSummary.incompleteCount === 28, "Incomplete matches must be 28");
+
+  // 4. Conservation
+  assertAnalysis(report.decompositionIntegrity.conservationVerified, "Conservation must be verified");
+}
+
+runPassScoreAnalysisR2().catch((err) => {
   console.error("FATAL ANALYSIS ERROR:", err);
   process.exit(1);
 });
