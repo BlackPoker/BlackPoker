@@ -20,7 +20,8 @@
     "simulate:official": "vite-node src/cli/simulateOfficialRunner.ts",
     "measure:official-baseline": "vite-node src/cli/measureOfficialBaseline.ts",
     "diagnose:official-baseline": "vite-node src/cli/diagnoseOfficialBaseline.ts",
-    "simulate:genome-sensitivity": "vite-node src/cli/genomeSensitivityRunner.ts"
+    "simulate:genome-sensitivity": "vite-node src/cli/genomeSensitivityRunner.ts",
+    "evidence:feature-scaling-ab": "vite-node src/cli/featureScalingABEvidence.ts"
   },
   "dependencies": {
     "fflate": "^0.8.3",

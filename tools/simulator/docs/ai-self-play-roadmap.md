@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1-R2`
-更新日時: 2026-10-15 23:05 JST
+作業ID: `BP-SIM-AI-FEATURE-SCALING-AB-EVIDENCE-V1`
+更新日時: 2026-10-16 00:39 JST
 
 ---
 
@@ -84,8 +84,8 @@
 | **Feature Scaling Design V1-R2** | **FORMAL ACCEPTED** | `docs/ai-feature-scaling-design-v1-r2.md`, `docs/ai-feature-scaling-registry-v1-r2.json` | - | 全306特徴量の有界スケーリング設計、Registry完全同期、包括値域 c, p in [-1, 1]、不変条件 \|c_i * p_j\| <= 1、Feature Schema v5 契約 |
 | **Feature Scaling Implementation V1** | **NOT ACCEPTED** | `docs/ai-feature-scaling-implementation-v1.md` | - | V1 実装（dist 混入および Evidence 不整合により却下） |
 | **Feature Scaling Implementation V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `docs/ai-feature-scaling-implementation-v1.md` | - | R1 実装（parameter 列挙不一致および diff 説明混同により R2 へ差し替え） |
-| **Feature Scaling Implementation V1-R2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureScalingRegistry.ts`, `src/engine/ai/DecisionFeatureScaler.ts`, `docs/ai-feature-scaling-implementation-v1-r2.md` | `src/tests/ai/decisionFeatureScaling.test.ts`, `architectureBoundary.test.ts` | Feature Schema v5, Pure TypeScript Canonical Registry 306 features, Fail-Closed DecisionFeatureScaler, DecisionFeatureEncoder 統合, Negative Pattern Golden Test 完備, 27 AI テストスイート 509 tests 全件パス, dist/** 差分除外 |
-| **Controlled v4/v5 A/B** | **NOT STARTED** | - | - | スケーリング独立レビュー受領後に着手 |
+| **Feature Scaling Implementation V1-R2** | **FORMAL ACCEPTED** | `src/domain/ai/DecisionFeatureScalingRegistry.ts`, `src/engine/ai/DecisionFeatureScaler.ts`, `docs/ai-feature-scaling-implementation-v1-r2.md` | `src/tests/ai/decisionFeatureScaling.test.ts`, `architectureBoundary.test.ts` | Feature Schema v5, Pure TypeScript Canonical Registry 306 features, Fail-Closed DecisionFeatureScaler, DecisionFeatureEncoder 統合, Negative Pattern Golden Test 完備, 27 AI テストスイート 509 tests 全件パス, dist/** 差分除外 |
+| **Controlled Feature Scaling A/B Evidence V1** | **EVIDENCE CAPTURED / PENDING INDEPENDENT REVIEW** | `src/cli/featureScalingABEvidence.ts`, `docs/ai-feature-scaling-ab-evidence-v1.md`, `docs/ai-feature-scaling-ab-evidence-v1.json` | `src/tests/ai/featureScalingABEvidence.test.ts`, `evidence:feature-scaling-ab` | CONTROL (RAW_V4_EQUIVALENT) vs TREATMENT (SCALED_V5) 決定論的比較検証完走 |
 | **Rule-side PASS / Core Flow** | **RULES UNCHANGED / NO CHANGE PLANNED** | `src/domain/rules/`, `src/engine/rules/` | `git diff --stat` (Rules / Core Flow diff: 0) | PASS Rule / Core Flow / Turn Player PASS legality / Stage Empty behavior は変更せず、AI側 Feature Scaling のみで対処 |
 | **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling レビュー後検討) |
 | **N=100 Multi-Generation** | **NOT EXECUTED** | - | - | 未実行 |

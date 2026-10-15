@@ -1,0 +1,1331 @@
+{
+  "workId": "BP-SIM-AI-FEATURE-SCALING-AB-EVIDENCE-V1",
+  "baselineSha": "4c9f8c273d9c2bd8068173dd1333bcc55547668a",
+  "implementationSha": "975788f80054f4e5a08e446ee9967d400726bca9",
+  "environment": {
+    "regulation": "light-entry16",
+    "populationSize": 6,
+    "campaignSeed": 42,
+    "g0Seed": 4143575905,
+    "g1Seed": 4126798286,
+    "pairRepetitions": 1,
+    "maxDecisionsPerMatch": 500
+  },
+  "g1Population": {
+    "generation": 1,
+    "size": 6,
+    "entries": [
+      {
+        "genomeId": "genome-001",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "7e8e37c099e59544b82767e494a533431b5081b3fbdf47bf320f6b4e55f4a3d4"
+      },
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "79c8902718af8e7f6f09d444682edc922a4d213728ea798b72e7a26d8490b0c7"
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "0d64ee5ddbb9641c37695b0fbb00306cebbaa2ab074f963cb9d61d9ba7733dad"
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "66650b6a8b30702f08b0aab3b67d95cc8418a11a1171aeb82be8d55346d150bf"
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "9da9e20aea0bde59087a679aa9f67c6d61099c5d829c14b3c73b5427774312a8"
+      },
+      {
+        "genomeId": "gen-000001-offspring-000004",
+        "patternWeightCount": 143,
+        "interactionWeightCount": 23309,
+        "totalWeightCount": 23452,
+        "weightDigest": "d8df6b7295f116217242a89c46e142d5fc36e690d870fedd4aa2be60f9f504c4"
+      }
+    ]
+  },
+  "weightDigest": {
+    "genome-001": "7e8e37c099e59544b82767e494a533431b5081b3fbdf47bf320f6b4e55f4a3d4",
+    "gen-000001-offspring-000000": "79c8902718af8e7f6f09d444682edc922a4d213728ea798b72e7a26d8490b0c7",
+    "gen-000001-offspring-000001": "0d64ee5ddbb9641c37695b0fbb00306cebbaa2ab074f963cb9d61d9ba7733dad",
+    "gen-000001-offspring-000002": "66650b6a8b30702f08b0aab3b67d95cc8418a11a1171aeb82be8d55346d150bf",
+    "gen-000001-offspring-000003": "9da9e20aea0bde59087a679aa9f67c6d61099c5d829c14b3c73b5427774312a8",
+    "gen-000001-offspring-000004": "d8df6b7295f116217242a89c46e142d5fc36e690d870fedd4aa2be60f9f504c4"
+  },
+  "control": {
+    "arm": "CONTROL",
+    "logicalDigest": "8dcae3d5f8d1fdd316931fe57bec6ee0cdb02b8c70242616eaad7a3bafbabdcb",
+    "completedCount": 2,
+    "incompleteCount": 28,
+    "failedCount": 0,
+    "drawsCount": 0,
+    "p1WinsCount": 0,
+    "p2WinsCount": 2,
+    "completionRate": 0.06666666666666667,
+    "totalDecisions": 14124,
+    "decisionCountStats": {
+      "count": 30,
+      "mean": 470.8,
+      "median": 500,
+      "min": 62,
+      "max": 500,
+      "p05": 259.1,
+      "p50": 500,
+      "p95": 500,
+      "p99": 500
+    },
+    "passMetrics": {
+      "totalDecisionCount": 14124,
+      "passSelectedCount": 13962,
+      "actionSelectedCount": 144,
+      "effectSelectedCount": 18,
+      "otherSelectedCount": 0,
+      "forcedPassCount": 3996,
+      "strictPassWinCount": 9966,
+      "tieBreakPassCount": 0,
+      "endLegalCount": 6875,
+      "passGreaterThanEndCount": 6840,
+      "passEqualsEndCount": 22,
+      "passLessThanEndCount": 13,
+      "passChosenWhileEndLegalCount": 6823
+    },
+    "marginStats": {
+      "count": 10110,
+      "mean": 1.565003,
+      "median": 1.172383,
+      "min": -12.424762,
+      "max": 16.489811,
+      "p05": 0.044409,
+      "p50": 1.172383,
+      "p95": 4.993483,
+      "p99": 6.972374
+    },
+    "scoreMagnitude": {
+      "selectedScoreAbs": {
+        "count": 14124,
+        "mean": 0.579021,
+        "median": 0,
+        "min": 0,
+        "max": 12.424762,
+        "p05": 0,
+        "p50": 0,
+        "p95": 4.446606,
+        "p99": 5.081836
+      },
+      "passScoreAbs": {
+        "count": 14106,
+        "mean": 0.568517,
+        "median": 0,
+        "min": 0,
+        "max": 5.717065,
+        "p05": 0,
+        "p50": 0,
+        "p95": 4.446606,
+        "p99": 5.081836
+      },
+      "bestNonPassScoreAbs": {
+        "count": 10128,
+        "mean": 0.812251,
+        "median": 0.33733,
+        "min": 0,
+        "max": 12.424762,
+        "p05": 0.02376,
+        "p50": 0.33733,
+        "p95": 2.589117,
+        "p99": 4.794444
+      },
+      "marginAbs": {
+        "count": 10110,
+        "mean": 1.595237,
+        "median": 1.217509,
+        "min": 0,
+        "max": 16.489811,
+        "p05": 0.044409,
+        "p50": 1.217509,
+        "p95": 4.993483,
+        "p99": 6.972374
+      }
+    },
+    "featureMagnitude": {
+      "maxAbsContextFeature": 138,
+      "maxAbsPatternFeature": 26,
+      "maxAbsInteractionInput": 3120
+    },
+    "fitnessEntries": [
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000004",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "provisionalFitness": 0.5,
+        "completedMatches": 2,
+        "wins": 1,
+        "draws": 0,
+        "losses": 1
+      },
+      {
+        "genomeId": "genome-001",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "provisionalFitness": 0.5,
+        "completedMatches": 2,
+        "wins": 1,
+        "draws": 0,
+        "losses": 1
+      }
+    ],
+    "readiness": {
+      "status": "REEVALUATION_REQUIRED"
+    },
+    "matches": [
+      {
+        "matchIndex": 0,
+        "pairIndex": 0,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 3614123313,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 1,
+        "pairIndex": 0,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 3614123313,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 2,
+        "pairIndex": 1,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 1256947178,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 3,
+        "pairIndex": 1,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 1256947178,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 4,
+        "pairIndex": 2,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 2781041343,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 5,
+        "pairIndex": 2,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 2781041343,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 6,
+        "pairIndex": 3,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 133355024,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 7,
+        "pairIndex": 3,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 133355024,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 8,
+        "pairIndex": 4,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 2881258685,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 9,
+        "pairIndex": 4,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 2881258685,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 10,
+        "pairIndex": 5,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 2124288214,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 11,
+        "pairIndex": 5,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 2124288214,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 12,
+        "pairIndex": 6,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 2048176715,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 13,
+        "pairIndex": 6,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 2048176715,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 14,
+        "pairIndex": 7,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 1553145340,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 15,
+        "pairIndex": 7,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 1553145340,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 16,
+        "pairIndex": 8,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 3769388073,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 17,
+        "pairIndex": 8,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 3769388073,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 18,
+        "pairIndex": 9,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 1391423586,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 19,
+        "pairIndex": 9,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 1391423586,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 20,
+        "pairIndex": 10,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 3466415816,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 21,
+        "pairIndex": 10,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 3466415816,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 22,
+        "pairIndex": 11,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 3956224311,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 23,
+        "pairIndex": 11,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 3956224311,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 24,
+        "pairIndex": 12,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 1879680866,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 25,
+        "pairIndex": 12,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 1879680866,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 26,
+        "pairIndex": 13,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 4257645353,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 27,
+        "pairIndex": 13,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 4257645353,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 28,
+        "pairIndex": 14,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 2733551188,
+        "completed": true,
+        "winner": "p2",
+        "totalDecisions": 62,
+        "turnCount": 7
+      },
+      {
+        "matchIndex": 29,
+        "pairIndex": 14,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 2733551188,
+        "completed": true,
+        "winner": "p2",
+        "totalDecisions": 62,
+        "turnCount": 7
+      }
+    ]
+  },
+  "treatment": {
+    "arm": "TREATMENT",
+    "logicalDigest": "7b19ced5c029c8c8c5eef858ec415fb4a72ab81f508383026d86e29318ff0082",
+    "completedCount": 2,
+    "incompleteCount": 28,
+    "failedCount": 0,
+    "drawsCount": 0,
+    "p1WinsCount": 1,
+    "p2WinsCount": 1,
+    "completionRate": 0.06666666666666667,
+    "totalDecisions": 14041,
+    "decisionCountStats": {
+      "count": 30,
+      "mean": 468.033333,
+      "median": 500,
+      "min": 4,
+      "max": 500,
+      "p05": 245.35,
+      "p50": 500,
+      "p95": 500,
+      "p99": 500
+    },
+    "passMetrics": {
+      "totalDecisionCount": 14041,
+      "passSelectedCount": 13885,
+      "actionSelectedCount": 141,
+      "effectSelectedCount": 15,
+      "otherSelectedCount": 0,
+      "forcedPassCount": 3758,
+      "strictPassWinCount": 10127,
+      "tieBreakPassCount": 0,
+      "endLegalCount": 6850,
+      "passGreaterThanEndCount": 6820,
+      "passEqualsEndCount": 14,
+      "passLessThanEndCount": 16,
+      "passChosenWhileEndLegalCount": 6798
+    },
+    "marginStats": {
+      "count": 10268,
+      "mean": 0.052248,
+      "median": 0.04526,
+      "min": -0.186867,
+      "max": 0.120864,
+      "p05": 0.004425,
+      "p50": 0.04526,
+      "p95": 0.110465,
+      "p99": 0.120864
+    },
+    "scoreMagnitude": {
+      "selectedScoreAbs": {
+        "count": 14041,
+        "mean": 0.00451,
+        "median": 0,
+        "min": 0,
+        "max": 0.186867,
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.028443,
+        "p99": 0.030045
+      },
+      "passScoreAbs": {
+        "count": 14026,
+        "mean": 0.004049,
+        "median": 0,
+        "min": 0,
+        "max": 0.034253,
+        "p05": 0,
+        "p50": 0,
+        "p95": 0.028443,
+        "p99": 0.030045
+      },
+      "bestNonPassScoreAbs": {
+        "count": 10283,
+        "mean": 0.051869,
+        "median": 0.04526,
+        "min": 0,
+        "max": 0.186867,
+        "p05": 0.002014,
+        "p50": 0.04526,
+        "p95": 0.110465,
+        "p99": 0.120864
+      },
+      "marginAbs": {
+        "count": 10268,
+        "mean": 0.053437,
+        "median": 0.04526,
+        "min": 0,
+        "max": 0.186867,
+        "p05": 0.004425,
+        "p50": 0.04526,
+        "p95": 0.110465,
+        "p99": 0.120864
+      }
+    },
+    "featureMagnitude": {
+      "maxAbsContextFeature": 1,
+      "maxAbsPatternFeature": 1,
+      "maxAbsInteractionInput": 1
+    },
+    "fitnessEntries": [
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "provisionalFitness": 1,
+        "completedMatches": 1,
+        "wins": 1,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "provisionalFitness": 0,
+        "completedMatches": 1,
+        "wins": 0,
+        "draws": 0,
+        "losses": 1
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      },
+      {
+        "genomeId": "gen-000001-offspring-000004",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "provisionalFitness": 0.5,
+        "completedMatches": 2,
+        "wins": 1,
+        "draws": 0,
+        "losses": 1
+      },
+      {
+        "genomeId": "genome-001",
+        "status": "INSUFFICIENT_EVIDENCE",
+        "completedMatches": 0,
+        "wins": 0,
+        "draws": 0,
+        "losses": 0
+      }
+    ],
+    "readiness": {
+      "status": "REEVALUATION_REQUIRED"
+    },
+    "matches": [
+      {
+        "matchIndex": 0,
+        "pairIndex": 0,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 3614123313,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 1,
+        "pairIndex": 0,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 3614123313,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 2,
+        "pairIndex": 1,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 1256947178,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 3,
+        "pairIndex": 1,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 1256947178,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 4,
+        "pairIndex": 2,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 2781041343,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 5,
+        "pairIndex": 2,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 2781041343,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 6,
+        "pairIndex": 3,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 133355024,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 7,
+        "pairIndex": 3,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 133355024,
+        "completed": true,
+        "winner": "p2",
+        "totalDecisions": 37,
+        "turnCount": 3
+      },
+      {
+        "matchIndex": 8,
+        "pairIndex": 4,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 2881258685,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 9,
+        "pairIndex": 4,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "matchSeed": 2881258685,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 10,
+        "pairIndex": 5,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 2124288214,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 11,
+        "pairIndex": 5,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 2124288214,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 12,
+        "pairIndex": 6,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 2048176715,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 13,
+        "pairIndex": 6,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 2048176715,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 14,
+        "pairIndex": 7,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 1553145340,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 15,
+        "pairIndex": 7,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 1553145340,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 16,
+        "pairIndex": 8,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 3769388073,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 17,
+        "pairIndex": 8,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "matchSeed": 3769388073,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 18,
+        "pairIndex": 9,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 1391423586,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 19,
+        "pairIndex": 9,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 1391423586,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 20,
+        "pairIndex": 10,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 3466415816,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 21,
+        "pairIndex": 10,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 3466415816,
+        "completed": true,
+        "winner": "p1",
+        "totalDecisions": 4,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 22,
+        "pairIndex": 11,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 3956224311,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 23,
+        "pairIndex": 11,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "matchSeed": 3956224311,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 24,
+        "pairIndex": 12,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 1879680866,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 25,
+        "pairIndex": 12,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 1879680866,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 26,
+        "pairIndex": 13,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 4257645353,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1
+      },
+      {
+        "matchIndex": 27,
+        "pairIndex": 13,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "matchSeed": 4257645353,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      },
+      {
+        "matchIndex": 28,
+        "pairIndex": 14,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "genome-001",
+        "matchSeed": 2733551188,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 3
+      },
+      {
+        "matchIndex": 29,
+        "pairIndex": 14,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "matchSeed": 2733551188,
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2
+      }
+    ]
+  },
+  "comparison": {
+    "categoryCounts": {
+      "UNCHANGED_COMPLETED": 0,
+      "UNCHANGED_INCOMPLETE": 26,
+      "CONTROL_INCOMPLETE_TO_TREATMENT_COMPLETED": 2,
+      "CONTROL_COMPLETED_TO_TREATMENT_INCOMPLETE": 2,
+      "OUTCOME_CHANGED": 0,
+      "FAILED": 0
+    },
+    "perMatch": [
+      {
+        "matchIndex": 0,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 1,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 2,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 3,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 4,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 5,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 6,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 7,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": true,
+        "treatmentWinner": "p2",
+        "treatmentDecisions": 37,
+        "classification": "CONTROL_INCOMPLETE_TO_TREATMENT_COMPLETED"
+      },
+      {
+        "matchIndex": 8,
+        "p1GenomeId": "gen-000001-offspring-000000",
+        "p2GenomeId": "genome-001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 9,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000000",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 10,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 11,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 12,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 13,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 14,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 15,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 16,
+        "p1GenomeId": "gen-000001-offspring-000001",
+        "p2GenomeId": "genome-001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 17,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 18,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 19,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 20,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 21,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": true,
+        "treatmentWinner": "p1",
+        "treatmentDecisions": 4,
+        "classification": "CONTROL_INCOMPLETE_TO_TREATMENT_COMPLETED"
+      },
+      {
+        "matchIndex": 22,
+        "p1GenomeId": "gen-000001-offspring-000002",
+        "p2GenomeId": "genome-001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 23,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000002",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 24,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 25,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 26,
+        "p1GenomeId": "gen-000001-offspring-000003",
+        "p2GenomeId": "genome-001",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 27,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000003",
+        "controlCompleted": false,
+        "controlDecisions": 500,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "UNCHANGED_INCOMPLETE"
+      },
+      {
+        "matchIndex": 28,
+        "p1GenomeId": "gen-000001-offspring-000004",
+        "p2GenomeId": "genome-001",
+        "controlCompleted": true,
+        "controlWinner": "p2",
+        "controlDecisions": 62,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "CONTROL_COMPLETED_TO_TREATMENT_INCOMPLETE"
+      },
+      {
+        "matchIndex": 29,
+        "p1GenomeId": "genome-001",
+        "p2GenomeId": "gen-000001-offspring-000004",
+        "controlCompleted": true,
+        "controlWinner": "p2",
+        "controlDecisions": 62,
+        "treatmentCompleted": false,
+        "treatmentDecisions": 500,
+        "classification": "CONTROL_COMPLETED_TO_TREATMENT_INCOMPLETE"
+      }
+    ]
+  },
+  "historicalControlCheck": {
+    "expectedCompleted": 2,
+    "actualCompleted": 2,
+    "expectedCompletedIndices": [
+      28,
+      29
+    ],
+    "actualCompletedIndices": [
+      28,
+      29
+    ],
+    "passed": true
+  },
+  "determinismCheck": {
+    "controlDigestsEqual": true,
+    "treatmentDigestsEqual": true,
+    "weightsEqualAcrossArms": true,
+    "passed": true
+  },
+  "nonClaims": {
+    "passStallFullySolved": false,
+    "strongDnaProven": false,
+    "cycleEliminated": false,
+    "multiGenerationProven": false,
+    "rulesNeedChange": false
+  }
+}
