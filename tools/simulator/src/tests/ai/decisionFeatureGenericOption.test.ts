@@ -236,7 +236,8 @@ describe("Generic Option Stable Identity & Scorer Proof (Feature Schema v4)", ()
     const scoreBetaA = scoresA.find((s) => s.patternRef === 1)!.score;
 
     expect(scoreAlphaA).toBeGreaterThan(scoreBetaA);
-    expect(scoreAlphaA).toBeCloseTo(12.0, 4); // 4 * 3.0 = 12.0
+    // Schema v5: turn_count = 4 scaled to 4 / (4 + 10) = 2/7, so scoreAlphaA = (2/7) * 3.0 = 6/7
+    expect(scoreAlphaA).toBeCloseTo(6 / 7, 4);
     expect(scoreBetaA).toBeCloseTo(0.0, 4);
 
     // --- Case B: Genome Beta (turn_count x beta_option = +3.0) ---
@@ -254,7 +255,8 @@ describe("Generic Option Stable Identity & Scorer Proof (Feature Schema v4)", ()
 
     expect(scoreBetaB).toBeGreaterThan(scoreAlphaB);
     expect(scoreAlphaB).toBeCloseTo(0.0, 4);
-    expect(scoreBetaB).toBeCloseTo(12.0, 4);
+    // Schema v5: scoreBetaB = (2/7) * 3.0 = 6/7
+    expect(scoreBetaB).toBeCloseTo(6 / 7, 4);
 
     // 【証明の完了】
     // 同一盤面における任意の Generic Option 選択肢であっても、

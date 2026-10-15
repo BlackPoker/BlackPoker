@@ -149,7 +149,8 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       expect(effReq.observation.stageRequests.length).toBe(1);
       expect(effReq.observation.stageRequestRefs.length).toBe(1);
       expect(effReq.observation.effectSourceRequest).toBeUndefined();
-      expect(getContextValue(encoded, "stage_depth")).toBe(1);
+      // Schema v5: stage_depth is scaled via saturatingRational(1, 4) = 0.2
+      expect(getContextValue(encoded, "stage_depth")).toBeCloseTo(0.2, 10);
 
       // 1. Action Identity は action.attack のバケットと完全一致
       const expectedActionBuckets = StableIdentityEncoder.encodeActionIdentity("action.attack");
@@ -188,28 +189,28 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
         return eff.selectedValues?.length === 2;
       })!;
 
-      // 0体: candidateCount = 2, selectedCount = 0, coverageRatio = 0.0
+      // 0体: candidateCount = 2 (scale 10 -> 2/12), selectedCount = 0, coverageRatio = 0.0
       expect(getPatternValue(p0, "effect_selected_unit_count")).toBe(0);
       expect(getPatternValue(p0, "effect_selected_unit_size_sum")).toBe(0);
-      expect(getPatternValue(p0, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(p0, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(p0, "effect_selection_coverage_ratio")).toBe(0.0);
 
-      // soldier-1 (Size 6): candidateCount = 2, selectedCount = 1, coverageRatio = 0.5
-      expect(getPatternValue(p1, "effect_selected_unit_count")).toBe(1);
-      expect(getPatternValue(p1, "effect_selected_unit_size_sum")).toBe(6);
-      expect(getPatternValue(p1, "effect_selection_candidate_count")).toBe(2);
+      // soldier-1 (Size 6): candidateCount = 2, selectedCount = 1 (scale 5 -> 1/6), sizeSum = 6 (scale 20 -> 6/26)
+      expect(getPatternValue(p1, "effect_selected_unit_count")).toBeCloseTo(1 / 6, 10);
+      expect(getPatternValue(p1, "effect_selected_unit_size_sum")).toBeCloseTo(6 / 26, 10);
+      expect(getPatternValue(p1, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(p1, "effect_selection_coverage_ratio")).toBe(0.5);
 
-      // soldier-2 (Size 7): candidateCount = 2, selectedCount = 1, coverageRatio = 0.5
-      expect(getPatternValue(p2, "effect_selected_unit_count")).toBe(1);
-      expect(getPatternValue(p2, "effect_selected_unit_size_sum")).toBe(7);
-      expect(getPatternValue(p2, "effect_selection_candidate_count")).toBe(2);
+      // soldier-2 (Size 7): candidateCount = 2, selectedCount = 1 (scale 5 -> 1/6), sizeSum = 7 (scale 20 -> 7/27)
+      expect(getPatternValue(p2, "effect_selected_unit_count")).toBeCloseTo(1 / 6, 10);
+      expect(getPatternValue(p2, "effect_selected_unit_size_sum")).toBeCloseTo(7 / 27, 10);
+      expect(getPatternValue(p2, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(p2, "effect_selection_coverage_ratio")).toBe(0.5);
 
-      // 両方 (Size 13): candidateCount = 2, selectedCount = 2, coverageRatio = 1.0
-      expect(getPatternValue(p3, "effect_selected_unit_count")).toBe(2);
-      expect(getPatternValue(p3, "effect_selected_unit_size_sum")).toBe(13);
-      expect(getPatternValue(p3, "effect_selection_candidate_count")).toBe(2);
+      // 両方 (Size 13): candidateCount = 2, selectedCount = 2 (scale 5 -> 2/7), sizeSum = 13 (scale 20 -> 13/33)
+      expect(getPatternValue(p3, "effect_selected_unit_count")).toBeCloseTo(2 / 7, 10);
+      expect(getPatternValue(p3, "effect_selected_unit_size_sum")).toBeCloseTo(13 / 33, 10);
+      expect(getPatternValue(p3, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(p3, "effect_selection_coverage_ratio")).toBe(1.0);
 
       expect(p0.values).not.toEqual(p1.values);
@@ -341,16 +342,17 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       expect(blockPattern).toBeDefined();
 
       expect(getPatternValue(passPattern!, "effect_assignment_selected_count")).toBe(0);
-      expect(getPatternValue(blockPattern!, "effect_assignment_selected_count")).toBe(1);
+      // Schema v5: effect_assignment_selected_count scale 4 -> 1/5 = 0.2
+      expect(getPatternValue(blockPattern!, "effect_assignment_selected_count")).toBeCloseTo(0.2, 10);
 
-      // ブロッカー Size 6 vs アタッカー Size 5 -> Delta = +1
-      expect(getPatternValue(blockPattern!, "effect_assignment_positive_delta_count")).toBe(1);
+      // ブロッカー Size 6 vs アタッカー Size 5 -> Delta = +1 (Schema v5: scale 4 -> 0.2)
+      expect(getPatternValue(blockPattern!, "effect_assignment_positive_delta_count")).toBeCloseTo(0.2, 10);
 
       // 【Unit Assignment 方向性検証】
       // 攻撃側: p1 (opponent, source)
       // 防御側: p2 (self viewer, selected)
-      // opponent の攻撃に対して self のユニットを割り当てるため、opp_to_self = 1, self_to_opp = 0
-      expect(getPatternValue(blockPattern!, "effect_assignment_opp_to_self_count")).toBe(1);
+      // opponent の攻撃に対して self のユニットを割り当てるため、opp_to_self = 0.2 (scale 4), self_to_opp = 0
+      expect(getPatternValue(blockPattern!, "effect_assignment_opp_to_self_count")).toBeCloseTo(0.2, 10);
       expect(getPatternValue(blockPattern!, "effect_assignment_self_to_opp_count")).toBe(0);
     });
   });
@@ -540,16 +542,16 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       expect(acePattern).toBeDefined();
       expect(numPattern).toBeDefined();
 
-      expect(getPatternValue(acePattern, "effect_selected_card_ace_count")).toBe(1);
+      expect(getPatternValue(acePattern, "effect_selected_card_ace_count")).toBeCloseTo(0.2, 10);
       expect(getPatternValue(acePattern, "effect_selected_card_numeric_count")).toBe(0);
-      expect(getPatternValue(acePattern, "effect_selected_card_value_sum")).toBe(1);
-      expect(getPatternValue(acePattern, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(acePattern, "effect_selected_card_value_sum")).toBeCloseTo(1 / 21, 10);
+      expect(getPatternValue(acePattern, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(acePattern, "effect_selection_coverage_ratio")).toBe(0.5);
 
       expect(getPatternValue(numPattern, "effect_selected_card_ace_count")).toBe(0);
-      expect(getPatternValue(numPattern, "effect_selected_card_numeric_count")).toBe(1);
-      expect(getPatternValue(numPattern, "effect_selected_card_value_sum")).toBe(7);
-      expect(getPatternValue(numPattern, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(numPattern, "effect_selected_card_numeric_count")).toBeCloseTo(1 / 6, 10);
+      expect(getPatternValue(numPattern, "effect_selected_card_value_sum")).toBeCloseTo(7 / 27, 10);
+      expect(getPatternValue(numPattern, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(numPattern, "effect_selection_coverage_ratio")).toBe(0.5);
 
       expect(acePattern.values).not.toEqual(numPattern.values);
@@ -651,7 +653,8 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       expect(revReq.observation.stageRequests.length).toBe(1);
       expect(revReq.observation.stageRequestRefs.length).toBe(1);
       expect(revReq.observation.effectSourceRequest).toBeUndefined();
-      expect(getContextValue(encoded, "stage_depth")).toBe(1);
+      // Schema v5: stage_depth is scaled via saturatingRational(1, 4) = 0.2
+      expect(getContextValue(encoded, "stage_depth")).toBeCloseTo(0.2, 10);
 
       // 1. Action Identity は action.reverse のバケットと完全一致
       const expectedRevBuckets = StableIdentityEncoder.encodeActionIdentity("action.reverse");
@@ -687,10 +690,10 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
         expect(getPatternValue(drivePat, `effect_option_bucket_${b}`)).toBe(driveBuckets[b]);
       }
 
-      // 5. Coverage Ratio の検証 (options = 2, selected = 1)
-      expect(getPatternValue(chargePat, "effect_selection_candidate_count")).toBe(2);
+      // 5. Coverage Ratio の検証 (options = 2, selected = 1) - Schema v5: candidate_count scale 10 -> 2/12
+      expect(getPatternValue(chargePat, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(chargePat, "effect_selection_coverage_ratio")).toBe(0.5);
-      expect(getPatternValue(drivePat, "effect_selection_candidate_count")).toBe(2);
+      expect(getPatternValue(drivePat, "effect_selection_candidate_count")).toBeCloseTo(2 / 12, 10);
       expect(getPatternValue(drivePat, "effect_selection_coverage_ratio")).toBe(0.5);
 
       expect(chargePat.values).not.toEqual(drivePat.values);
@@ -757,14 +760,20 @@ describe("Real Decision Path Feature Evidence (Feature Schema v4)", () => {
       const encoded = DecisionFeatureEncoder.encode(req);
 
       expect(getContextValue(encoded, "request_has_source")).toBe(1);
-      expect(getContextValue(encoded, "request_source_is_effect")).toBe(1);
-      expect(getContextValue(encoded, "request_source_controller_is_self")).toBe(1);
+      // Schema v5 scaled values:
+      // request_source_is_effect: scale 10 -> 1/11
+      expect(getContextValue(encoded, "request_source_is_effect")).toBeCloseTo(1 / 11, 10);
+      // request_source_controller_is_self: scale 10 -> 1/11
+      expect(getContextValue(encoded, "request_source_controller_is_self")).toBeCloseTo(1 / 11, 10);
       expect(getContextValue(encoded, "request_source_controller_is_opponent")).toBe(0);
       expect(getContextValue(encoded, "request_action_speed_normal")).toBe(1);
       expect(getContextValue(encoded, "request_action_timing_main")).toBe(1);
-      expect(getContextValue(encoded, "request_key_card_count")).toBe(1);
-      expect(getContextValue(encoded, "request_key_card_known_count")).toBe(1);
-      expect(getContextValue(encoded, "request_key_card_value_sum")).toBe(1);
+      // request_key_card_count: scale 4 -> 1/5 = 0.2
+      expect(getContextValue(encoded, "request_key_card_count")).toBeCloseTo(0.2, 10);
+      // request_key_card_known_count: scale 4 -> 1/5 = 0.2
+      expect(getContextValue(encoded, "request_key_card_known_count")).toBeCloseTo(0.2, 10);
+      // request_key_card_value_sum: scale 30 -> 1/31
+      expect(getContextValue(encoded, "request_key_card_value_sum")).toBeCloseTo(1 / 31, 10);
       expect(getContextValue(encoded, "request_target_is_player")).toBe(1);
       expect(getContextValue(encoded, "request_target_is_opponent")).toBe(1);
     });

@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-FEATURE-SCALING-DESIGN-V1-R2`
-更新日時: 2026-10-15 15:55 JST
+作業ID: `BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1`
+更新日時: 2026-10-15 19:42 JST
 
 ---
 
@@ -81,9 +81,9 @@
 | **Evolution g1 DNA PASS Score Analysis V1-R2** | **FORMAL ACCEPTED** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.json` | - | R2 アーティファクト修復（perGenomeContributors 5オフスプリング完全修復、二重再構築A/B完全一致、全分解保存則、連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証、個体別Top-3 Ablation完走実証） |
 | **Feature Scaling Design V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-feature-scaling-design-v1.md`, `docs/ai-feature-scaling-registry-v1.json` | - | V1 設計（PowerShellプロセス違反および集計不整合により却下） |
 | **Feature Scaling Design V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `docs/ai-feature-scaling-design-v1-r1.md`, `docs/ai-feature-scaling-registry-v1-r1.json` | - | R1 設計（パラメータ不一致、Context値域誤記、固定上限誤記により却下） |
-| **Feature Scaling Design V1-R2** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-feature-scaling-design-v1-r2.md`, `docs/ai-feature-scaling-registry-v1-r2.json` | - | 全306特徴量の有界スケーリング設計、Registry完全同期、包括値域 c, p in [-1, 1]、不変条件 \|c_i * p_j\| <= 1、Feature Schema v5 契約 |
-| **Feature Scaling Implementation** | **NOT STARTED** | - | - | スケーラー実装、レジストリ配線、Controlled A/B 検証 |
-| **Rule-side PASS / Core Flow** | **SEPARATE DISCUSSION** | - | - | 別ブランチ・別会話にて検討中 |
+| **Feature Scaling Design V1-R2** | **FORMAL ACCEPTED** | `docs/ai-feature-scaling-design-v1-r2.md`, `docs/ai-feature-scaling-registry-v1-r2.json` | - | 全306特徴量の有界スケーリング設計、Registry完全同期、包括値域 c, p in [-1, 1]、不変条件 \|c_i * p_j\| <= 1、Feature Schema v5 契約 |
+| **Feature Scaling Implementation V1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureScalingRegistry.ts`, `src/engine/ai/DecisionFeatureScaler.ts`, `docs/ai-feature-scaling-implementation-v1.md` | `src/tests/ai/decisionFeatureScaling.test.ts`, `architectureBoundary.test.ts` | Feature Schema v5, Pure TypeScript Canonical Registry 306 features, Fail-Closed DecisionFeatureScaler, DecisionFeatureEncoder 統合, 27 AI テストスイート 508 tests 全件パス |
+| **Rule-side PASS / Core Flow** | **RULES UNCHANGED / NO CHANGE PLANNED** | `src/domain/rules/`, `src/engine/rules/` | `git diff --stat` (Rules / Core Flow diff: 0) | PASS Rule / Core Flow / Turn Player PASS legality / Stage Empty behavior は変更せず、AI側 Feature Scaling のみで対処 |
 | **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling レビュー後検討) |
 | **N=100 Multi-Generation** | **NOT EXECUTED** | - | - | 未実行 |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |

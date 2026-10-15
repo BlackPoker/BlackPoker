@@ -263,8 +263,8 @@ describe("Candidate Action Stable Identity & Scorer Proof (Feature Schema v4)", 
     const scoreBetaA = scoresA.find((s) => s.patternRef === 1)!.score;
 
     expect(scoreAlphaA).toBeGreaterThan(scoreBetaA);
-    // scoreAlphaA = 2 * 5.0 = 10, scoreBetaA = 0
-    expect(scoreAlphaA).toBeCloseTo(10.0, 4);
+    // Schema v5: turn_count = 2 is scaled to 2 / (2 + 10) = 1/6, so scoreAlphaA = (1/6) * 5.0 = 5/6
+    expect(scoreAlphaA).toBeCloseTo(5 / 6, 4);
     expect(scoreBetaA).toBeCloseTo(0.0, 4);
 
     // --- Case B: Genome B (beta preference: turn_count x beta_bucket = +5.0) ---
@@ -282,7 +282,8 @@ describe("Candidate Action Stable Identity & Scorer Proof (Feature Schema v4)", 
 
     expect(scoreBetaB).toBeGreaterThan(scoreAlphaB);
     expect(scoreAlphaB).toBeCloseTo(0.0, 4);
-    expect(scoreBetaB).toBeCloseTo(10.0, 4);
+    // Schema v5: scoreBetaB = (1/6) * 5.0 = 5/6
+    expect(scoreBetaB).toBeCloseTo(5 / 6, 4);
 
     // 【証明の完了】
     // 候補Action自体のメタデータ（speed, timing, cost, target等）が完全に同一であっても、

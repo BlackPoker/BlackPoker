@@ -493,13 +493,14 @@ describe("Decision Feature Schema v2 - Encoder-Level Defensive Privacy Tests", (
       const sumIdx = CONTEXT_FEATURE_NAMES.indexOf("self_hand_value_sum");
       const pairIdx = CONTEXT_FEATURE_NAMES.indexOf("self_hand_pair_rank_count");
 
-      // base: 1 + 10 + 13 = 24, mod: 1 + 1 + 13 = 15
-      expect(baseEnc.context.values[sumIdx]).toBe(24);
-      expect(modEnc.context.values[sumIdx]).toBe(15);
+      // base: 1 + 10 + 13 = 24 -> 24 / (24 + 30) = 24/54 = 4/9
+      // mod: 1 + 1 + 13 = 15 -> 15 / (15 + 30) = 15/45 = 1/3
+      expect(baseEnc.context.values[sumIdx]).toBeCloseTo(24 / 54, 5);
+      expect(modEnc.context.values[sumIdx]).toBeCloseTo(15 / 45, 5);
 
-      // mod では A が2枚あるため pair_rank_count が 1
+      // mod では A が2枚あるため pair_rank_count が 1 -> 1 / (1 + 4) = 0.2
       expect(baseEnc.context.values[pairIdx]).toBe(0);
-      expect(modEnc.context.values[pairIdx]).toBe(1);
+      expect(modEnc.context.values[pairIdx]).toBeCloseTo(1 / 5, 5);
     });
 
     it("2-2. 自分のフィールドユニットサイズを変更した場合、field_size_sum が正しく変化すること", () => {
@@ -531,12 +532,14 @@ describe("Decision Feature Schema v2 - Encoder-Level Defensive Privacy Tests", (
       const sizeSumIdx = CONTEXT_FEATURE_NAMES.indexOf("self_field_size_sum");
       const relSizeIdx = CONTEXT_FEATURE_NAMES.indexOf("relative_field_size_sum");
 
-      expect(baseEnc.context.values[sizeSumIdx]).toBe(5);
-      expect(modEnc.context.values[sizeSumIdx]).toBe(8);
+      // self_field_size_sum: scale 30 => x / (x + 30)
+      expect(baseEnc.context.values[sizeSumIdx]).toBeCloseTo(5 / 35, 5);
+      expect(modEnc.context.values[sizeSumIdx]).toBeCloseTo(8 / 38, 5);
 
-      // relative = self(8) - opp(3) = 5
-      expect(baseEnc.context.values[relSizeIdx]).toBe(5 - 3);
-      expect(modEnc.context.values[relSizeIdx]).toBe(8 - 3);
+      // relative = self(5) - opp(3) = 2 -> 2 / (2 + 30) = 2 / 32
+      // mod: self(8) - opp(3) = 5 -> 5 / (5 + 30) = 5 / 35
+      expect(baseEnc.context.values[relSizeIdx]).toBeCloseTo(2 / 32, 5);
+      expect(modEnc.context.values[relSizeIdx]).toBeCloseTo(5 / 35, 5);
     });
 
     it("2-3. 自分のパックが開封されて閲覧可能 (canViewCards: true) になった場合、パック統計特徴量が正しく変化すること", () => {
@@ -594,8 +597,10 @@ describe("Decision Feature Schema v2 - Encoder-Level Defensive Privacy Tests", (
 
       expect(modEnc.context.values[openedIdx]).toBe(1);
       expect(modEnc.context.values[canViewIdx]).toBe(1);
-      expect(modEnc.context.values[knownCountIdx]).toBe(2);
-      expect(modEnc.context.values[valSumIdx]).toBe(18);
+      // knownCount: 2 -> 2 / (2 + 10) = 2/12 = 1/6
+      expect(modEnc.context.values[knownCountIdx]).toBeCloseTo(2 / 12, 5);
+      // valSum: 18 -> 18 / (18 + 30) = 18/48 = 3/8
+      expect(modEnc.context.values[valSumIdx]).toBeCloseTo(18 / 48, 5);
     });
 
     it("2-4. turnCount がインクリメントされた場合、turn_count 特徴量が正しく反映されること", () => {
@@ -612,8 +617,9 @@ describe("Decision Feature Schema v2 - Encoder-Level Defensive Privacy Tests", (
       const modEnc = DecisionFeatureEncoder.encode(modReq);
 
       const tcIdx = CONTEXT_FEATURE_NAMES.indexOf("turn_count");
-      expect(baseEnc.context.values[tcIdx]).toBe(3);
-      expect(modEnc.context.values[tcIdx]).toBe(7);
+      // turn_count: scale 10 => x / (x + 10)
+      expect(baseEnc.context.values[tcIdx]).toBeCloseTo(3 / 13, 5);
+      expect(modEnc.context.values[tcIdx]).toBeCloseTo(7 / 17, 5);
     });
 
     it("2-5. ターンプレイヤーが交代した場合、self_is_turn_player と opponent_is_turn_player が反転すること", () => {

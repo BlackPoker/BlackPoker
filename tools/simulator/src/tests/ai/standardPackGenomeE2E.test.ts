@@ -65,7 +65,11 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
     expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
 
     const tcIdx = CONTEXT_FEATURE_NAMES.indexOf("turn_count");
-    expect(encoded.context.values[tcIdx]).toBe(req.observation.turnCount);
+    // Schema v5: turn_count is scaled via saturatingRational(tc, 10)
+    expect(encoded.context.values[tcIdx]).toBeCloseTo(
+      req.observation.turnCount / (req.observation.turnCount + 10),
+      10
+    );
 
     // Standard + Pack では両プレイヤーにパックが配備されている
     const selfPackCountIdx = CONTEXT_FEATURE_NAMES.indexOf("self_pack_count");
@@ -151,7 +155,11 @@ describe("Standard + Pack Genome E2E (BP-SIM-AI-FEATURE-SCHEMA-V2)", () => {
 
       const encoded = DecisionFeatureEncoder.encode(req);
       const tcIdx = CONTEXT_FEATURE_NAMES.indexOf("turn_count");
-      expect(encoded.context.values[tcIdx]).toBe(req.observation.turnCount);
+      // Schema v5: turn_count is scaled via saturatingRational(tc, 10)
+      expect(encoded.context.values[tcIdx]).toBeCloseTo(
+        req.observation.turnCount / (req.observation.turnCount + 10),
+        10
+      );
 
       // 対戦進行中も Standard + Pack では Rare / Trump は 0 であること
       const selfRareIdx = CONTEXT_FEATURE_NAMES.indexOf("self_rare_count");

@@ -1,7 +1,7 @@
 /**
  * DecisionFeatureTypes.ts
  *
- * BlackPoker Simulator - AI Feature Schema v4
+ * BlackPoker Simulator - AI Feature Schema v5
  *
  * 【設計原則】
  * 1. 汎用観測情報の完全網羅:
@@ -16,15 +16,18 @@
  *    観測不能な秘密情報は一切特徴量へ含めない。
  * 4. 固定長・順序非依存・決定論的:
  *    特徴量次元数・順序は不変であり、同一観測情報に対して完全に決定論的な数値を返します。
+ * 5. 正規化・スケーリング整合性 (Schema v5):
+ *    全306特徴量は Canonical Scaling Registry に基づき bounded domain へスケーリングされ、
+ *    DNA Mutation の増幅・歪みを防止します。
  */
 
 /**
- * Decision Feature Schema Version (Version 4)
+ * Decision Feature Schema Version (Version 5)
  */
-export const FEATURE_SCHEMA_VERSION = 4;
+export const FEATURE_SCHEMA_VERSION = 5;
 
 /**
- * Ordered list of Context Feature names (Version 3)
+ * Ordered list of Context Feature names (Version 5)
  */
 export const CONTEXT_FEATURE_NAMES = [
   // 1. Decision Context (Viewer Relative) (8)

@@ -196,4 +196,76 @@ describe("Architecture Boundary & Dependency Direction Tests (Phase 21B.3)", () 
 
     expect(violations).toEqual([]);
   });
+
+  it("GenomeScorer, GenomePolicy, GeneticMutation, and rules layers must NOT import DecisionFeatureScaler or DecisionFeatureScalingRegistry", () => {
+    const targetFilesOrDirs = [
+      path.resolve(srcDir, "engine/ai/GenomeScorer.ts"),
+      path.resolve(srcDir, "engine/ai/GenomePolicy.ts"),
+      path.resolve(srcDir, "engine/ai/GeneticMutation.ts"),
+      path.resolve(srcDir, "domain/rules"),
+      path.resolve(srcDir, "engine/rules"),
+    ];
+
+    const forbiddenPatterns = [
+      /from\s+['"].*DecisionFeatureScaler.*['"]/,
+      /from\s+['"].*DecisionFeatureScalingRegistry.*['"]/,
+    ];
+
+    const violations: Array<{ file: string; match: string }> = [];
+
+    for (const item of targetFilesOrDirs) {
+      const files = fs.statSync(item).isDirectory() ? getTsFiles(item) : [item];
+      for (const file of files) {
+        const content = fs.readFileSync(file, "utf-8");
+        for (const pattern of forbiddenPatterns) {
+          const match = content.match(pattern);
+          if (match) {
+            violations.push({
+              file: path.relative(srcDir, file),
+              match: match[0],
+            });
+          }
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it("Production AI runtime code (src/domain/ai, src/engine/ai) must NOT import docs/*.json or Node fs/path", () => {
+    const targetDirs = [
+      path.resolve(srcDir, "domain/ai"),
+      path.resolve(srcDir, "engine/ai"),
+    ];
+
+    const forbiddenPatterns = [
+      /from\s+['"].*docs\/.*\.json['"]/,
+      /import\s+.*['"].*docs\/.*\.json['"]/,
+      /from\s+['"](node:)?fs(\/.*)?['"]/,
+      /from\s+['"](node:)?path(\/.*)?['"]/,
+      /require\(['"](node:)?fs(\/.*)?['"]\)/,
+      /require\(['"](node:)?path(\/.*)?['"]\)/,
+    ];
+
+    const violations: Array<{ file: string; match: string }> = [];
+
+    for (const dir of targetDirs) {
+      const files = getTsFiles(dir);
+      for (const file of files) {
+        const content = fs.readFileSync(file, "utf-8");
+        for (const pattern of forbiddenPatterns) {
+          const match = content.match(pattern);
+          if (match) {
+            violations.push({
+              file: path.relative(srcDir, file),
+              match: match[0],
+            });
+          }
+        }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
 });
+

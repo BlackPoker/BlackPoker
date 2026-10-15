@@ -146,10 +146,10 @@ describe("Down vs Up Request-Conditioned Selection Scorer Proof (Feature Schema 
     expect(downEncoded.patterns[0].values).toEqual(upEncoded.patterns[0].values);
     expect(downEncoded.patterns[1].values).toEqual(upEncoded.patterns[1].values);
 
-    // 候補A (小型) と 候補B (大型) では、Unit Size 等の汎用 Pattern 特徴量が異なる
+    // 候補A (小型) と 候補B (大型) では、Unit Size 等の汎用 Pattern 特徴量が異なる (Schema v5: scale 10 -> 2/12 vs 8/18)
     const sizeMaxIdx = PATTERN_FEATURE_NAMES.indexOf("effect_selected_unit_size_max");
-    expect(downEncoded.patterns[0].values[sizeMaxIdx]).toBe(2);
-    expect(downEncoded.patterns[1].values[sizeMaxIdx]).toBe(8);
+    expect(downEncoded.patterns[0].values[sizeMaxIdx]).toBeCloseTo(2 / 12, 10);
+    expect(downEncoded.patterns[1].values[sizeMaxIdx]).toBeCloseTo(8 / 18, 10);
   });
 
   it("2. encodes distinct Request Context features between Down and Up", () => {

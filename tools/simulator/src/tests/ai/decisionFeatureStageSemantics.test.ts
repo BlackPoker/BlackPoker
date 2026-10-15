@@ -213,7 +213,8 @@ describe("Stage Semantics Preservation & Source Request Observation Separation",
       };
 
       const encoded = DecisionFeatureEncoder.encode(req);
-      expect(getContextValue(encoded, "stage_depth")).toBe(2);
+      // Schema v5: stage_depth is scaled via saturatingRational(2, 4) = 2 / 6
+      expect(getContextValue(encoded, "stage_depth")).toBeCloseTo(2 / 6, 10);
       expect(getContextValue(encoded, "request_action_speed_immediate")).toBe(1);
       expect(getContextValue(encoded, "request_action_timing_quick")).toBe(1);
     });
@@ -279,7 +280,8 @@ describe("Stage Semantics Preservation & Source Request Observation Separation",
       };
 
       const encoded = DecisionFeatureEncoder.encode(req);
-      expect(getContextValue(encoded, "stage_depth")).toBe(1);
+      // Schema v5: stage_depth is scaled via saturatingRational(1, 4) = 0.2
+      expect(getContextValue(encoded, "stage_depth")).toBeCloseTo(0.2, 10);
       expect(getContextValue(encoded, "request_action_speed_normal")).toBe(1);
       expect(getContextValue(encoded, "request_action_timing_main")).toBe(1);
     });
@@ -363,8 +365,8 @@ describe("Stage Semantics Preservation & Source Request Observation Separation",
       const pStage = encoded.patterns[0];
       const pOutside = encoded.patterns[1];
 
-      // パターン0: 実 Stage 上の相手リクエストとして正しくカウント
-      expect(getPatternValue(pStage, "effect_selected_request_count")).toBe(1);
+      // パターン0: 実 Stage 上の相手リクエストとして正しくカウント (Schema v5: scale 4 -> 1/5 = 0.2)
+      expect(getPatternValue(pStage, "effect_selected_request_count")).toBeCloseTo(0.2, 10);
       expect(getPatternValue(pStage, "effect_selected_request_is_opponent")).toBe(1);
       expect(getPatternValue(pStage, "effect_selected_request_is_self")).toBe(0);
 

@@ -171,7 +171,8 @@ describe("Request Target Context & Privacy Tests (Feature Schema v3)", () => {
       expect(getContextValue(encoded, "request_target_is_unit")).toBe(1);
       expect(getContextValue(encoded, "request_target_is_self")).toBe(1);
       expect(getContextValue(encoded, "request_target_is_opponent")).toBe(0);
-      expect(getContextValue(encoded, "request_target_unit_size")).toBe(5);
+      // Schema v5: size 5 scaled with scale 10 -> 5/15 = 1/3
+      expect(getContextValue(encoded, "request_target_unit_size")).toBeCloseTo(5 / 15, 10);
       expect(getContextValue(encoded, "request_target_unit_is_drive")).toBe(1);
       expect(getContextValue(encoded, "request_target_unit_is_charge")).toBe(0);
       expect(getContextValue(encoded, "request_target_unit_face_up")).toBe(1);
@@ -222,7 +223,8 @@ describe("Request Target Context & Privacy Tests (Feature Schema v3)", () => {
       expect(getContextValue(encoded, "request_target_is_unit")).toBe(1);
       expect(getContextValue(encoded, "request_target_is_self")).toBe(0);
       expect(getContextValue(encoded, "request_target_is_opponent")).toBe(1);
-      expect(getContextValue(encoded, "request_target_unit_size")).toBe(8);
+      // Schema v5: size 8 scaled with scale 10 -> 8/18
+      expect(getContextValue(encoded, "request_target_unit_size")).toBeCloseTo(8 / 18, 10);
       expect(getContextValue(encoded, "request_target_unit_is_charge")).toBe(1);
       expect(getContextValue(encoded, "request_target_unit_face_up")).toBe(1);
     });

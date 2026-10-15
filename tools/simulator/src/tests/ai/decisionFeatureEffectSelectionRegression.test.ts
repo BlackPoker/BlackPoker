@@ -196,20 +196,20 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       expect(encoded.patterns[0].values[unitCountIdx]).toBe(0);
       expect(encoded.patterns[0].values[sizeSumIdx]).toBe(0);
 
-      // 1体 (Size 2)
-      expect(encoded.patterns[1].values[unitCountIdx]).toBe(1);
-      expect(encoded.patterns[1].values[sizeSumIdx]).toBe(2);
-      expect(encoded.patterns[1].values[sizeMaxIdx]).toBe(2);
+      // 1体 (Size 2) - Schema v5 scaled (unitCount scale 5 -> 1/6, sizeSum scale 20 -> 2/22, sizeMax scale 10 -> 2/12)
+      expect(encoded.patterns[1].values[unitCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[1].values[sizeSumIdx]).toBeCloseTo(2 / 22, 10);
+      expect(encoded.patterns[1].values[sizeMaxIdx]).toBeCloseTo(2 / 12, 10);
 
-      // 1体 (Size 8)
-      expect(encoded.patterns[2].values[unitCountIdx]).toBe(1);
-      expect(encoded.patterns[2].values[sizeSumIdx]).toBe(8);
-      expect(encoded.patterns[2].values[sizeMaxIdx]).toBe(8);
+      // 1体 (Size 8) - Schema v5 scaled (sizeSum scale 20 -> 8/28, sizeMax scale 10 -> 8/18)
+      expect(encoded.patterns[2].values[unitCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[2].values[sizeSumIdx]).toBeCloseTo(8 / 28, 10);
+      expect(encoded.patterns[2].values[sizeMaxIdx]).toBeCloseTo(8 / 18, 10);
 
-      // 2体 (合計 10)
-      expect(encoded.patterns[3].values[unitCountIdx]).toBe(2);
-      expect(encoded.patterns[3].values[sizeSumIdx]).toBe(10);
-      expect(encoded.patterns[3].values[sizeMaxIdx]).toBe(8);
+      // 2体 (合計 10) - Schema v5 scaled (unitCount scale 5 -> 2/7, sizeSum scale 20 -> 10/30, sizeMax scale 10 -> 8/18)
+      expect(encoded.patterns[3].values[unitCountIdx]).toBeCloseTo(2 / 7, 10);
+      expect(encoded.patterns[3].values[sizeSumIdx]).toBeCloseTo(10 / 30, 10);
+      expect(encoded.patterns[3].values[sizeMaxIdx]).toBeCloseTo(8 / 18, 10);
 
       // 4パターン全ての特徴量ベクトルが相互に相違していることを確認
       const p0 = encoded.patterns[0].values.join(",");
@@ -284,22 +284,22 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       expect(encoded.patterns[0].values[assignSelSizeSumIdx]).toBe(0);
       expect(encoded.patterns[0].values[deltaSumIdx]).toBe(0);
 
-      // Size 2 でブロック (Delta = 2 - 5 = -3, negative delta count = 1)
-      expect(encoded.patterns[1].values[assignSelCountIdx]).toBe(1);
-      expect(encoded.patterns[1].values[assignSelSizeSumIdx]).toBe(2);
-      expect(encoded.patterns[1].values[deltaSumIdx]).toBe(-3);
+      // Size 2 でブロック (Delta = 2 - 5 = -3, negative delta count = 1) - Schema v5 scaled (sizeSum scale 20 -> 2/22, negDelta scale 4 -> 1/5 = 0.2, oppToSelf scale 4 -> 1/5 = 0.2)
+      expect(encoded.patterns[1].values[assignSelCountIdx]).toBeCloseTo(1 / 5, 10);
+      expect(encoded.patterns[1].values[assignSelSizeSumIdx]).toBeCloseTo(2 / 22, 10);
+      expect(encoded.patterns[1].values[deltaSumIdx]).toBeCloseTo(-3 / 23, 10);
       expect(encoded.patterns[1].values[posDeltaIdx]).toBe(0);
-      expect(encoded.patterns[1].values[negDeltaIdx]).toBe(1);
-      expect(encoded.patterns[1].values[oppToSelfIdx]).toBe(1); // opp attack -> self blocker
+      expect(encoded.patterns[1].values[negDeltaIdx]).toBeCloseTo(0.2, 10);
+      expect(encoded.patterns[1].values[oppToSelfIdx]).toBeCloseTo(0.2, 10); // opp attack -> self blocker
       expect(encoded.patterns[1].values[selfToOppIdx]).toBe(0);
 
-      // Size 8 でブロック (Delta = 8 - 5 = +3, positive delta count = 1)
-      expect(encoded.patterns[2].values[assignSelCountIdx]).toBe(1);
-      expect(encoded.patterns[2].values[assignSelSizeSumIdx]).toBe(8);
-      expect(encoded.patterns[2].values[deltaSumIdx]).toBe(3);
-      expect(encoded.patterns[2].values[posDeltaIdx]).toBe(1);
+      // Size 8 でブロック (Delta = 8 - 5 = +3, positive delta count = 1) - Schema v5 scaled (sizeSum scale 20 -> 8/28, posDelta scale 4 -> 1/5 = 0.2, oppToSelf scale 4 -> 1/5 = 0.2)
+      expect(encoded.patterns[2].values[assignSelCountIdx]).toBeCloseTo(1 / 5, 10);
+      expect(encoded.patterns[2].values[assignSelSizeSumIdx]).toBeCloseTo(8 / 28, 10);
+      expect(encoded.patterns[2].values[deltaSumIdx]).toBeCloseTo(3 / 23, 10);
+      expect(encoded.patterns[2].values[posDeltaIdx]).toBeCloseTo(0.2, 10);
       expect(encoded.patterns[2].values[negDeltaIdx]).toBe(0);
-      expect(encoded.patterns[2].values[oppToSelfIdx]).toBe(1);
+      expect(encoded.patterns[2].values[oppToSelfIdx]).toBeCloseTo(0.2, 10);
       expect(encoded.patterns[2].values[selfToOppIdx]).toBe(0);
 
       // 全て相互に異なる
@@ -349,24 +349,24 @@ describe("Generic Effect Selection Regression & Synthetic Future Action (Feature
       const spadeCountIdx = PATTERN_FEATURE_NAMES.indexOf("effect_selected_card_spade_count");
       const heartCountIdx = PATTERN_FEATURE_NAMES.indexOf("effect_selected_card_heart_count");
 
-      // ♠A
-      expect(encoded.patterns[0].values[cardCountIdx]).toBe(1);
-      expect(encoded.patterns[0].values[aceCountIdx]).toBe(1);
-      expect(encoded.patterns[0].values[spadeCountIdx]).toBe(1);
-      expect(encoded.patterns[0].values[valueSumIdx]).toBe(1);
+      // ♠A - Schema v5 scaled (cardCount scale 5 -> 1/6, aceCount scale 4 -> 1/5, spadeCount scale 4 -> 1/5, valueSum scale 20 -> 1/21)
+      expect(encoded.patterns[0].values[cardCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[0].values[aceCountIdx]).toBeCloseTo(0.2, 10);
+      expect(encoded.patterns[0].values[spadeCountIdx]).toBeCloseTo(0.2, 10);
+      expect(encoded.patterns[0].values[valueSumIdx]).toBeCloseTo(1 / 21, 10);
       expect(encoded.patterns[0].values[jokerCountIdx]).toBe(0);
 
-      // ♥7
-      expect(encoded.patterns[1].values[cardCountIdx]).toBe(1);
-      expect(encoded.patterns[1].values[numericCountIdx]).toBe(1);
-      expect(encoded.patterns[1].values[heartCountIdx]).toBe(1);
-      expect(encoded.patterns[1].values[valueSumIdx]).toBe(7);
+      // ♥7 - Schema v5 scaled (cardCount scale 5 -> 1/6, numericCount scale 5 -> 1/6, heartCount scale 4 -> 1/5, valueSum scale 20 -> 7/27)
+      expect(encoded.patterns[1].values[cardCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[1].values[numericCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[1].values[heartCountIdx]).toBeCloseTo(0.2, 10);
+      expect(encoded.patterns[1].values[valueSumIdx]).toBeCloseTo(7 / 27, 10);
       expect(encoded.patterns[1].values[aceCountIdx]).toBe(0);
 
-      // Joker
-      expect(encoded.patterns[2].values[cardCountIdx]).toBe(1);
-      expect(encoded.patterns[2].values[jokerCountIdx]).toBe(1);
-      expect(encoded.patterns[2].values[valueSumIdx]).toBe(14);
+      // Joker - Schema v5: Joker is rank 0, so valueSum is 0, jokerCount scale 4 -> 1/5
+      expect(encoded.patterns[2].values[cardCountIdx]).toBeCloseTo(1 / 6, 10);
+      expect(encoded.patterns[2].values[jokerCountIdx]).toBeCloseTo(0.2, 10);
+      expect(encoded.patterns[2].values[valueSumIdx]).toBe(0);
       expect(encoded.patterns[2].values[numericCountIdx]).toBe(0);
 
       // 3候補全てが相互に完全に区別可能

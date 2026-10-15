@@ -127,8 +127,9 @@ export class KnownCardAggregateEncoder {
       const prevCount = rankCounts.get(canonicalRank) || 0;
       rankCounts.set(canonicalRank, prevCount + 1);
 
-      // 数値統計
-      const val = typeof c.value === "number" && Number.isFinite(c.value) ? c.value : 0;
+      // 数値統計 (Schema v5: Joker は rank 0 として集約)
+      const rawVal = typeof c.value === "number" && Number.isFinite(c.value) ? c.value : 0;
+      const val = isJoker ? 0 : rawVal;
       valueSum += val;
       if (val > valueMax) valueMax = val;
       if (val < valueMin) valueMin = val;

@@ -246,9 +246,9 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     };
   };
 
-  it("A. Feature Schema v4 の次元数と名前配列が正しく固定されていること", () => {
-    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(4);
-    expect(FEATURE_SCHEMA_VERSION).toBe(4);
+  it("A. Feature Schema v5 の次元数と名前配列が正しく固定されていること", () => {
+    expect(DecisionFeatureEncoder.SCHEMA_VERSION).toBe(5);
+    expect(FEATURE_SCHEMA_VERSION).toBe(5);
     expect(CONTEXT_FEATURE_NAMES.length).toBe(CONTEXT_FEATURE_DIMENSION);
     expect(PATTERN_FEATURE_NAMES.length).toBe(PATTERN_FEATURE_DIMENSION);
     expect(DecisionFeatureEncoder.CONTEXT_DIMENSION).toBe(CONTEXT_FEATURE_DIMENSION);
@@ -273,7 +273,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const json = JSON.stringify(encoded);
     const parsed = JSON.parse(json);
 
-    expect(parsed.featureSchemaVersion).toBe(4);
+    expect(parsed.featureSchemaVersion).toBe(5);
     expect(parsed.context.values).toEqual(encoded.context.values);
     expect(parsed.patterns.length).toBe(encoded.patterns.length);
     expect(parsed.patterns[0].values).toEqual(encoded.patterns[0].values);
@@ -708,10 +708,11 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const sumIdx = PATTERN_FEATURE_NAMES.indexOf("key_card_value_sum");
     const maxIdx = PATTERN_FEATURE_NAMES.indexOf("key_card_value_max");
 
-    expect(valOrig[sumIdx]).toBe(1 + 10);
-    expect(valMod[sumIdx]).toBe(13 + 10);
-    expect(valOrig[maxIdx]).toBe(10);
-    expect(valMod[maxIdx]).toBe(13);
+    // Schema v5: sum scale 20 -> 11/31 vs 23/43, max bound 13 -> 10/13 vs 1.0
+    expect(valOrig[sumIdx]).toBeCloseTo(11 / 31, 10);
+    expect(valMod[sumIdx]).toBeCloseTo(23 / 43, 10);
+    expect(valOrig[maxIdx]).toBeCloseTo(10 / 13, 10);
+    expect(valMod[maxIdx]).toBe(1.0);
   });
 
   it("L. パターンのコスト差 (手札破棄 vs ライフ支払い) が特徴量に正しく反映されること", () => {
@@ -736,8 +737,9 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const discardIdx = PATTERN_FEATURE_NAMES.indexOf("cost_discard_count");
     const lifeIdx = PATTERN_FEATURE_NAMES.indexOf("cost_life_count");
 
+    // Schema v5: cost_life_count scale 4 -> 2/6 = 1/3
     expect(patVal[discardIdx]).toBe(0);
-    expect(patVal[lifeIdx]).toBe(2);
+    expect(patVal[lifeIdx]).toBeCloseTo(2 / 6, 10);
   });
 
   it("M. PASS, ACTION, EFFECT_SELECTION が特徴量上で明確に区別されること", () => {
@@ -823,7 +825,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
 
     expect(() => {
       const encoded = DecisionFeatureEncoder.encode(reqFuture);
-      expect(encoded.featureSchemaVersion).toBe(4);
+      expect(encoded.featureSchemaVersion).toBe(5);
       expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
       expect(encoded.patterns[1].values.length).toBe(PATTERN_FEATURE_DIMENSION);
     }).not.toThrow();
@@ -839,7 +841,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     if (step.type === "WAITING_FOR_DECISION") {
       const encoded = DecisionFeatureEncoder.encode(step.request);
 
-      expect(encoded.featureSchemaVersion).toBe(4);
+      expect(encoded.featureSchemaVersion).toBe(5);
       expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
       expect(encoded.patterns.length).toBe(step.request.patterns.length);
 
@@ -967,7 +969,7 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     // 5. エンコード実行
     const encoded = DecisionFeatureEncoder.encode(effReq);
 
-    expect(encoded.featureSchemaVersion).toBe(4);
+    expect(encoded.featureSchemaVersion).toBe(5);
     expect(encoded.context.values.length).toBe(CONTEXT_FEATURE_DIMENSION);
     for (const val of encoded.context.values) {
       expect(Number.isFinite(val)).toBe(true);
@@ -977,9 +979,9 @@ describe("Decision Feature Contract v1 & Generic Feature Encoder v1 (Phase 3.0)"
     const effSrcIdx = CONTEXT_FEATURE_NAMES.indexOf("source_is_effect_resolution");
     expect(encoded.context.values[effSrcIdx]).toBe(1);
 
-    // context の legal_effect_selection_pattern_count が patterns.length と一致すること
+    // context の legal_effect_selection_pattern_count が patterns.length (4) と一致すること (Schema v5: scale 50 -> 4/54)
     const effCountIdx = CONTEXT_FEATURE_NAMES.indexOf("legal_effect_selection_pattern_count");
-    expect(encoded.context.values[effCountIdx]).toBe(effReq.patterns.length);
+    expect(encoded.context.values[effCountIdx]).toBeCloseTo(effReq.patterns.length / (effReq.patterns.length + 50), 10);
 
     // patterns の検証
     expect(encoded.patterns.length).toBe(effReq.patterns.length);

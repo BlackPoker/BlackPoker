@@ -1,9 +1,9 @@
 /**
  * DecisionFeatureEncoder.ts
  *
- * BlackPoker Simulator - AI Feature Schema v4
+ * BlackPoker Simulator - AI Feature Schema v5
  *
- * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 4)。
+ * DecisionRequest を合法的かつ決定論的な数値特徴量ベクトルへ変換する汎用エンコーダー (Version 5)。
  *
  * 【入力境界の原則】
  * 本エンコーダーの入力は合法的観測情報である Readonly<DecisionRequest> のみです。
@@ -16,6 +16,10 @@
  * 【Master + Extra 汎用原則】
  * 特定のアクション名 (action.attack 等) に対する手動ルールや個別 one-hot カラムをハードコードせず、
  * 固定長 multi-bucket hashing (StableIdentityEncoder) および汎用メタデータによって表現します。
+ *
+ * 【正規化・スケーリング統合 (Schema v5)】
+ * 生の抽出配列は DecisionFeatureScaler を介して厳格に有界区間へ正規化され、
+ * NaN/Infinity/定義域違反に対する fail-closed 安全性を保証します。
  */
 
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
@@ -35,6 +39,7 @@ import {
   EMPTY_KNOWN_CARD_AGGREGATE,
 } from "./KnownCardAggregateEncoder";
 import { StableIdentityEncoder } from "./StableIdentityEncoder";
+import { DecisionFeatureScaler } from "./DecisionFeatureScaler";
 
 export class DecisionFeatureEncoder {
   public static readonly SCHEMA_VERSION = FEATURE_SCHEMA_VERSION;
@@ -415,7 +420,8 @@ export class DecisionFeatureEncoder {
       const c = sourceKeyCards[i];
       if (c && c.visibility === "KNOWN") {
         reqKeyCardKnownCount++;
-        const val = (c as KnownCardView).value ?? 0;
+        const isJk = (c.suit || "").toUpperCase() === "J" || (c.suit || "").toUpperCase() === "JOKER" || ((c as any).rank || "").toUpperCase() === "JOKER";
+        const val = isJk ? 0 : ((c as KnownCardView).value ?? 0);
         reqKeyCardValueSum += val;
         if (val > reqKeyCardValueMax) reqKeyCardValueMax = val;
         if (val < reqMinVal) reqMinVal = val;
@@ -632,7 +638,7 @@ export class DecisionFeatureEncoder {
       reqTargetUnitFaceDown,
     ];
 
-    return values.map((v) => (Number.isFinite(v) ? v : 0));
+    return DecisionFeatureScaler.scaleContext(values);
   }
 
   /**
@@ -830,15 +836,15 @@ export class DecisionFeatureEncoder {
             const instanceId = typeof cardRef === "string" ? cardRef : (cardRef.cardInstanceId || cardRef.id);
             const knownCard = instanceId ? allKnownCardsMap.get(instanceId) : undefined;
             if (knownCard) {
-              keyCardKnownCount++;
-              const val = knownCard.value ?? 0;
+              const suit = (knownCard.suit || "").toUpperCase();
+              const rank = (knownCard.rank || "").toUpperCase();
+              const isJk = suit === "J" || suit === "JOKER" || rank === "JOKER";
+              const val = isJk ? 0 : (knownCard.value ?? 0);
               keyCardValueSum += val;
               if (val > keyCardValueMax) keyCardValueMax = val;
               if (val < minVal) minVal = val;
 
-              const suit = (knownCard.suit || "").toUpperCase();
-              const rank = (knownCard.rank || "").toUpperCase();
-              if (suit === "J" || suit === "JOKER" || rank === "JOKER") {
+              if (isJk) {
                 keyCardJokerCount++;
               } else if (suit === "S" || suit === "SPADE") {
                 keyCardSpadeCount++;
@@ -1330,14 +1336,14 @@ export class DecisionFeatureEncoder {
         orderedItemCount,
       ];
 
-      const sanitizedValues = patternValues.map((v) => (Number.isFinite(v) ? v : 0));
+      const scaledValues = DecisionFeatureScaler.scalePattern(patternValues);
       const logicalKey = generateLogicalPatternKey(p);
 
       encodedPatterns.push({
         patternRef: (p as any).patternRef ?? i,
         kind: p.kind,
         logicalPatternKey: logicalKey,
-        values: sanitizedValues,
+        values: scaledValues,
       });
     }
 

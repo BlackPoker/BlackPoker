@@ -817,7 +817,7 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
 
     // 4. DecisionFeatureEncoder (23452次元特徴量エンコーダ)
     const encoded = DecisionFeatureEncoder.encode(nextStep.request);
-    expect(encoded.featureSchemaVersion).toBe(4);
+    expect(encoded.featureSchemaVersion).toBe(5);
     expect(encoded.context.values.length).toBe(DecisionFeatureEncoder.CONTEXT_DIMENSION);
     expect(encoded.patterns.length).toBe(nextStep.request.patterns.length);
   });

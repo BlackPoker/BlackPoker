@@ -69,7 +69,7 @@ export interface DecisionDNAMetadata {
 export interface DecisionDNA {
   /** DNA Format Version (必ず 1) */
   readonly dnaFormatVersion: number;
-  /** 対応する Feature Schema Version (DecisionFeatureEncoder と一致必須, 現在 2) */
+  /** 対応する Feature Schema Version (DecisionFeatureEncoder と一致必須, 現在 5) */
   readonly featureSchemaVersion: number;
   /** Scoring Model 識別子 ("linear-bilinear-v1") */
   readonly scoringModel: string;

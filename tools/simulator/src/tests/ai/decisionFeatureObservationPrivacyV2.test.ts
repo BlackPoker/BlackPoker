@@ -420,11 +420,13 @@ describe("Decision Feature Schema v2 - End-to-End GameState Observation Privacy 
       const sumIdx = CONTEXT_FEATURE_NAMES.indexOf("self_hand_value_sum");
       const pairIdx = CONTEXT_FEATURE_NAMES.indexOf("self_hand_pair_rank_count");
 
-      expect(encA.context.values[sumIdx]).toBe(23);
-      expect(encB.context.values[sumIdx]).toBe(2);
+      // self_hand_value_sum: scale 30 => x / (x + 30)
+      expect(encA.context.values[sumIdx]).toBeCloseTo(23 / 53, 5);
+      expect(encB.context.values[sumIdx]).toBeCloseTo(2 / 32, 5);
 
+      // self_hand_pair_rank_count: scale 4 => x / (x + 4)
       expect(encA.context.values[pairIdx]).toBe(0);
-      expect(encB.context.values[pairIdx]).toBe(1);
+      expect(encB.context.values[pairIdx]).toBeCloseTo(1 / 5, 5);
     });
 
     it("2-2. 相手の手札枚数を変更した場合、opponent_hand_count と relative_hand_count が正しく変化すること", () => {
@@ -446,12 +448,14 @@ describe("Decision Feature Schema v2 - End-to-End GameState Observation Privacy 
       const oppHandIdx = CONTEXT_FEATURE_NAMES.indexOf("opponent_hand_count");
       const relHandIdx = CONTEXT_FEATURE_NAMES.indexOf("relative_hand_count");
 
-      expect(encA.context.values[oppHandIdx]).toBe(2);
-      expect(encB.context.values[oppHandIdx]).toBe(4);
+      // opponent_hand_count: scale 10 => x / (x + 10)
+      expect(encA.context.values[oppHandIdx]).toBeCloseTo(2 / 12, 5);
+      expect(encB.context.values[oppHandIdx]).toBeCloseTo(4 / 14, 5);
 
-      // self(2) - opp(2) = 0, self(2) - opp(4) = -2
+      // relative_hand_count: scale 10 signed => x / (|x| + 10)
+      // self(2) - opp(2) = 0, self(2) - opp(4) = -2 -> -2 / (2 + 10) = -2/12 = -1/6
       expect(encA.context.values[relHandIdx]).toBe(0);
-      expect(encB.context.values[relHandIdx]).toBe(-2);
+      expect(encB.context.values[relHandIdx]).toBeCloseTo(-2 / 12, 5);
     });
 
     it("2-3. turnCount を進めた場合、turn_count 特徴量が正しく変化すること", () => {
@@ -467,8 +471,9 @@ describe("Decision Feature Schema v2 - End-to-End GameState Observation Privacy 
       const encB = DecisionFeatureEncoder.encode(reqB);
 
       const tcIdx = CONTEXT_FEATURE_NAMES.indexOf("turn_count");
-      expect(encA.context.values[tcIdx]).toBe(2);
-      expect(encB.context.values[tcIdx]).toBe(5);
+      // turn_count: scale 10 => x / (x + 10)
+      expect(encA.context.values[tcIdx]).toBeCloseTo(2 / 12, 5);
+      expect(encB.context.values[tcIdx]).toBeCloseTo(5 / 15, 5);
     });
 
     it("2-4. 自分のパックが開封された場合 (opened: true)、self_pack_opened とパック統計が正しく変化すること", () => {
@@ -494,9 +499,10 @@ describe("Decision Feature Schema v2 - End-to-End GameState Observation Privacy 
 
       expect(encB.context.values[openedIdx]).toBe(1);
       expect(encB.context.values[canViewIdx]).toBe(1);
-      expect(encB.context.values[knownCountIdx]).toBe(3);
-      // 5 + 6 + 7 = 18
-      expect(encB.context.values[valSumIdx]).toBe(18);
+      // knownCount: 3 -> 3 / (3 + 10) = 3 / 13
+      expect(encB.context.values[knownCountIdx]).toBeCloseTo(3 / 13, 5);
+      // 5 + 6 + 7 = 18 -> 18 / (18 + 30) = 18 / 48 = 3 / 8
+      expect(encB.context.values[valSumIdx]).toBeCloseTo(18 / 48, 5);
     });
   });
 });

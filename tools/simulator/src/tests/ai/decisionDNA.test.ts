@@ -88,7 +88,7 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA({ id: "zero-001", name: "Zero Agent" });
 
       expect(zeroDna.dnaFormatVersion).toBe(1);
-      expect(zeroDna.featureSchemaVersion).toBe(4);
+      expect(zeroDna.featureSchemaVersion).toBe(5);
       expect(zeroDna.scoringModel).toBe("linear-bilinear-v1");
       expect(zeroDna.contextDimension).toBe(163);
       expect(zeroDna.patternDimension).toBe(143);
