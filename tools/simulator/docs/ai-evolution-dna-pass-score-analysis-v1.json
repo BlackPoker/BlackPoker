@@ -1,0 +1,1277 @@
+{
+  "workId": "BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1",
+  "timestamp": "2026-10-15T00:14:44.218Z",
+  "nodeVersion": "v20.20.2",
+  "dimensions": {
+    "contextDimension": 163,
+    "patternDimension": 143,
+    "interactionDimension": 23309,
+    "totalWeights": 23452
+  },
+  "dnaInventory": [
+    {
+      "genomeId": "genome-001",
+      "isZeroDNA": true,
+      "totalWeights": 23452,
+      "nonZeroCount": 0,
+      "nonZeroPatternCount": 0,
+      "nonZeroInteractionCount": 0,
+      "topSampleGenes": []
+    },
+    {
+      "genomeId": "gen-000001-offspring-000000",
+      "isZeroDNA": false,
+      "totalWeights": 23452,
+      "nonZeroCount": 250,
+      "nonZeroPatternCount": 1,
+      "nonZeroInteractionCount": 249,
+      "topSampleGenes": [
+        {
+          "id": "P[107]:effect_option_bucket_4",
+          "type": "PATTERN",
+          "index": 107,
+          "patternIndex": 107,
+          "patternFeatureName": "effect_option_bucket_4",
+          "weight": 0.020259857177734375
+        },
+        {
+          "id": "I[1,115]:source_is_effect_resolutionxeffect_option_bucket_12",
+          "type": "INTERACTION",
+          "flatIndex": 258,
+          "contextIndex": 1,
+          "patternIndex": 115,
+          "contextFeatureName": "source_is_effect_resolution",
+          "patternFeatureName": "effect_option_bucket_12",
+          "weight": 0.06257858276367188
+        },
+        {
+          "id": "I[1,120]:source_is_effect_resolutionxeffect_selected_player_is_self",
+          "type": "INTERACTION",
+          "flatIndex": 263,
+          "contextIndex": 1,
+          "patternIndex": 120,
+          "contextFeatureName": "source_is_effect_resolution",
+          "patternFeatureName": "effect_selected_player_is_self",
+          "weight": 0.02386016845703125
+        },
+        {
+          "id": "I[1,137]:source_is_effect_resolutionxeffect_assignment_opp_to_self_count",
+          "type": "INTERACTION",
+          "flatIndex": 280,
+          "contextIndex": 1,
+          "patternIndex": 137,
+          "contextFeatureName": "source_is_effect_resolution",
+          "patternFeatureName": "effect_assignment_opp_to_self_count",
+          "weight": 0.09710006713867188
+        },
+        {
+          "id": "I[2,30]:self_is_turn_playerxcost_discard_count",
+          "type": "INTERACTION",
+          "flatIndex": 316,
+          "contextIndex": 2,
+          "patternIndex": 30,
+          "contextFeatureName": "self_is_turn_player",
+          "patternFeatureName": "cost_discard_count",
+          "weight": -0.029410552978515626
+        }
+      ]
+    },
+    {
+      "genomeId": "gen-000001-offspring-000001",
+      "isZeroDNA": false,
+      "totalWeights": 23452,
+      "nonZeroCount": 216,
+      "nonZeroPatternCount": 1,
+      "nonZeroInteractionCount": 215,
+      "topSampleGenes": [
+        {
+          "id": "P[62]:target_unit_size",
+          "type": "PATTERN",
+          "index": 62,
+          "patternIndex": 62,
+          "patternFeatureName": "target_unit_size",
+          "weight": -0.05873184204101563
+        },
+        {
+          "id": "I[0,8]:source_is_action_requestxaction_timing_main",
+          "type": "INTERACTION",
+          "flatIndex": 8,
+          "contextIndex": 0,
+          "patternIndex": 8,
+          "contextFeatureName": "source_is_action_request",
+          "patternFeatureName": "action_timing_main",
+          "weight": -0.06707382202148438
+        },
+        {
+          "id": "I[1,76]:source_is_effect_resolutionxeffect_selected_opponent_unit_count",
+          "type": "INTERACTION",
+          "flatIndex": 219,
+          "contextIndex": 1,
+          "patternIndex": 76,
+          "contextFeatureName": "source_is_effect_resolution",
+          "patternFeatureName": "effect_selected_opponent_unit_count",
+          "weight": 0.03420257568359375
+        },
+        {
+          "id": "I[4,78]:opponent_is_turn_playerxeffect_selected_unit_drive_count",
+          "type": "INTERACTION",
+          "flatIndex": 650,
+          "contextIndex": 4,
+          "patternIndex": 78,
+          "contextFeatureName": "opponent_is_turn_player",
+          "patternFeatureName": "effect_selected_unit_drive_count",
+          "weight": 0.03252105712890625
+        },
+        {
+          "id": "I[6,22]:turn_countxcandidate_action_bucket_9",
+          "type": "INTERACTION",
+          "flatIndex": 880,
+          "contextIndex": 6,
+          "patternIndex": 22,
+          "contextFeatureName": "turn_count",
+          "patternFeatureName": "candidate_action_bucket_9",
+          "weight": -0.07017822265625
+        }
+      ]
+    },
+    {
+      "genomeId": "gen-000001-offspring-000002",
+      "isZeroDNA": false,
+      "totalWeights": 23452,
+      "nonZeroCount": 240,
+      "nonZeroPatternCount": 3,
+      "nonZeroInteractionCount": 237,
+      "topSampleGenes": [
+        {
+          "id": "P[20]:candidate_action_bucket_7",
+          "type": "PATTERN",
+          "index": 20,
+          "patternIndex": 20,
+          "patternFeatureName": "candidate_action_bucket_7",
+          "weight": 0.052317810058593754
+        },
+        {
+          "id": "P[79]:effect_selected_unit_face_up_count",
+          "type": "PATTERN",
+          "index": 79,
+          "patternIndex": 79,
+          "patternFeatureName": "effect_selected_unit_face_up_count",
+          "weight": 0.08549423217773439
+        },
+        {
+          "id": "P[85]:effect_selected_unit_blocker_count",
+          "type": "PATTERN",
+          "index": 85,
+          "patternIndex": 85,
+          "patternFeatureName": "effect_selected_unit_blocker_count",
+          "weight": 0.09683532714843751
+        },
+        {
+          "id": "I[0,30]:source_is_action_requestxcost_discard_count",
+          "type": "INTERACTION",
+          "flatIndex": 30,
+          "contextIndex": 0,
+          "patternIndex": 30,
+          "contextFeatureName": "source_is_action_request",
+          "patternFeatureName": "cost_discard_count",
+          "weight": 0.05991439819335938
+        },
+        {
+          "id": "I[0,35]:source_is_action_requestxhas_key_card",
+          "type": "INTERACTION",
+          "flatIndex": 35,
+          "contextIndex": 0,
+          "patternIndex": 35,
+          "contextFeatureName": "source_is_action_request",
+          "patternFeatureName": "has_key_card",
+          "weight": 0.05179367065429688
+        }
+      ]
+    },
+    {
+      "genomeId": "gen-000001-offspring-000003",
+      "isZeroDNA": false,
+      "totalWeights": 23452,
+      "nonZeroCount": 244,
+      "nonZeroPatternCount": 0,
+      "nonZeroInteractionCount": 244,
+      "topSampleGenes": [
+        {
+          "id": "I[0,98]:source_is_action_requestxeffect_selected_card_value_sum",
+          "type": "INTERACTION",
+          "flatIndex": 98,
+          "contextIndex": 0,
+          "patternIndex": 98,
+          "contextFeatureName": "source_is_action_request",
+          "patternFeatureName": "effect_selected_card_value_sum",
+          "weight": 0.0660400390625
+        },
+        {
+          "id": "I[2,68]:self_is_turn_playerxeffect_type_unit",
+          "type": "INTERACTION",
+          "flatIndex": 354,
+          "contextIndex": 2,
+          "patternIndex": 68,
+          "contextFeatureName": "self_is_turn_player",
+          "patternFeatureName": "effect_type_unit",
+          "weight": 0.033061218261718754
+        },
+        {
+          "id": "I[2,86]:self_is_turn_playerxeffect_selected_card_count",
+          "type": "INTERACTION",
+          "flatIndex": 372,
+          "contextIndex": 2,
+          "patternIndex": 86,
+          "contextFeatureName": "self_is_turn_player",
+          "patternFeatureName": "effect_selected_card_count",
+          "weight": 0.04441680908203125
+        },
+        {
+          "id": "I[3,3]:self_is_chance_playerxpattern_is_other",
+          "type": "INTERACTION",
+          "flatIndex": 432,
+          "contextIndex": 3,
+          "patternIndex": 3,
+          "contextFeatureName": "self_is_chance_player",
+          "patternFeatureName": "pattern_is_other",
+          "weight": 0.0044403076171875
+        },
+        {
+          "id": "I[3,91]:self_is_chance_playerxeffect_selected_card_club_count",
+          "type": "INTERACTION",
+          "flatIndex": 520,
+          "contextIndex": 3,
+          "patternIndex": 91,
+          "contextFeatureName": "self_is_chance_player",
+          "patternFeatureName": "effect_selected_card_club_count",
+          "weight": 0.10255355834960939
+        }
+      ]
+    },
+    {
+      "genomeId": "gen-000001-offspring-000004",
+      "isZeroDNA": false,
+      "totalWeights": 23452,
+      "nonZeroCount": 211,
+      "nonZeroPatternCount": 3,
+      "nonZeroInteractionCount": 208,
+      "topSampleGenes": [
+        {
+          "id": "P[47]:key_unit_count",
+          "type": "PATTERN",
+          "index": 47,
+          "patternIndex": 47,
+          "patternFeatureName": "key_unit_count",
+          "weight": 0.045717620849609376
+        },
+        {
+          "id": "P[64]:target_unit_is_drive",
+          "type": "PATTERN",
+          "index": 64,
+          "patternIndex": 64,
+          "patternFeatureName": "target_unit_is_drive",
+          "weight": 0.06376724243164063
+        },
+        {
+          "id": "P[134]:effect_assignment_positive_delta_count",
+          "type": "PATTERN",
+          "index": 134,
+          "patternIndex": 134,
+          "patternFeatureName": "effect_assignment_positive_delta_count",
+          "weight": 0.002752685546875
+        },
+        {
+          "id": "I[0,116]:source_is_action_requestxeffect_option_bucket_13",
+          "type": "INTERACTION",
+          "flatIndex": 116,
+          "contextIndex": 0,
+          "patternIndex": 116,
+          "contextFeatureName": "source_is_action_request",
+          "patternFeatureName": "effect_option_bucket_13",
+          "weight": -0.05894546508789063
+        },
+        {
+          "id": "I[1,75]:source_is_effect_resolutionxeffect_selected_self_unit_count",
+          "type": "INTERACTION",
+          "flatIndex": 218,
+          "contextIndex": 1,
+          "patternIndex": 75,
+          "contextFeatureName": "source_is_effect_resolution",
+          "patternFeatureName": "effect_selected_self_unit_count",
+          "weight": 0.007189941406250001
+        }
+      ]
+    }
+  ],
+  "incompleteMatchSummary": {
+    "totalIncompleteMatches": 28,
+    "totalIncompleteDecisions": 14000,
+    "totalPassDecisions": 13877,
+    "passRatioOverall": 0.9912142857142857,
+    "passCategoryBreakdownOverall": {
+      "forcedPassCount": 3954,
+      "strictPassWinCount": 9923,
+      "tieBreakPassCount": 0,
+      "strictPassWinRatio": 0.715068098292138,
+      "tieBreakPassRatio": 0,
+      "forcedPassRatio": 0.2849319017078619
+    },
+    "offspringOnly": {
+      "totalDecisions": 11992,
+      "passCount": 11908,
+      "passRatio": 0.9929953302201467,
+      "forcedPass": 1985,
+      "strictPassWin": 9923,
+      "tieBreakPass": 0,
+      "strictPassWinRatio": 0.8333053409472624,
+      "tieBreakPassRatio": 0,
+      "forcedPassRatio": 0.16669465905273764
+    }
+  },
+  "scoreStatistics": {
+    "passVsBestNonPass": {
+      "passStats": {
+        "count": 9923,
+        "mean": 0.8081729414145228,
+        "min": 0,
+        "max": 5.7170654296875005
+      },
+      "bestNonPassStats": {
+        "count": 9923,
+        "mean": -0.7926659076310411,
+        "min": -10.772745513916016,
+        "max": 0.08835296630859375
+      },
+      "marginStats": {
+        "count": 9923,
+        "mean": 1.6008388490454801,
+        "min": 0.016985321044921873,
+        "max": 16.489810943603516
+      },
+      "causeDistribution": {
+        "PASS_UPLIFT": 1255,
+        "NONPASS_SUPPRESSION": 7432,
+        "MIXED_EFFECT": 1236,
+        "TIE_BREAK": 0
+      },
+      "causeRatios": {
+        "passUpliftRatio": 0.12647384863448555,
+        "nonPassSuppressionRatio": 0.7489670462561725,
+        "mixedEffectRatio": 0.12455910510934193,
+        "tieBreakRatio": 0
+      }
+    },
+    "passVsActionEnd": {
+      "passStats": {
+        "count": 6821,
+        "mean": 0.9187392515130184,
+        "min": 0,
+        "max": 5.081835937500001
+      },
+      "endStats": {
+        "count": 6821,
+        "mean": -0.5298832476025276,
+        "min": -2.314910125732422,
+        "max": 0.08835296630859375
+      },
+      "marginStats": {
+        "count": 6821,
+        "mean": 1.4486224991156091,
+        "min": 0.09021759033203126,
+        "max": 4.9934829711914075
+      },
+      "causeDistribution": {
+        "PASS_UPLIFT": 494,
+        "NONPASS_SUPPRESSION": 5091,
+        "MIXED_EFFECT": 1236,
+        "TIE_BREAK": 0
+      },
+      "causeRatios": {
+        "passUpliftRatio": 0.07242339832869081,
+        "nonPassSuppressionRatio": 0.7463714997800909,
+        "mixedEffectRatio": 0.1812051018912183,
+        "tieBreakRatio": 0
+      }
+    }
+  },
+  "topContributorsOverall": {
+    "toBestNonPass": [
+      {
+        "geneId": "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+        "type": "INTERACTION",
+        "weight": 0.045373535156250006,
+        "contextFeatureName": "legal_action_timing_quick_count",
+        "patternFeatureName": "pattern_is_pass",
+        "cumulativeDelta": 8019.50009765631,
+        "decisionCount": 2491,
+        "maxSingleDelta": 5.7170654296875005,
+        "meanDelta": 3.2193898424955076,
+        "typicalContextVal": 70.9530309112806,
+        "typicalPatternDiff": 1,
+        "primaryDirection": "PASS_UPLIFT"
+      },
+      {
+        "geneId": "I[16,34]:legal_action_timing_quick_countxcost_total_item_count",
+        "type": "INTERACTION",
+        "weight": -0.08271255493164063,
+        "contextFeatureName": "legal_action_timing_quick_count",
+        "patternFeatureName": "cost_total_item_count",
+        "cumulativeDelta": 3195.185997009214,
+        "decisionCount": 761,
+        "maxSingleDelta": 10.421781921386719,
+        "meanDelta": 4.198667538776891,
+        "typicalContextVal": 50.76215505913272,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[16,38]:legal_action_timing_quick_countxkey_card_value_sum",
+        "type": "INTERACTION",
+        "weight": -0.008103179931640626,
+        "contextFeatureName": "legal_action_timing_quick_count",
+        "patternFeatureName": "key_card_value_sum",
+        "cumulativeDelta": 3097.335187530575,
+        "decisionCount": 1991,
+        "maxSingleDelta": 4.53778076171875,
+        "meanDelta": 1.5556681002162607,
+        "typicalContextVal": 53.15670517327976,
+        "typicalPatternDiff": -3.3852335509794074,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+        "type": "INTERACTION",
+        "weight": -0.05854110717773438,
+        "contextFeatureName": "legal_non_pass_pattern_count",
+        "patternFeatureName": "has_cost",
+        "cumulativeDelta": 1904.6934631347663,
+        "decisionCount": 1977,
+        "maxSingleDelta": 5.619946289062501,
+        "meanDelta": 0.9634261320863765,
+        "typicalContextVal": 16.45725847243298,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[32,4]:self_hand_value_sumxhas_action",
+        "type": "INTERACTION",
+        "weight": -0.038523864746093754,
+        "contextFeatureName": "self_hand_value_sum",
+        "patternFeatureName": "has_action",
+        "cumulativeDelta": 1524.081137084965,
+        "decisionCount": 1476,
+        "maxSingleDelta": 2.2343841552734376,
+        "meanDelta": 1.032575296128025,
+        "typicalContextVal": 26.803523035230352,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[12,65]:legal_non_pass_pattern_countxtarget_unit_face_up",
+        "type": "INTERACTION",
+        "weight": -0.0537933349609375,
+        "contextFeatureName": "legal_non_pass_pattern_count",
+        "patternFeatureName": "target_unit_face_up",
+        "cumulativeDelta": 601.5170715332018,
+        "decisionCount": 487,
+        "maxSingleDelta": 1.2910400390625,
+        "meanDelta": 1.23514799082793,
+        "typicalContextVal": 22.960985626283367,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "P[62]:target_unit_size",
+        "type": "PATTERN",
+        "weight": -0.05873184204101563,
+        "patternFeatureName": "target_unit_size",
+        "cumulativeDelta": 299.00380783081073,
+        "decisionCount": 487,
+        "maxSingleDelta": 0.6460502624511719,
+        "meanDelta": 0.6139708579688106,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -10.453798767967145,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[54,22]:self_grave_top_card_valuexcandidate_action_bucket_9",
+        "type": "INTERACTION",
+        "weight": -0.043238830566406254,
+        "contextFeatureName": "self_grave_top_card_value",
+        "patternFeatureName": "candidate_action_bucket_9",
+        "cumulativeDelta": 276.0799331665008,
+        "decisionCount": 737,
+        "maxSingleDelta": 0.4756271362304688,
+        "meanDelta": 0.3745996379464054,
+        "typicalContextVal": 8.663500678426052,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[78,40]:opponent_fog_card_known_countxkey_card_value_min",
+        "type": "INTERACTION",
+        "weight": -0.0679443359375,
+        "contextFeatureName": "opponent_fog_card_known_count",
+        "patternFeatureName": "key_card_value_min",
+        "cumulativeDelta": 237.73723144531147,
+        "decisionCount": 251,
+        "maxSingleDelta": 1.2229980468750001,
+        "meanDelta": 0.9471602846426752,
+        "typicalContextVal": 1.9840637450199203,
+        "typicalPatternDiff": -7.035856573705179,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[27,9]:self_hand_numeric_countxaction_timing_quick",
+        "type": "INTERACTION",
+        "weight": -0.02868499755859375,
+        "contextFeatureName": "self_hand_numeric_count",
+        "patternFeatureName": "action_timing_quick",
+        "cumulativeDelta": 207.1917373657185,
+        "decisionCount": 1991,
+        "maxSingleDelta": 0.14342498779296875,
+        "meanDelta": 0.10406415739111928,
+        "typicalContextVal": 3.6278252134605724,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[94,5]:relative_grave_countxaction_speed_normal",
+        "type": "INTERACTION",
+        "weight": -0.13427429199218752,
+        "contextFeatureName": "relative_grave_count",
+        "patternFeatureName": "action_speed_normal",
+        "cumulativeDelta": 200.0686950683595,
+        "decisionCount": 498,
+        "maxSingleDelta": 0.6713714599609376,
+        "meanDelta": 0.40174436760714755,
+        "typicalContextVal": 2.9919678714859437,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[65,62]:opponent_life_visible_countxtarget_unit_size",
+        "type": "INTERACTION",
+        "weight": -0.011425781250000001,
+        "contextFeatureName": "opponent_life_visible_count",
+        "patternFeatureName": "target_unit_size",
+        "cumulativeDelta": 199.51699218750005,
+        "decisionCount": 748,
+        "maxSingleDelta": 0.5712890625000001,
+        "meanDelta": 0.26673394677473267,
+        "typicalContextVal": 5.002673796791444,
+        "typicalPatternDiff": -4.668449197860962,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[33,9]:self_hand_value_maxxaction_timing_quick",
+        "type": "INTERACTION",
+        "weight": -0.017748260498046876,
+        "contextFeatureName": "self_hand_value_max",
+        "patternFeatureName": "action_timing_quick",
+        "cumulativeDelta": 170.52528686523215,
+        "decisionCount": 759,
+        "maxSingleDelta": 0.23072738647460939,
+        "meanDelta": 0.22467099718739414,
+        "typicalContextVal": 12.658761528326746,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[92,38]:relative_field_size_sumxkey_card_value_sum",
+        "type": "INTERACTION",
+        "weight": 0.04170074462890625,
+        "contextFeatureName": "relative_field_size_sum",
+        "patternFeatureName": "key_card_value_sum",
+        "cumulativeDelta": 154.75146331787107,
+        "decisionCount": 250,
+        "maxSingleDelta": 0.6255111694335938,
+        "meanDelta": 0.6190058532714843,
+        "typicalContextVal": -4.996,
+        "typicalPatternDiff": -2.984,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[64,38]:opponent_life_knownxkey_card_value_sum",
+        "type": "INTERACTION",
+        "weight": -0.025426483154296877,
+        "contextFeatureName": "opponent_life_known",
+        "patternFeatureName": "key_card_value_sum",
+        "cumulativeDelta": 146.32941055297982,
+        "decisionCount": 1252,
+        "maxSingleDelta": 0.12713241577148438,
+        "meanDelta": 0.1168765260007826,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -4.59664536741214,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      }
+    ],
+    "toActionEnd": [
+      {
+        "geneId": "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+        "type": "INTERACTION",
+        "weight": 0.045373535156250006,
+        "contextFeatureName": "legal_action_timing_quick_count",
+        "patternFeatureName": "pattern_is_pass",
+        "cumulativeDelta": 6266.7204345702985,
+        "decisionCount": 1730,
+        "maxSingleDelta": 5.081835937500001,
+        "meanDelta": 3.6223817540868777,
+        "typicalContextVal": 79.83468208092485,
+        "typicalPatternDiff": 1,
+        "primaryDirection": "PASS_UPLIFT"
+      },
+      {
+        "geneId": "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+        "type": "INTERACTION",
+        "weight": -0.05854110717773438,
+        "contextFeatureName": "legal_non_pass_pattern_count",
+        "patternFeatureName": "has_cost",
+        "cumulativeDelta": 1497.1888160705696,
+        "decisionCount": 1695,
+        "maxSingleDelta": 2.1074798583984378,
+        "meanDelta": 0.8832972366198051,
+        "typicalContextVal": 15.08849557522124,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[32,4]:self_hand_value_sumxhas_action",
+        "type": "INTERACTION",
+        "weight": -0.038523864746093754,
+        "contextFeatureName": "self_hand_value_sum",
+        "patternFeatureName": "has_action",
+        "cumulativeDelta": 1489.9875167846715,
+        "decisionCount": 1450,
+        "maxSingleDelta": 1.887669372558594,
+        "meanDelta": 1.027577597782532,
+        "typicalContextVal": 26.673793103448276,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[94,5]:relative_grave_countxaction_speed_normal",
+        "type": "INTERACTION",
+        "weight": -0.13427429199218752,
+        "contextFeatureName": "relative_grave_count",
+        "patternFeatureName": "action_speed_normal",
+        "cumulativeDelta": 589.1955932617162,
+        "decisionCount": 1450,
+        "maxSingleDelta": 0.6713714599609376,
+        "meanDelta": 0.40634178845635605,
+        "typicalContextVal": 3.026206896551724,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[6,22]:turn_countxcandidate_action_bucket_9",
+        "type": "INTERACTION",
+        "weight": -0.07017822265625,
+        "contextFeatureName": "turn_count",
+        "patternFeatureName": "candidate_action_bucket_9",
+        "cumulativeDelta": 152.77799072266026,
+        "decisionCount": 1695,
+        "maxSingleDelta": 0.1403564453125,
+        "meanDelta": 0.09013450780097951,
+        "typicalContextVal": 1.2843657817109144,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[0,58]:source_is_action_requestxtarget_is_none",
+        "type": "INTERACTION",
+        "weight": -0.08727951049804689,
+        "contextFeatureName": "source_is_action_request",
+        "patternFeatureName": "target_is_none",
+        "cumulativeDelta": 147.50237274169962,
+        "decisionCount": 1690,
+        "maxSingleDelta": 0.08727951049804689,
+        "meanDelta": 0.08727951049804711,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[3,5]:self_is_chance_playerxaction_speed_normal",
+        "type": "INTERACTION",
+        "weight": -0.08111953735351562,
+        "contextFeatureName": "self_is_chance_player",
+        "patternFeatureName": "action_speed_normal",
+        "cumulativeDelta": 137.0920181274414,
+        "decisionCount": 1690,
+        "maxSingleDelta": 0.08111953735351562,
+        "meanDelta": 0.08111953735351562,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[0,8]:source_is_action_requestxaction_timing_main",
+        "type": "INTERACTION",
+        "weight": -0.06707382202148438,
+        "contextFeatureName": "source_is_action_request",
+        "patternFeatureName": "action_timing_main",
+        "cumulativeDelta": 113.69012832641602,
+        "decisionCount": 1695,
+        "maxSingleDelta": 0.06707382202148438,
+        "meanDelta": 0.06707382202148438,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[62,19]:self_rare_can_view_cardsxcandidate_action_bucket_6",
+        "type": "INTERACTION",
+        "weight": -0.04988937377929688,
+        "contextFeatureName": "self_rare_can_view_cards",
+        "patternFeatureName": "candidate_action_bucket_6",
+        "cumulativeDelta": 85.11127166747777,
+        "decisionCount": 1706,
+        "maxSingleDelta": 0.04988937377929688,
+        "meanDelta": 0.04988937377929529,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[62,29]:self_rare_can_view_cardsxhas_cost",
+        "type": "INTERACTION",
+        "weight": -0.04530029296875,
+        "contextFeatureName": "self_rare_can_view_cards",
+        "patternFeatureName": "has_cost",
+        "cumulativeDelta": 77.28229980468501,
+        "decisionCount": 1706,
+        "maxSingleDelta": 0.04530029296875,
+        "meanDelta": 0.04530029296874854,
+        "typicalContextVal": 1,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[30,0]:self_hand_queen_countxpattern_is_action",
+        "type": "INTERACTION",
+        "weight": -0.04317398071289063,
+        "contextFeatureName": "self_hand_queen_count",
+        "patternFeatureName": "pattern_is_action",
+        "cumulativeDelta": 74.34559478759921,
+        "decisionCount": 1481,
+        "maxSingleDelta": 0.08634796142578126,
+        "meanDelta": 0.05019959134881783,
+        "typicalContextVal": 1.162727886563133,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[93,0]:relative_fog_countxpattern_is_action",
+        "type": "INTERACTION",
+        "weight": -0.04201507568359375,
+        "contextFeatureName": "relative_fog_count",
+        "patternFeatureName": "pattern_is_action",
+        "cumulativeDelta": 60.92185974121094,
+        "decisionCount": 1210,
+        "maxSingleDelta": 0.0840301513671875,
+        "meanDelta": 0.05034864441422392,
+        "typicalContextVal": 1.1983471074380165,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[77,58]:opponent_fog_countxtarget_is_none",
+        "type": "INTERACTION",
+        "weight": -0.068939208984375,
+        "contextFeatureName": "opponent_fog_count",
+        "patternFeatureName": "target_is_none",
+        "cumulativeDelta": 51.083953857421875,
+        "decisionCount": 494,
+        "maxSingleDelta": 0.13787841796875,
+        "meanDelta": 0.1034088134765625,
+        "typicalContextVal": 1.5,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      },
+      {
+        "geneId": "I[93,58]:relative_fog_countxtarget_is_none",
+        "type": "INTERACTION",
+        "weight": 0.024454498291015626,
+        "contextFeatureName": "relative_fog_count",
+        "patternFeatureName": "target_is_none",
+        "cumulativeDelta": 17.680602264404445,
+        "decisionCount": 481,
+        "maxSingleDelta": 0.04890899658203125,
+        "meanDelta": 0.03675800886570571,
+        "typicalContextVal": -1.503118503118503,
+        "typicalPatternDiff": -1,
+        "primaryDirection": "NONPASS_SUPPRESSION"
+      }
+    ]
+  },
+  "pair14PositiveControl": {
+    "leg0": {
+      "matchIndex": 28,
+      "totalDecisions": 62,
+      "passCount": 41,
+      "endCount": 6,
+      "actionCount": 15,
+      "effectCount": 6,
+      "actionHistogram": {
+        "action.end": 6,
+        "action.down": 2,
+        "action.counter": 1,
+        "action.twist": 2,
+        "action.attack": 3,
+        "action.up": 1
+      },
+      "finalTurn": 7
+    },
+    "leg1": {
+      "matchIndex": 29,
+      "totalDecisions": 62,
+      "passCount": 42,
+      "endCount": 6,
+      "actionCount": 15,
+      "effectCount": 5,
+      "actionHistogram": {
+        "action.attack": 3,
+        "action.twist": 1,
+        "action.counter": 1,
+        "action.up": 1,
+        "action.destroyBulwark": 1,
+        "action.end": 6,
+        "action.down": 2
+      },
+      "finalTurn": 7
+    }
+  },
+  "ablationExperiments": {
+    "localAblation": [
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "matchIndex": 8,
+        "stallingPassDecisionCount": 249,
+        "top1Genes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass"
+        ],
+        "top3Genes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+          "I[16,34]:legal_action_timing_quick_countxcost_total_item_count",
+          "I[30,0]:self_hand_queen_countxpattern_is_action"
+        ],
+        "top5Genes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+          "I[16,34]:legal_action_timing_quick_countxcost_total_item_count",
+          "I[30,0]:self_hand_queen_countxpattern_is_action",
+          "I[19,62]:self_life_countxtarget_unit_size",
+          "I[33,9]:self_hand_value_maxxaction_timing_quick"
+        ],
+        "flipsTop1": 247,
+        "flipsTop1Ratio": 0.9919678714859438,
+        "flipsTop3": 247,
+        "flipsTop3Ratio": 0.9919678714859438,
+        "flipsTop5": 249,
+        "flipsTop5Ratio": 1,
+        "flippedActionDistributionTop1": {
+          "action.attack": 247
+        },
+        "flippedActionDistributionTop3": {
+          "action.setBulwark": 247
+        },
+        "flippedActionDistributionTop5": {
+          "action.setBulwark": 247,
+          "action.down": 2
+        }
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "matchIndex": 16,
+        "stallingPassDecisionCount": 244,
+        "top1Genes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost"
+        ],
+        "top3Genes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+          "I[6,22]:turn_countxcandidate_action_bucket_9",
+          "I[0,8]:source_is_action_requestxaction_timing_main"
+        ],
+        "top5Genes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+          "I[6,22]:turn_countxcandidate_action_bucket_9",
+          "I[0,8]:source_is_action_requestxaction_timing_main",
+          "I[67,44]:opponent_hand_countxkey_card_club_count",
+          "I[37,36]:self_field_countxkey_card_count"
+        ],
+        "flipsTop1": 4,
+        "flipsTop1Ratio": 0.01639344262295082,
+        "flipsTop3": 244,
+        "flipsTop3Ratio": 1,
+        "flipsTop5": 244,
+        "flipsTop5Ratio": 1,
+        "flippedActionDistributionTop1": {
+          "action.counter": 4
+        },
+        "flippedActionDistributionTop3": {
+          "action.counter": 4,
+          "action.end": 240
+        },
+        "flippedActionDistributionTop5": {
+          "action.counter": 4,
+          "action.end": 240
+        }
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "matchIndex": 22,
+        "stallingPassDecisionCount": 235,
+        "top1Genes": [
+          "I[32,4]:self_hand_value_sumxhas_action"
+        ],
+        "top3Genes": [
+          "I[32,4]:self_hand_value_sumxhas_action",
+          "I[0,58]:source_is_action_requestxtarget_is_none",
+          "I[69,21]:opponent_field_charge_countxcandidate_action_bucket_8"
+        ],
+        "top5Genes": [
+          "I[32,4]:self_hand_value_sumxhas_action",
+          "I[0,58]:source_is_action_requestxtarget_is_none",
+          "I[69,21]:opponent_field_charge_countxcandidate_action_bucket_8",
+          "I[38,27]:self_field_charge_countxcandidate_action_bucket_14",
+          "I[94,34]:relative_grave_countxcost_total_item_count"
+        ],
+        "flipsTop1": 2,
+        "flipsTop1Ratio": 0.00851063829787234,
+        "flipsTop3": 235,
+        "flipsTop3Ratio": 1,
+        "flipsTop5": 235,
+        "flipsTop5Ratio": 1,
+        "flippedActionDistributionTop1": {
+          "action.twist": 2
+        },
+        "flippedActionDistributionTop3": {
+          "action.twist": 2,
+          "action.setBulwark": 233
+        },
+        "flippedActionDistributionTop5": {
+          "action.twist": 2,
+          "action.setBulwark": 233
+        }
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "matchIndex": 26,
+        "stallingPassDecisionCount": 248,
+        "top1Genes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max"
+        ],
+        "top3Genes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max",
+          "I[62,29]:self_rare_can_view_cardsxhas_cost",
+          "I[47,23]:self_fog_card_known_countxcandidate_action_bucket_10"
+        ],
+        "top5Genes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max",
+          "I[62,29]:self_rare_can_view_cardsxhas_cost",
+          "I[47,23]:self_fog_card_known_countxcandidate_action_bucket_10",
+          "I[33,16]:self_hand_value_maxxcandidate_action_bucket_3",
+          "I[83,9]:opponent_grave_countxaction_timing_quick"
+        ],
+        "flipsTop1": 4,
+        "flipsTop1Ratio": 0.016129032258064516,
+        "flipsTop3": 246,
+        "flipsTop3Ratio": 0.9919354838709677,
+        "flipsTop5": 248,
+        "flipsTop5Ratio": 1,
+        "flippedActionDistributionTop1": {
+          "action.twist": 4
+        },
+        "flippedActionDistributionTop3": {
+          "action.twist": 4,
+          "action.attack": 242
+        },
+        "flippedActionDistributionTop5": {
+          "action.twist": 6,
+          "action.attack": 242
+        }
+      }
+    ],
+    "trajectoryAblation": [
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "matchIndex": 8,
+        "ablationLevel": "BASELINE_TOP0",
+        "ablatedGenes": [],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 249,
+        "offspringNonPassCount": 0,
+        "offspringPassRatio": 1
+      },
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "matchIndex": 8,
+        "ablationLevel": "TOP1_ZEROED",
+        "ablatedGenes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass"
+        ],
+        "completed": true,
+        "totalDecisions": 45,
+        "turnCount": 3,
+        "escapedTurn1": true,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 15,
+        "offspringNonPassCount": 6,
+        "offspringPassRatio": 0.7142857142857143
+      },
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "matchIndex": 8,
+        "ablationLevel": "TOP3_ZEROED",
+        "ablatedGenes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+          "I[16,34]:legal_action_timing_quick_countxcost_total_item_count",
+          "I[30,0]:self_hand_queen_countxpattern_is_action"
+        ],
+        "completed": true,
+        "totalDecisions": 48,
+        "turnCount": 3,
+        "escapedTurn1": true,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 15,
+        "offspringNonPassCount": 9,
+        "offspringPassRatio": 0.625
+      },
+      {
+        "genomeId": "gen-000001-offspring-000000",
+        "matchIndex": 8,
+        "ablationLevel": "TOP5_ZEROED",
+        "ablatedGenes": [
+          "I[16,1]:legal_action_timing_quick_countxpattern_is_pass",
+          "I[16,34]:legal_action_timing_quick_countxcost_total_item_count",
+          "I[30,0]:self_hand_queen_countxpattern_is_action",
+          "I[19,62]:self_life_countxtarget_unit_size",
+          "I[33,9]:self_hand_value_maxxaction_timing_quick"
+        ],
+        "completed": true,
+        "totalDecisions": 58,
+        "turnCount": 4,
+        "escapedTurn1": true,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 19,
+        "offspringNonPassCount": 12,
+        "offspringPassRatio": 0.6129032258064516
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "matchIndex": 16,
+        "ablationLevel": "BASELINE_TOP0",
+        "ablatedGenes": [],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 247,
+        "offspringNonPassCount": 4,
+        "offspringPassRatio": 0.9840637450199203
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "matchIndex": 16,
+        "ablationLevel": "TOP1_ZEROED",
+        "ablatedGenes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost"
+        ],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 247,
+        "offspringNonPassCount": 4,
+        "offspringPassRatio": 0.9840637450199203
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "matchIndex": 16,
+        "ablationLevel": "TOP3_ZEROED",
+        "ablatedGenes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+          "I[6,22]:turn_countxcandidate_action_bucket_9",
+          "I[0,8]:source_is_action_requestxaction_timing_main"
+        ],
+        "completed": true,
+        "totalDecisions": 54,
+        "turnCount": 3,
+        "escapedTurn1": true,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 18,
+        "offspringNonPassCount": 9,
+        "offspringPassRatio": 0.6666666666666666
+      },
+      {
+        "genomeId": "gen-000001-offspring-000001",
+        "matchIndex": 16,
+        "ablationLevel": "TOP5_ZEROED",
+        "ablatedGenes": [
+          "I[12,29]:legal_non_pass_pattern_countxhas_cost",
+          "I[6,22]:turn_countxcandidate_action_bucket_9",
+          "I[0,8]:source_is_action_requestxaction_timing_main",
+          "I[67,44]:opponent_hand_countxkey_card_club_count",
+          "I[37,36]:self_field_countxkey_card_count"
+        ],
+        "completed": true,
+        "totalDecisions": 54,
+        "turnCount": 3,
+        "escapedTurn1": true,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 18,
+        "offspringNonPassCount": 9,
+        "offspringPassRatio": 0.6666666666666666
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "matchIndex": 22,
+        "ablationLevel": "BASELINE_TOP0",
+        "ablatedGenes": [],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2,
+        "escapedTurn1": true,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 244,
+        "offspringNonPassCount": 4,
+        "offspringPassRatio": 0.9838709677419355
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "matchIndex": 22,
+        "ablationLevel": "TOP1_ZEROED",
+        "ablatedGenes": [
+          "I[32,4]:self_hand_value_sumxhas_action"
+        ],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2,
+        "escapedTurn1": true,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 244,
+        "offspringNonPassCount": 4,
+        "offspringPassRatio": 0.9838709677419355
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "matchIndex": 22,
+        "ablationLevel": "TOP3_ZEROED",
+        "ablatedGenes": [
+          "I[32,4]:self_hand_value_sumxhas_action",
+          "I[0,58]:source_is_action_requestxtarget_is_none",
+          "I[69,21]:opponent_field_charge_countxcandidate_action_bucket_8"
+        ],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2,
+        "escapedTurn1": true,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 243,
+        "offspringNonPassCount": 6,
+        "offspringPassRatio": 0.9759036144578314
+      },
+      {
+        "genomeId": "gen-000001-offspring-000002",
+        "matchIndex": 22,
+        "ablationLevel": "TOP5_ZEROED",
+        "ablatedGenes": [
+          "I[32,4]:self_hand_value_sumxhas_action",
+          "I[0,58]:source_is_action_requestxtarget_is_none",
+          "I[69,21]:opponent_field_charge_countxcandidate_action_bucket_8",
+          "I[38,27]:self_field_charge_countxcandidate_action_bucket_14",
+          "I[94,34]:relative_grave_countxcost_total_item_count"
+        ],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 2,
+        "escapedTurn1": true,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 243,
+        "offspringNonPassCount": 6,
+        "offspringPassRatio": 0.9759036144578314
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "matchIndex": 26,
+        "ablationLevel": "BASELINE_TOP0",
+        "ablatedGenes": [],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 248,
+        "offspringNonPassCount": 2,
+        "offspringPassRatio": 0.992
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "matchIndex": 26,
+        "ablationLevel": "TOP1_ZEROED",
+        "ablatedGenes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max"
+        ],
+        "completed": false,
+        "totalDecisions": 500,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "reason": "最大判断回数 (500) に到達しました。",
+        "offspringPassCount": 248,
+        "offspringNonPassCount": 3,
+        "offspringPassRatio": 0.9880478087649402
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "matchIndex": 26,
+        "ablationLevel": "TOP3_ZEROED",
+        "ablatedGenes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max",
+          "I[62,29]:self_rare_can_view_cardsxhas_cost",
+          "I[47,23]:self_fog_card_known_countxcandidate_action_bucket_10"
+        ],
+        "completed": true,
+        "totalDecisions": 29,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 10,
+        "offspringNonPassCount": 5,
+        "offspringPassRatio": 0.6666666666666666
+      },
+      {
+        "genomeId": "gen-000001-offspring-000003",
+        "matchIndex": 26,
+        "ablationLevel": "TOP5_ZEROED",
+        "ablatedGenes": [
+          "I[54,39]:self_grave_top_card_valuexkey_card_value_max",
+          "I[62,29]:self_rare_can_view_cardsxhas_cost",
+          "I[47,23]:self_fog_card_known_countxcandidate_action_bucket_10",
+          "I[33,16]:self_hand_value_maxxcandidate_action_bucket_3",
+          "I[83,9]:opponent_grave_countxaction_timing_quick"
+        ],
+        "completed": true,
+        "totalDecisions": 29,
+        "turnCount": 1,
+        "escapedTurn1": false,
+        "winner": "p1",
+        "reason": "Player B のライフが0になりました",
+        "offspringPassCount": 10,
+        "offspringNonPassCount": 5,
+        "offspringPassRatio": 0.6666666666666666
+      }
+    ]
+  }
+}

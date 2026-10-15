@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1`
-更新日時: 2026-10-15 02:20 JST
+作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1`
+更新日時: 2026-10-15 09:20 JST
 
 ---
 
@@ -76,6 +76,7 @@
 | **Evolution Loop** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
 | **Controlled Multi-Generation Evidence V1** | **BLOCKED / NOT ACCEPTED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
 | **Evolution g1 Incomplete Analysis V1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
+| **Evolution g1 DNA PASS Score Analysis V1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | PASS スコア要因分析 (STRICT_PASS_WIN 83.33%, NONPASS_SUPPRESSION 74.90%, 特徴量未正規化による増幅実証, Top-3 Ablation での 100% 反転・対戦完走証明) |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
