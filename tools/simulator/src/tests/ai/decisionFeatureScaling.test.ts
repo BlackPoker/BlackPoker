@@ -347,6 +347,10 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
       if (covIdx >= 0) {
         samplePat[covIdx] = 0.75; // (RATIO_0_1 -> 0.75)
       }
+      const deltaSumIdx = PATTERN_FEATURE_NAMES.indexOf("effect_assignment_size_delta_sum");
+      if (deltaSumIdx >= 0) {
+        samplePat[deltaSumIdx] = -6; // (SIGNED_DELTA scale 20 -> -6 / (6 + 20) = -6/26 = -3/13)
+      }
 
       const scaled = DecisionFeatureScaler.scalePattern(samplePat);
       expect(scaled.length).toBe(143);
@@ -358,12 +362,74 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
       if (covIdx >= 0) {
         expect(scaled[covIdx]).toBe(0.75);
       }
+      if (deltaSumIdx >= 0) {
+        expect(scaled[deltaSumIdx]).toBeCloseTo(-6 / 26, 10);
+        expect(scaled[deltaSumIdx]).toBeLessThan(0);
+      }
 
       for (let i = 0; i < 143; i++) {
         const val = scaled[i];
         expect(Number.isFinite(val)).toBe(true);
         expect(val).toBeGreaterThanOrEqual(-1);
         expect(val).toBeLessThanOrEqual(1);
+      }
+    });
+
+    it("should scale negative Pattern SIGNED_DELTA (effect_assignment_size_delta_sum) into (-1, 0) matching canonical contract", () => {
+      const featureName = "effect_assignment_size_delta_sum";
+      const featureIndex = PATTERN_FEATURE_NAMES.indexOf(featureName);
+      expect(featureIndex).toBeGreaterThanOrEqual(0);
+
+      // Verify canonical registry rule for this feature
+      const rule = PATTERN_SCALING_RULES[featureIndex];
+      expect(rule.name).toBe(featureName);
+      expect(rule.scalingClass).toBe("SIGNED_DELTA");
+      expect(rule.scalingFunction).toBe("signed_saturating_rational");
+      expect(rule.outputDomain).toBe("(-1, 1)");
+
+      const scaleParam = rule.parameter.scale;
+      expect(typeof scaleParam).toBe("number");
+      expect(scaleParam).toBeGreaterThan(0);
+      const s = scaleParam!;
+
+      // 1. Negative raw value test (raw = -10, scale = 20 -> -10 / (10 + 20) = -10/30 = -1/3)
+      const rawNeg = -10;
+      const samplePatNeg = new Array<number>(PATTERN_FEATURE_DIMENSION).fill(0);
+      samplePatNeg[featureIndex] = rawNeg;
+
+      const scaledNeg = DecisionFeatureScaler.scalePattern(samplePatNeg);
+      const valNeg = scaledNeg[featureIndex];
+
+      // Must be negative and in (-1, 0)
+      expect(valNeg).toBeLessThan(0);
+      expect(valNeg).toBeGreaterThan(-1);
+
+      // Must match canonical formula: x / (|x| + s)
+      const expectedNeg = rawNeg / (Math.abs(rawNeg) + s);
+      expect(valNeg).toBeCloseTo(expectedNeg, 10);
+
+      // 2. Positive raw value & exact antisymmetry test: f(-x) = -f(x)
+      const rawPos = 10;
+      const samplePatPos = new Array<number>(PATTERN_FEATURE_DIMENSION).fill(0);
+      samplePatPos[featureIndex] = rawPos;
+
+      const scaledPos = DecisionFeatureScaler.scalePattern(samplePatPos);
+      const valPos = scaledPos[featureIndex];
+
+      expect(valPos).toBeGreaterThan(0);
+      expect(valPos).toBeLessThan(1);
+      const expectedPos = rawPos / (Math.abs(rawPos) + s);
+      expect(valPos).toBeCloseTo(expectedPos, 10);
+      expect(valNeg + valPos).toBeCloseTo(0, 10); // exact antisymmetry
+
+      // 3. Multiplicative interaction bound check with full Context domain [-1, 1]
+      // For any context feature value c_i in [-1, 1], |c_i * p_j| <= 1.0 must hold strictly
+      for (const c_val of [-1.0, -0.75, -0.5, 0.0, 0.5, 0.75, 1.0]) {
+        const interactionNeg = c_val * valNeg;
+        expect(Math.abs(interactionNeg)).toBeLessThanOrEqual(1.0);
+
+        const interactionPos = c_val * valPos;
+        expect(Math.abs(interactionPos)).toBeLessThanOrEqual(1.0);
       }
     });
   });
