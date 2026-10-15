@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R2`
-更新日時: 2026-10-15 12:15 JST
+作業ID: `BP-SIM-AI-FEATURE-SCALING-DESIGN-V1`
+更新日時: 2026-10-15 14:15 JST
 
 ---
 
@@ -74,14 +74,15 @@
 | **Controlled One-Generation Evidence V1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, 30試合実機検証 (g=0 -> g=1) |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md` | - | Official light-entry16, N=100, R=1, 9,900試合実機完走 (g=0 -> g=1) |
 | **Evolution Loop** | **FORMAL ACCEPTED** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
-| **Controlled Multi-Generation Evidence V1** | **BLOCKED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
+| **Controlled Multi-Generation Evidence V1** | **BLOCKED / WAITING** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED (スケーリング実装後に再挑戦) |
 | **Evolution g1 Incomplete Analysis V1** | **FOLLOW-UP REQUIRED** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
 | **Evolution g1 DNA PASS Score Analysis V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | V1 分析（プロセス再実行問題により R1 へ差し替え） |
 | **Evolution g1 DNA PASS Score Analysis V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.json` | - | R1 再検証（JSON アーティファクトの perGenomeContributors キー欠陥により R2 へ差し替え） |
-| **Evolution g1 DNA PASS Score Analysis V1-R2** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.json` | - | R2 アーティファクト修復（perGenomeContributors 5オフスプリング完全修復、二重再構築A/B完全一致、全分解保存則、連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証、個体別Top-3 Ablation完走実証） |
+| **Evolution g1 DNA PASS Score Analysis V1-R2** | **FORMAL ACCEPTED** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r2.json` | - | R2 アーティファクト修復（perGenomeContributors 5オフスプリング完全修復、二重再構築A/B完全一致、全分解保存則、連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証、個体別Top-3 Ablation完走実証） |
+| **Feature Scaling Design V1** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-feature-scaling-design-v1.md`, `docs/ai-feature-scaling-registry-v1.json` | - | 全306特徴量の有界スケーリング設計（Saturating Rational / Linear Bound / Identity）、相互作用上限 \|c_i * p_j\| <= 1、Feature Schema v5 契約 |
+| **Feature Scaling Implementation** | **NOT STARTED** | - | - | スケーラー実装、レジストリ配線、Controlled A/B 検証 |
 | **Rule-side PASS / Core Flow** | **SEPARATE DISCUSSION** | - | - | 別ブランチ・別会話にて検討中 |
-| **Feature Scaling Design** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |
-| **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |
+| **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling レビュー後検討) |
 | **N=100 Multi-Generation** | **NOT EXECUTED** | - | - | 未実行 |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
