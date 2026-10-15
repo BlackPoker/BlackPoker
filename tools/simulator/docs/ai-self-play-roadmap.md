@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1`
-更新日時: 2026-10-15 09:20 JST
+作業ID: `BP-SIM-AI-DNA-PASS-SCORE-ANALYSIS-V1-R1`
+更新日時: 2026-10-15 11:25 JST
 
 ---
 
@@ -73,10 +73,15 @@
 | **Generation Runner** | **FORMAL ACCEPTED** | `src/engine/ai/GenerationRunner.ts`, `src/domain/ai/GenerationRunnerTypes.ts` | `src/tests/ai/generationRunner.test.ts` (60 Canonical Tests) | 1世代自己対戦評価・適応度集計・次世代遷移 (Double Round Robin V1) |
 | **Controlled One-Generation Evidence V1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, 30試合実機検証 (g=0 -> g=1) |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md` | - | Official light-entry16, N=100, R=1, 9,900試合実機完走 (g=0 -> g=1) |
-| **Evolution Loop** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
-| **Controlled Multi-Generation Evidence V1** | **BLOCKED / NOT ACCEPTED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
-| **Evolution g1 Incomplete Analysis V1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
-| **Evolution g1 DNA PASS Score Analysis V1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | PASS スコア要因分析 (STRICT_PASS_WIN 83.33%, NONPASS_SUPPRESSION 74.90%, 特徴量未正規化による増幅実証, Top-3 Ablation での 100% 反転・対戦完走証明) |
+| **Evolution Loop** | **FORMAL ACCEPTED** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
+| **Controlled Multi-Generation Evidence V1** | **BLOCKED** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED |
+| **Evolution g1 Incomplete Analysis V1** | **FOLLOW-UP REQUIRED** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
+| **Evolution g1 DNA PASS Score Analysis V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | V1 分析（プロセス再実行問題により R1 へ差し替え） |
+| **Evolution g1 DNA PASS Score Analysis V1-R1** | **ANALYZED / PENDING INDEPENDENT REVIEW** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.json` | - | R1 再検証（二重再構築A/B完全一致, 全分解保存則, 連続質量分析: Suppression 64.38%, Uplift 35.62%, 未正規化特徴量最大137増幅実証, 個体別Top-3 Ablation完走実証） |
+| **Rule-side PASS / Core Flow** | **SEPARATE DISCUSSION** | - | - | 別ブランチ・別会話にて検討中 |
+| **Feature Scaling Design** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |
+| **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (R1 レビュー後検討) |
+| **N=100 Multi-Generation** | **NOT EXECUTED** | - | - | 未実行 |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
 ---
