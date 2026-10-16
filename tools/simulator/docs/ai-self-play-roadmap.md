@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R7`
-更新日時: 2026-10-16 22:00 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R8`
+更新日時: 2026-10-16 23:35 JST
 
 ---
 
@@ -95,8 +95,9 @@
 | **Semantic Stall / Cycle Detection Design V1-R4** | **NOT ACCEPTED / SUPERSEDED BY R5** | `docs/ai-semantic-stall-cycle-detection-design-v1-r4.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r4.json` | - | Policy State監査境界（DecisionDNA全プロパティ監査: cDim/pDim/scoringModel/metadata分離, PolicyDescriptor kind/policyVersion）、実在性監査証拠分類（TYPE_DECLARATION 80件, RUNTIME_ACCESS 57件, PRIVATE 1件, DERIVED 2件）、計140エントリ確定 (R5へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R5** | **NOT ACCEPTED / SUPERSEDED BY R6** | `docs/ai-semantic-stall-cycle-detection-design-v1-r5.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r5.json` | - | $schema破損修復（top-level $schema正常保持、空文字キー完全排除）、declaringType明示AST検証（79件TYPE_DECLARATION + 1件TYPE_INDEX_SIGNATURE + 1件PRIVATE）、Behavioral Continuation vs Provenance Identity直交分離確定 (R6へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R6** | **NOT ACCEPTED / SUPERSEDED BY R7** | `docs/ai-semantic-stall-cycle-detection-design-v1-r6.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r6.json` | - | Fail-Closed Status契約、gpif1とPolicy DNAの責務境界是正（EncodedDecisionFeatures出所確定）、Future Test #10過剰主張修正、first-encounteredタイブレーク実態整合、CCF GenomePolicy-onlyスコープ確定 (R7へ改訂) |
-| **Semantic Stall / Cycle Detection Design V1-R7** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r7.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r7.json` | - | SimulationRunner.run / GameSession実API統合境界整合（runMatch/applyDecision非実在API参照完全除去）、PASS / 2-PASS / Explicit End Core Flow意味論整合（PASSはターン終了しない、空ステージ2-PASSはターン継続、明示的action.endのみがターン進行） |
-| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R7 独立レビュー承認待ち) |
+| **Semantic Stall / Cycle Detection Design V1-R7** | **NOT ACCEPTED / SUPERSEDED BY R8** | `docs/ai-semantic-stall-cycle-detection-design-v1-r7.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r7.json` | - | SimulationRunner.run / GameSession実API統合境界整合（runMatch/applyDecision非実在API参照完全除去）、PASS / 2-PASS / Explicit End Core Flow意味論整合（PASSはターン終了しない、空ステージ2-PASSはターン継続、明示的action.endのみがターン進行） (R8へ改訂) |
+| **Semantic Stall / Cycle Detection Design V1-R8** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r8.json` | - | state.turnCount rationale是正、Endライフサイクル完全整合（Normal Action積載/2-PASS/End解決/Charge/Draw）、PRE_DECISION単一サンプリング境界確定（5大Fingerprint同一時点採取） |
+| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R8 独立レビュー承認待ち) |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
