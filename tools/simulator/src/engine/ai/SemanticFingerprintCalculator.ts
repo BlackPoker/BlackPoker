@@ -10,7 +10,7 @@
 
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionSource } from "../../domain/decision/DecisionSource";
-import { PlayerObservation, CardView, UnitView, FogView, RequestView } from "../../domain/decision/PlayerObservation";
+import { PlayerObservation, CardView, UnitView, FogView, RequestView, GameEventView } from "../../domain/decision/PlayerObservation";
 import { DecisionCatalog } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder";
@@ -579,6 +579,11 @@ export class SemanticFingerprintCalculator {
       });
     }
 
+    if (Array.isArray(obs.stageRequestRefs)) {
+      obs.stageRequestRefs.forEach((ref) => {
+        registerId(ref, "req");
+      });
+    }
     if (Array.isArray(obs.stageRequests)) {
       obs.stageRequests.forEach((r) => {
         registerId(r.requestId, "req");
@@ -586,6 +591,12 @@ export class SemanticFingerprintCalculator {
     }
     if (obs.effectSourceRequest) {
       registerId(obs.effectSourceRequest.requestId, "req");
+    }
+    if (Array.isArray(obs.recentEvents)) {
+      obs.recentEvents.forEach((e) => {
+        registerId(e.eventId, "event");
+        if (e.payload) registerRecursively(e.payload);
+      });
     }
   }
 
@@ -668,6 +679,15 @@ export class SemanticFingerprintCalculator {
       };
     };
 
+    const normalizeGameEventView = (e: GameEventView): any => {
+      if (!e) return undefined;
+      return {
+        eventId: resolveId(e.eventId) || e.eventId,
+        type: e.type,
+        payload: e.payload ? ctx.canonicalizeValue(e.payload) : {},
+      };
+    };
+
     return {
       viewerPlayerId: obs.viewerPlayerId,
       turnPlayerId: obs.turnPlayerId,
@@ -714,10 +734,16 @@ export class SemanticFingerprintCalculator {
               : undefined,
           }))
         : [],
+      stageRequestRefs: Array.isArray(obs.stageRequestRefs)
+        ? obs.stageRequestRefs.map((ref) => resolveId(ref) || ref)
+        : [],
       stageRequests: Array.isArray(obs.stageRequests)
         ? obs.stageRequests.map((r, idx) => normalizeRequestView(r, idx))
         : [],
       effectSourceRequest: obs.effectSourceRequest ? normalizeRequestView(obs.effectSourceRequest) : undefined,
+      recentEvents: Array.isArray(obs.recentEvents)
+        ? obs.recentEvents.map(normalizeGameEventView)
+        : [],
     };
   }
 
@@ -877,7 +903,7 @@ export class SemanticFingerprintCalculator {
         patObj.effectSelection = {
           selectionType: e.selectionType,
           selectedValues: Array.isArray(e.selectedValues)
-            ? e.selectedValues.map((v) => resolveId(v)!).sort()
+            ? e.selectedValues.map((v) => resolveId(v)!)
             : undefined,
           assignments: Array.isArray(e.assignments)
             ? e.assignments.map((a) => ({

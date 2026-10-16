@@ -1774,5 +1774,390 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(sgfA).not.toBe(sgfB);
     });
   });
+
+  // =========================================================================
+  // 14. stageRequestRefs Coverage & Ordering (Blocker A)
+  // =========================================================================
+  describe("14. stageRequestRefs Coverage & Ordering (Blocker A)", () => {
+    const buildRequestWithStageRefs = (stageRequestRefs: string[], requestIdA = "req-1", requestIdB = "req-2"): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "match-test",
+      decisionId: "dec-1",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { type: "ACTION_REQUEST", playerId: "p1" },
+      observation: {
+        viewerPlayerId: "p1",
+        turnPlayerId: "p1",
+        chancePlayerId: "p1",
+        turnCount: 1,
+        players: [],
+        stageRequestRefs,
+        stageRequests: [
+          {
+            requestId: requestIdA,
+            actionId: "action.attack",
+            controller: "p1",
+            status: "RESOLVING",
+            sequence: 0,
+          },
+          {
+            requestId: requestIdB,
+            actionId: "action.defend",
+            controller: "p2",
+            status: "RESOLVING",
+            sequence: 1,
+          },
+        ],
+        recentEvents: [],
+      },
+      catalog: {
+        actions: [],
+        cardSelections: [],
+        unitSelections: [],
+        costPayments: [],
+        targetSelections: [],
+        effectSelections: [],
+        orderSelections: [],
+      },
+      patterns: [],
+    });
+
+    it("should produce identical pof1 and drsf1 when raw dynamic Request IDs differ but topology and order match (Test A)", () => {
+      const reqA = buildRequestWithStageRefs(["req-alpha-1", "req-alpha-2"], "req-alpha-1", "req-alpha-2");
+      const reqB = buildRequestWithStageRefs(["req-beta-1", "req-beta-2"], "req-beta-1", "req-beta-2");
+
+      const pofA = SemanticFingerprintCalculator.computePof1(reqA.observation);
+      const pofB = SemanticFingerprintCalculator.computePof1(reqB.observation);
+      expect(pofA).toBe(pofB);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).toBe(drsfB);
+    });
+
+    it("should produce different pof1 and drsf1 when stageRequestRefs ordering differs (Test B)", () => {
+      const reqA = buildRequestWithStageRefs(["req-1", "req-2"], "req-1", "req-2");
+      const reqB = buildRequestWithStageRefs(["req-2", "req-1"], "req-1", "req-2");
+
+      const pofA = SemanticFingerprintCalculator.computePof1(reqA.observation);
+      const pofB = SemanticFingerprintCalculator.computePof1(reqB.observation);
+      expect(pofA).not.toBe(pofB);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).not.toBe(drsfB);
+    });
+
+    it("should produce different pof1 and drsf1 when stageRequestRefs semantic target differs (Test C)", () => {
+      const reqA = buildRequestWithStageRefs(["req-1"], "req-1", "req-2");
+      const reqB = buildRequestWithStageRefs(["req-2"], "req-1", "req-2");
+
+      const pofA = SemanticFingerprintCalculator.computePof1(reqA.observation);
+      const pofB = SemanticFingerprintCalculator.computePof1(reqB.observation);
+      expect(pofA).not.toBe(pofB);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).not.toBe(drsfB);
+    });
+  });
+
+  // =========================================================================
+  // 15. recentEvents Coverage & Timestamp Bookkeeping Boundary (Blocker B)
+  // =========================================================================
+  describe("15. recentEvents Coverage & Timestamp Bookkeeping Boundary (Blocker B)", () => {
+    const buildRequestWithEvents = (recentEvents: any[]): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "match-test",
+      decisionId: "dec-1",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { type: "ACTION_REQUEST", playerId: "p1" },
+      observation: {
+        viewerPlayerId: "p1",
+        turnPlayerId: "p1",
+        chancePlayerId: "p1",
+        turnCount: 1,
+        players: [],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents,
+      },
+      catalog: {
+        actions: [],
+        cardSelections: [],
+        unitSelections: [],
+        costPayments: [],
+        targetSelections: [],
+        effectSelections: [],
+        orderSelections: [],
+      },
+      patterns: [],
+    });
+
+    it("should produce different pof1 and drsf1 when event type differs (Test D)", () => {
+      const reqA = buildRequestWithEvents([
+        { eventId: "ev-1", type: "UNIT_MOVED", payload: { pos: 1 } },
+      ]);
+      const reqB = buildRequestWithEvents([
+        { eventId: "ev-1", type: "UNIT_DESTROYED", payload: { pos: 1 } },
+      ]);
+
+      expect(SemanticFingerprintCalculator.computePof1(reqA.observation)).not.toBe(
+        SemanticFingerprintCalculator.computePof1(reqB.observation)
+      );
+      expect(SemanticFingerprintCalculator.computeDrsf1(reqA)).not.toBe(
+        SemanticFingerprintCalculator.computeDrsf1(reqB)
+      );
+    });
+
+    it("should produce different pof1 and drsf1 when semantic payload differs (Test E)", () => {
+      const reqA = buildRequestWithEvents([
+        { eventId: "ev-1", type: "DAMAGE_DEALT", payload: { amount: 3 } },
+      ]);
+      const reqB = buildRequestWithEvents([
+        { eventId: "ev-1", type: "DAMAGE_DEALT", payload: { amount: 5 } },
+      ]);
+
+      expect(SemanticFingerprintCalculator.computePof1(reqA.observation)).not.toBe(
+        SemanticFingerprintCalculator.computePof1(reqB.observation)
+      );
+      expect(SemanticFingerprintCalculator.computeDrsf1(reqA)).not.toBe(
+        SemanticFingerprintCalculator.computeDrsf1(reqB)
+      );
+    });
+
+    it("should produce different pof1 and drsf1 when event array order differs (Test F)", () => {
+      const ev1 = { eventId: "ev-1", type: "DAMAGE_DEALT", payload: { amount: 3 } };
+      const ev2 = { eventId: "ev-2", type: "DRAW", payload: { count: 1 } };
+
+      const reqA = buildRequestWithEvents([ev1, ev2]);
+      const reqB = buildRequestWithEvents([ev2, ev1]);
+
+      expect(SemanticFingerprintCalculator.computePof1(reqA.observation)).not.toBe(
+        SemanticFingerprintCalculator.computePof1(reqB.observation)
+      );
+      expect(SemanticFingerprintCalculator.computeDrsf1(reqA)).not.toBe(
+        SemanticFingerprintCalculator.computeDrsf1(reqB)
+      );
+    });
+
+    it("should produce identical pof1 and drsf1 when dynamic event IDs differ but topology and contents match (Test G)", () => {
+      const reqA = buildRequestWithEvents([
+        { eventId: "ev-1788000000001", type: "DAMAGE_DEALT", payload: { amount: 3, unitId: "unit-1788000000001" } },
+      ]);
+      const reqB = buildRequestWithEvents([
+        { eventId: "ev-1788999999999", type: "DAMAGE_DEALT", payload: { amount: 3, unitId: "unit-1788999999999" } },
+      ]);
+
+      expect(SemanticFingerprintCalculator.computePof1(reqA.observation)).toBe(
+        SemanticFingerprintCalculator.computePof1(reqB.observation)
+      );
+      expect(SemanticFingerprintCalculator.computeDrsf1(reqA)).toBe(
+        SemanticFingerprintCalculator.computeDrsf1(reqB)
+      );
+    });
+
+    it("should produce identical pof1 and drsf1 when only bookkeeping timestamp differs (Test H)", () => {
+      const reqA = buildRequestWithEvents([
+        { eventId: "ev-1", type: "DAMAGE_DEALT", payload: { amount: 3 }, timestamp: 1000 },
+      ]);
+      const reqB = buildRequestWithEvents([
+        { eventId: "ev-1", type: "DAMAGE_DEALT", payload: { amount: 3 }, timestamp: 9999 },
+      ]);
+
+      expect(SemanticFingerprintCalculator.computePof1(reqA.observation)).toBe(
+        SemanticFingerprintCalculator.computePof1(reqB.observation)
+      );
+      expect(SemanticFingerprintCalculator.computeDrsf1(reqA)).toBe(
+        SemanticFingerprintCalculator.computeDrsf1(reqB)
+      );
+    });
+  });
+
+  // =========================================================================
+  // 16. EffectSelection.selectedValues Ordering (Blocker C)
+  // =========================================================================
+  describe("16. EffectSelection.selectedValues Ordering (Blocker C)", () => {
+    const buildRequestWithSelectedValues = (selectedValues: string[]): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "match-test",
+      decisionId: "dec-1",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { type: "ACTION_REQUEST", playerId: "p1" },
+      observation: {
+        viewerPlayerId: "p1",
+        turnPlayerId: "p1",
+        chancePlayerId: "p1",
+        turnCount: 1,
+        players: [],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      },
+      catalog: {
+        actions: [],
+        cardSelections: [],
+        unitSelections: [],
+        costPayments: [],
+        targetSelections: [],
+        effectSelections: [
+          {
+            selectionType: "option",
+            selectedValues,
+          },
+        ],
+        orderSelections: [],
+      },
+      patterns: [
+        {
+          patternId: "pat-1",
+          kind: "EFFECT_SELECTION",
+          effectSelectionRef: 0,
+        },
+      ],
+    });
+
+    it("should produce different drsf1 when selectedValues array order differs (Test I)", () => {
+      const reqA = buildRequestWithSelectedValues(["val-alpha", "val-beta"]);
+      const reqB = buildRequestWithSelectedValues(["val-beta", "val-alpha"]);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).not.toBe(drsfB);
+    });
+
+    it("should produce identical drsf1 when raw dynamic IDs differ but order and topology match (Test J)", () => {
+      const reqA = buildRequestWithSelectedValues(["dyn-val-1788000000001", "dyn-val-1788000000002"]);
+      const reqB = buildRequestWithSelectedValues(["dyn-val-1788999999991", "dyn-val-1788999999992"]);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).toBe(drsfB);
+    });
+  });
+
+  // =========================================================================
+  // 17. Generic Payload Semantic Key Preservation (Blocker D)
+  // =========================================================================
+  describe("17. Generic Payload Semantic Key Preservation (Blocker D)", () => {
+    it("should reflect sequence value difference in triggerBindings into sgf1 (Test K)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 1,
+            triggerBindings: { sequence: "semantic-value-A" },
+          },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 1,
+            triggerBindings: { sequence: "semantic-value-B" },
+          },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should reflect sourceEvent.payload semantic differences including sequence into sgf1 (Test L)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 1,
+            sourceEvent: {
+              type: "TRIGGER",
+              name: "onDraw",
+              payload: { sequence: "payload-val-A", stateVersion: 1 },
+            },
+          },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 1,
+            sourceEvent: {
+              type: "TRIGGER",
+              name: "onDraw",
+              payload: { sequence: "payload-val-B", stateVersion: 1 },
+            },
+          },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should maintain absolute sequence invariance on request itself while preserving payload (Test M)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 17,
+            triggerBindings: { customKey: "val-X" },
+          },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.requestBuffer = {
+        requests: [
+          {
+            id: "buf-1",
+            actionId: "action.draw",
+            controller: "p1",
+            sequence: 101,
+            triggerBindings: { customKey: "val-X" },
+          },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).toBe(sgfB);
+    });
+  });
 });
 
