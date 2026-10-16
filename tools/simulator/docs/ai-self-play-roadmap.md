@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1`
-更新日時: 2026-10-16 11:00 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R1`
+更新日時: 2026-10-16 12:40 JST
 
 ---
 
@@ -88,8 +88,10 @@
 | **Controlled Feature Scaling A/B Evidence V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-feature-scaling-ab-evidence-v1.md`, `docs/ai-feature-scaling-ab-evidence-v1.json` | - | V1 Evidence（Markdown内結果値ハードコード不整合、Weight再検証欠落、恒真アサーションにより却下） |
 | **Controlled Feature Scaling A/B Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/featureScalingABEvidence.ts`, `docs/ai-feature-scaling-ab-evidence-v1-r1.md`, `docs/ai-feature-scaling-ab-evidence-v1-r1.json` | `src/tests/ai/featureScalingABEvidence.test.ts`, `evidence:feature-scaling-ab` | CONTROL (RAW_V4_EQUIVALENT) vs TREATMENT (SCALED_V5) 決定論的比較検証、全9チェックポイント厳密Weight整合性(===)、動的Markdown生成、Scaler参照復元検証完備 |
 | **Rule-side PASS / Core Flow** | **RULES UNCHANGED / NO CHANGE PLANNED** | `src/domain/rules/`, `src/engine/rules/` | `git diff --stat` (Rules / Core Flow diff: 0) | PASS Rule / Core Flow / Turn Player PASS legality / Stage Empty behavior は変更せず、AI側 Feature Scaling のみで対処 |
-| **Semantic Stall / Cycle Detection Design V1** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1.md`, `docs/ai-semantic-fingerprint-field-registry-v1.json` | - | 受動的診断アーキテクチャ設計、4層フィンガープリント分離（Replay / Structural / Observation / DecisionContext）、47フィールド監査レジストリ、検出アルゴリズム策定 |
-| **Semantic Stall / Cycle Production** | **NOT STARTED** | - | - | 未着手 (Design V1 独立レビュー承認待ち) |
+| **Semantic Stall / Cycle Detection Design V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-semantic-stall-cycle-detection-design-v1.md`, `docs/ai-semantic-fingerprint-field-registry-v1.json` | - | 受動的診断アーキテクチャ設計 (V1-R1へ改訂) |
+| **Semantic Stall / Cycle Detection Design V1-R1** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r1.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r1.json` | - | 2層判断Fingerprint（Request Semantic / Policy Input）、129フィールド完全監査、厳格非丸め、SHA-256統一、保守的サイクル用語、Continuation Research境界確定 |
+| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R1 独立レビュー承認待ち) |
+| **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
 | **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling / Stall レビュー後検討) |
