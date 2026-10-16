@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R5`
-更新日時: 2026-10-16 20:30 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R6`
+更新日時: 2026-10-16 21:30 JST
 
 ---
 
@@ -93,8 +93,9 @@
 | **Semantic Stall / Cycle Detection Design V1-R2** | **NOT ACCEPTED / SUPERSEDED BY R3** | `docs/ai-semantic-stall-cycle-detection-design-v1-r2.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r2.json` | - | Feature Schema v5整合（Pattern 143次元, total weights 23,452, version 5 number）、DecisionCatalog完全監査（primary/secondaryLabel追跡）、全131フィールド監査完了 (R3へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R3** | **NOT ACCEPTED / SUPERSEDED BY R4** | `docs/ai-semantic-stall-cycle-detection-design-v1-r3.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r3.json` | - | Canonical Source参照整合（DecisionFeatureTypes.ts / DecisionDNATypes.ts 確定, 存在しないFeatureSchemaConstants.ts完全除去）、Current Runtime Field (130件) と Derived Research Candidate (2件: rulePackage.contentDigest, simulator.buildSha) の厳格分離、全132エントリプロパティ実在性監査完了 (R4へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R4** | **NOT ACCEPTED / SUPERSEDED BY R5** | `docs/ai-semantic-stall-cycle-detection-design-v1-r4.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r4.json` | - | Policy State監査境界（DecisionDNA全プロパティ監査: cDim/pDim/scoringModel/metadata分離, PolicyDescriptor kind/policyVersion）、実在性監査証拠分類（TYPE_DECLARATION 80件, RUNTIME_ACCESS 57件, PRIVATE 1件, DERIVED 2件）、計140エントリ確定 (R5へ改訂) |
-| **Semantic Stall / Cycle Detection Design V1-R5** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r5.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r5.json` | - | $schema破損修復（top-level $schema正常保持、空文字キー完全排除）、declaringType明示AST検証（79件TYPE_DECLARATION + 1件TYPE_INDEX_SIGNATURE + 1件PRIVATE）、Behavioral Continuation vs Provenance Identity直交分離確定 |
-| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R5 独立レビュー承認待ち) |
+| **Semantic Stall / Cycle Detection Design V1-R5** | **NOT ACCEPTED / SUPERSEDED BY R6** | `docs/ai-semantic-stall-cycle-detection-design-v1-r5.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r5.json` | - | $schema破損修復（top-level $schema正常保持、空文字キー完全排除）、declaringType明示AST検証（79件TYPE_DECLARATION + 1件TYPE_INDEX_SIGNATURE + 1件PRIVATE）、Behavioral Continuation vs Provenance Identity直交分離確定 (R6へ改訂) |
+| **Semantic Stall / Cycle Detection Design V1-R6** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r6.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r6.json` | - | Fail-Closed Status契約、gpif1とPolicy DNAの責務境界是正（EncodedDecisionFeatures出所確定）、Future Test #10過剰主張修正、first-encounteredタイブレーク実態整合、CCF GenomePolicy-onlyスコープ確定 |
+| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R6 独立レビュー承認待ち) |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
