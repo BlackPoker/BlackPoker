@@ -16,11 +16,15 @@ export class SemanticDynamicIdCanonicalizer {
   public static isDynamicId(id: any): boolean {
     if (!id || typeof id !== "string") return false;
     return (
-      /\d{10,}/.test(id) ||
+      /\d{5,}/.test(id) ||
       id.includes("runtime-") ||
+      id.includes("dyn-") ||
+      id.includes("dynamic-") ||
       (id.startsWith("dec-") && /\d+/.test(id)) ||
-      (id.startsWith("req-") && /\d{5,}/.test(id)) ||
-      (id.startsWith("unit-") && /\d{5,}/.test(id))
+      (id.startsWith("req-") && (/\d+/.test(id) || id.includes("trg-") || id.includes("eff-"))) ||
+      (id.startsWith("unit-") && (/\d+/.test(id) || id.includes("grave-") || id.includes("cost-"))) ||
+      (id.startsWith("card-") && /\d+/.test(id)) ||
+      (id.startsWith("fog-") && /\d+/.test(id))
     );
   }
 
@@ -28,7 +32,7 @@ export class SemanticDynamicIdCanonicalizer {
    * 動的 ID のプレフィックスを抽出 (例: "unit-cost-1788..." -> "unit-cost", "req-trg-1788..." -> "req-trg")
    */
   public static extractPrefix(id: string, defaultPrefix = "entity"): string {
-    const match = id.match(/^([a-zA-Z_-]+?)(?:-\d{10,}|-\d{5,}|$)/);
+    const match = id.match(/^([a-zA-Z_-]+?)(?:-\d{5,}|$)/);
     return match ? match[1] : defaultPrefix;
   }
 
@@ -38,7 +42,7 @@ export class SemanticDynamicIdCanonicalizer {
   public static createMappingContext(): {
     idMap: Map<string, string>;
     prefixCounters: Map<string, number>;
-    registerId: (rawId: any, defaultPrefix?: string) => void;
+    registerId: (rawId: any, defaultPrefix?: string, force?: boolean) => void;
     registerRecursively: (value: any, defaultPrefix?: string) => void;
     resolveId: (rawId: any) => string | undefined;
     canonicalizeValue: (value: any) => any;
@@ -46,9 +50,10 @@ export class SemanticDynamicIdCanonicalizer {
     const idMap = new Map<string, string>();
     const prefixCounters = new Map<string, number>();
 
-    const registerId = (rawId: any, defaultPrefix = "entity") => {
+    const registerId = (rawId: any, defaultPrefix = "entity", force = false) => {
       if (!rawId || typeof rawId !== "string") return;
-      if (SemanticDynamicIdCanonicalizer.isDynamicId(rawId) && !idMap.has(rawId)) {
+      if (idMap.has(rawId)) return;
+      if (force || defaultPrefix !== "entity" || SemanticDynamicIdCanonicalizer.isDynamicId(rawId)) {
         const prefix = SemanticDynamicIdCanonicalizer.extractPrefix(rawId, defaultPrefix);
         const count = (prefixCounters.get(prefix) || 0) + 1;
         prefixCounters.set(prefix, count);

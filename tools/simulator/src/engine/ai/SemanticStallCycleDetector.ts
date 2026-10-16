@@ -40,13 +40,16 @@ interface PendingSnapshot {
 
 export class SemanticStallCycleDetector {
   private readonly historySize: number;
+  private readonly traceRetentionLimit: number;
   private readonly consecutiveRepeatThreshold: number;
   private readonly periodicMinOccurrences: number;
   private readonly noSemanticChangeWindow: number;
   private readonly onTraceRecord?: (record: DiagnosticTraceRecord) => void;
 
-  private readonly traces: DiagnosticTraceRecord[] = [];
+  private totalTraceCount = 0;
+  private readonly retainedTraces: DiagnosticTraceRecord[] = [];
   private readonly ringBuffer: DiagnosticTraceRecord[] = [];
+  private readonly invertedIndices: Record<keyof SemanticFingerprints, Map<string, number[]>>;
   private readonly signalsEncountered = new Set<SemanticDiagnosticSignal>();
   private readonly signalCounts: Record<SemanticDiagnosticSignal, number>;
 
@@ -58,10 +61,19 @@ export class SemanticStallCycleDetector {
 
   constructor(options?: SemanticDiagnosticOptions) {
     this.historySize = options?.historySize ?? 64;
+    this.traceRetentionLimit = options?.traceRetentionLimit ?? this.historySize;
     this.consecutiveRepeatThreshold = options?.consecutiveRepeatThreshold ?? 3;
     this.periodicMinOccurrences = options?.periodicMinOccurrences ?? 3;
     this.noSemanticChangeWindow = options?.noSemanticChangeWindow ?? 20;
     this.onTraceRecord = options?.onTraceRecord;
+
+    this.invertedIndices = {
+      structural: new Map(),
+      structuralTurnInvariant: new Map(),
+      observation: new Map(),
+      decisionRequest: new Map(),
+      policyInput: new Map(),
+    };
 
     this.signalCounts = {} as Record<SemanticDiagnosticSignal, number>;
     for (const sig of SEMANTIC_DIAGNOSTIC_SIGNALS) {
@@ -200,13 +212,45 @@ export class SemanticStallCycleDetector {
       diagnostics: this.pendingSnapshot.diagnostics,
     };
 
-    this.traces.push(record);
+    this.totalTraceCount++;
+    if (this.retainedTraces.length >= this.traceRetentionLimit) {
+      this.retainedTraces.shift();
+    }
+    this.retainedTraces.push(record);
 
-    // リングバッファ更新
+    const fpTypes: (keyof SemanticFingerprints)[] = [
+      "structural",
+      "structuralTurnInvariant",
+      "observation",
+      "decisionRequest",
+      "policyInput",
+    ];
+
+    // リングバッファ更新 & Inverted Index 整合性維持 (Bounded Eviction)
     if (this.ringBuffer.length >= this.historySize) {
-      this.ringBuffer.shift();
+      const evicted = this.ringBuffer.shift()!;
+      for (const fpType of fpTypes) {
+        const map = this.invertedIndices[fpType];
+        const val = evicted.fingerprints[fpType];
+        const list = map.get(val);
+        if (list) {
+          const nextList = list.filter((idx) => idx !== evicted.stepIndex);
+          if (nextList.length > 0) {
+            map.set(val, nextList);
+          } else {
+            map.delete(val);
+          }
+        }
+      }
     }
     this.ringBuffer.push(record);
+    for (const fpType of fpTypes) {
+      const map = this.invertedIndices[fpType];
+      const val = record.fingerprints[fpType];
+      const list = map.get(val) || [];
+      list.push(record.stepIndex);
+      map.set(val, list);
+    }
 
     this.pendingSnapshot = undefined;
 
@@ -222,10 +266,21 @@ export class SemanticStallCycleDetector {
    */
   public getResult(): SemanticDiagnosticResult {
     return {
-      traces: this.traces,
+      semanticDiagnosticVersion: 1,
+      totalTraceCount: this.totalTraceCount,
+      traceRetentionLimit: this.traceRetentionLimit,
+      traceTruncated: this.totalTraceCount > this.traceRetentionLimit,
+      traces: this.retainedTraces,
       finalSignals: Array.from(this.signalsEncountered),
       signalCounts: { ...this.signalCounts },
     };
+  }
+
+  /**
+   * 診断テレメトリ検証用: 指定フィンガープリント種別の Inverted Hash Index を取得
+   */
+  public getInvertedIndex(fpType: keyof SemanticFingerprints): ReadonlyMap<string, readonly number[]> {
+    return this.invertedIndices[fpType];
   }
 
   // =========================================================================

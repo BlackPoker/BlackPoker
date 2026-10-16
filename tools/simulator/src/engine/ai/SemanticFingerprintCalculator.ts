@@ -373,9 +373,9 @@ export class SemanticFingerprintCalculator {
       logical.players = players;
     }
 
-    // Stage Requests (LIFO 順序厳格保持)
+    // Stage Requests (LIFO 順序厳格保持, sequence は array-local relative index へ正規化)
     if (state.stage?.requests && Array.isArray(state.stage.requests)) {
-      logical.stageRequests = state.stage.requests.map((r: any) => {
+      logical.stageRequests = state.stage.requests.map((r: any, idx: number) => {
         const keyCards = Array.isArray(r.keyCards)
           ? r.keyCards.map((c: any) => normalizeCard(c))
           : r.keyCard
@@ -402,7 +402,7 @@ export class SemanticFingerprintCalculator {
           actionId: r.actionId,
           controller: r.controller,
           status: r.status,
-          sequence: r.sequence,
+          sequence: idx,
           definitionOwner: r.definitionOwner,
           keyCards,
           targets,
@@ -412,9 +412,9 @@ export class SemanticFingerprintCalculator {
       });
     }
 
-    // Request Buffer Requests (FIFO 順序厳格保持)
+    // Request Buffer Requests (FIFO 順序厳格保持, sequence は array-local relative index へ正規化)
     if (state.requestBuffer?.requests && Array.isArray(state.requestBuffer.requests)) {
-      logical.bufferRequests = state.requestBuffer.requests.map((r: any) => {
+      logical.bufferRequests = state.requestBuffer.requests.map((r: any, idx: number) => {
         const keyCards = Array.isArray(r.keyCards)
           ? r.keyCards.map((c: any) => normalizeCard(c))
           : r.keyCard
@@ -425,7 +425,7 @@ export class SemanticFingerprintCalculator {
           id: resolveId(r.id),
           actionId: r.actionId,
           controller: r.controller,
-          sequence: r.sequence,
+          sequence: idx,
           definitionOwner: r.definitionOwner,
           keyCards,
           triggerBindings: r.triggerBindings ? ctx.canonicalizeValue(r.triggerBindings) : undefined,
@@ -465,13 +465,11 @@ export class SemanticFingerprintCalculator {
     return logical;
   }
 
-  private static extractObservationProjection(obs: Readonly<PlayerObservation>): any {
-    if (!obs || typeof obs !== "object") return obs;
-
-    const ctx = SemanticDynamicIdCanonicalizer.createMappingContext();
-    const { registerId, registerRecursively, resolveId } = ctx;
-
-    // Pass 1: 走査順序で動的 ID を登録
+  private static registerObservationIds(
+    obs: Readonly<PlayerObservation>,
+    ctx: ReturnType<typeof SemanticDynamicIdCanonicalizer.createMappingContext>
+  ): void {
+    const { registerId, registerRecursively } = ctx;
     if (Array.isArray(obs.players)) {
       obs.players.forEach((p) => {
         if (Array.isArray(p.handCards)) {
@@ -522,6 +520,21 @@ export class SemanticFingerprintCalculator {
     if (obs.effectSourceRequest) {
       registerId(obs.effectSourceRequest.requestId, "req");
     }
+  }
+
+  private static extractObservationProjection(
+    obs: Readonly<PlayerObservation>,
+    externalCtx?: ReturnType<typeof SemanticDynamicIdCanonicalizer.createMappingContext>
+  ): any {
+    if (!obs || typeof obs !== "object") return obs;
+
+    const ctx = externalCtx || SemanticDynamicIdCanonicalizer.createMappingContext();
+    const { resolveId } = ctx;
+
+    // externalCtx が渡されていない場合は独自に Pass 1 を実行
+    if (!externalCtx) {
+      this.registerObservationIds(obs, ctx);
+    }
 
     // Pass 2: 正規化
     const normalizeCardView = (c: CardView): any => {
@@ -565,7 +578,7 @@ export class SemanticFingerprintCalculator {
       };
     };
 
-    const normalizeRequestView = (r: RequestView): any => {
+    const normalizeRequestView = (r: RequestView, idx?: number): any => {
       if (!r) return undefined;
       return {
         requestId: resolveId(r.requestId),
@@ -574,7 +587,7 @@ export class SemanticFingerprintCalculator {
         actionTiming: r.actionTiming,
         controller: r.controller,
         status: r.status,
-        sequence: r.sequence,
+        sequence: idx !== undefined ? idx : r.sequence,
         definitionOwner: r.definitionOwner,
         keyCards: Array.isArray(r.keyCards) ? r.keyCards.map(normalizeCardView) : undefined,
         target: r.target
@@ -634,7 +647,9 @@ export class SemanticFingerprintCalculator {
               : undefined,
           }))
         : [],
-      stageRequests: Array.isArray(obs.stageRequests) ? obs.stageRequests.map(normalizeRequestView) : [],
+      stageRequests: Array.isArray(obs.stageRequests)
+        ? obs.stageRequests.map((r, idx) => normalizeRequestView(r, idx))
+        : [],
       effectSourceRequest: obs.effectSourceRequest ? normalizeRequestView(obs.effectSourceRequest) : undefined,
     };
   }
@@ -643,9 +658,97 @@ export class SemanticFingerprintCalculator {
     if (!req || typeof req !== "object") return req;
 
     const catalog = req.catalog || ({} as DecisionCatalog);
-    const observation = this.extractObservationProjection(req.observation);
+    const ctx = SemanticDynamicIdCanonicalizer.createMappingContext();
+    const { registerId, resolveId } = ctx;
 
-    // カタログ参照を解決したパターン射影 (順序厳格保持, 表示用文字列除外)
+    // Pass 1: DecisionRequest 全体で単一の canonical mapping context を共有
+    // 1-A: Observation のエンティティ ID を登録
+    if (req.observation) {
+      this.registerObservationIds(req.observation, ctx);
+    }
+
+    // 1-B: DecisionSource のエンティティ ID を登録
+    if (req.source?.type === "EFFECT_RESOLUTION" && req.source.sourceRequestRef) {
+      registerId(req.source.sourceRequestRef, "req");
+    }
+
+    // 1-C: Catalog 内の動的エンティティ ID を登録
+    if (Array.isArray(catalog.cardSelections)) {
+      catalog.cardSelections.forEach((c) => {
+        if (Array.isArray(c.cardIds)) c.cardIds.forEach((id) => registerId(id, "card"));
+      });
+    }
+    if (Array.isArray(catalog.unitSelections)) {
+      catalog.unitSelections.forEach((u) => {
+        if (Array.isArray(u.unitIds)) u.unitIds.forEach((id) => registerId(id, "unit"));
+      });
+    }
+    if (Array.isArray(catalog.costPayments)) {
+      catalog.costPayments.forEach((cp) => {
+        if (Array.isArray(cp.discardedCardIds)) cp.discardedCardIds.forEach((id) => registerId(id, "card"));
+        if (Array.isArray(cp.drivenBulwarkUnitIds)) cp.drivenBulwarkUnitIds.forEach((id) => registerId(id, "unit"));
+        if (Array.isArray(cp.sacrificedUnitIds)) cp.sacrificedUnitIds.forEach((id) => registerId(id, "unit"));
+      });
+    }
+    if (Array.isArray(catalog.targetSelections)) {
+      catalog.targetSelections.forEach((t) => {
+        if (t.targetUnitId) registerId(t.targetUnitId, "unit");
+        if (t.targetRequestId) registerId(t.targetRequestId, "req");
+      });
+    }
+    if (Array.isArray(catalog.effectSelections)) {
+      catalog.effectSelections.forEach((e) => {
+        if (Array.isArray(e.selectedValues)) {
+          e.selectedValues.forEach((val) => registerId(val, "entity"));
+        }
+        if (Array.isArray(e.assignments)) {
+          e.assignments.forEach((a) => {
+            if (a.sourceUnitId) registerId(a.sourceUnitId, "unit");
+            if (Array.isArray(a.selectedUnitIds)) a.selectedUnitIds.forEach((id) => registerId(id, "unit"));
+          });
+        }
+        if (e.targetSelection) {
+          if (e.targetSelection.targetUnitId) registerId(e.targetSelection.targetUnitId, "unit");
+          if (e.targetSelection.targetRequestId) registerId(e.targetSelection.targetRequestId, "req");
+        }
+        if (Array.isArray(e.cards)) {
+          e.cards.forEach((c) => {
+            if (c.visibility === "KNOWN") registerId(c.cardInstanceId, "card");
+            else if (c.opaqueCardId) registerId(c.opaqueCardId, "card");
+          });
+        }
+      });
+    }
+    if (Array.isArray(catalog.orderSelections)) {
+      catalog.orderSelections.forEach((o) => {
+        if (Array.isArray(o.orderedIds)) o.orderedIds.forEach((id) => registerId(id, "entity"));
+      });
+    }
+
+    // Pass 2: 同一 ctx を用いた正規化射影の抽出
+    const observation = this.extractObservationProjection(req.observation, ctx);
+
+    const normalizeCardView = (c: CardView): any => {
+      if (!c) return undefined;
+      if (c.visibility === "KNOWN") {
+        return {
+          visibility: "KNOWN",
+          cardInstanceId: resolveId(c.cardInstanceId),
+          suit: c.suit,
+          rank: c.rank,
+          value: c.value,
+          faceUp: c.faceUp,
+          code: c.code,
+        };
+      }
+      return {
+        visibility: "HIDDEN",
+        opaqueCardId: c.opaqueCardId ? resolveId(c.opaqueCardId) : undefined,
+        faceUp: false,
+      };
+    };
+
+    // カタログ参照を解決したパターン射影 (順序厳格保持, 表示用文字列除外, 同一 ctx で canonicalize)
     const patterns = (req.patterns || []).map((p: LegalPattern) => {
       const patObj: Record<string, any> = {
         kind: p.kind,
@@ -664,23 +767,29 @@ export class SemanticFingerprintCalculator {
       if (p.keyCardSelectionRef !== undefined && catalog.cardSelections?.[p.keyCardSelectionRef]) {
         const c = catalog.cardSelections[p.keyCardSelectionRef];
         patObj.keyCards = {
-          cardIds: Array.isArray(c.cardIds) ? [...c.cardIds] : [],
+          cardIds: Array.isArray(c.cardIds) ? c.cardIds.map((id) => resolveId(id)!) : [],
         };
       }
 
       if (p.keyUnitSelectionRef !== undefined && catalog.unitSelections?.[p.keyUnitSelectionRef]) {
         const u = catalog.unitSelections[p.keyUnitSelectionRef];
         patObj.keyUnits = {
-          unitIds: Array.isArray(u.unitIds) ? [...u.unitIds] : [],
+          unitIds: Array.isArray(u.unitIds) ? u.unitIds.map((id) => resolveId(id)!) : [],
         };
       }
 
       if (p.costPaymentRef !== undefined && catalog.costPayments?.[p.costPaymentRef]) {
         const cp = catalog.costPayments[p.costPaymentRef];
         patObj.costPayment = {
-          discardedCardIds: Array.isArray(cp.discardedCardIds) ? [...cp.discardedCardIds].sort() : [],
-          drivenBulwarkUnitIds: Array.isArray(cp.drivenBulwarkUnitIds) ? [...cp.drivenBulwarkUnitIds].sort() : [],
-          sacrificedUnitIds: Array.isArray(cp.sacrificedUnitIds) ? [...cp.sacrificedUnitIds].sort() : [],
+          discardedCardIds: Array.isArray(cp.discardedCardIds)
+            ? cp.discardedCardIds.map((id) => resolveId(id)!).sort()
+            : [],
+          drivenBulwarkUnitIds: Array.isArray(cp.drivenBulwarkUnitIds)
+            ? cp.drivenBulwarkUnitIds.map((id) => resolveId(id)!).sort()
+            : [],
+          sacrificedUnitIds: Array.isArray(cp.sacrificedUnitIds)
+            ? cp.sacrificedUnitIds.map((id) => resolveId(id)!).sort()
+            : [],
           lifeCount: cp.lifeCount ?? 0,
         };
       }
@@ -690,8 +799,8 @@ export class SemanticFingerprintCalculator {
         patObj.targetSelection = {
           targetType: t.targetType,
           targetPlayerKey: t.targetPlayerKey,
-          targetUnitId: t.targetUnitId,
-          targetRequestId: t.targetRequestId,
+          targetUnitId: t.targetUnitId ? resolveId(t.targetUnitId) : undefined,
+          targetRequestId: t.targetRequestId ? resolveId(t.targetRequestId) : undefined,
           targetDefinitionId: t.targetDefinitionId,
         };
       }
@@ -700,30 +809,37 @@ export class SemanticFingerprintCalculator {
         const e = catalog.effectSelections[p.effectSelectionRef];
         patObj.effectSelection = {
           selectionType: e.selectionType,
-          selectedValues: Array.isArray(e.selectedValues) ? [...e.selectedValues].sort() : undefined,
+          selectedValues: Array.isArray(e.selectedValues)
+            ? e.selectedValues.map((v) => resolveId(v)!).sort()
+            : undefined,
           assignments: Array.isArray(e.assignments)
             ? e.assignments.map((a) => ({
-                sourceUnitId: a.sourceUnitId,
-                selectedUnitIds: Array.isArray(a.selectedUnitIds) ? [...a.selectedUnitIds].sort() : [],
+                sourceUnitId: resolveId(a.sourceUnitId)!,
+                selectedUnitIds: Array.isArray(a.selectedUnitIds)
+                  ? a.selectedUnitIds.map((id) => resolveId(id)!).sort()
+                  : [],
               }))
             : undefined,
           targetSelection: e.targetSelection
             ? {
                 targetType: e.targetSelection.targetType,
                 targetPlayerKey: e.targetSelection.targetPlayerKey,
-                targetUnitId: e.targetSelection.targetUnitId,
-                targetRequestId: e.targetSelection.targetRequestId,
+                targetUnitId: e.targetSelection.targetUnitId ? resolveId(e.targetSelection.targetUnitId) : undefined,
+                targetRequestId: e.targetSelection.targetRequestId
+                  ? resolveId(e.targetSelection.targetRequestId)
+                  : undefined,
                 targetDefinitionId: e.targetSelection.targetDefinitionId,
               }
             : undefined,
           candidateCount: e.candidateCount,
+          cards: Array.isArray(e.cards) ? e.cards.map(normalizeCardView) : undefined,
         };
       }
 
       if (p.orderSelectionRef !== undefined && catalog.orderSelections?.[p.orderSelectionRef]) {
         const o = catalog.orderSelections[p.orderSelectionRef];
         patObj.orderSelection = {
-          orderedIds: Array.isArray(o.orderedIds) ? [...o.orderedIds] : [],
+          orderedIds: Array.isArray(o.orderedIds) ? o.orderedIds.map((id) => resolveId(id)!) : [],
         };
       }
 
@@ -733,13 +849,16 @@ export class SemanticFingerprintCalculator {
     return {
       protocolVersion: req.protocolVersion,
       playerId: req.playerId,
-      source: this.projectDecisionSource(req.source),
+      source: this.projectDecisionSource(req.source, resolveId),
       observation,
       patterns,
     };
   }
 
-  private static projectDecisionSource(src: DecisionSource | undefined): any {
+  private static projectDecisionSource(
+    src: DecisionSource | undefined,
+    resolveId: (id: any) => string | undefined = (id) => id
+  ): any {
     if (!src) return undefined;
     switch (src.type) {
       case "ACTION_REQUEST":
@@ -750,7 +869,7 @@ export class SemanticFingerprintCalculator {
       case "EFFECT_RESOLUTION":
         return {
           type: src.type,
-          sourceRequestRef: src.sourceRequestRef,
+          sourceRequestRef: resolveId(src.sourceRequestRef),
           effectStepId: src.effectStepId,
           playerId: src.playerId,
           sourceActionId: src.sourceActionId,

@@ -102,6 +102,8 @@ export interface SemanticDiagnosticOptions {
   readonly enabled?: boolean;
   /** リングバッファの履歴保持サイズ (デフォルト: 64) */
   readonly historySize?: number;
+  /** 保持するトレースレコードの最大件数 (デフォルト: historySize と同一) */
+  readonly traceRetentionLimit?: number;
   /** 連続一致とみなす閾値 (デフォルト: 3) */
   readonly consecutiveRepeatThreshold?: number;
   /** 周期検出に必要な最小反復回数 (デフォルト: 3) */
@@ -116,6 +118,15 @@ export interface SemanticDiagnosticOptions {
  * シミュレーション完了時に返却される診断集計結果
  */
 export interface SemanticDiagnosticResult {
+  /** セマンティック診断バージョン (契約値: 1) */
+  readonly semanticDiagnosticVersion: 1;
+  /** 実行中に生成された全トレースレコードの総数 */
+  readonly totalTraceCount: number;
+  /** 保持トレースの上限設定 */
+  readonly traceRetentionLimit: number;
+  /** トレースが上限により古いものから切り捨てられたか (totalTraceCount > traceRetentionLimit) */
+  readonly traceTruncated: boolean;
+  /** 保持された直近のトレースレコード配列 (最大 traceRetentionLimit 件) */
   readonly traces: readonly DiagnosticTraceRecord[];
   readonly finalSignals: readonly SemanticDiagnosticSignal[];
   readonly signalCounts: Record<SemanticDiagnosticSignal, number>;

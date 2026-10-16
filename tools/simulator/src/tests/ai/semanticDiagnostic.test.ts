@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, vi } from "vitest";
 import * as path from "path";
 import * as crypto from "crypto";
 import { fileURLToPath } from "url";
@@ -25,6 +25,7 @@ import { SemanticFingerprintCalculator } from "../../engine/ai/SemanticFingerpri
 import { SemanticStallCycleDetector } from "../../engine/ai/SemanticStallCycleDetector";
 import { GameSessionSideState } from "../../domain/ai/SemanticDiagnosticTypes";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
+import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -193,6 +194,57 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(fps2.decisionRequest).toBe(fps.decisionRequest);
       expect(fps2.policyInput).toBe(fps.policyInput);
     });
+
+    // Blocker C: Structural Request Sequence Normalization & Ordering Sensitivity
+    it("should produce identical sgf1 when request absolute sequences differ but relative order is identical (Blocker C)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      // State A: sequences 17, 18
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.stage.requests = [
+        { sequence: 17, type: "ACTION", actionId: "action.attack", actorPlayerId: "p1" },
+        { sequence: 18, type: "ACTION", actionId: "action.defend", actorPlayerId: "p2" },
+      ];
+
+      // State B: sequences 101, 102
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.stage.requests = [
+        { sequence: 101, type: "ACTION", actionId: "action.attack", actorPlayerId: "p1" },
+        { sequence: 102, type: "ACTION", actionId: "action.defend", actorPlayerId: "p2" },
+      ];
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when stage request ordering changes (Blocker C)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.stage.requests = [
+        { sequence: 1, type: "ACTION", actionId: "action.attack", actorPlayerId: "p1" },
+        { sequence: 2, type: "ACTION", actionId: "action.defend", actorPlayerId: "p2" },
+      ];
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.stage.requests = [
+        { sequence: 1, type: "ACTION", actionId: "action.defend", actorPlayerId: "p2" },
+        { sequence: 2, type: "ACTION", actionId: "action.attack", actorPlayerId: "p1" },
+      ];
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
   });
 
   // =========================================================================
@@ -240,6 +292,339 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
 
       const mutatedDrsf = SemanticFingerprintCalculator.computeDrsf1(mutatedRequest);
       expect(mutatedDrsf).not.toBe(originalDrsf);
+    });
+
+    // Blocker A: EffectSelection.cards semantic sensitivity
+    it("should be sensitive to EffectSelection.cards and insensitive to presentation summary (Blocker A)", () => {
+      const baseReq: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "test-match",
+        decisionId: "dec-100",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { type: "ACTION_REQUEST", playerId: "p1" },
+        observation: {
+          viewerPlayerId: "p1",
+          turnPlayerId: "p1",
+          chancePlayerId: "p1",
+          turnCount: 1,
+          players: [],
+          stageRequestRefs: [],
+          stageRequests: [],
+          recentEvents: [],
+        },
+        catalog: {
+          actions: [],
+          cardSelections: [],
+          unitSelections: [],
+          costPayments: [],
+          targetSelections: [],
+          effectSelections: [
+            {
+              selectionType: "unitAssignment",
+              summary: "Presentation summary 1",
+              cards: [
+                {
+                  visibility: "KNOWN",
+                  cardInstanceId: "card-1001",
+                  suit: "S",
+                  rank: "5",
+                  value: 5,
+                  faceUp: true,
+                },
+              ],
+            },
+          ],
+          orderSelections: [],
+        },
+        patterns: [
+          {
+            patternId: "pat-effect-1",
+            kind: "EFFECT_SELECTION",
+            effectSelectionRef: 0,
+          },
+        ],
+      };
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(baseReq);
+
+      // summary のみ異なる場合 -> 同一 (presentation metadata 除外保証)
+      const diffSummaryReq: DecisionRequest = {
+        ...baseReq,
+        catalog: {
+          ...baseReq.catalog,
+          effectSelections: [
+            {
+              ...baseReq.catalog.effectSelections[0],
+              summary: "Completely different presentation summary 2",
+            },
+          ],
+        },
+      };
+      const drsfSummary = SemanticFingerprintCalculator.computeDrsf1(diffSummaryReq);
+      expect(drsfSummary).toBe(drsfA);
+
+      // cards のみ異なる場合 -> 異なる (CardView semantic projection 保証)
+      const diffCardsReq: DecisionRequest = {
+        ...baseReq,
+        catalog: {
+          ...baseReq.catalog,
+          effectSelections: [
+            {
+              ...baseReq.catalog.effectSelections[0],
+              cards: [
+                {
+                  visibility: "KNOWN",
+                  cardInstanceId: "card-1001",
+                  suit: "H", // suit differs
+                  rank: "5",
+                  value: 5,
+                  faceUp: true,
+                },
+              ],
+            },
+          ],
+        },
+      };
+      const drsfCards = SemanticFingerprintCalculator.computeDrsf1(diffCardsReq);
+      expect(drsfCards).not.toBe(drsfA);
+    });
+
+    // Blocker B: drsf1 Dynamic ID Canonicalization & Topology Equivalence
+    it("should produce identical drsf1 for requests with different raw dynamic IDs but identical reference topology (Blocker B)", () => {
+      const reqA: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "match-A",
+        decisionId: "dec-A-1788000000001",
+        stateVersion: 1,
+        playerId: "p1",
+        source: {
+          type: "EFFECT_RESOLUTION",
+          sourceRequestRef: "req-trg-1788000000001",
+          effectStepId: "step-1",
+          playerId: "p1",
+        },
+        observation: {
+          viewerPlayerId: "p1",
+          turnPlayerId: "p1",
+          chancePlayerId: "p1",
+          turnCount: 1,
+          players: [
+            {
+              playerId: "p1",
+              name: "Player 1",
+              isViewer: true,
+              lifeCount: 5,
+              lifeDisplay: "5",
+              handCount: 1,
+              handCards: [],
+              field: [
+                {
+                  unitId: "unit-1788000000001",
+                  kind: "一般兵",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+          ],
+          stageRequestRefs: [],
+          stageRequests: [],
+          recentEvents: [],
+        },
+        catalog: {
+          actions: [],
+          cardSelections: [],
+          unitSelections: [{ unitIds: ["unit-1788000000001"], displayNames: ["一般兵"] }],
+          costPayments: [],
+          targetSelections: [
+            {
+              targetType: "unit",
+              targetUnitId: "unit-1788000000001",
+            },
+          ],
+          effectSelections: [
+            {
+              selectionType: "unitAssignment",
+              assignments: [
+                {
+                  sourceUnitId: "unit-1788000000001",
+                  selectedUnitIds: ["unit-1788000000001"],
+                },
+              ],
+            },
+          ],
+          orderSelections: [],
+        },
+        patterns: [
+          {
+            patternId: "pat-1",
+            kind: "ACTION",
+            keyUnitSelectionRef: 0,
+            targetSelectionRef: 0,
+            effectSelectionRef: 0,
+          },
+        ],
+      };
+
+      const reqB: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "match-B",
+        decisionId: "dec-B-1788999999999",
+        stateVersion: 10,
+        playerId: "p1",
+        source: {
+          type: "EFFECT_RESOLUTION",
+          sourceRequestRef: "req-trg-1788999999999",
+          effectStepId: "step-1",
+          playerId: "p1",
+        },
+        observation: {
+          viewerPlayerId: "p1",
+          turnPlayerId: "p1",
+          chancePlayerId: "p1",
+          turnCount: 1,
+          players: [
+            {
+              playerId: "p1",
+              name: "Player 1",
+              isViewer: true,
+              lifeCount: 5,
+              lifeDisplay: "5",
+              handCount: 1,
+              handCards: [],
+              field: [
+                {
+                  unitId: "unit-1788999999999",
+                  kind: "一般兵",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+          ],
+          stageRequestRefs: [],
+          stageRequests: [],
+          recentEvents: [],
+        },
+        catalog: {
+          actions: [],
+          cardSelections: [],
+          unitSelections: [{ unitIds: ["unit-1788999999999"], displayNames: ["一般兵"] }],
+          costPayments: [],
+          targetSelections: [
+            {
+              targetType: "unit",
+              targetUnitId: "unit-1788999999999",
+            },
+          ],
+          effectSelections: [
+            {
+              selectionType: "unitAssignment",
+              assignments: [
+                {
+                  sourceUnitId: "unit-1788999999999",
+                  selectedUnitIds: ["unit-1788999999999"],
+                },
+              ],
+            },
+          ],
+          orderSelections: [],
+        },
+        patterns: [
+          {
+            patternId: "pat-1",
+            kind: "ACTION",
+            keyUnitSelectionRef: 0,
+            targetSelectionRef: 0,
+            effectSelectionRef: 0,
+          },
+        ],
+      };
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).toBe(drsfB);
+    });
+
+    // Blocker B: drsf1 Topology Difference Sensitivity
+    it("should produce different drsf1 when entity reference topology differs (Blocker B)", () => {
+      const buildRequest = (targetIndex: 0 | 1): DecisionRequest => ({
+        protocolVersion: "1.0",
+        matchId: "match-test",
+        decisionId: "dec-1",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { type: "ACTION_REQUEST", playerId: "p1" },
+        observation: {
+          viewerPlayerId: "p1",
+          turnPlayerId: "p1",
+          chancePlayerId: "p1",
+          turnCount: 1,
+          players: [
+            {
+              playerId: "p1",
+              name: "Player 1",
+              isViewer: true,
+              lifeCount: 5,
+              lifeDisplay: "5",
+              handCount: 0,
+              handCards: [],
+              field: [
+                { unitId: "unit-1788000000001", kind: "一般兵", state: "charge", face: "up", cards: [], labels: [] },
+                { unitId: "unit-1788000000002", kind: "一般兵", state: "charge", face: "up", cards: [], labels: [] },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+          ],
+          stageRequestRefs: [],
+          stageRequests: [],
+          recentEvents: [],
+        },
+        catalog: {
+          actions: [],
+          cardSelections: [],
+          unitSelections: [],
+          costPayments: [],
+          targetSelections: [
+            {
+              targetType: "unit",
+              targetUnitId: targetIndex === 0 ? "unit-1788000000001" : "unit-1788000000002",
+            },
+          ],
+          effectSelections: [],
+          orderSelections: [],
+        },
+        patterns: [
+          {
+            patternId: "pat-1",
+            kind: "ACTION",
+            targetSelectionRef: 0,
+          },
+        ],
+      });
+
+      const drsf1 = SemanticFingerprintCalculator.computeDrsf1(buildRequest(0));
+      const drsf2 = SemanticFingerprintCalculator.computeDrsf1(buildRequest(1));
+      expect(drsf1).not.toBe(drsf2);
     });
   });
 
@@ -688,6 +1073,233 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(result.totalDecisions).toBe(5);
       expect(result.reason).toContain("最大判断回数 (5) に到達しました。");
       expect(result.semanticDiagnostics).toBeDefined();
+    });
+
+    it("should guarantee exact call count parity for policy.choose, session.advance, and session.submitDecision", () => {
+      const playtestRulePackage = getCoreBattlePlaytestRulePackage(rulePackage);
+      const SEED = 7777;
+
+      let chooseCountOff = 0;
+      let advanceCountOff = 0;
+      let submitCountOff = 0;
+
+      const stateA = createCoreBattlePresetState();
+      const sessionA = new GameSession(stateA, playtestRulePackage);
+      const origAdvanceA = sessionA.advance.bind(sessionA);
+      sessionA.advance = () => {
+        advanceCountOff++;
+        return origAdvanceA();
+      };
+      const origSubmitA = sessionA.submitDecision.bind(sessionA);
+      sessionA.submitDecision = (d) => {
+        submitCountOff++;
+        return origSubmitA(d);
+      };
+
+      const policyOffP1 = new RandomPolicy(new SeededRandom(SEED));
+      const origChooseOffP1 = policyOffP1.choose.bind(policyOffP1);
+      policyOffP1.choose = (req) => {
+        chooseCountOff++;
+        return origChooseOffP1(req);
+      };
+
+      const policyOffP2 = new RandomPolicy(new SeededRandom(SEED + 1));
+      const origChooseOffP2 = policyOffP2.choose.bind(policyOffP2);
+      policyOffP2.choose = (req) => {
+        chooseCountOff++;
+        return origChooseOffP2(req);
+      };
+
+      SimulationRunner.run(sessionA, { p1: policyOffP1, p2: policyOffP2 }, {
+        maxDecisions: 50,
+        enableSemanticDiagnostics: false,
+      });
+
+      let chooseCountOn = 0;
+      let advanceCountOn = 0;
+      let submitCountOn = 0;
+
+      const stateB = createCoreBattlePresetState();
+      const sessionB = new GameSession(stateB, playtestRulePackage);
+      const origAdvanceB = sessionB.advance.bind(sessionB);
+      sessionB.advance = () => {
+        advanceCountOn++;
+        return origAdvanceB();
+      };
+      const origSubmitB = sessionB.submitDecision.bind(sessionB);
+      sessionB.submitDecision = (d) => {
+        submitCountOn++;
+        return origSubmitB(d);
+      };
+
+      const policyOnP1 = new RandomPolicy(new SeededRandom(SEED));
+      const origChooseOnP1 = policyOnP1.choose.bind(policyOnP1);
+      policyOnP1.choose = (req) => {
+        chooseCountOn++;
+        return origChooseOnP1(req);
+      };
+
+      const policyOnP2 = new RandomPolicy(new SeededRandom(SEED + 1));
+      const origChooseOnP2 = policyOnP2.choose.bind(policyOnP2);
+      policyOnP2.choose = (req) => {
+        chooseCountOn++;
+        return origChooseOnP2(req);
+      };
+
+      SimulationRunner.run(sessionB, { p1: policyOnP1, p2: policyOnP2 }, {
+        maxDecisions: 50,
+        enableSemanticDiagnostics: true,
+      });
+
+      expect(chooseCountOn).toBe(chooseCountOff);
+      expect(advanceCountOn).toBe(advanceCountOff);
+      expect(submitCountOn).toBe(submitCountOff);
+    });
+
+    it("should preserve StateHasher v2 behavior and produce identical hashes on cloned states", () => {
+      const session = setupLightEntry16Session(42);
+      const step = session.advance();
+      if (step.type !== "WAITING_FOR_DECISION") return;
+
+      const hashBefore = StateHasher.hash(session.state);
+      const clone = JSON.parse(JSON.stringify(session.state));
+      const hashClone = StateHasher.hash(clone);
+      expect(hashBefore).toBe(hashClone);
+
+      // Compute all semantic fingerprints
+      const sideState: GameSessionSideState = {
+        consecutivePassCount: session.passTracker.consecutivePassCount,
+      };
+      SemanticFingerprintCalculator.computeAll(session.state, sideState, step.request);
+
+      const hashAfter = StateHasher.hash(session.state);
+      expect(hashAfter).toBe(hashBefore);
+    });
+  });
+
+  // =========================================================================
+  // 11. Bounded Detector History & Inverted Hash Index (Blocker D & E)
+  // =========================================================================
+  describe("11. Bounded Detector History & Version Contract (Blocker D & E)", () => {
+    it("should enforce traceRetentionLimit, totalTraceCount, traceTruncated, and semanticDiagnosticVersion", () => {
+      const session = setupLightEntry16Session(42);
+      const policies = {
+        p1: new FirstLegalPolicy(true),
+        p2: new FirstLegalPolicy(true),
+      };
+
+      // Run with maxDecisions: 80 and default historySize: 64
+      const result = SimulationRunner.run(session, policies, {
+        maxDecisions: 80,
+        enableSemanticDiagnostics: true,
+      });
+
+      expect(result.semanticDiagnostics).toBeDefined();
+      const diag = result.semanticDiagnostics!;
+
+      // Blocker E: Version Contract
+      expect(diag.semanticDiagnosticVersion).toBe(1);
+
+      // Blocker D: Retention limit default 64
+      expect(diag.traceRetentionLimit).toBe(64);
+      expect(diag.totalTraceCount).toBe(80);
+      expect(diag.traces.length).toBe(64);
+      expect(diag.traceTruncated).toBe(true);
+
+      // Check step indices of retained traces: should be the latest 64 (16 to 79, 0-indexed)
+      expect(diag.traces[0].stepIndex).toBe(16);
+      expect(diag.traces[diag.traces.length - 1].stepIndex).toBe(79);
+    });
+
+    it("should respect explicit traceRetentionLimit option", () => {
+      const session = setupLightEntry16Session(42);
+      const policies = {
+        p1: new FirstLegalPolicy(true),
+        p2: new FirstLegalPolicy(true),
+      };
+
+      const result = SimulationRunner.run(session, policies, {
+        maxDecisions: 30,
+        enableSemanticDiagnostics: true,
+        semanticDiagnosticOptions: {
+          traceRetentionLimit: 10,
+        },
+      });
+
+      expect(result.semanticDiagnostics).toBeDefined();
+      const diag = result.semanticDiagnostics!;
+
+      expect(diag.traceRetentionLimit).toBe(10);
+      expect(diag.totalTraceCount).toBe(30);
+      expect(diag.traces.length).toBe(10);
+      expect(diag.traceTruncated).toBe(true);
+      expect(diag.traces[0].stepIndex).toBe(20);
+      expect(diag.traces[diag.traces.length - 1].stepIndex).toBe(29);
+    });
+
+    it("should purge evicted entries from inverted hash index when ring buffer capacity is exceeded", () => {
+      const detector = new SemanticStallCycleDetector({
+        historySize: 3,
+      });
+
+      const session = setupLightEntry16Session(42);
+      const step = session.advance();
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
+
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+      const req = step.request;
+      const resp: DecisionResponse = {
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        selectedPatternRef: 0,
+      };
+
+      const computeAllSpy = vi.spyOn(SemanticFingerprintCalculator, "computeAll");
+
+      const makeFps = (id: string): any => ({
+        structural: `sgf1-${id}`,
+        structuralTurnInvariant: `sgf1-ti-${id}`,
+        observation: `pof1-${id}`,
+        decisionRequest: `drsf1-${id}`,
+        policyInput: `gpif1-${id}`,
+      });
+
+      // Step 0
+      computeAllSpy.mockReturnValueOnce(makeFps("hash-step0"));
+      detector.preDecision(0, session.state, sideState, req);
+      detector.recordDecision(resp, req);
+
+      // Step 1
+      computeAllSpy.mockReturnValueOnce(makeFps("hash-step1"));
+      detector.preDecision(1, session.state, sideState, req);
+      detector.recordDecision(resp, req);
+
+      // Step 2 (ring buffer full with capacity 3)
+      computeAllSpy.mockReturnValueOnce(makeFps("hash-step2"));
+      detector.preDecision(2, session.state, sideState, req);
+      detector.recordDecision(resp, req);
+
+      expect(detector.getInvertedIndex("structural").has("sgf1-hash-step0")).toBe(true);
+
+      // Step 3 (evicts Step 0)
+      computeAllSpy.mockReturnValueOnce(makeFps("hash-step3"));
+      detector.preDecision(3, session.state, sideState, req);
+      detector.recordDecision(resp, req);
+
+      const result = detector.getResult();
+      expect(result.traces.length).toBe(3);
+      expect(result.totalTraceCount).toBe(4);
+      expect(result.traceTruncated).toBe(true);
+      expect(result.traces.map((t) => t.stepIndex)).toEqual([1, 2, 3]);
+
+      // Check Inverted Hash Index: hash-step0 has been completely purged!
+      expect(detector.getInvertedIndex("structural").has("sgf1-hash-step0")).toBe(false);
+      expect(detector.getInvertedIndex("structural").has("sgf1-hash-step1")).toBe(true);
+      expect(detector.getInvertedIndex("structural").has("sgf1-hash-step2")).toBe(true);
+      expect(detector.getInvertedIndex("structural").has("sgf1-hash-step3")).toBe(true);
+
+      computeAllSpy.mockRestore();
     });
   });
 });
