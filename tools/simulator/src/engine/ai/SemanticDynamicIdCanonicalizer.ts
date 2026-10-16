@@ -92,7 +92,17 @@ export class SemanticDynamicIdCanonicalizer {
 
       const sorted: Record<string, any> = {};
       for (const key of Object.keys(value).sort()) {
-        if (key === "timestamp" || key === "createdAt") continue;
+        if (
+          key === "timestamp" ||
+          key === "createdAt" ||
+          key === "sequence" ||
+          key === "stateVersion" ||
+          key === "decisionId" ||
+          key === "actionName" ||
+          key === "displayName" ||
+          key === "primaryLabel" ||
+          key === "secondaryLabel"
+        ) continue;
         sorted[key] = canonicalizeValue(value[key]);
       }
       return sorted;

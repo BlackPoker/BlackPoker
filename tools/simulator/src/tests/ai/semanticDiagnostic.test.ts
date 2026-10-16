@@ -23,7 +23,10 @@ import { SemanticSHA256 } from "../../engine/ai/SemanticSHA256";
 import { SemanticDynamicIdCanonicalizer } from "../../engine/ai/SemanticDynamicIdCanonicalizer";
 import { SemanticFingerprintCalculator } from "../../engine/ai/SemanticFingerprintCalculator";
 import { SemanticStallCycleDetector } from "../../engine/ai/SemanticStallCycleDetector";
-import { GameSessionSideState } from "../../domain/ai/SemanticDiagnosticTypes";
+import {
+  GameSessionSideState,
+  SemanticDiagnosticValidationError,
+} from "../../domain/ai/SemanticDiagnosticTypes";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 
@@ -1301,5 +1304,475 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
 
       computeAllSpy.mockRestore();
     });
+
+    it("should enforce fail-closed validation for constructor options (Blocker D)", () => {
+      // Valid default construction
+      const defaultDetector = new SemanticStallCycleDetector();
+      const defaultResult = defaultDetector.getResult();
+      expect(defaultResult.traceRetentionLimit).toBe(64);
+
+      // historySize invalid
+      expect(() => new SemanticStallCycleDetector({ historySize: 0 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ historySize: -5 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ historySize: 3.5 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+
+      // traceRetentionLimit invalid
+      expect(() => new SemanticStallCycleDetector({ traceRetentionLimit: 0 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ traceRetentionLimit: -1 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ traceRetentionLimit: 2.5 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ historySize: 10, traceRetentionLimit: 11 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+
+      // consecutiveRepeatThreshold invalid
+      expect(() => new SemanticStallCycleDetector({ consecutiveRepeatThreshold: 0 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ consecutiveRepeatThreshold: 1.5 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+
+      // periodicMinOccurrences invalid
+      expect(() => new SemanticStallCycleDetector({ periodicMinOccurrences: 0 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ periodicMinOccurrences: 2.2 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+
+      // noSemanticChangeWindow invalid
+      expect(() => new SemanticStallCycleDetector({ noSemanticChangeWindow: 0 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+      expect(() => new SemanticStallCycleDetector({ noSemanticChangeWindow: 10.1 })).toThrow(
+        SemanticDiagnosticValidationError
+      );
+    });
+  });
+
+  // =========================================================================
+  // 12. Pack & Rare Cards Structural Fingerprint Coverage (Blocker A & B)
+  // =========================================================================
+  describe("12. Pack & Rare Cards Structural Fingerprint Coverage (Blocker A & B)", () => {
+    it("should produce different sgf1 and sgf1-ti when pack.opened differs (Test A)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.pack = {
+        count: 3,
+        opened: false,
+        cards: [{ id: "c1", suit: "S", rank: "A", value: 14 }],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.pack = {
+        count: 3,
+        opened: true,
+        cards: [{ id: "c1", suit: "S", rank: "A", value: 14 }],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+
+      const sgfTiA = SemanticFingerprintCalculator.computeSgf1Ti(stateA, sideState);
+      const sgfTiB = SemanticFingerprintCalculator.computeSgf1Ti(stateB, sideState);
+      expect(sgfTiA).not.toBe(sgfTiB);
+    });
+
+    it("should produce different sgf1 when pack.count differs (Test B)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.pack = { count: 5, opened: false, cards: [] };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.pack = { count: 6, opened: false, cards: [] };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when pack card semantic contents differ (Test C)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.pack = {
+        count: 1,
+        opened: false,
+        cards: [{ id: "c1", suit: "S", rank: "A", value: 14 }],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.pack = {
+        count: 1,
+        opened: false,
+        cards: [{ id: "c1", suit: "H", rank: "A", value: 14 }],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when pack card array order differs (Test D)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const card1 = { id: "c1", suit: "S", rank: "A", value: 14 };
+      const card2 = { id: "c2", suit: "D", rank: "K", value: 13 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.pack = { count: 2, opened: false, cards: [card1, card2] };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.pack = { count: 2, opened: false, cards: [card2, card1] };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce identical sgf1 when pack card raw dynamic IDs differ but contents and order match (Test E)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.pack = {
+        count: 2,
+        opened: false,
+        cards: [
+          { id: "pack-card-A1", suit: "S", rank: "A", value: 14 },
+          { id: "pack-card-A2", suit: "D", rank: "K", value: 13 },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.pack = {
+        count: 2,
+        opened: false,
+        cards: [
+          { id: "pack-card-B1", suit: "S", rank: "A", value: 14 },
+          { id: "pack-card-B2", suit: "D", rank: "K", value: 13 },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when rareCards semantic contents differ (Test F)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.rareCards = [{ id: "c1", suit: "S", rank: "A", value: 14 }];
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.rareCards = [{ id: "c1", suit: "C", rank: "A", value: 14 }];
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when rareCards array order differs (Test G)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const card1 = { id: "c1", suit: "S", rank: "A", value: 14 };
+      const card2 = { id: "c2", suit: "D", rank: "K", value: 13 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.rareCards = [card1, card2];
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.rareCards = [card2, card1];
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce identical sgf1 when rareCards raw dynamic IDs differ but contents and order match (Test H)", () => {
+      const session = setupLightEntry16Session(42);
+      session.advance();
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.players.p1.rareCards = [
+        { id: "rare-card-A1", suit: "S", rank: "A", value: 14 },
+        { id: "rare-card-A2", suit: "D", rank: "K", value: 13 },
+      ];
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.players.p1.rareCards = [
+        { id: "rare-card-B1", suit: "S", rank: "A", value: 14 },
+        { id: "rare-card-B2", suit: "D", rank: "K", value: 13 },
+      ];
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("should verify pack semantic state change alters sgf1 in official standard-pack regulation (Test I)", () => {
+      const reg = catalog.regulations.get("standard-pack");
+      expect(reg).toBeDefined();
+      if (!reg) return;
+
+      const frame = catalog.frames.get(reg.frameId);
+      expect(frame).toBeDefined();
+      if (!frame) return;
+
+      const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, 42, {
+        playerNames: { p1: "Standard Player 1", p2: "Standard Player 2" },
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
+
+      const matchSession = new GameSession(outcome.state, rulePackage, { matchSeed: 42 });
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+      const initialSgf = SemanticFingerprintCalculator.computeSgf1(matchSession.state, sideState);
+
+      expect(matchSession.state.players.p1.pack).toBeDefined();
+      expect(matchSession.state.players.p1.pack.cards.length).toBe(14);
+
+      // Pack semantic change (opened changed from false to true)
+      const modifiedState = JSON.parse(JSON.stringify(matchSession.state));
+      modifiedState.players.p1.pack.opened = true;
+      const modifiedSgf = SemanticFingerprintCalculator.computeSgf1(modifiedState, sideState);
+      expect(modifiedSgf).not.toBe(initialSgf);
+    });
+  });
+
+  // =========================================================================
+  // 13. Bookkeeping Sequence Invariance & Side-State Audit (Blocker C)
+  // =========================================================================
+  describe("13. Bookkeeping Sequence Invariance & Side-State Audit (Blocker C)", () => {
+    const buildRequestWithEffectSource = (seq: number, actionId = "action.draw"): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "match-test",
+      decisionId: "dec-1",
+      stateVersion: 1,
+      playerId: "p1",
+      source: {
+        type: "EFFECT_RESOLUTION",
+        playerId: "p1",
+        sourceRequestRef: "req-trigger-1",
+        effectStepId: "step-1",
+      },
+      observation: {
+        viewerPlayerId: "p1",
+        turnPlayerId: "p1",
+        chancePlayerId: "p1",
+        turnCount: 1,
+        players: [],
+        stageRequestRefs: [],
+        stageRequests: [],
+        effectSourceRequest: {
+          requestId: "req-trigger-1",
+          actionId,
+          actionSpeed: "NORMAL",
+          actionTiming: "MAIN",
+          controller: "p1",
+          status: "RESOLVING",
+          sequence: seq,
+          definitionOwner: "p1",
+        },
+        recentEvents: [],
+      },
+      catalog: {
+        actions: [],
+        cardSelections: [],
+        unitSelections: [],
+        costPayments: [],
+        targetSelections: [],
+        effectSelections: [],
+        orderSelections: [],
+      },
+      patterns: [],
+    });
+
+    it("should produce identical pof1 and drsf1 when effectSourceRequest sequence differs but actionId matches (Test J)", () => {
+      const reqA = buildRequestWithEffectSource(17);
+      const reqB = buildRequestWithEffectSource(101);
+
+      const pofA = SemanticFingerprintCalculator.computePof1(reqA.observation);
+      const pofB = SemanticFingerprintCalculator.computePof1(reqB.observation);
+      expect(pofA).toBe(pofB);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).toBe(drsfB);
+    });
+
+    it("should produce different pof1 and drsf1 when effectSourceRequest semantic actionId differs (Test K)", () => {
+      const reqA = buildRequestWithEffectSource(17, "action.draw");
+      const reqB = buildRequestWithEffectSource(17, "action.damage");
+
+      const pofA = SemanticFingerprintCalculator.computePof1(reqA.observation);
+      const pofB = SemanticFingerprintCalculator.computePof1(reqB.observation);
+      expect(pofA).not.toBe(pofB);
+
+      const drsfA = SemanticFingerprintCalculator.computeDrsf1(reqA);
+      const drsfB = SemanticFingerprintCalculator.computeDrsf1(reqB);
+      expect(drsfA).not.toBe(drsfB);
+    });
+
+    it("should produce identical sgf1 when sideState.resolvingRequest bookkeeping fields differ (Test L)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingRequest: {
+          id: "req-resolve-1",
+          actionId: "action.deploy",
+          controller: "p1",
+          status: "RESOLVING",
+          sequence: 17,
+          stateVersion: 10,
+          decisionId: "dec-100",
+          timestamp: 1670000000000,
+          createdAt: "2026-01-01T00:00:00Z",
+          displayName: "召喚",
+        } as any,
+      };
+
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingRequest: {
+          id: "req-resolve-1",
+          actionId: "action.deploy",
+          controller: "p1",
+          status: "RESOLVING",
+          sequence: 101,
+          stateVersion: 99,
+          decisionId: "dec-999",
+          timestamp: 1680000000000,
+          createdAt: "2026-02-01T00:00:00Z",
+          displayName: "異なる表示名",
+        } as any,
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when sideState.resolvingRequest semantic actionId differs (Test M)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingRequest: {
+          id: "req-resolve-1",
+          actionId: "action.deploy",
+          controller: "p1",
+          status: "RESOLVING",
+        } as any,
+      };
+
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingRequest: {
+          id: "req-resolve-1",
+          actionId: "action.attack",
+          controller: "p1",
+          status: "RESOLVING",
+        } as any,
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("should produce identical sgf1 when requestBuffer absolute sequences differ but contents match (Test N)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.requestBuffer = {
+        requests: [
+          { id: "buf-1", actionId: "action.draw", controller: "p1", sequence: 17 },
+          { id: "buf-2", actionId: "action.discard", controller: "p2", sequence: 18 },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.requestBuffer = {
+        requests: [
+          { id: "buf-1", actionId: "action.draw", controller: "p1", sequence: 101 },
+          { id: "buf-2", actionId: "action.discard", controller: "p2", sequence: 102 },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("should produce different sgf1 when requestBuffer FIFO order changes (Test O)", () => {
+      const session = setupLightEntry16Session(42);
+      const baseState = JSON.parse(JSON.stringify(session.state));
+      const sideState: GameSessionSideState = { consecutivePassCount: 0 };
+
+      const stateA = JSON.parse(JSON.stringify(baseState));
+      stateA.requestBuffer = {
+        requests: [
+          { id: "buf-1", actionId: "action.draw", controller: "p1", sequence: 1 },
+          { id: "buf-2", actionId: "action.discard", controller: "p2", sequence: 2 },
+        ],
+      };
+
+      const stateB = JSON.parse(JSON.stringify(baseState));
+      stateB.requestBuffer = {
+        requests: [
+          { id: "buf-2", actionId: "action.discard", controller: "p2", sequence: 1 },
+          { id: "buf-1", actionId: "action.draw", controller: "p1", sequence: 2 },
+        ],
+      };
+
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(stateA, sideState);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(stateB, sideState);
+      expect(sgfA).not.toBe(sgfB);
+    });
   });
 });
+

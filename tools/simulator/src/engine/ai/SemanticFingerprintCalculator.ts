@@ -193,6 +193,12 @@ export class SemanticFingerprintCalculator {
             if (Array.isArray(t?.cards)) t.cards.forEach((c: any) => registerId(c?.id, "card"));
           });
         }
+        if (p.pack?.cards && Array.isArray(p.pack.cards)) {
+          p.pack.cards.forEach((c: any) => registerId(c?.id, "card"));
+        }
+        if (Array.isArray(p.rareCards)) {
+          p.rareCards.forEach((c: any) => registerId(c?.id, "card"));
+        }
       }
     }
 
@@ -368,6 +374,16 @@ export class SemanticFingerprintCalculator {
           trumps: Array.isArray(p.trumps || p.trump)
             ? (p.trumps || p.trump).map((t: any) => normalizeUnit(t))
             : [],
+          pack: p.pack
+            ? {
+                count: p.pack.count ?? (Array.isArray(p.pack.cards) ? p.pack.cards.length : 0),
+                opened: Boolean(p.pack.opened),
+                cards: Array.isArray(p.pack.cards) ? p.pack.cards.map((c: any) => normalizeCard(c)) : [],
+              }
+            : undefined,
+          rareCards: Array.isArray(p.rareCards)
+            ? p.rareCards.map((c: any) => normalizeCard(c))
+            : undefined,
         };
       }
       logical.players = players;
@@ -452,12 +468,52 @@ export class SemanticFingerprintCalculator {
       }));
     }
 
+    // Side-state ResolvingRequest 正規化 (Bookkeeping の sequence/stateVersion/decisionId/timestamp 等を除外)
+    const normalizeResolvingRequest = (r: any): any => {
+      if (!r || typeof r !== "object") return r;
+      const keyCards = Array.isArray(r.keyCards)
+        ? r.keyCards.map((c: any) => normalizeCard(c))
+        : r.keyCard
+        ? [normalizeCard(r.keyCard)]
+        : undefined;
+
+      const targets = Array.isArray(r.targets)
+        ? r.targets.map((t: any) => normalizeTarget(t))
+        : r.target
+        ? [normalizeTarget(r.target)]
+        : r.targetComponent
+        ? [
+            normalizeTarget({
+              type: "unit",
+              unitId: r.targetComponent.unitId,
+              kind: r.targetComponent.kind,
+              componentId: r.targetComponent.componentId,
+            }),
+          ]
+        : undefined;
+
+      return {
+        id: resolveId(r.id),
+        actionId: r.actionId,
+        controller: r.controller,
+        status: r.status,
+        definitionOwner: r.definitionOwner,
+        keyCards,
+        targets,
+        cost: r.cost,
+        selectedCostPayment: normalizeCostPayment(r.selectedCostPayment),
+        effectStepId: r.effectStepId,
+        params: r.params ? ctx.canonicalizeValue(r.params) : undefined,
+        triggerBindings: r.triggerBindings ? ctx.canonicalizeValue(r.triggerBindings) : undefined,
+      };
+    };
+
     // Side-state
     if (sideState) {
       logical.sideState = {
         consecutivePassCount: sideState.consecutivePassCount ?? 0,
         continuation: sideState.continuation ? ctx.canonicalizeValue(sideState.continuation) : undefined,
-        resolvingRequest: sideState.resolvingRequest ? ctx.canonicalizeValue(sideState.resolvingRequest) : undefined,
+        resolvingRequest: sideState.resolvingRequest ? normalizeResolvingRequest(sideState.resolvingRequest) : undefined,
         resolvingContext: sideState.resolvingContext ? ctx.canonicalizeValue(sideState.resolvingContext) : undefined,
       };
     }
@@ -508,6 +564,17 @@ export class SemanticFingerprintCalculator {
         }
         if (p.graveTopCard?.visibility === "KNOWN") {
           registerId(p.graveTopCard.cardInstanceId, "card");
+        }
+        if (p.pack?.cards && Array.isArray(p.pack.cards)) {
+          p.pack.cards.forEach((c) => {
+            if (c.visibility === "KNOWN") registerId(c.cardInstanceId, "card");
+            else if (c.opaqueCardId) registerId(c.opaqueCardId, "card");
+          });
+        }
+        if (p.rareCards?.cards && Array.isArray(p.rareCards.cards)) {
+          p.rareCards.cards.forEach((c) => {
+            if (c.visibility === "KNOWN") registerId(c.cardInstanceId, "card");
+          });
         }
       });
     }
@@ -587,7 +654,7 @@ export class SemanticFingerprintCalculator {
         actionTiming: r.actionTiming,
         controller: r.controller,
         status: r.status,
-        sequence: idx !== undefined ? idx : r.sequence,
+        sequence: idx !== undefined ? idx : undefined,
         definitionOwner: r.definitionOwner,
         keyCards: Array.isArray(r.keyCards) ? r.keyCards.map(normalizeCardView) : undefined,
         target: r.target

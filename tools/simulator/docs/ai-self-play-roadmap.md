@@ -97,7 +97,7 @@
 | **Semantic Stall / Cycle Detection Design V1-R6** | **NOT ACCEPTED / SUPERSEDED BY R7** | `docs/ai-semantic-stall-cycle-detection-design-v1-r6.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r6.json` | - | Fail-Closed Status契約、gpif1とPolicy DNAの責務境界是正（EncodedDecisionFeatures出所確定）、Future Test #10過剰主張修正、first-encounteredタイブレーク実態整合、CCF GenomePolicy-onlyスコープ確定 (R7へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R7** | **NOT ACCEPTED / SUPERSEDED BY R8** | `docs/ai-semantic-stall-cycle-detection-design-v1-r7.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r7.json` | - | SimulationRunner.run / GameSession実API統合境界整合（runMatch/applyDecision非実在API参照完全除去）、PASS / 2-PASS / Explicit End Core Flow意味論整合（PASSはターン終了しない、空ステージ2-PASSはターン継続、明示的action.endのみがターン進行） (R8へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R8** | **FORMAL ACCEPTED** | `docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r8.json` | - | state.turnCount rationale是正、Endライフサイクル完全整合（Normal Action積載/2-PASS/End解決/Charge/Draw）、PRE_DECISION単一サンプリング境界確定（5大Fingerprint同一時点採取） |
-| **Semantic Diagnostic Implementation V1-R1** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts` | `src/tests/ai/semanticDiagnostic.test.ts` | Canonical Design V1-R8準拠、受動的診断基盤（sgf1, sgf1-ti, pof1, drsf1, gpif1）、PRE_DECISIONサンプリング、M=64リングバッファ、Inverted Hash Index、履歴保持上限（traceRetentionLimit/traceTruncated）、EffectSelection.cards網羅、全要求単一IDコンテキスト、Stage/Buffer相対シーケンス正規化、semanticDiagnosticVersion: 1、100%決定論的パリティ契約保証（OFF vs ON完全一致） |
+| **Semantic Diagnostic Implementation V1-R2** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts` | `src/tests/ai/semanticDiagnostic.test.ts` | Canonical Design V1-R8準拠、受動的診断基盤、Pack/RareCards Structural完全網羅、effectSourceRequest/SideState sequence漏れ排除、絶対履歴上限契約（fail-closed）、シグナル呼称統制（NO_SIGNAL: 診断シグナル未検出） |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
@@ -505,7 +505,7 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。
 9. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 10. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
-11. **Semantic Stall / Cycle Diagnostic V1 (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R1)**:
+11. **Semantic Stall / Cycle Diagnostic V1 (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R2)**:
     - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `tools/simulator/docs/ai-semantic-fingerprint-field-registry-v1-r8.json`)
     - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts`, `src/tests/ai/semanticDiagnostic.test.ts`)
     - **設計原則**: 受動的診断器（Passive Observer, `DEFAULT = DISABLED`）。診断の有無でゲーム進行、StateHasher、勝敗判定、手番進行、乱数消費を一切変えない。
@@ -513,18 +513,17 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
     - **5大フィンガープリント**: `sgf1` (盤面構造 + Side State, Turn-Aware), `sgf1-ti` (盤面構造 + Side State, Turn-Invariant), `pof1` (PlayerObservation), `drsf1` (DecisionRequest Root + Observation + Patterns), `gpif1` (GenomePolicy Scoring Input Projection: EncodedDecisionFeatures)。
     - **サンプリング境界**: `PRE_DECISION`（`WAITING_FOR_DECISION` 到達後、`policy.choose` 呼出前の単一境界で5大Fingerprintを同時サンプリング）。
     - **Canonical 診断シグナル分類**:
-      - `NO_SIGNAL`: 正常進行（※ `NO_SIGNAL != GENUINE_LONG_PROGRESS`, `NO_SIGNAL != gameplay progress proven` であり、ゲーム進行の数学的証明とは主張しない）。
+      - `NO_SIGNAL`: 診断シグナル未検出（diagnostic signal not detected）（※ `NO_SIGNAL != GENUINE_LONG_PROGRESS`, `NO_SIGNAL != gameplay progress proven` であり、ゲーム進行の数学的証明とは主張しない）。
       - `REPEATED_STRUCTURAL_FINGERPRINT`: 同一の構造的盤面フィンガープリント（`sgf1`）が連続観測。
       - `REPEATED_DECISION_REQUEST`: 同一の判断要求意味論フィンガープリント（`drsf1`）が連続観測。
       - `REPEATED_POLICY_INPUT`: 同一のポリシー入力数値フィンガープリント（`gpif1`）が連続観測。
       - `PERIODIC_FINGERPRINT_CANDIDATE`: リングバッファ（$M=64$）内において周期 $k \ge 2$ の再帰が複数回反復観測（周期循環候補）。
       - `NO_SEMANTIC_CHANGE_WINDOW`: 指定ウィンドウ（例: 20 決定）の間、意味的盤面更新が発生しなかった。
-    - **R1 改訂点**:
-      - `drsf1` における `EffectSelection.cards` の網羅的射影（presentation-only metadata 除外、CardView セマンティクス保持）。
-      - DecisionRequest 全体で単一の canonical mapping context を共有（Observation / Source / Catalog / Pattern をまたぐ entity ID の完全一致）。
-      - Stage / RequestBuffer の absolute sequence 番号を array-local relative index へ正規化（順序同一時の偽差異排除、順序変更時の差異検知）。
-      - Detector 内部 history の絶対上限化（`historySize` / `traceRetentionLimit` default 64）、`totalTraceCount` / `traceTruncated` の明示、および eviction 時の Inverted Hash Index 追従削除。
-      - ランタイム出力への `semanticDiagnosticVersion: 1` 追加。
+    - **R2 改訂点**:
+      - `sgf1` / `sgf1-ti` における `state.players[pKey].pack` および `state.players[pKey].rareCards` の完全網羅（カード順序厳格保持、Dynamic ID 正規化、FULL_STATE 意味論保持）。
+      - `effectSourceRequest` および Side-State（`resolvingRequest`, `continuation`, `resolvingContext`）からの絶対 sequence / bookkeeping 漏れ完全排除。
+      - 診断オプションの fail-closed バリデーション契約（`SemanticDiagnosticValidationError`）導入、`historySize` / `traceRetentionLimit` の絶対上限（$M \le historySize$）保証。
+      - `NO_SIGNAL` の用語定義を「診断シグナル未検出（diagnostic signal not detected）」へ統制。
 
 
 

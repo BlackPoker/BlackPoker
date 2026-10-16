@@ -115,6 +115,16 @@ export interface SemanticDiagnosticOptions {
 }
 
 /**
+ * 診断オプション不正時のバリデーションエラー (Fail-Closed)
+ */
+export class SemanticDiagnosticValidationError extends Error {
+  constructor(message: string) {
+    super(`SemanticDiagnosticValidationError: ${message}`);
+    this.name = "SemanticDiagnosticValidationError";
+  }
+}
+
+/**
  * シミュレーション完了時に返却される診断集計結果
  */
 export interface SemanticDiagnosticResult {

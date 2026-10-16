@@ -26,6 +26,7 @@ import {
   SemanticFingerprints,
   CycleCandidateInfo,
   SEMANTIC_DIAGNOSTIC_SIGNALS,
+  SemanticDiagnosticValidationError,
 } from "../../domain/ai/SemanticDiagnosticTypes";
 import { SemanticFingerprintCalculator } from "./SemanticFingerprintCalculator";
 
@@ -60,11 +61,63 @@ export class SemanticStallCycleDetector {
   private consecutivePolicyInputCount = 0;
 
   constructor(options?: SemanticDiagnosticOptions) {
-    this.historySize = options?.historySize ?? 64;
-    this.traceRetentionLimit = options?.traceRetentionLimit ?? this.historySize;
-    this.consecutiveRepeatThreshold = options?.consecutiveRepeatThreshold ?? 3;
-    this.periodicMinOccurrences = options?.periodicMinOccurrences ?? 3;
-    this.noSemanticChangeWindow = options?.noSemanticChangeWindow ?? 20;
+    const historySize = options?.historySize ?? 64;
+    if (typeof historySize !== "number" || !Number.isInteger(historySize) || historySize < 1) {
+      throw new SemanticDiagnosticValidationError(
+        `historySize must be a positive integer >= 1, received: ${options?.historySize}`
+      );
+    }
+    this.historySize = historySize;
+
+    const traceRetentionLimit = options?.traceRetentionLimit ?? this.historySize;
+    if (typeof traceRetentionLimit !== "number" || !Number.isInteger(traceRetentionLimit) || traceRetentionLimit < 1) {
+      throw new SemanticDiagnosticValidationError(
+        `traceRetentionLimit must be a positive integer >= 1, received: ${options?.traceRetentionLimit}`
+      );
+    }
+    if (traceRetentionLimit > this.historySize) {
+      throw new SemanticDiagnosticValidationError(
+        `traceRetentionLimit (${traceRetentionLimit}) cannot exceed historySize (${this.historySize})`
+      );
+    }
+    this.traceRetentionLimit = traceRetentionLimit;
+
+    const consecutiveRepeatThreshold = options?.consecutiveRepeatThreshold ?? 3;
+    if (
+      typeof consecutiveRepeatThreshold !== "number" ||
+      !Number.isInteger(consecutiveRepeatThreshold) ||
+      consecutiveRepeatThreshold < 1
+    ) {
+      throw new SemanticDiagnosticValidationError(
+        `consecutiveRepeatThreshold must be a positive integer >= 1, received: ${options?.consecutiveRepeatThreshold}`
+      );
+    }
+    this.consecutiveRepeatThreshold = consecutiveRepeatThreshold;
+
+    const periodicMinOccurrences = options?.periodicMinOccurrences ?? 3;
+    if (
+      typeof periodicMinOccurrences !== "number" ||
+      !Number.isInteger(periodicMinOccurrences) ||
+      periodicMinOccurrences < 1
+    ) {
+      throw new SemanticDiagnosticValidationError(
+        `periodicMinOccurrences must be a positive integer >= 1, received: ${options?.periodicMinOccurrences}`
+      );
+    }
+    this.periodicMinOccurrences = periodicMinOccurrences;
+
+    const noSemanticChangeWindow = options?.noSemanticChangeWindow ?? 20;
+    if (
+      typeof noSemanticChangeWindow !== "number" ||
+      !Number.isInteger(noSemanticChangeWindow) ||
+      noSemanticChangeWindow < 1
+    ) {
+      throw new SemanticDiagnosticValidationError(
+        `noSemanticChangeWindow must be a positive integer >= 1, received: ${options?.noSemanticChangeWindow}`
+      );
+    }
+    this.noSemanticChangeWindow = noSemanticChangeWindow;
+
     this.onTraceRecord = options?.onTraceRecord;
 
     this.invertedIndices = {
