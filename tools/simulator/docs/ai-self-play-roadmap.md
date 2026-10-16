@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R1`
-更新日時: 2026-10-16 12:40 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R2`
+更新日時: 2026-10-16 17:30 JST
 
 ---
 
@@ -89,8 +89,9 @@
 | **Controlled Feature Scaling A/B Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/featureScalingABEvidence.ts`, `docs/ai-feature-scaling-ab-evidence-v1-r1.md`, `docs/ai-feature-scaling-ab-evidence-v1-r1.json` | `src/tests/ai/featureScalingABEvidence.test.ts`, `evidence:feature-scaling-ab` | CONTROL (RAW_V4_EQUIVALENT) vs TREATMENT (SCALED_V5) 決定論的比較検証、全9チェックポイント厳密Weight整合性(===)、動的Markdown生成、Scaler参照復元検証完備 |
 | **Rule-side PASS / Core Flow** | **RULES UNCHANGED / NO CHANGE PLANNED** | `src/domain/rules/`, `src/engine/rules/` | `git diff --stat` (Rules / Core Flow diff: 0) | PASS Rule / Core Flow / Turn Player PASS legality / Stage Empty behavior は変更せず、AI側 Feature Scaling のみで対処 |
 | **Semantic Stall / Cycle Detection Design V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-semantic-stall-cycle-detection-design-v1.md`, `docs/ai-semantic-fingerprint-field-registry-v1.json` | - | 受動的診断アーキテクチャ設計 (V1-R1へ改訂) |
-| **Semantic Stall / Cycle Detection Design V1-R1** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r1.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r1.json` | - | 2層判断Fingerprint（Request Semantic / Policy Input）、129フィールド完全監査、厳格非丸め、SHA-256統一、保守的サイクル用語、Continuation Research境界確定 |
-| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R1 独立レビュー承認待ち) |
+| **Semantic Stall / Cycle Detection Design V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `docs/ai-semantic-stall-cycle-detection-design-v1-r1.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r1.json` | - | 2層判断Fingerprint（Request Semantic / Policy Input）、129フィールド監査、厳格非丸め、SHA-256統一、保守的サイクル用語、Continuation Research境界確定 (R2へ改訂) |
+| **Semantic Stall / Cycle Detection Design V1-R2** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r2.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r2.json` | - | Feature Schema v5整合（Pattern 143次元, total weights 23,452, version 5 number）、DecisionCatalog完全監査（primary/secondaryLabel追跡）、全131フィールド監査完了（REVIEW_REQUIRED 0件, UNKNOWN 0件）、CIテスト件数是正、受動的診断設計完成 |
+| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R2 独立レビュー承認待ち) |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
