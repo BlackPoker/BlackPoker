@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R3`
-更新日時: 2026-10-16 18:25 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1-R4`
+更新日時: 2026-10-16 19:30 JST
 
 ---
 
@@ -91,8 +91,9 @@
 | **Semantic Stall / Cycle Detection Design V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-semantic-stall-cycle-detection-design-v1.md`, `docs/ai-semantic-fingerprint-field-registry-v1.json` | - | 受動的診断アーキテクチャ設計 (V1-R1へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `docs/ai-semantic-stall-cycle-detection-design-v1-r1.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r1.json` | - | 2層判断Fingerprint（Request Semantic / Policy Input）、129フィールド監査、厳格非丸め、SHA-256統一、保守的サイクル用語、Continuation Research境界確定 (R2へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R2** | **NOT ACCEPTED / SUPERSEDED BY R3** | `docs/ai-semantic-stall-cycle-detection-design-v1-r2.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r2.json` | - | Feature Schema v5整合（Pattern 143次元, total weights 23,452, version 5 number）、DecisionCatalog完全監査（primary/secondaryLabel追跡）、全131フィールド監査完了 (R3へ改訂) |
-| **Semantic Stall / Cycle Detection Design V1-R3** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r3.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r3.json` | - | Canonical Source参照整合（DecisionFeatureTypes.ts / DecisionDNATypes.ts 確定, 存在しないFeatureSchemaConstants.ts完全除去）、Current Runtime Field (130件) と Derived Research Candidate (2件: rulePackage.contentDigest, simulator.buildSha) の厳格分離、全132エントリプロパティ実在性監査完了 |
-| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R3 独立レビュー承認待ち) |
+| **Semantic Stall / Cycle Detection Design V1-R3** | **NOT ACCEPTED / SUPERSEDED BY R4** | `docs/ai-semantic-stall-cycle-detection-design-v1-r3.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r3.json` | - | Canonical Source参照整合（DecisionFeatureTypes.ts / DecisionDNATypes.ts 確定, 存在しないFeatureSchemaConstants.ts完全除去）、Current Runtime Field (130件) と Derived Research Candidate (2件: rulePackage.contentDigest, simulator.buildSha) の厳格分離、全132エントリプロパティ実在性監査完了 (R4へ改訂) |
+| **Semantic Stall / Cycle Detection Design V1-R4** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1-r4.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r4.json` | - | Policy State監査境界（DecisionDNA全プロパティ監査: cDim/pDim/scoringModel/metadata分離, PolicyDescriptor kind/policyVersion）、実在性監査証拠分類（TYPE_DECLARATION 80件, RUNTIME_ACCESS 57件, PRIVATE 1件, DERIVED 2件）、計140エントリ確定 |
+| **Semantic Diagnostic Implementation** | **NOT STARTED / WAITING FOR INDEPENDENT REVIEW** | - | - | 未着手 (Design V1-R4 独立レビュー承認待ち) |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
