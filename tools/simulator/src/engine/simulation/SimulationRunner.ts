@@ -4,6 +4,12 @@ import { DecisionPolicy, PolicyDescriptor } from "./DecisionPolicy";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 import { StateHasher } from "./StateHasher";
+import {
+  SemanticDiagnosticOptions,
+  SemanticDiagnosticResult,
+  GameSessionSideState,
+} from "../../domain/ai/SemanticDiagnosticTypes";
+import { SemanticStallCycleDetector } from "../ai/SemanticStallCycleDetector";
 
 import { generateLogicalPatternKey } from "../../domain/decision/LogicalPatternKey";
 export { generateLogicalPatternKey };
@@ -76,10 +82,16 @@ export interface SimulationResult {
   readonly finalStateHash?: string;
   /** ゲームセッションの公式ログ */
   readonly matchLog?: CanonicalMatchLog;
+  /** 受動的診断集計結果 (enableSemanticDiagnostics 有効時のみ付与) */
+  readonly semanticDiagnostics?: SemanticDiagnosticResult;
 }
 
 export interface SimulationOptions {
   readonly maxDecisions?: number;
+  /** 受動的 Semantic Stall / Cycle 診断を有効化するか (デフォルト: false) */
+  readonly enableSemanticDiagnostics?: boolean;
+  /** 受動的診断の詳細オプション */
+  readonly semanticDiagnosticOptions?: SemanticDiagnosticOptions;
   readonly onStep?: (info: {
     stepCount: number;
     decisionPlayer: PlayerKey;
@@ -119,6 +131,11 @@ export class SimulationRunner {
     let totalDecisions = 0;
     const decisionTrace: DecisionTraceRecord[] = [];
 
+    // 受動的診断検出器 (options?.enableSemanticDiagnostics === true の場合のみインスタンス化)
+    const detector = options?.enableSemanticDiagnostics
+      ? new SemanticStallCycleDetector(options.semanticDiagnosticOptions)
+      : undefined;
+
     while (totalDecisions < maxDecisions) {
       const step = session.advance();
 
@@ -135,6 +152,7 @@ export class SimulationRunner {
           decisionTrace,
           finalStateHash,
           matchLog: session.getMatchLog ? session.getMatchLog() : undefined,
+          semanticDiagnostics: detector?.getResult(),
         };
       }
 
@@ -143,6 +161,20 @@ export class SimulationRunner {
         const policy = policies[playerId];
         if (!policy) {
           throw new Error(`プレイヤー '${playerId}' に対する DecisionPolicy が設定されていません。`);
+        }
+
+        // =======================================================================
+        // ★ CANONICAL DECISION SNAPSHOT (PRE_DECISION / DECISION_BOUNDARY) ★
+        // WAITING_FOR_DECISION 到達直後、policy.choose 呼び出し前の単一時点で一括採取
+        // =======================================================================
+        if (detector) {
+          const sideState: GameSessionSideState = {
+            consecutivePassCount: session.passTracker.consecutivePassCount,
+            continuation: session.continuation,
+            resolvingRequest: session.resolvingRequest,
+            resolvingContext: session.resolvingContext,
+          };
+          detector.preDecision(totalDecisions, session.state, sideState, step.request);
         }
 
         // 1. Decision 直前の Logical State Hash を算出 (State Hash v2)
@@ -184,6 +216,11 @@ export class SimulationRunner {
         // 3. AI Policy には合法的観測情報 (step.request) のみを渡す (生 GameState は渡さない)
         const response = policy.choose(step.request);
         totalDecisions++;
+
+        // 意思決定結果メタデータを直前の PRE_DECISION スナップショットに関連付け
+        if (detector) {
+          detector.recordDecision(response, step.request);
+        }
 
         const selectedPat = step.request.patterns[response.selectedPatternRef];
         const selectedPatternKind = selectedPat?.kind || "UNKNOWN";
@@ -261,6 +298,7 @@ export class SimulationRunner {
       decisionTrace,
       finalStateHash,
       matchLog: session.getMatchLog ? session.getMatchLog() : undefined,
+      semanticDiagnostics: detector?.getResult(),
     };
   }
 }
