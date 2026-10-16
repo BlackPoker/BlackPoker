@@ -245,7 +245,68 @@ export class SemanticFingerprintCalculator {
       registerRecursively(sideState.resolvingRequest);
     }
     if (sideState?.resolvingContext) {
-      registerRecursively(sideState.resolvingContext);
+      const rc = sideState.resolvingContext;
+      if (Array.isArray(rc.keyCards)) {
+        rc.keyCards.forEach((c: any) => registerId(c?.id, "card"));
+      } else if (rc.keyCard) {
+        registerId(rc.keyCard?.id, "card");
+      }
+      if (Array.isArray(rc.keyCardIds)) {
+        rc.keyCardIds.forEach((id: string) => registerId(id, "card"));
+      }
+      if (rc.targetUnitId) {
+        registerId(rc.targetUnitId, "unit");
+      }
+      if (rc.targetComponent) {
+        if (typeof rc.targetComponent === "string") {
+          registerId(rc.targetComponent, "unit");
+        } else if (rc.targetComponent.unitId) {
+          registerId(rc.targetComponent.unitId, "unit");
+        } else if (rc.targetComponent.requestId) {
+          registerId(rc.targetComponent.requestId, "req");
+        }
+      }
+      if (rc.targetRequest) {
+        registerId(rc.targetRequest.id, "req");
+        if (Array.isArray(rc.targetRequest.keyCards)) {
+          rc.targetRequest.keyCards.forEach((c: any) => registerId(c?.id, "card"));
+        } else if (rc.targetRequest.keyCard) {
+          registerId(rc.targetRequest.keyCard?.id, "card");
+        }
+        if (Array.isArray(rc.targetRequest.targets)) {
+          rc.targetRequest.targets.forEach((t: any) => {
+            if (t?.unitId) registerId(t.unitId, "unit");
+            if (t?.requestId) registerId(t.requestId, "req");
+          });
+        }
+        if (rc.targetRequest.triggerBindings) registerRecursively(rc.targetRequest.triggerBindings);
+        if (rc.targetRequest.sourceEvent?.payload) registerRecursively(rc.targetRequest.sourceEvent.payload);
+      }
+      if (rc.currentRequest) {
+        registerId(rc.currentRequest.id, "req");
+        if (Array.isArray(rc.currentRequest.keyCards)) {
+          rc.currentRequest.keyCards.forEach((c: any) => registerId(c?.id, "card"));
+        } else if (rc.currentRequest.keyCard) {
+          registerId(rc.currentRequest.keyCard?.id, "card");
+        }
+        if (Array.isArray(rc.currentRequest.targets)) {
+          rc.currentRequest.targets.forEach((t: any) => {
+            if (t?.unitId) registerId(t.unitId, "unit");
+            if (t?.requestId) registerId(t.requestId, "req");
+          });
+        }
+        if (rc.currentRequest.triggerBindings) registerRecursively(rc.currentRequest.triggerBindings);
+        if (rc.currentRequest.sourceEvent?.payload) registerRecursively(rc.currentRequest.sourceEvent.payload);
+      }
+      if (rc.selections) registerRecursively(rc.selections);
+      if (rc.results) registerRecursively(rc.results);
+      if (rc.sourceEvent) {
+        registerId(rc.sourceEvent.eventId || rc.sourceEvent.id, "event");
+        if (rc.sourceEvent.payload) registerRecursively(rc.sourceEvent.payload);
+      }
+      if (rc.source && typeof rc.source === "string") {
+        registerId(rc.source, "entity");
+      }
     }
     if (sideState?.continuation) {
       registerRecursively(sideState.continuation);
@@ -490,6 +551,22 @@ export class SemanticFingerprintCalculator {
               componentId: r.targetComponent.componentId,
             }),
           ]
+        : r.targetRequest
+        ? [
+            normalizeTarget({
+              type: "request",
+              requestId: r.targetRequest.id,
+              actionId: r.targetRequest.actionId,
+            }),
+          ]
+        : undefined;
+
+      const sourceEvent = r.sourceEvent
+        ? {
+            eventId: resolveId(r.sourceEvent.eventId) || resolveId(r.sourceEvent.id) || r.sourceEvent.eventId || r.sourceEvent.id,
+            type: r.sourceEvent.type,
+            payload: r.sourceEvent.payload ? ctx.canonicalizeValue(r.sourceEvent.payload) : undefined,
+          }
         : undefined;
 
       return {
@@ -505,6 +582,67 @@ export class SemanticFingerprintCalculator {
         effectStepId: r.effectStepId,
         params: r.params ? ctx.canonicalizeValue(r.params) : undefined,
         triggerBindings: r.triggerBindings ? ctx.canonicalizeValue(r.triggerBindings) : undefined,
+        sourceEvent,
+      };
+    };
+
+    // Side-state ResolvingContext 正規化 (Bookkeeping の state/actions/components/logRecorder/matchSeed 等を除外)
+    const normalizeResolvingContext = (rc: any): any => {
+      if (!rc || typeof rc !== "object") return rc;
+
+      const keyCards = Array.isArray(rc.keyCards)
+        ? rc.keyCards.map((c: any) => normalizeCard(c))
+        : rc.keyCard
+        ? [normalizeCard(rc.keyCard)]
+        : Array.isArray(rc.keyCardIds)
+        ? rc.keyCardIds.map((id: string) => ({ id: resolveId(id) || id }))
+        : undefined;
+
+      let targetComponent: any = undefined;
+      if (typeof rc.targetComponent === "string") {
+        targetComponent = resolveId(rc.targetComponent) || rc.targetComponent;
+      } else if (rc.targetComponent && typeof rc.targetComponent === "object") {
+        targetComponent = normalizeTarget(rc.targetComponent);
+      }
+
+      const targetUnitId = rc.targetUnitId
+        ? resolveId(rc.targetUnitId) || rc.targetUnitId
+        : undefined;
+
+      const targetRequest = rc.targetRequest
+        ? normalizeResolvingRequest(rc.targetRequest)
+        : undefined;
+
+      const currentRequest = rc.currentRequest
+        ? normalizeResolvingRequest(rc.currentRequest)
+        : undefined;
+
+      const currentActionId = rc.currentAction
+        ? (typeof rc.currentAction === "string" ? rc.currentAction : rc.currentAction.id)
+        : rc.currentActionId;
+
+      const sourceEvent = rc.sourceEvent
+        ? {
+            eventId: resolveId(rc.sourceEvent.eventId) || resolveId(rc.sourceEvent.id) || rc.sourceEvent.eventId || rc.sourceEvent.id,
+            type: rc.sourceEvent.type,
+            payload: rc.sourceEvent.payload ? ctx.canonicalizeValue(rc.sourceEvent.payload) : undefined,
+          }
+        : undefined;
+
+      return {
+        playerKey: rc.playerKey,
+        keyCards,
+        targetComponent,
+        targetUnitId,
+        targetPlayerKey: rc.targetPlayerKey,
+        targetRequest,
+        currentActionId,
+        currentRequest,
+        triggered: typeof rc.triggered === "boolean" ? rc.triggered : undefined,
+        source: rc.source ? (resolveId(rc.source) || rc.source) : undefined,
+        sourceEvent,
+        selections: rc.selections ? ctx.canonicalizeValue(rc.selections) : undefined,
+        results: rc.results ? ctx.canonicalizeValue(rc.results) : undefined,
       };
     };
 
@@ -514,7 +652,7 @@ export class SemanticFingerprintCalculator {
         consecutivePassCount: sideState.consecutivePassCount ?? 0,
         continuation: sideState.continuation ? ctx.canonicalizeValue(sideState.continuation) : undefined,
         resolvingRequest: sideState.resolvingRequest ? normalizeResolvingRequest(sideState.resolvingRequest) : undefined,
-        resolvingContext: sideState.resolvingContext ? ctx.canonicalizeValue(sideState.resolvingContext) : undefined,
+        resolvingContext: sideState.resolvingContext ? normalizeResolvingContext(sideState.resolvingContext) : undefined,
       };
     }
 

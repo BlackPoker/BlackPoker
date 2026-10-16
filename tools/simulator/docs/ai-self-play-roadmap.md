@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R1`
-更新日時: 2026-10-17 02:00 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R4`
+更新日時: 2026-10-17 08:00 JST
 
 ---
 
@@ -505,7 +505,7 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。
 9. **Hall of Fame**: 歴代チャンピオン DNA、baseline AI の保存
 10. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
-11. **Semantic Stall / Cycle Diagnostic V1 (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R3)**:
+11. **Semantic Stall / Cycle Diagnostic V1 (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R4)**:
     - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `tools/simulator/docs/ai-semantic-fingerprint-field-registry-v1-r8.json`)
     - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts`, `src/tests/ai/semanticDiagnostic.test.ts`)
     - **設計原則**: 受動的診断器（Passive Observer, `DEFAULT = DISABLED`）。診断の有無でゲーム進行、StateHasher、勝敗判定、手番進行、乱数消費を一切変えない。
@@ -531,6 +531,13 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
       - `assignments`, `selectedUnitIds`, `orderedIds` の順序セマンティクス監査（R8 Registry 準拠確認）。
       - Generic Canonicalizer（`canonicalizeValue`）における semantic key（`sequence`, `stateVersion`, `decisionId` 等）の過剰 Global 除外を撤回し、型・パス固有の正規化関数（`normalizeResolvingRequest`, `normalizeRequestView`, `normalizeGameEventView`）での明示的 Bookkeeping 除外へ局所化。
       - `triggerBindings` / `sourceEvent.payload` 等の汎用意味論ペイロードにおける同名キー値差異の Structural Fingerprint 反映保証。
+    - **R4 改訂点**:
+      - `GameSession.resolvingContext` の Structural Fingerprint 境界正規化（`normalizeResolvingContext` を実装）。
+      - CommandContext 実体（`state`, `actions`, `components`, `logRecorder`, `matchSeed` 等）の Structural Fingerprint への丸ごと混入・Bookkeeping 再注入を完全排除。
+      - `playerKey`, `keyCards`, `targetComponent`, `targetUnitId`, `targetPlayerKey`, `targetRequest`, `currentActionId`, `currentRequest`, `triggered`, `source`, `sourceEvent`, `selections`, `results` の意味論的プロジェクション保持と Dynamic ID canonicalization。
+      - `targetRequest` からの絶対 sequence / bookkeeping 除外と semantic actionId / target 感度。
+      - `selections` / `sourceEvent.payload` 等の汎用意味論ディクショナリ内キー名（`sequence`, `decisionId`, `actionName` 等）の保持。
+      - 実ランタイム効果中断再開（`STAGE_RESOLUTION_INTERRUPTED`）フィクスチャによる検証完了。
 
 
 

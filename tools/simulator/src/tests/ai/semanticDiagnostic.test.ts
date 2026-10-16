@@ -2159,5 +2159,443 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(sgfA).toBe(sgfB);
     });
   });
+
+  // =========================================================================
+  // 18. ResolvingContext Structural Fingerprint Boundary Tests (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R4)
+  // =========================================================================
+  describe("18. ResolvingContext Structural Fingerprint Boundary Tests", () => {
+    it("Test A: resolvingContext referencing state with different stateVersion yields identical sgf1 and sgf1-ti", () => {
+      const baseState = createCoreBattlePresetState();
+      const stateObjA = { ...baseState, stateVersion: 10 };
+      const stateObjB = { ...baseState, stateVersion: 99 };
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjA,
+          playerKey: "p1",
+          targetPlayerKey: "p2",
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjB,
+          playerKey: "p1",
+          targetPlayerKey: "p2",
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+
+      const sgfTiA = SemanticFingerprintCalculator.computeSgf1Ti(baseState, sideStateA);
+      const sgfTiB = SemanticFingerprintCalculator.computeSgf1Ti(baseState, sideStateB);
+      expect(sgfTiA).toBe(sgfTiB);
+    });
+
+    it("Test B: resolvingContext referencing state with different nextRequestSeq yields identical sgf1 and sgf1-ti", () => {
+      const baseState = createCoreBattlePresetState();
+      const stateObjA = { ...baseState, nextRequestSeq: 5 };
+      const stateObjB = { ...baseState, nextRequestSeq: 88 };
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjA,
+          playerKey: "p1",
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjB,
+          playerKey: "p1",
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+
+      const sgfTiA = SemanticFingerprintCalculator.computeSgf1Ti(baseState, sideStateA);
+      const sgfTiB = SemanticFingerprintCalculator.computeSgf1Ti(baseState, sideStateB);
+      expect(sgfTiA).toBe(sgfTiB);
+    });
+
+    it("Test C: resolvingContext with different player presentation name yields identical sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const stateObjA = JSON.parse(JSON.stringify(baseState));
+      stateObjA.players.p1.name = "Player Alpha Display";
+      const stateObjB = JSON.parse(JSON.stringify(baseState));
+      stateObjB.players.p1.name = "Player Omega Display";
+
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjA,
+          playerKey: "p1",
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          state: stateObjB,
+          playerKey: "p1",
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("Test D: resolvingContext.matchSeed difference yields identical sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          matchSeed: 12345,
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          matchSeed: 98765,
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("Test E: resolvingContext.logRecorder or logging bookkeeping difference yields identical sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          logRecorder: { matchLog: { records: [{ type: "test1", seq: 1 }] } },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          logRecorder: { matchLog: { records: [{ type: "test2", seq: 999 }] } },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("Test F: resolvingContext.playerKey difference yields different sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p2",
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("Test G: semantic targetComponent, targetPlayerKey, or targetRequest semantic target difference yields different sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+
+      // G1: targetComponent difference
+      const sideStateG1_A: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetComponent: { unitId: "dyn-unit-10001", kind: "character", componentId: "soldier" },
+        },
+      };
+      const sideStateG1_B: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetComponent: { unitId: "dyn-unit-10001", kind: "character", componentId: "archer" },
+        },
+      };
+      expect(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG1_A))
+        .not.toBe(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG1_B));
+
+      // G2: targetPlayerKey difference
+      const sideStateG2_A: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetPlayerKey: "p1",
+        },
+      };
+      const sideStateG2_B: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetPlayerKey: "p2",
+        },
+      };
+      expect(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG2_A))
+        .not.toBe(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG2_B));
+
+      // G3: targetRequest semantic target difference (targeting different units on the field)
+      const sideStateG3_A: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.counter",
+            targets: [{ type: "unit", unitId: "soldier-p1-1" }],
+          },
+        },
+      };
+      const sideStateG3_B: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.counter",
+            targets: [{ type: "unit", unitId: "soldier-p1-2" }],
+          },
+        },
+      };
+      expect(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG3_A))
+        .not.toBe(SemanticFingerprintCalculator.computeSgf1(baseState, sideStateG3_B));
+    });
+
+    it("Test H: resolvingContext.selections semantic sequence key difference yields different sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          selections: {
+            sequence: "semantic-A",
+          },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          selections: {
+            sequence: "semantic-B",
+          },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("Test I: resolvingContext.sourceEvent.payload semantic decisionId/actionName difference yields different sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          sourceEvent: {
+            eventId: "dyn-ev-10001",
+            type: "unit.summoned",
+            payload: {
+              decisionId: "decision-semantic-alpha",
+              actionName: "action-semantic-alpha",
+            },
+          },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          sourceEvent: {
+            eventId: "dyn-ev-10001",
+            type: "unit.summoned",
+            payload: {
+              decisionId: "decision-semantic-beta",
+              actionName: "action-semantic-beta",
+            },
+          },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("Test J: resolvingContext.targetRequest absolute sequence difference (17 vs 101) yields identical sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.up",
+            controller: "p1",
+            sequence: 17,
+          },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.up",
+            controller: "p1",
+            sequence: 101,
+          },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("Test K: resolvingContext.targetRequest semantic actionId difference yields different sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.A",
+            controller: "p1",
+          },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.B",
+            controller: "p1",
+          },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).not.toBe(sgfB);
+    });
+
+    it("Test L: raw Dynamic IDs difference with identical semantic topology yields identical sgf1", () => {
+      const baseState = createCoreBattlePresetState();
+      const sideStateA: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetComponent: { unitId: "dyn-unit-10001", kind: "character", componentId: "soldier" },
+          targetUnitId: "dyn-unit-10001",
+          targetRequest: {
+            id: "dyn-req-10001",
+            actionId: "action.up",
+            controller: "p1",
+            keyCards: [{ id: "dyn-card-10001", suit: "spade", rank: 10, value: 10, code: "S10" }],
+          },
+          selections: {
+            targetUnit: ["dyn-unit-10001"],
+          },
+        },
+      };
+      const sideStateB: GameSessionSideState = {
+        consecutivePassCount: 0,
+        resolvingContext: {
+          playerKey: "p1",
+          targetComponent: { unitId: "dyn-unit-88881", kind: "character", componentId: "soldier" },
+          targetUnitId: "dyn-unit-88881",
+          targetRequest: {
+            id: "dyn-req-77771",
+            actionId: "action.up",
+            controller: "p1",
+            keyCards: [{ id: "dyn-card-99991", suit: "spade", rank: 10, value: 10, code: "S10" }],
+          },
+          selections: {
+            targetUnit: ["dyn-unit-88881"],
+          },
+        },
+      };
+      const sgfA = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateA);
+      const sgfB = SemanticFingerprintCalculator.computeSgf1(baseState, sideStateB);
+      expect(sgfA).toBe(sgfB);
+    });
+
+    it("Section 11: actual runtime interrupted-effect fixture verification", async () => {
+      const playtestRulePackage = getCoreBattlePlaytestRulePackage(rulePackage);
+      const state = createCoreBattlePresetState();
+      const session = new GameSession(state, playtestRulePackage, { matchId: "match-eff-r4-001" });
+
+      let effectStepReached = false;
+      const policy = new FirstLegalPolicy();
+
+      for (let s = 0; s < 100; s++) {
+        const step = session.advance();
+        if (step.type === "WAITING_FOR_DECISION") {
+          if (step.request.source.type === "EFFECT_RESOLUTION") {
+            effectStepReached = true;
+            break;
+          }
+          session.submitDecision(policy.choose(step.request));
+        } else if (step.type === "FINISHED") {
+          break;
+        }
+      }
+
+      expect(effectStepReached).toBe(true);
+      expect(session.resolvingContext).toBeDefined();
+      expect(session.resolvingContext.state).toBeDefined();
+      expect(session.resolvingContext.actions).toBeDefined();
+
+      const runtimeSideState: GameSessionSideState = {
+        consecutivePassCount: session.passTracker.consecutivePassCount,
+        continuation: session.continuation,
+        resolvingRequest: session.resolvingRequest,
+        resolvingContext: session.resolvingContext,
+      };
+
+      // 1. computeSgf1 succeeds and returns valid format
+      const baseSgf = SemanticFingerprintCalculator.computeSgf1(session.state, runtimeSideState);
+      const baseSgfTi = SemanticFingerprintCalculator.computeSgf1Ti(session.state, runtimeSideState);
+      expect(baseSgf.startsWith("sgf1-")).toBe(true);
+      expect(baseSgfTi.startsWith("sgf1-ti-")).toBe(true);
+
+      // 2. Deterministic parity
+      const secondSgf = SemanticFingerprintCalculator.computeSgf1(session.state, runtimeSideState);
+      expect(secondSgf).toBe(baseSgf);
+
+      // 3. Bookkeeping differences in runtime resolvingContext do NOT change fingerprint
+      session.resolvingContext.state.stateVersion += 100;
+      session.resolvingContext.state.nextRequestSeq += 100;
+      session.resolvingContext.matchSeed = 888888;
+      if (session.resolvingContext.logRecorder) {
+        session.resolvingContext.logRecorder.record({
+          type: "arbitrary.bookkeeping.event",
+          stateVersion: 9999,
+        } as any);
+      }
+      const bookkeepingModifiedSgf = SemanticFingerprintCalculator.computeSgf1(session.state, runtimeSideState);
+      expect(bookkeepingModifiedSgf).toBe(baseSgf);
+
+      // 4. Semantic context difference DOES change fingerprint
+      const origPlayerKey = session.resolvingContext.playerKey;
+      session.resolvingContext.playerKey = origPlayerKey === "p1" ? "p2" : "p1";
+      const semanticModifiedSgf = SemanticFingerprintCalculator.computeSgf1(session.state, runtimeSideState);
+      expect(semanticModifiedSgf).not.toBe(baseSgf);
+    });
+  });
 });
 
