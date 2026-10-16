@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-FEATURE-SCALING-AB-EVIDENCE-V1-R1`
-更新日時: 2026-10-16 09:50 JST
+作業ID: `BP-SIM-AI-SEMANTIC-STALL-CYCLE-DESIGN-V1`
+更新日時: 2026-10-16 11:00 JST
 
 ---
 
@@ -74,7 +74,7 @@
 | **Controlled One-Generation Evidence V1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerControlledEvidence.ts`, `docs/ai-generation-runner-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, 30試合実機検証 (g=0 -> g=1) |
 | **N=100 Scale Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/generationRunnerScaleEvidence.ts`, `docs/ai-generation-runner-scale-evidence-v1.md` | - | Official light-entry16, N=100, R=1, 9,900試合実機完走 (g=0 -> g=1) |
 | **Evolution Loop** | **FORMAL ACCEPTED** | `src/engine/ai/EvolutionLoop.ts`, `src/domain/ai/EvolutionLoopTypes.ts`, `docs/ai-evolution-loop-design-v1.md` (V1-R2) | `src/tests/ai/evolutionLoop.test.ts` (48 Canonical Tests) | 複数世代進化ループ統括オーケストレータ |
-| **Controlled Multi-Generation Evidence V1** | **WAITING FOR A/B REVIEW** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED (A/B レビュー完了後に再挑戦) |
+| **Controlled Multi-Generation Evidence V1** | **WAITING** | `src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md` | - | Official light-entry16, N=6, R=1, g=0完走, g=1未完了28戦によるREEVALUATION_REQUIRED (診断基盤完了後に再挑戦) |
 | **Evolution g1 Incomplete Analysis V1** | **FOLLOW-UP REQUIRED** | `src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md` | - | Generation 1 での未完了28戦の原因分析 (PROGRESSING_LONG_MATCH, Turn 1 での PASS 過剰選好実証) |
 | **Evolution g1 DNA PASS Score Analysis V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1.json` | - | V1 分析（プロセス再実行問題により R1 へ差し替え） |
 | **Evolution g1 DNA PASS Score Analysis V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `src/cli/evolutionDnaPassScoreAnalysis.ts`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.md`, `docs/ai-evolution-dna-pass-score-analysis-v1-r1.json` | - | R1 再検証（JSON アーティファクトの perGenomeContributors キー欠陥により R2 へ差し替え） |
@@ -86,11 +86,13 @@
 | **Feature Scaling Implementation V1-R1** | **NOT ACCEPTED / SUPERSEDED BY R2** | `docs/ai-feature-scaling-implementation-v1.md` | - | R1 実装（parameter 列挙不一致および diff 説明混同により R2 へ差し替え） |
 | **Feature Scaling Implementation V1-R2** | **FORMAL ACCEPTED** | `src/domain/ai/DecisionFeatureScalingRegistry.ts`, `src/engine/ai/DecisionFeatureScaler.ts`, `docs/ai-feature-scaling-implementation-v1-r2.md` | `src/tests/ai/decisionFeatureScaling.test.ts`, `architectureBoundary.test.ts` | Feature Schema v5, Pure TypeScript Canonical Registry 306 features, Fail-Closed DecisionFeatureScaler, DecisionFeatureEncoder 統合, Negative Pattern Golden Test 完備, 27 AI テストスイート 509 tests 全件パス, dist/** 差分除外 |
 | **Controlled Feature Scaling A/B Evidence V1** | **NOT ACCEPTED / SUPERSEDED BY R1** | `docs/ai-feature-scaling-ab-evidence-v1.md`, `docs/ai-feature-scaling-ab-evidence-v1.json` | - | V1 Evidence（Markdown内結果値ハードコード不整合、Weight再検証欠落、恒真アサーションにより却下） |
-| **Controlled Feature Scaling A/B Evidence V1-R1** | **EVIDENCE CAPTURED / PENDING INDEPENDENT REVIEW** | `src/cli/featureScalingABEvidence.ts`, `docs/ai-feature-scaling-ab-evidence-v1-r1.md`, `docs/ai-feature-scaling-ab-evidence-v1-r1.json` | `src/tests/ai/featureScalingABEvidence.test.ts`, `evidence:feature-scaling-ab` | CONTROL (RAW_V4_EQUIVALENT) vs TREATMENT (SCALED_V5) 決定論的比較検証、全9チェックポイント厳密Weight整合性(===)、動的Markdown生成、Scaler参照復元検証完備 |
+| **Controlled Feature Scaling A/B Evidence V1-R1** | **FORMAL ACCEPTED** | `src/cli/featureScalingABEvidence.ts`, `docs/ai-feature-scaling-ab-evidence-v1-r1.md`, `docs/ai-feature-scaling-ab-evidence-v1-r1.json` | `src/tests/ai/featureScalingABEvidence.test.ts`, `evidence:feature-scaling-ab` | CONTROL (RAW_V4_EQUIVALENT) vs TREATMENT (SCALED_V5) 決定論的比較検証、全9チェックポイント厳密Weight整合性(===)、動的Markdown生成、Scaler参照復元検証完備 |
 | **Rule-side PASS / Core Flow** | **RULES UNCHANGED / NO CHANGE PLANNED** | `src/domain/rules/`, `src/engine/rules/` | `git diff --stat` (Rules / Core Flow diff: 0) | PASS Rule / Core Flow / Turn Player PASS legality / Stage Empty behavior は変更せず、AI側 Feature Scaling のみで対処 |
-| **Semantic State / Stall / Cycle Detection** | **NOT STARTED** | - | - | 未着手 (A/B レビュー後検討) |
-| **Competitive / Test DNA** | **NOT STARTED** | - | - | 未着手 (A/B レビュー後検討) |
-| **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling レビュー後検討) |
+| **Semantic Stall / Cycle Detection Design V1** | **DESIGNED / PENDING INDEPENDENT REVIEW** | `docs/ai-semantic-stall-cycle-detection-design-v1.md`, `docs/ai-semantic-fingerprint-field-registry-v1.json` | - | 受動的診断アーキテクチャ設計、4層フィンガープリント分離（Replay / Structural / Observation / DecisionContext）、47フィールド監査レジストリ、検出アルゴリズム策定 |
+| **Semantic Stall / Cycle Production** | **NOT STARTED** | - | - | 未着手 (Design V1 独立レビュー承認待ち) |
+| **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
+| **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
+| **Fitness Redesign** | **NOT STARTED** | - | - | 未着手 (Scaling / Stall レビュー後検討) |
 | **N=100 Multi-Generation** | **NOT EXECUTED** | - | - | 未実行 |
 | **Hall of Fame** | **NOT IMPLEMENTED / FUTURE** | - | - | Phase 4.0 で策定 |
 
