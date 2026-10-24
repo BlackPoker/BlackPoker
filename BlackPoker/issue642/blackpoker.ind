@@ -68,7 +68,7 @@
   \item \spxentry{キャラクター}, \hyperpage{23}
   \item \spxentry{キャラクター名}, \hyperpage{24}
   \item \spxentry{キル(アクション)}, \hyperpage{53}
-  \item \spxentry{クイック}, \hyperpage{122}
+  \item \spxentry{クイック}, \hyperpage{123}
   \item \spxentry{クイック兵士召喚\clobsym{} (アクション)}, 
 		\hyperpage{93}
   \item \spxentry{クイック兵士召喚\diamondsym{} (アクション)}, 
@@ -102,7 +102,7 @@
   \item \spxentry{コスト}, \hyperpage{28}
   \item \spxentry{コントローラー}, \hyperpage{124}
   \item \spxentry{コンポーネント}, \hyperpage{21}, 
-		\hyperpage{120}
+		\hyperpage{121}
   \item \spxentry{コンポーネントスクリプト}, \hyperpage{21}
 
   \indexspace
@@ -226,6 +226,7 @@
   \item \spxentry{ファントム(切札)}, \hyperpage{109}
   \item \spxentry{ファントムリバース(アクション)}, 
 		\hyperpage{84}
+  \item \spxentry{フォーカス(コア)}, \hyperpage{120}
   \item \spxentry{フォース(アクション)}, \hyperpage{56}
   \item \spxentry{フォース(フォグ)}, \hyperpage{61}
   \item \spxentry{フォーマット}, \hyperpage{41}
@@ -276,7 +277,7 @@
   \item \spxentry{誘惑(アクション)}, \hyperpage{82}
   \item \spxentry{誘惑(切札)}, \hyperpage{108}
   \item \spxentry{ユニット}, \hyperpage{14}, \hyperpage{21}, 
-		\hyperpage{120}
+		\hyperpage{121}
   \item \spxentry{ユニットカード}, \hyperpage{14}
   \item \spxentry{ユニット条件}, \hyperpage{14}, \hyperpage{21}
   \item \spxentry{よ\textbar{}要塞(切札)}, \hyperpage{117}
