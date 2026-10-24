@@ -3,20 +3,17 @@ skinparam defaultFontName "Droid Sans Fallback"
 start
 :[1] ゲーム開始;
 repeat
-:[2] チャンスを調整;
+:[2] チャンスの確認と移動;
 if ([3] パスするか？) then (Yes)
     if ([11] 次のプレイヤーはフォーカスか？) then (Yes)
         :[12] ルールシステムにチャンスを移動;
-        if ([13] ステージにリクエストが存在するか？) then (Yes)
-            :[14] 最後のリクエストを解決;
-            if ([8] 勝敗判定) then (決着)
-                stop
-            endif
-            :[5] 誘発チェック;
-        else (No)
+        :[13] 最後のリクエストを解決;
+        if ([8] 勝敗判定) then (決着)
+            stop
         endif
+        :[5] 誘発チェック;
     else (No)
-        :[15] チャンス移動;
+        :[14] チャンス移動;
     endif
 else (No)
     :[4] アクションをリクエストする;
