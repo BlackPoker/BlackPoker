@@ -442,96 +442,103 @@
 \BOOKMARK [2][-]{subsection.13.5.5}{影響}{section.13.5}% 441
 \BOOKMARK [2][-]{subsection.13.5.6}{本文ルールとの関係}{section.13.5}% 442
 \BOOKMARK [0][-]{chapter*.301}{変更履歴}{}% 443
-\BOOKMARK [1][-]{section*.302}{第9.1版 変更履歴}{chapter*.301}% 444
-\BOOKMARK [2][-]{subsection*.303}{第9.1版}{section*.302}% 445
-\BOOKMARK [3][-]{subsubsection*.304}{第9.1版アップデートの要点}{subsection*.303}% 446
-\BOOKMARK [3][-]{subsubsection*.305}{文書構成の変更}{subsection*.303}% 447
-\BOOKMARK [4][-]{paragraph*.306}{対戦レギュレーション章の増補}{subsubsection*.305}% 448
-\BOOKMARK [4][-]{paragraph*.307}{フレーム章の増補}{subsubsection*.305}% 449
-\BOOKMARK [4][-]{paragraph*.308}{コアルール章の整理}{subsubsection*.305}% 450
-\BOOKMARK [4][-]{paragraph*.309}{付録Dの追加}{subsubsection*.305}% 451
-\BOOKMARK [3][-]{subsubsection*.310}{対戦レギュレーション・構築概念の変更}{subsection*.303}% 452
-\BOOKMARK [4][-]{paragraph*.311}{デッキ構築の定義追加}{subsubsection*.310}% 453
-\BOOKMARK [4][-]{paragraph*.312}{シナリオ構築の定義追加}{subsubsection*.310}% 454
-\BOOKMARK [4][-]{paragraph*.313}{対戦準備の流れの整理}{subsubsection*.310}% 455
-\BOOKMARK [4][-]{paragraph*.314}{シナリオ手札の定義追加}{subsubsection*.310}% 456
-\BOOKMARK [3][-]{subsubsection*.315}{用語の変更}{subsection*.303}% 457
-\BOOKMARK [4][-]{paragraph*.316}{ストラテジー から シナリオ手札 への改名}{subsubsection*.315}% 458
-\BOOKMARK [3][-]{subsubsection*.317}{フレームの変更}{subsection*.303}% 459
-\BOOKMARK [4][-]{paragraph*.318}{フレーム対応表の変更}{subsubsection*.317}% 460
-\BOOKMARK [4][-]{paragraph*.319}{ドラフトフレームの追加}{subsubsection*.317}% 461
-\BOOKMARK [4][-]{paragraph*.320}{ストラテジーフレームの表記変更}{subsubsection*.317}% 462
-\BOOKMARK [4][-]{paragraph*.321}{エクストラフレームの表記変更}{subsubsection*.317}% 463
-\BOOKMARK [4][-]{paragraph*.322}{フレームアクション・コンポーネント対応表の変更}{subsubsection*.317}% 464
-\BOOKMARK [3][-]{subsubsection*.323}{共通ルールの変更}{subsection*.303}% 465
-\BOOKMARK [4][-]{paragraph*.324}{エンドアクション の フォグ 処理修正}{subsubsection*.323}% 466
-\BOOKMARK [3][-]{subsubsection*.325}{コアルールの変更}{subsection*.303}% 467
-\BOOKMARK [4][-]{paragraph*.326}{能力の適用順 の配置変更}{subsubsection*.325}% 468
-\BOOKMARK [3][-]{subsubsection*.327}{設計ノートの追加}{subsection*.303}% 469
-\BOOKMARK [4][-]{paragraph*.328}{BDRの追加}{subsubsection*.327}% 470
-\BOOKMARK [3][-]{subsubsection*.329}{プレイヤー向け確認チェックリスト}{subsection*.303}% 471
-\BOOKMARK [2][-]{subsection*.330}{第9.1.1版}{section*.302}% 472
-\BOOKMARK [3][-]{subsubsection*.331}{第9.1.1版アップデートの要点}{subsection*.330}% 473
-\BOOKMARK [3][-]{subsubsection*.332}{共通ルールの変更}{subsection*.330}% 474
-\BOOKMARK [4][-]{paragraph*.333}{墓地の一番上のカードの扱い の追加}{subsubsection*.332}% 475
-\BOOKMARK [3][-]{subsubsection*.334}{対戦レギュレーションの変更}{subsection*.330}% 476
-\BOOKMARK [4][-]{paragraph*.335}{推奨レギュレーションへの位置づけ変更とマトリクスの整理}{subsubsection*.334}% 477
-\BOOKMARK [4][-]{paragraph*.336}{推奨レギュレーションの進み方の追加}{subsubsection*.334}% 478
-\BOOKMARK [3][-]{subsubsection*.337}{切札アクションの変更}{subsection*.330}% 479
-\BOOKMARK [4][-]{paragraph*.338}{革命ドロー の誘発条件の明確化}{subsubsection*.337}% 480
-\BOOKMARK [3][-]{subsubsection*.339}{エクストラアクションの変更}{subsection*.330}% 481
-\BOOKMARK [4][-]{paragraph*.340}{転生召喚 の即時・クイック化}{subsubsection*.339}% 482
-\BOOKMARK [4][-]{paragraph*.341}{追撃 の即時化}{subsubsection*.339}% 483
-\BOOKMARK [4][-]{paragraph*.342}{粉砕 の即時・クイック化}{subsubsection*.339}% 484
-\BOOKMARK [4][-]{paragraph*.343}{虚脱 の即時化}{subsubsection*.339}% 485
-\BOOKMARK [3][-]{subsubsection*.344}{付録の変更}{subsection*.330}% 486
-\BOOKMARK [4][-]{paragraph*.345}{周年大会記録の更新}{subsubsection*.344}% 487
-\BOOKMARK [3][-]{subsubsection*.346}{表記揺れの修正}{subsection*.330}% 488
-\BOOKMARK [4][-]{paragraph*.347}{全角括弧および比較演算子の半角統一}{subsubsection*.346}% 489
-\BOOKMARK [3][-]{subsubsection*.348}{プレイヤー向け確認チェックリスト}{subsection*.330}% 490
-\BOOKMARK [1][-]{section*.349}{第9.0版 変更履歴}{chapter*.301}% 491
-\BOOKMARK [2][-]{subsection*.350}{文書構成の変更}{section*.349}% 492
-\BOOKMARK [2][-]{subsection*.351}{対戦レギュレーション・入門導線の変更}{section*.349}% 493
-\BOOKMARK [2][-]{subsection*.352}{フレーム定義の変更}{section*.349}% 494
-\BOOKMARK [3][-]{subsubsection*.353}{エントリー}{subsection*.352}% 495
-\BOOKMARK [2][-]{subsection*.354}{共通ルールの変更}{section*.349}% 496
-\BOOKMARK [3][-]{subsubsection*.355}{プリセット配置}{subsection*.354}% 497
-\BOOKMARK [3][-]{subsubsection*.356}{ドロー}{subsection*.354}% 498
-\BOOKMARK [3][-]{subsubsection*.357}{攻撃・防御ラベル}{subsection*.354}% 499
-\BOOKMARK [3][-]{subsubsection*.358}{パス}{subsection*.354}% 500
-\BOOKMARK [3][-]{subsubsection*.359}{FAQで明文化された点}{subsection*.354}% 501
-\BOOKMARK [2][-]{subsection*.360}{アクションリスト・用語体系の変更}{section*.349}% 502
-\BOOKMARK [3][-]{subsubsection*.361}{@ 記法の追加}{subsection*.360}% 503
-\BOOKMARK [3][-]{subsubsection*.362}{魔法分類の再編}{subsection*.360}% 504
-\BOOKMARK [2][-]{subsection*.363}{レアカード操作・切札操作の変更}{section*.349}% 505
-\BOOKMARK [3][-]{subsubsection*.364}{罠カウンター}{subsection*.363}% 506
-\BOOKMARK [2][-]{subsection*.365}{エクストラ全体の傾向}{section*.349}% 507
-\BOOKMARK [2][-]{subsection*.366}{スペード系の変更}{section*.349}% 508
-\BOOKMARK [3][-]{subsubsection*.367}{スペード 2 スラッシュ}{subsection*.366}% 509
-\BOOKMARK [3][-]{subsubsection*.368}{スペード 4 威圧}{subsection*.366}% 510
-\BOOKMARK [3][-]{subsubsection*.369}{スペード 5 蘇生}{subsection*.366}% 511
-\BOOKMARK [3][-]{subsubsection*.370}{スペード J リアニメーター}{subsection*.366}% 512
-\BOOKMARK [2][-]{subsection*.371}{ハート系の変更}{section*.349}% 513
-\BOOKMARK [3][-]{subsubsection*.372}{ハート 3 激励 \040ハート 3 誘惑}{subsection*.371}% 514
-\BOOKMARK [3][-]{subsubsection*.373}{ハート 5 追撃}{subsection*.371}% 515
-\BOOKMARK [3][-]{subsubsection*.374}{ハート 8 救済}{subsection*.371}% 516
-\BOOKMARK [3][-]{subsubsection*.375}{ハート J チャリオット \040ハート J 破砕士}{subsection*.371}% 517
-\BOOKMARK [2][-]{subsection*.376}{ダイヤ系の変更}{section*.349}% 518
-\BOOKMARK [3][-]{subsubsection*.377}{ダイヤ A 防壁追加}{subsection*.376}% 519
-\BOOKMARK [3][-]{subsubsection*.378}{ダイヤ 3 交渉}{subsection*.376}% 520
-\BOOKMARK [3][-]{subsubsection*.379}{ダイヤ 4 相殺}{subsection*.376}% 521
-\BOOKMARK [3][-]{subsubsection*.380}{ダイヤ 5 喪失}{subsection*.376}% 522
-\BOOKMARK [3][-]{subsubsection*.381}{ダイヤ 8 修繕}{subsection*.376}% 523
-\BOOKMARK [3][-]{subsubsection*.382}{ダイヤ J 策士}{subsection*.376}% 524
-\BOOKMARK [2][-]{subsection*.383}{クラブ系の変更}{section*.349}% 525
-\BOOKMARK [3][-]{subsubsection*.384}{クラブ 4 スイッチ}{subsection*.383}% 526
-\BOOKMARK [3][-]{subsubsection*.385}{クラブ 7 手札補充}{subsection*.383}% 527
-\BOOKMARK [3][-]{subsubsection*.386}{クラブ 8 リセット}{subsection*.383}% 528
-\BOOKMARK [3][-]{subsubsection*.387}{クラブ 9 要塞}{subsection*.383}% 529
-\BOOKMARK [2][-]{subsection*.388}{プレイヤー向け確認チェックリスト}{section*.349}% 530
-\BOOKMARK [0][-]{chapter*.389}{あとがき}{}% 531
-\BOOKMARK [1][-]{section*.390}{第9版アップデートの要点}{chapter*.389}% 532
-\BOOKMARK [1][-]{section*.391}{ロゴと名前の由来}{chapter*.389}% 533
-\BOOKMARK [1][-]{section*.392}{さらなる楽しみ方}{chapter*.389}% 534
-\BOOKMARK [1][-]{section*.393}{最後に}{chapter*.389}% 535
-\BOOKMARK [0][-]{chapter*.394}{索引}{}% 536
+\BOOKMARK [1][-]{section*.302}{第9.2版 変更履歴}{chapter*.301}% 444
+\BOOKMARK [2][-]{subsection*.303}{第9.2版\(未リリース\)}{section*.302}% 445
+\BOOKMARK [3][-]{subsubsection*.304}{空ステージでのパス禁止}{subsection*.303}% 446
+\BOOKMARK [3][-]{subsubsection*.305}{即時アクション後の応答機会}{subsection*.303}% 447
+\BOOKMARK [3][-]{subsubsection*.306}{ステージの1件解決ごとに応答を確認}{subsection*.303}% 448
+\BOOKMARK [3][-]{subsubsection*.307}{フォーカスの新設と進行管理の整理}{subsection*.303}% 449
+\BOOKMARK [3][-]{subsubsection*.308}{処理番号と説明文の整理}{subsection*.303}% 450
+\BOOKMARK [1][-]{section*.309}{第9.1版 変更履歴}{chapter*.301}% 451
+\BOOKMARK [2][-]{subsection*.310}{第9.1版}{section*.309}% 452
+\BOOKMARK [3][-]{subsubsection*.311}{第9.1版アップデートの要点}{subsection*.310}% 453
+\BOOKMARK [3][-]{subsubsection*.312}{文書構成の変更}{subsection*.310}% 454
+\BOOKMARK [4][-]{paragraph*.313}{対戦レギュレーション章の増補}{subsubsection*.312}% 455
+\BOOKMARK [4][-]{paragraph*.314}{フレーム章の増補}{subsubsection*.312}% 456
+\BOOKMARK [4][-]{paragraph*.315}{コアルール章の整理}{subsubsection*.312}% 457
+\BOOKMARK [4][-]{paragraph*.316}{付録Dの追加}{subsubsection*.312}% 458
+\BOOKMARK [3][-]{subsubsection*.317}{対戦レギュレーション・構築概念の変更}{subsection*.310}% 459
+\BOOKMARK [4][-]{paragraph*.318}{デッキ構築の定義追加}{subsubsection*.317}% 460
+\BOOKMARK [4][-]{paragraph*.319}{シナリオ構築の定義追加}{subsubsection*.317}% 461
+\BOOKMARK [4][-]{paragraph*.320}{対戦準備の流れの整理}{subsubsection*.317}% 462
+\BOOKMARK [4][-]{paragraph*.321}{シナリオ手札の定義追加}{subsubsection*.317}% 463
+\BOOKMARK [3][-]{subsubsection*.322}{用語の変更}{subsection*.310}% 464
+\BOOKMARK [4][-]{paragraph*.323}{ストラテジー から シナリオ手札 への改名}{subsubsection*.322}% 465
+\BOOKMARK [3][-]{subsubsection*.324}{フレームの変更}{subsection*.310}% 466
+\BOOKMARK [4][-]{paragraph*.325}{フレーム対応表の変更}{subsubsection*.324}% 467
+\BOOKMARK [4][-]{paragraph*.326}{ドラフトフレームの追加}{subsubsection*.324}% 468
+\BOOKMARK [4][-]{paragraph*.327}{ストラテジーフレームの表記変更}{subsubsection*.324}% 469
+\BOOKMARK [4][-]{paragraph*.328}{エクストラフレームの表記変更}{subsubsection*.324}% 470
+\BOOKMARK [4][-]{paragraph*.329}{フレームアクション・コンポーネント対応表の変更}{subsubsection*.324}% 471
+\BOOKMARK [3][-]{subsubsection*.330}{共通ルールの変更}{subsection*.310}% 472
+\BOOKMARK [4][-]{paragraph*.331}{エンドアクション の フォグ 処理修正}{subsubsection*.330}% 473
+\BOOKMARK [3][-]{subsubsection*.332}{コアルールの変更}{subsection*.310}% 474
+\BOOKMARK [4][-]{paragraph*.333}{能力の適用順 の配置変更}{subsubsection*.332}% 475
+\BOOKMARK [3][-]{subsubsection*.334}{設計ノートの追加}{subsection*.310}% 476
+\BOOKMARK [4][-]{paragraph*.335}{BDRの追加}{subsubsection*.334}% 477
+\BOOKMARK [3][-]{subsubsection*.336}{プレイヤー向け確認チェックリスト}{subsection*.310}% 478
+\BOOKMARK [2][-]{subsection*.337}{第9.1.1版}{section*.309}% 479
+\BOOKMARK [3][-]{subsubsection*.338}{第9.1.1版アップデートの要点}{subsection*.337}% 480
+\BOOKMARK [3][-]{subsubsection*.339}{共通ルールの変更}{subsection*.337}% 481
+\BOOKMARK [4][-]{paragraph*.340}{墓地の一番上のカードの扱い の追加}{subsubsection*.339}% 482
+\BOOKMARK [3][-]{subsubsection*.341}{対戦レギュレーションの変更}{subsection*.337}% 483
+\BOOKMARK [4][-]{paragraph*.342}{推奨レギュレーションへの位置づけ変更とマトリクスの整理}{subsubsection*.341}% 484
+\BOOKMARK [4][-]{paragraph*.343}{推奨レギュレーションの進み方の追加}{subsubsection*.341}% 485
+\BOOKMARK [3][-]{subsubsection*.344}{切札アクションの変更}{subsection*.337}% 486
+\BOOKMARK [4][-]{paragraph*.345}{革命ドロー の誘発条件の明確化}{subsubsection*.344}% 487
+\BOOKMARK [3][-]{subsubsection*.346}{エクストラアクションの変更}{subsection*.337}% 488
+\BOOKMARK [4][-]{paragraph*.347}{転生召喚 の即時・クイック化}{subsubsection*.346}% 489
+\BOOKMARK [4][-]{paragraph*.348}{追撃 の即時化}{subsubsection*.346}% 490
+\BOOKMARK [4][-]{paragraph*.349}{粉砕 の即時・クイック化}{subsubsection*.346}% 491
+\BOOKMARK [4][-]{paragraph*.350}{虚脱 の即時化}{subsubsection*.346}% 492
+\BOOKMARK [3][-]{subsubsection*.351}{付録の変更}{subsection*.337}% 493
+\BOOKMARK [4][-]{paragraph*.352}{周年大会記録の更新}{subsubsection*.351}% 494
+\BOOKMARK [3][-]{subsubsection*.353}{表記揺れの修正}{subsection*.337}% 495
+\BOOKMARK [4][-]{paragraph*.354}{全角括弧および比較演算子の半角統一}{subsubsection*.353}% 496
+\BOOKMARK [3][-]{subsubsection*.355}{プレイヤー向け確認チェックリスト}{subsection*.337}% 497
+\BOOKMARK [1][-]{section*.356}{第9.0版 変更履歴}{chapter*.301}% 498
+\BOOKMARK [2][-]{subsection*.357}{文書構成の変更}{section*.356}% 499
+\BOOKMARK [2][-]{subsection*.358}{対戦レギュレーション・入門導線の変更}{section*.356}% 500
+\BOOKMARK [2][-]{subsection*.359}{フレーム定義の変更}{section*.356}% 501
+\BOOKMARK [3][-]{subsubsection*.360}{エントリー}{subsection*.359}% 502
+\BOOKMARK [2][-]{subsection*.361}{共通ルールの変更}{section*.356}% 503
+\BOOKMARK [3][-]{subsubsection*.362}{プリセット配置}{subsection*.361}% 504
+\BOOKMARK [3][-]{subsubsection*.363}{ドロー}{subsection*.361}% 505
+\BOOKMARK [3][-]{subsubsection*.364}{攻撃・防御ラベル}{subsection*.361}% 506
+\BOOKMARK [3][-]{subsubsection*.365}{パス}{subsection*.361}% 507
+\BOOKMARK [3][-]{subsubsection*.366}{FAQで明文化された点}{subsection*.361}% 508
+\BOOKMARK [2][-]{subsection*.367}{アクションリスト・用語体系の変更}{section*.356}% 509
+\BOOKMARK [3][-]{subsubsection*.368}{@ 記法の追加}{subsection*.367}% 510
+\BOOKMARK [3][-]{subsubsection*.369}{魔法分類の再編}{subsection*.367}% 511
+\BOOKMARK [2][-]{subsection*.370}{レアカード操作・切札操作の変更}{section*.356}% 512
+\BOOKMARK [3][-]{subsubsection*.371}{罠カウンター}{subsection*.370}% 513
+\BOOKMARK [2][-]{subsection*.372}{エクストラ全体の傾向}{section*.356}% 514
+\BOOKMARK [2][-]{subsection*.373}{スペード系の変更}{section*.356}% 515
+\BOOKMARK [3][-]{subsubsection*.374}{スペード 2 スラッシュ}{subsection*.373}% 516
+\BOOKMARK [3][-]{subsubsection*.375}{スペード 4 威圧}{subsection*.373}% 517
+\BOOKMARK [3][-]{subsubsection*.376}{スペード 5 蘇生}{subsection*.373}% 518
+\BOOKMARK [3][-]{subsubsection*.377}{スペード J リアニメーター}{subsection*.373}% 519
+\BOOKMARK [2][-]{subsection*.378}{ハート系の変更}{section*.356}% 520
+\BOOKMARK [3][-]{subsubsection*.379}{ハート 3 激励 \040ハート 3 誘惑}{subsection*.378}% 521
+\BOOKMARK [3][-]{subsubsection*.380}{ハート 5 追撃}{subsection*.378}% 522
+\BOOKMARK [3][-]{subsubsection*.381}{ハート 8 救済}{subsection*.378}% 523
+\BOOKMARK [3][-]{subsubsection*.382}{ハート J チャリオット \040ハート J 破砕士}{subsection*.378}% 524
+\BOOKMARK [2][-]{subsection*.383}{ダイヤ系の変更}{section*.356}% 525
+\BOOKMARK [3][-]{subsubsection*.384}{ダイヤ A 防壁追加}{subsection*.383}% 526
+\BOOKMARK [3][-]{subsubsection*.385}{ダイヤ 3 交渉}{subsection*.383}% 527
+\BOOKMARK [3][-]{subsubsection*.386}{ダイヤ 4 相殺}{subsection*.383}% 528
+\BOOKMARK [3][-]{subsubsection*.387}{ダイヤ 5 喪失}{subsection*.383}% 529
+\BOOKMARK [3][-]{subsubsection*.388}{ダイヤ 8 修繕}{subsection*.383}% 530
+\BOOKMARK [3][-]{subsubsection*.389}{ダイヤ J 策士}{subsection*.383}% 531
+\BOOKMARK [2][-]{subsection*.390}{クラブ系の変更}{section*.356}% 532
+\BOOKMARK [3][-]{subsubsection*.391}{クラブ 4 スイッチ}{subsection*.390}% 533
+\BOOKMARK [3][-]{subsubsection*.392}{クラブ 7 手札補充}{subsection*.390}% 534
+\BOOKMARK [3][-]{subsubsection*.393}{クラブ 8 リセット}{subsection*.390}% 535
+\BOOKMARK [3][-]{subsubsection*.394}{クラブ 9 要塞}{subsection*.390}% 536
+\BOOKMARK [2][-]{subsection*.395}{プレイヤー向け確認チェックリスト}{section*.356}% 537
+\BOOKMARK [0][-]{chapter*.396}{あとがき}{}% 538
+\BOOKMARK [1][-]{section*.397}{第9版アップデートの要点}{chapter*.396}% 539
+\BOOKMARK [1][-]{section*.398}{ロゴと名前の由来}{chapter*.396}% 540
+\BOOKMARK [1][-]{section*.399}{さらなる楽しみ方}{chapter*.396}% 541
+\BOOKMARK [1][-]{section*.400}{最後に}{chapter*.396}% 542
+\BOOKMARK [0][-]{chapter*.401}{索引}{}% 543
