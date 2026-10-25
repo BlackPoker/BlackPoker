@@ -5,7 +5,7 @@ skinparam defaultFontName "Droid Sans Fallback"
 '==============================
 |Main method|
 start
-:[5-1] 誘発したアクションを分類しバッファに追加;
+:[5-1] 誘発したリクエストを分類しバッファに追加;
 note right
     「即時/通常 × メイン/クイック」で分類
 end note
