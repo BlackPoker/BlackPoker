@@ -74,7 +74,7 @@ while ([5-2] バッファは空か？) is (No)
         :[5-12] 次のプレイヤーへ;
       repeat while (全員チェックしたか？) is (No)
     end group
-  endwhile (Yes)
+  endwhile (No)
 
 endwhile (Yes)
 stop
