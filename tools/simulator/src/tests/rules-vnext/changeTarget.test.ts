@@ -2201,6 +2201,7 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
 
       // 2. Change Target targeting Kill
       session.state.chancePlayer = "p1";
+      session.state.focusPlayer = "p1";
       const ctReq = session.registry.createRequest(changeTargetAction, {
         state: session.state,
         playerKey: "p1",

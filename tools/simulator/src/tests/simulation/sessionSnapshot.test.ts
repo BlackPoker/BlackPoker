@@ -26,16 +26,17 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2.1-2026
   // 1. JSON Round-Trip, Format Version & RulePackage Validation Tests
   // --------------------------------------------------------------------------
   describe("Snapshot Format, Serialization & RulePackage Validation", () => {
-    it("captures, serializes and deserializes snapshot with JSON round-trip (Version 1)", () => {
+    it("captures, serializes and deserializes snapshot with JSON round-trip (Version 2)", () => {
       const state = createCoreBattlePresetState();
       const session = new GameSession(state, playtestRulePackage, { matchId: "test-match-123" });
       session.advance(); // WAITING_FOR_DECISION
 
       const snapshot = session.createSnapshot();
 
-      // Version 1
+      // Version 2
       expect(snapshot.snapshotFormatVersion).toBe(SNAPSHOT_FORMAT_VERSION);
-      expect(snapshot.snapshotFormatVersion).toBe(1);
+      expect(snapshot.snapshotFormatVersion).toBe(2);
+      expect(snapshot.gameState.focusPlayer).toBe("p1");
 
       // Metadata with RulePackage id & version
       expect(snapshot.metadata.matchId).toBe("test-match-123");
@@ -74,6 +75,60 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2.1-2026
 
       expect(() => {
         GameSessionSnapshotCodec.restore(invalidSnapshot, playtestRulePackage);
+      }).toThrow(GameSessionSnapshotValidationError);
+    });
+
+    it("explicitly rejects legacy Snapshot Format Version 1 without silently filling focusPlayer", () => {
+      const state = createCoreBattlePresetState();
+      const session = new GameSession(state, playtestRulePackage);
+      session.advance();
+
+      const snapshot = session.createSnapshot();
+      const legacyV1Snapshot = {
+        ...snapshot,
+        snapshotFormatVersion: 1 as any,
+      };
+      delete (legacyV1Snapshot.gameState as any).focusPlayer;
+
+      expect(() => {
+        GameSessionSnapshotCodec.restore(legacyV1Snapshot, playtestRulePackage);
+      }).toThrow(GameSessionSnapshotValidationError);
+
+      try {
+        GameSessionSnapshotCodec.restore(legacyV1Snapshot, playtestRulePackage);
+      } catch (err: any) {
+        expect(err).toBeInstanceOf(GameSessionSnapshotValidationError);
+        expect(err.message).toContain("Unsupported legacy snapshot format version 1");
+        expect(err.message).toContain("focusPlayer");
+      }
+    });
+
+    it("rejects V2 snapshot if focusPlayer is missing or invalid (e.g. 'system')", () => {
+      const state = createCoreBattlePresetState();
+      const session = new GameSession(state, playtestRulePackage);
+      session.advance();
+
+      const snapshot = session.createSnapshot();
+      const missingFocusSnapshot = {
+        ...snapshot,
+        gameState: {
+          ...snapshot.gameState,
+          focusPlayer: undefined,
+        },
+      };
+      expect(() => {
+        GameSessionSnapshotCodec.restore(missingFocusSnapshot, playtestRulePackage);
+      }).toThrow(GameSessionSnapshotValidationError);
+
+      const systemFocusSnapshot = {
+        ...snapshot,
+        gameState: {
+          ...snapshot.gameState,
+          focusPlayer: "system",
+        },
+      };
+      expect(() => {
+        GameSessionSnapshotCodec.restore(systemFocusSnapshot, playtestRulePackage);
       }).toThrow(GameSessionSnapshotValidationError);
     });
 
@@ -346,10 +401,15 @@ describe("Match Snapshot & Session Resume Foundation Tests (BP-SIM-AI-1.2.1-2026
       const snapshot = originalSession.createSnapshot();
       expect(snapshot.session.continuation).toBeDefined();
       expect(snapshot.session.resolvingContext).toBeDefined();
+      // ステージ解決中断時はチャンスがルールシステム ("system") に保持され、フォーカスはプレイヤーのままであること
+      expect(snapshot.gameState.chancePlayer).toBe("system");
+      expect(["p1", "p2"]).toContain(snapshot.gameState.focusPlayer);
 
       // Snapshot から復元
       const restoredSession = GameSession.fromSnapshot(snapshot, playtestRulePackage);
       expect(StateHasher.hash(restoredSession.state)).toBe(StateHasher.hash(originalSession.state));
+      expect(restoredSession.state.chancePlayer).toBe("system");
+      expect(restoredSession.state.focusPlayer).toBe(originalSession.state.focusPlayer);
       expect(restoredSession.continuation).toBeDefined();
       expect(restoredSession.resolvingContext).toBeDefined();
 

@@ -430,4 +430,61 @@ describe("Next Generation Triggered Action Integration Test (New YAML)", () => {
     expect(state.players.p1.life.length).toBe(2);
     expect(state.players.p1.hand.length).toBe(0);
   });
+
+  it("should reject destroyBulwark when specified keyCards do not exist in hand (Regression Test)", () => {
+    const state: any = {
+      stateVersion: 1,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      focusPlayer: "p1",
+      players: {
+        p1: {
+          name: "Player A",
+          life: [],
+          hand: [], // キーカードが手札に存在しない状態
+          field: [
+            {
+              unitId: "bulwark-1",
+              kind: "ユニット",
+              componentId: "character.bulwark",
+              state: "charge",
+              face: "down",
+              cards: [{ id: "c-K", suit: "H", rank: "K", value: 13 }],
+              labels: ["防御"],
+            },
+          ],
+          fog: [],
+          grave: [],
+        },
+        p2: {
+          name: "Player B",
+          life: [],
+          hand: [],
+          field: [],
+          fog: [],
+          grave: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: { requests: [], history: [] },
+    };
+
+    const registry = new CommandRegistry();
+    const destroyAction = rulePackage.actions.find((a) => a.id === "action.destroyBulwark")!;
+    const context: CommandContext = {
+      state,
+      playerKey: "p1",
+      keyCards: [
+        { id: "key-heart-A", suit: "H", rank: "A", value: 1 },
+        { id: "key-diamond-A", suit: "D", rank: "A", value: 1 },
+      ],
+      targetComponent: state.players.p1.field[0],
+      actions: rulePackage.actions,
+      components: rulePackage.components,
+    };
+
+    expect(() => registry.executeAction(destroyAction, context)).toThrow(
+      "キーカード 'key-heart-A' が指定元ゾーン 'hand' に存在しません。"
+    );
+  });
 });

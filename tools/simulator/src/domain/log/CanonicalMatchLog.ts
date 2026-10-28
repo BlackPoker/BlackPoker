@@ -24,6 +24,7 @@ export type CanonicalGameEventType =
   | "stage.popped"
   | "turn.changed"
   | "chance.changed"
+  | "focus.changed"
   | "player.passed"
   | "card.moved"
   | "card.revealed"
@@ -69,6 +70,7 @@ export interface MatchStartedEvent extends CanonicalGameEventBase {
   readonly matchId: string;
   readonly turnPlayer: string;
   readonly chancePlayer: string;
+  readonly focusPlayer: string;
   readonly initialPlayers: readonly string[];
 }
 
@@ -213,6 +215,13 @@ export interface ChanceChangedEvent extends CanonicalGameEventBase {
   readonly reason?: string;
 }
 
+export interface FocusChangedEvent extends CanonicalGameEventBase {
+  readonly type: "focus.changed";
+  readonly fromFocusPlayer?: string;
+  readonly toFocusPlayer: string;
+  readonly reason: string;
+}
+
 export interface PlayerPassedEvent extends CanonicalGameEventBase {
   readonly type: "player.passed";
   readonly playerId: string;
@@ -301,6 +310,7 @@ export type CanonicalGameEvent =
   | StagePoppedEvent
   | TurnChangedEvent
   | ChanceChangedEvent
+  | FocusChangedEvent
   | PlayerPassedEvent
   | CardMovedEvent
   | CardRevealedEvent

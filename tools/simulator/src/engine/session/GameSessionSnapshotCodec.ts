@@ -2,6 +2,7 @@ import {
   GameSessionSnapshot,
   SNAPSHOT_FORMAT_VERSION,
 } from "../../domain/session/GameSessionSnapshot";
+import { RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 import { GameSession } from "./GameSession";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { StateHasher } from "../simulation/StateHasher";
@@ -25,6 +26,12 @@ export class GameSessionSnapshotCodec {
    */
   static capture(session: GameSession): GameSessionSnapshot {
     const rawStateCopy = JSON.parse(JSON.stringify(session.state));
+    if (!rawStateCopy.focusPlayer && rawStateCopy.turnPlayer) {
+      rawStateCopy.focusPlayer =
+        rawStateCopy.chancePlayer && rawStateCopy.chancePlayer !== RULE_SYSTEM_CHANCE
+          ? rawStateCopy.chancePlayer
+          : rawStateCopy.turnPlayer;
+    }
     const stateHash = StateHasher.hash(rawStateCopy);
 
     const snapshot: GameSessionSnapshot = {
@@ -72,11 +79,17 @@ export class GameSessionSnapshotCodec {
   }
 
   /**
-   * Snapshot DTO の正当性（バージョン、必須フィールド、State Hash 整合性）を検証
+   * Snapshot DTO の正当性（バージョン、必須フィールド、focusPlayer、State Hash 整合性）を検証
    */
   static validate(snapshot: any): void {
     if (!snapshot || typeof snapshot !== "object") {
       throw new GameSessionSnapshotValidationError("Snapshot validation failed: Snapshot must be an object.");
+    }
+
+    if (snapshot.snapshotFormatVersion === 1) {
+      throw new GameSessionSnapshotValidationError(
+        `Unsupported legacy snapshot format version 1: Format version 1 is rejected because v9.2 Core Flow requires 'focusPlayer' in format version ${SNAPSHOT_FORMAT_VERSION}. Automatic migration from V1 to V2 is not supported.`
+      );
     }
 
     if (snapshot.snapshotFormatVersion !== SNAPSHOT_FORMAT_VERSION) {
@@ -103,6 +116,36 @@ export class GameSessionSnapshotCodec {
 
     if (!snapshot.gameState || typeof snapshot.gameState !== "object") {
       throw new GameSessionSnapshotValidationError("Snapshot validation failed: missing gameState object.");
+    }
+
+    // V2 必須フィールド: focusPlayer の検証
+    if (
+      !snapshot.gameState.focusPlayer ||
+      typeof snapshot.gameState.focusPlayer !== "string" ||
+      snapshot.gameState.focusPlayer === RULE_SYSTEM_CHANCE
+    ) {
+      throw new GameSessionSnapshotValidationError(
+        "Snapshot validation failed: missing or invalid gameState.focusPlayer (required in V2 format)."
+      );
+    }
+
+    const playerKeys = Object.keys(snapshot.gameState.players || {});
+    if (playerKeys.length > 0 && !playerKeys.includes(snapshot.gameState.focusPlayer)) {
+      throw new GameSessionSnapshotValidationError(
+        `Snapshot validation failed: gameState.focusPlayer '${snapshot.gameState.focusPlayer}' is not a valid player key.`
+      );
+    }
+
+    if (
+      !snapshot.gameState.chancePlayer ||
+      typeof snapshot.gameState.chancePlayer !== "string" ||
+      (playerKeys.length > 0 &&
+        snapshot.gameState.chancePlayer !== RULE_SYSTEM_CHANCE &&
+        !playerKeys.includes(snapshot.gameState.chancePlayer))
+    ) {
+      throw new GameSessionSnapshotValidationError(
+        `Snapshot validation failed: invalid gameState.chancePlayer '${snapshot.gameState.chancePlayer}'.`
+      );
     }
 
     if (!snapshot.gameStateHash || typeof snapshot.gameStateHash !== "string") {

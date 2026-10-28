@@ -18,6 +18,7 @@ export function createCoreBattlePresetState(): any {
     presetId: CORE_BATTLE_PRESET_ID,
     turnPlayer: "p1",
     chancePlayer: "p1",
+    focusPlayer: "p1",
     turnCount: 1,
     actionCount: 0,
     players: {

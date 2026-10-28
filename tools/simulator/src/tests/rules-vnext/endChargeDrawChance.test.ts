@@ -131,16 +131,17 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
     expect(state.stage.requests.length).toBe(1);
     expect(state.stage.requests[0].actionId).toBe("action.draw");
 
-    // H: この時点で turnPlayer = "p2", chancePlayer = "p2"
+    // H: この時点で turnPlayer = "p2", chancePlayer = "p2", focusPlayer = "p2"
     expect(state.turnPlayer).toBe("p2");
     expect(state.chancePlayer).toBe("p2");
+    expect(state.focusPlayer).toBe("p2");
 
     // I: 次の DecisionRequest.playerId も p2
     expect(afterP2EndPass.type).toBe("WAITING_FOR_DECISION");
     if (afterP2EndPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP2EndPass.request.playerId).toBe("p2");
 
-    // J: p2 が PASS -> chancePlayer が p1 になる
+    // J: p2 が PASS -> chancePlayer が p1 になる（focusPlayer は p2 を維持）
     const p2DrawPassIdx = afterP2EndPass.request.patterns.findIndex((p) => p.kind === "PASS");
     expect(p2DrawPassIdx).toBeGreaterThanOrEqual(0);
 
@@ -151,6 +152,7 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
     });
 
     expect(state.chancePlayer).toBe("p1");
+    expect(state.focusPlayer).toBe("p2");
     expect(afterP2DrawPass.type).toBe("WAITING_FOR_DECISION");
     if (afterP2DrawPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP2DrawPass.request.playerId).toBe("p1");
@@ -165,10 +167,11 @@ describe("End -> Charge -> Draw Chance Transition Test (Phase 21B.8.2)", () => {
       selectedPatternRef: p1DrawPassIdx,
     });
 
-    // L: Draw 解決後、p2 が 2枚ドローし、chancePlayer は turnPlayer (p2) に戻る
+    // L: Draw 解決後、p2 が 2枚ドローし、chancePlayer / focusPlayer は turnPlayer (p2) に戻る
     expect(state.stage.requests.length).toBe(0);
     expect(state.players.p2.hand.length).toBe(2);
     expect(state.chancePlayer).toBe("p2");
+    expect(state.focusPlayer).toBe("p2");
     expect(afterP1DrawPass.type).toBe("WAITING_FOR_DECISION");
     if (afterP1DrawPass.type !== "WAITING_FOR_DECISION") return;
     expect(afterP1DrawPass.request.playerId).toBe("p2");

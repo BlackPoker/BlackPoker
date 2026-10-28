@@ -83,13 +83,21 @@ describe("Live Match Direct Replay Integration Tests (Phase 4.0-B)", () => {
       if (step.type !== "WAITING_FOR_DECISION") break;
 
       if (step.request.playerId === "p1") {
-        // Human 側は PASS を選択
+        // Human 側はステージにリクエストがあれば PASS、空ステージならエンド（または先頭合法手）を選択
         const passRef = step.request.patterns.findIndex((p) => p.kind === "PASS");
-        expect(passRef).toBeGreaterThanOrEqual(0);
+        const endRef = step.request.patterns.findIndex(
+          (p) =>
+            p.kind === "ACTION" &&
+            p.actionSelectionRef !== undefined &&
+            step.type === "WAITING_FOR_DECISION" &&
+            step.request.catalog.actions[p.actionSelectionRef]?.actionId === "action.end"
+        );
+        const chosenRef = passRef >= 0 ? passRef : endRef >= 0 ? endRef : 0;
+        expect(chosenRef).toBeGreaterThanOrEqual(0);
         const resp = {
           decisionId: step.request.decisionId,
           stateVersion: step.request.stateVersion,
-          selectedPatternRef: passRef,
+          selectedPatternRef: chosenRef,
         };
         step = session.submitDecision(resp);
         transcript.push(

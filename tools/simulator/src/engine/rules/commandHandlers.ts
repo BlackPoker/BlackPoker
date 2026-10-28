@@ -948,7 +948,36 @@ export function takeUntilLegacyCardHandler(): CommandHandler {
       } else {
         // 違えば墓地に送る
         const unit = {
-          unitId: `unit-grave-${context.state.stateVersion || 1}-${card.id}-${Math.random().toString(36).slice(2)}`,
+          unitId: (() => {
+            const existing = new Set<string>();
+            const players = context.state?.players || {};
+            for (const pKey of Object.keys(players)) {
+              const p = players[pKey];
+              if (!p) continue;
+              for (const u of p.field || []) {
+                if (u && typeof u.unitId === "string") existing.add(u.unitId);
+              }
+              for (const u of p.grave || []) {
+                if (u && typeof u.unitId === "string") existing.add(u.unitId);
+              }
+              for (const u of p.trumps || []) {
+                if (u && typeof u.unitId === "string") existing.add(u.unitId);
+              }
+            }
+            const requestId =
+              context.currentRequest?.id ||
+              (context.currentRequest as any)?.requestId ||
+              `seq-${context.state?.nextRequestSeq ?? 0}`;
+            const stateVer = context.state?.stateVersion ?? context.state?.version ?? 1;
+            const baseId = `unit-grave-${context.playerKey}-${requestId}-v${stateVer}-${card.id}`;
+            let candidate = baseId;
+            let dup = 2;
+            while (existing.has(candidate)) {
+              candidate = `${baseId}#${dup}`;
+              dup++;
+            }
+            return candidate;
+          })(),
           kind: "一般兵",
           cards: [card],
           labels: []

@@ -1,7 +1,7 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection, EffectSelection, UnitAssignment, OrderSelection } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
-import { PlayerKey, DecisionSource } from "../../domain/decision/DecisionSource";
+import { PlayerKey, DecisionSource, RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 import { RulePackage, ActionDefinition, ComponentDefinition, ActionRequest } from "../../domain/rules/RulePackage";
 import { ObservationFactory } from "./ObservationFactory";
 import { CostPaymentEnumerator } from "./CostPaymentEnumerator";
@@ -266,8 +266,10 @@ export class LegalPatternGenerator {
       return a.patternId.localeCompare(b.patternId);
     });
 
-    // PASS パターンの付与（Decision でのパス選択肢）
-    if (options?.includePass !== false) {
+    // PASS パターンの付与（第9.2版コアフロー[3]: ステージが空でない場合のみパス可能）
+    const stageRequests = state.stage?.requests || [];
+    const canPass = stageRequests.length > 0 && playerId !== RULE_SYSTEM_CHANCE;
+    if (options?.includePass !== false && canPass) {
       patterns.push({
         patternId: "pat-pass",
         kind: "PASS",
@@ -320,6 +322,9 @@ export class LegalPatternGenerator {
    * 現在のタイミングとチャンスから候補となり得るアクションを抽出
    */
   private static filterCandidateActions(actions: ActionDefinition[], state: any, playerId: PlayerKey): ActionDefinition[] {
+    if (!playerId || playerId === RULE_SYSTEM_CHANCE || state.chancePlayer === RULE_SYSTEM_CHANCE) {
+      return [];
+    }
     const isTurnPlayer = state.turnPlayer === playerId;
     const isChancePlayer = state.chancePlayer === playerId;
     const stageRequests = state.stage?.requests || [];

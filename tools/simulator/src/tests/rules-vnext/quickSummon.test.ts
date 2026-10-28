@@ -1147,13 +1147,24 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       const costCard = { id: "p2-cost", suit: "D", rank: "6", value: 6 };
       const extraCard = { id: "p2-extra", suit: "H", rank: "10", value: 10 };
 
+      const endAction = proRulePackage.actions.find((a) => a.id === "action.end")!;
+      const p1EndRequest = {
+        id: "req-p1-end",
+        actionId: "action.end",
+        controller: "p1",
+        status: "pending",
+        sequence: 1,
+        action: endAction,
+      };
+
       const state: any = {
         stateVersion: 1,
         turnPlayer: "p1",
         chancePlayer: "p2",
+        focusPlayer: "p1",
         nonTurnPlayer: "p2",
         turnCount: 2,
-        stage: { requests: [] },
+        stage: { requests: [p1EndRequest] },
         players: {
           p1: {
             hand: [{ id: "p1-h1", suit: "C", rank: "3", value: 3 }],
@@ -1192,9 +1203,9 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
         selectedPatternRef: qsPatternIdx,
       });
 
-      // Request is placed on Stage (speed: normal)
-      expect(session.state.stage.requests).toHaveLength(1);
-      const stageReq = session.state.stage.requests[0];
+      // Request is placed on Stage (speed: normal, stacked on top of p1's end request)
+      expect(session.state.stage.requests).toHaveLength(2);
+      const stageReq = session.state.stage.requests[1];
       expect(stageReq.actionId).toBe("action.quickSummonsAce");
       expect(stageReq.controller).toBe("p2");
 
@@ -1254,8 +1265,9 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       expect(aceUnit.state).toBe("charge");
       expect(aceUnit.cards[0].id).toBe(aceCard.id);
 
-      // Stage request resolved and empty
-      expect(session.state.stage.requests).toHaveLength(0);
+      // Top stage request (quickSummonsAce) resolved, leaving p1's end request on stage
+      expect(session.state.stage.requests).toHaveLength(1);
+      expect(session.state.stage.requests[0].id).toBe("req-p1-end");
 
       // Chance returns to turn player (p1)
       expect(session.state.chancePlayer).toBe("p1");
@@ -1359,13 +1371,24 @@ describe("BP-SIM-REG-5.0-B-R1: Quick Summon Hardening & Comprehensive Verificati
       const costCard = { id: "p2-cost-bw", suit: "D", rank: "6", value: 6 };
       const extraCard = { id: "p2-extra-bw", suit: "H", rank: "10", value: 10 };
 
+      const endAction = proRulePackage.actions.find((a) => a.id === "action.end")!;
+      const p1EndRequest = {
+        id: "req-p1-end",
+        actionId: "action.end",
+        controller: "p1",
+        status: "pending",
+        sequence: 1,
+        action: endAction,
+      };
+
       const state: any = {
         stateVersion: 1,
         turnPlayer: "p1",
         chancePlayer: "p2",
+        focusPlayer: "p1",
         nonTurnPlayer: "p2",
         turnCount: 2,
-        stage: { requests: [] },
+        stage: { requests: [p1EndRequest] },
         players: {
           p1: {
             hand: [{ id: "p1-h1", suit: "C", rank: "3", value: 3 }],

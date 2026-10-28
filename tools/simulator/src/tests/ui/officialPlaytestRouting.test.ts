@@ -67,7 +67,9 @@ describe("Official Playtest UI Routing Tests (Phase 2.4 / 2.4.1)", () => {
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type === "WAITING_FOR_DECISION") {
       expect(step.request.patterns.length).toBeGreaterThan(0);
-      expect(step.request.patterns.some((p) => p.kind === "PASS")).toBe(true);
+      // 第9.2版コアフロー: 初期盤面（空ステージ）では PASS パターンは含まれず、ACTION パターンのみが生成される
+      expect(step.request.patterns.some((p) => p.kind === "PASS")).toBe(false);
+      expect(step.request.patterns.some((p) => p.kind === "ACTION")).toBe(true);
       expect(step.request.playerId).toBe(outcome.firstPlayer);
     }
   });

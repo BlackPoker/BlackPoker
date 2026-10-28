@@ -930,7 +930,7 @@ describe("Counterattack Action Integration Tests (Phase 18)", () => {
 
     // Snapshot 取得
     const snapshot = originalSession.createSnapshot();
-    expect(snapshot.snapshotFormatVersion).toBe(1);
+    expect(snapshot.snapshotFormatVersion).toBe(2);
     expect(snapshot.session.continuation?.effectStepId).toBe(TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID);
     expect(snapshot.session.resolvingRequest).toBeDefined();
 

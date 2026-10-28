@@ -558,7 +558,7 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
   // =========================================================================
   describe("Group P: Snapshot / Restore Determinism", () => {
     it("P1: Pre-game and in-game snapshots serialize and restore with identical StateHash", async () => {
-      expect(SNAPSHOT_FORMAT_VERSION).toBe(1);
+      expect(SNAPSHOT_FORMAT_VERSION).toBe(2);
 
       const session = await OfficialRegulationMatchFactory.createSession("standard-pack", 42, {
         catalog,
@@ -697,11 +697,11 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       // 自然終了（ライフ0）かつステップ上限未満で完了すること
       expect(result.completed).toBe(true);
       expect(result.totalDecisions).toBeLessThan(STEP_CAP);
-      expect(result.totalDecisions).toBe(217); // 54枚デッキ (Joker 2枚) / 即時Action(Search/PackOpen)のStage由来Chance保持修正後の決定論的検証
-      expect(result.turnCount).toBe(11);
-      expect(result.winner).toBe("p1");
+      expect(result.totalDecisions).toBe(148); // 第9.2版コアフロー（空ステージPASS禁止・フォーカス方式）下での決定論的検証
+      expect(result.turnCount).toBe(9);
+      expect(result.winner).toBe("p2");
       expect(result.reason).toContain("ライフが0になりました");
-      expect(session.state.players.p2.life.length).toBe(0);
+      expect(session.state.players.p1.life.length).toBe(0);
     });
   });
 

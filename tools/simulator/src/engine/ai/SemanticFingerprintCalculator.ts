@@ -402,6 +402,7 @@ export class SemanticFingerprintCalculator {
       presetId: state.presetId,
       turnPlayer: state.turnPlayer,
       chancePlayer: state.chancePlayer,
+      focusPlayer: state.focusPlayer,
       turnUsage: normalizeTurnUsage(state.turnUsage),
     };
 

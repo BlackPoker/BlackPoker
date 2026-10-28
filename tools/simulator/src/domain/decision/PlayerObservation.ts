@@ -1,4 +1,4 @@
-import { PlayerKey, RequestRef } from "./DecisionSource";
+import { PlayerKey, ChanceHolder, RequestRef } from "./DecisionSource";
 
 export interface KnownCardView {
   readonly visibility: "KNOWN";
@@ -121,7 +121,8 @@ export interface GameEventView {
 export interface PlayerObservation {
   readonly viewerPlayerId: PlayerKey;
   readonly turnPlayerId?: PlayerKey;
-  readonly chancePlayerId?: PlayerKey;
+  readonly chancePlayerId?: ChanceHolder;
+  readonly focusPlayerId?: PlayerKey;
   readonly turnCount?: number;
   readonly players: readonly PlayerObservationView[];
   /**

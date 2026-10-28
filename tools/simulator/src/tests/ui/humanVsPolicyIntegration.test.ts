@@ -44,8 +44,26 @@ describe("Human vs Policy Integration Tests (Phase 2.5)", () => {
       expect(step.type).toBe("WAITING_FOR_DECISION");
       if (step.type !== "WAITING_FOR_DECISION") return;
 
-      // 初手が p1 (Human) であることを明示的にアサート
+      // 初手が p1 (Human) であることを明示的にアサート（第9.2版: 空ステージでは通常アクションをリクエスト後にPASS）
+      const req1 = step.request;
+      expect(req1.playerId).toBe("p1");
+      expect(req1.patterns.findIndex((p) => p.kind === "PASS")).toBe(-1);
+
+      const endActionRef = req1.patterns.findIndex((p) => {
+        if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+        return req1.catalog.actions[p.actionSelectionRef]?.actionId === "action.end";
+      });
+      expect(endActionRef).toBeGreaterThanOrEqual(0);
+
+      step = outcome.session.submitDecision({
+        decisionId: req1.decisionId,
+        stateVersion: req1.stateVersion,
+        selectedPatternRef: endActionRef,
+      });
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
       expect(step.request.playerId).toBe("p1");
+
       const passPatternRef = step.request.patterns.findIndex((p) => p.kind === "PASS");
       expect(passPatternRef).toBeGreaterThanOrEqual(0);
 

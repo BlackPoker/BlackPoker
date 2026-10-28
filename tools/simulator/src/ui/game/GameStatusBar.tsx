@@ -22,7 +22,10 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
   stateVersion,
 }) => {
   const turnPlayerName = players[turnPlayer]?.name || (turnPlayer === "p1" ? "Player A" : "Player B");
-  const chancePlayerName = players[chancePlayer]?.name || (chancePlayer === "p1" ? "Player A" : "Player B");
+  const chancePlayerName =
+    chancePlayer === "system"
+      ? "Rule System"
+      : players[chancePlayer]?.name || (chancePlayer === "p1" ? "Player A" : "Player B");
 
   return (
     <div className="flex flex-col gap-1.5 p-2 bg-white rounded border border-zinc-200 shadow-sm">

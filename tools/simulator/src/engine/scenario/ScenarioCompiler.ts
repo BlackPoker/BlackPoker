@@ -689,6 +689,7 @@ export class ScenarioCompiler {
       frameId: regulation.frameId,
       turnPlayer: normalizedDef.turnPlayer,
       chancePlayer: normalizedDef.chancePlayer,
+      focusPlayer: normalizedDef.chancePlayer,
       nonTurnPlayer,
       turnCount: normalizedDef.turnCount,
       actionCount: 0,

@@ -741,7 +741,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
 
     // スナップショットの作成
     const snapshot = session.createSnapshot();
-    expect(snapshot.snapshotFormatVersion).toBe(1);
+    expect(snapshot.snapshotFormatVersion).toBe(2);
     expect(snapshot.session.pendingDecision).toBeDefined();
 
     // スナップショットからの復元

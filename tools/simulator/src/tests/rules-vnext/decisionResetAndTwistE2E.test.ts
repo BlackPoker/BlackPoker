@@ -52,11 +52,21 @@ describe("Phase 21B.6.2: Decision Reset, Twist LIFO & Up/Down Exposure E2E Tests
     const upPatterns = reqA.patterns.filter((p) => p.actionSelectionRef === upActionRef);
     expect(upPatterns.length).toBeGreaterThan(0);
 
-    // Player A が PASS して Player B (チャンス) に移行
-    const passRefA = reqA.patterns.findIndex((p) => p.kind === "PASS");
+    // 第9.2版コアフロー: 空ステージではPASS不可のため、Player A が action.up をリクエストしてから PASS して Player B (チャンス) に移行
+    const upPatternIdx = reqA.patterns.findIndex((p) => p.actionSelectionRef === upActionRef);
     step = session.submitDecision({
       decisionId: reqA.decisionId,
       stateVersion: reqA.stateVersion,
+      selectedPatternRef: upPatternIdx,
+    });
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    if (step.type !== "WAITING_FOR_DECISION") return;
+
+    const passRefA = step.request.patterns.findIndex((p) => p.kind === "PASS");
+    expect(passRefA).toBeGreaterThanOrEqual(0);
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
       selectedPatternRef: passRefA,
     });
 

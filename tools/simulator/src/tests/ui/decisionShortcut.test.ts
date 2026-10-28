@@ -481,29 +481,69 @@ describe("Decision Keyboard Shortcut Tests (BP-SIM-SHARE-1.0-R2-PLAYTEST-UX-HARD
   });
 
   describe("CoreBattlePlaytest Global P Shortcut", () => {
-    it("E: 対戦待機中に P キーを押すと PASS が実行されること", async () => {
-      let testRenderer!: TestRenderer.ReactTestRenderer;
-      await act(async () => {
-        testRenderer = TestRenderer.create(React.createElement(CoreBattlePlaytest));
-      });
-
+    async function advanceToStagedPassableDecision(testRenderer: TestRenderer.ReactTestRenderer) {
       // MatchSetupScreen から対戦開始をクリック
       const setupScreen = testRenderer.root.findByType(MatchSetupScreen);
       await act(async () => {
         await setupScreen.props.onStartMatch();
       });
 
-      // 対戦開始後は Player A 行動選択で待機中
-      const initialJson = JSON.stringify(testRenderer.toJSON());
-      expect(initialJson).toContain("PASS [P]");
+      // PassAndPlayOverlay が表示されている場合は onReady() で解除
+      const readyNodes1 = testRenderer.root.findAll((n) => typeof n.props?.onReady === "function");
+      for (const n of readyNodes1) {
+        await act(async () => {
+          n.props.onReady();
+        });
+      }
+
+      // 第9.2版コアフロー: 空ステージの初期状態では PASS [P] は表示されない
+      expect(JSON.stringify(testRenderer.toJSON())).not.toContain("PASS [P]");
+
+      // DecisionPanel から通常アクション（エンド）をステージへ積載（AutoPass により相手チャンスへ移動）
+      const panel = testRenderer.root.findByType(DecisionPanel);
+      const req = panel.props.request as DecisionRequest;
+      const endPatternIdx = req.patterns.findIndex((p) => {
+        if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+        return req.catalog.actions[p.actionSelectionRef]?.actionId === "action.end";
+      });
+      expect(endPatternIdx).toBeGreaterThanOrEqual(0);
+      await act(async () => {
+        panel.props.onSubmit({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: endPatternIdx,
+        });
+      });
+
+      // PassAndPlayOverlay が表示された場合は onReady() で解除
+      const readyNodes2 = testRenderer.root.findAll((n) => typeof n.props?.onReady === "function");
+      for (const n of readyNodes2) {
+        await act(async () => {
+          n.props.onReady();
+        });
+      }
+    }
+
+    it("E: 対戦待機中に P キーを押すと PASS が実行されること", async () => {
+      let testRenderer!: TestRenderer.ReactTestRenderer;
+      await act(async () => {
+        testRenderer = TestRenderer.create(React.createElement(CoreBattlePlaytest));
+      });
+
+      await advanceToStagedPassableDecision(testRenderer);
+
+      // ステージにリクエストが存在する状態では PASS [P] が表示される
+      const stagedJson = JSON.stringify(testRenderer.toJSON());
+      expect(stagedJson).toContain("PASS [P]");
 
       await act(async () => {
         fireKeyDown({ key: "p" });
       });
 
-      // PASS により進行すること
+      // PASS によりステージ最上段（エンド）が解決され進行すること
       const afterJson = JSON.stringify(testRenderer.toJSON());
       expect(afterJson).toBeDefined();
+      expect(afterJson).not.toBe(stagedJson);
     });
 
     it("F: INPUT focus 中は P キーを押しても PASS されないこと", async () => {
@@ -512,10 +552,7 @@ describe("Decision Keyboard Shortcut Tests (BP-SIM-SHARE-1.0-R2-PLAYTEST-UX-HARD
         testRenderer = TestRenderer.create(React.createElement(CoreBattlePlaytest));
       });
 
-      const setupScreen = testRenderer.root.findByType(MatchSetupScreen);
-      await act(async () => {
-        await setupScreen.props.onStartMatch();
-      });
+      await advanceToStagedPassableDecision(testRenderer);
 
       expect(JSON.stringify(testRenderer.toJSON())).toContain("PASS [P]");
 

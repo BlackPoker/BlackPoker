@@ -361,6 +361,7 @@ export class StateHasher {
       turnCount: state.turnCount ?? 1,
       turnPlayer: state.turnPlayer,
       chancePlayer: state.chancePlayer,
+      focusPlayer: state.focusPlayer,
       stateVersion: state.stateVersion ?? 0,
       nextRequestSeq: state.nextRequestSeq !== undefined ? Number(state.nextRequestSeq) : undefined,
       turnUsage: normalizeTurnUsage(state.turnUsage),

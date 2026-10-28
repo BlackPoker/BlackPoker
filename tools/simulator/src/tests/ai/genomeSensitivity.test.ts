@@ -40,11 +40,26 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
     if (outcome.type !== "READY") throw new Error("Setup not ready");
 
     const session = new GameSession(outcome.state, rulePackage, { matchSeed: 42 });
-    const step = session.advance();
-    if (step.type !== "WAITING_FOR_DECISION") {
-      throw new Error(`Expected WAITING_FOR_DECISION, got: ${step.type}`);
+    const step1 = session.advance();
+    if (step1.type !== "WAITING_FOR_DECISION") {
+      throw new Error(`Expected WAITING_FOR_DECISION, got: ${step1.type}`);
     }
-    sampleRequest = step.request;
+    // 第9.2版コアフロー: 空ステージでは PASS が存在しないため、通常アクションを1件ステージに積んだ後の
+    // 「PASS と ACTION が共存する実 Request」を sampleRequest として取得する
+    const normalActionIdx = step1.request.patterns.findIndex((p) => {
+      if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+      const actId = step1.request.catalog.actions[p.actionSelectionRef]?.actionId;
+      return actId === "action.end" || actId === "action.attack";
+    });
+    const step2 = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: normalActionIdx >= 0 ? normalActionIdx : 0,
+    });
+    if (step2.type !== "WAITING_FOR_DECISION") {
+      throw new Error(`Expected WAITING_FOR_DECISION after staging action, got: ${step2.type}`);
+    }
+    sampleRequest = step2.request;
   });
 
   const createStandardPackSessionFactory = () => {

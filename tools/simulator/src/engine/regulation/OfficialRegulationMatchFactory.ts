@@ -80,6 +80,7 @@ export class OfficialRegulationMatchFactory {
         matchId: options?.matchId || `match-official-${matchSeed}`,
         turnPlayer: outcome.loser,
         chancePlayer: outcome.loser,
+        focusPlayer: outcome.loser,
         players: {
           p1: { life: outcome.winner === "p1" ? [1] : [] },
           p2: { life: outcome.winner === "p2" ? [1] : [] },
@@ -160,6 +161,7 @@ export class OfficialRegulationMatchFactory {
           matchId: ctx.matchId,
           turnPlayer: outcome.loser,
           chancePlayer: outcome.loser,
+          focusPlayer: outcome.loser,
           players: {
             p1: { life: outcome.winner === "p1" ? [1] : [] },
             p2: { life: outcome.winner === "p2" ? [1] : [] },

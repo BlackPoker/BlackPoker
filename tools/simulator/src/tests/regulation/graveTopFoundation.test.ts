@@ -716,7 +716,7 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
 
       // Create snapshot
       const snapshot = session.createSnapshot();
-      expect(snapshot.snapshotFormatVersion).toBe(1);
+      expect(snapshot.snapshotFormatVersion).toBe(2);
 
       // Restore session
       const restored = GameSession.fromSnapshot(snapshot, standardRulePackage);
@@ -1647,7 +1647,7 @@ describe("Official Regulation: Grave TOP Foundation 1.0 Comprehensive Tests", ()
 
       // Snapshot 保存
       const snapshot = session.createSnapshot();
-      expect(snapshot.snapshotFormatVersion).toBe(1);
+      expect(snapshot.snapshotFormatVersion).toBe(2);
 
       // Snapshot から復元
       const restored = GameSession.fromSnapshot(snapshot, standardRulePackage);

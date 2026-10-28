@@ -91,8 +91,8 @@ export class MatchLogRecorder {
     } else {
       this.meta = {
         matchId: options.matchId,
-        rulesVersion: options.rulesVersion || "9.1.2",
-        rulePackageRef: options.rulePackageRef || "rules-vnext",
+        rulesVersion: options.rulesVersion,
+        rulePackageRef: options.rulePackageRef,
         buildSha: options.buildSha,
         buildRef: options.buildRef,
         simulatorCommit: options.simulatorCommit,
@@ -161,8 +161,8 @@ export class MatchLogRecorder {
     this.events = [];
     this.meta = {
       matchId: options.matchId,
-      rulesVersion: options.rulesVersion || "9.1.2",
-      rulePackageRef: options.rulePackageRef || "rules-vnext",
+      rulesVersion: options.rulesVersion,
+      rulePackageRef: options.rulePackageRef,
       buildSha: options.buildSha,
       buildRef: options.buildRef,
       simulatorCommit: options.simulatorCommit,

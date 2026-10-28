@@ -1,4 +1,4 @@
-﻿import type { PlayerKey } from "../../domain/decision/DecisionSource";
+import type { PlayerKey } from "../../domain/decision/DecisionSource";
 import type { PlaytestMatchMode } from "../../engine/playtest/PlaytestSeatController";
 
 export interface PlaytestPerspectiveState {
@@ -42,7 +42,7 @@ export class PlaytestPerspectiveResolver {
       bottomPlayerKey = activeHumanSeat;
     } else if (currentStep?.type === "WAITING_FOR_DECISION" && currentStep.request?.playerId) {
       bottomPlayerKey = currentStep.request.playerId as PlayerKey;
-    } else if (gameState?.chancePlayer) {
+    } else if (gameState?.chancePlayer && gameState.chancePlayer !== "system") {
       bottomPlayerKey = gameState.chancePlayer as PlayerKey;
     } else if (gameState?.turnPlayer) {
       bottomPlayerKey = gameState.turnPlayer as PlayerKey;

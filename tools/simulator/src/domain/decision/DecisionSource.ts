@@ -1,4 +1,6 @@
 export type PlayerKey = "p1" | "p2" | string;
+export type ChanceHolder = PlayerKey | "system";
+export const RULE_SYSTEM_CHANCE = "system" as const;
 export type RequestRef = string;
 
 /**
@@ -22,4 +24,3 @@ export type DecisionSource =
       readonly playerId: PlayerKey;
       readonly reason?: "MULTI_CARD_GRAVE_MOVE" | "TOP_REMOVED";
     };
-

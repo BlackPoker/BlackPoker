@@ -349,6 +349,7 @@ export class OfficialRegulationMatchSetup {
       frameId: regulation.frameId,
       turnPlayer: undefined,
       chancePlayer: undefined,
+      focusPlayer: undefined,
       turnCount: 0,
       actionCount: 0,
       stage: { requests: [] },

@@ -3969,8 +3969,19 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       expect(session.state.players.p2.life.length).toBe(9);
       expect(session.state.players.p2.rareCards.length).toBe(1);
 
+      // P1 の手番中、Stage に P1 の保留リクエストが存在し、P2 にクイック判断のチャンスがある合法状態
+      session.state.stage.requests.push({
+        id: "pending-stage-req-pos-1",
+        requestId: "pending-stage-req-pos-1",
+        actionId: "action.mountSoldier",
+        controller: "p1",
+        definitionOwner: "p1",
+        targets: [],
+        stepIndex: 1,
+      } as any);
       session.state.turnPlayer = "p1";
       session.state.chancePlayer = "p2";
+      session.state.focusPlayer = "p1";
 
       // 1. Rare Cards が 1 枚ある時は Legal Pattern として提示される
       const preDecision = LegalPatternGenerator.generateActionRequestDecision(session.state, "p2", proRulePackage);
@@ -4052,6 +4063,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
 
       // Stage に P1 の pending request (mountSoldier 等) を積載
       session.state.stage.requests.push({
+        id: "pending-stage-req-cont-1",
         requestId: "pending-stage-req-cont-1",
         actionId: "action.mountSoldier",
         controller: "p1",
@@ -4061,7 +4073,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       } as any);
 
       session.state.turnPlayer = "p1";
-      session.state.chancePlayer = "p2"; // AI がクイック判断機会を持つ
+      session.state.chancePlayer = "p2";
+      session.state.focusPlayer = "p1"; // P1の手番中、P1のリクエストに対してAI(p2)がクイック判断機会を持つ
 
       const preHandCount = session.state.players.p2.hand.length;
 
@@ -4174,6 +4187,7 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
 
       // Stage にダミーのリクエスト (mountSoldier / 装備) が積載されている状況
       session.state.stage.requests.push({
+        id: "pending-stage-req-1",
         requestId: "pending-stage-req-1",
         actionId: "action.mountSoldier",
         controller: "p1",
@@ -4183,7 +4197,8 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       } as any);
 
       session.state.turnPlayer = "p1";
-      session.state.chancePlayer = "p2"; // AI がクイック判断を求められる
+      session.state.chancePlayer = "p2";
+      session.state.focusPlayer = "p1"; // P1の手番中、P1のリクエストに対してAI(p2)がクイック判断を求められる
 
       const initialStep = session.advance();
       expect(initialStep.type).toBe("WAITING_FOR_DECISION");

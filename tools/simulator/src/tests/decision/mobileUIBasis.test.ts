@@ -24,14 +24,30 @@ describe("Mobile UI Infrastructure & Observation Boundary Tests (Phase 2.3)", ()
   it("Mobile PASS is available when kind === 'PASS' exists in patterns", () => {
     const state = createCoreBattlePresetState();
     const session = new GameSession(state, playtestRulePackage);
-    const step = session.advance();
+    const step0 = session.advance();
 
+    expect(step0.type).toBe("WAITING_FOR_DECISION");
+    if (step0.type !== "WAITING_FOR_DECISION") {
+      throw new Error("Expected WAITING_FOR_DECISION");
+    }
+
+    // 第9.2版コアフロー: 空ステージの手番開始時には PASS パターンが存在しない
+    expect(step0.request.patterns.findIndex((p) => p.kind === "PASS")).toBe(-1);
+
+    // 通常アクション（アタック等）をステージに積むと PASS パターンが出現する
+    const attackIdx = step0.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && step0.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.attack"
+    );
+    const step = session.submitDecision({
+      decisionId: step0.request.decisionId,
+      stateVersion: step0.request.stateVersion,
+      selectedPatternRef: attackIdx,
+    });
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") {
       throw new Error("Expected WAITING_FOR_DECISION");
     }
 
-    // 手番開始時: PASS パターンが存在する
     const passPatternIdx = step.request.patterns.findIndex((p) => p.kind === "PASS");
     expect(passPatternIdx).toBeGreaterThanOrEqual(0);
 

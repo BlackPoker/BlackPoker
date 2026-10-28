@@ -3,9 +3,9 @@ import { CanonicalMatchLog } from "../log/CanonicalMatchLog";
 import { EffectContinuation } from "../../engine/session/GameSession";
 
 /**
- * Snapshot フォーマットバージョン (現在: 1)
+ * Snapshot フォーマットバージョン (現在: 2 — 第9.2版コアフロー フォーカス方式対応)
  */
-export const SNAPSHOT_FORMAT_VERSION = 1;
+export const SNAPSHOT_FORMAT_VERSION = 2;
 
 /**
  * GameSession Snapshot のメタデータ (RulePackage.id / RulePackage.version を正式保持)
@@ -46,13 +46,14 @@ export interface GameSessionSnapshotSessionData {
   readonly resolvingContext?: ResolvingContextSnapshotData;
   readonly matchStartedRecorded: boolean;
   readonly lastRecordedTurnPlayer?: string;
+  readonly pendingDirectFocusPlayer?: string;
 }
 
 /**
- * GameSession の完全な JSON-safe Snapshot DTO (Format Version 1)
+ * GameSession の完全な JSON-safe Snapshot DTO (Format Version 2)
  */
 export interface GameSessionSnapshot {
-  readonly snapshotFormatVersion: 1;
+  readonly snapshotFormatVersion: 2;
   readonly metadata: GameSessionSnapshotMetadata;
   readonly gameState: any;
   readonly gameStateHash: string;

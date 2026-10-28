@@ -838,15 +838,22 @@ describe("Canonical Match Log Minimal Infrastructure Tests", () => {
     const matchLog = session.getMatchLog();
     const chanceEvents = matchLog.events.filter((e) => e.type === "chance.changed") as any[];
 
-    // p1 PASS (p1 -> p2) と p2 PASS (p2 -> p1) の2件。解決後の p1 への再代入では二重発行されないこと
-    expect(chanceEvents).toHaveLength(2);
+    // 第9.2版コアフロー:
+    // 1. p1 PASS (p1 -> p2, reason: "pass")
+    // 2. p2 PASS で全員パス成立 (p2 -> "system", reason: "allPassed")
+    // 3. Twist 解決後、コアフロー[2]により手番プレイヤーへ移動 ("system" -> p1, reason: "stageTopResolved")
+    expect(chanceEvents).toHaveLength(3);
     expect(chanceEvents[0].fromChancePlayer).toBe("p1");
     expect(chanceEvents[0].toChancePlayer).toBe("p2");
     expect(chanceEvents[0].reason).toBe("pass");
 
     expect(chanceEvents[1].fromChancePlayer).toBe("p2");
-    expect(chanceEvents[1].toChancePlayer).toBe("p1");
-    expect(chanceEvents[1].reason).toBe("pass");
+    expect(chanceEvents[1].toChancePlayer).toBe("system");
+    expect(chanceEvents[1].reason).toBe("allPassed");
+
+    expect(chanceEvents[2].fromChancePlayer).toBe("system");
+    expect(chanceEvents[2].toChancePlayer).toBe("p1");
+    expect(chanceEvents[2].reason).toBe("stageTopResolved");
   });
 
 
@@ -911,5 +918,100 @@ describe("Canonical Match Log Minimal Infrastructure Tests", () => {
     expect(keyHandToReq).toBeDefined();
     // 移動時の stateVersion (11) が正確に記録されていること（初期値 1 に固定されない）
     expect(keyHandToReq?.stateVersion).toBe(11);
+  });
+
+  // --------------------------------------------------------------------------
+  // P. focusPlayer in match.started, focus.changed transitions, and meta.rulesVersion
+  // --------------------------------------------------------------------------
+  it("P: records initial focusPlayer in match.started, emits focus.changed only when focusPlayer actually changes, and derives meta.rulesVersion from RulePackage", () => {
+    const state = createBaseState();
+    const twistKeyP1 = { id: "d4-twist-p1", suit: "D", rank: "4", value: 4 };
+    const twistCostP1 = { id: "twist-cost-p1", suit: "S", rank: "3", value: 3 };
+    const twistKeyP2 = { id: "d4-twist-p2", suit: "H", rank: "4", value: 4 };
+    const twistCostP2 = { id: "twist-cost-p2", suit: "C", rank: "3", value: 3 };
+    state.players.p1.hand = [twistKeyP1, twistCostP1];
+    state.players.p2.hand = [twistKeyP2, twistCostP2];
+
+    const session = new GameSession(state, playtestRulePackage, { matchId: "match-test-p" });
+    const step1 = session.advance();
+    expect(step1.type).toBe("WAITING_FOR_DECISION");
+    if (step1.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    // 1. P1 Twist リクエスト (focus: p1 -> p1 のため focus.changed は発生しない)
+    const p1TwistIdx = step1.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && step1.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.twist"
+    );
+    const step2 = session.submitDecision({
+      decisionId: step1.request.decisionId,
+      stateVersion: step1.request.stateVersion,
+      selectedPatternRef: p1TwistIdx,
+    });
+    expect(step2.type).toBe("WAITING_FOR_DECISION");
+    if (step2.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    // 2. P1 PASS -> chance は p2 へ移動 (focus は p1 のまま維持)
+    const step3 = session.submitDecision({
+      decisionId: step2.request.decisionId,
+      stateVersion: step2.request.stateVersion,
+      selectedPatternRef: step2.request.patterns.findIndex((p) => p.kind === "PASS"),
+    });
+    expect(step3.type).toBe("WAITING_FOR_DECISION");
+    if (step3.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    // 3. P2 Counter リクエスト (クイック対応: コアフロー[10]で focus: p1 -> p2 へ変化し focus.changed が記録される)
+    const p2CounterIdx = step3.request.patterns.findIndex(
+      (p) => p.kind === "ACTION" && step3.request.catalog.actions[p.actionSelectionRef!]?.actionId === "action.counter"
+    );
+    expect(p2CounterIdx).toBeGreaterThanOrEqual(0);
+    const step4 = session.submitDecision({
+      decisionId: step3.request.decisionId,
+      stateVersion: step3.request.stateVersion,
+      selectedPatternRef: p2CounterIdx,
+    });
+    expect(step4.type).toBe("WAITING_FOR_DECISION");
+    if (step4.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    // 4. P2 PASS -> P1 PASS で全員パス成立 -> P2 の Counter が解決 -> コアフロー[2]で turnPlayer(p1) へ focus: p2 -> p1 が移動
+    const step5 = session.submitDecision({
+      decisionId: step4.request.decisionId,
+      stateVersion: step4.request.stateVersion,
+      selectedPatternRef: step4.request.patterns.findIndex((p) => p.kind === "PASS"),
+    });
+    expect(step5.type).toBe("WAITING_FOR_DECISION");
+    if (step5.type !== "WAITING_FOR_DECISION") throw new Error("Expected WAITING_FOR_DECISION");
+
+    session.submitDecision({
+      decisionId: step5.request.decisionId,
+      stateVersion: step5.request.stateVersion,
+      selectedPatternRef: step5.request.patterns.findIndex((p) => p.kind === "PASS"),
+    });
+
+    const matchLog = session.getMatchLog();
+
+    // meta.rulesVersion はハードコードではなく RulePackage.version から取得されていること
+    expect(matchLog.meta.rulesVersion).toBe(playtestRulePackage.version);
+    expect(matchLog.meta.rulePackageRef).toBe(playtestRulePackage.id);
+
+    // match.started に初期 focusPlayer が含まれていること
+    const matchStarted = matchLog.events.find((e) => e.type === "match.started");
+    expect(matchStarted).toBeDefined();
+    if (matchStarted?.type === "match.started") {
+      expect(matchStarted.turnPlayer).toBe("p1");
+      expect(matchStarted.chancePlayer).toBe("p1");
+      expect(matchStarted.focusPlayer).toBe("p1");
+    }
+
+    // focus.changed が 2回（p1 -> p2: directRequest, p2 -> p1: stageTopResolved）のみ記録されていること
+    const focusEvents = matchLog.events.filter((e) => e.type === "focus.changed");
+    expect(focusEvents).toHaveLength(2);
+    if (focusEvents[0]?.type === "focus.changed" && focusEvents[1]?.type === "focus.changed") {
+      expect(focusEvents[0].fromFocusPlayer).toBe("p1");
+      expect(focusEvents[0].toFocusPlayer).toBe("p2");
+      expect(focusEvents[0].reason).toBe("directRequest");
+
+      expect(focusEvents[1].fromFocusPlayer).toBe("p2");
+      expect(focusEvents[1].toFocusPlayer).toBe("p1");
+      expect(focusEvents[1].reason).toBe("stageTopResolved");
+    }
   });
 });

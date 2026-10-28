@@ -1142,7 +1142,7 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
     expect(step5.request.catalog.orderSelections.length).toBe(2);
 
     const snapshot = session.createSnapshot();
-    expect(snapshot.snapshotFormatVersion).toBe(1);
+    expect(snapshot.snapshotFormatVersion).toBe(2);
     expect(snapshot.gameStateHash).toBeDefined();
     expect(snapshot.session.pendingDecision).toBeDefined();
     expect(snapshot.session.pendingDecision!.playerId).toBe("p2");

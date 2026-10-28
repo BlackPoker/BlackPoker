@@ -1,7 +1,7 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
-import { PlayerKey, RequestRef } from "../../domain/decision/DecisionSource";
+import { PlayerKey, RequestRef, RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry } from "../rules/CommandRegistry";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
@@ -9,7 +9,6 @@ import { PatternExecutor } from "../decision/PatternExecutor";
 import { CoreFlowCoordinator, CoreFlowEvent } from "./CoreFlowCoordinator";
 import { PassTracker } from "./PassTracker";
 import { TriggerProcessingCoordinator } from "../rules/TriggerProcessingCoordinator";
-import { getOpponentPlayerKey } from "../rules/playerUtils";
 import { MatchLogRecorder, MatchLogRecorderOptions } from "../log/MatchLogRecorder";
 import { CanonicalMatchLog } from "../../domain/log/CanonicalMatchLog";
 import {
@@ -85,6 +84,17 @@ export class GameSession {
   private triggerCoordinator: TriggerProcessingCoordinator;
   private matchStartedRecorded = false;
   private lastRecordedTurnPlayer?: string;
+  /**
+   * コアフロー[12]〜[13]において、全員パス成立後にステージ最上段を1件解決すべき状態かどうかを表す内部フラグ。
+   * 1件の解決が開始された時点で false になり、その解決および誘発チェック[5]が完了するまで
+   * state.chancePlayer === "system" は維持されますが、2件目以降のステージリクエストは自動解決されません。
+   */
+  private stageTopResolutionPending = false;
+  /**
+   * コアフロー[4]〜[10]において、直接リクエストされたアクションの解決および誘発チェック[5]が完了した直後に
+   * フォーカスを設定すべきリクエスト実行プレイヤー。
+   */
+  private pendingDirectFocusPlayer?: PlayerKey;
 
   public get stateVersion(): number {
     return this.state.stateVersion ?? this.state.version ?? 1;
@@ -111,6 +121,13 @@ export class GameSession {
     if (this.state.stateVersion === undefined) {
       this.state.stateVersion = this.state.version || 1;
     }
+    // ゲーム開始時の3要素（手番・チャンス・フォーカス）整合化（コアフロー[1]）
+    if (this.state.turnPlayer && !this.state.focusPlayer) {
+      this.state.focusPlayer =
+        this.state.chancePlayer && this.state.chancePlayer !== RULE_SYSTEM_CHANCE
+          ? this.state.chancePlayer
+          : this.state.turnPlayer;
+    }
     this.rulePackage = rulePackage;
     this.registry = options?.registry || new CommandRegistry();
     this.matchSeed = options?.matchSeed;
@@ -123,8 +140,8 @@ export class GameSession {
       options?.logRecorder ||
       new MatchLogRecorder({
         matchId: this.matchId,
-        rulesVersion: this.rulePackage?.version || "9.1.2",
-        rulePackageRef: this.rulePackage?.id || "rules-vnext",
+        rulesVersion: this.rulePackage?.version,
+        rulePackageRef: this.rulePackage?.id,
         ...(options?.logOptions || {}),
       });
 
@@ -189,6 +206,7 @@ export class GameSession {
       resolvingContext: resolvingContextData,
       matchStartedRecorded: this.matchStartedRecorded,
       lastRecordedTurnPlayer: this.lastRecordedTurnPlayer,
+      pendingDirectFocusPlayer: this.pendingDirectFocusPlayer,
     };
   }
 
@@ -198,6 +216,7 @@ export class GameSession {
   importSnapshotSessionData(data: GameSessionSnapshotSessionData): void {
     this.matchStartedRecorded = data.matchStartedRecorded;
     this.lastRecordedTurnPlayer = data.lastRecordedTurnPlayer;
+    this.pendingDirectFocusPlayer = data.pendingDirectFocusPlayer as PlayerKey | undefined;
 
     if (data.pendingDecision) {
       this.pendingDecision = JSON.parse(JSON.stringify(data.pendingDecision));
@@ -278,21 +297,30 @@ export class GameSession {
     return GameSessionSnapshotCodec.restore(snapshot, rulePackage);
   }
 
-
   /**
    * ゲームを自動的に進め、プレイヤーの判断が必要な場合は WAITING_FOR_DECISION を返します。
    */
   advance(): GameSessionStep {
-    // 0. マッチ開始イベント（初回のみ）
+    // 0. マッチ開始イベント（初回のみ・コアフロー[1]）
     if (!this.matchStartedRecorded) {
       this.matchStartedRecorded = true;
-      this.lastRecordedTurnPlayer = this.state.turnPlayer || "p1";
+      const initialTurnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+      const initialChancePlayer: PlayerKey =
+        this.state.chancePlayer && this.state.chancePlayer !== RULE_SYSTEM_CHANCE
+          ? this.state.chancePlayer
+          : initialTurnPlayer;
+      if (!this.state.focusPlayer) {
+        this.state.focusPlayer = initialChancePlayer;
+      }
+      const initialFocusPlayer: PlayerKey = this.state.focusPlayer;
+      this.lastRecordedTurnPlayer = initialTurnPlayer;
       this.logRecorder.record({
         type: "match.started",
         stateVersion: this.stateVersion,
         matchId: this.matchId,
-        turnPlayer: this.state.turnPlayer || "p1",
-        chancePlayer: this.state.chancePlayer || this.state.turnPlayer || "p1",
+        turnPlayer: initialTurnPlayer,
+        chancePlayer: initialChancePlayer,
+        focusPlayer: initialFocusPlayer,
         initialPlayers: Object.keys(this.state.players || {}),
       });
     }
@@ -350,17 +378,23 @@ export class GameSession {
       };
     }
 
-    // 2. 全員連続PASS成立時の自動処理（ステージ最上段を1件だけ解決）
-    const stageResolveEvent = CoreFlowCoordinator.tryResolveStageTop(
-      this.state,
-      this.rulePackage,
-      this.registry,
-      this.passTracker
-    );
+    // 2. 全員パス成立時（[12]〜[13]）の自動処理（ステージ最上段を1件だけ解決）
+    let stageResolveEvent: CoreFlowEvent | null = null;
+    if (this.stageTopResolutionPending) {
+      this.stageTopResolutionPending = false;
+      stageResolveEvent = CoreFlowCoordinator.tryResolveStageTop(
+        this.state,
+        this.rulePackage,
+        this.registry,
+        this.passTracker,
+        2,
+        { deferChanceReturnToStep2: true }
+      );
+    }
 
     if (stageResolveEvent) {
       if (stageResolveEvent.type === "STAGE_RESOLUTION_INTERRUPTED") {
-        // 効果解決途中で判断が必要になったため待機
+        // 効果解決途中で判断が必要になったため待機（state.chancePlayer === "system" を維持）
         this.pendingDecision = stageResolveEvent.decisionRequest;
         this.continuation = stageResolveEvent.continuation;
         this.resolvingRequest = stageResolveEvent.actionRequest;
@@ -410,7 +444,7 @@ export class GameSession {
         };
       }
 
-      // 解決後の勝敗判定
+      // [8] 解決後の勝敗判定
       const postFinishCheck = this.checkGameFinished();
       if (postFinishCheck) {
         this.pendingDecision = undefined;
@@ -428,7 +462,8 @@ export class GameSession {
       }
     }
 
-    // 3. 誘発リクエストバッファの処理（公式ルール9.4.1順序）
+    // 3. 誘発リクエストバッファの処理（コアフロー[5]：公式ルール第9.2版 誘発チェックフロー）
+    // ※ 誘発チェックの内部ではチャンス・フォーカスを変更しない（initialChance による上書きは廃止）
     const triggerResult = this.triggerCoordinator.processPendingTriggers(
       this.state,
       this.rulePackage,
@@ -442,7 +477,9 @@ export class GameSession {
       this.resolvingContext = interrupted.context;
       this.continuation = {
         sourceRequestId: interrupted.request.id,
-        effectPath: interrupted.completedEffectPath ?? (interrupted.request.action?.effect ? [interrupted.request.action.effect.length] : [0]),
+        effectPath:
+          interrupted.completedEffectPath ??
+          (interrupted.request.action?.effect ? [interrupted.request.action.effect.length] : [0]),
         effectStepId: TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID,
         selectionId: "graveTopCard",
       };
@@ -492,42 +529,68 @@ export class GameSession {
       }
     }
 
-    if (triggerResult.stagedRequests.length > 0) {
-      // 通常誘発アクションがステージに積まれた場合、DSL (initialChance) またはコントローラーの対戦相手へチャンスを設定
-      const topStagedReq = triggerResult.stagedRequests[triggerResult.stagedRequests.length - 1];
-      const actionDef = this.rulePackage.actions.find((a) => a.id === topStagedReq.actionId);
-      const initialChanceSpec = actionDef?.request?.initialChance;
-      const prevChance = this.state.chancePlayer;
-      let newChance: PlayerKey;
-
-      if (initialChanceSpec === "turnPlayer") {
-        newChance = this.state.turnPlayer || topStagedReq.controller;
-      } else if (initialChanceSpec === "nonTurnPlayer") {
-        newChance =
-          this.state.nonTurnPlayer ||
-          getOpponentPlayerKey(this.state.turnPlayer || topStagedReq.controller, this.state);
-      } else if (initialChanceSpec === "controller") {
-        newChance = topStagedReq.controller;
-      } else if (initialChanceSpec === "opponent") {
-        newChance = getOpponentPlayerKey(topStagedReq.controller, this.state);
-      } else {
-        newChance = getOpponentPlayerKey(topStagedReq.controller, this.state);
-      }
-
-      this.state.chancePlayer = newChance;
-      if (prevChance !== newChance) {
+    // 3.2. コアフロー[10]: 直接リクエストおよびその誘発チェック[5]が完了した時点で、
+    // フォーカスをリクエスト実行プレイヤーに設定する
+    if (this.pendingDirectFocusPlayer) {
+      const prevFocus = this.state.focusPlayer;
+      const nextFocus = this.pendingDirectFocusPlayer;
+      this.state.focusPlayer = nextFocus;
+      this.pendingDirectFocusPlayer = undefined;
+      if (prevFocus && prevFocus !== nextFocus) {
         this.logRecorder.record({
-          type: "chance.changed",
+          type: "focus.changed",
           stateVersion: this.stateVersion,
-          fromChancePlayer: prevChance,
-          toChancePlayer: newChance,
-          reason: "triggerStaged",
+          fromFocusPlayer: prevFocus,
+          toFocusPlayer: nextFocus,
+          reason: "directRequest",
         });
       }
     }
 
-    // 4. 現在のチャンスプレイヤーの判断要求を生成
-    const chancePlayer: PlayerKey = this.state.chancePlayer || this.state.turnPlayer || "p1";
+    // 3.3. コアフロー[2] チャンスの確認と移動:
+    // 「プレイヤーにチャンスがない（ルールシステム "system" 等）」または「ステージが空」の場合、
+    // チャンスとフォーカスをターンプレイヤーに移動する。それ以外の場合は維持する。
+    const isSystemOrNoPlayerChance =
+      !this.state.chancePlayer || this.state.chancePlayer === RULE_SYSTEM_CHANCE;
+    const isStageEmpty =
+      !this.state.stage?.requests || this.state.stage.requests.length === 0;
+
+    if (isSystemOrNoPlayerChance || isStageEmpty) {
+      const prevChance = this.state.chancePlayer;
+      const prevFocus = this.state.focusPlayer;
+      const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
+      const transitionReason =
+        prevChance === RULE_SYSTEM_CHANCE ? "stageTopResolved" : "stageEmpty";
+      this.state.chancePlayer = turnPlayer;
+      this.state.focusPlayer = turnPlayer;
+
+      if (prevChance && prevChance !== turnPlayer) {
+        this.logRecorder.record({
+          type: "chance.changed",
+          stateVersion: this.stateVersion,
+          fromChancePlayer: prevChance,
+          toChancePlayer: turnPlayer,
+          reason: transitionReason,
+        });
+      }
+      if (prevFocus && prevFocus !== turnPlayer) {
+        this.logRecorder.record({
+          type: "focus.changed",
+          stateVersion: this.stateVersion,
+          fromFocusPlayer: prevFocus,
+          toFocusPlayer: turnPlayer,
+          reason: transitionReason,
+        });
+      }
+    } else if (!this.state.focusPlayer) {
+      this.state.focusPlayer = this.state.turnPlayer || "p1";
+    }
+
+    // 4. 現在のチャンスプレイヤーの判断要求を生成（コアフロー[3]）
+    const chancePlayer: PlayerKey =
+      this.state.chancePlayer && this.state.chancePlayer !== RULE_SYSTEM_CHANCE
+        ? this.state.chancePlayer
+        : this.state.turnPlayer || "p1";
     const { request } = LegalPatternGenerator.generateActionRequestDecision(
       this.state,
       chancePlayer,
@@ -649,19 +712,12 @@ export class GameSession {
         this.resolvingRequest = undefined;
         this.resolvingContext = undefined;
 
-        // 解決完了後、自動進行へ戻る (勝敗判定、後続の誘発リクエスト処理など)
+        // 解決完了後、自動進行へ戻る (勝敗判定、後続の誘発リクエスト処理、[2]チャンス移動など)
         return this.advance();
       }
 
-      // 7. 通常Stage Request continuation check (中断されたリクエストの効果解決中だった場合は、再開)
+      // 7. 中断されたリクエストの効果解決中だった場合は再開
       if (this.resolvingRequest && this.continuation) {
-        const resolvingRequest = this.resolvingRequest;
-        const wasStageBacked =
-          !!resolvingRequest &&
-          !!this.state.stage?.requests?.some(
-            (r: any) => r.id === resolvingRequest.id
-          );
-
         const resumeResult = this.registry.resumeRequest(
           this.resolvingRequest,
           this.continuation,
@@ -681,27 +737,13 @@ export class GameSession {
           };
         }
 
-        // 解決完了
+        // 解決完了: ステージ解決中の場合は chancePlayer === "system" のまま advance() へ進み、
+        // 勝敗判定[8] -> 誘発チェック[5] -> チャンス確認と移動[2] で手番プレイヤーへ戻す。
+        // 直接即時リクエストの場合は pendingDirectFocusPlayer により[10]でフォーカスが設定される。
         this.pendingDecision = undefined;
         this.continuation = undefined;
         this.resolvingRequest = undefined;
         this.resolvingContext = undefined;
-
-        if (wasStageBacked) {
-          // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
-          const prevChance = this.state.chancePlayer;
-          const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
-          this.state.chancePlayer = turnPlayer;
-          if (prevChance !== turnPlayer) {
-            this.logRecorder.record({
-              type: "chance.changed",
-              stateVersion: this.stateVersion,
-              fromChancePlayer: prevChance,
-              toChancePlayer: turnPlayer,
-              reason: "effectResolved",
-            });
-          }
-        }
 
         return this.advance();
       }
@@ -731,13 +773,6 @@ export class GameSession {
         }
       }
 
-      const resolvingRequest = this.resolvingRequest;
-      const wasStageBacked =
-        !!resolvingRequest &&
-        !!this.state.stage?.requests?.some(
-          (r: any) => r.id === resolvingRequest.id
-        );
-
       const resumeResult = this.registry.resumeRequest(
         this.resolvingRequest!,
         this.continuation!,
@@ -759,33 +794,20 @@ export class GameSession {
         };
       }
 
-      // 解決完了
+      // 解決完了:
+      // - ステージ解決中のリクエストだった場合は state.chancePlayer === "system" のまま advance() へ進み、
+      //   勝敗判定[8] -> 誘発チェック[5] -> チャンス確認と移動[2] にて TP へチャンス・フォーカスが移動する。
+      // - 直接即時リクエストだった場合は pendingDirectFocusPlayer により誘発チェック[5]後に[10]でフォーカスが設定される。
       this.pendingDecision = undefined;
       this.continuation = undefined;
       this.resolvingRequest = undefined;
       this.resolvingContext = undefined;
 
-      if (wasStageBacked) {
-        // 解決後、チャンスを手番プレイヤー (turnPlayer) へ戻す
-        const prevChance = this.state.chancePlayer;
-        const turnPlayer: PlayerKey = this.state.turnPlayer || "p1";
-        this.state.chancePlayer = turnPlayer;
-        if (prevChance !== turnPlayer) {
-          this.logRecorder.record({
-            type: "chance.changed",
-            stateVersion: this.stateVersion,
-            fromChancePlayer: prevChance,
-            toChancePlayer: turnPlayer,
-            reason: "effectResolved",
-          });
-        }
-      }
-
       return this.advance();
-
     }
 
     // 2. 通常の行動要求 (ACTION_REQUEST) の場合
+    const requestingPlayerId = this.pendingDecision.playerId;
     const flowEvent = CoreFlowCoordinator.applyDecision(
       this.pendingDecision,
       response,
@@ -795,11 +817,35 @@ export class GameSession {
       this.passTracker
     );
 
-    if (flowEvent.type === "STAGE_RESOLUTION_INTERRUPTED") {
+    if (flowEvent.type === "ALL_PASSED") {
+      // [11] 全員パス成立 -> [12] チャンスは "system" へ移動済み -> [13] ステージ最上段1件解決を予約
+      this.stageTopResolutionPending = true;
+    } else if (
+      flowEvent.type === "NORMAL_ACTION_QUEUED" ||
+      flowEvent.type === "IMMEDIATE_ACTION_RESOLVED"
+    ) {
+      // [4]〜[10] 直接リクエスト完了後の誘発チェック[5]完了時にフォーカスをリクエスト実行プレイヤーへ設定
+      this.pendingDirectFocusPlayer = requestingPlayerId;
+    } else if (flowEvent.type === "STAGE_RESOLUTION_INTERRUPTED") {
+      // 直接即時アクション（サーチ等）が解決途中で効果選択を要求した場合:
+      // 解決・誘発チェック完了後（[10]）にフォーカスをリクエスト実行プレイヤーへ設定するため予約し、
+      // 中断中は現在の focusPlayer を維持する
+      this.pendingDirectFocusPlayer = requestingPlayerId;
       this.pendingDecision = flowEvent.decisionRequest;
       this.continuation = flowEvent.continuation;
       this.resolvingRequest = flowEvent.actionRequest;
       this.resolvingContext = flowEvent.context;
+
+      this.logRecorder.record({
+        type: "decision.requested",
+        stateVersion: this.stateVersion,
+        decisionId: this.pendingDecision.decisionId,
+        playerId: this.pendingDecision.playerId,
+        source: this.pendingDecision.source.type,
+        requestId: (this.pendingDecision.source as any).requestId,
+        legalPatternCount: this.pendingDecision.patterns.length,
+        legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
+      });
 
       return {
         type: "WAITING_FOR_DECISION",

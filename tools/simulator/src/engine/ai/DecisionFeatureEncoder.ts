@@ -79,7 +79,7 @@ export class DecisionFeatureEncoder {
     const selfIsTurn = obs.turnPlayerId === viewerId ? 1 : 0;
     const selfIsChance = obs.chancePlayerId === viewerId ? 1 : 0;
     const oppIsTurn = obs.turnPlayerId && obs.turnPlayerId !== viewerId ? 1 : 0;
-    const oppIsChance = obs.chancePlayerId && obs.chancePlayerId !== viewerId ? 1 : 0;
+    const oppIsChance = obs.chancePlayerId && obs.chancePlayerId !== viewerId && obs.chancePlayerId !== "system" ? 1 : 0;
     const turnCount = typeof obs.turnCount === "number" && Number.isFinite(obs.turnCount) ? obs.turnCount : 0;
     const stageDepth = obs.stageRequests
       ? obs.stageRequests.length

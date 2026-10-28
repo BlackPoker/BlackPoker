@@ -225,6 +225,7 @@ export function applyGameStart(state: any, firstPlayer: PlayerKey): GameStartRes
   // 3. ゲーム開始情報の確定
   state.turnPlayer = firstPlayer;
   state.chancePlayer = firstPlayer;
+  state.focusPlayer = firstPlayer;
   state.nonTurnPlayer = getOpponentPlayerKey(firstPlayer, state);
   state.turnCount = 1;
   state.actionCount = 0;

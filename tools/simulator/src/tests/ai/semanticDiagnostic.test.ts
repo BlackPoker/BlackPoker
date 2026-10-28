@@ -7,6 +7,8 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup";
 import { GameSession } from "../../engine/session/GameSession";
+import { CoreFlowCoordinator } from "../../engine/session/CoreFlowCoordinator";
+import { ValidationError } from "../../engine/rules/ActionRequestValidator";
 import { SimulationRunner } from "../../engine/simulation/SimulationRunner";
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy";
 import { SeededRandom } from "../../engine/random/RandomSource";
@@ -681,13 +683,13 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
   });
 
   // =========================================================================
-  // 6. Stage-Empty PASS Recurrence Canonical Example Test (Section 36.5)
+  // 6. Stage-Empty PASS Rejection & Stage-Request PASS Recurrence Test (Section 36.5)
   // =========================================================================
   describe("6. Stage-Empty PASS Recurrence Canonical Example Test", () => {
-    it("should show sgf1(Snapshot 0) === sgf1(Snapshot 2) after 2-PASS in empty stage", () => {
+    it("should reject empty-stage PASS and diagnose real GameSession PASS progression, focusPlayer sensitivity, and state recurrence", () => {
       const session = setupLightEntry16Session(100);
 
-      // Advance to first decision
+      // 1. ステージが空のときは合法パターンに PASS が存在しないこと
       const step0 = session.advance();
       expect(step0.type).toBe("WAITING_FOR_DECISION");
       if (step0.type !== "WAITING_FOR_DECISION") return;
@@ -696,9 +698,38 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(session.passTracker.consecutivePassCount).toBe(0);
       const turnPlayer0 = session.state.turnPlayer;
       const chancePlayer0 = session.state.chancePlayer;
-      expect(turnPlayer0).toBe(chancePlayer0);
+      const focusPlayer0 = session.state.focusPlayer;
+      expect(turnPlayer0).toBe("p1");
+      expect(chancePlayer0).toBe("p1");
+      expect(focusPlayer0).toBe("p1");
 
-      // Snapshot 0
+      const emptyStagePassIdx = step0.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(emptyStagePassIdx).toBe(-1);
+
+      // 2. 空ステージで直接 PASS を submit すると拒否されること
+      const forgedEmptyPassRequest: DecisionRequest = {
+        ...step0.request,
+        patterns: [
+          ...step0.request.patterns,
+          { patternId: "forged-empty-pass", kind: "PASS" },
+        ],
+      };
+      expect(() =>
+        CoreFlowCoordinator.applyDecision(
+          forgedEmptyPassRequest,
+          {
+            decisionId: forgedEmptyPassRequest.decisionId,
+            stateVersion: forgedEmptyPassRequest.stateVersion,
+            selectedPatternRef: forgedEmptyPassRequest.patterns.length - 1,
+          },
+          session.state,
+          rulePackage,
+          (session as any).registry,
+          session.passTracker
+        )
+      ).toThrow(ValidationError);
+
+      // Snapshot 0: ステージが空の初期状態 (turn = p1, chance = p1, focus = p1)
       const sideState0: GameSessionSideState = {
         consecutivePassCount: session.passTracker.consecutivePassCount,
         continuation: session.continuation,
@@ -707,49 +738,80 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       };
       const sgf1_0 = SemanticFingerprintCalculator.computeSgf1(session.state, sideState0);
 
-      // Find PASS pattern for P1
-      const p1PassIdx = step0.request.patterns.findIndex((p) => p.kind === "PASS");
-      expect(p1PassIdx).toBeGreaterThanOrEqual(0);
+      // 5. focusPlayer を含む意味状態の変化が診断されること（focusPlayer のみ異なる状態で sgf1 が変化すること）
+      const stateWithDiffFocus = JSON.parse(JSON.stringify(session.state));
+      stateWithDiffFocus.focusPlayer = "p2";
+      const sgf1_diffFocus = SemanticFingerprintCalculator.computeSgf1(stateWithDiffFocus, sideState0);
+      expect(sgf1_diffFocus).not.toBe(sgf1_0);
 
-      // P1 PASS
-      const step1 = session.submitDecision({
-        decisionId: step0.request.decisionId,
-        stateVersion: step0.request.stateVersion,
-        selectedPatternRef: p1PassIdx,
-      });
+      // 3. ステージ上にリクエスト（対象不成立のダミー通常リクエスト）が存在するときは合法 PASS が可能であること
+      // ※ GameSession の実進行でステージ積載 -> P1 PASS -> P2 PASS（全員パス） -> 対象不成立により盤面変化なしで解決完了 -> Snapshot 0 と同一の論理状態へ回帰する経路を検証
+      session.state.stage.requests.push({
+        id: "noop-stage-req-1",
+        requestId: "noop-stage-req-1",
+        actionId: "action.mountSoldier",
+        controller: "p1",
+        definitionOwner: "p1",
+        targets: [],
+        stepIndex: 1,
+      } as any);
+      (session as any).pendingDecision = undefined;
 
-      expect(step1.type).toBe("WAITING_FOR_DECISION");
-      if (step1.type !== "WAITING_FOR_DECISION") return;
+      const stepWithStage = session.advance();
+      expect(stepWithStage.type).toBe("WAITING_FOR_DECISION");
+      if (stepWithStage.type !== "WAITING_FOR_DECISION") return;
 
-      // Snapshot 1 (P2 chance, passCount = 1)
-      expect(session.passTracker.consecutivePassCount).toBe(1);
-      const sideState1: GameSessionSideState = {
+      const p1LegalPassIdx = stepWithStage.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(p1LegalPassIdx).toBeGreaterThanOrEqual(0);
+
+      const sideStateStagedP1: GameSessionSideState = {
         consecutivePassCount: session.passTracker.consecutivePassCount,
         continuation: session.continuation,
         resolvingRequest: session.resolvingRequest,
         resolvingContext: session.resolvingContext,
       };
-      const sgf1_1 = SemanticFingerprintCalculator.computeSgf1(session.state, sideState1);
-      expect(sgf1_1).not.toBe(sgf1_0);
+      const sgf1_stagedP1 = SemanticFingerprintCalculator.computeSgf1(session.state, sideStateStagedP1);
+      expect(sgf1_stagedP1).not.toBe(sgf1_0);
 
-      // Find PASS pattern for P2
-      const p2PassIdx = step1.request.patterns.findIndex((p) => p.kind === "PASS");
-      expect(p2PassIdx).toBeGreaterThanOrEqual(0);
-
-      // P2 PASS -> 2-PASS resolves empty stage -> passTracker resets -> chance returns to turnPlayer (P1)
-      const step2 = session.submitDecision({
-        decisionId: step1.request.decisionId,
-        stateVersion: step1.request.stateVersion,
-        selectedPatternRef: p2PassIdx,
+      // 4. GameSession 経由で P1 が PASS を submit し、chancePlayer が p2 へ移動すること
+      const stepAfterP1Pass = session.submitDecision({
+        decisionId: stepWithStage.request.decisionId,
+        stateVersion: stepWithStage.request.stateVersion,
+        selectedPatternRef: p1LegalPassIdx,
       });
+      expect(stepAfterP1Pass.type).toBe("WAITING_FOR_DECISION");
+      if (stepAfterP1Pass.type !== "WAITING_FOR_DECISION") return;
 
-      expect(step2.type).toBe("WAITING_FOR_DECISION");
-      if (step2.type !== "WAITING_FOR_DECISION") return;
+      expect(session.state.chancePlayer).toBe("p2");
+      expect(session.state.focusPlayer).toBe("p1");
+      expect(stepAfterP1Pass.request.playerId).toBe("p2");
 
-      expect(session.passTracker.consecutivePassCount).toBe(0);
-      expect(session.state.chancePlayer).toBe(turnPlayer0);
+      const sideStateStagedP2: GameSessionSideState = {
+        consecutivePassCount: session.passTracker.consecutivePassCount,
+        continuation: session.continuation,
+        resolvingRequest: session.resolvingRequest,
+        resolvingContext: session.resolvingContext,
+      };
+      const sgf1_stagedP2 = SemanticFingerprintCalculator.computeSgf1(session.state, sideStateStagedP2);
+      expect(sgf1_stagedP2).not.toBe(sgf1_stagedP1);
+      expect(sgf1_stagedP2).not.toBe(sgf1_0);
 
-      // Snapshot 2
+      // 6. P2 も GameSession 経由で PASS を submit -> 全員パス成立 -> ステージトップ解決（対象なしで盤面不変）-> コアフロー[2]で turn=p1, chance=p1, focus=p1 へ復帰し、Snapshot 0 と同一の論理状態（sgf1）へ回帰すること
+      const p2LegalPassIdx = stepAfterP1Pass.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(p2LegalPassIdx).toBeGreaterThanOrEqual(0);
+
+      const stepAfterAllPass = session.submitDecision({
+        decisionId: stepAfterP1Pass.request.decisionId,
+        stateVersion: stepAfterP1Pass.request.stateVersion,
+        selectedPatternRef: p2LegalPassIdx,
+      });
+      expect(stepAfterAllPass.type).toBe("WAITING_FOR_DECISION");
+
+      expect(session.state.stage.requests).toHaveLength(0);
+      expect(session.state.turnPlayer).toBe("p1");
+      expect(session.state.chancePlayer).toBe("p1");
+      expect(session.state.focusPlayer).toBe("p1");
+
       const sideState2: GameSessionSideState = {
         consecutivePassCount: session.passTracker.consecutivePassCount,
         continuation: session.continuation,
@@ -758,7 +820,7 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       };
       const sgf1_2 = SemanticFingerprintCalculator.computeSgf1(session.state, sideState2);
 
-      // Crucial verification: Snapshot 0 and Snapshot 2 have identical structural fingerprint!
+      // 元のテスト意図であった「進行後に同一の論理状態へ回帰したことを sgf1 一致で検出できること」を実セッション進行で保証
       expect(sgf1_2).toBe(sgf1_0);
     });
   });
@@ -1203,15 +1265,16 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       // Blocker E: Version Contract
       expect(diag.semanticDiagnosticVersion).toBe(1);
 
-      // Blocker D: Retention limit default 64
+      // Blocker D: Retention limit default 64 (under v9.2 rules, match naturally completes at 75 decisions > 64)
       expect(diag.traceRetentionLimit).toBe(64);
-      expect(diag.totalTraceCount).toBe(80);
+      expect(diag.totalTraceCount).toBe(result.totalDecisions);
+      expect(result.totalDecisions).toBeGreaterThan(64);
       expect(diag.traces.length).toBe(64);
       expect(diag.traceTruncated).toBe(true);
 
-      // Check step indices of retained traces: should be the latest 64 (16 to 79, 0-indexed)
-      expect(diag.traces[0].stepIndex).toBe(16);
-      expect(diag.traces[diag.traces.length - 1].stepIndex).toBe(79);
+      // Check step indices of retained traces: should be the latest 64
+      expect(diag.traces[0].stepIndex).toBe(result.totalDecisions - 64);
+      expect(diag.traces[diag.traces.length - 1].stepIndex).toBe(result.totalDecisions - 1);
     });
 
     it("should respect explicit traceRetentionLimit option", () => {
