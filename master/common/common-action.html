@@ -365,7 +365,9 @@ stop
 </dl>
 <dl class="simple" id="index-18">
 <dt><strong>パス</strong></dt><dd><p>チャンスを持っているプレイヤーがアクションをリクエストしないことを選択することです。
-全員がパスすると、ステージ上のリクエストの解決に進みます。</p>
+ステージにリクエストが存在する場合にのみ選択できます。ステージが空の場合は、エンドを含む何らかのアクションをリクエストする必要があります。
+全員がパスすると、ステージ上の最後のリクエストを1件解決します。解決後は、改めて応答する機会があります。
+全員パスの判定に用いるフォーカスと詳しい進行は <a class="reference internal" href="../core/core.html#core-rst"><span class="std std-numref">9 コアルール</span></a> を参照してください。</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -403,9 +405,11 @@ stop
 </figcaption>
 </figure>
 <p>大まかな流れは図の通りとなります。</p>
-<p>ステージにアクションを積んだ後、相手にチャンスが移動します。
+<p>ステージにアクションを積んだ後も、リクエストしたプレイヤーがチャンスを持ちます。そのプレイヤーがパスすると、相手にチャンスが移動します。
 相手がさらにアクションを積むか、アクションを積まずに <strong>パス</strong> するかを選択します。
-全員がパスすると、ステージの一番上にあるリクエストから順に解決されます。</p>
+全員がパスすると、ステージの一番上にあるリクエストを1件解決します。
+勝敗が決まらなければ、誘発チェックの後、チャンスとフォーカスを現在のターンプレイヤーに設定します。
+ステージにリクエストが残っている場合、次の1件を解決する前に改めて全員に応答の機会があり、全員のパスが必要です。</p>
 </section>
 <section id="id9">
 <h3><span class="section-number">5.4.2. </span>即時の場合<a class="headerlink" href="#id9" title="この見出しへのパーマリンク">¶</a></h3>
@@ -443,7 +447,7 @@ note over A, B : 相手の割り込みチャンスはない
 <p>更に厳密な処理は <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> を参照してください。</p>
 <div class="admonition seealso">
 <p class="admonition-title">参考</p>
-<p>次に説明する部分は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#actresolve"><span class="std std-ref">[8] リクエストの解決</span></a> で順に行われます。</p>
+<p>次に説明する部分は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#actresolve"><span class="std std-ref">[7] リクエストの解決</span></a> で順に行われます。</p>
 </div>
 </section>
 <section id="id10">
@@ -539,7 +543,7 @@ stop
 <p>勝敗はライフを確認し0枚の場合そのプレイヤーは敗北となります。</p>
 <p>勝敗判定はターンプレイヤーから行われます。
 もし、両プレイヤーのライフが0枚の場合、ターンプレイヤーの負けとなります。</p>
-<p>補足ですがこの勝敗判定は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#winlose"><span class="std std-ref">[9] 勝敗判定</span></a> で確認されます。</p>
+<p>補足ですがこの勝敗判定は、 <a class="reference internal" href="../core/core.html#coreflowsec"><span class="std std-numref">9.4 コアフロー</span></a> の <a class="reference internal" href="../core/core.html#winlose"><span class="std std-ref">[8] 勝敗判定</span></a> で確認されます。</p>
 </section>
 <section id="id16">
 <h2><span class="section-number">5.6. </span>誘発チェック<a class="headerlink" href="#id16" title="この見出しへのパーマリンク">¶</a></h2>

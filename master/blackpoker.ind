@@ -68,7 +68,7 @@
   \item \spxentry{キャラクター}, \hyperpage{23}
   \item \spxentry{キャラクター名}, \hyperpage{24}
   \item \spxentry{キル(アクション)}, \hyperpage{53}
-  \item \spxentry{クイック}, \hyperpage{122}
+  \item \spxentry{クイック}, \hyperpage{123}
   \item \spxentry{クイック兵士召喚\clobsym{} (アクション)}, 
 		\hyperpage{93}
   \item \spxentry{クイック兵士召喚\diamondsym{} (アクション)}, 
@@ -95,14 +95,14 @@
   \item \spxentry{クローズ(フォグ)}, \hyperpage{100}
   \item \spxentry{げ\textbar{}幻影(アクション)}, \hyperpage{84}
   \item \spxentry{こ\textbar{}効果}, \hyperpage{28}
-  \item \spxentry{こ\textbar{}効果(コア)}, \hyperpage{123}
+  \item \spxentry{こ\textbar{}効果(コア)}, \hyperpage{124}
   \item \spxentry{こ\textbar{}交渉(アクション)}, \hyperpage{88}
   \item \spxentry{こ\textbar{}交渉(切札)}, \hyperpage{112}
   \item \spxentry{コアフロー}, \hyperpage{127}
   \item \spxentry{コスト}, \hyperpage{28}
   \item \spxentry{コントローラー}, \hyperpage{124}
   \item \spxentry{コンポーネント}, \hyperpage{21}, 
-		\hyperpage{120}
+		\hyperpage{121}
   \item \spxentry{コンポーネントスクリプト}, \hyperpage{21}
 
   \indexspace
@@ -131,7 +131,7 @@
   \item \spxentry{シナリオ手札}, \hyperpage{10}
   \item \spxentry{スイッチ(アクション)}, \hyperpage{93}
   \item \spxentry{スイッチ(切札)}, \hyperpage{115}
-  \item \spxentry{ステージ}, \hyperpage{29}, \hyperpage{120}
+  \item \spxentry{ステージ}, \hyperpage{29}, \hyperpage{121}
   \item \spxentry{スピード}, \hyperpage{27}
   \item \spxentry{スピード(コア)}, \hyperpage{122}
   \item \spxentry{スラッシュ(アクション)}, \hyperpage{77}
@@ -162,7 +162,7 @@
   \item \spxentry{タイプ(アクション)}, \hyperpage{27}
   \item \spxentry{タイプ(キャラクター)}, \hyperpage{24}
   \item \spxentry{タイミング}, \hyperpage{28}
-  \item \spxentry{タイミング(コア)}, \hyperpage{122}
+  \item \spxentry{タイミング(コア)}, \hyperpage{123}
   \item \spxentry{ダウン(アクション)}, \hyperpage{49}
   \item \spxentry{ダウン(フォグ)}, \hyperpage{61}
   \item \spxentry{ダメージ}, \hyperpage{16}
@@ -203,7 +203,7 @@
   \item \spxentry{の\textbar{}能力(キャラクター)}, 
 		\hyperpage{24}
   \item \spxentry{の\textbar{}能力(切札)}, \hyperpage{25}
-  \item \spxentry{の\textbar{}能力(コア)}, \hyperpage{124}
+  \item \spxentry{の\textbar{}能力(コア)}, \hyperpage{125}
   \item \spxentry{の\textbar{}能力(フォグ)}, \hyperpage{24}
 
   \indexspace
@@ -226,6 +226,7 @@
   \item \spxentry{ファントム(切札)}, \hyperpage{109}
   \item \spxentry{ファントムリバース(アクション)}, 
 		\hyperpage{84}
+  \item \spxentry{フォーカス(コア)}, \hyperpage{120}
   \item \spxentry{フォース(アクション)}, \hyperpage{56}
   \item \spxentry{フォース(フォグ)}, \hyperpage{61}
   \item \spxentry{フォーマット}, \hyperpage{41}
@@ -265,7 +266,7 @@
 		\hyperpage{59}
   \item \spxentry{ま\textbar{}魔術士召喚(アクション)}, 
 		\hyperpage{48}
-  \item \spxentry{メイン}, \hyperpage{122}
+  \item \spxentry{メイン}, \hyperpage{123}
   \item \spxentry{メインオープン(アクション)}, 
 		\hyperpage{76}
 
@@ -276,7 +277,7 @@
   \item \spxentry{誘惑(アクション)}, \hyperpage{82}
   \item \spxentry{誘惑(切札)}, \hyperpage{108}
   \item \spxentry{ユニット}, \hyperpage{14}, \hyperpage{21}, 
-		\hyperpage{120}
+		\hyperpage{121}
   \item \spxentry{ユニットカード}, \hyperpage{14}
   \item \spxentry{ユニット条件}, \hyperpage{14}, \hyperpage{21}
   \item \spxentry{よ\textbar{}要塞(切札)}, \hyperpage{117}
