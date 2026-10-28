@@ -19,7 +19,7 @@ actions:
         hasAttacker: true
 
     text:
-      effect: アタッカー毎にそれをブロックするキャラクター（ブロッカー）を指定する。
+      effect: アタッカー毎にそれをブロックするキャラクター(ブロッカー)を指定する。
 
     effect:
       - selectBlockAssignments:
