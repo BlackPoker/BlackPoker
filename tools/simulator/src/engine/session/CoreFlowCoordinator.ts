@@ -193,8 +193,8 @@ export class CoreFlowCoordinator {
    * ステージ最上段（トップ）のアクションを1件だけ解決します（コアフロー[13]）。
    *
    * 発動条件:
-   * - 新方式: state.chancePlayer === "system"（全員パスによりルールシステムがチャンスを所持）
-   * - 旧単体テスト互換: passTracker.isAllPassed(playerCount) が true
+   * - state.chancePlayer === RULE_SYSTEM_CHANCE ("system")（全員パスによりルールシステムがチャンスを所持）
+   * ※旧PassTracker.isAllPassed() による解決開始は完全廃止（第9.2版フォーカス方式へ統一）。
    *
    * options.deferChanceReturnToStep2 が true の場合（GameSession.advance からの呼び出し時）、
    * 解決完了時点では state.chancePlayer を "system" のまま維持し、誘発チェック[5]完了後のコアフロー[2]にて
@@ -205,39 +205,28 @@ export class CoreFlowCoordinator {
     rulePackage: RulePackage,
     registry: CommandRegistry,
     passTracker?: PassTracker,
-    playerCount: number = 2,
+    playerCount?: number | { deferChanceReturnToStep2?: boolean },
     options?: { deferChanceReturnToStep2?: boolean }
   ): CoreFlowEvent | null {
-    const stageRequests = state.stage?.requests;
-    const hasStageRequests = Array.isArray(stageRequests) && stageRequests.length > 0;
-    const isSystemChance = state.chancePlayer === RULE_SYSTEM_CHANCE;
-    const isLegacyDirectCallAllPassed =
-      !options?.deferChanceReturnToStep2 && passTracker ? passTracker.isAllPassed(playerCount) : false;
+    // 引数正規化 (第5引数に options が渡された場合に対応)
+    const resolvedOptions =
+      typeof playerCount === "object" && playerCount !== null
+        ? playerCount
+        : options;
 
-    if (!isSystemChance && !isLegacyDirectCallAllPassed) {
-      return null; // 全員パス未成立
+    // ステージ解決の開始条件は chancePlayer === "system"（ルールシステムがチャンスを所持）
+    if (state.chancePlayer !== RULE_SYSTEM_CHANCE) {
+      return null; // 全員パス未成立（ルールシステムがチャンスを所持していない）
     }
 
     if (passTracker) {
       passTracker.reset();
     }
 
-    if (hasStageRequests) {
-      // [12] 全員パス成立時、ステージ最上段解決[13]の直前に必ずルールシステムがチャンスを保持している状態を保証する
-      if (state.chancePlayer !== RULE_SYSTEM_CHANCE) {
-        const prevChance = state.chancePlayer;
-        state.chancePlayer = RULE_SYSTEM_CHANCE;
-        if (registry.logRecorder && prevChance && prevChance !== RULE_SYSTEM_CHANCE) {
-          registry.logRecorder.record({
-            type: "chance.changed",
-            stateVersion: state.stateVersion ?? state.version ?? 1,
-            fromChancePlayer: prevChance,
-            toChancePlayer: RULE_SYSTEM_CHANCE,
-            reason: "allPassed",
-          });
-        }
-      }
+    const stageRequests = state.stage?.requests;
+    const hasStageRequests = Array.isArray(stageRequests) && stageRequests.length > 0;
 
+    if (hasStageRequests) {
       const topReq = stageRequests[stageRequests.length - 1];
       // ステージ最上段（最新）を 1 件だけ解決
       const context: CommandContext = {
@@ -266,7 +255,7 @@ export class CoreFlowCoordinator {
       const turnPlayer: PlayerKey = state.turnPlayer || "p1";
 
       // 単体テスト等（GameSession外）から直接呼ばれた場合は、ここで[2]相当のチャンス・フォーカス移動を行う
-      if (!options?.deferChanceReturnToStep2) {
+      if (!resolvedOptions?.deferChanceReturnToStep2) {
         const prevChance = state.chancePlayer;
         const prevFocus = state.focusPlayer;
         state.chancePlayer = turnPlayer;
@@ -297,8 +286,8 @@ export class CoreFlowCoordinator {
         nextChancePlayerId: turnPlayer,
       };
     } else {
-      // ステージが空の場合は、既にルールシステムがチャンスを保持している場合のみ[2]相当の返却を行う
-      if (!options?.deferChanceReturnToStep2 && isSystemChance) {
+      // ステージが空の場合、ルールシステムが保持しているチャンスを[2]相当で返却
+      if (!resolvedOptions?.deferChanceReturnToStep2) {
         const prevChance = state.chancePlayer;
         const prevFocus = state.focusPlayer;
         const turnPlayer: PlayerKey = state.turnPlayer || "p1";

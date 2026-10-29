@@ -32,6 +32,10 @@ export class PassTracker {
   /**
    * 全プレイヤーが連続してパスしたかどうかを判定
    * （2人対戦では consecutivePassCount >= 2）
+   *
+   * @deprecated 第9.2版コアフローでは全員パス判定はフォーカス比較 (nextPlayer === focusPlayer) により行われ、
+   * チャンスが "system" へ移動するため、isAllPassed() による解決開始は禁止されています。
+   * 診断・メトリクス互換用としてのみ残置されています。
    */
   isAllPassed(playerCount: number = 2): boolean {
     return this._consecutivePassCount >= playerCount;

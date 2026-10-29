@@ -8,6 +8,7 @@ import { CoreFlowCoordinator } from "../../engine/session/CoreFlowCoordinator";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { TurnManager } from "../../engine/rules/TurnManager";
 import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
+import { RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 
 describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () => {
   let rulePackage: RulePackage;
@@ -119,15 +120,16 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     expect(state.stage.requests[0].id).toBe(req1.id);
     expect(state.stage.requests[1].id).toBe(req2.id);
 
-    // 1回目のPASS (p1)
+    // 1回目のPASS (p1) -> チャンスは p2 へ
     passTracker.recordPass();
+    state.chancePlayer = "p2";
     const event1 = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
     expect(event1).toBeNull();
     expect(state.stage.requests.length).toBe(2);
 
-    // 2回目のPASS (p2) -> 連続PASS成立でTOP（req2）が解決
+    // 2回目のPASS (p2) -> 全員パス成立 (chancePlayer === "system") でTOP（req2）が解決
     passTracker.recordPass();
-    state.chancePlayer = "p2";
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
     const event2 = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
 
     expect(event2).not.toBeNull();
@@ -187,9 +189,10 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     expect(state.stage.requests[0].id).toBe(reqBottom.id);
     expect(state.stage.requests[1].id).toBe(reqTop.id);
 
-    // 2連続PASS実行
+    // 2連続PASS実行 (全員パス成立)
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     const event = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
 
@@ -243,6 +246,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
 
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     // tryResolveStageTop 内でエラーが握り潰されず、呼び出し元へ確実に伝播すること
     expect(() => {
@@ -303,6 +307,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
 
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     const event = CoreFlowCoordinator.tryResolveStageTop(
       state,
@@ -375,6 +380,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     // 解決 1: req3 (TOP) を解決 -> req1 がキャンセルされてステージから除去される
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
     const event1 = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
     expect(event1?.type).toBe("STAGE_TOP_RESOLVED");
     if (event1?.type === "STAGE_TOP_RESOLVED") {
@@ -393,6 +399,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     // req2 の対象 req1 は既にキャンセルされてステージ上に存在しない（対象喪失）
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     // ここで例外をスローせず、効果スキップで正常に解決されること！
     const event2 = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
@@ -445,6 +452,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     // 2連続PASSで reqUp を解決
     passTracker.recordPass();
     passTracker.recordPass();
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     const event = CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
     expect(event?.type).toBe("STAGE_TOP_RESOLVED");
@@ -487,6 +495,7 @@ describe("Stage TOP Resolution & Consecutive PASS Cycle Tests (Phase 6.0)", () =
     // 2 PASS -> Stage TOP 解決
     passTracker.recordPass();
     expect(passTracker.consecutivePassCount).toBe(2);
+    state.chancePlayer = RULE_SYSTEM_CHANCE;
 
     CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2);
     // 解決後にリセットされていること

@@ -861,8 +861,8 @@ describe("Core Flow Integration Tests (Phase: Core Flow & Decision Integration)"
       ).toBeNull();
       expect(state.chancePlayer).toBe("p1");
 
-      // 2. ステージに action.end がある状態で直接 tryResolveStageTop を呼んだ際、
-      // 解決直前に chancePlayer === "system" [12] が設定されてから TurnManager.endTurn が実行されること
+      // 2. ステージに action.end がある状態でも、passTracker.isAllPassed が true であっても
+      // chancePlayer !== "system" ならステージ解決を開始せず null を返すこと (旧方式の完全禁止)
       const logRecorder = new MatchLogRecorder({ matchId: "direct-try-resolve-test" });
       registry.logRecorder = logRecorder;
       state.stage.requests.push({
@@ -876,6 +876,13 @@ describe("Core Flow Integration Tests (Phase: Core Flow & Decision Integration)"
       passTracker.recordPass();
       passTracker.recordPass();
 
+      expect(
+        CoreFlowCoordinator.tryResolveStageTop(state, rulePackage, registry, passTracker, 2)
+      ).toBeNull();
+      expect(state.chancePlayer).toBe("p1");
+
+      // 全員パス成立 (chancePlayer === "system") に設定されたときのみステージ解決が開始されること
+      state.chancePlayer = RULE_SYSTEM_CHANCE;
       const resolvedEv = CoreFlowCoordinator.tryResolveStageTop(
         state,
         rulePackage,
@@ -889,7 +896,6 @@ describe("Core Flow Integration Tests (Phase: Core Flow & Decision Integration)"
       expect(state.focusPlayer).toBe("p2");
       const chanceLogs = logRecorder.getEvents().filter((e) => e.type === "chance.changed") as any[];
       expect(chanceLogs.map((e) => `${e.fromChancePlayer}->${e.toChancePlayer}(${e.reason})`)).toEqual([
-        "p1->system(allPassed)",
         "system->p2(stageTopResolved)",
       ]);
 
