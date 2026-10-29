@@ -636,7 +636,7 @@ describe("Core Flow Integration Tests (Phase: Core Flow & Decision Integration)"
         ...corePlaytestPkg,
         actions: corePlaytestPkg.actions.map((a) => ({
           ...a,
-          request: a.request ? { ...a.request, initialChance: undefined } : a.request,
+          request: a.request,
         })),
       };
 

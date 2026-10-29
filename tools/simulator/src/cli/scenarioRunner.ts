@@ -272,6 +272,9 @@ async function runUpScenario(rulePackage: any) {
   const nextTurnPlayerName = state.players[state.turnPlayer]?.name || state.turnPlayer;
   const nextChancePlayerName = state.players[state.chancePlayer]?.name || state.chancePlayer;
   console.log(`結果検証: 次の手番プレイヤー = ${nextTurnPlayerName} (期待値: Player B。ターンとチャンスが移行しました！)${colors.reset}`);
+  if (finalSize !== 13) throw new Error(`シナリオ1検証失敗: 兵士の最終サイズが期待値(13)と異なります: ${finalSize}`);
+  if (cleanSize !== 6) throw new Error(`シナリオ1検証失敗: エンド解決後の兵士サイズが期待値(6)と異なります: ${cleanSize}`);
+  if (state.turnPlayer !== "p2") throw new Error(`シナリオ1検証失敗: ターンプレイヤーが期待値(p2)と異なります: ${state.turnPlayer}`);
 }
 
 async function runDownScenario(rulePackage: any) {
@@ -335,6 +338,7 @@ async function runDownScenario(rulePackage: any) {
 
   const finalSizeA = registryA.calculateUnitSize(targetUnitA, stateA.players.p1);
   console.log(`\n${colors.bold}${colors.green}結果検証: 兵士の最終サイズ = ${finalSizeA} (期待値: 3)${colors.reset}`);
+  if (finalSizeA !== 3) throw new Error(`シナリオ2A検証失敗: 兵士サイズが期待値(3)と異なります: ${finalSizeA}`);
 
   // パターンB (墓地送り)
   subHeader("パターンB: Spade 5 を適用 (サイズ5に対して減衰-5、サイズ0となり墓地へ直行、フォグは生成されない)");
@@ -389,7 +393,10 @@ async function runDownScenario(rulePackage: any) {
   subHeader("パターンB 最終状態");
   logState(stateB);
 
-  console.log(`\n${colors.bold}${colors.green}結果検証: フィールドの兵士数 = ${stateB.players.p1.field.length} (期待値: 0)、墓地 = ${stateB.players.p1.grave.length} (期待値: 1)、フォグ数 = ${stateB.players.p1.fog.length} (期待値: 0)${colors.reset}`);
+  console.log(`\n${colors.bold}${colors.green}結果検証: フィールドの兵士数 = ${stateB.players.p1.field.length} (期待値: 0)、墓地 = ${stateB.players.p1.grave.length} (期待値: 3 = 兵士1 + コスト1 + キーカード1)、フォグ数 = ${stateB.players.p1.fog.length} (期待値: 0)${colors.reset}`);
+  if (stateB.players.p1.field.length !== 0) throw new Error("シナリオ2B検証失敗: フィールドに兵士が残っています");
+  if (stateB.players.p1.grave.length !== 3) throw new Error(`シナリオ2B検証失敗: 墓地数が期待値(3)と異なります: ${stateB.players.p1.grave.length}`);
+  if (stateB.players.p1.fog.length !== 0) throw new Error("シナリオ2B検証失敗: フォグが生成されています");
 }
 
 async function runBulwarkAndNextGenScenario(rulePackage: any) {
@@ -399,7 +406,7 @@ async function runBulwarkAndNextGenScenario(rulePackage: any) {
   const destroyAction = rulePackage.actions.find((a: any) => a.id === "action.destroyBulwark");
   if (!destroyAction) throw new Error("action.destroyBulwark が見つかりません");
 
-  const state = {
+  const state: any = {
     players: {
       p1: {
         name: "Player A",
@@ -409,7 +416,10 @@ async function runBulwarkAndNextGenScenario(rulePackage: any) {
           { id: "life-K", suit: "S", rank: "K", value: 13 },
           { id: "life-Joker", suit: "Joker", rank: "Joker", value: 20 },
         ],
-        hand: [],
+        hand: [
+          { id: "key-heart-A", suit: "H", rank: "A", value: 1 },
+          { id: "key-diamond-A", suit: "D", rank: "A", value: 1 },
+        ],
         field: [
           {
             unitId: "bulwark-1",
@@ -452,15 +462,26 @@ async function runBulwarkAndNextGenScenario(rulePackage: any) {
   console.log(`実行アクション: ${destroyAction.name}`);
   registry.executeAction(destroyAction, context);
 
+  const coordinator = new TriggerProcessingCoordinator();
+  coordinator.processPendingTriggers(state, rulePackage, registry);
+
   subHeader("最終状態");
   logState(state);
 
   console.log(`\n${colors.bold}${colors.green}結果検証: 
   - フィールドの防壁数 = ${state.players.p1.field.length} (期待値: 0)
   - 手札のカード = ${state.players.p1.hand.map((c: any) => `${c.suit}${c.rank}`).join(", ")} (期待値: S-K)
-  - 墓地のユニット数 = ${state.players.p1.grave.length} (期待値: 3 = 防壁 + ライフから落ちた2枚)
+  - 墓地のユニット数 = ${state.players.p1.grave.length} (期待値: 5 = 防壁1 + キーカード2 + ライフから落ちた非レガシー2)
   - 残りライフ = ${state.players.p1.life.map((c: any) => `${c.suit}${c.rank}`).join(", ")} (期待値: Joker)
 ${colors.reset}`);
+  if (state.players.p1.field.length !== 0) throw new Error("シナリオ3検証失敗: 防壁がフィールドに残っています");
+  if (state.players.p1.hand.length !== 1 || state.players.p1.hand[0].suit !== "S" || state.players.p1.hand[0].rank !== "K") {
+    throw new Error(`シナリオ3検証失敗: 手札のカードが期待値(S-K)と異なります: ${JSON.stringify(state.players.p1.hand)}`);
+  }
+  if (state.players.p1.grave.length !== 5) throw new Error(`シナリオ3検証失敗: 墓地のユニット数が期待値(5)と異なります: ${state.players.p1.grave.length}`);
+  if (state.players.p1.life.length !== 1 || state.players.p1.life[0].rank !== "Joker") {
+    throw new Error(`シナリオ3検証失敗: 残りライフが期待値(Joker)と異なります: ${JSON.stringify(state.players.p1.life)}`);
+  }
 }
 
 async function runFortressDefenseScenario(rulePackage: any) {
@@ -477,7 +498,10 @@ async function runFortressDefenseScenario(rulePackage: any) {
     players: {
       p1: {
         name: "Player A (攻撃側)",
-        hand: [],
+        hand: [
+          { id: "key-spade-5", suit: "S", rank: "5", value: 5 },
+          { id: "key-club-2", suit: "C", rank: "2", value: 2 },
+        ],
         field: [],
         grave: [],
         life: [],
@@ -527,6 +551,9 @@ async function runFortressDefenseScenario(rulePackage: any) {
     state,
     playerKey: "p2", // Bが発動
     keyCard: bulwarkKeyCard,
+    selections: {
+      bulwarkCard: [bulwarkKeyCard],
+    },
     actions: rulePackage.actions,
     components: rulePackage.components,
   };
@@ -564,6 +591,8 @@ async function runFortressDefenseScenario(rulePackage: any) {
   logState(state);
 
   console.log(`\n${colors.bold}${colors.green}結果検証: Player B の残りライフ = ${state.players.p2.life.length} (期待値: 2。防壁設置した防壁が場にあるため、投擲ダメージが完璧に無効化されました！)${colors.reset}`);
+  if (state.players.p2.life.length !== 2) throw new Error(`シナリオ4検証失敗: Player Bの残りライフが期待値(2)と異なります: ${state.players.p2.life.length}`);
+  if (state.players.p2.field.length !== 1) throw new Error("シナリオ4検証失敗: 防壁がフィールドに存在しません");
 }
 
 async function runCounterScenario(rulePackage: any) {
@@ -604,7 +633,7 @@ async function runCounterScenario(rulePackage: any) {
         name: "Player B",
         life: [],
         hand: [
-          { id: "counter-key", suit: "C", rank: "2", value: 2 },
+          { id: "counter-key", suit: "C", rank: "8", value: 8 },
           { id: "counter-cost", suit: "D", rank: "5", value: 5 }, // カウンターコスト用手札 (D)
         ],
         field: [],
@@ -669,8 +698,12 @@ async function runCounterScenario(rulePackage: any) {
   const finalSize = registry.calculateUnitSize(targetUnit, state.players.p1);
   console.log(`\n${colors.bold}${colors.green}結果検証: 
   - 兵士の最終サイズ = ${finalSize} (期待値: 6。アップがカウンターされたためサイズ増幅なし！)
-  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 1。アップのDコストはリクエスト時に消費済み！)
-  - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 0。カウンターのDコストは支払われている！)${colors.reset}`);
+  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 0。キーカードとコスト消費済み)
+  - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 0。カウンターのキーカードとコスト消費済み)${colors.reset}`);
+  if (finalSize !== 6) throw new Error(`シナリオ5検証失敗: 兵士のサイズが期待値(6)と異なります: ${finalSize}`);
+  if (state.players.p1.hand.length !== 0) throw new Error(`シナリオ5検証失敗: Player Aの手札数が期待値(0)と異なります: ${state.players.p1.hand.length}`);
+  if (state.players.p2.hand.length !== 0) throw new Error(`シナリオ5検証失敗: Player Bの手札数が期待値(0)と異なります: ${state.players.p2.hand.length}`);
+  if ((state as any).stage?.requests?.length !== 0) throw new Error("シナリオ5検証失敗: ステージにリクエストが残っています");
 }
 
 async function runTwistScenario(rulePackage: any) {
@@ -733,7 +766,9 @@ async function runTwistScenario(rulePackage: any) {
 
   console.log(`\n${colors.bold}${colors.green}結果検証: 
   - 一般兵1の最終状態 = ${soldier.state} (期待値: drive)
-  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 1。ツイストのDコストは支払われた！)${colors.reset}`);
+  - Player A の手札数 = ${state.players.p1.hand.length} (期待値: 0。ツイストのDコストおよびキーカード消費済み)${colors.reset}`);
+  if (soldier.state !== "drive") throw new Error("シナリオ6検証失敗: 一般兵1の状態がdriveになっていません");
+  if (state.players.p1.hand.length !== 0) throw new Error(`シナリオ6検証失敗: Player Aの手札数が期待値(0)と異なります: ${state.players.p1.hand.length}`);
 }
 
 async function runAttackScenario(rulePackage: any) {
@@ -871,6 +906,13 @@ async function runAttackScenario(rulePackage: any) {
   - 墓地に送られた防壁1の戦闘情報 (bulwark.battle) = ${JSON.stringify(state.players.p2.grave[0].battle)} (期待値: undefined。クリア済み)
   - アタッカー状態 = ${soldier.state} (期待値: drive)
   - 墓地へ送られた防壁1の状態 = ${state.players.p2.grave[0].state} (期待値: charge)${colors.reset}`);
+  if (state.players.p1.field.length !== 1) throw new Error("シナリオ7検証失敗: アタッカーが生存していません");
+  if (state.players.p1.field[0].battle !== undefined) throw new Error("シナリオ7検証失敗: アタッカーのbattle情報がクリアされていません");
+  if (state.players.p2.field.length !== 0) throw new Error("シナリオ7検証失敗: 防壁がフィールドに残っています");
+  if (state.players.p2.grave.length !== 1) throw new Error("シナリオ7検証失敗: 防壁が墓地に存在しません");
+  if (state.players.p2.grave[0].battle !== undefined) throw new Error("シナリオ7検証失敗: 墓地防壁のbattle情報がクリアされていません");
+  if (soldier.state !== "drive") throw new Error("シナリオ7検証失敗: アタッカーの状態がdriveになっていません");
+  if (state.players.p2.grave[0].state !== "charge") throw new Error("シナリオ7検証失敗: 墓地防壁の状態がchargeになっていません");
 }
 
 async function runTurnCycleScenario(rulePackage: any) {
@@ -974,6 +1016,12 @@ async function runTurnCycleScenario(rulePackage: any) {
   - Player B の手札数 = ${state.players.p2.hand.length} (期待値: 2。2枚ドロー成功！)
   - Player B の残りライフ数 = ${state.players.p2.life.length} (期待値: 1)
   - 現在のチャンスプレイヤー = ${state.chancePlayer} (期待値: p2)${colors.reset}`);
+  if (state.turnPlayer !== "p2") throw new Error("シナリオ8検証失敗: ターンプレイヤーがp2になっていません");
+  if (soldier.state !== "charge") throw new Error("シナリオ8検証失敗: 一般兵の状態がchargeになっていません");
+  if (bulwark.state !== "charge") throw new Error("シナリオ8検証失敗: 防壁の状態がchargeになっていません");
+  if (state.players.p2.hand.length !== 2) throw new Error(`シナリオ8検証失敗: Player Bの手札数が期待値(2)と異なります: ${state.players.p2.hand.length}`);
+  if (state.players.p2.life.length !== 1) throw new Error(`シナリオ8検証失敗: Player Bの残りライフが期待値(1)と異なります: ${state.players.p2.life.length}`);
+  if (state.chancePlayer !== "p2") throw new Error("シナリオ8検証失敗: チャンスプレイヤーがp2になっていません");
 }
 
 async function main() {
